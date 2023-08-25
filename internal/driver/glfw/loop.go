@@ -241,7 +241,7 @@ func refreshWindow(w *window) {
 }
 
 func updateGLContext(w *window) {
-	canvas := w.Canvas().(*glCanvas)
+	canvas := w.canvas
 	size := canvas.Size()
 
 	// w.width and w.height are not correct if we are maximised, so figure from canvas
