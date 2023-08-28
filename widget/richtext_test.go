@@ -126,6 +126,20 @@ func TestText_Scroll(t *testing.T) {
 	text3.Scroll = widget.ScrollVerticalOnly
 	assert.Equal(t, text3.MinSize().Width, text1.MinSize().Width)
 	assert.Less(t, text3.MinSize().Height, text1.MinSize().Height)
+
+	text4 := NewRichTextWithText("test1\ntest2")
+	text4.Scroll = widget.ScrollVerticalOnly
+	text4.Wrapping = fyne.TextWrapBreak
+
+	text3.Resize(fyne.NewSize(32, 32))
+	text4.Resize(fyne.NewSize(32, 32))
+	assert.Less(t, text4.MinSize().Width, text3.MinSize().Width)
+	assert.Equal(t, text4.MinSize().Height, text3.MinSize().Height)
+
+	content3 := test.WidgetRenderer(text3).Objects()[0].(*widget.Scroll).Content
+	content4 := test.WidgetRenderer(text4).Objects()[0].(*widget.Scroll).Content
+	assert.Less(t, content4.MinSize().Width, content3.MinSize().Width)
+	assert.Greater(t, content4.MinSize().Height, content3.MinSize().Height)
 }
 
 func TestText_InsertAt(t *testing.T) {

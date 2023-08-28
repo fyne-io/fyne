@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -455,11 +454,11 @@ func (t *TextSegment) size() float32 {
 
 type richImage struct {
 	BaseWidget
-	align      fyne.TextAlign
-	img        *canvas.Image
-	oldMin     fyne.Size
-	layout     *fyne.Container
-	pad1, pad2 fyne.CanvasObject
+	align  fyne.TextAlign
+	img    *canvas.Image
+	oldMin fyne.Size
+	layout *fyne.Container
+	min    fyne.Size
 }
 
 func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
@@ -471,15 +470,7 @@ func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
 }
 
 func (r *richImage) CreateRenderer() fyne.WidgetRenderer {
-	r.pad1 = layout.NewSpacer()
-	if r.align == fyne.TextAlignLeading {
-		r.pad1.Hide()
-	}
-	r.pad2 = layout.NewSpacer()
-	if r.align == fyne.TextAlignTrailing {
-		r.pad2.Hide()
-	}
-	r.layout = &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{r.pad1, r.img, r.pad2}}
+	r.layout = &fyne.Container{Layout: &richImageLayout{r}, Objects: []fyne.CanvasObject{r.img}}
 	return NewSimpleRenderer(r.layout)
 }
 
@@ -494,25 +485,37 @@ func (r *richImage) MinSize() fyne.Size {
 	w := scale.ToScreenCoordinate(c, orig.Width)
 	h := scale.ToScreenCoordinate(c, orig.Height)
 	// we return size / 2 as this assumes a HiDPI / 2x image scaling
-	return fyne.NewSize(float32(w)/2, float32(h)/2)
+	r.min = fyne.NewSize(float32(w)/2, float32(h)/2)
+	return r.min
 }
 
 func (r *richImage) setAlign(a fyne.TextAlign) {
 	if r.layout != nil {
-		switch a {
-		case fyne.TextAlignLeading:
-			r.pad1.Hide()
-			r.pad2.Show()
-		case fyne.TextAlignTrailing:
-			r.pad1.Show()
-			r.pad2.Hide()
-		default:
-			r.pad1.Show()
-			r.pad2.Show()
-		}
 		r.layout.Refresh()
 	}
 	r.align = a
+}
+
+type richImageLayout struct {
+	r *richImage
+}
+
+func (r *richImageLayout) Layout(_ []fyne.CanvasObject, s fyne.Size) {
+	r.r.img.Resize(r.r.min)
+	gap := float32(0)
+
+	switch r.r.align {
+	case fyne.TextAlignCenter:
+		gap = (s.Width - r.r.min.Width) / 2
+	case fyne.TextAlignTrailing:
+		gap = s.Width - r.r.min.Width
+	}
+
+	r.r.img.Move(fyne.NewPos(gap, 0))
+}
+
+func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+	return r.r.min
 }
 
 type unpadTextWidgetLayout struct {
