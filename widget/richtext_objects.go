@@ -502,16 +502,16 @@ type richImageLayout struct {
 
 func (r *richImageLayout) Layout(_ []fyne.CanvasObject, s fyne.Size) {
 	r.r.img.Resize(r.r.min)
-	gap := s.Width - r.r.min.Width
+	gap := float32(0)
 
 	switch r.r.align {
 	case fyne.TextAlignCenter:
-		r.r.img.Move(fyne.NewPos(gap/2, 0))
+		gap = (s.Width - r.r.min.Width) / 2
 	case fyne.TextAlignTrailing:
-		r.r.img.Move(fyne.NewPos(gap, 0))
-	default:
-		r.r.img.Move(fyne.NewPos(0, 0))
+		gap = s.Width - r.r.min.Width
 	}
+
+	r.r.img.Move(fyne.NewPos(gap, 0))
 }
 
 func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
