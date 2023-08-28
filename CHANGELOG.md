@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.4.0 - 30 August 2023
+## 2.4.0 - 1 September 2023
 
 ## Added
 
@@ -90,6 +90,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Window doesn't render when called for the first time from system tray and the last window was closed (#4163)
 * Possible race condition in preference change listeners
 * Various vulnerabilities resolved through updating dependencies 
+* Wrong background for color dialog (#4199)
 
 
 ## 2.3.5 - 6 June 2023
