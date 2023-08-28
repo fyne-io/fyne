@@ -560,12 +560,9 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RUnlock()
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{})
-	min := r.obj.prop.MinSize()
-	if min.Height < 2 { // prop (Rectangle) defaults to 1 min
-		min = r.calculateMin(bounds, wrap, objs, charMinSize)
-		if r.obj.scr != nil {
-			r.obj.prop.SetMinSize(min)
-		}
+	min := r.calculateMin(bounds, wrap, objs, charMinSize)
+	if r.obj.scr != nil {
+		r.obj.prop.SetMinSize(min)
 	}
 
 	if trunc != fyne.TextTruncateOff && r.obj.Scroll == widget.ScrollNone {
