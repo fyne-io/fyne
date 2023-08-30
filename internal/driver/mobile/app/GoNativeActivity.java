@@ -104,7 +104,7 @@ public class GoNativeActivity extends NativeActivity {
                     default:
                         Log.e("Fyne", "unknown keyboard type, use default");
                 }
-                mTextEdit.setImeOptions(imeOptions);
+                mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
                 mTextEdit.setInputType(inputType);
 
                 mTextEdit.setOnEditorActionListener(new OnEditorActionListener() {
