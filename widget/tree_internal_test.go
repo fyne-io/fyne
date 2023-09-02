@@ -194,6 +194,127 @@ func TestTree_Focus(t *testing.T) {
 	assert.Equal(t, "foo", tree.selected[0])
 }
 
+func TestTree_Keyboard(t *testing.T) {
+	// Prepare data for a tree like this:
+	// item_1
+	//   |- item_1_1
+	//     |- item_1_1_1
+	//     |- item_1_1_2
+	//   |- item_1_2
+	//     |- item_1_2_1
+	//     |- item_1_2_2
+	// item_2
+	//   |- item_2_1
+	//   |- item_2_2
+	var treeData = map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(tree.MinSize().Max(fyne.NewSize(250, 400)))
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	assert.Nil(t, canvas.Focused())
+
+	// Start with a fully collapsed tree
+	tree.CloseAllBranches()
+
+	// Select the first node
+	canvas.FocusNext()
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+
+	// Open the node "item_1"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+
+	// Go to next node "item1_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+
+	// Open the node "item_1_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_2_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), true)
+
+	// Go to next node "item_1_2_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_2_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), true)
+
+	// Press left on the non-branch node "item_1_2_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), true)
+
+	// Press left on the open branch node "item_1_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1_2", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+
+	// Press left on the closed branch node "item_1_2"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), true)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+
+	// Press left on the open branch node "item_1"
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	// Validate the state
+	assert.NotNil(t, canvas.Focused())
+	assert.Equal(t, "item_1", canvas.Focused().(*Tree).currentFocus)
+	assert.Equal(t, tree.IsBranchOpen("item_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_2"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_1"), false)
+	assert.Equal(t, tree.IsBranchOpen("item_1_2"), false)
+}
+
 func TestTree_Indentation(t *testing.T) {
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)

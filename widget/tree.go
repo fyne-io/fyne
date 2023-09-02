@@ -348,11 +348,17 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		t.ScrollTo(t.currentFocus)
 		t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
-		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
-			if id == t.currentFocus && p != "" {
-				t.currentFocus = p
-			}
-		})
+		// If the current focus is on a branch which is open, just close it
+		if t.IsBranch(t.currentFocus) && t.IsBranchOpen(t.currentFocus) {
+			t.CloseBranch(t.currentFocus)
+		} else {
+			// Every other case should move the focus to the current parent node
+			t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
+				if id == t.currentFocus && p != "" {
+					t.currentFocus = p
+				}
+			})
+		}
 
 		t.RefreshItem(t.currentFocus)
 		t.ScrollTo(t.currentFocus)
