@@ -27,6 +27,7 @@ const (
 // DarkTheme defines the built-in dark theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+// If developers want to ignore user preference for theme variant they can set a custom theme.
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantDark}
 
@@ -48,6 +49,7 @@ func DefaultTheme() fyne.Theme {
 // LightTheme defines the built-in light theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+// If developers want to ignore user preference for theme variant they can set a custom theme.
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantLight}
 
