@@ -132,6 +132,29 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
+// ScrollDirection represents the directions in which a Scroll can scroll its child content.
+type ScrollDirection widget.ScrollDirection
+
+// Constants for valid values of ScrollDirection.
+const (
+	// ScrollBoth supports horizontal and vertical scrolling.
+	ScrollBoth ScrollDirection = iota
+	// ScrollHorizontalOnly specifies the scrolling should only happen left to right.
+	ScrollHorizontalOnly
+	// ScrollVerticalOnly specifies the scrolling should only happen top to bottom.
+	ScrollVerticalOnly
+	// ScrollNone turns off scrolling for this container.
+	//
+	// Since: 2.0
+	ScrollNone
+)
+
+// SetScroll  control the entry widget if to scroll
+// Since: 2.4
+func (e *Entry) SetScroll(scroll ScrollDirection) {
+	e.Scroll = widget.ScrollDirection(scroll)
+}
+
 // AcceptsTab returns if Entry accepts the Tab key or not.
 //
 // Implements: fyne.Tabbable
