@@ -1,7 +1,7 @@
 <p align="center">
   <a href="https://pkg.go.dev/fyne.io/fyne/v2?tab=doc" title="Go API Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="Go API Reference"></a>
   <a href="https://img.shields.io/github/v/release/fyne-io/fyne?include_prereleases" title="Latest Release" rel="nofollow"><img src="https://img.shields.io/github/v/release/fyne-io/fyne?include_prereleases" alt="Latest Release"></a>
-  <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
+  <a href='https://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
   <a href="https://goreportcard.com/report/fyne.io/fyne/v2"><img src="https://goreportcard.com/badge/fyne.io/fyne/v2" alt="Code Status" /></a>
   <a href="https://github.com/fyne-io/fyne/actions"><img src="https://github.com/fyne-io/fyne/workflows/Platform%20Tests/badge.svg" alt="Build Status" /></a>
@@ -14,22 +14,22 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.3 is the current release of the Fyne API, it added a refined theme design,
-cloud storage, improved text handling for international languages and many
+Version 2.4 is the current release of the Fyne API, it added rounded corners, emoji,
+layout debug support and table headers, along with a large number of
 smaller feature additions.
 We are now working towards the next big release, codenamed
-[Dalwhinnie](https://github.com/fyne-io/fyne/milestone/18)
+[Elgin](https://github.com/fyne-io/fyne/milestone/21)
 and more news will follow in our news feeds and GitHub project.
 
 # Prerequisites
 
-To develop apps using Fyne you will need Go version 1.14 or later, a C compiler and your system's development tools.
+To develop apps using Fyne you will need Go version 1.17 or later, a C compiler and your system's development tools.
 If you're not sure if that's all installed or you don't know how then check out our
 [Getting Started](https://fyne.io/develop/) document.
 
 Using the standard go tools you can install Fyne's core library using:
 
-    go get fyne.io/fyne/v2
+    go get fyne.io/fyne/v2@latest
 
 After importing a new module, run the following command before compiling the code for the first time. Avoid running it before writing code that uses the module to prevent accidental removal of dependencies:
 
@@ -45,19 +45,19 @@ To run a showcase of the features of Fyne execute the following:
 And you should see something like this (after you click a few buttons):
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-dark.png" width="752" height="617" alt="Fyne Demo Dark Theme" style="max-width: 100%" />
+  <img src="img/widgets-dark.png" width="752" alt="Fyne Demo Dark Theme" style="max-width: 100%" />
 </p>
 
 Or if you are using the light theme:
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-light.png" width="752" height="617" alt="Fyne Demo Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-light.png" width="752" alt="Fyne Demo Light Theme" style="max-width: 100%" />
 </p>
 
 And even running on a mobile device:
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-mobile-light.png" width="348" height="617" alt="Fyne Demo Mobile Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-mobile-light.png" width="348" alt="Fyne Demo Mobile Light Theme" style="max-width: 100%" />
 </p>
 
 # Getting Started
@@ -102,15 +102,12 @@ It should look like this:
 <div align="center">
   <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;">
     <tr style="border: none;"><td style="border: none;">
-      <img src="img/hello-light.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
+      <img src="img/hello-light.png" width="207" alt="Fyne Hello Dark Theme" />
     </td><td style="border: none;">
-      <img src="img/hello-dark.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
+      <img src="img/hello-dark.png" width="207" alt="Fyne Hello Dark Theme" />
     </td></tr>
   </table>
 </div>
-
-> Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
-> To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
 ## Run in mobile simulation
 
@@ -186,4 +183,6 @@ These are optional applications but can help to create a more complete desktop e
 
 ## FyneDesk (Linux / BSD)
 
-To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyne-io/fynedesk) as well :)
+To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyshos/fynedesk) as well :)
+
+![FyneDesk screenshopt in dark mode](https://fyshos.com/img/desktop.png)
