@@ -55,6 +55,11 @@ static char* checkException(uintptr_t jnienv) {
 static void unlockJNI(JavaVM *vm) {
 	(*vm)->DetachCurrentThread(vm);
 }
+
+static void deletePrevCtx(JNIEnv* env,jobject ctx){
+    if (ctx == NULL) { return; }
+    (*env)->DeleteGlobalRef(env, ctx);
+}
 */
 import "C"
 
@@ -80,7 +85,13 @@ var currentCtx C.jobject
 // The android.context.Context object must be a global reference.
 func SetCurrentContext(vm unsafe.Pointer, ctx uintptr) {
 	currentVM = (*C.JavaVM)(vm)
+	currentCtxPrev := currentCtx
 	currentCtx = (C.jobject)(ctx)
+	RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		C.deletePrevCtx(env, C.jobject(currentCtxPrev))
+		return nil
+	})
 }
 
 // RunOnJVM runs fn on a new goroutine locked to an OS thread with a JNIEnv.
