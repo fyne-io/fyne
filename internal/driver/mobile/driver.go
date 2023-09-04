@@ -3,6 +3,7 @@ package mobile
 import (
 	"runtime"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -54,6 +55,7 @@ type mobileDriver struct {
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
+	running         uint32 // atomic, 1 == running, 0 == stopped
 }
 
 // Declare conformity with Driver
@@ -137,6 +139,10 @@ func (d *mobileDriver) Quit() {
 }
 
 func (d *mobileDriver) Run() {
+	if !atomic.CompareAndSwapUint32(&d.running, 0, 1) {
+		return // Run was called twice.
+	}
+
 	app.Main(func(a app.App) {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)

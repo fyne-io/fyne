@@ -134,11 +134,7 @@ func (w *window) doShow() {
 		return
 	}
 
-	run.L.Lock()
-	for !run.flag {
-		run.Wait()
-	}
-	run.L.Unlock()
+	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {

@@ -3,6 +3,7 @@ package glfw
 import (
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -24,15 +25,10 @@ type drawData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
-type runFlag struct {
-	sync.Cond
-	flag bool
-}
-
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var run = &runFlag{Cond: sync.Cond{L: &sync.Mutex{}}}
+var running uint32 // atomic bool, 0 or 1
 var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
@@ -45,20 +41,17 @@ func init() {
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	run.L.Lock()
-	running := !run.flag
-	run.L.Unlock()
-
-	if running {
+	if onMain := atomic.LoadUint32(&running) == 0; onMain {
 		f()
-	} else {
-		done := common.DonePool.Get().(chan struct{})
-		defer common.DonePool.Put(done)
-
-		funcQueue <- funcData{f: f, done: done}
-
-		<-done
+		return
 	}
+
+	done := common.DonePool.Get().(chan struct{})
+	defer common.DonePool.Put(done)
+
+	funcQueue <- funcData{f: f, done: done}
+
+	<-done
 }
 
 // force a function f to run on the draw thread
@@ -99,31 +92,28 @@ func (d *gLDriver) drawSingleFrame() {
 }
 
 func (d *gLDriver) runGL() {
-	eventTick := time.NewTicker(time.Second / 60)
-
-	run.L.Lock()
-	run.flag = true
-	run.L.Unlock()
-	run.Broadcast()
+	if !atomic.CompareAndSwapUint32(&running, 0, 1) {
+		return // Run was called twice.
+	}
+	close(d.waitForStart) // Signal that execution can continue.
 
 	d.initGLFW()
 	if d.trayStart != nil {
 		d.trayStart()
 	}
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
+	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
-			d.drawDone <- nil // wait for draw thread to stop
+			d.drawDone <- struct{}{} // wait for draw thread to stop
 			d.Terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
 		case f := <-funcQueue:
 			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
-			}
+			f.done <- struct{}{}
 		case <-eventTick.C:
 			d.tryPollEvents()
 			newWindows := []fyne.Window{}
@@ -226,9 +216,7 @@ func (d *gLDriver) startDrawThread() {
 				return
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
-				if f.done != nil {
-					f.done <- struct{}{}
-				}
+				f.done <- struct{}{}
 			case set := <-settingsChange:
 				painter.ClearFontCache()
 				cache.ResetThemeCaches()
@@ -253,7 +241,7 @@ func refreshWindow(w *window) {
 }
 
 func updateGLContext(w *window) {
-	canvas := w.Canvas().(*glCanvas)
+	canvas := w.canvas
 	size := canvas.Size()
 
 	// w.width and w.height are not correct if we are maximised, so figure from canvas

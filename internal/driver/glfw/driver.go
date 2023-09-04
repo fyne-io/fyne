@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fyne-io/image/ico"
 
@@ -36,11 +37,12 @@ var _ fyne.Driver = (*gLDriver)(nil)
 const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
 
 type gLDriver struct {
-	windowLock sync.RWMutex
-	windows    []fyne.Window
-	device     *glDevice
-	done       chan interface{}
-	drawDone   chan interface{}
+	windowLock   sync.RWMutex
+	windows      []fyne.Window
+	device       *glDevice
+	done         chan struct{}
+	drawDone     chan struct{}
+	waitForStart chan struct{}
 
 	animation *animation.Runner
 
@@ -102,10 +104,11 @@ func (d *gLDriver) Quit() {
 		}
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
-	defer func() {
-		recover() // we could be called twice - no safe way to check if d.done is closed
-	}()
-	close(d.done)
+
+	// Only call close once to avoid panic.
+	if atomic.CompareAndSwapUint32(&running, 1, 0) {
+		close(d.done)
+	}
 }
 
 func (d *gLDriver) addWindow(w *window) {
@@ -148,11 +151,8 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	run.L.Lock()
-	running := !run.flag
-	run.L.Unlock()
-
-	if running {
+	onMain := atomic.LoadUint32(&running) == 0
+	if onMain {
 		d.Quit()
 	} else {
 		os.Exit(1)
@@ -169,12 +169,13 @@ func (d *gLDriver) Run() {
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
-func NewGLDriver() fyne.Driver {
+func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:      make(chan interface{}),
-		drawDone:  make(chan interface{}),
-		animation: &animation.Runner{},
+		done:         make(chan struct{}),
+		drawDone:     make(chan struct{}),
+		waitForStart: make(chan struct{}),
+		animation:    &animation.Runner{},
 	}
 }
