@@ -58,8 +58,8 @@ func (l *Line) Move(pos fyne.Position) {
 	deltaX := pos.X - oldPos.X
 	deltaY := pos.Y - oldPos.Y
 
-	l.Position1 = l.Position1.Add(fyne.NewPos(deltaX, deltaY))
-	l.Position2 = l.Position2.Add(fyne.NewPos(deltaX, deltaY))
+	l.Position1 = l.Position1.AddXY(deltaX, deltaY)
+	l.Position2 = l.Position2.AddXY(deltaX, deltaY)
 	repaint(l)
 }
 
