@@ -17,7 +17,7 @@ import (
 
 // Install returns the cli command for installing fyne applications
 func Install() *cli.Command {
-	i := &Installer{appData: &appData{}}
+	i := NewInstaller()
 
 	return &cli.Command{
 		Name:  "install",
@@ -71,6 +71,11 @@ type Installer struct {
 	installDir, srcDir, os string
 	Packager               *Packager
 	release                bool
+}
+
+// NewInstaller returns a command that can install a GUI apps built using Fyne from local source code.
+func NewInstaller() *Installer {
+	return &Installer{appData: &appData{}}
 }
 
 // AddFlags adds the flags for interacting with the Installer.
