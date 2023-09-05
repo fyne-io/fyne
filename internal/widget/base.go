@@ -72,9 +72,10 @@ func (w *Base) Position() fyne.Position {
 func (w *Base) Move(pos fyne.Position) {
 	w.propertyLock.Lock()
 	w.position = pos
+	impl := w.impl
 	w.propertyLock.Unlock()
 
-	Repaint(w.super())
+	Repaint(impl)
 }
 
 // MinSize for the widget - it should never be resized below this value.
