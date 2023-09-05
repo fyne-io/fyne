@@ -33,9 +33,14 @@ type Builder struct {
 	runner runner
 }
 
+// NewBuilder returns a command that can handle the build of GUI apps built using Fyne.
+func NewBuilder() *Builder {
+	return &Builder{appData: &appData{}}
+}
+
 // Build returns the cli command for building fyne applications
 func Build() *cli.Command {
-	b := &Builder{appData: &appData{}}
+	b := NewBuilder()
 
 	return &cli.Command{
 		Name:        "build",

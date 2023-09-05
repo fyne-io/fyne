@@ -50,7 +50,7 @@ type Getter struct {
 }
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
-// It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
+// It depends on a Go and C compiler installed at this stage.
 func NewGetter() *Getter {
 	return &Getter{appData: &appData{}}
 }

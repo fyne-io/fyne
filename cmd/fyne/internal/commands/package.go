@@ -31,7 +31,7 @@ const (
 
 // Package returns the cli command for packaging fyne applications
 func Package() *cli.Command {
-	p := &Packager{appData: &appData{}}
+	p := NewPackager()
 
 	return &cli.Command{
 		Name:        "package",
@@ -138,6 +138,11 @@ type Packager struct {
 
 	customMetadata      keyValueFlag
 	linuxAndBSDMetadata *metadata.LinuxAndBSD
+}
+
+// NewPackager returns a command that can handle the packaging a GUI apps built using Fyne from local source code.
+func NewPackager() *Packager {
+	return &Packager{appData: &appData{}}
 }
 
 // AddFlags adds the flags for interacting with the package command.
