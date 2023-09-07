@@ -489,12 +489,13 @@ func (e *Entry) Append(text string) {
 	provider.insertAt(provider.len(), text)
 	content := provider.String()
 	changed := e.updateText(content)
+	cb := e.OnChanged
 	e.propertyLock.Unlock()
 
 	if changed {
 		e.Validate()
-		if e.OnChanged != nil {
-			e.OnChanged(content)
+		if cb != nil {
+			cb(content)
 		}
 	}
 	e.Refresh()
@@ -668,11 +669,12 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
 		e.selecting = false
 	}
+	cb := e.OnChanged
 	e.propertyLock.Unlock()
 	if changed {
 		e.Validate()
-		if e.OnChanged != nil {
-			e.OnChanged(content)
+		if cb != nil {
+			cb(content)
 		}
 	}
 	e.Refresh()
@@ -846,10 +848,11 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	e.copyToClipboard(clipboard)
 	e.setFieldsAndRefresh(e.eraseSelection)
 	e.propertyLock.Lock()
-	if e.OnChanged != nil {
-		e.OnChanged(e.Text)
-	}
+	cb := e.OnChanged
 	e.propertyLock.Unlock()
+	if cb != nil {
+		cb(e.Text)
+	}
 	e.Validate()
 }
 
@@ -1091,10 +1094,11 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		// clears the selection -- return handled
 		e.setFieldsAndRefresh(e.eraseSelection)
 		e.propertyLock.Lock()
-		if e.OnChanged != nil {
-			e.OnChanged(e.Text)
-		}
+		cb := e.OnChanged
 		e.propertyLock.Unlock()
+		if cb != nil {
+			cb(e.Text)
+		}
 		e.Validate()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
