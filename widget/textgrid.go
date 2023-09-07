@@ -61,73 +61,6 @@ func (c *CustomTextGridStyle) BackgroundColor() color.Color {
 	return c.BGColor
 }
 
-// HighlightedTextGridStyle defines a style that can be original or highlighted.
-type HighlightedTextGridStyle struct {
-	OriginalStyle    TextGridStyle
-	HighlightedStyle TextGridStyle
-	Highlighted      bool
-}
-
-// TextColor returns the color of the text, depending on whether it is highlighted.
-func (h *HighlightedTextGridStyle) TextColor() color.Color {
-	if h.Highlighted {
-		return h.HighlightedStyle.TextColor()
-	}
-	return h.OriginalStyle.TextColor()
-}
-
-// BackgroundColor returns the background color, depending on whether it is highlighted.
-func (h *HighlightedTextGridStyle) BackgroundColor() color.Color {
-	if h.Highlighted {
-		return h.HighlightedStyle.BackgroundColor()
-	}
-	return h.OriginalStyle.BackgroundColor()
-}
-
-// HighlightOption defines a function type that can modify a HighlightedTextGridStyle.
-type HighlightOption func(h *HighlightedTextGridStyle)
-
-// InvertColor inverts a color c with the given bitmask
-func InvertColor(c color.Color, bitmask uint8) color.Color {
-	r, g, b, a := c.RGBA()
-	return color.RGBA{
-		R: uint8(r>>8) ^ bitmask,
-		G: uint8(g>>8) ^ bitmask,
-		B: uint8(b>>8) ^ bitmask,
-		A: uint8(a >> 8),
-	}
-}
-
-// WithInvert returns a HighlightOption that inverts the colors of the HighlightedTextGridStyle using the provided bitmask.
-func WithInvert(bitmask uint8) HighlightOption {
-	return func(h *HighlightedTextGridStyle) {
-		var fg, bg color.Color
-		if h.OriginalStyle != nil {
-			fg = h.OriginalStyle.TextColor()
-			bg = h.OriginalStyle.BackgroundColor()
-		}
-		if fg == nil {
-			fg = theme.ForegroundColor()
-		}
-		if bg == nil {
-			bg = theme.BackgroundColor()
-		}
-
-		h.HighlightedStyle = &CustomTextGridStyle{
-			FGColor: InvertColor(fg, bitmask),
-			BGColor: InvertColor(bg, bitmask),
-		}
-	}
-}
-
-// With applies one or more HighlightOption functions to the HighlightedTextGridStyle,
-// allowing customization of the style.
-func (h *HighlightedTextGridStyle) With(options ...HighlightOption) {
-	for _, option := range options {
-		option(h)
-	}
-}
-
 // TextGrid is a monospaced grid of characters.
 // This is designed to be used by a text editor, code preview or terminal emulator.
 type TextGrid struct {
@@ -395,7 +328,9 @@ func (t *TextGrid) ForRangeFn(blockMode bool, startRow, startCol, endRow, endCol
 			endCol = len(t.Rows[startRow].Cells) - 1
 		}
 		for col := startCol; col <= endCol; col++ {
-			eachCell(&t.Rows[startRow].Cells[col])
+			if eachCell != nil {
+				eachCell(&t.Rows[startRow].Cells[col])
+			}
 		}
 		return
 	}
@@ -404,69 +339,51 @@ func (t *TextGrid) ForRangeFn(blockMode bool, startRow, startCol, endRow, endCol
 		// Iterate through the rows
 		for rowNum := startRow; rowNum <= endRow; rowNum++ {
 			row := &t.Rows[rowNum]
-			if rowNum != startRow {
+			if rowNum != startRow && eachRow != nil {
 				eachRow(row)
 			}
 
 			// Apply the cell function for the cells in the given column range
 			for col := startCol; col <= endCol && col < len(row.Cells); col++ {
-				eachCell(&row.Cells[col])
+				if eachCell != nil {
+					eachCell(&row.Cells[col])
+				}
 			}
 		}
 		return
 	}
 
 	// first row
-	for col := startCol; col < len(t.Rows[startRow].Cells); col++ {
-		eachCell(&t.Rows[startRow].Cells[col])
+	if eachCell != nil {
+		for col := startCol; col < len(t.Rows[startRow].Cells); col++ {
+			eachCell(&t.Rows[startRow].Cells[col])
+		}
 	}
 
 	// possible middle rows
 	for rowNum := startRow + 1; rowNum < endRow; rowNum++ {
-		eachRow(&t.Rows[rowNum])
+		if eachRow != nil {
+			eachRow(&t.Rows[rowNum])
+		}
 		for col := 0; col < len(t.Rows[rowNum].Cells); col++ {
-			eachCell(&t.Rows[rowNum].Cells[col])
+			if eachCell != nil {
+				eachCell(&t.Rows[rowNum].Cells[col])
+			}
 		}
 	}
 
 	if len(t.Rows[endRow].Cells)-1 < endCol {
 		endCol = len(t.Rows[endRow].Cells) - 1
 	}
-	eachRow(&t.Rows[endRow])
+	if eachRow != nil {
+		eachRow(&t.Rows[endRow])
+	}
 	// last row
 	for col := 0; col <= endCol; col++ {
-		eachCell(&t.Rows[endRow].Cells[col])
-	}
-}
-
-// HighlightRange apply's the highlight options to the given range
-// if highlighting has previously been applied it is enabled
-func (t *TextGrid) HighlightRange(blockMode bool, startRow, startCol, endRow, endCol int, o ...HighlightOption) {
-	applyHighlight := func(cell *TextGridCell) {
-		// Check if already highlighted
-		if h, ok := cell.Style.(*HighlightedTextGridStyle); !ok {
-			highlightedStyle := &HighlightedTextGridStyle{OriginalStyle: cell.Style, Highlighted: true}
-			highlightedStyle.With(o...)
-			cell.Style = highlightedStyle
-		} else {
-			h.Highlighted = true
+		if eachCell != nil {
+			eachCell(&t.Rows[endRow].Cells[col])
 		}
 	}
-
-	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, applyHighlight, func(row *TextGridRow) {
-	})
-}
-
-// ClearHighlightRange disables the highlight style for the given range
-func (t *TextGrid) ClearHighlightRange(blockMode bool, startRow, startCol, endRow, endCol int) {
-	clearHighlight := func(cell *TextGridCell) {
-		// Check if already highlighted
-		if h, ok := cell.Style.(*HighlightedTextGridStyle); ok {
-			h.Highlighted = false
-		}
-	}
-	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, clearHighlight, func(row *TextGridRow) {
-	})
 }
 
 // GetTextRange returns a string from the TextGrid given the start and end row and column.
