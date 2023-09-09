@@ -847,9 +847,9 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 
 	e.copyToClipboard(clipboard)
 	e.setFieldsAndRefresh(e.eraseSelection)
-	e.propertyLock.Lock()
+	e.propertyLock.RLock()
 	cb := e.OnChanged
-	e.propertyLock.Unlock()
+	e.propertyLock.RUnlock()
 	if cb != nil {
 		cb(e.Text)
 	}
@@ -1093,9 +1093,9 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
 		e.setFieldsAndRefresh(e.eraseSelection)
-		e.propertyLock.Lock()
+		e.propertyLock.RLock()
 		cb := e.OnChanged
-		e.propertyLock.Unlock()
+		e.propertyLock.RUnlock()
 		if cb != nil {
 			cb(e.Text)
 		}
