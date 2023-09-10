@@ -41,7 +41,7 @@ func Package() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, gopherjs, web).",
+				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, js, web).",
 				Destination: &p.os,
 			},
 			&cli.StringFlag{
@@ -243,7 +243,7 @@ func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) 
 	}
 
 	bGopherJS := &Builder{
-		os:      "gopherjs",
+		os:      "js",
 		srcdir:  p.srcDir,
 		target:  p.exe + ".js",
 		release: p.release,
@@ -322,7 +322,7 @@ func (p *Packager) doPackage(runner runner) error {
 		return p.packageIOS(p.os, tags)
 	case "wasm":
 		return p.packageWasm()
-	case "gopherjs":
+	case "js":
 		return p.packageGopherJS()
 	case "web":
 		return p.packageWeb()
