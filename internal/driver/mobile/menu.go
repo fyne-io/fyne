@@ -55,6 +55,9 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	for _, item := range menu.Items {
 		panel.Add(newMenuLabel(item, panel, c))
 	}
+	if c.padded {
+		panel = container.NewPadded(panel)
+	}
 
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
