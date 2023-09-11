@@ -309,8 +309,29 @@ func (t *TextGrid) refreshCell(row, col int) {
 	r.refreshCell(row, col)
 }
 
-// ForRangeFn calls back for each cell and row in the selection
-func (t *TextGrid) ForRangeFn(blockMode bool, startRow, startCol, endRow, endCol int, eachCell func(cell *TextGridCell), eachRow func(row *TextGridRow)) {
+// ForRange iterates over a range of cells and rows within a TermGrid, optionally applying a function to each cell and row.
+//
+// Parameters:
+// - blockMode (bool): If true, the iteration is done in block mode, meaning it iterates through rows and applies the cell function for each cell in the specified column range.
+// - startRow (int): The starting row index for the iteration. Rows are 0-indexed.
+// - startCol (int): The starting column index for the iteration within the starting row. Columns are 0-indexed.
+// - endRow (int): The ending row index for the iteration.
+// - endCol (int): The ending column index for the iteration within the ending row.
+// - eachCell (func(cell *widget.TextGridCell)): A function that takes a pointer to a TextGridCell and is applied to each cell in the specified range. Pass `nil` if you don't want to apply a cell function.
+// - eachRow (func(row *widget.TextGridRow)): A function that takes a pointer to a TextGridRow and is applied to each row in the specified range. Pass `nil` if you don't want to apply a row function.
+//
+// Note:
+// - If startRow or endRow are out of bounds (negative or greater/equal to the number of rows in the TermGrid), they will be adjusted to valid values.
+// - If startRow and endRow are the same, the iteration will be limited to the specified column range within that row.
+// - When blockMode is true, it iterates through rows from startRow to endRow, applying the cell function for each cell in the specified column range.
+// - When blockMode is false, it iterates through individual cells row by row, applying the cell function for each cell and optionally applying the row function for each row.
+//
+// Example Usage:
+// termGrid.ForRange(true, 0, 1, 2, 3, cellFunc, rowFunc) // Iterate in block mode, applying cellFunc to cells in columns 1 to 3 and rowFunc to rows 0 to 2.
+// termGrid.ForRange(false, 1, 0, 3, 2, cellFunc, rowFunc) // Iterate cell by cell, applying cellFunc to all cells and rowFunc to rows 1 and 2.
+//
+// Since: 2.5
+func (t *TextGrid) ForRange(blockMode bool, startRow, startCol, endRow, endCol int, eachCell func(cell *TextGridCell), eachRow func(row *TextGridRow)) {
 	if startRow >= len(t.Rows) || endRow < 0 {
 		return
 	}
@@ -386,12 +407,29 @@ func (t *TextGrid) ForRangeFn(blockMode bool, startRow, startCol, endRow, endCol
 	}
 }
 
-// GetTextRange returns a string from the TextGrid given the start and end row and column.
-// If the range is out of bounds, it returns an empty string.
+// GetTextRange retrieves a text range from the TextGrid. It collects the text
+// within the specified grid coordinates, starting from (startRow, startCol) and
+// ending at (endRow, endCol), and returns it as a string. The behavior of the
+// selection depends on the blockMode parameter. If blockMode is true, then
+// startCol and endCol apply to each row in the range, creating a block selection.
+// If blockMode is false, startCol applies only to the first row, and endCol
+// applies only to the last row, resulting in a continuous range.
+//
+// Parameters:
+//   - blockMode: A boolean flag indicating whether to use block mode.
+//   - startRow:  The starting row index of the text range.
+//   - startCol:  The starting column index of the text range.
+//   - endRow:    The ending row index of the text range.
+//   - endCol:    The ending column index of the text range.
+//
+// Returns:
+//   - string: The text content within the specified range as a string.
+//
+// Since: 2.5
 func (t *TextGrid) GetTextRange(blockMode bool, startRow, startCol, endRow, endCol int) string {
 	var result []rune
 
-	t.ForRangeFn(blockMode, startRow, startCol, endRow, endCol, func(cell *TextGridCell) {
+	t.ForRange(blockMode, startRow, startCol, endRow, endCol, func(cell *TextGridCell) {
 		result = append(result, cell.Rune)
 	}, func(row *TextGridRow) {
 		result = append(result, '\n')
