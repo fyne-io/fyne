@@ -611,12 +611,15 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		f(id, li.child)
 	}
 	li.onTapped = func() {
-		canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
-		if canvas != nil {
-			canvas.Focus(l.list)
+		if !fyne.CurrentDevice().IsMobile() {
+			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+			if canvas != nil {
+				canvas.Focus(l.list)
+			}
+
+			l.list.currentFocus = id
 		}
 
-		l.list.currentFocus = id
 		l.list.Select(id)
 	}
 }
