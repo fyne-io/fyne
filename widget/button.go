@@ -99,6 +99,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.background = canvas.NewRectangle(theme.ButtonColor())
 	b.background.CornerRadius = theme.InputRadiusSize()
 	tapBG := canvas.NewRectangle(color.Transparent)
+	tapBG.FillColor = &color.NRGBA{R: 0, G: 0, B: 0, A: 0}
 	b.tapAnim = newButtonTapAnimation(tapBG, b)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
@@ -282,6 +283,7 @@ type buttonRenderer struct {
 // Layout the components of the button widget
 func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
+	r.tapBG.Resize(size)
 
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
