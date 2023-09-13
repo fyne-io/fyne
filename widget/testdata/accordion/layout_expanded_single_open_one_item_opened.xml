@@ -4,7 +4,7 @@
 			<widget pos="42,98" size="56x75" type="*widget.Accordion">
 				<widget size="56x36" type="*widget.Button">
 					<rectangle radius="4" size="56x36"/>
-					<rectangle size="0x0"/>
+					<rectangle fillColor="rgba(0,0,0,0)" size="56x36"/>
 					<widget pos="32,8" size="9x20" type="*widget.RichText">
 						<text alignment="center" bold size="9x19">A</text>
 					</widget>
