@@ -27,7 +27,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 	rend.Refresh()
 
-	assert.Equal(t, 12, len(rend.objects))
+	assert.Equal(t, 18, len(rend.objects))
 }
 
 func TestTextGrid_Row(t *testing.T) {
@@ -266,6 +266,6 @@ func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles 
 }
 
 func rendererCell(r *textGridRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
-	i := (row*r.cols + col) * 2
+	i := (row*r.cols + col) * 3
 	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
 }
