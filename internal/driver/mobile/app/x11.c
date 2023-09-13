@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (linux && !android) || freebsd
-// +build linux,!android freebsd
+//go:build (linux && !android) || freebsd || openbsd
+// +build linux,!android freebsd openbsd
 
 #include "_cgo_export.h"
 #include <EGL/egl.h>

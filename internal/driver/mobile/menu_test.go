@@ -32,6 +32,7 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 
 func TestMobileCanvas_DismissMenu(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
+	c.padded = false
 	c.SetContent(canvas.NewRectangle(theme.BackgroundColor()))
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
