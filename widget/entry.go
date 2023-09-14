@@ -628,13 +628,13 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		pos := e.cursorTextPos()
-		deletedText := provider.String()[pos-1:pos]
+		deletedText := provider.String()[pos-1 : pos]
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.undoStack.MergeOrAdd(&entryInsertAction{
-			Delete: true,
-			Position: pos-1,
-			Text: deletedText,
+			Delete:   true,
+			Position: pos - 1,
+			Text:     deletedText,
 		})
 		e.propertyLock.Unlock()
 	case fyne.KeyDelete:
@@ -642,14 +642,14 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
-		deletedText := provider.String()[pos:pos+1]
+		deletedText := provider.String()[pos : pos+1]
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
 		e.undoStack.MergeOrAdd(&entryInsertAction{
-			Delete: true,
+			Delete:   true,
 			Position: pos,
-			Text: deletedText,
+			Text:     deletedText,
 		})
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
@@ -815,7 +815,7 @@ func (e *Entry) TypedRune(r rune) {
 
 	e.undoStack.MergeOrAdd(&entryInsertAction{
 		Position: pos,
-		Text: string(runes),
+		Text:     string(runes),
 	})
 	e.propertyLock.Unlock()
 
@@ -908,9 +908,9 @@ func (e *Entry) eraseSelection() {
 	e.updateText(provider.String())
 
 	e.undoStack.MergeOrAdd(&entryInsertAction{
-		Delete: true,
+		Delete:   true,
 		Position: posA,
-		Text: erasedText,
+		Text:     erasedText,
 	})
 }
 
@@ -952,7 +952,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	e.propertyLock.Lock()
 	e.undoStack.Add(&entryInsertAction{
 		Position: pos,
-		Text: text,
+		Text:     text,
 	})
 	e.propertyLock.Unlock()
 
@@ -2120,13 +2120,13 @@ func (i *entryInsertAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		if i.Delete {
-			if i.Position == other.Position + len(other.Text) {
+			if i.Position == other.Position+len(other.Text) {
 				i.Position = other.Position
-				i.Text = other.Text+i.Text
+				i.Text = other.Text + i.Text
 				return true
 			}
 		} else {
-			if i.Position + len(i.Text) == other.Position {
+			if i.Position+len(i.Text) == other.Position {
 				i.Text += other.Text
 				return true
 			}
