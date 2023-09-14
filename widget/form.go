@@ -2,7 +2,6 @@ package widget
 
 import (
 	"errors"
-	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -150,7 +149,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 		if !ok {
 			return item.Widget
 		}
-		if !f.itemWidgetHasValidator(item.Widget) { // we don't have validation
+		if ev, ok := item.Widget.(fyne.ExpandedValidator); ok && !ev.HasValidator() {
 			return item.Widget
 		}
 	}
@@ -161,19 +160,6 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	f.updateHelperText(item)
 	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
 	return &fyne.Container{Layout: formItemLayout{}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
-}
-
-func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
-	value := reflect.ValueOf(w).Elem()
-	validatorField := value.FieldByName("Validator")
-	if validatorField == (reflect.Value{}) {
-		return false
-	}
-	validator, ok := validatorField.Interface().(fyne.StringValidator)
-	if !ok {
-		return false
-	}
-	return validator != nil
 }
 
 func (f *Form) createLabel(text string) *canvas.Text {
@@ -267,18 +253,20 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
-	if w, ok := widget.(fyne.Validatable); ok {
-		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok {
-			e.onFocusChanged = func(bool) {
-				updateValidation(e.validationError)
-			}
-			if e.Validator != nil && f.Items[i].invalid {
+	if v, ok := widget.(fyne.Validatable); ok {
+		f.Items[i].invalid = v.Validate() != nil
+		if ev, ok := widget.(fyne.ExpandedValidator); ok {
+			ev.SetOnFocusChanged(func(bool) {
+				updateValidation(ev.Validate())
+			})
+
+			if ev.HasValidator() && f.Items[i].invalid {
 				// set initial state error to guarantee next error (if triggers) is always different
-				e.SetValidationError(errFormItemInitialState)
+				ev.SetValidationError(errFormItemInitialState)
 			}
 		}
-		w.SetOnValidationChanged(updateValidation)
+
+		v.SetOnValidationChanged(updateValidation)
 	}
 }
 

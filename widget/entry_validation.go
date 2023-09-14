@@ -21,13 +21,29 @@ func (e *Entry) Validate() error {
 	return err
 }
 
+// HasValidator makes it possible for a parent that cares about child validation (e.g. widget.Form)
+// to know if the developer has attached a validator or not.
+//
+// Since: 2.5
+func (e *Entry) HasValidator() bool {
+	return e.Validator != nil
+}
+
+// SetOnFocusChanged is intended for parent widgets or containers to hook into the change of focus.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
+//
+// Since: 2.5
+func (e *Entry) SetOnFocusChanged(callback func(bool)) {
+	e.onFocusChanged = callback
+}
+
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (e *Entry) SetOnValidationChanged(callback func(error)) {
 	e.onValidationChanged = callback
 }
 
-// SetValidationError manually updates the validation status until the next input change
+// SetValidationError manually updates the validation status until the next input change.
 func (e *Entry) SetValidationError(err error) {
 	if e.Validator == nil {
 		return
