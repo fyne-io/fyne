@@ -1,0 +1,19 @@
+<canvas padded size="128x128">
+	<content>
+		<widget pos="4,4" size="120x120" type="*widget.Entry">
+			<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="116x116"/>
+			<rectangle pos="1,1" radius="4" size="117x117" strokeColor="primary" strokeWidth="2"/>
+			<widget pos="0,2" size="120x116" type="*widget.Scroll">
+				<widget size="120x116" type="*widget.entryContent">
+					<widget size="120x116" type="*widget.RichText">
+						<text pos="8,6" size="67x19">The undo/</text>
+						<text pos="8,25" size="88x19">redo function</text>
+						<text pos="8,44" size="86x19">allows you to</text>
+						<text pos="8,63" size="83x19">efficiently fix</text>
+					</widget>
+					<rectangle fillColor="primary" pos="90,63" size="2x19"/>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>

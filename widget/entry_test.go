@@ -1954,6 +1954,43 @@ func TestEntry_CarriageReturn(t *testing.T) {
 	test.AssertImageMatches(t, "entry/carriage_return_text.png", w.Canvas().Capture())
 }
 
+func TestEntry_UndoRedo(t *testing.T) {
+	e, window := setupImageTest(t, true)
+	window.Resize(fyne.NewSize(128, 128))
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	c.Focus(e)
+	runes := "The undo/\nredo function allows you to efficiently fix"
+	for _, r := range runes {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_initial.png", window.Canvas().Capture())
+
+	for _, r := range " mistkaes" {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistkaes.png", window.Canvas().Capture())
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	test.AssertImageMatches(t, "entry/undo_redo_initial.png", window.Canvas().Capture())
+
+	for _, r := range " mistakes" {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
+
+	for i := 0; i < 5; i++ {
+		e.TypedShortcut(&fyne.ShortcutUndo{})
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_5undo.png", window.Canvas().Capture())
+
+	for i := 0; i < 5; i++ {
+		e.TypedShortcut(&fyne.ShortcutRedo{})
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
+}
+
 const (
 	entryOffset = 10
 

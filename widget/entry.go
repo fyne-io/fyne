@@ -21,7 +21,6 @@ import (
 const (
 	bindIgnoreDelay = time.Millisecond * 100 // ignore incoming DataItem fire after we have called Set
 	multiLineRows   = 3
-	wordSeparator   = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
 // Declare conformity with interfaces
@@ -98,6 +97,10 @@ type Entry struct {
 	conversionError error
 	lastChange      time.Time
 	multiLineRows   int // override global default number of visible lines
+
+	// undoStack stores the data necessary for undo/redo functionality
+	// See entryUndoStack for implementation details.
+	undoStack entryUndoStack
 }
 
 // NewEntry creates a new single line entry widget.
@@ -478,6 +481,10 @@ func (e *Entry) SetText(text string) {
 	e.updateTextAndRefresh(text)
 
 	e.updateCursorAndSelection()
+
+	e.propertyLock.Lock()
+	e.undoStack.Clear()
+	e.propertyLock.Unlock()
 }
 
 // Appends the text to the end of the entry
@@ -525,6 +532,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 	super := e.super()
 
+	undoItem := fyne.NewMenuItem("Undo", func() {
+		e.undo()
+	})
+	redoItem := fyne.NewMenuItem("Redo", func() {
+		e.redo()
+	})
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
@@ -546,7 +559,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else if e.Password {
 		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
+		menu = fyne.NewMenu("", undoItem, redoItem, cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
 	e.popUp = NewPopUpMenu(menu, c)
@@ -615,17 +628,29 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		pos := e.cursorTextPos()
+		deletedText := provider.String()[pos-1:pos]
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		e.undoStack.MergeOrAdd(&entryInsertAction{
+			Delete: true,
+			Position: pos-1,
+			Text: deletedText,
+		})
 		e.propertyLock.Unlock()
 	case fyne.KeyDelete:
 		pos := e.cursorTextPos()
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
+		deletedText := provider.String()[pos:pos+1]
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
+		e.undoStack.MergeOrAdd(&entryInsertAction{
+			Delete: true,
+			Position: pos,
+			Text: deletedText,
+		})
 		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
 		e.typedKeyReturn(provider, multiLine)
@@ -787,6 +812,11 @@ func (e *Entry) TypedRune(r rune) {
 	content := provider.String()
 	e.updateText(content)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+
+	e.undoStack.MergeOrAdd(&entryInsertAction{
+		Position: pos,
+		Text: string(runes),
+	})
 	e.propertyLock.Unlock()
 
 	e.Validate()
@@ -869,11 +899,19 @@ func (e *Entry) eraseSelection() {
 		return
 	}
 
+	erasedText := provider.String()[posA:posB]
+
 	provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
 	e.updateText(provider.String())
+
+	e.undoStack.MergeOrAdd(&entryInsertAction{
+		Delete: true,
+		Position: posA,
+		Text: erasedText,
+	})
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
@@ -911,6 +949,13 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	pos := e.cursorTextPos()
 	provider.insertAt(pos, text)
 
+	e.propertyLock.Lock()
+	e.undoStack.Add(&entryInsertAction{
+		Position: pos,
+		Text: text,
+	})
+	e.propertyLock.Unlock()
+
 	e.updateTextAndRefresh(provider.String())
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 }
@@ -935,6 +980,12 @@ func (e *Entry) placeholderProvider() *RichText {
 }
 
 func (e *Entry) registerShortcut() {
+	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(se fyne.Shortcut) {
+		e.undo()
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(se fyne.Shortcut) {
+		e.redo()
+	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut := se.(*fyne.ShortcutCut)
 		e.cutToClipboard(cut.Clipboard)
@@ -1386,6 +1437,44 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
+}
+
+// undo un-does the last modifying user-action
+func (e *Entry) undo() {
+	var pos int
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Undo(e.Text)
+	if insert, ok := action.(*entryInsertAction); ok {
+		pos = insert.Position
+		if insert.Delete {
+			pos += len(insert.Text)
+		}
+	}
+	e.propertyLock.Unlock()
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
+}
+
+// redo un-does the last undo action
+func (e *Entry) redo() {
+	var pos int
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Redo(e.Text)
+	if insert, ok := action.(*entryInsertAction); ok {
+		pos = insert.Position
+		if !insert.Delete {
+			pos += len(insert.Text)
+		}
+	}
+	e.propertyLock.Unlock()
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
@@ -1898,11 +1987,8 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 	// maps: " fi-sh 日本語本語日  \t "
 	// into: " -- -- ------   "
 	space := func(r rune) rune {
-		if unicode.IsSpace(r) {
-			return ' '
-		}
 		// If this rune is a typical word separator then classify it as whitespace
-		if strings.ContainsRune(wordSeparator, r) {
+		if isWordSeparator(r) {
 			return ' '
 		}
 		return '-'
@@ -1940,4 +2026,180 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 		end += endCheck // otherwise include the text slice position
 	}
 	return start, end
+}
+
+func isWordSeparator(r rune) bool {
+	return unicode.IsSpace(r) ||
+		strings.ContainsRune("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?", r)
+}
+
+// entryUndoAction represents a single user action that can be undone
+type entryUndoAction interface {
+	Undo(string) string
+	Redo(string) string
+}
+
+// entryMergeableUndoAction is like entryUndoAction, but the undoStack
+// can try to merge it with the next action (see TryMerge).
+// This is useful because it allows grouping together actions like
+// entering every single characters in a word. We don't want to have to
+// undo every single character addition.
+type entryMergeableUndoAction interface {
+	entryUndoAction
+	// TryMerge attempts to merge the current action
+	// with the next action. It returns true if successful.
+	// If it fails, the undoStack will simply add the next
+	// item without merging.
+	TryMerge(next entryMergeableUndoAction) bool
+}
+
+// Declare conformity with entryMergeableUndoAction interface
+var _ entryMergeableUndoAction = (*entryInsertAction)(nil)
+
+// entryInsertAction implements entryMergeableUndoAction.
+// It represents the insertion/deletion of a single string at a
+// position (e.g. "Hello" => "Hello, world", or "Hello" => "He").
+type entryInsertAction struct {
+	// Delete is true if this action deletes Text, and false if it inserts Text
+	Delete bool
+	// Position represents the start position of Text
+	Position int
+	// Text is the text that is inserted or deleted at Position
+	Text string
+}
+
+func (i *entryInsertAction) Undo(s string) string {
+	if i.Delete {
+		return i.add(s)
+	} else {
+		return i.sub(s)
+	}
+}
+
+func (i *entryInsertAction) Redo(s string) string {
+	if i.Delete {
+		return i.sub(s)
+	} else {
+		return i.add(s)
+	}
+}
+
+// Inserts Text
+func (i *entryInsertAction) add(s string) string {
+	return s[:i.Position] + i.Text + s[i.Position:]
+}
+
+// Deletes Text
+func (i *entryInsertAction) sub(s string) string {
+	return s[:i.Position] + s[i.Position+len(i.Text):]
+}
+
+func (i *entryInsertAction) TryMerge(other entryMergeableUndoAction) bool {
+	if other, ok := other.(*entryInsertAction); ok {
+		// Don't merge two different types of insertAction
+		if i.Delete != other.Delete {
+			return false
+		}
+
+		// Don't merge two separate words
+		wordSeparators := func(s string) (num int, onlyWordSeparators bool) {
+			onlyWordSeparators = true
+			for _, r := range s {
+				if isWordSeparator(r) {
+					num++
+					onlyWordSeparators = false
+				}
+			}
+			return
+		}
+		selfNumWS, _ := wordSeparators(i.Text)
+		otherNumWS, otherOnlyWS := wordSeparators(other.Text)
+		if !((selfNumWS == 0 && otherNumWS == 0) ||
+			(selfNumWS > 0 && otherOnlyWS)) {
+			return false
+		}
+
+		if i.Delete {
+			if i.Position == other.Position + len(other.Text) {
+				i.Position = other.Position
+				i.Text = other.Text+i.Text
+				return true
+			}
+		} else {
+			if i.Position + len(i.Text) == other.Position {
+				i.Text += other.Text
+				return true
+			}
+		}
+		return false
+	}
+	return false
+}
+
+// entryUndoStack stores the information necessary for textual undo/redo functionality.
+type entryUndoStack struct {
+	// items is the stack for storing the history of user actions.
+	items []entryUndoAction
+	// index is the size of the current effective undo stack.
+	// items[index-1] and below are the possible undo actions.
+	// items[index] and above are the possible redo actions.
+	index int
+}
+
+// Applies the undo action to s and returns the result along with the action performed
+func (u *entryUndoStack) Undo(s string) (newS string, action entryUndoAction) {
+	if u.index == 0 {
+		return s, nil
+	}
+	u.index--
+	action = u.items[u.index]
+	return action.Undo(s), action
+}
+
+// Applies the redo action to s and returns the result along with the action performed
+func (u *entryUndoStack) Redo(s string) (newS string, action entryUndoAction) {
+	if u.index == len(u.items) {
+		return s, nil
+	}
+	action = u.items[u.index]
+	res := action.Redo(s)
+	u.index++
+	return res, action
+}
+
+// Adds the action to the stack, which can later be undone by calling Undo()
+func (u *entryUndoStack) Add(a entryUndoAction) {
+	u.items = u.items[:u.index]
+	u.items = append(u.items, a)
+	u.index++
+}
+
+// Tries to merge the action with the last item on the undo stack.
+// If it can't be merged, it calls Add().
+func (u *entryUndoStack) MergeOrAdd(a entryUndoAction) {
+	u.items = u.items[:u.index]
+	if u.index == 0 {
+		u.Add(a)
+		return
+	}
+	ma, ok := a.(entryMergeableUndoAction)
+	if !ok {
+		u.Add(a)
+		return
+	}
+	mprev, ok := u.items[u.index-1].(entryMergeableUndoAction)
+	if !ok {
+		u.Add(a)
+		return
+	}
+	if !mprev.TryMerge(ma) {
+		u.Add(a)
+		return
+	}
+}
+
+// Removes all items from the undo stack
+func (u *entryUndoStack) Clear() {
+	u.items = nil
+	u.index = 0
 }

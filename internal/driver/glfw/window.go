@@ -844,6 +844,12 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 	}
 	if modifier == ctrlMod {
 		switch keyName {
+		case fyne.KeyZ:
+			// detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY:
+			// detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
 		case fyne.KeyV:
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
