@@ -187,6 +187,10 @@ func (d *gLDriver) runGL() {
 				d.windowLock.Lock()
 				d.windows = newWindows
 				d.windowLock.Unlock()
+
+				if len(newWindows) == 0 {
+					d.Quit()
+				}
 			}
 		}
 	}

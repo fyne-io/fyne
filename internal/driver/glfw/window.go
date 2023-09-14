@@ -279,7 +279,7 @@ func (w *window) destroy(d *gLDriver) {
 	w.DestroyEventQueue()
 	cache.CleanCanvas(w.canvas)
 
-	if w.master || len(w.driver.windowList()) == 1 {
+	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
 		go d.focusPreviousWindow()
