@@ -28,6 +28,10 @@ type InnerWindow struct {
 	content fyne.CanvasObject
 }
 
+// NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
+// This will behave like a normal contain and will probably want to be added to a `MultipleWindows` parent.
+//
+// Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
 	w := &InnerWindow{title: title, content: content}
 	w.ExtendBaseWidget(w)

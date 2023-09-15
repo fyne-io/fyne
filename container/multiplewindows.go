@@ -18,6 +18,11 @@ type MultipleWindows struct {
 	content *fyne.Container
 }
 
+// NewMultipleWindows creates a new `MultipleWindows` container to manage many inner windows.
+// You can add new more windows to this container by calling `Add` or updating the `Windows`
+// field and calling `Refresh`.
+//
+// Since: 2.5
 func NewMultipleWindows() *MultipleWindows {
 	m := &MultipleWindows{}
 	m.ExtendBaseWidget(m)
