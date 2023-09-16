@@ -55,6 +55,53 @@ func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	return ac
 }
 
+func makeActivityTab(_ fyne.Window) fyne.CanvasObject {
+	a1 := widget.NewActivity()
+	a2 := widget.NewActivity()
+	a3 := widget.NewActivity()
+
+	prop := canvas.NewRectangle(color.Transparent)
+	prop.SetMinSize(fyne.NewSize(160, 80))
+
+	var button *widget.Button
+	start := func() {
+		button.Disable()
+		a1.Start()
+		a1.Show()
+		a2.Start()
+		a2.Show()
+		a3.Start()
+		a3.Show()
+
+		defer func() {
+			go func() {
+				time.Sleep(time.Second * 10)
+				a1.Stop()
+				a1.Hide()
+				a2.Stop()
+				a2.Hide()
+				a3.Stop()
+				a3.Hide()
+
+				button.Enable()
+			}()
+		}()
+	}
+
+	button = widget.NewButton("Animate", start)
+	start()
+
+	fakeDialog := container.NewStack(canvas.NewRectangle(theme.OverlayBackgroundColor()),
+		container.NewVBox(widget.NewLabelWithStyle("Dialog, e.g.", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			container.NewStack(prop, a3)))
+
+	return container.NewCenter(container.NewGridWithColumns(1,
+		container.NewCenter(container.NewVBox(
+			container.NewHBox(widget.NewLabel("Working..."), a1),
+			container.NewStack(button, a2))),
+		container.NewCenter(fakeDialog)))
+}
+
 func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
