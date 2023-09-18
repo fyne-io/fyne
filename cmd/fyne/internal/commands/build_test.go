@@ -201,7 +201,7 @@ func Test_BuildGopherJSReleaseVersion(t *testing.T) {
 	}
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{appData: &appData{}, os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
+	b := &Builder{appData: &appData{}, os: "js", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
 	err := b.build()
 	if runtime.GOOS == "windows" {
 		assert.NotNil(t, err)

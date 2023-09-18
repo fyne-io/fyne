@@ -39,7 +39,7 @@ func (p *Packager) packageWasm() error {
 }
 
 func (p *Packager) packageGopherJS() error {
-	appDir := util.EnsureSubDir(p.dir, "gopherjs")
+	appDir := util.EnsureSubDir(p.dir, "js")
 
 	tpl := webData{
 		AppName:      p.Name,
