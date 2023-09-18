@@ -14,11 +14,15 @@ var _ fyne.Widget = (*Activity)(nil)
 
 // Activity is used to indicate that something is happening that should be waited for,
 // or is in the background (depending on usage).
+//
+// Since: 2.5
 type Activity struct {
 	BaseWidget
 }
 
 // NewActivity returns a widget for indicating activity
+//
+// Since: 2.5
 func NewActivity() *Activity {
 	a := &Activity{}
 	a.ExtendBaseWidget(a)
