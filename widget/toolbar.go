@@ -24,7 +24,7 @@ type ToolbarAction struct {
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
 	button.Importance = LowImportance
-	if t.disable == true {
+	if t.disable {
 		button.Disable()
 	}
 	return button
