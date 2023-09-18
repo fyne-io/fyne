@@ -27,21 +27,21 @@
 				<container pos="36,90" size="80x36">
 					<widget size="24x36" type="*widget.Button">
 						<rectangle fillColor="button" radius="4" size="24x36"/>
-						<rectangle fillColor="rgba(0,0,0,0)" size="24x36"/>
+						<rectangle size="24x36"/>
 						<widget pos="8,8" size="8x19" type="*widget.RichText">
 							<text alignment="center" bold size="8x19">1</text>
 						</widget>
 					</widget>
 					<widget pos="28,0" size="24x36" type="*widget.Button">
 						<rectangle fillColor="button" radius="4" size="24x36"/>
-						<rectangle fillColor="rgba(0,0,0,0)" size="24x36"/>
+						<rectangle size="24x36"/>
 						<widget pos="8,8" size="8x19" type="*widget.RichText">
 							<text alignment="center" bold size="8x19">2</text>
 						</widget>
 					</widget>
 					<widget pos="56,0" size="24x36" type="*widget.Button">
 						<rectangle fillColor="button" radius="4" size="24x36"/>
-						<rectangle fillColor="rgba(0,0,0,0)" size="24x36"/>
+						<rectangle size="24x36"/>
 						<widget pos="8,8" size="8x19" type="*widget.RichText">
 							<text alignment="center" bold size="8x19">3</text>
 						</widget>

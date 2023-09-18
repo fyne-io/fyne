@@ -3,7 +3,7 @@
 		<container pos="4,4" size="142x192">
 			<widget pos="7,78" size="127x35" type="*widget.Select">
 				<rectangle fillColor="inputBackground" radius="4" size="127x35"/>
-				<rectangle fillColor="rgba(0,0,0,0)" size="127x35"/>
+				<rectangle size="127x35"/>
 				<widget pos="4,4" size="95x27" type="*widget.RichText">
 					<text pos="4,4" size="24x19">Foo</text>
 				</widget>

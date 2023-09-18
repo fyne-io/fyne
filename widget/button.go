@@ -99,7 +99,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.background = canvas.NewRectangle(theme.ButtonColor())
 	b.background.CornerRadius = theme.InputRadiusSize()
 	tapBG := canvas.NewRectangle(color.Transparent)
-	tapBG.FillColor = &color.NRGBA{R: 0, G: 0, B: 0, A: 0}
 	b.tapAnim = newButtonTapAnimation(tapBG, b)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
@@ -454,7 +453,11 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation 
 		r, g, bb, a := col.ToNRGBA(theme.PressedColor())
 		aa := uint8(a)
 		fade := aa - uint8(float32(aa)*done)
-		bg.FillColor = &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(bb), A: fade}
+		if fade > 0 {
+			bg.FillColor = &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(bb), A: fade}
+		} else {
+			bg.FillColor = color.Transparent
+		}
 		canvas.Refresh(bg)
 	})
 }
