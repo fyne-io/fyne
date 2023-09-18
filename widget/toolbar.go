@@ -120,7 +120,7 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 
 // Disable the toolbar actions so that it cannot be interacted with and updating any style/feature accordingly.
 //
-// Since: 2.4
+// Since: 2.5
 func (t *Toolbar) Disable() {
 	for _, item := range t.Items {
 		action, ok := item.(*ToolbarAction)
