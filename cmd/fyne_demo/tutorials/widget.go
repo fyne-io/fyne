@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -55,13 +56,9 @@ func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	return ac
 }
 
-func makeActivityTab(_ fyne.Window) fyne.CanvasObject {
+func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 	a1 := widget.NewActivity()
 	a2 := widget.NewActivity()
-	a3 := widget.NewActivity()
-
-	prop := canvas.NewRectangle(color.Transparent)
-	prop.SetMinSize(fyne.NewSize(160, 80))
 
 	var button *widget.Button
 	start := func() {
@@ -70,8 +67,6 @@ func makeActivityTab(_ fyne.Window) fyne.CanvasObject {
 		a1.Show()
 		a2.Start()
 		a2.Show()
-		a3.Start()
-		a3.Show()
 
 		defer func() {
 			go func() {
@@ -80,8 +75,6 @@ func makeActivityTab(_ fyne.Window) fyne.CanvasObject {
 				a1.Hide()
 				a2.Stop()
 				a2.Hide()
-				a3.Stop()
-				a3.Hide()
 
 				button.Enable()
 			}()
@@ -91,15 +84,25 @@ func makeActivityTab(_ fyne.Window) fyne.CanvasObject {
 	button = widget.NewButton("Animate", start)
 	start()
 
-	fakeDialog := container.NewStack(canvas.NewRectangle(theme.OverlayBackgroundColor()),
-		container.NewVBox(widget.NewLabelWithStyle("Dialog, e.g.", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-			container.NewStack(prop, a3)))
-
 	return container.NewCenter(container.NewGridWithColumns(1,
 		container.NewCenter(container.NewVBox(
 			container.NewHBox(widget.NewLabel("Working..."), a1),
 			container.NewStack(button, a2))),
-		container.NewCenter(fakeDialog)))
+		container.NewCenter(widget.NewButton("Show dialog", func() {
+			prop := canvas.NewRectangle(color.Transparent)
+			prop.SetMinSize(fyne.NewSize(50, 50))
+
+			a3 := widget.NewActivity()
+			d := dialog.NewCustomWithoutButtons("Please wait...", container.NewStack(prop, a3), win)
+			a3.Start()
+			d.Show()
+
+			go func() {
+				time.Sleep(time.Second * 5)
+				a3.Stop()
+				d.Hide()
+			}()
+		}))))
 }
 
 func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
