@@ -41,9 +41,8 @@ func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 	return &ToolbarAction{
-		icon,
-		onActivated,
-		false,
+		Icon:        icon,
+		OnActivated: onActivated,
 	}
 }
 
