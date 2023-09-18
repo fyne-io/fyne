@@ -87,8 +87,8 @@ func TestToolbar_Disable(t *testing.T) {
 	toolbarItem := NewToolbarAction(testIcon, nil)
 	toolbar := NewToolbar(toolbarItem)
 	toolbar.Disable()
-	assert.Equal(t, toolbarItem.disable, true)
-	assert.NotEqual(t, toolbarItem.disable, false)
+	assert.Equal(t, toolbarItem.disabled, true)
+	assert.NotEqual(t, toolbarItem.disabled, false)
 }
 
 type toolbarLabel struct {

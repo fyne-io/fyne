@@ -17,14 +17,14 @@ type ToolbarItem interface {
 type ToolbarAction struct {
 	Icon        fyne.Resource
 	OnActivated func() `json:"-"`
-	disable     bool
+	disabled    bool
 }
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
 	button.Importance = LowImportance
-	if t.disable {
+	if t.disabled {
 		button.Disable()
 	}
 	return button
@@ -40,12 +40,11 @@ func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
-	t := &ToolbarAction{
+	return &ToolbarAction{
 		icon,
 		onActivated,
 		false,
 	}
-	return t
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
@@ -120,11 +119,14 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 	return t
 }
 
+// Disable the toolbar actions so that it cannot be interacted with and updating any style/feature accordingly.
+//
+// Since: 2.4
 func (t *Toolbar) Disable() {
 	for _, item := range t.Items {
-		_, ok := item.(*ToolbarAction)
+		action, ok := item.(*ToolbarAction)
 		if ok {
-			item.(*ToolbarAction).disable = true
+			action.disabled = true
 		}
 	}
 }
