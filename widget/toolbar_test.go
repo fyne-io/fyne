@@ -82,6 +82,14 @@ func TestToolbar_SetIcon(t *testing.T) {
 	assert.NotEqual(t, oldIcon, toolbarItem.Icon)
 	assert.Equal(t, newIcon, toolbarItem.Icon)
 }
+func TestToolbar_Disable(t *testing.T) {
+	testIcon := theme.FyneLogo()
+	toolbarItem := NewToolbarAction(testIcon, nil)
+	toolbar := NewToolbar(toolbarItem)
+	toolbar.Disable()
+	assert.Equal(t, toolbarItem.disable, true)
+	assert.NotEqual(t, toolbarItem.disable, false)
+}
 
 type toolbarLabel struct {
 	*Label
