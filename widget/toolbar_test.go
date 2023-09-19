@@ -86,8 +86,8 @@ func TestToolbar_Disable(t *testing.T) {
 	testIcon := theme.FyneLogo()
 	toolbarItem := NewToolbarAction(testIcon, nil)
 	toolbarItem.Disable()
-	assert.Equal(t, toolbarItem.Disabled(), true)
-	assert.NotEqual(t, toolbarItem.Disabled(), false)
+	assert.Equal(t, true, toolbarItem.Disabled())
+	assert.NotEqual(t, false, toolbarItem.Disabled())
 }
 
 func TestToolbar_Enable(t *testing.T) {
