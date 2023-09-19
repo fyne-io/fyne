@@ -46,6 +46,35 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 	}
 }
 
+// Enable the ToolbarAction, updating any style or features appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Enable() {
+	if !t.Disabled() {
+		return
+	}
+
+	t.disabled = false
+}
+
+// Disable the ToolbarAction, updating any style or features appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disable() {
+	if t.Disabled() {
+		return
+	}
+
+	t.disabled = true
+}
+
+// Disabled returns true if this ToolbarAction is currently disabled or false if it can currently be interacted with.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disabled() bool {
+	return t.disabled
+}
+
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
 // This is typically used to assist layout if you wish some left and some right aligned items.
 // Space will be split evebly amongst all the spacers on a toolbar.
@@ -116,18 +145,6 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 
 	t.Refresh()
 	return t
-}
-
-// Disable the toolbar actions so that it cannot be interacted with and updating any style/feature accordingly.
-//
-// Since: 2.5
-func (t *Toolbar) Disable() {
-	for _, item := range t.Items {
-		action, ok := item.(*ToolbarAction)
-		if ok {
-			action.disabled = true
-		}
-	}
 }
 
 type toolbarRenderer struct {
