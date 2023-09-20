@@ -1016,10 +1016,10 @@ func (e *Entry) placeholderProvider() *RichText {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(se fyne.Shortcut) {
-		e.undo()
+		e.Undo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(se fyne.Shortcut) {
-		e.redo()
+		e.Redo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut := se.(*fyne.ShortcutCut)
