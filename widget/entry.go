@@ -488,46 +488,6 @@ func (e *Entry) SetText(text string) {
 	e.propertyLock.Unlock()
 }
 
-// Undo un-does the last modifying user-action.
-func (e *Entry) Undo() {
-	e.propertyLock.Lock()
-	newText, action := e.undoStack.Undo(e.Text)
-	e.propertyLock.Unlock()
-	modify, ok := action.(*entryModifyAction)
-	if !ok {
-		return
-	}
-	pos := modify.Position
-	if modify.Delete {
-		pos += len(modify.Text)
-	}
-	e.updateTextAndRefresh(newText)
-	e.propertyLock.Lock()
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.propertyLock.Unlock()
-	e.Refresh()
-}
-
-// Redo un-does the last undo action.
-func (e *Entry) Redo() {
-	e.propertyLock.Lock()
-	newText, action := e.undoStack.Redo(e.Text)
-	e.propertyLock.Unlock()
-	modify, ok := action.(*entryModifyAction)
-	if !ok {
-		return
-	}
-	pos := modify.Position
-	if !modify.Delete {
-		pos += len(modify.Text)
-	}
-	e.updateTextAndRefresh(newText)
-	e.propertyLock.Lock()
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.propertyLock.Unlock()
-	e.Refresh()
-}
-
 // Appends the text to the end of the entry
 //
 // Since: 2.4
@@ -1475,6 +1435,50 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
+}
+
+// Undo un-does the last modifying user-action.
+//
+// Since 2.5
+func (e *Entry) Undo() {
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Undo(e.Text)
+	e.propertyLock.Unlock()
+	modify, ok := action.(*entryModifyAction)
+	if !ok {
+		return
+	}
+	pos := modify.Position
+	if modify.Delete {
+		pos += len(modify.Text)
+	}
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
+}
+
+// Redo un-does the last undo action.
+//
+// Since 2.5
+func (e *Entry) Redo() {
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Redo(e.Text)
+	e.propertyLock.Unlock()
+	modify, ok := action.(*entryModifyAction)
+	if !ok {
+		return
+	}
+	pos := modify.Position
+	if !modify.Delete {
+		pos += len(modify.Text)
+	}
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
