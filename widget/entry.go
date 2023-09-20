@@ -594,7 +594,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else if e.Password {
 		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		menu = fyne.NewMenu("", undoItem, redoItem, cutItem, copyItem, pasteItem, selectAllItem)
+		sep := fyne.NewMenuItemSeparator()
+		menu = fyne.NewMenu("", undoItem, redoItem, sep, cutItem, copyItem, pasteItem, selectAllItem)
 	}
 
 	e.popUp = NewPopUpMenu(menu, c)
