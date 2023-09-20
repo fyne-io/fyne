@@ -490,16 +490,17 @@ func (e *Entry) SetText(text string) {
 
 // Undo un-does the last modifying user-action.
 func (e *Entry) Undo() {
-	var pos int
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Undo(e.Text)
-	if insert, ok := action.(*entryModifyAction); ok {
-		pos = insert.Position
-		if insert.Delete {
-			pos += len(insert.Text)
-		}
-	}
 	e.propertyLock.Unlock()
+	modify, ok := action.(*entryModifyAction)
+	if !ok {
+		return
+	}
+	pos := modify.Position
+	if modify.Delete {
+		pos += len(modify.Text)
+	}
 	e.updateTextAndRefresh(newText)
 	e.propertyLock.Lock()
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
@@ -509,16 +510,17 @@ func (e *Entry) Undo() {
 
 // Redo un-does the last undo action.
 func (e *Entry) Redo() {
-	var pos int
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Redo(e.Text)
-	if insert, ok := action.(*entryModifyAction); ok {
-		pos = insert.Position
-		if !insert.Delete {
-			pos += len(insert.Text)
-		}
-	}
 	e.propertyLock.Unlock()
+	modify, ok := action.(*entryModifyAction)
+	if !ok {
+		return
+	}
+	pos := modify.Position
+	if !modify.Delete {
+		pos += len(modify.Text)
+	}
 	e.updateTextAndRefresh(newText)
 	e.propertyLock.Lock()
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
