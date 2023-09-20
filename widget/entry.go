@@ -477,6 +477,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 }
 
 // SetText manually sets the text of the Entry to the given text value.
+// Calling SetText resets all undo history.
 func (e *Entry) SetText(text string) {
 	e.updateTextAndRefresh(text)
 
@@ -485,6 +486,44 @@ func (e *Entry) SetText(text string) {
 	e.propertyLock.Lock()
 	e.undoStack.Clear()
 	e.propertyLock.Unlock()
+}
+
+// Undo un-does the last modifying user-action.
+func (e *Entry) Undo() {
+	var pos int
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Undo(e.Text)
+	if insert, ok := action.(*entryInsertAction); ok {
+		pos = insert.Position
+		if insert.Delete {
+			pos += len(insert.Text)
+		}
+	}
+	e.propertyLock.Unlock()
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
+}
+
+// Redo un-does the last undo action.
+func (e *Entry) Redo() {
+	var pos int
+	e.propertyLock.Lock()
+	newText, action := e.undoStack.Redo(e.Text)
+	if insert, ok := action.(*entryInsertAction); ok {
+		pos = insert.Position
+		if !insert.Delete {
+			pos += len(insert.Text)
+		}
+	}
+	e.propertyLock.Unlock()
+	e.updateTextAndRefresh(newText)
+	e.propertyLock.Lock()
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 // Appends the text to the end of the entry
@@ -532,12 +571,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 	super := e.super()
 
-	undoItem := fyne.NewMenuItem("Undo", func() {
-		e.undo()
-	})
-	redoItem := fyne.NewMenuItem("Redo", func() {
-		e.redo()
-	})
+	undoItem := fyne.NewMenuItem("Undo", e.Undo)
+	redoItem := fyne.NewMenuItem("Redo", e.Redo)
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
@@ -1437,44 +1472,6 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
-}
-
-// undo un-does the last modifying user-action
-func (e *Entry) undo() {
-	var pos int
-	e.propertyLock.Lock()
-	newText, action := e.undoStack.Undo(e.Text)
-	if insert, ok := action.(*entryInsertAction); ok {
-		pos = insert.Position
-		if insert.Delete {
-			pos += len(insert.Text)
-		}
-	}
-	e.propertyLock.Unlock()
-	e.updateTextAndRefresh(newText)
-	e.propertyLock.Lock()
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.propertyLock.Unlock()
-	e.Refresh()
-}
-
-// redo un-does the last undo action
-func (e *Entry) redo() {
-	var pos int
-	e.propertyLock.Lock()
-	newText, action := e.undoStack.Redo(e.Text)
-	if insert, ok := action.(*entryInsertAction); ok {
-		pos = insert.Position
-		if !insert.Delete {
-			pos += len(insert.Text)
-		}
-	}
-	e.propertyLock.Unlock()
-	e.updateTextAndRefresh(newText)
-	e.propertyLock.Lock()
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.propertyLock.Unlock()
-	e.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
