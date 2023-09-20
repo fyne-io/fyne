@@ -493,7 +493,7 @@ func (e *Entry) Undo() {
 	var pos int
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Undo(e.Text)
-	if insert, ok := action.(*entryInsertAction); ok {
+	if insert, ok := action.(*entryModifyAction); ok {
 		pos = insert.Position
 		if insert.Delete {
 			pos += len(insert.Text)
@@ -512,7 +512,7 @@ func (e *Entry) Redo() {
 	var pos int
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Redo(e.Text)
-	if insert, ok := action.(*entryInsertAction); ok {
+	if insert, ok := action.(*entryModifyAction); ok {
 		pos = insert.Position
 		if !insert.Delete {
 			pos += len(insert.Text)
@@ -667,7 +667,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		deletedText := provider.String()[pos-1 : pos]
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
-		e.undoStack.MergeOrAdd(&entryInsertAction{
+		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
 			Position: pos - 1,
 			Text:     deletedText,
@@ -682,7 +682,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
-		e.undoStack.MergeOrAdd(&entryInsertAction{
+		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
 			Position: pos,
 			Text:     deletedText,
@@ -849,7 +849,7 @@ func (e *Entry) TypedRune(r rune) {
 	e.updateText(content)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-	e.undoStack.MergeOrAdd(&entryInsertAction{
+	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Position: pos,
 		Text:     string(runes),
 	})
@@ -943,7 +943,7 @@ func (e *Entry) eraseSelection() {
 	e.selecting = false
 	e.updateText(provider.String())
 
-	e.undoStack.MergeOrAdd(&entryInsertAction{
+	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Delete:   true,
 		Position: posA,
 		Text:     erasedText,
@@ -986,7 +986,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	provider.insertAt(pos, text)
 
 	e.propertyLock.Lock()
-	e.undoStack.Add(&entryInsertAction{
+	e.undoStack.Add(&entryModifyAction{
 		Position: pos,
 		Text:     text,
 	})
@@ -2052,12 +2052,12 @@ type entryMergeableUndoAction interface {
 }
 
 // Declare conformity with entryMergeableUndoAction interface
-var _ entryMergeableUndoAction = (*entryInsertAction)(nil)
+var _ entryMergeableUndoAction = (*entryModifyAction)(nil)
 
-// entryInsertAction implements entryMergeableUndoAction.
+// entryModifyAction implements entryMergeableUndoAction.
 // It represents the insertion/deletion of a single string at a
 // position (e.g. "Hello" => "Hello, world", or "Hello" => "He").
-type entryInsertAction struct {
+type entryModifyAction struct {
 	// Delete is true if this action deletes Text, and false if it inserts Text
 	Delete bool
 	// Position represents the start position of Text
@@ -2066,7 +2066,7 @@ type entryInsertAction struct {
 	Text string
 }
 
-func (i *entryInsertAction) Undo(s string) string {
+func (i *entryModifyAction) Undo(s string) string {
 	if i.Delete {
 		return i.add(s)
 	} else {
@@ -2074,7 +2074,7 @@ func (i *entryInsertAction) Undo(s string) string {
 	}
 }
 
-func (i *entryInsertAction) Redo(s string) string {
+func (i *entryModifyAction) Redo(s string) string {
 	if i.Delete {
 		return i.sub(s)
 	} else {
@@ -2083,18 +2083,18 @@ func (i *entryInsertAction) Redo(s string) string {
 }
 
 // Inserts Text
-func (i *entryInsertAction) add(s string) string {
+func (i *entryModifyAction) add(s string) string {
 	return s[:i.Position] + i.Text + s[i.Position:]
 }
 
 // Deletes Text
-func (i *entryInsertAction) sub(s string) string {
+func (i *entryModifyAction) sub(s string) string {
 	return s[:i.Position] + s[i.Position+len(i.Text):]
 }
 
-func (i *entryInsertAction) TryMerge(other entryMergeableUndoAction) bool {
-	if other, ok := other.(*entryInsertAction); ok {
-		// Don't merge two different types of insertAction
+func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
+	if other, ok := other.(*entryModifyAction); ok {
+		// Don't merge two different types of modifyAction
 		if i.Delete != other.Delete {
 			return false
 		}
