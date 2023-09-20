@@ -28,25 +28,28 @@
 					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x200"/>
 				</widget>
 				<widget size="73x200" type="*widget.Scroll">
-					<widget size="73x230" type="*widget.menuBox">
-						<rectangle fillColor="menuBackground" size="73x230"/>
-						<container size="73x230">
+					<widget size="73x235" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="73x235"/>
+						<container size="73x235">
 							<widget size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Undo</text>
 							</widget>
 							<widget pos="0,39" size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Redo</text>
 							</widget>
-							<widget pos="0,78" size="73x35" type="*widget.menuItem">
+							<widget pos="0,78" size="73x1" type="*widget.Separator">
+								<rectangle fillColor="disabled" size="73x1"/>
+							</widget>
+							<widget pos="0,83" size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Cut</text>
 							</widget>
-							<widget pos="0,117" size="73x35" type="*widget.menuItem">
+							<widget pos="0,122" size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Copy</text>
 							</widget>
-							<widget pos="0,156" size="73x35" type="*widget.menuItem">
+							<widget pos="0,161" size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Paste</text>
 							</widget>
-							<widget pos="0,195" size="73x35" type="*widget.menuItem">
+							<widget pos="0,200" size="73x35" type="*widget.menuItem">
 								<text pos="8,8" size="57x19">Select all</text>
 							</widget>
 						</container>
@@ -55,8 +58,8 @@
 						<linearGradient endColor="shadow" pos="0,-8" size="73x8"/>
 					</widget>
 					<widget pos="67,0" size="6x200" type="*widget.scrollBarArea">
-						<widget pos="3,0" size="3x173" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="3x173"/>
+						<widget pos="3,0" size="3x169" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="3x169"/>
 						</widget>
 					</widget>
 				</widget>
