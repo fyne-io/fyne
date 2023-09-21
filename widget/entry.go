@@ -439,7 +439,7 @@ func (e *Entry) MouseUp(m *desktop.MouseEvent) {
 
 // Redo un-does the last undo action.
 //
-// Since 2.5
+// Since: 2.5
 func (e *Entry) Redo() {
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Redo(e.Text)
@@ -727,7 +727,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 // Undo un-does the last modifying user-action.
 //
-// Since 2.5
+// Since: 2.5
 func (e *Entry) Undo() {
 	e.propertyLock.Lock()
 	newText, action := e.undoStack.Undo(e.Text)
