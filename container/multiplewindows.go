@@ -19,12 +19,13 @@ type MultipleWindows struct {
 }
 
 // NewMultipleWindows creates a new `MultipleWindows` container to manage many inner windows.
+// The initial window list is passed optionally to this constructor function.
 // You can add new more windows to this container by calling `Add` or updating the `Windows`
 // field and calling `Refresh`.
 //
 // Since: 2.5
-func NewMultipleWindows() *MultipleWindows {
-	m := &MultipleWindows{}
+func NewMultipleWindows(wins ...*InnerWindow) *MultipleWindows {
+	m := &MultipleWindows{Windows: wins}
 	m.ExtendBaseWidget(m)
 	return m
 }
