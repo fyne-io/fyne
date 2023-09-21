@@ -549,11 +549,11 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 
 	col := t.columnAt(e.Position)
-	if col == -1 {
+	if col == noCellMatch {
 		return // out of col range
 	}
 	row := t.rowAt(e.Position)
-	if row == -1 {
+	if row == noCellMatch {
 		return // out of row range
 	}
 	t.Select(TableCellID{row, col})
