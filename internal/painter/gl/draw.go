@@ -432,10 +432,11 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
 	xPad, yPad := float32(0), float32(0)
-	if rect.Size().Width > rect.Size().Height {
-		xPad = (rect.Size().Width - rect.Size().Height) / 2
+	size := rect.Size()
+	if size.Width > size.Height {
+		xPad = (size.Width - size.Height) / 2
 	} else {
-		yPad = (rect.Size().Height - rect.Size().Width) / 2
+		yPad = (size.Height - size.Width) / 2
 	}
 
 	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
