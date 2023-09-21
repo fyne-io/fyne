@@ -2,7 +2,7 @@
 	<content>
 		<widget pos="4,4" size="142x192" type="*widget.Button">
 			<rectangle fillColor="button" radius="4" size="142x192"/>
-			<rectangle size="0x0"/>
+			<rectangle size="142x192"/>
 			<widget pos="56,86" size="28x19" type="*widget.RichText">
 				<text alignment="center" bold size="28x19">Test</text>
 			</widget>
