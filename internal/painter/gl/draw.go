@@ -30,9 +30,10 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
 		1.0, paint.VectorPad(circle))
 
-	radius := circle.Size().Width / 2
-	if circle.Size().Height < circle.Size().Width {
-		radius = circle.Size().Height / 2
+	size := circe.Size()
+	radius := size.Width / 2
+	if size.Height < size.Width {
+		radius = size.Height / 2
 	}
 	program := p.roundRectangleProgram
 
