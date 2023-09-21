@@ -56,7 +56,6 @@ func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r := &activityRenderer{dots: dots}
 	r.anim = &fyne.Animation{
-		//		Curve: fyne.AnimationEaseOut,
 		Duration:    time.Second * 2,
 		RepeatCount: fyne.AnimationRepeatForever,
 		Tick:        r.animate}
