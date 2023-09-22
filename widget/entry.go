@@ -661,7 +661,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		pos := e.cursorTextPos()
-		deletedText := provider.String()[pos-1 : pos]
+		deletedText := e.Text[pos-1 : pos]
 		provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.undoStack.MergeOrAdd(&entryModifyAction{
@@ -675,7 +675,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
-		deletedText := provider.String()[pos : pos+1]
+		deletedText := e.Text[pos : pos+1]
 
 		e.propertyLock.Lock()
 		provider.deleteFromTo(pos, pos+1)
@@ -954,7 +954,7 @@ func (e *Entry) eraseSelection() {
 		return
 	}
 
-	erasedText := provider.String()[posA:posB]
+	erasedText := e.Text[posA:posB]
 
 	provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
