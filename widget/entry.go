@@ -954,9 +954,7 @@ func (e *Entry) eraseSelection() {
 		return
 	}
 
-	e.propertyLock.RLock()
 	erasedText := e.Text[posA:posB]
-	e.propertyLock.RUnlock()
 
 	provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
