@@ -578,8 +578,21 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else if e.Password {
 		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		sep := fyne.NewMenuItemSeparator()
-		menu = fyne.NewMenu("", undoItem, redoItem, sep, cutItem, copyItem, pasteItem, selectAllItem)
+		var menuItems []*fyne.MenuItem
+		e.propertyLock.Lock()
+		canUndo, canRedo := e.undoStack.CanUndo(), e.undoStack.CanRedo()
+		e.propertyLock.Unlock()
+		if canUndo {
+			menuItems = append(menuItems, undoItem)
+		}
+		if canRedo {
+			menuItems = append(menuItems, redoItem)
+		}
+		if canUndo || canRedo {
+			menuItems = append(menuItems, fyne.NewMenuItemSeparator())
+		}
+		menuItems = append(menuItems, cutItem, copyItem, pasteItem, selectAllItem)
+		menu = fyne.NewMenu("", menuItems...)
 	}
 
 	e.popUp = NewPopUpMenu(menu, c)
@@ -2152,7 +2165,7 @@ type entryUndoStack struct {
 
 // Applies the undo action to s and returns the result along with the action performed
 func (u *entryUndoStack) Undo(s string) (newS string, action entryUndoAction) {
-	if u.index == 0 {
+	if !u.CanUndo() {
 		return s, nil
 	}
 	u.index--
@@ -2162,13 +2175,23 @@ func (u *entryUndoStack) Undo(s string) (newS string, action entryUndoAction) {
 
 // Applies the redo action to s and returns the result along with the action performed
 func (u *entryUndoStack) Redo(s string) (newS string, action entryUndoAction) {
-	if u.index == len(u.items) {
+	if !u.CanRedo() {
 		return s, nil
 	}
 	action = u.items[u.index]
 	res := action.Redo(s)
 	u.index++
 	return res, action
+}
+
+// Returns true if an undo action is available
+func (u *entryUndoStack) CanUndo() bool {
+	return u.index != 0
+}
+
+// Returns true if an redo action is available
+func (u *entryUndoStack) CanRedo() bool {
+	return u.index != len(u.items)
 }
 
 // Adds the action to the stack, which can later be undone by calling Undo()
