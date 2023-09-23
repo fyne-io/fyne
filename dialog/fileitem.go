@@ -85,7 +85,7 @@ type fileItemRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (s fileItemRenderer) Layout(size fyne.Size) {
+func (s *fileItemRenderer) Layout(size fyne.Size) {
 	if s.item.picker.view == gridView {
 		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
@@ -105,7 +105,7 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 	s.text.Refresh()
 }
 
-func (s fileItemRenderer) MinSize() fyne.Size {
+func (s *fileItemRenderer) MinSize() fyne.Size {
 	if s.item.picker.view == gridView {
 		return fyne.NewSize(fileIconCellWidth, fileIconSize+s.fileTextSize)
 	}
@@ -114,16 +114,16 @@ func (s fileItemRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(fileInlineIconSize+textMin.Width+theme.Padding(), textMin.Height)
 }
 
-func (s fileItemRenderer) Refresh() {
+func (s *fileItemRenderer) Refresh() {
 	s.fileTextSize = widget.NewLabel("M\nM").MinSize().Height // cache two-line label height
 
 	s.text.SetText(s.item.name)
 	s.icon.SetURI(s.item.location)
 }
 
-func (s fileItemRenderer) Objects() []fyne.CanvasObject {
+func (s *fileItemRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s fileItemRenderer) Destroy() {
+func (s *fileItemRenderer) Destroy() {
 }
