@@ -88,6 +88,11 @@ var (
 			makeAccordionTab,
 			true,
 		},
+		"activity": {"Activity",
+			"A spinner indicating activity used in buttons etc.",
+			makeActivityTab,
+			true,
+		},
 		"button": {"Button",
 			"Simple widget for user tap handling.",
 			makeButtonTab,
@@ -182,6 +187,6 @@ var (
 		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
 		"collections": {"list", "table", "tree", "gridwrap"},
 		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split"},
-		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
+		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
 	}
 )
