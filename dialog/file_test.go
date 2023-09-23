@@ -117,8 +117,9 @@ func TestFileDialogResize(t *testing.T) {
 	d := &fileDialog{file: file}
 	open := widget.NewButton("open", func() {})
 	ui := container.NewBorder(nil, nil, nil, open)
-	originalSize := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
-		(fileIconSize+fileTextSize)+theme.Padding()*4))
+	pad := theme.Padding()
+	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
+	originalSize := ui.MinSize().Add(itemMin.AddWidthHeight(itemMin.Width+pad*6, pad*3))
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(originalSize)
 	file.dialog = d
