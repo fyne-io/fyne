@@ -66,11 +66,14 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
-		icon = &widget.Button{Icon: theme.FyneLogo(), Importance: widget.LowImportance, OnTapped: func() {
+		icon = &widget.Button{Icon: w.Icon, Importance: widget.LowImportance, OnTapped: func() {
 			if f := w.OnTappedIcon; f != nil {
 				f()
 			}
 		}}
+		if w.OnTappedIcon == nil {
+			icon.(*widget.Button).Disable()
+		}
 	}
 	title := newDraggableLabel(w.title, w.OnDragged, w.OnTappedBar)
 	title.Truncation = fyne.TextTruncateEllipsis
@@ -106,7 +109,6 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	i.bg.Move(pos)
 	i.bg.Resize(size)
 
-	pad = theme.Padding()
 	barHeight := i.bar.MinSize().Height
 	i.bar.Move(pos.AddXY(pad, 0))
 	i.bar.Resize(fyne.NewSize(size.Width-pad*2, barHeight))
@@ -156,6 +158,7 @@ func newDraggableLabel(title string, fn func(*fyne.DragEvent), tap func()) *drag
 	d := &draggableLabel{drag: fn, tap: tap}
 	d.ExtendBaseWidget(d)
 	d.Text = title
+	d.Alignment = fyne.TextAlignCenter
 	return d
 }
 
