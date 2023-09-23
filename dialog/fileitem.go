@@ -11,7 +11,6 @@ import (
 const (
 	fileIconSize       = 64
 	fileInlineIconSize = 24
-	fileTextSize       = 24
 	fileIconCellWidth  = fileIconSize * 1.25
 )
 
@@ -26,14 +25,16 @@ type fileDialogItem struct {
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
-	text.Wrapping = fyne.TextTruncate
+	text.Truncation = fyne.TextTruncateEllipsis
+	text.Wrapping = fyne.TextWrapBreak
 	icon := widget.NewFileIcon(i.location)
 
 	return &fileItemRenderer{
-		item:    i,
-		icon:    icon,
-		text:    text,
-		objects: []fyne.CanvasObject{icon, text},
+		item:         i,
+		icon:         icon,
+		text:         text,
+		objects:      []fyne.CanvasObject{icon, text},
+		fileTextSize: widget.NewLabel("M\nM").MinSize().Height, // cache two-line label height,
 	}
 }
 
@@ -76,7 +77,8 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 }
 
 type fileItemRenderer struct {
-	item *fileDialogItem
+	item         *fileDialogItem
+	fileTextSize float32
 
 	icon    *widget.FileIcon
 	text    *widget.Label
@@ -89,32 +91,32 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
 
 		s.text.Alignment = fyne.TextAlignCenter
-		s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
-		s.text.Move(fyne.NewPos(0, size.Height-s.text.MinSize().Height))
+		s.text.Resize(fyne.NewSize(size.Width, s.fileTextSize))
+		s.text.Move(fyne.NewPos(0, size.Height-s.fileTextSize))
 	} else {
 		s.icon.Resize(fyne.NewSize(fileInlineIconSize, fileInlineIconSize))
 		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-fileInlineIconSize)/2))
 
 		s.text.Alignment = fyne.TextAlignLeading
-		s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
-		s.text.Move(fyne.NewPos(fileInlineIconSize, (size.Height-s.text.MinSize().Height)/2))
+		textMin := s.text.MinSize()
+		s.text.Resize(fyne.NewSize(size.Width, textMin.Height))
+		s.text.Move(fyne.NewPos(fileInlineIconSize, (size.Height-textMin.Height)/2))
 	}
 	s.text.Refresh()
 }
 
 func (s fileItemRenderer) MinSize() fyne.Size {
-	var padding fyne.Size
-
 	if s.item.picker.view == gridView {
-		padding = fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
-		return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding)
+		return fyne.NewSize(fileIconCellWidth, fileIconSize+s.fileTextSize)
 	}
 
-	padding = fyne.NewSize(theme.Padding(), theme.Padding()*4)
-	return fyne.NewSize(fileInlineIconSize+s.text.MinSize().Width, fileTextSize).Add(padding)
+	textMin := s.text.MinSize()
+	return fyne.NewSize(fileInlineIconSize+textMin.Width+theme.Padding(), textMin.Height)
 }
 
 func (s fileItemRenderer) Refresh() {
+	s.fileTextSize = widget.NewLabel("M\nM").MinSize().Height // cache two-line label height
+
 	s.text.SetText(s.item.name)
 	s.icon.SetURI(s.item.location)
 }
