@@ -158,7 +158,6 @@ func newDraggableLabel(title string, fn func(*fyne.DragEvent), tap func()) *drag
 	d := &draggableLabel{drag: fn, tap: tap}
 	d.ExtendBaseWidget(d)
 	d.Text = title
-	d.Alignment = fyne.TextAlignCenter
 	return d
 }
 
