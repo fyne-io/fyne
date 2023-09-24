@@ -2,7 +2,6 @@ package dialog
 
 import (
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,7 +10,7 @@ import (
 )
 
 func TestFileItem_Name(t *testing.T) {
-	f := &fileDialog{file: &FileDialog{}, dataLock: &sync.RWMutex{}}
+	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()
 
 	item := f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false, false)
@@ -43,7 +42,7 @@ func TestFileItem_Name(t *testing.T) {
 }
 
 func TestFileItem_FolderName(t *testing.T) {
-	f := &fileDialog{file: &FileDialog{}, dataLock: &sync.RWMutex{}}
+	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()
 
 	item := f.newFileItem(storage.NewFileURI("/path/to/foldername/"), true, false)
@@ -62,7 +61,7 @@ func TestFileItem_FolderName(t *testing.T) {
 }
 
 func TestNewFileItem(t *testing.T) {
-	f := &fileDialog{file: &FileDialog{}, dataLock: &sync.RWMutex{}}
+	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()
 	item := f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false, false)
 
@@ -70,7 +69,7 @@ func TestNewFileItem(t *testing.T) {
 }
 
 func TestNewFileItem_Folder(t *testing.T) {
-	f := &fileDialog{file: &FileDialog{}, dataLock: &sync.RWMutex{}}
+	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()
 	currentDir, _ := filepath.Abs(".")
 	currentLister, err := storage.ListerForURI(storage.NewFileURI(currentDir))
@@ -91,7 +90,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 }
 
 func TestNewFileItem_ParentFolder(t *testing.T) {
-	f := &fileDialog{file: &FileDialog{}, dataLock: &sync.RWMutex{}}
+	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()
 	currentDir, _ := filepath.Abs(".")
 	currentLister, err := storage.ListerForURI(storage.NewFileURI(currentDir))

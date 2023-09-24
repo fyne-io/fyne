@@ -57,7 +57,7 @@ type fileDialog struct {
 	view viewLayout
 
 	data     []fyne.URI
-	dataLock *sync.RWMutex
+	dataLock sync.RWMutex
 
 	win        *widget.PopUp
 	selected   fyne.URI
@@ -604,7 +604,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 }
 
 func showFile(file *FileDialog) *fileDialog {
-	d := &fileDialog{file: file, initialFileName: file.initialFileName, dataLock: &sync.RWMutex{}}
+	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*6))
