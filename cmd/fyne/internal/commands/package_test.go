@@ -343,7 +343,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{},
-		os:      "gopherjs",
+		os:      "js",
 		srcDir:  "myTest",
 		exe:     "myTest.js",
 		release: true,
@@ -394,7 +394,7 @@ func Test_PackageGopherJS(t *testing.T) {
 			Name: "myTest",
 			icon: "myTest.png",
 		},
-		os:     "gopherjs",
+		os:     "js",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.js",
@@ -409,7 +409,7 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedEnsureSubDirRuns := mockEnsureSubDirRuns{
 		expected: []mockEnsureSubDir{
-			{"myTestTarget", "gopherjs", "myTestTarget/gopherjs"},
+			{"myTestTarget", "js", "myTestTarget/js"},
 		},
 	}
 	utilEnsureSubDirMock = func(parent, name string) string {
@@ -428,12 +428,12 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
-			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "spinner_light.gif"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "spinner_dark.gif"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "light.css"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "dark.css"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
+			{filepath.Join("myTestTarget", "js", "index.html"), nil},
+			{filepath.Join("myTestTarget", "js", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "js", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "js", "light.css"), nil},
+			{filepath.Join("myTestTarget", "js", "dark.css"), nil},
+			{filepath.Join("myTestTarget", "js", "webgl-debug.js"), nil},
 		},
 	}
 	utilWriteFileMock = func(target string, _ []byte) error {
@@ -442,8 +442,8 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedCopyFileRuns := mockCopyFileRuns{
 		expected: []mockCopyFile{
-			{source: "myTest.png", target: filepath.Join("myTestTarget", "gopherjs", "icon.png")},
-			{source: "myTest.js", target: filepath.Join("myTestTarget", "gopherjs", "myTest.js")},
+			{source: "myTest.png", target: filepath.Join("myTestTarget", "js", "icon.png")},
+			{source: "myTest.js", target: filepath.Join("myTestTarget", "js", "myTest.js")},
 		},
 	}
 	utilCopyFileMock = func(source, target string) error {

@@ -41,7 +41,7 @@ static jmethodID find_static_method(JNIEnv *env, jclass clazz, const char *name,
 	return m;
 }
 
-char* getString(uintptr_t jni_env, uintptr_t ctx, jstring str) {
+const char* getString(uintptr_t jni_env, uintptr_t ctx, jstring str) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 
 	const char *chars = (*env)->GetStringUTFChars(env, str, NULL);
@@ -65,11 +65,11 @@ jobject parseURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
 	JNIEnv *env = (JNIEnv*)jni_env;
-	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
 	jmethodID getSystemService = find_method(env, ctxClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
 
 	jstring service = (*env)->NewStringUTF(env, "clipboard");
-	jobject ret = (jobject)(*env)->CallObjectMethod(env, ctx, getSystemService, service);
+	jobject ret = (*env)->CallObjectMethod(env, (jobject)ctx, getSystemService, service);
 	jthrowable err = (*env)->ExceptionOccurred(env);
 
 	if (err != NULL) {
@@ -80,7 +80,7 @@ jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
 	return ret;
 }
 
-char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
+const char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject mgr = getClipboard(jni_env, ctx);
 	if (mgr == NULL) {
@@ -120,10 +120,10 @@ void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, ch
 
 jobject getContentResolver(uintptr_t jni_env, uintptr_t ctx) {
 	JNIEnv *env = (JNIEnv*)jni_env;
-	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
 	jmethodID getContentResolver = find_method(env, ctxClass, "getContentResolver", "()Landroid/content/ContentResolver;");
 
-	return (jobject)(*env)->CallObjectMethod(env, ctx, getContentResolver);
+	return (jobject)(*env)->CallObjectMethod(env, (jobject)ctx, getContentResolver);
 }
 
 void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
@@ -165,7 +165,7 @@ void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return (*env)->NewGlobalRef(env, stream);
 }
 
-char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total) {
+jbyte* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
 	jmethodID read = find_method(env, streamClass, "read", "([BII)I");
@@ -178,12 +178,12 @@ char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* t
 		return NULL;
 	}
 
-	char* bytes = malloc(sizeof(char)*count);
+	jbyte* bytes = (jbyte*)malloc(sizeof(jbyte)*count);
 	(*env)->GetByteArrayRegion(env, data, 0, count, bytes);
 	return bytes;
 }
 
-void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* buf, int len) {
+void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, jbyte* buf, int len) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
 	jmethodID write = find_method(env, streamClass, "write", "([BII)V");
@@ -246,7 +246,7 @@ bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 		return false;
 	}
 
-	char *str = getString(jni_env, ctx, type);
+	const char *str = getString(jni_env, ctx, type);
 	return strcmp(str, "vnd.android.document/directory") == 0;
 }
 
@@ -297,7 +297,7 @@ bool createListableURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return false;
 }
 
-char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+const char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
@@ -322,7 +322,7 @@ char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	if (((jboolean)(*env)->CallBooleanMethod(env, cursor, first)) == JNI_TRUE) {
 		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
-		char *fname = getString(jni_env, ctx, name);
+		const char *fname = getString(jni_env, ctx, name);
 		return fname;
 	}
 
@@ -401,7 +401,7 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 		jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
 		jstring s = (jstring)(*env)->CallObjectMethod(env, childUri, toString);
 
-		char *uid = getString(jni_env, ctx, s);
+		const char *uid = getString(jni_env, ctx, s);
 
 		// append
 		char *old = ret;
