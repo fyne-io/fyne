@@ -504,6 +504,54 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
+func TestViewPreferences(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	const viewLayoutKey string = "fileDialogViewLayout"
+
+	prefs := fyne.CurrentApp().Preferences()
+
+	// ensure viewLayout preference is not set to a valid value
+	prefs.SetString(viewLayoutKey, "")
+	prefs.RemoveValue(viewLayoutKey)
+
+	// viewLayout preference should not be set
+	viewLayout := prefs.StringWithFallback(viewLayoutKey, "")
+	assert.Equal(t, viewLayout, "")
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+
+	// viewLayout preference should be 'grid'
+	viewLayout = prefs.String(viewLayoutKey)
+	assert.Equal(t, viewLayout, "grid")
+
+	// toggle view
+	test.Tap(toggleViewButton)
+
+	// viewLayout preference should be 'list'
+	viewLayout = prefs.String(viewLayoutKey)
+	assert.Equal(t, viewLayout, "list")
+
+	// toggle view
+	test.Tap(toggleViewButton)
+
+	// viewLayout preference should be 'grid' again
+	viewLayout = prefs.String(viewLayoutKey)
+	assert.Equal(t, viewLayout, "grid")
+}
+
 func TestFileFavorites(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
 
