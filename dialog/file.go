@@ -206,7 +206,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	f.setView(gridView)
+	viewPreference := fyne.CurrentApp().Preferences().StringWithFallback("fileDialogViewLayout", "grid")
+	if viewPreference == "grid" {
+		f.setView(gridView)
+	} else {
+		f.setView(listView)
+	}
+
 	f.loadFavorites()
 
 	f.favoritesList = widget.NewList(
@@ -230,8 +236,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
+	var toggleViewButtonIcon fyne.Resource
+	if f.view == gridView {
+		toggleViewButtonIcon = theme.ListIcon()
+	} else {
+		toggleViewButtonIcon = theme.GridIcon()
+	}
+
 	var toggleViewButton *widget.Button
-	toggleViewButton = widget.NewButtonWithIcon("", theme.ListIcon(), func() {
+	toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
 		if f.view == gridView {
 			f.setView(listView)
 			toggleViewButton.SetIcon(theme.GridIcon())
@@ -499,10 +512,12 @@ func (f *fileDialog) setView(view viewLayout) {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
+		fyne.CurrentApp().Preferences().SetString("fileDialogViewLayout", "grid")
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
+		fyne.CurrentApp().Preferences().SetString("fileDialogViewLayout", "list")
 	}
 	if f.dir != nil {
 		f.refreshDir(f.dir)
