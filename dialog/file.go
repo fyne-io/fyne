@@ -23,6 +23,8 @@ const (
 	listView
 )
 
+const viewLayoutKey = "fyne:fileDialogViewLayout"
+
 type textWidget interface {
 	fyne.Widget
 	SetText(string)
@@ -206,12 +208,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	viewPreference := fyne.CurrentApp().Preferences().StringWithFallback("fileDialogViewLayout", "grid")
-	if viewPreference == "grid" {
-		f.setView(gridView)
-	} else {
-		f.setView(listView)
+	view := fyne.CurrentApp().Preferences().Int(viewLayoutKey)
+	if view != int(listView) {
+		view = int(gridView)
 	}
+
+	f.setView(viewLayout(view))
 
 	f.loadFavorites()
 
@@ -492,6 +494,8 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 
 func (f *fileDialog) setView(view viewLayout) {
 	f.view = view
+	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
+
 	count := func() int {
 		return len(f.data)
 	}
@@ -512,12 +516,10 @@ func (f *fileDialog) setView(view viewLayout) {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
-		fyne.CurrentApp().Preferences().SetString("fileDialogViewLayout", "grid")
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
-		fyne.CurrentApp().Preferences().SetString("fileDialogViewLayout", "list")
 	}
 	if f.dir != nil {
 		f.refreshDir(f.dir)
