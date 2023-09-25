@@ -1488,7 +1488,13 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		return
 	}
 	e.propertyLock.Lock()
-	provider.insertAt(e.cursorTextPos(), "\n")
+	s := "\n"
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, s)
+	e.undoStack.MergeOrAdd(&entryModifyAction{
+		Position: pos,
+		Text:     s,
+	})
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
