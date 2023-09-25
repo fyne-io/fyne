@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.17.12', '1.20.x']
+        go-version: ['1.17.x', '1.20.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
