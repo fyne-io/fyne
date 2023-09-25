@@ -77,6 +77,11 @@ var (
 			makeScrollTab,
 			true,
 		},
+		"innerwindow": {"InnerWindow",
+			"A window that can be used inside a traditional window to contain a document or content.",
+			makeInnerWindowTab,
+			true,
+		},
 		"widgets": {"Widgets",
 			"In this section you can see the features available in the toolkit widget set.\n" +
 				"Expand the tree on the left to browse the individual tutorial elements.",
@@ -186,7 +191,7 @@ var (
 	TutorialIndex = map[string][]string{
 		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
 		"collections": {"list", "table", "tree", "gridwrap"},
-		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split"},
+		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split", "innerwindow"},
 		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
 	}
 )
