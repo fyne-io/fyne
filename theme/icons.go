@@ -455,6 +455,21 @@ const (
 	//
 	// Since: 2.1
 	IconNameGrid fyne.ThemeIconName = "grid"
+
+	// IconNameWindowClose is the name of theme lookup for window close icon.
+	//
+	// Since: 2.5
+	IconNameWindowClose fyne.ThemeIconName = "windowClose"
+
+	// IconNameWindowMaximize is the name of theme lookup for window maximize icon.
+	//
+	// Since: 2.5
+	IconNameWindowMaximize fyne.ThemeIconName = "windowMaximize"
+
+	// IconNameWindowMinimize is the name of theme lookup for window minimize icon.
+	//
+	// Since: 2.5
+	IconNameWindowMinimize fyne.ThemeIconName = "windowMinimize"
 )
 
 var (
@@ -567,6 +582,10 @@ var (
 
 		IconNameList: NewThemedResource(listIconRes),
 		IconNameGrid: NewThemedResource(gridIconRes),
+
+		IconNameWindowClose:    NewThemedResource(cancelIconRes),
+		IconNameWindowMaximize: NewThemedResource(maximizeIconRes),
+		IconNameWindowMinimize: NewThemedResource(minimizeIconRes),
 	}
 )
 
@@ -1219,6 +1238,27 @@ func ListIcon() fyne.Resource {
 // GridIcon returns a resource containing the standard grid icon for the current theme
 func GridIcon() fyne.Resource {
 	return safeIconLookup(IconNameGrid)
+}
+
+// WindowCloseIcon returns a resource containing the window close icon for the current theme
+//
+// Since: 2.5
+func WindowCloseIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowClose)
+}
+
+// WindowMaximizeIcon returns a resource containing the window maximize icon for the current theme
+//
+// Since: 2.5
+func WindowMaximizeIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowMaximize)
+}
+
+// WindowMinimizeIcon returns a resource containing the window minimize icon for the current theme
+//
+// Since: 2.5
+func WindowMinimizeIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowMinimize)
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
