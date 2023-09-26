@@ -68,6 +68,10 @@ func TestInMemoryRepositoryParsing(t *testing.T) {
 	baz, _ := storage.ParseURI("mem:///baz")
 	assert.Nil(t, err)
 	assert.NotNil(t, baz)
+
+	empty, _ := storage.ParseURI("mem:")
+	assert.Nil(t, err)
+	assert.NotNil(t, empty)
 }
 
 func TestInMemoryRepositoryExists(t *testing.T) {
@@ -328,6 +332,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
+	m.Data[""] = []byte{1, 2, 3}
 	m.Data["/foo"] = []byte{1, 2, 3}
 	m.Data["/foo/bar"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/"] = []byte{1, 2, 3}
@@ -346,6 +351,11 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 		stringListing = append(stringListing, u.String())
 	}
 	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
+
+	empty, _ := storage.ParseURI("mem:") // invalid path
+	canList, err = storage.CanList(empty)
+	assert.NotNil(t, err)
+	assert.False(t, canList)
 }
 
 func TestInMemoryRepositoryCreateListable(t *testing.T) {

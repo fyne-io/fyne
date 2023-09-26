@@ -459,3 +459,13 @@ var gridIconRes = &fyne.StaticResource{
 	StaticName:    "grid.svg",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\"  width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"#000000\" d=\"M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3\" /></svg>"),
 }
+
+var maximizeIconRes = &fyne.StaticResource{
+	StaticName:    "maximize.svg",
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M4,4H20V20H4V4M6,8V18H18V8H6Z\" /></svg>"),
+}
+
+var minimizeIconRes = &fyne.StaticResource{
+	StaticName:    "minimize.svg",
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"none\" d=\"M0 0h24v24H0V0z\"/><path d=\"M6 19h12v2H6v-2z\"/></svg>"),
+}
