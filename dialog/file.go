@@ -530,33 +530,17 @@ func (f *fileDialog) setView(view viewLayout) {
 		return f.newFileItem(storage.NewFileURI("./tempfile"), true, false)
 	}
 	update := func(id widget.GridWrapItemID, o fyne.CanvasObject) {
-		f.dataLock.RLock()
-
-		if id >= len(f.data) {
-			f.dataLock.RUnlock()
-			return
+		if dir, ok := f.getDataItem(id); ok {
+			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
+			_, isDir := dir.(fyne.ListableURI)
+			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
 		}
-
-		dir := f.data[id]
-		f.dataLock.RUnlock()
-
-		parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
-		_, isDir := dir.(fyne.ListableURI)
-		o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
 	}
 	choose := func(id int) {
-		f.dataLock.RLock()
-
-		if id >= len(f.data) {
-			f.dataLock.RUnlock()
-			return
+		if file, ok := f.getDataItem(id); ok {
+			f.selectedID = id
+			f.setSelected(file, id)
 		}
-
-		file := f.data[id]
-		f.dataLock.RUnlock()
-
-		f.selectedID = id
-		f.setSelected(file, id)
 	}
 	if f.view == gridView {
 		grid := widget.NewGridWrap(count, template, update)
@@ -572,6 +556,17 @@ func (f *fileDialog) setView(view viewLayout) {
 	}
 	f.filesScroll.Content = container.NewPadded(f.files)
 	f.filesScroll.Refresh()
+}
+
+func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
+	f.dataLock.RLock()
+	defer f.dataLock.RUnlock()
+
+	if id >= len(f.data) {
+		return nil, false
+	}
+
+	return f.data[id], true
 }
 
 // effectiveStartingDir calculates the directory at which the file dialog should
