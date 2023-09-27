@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -105,6 +106,22 @@ func makeGridLayout(_ fyne.Window) fyne.CanvasObject {
 
 	return container.NewGridWithColumns(2,
 		box1, box2, box3, box4)
+}
+
+func makeInnerWindowTab(_ fyne.Window) fyne.CanvasObject {
+	label := widget.NewLabel("Window content for inner demo")
+	win1 := container.NewInnerWindow("Inner Demo", container.NewVBox(
+		label,
+		widget.NewButton("Tap Me", func() {
+			label.SetText("Tapped")
+		})))
+	win1.Icon = theme.FyneLogo()
+
+	win2 := container.NewInnerWindow("Inner2", widget.NewLabel("Win 2"))
+
+	multi := container.NewMultipleWindows()
+	multi.Windows = []*container.InnerWindow{win1, win2}
+	return multi
 }
 
 func makeScrollTab(_ fyne.Window) fyne.CanvasObject {

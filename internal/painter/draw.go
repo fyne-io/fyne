@@ -16,14 +16,15 @@ const quarterCircleControl = 1 - 0.55228
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawCircle(circle *canvas.Circle, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
+	size := circle.Size()
+	radius := fyne.Min(size.Width, size.Height) / 2
 
-	width := int(scale(circle.Size().Width + vectorPad*2))
-	height := int(scale(circle.Size().Height + vectorPad*2))
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
 	stroke := scale(circle.StrokeWidth)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(int(circle.Size().Width), int(circle.Size().Height), raw, raw.Bounds())
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
 	if circle.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)

@@ -39,7 +39,7 @@ type hexColor string
 
 func (h hexColor) color() (color.Color, error) {
 	data := h
-	switch len(h) {
+	switch len([]rune(h)) {
 	case 8, 6:
 	case 9, 7: // remove # prefix
 		data = h[1:]

@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -53,6 +54,55 @@ func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	ac.MultiOpen = true
 	ac.Append(widget.NewAccordionItem("D", &widget.Entry{Text: "Four"}))
 	return ac
+}
+
+func makeActivityTab(win fyne.Window) fyne.CanvasObject {
+	a1 := widget.NewActivity()
+	a2 := widget.NewActivity()
+
+	var button *widget.Button
+	start := func() {
+		button.Disable()
+		a1.Start()
+		a1.Show()
+		a2.Start()
+		a2.Show()
+
+		defer func() {
+			go func() {
+				time.Sleep(time.Second * 10)
+				a1.Stop()
+				a1.Hide()
+				a2.Stop()
+				a2.Hide()
+
+				button.Enable()
+			}()
+		}()
+	}
+
+	button = widget.NewButton("Animate", start)
+	start()
+
+	return container.NewCenter(container.NewGridWithColumns(1,
+		container.NewCenter(container.NewVBox(
+			container.NewHBox(widget.NewLabel("Working..."), a1),
+			container.NewStack(button, a2))),
+		container.NewCenter(widget.NewButton("Show dialog", func() {
+			prop := canvas.NewRectangle(color.Transparent)
+			prop.SetMinSize(fyne.NewSize(50, 50))
+
+			a3 := widget.NewActivity()
+			d := dialog.NewCustomWithoutButtons("Please wait...", container.NewStack(prop, a3), win)
+			a3.Start()
+			d.Show()
+
+			go func() {
+				time.Sleep(time.Second * 5)
+				a3.Stop()
+				d.Hide()
+			}()
+		}))))
 }
 
 func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
