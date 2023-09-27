@@ -6,7 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 )
 
 func TestFileItem_Name(t *testing.T) {
@@ -105,4 +107,20 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 
 	assert.Equal(t, "(Parent)", item.name)
 	assert.Equal(t, parentDir.String()+"/", f.data[0].String())
+}
+
+func TestFileItem_Wrap(t *testing.T) {
+	f := &fileDialog{file: &FileDialog{}}
+	_ = f.makeUI()
+	item := f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false, false)
+	item.Resize(item.MinSize())
+	label := test.WidgetRenderer(item).(*fileItemRenderer).text
+	assert.Equal(t, "filename", label.Text)
+	texts := test.WidgetRenderer(label).Objects()
+	assert.Equal(t, 1, len(texts))
+
+	item.setLocation(storage.NewFileURI("/path/to/averylongfilename.svg"), false, false)
+	texts = test.WidgetRenderer(label).Objects()
+	assert.Equal(t, 2, len(texts))
+	assert.Equal(t, "averylon", texts[0].(*canvas.Text).Text)
 }
