@@ -208,12 +208,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	view := fyne.CurrentApp().Preferences().Int(viewLayoutKey)
-	if view != int(listView) {
-		view = int(gridView)
+	view := viewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
+	if view != listView {
+		view = gridView
 	}
 
-	f.setView(viewLayout(view))
+	f.setView(view)
 
 	f.loadFavorites()
 
