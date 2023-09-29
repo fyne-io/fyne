@@ -146,6 +146,8 @@ func (se *ShortcutSelectAll) ShortcutName() string {
 }
 
 // ShortcutUndo describes a shortcut undo action.
+//
+// Since: 2.5
 type ShortcutUndo struct{}
 
 var _ KeyboardShortcut = (*ShortcutUndo)(nil)
@@ -170,6 +172,8 @@ func (se *ShortcutUndo) ShortcutName() string {
 }
 
 // ShortcutRedo describes a shortcut redo action.
+//
+// Since: 2.5
 type ShortcutRedo struct{}
 
 var _ KeyboardShortcut = (*ShortcutRedo)(nil)
