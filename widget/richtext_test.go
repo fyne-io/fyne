@@ -969,6 +969,16 @@ func TestText_lineBounds(t *testing.T) {
 			},
 			ellipses: 1,
 		},
+		{
+			name:  "Multi_byte_ellipsis_not_truncated",
+			text:  "🪃 234",
+			trunc: fyne.TextTruncateEllipsis,
+			wrap:  fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 5},
+			},
+			ellipses: 0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
