@@ -282,7 +282,7 @@ func (r *Releaser) nameFromCertInfo(info string) string {
 	return cn[pos+3:]
 }
 
-func (r *Releaser) packageIOSRelease() error {
+func (r *Releaser) packageIOSRelease() (err0 error) {
 	team, err := mobile.DetectIOSTeamID(r.certificate)
 	if err != nil {
 		return errors.New("failed to determine team ID")
@@ -290,7 +290,12 @@ func (r *Releaser) packageIOSRelease() error {
 
 	payload := filepath.Join(r.dir, "Payload")
 	_ = os.Mkdir(payload, 0750)
-	defer os.RemoveAll(payload)
+	defer func() {
+		// keep this dir, on error, for debuggging.
+		if err0 == nil {
+			os.RemoveAll(payload)
+		}
+	}()
 	appName := mobile.AppOutputName(r.os, r.Name, r.release)
 	payloadAppDir := filepath.Join(payload, appName)
 	if err := os.Rename(filepath.Join(r.dir, appName), payloadAppDir); err != nil {
@@ -304,13 +309,23 @@ func (r *Releaser) packageIOSRelease() error {
 	if err != nil {
 		return errors.New("failed to write entitlements plist template")
 	}
-	defer cleanup()
+	defer func() {
+		// on error, keep the entitlement.plist around;
+		// so we can rerun codesign manually and debug.
+		if err0 == nil {
+			cleanup()
+		}
+	}()
 
 	cmd := execabs.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
 		"entitlements.plist", "Payload/"+appName+"/")
-	if err := cmd.Run(); err != nil {
-		fyne.LogError("Codesign failed", err)
-		return errors.New("unable to codesign application bundle")
+
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		cwd, _ := os.Getwd()
+		err1 := fmt.Errorf("unable codesign application bundle; command that gave error was: codesign -f -vv -s '%v' --entitlements entitlements.plist Payload/%v/\n\nerror on codesign: '%v' in dir '%v'; and stderr/stout from codesign:\n%v\n", r.certificate, appName, err, cwd, string(stdoutStderr))
+		fyne.LogError("Codesign failed: ", err1)
+		return err1
 	}
 
 	return execabs.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
