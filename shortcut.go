@@ -144,3 +144,55 @@ func (se *ShortcutSelectAll) Mod() KeyModifier {
 func (se *ShortcutSelectAll) ShortcutName() string {
 	return "SelectAll"
 }
+
+// ShortcutUndo describes a shortcut undo action.
+//
+// Since: 2.5
+type ShortcutUndo struct{}
+
+var _ KeyboardShortcut = (*ShortcutUndo)(nil)
+
+// Key returns the KeyName for this shortcut.
+//
+// Implements: KeyboardShortcut
+func (se *ShortcutUndo) Key() KeyName {
+	return KeyZ
+}
+
+// Mod returns the KeyModifier for this shortcut.
+//
+// Implements: KeyboardShortcut
+func (se *ShortcutUndo) Mod() KeyModifier {
+	return KeyModifierShortcutDefault
+}
+
+// ShortcutName returns the shortcut name
+func (se *ShortcutUndo) ShortcutName() string {
+	return "Undo"
+}
+
+// ShortcutRedo describes a shortcut redo action.
+//
+// Since: 2.5
+type ShortcutRedo struct{}
+
+var _ KeyboardShortcut = (*ShortcutRedo)(nil)
+
+// Key returns the KeyName for this shortcut.
+//
+// Implements: KeyboardShortcut
+func (se *ShortcutRedo) Key() KeyName {
+	return KeyY
+}
+
+// Mod returns the KeyModifier for this shortcut.
+//
+// Implements: KeyboardShortcut
+func (se *ShortcutRedo) Mod() KeyModifier {
+	return KeyModifierShortcutDefault
+}
+
+// ShortcutName returns the shortcut name
+func (se *ShortcutRedo) ShortcutName() string {
+	return "Redo"
+}
