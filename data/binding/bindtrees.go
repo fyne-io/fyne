@@ -1557,6 +1557,264 @@ func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 	return nil
 }
 
+// UntypedTree supports binding a tree of interface{} values.
+//
+// Since: 2.4
+type UntypedTree interface {
+	DataTree
+
+	Append(parent, id string, value interface{}) error
+	Get() (map[string][]string, map[string]interface{}, error)
+	GetValue(id string) (interface{}, error)
+	Prepend(parent, id string, value interface{}) error
+	Set(ids map[string][]string, values map[string]interface{}) error
+	SetValue(id string, value interface{}) error
+}
+
+// ExternalUntypedTree supports binding a tree of interface{} values from an external variable.
+//
+// Since: 2.4
+type ExternalUntypedTree interface {
+	UntypedTree
+
+	Reload() error
+}
+
+// NewUntypedTree returns a bindable tree of interface{} values.
+//
+// Since: 2.4
+func NewUntypedTree() UntypedTree {
+	t := &boundUntypedTree{val: &map[string]interface{}{}}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+	return t
+}
+
+// BindUntypedTree returns a bound tree of interface{} values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
+func BindUntypedTree(ids *map[string][]string, v *map[string]interface{}) ExternalUntypedTree {
+	if v == nil {
+		return NewUntypedTree().(ExternalUntypedTree)
+	}
+
+	t := &boundUntypedTree{val: v, updateExternal: true}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+
+	for parent, children := range *ids {
+		for _, leaf := range children {
+			t.appendItem(bindUntypedTreeItem(v, leaf, t.updateExternal), leaf, parent)
+		}
+	}
+
+	return t
+}
+
+type boundUntypedTree struct {
+	treeBase
+
+	updateExternal bool
+	val            *map[string]interface{}
+}
+
+func (t *boundUntypedTree) Append(parent, id string, val interface{}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append(ids, id)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) Get() (map[string][]string, map[string]interface{}, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	return t.ids, *t.val, nil
+}
+
+func (t *boundUntypedTree) GetValue(id string) (interface{}, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if item, ok := (*t.val)[id]; ok {
+		return item, nil
+	}
+
+	return nil, errOutOfBounds
+}
+
+func (t *boundUntypedTree) Prepend(parent, id string, val interface{}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append([]string{id}, ids...)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) Reload() error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]interface{}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	t.ids = ids
+	*t.val = v
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) doReload() (retErr error) {
+	updated := []string{}
+	fire := false
+	for id := range *t.val {
+		found := false
+		for child := range t.items {
+			if child == id { // update existing
+				updated = append(updated, id)
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		// append new
+		t.appendItem(bindUntypedTreeItem(t.val, id, t.updateExternal), id, parentIDFor(id, t.ids))
+		updated = append(updated, id)
+		fire = true
+	}
+
+	for id := range t.items {
+		remove := true
+		for _, done := range updated {
+			if done == id {
+				remove = false
+				break
+			}
+		}
+
+		if remove { // remove item no longer present
+			fire = true
+			t.deleteItem(id, parentIDFor(id, t.ids))
+		}
+	}
+	if fire {
+		t.trigger()
+	}
+
+	for id, item := range t.items {
+		var err error
+		if t.updateExternal {
+			item.(*boundExternalUntypedTreeItem).lock.Lock()
+			err = item.(*boundExternalUntypedTreeItem).setIfChanged((*t.val)[id])
+			item.(*boundExternalUntypedTreeItem).lock.Unlock()
+		} else {
+			item.(*boundUntypedTreeItem).lock.Lock()
+			err = item.(*boundUntypedTreeItem).doSet((*t.val)[id])
+			item.(*boundUntypedTreeItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (t *boundUntypedTree) SetValue(id string, v interface{}) error {
+	t.lock.Lock()
+	(*t.val)[id] = v
+	t.lock.Unlock()
+
+	item, err := t.GetItem(id)
+	if err != nil {
+		return err
+	}
+	return item.(Untyped).Set(v)
+}
+
+func bindUntypedTreeItem(v *map[string]interface{}, id string, external bool) Untyped {
+	if external {
+		ret := &boundExternalUntypedTreeItem{old: (*v)[id]}
+		ret.val = v
+		ret.id = id
+		return ret
+	}
+
+	return &boundUntypedTreeItem{id: id, val: v}
+}
+
+type boundUntypedTreeItem struct {
+	base
+
+	val *map[string]interface{}
+	id  string
+}
+
+func (t *boundUntypedTreeItem) Get() (interface{}, error) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	v := *t.val
+	if item, ok := v[t.id]; ok {
+		return item, nil
+	}
+
+	return nil, errOutOfBounds
+}
+
+func (t *boundUntypedTreeItem) Set(val interface{}) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doSet(val)
+}
+
+func (t *boundUntypedTreeItem) doSet(val interface{}) error {
+	(*t.val)[t.id] = val
+
+	t.trigger()
+	return nil
+}
+
+type boundExternalUntypedTreeItem struct {
+	boundUntypedTreeItem
+
+	old interface{}
+}
+
+func (t *boundExternalUntypedTreeItem) setIfChanged(val interface{}) error {
+	if val == t.old {
+		return nil
+	}
+	(*t.val)[t.id] = val
+	t.old = val
+
+	t.trigger()
+	return nil
+}
+
 // URITree supports binding a tree of fyne.URI values.
 //
 // Since: 2.4

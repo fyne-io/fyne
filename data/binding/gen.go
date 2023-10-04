@@ -991,10 +991,6 @@ import (
 		}
 
 		writeFile(listFile, list, b)
-		if b.Name == "Untyped" {
-			continue // interface{} is special, we have it in binding.go instead
-		}
-
 		writeFile(treeFile, tree, b)
 		if b.Name == "Untyped" {
 			continue // interface{} is special, we have it in binding.go instead
