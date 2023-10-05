@@ -21,7 +21,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Possible crash parsing malformed JSON color (#4270)
 * NewFolderOpen: incomplete filenames (#2165)
 * Resolve issue where storage.List could crash with short URI (#4271)
-* Application crash when fast clicking the folders inside the file dialog (#4260)
 * TextTruncateEllipsis abnormally truncates strings with multi-byte UTF-8 characters (#4283)
 * Last character doesn't appear in Select when there is a special character (#4293)
 * Resolve random crash in DocTab (#3909)
