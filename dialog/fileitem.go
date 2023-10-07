@@ -102,7 +102,6 @@ func (s *fileItemRenderer) Layout(size fyne.Size) {
 		s.text.Resize(fyne.NewSize(size.Width, textMin.Height))
 		s.text.Move(fyne.NewPos(fileInlineIconSize, (size.Height-textMin.Height)/2))
 	}
-	s.text.Refresh()
 }
 
 func (s *fileItemRenderer) MinSize() fyne.Size {
