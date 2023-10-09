@@ -333,6 +333,11 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 			text := NewRichText(tt.segments...)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
 			assert.Equal(t, tt.want, got)
+			for _, s := range tt.wantSegments {
+				if txt, ok := s.(*TextSegment); ok {
+					txt.parent = text
+				}
+			}
 			assert.Equal(t, tt.wantSegments, text.Segments)
 		})
 	}
