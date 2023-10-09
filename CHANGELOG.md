@@ -3,9 +3,33 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.1 - 8 October 2023
+
+### Fixed
+
+* Left key on tree now collapses open branch
+* Avoid memory leak in Android driver code
+* Entry Field on Android in Landscape Mode Shows "0" (#4036)
+* DocTabs Indicator remains visible after last tab is removed (#4220)
+* Some SVG resources don't update appearance correctly with the theme (#3900)
+* Fix mobile simulation builds on OpenBSD
+* Fix alignment of menu button on mobile
+* Fix Compilation with Android NDK r26
+* Clicking table headers causes high CPU consumption (#4264)
+* Frequent clicking on table may cause the program to not respond (#4210)
+* Application stops responding when scrolling a table (#4263)
+* Possible crash parsing malformed JSON color (#4270)
+* NewFolderOpen: incomplete filenames (#2165)
+* Resolve issue where storage.List could crash with short URI (#4271)
+* TextTruncateEllipsis abnormally truncates strings with multi-byte UTF-8 characters (#4283)
+* Last character doesn't appear in Select when there is a special character (#4293)
+* Resolve random crash in DocTab (#3909)
+* Selecting items from a list caused the keyboard to popup on Android (#4236)
+
+
 ## 2.4.0 - 1 September 2023
 
-## Added
+### Added
 
 * Rounded corners in rectangle (#1090)
 * Support for emoji in text
@@ -43,7 +67,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add `--pprof` option to fyne build commands to enable profiling
 * Support compiling from Android (termux)
 
-## Changed
+### Changed
 
 * Go 1.17 or later is now required.
 * Theme updated for rounded corners on buttons and input widgets
@@ -60,7 +84,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Improving performance of lookup for theme data
 * Improved application startup time
 
-## Fixed
+### Fixed
 
 * Rendering performance enhancements
 * `dialog.NewProgressInfinite` is deprecated, but dialog.NewCustom isn't equivalent
