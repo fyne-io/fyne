@@ -27,7 +27,7 @@ const (
 
 var (
 	defaultTheme fyne.Theme
-	overrides    = make(map[fyne.Widget]fyne.Theme) // TODO clear on the cache emptying...?
+	overrides    = make(map[fyne.Widget]fyne.Theme)
 )
 
 // DarkTheme defines the built-in dark theme colors and sizes.
@@ -72,6 +72,9 @@ func OverrideWidget(w fyne.Widget, th fyne.Theme) {
 	if r == nil {
 		return
 	}
+	cache.HookRendererDestroyed(w, func() {
+		delete(overrides, w)
+	})
 
 	for _, o := range r.Objects() {
 		overrideTheme(o, th)

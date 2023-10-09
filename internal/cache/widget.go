@@ -56,9 +56,22 @@ func DestroyRenderer(wid fyne.Widget) {
 	}
 	if rinfo != nil {
 		rinfo.renderer.Destroy()
+		for _, h := range rinfo.hooks {
+			h()
+		}
 	}
 	renderersLock.Lock()
 	delete(renderers, wid)
+	renderersLock.Unlock()
+}
+
+// HookRendererDestroyed allows internal code to be told when a widget's renderer is being destroyed.
+func HookRendererDestroyed(w fyne.Widget, f func()) {
+	renderersLock.Lock()
+	info, found := renderers[w]
+	if found {
+		info.hooks = append(info.hooks, f)
+	}
 	renderersLock.Unlock()
 }
 
@@ -74,4 +87,5 @@ func IsRendered(wid fyne.Widget) bool {
 type rendererInfo struct {
 	expiringCache
 	renderer fyne.WidgetRenderer
+	hooks    []func()
 }
