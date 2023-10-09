@@ -69,6 +69,11 @@ type Bundler struct {
 	noheader       bool
 }
 
+// NewBundler returns a command that can handle the bundling assets into a GUI app binary.
+func NewBundler() *Bundler {
+	return &Bundler{}
+}
+
 // AddFlags adds all the command line flags for passing to the Bundler.
 //
 // Deprecated: Access to the individual cli commands are being removed.

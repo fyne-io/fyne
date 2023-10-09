@@ -528,13 +528,16 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 		f(id, li.child)
 	}
 	li.onTapped = func() {
-		l.list.RefreshItem(l.list.currentFocus)
-		canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
-		if canvas != nil {
-			canvas.Focus(l.list)
+		if !fyne.CurrentDevice().IsMobile() {
+			l.list.RefreshItem(l.list.currentFocus)
+			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
+			if canvas != nil {
+				canvas.Focus(l.list)
+			}
+
+			l.list.currentFocus = id
 		}
 
-		l.list.currentFocus = id
 		l.list.Select(id)
 	}
 }

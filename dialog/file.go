@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -54,7 +55,9 @@ type fileDialog struct {
 	showHidden       bool
 
 	view viewLayout
-	data []fyne.URI
+
+	data     []fyne.URI
+	dataLock sync.RWMutex
 
 	win        *widget.PopUp
 	selected   fyne.URI
@@ -196,8 +199,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
-	f.filesScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
-		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
+	itemMin := f.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
+	f.filesScroll.SetMinSize(itemMin.AddWidthHeight(itemMin.Width+theme.Padding()*3, verticalExtra))
 
 	f.breadcrumb = container.NewHBox()
 	f.breadcrumbScroll = container.NewHScroll(container.NewPadded(f.breadcrumb))
@@ -334,7 +337,9 @@ func (f *fileDialog) loadFavorites() {
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
+	f.dataLock.Lock()
 	f.data = nil
+	f.dataLock.Unlock()
 
 	files, err := dir.List()
 	if err != nil {
@@ -366,7 +371,10 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 			icons = append(icons, file)
 		}
 	}
+
+	f.dataLock.Lock()
 	f.data = icons
+	f.dataLock.Unlock()
 
 	f.files.Refresh()
 	f.filesScroll.Offset = fyne.NewPos(0, 0)
@@ -480,20 +488,26 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 func (f *fileDialog) setView(view viewLayout) {
 	f.view = view
 	count := func() int {
+		f.dataLock.RLock()
+		defer f.dataLock.RUnlock()
+
 		return len(f.data)
 	}
 	template := func() fyne.CanvasObject {
 		return f.newFileItem(storage.NewFileURI("./tempfile"), true, false)
 	}
 	update := func(id widget.GridWrapItemID, o fyne.CanvasObject) {
-		dir := f.data[id]
-		parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
-		_, isDir := dir.(fyne.ListableURI)
-		o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+		if dir, ok := f.getDataItem(id); ok {
+			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
+			_, isDir := dir.(fyne.ListableURI)
+			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+		}
 	}
 	choose := func(id int) {
-		f.selectedID = id
-		f.setSelected(f.data[id], id)
+		if file, ok := f.getDataItem(id); ok {
+			f.selectedID = id
+			f.setSelected(file, id)
+		}
 	}
 	if f.view == gridView {
 		grid := widget.NewGridWrap(count, template, update)
@@ -509,6 +523,17 @@ func (f *fileDialog) setView(view viewLayout) {
 	}
 	f.filesScroll.Content = container.NewPadded(f.files)
 	f.filesScroll.Refresh()
+}
+
+func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
+	f.dataLock.RLock()
+	defer f.dataLock.RUnlock()
+
+	if id >= len(f.data) {
+		return nil, false
+	}
+
+	return f.data[id], true
 }
 
 // effectiveStartingDir calculates the directory at which the file dialog should
@@ -576,8 +601,9 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
-	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
-		(fileIconSize+fileTextSize)+theme.Padding()*6))
+	pad := theme.Padding()
+	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
+	size := ui.MinSize().Add(itemMin.AddWidthHeight(itemMin.Width+pad*4, pad*2))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(size)

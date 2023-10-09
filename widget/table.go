@@ -40,7 +40,7 @@ type TableCellID struct {
 type Table struct {
 	BaseWidget
 
-	Length       func() (int, int)                                `json:"-"`
+	Length       func() (rows int, cols int)                      `json:"-"`
 	CreateCell   func() fyne.CanvasObject                         `json:"-"`
 	UpdateCell   func(id TableCellID, template fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id TableCellID)                             `json:"-"`
@@ -104,7 +104,7 @@ type Table struct {
 // passed template CanvasObject.
 //
 // Since: 1.4
-func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
+func NewTable(length func() (rows int, cols int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
 	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
 	t.ExtendBaseWidget(t)
 	return t
@@ -117,7 +117,7 @@ func NewTable(length func() (int, int), create func() fyne.CanvasObject, update 
 // The row and column headers will stick to the leading and top edges of the table and contain "1-10" and "A-Z" formatted labels.
 //
 // Since: 2.4
-func NewTableWithHeaders(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
+func NewTableWithHeaders(length func() (rows int, cols int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
 	t := NewTable(length, create, update)
 	t.ShowHeaderRow = true
 	t.ShowHeaderColumn = true
@@ -549,22 +549,24 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 
 	col := t.columnAt(e.Position)
-	if col == -1 {
+	if col == noCellMatch {
 		return // out of col range
 	}
 	row := t.rowAt(e.Position)
-	if row == -1 {
+	if row == noCellMatch {
 		return // out of row range
 	}
 	t.Select(TableCellID{row, col})
 
-	t.RefreshItem(t.currentFocus)
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
-	if canvas != nil {
-		canvas.Focus(t)
+	if !fyne.CurrentDevice().IsMobile() {
+		t.RefreshItem(t.currentFocus)
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
+		if canvas != nil {
+			canvas.Focus(t)
+		}
+		t.currentFocus = TableCellID{row, col}
+		t.RefreshItem(t.currentFocus)
 	}
-	t.currentFocus = TableCellID{row, col}
-	t.RefreshItem(t.currentFocus)
 }
 
 // columnAt returns a positive integer (or 0) for the column that is found at the `pos` X position.

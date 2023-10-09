@@ -131,25 +131,9 @@ func callMain(mainPC uintptr) {
 	go callfn.CallFn(mainPC)
 }
 
-//export onStart
-func onStart(activity *C.ANativeActivity) {
-}
-
-//export onResume
-func onResume(activity *C.ANativeActivity) {
-}
-
 //export onSaveInstanceState
 func onSaveInstanceState(activity *C.ANativeActivity, outSize *C.size_t) unsafe.Pointer {
 	return nil
-}
-
-//export onPause
-func onPause(activity *C.ANativeActivity) {
-}
-
-//export onStop
-func onStop(activity *C.ANativeActivity) {
 }
 
 //export onBackPressed

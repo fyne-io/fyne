@@ -363,6 +363,13 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 
 func (r *docTabsRenderer) scrollToSelected() {
 	buttons := r.scroller.Content.(*fyne.Container)
+
+	// https://github.com/fyne-io/fyne/issues/3909
+	// very dirty temporary fix to this crash!
+	if r.docTabs.current < 0 || r.docTabs.current >= len(buttons.Objects) {
+		return
+	}
+
 	button := buttons.Objects[r.docTabs.current]
 	pos := button.Position()
 	size := button.Size()
@@ -388,7 +395,7 @@ func (r *docTabsRenderer) scrollToSelected() {
 func (r *docTabsRenderer) updateIndicator(animate bool) {
 	if r.docTabs.current < 0 {
 		r.indicator.FillColor = color.Transparent
-		r.indicator.Refresh()
+		r.moveIndicator(fyne.NewPos(0, 0), fyne.NewSize(0, 0), animate)
 		return
 	}
 

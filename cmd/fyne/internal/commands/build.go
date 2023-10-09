@@ -33,9 +33,14 @@ type Builder struct {
 	runner runner
 }
 
+// NewBuilder returns a command that can handle the build of GUI apps built using Fyne.
+func NewBuilder() *Builder {
+	return &Builder{appData: &appData{}}
+}
+
 // Build returns the cli command for building fyne applications
 func Build() *cli.Command {
-	b := &Builder{appData: &appData{}}
+	b := NewBuilder()
 
 	return &cli.Command{
 		Name:        "build",
@@ -137,7 +142,7 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 }
 
 func isWeb(goos string) bool {
-	return goos == "gopherjs" || goos == "wasm"
+	return goos == "js" || goos == "wasm"
 }
 
 func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
@@ -197,7 +202,7 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
-	if goos == "gopherjs" && runtime.GOOS == "windows" {
+	if goos == "js" && runtime.GOOS == "windows" {
 		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
 	}
 
@@ -262,7 +267,7 @@ func (b *Builder) build() error {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		if goos == "gopherjs" {
+		if goos == "js" {
 			args = append(args, "--tags")
 		} else {
 			args = append(args, "-tags")
@@ -280,7 +285,7 @@ func (b *Builder) build() error {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
-	} else if goos == "gopherjs" {
+	} else if goos == "js" {
 		_, err := b.runner.runOutput("version")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Can not execute `gopherjs version`. Please do `go install github.com/gopherjs/gopherjs@latest`.\n")
@@ -359,7 +364,7 @@ func (b *Builder) updateAndGetGoExecutable(goos string) runner {
 			fyneGoModRunner = newCommand(goBin)
 			b.runner = fyneGoModRunner
 		} else {
-			if goos != "gopherjs" {
+			if goos != "js" {
 				b.runner = newCommand("go")
 			} else {
 				b.runner = newCommand("gopherjs")

@@ -67,12 +67,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 static int main_running = 0;
 
 // ensure we refresh context on resume in case something has changed...
-void processOnResume(ANativeActivity *activity) {
+void onResume(ANativeActivity *activity) {
 	JNIEnv* env = activity->env;
 	setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
-
-    onResume(activity);
 }
+
+void onStart(ANativeActivity *activity) {}
+void onPause(ANativeActivity *activity) {}
+void onStop(ANativeActivity *activity) {}
 
 // Entry point from our subclassed NativeActivity.
 //
@@ -127,7 +129,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 	// Note that onNativeWindowResized is not called on resize. Avoid it.
 	// https://code.google.com/p/android/issues/detail?id=180645
 	activity->callbacks->onStart = onStart;
-	activity->callbacks->onResume = processOnResume;
+	activity->callbacks->onResume = onResume;
 	activity->callbacks->onSaveInstanceState = onSaveInstanceState;
 	activity->callbacks->onPause = onPause;
 	activity->callbacks->onStop = onStop;

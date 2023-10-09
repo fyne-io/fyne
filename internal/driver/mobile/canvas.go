@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
@@ -167,6 +168,9 @@ func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
 }
 
 func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
+	if c.padded {
+		head = container.NewPadded(head)
+	}
 	c.windowHead = head
 	c.SetMobileWindowHeadTree(head)
 }

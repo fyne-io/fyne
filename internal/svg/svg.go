@@ -212,6 +212,7 @@ type objGroup struct {
 	Ellipses        []*ellipseObj `xml:"ellipse"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
+	Groups          []*objGroup   `xml:"g"`
 }
 
 func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
@@ -266,6 +267,7 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string)
 		replacePathsFill(grp.Paths, hexColor, opacity)
 		replaceRectsFill(grp.Rects, hexColor, opacity)
 		replacePolygonsFill(grp.Polygons, hexColor, opacity)
+		replaceGroupObjectFill(grp.Groups, hexColor, opacity)
 	}
 }
 

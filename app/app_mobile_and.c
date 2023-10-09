@@ -42,10 +42,10 @@ jobject getSystemService(uintptr_t jni_env, uintptr_t ctx, char *service) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jstring serviceStr = (*env)->NewStringUTF(env, service);
 
-	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
 	jmethodID getSystemService = find_method(env, ctxClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
 
-	return (jobject)(*env)->CallObjectMethod(env, ctx, getSystemService, serviceStr);
+	return (jobject)(*env)->CallObjectMethod(env, (jobject)ctx, getSystemService, serviceStr);
 }
 
 int nextId = 1;
@@ -81,7 +81,7 @@ void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url) {
 
 	jclass contextClass = find_class(env, "android/content/Context");
 	jmethodID start = find_method(env, contextClass, "startActivity", "(Landroid/content/Intent;)V");
-	(*env)->CallVoidMethod(env, ctx, start, intent);
+	(*env)->CallVoidMethod(env, (jobject)ctx, start, intent);
 }
 
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *body) {
@@ -94,7 +94,7 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	jobject builder = (*env)->NewObject(env, cls, constructor, ctx);
 
 	jclass mgrCls = find_class(env, "android/app/NotificationManager");
-	jobject mgr = getSystemService(env, ctx, "notification");
+	jobject mgr = getSystemService((uintptr_t)env, ctx, "notification");
 
 	if (isOreoOrLater(env)) {
 		jstring channelId = (*env)->NewStringUTF(env, "fyne-notif");
