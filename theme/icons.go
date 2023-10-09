@@ -589,6 +589,13 @@ var (
 	}
 )
 
+// Icon looks up the specified icon for current theme.
+//
+// Since: 2.5
+func Icon(name fyne.ThemeIconName) fyne.Resource {
+	return safeIconLookup(name)
+}
+
 func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }

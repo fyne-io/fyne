@@ -172,6 +172,13 @@ func ButtonColor() color.Color {
 	return safeColorLookup(ColorNameButton, currentVariant())
 }
 
+// Color looks up the named colour for current theme and variant.
+//
+// Since: 2.5
+func Color(name fyne.ThemeColorName) color.Color {
+	return safeColorLookup(name, currentVariant())
+}
+
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
 	return safeColorLookup(ColorNameDisabledButton, currentVariant())

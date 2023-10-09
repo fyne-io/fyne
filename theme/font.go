@@ -46,6 +46,13 @@ func DefaultSymbolFont() fyne.Resource {
 	return symbol
 }
 
+// Font looks up the font for current theme and text style.
+//
+// Since: 2.5
+func Font(style fyne.TextStyle) fyne.Resource {
+	return safeFontLookup(style)
+}
+
 // TextBoldFont returns the font resource for the bold font style.
 func TextBoldFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Bold: true})

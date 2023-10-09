@@ -141,6 +141,13 @@ func SeparatorThicknessSize() float32 {
 	return current().Size(SizeNameSeparatorThickness)
 }
 
+// Size looks up the specified size for current theme.
+//
+// Since: 2.5
+func Size(name fyne.ThemeSizeName) float32 {
+	return current().Size(name)
+}
+
 // TextHeadingSize returns the text size for header text.
 //
 // Since: 2.1
