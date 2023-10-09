@@ -96,7 +96,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text := NewRichText(seg)
 	text.inset = fyne.NewSquareSize(theme.InnerPadding())
 
-	b.background = canvas.NewRectangle(theme.ButtonColor())
+	b.background = canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameButton, b))
 	b.background.CornerRadius = theme.InputRadiusSize()
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b)
@@ -215,45 +215,45 @@ func (b *Button) buttonColor() color.Color {
 		if b.Importance == LowImportance {
 			return color.Transparent
 		}
-		return theme.DisabledButtonColor()
+		return theme.ColorForWidget(theme.ColorNameDisabledButton, b)
 	case b.focused:
-		bg := theme.ButtonColor()
+		bg := theme.ColorForWidget(theme.ColorNameButton, b)
 		if b.Importance == HighImportance {
-			bg = theme.PrimaryColor()
+			bg = theme.ColorForWidget(theme.ColorNamePrimary, b)
 		} else if b.Importance == DangerImportance {
-			bg = theme.ErrorColor()
+			bg = theme.ColorForWidget(theme.ColorNameError, b)
 		} else if b.Importance == WarningImportance {
-			bg = theme.WarningColor()
+			bg = theme.ColorForWidget(theme.ColorNameWarning, b)
 		} else if b.Importance == SuccessImportance {
-			bg = theme.SuccessColor()
+			bg = theme.ColorForWidget(theme.ColorNameSuccess, b)
 		}
 
-		return blendColor(bg, theme.FocusColor())
+		return blendColor(bg, theme.ColorForWidget(theme.ColorNameFocus, b))
 	case b.hovered:
-		bg := theme.ButtonColor()
+		bg := theme.ColorForWidget(theme.ColorNameButton, b)
 		if b.Importance == HighImportance {
-			bg = theme.PrimaryColor()
+			bg = theme.ColorForWidget(theme.ColorNamePrimary, b)
 		} else if b.Importance == DangerImportance {
-			bg = theme.ErrorColor()
+			bg = theme.ColorForWidget(theme.ColorNameError, b)
 		} else if b.Importance == WarningImportance {
-			bg = theme.WarningColor()
+			bg = theme.ColorForWidget(theme.ColorNameWarning, b)
 		} else if b.Importance == SuccessImportance {
-			bg = theme.SuccessColor()
+			bg = theme.ColorForWidget(theme.ColorNameSuccess, b)
 		}
 
-		return blendColor(bg, theme.HoverColor())
+		return blendColor(bg, theme.ColorForWidget(theme.ColorNameHover, b))
 	case b.Importance == HighImportance:
-		return theme.PrimaryColor()
+		return theme.ColorForWidget(theme.ColorNamePrimary, b)
 	case b.Importance == LowImportance:
 		return color.Transparent
 	case b.Importance == DangerImportance:
-		return theme.ErrorColor()
+		return theme.ColorForWidget(theme.ColorNameError, b)
 	case b.Importance == WarningImportance:
-		return theme.WarningColor()
+		return theme.ColorForWidget(theme.ColorNameWarning, b)
 	case b.Importance == SuccessImportance:
-		return theme.SuccessColor()
+		return theme.ColorForWidget(theme.ColorNameSuccess, b)
 	default:
-		return theme.ButtonColor()
+		return theme.ColorForWidget(theme.ColorNameButton, b)
 	}
 }
 

@@ -179,6 +179,14 @@ func Color(name fyne.ThemeColorName) color.Color {
 	return safeColorLookup(name, currentVariant())
 }
 
+func ColorForWidget(name fyne.ThemeColorName, w fyne.Widget) color.Color {
+	if custom, ok := overrides[w]; ok {
+		return custom.Color(name, currentVariant())
+	}
+
+	return safeColorLookup(name, currentVariant())
+}
+
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
 	return safeColorLookup(ColorNameDisabledButton, currentVariant())

@@ -99,6 +99,12 @@ func (t *RichText) Refresh() {
 	t.minCache = fyne.Size{}
 	t.updateRowBounds()
 
+	for _, s := range t.Segments {
+		if txt, ok := s.(*TextSegment); ok {
+			txt.parent = t
+		}
+	}
+
 	t.BaseWidget.Refresh()
 }
 

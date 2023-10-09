@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
 
 const (
@@ -22,6 +23,11 @@ const (
 
 	// potential for adding theme types such as high visibility or monochrome...
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
+)
+
+var (
+	defaultTheme fyne.Theme
+	overrides    = make(map[fyne.Widget]fyne.Theme) // TODO clear on the cache emptying...?
 )
 
 // DarkTheme defines the built-in dark theme colors and sizes.
@@ -55,9 +61,32 @@ func LightTheme() fyne.Theme {
 	return theme
 }
 
-var (
-	defaultTheme fyne.Theme
-)
+// OverrideWidget allows an app to specify that a single widget should use a different theme to the app.
+// This should be used sparingly to avoid a jarring user experience.
+//
+// Since: 2.5
+func OverrideWidget(w fyne.Widget, th fyne.Theme) {
+	overrides[w] = th
+
+	r := cache.Renderer(w)
+	if r == nil {
+		return
+	}
+
+	for _, o := range r.Objects() {
+		overrideTheme(o, th)
+	}
+}
+
+// OverrideContainer allows an app to specify that a container (and widgets it contains) should use a
+// different theme to the app. This should be used sparingly to avoid a jarring user experience.
+//
+// Since: 2.5
+func OverrideContainer(c *fyne.Container, th fyne.Theme) {
+	for _, o := range c.Objects {
+		overrideTheme(o, th)
+	}
+}
 
 type builtinTheme struct {
 	variant fyne.ThemeVariant
@@ -317,6 +346,15 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	}
 
 	return res
+}
+
+func overrideTheme(o fyne.CanvasObject, th fyne.Theme) {
+	switch c := o.(type) {
+	case fyne.Widget:
+		OverrideWidget(c, th)
+	case *fyne.Container:
+		OverrideContainer(c, th)
+	}
 }
 
 func primaryColorNamed(name string) color.NRGBA {
