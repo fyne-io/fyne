@@ -269,6 +269,10 @@ func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
+func (w *window) Test() {
+
+}
+
 func (w *window) processClosed() {
 	if w.onCloseIntercepted != nil {
 		w.QueueEvent(w.onCloseIntercepted)

@@ -140,3 +140,7 @@ func (w *testWindow) ShowAndRun() {
 func (w *testWindow) Title() string {
 	return w.title
 }
+
+func (w *testWindow) Test() {
+
+}

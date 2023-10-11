@@ -223,3 +223,7 @@ func (w *window) RescaleContext() {
 func (w *window) Context() interface{} {
 	return fyne.CurrentApp().Driver().(*mobileDriver).glctx
 }
+
+func (w *window) Test() {
+
+}
