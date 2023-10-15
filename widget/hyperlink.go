@@ -28,7 +28,7 @@ type Hyperlink struct {
 	// Since: 2.2
 	OnTapped func() `json:"-"`
 
-	textWidth        float32 // updated in syncSegments
+	textSize         fyne.Size // updated in syncSegments
 	focused, hovered bool
 	provider         *RichText
 }
@@ -108,7 +108,10 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
-	return pos.X <= hl.textWidth+theme.Padding()*2
+	innerPad := theme.InnerPadding()
+	pad := theme.Padding()
+	return pos.X >= innerPad/2 && pos.X <= hl.textSize.Width+pad*2+innerPad/2 &&
+		pos.Y >= innerPad/2 && pos.Y <= hl.textSize.Height+pad*2+innerPad/2
 }
 
 // Refresh triggers a redraw of the hyperlink.
@@ -215,7 +218,7 @@ func (hl *Hyperlink) syncSegments() {
 		},
 		Text: hl.Text,
 	}}
-	hl.textWidth = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle).Width
+	hl.textSize = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
@@ -235,9 +238,9 @@ func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	innerPad := theme.InnerPadding()
 	r.hl.provider.Resize(s)
 	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
-	w := fyne.Min(s.Width, r.hl.textWidth+innerPad+theme.Padding()*2)
-	r.focus.Resize(fyne.NewSize(w-innerPad, s.Height-innerPad))
-	r.under.Move(fyne.NewPos(innerPad, s.Height-innerPad))
+	w := fyne.Min(s.Width, r.hl.textSize.Width+innerPad+theme.Padding()*2)
+	r.focus.Resize(fyne.NewSize(w-innerPad, r.hl.textSize.Height+innerPad))
+	r.under.Move(fyne.NewPos(innerPad, r.hl.textSize.Height+theme.Padding()*2))
 	r.under.Resize(fyne.NewSize(w-innerPad*2, 1))
 }
 
