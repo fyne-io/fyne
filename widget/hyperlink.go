@@ -28,6 +28,7 @@ type Hyperlink struct {
 	// Since: 2.2
 	OnTapped func() `json:"-"`
 
+	textWidth        float32 // updated in syncSegments
 	focused, hovered bool
 	provider         *RichText
 }
@@ -67,7 +68,10 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 
 // Cursor returns the cursor type of this widget
 func (hl *Hyperlink) Cursor() desktop.Cursor {
-	return desktop.PointerCursor
+	if hl.hovered {
+		return desktop.PointerCursor
+	}
+	return desktop.DefaultCursor
 }
 
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
@@ -83,19 +87,28 @@ func (hl *Hyperlink) FocusLost() {
 }
 
 // MouseIn is a hook that is called if the mouse pointer enters the element.
-func (hl *Hyperlink) MouseIn(*desktop.MouseEvent) {
-	hl.hovered = true
+func (hl *Hyperlink) MouseIn(e *desktop.MouseEvent) {
+	hl.hovered = hl.isPosOverText(e.Position)
 	hl.BaseWidget.Refresh()
 }
 
 // MouseMoved is a hook that is called if the mouse pointer moved over the element.
-func (hl *Hyperlink) MouseMoved(*desktop.MouseEvent) {
+func (hl *Hyperlink) MouseMoved(e *desktop.MouseEvent) {
+	oldHovered := hl.hovered
+	hl.hovered = hl.isPosOverText(e.Position)
+	if hl.hovered != oldHovered {
+		hl.BaseWidget.Refresh()
+	}
 }
 
 // MouseOut is a hook that is called if the mouse pointer leaves the element.
 func (hl *Hyperlink) MouseOut() {
 	hl.hovered = false
 	hl.BaseWidget.Refresh()
+}
+
+func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
+	return pos.X <= hl.textWidth+theme.Padding()*2
 }
 
 // Refresh triggers a redraw of the hyperlink.
@@ -156,12 +169,18 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
+func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
+	if !hl.isPosOverText(e.Position) {
+		return
+	}
+	hl.invokeAction()
+}
+
+func (hl *Hyperlink) invokeAction() {
 	if hl.OnTapped != nil {
 		hl.OnTapped()
 		return
 	}
-
 	hl.openURL()
 }
 
@@ -172,7 +191,7 @@ func (hl *Hyperlink) TypedRune(rune) {
 // TypedKey is a hook called by the input handling logic on key events if this object is focused.
 func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 	if ev.Name == fyne.KeySpace {
-		hl.Tapped(nil)
+		hl.invokeAction()
 	}
 }
 
@@ -196,6 +215,7 @@ func (hl *Hyperlink) syncSegments() {
 		},
 		Text: hl.Text,
 	}}
+	hl.textWidth = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle).Width
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
@@ -212,11 +232,13 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
+	innerPad := theme.InnerPadding()
 	r.hl.provider.Resize(s)
-	r.focus.Move(fyne.NewPos(theme.InnerPadding()/2, theme.InnerPadding()/2))
-	r.focus.Resize(fyne.NewSize(s.Width-theme.InnerPadding(), s.Height-theme.InnerPadding()))
-	r.under.Move(fyne.NewPos(theme.InnerPadding(), s.Height-theme.InnerPadding()))
-	r.under.Resize(fyne.NewSize(s.Width-theme.InnerPadding()*2, 1))
+	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
+	w := fyne.Min(s.Width, r.hl.textWidth+innerPad+theme.Padding()*2)
+	r.focus.Resize(fyne.NewSize(w-innerPad, s.Height-innerPad))
+	r.under.Move(fyne.NewPos(innerPad, s.Height-innerPad))
+	r.under.Resize(fyne.NewSize(w-innerPad*2, 1))
 }
 
 func (r *hyperlinkRenderer) MinSize() fyne.Size {
