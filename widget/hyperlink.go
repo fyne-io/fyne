@@ -110,8 +110,9 @@ func (hl *Hyperlink) MouseOut() {
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	innerPad := theme.InnerPadding()
 	pad := theme.Padding()
+	lineCount := float32(len(hl.provider.rowBounds))
 	return pos.X >= innerPad/2 && pos.X <= hl.textSize.Width+pad*2+innerPad/2 &&
-		pos.Y >= innerPad/2 && pos.Y <= hl.textSize.Height+pad*2+innerPad/2
+		pos.Y >= innerPad/2 && pos.Y <= hl.textSize.Height*lineCount+pad*2+innerPad/2
 }
 
 // Refresh triggers a redraw of the hyperlink.
@@ -235,12 +236,13 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
-	innerPad := theme.InnerPadding()
 	r.hl.provider.Resize(s)
+	innerPad := theme.InnerPadding()
+	lineCount := float32(len(r.hl.provider.rowBounds))
 	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
 	w := fyne.Min(s.Width, r.hl.textSize.Width+innerPad+theme.Padding()*2)
-	r.focus.Resize(fyne.NewSize(w-innerPad, r.hl.textSize.Height+innerPad))
-	r.under.Move(fyne.NewPos(innerPad, r.hl.textSize.Height+theme.Padding()*2))
+	r.focus.Resize(fyne.NewSize(w-innerPad, r.hl.textSize.Height*lineCount+innerPad))
+	r.under.Move(fyne.NewPos(innerPad, r.hl.textSize.Height*lineCount+theme.Padding()*2))
 	r.under.Resize(fyne.NewSize(w-innerPad*2, 1))
 }
 
