@@ -110,7 +110,11 @@ func (hl *Hyperlink) MouseOut() {
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	innerPad := theme.InnerPadding()
 	pad := theme.Padding()
-	lineCount := float32(len(hl.provider.rowBounds))
+	// If not rendered yet provider will be nil
+	lineCount := float32(1)
+	if hl.provider != nil {
+		lineCount = fyne.Max(lineCount, float32(len(hl.provider.rowBounds)))
+	}
 	return pos.X >= innerPad/2 && pos.X <= hl.textSize.Width+pad*2+innerPad/2 &&
 		pos.Y >= innerPad/2 && pos.Y <= hl.textSize.Height*lineCount+pad*2+innerPad/2
 }
@@ -174,7 +178,9 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
-	if !hl.isPosOverText(e.Position) {
+	// If not rendered yet (hl.provider == nil), register all taps
+	// in practice this probably only happens in our unit tests
+	if hl.provider != nil && !hl.isPosOverText(e.Position) {
 		return
 	}
 	hl.invokeAction()
