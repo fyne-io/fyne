@@ -1,6 +1,6 @@
 module fyne.io/fyne/v2
 
-go 1.17
+go 1.19
 
 require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e
