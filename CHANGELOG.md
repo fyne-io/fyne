@@ -3,6 +3,15 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.2 - In Progress
+
+### Fixed
+
+* Markdown only shows one horizontal rule (#4216)
+* Spacer in HBox with hidden item will cause an additional trailing padding (#4259)
+* Application crash when fast clicking the folders inside the file dialog (#4260)
+
+
 ## 2.4.1 - 8 October 2023
 
 ### Fixed
