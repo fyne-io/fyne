@@ -27,8 +27,7 @@ jobs:
       working-directory: cmd/fyne_demo
       run: go build
 
-    - name: Build GopherJS and Wasm full website
+    - name: Build WASM full website
       run: |
-        go install github.com/gopherjs/gopherjs@latest
         go install ./cmd/fyne
-        cd cmd/fyne_demo && fyne package --target=web
+        cd cmd/fyne_demo && fyne package --target=wasm
