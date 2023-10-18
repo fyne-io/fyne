@@ -200,6 +200,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
+	e.syncSegments()
 	return &entryRenderer{box, border, e.scroll, objects, e}
 }
 
