@@ -88,8 +88,7 @@ func (hl *Hyperlink) FocusLost() {
 
 // MouseIn is a hook that is called if the mouse pointer enters the element.
 func (hl *Hyperlink) MouseIn(e *desktop.MouseEvent) {
-	hl.hovered = hl.isPosOverText(e.Position)
-	hl.BaseWidget.Refresh()
+	hl.MouseMoved(e)
 }
 
 // MouseMoved is a hook that is called if the mouse pointer moved over the element.
@@ -103,8 +102,11 @@ func (hl *Hyperlink) MouseMoved(e *desktop.MouseEvent) {
 
 // MouseOut is a hook that is called if the mouse pointer leaves the element.
 func (hl *Hyperlink) MouseOut() {
+	changed := hl.hovered
 	hl.hovered = false
-	hl.BaseWidget.Refresh()
+	if changed {
+		hl.BaseWidget.Refresh()
+	}
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
