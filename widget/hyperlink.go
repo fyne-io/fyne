@@ -107,6 +107,24 @@ func (hl *Hyperlink) MouseOut() {
 	hl.BaseWidget.Refresh()
 }
 
+func (hl *Hyperlink) focusWidth() float32 {
+	innerPad := theme.InnerPadding()
+	return fyne.Min(hl.size.Width, hl.textSize.Width+innerPad+theme.Padding()*2) - innerPad
+}
+
+func (hl *Hyperlink) focusXPos() float32 {
+	switch hl.Alignment {
+	case fyne.TextAlignLeading:
+		return theme.InnerPadding() / 2
+	case fyne.TextAlignCenter:
+		return (hl.size.Width - hl.focusWidth()) / 2
+	case fyne.TextAlignTrailing:
+		return (hl.size.Width - hl.focusWidth()) - theme.InnerPadding()/2
+	default:
+		return 0 // unreached
+	}
+}
+
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	innerPad := theme.InnerPadding()
 	pad := theme.Padding()
@@ -115,7 +133,9 @@ func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	if hl.provider != nil {
 		lineCount = fyne.Max(lineCount, float32(len(hl.provider.rowBounds)))
 	}
-	return pos.X >= innerPad/2 && pos.X <= hl.textSize.Width+pad*2+innerPad/2 &&
+
+	xpos := hl.focusXPos()
+	return pos.X >= xpos && pos.X <= xpos+hl.focusWidth() &&
 		pos.Y >= innerPad/2 && pos.Y <= hl.textSize.Height*lineCount+pad*2+innerPad/2
 }
 
@@ -242,14 +262,17 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
-	r.hl.provider.Resize(s)
 	innerPad := theme.InnerPadding()
+	w := r.hl.focusWidth()
+	xposFocus := r.hl.focusXPos()
+	xposUnderline := xposFocus + innerPad/2
+
+	r.hl.provider.Resize(s)
 	lineCount := float32(len(r.hl.provider.rowBounds))
-	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
-	w := fyne.Min(s.Width, r.hl.textSize.Width+innerPad+theme.Padding()*2)
-	r.focus.Resize(fyne.NewSize(w-innerPad, r.hl.textSize.Height*lineCount+innerPad))
-	r.under.Move(fyne.NewPos(innerPad, r.hl.textSize.Height*lineCount+theme.Padding()*2))
-	r.under.Resize(fyne.NewSize(w-innerPad*2, 1))
+	r.focus.Move(fyne.NewPos(xposFocus, innerPad/2))
+	r.focus.Resize(fyne.NewSize(w, r.hl.textSize.Height*lineCount+innerPad))
+	r.under.Move(fyne.NewPos(xposUnderline, r.hl.textSize.Height*lineCount+theme.Padding()*2))
+	r.under.Resize(fyne.NewSize(w-innerPad, 1))
 }
 
 func (r *hyperlinkRenderer) MinSize() fyne.Size {
