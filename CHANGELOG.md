@@ -10,6 +10,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Markdown only shows one horizontal rule (#4216)
 * Spacer in HBox with hidden item will cause an additional trailing padding (#4259)
 * Application crash when fast clicking the folders inside the file dialog (#4260)
+* failed to initialise OpenGL (#437)
 
 
 ## 2.4.1 - 8 October 2023
