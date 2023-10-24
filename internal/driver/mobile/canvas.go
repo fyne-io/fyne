@@ -16,10 +16,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const (
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
-)
-
 var _ fyne.Canvas = (*mobileCanvas)(nil)
 
 type mobileCanvas struct {
@@ -378,7 +374,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
 	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*common.MobileDoubleClickDelay))
 	defer c.touchCancelFunc()
 	<-ctx.Done()
 	if c.touchTapCount == 2 && c.touchLastTapped == co {

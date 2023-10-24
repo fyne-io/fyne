@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -21,9 +22,6 @@ import (
 const (
 	bindIgnoreDelay = time.Millisecond * 100 // ignore incoming DataItem fire after we have called Set
 	multiLineRows   = 3
-
-	desktopDoubleClickDelay = 300 // ms - keep in sync with internal/driver/glfw/window.go
-	mobileDoubleClickDelay  = 500 // ms - keep in sync with internal/driver/mobile/canvas.go
 )
 
 // Declare conformity with interfaces
@@ -258,9 +256,9 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 }
 
 func (e *Entry) isTripleTap(nowMilli int64) bool {
-	doubleClickDelay := int64(desktopDoubleClickDelay)
+	doubleClickDelay := int64(common.DesktopDoubleClickDelay)
 	if fyne.CurrentDevice().IsMobile() {
-		doubleClickDelay = mobileDoubleClickDelay
+		doubleClickDelay = common.MobileDoubleClickDelay
 	}
 	return nowMilli-e.doubleTappedAtUnixMillis <= doubleClickDelay
 }
