@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	// KeyBack represents the back button which may be hardware or software
+	//
+	// Since: 2.5
 	KeyBack       fyne.KeyName = "Back"
 	KeyDPadLeft   fyne.KeyName = "DPadLeft"
 	KeyDPadRight  fyne.KeyName = "DPadRight"
