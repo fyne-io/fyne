@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/common"
+	driverconsts "fyne.io/fyne/v2/internal/driver/consts"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -256,9 +256,9 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 }
 
 func (e *Entry) isTripleTap(nowMilli int64) bool {
-	doubleClickDelay := int64(common.DesktopDoubleClickDelay)
+	doubleClickDelay := int64(driverconsts.DesktopDoubleClickDelay)
 	if fyne.CurrentDevice().IsMobile() {
-		doubleClickDelay = common.MobileDoubleClickDelay
+		doubleClickDelay = driverconsts.MobileDoubleClickDelay
 	}
 	return nowMilli-e.doubleTappedAtUnixMillis <= doubleClickDelay
 }
