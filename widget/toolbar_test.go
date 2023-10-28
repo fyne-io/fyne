@@ -90,3 +90,20 @@ type toolbarLabel struct {
 func (t *toolbarLabel) ToolbarObject() fyne.CanvasObject {
 	return t.Label
 }
+
+func TestToolbarAction_Disable(t *testing.T) {
+	testIcon := theme.InfoIcon()
+	toolbarAction := NewToolbarAction(testIcon, nil)
+	toolbarAction.Disable()
+	assert.NotEqual(t, false, toolbarAction.Disabled())
+	assert.Equal(t, true, toolbarAction.Disabled())
+}
+
+func TestToolbarAction_Enable(t *testing.T) {
+	testIcon := theme.InfoIcon()
+	toolbarAction := NewToolbarAction(testIcon, nil)
+	toolbarAction.Disable()
+	toolbarAction.Enable()
+	assert.NotEqual(t, true, toolbarAction.Disabled())
+	assert.Equal(t, false, toolbarAction.Disabled())
+}
