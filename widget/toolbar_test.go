@@ -107,3 +107,22 @@ func TestToolbarAction_Enable(t *testing.T) {
 	assert.NotEqual(t, true, toolbarAction.Disabled())
 	assert.Equal(t, false, toolbarAction.Disabled())
 }
+
+func TestToolbarAction_UpdateOnActivated(t *testing.T) {
+	activated := false
+
+	testIcon := theme.InfoIcon()
+	toolbarAction := NewToolbarAction(testIcon, func() {activated = true})
+
+	test.Tap(toolbarAction.ToolbarObject().(*Button))
+
+	assert.True(t, activated)
+
+	activated = false
+
+	toolbarAction.OnActivated = func() {}
+
+	test.Tap(toolbarAction.ToolbarObject().(*Button))
+
+	assert.False(t, activated)
+}
