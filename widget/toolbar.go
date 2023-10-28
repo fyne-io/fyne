@@ -36,16 +36,22 @@ func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 }
 
 // Enable this ToolbarAction, updating any style or features appropriately.
+//
+// Since: 2.5
 func (t *ToolbarAction) Enable() {
 	t.button.Enable()
 }
 
 // Disable this ToolbarAction so that it cannot be interacted with, updating any style appropriately.
+//
+// Since: 2.5
 func (t *ToolbarAction) Disable() {
 	t.button.Disable()
 }
 
 // Disabled returns true if this ToolbarAction is currently disabled or false if it can currently be interacted with.
+//
+// Since: 2.5
 func (t *ToolbarAction) Disabled() bool {
 	return t.button.Disabled()
 }
