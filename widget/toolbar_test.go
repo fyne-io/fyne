@@ -46,11 +46,11 @@ func TestToolbar_Replace(t *testing.T) {
 	toolbar := NewToolbar(NewToolbarAction(icon, func() {}))
 	assert.Equal(t, 1, len(toolbar.Items))
 	render := test.WidgetRenderer(toolbar)
-	assert.Equal(t, icon, render.Objects()[0].(*Button).Icon)
+	assert.Equal(t, icon, render.Objects()[0].(*toolbarActionButton).Icon)
 
 	toolbar.Items[0] = NewToolbarAction(theme.HelpIcon(), func() {})
 	toolbar.Refresh()
-	assert.NotEqual(t, icon, render.Objects()[0].(*Button).Icon)
+	assert.NotEqual(t, icon, render.Objects()[0].(*toolbarActionButton).Icon)
 }
 
 func TestToolbar_ItemPositioning(t *testing.T) {
@@ -64,7 +64,7 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 	toolbar.Refresh()
 	var items []fyne.CanvasObject
 	for _, o := range test.LaidOutObjects(toolbar) {
-		if b, ok := o.(*Button); ok {
+		if b, ok := o.(*toolbarActionButton); ok {
 			items = append(items, b)
 		}
 	}
@@ -94,27 +94,38 @@ func (t *toolbarLabel) ToolbarObject() fyne.CanvasObject {
 func TestToolbarAction_Disable(t *testing.T) {
 	testIcon := theme.InfoIcon()
 	toolbarAction := NewToolbarAction(testIcon, nil)
-	toolbarAction.Disable()
-	assert.NotEqual(t, false, toolbarAction.Disabled())
-	assert.Equal(t, true, toolbarAction.Disabled())
+	object := toolbarAction.ToolbarObject().(*toolbarActionButton)
+
+	assert.False(t, object.Disabled())
+
+	toolbarAction.Disabled = true
+	object.Refresh()
+
+	assert.True(t, object.Disabled())
 }
 
 func TestToolbarAction_Enable(t *testing.T) {
 	testIcon := theme.InfoIcon()
 	toolbarAction := NewToolbarAction(testIcon, nil)
-	toolbarAction.Disable()
-	toolbarAction.Enable()
-	assert.NotEqual(t, true, toolbarAction.Disabled())
-	assert.Equal(t, false, toolbarAction.Disabled())
+	object := toolbarAction.ToolbarObject().(*toolbarActionButton)
+	toolbarAction.Disabled = true
+	object.Refresh()
+
+	assert.True(t, object.Disabled())
+
+	toolbarAction.Disabled = false
+	object.Refresh()
+
+	assert.False(t, object.Disabled())
 }
 
 func TestToolbarAction_UpdateOnActivated(t *testing.T) {
 	activated := false
 
 	testIcon := theme.InfoIcon()
-	toolbarAction := NewToolbarAction(testIcon, func() {activated = true})
+	toolbarAction := NewToolbarAction(testIcon, func() { activated = true })
 
-	test.Tap(toolbarAction.ToolbarObject().(*Button))
+	test.Tap(toolbarAction.ToolbarObject().(*toolbarActionButton))
 
 	assert.True(t, activated)
 
@@ -122,7 +133,7 @@ func TestToolbarAction_UpdateOnActivated(t *testing.T) {
 
 	toolbarAction.OnActivated = func() {}
 
-	test.Tap(toolbarAction.ToolbarObject().(*Button))
+	test.Tap(toolbarAction.ToolbarObject().(*toolbarActionButton))
 
 	assert.False(t, activated)
 }
