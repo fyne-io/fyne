@@ -1652,7 +1652,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing", e.SelectedText())
 
 	ctrlMod := glfw.ModControl
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == "darwin" || isMacOSBrowser() {
 		ctrlMod = glfw.ModSuper
 	}
 	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
