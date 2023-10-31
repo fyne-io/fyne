@@ -19,6 +19,12 @@ type toolbarActionButton struct {
 	t *ToolbarAction
 }
 
+func newToolbarActionButton(t *ToolbarAction) *toolbarActionButton {
+	b := &toolbarActionButton{t: t}
+	b.ExtendBaseWidget(b)
+	return b
+}
+
 func (b *toolbarActionButton) Refresh() {
 	b.Icon = b.t.Icon
 	b.OnTapped = b.t.OnActivated
@@ -40,7 +46,7 @@ type ToolbarAction struct {
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	b := &toolbarActionButton{t: t}
+	b := newToolbarActionButton(t)
 	b.Refresh()
 	return b
 }
