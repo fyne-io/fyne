@@ -46,6 +46,12 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 				d.SetSystemTrayIcon(theme.BrokenImageIcon())
 			}
 
+			title := fyne.CurrentApp().Metadata().Name
+			if title == "" {
+				title = fyne.CurrentApp().UniqueID()
+			}
+			systray.SetTitle(title)
+
 			// it must be refreshed after init, so an earlier call would have been ineffective
 			d.refreshSystray(m)
 		}, func() {
