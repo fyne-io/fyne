@@ -46,9 +46,10 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 				d.SetSystemTrayIcon(theme.BrokenImageIcon())
 			}
 
-			title := fyne.CurrentApp().Metadata().Name
+			app := fyne.CurrentApp()
+			title := app.Metadata().Name
 			if title == "" {
-				title = fyne.CurrentApp().UniqueID()
+				title = app.UniqueID()
 			}
 			systray.SetTitle(title)
 
