@@ -73,7 +73,7 @@ func runOnDraw(w *window, f func()) {
 // window canvases that are dirty on a single frame.
 // So its memory impact should be negligible and does not
 // need periodic shrinking.
-var refreshingCanvases = make([]fyne.Canvas, 0)
+var refreshingCanvases []fyne.Canvas
 
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
