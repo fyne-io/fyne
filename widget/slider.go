@@ -103,15 +103,6 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 //
 // Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
-	driver := fyne.CurrentApp().Driver()
-	if !s.focused && !driver.Device().IsMobile() {
-		impl := s.super()
-
-		if c := driver.CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
-	}
-
 	ratio := s.getRatio(e)
 	lastValue := s.Value
 
