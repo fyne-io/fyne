@@ -296,10 +296,10 @@ func (f *Form) updateHelperText(item *FormItem) {
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
 	}
-	showHintIfError := false
-	if e, ok := item.Widget.(*Entry); ok && (!e.dirty || e.focused) {
-		showHintIfError = true
-	}
+
+	ev, ok := item.Widget.(fyne.ExpandedValidator)
+	showHintIfError := ok && ev.ShouldDisplayValidation()
+
 	if item.validationError == nil || showHintIfError {
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = theme.PlaceHolderColor()

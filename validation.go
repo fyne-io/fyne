@@ -16,6 +16,11 @@ type ExpandedValidator interface {
 
 	// SetValidationError manually updates the validation status until the next input change.
 	SetValidationError(error)
+
+	// ShouldDisplayValidation tells a parent widget if the validatable widget wants to currently display
+	// the validation error. This can be used to avoid "nagging" the user about errors until it makes
+	// sense to show it. I.e. an empty widget.Entry that hasn't been interacted with does not show the error.
+	ShouldDisplayValidation() bool
 }
 
 // Validatable is an interface for specifying if a widget is validatable.

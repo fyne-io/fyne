@@ -63,6 +63,14 @@ func (e *Entry) SetValidationError(err error) {
 	}
 }
 
+// ShouldDisplayValidation returns true if the entry has not been interacted with
+// or is currently focused.
+//
+// Since: 2.5
+func (e *Entry) ShouldDisplayValidation() bool {
+	return !e.dirty || e.focused
+}
+
 var _ fyne.Widget = (*validationStatus)(nil)
 
 type validationStatus struct {
