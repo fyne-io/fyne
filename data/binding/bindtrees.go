@@ -121,6 +121,10 @@ func (t *boundBoolTree) Prepend(parent, id string, val bool) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundBoolTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -402,6 +406,10 @@ func (t *boundBytesTree) Prepend(parent, id string, val []byte) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundBytesTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -683,6 +691,10 @@ func (t *boundFloatTree) Prepend(parent, id string, val float64) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundFloatTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -964,6 +976,10 @@ func (t *boundIntTree) Prepend(parent, id string, val int) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundIntTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -1245,6 +1261,10 @@ func (t *boundRuneTree) Prepend(parent, id string, val rune) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundRuneTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -1526,6 +1546,10 @@ func (t *boundStringTree) Prepend(parent, id string, val string) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundStringTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -1807,6 +1831,10 @@ func (t *boundUntypedTree) Prepend(parent, id string, val interface{}) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundUntypedTree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
@@ -2088,6 +2116,10 @@ func (t *boundURITree) Prepend(parent, id string, val fyne.URI) error {
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *boundURITree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()

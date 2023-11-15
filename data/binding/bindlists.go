@@ -107,6 +107,9 @@ func (l *boundBoolList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified bool out of the list.
+//
+// Since: 2.5
 func (l *boundBoolList) Remove(val bool) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -358,6 +361,9 @@ func (l *boundBytesList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified []byte out of the list.
+//
+// Since: 2.5
 func (l *boundBytesList) Remove(val []byte) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -609,6 +615,9 @@ func (l *boundFloatList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified float64 out of the list.
+//
+// Since: 2.5
 func (l *boundFloatList) Remove(val float64) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -860,6 +869,9 @@ func (l *boundIntList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified int out of the list.
+//
+// Since: 2.5
 func (l *boundIntList) Remove(val int) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -1111,6 +1123,9 @@ func (l *boundRuneList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified rune out of the list.
+//
+// Since: 2.5
 func (l *boundRuneList) Remove(val rune) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -1362,6 +1377,9 @@ func (l *boundStringList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified string out of the list.
+//
+// Since: 2.5
 func (l *boundStringList) Remove(val string) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -1613,6 +1631,9 @@ func (l *boundUntypedList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified interface{} out of the list.
+//
+// Since: 2.5
 func (l *boundUntypedList) Remove(val interface{}) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -1864,6 +1885,9 @@ func (l *boundURIList) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified fyne.URI out of the list.
+//
+// Since: 2.5
 func (l *boundURIList) Remove(val fyne.URI) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()

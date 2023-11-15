@@ -473,6 +473,9 @@ func (l *bound{{ .Name }}List) Reload() error {
 	return l.doReload()
 }
 
+// Remove takes the specified {{ .Type }} out of the list.
+//
+// Since: 2.5
 func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
@@ -761,6 +764,10 @@ func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error
 	return t.doReload()
 }
 
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
 func (t *bound{{ .Name }}Tree) Remove(id string) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
