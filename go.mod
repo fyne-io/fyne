@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.17
 
 require (
-	fyne.io/systray v1.10.1-0.20230722100817-88df1e0ffa9a
+	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e
 	github.com/BurntSushi/toml v1.3.2
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.0.0
