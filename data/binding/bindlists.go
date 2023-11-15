@@ -19,6 +19,7 @@ type BoolList interface {
 	Get() ([]bool, error)
 	GetValue(index int) (bool, error)
 	Prepend(value bool) error
+	Remove(value bool) error
 	Set(list []bool) error
 	SetValue(index int, value bool) error
 }
@@ -102,6 +103,34 @@ func (l *boundBoolList) Prepend(val bool) error {
 func (l *boundBoolList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundBoolList) Remove(val bool) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -241,6 +270,7 @@ type BytesList interface {
 	Get() ([][]byte, error)
 	GetValue(index int) ([]byte, error)
 	Prepend(value []byte) error
+	Remove(value []byte) error
 	Set(list [][]byte) error
 	SetValue(index int, value []byte) error
 }
@@ -324,6 +354,34 @@ func (l *boundBytesList) Prepend(val []byte) error {
 func (l *boundBytesList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundBytesList) Remove(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if bytes.Equal((*l.val)[0], val) {
+		*l.val = (*l.val)[1:]
+	} else if bytes.Equal((*l.val)[len(*l.val)-1], val) {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if bytes.Equal(v, val) {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -463,6 +521,7 @@ type FloatList interface {
 	Get() ([]float64, error)
 	GetValue(index int) (float64, error)
 	Prepend(value float64) error
+	Remove(value float64) error
 	Set(list []float64) error
 	SetValue(index int, value float64) error
 }
@@ -546,6 +605,34 @@ func (l *boundFloatList) Prepend(val float64) error {
 func (l *boundFloatList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundFloatList) Remove(val float64) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -685,6 +772,7 @@ type IntList interface {
 	Get() ([]int, error)
 	GetValue(index int) (int, error)
 	Prepend(value int) error
+	Remove(value int) error
 	Set(list []int) error
 	SetValue(index int, value int) error
 }
@@ -768,6 +856,34 @@ func (l *boundIntList) Prepend(val int) error {
 func (l *boundIntList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundIntList) Remove(val int) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -907,6 +1023,7 @@ type RuneList interface {
 	Get() ([]rune, error)
 	GetValue(index int) (rune, error)
 	Prepend(value rune) error
+	Remove(value rune) error
 	Set(list []rune) error
 	SetValue(index int, value rune) error
 }
@@ -990,6 +1107,34 @@ func (l *boundRuneList) Prepend(val rune) error {
 func (l *boundRuneList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundRuneList) Remove(val rune) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -1129,6 +1274,7 @@ type StringList interface {
 	Get() ([]string, error)
 	GetValue(index int) (string, error)
 	Prepend(value string) error
+	Remove(value string) error
 	Set(list []string) error
 	SetValue(index int, value string) error
 }
@@ -1212,6 +1358,34 @@ func (l *boundStringList) Prepend(val string) error {
 func (l *boundStringList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundStringList) Remove(val string) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -1351,6 +1525,7 @@ type UntypedList interface {
 	Get() ([]interface{}, error)
 	GetValue(index int) (interface{}, error)
 	Prepend(value interface{}) error
+	Remove(value interface{}) error
 	Set(list []interface{}) error
 	SetValue(index int, value interface{}) error
 }
@@ -1434,6 +1609,34 @@ func (l *boundUntypedList) Prepend(val interface{}) error {
 func (l *boundUntypedList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) Remove(val interface{}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if (*l.val)[0] == val {
+		*l.val = (*l.val)[1:]
+	} else if (*l.val)[len(*l.val)-1] == val {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if v == val {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -1573,6 +1776,7 @@ type URIList interface {
 	Get() ([]fyne.URI, error)
 	GetValue(index int) (fyne.URI, error)
 	Prepend(value fyne.URI) error
+	Remove(value fyne.URI) error
 	Set(list []fyne.URI) error
 	SetValue(index int, value fyne.URI) error
 }
@@ -1656,6 +1860,34 @@ func (l *boundURIList) Prepend(val fyne.URI) error {
 func (l *boundURIList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+func (l *boundURIList) Remove(val fyne.URI) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	if len(*l.val) == 0 {
+		return nil
+	}
+	if compareURI((*l.val)[0], val) {
+		*l.val = (*l.val)[1:]
+	} else if compareURI((*l.val)[len(*l.val)-1], val) {
+		*l.val = (*l.val)[:len(*l.val)]
+	} else {
+		id := -1
+		for i, v := range *l.val {
+			if compareURI(v, val) {
+				id = i
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+	}
 
 	return l.doReload()
 }
