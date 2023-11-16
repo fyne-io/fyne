@@ -11,15 +11,15 @@
 							</widget>
 						</widget>
 						<widget pos="80,0" size="76x36" type="*container.tabButton">
-							<text bold color="primary" pos="8,8" size="60x20">Test2</text>
+							<text bold pos="8,8" size="60x20">Test2</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
+								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
 						<widget pos="160,0" size="76x36" type="*container.tabButton">
-							<text bold pos="8,8" size="60x20">Test3</text>
+							<text bold color="primary" pos="8,8" size="60x20">Test3</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
 					</container>
@@ -38,9 +38,9 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="380x4"/>
-			<rectangle fillColor="primary" pos="80,36" radius="4" size="76x4"/>
+			<rectangle fillColor="primary" pos="160,36" radius="4" size="76x4"/>
 			<widget pos="0,40" size="380x60" type="*widget.Label">
-				<text pos="8,8" size="38x19">Text 2</text>
+				<text pos="8,8" size="38x19">Text 3</text>
 			</widget>
 		</widget>
 	</content>
