@@ -319,18 +319,7 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 	buttons.Objects = nil
 
 	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() {
-		cells := count
-		if cells == 0 {
-			cells = 1
-		}
-		if r.docTabs.location == TabLocationTop || r.docTabs.location == TabLocationBottom {
-			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
-		} else {
-			buttons.Layout = layout.NewGridLayoutWithRows(cells)
-		}
-		iconPos = buttonIconTop
-	} else if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
+	if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
 		iconPos = buttonIconTop
 	} else {
