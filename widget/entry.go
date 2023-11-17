@@ -910,6 +910,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	e.updateTextAndRefresh(provider.String())
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	e.Refresh() // placing the cursor (and refreshing) happens last
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
