@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.4.2 - In Progress
+## 2.4.2 - 21 November 2023
 
 ### Fixed
 
@@ -20,6 +20,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Update for security fixes to x/sys and x/net
 * Inconsistent rendering of Button widget (#4243)
 * PasswordEntry initial text is not obscured (#4312)
+* Pasting text in Entry does not update cursor position display (#4181)
 
 
 ## 2.4.1 - 9 October 2023
