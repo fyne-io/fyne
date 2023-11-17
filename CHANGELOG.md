@@ -18,6 +18,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * RichText may not refresh if segments manually replaced
 * Correct URI.Extension() documentation
 * Update for security fixes to x/sys and x/net
+* Inconsistent rendering of Button widget (#4243)
+* PasswordEntry initial text is not obscured (#4312)
 
 
 ## 2.4.1 - 9 October 2023
