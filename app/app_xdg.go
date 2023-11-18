@@ -29,9 +29,34 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
+	if openURLThroughPortal(url) == nil {
+		return nil
+	}
+
 	cmd := execabs.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
+}
+
+func openURLThroughPortal(url *url.URL) error {
+	conn, err := dbus.SessionBus() // shared connection, don't close
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
+		return err
+	}
+
+	parentWindow := ""
+	uri := url.String()
+	options := map[string]dbus.Variant{}
+
+	obj := conn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
+	call := obj.Call("org.freedesktop.portal.OpenURI.OpenURI", 0, parentWindow, uri, options)
+	if call.Err != nil {
+		fyne.LogError("Failed to open url with xdg-desktop-portal", call.Err)
+		return call.Err
+	}
+
+	return nil
 }
 
 // fetch color variant from dbus portal desktop settings.
@@ -82,7 +107,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	if a.sendXDGDesktopPortalNotification(conn, n) == nil {
+	if a.sendNotificationThroughPortal(conn, n) == nil {
 		return // No need to use the fallback path.
 	}
 
@@ -98,11 +123,11 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 // Sending with same ID replaces the old notification.
-var notificationID int = 0
+var notificationID uint64 = 0
 
 // See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
-func (a *fyneApp) sendXDGDesktopPortalNotification(conn *dbus.Conn, n *fyne.Notification) error {
-	id := strconv.Itoa(notificationID)
+func (a *fyneApp) sendNotificationThroughPortal(conn *dbus.Conn, n *fyne.Notification) error {
+	id := strconv.FormatUint(notificationID, 10)
 	data := map[string]dbus.Variant{
 		"title": dbus.MakeVariant(n.Title),
 		"body":  dbus.MakeVariant(n.Content),
