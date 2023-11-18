@@ -119,7 +119,8 @@ func (d *gLDriver) runGL() {
 
 	postEmptyEvent()
 
-	for {
+	eventTick := time.NewTicker(time.Second / 60) // TODO: Why does it not work without this?
+	for range eventTick.C {
 		d.waitForEvents()
 
 		if atomic.LoadUint32(&d.mainDone) == 1 {
