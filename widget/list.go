@@ -647,7 +647,8 @@ func (l *listLayout) updateList(newOnly bool) {
 	}
 
 	visible := make(map[ListItemID]*listItem, len(visibleRowHeights))
-	cells := make([]fyne.CanvasObject, len(visibleRowHeights))
+	oldChildrenLen := len(l.children)
+	l.children = l.children[:0]
 
 	y := offY
 	for index, itemHeight := range visibleRowHeights {
@@ -668,7 +669,15 @@ func (l *listLayout) updateList(newOnly bool) {
 
 		y += itemHeight + separatorThickness
 		visible[row] = c
-		cells[index] = c
+		l.children = append(l.children, c)
+	}
+	if ln := len(l.children); oldChildrenLen > ln {
+		// nil out slice's unreferenced items
+		l.children = l.children[:oldChildrenLen]
+		for i := ln; i < oldChildrenLen; i++ {
+			l.children[i] = nil
+		}
+		l.children = l.children[:ln]
 	}
 
 	l.visible = visible
@@ -678,13 +687,22 @@ func (l *listLayout) updateList(newOnly bool) {
 			l.itemPool.Release(old)
 		}
 	}
-	l.children = cells
 
 	l.updateSeparators()
 
-	objects := l.children
-	objects = append(objects, l.separators...)
-	l.list.scroller.Content.(*fyne.Container).Objects = objects
+	c := l.list.scroller.Content.(*fyne.Container)
+	oldObjLen := len(c.Objects)
+	c.Objects = c.Objects[:0]
+	c.Objects = append(c.Objects, l.children...)
+	c.Objects = append(c.Objects, l.separators...)
+	if ln := len(c.Objects); oldObjLen > ln {
+		// nil out slice's unreferenced items
+		c.Objects = c.Objects[:oldObjLen]
+		for i := ln; i < oldObjLen; i++ {
+			c.Objects[i] = nil
+		}
+		c.Objects = c.Objects[:ln]
+	}
 	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
@@ -701,11 +719,11 @@ func (l *listLayout) updateList(newOnly bool) {
 }
 
 func (l *listLayout) updateSeparators() {
-	if len(l.children) > 1 {
-		if len(l.separators) > len(l.children) {
-			l.separators = l.separators[:len(l.children)]
+	if lenChildren := len(l.children); lenChildren > 1 {
+		if lenSep := len(l.separators); lenSep > lenChildren {
+			l.separators = l.separators[:lenChildren]
 		} else {
-			for i := len(l.separators); i < len(l.children); i++ {
+			for i := lenSep; i < lenChildren; i++ {
 				l.separators = append(l.separators, NewSeparator())
 			}
 		}
