@@ -642,10 +642,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	for i := 0; i < len(l.wasVisible); i++ {
-		l.wasVisible[i].item = nil
-	}
-	l.wasVisible = l.wasVisible[:0]
+	l.wasVisible = l.wasVisible[:0] // data already nilled out at end of this func
 	l.wasVisible = append(l.wasVisible, l.visible...)
 
 	l.list.propertyLock.Lock()
