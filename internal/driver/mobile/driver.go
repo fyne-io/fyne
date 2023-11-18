@@ -315,7 +315,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if internal.BuildTypeIsDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}

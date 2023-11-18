@@ -20,10 +20,10 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 type glCanvas struct {
 	common.Canvas
 
-	content       fyne.CanvasObject
-	menu          fyne.CanvasObject
-	padded, debug bool
-	size          fyne.Size
+	content fyne.CanvasObject
+	menu    fyne.CanvasObject
+	padded  bool
+	size    fyne.Size
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -298,7 +298,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if internal.BuildTypeIsDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
@@ -339,6 +339,5 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
-	c.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	return c
 }
