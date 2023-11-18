@@ -318,24 +318,25 @@ func (l *List) UnselectAll() {
 	}
 }
 
-func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow int) {
+// fills l.visibleRowHeights and also returns offY and minRow
+func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) (offY float32, minRow int) {
 	rowOffset := float32(0)
 	isVisible := false
-	visible = []float32{}
+	l.visibleRowHeights = l.visibleRowHeights[:0]
 
-	if l.scroller.Size().Height <= 0 {
+	if l.list.scroller.Size().Height <= 0 {
 		return
 	}
 
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 
-	if len(l.itemHeights) == 0 {
+	if len(l.list.itemHeights) == 0 {
 		paddedItemHeight := itemHeight + padding
 
-		offY = float32(math.Floor(float64(l.offsetY/paddedItemHeight))) * paddedItemHeight
+		offY = float32(math.Floor(float64(l.list.offsetY/paddedItemHeight))) * paddedItemHeight
 		minRow = int(math.Floor(float64(offY / paddedItemHeight)))
-		maxRow := int(math.Ceil(float64((offY + l.scroller.Size().Height) / paddedItemHeight)))
+		maxRow := int(math.Ceil(float64((offY + l.list.scroller.Size().Height) / paddedItemHeight)))
 
 		if minRow > length-1 {
 			minRow = length - 1
@@ -349,33 +350,32 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 			maxRow = length
 		}
 
-		visible = make([]float32, maxRow-minRow)
 		for i := 0; i < maxRow-minRow; i++ {
-			visible[i] = itemHeight
+			l.visibleRowHeights = append(l.visibleRowHeights, itemHeight)
 		}
 		return
 	}
 
 	for i := 0; i < length; i++ {
 		height := itemHeight
-		if h, ok := l.itemHeights[i]; ok {
+		if h, ok := l.list.itemHeights[i]; ok {
 			height = h
 		}
 
-		if rowOffset <= l.offsetY-height-padding {
+		if rowOffset <= l.list.offsetY-height-padding {
 			// before scroll
-		} else if rowOffset <= l.offsetY {
+		} else if rowOffset <= l.list.offsetY {
 			minRow = i
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset >= l.offsetY+l.scroller.Size().Height {
+		if rowOffset >= l.list.offsetY+l.list.scroller.Size().Height {
 			break
 		}
 
 		rowOffset += height + padding
 		if isVisible {
-			visible = append(visible, height)
+			l.visibleRowHeights = append(l.visibleRowHeights, height)
 		}
 	}
 	return
@@ -528,9 +528,10 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool   *syncPool
-	visible    map[ListItemID]*listItem
-	renderLock sync.Mutex
+	itemPool          *syncPool
+	visible           map[ListItemID]*listItem
+	visibleRowHeights []float32
+	renderLock        sync.Mutex
 }
 
 func newListLayout(list *List) fyne.Layout {
@@ -639,19 +640,19 @@ func (l *listLayout) updateList(newOnly bool) {
 	wasVisible := l.visible
 
 	l.list.propertyLock.Lock()
-	visibleRowHeights, offY, minRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
+	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
 	l.list.propertyLock.Unlock()
-	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
+	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
-	visible := make(map[ListItemID]*listItem, len(visibleRowHeights))
+	visible := make(map[ListItemID]*listItem, len(l.visibleRowHeights))
 	oldChildrenLen := len(l.children)
 	l.children = l.children[:0]
 
 	y := offY
-	for index, itemHeight := range visibleRowHeights {
+	for index, itemHeight := range l.visibleRowHeights {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
