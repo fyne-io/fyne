@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/godbus/dbus/v5"
@@ -81,16 +82,42 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	appName := fyne.CurrentApp().UniqueID()
+	if a.sendXDGDesktopPortalNotification(conn, n) == nil {
+		return // No need to use the fallback path.
+	}
+
 	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
-	call := obj.Call("org.freedesktop.Notifications.Notify", 0, appName, uint32(0),
+	call := obj.Call("org.freedesktop.Notifications.Notify", 0, a.uniqueID, uint32(0),
 		appIcon, n.Title, n.Content, []string{}, map[string]dbus.Variant{}, timeout)
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+// Sending with same ID replaces the old notification.
+var notificationID int = 0
+
+// See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
+func (a *fyneApp) sendXDGDesktopPortalNotification(conn *dbus.Conn, n *fyne.Notification) error {
+	id := strconv.Itoa(notificationID)
+	data := map[string]dbus.Variant{
+		"title": dbus.MakeVariant(n.Title),
+		"body":  dbus.MakeVariant(n.Content),
+		"icon":  dbus.MakeVariant(a.uniqueID),
+	}
+
+	obj := conn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
+	call := obj.Call("org.freedesktop.portal.Notification.AddNotification", 0, id, data)
+	if call.Err != nil {
+		fyne.LogError("Failed to send notification to xdg-desktop-portal", call.Err)
+		return call.Err
+	}
+
+	notificationID++
+	return nil
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
