@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	// VariantDark is the version of a theme that satisfies a user preference for a light look.
+	// VariantDark is the version of a theme that satisfies a user preference for a dark look.
 	//
 	// Since: 2.0
 	VariantDark fyne.ThemeVariant = 0
 
-	// VariantLight is the version of a theme that satisfies a user preference for a dark look.
+	// VariantLight is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since: 2.0
 	VariantLight fyne.ThemeVariant = 1
