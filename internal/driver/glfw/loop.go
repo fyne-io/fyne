@@ -50,6 +50,7 @@ func runOnMain(f func()) {
 	defer common.DonePool.Put(done)
 
 	funcQueue <- funcData{f: f, done: done}
+	postEmptyEvent()
 
 	<-done
 }
@@ -115,87 +116,97 @@ func (d *gLDriver) runGL() {
 		d.trayStart()
 	}
 	fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStarted()
-	eventTick := time.NewTicker(time.Second / 60)
+
+	postEmptyEvent()
+
 	for {
-		select {
-		case <-d.done:
-			eventTick.Stop()
-			d.drawDone <- struct{}{} // wait for draw thread to stop
-			d.Terminate()
+		d.waitForEvents()
+
+		if atomic.LoadUint32(&d.mainDone) == 1 {
+			d.drawDone <- struct{}{} // Tell draw thread to stop.
+			d.terminate()
 			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerStopped()
 			return
+		}
+
+		select {
 		case f := <-funcQueue:
 			f.f()
 			f.done <- struct{}{}
-		case <-eventTick.C:
-			d.tryPollEvents()
-			windowsToRemove := 0
-			for _, win := range d.windowList() {
-				w := win.(*window)
-				if w.viewport == nil {
-					continue
-				}
+		default: // Do not wait for items to populate in the queue.
+		}
 
-				if w.viewport.ShouldClose() {
-					windowsToRemove++
-					continue
-				}
+		windowsToRemove := 0
+		for _, win := range d.windowList() {
+			w := win.(*window)
+			if w.viewport == nil {
+				continue
+			}
 
-				w.viewLock.RLock()
-				expand := w.shouldExpand
-				fullScreen := w.fullScreen
-				w.viewLock.RUnlock()
+			if w.viewport.ShouldClose() {
+				windowsToRemove++
+				continue
+			}
 
-				if expand && !fullScreen {
-					w.fitContent()
-					w.viewLock.Lock()
-					shouldExpand := w.shouldExpand
-					w.shouldExpand = false
-					view := w.viewport
-					w.viewLock.Unlock()
-					if shouldExpand {
-						view.SetSize(w.shouldWidth, w.shouldHeight)
-					}
-				}
+			w.viewLock.RLock()
+			expand := w.shouldExpand
+			fullScreen := w.fullScreen
+			w.viewLock.RUnlock()
 
-				if drawOnMainThread {
-					d.drawSingleFrame()
+			if expand && !fullScreen {
+				w.fitContent()
+				w.viewLock.Lock()
+				shouldExpand := w.shouldExpand
+				w.shouldExpand = false
+				view := w.viewport
+				w.viewLock.Unlock()
+				if shouldExpand {
+					view.SetSize(w.shouldWidth, w.shouldHeight)
 				}
 			}
-			if windowsToRemove > 0 {
-				oldWindows := d.windowList()
-				newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
 
-				for _, win := range oldWindows {
-					w := win.(*window)
-					if w.viewport == nil {
-						continue
-					}
-
-					if w.viewport.ShouldClose() {
-						w.viewLock.Lock()
-						w.visible = false
-						v := w.viewport
-						w.viewLock.Unlock()
-
-						// remove window from window list
-						v.Destroy()
-						w.destroy(d)
-						continue
-					}
-
-					newWindows = append(newWindows, win)
-				}
-
-				d.windowLock.Lock()
-				d.windows = newWindows
-				d.windowLock.Unlock()
-
-				if len(newWindows) == 0 {
-					d.Quit()
-				}
+			if drawOnMainThread {
+				d.drawSingleFrame()
 			}
 		}
+
+		if windowsToRemove > 0 {
+			d.removeWindows(windowsToRemove)
+		}
+	}
+}
+
+func (d *gLDriver) removeWindows(windowsToRemove int) {
+	oldWindows := d.windowList()
+	newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
+
+	for _, win := range oldWindows {
+		w := win.(*window)
+		if w.viewport == nil {
+			continue
+		}
+
+		if w.viewport.ShouldClose() {
+			w.viewLock.Lock()
+			w.visible = false
+			v := w.viewport
+			w.viewLock.Unlock()
+
+			// remove window from window list
+			v.Destroy()
+			w.destroy(d)
+			continue
+		}
+
+		newWindows = append(newWindows, win)
+	}
+
+	d.windowLock.Lock()
+	d.windows = newWindows
+	d.windowLock.Unlock()
+
+	if len(newWindows) == 0 {
+		d.Quit()
 	}
 }
 
