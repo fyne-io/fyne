@@ -275,22 +275,24 @@ func TestList_Select(t *testing.T) {
 	assert.Equal(t, float32(0), list.offsetY)
 	list.Select(50)
 	assert.Equal(t, 988, int(list.offsetY))
-	visible := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.Equal(t, visible[50].background.FillColor, theme.SelectionColor())
-	assert.True(t, visible[50].background.Visible())
+	lo := list.scroller.Content.(*fyne.Container).Layout.(*listLayout)
+	visible50 := lo.visible[lo.searchVisible(lo.visible, 50)].item
+	assert.Equal(t, visible50.background.FillColor, theme.SelectionColor())
+	assert.True(t, visible50.background.Visible())
 
 	list.Select(5)
 	assert.Equal(t, 195, int(list.offsetY))
-	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.Equal(t, visible[5].background.FillColor, theme.SelectionColor())
-	assert.True(t, visible[5].background.Visible())
+	visible5 := lo.visible[lo.searchVisible(lo.visible, 5)].item
+	assert.Equal(t, visible5.background.FillColor, theme.SelectionColor())
+	assert.True(t, visible5.background.Visible())
 
 	list.Select(6)
 	assert.Equal(t, 195, int(list.offsetY))
-	visible = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).visible
-	assert.False(t, visible[5].background.Visible())
-	assert.Equal(t, visible[6].background.FillColor, theme.SelectionColor())
-	assert.True(t, visible[6].background.Visible())
+	visible5 = lo.visible[lo.searchVisible(lo.visible, 5)].item
+	visible6 := lo.visible[lo.searchVisible(lo.visible, 6)].item
+	assert.False(t, visible5.background.Visible())
+	assert.Equal(t, visible6.background.FillColor, theme.SelectionColor())
+	assert.True(t, visible6.background.Visible())
 }
 
 func TestList_Unselect(t *testing.T) {
