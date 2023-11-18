@@ -663,16 +663,15 @@ func (l *listLayout) updateList(newOnly bool) {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		visIdx := l.searchVisible(l.wasVisible, row)
 		var c *listItem
-		if visIdx < 0 {
+		if idx := l.searchVisible(l.wasVisible, row); idx < 0 {
 			c = l.getItem()
 			if c == nil {
 				continue
 			}
 			c.Resize(size)
 		} else {
-			c = l.wasVisible[visIdx].item
+			c = l.wasVisible[idx].item
 		}
 
 		c.Move(fyne.NewPos(0, y))
