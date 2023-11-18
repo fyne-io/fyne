@@ -122,8 +122,8 @@ func (l *List) RefreshItem(id ListItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	if idx := lo.searchVisible(lo.visible, id); idx >= 0 {
-		lo.setupListItem(lo.visible[idx].item, id, l.focused && l.currentFocus == id)
+	if item, ok := lo.searchVisible(lo.visible, id); ok {
+		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
 }
 
@@ -663,15 +663,13 @@ func (l *listLayout) updateList(newOnly bool) {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		var c *listItem
-		if idx := l.searchVisible(l.wasVisible, row); idx < 0 {
+		c, ok := l.searchVisible(l.wasVisible, row)
+		if !ok {
 			c = l.getItem()
 			if c == nil {
 				continue
 			}
 			c.Resize(size)
-		} else {
-			c = l.wasVisible[idx].item
 		}
 
 		c.Move(fyne.NewPos(0, y))
@@ -691,10 +689,10 @@ func (l *listLayout) updateList(newOnly bool) {
 		l.visible = l.visible[:ln]
 	}
 
-	for _, item := range l.wasVisible {
-		if idx := l.searchVisible(l.visible, item.id); idx < 0 {
-			l.itemPool.Release(item.item)
-			item.item = nil
+	for _, wasVis := range l.wasVisible {
+		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
+			l.itemPool.Release(wasVis.item)
+			wasVis.item = nil
 		}
 	}
 
@@ -709,14 +707,14 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
-		for _, item := range l.visible {
-			if idx := l.searchVisible(l.wasVisible, item.id); idx < 0 {
-				l.setupListItem(item.item, item.id, l.list.focused && l.list.currentFocus == item.id)
+		for _, vis := range l.visible {
+			if _, ok := l.searchVisible(l.wasVisible, vis.id); !ok {
+				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 			}
 		}
 	} else {
-		for _, item := range l.visible {
-			l.setupListItem(item.item, item.id, l.list.focused && l.list.currentFocus == item.id)
+		for _, vis := range l.visible {
+			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
 	}
 
@@ -752,14 +750,14 @@ func (l *listLayout) updateSeparators() {
 }
 
 // invariant: visible is in ascending order of IDs
-func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) int {
+func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) (*listItem, bool) {
 	// binary search
 	low := 0
 	high := len(visible) - 1
 	for low <= high {
 		mid := (low + high) / 2
 		if visible[mid].id == id {
-			return mid
+			return visible[mid].item, true
 		}
 		if visible[mid].id > id {
 			high = mid - 1
@@ -767,7 +765,7 @@ func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) int {
 			low = mid + 1
 		}
 	}
-	return -1
+	return nil, false
 }
 
 func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {

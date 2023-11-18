@@ -276,20 +276,20 @@ func TestList_Select(t *testing.T) {
 	list.Select(50)
 	assert.Equal(t, 988, int(list.offsetY))
 	lo := list.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	visible50 := lo.visible[lo.searchVisible(lo.visible, 50)].item
+	visible50, _ := lo.searchVisible(lo.visible, 50)
 	assert.Equal(t, visible50.background.FillColor, theme.SelectionColor())
 	assert.True(t, visible50.background.Visible())
 
 	list.Select(5)
 	assert.Equal(t, 195, int(list.offsetY))
-	visible5 := lo.visible[lo.searchVisible(lo.visible, 5)].item
+	visible5, _ := lo.searchVisible(lo.visible, 5)
 	assert.Equal(t, visible5.background.FillColor, theme.SelectionColor())
 	assert.True(t, visible5.background.Visible())
 
 	list.Select(6)
 	assert.Equal(t, 195, int(list.offsetY))
-	visible5 = lo.visible[lo.searchVisible(lo.visible, 5)].item
-	visible6 := lo.visible[lo.searchVisible(lo.visible, 6)].item
+	visible5, _ = lo.searchVisible(lo.visible, 5)
+	visible6, _ := lo.searchVisible(lo.visible, 6)
 	assert.False(t, visible5.background.Visible())
 	assert.Equal(t, visible6.background.FillColor, theme.SelectionColor())
 	assert.True(t, visible6.background.Visible())
