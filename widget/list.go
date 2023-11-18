@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"sort"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -746,19 +747,10 @@ func (l *listLayout) updateSeparators() {
 
 // invariant: visible is in ascending order of IDs
 func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) (*listItem, bool) {
-	// binary search
-	low := 0
-	high := len(visible) - 1
-	for low <= high {
-		mid := (low + high) / 2
-		if visible[mid].id == id {
-			return visible[mid].item, true
-		}
-		if visible[mid].id > id {
-			high = mid - 1
-		} else {
-			low = mid + 1
-		}
+	ln := len(visible)
+	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
+	if idx < ln && visible[idx].id == id {
+		return visible[idx].item, true
 	}
 	return nil, false
 }
