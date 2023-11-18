@@ -752,10 +752,20 @@ func (l *listLayout) updateSeparators() {
 	}
 }
 
+// invariant: visible is in ascending order of IDs
 func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) int {
-	for i, v := range visible {
-		if v.id == id {
-			return i
+	// binary search
+	low := 0
+	high := len(visible) - 1
+	for low <= high {
+		mid := (low + high) / 2
+		if visible[mid].id == id {
+			return mid
+		}
+		if visible[mid].id > id {
+			high = mid - 1
+		} else {
+			low = mid + 1
 		}
 	}
 	return -1
