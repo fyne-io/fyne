@@ -692,7 +692,6 @@ func (l *listLayout) updateList(newOnly bool) {
 	for _, wasVis := range l.wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
 			l.itemPool.Release(wasVis.item)
-			wasVis.item = nil
 		}
 	}
 
