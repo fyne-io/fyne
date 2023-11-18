@@ -123,7 +123,10 @@ func (l *List) RefreshItem(id ListItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	if item, ok := lo.searchVisible(lo.visible, id); ok {
+	lo.renderLock.RLock() // ensures we are not changing visible info in render code during the search
+	item, ok := lo.searchVisible(lo.visible, id)
+	lo.renderLock.RUnlock()
+	if ok {
 		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
 }
@@ -537,7 +540,7 @@ type listLayout struct {
 	visible           []itemAndID
 	wasVisible        []itemAndID
 	visibleRowHeights []float32
-	renderLock        sync.Mutex
+	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
