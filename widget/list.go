@@ -642,8 +642,13 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	l.wasVisible = l.wasVisible[:0] // data already nilled out at end of this func
-	l.wasVisible = append(l.wasVisible, l.visible...)
+	// Swap l.wasVisible and l.visible
+	// since l.wasVisible contains only nil references at this point,
+	// we don't need to overwrite old data if we fill l.visible to less than
+	// the previous length of l.wasVisible
+	tmp := l.wasVisible
+	l.wasVisible = l.visible
+	l.visible = tmp
 
 	l.list.propertyLock.Lock()
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
@@ -653,7 +658,6 @@ func (l *listLayout) updateList(newOnly bool) {
 		return
 	}
 
-	oldVisibleLen := len(l.visible)
 	l.visible = l.visible[:0]
 	oldChildrenLen := len(l.children)
 	l.children = l.children[:0]
@@ -680,14 +684,6 @@ func (l *listLayout) updateList(newOnly bool) {
 		l.children = append(l.children, c)
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
-	// nil out l.visible slice's unreferenced items
-	if ln := len(l.visible); oldVisibleLen > ln {
-		l.visible = l.visible[:oldVisibleLen]
-		for i := ln; i < oldVisibleLen; i++ {
-			l.visible[i].item = nil
-		}
-		l.visible = l.visible[:ln]
-	}
 
 	for _, wasVis := range l.wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
