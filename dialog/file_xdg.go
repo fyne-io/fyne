@@ -87,6 +87,11 @@ func fileOpenOSOverride(d *FileDialog) bool {
 				folderCallback(nil, err)
 			}
 
+			if len(uris) == 0 {
+				folderCallback(nil, nil)
+				return
+			}
+
 			uri, err := storage.ParseURI(uris[0])
 			if err != nil {
 				folderCallback(nil, err)
@@ -101,6 +106,11 @@ func fileOpenOSOverride(d *FileDialog) bool {
 		fileCallback := d.callback.(func(fyne.URIReadCloser, error))
 		if err != nil {
 			fileCallback(nil, err)
+			return
+		}
+
+		if len(uris) == 0 {
+			folderCallback(nil, nil)
 			return
 		}
 
@@ -121,6 +131,11 @@ func fileSaveOSOverride(d *FileDialog) bool {
 		uris, err := filechooser.SaveFile("", "Open File", &filechooser.SaveSingleOptions{Modal: true})
 		if err != nil {
 			callback(nil, err)
+			return
+		}
+
+		if len(uris) == 0 {
+			callback(nil, nil)
 			return
 		}
 
