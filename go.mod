@@ -23,7 +23,7 @@ require (
 	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/rymdport/portal v0.0.0-20231119112124-889a3dbc2075
+	github.com/rymdport/portal v0.0.0-20231119122349-dd7585c58dd5
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.8.4
