@@ -704,6 +704,10 @@ func (w *window) rescaleOnMain() {
 	w.viewport.SetSize(newWidth, newHeight)
 }
 
+func (w *window) GetX11ID() uint {
+	return uint(w.viewport.GetX11Window())
+}
+
 func (w *window) create() {
 	runOnMain(func() {
 		if !build.IsWayland {
