@@ -78,13 +78,16 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 
 func fileOpenOSOverride(d *FileDialog) bool {
 	go func() {
-		folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
 		options := &filechooser.OpenOptions{
 			Modal:       true,
 			Directory:   folder,
 			AcceptLabel: d.confirmText,
 		}
+		if d.startingLocation != nil {
+			options.Location = d.startingLocation.Path()
+		}
 
+		folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
 		if folder {
 			uris, err := filechooser.OpenFile("", "Open Folder", options)
 			if err != nil {
@@ -131,14 +134,17 @@ func fileOpenOSOverride(d *FileDialog) bool {
 
 func fileSaveOSOverride(d *FileDialog) bool {
 	go func() {
+		options := &filechooser.SaveSingleOptions{
+			Modal:       true,
+			AcceptLabel: d.confirmText,
+			FileName:    d.initialFileName,
+		}
+		if d.startingLocation != nil {
+			options.Location = d.startingLocation.Path()
+		}
+
 		callback := d.callback.(func(fyne.URIWriteCloser, error))
-		uris, err := filechooser.SaveFile("", "Open File",
-			&filechooser.SaveSingleOptions{
-				Modal:       true,
-				AcceptLabel: d.confirmText,
-				FileName:    d.initialFileName,
-			},
-		)
+		uris, err := filechooser.SaveFile("", "Open File", options)
 		if err != nil {
 			callback(nil, err)
 			return
