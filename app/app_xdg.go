@@ -69,7 +69,7 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 
 	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
 	call := dbusObj.Call(
-		"org.freedesktop.portal.Settings.Read",
+		"org.freedesktop.portal.Settings.ReadOne",
 		dbus.FlagNoAutoStart,
 		"org.freedesktop.appearance",
 		"color-scheme",
