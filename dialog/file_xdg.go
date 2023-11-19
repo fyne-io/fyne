@@ -12,6 +12,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
+	"github.com/rymdport/portal/filechooser"
 
 	"golang.org/x/sys/execabs"
 )
@@ -73,4 +74,62 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	}
 
 	return favoriteLocations, err
+}
+
+func fileOpenOSOverride(d *FileDialog) bool {
+	go func() {
+		callback, folder := d.callback.(func(fyne.ListableURI, error))
+		options := &filechooser.OpenOptions{Modal: true, Directory: folder}
+
+		uris, err := filechooser.OpenFile("", "Open File", options)
+		if !folder {
+			callback := d.callback.(func(fyne.URIReadCloser, error))
+			if err != nil {
+				callback(nil, err)
+				return
+			}
+
+			uri, err := storage.ParseURI(uris[0])
+			if err != nil {
+				callback(nil, err)
+				return
+			}
+
+			callback(storage.Reader(uri))
+			return
+		}
+		if err != nil {
+			callback(nil, err)
+		}
+
+		uri, err := storage.ParseURI(uris[0])
+		if err != nil {
+			callback(nil, err)
+			return
+		}
+
+		callback(storage.ListerForURI(uri))
+	}()
+
+	return true
+}
+
+func fileSaveOSOverride(d *FileDialog) bool {
+	go func() {
+		callback := d.callback.(func(fyne.URIWriteCloser, error))
+		uris, err := filechooser.SaveFile("", "Open File", &filechooser.SaveSingleOptions{Modal: true})
+		if err != nil {
+			callback(nil, err)
+			return
+		}
+
+		uri, err := storage.ParseURI(uris[0])
+		if err != nil {
+			callback(nil, err)
+			return
+		}
+
+		callback(storage.Writer(uri))
+	}()
+	return true
 }
