@@ -30,7 +30,7 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	if err := openuri.OpenURI(url.String()); err == nil {
+	if err := openuri.OpenURI("", url.String()); err == nil {
 		return nil
 	} else {
 		fyne.LogError("Opening url in portal failed", err)
