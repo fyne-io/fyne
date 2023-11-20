@@ -152,7 +152,8 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
 		defaultChar = passwordChar
 	}
 
-	return fyne.MeasureText(defaultChar, theme.TextSize(), style)
+	textSize := theme.SizeForWidget(theme.SizeNameText, t)
+	return fyne.MeasureText(defaultChar, textSize, style)
 }
 
 // deleteFromTo removes the text between the specified positions
@@ -742,7 +743,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	baselines := make([]float32, len(texts))
 
 	// Access to theme is slow, so we cache the text size
-	textSize := theme.TextSize()
+	textSize := theme.SizeForWidget(theme.SizeNameText, r.obj)
 
 	for i, text := range texts {
 		var size fyne.Size

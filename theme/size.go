@@ -148,6 +148,14 @@ func Size(name fyne.ThemeSizeName) float32 {
 	return Current().Size(name)
 }
 
+// SizeForWidget looks up the specified size for the requested widget using the current theme.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
+func SizeForWidget(name fyne.ThemeSizeName, w fyne.Widget) float32 {
+	return CurrentForWidget(w).Size(name)
+}
+
 // TextHeadingSize returns the text size for header text.
 //
 // Since: 2.1
