@@ -179,12 +179,12 @@ func Color(name fyne.ThemeColorName) color.Color {
 	return safeColorLookup(name, currentVariant())
 }
 
+// ColorForWidget looks up the named colour for the requested widget using the current theme and variant.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
 func ColorForWidget(name fyne.ThemeColorName, w fyne.Widget) color.Color {
-	if custom, ok := overrides[w]; ok {
-		return custom.Color(name, currentVariant())
-	}
-
-	return safeColorLookup(name, currentVariant())
+	return CurrentForWidget(w).Color(name, currentVariant())
 }
 
 // DisabledButtonColor returns the theme's disabled button color.
@@ -229,7 +229,7 @@ func ForegroundColor() color.Color {
 //
 // Since: 2.4
 func HeaderBackgroundColor() color.Color {
-	return current().Color(ColorNameHeaderBackground, currentVariant())
+	return Current().Color(ColorNameHeaderBackground, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
@@ -244,14 +244,14 @@ func HyperlinkColor() color.Color {
 
 // InputBackgroundColor returns the color used to draw underneath input elements.
 func InputBackgroundColor() color.Color {
-	return current().Color(ColorNameInputBackground, currentVariant())
+	return Current().Color(ColorNameInputBackground, currentVariant())
 }
 
 // InputBorderColor returns the color used to draw underneath input elements.
 //
 // Since: 2.3
 func InputBorderColor() color.Color {
-	return current().Color(ColorNameInputBorder, currentVariant())
+	return Current().Color(ColorNameInputBorder, currentVariant())
 }
 
 // MenuBackgroundColor returns the theme's background color for menus.
@@ -338,7 +338,7 @@ func WarningColor() color.Color {
 }
 
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	col := current().Color(n, v)
+	col := Current().Color(n, v)
 	if col == nil {
 		fyne.LogError("Loaded theme returned nil color", nil)
 		return fallbackColor

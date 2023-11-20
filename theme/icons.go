@@ -596,6 +596,14 @@ func Icon(name fyne.ThemeIconName) fyne.Resource {
 	return safeIconLookup(name)
 }
 
+// IconForWidget looks up the specified icon for requested widget using the current theme.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
+func IconForWidget(name fyne.ThemeIconName, w fyne.Widget) fyne.Resource {
+	return CurrentForWidget(w).Icon(name)
+}
+
 func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
@@ -951,12 +959,12 @@ func DocumentSaveIcon() fyne.Resource {
 
 // MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
 func MoreHorizontalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreHorizontal)
+	return Current().Icon(IconNameMoreHorizontal)
 }
 
 // MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
 func MoreVerticalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreVertical)
+	return Current().Icon(IconNameMoreVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
@@ -1299,7 +1307,7 @@ func WindowMinimizeIcon() fyne.Resource {
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
-	icon := current().Icon(n)
+	icon := Current().Icon(n)
 	if icon == nil {
 		fyne.LogError("Loaded theme returned nil icon", nil)
 		return fallbackIcon

@@ -204,7 +204,11 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	}
 }
 
-func current() fyne.Theme {
+// Current returns the theme that is currently used for the running application.
+// It looks up based on user preferences and application configuration.
+//
+// Since: 2.5
+func Current() fyne.Theme {
 	app := fyne.CurrentApp()
 	if app == nil {
 		return DarkTheme()
@@ -217,8 +221,20 @@ func current() fyne.Theme {
 	return currentTheme
 }
 
+// CurrentForWidget returns the theme that is currently used for the specified widget.
+// It looks for widget overrides and falls back to the application's current theme.
+//
+// Since: 2.5
+func CurrentForWidget(w fyne.Widget) fyne.Theme {
+	if custom, ok := overrides[w]; ok {
+		return custom
+	}
+
+	return Current()
+}
+
 func currentVariant() fyne.ThemeVariant {
-	if std, ok := current().(*builtinTheme); ok {
+	if std, ok := Current().(*builtinTheme); ok {
 		if std.variant != variantNameUserPreference {
 			return std.variant // override if using the old LightTheme() or DarkTheme() constructor
 		}

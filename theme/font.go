@@ -92,7 +92,7 @@ func SymbolFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Symbol: true})
 }
 func safeFontLookup(s fyne.TextStyle) fyne.Resource {
-	font := current().Font(s)
+	font := Current().Font(s)
 	if font != nil {
 		return font
 	}
