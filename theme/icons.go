@@ -609,6 +609,12 @@ type ThemedResource struct {
 	//
 	// Since: 2.3
 	ColorName fyne.ThemeColorName
+
+	// ForWidget marks that this resource should be themed to match a certain widget.
+	// This is useful if your code is overriding the app theme for subsets of your UI content.
+	//
+	// Since: 2.5
+	ForWidget fyne.Widget `json:"-"`
 }
 
 // NewColoredResource creates a resource that adapts to the current theme setting using
@@ -669,7 +675,7 @@ func (res *ThemedResource) Content() []byte {
 		name = ColorNameForeground
 	}
 
-	return svg.Colorize(res.source.Content(), safeColorLookup(name, currentVariant()))
+	return svg.Colorize(res.source.Content(), ColorForWidget(name, res.ForWidget))
 }
 
 // Error returns a different resource for indicating an error.
@@ -681,6 +687,12 @@ func (res *ThemedResource) Error() *ErrorThemedResource {
 // for use over highlighted elements.
 type InvertedThemedResource struct {
 	source fyne.Resource
+
+	// ForWidget marks that this resource should be themed to match a certain widget.
+	// This is useful if your code is overriding the app theme for subsets of your UI content.
+	//
+	// Since: 2.5
+	ForWidget fyne.Widget `json:"-"`
 }
 
 // NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
@@ -696,7 +708,7 @@ func (res *InvertedThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
-	clr := BackgroundColor()
+	clr := ColorForWidget(ColorNameBackground, res.ForWidget)
 	return svg.Colorize(res.source.Content(), clr)
 }
 
@@ -709,6 +721,12 @@ func (res *InvertedThemedResource) Original() fyne.Resource {
 // to indicate an error.
 type ErrorThemedResource struct {
 	source fyne.Resource
+
+	// ForWidget marks that this resource should be themed to match a certain widget.
+	// This is useful if your code is overriding the app theme for subsets of your UI content.
+	//
+	// Since: 2.5
+	ForWidget fyne.Widget `json:"-"`
 }
 
 // NewErrorThemedResource creates a resource that adapts to the error color for the current theme.
@@ -724,7 +742,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ErrorColor())
+	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNameError, res.ForWidget))
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -736,6 +754,12 @@ func (res *ErrorThemedResource) Original() fyne.Resource {
 // to the theme primary color.
 type PrimaryThemedResource struct {
 	source fyne.Resource
+
+	// ForWidget marks that this resource should be themed to match a certain widget.
+	// This is useful if your code is overriding the app theme for subsets of your UI content.
+	//
+	// Since: 2.5
+	ForWidget fyne.Widget `json:"-"`
 }
 
 // NewPrimaryThemedResource creates a resource that adapts to the primary color for the current theme.
@@ -751,7 +775,7 @@ func (res *PrimaryThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), PrimaryColor())
+	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNamePrimary, res.ForWidget))
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -763,6 +787,12 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 // the current theme's `DisabledColor` color.
 type DisabledResource struct {
 	source fyne.Resource
+
+	// ForWidget marks that this resource should be themed to match a certain widget.
+	// This is useful if your code is overriding the app theme for subsets of your UI content.
+	//
+	// Since: 2.5
+	ForWidget fyne.Widget `json:"-"`
 }
 
 // Name returns the resource source name prefixed with `disabled_` (used for caching)
@@ -772,7 +802,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), DisabledColor())
+	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNameDisabled, res.ForWidget))
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.

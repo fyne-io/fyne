@@ -66,6 +66,7 @@ func LightTheme() fyne.Theme {
 //
 // Since: 2.5
 func OverrideWidget(w fyne.Widget, th fyne.Theme) {
+	cache.ResetThemeCaches()
 	overrides[w] = th
 
 	r := cache.Renderer(w)

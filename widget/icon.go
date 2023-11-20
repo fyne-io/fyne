@@ -31,9 +31,25 @@ func (i *iconRenderer) Refresh() {
 		return
 	}
 
+	r := i.image.Resource
+	if r != nil {
+		switch res := r.(type) {
+		case *theme.ErrorThemedResource:
+			res.ForWidget = i.image
+		case *theme.PrimaryThemedResource:
+			res.ForWidget = i.image
+		case *theme.DisabledResource:
+			res.ForWidget = i.image
+		case *theme.ThemedResource:
+			res.ForWidget = i.image
+		case *theme.InvertedThemedResource:
+			res.ForWidget = i.image
+		}
+	}
+
 	i.image.propertyLock.RLock()
-	i.raster.Resource = i.image.Resource
-	i.image.cachedRes = i.image.Resource
+	i.raster.Resource = r
+	i.image.cachedRes = r
 	i.image.propertyLock.RUnlock()
 
 	i.raster.Refresh()
