@@ -1,5 +1,5 @@
-//go:build !linux
-// +build !linux
+//go:build !linux && !freebsd && !openbsd && !netbsd
+// +build !linux,!freebsd,!openbsd,!netbsd
 
 package glfw
 
