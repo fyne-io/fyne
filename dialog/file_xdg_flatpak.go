@@ -8,7 +8,7 @@
 package dialog
 
 import (
-	"strconv"
+	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -27,11 +27,11 @@ func fileOpenOSOverride(d *FileDialog) bool {
 			options.Location = d.startingLocation.Path()
 		}
 
-		xid := d.parent.(interface{ GetX11ID() uint }).GetX11ID()
-		parentWindow := "x11:" + strconv.FormatUint(uint64(xid), 16)
+		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
+		fmt.Println(parentWindowHandle)
 
 		if folder {
-			uris, err := filechooser.OpenFile(parentWindow, "Open Folder", options)
+			uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
 			if err != nil {
 				folderCallback(nil, err)
 			}
@@ -51,7 +51,7 @@ func fileOpenOSOverride(d *FileDialog) bool {
 			return
 		}
 
-		uris, err := filechooser.OpenFile(parentWindow, "Open File", options)
+		uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
 		fileCallback := d.callback.(func(fyne.URIReadCloser, error))
 		if err != nil {
 			fileCallback(nil, err)
@@ -85,11 +85,11 @@ func fileSaveOSOverride(d *FileDialog) bool {
 			options.Location = d.startingLocation.Path()
 		}
 
-		xid := d.parent.(interface{ GetX11ID() uint }).GetX11ID()
-		parentWindow := "x11:" + strconv.FormatUint(uint64(xid), 16)
+		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
+		fmt.Println(parentWindowHandle)
 
 		callback := d.callback.(func(fyne.URIWriteCloser, error))
-		uris, err := filechooser.SaveFile(parentWindow, "Open File", options)
+		uris, err := filechooser.SaveFile(parentWindowHandle, "Open File", options)
 		if err != nil {
 			callback(nil, err)
 			return

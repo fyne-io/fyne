@@ -22,3 +22,8 @@ func (w *window) platformResize(canvasSize fyne.Size) {
 		})
 	}
 }
+
+// GetWindowHandle returns the window handle. Only implemented for X11 and Wayland currently.
+func (w *window) GetWindowHandle() string {
+	return ""
+}
