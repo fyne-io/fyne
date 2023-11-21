@@ -1,9 +1,5 @@
-//go:build flatpak && (linux || openbsd || freebsd || netbsd) && !android && !wasm && !js
-// +build flatpak
-// +build linux openbsd freebsd netbsd
-// +build !android
-// +build !wasm
-// +build !js
+//go:build flatpak && !windows && !android && !ios && !wasm && !js
+// +build flatpak,!windows,!android,!ios,!wasm,!js
 
 package dialog
 
