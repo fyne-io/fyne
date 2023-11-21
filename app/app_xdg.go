@@ -20,6 +20,7 @@ import (
 	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -30,10 +31,12 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	if err := openuri.OpenURI("", url.String()); err == nil {
-		return nil
-	} else {
-		fyne.LogError("Opening url in portal failed", err)
+	if build.IsFlatpak {
+		err := openuri.OpenURI("", url.String())
+		if err != nil {
+			fyne.LogError("Opening url in portal failed", err)
+		}
+		return err
 	}
 
 	cmd := execabs.Command("xdg-open", url.String())
@@ -89,10 +92,12 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	if err := a.sendNotificationThroughPortal(conn, n); err == nil {
-		return // No need to use the fallback path.
-	} else {
-		fyne.LogError("Sending notification using portal failed", err)
+	if build.IsFlatpak {
+		err := a.sendNotificationThroughPortal(conn, n)
+		if err != nil {
+			fyne.LogError("Sending notification using portal failed", err)
+		}
+		return
 	}
 
 	appIcon := a.cachedIconPath()
