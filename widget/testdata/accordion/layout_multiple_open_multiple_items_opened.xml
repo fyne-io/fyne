@@ -4,7 +4,7 @@
 			<widget size="96x154" type="*widget.Accordion">
 				<widget size="96x36" type="*widget.Button">
 					<rectangle radius="4" size="96x36"/>
-					<rectangle size="0x0"/>
+					<rectangle size="96x36"/>
 					<widget pos="32,8" size="9x20" type="*widget.RichText">
 						<text alignment="center" bold size="9x19">A</text>
 					</widget>
@@ -12,7 +12,7 @@
 				</widget>
 				<widget pos="0,75" size="96x36" type="*widget.Button">
 					<rectangle radius="4" size="96x36"/>
-					<rectangle size="0x0"/>
+					<rectangle size="96x36"/>
 					<widget pos="32,8" size="9x20" type="*widget.RichText">
 						<text alignment="center" bold size="9x19">B</text>
 					</widget>

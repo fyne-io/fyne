@@ -259,3 +259,20 @@ func TestVBoxLayout_MiddleSpacer(t *testing.T) {
 	cell3Pos := fyne.NewPos(0, 250)
 	assert.Equal(t, cell3Pos, obj3.Position())
 }
+
+// Test for issue #4259 - spacer in HBox with hidden item causing add'l trailing padding
+func TestHBoxLayout_MiddleSpacerHiddenItem(t *testing.T) {
+	cellSize := fyne.NewSize(100, 50)
+
+	obj1 := NewMinSizeRect(cellSize)
+	obj2 := NewMinSizeRect(cellSize)
+	obj3 := NewMinSizeRect(cellSize)
+
+	container := container.NewHBox(obj1, obj2, layout.NewSpacer(), obj3)
+	container.Resize(fyne.NewSize(400, 100))
+	assert.Equal(t, fyne.NewPos(300, 0), obj3.Position())
+
+	obj2.Hide()
+	container.Refresh()
+	assert.Equal(t, fyne.NewPos(300, 0), obj3.Position())
+}
