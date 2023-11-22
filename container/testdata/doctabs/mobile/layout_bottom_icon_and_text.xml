@@ -13,11 +13,11 @@
 						</widget>
 					</container>
 				</widget>
-				<container pos="114,0" size="36x36">
-					<widget size="36x36" type="*widget.Button">
-						<rectangle radius="4" size="36x36"/>
-						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+				<container pos="114,0" size="36x79">
+					<widget size="36x79" type="*widget.Button">
+						<rectangle radius="4" size="36x79"/>
+						<rectangle size="36x79"/>
+						<image fillMode="contain" pos="8,29" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>

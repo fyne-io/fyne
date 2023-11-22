@@ -3,6 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.2 - 22 November 2023
+
+### Fixed
+
+* Markdown only shows one horizontal rule (#4216)
+* Spacer in HBox with hidden item will cause an additional trailing padding (#4259)
+* Application crash when fast clicking the folders inside the file dialog (#4260)
+* failed to initialise OpenGL (#437)
+* App panic when clicking on a notification panel if there's a systray icon (#4385)
+* Systray cannot be shown on Ubuntu (#3678, #4381)
+* failed to initialise OpenGL on Windows dual-chip graphics cards (#437)
+* Reduce memory allocations for each frame painted
+* RichText may not refresh if segments manually replaced
+* Correct URI.Extension() documentation
+* Update for security fixes to x/sys and x/net
+* Inconsistent rendering of Button widget (#4243)
+* PasswordEntry initial text is not obscured (#4312)
+* Pasting text in Entry does not update cursor position display (#4181)
+
+
 ## 2.4.1 - 9 October 2023
 
 ### Fixed
