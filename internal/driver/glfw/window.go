@@ -229,14 +229,7 @@ func (w *window) ShowAndRun() {
 
 // Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.view() == nil {
-		return nil
-	}
-
-	if w.clipboard == nil {
-		w.clipboard = &clipboard{window: w.viewport}
-	}
-	return w.clipboard
+	return &clipboard{}
 }
 
 func (w *window) Content() fyne.CanvasObject {

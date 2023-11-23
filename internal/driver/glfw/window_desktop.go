@@ -77,8 +77,6 @@ type window struct {
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
 
-	clipboard fyne.Clipboard
-
 	master     bool
 	fullScreen bool
 	centered   bool
