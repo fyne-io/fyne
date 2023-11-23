@@ -24,7 +24,6 @@ func fileOpenOSOverride(d *FileDialog) bool {
 		}
 
 		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
-		fmt.Println(parentWindowHandle)
 
 		if folder {
 			uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
