@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -44,7 +45,7 @@ type settings struct {
 }
 
 func (s *settings) BuildType() fyne.BuildType {
-	return buildMode
+	return build.Mode
 }
 
 func (s *settings) PrimaryColor() string {
