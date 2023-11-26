@@ -46,12 +46,16 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 				d.SetSystemTrayIcon(theme.BrokenImageIcon())
 			}
 
-			app := fyne.CurrentApp()
-			title := app.Metadata().Name
-			if title == "" {
-				title = app.UniqueID()
+			// Some XDG systray crash without a title (See #3678)
+			if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
+				app := fyne.CurrentApp()
+				title := app.Metadata().Name
+				if title == "" {
+					title = app.UniqueID()
+				}
+
+				systray.SetTitle(title)
 			}
-			systray.SetTitle(title)
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
 			d.refreshSystray(m)
