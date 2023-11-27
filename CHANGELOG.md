@@ -3,6 +3,14 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.3 - Ongoing
+
+### Fixes
+
+* Fix OpenGL init for arm64 desktop devices 
+* System tray icon on Mac is showing the app ID (#4416)
+
+
 ## 2.4.2 - 21 November 2023
 
 ### Fixed
