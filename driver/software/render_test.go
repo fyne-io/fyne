@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -45,7 +45,7 @@ func TestRenderCanvas(t *testing.T) {
 	c := NewCanvas()
 	c.SetContent(obj)
 
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		test.AssertImageMatches(t, "canvas_mobile.png", RenderCanvas(c, theme.LightTheme()))
 	} else {
 		test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, theme.LightTheme()))

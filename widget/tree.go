@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -883,7 +884,7 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	}
 
 	n.tree.Select(n.uid)
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree)
 		if canvas != nil {
 			canvas.Focus(n.tree)

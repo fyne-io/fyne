@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -558,7 +559,7 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 	t.Select(TableCellID{row, col})
 
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		t.RefreshItem(t.currentFocus)
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
 		if canvas != nil {

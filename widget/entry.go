@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -537,7 +538,7 @@ func (e *Entry) Append(text string) {
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if fyne.CurrentDevice().IsMobile() && e.selecting {
+	if build.IsMobile() && e.selecting {
 		e.selecting = false
 	}
 }

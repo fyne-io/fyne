@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -145,7 +146,7 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	store.Docs = makeStoreDocs(id, store)
 	newApp.storage = store
 
-	if !d.Device().IsMobile() {
+	if !build.IsMobile() {
 		newApp.settings.watchSettings()
 	}
 

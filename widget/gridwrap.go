@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -528,7 +529,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 		f(id, li.child)
 	}
 	li.onTapped = func() {
-		if !fyne.CurrentDevice().IsMobile() {
+		if !build.IsMobile() {
 			l.list.RefreshItem(l.list.currentFocus)
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
 			if canvas != nil {

@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -179,7 +180,7 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		return
 	}
 

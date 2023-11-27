@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -187,7 +188,7 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.focused && !fyne.CurrentDevice().IsMobile() {
+	if !c.focused && !build.IsMobile() {
 		impl := c.super()
 
 		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {

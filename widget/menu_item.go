@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -144,7 +145,7 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 		return
 	}
 	if i.Item.Action == nil {
-		if fyne.CurrentDevice().IsMobile() {
+		if build.IsMobile() {
 			i.activate()
 		}
 		return
@@ -295,7 +296,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 
 func (r *menuItemRenderer) updateVisuals() {
 	r.background.CornerRadius = theme.SelectionRadiusSize()
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
 		r.background.FillColor = theme.FocusColor()

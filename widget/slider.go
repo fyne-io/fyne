@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -104,7 +105,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 // Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
 	driver := fyne.CurrentApp().Driver()
-	if !s.focused && !driver.Device().IsMobile() {
+	if !s.focused && !build.IsMobile() {
 		impl := s.super()
 
 		if c := driver.CanvasForObject(impl); c != nil {

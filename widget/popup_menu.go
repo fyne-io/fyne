@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 )
 
@@ -94,7 +95,7 @@ func (p *PopUpMenu) Show() {
 
 	p.overlay.Show()
 	p.Menu.Show()
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		p.canvas.Focus(p)
 	}
 }

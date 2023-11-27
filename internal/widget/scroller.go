@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
@@ -407,7 +408,7 @@ func (s *Scroll) DragEnd() {
 
 // Dragged will scroll on any drag - bar or otherwise - for mobile
 func (s *Scroll) Dragged(e *fyne.DragEvent) {
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		return
 	}
 

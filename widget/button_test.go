@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -144,14 +145,14 @@ func TestButton_Hover(t *testing.T) {
 	w := test.NewWindow(b)
 	defer w.Close()
 
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
 		test.AssertImageMatches(t, "button/hovered.png", w.Canvas().Capture())
 	}
 
 	b.Importance = widget.HighImportance
 	b.Refresh()
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		test.AssertImageMatches(t, "button/high_importance_hovered.png", w.Canvas().Capture())
 
 		test.MoveMouse(w.Canvas(), fyne.NewPos(0, 0))

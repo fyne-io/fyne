@@ -3,6 +3,7 @@ package container
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -348,7 +349,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	buttons := &fyne.Container{}
 
 	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		cells := count
 		if cells == 0 {
 			cells = 1

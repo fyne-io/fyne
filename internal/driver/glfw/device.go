@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 )
 
 type glDevice struct {
@@ -22,4 +23,8 @@ func (*glDevice) HasKeyboard() bool {
 
 func (*glDevice) IsBrowser() bool {
 	return runtime.GOARCH == "js" || runtime.GOOS == "js"
+}
+
+func (*glDevice) IsMobile() bool {
+	return build.IsMobile()
 }

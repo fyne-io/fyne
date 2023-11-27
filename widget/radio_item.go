@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -115,7 +116,7 @@ func (i *radioItem) SetSelected(selected bool) {
 //
 // Implements: fyne.Tappable
 func (i *radioItem) Tapped(_ *fyne.PointEvent) {
-	if !i.focused && !fyne.CurrentDevice().IsMobile() {
+	if !i.focused && !build.IsMobile() {
 		impl := i.super()
 
 		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {

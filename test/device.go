@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 )
 
 type device struct {
@@ -30,4 +31,8 @@ func (d *device) SystemScaleForWindow(fyne.Window) float32 {
 
 func (*device) IsBrowser() bool {
 	return runtime.GOARCH == "js" || runtime.GOOS == "js"
+}
+
+func (*device) IsMobile() bool {
+	return build.IsMobile()
 }

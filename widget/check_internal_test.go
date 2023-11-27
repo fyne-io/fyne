@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -139,7 +139,7 @@ func TestCheck_Focused(t *testing.T) {
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	test.Tap(check)
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		assert.False(t, check.focused)
 	} else {
 		assert.True(t, check.focused)
@@ -151,7 +151,7 @@ func TestCheck_Focused(t *testing.T) {
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.Enable()
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		assert.False(t, check.focused)
 	} else {
 		assert.True(t, check.focused)
@@ -180,7 +180,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 	test.Tap(check)
 	assert.True(t, check.hovered)
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
 	}
 
@@ -191,7 +191,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.Enable()
 	assert.True(t, check.hovered)
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
 	} else {
 		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
@@ -199,7 +199,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.MouseOut()
 	assert.False(t, check.hovered)
-	if fyne.CurrentDevice().IsMobile() {
+	if build.IsMobile() {
 		assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 	} else {
 		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
@@ -217,7 +217,7 @@ func TestCheck_TypedRune(t *testing.T) {
 	assert.False(t, check.Checked)
 
 	test.Tap(check)
-	if !fyne.CurrentDevice().IsMobile() {
+	if !build.IsMobile() {
 		assert.True(t, check.focused)
 	}
 	assert.True(t, check.Checked)
