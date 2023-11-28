@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -1001,6 +1002,16 @@ func (d *gLDriver) CreateSplashWindow() fyne.Window {
 
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
+}
+
+func (w *window) Topmost(makeTopmost bool) {
+	w.runOnMainWhenCreated(func() {
+		top := 0
+		if makeTopmost {
+			top = 1
+		}
+		w.viewport.SetAttrib(glfw.Floating, top)
+	})
 }
 
 func isKeyModifier(keyName fyne.KeyName) bool {
