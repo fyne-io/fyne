@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -110,7 +111,7 @@ func (a *fyneApp) newDefaultPreferences() *preferences {
 
 // New returns a new application instance with the default driver and no unique ID (unless specified in FyneApp.toml)
 func New() fyne.App {
-	if meta.ID == "" {
+	if build.HasHints && meta.ID == "" {
 		internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
 	}
 	return NewWithID(meta.ID)
