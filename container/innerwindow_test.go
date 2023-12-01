@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -47,4 +48,14 @@ func TestInnerWindow_MinSize(t *testing.T) {
 
 	w2 := NewInnerWindow("Much longer title that will truncate", widget.NewLabel("Content"))
 	assert.Equal(t, winMin, w2.MinSize())
+}
+
+func TestInnerWindow_SetTitle(t *testing.T) {
+	w := NewInnerWindow("Title1", widget.NewLabel("Content"))
+	r := cache.Renderer(w).(*innerWindowRenderer)
+	title := r.bar.Objects[0].(*draggableLabel)
+	assert.Equal(t, "Title1", title.Text)
+
+	w.SetTitle("Title2")
+	assert.Equal(t, "Title2", title.Text)
 }
