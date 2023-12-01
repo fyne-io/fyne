@@ -88,6 +88,11 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		win: w, bar: bar, bg: bg, corner: corner, contentBG: contentBG}
 }
 
+func (w *InnerWindow) SetTitle(title string) {
+	w.title = title
+	w.Refresh()
+}
+
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 
 type innerWindowRenderer struct {
@@ -145,6 +150,8 @@ func (i *innerWindowRenderer) Refresh() {
 	i.contentBG.Refresh()
 	i.bar.Refresh()
 
+	title := i.bar.Objects[0].(*draggableLabel)
+	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
 }
 
