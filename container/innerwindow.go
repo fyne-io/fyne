@@ -88,11 +88,15 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		win: w, bar: bar, bg: bg, corner: corner, contentBG: contentBG}
 }
 
+func (w *InnerWindow) SetTitle(title string) {
+	w.title = title
+	w.Refresh()
+}
+
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 
 type innerWindowRenderer struct {
 	*intWidget.ShadowingRenderer
-	min fyne.Size
 
 	win           *InnerWindow
 	bar           *fyne.Container
@@ -130,9 +134,6 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	contentMin := i.win.content.MinSize()
 	barMin := i.bar.MinSize()
 
-	// only allow windows to grow, as per normal windows
-	contentMin = contentMin.Max(i.min)
-	i.min = contentMin
 	innerWidth := fyne.Max(barMin.Width, contentMin.Width)
 
 	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barMin.Height).Add(fyne.NewSquareSize(pad))
@@ -145,6 +146,8 @@ func (i *innerWindowRenderer) Refresh() {
 	i.contentBG.Refresh()
 	i.bar.Refresh()
 
+	title := i.bar.Objects[0].(*draggableLabel)
+	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
 }
 
