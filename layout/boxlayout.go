@@ -51,16 +51,20 @@ func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 // Any spacers added will pad the view, sharing the space if there are two or more.
 func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := 0
+	visibleObjects := 0
+	// Size taken up by visible objects
 	total := float32(0)
+
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
-
 		if g.isSpacer(child) {
 			spacers++
 			continue
 		}
+
+		visibleObjects++
 		if g.horizontal {
 			total += child.MinSize().Width
 		} else {
@@ -69,15 +73,19 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	padding := theme.Padding()
+
+	// Amount of space not taken up by visible objects and inter-object padding
 	var extra float32
 	if g.horizontal {
-		extra = size.Width - total - (padding * float32(len(objects)-spacers-1))
+		extra = size.Width - total - (padding * float32(visibleObjects-1))
 	} else {
-		extra = size.Height - total - (padding * float32(len(objects)-spacers-1))
+		extra = size.Height - total - (padding * float32(visibleObjects-1))
 	}
-	extraCell := float32(0)
+
+	// Spacers split extra space equally
+	spacerSize := float32(0)
 	if spacers > 0 {
-		extraCell = extra / float32(spacers)
+		spacerSize = extra / float32(spacers)
 	}
 
 	x, y := float32(0), float32(0)
@@ -88,9 +96,9 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 		if g.isSpacer(child) {
 			if g.horizontal {
-				x += extraCell
+				x += spacerSize
 			} else {
-				y += extraCell
+				y += spacerSize
 			}
 			continue
 		}

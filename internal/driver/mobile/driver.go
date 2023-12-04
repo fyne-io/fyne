@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -315,7 +316,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if build.Mode == fyne.BuildDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}

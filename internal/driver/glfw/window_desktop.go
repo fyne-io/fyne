@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -76,8 +77,6 @@ type window struct {
 	title        string
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
-
-	clipboard fyne.Clipboard
 
 	master     bool
 	fullScreen bool
@@ -184,7 +183,7 @@ func (w *window) doCenterOnScreen() {
 }
 
 func (w *window) RequestFocus() {
-	if isWayland || w.view() == nil {
+	if build.IsWayland || w.view() == nil {
 		return
 	}
 
@@ -296,7 +295,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 }
 
 func (w *window) detectScale() float32 {
-	if isWayland { // Wayland controls scale through content scaling
+	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1.0
 	}
 	monitor := w.getMonitorForWindow()
@@ -319,7 +318,7 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) scaled(_ *glfw.Window, x float32, y float32) {
-	if !isWayland { // other platforms handle this using older APIs
+	if !build.IsWayland { // other platforms handle this using older APIs
 		return
 	}
 
@@ -707,7 +706,7 @@ func (w *window) rescaleOnMain() {
 
 func (w *window) create() {
 	runOnMain(func() {
-		if !isWayland {
+		if !build.IsWayland {
 			// make the window hidden, we will set it up and then show it later
 			glfw.WindowHint(glfw.Visible, glfw.False)
 		}

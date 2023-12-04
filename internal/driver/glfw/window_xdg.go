@@ -1,3 +1,6 @@
+//go:build linux || freebsd || openbsd || netbsd
+// +build linux freebsd openbsd netbsd
+
 package glfw
 
 import "fyne.io/fyne/v2"

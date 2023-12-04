@@ -50,18 +50,19 @@ func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScal
 		return pixels
 	}
 
-	pixW := int(fyne.Min(float32(scaledW), float32(pixels.Bounds().Dx()))) // don't push more pixels than we have to
-	pixH := int(fyne.Min(float32(scaledH), float32(pixels.Bounds().Dy()))) // the GL calls will scale this up on GPU.
+	bounds := pixels.Bounds()
+	pixW := int(fyne.Min(float32(scaledW), float32(bounds.Dx()))) // don't push more pixels than we have to
+	pixH := int(fyne.Min(float32(scaledH), float32(bounds.Dy()))) // the GL calls will scale this up on GPU.
 	scaledBounds := image.Rect(0, 0, pixW, pixH)
 	tex := image.NewNRGBA(scaledBounds)
 	switch scale {
 	case canvas.ImageScalePixels:
-		draw.NearestNeighbor.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)
+		draw.NearestNeighbor.Scale(tex, scaledBounds, pixels, bounds, draw.Over, nil)
 	default:
 		if scale != canvas.ImageScaleSmooth {
 			fyne.LogError("Invalid canvas.ImageScale value, using canvas.ImageScaleSmooth", nil)
 		}
-		draw.CatmullRom.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)
+		draw.CatmullRom.Scale(tex, scaledBounds, pixels, bounds, draw.Over, nil)
 	}
 	return tex
 }

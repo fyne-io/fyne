@@ -200,6 +200,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
+	e.syncSegments()
 	return &entryRenderer{box, border, e.scroll, objects, e}
 }
 
@@ -1013,6 +1014,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	e.updateTextAndRefresh(provider.String())
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	e.Refresh() // placing the cursor (and refreshing) happens last
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
