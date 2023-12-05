@@ -286,15 +286,16 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.Objects()[0] = r.scroll.Content
 	}
+	size := r.scroll.Size()
 	newMin := r.scroll.Content.MinSize()
 	if r.oldMinSize == newMin && r.oldMinSize == r.scroll.Content.Size() &&
-		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
-		r.layoutBars(r.scroll.Size())
+		(size.Width <= r.oldMinSize.Width && size.Height <= r.oldMinSize.Height) {
+		r.layoutBars(size)
 		return
 	}
 
 	r.oldMinSize = newMin
-	r.Layout(r.scroll.Size())
+	r.Layout(size)
 }
 
 func (r *scrollContainerRenderer) handleAreaVisibility(contentSize, scrollSize float32, area *scrollBarArea) {
@@ -474,9 +475,8 @@ func (s *Scroll) scrollBy(dx, dy float32) {
 }
 
 func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
-	min := s.Content.MinSize()
-	contentSize := s.Content.Size()
 	size := s.Size()
+	contentSize := s.Content.Size()
 	if contentSize.Width <= size.Width && contentSize.Height <= size.Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
@@ -487,6 +487,7 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	}
 	oldX := s.Offset.X
 	oldY := s.Offset.Y
+	min := s.Content.MinSize()
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
 	if f := s.OnScrolled; f != nil && (s.Offset.X != oldX || s.Offset.Y != oldY) {
