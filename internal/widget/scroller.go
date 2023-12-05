@@ -159,12 +159,11 @@ func (r *scrollBarAreaRenderer) Refresh() {
 }
 
 func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
+	scrollBarSize := theme.ScrollBarSize()
 	if scrollLength < contentLength {
 		portion := scrollLength / contentLength
 		length = float32(int(scrollLength)) * portion
-		if length < theme.ScrollBarSize() {
-			length = theme.ScrollBarSize()
-		}
+		length = fyne.Max(length, scrollBarSize)
 	} else {
 		length = scrollLength
 	}
@@ -172,10 +171,10 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
 	if r.area.isLarge {
-		width = theme.ScrollBarSize()
+		width = scrollBarSize
 	} else {
 		widthOffset = theme.ScrollBarSmallSize()
-		width = theme.ScrollBarSmallSize()
+		width = widthOffset
 	}
 	return
 }
@@ -287,13 +286,14 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.Objects()[0] = r.scroll.Content
 	}
-	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
+	newMin := r.scroll.Content.MinSize()
+	if r.oldMinSize == newMin && r.oldMinSize == r.scroll.Content.Size() &&
 		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
 		r.layoutBars(r.scroll.Size())
 		return
 	}
 
-	r.oldMinSize = r.scroll.Content.MinSize()
+	r.oldMinSize = newMin
 	r.Layout(r.scroll.Size())
 }
 
@@ -463,7 +463,9 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
-	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
+	min := s.Content.MinSize()
+	size := s.Size()
+	if size.Width < min.Width && size.Height >= min.Height && dx == 0 {
 		dx, dy = dy, dx
 	}
 	if s.updateOffset(dx, dy) {
@@ -472,7 +474,10 @@ func (s *Scroll) scrollBy(dx, dy float32) {
 }
 
 func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
-	if s.Content.Size().Width <= s.Size().Width && s.Content.Size().Height <= s.Size().Height {
+	min := s.Content.MinSize()
+	contentSize := s.Content.Size()
+	size := s.Size()
+	if contentSize.Width <= size.Width && contentSize.Height <= size.Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
 			s.Offset.Y = 0
@@ -482,8 +487,8 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	}
 	oldX := s.Offset.X
 	oldY := s.Offset.Y
-	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.MinSize().Width)
-	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.MinSize().Height)
+	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
+	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
 	if f := s.OnScrolled; f != nil && (s.Offset.X != oldX || s.Offset.Y != oldY) {
 		f(s.Offset)
 	}
@@ -495,10 +500,8 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 	if offset+outerWidth >= innerWidth {
 		offset = innerWidth - outerWidth
 	}
-	if offset < 0 {
-		offset = 0
-	}
-	return offset
+
+	return fyne.Max(offset, 0)
 }
 
 // NewScroll creates a scrollable parent wrapping the specified content.
