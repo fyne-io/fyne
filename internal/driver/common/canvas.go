@@ -283,11 +283,9 @@ func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 		}
 	}
 
-	cache.RangeExpiredTexturesFor(c.impl, func(obj fyne.CanvasObject) {
-		if c.painter != nil {
-			c.painter.Free(obj)
-		}
-	})
+	if c.painter != nil {
+		cache.RangeExpiredTexturesFor(c.impl, c.painter.Free)
+	}
 	return
 }
 

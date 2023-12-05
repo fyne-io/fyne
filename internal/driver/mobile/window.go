@@ -161,9 +161,7 @@ func (w *window) Close() {
 		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
 	}
 
-	cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
-		w.canvas.Painter().Free(obj)
-	})
+	cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
 
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
