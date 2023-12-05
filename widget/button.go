@@ -94,13 +94,15 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
+	th := theme.CurrentForWidget(b)
+
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
-	text.inset = fyne.NewSquareSize(theme.InnerPadding())
+	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
 	b.background = canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameButton, b))
-	b.background.CornerRadius = theme.InputRadiusSize()
+	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
@@ -149,7 +151,7 @@ func (b *Button) MinSize() fyne.Size {
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 
-	b.applyButtonTheme()
+	b.applyButtonTheme(theme.CurrentForWidget(b))
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -160,7 +162,7 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 func (b *Button) MouseOut() {
 	b.hovered = false
 
-	b.applyButtonTheme()
+	b.applyButtonTheme(theme.CurrentForWidget(b))
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -184,7 +186,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.applyButtonTheme()
+	b.applyButtonTheme(theme.CurrentForWidget(b))
 
 	if b.OnTapped != nil {
 		b.OnTapped()
@@ -202,13 +204,13 @@ func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-func (b *Button) applyButtonTheme() {
+func (b *Button) applyButtonTheme(th fyne.Theme) {
 	if b.background == nil {
 		return
 	}
 
 	b.background.FillColor = b.buttonColor()
-	b.background.CornerRadius = theme.InputRadiusSize()
+	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	b.background.Refresh()
 }
 
@@ -287,15 +289,16 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
 	r.tapBG.Resize(size)
 
+	th := theme.CurrentForWidget(r.button)
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	if !hasIcon && !hasLabel {
 		// Nothing to layout
 		return
 	}
-	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
+	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
 	labelSize := r.label.MinSize()
-	padding := r.padding()
+	padding := r.padding(th)
 	if hasLabel {
 		if hasIcon {
 			// Both
@@ -328,26 +331,28 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (r *buttonRenderer) MinSize() (size fyne.Size) {
+	th := theme.CurrentForWidget(r.button)
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
-	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
+	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
 	labelSize := r.label.MinSize()
 	if hasLabel {
 		size.Width = labelSize.Width
 	}
 	if hasIcon {
 		if hasLabel {
-			size.Width += theme.Padding()
+			size.Width += th.Size(theme.SizeNamePadding)
 		}
 		size.Width += iconSize.Width
 	}
 	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
-	size = size.Add(r.padding())
+	size = size.Add(r.padding(th))
 	return
 }
 
 func (r *buttonRenderer) Refresh() {
-	r.label.inset = fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())
+	th := theme.CurrentForWidget(r.button)
+	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
@@ -358,7 +363,7 @@ func (r *buttonRenderer) Refresh() {
 
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
-	r.button.applyButtonTheme()
+	r.button.applyButtonTheme(theme.CurrentForWidget(r.button))
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled:
@@ -398,8 +403,8 @@ func (r *buttonRenderer) applyTheme() {
 	}
 }
 
-func (r *buttonRenderer) padding() fyne.Size {
-	return fyne.NewSquareSize(theme.InnerPadding() * 2)
+func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
+	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
 }
 
 func (r *buttonRenderer) updateIconAndText() {
