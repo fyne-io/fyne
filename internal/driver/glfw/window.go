@@ -119,8 +119,9 @@ func (w *window) calculatedScale() float32 {
 }
 
 func (w *window) detectTextureScale() float32 {
-	winWidth, _ := w.view().GetSize()
-	texWidth, _ := w.view().GetFramebufferSize()
+	view := w.view()
+	winWidth, _ := view.GetSize()
+	texWidth, _ := view.GetFramebufferSize()
 	return float32(texWidth) / float32(winWidth)
 }
 
@@ -149,15 +150,16 @@ func (w *window) doShow() {
 		w.viewLock.Lock()
 		w.visible = true
 		w.viewLock.Unlock()
-		w.view().SetTitle(w.title)
+		view := w.view()
+		view.SetTitle(w.title)
 
 		if w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
 		}
-		w.view().Show()
+		view.Show()
 
 		// save coordinates
-		w.xpos, w.ypos = w.view().GetPos()
+		w.xpos, w.ypos = view.GetPos()
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			go func() {
@@ -168,8 +170,8 @@ func (w *window) doShow() {
 	})
 
 	// show top canvas element
-	if w.canvas.Content() != nil {
-		w.canvas.Content().Show()
+	if content := w.canvas.Content(); content != nil {
+		content.Show()
 
 		runOnDraw(w, func() {
 			w.driver.repaintWindow(w)
@@ -192,8 +194,8 @@ func (w *window) Hide() {
 		v.Hide()
 
 		// hide top canvas element
-		if w.canvas.Content() != nil {
-			w.canvas.Content().Hide()
+		if content := w.canvas.Content(); content != nil {
+			content.Hide()
 		}
 	})
 }
@@ -214,8 +216,10 @@ func (w *window) Close() {
 		w.closing = true
 		w.viewLock.Unlock()
 		w.viewport.SetShouldClose(true)
+
+		painter := w.canvas.Painter()
 		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
-			w.canvas.Painter().Free(obj)
+			painter.Free(obj)
 		})
 	})
 
@@ -973,12 +977,13 @@ func (w *window) doShowAgain() {
 
 	runOnMain(func() {
 		// show top canvas element
-		if w.canvas.Content() != nil {
-			w.canvas.Content().Show()
+		if content := w.canvas.Content(); content != nil {
+			content.Show()
 		}
 
-		w.view().SetPos(w.xpos, w.ypos)
-		w.view().Show()
+		view := w.view()
+		view.SetPos(w.xpos, w.ypos)
+		view.Show()
 		w.viewLock.Lock()
 		w.visible = true
 		w.viewLock.Unlock()

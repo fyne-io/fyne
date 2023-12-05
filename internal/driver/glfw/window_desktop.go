@@ -279,7 +279,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 		if x > xOff || y > yOff {
 			continue
 		}
-		if x+monitor.GetVideoMode().Width <= xOff || y+monitor.GetVideoMode().Height <= yOff {
+		if videoMode := monitor.GetVideoMode(); x+videoMode.Width <= xOff || y+videoMode.Height <= yOff {
 			continue
 		}
 

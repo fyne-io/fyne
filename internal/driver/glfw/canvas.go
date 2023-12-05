@@ -95,8 +95,9 @@ func (c *glCanvas) Padded() bool {
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	c.RLock()
 	texScale := c.texScale
+	scale := c.scale
 	c.RUnlock()
-	multiple := c.Scale() * texScale
+	multiple := scale * texScale
 	scaleInt := func(x float32) int {
 		return int(math.Round(float64(x * multiple)))
 	}
