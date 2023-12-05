@@ -213,10 +213,7 @@ func (w *window) Close() {
 		w.viewLock.Unlock()
 		w.viewport.SetShouldClose(true)
 
-		painter := w.canvas.Painter()
-		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
-			painter.Free(obj)
-		})
+		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
 	})
 
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
