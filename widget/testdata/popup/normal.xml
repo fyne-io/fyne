@@ -16,7 +16,9 @@
 			</widget>
 			<rectangle fillColor="overlayBackground" size="37x43"/>
 			<widget pos="4,4" size="29x35" type="*widget.Label">
-				<text pos="8,8" size="13x19">Hi</text>
+				<widget size="29x35" type="*widget.RichText">
+					<text pos="8,8" size="13x19">Hi</text>
+				</widget>
 			</widget>
 		</widget>
 	</overlay>
