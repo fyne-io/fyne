@@ -14,8 +14,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func richTextRenderTexts(p fyne.Widget) []*canvas.Text {
-	rich := cache.Renderer(p).Objects()[0].(*RichText)
+func richTextRenderTexts(rich fyne.Widget) []*canvas.Text {
 	renderer := cache.Renderer(rich).(*textRenderer)
 	texts := make([]*canvas.Text, len(renderer.Objects()))
 	for i, obj := range renderer.Objects() {
@@ -362,18 +361,18 @@ func TestText_Color(t *testing.T) {
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
-	render := test.WidgetRenderer(label).(*textRenderer)
+	texts := labelTextRenderTexts(label)
 
-	text1 := render.Objects()[0].(*canvas.Text)
-	text2 := render.Objects()[1].(*canvas.Text)
+	text1 := texts[0]
+	text2 := texts[1]
 	textSize1 := text1.TextSize
 	textSize2 := text2.TextSize
 	customTextSize1 := textSize1
 	customTextSize2 := textSize2
 	test.WithTestTheme(t, func() {
 		label.Refresh()
-		text1 := render.Objects()[0].(*canvas.Text)
-		text2 := render.Objects()[1].(*canvas.Text)
+		text1 := texts[0]
+		text2 := texts[1]
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})

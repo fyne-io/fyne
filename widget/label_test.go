@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -80,19 +81,19 @@ func TestLabel_Text(t *testing.T) {
 	label.Refresh()
 
 	assert.Equal(t, "Test", label.Text)
-	assert.Equal(t, "Test", richTextRenderTexts(label)[0].Text)
+	assert.Equal(t, "Test", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_Text_Refresh(t *testing.T) {
 	label := &Label{Text: ""}
 
 	assert.Equal(t, "", label.Text)
-	assert.Equal(t, "", richTextRenderTexts(label)[0].Text)
+	assert.Equal(t, "", labelTextRenderTexts(label)[0].Text)
 
 	label.Text = "Test"
 	label.Refresh()
 	assert.Equal(t, "Test", label.Text)
-	assert.Equal(t, "Test", richTextRenderTexts(label)[0].Text)
+	assert.Equal(t, "Test", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_SetText(t *testing.T) {
@@ -102,24 +103,24 @@ func TestLabel_SetText(t *testing.T) {
 	label.SetText("New")
 
 	assert.Equal(t, "New", label.Text)
-	assert.Equal(t, "New", richTextRenderTexts(label)[0].Text)
+	assert.Equal(t, "New", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	label.Refresh()
 
-	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, labelTextRenderTexts(label)[0].Alignment)
 }
 
 func TestLabel_Alignment_Later(t *testing.T) {
 	label := &Label{Text: "Test"}
 	label.Refresh()
-	assert.Equal(t, fyne.TextAlignLeading, richTextRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignLeading, labelTextRenderTexts(label)[0].Alignment)
 
 	label.Alignment = fyne.TextAlignTrailing
 	label.Refresh()
-	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, labelTextRenderTexts(label)[0].Alignment)
 }
 
 func TestText_MinSize_MultiLine(t *testing.T) {
@@ -241,4 +242,9 @@ func TestLabelImportance(t *testing.T) {
 	lbl.Importance = SuccessImportance
 	lbl.Refresh()
 	test.AssertImageMatches(t, "label/label_importance_success.png", w.Canvas().Capture())
+}
+
+func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
+	rich := cache.Renderer(p).Objects()[0].(*RichText)
+	return richTextRenderTexts(rich)
 }

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -47,7 +46,7 @@ func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	hyperlink.CreateRenderer()
 
-	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(hyperlink.provider).Objects()[0].(*canvas.Text).Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(hyperlink.provider)[0].Alignment)
 }
 
 func TestHyperlink_Hide(t *testing.T) {
@@ -127,7 +126,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)
-	assert.Equal(t, "New", test.WidgetRenderer(hyperlink.provider).Objects()[0].(*canvas.Text).Text)
+	assert.Equal(t, "New", richTextRenderTexts(hyperlink.provider)[0].Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
@@ -150,16 +149,18 @@ func TestHyperlink_Truncate(t *testing.T) {
 	hyperlink.CreateRenderer()
 	hyperlink.Resize(fyne.NewSize(100, 20))
 
-	r := test.WidgetRenderer(hyperlink.provider)
-	assert.Equal(t, "TestingWithLongText", r.Objects()[0].(*canvas.Text).Text)
+	texts := richTextRenderTexts(hyperlink.provider)
+	assert.Equal(t, "TestingWithLongText", texts[0].Text)
 
 	hyperlink.Truncation = fyne.TextTruncateClip
 	hyperlink.Refresh()
-	assert.Equal(t, "TestingWith", r.Objects()[0].(*canvas.Text).Text)
+	texts = richTextRenderTexts(hyperlink.provider)
+	assert.Equal(t, "TestingWith", texts[0].Text)
 
 	hyperlink.Truncation = fyne.TextTruncateEllipsis
 	hyperlink.Refresh()
-	assert.Equal(t, "TestingWi…", r.Objects()[0].(*canvas.Text).Text)
+	texts = richTextRenderTexts(hyperlink.provider)
+	assert.Equal(t, "TestingWi…", texts[0].Text)
 }
 
 func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {
