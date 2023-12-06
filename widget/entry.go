@@ -1605,7 +1605,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
 
-	innerPadding := theme.InnerPadding()
+	innerPadding := theme.CurrentForWidget(r.entry).Size(theme.SizeNameInnerPadding)
 	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
 	minSize := charMin.Add(fyne.NewSquareSize(innerPadding))
 
@@ -1861,10 +1861,12 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 
 	provider := r.content.entry.textProvider()
+	th := theme.CurrentForWidget(r.content.entry)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
-		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width, sz.Height*float32(row) - theme.InputBorderSize() + theme.InnerPadding()
+		sz := provider.lineSizeToColumn(column, row, innerPad)
+		return sz.Width, sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
 	}
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
@@ -1962,15 +1964,18 @@ func (r *entryContentRenderer) moveCursor() {
 	r.buildSelection()
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
-	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow)
+	th := theme.CurrentForWidget(r.content.entry)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inputBorder := th.Size(theme.SizeNameInputBorder)
+	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, innerPad)
 	xPos := size.Width
 	yPos := size.Height * float32(r.content.entry.CursorRow)
 	r.content.entry.propertyLock.RUnlock()
 
 	r.content.entry.propertyLock.Lock()
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
-	r.cursor.Resize(fyne.NewSize(theme.InputBorderSize(), lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-(theme.InputBorderSize()/2), yPos+theme.InnerPadding()-theme.InputBorderSize()))
+	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
+	r.cursor.Move(fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder))
 
 	callback := r.content.entry.OnCursorChanged
 	r.content.entry.propertyLock.Unlock()
