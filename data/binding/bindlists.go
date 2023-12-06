@@ -114,25 +114,27 @@ func (l *boundBoolList) Remove(val bool) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -368,25 +370,27 @@ func (l *boundBytesList) Remove(val []byte) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if bytes.Equal((*l.val)[0], val) {
-		*l.val = (*l.val)[1:]
-	} else if bytes.Equal((*l.val)[len(*l.val)-1], val) {
-		*l.val = (*l.val)[:len(*l.val)]
+	if bytes.Equal(v[0], val) {
+		*l.val = v[1:]
+	} else if bytes.Equal(v[len(v)-1], val) {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if bytes.Equal(v, val) {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -622,25 +626,27 @@ func (l *boundFloatList) Remove(val float64) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -876,25 +882,27 @@ func (l *boundIntList) Remove(val int) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -1130,25 +1138,27 @@ func (l *boundRuneList) Remove(val rune) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -1384,25 +1394,27 @@ func (l *boundStringList) Remove(val string) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -1638,25 +1650,27 @@ func (l *boundUntypedList) Remove(val interface{}) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if v == val {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
@@ -1892,25 +1906,27 @@ func (l *boundURIList) Remove(val fyne.URI) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
-	if compareURI((*l.val)[0], val) {
-		*l.val = (*l.val)[1:]
-	} else if compareURI((*l.val)[len(*l.val)-1], val) {
-		*l.val = (*l.val)[:len(*l.val)]
+	if compareURI(v[0], val) {
+		*l.val = v[1:]
+	} else if compareURI(v[len(v)-1], val) {
+		*l.val = v[:len(v)]
 	} else {
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 			if compareURI(v, val) {
 				id = i
+				break
 			}
 		}
 
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()

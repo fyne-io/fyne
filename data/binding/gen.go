@@ -480,32 +480,35 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if len(*l.val) == 0 {
+	v := *l.val
+	if len(v) == 0 {
 		return nil
 	}
 
 	{{- if eq .Comparator "" }}
-	if (*l.val)[0] == val {
-		*l.val = (*l.val)[1:]
-	} else if (*l.val)[len(*l.val)-1] == val {
-		*l.val = (*l.val)[:len(*l.val)]
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)]
 	} else {
 	{{- else }}
-	if {{ .Comparator }}((*l.val)[0], val) {
-		*l.val = (*l.val)[1:]
-	} else if {{ .Comparator }}((*l.val)[len(*l.val)-1], val) {
-		*l.val = (*l.val)[:len(*l.val)]
+	if {{ .Comparator }}(v[0], val) {
+		*l.val = v[1:]
+	} else if {{ .Comparator }}(v[len(v)-1], val) {
+		*l.val = v[:len(v)]
 	} else {
 	{{- end }}
 		id := -1
-		for i, v := range *l.val {
+		for i, v := range v {
 		{{- if eq .Comparator "" }}
 			if v == val {
 				id = i
+				break
 			}
 		{{- else }}
 			if {{ .Comparator }}(v, val) {
 				id = i
+				break
 			}
 		{{- end }}
 		}
@@ -513,7 +516,7 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 		if id == -1 {
 			return nil
 		}
-		*l.val = append((*l.val)[:id], (*l.val)[id+1:]...)
+		*l.val = append(v[:id], v[id+1:]...)
 	}
 
 	return l.doReload()
