@@ -121,7 +121,7 @@ func (l *boundBoolList) Remove(val bool) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -377,7 +377,7 @@ func (l *boundBytesList) Remove(val []byte) error {
 	if bytes.Equal(v[0], val) {
 		*l.val = v[1:]
 	} else if bytes.Equal(v[len(v)-1], val) {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -633,7 +633,7 @@ func (l *boundFloatList) Remove(val float64) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -889,7 +889,7 @@ func (l *boundIntList) Remove(val int) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -1145,7 +1145,7 @@ func (l *boundRuneList) Remove(val rune) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -1401,7 +1401,7 @@ func (l *boundStringList) Remove(val string) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -1657,7 +1657,7 @@ func (l *boundUntypedList) Remove(val interface{}) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {
@@ -1913,7 +1913,7 @@ func (l *boundURIList) Remove(val fyne.URI) error {
 	if compareURI(v[0], val) {
 		*l.val = v[1:]
 	} else if compareURI(v[len(v)-1], val) {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 		id := -1
 		for i, v := range v {

@@ -489,13 +489,13 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 	if v[0] == val {
 		*l.val = v[1:]
 	} else if v[len(v)-1] == val {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 	{{- else }}
 	if {{ .Comparator }}(v[0], val) {
 		*l.val = v[1:]
 	} else if {{ .Comparator }}(v[len(v)-1], val) {
-		*l.val = v[:len(v)]
+		*l.val = v[:len(v)-1]
 	} else {
 	{{- end }}
 		id := -1

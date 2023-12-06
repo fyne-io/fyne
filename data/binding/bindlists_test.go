@@ -124,10 +124,13 @@ func TestFloatList_GetValue(t *testing.T) {
 func TestFloatList_Remove(t *testing.T) {
 	f := NewFloatList()
 	f.Append(0.5)
+	f.Append(0.7)
 	f.Append(0.3)
-	assert.Equal(t, 2, f.Length())
+	assert.Equal(t, 3, f.Length())
 
 	f.Remove(0.5)
+	assert.Equal(t, 2, f.Length())
+	f.Remove(0.3)
 	assert.Equal(t, 1, f.Length())
 }
 
