@@ -385,6 +385,7 @@ type {{ .Name }}List interface {
 	Get() ([]{{ .Type }}, error)
 	GetValue(index int) ({{ .Type }}, error)
 	Prepend(value {{ .Type }}) error
+	Remove(value {{ .Type }}) error
 	Set(list []{{ .Type }}) error
 	SetValue(index int, value {{ .Type }}) error
 }
@@ -468,6 +469,55 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 func (l *bound{{ .Name }}List) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified {{ .Type }} out of the list.
+//
+// Since: 2.5
+func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+
+	{{- if eq .Comparator "" }}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+	{{- else }}
+	if {{ .Comparator }}(v[0], val) {
+		*l.val = v[1:]
+	} else if {{ .Comparator }}(v[len(v)-1], val) {
+		*l.val = v[:len(v)-1]
+	} else {
+	{{- end }}
+		id := -1
+		for i, v := range v {
+		{{- if eq .Comparator "" }}
+			if v == val {
+				id = i
+				break
+			}
+		{{- else }}
+			if {{ .Comparator }}(v, val) {
+				id = i
+				break
+			}
+		{{- end }}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -615,6 +665,7 @@ type {{ .Name }}Tree interface {
 	Get() (map[string][]string, map[string]{{ .Type }}, error)
 	GetValue(id string) ({{ .Type }}, error)
 	Prepend(parent, id string, value {{ .Type }}) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]{{ .Type }}) error
 	SetValue(id string, value {{ .Type }}) error
 }
@@ -714,6 +765,32 @@ func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *bound{{ .Name }}Tree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *bound{{ .Name }}Tree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *bound{{ .Name }}Tree) Reload() error {
