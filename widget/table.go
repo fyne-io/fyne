@@ -133,6 +133,16 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	t.propertyLock.Lock()
 	t.headerSize = t.createHeader().MinSize()
+	if t.columnWidths != nil {
+		if v, ok := t.columnWidths[-1]; ok {
+			t.headerSize.Width = v
+		}
+	}
+	if t.rowHeights != nil {
+		if v, ok := t.rowHeights[-1]; ok {
+			t.headerSize.Height = v
+		}
+	}
 	t.cellSize = t.templateSize()
 	t.cells = newTableCells(t)
 	t.content = widget.NewScroll(t.cells)
@@ -281,9 +291,14 @@ func (t *Table) Select(id TableCellID) {
 // Since: 1.4.1
 func (t *Table) SetColumnWidth(id int, width float32) {
 	t.propertyLock.Lock()
+	if id < 0 {
+		t.headerSize.Width = width
+	}
+
 	if t.columnWidths == nil {
 		t.columnWidths = make(map[int]float32)
 	}
+
 	t.columnWidths[id] = width
 	t.propertyLock.Unlock()
 
@@ -297,9 +312,14 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 // Since: 2.3
 func (t *Table) SetRowHeight(id int, height float32) {
 	t.propertyLock.Lock()
+	if id < 0 {
+		t.headerSize.Height = height
+	}
+
 	if t.rowHeights == nil {
 		t.rowHeights = make(map[int]float32)
 	}
+
 	t.rowHeights[id] = height
 	t.propertyLock.Unlock()
 
@@ -1061,6 +1081,16 @@ func (t *tableRenderer) MinSize() fyne.Size {
 func (t *tableRenderer) Refresh() {
 	t.t.propertyLock.Lock()
 	t.t.headerSize = t.t.createHeader().MinSize()
+	if t.t.columnWidths != nil {
+		if v, ok := t.t.columnWidths[-1]; ok {
+			t.t.headerSize.Width = v
+		}
+	}
+	if t.t.rowHeights != nil {
+		if v, ok := t.t.rowHeights[-1]; ok {
+			t.t.headerSize.Height = v
+		}
+	}
 	t.t.cellSize = t.t.templateSize()
 	t.calculateHeaderSizes()
 	t.t.propertyLock.Unlock()
@@ -1536,7 +1566,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	startRow, maxRow, startCol, maxCol int, separatorThickness float32) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
-	headerMin := r.cells.t.createHeader().MinSize()
+	headerMin := r.cells.t.headerSize
 	rowHeight := headerMin.Height
 	colWidth := headerMin.Width
 
