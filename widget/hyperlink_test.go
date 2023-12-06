@@ -46,7 +46,8 @@ func TestHyperlink_Cursor(t *testing.T) {
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	hyperlink.CreateRenderer()
-	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink.provider)[0].Alignment)
+
+	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(hyperlink.provider).Objects()[0].(*canvas.Text).Alignment)
 }
 
 func TestHyperlink_Hide(t *testing.T) {
@@ -126,7 +127,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)
-	assert.Equal(t, "New", textRenderTexts(hyperlink.provider)[0].Text)
+	assert.Equal(t, "New", test.WidgetRenderer(hyperlink.provider).Objects()[0].(*canvas.Text).Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {

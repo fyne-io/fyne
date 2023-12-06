@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func textRenderTexts(p fyne.Widget) []*canvas.Text {
+func richTextRenderTexts(p fyne.Widget) []*canvas.Text {
 	rich := cache.Renderer(p).Objects()[0].(*RichText)
 	renderer := cache.Renderer(rich).(*textRenderer)
 	texts := make([]*canvas.Text, len(renderer.Objects()))
@@ -357,7 +357,7 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.ErrorColor(), textRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.ErrorColor(), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
