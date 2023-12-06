@@ -15,7 +15,8 @@ import (
 )
 
 func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	renderer := cache.Renderer(p).(*textRenderer)
+	rich := cache.Renderer(p).Objects()[0].(*RichText)
+	renderer := cache.Renderer(rich).(*textRenderer)
 	texts := make([]*canvas.Text, len(renderer.Objects()))
 	for i, obj := range renderer.Objects() {
 		texts[i] = obj.(*canvas.Text)
@@ -386,12 +387,13 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
 	provider := label.provider
 
-	fullSize := provider.lineSizeToColumn(4, 0)
-	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
-	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+	inPad := theme.InnerPadding()
+	fullSize := provider.lineSizeToColumn(4, 0, inPad)
+	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0, inPad))
+	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0, inPad).Width)
 
-	out := provider.lineSizeToColumn(-1, -1)
-	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
+	out := provider.lineSizeToColumn(-1, -1, inPad)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0, inPad))
 }
 
 func TestText_splitLines(t *testing.T) {
