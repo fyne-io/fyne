@@ -152,7 +152,7 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
 		defaultChar = passwordChar
 	}
 
-	textSize := theme.SizeForWidget(theme.SizeNameText, t)
+	textSize := t.theme().Size(theme.SizeNameText)
 	return fyne.MeasureText(defaultChar, textSize, style)
 }
 
@@ -362,7 +362,8 @@ func (t *RichText) rows() int {
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time a segment Text, widget Wrapping or size changes.
 func (t *RichText) updateRowBounds() {
-	innerPadding := theme.SizeForWidget(theme.SizeNameInnerPadding, t)
+	th := t.theme()
+	innerPadding := th.Size(theme.SizeNameInnerPadding)
 	fitSize := t.Size()
 	if t.scr != nil {
 		fitSize = t.scr.Content.MinSize()
@@ -402,7 +403,7 @@ func (t *RichText) updateRowBounds() {
 				} else {
 					wrapWidth = maxWidth
 					currentBound = nil
-					fitSize.Height -= itemMin.Height + theme.SizeForWidget(theme.SizeNameLineSpacing, t)
+					fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
 				}
 				continue
 			}
@@ -484,6 +485,7 @@ type textRenderer struct {
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.obj.propertyLock.RLock()
+	th := r.obj.theme()
 	bounds := r.obj.rowBounds
 	objs := r.Objects()
 	if r.obj.scr != nil {
@@ -493,7 +495,6 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	r.obj.propertyLock.RUnlock()
 
 	// Accessing theme here is slow, so we cache the value
-	th := theme.CurrentForWidget(r.obj)
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
 	lineSpacing := th.Size(theme.SizeNameLineSpacing)
 
@@ -557,7 +558,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RLock()
-	th := theme.CurrentForWidget(r.obj)
+	th := r.obj.theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	bounds := r.obj.rowBounds
@@ -571,7 +572,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RUnlock()
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{})
-	min := r.calculateMin(bounds, wrap, objs, charMinSize, innerPad)
+	min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 	if r.obj.scr != nil {
 		r.obj.prop.SetMinSize(min)
 	}
@@ -604,12 +605,13 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, objs []fyne.CanvasObject,
-	charMinSize fyne.Size, innerPad float32) fyne.Size {
+	charMinSize fyne.Size, th fyne.Theme) fyne.Size {
 	height := float32(0)
 	width := float32(0)
 	rowHeight := float32(0)
 	rowWidth := float32(0)
 	trunc := r.obj.Truncation
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	// Accessing the theme here is slow, so we cache the value
 	lineSpacing := theme.SizeForWidget(theme.SizeNameLineSpacing, r.obj)
@@ -628,7 +630,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 				if !img.MinSize().Subtract(img.oldMin).IsZero() {
 					img.oldMin = img.MinSize()
 
-					min := r.calculateMin(bounds, wrap, objs, charMinSize, innerPad)
+					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
 						r.obj.prop.SetMinSize(min)
 					}

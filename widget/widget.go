@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -18,6 +19,7 @@ type BaseWidget struct {
 
 	impl         fyne.Widget
 	propertyLock sync.RWMutex
+	themeCache   fyne.Theme
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -136,6 +138,10 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
+	w.propertyLock.Lock()
+	w.themeCache = nil
+	w.propertyLock.Unlock()
+
 	render := cache.Renderer(impl)
 	render.Refresh()
 }
@@ -161,6 +167,15 @@ func (w *BaseWidget) super() fyne.Widget {
 	impl := w.impl
 	w.propertyLock.RUnlock()
 	return impl
+}
+
+// theme returns a cached theme instance for this widget (or its extending widget).
+func (w *BaseWidget) theme() fyne.Theme {
+	if w.themeCache == nil {
+		w.themeCache = theme.CurrentForWidget(w.impl)
+	}
+
+	return w.themeCache
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
