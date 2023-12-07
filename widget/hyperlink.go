@@ -60,11 +60,13 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.provider.ExtendBaseWidget(hl.provider)
 	hl.syncSegments()
 
+	th := hl.theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	focus := canvas.NewRectangle(color.Transparent)
-	focus.StrokeColor = theme.FocusColor()
+	focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	focus.StrokeWidth = 2
 	focus.Hide()
-	under := canvas.NewRectangle(theme.HyperlinkColor())
+	under := canvas.NewRectangle(th.Color(theme.ColorNameHyperlink, v))
 	under.Hide()
 	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus, under}, focus: focus, under: under}
 }
@@ -217,11 +219,12 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
+	innerPad := r.hl.theme().Size(theme.SizeNameInnerPadding)
 	r.hl.provider.Resize(s)
-	r.focus.Move(fyne.NewPos(theme.InnerPadding()/2, theme.InnerPadding()/2))
-	r.focus.Resize(fyne.NewSize(s.Width-theme.InnerPadding(), s.Height-theme.InnerPadding()))
-	r.under.Move(fyne.NewPos(theme.InnerPadding(), s.Height-theme.InnerPadding()))
-	r.under.Resize(fyne.NewSize(s.Width-theme.InnerPadding()*2, 1))
+	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
+	r.focus.Resize(fyne.NewSize(s.Width-innerPad, s.Height-innerPad))
+	r.under.Move(fyne.NewPos(innerPad, s.Height-innerPad))
+	r.under.Resize(fyne.NewSize(s.Width-innerPad*2, 1))
 }
 
 func (r *hyperlinkRenderer) MinSize() fyne.Size {
@@ -233,9 +236,14 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *hyperlinkRenderer) Refresh() {
+	th := r.hl.theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	r.hl.provider.Refresh()
-	r.focus.StrokeColor = theme.FocusColor()
+	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	r.focus.Hidden = !r.hl.focused
-	r.under.StrokeColor = theme.HyperlinkColor()
+	r.focus.Refresh()
+	r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
 	r.under.Hidden = !r.hl.hovered
+	r.under.Refresh()
 }
