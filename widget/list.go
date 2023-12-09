@@ -664,6 +664,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		return
 	}
 
+	oldVisibleLen := len(l.visible)
 	l.visible = l.visible[:0]
 	oldChildrenLen := len(l.children)
 	l.children = l.children[:0]
@@ -690,6 +691,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		l.children = append(l.children, c)
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
+	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
 	for _, wasVis := range wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
@@ -778,6 +780,15 @@ func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) 
 		objs = objs[:oldLen] // gain view into old data
 		for i := len; i < oldLen; i++ {
 			objs[i] = nil
+		}
+	}
+}
+
+func (l *listLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
+	if oldLen > len {
+		objs = objs[:oldLen] // gain view into old data
+		for i := len; i < oldLen; i++ {
+			objs[i].item = nil
 		}
 	}
 }
