@@ -536,15 +536,19 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool          *syncPool
+	itemPool          syncPool
 	visible           []itemAndID
-	wasVisible        []itemAndID
+	slicePool         sync.Pool // *[]itemAndID
 	visibleRowHeights []float32
 	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
-	l := &listLayout{list: list, itemPool: &syncPool{}}
+	l := &listLayout{list: list}
+	l.slicePool.New = func() interface{} {
+		s := make([]itemAndID, 0)
+		return &s
+	}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -646,13 +650,11 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	// Swap l.wasVisible and l.visible
-	// since l.wasVisible contains only nil references at this point,
-	// we don't need to overwrite old data if we fill l.visible to less than
-	// the previous length of l.wasVisible
-	tmp := l.wasVisible
-	l.wasVisible = l.visible
-	l.visible = tmp
+	// Keep pointer reference for copying slice header when returning to the pool
+	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
+	wasVisiblePtr := l.slicePool.Get().(*[]itemAndID)
+	wasVisible := (*wasVisiblePtr)[:0]
+	wasVisible = append(wasVisible, l.visible...)
 
 	l.list.propertyLock.Lock()
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
@@ -671,7 +673,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		c, ok := l.searchVisible(l.wasVisible, row)
+		c, ok := l.searchVisible(wasVisible, row)
 		if !ok {
 			c = l.getItem()
 			if c == nil {
@@ -689,7 +691,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
 
-	for _, wasVis := range l.wasVisible {
+	for _, wasVis := range wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
 			l.itemPool.Release(wasVis.item)
 		}
@@ -703,24 +705,37 @@ func (l *listLayout) updateList(newOnly bool) {
 	c.Objects = append(c.Objects, l.children...)
 	c.Objects = append(c.Objects, l.separators...)
 	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
+
+	// make a local deep copy of l.visible since rest of this function is unlocked
+	// and cannot safely access l.visible
+	visiblePtr := l.slicePool.Get().(*[]itemAndID)
+	visible := (*visiblePtr)[:0]
+	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
-		for _, vis := range l.visible {
-			if _, ok := l.searchVisible(l.wasVisible, vis.id); !ok {
+		for _, vis := range visible {
+			if _, ok := l.searchVisible(wasVisible, vis.id); !ok {
 				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 			}
 		}
 	} else {
-		for _, vis := range l.visible {
+		for _, vis := range visible {
 			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
 	}
 
-	// we don't need wasVisible's data anymore; nil out all references
-	for i := 0; i < len(l.wasVisible); i++ {
-		l.wasVisible[i].item = nil
+	// nil out all references before returning slices to pool
+	for i := 0; i < len(wasVisible); i++ {
+		wasVisible[i].item = nil
 	}
+	for i := 0; i < len(visible); i++ {
+		visible[i].item = nil
+	}
+	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
+	*visiblePtr = visible
+	l.slicePool.Put(wasVisiblePtr)
+	l.slicePool.Put(visiblePtr)
 }
 
 func (l *listLayout) updateSeparators() {
