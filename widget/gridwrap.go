@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"sort"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -137,8 +138,10 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
-	visible := lo.visible
-	if item, ok := visible[id]; ok {
+	lo.renderLock.Lock() // ensures we are not changing visible info in render code during the search
+	item, ok := lo.searchVisible(lo.visible, id)
+	lo.renderLock.Unlock()
+	if ok {
 		lo.setupGridItem(item, id, l.focused && l.currentFocus == id)
 	}
 }
@@ -461,17 +464,27 @@ func (gw *gridWrapItemRenderer) Refresh() {
 // Declare conformity with Layout interface.
 var _ fyne.Layout = (*gridWrapLayout)(nil)
 
+type itemAndID struct {
+	item *gridWrapItem
+	id   GridWrapItemID
+}
+
 type gridWrapLayout struct {
 	list     *GridWrap
 	children []fyne.CanvasObject
 
-	itemPool   *syncPool
-	visible    map[GridWrapItemID]*gridWrapItem
+	itemPool   syncPool
+	slicePool  sync.Pool // *[]itemAndID
+	visible    []itemAndID
 	renderLock sync.Mutex
 }
 
 func newGridWrapLayout(list *GridWrap) fyne.Layout {
-	l := &gridWrapLayout{list: list, itemPool: &syncPool{}, visible: make(map[GridWrapItemID]*gridWrapItem)}
+	l := &gridWrapLayout{list: list}
+	l.slicePool.New = func() interface{} {
+		s := make([]itemAndID, 0)
+		return &s
+	}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -573,48 +586,92 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 		fyne.LogError("Missing UpdateCell callback required for GridWrap", nil)
 	}
 
-	wasVisible := l.visible
-	l.visible = make(map[GridWrapItemID]*gridWrapItem)
+	// Keep pointer reference for copying slice header when returning to the pool
+	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
+	wasVisiblePtr := l.slicePool.Get().(*[]itemAndID)
+	wasVisible := (*wasVisiblePtr)[:0]
+	wasVisible = append(wasVisible, l.visible...)
+
+	oldVisibleLen := len(l.visible)
+	l.visible = l.visible[:0]
+
 	var cells []fyne.CanvasObject
 	y := offY
-	curItem := minItem
-	for row := minRow; row <= maxRow && curItem <= maxItem; row++ {
+	curItemID := minItem
+	for row := minRow; row <= maxRow && curItemID <= maxItem; row++ {
 		x := float32(0)
-		for col := 0; col < colCount && curItem <= maxItem; col++ {
-			c, ok := wasVisible[curItem]
+		for col := 0; col < colCount && curItemID <= maxItem; col++ {
+			item, ok := l.searchVisible(wasVisible, curItemID)
 			if !ok {
-				c = l.getItem()
-				if c == nil {
+				item = l.getItem()
+				if item == nil {
 					continue
 				}
-				c.Resize(l.list.itemMin)
+				item.Resize(l.list.itemMin)
 			}
 
-			c.Move(fyne.NewPos(x, y))
+			item.Move(fyne.NewPos(x, y))
 			if refresh {
-				c.Resize(l.list.itemMin)
+				item.Resize(l.list.itemMin)
 			}
 
 			x += l.list.itemMin.Width + theme.Padding()
-			l.visible[curItem] = c
-			cells = append(cells, c)
-			curItem++
+			l.visible = append(l.visible, itemAndID{item: item, id: curItemID})
+			cells = append(cells, item)
+			curItemID++
 		}
 		y += l.list.itemMin.Height + theme.Padding()
 	}
+	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
-	for id, old := range wasVisible {
-		if _, ok := l.visible[id]; !ok {
-			l.itemPool.Release(old)
+	for _, old := range wasVisible {
+		if _, ok := l.searchVisible(l.visible, old.id); !ok {
+			l.itemPool.Release(old.item)
 		}
 	}
 	l.children = cells
 
-	objects := l.children
-	l.list.scroller.Content.(*fyne.Container).Objects = objects
+	l.list.scroller.Content.(*fyne.Container).Objects = l.children
+
+	// make a local deep copy of l.visible since rest of this function is unlocked
+	// and cannot safely access l.visible
+	visiblePtr := l.slicePool.Get().(*[]itemAndID)
+	visible := (*visiblePtr)[:0]
+	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked
 
-	for row, obj := range l.visible {
-		l.setupGridItem(obj, row, l.list.focused && l.list.currentFocus == row)
+	for _, obj := range visible {
+		l.setupGridItem(obj.item, obj.id, l.list.focused && l.list.currentFocus == obj.id)
+	}
+
+	// nil out all references before returning slices to pool
+	for i := 0; i < len(wasVisible); i++ {
+		wasVisible[i].item = nil
+	}
+	for i := 0; i < len(visible); i++ {
+		visible[i].item = nil
+	}
+	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
+	*visiblePtr = visible
+	l.slicePool.Put(wasVisiblePtr)
+	l.slicePool.Put(visiblePtr)
+}
+
+// invariant: visible is in ascending order of IDs
+func (l *gridWrapLayout) searchVisible(visible []itemAndID, id GridWrapItemID) (*gridWrapItem, bool) {
+	ln := len(visible)
+	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
+	if idx < ln && visible[idx].id == id {
+		return visible[idx].item, true
+	}
+	return nil, false
+}
+
+func (l *gridWrapLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
+	if oldLen > len {
+		objs = objs[:oldLen] // gain view into old data
+		for i := len; i < oldLen; i++ {
+			objs[i].item = nil
+		}
 	}
 }
