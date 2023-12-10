@@ -149,9 +149,9 @@ func TestHyperlink_SetUrl(t *testing.T) {
 }
 
 func TestHyperlink_ThemeOverride(t *testing.T) {
-	app := test.NewApp()
+	_ = test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
@@ -162,7 +162,7 @@ func TestHyperlink_ThemeOverride(t *testing.T) {
 	w.Resize(hyperlink.MinSize())
 
 	light := w.Canvas().Capture()
-	app.Settings().SetTheme(test.Theme())
+	test.ApplyTheme(t, test.Theme())
 	hyperlink.Refresh()
 	ugly := w.Canvas().Capture()
 	assertPixelsMatch(t, false, ugly, light)
