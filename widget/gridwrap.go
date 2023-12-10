@@ -470,8 +470,7 @@ type itemAndID struct {
 }
 
 type gridWrapLayout struct {
-	list     *GridWrap
-	children []fyne.CanvasObject
+	list *GridWrap
 
 	itemPool   syncPool
 	slicePool  sync.Pool // *[]itemAndID
@@ -595,7 +594,9 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	oldVisibleLen := len(l.visible)
 	l.visible = l.visible[:0]
 
-	var cells []fyne.CanvasObject
+	c := l.list.scroller.Content.(*fyne.Container)
+	oldObjLen := len(c.Objects)
+	c.Objects = c.Objects[:0]
 	y := offY
 	curItemID := minItem
 	for row := minRow; row <= maxRow && curItemID <= maxItem; row++ {
@@ -617,11 +618,12 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 
 			x += l.list.itemMin.Width + theme.Padding()
 			l.visible = append(l.visible, itemAndID{item: item, id: curItemID})
-			cells = append(cells, item)
+			c.Objects = append(c.Objects, item)
 			curItemID++
 		}
 		y += l.list.itemMin.Height + theme.Padding()
 	}
+	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
 	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
 	for _, old := range wasVisible {
@@ -629,9 +631,6 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 			l.itemPool.Release(old.item)
 		}
 	}
-	l.children = cells
-
-	l.list.scroller.Content.(*fyne.Container).Objects = l.children
 
 	// make a local deep copy of l.visible since rest of this function is unlocked
 	// and cannot safely access l.visible
@@ -665,6 +664,15 @@ func (l *gridWrapLayout) searchVisible(visible []itemAndID, id GridWrapItemID) (
 		return visible[idx].item, true
 	}
 	return nil, false
+}
+
+func (l *gridWrapLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {
+	if oldLen > len {
+		objs = objs[:oldLen] // gain view into old data
+		for i := len; i < oldLen; i++ {
+			objs[i] = nil
+		}
+	}
 }
 
 func (l *gridWrapLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
