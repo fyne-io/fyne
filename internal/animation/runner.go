@@ -36,7 +36,9 @@ func (r *Runner) runAnimations() {
 			<-draw.C
 
 			// tick currently running animations
-			newList := r.animations[:0] // references same underlying backing array
+			// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
+			// to filter the still-running animations for the next iteration without allocating a new slice
+			newList := r.animations[:0]
 			for _, a := range r.animations {
 				if stopped := a.a.State() == fyne.AnimationStateStopped; !stopped && r.tickAnimation(a) {
 					newList = append(newList, a) // still running
@@ -56,7 +58,7 @@ func (r *Runner) runAnimations() {
 
 			done = len(newList) == 0
 			for i := len(newList); i < len(r.animations); i++ {
-				r.animations[i] = nil
+				r.animations[i] = nil // nil out extra slice capacity
 			}
 			r.animations = newList
 		}
