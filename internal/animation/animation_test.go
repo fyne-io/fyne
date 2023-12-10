@@ -48,9 +48,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	a.Stop()
-	run.animationMutex.Lock()
 	assert.True(t, a.State() == fyne.AnimationStateStopped, "animation was not stopped")
-	run.animationMutex.Unlock()
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
