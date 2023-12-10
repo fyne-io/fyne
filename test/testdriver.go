@@ -112,7 +112,7 @@ func (d *testDriver) StopAnimation(a *fyne.Animation) {
 	// currently no animations in test app, do nothing
 }
 
-func (d *testDriver) StartAnimationPrivate(a *fyne.Animation) {
+func (d *testDriver) StartAnimationInternal(a *fyne.Animation) {
 	/// currently no animations in test app, we just initialise it and leave
 	a.Tick(1.0)
 }

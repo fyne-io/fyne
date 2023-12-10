@@ -83,8 +83,8 @@ func (a *Animation) Start() {
 		return
 	}
 	a.state = AnimationStateRunning
-	d := CurrentApp().Driver().(interface{ StartAnimationPrivate(*Animation) })
-	d.StartAnimationPrivate(a)
+	d := CurrentApp().Driver().(interface{ StartAnimationInternal(*Animation) })
+	d.StartAnimationInternal(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.

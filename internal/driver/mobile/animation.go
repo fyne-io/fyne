@@ -6,7 +6,7 @@ func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
 	a.Start()
 }
 
-func (d *mobileDriver) StartAnimationPrivate(a *fyne.Animation) {
+func (d *mobileDriver) StartAnimationInternal(a *fyne.Animation) {
 	d.animation.Start(a)
 }
 
