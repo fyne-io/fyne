@@ -1,6 +1,8 @@
 package fyne
 
-import "time"
+import (
+	"time"
+)
 
 // AnimationCurve represents an animation algorithm for calculating the progress through a timeline.
 // Custom animations can be provided by implementing the "func(float32) float32" definition.
@@ -42,6 +44,8 @@ type Animation struct {
 	Duration    time.Duration
 	RepeatCount int
 	Tick        func(float32)
+
+	stopped bool
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
@@ -55,12 +59,20 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
+	a.stopped = false
 	CurrentApp().Driver().StartAnimation(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.
 func (a *Animation) Stop() {
-	CurrentApp().Driver().StopAnimation(a)
+	a.stopped = true
+}
+
+// Stopped returns true if this animation has been stopped or has completed running.
+//
+// Since: 2.5
+func (a *Animation) Stopped() bool {
+	return a.stopped
 }
 
 func animationEaseIn(val float32) float32 {

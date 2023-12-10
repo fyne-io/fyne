@@ -26,7 +26,12 @@ type Driver interface {
 	Quit()
 
 	// StartAnimation registers a new animation with this driver and requests it be started.
-	StartAnimation(*Animation)
+	//
+	// Deprecated: Use a.Start() instead.
+	StartAnimation(a *Animation)
+
 	// StopAnimation stops an animation and unregisters from this driver.
-	StopAnimation(*Animation)
+	//
+	// Deprecated: Use a.Stop() instead.
+	StopAnimation(a *Animation)
 }

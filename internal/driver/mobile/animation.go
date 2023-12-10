@@ -7,5 +7,5 @@ func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
 }
 
 func (d *mobileDriver) StopAnimation(a *fyne.Animation) {
-	d.animation.Stop(a)
+	a.Stop()
 }

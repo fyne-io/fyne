@@ -7,5 +7,5 @@ func (d *gLDriver) StartAnimation(a *fyne.Animation) {
 }
 
 func (d *gLDriver) StopAnimation(a *fyne.Animation) {
-	d.animation.Stop(a)
+	a.Stop()
 }
