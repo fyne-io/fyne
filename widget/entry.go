@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
-	driverconsts "fyne.io/fyne/v2/internal/driver/consts"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -256,11 +255,7 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 }
 
 func (e *Entry) isTripleTap(nowMilli int64) bool {
-	doubleClickDelay := int64(driverconsts.DesktopDoubleClickDelay)
-	if fyne.CurrentDevice().IsMobile() {
-		doubleClickDelay = driverconsts.MobileDoubleClickDelay
-	}
-	return nowMilli-e.doubleTappedAtUnixMillis <= doubleClickDelay
+	return nowMilli-e.doubleTappedAtUnixMillis <= fyne.CurrentApp().Driver().DoubleTapDelay().Milliseconds()
 }
 
 // DragEnd is called at end of a drag event.

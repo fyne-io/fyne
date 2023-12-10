@@ -12,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
-	"fyne.io/fyne/v2/internal/driver/consts"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -375,7 +374,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
 	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*consts.MobileDoubleClickDelay))
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
 	defer c.touchCancelFunc()
 	<-ctx.Done()
 	if c.touchTapCount == 2 && c.touchLastTapped == co {

@@ -31,6 +31,7 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapDoubleDelay    = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
 // Configuration is the system information about the current device
@@ -547,6 +548,10 @@ func (d *mobileDriver) Device() fyne.Device {
 
 func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
+}
+
+func (d *mobileDriver) DoubleTapDelay() time.Duration {
+	return tapDoubleDelay
 }
 
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
