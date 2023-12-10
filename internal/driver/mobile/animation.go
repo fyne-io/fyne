@@ -3,6 +3,10 @@ package mobile
 import "fyne.io/fyne/v2"
 
 func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
+	a.Start()
+}
+
+func (d *mobileDriver) StartAnimationPrivate(a *fyne.Animation) {
 	d.animation.Start(a)
 }
 

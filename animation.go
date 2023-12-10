@@ -1,6 +1,7 @@
 package fyne
 
 import (
+	"sync"
 	"time"
 )
 
@@ -34,6 +35,22 @@ var (
 	AnimationLinear = animationLinear
 )
 
+// AnimationState represents the state of an animation.
+//
+// Since: 2.5
+type AnimationState int
+
+const (
+	// AnimationStateNotStarted represents an animation that has been created but not yet started.
+	AnimationStateNotStarted AnimationState = iota
+
+	// AnimationStateRunning represents an animation that is running.
+	AnimationStateRunning
+
+	// AnimationStateStopped represents an animation that has been stopped or has finished running.
+	AnimationStateStopped
+)
+
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
 //
@@ -45,7 +62,8 @@ type Animation struct {
 	RepeatCount int
 	Tick        func(float32)
 
-	stopped bool
+	mutex sync.Mutex
+	state AnimationState
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
@@ -59,20 +77,28 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
-	a.stopped = false
-	CurrentApp().Driver().StartAnimation(a)
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	if a.state == AnimationStateRunning {
+		return
+	}
+	a.state = AnimationStateRunning
+	d := CurrentApp().Driver().(interface{ StartAnimationPrivate(*Animation) })
+	d.StartAnimationPrivate(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.
 func (a *Animation) Stop() {
-	a.stopped = true
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	a.state = AnimationStateStopped
 }
 
-// Stopped returns true if this animation has been stopped or has completed running.
+// State returns the state of this animation.
 //
 // Since: 2.5
-func (a *Animation) Stopped() bool {
-	return a.stopped
+func (a *Animation) State() AnimationState {
+	return a.state
 }
 
 func animationEaseIn(val float32) float32 {

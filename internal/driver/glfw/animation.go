@@ -3,6 +3,10 @@ package glfw
 import "fyne.io/fyne/v2"
 
 func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	a.Start()
+}
+
+func (d *gLDriver) StartAnimationPrivate(a *fyne.Animation) {
 	d.animation.Start(a)
 }
 
