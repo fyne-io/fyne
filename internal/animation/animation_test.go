@@ -49,7 +49,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	}
 	a.Stop()
 	run.animationMutex.Lock()
-	assert.True(t, a.Stopped(), "animation was not stopped")
+	assert.True(t, a.State() == fyne.AnimationStateStopped, "animation was not stopped")
 	run.animationMutex.Unlock()
 }
 

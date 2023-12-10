@@ -38,9 +38,9 @@ func (r *Runner) runAnimations() {
 			// tick currently running animations
 			newList := r.animations[:0] // references same underlying backing array
 			for _, a := range r.animations {
-				if s := a.a.Stopped(); !s && r.tickAnimation(a) {
+				if stopped := a.a.State() == fyne.AnimationStateStopped; !stopped && r.tickAnimation(a) {
 					newList = append(newList, a) // still running
-				} else if !s {
+				} else if !stopped {
 					a.a.Stop() // mark as stopped (completed running)
 				}
 			}
