@@ -650,7 +650,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	for i := 0; i < len(visible); i++ {
 		visible[i].item = nil
 	}
-	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
+	*wasVisiblePtr = wasVisible // Copy the slice header over to the heap
 	*visiblePtr = visible
 	l.slicePool.Put(wasVisiblePtr)
 	l.slicePool.Put(visiblePtr)
