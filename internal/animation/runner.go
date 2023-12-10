@@ -19,9 +19,9 @@ type Runner struct {
 // Start will register the passed application and initiate its ticking.
 func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
-	defer r.animationMutex.Unlock()
-
 	r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
+	r.animationMutex.Unlock()
+
 	if !r.runnerStarted {
 		r.runnerStarted = true
 		r.runAnimations()
