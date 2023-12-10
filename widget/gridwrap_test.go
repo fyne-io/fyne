@@ -23,7 +23,7 @@ func TestGridWrap_Focus(t *testing.T) {
 	assert.NotNil(t, canvas.Focused())
 	assert.Equal(t, 0, canvas.Focused().(*GridWrap).currentFocus)
 
-	children := list.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).children
+	children := list.scroller.Content.(*fyne.Container).Objects
 	assert.True(t, children[0].(*gridWrapItem).hovered)
 	assert.False(t, children[1].(*gridWrapItem).hovered)
 	assert.False(t, children[6].(*gridWrapItem).hovered)
@@ -182,7 +182,7 @@ func TestGridWrap_RefreshItem(t *testing.T) {
 	data[2] = "Replace"
 	list.RefreshItem(2)
 
-	children := list.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).children
+	children := list.scroller.Content.(*fyne.Container).Objects
 	assert.Equal(t, children[1].(*gridWrapItem).child.(*Label).Text, "Text")
 	assert.Equal(t, children[2].(*gridWrapItem).child.(*Label).Text, "Replace")
 }
