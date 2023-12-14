@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	doubleClickDelay  = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold = 2   // how far can we move before it is a drag
+	dragMoveThreshold = 2 // how far can we move before it is a drag
 	windowIconSize    = 256
 )
 
@@ -646,7 +645,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	var ctx context.Context
 	w.mouseLock.Lock()
-	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(doubleTapDelay))
 	defer w.mouseCancelFunc()
 	w.mouseLock.Unlock()
 
