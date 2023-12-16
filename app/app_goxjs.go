@@ -56,3 +56,11 @@ func (app *fyneApp) SendNotification(n *fyne.Notification) {
 func rootConfigDir() string {
 	return "/data/"
 }
+func watchTheme() {
+	js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Call("addEventListener", "change", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) > 0 && args[0].Type() == js.TypeObject {
+			fyne.CurrentApp().Settings().(*settings).setupTheme()
+		}
+		return nil
+	}))
+}
