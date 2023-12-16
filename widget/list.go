@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"sort"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -122,8 +123,10 @@ func (l *List) RefreshItem(id ListItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	visible := lo.visible
-	if item, ok := visible[id]; ok {
+	lo.renderLock.RLock() // ensures we are not changing visible info in render code during the search
+	item, ok := lo.searchVisible(lo.visible, id)
+	lo.renderLock.RUnlock()
+	if ok {
 		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
 }
@@ -318,24 +321,25 @@ func (l *List) UnselectAll() {
 	}
 }
 
-func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow int) {
+// fills l.visibleRowHeights and also returns offY and minRow
+func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) (offY float32, minRow int) {
 	rowOffset := float32(0)
 	isVisible := false
-	visible = []float32{}
+	l.visibleRowHeights = l.visibleRowHeights[:0]
 
-	if l.scroller.Size().Height <= 0 {
+	if l.list.scroller.Size().Height <= 0 {
 		return
 	}
 
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 
-	if len(l.itemHeights) == 0 {
+	if len(l.list.itemHeights) == 0 {
 		paddedItemHeight := itemHeight + padding
 
-		offY = float32(math.Floor(float64(l.offsetY/paddedItemHeight))) * paddedItemHeight
+		offY = float32(math.Floor(float64(l.list.offsetY/paddedItemHeight))) * paddedItemHeight
 		minRow = int(math.Floor(float64(offY / paddedItemHeight)))
-		maxRow := int(math.Ceil(float64((offY + l.scroller.Size().Height) / paddedItemHeight)))
+		maxRow := int(math.Ceil(float64((offY + l.list.scroller.Size().Height) / paddedItemHeight)))
 
 		if minRow > length-1 {
 			minRow = length - 1
@@ -349,33 +353,32 @@ func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []flo
 			maxRow = length
 		}
 
-		visible = make([]float32, maxRow-minRow)
 		for i := 0; i < maxRow-minRow; i++ {
-			visible[i] = itemHeight
+			l.visibleRowHeights = append(l.visibleRowHeights, itemHeight)
 		}
 		return
 	}
 
 	for i := 0; i < length; i++ {
 		height := itemHeight
-		if h, ok := l.itemHeights[i]; ok {
+		if h, ok := l.list.itemHeights[i]; ok {
 			height = h
 		}
 
-		if rowOffset <= l.offsetY-height-padding {
+		if rowOffset <= l.list.offsetY-height-padding {
 			// before scroll
-		} else if rowOffset <= l.offsetY {
+		} else if rowOffset <= l.list.offsetY {
 			minRow = i
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset >= l.offsetY+l.scroller.Size().Height {
+		if rowOffset >= l.list.offsetY+l.list.scroller.Size().Height {
 			break
 		}
 
 		rowOffset += height + padding
 		if isVisible {
-			visible = append(visible, height)
+			l.visibleRowHeights = append(l.visibleRowHeights, height)
 		}
 	}
 	return
@@ -523,18 +526,29 @@ func (li *listItemRenderer) Refresh() {
 // Declare conformity with Layout interface.
 var _ fyne.Layout = (*listLayout)(nil)
 
+type itemAndID struct {
+	item *listItem
+	id   ListItemID
+}
+
 type listLayout struct {
 	list       *List
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool   *syncPool
-	visible    map[ListItemID]*listItem
-	renderLock sync.Mutex
+	itemPool          syncPool
+	visible           []itemAndID
+	slicePool         sync.Pool // *[]itemAndID
+	visibleRowHeights []float32
+	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
-	l := &listLayout{list: list, itemPool: &syncPool{}, visible: make(map[ListItemID]*listItem)}
+	l := &listLayout{list: list}
+	l.slicePool.New = func() interface{} {
+		s := make([]itemAndID, 0)
+		return &s
+	}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -636,25 +650,31 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	wasVisible := l.visible
+	// Keep pointer reference for copying slice header when returning to the pool
+	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
+	wasVisiblePtr := l.slicePool.Get().(*[]itemAndID)
+	wasVisible := (*wasVisiblePtr)[:0]
+	wasVisible = append(wasVisible, l.visible...)
 
 	l.list.propertyLock.Lock()
-	visibleRowHeights, offY, minRow := l.list.visibleItemHeights(l.list.itemMin.Height, length)
+	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
 	l.list.propertyLock.Unlock()
-	if len(visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
+	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
-	visible := make(map[ListItemID]*listItem, len(visibleRowHeights))
-	cells := make([]fyne.CanvasObject, len(visibleRowHeights))
+	oldVisibleLen := len(l.visible)
+	l.visible = l.visible[:0]
+	oldChildrenLen := len(l.children)
+	l.children = l.children[:0]
 
 	y := offY
-	for index, itemHeight := range visibleRowHeights {
+	for index, itemHeight := range l.visibleRowHeights {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		c, ok := wasVisible[row]
+		c, ok := l.searchVisible(wasVisible, row)
 		if !ok {
 			c = l.getItem()
 			if c == nil {
@@ -667,45 +687,65 @@ func (l *listLayout) updateList(newOnly bool) {
 		c.Resize(size)
 
 		y += itemHeight + separatorThickness
-		visible[row] = c
-		cells[index] = c
+		l.visible = append(l.visible, itemAndID{id: row, item: c})
+		l.children = append(l.children, c)
 	}
+	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
+	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
-	l.visible = visible
-
-	for id, old := range wasVisible {
-		if _, ok := l.visible[id]; !ok {
-			l.itemPool.Release(old)
+	for _, wasVis := range wasVisible {
+		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
+			l.itemPool.Release(wasVis.item)
 		}
 	}
-	l.children = cells
 
 	l.updateSeparators()
 
-	objects := l.children
-	objects = append(objects, l.separators...)
-	l.list.scroller.Content.(*fyne.Container).Objects = objects
+	c := l.list.scroller.Content.(*fyne.Container)
+	oldObjLen := len(c.Objects)
+	c.Objects = c.Objects[:0]
+	c.Objects = append(c.Objects, l.children...)
+	c.Objects = append(c.Objects, l.separators...)
+	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
+
+	// make a local deep copy of l.visible since rest of this function is unlocked
+	// and cannot safely access l.visible
+	visiblePtr := l.slicePool.Get().(*[]itemAndID)
+	visible := (*visiblePtr)[:0]
+	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
-		for row, obj := range visible {
-			if _, ok := wasVisible[row]; !ok {
-				l.setupListItem(obj, row, l.list.focused && l.list.currentFocus == row)
+		for _, vis := range visible {
+			if _, ok := l.searchVisible(wasVisible, vis.id); !ok {
+				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 			}
 		}
 	} else {
-		for row, obj := range visible {
-			l.setupListItem(obj, row, l.list.focused && l.list.currentFocus == row)
+		for _, vis := range visible {
+			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
 	}
+
+	// nil out all references before returning slices to pool
+	for i := 0; i < len(wasVisible); i++ {
+		wasVisible[i].item = nil
+	}
+	for i := 0; i < len(visible); i++ {
+		visible[i].item = nil
+	}
+	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
+	*visiblePtr = visible
+	l.slicePool.Put(wasVisiblePtr)
+	l.slicePool.Put(visiblePtr)
 }
 
 func (l *listLayout) updateSeparators() {
-	if len(l.children) > 1 {
-		if len(l.separators) > len(l.children) {
-			l.separators = l.separators[:len(l.children)]
+	if lenChildren := len(l.children); lenChildren > 1 {
+		if lenSep := len(l.separators); lenSep > lenChildren {
+			l.separators = l.separators[:lenChildren]
 		} else {
-			for i := len(l.separators); i < len(l.children); i++ {
+			for i := lenSep; i < lenChildren; i++ {
 				l.separators = append(l.separators, NewSeparator())
 			}
 		}
@@ -722,5 +762,33 @@ func (l *listLayout) updateSeparators() {
 		l.separators[i].Move(fyne.NewPos(0, child.Position().Y-dividerOff))
 		l.separators[i].Resize(fyne.NewSize(l.list.Size().Width, separatorThickness))
 		l.separators[i].Show()
+	}
+}
+
+// invariant: visible is in ascending order of IDs
+func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) (*listItem, bool) {
+	ln := len(visible)
+	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
+	if idx < ln && visible[idx].id == id {
+		return visible[idx].item, true
+	}
+	return nil, false
+}
+
+func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {
+	if oldLen > len {
+		objs = objs[:oldLen] // gain view into old data
+		for i := len; i < oldLen; i++ {
+			objs[i] = nil
+		}
+	}
+}
+
+func (l *listLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
+	if oldLen > len {
+		objs = objs[:oldLen] // gain view into old data
+		for i := len; i < oldLen; i++ {
+			objs[i].item = nil
+		}
 	}
 }
