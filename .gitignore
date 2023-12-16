@@ -21,6 +21,8 @@ fyne-cross
 ### Go
 # Output of the coverage tool
 *.out
+# Output of WASM building
+*.wasm
 
 ### macOS
 # General

@@ -17,7 +17,7 @@ require (
 	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
 	github.com/go-text/typesetting v0.0.0-20230616162802-9c17dd34aa4a
 	github.com/godbus/dbus/v5 v5.1.0
-	github.com/gopherjs/gopherjs v1.17.2
+	github.com/gopherjs/gopherjs v1.18.0-beta3
 	github.com/jackmordaunt/icns/v2 v2.2.6
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.9.0
@@ -41,11 +41,21 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
+	github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86 // indirect
+	github.com/neelance/sourcemap v0.0.0-20200213170602-2833bce08e4c // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/cobra v1.2.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tevino/abool v1.2.0 // indirect
+	github.com/visualfc/goembed v0.3.3 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
