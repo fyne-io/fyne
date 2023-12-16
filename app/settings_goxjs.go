@@ -22,4 +22,5 @@ func (s *settings) watchSettings() {
 }
 
 func (s *settings) stopWatching() {
+	stopWatching()
 }
