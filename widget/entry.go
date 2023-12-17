@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"errors"
 	"image/color"
 	"math"
 	"runtime"
@@ -893,11 +894,13 @@ func (e *Entry) TypedRune(r rune) {
 	})
 	e.propertyLock.Unlock()
 
-	e.Validate()
+	if err := e.Validate(); err == nil || errors.Is(err, e.validationError) {
+		// Under this situation, the validate function won't call refresh, so do it here
+		e.Refresh()
+	}
 	if cb != nil {
 		cb(content)
 	}
-	e.Refresh()
 }
 
 // TypedShortcut implements the Shortcutable interface
@@ -1018,6 +1021,11 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		// format clipboard content to be compatible with single line entry
 		text = strings.Replace(text, "\n", " ", -1)
 	}
+	if text == "" {
+		// The content of the clipboard can be the unsupported type or just empty.
+		// Then we do nothing about this.
+		return
+	}
 	provider := e.textProvider()
 	runes := []rune(text)
 	pos := e.cursorTextPos()
@@ -1028,11 +1036,19 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		Position: pos,
 		Text:     text,
 	})
+	content := provider.String()
+	e.updateText(content)
+	cb := e.OnChanged
 	e.propertyLock.Unlock()
 
-	e.updateTextAndRefresh(provider.String())
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
-	e.Refresh() // placing the cursor (and refreshing) happens last
+	if err := e.Validate(); err == nil || errors.Is(err, e.validationError) {
+		// the validate() won't call refresh under this condition, so we need to do it manually
+		e.Refresh() // placing the cursor (and refreshing) happens last
+	}
+	if cb != nil { // we have made sure that the paste content is not empty, so we always need to call the callback
+		cb(content)
+	}
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
