@@ -537,7 +537,7 @@ func (e *Entry) Append(text string) {
 	e.propertyLock.Unlock()
 
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -749,7 +749,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	cb := e.OnChanged
 	e.propertyLock.Unlock()
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -1397,8 +1397,9 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 
 	val, err := textSource.Get()
 	e.conversionError = err
-	e.Validate()
+	e.validate()
 	if err != nil {
+		e.Refresh()
 		return
 	}
 	e.SetText(val)
@@ -1468,7 +1469,7 @@ func (e *Entry) updateText(text string) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string) {
 	var callback func(string)
-	e.setFieldsAndRefresh(func() {
+	e.setFields(func() {
 		changed := e.updateText(text)
 
 		if changed {
@@ -1476,8 +1477,8 @@ func (e *Entry) updateTextAndRefresh(text string) {
 		}
 	})
 
-	e.Validate()
-
+	e.validate()
+	e.Refresh()
 	if callback != nil {
 		callback(text)
 	}
@@ -1754,7 +1755,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size)
 
-		r.entry.Validate()
+		r.entry.validate()
 
 		r.Refresh()
 	}

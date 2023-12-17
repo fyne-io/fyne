@@ -154,6 +154,14 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 	impl.Refresh()
 }
 
+// setFields helps to make changes to a widget.
+// This method is a guaranteed thread-safe way of directly manipulating widget fields.
+func (w *BaseWidget) setFields(f func()) {
+	w.propertyLock.Lock()
+	f()
+	w.propertyLock.Unlock()
+}
+
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is nil.
 func (w *BaseWidget) super() fyne.Widget {
