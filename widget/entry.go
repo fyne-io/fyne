@@ -1759,7 +1759,6 @@ func (r *entryRenderer) ensureValidationSetup() {
 
 		r.entry.validate()
 
-		r.Refresh()
 	}
 }
 
