@@ -950,14 +950,15 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.setFieldsAndRefresh(e.eraseSelection)
+	e.setFields(e.eraseSelection)
 	e.propertyLock.RLock()
 	cb := e.OnChanged
 	e.propertyLock.RUnlock()
 	if cb != nil {
 		cb(e.Text)
 	}
-	e.Validate()
+	e.validate()
+	e.Refresh()
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -1229,14 +1230,15 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.setFieldsAndRefresh(e.eraseSelection)
+		e.setFields(e.eraseSelection)
 		e.propertyLock.RLock()
 		cb := e.OnChanged
 		e.propertyLock.RUnlock()
 		if cb != nil {
 			cb(e.Text)
 		}
-		e.Validate()
+		e.validate()
+		e.Refresh()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
