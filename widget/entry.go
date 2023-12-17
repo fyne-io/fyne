@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"errors"
 	"image/color"
 	"math"
 	"runtime"
@@ -894,10 +893,8 @@ func (e *Entry) TypedRune(r rune) {
 	})
 	e.propertyLock.Unlock()
 
-	if err := e.Validate(); err == nil || errors.Is(err, e.validationError) {
-		// Under this situation, the validate function won't call refresh, so do it here
-		e.Refresh()
-	}
+	e.validate()
+	e.Refresh()
 	if cb != nil {
 		cb(content)
 	}
@@ -1042,10 +1039,8 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	e.propertyLock.Unlock()
 
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
-	if err := e.Validate(); err == nil || errors.Is(err, e.validationError) {
-		// the validate() won't call refresh under this condition, so we need to do it manually
-		e.Refresh() // placing the cursor (and refreshing) happens last
-	}
+	e.validate()
+	e.Refresh()
 	if cb != nil { // we have made sure that the paste content is not empty, so we always need to call the callback
 		cb(content)
 	}
