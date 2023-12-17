@@ -464,7 +464,7 @@ func (gw *gridWrapItemRenderer) Refresh() {
 // Declare conformity with Layout interface.
 var _ fyne.Layout = (*gridWrapLayout)(nil)
 
-type itemAndID struct {
+type gridItemAndID struct {
 	item *gridWrapItem
 	id   GridWrapItemID
 }
@@ -474,14 +474,14 @@ type gridWrapLayout struct {
 
 	itemPool   syncPool
 	slicePool  sync.Pool // *[]itemAndID
-	visible    []itemAndID
+	visible    []gridItemAndID
 	renderLock sync.Mutex
 }
 
 func newGridWrapLayout(list *GridWrap) fyne.Layout {
 	l := &gridWrapLayout{list: list}
 	l.slicePool.New = func() interface{} {
-		s := make([]itemAndID, 0)
+		s := make([]gridItemAndID, 0)
 		return &s
 	}
 	list.offsetUpdated = l.offsetUpdated
@@ -587,7 +587,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 
 	// Keep pointer reference for copying slice header when returning to the pool
 	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get().(*[]itemAndID)
+	wasVisiblePtr := l.slicePool.Get().(*[]gridItemAndID)
 	wasVisible := (*wasVisiblePtr)[:0]
 	wasVisible = append(wasVisible, l.visible...)
 
@@ -617,7 +617,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 			}
 
 			x += l.list.itemMin.Width + theme.Padding()
-			l.visible = append(l.visible, itemAndID{item: item, id: curItemID})
+			l.visible = append(l.visible, gridItemAndID{item: item, id: curItemID})
 			c.Objects = append(c.Objects, item)
 			curItemID++
 		}
@@ -634,7 +634,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 
 	// make a local deep copy of l.visible since rest of this function is unlocked
 	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get().(*[]itemAndID)
+	visiblePtr := l.slicePool.Get().(*[]gridItemAndID)
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked
@@ -657,7 +657,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 }
 
 // invariant: visible is in ascending order of IDs
-func (l *gridWrapLayout) searchVisible(visible []itemAndID, id GridWrapItemID) (*gridWrapItem, bool) {
+func (l *gridWrapLayout) searchVisible(visible []gridItemAndID, id GridWrapItemID) (*gridWrapItem, bool) {
 	ln := len(visible)
 	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
 	if idx < ln && visible[idx].id == id {
@@ -675,7 +675,7 @@ func (l *gridWrapLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen i
 	}
 }
 
-func (l *gridWrapLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
+func (l *gridWrapLayout) nilOldVisibleSliceData(objs []gridItemAndID, len, oldLen int) {
 	if oldLen > len {
 		objs = objs[:oldLen] // gain view into old data
 		for i := len; i < oldLen; i++ {
