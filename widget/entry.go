@@ -466,8 +466,8 @@ func (e *Entry) Redo() {
 	if !modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText)
 	e.propertyLock.Lock()
+	e.updateText(newText)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
@@ -772,8 +772,8 @@ func (e *Entry) Undo() {
 	if modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText)
 	e.propertyLock.Lock()
+	e.updateText(newText)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
