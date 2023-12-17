@@ -12,22 +12,22 @@ var _ fyne.Validatable = (*Entry)(nil)
 
 // Validate validates the current text in the widget
 func (e *Entry) Validate() error {
-	err, needRefresh := e.validate()
-	if needRefresh {
+	err, updated := e.validate()
+	if updated {
 		e.Refresh()
 	}
 	return err
 }
 
 // validate validates the current text in the widget but not refresh
-func (e *Entry) validate() (err error, needRefresh bool) {
+func (e *Entry) validate() (err error, updated bool) {
 	if e.Validator == nil {
 		return nil, false
 	}
 
 	err = e.Validator(e.Text)
-	updated := e.SetValidationError(err)
-	return err, updated
+	updated = e.setValidationError(err)
+	return
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -36,8 +36,13 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 	e.onValidationChanged = callback
 }
 
+// SetValidationError manually updates the validation status until the next input change.
+func (e *Entry) SetValidationError(err error) {
+	_ = e.setValidationError(err)
+}
+
 // SetValidationError manually updates the validation status until the next input change. Returns if the validation error is really set.
-func (e *Entry) SetValidationError(err error) bool {
+func (e *Entry) setValidationError(err error) bool {
 	if e.Validator == nil {
 		return false
 	}
