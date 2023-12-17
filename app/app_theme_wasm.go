@@ -20,12 +20,3 @@ func defaultVariant() fyne.ThemeVariant {
 	}
 	return theme.VariantDark
 }
-
-func init() {
-	if matchMedia := js.Global().Call("matchMedia", "(prefers-color-scheme: dark)"); matchMedia.Truthy() {
-		matchMedia.Call("addEventListener", "change", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			fyne.CurrentApp().Settings().(*settings).setupTheme()
-			return nil
-		}))
-	}
-}
