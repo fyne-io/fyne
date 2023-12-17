@@ -526,7 +526,7 @@ func (li *listItemRenderer) Refresh() {
 // Declare conformity with Layout interface.
 var _ fyne.Layout = (*listLayout)(nil)
 
-type itemAndID struct {
+type listItemAndID struct {
 	item *listItem
 	id   ListItemID
 }
@@ -537,7 +537,7 @@ type listLayout struct {
 	children   []fyne.CanvasObject
 
 	itemPool          syncPool
-	visible           []itemAndID
+	visible           []listItemAndID
 	slicePool         sync.Pool // *[]itemAndID
 	visibleRowHeights []float32
 	renderLock        sync.RWMutex
@@ -546,7 +546,7 @@ type listLayout struct {
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
 	l.slicePool.New = func() interface{} {
-		s := make([]itemAndID, 0)
+		s := make([]gridItemAndID, 0)
 		return &s
 	}
 	list.offsetUpdated = l.offsetUpdated
@@ -652,7 +652,7 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	// Keep pointer reference for copying slice header when returning to the pool
 	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get().(*[]itemAndID)
+	wasVisiblePtr := l.slicePool.Get().(*[]listItemAndID)
 	wasVisible := (*wasVisiblePtr)[:0]
 	wasVisible = append(wasVisible, l.visible...)
 
@@ -687,7 +687,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		c.Resize(size)
 
 		y += itemHeight + separatorThickness
-		l.visible = append(l.visible, itemAndID{id: row, item: c})
+		l.visible = append(l.visible, listItemAndID{id: row, item: c})
 		l.children = append(l.children, c)
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
@@ -710,7 +710,7 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	// make a local deep copy of l.visible since rest of this function is unlocked
 	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get().(*[]itemAndID)
+	visiblePtr := l.slicePool.Get().(*[]listItemAndID)
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked
@@ -766,7 +766,7 @@ func (l *listLayout) updateSeparators() {
 }
 
 // invariant: visible is in ascending order of IDs
-func (l *listLayout) searchVisible(visible []itemAndID, id ListItemID) (*listItem, bool) {
+func (l *listLayout) searchVisible(visible []listItemAndID, id ListItemID) (*listItem, bool) {
 	ln := len(visible)
 	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
 	if idx < ln && visible[idx].id == id {
@@ -784,7 +784,7 @@ func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) 
 	}
 }
 
-func (l *listLayout) nilOldVisibleSliceData(objs []itemAndID, len, oldLen int) {
+func (l *listLayout) nilOldVisibleSliceData(objs []listItemAndID, len, oldLen int) {
 	if oldLen > len {
 		objs = objs[:oldLen] // gain view into old data
 		for i := len; i < oldLen; i++ {
