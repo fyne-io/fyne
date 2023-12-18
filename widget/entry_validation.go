@@ -38,7 +38,9 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 
 // SetValidationError manually updates the validation status until the next input change.
 func (e *Entry) SetValidationError(err error) {
-	_ = e.setValidationError(err)
+	if e.setValidationError(err) {
+		e.Refresh()
+	}
 }
 
 // SetValidationError manually updates the validation status until the next input change. Returns if the validation error is really set.
