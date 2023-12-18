@@ -538,9 +538,11 @@ func (e *Entry) Append(text string) {
 
 	if changed {
 		e.validate()
+		e.Refresh()
 		if cb != nil {
 			cb(content)
 		}
+		return
 	}
 	e.Refresh()
 }
@@ -954,11 +956,11 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	e.propertyLock.RLock()
 	cb := e.OnChanged
 	e.propertyLock.RUnlock()
+	e.validate()
+	e.Refresh()
 	if cb != nil {
 		cb(e.Text)
 	}
-	e.validate()
-	e.Refresh()
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -1234,11 +1236,11 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		e.propertyLock.RLock()
 		cb := e.OnChanged
 		e.propertyLock.RUnlock()
+		e.validate()
+		e.Refresh()
 		if cb != nil {
 			cb(e.Text)
 		}
-		e.validate()
-		e.Refresh()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
