@@ -752,9 +752,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	e.propertyLock.Unlock()
 	if changed {
 		e.validate()
+		e.Refresh()
 		if cb != nil {
 			cb(content)
 		}
+		return
 	}
 	e.Refresh()
 }
