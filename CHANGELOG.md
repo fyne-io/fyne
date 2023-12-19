@@ -12,7 +12,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Failure with fyne release -os android/arm (#4174)
 * Android GoBack with forcefully close the app even if the keyboard is up (#4257)
 * *BSD systems using the wrong (and slow) window resize
-* Optimisations to reduce memory allocations in List, GridWrap and mime type handling
+* Optimisations to reduce memory allocations in List, GridWrap, driver and mime type handling
 * Reduce calls to C and repeated size checks in painter and driver code
 
 
