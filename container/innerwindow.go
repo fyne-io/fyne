@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -33,7 +34,7 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: NewStack(content)}
+	w := &InnerWindow{title: title, content: NewPadded(content)}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -91,6 +92,15 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
 	w.content.Objects[0] = obj
 
+	w.content.Refresh()
+}
+
+func (w *InnerWindow) SetPadded(pad bool) {
+	if pad {
+		w.content.Layout = layout.NewPaddedLayout()
+	} else {
+		w.content.Layout = layout.NewStackLayout()
+	}
 	w.content.Refresh()
 }
 

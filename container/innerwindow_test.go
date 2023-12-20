@@ -43,8 +43,8 @@ func TestInnerWindow_MinSize(t *testing.T) {
 	labelMin := widget.NewLabel("Inner").MinSize()
 
 	winMin := w.MinSize()
-	assert.Equal(t, btnMin.Height+labelMin.Height+theme.Padding()*2, winMin.Height)
-	assert.Greater(t, winMin.Width, btnMin.Width*3+theme.Padding()*3)
+	assert.Equal(t, btnMin.Height+labelMin.Height+theme.Padding()*4, winMin.Height)
+	assert.Greater(t, winMin.Width, btnMin.Width*3+theme.Padding()*5)
 
 	w2 := NewInnerWindow("Much longer title that will truncate", widget.NewLabel("Content"))
 	assert.Equal(t, winMin, w2.MinSize())
@@ -58,6 +58,17 @@ func TestInnerWindow_SetContent(t *testing.T) {
 
 	w.SetContent(widget.NewLabel("Content2"))
 	assert.Equal(t, "Content2", title.Objects[0].(*widget.Label).Text)
+}
+
+func TestInnerWindow_SetPadded(t *testing.T) {
+	w := NewInnerWindow("Title", widget.NewLabel("Content"))
+	minPadded := w.MinSize()
+
+	w.SetPadded(false)
+	assert.Less(t, w.MinSize().Height, minPadded.Height)
+
+	w.SetPadded(true)
+	assert.Equal(t, minPadded, w.MinSize())
 }
 
 func TestInnerWindow_SetTitle(t *testing.T) {
