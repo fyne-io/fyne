@@ -25,7 +25,7 @@ type InnerWindow struct {
 	Icon                                                fyne.Resource
 
 	title   string
-	content fyne.CanvasObject
+	content *fyne.Container
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
@@ -33,7 +33,7 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: content}
+	w := &InnerWindow{title: title, content: NewStack(content)}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -86,6 +86,12 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{bg, contentBG, bar, corner, w.content}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
 		win: w, bar: bar, bg: bg, corner: corner, contentBG: contentBG}
+}
+
+func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
+	w.content.Objects[0] = obj
+
+	w.content.Refresh()
 }
 
 func (w *InnerWindow) SetTitle(title string) {
