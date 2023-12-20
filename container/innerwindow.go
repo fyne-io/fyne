@@ -82,7 +82,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	bar := NewBorder(nil, nil, buttons, icon, title)
 	bg := canvas.NewRectangle(theme.OverlayBackgroundColor())
 	contentBG := canvas.NewRectangle(theme.BackgroundColor())
-	corner := newDraggableCorner(w.OnResized)
+	corner := newDraggableCorner(w)
 
 	objects := []fyne.CanvasObject{bg, contentBG, bar, corner, w.content}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
@@ -197,11 +197,11 @@ func (d *draggableLabel) Tapped(ev *fyne.PointEvent) {
 
 type draggableCorner struct {
 	widget.BaseWidget
-	drag func(*fyne.DragEvent)
+	win *InnerWindow
 }
 
-func newDraggableCorner(fn func(*fyne.DragEvent)) *draggableCorner {
-	d := &draggableCorner{drag: fn}
+func newDraggableCorner(w *InnerWindow) *draggableCorner {
+	d := &draggableCorner{win: w}
 	d.ExtendBaseWidget(d)
 	return d
 }
@@ -213,8 +213,8 @@ func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (c *draggableCorner) Dragged(ev *fyne.DragEvent) {
-	if f := c.drag; f != nil {
-		c.drag(ev)
+	if f := c.win.OnResized; f != nil {
+		c.win.OnResized(ev)
 	}
 }
 
