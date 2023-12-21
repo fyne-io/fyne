@@ -161,6 +161,11 @@ const (
 	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
 
+	// IconNameDragCornerIndicator is the name of the icon used in inner windows to indicate a draggable corner.
+	//
+	// Since: 2.5
+	IconNameDragCornerIndicator fyne.ThemeIconName = "dragCornerIndicator"
+
 	// IconNameMoreHorizontal is the name of theme lookup for horizontal more.
 	//
 	// Since 2.0
@@ -506,6 +511,8 @@ var (
 		IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
+
+		IconNameDragCornerIndicator: NewThemedResource(dragcornerindicatorIconRes),
 
 		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
 		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),

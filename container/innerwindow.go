@@ -1,8 +1,6 @@
 package container
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	intWidget "fyne.io/fyne/v2/internal/widget"
@@ -84,7 +82,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	contentBG := canvas.NewRectangle(theme.BackgroundColor())
 	corner := newDraggableCorner(w)
 
-	objects := []fyne.CanvasObject{bg, contentBG, bar, corner, w.content}
+	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
 		win: w, bar: bar, bg: bg, corner: corner, contentBG: contentBG}
 }
@@ -141,7 +139,7 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	i.win.content.Resize(innerSize)
 
 	cornerSize := i.corner.MinSize()
-	i.corner.Move(pos.Add(size).Subtract(cornerSize))
+	i.corner.Move(pos.Add(size).Subtract(cornerSize).AddXY(1, 1))
 	i.corner.Resize(cornerSize)
 }
 
@@ -207,8 +205,8 @@ func newDraggableCorner(w *InnerWindow) *draggableCorner {
 }
 
 func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
-	prop := canvas.NewRectangle(color.Transparent)
-	prop.SetMinSize(fyne.NewSquareSize(20))
+	prop := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon(theme.IconNameDragCornerIndicator))
+	prop.SetMinSize(fyne.NewSquareSize(16))
 	return widget.NewSimpleRenderer(prop)
 }
 
