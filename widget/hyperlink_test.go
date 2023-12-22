@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -167,7 +168,7 @@ func TestHyperlink_ThemeOverride(t *testing.T) {
 	ugly := w.Canvas().Capture()
 	assertPixelsMatch(t, false, ugly, light)
 
-	theme.OverrideWidget(hyperlink, theme.LightTheme())
+	cache.OverrideTheme(hyperlink, theme.LightTheme())
 	hyperlink.Refresh()
 	override := w.Canvas().Capture()
 	assertPixelsMatch(t, true, override, light)
