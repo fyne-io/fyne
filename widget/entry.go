@@ -101,6 +101,10 @@ type Entry struct {
 	// undoStack stores the data necessary for undo/redo functionality
 	// See entryUndoStack for implementation details.
 	undoStack entryUndoStack
+
+	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
+	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
+	doubleTappedAtUnixMillis int64
 }
 
 // NewEntry creates a new single line entry widget.
@@ -229,6 +233,7 @@ func (e *Entry) Disabled() bool {
 //
 // Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
+	e.doubleTappedAtUnixMillis = time.Now().UnixMilli()
 	row := e.textProvider().row(e.CursorRow)
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
 	if start == -1 || end == -1 {
@@ -248,6 +253,10 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		}
 		e.selecting = true
 	})
+}
+
+func (e *Entry) isTripleTap(nowMilli int64) bool {
+	return nowMilli-e.doubleTappedAtUnixMillis <= fyne.CurrentApp().Driver().DoubleTapDelay().Milliseconds()
 }
 
 // DragEnd is called at end of a drag event.
@@ -407,6 +416,10 @@ func (e *Entry) MinSize() fyne.Size {
 //
 // Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
+	if e.isTripleTap(time.Now().UnixMilli()) {
+		e.selectCurrentRow()
+		return
+	}
 	e.propertyLock.Lock()
 	if e.selectKeyDown {
 		e.selecting = true
@@ -606,8 +619,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 //
 // Implements: mobile.Touchable
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
+	now := time.Now().UnixMilli()
 	if !e.Disabled() {
 		e.requestFocus()
+	}
+	if e.isTripleTap(now) {
+		e.selectCurrentRow()
+		return
 	}
 
 	e.updateMousePointer(ev.Position, false)
@@ -1500,6 +1518,22 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
+}
+
+// Selects the row where the CursorColumn is currently positioned
+// Do not call while holding the proeprtyLock
+func (e *Entry) selectCurrentRow() {
+	provider := e.textProvider()
+	e.propertyLock.Lock()
+	e.selectRow = e.CursorRow
+	e.selectColumn = 0
+	if e.MultiLine {
+		e.CursorColumn = provider.rowLength(e.CursorRow)
+	} else {
+		e.CursorColumn = provider.len()
+	}
+	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)

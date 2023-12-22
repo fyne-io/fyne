@@ -30,7 +30,6 @@ func (u *uri) Name() string {
 }
 
 func (u *uri) MimeType() string {
-
 	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {
 		mimeTypeFull = "text/plain"
@@ -50,7 +49,12 @@ func (u *uri) MimeType() string {
 		}
 	}
 
-	return strings.Split(mimeTypeFull, ";")[0]
+	// Replace with strings.Cut() when Go 1.18 is our new base version.
+	semicolonIndex := strings.IndexByte(mimeTypeFull, ';')
+	if semicolonIndex == -1 {
+		return mimeTypeFull
+	}
+	return mimeTypeFull[:semicolonIndex]
 }
 
 func (u *uri) Scheme() string {

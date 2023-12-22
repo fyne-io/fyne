@@ -1298,6 +1298,17 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 	assert.Equal(t, "", e.SelectedText())
 }
 
+func TestEntry_Select_TripleTap(t *testing.T) {
+	e, _ := setupSelection(t, false)
+	e.MultiLine = true
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, "sti", e.SelectedText())
+	test.DoubleTap(e)
+	time.Sleep(50 * time.Millisecond)
+	e.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1)}})
+	assert.Equal(t, "Testing", e.SelectedText())
+}
+
 func TestEntry_SelectedText(t *testing.T) {
 	e, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
