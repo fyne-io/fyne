@@ -197,16 +197,21 @@ func (l *List) Resize(s fyne.Size) {
 
 // Select adds the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
+	l._select(id)
+}
+
+// select; return true if selected + refreshed
+func (l *List) _select(id ListItemID) bool {
 	sel := l.selected
 	for _, selId := range sel {
 		if id == selId {
-			return
+			return false
 		}
 	}
 
 	length := l.length()
 	if id < 0 || id >= length {
-		return
+		return false
 	}
 	l.selected = append(sel, id)
 	defer func() {
@@ -216,6 +221,7 @@ func (l *List) Select(id ListItemID) {
 	}()
 	l.scrollTo(id)
 	l.RefreshItem(id)
+	return true
 }
 
 // SelectOnly selects only the item identified by the given ID to the selection,
@@ -372,14 +378,12 @@ func (l *List) ScrollToTop() {
 //
 // Implements: fyne.Focusable
 func (l *List) TypedKey(event *fyne.KeyEvent) {
-	selectOrFocus := func() {
+	maybeSelect := func() bool {
 		d, ok := fyne.CurrentApp().Driver().(desktop.Driver)
 		if ok && d.CurrentKeyModifiers()&fyne.KeyModifierShift > 0 {
-			l.Select(l.currentFocus)
-		} else {
-			l.scrollTo(l.currentFocus)
-			l.RefreshItem(l.currentFocus)
+			return l._select(l.currentFocus)
 		}
+		return false
 	}
 
 	switch event.Name {
@@ -395,14 +399,20 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus++
-		selectOrFocus()
+		if !maybeSelect() {
+			l.scrollTo(l.currentFocus)
+			l.RefreshItem(l.currentFocus)
+		}
 	case fyne.KeyUp:
 		if l.currentFocus <= 0 {
 			return
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus--
-		selectOrFocus()
+		if !maybeSelect() {
+			l.scrollTo(l.currentFocus)
+			l.RefreshItem(l.currentFocus)
+		}
 	}
 }
 
@@ -504,33 +514,37 @@ func (l *List) handleMultiSelectAction(id ListItemID) {
 	if mods&fyne.KeyModifierShortcutDefault > 0 {
 		toggleSelect()
 	} else if mods&fyne.KeyModifierShift > 0 {
-		if isSelected {
-			return
+		if !isSelected {
+			l.selectRange(id)
 		}
-
-		// select range between id and nearest existing selected item
-		nearest, dist := l.findNearestSelectedItem(id)
-		above := nearest < id
-		if nearest == -1 || dist <= 1 {
-			// either nothing selected, or something selected right next to id
-			l.addToSelection([]int{id})
-			return
-		}
-		selAdd := make([]int, 0, dist-1)
-		if above {
-			// nearest selected item is above id
-			for i := 0; i < dist; i++ {
-				selAdd = append(selAdd, id-i)
-			}
-		} else {
-			for i := 0; i < dist; i++ {
-				selAdd = append(selAdd, id+i)
-			}
-		}
-		l.addToSelection(selAdd)
 	} else {
-		l.SelectOnly(id)
+		if !isSelected {
+			l.SelectOnly(id)
+		}
 	}
+}
+
+// select range between id and nearest existing selected item
+func (l *List) selectRange(id ListItemID) {
+	nearest, dist := l.findNearestSelectedItem(id)
+	above := nearest < id
+	if nearest == -1 || dist <= 1 {
+		// either nothing selected, or something selected right next to id
+		l.addToSelection([]int{id})
+		return
+	}
+	selAdd := make([]int, 0, dist-1)
+	if above {
+		// nearest selected item is above id
+		for i := 0; i < dist; i++ {
+			selAdd = append(selAdd, id-i)
+		}
+	} else {
+		for i := 0; i < dist; i++ {
+			selAdd = append(selAdd, id+i)
+		}
+	}
+	l.addToSelection(selAdd)
 }
 
 func (l *List) findNearestSelectedItem(id ListItemID) (nearest ListItemID, dist int) {
