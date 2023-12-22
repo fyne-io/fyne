@@ -202,7 +202,9 @@ func (l *List) Select(id ListItemID) {
 
 // select; return true if selected + refreshed
 func (l *List) _select(id ListItemID) bool {
+	l.propertyLock.RLock()
 	sel := l.selected
+	l.propertyLock.RUnlock()
 	for _, selId := range sel {
 		if id == selId {
 			return false
@@ -213,7 +215,9 @@ func (l *List) _select(id ListItemID) bool {
 	if id < 0 || id >= length {
 		return false
 	}
+	l.propertyLock.Lock()
 	l.selected = append(sel, id)
+	l.propertyLock.Unlock()
 	defer func() {
 		if f := l.OnSelected; f != nil {
 			f(id)
@@ -229,19 +233,22 @@ func (l *List) _select(id ListItemID) bool {
 //
 // Since: 2.5
 func (l *List) SelectOnly(id ListItemID) {
-	if len(l.selected) == 1 && id == l.selected[0] {
+	l.propertyLock.RLock()
+	sel := l.selected
+	l.propertyLock.RUnlock()
+
+	if len(sel) == 1 && id == sel[0] {
 		return
 	}
 	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
-	old := l.selected
 	l.selected = []ListItemID{id}
 	wasPrevSelected := false
 	defer func() {
 		if f := l.OnUnselected; f != nil {
-			for _, oldSelId := range old {
+			for _, oldSelId := range sel {
 				if oldSelId != id {
 					f(id)
 				} else {
@@ -263,15 +270,20 @@ func (l *List) SelectOnly(id ListItemID) {
 // Since: 2.5
 func (l *List) SelectAll(id ListItemID) {
 	length := l.length()
-	if length == 0 || len(l.selected) == length {
+	l.propertyLock.RLock()
+	prev := l.selected
+	l.propertyLock.RUnlock()
+	if length == 0 || len(prev) == length {
 		return
 	}
 
-	prev := l.selected
-	l.selected = make([]int, length)
-	for i := range l.selected {
-		l.selected[i] = i
+	selected := make([]int, length)
+	for i := range selected {
+		selected[i] = i
 	}
+	l.propertyLock.Lock()
+	l.selected = selected
+	l.propertyLock.Unlock()
 	l.Refresh()
 
 	// Call OnSelected callback for each newly selected item
@@ -305,14 +317,18 @@ func (l *List) SetSelection(selected []ListItemID) {
 		return
 	}
 
+	l.propertyLock.RLock()
 	oldSel := l.selected
+	l.propertyLock.RUnlock()
 	newSel := make([]ListItemID, 0, len(selected))
 	for _, id := range selected {
 		if id >= 0 && id < length {
 			newSel = append(newSel, id)
 		}
 	}
+	l.propertyLock.Lock()
 	l.selected = newSel
+	l.propertyLock.Unlock()
 	l.Refresh()
 
 	// Call OnSelected, OnUnselected callbacks for each newly (un)selected item
@@ -426,7 +442,9 @@ func (l *List) TypedRune(_ rune) {
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
 	// check if already not selected
+	l.propertyLock.RLock()
 	sel := l.selected
+	l.propertyLock.RUnlock()
 	selected := false
 	for _, selID := range sel {
 		if selID == id {
@@ -445,7 +463,9 @@ func (l *List) Unselect(id ListItemID) {
 		}
 	}
 
+	l.propertyLock.Lock()
 	l.selected = newSel
+	l.propertyLock.Unlock()
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		f(id)
@@ -456,12 +476,16 @@ func (l *List) Unselect(id ListItemID) {
 //
 // Since: 2.1
 func (l *List) UnselectAll() {
+	l.propertyLock.RLock()
 	sel := l.selected
+	l.propertyLock.RUnlock()
 	if len(sel) == 0 {
 		return
 	}
 
+	l.propertyLock.Lock()
 	l.selected = nil
+	l.propertyLock.Unlock()
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		for _, id := range sel {
@@ -472,7 +496,9 @@ func (l *List) UnselectAll() {
 
 // invariant: all of ids are valid and none are already selected
 func (l *List) addToSelection(ids []int) {
+	l.propertyLock.Lock()
 	l.selected = append(l.selected, ids...)
+	l.propertyLock.Unlock()
 	l.Refresh()
 	if f := l.OnSelected; f != nil {
 		for _, id := range ids {
@@ -482,7 +508,9 @@ func (l *List) addToSelection(ids []int) {
 }
 
 func (l *List) handleMultiSelectAction(id ListItemID) {
+	l.propertyLock.RLock()
 	sel := l.selected
+	l.propertyLock.RUnlock()
 	isSelected := false
 	for _, selID := range sel {
 		if selID == id {
@@ -515,7 +543,7 @@ func (l *List) handleMultiSelectAction(id ListItemID) {
 		toggleSelect()
 	} else if mods&fyne.KeyModifierShift > 0 {
 		if !isSelected {
-			l.selectRange(id)
+			l.selectRange(id, sel)
 		}
 	} else {
 		if !isSelected {
@@ -525,8 +553,8 @@ func (l *List) handleMultiSelectAction(id ListItemID) {
 }
 
 // select range between id and nearest existing selected item
-func (l *List) selectRange(id ListItemID) {
-	nearest, dist := l.findNearestSelectedItem(id)
+func (l *List) selectRange(id ListItemID, curSelection []int) {
+	nearest, dist := l.findNearestSelectedItem(id, curSelection)
 	above := nearest < id
 	if nearest == -1 || dist <= 1 {
 		// either nothing selected, or something selected right next to id
@@ -547,12 +575,11 @@ func (l *List) selectRange(id ListItemID) {
 	l.addToSelection(selAdd)
 }
 
-func (l *List) findNearestSelectedItem(id ListItemID) (nearest ListItemID, dist int) {
+func (l *List) findNearestSelectedItem(id ListItemID, curSelection []int) (nearest ListItemID, dist int) {
 	above, below := -1, math.MaxInt
-	sel := l.selected
 	length := l.length()
 
-	for _, selId := range sel {
+	for _, selId := range curSelection {
 		if selId >= 0 && selId < id && selId > above {
 			above = selId
 		} else if selId < length && selId > id && selId < below {
