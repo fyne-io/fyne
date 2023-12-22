@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -84,9 +85,7 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 		OnTapped: tapped,
 	}
 
-	if th, ok := icon.(*theme.ThemedResource); ok {
-		th.ForWidget = button
-	}
+	cache.SetWidgetForResource(icon, button)
 	button.ExtendBaseWidget(button)
 	return button
 }
@@ -381,29 +380,18 @@ func (r *buttonRenderer) applyTheme() {
 	}
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
+		cache.SetWidgetForResource(r.icon.Resource, r.button)
 		switch res := r.icon.Resource.(type) {
-		case *theme.ErrorThemedResource:
-			res.ForWidget = r.button
-			r.icon.Refresh()
-		case *theme.PrimaryThemedResource:
-			res.ForWidget = r.button
-			r.icon.Refresh()
-		case *theme.DisabledResource:
-			res.ForWidget = r.button
-			r.icon.Refresh()
 		case *theme.ThemedResource:
-			res.ForWidget = r.button
 			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
 				r.icon.Resource = theme.NewInvertedThemedResource(res)
 			}
-			r.icon.Refresh()
 		case *theme.InvertedThemedResource:
-			res.ForWidget = r.button
 			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
 				r.icon.Resource = res.Original()
 			}
-			r.icon.Refresh()
 		}
+		r.icon.Refresh()
 	}
 }
 

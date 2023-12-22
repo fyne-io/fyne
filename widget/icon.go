@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -33,18 +34,7 @@ func (i *iconRenderer) Refresh() {
 
 	r := i.image.Resource
 	if r != nil {
-		switch res := r.(type) {
-		case *theme.ErrorThemedResource:
-			res.ForWidget = i.image
-		case *theme.PrimaryThemedResource:
-			res.ForWidget = i.image
-		case *theme.DisabledResource:
-			res.ForWidget = i.image
-		case *theme.ThemedResource:
-			res.ForWidget = i.image
-		case *theme.InvertedThemedResource:
-			res.ForWidget = i.image
-		}
+		cache.SetWidgetForResource(r, i.image)
 	}
 
 	i.image.propertyLock.RLock()
@@ -83,6 +73,10 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 
 	img := canvas.NewImageFromResource(i.Resource)
 	img.FillMode = canvas.ImageFillContain
+	if i.Resource != nil {
+		cache.SetWidgetForResource(i.Resource, i)
+	}
+
 	r := &iconRenderer{image: i, raster: img}
 	r.SetObjects([]fyne.CanvasObject{img})
 	i.cachedRes = i.Resource

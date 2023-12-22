@@ -2,7 +2,10 @@ package cache
 
 import "fyne.io/fyne/v2"
 
-var overrides = make(map[fyne.Widget]fyne.Theme)
+var (
+	forWidgets = make(map[fyne.Resource]fyne.Widget)
+	overrides  = make(map[fyne.Widget]fyne.Theme)
+)
 
 func overrideWidget(w fyne.Widget, th fyne.Theme) {
 	ResetThemeCaches()
@@ -45,4 +48,17 @@ func WidgetTheme(o fyne.Widget) fyne.Theme {
 	}
 
 	return th
+}
+
+func SetWidgetForResource(res fyne.Resource, w fyne.Widget) {
+	forWidgets[res] = w
+}
+
+func WidgetForResource(res fyne.Resource) fyne.Widget {
+	w, ok := forWidgets[res]
+	if !ok {
+		return nil
+	}
+
+	return w
 }
