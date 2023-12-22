@@ -394,7 +394,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		if sel := l.SelectionMode; sel == SelectionSingle {
 			l.SelectOnly(l.currentFocus)
 		} else if sel == SelectionMultiple {
-			l.toggleSelect(l.currentFocus)
+			l.handleMultiSelectAction(l.currentFocus)
 		}
 	case fyne.KeyDown:
 		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
@@ -469,7 +469,7 @@ func (l *List) UnselectAll() {
 	}
 }
 
-func (l *List) toggleSelect(id ListItemID) {
+func (l *List) handleMultiSelectAction(id ListItemID) {
 	sel := l.selected
 	isSelected := false
 	for _, selID := range sel {
@@ -479,10 +479,30 @@ func (l *List) toggleSelect(id ListItemID) {
 		}
 	}
 
-	if isSelected {
-		l.Unselect(id)
+	toggleSelect := func() {
+		if isSelected {
+			l.Unselect(id)
+		} else {
+			l.Select(id)
+		}
+	}
+
+	desktopDriver, ok := fyne.CurrentApp().Driver().(desktop.Driver)
+	if !ok {
+		// simple toggle-select behavior for mobile
+		toggleSelect()
+		return
+	}
+
+	// for desktops:
+	// *  (no modifier)  + click = select only
+	// * ModifierDefault + click = toggle select
+	// * ModifierShift   + click = select range (TODO)
+	mods := desktopDriver.CurrentKeyModifiers()
+	if mods&fyne.KeyModifierShortcutDefault > 0 {
+		toggleSelect()
 	} else {
-		l.Select(id)
+		l.SelectOnly(id)
 	}
 }
 
@@ -790,7 +810,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		if sel := l.list.SelectionMode; sel == SelectionSingle {
 			l.list.SelectOnly(id)
 		} else if sel == SelectionMultiple {
-			l.list.toggleSelect(id)
+			l.list.handleMultiSelectAction(id)
 		}
 	}
 }
