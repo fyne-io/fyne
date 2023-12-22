@@ -197,7 +197,8 @@ func (l *List) Resize(s fyne.Size) {
 
 // Select adds the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
-	for _, selId := range l.selected {
+	sel := l.selected
+	for _, selId := range sel {
 		if id == selId {
 			return
 		}
@@ -207,14 +208,14 @@ func (l *List) Select(id ListItemID) {
 	if id < 0 || id >= length {
 		return
 	}
-	l.selected = append(l.selected, id)
+	l.selected = append(sel, id)
 	defer func() {
 		if f := l.OnSelected; f != nil {
 			f(id)
 		}
 	}()
 	l.scrollTo(id)
-	l.Refresh()
+	l.RefreshItem(id)
 }
 
 // SelectOnly selects only the item identified by the given ID to the selection,
@@ -371,6 +372,16 @@ func (l *List) ScrollToTop() {
 //
 // Implements: fyne.Focusable
 func (l *List) TypedKey(event *fyne.KeyEvent) {
+	selectOrFocus := func() {
+		d, ok := fyne.CurrentApp().Driver().(desktop.Driver)
+		if ok && d.CurrentKeyModifiers()&fyne.KeyModifierShift > 0 {
+			l.Select(l.currentFocus)
+		} else {
+			l.scrollTo(l.currentFocus)
+			l.RefreshItem(l.currentFocus)
+		}
+	}
+
 	switch event.Name {
 	case fyne.KeySpace:
 		if sel := l.SelectionMode; sel == SelectionSingle {
@@ -384,16 +395,14 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus++
-		l.scrollTo(l.currentFocus)
-		l.RefreshItem(l.currentFocus)
+		selectOrFocus()
 	case fyne.KeyUp:
 		if l.currentFocus <= 0 {
 			return
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus--
-		l.scrollTo(l.currentFocus)
-		l.RefreshItem(l.currentFocus)
+		selectOrFocus()
 	}
 }
 
