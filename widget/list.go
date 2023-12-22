@@ -205,6 +205,9 @@ func (l *List) Select(id ListItemID) {
 	if id < 0 || id >= length {
 		return
 	}
+	if !fyne.CurrentDevice().IsMobile() {
+		l.currentFocus = id
+	}
 	old := l.selected
 	l.selected = []ListItemID{id}
 	defer func() {
@@ -630,8 +633,6 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 			if canvas != nil {
 				canvas.Focus(l.list)
 			}
-
-			l.list.currentFocus = id
 		}
 
 		l.list.Select(id)
