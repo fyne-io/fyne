@@ -122,6 +122,8 @@ func main() {
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
 
+	bundleIcon("drag-corner-indicator", f)
+
 	bundleIcon("more-horizontal", f)
 	bundleIcon("more-vertical", f)
 
