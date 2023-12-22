@@ -203,10 +203,7 @@ func (l *List) Select(id ListItemID) {
 		}
 	}
 
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
@@ -228,10 +225,7 @@ func (l *List) SelectOnly(id ListItemID) {
 	if len(l.selected) == 1 && id == l.selected[0] {
 		return
 	}
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
@@ -261,10 +255,7 @@ func (l *List) SelectOnly(id ListItemID) {
 //
 // Since: 2.5
 func (l *List) SelectAll(id ListItemID) {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if length == 0 || len(l.selected) == length {
 		return
 	}
@@ -302,10 +293,7 @@ func (l *List) SelectAll(id ListItemID) {
 //
 // Since: 2.5
 func (l *List) SetSelection(selected []ListItemID) {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if length == 0 {
 		return
 	}
@@ -351,10 +339,7 @@ func (l *List) SetSelection(selected []ListItemID) {
 //
 // Since: 2.1
 func (l *List) ScrollTo(id ListItemID) {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
@@ -366,10 +351,7 @@ func (l *List) ScrollTo(id ListItemID) {
 //
 // Since: 2.1
 func (l *List) ScrollToBottom() {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if length > 0 {
 		length--
 	}
@@ -469,6 +451,17 @@ func (l *List) UnselectAll() {
 	}
 }
 
+// invariant: all of ids are valid and none are already selected
+func (l *List) addToSelection(ids []int) {
+	l.selected = append(l.selected, ids...)
+	l.Refresh()
+	if f := l.OnSelected; f != nil {
+		for _, id := range ids {
+			f(id)
+		}
+	}
+}
+
 func (l *List) handleMultiSelectAction(id ListItemID) {
 	sel := l.selected
 	isSelected := false
@@ -497,13 +490,70 @@ func (l *List) handleMultiSelectAction(id ListItemID) {
 	// for desktops:
 	// *  (no modifier)  + click = select only
 	// * ModifierDefault + click = toggle select
-	// * ModifierShift   + click = select range (TODO)
+	// * ModifierShift   + click = select range
 	mods := desktopDriver.CurrentKeyModifiers()
 	if mods&fyne.KeyModifierShortcutDefault > 0 {
 		toggleSelect()
+	} else if mods&fyne.KeyModifierShift > 0 {
+		if isSelected {
+			return
+		}
+
+		// select range between id and nearest existing selected item
+		nearest, dist := l.findNearestSelectedItem(id)
+		above := nearest < id
+		if nearest == -1 || dist <= 1 {
+			// either nothing selected, or something selected right next to id
+			l.addToSelection([]int{id})
+			return
+		}
+		selAdd := make([]int, 0, dist-1)
+		if above {
+			// nearest selected item is above id
+			for i := 0; i < dist; i++ {
+				selAdd = append(selAdd, id-i)
+			}
+		} else {
+			for i := 0; i < dist; i++ {
+				selAdd = append(selAdd, id+i)
+			}
+		}
+		l.addToSelection(selAdd)
 	} else {
 		l.SelectOnly(id)
 	}
+}
+
+func (l *List) findNearestSelectedItem(id ListItemID) (nearest ListItemID, dist int) {
+	above, below := -1, math.MaxInt
+	sel := l.selected
+	length := l.length()
+
+	for _, selId := range sel {
+		if selId >= 0 && selId < id && selId > above {
+			above = selId
+		} else if selId < length && selId > id && selId < below {
+			below = selId
+		}
+	}
+	if above == -1 && below >= length {
+		return -1, math.MaxInt // no selected item
+	}
+	dAbove, dBelow := id-above, below-id
+	if above == -1 {
+		dAbove = math.MaxInt
+	}
+	if dAbove <= dBelow {
+		return above, dAbove
+	}
+	return below, dBelow
+}
+
+func (l *List) length() int {
+	if f := l.Length; f != nil {
+		return f()
+	}
+	return 0
 }
 
 func (l *List) visibleItemHeights(itemHeight float32, length int) (visible []float32, offY float32, minRow int) {
@@ -819,10 +869,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.renderLock.Lock()
 	separatorThickness := theme.Padding()
 	width := l.list.Size().Width
-	length := 0
-	if f := l.list.Length; f != nil {
-		length = f()
-	}
+	length := l.list.length()
 	if l.list.UpdateItem == nil {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
