@@ -34,6 +34,11 @@ type List struct {
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
 
+	// SelectionMode is the selection mode for the list
+	//
+	// Since: 2.5
+	SelectionMode SelectionMode
+
 	currentFocus  ListItemID
 	focused       bool
 	scroller      *widget.Scroll
@@ -190,9 +195,37 @@ func (l *List) Resize(s fyne.Size) {
 	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(false)
 }
 
-// Select add the item identified by the given ID to the selection.
+// Select adds the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
-	if len(l.selected) > 0 && id == l.selected[0] {
+	for _, selId := range l.selected {
+		if id == selId {
+			return
+		}
+	}
+
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if id < 0 || id >= length {
+		return
+	}
+	l.selected = append(l.selected, id)
+	defer func() {
+		if f := l.OnSelected; f != nil {
+			f(id)
+		}
+	}()
+	l.scrollTo(id)
+	l.Refresh()
+}
+
+// SelectOnly selects only the item identified by the given ID to the selection,
+// unselecting any previously-selected items.
+//
+// Since: 2.5
+func (l *List) SelectOnly(id ListItemID) {
+	if len(l.selected) == 1 && id == l.selected[0] {
 		return
 	}
 	length := 0
@@ -204,16 +237,114 @@ func (l *List) Select(id ListItemID) {
 	}
 	old := l.selected
 	l.selected = []ListItemID{id}
+	wasPrevSelected := false
 	defer func() {
-		if f := l.OnUnselected; f != nil && len(old) > 0 {
-			f(old[0])
+		if f := l.OnUnselected; f != nil {
+			for _, oldSelId := range old {
+				if oldSelId != id {
+					f(id)
+				} else {
+					// item represented by id was in prev. selection set
+					wasPrevSelected = true
+				}
+			}
 		}
-		if f := l.OnSelected; f != nil {
+		if f := l.OnSelected; f != nil && !wasPrevSelected {
 			f(id)
 		}
 	}()
 	l.scrollTo(id)
 	l.Refresh()
+}
+
+// SelectAll selects all items in the list.
+//
+// Since: 2.5
+func (l *List) SelectAll(id ListItemID) {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if length == 0 || len(l.selected) == length {
+		return
+	}
+
+	prev := l.selected
+	l.selected = make([]int, length)
+	for i := range l.selected {
+		l.selected[i] = i
+	}
+	l.Refresh()
+
+	// Call OnSelected callback for each newly selected item
+	// TODO: this is O(n^2). improve?
+	wasPrevSelected := func(id ListItemID) bool {
+		for _, selId := range prev {
+			if id == selId {
+				return true
+			}
+		}
+		return false
+	}
+	f := l.OnSelected
+	if f == nil {
+		return
+	}
+	for i := 0; i < length; i++ {
+		l := ListItemID(i)
+		if !wasPrevSelected(l) {
+			f(l)
+		}
+	}
+}
+
+// SetSelection sets the currently selected items in the list
+//
+// Since: 2.5
+func (l *List) SetSelection(selected []ListItemID) {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if length == 0 {
+		return
+	}
+
+	oldSel := l.selected
+	newSel := make([]ListItemID, 0, len(selected))
+	for _, id := range selected {
+		if id >= 0 && id < length {
+			newSel = append(newSel, id)
+		}
+	}
+	l.selected = newSel
+	l.Refresh()
+
+	// Call OnSelected, OnUnselected callbacks for each newly (un)selected item
+	// TODO: this is O(n^2). improve
+	onSelected := l.OnSelected
+	onUnselected := l.OnUnselected
+	if onSelected == nil && onUnselected == nil {
+		return
+	}
+	find := func(id ListItemID, idSet []ListItemID) bool {
+		for _, selId := range oldSel {
+			if id == selId {
+				return true
+			}
+		}
+		return false
+	}
+	for i := 0; i < length; i++ {
+		id := ListItemID(i)
+		wasSel := find(id, oldSel)
+		isSel := find(id, newSel)
+		if wasSel && !isSel && onUnselected != nil {
+			onUnselected(id)
+		} else if isSel && !wasSel && onSelected != nil {
+			onSelected(id)
+		}
+	}
 }
 
 // ScrollTo scrolls to the item represented by id
@@ -260,7 +391,11 @@ func (l *List) ScrollToTop() {
 func (l *List) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace:
-		l.Select(l.currentFocus)
+		if sel := l.SelectionMode; sel == SelectionSingle {
+			l.SelectOnly(l.currentFocus)
+		} else if sel == SelectionMultiple {
+			l.toggleSelect(l.currentFocus)
+		}
 	case fyne.KeyDown:
 		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
 			return
@@ -289,11 +424,27 @@ func (l *List) TypedRune(_ rune) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	if len(l.selected) == 0 || l.selected[0] != id {
+	// check if already not selected
+	sel := l.selected
+	selected := false
+	for _, selID := range sel {
+		if selID == id {
+			selected = true
+			break
+		}
+	}
+	if !selected {
 		return
 	}
 
-	l.selected = nil
+	newSel := make([]ListItemID, 0, len(sel)-1)
+	for _, selID := range sel {
+		if selID != id {
+			newSel = append(newSel, selID)
+		}
+	}
+
+	l.selected = newSel
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		f(id)
@@ -304,17 +455,34 @@ func (l *List) Unselect(id ListItemID) {
 //
 // Since: 2.1
 func (l *List) UnselectAll() {
-	if len(l.selected) == 0 {
+	sel := l.selected
+	if len(sel) == 0 {
 		return
 	}
 
-	selected := l.selected
 	l.selected = nil
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
-		for _, id := range selected {
+		for _, id := range sel {
 			f(id)
 		}
+	}
+}
+
+func (l *List) toggleSelect(id ListItemID) {
+	sel := l.selected
+	isSelected := false
+	for _, selID := range sel {
+		if selID == id {
+			isSelected = true
+			break
+		}
+	}
+
+	if isSelected {
+		l.Unselect(id)
+	} else {
+		l.Select(id)
 	}
 }
 
@@ -478,7 +646,6 @@ func (li *listItem) MouseOut() {
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler.
 func (li *listItem) Tapped(*fyne.PointEvent) {
 	if li.onTapped != nil {
-		li.selected = true
 		li.Refresh()
 		li.onTapped()
 	}
@@ -594,7 +761,8 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	previousIndicator := li.selected
 	li.selected = false
-	for _, s := range l.list.selected {
+	sel := l.list.selected
+	for _, s := range sel {
 		if id == s {
 			li.selected = true
 			break
@@ -619,8 +787,11 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 
 			l.list.currentFocus = id
 		}
-
-		l.list.Select(id)
+		if sel := l.list.SelectionMode; sel == SelectionSingle {
+			l.list.SelectOnly(id)
+		} else if sel == SelectionMultiple {
+			l.list.toggleSelect(id)
+		}
 	}
 }
 

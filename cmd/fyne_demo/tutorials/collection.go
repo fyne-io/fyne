@@ -96,7 +96,27 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	list.SetItemHeight(5, 50)
 	list.SetItemHeight(6, 50)
 
-	return container.NewHSplit(list, container.NewCenter(hbox))
+	split := container.NewHSplit(list, container.NewCenter(hbox))
+	radio := widget.NewRadioGroup([]string{"Single", "Multiple", "None"}, func(sel string) {
+		switch sel {
+		case "Single":
+			list.SelectionMode = widget.SelectionSingle
+		case "Multiple":
+			list.SelectionMode = widget.SelectionMultiple
+		case "None":
+			list.SelectionMode = widget.SelectionNone
+		}
+	})
+	radio.Horizontal = true
+	radio.Selected = "Single"
+
+	return container.NewBorder(
+		container.NewHBox(widget.NewLabel("Selection:"), radio),
+		nil,
+		nil,
+		nil,
+		split,
+	)
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
