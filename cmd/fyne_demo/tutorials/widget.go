@@ -351,6 +351,8 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	disabledRadio := widget.NewRadioGroup([]string{"Disabled radio"}, func(string) {})
 	disabledRadio.Disable()
 
+	disabledSlider := widget.NewSlider(0, 1000)
+	disabledSlider.Disable()
 	return container.NewVBox(
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
@@ -359,7 +361,8 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 		checkGroup,
 		radio,
 		disabledRadio,
-		widget.NewSlider(0, 1000),
+		container.NewBorder(nil, nil, widget.NewLabel("Slider"), nil, widget.NewSlider(0, 1000)),
+		container.NewBorder(nil, nil, widget.NewLabel("Disabled slider"), nil, disabledSlider),
 	)
 }
 
