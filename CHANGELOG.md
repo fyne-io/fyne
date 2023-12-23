@@ -3,6 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.3 - 23 December 2023
+
+### Fixed
+
+* Fix OpenGL init for arm64 desktop devices 
+* System tray icon on Mac is showing the app ID (#4416)
+* Failure with fyne release -os android/arm (#4174)
+* Android GoBack with forcefully close the app even if the keyboard is up (#4257)
+* *BSD systems using the wrong (and slow) window resize
+* Optimisations to reduce memory allocations in List, GridWrap, driver and mime type handling
+* Reduce calls to C and repeated size checks in painter and driver code
+
+
 ## 2.4.2 - 22 November 2023
 
 ### Fixed
