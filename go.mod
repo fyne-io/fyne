@@ -12,7 +12,7 @@ require (
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231124074035-2de0cf0c80af
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231223183121-56fa3ac82ce7
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
 	github.com/go-text/typesetting v0.0.0-20230616162802-9c17dd34aa4a
