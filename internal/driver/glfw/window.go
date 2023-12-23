@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -148,13 +149,15 @@ func (w *window) doShow() {
 		view := w.view()
 		view.SetTitle(w.title)
 
-		if w.centered {
+		if !build.IsWayland && w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
 		}
 		view.Show()
 
 		// save coordinates
-		w.xpos, w.ypos = view.GetPos()
+		if !build.IsWayland {
+			w.xpos, w.ypos = view.GetPos()
+		}
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			go func() {
@@ -973,7 +976,9 @@ func (w *window) doShowAgain() {
 		}
 
 		view := w.view()
-		view.SetPos(w.xpos, w.ypos)
+		if !build.IsWayland {
+			view.SetPos(w.xpos, w.ypos)
+		}
 		view.Show()
 		w.viewLock.Lock()
 		w.visible = true
