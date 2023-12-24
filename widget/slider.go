@@ -154,33 +154,30 @@ func (s *Slider) fireChangeEnded() {
 //
 // Since: 2.4
 func (s *Slider) FocusGained() {
-	if s.disabled {
-		return
-	}
 	s.focused = true
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // FocusLost is called when this item lost the focus.
 //
 // Since: 2.4
 func (s *Slider) FocusLost() {
-	if s.disabled {
-		return
-	}
 	s.focused = false
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
 //
 // Since: 2.4
 func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
-	if s.disabled {
-		return
-	}
 	s.hovered = true
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
@@ -193,11 +190,10 @@ func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 //
 // Since: 2.4
 func (s *Slider) MouseOut() {
-	if s.disabled {
-		return
-	}
 	s.hovered = false
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // TypedKey is called when this item receives a key event.
