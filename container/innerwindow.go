@@ -74,7 +74,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			icon.(*widget.Button).Disable()
 		}
 	}
-	title := newDraggableLabel(w.title, w.OnDragged, w.OnTappedBar)
+	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	bar := NewBorder(nil, nil, buttons, icon, title)
@@ -167,20 +167,19 @@ func (i *innerWindowRenderer) Refresh() {
 
 type draggableLabel struct {
 	widget.Label
-	drag func(*fyne.DragEvent)
-	tap  func()
+	win *InnerWindow
 }
 
-func newDraggableLabel(title string, fn func(*fyne.DragEvent), tap func()) *draggableLabel {
-	d := &draggableLabel{drag: fn, tap: tap}
+func newDraggableLabel(title string, win *InnerWindow) *draggableLabel {
+	d := &draggableLabel{win: win}
 	d.ExtendBaseWidget(d)
 	d.Text = title
 	return d
 }
 
 func (d *draggableLabel) Dragged(ev *fyne.DragEvent) {
-	if f := d.drag; f != nil {
-		d.drag(ev)
+	if f := d.win.OnDragged; f != nil {
+		f(ev)
 	}
 }
 
@@ -188,8 +187,8 @@ func (d *draggableLabel) DragEnd() {
 }
 
 func (d *draggableLabel) Tapped(ev *fyne.PointEvent) {
-	if f := d.tap; f != nil {
-		d.tap()
+	if f := d.win.OnTappedBar; f != nil {
+		f()
 	}
 }
 
