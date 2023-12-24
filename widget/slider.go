@@ -110,6 +110,10 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 //
 // Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
+	if s.disabled {
+		return
+	}
+
 	driver := fyne.CurrentApp().Driver()
 	if !s.focused && !driver.Device().IsMobile() {
 		impl := s.super()

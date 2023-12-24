@@ -320,6 +320,11 @@ func TestSlider_Disabled(t *testing.T) {
 		changes++
 	}
 
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(30, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 0, changes)
+
 	drag := &fyne.DragEvent{}
 	drag.PointEvent.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
