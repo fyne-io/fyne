@@ -3,6 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+<<<<<<< HEAD
 ## 2.4.3 - 23 December 2023
 
 ### Fixed
@@ -16,7 +17,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Reduce calls to C and repeated size checks in painter and driver code
 
 
-## 2.4.2 - 21 November 2023
+## 2.4.2 - 22 November 2023
 
 ### Fixed
 
