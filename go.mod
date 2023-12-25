@@ -6,7 +6,7 @@ require (
 	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e
 	github.com/BurntSushi/toml v1.3.2
 	github.com/fogleman/gg v1.3.0
-	github.com/fredbi/uri v1.1.0
+	github.com/fredbi/uri v1.0.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
