@@ -6,11 +6,8 @@ permissions:
 jobs:
   web_tests:
     runs-on: ubuntu-latest
-    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        go-version: ['1.19.x', '1.21.x']
 
     steps:
     - uses: actions/checkout@v3
@@ -18,7 +15,7 @@ jobs:
         persist-credentials: false
     - uses: WillAbides/setup-go-faster@v1.8.0
       with:
-        go-version: ${{ matrix.go-version }}
+        go-version: '1.17.x'
 
     - name: Get dependencies
       run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
@@ -30,7 +27,8 @@ jobs:
       working-directory: cmd/fyne_demo
       run: go build
 
-    - name: Build WASM full website
+    - name: Build GopherJS and Wasm full website
       run: |
+        go install github.com/gopherjs/gopherjs@latest
         go install ./cmd/fyne
-        cd cmd/fyne_demo && fyne package --target=wasm
+        cd cmd/fyne_demo && fyne package --target=web
