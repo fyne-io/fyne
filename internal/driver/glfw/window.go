@@ -824,7 +824,7 @@ func (w *window) processFocused(focus bool) {
 func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
 	ctrlMod := fyne.KeyModifierControl
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		ctrlMod = fyne.KeyModifierSuper
 	}
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
