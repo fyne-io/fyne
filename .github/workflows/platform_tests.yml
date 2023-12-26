@@ -47,7 +47,7 @@ jobs:
     - name: Wayland Tests
       run: go test -tags no_glfw,ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
-  
+
   windows_tests:
     runs-on: windows-latest
     strategy:
@@ -62,5 +62,5 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
     
-    - name: Tests
-      run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags no_glfw ./...
+      - name: Tests
+        run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags no_glfw ./...
