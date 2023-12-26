@@ -215,7 +215,7 @@ func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
 }
 
 type expiringCache struct {
-	expires atomic.Value // time.Time
+	expires atomic.Pointer[time.Time]
 }
 
 // isExpired check if the cache data is expired.
@@ -224,12 +224,13 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 	if t == nil {
 		return (time.Time{}).Before(now)
 	}
-	return t.(time.Time).Before(now)
+	return t.Before(now)
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires.Store(timeNow().Add(cacheDuration))
+	expirationTIme := timeNow().Add(cacheDuration)
+	c.expires.Store(&expirationTIme)
 }
 
 type expiringCacheNoLock struct {

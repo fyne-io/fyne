@@ -28,7 +28,7 @@ type drawData struct {
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var running uint32 // atomic bool, 0 or 1
+var running atomic.Bool
 var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
@@ -41,7 +41,7 @@ func init() {
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if onMain := atomic.LoadUint32(&running) == 0; onMain {
+	if !running.Load() {
 		f()
 		return
 	}
@@ -105,7 +105,7 @@ func (d *gLDriver) drawSingleFrame() {
 }
 
 func (d *gLDriver) runGL() {
-	if !atomic.CompareAndSwapUint32(&running, 0, 1) {
+	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
 	close(d.waitForStart) // Signal that execution can continue.

@@ -14,7 +14,7 @@ type anim struct {
 	reverse     bool
 	start       time.Time
 	total       int64
-	stopped     uint32 // atomic, 0 == false 1 == true
+	stopped     atomic.Bool
 }
 
 func newAnim(a *fyne.Animation) *anim {
@@ -25,9 +25,9 @@ func newAnim(a *fyne.Animation) *anim {
 }
 
 func (a *anim) setStopped() {
-	atomic.StoreUint32(&a.stopped, 1)
+	a.stopped.Store(true)
 }
 
 func (a *anim) isStopped() bool {
-	return atomic.LoadUint32(&a.stopped) == 1
+	return a.stopped.Load()
 }
