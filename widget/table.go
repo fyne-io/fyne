@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const noCellMatch = math.MaxInt32 // TODO make this MaxInt once we move to newer Go version
+const noCellMatch = math.MaxInt
 
 // allTableCellsID represents all table cells when refreshing requested cells
 var allTableCellsID = TableCellID{-1, -1}
