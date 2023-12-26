@@ -9,20 +9,19 @@ package dialog
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
-
-	"golang.org/x/sys/execabs"
 )
 
 func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI, error) {
 	cmdName := "xdg-user-dir"
-	if _, err := execabs.LookPath(cmdName); err != nil {
+	if _, err := exec.LookPath(cmdName); err != nil {
 		return storage.Child(homeURI, fallbackName) // no lookup possible
 	}
 
-	cmd := execabs.Command(cmdName, name)
+	cmd := exec.Command(cmdName, name)
 	loc, err := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, fallbackName)
