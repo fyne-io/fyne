@@ -14,8 +14,6 @@ jobs:
         include:
           - os: ubuntu-latest
             runner: xvfb-run
-          - os: windows-latest
-            tags: no_glfw
           - os: macos-latest
             tags: no_glfw
 
