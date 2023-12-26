@@ -20,10 +20,10 @@ jobs:
             tags: no_glfw
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.8.0
+    - uses: WillAbides/setup-go-faster@v1.13.0
       with:
         go-version: ${{ matrix.go-version }}
 
