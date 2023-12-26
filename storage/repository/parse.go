@@ -65,6 +65,7 @@ func ParseURI(s string) (fyne.URI, error) {
 		return NewFileURI(path), nil
 	}
 
+	scheme = strings.ToLower(scheme)
 	repo, err := ForScheme(scheme)
 	if err == nil {
 		// If the repository registered for this scheme implements a parser
