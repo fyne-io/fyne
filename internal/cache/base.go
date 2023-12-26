@@ -229,8 +229,7 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	expirationTIme := timeNow().Add(cacheDuration)
-	c.expires.Store(&expirationTIme)
+	c.expires.Store(timeNow().Add(cacheDuration))
 }
 
 type expiringCacheNoLock struct {
