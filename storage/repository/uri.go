@@ -49,12 +49,8 @@ func (u *uri) MimeType() string {
 		}
 	}
 
-	// Replace with strings.Cut() when Go 1.18 is our new base version.
-	semicolonIndex := strings.IndexByte(mimeTypeFull, ';')
-	if semicolonIndex == -1 {
-		return mimeTypeFull
-	}
-	return mimeTypeFull[:semicolonIndex]
+	mimeType, _, _ := strings.Cut(mimeTypeFull, ";")
+	return mimeType
 }
 
 func (u *uri) Scheme() string {
