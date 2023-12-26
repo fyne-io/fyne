@@ -5,6 +5,8 @@
 package async
 
 import (
+	"sync/atomic"
+
 	"fyne.io/fyne/v2"
 )
 
