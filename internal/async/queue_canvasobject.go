@@ -4,7 +4,6 @@ package async
 
 import (
 	"sync"
-	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 )
@@ -27,7 +26,7 @@ func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
 			if lastnext == nil {
 				if casCanvasObjectItem(&last.next, lastnext, i) {
 					casCanvasObjectItem(&q.tail, last, i)
-					atomic.AddUint64(&q.len, 1)
+					q.len.Add(1)
 					return
 				}
 			} else {
@@ -54,7 +53,7 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 			} else {
 				v := firstnext.v
 				if casCanvasObjectItem(&q.head, first, firstnext) {
-					atomic.AddUint64(&q.len, ^uint64(0))
+					q.len.Add(^uint64(0))
 					itemCanvasObjectPool.Put(first)
 					return v
 				}
@@ -65,5 +64,5 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 
 // Len returns the length of the queue.
 func (q *CanvasObjectQueue) Len() uint64 {
-	return atomic.LoadUint64(&q.len)
+	return q.len.Load()
 }

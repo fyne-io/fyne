@@ -10,7 +10,7 @@ import (
 // basicBinder stores a DataItem and a function to be called when it changes.
 // It provides a convenient way to replace data and callback independently.
 type basicBinder struct {
-	callback atomic.Value // func(binding.DataItem)
+	callback atomic.Pointer[func(binding.DataItem)]
 
 	dataListenerPairLock sync.RWMutex
 	dataListenerPair     annotatedListener // access guarded by dataListenerPairLock
@@ -19,10 +19,12 @@ type basicBinder struct {
 // Bind replaces the data item whose changes are tracked by the callback function.
 func (binder *basicBinder) Bind(data binding.DataItem) {
 	listener := binding.NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
-		f := binder.callback.Load()
-		if fn, ok := f.(func(binding.DataItem)); ok && fn != nil {
-			fn(data)
+		f := *binder.callback.Load()
+		if f == nil {
+			return
 		}
+
+		f(data)
 	})
 	data.AddListener(listener)
 	listenerInfo := annotatedListener{
@@ -47,7 +49,7 @@ func (binder *basicBinder) CallWithData(f func(data binding.DataItem)) {
 
 // SetCallback replaces the function to be called when the data changes.
 func (binder *basicBinder) SetCallback(f func(data binding.DataItem)) {
-	binder.callback.Store(f)
+	binder.callback.Store(&f)
 }
 
 // Unbind requests the callback to be no longer called when the previously bound

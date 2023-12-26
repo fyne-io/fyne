@@ -51,7 +51,6 @@ func main() {
 				Name: "CanvasObject",
 				Imports: `import (
 					"sync"
-					"sync/atomic"
 
 					"fyne.io/fyne/v2"
 				)`,
@@ -204,7 +203,7 @@ package async
 type {{.Name}}Queue struct {
 	head unsafe.Pointer
 	tail unsafe.Pointer
-	len  uint64
+	len  atomic.Uint64
 }
 
 // New{{.Name}}Queue returns a queue for caching values.
@@ -254,7 +253,7 @@ func (q *{{.Name}}Queue) In(v {{.Type}}) {
 			if lastnext == nil {
 				if cas{{.Name}}Item(&last.next, lastnext, i) {
 					cas{{.Name}}Item(&q.tail, last, i)
-					atomic.AddUint64(&q.len, 1)
+					q.len.Add(1)
 					return
 				}
 			} else {
@@ -281,7 +280,7 @@ func (q *{{.Name}}Queue) Out() {{.Type}} {
 			} else {
 				v := firstnext.v
 				if cas{{.Name}}Item(&q.head, first, firstnext) {
-					atomic.AddUint64(&q.len, ^uint64(0))
+					q.len.Add(^uint64(0))
 					item{{.Name}}Pool.Put(first)
 					return v
 				}
@@ -292,6 +291,6 @@ func (q *{{.Name}}Queue) Out() {{.Type}} {
 
 // Len returns the length of the queue.
 func (q *{{.Name}}Queue) Len() uint64 {
-	return atomic.LoadUint64(&q.len)
+	return q.len.Load()
 }
 `))
