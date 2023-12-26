@@ -19,12 +19,12 @@ type basicBinder struct {
 // Bind replaces the data item whose changes are tracked by the callback function.
 func (binder *basicBinder) Bind(data binding.DataItem) {
 	listener := binding.NewDataListener(func() { // NB: listener captures `data` but always calls the up-to-date callback
-		f := *binder.callback.Load()
+		f := binder.callback.Load()
 		if f == nil {
 			return
 		}
 
-		f(data)
+		(*f)(data)
 	})
 	data.AddListener(listener)
 	listenerInfo := annotatedListener{

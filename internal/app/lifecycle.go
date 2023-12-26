@@ -50,40 +50,40 @@ func (l *Lifecycle) SetOnStopped(f func()) {
 
 // TriggerEnteredForeground will call the focus gained hook, if one is registered.
 func (l *Lifecycle) TriggerEnteredForeground() {
-	f := *l.onForeground.Load()
+	f := l.onForeground.Load()
 	if f == nil {
 		return
 	}
 
-	f()
+	(*f)()
 }
 
 // TriggerExitedForeground will call the focus lost hook, if one is registered.
 func (l *Lifecycle) TriggerExitedForeground() {
-	f := *l.onBackground.Load()
+	f := l.onBackground.Load()
 	if f == nil {
 		return
 	}
 
-	f()
+	(*f)()
 }
 
 // TriggerStarted will call the started hook, if one is registered.
 func (l *Lifecycle) TriggerStarted() {
-	f := *l.onStarted.Load()
+	f := l.onStarted.Load()
 	if f == nil {
 		return
 	}
 
-	f()
+	(*f)()
 }
 
 // TriggerStopped will call the stopped hook, if one is registered,
 // and an internal stopped hook after that.
 func (l *Lifecycle) TriggerStopped() {
-	f := *l.onStopped.Load()
+	f := l.onStopped.Load()
 	if f != nil {
-		f()
+		(*f)()
 	}
 
 	if l.onStoppedHookExecuted != nil {
