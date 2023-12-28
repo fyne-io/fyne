@@ -42,7 +42,7 @@ type UnboundedChan[T any] struct {
 // NewUnboundedFuncChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedChan[T any]() *UnboundedChan[T] {
 	ch := &UnboundedChan[T]{
-		// The size of Func is less than 16 bytes, we use 16 to fit
+		// The size of Func, Interface, and CanvasObject are all less than 16 bytes, we use 16 to fit
 		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
 		in:    make(chan T, 16),
 		out:   make(chan T, 16),
