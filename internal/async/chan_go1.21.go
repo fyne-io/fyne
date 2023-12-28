@@ -5,6 +5,33 @@ package async
 import "fyne.io/fyne/v2"
 
 // UnboundedFuncChan is a channel with an unbounded buffer for caching
+// Func objects. A channel must be closed via Close method
+type UnboundedFuncChan = UnboundedChan[func()]
+
+// NewUnboundedInterfaceChan returns a unbounded channel, of func(), with unlimited capacity.
+func NewUnboundedFuncChan() *UnboundedFuncChan {
+	return NewUnboundedChan[func()]()
+}
+
+// UnboundedInterfaceChan is a channel with an unbounded buffer for caching
+// Interface objects. A channel must be closed via Close method.
+type UnboundedInterfaceChan = UnboundedChan[any]
+
+// NewUnboundedInterfaceChan returns a unbounded channel, of any type, with unlimited capacity.
+func NewUnboundedInterfaceChan() *UnboundedInterfaceChan {
+	return NewUnboundedChan[any]()
+}
+
+// UnboundedCanvasObjectChan is a channel with an unbounded buffer for caching
+// CanvasObject objects. A channel must be closed via Close method.
+type UnboundedCanvasObjectChan = UnboundedChan[fyne.CanvasObject]
+
+// NewUnboundedCanvasObjectChan returns a unbounded channel, of canvas objects, with unlimited capacity.
+func NewUnboundedCanvasObjectChan() *UnboundedChan[fyne.CanvasObject] {
+	return NewUnboundedChan[fyne.CanvasObject]()
+}
+
+// UnboundedFuncChan is a channel with an unbounded buffer for caching
 // Func objects. A channel must be closed via Close method.
 type UnboundedChan[T any] struct {
 	in, out chan T
@@ -98,27 +125,4 @@ func (ch *UnboundedChan[T]) closed() {
 	}
 	close(ch.out)
 	close(ch.close)
-}
-
-// UnboundedFuncChan is a channel with an unbounded buffer for caching
-// Func objects. A channel must be closed via Close method
-type UnboundedFuncChan = UnboundedChan[func()]
-
-// NewUnboundedInterfaceChan returns a unbounded channel, of func(), with unlimited capacity.
-func NewUnboundedFuncChan() *UnboundedChan[func()] {
-	return NewUnboundedChan[func()]()
-}
-
-// UnboundedInterfaceChan is a channel with an unbounded buffer for caching
-// Interface objects. A channel must be closed via Close method.
-type UnboundedInterfaceChan = UnboundedChan[any]
-
-// NewUnboundedInterfaceChan returns a unbounded channel, of any type, with unlimited capacity.
-func NewUnboundedInterfaceChan() *UnboundedChan[any] {
-	return NewUnboundedChan[any]()
-}
-
-// NewUnboundedCanvasObjectChan returns a unbounded channel, of canvas objects, with unlimited capacity.
-func NewUnboundedCanvasObjectChan() *UnboundedChan[fyne.CanvasObject] {
-	return NewUnboundedChan[fyne.CanvasObject]()
 }
