@@ -139,18 +139,23 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	}
 
 	padding := theme.Padding()
+	var primaryObjects, secondaryObjects int
 	if g.horizontal() {
-		minContentSize := fyne.NewSize(minSize.Width*float32(g.Cols), minSize.Height*float32(rows))
-		if rows == 0 {
-			return minContentSize
-		}
-
-		return minContentSize.Add(fyne.NewSize(padding*float32(g.Cols-1), padding*float32(rows-1)))
+		primaryObjects = g.Cols
+		secondaryObjects = rows
+	} else {
+		primaryObjects = rows
+		secondaryObjects = g.Cols
 	}
 
-	minContentSize := fyne.NewSize(minSize.Width*float32(rows), minSize.Height*float32(g.Cols))
+	width := minSize.Width * float32(primaryObjects)
+	height := minSize.Height * float32(secondaryObjects)
+	xpad := padding * float32(primaryObjects-1)
+	ypad := padding * float32(secondaryObjects-1)
+
+	minContentSize := fyne.NewSize(width, height)
 	if rows == 0 {
 		return minContentSize
 	}
-	return minContentSize.Add(fyne.NewSize(padding*float32(rows-1), padding*float32(g.Cols-1)))
+	return minContentSize.Add(fyne.NewSize(xpad, ypad))
 }
