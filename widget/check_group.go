@@ -265,3 +265,17 @@ func (r *checkGroupRenderer) updateItems() {
 		item.Refresh()
 	}
 }
+
+func removeDuplicates(options []string) []string {
+	var result []string
+	found := make(map[string]bool)
+
+	for _, option := range options {
+		if _, ok := found[option]; !ok {
+			found[option] = true
+			result = append(result, option)
+		}
+	}
+
+	return result
+}
