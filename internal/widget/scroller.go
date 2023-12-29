@@ -401,7 +401,7 @@ func (s *Scroll) ScrollToBottom() {
 
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
-	s.scrollBy(0, -s.Offset.Y)
+	s.scrollBy(0, s.Offset.Y)
 }
 
 // DragEnd will stop scrolling on mobile has stopped
