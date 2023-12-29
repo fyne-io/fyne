@@ -78,16 +78,17 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	rows := g.countRows(objects)
 
 	padding := theme.Padding()
-	padWidth := float32(g.Cols-1) * padding
-	padHeight := float32(rows-1) * padding
-	cellWidth := float64(size.Width-padWidth) / float64(g.Cols)
-	cellHeight := float64(size.Height-padHeight) / float64(rows)
 
-	if !g.horizontal() {
-		padWidth, padHeight = padHeight, padWidth
-		cellWidth = float64(size.Width-padWidth) / float64(rows)
-		cellHeight = float64(size.Height-padHeight) / float64(g.Cols)
+	primaryObjects := rows
+	secondaryObjects := g.Cols
+	if g.horizontal() {
+		primaryObjects, secondaryObjects = secondaryObjects, primaryObjects
 	}
+
+	padWidth := float32(primaryObjects-1) * padding
+	padHeight := float32(secondaryObjects-1) * padding
+	cellWidth := float64(size.Width-padWidth) / float64(primaryObjects)
+	cellHeight := float64(size.Height-padHeight) / float64(secondaryObjects)
 
 	row, col := 0, 0
 	i := 0
@@ -139,13 +140,11 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	}
 
 	padding := theme.Padding()
-	var primaryObjects, secondaryObjects int
+
+	primaryObjects := rows
+	secondaryObjects := g.Cols
 	if g.horizontal() {
-		primaryObjects = g.Cols
-		secondaryObjects = rows
-	} else {
-		primaryObjects = rows
-		secondaryObjects = g.Cols
+		primaryObjects, secondaryObjects = secondaryObjects, primaryObjects
 	}
 
 	width := minSize.Width * float32(primaryObjects)
