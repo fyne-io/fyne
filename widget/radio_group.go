@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"log"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -93,12 +91,10 @@ func (r *RadioGroup) itemTapped(item *radioItem, idx int) {
 		if r.Required {
 			return
 		}
-		log.Printf("trying to unselect item %d", idx)
 		r.Selected = ""
 		r.setSelectedIndex(-1)
 		item.SetSelected(false)
 	} else {
-		log.Printf("trying to select item %d", idx)
 		r.Selected = item.Label
 		r.setSelectedIndex(idx)
 		item.SetSelected(true)
