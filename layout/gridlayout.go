@@ -62,7 +62,6 @@ func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
 // size is the ideal cell size and the offset is which col or row its on.
 func getLeading(size float64, offset int) float32 {
 	ret := (size + float64(theme.Padding())) * float64(offset)
-
 	return float32(ret)
 }
 
@@ -139,11 +138,19 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		minSize = minSize.Max(child.MinSize())
 	}
 
+	padding := theme.Padding()
 	if g.horizontal() {
 		minContentSize := fyne.NewSize(minSize.Width*float32(g.Cols), minSize.Height*float32(rows))
-		return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(float32(g.Cols-1), 0), theme.Padding()*fyne.Max(float32(rows-1), 0)))
+		if rows == 0 {
+			return minContentSize
+		}
+
+		return minContentSize.Add(fyne.NewSize(padding*float32(g.Cols-1), padding*float32(rows-1)))
 	}
 
 	minContentSize := fyne.NewSize(minSize.Width*float32(rows), minSize.Height*float32(g.Cols))
-	return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(float32(rows-1), 0), theme.Padding()*fyne.Max(float32(g.Cols-1), 0)))
+	if rows == 0 {
+		return minContentSize
+	}
+	return minContentSize.Add(fyne.NewSize(padding*float32(rows-1), padding*float32(g.Cols-1)))
 }
