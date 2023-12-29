@@ -6,8 +6,7 @@ import "fyne.io/fyne/v2"
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*stackLayout)(nil)
 
-type stackLayout struct {
-}
+type stackLayout struct{}
 
 // NewStackLayout returns a new StackLayout instance. Objects are stacked
 // on top of each other with later objects on top of those before.
