@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.19
 
 require (
-	fyne.io/systray v1.10.1-0.20231115130155-104f5ef7839e
+	fyne.io/systray v1.10.1-0.20231230205326-d160fd363db9
 	github.com/BurntSushi/toml v1.3.2
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
@@ -44,7 +44,6 @@ require (
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/tevino/abool v1.2.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
