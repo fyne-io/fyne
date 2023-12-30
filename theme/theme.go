@@ -25,9 +25,7 @@ const (
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
 )
 
-var (
-	defaultTheme fyne.Theme
-)
+var defaultTheme fyne.Theme
 
 // DarkTheme defines the built-in dark theme colors and sizes.
 //
