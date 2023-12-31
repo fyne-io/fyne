@@ -1,4 +1,6 @@
 // Run a command line helper for various Fyne tools.
+//
+// Deprecated: Install fyne.io/tools/cmd/fyne for latest version.
 package main
 
 import (
@@ -11,6 +13,8 @@ import (
 )
 
 func main() {
+	fmt.Println("NOTE: This tool is deprecated. Install fyne.io/tools/cmd/fyne for the latest version.")
+
 	app := &cli.App{
 		Name:        "fyne",
 		Usage:       "A command line helper for various Fyne tools.",
