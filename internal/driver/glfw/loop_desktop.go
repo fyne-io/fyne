@@ -24,7 +24,8 @@ func (d *gLDriver) initGLFW() {
 	})
 }
 
-func (d *gLDriver) tryPollEvents() {
+// waitForEvents() will block until one or more events occur.
+func (*gLDriver) waitForEvents() {
 	defer func() {
 		// See https://github.com/glfw/glfw/issues/1785 and https://github.com/fyne-io/fyne/issues/1024.
 		if r := recover(); r != nil {
@@ -32,9 +33,13 @@ func (d *gLDriver) tryPollEvents() {
 		}
 	}()
 
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
+	glfw.WaitEvents()
 }
 
-func (d *gLDriver) Terminate() {
+func postEmptyEvent() {
+	glfw.PostEmptyEvent()
+}
+
+func (*gLDriver) terminate() {
 	glfw.Terminate()
 }

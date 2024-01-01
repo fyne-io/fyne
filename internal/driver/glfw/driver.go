@@ -43,7 +43,7 @@ type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
 	device       *glDevice
-	done         chan struct{}
+	mainDone     uint32
 	drawDone     chan struct{}
 	waitForStart chan struct{}
 
@@ -108,10 +108,8 @@ func (d *gLDriver) Quit() {
 		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
 	}
 
-	// Only call close once to avoid panic.
-	if atomic.CompareAndSwapUint32(&running, 1, 0) {
-		close(d.done)
-	}
+	atomic.StoreUint32(&d.mainDone, 1)
+	postEmptyEvent()
 }
 
 func (d *gLDriver) addWindow(w *window) {
@@ -180,7 +178,6 @@ func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:         make(chan struct{}),
 		drawDone:     make(chan struct{}),
 		waitForStart: make(chan struct{}),
 		animation:    &animation.Runner{},
