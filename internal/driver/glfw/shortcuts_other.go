@@ -1,5 +1,5 @@
-//go:build !js && !wasm
-// +build !js,!wasm
+//go:build !wasm
+// +build !wasm
 
 package glfw
 
