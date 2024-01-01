@@ -1,7 +1,6 @@
-//go:build !wayland && (linux || freebsd || openbsd || netbsd) && !js && !wasm && !test_web_driver
+//go:build !wayland && (linux || freebsd || openbsd || netbsd) && !wasm && !test_web_driver
 // +build !wayland
 // +build linux freebsd openbsd netbsd
-// +build !js
 // +build !wasm
 // +build !test_web_driver
 

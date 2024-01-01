@@ -1,6 +1,6 @@
-//go:build (android || ios || mobile) && (!js || !wasm || !test_web_driver)
+//go:build (android || ios || mobile) && (!wasm || !test_web_driver)
 // +build android ios mobile
-// +build !js !wasm !test_web_driver
+// +build !wasm !test_web_driver
 
 package gl
 

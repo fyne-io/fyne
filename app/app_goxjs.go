@@ -1,7 +1,7 @@
-//go:build !ci && (!android || !ios || !mobile) && (js || wasm || test_web_driver)
+//go:build !ci && (!android || !ios || !mobile) && (wasm || test_web_driver)
 // +build !ci
 // +build !android !ios !mobile
-// +build js wasm test_web_driver
+// +build wasm test_web_driver
 
 package app
 
