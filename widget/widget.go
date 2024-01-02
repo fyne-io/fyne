@@ -154,7 +154,7 @@ func (w *BaseWidget) Theme() fyne.Theme {
 	w.propertyLock.RLock()
 	cached := w.themeCache
 	w.propertyLock.RUnlock()
-	if w.themeCache == nil {
+	if cached == nil {
 		cached = theme.CurrentForWidget(w.impl)
 		w.propertyLock.Lock()
 		w.themeCache = cached
