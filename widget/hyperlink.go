@@ -221,8 +221,8 @@ func (r *hyperlinkRenderer) Destroy() {
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	innerPad := r.hl.Theme().Size(theme.SizeNameInnerPadding)
 	r.hl.provider.Resize(s)
-	r.focus.Move(fyne.NewPos(innerPad/2, innerPad/2))
-	r.focus.Resize(fyne.NewSize(s.Width-innerPad, s.Height-innerPad))
+	r.focus.Move(fyne.NewSquareOffsetPos(innerPad / 2))
+	r.focus.Resize(s.SubtractWidthHeight(innerPad, innerPad))
 	r.under.Move(fyne.NewPos(innerPad, s.Height-innerPad))
 	r.under.Resize(fyne.NewSize(s.Width-innerPad*2, 1))
 }

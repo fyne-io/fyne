@@ -1,5 +1,5 @@
-//go:build !ci && !js && !wasm && test_web_driver
-// +build !ci,!js,!wasm,test_web_driver
+//go:build !ci && !wasm && test_web_driver
+// +build !ci,!wasm,test_web_driver
 
 package app
 

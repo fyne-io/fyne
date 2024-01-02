@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -106,6 +107,13 @@ func TestFormLayout_MinSize(t *testing.T) {
 	expectedRowWidth := 70 + 120 + theme.Padding()
 	expectedRowHeight := 100 + 80 + theme.Padding()
 	assert.Equal(t, fyne.NewSize(expectedRowWidth, expectedRowHeight), layoutMin)
+
+	text := canvas.NewText("Text", color.Black)
+	value := widget.NewLabel("Text")
+	l = layout.NewFormLayout()
+	layoutMin = l.MinSize([]fyne.CanvasObject{text, value})
+	// check that the text minsize is padded to match a label
+	assert.Equal(t, value.MinSize().Width*2+theme.Padding(), layoutMin.Width)
 }
 
 func TestFormLayout_MinSize_Hidden(t *testing.T) {
