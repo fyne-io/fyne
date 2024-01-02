@@ -6,6 +6,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// ThemeOverride is a container where the child widgets are themed by the specified theme.
+// Containers will be traversed and all child widgets will reflect the theme in this container.
+// This should be used sparingly to avoid a jarring user experience.
+//
+// Since: 2.5
 type ThemeOverride struct {
 	widget.BaseWidget
 
@@ -29,6 +34,8 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 }
 
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
+	cache.OverrideTheme(t.Content, t.Theme)
+
 	return widget.NewSimpleRenderer(t.holder)
 }
 
