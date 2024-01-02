@@ -57,6 +57,8 @@ func (s *Select) ClearSelected() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
+	th := s.Theme()
+
 	s.propertyLock.RLock()
 	icon := NewIcon(theme.MenuDropDownIcon())
 	if s.PlaceHolder == "" {
@@ -72,7 +74,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	background := &canvas.Rectangle{}
 	tapBG := canvas.NewRectangle(color.Transparent)
-	s.tapAnim = newButtonTapAnimation(tapBG, s)
+	s.tapAnim = newButtonTapAnimation(tapBG, s, th)
 	s.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{background, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, objects, s}

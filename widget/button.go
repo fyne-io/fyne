@@ -104,7 +104,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.background = canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
 	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
-	b.tapAnim = newButtonTapAnimation(tapBG, b)
+	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
 		b.background,
@@ -454,13 +454,7 @@ func blendColor(under, over color.Color) color.Color {
 
 }
 
-func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
-	var th fyne.Theme
-	if s, ok := w.(*Select); ok {
-		th = s.Theme()
-	} else {
-		th = w.(*Button).Theme()
-	}
+func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *fyne.Animation {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
 		mid := w.Size().Width / 2

@@ -387,12 +387,13 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	provider := label.provider
 
 	inPad := theme.InnerPadding()
-	fullSize := provider.lineSizeToColumn(4, 0, inPad)
-	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0, inPad))
-	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0, inPad).Width)
+	textSize := theme.TextSize()
+	fullSize := provider.lineSizeToColumn(4, 0, textSize, inPad)
+	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0, textSize, inPad))
+	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0, textSize, inPad).Width)
 
-	out := provider.lineSizeToColumn(-1, -1, inPad)
-	assert.Equal(t, out, provider.lineSizeToColumn(0, 0, inPad))
+	out := provider.lineSizeToColumn(-1, -1, textSize, inPad)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0, textSize, inPad))
 }
 
 func TestText_splitLines(t *testing.T) {

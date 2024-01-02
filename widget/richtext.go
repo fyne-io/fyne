@@ -147,13 +147,12 @@ func (t *RichText) String() string {
 }
 
 // charMinSize returns the average char size to use for internal computation
-func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
+func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
 	defaultChar := "M"
 	if concealed {
 		defaultChar = passwordChar
 	}
 
-	textSize := t.Theme().Size(theme.SizeNameText)
 	return fyne.MeasureText(defaultChar, textSize, style)
 }
 
@@ -264,7 +263,7 @@ func (t *RichText) len() int {
 }
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (t *RichText) lineSizeToColumn(col, row int, innerPad float32) fyne.Size {
+func (t *RichText) lineSizeToColumn(col, row int, textSize, innerPad float32) fyne.Size {
 	if row < 0 {
 		row = 0
 	}
@@ -276,7 +275,7 @@ func (t *RichText) lineSizeToColumn(col, row int, innerPad float32) fyne.Size {
 	counted := 0
 	last := false
 	if bound == nil {
-		return t.charMinSize(false, fyne.TextStyle{})
+		return t.charMinSize(false, fyne.TextStyle{}, textSize)
 	}
 	for i, seg := range bound.segments {
 		var size fyne.Size
@@ -485,8 +484,8 @@ type textRenderer struct {
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
-	r.obj.propertyLock.RLock()
 	th := r.obj.Theme()
+	r.obj.propertyLock.RLock()
 	bounds := r.obj.rowBounds
 	objs := r.Objects()
 	if r.obj.scr != nil {
@@ -558,6 +557,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 // MinSize calculates the minimum size of a rich text widget.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
+	textSize := r.obj.Theme().Size(theme.SizeNameText)
 	r.obj.propertyLock.RLock()
 	th := r.obj.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
@@ -572,7 +572,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 	}
 	r.obj.propertyLock.RUnlock()
 
-	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{})
+	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{}, textSize)
 	min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 	if r.obj.scr != nil {
 		r.obj.prop.SetMinSize(min)

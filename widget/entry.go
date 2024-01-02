@@ -989,10 +989,11 @@ func (e *Entry) eraseSelection() {
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
+	textSize := e.Theme().Size(theme.SizeNameText)
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 
-	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle).Height
+	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle, textSize).Height
 	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.LineSpacing()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
@@ -1639,8 +1640,9 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
 	}
 
-	innerPadding := theme.CurrentForWidget(r.entry).Size(theme.SizeNameInnerPadding)
-	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle)
+	innerPadding := r.entry.Theme().Size(theme.SizeNameInnerPadding)
+	textSize := r.entry.Theme().Size(theme.SizeNameText)
+	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle, textSize)
 	minSize := charMin.Add(fyne.NewSquareSize(innerPadding))
 
 	if r.entry.MultiLine {
@@ -1879,6 +1881,8 @@ func (r *entryContentRenderer) Refresh() {
 // require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
 // all rectangles to comply with the occurrence order as stated above.
 func (r *entryContentRenderer) buildSelection() {
+	textSize := r.content.entry.Theme().Size(theme.SizeNameText)
+
 	r.content.entry.propertyLock.RLock()
 	cursorRow, cursorCol := r.content.entry.CursorRow, r.content.entry.CursorColumn
 	selectRow, selectCol := -1, -1
@@ -1899,11 +1903,11 @@ func (r *entryContentRenderer) buildSelection() {
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
-		sz := provider.lineSizeToColumn(column, row, innerPad)
+		sz := provider.lineSizeToColumn(column, row, textSize, innerPad)
 		return sz.Width, sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
 	}
 
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
+	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 
 	minmax := func(a, b int) (int, int) {
 		if a < b {
@@ -1996,18 +2000,20 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 func (r *entryContentRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
+
+	textSize := r.content.entry.Theme().Size(theme.SizeNameText)
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
 	th := theme.CurrentForWidget(r.content.entry)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
-	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, innerPad)
+	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, textSize, innerPad)
 	xPos := size.Width
 	yPos := size.Height * float32(r.content.entry.CursorRow)
 	r.content.entry.propertyLock.RUnlock()
 
 	r.content.entry.propertyLock.Lock()
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height
+	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
 	r.cursor.Move(fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder))
 
