@@ -46,7 +46,7 @@ func (w *Window) WaitForEvents() {
 }
 
 var DonePool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return make(chan struct{})
 	},
 }

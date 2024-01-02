@@ -38,8 +38,8 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	changeListeners sync.Map    // map[chan fyne.Settings]bool
-	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
+	changeListeners sync.Map // map[chan fyne.Settings]bool
+	watcher         any      // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
 }
@@ -104,7 +104,7 @@ func (s *settings) AddChangeListener(listener chan fyne.Settings) {
 }
 
 func (s *settings) apply() {
-	s.changeListeners.Range(func(key, _ interface{}) bool {
+	s.changeListeners.Range(func(key, _ any) bool {
 		listener := key.(chan fyne.Settings)
 		select {
 		case listener <- s:

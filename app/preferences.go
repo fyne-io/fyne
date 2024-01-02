@@ -80,7 +80,7 @@ func (p *preferences) saveToFile(path string) error {
 	defer file.Close()
 	encode := json.NewEncoder(file)
 
-	p.InMemoryPreferences.ReadValues(func(values map[string]interface{}) {
+	p.InMemoryPreferences.ReadValues(func(values map[string]any) {
 		err = encode.Encode(&values)
 	})
 
@@ -120,7 +120,7 @@ func (p *preferences) loadFromFile(path string) (err error) {
 	p.loadingInProgress = true
 	p.prefLock.Unlock()
 
-	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
+	p.InMemoryPreferences.WriteValues(func(values map[string]any) {
 		err = decode.Decode(&values)
 		if err != nil {
 			return
@@ -170,9 +170,9 @@ func newPreferences(app *fyneApp) *preferences {
 	return p
 }
 
-func convertLists(values map[string]interface{}) {
+func convertLists(values map[string]any) {
 	for k, v := range values {
-		if items, ok := v.([]interface{}); ok {
+		if items, ok := v.([]any); ok {
 			if len(items) == 0 {
 				continue
 			}

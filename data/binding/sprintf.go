@@ -35,7 +35,7 @@ func NewSprintf(format string, b ...DataItem) String {
 }
 
 func (s *sprintfString) DataChanged() {
-	data := make([]interface{}, 0, len(s.source))
+	data := make([]any, 0, len(s.source))
 
 	s.err = nil
 	for _, value := range s.source {
@@ -112,7 +112,7 @@ func (s *sprintfString) Get() (string, error) {
 }
 
 func (s *sprintfString) Set(str string) error {
-	data := make([]interface{}, 0, len(s.source))
+	data := make([]any, 0, len(s.source))
 
 	s.err = nil
 	for _, value := range s.source {

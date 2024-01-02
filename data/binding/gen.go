@@ -969,7 +969,7 @@ package binding
 	return f, nil
 }
 
-func writeFile(f *os.File, t *template.Template, d interface{}) {
+func writeFile(f *os.File, t *template.Template, d any) {
 	if err := t.Execute(f, d); err != nil {
 		fyne.LogError("Unable to write file "+f.Name(), err)
 	}
@@ -1054,7 +1054,7 @@ import (
 		{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-		{Name: "Untyped", Type: "interface{}", Default: "nil", Since: "2.1"},
+		{Name: "Untyped", Type: "any", Default: "nil", Since: "2.1"},
 		{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
@@ -1066,7 +1066,7 @@ import (
 		writeFile(listFile, list, b)
 		writeFile(treeFile, tree, b)
 		if b.Name == "Untyped" {
-			continue // interface{} is special, we have it in binding.go instead
+			continue // any is special, we have it in binding.go instead
 		}
 
 		writeFile(itemFile, item, b)

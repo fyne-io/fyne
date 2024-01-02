@@ -545,7 +545,7 @@ type listLayout struct {
 
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
-	l.slicePool.New = func() interface{} {
+	l.slicePool.New = func() any {
 		s := make([]listItemAndID, 0)
 		return &s
 	}

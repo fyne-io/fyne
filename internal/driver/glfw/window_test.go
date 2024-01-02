@@ -1813,9 +1813,9 @@ type hoverableObject struct {
 var _ desktop.Hoverable = (*hoverable)(nil)
 
 type hoverable struct {
-	mouseInEvents    []interface{}
-	mouseOutEvents   []interface{}
-	mouseMovedEvents []interface{}
+	mouseInEvents    []any
+	mouseOutEvents   []any
+	mouseMovedEvents []any
 }
 
 func (h *hoverable) MouseIn(e *desktop.MouseEvent) {
@@ -1830,17 +1830,17 @@ func (h *hoverable) MouseOut() {
 	h.mouseOutEvents = append(h.mouseOutEvents, true)
 }
 
-func (h *hoverable) popMouseInEvent() (e interface{}) {
+func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
 	return
 }
 
-func (h *hoverable) popMouseMovedEvent() (e interface{}) {
+func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
 	return
 }
 
-func (h *hoverable) popMouseOutEvent() (e interface{}) {
+func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
 	return
 }
@@ -1853,8 +1853,8 @@ type draggableObject struct {
 var _ fyne.Draggable = (*draggable)(nil)
 
 type draggable struct {
-	events    []interface{}
-	endEvents []interface{}
+	events    []any
+	endEvents []any
 }
 
 func (d *draggable) Dragged(e *fyne.DragEvent) {
@@ -1865,12 +1865,12 @@ func (d *draggable) DragEnd() {
 	d.endEvents = append(d.endEvents, true)
 }
 
-func (d *draggable) popDragEvent() (e interface{}) {
+func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
 	return
 }
 
-func (d *draggable) popDragEndEvent() (e interface{}) {
+func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
 	return
 }
@@ -1889,7 +1889,7 @@ type mouseableObject struct {
 var _ desktop.Mouseable = (*mouseable)(nil)
 
 type mouseable struct {
-	mouseEvents []interface{}
+	mouseEvents []any
 }
 
 func (m *mouseable) MouseDown(e *desktop.MouseEvent) {
@@ -1900,7 +1900,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 	m.mouseEvents = append(m.mouseEvents, e)
 }
 
-func (m *mouseable) popMouseEvent() (e interface{}) {
+func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
 	return
 }
@@ -1919,8 +1919,8 @@ type tappableObject struct {
 var _ fyne.Tappable = (*tappable)(nil)
 
 type tappable struct {
-	tapEvents          []interface{}
-	secondaryTapEvents []interface{}
+	tapEvents          []any
+	secondaryTapEvents []any
 }
 
 func (t *tappable) Tapped(e *fyne.PointEvent) {
@@ -1931,12 +1931,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
 }
 
-func (t *tappable) popTapEvent() (e interface{}) {
+func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
 	return
 }
 
-func (t *tappable) popSecondaryTapEvent() (e interface{}) {
+func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
 }
@@ -2007,14 +2007,14 @@ var _ fyne.Scrollable = (*scrollable)(nil)
 
 type scrollable struct {
 	*canvas.Rectangle
-	events []interface{}
+	events []any
 }
 
 func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 	s.events = append(s.events, e)
 }
 
-func (s *scrollable) popScrollEvent() (e interface{}) {
+func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
 	return
 }
@@ -2023,7 +2023,7 @@ func (s *scrollable) popScrollEvent() (e interface{}) {
 // Test helper
 //
 
-func pop(s []interface{}) (interface{}, []interface{}) {
+func pop(s []any) (any, []any) {
 	if len(s) == 0 {
 		return nil, s
 	}

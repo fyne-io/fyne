@@ -39,7 +39,7 @@ func main() {
 				Imports: "",
 			},
 			"chan_interface.go": {
-				Type:    "interface{}",
+				Type:    "any",
 				Name:    "Interface",
 				Imports: "",
 			},
