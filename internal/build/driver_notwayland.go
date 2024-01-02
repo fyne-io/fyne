@@ -1,5 +1,4 @@
 //go:build !wayland
-// +build !wayland
 
 package build
 

@@ -1,11 +1,4 @@
 //go:build (gles || arm || arm64) && !android && !ios && !mobile && !darwin && !wasm && !test_web_driver
-// +build gles arm arm64
-// +build !android
-// +build !ios
-// +build !mobile
-// +build !darwin
-// +build !wasm
-// +build !test_web_driver
 
 package gl
 

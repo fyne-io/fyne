@@ -1,5 +1,4 @@
 //go:build !windows || !ci
-// +build !windows !ci
 
 package mobile
 

@@ -1,5 +1,4 @@
 //go:build !windows && !android && !ios && !wasm && !js
-// +build !windows,!android,!ios,!wasm,!js
 
 package dialog
 

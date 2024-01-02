@@ -1,7 +1,4 @@
 //go:build !ci && (!android || !ios || !mobile) && (wasm || test_web_driver)
-// +build !ci
-// +build !android !ios !mobile
-// +build wasm test_web_driver
 
 package app
 

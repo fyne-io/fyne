@@ -1,5 +1,4 @@
 //go:build flatpak
-// +build flatpak
 
 package build
 
