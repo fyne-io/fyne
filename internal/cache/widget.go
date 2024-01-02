@@ -61,7 +61,7 @@ func DestroyRenderer(wid fyne.Widget) {
 	for r, w := range forWidgets {
 		if w == wid {
 			delete(forWidgets, r)
-			return
+			break
 		}
 	}
 

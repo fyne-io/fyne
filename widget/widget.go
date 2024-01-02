@@ -171,11 +171,17 @@ func (w *BaseWidget) super() fyne.Widget {
 
 // theme returns a cached theme instance for this widget (or its extending widget).
 func (w *BaseWidget) theme() fyne.Theme {
+	w.propertyLock.RLock()
+	cached := w.themeCache
+	w.propertyLock.RUnlock()
 	if w.themeCache == nil {
-		w.themeCache = theme.CurrentForWidget(w.impl)
+		cached = theme.CurrentForWidget(w.impl)
+		w.propertyLock.Lock()
+		w.themeCache = cached
+		w.propertyLock.Unlock()
 	}
 
-	return w.themeCache
+	return cached
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
