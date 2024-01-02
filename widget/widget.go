@@ -146,6 +146,24 @@ func (w *BaseWidget) Refresh() {
 	render.Refresh()
 }
 
+// Theme returns a cached Theme instance for this widget (or its extending widget).
+// This will be the app theme in most cases, or a widget specific theme if it is inside a ThemeOverride container.
+//
+// Since: 2.5
+func (w *BaseWidget) Theme() fyne.Theme {
+	w.propertyLock.RLock()
+	cached := w.themeCache
+	w.propertyLock.RUnlock()
+	if w.themeCache == nil {
+		cached = theme.CurrentForWidget(w.impl)
+		w.propertyLock.Lock()
+		w.themeCache = cached
+		w.propertyLock.Unlock()
+	}
+
+	return cached
+}
+
 // setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
 func (w *BaseWidget) setFieldsAndRefresh(f func()) {
@@ -167,21 +185,6 @@ func (w *BaseWidget) super() fyne.Widget {
 	impl := w.impl
 	w.propertyLock.RUnlock()
 	return impl
-}
-
-// theme returns a cached theme instance for this widget (or its extending widget).
-func (w *BaseWidget) theme() fyne.Theme {
-	w.propertyLock.RLock()
-	cached := w.themeCache
-	w.propertyLock.RUnlock()
-	if w.themeCache == nil {
-		cached = theme.CurrentForWidget(w.impl)
-		w.propertyLock.Lock()
-		w.themeCache = cached
-		w.propertyLock.Unlock()
-	}
-
-	return cached
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.

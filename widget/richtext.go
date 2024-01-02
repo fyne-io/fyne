@@ -7,6 +7,10 @@ import (
 	"sync"
 	"unicode"
 
+	"github.com/go-text/typesetting/di"
+	"github.com/go-text/typesetting/shaping"
+	"golang.org/x/image/math/fixed"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
@@ -14,9 +18,6 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
-	"github.com/go-text/typesetting/di"
-	"github.com/go-text/typesetting/shaping"
-	"golang.org/x/image/math/fixed"
 )
 
 const (
@@ -152,7 +153,7 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle) fyne.Size {
 		defaultChar = passwordChar
 	}
 
-	textSize := t.theme().Size(theme.SizeNameText)
+	textSize := t.Theme().Size(theme.SizeNameText)
 	return fyne.MeasureText(defaultChar, textSize, style)
 }
 
@@ -362,7 +363,7 @@ func (t *RichText) rows() int {
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time a segment Text, widget Wrapping or size changes.
 func (t *RichText) updateRowBounds() {
-	th := t.theme()
+	th := t.Theme()
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
 	fitSize := t.Size()
 	if t.scr != nil {
@@ -485,7 +486,7 @@ type textRenderer struct {
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	r.obj.propertyLock.RLock()
-	th := r.obj.theme()
+	th := r.obj.Theme()
 	bounds := r.obj.rowBounds
 	objs := r.Objects()
 	if r.obj.scr != nil {
@@ -558,7 +559,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
 	r.obj.propertyLock.RLock()
-	th := r.obj.theme()
+	th := r.obj.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	bounds := r.obj.rowBounds

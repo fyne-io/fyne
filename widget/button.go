@@ -93,7 +93,7 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	th := b.theme()
+	th := b.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
@@ -151,7 +151,7 @@ func (b *Button) MinSize() fyne.Size {
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 
-	b.applyButtonTheme(b.theme())
+	b.applyButtonTheme(b.Theme())
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -162,7 +162,7 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 func (b *Button) MouseOut() {
 	b.hovered = false
 
-	b.applyButtonTheme(b.theme())
+	b.applyButtonTheme(b.Theme())
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -186,7 +186,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.applyButtonTheme(b.theme())
+	b.applyButtonTheme(b.Theme())
 
 	if b.OnTapped != nil {
 		b.OnTapped()
@@ -215,7 +215,7 @@ func (b *Button) applyButtonTheme(th fyne.Theme) {
 }
 
 func (b *Button) buttonColor() color.Color {
-	th := b.theme()
+	th := b.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	switch {
@@ -292,7 +292,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
 	r.tapBG.Resize(size)
 
-	th := r.button.theme()
+	th := r.button.Theme()
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	if !hasIcon && !hasLabel {
@@ -334,7 +334,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (r *buttonRenderer) MinSize() (size fyne.Size) {
-	th := r.button.theme()
+	th := r.button.Theme()
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
@@ -354,7 +354,7 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *buttonRenderer) Refresh() {
-	th := r.button.theme()
+	th := r.button.Theme()
 	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
@@ -366,7 +366,7 @@ func (r *buttonRenderer) Refresh() {
 
 // applyTheme updates this button to match the current theme
 func (r *buttonRenderer) applyTheme() {
-	r.button.applyButtonTheme(r.button.theme())
+	r.button.applyButtonTheme(r.button.Theme())
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled:
@@ -457,9 +457,9 @@ func blendColor(under, over color.Color) color.Color {
 func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
 	var th fyne.Theme
 	if s, ok := w.(*Select); ok {
-		th = s.theme()
+		th = s.Theme()
 	} else {
-		th = w.(*Button).theme()
+		th = w.(*Button).Theme()
 	}
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
