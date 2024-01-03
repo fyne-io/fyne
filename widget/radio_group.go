@@ -124,7 +124,7 @@ func (r *RadioGroup) update() {
 	for i, item := range r.items {
 		item.Label = r.Options[i]
 		item.Selected = item.Label == r.Selected
-		item.DisableableWidget.disabled = r.disabled
+		item.DisableableWidget.disabled.Store(r.Disabled())
 		item.Refresh()
 	}
 }
@@ -207,7 +207,7 @@ func (r *radioGroupRenderer) updateItems() {
 	for i, item := range r.items {
 		item.Label = r.radio.Options[i]
 		item.Selected = item.Label == r.radio.Selected
-		item.disabled = r.radio.disabled
+		item.disabled.Store(r.radio.Disabled())
 		item.Refresh()
 	}
 }

@@ -358,7 +358,7 @@ func (r *buttonRenderer) applyTheme() {
 	r.button.applyButtonTheme()
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
-	case r.button.disabled:
+	case r.button.Disabled():
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance:
 		if r.button.focused {

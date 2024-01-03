@@ -155,7 +155,7 @@ func (w *BaseWidget) super() fyne.Widget {
 type DisableableWidget struct {
 	BaseWidget
 
-	disabled bool
+	disabled atomic.Bool
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -164,9 +164,13 @@ func (w *DisableableWidget) Enable() {
 		return
 	}
 
-	w.setFieldsAndRefresh(func() {
-		w.disabled = false
-	})
+	w.disabled.Store(false)
+
+	impl := w.super()
+	if impl == nil {
+		return
+	}
+	impl.Refresh()
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
@@ -175,17 +179,18 @@ func (w *DisableableWidget) Disable() {
 		return
 	}
 
-	w.setFieldsAndRefresh(func() {
-		w.disabled = true
-	})
+	w.disabled.Store(true)
+
+	impl := w.super()
+	if impl == nil {
+		return
+	}
+	impl.Refresh()
 }
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.disabled
+	return w.disabled.Load()
 }
 
 // NewSimpleRenderer creates a new SimpleRenderer to render a widget using a

@@ -226,7 +226,7 @@ func (e *Entry) Disable() {
 //
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled
+	return e.DisableableWidget.Disabled()
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
@@ -1305,7 +1305,8 @@ func (e *Entry) textPosFromRowCol(row, col int) int {
 func (e *Entry) syncSegments() {
 	colName := theme.ColorNameForeground
 	wrap := e.textWrap()
-	if e.disabled {
+	disabled := e.Disabled()
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
@@ -1324,7 +1325,7 @@ func (e *Entry) syncSegments() {
 		Text:  e.Text,
 	}}
 	colName = theme.ColorNamePlaceHolder
-	if e.disabled {
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.placeholderProvider().Wrapping = wrap
@@ -1666,7 +1667,7 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	content := r.entry.content
-	focusedAppearance := r.entry.focused && !r.entry.disabled
+	focusedAppearance := r.entry.focused && !r.entry.Disabled()
 	scroll := r.entry.Scroll
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
@@ -1842,7 +1843,7 @@ func (r *entryContentRenderer) Refresh() {
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	focused := r.content.entry.focused
-	focusedAppearance := focused && !r.content.entry.disabled
+	focusedAppearance := focused && !r.content.entry.disabled.Load()
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()

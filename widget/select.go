@@ -66,7 +66,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
-	if s.disabled {
+	if s.Disabled() {
 		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	}
 
@@ -342,7 +342,7 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) bgColor() color.Color {
-	if s.combo.disabled {
+	if s.combo.Disabled() {
 		return theme.DisabledButtonColor()
 	}
 	if s.combo.focused {
@@ -355,7 +355,7 @@ func (s *selectRenderer) bgColor() color.Color {
 }
 
 func (s *selectRenderer) updateIcon() {
-	if s.combo.disabled {
+	if s.combo.Disabled() {
 		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
@@ -369,7 +369,7 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	s.label.Segments[0].(*TextSegment).Style.Alignment = s.combo.Alignment
-	if s.combo.disabled {
+	if s.combo.Disabled() {
 		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	} else {
 		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
