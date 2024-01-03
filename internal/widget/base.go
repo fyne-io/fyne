@@ -1,7 +1,9 @@
 package widget
 
 import (
+	"math"
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -11,8 +13,8 @@ import (
 // Base provides a helper that handles basic widget behaviours.
 type Base struct {
 	hidden   bool
-	position fyne.Position
-	size     fyne.Size
+	position atomic.Uint64
+	size     atomic.Uint64
 
 	impl         fyne.Widget
 	propertyLock sync.RWMutex
@@ -32,27 +34,19 @@ func (w *Base) ExtendBaseWidget(wid fyne.Widget) {
 
 // Size gets the current size of this widget.
 func (w *Base) Size() fyne.Size {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.size
+	return fyne.NewSize(twoFloat32FromUint64(w.size.Load()))
 }
 
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *Base) Resize(size fyne.Size) {
-	w.propertyLock.RLock()
-	baseSize := w.size
-	impl := w.impl
-	w.propertyLock.RUnlock()
-	if baseSize == size {
+	if size == w.Size() {
 		return
 	}
 
-	w.propertyLock.Lock()
-	w.size = size
-	w.propertyLock.Unlock()
+	w.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
 
+	impl := w.super()
 	if impl == nil {
 		return
 	}
@@ -61,21 +55,15 @@ func (w *Base) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *Base) Position() fyne.Position {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.position
+	return fyne.NewPos(twoFloat32FromUint64(w.position.Load()))
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *Base) Move(pos fyne.Position) {
-	w.propertyLock.Lock()
-	w.position = pos
-	impl := w.impl
-	w.propertyLock.Unlock()
+	w.position.Store(uint64fromTwoFloat32(pos.X, pos.Y))
 
-	Repaint(impl)
+	Repaint(w.super())
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -175,4 +163,16 @@ func Repaint(obj fyne.CanvasObject) {
 			paint.SetDirty()
 		}
 	}
+}
+
+func uint64fromTwoFloat32(a, b float32) uint64 {
+	x := uint64(math.Float32bits(a))
+	y := uint64(math.Float32bits(b))
+	return (y << 32) | x
+}
+
+func twoFloat32FromUint64(combined uint64) (float32, float32) {
+	x := uint32(combined & 0x00000000FFFFFFFF)
+	y := uint32(combined & 0xFFFFFFFF00000000 >> 32)
+	return math.Float32frombits(x), math.Float32frombits(y)
 }

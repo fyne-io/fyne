@@ -256,7 +256,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
 		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
 		r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
-		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
+		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.Size().Height))
 	}
 
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
@@ -264,7 +264,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
 		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
 		r.rightShadow.Resize(fyne.NewSize(0, size.Height))
-		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
+		r.rightShadow.Move(fyne.NewPos(r.scroll.Size().Width, 0))
 	}
 
 	r.updatePosition()
@@ -334,7 +334,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
 		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
-		cache.Renderer(r.vertArea).Layout(r.scroll.size)
+		cache.Renderer(r.vertArea).Layout(r.scroll.Size())
 	} else {
 		r.vertArea.Hide()
 		r.topShadow.Hide()
@@ -343,7 +343,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
 		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
-		cache.Renderer(r.horizArea).Layout(r.scroll.size)
+		cache.Renderer(r.horizArea).Layout(r.scroll.Size())
 	} else {
 		r.horizArea.Hide()
 		r.leftShadow.Hide()
@@ -446,7 +446,7 @@ func (s *Scroll) Refresh() {
 
 // Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
 func (s *Scroll) Resize(sz fyne.Size) {
-	if sz == s.size {
+	if sz == s.Size() {
 		return
 	}
 
