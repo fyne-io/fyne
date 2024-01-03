@@ -57,7 +57,7 @@ type mobileDriver struct {
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
-	running         uint32 // atomic, 1 == running, 0 == stopped
+	running         atomic.Bool
 }
 
 // Declare conformity with Driver
@@ -141,7 +141,7 @@ func (d *mobileDriver) Quit() {
 }
 
 func (d *mobileDriver) Run() {
-	if !atomic.CompareAndSwapUint32(&d.running, 0, 1) {
+	if !d.running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
 

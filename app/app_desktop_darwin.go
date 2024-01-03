@@ -17,9 +17,8 @@ import "C"
 import (
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
-
-	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -54,7 +53,7 @@ func rootConfigDir() string {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := execabs.Command("open", url.String())
+	cmd := exec.Command("open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }

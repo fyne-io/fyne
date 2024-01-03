@@ -10,13 +10,13 @@ package app
 import (
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sync"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/rymdport/portal/notification"
 	"github.com/rymdport/portal/openuri"
-	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
@@ -38,7 +38,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 		return err
 	}
 
-	cmd := execabs.Command("xdg-open", url.String())
+	cmd := exec.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
