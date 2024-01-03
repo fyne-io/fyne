@@ -2,6 +2,7 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
+	"math"
 	"sync"
 	"sync/atomic"
 
@@ -14,7 +15,7 @@ import (
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	size     fyne.Size
-	position fyne.Position
+	position atomic.Uint64
 	Hidden   bool
 
 	impl         atomic.Pointer[fyne.Widget]
@@ -62,19 +63,13 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *BaseWidget) Position() fyne.Position {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.position
+	return fyne.NewPos(twoFloat32FromUint64(w.position.Load()))
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
-	w.propertyLock.Lock()
-	w.position = pos
-	w.propertyLock.Unlock()
-
+	w.position.Store(uint64fromTwoFloat32(pos.X, pos.Y))
 	internalWidget.Repaint(w.super())
 }
 
@@ -207,4 +202,16 @@ func (w *DisableableWidget) Disabled() bool {
 // Since: 2.1
 func NewSimpleRenderer(object fyne.CanvasObject) fyne.WidgetRenderer {
 	return internalWidget.NewSimpleRenderer(object)
+}
+
+func uint64fromTwoFloat32(a, b float32) uint64 {
+	x := uint64(math.Float32bits(a))
+	y := uint64(math.Float32bits(b))
+	return (y << 32) | x
+}
+
+func twoFloat32FromUint64(combined uint64) (float32, float32) {
+	x := uint32(combined & 0x00000000FFFFFFFF)
+	y := uint32(combined & 0xFFFFFFFF00000000 >> 32)
+	return math.Float32frombits(x), math.Float32frombits(y)
 }
