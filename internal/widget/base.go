@@ -85,6 +85,8 @@ func (w *Base) Show() {
 		return
 	}
 
+	w.hidden.Store(false)
+
 	impl := w.super()
 	if impl == nil {
 		return
