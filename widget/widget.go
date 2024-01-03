@@ -3,6 +3,7 @@ package widget // import "fyne.io/fyne/v2/widget"
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -16,7 +17,7 @@ type BaseWidget struct {
 	position fyne.Position
 	Hidden   bool
 
-	impl         fyne.Widget
+	impl         atomic.Pointer[fyne.Widget]
 	propertyLock sync.RWMutex
 }
 
@@ -27,9 +28,7 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-	w.impl = wid
+	w.impl.Store(&wid)
 }
 
 // Size gets the current size of this widget.
@@ -45,7 +44,6 @@ func (w *BaseWidget) Size() fyne.Size {
 func (w *BaseWidget) Resize(size fyne.Size) {
 	w.propertyLock.RLock()
 	baseSize := w.size
-	impl := w.impl
 	w.propertyLock.RUnlock()
 	if baseSize == size {
 		return
@@ -55,6 +53,7 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 	w.size = size
 	w.propertyLock.Unlock()
 
+	impl := w.super()
 	if impl == nil {
 		return
 	}
@@ -74,10 +73,9 @@ func (w *BaseWidget) Position() fyne.Position {
 func (w *BaseWidget) Move(pos fyne.Position) {
 	w.propertyLock.Lock()
 	w.position = pos
-	impl := w.impl
 	w.propertyLock.Unlock()
 
-	internalWidget.Repaint(impl)
+	internalWidget.Repaint(w.super())
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -120,9 +118,9 @@ func (w *BaseWidget) Hide() {
 
 	w.propertyLock.Lock()
 	w.Hidden = true
-	impl := w.impl
 	w.propertyLock.Unlock()
 
+	impl := w.super()
 	if impl == nil {
 		return
 	}
@@ -145,9 +143,9 @@ func (w *BaseWidget) Refresh() {
 func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 	w.propertyLock.Lock()
 	f()
-	impl := w.impl
 	w.propertyLock.Unlock()
 
+	impl := w.super()
 	if impl == nil {
 		return
 	}
@@ -157,10 +155,12 @@ func (w *BaseWidget) setFieldsAndRefresh(f func()) {
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is nil.
 func (w *BaseWidget) super() fyne.Widget {
-	w.propertyLock.RLock()
-	impl := w.impl
-	w.propertyLock.RUnlock()
-	return impl
+	impl := w.impl.Load()
+	if impl == nil {
+		return nil
+	}
+
+	return *impl
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.

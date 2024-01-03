@@ -302,10 +302,11 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
+	e.impl.Store(&wid)
+
 	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	e.BaseWidget.impl = wid
 	e.registerShortcut()
+	e.propertyLock.Unlock()
 }
 
 // FocusGained is called when the Entry has been given focus.
