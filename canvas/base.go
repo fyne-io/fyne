@@ -50,12 +50,7 @@ func (o *baseObject) Move(pos fyne.Position) {
 
 // Position gets the current position of this canvas object, relative to its parent.
 func (o *baseObject) Position() fyne.Position {
-	pos := o.position.Load()
-	if pos == 0 {
-		return fyne.Position{}
-	}
-
-	return fyne.NewPos(twoFloat32FromUint64(pos))
+	return fyne.NewPos(twoFloat32FromUint64(o.position.Load()))
 }
 
 // Resize sets a new size for the canvas object.
