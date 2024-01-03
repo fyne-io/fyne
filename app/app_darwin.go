@@ -1,5 +1,4 @@
 //go:build !ci && !wasm && !test_web_driver
-// +build !ci,!wasm,!test_web_driver
 
 package app
 

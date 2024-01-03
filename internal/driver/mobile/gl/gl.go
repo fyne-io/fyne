@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build darwin || linux || openbsd || freebsd || windows
-// +build darwin linux openbsd freebsd windows
 
 package gl
 

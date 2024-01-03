@@ -1,5 +1,4 @@
 //go:build ignore
-// +build ignore
 
 package main
 
@@ -74,7 +73,7 @@ func main() {
 
 	fmt.Println("Bundle emoji…")
 	f = &bytes.Buffer{}
-	f.WriteString(fileHeader + "//go:build !no_emoji\n// +build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
+	f.WriteString(fileHeader + "//go:build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
 	bundleFont("EmojiOneColor.otf", "emoji", f)
 
 	err = writeFile("bundled-emoji.go", f.Bytes())
