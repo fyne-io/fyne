@@ -14,7 +14,7 @@ import (
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
-	size     fyne.Size
+	size     atomic.Uint64
 	position atomic.Uint64
 	Hidden   bool
 
@@ -34,25 +34,17 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.size
+	return fyne.NewSize(twoFloat32FromUint64(w.size.Load()))
 }
 
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Resize(size fyne.Size) {
-	w.propertyLock.RLock()
-	baseSize := w.size
-	w.propertyLock.RUnlock()
-	if baseSize == size {
+	if size == w.Size() {
 		return
 	}
 
-	w.propertyLock.Lock()
-	w.size = size
-	w.propertyLock.Unlock()
+	w.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
 
 	impl := w.super()
 	if impl == nil {

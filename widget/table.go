@@ -854,13 +854,14 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyColumnCount
+	size := t.Size()
 
 	if len(t.columnWidths) == 0 {
 		paddedWidth := colWidth + padding
 
 		offX = float32(math.Floor(float64(t.offset.X/paddedWidth))) * paddedWidth
 		minCol = int(math.Floor(float64(offX / paddedWidth)))
-		maxCol = int(math.Ceil(float64((t.offset.X + t.size.Width) / paddedWidth)))
+		maxCol = int(math.Ceil(float64((t.offset.X + size.Width) / paddedWidth)))
 
 		if minCol > cols-1 {
 			minCol = cols - 1
@@ -896,7 +897,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			offX = colOffset
 			isVisible = true
 		}
-		if colOffset < t.offset.X+t.size.Width {
+		if colOffset < t.offset.X+size.Width {
 			maxCol = i + 1
 		} else {
 			break
@@ -954,13 +955,14 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyRowCount
+	size := t.Size()
 
 	if len(t.rowHeights) == 0 {
 		paddedHeight := rowHeight + padding
 
 		offY = float32(math.Floor(float64(t.offset.Y/paddedHeight))) * paddedHeight
 		minRow = int(math.Floor(float64(offY / paddedHeight)))
-		maxRow = int(math.Ceil(float64((t.offset.Y + t.size.Height) / paddedHeight)))
+		maxRow = int(math.Ceil(float64((t.offset.Y + size.Height) / paddedHeight)))
 
 		if minRow > rows-1 {
 			minRow = rows - 1
@@ -996,7 +998,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset < t.offset.Y+t.size.Height {
+		if rowOffset < t.offset.Y+size.Height {
 			maxRow = i + 1
 		} else {
 			break
@@ -1448,7 +1450,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			xPos := x + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.Size().Height))
 			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 			r.dividers[divs].Show()
 			divs++
@@ -1459,7 +1461,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.Size().Height))
 		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 		r.dividers[divs].Show()
 		divs++
@@ -1471,7 +1473,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			yPos := y + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.Size().Width, separatorThickness))
 			r.dividers[divs].Move(fyne.NewPos(0, yPos))
 			r.dividers[divs].Show()
 			divs++
@@ -1482,7 +1484,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.Size().Width, separatorThickness))
 		r.dividers[divs].Move(fyne.NewPos(0, yPos))
 		r.dividers[divs].Show()
 		divs++
@@ -1543,7 +1545,8 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	if x2 < 0 || x1 > r.cells.t.size.Width || y2 < 0 || y1 > r.cells.t.size.Height {
+	size := r.cells.t.Size()
+	if x2 < 0 || x1 > size.Width || y2 < 0 || y1 > size.Height {
 		marker.Hide()
 	} else {
 		left := x1

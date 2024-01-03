@@ -1668,7 +1668,6 @@ func (r *entryRenderer) Refresh() {
 	content := r.entry.content
 	focusedAppearance := r.entry.focused && !r.entry.disabled
 	scroll := r.entry.Scroll
-	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
 
@@ -1679,7 +1678,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 
 	// correct our scroll wrappers if the wrap mode changed
-	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
+	entrySize := r.entry.Size().Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
@@ -1742,7 +1741,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 	if r.entry.validationStatus == nil {
 		r.entry.validationStatus = newValidationStatus(r.entry)
 		r.objects = append(r.objects, r.entry.validationStatus)
-		r.Layout(r.entry.size)
+		r.Layout(r.entry.Size())
 
 		r.entry.Validate()
 
@@ -1774,7 +1773,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
 		provider, placeholder, e}
 	r.updateScrollDirections()
-	r.Layout(e.size)
+	r.Layout(e.Size())
 	return r
 }
 

@@ -233,17 +233,11 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 
 // Resize sets a new size for a widget.
 func (t *Tree) Resize(size fyne.Size) {
-	t.propertyLock.RLock()
-	s := t.size
-	t.propertyLock.RUnlock()
-
-	if s == size {
+	if size == t.Size() {
 		return
 	}
 
-	t.propertyLock.Lock()
-	t.size = size
-	t.propertyLock.Unlock()
+	t.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
 
 	t.Refresh() // trigger a redraw
 }
@@ -592,17 +586,11 @@ func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (c *treeContent) Resize(size fyne.Size) {
-	c.propertyLock.RLock()
-	s := c.size
-	c.propertyLock.RUnlock()
-
-	if s == size {
+	if size == c.Size() {
 		return
 	}
 
-	c.propertyLock.Lock()
-	c.size = size
-	c.propertyLock.Unlock()
+	c.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
 
 	c.Refresh() // trigger a redraw
 }
@@ -976,7 +964,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 		r.background.Hide()
 	}
 	r.background.Refresh()
-	r.Layout(r.treeNode.size)
+	r.Layout(r.treeNode.Size())
 	canvas.Refresh(r.treeNode.super())
 }
 
