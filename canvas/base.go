@@ -8,6 +8,7 @@
 package canvas // import "fyne.io/fyne/v2/canvas"
 
 import (
+	"math"
 	"sync"
 	"sync/atomic"
 
@@ -15,11 +16,11 @@ import (
 )
 
 type baseObject struct {
-	size     atomic.Pointer[fyne.Size]     // The current size of the canvas object
-	position atomic.Pointer[fyne.Position] // The current position of the object
-	Hidden   bool                          // Is this object currently hidden
+	size     atomic.Uint64 // The current size of the canvas object
+	position atomic.Uint64 // The current position of the object
+	Hidden   bool          // Is this object currently hidden
 
-	min atomic.Pointer[fyne.Size] // The minimum size this object can be
+	min atomic.Uint64 // The minimum size this object can be
 
 	propertyLock sync.RWMutex
 }
@@ -35,36 +36,36 @@ func (o *baseObject) Hide() {
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (o *baseObject) MinSize() fyne.Size {
 	min := o.min.Load()
-	if min == nil || ((*min).Width == 0 && (*min).Height == 0) {
+	if min == 0 {
 		return fyne.Size{Width: 1, Height: 1}
 	}
 
-	return *min
+	return fyne.NewSize(twoFloat32FromUint64(min))
 }
 
 // Move the object to a new position, relative to its parent.
 func (o *baseObject) Move(pos fyne.Position) {
-	o.position.Store(&pos)
+	o.position.Store(uint64fromTwoFloat32(pos.X, pos.Y))
 }
 
 // Position gets the current position of this canvas object, relative to its parent.
 func (o *baseObject) Position() fyne.Position {
 	pos := o.position.Load()
-	if pos == nil {
+	if pos == 0 {
 		return fyne.Position{}
 	}
 
-	return *pos
+	return fyne.NewPos(twoFloat32FromUint64(pos))
 }
 
 // Resize sets a new size for the canvas object.
 func (o *baseObject) Resize(size fyne.Size) {
-	o.size.Store(&size)
+	o.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
 }
 
 // SetMinSize specifies the smallest size this object should be.
 func (o *baseObject) SetMinSize(size fyne.Size) {
-	o.min.Store(&size)
+	o.min.Store(uint64fromTwoFloat32(size.Width, size.Height))
 }
 
 // Show will set this object to be visible.
@@ -77,12 +78,7 @@ func (o *baseObject) Show() {
 
 // Size returns the current size of this canvas object.
 func (o *baseObject) Size() fyne.Size {
-	size := o.size.Load()
-	if size == nil {
-		return fyne.Size{}
-	}
-
-	return *size
+	return fyne.NewSize(twoFloat32FromUint64(o.size.Load()))
 }
 
 // Visible returns true if this object is visible, false otherwise.
@@ -91,4 +87,16 @@ func (o *baseObject) Visible() bool {
 	defer o.propertyLock.RUnlock()
 
 	return !o.Hidden
+}
+
+func uint64fromTwoFloat32(a, b float32) uint64 {
+	x := uint64(math.Float32bits(a))
+	y := uint64(math.Float32bits(b))
+	return (y << 32) | x
+}
+
+func twoFloat32FromUint64(combined uint64) (float32, float32) {
+	x := uint32(combined & 0x00000000FFFFFFFF)
+	y := uint32(combined & 0xFFFFFFFF00000000 >> 32)
+	return math.Float32frombits(x), math.Float32frombits(y)
 }
