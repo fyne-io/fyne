@@ -1,9 +1,4 @@
-//go:build (gles || arm || arm64) && !darwin && !js && !wasm && !test_web_driver
-// +build gles arm arm64
-// +build !darwin
-// +build !js
-// +build !wasm
-// +build !test_web_driver
+//go:build (gles || arm || arm64) && !darwin && !wasm && !test_web_driver
 
 package glfw
 

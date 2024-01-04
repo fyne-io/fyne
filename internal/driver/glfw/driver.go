@@ -8,7 +8,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"sync/atomic"
+	"time"
 
 	"github.com/fyne-io/image/ico"
 
@@ -35,6 +35,8 @@ var _ fyne.Driver = (*gLDriver)(nil)
 
 // A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
 const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
+
+const doubleTapDelay = 300 * time.Millisecond
 
 type gLDriver struct {
 	windowLock   sync.RWMutex
@@ -106,7 +108,7 @@ func (d *gLDriver) Quit() {
 	}
 
 	// Only call close once to avoid panic.
-	if atomic.CompareAndSwapUint32(&running, 1, 0) {
+	if running.CompareAndSwap(true, false) {
 		close(d.done)
 	}
 }
@@ -151,8 +153,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	onMain := atomic.LoadUint32(&running) == 0
-	if onMain {
+	if !running.Load() {
 		d.Quit()
 	} else {
 		os.Exit(1)
@@ -166,6 +167,10 @@ func (d *gLDriver) Run() {
 
 	go d.catchTerm()
 	d.runGL()
+}
+
+func (d *gLDriver) DoubleTapDelay() time.Duration {
+	return doubleTapDelay
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

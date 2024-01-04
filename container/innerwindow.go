@@ -1,11 +1,10 @@
 package container
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -25,7 +24,7 @@ type InnerWindow struct {
 	Icon                                                fyne.Resource
 
 	title   string
-	content fyne.CanvasObject
+	content *fyne.Container
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
@@ -33,7 +32,7 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: content}
+	w := &InnerWindow{title: title, content: NewPadded(content)}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -75,24 +74,43 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			icon.(*widget.Button).Disable()
 		}
 	}
-	title := newDraggableLabel(w.title, w.OnDragged, w.OnTappedBar)
+	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	bar := NewBorder(nil, nil, buttons, icon, title)
 	bg := canvas.NewRectangle(theme.OverlayBackgroundColor())
 	contentBG := canvas.NewRectangle(theme.BackgroundColor())
-	corner := newDraggableCorner(w.OnResized)
+	corner := newDraggableCorner(w)
 
-	objects := []fyne.CanvasObject{bg, contentBG, bar, corner, w.content}
+	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
 		win: w, bar: bar, bg: bg, corner: corner, contentBG: contentBG}
+}
+
+func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
+	w.content.Objects[0] = obj
+
+	w.content.Refresh()
+}
+
+func (w *InnerWindow) SetPadded(pad bool) {
+	if pad {
+		w.content.Layout = layout.NewPaddedLayout()
+	} else {
+		w.content.Layout = layout.NewStackLayout()
+	}
+	w.content.Refresh()
+}
+
+func (w *InnerWindow) SetTitle(title string) {
+	w.title = title
+	w.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 
 type innerWindowRenderer struct {
 	*intWidget.ShadowingRenderer
-	min fyne.Size
 
 	win           *InnerWindow
 	bar           *fyne.Container
@@ -121,7 +139,7 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	i.win.content.Resize(innerSize)
 
 	cornerSize := i.corner.MinSize()
-	i.corner.Move(pos.Add(size).Subtract(cornerSize))
+	i.corner.Move(pos.Add(size).Subtract(cornerSize).AddXY(1, 1))
 	i.corner.Resize(cornerSize)
 }
 
@@ -130,9 +148,6 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	contentMin := i.win.content.MinSize()
 	barMin := i.bar.MinSize()
 
-	// only allow windows to grow, as per normal windows
-	contentMin = contentMin.Max(i.min)
-	i.min = contentMin
 	innerWidth := fyne.Max(barMin.Width, contentMin.Width)
 
 	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barMin.Height).Add(fyne.NewSquareSize(pad))
@@ -145,25 +160,26 @@ func (i *innerWindowRenderer) Refresh() {
 	i.contentBG.Refresh()
 	i.bar.Refresh()
 
+	title := i.bar.Objects[0].(*draggableLabel)
+	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
 }
 
 type draggableLabel struct {
 	widget.Label
-	drag func(*fyne.DragEvent)
-	tap  func()
+	win *InnerWindow
 }
 
-func newDraggableLabel(title string, fn func(*fyne.DragEvent), tap func()) *draggableLabel {
-	d := &draggableLabel{drag: fn, tap: tap}
+func newDraggableLabel(title string, win *InnerWindow) *draggableLabel {
+	d := &draggableLabel{win: win}
 	d.ExtendBaseWidget(d)
 	d.Text = title
 	return d
 }
 
 func (d *draggableLabel) Dragged(ev *fyne.DragEvent) {
-	if f := d.drag; f != nil {
-		d.drag(ev)
+	if f := d.win.OnDragged; f != nil {
+		f(ev)
 	}
 }
 
@@ -171,31 +187,31 @@ func (d *draggableLabel) DragEnd() {
 }
 
 func (d *draggableLabel) Tapped(ev *fyne.PointEvent) {
-	if f := d.tap; f != nil {
-		d.tap()
+	if f := d.win.OnTappedBar; f != nil {
+		f()
 	}
 }
 
 type draggableCorner struct {
 	widget.BaseWidget
-	drag func(*fyne.DragEvent)
+	win *InnerWindow
 }
 
-func newDraggableCorner(fn func(*fyne.DragEvent)) *draggableCorner {
-	d := &draggableCorner{drag: fn}
+func newDraggableCorner(w *InnerWindow) *draggableCorner {
+	d := &draggableCorner{win: w}
 	d.ExtendBaseWidget(d)
 	return d
 }
 
 func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
-	prop := canvas.NewRectangle(color.Transparent)
-	prop.SetMinSize(fyne.NewSquareSize(20))
+	prop := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon(theme.IconNameDragCornerIndicator))
+	prop.SetMinSize(fyne.NewSquareSize(16))
 	return widget.NewSimpleRenderer(prop)
 }
 
 func (c *draggableCorner) Dragged(ev *fyne.DragEvent) {
-	if f := c.drag; f != nil {
-		c.drag(ev)
+	if f := c.win.OnResized; f != nil {
+		c.win.OnResized(ev)
 	}
 }
 

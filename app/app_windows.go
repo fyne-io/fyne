@@ -1,5 +1,4 @@
-//go:build !ci && !js && !android && !ios && !wasm && !test_web_driver
-// +build !ci,!js,!android,!ios,!wasm,!test_web_driver
+//go:build !ci && !android && !ios && !wasm && !test_web_driver
 
 package app
 
@@ -7,11 +6,11 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
 
-	"golang.org/x/sys/execabs"
 	"golang.org/x/sys/windows/registry"
 
 	"fyne.io/fyne/v2"
@@ -62,7 +61,7 @@ func rootConfigDir() string {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := execabs.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
+	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
@@ -112,7 +111,7 @@ func runScript(name, script string) {
 	defer os.Remove(tmpFilePath)
 
 	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
-	cmd := execabs.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
+	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
@@ -20,10 +21,10 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 type glCanvas struct {
 	common.Canvas
 
-	content       fyne.CanvasObject
-	menu          fyne.CanvasObject
-	padded, debug bool
-	size          fyne.Size
+	content fyne.CanvasObject
+	menu    fyne.CanvasObject
+	padded  bool
+	size    fyne.Size
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -95,8 +96,9 @@ func (c *glCanvas) Padded() bool {
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	c.RLock()
 	texScale := c.texScale
+	scale := c.scale
 	c.RUnlock()
-	multiple := c.Scale() * texScale
+	multiple := scale * texScale
 	scaleInt := func(x float32) int {
 		return int(math.Round(float64(x * multiple)))
 	}
@@ -298,7 +300,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if build.Mode == fyne.BuildDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
@@ -339,6 +341,5 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
-	c.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	return c
 }

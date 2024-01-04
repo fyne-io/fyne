@@ -1,5 +1,4 @@
 //go:build ios || android
-// +build ios android
 
 package dialog
 

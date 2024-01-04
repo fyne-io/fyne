@@ -28,7 +28,7 @@ type drawData struct {
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var running uint32 // atomic bool, 0 or 1
+var running atomic.Bool
 var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
@@ -41,7 +41,7 @@ func init() {
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if onMain := atomic.LoadUint32(&running) == 0; onMain {
+	if !running.Load() {
 		f()
 		return
 	}
@@ -67,8 +67,15 @@ func runOnDraw(w *window, f func()) {
 	<-done
 }
 
+// Preallocate to avoid allocations on every drawSingleFrame.
+// Note that the capacity of this slice can only grow,
+// but its length will never be longer than the total number of
+// window canvases that are dirty on a single frame.
+// So its memory impact should be negligible and does not
+// need periodic shrinking.
+var refreshingCanvases []fyne.Canvas
+
 func (d *gLDriver) drawSingleFrame() {
-	refreshingCanvases := make([]fyne.Canvas, 0)
 	for _, win := range d.windowList() {
 		w := win.(*window)
 		w.viewLock.RLock()
@@ -89,10 +96,16 @@ func (d *gLDriver) drawSingleFrame() {
 		refreshingCanvases = append(refreshingCanvases, canvas)
 	}
 	cache.CleanCanvases(refreshingCanvases)
+
+	// cleanup refreshingCanvases slice
+	for i := 0; i < len(refreshingCanvases); i++ {
+		refreshingCanvases[i] = nil
+	}
+	refreshingCanvases = refreshingCanvases[:0]
 }
 
 func (d *gLDriver) runGL() {
-	if !atomic.CompareAndSwapUint32(&running, 0, 1) {
+	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
 	close(d.waitForStart) // Signal that execution can continue.

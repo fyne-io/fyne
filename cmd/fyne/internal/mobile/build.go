@@ -81,7 +81,7 @@ func runBuild(cmd *command) (err error) {
 // AppOutputName provides the name of a build resource for a given os - "ios" or "android".
 func AppOutputName(os, name string, release bool) string {
 	switch os {
-	case "android":
+	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
 		if release {
 			return androidPkgName(name) + ".aab"
 		} else {

@@ -310,3 +310,31 @@ func TestSlider_Focus(t *testing.T) {
 	slider.TypedKey(down)
 	assert.Equal(t, slider.Min, slider.Value)
 }
+
+func TestSlider_Disabled(t *testing.T) {
+	slider := NewSlider(0, 5)
+	slider.Disable()
+
+	changes := 0
+	slider.OnChanged = func(_ float64) {
+		changes++
+	}
+
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(30, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 0, changes)
+
+	slider.Enable()
+
+	slider.Dragged(drag)
+	assert.Equal(t, 1, changes)
+}

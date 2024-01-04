@@ -95,12 +95,12 @@ func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
 }
 
 func IsFileSVG(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".svg"
+	return strings.EqualFold(filepath.Ext(path), ".svg")
 }
 
 // IsResourceSVG checks if the resource is an SVG or not.
 func IsResourceSVG(res fyne.Resource) bool {
-	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
+	if IsFileSVG(res.Name()) {
 		return true
 	}
 

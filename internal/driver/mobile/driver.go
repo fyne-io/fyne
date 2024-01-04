@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -31,6 +32,7 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapDoubleDelay    = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
 // Configuration is the system information about the current device
@@ -55,7 +57,7 @@ type mobileDriver struct {
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
-	running         uint32 // atomic, 1 == running, 0 == stopped
+	running         atomic.Bool
 }
 
 // Declare conformity with Driver
@@ -139,7 +141,7 @@ func (d *mobileDriver) Quit() {
 }
 
 func (d *mobileDriver) Run() {
-	if !atomic.CompareAndSwapUint32(&d.running, 0, 1) {
+	if !d.running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
 
@@ -315,7 +317,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if build.Mode == fyne.BuildDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
@@ -547,6 +549,10 @@ func (d *mobileDriver) Device() fyne.Device {
 
 func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
+}
+
+func (d *mobileDriver) DoubleTapDelay() time.Duration {
+	return tapDoubleDelay
 }
 
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go

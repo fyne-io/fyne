@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -144,6 +145,23 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
+}
+
+func TestHyperlink_Truncate(t *testing.T) {
+	hyperlink := &Hyperlink{Text: "TestingWithLongText"}
+	hyperlink.CreateRenderer()
+	hyperlink.Resize(fyne.NewSize(100, 20))
+
+	r := test.WidgetRenderer(hyperlink.provider)
+	assert.Equal(t, "TestingWithLongText", r.Objects()[0].(*canvas.Text).Text)
+
+	hyperlink.Truncation = fyne.TextTruncateClip
+	hyperlink.Refresh()
+	assert.Equal(t, "TestingWith", r.Objects()[0].(*canvas.Text).Text)
+
+	hyperlink.Truncation = fyne.TextTruncateEllipsis
+	hyperlink.Refresh()
+	assert.Equal(t, "TestingWi…", r.Objects()[0].(*canvas.Text).Text)
 }
 
 func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {

@@ -1,5 +1,4 @@
 //go:build !ci && ios
-// +build !ci,ios
 
 #import <UIKit/UIKit.h>
 

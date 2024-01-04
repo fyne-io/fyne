@@ -22,6 +22,10 @@ type Hyperlink struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+	// The truncation mode of the hyperlink
+	//
+	// Since: 2.5
+	Truncation fyne.TextTruncation
 
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
@@ -238,6 +242,7 @@ func (hl *Hyperlink) openURL() {
 
 func (hl *Hyperlink) syncSegments() {
 	hl.provider.Wrapping = hl.Wrapping
+	hl.provider.Truncation = hl.Truncation
 	hl.provider.Segments = []RichTextSegment{&TextSegment{
 		Style: RichTextStyle{
 			Alignment: hl.Alignment,

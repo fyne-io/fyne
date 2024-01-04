@@ -1,5 +1,4 @@
 //go:build !windows || !ci
-// +build !windows !ci
 
 package mobile
 
@@ -298,7 +297,7 @@ func TestCanvas_Focusable(t *testing.T) {
 	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, nil, nil, nil)
-	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
+	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
@@ -306,7 +305,7 @@ func TestCanvas_Focusable(t *testing.T) {
 	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, nil, nil, nil)
-	time.Sleep(time.Millisecond * (doubleClickDelay + 150))
+	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 

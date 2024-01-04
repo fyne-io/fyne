@@ -1,5 +1,4 @@
-//go:build !js && !wasm && !test_web_driver
-// +build !js,!wasm,!test_web_driver
+//go:build !wasm && !test_web_driver
 
 package glfw
 
@@ -16,9 +15,7 @@ import (
 var _ fyne.Clipboard = (*clipboard)(nil)
 
 // clipboard represents the system clipboard
-type clipboard struct {
-	window *glfw.Window
-}
+type clipboard struct{}
 
 // Content returns the clipboard content
 func (c *clipboard) Content() string {
@@ -64,12 +61,6 @@ func (c *clipboard) SetContent(content string) {
 
 func (c *clipboard) setContent(content string) {
 	runOnMain(func() {
-		defer func() {
-			if r := recover(); r != nil {
-				fyne.LogError("GLFW clipboard error (details above)", nil)
-			}
-		}()
-
 		glfw.SetClipboardString(content)
 	})
 }

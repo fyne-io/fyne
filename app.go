@@ -81,20 +81,11 @@ type App interface {
 	SetCloudProvider(CloudProvider) // configure cloud for this app
 }
 
-// app contains an App variable, but due to atomic.Value restrictions on
-// interfaces we need to use an indirect type, i.e. appContainer.
-var app atomic.Value // appContainer
-
-// appContainer is a dummy container that holds an App instance. This
-// struct exists to guarantee that atomic.Value can store objects with
-// same type.
-type appContainer struct {
-	current App
-}
+var app atomic.Pointer[App]
 
 // SetCurrentApp is an internal function to set the app instance currently running.
 func SetCurrentApp(current App) {
-	app.Store(appContainer{current})
+	app.Store(&current)
 }
 
 // CurrentApp returns the current application, for which there is only 1 per process.
@@ -104,7 +95,7 @@ func CurrentApp() App {
 		LogError("Attempt to access current Fyne app when none is started", nil)
 		return nil
 	}
-	return (val).(appContainer).current
+	return *val
 }
 
 // AppMetadata captures the build metadata for an application.

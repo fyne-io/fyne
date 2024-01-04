@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build android
-// +build android
 
 /*
 Android Apps are built with -buildmode=c-shared. They are loaded by a
@@ -142,7 +141,6 @@ func onBackPressed() {
 		Code:      key.CodeBackButton,
 		Direction: key.DirPress,
 	}
-	log.Println("Logging key event back")
 	theApp.events.In() <- k
 
 	k.Direction = key.DirRelease
