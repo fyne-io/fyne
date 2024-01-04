@@ -3,6 +3,13 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.4 - Ongoing
+
+### Fixed
+
+* Spaces could be appended to linux Exec command during packaging
+
+
 ## 2.4.3 - 23 December 2023
 
 ### Fixed
