@@ -94,6 +94,9 @@ func (i *FileIcon) SetSelected(selected bool) {
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
+	if icon, ok := uri.(fyne.URIWithIcon); ok {
+		return icon.Icon()
+	}
 	if i.isDir(uri) {
 		return theme.FolderIcon()
 	}
@@ -190,6 +193,7 @@ func (s *fileIconRenderer) Refresh() {
 		}
 	}
 
+	s.img.Refresh()
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
 }

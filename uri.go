@@ -91,3 +91,12 @@ type ListableURI interface {
 	// List returns a list of child URIs of this URI.
 	List() ([]URI, error)
 }
+
+// URIWithIcon describes a URI that should be rendered with a certain icon in file browsers.
+//
+// Since: 2.5
+type URIWithIcon interface {
+	URI
+
+	Icon() Resource
+}

@@ -5,9 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -57,4 +61,37 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 	test.AssertImageMatches(t, "fileicon/fileicon_folder.png", w.Canvas().Capture())
 
 	w.Close()
+}
+
+func TestFileIcon_Icon(t *testing.T) {
+	data, _ := filepath.Abs("testdata")
+	dir := storage.NewFileURI(data)
+
+	icon1 := widget.NewFileIcon(dir)
+	trash := &customURI{URI: dir, icon: theme.DeleteIcon()}
+	icon2 := widget.NewFileIcon(trash)
+
+	// test icon change
+	icon1Img := software.Render(icon1, test.Theme())
+	icon2Img := software.Render(icon2, test.Theme())
+	assert.NotEqual(t, icon1Img, icon2Img)
+}
+
+type customURI struct {
+	fyne.URI
+
+	name string
+	icon fyne.Resource
+}
+
+func (c *customURI) Icon() fyne.Resource {
+	return c.icon
+}
+
+func (c *customURI) Name() string {
+	if c.name != "" {
+		return c.name
+	}
+
+	return c.URI.Name()
 }
