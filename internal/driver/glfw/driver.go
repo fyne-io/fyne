@@ -41,12 +41,12 @@ const doubleTapDelay = 300 * time.Millisecond
 type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
-	device       *glDevice
+	device       glDevice
 	done         chan struct{}
 	drawDone     chan struct{}
 	waitForStart chan struct{}
 
-	animation *animation.Runner
+	animation animation.Runner
 
 	currentKeyModifiers fyne.KeyModifier // desktop driver only
 
@@ -91,11 +91,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 }
 
 func (d *gLDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &glDevice{}
-	}
-
-	return d.device
+	return &d.device
 }
 
 func (d *gLDriver) Quit() {
@@ -127,18 +123,19 @@ func (d *gLDriver) focusPreviousWindow() {
 	wins := d.windows
 	d.windowLock.RUnlock()
 
-	var chosen fyne.Window
+	var chosen *window
 	for _, w := range wins {
-		if !w.(*window).visible {
+		win := w.(*window)
+		if !win.visible {
 			continue
 		}
-		chosen = w
-		if w.(*window).master {
+		chosen = win
+		if win.master {
 			break
 		}
 	}
 
-	if chosen == nil || chosen.(*window).view() == nil {
+	if chosen == nil || chosen.view() == nil {
 		return
 	}
 	chosen.RequestFocus()
@@ -181,6 +178,5 @@ func NewGLDriver() *gLDriver {
 		done:         make(chan struct{}),
 		drawDone:     make(chan struct{}),
 		waitForStart: make(chan struct{}),
-		animation:    &animation.Runner{},
 	}
 }
