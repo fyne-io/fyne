@@ -151,6 +151,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 				Options:    tt.options,
 				Selected:   tt.selected,
 			}
+			radio.Refresh() // set up selectedIndex
 			if tt.disabled {
 				radio.Disable()
 			}
