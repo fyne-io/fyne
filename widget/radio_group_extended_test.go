@@ -22,7 +22,6 @@ func newextendedRadioGroup(opts []string, f func(string)) *extendedRadioGroup {
 	ret.Options = opts
 	ret.OnChanged = f
 	ret.ExtendBaseWidget(ret)
-	//ret.update() // Not needed for extending Radio but for the tests to be able to access items without creating a renderer first.
 
 	return ret
 }
