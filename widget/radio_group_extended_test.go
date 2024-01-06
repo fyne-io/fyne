@@ -22,7 +22,7 @@ func newextendedRadioGroup(opts []string, f func(string)) *extendedRadioGroup {
 	ret.Options = opts
 	ret.OnChanged = f
 	ret.ExtendBaseWidget(ret)
-	ret.update() // Not needed for extending Radio but for the tests to be able to access items without creating a renderer first.
+	//ret.update() // Not needed for extending Radio but for the tests to be able to access items without creating a renderer first.
 
 	return ret
 }
@@ -32,7 +32,7 @@ func TestRadioGroup_Extended_Selected(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
-	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	extendedRadioGroupTestTapItem(t, radio, 0)
 
 	assert.Equal(t, "Hi", selected)
 }
@@ -43,7 +43,8 @@ func TestRadioGroup_Extended_Unselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.Refresh() // sets up selectedIndex
+	extendedRadioGroupTestTapItem(t, radio, 0)
 
 	assert.Equal(t, "", selected)
 }
@@ -89,7 +90,7 @@ func TestRadioGroup_Extended_Disable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	extendedRadioGroupTestTapItem(t, radio, 0)
 
 	assert.Equal(t, "", selected, "RadioGroup should have been disabled.")
 }
@@ -101,11 +102,11 @@ func TestRadioGroup_Extended_Enable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	extendedRadioGroupTestTapItem(t, radio, 0)
 	assert.Equal(t, "", selected, "Radio should have been disabled.")
 
 	radio.Enable()
-	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	extendedRadioGroupTestTapItem(t, radio, 0)
 	assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 }
 
@@ -131,9 +132,9 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := newextendedRadioGroup(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			item1 := radio.items[0]
+			item1 := test.WidgetRenderer(radio).Objects()[0].(*radioItem)
 			render1 := cache.Renderer(item1).(*radioItemRenderer)
-			render2 := cache.Renderer(radio.items[1]).(*radioItemRenderer)
+			render2 := cache.Renderer(test.WidgetRenderer(radio).Objects()[1].(*radioItem)).(*radioItemRenderer)
 
 			assert.False(t, item1.hovered)
 			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
@@ -166,7 +167,7 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 
 func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Test"}, func(string) {})
-	render := cache.Renderer(radio.items[0]).(*radioItemRenderer)
+	render := cache.Renderer(test.WidgetRenderer(radio).Objects()[0].(*radioItem)).(*radioItemRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
@@ -176,4 +177,11 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
+}
+
+func extendedRadioGroupTestTapItem(t *testing.T, radio *extendedRadioGroup, item int) {
+	t.Helper()
+	renderer := test.WidgetRenderer(radio)
+	radioItem := renderer.Objects()[item].(*radioItem)
+	radioItem.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 }
