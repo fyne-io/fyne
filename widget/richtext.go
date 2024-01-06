@@ -107,7 +107,7 @@ func (t *RichText) Refresh() {
 //
 // Implements: fyne.Widget
 func (t *RichText) Resize(size fyne.Size) {
-	if size == t.Size() {
+	if size == t.size.Load() {
 		return
 	}
 
@@ -355,7 +355,7 @@ func (t *RichText) rows() int {
 // updateRowBounds should be invoked every time a segment Text, widget Wrapping or size changes.
 func (t *RichText) updateRowBounds() {
 	innerPadding := theme.InnerPadding()
-	fitSize := t.Size()
+	fitSize := t.size.Load()
 	if t.scr != nil {
 		fitSize = t.scr.Content.MinSize()
 	}
@@ -363,7 +363,7 @@ func (t *RichText) updateRowBounds() {
 
 	t.propertyLock.RLock()
 	var bounds []rowBoundary
-	maxWidth := t.Size().Width - 2*innerPadding + 2*t.inset.Width
+	maxWidth := t.size.Load().Width - 2*innerPadding + 2*t.inset.Width
 	wrapWidth := maxWidth
 
 	var currentBound *rowBoundary

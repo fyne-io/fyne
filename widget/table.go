@@ -854,7 +854,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyColumnCount
-	size := t.Size()
+	size := t.size.Load()
 
 	if len(t.columnWidths) == 0 {
 		paddedWidth := colWidth + padding
@@ -955,7 +955,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyRowCount
-	size := t.Size()
+	size := t.size.Load()
 
 	if len(t.rowHeights) == 0 {
 		paddedHeight := rowHeight + padding
@@ -1443,6 +1443,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.cells.t.dividerLayer.Content.Refresh()
 	}
 
+	size := r.cells.t.size.Load()
+
 	divs := 0
 	i := 0
 	if stickCols > 0 {
@@ -1450,7 +1452,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			xPos := x + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.Size().Height))
+			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, size.Height))
 			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 			r.dividers[divs].Show()
 			divs++
@@ -1461,7 +1463,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.Size().Height))
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, size.Height))
 		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 		r.dividers[divs].Show()
 		divs++
@@ -1473,7 +1475,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			yPos := y + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.Size().Width, separatorThickness))
+			r.dividers[divs].Resize(fyne.NewSize(size.Width, separatorThickness))
 			r.dividers[divs].Move(fyne.NewPos(0, yPos))
 			r.dividers[divs].Show()
 			divs++
@@ -1484,7 +1486,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.Size().Width, separatorThickness))
+		r.dividers[divs].Resize(fyne.NewSize(size.Width, separatorThickness))
 		r.dividers[divs].Move(fyne.NewPos(0, yPos))
 		r.dividers[divs].Show()
 		divs++
@@ -1545,7 +1547,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	size := r.cells.t.Size()
+	size := r.cells.t.size.Load()
 	if x2 < 0 || x1 > size.Width || y2 < 0 || y1 > size.Height {
 		marker.Hide()
 	} else {

@@ -251,20 +251,21 @@ type scrollContainerRenderer struct {
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
+	scrollerSize := r.scroll.size.Load()
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
-		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
+		r.vertArea.Move(fyne.NewPos(scrollerSize.Width-r.vertArea.Size().Width, 0))
 		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
 		r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
-		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.Size().Height))
+		r.bottomShadow.Move(fyne.NewPos(0, scrollerSize.Height))
 	}
 
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
-		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
+		r.horizArea.Move(fyne.NewPos(0, scrollerSize.Height-r.horizArea.Size().Height))
 		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
 		r.rightShadow.Resize(fyne.NewSize(0, size.Height))
-		r.rightShadow.Move(fyne.NewPos(r.scroll.Size().Width, 0))
+		r.rightShadow.Move(fyne.NewPos(scrollerSize.Width, 0))
 	}
 
 	r.updatePosition()
@@ -326,7 +327,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Content == nil {
 		return
 	}
-	scrollSize := r.scroll.Size()
+	scrollSize := r.scroll.size.Load()
 	contentSize := r.scroll.Content.Size()
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
@@ -334,7 +335,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
 		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
-		cache.Renderer(r.vertArea).Layout(r.scroll.Size())
+		cache.Renderer(r.vertArea).Layout(scrollSize)
 	} else {
 		r.vertArea.Hide()
 		r.topShadow.Hide()
@@ -343,7 +344,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
 		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
-		cache.Renderer(r.horizArea).Layout(r.scroll.Size())
+		cache.Renderer(r.horizArea).Layout(scrollSize)
 	} else {
 		r.horizArea.Hide()
 		r.leftShadow.Hide()
