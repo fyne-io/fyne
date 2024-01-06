@@ -294,7 +294,6 @@ func TestRadioGroup_Required(t *testing.T) {
 	radioGroupTestTapItem(t, radio, 0)
 	assert.Equal(t, "Hi", radio.Selected, "tapping selected option of required radio does nothing")
 	radioGroupTestTapItem(t, radio, 1)
-	//radio.items[1].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.Size().Height-theme.Padding())})
 	assert.Equal(t, "There", radio.Selected)
 }
 
