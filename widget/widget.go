@@ -71,7 +71,7 @@ func (w *BaseWidget) MinSize() fyne.Size {
 
 	r := cache.Renderer(impl)
 	if r == nil {
-		return fyne.NewSize(0, 0)
+		return fyne.Size{}
 	}
 
 	return r.MinSize()
@@ -160,11 +160,9 @@ type DisableableWidget struct {
 
 // Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
-	if !w.Disabled() {
-		return
+	if !w.disabled.CompareAndSwap(true, false) {
+		return // Enabled already
 	}
-
-	w.disabled.Store(false)
 
 	impl := w.super()
 	if impl == nil {
@@ -175,11 +173,9 @@ func (w *DisableableWidget) Enable() {
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
-	if w.Disabled() {
-		return
+	if !w.disabled.CompareAndSwap(false, true) {
+		return // Disabled already
 	}
-
-	w.disabled.Store(true)
 
 	impl := w.super()
 	if impl == nil {

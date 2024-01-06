@@ -81,11 +81,9 @@ func (w *Base) Visible() bool {
 
 // Show this widget so it becomes visible
 func (w *Base) Show() {
-	if w.Visible() {
-		return
+	if !w.hidden.CompareAndSwap(true, false) {
+		return // Visible already
 	}
-
-	w.hidden.Store(false)
 
 	impl := w.super()
 	if impl == nil {
@@ -96,11 +94,9 @@ func (w *Base) Show() {
 
 // Hide this widget so it is no longer visible
 func (w *Base) Hide() {
-	if !w.Visible() {
-		return
+	if !w.hidden.CompareAndSwap(false, true) {
+		return // Hidden already
 	}
-
-	w.hidden.Store(true)
 
 	impl := w.super()
 	if impl == nil {
