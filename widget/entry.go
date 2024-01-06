@@ -1864,8 +1864,9 @@ func (r *entryContentRenderer) Refresh() {
 	r.moveCursor()
 
 	for _, selection := range selections {
-		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
-		selection.(*canvas.Rectangle).FillColor = theme.SelectionColor()
+		rect := selection.(*canvas.Rectangle)
+		rect.Hidden = !r.content.entry.focused
+		rect.FillColor = theme.SelectionColor()
 	}
 
 	canvas.Refresh(r.content)
