@@ -41,7 +41,6 @@ const doubleTapDelay = 300 * time.Millisecond
 type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
-	device       glDevice
 	done         chan struct{}
 	drawDone     chan struct{}
 	waitForStart chan struct{}
@@ -91,7 +90,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 }
 
 func (d *gLDriver) Device() fyne.Device {
-	return &d.device
+	return &glDevice{}
 }
 
 func (d *gLDriver) Quit() {
