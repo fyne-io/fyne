@@ -1841,7 +1841,8 @@ func (r *entryContentRenderer) Refresh() {
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
-	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
+	focused := r.content.entry.focused
+	focusedAppearance := focused && !r.content.entry.disabled
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
@@ -1863,10 +1864,11 @@ func (r *entryContentRenderer) Refresh() {
 	}
 	r.moveCursor()
 
+	selectionColor := theme.SelectionColor()
 	for _, selection := range selections {
 		rect := selection.(*canvas.Rectangle)
-		rect.Hidden = !r.content.entry.focused
-		rect.FillColor = theme.SelectionColor()
+		rect.Hidden = !focused
+		rect.FillColor = selectionColor
 	}
 
 	canvas.Refresh(r.content)
