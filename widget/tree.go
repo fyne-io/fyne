@@ -237,7 +237,7 @@ func (t *Tree) Resize(size fyne.Size) {
 		return
 	}
 
-	t.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
+	t.size.Store(size)
 
 	t.Refresh() // trigger a redraw
 }
@@ -590,7 +590,7 @@ func (c *treeContent) Resize(size fyne.Size) {
 		return
 	}
 
-	c.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
+	c.size.Store(size)
 
 	c.Refresh() // trigger a redraw
 }

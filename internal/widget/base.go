@@ -1,19 +1,19 @@
 package widget
 
 import (
-	"math"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 )
 
 // Base provides a helper that handles basic widget behaviours.
 type Base struct {
 	hidden   atomic.Bool
-	position atomic.Uint64
-	size     atomic.Uint64
+	position async.Position
+	size     async.Size
 	impl     atomic.Pointer[fyne.Widget]
 }
 
@@ -29,7 +29,7 @@ func (w *Base) ExtendBaseWidget(wid fyne.Widget) {
 
 // Size gets the current size of this widget.
 func (w *Base) Size() fyne.Size {
-	return fyne.NewSize(twoFloat32FromUint64(w.size.Load()))
+	return w.size.Load()
 }
 
 // Resize sets a new size for a widget.
@@ -39,7 +39,7 @@ func (w *Base) Resize(size fyne.Size) {
 		return
 	}
 
-	w.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
+	w.size.Store(size)
 
 	impl := w.super()
 	if impl == nil {
@@ -50,13 +50,13 @@ func (w *Base) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *Base) Position() fyne.Position {
-	return fyne.NewPos(twoFloat32FromUint64(w.position.Load()))
+	return w.position.Load()
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *Base) Move(pos fyne.Position) {
-	w.position.Store(uint64fromTwoFloat32(pos.X, pos.Y))
+	w.position.Store(pos)
 
 	Repaint(w.super())
 }
@@ -141,16 +141,4 @@ func Repaint(obj fyne.CanvasObject) {
 			paint.SetDirty()
 		}
 	}
-}
-
-func uint64fromTwoFloat32(a, b float32) uint64 {
-	x := uint64(math.Float32bits(a))
-	y := uint64(math.Float32bits(b))
-	return (y << 32) | x
-}
-
-func twoFloat32FromUint64(combined uint64) (float32, float32) {
-	x := uint32(combined & 0x00000000FFFFFFFF)
-	y := uint32(combined & 0xFFFFFFFF00000000 >> 32)
-	return math.Float32frombits(x), math.Float32frombits(y)
 }

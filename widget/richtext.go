@@ -111,7 +111,7 @@ func (t *RichText) Resize(size fyne.Size) {
 		return
 	}
 
-	t.size.Store(uint64fromTwoFloat32(size.Width, size.Height))
+	t.size.Store(size)
 
 	t.propertyLock.RLock()
 	segments := t.Segments
