@@ -1116,6 +1116,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
 		e.setFieldsAndRefresh(e.eraseSelection)
+
 		e.propertyLock.RLock()
 		content := e.Text
 		e.propertyLock.RUnlock()
