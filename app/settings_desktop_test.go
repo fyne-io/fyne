@@ -44,7 +44,7 @@ func TestWatchFile(t *testing.T) {
 	f.Close()
 	defer os.Remove(path)
 
-	called := make(chan interface{}, 1)
+	called := make(chan any, 1)
 	watchFile(path, func() {
 		called <- true
 	})
@@ -65,7 +65,7 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	f.Close()
 	defer os.Remove(path)
 
-	called := make(chan interface{}, 1)
+	called := make(chan any, 1)
 	watcher := watchFile(path, func() {
 		called <- true
 	})

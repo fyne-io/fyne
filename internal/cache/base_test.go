@@ -267,7 +267,7 @@ func testClearAll() {
 	expiredObjects = make([]fyne.CanvasObject, 0, 50)
 	skippedCleanWithCanvasRefresh = false
 	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
-	svgs.Range(func(key, _ interface{}) bool {
+	svgs.Range(func(key, _ any) bool {
 		svgs.Delete(key)
 		return true
 	})

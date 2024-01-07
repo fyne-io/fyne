@@ -555,7 +555,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 var _ fyne.Layout = (*recordingLayout)(nil)
 
 type recordingLayout struct {
-	layoutEvents []interface{}
+	layoutEvents []any
 }
 
 func (l *recordingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
@@ -566,7 +566,7 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(6, 9)
 }
 
-func (l *recordingLayout) popLayoutEvent() (e interface{}) {
+func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
 	return
 }

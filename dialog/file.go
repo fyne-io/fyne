@@ -71,7 +71,7 @@ type fileDialog struct {
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	callback         interface{}
+	callback         any
 	onClosedCallback func(bool)
 	parent           fyne.Window
 	dialog           *fileDialog

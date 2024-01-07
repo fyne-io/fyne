@@ -457,7 +457,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	}
 }
 
-func (w *window) objIsDragged(obj interface{}) bool {
+func (w *window) objIsDragged(obj any) bool {
 	if w.mouseDragged != nil && obj != nil {
 		draggedObj, _ := obj.(fyne.Draggable)
 		return draggedObj == w.mouseDragged
@@ -926,7 +926,7 @@ func (w *window) RescaleContext() {
 	runOnMain(w.rescaleOnMain)
 }
 
-func (w *window) Context() interface{} {
+func (w *window) Context() any {
 	return nil
 }
 

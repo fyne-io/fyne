@@ -2161,7 +2161,7 @@ func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
 	}
 }
 
-func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}

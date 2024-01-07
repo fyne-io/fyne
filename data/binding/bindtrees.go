@@ -1719,22 +1719,22 @@ func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 	return nil
 }
 
-// UntypedTree supports binding a tree of interface{} values.
+// UntypedTree supports binding a tree of any values.
 //
 // Since: 2.4
 type UntypedTree interface {
 	DataTree
 
-	Append(parent, id string, value interface{}) error
-	Get() (map[string][]string, map[string]interface{}, error)
-	GetValue(id string) (interface{}, error)
-	Prepend(parent, id string, value interface{}) error
+	Append(parent, id string, value any) error
+	Get() (map[string][]string, map[string]any, error)
+	GetValue(id string) (any, error)
+	Prepend(parent, id string, value any) error
 	Remove(id string) error
-	Set(ids map[string][]string, values map[string]interface{}) error
-	SetValue(id string, value interface{}) error
+	Set(ids map[string][]string, values map[string]any) error
+	SetValue(id string, value any) error
 }
 
-// ExternalUntypedTree supports binding a tree of interface{} values from an external variable.
+// ExternalUntypedTree supports binding a tree of any values from an external variable.
 //
 // Since: 2.4
 type ExternalUntypedTree interface {
@@ -1743,22 +1743,22 @@ type ExternalUntypedTree interface {
 	Reload() error
 }
 
-// NewUntypedTree returns a bindable tree of interface{} values.
+// NewUntypedTree returns a bindable tree of any values.
 //
 // Since: 2.4
 func NewUntypedTree() UntypedTree {
-	t := &boundUntypedTree{val: &map[string]interface{}{}}
+	t := &boundUntypedTree{val: &map[string]any{}}
 	t.ids = make(map[string][]string)
 	t.items = make(map[string]DataItem)
 	return t
 }
 
-// BindUntypedTree returns a bound tree of interface{} values, based on the contents of the passed values.
+// BindUntypedTree returns a bound tree of any values, based on the contents of the passed values.
 // The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindUntypedTree(ids *map[string][]string, v *map[string]interface{}) ExternalUntypedTree {
+func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalUntypedTree {
 	if v == nil {
 		return NewUntypedTree().(ExternalUntypedTree)
 	}
@@ -1780,10 +1780,10 @@ type boundUntypedTree struct {
 	treeBase
 
 	updateExternal bool
-	val            *map[string]interface{}
+	val            *map[string]any
 }
 
-func (t *boundUntypedTree) Append(parent, id string, val interface{}) error {
+func (t *boundUntypedTree) Append(parent, id string, val any) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
@@ -1798,14 +1798,14 @@ func (t *boundUntypedTree) Append(parent, id string, val interface{}) error {
 	return t.doReload()
 }
 
-func (t *boundUntypedTree) Get() (map[string][]string, map[string]interface{}, error) {
+func (t *boundUntypedTree) Get() (map[string][]string, map[string]any, error) {
 	t.lock.RLock()
 	defer t.lock.RUnlock()
 
 	return t.ids, *t.val, nil
 }
 
-func (t *boundUntypedTree) GetValue(id string) (interface{}, error) {
+func (t *boundUntypedTree) GetValue(id string) (any, error) {
 	t.lock.RLock()
 	defer t.lock.RUnlock()
 
@@ -1816,7 +1816,7 @@ func (t *boundUntypedTree) GetValue(id string) (interface{}, error) {
 	return nil, errOutOfBounds
 }
 
-func (t *boundUntypedTree) Prepend(parent, id string, val interface{}) error {
+func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
@@ -1864,7 +1864,7 @@ func (t *boundUntypedTree) Reload() error {
 	return t.doReload()
 }
 
-func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]interface{}) error {
+func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]any) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	t.ids = ids
@@ -1931,7 +1931,7 @@ func (t *boundUntypedTree) doReload() (retErr error) {
 	return
 }
 
-func (t *boundUntypedTree) SetValue(id string, v interface{}) error {
+func (t *boundUntypedTree) SetValue(id string, v any) error {
 	t.lock.Lock()
 	(*t.val)[id] = v
 	t.lock.Unlock()
@@ -1943,7 +1943,7 @@ func (t *boundUntypedTree) SetValue(id string, v interface{}) error {
 	return item.(Untyped).Set(v)
 }
 
-func bindUntypedTreeItem(v *map[string]interface{}, id string, external bool) Untyped {
+func bindUntypedTreeItem(v *map[string]any, id string, external bool) Untyped {
 	if external {
 		ret := &boundExternalUntypedTreeItem{old: (*v)[id]}
 		ret.val = v
@@ -1957,11 +1957,11 @@ func bindUntypedTreeItem(v *map[string]interface{}, id string, external bool) Un
 type boundUntypedTreeItem struct {
 	base
 
-	val *map[string]interface{}
+	val *map[string]any
 	id  string
 }
 
-func (t *boundUntypedTreeItem) Get() (interface{}, error) {
+func (t *boundUntypedTreeItem) Get() (any, error) {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 
@@ -1973,14 +1973,14 @@ func (t *boundUntypedTreeItem) Get() (interface{}, error) {
 	return nil, errOutOfBounds
 }
 
-func (t *boundUntypedTreeItem) Set(val interface{}) error {
+func (t *boundUntypedTreeItem) Set(val any) error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 
 	return t.doSet(val)
 }
 
-func (t *boundUntypedTreeItem) doSet(val interface{}) error {
+func (t *boundUntypedTreeItem) doSet(val any) error {
 	(*t.val)[t.id] = val
 
 	t.trigger()
@@ -1990,10 +1990,10 @@ func (t *boundUntypedTreeItem) doSet(val interface{}) error {
 type boundExternalUntypedTreeItem struct {
 	boundUntypedTreeItem
 
-	old interface{}
+	old any
 }
 
-func (t *boundExternalUntypedTreeItem) setIfChanged(val interface{}) error {
+func (t *boundExternalUntypedTreeItem) setIfChanged(val any) error {
 	if val == t.old {
 		return nil
 	}
