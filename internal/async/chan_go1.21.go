@@ -8,7 +8,7 @@ import "fyne.io/fyne/v2"
 // Func objects. A channel must be closed via Close method
 type UnboundedFuncChan = UnboundedChan[func()]
 
-// NewUnboundedInterfaceChan returns a unbounded channel, of func(), with unlimited capacity.
+// NewUnboundedFuncChan returns a unbounded channel, of func(), with unlimited capacity.
 func NewUnboundedFuncChan() *UnboundedFuncChan {
 	return NewUnboundedChan[func()]()
 }
@@ -31,7 +31,7 @@ func NewUnboundedCanvasObjectChan() *UnboundedChan[fyne.CanvasObject] {
 	return NewUnboundedChan[fyne.CanvasObject]()
 }
 
-// UnboundedFuncChan is a channel with an unbounded buffer for caching
+// UnboundedChan is a channel with an unbounded buffer for caching
 // Func objects. A channel must be closed via Close method.
 type UnboundedChan[T any] struct {
 	in, out chan T
@@ -39,7 +39,7 @@ type UnboundedChan[T any] struct {
 	q       []T
 }
 
-// NewUnboundedFuncChan returns a unbounded channel with unlimited capacity.
+// NewUnboundedChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedChan[T any]() *UnboundedChan[T] {
 	ch := &UnboundedChan[T]{
 		// The size of Func, Interface, and CanvasObject are all less than 16 bytes, we use 16 to fit

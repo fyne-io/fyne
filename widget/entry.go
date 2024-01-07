@@ -524,7 +524,7 @@ func (e *Entry) SetText(text string) {
 	e.propertyLock.Unlock()
 }
 
-// Appends the text to the end of the entry
+// Append appends the text to the end of the entry.
 //
 // Since: 2.4
 func (e *Entry) Append(text string) {
