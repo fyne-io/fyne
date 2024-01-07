@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	intTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -37,7 +38,7 @@ func TestTab_ThemeChange(t *testing.T) {
 
 	initial := w.Canvas().Capture()
 
-	a.Settings().SetTheme(theme.DarkTheme())
+	a.Settings().SetTheme(intTest.DarkTheme())
 	tabs.SelectIndex(1)
 	second := w.Canvas().Capture()
 	assert.NotEqual(t, initial, second)
