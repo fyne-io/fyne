@@ -1,5 +1,4 @@
 //go:build ignore
-// +build ignore
 
 package main
 
@@ -9,12 +8,11 @@ import (
 	"go/format"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"golang.org/x/sys/execabs"
 
 	"fyne.io/fyne/v2"
 )
@@ -75,7 +73,7 @@ func main() {
 
 	fmt.Println("Bundle emoji…")
 	f = &bytes.Buffer{}
-	f.WriteString(fileHeader + "//go:build !no_emoji\n// +build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
+	f.WriteString(fileHeader + "//go:build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
 	bundleFont("EmojiOneColor.otf", "emoji", f)
 
 	err = writeFile("bundled-emoji.go", f.Bytes())
@@ -245,7 +243,7 @@ func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
 	for _, r := range runes {
 		unicodes = append(unicodes, fmt.Sprintf(`%04X`, r))
 	}
-	cmd := execabs.Command(
+	cmd := exec.Command(
 		"pyftsubset",
 		fontPath(fontFile),
 		"--output-file="+fontPath(newFontFile),

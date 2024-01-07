@@ -1,5 +1,4 @@
 //go:build flatpak && !windows && !android && !ios && !wasm && !js
-// +build flatpak,!windows,!android,!ios,!wasm,!js
 
 package dialog
 

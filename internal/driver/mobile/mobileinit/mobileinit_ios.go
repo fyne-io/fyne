@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build darwin && (arm || arm64)
-// +build darwin
-// +build arm arm64
 
 package mobileinit
 

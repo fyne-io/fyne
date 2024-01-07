@@ -50,12 +50,7 @@ func (mt *MimeTypeFileFilter) Matches(uri fyne.URI) bool {
 			continue
 		}
 
-		// Replace with strings.Cut() when Go 1.18 is our new base version.
-		subTypeSeparatorIndex := strings.IndexByte(mSubType, ';')
-		if subTypeSeparatorIndex != -1 {
-			mSubType = mSubType[:subTypeSeparatorIndex]
-		}
-
+		mSubType, _, _ = strings.Cut(mSubType, ";")
 		if mType == mimeType && (mSubType == mimeSubType || mSubType == "*") {
 			return true
 		}

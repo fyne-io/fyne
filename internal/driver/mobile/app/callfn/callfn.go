@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build android && (arm || 386 || amd64 || arm64)
-// +build android
-// +build arm 386 amd64 arm64
 
 // Package callfn provides an android entry point.
 //

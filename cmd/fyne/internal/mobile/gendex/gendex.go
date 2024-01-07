@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build gendex
-// +build gendex
 
 // Gendex generates a dex file used by Go apps created with gomobile.
 //

@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build ignore
-// +build ignore
 
 // Genarsc generates stripped down version of android.jar resources used
 // for validation of manifest entries.

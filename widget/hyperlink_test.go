@@ -44,6 +44,9 @@ func TestHyperlink_Cursor(t *testing.T) {
 	hyperlink := NewHyperlink("Test", u)
 
 	assert.Nil(t, err)
+	assert.Equal(t, desktop.DefaultCursor, hyperlink.Cursor())
+
+	hyperlink.hovered = true
 	assert.Equal(t, desktop.PointerCursor, hyperlink.Cursor())
 }
 

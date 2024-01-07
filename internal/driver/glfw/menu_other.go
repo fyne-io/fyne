@@ -1,5 +1,4 @@
 //go:build !darwin || wasm || test_web_driver || no_native_menus
-// +build !darwin wasm test_web_driver no_native_menus
 
 package glfw
 

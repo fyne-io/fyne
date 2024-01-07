@@ -1,5 +1,4 @@
 //go:build release
-// +build release
 
 package build
 

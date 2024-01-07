@@ -1,5 +1,4 @@
 //go:build ignore
-// +build ignore
 
 package main
 
@@ -122,7 +121,7 @@ type prefBound{{ .Name }} struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache atomic.Value // {{ .Type }}
+	cache atomic.Pointer[{{ .Type }}]
 }
 
 // BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
@@ -148,7 +147,7 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 
 func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
 	cache := b.p.{{ .Name }}(b.key)
-	b.cache.Store(cache)
+	b.cache.Store(&cache)
 	return cache, nil
 }
 
@@ -163,11 +162,8 @@ func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
 
 func (b *prefBound{{ .Name }}) checkForChange() {
 	val := b.cache.Load()
-	if val != nil {
-		cache := val.({{ .Type }})
-		if b.p.{{ .Name }}(b.key) == cache {
-			return
-		}
+	if val != nil && b.p.{{ .Name }}(b.key) == *val {
+		return
 	}
 	b.trigger()
 }
