@@ -27,13 +27,13 @@ func TestTabButton_Icon_Change(t *testing.T) {
 func TestTab_ThemeChange(t *testing.T) {
 	a := test.NewApp()
 	defer test.NewApp()
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(test.Theme())
 
 	tabs := NewAppTabs(
 		NewTabItem("a", widget.NewLabel("a")),
 		NewTabItem("b", widget.NewLabel("b")))
 	w := test.NewWindow(tabs)
-	w.Resize(fyne.NewSquareSize(100))
+	w.Resize(fyne.NewSquareSize(150))
 
 	initial := w.Canvas().Capture()
 
@@ -42,7 +42,7 @@ func TestTab_ThemeChange(t *testing.T) {
 	second := w.Canvas().Capture()
 	assert.NotEqual(t, initial, second)
 
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(test.Theme())
 	tabs.SelectIndex(0)
 	assert.Equal(t, initial, w.Canvas().Capture())
 }
