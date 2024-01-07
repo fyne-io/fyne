@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
@@ -32,6 +33,7 @@ func TestTab_ThemeChange(t *testing.T) {
 		NewTabItem("a", widget.NewLabel("a")),
 		NewTabItem("b", widget.NewLabel("b")))
 	w := test.NewWindow(tabs)
+	w.Resize(fyne.NewSquareSize(100))
 
 	initial := w.Canvas().Capture()
 
