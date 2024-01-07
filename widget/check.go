@@ -24,6 +24,8 @@ type Check struct {
 	hovered bool
 
 	binder basicBinder
+
+	minSize fyne.Size // cached for hover/tap position calculations
 }
 
 // NewCheck creates a new check widget with the set label and change handler
@@ -91,26 +93,50 @@ func (c *Check) Hide() {
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (c *Check) MouseIn(*desktop.MouseEvent) {
-	if c.Disabled() {
-		return
-	}
-	c.hovered = true
-	c.Refresh()
+func (c *Check) MouseIn(me *desktop.MouseEvent) {
+	c.MouseMoved(me)
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (c *Check) MouseOut() {
-	c.hovered = false
-	c.Refresh()
+	if c.hovered {
+		c.hovered = false
+		c.Refresh()
+	}
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (c *Check) MouseMoved(*desktop.MouseEvent) {
+func (c *Check) MouseMoved(me *desktop.MouseEvent) {
+	if c.Disabled() {
+		return
+	}
+
+	oldHovered := c.hovered
+	if c.minSize.Width == 0 && c.minSize.Height == 0 {
+		c.hovered = true
+	} else if me.Position.X <= c.minSize.Width && me.Position.Y <= c.minSize.Height {
+		c.hovered = true
+	} else {
+		// mouse outside the active area of the widget
+		c.hovered = false
+	}
+
+	if oldHovered != c.hovered {
+		c.Refresh()
+	}
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (c *Check) Tapped(*fyne.PointEvent) {
+func (c *Check) Tapped(pe *fyne.PointEvent) {
+	if c.Disabled() {
+		return
+	}
+	if c.minSize.Height > 0 && c.minSize.Width > 0 &&
+		(pe.Position.X > c.minSize.Width || pe.Position.Y > c.minSize.Height) {
+		// tapped outside the active area of the widget
+		return
+	}
+
 	if !c.focused && !fyne.CurrentDevice().IsMobile() {
 		impl := c.super()
 
@@ -118,15 +144,14 @@ func (c *Check) Tapped(*fyne.PointEvent) {
 			c.Focus(impl.(fyne.Focusable))
 		}
 	}
-	if !c.Disabled() {
-		c.SetChecked(!c.Checked)
-	}
+	c.SetChecked(!c.Checked)
 }
 
 // MinSize returns the size that this widget should not shrink below
 func (c *Check) MinSize() fyne.Size {
 	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
+	c.minSize = c.BaseWidget.MinSize()
+	return c.minSize
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
