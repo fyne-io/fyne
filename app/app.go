@@ -24,7 +24,7 @@ type fyneApp struct {
 	uniqueID string
 
 	cloud     fyne.CloudProvider
-	lifecycle fyne.Lifecycle
+	lifecycle app.Lifecycle
 	settings  *settings
 	storage   fyne.Storage
 	prefs     fyne.Preferences
@@ -97,7 +97,7 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 }
 
 func (a *fyneApp) Lifecycle() fyne.Lifecycle {
-	return a.lifecycle
+	return &a.lifecycle
 }
 
 func (a *fyneApp) newDefaultPreferences() *preferences {
@@ -131,11 +131,11 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, lifecycle: &app.Lifecycle{}}
+	newApp := &fyneApp{uniqueID: id, driver: d}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
-	newApp.lifecycle.(*app.Lifecycle).SetOnStoppedHookExecuted(func() {
+	newApp.lifecycle.SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()
 		}
