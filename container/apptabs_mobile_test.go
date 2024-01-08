@@ -160,7 +160,7 @@ func TestAppTabs_DynamicTabs(t *testing.T) {
 func TestAppTabs_HoverButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}

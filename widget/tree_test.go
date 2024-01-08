@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -329,7 +330,7 @@ func TestTree_Move(t *testing.T) {
 func TestTree_Refresh(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	value := "Foo Leaf"
 	tree := widget.NewTreeWithStrings(treeData)

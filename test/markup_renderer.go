@@ -444,7 +444,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.FolderIcon():             "folderIcon",
 		theme.FolderNewIcon():          "folderNewIcon",
 		theme.FolderOpenIcon():         "folderOpenIcon",
-		theme.FyneLogo():               "fyneLogo",
+		theme.FyneLogo():               "fyneLogo", //lint:ignore SA1019 This needs to stay until the API is removed.
 		theme.HelpIcon():               "helpIcon",
 		theme.HistoryIcon():            "historyIcon",
 		theme.HomeIcon():               "homeIcon",
