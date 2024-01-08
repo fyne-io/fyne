@@ -210,6 +210,38 @@ func TestCheck_Hovered(t *testing.T) {
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 }
 
+func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
+	check := NewCheck("Test", func(on bool) {})
+	w := test.NewWindow(check)
+	defer w.Close()
+	render := test.WidgetRenderer(check).(*checkRenderer)
+
+	check.SetChecked(true)
+	assert.False(t, check.hovered)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
+
+	ms := check.MinSize()
+	check.MouseIn(&desktop.MouseEvent{PointEvent: fyne.PointEvent{
+		Position: fyne.NewPos(ms.Width+2, 1),
+	}})
+	assert.False(t, check.hovered)
+	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
+}
+
+func TestCheck_TappedOutsideActiveArea(t *testing.T) {
+	check := NewCheck("Test", func(on bool) {})
+	w := test.NewWindow(check)
+	defer w.Close()
+
+	check.SetChecked(true)
+
+	ms := check.MinSize()
+	check.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(ms.Width+2, 1),
+	})
+	assert.True(t, check.Checked)
+}
+
 func TestCheck_TypedRune(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
