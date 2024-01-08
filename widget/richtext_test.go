@@ -461,7 +461,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Empty_Truncate",
 			text: "",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 0},
 			},
@@ -501,7 +501,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Single_Short_Truncate",
 			text: "foobar",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 6},
 			},
@@ -550,7 +550,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Single_Long_Truncate",
 			text: "foobar foobar",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 10},
 			},
@@ -602,7 +602,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Multiple_Short_Truncate",
 			text: "foo\nbar",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 3},
 				{4, 7},
@@ -658,7 +658,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Multiple_Long_Truncate",
 			text: "foobar\nfoobar foobar foobar\nfoobar foobar",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 6},
 				{7, 17},
@@ -725,7 +725,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Multiple_Contiguous_Long_Truncate",
 			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 6},
 				{7, 17},
@@ -795,7 +795,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Multiple_Trailing_Short_Truncate",
 			text: "foo\nbar\n",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 3},
 				{4, 7},
@@ -877,7 +877,7 @@ func TestText_lineBounds(t *testing.T) {
 		{
 			name: "Multiple_Trailing_Long_Truncate",
 			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 6},
 				{7, 17},
@@ -1016,7 +1016,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 		{
 			name: "IM_Truncate",
 			text: "iiiiiiiiiimmmmmmmmmm",
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: [][2]int{
 				{0, 12},
 			},

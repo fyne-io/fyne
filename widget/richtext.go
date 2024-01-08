@@ -897,7 +897,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	lines := splitLines(seg)
 
-	if wrap == fyne.TextTruncate {
+	if wrap == fyne.TextWrap(fyne.TextTruncateClip) {
 		if trunc == fyne.TextTruncateOff {
 			trunc = fyne.TextTruncateClip
 		}

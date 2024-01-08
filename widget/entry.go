@@ -109,7 +109,7 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{Wrapping: fyne.TextTruncate}
+	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -126,14 +126,14 @@ func NewEntryWithData(data binding.String) *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{MultiLine: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{Password: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
@@ -1356,13 +1356,13 @@ func (e *Entry) textProvider() *RichText {
 
 // textWrap calculates the wrapping that we should apply.
 func (e *Entry) textWrap() fyne.TextWrap {
-	if e.Wrapping == fyne.TextTruncate { // this is now the default - but we scroll around this large content
+	if e.Wrapping == fyne.TextWrap(fyne.TextTruncateClip) { // this is now the default - but we scroll around this large content
 		return fyne.TextWrapOff
 	}
 
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
-		e.Wrapping = fyne.TextTruncate
+		e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 		return fyne.TextWrapOff
 	}
 	return e.Wrapping
@@ -2026,7 +2026,7 @@ func (r *entryContentRenderer) updateScrollDirections() {
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
 		r.content.scroll.Direction = r.content.entry.Scroll
-	case fyne.TextTruncate: // this is now the default - but we scroll
+	case fyne.TextWrap(fyne.TextTruncateClip): // this is now the default - but we scroll
 		r.content.scroll.Direction = widget.ScrollBoth
 	default: // fyne.TextWrapBreak, fyne.TextWrapWord
 		r.content.scroll.Direction = widget.ScrollVerticalOnly

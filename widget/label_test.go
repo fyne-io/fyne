@@ -192,7 +192,7 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 
 	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
 	text.Resize(truncSize)
-	text.Wrapping = fyne.TextTruncate
+	text.Truncation = fyne.TextTruncateClip
 	text.Refresh()
 	test.AssertRendersToMarkup(t, "label/truncate.xml", c)
 }
