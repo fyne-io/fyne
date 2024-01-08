@@ -4,15 +4,14 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
-func DarkTheme() fyne.Theme {
-	return &forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantDark}
+func DarkTheme(fallback fyne.Theme) fyne.Theme {
+	return &forcedVariant{Theme: fallback, variant: 0} // avoid import loops
 }
 
-func LightTheme() fyne.Theme {
-	return &forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantLight}
+func LightTheme(fallback fyne.Theme) fyne.Theme {
+	return &forcedVariant{Theme: fallback, variant: 1} // avoid import loops
 }
 
 type forcedVariant struct {

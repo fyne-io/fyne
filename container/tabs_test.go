@@ -38,7 +38,7 @@ func TestTab_ThemeChange(t *testing.T) {
 
 	initial := w.Canvas().Capture()
 
-	a.Settings().SetTheme(intTest.DarkTheme())
+	a.Settings().SetTheme(intTest.DarkTheme(theme.DefaultTheme()))
 	tabs.SelectIndex(1)
 	second := w.Canvas().Capture()
 	assert.NotEqual(t, initial, second)
