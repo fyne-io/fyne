@@ -112,14 +112,11 @@ func (c *Check) MouseMoved(me *desktop.MouseEvent) {
 	}
 
 	oldHovered := c.hovered
-	if c.minSize.Width == 0 && c.minSize.Height == 0 {
-		c.hovered = true
-	} else if me.Position.X <= c.minSize.Width && me.Position.Y <= c.minSize.Height {
-		c.hovered = true
-	} else {
-		// mouse outside the active area of the widget
-		c.hovered = false
-	}
+
+	// only hovered if cached minSize has not been initialized (test code)
+	// or the pointer is within the "active" area of the widget (its minSize)
+	c.hovered = c.minSize.IsZero() ||
+		(me.Position.X <= c.minSize.Width && me.Position.Y <= c.minSize.Height)
 
 	if oldHovered != c.hovered {
 		c.Refresh()
@@ -131,7 +128,7 @@ func (c *Check) Tapped(pe *fyne.PointEvent) {
 	if c.Disabled() {
 		return
 	}
-	if c.minSize.Height > 0 && c.minSize.Width > 0 &&
+	if !c.minSize.IsZero() &&
 		(pe.Position.X > c.minSize.Width || pe.Position.Y > c.minSize.Height) {
 		// tapped outside the active area of the widget
 		return
