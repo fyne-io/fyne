@@ -7,17 +7,21 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
+
+var noAnimations bool // set to true at compile time if no_animations tag is passed
 
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeName    string  `json:"theme"`
-	Scale        float32 `json:"scale"`
-	PrimaryColor string  `json:"primary_color"`
-	CloudName    string  `json:"cloud_name"`
-	CloudConfig  string  `json:"cloud_config"`
+	ThemeName         string  `json:"theme"`
+	Scale             float32 `json:"scale"`
+	PrimaryColor      string  `json:"primary_color"`
+	CloudName         string  `json:"cloud_name"`
+	CloudConfig       string  `json:"cloud_config"`
+	DisableAnimations bool    `json:"no_animations"`
 }
 
 // StoragePath returns the location of the settings storage
@@ -34,14 +38,14 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	changeListeners sync.Map    // map[chan fyne.Settings]bool
-	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
+	changeListeners sync.Map // map[chan fyne.Settings]bool
+	watcher         any      // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
 }
 
 func (s *settings) BuildType() fyne.BuildType {
-	return buildMode
+	return build.Mode
 }
 
 func (s *settings) PrimaryColor() string {
@@ -70,6 +74,10 @@ func (s *settings) SetTheme(theme fyne.Theme) {
 	s.applyTheme(theme, s.variant)
 }
 
+func (s *settings) ShowAnimations() bool {
+	return !s.schema.DisableAnimations && !noAnimations
+}
+
 func (s *settings) ThemeVariant() fyne.ThemeVariant {
 	return s.variant
 }
@@ -96,7 +104,7 @@ func (s *settings) AddChangeListener(listener chan fyne.Settings) {
 }
 
 func (s *settings) apply() {
-	s.changeListeners.Range(func(key, _ interface{}) bool {
+	s.changeListeners.Range(func(key, _ any) bool {
 		listener := key.(chan fyne.Settings)
 		select {
 		case listener <- s:

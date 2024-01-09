@@ -45,7 +45,7 @@ type svgInfo struct {
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
 	expiredSvgs := make([]string, 0, 20)
-	svgs.Range(func(key, value interface{}) bool {
+	svgs.Range(func(key, value any) bool {
 		s, sinfo := key.(string), value.(*svgInfo)
 		if sinfo.isExpired(now) {
 			expiredSvgs = append(expiredSvgs, s)

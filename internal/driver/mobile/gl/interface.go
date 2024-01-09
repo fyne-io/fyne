@@ -172,11 +172,6 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glLinkProgram.xhtml
 	LinkProgram(p Program)
 
-	// PixelStorei set pixel storage modes
-	//
-	// https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glPixelStorei.xhtml
-	PixelStorei(pname Enum, param int32)
-
 	// ReadPixels returns pixel data from a buffer.
 	//
 	// In GLES 3, the source buffer is controlled with ReadBuffer.
@@ -208,6 +203,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
 
+	// Uniform2f writes a vec2 uniform variable.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform2f(dst Uniform, v0, v1 float32)
+
 	// Uniform4f writes a vec4 uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
@@ -217,6 +217,7 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform4fv(dst Uniform, src []float32)
+
 	// UseProgram sets the active program.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUseProgram.xhtml

@@ -7,16 +7,22 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 )
 
 const floatSize = 4
 const max16bit = float32(255 * 255)
 
-func logGLError(err uint32) {
-	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
+// logGLError logs error in the GL renderer.
+//
+// Receives a function as parameter, to lazily get the error code only when
+// needed, avoiding unneeded overhead.
+func logGLError(getError func() uint32) {
+	if build.Mode != fyne.BuildDebug {
 		return
 	}
 
+	err := getError()
 	if err == 0 {
 		return
 	}

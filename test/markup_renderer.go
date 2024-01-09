@@ -259,7 +259,7 @@ func (r *markupRenderer) writeCircle(c *canvas.Circle, attrs map[string]*string)
 	r.writeTag("circle", true, attrs)
 }
 
-func (r *markupRenderer) writeCloseCanvasObject(o, _ fyne.CanvasObject) {
+func (r *markupRenderer) writeCloseCanvasObject(o fyne.CanvasObject, _ fyne.Position, _ fyne.CanvasObject) {
 	switch o.(type) {
 	case *fyne.Container:
 		r.indentation--

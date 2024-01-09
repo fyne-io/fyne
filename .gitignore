@@ -1,19 +1,14 @@
-### Project Specific
+### Binaries and project specific files
 cmd/fyne/fyne
-cmd/fyne/fyne.exe
 cmd/fyne_demo/fyne_demo
-cmd/fyne_demo/fyne_demo.apk
-cmd/fyne_demo/fyne-demo.app
-cmd/fyne_demo/fyne_demo.exe
 cmd/fyne_settings/fyne_settings
-cmd/fyne_settings/fyne_settings.apk
-cmd/fyne_settings/fyne_settings.app
-cmd/fyne_settings/fyne_settings.exe
 cmd/hello/hello
-cmd/hello/hello.apk
-cmd/hello/hello.app
-cmd/hello/hello.exe
 fyne-cross
+*.exe
+*.apk
+*.app
+*.tar.xz
+*.zip
 
 ### Tests
 **/testdata/failed

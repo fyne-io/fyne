@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	version "github.com/mcuadros/go-version"
+	"github.com/mcuadros/go-version"
 	"github.com/urfave/cli/v2"
 
 	"fyne.io/fyne/v2"
@@ -23,6 +23,8 @@ type Builder struct {
 	os, srcdir, target string
 	goPackage          string
 	release            bool
+	pprof              bool
+	pprofPort          int
 	tags               []string
 	tagsToParse        string
 
@@ -31,9 +33,14 @@ type Builder struct {
 	runner runner
 }
 
+// NewBuilder returns a command that can handle the build of GUI apps built using Fyne.
+func NewBuilder() *Builder {
+	return &Builder{appData: &appData{}}
+}
+
 // Build returns the cli command for building fyne applications
 func Build() *cli.Command {
-	b := &Builder{appData: &appData{}}
+	b := NewBuilder()
 
 	return &cli.Command{
 		Name:        "build",
@@ -66,6 +73,17 @@ func Build() *cli.Command {
 				Name:        "o",
 				Usage:       "Specify a name for the output file, default is based on the current directory.",
 				Destination: &b.target,
+			},
+			&cli.BoolFlag{
+				Name:        "pprof",
+				Usage:       "Enable pprof profiling.",
+				Destination: &b.pprof,
+			},
+			&cli.IntFlag{
+				Name:        "pprof-port",
+				Usage:       "Specify the port to use for pprof profiling.",
+				Value:       6060,
+				Destination: &b.pprofPort,
 			},
 			&cli.GenericFlag{
 				Name:  "metadata",
@@ -124,7 +142,7 @@ func checkVersion(output string, versionConstraint *version.ConstraintGroup) err
 }
 
 func isWeb(goos string) bool {
-	return goos == "gopherjs" || goos == "wasm"
+	return goos == "js" || goos == "wasm"
 }
 
 func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
@@ -184,7 +202,7 @@ func (b *Builder) build() error {
 		goos = targetOS()
 	}
 
-	if goos == "gopherjs" && runtime.GOOS == "windows" {
+	if goos == "js" && runtime.GOOS == "windows" {
 		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
 	}
 
@@ -195,10 +213,14 @@ func (b *Builder) build() error {
 		return err
 	}
 
-	if b.icon == "" {
-		defaultIcon := filepath.Join(srcdir, "Icon.png")
-		if util.Exists(defaultIcon) {
-			b.icon = defaultIcon
+	b.updateToDefaultIconIfNotSet(srcdir)
+
+	if b.pprof {
+		close, err := injectPprofFile(fyneGoModRunner, srcdir, b.pprofPort)
+		if err != nil {
+			fyne.LogError("Failed to inject pprof file, omitting pprof", err)
+		} else if close != nil {
+			defer close()
 		}
 	}
 
@@ -245,7 +267,7 @@ func (b *Builder) build() error {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		if goos == "gopherjs" {
+		if goos == "js" {
 			args = append(args, "--tags")
 		} else {
 			args = append(args, "-tags")
@@ -263,7 +285,7 @@ func (b *Builder) build() error {
 		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
-	} else if goos == "gopherjs" {
+	} else if goos == "js" {
 		_, err := b.runner.runOutput("version")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Can not execute `gopherjs version`. Please do `go install github.com/gopherjs/gopherjs@latest`.\n")
@@ -301,6 +323,38 @@ func (b *Builder) computeSrcDir(fyneGoModRunner runner) (string, error) {
 	return srcdir, nil
 }
 
+func (b *Builder) updateToDefaultIconIfNotSet(srcdir string) {
+	if b.icon == "" {
+		defaultIcon := filepath.Join(srcdir, "Icon.png")
+		if util.Exists(defaultIcon) {
+			b.icon = defaultIcon
+		}
+	}
+}
+
+func injectPprofFile(runner runner, srcdir string, port int) (func(), error) {
+	pprofInitFilePath := filepath.Join(srcdir, "fyne_pprof.go")
+	pprofInitFile, err := os.Create(pprofInitFilePath)
+	if err != nil {
+		return func() {}, err
+	}
+	defer pprofInitFile.Close()
+
+	pprofInfo := struct {
+		Port int
+	}{
+		Port: port,
+	}
+
+	err = templates.FynePprofInit.Execute(pprofInitFile, pprofInfo)
+	if err != nil {
+		os.Remove(pprofInitFilePath)
+		return func() {}, err
+	}
+
+	return func() { os.Remove(pprofInitFilePath) }, nil
+}
+
 func (b *Builder) updateAndGetGoExecutable(goos string) runner {
 	fyneGoModRunner := b.runner
 	if b.runner == nil {
@@ -310,7 +364,7 @@ func (b *Builder) updateAndGetGoExecutable(goos string) runner {
 			fyneGoModRunner = newCommand(goBin)
 			b.runner = fyneGoModRunner
 		} else {
-			if goos != "gopherjs" {
+			if goos != "js" {
 				b.runner = newCommand("go")
 			} else {
 				b.runner = newCommand("gopherjs")
@@ -365,14 +419,14 @@ func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
 		return nil, err
 	}
 
-	fyneGoModVersionNormalized := version.Normalize(fyneGoModVersion)
+	fyneGoModVersion = normaliseVersion(fyneGoModVersion)
 	fyneGoModVersionConstraint := version.NewConstrainGroupFromString(">=2.2")
-	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersionNormalized) {
+	if fyneGoModVersion != "master" && !fyneGoModVersionConstraint.Match(fyneGoModVersion) {
 		return nil, nil
 	}
 
 	fyneGoModVersionAtLeast2_3 := version.NewConstrainGroupFromString(">=2.3")
-	if fyneGoModVersionAtLeast2_3.Match(fyneGoModVersionNormalized) {
+	if fyneGoModVersionAtLeast2_3.Match(fyneGoModVersion) {
 		app.VersionAtLeast2_3 = true
 	}
 
@@ -435,4 +489,15 @@ func extractLdFlags(goFlags string) (string, string) {
 	newGoFlags = strings.TrimSpace(newGoFlags)
 
 	return ldflags, newGoFlags
+}
+
+func normaliseVersion(str string) string {
+	if str == "master" {
+		return str
+	}
+
+	if pos := strings.Index(str, "-0.20"); pos != -1 {
+		str = str[:pos] + "-dev"
+	}
+	return version.Normalize(str)
 }

@@ -66,13 +66,3 @@ func TestListBase_RemoveListener(t *testing.T) {
 	waitForItems()
 	assert.False(t, called)
 }
-
-func TestNewDataListListener(t *testing.T) {
-	called := false
-	fn := NewDataListener(func() {
-		called = true
-	})
-
-	fn.DataChanged()
-	assert.True(t, called)
-}

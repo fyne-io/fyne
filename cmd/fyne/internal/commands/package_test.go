@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"image"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -67,6 +69,32 @@ func Test_combinedVersion(t *testing.T) {
 		comb := p.combinedVersion()
 		assert.Equal(t, tt.comb, comb)
 	}
+}
+
+func Test_processMacOSIcon(t *testing.T) {
+	f, err := os.Open("testdata/icon.png")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	icon, _, err := image.Decode(f)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	processed := processMacOSIcon(icon)
+
+	assert.Equal(t, 1024, processed.Bounds().Dx())
+	assert.Equal(t, 1024, processed.Bounds().Dy())
+	_, _, _, a := processed.At(3, 3).RGBA() // border
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(125, 125).RGBA() // inside cut out corner
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(900, 900).RGBA()
+	assert.Equal(t, uint32(0), a)
+	_, _, _, a = processed.At(1020, 1020).RGBA()
+	assert.Equal(t, uint32(0), a)
 }
 
 func Test_MergeMetata(t *testing.T) {
@@ -315,7 +343,7 @@ func Test_buildPackageGopherJS(t *testing.T) {
 
 	p := &Packager{
 		appData: &appData{},
-		os:      "gopherjs",
+		os:      "js",
 		srcDir:  "myTest",
 		exe:     "myTest.js",
 		release: true,
@@ -366,7 +394,7 @@ func Test_PackageGopherJS(t *testing.T) {
 			Name: "myTest",
 			icon: "myTest.png",
 		},
-		os:     "gopherjs",
+		os:     "js",
 		srcDir: "myTest",
 		dir:    "myTestTarget",
 		exe:    "myTest.js",
@@ -381,7 +409,7 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedEnsureSubDirRuns := mockEnsureSubDirRuns{
 		expected: []mockEnsureSubDir{
-			{"myTestTarget", "gopherjs", "myTestTarget/gopherjs"},
+			{"myTestTarget", "js", "myTestTarget/js"},
 		},
 	}
 	utilEnsureSubDirMock = func(parent, name string) string {
@@ -400,12 +428,12 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedWriteFileRuns := mockWriteFileRuns{
 		expected: []mockWriteFile{
-			{filepath.Join("myTestTarget", "gopherjs", "index.html"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "spinner_light.gif"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "spinner_dark.gif"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "light.css"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "dark.css"), nil},
-			{filepath.Join("myTestTarget", "gopherjs", "webgl-debug.js"), nil},
+			{filepath.Join("myTestTarget", "js", "index.html"), nil},
+			{filepath.Join("myTestTarget", "js", "spinner_light.gif"), nil},
+			{filepath.Join("myTestTarget", "js", "spinner_dark.gif"), nil},
+			{filepath.Join("myTestTarget", "js", "light.css"), nil},
+			{filepath.Join("myTestTarget", "js", "dark.css"), nil},
+			{filepath.Join("myTestTarget", "js", "webgl-debug.js"), nil},
 		},
 	}
 	utilWriteFileMock = func(target string, _ []byte) error {
@@ -414,8 +442,8 @@ func Test_PackageGopherJS(t *testing.T) {
 
 	expectedCopyFileRuns := mockCopyFileRuns{
 		expected: []mockCopyFile{
-			{source: "myTest.png", target: filepath.Join("myTestTarget", "gopherjs", "icon.png")},
-			{source: "myTest.js", target: filepath.Join("myTestTarget", "gopherjs", "myTest.js")},
+			{source: "myTest.png", target: filepath.Join("myTestTarget", "js", "icon.png")},
+			{source: "myTest.js", target: filepath.Join("myTestTarget", "js", "myTest.js")},
 		},
 	}
 	utilCopyFileMock = func(source, target string) error {
@@ -644,4 +672,19 @@ func Test_PackageWeb(t *testing.T) {
 	expectedTotalCount(t, len(expectedExistRuns.expected), expectedExistRuns.current)
 	expectedTotalCount(t, len(expectedWriteFileRuns.expected), expectedWriteFileRuns.current)
 	expectedTotalCount(t, len(expectedCopyFileRuns.expected), expectedCopyFileRuns.current)
+}
+
+func Test_PowerShellArguments(t *testing.T) {
+	tests := []struct {
+		expected string
+		args     []string
+	}{
+		{"\"/c\",'mkdir \"C:\\Program Files\\toto\"'", []string{"mkdir", "C:\\Program Files\\toto"}},
+		{"\"/c\",'copy \"C:\\Program Files\\toto\\titi.txt\" \"C:\\Program Files\\toto\\tata.txt\"'", []string{"copy", "C:\\Program Files\\toto\\titi.txt", "C:\\Program Files\\toto\\tata.txt"}},
+	}
+
+	for _, test := range tests {
+		result := escapePowerShellArguments(test.args...)
+		assert.Equal(t, test.expected, result)
+	}
 }

@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -17,12 +18,8 @@ import (
 )
 
 const (
-	scrollAccelerateRate   = float64(5)
-	scrollAccelerateCutoff = float64(5)
-	scrollSpeed            = float32(10)
-	doubleClickDelay       = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold      = 2   // how far can we move before it is a drag
-	windowIconSize         = 256
+	dragMoveThreshold = 2 // how far can we move before it is a drag
+	windowIconSize    = 256
 )
 
 func (w *window) Title() string {
@@ -122,8 +119,9 @@ func (w *window) calculatedScale() float32 {
 }
 
 func (w *window) detectTextureScale() float32 {
-	winWidth, _ := w.view().GetSize()
-	texWidth, _ := w.view().GetFramebufferSize()
+	view := w.view()
+	winWidth, _ := view.GetSize()
+	texWidth, _ := view.GetFramebufferSize()
 	return float32(texWidth) / float32(winWidth)
 }
 
@@ -137,11 +135,7 @@ func (w *window) doShow() {
 		return
 	}
 
-	run.Lock()
-	for !run.flag {
-		run.cond.Wait()
-	}
-	run.Unlock()
+	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
@@ -152,15 +146,18 @@ func (w *window) doShow() {
 		w.viewLock.Lock()
 		w.visible = true
 		w.viewLock.Unlock()
-		w.view().SetTitle(w.title)
+		view := w.view()
+		view.SetTitle(w.title)
 
-		if w.centered {
+		if !build.IsWayland && w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
 		}
-		w.view().Show()
+		view.Show()
 
 		// save coordinates
-		w.xpos, w.ypos = w.view().GetPos()
+		if !build.IsWayland {
+			w.xpos, w.ypos = view.GetPos()
+		}
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			go func() {
@@ -171,8 +168,12 @@ func (w *window) doShow() {
 	})
 
 	// show top canvas element
-	if w.canvas.Content() != nil {
-		w.canvas.Content().Show()
+	if content := w.canvas.Content(); content != nil {
+		content.Show()
+
+		runOnDraw(w, func() {
+			w.driver.repaintWindow(w)
+		})
 	}
 }
 
@@ -191,8 +192,8 @@ func (w *window) Hide() {
 		v.Hide()
 
 		// hide top canvas element
-		if w.canvas.Content() != nil {
-			w.canvas.Content().Hide()
+		if content := w.canvas.Content(); content != nil {
+			content.Hide()
 		}
 	})
 }
@@ -213,12 +214,11 @@ func (w *window) Close() {
 		w.closing = true
 		w.viewLock.Unlock()
 		w.viewport.SetShouldClose(true)
-		cache.RangeTexturesFor(w.canvas, func(obj fyne.CanvasObject) {
-			w.canvas.Painter().Free(obj)
-		})
+
+		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
 	})
 
-	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode) {
+	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
 		}
@@ -232,14 +232,7 @@ func (w *window) ShowAndRun() {
 
 // Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.view() == nil {
-		return nil
-	}
-
-	if w.clipboard == nil {
-		w.clipboard = &clipboard{window: w.viewport}
-	}
-	return w.clipboard
+	return &clipboard{}
 }
 
 func (w *window) Content() fyne.CanvasObject {
@@ -410,10 +403,9 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	isMouseOverDragged := w.objIsDragged(mouseOver)
 	w.mouseLock.RUnlock()
 	if obj != nil && !isObjDragged {
-		ev := new(desktop.MouseEvent)
+		ev := &desktop.MouseEvent{Button: mouseButton}
 		ev.AbsolutePosition = mousePos
 		ev.Position = pos
-		ev.Button = mouseButton
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == mouseOver {
@@ -450,7 +442,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	if mouseDragged != nil && mouseButton != desktop.MouseButtonSecondary {
 		if w.mouseButton > 0 {
 			draggedObjDelta := mouseDraggedObjStart.Subtract(mouseDragged.(fyne.CanvasObject).Position())
-			ev := new(fyne.DragEvent)
+			ev := &fyne.DragEvent{}
 			ev.AbsolutePosition = mousePos
 			ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
 			ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
@@ -465,7 +457,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	}
 }
 
-func (w *window) objIsDragged(obj interface{}) bool {
+func (w *window) objIsDragged(obj any) bool {
 	if w.mouseDragged != nil && obj != nil {
 		draggedObj, _ := obj.(fyne.Draggable)
 		return draggedObj == w.mouseDragged
@@ -524,22 +516,37 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 
 		return false
 	})
-	ev := new(fyne.PointEvent)
-	ev.Position = pos
-	ev.AbsolutePosition = mousePos
+	ev := &fyne.PointEvent{
+		Position:         pos,
+		AbsolutePosition: mousePos,
+	}
 
 	coMouse := co
 	if wid, ok := co.(desktop.Mouseable); ok {
-		mev := new(desktop.MouseEvent)
+		mev := &desktop.MouseEvent{
+			Button:   button,
+			Modifier: modifiers,
+		}
 		mev.Position = ev.Position
 		mev.AbsolutePosition = mousePos
-		mev.Button = button
-		mev.Modifier = modifiers
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
 	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
-		w.canvas.Unfocus()
+		ignore := false
+		_, _, _ = w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+			switch object.(type) {
+			case fyne.Focusable:
+				ignore = true
+				return true
+			}
+
+			return false
+		})
+
+		if !ignore { // if a parent item under the mouse has focus then ignore this tap unfocus
+			w.canvas.Unfocus()
+		}
 	}
 
 	w.mouseLock.Lock()
@@ -572,7 +579,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	}
 
 	_, tap := co.(fyne.Tappable)
-	_, altTap := co.(fyne.SecondaryTappable)
+	secondary, altTap := co.(fyne.SecondaryTappable)
 	if tap || altTap {
 		if action == press {
 			w.mouseLock.Lock()
@@ -581,7 +588,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		} else if action == release {
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
-					w.QueueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+					w.QueueEvent(func() { secondary.TappedSecondary(ev) })
 				}
 			}
 		}
@@ -641,7 +648,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	var ctx context.Context
 	w.mouseLock.Lock()
-	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(doubleTapDelay))
 	defer w.mouseCancelFunc()
 	w.mouseLock.Unlock()
 
@@ -821,7 +828,7 @@ func (w *window) processFocused(focus bool) {
 func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
 	ctrlMod := fyne.KeyModifierControl
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		ctrlMod = fyne.KeyModifierSuper
 	}
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
@@ -837,6 +844,12 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 	}
 	if modifier == ctrlMod {
 		switch keyName {
+		case fyne.KeyZ:
+			// detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY:
+			// detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
 		case fyne.KeyV:
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
@@ -914,12 +927,10 @@ func (w *window) RunWithContext(f func()) {
 }
 
 func (w *window) RescaleContext() {
-	runOnMain(func() {
-		w.rescaleOnMain()
-	})
+	runOnMain(w.rescaleOnMain)
 }
 
-func (w *window) Context() interface{} {
+func (w *window) Context() any {
 	return nil
 }
 
@@ -964,12 +975,15 @@ func (w *window) doShowAgain() {
 
 	runOnMain(func() {
 		// show top canvas element
-		if w.canvas.Content() != nil {
-			w.canvas.Content().Show()
+		if content := w.canvas.Content(); content != nil {
+			content.Show()
 		}
 
-		w.view().SetPos(w.xpos, w.ypos)
-		w.view().Show()
+		view := w.view()
+		if !build.IsWayland {
+			view.SetPos(w.xpos, w.ypos)
+		}
+		view.Show()
 		w.viewLock.Lock()
 		w.visible = true
 		w.viewLock.Unlock()

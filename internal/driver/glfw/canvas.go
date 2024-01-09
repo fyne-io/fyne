@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
@@ -95,8 +96,9 @@ func (c *glCanvas) Padded() bool {
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	c.RLock()
 	texScale := c.texScale
+	scale := c.scale
 	c.RUnlock()
-	multiple := c.Scale() * texScale
+	multiple := scale * texScale
 	scaleInt := func(x float32) int {
 		return int(math.Round(float64(x * multiple)))
 	}
@@ -125,14 +127,20 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	}
 
 	c.RLock()
-	c.content.Resize(c.contentSize(nearestSize))
-	c.content.Move(c.contentPos())
-
-	if c.menu != nil {
-		c.menu.Refresh()
-		c.menu.Resize(fyne.NewSize(nearestSize.Width, c.menu.MinSize().Height))
-	}
+	content := c.content
+	contentSize := c.contentSize(nearestSize)
+	contentPos := c.contentPos()
+	menu := c.menu
+	menuHeight := c.menuHeight()
 	c.RUnlock()
+
+	content.Resize(contentSize)
+	content.Move(contentPos)
+
+	if menu != nil {
+		menu.Refresh()
+		menu.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
+	}
 }
 
 func (c *glCanvas) Scale() float32 {
@@ -191,7 +199,7 @@ func (c *glCanvas) reloadScale() {
 	}
 
 	c.Lock()
-	c.scale = c.context.(*window).calculatedScale()
+	c.scale = w.calculatedScale()
 	c.Unlock()
 	c.SetDirty()
 
@@ -231,8 +239,7 @@ func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
 func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
 	if c.Padded() {
-		pad := theme.Padding() * 2
-		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
+		return canvasSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
 	}
 	return canvasSize
 }
@@ -240,7 +247,7 @@ func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 func (c *glCanvas) contentPos() fyne.Position {
 	contentPos := fyne.NewPos(0, c.menuHeight())
 	if c.Padded() {
-		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+		return contentPos.Add(fyne.NewSquareOffsetPos(theme.Padding()))
 	}
 	return contentPos
 }
@@ -248,20 +255,17 @@ func (c *glCanvas) contentPos() fyne.Position {
 func (c *glCanvas) contentSize(canvasSize fyne.Size) fyne.Size {
 	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-c.menuHeight())
 	if c.Padded() {
-		pad := theme.Padding() * 2
-		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
+		return contentSize.Subtract(fyne.NewSquareSize(theme.Padding() * 2))
 	}
 	return contentSize
 }
 
 func (c *glCanvas) menuHeight() float32 {
-	switch c.menu {
-	case nil:
-		// no menu or native menu -> does not consume space on the canvas
-		return 0
-	default:
-		return c.menu.MinSize().Height
+	if c.menu == nil {
+		return 0 // no menu or native menu -> does not consume space on the canvas
 	}
+
+	return c.menu.MinSize().Height
 }
 
 func (c *glCanvas) overlayChanged() {
@@ -286,7 +290,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 		c.Painter().Paint(obj, pos, size)
 	}
-	afterPaint := func(node *common.RenderCacheNode) {
+	afterPaint := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if _, ok := node.Obj().(fyne.Scrollable); ok {
 			clips.Pop()
 			if top := clips.Top(); top != nil {
@@ -294,6 +298,10 @@ func (c *glCanvas) paint(size fyne.Size) {
 			} else {
 				c.Painter().StopClipping()
 			}
+		}
+
+		if build.Mode == fyne.BuildDebug {
+			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
 	c.WalkTrees(paint, afterPaint)
@@ -330,9 +338,8 @@ func (c *glCanvas) applyThemeOutOfTreeObjects() {
 }
 
 func newCanvas() *glCanvas {
-	c := &glCanvas{scale: 1.0, texScale: 1.0}
+	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
-	c.padded = true
 	return c
 }

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -23,6 +24,8 @@ const (
 	listView
 )
 
+const viewLayoutKey = "fyne:fileDialogViewLayout"
+
 type textWidget interface {
 	fyne.Widget
 	SetText(string)
@@ -34,6 +37,12 @@ type favoriteItem struct {
 	loc     fyne.URI
 }
 
+type fileDialogPanel interface {
+	fyne.Widget
+
+	Unselect(int)
+}
+
 type fileDialog struct {
 	file             *FileDialog
 	fileName         textWidget
@@ -41,7 +50,7 @@ type fileDialog struct {
 	open             *widget.Button
 	breadcrumb       *fyne.Container
 	breadcrumbScroll *container.Scroll
-	files            *fyne.Container
+	files            fileDialogPanel
 	filesScroll      *container.Scroll
 	favorites        []favoriteItem
 	favoritesList    *widget.List
@@ -49,16 +58,20 @@ type fileDialog struct {
 
 	view viewLayout
 
-	win      *widget.PopUp
-	selected *fileDialogItem
-	dir      fyne.ListableURI
+	data     []fyne.URI
+	dataLock sync.RWMutex
+
+	win        *widget.PopUp
+	selected   fyne.URI
+	selectedID int
+	dir        fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	callback         interface{}
+	callback         any
 	onClosedCallback func(bool)
 	parent           fyne.Window
 	dialog           *fileDialog
@@ -99,97 +112,24 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	if f.file.confirmText != "" {
 		label = f.file.confirmText
 	}
-	f.open = widget.NewButton(label, func() {
-		if f.file.callback == nil {
-			f.win.Hide()
-			if f.file.onClosedCallback != nil {
-				f.file.onClosedCallback(false)
-			}
-			return
-		}
+	f.open = f.makeOpenButton(label)
 
-		if f.file.save {
-			callback := f.file.callback.(func(fyne.URIWriteCloser, error))
-			name := f.fileName.(*widget.Entry).Text
-			location, _ := storage.Child(f.dir, name)
-
-			exists, _ := storage.Exists(location)
-
-			// check if a directory is selected
-			listable, err := storage.CanList(location)
-
-			if !exists {
-				f.win.Hide()
-				if f.file.onClosedCallback != nil {
-					f.file.onClosedCallback(true)
-				}
-				callback(storage.Writer(location))
-				return
-			} else if err == nil && listable {
-				// a directory has been selected
-				ShowInformation("Cannot overwrite",
-					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
-				return
-			}
-
-			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
-				func(ok bool) {
-					if !ok {
-						return
-					}
-					f.win.Hide()
-
-					callback(storage.Writer(location))
-					if f.file.onClosedCallback != nil {
-						f.file.onClosedCallback(true)
-					}
-				}, f.file.parent)
-		} else if f.selected != nil {
-			callback := f.file.callback.(func(fyne.URIReadCloser, error))
-			f.win.Hide()
-			if f.file.onClosedCallback != nil {
-				f.file.onClosedCallback(true)
-			}
-			callback(storage.Reader(f.selected.location))
-		} else if f.file.isDirectory() {
-			callback := f.file.callback.(func(fyne.ListableURI, error))
-			f.win.Hide()
-			if f.file.onClosedCallback != nil {
-				f.file.onClosedCallback(true)
-			}
-			callback(f.dir, nil)
-		}
-	})
-	f.open.Importance = widget.HighImportance
-	f.open.Disable()
 	if f.file.save {
 		f.fileName.SetText(f.initialFileName)
 	}
+
 	dismissLabel := "Cancel"
 	if f.file.dismissText != "" {
 		dismissLabel = f.file.dismissText
 	}
-	f.dismiss = widget.NewButton(dismissLabel, func() {
-		f.win.Hide()
-		if f.file.onClosedCallback != nil {
-			f.file.onClosedCallback(false)
-		}
-		if f.file.callback != nil {
-			if f.file.save {
-				f.file.callback.(func(fyne.URIWriteCloser, error))(nil, nil)
-			} else if f.file.isDirectory() {
-				f.file.callback.(func(fyne.ListableURI, error))(nil, nil)
-			} else {
-				f.file.callback.(func(fyne.URIReadCloser, error))(nil, nil)
-			}
-		}
-	})
+	f.dismiss = f.makeDismissButton(dismissLabel)
+
 	buttons := container.NewGridWithRows(1, f.dismiss, f.open)
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
 	verticalExtra := float32(float64(fileIconSize) * 0.25)
-	f.filesScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
-		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
+	itemMin := f.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
+	f.filesScroll.SetMinSize(itemMin.AddWidthHeight(itemMin.Width+theme.Padding()*3, verticalExtra))
 
 	f.breadcrumb = container.NewHBox()
 	f.breadcrumbScroll = container.NewHScroll(container.NewPadded(f.breadcrumb))
@@ -198,7 +138,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	f.setView(gridView)
+	view := viewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
+	if view != listView {
+		view = gridView
+	}
+
+	f.setView(view)
+
 	f.loadFavorites()
 
 	f.favoritesList = widget.NewList(
@@ -206,10 +152,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			return len(f.favorites)
 		},
 		func() fyne.CanvasObject {
-			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			return container.NewHBox(container.New(&iconPaddingLayout{}, widget.NewIcon(theme.DocumentIcon())), widget.NewLabel("Template Object"))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
+			item.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(f.favorites[id].locName)
 		},
 	)
@@ -222,8 +168,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
+	var toggleViewButtonIcon fyne.Resource
+	if f.view == gridView {
+		toggleViewButtonIcon = theme.ListIcon()
+	} else {
+		toggleViewButtonIcon = theme.GridIcon()
+	}
+
 	var toggleViewButton *widget.Button
-	toggleViewButton = widget.NewButtonWithIcon("", theme.ListIcon(), func() {
+	toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
 		if f.view == gridView {
 			f.setView(listView)
 			toggleViewButton.SetIcon(theme.GridIcon())
@@ -283,6 +236,95 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	return container.NewBorder(header, footer, nil, nil, body)
 }
 
+func (f *fileDialog) makeOpenButton(label string) *widget.Button {
+	btn := widget.NewButton(label, func() {
+		if f.file.callback == nil {
+			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(false)
+			}
+			return
+		}
+
+		if f.file.save {
+			callback := f.file.callback.(func(fyne.URIWriteCloser, error))
+			name := f.fileName.(*widget.Entry).Text
+			location, _ := storage.Child(f.dir, name)
+
+			exists, _ := storage.Exists(location)
+
+			// check if a directory is selected
+			listable, err := storage.CanList(location)
+
+			if !exists {
+				f.win.Hide()
+				if f.file.onClosedCallback != nil {
+					f.file.onClosedCallback(true)
+				}
+				callback(storage.Writer(location))
+				return
+			} else if err == nil && listable {
+				// a directory has been selected
+				ShowInformation("Cannot overwrite",
+					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
+				return
+			}
+
+			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
+				func(ok bool) {
+					if !ok {
+						return
+					}
+					f.win.Hide()
+
+					callback(storage.Writer(location))
+					if f.file.onClosedCallback != nil {
+						f.file.onClosedCallback(true)
+					}
+				}, f.file.parent)
+		} else if f.selected != nil {
+			callback := f.file.callback.(func(fyne.URIReadCloser, error))
+			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(true)
+			}
+			callback(storage.Reader(f.selected))
+		} else if f.file.isDirectory() {
+			callback := f.file.callback.(func(fyne.ListableURI, error))
+			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(true)
+			}
+			callback(f.dir, nil)
+		}
+	})
+
+	btn.Importance = widget.HighImportance
+	btn.Disable()
+
+	return btn
+}
+
+func (f *fileDialog) makeDismissButton(label string) *widget.Button {
+	btn := widget.NewButton(label, func() {
+		f.win.Hide()
+		if f.file.onClosedCallback != nil {
+			f.file.onClosedCallback(false)
+		}
+		if f.file.callback != nil {
+			if f.file.save {
+				f.file.callback.(func(fyne.URIWriteCloser, error))(nil, nil)
+			} else if f.file.isDirectory() {
+				f.file.callback.(func(fyne.ListableURI, error))(nil, nil)
+			} else {
+				f.file.callback.(func(fyne.URIReadCloser, error))(nil, nil)
+			}
+		}
+	})
+
+	return btn
+}
+
 func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
 		f.showHidden = changed
@@ -326,7 +368,9 @@ func (f *fileDialog) loadFavorites() {
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
-	f.files.Objects = nil
+	f.dataLock.Lock()
+	f.data = nil
+	f.dataLock.Unlock()
 
 	files, err := dir.List()
 	if err != nil {
@@ -334,16 +378,14 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		return
 	}
 
-	var icons []fyne.CanvasObject
+	var icons []fyne.URI
 	parent, err := storage.Parent(dir)
 	if err != nil && err != repository.ErrURIRoot {
 		fyne.LogError("Unable to get parent of "+dir.String(), err)
 		return
 	}
 	if parent != nil && parent.String() != dir.String() {
-		fi := &fileDialogItem{picker: f, name: "(Parent)", location: parent, dir: true}
-		fi.ExtendBaseWidget(fi)
-		icons = append(icons, fi)
+		icons = append(icons, parent)
 	}
 
 	for _, file := range files {
@@ -351,23 +393,29 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 			continue
 		}
 
-		listable, err := storage.CanList(file)
+		listable, err := storage.ListerForURI(file)
 		if f.file.isDirectory() && err != nil {
 			continue
-		} else if err == nil && listable { // URI points to a directory
-			icons = append(icons, f.newFileItem(file, true)) // Pass the listable URI to avoid doing the same check in FileIcon
+		} else if err == nil { // URI points to a directory
+			icons = append(icons, listable)
 		} else if f.file.filter == nil || f.file.filter.Matches(file) {
-			icons = append(icons, f.newFileItem(file, false))
+			icons = append(icons, file)
 		}
 	}
 
-	f.files.Objects = icons
+	f.dataLock.Lock()
+	f.data = icons
+	f.dataLock.Unlock()
+
 	f.files.Refresh()
 	f.filesScroll.Offset = fyne.NewPos(0, 0)
 	f.filesScroll.Refresh()
 }
 
 func (f *fileDialog) setLocation(dir fyne.URI) error {
+	if f.selectedID > -1 {
+		f.files.Unselect(f.selectedID)
+	}
 	if dir == nil {
 		return fmt.Errorf("failed to open nil directory")
 	}
@@ -391,7 +439,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		f.favoritesList.UnselectAll()
 	}
 
-	f.setSelected(nil)
+	f.setSelected(nil, -1)
 	f.dir = list
 
 	f.breadcrumb.Objects = nil
@@ -445,22 +493,17 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 	return nil
 }
 
-func (f *fileDialog) setSelected(file *fileDialogItem) {
-	if f.selected != nil {
-		f.selected.isCurrent = false
-		f.selected.Refresh()
-	}
-	if file != nil && file.isDirectory() {
-		listable, err := storage.CanList(file.location)
-		if err != nil || !listable {
-			fyne.LogError("Failed to create lister for URI"+file.location.String(), err)
+func (f *fileDialog) setSelected(file fyne.URI, id int) {
+	if file != nil {
+		if listable, err := storage.CanList(file); err == nil && listable {
+			f.setLocation(file)
+			return
 		}
-		f.setLocation(file.location)
-		return
 	}
 	f.selected = file
+	f.selectedID = id
 
-	if file == nil || file.location.String()[len(file.location.Scheme())+3:] == "" {
+	if file == nil || file.String()[len(file.Scheme())+3:] == "" {
 		// keep user input while navigating
 		// in a FileSave dialog
 		if !f.file.save {
@@ -468,27 +511,62 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 			f.open.Disable()
 		}
 	} else {
-		file.isCurrent = true
-		f.fileName.SetText(file.location.Name())
+		f.fileName.SetText(file.Name())
 		f.open.Enable()
 	}
 }
 
 func (f *fileDialog) setView(view viewLayout) {
 	f.view = view
+	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
+
+	count := func() int {
+		f.dataLock.RLock()
+		defer f.dataLock.RUnlock()
+
+		return len(f.data)
+	}
+	template := func() fyne.CanvasObject {
+		return f.newFileItem(storage.NewFileURI("./tempfile"), true, false)
+	}
+	update := func(id widget.GridWrapItemID, o fyne.CanvasObject) {
+		if dir, ok := f.getDataItem(id); ok {
+			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
+			_, isDir := dir.(fyne.ListableURI)
+			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+		}
+	}
+	choose := func(id int) {
+		if file, ok := f.getDataItem(id); ok {
+			f.selectedID = id
+			f.setSelected(file, id)
+		}
+	}
 	if f.view == gridView {
-		padding := fyne.NewSize(fileIconCellWidth-fileIconSize, theme.Padding())
-		f.files = container.NewGridWrap(
-			fyne.NewSize(fileIconSize, fileIconSize+fileTextSize).Add(padding),
-		)
+		grid := widget.NewGridWrap(count, template, update)
+		grid.OnSelected = choose
+		f.files = grid
 	} else {
-		f.files = container.NewVBox()
+		list := widget.NewList(count, template, update)
+		list.OnSelected = choose
+		f.files = list
 	}
 	if f.dir != nil {
 		f.refreshDir(f.dir)
 	}
 	f.filesScroll.Content = container.NewPadded(f.files)
 	f.filesScroll.Refresh()
+}
+
+func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
+	f.dataLock.RLock()
+	defer f.dataLock.RUnlock()
+
+	if id >= len(f.data) {
+		return nil, false
+	}
+
+	return f.data[id], true
 }
 
 // effectiveStartingDir calculates the directory at which the file dialog should
@@ -556,8 +634,9 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
-	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*6+theme.Padding(),
-		(fileIconSize+fileTextSize)+theme.Padding()*6))
+	pad := theme.Padding()
+	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
+	size := ui.MinSize().Add(itemMin.AddWidthHeight(itemMin.Width+pad*4, pad*2))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(size)
@@ -788,4 +867,19 @@ func hasAppFiles(a fyne.App) bool {
 func storageURI(a fyne.App) fyne.URI {
 	dir, _ := storage.Child(a.Storage().RootURI(), "Documents")
 	return dir
+}
+
+// iconPaddingLayout adds padding to the left of a widget.Icon().
+// NOTE: It assumes that the slice only contains one item.
+type iconPaddingLayout struct {
+}
+
+func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	padding := theme.Padding() * 2
+	objects[0].Move(fyne.NewPos(padding, 0))
+	objects[0].Resize(size.SubtractWidthHeight(padding, 0))
+}
+
+func (i *iconPaddingLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return objects[0].MinSize().AddWidthHeight(theme.Padding()*2, 0)
 }

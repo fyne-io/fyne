@@ -1,0 +1,17 @@
+package main
+
+import (
+    "log"
+    "net/http"
+
+    _ "net/http/pprof"
+)
+
+func init() {
+	go func() {
+		log.Println("Start pprof server at localhost:{{.Port}}")
+		if err := http.ListenAndServe("localhost:{{.Port}}", nil); err != nil {
+			log.Fatal(err)
+		}
+	}()
+}

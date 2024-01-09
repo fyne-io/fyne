@@ -85,3 +85,10 @@ func TestPaintImage_SVG(t *testing.T) {
 		})
 	}
 }
+
+func TestPaintImage_Direct(t *testing.T) {
+	img := canvas.NewImageFromFile("testdata/stroke.svg")
+	pix := painter.PaintImage(img, nil, 480, 240)
+
+	test.AssertImageMatches(t, "svg-stroke-direct.png", pix)
+}

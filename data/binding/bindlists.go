@@ -19,6 +19,7 @@ type BoolList interface {
 	Get() ([]bool, error)
 	GetValue(index int) (bool, error)
 	Prepend(value bool) error
+	Remove(value bool) error
 	Set(list []bool) error
 	SetValue(index int, value bool) error
 }
@@ -102,6 +103,39 @@ func (l *boundBoolList) Prepend(val bool) error {
 func (l *boundBoolList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified bool out of the list.
+//
+// Since: 2.5
+func (l *boundBoolList) Remove(val bool) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -241,6 +275,7 @@ type BytesList interface {
 	Get() ([][]byte, error)
 	GetValue(index int) ([]byte, error)
 	Prepend(value []byte) error
+	Remove(value []byte) error
 	Set(list [][]byte) error
 	SetValue(index int, value []byte) error
 }
@@ -324,6 +359,39 @@ func (l *boundBytesList) Prepend(val []byte) error {
 func (l *boundBytesList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified []byte out of the list.
+//
+// Since: 2.5
+func (l *boundBytesList) Remove(val []byte) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if bytes.Equal(v[0], val) {
+		*l.val = v[1:]
+	} else if bytes.Equal(v[len(v)-1], val) {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if bytes.Equal(v, val) {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -463,6 +531,7 @@ type FloatList interface {
 	Get() ([]float64, error)
 	GetValue(index int) (float64, error)
 	Prepend(value float64) error
+	Remove(value float64) error
 	Set(list []float64) error
 	SetValue(index int, value float64) error
 }
@@ -546,6 +615,39 @@ func (l *boundFloatList) Prepend(val float64) error {
 func (l *boundFloatList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified float64 out of the list.
+//
+// Since: 2.5
+func (l *boundFloatList) Remove(val float64) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -685,6 +787,7 @@ type IntList interface {
 	Get() ([]int, error)
 	GetValue(index int) (int, error)
 	Prepend(value int) error
+	Remove(value int) error
 	Set(list []int) error
 	SetValue(index int, value int) error
 }
@@ -768,6 +871,39 @@ func (l *boundIntList) Prepend(val int) error {
 func (l *boundIntList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified int out of the list.
+//
+// Since: 2.5
+func (l *boundIntList) Remove(val int) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -907,6 +1043,7 @@ type RuneList interface {
 	Get() ([]rune, error)
 	GetValue(index int) (rune, error)
 	Prepend(value rune) error
+	Remove(value rune) error
 	Set(list []rune) error
 	SetValue(index int, value rune) error
 }
@@ -990,6 +1127,39 @@ func (l *boundRuneList) Prepend(val rune) error {
 func (l *boundRuneList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified rune out of the list.
+//
+// Since: 2.5
+func (l *boundRuneList) Remove(val rune) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -1129,6 +1299,7 @@ type StringList interface {
 	Get() ([]string, error)
 	GetValue(index int) (string, error)
 	Prepend(value string) error
+	Remove(value string) error
 	Set(list []string) error
 	SetValue(index int, value string) error
 }
@@ -1212,6 +1383,39 @@ func (l *boundStringList) Prepend(val string) error {
 func (l *boundStringList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified string out of the list.
+//
+// Since: 2.5
+func (l *boundStringList) Remove(val string) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }
@@ -1341,21 +1545,22 @@ func (b *boundExternalStringListItem) setIfChanged(val string) error {
 	return nil
 }
 
-// UntypedList supports binding a list of interface{} values.
+// UntypedList supports binding a list of any values.
 //
 // Since: 2.1
 type UntypedList interface {
 	DataList
 
-	Append(value interface{}) error
-	Get() ([]interface{}, error)
-	GetValue(index int) (interface{}, error)
-	Prepend(value interface{}) error
-	Set(list []interface{}) error
-	SetValue(index int, value interface{}) error
+	Append(value any) error
+	Get() ([]any, error)
+	GetValue(index int) (any, error)
+	Prepend(value any) error
+	Remove(value any) error
+	Set(list []any) error
+	SetValue(index int, value any) error
 }
 
-// ExternalUntypedList supports binding a list of interface{} values from an external variable.
+// ExternalUntypedList supports binding a list of any values from an external variable.
 //
 // Since: 2.1
 type ExternalUntypedList interface {
@@ -1364,18 +1569,18 @@ type ExternalUntypedList interface {
 	Reload() error
 }
 
-// NewUntypedList returns a bindable list of interface{} values.
+// NewUntypedList returns a bindable list of any values.
 //
 // Since: 2.1
 func NewUntypedList() UntypedList {
-	return &boundUntypedList{val: &[]interface{}{}}
+	return &boundUntypedList{val: &[]any{}}
 }
 
-// BindUntypedList returns a bound list of interface{} values, based on the contents of the passed slice.
+// BindUntypedList returns a bound list of any values, based on the contents of the passed slice.
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.1
-func BindUntypedList(v *[]interface{}) ExternalUntypedList {
+func BindUntypedList(v *[]any) ExternalUntypedList {
 	if v == nil {
 		return NewUntypedList().(ExternalUntypedList)
 	}
@@ -1393,10 +1598,10 @@ type boundUntypedList struct {
 	listBase
 
 	updateExternal bool
-	val            *[]interface{}
+	val            *[]any
 }
 
-func (l *boundUntypedList) Append(val interface{}) error {
+func (l *boundUntypedList) Append(val any) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
@@ -1405,14 +1610,14 @@ func (l *boundUntypedList) Append(val interface{}) error {
 	return l.doReload()
 }
 
-func (l *boundUntypedList) Get() ([]interface{}, error) {
+func (l *boundUntypedList) Get() ([]any, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
 	return *l.val, nil
 }
 
-func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
+func (l *boundUntypedList) GetValue(i int) (any, error) {
 	l.lock.RLock()
 	defer l.lock.RUnlock()
 
@@ -1423,10 +1628,10 @@ func (l *boundUntypedList) GetValue(i int) (interface{}, error) {
 	return (*l.val)[i], nil
 }
 
-func (l *boundUntypedList) Prepend(val interface{}) error {
+func (l *boundUntypedList) Prepend(val any) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
-	*l.val = append([]interface{}{val}, *l.val...)
+	*l.val = append([]any{val}, *l.val...)
 
 	return l.doReload()
 }
@@ -1438,7 +1643,40 @@ func (l *boundUntypedList) Reload() error {
 	return l.doReload()
 }
 
-func (l *boundUntypedList) Set(v []interface{}) error {
+// Remove takes the specified any out of the list.
+//
+// Since: 2.5
+func (l *boundUntypedList) Remove(val any) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if v[0] == val {
+		*l.val = v[1:]
+	} else if v[len(v)-1] == val {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if v == val {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
+
+	return l.doReload()
+}
+
+func (l *boundUntypedList) Set(v []any) error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	*l.val = v
@@ -1483,7 +1721,7 @@ func (l *boundUntypedList) doReload() (retErr error) {
 	return
 }
 
-func (l *boundUntypedList) SetValue(i int, v interface{}) error {
+func (l *boundUntypedList) SetValue(i int, v any) error {
 	l.lock.RLock()
 	len := l.Length()
 	l.lock.RUnlock()
@@ -1503,7 +1741,7 @@ func (l *boundUntypedList) SetValue(i int, v interface{}) error {
 	return item.(Untyped).Set(v)
 }
 
-func bindUntypedListItem(v *[]interface{}, i int, external bool) Untyped {
+func bindUntypedListItem(v *[]any, i int, external bool) Untyped {
 	if external {
 		ret := &boundExternalUntypedListItem{old: (*v)[i]}
 		ret.val = v
@@ -1517,11 +1755,11 @@ func bindUntypedListItem(v *[]interface{}, i int, external bool) Untyped {
 type boundUntypedListItem struct {
 	base
 
-	val   *[]interface{}
+	val   *[]any
 	index int
 }
 
-func (b *boundUntypedListItem) Get() (interface{}, error) {
+func (b *boundUntypedListItem) Get() (any, error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
@@ -1532,14 +1770,14 @@ func (b *boundUntypedListItem) Get() (interface{}, error) {
 	return (*b.val)[b.index], nil
 }
 
-func (b *boundUntypedListItem) Set(val interface{}) error {
+func (b *boundUntypedListItem) Set(val any) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
 	return b.doSet(val)
 }
 
-func (b *boundUntypedListItem) doSet(val interface{}) error {
+func (b *boundUntypedListItem) doSet(val any) error {
 	(*b.val)[b.index] = val
 
 	b.trigger()
@@ -1549,10 +1787,10 @@ func (b *boundUntypedListItem) doSet(val interface{}) error {
 type boundExternalUntypedListItem struct {
 	boundUntypedListItem
 
-	old interface{}
+	old any
 }
 
-func (b *boundExternalUntypedListItem) setIfChanged(val interface{}) error {
+func (b *boundExternalUntypedListItem) setIfChanged(val any) error {
 	if val == b.old {
 		return nil
 	}
@@ -1573,6 +1811,7 @@ type URIList interface {
 	Get() ([]fyne.URI, error)
 	GetValue(index int) (fyne.URI, error)
 	Prepend(value fyne.URI) error
+	Remove(value fyne.URI) error
 	Set(list []fyne.URI) error
 	SetValue(index int, value fyne.URI) error
 }
@@ -1656,6 +1895,39 @@ func (l *boundURIList) Prepend(val fyne.URI) error {
 func (l *boundURIList) Reload() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	return l.doReload()
+}
+
+// Remove takes the specified fyne.URI out of the list.
+//
+// Since: 2.5
+func (l *boundURIList) Remove(val fyne.URI) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	v := *l.val
+	if len(v) == 0 {
+		return nil
+	}
+	if compareURI(v[0], val) {
+		*l.val = v[1:]
+	} else if compareURI(v[len(v)-1], val) {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if compareURI(v, val) {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
 
 	return l.doReload()
 }

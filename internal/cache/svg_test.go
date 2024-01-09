@@ -10,7 +10,7 @@ import (
 )
 
 func syncMapLen(m *sync.Map) (n int) {
-	m.Range(func(_, _ interface{}) bool {
+	m.Range(func(_, _ any) bool {
 		n++
 		return true
 	})

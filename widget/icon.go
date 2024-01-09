@@ -15,8 +15,7 @@ type iconRenderer struct {
 }
 
 func (i *iconRenderer) MinSize() fyne.Size {
-	size := theme.IconInlineSize()
-	return fyne.NewSize(size, size)
+	return fyne.NewSquareSize(theme.IconInlineSize())
 }
 
 func (i *iconRenderer) Layout(size fyne.Size) {
@@ -37,7 +36,7 @@ func (i *iconRenderer) Refresh() {
 	i.image.cachedRes = i.image.Resource
 	i.image.propertyLock.RUnlock()
 
-	canvas.Refresh(i.image.super())
+	i.raster.Refresh()
 }
 
 // Icon widget is a basic image component that load's its resource to match the theme.

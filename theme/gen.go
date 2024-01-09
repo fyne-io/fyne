@@ -1,5 +1,4 @@
 //go:build ignore
-// +build ignore
 
 package main
 
@@ -8,15 +7,14 @@ import (
 	"fmt"
 	"go/format"
 	"io"
-	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"golang.org/x/sys/execabs"
 )
 
 const fontFace = "NotoSans"
@@ -73,6 +71,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("Bundle emoji…")
+	f = &bytes.Buffer{}
+	f.WriteString(fileHeader + "//go:build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
+	bundleFont("EmojiOneColor.otf", "emoji", f)
+
+	err = writeFile("bundled-emoji.go", f.Bytes())
+	if err != nil {
+		fyne.LogError("unable to write file", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("Bundle icons…")
 	f = &bytes.Buffer{}
 	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
@@ -88,9 +97,11 @@ func main() {
 	bundleIcon("menu-expand", f)
 
 	bundleIcon("check-box", f)
-	bundleIcon("check-box-blank", f)
+	bundleIcon("check-box-checked", f)
+	bundleIcon("check-box-fill", f)
 	bundleIcon("radio-button", f)
 	bundleIcon("radio-button-checked", f)
+	bundleIcon("radio-button-fill", f)
 
 	bundleIcon("content-add", f)
 	bundleIcon("content-remove", f)
@@ -109,6 +120,8 @@ func main() {
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
 
+	bundleIcon("drag-corner-indicator", f)
+
 	bundleIcon("more-horizontal", f)
 	bundleIcon("more-vertical", f)
 
@@ -116,6 +129,7 @@ func main() {
 	bundleIcon("question", f)
 	bundleIcon("warning", f)
 	bundleIcon("error", f)
+	bundleIcon("broken-image", f)
 
 	bundleIcon("arrow-back", f)
 	bundleIcon("arrow-down", f)
@@ -183,6 +197,9 @@ func main() {
 	bundleIcon("list", f)
 	bundleIcon("grid", f)
 
+	bundleIcon("maximize", f)
+	bundleIcon("minimize", f)
+
 	err = writeFile("bundled-icons.go", f.Bytes())
 	if err != nil {
 		fyne.LogError("unable to write file", err)
@@ -226,7 +243,7 @@ func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
 	for _, r := range runes {
 		unicodes = append(unicodes, fmt.Sprintf(`%04X`, r))
 	}
-	cmd := execabs.Command(
+	cmd := exec.Command(
 		"pyftsubset",
 		fontPath(fontFile),
 		"--output-file="+fontPath(newFontFile),
@@ -263,5 +280,5 @@ func writeFile(filename string, contents []byte) error {
 		return err
 	}
 	_, dirname, _, _ := runtime.Caller(0)
-	return ioutil.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
+	return os.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
 }

@@ -1,22 +1,20 @@
-//go:build !ci && !js && !wasm && !test_web_driver && (linux || openbsd || freebsd || netbsd) && !android
-// +build !ci
-// +build !js
-// +build !wasm
-// +build !test_web_driver
-// +build linux openbsd freebsd netbsd
-// +build !android
+//go:build !ci && !wasm && !test_web_driver && (linux || openbsd || freebsd || netbsd) && !android
 
 package app
 
 import (
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sync"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/rymdport/portal/notification"
+	"github.com/rymdport/portal/openuri"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -27,7 +25,15 @@ func defaultVariant() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("xdg-open", url.String())
+	if build.IsFlatpak {
+		err := openuri.OpenURI("", url.String())
+		if err != nil {
+			fyne.LogError("Opening url in portal failed", err)
+		}
+		return err
+	}
+
+	cmd := exec.Command("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
@@ -42,7 +48,7 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 
 	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
 	call := dbusObj.Call(
-		"org.freedesktop.portal.Settings.Read",
+		"org.freedesktop.portal.Settings.ReadOne",
 		dbus.FlagNoAutoStart,
 		"org.freedesktop.appearance",
 		"color-scheme",
@@ -80,16 +86,43 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	appName := fyne.CurrentApp().UniqueID()
+	if build.IsFlatpak {
+		err := a.sendNotificationThroughPortal(conn, n)
+		if err != nil {
+			fyne.LogError("Sending notification using portal failed", err)
+		}
+		return
+	}
+
 	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
-	call := obj.Call("org.freedesktop.Notifications.Notify", 0, appName, uint32(0),
+	call := obj.Call("org.freedesktop.Notifications.Notify", 0, a.uniqueID, uint32(0),
 		appIcon, n.Title, n.Content, []string{}, map[string]dbus.Variant{}, timeout)
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+// Sending with same ID replaces the old notification.
+var notificationID uint = 0
+
+// See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
+func (a *fyneApp) sendNotificationThroughPortal(conn *dbus.Conn, n *fyne.Notification) error {
+	err := notification.Add(notificationID,
+		&notification.Content{
+			Title: n.Title,
+			Body:  n.Content,
+			Icon:  a.uniqueID,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	notificationID++
+	return nil
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {

@@ -12,7 +12,7 @@ import (
 
 // ProgressDialog is a simple dialog window that displays text and a progress bar.
 //
-// Deprecated: Create a new custom dialog with a widget.ProgressBar() inside.
+// Deprecated: Use NewCustomWithoutButtons() and add a widget.ProgressBar() inside.
 type ProgressDialog struct {
 	*dialog
 
@@ -27,7 +27,7 @@ func (p *ProgressDialog) SetValue(v float64) {
 // NewProgress creates a progress dialog and returns the handle.
 // Using the returned type you should call Show() and then set its value through SetValue().
 //
-// Deprecated: Create a new custom dialog with a widget.ProgressBar() inside.
+// Deprecated: Use NewCustomWithoutButtons() and add a widget.ProgressBar() inside.
 func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
 	d := newDialog(title, message, theme.InfoIcon(), nil /*cancel?*/, parent)
 	bar := widget.NewProgressBar()

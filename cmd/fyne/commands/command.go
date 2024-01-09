@@ -17,35 +17,35 @@ type Command interface {
 type Getter = commands.Getter
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
-// It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
+// It depends on a Go and C compiler installed.
 func NewGetter() *Getter {
-	return &Getter{}
+	return commands.NewGetter()
 }
 
 // NewBundler returns a command that can bundle resources into Go code.
 //
 // Deprecated: A better version will be exposed in the future.
 func NewBundler() Command {
-	return &commands.Bundler{}
+	return commands.NewBundler()
 }
 
 // NewInstaller returns an install command that can install locally built Fyne apps.
 //
 // Deprecated: A better version will be exposed in the future.
 func NewInstaller() Command {
-	return &commands.Installer{}
+	return commands.NewInstaller()
 }
 
 // NewPackager returns a packager command that can wrap executables into full GUI app packages.
 //
 // Deprecated: A better version will be exposed in the future.
 func NewPackager() Command {
-	return &commands.Packager{}
+	return commands.NewPackager()
 }
 
 // NewReleaser returns a command that can adapt app packages for distribution.
 //
 // Deprecated: A better version will be exposed in the future.
 func NewReleaser() Command {
-	return &commands.Releaser{}
+	return commands.NewReleaser()
 }

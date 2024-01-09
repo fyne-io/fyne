@@ -1,6 +1,4 @@
-//go:build !mobile && (!ci || !windows)
-// +build !mobile
-// +build !ci !windows
+//go:build !mobile && (!no_glfw || !windows)
 
 package glfw_test
 

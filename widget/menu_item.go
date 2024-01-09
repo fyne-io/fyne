@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -69,6 +70,7 @@ func (i *menuItem) Child() *Menu {
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.HoverColor())
+	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
 	text.Alignment = i.alignment
@@ -106,7 +108,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 		text:          text,
 		background:    background,
 	}
-	r.Refresh() // ensure text and icon resources match state
+	r.updateVisuals()
 	return r
 }
 
@@ -240,11 +242,12 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	}
 
 	rightOffset -= theme.InnerPadding()
+	textHeight := r.text.MinSize().Height
 	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 		text := r.shortcutTexts[i]
 		text.Resize(text.MinSize())
 		rightOffset -= text.MinSize().Width
-		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()))
+		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()+(textHeight-text.Size().Height)))
 
 		if i == 0 {
 			rightOffset -= theme.InnerPadding()
@@ -261,7 +264,7 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 		leftOffset += theme.InnerPadding()
 	}
 
-	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, r.text.MinSize().Height))
+	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, textHeight))
 	r.text.Move(fyne.NewPos(leftOffset, theme.InnerPadding()))
 
 	r.background.Resize(size)
@@ -290,7 +293,8 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	return r.minSize
 }
 
-func (r *menuItemRenderer) Refresh() {
+func (r *menuItemRenderer) updateVisuals() {
+	r.background.CornerRadius = theme.SelectionRadiusSize()
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
@@ -301,9 +305,9 @@ func (r *menuItemRenderer) Refresh() {
 	}
 	r.background.Refresh()
 	r.text.Alignment = r.i.alignment
-	r.refreshText(r.text)
+	r.refreshText(r.text, false)
 	for _, text := range r.shortcutTexts {
-		r.refreshText(text)
+		r.refreshText(text, true)
 	}
 
 	if r.i.Item.Checked {
@@ -311,9 +315,13 @@ func (r *menuItemRenderer) Refresh() {
 	} else {
 		r.checkIcon.Hide()
 	}
-	r.refreshIcon(r.checkIcon, theme.ConfirmIcon())
-	r.refreshIcon(r.expandIcon, theme.MenuExpandIcon())
-	r.refreshIcon(r.icon, r.i.Item.Icon)
+	r.updateIcon(r.checkIcon, theme.ConfirmIcon())
+	r.updateIcon(r.expandIcon, theme.MenuExpandIcon())
+	r.updateIcon(r.icon, r.i.Item.Icon)
+}
+
+func (r *menuItemRenderer) Refresh() {
+	r.updateVisuals()
 	canvas.Refresh(r.i)
 }
 
@@ -331,7 +339,7 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 		r.lastThemePadding == theme.InnerPadding()
 }
 
-func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
+func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 	if img == nil {
 		return
 	}
@@ -340,17 +348,26 @@ func (r *menuItemRenderer) refreshIcon(img *canvas.Image, rsc fyne.Resource) {
 	} else {
 		img.Resource = rsc
 	}
-	img.Refresh()
 }
 
-func (r *menuItemRenderer) refreshText(text *canvas.Text) {
+func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
 	text.TextSize = theme.TextSize()
 	if r.i.Item.Disabled {
 		text.Color = theme.DisabledColor()
 	} else {
-		text.Color = theme.ForegroundColor()
+		if shortcut {
+			text.Color = shortcutColor()
+		} else {
+			text.Color = theme.ForegroundColor()
+		}
 	}
 	text.Refresh()
+}
+
+func shortcutColor() color.Color {
+	r, g, b, a := theme.ForegroundColor().RGBA()
+	a = uint32(float32(a) * 0.95)
+	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
 func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
@@ -372,11 +389,14 @@ func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	if r != 0 {
 		b.WriteRune(r)
 	}
-	t := canvas.NewText(b.String(), theme.ForegroundColor())
+	shortColor := shortcutColor()
+	t := canvas.NewText(b.String(), shortColor)
 	t.TextStyle.Symbol = true
 	texts = append(texts, t)
 	if r == 0 {
-		texts = append(texts, canvas.NewText(string(s.Key()), theme.ForegroundColor()))
+		text := canvas.NewText(string(s.Key()), shortColor)
+		text.TextStyle.Monospace = true
+		texts = append(texts, text)
 	}
 	return
 }

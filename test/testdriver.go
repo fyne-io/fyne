@@ -3,6 +3,7 @@ package test
 import (
 	"image"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver"
@@ -29,8 +30,7 @@ var _ fyne.Driver = (*testDriver)(nil)
 
 // NewDriver sets up and registers a new dummy driver for test purpose
 func NewDriver() fyne.Driver {
-	drv := new(testDriver)
-	drv.windowsMutex = sync.RWMutex{}
+	drv := &testDriver{windowsMutex: sync.RWMutex{}}
 	repository.Register("file", intRepo.NewFileRepository())
 
 	// make a single dummy window for rendering tests
@@ -42,11 +42,10 @@ func NewDriver() fyne.Driver {
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
 func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
-	drv := new(testDriver)
-	drv.painter = painter
-	drv.windowsMutex = sync.RWMutex{}
-
-	return drv
+	return &testDriver{
+		painter:      painter,
+		windowsMutex: sync.RWMutex{},
+	}
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
@@ -130,4 +129,8 @@ func (d *testDriver) removeWindow(w *testWindow) {
 
 	d.windows = append(d.windows[:i], d.windows[i+1:]...)
 	d.windowsMutex.Unlock()
+}
+
+func (d *testDriver) DoubleTapDelay() time.Duration {
+	return 300 * time.Millisecond
 }

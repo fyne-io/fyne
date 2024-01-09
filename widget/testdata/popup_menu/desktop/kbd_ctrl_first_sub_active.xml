@@ -23,7 +23,7 @@
 								<text pos="8,8" size="78x19">Option A</text>
 							</widget>
 							<widget pos="0,39" size="94x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="94x35"/>
+								<rectangle fillColor="focus" radius="4" size="94x35"/>
 								<text pos="8,8" size="58x19">Option B</text>
 								<image pos="74,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
@@ -46,7 +46,7 @@
 							<rectangle fillColor="menuBackground" size="122x74"/>
 							<container size="122x74">
 								<widget size="122x35" type="*widget.menuItem">
-									<rectangle fillColor="focus" size="122x35"/>
+									<rectangle fillColor="focus" radius="4" size="122x35"/>
 									<text pos="8,8" size="106x19">Sub Option A</text>
 								</widget>
 								<widget pos="0,39" size="122x35" type="*widget.menuItem">

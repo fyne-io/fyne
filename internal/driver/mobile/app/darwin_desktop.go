@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build darwin && !ios
-// +build darwin,!ios
 
 package app
 
@@ -61,6 +60,10 @@ func main(f func(App)) {
 	}()
 
 	C.runApp()
+}
+
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 // loop is the primary drawing loop.

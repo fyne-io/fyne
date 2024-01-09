@@ -16,14 +16,15 @@ const quarterCircleControl = 1 - 0.55228
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawCircle(circle *canvas.Circle, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
+	size := circle.Size()
+	radius := fyne.Min(size.Width, size.Height) / 2
 
-	width := int(scale(circle.Size().Width + vectorPad*2))
-	height := int(scale(circle.Size().Height + vectorPad*2))
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
 	stroke := scale(circle.StrokeWidth)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(int(circle.Size().Width), int(circle.Size().Height), raw, raw.Bounds())
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
 	if circle.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
@@ -46,20 +47,22 @@ func DrawCircle(circle *canvas.Circle, vectorPad float32, scale func(float32) fl
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	col := line.StrokeColor
-	width := int(scale(line.Size().Width + vectorPad*2))
-	height := int(scale(line.Size().Height + vectorPad*2))
+	size := line.Size()
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
 	stroke := scale(line.StrokeWidth)
 	if stroke < 1 { // software painter doesn't fade lines to compensate
 		stroke = 1
 	}
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(int(line.Size().Width), int(line.Size().Height), raw, raw.Bounds())
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 	dasher := rasterx.NewDasher(width, height, scanner)
 	dasher.SetColor(col)
 	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-	p1x, p1y := scale(line.Position1.X-line.Position().X+vectorPad), scale(line.Position1.Y-line.Position().Y+vectorPad)
-	p2x, p2y := scale(line.Position2.X-line.Position().X+vectorPad), scale(line.Position2.Y-line.Position().Y+vectorPad)
+	positon := line.Position()
+	p1x, p1y := scale(line.Position1.X-positon.X+vectorPad), scale(line.Position1.Y-positon.Y+vectorPad)
+	p2x, p2y := scale(line.Position2.X-positon.X+vectorPad), scale(line.Position2.Y-positon.Y+vectorPad)
 
 	if stroke <= 1.5 { // adjust to support 1px
 		if p1x == p2x {
@@ -84,17 +87,18 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawRectangle(rect *canvas.Rectangle, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	width := int(scale(rect.Size().Width + vectorPad*2))
-	height := int(scale(rect.Size().Height + vectorPad*2))
+	size := rect.Size()
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
 	stroke := scale(rect.StrokeWidth)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(int(rect.Size().Width), int(rect.Size().Height), raw, raw.Bounds())
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
 	scaledPad := scale(vectorPad)
 	p1x, p1y := scaledPad, scaledPad
-	p2x, p2y := scale(rect.Size().Width)+scaledPad, scaledPad
-	p3x, p3y := scale(rect.Size().Width)+scaledPad, scale(rect.Size().Height)+scaledPad
+	p2x, p2y := scale(size.Width)+scaledPad, scaledPad
+	p3x, p3y := scale(size.Width)+scaledPad, scale(size.Height)+scaledPad
 	p4x, p4y := scaledPad, scale(rect.Size().Height)+scaledPad
 
 	if rect.FillColor != nil {

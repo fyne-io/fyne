@@ -10,7 +10,6 @@ import (
 	"debug/pe"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -18,7 +17,7 @@ import (
 	"runtime"
 )
 
-var debug = log.New(ioutil.Discard, "gl: ", log.LstdFlags)
+var debug = log.New(io.Discard, "gl: ", log.LstdFlags)
 
 func downloadDLLs() (path string, err error) {
 	url := "https://dl.google.com/go/mobile/angle-bd3f8780b-" + runtime.GOARCH + ".tgz"
@@ -54,11 +53,11 @@ func downloadDLLs() (path string, err error) {
 		}
 		switch header.Name {
 		case "angle-" + runtime.GOARCH + "/libglesv2.dll":
-			bytesGLESv2, err = ioutil.ReadAll(tr)
+			bytesGLESv2, err = io.ReadAll(tr)
 		case "angle-" + runtime.GOARCH + "/libegl.dll":
-			bytesEGL, err = ioutil.ReadAll(tr)
+			bytesEGL, err = io.ReadAll(tr)
 		case "angle-" + runtime.GOARCH + "/d3dcompiler_47.dll":
-			bytesD3DCompiler, err = ioutil.ReadAll(tr)
+			bytesD3DCompiler, err = io.ReadAll(tr)
 		default: // skip
 		}
 		if err != nil {
@@ -70,13 +69,13 @@ func downloadDLLs() (path string, err error) {
 	}
 
 	writeDLLs := func(path string) error {
-		if err := ioutil.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0755); err != nil {
+		if err := os.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := ioutil.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0755); err != nil {
+		if err := os.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := ioutil.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0755); err != nil {
+		if err := os.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
 		return nil
@@ -152,7 +151,7 @@ func chromePath() string {
 	}
 
 	for _, installdir := range installdirs {
-		versiondirs, err := ioutil.ReadDir(installdir)
+		versiondirs, err := os.ReadDir(installdir)
 		if err != nil {
 			continue
 		}

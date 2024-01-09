@@ -7,16 +7,13 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-)
-
-const (
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
 )
 
 var _ fyne.Canvas = (*mobileCanvas)(nil)
@@ -166,6 +163,9 @@ func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
 }
 
 func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
+	if c.padded {
+		head = container.NewPadded(head)
+	}
 	c.windowHead = head
 	c.SetMobileWindowHeadTree(head)
 }
@@ -292,7 +292,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 		}
 	}
 
-	ev := new(fyne.DragEvent)
+	ev := &fyne.DragEvent{}
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
@@ -344,9 +344,10 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		c.touched[tapID] = nil
 	}
 
-	ev := new(fyne.PointEvent)
-	ev.Position = objPos
-	ev.AbsolutePosition = pos
+	ev := &fyne.PointEvent{
+		Position:         objPos,
+		AbsolutePosition: pos,
+	}
 
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
@@ -372,7 +373,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
 	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
 	defer c.touchCancelFunc()
 	<-ctx.Done()
 	if c.touchTapCount == 2 && c.touchLastTapped == co {

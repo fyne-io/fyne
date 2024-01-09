@@ -23,7 +23,7 @@
 						<text pos="8,4" size="22x19">File</text>
 					</widget>
 					<widget pos="42,0" size="41x27" type="*glfw.menuBarItem">
-						<rectangle fillColor="focus" size="41x27"/>
+						<rectangle fillColor="focus" radius="4" size="41x27"/>
 						<text pos="8,4" size="25x19">Edit</text>
 					</widget>
 					<widget pos="87,0" size="46x27" type="*glfw.menuBarItem">

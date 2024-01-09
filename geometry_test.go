@@ -7,6 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewSquareOffsetPosition(t *testing.T) {
+	pos := fyne.NewSquareOffsetPos(10)
+	assert.Equal(t, pos.X, pos.Y)
+}
+
 func TestPosition_Add(t *testing.T) {
 	pos1 := fyne.NewPos(10, 10)
 	pos2 := fyne.NewPos(25, 25)
@@ -175,6 +180,11 @@ func TestSize_SubtractWidthHeight(t *testing.T) {
 
 	assert.Equal(t, float32(15), size2.Width)
 	assert.Equal(t, float32(15), size2.Height)
+}
+
+func TestSquareSize(t *testing.T) {
+	size := fyne.NewSquareSize(10)
+	assert.Equal(t, size.Height, size.Width)
 }
 
 func TestVector_IsZero(t *testing.T) {

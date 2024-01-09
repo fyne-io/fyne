@@ -1,9 +1,9 @@
 //go:build !windows || !ci
-// +build !windows !ci
 
 package gl
 
 import (
+	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,6 +11,30 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 )
+
+func TestGetFragmentColor(t *testing.T) {
+	var c color.Color
+
+	r, g, b, a := getFragmentColor(c)
+	assert.Equal(t, float32(0), r)
+	assert.Equal(t, float32(0), g)
+	assert.Equal(t, float32(0), b)
+	assert.Equal(t, float32(0), a)
+
+	c = color.NRGBA{R: 0x0, G: 0x66, B: 0x99, A: 0xff}
+	r, g, b, a = getFragmentColor(c)
+	assert.Equal(t, float32(0), r)
+	assert.Equal(t, float32(0.4), g)
+	assert.Equal(t, float32(0.6), b)
+	assert.Equal(t, float32(1), a)
+
+	c = color.NRGBA{R: 0x0, G: 0x66, B: 0x99, A: 0x99}
+	r, g, b, a = getFragmentColor(c)
+	assert.Equal(t, float32(0), r)
+	assert.Equal(t, float32(0.3999898), g)
+	assert.Equal(t, float32(0.59998477), b)
+	assert.Equal(t, float32(0.6), a)
+}
 
 func TestInnerRect_Stretch(t *testing.T) {
 	pos := fyne.NewPos(10, 10)

@@ -15,7 +15,7 @@ type prefBoundBool struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache atomic.Value // bool
+	cache atomic.Pointer[bool]
 }
 
 // BindPreferenceBool returns a bindable bool value that is managed by the application preferences.
@@ -41,7 +41,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 
 func (b *prefBoundBool) Get() (bool, error) {
 	cache := b.p.Bool(b.key)
-	b.cache.Store(cache)
+	b.cache.Store(&cache)
 	return cache, nil
 }
 
@@ -56,11 +56,8 @@ func (b *prefBoundBool) Set(v bool) error {
 
 func (b *prefBoundBool) checkForChange() {
 	val := b.cache.Load()
-	if val != nil {
-		cache := val.(bool)
-		if b.p.Bool(b.key) == cache {
-			return
-		}
+	if val != nil && b.p.Bool(b.key) == *val {
+		return
 	}
 	b.trigger()
 }
@@ -73,7 +70,7 @@ type prefBoundFloat struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache atomic.Value // float64
+	cache atomic.Pointer[float64]
 }
 
 // BindPreferenceFloat returns a bindable float64 value that is managed by the application preferences.
@@ -99,7 +96,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 
 func (b *prefBoundFloat) Get() (float64, error) {
 	cache := b.p.Float(b.key)
-	b.cache.Store(cache)
+	b.cache.Store(&cache)
 	return cache, nil
 }
 
@@ -114,11 +111,8 @@ func (b *prefBoundFloat) Set(v float64) error {
 
 func (b *prefBoundFloat) checkForChange() {
 	val := b.cache.Load()
-	if val != nil {
-		cache := val.(float64)
-		if b.p.Float(b.key) == cache {
-			return
-		}
+	if val != nil && b.p.Float(b.key) == *val {
+		return
 	}
 	b.trigger()
 }
@@ -131,7 +125,7 @@ type prefBoundInt struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache atomic.Value // int
+	cache atomic.Pointer[int]
 }
 
 // BindPreferenceInt returns a bindable int value that is managed by the application preferences.
@@ -157,7 +151,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 
 func (b *prefBoundInt) Get() (int, error) {
 	cache := b.p.Int(b.key)
-	b.cache.Store(cache)
+	b.cache.Store(&cache)
 	return cache, nil
 }
 
@@ -172,11 +166,8 @@ func (b *prefBoundInt) Set(v int) error {
 
 func (b *prefBoundInt) checkForChange() {
 	val := b.cache.Load()
-	if val != nil {
-		cache := val.(int)
-		if b.p.Int(b.key) == cache {
-			return
-		}
+	if val != nil && b.p.Int(b.key) == *val {
+		return
 	}
 	b.trigger()
 }
@@ -189,7 +180,7 @@ type prefBoundString struct {
 	base
 	key   string
 	p     fyne.Preferences
-	cache atomic.Value // string
+	cache atomic.Pointer[string]
 }
 
 // BindPreferenceString returns a bindable string value that is managed by the application preferences.
@@ -215,7 +206,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 
 func (b *prefBoundString) Get() (string, error) {
 	cache := b.p.String(b.key)
-	b.cache.Store(cache)
+	b.cache.Store(&cache)
 	return cache, nil
 }
 
@@ -230,11 +221,8 @@ func (b *prefBoundString) Set(v string) error {
 
 func (b *prefBoundString) checkForChange() {
 	val := b.cache.Load()
-	if val != nil {
-		cache := val.(string)
-		if b.p.String(b.key) == cache {
-			return
-		}
+	if val != nil && b.p.String(b.key) == *val {
+		return
 	}
 	b.trigger()
 }

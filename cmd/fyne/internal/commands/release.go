@@ -28,8 +28,7 @@ var macAppStoreCategories = []string{
 
 // Release returns the cli command for bundling release builds of fyne applications
 func Release() *cli.Command {
-	r := &Releaser{}
-	r.appData = &appData{}
+	r := NewReleaser()
 
 	return &cli.Command{
 		Name:  "release",
@@ -121,6 +120,17 @@ func Release() *cli.Command {
 				Value:       "",
 				Destination: &r.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &r.rawIcon,
+			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &r.customMetadata,
+			},
 		},
 		Action: r.releaseAction,
 	}
@@ -136,6 +146,13 @@ type Releaser struct {
 	keyPass      string
 	developer    string
 	password     string
+}
+
+// NewReleaser returns a command that can handle the packaging a GUI apps for release from local Fyne source code.
+func NewReleaser() *Releaser {
+	r := &Releaser{}
+	r.appData = &appData{}
+	return r
 }
 
 // AddFlags adds the flags for interacting with the release command.
@@ -482,7 +499,7 @@ func (r *Releaser) validate() error {
 	return nil
 }
 
-func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData interface{}) (cleanup func(), err error) {
+func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData any) (cleanup func(), err error) {
 	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
 	entitlements, err := os.Create(entitlementPath)
 	if err != nil {

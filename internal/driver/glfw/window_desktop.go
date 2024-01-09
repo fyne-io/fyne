@@ -1,5 +1,4 @@
-//go:build !js && !wasm && !test_web_driver
-// +build !js,!wasm,!test_web_driver
+//go:build !wasm && !test_web_driver
 
 package glfw
 
@@ -14,11 +13,13 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/storage"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -76,8 +77,6 @@ type window struct {
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
 
-	clipboard fyne.Clipboard
-
 	master     bool
 	fullScreen bool
 	centered   bool
@@ -134,11 +133,32 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
+	if build.IsWayland {
+		return
+	}
+
 	w.centered = true
 
 	if w.view() != nil {
 		runOnMain(w.doCenterOnScreen)
 	}
+}
+
+func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
+	w.runOnMainWhenCreated(func() {
+		w.viewport.SetDropCallback(func(win *glfw.Window, names []string) {
+			if dropped == nil {
+				return
+			}
+
+			uris := make([]fyne.URI, len(names))
+			for i, name := range names {
+				uris[i] = storage.NewFileURI(name)
+			}
+
+			dropped(w.mousePos, uris)
+		})
+	})
 }
 
 func (w *window) doCenterOnScreen() {
@@ -166,7 +186,7 @@ func (w *window) doCenterOnScreen() {
 }
 
 func (w *window) RequestFocus() {
-	if isWayland || w.view() == nil {
+	if build.IsWayland || w.view() == nil {
 		return
 	}
 
@@ -175,6 +195,10 @@ func (w *window) RequestFocus() {
 
 func (w *window) SetIcon(icon fyne.Resource) {
 	w.icon = icon
+	if build.IsWayland {
+		return
+	}
+
 	if icon == nil {
 		appIcon := fyne.CurrentApp().Icon()
 		if appIcon != nil {
@@ -248,24 +272,26 @@ func (w *window) fitContent() {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
-	x, y := w.xpos, w.ypos
-	if w.fullScreen {
-		x, y = w.viewport.GetPos()
-	}
-	xOff := x + (w.width / 2)
-	yOff := y + (w.height / 2)
-
-	for _, monitor := range glfw.GetMonitors() {
-		x, y := monitor.GetPos()
-
-		if x > xOff || y > yOff {
-			continue
+	if !build.IsWayland {
+		x, y := w.xpos, w.ypos
+		if w.fullScreen {
+			x, y = w.viewport.GetPos()
 		}
-		if x+monitor.GetVideoMode().Width <= xOff || y+monitor.GetVideoMode().Height <= yOff {
-			continue
-		}
+		xOff := x + (w.width / 2)
+		yOff := y + (w.height / 2)
 
-		return monitor
+		for _, monitor := range glfw.GetMonitors() {
+			x, y := monitor.GetPos()
+
+			if x > xOff || y > yOff {
+				continue
+			}
+			if videoMode := monitor.GetVideoMode(); x+videoMode.Width <= xOff || y+videoMode.Height <= yOff {
+				continue
+			}
+
+			return monitor
+		}
 	}
 
 	// try built-in function to detect monitor if above logic didn't succeed
@@ -278,7 +304,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 }
 
 func (w *window) detectScale() float32 {
-	if isWayland { // Wayland controls scale through content scaling
+	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1.0
 	}
 	monitor := w.getMonitorForWindow()
@@ -301,7 +327,7 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) scaled(_ *glfw.Window, x float32, y float32) {
-	if !isWayland { // other platforms handle this using older APIs
+	if !build.IsWayland { // other platforms handle this using older APIs
 		return
 	}
 
@@ -318,7 +344,9 @@ func (w *window) refresh(_ *glfw.Window) {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
+	if viewport != nil {
+		viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
+	}
 
 	w.processClosed()
 }
@@ -563,10 +591,6 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
-	if runtime.GOOS == "darwin" && scancode == 0x69 { // TODO remove once fixed upstream glfw/glfw#1786
-		code = glfw.KeyPrintScreen
-	}
-
 	ret := glfwKeyToKeyName(code)
 	if ret != fyne.KeyUnknown {
 		return ret
@@ -599,6 +623,7 @@ func convertASCII(key glfw.Key) fyne.KeyName {
 func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	keyDesktopModifier := desktopModifier(mods)
+	w.driver.currentKeyModifiers = desktopModifierCorrected(mods, key, action)
 	keyAction := convertAction(action)
 	keyASCII := convertASCII(key)
 
@@ -618,6 +643,32 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 	}
 	if (mods & glfw.ModSuper) != 0 {
 		m |= fyne.KeyModifierSuper
+	}
+	return m
+}
+
+func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.Action) fyne.KeyModifier {
+	// On X11, pressing/releasing modifier keys does not include newly pressed/released keys in 'mod' mask.
+	// https://github.com/glfw/glfw/issues/1630
+	if action == glfw.Press {
+		mods |= glfwKeyToModifier(key)
+	} else {
+		mods &= ^glfwKeyToModifier(key)
+	}
+	return desktopModifier(mods)
+}
+
+func glfwKeyToModifier(key glfw.Key) glfw.ModifierKey {
+	var m glfw.ModifierKey
+	switch key {
+	case glfw.KeyLeftControl, glfw.KeyRightControl:
+		m = glfw.ModControl
+	case glfw.KeyLeftAlt, glfw.KeyRightAlt:
+		m = glfw.ModAlt
+	case glfw.KeyLeftShift, glfw.KeyRightShift:
+		m = glfw.ModShift
+	case glfw.KeyLeftSuper, glfw.KeyRightSuper:
+		m = glfw.ModSuper
 	}
 	return m
 }
@@ -660,7 +711,7 @@ func (w *window) rescaleOnMain() {
 
 func (w *window) create() {
 	runOnMain(func() {
-		if !isWayland {
+		if !build.IsWayland {
 			// make the window hidden, we will set it up and then show it later
 			glfw.WindowHint(glfw.Visible, glfw.False)
 		}

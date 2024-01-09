@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build android
-// +build android
 
 /*
 Android Apps are built with -buildmode=c-shared. They are loaded by a
@@ -48,6 +47,7 @@ void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
+void finish(JNIEnv* env, jobject ctx);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -75,6 +75,18 @@ import (
 // mimeMap contains standard mime entries that are missing on Android
 var mimeMap = map[string]string{
 	".txt": "text/plain",
+}
+
+// GoBack asks the OS to go to the previous app / activity
+func GoBack() {
+	err := RunOnJVM(func(_, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		C.finish(env, C.jobject(ctx))
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("app: %v", err)
+	}
 }
 
 // RunOnJVM runs fn on a new goroutine locked to an OS thread with a JNIEnv.
@@ -118,25 +130,21 @@ func callMain(mainPC uintptr) {
 	go callfn.CallFn(mainPC)
 }
 
-//export onStart
-func onStart(activity *C.ANativeActivity) {
-}
-
-//export onResume
-func onResume(activity *C.ANativeActivity) {
-}
-
 //export onSaveInstanceState
 func onSaveInstanceState(activity *C.ANativeActivity, outSize *C.size_t) unsafe.Pointer {
 	return nil
 }
 
-//export onPause
-func onPause(activity *C.ANativeActivity) {
-}
+//export onBackPressed
+func onBackPressed() {
+	k := key.Event{
+		Code:      key.CodeBackButton,
+		Direction: key.DirPress,
+	}
+	theApp.events.In() <- k
 
-//export onStop
-func onStop(activity *C.ANativeActivity) {
+	k.Direction = key.DirRelease
+	theApp.events.In() <- k
 }
 
 //export onCreate

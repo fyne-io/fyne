@@ -1,5 +1,4 @@
 //go:build mobile
-// +build mobile
 
 package container_test
 
@@ -347,11 +346,11 @@ func TestDocTabs_Tapped(t *testing.T) {
 	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(120, 10))
+	test.TapCanvas(c, fyne.NewPos(100, 10))
 	assert.Equal(t, 1, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_second_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(240, 10))
+	test.TapCanvas(c, fyne.NewPos(180, 10))
 	assert.Equal(t, 2, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_third_selected.xml", c)
 
@@ -359,7 +358,7 @@ func TestDocTabs_Tapped(t *testing.T) {
 	require.Equal(t, 0, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_first_selected.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(330, 10))
+	test.TapCanvas(c, fyne.NewPos(320, 10))
 	require.Equal(t, 3, tabs.SelectedIndex())
 	test.AssertRendersToMarkup(t, "doctabs/mobile/tapped_create_tab.xml", c)
 

@@ -152,7 +152,7 @@ func (e *colorChannelEntry) MinSize() fyne.Size {
 
 type userChangeEntry struct {
 	widget.Entry
-	userTyped uint32 // atomic, 0 == false, 1 == true
+	userTyped atomic.Bool
 }
 
 func newUserChangeEntry(text string) *userChangeEntry {
@@ -164,7 +164,7 @@ func newUserChangeEntry(text string) *userChangeEntry {
 
 func (e *userChangeEntry) setOnChanged(onChanged func(s string)) {
 	e.Entry.OnChanged = func(text string) {
-		if !atomic.CompareAndSwapUint32(&e.userTyped, 1, 0) {
+		if !e.userTyped.CompareAndSwap(true, false) {
 			return
 		}
 		if onChanged != nil {
@@ -175,11 +175,11 @@ func (e *userChangeEntry) setOnChanged(onChanged func(s string)) {
 }
 
 func (e *userChangeEntry) TypedRune(r rune) {
-	atomic.StoreUint32(&e.userTyped, 1)
+	e.userTyped.Store(true)
 	e.Entry.TypedRune(r)
 }
 
 func (e *userChangeEntry) TypedKey(ev *fyne.KeyEvent) {
-	atomic.StoreUint32(&e.userTyped, 1)
+	e.userTyped.Store(true)
 	e.Entry.TypedKey(ev)
 }

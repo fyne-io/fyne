@@ -38,15 +38,14 @@ type radioItem struct {
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	focusIndicator := canvas.NewCircle(color.Transparent)
-	bg := canvas.NewCircle(theme.InputBackgroundColor())
-	icon := canvas.NewImageFromResource(theme.NewPrimaryThemedResource(theme.RadioButtonCheckedIcon()))
+	// TODO move to `theme.RadioButtonFillIcon()` when we add it in 2.4
+	icon := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill"))
 	over := canvas.NewImageFromResource(theme.NewThemedResource(theme.RadioButtonIcon()))
 	label := canvas.NewText(i.Label, theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignLeading
 	r := &radioItemRenderer{
-		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, bg, icon, over, label}),
+		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, over, label}),
 		focusIndicator: focusIndicator,
-		bg:             bg,
 		icon:           icon,
 		over:           over,
 		item:           i,
@@ -152,14 +151,14 @@ func (i *radioItem) toggle() {
 type radioItemRenderer struct {
 	widget.BaseRenderer
 
-	bg, focusIndicator *canvas.Circle
-	icon, over         *canvas.Image
-	item               *radioItem
-	label              *canvas.Text
+	focusIndicator *canvas.Circle
+	icon, over     *canvas.Image
+	item           *radioItem
+	label          *canvas.Text
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
+	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
 	r.focusIndicator.Resize(focusIndicatorSize)
 	r.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
 
@@ -168,9 +167,7 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+theme.Padding(), 0))
 
 	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	r.bg.Move(iconPos.AddXY(3, 3)) // absolute numbers to move relative to SVG details
-	r.bg.Resize(iconSize.SubtractWidthHeight(6, 6))
+	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
 	r.icon.Resize(iconSize)
 	r.icon.Move(iconPos)
 	r.over.Resize(iconSize)
@@ -200,17 +197,19 @@ func (r *radioItemRenderer) update() {
 
 	out := theme.NewThemedResource(theme.RadioButtonIcon())
 	out.ColorName = theme.ColorNameInputBorder
-	in := theme.NewThemedResource(theme.RadioButtonCheckedIcon())
-	r.icon.Hidden = true
-	r.bg.FillColor = theme.InputBackgroundColor()
+	// TODO move to `theme.RadioButtonFillIcon()` when we add it in 2.4
+	in := theme.NewThemedResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill"))
+	in.ColorName = theme.ColorNameInputBackground
 	if r.item.Selected {
 		in.ColorName = theme.ColorNamePrimary
-		r.icon.Hidden = false
 		out.ColorName = theme.ColorNameForeground
 	}
 	if r.item.Disabled() {
-		r.bg.FillColor = theme.BackgroundColor()
-		in.ColorName = theme.ColorNameDisabled
+		if r.item.Selected {
+			in.ColorName = theme.ColorNameDisabled
+		} else {
+			in.ColorName = theme.ColorNameBackground
+		}
 		out.ColorName = theme.ColorNameDisabled
 	}
 	r.icon.Resource = in

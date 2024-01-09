@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"fyne.io/fyne/v2/storage"
@@ -68,6 +68,10 @@ func TestInMemoryRepositoryParsing(t *testing.T) {
 	baz, _ := storage.ParseURI("mem:///baz")
 	assert.Nil(t, err)
 	assert.NotNil(t, baz)
+
+	empty, _ := storage.ParseURI("mem:")
+	assert.Nil(t, err)
+	assert.NotNil(t, empty)
 }
 
 func TestInMemoryRepositoryExists(t *testing.T) {
@@ -109,13 +113,13 @@ func TestInMemoryRepositoryReader(t *testing.T) {
 
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
 	assert.Nil(t, err)
 
@@ -193,19 +197,19 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
-	fooData, err := ioutil.ReadAll(fooReader)
+	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
 	assert.Nil(t, err)
 
 	barReader, err := storage.Reader(bar)
 	assert.Nil(t, err)
-	barData, err := ioutil.ReadAll(barReader)
+	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
 	assert.Nil(t, err)
 
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
-	bazData, err := ioutil.ReadAll(bazReader)
+	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
 	assert.Nil(t, err)
 
@@ -328,6 +332,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
+	m.Data[""] = []byte{1, 2, 3}
 	m.Data["/foo"] = []byte{1, 2, 3}
 	m.Data["/foo/bar"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/"] = []byte{1, 2, 3}
@@ -346,6 +351,11 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 		stringListing = append(stringListing, u.String())
 	}
 	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
+
+	empty, _ := storage.ParseURI("mem:") // invalid path
+	canList, err = storage.CanList(empty)
+	assert.NotNil(t, err)
+	assert.False(t, canList)
 }
 
 func TestInMemoryRepositoryCreateListable(t *testing.T) {

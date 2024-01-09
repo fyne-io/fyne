@@ -117,7 +117,7 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 	limit := math.Min(width, height) / 2.0
 	if radius > limit {
 		// Out of bounds
-		return theme.BackgroundColor()
+		return color.Transparent
 	}
 	degrees := radians * (180.0 / math.Pi)
 	hue := wrapHue(int(degrees))

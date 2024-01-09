@@ -18,6 +18,14 @@ func TestSelect_SetOptions(t *testing.T) {
 	assert.Equal(t, "10", sel.popUp.Items[0].(*menuItem).Item.Label)
 
 	sel.popUp.Hide()
+	sel.SetOptions([]string{"15", "16", "17"})
+
+	test.Tap(sel)
+	assert.NotNil(t, sel.popUp)
+	assert.Equal(t, 3, len(sel.popUp.Items))
+	assert.Equal(t, "16", sel.popUp.Items[1].(*menuItem).Item.Label)
+
+	sel.popUp.Hide()
 	sel.Options = []string{"20", "21"}
 	sel.Refresh()
 

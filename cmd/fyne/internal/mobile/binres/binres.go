@@ -483,6 +483,24 @@ func resolveElements(elms []*Element, pool, bxPool *Pool) {
 				b := el.attrs[j].Name.Resolve(bxPool)
 				return a < b
 			})
+		} else if el.Name.Resolve(bxPool) == "activity" {
+			// As above the android manifest seems to be very delicate - name must be first then exported before configChanges
+			sort.Slice(el.attrs, func(i, j int) bool {
+				a := el.attrs[i].Name.Resolve(bxPool)
+				if a == "name" {
+					return true
+				}
+
+				b := el.attrs[j].Name.Resolve(bxPool)
+				if a == "exported" {
+					return b != "name"
+				}
+
+				if b == "name" {
+					return false
+				}
+				return a < b
+			})
 		}
 
 		for _, child := range el.Children {

@@ -21,6 +21,44 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 	return container.NewCenter(content)
 }
 
+func makeGridWrapTab(_ fyne.Window) fyne.CanvasObject {
+	data := make([]string, 1000)
+	for i := range data {
+		data[i] = "Test Item " + strconv.Itoa(i)
+	}
+
+	icon := widget.NewIcon(nil)
+	label := widget.NewLabel("Select An Item From The List")
+	vbox := container.NewVBox(icon, label)
+
+	grid := widget.NewGridWrap(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			text := widget.NewLabel("Template Object")
+			text.Alignment = fyne.TextAlignCenter
+			return container.NewVBox(container.NewPadded(widget.NewIcon(theme.DocumentIcon())), text)
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
+		},
+	)
+	grid.OnSelected = func(id widget.ListItemID) {
+		label.SetText(data[id])
+		icon.SetResource(theme.DocumentIcon())
+	}
+	grid.OnUnselected = func(id widget.ListItemID) {
+		label.SetText("Select An Item From The List")
+		icon.SetResource(nil)
+	}
+	grid.Select(15)
+
+	split := container.NewHSplit(grid, container.NewCenter(vbox))
+	split.Offset = 0.6
+	return split
+}
+
 func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	data := make([]string, 1000)
 	for i := range data {
@@ -62,7 +100,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
-	t := widget.NewTable(
+	t := widget.NewTableWithHeaders(
 		func() (int, int) { return 500, 150 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Cell 000, 000")
@@ -71,15 +109,12 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 			label := cell.(*widget.Label)
 			switch id.Col {
 			case 0:
-				label.SetText(fmt.Sprintf("%d", id.Row+1))
-			case 1:
 				label.SetText("A longer cell")
 			default:
 				label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
 			}
 		})
-	t.SetColumnWidth(0, 34)
-	t.SetColumnWidth(1, 102)
+	t.SetColumnWidth(0, 102)
 	t.SetRowHeight(2, 50)
 	return t
 }
@@ -87,7 +122,7 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 	data := map[string][]string{
 		"":  {"A"},
-		"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V"},
+		"A": {"B", "D", "H", "J", "L", "O", "P", "S", "V", "Z"},
 		"B": {"C"},
 		"C": {"abc"},
 		"D": {"E"},
@@ -106,9 +141,16 @@ func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 		"V": {"W"},
 		"W": {"X"},
 		"X": {"Y"},
-		"Y": {"Z"},
-		"Z": {"avwxyz"},
+		"Y": {"zzz"},
+		"Z": {},
 	}
+
+	childlen := 10000
+	z := make([]string, childlen)
+	for i := 0; i < childlen; i++ {
+		z[i] = strconv.Itoa(i)
+	}
+	data["Z"] = z
 
 	tree := widget.NewTreeWithStrings(data)
 	tree.OnSelected = func(id string) {

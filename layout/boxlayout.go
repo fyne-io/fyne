@@ -5,145 +5,190 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Declare conformity with Layout interface
-var _ fyne.Layout = (*boxLayout)(nil)
-
-type boxLayout struct {
-	horizontal bool
+// NewVBoxLayout returns a vertical box layout for stacking a number of child
+// canvas objects or widgets top to bottom. The objects are always displayed
+// at their vertical MinSize. Use a different layout if the objects are intended
+// to be larger then their vertical MinSize.
+func NewVBoxLayout() fyne.Layout {
+	return vBoxLayout{}
 }
 
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child
-// canvas objects or widgets left to right.
+// canvas objects or widgets left to right. The objects are always displayed
+// at their horizontal MinSize. Use a different layout if the objects are intended
+// to be larger then their horizontal MinSize.
 func NewHBoxLayout() fyne.Layout {
-	return &boxLayout{true}
+	return hBoxLayout{}
 }
 
-// NewVBoxLayout returns a vertical box layout for stacking a number of child
-// canvas objects or widgets top to bottom.
-func NewVBoxLayout() fyne.Layout {
-	return &boxLayout{false}
-}
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*vBoxLayout)(nil)
 
-func isVerticalSpacer(obj fyne.CanvasObject) bool {
-	if spacer, ok := obj.(SpacerObject); ok {
-		return spacer.ExpandVertical()
-	}
-
-	return false
-}
-
-func isHorizontalSpacer(obj fyne.CanvasObject) bool {
-	if spacer, ok := obj.(SpacerObject); ok {
-		return spacer.ExpandHorizontal()
-	}
-
-	return false
-}
-
-func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
-	// invisible spacers don't impact layout
-	if !obj.Visible() {
-		return false
-	}
-
-	if g.horizontal {
-		return isHorizontalSpacer(obj)
-	}
-	return isVerticalSpacer(obj)
-}
+type vBoxLayout struct{}
 
 // Layout is called to pack all child objects into a specified size.
-// For a VBoxLayout this will pack objects into a single column where each item
+// This will pack objects into a single column where each item
 // is full width but the height is the minimum required.
 // Any spacers added will pad the view, sharing the space if there are two or more.
-func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	spacers := make([]fyne.CanvasObject, 0)
+func (v vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	spacers := 0
+	visibleObjects := 0
+	// Size taken up by visible objects
 	total := float32(0)
+
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
 
-		if g.isSpacer(child) {
-			spacers = append(spacers, child)
+		if isVerticalSpacer(child) {
+			spacers++
 			continue
 		}
-		if g.horizontal {
-			total += child.MinSize().Width
-		} else {
-			total += child.MinSize().Height
-		}
+
+		visibleObjects++
+		total += child.MinSize().Height
+	}
+
+	padding := theme.Padding()
+
+	// Amount of space not taken up by visible objects and inter-object padding
+	extra := size.Height - total - (padding * float32(visibleObjects-1))
+
+	// Spacers split extra space equally
+	spacerSize := float32(0)
+	if spacers > 0 {
+		spacerSize = extra / float32(spacers)
 	}
 
 	x, y := float32(0), float32(0)
-	var extra float32
-	if g.horizontal {
-		extra = size.Width - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
-	} else {
-		extra = size.Height - total - (theme.Padding() * float32(len(objects)-len(spacers)-1))
-	}
-	extraCell := float32(0)
-	if len(spacers) > 0 {
-		extraCell = extra / float32(len(spacers))
-	}
-
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
 
-		width := child.MinSize().Width
-		height := child.MinSize().Height
-
-		if g.isSpacer(child) {
-			if g.horizontal {
-				x += extraCell
-			} else {
-				y += extraCell
-			}
+		if isVerticalSpacer(child) {
+			y += spacerSize
 			continue
 		}
 		child.Move(fyne.NewPos(x, y))
 
-		if g.horizontal {
-			x += theme.Padding() + width
-			child.Resize(fyne.NewSize(width, size.Height))
-		} else {
-			y += theme.Padding() + height
-			child.Resize(fyne.NewSize(size.Width, height))
-		}
+		height := child.MinSize().Height
+		y += padding + height
+		child.Resize(fyne.NewSize(size.Width, height))
 	}
 }
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a BoxLayout this is the width of the widest item and the height is
 // the sum of of all children combined with padding between each.
-func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+func (v vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false
+	padding := theme.Padding()
+	for _, child := range objects {
+		if !child.Visible() || isVerticalSpacer(child) {
+			continue
+		}
+
+		childMin := child.MinSize()
+		minSize.Width = fyne.Max(childMin.Width, minSize.Width)
+		minSize.Height += childMin.Height
+		if addPadding {
+			minSize.Height += padding
+		}
+		addPadding = true
+	}
+	return minSize
+}
+
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*hBoxLayout)(nil)
+
+type hBoxLayout struct{}
+
+// Layout is called to pack all child objects into a specified size.
+// For a VBoxLayout this will pack objects into a single column where each item
+// is full width but the height is the minimum required.
+// Any spacers added will pad the view, sharing the space if there are two or more.
+func (g hBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	spacers := 0
+	visibleObjects := 0
+	// Size taken up by visible objects
+	total := float32(0)
+
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
 
-		if g.isSpacer(child) {
+		if isHorizontalSpacer(child) {
+			spacers++
 			continue
 		}
 
-		if g.horizontal {
-			minSize.Height = fyne.Max(child.MinSize().Height, minSize.Height)
-			minSize.Width += child.MinSize().Width
-			if addPadding {
-				minSize.Width += theme.Padding()
-			}
-		} else {
-			minSize.Width = fyne.Max(child.MinSize().Width, minSize.Width)
-			minSize.Height += child.MinSize().Height
-			if addPadding {
-				minSize.Height += theme.Padding()
-			}
+		visibleObjects++
+		total += child.MinSize().Width
+	}
+
+	padding := theme.Padding()
+
+	// Amount of space not taken up by visible objects and inter-object padding
+	extra := size.Width - total - (padding * float32(visibleObjects-1))
+
+	// Spacers split extra space equally
+	spacerSize := float32(0)
+	if spacers > 0 {
+		spacerSize = extra / float32(spacers)
+	}
+
+	x, y := float32(0), float32(0)
+	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
+		if isHorizontalSpacer(child) {
+			x += spacerSize
+			continue
+		}
+		child.Move(fyne.NewPos(x, y))
+
+		width := child.MinSize().Width
+		x += padding + width
+		child.Resize(fyne.NewSize(width, size.Height))
+	}
+}
+
+// MinSize finds the smallest size that satisfies all the child objects.
+// For a BoxLayout this is the width of the widest item and the height is
+// the sum of of all children combined with padding between each.
+func (g hBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	minSize := fyne.NewSize(0, 0)
+	addPadding := false
+	padding := theme.Padding()
+	for _, child := range objects {
+		if !child.Visible() || isHorizontalSpacer(child) {
+			continue
+		}
+
+		childMin := child.MinSize()
+		minSize.Height = fyne.Max(childMin.Height, minSize.Height)
+		minSize.Width += childMin.Width
+		if addPadding {
+			minSize.Width += padding
 		}
 		addPadding = true
 	}
 	return minSize
+}
+
+func isVerticalSpacer(obj fyne.CanvasObject) bool {
+	spacer, ok := obj.(SpacerObject)
+	return ok && spacer.ExpandVertical()
+}
+
+func isHorizontalSpacer(obj fyne.CanvasObject) bool {
+	spacer, ok := obj.(SpacerObject)
+	return ok && spacer.ExpandHorizontal()
 }

@@ -1,5 +1,4 @@
 //go:build !ci && android
-// +build !ci,android
 
 package app
 

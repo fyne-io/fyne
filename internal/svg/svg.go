@@ -9,7 +9,6 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"io/ioutil"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -96,12 +95,12 @@ func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
 }
 
 func IsFileSVG(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".svg"
+	return strings.EqualFold(filepath.Ext(path), ".svg")
 }
 
 // IsResourceSVG checks if the resource is an SVG or not.
 func IsResourceSVG(res fyne.Resource) bool {
-	if strings.ToLower(filepath.Ext(res.Name())) == ".svg" {
+	if IsFileSVG(res.Name()) {
 		return true
 	}
 
@@ -213,6 +212,7 @@ type objGroup struct {
 	Ellipses        []*ellipseObj `xml:"ellipse"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
+	Groups          []*objGroup   `xml:"g"`
 }
 
 func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
@@ -267,6 +267,7 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string)
 		replacePathsFill(grp.Paths, hexColor, opacity)
 		replaceRectsFill(grp.Rects, hexColor, opacity)
 		replacePolygonsFill(grp.Polygons, hexColor, opacity)
+		replaceGroupObjectFill(grp.Groups, hexColor, opacity)
 	}
 }
 
@@ -286,7 +287,7 @@ func (s *svg) replaceFillColor(color color.Color) error {
 
 func svgFromXML(reader io.Reader) (*svg, error) {
 	var s svg
-	bSlice, err := ioutil.ReadAll(reader)
+	bSlice, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

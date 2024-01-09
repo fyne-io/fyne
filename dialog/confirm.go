@@ -23,7 +23,7 @@ func (d *ConfirmDialog) SetConfirmText(label string) {
 // SetConfirmImportance sets the importance level of the confirm button.
 //
 // Since 2.4
-func (d *ConfirmDialog) SetConfirmImportance(importance widget.ButtonImportance) {
+func (d *ConfirmDialog) SetConfirmImportance(importance widget.Importance) {
 	d.confirm.Importance = importance
 }
 

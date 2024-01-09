@@ -13,6 +13,25 @@ const (
 	TextAlignTrailing
 )
 
+// TextTruncation controls how a `Label` or `Entry` will truncate its text.
+// The default value is `TextTruncateOff` which will not truncate.
+//
+// Since: 2.4
+type TextTruncation int
+
+const (
+	// TextTruncateOff means no truncation will be applied, it is the default.
+	// This means that the minimum size of a text block will be the space required to display it fully.
+	TextTruncateOff TextTruncation = iota
+	// TextTruncateClip will truncate text when it reaches the end of the available space.
+	TextTruncateClip
+	// TextTruncateEllipsis is like regular truncation except that an ellipses (…) will be inserted
+	// wherever text has been shortened to fit.
+	//
+	// Since: 2.4
+	TextTruncateEllipsis
+)
+
 // TextWrap represents how text longer than the widget's width will be wrapped.
 type TextWrap int
 
@@ -21,6 +40,8 @@ const (
 	TextWrapOff TextWrap = iota
 	// TextTruncate trims the text to the widget's width, no wrapping is applied.
 	// If an entry is asked to truncate it will provide scrolling capabilities.
+	//
+	// Deprecated: Use `TextTruncateClip` value of the widget `Truncation` field instead
 	TextTruncate
 	// TextWrapBreak trims the line of characters to the widget's width adding the excess as new line.
 	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.

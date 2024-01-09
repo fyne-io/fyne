@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"image"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,7 +37,7 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 // This path is also reported, thus the file can be used as new master.
 //
 // Since 2.3
-func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...interface{}) bool {
+func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
 	c := NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
 	size := o.MinSize().Max(o.Size())
@@ -60,7 +59,7 @@ func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.Canv
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
 //
 // Since 2.3
-func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...interface{}) bool {
+func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
 	c := NewCanvas()
 	c.SetPadded(false)
 	size := o.MinSize().Max(o.Size())
@@ -75,7 +74,7 @@ func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.Can
 // The test `t` fails if the given image is not equal to the loaded master image.
 // In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
 // This path is also reported, thus the file can be used as new master.
-func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
+func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...any) bool {
 	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
 }
 
@@ -86,7 +85,7 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // This path is also reported, thus the file can be used as new master.
 //
 // Since 2.3
-func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...any) bool {
 	return test.AssertImageMatches(t, masterFilename, c.Capture(), msgAndArgs...)
 }
 
@@ -102,7 +101,7 @@ func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, ms
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
 //
 // Since: 2.0
-func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...any) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 
@@ -116,7 +115,7 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 		return false
 	}
 
-	raw, err := ioutil.ReadFile(masterPath)
+	raw, err := os.ReadFile(masterPath)
 	require.NoError(t, err)
 	master := strings.ReplaceAll(string(raw), "\r", "")
 
@@ -324,7 +323,7 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 	return
 }
 
-func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
+func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
 	d := fyne.CurrentApp().Driver()
 	ev := &fyne.PointEvent{Position: pos}
 	var c fyne.Canvas
@@ -340,7 +339,7 @@ func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	obj.Tapped(ev)
 }
 
-func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}
@@ -368,5 +367,5 @@ func writeMarkup(path string, markup string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, []byte(markup), 0644)
+	return os.WriteFile(path, []byte(markup), 0644)
 }

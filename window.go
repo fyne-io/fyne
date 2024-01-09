@@ -70,6 +70,13 @@ type Window interface {
 	// Since: 1.4
 	SetCloseIntercept(func())
 
+	// SetOnDropped allows setting a window-wide callback to receive dropped items.
+	// The callback function is called with the absolute position of the drop and a
+	// slice of all of the dropped URIs.
+	//
+	// Since 2.4
+	SetOnDropped(func(Position, []URI))
+
 	// Show the window on screen.
 	Show()
 	// Hide the window from the user.

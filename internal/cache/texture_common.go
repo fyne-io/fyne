@@ -30,7 +30,7 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 // gl context to ensure textures are deleted from gl.
 func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	now := timeNow()
-	textures.Range(func(key, value interface{}) bool {
+	textures.Range(func(key, value any) bool {
 		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
 		if tinfo.isExpired(now) && tinfo.canvas == canvas {
 			f(obj)
@@ -44,7 +44,7 @@ func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
 func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
-	textures.Range(func(key, value interface{}) bool {
+	textures.Range(func(key, value any) bool {
 		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
 		if tinfo.canvas == canvas {
 			f(obj)

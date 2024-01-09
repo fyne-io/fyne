@@ -17,7 +17,7 @@ import (
 
 // Install returns the cli command for installing fyne applications
 func Install() *cli.Command {
-	i := &Installer{appData: &appData{}}
+	i := NewInstaller()
 
 	return &cli.Command{
 		Name:  "install",
@@ -43,6 +43,12 @@ func Install() *cli.Command {
 				Value:       "",
 				Destination: &i.icon,
 			},
+			&cli.BoolFlag{
+				Name:        "use-raw-icon",
+				Usage:       "Skip any OS-specific icon pre-processing",
+				Value:       false,
+				Destination: &i.rawIcon,
+			},
 			&cli.StringFlag{
 				Name:        "appID",
 				Aliases:     []string{"id"},
@@ -65,6 +71,11 @@ type Installer struct {
 	installDir, srcDir, os string
 	Packager               *Packager
 	release                bool
+}
+
+// NewInstaller returns a command that can install a GUI apps built using Fyne from local source code.
+func NewInstaller() *Installer {
+	return &Installer{appData: &appData{}}
 }
 
 // AddFlags adds the flags for interacting with the Installer.
@@ -152,7 +163,7 @@ func (i *Installer) install() error {
 				dirName = p.Name[:len(p.Name)-4]
 			}
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), dirName)
-			err := runAsAdminWindows("mkdir", "\"\""+i.installDir+"\"\"")
+			err := runAsAdminWindows("mkdir", i.installDir)
 			if err != nil {
 				fyne.LogError("Failed to run as windows administrator", err)
 				return err

@@ -31,6 +31,20 @@ func (r *Raster) Alpha() float64 {
 	return 1.0 - r.Translucency
 }
 
+// Hide will set this raster to not be visible
+func (r *Raster) Hide() {
+	r.baseObject.Hide()
+
+	repaint(r)
+}
+
+// Move the raster to a new position, relative to its parent / canvas
+func (r *Raster) Move(pos fyne.Position) {
+	r.baseObject.Move(pos)
+
+	repaint(r)
+}
+
 // Resize on a raster image causes the new size to be set and then calls Refresh.
 // This causes the underlying data to be recalculated and a new output to be drawn.
 func (r *Raster) Resize(s fyne.Size) {
@@ -42,7 +56,7 @@ func (r *Raster) Resize(s fyne.Size) {
 	Refresh(r)
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this raster to be redrawn with its configured state.
 func (r *Raster) Refresh() {
 	Refresh(r)
 }
@@ -151,25 +165,25 @@ func NewRasterFromImage(img image.Image) *Raster {
 			// respect the user's pixel format (if possible)
 			var dst draw.Image
 			switch i := img.(type) {
-			case (*image.Alpha):
+			case *image.Alpha:
 				dst = image.NewAlpha(rect)
-			case (*image.Alpha16):
+			case *image.Alpha16:
 				dst = image.NewAlpha16(rect)
-			case (*image.CMYK):
+			case *image.CMYK:
 				dst = image.NewCMYK(rect)
-			case (*image.Gray):
+			case *image.Gray:
 				dst = image.NewGray(rect)
-			case (*image.Gray16):
+			case *image.Gray16:
 				dst = image.NewGray16(rect)
-			case (*image.NRGBA):
+			case *image.NRGBA:
 				dst = image.NewNRGBA(rect)
-			case (*image.NRGBA64):
+			case *image.NRGBA64:
 				dst = image.NewNRGBA64(rect)
-			case (*image.Paletted):
+			case *image.Paletted:
 				dst = image.NewPaletted(rect, i.Palette)
-			case (*image.RGBA):
+			case *image.RGBA:
 				dst = image.NewRGBA(rect)
-			case (*image.RGBA64):
+			case *image.RGBA64:
 				dst = image.NewRGBA64(rect)
 			default:
 				dst = image.NewRGBA(rect)

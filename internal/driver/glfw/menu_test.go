@@ -1,5 +1,4 @@
-//go:build !ci && !mobile
-// +build !ci,!mobile
+//go:build !no_glfw && !mobile
 
 package glfw
 

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build linux && !android
-// +build linux,!android
+//go:build (linux && !android) || freebsd || openbsd
 
 package app
 
@@ -15,6 +14,8 @@ than screens with touch panels.
 
 /*
 #cgo LDFLAGS: -lEGL -lGLESv2 -lX11
+#cgo freebsd CFLAGS: -I/usr/local/include/
+#cgo openbsd CFLAGS: -I/usr/X11R6/include/
 
 void createWindow(void);
 void processEvents(void);
@@ -77,6 +78,10 @@ func main(f func(App)) {
 			theApp.publishResult <- PublishResult{}
 		}
 	}
+}
+
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 //export onResize

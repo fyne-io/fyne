@@ -84,7 +84,7 @@ func TestCanvas_walkTree(t *testing.T) {
 		i++
 		updateInfoBefore(node, i)
 		beforeCalls = append(beforeCalls, beforeCall{obj: node.obj, parent: parent, pos: pos})
-	}, func(node *RenderCacheNode) {
+	}, func(node *RenderCacheNode, _ fyne.Position) {
 		var parent fyne.CanvasObject
 		if node.parent != nil {
 			parent = node.parent.obj
@@ -124,7 +124,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		secondRunBeforePainterData = append(secondRunBeforePainterData, node.painterData.(nodeInfo))
 		nodes = append(nodes, node)
-	}, func(node *RenderCacheNode) {
+	}, func(node *RenderCacheNode, _ fyne.Position) {
 		secondRunAfterPainterData = append(secondRunAfterPainterData, node.painterData.(nodeInfo))
 	})
 
@@ -173,7 +173,7 @@ func TestCanvas_walkTree(t *testing.T) {
 		i++
 		updateInfoBefore(node, i)
 		thirdRunBeforePainterData = append(thirdRunBeforePainterData, node.painterData.(nodeInfo))
-	}, func(node *RenderCacheNode) {
+	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
 		thirdRunAfterPainterData = append(thirdRunAfterPainterData, node.painterData.(nodeInfo))
@@ -219,7 +219,7 @@ func TestCanvas_walkTree(t *testing.T) {
 		updateInfoBefore(node, i)
 		fourthRunBeforePainterData = append(fourthRunBeforePainterData, node.painterData.(nodeInfo))
 		nodes = append(nodes, node)
-	}, func(node *RenderCacheNode) {
+	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
 		fourthRunAfterPainterData = append(fourthRunAfterPainterData, node.painterData.(nodeInfo))
@@ -301,7 +301,7 @@ func TestCanvas_walkTree(t *testing.T) {
 		updateInfoBefore(node, i)
 		fifthRunBeforePainterData = append(fifthRunBeforePainterData, node.painterData.(nodeInfo))
 		nodes = append(nodes, node)
-	}, func(node *RenderCacheNode) {
+	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
 		fifthRunAfterPainterData = append(fifthRunAfterPainterData, node.painterData.(nodeInfo))
@@ -354,6 +354,21 @@ func TestCanvas_walkTree(t *testing.T) {
 	assert.Equal(t, thirdCol, nodes[6].obj)
 	assert.Nil(t, nodes[6].firstChild)
 	assert.Nil(t, nodes[6].nextSibling)
+}
+
+func TestCanvas_OverlayStack(t *testing.T) {
+	o := &overlayStack{}
+	a := canvas.NewRectangle(color.Black)
+	b := canvas.NewCircle(color.Black)
+	c := canvas.NewRectangle(color.White)
+	o.Add(a)
+	o.Add(b)
+	o.Add(c)
+	assert.Equal(t, 3, len(o.List()))
+	o.Remove(c)
+	assert.Equal(t, 2, len(o.List()))
+	o.Remove(a)
+	assert.Equal(t, 0, len(o.List()))
 }
 
 func deleteAt(c *fyne.Container, index int) {

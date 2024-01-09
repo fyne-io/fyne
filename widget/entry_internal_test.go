@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
+	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -31,6 +32,7 @@ func TestEntry_Cursor(t *testing.T) {
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
 	entry.Resize(entry.MinSize())
 
@@ -40,11 +42,15 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
+	entry.doubleTappedAtUnixMillis = 0 // make sure we don't register a triple tap next
+
 	// select the whitespace after 'quick'
 	ev = getClickPosition("The quick", 0)
 	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
+
+	entry.doubleTappedAtUnixMillis = 0
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition("jumped  ", 1)
@@ -80,6 +86,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 func TestEntry_DragSelect(t *testing.T) {
 	entry := NewEntry()
 	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
 	entry.Resize(entry.MinSize())
 
@@ -96,6 +103,32 @@ func TestEntry_DragSelect(t *testing.T) {
 		entry.Dragged(de)
 	}
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
+	entry.MouseUp(me)
+
+	assert.Equal(t, "r the laz", entry.SelectedText())
+}
+
+func TestEntry_DragSelectLargeStep(t *testing.T) {
+	entry := NewEntry()
+	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = intWidget.ScrollNone
+	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
+	entry.Resize(entry.MinSize())
+
+	// get position after the letter 'e' on the second row
+	ev1 := getClickPosition("ove", 1)
+	// get position after the letter 'z' on the second row
+	ev2 := getClickPosition("over the laz", 1)
+
+	// mouse down and drag from 'r' to 'z'
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.MouseButtonPrimary}
+	entry.MouseDown(me)
+
+	delta := ev2.Position.Subtract(ev1.Position)
+	de := &fyne.DragEvent{PointEvent: *ev2, Dragged: fyne.NewDelta(delta.X, delta.Y)}
+	entry.Dragged(de)
+
+	me = &desktop.MouseEvent{PointEvent: *ev2, Button: desktop.MouseButtonPrimary}
 	entry.MouseUp(me)
 
 	assert.Equal(t, "r the laz", entry.SelectedText())
@@ -335,6 +368,17 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 	assert.Equal(t, "Testing entry paste\ncontent", entry.Text)
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 7, entry.CursorColumn)
+}
+
+func TestEntry_PlaceholderTextStyle(t *testing.T) {
+	e := NewEntry()
+	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
+
+	w := test.NewWindow(e)
+	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+
+	w.Canvas().Focus(e)
+	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
 }
 
 func TestEntry_Tab(t *testing.T) {

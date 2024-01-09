@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build darwin && ios
-// +build darwin,ios
 
 package app
 
@@ -80,6 +79,10 @@ var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
 var DisplayMetrics struct {
 	WidthPx  int
 	HeightPx int
+}
+
+func GoBack() {
+	// Apple do not permit apps to exit in any way other than user pressing home button / gesture
 }
 
 //export setDisplayMetrics

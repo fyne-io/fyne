@@ -36,7 +36,7 @@
 								<rectangle fillColor="disabled" size="66x1"/>
 							</widget>
 							<widget pos="0,127" size="66x35" type="*widget.menuItem">
-								<rectangle fillColor="focus" size="66x35"/>
+								<rectangle fillColor="focus" radius="4" size="66x35"/>
 								<text pos="8,8" size="30x19">D</text>
 								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
@@ -60,73 +60,73 @@
 							<container size="97x660">
 								<widget size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="53x19">a</text>
-									<text pos="69,8" size="11x16">⌃</text>
-									<text pos="80,8" size="8x19">A</text>
+									<text color="rgba(255,255,255,50)" pos="69,10" size="11x16">⌃</text>
+									<text color="rgba(255,255,255,50)" monospace pos="80,10" size="8x16">A</text>
 								</widget>
 								<widget pos="0,39" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="41x19">b</text>
-									<text pos="57,8" size="31x16">⌥⌫</text>
+									<text color="rgba(255,255,255,50)" pos="57,10" size="31x16">⌥⌫</text>
 								</widget>
 								<widget pos="0,78" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="41x19">c</text>
-									<text pos="57,8" size="31x16">❖⌦</text>
+									<text color="rgba(255,255,255,50)" pos="57,10" size="31x16">❖⌦</text>
 								</widget>
 								<widget pos="0,117" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="45x19">d</text>
-									<text pos="61,8" size="27x16">⇧↓</text>
+									<text color="rgba(255,255,255,50)" pos="61,10" size="27x16">⇧↓</text>
 								</widget>
 								<widget pos="0,156" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="34x19">e</text>
-									<text pos="50,8" size="38x16">⌃⌥↘</text>
+									<text color="rgba(255,255,255,50)" pos="50,10" size="38x16">⌃⌥↘</text>
 								</widget>
 								<widget pos="0,195" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="31x19">f</text>
-									<text pos="47,8" size="41x16">⌃❖↩</text>
+									<text color="rgba(255,255,255,50)" pos="47,10" size="41x16">⌃❖↩</text>
 								</widget>
 								<widget pos="0,234" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="34x19">g</text>
-									<text pos="50,8" size="38x16">⌃⇧⎋</text>
+									<text color="rgba(255,255,255,50)" pos="50,10" size="38x16">⌃⇧⎋</text>
 								</widget>
 								<widget pos="0,273" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="30x19">h</text>
-									<text pos="46,8" size="42x16">⌥❖↖</text>
+									<text color="rgba(255,255,255,50)" pos="46,10" size="42x16">⌥❖↖</text>
 								</widget>
 								<widget pos="0,312" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="31x19">i</text>
-									<text pos="47,8" size="41x16">⌥⇧←</text>
+									<text color="rgba(255,255,255,50)" pos="47,10" size="41x16">⌥⇧←</text>
 								</widget>
 								<widget pos="0,351" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="35x19">j</text>
-									<text pos="51,8" size="37x16">⇧❖⇟</text>
+									<text color="rgba(255,255,255,50)" pos="51,10" size="37x16">⇧❖⇟</text>
 								</widget>
 								<widget pos="0,390" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="24x19">k</text>
-									<text pos="40,8" size="48x16">⌃⌥❖⇞</text>
+									<text color="rgba(255,255,255,50)" pos="40,10" size="48x16">⌃⌥❖⇞</text>
 								</widget>
 								<widget pos="0,429" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="17x19">l</text>
-									<text pos="33,8" size="55x16">⌃⌥⇧↩</text>
+									<text color="rgba(255,255,255,50)" pos="33,10" size="55x16">⌃⌥⇧↩</text>
 								</widget>
 								<widget pos="0,468" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="19x19">m</text>
-									<text pos="35,8" size="53x16">⌃⇧❖→</text>
+									<text color="rgba(255,255,255,50)" pos="35,10" size="53x16">⌃⇧❖→</text>
 								</widget>
 								<widget pos="0,508" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="8x19">n</text>
-									<text pos="24,8" size="64x16">⌃⌥⇧❖␣</text>
+									<text color="rgba(255,255,255,50)" pos="24,10" size="64x16">⌃⌥⇧❖␣</text>
 								</widget>
 								<widget pos="0,547" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="47x19">o</text>
-									<text pos="63,8" size="25x16">⌃⇥</text>
+									<text color="rgba(255,255,255,50)" pos="63,10" size="25x16">⌃⇥</text>
 								</widget>
 								<widget pos="0,586" size="97x35" type="*widget.menuItem">
 									<text pos="8,8" size="48x19">p</text>
-									<text pos="64,8" size="24x16">⌃↑</text>
+									<text color="rgba(255,255,255,50)" pos="64,10" size="24x16">⌃↑</text>
 								</widget>
 								<widget pos="0,625" size="97x35" type="*widget.menuItem">
-									<text pos="8,8" size="57x19">q</text>
-									<text pos="73,8" size="0x16"></text>
-									<text pos="73,8" size="15x19">F6</text>
+									<text pos="8,8" size="56x19">q</text>
+									<text color="rgba(255,255,255,50)" pos="72,10" size="0x16"></text>
+									<text color="rgba(255,255,255,50)" monospace pos="72,10" size="16x16">F6</text>
 								</widget>
 							</container>
 						</widget>

@@ -201,7 +201,7 @@ func Test_BuildGopherJSReleaseVersion(t *testing.T) {
 	}
 
 	gopherJSBuildTest := &testCommandRuns{runs: expected, t: t}
-	b := &Builder{appData: &appData{}, os: "gopherjs", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
+	b := &Builder{appData: &appData{}, os: "js", srcdir: "myTest", release: true, runner: gopherJSBuildTest}
 	err := b.build()
 	if runtime.GOOS == "windows" {
 		assert.NotNil(t, err)
@@ -333,4 +333,11 @@ func Test_ExtractLdFlags(t *testing.T) {
 		assert.Equal(t, test.wantLdFlags, ldFlags)
 		assert.Equal(t, test.wantGoFlags, goFlags)
 	}
+}
+
+func Test_NormaliseVersion(t *testing.T) {
+	assert.Equal(t, "master", normaliseVersion("master"))
+	assert.Equal(t, "2.3.0.0", normaliseVersion("v2.3"))
+	assert.Equal(t, "2.4.0.0", normaliseVersion("v2.4.0"))
+	assert.Equal(t, "2.3.6.0-dev", normaliseVersion("v2.3.6-0.20230711180435-d4b95e1cb1eb"))
 }

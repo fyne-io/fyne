@@ -5,7 +5,7 @@
 				<widget size="70x36" type="*widget.Scroll">
 					<container size="156x36">
 						<widget size="76x36" type="*container.tabButton">
-							<rectangle fillColor="hover" size="76x36"/>
+							<rectangle fillColor="hover" radius="4" size="76x36"/>
 							<text bold color="primary" pos="8,8" size="60x20">Test1</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
@@ -26,19 +26,19 @@
 				</widget>
 				<container pos="74,0" size="76x36">
 					<widget size="36x36" type="*widget.Button">
+						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
 					</widget>
 					<widget pos="40,0" size="36x36" type="*widget.Button">
+						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<rectangle size="0x0"/>
 						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,36" size="70x4"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="70x4"/>
 			<widget pos="0,40" size="150x110" type="*widget.Label">
 				<text pos="8,8" size="34x19">Text1</text>
 			</widget>

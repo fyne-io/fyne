@@ -1,7 +1,4 @@
-//go:build !ci && !mobile && (!darwin || no_native_menus)
-// +build !ci
-// +build !mobile
-// +build !darwin no_native_menus
+//go:build !no_glfw && !mobile && (!darwin || no_native_menus)
 
 package glfw
 

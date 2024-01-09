@@ -1,0 +1,27 @@
+<canvas padded size="150x280">
+	<content>
+		<container pos="4,4" size="142x272">
+			<widget pos="22,98" size="96x76" type="*widget.Accordion">
+				<widget size="96x36" type="*widget.Button">
+					<rectangle radius="4" size="96x36"/>
+					<rectangle size="96x36"/>
+					<widget pos="32,8" size="9x20" type="*widget.RichText">
+						<text alignment="center" bold size="9x19">A</text>
+					</widget>
+					<image fillMode="contain" pos="8,8" rsc="menuDropDownIcon" size="iconInlineSize"/>
+				</widget>
+				<widget pos="0,40" size="96x36" type="*widget.Button">
+					<rectangle radius="4" size="96x36"/>
+					<rectangle size="96x36"/>
+					<widget pos="32,8" size="9x20" type="*widget.RichText">
+						<text alignment="center" bold size="9x19">B</text>
+					</widget>
+					<image fillMode="contain" pos="8,8" rsc="menuDropDownIcon" size="iconInlineSize"/>
+				</widget>
+				<widget pos="0,37" size="96x1" type="*widget.Separator">
+					<rectangle fillColor="disabled" size="96x1"/>
+				</widget>
+			</widget>
+		</container>
+	</content>
+</canvas>

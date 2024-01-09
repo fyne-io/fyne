@@ -92,7 +92,7 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 func ReverseWalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, true, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
@@ -110,7 +110,7 @@ func ReverseWalkVisibleObjectTree(
 func WalkCompleteObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false)
@@ -128,7 +128,7 @@ func WalkCompleteObjectTree(
 func WalkVisibleObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
 	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
@@ -141,7 +141,7 @@ func walkObjectTree(
 	offset, clipPos fyne.Position,
 	clipSize fyne.Size,
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
-	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.Position, fyne.CanvasObject),
 	requireVisible bool,
 ) bool {
 	if obj == nil {
@@ -157,7 +157,9 @@ func walkObjectTree(
 	case *fyne.Container:
 		children = co.Objects
 	case fyne.Widget:
-		children = cache.Renderer(co).Objects()
+		if cache.IsRendered(co) || requireVisible {
+			children = cache.Renderer(co).Objects()
+		}
 	}
 
 	if _, ok := obj.(fyne.Scrollable); ok {
@@ -194,7 +196,7 @@ func walkObjectTree(
 	}
 
 	if afterChildren != nil {
-		afterChildren(obj, parent)
+		afterChildren(obj, pos, parent)
 	}
 	return cancelled
 }

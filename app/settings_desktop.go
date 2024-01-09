@@ -1,5 +1,4 @@
-//go:build !android && !ios && !mobile && !js && !wasm && !test_web_driver
-// +build !android,!ios,!mobile,!js,!wasm,!test_web_driver
+//go:build !android && !ios && !mobile && !wasm && !test_web_driver
 
 package app
 
@@ -41,7 +40,7 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 
 	go func() {
 		for event := range watcher.Events {
-			if event.Op&fsnotify.Remove != 0 { // if it was deleted then watch again
+			if event.Op.Has(fsnotify.Remove) { // if it was deleted then watch again
 				watcher.Remove(path) // fsnotify returns false positives, see https://github.com/fsnotify/fsnotify/issues/268
 
 				watchFileAddTarget(watcher, path)

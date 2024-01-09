@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -74,12 +73,18 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	scale := s.makeScaleGroup(w.Canvas().Scale())
 	box := container.NewVBox(scale)
 
+	animations := widget.NewCheck("Animate widgets", func(on bool) {
+		s.fyneSettings.DisableAnimations = !on
+	})
+	animations.Checked = !s.fyneSettings.DisableAnimations
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
 	}
 	swatch := container.NewGridWithColumns(len(s.colors), s.colors...)
-	appearance := widget.NewForm(widget.NewFormItem("Main Color", swatch),
+	appearance := widget.NewForm(
+		widget.NewFormItem("Animations", animations),
+		widget.NewFormItem("Main Color", swatch),
 		widget.NewFormItem("Theme", themes))
 
 	box.Add(widget.NewCard("Appearance", "", appearance))
@@ -185,7 +190,7 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	return ioutil.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0644)
 }
 
 type colorButton struct {
@@ -204,6 +209,7 @@ func newColorButton(n string, c color.Color, s *Settings) *colorButton {
 
 func (c *colorButton) CreateRenderer() fyne.WidgetRenderer {
 	r := canvas.NewRectangle(c.color)
+	r.CornerRadius = theme.SelectionRadiusSize()
 	r.StrokeWidth = 5
 
 	if c.name == c.s.fyneSettings.PrimaryColor {
@@ -234,7 +240,7 @@ func (c *colorRenderer) Layout(s fyne.Size) {
 }
 
 func (c *colorRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(20, 20)
+	return fyne.NewSize(20, 32)
 }
 
 func (c *colorRenderer) Refresh() {
@@ -244,6 +250,7 @@ func (c *colorRenderer) Refresh() {
 		c.rect.StrokeColor = color.Transparent
 	}
 	c.rect.FillColor = c.c.color
+	c.rect.CornerRadius = theme.SelectionRadiusSize()
 
 	c.rect.Refresh()
 }
@@ -290,7 +297,7 @@ func showOverlay(c fyne.Canvas) {
 	content.Resize(content.MinSize())
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
-	over := container.NewMax(
+	over := container.NewStack(
 		canvas.NewRectangle(theme.ShadowColor()), container.NewCenter(wrap),
 	)
 

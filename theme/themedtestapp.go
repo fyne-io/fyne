@@ -95,5 +95,9 @@ func (t *themedApp) Scale() float32 {
 	return 1.0
 }
 
+func (t *themedApp) ShowAnimations() bool {
+	return true
+}
+
 func (t *themedApp) AddChangeListener(chan fyne.Settings) {
 }

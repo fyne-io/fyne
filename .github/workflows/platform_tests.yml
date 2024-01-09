@@ -9,24 +9,56 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.14.x', '1.20.x']
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        go-version: ['1.19.x', '1.21.x']
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            runner: xvfb-run
+          - os: macos-latest
+            tags: no_glfw
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.8.0
+    - uses: WillAbides/setup-go-faster@v1.13.0
       with:
         go-version: ${{ matrix.go-version }}
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev libwayland-dev libxkbcommon-dev bc
+      run: >-
+        sudo apt-get update &&
+        sudo apt-get install
+        bc
+        gcc
+        libgl1-mesa-dev
+        libwayland-dev
+        libx11-dev
+        libxkbcommon-dev
+        xorg-dev
+        xvfb
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
-      run: go test -tags ci ./...
+      run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags "${{ matrix.tags }}" ./...
 
     - name: Wayland Tests
-      run: go test -tags ci,wayland ./...
+      run: go test -tags no_glfw,ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
+
+  windows_tests:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: ['1.20.x', '1.21.x']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: WillAbides/setup-go-faster@v1.13.0
+        with:
+          go-version: ${{ matrix.go-version }}
+    
+      - name: Tests
+        run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags no_glfw ./...

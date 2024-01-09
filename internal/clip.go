@@ -15,8 +15,10 @@ func (c *ClipStack) Pop() *ClipItem {
 		return nil
 	}
 
-	ret := c.clips[len(c.clips)-1]
-	c.clips = c.clips[:len(c.clips)-1]
+	top := len(c.clips) - 1
+	ret := c.clips[top]
+	c.clips[top] = nil // release memory reference
+	c.clips = c.clips[:top]
 	return ret
 }
 

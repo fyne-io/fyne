@@ -204,3 +204,39 @@ func TestNewLabelWithData(t *testing.T) {
 	waitForBinding()
 	assert.Equal(t, "Init", label.Text)
 }
+
+func TestLabelImportance(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	lbl := NewLabel("hello, fyne")
+	w := test.NewWindow(lbl)
+	defer w.Close()
+
+	test.AssertImageMatches(t, "label/label_importance_medium.png", w.Canvas().Capture())
+
+	lbl.Importance = LowImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_low.png", w.Canvas().Capture())
+
+	lbl.Importance = MediumImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_medium.png", w.Canvas().Capture())
+
+	lbl.Importance = HighImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_high.png", w.Canvas().Capture())
+
+	lbl.Importance = DangerImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_danger.png", w.Canvas().Capture())
+
+	lbl.Importance = WarningImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_warning.png", w.Canvas().Capture())
+
+	lbl.Importance = SuccessImportance
+	lbl.Refresh()
+	test.AssertImageMatches(t, "label/label_importance_success.png", w.Canvas().Capture())
+}

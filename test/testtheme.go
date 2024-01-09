@@ -25,6 +25,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameFocus:             color.RGBA{red.R, red.G, red.B, 66},
 			theme.ColorNameForeground:        color.White,
 			theme.ColorNameHover:             green,
+			theme.ColorNameHeaderBackground:  color.RGBA{red.R, red.G, red.B, 22},
 			theme.ColorNameInputBackground:   color.RGBA{red.R, red.G, red.B, 30},
 			theme.ColorNameInputBorder:       color.Black,
 			theme.ColorNameMenuBackground:    color.RGBA{red.R, red.G, red.B, 30},
@@ -57,6 +58,8 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameSubHeadingText:     float32(24),
 			theme.SizeNameCaptionText:        float32(15),
 			theme.SizeNameInputBorder:        float32(5),
+			theme.SizeNameInputRadius:        float32(2),
+			theme.SizeNameSelectionRadius:    float32(6),
 		},
 	}
 }

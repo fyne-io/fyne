@@ -1,12 +1,4 @@
-//go:build (gles || arm || arm64) && !android && !ios && !mobile && !darwin && !js && !wasm && !test_web_driver
-// +build gles arm arm64
-// +build !android
-// +build !ios
-// +build !mobile
-// +build !darwin
-// +build !js
-// +build !wasm
-// +build !test_web_driver
+//go:build (gles || arm || arm64) && !android && !ios && !mobile && !darwin && !wasm && !test_web_driver
 
 package gl
 
@@ -24,7 +16,6 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
-	colorFormatR          = gl.LUMINANCE
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
@@ -46,7 +37,6 @@ const (
 	textureWrapT          = gl.TEXTURE_WRAP_T
 	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
-	unpackAlignment       = gl.UNPACK_ALIGNMENT
 	unsignedByte          = gl.UNSIGNED_BYTE
 	vertexShader          = gl.VERTEX_SHADER
 )
@@ -67,7 +57,7 @@ type (
 	Uniform int32
 )
 
-var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 
 func (p *painter) Init() {
 	p.ctx = &esContext{}
@@ -81,7 +71,6 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple_es")
-	p.singleChannelProgram = p.createProgram("single_channel_es")
 	p.lineProgram = p.createProgram("line_es")
 	p.rectangleProgram = p.createProgram("rectangle_es")
 	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
@@ -176,10 +165,6 @@ func (c *esContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(uint32(attribute))
 }
 
-func (c *esContext) DisableVertexAttribArray(attribute Attribute) {
-	gl.DisableVertexAttribArray(uint32(attribute))
-}
-
 func (c *esContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(gl.GetAttribLocation(uint32(program), gl.Str(name+"\x00")))
 }
@@ -224,10 +209,6 @@ func (c *esContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
-func (c *esContext) PixelStorei(pname uint32, param int32) {
-	gl.PixelStorei(pname, param)
-}
-
 func (c *esContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
@@ -266,6 +247,10 @@ func (c *esContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *esContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+	gl.Uniform2f(int32(uniform), v0, v1)
 }
 
 func (c *esContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

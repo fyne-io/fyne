@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build windows
-// +build windows
 
 package app
 
@@ -13,6 +12,10 @@ import (
 
 func main(f func(a App)) {
 	fmt.Errorf("Running mobile simulation mode does not currently work on Windows.")
+}
+
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 // driverShowVirtualKeyboard does nothing on desktop

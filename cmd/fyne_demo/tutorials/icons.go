@@ -115,6 +115,7 @@ func loadIcons() []iconInfo {
 		{"ErrorIcon", theme.ErrorIcon()},
 		{"QuestionIcon", theme.QuestionIcon()},
 		{"WarningIcon", theme.WarningIcon()},
+		{"BrokenImageIcon", theme.BrokenImageIcon()},
 
 		{"DocumentIcon", theme.DocumentIcon()},
 		{"DocumentCreateIcon", theme.DocumentCreateIcon()},
@@ -144,9 +145,9 @@ func loadIcons() []iconInfo {
 		{"ViewRefreshIcon", theme.ViewRefreshIcon()},
 		{"VisibilityIcon", theme.VisibilityIcon()},
 		{"VisibilityOffIcon", theme.VisibilityOffIcon()},
-		{"ZoomFitIcon", theme.ZoomFitIcon()},
-		{"ZoomInIcon", theme.ZoomInIcon()},
-		{"ZoomOutIcon", theme.ZoomOutIcon()},
+		{"ViewZoomFitIcon", theme.ZoomFitIcon()},
+		{"ViewZoomInIcon", theme.ZoomInIcon()},
+		{"ViewZoomOutIcon", theme.ZoomOutIcon()},
 
 		{"MoreHorizontalIcon", theme.MoreHorizontalIcon()},
 		{"MoreVerticalIcon", theme.MoreVerticalIcon()},

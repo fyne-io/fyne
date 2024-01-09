@@ -3,13 +3,16 @@ package mobile
 import (
 	"runtime"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -29,6 +32,7 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapDoubleDelay    = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
 // Configuration is the system information about the current device
@@ -46,13 +50,14 @@ type mobileDriver struct {
 	glctx gl.Context
 
 	windows     []fyne.Window
-	device      *device
-	animation   *animation.Runner
+	device      device
+	animation   animation.Runner
 	currentSize size.Event
 
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
+	running         atomic.Bool
 }
 
 // Declare conformity with Driver
@@ -127,11 +132,19 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 	return pos.Subtract(inset)
 }
 
+func (d *mobileDriver) GoBack() {
+	app.GoBack()
+}
+
 func (d *mobileDriver) Quit() {
 	// Android and iOS guidelines say this should not be allowed!
 }
 
 func (d *mobileDriver) Run() {
+	if !d.running.CompareAndSwap(false, true) {
+		return // Run was called twice.
+	}
+
 	app.Main(func(a app.App) {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
@@ -297,15 +310,23 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
+
+		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
+			return
+		}
 		c.Painter().Paint(obj, pos, size)
 	}
-	afterDraw := func(node *common.RenderCacheNode) {
+	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if _, ok := node.Obj().(fyne.Scrollable); ok {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
 				c.Painter().StartClipping(top.Rect())
 			}
+		}
+
+		if build.Mode == fyne.BuildDebug {
+			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
 
@@ -458,6 +479,8 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
 	key.CodeGraveAccent:        fyne.KeyBackTick,
+
+	key.CodeBackButton: mobile.KeyBack,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
@@ -508,8 +531,12 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 			canvas.Focused().TypedRune(r)
 		}
 	} else {
-		if keyName != "" && canvas.onTypedKey != nil {
-			canvas.onTypedKey(keyEvent)
+		if keyName != "" {
+			if canvas.onTypedKey != nil {
+				canvas.onTypedKey(keyEvent)
+			} else if keyName == mobile.KeyBack {
+				d.GoBack()
+			}
 		}
 		if r > 0 && canvas.onTypedRune != nil {
 			canvas.onTypedRune(r)
@@ -521,23 +548,23 @@ func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.M
 }
 
 func (d *mobileDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &device{}
-	}
-
-	return d.device
+	return &d.device
 }
 
 func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
 }
 
+func (d *mobileDriver) DoubleTapDelay() time.Duration {
+	return tapDoubleDelay
+}
+
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	d := new(mobileDriver)
-	d.theme = fyne.ThemeVariant(2) // unspecified
-	d.animation = &animation.Runner{}
+	d := &mobileDriver{
+		theme: fyne.ThemeVariant(2), // unspecified
+	}
 
 	registerRepository(d)
 	return d

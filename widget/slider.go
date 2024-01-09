@@ -26,6 +26,7 @@ var _ fyne.Draggable = (*Slider)(nil)
 var _ fyne.Focusable = (*Slider)(nil)
 var _ desktop.Hoverable = (*Slider)(nil)
 var _ fyne.Tappable = (*Slider)(nil)
+var _ fyne.Disableable = (*Slider)(nil)
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {
@@ -39,9 +40,14 @@ type Slider struct {
 	Orientation Orientation
 	OnChanged   func(float64)
 
-	binder  basicBinder
-	hovered bool
-	focused bool
+	// Since: 2.4
+	OnChangeEnded func(float64)
+
+	binder        basicBinder
+	hovered       bool
+	focused       bool
+	disabled      bool // don't use DisableableWidget so we can put Since comments on funcs
+	pendingChange bool // true if value changed since last OnChangeEnded
 }
 
 // NewSlider returns a basic slider.
@@ -83,10 +89,16 @@ func (s *Slider) Bind(data binding.Float) {
 
 // DragEnd is called when the drag ends.
 func (s *Slider) DragEnd() {
+	if !s.disabled {
+		s.fireChangeEnded()
+	}
 }
 
-// DragEnd is called when a drag event occurs.
+// Dragged is called when a drag event occurs.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
+	if s.disabled {
+		return
+	}
 	ratio := s.getRatio(&e.PointEvent)
 	lastValue := s.Value
 
@@ -98,6 +110,10 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 //
 // Since: 2.4
 func (s *Slider) Tapped(e *fyne.PointEvent) {
+	if s.disabled {
+		return
+	}
+
 	driver := fyne.CurrentApp().Driver()
 	if !s.focused && !driver.Device().IsMobile() {
 		impl := s.super()
@@ -112,6 +128,7 @@ func (s *Slider) Tapped(e *fyne.PointEvent) {
 
 	s.updateValue(ratio)
 	s.positionChanged(lastValue, s.Value)
+	s.fireChangeEnded()
 }
 
 func (s *Slider) positionChanged(lastValue, currentValue float64) {
@@ -121,8 +138,19 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 
 	s.Refresh()
 
+	s.pendingChange = true
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
+	}
+}
+
+func (s *Slider) fireChangeEnded() {
+	if !s.pendingChange {
+		return
+	}
+	s.pendingChange = false
+	if s.OnChangeEnded != nil {
+		s.OnChangeEnded(s.Value)
 	}
 }
 
@@ -131,7 +159,9 @@ func (s *Slider) positionChanged(lastValue, currentValue float64) {
 // Since: 2.4
 func (s *Slider) FocusGained() {
 	s.focused = true
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // FocusLost is called when this item lost the focus.
@@ -139,7 +169,9 @@ func (s *Slider) FocusGained() {
 // Since: 2.4
 func (s *Slider) FocusLost() {
 	s.focused = false
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
@@ -147,7 +179,9 @@ func (s *Slider) FocusLost() {
 // Since: 2.4
 func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
 	s.hovered = true
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
@@ -161,13 +195,18 @@ func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
 // Since: 2.4
 func (s *Slider) MouseOut() {
 	s.hovered = false
-	s.Refresh()
+	if !s.disabled {
+		s.Refresh()
+	}
 }
 
 // TypedKey is called when this item receives a key event.
 //
 // Since: 2.4
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
+	if s.disabled {
+		return
+	}
 	if s.Orientation == Vertical {
 		switch key.Name {
 		case fyne.KeyUp:
@@ -267,12 +306,40 @@ func (s *Slider) SetValue(value float64) {
 
 	s.clampValueToRange()
 	s.positionChanged(lastValue, s.Value)
+	s.fireChangeEnded()
 }
 
 // MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()
+}
+
+// Disable disables the slider
+//
+// Since: 2.5
+func (s *Slider) Disable() {
+	if !s.disabled {
+		defer s.Refresh()
+	}
+	s.disabled = true
+}
+
+// Enable enables the slider
+//
+// Since: 2.5
+func (s *Slider) Enable() {
+	if s.disabled {
+		defer s.Refresh()
+	}
+	s.disabled = false
+}
+
+// Disabled returns true if the slider is currently disabled
+//
+// Since: 2.5
+func (s *Slider) Disabled() bool {
+	return s.disabled
 }
 
 // CreateRenderer links this widget to its renderer.
@@ -355,12 +422,17 @@ type sliderRenderer struct {
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.InputBackgroundColor()
-	s.thumb.FillColor = theme.ForegroundColor()
-	s.active.FillColor = theme.ForegroundColor()
+	if s.slider.disabled {
+		s.thumb.FillColor = theme.DisabledColor()
+		s.active.FillColor = theme.DisabledColor()
+	} else {
+		s.thumb.FillColor = theme.ForegroundColor()
+		s.active.FillColor = theme.ForegroundColor()
+	}
 
-	if s.slider.focused {
+	if s.slider.focused && !s.slider.disabled {
 		s.focusIndicator.FillColor = theme.FocusColor()
-	} else if s.slider.hovered {
+	} else if s.slider.hovered && !s.slider.disabled {
 		s.focusIndicator.FillColor = theme.HoverColor()
 	} else {
 		s.focusIndicator.FillColor = color.Transparent
@@ -417,7 +489,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
 
-	focusIndicatorSize := fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), theme.IconInlineSize()+theme.InnerPadding())
+	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
 	delta := (focusIndicatorSize.Width - diameter) / 2
 	s.focusIndicator.Resize(focusIndicatorSize)
 	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))

@@ -77,6 +77,11 @@ var (
 			makeScrollTab,
 			true,
 		},
+		"innerwindow": {"InnerWindow",
+			"A window that can be used inside a traditional window to contain a document or content.",
+			makeInnerWindowTab,
+			true,
+		},
 		"widgets": {"Widgets",
 			"In this section you can see the features available in the toolkit widget set.\n" +
 				"Expand the tree on the left to browse the individual tutorial elements.",
@@ -86,6 +91,11 @@ var (
 		"accordion": {"Accordion",
 			"Expand or collapse content panels.",
 			makeAccordionTab,
+			true,
+		},
+		"activity": {"Activity",
+			"A spinner indicating activity used in buttons etc.",
+			makeActivityTab,
 			true,
 		},
 		"button": {"Button",
@@ -150,6 +160,11 @@ var (
 			makeTreeTab,
 			true,
 		},
+		"gridwrap": {"GridWrap",
+			"A grid based arrangement of cached elements that wraps rows to fit.",
+			makeGridWrapTab,
+			true,
+		},
 		"dialogs": {"Dialogs",
 			"Work with dialogs.",
 			dialogScreen,
@@ -175,8 +190,8 @@ var (
 	// TutorialIndex  defines how our tutorials should be laid out in the index tree
 	TutorialIndex = map[string][]string{
 		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
-		"collections": {"list", "table", "tree"},
-		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split"},
-		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
+		"collections": {"list", "table", "tree", "gridwrap"},
+		"containers":  {"apptabs", "border", "box", "center", "doctabs", "grid", "scroll", "split", "innerwindow"},
+		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
 	}
 )

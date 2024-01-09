@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -68,6 +67,11 @@ type Bundler struct {
 	name, pkg, out string
 	prefix         string
 	noheader       bool
+}
+
+// NewBundler returns a command that can handle the bundling assets into a GUI app binary.
+func NewBundler() *Bundler {
+	return &Bundler{}
 }
 
 // AddFlags adds all the command line flags for passing to the Bundler.
@@ -175,7 +179,7 @@ func (b *Bundler) bundleAction(ctx *cli.Context) (err error) {
 }
 
 func (b *Bundler) dirBundle(dirpath string, out *os.File) error {
-	files, err := ioutil.ReadDir(dirpath)
+	files, err := os.ReadDir(dirpath)
 	if err != nil {
 		fyne.LogError("Error reading specified directory", err)
 		return err

@@ -1,13 +1,12 @@
-//go:build !ci && !js && !android && !ios && !wasm && !test_web_driver
-// +build !ci,!js,!android,!ios,!wasm,!test_web_driver
+//go:build !ci && !android && !ios && !wasm && !test_web_driver
 
 package app
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -16,8 +15,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
-
-	"golang.org/x/sys/execabs"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -64,7 +61,7 @@ func rootConfigDir() string {
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := a.exec("rundll32", "url.dll,FileProtocolHandler", url.String())
+	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
@@ -106,7 +103,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := os.WriteFile(tmpFilePath, []byte(script), 0600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return
@@ -114,7 +111,7 @@ func runScript(name, script string) {
 	defer os.Remove(tmpFilePath)
 
 	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
-	cmd := execabs.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
+	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {

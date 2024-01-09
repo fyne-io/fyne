@@ -30,9 +30,8 @@ var _ fyne.Widget = (*CheckGroup)(nil)
 // Since: 2.1
 func NewCheckGroup(options []string, changed func([]string)) *CheckGroup {
 	r := &CheckGroup{
-		DisableableWidget: DisableableWidget{},
-		Options:           options,
-		OnChanged:         changed,
+		Options:   options,
+		OnChanged: changed,
 	}
 	r.ExtendBaseWidget(r)
 	r.update()
@@ -217,13 +216,15 @@ func (r *checkGroupRenderer) MinSize() fyne.Size {
 	height := float32(0)
 	for _, item := range r.items {
 		itemMin := item.MinSize()
-		if r.checks.Horizontal {
-			height = fyne.Max(height, itemMin.Height)
-			width += itemMin.Width
-		} else {
-			width = fyne.Max(width, itemMin.Width)
-			height += itemMin.Height
-		}
+
+		width = fyne.Max(width, itemMin.Width)
+		height = fyne.Max(height, itemMin.Height)
+	}
+
+	if r.checks.Horizontal {
+		width = width * float32(len(r.items))
+	} else {
+		height = height * float32(len(r.items))
 	}
 
 	return fyne.NewSize(width, height)

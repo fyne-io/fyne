@@ -11,7 +11,7 @@ precision lowp sampler2D;
 #endif
 
 /* scaled params */
-uniform vec4 frame_size;  //width = x, height = y (z, w NOT USED)
+uniform vec2 frame_size;
 uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width;
 /* colors params*/

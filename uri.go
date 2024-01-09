@@ -33,9 +33,9 @@ type URI interface {
 	fmt.Stringer
 
 	// Extension should return the file extension of the resource
-	// referenced by the URI. For example, the Extension() of
-	// 'file://foo/bar.baz' is 'baz'. May return an empty string if the
-	// referenced resource has none.
+	// (including the dot) referenced by the URI. For example, the
+	// Extension() of 'file://foo/bar.baz' is '.baz'. May return an
+	// empty string if the referenced resource has none.
 	Extension() string
 
 	// Name should return the base name of the item referenced by the URI.
@@ -90,4 +90,13 @@ type ListableURI interface {
 
 	// List returns a list of child URIs of this URI.
 	List() ([]URI, error)
+}
+
+// URIWithIcon describes a URI that should be rendered with a certain icon in file browsers.
+//
+// Since: 2.5
+type URIWithIcon interface {
+	URI
+
+	Icon() Resource
 }

@@ -20,10 +20,6 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
 	case "simple_es":
 		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
-	case "single_channel":
-		return shaderSimpleVert.StaticContent, shaderSinglechannelFrag.StaticContent
-	case "single_channel_es":
-		return shaderSimpleesVert.StaticContent, shaderSinglechannelesFrag.StaticContent
 	case "rectangle":
 		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
 	case "round_rectangle":
@@ -71,7 +67,6 @@ type painter struct {
 	ctx                   context
 	contextProvider       driver.WithContext
 	program               Program
-	singleChannelProgram  Program
 	lineProgram           Program
 	rectangleProgram      Program
 	roundRectangleProgram Program
@@ -188,5 +183,5 @@ func (p *painter) createProgram(shaderFilename string) Program {
 }
 
 func (p *painter) logError() {
-	logGLError(p.ctx.GetError())
+	logGLError(p.ctx.GetError)
 }

@@ -45,6 +45,7 @@ func Clean(canvasRefreshed bool) {
 		return
 	}
 	destroyExpiredSvgs(now)
+	destroyExpiredFontMetrics(now)
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(now)
@@ -148,13 +149,13 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
-	svgs.Range(func(key, value interface{}) bool {
+	svgs.Range(func(key, value any) bool {
 		svgs.Delete(key)
 		return true
 	})
 
 	fontSizeLock.Lock()
-	fontSizeCache = map[fontSizeEntry]fontMetric{}
+	fontSizeCache = map[fontSizeEntry]*fontMetric{}
 	fontSizeLock.Unlock()
 }
 
@@ -214,7 +215,7 @@ func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
 }
 
 type expiringCache struct {
-	expires atomic.Value // time.Time
+	expires atomic.Pointer[time.Time]
 }
 
 // isExpired check if the cache data is expired.
@@ -223,12 +224,13 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 	if t == nil {
 		return (time.Time{}).Before(now)
 	}
-	return t.(time.Time).Before(now)
+	return (*t).Before(now)
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires.Store(timeNow().Add(cacheDuration))
+	time := timeNow().Add(cacheDuration)
+	c.expires.Store(&time)
 }
 
 type expiringCacheNoLock struct {
