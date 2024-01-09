@@ -295,7 +295,7 @@ func ApplyTheme(t *testing.T, theme fyne.Theme) {
 	a := fyne.CurrentApp().(*testApp)
 	a.Settings().SetTheme(theme)
 	for a.lastAppliedTheme() != theme {
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 	}
 }
 
