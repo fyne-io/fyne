@@ -95,12 +95,12 @@ func (d *gLDriver) Device() fyne.Device {
 
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+			curWindow.QueueEvent(f)
+		}
 		curWindow = nil
 		if d.trayStop != nil {
 			d.trayStop()
-		}
-		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			curWindow.QueueEvent(f)
 		}
 	}
 
