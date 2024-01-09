@@ -16,7 +16,7 @@ type DataMap interface {
 	Keys() []string
 }
 
-// ExternalUntypedMap is a map data binding with all values untyped (interface{}), connected to an external data source.
+// ExternalUntypedMap is a map data binding with all values untyped (any), connected to an external data source.
 //
 // Since: 2.0
 type ExternalUntypedMap interface {
@@ -24,30 +24,30 @@ type ExternalUntypedMap interface {
 	Reload() error
 }
 
-// UntypedMap is a map data binding with all values Untyped (interface{}).
+// UntypedMap is a map data binding with all values Untyped (any).
 //
 // Since: 2.0
 type UntypedMap interface {
 	DataMap
 	Delete(string)
-	Get() (map[string]interface{}, error)
-	GetValue(string) (interface{}, error)
-	Set(map[string]interface{}) error
-	SetValue(string, interface{}) error
+	Get() (map[string]any, error)
+	GetValue(string) (any, error)
+	Set(map[string]any) error
+	SetValue(string, any) error
 }
 
-// NewUntypedMap creates a new, empty map binding of string to interface{}.
+// NewUntypedMap creates a new, empty map binding of string to any.
 //
 // Since: 2.0
 func NewUntypedMap() UntypedMap {
-	return &mapBase{items: make(map[string]reflectUntyped), val: &map[string]interface{}{}}
+	return &mapBase{items: make(map[string]reflectUntyped), val: &map[string]any{}}
 }
 
-// BindUntypedMap creates a new map binding of string to interface{} based on the data passed.
+// BindUntypedMap creates a new map binding of string to any based on the data passed.
 // If your code changes the content of the map this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
+func BindUntypedMap(d *map[string]any) ExternalUntypedMap {
 	if d == nil {
 		return NewUntypedMap().(ExternalUntypedMap)
 	}
@@ -65,17 +65,17 @@ func BindUntypedMap(d *map[string]interface{}) ExternalUntypedMap {
 // Since: 2.0
 type Struct interface {
 	DataMap
-	GetValue(string) (interface{}, error)
-	SetValue(string, interface{}) error
+	GetValue(string) (any, error)
+	SetValue(string, any) error
 	Reload() error
 }
 
-// BindStruct creates a new map binding of string to interface{} using the struct passed as data.
-// The key for each item is a string representation of each exported field with the value set as an interface{}.
+// BindStruct creates a new map binding of string to any using the struct passed as data.
+// The key for each item is a string representation of each exported field with the value set as an any.
 // Only exported fields are included.
 //
 // Since: 2.0
-func BindStruct(i interface{}) Struct {
+func BindStruct(i any) Struct {
 	if i == nil {
 		return NewUntypedMap().(Struct)
 	}
@@ -88,7 +88,7 @@ func BindStruct(i interface{}) Struct {
 
 	s := &boundStruct{orig: i}
 	s.items = make(map[string]reflectUntyped)
-	s.val = &map[string]interface{}{}
+	s.val = &map[string]any{}
 	s.updateExternal = true
 
 	v := reflect.ValueOf(i).Elem()
@@ -109,8 +109,8 @@ func BindStruct(i interface{}) Struct {
 
 type reflectUntyped interface {
 	DataItem
-	get() (interface{}, error)
-	set(interface{}) error
+	get() (any, error)
+	set(any) error
 }
 
 type mapBase struct {
@@ -118,7 +118,7 @@ type mapBase struct {
 
 	updateExternal bool
 	items          map[string]reflectUntyped
-	val            *map[string]interface{}
+	val            *map[string]any
 }
 
 func (b *mapBase) GetItem(key string) (DataItem, error) {
@@ -155,18 +155,18 @@ func (b *mapBase) Delete(key string) {
 	b.trigger()
 }
 
-func (b *mapBase) Get() (map[string]interface{}, error) {
+func (b *mapBase) Get() (map[string]any, error) {
 	b.lock.RLock()
 	defer b.lock.RUnlock()
 
 	if b.val == nil {
-		return map[string]interface{}{}, nil
+		return map[string]any{}, nil
 	}
 
 	return *b.val, nil
 }
 
-func (b *mapBase) GetValue(key string) (interface{}, error) {
+func (b *mapBase) GetValue(key string) (any, error) {
 	b.lock.RLock()
 	defer b.lock.RUnlock()
 
@@ -184,7 +184,7 @@ func (b *mapBase) Reload() error {
 	return b.doReload()
 }
 
-func (b *mapBase) Set(v map[string]interface{}) error {
+func (b *mapBase) Set(v map[string]any) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
@@ -198,7 +198,7 @@ func (b *mapBase) Set(v map[string]interface{}) error {
 	return b.doReload()
 }
 
-func (b *mapBase) SetValue(key string, d interface{}) error {
+func (b *mapBase) SetValue(key string, d any) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
@@ -260,7 +260,7 @@ func (b *mapBase) setItem(key string, d reflectUntyped) {
 type boundStruct struct {
 	mapBase
 
-	orig interface{}
+	orig any
 }
 
 func (b *boundStruct) Reload() (retErr error) {
@@ -305,7 +305,7 @@ func (b *boundStruct) Reload() (retErr error) {
 	return
 }
 
-func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) reflectUntyped {
+func bindUntypedMapValue(m *map[string]any, k string, external bool) reflectUntyped {
 	if external {
 		ret := &boundExternalMapValue{old: (*m)[k]}
 		ret.val = m
@@ -319,11 +319,11 @@ func bindUntypedMapValue(m *map[string]interface{}, k string, external bool) ref
 type boundMapValue struct {
 	base
 
-	val *map[string]interface{}
+	val *map[string]any
 	key string
 }
 
-func (b *boundMapValue) get() (interface{}, error) {
+func (b *boundMapValue) get() (any, error) {
 	if v, ok := (*b.val)[b.key]; ok {
 		return v, nil
 	}
@@ -331,7 +331,7 @@ func (b *boundMapValue) get() (interface{}, error) {
 	return nil, errKeyNotFound
 }
 
-func (b *boundMapValue) set(val interface{}) error {
+func (b *boundMapValue) set(val any) error {
 	(*b.val)[b.key] = val
 
 	b.trigger()
@@ -341,10 +341,10 @@ func (b *boundMapValue) set(val interface{}) error {
 type boundExternalMapValue struct {
 	boundMapValue
 
-	old interface{}
+	old any
 }
 
-func (b *boundExternalMapValue) setIfChanged(val interface{}) error {
+func (b *boundExternalMapValue) setIfChanged(val any) error {
 	if val == b.old {
 		return nil
 	}
@@ -359,11 +359,11 @@ type boundReflect struct {
 	val reflect.Value
 }
 
-func (b *boundReflect) get() (interface{}, error) {
+func (b *boundReflect) get() (any, error) {
 	return b.val.Interface(), nil
 }
 
-func (b *boundReflect) set(val interface{}) (err error) {
+func (b *boundReflect) set(val any) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = errors.New("unable to set bool in data binding")

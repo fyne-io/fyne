@@ -537,7 +537,7 @@ type RenderCacheNode struct {
 	// it may for instance point to a GL texture
 	// it should free all associated resources when released
 	// i.e. it should not simply be a texture reference integer
-	painterData interface{}
+	painterData any
 }
 
 // Obj returns the node object.

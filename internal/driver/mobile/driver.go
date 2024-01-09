@@ -50,8 +50,8 @@ type mobileDriver struct {
 	glctx gl.Context
 
 	windows     []fyne.Window
-	device      *device
-	animation   *animation.Runner
+	device      device
+	animation   animation.Runner
 	currentSize size.Event
 
 	theme           fyne.ThemeVariant
@@ -540,11 +540,7 @@ func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.M
 }
 
 func (d *mobileDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &device{}
-	}
-
-	return d.device
+	return &d.device
 }
 
 func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
@@ -559,8 +555,7 @@ func (d *mobileDriver) DoubleTapDelay() time.Duration {
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
 	d := &mobileDriver{
-		theme:     fyne.ThemeVariant(2), // unspecified
-		animation: &animation.Runner{},
+		theme: fyne.ThemeVariant(2), // unspecified
 	}
 
 	registerRepository(d)

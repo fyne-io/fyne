@@ -149,7 +149,7 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
-	svgs.Range(func(key, value interface{}) bool {
+	svgs.Range(func(key, value any) bool {
 		svgs.Delete(key)
 		return true
 	})

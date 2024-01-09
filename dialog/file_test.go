@@ -653,21 +653,21 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(inputPopup)
 	assert.NotNil(t, inputPopup)
 
-	folderNameInputUi := inputPopup.Content.(*fyne.Container)
+	folderNameInputUI := inputPopup.Content.(*fyne.Container)
 
-	folderNameInputTitle := folderNameInputUi.Objects[4].(*widget.Label)
+	folderNameInputTitle := folderNameInputUI.Objects[4].(*widget.Label)
 	assert.Equal(t, "New Folder", folderNameInputTitle.Text)
 
-	folderNameInputLabel := folderNameInputUi.Objects[2].(*widget.Form).Items[0].Text
+	folderNameInputLabel := folderNameInputUI.Objects[2].(*widget.Form).Items[0].Text
 	assert.Equal(t, "Name", folderNameInputLabel)
 
-	folderNameInputEntry := folderNameInputUi.Objects[2].(*widget.Form).Items[0].Widget.(*widget.Entry)
+	folderNameInputEntry := folderNameInputUI.Objects[2].(*widget.Form).Items[0].Widget.(*widget.Entry)
 	assert.Equal(t, "", folderNameInputEntry.Text)
 
-	folderNameInputCancel := folderNameInputUi.Objects[3].(*fyne.Container).Objects[0].(*widget.Button)
+	folderNameInputCancel := folderNameInputUI.Objects[3].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "Cancel", folderNameInputCancel.Text)
 	assert.Equal(t, theme.CancelIcon(), folderNameInputCancel.Icon)
 
-	folderNameInputCreate := folderNameInputUi.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
+	folderNameInputCreate := folderNameInputUI.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, theme.ConfirmIcon(), folderNameInputCreate.Icon)
 }

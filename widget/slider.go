@@ -94,7 +94,7 @@ func (s *Slider) DragEnd() {
 	}
 }
 
-// DragEnd is called when a drag event occurs.
+// Dragged is called when a drag event occurs.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	if s.disabled {
 		return

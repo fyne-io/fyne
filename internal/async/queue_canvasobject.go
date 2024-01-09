@@ -31,7 +31,7 @@ type itemCanvasObject struct {
 }
 
 var itemCanvasObjectPool = sync.Pool{
-	New: func() interface{} { return &itemCanvasObject{} },
+	New: func() any { return &itemCanvasObject{} },
 }
 
 // In puts the given value at the tail of the queue.

@@ -206,7 +206,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 	}
 
 	*advance = x
-	return fyne.NewSize(*advance, fixed266ToFloat32(out.LineBounds.LineHeight())),
+	return fyne.NewSize(*advance, fixed266ToFloat32(out.LineBounds.LineThickness())),
 		fixed266ToFloat32(out.LineBounds.Ascent)
 }
 
