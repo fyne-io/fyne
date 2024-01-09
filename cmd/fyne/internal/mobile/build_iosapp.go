@@ -51,7 +51,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	infoplist := new(bytes.Buffer)
 	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
 		BundleID: bundleID,
-		Name:     strings.Title(appName),
+		Name:     strings.Title(appName), //lint:ignore SA1019 This is fine for our use case.
 		Version:  version,
 		Build:    build,
 		Legacy:   len(allArchs["ios"]) > 2,

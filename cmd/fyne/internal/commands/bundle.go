@@ -243,7 +243,7 @@ func openOutputFile(filePath string, noheader bool) (file *os.File, close func()
 }
 
 func sanitiseName(file, prefix string) string {
-	titled := strings.Title(file)
+	titled := strings.Title(file) //lint:ignore SA1019 This is fine for our use case.
 	name := filenameRegex.ReplaceAllString(titled, "")
 
 	return prefix + name
