@@ -582,8 +582,10 @@ func (o *overlayStack) add(overlay fyne.CanvasObject) {
 func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
-	o.renderCaches[overlayCount] = nil // release memory reference to removed element
-	o.renderCaches = o.renderCaches[:overlayCount]
+	if len(o.renderCaches) > overlayCount {
+		o.renderCaches[overlayCount] = nil // release memory reference to removed element
+		o.renderCaches = o.renderCaches[:overlayCount]
+	}
 }
 
 type renderCacheTree struct {
