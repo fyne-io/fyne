@@ -1,7 +1,7 @@
 package fyne
 
 import (
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -62,8 +62,7 @@ type Animation struct {
 	RepeatCount int
 	Tick        func(float32)
 
-	mutex sync.Mutex
-	state AnimationState
+	state atomic.Int64
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
@@ -77,28 +76,25 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	if a.state == AnimationStateRunning {
+	old := a.state.Swap(int64(AnimationStateRunning))
+	if old == int64(AnimationStateRunning) {
 		return
 	}
-	a.state = AnimationStateRunning
+
 	d := CurrentApp().Driver().(interface{ StartAnimationInternal(*Animation) })
 	d.StartAnimationInternal(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.
 func (a *Animation) Stop() {
-	a.mutex.Lock()
-	defer a.mutex.Unlock()
-	a.state = AnimationStateStopped
+	a.state.Store(int64(AnimationStateStopped))
 }
 
 // State returns the state of this animation.
 //
 // Since: 2.5
 func (a *Animation) State() AnimationState {
-	return a.state
+	return AnimationState(a.state.Load())
 }
 
 func animationEaseIn(val float32) float32 {
