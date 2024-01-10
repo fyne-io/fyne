@@ -66,7 +66,8 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Width, wSize.Height)
 
-	assert.Equal(t, wSize.Width-slider.endOffset()*2, tSize.Width)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Width-endOffset*2, tSize.Width)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Height)
 
 	assert.Greater(t, wSize.Width, aSize.Width)
@@ -102,7 +103,8 @@ func TestSlider_VerticalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Height, wSize.Width)
 
-	assert.Equal(t, wSize.Height-slider.endOffset()*2, tSize.Height)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Height-endOffset*2, tSize.Height)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Width)
 
 	assert.Greater(t, wSize.Height, aSize.Height)
