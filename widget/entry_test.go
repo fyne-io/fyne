@@ -1298,6 +1298,17 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 	assert.Equal(t, "", e.SelectedText())
 }
 
+func TestEntry_Select_TripleTap(t *testing.T) {
+	e, _ := setupSelection(t, false)
+	e.MultiLine = true
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, "sti", e.SelectedText())
+	test.DoubleTap(e)
+	time.Sleep(50 * time.Millisecond)
+	e.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1)}})
+	assert.Equal(t, "Testing", e.SelectedText())
+}
+
 func TestEntry_SelectedText(t *testing.T) {
 	e, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
@@ -1675,7 +1686,7 @@ func TestEntry_TextWrap(t *testing.T) {
 			want:   "entry/wrap_single_line_off.xml",
 		},
 		"single line Truncate": {
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"single line Scroll": {
@@ -1701,7 +1712,7 @@ func TestEntry_TextWrap(t *testing.T) {
 		// Disallowed - fallback to TextWrapOff
 		"multi line Truncate": {
 			multiLine: true,
-			wrap:      fyne.TextTruncate,
+			wrap:      fyne.TextWrap(fyne.TextTruncateClip),
 			want:      "entry/wrap_multi_line_truncate.xml",
 		},
 		"multi line WrapBreak": {
@@ -1744,7 +1755,7 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	e.SetText("Testing Wrapping")
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 
-	e.Wrapping = fyne.TextTruncate
+	e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 	e.Refresh()
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_truncate.xml", c)
 
@@ -2150,7 +2161,7 @@ func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
 	}
 }
 
-func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}

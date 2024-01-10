@@ -42,11 +42,15 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
+	entry.doubleTappedAtUnixMillis = 0 // make sure we don't register a triple tap next
+
 	// select the whitespace after 'quick'
 	ev = getClickPosition("The quick", 0)
 	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
+
+	entry.doubleTappedAtUnixMillis = 0
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition("jumped  ", 1)

@@ -101,11 +101,15 @@ type Entry struct {
 	// undoStack stores the data necessary for undo/redo functionality
 	// See entryUndoStack for implementation details.
 	undoStack entryUndoStack
+
+	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
+	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
+	doubleTappedAtUnixMillis int64
 }
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{Wrapping: fyne.TextTruncate}
+	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -122,14 +126,14 @@ func NewEntryWithData(data binding.String) *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{MultiLine: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{Password: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
@@ -229,6 +233,7 @@ func (e *Entry) Disabled() bool {
 //
 // Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
+	e.doubleTappedAtUnixMillis = time.Now().UnixMilli()
 	row := e.textProvider().row(e.CursorRow)
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
 	if start == -1 || end == -1 {
@@ -248,6 +253,10 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		}
 		e.selecting = true
 	})
+}
+
+func (e *Entry) isTripleTap(nowMilli int64) bool {
+	return nowMilli-e.doubleTappedAtUnixMillis <= fyne.CurrentApp().Driver().DoubleTapDelay().Milliseconds()
 }
 
 // DragEnd is called at end of a drag event.
@@ -407,6 +416,10 @@ func (e *Entry) MinSize() fyne.Size {
 //
 // Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
+	if e.isTripleTap(time.Now().UnixMilli()) {
+		e.selectCurrentRow()
+		return
+	}
 	e.propertyLock.Lock()
 	if e.selectKeyDown {
 		e.selecting = true
@@ -511,7 +524,7 @@ func (e *Entry) SetText(text string) {
 	e.propertyLock.Unlock()
 }
 
-// Appends the text to the end of the entry
+// Append appends the text to the end of the entry.
 //
 // Since: 2.4
 func (e *Entry) Append(text string) {
@@ -606,8 +619,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 //
 // Implements: mobile.Touchable
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
+	now := time.Now().UnixMilli()
 	if !e.Disabled() {
 		e.requestFocus()
+	}
+	if e.isTripleTap(now) {
+		e.selectCurrentRow()
+		return
 	}
 
 	e.updateMousePointer(ev.Position, false)
@@ -1014,6 +1032,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	e.updateTextAndRefresh(provider.String())
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	e.Refresh() // placing the cursor (and refreshing) happens last
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
@@ -1337,13 +1356,13 @@ func (e *Entry) textProvider() *RichText {
 
 // textWrap calculates the wrapping that we should apply.
 func (e *Entry) textWrap() fyne.TextWrap {
-	if e.Wrapping == fyne.TextTruncate { // this is now the default - but we scroll around this large content
+	if e.Wrapping == fyne.TextWrap(fyne.TextTruncateClip) { // this is now the default - but we scroll around this large content
 		return fyne.TextWrapOff
 	}
 
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
-		e.Wrapping = fyne.TextTruncate
+		e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 		return fyne.TextWrapOff
 	}
 	return e.Wrapping
@@ -1499,6 +1518,22 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.propertyLock.Unlock()
+}
+
+// Selects the row where the CursorColumn is currently positioned
+// Do not call while holding the proeprtyLock
+func (e *Entry) selectCurrentRow() {
+	provider := e.textProvider()
+	e.propertyLock.Lock()
+	e.selectRow = e.CursorRow
+	e.selectColumn = 0
+	if e.MultiLine {
+		e.CursorColumn = provider.rowLength(e.CursorRow)
+	} else {
+		e.CursorColumn = provider.len()
+	}
+	e.propertyLock.Unlock()
+	e.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
@@ -1806,7 +1841,8 @@ func (r *entryContentRenderer) Refresh() {
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
-	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
+	focused := r.content.entry.focused
+	focusedAppearance := focused && !r.content.entry.disabled
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
@@ -1828,9 +1864,11 @@ func (r *entryContentRenderer) Refresh() {
 	}
 	r.moveCursor()
 
+	selectionColor := theme.SelectionColor()
 	for _, selection := range selections {
-		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
-		selection.(*canvas.Rectangle).FillColor = theme.SelectionColor()
+		rect := selection.(*canvas.Rectangle)
+		rect.Hidden = !focused
+		rect.FillColor = selectionColor
 	}
 
 	canvas.Refresh(r.content)
@@ -1988,7 +2026,7 @@ func (r *entryContentRenderer) updateScrollDirections() {
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
 		r.content.scroll.Direction = r.content.entry.Scroll
-	case fyne.TextTruncate: // this is now the default - but we scroll
+	case fyne.TextWrap(fyne.TextTruncateClip): // this is now the default - but we scroll
 		r.content.scroll.Direction = widget.ScrollBoth
 	default: // fyne.TextWrapBreak, fyne.TextWrapWord
 		r.content.scroll.Direction = widget.ScrollVerticalOnly

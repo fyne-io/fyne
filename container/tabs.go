@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -209,7 +210,7 @@ func selectItem(t baseTabs, item *TabItem) {
 }
 
 func setItems(t baseTabs, items []*TabItem) {
-	if internal.HintsEnabled && mismatchedTabItems(items) {
+	if build.HasHints && mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
 	t.setItems(items)
@@ -292,6 +293,8 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
+
+	tabs baseTabs
 }
 
 func (r *baseTabsRenderer) Destroy() {
@@ -304,6 +307,10 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	r.divider.FillColor = theme.ShadowColor()
 	r.indicator.FillColor = theme.PrimaryColor()
 	r.indicator.CornerRadius = theme.SelectionRadiusSize()
+
+	for _, tab := range r.tabs.items() {
+		tab.Content.Refresh()
+	}
 }
 
 func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {

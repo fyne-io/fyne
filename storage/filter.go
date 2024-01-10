@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/repository/mime"
 )
 
 // FileFilter is an interface that can be implemented to provide a filter to a file dialog.
@@ -42,18 +43,16 @@ func NewExtensionFileFilter(extensions []string) FileFilter {
 
 // Matches returns true if a file URI has one of the filtered mimetypes.
 func (mt *MimeTypeFileFilter) Matches(uri fyne.URI) bool {
-	mimeType, mimeSubType := splitMimeType(uri)
+	mimeType, mimeSubType := mime.Split(uri.MimeType())
 	for _, mimeTypeFull := range mt.MimeTypes {
-		mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-		if len(mimeTypeSplit) <= 1 {
+		mType, mSubType := mime.Split(mimeTypeFull)
+		if mType == "" || mSubType == "" {
 			continue
 		}
-		mType := mimeTypeSplit[0]
-		mSubType := strings.Split(mimeTypeSplit[1], ";")[0]
-		if mType == mimeType {
-			if mSubType == mimeSubType || mSubType == "*" {
-				return true
-			}
+
+		mSubType, _, _ = strings.Cut(mSubType, ";")
+		if mType == mimeType && (mSubType == mimeSubType || mSubType == "*") {
+			return true
 		}
 	}
 	return false
@@ -63,17 +62,4 @@ func (mt *MimeTypeFileFilter) Matches(uri fyne.URI) bool {
 // Example: image/*, audio/mp3, text/plain, application/*
 func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 	return &MimeTypeFileFilter{MimeTypes: mimeTypes}
-}
-
-func splitMimeType(uri fyne.URI) (mimeType, mimeSubType string) {
-	mimeTypeFull := uri.MimeType()
-	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-	if len(mimeTypeSplit) <= 1 {
-		mimeType, mimeSubType = "", ""
-		return
-	}
-	mimeType = mimeTypeSplit[0]
-	mimeSubType = mimeTypeSplit[1]
-
-	return
 }

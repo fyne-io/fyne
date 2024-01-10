@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -54,7 +55,7 @@ func TestSlider_Binding(t *testing.T) {
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
@@ -89,7 +90,7 @@ func TestSlider_OutOfRange(t *testing.T) {
 func TestSlider_VerticalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical
@@ -309,4 +310,32 @@ func TestSlider_Focus(t *testing.T) {
 
 	slider.TypedKey(down)
 	assert.Equal(t, slider.Min, slider.Value)
+}
+
+func TestSlider_Disabled(t *testing.T) {
+	slider := NewSlider(0, 5)
+	slider.Disable()
+
+	changes := 0
+	slider.OnChanged = func(_ float64) {
+		changes++
+	}
+
+	tap := &fyne.PointEvent{}
+	tap.Position = fyne.NewPos(30, 2)
+	slider.Tapped(tap)
+	assert.Equal(t, 0, changes)
+
+	drag := &fyne.DragEvent{}
+	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	slider.Dragged(drag)
+	assert.Equal(t, 0, changes)
+
+	slider.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 0, changes)
+
+	slider.Enable()
+
+	slider.Dragged(drag)
+	assert.Equal(t, 1, changes)
 }

@@ -1,5 +1,4 @@
 //go:build !no_glfw && !mobile
-// +build !no_glfw,!mobile
 
 package glfw
 
@@ -17,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/scale"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -246,9 +246,13 @@ func TestWindow_Cursor(t *testing.T) {
 	textCursor := desktop.TextCursor
 	assert.Equal(t, textCursor, w.cursor)
 
-	w.mouseMoved(w.viewport, 10, float64(h.Position().Y+10))
-	pointerCursor := desktop.PointerCursor
-	assert.Equal(t, pointerCursor, w.cursor)
+	/*
+		// See fyne-io/fyne/issues/4513 - Hyperlink doesn't update its cursor type until
+		// mouse moves are processed in the event queue
+			w.mouseMoved(w.viewport, float64(h.Position().X+10), float64(h.Position().Y+10))
+			pointerCursor := desktop.PointerCursor
+			assert.Equal(t, pointerCursor, w.cursor)
+	*/
 
 	w.mouseMoved(w.viewport, 10, float64(b.Position().Y+10))
 	defaultCursor := desktop.DefaultCursor
@@ -302,7 +306,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w := createWindow("Test").(*window)
-	test.ApplyTheme(t, theme.DarkTheme())
+	test.ApplyTheme(t, internalTest.DarkTheme(theme.DefaultTheme()))
 	l := widget.NewList(
 		func() int { return 2 },
 		func() fyne.CanvasObject { return widget.NewEntry() },
@@ -1149,7 +1153,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w := createWindow("Test").(*window)
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	tapped := false
@@ -1220,14 +1224,14 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	waitSingleTapped := make(chan struct{})
 	waitDoubleTapped := make(chan struct{})
-	tapped := int32(0) // atomic
+	tapped := atomic.Int32{}
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
-		atomic.StoreInt32(&tapped, 1)
+		tapped.Store(1)
 		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
-		atomic.StoreInt32(&tapped, 2)
+		tapped.Store(2)
 		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
@@ -1240,8 +1244,8 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&tapped), "Single tap should have fired")
-	atomic.StoreInt32(&tapped, 0)
+	assert.Equal(t, int32(1), tapped.Load(), "Single tap should have fired")
+	tapped.Store(0)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
@@ -1252,7 +1256,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	assert.Equal(t, int32(2), atomic.LoadInt32(&tapped), "Double tap should have fired")
+	assert.Equal(t, int32(2), tapped.Load(), "Double tap should have fired")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -1432,7 +1436,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	} else {
 		menuHeight = canvas.NewText("", color.Black).MinSize().Height + theme.Padding()*2
 	}
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	tests := []struct {
 		name               string
 		padding            bool
@@ -1652,7 +1656,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing", e.SelectedText())
 
 	ctrlMod := glfw.ModControl
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		ctrlMod = glfw.ModSuper
 	}
 	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
@@ -1810,9 +1814,9 @@ type hoverableObject struct {
 var _ desktop.Hoverable = (*hoverable)(nil)
 
 type hoverable struct {
-	mouseInEvents    []interface{}
-	mouseOutEvents   []interface{}
-	mouseMovedEvents []interface{}
+	mouseInEvents    []any
+	mouseOutEvents   []any
+	mouseMovedEvents []any
 }
 
 func (h *hoverable) MouseIn(e *desktop.MouseEvent) {
@@ -1827,17 +1831,17 @@ func (h *hoverable) MouseOut() {
 	h.mouseOutEvents = append(h.mouseOutEvents, true)
 }
 
-func (h *hoverable) popMouseInEvent() (e interface{}) {
+func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
 	return
 }
 
-func (h *hoverable) popMouseMovedEvent() (e interface{}) {
+func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
 	return
 }
 
-func (h *hoverable) popMouseOutEvent() (e interface{}) {
+func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
 	return
 }
@@ -1850,8 +1854,8 @@ type draggableObject struct {
 var _ fyne.Draggable = (*draggable)(nil)
 
 type draggable struct {
-	events    []interface{}
-	endEvents []interface{}
+	events    []any
+	endEvents []any
 }
 
 func (d *draggable) Dragged(e *fyne.DragEvent) {
@@ -1862,12 +1866,12 @@ func (d *draggable) DragEnd() {
 	d.endEvents = append(d.endEvents, true)
 }
 
-func (d *draggable) popDragEvent() (e interface{}) {
+func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
 	return
 }
 
-func (d *draggable) popDragEndEvent() (e interface{}) {
+func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
 	return
 }
@@ -1886,7 +1890,7 @@ type mouseableObject struct {
 var _ desktop.Mouseable = (*mouseable)(nil)
 
 type mouseable struct {
-	mouseEvents []interface{}
+	mouseEvents []any
 }
 
 func (m *mouseable) MouseDown(e *desktop.MouseEvent) {
@@ -1897,7 +1901,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 	m.mouseEvents = append(m.mouseEvents, e)
 }
 
-func (m *mouseable) popMouseEvent() (e interface{}) {
+func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
 	return
 }
@@ -1916,8 +1920,8 @@ type tappableObject struct {
 var _ fyne.Tappable = (*tappable)(nil)
 
 type tappable struct {
-	tapEvents          []interface{}
-	secondaryTapEvents []interface{}
+	tapEvents          []any
+	secondaryTapEvents []any
 }
 
 func (t *tappable) Tapped(e *fyne.PointEvent) {
@@ -1928,12 +1932,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
 }
 
-func (t *tappable) popTapEvent() (e interface{}) {
+func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
 	return
 }
 
-func (t *tappable) popSecondaryTapEvent() (e interface{}) {
+func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
 }
@@ -2004,14 +2008,14 @@ var _ fyne.Scrollable = (*scrollable)(nil)
 
 type scrollable struct {
 	*canvas.Rectangle
-	events []interface{}
+	events []any
 }
 
 func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 	s.events = append(s.events, e)
 }
 
-func (s *scrollable) popScrollEvent() (e interface{}) {
+func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
 	return
 }
@@ -2020,7 +2024,7 @@ func (s *scrollable) popScrollEvent() (e interface{}) {
 // Test helper
 //
 
-func pop(s []interface{}) (interface{}, []interface{}) {
+func pop(s []any) (any, []any) {
 	if len(s) == 0 {
 		return nil, s
 	}

@@ -81,7 +81,7 @@ func runBuild(cmd *command) (err error) {
 // AppOutputName provides the name of a build resource for a given os - "ios" or "android".
 func AppOutputName(os, name string, release bool) string {
 	switch os {
-	case "android":
+	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
 		if release {
 			return androidPkgName(name) + ".aab"
 		} else {
@@ -232,7 +232,7 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 
 var xout io.Writer = os.Stderr
 
-func printcmd(format string, args ...interface{}) {
+func printcmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
 	if tmpdir != "" {
 		cmd = strings.Replace(cmd, tmpdir, "$WORK", -1)

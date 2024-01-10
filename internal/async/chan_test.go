@@ -16,7 +16,7 @@ func TestUnboundedChann(t *testing.T) {
 
 	wg := sync.WaitGroup{}
 	for i := 0; i < N; i++ {
-		t.Run("interface{}", func(t *testing.T) {
+		t.Run("any", func(t *testing.T) {
 			t.Run("send", func(t *testing.T) {
 				// Ensure send to an unbounded channel does not block.
 				c := async.NewUnboundedInterfaceChan()
@@ -175,7 +175,7 @@ func TestUnboundedChann(t *testing.T) {
 }
 
 func BenchmarkUnboundedChann(b *testing.B) {
-	b.Run("interface{}", func(b *testing.B) {
+	b.Run("any", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
 			c := async.NewUnboundedInterfaceChan()
 			b.ResetTimer()

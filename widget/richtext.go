@@ -897,7 +897,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	lines := splitLines(seg)
 
-	if wrap == fyne.TextTruncate {
+	if wrap == fyne.TextWrap(fyne.TextTruncateClip) {
 		if trunc == fyne.TextTruncateOff {
 			trunc = fyne.TextTruncateClip
 		}
@@ -1089,9 +1089,9 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 	out := shaper.Shape(in)
 
 	l.Prepare(conf, runes, shaping.NewSliceIterator([]shaping.Output{out}))
-	finalLine, _, done := l.WrapNextLine(limit)
+	wrapped, done := l.WrapNextLine(limit)
 
-	count := finalLine[0].Runes.Count
+	count := wrapped.Line[0].Runes.Count
 	full := done && count == len(runes)
 	if !full && len(ellipsis) > 0 {
 		count--

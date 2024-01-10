@@ -10,7 +10,7 @@ import (
 )
 
 type expectedValue struct {
-	dir   interface{}
+	dir   any
 	env   []string
 	osEnv bool
 	args  []string

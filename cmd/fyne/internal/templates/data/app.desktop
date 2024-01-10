@@ -3,7 +3,7 @@ Type=Application
 Name={{.Name}}
 {{- if ne .GenericName ""}}
 GenericName={{.GenericName}}{{end}}
-Exec={{.Exec}} {{.ExecParams}}
+Exec={{.Exec}} {{- .ExecParams}}
 Icon={{.Name}}
 {{- if ne .Comment ""}}
 Comment={{.Comment}}{{end}}

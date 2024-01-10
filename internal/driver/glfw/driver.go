@@ -8,7 +8,7 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"sync/atomic"
+	"time"
 
 	"github.com/fyne-io/image/ico"
 
@@ -36,15 +36,16 @@ var _ fyne.Driver = (*gLDriver)(nil)
 // A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
 const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
 
+const doubleTapDelay = 300 * time.Millisecond
+
 type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
-	device       *glDevice
 	done         chan struct{}
 	drawDone     chan struct{}
 	waitForStart chan struct{}
 
-	animation *animation.Runner
+	animation animation.Runner
 
 	currentKeyModifiers fyne.KeyModifier // desktop driver only
 
@@ -89,11 +90,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 }
 
 func (d *gLDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &glDevice{}
-	}
-
-	return d.device
+	return &glDevice{}
 }
 
 func (d *gLDriver) Quit() {
@@ -106,7 +103,7 @@ func (d *gLDriver) Quit() {
 	}
 
 	// Only call close once to avoid panic.
-	if atomic.CompareAndSwapUint32(&running, 1, 0) {
+	if running.CompareAndSwap(true, false) {
 		close(d.done)
 	}
 }
@@ -125,18 +122,19 @@ func (d *gLDriver) focusPreviousWindow() {
 	wins := d.windows
 	d.windowLock.RUnlock()
 
-	var chosen fyne.Window
+	var chosen *window
 	for _, w := range wins {
-		if !w.(*window).visible {
+		win := w.(*window)
+		if !win.visible {
 			continue
 		}
-		chosen = w
-		if w.(*window).master {
+		chosen = win
+		if win.master {
 			break
 		}
 	}
 
-	if chosen == nil || chosen.(*window).view() == nil {
+	if chosen == nil || chosen.view() == nil {
 		return
 	}
 	chosen.RequestFocus()
@@ -151,8 +149,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	logError(msg, err)
 
-	onMain := atomic.LoadUint32(&running) == 0
-	if onMain {
+	if !running.Load() {
 		d.Quit()
 	} else {
 		os.Exit(1)
@@ -168,6 +165,10 @@ func (d *gLDriver) Run() {
 	d.runGL()
 }
 
+func (d *gLDriver) DoubleTapDelay() time.Duration {
+	return doubleTapDelay
+}
+
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
 func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
@@ -176,6 +177,5 @@ func NewGLDriver() *gLDriver {
 		done:         make(chan struct{}),
 		drawDone:     make(chan struct{}),
 		waitForStart: make(chan struct{}),
-		animation:    &animation.Runner{},
 	}
 }

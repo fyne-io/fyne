@@ -58,7 +58,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := templates.ManifestAndroid.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
-			Name:        strings.Title(appName),
+			Name:        strings.Title(appName), //lint:ignore SA1019 This is fine for our use case.
 			Debug:       !buildRelease,
 			LibName:     libName,
 			Version:     version,
@@ -153,7 +153,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		_, err := execabs.LookPath("bundletool")
 		if err != nil {
 			_, _ = fmt.Fprint(os.Stderr, "Required command 'bundletool' not found when building Android for release.\n")
-			_, _ = fmt.Fprint(os.Stderr, "For more information see https://g.co/androidappbundle.\n")
+			_, _ = fmt.Fprint(os.Stderr, "For more information see https://developer.android.com/tools/bundletool.\n")
 			return nil, fmt.Errorf("bundletool: command not found")
 		}
 		err = convertAPKToAAB(buildO)

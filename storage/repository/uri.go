@@ -30,7 +30,6 @@ func (u *uri) Name() string {
 }
 
 func (u *uri) MimeType() string {
-
 	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {
 		mimeTypeFull = "text/plain"
@@ -50,7 +49,8 @@ func (u *uri) MimeType() string {
 		}
 	}
 
-	return strings.Split(mimeTypeFull, ";")[0]
+	mimeType, _, _ := strings.Cut(mimeTypeFull, ";")
+	return mimeType
 }
 
 func (u *uri) Scheme() string {

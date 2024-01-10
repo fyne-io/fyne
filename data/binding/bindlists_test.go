@@ -121,6 +121,19 @@ func TestFloatList_GetValue(t *testing.T) {
 	assert.Equal(t, 0.5, v)
 }
 
+func TestFloatList_Remove(t *testing.T) {
+	f := NewFloatList()
+	f.Append(0.5)
+	f.Append(0.7)
+	f.Append(0.3)
+	assert.Equal(t, 3, f.Length())
+
+	f.Remove(0.5)
+	assert.Equal(t, 2, f.Length())
+	f.Remove(0.3)
+	assert.Equal(t, 1, f.Length())
+}
+
 func TestFloatList_Set(t *testing.T) {
 	l := []float64{1.0, 5.0, 2.3}
 	f := BindFloatList(&l)

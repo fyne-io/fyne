@@ -1,10 +1,9 @@
 package widget
 
 import (
-	"strings"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/repository/mime"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
@@ -95,11 +94,15 @@ func (i *FileIcon) SetSelected(selected bool) {
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
+	if icon, ok := uri.(fyne.URIWithIcon); ok {
+		return icon.Icon()
+	}
 	if i.isDir(uri) {
 		return theme.FolderIcon()
 	}
 
-	switch splitMimeType(uri) {
+	mainMimeType, _ := mime.Split(uri.MimeType())
+	switch mainMimeType {
 	case "application":
 		return theme.FileApplicationIcon()
 	case "audio":
@@ -190,6 +193,7 @@ func (s *fileIconRenderer) Refresh() {
 		}
 	}
 
+	s.img.Refresh()
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
 }
@@ -200,12 +204,4 @@ func trimmedExtension(uri fyne.URI) string {
 		ext = ext[:5]
 	}
 	return ext
-}
-
-func splitMimeType(uri fyne.URI) string {
-	mimeTypeSplit := strings.Split(uri.MimeType(), "/")
-	if len(mimeTypeSplit) <= 1 {
-		return ""
-	}
-	return mimeTypeSplit[0]
 }

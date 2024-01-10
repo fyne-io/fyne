@@ -1,5 +1,7 @@
 package fyne
 
+import "time"
+
 // Driver defines an abstract concept of a Fyne render driver.
 // Any implementation must provide at least these methods.
 type Driver interface {
@@ -34,4 +36,10 @@ type Driver interface {
 	//
 	// Deprecated: Use a.Stop() instead.
 	StopAnimation(a *Animation)
+
+	// DoubleTapDelay returns the maximum duration where a second tap after a first one
+	// will be considered a DoubleTap instead of two distinct Tap events.
+	//
+	// Since: 2.5
+	DoubleTapDelay() time.Duration
 }

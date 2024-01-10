@@ -12,6 +12,256 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
+type Check struct {
+	DisableableWidget
+	Text    string
+	Checked bool
+
+	OnChanged func(bool) `json:"-"`
+
+	focused bool
+	hovered bool
+
+	binder basicBinder
+
+	minSize fyne.Size // cached for hover/tap position calculations
+}
+
+// NewCheck creates a new check widget with the set label and change handler
+func NewCheck(label string, changed func(bool)) *Check {
+	c := &Check{
+		Text:      label,
+		OnChanged: changed,
+	}
+
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+// NewCheckWithData returns a check widget connected with the specified data source.
+//
+// Since: 2.0
+func NewCheckWithData(label string, data binding.Bool) *Check {
+	check := NewCheck(label, nil)
+	check.Bind(data)
+
+	return check
+}
+
+// Bind connects the specified data source to this Check.
+// The current value will be displayed and any changes in the data will cause the widget to update.
+// User interactions with this Check will set the value into the data source.
+//
+// Since: 2.0
+func (c *Check) Bind(data binding.Bool) {
+	c.binder.SetCallback(c.updateFromData)
+	c.binder.Bind(data)
+
+	c.OnChanged = func(_ bool) {
+		c.binder.CallWithData(c.writeData)
+	}
+}
+
+// SetChecked sets the the checked state and refreshes widget
+func (c *Check) SetChecked(checked bool) {
+	if checked == c.Checked {
+		return
+	}
+
+	c.Checked = checked
+
+	if c.OnChanged != nil {
+		c.OnChanged(c.Checked)
+	}
+
+	c.Refresh()
+}
+
+// Hide this widget, if it was previously visible
+func (c *Check) Hide() {
+	if c.focused {
+		c.FocusLost()
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(nil)
+		}
+	}
+
+	c.BaseWidget.Hide()
+}
+
+// MouseIn is called when a desktop pointer enters the widget
+func (c *Check) MouseIn(me *desktop.MouseEvent) {
+	c.MouseMoved(me)
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+func (c *Check) MouseOut() {
+	if c.hovered {
+		c.hovered = false
+		c.Refresh()
+	}
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget
+func (c *Check) MouseMoved(me *desktop.MouseEvent) {
+	if c.Disabled() {
+		return
+	}
+
+	oldHovered := c.hovered
+
+	// only hovered if cached minSize has not been initialized (test code)
+	// or the pointer is within the "active" area of the widget (its minSize)
+	c.hovered = c.minSize.IsZero() ||
+		(me.Position.X <= c.minSize.Width && me.Position.Y <= c.minSize.Height)
+
+	if oldHovered != c.hovered {
+		c.Refresh()
+	}
+}
+
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+func (c *Check) Tapped(pe *fyne.PointEvent) {
+	if c.Disabled() {
+		return
+	}
+	if !c.minSize.IsZero() &&
+		(pe.Position.X > c.minSize.Width || pe.Position.Y > c.minSize.Height) {
+		// tapped outside the active area of the widget
+		return
+	}
+
+	if !c.focused && !fyne.CurrentDevice().IsMobile() {
+		impl := c.super()
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+			c.Focus(impl.(fyne.Focusable))
+		}
+	}
+	c.SetChecked(!c.Checked)
+}
+
+// MinSize returns the size that this widget should not shrink below
+func (c *Check) MinSize() fyne.Size {
+	c.ExtendBaseWidget(c)
+	c.minSize = c.BaseWidget.MinSize()
+	return c.minSize
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (c *Check) CreateRenderer() fyne.WidgetRenderer {
+	c.ExtendBaseWidget(c)
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
+	bg := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
+	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
+
+	text := canvas.NewText(c.Text, theme.ForegroundColor())
+	text.Alignment = fyne.TextAlignLeading
+
+	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
+	r := &checkRenderer{
+		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, bg, icon, text}),
+		bg,
+		icon,
+		text,
+		focusIndicator,
+		c,
+	}
+	r.applyTheme()
+	r.updateLabel()
+	r.updateResource()
+	r.updateFocusIndicator()
+	return r
+}
+
+// FocusGained is called when the Check has been given focus.
+func (c *Check) FocusGained() {
+	if c.Disabled() {
+		return
+	}
+	c.focused = true
+
+	c.Refresh()
+}
+
+// FocusLost is called when the Check has had focus removed.
+func (c *Check) FocusLost() {
+	c.focused = false
+
+	c.Refresh()
+}
+
+// TypedRune receives text input events when the Check is focused.
+func (c *Check) TypedRune(r rune) {
+	if c.Disabled() {
+		return
+	}
+	if r == ' ' {
+		c.SetChecked(!c.Checked)
+	}
+}
+
+// TypedKey receives key input events when the Check is focused.
+func (c *Check) TypedKey(key *fyne.KeyEvent) {}
+
+// SetText sets the text of the Check
+//
+// Since: 2.4
+func (c *Check) SetText(text string) {
+	c.Text = text
+	c.Refresh()
+}
+
+// Unbind disconnects any configured data source from this Check.
+// The current value will remain at the last value of the data source.
+//
+// Since: 2.0
+func (c *Check) Unbind() {
+	c.OnChanged = nil
+	c.binder.Unbind()
+}
+
+func (c *Check) updateFromData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	boolSource, ok := data.(binding.Bool)
+	if !ok {
+		return
+	}
+	val, err := boolSource.Get()
+	if err != nil {
+		fyne.LogError("Error getting current data value", err)
+		return
+	}
+	c.SetChecked(val) // if val != c.Checked, this will call updateFromData again, but only once
+}
+
+func (c *Check) writeData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	boolTarget, ok := data.(binding.Bool)
+	if !ok {
+		return
+	}
+	currentValue, err := boolTarget.Get()
+	if err != nil {
+		return
+	}
+	if currentValue != c.Checked {
+		err := boolTarget.Set(c.Checked)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", c.Checked), err)
+		}
+	}
+}
+
 type checkRenderer struct {
 	widget.BaseRenderer
 	bg, icon       *canvas.Image
@@ -106,233 +356,5 @@ func (c *checkRenderer) updateFocusIndicator() {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
 		c.focusIndicator.FillColor = color.Transparent
-	}
-}
-
-// Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
-type Check struct {
-	DisableableWidget
-	Text    string
-	Checked bool
-
-	OnChanged func(bool) `json:"-"`
-
-	focused bool
-	hovered bool
-
-	binder basicBinder
-}
-
-// Bind connects the specified data source to this Check.
-// The current value will be displayed and any changes in the data will cause the widget to update.
-// User interactions with this Check will set the value into the data source.
-//
-// Since: 2.0
-func (c *Check) Bind(data binding.Bool) {
-	c.binder.SetCallback(c.updateFromData)
-	c.binder.Bind(data)
-
-	c.OnChanged = func(_ bool) {
-		c.binder.CallWithData(c.writeData)
-	}
-}
-
-// SetChecked sets the the checked state and refreshes widget
-func (c *Check) SetChecked(checked bool) {
-	if checked == c.Checked {
-		return
-	}
-
-	c.Checked = checked
-
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
-	}
-
-	c.Refresh()
-}
-
-// Hide this widget, if it was previously visible
-func (c *Check) Hide() {
-	if c.focused {
-		c.FocusLost()
-		impl := c.super()
-
-		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
-			c.Focus(nil)
-		}
-	}
-
-	c.BaseWidget.Hide()
-}
-
-// MouseIn is called when a desktop pointer enters the widget
-func (c *Check) MouseIn(*desktop.MouseEvent) {
-	if c.Disabled() {
-		return
-	}
-	c.hovered = true
-	c.Refresh()
-}
-
-// MouseOut is called when a desktop pointer exits the widget
-func (c *Check) MouseOut() {
-	c.hovered = false
-	c.Refresh()
-}
-
-// MouseMoved is called when a desktop pointer hovers over the widget
-func (c *Check) MouseMoved(*desktop.MouseEvent) {
-}
-
-// Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.focused && !fyne.CurrentDevice().IsMobile() {
-		impl := c.super()
-
-		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
-	}
-	if !c.Disabled() {
-		c.SetChecked(!c.Checked)
-	}
-}
-
-// MinSize returns the size that this widget should not shrink below
-func (c *Check) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
-}
-
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *Check) CreateRenderer() fyne.WidgetRenderer {
-	c.ExtendBaseWidget(c)
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
-	bg := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
-	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
-
-	text := canvas.NewText(c.Text, theme.ForegroundColor())
-	text.Alignment = fyne.TextAlignLeading
-
-	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	r := &checkRenderer{
-		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, bg, icon, text}),
-		bg,
-		icon,
-		text,
-		focusIndicator,
-		c,
-	}
-	r.applyTheme()
-	r.updateLabel()
-	r.updateResource()
-	r.updateFocusIndicator()
-	return r
-}
-
-// NewCheck creates a new check widget with the set label and change handler
-func NewCheck(label string, changed func(bool)) *Check {
-	c := &Check{
-		Text:      label,
-		OnChanged: changed,
-	}
-
-	c.ExtendBaseWidget(c)
-	return c
-}
-
-// NewCheckWithData returns a check widget connected with the specified data source.
-//
-// Since: 2.0
-func NewCheckWithData(label string, data binding.Bool) *Check {
-	check := NewCheck(label, nil)
-	check.Bind(data)
-
-	return check
-}
-
-// FocusGained is called when the Check has been given focus.
-func (c *Check) FocusGained() {
-	if c.Disabled() {
-		return
-	}
-	c.focused = true
-
-	c.Refresh()
-}
-
-// FocusLost is called when the Check has had focus removed.
-func (c *Check) FocusLost() {
-	c.focused = false
-
-	c.Refresh()
-}
-
-// TypedRune receives text input events when the Check is focused.
-func (c *Check) TypedRune(r rune) {
-	if c.Disabled() {
-		return
-	}
-	if r == ' ' {
-		c.SetChecked(!c.Checked)
-	}
-}
-
-// TypedKey receives key input events when the Check is focused.
-func (c *Check) TypedKey(key *fyne.KeyEvent) {}
-
-// SetText sets the text of the Check
-//
-// Since: 2.4
-func (c *Check) SetText(text string) {
-	c.Text = text
-	c.Refresh()
-}
-
-// Unbind disconnects any configured data source from this Check.
-// The current value will remain at the last value of the data source.
-//
-// Since: 2.0
-func (c *Check) Unbind() {
-	c.OnChanged = nil
-	c.binder.Unbind()
-}
-
-func (c *Check) updateFromData(data binding.DataItem) {
-	if data == nil {
-		return
-	}
-	boolSource, ok := data.(binding.Bool)
-	if !ok {
-		return
-	}
-	val, err := boolSource.Get()
-	if err != nil {
-		fyne.LogError("Error getting current data value", err)
-		return
-	}
-	c.SetChecked(val) // if val != c.Checked, this will call updateFromData again, but only once
-}
-
-func (c *Check) writeData(data binding.DataItem) {
-	if data == nil {
-		return
-	}
-	boolTarget, ok := data.(binding.Bool)
-	if !ok {
-		return
-	}
-	currentValue, err := boolTarget.Get()
-	if err != nil {
-		return
-	}
-	if currentValue != c.Checked {
-		err := boolTarget.Set(c.Checked)
-		if err != nil {
-			fyne.LogError(fmt.Sprintf("Failed to set binding value to %t", c.Checked), err)
-		}
 	}
 }

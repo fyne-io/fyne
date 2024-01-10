@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -115,7 +114,7 @@ func makeInnerWindowTab(_ fyne.Window) fyne.CanvasObject {
 		widget.NewButton("Tap Me", func() {
 			label.SetText("Tapped")
 		})))
-	win1.Icon = theme.FyneLogo()
+	win1.Icon = data.FyneLogo
 
 	win2 := container.NewInnerWindow("Inner2", widget.NewLabel("Win 2"))
 
