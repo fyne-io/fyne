@@ -57,7 +57,10 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 		})
 	}
 
-	return &radioGroupRenderer{widget.NewBaseRenderer(items), items, r}
+	render := &radioGroupRenderer{widget.NewBaseRenderer(items), items, r}
+	r.updateSelectedIndex()
+	render.updateItems(false)
+	return render
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -202,11 +205,11 @@ func (r *radioGroupRenderer) MinSize() fyne.Size {
 }
 
 func (r *radioGroupRenderer) Refresh() {
-	r.updateItems()
+	r.updateItems(true)
 	canvas.Refresh(r.radio.super())
 }
 
-func (r *radioGroupRenderer) updateItems() {
+func (r *radioGroupRenderer) updateItems(refresh bool) {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			idx := i
@@ -238,7 +241,7 @@ func (r *radioGroupRenderer) updateItems() {
 			changed = true
 		}
 
-		if changed {
+		if refresh && changed {
 			item.Refresh()
 		}
 	}
