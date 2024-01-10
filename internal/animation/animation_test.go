@@ -88,7 +88,5 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
 	time.Sleep(time.Second/60 + 100*time.Millisecond)
-	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.Unlock()
 }
