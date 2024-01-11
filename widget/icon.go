@@ -34,7 +34,7 @@ func (i *iconRenderer) Refresh() {
 
 	r := i.image.Resource
 	if r != nil {
-		cache.SetWidgetForResource(r, i.image)
+		i.image.Resource = cache.OverrideResourceTheme(i.image.Resource, i.image)
 	}
 
 	i.image.propertyLock.RLock()
@@ -74,7 +74,7 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	img := canvas.NewImageFromResource(i.Resource)
 	img.FillMode = canvas.ImageFillContain
 	if i.Resource != nil {
-		cache.SetWidgetForResource(i.Resource, i)
+		i.Resource = cache.OverrideResourceTheme(i.Resource, i)
 	}
 
 	r := &iconRenderer{image: i, raster: img}

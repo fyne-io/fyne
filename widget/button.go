@@ -81,11 +81,10 @@ func NewButton(label string, tapped func()) *Button {
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{
 		Text:     label,
-		Icon:     icon,
 		OnTapped: tapped,
 	}
+	button.Icon = cache.OverrideResourceTheme(icon, button)
 
-	cache.SetWidgetForResource(icon, button)
 	button.ExtendBaseWidget(button)
 	return button
 }
@@ -167,7 +166,7 @@ func (b *Button) MouseOut() {
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
-	b.Icon = icon
+	b.Icon = cache.OverrideResourceTheme(icon, b)
 
 	b.Refresh()
 }
@@ -380,17 +379,18 @@ func (r *buttonRenderer) applyTheme() {
 	}
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
-		cache.SetWidgetForResource(r.icon.Resource, r.button)
+		icon := r.icon.Resource
 		switch res := r.icon.Resource.(type) {
-		case *theme.ThemedResource:
-			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
-				r.icon.Resource = theme.NewInvertedThemedResource(res)
-			}
 		case *theme.InvertedThemedResource:
 			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
-				r.icon.Resource = res.Original()
+				icon = res.Original()
+			}
+		case *theme.ThemedResource, fyne.ThemedResource:
+			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
+				icon = theme.NewInvertedThemedResource(res)
 			}
 		}
+		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
 		r.icon.Refresh()
 	}
 }

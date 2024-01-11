@@ -1,31 +1,20 @@
 package cache
 
-import "fyne.io/fyne/v2"
+import (
+	"strconv"
 
-var (
-	forWidgets = make(map[fyne.Resource]fyne.Widget)
-	overrides  = make(map[fyne.Widget]fyne.Theme)
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/svg"
 )
 
-func overrideWidget(w fyne.Widget, th fyne.Theme) {
-	ResetThemeCaches()
-	overrides[w] = th
+var overrides = make(map[fyne.Widget]*overrideScope)
 
-	r := Renderer(w)
-	if r == nil {
-		return
-	}
-
-	for _, o := range r.Objects() {
-		OverrideTheme(o, th)
-	}
+type overrideScope struct {
+	th      fyne.Theme
+	cacheID string
 }
 
-func overrideContainer(c *fyne.Container, th fyne.Theme) {
-	for _, o := range c.Objects {
-		OverrideTheme(o, th)
-	}
-}
+var nextID = 1
 
 // OverrideTheme allows an app to specify that a single object should use a different theme to the app.
 // This should be used sparingly to avoid a jarring user experience.
@@ -33,32 +22,87 @@ func overrideContainer(c *fyne.Container, th fyne.Theme) {
 //
 // Since: 2.5
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
-	switch c := o.(type) {
-	case fyne.Widget:
-		overrideWidget(c, th)
-	case *fyne.Container:
-		overrideContainer(c, th)
-	}
+	s := &overrideScope{th: th, cacheID: strconv.Itoa(nextID)}
+	overrideTheme(o, s, nextID)
+	nextID++
 }
 
 func WidgetTheme(o fyne.Widget) fyne.Theme {
-	th, ok := overrides[o]
+	data, ok := overrides[o]
 	if !ok {
 		return nil
 	}
 
-	return th
+	return data.th
 }
 
-func SetWidgetForResource(res fyne.Resource, w fyne.Widget) {
-	forWidgets[res] = w
-}
-
-func WidgetForResource(res fyne.Resource) fyne.Widget {
-	w, ok := forWidgets[res]
-	if !ok {
-		return nil
+func OverrideResourceTheme(res fyne.Resource, w fyne.Widget) fyne.Resource {
+	if th, ok := res.(fyne.ThemedResource); ok {
+		return &ThemedWidgetResource{ThemedResource: th, Owner: w}
 	}
 
-	return w
+	return res
+}
+
+func themeForResource(res fyne.Resource) fyne.Theme {
+	if th, ok := res.(*ThemedWidgetResource); ok {
+		if over, ok := overrides[th.Owner]; ok {
+			return over.th
+		}
+	}
+
+	return fyne.CurrentApp().Settings().Theme()
+}
+
+type ThemedWidgetResource struct {
+	fyne.ThemedResource
+	Owner fyne.Widget
+}
+
+// Content returns the underlying content of the resource adapted to the current text color.
+func (res *ThemedWidgetResource) Content() []byte {
+	name := res.Color()
+	if name == "" {
+		name = "foreground"
+	}
+
+	th := themeForResource(res)
+	return svg.Colorize(res.ThemedResource.Content(), th.Color(name, fyne.CurrentApp().Settings().ThemeVariant()))
+}
+
+func (res *ThemedWidgetResource) Name() string {
+	cacheID := ""
+	if over, ok := overrides[res.Owner]; ok {
+		cacheID = over.cacheID
+	}
+	return cacheID + res.ThemedResource.Name()
+}
+
+func overrideContainer(c *fyne.Container, s *overrideScope, id int) {
+	for _, o := range c.Objects {
+		overrideTheme(o, s, id)
+	}
+}
+
+func overrideTheme(o fyne.CanvasObject, s *overrideScope, id int) {
+	switch c := o.(type) {
+	case fyne.Widget:
+		overrideWidget(c, s, id)
+	case *fyne.Container:
+		overrideContainer(c, s, id)
+	}
+}
+
+func overrideWidget(w fyne.Widget, s *overrideScope, id int) {
+	ResetThemeCaches()
+	overrides[w] = s
+
+	r := Renderer(w)
+	if r == nil {
+		return
+	}
+
+	for _, o := range r.Objects() {
+		overrideTheme(o, s, id)
+	}
 }

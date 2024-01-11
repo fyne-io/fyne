@@ -2,7 +2,6 @@ package theme
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/svg"
 )
 
@@ -668,7 +667,7 @@ func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	prefix := res.ColorName
+	prefix := res.Color()
 	if prefix == "" {
 		prefix = "foreground_"
 	} else {
@@ -678,14 +677,18 @@ func (res *ThemedResource) Name() string {
 	return string(prefix) + res.source.Name()
 }
 
+func (res *ThemedResource) Color() fyne.ThemeColorName {
+	return res.ColorName
+}
+
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	name := res.ColorName
+	name := res.Color()
 	if name == "" {
 		name = ColorNameForeground
 	}
 
-	return svg.Colorize(res.source.Content(), ColorForWidget(name, cache.WidgetForResource(res)))
+	return svg.Colorize(res.source.Content(), Color(name))
 }
 
 // Error returns a different resource for indicating an error.
@@ -712,8 +715,12 @@ func (res *InvertedThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
-	clr := ColorForWidget(ColorNameBackground, cache.WidgetForResource(res))
+	clr := Color(ColorNameBackground)
 	return svg.Colorize(res.source.Content(), clr)
+}
+
+func (res *InvertedThemedResource) Color() fyne.ThemeColorName {
+	return ColorNameBackground
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -740,7 +747,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNameError, cache.WidgetForResource(res)))
+	return svg.Colorize(res.source.Content(), Color(ColorNameError))
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -767,7 +774,7 @@ func (res *PrimaryThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNamePrimary, cache.WidgetForResource(res)))
+	return svg.Colorize(res.source.Content(), Color(ColorNamePrimary))
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -788,7 +795,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ColorForWidget(ColorNameDisabled, cache.WidgetForResource(res)))
+	return svg.Colorize(res.source.Content(), Color(ColorNameDisabled))
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
