@@ -755,10 +755,6 @@ func (res *ErrorThemedResource) Original() fyne.Resource {
 	return res.source
 }
 
-func (res *ErrorThemedResource) ThemeColorName() fyne.ThemeColorName {
-	return ColorNameError
-}
-
 // PrimaryThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // to the theme primary color.
 type PrimaryThemedResource struct {
@@ -786,10 +782,6 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 	return res.source
 }
 
-func (res *PrimaryThemedResource) ThemeColorName() fyne.ThemeColorName {
-	return ColorNamePrimary
-}
-
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
 // the current theme's `DisabledColor` color.
 type DisabledResource struct {
@@ -804,10 +796,6 @@ func (res *DisabledResource) Name() string {
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
 	return svg.Colorize(res.source.Content(), Color(ColorNameDisabled))
-}
-
-func (res *DisabledResource) ThemeColorName() fyne.ThemeColorName {
-	return ColorNameDisabled
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
