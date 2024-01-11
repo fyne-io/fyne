@@ -155,11 +155,11 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		if variant == "" {
 			variant = "default"
 		}
-	case *cache.ThemedWidgetResource:
+	case *cache.WidgetResource:
 		if _, ok := t.ThemedResource.(*theme.InvertedThemedResource); ok {
 			variant = "inverted"
 		} else {
-			variant = string(t.Color())
+			variant = string(t.ThemeColorName())
 		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())

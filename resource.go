@@ -17,13 +17,12 @@ type Resource interface {
 }
 
 // ThemedResource is a version of a resource that can be updated to match a certain theme colour.
-// The `ThemeColorName` returned from `Color` will be used to look up the color
-// for the current theme and colorize the resource where possible.
+// The `ThemeColorName` will be used to look up the color for the current theme and colorize the resource.
 //
 // Since: 2.5
 type ThemedResource interface {
 	Resource
-	Color() ThemeColorName
+	ThemeColorName() ThemeColorName
 }
 
 // StaticResource is a bundled resource compiled into the application.

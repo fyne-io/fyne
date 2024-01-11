@@ -38,14 +38,14 @@ func WidgetTheme(o fyne.Widget) fyne.Theme {
 
 func OverrideResourceTheme(res fyne.Resource, w fyne.Widget) fyne.Resource {
 	if th, ok := res.(fyne.ThemedResource); ok {
-		return &ThemedWidgetResource{ThemedResource: th, Owner: w}
+		return &WidgetResource{ThemedResource: th, Owner: w}
 	}
 
 	return res
 }
 
 func themeForResource(res fyne.Resource) fyne.Theme {
-	if th, ok := res.(*ThemedWidgetResource); ok {
+	if th, ok := res.(*WidgetResource); ok {
 		if over, ok := overrides[th.Owner]; ok {
 			return over.th
 		}
@@ -54,14 +54,14 @@ func themeForResource(res fyne.Resource) fyne.Theme {
 	return fyne.CurrentApp().Settings().Theme()
 }
 
-type ThemedWidgetResource struct {
+type WidgetResource struct {
 	fyne.ThemedResource
 	Owner fyne.Widget
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
-func (res *ThemedWidgetResource) Content() []byte {
-	name := res.Color()
+func (res *WidgetResource) Content() []byte {
+	name := res.ThemeColorName()
 	if name == "" {
 		name = "foreground"
 	}
@@ -70,7 +70,7 @@ func (res *ThemedWidgetResource) Content() []byte {
 	return svg.Colorize(res.ThemedResource.Content(), th.Color(name, fyne.CurrentApp().Settings().ThemeVariant()))
 }
 
-func (res *ThemedWidgetResource) Name() string {
+func (res *WidgetResource) Name() string {
 	cacheID := ""
 	if over, ok := overrides[res.Owner]; ok {
 		cacheID = over.cacheID

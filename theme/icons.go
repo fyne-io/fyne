@@ -667,7 +667,7 @@ func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	prefix := res.Color()
+	prefix := res.ThemeColorName()
 	if prefix == "" {
 		prefix = "foreground_"
 	} else {
@@ -677,13 +677,13 @@ func (res *ThemedResource) Name() string {
 	return string(prefix) + res.source.Name()
 }
 
-func (res *ThemedResource) Color() fyne.ThemeColorName {
+func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return res.ColorName
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	name := res.Color()
+	name := res.ThemeColorName()
 	if name == "" {
 		name = ColorNameForeground
 	}
@@ -719,7 +719,7 @@ func (res *InvertedThemedResource) Content() []byte {
 	return svg.Colorize(res.source.Content(), clr)
 }
 
-func (res *InvertedThemedResource) Color() fyne.ThemeColorName {
+func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameBackground
 }
 
