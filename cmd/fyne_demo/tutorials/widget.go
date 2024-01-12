@@ -35,7 +35,7 @@ var (
 	progress    *widget.ProgressBar
 	fprogress   *widget.ProgressBar
 	infProgress *widget.ProgressBarInfinite
-	endProgress chan interface{}
+	endProgress chan any
 )
 
 func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
@@ -377,7 +377,7 @@ func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 	}
 
 	infProgress = widget.NewProgressBarInfinite()
-	endProgress = make(chan interface{}, 1)
+	endProgress = make(chan any, 1)
 	startProgress()
 
 	return container.NewVBox(

@@ -66,8 +66,8 @@ goroutine as other code that calls OpenGL.
 		})
 	}
 
-An event is represented by the empty interface type interface{}. Any value can
-be an event. Commonly used types include Event types defined by the following
+An event is represented by the any type, so any value can be an event.
+Commonly used types include Event types defined by the following
 packages:
   - golang.org/x/mobile/event/lifecycle
   - golang.org/x/mobile/event/mouse

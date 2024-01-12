@@ -480,7 +480,7 @@ type gridWrapLayout struct {
 
 func newGridWrapLayout(list *GridWrap) fyne.Layout {
 	l := &gridWrapLayout{list: list}
-	l.slicePool.New = func() interface{} {
+	l.slicePool.New = func() any {
 		s := make([]gridItemAndID, 0)
 		return &s
 	}

@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -67,7 +68,7 @@ func TestButton_Tapped(t *testing.T) {
 func TestButton_Disable(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	tapped := false
 	button := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {
@@ -138,7 +139,7 @@ func TestButton_LowImportance(t *testing.T) {
 func TestButton_Hover(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
 	w := test.NewWindow(b)
@@ -324,7 +325,7 @@ func TestButtonCompatImportance(t *testing.T) {
 func TestButtonSuccess(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
 	w := test.NewWindow(b)

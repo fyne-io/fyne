@@ -41,7 +41,7 @@ func TestBindFloat(t *testing.T) {
 }
 
 func TestBindUntyped(t *testing.T) {
-	var val interface{}
+	var val any
 	val = 0.5
 	f := BindUntyped(&val)
 	v, err := f.Get()

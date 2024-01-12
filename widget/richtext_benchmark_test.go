@@ -49,7 +49,7 @@ func BenchmarkText_lineBounds_WrapOff(b *testing.B) {
 }
 
 func BenchmarkText_lineBounds_Truncate(b *testing.B) {
-	benchmarkTextLineBounds(fyne.TextTruncate, b)
+	benchmarkTextLineBounds(fyne.TextWrap(fyne.TextTruncateClip), b)
 }
 
 func BenchmarkText_lineBounds_WrapBreak(b *testing.B) {

@@ -7,7 +7,7 @@ import (
 )
 
 func TestRunNative(t *testing.T) {
-	err := RunNative(func(i interface{}) error {
+	err := RunNative(func(i any) error {
 		native, ok := i.(*UnknownContext)
 
 		assert.True(t, ok)

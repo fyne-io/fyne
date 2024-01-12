@@ -21,7 +21,7 @@ func TestEntry_Password_Extended_CreateRenderer(t *testing.T) {
 	entry := &extendEntry{}
 	entry.ExtendBaseWidget(entry)
 	entry.Password = true
-	entry.Wrapping = fyne.TextTruncate
+	entry.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 	assert.NotNil(t, test.WidgetRenderer(entry))
 	r := test.WidgetRenderer(entry).(*entryRenderer).scroll.Content.(*entryContent)
 	p := test.WidgetRenderer(r).(*entryContentRenderer).provider
