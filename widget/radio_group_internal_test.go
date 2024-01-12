@@ -57,7 +57,6 @@ func TestRadioGroup_Unselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.Refresh() // sets up selectedIndex
 	radioGroupTestTapItem(t, radio, 0)
 
 	assert.Equal(t, "", selected)
