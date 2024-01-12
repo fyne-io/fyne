@@ -46,7 +46,7 @@ func uint64fromTwoFloat32(a, b float32) uint64 {
 }
 
 func twoFloat32FromUint64(combined uint64) (float32, float32) {
-	x := uint32(combined & 0x00000000FFFFFFFF)
-	y := uint32(combined & 0xFFFFFFFF00000000 >> 32)
+	x := uint32(combined)
+	y := uint32(combined >> 32)
 	return math.Float32frombits(x), math.Float32frombits(y)
 }
