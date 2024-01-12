@@ -38,6 +38,10 @@ func TestSize(t *testing.T) {
 	uneven := fyne.NewSize(125, 600)
 	size.Store(uneven)
 	assert.Equal(t, uneven, size.Load())
+
+	floats := fyne.NewSize(-22.565, 133.333)
+	size.Store(floats)
+	assert.Equal(t, floats, size.Load())
 }
 
 func TestPosition(t *testing.T) {
@@ -51,4 +55,8 @@ func TestPosition(t *testing.T) {
 	uneven := fyne.NewPos(125, 600)
 	pos.Store(uneven)
 	assert.Equal(t, uneven, pos.Load())
+
+	floats := fyne.NewPos(-22.565, 133.333)
+	pos.Store(floats)
+	assert.Equal(t, floats, pos.Load())
 }
