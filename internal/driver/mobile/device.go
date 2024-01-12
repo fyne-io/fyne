@@ -41,6 +41,10 @@ func (*device) HasKeyboard() bool {
 	return false
 }
 
+func (*device) SetDisableScreenBlanking(disable bool) {
+	setDisableScreenBlank(disable)
+}
+
 func (*device) ShowVirtualKeyboard() {
 	showVirtualKeyboard(mobile.DefaultKeyboard)
 }

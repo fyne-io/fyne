@@ -31,6 +31,11 @@ type Device interface {
 	IsBrowser() bool
 	HasKeyboard() bool
 	SystemScaleForWindow(Window) float32
+
+	// SetDisableScreenBlanking allows an app to ask the device not to sleep/lock/blank displays
+	//
+	// Since: 2.5
+	SetDisableScreenBlanking(bool)
 }
 
 // CurrentDevice returns the device information for the current hardware (via the driver)

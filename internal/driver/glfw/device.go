@@ -23,3 +23,7 @@ func (*glDevice) HasKeyboard() bool {
 func (*glDevice) IsBrowser() bool {
 	return runtime.GOARCH == "js" || runtime.GOOS == "js"
 }
+
+func (*glDevice) SetDisableScreenBlanking(bool) {
+	// TODO implement for Windows, macOS, X11 and Wayland
+}
