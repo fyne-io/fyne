@@ -226,7 +226,7 @@ func (e *Entry) Disable() {
 //
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled
+	return e.DisableableWidget.disabled.Load()
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
@@ -302,10 +302,11 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
+	e.impl.Store(&wid)
+
 	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	e.BaseWidget.impl = wid
 	e.registerShortcut()
+	e.propertyLock.Unlock()
 }
 
 // FocusGained is called when the Entry has been given focus.
@@ -1304,7 +1305,8 @@ func (e *Entry) textPosFromRowCol(row, col int) int {
 func (e *Entry) syncSegments() {
 	colName := theme.ColorNameForeground
 	wrap := e.textWrap()
-	if e.disabled {
+	disabled := e.disabled.Load()
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
@@ -1323,7 +1325,7 @@ func (e *Entry) syncSegments() {
 		Text:  e.Text,
 	}}
 	colName = theme.ColorNamePlaceHolder
-	if e.disabled {
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.placeholderProvider().Wrapping = wrap
@@ -1665,9 +1667,8 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	content := r.entry.content
-	focusedAppearance := r.entry.focused && !r.entry.disabled
+	focusedAppearance := r.entry.focused && !r.entry.disabled.Load()
 	scroll := r.entry.Scroll
-	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
 
@@ -1678,7 +1679,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 
 	// correct our scroll wrappers if the wrap mode changed
-	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
+	entrySize := r.entry.size.Load().Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
@@ -1741,7 +1742,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 	if r.entry.validationStatus == nil {
 		r.entry.validationStatus = newValidationStatus(r.entry)
 		r.objects = append(r.objects, r.entry.validationStatus)
-		r.Layout(r.entry.size)
+		r.Layout(r.entry.size.Load())
 
 		r.entry.Validate()
 
@@ -1773,7 +1774,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
 		provider, placeholder, e}
 	r.updateScrollDirections()
-	r.Layout(e.size)
+	r.Layout(e.size.Load())
 	return r
 }
 
@@ -1842,7 +1843,7 @@ func (r *entryContentRenderer) Refresh() {
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	focused := r.content.entry.focused
-	focusedAppearance := focused && !r.content.entry.disabled
+	focusedAppearance := focused && !r.content.entry.disabled.Load()
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()

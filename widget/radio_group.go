@@ -236,8 +236,8 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 			item.Selected = sel
 			changed = true
 		}
-		if d := r.radio.disabled; d != item.disabled {
-			item.disabled = d
+		if d := r.radio.disabled.Load(); d != item.disabled.Load() {
+			item.disabled.Store(d)
 			changed = true
 		}
 
