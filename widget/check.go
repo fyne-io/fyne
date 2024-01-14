@@ -283,21 +283,25 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
-	c.focusIndicator.Resize(focusIndicatorSize)
-	c.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
+	innerPadding := theme.InnerPadding()
+	borderSize := theme.InputBorderSize()
+	iconInlineSize := theme.IconInlineSize()
 
-	xOff := focusIndicatorSize.Width + theme.InputBorderSize()*2
+	focusIndicatorSize := fyne.NewSquareSize(iconInlineSize + innerPadding)
+	c.focusIndicator.Resize(focusIndicatorSize)
+	c.focusIndicator.Move(fyne.NewPos(borderSize, (size.Height-focusIndicatorSize.Height)/2))
+
+	xOff := focusIndicatorSize.Width + borderSize*2
 	labelSize := size.SubtractWidthHeight(xOff, 0)
 	c.label.Resize(labelSize)
 	c.label.Move(fyne.NewPos(xOff, 0))
 
-	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
-	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
+	iconPos := fyne.NewPos(innerPadding/2+borderSize, (size.Height-iconInlineSize)/2)
+	iconSize := fyne.NewSquareSize(iconInlineSize)
 	c.bg.Move(iconPos)
 	c.bg.Resize(iconSize)
-	c.icon.Resize(iconSize)
 	c.icon.Move(iconPos)
+	c.icon.Resize(iconSize)
 }
 
 // applyTheme updates this Check to the current theme
@@ -335,9 +339,6 @@ func (c *checkRenderer) updateResource() {
 		bgRes.ColorName = theme.ColorNameBackground
 	}
 	if c.check.disabled.Load() {
-		if c.check.Checked {
-			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
-		}
 		res.ColorName = theme.ColorNameDisabled
 		bgRes.ColorName = theme.ColorNameBackground
 	}

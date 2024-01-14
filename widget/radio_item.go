@@ -157,16 +157,20 @@ type radioItemRenderer struct {
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
+	innerPadding := theme.InnerPadding()
+	borderSize := theme.InputBorderSize()
+	iconInlineSize := theme.IconInlineSize()
+
+	focusIndicatorSize := fyne.NewSquareSize(iconInlineSize + innerPadding)
 	r.focusIndicator.Resize(focusIndicatorSize)
-	r.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
+	r.focusIndicator.Move(fyne.NewPos(borderSize, (size.Height-focusIndicatorSize.Height)/2))
 
 	labelSize := fyne.NewSize(size.Width, size.Height)
 	r.label.Resize(labelSize)
 	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+theme.Padding(), 0))
 
-	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
-	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
+	iconPos := fyne.NewPos(innerPadding/2+borderSize, (size.Height-iconInlineSize)/2)
+	iconSize := fyne.NewSquareSize(iconInlineSize)
 	r.icon.Resize(iconSize)
 	r.icon.Move(iconPos)
 	r.over.Resize(iconSize)
@@ -177,8 +181,7 @@ func (r *radioItemRenderer) MinSize() fyne.Size {
 	inPad := theme.InnerPadding() * 2
 
 	return r.label.MinSize().
-		Add(fyne.NewSize(inPad, inPad)).
-		Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+		AddWidthHeight(inPad+theme.IconInlineSize()+theme.Padding(), inPad)
 }
 
 func (r *radioItemRenderer) Refresh() {
