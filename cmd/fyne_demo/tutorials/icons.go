@@ -94,8 +94,10 @@ func loadIcons() []iconInfo {
 		{"SearchReplaceIcon", theme.SearchReplaceIcon()},
 
 		{"CheckButtonIcon", theme.CheckButtonIcon()},
+		{"CheckButtonFillIcon", theme.CheckButtonFillIcon()},
 		{"CheckButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
 		{"RadioButtonIcon", theme.RadioButtonIcon()},
+		{"RadioButtonFillIcon", theme.RadioButtonFillIcon()},
 		{"RadioButtonCheckedIcon", theme.RadioButtonCheckedIcon()},
 
 		{"ColorAchromaticIcon", theme.ColorAchromaticIcon()},
