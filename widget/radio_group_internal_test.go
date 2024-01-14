@@ -66,7 +66,7 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
 	render := radioGroupTestItemRenderer(t, radio, 0)
-	icon := fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill")
+	icon := theme.RadioButtonFillIcon()
 	assert.Equal(t, "primary_"+icon.Name(), render.icon.Resource.Name())
 
 	radio.Disable()

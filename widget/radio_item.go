@@ -38,8 +38,7 @@ type radioItem struct {
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	focusIndicator := canvas.NewCircle(color.Transparent)
-	// TODO move to `theme.RadioButtonFillIcon()` when we add it in 2.4
-	icon := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill"))
+	icon := canvas.NewImageFromResource(theme.RadioButtonFillIcon())
 	over := canvas.NewImageFromResource(theme.NewThemedResource(theme.RadioButtonIcon()))
 	label := canvas.NewText(i.Label, theme.ForegroundColor())
 	label.Alignment = fyne.TextAlignLeading
@@ -197,8 +196,7 @@ func (r *radioItemRenderer) update() {
 
 	out := theme.NewThemedResource(theme.RadioButtonIcon())
 	out.ColorName = theme.ColorNameInputBorder
-	// TODO move to `theme.RadioButtonFillIcon()` when we add it in 2.4
-	in := theme.NewThemedResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameRadioButtonFill"))
+	in := theme.NewThemedResource(theme.RadioButtonFillIcon())
 	in.ColorName = theme.ColorNameInputBackground
 	if r.item.Selected {
 		in.ColorName = theme.ColorNamePrimary

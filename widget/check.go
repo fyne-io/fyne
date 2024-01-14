@@ -154,12 +154,11 @@ func (c *Check) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
-	bg := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
+	bg := canvas.NewImageFromResource(theme.CheckButtonFillIcon())
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
 	text := canvas.NewText(c.Text, theme.ForegroundColor())
 	text.Alignment = fyne.TextAlignLeading
 
@@ -327,8 +326,7 @@ func (c *checkRenderer) updateLabel() {
 func (c *checkRenderer) updateResource() {
 	res := theme.NewThemedResource(theme.CheckButtonIcon())
 	res.ColorName = theme.ColorNameInputBorder
-	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
-	bgRes := theme.NewThemedResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
+	bgRes := theme.NewThemedResource(theme.CheckButtonFillIcon())
 	bgRes.ColorName = theme.ColorNameInputBackground
 
 	if c.check.Checked {
