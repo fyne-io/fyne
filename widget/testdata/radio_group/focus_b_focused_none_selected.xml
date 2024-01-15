@@ -4,19 +4,19 @@
 			<widget pos="21,43" size="98x105" type="*widget.RadioGroup">
 				<widget size="98x35" type="*widget.radioItem">
 					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radio-button-fill.svg" size="iconInlineSize" themed="inputBackground"/>
+					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
 					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
 					<text pos="32,0" size="98x35">Option A</text>
 				</widget>
 				<widget pos="0,35" size="98x35" type="*widget.radioItem">
 					<circle fillColor="focus" pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radio-button-fill.svg" size="iconInlineSize" themed="inputBackground"/>
+					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
 					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
 					<text pos="32,0" size="98x35">Option B</text>
 				</widget>
 				<widget pos="0,70" size="98x35" type="*widget.radioItem">
 					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radio-button-fill.svg" size="iconInlineSize" themed="inputBackground"/>
+					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
 					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="inputBorder"/>
 					<text pos="32,0" size="98x35">Option C</text>
 				</widget>
