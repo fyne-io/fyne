@@ -22,6 +22,7 @@ type ToolbarAction struct {
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
+	t.button.Icon = t.Icon
 	t.button.OnTapped = t.OnActivated
 	return t.button
 }
