@@ -2,18 +2,22 @@
 
 package glfw
 
-import "fyne.io/fyne/v2"
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
+)
 
 func addMissingQuitForMainMenu(menus *fyne.MainMenu, w *window) *fyne.MainMenu {
+	localQuit := lang.L("Quit")
 	var lastItem *fyne.MenuItem
 	if len(menus.Items[0].Items) > 0 {
 		lastItem = menus.Items[0].Items[len(menus.Items[0].Items)-1]
-		if lastItem.Label == "Quit" {
+		if lastItem.Label == localQuit {
 			lastItem.IsQuit = true
 		}
 	}
 	if lastItem == nil || !lastItem.IsQuit { // make sure the first menu always has a quit option
-		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem := fyne.NewMenuItem(localQuit, nil)
 		quitItem.IsQuit = true
 		menus.Items[0].Items = append(menus.Items[0].Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
