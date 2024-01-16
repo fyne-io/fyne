@@ -39,7 +39,7 @@ func SystemLocale() Locale {
 
 	tags := make([]language.Tag, len(locs))
 	for i, loc := range locs {
-		tags[i], err = language.Parse(loc[:2])
+		tags[i], err = language.Parse(loc)
 		if err != nil {
 			fyne.LogError("Error parsing user locale", err)
 		}
