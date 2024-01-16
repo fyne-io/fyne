@@ -16,19 +16,28 @@ import (
 )
 
 var (
-	// L is a shortcut to localise a string, similar to the gettext "_" function.
+	// L is a shortcut to localize a string, similar to the gettext "_" function.
+	// More info available on the `Localize` function
 	L = Localize
 
 	localizer *i18n.Localizer
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
-func Localize(in string) string {
+// The string can be templated and the template data can be passed as a struct with exported fields,
+// or as a map of string keys to any suitable value.
+func Localize(in string, data ...any) string {
+	var d0 any
+	if len(data) > 0 {
+		d0 = data[0]
+	}
+
 	ret, err := localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    in,
 			Other: in,
 		},
+		TemplateData: d0,
 	})
 
 	if err != nil {
