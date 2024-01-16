@@ -34,13 +34,14 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar(done float32) {
-	progressWidth := p.progress.size.Width
+	size := p.progress.size.Load()
+	progressWidth := size.Width
 	spanWidth := progressWidth + (progressWidth * (maxProgressBarInfiniteWidthRatio / 2))
 	maxBarWidth := progressWidth * maxProgressBarInfiniteWidthRatio
 
 	barCenterX := spanWidth*done - (spanWidth-progressWidth)/2
 	barPos := fyne.NewPos(barCenterX-maxBarWidth/2, 0)
-	barSize := fyne.NewSize(maxBarWidth, p.progress.size.Height)
+	barSize := fyne.NewSize(maxBarWidth, size.Height)
 	if barPos.X < 0 {
 		barSize.Width += barPos.X
 		barPos.X = 0
