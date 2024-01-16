@@ -13,42 +13,17 @@ type ToolbarItem interface {
 	ToolbarObject() fyne.CanvasObject
 }
 
-type toolbarActionButton struct {
-	Button
-
-	t *ToolbarAction
-}
-
-func newToolbarActionButton(t *ToolbarAction) *toolbarActionButton {
-	b := &toolbarActionButton{t: t}
-	b.ExtendBaseWidget(b)
-	return b
-}
-
-func (b *toolbarActionButton) Refresh() {
-	b.Icon = b.t.Icon
-	b.OnTapped = b.t.OnActivated
-
-	if b.t.Disabled {
-		b.Button.Disable()
-	} else {
-		b.Button.Enable()
-	}
-}
-
 // ToolbarAction is push button style of ToolbarItem
 type ToolbarAction struct {
 	Icon        fyne.Resource
 	OnActivated func() `json:"-"`
-	// Since: 2.5
-	Disabled bool
+	button      *Button
 }
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	b := newToolbarActionButton(t)
-	b.Refresh()
-	return b
+	t.button.OnTapped = t.OnActivated
+	return t.button
 }
 
 // SetIcon updates the icon on a ToolbarItem
@@ -56,11 +31,37 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 // Since: 2.2
 func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 	t.Icon = icon
+	t.button.SetIcon(t.Icon)
+	t.button.Refresh()
+}
+
+// Enable this ToolbarAction, updating any style or features appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Enable() {
+	t.button.Enable()
+}
+
+// Disable this ToolbarAction so that it cannot be interacted with, updating any style appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disable() {
+	t.button.Disable()
+}
+
+// Disabled returns true if this ToolbarAction is currently disabled or false if it can currently be interacted with.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disabled() bool {
+	return t.button.Disabled()
 }
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
-	return &ToolbarAction{Icon: icon, OnActivated: onActivated}
+	button := NewButtonWithIcon("", icon, onActivated)
+	button.Importance = LowImportance
+
+	return &ToolbarAction{Icon:icon, OnActivated: onActivated, button: button}
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
