@@ -18,6 +18,7 @@ require (
 	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jackmordaunt/icns/v2 v2.2.6
+	github.com/jeandeaual/go-locale v0.0.0-20220711133428-7de61946b173
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
@@ -33,6 +34,7 @@ require (
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
 	golang.org/x/mod v0.14.0
 	golang.org/x/sys v0.15.0
+	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.16.1
 )
 
@@ -46,6 +48,5 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

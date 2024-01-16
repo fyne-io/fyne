@@ -7,10 +7,11 @@ package lang
 
 import (
 	"encoding/json"
-	"os"
 
 	"fyne.io/fyne/v2"
+
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+
 	"golang.org/x/text/language"
 )
 
@@ -41,5 +42,6 @@ func init() {
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 	bundle.MustParseMessageFileBytes(resourceBaseFrJson.Content(), resourceBaseFrJson.Name())
-	localizer = i18n.NewLocalizer(bundle, os.Getenv("LANG")) // TODO more sophisticated
+	str := SystemLocale().LanguageString()
+	localizer = i18n.NewLocalizer(bundle, str)
 }
