@@ -4,14 +4,6 @@ package mobile
 
 import "fyne.io/fyne/v2"
 
-/*
-#cgo darwin LDFLAGS: -framework UIKit
-#import <Foundation/Foundation.h>
-
-void disableIdleTimer(BOOL disabled);
-*/
-import "C"
-
 const tapYOffset = -12.0 // to compensate for how we hold our fingers on the device
 
 func (*device) SystemScaleForWindow(_ fyne.Window) float32 {
@@ -21,8 +13,4 @@ func (*device) SystemScaleForWindow(_ fyne.Window) float32 {
 		return 2.5
 	}
 	return 2
-}
-
-func setDisableScreenBlank(disable bool) {
-	C.disableIdleTimer(C.BOOL(disable))
 }

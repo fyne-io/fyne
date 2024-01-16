@@ -31,7 +31,3 @@ func (d *device) SystemScaleForWindow(fyne.Window) float32 {
 func (*device) IsBrowser() bool {
 	return runtime.GOARCH == "js" || runtime.GOOS == "js"
 }
-
-func (*device) SetDisableScreenBlanking(_ bool) {
-	// no-op for test
-}
