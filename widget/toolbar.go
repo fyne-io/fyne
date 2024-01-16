@@ -32,7 +32,6 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 	t.Icon = icon
 	t.button.SetIcon(t.Icon)
-	t.button.Refresh()
 }
 
 // Enable this ToolbarAction, updating any style or features appropriately.
