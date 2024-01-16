@@ -41,15 +41,20 @@ const (
 	// Since: 2.0
 	IconNameMenuExpand fyne.ThemeIconName = "menuExpand"
 
+	// IconNameCheckButton is the name of theme lookup for unchecked check button icon.
+	//
+	// Since: 2.0
+	IconNameCheckButton fyne.ThemeIconName = "unchecked"
+
 	// IconNameCheckButtonChecked is the name of theme lookup for checked check button icon.
 	//
 	// Since: 2.0
 	IconNameCheckButtonChecked fyne.ThemeIconName = "checked"
 
-	// IconNameCheckButton is the name of theme lookup for  unchecked check button icon.
+	// InconNameCheckButtonFill is the name of theme lookup for filled check button icon.
 	//
-	// Since: 2.0
-	IconNameCheckButton fyne.ThemeIconName = "unchecked"
+	// Since: 2.5
+	IconNameCheckButtonFill fyne.ThemeIconName = "iconNameCheckButtonFill"
 
 	// IconNameRadioButton is the name of theme lookup for radio button unchecked icon.
 	//
@@ -60,6 +65,11 @@ const (
 	//
 	// Since: 2.0
 	IconNameRadioButtonChecked fyne.ThemeIconName = "radioButtonChecked"
+
+	// InconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
+	//
+	// Since: 2.5
+	IconNameRadioButtonFill fyne.ThemeIconName = "iconNameRadioButtonFill"
 
 	// IconNameColorAchromatic is the name of theme lookup for greyscale color icon.
 	//
@@ -489,10 +499,10 @@ var (
 
 		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
 		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
-		"iconNameCheckButtonFill":  NewThemedResource(checkboxfillIconRes),
+		IconNameCheckButtonFill:    NewThemedResource(checkboxfillIconRes),
 		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
 		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
-		"iconNameRadioButtonFill":  NewThemedResource(radiobuttonfillIconRes),
+		IconNameRadioButtonFill:    NewThemedResource(radiobuttonfillIconRes),
 
 		IconNameContentAdd:    NewThemedResource(contentaddIconRes),
 		IconNameContentClear:  NewThemedResource(cancelIconRes),
@@ -857,6 +867,13 @@ func CheckButtonCheckedIcon() fyne.Resource {
 	return safeIconLookup(IconNameCheckButtonChecked)
 }
 
+// CheckButtonFillIcon returns a resource containing the filled checkbox icon for the current theme.
+//
+// Since: 2.5
+func CheckButtonFillIcon() fyne.Resource {
+	return safeIconLookup(IconNameCheckButtonFill)
+}
+
 // RadioButtonIcon returns a resource containing the standard radio button icon for the current theme
 func RadioButtonIcon() fyne.Resource {
 	return safeIconLookup(IconNameRadioButton)
@@ -865,6 +882,13 @@ func RadioButtonIcon() fyne.Resource {
 // RadioButtonCheckedIcon returns a resource containing the standard radio button checked icon for the current theme
 func RadioButtonCheckedIcon() fyne.Resource {
 	return safeIconLookup(IconNameRadioButtonChecked)
+}
+
+// RadioButtonFillIcon returns a resource containing the filled checkbox icon for the current theme.
+//
+// Since: 2.5
+func RadioButtonFillIcon() fyne.Resource {
+	return safeIconLookup(IconNameRadioButtonFill)
 }
 
 // ContentAddIcon returns a resource containing the standard content add icon for the current theme

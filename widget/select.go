@@ -65,10 +65,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 		s.PlaceHolder = defaultPlaceHolder
 	}
 	txtProv := NewRichTextWithText(s.Selected)
-	txtProv.inset = fyne.NewSize(theme.Padding(), theme.Padding())
+	txtProv.inset = fyne.NewSquareSize(theme.Padding())
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
-	if s.disabled {
+	if s.disabled.Load() {
 		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	}
 
@@ -336,7 +336,7 @@ func (s *selectRenderer) Refresh() {
 	if s.combo.popUp != nil {
 		s.combo.popUp.alignment = s.combo.Alignment
 		s.combo.popUp.Move(s.combo.popUpPos())
-		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Width, s.combo.popUp.MinSize().Height))
+		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Load().Width, s.combo.popUp.MinSize().Height))
 		s.combo.popUp.Refresh()
 	}
 	s.background.Refresh()
@@ -344,7 +344,7 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) bgColor() color.Color {
-	if s.combo.disabled {
+	if s.combo.disabled.Load() {
 		return theme.DisabledButtonColor()
 	}
 	if s.combo.focused {
@@ -357,7 +357,7 @@ func (s *selectRenderer) bgColor() color.Color {
 }
 
 func (s *selectRenderer) updateIcon() {
-	if s.combo.disabled {
+	if s.combo.disabled.Load() {
 		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
@@ -371,7 +371,7 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	s.label.Segments[0].(*TextSegment).Style.Alignment = s.combo.Alignment
-	if s.combo.disabled {
+	if s.combo.disabled.Load() {
 		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	} else {
 		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground

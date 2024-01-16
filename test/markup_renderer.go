@@ -424,6 +424,7 @@ func knownResource(rsc fyne.Resource) string {
 	return map[fyne.Resource]string{
 		theme.CancelIcon():             "cancelIcon",
 		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
+		theme.CheckButtonFillIcon():    "checkButtonFillIcon",
 		theme.CheckButtonIcon():        "checkButtonIcon",
 		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
 		theme.ColorChromaticIcon():     "colorChromaticIcon",
@@ -483,6 +484,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.NavigateNextIcon():       "navigateNextIcon",
 		theme.QuestionIcon():           "questionIcon",
 		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
+		theme.RadioButtonFillIcon():    "radioButtonFillIcon",
 		theme.RadioButtonIcon():        "radioButtonIcon",
 		theme.SearchIcon():             "searchIcon",
 		theme.SearchReplaceIcon():      "searchReplaceIcon",

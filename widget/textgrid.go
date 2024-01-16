@@ -537,7 +537,7 @@ func (t *textGridRenderer) Refresh() {
 	t.updateCellSize()
 
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
-	t.updateGridSize(t.text.size)
+	t.updateGridSize(t.text.Size())
 	t.refreshGrid()
 }
 

@@ -147,7 +147,7 @@ func TestCheck_Focused(t *testing.T) {
 	}
 
 	check.Disable()
-	assert.True(t, check.disabled)
+	assert.True(t, check.Disabled())
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.Enable()
@@ -185,7 +185,7 @@ func TestCheck_Hovered(t *testing.T) {
 	}
 
 	check.Disable()
-	assert.True(t, check.disabled)
+	assert.True(t, check.Disabled())
 	assert.True(t, check.hovered)
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 

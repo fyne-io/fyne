@@ -114,17 +114,16 @@ func (t *RichText) Refresh() {
 //
 // Implements: fyne.Widget
 func (t *RichText) Resize(size fyne.Size) {
+	if size == t.size.Load() {
+		return
+	}
+
+	t.size.Store(size)
+
 	t.propertyLock.RLock()
-	baseSize := t.size
 	segments := t.Segments
 	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
 	t.propertyLock.RUnlock()
-	if baseSize == size {
-		return
-	}
-	t.propertyLock.Lock()
-	t.size = size
-	t.propertyLock.Unlock()
 
 	if skipResize {
 		if len(segments) < 2 { // we can simplify :)
@@ -364,7 +363,7 @@ func (t *RichText) rows() int {
 func (t *RichText) updateRowBounds() {
 	th := t.Theme()
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
-	fitSize := t.Size()
+	fitSize := t.size.Load()
 	if t.scr != nil {
 		fitSize = t.scr.Content.MinSize()
 	}
@@ -372,7 +371,7 @@ func (t *RichText) updateRowBounds() {
 
 	t.propertyLock.RLock()
 	var bounds []rowBoundary
-	maxWidth := t.size.Width - 2*innerPadding + 2*t.inset.Width
+	maxWidth := t.size.Load().Width - 2*innerPadding + 2*t.inset.Width
 	wrapWidth := maxWidth
 
 	var currentBound *rowBoundary
