@@ -50,3 +50,5 @@ require (
 	golang.org/x/net v0.19.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/jeandeaual/go-locale => github.com/andydotxyz/go-locale v0.0.0-20240117102327-c3c90d275541
