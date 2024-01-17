@@ -170,6 +170,27 @@ Alternatively a list of applications using fyne can be found at [our website](ht
 All Fyne apps will work without pre-installed libraries, this is one reason the apps are so portable.
 However, if looking to support Fyne in a bigger way on your operating system then you can install some utilities that help to make a more complete experience.
 
+# Helping contribute to the quality of Fyne release
+
+Once you have created your own Fyne application, you might want to ensure that you can easily update to the latest release and that nothing get broken for your application during Fyne development cycle and get unoticed. Fyne has a lot of API and it is hard to forsee all the possible way of using its API. That why application tests are useful and as we recommend to write them just for your own to help maintain your application, they can also be put to good use to ensure Fyne release have the highest release quality for you. This is why we do maintain a GitHub action workflow that you can call to ensure to build and tests your application with Fyne current master, release and develop branch.
+
+Here is an example workflow that will run the tests once a day a 4am UTC and that you can also trigger manually.
+
+```yaml
+name: Run tests on all maintained fyne branch every day at 4am UTC
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  fyne-qa-all:
+    uses: fyne-io/fyne/.github/workflows/fyne-qa-all.yml@develop
+```
+
+Note, that we do not have any telemetry and do not plan to implement any. This is not going to report automatically if there is any issues either with your code or Fyne. You will receive an email from GitHub if the action fail to build and you will have to investigate the error to see if it is a bug in your application or in Fyne and if it is already known by the Fyne project. Never the less, if you have time to turn this on for your project, and can spend the time report bugs ahead of release, this will help us deliver better quality release.
+
 ## Additional apps
 
 It is recommended that you install the following additional apps:

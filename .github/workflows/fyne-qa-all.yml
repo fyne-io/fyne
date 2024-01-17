@@ -1,0 +1,29 @@
+name: Run tests on all maintained fyne branch
+
+on:
+  workflow_call:
+    inputs:
+      tags:
+        description: 'Tags to pass when running tests'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  qa-develop:
+    uses: fyne-io/fyne/.github/workflows/fyne-qa.yml@develop
+    with:
+      branch: develop
+      tags: ${{ inputs.tags }}
+
+  qa-master:
+    uses: fyne-io/fyne/.github/workflows/fyne-qa.yml@develop
+    with:
+      branch: master
+      tags: ${{ inputs.tags }}
+        
+  qa-v24:
+    uses: fyne-io/fyne/.github/workflows/fyne-qa.yml@develop
+    with:
+      branch: "release/v2.4.x"
+      tags: ${{ inputs.tags }}

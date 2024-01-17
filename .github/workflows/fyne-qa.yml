@@ -1,0 +1,56 @@
+name: Run tests using fyne version from specified branch
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        description: 'Branch to run tests on'
+        required: true
+        default: 'master'
+        type: string
+      tags:
+        description: 'Tags to pass when running tests'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  qa:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+
+      - name: Install fyne dependencies
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+
+      - name: Install fyne
+        env:
+          GOPROXY: direct
+        run: go install fyne.io/fyne/v2/cmd/fyne@${{ inputs.branch }}
+
+      - name: Switch to requested branch
+        env:
+          GOPROXY: direct
+        run: |
+          go get fyne.io/fyne/v2@${{ inputs.branch }}
+          go mod tidy
+
+      - name: Run test with tags
+        if: ${{ inputs.tags != '' }}
+        run: go test -tags ${{ inputs.tags }} ./...
+
+      - name: Run test without tags
+        if: ${{ inputs.tags == '' }}
+        run: go test ./...
+
+      - name: Build the application with fyne
+        run: fyne package      
