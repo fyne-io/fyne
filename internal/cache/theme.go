@@ -2,19 +2,21 @@ package cache
 
 import (
 	"strconv"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/svg"
 )
 
-var overrides = make(map[fyne.Widget]*overrideScope)
+var (
+	overrides     = make(map[fyne.Widget]*overrideScope)
+	overrideCount = atomic.Uint32{}
+)
 
 type overrideScope struct {
 	th      fyne.Theme
 	cacheID string
 }
-
-var nextID = 1
 
 // OverrideTheme allows an app to specify that a single object should use a different theme to the app.
 // This should be used sparingly to avoid a jarring user experience.
@@ -22,9 +24,9 @@ var nextID = 1
 //
 // Since: 2.5
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
-	s := &overrideScope{th: th, cacheID: strconv.Itoa(nextID)}
-	overrideTheme(o, s, nextID)
-	nextID++
+	id := overrideCount.Add(1)
+	s := &overrideScope{th: th, cacheID: strconv.Itoa(int(id))}
+	overrideTheme(o, s, id)
 }
 
 func WidgetTheme(o fyne.Widget) fyne.Theme {
@@ -78,13 +80,13 @@ func (res *WidgetResource) Name() string {
 	return cacheID + res.ThemedResource.Name()
 }
 
-func overrideContainer(c *fyne.Container, s *overrideScope, id int) {
+func overrideContainer(c *fyne.Container, s *overrideScope, id uint32) {
 	for _, o := range c.Objects {
 		overrideTheme(o, s, id)
 	}
 }
 
-func overrideTheme(o fyne.CanvasObject, s *overrideScope, id int) {
+func overrideTheme(o fyne.CanvasObject, s *overrideScope, id uint32) {
 	switch c := o.(type) {
 	case fyne.Widget:
 		overrideWidget(c, s, id)
@@ -93,7 +95,7 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope, id int) {
 	}
 }
 
-func overrideWidget(w fyne.Widget, s *overrideScope, id int) {
+func overrideWidget(w fyne.Widget, s *overrideScope, id uint32) {
 	ResetThemeCaches()
 	overrides[w] = s
 
