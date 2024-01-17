@@ -24,6 +24,7 @@ var (
 	// More info available on the `LocalizePlural` function.
 	N = LocalizePlural
 
+	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
 )
 
@@ -77,8 +78,24 @@ func LocalizePlural(in string, count int, data ...any) string {
 	return ret
 }
 
+// AddLanguage allows an app to load a bundle of translations.
+// The language that this relates to will be inferred from the resource name, for example "fr.json".
+func AddLanguage(r fyne.Resource) error {
+	return addLanguage(r.Content(), r.Name())
+}
+
+// AddLanguageForLocale allows an app to load a bundle of translations for a specified locale.
+func AddLanguageForLocale(r fyne.Resource, l Locale) error {
+	return addLanguage(r.Content(), l.String())
+}
+
+func addLanguage(data []byte, name string) error {
+	_, err := bundle.ParseMessageFileBytes(data, name)
+	return err
+}
+
 func init() {
-	bundle := i18n.NewBundle(language.English)
+	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 	bundle.MustParseMessageFileBytes(resourceBaseFrJson.Content(), resourceBaseFrJson.Name())
 	str := SystemLocale().LanguageString()

@@ -3,6 +3,7 @@ package lang_test
 import (
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,6 +25,13 @@ func TestLocalize_Map(t *testing.T) {
 }
 
 func TestLocalizePlural_Fallback(t *testing.T) {
+	lang.AddLanguage(fyne.NewStaticResource("en.json", []byte(`{
+  "Apple": {
+    "one": "Apple",
+    "other": "Apples"
+  }
+}`)))
 	assert.Equal(t, "Missing", lang.N("Missing", 1))
 	assert.Equal(t, "Apple", lang.N("Apple", 1))
+	assert.Equal(t, "Apples", lang.N("Apple", 2))
 }
