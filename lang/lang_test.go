@@ -22,3 +22,8 @@ func TestLocalize_Struct(t *testing.T) {
 func TestLocalize_Map(t *testing.T) {
 	assert.Equal(t, "Hello World!", lang.L("Hello {{.Str}}!", map[string]string{"Str": "World"}))
 }
+
+func TestLocalizePlural_Fallback(t *testing.T) {
+	assert.Equal(t, "Missing", lang.N("Missing", 1))
+	assert.Equal(t, "Apple", lang.N("Apple", 1))
+}

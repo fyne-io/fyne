@@ -20,6 +20,10 @@ var (
 	// More info available on the `Localize` function
 	L = Localize
 
+	// N is a shortcut to localize a string with plural forms, similar to the ngettext function.
+	// More info available on the `LocalizePlural` function.
+	N = LocalizePlural
+
 	localizer *i18n.Localizer
 )
 
@@ -37,6 +41,32 @@ func Localize(in string, data ...any) string {
 			ID:    in,
 			Other: in,
 		},
+		TemplateData: d0,
+	})
+
+	if err != nil {
+		fyne.LogError("Translation failure", err)
+		return in
+	}
+	return ret
+}
+
+// LocalizePlural asks the translation engine to translate a string from one of a number of plural forms.
+// This behaves like the ngettext function, with the `count` parameter determining the plurality looked up.
+// The string can be templated and the template data can be passed as a struct with exported fields,
+// or as a map of string keys to any suitable value.
+func LocalizePlural(in string, count int, data ...any) string {
+	var d0 any
+	if len(data) > 0 {
+		d0 = data[0]
+	}
+
+	ret, err := localizer.Localize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID:    in,
+			Other: in,
+		},
+		PluralCount:  count,
 		TemplateData: d0,
 	})
 
