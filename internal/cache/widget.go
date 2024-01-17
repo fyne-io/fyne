@@ -57,7 +57,7 @@ func DestroyRenderer(wid fyne.Widget) {
 	if rinfo != nil {
 		rinfo.renderer.Destroy()
 	}
-	delete(overrides, wid)
+	overrides.Delete(wid)
 
 	renderersLock.Lock()
 	delete(renderers, wid)

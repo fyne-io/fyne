@@ -2,6 +2,7 @@ package cache
 
 import (
 	"strconv"
+	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -9,7 +10,7 @@ import (
 )
 
 var (
-	overrides     = make(map[fyne.Widget]*overrideScope)
+	overrides     = &sync.Map{} // map[fyne.Widget]*overrideScope
 	overrideCount = atomic.Uint32{}
 )
 
@@ -30,12 +31,12 @@ func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 }
 
 func WidgetTheme(o fyne.Widget) fyne.Theme {
-	data, ok := overrides[o]
+	data, ok := overrides.Load(o)
 	if !ok {
 		return nil
 	}
 
-	return data.th
+	return data.(*overrideScope).th
 }
 
 func OverrideResourceTheme(res fyne.Resource, w fyne.Widget) fyne.Resource {
@@ -48,8 +49,8 @@ func OverrideResourceTheme(res fyne.Resource, w fyne.Widget) fyne.Resource {
 
 func themeForResource(res fyne.Resource) fyne.Theme {
 	if th, ok := res.(*WidgetResource); ok {
-		if over, ok := overrides[th.Owner]; ok {
-			return over.th
+		if over, ok := overrides.Load(th.Owner); ok {
+			return over.(*overrideScope).th
 		}
 	}
 
@@ -74,8 +75,8 @@ func (res *WidgetResource) Content() []byte {
 
 func (res *WidgetResource) Name() string {
 	cacheID := ""
-	if over, ok := overrides[res.Owner]; ok {
-		cacheID = over.cacheID
+	if over, ok := overrides.Load(res.Owner); ok {
+		cacheID = over.(*overrideScope).cacheID
 	}
 	return cacheID + res.ThemedResource.Name()
 }
@@ -97,7 +98,7 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope, id uint32) {
 
 func overrideWidget(w fyne.Widget, s *overrideScope, id uint32) {
 	ResetThemeCaches()
-	overrides[w] = s
+	overrides.Store(w, s)
 
 	r := Renderer(w)
 	if r == nil {
