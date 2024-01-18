@@ -196,7 +196,11 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
 
-		if len(c.windowHead.(*fyne.Container).Objects) > 1 {
+		chromeBox := c.windowHead.(*fyne.Container)
+		if c.padded {
+			chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+		}
+		if len(chromeBox.Objects) > 1 {
 			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
 			offset = fyne.NewPos(0, topHeight)
 			areaSize = areaSize.Subtract(offset)
