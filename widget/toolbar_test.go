@@ -112,7 +112,7 @@ func TestToolbarAction_UpdateOnActivated(t *testing.T) {
 	activated := false
 
 	testIcon := theme.InfoIcon()
-	toolbarAction := NewToolbarAction(testIcon, func() {activated = true})
+	toolbarAction := NewToolbarAction(testIcon, func() { activated = true })
 
 	test.Tap(toolbarAction.ToolbarObject().(*Button))
 
@@ -125,4 +125,11 @@ func TestToolbarAction_UpdateOnActivated(t *testing.T) {
 	test.Tap(toolbarAction.ToolbarObject().(*Button))
 
 	assert.False(t, activated)
+}
+
+func TestToolbarAction_DefaultCreation(t *testing.T) {
+	testIcon := theme.InfoIcon()
+	toolbarAction := ToolbarAction{Icon: testIcon}
+	obj := toolbarAction.ToolbarObject()
+	assert.Equal(t, testIcon, obj.(*Button).Icon)
 }
