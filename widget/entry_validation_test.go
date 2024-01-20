@@ -2,6 +2,10 @@ package widget_test
 
 import (
 	"errors"
+	"image"
+	"image/png"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"fyne.io/fyne/v2/data/validation"
@@ -85,6 +89,20 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 
 	test.AssertRendersToMarkup(t, "entry/validator_not_empty_unfocused.xml", w.Canvas())
 }
+func writeImage(path string, img image.Image) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	if err = png.Encode(f, img); err != nil {
+		f.Close()
+		return err
+	}
+	return f.Close()
+}
 
 func TestEntry_SetValidationError(t *testing.T) {
 	entry, window := setupImageTest(t, false)
@@ -96,6 +114,9 @@ func TestEntry_SetValidationError(t *testing.T) {
 
 	entry.SetText("2020-30-30")
 	entry.SetValidationError(errors.New("set invalid"))
+
+	c.Capture()
+
 	test.AssertImageMatches(t, "entry/validation_set_invalid.png", c.Capture())
 
 	entry.SetText("set valid")

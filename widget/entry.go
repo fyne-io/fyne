@@ -1475,7 +1475,7 @@ func (e *Entry) updateText(text string) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string) {
 	var callback func(string)
-	e.setFields(func() {
+	e.setFieldsAndRefresh(func() {
 		changed := e.updateText(text)
 
 		if changed {

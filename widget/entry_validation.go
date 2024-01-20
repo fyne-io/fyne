@@ -12,21 +12,21 @@ var _ fyne.Validatable = (*Entry)(nil)
 
 // Validate validates the current text in the widget
 func (e *Entry) Validate() error {
-	err, updated := e.validate()
-	if updated {
+	err, needUpdate := e.validate()
+	if needUpdate {
 		e.Refresh()
 	}
 	return err
 }
 
 // validate validates the current text in the widget but not refresh
-func (e *Entry) validate() (err error, updated bool) {
+func (e *Entry) validate() (err error, needUpdate bool) {
 	if e.Validator == nil {
 		return nil, false
 	}
 
 	err = e.Validator(e.Text)
-	updated = e.setValidationError(err)
+	needUpdate = e.setValidationError(err)
 	return
 }
 
