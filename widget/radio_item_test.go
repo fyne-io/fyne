@@ -10,6 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var globalRadioRenderer fyne.WidgetRenderer
+
+func BenchmarkRadioCreateRenderer(b *testing.B) {
+	var renderer fyne.WidgetRenderer
+	widget := &radioItem{}
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		renderer = widget.CreateRenderer()
+	}
+
+	// Avoid having the value optimized out by the compiler.
+	globalRadioRenderer = renderer
+}
+
 func TestRadioItem_FocusIndicator_Centered_Vertically(t *testing.T) {
 	item := newRadioItem("Hello", nil)
 	render := test.WidgetRenderer(item).(*radioItemRenderer)
