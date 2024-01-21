@@ -3,7 +3,7 @@ package lang
 import (
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 
-	"github.com/jeandeaual/go-locale"
+	"github.com/fyne-io/go-locale"
 )
 
 func init() {

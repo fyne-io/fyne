@@ -3,7 +3,7 @@ package lang
 import (
 	"fyne.io/fyne/v2"
 
-	"github.com/jeandeaual/go-locale"
+	"github.com/fyne-io/go-locale"
 
 	"golang.org/x/text/language"
 )
