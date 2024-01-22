@@ -17,8 +17,12 @@ import (
 
 var (
 	// L is a shortcut to localize a string, similar to the gettext "_" function.
-	// More info available on the `Localize` function
+	// More info available on the `Localize` function.
 	L = Localize
+
+	// X is a shortcut to get the locaization of a string with specified key.
+	// More info available on the `LocalizeKey` function.
+	X = LocalizeKey
 
 	// N is a shortcut to localize a string with plural forms, similar to the ngettext function.
 	// More info available on the `LocalizePlural` function.
@@ -32,6 +36,14 @@ var (
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func Localize(in string, data ...any) string {
+	return LocalizeKey(in, in, data)
+}
+
+// LocalizeKey asks the translation engine for the translation with specific ID.
+// If it cannot be found then the fallback will be used.
+// The string can be templated and the template data can be passed as a struct with exported fields,
+// or as a map of string keys to any suitable value.
+func LocalizeKey(key, fallback string, data ...any) string {
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
@@ -39,15 +51,15 @@ func Localize(in string, data ...any) string {
 
 	ret, err := localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
-			ID:    in,
-			Other: in,
+			ID:    key,
+			Other: fallback,
 		},
 		TemplateData: d0,
 	})
 
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return in
+		return fallback
 	}
 	return ret
 }

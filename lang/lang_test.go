@@ -35,3 +35,12 @@ func TestLocalizePlural_Fallback(t *testing.T) {
 	assert.Equal(t, "Apple", lang.N("Apple", 1))
 	assert.Equal(t, "Apples", lang.N("Apple", 2))
 }
+
+func TestLocalizeKey_Fallback(t *testing.T) {
+	lang.AddLanguage(fyne.NewStaticResource("en.json", []byte(`{
+  "appleID": "Apple Matched"
+}`)))
+
+	assert.Equal(t, "Apple", lang.X("appleIDMissing", "Apple"))
+	assert.Equal(t, "Apple Matched", lang.X("appleID", "Apple"))
+}
