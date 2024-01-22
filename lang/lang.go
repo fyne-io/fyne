@@ -125,6 +125,7 @@ func init() {
 		all = []string{"en"}
 	}
 	str := closestSupportedLocale(all).LanguageString()
+	setupLang(str)
 	localizer = i18n.NewLocalizer(bundle, str)
 }
 
@@ -150,4 +151,9 @@ func loadTranslationsFromFS(fs embed.FS, dir string) {
 		tag := language.Make(name)
 		translated = append(translated, tag)
 	}
+}
+
+// A utility for setting up languages - available to unit tests for overriding system
+func setupLang(lang string) {
+	localizer = i18n.NewLocalizer(bundle, lang)
 }
