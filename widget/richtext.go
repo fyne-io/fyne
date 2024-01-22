@@ -28,9 +28,13 @@ const (
 // Since: 2.1
 type RichText struct {
 	BaseWidget
-	Segments   []RichTextSegment
-	Wrapping   fyne.TextWrap
-	Scroll     widget.ScrollDirection
+	Segments []RichTextSegment
+	Wrapping fyne.TextWrap
+	Scroll   widget.ScrollDirection
+
+	// The truncation mode of the text
+	//
+	// Since: 2.4
 	Truncation fyne.TextTruncation
 
 	inset     fyne.Size     // this varies due to how the widget works (entry with scroller vs others with padding)
