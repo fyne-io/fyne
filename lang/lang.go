@@ -38,7 +38,7 @@ var (
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func Localize(in string, data ...any) string {
-	return LocalizeKey(in, in, data)
+	return LocalizeKey(in, in, data...)
 }
 
 // LocalizeKey asks the translation engine for the translation with specific ID.
