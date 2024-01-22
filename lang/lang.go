@@ -6,7 +6,9 @@ package lang
 import (
 	"embed"
 	"encoding/json"
+	"log"
 	"strings"
+	"text/template"
 
 	"fyne.io/fyne/v2"
 	"github.com/fyne-io/go-locale"
@@ -63,7 +65,7 @@ func LocalizeKey(key, fallback string, data ...any) string {
 
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return fallback
+		return fallbackWithData(key, fallback, d0)
 	}
 	return ret
 }
@@ -89,7 +91,7 @@ func LocalizePlural(in string, count int, data ...any) string {
 
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return in
+		return fallbackWithData(in, in, d0)
 	}
 	return ret
 }
@@ -127,6 +129,17 @@ func init() {
 	str := closestSupportedLocale(all).LanguageString()
 	setupLang(str)
 	localizer = i18n.NewLocalizer(bundle, str)
+}
+
+func fallbackWithData(key, fallback string, data any) string {
+	t, err := template.New(key).Parse(fallback)
+	if err != nil {
+		log.Println("Could not parse fallback template")
+		return fallback
+	}
+	str := &strings.Builder{}
+	_ = t.Execute(str, data)
+	return str.String()
 }
 
 func loadTranslationsFromFS(fs embed.FS, dir string) {
