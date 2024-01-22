@@ -1,11 +1,10 @@
-//go:generate fyne bundle -o translations.go -package lang ../internal/translations/
-
 // Package lang introduces a translation and localisation API for Fyne applications
 //
 // Since 2.5
 package lang
 
 import (
+	"embed"
 	"encoding/json"
 
 	"fyne.io/fyne/v2"
@@ -30,6 +29,9 @@ var (
 
 	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
+
+	//go:embed translations
+	translations embed.FS
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
@@ -111,7 +113,20 @@ func addLanguage(data []byte, name string) error {
 func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	bundle.MustParseMessageFileBytes(resourceBaseFrJson.Content(), resourceBaseFrJson.Name())
+
+	files, err := translations.ReadDir("translations")
+	if err != nil {
+		fyne.LogError("failed to read bundled translations", err)
+	} else {
+		for _, f := range files {
+			data, err := translations.ReadFile("translations/" + f.Name())
+			if err != nil {
+				fyne.LogError("failed to read bundled translation", err)
+				continue
+			}
+			bundle.MustParseMessageFileBytes(data, f.Name())
+		}
+	}
 	str := SystemLocale().LanguageString()
 	localizer = i18n.NewLocalizer(bundle, str)
 }
