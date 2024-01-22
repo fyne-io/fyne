@@ -6,9 +6,10 @@ package lang
 import (
 	"embed"
 	"encoding/json"
+	"strings"
 
 	"fyne.io/fyne/v2"
-
+	"github.com/fyne-io/go-locale"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"golang.org/x/text/language"
@@ -32,6 +33,7 @@ var (
 
 	//go:embed translations
 	translations embed.FS
+	translated   []language.Tag
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
@@ -114,19 +116,38 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	files, err := translations.ReadDir("translations")
+	loadTranslationsFromFS(translations, "translations")
+
+	// Find the closest translation from the user's locale list and set it up
+	all, err := locale.GetLocales()
+	if err != nil {
+		fyne.LogError("Failed to load user locales", err)
+		all = []string{"en"}
+	}
+	str := closestSupportedLocale(all).LanguageString()
+	localizer = i18n.NewLocalizer(bundle, str)
+}
+
+func loadTranslationsFromFS(fs embed.FS, dir string) {
+	files, err := fs.ReadDir(dir)
 	if err != nil {
 		fyne.LogError("failed to read bundled translations", err)
-	} else {
-		for _, f := range files {
-			data, err := translations.ReadFile("translations/" + f.Name())
-			if err != nil {
-				fyne.LogError("failed to read bundled translation", err)
-				continue
-			}
-			bundle.MustParseMessageFileBytes(data, f.Name())
-		}
+		return
 	}
-	str := SystemLocale().LanguageString()
-	localizer = i18n.NewLocalizer(bundle, str)
+
+	for _, f := range files {
+		data, err := fs.ReadFile(dir + "/" + f.Name())
+		if err != nil {
+			fyne.LogError("failed to read bundled translation", err)
+			continue
+		}
+		bundle.MustParseMessageFileBytes(data, f.Name())
+
+		name := "en"
+		if !strings.Contains(f.Name(), "template") {
+			name = f.Name()[5 : len(f.Name())-5]
+		}
+		tag := language.Make(name)
+		translated = append(translated, tag)
+	}
 }
