@@ -101,7 +101,7 @@ func AddTranslations(r fyne.Resource) error {
 
 // AddTranslationsForLocale allows an app to load a bundle of translations for a specified locale.
 // The data should be in json format.
-func AddTranslationsForLocale(data []byte, l Locale) error {
+func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
 	return addLanguage(data, l.String()+".json")
 }
 

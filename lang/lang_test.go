@@ -21,7 +21,7 @@ func TestAddTranslations(t *testing.T) {
 
 	err = lang.AddTranslationsForLocale([]byte(`{
   "Test2": "Match2"
-}`), lang.Locale{Language: "en"})
+}`), "en")
 	assert.Nil(t, err)
 	assert.Equal(t, "Match2", lang.L("Test2"))
 

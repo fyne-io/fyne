@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 )
 
 type glDevice struct {
@@ -11,6 +12,10 @@ type glDevice struct {
 
 // Declare conformity with Device
 var _ fyne.Device = (*glDevice)(nil)
+
+func (*glDevice) Locale() fyne.Locale {
+	return lang.SystemLocale()
+}
 
 func (*glDevice) Orientation() fyne.DeviceOrientation {
 	return fyne.OrientationHorizontalLeft // TODO should we consider the monitor orientation or topmost window?

@@ -31,6 +31,11 @@ type Device interface {
 	IsBrowser() bool
 	HasKeyboard() bool
 	SystemScaleForWindow(Window) float32
+
+	// Locale returns the information about this device's language and region.
+	//
+	// Since: 2.5
+	Locale() Locale
 }
 
 // CurrentDevice returns the device information for the current hardware (via the driver)

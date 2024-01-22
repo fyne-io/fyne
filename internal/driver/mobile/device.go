@@ -1,10 +1,10 @@
 package mobile
 
 import (
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
-
-	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 )
 
 type device struct {
@@ -19,6 +19,10 @@ var (
 
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
+
+func (*device) Locale() fyne.Locale {
+	return lang.SystemLocale()
+}
 
 func (*device) Orientation() fyne.DeviceOrientation {
 	switch currentOrientation {
