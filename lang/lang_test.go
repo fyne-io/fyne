@@ -1,12 +1,32 @@
 package lang_test
 
 import (
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestAddTranslations(t *testing.T) {
+	oldLang := os.Getenv("LANG")
+	_ = os.Setenv("LANG", "en")
+
+	err := lang.AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+  "Test": "Match"
+}`)))
+	assert.Nil(t, err)
+	assert.Equal(t, "Match", lang.L("Test"))
+
+	err = lang.AddTranslationsForLocale([]byte(`{
+  "Test2": "Match2"
+}`), lang.Locale{Language: "en"})
+	assert.Nil(t, err)
+	assert.Equal(t, "Match2", lang.L("Test2"))
+
+	_ = os.Setenv("LANG", oldLang)
+}
 
 func TestLocalize_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", lang.L("Missing"))
@@ -25,7 +45,7 @@ func TestLocalize_Map(t *testing.T) {
 }
 
 func TestLocalizePlural_Fallback(t *testing.T) {
-	lang.AddLanguage(fyne.NewStaticResource("en.json", []byte(`{
+	_ = lang.AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
   "Apple": {
     "one": "Apple",
     "other": "Apples"
@@ -37,7 +57,7 @@ func TestLocalizePlural_Fallback(t *testing.T) {
 }
 
 func TestLocalizeKey_Fallback(t *testing.T) {
-	lang.AddLanguage(fyne.NewStaticResource("en.json", []byte(`{
+	_ = lang.AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
   "appleID": "Apple Matched"
 }`)))
 

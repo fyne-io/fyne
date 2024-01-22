@@ -90,15 +90,17 @@ func LocalizePlural(in string, count int, data ...any) string {
 	return ret
 }
 
-// AddLanguage allows an app to load a bundle of translations.
+// AddTranslations allows an app to load a bundle of translations.
 // The language that this relates to will be inferred from the resource name, for example "fr.json".
-func AddLanguage(r fyne.Resource) error {
+// The data should be in json format.
+func AddTranslations(r fyne.Resource) error {
 	return addLanguage(r.Content(), r.Name())
 }
 
-// AddLanguageForLocale allows an app to load a bundle of translations for a specified locale.
-func AddLanguageForLocale(r fyne.Resource, l Locale) error {
-	return addLanguage(r.Content(), l.String())
+// AddTranslationsForLocale allows an app to load a bundle of translations for a specified locale.
+// The data should be in json format.
+func AddTranslationsForLocale(data []byte, l Locale) error {
+	return addLanguage(data, l.String()+".json")
 }
 
 func addLanguage(data []byte, name string) error {

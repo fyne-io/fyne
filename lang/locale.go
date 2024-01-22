@@ -19,10 +19,18 @@ type Locale struct {
 }
 
 func (l Locale) LanguageString() string {
+	if l.Region == "" {
+		return string(l.Language)
+	}
+
 	return string(l.Language) + "-" + string(l.Region)
 }
 
 func (l Locale) String() string {
+	if l.Script == "" {
+		return l.LanguageString()
+	}
+
 	return l.LanguageString() + "-" + string(l.Script)
 }
 
