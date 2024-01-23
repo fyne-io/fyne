@@ -22,13 +22,17 @@ var (
 	// More info available on the `Localize` function.
 	L = Localize
 
-	// X is a shortcut to get the locaization of a string with specified key.
-	// More info available on the `LocalizeKey` function.
-	X = LocalizeKey
-
 	// N is a shortcut to localize a string with plural forms, similar to the ngettext function.
 	// More info available on the `LocalizePlural` function.
 	N = LocalizePlural
+
+	// X is a shortcut to get the localization of a string with specified key, similar to pgettext.
+	// More info available on the `LocalizeKey` function.
+	X = LocalizeKey
+
+	// XN is a shortcut to get the localization plural form of a string with specified key, similar to npgettext.
+	// More info available on the `LocalizePluralKey` function.
+	XN = LocalizePluralKey
 
 	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
@@ -75,6 +79,15 @@ func LocalizeKey(key, fallback string, data ...any) string {
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func LocalizePlural(in string, count int, data ...any) string {
+	return LocalizePluralKey(in, in, count, data...)
+}
+
+// LocalizePluralKey asks the translation engine for the translation with specific ID in plural form.
+// This behaves like the npgettext function, with the `count` parameter determining the plurality looked up.
+// If it cannot be found then the fallback will be used.
+// The string can be templated and the template data can be passed as a struct with exported fields,
+// or as a map of string keys to any suitable value.
+func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
@@ -82,8 +95,8 @@ func LocalizePlural(in string, count int, data ...any) string {
 
 	ret, err := localizer.Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
-			ID:    in,
-			Other: in,
+			ID:    key,
+			Other: fallback,
 		},
 		PluralCount:  count,
 		TemplateData: d0,
@@ -91,7 +104,7 @@ func LocalizePlural(in string, count int, data ...any) string {
 
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return fallbackWithData(in, in, d0)
+		return fallbackWithData(key, fallback, d0)
 	}
 	return ret
 }
