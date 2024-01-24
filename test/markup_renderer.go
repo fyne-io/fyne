@@ -131,9 +131,6 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if rsc == nil {
 		return
 	}
-	//if strings.Contains(name, "_") {
-	//	name = strings.Split(name, "_")[1]
-	//}
 
 	if value := knownResource(rsc); value != "" {
 		r.setStringAttr(attrs, name, value)
@@ -288,7 +285,7 @@ func (r *markupRenderer) writeCloseTag(name string) {
 	r.w.WriteString(">\n")
 }
 
-func (r *markupRenderer) writeContainer(c *fyne.Container, attrs map[string]*string) {
+func (r *markupRenderer) writeContainer(_ *fyne.Container, attrs map[string]*string) {
 	r.writeTag("container", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
