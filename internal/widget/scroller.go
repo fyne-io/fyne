@@ -42,7 +42,16 @@ type scrollBarRenderer struct {
 }
 
 func (r *scrollBarRenderer) Layout(size fyne.Size) {
-	r.background.Resize(size)
+	pl := theme.ScrollBarPaddingAlong()
+	pc := theme.ScrollBarPaddingAcross()
+	switch r.scrollBar.orientation {
+	case scrollBarOrientationHorizontal:
+		r.background.Resize(fyne.NewSize(size.Width - 2 * pl, size.Height - 2 * pc))
+		r.background.Move(fyne.NewPos(pl, pc))
+	case scrollBarOrientationVertical:
+		r.background.Resize(fyne.NewSize(size.Width - 2 * pc, size.Height - 2 * pl))
+		r.background.Move(fyne.NewPos(pc, pl))
+	}
 }
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
@@ -51,6 +60,7 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 
 func (r *scrollBarRenderer) Refresh() {
 	r.background.FillColor = theme.ScrollBarColor()
+	r.background.CornerRadius = theme.ScrollBarCornerRadius()
 	r.background.Refresh()
 }
 
@@ -68,6 +78,7 @@ type scrollBar struct {
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.ScrollBarColor())
+	background.CornerRadius = theme.ScrollBarCornerRadius()
 	r := &scrollBarRenderer{
 		scrollBar:  b,
 		background: background,
@@ -162,8 +173,8 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 	if scrollLength < contentLength {
 		portion := scrollLength / contentLength
 		length = float32(int(scrollLength)) * portion
-		if length < theme.ScrollBarSize() {
-			length = theme.ScrollBarSize()
+		if length < theme.ScrollBarLimitSize() {
+			length = theme.ScrollBarLimitSize()
 		}
 	} else {
 		length = scrollLength
@@ -273,8 +284,17 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 	c := r.scroll.Content
-	c.Resize(c.MinSize().Max(size))
-
+	p := theme.ScrollPadding()
+	switch s.Direction {
+	case ScrollBoth:
+		c.Resize(c.MinSize().Max(size.SubtractWidthHeight(p, p)))
+	case ScrollHorizontalOnly:
+		c.Resize(c.MinSize().Max(size.SubtractWidthHeight(0, p)))
+	case ScrollVerticalOnly:
+		c.Resize(c.MinSize().Max(size.SubtractWidthHeight(p, 0)))
+	case ScrollNone:
+		c.Resize(c.MinSize().Max(size))
+	}
 	r.layoutBars(size)
 }
 
@@ -418,12 +438,13 @@ func (s *Scroll) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *Scroll) MinSize() fyne.Size {
-	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
+	p := theme.ScrollPadding()
+	min := fyne.NewSize(scrollContainerMinSize + p, scrollContainerMinSize + p).Max(s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
-		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height)
+		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height + p)
 	case ScrollVerticalOnly:
-		min.Width = fyne.Max(min.Width, s.Content.MinSize().Width)
+		min.Width = fyne.Max(min.Width, s.Content.MinSize().Width + p)
 	case ScrollNone:
 		return s.Content.MinSize()
 	}

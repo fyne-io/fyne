@@ -28,10 +28,25 @@ const (
 	// Since: 2.0
 	SizeNamePadding fyne.ThemeSizeName = "padding"
 
+	// SizeNameScrollPadding is the name of theme lookup for scroll padding. Can be used to make the scrollbar non-overlapping.
+	SizeNameScrollPadding fyne.ThemeSizeName = "scrollPadding"
+
+	// SizeNameScrollBarPaddingAlong is the name of theme lookup for scrollbar padding along. Can be used to make the scrollbar-thumb shorter than.
+	SizeNameScrollBarPaddingAlong fyne.ThemeSizeName = "scrollBarPaddingAlong"
+
+	// SizeNameScrollBarPaddingAcross is the name of theme lookup for scrollbar padding across. Can be used to make the scrollbar-thumb thinner than the scrollbar.
+	SizeNameScrollBarPaddingAcross fyne.ThemeSizeName = "scrollBarPaddingAcross"
+
+	// SizeNameScrollBarCornerRadius is the name of theme lookup for scrollbar corner radius..
+	SizeNameScrollBarCornerRadius fyne.ThemeSizeName = "scrollBarCornerRadius"
+
 	// SizeNameScrollBar is the name of theme lookup for the scrollbar size.
 	//
 	// Since: 2.0
 	SizeNameScrollBar fyne.ThemeSizeName = "scrollBar"
+
+	// SizeNameScrollBarLimit is the name of theme lookup for the scroll-thumb size limit. Scrollbar-thumbs will not get shorter than this.
+	SizeNameScrollBarLimit fyne.ThemeSizeName = "scrollBarLimit"
 
 	// SizeNameScrollBarSmall is the name of theme lookup for the shrunk scrollbar size.
 	//
@@ -117,9 +132,34 @@ func Padding() float32 {
 	return current().Size(SizeNamePadding)
 }
 
+// ScrollPadding is the gap under scrollbars, can be used to make scrollbars non-overlapping.
+func ScrollPadding() float32 {
+	return current().Size(SizeNameScrollPadding)
+}
+
+// ScrollBarPaddingAlong is the gap at the start and end of the scrollbar.
+func ScrollBarPaddingAlong() float32 {
+	return current().Size(SizeNameScrollBarPaddingAlong)
+}
+
+// ScrollBarPaddingAcross is the gap at the sides of the scrollbar, making the scrollbar-thumb thinner.
+func ScrollBarPaddingAcross() float32 {
+	return current().Size(SizeNameScrollBarPaddingAcross)
+}
+
+// ScrollBarCornerRadius is the amount of rounding of scrollbar-thumbs.
+func ScrollBarCornerRadius() float32 {
+	return current().Size(SizeNameScrollBarCornerRadius)
+}
+
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer.
 func ScrollBarSize() float32 {
 	return current().Size(SizeNameScrollBar)
+}
+
+// ScrollBarLimitSize is the minimal length of scrollbar-thumbs.
+func ScrollBarLimitSize() float32 {
+	return current().Size(SizeNameScrollBarLimit)
 }
 
 // ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer.
