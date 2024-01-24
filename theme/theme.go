@@ -148,8 +148,18 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 4
 	case SizeNamePadding:
 		return 4
+	case SizeNameScrollPadding:
+		return 0
+	case SizeNameScrollBarPaddingAlong:
+		return 0
+	case SizeNameScrollBarPaddingAcross:
+		return 0
+	case SizeNameScrollBarCornerRadius:
+		return 0
 	case SizeNameScrollBar:
 		return 16
+	case SizeNameScrollBarLimit:
+		return 3
 	case SizeNameScrollBarSmall:
 		return 3
 	case SizeNameText:
