@@ -519,6 +519,7 @@ func (e *Entry) SelectedText() string {
 // Since: 2.2
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
+	e.Refresh()
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
