@@ -1766,6 +1766,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.True(t, multiMin.Height > singleMin.Height)
 
 	multi.MultiLine = false
+	multi.Refresh()
 	multiMin = multi.MinSize()
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
