@@ -15,8 +15,8 @@ import (
 
 type progressRenderer struct {
 	widget.BaseRenderer
-	background, bar *canvas.Rectangle
-	label           *canvas.Text
+	background, bar canvas.Rectangle
+	label           canvas.Text
 	progress        *ProgressBar
 }
 
@@ -64,10 +64,13 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
-	p.background.FillColor = progressBackgroundColor()
-	p.background.CornerRadius = theme.InputRadiusSize()
-	p.bar.FillColor = theme.PrimaryColor()
-	p.bar.CornerRadius = theme.InputRadiusSize()
+	primaryColor := theme.PrimaryColor()
+	inputRadius := theme.InputRadiusSize()
+
+	p.background.FillColor = progressBlendColor(primaryColor)
+	p.background.CornerRadius = inputRadius
+	p.bar.FillColor = primaryColor
+	p.bar.CornerRadius = inputRadius
 	p.label.Color = theme.BackgroundColor()
 	p.label.TextSize = theme.TextSize()
 }
@@ -125,13 +128,28 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	background := canvas.NewRectangle(progressBackgroundColor())
-	background.CornerRadius = theme.InputRadiusSize()
-	bar := canvas.NewRectangle(theme.PrimaryColor())
-	bar.CornerRadius = theme.InputRadiusSize()
-	label := canvas.NewText("0%", theme.BackgroundColor())
-	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{background, bar, label}), background, bar, label, p}
+	cornerRadius := theme.InputRadiusSize()
+	primaryColor := theme.PrimaryColor()
+
+	renderer := &progressRenderer{
+		background: canvas.Rectangle{
+			FillColor:    progressBlendColor(primaryColor),
+			CornerRadius: cornerRadius,
+		},
+		bar: canvas.Rectangle{
+			FillColor:    primaryColor,
+			CornerRadius: cornerRadius,
+		},
+		label: canvas.Text{
+			Text:      "0%",
+			Color:     theme.BackgroundColor(),
+			Alignment: fyne.TextAlignCenter,
+		},
+		progress: p,
+	}
+
+	renderer.SetObjects([]fyne.CanvasObject{&renderer.background, &renderer.bar, &renderer.label})
+	return renderer
 }
 
 // Unbind disconnects any configured data source from this ProgressBar.
@@ -162,8 +180,8 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	return p
 }
 
-func progressBackgroundColor() color.Color {
-	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
+func progressBlendColor(clr color.Color) color.Color {
+	r, g, b, a := col.ToNRGBA(clr)
 	faded := uint8(a) / 2
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

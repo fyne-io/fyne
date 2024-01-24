@@ -15,15 +15,15 @@ const (
 
 	// DangerImportance applies an error theme to the widget.
 	//
-	// Since 2.3
+	// Since: 2.3
 	DangerImportance
 	// WarningImportance applies a warning theme to the widget.
 	//
-	// Since 2.3
+	// Since: 2.3
 	WarningImportance
 
 	// SuccessImportance applies a success theme to the widget.
 	//
-	// Since 2.4
+	// Since: 2.4
 	SuccessImportance
 )

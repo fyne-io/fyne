@@ -230,36 +230,37 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 func (s *Slider) TypedRune(_ rune) {
 }
 
-func (s *Slider) buttonDiameter() float32 {
-	return theme.IconInlineSize() - 4 // match radio icons
+func (s *Slider) buttonDiameter(inlineIconSize float32) float32 {
+	return inlineIconSize - 4 // match radio icons
 }
 
-func (s *Slider) endOffset() float32 {
-	return s.buttonDiameter()/2 + theme.InnerPadding() - 1.5 // align with radio icons
+func (s *Slider) endOffset(inlineIconSize, innerPadding float32) float32 {
+	return s.buttonDiameter(inlineIconSize)/2 + innerPadding - 1.5 // align with radio icons
 }
 
 func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
-	pad := s.endOffset()
+	pad := s.endOffset(theme.IconInlineSize(), theme.InnerPadding())
 
 	x := e.Position.X
 	y := e.Position.Y
+	size := s.size.Load()
 
 	switch s.Orientation {
 	case Vertical:
-		if y > s.size.Height-pad {
+		if y > size.Height-pad {
 			return 0.0
 		} else if y < pad {
 			return 1.0
 		} else {
-			return 1 - float64(y-pad)/float64(s.size.Height-pad*2)
+			return 1 - float64(y-pad)/float64(size.Height-pad*2)
 		}
 	case Horizontal:
-		if x > s.size.Width-pad {
+		if x > size.Width-pad {
 			return 1.0
 		} else if x < pad {
 			return 0.0
 		} else {
-			return float64(x-pad) / float64(s.size.Width-pad*2)
+			return float64(x-pad) / float64(size.Width-pad*2)
 		}
 	}
 	return 0.0
@@ -424,11 +425,10 @@ func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.InputBackgroundColor()
 	if s.slider.disabled {
 		s.thumb.FillColor = theme.DisabledColor()
-		s.active.FillColor = theme.DisabledColor()
 	} else {
 		s.thumb.FillColor = theme.ForegroundColor()
-		s.active.FillColor = theme.ForegroundColor()
 	}
+	s.active.FillColor = s.thumb.FillColor
 
 	if s.slider.focused && !s.slider.disabled {
 		s.focusIndicator.FillColor = theme.FocusColor()
@@ -447,9 +447,12 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	trackWidth := theme.InputBorderSize() * 2
-	diameter := s.slider.buttonDiameter()
-	endPad := s.slider.endOffset()
+	inputBorderSize := theme.InputBorderSize()
+	trackWidth := inputBorderSize * 2
+	inlineIconSize := theme.IconInlineSize()
+	innerPadding := theme.InnerPadding()
+	diameter := s.slider.buttonDiameter(inlineIconSize)
+	endPad := s.slider.endOffset(inlineIconSize, innerPadding)
 
 	var trackPos, activePos, thumbPos fyne.Position
 	var trackSize, activeSize fyne.Size
@@ -457,17 +460,17 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	// some calculations are relative to trackSize, so we must update that first
 	switch s.slider.Orientation {
 	case Vertical:
-		trackPos = fyne.NewPos(size.Width/2-theme.InputBorderSize(), endPad)
+		trackPos = fyne.NewPos(size.Width/2-inputBorderSize, endPad)
 		trackSize = fyne.NewSize(trackWidth, size.Height-endPad*2)
 
 	case Horizontal:
-		trackPos = fyne.NewPos(endPad, size.Height/2-theme.InputBorderSize())
+		trackPos = fyne.NewPos(endPad, size.Height/2-inputBorderSize)
 		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
 	}
 	s.track.Move(trackPos)
 	s.track.Resize(trackSize)
 
-	activeOffset := s.getOffset() // TODO based on old size...0
+	activeOffset := s.getOffset(inlineIconSize, innerPadding) // TODO based on old size...0
 	switch s.slider.Orientation {
 	case Vertical:
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
@@ -489,7 +492,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	s.thumb.Move(thumbPos)
 	s.thumb.Resize(fyne.NewSize(diameter, diameter))
 
-	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
+	focusIndicatorSize := fyne.NewSquareSize(inlineIconSize + innerPadding)
 	delta := (focusIndicatorSize.Width - diameter) / 2
 	s.focusIndicator.Resize(focusIndicatorSize)
 	s.focusIndicator.Move(thumbPos.SubtractXY(delta, delta))
@@ -497,7 +500,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
-	dia := s.slider.buttonDiameter()
+	dia := s.slider.buttonDiameter(theme.IconInlineSize())
 	s1, s2 := minLongSide+dia, dia
 
 	switch s.slider.Orientation {
@@ -510,8 +513,8 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	return fyne.Size{Width: 0, Height: 0}
 }
 
-func (s *sliderRenderer) getOffset() float32 {
-	endPad := s.slider.endOffset()
+func (s *sliderRenderer) getOffset(iconInlineSize, innerPadding float32) float32 {
+	endPad := s.slider.endOffset(iconInlineSize, innerPadding)
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
