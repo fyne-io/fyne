@@ -97,6 +97,7 @@ type Entry struct {
 	binder          basicBinder
 	conversionError error
 	lastChange      time.Time
+	minCache        *fyne.Size
 	multiLineRows   int // override global default number of visible lines
 }
 
@@ -386,6 +387,13 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
+	e.propertyLock.RLock()
+	cached := e.minCache
+	e.propertyLock.RUnlock()
+	if cached != nil {
+		return *cached
+	}
+
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
@@ -396,6 +404,9 @@ func (e *Entry) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 
+	e.propertyLock.Lock()
+	e.minCache = &min
+	e.propertyLock.Unlock()
 	return min
 }
 
@@ -433,6 +444,14 @@ func (e *Entry) MouseUp(m *desktop.MouseEvent) {
 	if start == -1 && e.selecting && !e.selectKeyDown {
 		e.selecting = false
 	}
+}
+
+func (e *Entry) Refresh() {
+	e.propertyLock.Lock()
+	e.minCache = nil
+	e.propertyLock.Unlock()
+
+	e.BaseWidget.Refresh()
 }
 
 // SelectedText returns the text currently selected in this Entry.
