@@ -285,7 +285,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 	c := r.scroll.Content
 	p := theme.ScrollPadding()
-	switch s.Direction {
+	switch r.scroll.Direction {
 	case ScrollBoth:
 		c.Resize(c.MinSize().Max(size.SubtractWidthHeight(p, p)))
 	case ScrollHorizontalOnly:
