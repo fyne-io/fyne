@@ -187,7 +187,7 @@ func (d *mobileDriver) Run() {
 					currentDPI = e.PixelsPerPt * 72
 					d.setTheme(e.DarkMode)
 
-					dev := d.device
+					dev := &d.device
 					dev.safeTop = e.InsetTopPx
 					dev.safeLeft = e.InsetLeftPx
 					dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
