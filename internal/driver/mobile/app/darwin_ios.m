@@ -214,6 +214,19 @@ static void sendTouches(int change, NSSet* touches) {
     return NO;
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    if ([self returnKeyType] != UIReturnKeyDone) {
+        keyboardTyped("\n");
+        return YES;
+    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self resignFirstResponder];
+    });
+
+    return NO;
+}
+
 @end
 
 void runApp(void) {
