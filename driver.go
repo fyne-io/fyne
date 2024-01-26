@@ -37,4 +37,9 @@ type Driver interface {
 	//
 	// Since: 2.5
 	DoubleTapDelay() time.Duration
+
+	// SetDisableScreenBlanking allows an app to ask the device not to sleep/lock/blank displays
+	//
+	// Since: 2.5
+	SetDisableScreenBlanking(bool)
 }

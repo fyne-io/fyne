@@ -220,6 +220,10 @@ func (d *mobileDriver) Run() {
 	})
 }
 
+func (*mobileDriver) SetDisableScreenBlanking(disable bool) {
+	setDisableScreenBlank(disable)
+}
+
 func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 	c := w.Canvas().(*mobileCanvas)
 	switch e.Crosses(lifecycle.StageVisible) {

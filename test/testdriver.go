@@ -134,3 +134,7 @@ func (d *testDriver) removeWindow(w *testWindow) {
 func (d *testDriver) DoubleTapDelay() time.Duration {
 	return 300 * time.Millisecond
 }
+
+func (d *testDriver) SetDisableScreenBlanking(_ bool) {
+	// no-op for test
+}
