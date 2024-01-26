@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -96,6 +97,7 @@ type Entry struct {
 	binder          basicBinder
 	conversionError error
 	lastChange      time.Time
+	minCache        async.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -399,6 +401,11 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
+	cached := e.minCache.Load()
+	if !cached.IsZero() {
+		return cached
+	}
+
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
@@ -409,6 +416,7 @@ func (e *Entry) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 
+	e.minCache.Store(min)
 	return min
 }
 
@@ -474,6 +482,12 @@ func (e *Entry) Redo() {
 	e.Refresh()
 }
 
+func (e *Entry) Refresh() {
+	e.minCache.Store(fyne.Size{})
+
+	e.BaseWidget.Refresh()
+}
+
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
@@ -500,6 +514,7 @@ func (e *Entry) SelectedText() string {
 // Since: 2.2
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
+	e.Refresh()
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty

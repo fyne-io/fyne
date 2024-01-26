@@ -438,6 +438,7 @@ func TestEntry_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -462,6 +463,7 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -1775,6 +1777,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.True(t, multiMin.Height > singleMin.Height)
 
 	multi.MultiLine = false
+	multi.Refresh()
 	multiMin = multi.MinSize()
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
