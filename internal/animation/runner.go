@@ -32,35 +32,41 @@ func (r *Runner) Start(a *fyne.Animation) {
 
 // Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
 func (r *Runner) Stop(a *fyne.Animation) {
-	r.animationMutex.Lock()
-	defer r.animationMutex.Unlock()
+	// Since the runner needs to lock for the whole duration of a tick, which invokes user code,
+	// we must stop asynchronously to avoid possible deadlock if Stop is called within an animation tick callback.
+	// Since stopping animations should occur much less frequently than ticking them, the performance
+	// penalty of spawning a goroutine for stop should be acceptable to achieve a zero-allocation tick implementation.
+	go func() {
+		r.animationMutex.Lock()
+		defer r.animationMutex.Unlock()
 
-	// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
-	// to filter the animation slice without allocating a new slice
-	newList := r.animations[:0]
-	stopped := false
-	for _, item := range r.animations {
-		if item.a != a {
-			newList = append(newList, item)
-		} else {
-			item.setStopped()
-			stopped = true
+		// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
+		// to filter the animation slice without allocating a new slice
+		newList := r.animations[:0]
+		stopped := false
+		for _, item := range r.animations {
+			if item.a != a {
+				newList = append(newList, item)
+			} else {
+				item.setStopped()
+				stopped = true
+			}
 		}
-	}
-	r.animations = newList
-	if stopped {
-		return
-	}
+		r.animations = newList
+		if stopped {
+			return
+		}
 
-	newList = r.pendingAnimations[:0]
-	for _, item := range r.pendingAnimations {
-		if item.a != a {
-			newList = append(newList, item)
-		} else {
-			item.setStopped()
+		newList = r.pendingAnimations[:0]
+		for _, item := range r.pendingAnimations {
+			if item.a != a {
+				newList = append(newList, item)
+			} else {
+				item.setStopped()
+			}
 		}
-	}
-	r.pendingAnimations = newList
+		r.pendingAnimations = newList
+	}()
 }
 
 func (r *Runner) runAnimations() {
