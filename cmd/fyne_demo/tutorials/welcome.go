@@ -69,7 +69,8 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 
 	underlay := canvas.NewImageFromResource(data.FyneLogo)
 	bg := canvas.NewRectangle(bgColor)
-	slideBG := container.NewWithoutLayout(underlay)
+	underlayer := underLayout{}
+	slideBG := container.New(underlayer, underlay)
 	footerBG := canvas.NewRectangle(shadowColor)
 
 	listen := make(chan fyne.Settings)
@@ -87,11 +88,9 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	}()
 
 	underlay.Resize(fyne.NewSize(1024, 1024))
-	underlay.FillMode = canvas.ImageFillStretch
-	underlay.Move(fyne.NewPos(-250, -50)) // TODO move it into center of this space, requires layout
-
 	scroll.OnScrolled = func(p fyne.Position) {
-		underlay.Move(fyne.NewPos(-250, -50-p.Y/3))
+		underlayer.offset = -p.Y / 3
+		underlayer.Layout(slideBG.Objects, slideBG.Size())
 	}
 
 	bgClip := container.NewScroll(slideBG)
@@ -105,6 +104,20 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 func withAlpha(c color.Color, alpha uint8) color.Color {
 	r, g, b, _ := c.RGBA()
 	return color.NRGBA{R: uint8(r >> 8), G: uint8(g >> 8), B: uint8(b >> 8), A: alpha}
+}
+
+type underLayout struct {
+	offset float32
+}
+
+func (u underLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
+	under := objs[0]
+	left := size.Width/2 - under.Size().Width/2
+	under.Move(fyne.NewPos(left, u.offset-50))
+}
+
+func (u underLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+	return fyne.Size{}
 }
 
 type unpad struct {
