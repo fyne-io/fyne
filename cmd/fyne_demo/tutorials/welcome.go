@@ -61,7 +61,8 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	content := container.NewVBox(
 		widget.NewLabelWithStyle("\n\nWelcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		logo,
-		container.NewCenter(authors))
+		container.NewCenter(authors),
+		widget.NewLabelWithStyle("\nWith great thanks to our many kind sponsors\n", fyne.TextAlignCenter, fyne.TextStyle{Italic: true}))
 	scroll := container.NewScroll(content)
 
 	bgColor := withAlpha(theme.BackgroundColor(), 0xe0)
