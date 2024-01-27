@@ -51,6 +51,14 @@ func main() {
 		title.SetText(t.Title)
 		intro.SetText(t.Intro)
 
+		if t.Title == "Welcome" {
+			title.Hide()
+			intro.Hide()
+		} else {
+			title.Show()
+			intro.Show()
+		}
+
 		content.Objects = []fyne.CanvasObject{t.View(w)}
 		content.Refresh()
 	}
