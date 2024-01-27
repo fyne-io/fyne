@@ -48,6 +48,8 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	run.Stop(a)
+	// Animations are really stopped asynchronously
+	time.Sleep(time.Second/60 + 100*time.Millisecond)
 	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
 	run.animationMutex.Unlock()
