@@ -47,9 +47,21 @@ type TextGridStyle interface {
 	BackgroundColor() color.Color
 }
 
+// TextGridTextStyle defines the text style that can be applied to a TextGrid cell.
+//
+// Since: 2.5
+type TextGridTextStyle interface {
+	TextGridStyle
+	Bold() bool
+	Underlined() bool
+}
+
 // CustomTextGridStyle is a utility type for those not wanting to define their own style types.
 type CustomTextGridStyle struct {
 	FGColor, BGColor color.Color
+	//
+	// Since: 2.5
+	IsBold, IsUnderlined bool
 }
 
 // TextColor is the color a cell should use for the text.
@@ -60,6 +72,20 @@ func (c *CustomTextGridStyle) TextColor() color.Color {
 // BackgroundColor is the color a cell should use for the background.
 func (c *CustomTextGridStyle) BackgroundColor() color.Color {
 	return c.BGColor
+}
+
+// Bold is the text bold or not.
+//
+// Since: 2.5
+func (c *CustomTextGridStyle) Bold() bool {
+	return c.IsBold
+}
+
+// Underlined is the text underlined or not.
+//
+// Since: 2.5
+func (c *CustomTextGridStyle) Underlined() bool {
+	return c.IsUnderlined
 }
 
 // TextGrid is a monospaced grid of characters.
@@ -345,12 +371,15 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
-	t.objects = append(t.objects, bg, text)
+
+	ul := canvas.NewLine(color.Transparent)
+
+	t.objects = append(t.objects, bg, text, ul)
 }
 
 func (t *textGridRenderer) refreshCell(row, col int) {
 	pos := row*t.cols + col
-	if pos*2+1 >= len(t.objects) {
+	if pos*3+1 >= len(t.objects) {
 		return
 	}
 
@@ -362,23 +391,59 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	if str == 0 {
 		str = ' '
 	}
+	rect := t.objects[pos*3].(*canvas.Rectangle)
+	text := t.objects[pos*3+1].(*canvas.Text)
+	underline := t.objects[pos*3+2].(*canvas.Line)
 
-	text := t.objects[pos*2+1].(*canvas.Text)
 	text.TextSize = theme.TextSize()
+	textStyle := fyne.TextStyle{}
+	var underlineStrokeWidth float32 = 1
+	var underlineStrokeColor color.Color = color.Transparent
+
 	fg := theme.ForegroundColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
+
+	if ts, ok := style.(TextGridTextStyle); style != nil && ok {
+		if ts.Bold() {
+			underlineStrokeWidth = 2
+			textStyle = fyne.TextStyle{
+				Bold: true,
+			}
+		}
+		if ts.Underlined() {
+			underlineStrokeColor = fg
+
+		}
+	} else if ts, ok := rowStyle.(TextGridTextStyle); rowStyle != nil && ok {
+		if ts.Bold() {
+			underlineStrokeWidth = 2
+			textStyle = fyne.TextStyle{
+				Bold: true,
+			}
+		}
+		if ts.Underlined() {
+			underlineStrokeColor = fg
+
+		}
+	}
+
 	newStr := string(str)
-	if text.Text != newStr || text.Color != fg {
+	if text.Text != newStr || text.Color != fg || textStyle != text.TextStyle {
 		text.Text = newStr
 		text.Color = fg
+		text.TextStyle = textStyle
 		t.refresh(text)
 	}
 
-	rect := t.objects[pos*2].(*canvas.Rectangle)
+	if underlineStrokeWidth != underline.StrokeWidth || underlineStrokeColor != underline.StrokeColor {
+		underline.StrokeWidth, underline.StrokeColor = underlineStrokeWidth, underlineStrokeColor
+		t.refresh(underline)
+	}
+
 	bg := color.Color(color.Transparent)
 	if style != nil && style.BackgroundColor() != nil {
 		bg = style.BackgroundColor()
@@ -393,10 +458,10 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 
 func (t *textGridRenderer) addCellsIfRequired() {
 	cellCount := t.cols * t.rows
-	if len(t.objects) == cellCount*2 {
+	if len(t.objects) == cellCount*3 {
 		return
 	}
-	for i := len(t.objects); i < cellCount*2; i += 2 {
+	for i := len(t.objects); i < cellCount*3; i += 3 {
 		t.appendTextCell(' ')
 	}
 }
@@ -460,7 +525,7 @@ func (t *textGridRenderer) refreshGrid() {
 
 		line++
 	}
-	for ; x < len(t.objects)/2; x++ {
+	for ; x < len(t.objects)/3; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
 }
@@ -505,10 +570,17 @@ func (t *textGridRenderer) Layout(size fyne.Size) {
 	cellPos := fyne.NewPos(0, 0)
 	for y := 0; y < t.rows; y++ {
 		for x := 0; x < t.cols; x++ {
-			t.objects[i*2+1].Move(cellPos)
+			// rect
+			t.objects[i*3].Resize(t.cellSize)
+			t.objects[i*3].Move(cellPos)
 
-			t.objects[i*2].Resize(t.cellSize)
-			t.objects[i*2].Move(cellPos)
+			// text
+			t.objects[i*3+1].Move(cellPos)
+
+			// underline
+			t.objects[i*3+2].Move(cellPos.Add(fyne.Position{X: 0, Y: t.cellSize.Height}))
+			t.objects[i*3+2].Resize(fyne.Size{Width: t.cellSize.Width})
+
 			cellPos.X += t.cellSize.Width
 			i++
 		}
