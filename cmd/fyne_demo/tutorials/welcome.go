@@ -3,6 +3,7 @@ package tutorials
 import (
 	"image/color"
 	"net/url"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -41,23 +42,7 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 		layout.NewSpacer(),
 	)
 
-	// TODO load the AUTHORS file somehow
-	authors := widget.NewRichTextFromMarkdown(`### Authors
-
-* Andy Williams <andy@andy.xyz>
-* Steve OConnor <steveoc64@gmail.com>
-* Luca Corbo <lu.corbo@gmail.com>
-* Paul Hovey <paul@paulhovey.org>
-* Charles Corbett <nafredy@gmail.com>
-* Tilo Prütz <tilo@pruetz.net>
-* Stephen Houston <smhouston88@gmail.com>
-* Storm Hess <stormhess@gloryskulls.com>
-* Stuart Scott <stuart.murray.scott@gmail.com>
-* Jacob Alzén <jacalz@tutanota.com>
-* Charles A. Daniels <charles@cdaniels.net>
-* Pablo Fuentes <f.pablo1@hotmail.com>
-* Changkun Ou <hi@changkun.de>
-`)
+	authors := widget.NewRichTextFromMarkdown(formatAuthors(string(data.Authors.Content())))
 	content := container.NewVBox(
 		widget.NewLabelWithStyle("\n\nWelcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		logo,
@@ -146,4 +131,23 @@ func (u unpad) Layout(objs []fyne.CanvasObject, s fyne.Size) {
 
 func (u unpad) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(100, 100)
+}
+
+func formatAuthors(lines string) string {
+	markdown := &strings.Builder{}
+	markdown.WriteString(`### Authors
+
+`)
+
+	for _, line := range strings.Split(lines, "\n") {
+		if len(line) == 0 {
+			continue
+		}
+
+		markdown.WriteString("* ")
+		markdown.WriteString(line)
+		markdown.WriteString("\n")
+	}
+
+	return markdown.String()
 }
