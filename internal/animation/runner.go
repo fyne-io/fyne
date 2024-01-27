@@ -2,6 +2,7 @@ package animation
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -9,11 +10,11 @@ import (
 
 // Runner is the main driver for animations package
 type Runner struct {
-	animationMutex    sync.RWMutex
+	animationMutex    sync.Mutex
 	animations        []*anim
 	pendingAnimations []*anim
 
-	runnerStarted bool
+	runnerStarted atomic.Bool
 }
 
 // Start will register the passed application and initiate its ticking.
@@ -21,10 +22,9 @@ func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
 
-	if !r.runnerStarted {
-		r.runnerStarted = true
+	if r.runnerStarted.CompareAndSwap(false, true) {
 		r.animations = append(r.animations, newAnim(a))
-		r.runAnimations()
+		go r.runAnimations()
 	} else {
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
@@ -32,61 +32,63 @@ func (r *Runner) Start(a *fyne.Animation) {
 
 // Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
 func (r *Runner) Stop(a *fyne.Animation) {
-	r.animationMutex.Lock()
-	defer r.animationMutex.Unlock()
+	// Since the runner needs to lock for the whole duration of a tick, which invokes user code,
+	// we must stop asynchronously to avoid possible deadlock if Stop is called within an animation tick callback.
+	// Since stopping animations should occur much less frequently than ticking them, the performance
+	// penalty of spawning a goroutine for stop should be acceptable to achieve a zero-allocation tick implementation.
+	go func() {
+		r.animationMutex.Lock()
+		defer r.animationMutex.Unlock()
 
-	newList := make([]*anim, 0, len(r.animations))
-	stopped := false
-	for _, item := range r.animations {
-		if item.a != a {
-			newList = append(newList, item)
-		} else {
-			item.setStopped()
-			stopped = true
+		// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
+		// to filter the animation slice without allocating a new slice
+		newList := r.animations[:0]
+		stopped := false
+		for _, item := range r.animations {
+			if item.a != a {
+				newList = append(newList, item)
+			} else {
+				item.setStopped()
+				stopped = true
+			}
 		}
-	}
-	r.animations = newList
-	if stopped {
-		return
-	}
+		r.animations = newList
+		if stopped {
+			return
+		}
 
-	newList = make([]*anim, 0, len(r.pendingAnimations))
-	for _, item := range r.pendingAnimations {
-		if item.a != a {
-			newList = append(newList, item)
-		} else {
-			item.setStopped()
+		newList = r.pendingAnimations[:0]
+		for _, item := range r.pendingAnimations {
+			if item.a != a {
+				newList = append(newList, item)
+			} else {
+				item.setStopped()
+			}
 		}
-	}
-	r.pendingAnimations = newList
+		r.pendingAnimations = newList
+	}()
 }
 
 func (r *Runner) runAnimations() {
 	draw := time.NewTicker(time.Second / 60)
-
-	go func() {
-		for done := false; !done; {
-			<-draw.C
-			r.animationMutex.Lock()
-			oldList := r.animations
-			r.animationMutex.Unlock()
-			newList := make([]*anim, 0, len(oldList))
-			for _, a := range oldList {
-				if !a.isStopped() && r.tickAnimation(a) {
-					newList = append(newList, a)
-				}
-			}
-			r.animationMutex.Lock()
-			r.animations = append(newList, r.pendingAnimations...)
-			r.pendingAnimations = nil
-			done = len(r.animations) == 0
-			r.animationMutex.Unlock()
-		}
+	for done := false; !done; {
+		<-draw.C
+		// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
+		// to filter the still-running animations for the next iteration without allocating a new slice
 		r.animationMutex.Lock()
-		r.runnerStarted = false
+		newList := r.animations[:0]
+		for _, a := range r.animations {
+			if !a.isStopped() && r.tickAnimation(a) {
+				newList = append(newList, a)
+			}
+		}
+		r.animations = append(newList, r.pendingAnimations...)
+		r.pendingAnimations = r.pendingAnimations[:0]
+		done = len(r.animations) == 0
 		r.animationMutex.Unlock()
-		draw.Stop()
-	}()
+	}
+	r.runnerStarted.Store(false)
+	draw.Stop()
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
