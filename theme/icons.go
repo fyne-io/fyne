@@ -1305,18 +1305,20 @@ func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
 // the "base" resource - to avoid recolorizing SVG multiple times
 // if we for example have a ThemedResource wrapped in an ErrorThemedResource
 func unwrapResource(res fyne.Resource) fyne.Resource {
-	switch res := res.(type) {
-	case *DisabledResource:
-		return unwrapResource(res.source)
-	case *ErrorThemedResource:
-		return unwrapResource(res.source)
-	case *InvertedThemedResource:
-		return unwrapResource(res.source)
-	case *PrimaryThemedResource:
-		return unwrapResource(res.source)
-	case *ThemedResource:
-		return unwrapResource(res.source)
-	default:
-		return res
+	for {
+		switch typedRes := res.(type) {
+		case *DisabledResource:
+			res = typedRes.source
+		case *ErrorThemedResource:
+			res = typedRes.source
+		case *InvertedThemedResource:
+			res = typedRes.source
+		case *PrimaryThemedResource:
+			res = typedRes.source
+		case *ThemedResource:
+			res = typedRes.source
+		default:
+			return res
+		}
 	}
 }
