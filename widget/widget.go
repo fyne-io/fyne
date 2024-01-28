@@ -92,7 +92,7 @@ func (w *BaseWidget) Show() {
 		return
 	}
 
-	w.setFieldsAndRefresh(func() {
+	w.SetFieldsAndRefresh(func() {
 		w.Hidden = false
 	})
 }
@@ -125,9 +125,12 @@ func (w *BaseWidget) Refresh() {
 	render.Refresh()
 }
 
-// setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
+// SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (w *BaseWidget) setFieldsAndRefresh(f func()) {
+// Widgets extending BaseWidget should use this in their setter functions.
+//
+// Since: 2.5
+func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 	w.propertyLock.Lock()
 	f()
 	w.propertyLock.Unlock()

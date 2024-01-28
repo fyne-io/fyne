@@ -44,7 +44,7 @@ func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	r.entry.setFieldsAndRefresh(func() {
+	r.entry.SetFieldsAndRefresh(func() {
 		r.entry.Password = !r.entry.Password
 	})
 	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry.super().(fyne.Focusable))
