@@ -81,6 +81,7 @@ func NewButton(label string, tapped func()) *Button {
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{
 		Text:     label,
+		Icon:     icon,
 		OnTapped: tapped,
 	}
 
@@ -376,8 +377,8 @@ func (r *buttonRenderer) applyTheme() {
 		}
 	}
 	r.label.Refresh()
-	if r.icon != nil && r.button.Icon != nil {
-		icon := r.button.Icon
+	if r.icon != nil && r.icon.Resource != nil {
+		icon := r.icon.Resource
 		switch res := r.icon.Resource.(type) {
 		case *theme.InvertedThemedResource:
 			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
@@ -399,16 +400,16 @@ func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
 
 func (r *buttonRenderer) updateIconAndText() {
 	if r.button.Icon != nil && r.button.Visible() {
+		icon := r.button.Icon
 		if r.icon == nil {
-			r.icon = canvas.NewImageFromResource(r.button.Icon)
+			r.icon = canvas.NewImageFromResource(icon)
 			r.icon.FillMode = canvas.ImageFillContain
 			r.SetObjects([]fyne.CanvasObject{r.background, r.tapBG, r.label, r.icon})
 		}
 		if r.button.Disabled() {
-			r.icon.Resource = theme.NewDisabledResource(r.button.Icon)
-		} else {
-			r.icon.Resource = r.button.Icon
+			icon = theme.NewDisabledResource(icon)
 		}
+		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
 		r.icon.Refresh()
 		r.icon.Show()
 	} else if r.icon != nil {
