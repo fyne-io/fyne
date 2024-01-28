@@ -37,19 +37,8 @@ type radioItem struct {
 //
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	focusIndicator := canvas.NewCircle(color.Transparent)
-	icon := canvas.NewImageFromResource(theme.RadioButtonFillIcon())
-	over := canvas.NewImageFromResource(theme.NewThemedResource(theme.RadioButtonIcon()))
-	label := canvas.NewText(i.Label, theme.ForegroundColor())
-	label.Alignment = fyne.TextAlignLeading
-	r := &radioItemRenderer{
-		BaseRenderer:   widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, over, label}),
-		focusIndicator: focusIndicator,
-		icon:           icon,
-		over:           over,
-		item:           i,
-		label:          label,
-	}
+	r := &radioItemRenderer{item: i, label: canvas.Text{Alignment: fyne.TextAlignLeading}}
+	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &r.label})
 	r.update()
 	return r
 }
@@ -149,11 +138,11 @@ func (i *radioItem) toggle() {
 
 type radioItemRenderer struct {
 	widget.BaseRenderer
+	item *radioItem
 
-	focusIndicator *canvas.Circle
-	icon, over     *canvas.Image
-	item           *radioItem
-	label          *canvas.Text
+	focusIndicator canvas.Circle
+	icon, over     canvas.Image
+	label          canvas.Text
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
@@ -191,10 +180,11 @@ func (r *radioItemRenderer) Refresh() {
 
 func (r *radioItemRenderer) update() {
 	r.label.Text = r.item.Label
-	r.label.Color = theme.ForegroundColor()
 	r.label.TextSize = theme.TextSize()
 	if r.item.Disabled() {
 		r.label.Color = theme.DisabledColor()
+	} else {
+		r.label.Color = theme.ForegroundColor()
 	}
 
 	out := theme.NewThemedResource(theme.RadioButtonIcon())

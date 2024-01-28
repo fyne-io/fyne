@@ -19,8 +19,8 @@ const (
 
 type infProgressRenderer struct {
 	widget.BaseRenderer
-	background, bar *canvas.Rectangle
-	animation       *fyne.Animation
+	background, bar canvas.Rectangle
+	animation       fyne.Animation
 	running         bool
 	progress        *ProgressBarInfinite
 }
@@ -52,7 +52,7 @@ func (p *infProgressRenderer) updateBar(done float32) {
 
 	p.bar.Resize(barSize)
 	p.bar.Move(barPos)
-	canvas.Refresh(p.bar)
+	canvas.Refresh(&p.bar)
 }
 
 // Layout the components of the infinite progress bar
@@ -65,11 +65,13 @@ func (p *infProgressRenderer) Refresh() {
 	if p.isRunning() {
 		return // we refresh from the goroutine
 	}
+	cornerRadius := theme.InputRadiusSize()
+	primaryColor := theme.PrimaryColor()
 
-	p.background.FillColor = progressBackgroundColor()
-	p.background.CornerRadius = theme.InputRadiusSize()
-	p.bar.FillColor = theme.PrimaryColor()
-	p.bar.CornerRadius = theme.InputRadiusSize()
+	p.background.FillColor = progressBlendColor(primaryColor)
+	p.background.CornerRadius = cornerRadius
+	p.bar.FillColor = primaryColor
+	p.bar.CornerRadius = cornerRadius
 	p.background.Refresh()
 	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
@@ -90,7 +92,8 @@ func (p *infProgressRenderer) start() {
 
 	p.progress.propertyLock.Lock()
 	defer p.progress.propertyLock.Unlock()
-	p.animation = fyne.NewAnimation(time.Second*3, p.updateBar)
+	p.animation.Duration = time.Second * 3
+	p.animation.Tick = p.updateBar
 	p.animation.Curve = fyne.AnimationLinear
 	p.animation.RepeatCount = fyne.AnimationRepeatForever
 	p.running = true
@@ -157,16 +160,24 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	background := canvas.NewRectangle(progressBackgroundColor())
-	background.CornerRadius = theme.InputRadiusSize()
-	bar := canvas.NewRectangle(theme.PrimaryColor())
-	bar.CornerRadius = theme.InputRadiusSize()
+
+	primaryColor := theme.PrimaryColor()
+	cornerRadius := theme.InputRadiusSize()
+
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, bar}),
-		background:   background,
-		bar:          bar,
-		progress:     p,
+		background: canvas.Rectangle{
+			FillColor:    progressBlendColor(primaryColor),
+			CornerRadius: cornerRadius,
+		},
+		bar: canvas.Rectangle{
+			FillColor:    primaryColor,
+			CornerRadius: cornerRadius,
+		},
+		progress: p,
 	}
+
+	render.SetObjects([]fyne.CanvasObject{&render.background, &render.bar})
+
 	render.start()
 	return render
 }

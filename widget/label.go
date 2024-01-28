@@ -10,15 +10,22 @@ import (
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
 	BaseWidget
-	Text       string
-	Alignment  fyne.TextAlign      // The alignment of the text
-	Wrapping   fyne.TextWrap       // The wrapping of the text
-	TextStyle  fyne.TextStyle      // The style of the label text
-	Truncation fyne.TextTruncation // The truncation mode of the text
-	provider   *RichText
+	Text      string
+	Alignment fyne.TextAlign // The alignment of the text
+	Wrapping  fyne.TextWrap  // The wrapping of the text
+	TextStyle fyne.TextStyle // The style of the label text
+
+	// The truncation mode of the text
+	//
+	// Since: 2.4
+	Truncation fyne.TextTruncation
+	// Importance informs how the label should be styled, i.e. warning or disabled
+	//
+	// Since: 2.4
 	Importance Importance
 
-	binder basicBinder
+	provider *RichText
+	binder   basicBinder
 }
 
 // NewLabel creates a new label widget with the set text content

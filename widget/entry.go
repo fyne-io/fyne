@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -96,6 +97,7 @@ type Entry struct {
 	binder          basicBinder
 	conversionError error
 	lastChange      time.Time
+	minCache        async.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -240,7 +242,7 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		return
 	}
 
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		if !e.selectKeyDown {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
@@ -313,7 +315,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.dirty = true
 		e.focused = true
 	})
@@ -326,7 +328,7 @@ func (e *Entry) FocusGained() {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusLost() {
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
@@ -399,6 +401,11 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
+	cached := e.minCache.Load()
+	if !cached.IsZero() {
+		return cached
+	}
+
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
@@ -409,6 +416,7 @@ func (e *Entry) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 
+	e.minCache.Store(min)
 	return min
 }
 
@@ -474,6 +482,12 @@ func (e *Entry) Redo() {
 	e.Refresh()
 }
 
+func (e *Entry) Refresh() {
+	e.minCache.Store(fyne.Size{})
+
+	e.BaseWidget.Refresh()
+}
+
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
@@ -500,6 +514,7 @@ func (e *Entry) SelectedText() string {
 // Since: 2.2
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
+	e.Refresh()
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
@@ -951,12 +966,13 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.setFieldsAndRefresh(e.eraseSelection)
+	e.SetFieldsAndRefresh(e.eraseSelection)
 	e.propertyLock.RLock()
+	content := e.Text
 	cb := e.OnChanged
 	e.propertyLock.RUnlock()
 	if cb != nil {
-		cb(e.Text)
+		cb(content)
 	}
 	e.Validate()
 }
@@ -1013,7 +1029,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	if e.selecting {
-		e.setFieldsAndRefresh(e.eraseSelection)
+		e.SetFieldsAndRefresh(e.eraseSelection)
 	}
 	text := clipboard.Content()
 	if !e.MultiLine {
@@ -1086,7 +1102,7 @@ func (e *Entry) registerShortcut() {
 			return
 		}
 
-		e.setFieldsAndRefresh(func() {
+		e.SetFieldsAndRefresh(func() {
 			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
 				if e.CursorColumn == 0 {
 					if e.CursorRow > 0 {
@@ -1187,7 +1203,7 @@ func (e *Entry) selectAll() {
 	if e.textProvider().len() == 0 {
 		return
 	}
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
 
@@ -1220,19 +1236,20 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.setFieldsAndRefresh(e.eraseSelection)
+		e.SetFieldsAndRefresh(e.eraseSelection)
 		e.propertyLock.RLock()
+		content := e.Text
 		cb := e.OnChanged
 		e.propertyLock.RUnlock()
 		if cb != nil {
-			cb(e.Text)
+			cb(content)
 		}
 		e.Validate()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
 			// clear the selection -- return unhandled to add the newline
-			e.setFieldsAndRefresh(e.eraseSelection)
+			e.SetFieldsAndRefresh(e.eraseSelection)
 		}
 		return false
 	}
@@ -1460,7 +1477,7 @@ func (e *Entry) updateText(text string) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string) {
 	var callback func(string)
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		changed := e.updateText(text)
 
 		if changed {
@@ -1621,7 +1638,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	resizedTextPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
 	r.entry.propertyLock.Unlock()
 	if textPos != resizedTextPos {
-		r.entry.setFieldsAndRefresh(func() {
+		r.entry.SetFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
 
 			if r.entry.selecting {
