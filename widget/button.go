@@ -83,7 +83,6 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 		Text:     label,
 		OnTapped: tapped,
 	}
-	button.Icon = cache.OverrideResourceTheme(icon, button)
 
 	button.ExtendBaseWidget(button)
 	return button
@@ -166,8 +165,7 @@ func (b *Button) MouseOut() {
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
-	b.Icon = cache.OverrideResourceTheme(icon, b)
-
+	b.Icon = icon
 	b.Refresh()
 }
 
@@ -378,8 +376,8 @@ func (r *buttonRenderer) applyTheme() {
 		}
 	}
 	r.label.Refresh()
-	if r.icon != nil && r.icon.Resource != nil {
-		icon := r.icon.Resource
+	if r.icon != nil && r.button.Icon != nil {
+		icon := r.button.Icon
 		switch res := r.icon.Resource.(type) {
 		case *theme.InvertedThemedResource:
 			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
