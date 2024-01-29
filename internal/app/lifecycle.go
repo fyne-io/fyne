@@ -48,45 +48,55 @@ func (l *Lifecycle) SetOnStopped(f func()) {
 	l.onStopped.Store(&f)
 }
 
-// TriggerEnteredForeground will call the focus gained hook, if one is registered.
-func (l *Lifecycle) TriggerEnteredForeground() {
+// OnEnteredForeground returns the focus gained hook, if one is registered.
+func (l *Lifecycle) OnEnteredForeground() func() {
 	f := l.onForeground.Load()
-	if f == nil || *f == nil {
-		return
+	if f == nil {
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerExitedForeground will call the focus lost hook, if one is registered.
-func (l *Lifecycle) TriggerExitedForeground() {
+// OnExitedForeground returns the focus lost hook, if one is registered.
+func (l *Lifecycle) OnExitedForeground() func() {
 	f := l.onBackground.Load()
-	if f == nil || *f == nil {
-		return
+	if f == nil {
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerStarted will call the started hook, if one is registered.
-func (l *Lifecycle) TriggerStarted() {
+// OnStarted returns the started hook, if one is registered.
+func (l *Lifecycle) OnStarted() func() {
 	f := l.onStarted.Load()
-	if f == nil || *f == nil {
-		return
+	if f == nil {
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerStopped will call the stopped hook, if one is registered,
-// and an internal stopped hook after that.
-func (l *Lifecycle) TriggerStopped() {
-	f := l.onStopped.Load()
-	if f != nil && *f != nil {
-		(*f)()
+// OnStopped returns the stopped hook, if one is registered.
+func (l *Lifecycle) OnStopped() func() {
+	stopped := l.onStopped.Load()
+	stopHook := l.onStoppedHookExecuted
+	if stopped == nil && stopHook == nil {
+		return nil
 	}
 
-	if l.onStoppedHookExecuted != nil {
-		l.onStoppedHookExecuted()
+	if stopHook == nil {
+		return *stopped
+	}
+
+	if *stopped == nil {
+		return stopHook
+	}
+
+	// we have a stopped handle and the onStoppedHook
+	return func() {
+		(*stopped)()
+		stopHook()
 	}
 }

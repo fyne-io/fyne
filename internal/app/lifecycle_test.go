@@ -10,31 +10,31 @@ func TestLifecycle(t *testing.T) {
 	life := &Lifecycle{}
 
 	// Not setting anything should not panic.
-	assert.NotPanics(t, life.TriggerEnteredForeground)
-	assert.NotPanics(t, life.TriggerExitedForeground)
-	assert.NotPanics(t, life.TriggerStarted)
-	assert.NotPanics(t, life.TriggerStopped)
+	assert.Nil(t, life.OnEnteredForeground())
+	assert.Nil(t, life.OnExitedForeground())
+	assert.Nil(t, life.OnStarted())
+	assert.Nil(t, life.OnStopped())
 
 	var entered, exited, start, stop, hookedStop bool
 	life.SetOnEnteredForeground(func() { entered = true })
-	life.TriggerEnteredForeground()
+	life.OnEnteredForeground()()
 	assert.True(t, entered)
 
 	life.SetOnExitedForeground(func() { exited = true })
-	life.TriggerExitedForeground()
+	life.OnExitedForeground()()
 	assert.True(t, exited)
 
 	life.SetOnStarted(func() { start = true })
-	life.TriggerStarted()
+	life.OnStarted()()
 	assert.True(t, start)
 
 	life.SetOnStopped(func() { stop = true })
-	life.TriggerStopped()
+	life.OnStopped()()
 	assert.True(t, stop)
 
 	stop = false
 	life.SetOnStoppedHookExecuted(func() { hookedStop = true })
-	life.TriggerStopped()
+	life.OnStopped()()
 	assert.True(t, stop && hookedStop)
 
 	// Setting back to nil should not panic.
@@ -44,8 +44,8 @@ func TestLifecycle(t *testing.T) {
 	life.SetOnStopped(nil)
 	life.SetOnStoppedHookExecuted(nil)
 
-	assert.NotPanics(t, life.TriggerEnteredForeground)
-	assert.NotPanics(t, life.TriggerExitedForeground)
-	assert.NotPanics(t, life.TriggerStarted)
-	assert.NotPanics(t, life.TriggerStopped)
+	assert.Nil(t, life.OnEnteredForeground())
+	assert.Nil(t, life.OnExitedForeground())
+	assert.Nil(t, life.OnStarted())
+	assert.Nil(t, life.OnStopped())
 }
