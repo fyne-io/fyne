@@ -80,23 +80,23 @@ func (l *Lifecycle) OnStarted() func() {
 
 // OnStopped returns the stopped hook, if one is registered.
 func (l *Lifecycle) OnStopped() func() {
-	f := l.onStopped.Load()
-	f2 := l.onStoppedHookExecuted
-	if f == nil && f2 == nil {
+	stopped := l.onStopped.Load()
+	stopHook := l.onStoppedHookExecuted
+	if stopped == nil && stopHook == nil {
 		return nil
 	}
 
-	if f2 == nil {
-		return *f
+	if stopHook == nil {
+		return *stopped
 	}
 
-	if *f == nil {
-		return f2
+	if *stopped == nil {
+		return stopHook
 	}
 
 	// we have a stopped handle and the onStoppedHook
 	return func() {
-		(*f)()
-		f2()
+		(*stopped)()
+		stopHook()
 	}
 }
