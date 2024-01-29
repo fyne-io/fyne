@@ -162,6 +162,10 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	x := float32(0)
 	y := float32(0)
 	hasOpen := 0
+
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	for i, ai := range r.container.Items {
 		h := r.headers[i]
 		min := h.MinSize().Height
@@ -205,8 +209,13 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *accordionRenderer) MinSize() (size fyne.Size) {
+func (r *accordionRenderer) MinSize() fyne.Size {
 	pad := theme.Padding()
+	size := fyne.Size{}
+
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	for i, ai := range r.container.Items {
 		if i != 0 {
 			size.Height += pad
@@ -221,7 +230,8 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 			size.Height += pad
 		}
 	}
-	return
+
+	return size
 }
 
 func (r *accordionRenderer) Refresh() {
@@ -231,6 +241,9 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)
