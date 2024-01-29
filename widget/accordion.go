@@ -28,33 +28,45 @@ func NewAccordion(items ...*AccordionItem) *Accordion {
 
 // Append adds the given item to this Accordion.
 func (a *Accordion) Append(item *AccordionItem) {
+	a.propertyLock.Lock()
 	a.Items = append(a.Items, item)
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
 // Close collapses the item at the given index.
 func (a *Accordion) Close(index int) {
-	if index < 0 || index >= len(a.Items) {
+	a.propertyLock.RLock()
+	numItems := len(a.Items)
+	a.propertyLock.RUnlock()
+
+	if index < 0 || index >= numItems {
 		return
 	}
+
+	a.propertyLock.Lock()
 	a.Items[index].Open = false
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
 // CloseAll collapses all items.
 func (a *Accordion) CloseAll() {
+	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = false
 	}
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (a *Accordion) CreateRenderer() fyne.WidgetRenderer {
 	a.ExtendBaseWidget(a)
-	r := &accordionRenderer{
-		container: a,
-	}
+	r := &accordionRenderer{container: a}
 	r.updateObjects()
 	return r
 }
@@ -67,9 +79,15 @@ func (a *Accordion) MinSize() fyne.Size {
 
 // Open expands the item at the given index.
 func (a *Accordion) Open(index int) {
-	if index < 0 || index >= len(a.Items) {
+	a.propertyLock.RLock()
+	numItems := len(a.Items)
+	a.propertyLock.RUnlock()
+
+	if index < 0 || index >= numItems {
 		return
 	}
+
+	a.propertyLock.Lock()
 	for i, ai := range a.Items {
 		if i == index {
 			ai.Open = true
@@ -77,36 +95,57 @@ func (a *Accordion) Open(index int) {
 			ai.Open = false
 		}
 	}
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
 // OpenAll expands all items.
 func (a *Accordion) OpenAll() {
-	if !a.MultiOpen {
+	a.propertyLock.RLock()
+	multiOpen := a.MultiOpen
+	a.propertyLock.RUnlock()
+
+	if !multiOpen {
 		return
 	}
+
+	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = true
 	}
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
 // Remove deletes the given item from this Accordion.
 func (a *Accordion) Remove(item *AccordionItem) {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
 	for i, ai := range a.Items {
 		if ai == item {
-			a.RemoveIndex(i)
-			break
+			a.Items = append(a.Items[:i], a.Items[i+1:]...)
+			return
 		}
 	}
 }
 
 // RemoveIndex deletes the item at the given index from this Accordion.
 func (a *Accordion) RemoveIndex(index int) {
-	if index < 0 || index >= len(a.Items) {
+	a.propertyLock.RLock()
+	numItems := len(a.Items)
+	a.propertyLock.RUnlock()
+
+	if index < 0 || index >= numItems {
 		return
 	}
+
+	a.propertyLock.Lock()
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
+	a.propertyLock.Unlock()
+
 	a.Refresh()
 }
 
@@ -123,6 +162,10 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	x := float32(0)
 	y := float32(0)
 	hasOpen := 0
+
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	for i, ai := range r.container.Items {
 		h := r.headers[i]
 		min := h.MinSize().Height
@@ -166,8 +209,13 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *accordionRenderer) MinSize() (size fyne.Size) {
+func (r *accordionRenderer) MinSize() fyne.Size {
 	pad := theme.Padding()
+	size := fyne.Size{}
+
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	for i, ai := range r.container.Items {
 		if i != 0 {
 			size.Height += pad
@@ -182,7 +230,8 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 			size.Height += pad
 		}
 	}
-	return
+
+	return size
 }
 
 func (r *accordionRenderer) Refresh() {
@@ -192,6 +241,9 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
+	r.container.propertyLock.RLock()
+	defer r.container.propertyLock.RUnlock()
+
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)
