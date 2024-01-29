@@ -32,7 +32,7 @@ func main() {
 			commands.Build(),
 
 			// Deprecated: Use "go mod vendor" instead.
-			commands.Vendor(),
+			commands.Vendor(), //lint:ignore SA1019 This whole tool is deprecated.
 		},
 	}
 

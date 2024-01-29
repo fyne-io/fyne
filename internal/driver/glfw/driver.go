@@ -171,6 +171,10 @@ func (d *gLDriver) DoubleTapDelay() time.Duration {
 	return doubleTapDelay
 }
 
+func (d *gLDriver) SetDisableScreenBlanking(bool) {
+	// TODO implement for Windows, macOS, X11 and Wayland
+}
+
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
 func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())

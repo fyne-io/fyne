@@ -10,6 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var globalProgressInfRenderer fyne.WidgetRenderer
+
+func BenchmarkProgressbarInf(b *testing.B) {
+	var renderer fyne.WidgetRenderer
+	widget := &ProgressBarInfinite{}
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		renderer = widget.CreateRenderer()
+	}
+
+	// Avoid having the value optimized out by the compiler.
+	globalProgressInfRenderer = renderer
+}
+
 func TestProgressBarInfinite_Creation(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	// ticker should start automatically
@@ -54,7 +69,7 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	render.updateBar(0.0)
 	// start at the smallest size
-	assert.Equal(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width)
+	assert.InEpsilon(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width, 0.0001)
 
 	// make sure the inner progress bar grows in size
 	// call updateBar() enough times to grow the inner bar

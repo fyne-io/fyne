@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne/v2/internal/build"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSettingsBuildType(t *testing.T) {
@@ -100,7 +101,7 @@ func TestCustomTheme(t *testing.T) {
 		fyne.Theme
 	}
 	set := &settings{}
-	ctheme := &customTheme{theme.LightTheme()}
+	ctheme := &customTheme{internalTest.LightTheme(theme.DefaultTheme())}
 	set.SetTheme(ctheme)
 
 	set.setupTheme()

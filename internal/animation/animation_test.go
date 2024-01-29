@@ -47,9 +47,11 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	run.Stop(a)
-	run.animationMutex.RLock()
+	// Animations are really stopped asynchronously
+	time.Sleep(time.Second/60 + 100*time.Millisecond)
+	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.RUnlock()
+	run.animationMutex.Unlock()
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
@@ -90,7 +92,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
 	time.Sleep(time.Second/60 + 100*time.Millisecond)
-	run.animationMutex.RLock()
+	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.RUnlock()
+	run.animationMutex.Unlock()
 }

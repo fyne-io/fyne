@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -96,6 +97,7 @@ type Entry struct {
 	binder          basicBinder
 	conversionError error
 	lastChange      time.Time
+	minCache        async.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -109,7 +111,7 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{Wrapping: fyne.TextTruncate}
+	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -126,14 +128,14 @@ func NewEntryWithData(data binding.String) *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{MultiLine: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true, Wrapping: fyne.TextTruncate}
+	e := &Entry{Password: true, Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
 	e.ActionItem = newPasswordRevealer(e)
 	return e
@@ -226,7 +228,7 @@ func (e *Entry) Disable() {
 //
 // Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled
+	return e.DisableableWidget.disabled.Load()
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
@@ -240,7 +242,7 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		return
 	}
 
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		if !e.selectKeyDown {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
@@ -302,17 +304,18 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
+	e.impl.Store(&wid)
+
 	e.propertyLock.Lock()
-	defer e.propertyLock.Unlock()
-	e.BaseWidget.impl = wid
 	e.registerShortcut()
+	e.propertyLock.Unlock()
 }
 
 // FocusGained is called when the Entry has been given focus.
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.dirty = true
 		e.focused = true
 	})
@@ -325,7 +328,7 @@ func (e *Entry) FocusGained() {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusLost() {
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
@@ -398,6 +401,11 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
+	cached := e.minCache.Load()
+	if !cached.IsZero() {
+		return cached
+	}
+
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
@@ -408,6 +416,7 @@ func (e *Entry) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
 	}
 
+	e.minCache.Store(min)
 	return min
 }
 
@@ -473,6 +482,12 @@ func (e *Entry) Redo() {
 	e.Refresh()
 }
 
+func (e *Entry) Refresh() {
+	e.minCache.Store(fyne.Size{})
+
+	e.BaseWidget.Refresh()
+}
+
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
@@ -499,6 +514,7 @@ func (e *Entry) SelectedText() string {
 // Since: 2.2
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
+	e.Refresh()
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
@@ -950,12 +966,13 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.setFieldsAndRefresh(e.eraseSelection)
+	e.SetFieldsAndRefresh(e.eraseSelection)
 	e.propertyLock.RLock()
+	content := e.Text
 	cb := e.OnChanged
 	e.propertyLock.RUnlock()
 	if cb != nil {
-		cb(e.Text)
+		cb(content)
 	}
 	e.Validate()
 }
@@ -1011,7 +1028,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	if e.selecting {
-		e.setFieldsAndRefresh(e.eraseSelection)
+		e.SetFieldsAndRefresh(e.eraseSelection)
 	}
 	text := clipboard.Content()
 	if !e.MultiLine {
@@ -1084,7 +1101,7 @@ func (e *Entry) registerShortcut() {
 			return
 		}
 
-		e.setFieldsAndRefresh(func() {
+		e.SetFieldsAndRefresh(func() {
 			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
 				if e.CursorColumn == 0 {
 					if e.CursorRow > 0 {
@@ -1185,7 +1202,7 @@ func (e *Entry) selectAll() {
 	if e.textProvider().len() == 0 {
 		return
 	}
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
 
@@ -1218,19 +1235,20 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.setFieldsAndRefresh(e.eraseSelection)
+		e.SetFieldsAndRefresh(e.eraseSelection)
 		e.propertyLock.RLock()
+		content := e.Text
 		cb := e.OnChanged
 		e.propertyLock.RUnlock()
 		if cb != nil {
-			cb(e.Text)
+			cb(content)
 		}
 		e.Validate()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
 			// clear the selection -- return unhandled to add the newline
-			e.setFieldsAndRefresh(e.eraseSelection)
+			e.SetFieldsAndRefresh(e.eraseSelection)
 		}
 		return false
 	}
@@ -1304,7 +1322,8 @@ func (e *Entry) textPosFromRowCol(row, col int) int {
 func (e *Entry) syncSegments() {
 	colName := theme.ColorNameForeground
 	wrap := e.textWrap()
-	if e.disabled {
+	disabled := e.disabled.Load()
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
@@ -1323,7 +1342,7 @@ func (e *Entry) syncSegments() {
 		Text:  e.Text,
 	}}
 	colName = theme.ColorNamePlaceHolder
-	if e.disabled {
+	if disabled {
 		colName = theme.ColorNameDisabled
 	}
 	e.placeholderProvider().Wrapping = wrap
@@ -1356,13 +1375,13 @@ func (e *Entry) textProvider() *RichText {
 
 // textWrap calculates the wrapping that we should apply.
 func (e *Entry) textWrap() fyne.TextWrap {
-	if e.Wrapping == fyne.TextTruncate { // this is now the default - but we scroll around this large content
+	if e.Wrapping == fyne.TextWrap(fyne.TextTruncateClip) { // this is now the default - but we scroll around this large content
 		return fyne.TextWrapOff
 	}
 
 	if !e.MultiLine && (e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord) {
 		fyne.LogError("Entry cannot wrap single line", nil)
-		e.Wrapping = fyne.TextTruncate
+		e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 		return fyne.TextWrapOff
 	}
 	return e.Wrapping
@@ -1457,7 +1476,7 @@ func (e *Entry) updateText(text string) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string) {
 	var callback func(string)
-	e.setFieldsAndRefresh(func() {
+	e.SetFieldsAndRefresh(func() {
 		changed := e.updateText(text)
 
 		if changed {
@@ -1618,7 +1637,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	resizedTextPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
 	r.entry.propertyLock.Unlock()
 	if textPos != resizedTextPos {
-		r.entry.setFieldsAndRefresh(func() {
+		r.entry.SetFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
 
 			if r.entry.selecting {
@@ -1665,9 +1684,8 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	content := r.entry.content
-	focusedAppearance := r.entry.focused && !r.entry.disabled
+	focusedAppearance := r.entry.focused && !r.entry.disabled.Load()
 	scroll := r.entry.Scroll
-	size := r.entry.size
 	wrapping := r.entry.Wrapping
 	r.entry.propertyLock.RUnlock()
 
@@ -1678,7 +1696,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 
 	// correct our scroll wrappers if the wrap mode changed
-	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
+	entrySize := r.entry.size.Load().Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
@@ -1741,7 +1759,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 	if r.entry.validationStatus == nil {
 		r.entry.validationStatus = newValidationStatus(r.entry)
 		r.objects = append(r.objects, r.entry.validationStatus)
-		r.Layout(r.entry.size)
+		r.Layout(r.entry.size.Load())
 
 		r.entry.Validate()
 
@@ -1773,7 +1791,7 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
 		provider, placeholder, e}
 	r.updateScrollDirections()
-	r.Layout(e.size)
+	r.Layout(e.size.Load())
 	return r
 }
 
@@ -1842,7 +1860,7 @@ func (r *entryContentRenderer) Refresh() {
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	focused := r.content.entry.focused
-	focusedAppearance := focused && !r.content.entry.disabled
+	focusedAppearance := focused && !r.content.entry.disabled.Load()
 	selections := r.selection
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
@@ -2026,7 +2044,7 @@ func (r *entryContentRenderer) updateScrollDirections() {
 	switch r.content.entry.Wrapping {
 	case fyne.TextWrapOff:
 		r.content.scroll.Direction = r.content.entry.Scroll
-	case fyne.TextTruncate: // this is now the default - but we scroll
+	case fyne.TextWrap(fyne.TextTruncateClip): // this is now the default - but we scroll
 		r.content.scroll.Direction = widget.ScrollBoth
 	default: // fyne.TextWrapBreak, fyne.TextWrapWord
 		r.content.scroll.Direction = widget.ScrollVerticalOnly

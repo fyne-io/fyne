@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/scale"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -305,7 +306,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w := createWindow("Test").(*window)
-	test.ApplyTheme(t, theme.DarkTheme())
+	test.ApplyTheme(t, internalTest.DarkTheme(theme.DefaultTheme()))
 	l := widget.NewList(
 		func() int { return 2 },
 		func() fyne.CanvasObject { return widget.NewEntry() },
@@ -1152,7 +1153,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w := createWindow("Test").(*window)
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	tapped := false
@@ -1435,7 +1436,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	} else {
 		menuHeight = canvas.NewText("", color.Black).MinSize().Height + theme.Padding()*2
 	}
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	tests := []struct {
 		name               string
 		padding            bool

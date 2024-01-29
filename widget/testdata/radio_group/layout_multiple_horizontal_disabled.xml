@@ -4,13 +4,13 @@
 			<widget pos="-4,78" size="162x35" type="*widget.RadioGroup">
 				<widget size="81x35" type="*widget.radioItem">
 					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radio-button-fill.svg" size="iconInlineSize" themed="background"/>
+					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="background"/>
 					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
 					<text color="disabled" pos="32,0" size="81x35">Foo</text>
 				</widget>
 				<widget pos="81,0" size="81x35" type="*widget.radioItem">
 					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radio-button-fill.svg" size="iconInlineSize" themed="background"/>
+					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="background"/>
 					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
 					<text color="disabled" pos="32,0" size="81x35">Barley</text>
 				</widget>

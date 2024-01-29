@@ -438,6 +438,7 @@ func TestEntry_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -462,6 +463,7 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -1686,7 +1688,7 @@ func TestEntry_TextWrap(t *testing.T) {
 			want:   "entry/wrap_single_line_off.xml",
 		},
 		"single line Truncate": {
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"single line Scroll": {
@@ -1712,7 +1714,7 @@ func TestEntry_TextWrap(t *testing.T) {
 		// Disallowed - fallback to TextWrapOff
 		"multi line Truncate": {
 			multiLine: true,
-			wrap:      fyne.TextTruncate,
+			wrap:      fyne.TextWrap(fyne.TextTruncateClip),
 			want:      "entry/wrap_multi_line_truncate.xml",
 		},
 		"multi line WrapBreak": {
@@ -1755,7 +1757,7 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	e.SetText("Testing Wrapping")
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 
-	e.Wrapping = fyne.TextTruncate
+	e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 	e.Refresh()
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_truncate.xml", c)
 
@@ -1775,6 +1777,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.True(t, multiMin.Height > singleMin.Height)
 
 	multi.MultiLine = false
+	multi.Refresh()
 	multiMin = multi.MinSize()
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }

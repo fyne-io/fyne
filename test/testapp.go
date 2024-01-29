@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -216,7 +217,7 @@ func (s *testSettings) Theme() fyne.Theme {
 	defer s.propertyLock.RUnlock()
 
 	if s.theme == nil {
-		return theme.DarkTheme()
+		return test.DarkTheme(theme.DefaultTheme())
 	}
 
 	return s.theme

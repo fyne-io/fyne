@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -54,7 +55,7 @@ func TestSlider_Binding(t *testing.T) {
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
@@ -66,7 +67,8 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Width, wSize.Height)
 
-	assert.Equal(t, wSize.Width-slider.endOffset()*2, tSize.Width)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Width-endOffset*2, tSize.Width)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Height)
 
 	assert.Greater(t, wSize.Width, aSize.Width)
@@ -89,7 +91,7 @@ func TestSlider_OutOfRange(t *testing.T) {
 func TestSlider_VerticalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical
@@ -102,7 +104,8 @@ func TestSlider_VerticalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Height, wSize.Width)
 
-	assert.Equal(t, wSize.Height-slider.endOffset()*2, tSize.Height)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Height-endOffset*2, tSize.Height)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Width)
 
 	assert.Greater(t, wSize.Height, aSize.Height)

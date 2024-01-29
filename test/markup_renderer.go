@@ -414,6 +414,7 @@ func knownResource(rsc fyne.Resource) string {
 	return map[fyne.Resource]string{
 		theme.CancelIcon():             "cancelIcon",
 		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
+		theme.CheckButtonFillIcon():    "checkButtonFillIcon",
 		theme.CheckButtonIcon():        "checkButtonIcon",
 		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
 		theme.ColorChromaticIcon():     "colorChromaticIcon",
@@ -444,7 +445,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.FolderIcon():             "folderIcon",
 		theme.FolderNewIcon():          "folderNewIcon",
 		theme.FolderOpenIcon():         "folderOpenIcon",
-		theme.FyneLogo():               "fyneLogo",
+		theme.FyneLogo():               "fyneLogo", //lint:ignore SA1019 This needs to stay until the API is removed.
 		theme.HelpIcon():               "helpIcon",
 		theme.HistoryIcon():            "historyIcon",
 		theme.HomeIcon():               "homeIcon",
@@ -473,6 +474,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.NavigateNextIcon():       "navigateNextIcon",
 		theme.QuestionIcon():           "questionIcon",
 		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
+		theme.RadioButtonFillIcon():    "radioButtonFillIcon",
 		theme.RadioButtonIcon():        "radioButtonIcon",
 		theme.SearchIcon():             "searchIcon",
 		theme.SearchReplaceIcon():      "searchReplaceIcon",
