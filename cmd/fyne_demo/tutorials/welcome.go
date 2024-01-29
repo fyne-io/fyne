@@ -146,7 +146,7 @@ func formatAuthors(lines string) string {
 
 		markdown.WriteString("* ")
 		markdown.WriteString(line)
-		markdown.WriteString("\n")
+		markdown.WriteByte('\n')
 	}
 
 	return markdown.String()
