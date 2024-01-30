@@ -139,12 +139,9 @@ func (c *Container) Remove(rem CanvasObject) {
 		if o != rem {
 			continue
 		}
-
-		removed := make([]CanvasObject, len(c.Objects)-1)
-		copy(removed, c.Objects[:i])
-		copy(removed[i:], c.Objects[i+1:])
-
-		c.Objects = removed
+		copy(c.Objects[i:], c.Objects[i+1:])
+		c.Objects[len(c.Objects)-1] = nil
+		c.Objects = c.Objects[:len(c.Objects)-1]
 		c.layout()
 		return
 	}
