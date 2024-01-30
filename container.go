@@ -86,6 +86,9 @@ func (c *Container) Hide() {
 // MinSize calculates the minimum size of a Container.
 // This is delegated to the Layout, if specified, otherwise it will mimic MaxLayout.
 func (c *Container) MinSize() Size {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if c.Layout != nil {
 		return c.Layout.MinSize(c.Objects)
 	}
@@ -111,11 +114,13 @@ func (c *Container) Position() Position {
 
 // Refresh causes this object to be redrawn in it's current state
 func (c *Container) Refresh() {
+	c.lock.Lock()
 	c.layout()
 
 	for _, child := range c.Objects {
 		child.Refresh()
 	}
+	c.lock.Unlock()
 
 	// this is basically just canvas.Refresh(c) without the package loop
 	o := CurrentApp().Driver().CanvasForObject(c)
@@ -129,12 +134,13 @@ func (c *Container) Refresh() {
 // This method is not intended to be used inside a loop, to remove all the elements.
 // It is much more efficient to call RemoveAll() instead.
 func (c *Container) Remove(rem CanvasObject) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if len(c.Objects) == 0 {
 		return
 	}
 
-	c.lock.Lock()
-	defer c.lock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue
@@ -154,12 +160,18 @@ func (c *Container) Remove(rem CanvasObject) {
 //
 // Since: 2.2
 func (c *Container) RemoveAll() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	c.Objects = nil
 	c.layout()
 }
 
 // Resize sets a new size for the Container.
 func (c *Container) Resize(size Size) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if c.size == size {
 		return
 	}
@@ -170,6 +182,9 @@ func (c *Container) Resize(size Size) {
 
 // Show sets this container, and all its children, to be visible.
 func (c *Container) Show() {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if !c.Hidden {
 		return
 	}
