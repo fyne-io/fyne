@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Spaces could be appended to linux Exec command during packaging
 * Secondary mobile windows would not size correctly when padded
+* Setting Icon.Resource to nil will not clear rendering
 
 
 ## 2.4.3 - 23 December 2023
