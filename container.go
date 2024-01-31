@@ -92,6 +92,7 @@ func (c *Container) AddObject(o CanvasObject) {
 func (c *Container) Hide() {
 	c.lock.Lock()
 	if c.Hidden {
+		c.lock.Unlock()
 		return
 	}
 
