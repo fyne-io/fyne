@@ -168,7 +168,6 @@ func (c *Container) Refresh() {
 // It is much more efficient to call RemoveAll() instead.
 func (c *Container) Remove(rem CanvasObject) {
 	c.lock.Lock()
-
 	if len(c.Objects) == 0 {
 		c.lock.Unlock()
 		return
