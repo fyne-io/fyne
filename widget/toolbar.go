@@ -17,22 +17,16 @@ type ToolbarItem interface {
 type ToolbarAction struct {
 	Icon        fyne.Resource
 	OnActivated func() `json:"-"`
-	button      *Button
+	button      Button
 }
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	if t.button == nil {
-		// lazy initialization of the button, when the ToolbarAction 
-		// has not been created via the constructor
-		t.button = createToolbarActionButton(t.Icon, t.OnActivated)
-	} else {
-		// synchronize properties
-		t.button.Icon = t.Icon
-		t.button.OnTapped = t.OnActivated
-	}
-
-	return t.button
+	// synchronize properties
+	t.button.Icon = t.Icon
+	t.button.OnTapped = t.OnActivated
+	
+	return &t.button
 }
 
 // SetIcon updates the icon on a ToolbarItem
@@ -64,16 +58,10 @@ func (t *ToolbarAction) Disabled() bool {
 	return t.button.Disabled()
 }
 
-func createToolbarActionButton(icon fyne.Resource, onActivated func()) *Button {
-	button := NewButtonWithIcon("", icon, onActivated)
-	button.Importance = LowImportance
-
-	return button
-}
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
-	return &ToolbarAction{Icon: icon, OnActivated: onActivated, button: createToolbarActionButton(icon, onActivated)}
+	return &ToolbarAction{Icon: icon, OnActivated: onActivated}
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
