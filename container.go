@@ -111,7 +111,7 @@ func (c *Container) MinSize() Size {
 	c.lock.Unlock()
 
 	if layout != nil {
-		return c.Layout.MinSize(obj)
+		return layout.MinSize(obj)
 	}
 
 	minSize := NewSize(1, 1)
