@@ -120,6 +120,7 @@ func TestToolbarAction_UpdateOnActivated(t *testing.T) {
 
 	activated = false
 
+	// verify that changes are synchronized as well
 	toolbarAction.OnActivated = func() {}
 
 	test.Tap(toolbarAction.ToolbarObject().(*Button))
