@@ -165,6 +165,26 @@ func TestContainer_Show(t *testing.T) {
 	assert.True(t, container.Visible())
 }
 
+func TestSlicePool(t *testing.T) {
+	containerSlicePool = canvasObjectSlicePool{}
+
+	slice := make([]CanvasObject, 23)
+	containerSlicePool.Put(&slice)
+	got := *containerSlicePool.Get(12)
+
+	// make sure we got back the same slice
+	assert.Equal(t, 23, cap(got))
+
+	slice = []CanvasObject{
+		&dummyObject{size: NewSquareSize(5)},
+		&dummyObject{size: NewSquareSize(8)},
+		&dummyObject{size: NewSquareSize(15)}}
+	copyPtr := containerSlicePool.CopyOf(slice)
+	copy := *copyPtr
+	assert.ElementsMatch(t, slice, copy)
+
+}
+
 type customLayout struct {
 }
 
