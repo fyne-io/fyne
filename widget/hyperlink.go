@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -263,16 +264,25 @@ func (hl *Hyperlink) syncSegments() {
 
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
-	hl.provider.Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: hl.Alignment,
-			ColorName: theme.ColorNameHyperlink,
-			Inline:    true,
-			TextStyle: hl.TextStyle,
-		},
-		Text: hl.Text,
-	}}
+
+	style := RichTextStyle{
+		Alignment: hl.Alignment,
+		ColorName: theme.ColorNameHyperlink,
+		Inline:    true,
+		TextStyle: hl.TextStyle,
+	}
+
 	hl.textSize = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle)
+
+	if len(hl.provider.Segments) == 0 {
+		hl.provider.Scroll = widget.ScrollNone
+		hl.provider.Segments = []RichTextSegment{&TextSegment{Style: style, Text: hl.Text}}
+		return
+	}
+
+	segment := hl.provider.Segments[0].(*TextSegment)
+	segment.Style = style
+	segment.Text = hl.Text
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
