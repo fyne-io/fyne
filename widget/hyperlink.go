@@ -57,7 +57,9 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
+	hl.propertyLock.RLock()
 	hl.provider = NewRichTextWithText(hl.Text)
+	hl.propertyLock.RUnlock()
 	hl.provider.ExtendBaseWidget(hl.provider)
 	hl.syncSegments()
 
@@ -179,7 +181,9 @@ func (hl *Hyperlink) Resize(size fyne.Size) {
 
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
+	hl.propertyLock.Lock()
 	hl.Text = text
+	hl.propertyLock.Unlock()
 	if hl.provider == nil { // not created until visible
 		return
 	}
@@ -189,6 +193,9 @@ func (hl *Hyperlink) SetText(text string) {
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
 func (hl *Hyperlink) SetURL(url *url.URL) {
+	hl.propertyLock.Lock()
+	defer hl.propertyLock.Unlock()
+
 	hl.URL = url
 }
 
@@ -198,7 +205,7 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 	if err != nil {
 		return err
 	}
-	hl.URL = u
+	hl.SetURL(u)
 	return nil
 }
 
@@ -213,8 +220,12 @@ func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
 }
 
 func (hl *Hyperlink) invokeAction() {
-	if hl.OnTapped != nil {
-		hl.OnTapped()
+	hl.propertyLock.RLock()
+	onTapped := hl.OnTapped
+	hl.propertyLock.RUnlock()
+
+	if onTapped != nil {
+		onTapped()
 		return
 	}
 	hl.openURL()
@@ -232,8 +243,12 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 }
 
 func (hl *Hyperlink) openURL() {
-	if hl.URL != nil {
-		err := fyne.CurrentApp().OpenURL(hl.URL)
+	hl.propertyLock.RLock()
+	url := hl.URL
+	hl.propertyLock.RUnlock()
+
+	if url != nil {
+		err := fyne.CurrentApp().OpenURL(url)
 		if err != nil {
 			fyne.LogError("Failed to open url", err)
 		}
@@ -241,6 +256,9 @@ func (hl *Hyperlink) openURL() {
 }
 
 func (hl *Hyperlink) syncSegments() {
+	hl.propertyLock.RLock()
+	defer hl.propertyLock.RUnlock()
+
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
 	hl.provider.Segments = []RichTextSegment{&TextSegment{
