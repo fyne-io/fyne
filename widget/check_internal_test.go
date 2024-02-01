@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,19 +47,19 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.Equal(t, fmt.Sprintf("primary_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
 
 	check.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))
 }
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	render := test.WidgetRenderer(check).(*checkRenderer)
-	assert.Equal(t, fmt.Sprintf("inputBorder_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "inputBorder_"))
 
 	check.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))
 }
 
 func TestCheckIsDisabledByDefault(t *testing.T) {

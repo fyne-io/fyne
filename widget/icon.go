@@ -40,6 +40,10 @@ func (i *iconRenderer) Refresh() {
 	i.image.propertyLock.RLock()
 	i.raster.Resource = r
 	i.image.cachedRes = r
+
+	if i.image.Resource == nil {
+		i.raster.Image = nil // reset the internal caching too...
+	}
 	i.image.propertyLock.RUnlock()
 
 	i.raster.Refresh()

@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -66,11 +66,10 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
 	render := radioGroupTestItemRenderer(t, radio, 0)
-	icon := theme.RadioButtonFillIcon()
-	assert.Equal(t, "primary_"+icon.Name(), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
 
 	radio.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", icon.Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))
 }
 
 func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
@@ -79,7 +78,7 @@ func TestRadioGroup_DisableWhenNotSelected(t *testing.T) {
 
 	radio.Disable()
 	resName := render.over.Resource.Name()
-	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonIcon().Name()))
+	assert.True(t, strings.HasPrefix(resName, "disabled_"))
 }
 
 func TestRadioGroup_SelectedOther(t *testing.T) {

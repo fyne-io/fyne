@@ -23,7 +23,7 @@ func assertCanvasSize(t *testing.T, w *window, size fyne.Size) {
 }
 
 func ensureCanvasSize(t *testing.T, w *window, size fyne.Size) {
-	if runtime.GOOS == "linux" {
+	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		// TODO: find the root cause for these problems and solve them without additional repaint
 		// fixes issues where the window does not have the correct size
 		waitForCanvasSize(t, w, size, true)

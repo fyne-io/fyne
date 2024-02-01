@@ -224,7 +224,7 @@ func (*mobileDriver) SetDisableScreenBlanking(disable bool) {
 	setDisableScreenBlank(disable)
 }
 
-func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
+func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
 	c := w.Canvas().(*mobileCanvas)
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
@@ -241,7 +241,9 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
 	case lifecycle.CrossOn: // foregrounding
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerEnteredForeground()
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnEnteredForeground(); f != nil {
+			w.QueueEvent(f)
+		}
 	case lifecycle.CrossOff: // will enter background
 		if runtime.GOOS == "darwin" {
 			if d.glctx == nil {
@@ -252,7 +254,9 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+			w.QueueEvent(f)
+		}
 	}
 }
 
@@ -284,11 +288,15 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 }
 
 func (d *mobileDriver) onStart() {
-	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStarted()
+	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
+		go f() // don't block main, we don't have window event queue
+	}
 }
 
 func (d *mobileDriver) onStop() {
-	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStopped()
+	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStopped(); f != nil {
+		go f() // don't block main, we don't have window event queue
+	}
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
