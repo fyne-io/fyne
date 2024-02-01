@@ -1010,16 +1010,17 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 
+	text := e.textProvider()
 	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle, textSize).Height
 	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.LineSpacing()) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
-	} else if row >= e.textProvider().rows() {
-		row = e.textProvider().rows() - 1
-		col = e.textProvider().rowLength(row)
+	} else if row >= text.rows() {
+		row = text.rows() - 1
+		col = text.rowLength(row)
 	} else {
-		col = e.cursorColAt(e.textProvider().row(row), p.Add(e.scroll.Offset))
+		col = e.cursorColAt(text.row(row), p.Add(e.scroll.Offset))
 	}
 
 	return row, col
@@ -1092,7 +1093,8 @@ func (e *Entry) registerShortcut() {
 	})
 
 	moveWord := func(s fyne.Shortcut) {
-		row := e.textProvider().row(e.CursorRow)
+		text := e.textProvider()
+		row := text.row(e.CursorRow)
 		start, end := getTextWhitespaceRegion(row, e.CursorColumn, true)
 		if start == -1 || end == -1 {
 			return
@@ -1103,14 +1105,14 @@ func (e *Entry) registerShortcut() {
 				if e.CursorColumn == 0 {
 					if e.CursorRow > 0 {
 						e.CursorRow--
-						e.CursorColumn = len(e.textProvider().row(e.CursorRow))
+						e.CursorColumn = len(text.row(e.CursorRow))
 					}
 				} else {
 					e.CursorColumn = start
 				}
 			} else {
-				if e.CursorColumn == len(e.textProvider().row(e.CursorRow)) {
-					if e.CursorRow < e.textProvider().rows()-1 {
+				if e.CursorColumn == len(text.row(e.CursorRow)) {
+					if e.CursorRow < text.rows()-1 {
 						e.CursorRow++
 						e.CursorColumn = 0
 					}
@@ -1196,15 +1198,17 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
-	if e.textProvider().len() == 0 {
+	text := e.textProvider()
+	if text.len() == 0 {
 		return
 	}
+
 	e.SetFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
 
-		lastRow := e.textProvider().rows() - 1
-		e.CursorColumn = e.textProvider().rowLength(lastRow)
+		lastRow := text.rows() - 1
+		e.CursorColumn = text.rowLength(lastRow)
 		e.CursorRow = lastRow
 		e.selecting = true
 	})
@@ -1317,13 +1321,16 @@ func (e *Entry) textPosFromRowCol(row, col int) int {
 }
 
 func (e *Entry) syncSegments() {
+	text := e.textProvider()
+
 	colName := theme.ColorNameForeground
 	wrap := e.textWrap()
 	disabled := e.disabled.Load()
 	if disabled {
 		colName = theme.ColorNameDisabled
 	}
-	e.textProvider().Wrapping = wrap
+
+	text.Wrapping = wrap
 	style := RichTextStyle{
 		Alignment: fyne.TextAlignLeading,
 		ColorName: colName,
@@ -1334,23 +1341,26 @@ func (e *Entry) syncSegments() {
 		style.ColorName = colName
 		style.TextStyle = e.TextStyle
 	}
-	e.textProvider().Segments = []RichTextSegment{&TextSegment{
-		Style: style,
-		Text:  e.Text,
-	}}
+	segment := text.Segments[0].(*TextSegment)
+	segment.Style = style
+	segment.Text = e.Text
+
 	colName = theme.ColorNamePlaceHolder
 	if disabled {
 		colName = theme.ColorNameDisabled
 	}
-	e.placeholderProvider().Wrapping = wrap
-	e.placeholderProvider().Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: fyne.TextAlignLeading,
-			ColorName: colName,
-			TextStyle: e.TextStyle,
-		},
-		Text: e.PlaceHolder,
-	}}
+
+	placeholder := e.placeholderProvider()
+	placeholder.Wrapping = wrap
+
+	segment = placeholder.Segments[0].(*TextSegment)
+	segment.Style = RichTextStyle{
+		Alignment: fyne.TextAlignLeading,
+		ColorName: colName,
+		TextStyle: e.TextStyle,
+	}
+
+	segment.Text = e.PlaceHolder
 }
 
 // textProvider returns the text handler for this entry
@@ -1414,10 +1424,11 @@ func (e *Entry) truncatePosition(row, col int) (int, int) {
 	}
 	newRow := row
 	newCol := col
-	if row >= e.textProvider().rows() {
-		newRow = e.textProvider().rows() - 1
+	text := e.textProvider()
+	if row >= text.rows() {
+		newRow = text.rows() - 1
 	}
-	rowLength := e.textProvider().rowLength(newRow)
+	rowLength := text.rowLength(newRow)
 	if (newCol >= rowLength) || (newRow < row) {
 		newCol = rowLength
 	}
@@ -1778,15 +1789,15 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 
 	e.entry.propertyLock.Lock()
 	defer e.entry.propertyLock.Unlock()
-	provider := e.entry.textProvider()
+	text := e.entry.textProvider()
 	placeholder := e.entry.placeholderProvider()
-	if provider.len() != 0 {
+	if text.len() != 0 {
 		placeholder.Hide()
 	}
-	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor}
+	objects := []fyne.CanvasObject{placeholder, text, e.entry.cursorAnim.cursor}
 
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
-		provider, placeholder, e}
+		text, placeholder, e}
 	r.updateScrollDirections()
 	r.Layout(e.size.Load())
 	return r
@@ -1854,7 +1865,7 @@ func (r *entryContentRenderer) Objects() []fyne.CanvasObject {
 
 func (r *entryContentRenderer) Refresh() {
 	r.content.entry.propertyLock.RLock()
-	provider := r.content.entry.textProvider()
+	text := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
 	focused := r.content.entry.focused
 	focusedAppearance := focused && !r.content.entry.disabled.Load()
@@ -1862,7 +1873,7 @@ func (r *entryContentRenderer) Refresh() {
 	r.updateScrollDirections()
 	r.content.entry.propertyLock.RUnlock()
 
-	if provider.len() == 0 {
+	if text.len() == 0 {
 		placeholder.Show()
 	} else if placeholder.Visible() {
 		placeholder.Hide()
