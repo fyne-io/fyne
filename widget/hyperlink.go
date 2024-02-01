@@ -35,7 +35,7 @@ type Hyperlink struct {
 
 	textSize         fyne.Size // updated in syncSegments
 	focused, hovered bool
-	provider         *RichText
+	provider         RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -58,10 +58,7 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
-	hl.propertyLock.RLock()
-	hl.provider = NewRichTextWithText(hl.Text)
-	hl.propertyLock.RUnlock()
-	hl.provider.ExtendBaseWidget(hl.provider)
+	hl.provider.ExtendBaseWidget(&hl.provider)
 	hl.syncSegments()
 
 	th := hl.Theme()
@@ -72,7 +69,7 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	focus.Hide()
 	under := canvas.NewRectangle(th.Color(theme.ColorNameHyperlink, v))
 	under.Hide()
-	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus, under}, focus: focus, under: under}
+	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{&hl.provider, focus, under}, focus: focus, under: under}
 }
 
 // Cursor returns the cursor type of this widget
@@ -139,11 +136,7 @@ func (hl *Hyperlink) focusXPos() float32 {
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	innerPad := theme.InnerPadding()
 	pad := theme.Padding()
-	// If not rendered yet provider will be nil
-	lineCount := float32(1)
-	if hl.provider != nil {
-		lineCount = fyne.Max(lineCount, float32(len(hl.provider.rowBounds)))
-	}
+	lineCount := fyne.Max(1, float32(len(hl.provider.rowBounds)))
 
 	xpos := hl.focusXPos()
 	return pos.X >= xpos && pos.X <= xpos+hl.focusWidth() &&
@@ -154,21 +147,14 @@ func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 //
 // Implements: fyne.Widget
 func (hl *Hyperlink) Refresh() {
-	if hl.provider == nil { // not created until visible
-		return
-	}
 	hl.syncSegments()
-
 	hl.provider.Refresh()
 	hl.BaseWidget.Refresh()
 }
 
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	if hl.provider == nil {
-		hl.CreateRenderer()
-	}
-
+	hl.syncSegments()
 	return hl.provider.MinSize()
 }
 
@@ -176,9 +162,6 @@ func (hl *Hyperlink) MinSize() fyne.Size {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (hl *Hyperlink) Resize(size fyne.Size) {
 	hl.BaseWidget.Resize(size)
-	if hl.provider == nil { // not created until visible
-		return
-	}
 	hl.provider.Resize(size)
 }
 
@@ -187,9 +170,7 @@ func (hl *Hyperlink) SetText(text string) {
 	hl.propertyLock.Lock()
 	hl.Text = text
 	hl.propertyLock.Unlock()
-	if hl.provider == nil { // not created until visible
-		return
-	}
+
 	hl.syncSegments()
 	hl.provider.Refresh()
 }
@@ -214,11 +195,6 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
-	// If not rendered yet (hl.provider == nil), register all taps
-	// in practice this probably only happens in our unit tests
-	if hl.provider != nil && !hl.isPosOverText(e.Position) {
-		return
-	}
 	hl.invokeAction()
 }
 

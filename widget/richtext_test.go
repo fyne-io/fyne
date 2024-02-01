@@ -384,8 +384,8 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label := NewLabel("Test")
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
-	provider := label.provider
 
+	provider := &label.provider
 	inPad := theme.InnerPadding()
 	textSize := theme.TextSize()
 	fullSize := provider.lineSizeToColumn(4, 0, textSize, inPad)
