@@ -505,6 +505,44 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
+func TestSetView(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.SetConfirmText("Yes")
+	dlg.SetDismissText("Dismiss")
+
+	// set view to list
+	dlg.SetView(ListView)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+
+	// view should be a list
+	_, isList := panel.(*widget.List)
+	assert.True(t, isList)
+	// toggleViewButton should reflect to what it will do (change to a grid view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
+
+	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Yes", confirm.Text)
+	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "Dismiss", dismiss.Text)
+}
+
+
 func TestViewPreferences(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
 
