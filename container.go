@@ -48,7 +48,7 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	}
 
 	ret.size = layout.MinSize(objects)
-	ret.layout()
+	ret.layout(objects, ret.size)
 	return ret
 }
 
@@ -61,9 +61,14 @@ func (c *Container) Add(add CanvasObject) {
 	}
 
 	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.Objects = append(c.Objects, add)
-	c.layout()
+	newObj := make([]CanvasObject, len(c.Objects)+1)
+	copy(newObj, c.Objects)
+	newObj = append(newObj, add)
+	c.Objects = newObj
+	size := c.size
+	c.lock.Unlock()
+
+	c.layout(newObj, size)
 }
 
 // AddObject adds another CanvasObject to the set this Container holds.
@@ -86,8 +91,11 @@ func (c *Container) Hide() {
 // MinSize calculates the minimum size of a Container.
 // This is delegated to the Layout, if specified, otherwise it will mimic MaxLayout.
 func (c *Container) MinSize() Size {
-	if c.Layout != nil {
-		return c.Layout.MinSize(c.Objects)
+	c.lock.Lock()
+	layout := c.Layout
+	c.lock.Unlock()
+	if layout != nil {
+		return layout.MinSize(c.Objects)
 	}
 
 	minSize := NewSize(1, 1)
@@ -111,9 +119,13 @@ func (c *Container) Position() Position {
 
 // Refresh causes this object to be redrawn in it's current state
 func (c *Container) Refresh() {
-	c.layout()
+	c.lock.Lock()
+	obj := c.Objects
+	size := c.size
+	c.lock.Unlock()
+	c.layout(obj, size)
 
-	for _, child := range c.Objects {
+	for _, child := range obj {
 		child.Refresh()
 	}
 
@@ -129,13 +141,14 @@ func (c *Container) Refresh() {
 // This method is not intended to be used inside a loop, to remove all the elements.
 // It is much more efficient to call RemoveAll() instead.
 func (c *Container) Remove(rem CanvasObject) {
-	if len(c.Objects) == 0 {
+	c.lock.Lock()
+	obj := c.Objects
+	c.lock.Unlock()
+	if len(obj) == 0 {
 		return
 	}
 
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	for i, o := range c.Objects {
+	for i, o := range obj {
 		if o != rem {
 			continue
 		}
@@ -144,8 +157,11 @@ func (c *Container) Remove(rem CanvasObject) {
 		copy(removed, c.Objects[:i])
 		copy(removed[i:], c.Objects[i+1:])
 
+		c.lock.Lock()
 		c.Objects = removed
-		c.layout()
+		size := c.size
+		c.lock.Unlock()
+		c.layout(removed, size)
 		return
 	}
 }
@@ -154,18 +170,25 @@ func (c *Container) Remove(rem CanvasObject) {
 //
 // Since: 2.2
 func (c *Container) RemoveAll() {
+	c.lock.Lock()
 	c.Objects = nil
-	c.layout()
+	size := c.size
+	c.lock.Unlock()
+	c.layout(nil, size)
 }
 
 // Resize sets a new size for the Container.
 func (c *Container) Resize(size Size) {
+	c.lock.Lock()
 	if c.size == size {
+		c.lock.Unlock()
 		return
 	}
 
+	obj := c.Objects
 	c.size = size
-	c.layout()
+	c.lock.Unlock()
+	c.layout(obj, size)
 }
 
 // Show sets this container, and all its children, to be visible.
@@ -187,12 +210,12 @@ func (c *Container) Visible() bool {
 	return !c.Hidden
 }
 
-func (c *Container) layout() {
-	if c.Layout == nil {
+func (c *Container) layout(obj []CanvasObject, size Size) {
+	layout := c.Layout
+	if layout == nil {
 		return
 	}
-
-	c.Layout.Layout(c.Objects, c.size)
+	layout.Layout(obj, size)
 }
 
 // repaint instructs the containing canvas to redraw, even if nothing changed.
