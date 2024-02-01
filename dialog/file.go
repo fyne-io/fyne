@@ -22,7 +22,7 @@ type ViewLayout int
 const (
 	defaultView ViewLayout = iota
 	ListView
-	GridView 
+	GridView
 )
 
 const viewLayoutKey = "fyne:fileDialogViewLayout"
@@ -146,7 +146,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	if view == defaultView {
 		// set GridView as default
 		view = GridView
-		
+
 		if f.file.initialView != defaultView {
 			view = f.file.initialView
 		}
