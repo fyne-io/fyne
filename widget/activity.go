@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,7 +20,7 @@ var _ fyne.Widget = (*Activity)(nil)
 type Activity struct {
 	BaseWidget
 
-	started bool
+	started atomic.Bool
 }
 
 // NewActivity returns a widget for indicating activity
@@ -39,14 +40,10 @@ func (a *Activity) MinSize() fyne.Size {
 
 // Start the activity indicator animation
 func (a *Activity) Start() {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
-	if a.started {
-		return
+	if !a.started.CompareAndSwap(false, true) {
+		return // already started
 	}
 
-	a.started = true
 	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
 		r.start()
 	}
@@ -54,14 +51,10 @@ func (a *Activity) Start() {
 
 // Stop the activity indicator animation
 func (a *Activity) Stop() {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
-	if !a.started {
-		return
+	if !a.started.CompareAndSwap(true, false) {
+		return // already stopped
 	}
 
-	a.started = false
 	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
 		r.stop()
 	}
@@ -79,11 +72,9 @@ func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 		Tick:        r.animate}
 	r.updateColor()
 
-	a.propertyLock.RLock()
-	if a.started {
+	if a.started.Load() {
 		r.start()
 	}
-	a.propertyLock.RUnlock()
 
 	return r
 }
