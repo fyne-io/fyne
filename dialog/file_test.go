@@ -508,6 +508,8 @@ func TestView(t *testing.T) {
 func TestSetView(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
 
+	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(defaultView))
+
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		assert.Nil(t, err)
 		assert.Nil(t, reader)
@@ -542,6 +544,39 @@ func TestSetView(t *testing.T) {
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
+func TestSetViewPreferences(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	prefs := fyne.CurrentApp().Preferences()
+
+	// set user-saved viewLayout to GridView
+	prefs.SetInt(viewLayoutKey, int(GridView))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	// set default view to be ListView
+	dlg.SetView(ListView)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+
+	// check that preference setting overrules configured default view
+	_, isGrid := panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+}
 
 func TestViewPreferences(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
@@ -549,7 +584,7 @@ func TestViewPreferences(t *testing.T) {
 	prefs := fyne.CurrentApp().Preferences()
 
 	// set viewLayout to an invalid value to verify that this situation is handled properly
-	prefs.SetInt(viewLayoutKey, -1)
+	prefs.SetInt(viewLayoutKey, 0)
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		assert.Nil(t, err)
