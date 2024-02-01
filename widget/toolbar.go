@@ -25,7 +25,7 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	// synchronize properties
 	t.button.Icon = t.Icon
 	t.button.OnTapped = t.OnActivated
-	
+
 	return &t.button
 }
 
@@ -57,7 +57,6 @@ func (t *ToolbarAction) Disable() {
 func (t *ToolbarAction) Disabled() bool {
 	return t.button.Disabled()
 }
-
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
