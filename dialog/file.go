@@ -84,6 +84,8 @@ type FileDialog struct {
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+	// this will be the initial view in a FileDialog
+	initialView ViewLayout
 }
 
 // Declare conformity to Dialog interface
@@ -771,6 +773,17 @@ func (f *FileDialog) SetFileName(fileName string) {
 		if f.dialog != nil {
 			f.dialog.fileName.SetText(fileName)
 		}
+	}
+}
+
+// SetView changes the default display view of the FileDialog
+// This is normally called before the dialog is shown.
+//
+// Since: 2.5
+func (f *FileDialog) SetView(v ViewLayout) {
+	f.initialView = v
+	if f.dialog != nil {
+		f.dialog.setView(v)
 	}
 }
 
