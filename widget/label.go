@@ -3,7 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -24,13 +24,15 @@ type Label struct {
 	// Since: 2.4
 	Importance Importance
 
-	provider *RichText
+	provider RichText
 	binder   basicBinder
 }
 
 // NewLabel creates a new label widget with the set text content
 func NewLabel(text string) *Label {
-	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
+	l := &Label{Text: text}
+	l.ExtendBaseWidget(l)
+	return l
 }
 
 // NewLabelWithData returns an Label widget connected to the specified data source.
@@ -45,12 +47,7 @@ func NewLabelWithData(data binding.String) *Label {
 
 // NewLabelWithStyle creates a new label widget with the set text content
 func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
-	l := &Label{
-		Text:      text,
-		Alignment: alignment,
-		TextStyle: style,
-	}
-
+	l := &Label{Text: text, Alignment: alignment, TextStyle: style}
 	l.ExtendBaseWidget(l)
 	return l
 }
@@ -66,22 +63,17 @@ func (l *Label) Bind(data binding.String) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
-	l.provider = NewRichTextWithText(l.Text)
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	return NewSimpleRenderer(l.provider)
+	return NewSimpleRenderer(&l.provider)
 }
 
 // MinSize returns the size that this label should not shrink below.
 //
 // Implements: fyne.Widget
 func (l *Label) MinSize() fyne.Size {
-	if l.provider == nil {
-		l.ExtendBaseWidget(l)
-		cache.Renderer(l.super())
-	}
-
+	l.ExtendBaseWidget(l)
 	return l.provider.MinSize()
 }
 
@@ -89,9 +81,6 @@ func (l *Label) MinSize() fyne.Size {
 //
 // Implements: fyne.Widget
 func (l *Label) Refresh() {
-	if l.provider == nil { // not created until visible
-		return
-	}
 	l.syncSegments()
 	l.provider.Refresh()
 	l.BaseWidget.Refresh()
@@ -103,9 +92,7 @@ func (l *Label) Refresh() {
 // Implements: fyne.Widget
 func (l *Label) Resize(s fyne.Size) {
 	l.BaseWidget.Resize(s)
-	if l.provider != nil {
-		l.provider.Resize(s)
-	}
+	l.provider.Resize(s)
 }
 
 // SetText sets the text of the label
@@ -148,13 +135,24 @@ func (l *Label) syncSegments() {
 
 	l.provider.Wrapping = l.Wrapping
 	l.provider.Truncation = l.Truncation
-	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
+
+	style := RichTextStyle{
 		Alignment: l.Alignment,
 		ColorName: color,
 		Inline:    true,
 		TextStyle: l.TextStyle,
 	}
-	l.provider.Segments[0].(*TextSegment).Text = l.Text
+
+	// Check if the widget has been rendered yet.
+	if len(l.provider.Segments) == 0 {
+		l.provider.Scroll = widget.ScrollNone
+		l.provider.Segments = []RichTextSegment{&TextSegment{Style: style, Text: l.Text}}
+		return
+	}
+
+	segment := l.provider.Segments[0].(*TextSegment)
+	segment.Style = style
+	segment.Text = l.Text
 }
 
 func (l *Label) updateFromData(data binding.DataItem) {

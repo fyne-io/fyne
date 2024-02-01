@@ -20,9 +20,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const (
-	passwordChar = "•"
-)
+const passwordChar = "•"
 
 // RichText represents the base element for a rich text-based widget.
 //
