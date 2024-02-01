@@ -287,16 +287,20 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
-	innerPad := theme.InnerPadding()
+	r.hl.propertyLock.RLock()
+	textSize := r.hl.textSize
 	w := r.hl.focusWidth()
 	xposFocus := r.hl.focusXPos()
+	r.hl.propertyLock.RUnlock()
+
+	innerPad := theme.InnerPadding()
 	xposUnderline := xposFocus + innerPad/2
+	lineCount := float32(len(r.hl.provider.rowBounds))
 
 	r.hl.provider.Resize(s)
-	lineCount := float32(len(r.hl.provider.rowBounds))
 	r.focus.Move(fyne.NewPos(xposFocus, innerPad/2))
-	r.focus.Resize(fyne.NewSize(w, r.hl.textSize.Height*lineCount+innerPad))
-	r.under.Move(fyne.NewPos(xposUnderline, r.hl.textSize.Height*lineCount+theme.Padding()*2))
+	r.focus.Resize(fyne.NewSize(w, textSize.Height*lineCount+innerPad))
+	r.under.Move(fyne.NewPos(xposUnderline, textSize.Height*lineCount+theme.Padding()*2))
 	r.under.Resize(fyne.NewSize(w-innerPad, 1))
 }
 
@@ -310,6 +314,8 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 
 func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
+	r.hl.propertyLock.RLock()
+	defer r.hl.propertyLock.RUnlock()
 	r.focus.StrokeColor = theme.FocusColor()
 	r.focus.Hidden = !r.hl.focused
 	r.under.StrokeColor = theme.HyperlinkColor()
