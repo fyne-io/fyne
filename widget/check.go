@@ -65,14 +65,18 @@ func (c *Check) Bind(data binding.Bool) {
 
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
+	c.propertyLock.Lock()
 	if checked == c.Checked {
+		c.propertyLock.Unlock()
 		return
 	}
 
 	c.Checked = checked
+	onChanged := c.OnChanged
+	c.propertyLock.Unlock()
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
+	if onChanged != nil {
+		onChanged(checked)
 	}
 
 	c.Refresh()
@@ -212,7 +216,9 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 //
 // Since: 2.4
 func (c *Check) SetText(text string) {
+	c.propertyLock.Lock()
 	c.Text = text
+	c.propertyLock.Unlock()
 	c.Refresh()
 }
 
