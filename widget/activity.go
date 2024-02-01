@@ -18,6 +18,8 @@ var _ fyne.Widget = (*Activity)(nil)
 // Since: 2.5
 type Activity struct {
 	BaseWidget
+
+	started bool
 }
 
 // NewActivity returns a widget for indicating activity
@@ -37,6 +39,14 @@ func (a *Activity) MinSize() fyne.Size {
 
 // Start the activity indicator animation
 func (a *Activity) Start() {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	if a.started {
+		return
+	}
+
+	a.started = true
 	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
 		r.start()
 	}
@@ -44,6 +54,14 @@ func (a *Activity) Start() {
 
 // Stop the activity indicator animation
 func (a *Activity) Stop() {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	if !a.started {
+		return
+	}
+
+	a.started = false
 	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
 		r.stop()
 	}
@@ -60,6 +78,13 @@ func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 		RepeatCount: fyne.AnimationRepeatForever,
 		Tick:        r.animate}
 	r.updateColor()
+
+	a.propertyLock.RLock()
+	if a.started {
+		r.start()
+	}
+	a.propertyLock.RUnlock()
+
 	return r
 }
 
