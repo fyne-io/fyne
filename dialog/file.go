@@ -17,11 +17,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type viewLayout int
+type ViewLayout int
 
 const (
-	gridView viewLayout = iota
-	listView
+	GridView ViewLayout = iota
+	ListView
 )
 
 const viewLayoutKey = "fyne:fileDialogViewLayout"
@@ -56,7 +56,7 @@ type fileDialog struct {
 	favoritesList    *widget.List
 	showHidden       bool
 
-	view viewLayout
+	view ViewLayout
 
 	data     []fyne.URI
 	dataLock sync.RWMutex
@@ -138,9 +138,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		title = label + " Folder"
 	}
 
-	view := viewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
-	if view != listView {
-		view = gridView
+	view := ViewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
+	if view != ListView {
+		view = GridView
 	}
 
 	f.setView(view)
@@ -169,7 +169,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	})
 
 	var toggleViewButtonIcon fyne.Resource
-	if f.view == gridView {
+	if f.view == GridView {
 		toggleViewButtonIcon = theme.ListIcon()
 	} else {
 		toggleViewButtonIcon = theme.GridIcon()
@@ -177,11 +177,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	var toggleViewButton *widget.Button
 	toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
-		if f.view == gridView {
-			f.setView(listView)
+		if f.view == GridView {
+			f.setView(ListView)
 			toggleViewButton.SetIcon(theme.GridIcon())
 		} else {
-			f.setView(gridView)
+			f.setView(GridView)
 			toggleViewButton.SetIcon(theme.ListIcon())
 		}
 	})
@@ -516,7 +516,7 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 	}
 }
 
-func (f *fileDialog) setView(view viewLayout) {
+func (f *fileDialog) setView(view ViewLayout) {
 	f.view = view
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
 
@@ -542,7 +542,7 @@ func (f *fileDialog) setView(view viewLayout) {
 			f.setSelected(file, id)
 		}
 	}
-	if f.view == gridView {
+	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid

@@ -528,22 +528,22 @@ func TestViewPreferences(t *testing.T) {
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 
 	// viewLayout preference should be 'grid'
-	view := viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, gridView, view)
+	view := ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, GridView, view)
 
 	// toggle view
 	test.Tap(toggleViewButton)
 
 	// viewLayout preference should be 'list'
-	view = viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, listView, view)
+	view = ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, ListView, view)
 
 	// toggle view
 	test.Tap(toggleViewButton)
 
 	// viewLayout preference should be 'grid' again
-	view = viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, gridView, view)
+	view = ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, GridView, view)
 }
 
 func TestFileFavorites(t *testing.T) {
