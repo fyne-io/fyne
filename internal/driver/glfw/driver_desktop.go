@@ -164,7 +164,11 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	systray.SetIcon(img)
+	if _, ok := resource.(*theme.ThemedResource); ok {
+		systray.SetTemplateIcon(img, img)
+	} else {
+		systray.SetIcon(img)
+	}
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
