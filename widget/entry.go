@@ -70,8 +70,8 @@ type Entry struct {
 
 	dirty       bool
 	focused     bool
-	text        *RichText
-	placeholder *RichText
+	text        RichText
+	placeholder RichText
 	content     *entryContent
 	scroll      *widget.Scroll
 
@@ -1055,21 +1055,17 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *RichText {
-	if e.placeholder != nil {
-		return e.placeholder
+	if len(e.placeholder.Segments) != 0 {
+		return &e.placeholder
 	}
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
 	style.TextStyle = e.TextStyle
-	text := NewRichText(&TextSegment{
-		Style: style,
-		Text:  e.PlaceHolder,
-	})
-	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, theme.InputBorderSize())
-	e.placeholder = text
-	return e.placeholder
+	e.placeholder.Segments = []RichTextSegment{&TextSegment{Style: style, Text: e.PlaceHolder}}
+	e.placeholder.Scroll = widget.ScrollNone
+	e.placeholder.inset = fyne.NewSize(0, theme.InputBorderSize())
+	return &e.placeholder
 }
 
 func (e *Entry) registerShortcut() {
@@ -1359,19 +1355,18 @@ func (e *Entry) syncSegments() {
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
-	if e.text != nil {
-		return e.text
+	if len(e.text.Segments) != 0 {
+		return &e.text
 	}
 
 	if e.Text != "" {
 		e.dirty = true
 	}
 
-	text := NewRichTextWithText(e.Text)
-	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, theme.InputBorderSize())
-	e.text = text
-	return e.text
+	e.text.Scroll = widget.ScrollNone
+	e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
+	e.text.inset = fyne.NewSize(0, theme.InputBorderSize())
+	return &e.text
 }
 
 // textWrap calculates the wrapping that we should apply.
