@@ -6,7 +6,9 @@
 					<widget size="192x35" type="*widget.leaf">
 						<rectangle fillColor="selection" radius="4" size="192x35"/>
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="40x19">11111</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="40x19">11111</text>
+							</widget>
 						</widget>
 					</widget>
 				</widget>

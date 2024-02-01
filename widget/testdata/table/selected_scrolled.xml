@@ -36,34 +36,54 @@
 			<widget size="172x172" type="*widget.Scroll">
 				<widget pos="-214,-19" size="484x191" type="*widget.tableCells">
 					<widget pos="195,0" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 0, 2</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 0, 2</text>
+						</widget>
 					</widget>
 					<widget pos="293,0" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 0, 3</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 0, 3</text>
+						</widget>
 					</widget>
 					<widget pos="195,39" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 1, 2</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 1, 2</text>
+						</widget>
 					</widget>
 					<widget pos="293,39" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 1, 3</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 1, 3</text>
+						</widget>
 					</widget>
 					<widget pos="195,78" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 2, 2</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 2, 2</text>
+						</widget>
 					</widget>
 					<widget pos="293,78" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 2, 3</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 2, 3</text>
+						</widget>
 					</widget>
 					<widget pos="195,117" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 3, 2</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 3, 2</text>
+						</widget>
 					</widget>
 					<widget pos="293,117" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 3, 3</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 3, 3</text>
+						</widget>
 					</widget>
 					<widget pos="195,156" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 4, 2</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 4, 2</text>
+						</widget>
 					</widget>
 					<widget pos="293,156" size="93x35" type="*widget.Label">
-						<text pos="8,8" size="51x19">Cell 4, 3</text>
+						<widget size="93x35" type="*widget.RichText">
+							<text pos="8,8" size="51x19">Cell 4, 3</text>
+						</widget>
 					</widget>
 				</widget>
 				<widget size="172x0" type="*widget.Shadow">

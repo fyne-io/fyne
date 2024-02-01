@@ -186,13 +186,13 @@ func TestShowFileOpen(t *testing.T) {
 	//optionsbuttons
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
-	assert.Equal(t, theme.FolderNewIcon(), createNewFolderButton.Icon)
+	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
-	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
-	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
+	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 	//footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
@@ -274,13 +274,13 @@ func TestHiddenFiles(t *testing.T) {
 
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
-	assert.Equal(t, theme.FolderNewIcon(), createNewFolderButton.Icon)
+	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
-	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
-	assert.Equal(t, theme.SettingsIcon(), optionsButton.Icon)
+	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
@@ -473,7 +473,7 @@ func TestView(t *testing.T) {
 	assert.True(t, isGrid)
 	// toggleViewButton should reflect to what it will do (change to a list view).
 	assert.Equal(t, "", toggleViewButton.Text)
-	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 
 	// toggle view
 	test.Tap(toggleViewButton)
@@ -485,7 +485,7 @@ func TestView(t *testing.T) {
 	assert.True(t, isList)
 	// toggleViewButton should reflect to what it will do (change to a grid view).
 	assert.Equal(t, "", toggleViewButton.Text)
-	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
+	assert.Equal(t, theme.GridIcon().Name(), toggleViewButton.Icon.Name())
 
 	// toggle view
 	test.Tap(toggleViewButton)
@@ -497,7 +497,7 @@ func TestView(t *testing.T) {
 	assert.True(t, isGrid)
 	// toggleViewButton should reflect to what it will do (change to a list view).
 	assert.Equal(t, "", toggleViewButton.Text)
-	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
@@ -644,7 +644,7 @@ func TestCreateNewFolderInDir(t *testing.T) {
 
 	createNewFolderButton := folderDialogUI.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
-	assert.Equal(t, theme.FolderNewIcon(), createNewFolderButton.Icon)
+	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
 
 	// open folder name input dialog
 	test.Tap(createNewFolderButton)

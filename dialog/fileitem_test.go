@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestFileItem_Name(t *testing.T) {
@@ -120,7 +121,8 @@ func TestFileItem_Wrap(t *testing.T) {
 	assert.Equal(t, 1, len(texts))
 
 	item.setLocation(storage.NewFileURI("/path/to/averylongfilename.svg"), false, false)
-	texts = test.WidgetRenderer(label).Objects()
+	rich := test.WidgetRenderer(label).Objects()[0].(*widget.RichText)
+	texts = test.WidgetRenderer(rich).Objects()
 	assert.Equal(t, 2, len(texts))
 	assert.Equal(t, "averylon", texts[0].(*canvas.Text).Text)
 }
