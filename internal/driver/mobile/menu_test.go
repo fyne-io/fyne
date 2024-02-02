@@ -62,7 +62,7 @@ func TestMobileCanvas_Menu(t *testing.T) {
 	assert.True(t, ok)
 	closed, ok := header.Objects[0].(*widget.Button)
 	assert.True(t, ok)
-	assert.Equal(t, theme.CancelIcon(), closed.Icon)
+	assert.Equal(t, theme.CancelIcon().Name(), closed.Icon.Name())
 
 	for i := 1; i < 3; i++ {
 		item, ok := menuObjects.Objects[i].(*menuLabel)

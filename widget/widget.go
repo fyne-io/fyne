@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/theme"
 )
 
 // BaseWidget provides a helper that handles basic widget behaviours.
@@ -20,6 +21,7 @@ type BaseWidget struct {
 
 	impl         atomic.Pointer[fyne.Widget]
 	propertyLock sync.RWMutex
+	themeCache   fyne.Theme
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -121,8 +123,30 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
+	w.propertyLock.Lock()
+	w.themeCache = nil
+	w.propertyLock.Unlock()
+
 	render := cache.Renderer(impl)
 	render.Refresh()
+}
+
+// Theme returns a cached Theme instance for this widget (or its extending widget).
+// This will be the app theme in most cases, or a widget specific theme if it is inside a ThemeOverride container.
+//
+// Since: 2.5
+func (w *BaseWidget) Theme() fyne.Theme {
+	w.propertyLock.RLock()
+	cached := w.themeCache
+	w.propertyLock.RUnlock()
+	if cached == nil {
+		cached = theme.CurrentForWidget(w.super())
+		w.propertyLock.Lock()
+		w.themeCache = cached
+		w.propertyLock.Unlock()
+	}
+
+	return cached
 }
 
 // SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.

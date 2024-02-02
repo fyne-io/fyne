@@ -2,7 +2,9 @@
 	<content>
 		<container size="300x300">
 			<widget pos="100,50" size="60x35" type="*glfw_test.notFocusableButton">
-				<text pos="8,8" size="44x19">Button</text>
+				<widget size="60x35" type="*widget.RichText">
+					<text pos="8,8" size="44x19">Button</text>
+				</widget>
 			</widget>
 			<widget size="300x27" type="*glfw.MenuBar">
 				<widget size="300x27" type="*widget.Shadow">

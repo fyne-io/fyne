@@ -70,18 +70,7 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	return l.provider.CreateRenderer()
-}
-
-// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
-func (l *Label) ExtendBaseWidget(w fyne.Widget) {
-	if w == nil {
-		w = l
-	}
-	l.BaseWidget.ExtendBaseWidget(w)
-	if l.provider != nil {
-		l.provider.ExtendBaseWidget(l.super())
-	}
+	return NewSimpleRenderer(l.provider)
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -121,7 +110,9 @@ func (l *Label) Resize(s fyne.Size) {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
+	l.propertyLock.Lock()
 	l.Text = text
+	l.propertyLock.Unlock()
 	l.Refresh()
 }
 
@@ -134,6 +125,9 @@ func (l *Label) Unbind() {
 }
 
 func (l *Label) syncSegments() {
+	l.propertyLock.RLock()
+	defer l.propertyLock.RUnlock()
+
 	var color fyne.ThemeColorName
 	switch l.Importance {
 	case LowImportance:
