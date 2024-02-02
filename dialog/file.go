@@ -17,6 +17,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// ViewLayout can be passed to SetView() to set the view of
+// a FileDialog
+//
+// Since: 2.5
 type ViewLayout int
 
 const (
