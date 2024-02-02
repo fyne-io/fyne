@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -170,6 +172,11 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 	// trim the scheme
 	s = strings.TrimPrefix(s, fileSchemePrefix)
+
+	// Only for Windows: If the path is a drive root, no parent is possible
+	if runtime.GOOS == "windows" && regexp.MustCompile(`(?i)^/[a-z]:$`).MatchString(s) {
+		return nil, repository.ErrURIRoot
+	}
 
 	// Completely empty URI with just a scheme
 	if s == "" {

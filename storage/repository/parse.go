@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -22,6 +23,10 @@ func NewFileURI(path string) fyne.URI {
 	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
 	if runtime.GOOS == "windows" {
+		// Make sure that Windows paths (eg "c:\") also correctly start with a "/"
+		if regexp.MustCompile(`(?i)^[a-z]:`).MatchString(path) {
+			path = "/" + path
+		}
 		// seems that sometimes we end up with
 		// double-backslashes
 		path = filepath.ToSlash(path)
