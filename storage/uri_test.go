@@ -56,7 +56,12 @@ func TestURIPath(t *testing.T) {
 	s = "file:///C:/over/there"
 	u, err = storage.ParseURI(s)
 	assert.Nil(t, err)
-	assert.Equal(t, "/C:/over/there", u.Path())
+	if runtime.GOOS == "windows" {
+		// Windows should not have that leading slash
+		assert.Equal(t, "C:/over/there", u.Path())
+	} else {
+		assert.Equal(t, "/C:/over/there", u.Path())
+	}
 }
 
 func TestURIQuery(t *testing.T) {
