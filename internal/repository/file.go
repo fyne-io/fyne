@@ -18,6 +18,9 @@ import (
 // for string processing
 const fileSchemePrefix string = "file://"
 
+// Regex pattern to match Windows drive paths
+var windowsDrivePathPattern = regexp.MustCompile(`(?i)^/[a-z]:$`)
+
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
 var _ repository.WritableRepository = (*FileRepository)(nil)
@@ -174,7 +177,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	s = strings.TrimPrefix(s, fileSchemePrefix)
 
 	// Only for Windows: If the path is a drive root, no parent is possible
-	if runtime.GOOS == "windows" && regexp.MustCompile(`(?i)^/[a-z]:$`).MatchString(s) {
+	if runtime.GOOS == "windows" && windowsDrivePathPattern.MatchString(s) {
 		return nil, repository.ErrURIRoot
 	}
 
