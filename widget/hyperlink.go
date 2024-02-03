@@ -315,13 +315,13 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *hyperlinkRenderer) Refresh() {
-	r.hl.propertyLock.RLock()
-	defer r.hl.propertyLock.RUnlock()
-
+	r.hl.provider.Refresh()
 	th := r.hl.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.hl.provider.Refresh()
+	r.hl.propertyLock.RLock()
+	defer r.hl.propertyLock.RUnlock()
+
 	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	r.focus.Hidden = !r.hl.focused
 	r.focus.Refresh()
