@@ -52,6 +52,11 @@ func TestURIPath(t *testing.T) {
 	u, err = storage.ParseURI(s)
 	assert.Nil(t, err)
 	assert.Equal(t, "example:animal:ferret:nose", u.Path())
+
+	s = "file:///C:/over/there"
+	u, err = storage.ParseURI(s)
+	assert.Nil(t, err)
+	assert.Equal(t, "/C:/over/there", u.Path())
 }
 
 func TestURIQuery(t *testing.T) {
