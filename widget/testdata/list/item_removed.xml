@@ -9,7 +9,9 @@
 								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
 							</widget>
 							<widget pos="24,0" size="88x35" type="*widget.Label">
-								<text pos="8,8" size="72x19">Test Item 0</text>
+								<widget size="88x35" type="*widget.RichText">
+									<text pos="8,8" size="72x19">Test Item 0</text>
+								</widget>
 							</widget>
 						</container>
 					</widget>
@@ -19,7 +21,9 @@
 								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
 							</widget>
 							<widget pos="24,0" size="123x35" type="*widget.Label">
-								<text pos="8,8" size="72x19">Test Item 1</text>
+								<widget size="123x35" type="*widget.RichText">
+									<text pos="8,8" size="72x19">Test Item 1</text>
+								</widget>
 							</widget>
 						</container>
 					</widget>

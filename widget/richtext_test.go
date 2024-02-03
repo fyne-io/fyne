@@ -14,8 +14,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	renderer := cache.Renderer(p).(*textRenderer)
+func richTextRenderTexts(rich fyne.Widget) []*canvas.Text {
+	renderer := cache.Renderer(rich).(*textRenderer)
 	texts := make([]*canvas.Text, len(renderer.Objects()))
 	for i, obj := range renderer.Objects() {
 		texts[i] = obj.(*canvas.Text)
@@ -333,6 +333,11 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 			text := NewRichText(tt.segments...)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
 			assert.Equal(t, tt.want, got)
+			for _, s := range tt.wantSegments {
+				if txt, ok := s.(*TextSegment); ok {
+					txt.parent = text
+				}
+			}
 			assert.Equal(t, tt.wantSegments, text.Segments)
 		})
 	}
@@ -351,23 +356,23 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.ErrorColor(), textRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.ErrorColor(), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
-	render := test.WidgetRenderer(label).(*textRenderer)
+	texts := labelTextRenderTexts(label)
 
-	text1 := render.Objects()[0].(*canvas.Text)
-	text2 := render.Objects()[1].(*canvas.Text)
+	text1 := texts[0]
+	text2 := texts[1]
 	textSize1 := text1.TextSize
 	textSize2 := text2.TextSize
 	customTextSize1 := textSize1
 	customTextSize2 := textSize2
 	test.WithTestTheme(t, func() {
 		label.Refresh()
-		text1 := render.Objects()[0].(*canvas.Text)
-		text2 := render.Objects()[1].(*canvas.Text)
+		text1 := texts[0]
+		text2 := texts[1]
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})
@@ -381,12 +386,14 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
 	provider := label.provider
 
-	fullSize := provider.lineSizeToColumn(4, 0)
-	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
-	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+	inPad := theme.InnerPadding()
+	textSize := theme.TextSize()
+	fullSize := provider.lineSizeToColumn(4, 0, textSize, inPad)
+	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0, textSize, inPad))
+	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0, textSize, inPad).Width)
 
-	out := provider.lineSizeToColumn(-1, -1)
-	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
+	out := provider.lineSizeToColumn(-1, -1, textSize, inPad)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0, textSize, inPad))
 }
 
 func TestText_splitLines(t *testing.T) {

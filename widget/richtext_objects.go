@@ -391,6 +391,8 @@ type RichTextSegment interface {
 type TextSegment struct {
 	Style RichTextStyle
 	Text  string
+
+	parent *RichText
 }
 
 // Inline should return true if this text can be included within other elements, or false if it creates a new block.
@@ -440,18 +442,20 @@ func (t *TextSegment) Unselect() {
 
 func (t *TextSegment) color() color.Color {
 	if t.Style.ColorName != "" {
-		return fyne.CurrentApp().Settings().Theme().Color(t.Style.ColorName, fyne.CurrentApp().Settings().ThemeVariant())
+		return theme.ColorForWidget(t.Style.ColorName, t.parent)
 	}
 
-	return theme.ForegroundColor()
+	return theme.ColorForWidget(theme.ColorNameForeground, t.parent)
 }
 
 func (t *TextSegment) size() float32 {
 	if t.Style.SizeName != "" {
-		return fyne.CurrentApp().Settings().Theme().Size(t.Style.SizeName)
+		i := theme.SizeForWidget(t.Style.SizeName, t.parent)
+		return i
 	}
 
-	return theme.TextSize()
+	i := theme.SizeForWidget(theme.SizeNameText, t.parent)
+	return i
 }
 
 type richImage struct {

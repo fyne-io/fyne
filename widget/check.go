@@ -65,14 +65,18 @@ func (c *Check) Bind(data binding.Bool) {
 
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
+	c.propertyLock.Lock()
 	if checked == c.Checked {
+		c.propertyLock.Unlock()
 		return
 	}
 
 	c.Checked = checked
+	onChanged := c.OnChanged
+	c.propertyLock.Unlock()
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
+	if onChanged != nil {
+		onChanged(checked)
 	}
 
 	c.Refresh()
@@ -212,7 +216,9 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 //
 // Since: 2.4
 func (c *Check) SetText(text string) {
+	c.propertyLock.Lock()
 	c.Text = text
+	c.propertyLock.Unlock()
 	c.Refresh()
 }
 
@@ -274,7 +280,10 @@ type checkRenderer struct {
 func (c *checkRenderer) MinSize() fyne.Size {
 	pad4 := theme.InnerPadding() * 2
 	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
-	if c.check.Text != "" {
+	c.check.propertyLock.RLock()
+	text := c.check.Text
+	c.check.propertyLock.RUnlock()
+	if text != "" {
 		min.Add(fyne.NewSize(theme.Padding(), 0))
 	}
 
@@ -323,10 +332,12 @@ func (c *checkRenderer) Refresh() {
 	canvas.Refresh(c.check.super())
 }
 
+// must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateLabel() {
 	c.label.Text = c.check.Text
 }
 
+// must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateResource() {
 	res := theme.NewThemedResource(theme.CheckButtonIcon())
 	res.ColorName = theme.ColorNameInputBorder
@@ -346,6 +357,7 @@ func (c *checkRenderer) updateResource() {
 	c.bg.Resource = bgRes
 }
 
+// must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.disabled.Load() {
 		c.focusIndicator.FillColor = color.Transparent

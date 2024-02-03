@@ -5,13 +5,19 @@
 				<container size="0x0">
 					<rectangle fillColor="overlayBackground" size="112x35"/>
 					<widget size="41x35" type="*widget.Label">
-						<text alignment="center" bold pos="15,8" size="9x19">A</text>
+						<widget size="41x35" type="*widget.RichText">
+							<text alignment="center" bold pos="15,8" size="9x19">A</text>
+						</widget>
 					</widget>
 					<widget pos="45,0" size="41x35" type="*widget.Label">
-						<text alignment="center" bold pos="15,8" size="9x19">B</text>
+						<widget size="41x35" type="*widget.RichText">
+							<text alignment="center" bold pos="15,8" size="9x19">B</text>
+						</widget>
 					</widget>
 					<widget pos="90,0" size="41x35" type="*widget.Label">
-						<text alignment="center" bold pos="16,8" size="8x19">C</text>
+						<widget size="41x35" type="*widget.RichText">
+							<text alignment="center" bold pos="16,8" size="8x19">C</text>
+						</widget>
 					</widget>
 				</container>
 			</widget>

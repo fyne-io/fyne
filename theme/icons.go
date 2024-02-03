@@ -606,6 +606,21 @@ var (
 	}
 )
 
+// Icon looks up the specified icon for current theme.
+//
+// Since: 2.5
+func Icon(name fyne.ThemeIconName) fyne.Resource {
+	return safeIconLookup(name)
+}
+
+// IconForWidget looks up the specified icon for requested widget using the current theme.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
+func IconForWidget(name fyne.ThemeIconName, w fyne.Widget) fyne.Resource {
+	return CurrentForWidget(w).Icon(name)
+}
+
 func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
@@ -643,7 +658,7 @@ func NewSuccessThemedResource(src fyne.Resource) *ThemedResource {
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-// By default this will match the foreground color, but it can be changed using the `ColorName` field.
+// By default, this will match the foreground color, but it can be changed using the `ColorName` field.
 func NewThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
@@ -662,7 +677,7 @@ func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	prefix := res.ColorName
+	prefix := res.ThemeColorName()
 	if prefix == "" {
 		prefix = "foreground_"
 	} else {
@@ -672,14 +687,18 @@ func (res *ThemedResource) Name() string {
 	return string(prefix) + unwrapResource(res.source).Name()
 }
 
+func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
+	return res.ColorName
+}
+
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	name := res.ColorName
+	name := res.ThemeColorName()
 	if name == "" {
 		name = ColorNameForeground
 	}
 
-	return svg.Colorize(unwrapResource(res.source).Content(), safeColorLookup(name, currentVariant()))
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(name))
 }
 
 // Error returns a different resource for indicating an error.
@@ -706,8 +725,12 @@ func (res *InvertedThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
-	clr := BackgroundColor()
+	clr := Color(ColorNameBackground)
 	return svg.Colorize(unwrapResource(res.source).Content(), clr)
+}
+
+func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
+	return ColorNameBackground
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -734,7 +757,7 @@ func (res *ErrorThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.Colorize(unwrapResource(res.source).Content(), ErrorColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameError))
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -761,7 +784,7 @@ func (res *PrimaryThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.Colorize(unwrapResource(res.source).Content(), PrimaryColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNamePrimary))
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -782,7 +805,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return svg.Colorize(unwrapResource(res.source).Content(), DisabledColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameDisabled))
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
@@ -945,12 +968,12 @@ func DocumentSaveIcon() fyne.Resource {
 
 // MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
 func MoreHorizontalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreHorizontal)
+	return Current().Icon(IconNameMoreHorizontal)
 }
 
 // MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
 func MoreVerticalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreVertical)
+	return Current().Icon(IconNameMoreVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
@@ -1293,7 +1316,7 @@ func WindowMinimizeIcon() fyne.Resource {
 }
 
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
-	icon := current().Icon(n)
+	icon := Current().Icon(n)
 	if icon == nil {
 		fyne.LogError("Loaded theme returned nil icon", nil)
 		return fallbackIcon

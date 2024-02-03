@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	internalTest "fyne.io/fyne/v2/internal/test"
@@ -12,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 type myWidget struct {

@@ -37,15 +37,11 @@ func (a *Accordion) Append(item *AccordionItem) {
 
 // Close collapses the item at the given index.
 func (a *Accordion) Close(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
-
-	if index < 0 || index >= numItems {
+	a.propertyLock.Lock()
+	if index < 0 || index >= len(a.Items) {
+		a.propertyLock.Unlock()
 		return
 	}
-
-	a.propertyLock.Lock()
 	a.Items[index].Open = false
 	a.propertyLock.Unlock()
 
@@ -79,15 +75,13 @@ func (a *Accordion) MinSize() fyne.Size {
 
 // Open expands the item at the given index.
 func (a *Accordion) Open(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
+	a.propertyLock.Lock()
 
-	if index < 0 || index >= numItems {
+	if index < 0 || index >= len(a.Items) {
+		a.propertyLock.Unlock()
 		return
 	}
 
-	a.propertyLock.Lock()
 	for i, ai := range a.Items {
 		if i == index {
 			ai.Open = true
@@ -134,15 +128,11 @@ func (a *Accordion) Remove(item *AccordionItem) {
 
 // RemoveIndex deletes the item at the given index from this Accordion.
 func (a *Accordion) RemoveIndex(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
-
-	if index < 0 || index >= numItems {
+	a.propertyLock.Lock()
+	if index < 0 || index >= len(a.Items) {
+		a.propertyLock.Unlock()
 		return
 	}
-
-	a.propertyLock.Lock()
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
 	a.propertyLock.Unlock()
 
