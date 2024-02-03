@@ -172,7 +172,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 	b.propertyLock.Lock()
 	b.Icon = icon
 	b.propertyLock.Unlock()
- 
+
 	b.Refresh()
 }
 
