@@ -168,7 +168,11 @@ func loadTranslationsFromFS(fs embed.FS, dir string) {
 			fyne.LogError("failed to read bundled translation", err)
 			continue
 		}
-		bundle.MustParseMessageFileBytes(data, f.Name())
+		err = addLanguage(data, f.Name())
+		if err != nil {
+			fyne.LogError("Parse error on translation file", err)
+			continue
+		}
 
 		name := "en"
 		nameLen := len(f.Name())
