@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"fyne.io/fyne/v2"
-	"github.com/fyne-io/go-locale"
+	"github.com/jeandeaual/go-locale"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"golang.org/x/text/language"
