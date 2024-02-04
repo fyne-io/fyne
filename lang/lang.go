@@ -122,6 +122,38 @@ func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
 	return addLanguage(data, l.String()+".json")
 }
 
+// AddTranslationsFS supports adding all translations in one calling using an `embed.FS` setup.
+// The `dir` parameter specifies the name or path of the directory containing translation files
+// inside this embedded filesystem.
+// Each file should be a json file with the name following pattern [prefix.]lang.json.
+func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
+	files, err := fs.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		name := f.Name()
+		data, err := fs.ReadFile(dir + "/" + name)
+		if err != nil {
+			if retErr == nil {
+				retErr = err
+			}
+			continue
+		}
+
+		err = addLanguage(data, name)
+		if err != nil {
+			if retErr == nil {
+				retErr = err
+			}
+			continue
+		}
+	}
+
+	return retErr
+}
+
 func addLanguage(data []byte, name string) error {
 	_, err := bundle.ParseMessageFileBytes(data, name)
 	return err
@@ -131,7 +163,10 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	loadTranslationsFromFS(translations, "translations")
+	err := AddTranslationsFS(translations, "translations")
+	if err != nil {
+		fyne.LogError("Error occurred loading built-in translations", err)
+	}
 
 	// Find the closest translation from the user's locale list and set it up
 	all, err := locale.GetLocales()
@@ -153,35 +188,6 @@ func fallbackWithData(key, fallback string, data any) string {
 	str := &strings.Builder{}
 	_ = t.Execute(str, data)
 	return str.String()
-}
-
-func loadTranslationsFromFS(fs embed.FS, dir string) {
-	files, err := fs.ReadDir(dir)
-	if err != nil {
-		fyne.LogError("failed to read bundled translations", err)
-		return
-	}
-
-	for _, f := range files {
-		data, err := fs.ReadFile(dir + "/" + f.Name())
-		if err != nil {
-			fyne.LogError("failed to read bundled translation", err)
-			continue
-		}
-		err = addLanguage(data, f.Name())
-		if err != nil {
-			fyne.LogError("Parse error on translation file", err)
-			continue
-		}
-
-		name := "en"
-		nameLen := len(f.Name())
-		if !strings.Contains(f.Name(), "template") && nameLen > 5 {
-			name = f.Name()[5 : nameLen-5]
-		}
-		tag := language.Make(name)
-		translated = append(translated, tag)
-	}
 }
 
 // A utility for setting up languages - available to unit tests for overriding system
