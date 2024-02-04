@@ -171,8 +171,9 @@ func loadTranslationsFromFS(fs embed.FS, dir string) {
 		bundle.MustParseMessageFileBytes(data, f.Name())
 
 		name := "en"
-		if !strings.Contains(f.Name(), "template") {
-			name = f.Name()[5 : len(f.Name())-5]
+		nameLen := len(f.Name())
+		if !strings.Contains(f.Name(), "template") && nameLen > 5 {
+			name = f.Name()[5 : nameLen-5]
 		}
 		tag := language.Make(name)
 		translated = append(translated, tag)
