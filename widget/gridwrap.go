@@ -52,7 +52,7 @@ type GridWrap struct {
 //
 // Since: 2.4
 func NewGridWrap(length func() int, createItem func() fyne.CanvasObject, updateItem func(GridWrapItemID, fyne.CanvasObject)) *GridWrap {
-	gwList := &GridWrap{Length: length, CreateItem: createItem, UpdateItem: updateItem, colCountCache: -1}
+	gwList := &GridWrap{Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	gwList.ExtendBaseWidget(gwList)
 	return gwList
 }
@@ -149,7 +149,7 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
 func (l *GridWrap) Resize(s fyne.Size) {
-	l.colCountCache = -1
+	l.colCountCache = 0
 	l.BaseWidget.Resize(s)
 	l.offsetUpdated(l.scroller.Offset)
 	l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
@@ -558,7 +558,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 }
 
 func (l *GridWrap) getColCount() int {
-	if l.colCountCache < 0 {
+	if l.colCountCache < 1 {
 		padding := theme.Padding()
 		l.colCountCache = 1
 		width := l.Size().Width
