@@ -28,6 +28,7 @@ const (
 var _ fyne.Disableable = (*Entry)(nil)
 var _ fyne.Draggable = (*Entry)(nil)
 var _ fyne.Focusable = (*Entry)(nil)
+var _ fyne.Preeditable = (*Entry)(nil)
 var _ fyne.Tappable = (*Entry)(nil)
 var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
@@ -39,8 +40,9 @@ var _ fyne.Tabbable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut fyne.ShortcutHandler
-	Text     string
+	shortcut    fyne.ShortcutHandler
+	Text        string
+	PreeditText string
 	// Since: 2.0
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
@@ -71,6 +73,7 @@ type Entry struct {
 	dirty       bool
 	focused     bool
 	text        *RichText
+	preedit     *RichText
 	placeholder *RichText
 	content     *entryContent
 	scroll      *widget.Scroll
@@ -102,6 +105,7 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
+	//	e := &Entry{Wrapping: fyne.TextTruncate, PreeditText: "(日本語)"}
 	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
@@ -163,6 +167,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	// initialise
 	e.textProvider()
+	e.preeditProvider()
 	e.placeholderProvider()
 
 	box := canvas.NewRectangle(theme.InputBackgroundColor())
@@ -795,6 +800,26 @@ func (e *Entry) TypedRune(r rune) {
 	e.Refresh()
 }
 
+// PreeditChanged receives preedit events when the Entry widget is focused and IME(FEP) is on.
+//
+// Implements: fyne.Preeditable
+func (e *Entry) PreeditChanged(preedit string) {
+	if e.Disabled() {
+		return
+	}
+
+	e.propertyLock.Lock()
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
+	e.PreeditText = preedit
+	e.syncSegments()
+	e.propertyLock.Unlock()
+
+	e.Validate()
+	e.Refresh()
+}
+
 // TypedShortcut implements the Shortcutable interface
 //
 // Implements: fyne.Shortcutable
@@ -1180,6 +1205,7 @@ func (e *Entry) syncSegments() {
 		colName = theme.ColorNameDisabled
 	}
 	e.textProvider().Wrapping = wrap
+	e.preeditProvider().Wrapping = wrap
 	style := RichTextStyle{
 		Alignment: fyne.TextAlignLeading,
 		ColorName: colName,
@@ -1193,6 +1219,10 @@ func (e *Entry) syncSegments() {
 	e.textProvider().Segments = []RichTextSegment{&TextSegment{
 		Style: style,
 		Text:  e.Text,
+	}}
+	e.preeditProvider().Segments = []RichTextSegment{&TextSegment{
+		Style: style,
+		Text:  e.PreeditText,
 	}}
 	colName = theme.ColorNamePlaceHolder
 	if e.disabled {
@@ -1224,6 +1254,23 @@ func (e *Entry) textProvider() *RichText {
 	text.inset = fyne.NewSize(0, theme.InputBorderSize())
 	e.text = text
 	return e.text
+}
+
+// preeditProvider returns the text handler for preedit(IME) entry
+func (e *Entry) preeditProvider() *RichText {
+	if e.preedit != nil {
+		return e.preedit
+	}
+
+	if e.Text != "" {
+		e.dirty = true
+	}
+
+	preedit := NewRichTextWithText(e.PreeditText)
+	preedit.ExtendBaseWidget(preedit)
+	preedit.inset = fyne.NewSize(0, theme.InputBorderSize())
+	e.preedit = preedit
+	return e.preedit
 }
 
 // textWrap calculates the wrapping that we should apply.
@@ -1309,6 +1356,7 @@ func (e *Entry) updateText(text string) bool {
 	e.Text = text
 	e.syncSegments()
 	e.text.updateRowBounds()
+	e.preedit.updateRowBounds()
 
 	if e.Text != "" {
 		e.dirty = true
@@ -1448,6 +1496,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	}
 
 	r.entry.textProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
+	r.entry.preeditProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
 	r.entry.placeholderProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
 	entryPos := fyne.NewPos(0, theme.InputBorderSize())
@@ -1523,8 +1572,10 @@ func (r *entryRenderer) Refresh() {
 
 	r.entry.syncSegments()
 	r.entry.text.updateRowBounds()
+	r.entry.preedit.updateRowBounds()
 	r.entry.placeholder.updateRowBounds()
 	r.entry.text.Refresh()
+	r.entry.preedit.Refresh()
 	r.entry.placeholder.Refresh()
 
 	// correct our scroll wrappers if the wrap mode changed
@@ -1614,14 +1665,15 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	e.entry.propertyLock.Lock()
 	defer e.entry.propertyLock.Unlock()
 	provider := e.entry.textProvider()
+	preedit := e.entry.preeditProvider()
 	placeholder := e.entry.placeholderProvider()
 	if provider.len() != 0 {
 		placeholder.Hide()
 	}
-	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor}
+	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor, preedit}
 
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
-		provider, placeholder, e}
+		provider, preedit, placeholder, e}
 	r.updateScrollDirections()
 	r.Layout(e.size)
 	return r
@@ -1652,8 +1704,8 @@ type entryContentRenderer struct {
 	selection []fyne.CanvasObject
 	objects   []fyne.CanvasObject
 
-	provider, placeholder *RichText
-	content               *entryContent
+	provider, placeholder, preedit *RichText
+	content                        *entryContent
 }
 
 func (r *entryContentRenderer) Destroy() {
@@ -1663,6 +1715,7 @@ func (r *entryContentRenderer) Destroy() {
 func (r *entryContentRenderer) Layout(size fyne.Size) {
 	r.provider.Resize(size)
 	r.placeholder.Resize(size)
+	r.preedit.Resize(size)
 }
 
 func (r *entryContentRenderer) MinSize() fyne.Size {
@@ -1691,6 +1744,7 @@ func (r *entryContentRenderer) Refresh() {
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
 	placeholder := r.content.entry.placeholderProvider()
+	preedit := r.content.entry.preeditProvider()
 	focusedAppearance := r.content.entry.focused && !r.content.entry.disabled
 	selections := r.selection
 	r.updateScrollDirections()
@@ -1712,6 +1766,7 @@ func (r *entryContentRenderer) Refresh() {
 		r.cursor.Hide()
 	}
 	r.moveCursor()
+	preedit.position.X = r.cursor.Position().X
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
@@ -1745,10 +1800,12 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 
 	provider := r.content.entry.textProvider()
+	preedit := r.content.entry.preeditProvider()
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width, sz.Height*float32(row) - theme.InputBorderSize() + theme.InnerPadding()
+		szpe := preedit.lineSizeToColumn(column, row)
+		return float32(math.Max(float64(sz.Width), float64(r.cursor.Position().X+szpe.Width))), sz.Height*float32(row) - theme.InputBorderSize() + theme.InnerPadding()
 	}
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle).Height

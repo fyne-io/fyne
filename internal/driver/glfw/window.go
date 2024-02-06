@@ -805,6 +805,14 @@ func (w *window) processCharInput(char rune) {
 	}
 }
 
+// preedit defines the character with modifiers callback
+// witch is called when character input on IME
+func (w *window) processPreedit(preedit string) {
+	if preeditable := w.canvas.Preeditable(); preeditable != nil {
+		w.QueueEvent(func() { preeditable.PreeditChanged(preedit) })
+	}
+}
+
 func (w *window) processFocused(focus bool) {
 	if focus {
 		if curWindow == nil {

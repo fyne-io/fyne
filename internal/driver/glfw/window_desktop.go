@@ -6,6 +6,7 @@ package glfw
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -677,6 +678,32 @@ func (w *window) charInput(viewport *glfw.Window, char rune) {
 	w.processCharInput(char)
 }
 
+var counterIme int
+
+// IME
+func (w *window) imeStatus(_ *glfw.Window) {
+	fmt.Println("ime status ", counterIme)
+	counterIme++
+}
+func (w *window) preedit(
+	_ *glfw.Window,
+	preeditCount int,
+	preeditString string,
+	blockCount int,
+	blockSizes string,
+	focusedBlock int,
+	caret int,
+) {
+	fmt.Println(
+		"preedit preeditCount", preeditCount,
+		"preeditString", preeditString,
+		"blockCount", blockCount,
+		"focusedBlock", focusedBlock,
+		"caret", caret,
+	)
+	w.processPreedit(preeditString)
+}
+
 func (w *window) focused(_ *glfw.Window, focused bool) {
 	w.processFocused(focused)
 }
@@ -765,6 +792,8 @@ func (w *window) create() {
 		win.SetRefreshCallback(w.refresh)
 		win.SetContentScaleCallback(w.scaled)
 		win.SetCursorPosCallback(w.mouseMoved)
+		win.SetPreeditCallback(w.preedit)
+		win.SetImeStatusCallback(w.imeStatus)
 		win.SetMouseButtonCallback(w.mouseClicked)
 		win.SetScrollCallback(w.mouseScrolled)
 		win.SetKeyCallback(w.keyPressed)

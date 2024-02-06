@@ -191,6 +191,15 @@ func (c *Canvas) Focused() fyne.Focusable {
 	return mgr.Focused()
 }
 
+// Preeditable return the current preeditable object only when focused
+func (c *Canvas) Preeditable() fyne.Preeditable {
+	focused := c.Focused()
+	if focused == nil {
+		return nil
+	}
+	return focused.(fyne.Preeditable)
+}
+
 // FocusGained signals to the manager that its content got focus.
 // Valid only on Desktop.
 func (c *Canvas) FocusGained() {
