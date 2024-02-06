@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -108,8 +109,15 @@ func (d *dialog) hideWithResponse(resp bool) {
 func (d *dialog) create(buttons fyne.CanvasObject) {
 	label := widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
+	var image fyne.CanvasObject
+	if d.icon != nil {
+		image = &canvas.Image{Resource: d.icon}
+	} else {
+		image = &layout.Spacer{}
+	}
+
 	content := container.New(&dialogLayout{d: d},
-		&canvas.Image{Resource: d.icon},
+		image,
 		newThemedBackground(),
 		d.content,
 		buttons,
