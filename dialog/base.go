@@ -108,8 +108,13 @@ func (d *dialog) hideWithResponse(resp bool) {
 func (d *dialog) create(buttons fyne.CanvasObject) {
 	label := widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
+	image := &canvas.Image{Resource: d.icon}
+	if d.icon == nil {
+		image.Hide()
+	}
+
 	content := container.New(&dialogLayout{d: d},
-		&canvas.Image{Resource: d.icon},
+		image,
 		newThemedBackground(),
 		d.content,
 		buttons,
