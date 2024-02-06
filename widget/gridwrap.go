@@ -44,6 +44,7 @@ type GridWrap struct {
 	itemMin       fyne.Size
 	offsetY       float32
 	offsetUpdated func(fyne.Position)
+	colCountCache int
 }
 
 // NewGridWrap creates and returns a GridWrap widget for displaying items in
@@ -123,8 +124,8 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 	y := float32(row)*l.itemMin.Height + float32(row)*theme.Padding()
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
-	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
-		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
+	} else if size := l.scroller.Size(); y+l.itemMin.Height > l.scroller.Offset.Y+size.Height {
+		l.scroller.Offset.Y = y + l.itemMin.Height - size.Height
 	}
 	l.offsetUpdated(l.scroller.Offset)
 }
@@ -148,6 +149,7 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
 func (l *GridWrap) Resize(s fyne.Size) {
+	l.colCountCache = 0
 	l.BaseWidget.Resize(s)
 	l.offsetUpdated(l.scroller.Offset)
 	l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
@@ -493,11 +495,12 @@ func (l *gridWrapLayout) Layout(_ []fyne.CanvasObject, _ fyne.Size) {
 }
 
 func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+	padding := theme.Padding()
 	if lenF := l.list.Length; lenF != nil {
 		cols := l.list.getColCount()
 		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
 		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+theme.Padding())*rows-theme.Padding())
+			(l.list.itemMin.Height+padding)*rows-padding)
 	}
 	return fyne.NewSize(0, 0)
 }
@@ -555,16 +558,20 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 }
 
 func (l *GridWrap) getColCount() int {
-	colCount := 1
-	width := l.Size().Width
-	if width > l.itemMin.Width {
-		colCount = int(math.Floor(float64(width+theme.Padding()) / float64(l.itemMin.Width+theme.Padding())))
+	if l.colCountCache < 1 {
+		padding := theme.Padding()
+		l.colCountCache = 1
+		width := l.Size().Width
+		if width > l.itemMin.Width {
+			l.colCountCache = int(math.Floor(float64(width+padding) / float64(l.itemMin.Width+padding)))
+		}
 	}
-	return colCount
+	return l.colCountCache
 }
 
 func (l *gridWrapLayout) updateGrid(refresh bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
+	padding := theme.Padding()
 
 	l.renderLock.Lock()
 	length := 0
@@ -573,10 +580,10 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	}
 
 	colCount := l.list.getColCount()
-	visibleRowsCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+theme.Padding()))) + 1
+	visibleRowsCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+padding))) + 1
 
-	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+theme.Padding())))
-	minRow := int(offY / (l.list.itemMin.Height + theme.Padding()))
+	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+padding)))
+	minRow := int(offY / (l.list.itemMin.Height + padding))
 	minItem := GridWrapItemID(minRow * colCount)
 	maxRow := int(math.Min(float64(minRow+visibleRowsCount), math.Ceil(float64(length)/float64(colCount))))
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
@@ -616,12 +623,12 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 				item.Resize(l.list.itemMin)
 			}
 
-			x += l.list.itemMin.Width + theme.Padding()
+			x += l.list.itemMin.Width + padding
 			l.visible = append(l.visible, gridItemAndID{item: item, id: curItemID})
 			c.Objects = append(c.Objects, item)
 			curItemID++
 		}
-		y += l.list.itemMin.Height + theme.Padding()
+		y += l.list.itemMin.Height + padding
 	}
 	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
 	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
