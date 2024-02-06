@@ -17,7 +17,6 @@
 			<rectangle fillColor="shadow" size="200x300"/>
 			<rectangle fillColor="overlayBackground" pos="19,92" size="161x114"/>
 			<container pos="23,96" size="153x106">
-				<image pos="59,-4" size="98x98"/>
 				<widget size="153x106" type="*dialog.themedBackground">
 					<rectangle fillColor="rgba(34,34,34,230)" size="153x106"/>
 				</widget>
