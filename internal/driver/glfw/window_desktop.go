@@ -11,6 +11,7 @@ import (
 	_ "image/png" // for the icon
 	"runtime"
 	"sync"
+	"unsafe"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -685,6 +686,7 @@ func (w *window) imeStatus(_ *glfw.Window) {
 	fmt.Println("ime status ", counterIme)
 	counterIme++
 }
+
 func (w *window) preedit(
 	_ *glfw.Window,
 	preeditCount int,
@@ -694,14 +696,19 @@ func (w *window) preedit(
 	focusedBlock int,
 	caret int,
 ) {
-	fmt.Println(
-		"preedit preeditCount", preeditCount,
-		"preeditString", preeditString,
-		"blockCount", blockCount,
-		"focusedBlock", focusedBlock,
-		"caret", caret,
-	)
 	w.processPreedit(preeditString)
+}
+
+func (w *window) preeditCandidate(
+	_ *glfw.Window,
+	candidatesCount int,
+	selectedIndex int,
+	pageStart int,
+	pageSize int,
+) {
+	fmt.Println("preeditCandidate", "candidatesCount", candidatesCount, "selectedIndex", selectedIndex, "pageStart", pageStart, "pageSize", pageSize)
+	candidates := glfw.GetPreeditCandidate(unsafe.Pointer(w))
+	fmt.Println("candidates", candidates)
 }
 
 func (w *window) focused(_ *glfw.Window, focused bool) {
@@ -794,6 +801,7 @@ func (w *window) create() {
 		win.SetCursorPosCallback(w.mouseMoved)
 		win.SetPreeditCallback(w.preedit)
 		win.SetImeStatusCallback(w.imeStatus)
+		win.SetPreeditCandidateCallback(w.preeditCandidate)
 		win.SetMouseButtonCallback(w.mouseClicked)
 		win.SetScrollCallback(w.mouseScrolled)
 		win.SetKeyCallback(w.keyPressed)
