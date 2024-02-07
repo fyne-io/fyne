@@ -90,7 +90,7 @@ func (l *Lifecycle) OnStopped() func() {
 		return *stopped
 	}
 
-	if *stopped == nil {
+	if stopped == nil {
 		return stopHook
 	}
 
