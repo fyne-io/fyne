@@ -197,7 +197,10 @@ func (c *Canvas) Preeditable() fyne.Preeditable {
 	if focused == nil {
 		return nil
 	}
-	return focused.(fyne.Preeditable)
+	if preeditable, ok := focused.(fyne.Preeditable); ok {
+		return preeditable
+	}
+	return nil
 }
 
 // FocusGained signals to the manager that its content got focus.
