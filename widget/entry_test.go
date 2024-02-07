@@ -45,6 +45,21 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
+func TestEntry_Binding_Bounce(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Init")
+	assert.Equal(t, "Init", entry.Text)
+	waitForBinding() // this time it is the de-echo before binding
+
+	str := binding.NewString()
+	entry.Bind(str)
+	str.Set("1")
+	time.Sleep(10 * time.Millisecond)
+	str.Set("2")
+	waitForBinding()
+	assert.Equal(t, "2", entry.Text)
+}
+
 func TestEntry_Binding_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 	str := binding.NewString()

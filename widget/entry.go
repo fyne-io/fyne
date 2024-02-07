@@ -96,7 +96,6 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
-	lastChange      time.Time
 	minCache        *fyne.Size
 	multiLineRows   int // override global default number of visible lines
 }
@@ -496,7 +495,11 @@ func (e *Entry) SetPlaceHolder(text string) {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.updateTextAndRefresh(text)
+	e.setText(text, false)
+}
+
+func (e *Entry) setText(text string, fromBinding bool) {
+	e.updateTextAndRefresh(text, fromBinding)
 
 	e.updateCursorAndSelection()
 }
@@ -509,7 +512,7 @@ func (e *Entry) Append(text string) {
 	provider := e.textProvider()
 	provider.insertAt(provider.len(), text)
 	content := provider.String()
-	changed := e.updateText(content)
+	changed := e.updateText(content, false)
 	e.propertyLock.Unlock()
 
 	if changed {
@@ -685,7 +688,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	e.propertyLock.Lock()
 	content := provider.String()
-	changed := e.updateText(content)
+	changed := e.updateText(content, false)
 	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
 		e.selecting = false
 	}
@@ -804,7 +807,7 @@ func (e *Entry) TypedRune(r rune) {
 	provider.insertAt(pos, string(runes))
 
 	content := provider.String()
-	e.updateText(content)
+	e.updateText(content, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.propertyLock.Unlock()
 
@@ -892,7 +895,7 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	e.updateText(provider.String())
+	e.updateText(provider.String(), false)
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
@@ -930,7 +933,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	pos := e.cursorTextPos()
 	provider.insertAt(pos, text)
 
-	e.updateTextAndRefresh(provider.String())
+	e.updateTextAndRefresh(provider.String(), false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.Refresh() // placing the cursor (and refreshing) happens last
 }
@@ -1270,7 +1273,7 @@ func (e *Entry) updateCursorAndSelection() {
 }
 
 func (e *Entry) updateFromData(data binding.DataItem) {
-	if data == nil || e.lastChange.After(time.Now().Add(-bindIgnoreDelay)) {
+	if data == nil {
 		return
 	}
 	textSource, ok := data.(binding.String)
@@ -1284,7 +1287,7 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 	if err != nil {
 		return
 	}
-	e.SetText(val)
+	e.setText(val, true)
 }
 
 func (e *Entry) truncatePosition(row, col int) (int, int) {
@@ -1326,7 +1329,7 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 
 // updateText updates the internal text to the given value.
 // It assumes that a lock exists on the widget.
-func (e *Entry) updateText(text string) bool {
+func (e *Entry) updateText(text string, fromBinding bool) bool {
 	changed := e.Text != text
 	e.Text = text
 	e.syncSegments()
@@ -1336,8 +1339,7 @@ func (e *Entry) updateText(text string) bool {
 		e.dirty = true
 	}
 
-	e.lastChange = time.Now()
-	if changed {
+	if changed && !fromBinding {
 		if e.binder.dataListenerPair.listener != nil {
 			e.binder.SetCallback(nil)
 			e.binder.CallWithData(e.writeData)
@@ -1349,10 +1351,10 @@ func (e *Entry) updateText(text string) bool {
 
 // updateTextAndRefresh updates the internal text to the given value then refreshes it.
 // This should not be called under a property lock
-func (e *Entry) updateTextAndRefresh(text string) {
+func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 	var callback func(string)
 	e.setFieldsAndRefresh(func() {
-		changed := e.updateText(text)
+		changed := e.updateText(text, fromBinding)
 
 		if changed {
 			callback = e.OnChanged
