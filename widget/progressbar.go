@@ -23,6 +23,8 @@ type progressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
+	th := p.progress.Theme()
+
 	var tsize fyne.Size
 	if text := p.progress.TextFormatter; text != nil {
 		tsize = fyne.MeasureText(text(), p.label.TextSize, p.label.TextStyle)
@@ -30,7 +32,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 	}
 
-	padding := theme.InnerPadding() * 2
+	padding := th.Size(theme.SizeNameInnerPadding) * 2
 	return fyne.NewSize(tsize.Width+padding, tsize.Height+padding)
 }
 
@@ -64,15 +66,18 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
-	primaryColor := theme.PrimaryColor()
-	inputRadius := theme.InputRadiusSize()
+	th := p.progress.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
+	inputRadius := th.Size(theme.SizeNameInputRadius)
 
 	p.background.FillColor = progressBlendColor(primaryColor)
 	p.background.CornerRadius = inputRadius
 	p.bar.FillColor = primaryColor
 	p.bar.CornerRadius = inputRadius
-	p.label.Color = theme.BackgroundColor()
-	p.label.TextSize = theme.TextSize()
+	p.label.Color = th.Color(theme.ColorNameBackground, v)
+	p.label.TextSize = th.Size(theme.SizeNameText)
 }
 
 func (p *progressRenderer) Refresh() {
@@ -128,8 +133,10 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	cornerRadius := theme.InputRadiusSize()
-	primaryColor := theme.PrimaryColor()
+	th := p.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	cornerRadius := th.Size(theme.SizeNameInputRadius)
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
 
 	renderer := &progressRenderer{
 		background: canvas.Rectangle{
@@ -142,7 +149,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		},
 		label: canvas.Text{
 			Text:      "0%",
-			Color:     theme.BackgroundColor(),
+			Color:     th.Color(theme.ColorNameBackground, v),
 			Alignment: fyne.TextAlignCenter,
 		},
 		progress: p,

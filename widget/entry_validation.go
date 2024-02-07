@@ -82,15 +82,18 @@ type validationStatusRenderer struct {
 }
 
 func (r *validationStatusRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
+	r.icon.Resize(fyne.NewSquareSize(iconSize))
+	r.icon.Move(fyne.NewPos((size.Width-iconSize)/2, (size.Height-iconSize)/2))
 }
 
 func (r *validationStatusRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
+	return fyne.NewSquareSize(iconSize)
 }
 
 func (r *validationStatusRenderer) Refresh() {
+	th := r.entry.Theme()
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.disabled.Load() {
@@ -99,10 +102,10 @@ func (r *validationStatusRenderer) Refresh() {
 	}
 
 	if r.entry.validationError == nil && r.entry.Text != "" {
-		r.icon.Resource = theme.ConfirmIcon()
+		r.icon.Resource = th.Icon(theme.IconNameConfirm)
 		r.icon.Show()
 	} else if r.entry.validationError != nil && !r.entry.focused && r.entry.dirty {
-		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
+		r.icon.Resource = theme.NewErrorThemedResource(th.Icon(theme.IconNameError))
 		r.icon.Show()
 	} else {
 		r.icon.Hide()

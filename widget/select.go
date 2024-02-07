@@ -58,14 +58,15 @@ func (s *Select) ClearSelected() {
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	th := s.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	s.propertyLock.RLock()
-	icon := NewIcon(theme.MenuDropDownIcon())
+	icon := NewIcon(th.Icon(theme.IconNameArrowDropDown))
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
 	txtProv := NewRichTextWithText(s.Selected)
-	txtProv.inset = fyne.NewSquareSize(theme.Padding())
+	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
 	if s.disabled.Load() {
@@ -78,9 +79,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{background, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, objects, s}
-	background.FillColor = r.bgColor()
-	background.CornerRadius = theme.InputRadiusSize()
-	r.updateIcon()
+	background.FillColor = r.bgColor(th, v)
+	background.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	r.updateIcon(th)
 	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
 	r.updateLabel()
 	return r
@@ -236,7 +237,7 @@ func (s *Select) TypedRune(_ rune) {
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-theme.InputBorderSize()))
+	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-s.Theme().Size(theme.SizeNameInputBorder)))
 }
 
 func (s *Select) showPopUp() {
@@ -298,38 +299,48 @@ func (s *selectRenderer) Destroy() {}
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
+	th := s.combo.Theme()
+	pad := th.Size(theme.SizeNamePadding)
+	iconSize := th.Size(theme.SizeNameInlineIcon)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 	s.background.Resize(fyne.NewSize(size.Width, size.Height))
-	s.label.inset = fyne.NewSize(theme.Padding(), theme.Padding())
+	s.label.inset = fyne.NewSquareSize(pad)
 
-	iconPos := fyne.NewPos(size.Width-theme.IconInlineSize()-theme.InnerPadding(), (size.Height-theme.IconInlineSize())/2)
-	labelSize := fyne.NewSize(iconPos.X-theme.Padding(), s.label.MinSize().Height)
+	iconPos := fyne.NewPos(size.Width-iconSize-innerPad, (size.Height-iconSize)/2)
+	labelSize := fyne.NewSize(iconPos.X-pad, s.label.MinSize().Height)
 
 	s.label.Resize(labelSize)
-	s.label.Move(fyne.NewPos(theme.Padding(), (size.Height-labelSize.Height)/2))
+	s.label.Move(fyne.NewPos(pad, (size.Height-labelSize.Height)/2))
 
-	s.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	s.icon.Resize(fyne.NewSquareSize(iconSize))
 	s.icon.Move(iconPos)
 }
 
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
+	th := s.combo.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), fyne.TextStyle{}).Width
+	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, th.Size(theme.SizeNameText), fyne.TextStyle{}).Width
 	min := s.label.MinSize()
 	min.Width = minPlaceholderWidth
-	min = min.Add(fyne.NewSize(theme.InnerPadding()*3, theme.InnerPadding()))
-	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.InnerPadding(), 0))
+	min = min.Add(fyne.NewSize(innerPad*3, innerPad))
+	return min.Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+innerPad, 0))
 }
 
 func (s *selectRenderer) Refresh() {
+	th := s.combo.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
-	s.updateIcon()
-	s.background.FillColor = s.bgColor()
-	s.background.CornerRadius = theme.InputRadiusSize()
+	s.updateIcon(th)
+	s.background.FillColor = s.bgColor(th, v)
+	s.background.CornerRadius = s.combo.Theme().Size(theme.SizeNameInputRadius)
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
@@ -343,24 +354,25 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-func (s *selectRenderer) bgColor() color.Color {
+func (s *selectRenderer) bgColor(th fyne.Theme, v fyne.ThemeVariant) color.Color {
 	if s.combo.disabled.Load() {
-		return theme.DisabledButtonColor()
+		return th.Color(theme.ColorNameDisabledButton, v)
 	}
 	if s.combo.focused {
-		return theme.FocusColor()
+		return th.Color(theme.ColorNameFocus, v)
 	}
 	if s.combo.hovered {
-		return theme.HoverColor()
+		return th.Color(theme.ColorNameHover, v)
 	}
-	return theme.InputBackgroundColor()
+	return th.Color(theme.ColorNameInputBackground, v)
 }
 
-func (s *selectRenderer) updateIcon() {
+func (s *selectRenderer) updateIcon(th fyne.Theme) {
+	icon := th.Icon(theme.IconNameArrowDropDown)
 	if s.combo.disabled.Load() {
-		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
+		s.icon.Resource = theme.NewDisabledResource(icon)
 	} else {
-		s.icon.Resource = theme.MenuDropDownIcon()
+		s.icon.Resource = icon
 	}
 	s.icon.Refresh()
 }

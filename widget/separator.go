@@ -29,7 +29,9 @@ func NewSeparator() *Separator {
 // Implements: fyne.Widget
 func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	bar := canvas.NewRectangle(theme.SeparatorColor())
+	th := s.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	bar := canvas.NewRectangle(th.Color(theme.ColorNameSeparator, v))
 	return &separatorRenderer{
 		WidgetRenderer: NewSimpleRenderer(bar),
 		bar:            bar,
@@ -42,7 +44,7 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Widget
 func (s *Separator) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
-	t := theme.SeparatorThicknessSize()
+	t := s.Theme().Size(theme.SizeNameSeparatorThickness)
 	return fyne.NewSize(t, t)
 }
 
@@ -55,11 +57,14 @@ type separatorRenderer struct {
 }
 
 func (r *separatorRenderer) MinSize() fyne.Size {
-	t := theme.SeparatorThicknessSize()
+	t := r.d.Theme().Size(theme.SizeNameSeparatorThickness)
 	return fyne.NewSize(t, t)
 }
 
 func (r *separatorRenderer) Refresh() {
-	r.bar.FillColor = theme.SeparatorColor()
+	th := r.d.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	r.bar.FillColor = th.Color(theme.ColorNameSeparator, v)
 	canvas.Refresh(r.d)
 }

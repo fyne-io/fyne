@@ -118,26 +118,31 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
-	innerPad := theme.InnerPadding()
-	return fyne.Min(hl.size.Load().Width, hl.textSize.Width+innerPad+theme.Padding()*2) - innerPad
+	th := hl.Theme()
+
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	return fyne.Min(hl.size.Load().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
+	innerPad := hl.Theme().Size(theme.SizeNameInnerPadding)
+
 	switch hl.Alignment {
 	case fyne.TextAlignLeading:
-		return theme.InnerPadding() / 2
+		return innerPad / 2
 	case fyne.TextAlignCenter:
 		return (hl.size.Load().Width - hl.focusWidth()) / 2
 	case fyne.TextAlignTrailing:
-		return (hl.size.Load().Width - hl.focusWidth()) - theme.InnerPadding()/2
+		return (hl.size.Load().Width - hl.focusWidth()) - innerPad/2
 	default:
 		return 0 // unreached
 	}
 }
 
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
-	innerPad := theme.InnerPadding()
-	pad := theme.Padding()
+	th := hl.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	pad := th.Size(theme.SizeNamePadding)
 	// If not rendered yet provider will be nil
 	lineCount := float32(1)
 	if hl.provider != nil {
@@ -258,6 +263,8 @@ func (hl *Hyperlink) openURL() {
 }
 
 func (hl *Hyperlink) syncSegments() {
+	th := hl.Theme()
+
 	hl.propertyLock.RLock()
 	defer hl.propertyLock.RUnlock()
 
@@ -272,7 +279,7 @@ func (hl *Hyperlink) syncSegments() {
 		},
 		Text: hl.Text,
 	}}
-	hl.textSize = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle)
+	hl.textSize = fyne.MeasureText(hl.Text, th.Size(theme.SizeNameText), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
@@ -289,9 +296,10 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
+	th := r.hl.Theme()
 	r.hl.propertyLock.RLock()
 	textSize := r.hl.textSize
-	innerPad := r.hl.Theme().Size(theme.SizeNameInnerPadding)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 	w := r.hl.focusWidth()
 	xposFocus := r.hl.focusXPos()
 	r.hl.propertyLock.RUnlock()
@@ -302,7 +310,7 @@ func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	r.hl.provider.Resize(s)
 	r.focus.Move(fyne.NewPos(xposFocus, innerPad/2))
 	r.focus.Resize(fyne.NewSize(w, textSize.Height*lineCount+innerPad))
-	r.under.Move(fyne.NewPos(xposUnderline, textSize.Height*lineCount+theme.Padding()*2))
+	r.under.Move(fyne.NewPos(xposUnderline, textSize.Height*lineCount+th.Size(theme.SizeNamePadding)*2))
 	r.under.Resize(fyne.NewSize(w-innerPad, 1))
 }
 

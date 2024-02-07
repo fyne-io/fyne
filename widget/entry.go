@@ -168,18 +168,20 @@ func (e *Entry) Bind(data binding.String) {
 //
 // Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
+	th := e.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	e.ExtendBaseWidget(e)
 
 	// initialise
 	e.textProvider()
 	e.placeholderProvider()
 
-	box := canvas.NewRectangle(theme.InputBackgroundColor())
-	box.CornerRadius = theme.InputRadiusSize()
+	box := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
+	box.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	border := canvas.NewRectangle(color.Transparent)
-	border.StrokeWidth = theme.InputBorderSize()
-	border.StrokeColor = theme.InputBorderColor()
-	border.CornerRadius = theme.InputRadiusSize()
+	border.StrokeWidth = th.Size(theme.SizeNameInputBorder)
+	border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
+	border.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
@@ -281,7 +283,7 @@ func (e *Entry) DragEnd() {
 //
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, theme.InputBorderSize()))
+	pos := d.Position.Subtract(e.scroll.Offset).Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
 	if !e.selecting {
 		startPos := pos.Subtract(d.Dragged)
 		e.selectRow, e.selectColumn = e.getRowCol(startPos)
@@ -408,12 +410,14 @@ func (e *Entry) MinSize() fyne.Size {
 
 	e.ExtendBaseWidget(e)
 
+	th := e.Theme()
+	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	min := e.BaseWidget.MinSize()
 	if e.ActionItem != nil {
-		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
+		min = min.Add(fyne.NewSize(iconSpace, 0))
 	}
 	if e.Validator != nil {
-		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0))
+		min = min.Add(fyne.NewSize(iconSpace, 0))
 	}
 
 	e.minCache.Store(min)
@@ -519,6 +523,8 @@ func (e *Entry) SetMinRowsVisible(count int) {
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
+	e.Theme() // setup theme cache before locking
+
 	e.propertyLock.Lock()
 	e.PlaceHolder = text
 	e.propertyLock.Unlock()
@@ -531,8 +537,9 @@ func (e *Entry) SetPlaceHolder(text string) {
 // SetText manually sets the text of the Entry to the given text value.
 // Calling SetText resets all undo history.
 func (e *Entry) SetText(text string) {
-	e.updateTextAndRefresh(text)
+	e.Theme() // setup theme cache before locking
 
+	e.updateTextAndRefresh(text)
 	e.updateCursorAndSelection()
 
 	e.propertyLock.Lock()
@@ -943,11 +950,15 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 }
 
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
+	th := e.Theme()
+	textSize := th.Size(theme.SizeNameText)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+
 	for i := 0; i < len(text); i++ {
 		str := string(text[0:i])
-		wid := fyne.MeasureText(str, theme.TextSize(), e.TextStyle).Width
-		charWid := fyne.MeasureText(string(text[i]), theme.TextSize(), e.TextStyle).Width
-		if pos.X < theme.InnerPadding()+wid+(charWid/2) {
+		wid := fyne.MeasureText(str, textSize, e.TextStyle).Width
+		charWid := fyne.MeasureText(string(text[i]), textSize, e.TextStyle).Width
+		if pos.X < innerPad+wid+(charWid/2) {
 			return i
 		}
 	}
@@ -1006,12 +1017,13 @@ func (e *Entry) eraseSelection() {
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
-	textSize := e.Theme().Size(theme.SizeNameText)
+	th := e.Theme()
+	textSize := th.Size(theme.SizeNameText)
 	e.propertyLock.RLock()
 	defer e.propertyLock.RUnlock()
 
 	rowHeight := e.textProvider().charMinSize(e.Password, e.TextStyle, textSize).Height
-	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-theme.LineSpacing()) / float64(rowHeight)))
+	row := int(math.Floor(float64(p.Y+e.scroll.Offset.Y-th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
 		row = 0
@@ -1067,7 +1079,7 @@ func (e *Entry) placeholderProvider() *RichText {
 		Text:  e.PlaceHolder,
 	})
 	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, theme.InputBorderSize())
+	text.inset = fyne.NewSize(0, e.themeCache.Size(theme.SizeNameInputBorder))
 	e.placeholder = text
 	return e.placeholder
 }
@@ -1369,7 +1381,7 @@ func (e *Entry) textProvider() *RichText {
 
 	text := NewRichTextWithText(e.Text)
 	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, theme.InputBorderSize())
+	text.inset = fyne.NewSize(0, e.themeCache.Size(theme.SizeNameInputBorder))
 	e.text = text
 	return e.text
 }
@@ -1570,17 +1582,19 @@ func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) trailingInset() float32 {
+	th := r.entry.Theme()
 	xInset := float32(0)
 
+	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	if r.entry.ActionItem != nil {
-		xInset = theme.IconInlineSize() + theme.LineSpacing()
+		xInset = iconSpace
 	}
 
 	if r.entry.Validator != nil {
 		if r.entry.ActionItem == nil {
-			xInset = theme.IconInlineSize() + theme.LineSpacing()
+			xInset = iconSpace
 		} else {
-			xInset += theme.IconInlineSize() + theme.LineSpacing()
+			xInset += iconSpace
 		}
 	}
 
@@ -1588,39 +1602,46 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
+	th := r.entry.Theme()
+	borderSize := th.Size(theme.SizeNameInputBorder)
+	iconSize := th.Size(theme.SizeNameInlineIcon)
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inputBorder := th.Size(theme.SizeNameInputBorder)
+	lineSpace := th.Size(theme.SizeNameLineSpacing)
+
 	// 0.5 is removed so on low DPI it rounds down on the trailing edge
-	r.border.Resize(fyne.NewSize(size.Width-theme.InputBorderSize()-.5, size.Height-theme.InputBorderSize()-.5))
-	r.border.StrokeWidth = theme.InputBorderSize()
-	r.border.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize() / 2))
-	r.box.Resize(size.Subtract(fyne.NewSquareSize(theme.InputBorderSize() * 2)))
-	r.box.Move(fyne.NewSquareOffsetPos(theme.InputBorderSize()))
+	r.border.Resize(fyne.NewSize(size.Width-borderSize-.5, size.Height-borderSize-.5))
+	r.border.StrokeWidth = borderSize
+	r.border.Move(fyne.NewSquareOffsetPos(borderSize / 2))
+	r.box.Resize(size.Subtract(fyne.NewSquareSize(borderSize * 2)))
+	r.box.Move(fyne.NewSquareOffsetPos(borderSize))
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
-		actionIconSize = fyne.NewSquareSize(theme.IconInlineSize())
+		actionIconSize = fyne.NewSquareSize(iconSize)
 
 		r.entry.ActionItem.Resize(actionIconSize)
-		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.InnerPadding(), theme.InnerPadding()))
+		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-innerPad, innerPad))
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
 	if r.entry.Validator != nil {
-		validatorIconSize = fyne.NewSquareSize(theme.IconInlineSize())
+		validatorIconSize = fyne.NewSquareSize(iconSize)
 
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Resize(validatorIconSize)
 
 		if r.entry.ActionItem == nil {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-theme.InnerPadding(), theme.InnerPadding()))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-innerPad, innerPad))
 		} else {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-theme.InnerPadding()-theme.LineSpacing(), theme.InnerPadding()))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-innerPad-lineSpace, innerPad))
 		}
 	}
 
-	r.entry.textProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
-	r.entry.placeholderProvider().inset = fyne.NewSize(0, theme.InputBorderSize())
-	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
-	entryPos := fyne.NewPos(0, theme.InputBorderSize())
+	r.entry.textProvider().inset = fyne.NewSize(0, inputBorder)
+	r.entry.placeholderProvider().inset = fyne.NewSize(0, inputBorder)
+	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
+	entryPos := fyne.NewPos(0, inputBorder)
 
 	r.entry.propertyLock.Lock()
 	textPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
@@ -1656,7 +1677,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		rend.(*entryContentRenderer).updateScrollDirections()
 	}
 	if r.scroll.Direction == widget.ScrollNone {
-		return r.entry.content.MinSize().Add(fyne.NewSize(0, theme.InputBorderSize()*2))
+		return r.entry.content.MinSize().Add(fyne.NewSize(0, r.entry.Theme().Size(theme.SizeNameInputBorder)*2))
 	}
 
 	innerPadding := r.entry.Theme().Size(theme.SizeNameInnerPadding)
@@ -1697,12 +1718,16 @@ func (r *entryRenderer) Refresh() {
 	r.entry.text.Refresh()
 	r.entry.placeholder.Refresh()
 
+	th := r.entry.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	inputBorder := th.Size(theme.SizeNameInputBorder)
+
 	// correct our scroll wrappers if the wrap mode changed
-	entrySize := r.entry.size.Load().Subtract(fyne.NewSize(r.trailingInset(), theme.InputBorderSize()*2))
+	entrySize := r.entry.size.Load().Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
-		content.Move(fyne.NewPos(0, theme.InputBorderSize()))
+		content.Move(fyne.NewPos(0, inputBorder))
 		content.Resize(entrySize)
 
 		for i, o := range r.objects {
@@ -1714,7 +1739,7 @@ func (r *entryRenderer) Refresh() {
 	} else if (wrapping != fyne.TextWrapOff || scroll != widget.ScrollNone) && r.scroll.Content == nil {
 		r.scroll.Content = content
 		content.Move(fyne.NewPos(0, 0))
-		r.scroll.Move(fyne.NewPos(0, theme.InputBorderSize()))
+		r.scroll.Move(fyne.NewPos(0, inputBorder))
 		r.scroll.Resize(entrySize)
 		r.scroll.Show()
 
@@ -1727,16 +1752,16 @@ func (r *entryRenderer) Refresh() {
 	}
 	r.entry.updateCursorAndSelection()
 
-	r.box.FillColor = theme.InputBackgroundColor()
-	r.box.CornerRadius = theme.InputRadiusSize()
-	r.border.CornerRadius = theme.InputRadiusSize()
+	r.box.FillColor = th.Color(theme.ColorNameInputBackground, v)
+	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	r.border.CornerRadius = r.box.CornerRadius
 	if focusedAppearance {
-		r.border.StrokeColor = theme.PrimaryColor()
+		r.border.StrokeColor = th.Color(theme.ColorNamePrimary, v)
 	} else {
 		if r.entry.Disabled() {
-			r.border.StrokeColor = theme.DisabledColor()
+			r.border.StrokeColor = th.Color(theme.ColorNameDisabled, v)
 		} else {
-			r.border.StrokeColor = theme.InputBorderColor()
+			r.border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
 		}
 	}
 	if r.entry.ActionItem != nil {
@@ -1745,7 +1770,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil {
 		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
-			r.border.StrokeColor = theme.ErrorColor()
+			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()
@@ -1836,6 +1861,7 @@ func (r *entryContentRenderer) Layout(size fyne.Size) {
 }
 
 func (r *entryContentRenderer) MinSize() fyne.Size {
+	r.content.Theme() // setup theme cache before locking
 	minSize := r.content.entry.placeholderProvider().MinSize()
 
 	if r.content.entry.textProvider().len() > 0 {
@@ -1884,7 +1910,9 @@ func (r *entryContentRenderer) Refresh() {
 	}
 	r.moveCursor()
 
-	selectionColor := theme.SelectionColor()
+	th := r.content.entry.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	selectionColor := th.Color(theme.ColorNameSelection, v)
 	for _, selection := range selections {
 		rect := selection.(*canvas.Rectangle)
 		rect.Hidden = !focused
@@ -1902,7 +1930,9 @@ func (r *entryContentRenderer) Refresh() {
 // require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
 // all rectangles to comply with the occurrence order as stated above.
 func (r *entryContentRenderer) buildSelection() {
-	textSize := r.content.entry.Theme().Size(theme.SizeNameText)
+	th := r.content.entry.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	textSize := th.Size(theme.SizeNameText)
 
 	r.content.entry.propertyLock.RLock()
 	cursorRow, cursorCol := r.content.entry.CursorRow, r.content.entry.CursorColumn
@@ -1920,7 +1950,6 @@ func (r *entryContentRenderer) buildSelection() {
 	}
 
 	provider := r.content.entry.textProvider()
-	th := theme.CurrentForWidget(r.content.entry)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
@@ -1959,7 +1988,7 @@ func (r *entryContentRenderer) buildSelection() {
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
-			box := canvas.NewRectangle(theme.SelectionColor())
+			box := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
 			r.selection = append(r.selection, box)
 		}
 
@@ -1984,9 +2013,12 @@ func (r *entryContentRenderer) buildSelection() {
 }
 
 func (r *entryContentRenderer) ensureCursorVisible() {
-	letter := fyne.MeasureText("e", theme.TextSize(), r.content.entry.TextStyle)
-	padX := letter.Width*2 + theme.LineSpacing()
-	padY := letter.Height - theme.LineSpacing()
+	th := r.content.entry.Theme()
+	lineSpace := th.Size(theme.SizeNameLineSpacing)
+
+	letter := fyne.MeasureText("e", th.Size(theme.SizeNameText), r.content.entry.TextStyle)
+	padX := letter.Width*2 + lineSpace
+	padY := letter.Height - lineSpace
 	cx := r.cursor.Position().X
 	cy := r.cursor.Position().Y
 	cx1 := cx - padX
@@ -2022,10 +2054,10 @@ func (r *entryContentRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
 
-	textSize := r.content.entry.Theme().Size(theme.SizeNameText)
+	th := r.content.entry.Theme()
+	textSize := th.Size(theme.SizeNameText)
 	r.content.entry.propertyLock.RLock()
 	provider := r.content.entry.textProvider()
-	th := theme.CurrentForWidget(r.content.entry)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, textSize, innerPad)

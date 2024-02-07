@@ -618,7 +618,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	// Accessing the theme here is slow, so we cache the value
-	lineSpacing := theme.SizeForWidget(theme.SizeNameLineSpacing, r.obj)
+	lineSpacing := th.Size(theme.SizeNameLineSpacing)
 
 	i := 0
 	for row, bound := range bounds {
