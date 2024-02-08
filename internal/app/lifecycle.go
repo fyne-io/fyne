@@ -82,7 +82,7 @@ func (l *Lifecycle) OnStarted() func() {
 func (l *Lifecycle) OnStopped() func() {
 	stopped := l.onStopped.Load()
 	stopHook := l.onStoppedHookExecuted
-	if stopped == nil && stopHook == nil {
+	if (stopped == nil || *stopped == nil) && stopHook == nil {
 		return nil
 	}
 
@@ -90,7 +90,7 @@ func (l *Lifecycle) OnStopped() func() {
 		return *stopped
 	}
 
-	if stopped == nil {
+	if stopped == nil || *stopped == nil {
 		return stopHook
 	}
 
