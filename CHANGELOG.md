@@ -11,7 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Secondary mobile windows would not size correctly when padded
 * Setting Icon.Resource to nil will not clear rendering
 * Dismiss iOS keyboard if "Done" is tapped
-* Large speed improvement in Entry, GridWrap widgets and Animations
+* Large speed improvement in Entry and GridWrap widgets
 * tests fail with macOS Assertion failure in NSMenu (#4572)
 * Fix image test failures on Apple Silicon
 * High CPU use when showing CustomDialogs (#4574)
