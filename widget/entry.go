@@ -952,7 +952,7 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 }
 
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
-	th := e.Theme()
+	th := e.themeWithLock()
 	textSize := th.Size(theme.SizeNameText)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
@@ -1081,7 +1081,7 @@ func (e *Entry) placeholderProvider() *RichText {
 		Text:  e.PlaceHolder,
 	})
 	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, e.themeCache.Size(theme.SizeNameInputBorder))
+	text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
 	e.placeholder = text
 	return e.placeholder
 }
@@ -1383,7 +1383,7 @@ func (e *Entry) textProvider() *RichText {
 
 	text := NewRichTextWithText(e.Text)
 	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, e.themeCache.Size(theme.SizeNameInputBorder))
+	text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
 	e.text = text
 	return e.text
 }
