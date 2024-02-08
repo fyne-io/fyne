@@ -39,8 +39,8 @@ type radioItem struct {
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	txt := canvas.Text{Alignment: fyne.TextAlignLeading}
 	txt.TextSize = i.Theme().Size(theme.SizeNameText)
-	r := &radioItemRenderer{item: i, label: txt}
-	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &r.label})
+	r := &radioItemRenderer{item: i, label: &txt}
+	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &txt})
 	r.update()
 	return r
 }
@@ -144,7 +144,7 @@ type radioItemRenderer struct {
 
 	focusIndicator canvas.Circle
 	icon, over     canvas.Image
-	label          canvas.Text
+	label          *canvas.Text
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
