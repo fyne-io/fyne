@@ -281,7 +281,7 @@ func TestEntry_EraseSelection(t *testing.T) {
 
 	_ = e.Theme()
 	e.eraseSelection()
-	e.updateText(e.textProvider().String())
+	e.updateText(e.textProvider().String(), false)
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
 	a, b := e.selection()
 	assert.Equal(t, -1, a)
