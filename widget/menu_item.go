@@ -332,7 +332,7 @@ func (r *menuItemRenderer) updateVisuals() {
 		r.checkIcon.Hide()
 	}
 	r.updateIcon(r.checkIcon, th.Icon(theme.IconNameConfirm))
-	r.updateIcon(r.expandIcon, th.Icon(theme.IconNameArrowDropDown))
+	r.updateIcon(r.expandIcon, th.Icon(theme.IconNameMenuExpand))
 	r.updateIcon(r.icon, r.i.Item.Icon)
 }
 
