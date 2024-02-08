@@ -45,7 +45,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 
 func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
-		i.resource = i.themeCache.Icon(theme.IconNameFile)
+		i.resource = i.themeWithLock().Icon(theme.IconNameFile)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 		return theme.FolderIcon()
 	}
 
-	th := i.themeCache
+	th := i.themeWithLock()
 	mainMimeType, _ := mime.Split(uri.MimeType())
 	switch mainMimeType {
 	case "application":

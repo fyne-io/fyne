@@ -118,14 +118,14 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
-	th := hl.Theme()
+	th := hl.themeWithLock()
 
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	return fyne.Min(hl.size.Load().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
-	innerPad := hl.Theme().Size(theme.SizeNameInnerPadding)
+	innerPad := hl.themeWithLock().Size(theme.SizeNameInnerPadding)
 
 	switch hl.Alignment {
 	case fyne.TextAlignLeading:
