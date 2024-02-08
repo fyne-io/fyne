@@ -45,7 +45,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 
 func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
-		i.resource = i.Theme().Icon(theme.IconNameFile)
+		i.resource = i.themeCache.Icon(theme.IconNameFile)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 		return theme.FolderIcon()
 	}
 
-	th := i.Theme()
+	th := i.themeCache
 	mainMimeType, _ := mime.Split(uri.MimeType())
 	switch mainMimeType {
 	case "application":
@@ -175,6 +175,9 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileIconRenderer) Refresh() {
+	th := s.file.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	s.file.propertyLock.Lock()
 	s.file.setURI(s.file.URI)
 	s.file.propertyLock.Unlock()
@@ -183,9 +186,6 @@ func (s *fileIconRenderer) Refresh() {
 	s.img.Resource = s.file.resource
 	s.ext.Text = s.file.extension
 	s.file.propertyLock.RUnlock()
-
-	th := s.file.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	if s.file.Selected {
 		s.background.Show()
