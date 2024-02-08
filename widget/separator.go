@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
@@ -13,6 +15,8 @@ var _ fyne.Widget = (*Separator)(nil)
 // Since: 1.4
 type Separator struct {
 	BaseWidget
+
+	invert bool
 }
 
 // NewSeparator creates a new separator.
@@ -31,7 +35,14 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	th := s.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	bar := canvas.NewRectangle(th.Color(theme.ColorNameSeparator, v))
+	var col color.Color
+	if s.invert {
+		col = th.Color(theme.ColorNameForeground, v)
+	} else {
+		col = th.Color(theme.ColorNameSeparator, v)
+	}
+	bar := canvas.NewRectangle(col)
+
 	return &separatorRenderer{
 		WidgetRenderer: NewSimpleRenderer(bar),
 		bar:            bar,
@@ -65,6 +76,10 @@ func (r *separatorRenderer) Refresh() {
 	th := r.d.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.bar.FillColor = th.Color(theme.ColorNameSeparator, v)
+	if r.d.invert {
+		r.bar.FillColor = th.Color(theme.ColorNameForeground, v)
+	} else {
+		r.bar.FillColor = th.Color(theme.ColorNameSeparator, v)
+	}
 	canvas.Refresh(r.d)
 }
