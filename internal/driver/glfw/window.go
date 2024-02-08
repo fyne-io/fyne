@@ -272,7 +272,6 @@ func (w *window) processClosed() {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
-	w.DestroyEventQueue()
 	cache.CleanCanvas(w.canvas)
 
 	if w.master {
@@ -280,6 +279,7 @@ func (w *window) destroy(d *gLDriver) {
 	} else if runtime.GOOS == "darwin" {
 		go d.focusPreviousWindow()
 	}
+	w.DestroyEventQueue()
 }
 
 func (w *window) processMoved(x, y int) {
