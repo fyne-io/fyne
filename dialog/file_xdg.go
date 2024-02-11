@@ -44,6 +44,7 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 
 	favoriteNames := getFavoriteOrder()
 	arguments := map[string]string{
+		"Desktop":   "DESKTOP",
 		"Documents": "DOCUMENTS",
 		"Downloads": "DOWNLOAD",
 		"Music":     "MUSIC",
