@@ -7,8 +7,12 @@ import (
 )
 
 const (
+	// absolute max width of text dialogs
+	// (prevent them from looking unnaturally large on desktop)
 	maxTextDialogAbsoluteWidth float32 = 600
-	maxTextDialogWinPcntWidth  float32 = .9
+
+	// max width of text dialogs as a percentage of the current window width
+	maxTextDialogWinPcntWidth float32 = .9
 )
 
 func newTextDialog(title, message string, icon fyne.Resource, parent fyne.Window) *dialog {
@@ -25,6 +29,10 @@ func newTextDialog(title, message string, icon fyne.Resource, parent fyne.Window
 
 func createBeforeShowHook(d *dialog, message string) func() {
 	return func() {
+		// set the desired width of the dialog to the min of:
+		// - width needed to show message without wrapping
+		// - maxTextDialogAbsoluteWidth
+		// - current window width * maxTextDialogWinPcntWidth
 		if d.desiredSize.IsZero() {
 			noWrapWidth := fyne.MeasureText(message, theme.TextSize(), fyne.TextStyle{}).Width + padWidth*2
 			maxWinWitth := d.parent.Canvas().Size().Width * maxTextDialogWinPcntWidth
