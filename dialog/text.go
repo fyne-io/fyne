@@ -27,14 +27,14 @@ func newTextDialog(title, message string, icon fyne.Resource, parent fyne.Window
 	return d
 }
 
+// returns a beforeShowHook that sets the desired width of the dialog to the min of:
+// - width needed to show message without wrapping
+// - maxTextDialogAbsoluteWidth
+// - current window width * maxTextDialogWinPcntWidth
 func createBeforeShowHook(d *dialog, message string) func() {
+	noWrapWidth := widget.NewLabel(message).MinSize().Width + padWidth + theme.Padding()*2
 	return func() {
-		// set the desired width of the dialog to the min of:
-		// - width needed to show message without wrapping
-		// - maxTextDialogAbsoluteWidth
-		// - current window width * maxTextDialogWinPcntWidth
 		if d.desiredSize.IsZero() {
-			noWrapWidth := fyne.MeasureText(message, theme.TextSize(), fyne.TextStyle{}).Width + padWidth*2
 			maxWinWitth := d.parent.Canvas().Size().Width * maxTextDialogWinPcntWidth
 			w := fyne.Min(fyne.Min(noWrapWidth, maxTextDialogAbsoluteWidth), maxWinWitth)
 			d.desiredSize = fyne.NewSize(w, d.MinSize().Height)
