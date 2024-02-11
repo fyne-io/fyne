@@ -154,7 +154,9 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
-			dropped(w.mousePos, uris)
+			w.QueueEvent(func() {
+				dropped(w.mousePos, uris)
+			})
 		})
 	})
 }
