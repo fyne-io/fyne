@@ -31,7 +31,8 @@ func (d *ConfirmDialog) SetConfirmImportance(importance widget.Importance) {
 // The title is used for the dialog window and message is the content.
 // The callback is executed when the user decides. After creation you should call Show().
 func NewConfirm(title, message string, callback func(bool), parent fyne.Window) *ConfirmDialog {
-	d := newDialog(title, message, theme.QuestionIcon(), callback, parent)
+	d := newTextDialog(title, message, theme.QuestionIcon(), parent)
+	d.callback = callback
 
 	d.dismiss = &widget.Button{Text: "No", Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,

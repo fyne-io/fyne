@@ -29,7 +29,7 @@ func (p *ProgressDialog) SetValue(v float64) {
 //
 // Deprecated: Use NewCustomWithoutButtons() and add a widget.ProgressBar() inside.
 func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
-	d := newDialog(title, message, theme.InfoIcon(), nil /*cancel?*/, parent)
+	d := newTextDialog(title, message, theme.InfoIcon(), parent)
 	bar := widget.NewProgressBar()
 	rect := canvas.NewRectangle(color.Transparent)
 	rect.SetMinSize(fyne.NewSize(200, 0))
