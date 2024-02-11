@@ -11,7 +11,6 @@ import (
 	_ "image/png" // for the icon
 	"runtime"
 	"sync"
-	"unsafe"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -685,6 +684,13 @@ var counterIme int
 func (w *window) imeStatus(_ *glfw.Window) {
 	fmt.Println("ime status ", counterIme)
 	counterIme++
+	if preeditable := w.canvas.Preeditable(); preeditable != nil {
+		preeditable.ReceiveCursorPositionChangedCallback(func(pos fyne.Position) {
+			monitor := w.getMonitorForWindow()
+			xscale, yscale := monitor.GetContentScale()
+			w.viewport.SetPreeditCursorRectangle(int(pos.X*xscale), int(pos.Y*yscale), 100, 100)
+		})
+	}
 }
 
 func (w *window) preedit(
@@ -700,15 +706,17 @@ func (w *window) preedit(
 }
 
 func (w *window) preeditCandidate(
-	_ *glfw.Window,
+	glwin *glfw.Window,
 	candidatesCount int,
 	selectedIndex int,
 	pageStart int,
 	pageSize int,
 ) {
 	fmt.Println("preeditCandidate", "candidatesCount", candidatesCount, "selectedIndex", selectedIndex, "pageStart", pageStart, "pageSize", pageSize)
-	candidates := glfw.GetPreeditCandidate(unsafe.Pointer(w))
-	fmt.Println("candidates", candidates)
+	candidate := glwin.GetPreeditCandidate(selectedIndex)
+	if candidate != nil {
+		fmt.Println("candidates", *candidate)
+	}
 }
 
 func (w *window) focused(_ *glfw.Window, focused bool) {

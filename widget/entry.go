@@ -42,7 +42,7 @@ type Entry struct {
 	DisableableWidget
 	shortcut    fyne.ShortcutHandler
 	Text        string
-	PreeditText string
+	preeditText string
 	// Since: 2.0
 	TextStyle   fyne.TextStyle
 	PlaceHolder string
@@ -80,7 +80,8 @@ type Entry struct {
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
-	onFocusChanged func(bool)
+	onFocusChanged          func(bool)
+	onCursorPositionChanged fyne.CursorPositionChangedCallback
 
 	// selectRow and selectColumn represent the selection start location
 	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
@@ -105,7 +106,6 @@ type Entry struct {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	//	e := &Entry{Wrapping: fyne.TextTruncate, PreeditText: "(日本語)"}
 	e := &Entry{Wrapping: fyne.TextTruncate}
 	e.ExtendBaseWidget(e)
 	return e
@@ -812,12 +812,28 @@ func (e *Entry) PreeditChanged(preedit string) {
 	if e.popUp != nil {
 		e.popUp.Hide()
 	}
-	e.PreeditText = preedit
+	e.preeditText = preedit
 	e.syncSegments()
 	e.propertyLock.Unlock()
 
 	e.Validate()
 	e.Refresh()
+}
+
+// ReceiveCursorPositionChangedCallback receives a callback that notifies you when an entry changes the coordinates of the text cursor.
+//
+// Implements: fyne.Preeditable
+func (e *Entry) ReceiveCursorPositionChangedCallback(callback fyne.CursorPositionChangedCallback) {
+	if e.Disabled() {
+		return
+	}
+
+	//e.propertyLock.Lock()
+	e.onCursorPositionChanged = callback
+	d := fyne.CurrentApp().Driver()
+	pos := d.AbsolutePositionForObject(e.cursorAnim.cursor)
+	e.onCursorPositionChanged(pos)
+	//e.propertyLock.Unlock()
 }
 
 // TypedShortcut implements the Shortcutable interface
@@ -1222,7 +1238,7 @@ func (e *Entry) syncSegments() {
 	}}
 	e.preeditProvider().Segments = []RichTextSegment{&TextSegment{
 		Style: style,
-		Text:  e.PreeditText,
+		Text:  e.preeditText,
 	}}
 	colName = theme.ColorNamePlaceHolder
 	if e.disabled {
@@ -1266,7 +1282,7 @@ func (e *Entry) preeditProvider() *RichText {
 		e.dirty = true
 	}
 
-	preedit := NewRichTextWithText(e.PreeditText)
+	preedit := NewRichTextWithText(e.preeditText)
 	preedit.ExtendBaseWidget(preedit)
 	preedit.inset = fyne.NewSize(0, theme.InputBorderSize())
 	e.preedit = preedit

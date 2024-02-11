@@ -75,12 +75,16 @@ type Focusable interface {
 	TypedKey(*KeyEvent)
 }
 
+type CursorPositionChangedCallback func(pos Position)
+
 // Preeditable describes any CanvasObject that can respond to IME inputs.
 // Originally, it should be a method of Focusable, but only a few widgets need PreeditChanged,
 // and adding a method to Focusable will have a big impact on others, so defined as a new interface.
 type Preeditable interface {
 	// PreeditChanged is a hook called by window with IME is on and typed multi-byte characters inputed
 	PreeditChanged(preedit string)
+
+	ReceiveCursorPositionChangedCallback(callback CursorPositionChangedCallback)
 }
 
 // Scrollable describes any CanvasObject that can also be scrolled.
