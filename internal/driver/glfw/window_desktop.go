@@ -685,10 +685,11 @@ func (w *window) imeStatus(_ *glfw.Window) {
 	fmt.Println("ime status ", counterIme)
 	counterIme++
 	if preeditable := w.canvas.Preeditable(); preeditable != nil {
+		// This callback function is called by the focused widget and tells the system the exact canvas coordinates
+		// of the text cursor on the window. The system will display an IME Candidate Window with those coordinates
 		preeditable.ReceiveCursorPositionChangedCallback(func(pos fyne.Position) {
-			monitor := w.getMonitorForWindow()
-			xscale, yscale := monitor.GetContentScale()
-			w.viewport.SetPreeditCursorRectangle(int(pos.X*xscale), int(pos.Y*yscale), 100, 100)
+			canvasScale := w.canvas.scale
+			w.viewport.SetPreeditCursorRectangle(int(pos.X*canvasScale), int(pos.Y*canvasScale), 100, 100)
 		})
 	}
 }
@@ -815,6 +816,7 @@ func (w *window) create() {
 		win.SetKeyCallback(w.keyPressed)
 		win.SetCharCallback(w.charInput)
 		win.SetFocusCallback(w.focused)
+		win.SetInputMode(glfw.ImeOwnerDraw, glfw.False)
 
 		w.canvas.detectedScale = w.detectScale()
 		w.canvas.scale = w.calculatedScale()
