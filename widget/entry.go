@@ -830,10 +830,17 @@ func (e *Entry) ReceiveCursorPositionChangedCallback(callback fyne.CursorPositio
 
 	//e.propertyLock.Lock()
 	e.onCursorPositionChanged = callback
-	d := fyne.CurrentApp().Driver()
-	pos := d.AbsolutePositionForObject(e.cursorAnim.cursor)
-	e.onCursorPositionChanged(pos)
+	e.preeditCursorPositionChanged()
 	//e.propertyLock.Unlock()
+}
+
+// preeditCursorPositionChanged notifies window that preedit cursor has moved
+func (e *Entry) preeditCursorPositionChanged() {
+	if e.onCursorPositionChanged != nil {
+		d := fyne.CurrentApp().Driver()
+		pos := d.AbsolutePositionForObject(e.cursorAnim.cursor)
+		e.onCursorPositionChanged(pos)
+	}
 }
 
 // TypedShortcut implements the Shortcutable interface
@@ -1783,6 +1790,7 @@ func (r *entryContentRenderer) Refresh() {
 	}
 	r.moveCursor()
 	preedit.position.X = r.cursor.Position().X
+	r.content.entry.preeditCursorPositionChanged()
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused
