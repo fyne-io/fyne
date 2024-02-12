@@ -96,7 +96,7 @@ func (p *preferences) load() {
 	if err == nil {
 		err = p.loadFromStorage(storage)
 	}
-	if err != nil {
+	if err != nil && err != errEmptyPreferencesStore {
 		fyne.LogError("Preferences load error:", err)
 	}
 }
