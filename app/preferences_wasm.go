@@ -17,12 +17,12 @@ func (a *fyneApp) storageRoot() string {
 
 func (p *preferences) storageReader() (io.ReadCloser, error) {
 	key := js.ValueOf(preferencesLocalStorageKey)
-	data := js.Global().Get("localStorage").Call("getItem", key).String()
-
-	if data == "" {
+	data := js.Global().Get("localStorage").Call("getItem", key)
+	if data.IsNull() || data.IsUndefined() {
 		return nil, errEmptyPreferencesStore
 	}
-	return readerNopCloser{reader: strings.NewReader(data)}, nil
+
+	return readerNopCloser{reader: strings.NewReader(data.String())}, nil
 }
 
 func (p *preferences) storageWriter() (writeSyncCloser, error) {
@@ -53,7 +53,7 @@ type localStorageWriter struct {
 func (s *localStorageWriter) Sync() error {
 	text := s.String()
 	s.Reset()
-	js.Global().Get("localStorage").Call("getItem", js.ValueOf(s.key), js.ValueOf(text))
+	js.Global().Get("localStorage").Call("setItem", js.ValueOf(s.key), js.ValueOf(text))
 	return nil
 }
 
