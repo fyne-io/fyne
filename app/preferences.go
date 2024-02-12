@@ -29,7 +29,7 @@ var _ fyne.Preferences = (*preferences)(nil)
 // sentinel error to signal an empty preferences storage backend was loaded
 var errEmptyPreferencesStore = errors.New("empty preferences store")
 
-// returned from storageReader() - may be a file, browser local storage, etc
+// returned from storageWriter() - may be a file, browser local storage, etc
 type writeSyncCloser interface {
 	io.WriteCloser
 	Sync() error
