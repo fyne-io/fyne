@@ -434,10 +434,10 @@ func getPermisions(nmpkgs map[string]map[string]bool) string {
 	var s strings.Builder
 	// basis?
 	protoP := map[string][]string{
-		"fyne.io/fyne/v2/android_permisions/storage": []string{"<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
+		"fyne.io/fyne/v2/driver/android_permisions/storage": []string{"<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
 			"<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />"},
 
-		"fyne.io/fyne/v2/android_permisions/network": []string{"<uses-permission android:name=\"android.permission.INTERNET\"/>"},
+		"fyne.io/fyne/v2/driver/android_permisions/network": []string{"<uses-permission android:name=\"android.permission.INTERNET\"/>"},
 	}
 	for _, v := range protoP {
 		for vv := range v {
@@ -447,16 +447,16 @@ func getPermisions(nmpkgs map[string]map[string]bool) string {
 		}
 	}
 	//TODO how can dynamicaly add permisions? or give command "printandroidxml"?
-	p := map[string][]string{"fyne.io/fyne/v2/android_permisions/bluetooth": []string{"<uses-permission android:name=\"android.permission.BLUETOOTH\"/>",
+	p := map[string][]string{"fyne.io/fyne/v2/driver/android_permisions/bluetooth": []string{"<uses-permission android:name=\"android.permission.BLUETOOTH\"/>",
 		"<uses-permission android:name=\"android.permission.BLUETOOTH_ADMIN\"/>",
 		"<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
 		"<uses-feature android:name=\"android.hardware.bluetooth\" android:required=\"false\"/>",
 		"<uses-feature android:name=\"android.hardware.bluetooth_le\" android:required=\"false\"/>"},
 
-		"fyne.io/fyne/v2/android_permisions/camera": []string{"<uses-permission android:name=\"android.permission.CAMERA\"/>",
+		"fyne.io/fyne/v2/driver/android_permisions/camera": []string{"<uses-permission android:name=\"android.permission.CAMERA\"/>",
 			"<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\"/>"},
 
-		"fyne.io/fyne/v2/android_permisions/wokeup": []string{"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>"}}
+		"fyne.io/fyne/v2/driver/android_permisions/wokeup": []string{"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>"}}
 	for k, v := range p {
 	b:
 		for _, arch := range androidArchs {
