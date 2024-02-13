@@ -271,7 +271,7 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target i
 	return nil
 }
 
-func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string) (*Writer, error) {
+func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string, androidArchs []string) (*Writer, error) {
 	block, _ := pem.Decode([]byte(debugCert))
 	if block == nil {
 		return nil, errors.New("no debug cert")
@@ -468,11 +468,10 @@ func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) str
 	for k := range p {
 	b:
 		for _, arch := range androidArchs {
-			toolchain := ndk.Toolchain(arch)
 			if nmpkgs[arch][k] {
-				for _, vv := range p[k] {
+				for vv := range p[k] {
 					s.WriteString("\t")
-					s.WriteString(vv)
+					s.WriteString(p[k][vv])
 					s.WriteString("\n")
 				}
 				break b
