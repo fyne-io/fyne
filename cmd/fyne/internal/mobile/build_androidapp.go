@@ -44,6 +44,24 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	}
 	libName := androidPkgName(appName)
 
+
+	libFiles := []string{}
+	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
+
+	for _, arch := range androidArchs {
+		toolchain := ndk.Toolchain(arch)
+		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
+		libAbsPath := filepath.Join(tmpdir, libPath)
+		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
+			return nil, err
+		}
+		nmpkgs[arch], err = extractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
+		if err != nil {
+			return nil, err
+		}
+		libFiles = append(libFiles, libPath)
+	}
+
 	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
 	// Fix this to work with other Go tools.
 	dir := filepath.Dir(pkg.GoFiles[0])
@@ -54,37 +72,6 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if !os.IsNotExist(err) {
 			return nil, err
 		}
-
-		libFiles := []string{}
-		nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
-
-		for _, arch := range androidArchs {
-			toolchain := ndk.Toolchain(arch)
-			libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
-			libAbsPath := filepath.Join(tmpdir, libPath)
-			if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
-				return nil, err
-			}
-			// If building release and no ldflags are set then remove the useless debug and DWARF build options
-			if release && buildLdflags == "" {
-				buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
-			}
-			err = goBuild(
-				pkg.PkgPath,
-				androidEnv[arch],
-				"-buildmode=c-shared",
-				"-o", libAbsPath,
-			)
-			if err != nil {
-				return nil, err
-			}
-			nmpkgs[arch], err = extractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
-			if err != nil {
-				return nil, err
-			}
-			libFiles = append(libFiles, libPath)
-		}
-
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		permisions := getPermisions(nmpkgs)
@@ -111,6 +98,27 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		}
 	}
 
+	for _, arch := range androidArchs {
+		toolchain := ndk.Toolchain(arch)
+		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
+		libAbsPath := filepath.Join(tmpdir, libPath)
+		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
+			return nil, err
+		}
+		// If building release and no ldflags are set then remove the useless debug and DWARF build options
+		if release && buildLdflags == "" {
+			buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
+		}
+		err = goBuild(
+			pkg.PkgPath,
+			androidEnv[arch],
+			"-buildmode=c-shared",
+			"-o", libAbsPath,
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
 	ext := ".apk"
 	if release {
 		ext = ".aab"
