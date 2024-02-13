@@ -446,6 +446,11 @@ const (
 	// Since: 2.0
 	IconNameComputer fyne.ThemeIconName = "computer"
 
+	// IconNameDesktop is the name of theme lookup for desktop icon.
+	//
+	// Since: 2.5
+	IconNameDesktop fyne.ThemeIconName = "desktop"
+
 	// IconNameAccount is the name of theme lookup for account icon.
 	//
 	// Since: 2.1
@@ -590,6 +595,7 @@ var (
 
 		IconNameDownload: NewThemedResource(downloadIconRes),
 		IconNameComputer: NewThemedResource(computerIconRes),
+		IconNameDesktop:  NewThemedResource(desktopIconRes),
 		IconNameStorage:  NewThemedResource(storageIconRes),
 		IconNameUpload:   NewThemedResource(uploadIconRes),
 
@@ -1252,6 +1258,11 @@ func VolumeUpIcon() fyne.Resource {
 // ComputerIcon returns a resource containing the standard computer icon for the current theme
 func ComputerIcon() fyne.Resource {
 	return safeIconLookup(IconNameComputer)
+}
+
+// DesktopIcon returns a resource containing the standard desktop icon for the current theme
+func DesktopIcon() fyne.Resource {
+	return safeIconLookup(IconNameDesktop)
 }
 
 // DownloadIcon returns a resource containing the standard download icon for the current theme
