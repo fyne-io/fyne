@@ -350,6 +350,9 @@ func (c *checkRenderer) updateResource() {
 		bgRes.ColorName = theme.ColorNameBackground
 	}
 	if c.check.disabled.Load() {
+		if c.check.Checked {
+			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
+		}
 		res.ColorName = theme.ColorNameDisabled
 		bgRes.ColorName = theme.ColorNameBackground
 	}
