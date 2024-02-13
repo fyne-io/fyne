@@ -465,13 +465,13 @@ func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) str
 			"<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\"/>"},
 
 		"fyne.io/fyne/v2/driver/android_permisions/wokeup": []string{"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>"}}
-	for k := range p {
+	for k, v := range p {
 	b:
 		for _, arch := range androidArchs {
 			if nmpkgs[arch][k] {
-				for vv := range p[k] {
+				for _, str := range v {
 					s.WriteString("\t")
-					s.WriteString(p[k][vv])
+					s.WriteString(str)
 					s.WriteString("\n")
 				}
 				break b
