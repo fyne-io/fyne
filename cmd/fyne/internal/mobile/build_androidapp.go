@@ -33,6 +33,7 @@ type manifestTmplData struct {
 	LibName     string
 	Version     string
 	Build       int
+	Permisions  string
 }
 
 func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
@@ -54,8 +55,39 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			return nil, err
 		}
 
+		libFiles := []string{}
+		nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
+
+		for _, arch := range androidArchs {
+			toolchain := ndk.Toolchain(arch)
+			libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
+			libAbsPath := filepath.Join(tmpdir, libPath)
+			if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
+				return nil, err
+			}
+			// If building release and no ldflags are set then remove the useless debug and DWARF build options
+			if release && buildLdflags == "" {
+				buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
+			}
+			err = goBuild(
+				pkg.PkgPath,
+				androidEnv[arch],
+				"-buildmode=c-shared",
+				"-o", libAbsPath,
+			)
+			if err != nil {
+				return nil, err
+			}
+			nmpkgs[arch], err = extractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
+			if err != nil {
+				return nil, err
+			}
+			libFiles = append(libFiles, libPath)
+		}
+
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
+		permisions := getPermisions(nmpkgs)
 		err := templates.ManifestAndroid.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName), //lint:ignore SA1019 This is fine for our use case.
@@ -63,6 +95,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			LibName:     libName,
 			Version:     version,
 			Build:       build,
+			Permisions:  permisions,
 		})
 		if err != nil {
 			return nil, err
@@ -76,36 +109,6 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		if err != nil {
 			return nil, fmt.Errorf("error parsing %s: %v", manifestPath, err)
 		}
-	}
-
-	libFiles := []string{}
-	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
-
-	for _, arch := range androidArchs {
-		toolchain := ndk.Toolchain(arch)
-		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
-		libAbsPath := filepath.Join(tmpdir, libPath)
-		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
-			return nil, err
-		}
-		// If building release and no ldflags are set then remove the useless debug and DWARF build options
-		if release && buildLdflags == "" {
-			buildLdflags = "-w" // gomobile requires symbol check, so "-s" cannot be used yet - TODO resolve this
-		}
-		err = goBuild(
-			pkg.PkgPath,
-			androidEnv[arch],
-			"-buildmode=c-shared",
-			"-o", libAbsPath,
-		)
-		if err != nil {
-			return nil, err
-		}
-		nmpkgs[arch], err = extractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
-		if err != nil {
-			return nil, err
-		}
-		libFiles = append(libFiles, libPath)
 	}
 
 	ext := ".apk"
@@ -425,6 +428,50 @@ func convertAPKToAAB(aabPath string) error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
+}
+
+func getPermisions(nmpkgs map[string]map[string]bool) string {
+	var s strings.Builder
+	// basis?
+	protoP := map[string][]string{
+		"fyne.io/fyne/v2/android_permisions/storage": []string{"<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
+			"<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />"},
+
+		"fyne.io/fyne/v2/android_permisions/network": []string{"<uses-permission android:name=\"android.permission.INTERNET\"/>"},
+	}
+	for _, v := range protoP {
+		for vv := range v {
+			s.WriteString("\t")
+			s.WriteString(vv)
+			s.WriteString("\n")
+		}
+	}
+	//TODO how can dynamicaly add permisions? or give command "printandroidxml"?
+	p := map[string][]string{"fyne.io/fyne/v2/android_permisions/bluetooth": []string{"<uses-permission android:name=\"android.permission.BLUETOOTH\"/>",
+		"<uses-permission android:name=\"android.permission.BLUETOOTH_ADMIN\"/>",
+		"<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
+		"<uses-feature android:name=\"android.hardware.bluetooth\" android:required=\"false\"/>",
+		"<uses-feature android:name=\"android.hardware.bluetooth_le\" android:required=\"false\"/>"},
+
+		"fyne.io/fyne/v2/android_permisions/camera": []string{"<uses-permission android:name=\"android.permission.CAMERA\"/>",
+			"<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\"/>"},
+
+		"fyne.io/fyne/v2/android_permisions/wokeup": []string{"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>"}}
+	for k, v := range p {
+	b:
+		for _, arch := range androidArchs {
+			toolchain := ndk.Toolchain(arch)
+			if nmpkgs[arch][k] {
+				for vv := range v {
+					s.WriteString("\t")
+					s.WriteString(vv)
+					s.WriteString("\n")
+				}
+				break b
+			}
+		}
+	}
+	return s.String()
 }
 
 // A random uninteresting private key.
