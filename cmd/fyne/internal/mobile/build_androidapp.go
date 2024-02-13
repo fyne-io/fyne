@@ -440,15 +440,15 @@ func convertAPKToAAB(aabPath string) error {
 
 func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) string {
 	var s strings.Builder
-	// basis?
+	// basis? can I put to volatile?
 	protoP := map[string][]string{
 		"fyne.io/fyne/v2/driver/android_permisions/storage": []string{"<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
 			"<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />"},
 
 		"fyne.io/fyne/v2/driver/android_permisions/network": []string{"<uses-permission android:name=\"android.permission.INTERNET\"/>"},
 	}
-	for _, v := range protoP {
-		for vv := range v {
+	for k := range protoP {
+		for vv := range protoP[k] {
 			s.WriteString("\t")
 			s.WriteString(vv)
 			s.WriteString("\n")
@@ -465,12 +465,12 @@ func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) str
 			"<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\"/>"},
 
 		"fyne.io/fyne/v2/driver/android_permisions/wokeup": []string{"<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>"}}
-	for k, v := range p {
+	for k := range p {
 	b:
 		for _, arch := range androidArchs {
 			toolchain := ndk.Toolchain(arch)
 			if nmpkgs[arch][k] {
-				for vv := range v {
+				for _, vv := range p[k] {
 					s.WriteString("\t")
 					s.WriteString(vv)
 					s.WriteString("\n")
