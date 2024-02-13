@@ -74,7 +74,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 		}
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		permisions := getPermisions(nmpkgs)
+		permisions := getPermisions(nmpkgs, androidArchs)
 		err := templates.ManifestAndroid.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName), //lint:ignore SA1019 This is fine for our use case.
@@ -271,7 +271,7 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target i
 	return nil
 }
 
-func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string, androidArchs []string) (*Writer, error) {
+func buildAPK(out io.Writer, nmpkgs map[string]map[string]bool, libFiles []string) (*Writer, error) {
 	block, _ := pem.Decode([]byte(debugCert))
 	if block == nil {
 		return nil, errors.New("no debug cert")
@@ -438,7 +438,7 @@ func convertAPKToAAB(aabPath string) error {
 	return cmd.Run()
 }
 
-func getPermisions(nmpkgs map[string]map[string]bool) string {
+func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) string {
 	var s strings.Builder
 	// basis?
 	protoP := map[string][]string{
