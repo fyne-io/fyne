@@ -447,8 +447,8 @@ func getPermisions(nmpkgs map[string]map[string]bool, androidArchs []string) str
 
 		"fyne.io/fyne/v2/driver/android_permisions/network": []string{"<uses-permission android:name=\"android.permission.INTERNET\"/>"},
 	}
-	for k := range protoP {
-		for vv := range protoP[k] {
+	for _, v := range protoP {
+		for _, vv := range v {
 			s.WriteString("\t")
 			s.WriteString(vv)
 			s.WriteString("\n")
