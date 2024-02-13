@@ -292,6 +292,8 @@ type baseTabsRenderer struct {
 	action             *widget.Button
 	bar                *fyne.Container
 	divider, indicator *canvas.Rectangle
+
+	tabs baseTabs
 }
 
 func (r *baseTabsRenderer) Destroy() {
@@ -304,6 +306,10 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	r.divider.FillColor = theme.ShadowColor()
 	r.indicator.FillColor = theme.PrimaryColor()
 	r.indicator.CornerRadius = theme.SelectionRadiusSize()
+
+	for _, tab := range r.tabs.items() {
+		tab.Content.Refresh()
+	}
 }
 
 func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {

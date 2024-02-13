@@ -3,6 +3,27 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.4 - 13 February 2024
+
+### Fixed
+
+* Spaces could be appended to linux Exec command during packaging
+* Secondary mobile windows would not size correctly when padded
+* Setting Icon.Resource to nil will not clear rendering
+* Dismiss iOS keyboard if "Done" is tapped
+* Large speed improvement in Entry and GridWrap widgets
+* tests fail with macOS Assertion failure in NSMenu (#4572)
+* Fix image test failures on Apple Silicon
+* High CPU use when showing CustomDialogs (#4574)
+* Entry does not show the last (few) changes when updating a binding.String in a fast succession (#4082)
+* Calling Entry.SetText and then Entry.Bind immediately will ignore the bound value (#4235)
+* Changing theme while application is running doesn't change some parameters on some widgets (#4344)
+* Check widget: hovering/tapping to the right of the label area should not activate widget (#4527)
+* Calling entry.SetPlaceHolder inside of OnChanged callback freezes app (#4516)
+* Hyperlink enhancement: underline and tappable area shouldn't be wider than the text label (#3528)
+* Fix possible compile error from go-text/typesetting
+
+
 ## 2.4.3 - 23 December 2023
 
 ### Fixed

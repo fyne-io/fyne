@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,6 +41,13 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	masterPix := pixelsForImage(t, raw) // let's just compare the pixels directly
 	capturePix := pixelsForImage(t, img)
 
+	// On darwin/arm64, there are slight differences in the rendering.
+	// Use a slower, more lenient comparison. If that fails,
+	// fall back to the strict comparison for a more detailed error message.
+	if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" && pixCloseEnough(masterPix, capturePix) {
+		return true
+	}
+
 	var msg string
 	if len(msgAndArgs) > 0 {
 		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
@@ -49,6 +57,33 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 		return false
 	}
 	return true
+}
+
+// pixCloseEnough reports whether a and b are mostly the same.
+func pixCloseEnough(a, b []uint8) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	mismatches := 0
+
+	for i, v := range a {
+		w := b[i]
+		if v == w {
+			continue
+		}
+		// Allow a small delta for rendering variation.
+		delta := int(v) - int(w) // use int to avoid overflow
+		if delta < 0 {
+			delta *= -1
+		}
+		if delta > 4 {
+			return false
+		}
+		mismatches++
+	}
+
+	// Allow up to 1% of pixels to mismatch.
+	return mismatches < len(a)/100
 }
 
 // NewCheckedImage returns a new black/white checked image with the specified size
@@ -83,7 +118,7 @@ func pixelsForImage(t *testing.T, img image.Image) []uint8 {
 }
 
 func writeImage(path string, img image.Image) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
 	f, err := os.Create(path)

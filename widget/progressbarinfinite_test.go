@@ -54,7 +54,7 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	render.updateBar(0.0)
 	// start at the smallest size
-	assert.Equal(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width)
+	assert.InEpsilon(t, width*minProgressBarInfiniteWidthRatio, render.bar.Size().Width, 0.0001)
 
 	// make sure the inner progress bar grows in size
 	// call updateBar() enough times to grow the inner bar

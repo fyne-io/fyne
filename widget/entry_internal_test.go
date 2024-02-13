@@ -276,11 +276,26 @@ func TestEntry_EraseSelection(t *testing.T) {
 	keyPress(&fyne.KeyEvent{Name: fyne.KeyRight})
 
 	e.eraseSelection()
-	e.updateText(e.textProvider().String())
+	e.updateText(e.textProvider().String(), false)
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
 	a, b := e.selection()
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
+}
+
+func TestEntry_CallbackLocking(t *testing.T) {
+	e := &Entry{}
+	called := 0
+	e.OnChanged = func(_ string) {
+		e.propertyLock.Lock()
+		called++ // Just to not have an empty critical section.
+		e.propertyLock.Unlock()
+	}
+
+	test.Type(e, "abc123")
+	e.selectAll()
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, 7, called)
 }
 
 func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {

@@ -45,6 +45,21 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "Typed", entry.Text)
 }
 
+func TestEntry_Binding_Bounce(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Init")
+	assert.Equal(t, "Init", entry.Text)
+	waitForBinding() // this time it is the de-echo before binding
+
+	str := binding.NewString()
+	entry.Bind(str)
+	str.Set("1")
+	time.Sleep(10 * time.Millisecond)
+	str.Set("2")
+	waitForBinding()
+	assert.Equal(t, "2", entry.Text)
+}
+
 func TestEntry_Binding_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 	str := binding.NewString()
@@ -438,6 +453,7 @@ func TestEntry_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -462,6 +478,7 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 
 	min = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
+	entry.Refresh()
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -1764,6 +1781,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.True(t, multiMin.Height > singleMin.Height)
 
 	multi.MultiLine = false
+	multi.Refresh()
 	multiMin = multi.MinSize()
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }

@@ -689,7 +689,7 @@ func (f *FileDialog) SetDismissText(label string) {
 	f.dialog.win.Refresh()
 }
 
-// SetLocation tells this FileDirectory which location to display.
+// SetLocation tells this FileDialog which location to display.
 // This is normally called before the dialog is shown.
 //
 // Since: 1.4

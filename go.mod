@@ -15,7 +15,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
-	github.com/go-text/typesetting v0.0.0-20230616162802-9c17dd34aa4a
+	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
 	github.com/jackmordaunt/icns/v2 v2.2.6

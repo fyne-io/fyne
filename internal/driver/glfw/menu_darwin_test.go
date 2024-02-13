@@ -17,7 +17,9 @@ func TestDarwinMenu(t *testing.T) {
 	setExceptionCallback(func(msg string) { t.Error("Obj-C exception:", msg) })
 	defer setExceptionCallback(nil)
 
-	resetMainMenu()
+	runOnMain(func() {
+		resetMainMenu()
+	})
 
 	w := createWindow("Test").(*window)
 
@@ -59,7 +61,9 @@ func TestDarwinMenu(t *testing.T) {
 	menuSettings := fyne.NewMenu("Settings", itemSettings, fyne.NewMenuItemSeparator(), itemMoreSetings)
 
 	mainMenu := fyne.NewMainMenu(menuEdit, menuHelp, menuMore, menuSettings)
-	setupNativeMenu(w, mainMenu)
+	runOnMain(func() {
+		setupNativeMenu(w, mainMenu)
+	})
 
 	mm := testDarwinMainMenu()
 	// The custom “Preferences” menu should be moved to the system app menu completely.
@@ -247,13 +251,17 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			resetMainMenu()
+			runOnMain(func() {
+				resetMainMenu()
+			})
 			w := createWindow("Test").(*window)
 			item := fyne.NewMenuItem("Special", func() {})
 			item.Shortcut = &desktop.CustomShortcut{KeyName: tt.key, Modifier: fyne.KeyModifierShortcutDefault}
 			menu := fyne.NewMenu("Special", item)
 			mainMenu := fyne.NewMainMenu(menu)
-			setupNativeMenu(w, mainMenu)
+			runOnMain(func() {
+				setupNativeMenu(w, mainMenu)
+			})
 
 			mm := testDarwinMainMenu()
 			m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))

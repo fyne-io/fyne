@@ -129,12 +129,12 @@ func (c *Container) Refresh() {
 // This method is not intended to be used inside a loop, to remove all the elements.
 // It is much more efficient to call RemoveAll() instead.
 func (c *Container) Remove(rem CanvasObject) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	if len(c.Objects) == 0 {
 		return
 	}
 
-	c.lock.Lock()
-	defer c.lock.Unlock()
 	for i, o := range c.Objects {
 		if o != rem {
 			continue

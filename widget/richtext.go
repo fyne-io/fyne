@@ -28,9 +28,13 @@ const (
 // Since: 2.1
 type RichText struct {
 	BaseWidget
-	Segments   []RichTextSegment
-	Wrapping   fyne.TextWrap
-	Scroll     widget.ScrollDirection
+	Segments []RichTextSegment
+	Wrapping fyne.TextWrap
+	Scroll   widget.ScrollDirection
+
+	// The truncation mode of the text
+	//
+	// Since: 2.4
 	Truncation fyne.TextTruncation
 
 	inset     fyne.Size     // this varies due to how the widget works (entry with scroller vs others with padding)
@@ -1089,9 +1093,9 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 	out := shaper.Shape(in)
 
 	l.Prepare(conf, runes, shaping.NewSliceIterator([]shaping.Output{out}))
-	finalLine, _, done := l.WrapNextLine(limit)
+	wrapped, done := l.WrapNextLine(limit)
 
-	count := finalLine[0].Runes.Count
+	count := wrapped.Line[0].Runes.Count
 	full := done && count == len(runes)
 	if !full && len(ellipsis) > 0 {
 		count--
