@@ -545,7 +545,7 @@ func TestSetView(t *testing.T) {
 
 	// set view to grid on already opened dialog - should be updated automatically
 	dlg.SetView(GridView)
-	
+
 	// view should be a grid again
 	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 	_, isGrid := panel.(*widget.GridWrap)
