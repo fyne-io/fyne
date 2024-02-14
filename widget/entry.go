@@ -839,7 +839,7 @@ func (e *Entry) preeditCursorPositionChanged() {
 	if e.onCursorPositionChanged != nil {
 		d := fyne.CurrentApp().Driver()
 		pos := d.AbsolutePositionForObject(e.cursorAnim.cursor)
-		e.onCursorPositionChanged(pos)
+		e.onCursorPositionChanged(pos, e.cursorAnim.cursor.Size())
 	}
 }
 
@@ -1690,12 +1690,15 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	provider := e.entry.textProvider()
 	preedit := e.entry.preeditProvider()
 	placeholder := e.entry.placeholderProvider()
+	preeditBackground := canvas.NewRectangle(theme.InputBackgroundColor())
+	preeditUnder := canvas.NewRectangle(theme.ForegroundColor())
 	if provider.len() != 0 {
 		placeholder.Hide()
 	}
-	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor, preedit}
+	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor, preeditBackground, preeditUnder, preedit}
 
 	r := &entryContentRenderer{e.entry.cursorAnim.cursor, []fyne.CanvasObject{}, objects,
+		preeditBackground, preeditUnder,
 		provider, preedit, placeholder, e}
 	r.updateScrollDirections()
 	r.Layout(e.size)
@@ -1723,9 +1726,11 @@ func (e *entryContent) Dragged(d *fyne.DragEvent) {
 var _ fyne.WidgetRenderer = (*entryContentRenderer)(nil)
 
 type entryContentRenderer struct {
-	cursor    *canvas.Rectangle
-	selection []fyne.CanvasObject
-	objects   []fyne.CanvasObject
+	cursor            *canvas.Rectangle
+	selection         []fyne.CanvasObject
+	objects           []fyne.CanvasObject
+	preeditBackground *canvas.Rectangle
+	preeditUnder      *canvas.Rectangle
 
 	provider, placeholder, preedit *RichText
 	content                        *entryContent
@@ -1789,8 +1794,21 @@ func (r *entryContentRenderer) Refresh() {
 		r.cursor.Hide()
 	}
 	r.moveCursor()
-	preedit.position.X = r.cursor.Position().X
+
+	// IME preedit appears temporarily at the cursor position until the user confirms input text,
+	// and provides a unique background, underline, and text rendering.
+	preedit.position = r.cursor.Position().Subtract(fyne.NewSquareSize(theme.InnerPadding())).Add(preedit.inset)
 	r.content.entry.preeditCursorPositionChanged()
+	r.preeditBackground.Hidden = preedit.String() == ""
+	r.preeditUnder.Hidden = r.preeditBackground.Hidden
+	if r.preeditBackground.Visible() {
+		r.preeditBackground.Move(preedit.Position().Add(fyne.NewSquareSize(theme.InnerPadding())))
+		r.preeditBackground.Resize(preedit.MinSize().Subtract(fyne.NewSquareSize(theme.InnerPadding() * 2)))
+		r.preeditBackground.FillColor = theme.InputBackgroundColor()
+		r.preeditUnder.Move(r.preeditBackground.Position().AddXY(0, r.preeditBackground.Size().Height))
+		r.preeditUnder.Resize(fyne.NewSize(r.preeditBackground.Size().Width, 1))
+		r.preeditUnder.FillColor = theme.ForegroundColor()
+	}
 
 	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.content.entry.focused

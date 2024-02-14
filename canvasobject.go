@@ -75,7 +75,7 @@ type Focusable interface {
 	TypedKey(*KeyEvent)
 }
 
-type CursorPositionChangedCallback func(pos Position)
+type CursorPositionChangedCallback func(pos Position, size Size)
 
 // Preeditable describes any CanvasObject that can respond to IME inputs.
 // Originally, it should be a method of Focusable, but only a few widgets need PreeditChanged,
