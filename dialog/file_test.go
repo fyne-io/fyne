@@ -542,6 +542,17 @@ func TestSetView(t *testing.T) {
 	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "Dismiss", dismiss.Text)
+
+	// set view to grid on already opened dialog - should be updated automatically
+	dlg.SetView(GridView)
+	
+	// view should be a grid again
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	_, isGrid := panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
 }
 
 func TestSetViewPreferences(t *testing.T) {

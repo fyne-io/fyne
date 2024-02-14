@@ -72,6 +72,8 @@ type fileDialog struct {
 	dir        fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+
+	toggleViewButton *widget.Button
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
@@ -156,6 +158,21 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	}
 
+	var toggleViewButtonIcon fyne.Resource
+	if view == GridView {
+		toggleViewButtonIcon = theme.ListIcon()
+	} else {
+		toggleViewButtonIcon = theme.GridIcon()
+	}
+
+	f.toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
+		if f.view == GridView {
+			f.setView(ListView)
+		} else {
+			f.setView(GridView)
+		}
+	})
+
 	f.setView(view)
 
 	f.loadFavorites()
@@ -179,24 +196,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	var optionsButton *widget.Button
 	optionsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
-	})
-
-	var toggleViewButtonIcon fyne.Resource
-	if f.view == GridView {
-		toggleViewButtonIcon = theme.ListIcon()
-	} else {
-		toggleViewButtonIcon = theme.GridIcon()
-	}
-
-	var toggleViewButton *widget.Button
-	toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
-		if f.view == GridView {
-			f.setView(ListView)
-			toggleViewButton.SetIcon(theme.GridIcon())
-		} else {
-			f.setView(GridView)
-			toggleViewButton.SetIcon(theme.ListIcon())
-		}
 	})
 
 	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
@@ -226,7 +225,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	optionsbuttons := container.NewHBox(
 		newFolderButton,
-		toggleViewButton,
+		f.toggleViewButton,
 		optionsButton,
 	)
 
@@ -555,15 +554,22 @@ func (f *fileDialog) setView(view ViewLayout) {
 			f.setSelected(file, id)
 		}
 	}
+
+	var toggleViewButtonIcon fyne.Resource
 	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
+		toggleViewButtonIcon = theme.ListIcon()
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
+		toggleViewButtonIcon = theme.GridIcon()
 	}
+
+	f.toggleViewButton.SetIcon(toggleViewButtonIcon)
+
 	if f.dir != nil {
 		f.refreshDir(f.dir)
 	}
