@@ -13,7 +13,10 @@ package mobile
 bool iosExistsPath(const char* path);
 void* iosParseUrl(const char* url);
 const void* iosReadFromURL(void* url, int* len);
-const int iosWriteToURL(void* url, const void* bytes, int len);
+
+const void* iosOpenFileWriter(void* url);
+void iosCloseFileWriter(void* handle);
+const int iosWriteToFile(void* handle, const void* bytes, int len);
 */
 import "C"
 import (
@@ -70,7 +73,7 @@ func (s *secureReadCloser) Close() error {
 }
 
 type secureWriteCloser struct {
-	url    unsafe.Pointer
+	handle unsafe.Pointer
 	closer func()
 
 	offset int
@@ -80,7 +83,7 @@ type secureWriteCloser struct {
 var _ io.WriteCloser = (*secureWriteCloser)(nil)
 
 func (s *secureWriteCloser) Write(p []byte) (int, error) {
-	count := int(C.iosWriteToURL(s.url, C.CBytes(p), C.int(len(p))))
+	count := int(C.iosWriteToFile(s.handle, C.CBytes(p), C.int(len(p))))
 	s.offset += count
 
 	return count, nil
@@ -90,7 +93,8 @@ func (s *secureWriteCloser) Close() error {
 	if s.closer != nil {
 		s.closer()
 	}
-	s.url = nil
+	C.iosCloseFileWriter(s.handle)
+	s.handle = nil
 	return nil
 }
 
@@ -130,7 +134,8 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 
 	url := C.iosParseUrl(cStr)
 
-	fileStruct := &secureWriteCloser{url: url, closer: f.done}
+	handle := C.iosOpenFileWriter(url)
+	fileStruct := &secureWriteCloser{handle: handle, closer: f.done}
 	return fileStruct, nil
 }
 

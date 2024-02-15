@@ -23,13 +23,26 @@ const void* iosReadFromURL(void* urlPtr, int* len)  {
     return data.bytes;
 }
 
-const int iosWriteToURL(void* urlPtr, const void* bytes, int len) {
+const void* iosOpenFileWriter(void* urlPtr) {
     NSURL* url = (NSURL*)urlPtr;
-    NSData *data = [NSData dataWithBytes:bytes length:len];
-    BOOL ok = [data writeToURL:url atomically:YES];
+    [[NSFileManager defaultManager] createFileAtPath:url.path contents:nil attributes:nil];
 
-    if (!ok) {
-        return 0;
-    }
+    NSError *err = nil;
+    // TODO handle error
+    return [NSFileHandle fileHandleForWritingToURL:url error:&err];
+}
+
+void iosCloseFileWriter(void* handlePtr) {
+    NSFileHandle* handle = (NSFileHandle*)handlePtr;
+
+    [handle closeFile];
+}
+
+
+const int iosWriteToFile(void* handlePtr, const void* bytes, int len) {
+    NSFileHandle* handle = (NSFileHandle*)handlePtr;
+    NSData *data = [NSData dataWithBytes:bytes length:len];
+
+    [handle writeData:data];
     return data.length;
 }
