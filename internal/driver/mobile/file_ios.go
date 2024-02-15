@@ -9,6 +9,7 @@ package mobile
 #import <stdlib.h>
 #import <stdbool.h>
 
+void iosDeletePath(const char* path);
 bool iosExistsPath(const char* path);
 void* iosParseUrl(const char* url);
 const void* iosReadFromURL(void* url, int* len);
@@ -97,9 +98,21 @@ func (s *secureWriteCloser) Close() error {
 	return nil
 }
 
+func deleteURI(u fyne.URI) error {
+	if u.Scheme() != "file" {
+		return errors.New("cannot delete from " + u.Scheme() + " scheme on iOS")
+	}
+
+	cStr := C.CString(u.Path())
+	defer C.free(unsafe.Pointer(cStr))
+
+	C.iosDeletePath(cStr)
+	return nil
+}
+
 func existsURI(u fyne.URI) (bool, error) {
 	if u.Scheme() != "file" {
-		return true, errors.New("cannot check existence of " + u.Scheme() + " on iOS")
+		return true, errors.New("cannot check existence of " + u.Scheme() + " scheme on iOS")
 	}
 
 	cStr := C.CString(u.Path())

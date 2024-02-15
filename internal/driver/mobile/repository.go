@@ -40,8 +40,7 @@ func (m *mobileFileRepo) CreateListable(u fyne.URI) error {
 }
 
 func (m *mobileFileRepo) Delete(u fyne.URI) error {
-	// TODO: implement this
-	return repository.ErrOperationNotSupported
+	return deleteURI(u)
 }
 
 func (m *mobileFileRepo) Destroy(string) {
