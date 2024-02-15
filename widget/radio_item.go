@@ -37,8 +37,10 @@ type radioItem struct {
 //
 // Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	r := &radioItemRenderer{item: i, label: canvas.Text{Alignment: fyne.TextAlignLeading}}
-	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &r.label})
+	txt := canvas.Text{Alignment: fyne.TextAlignLeading}
+	txt.TextSize = i.Theme().Size(theme.SizeNameText)
+	r := &radioItemRenderer{item: i, label: &txt}
+	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &txt})
 	r.update()
 	return r
 }
@@ -142,13 +144,14 @@ type radioItemRenderer struct {
 
 	focusIndicator canvas.Circle
 	icon, over     canvas.Image
-	label          canvas.Text
+	label          *canvas.Text
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
-	innerPadding := theme.InnerPadding()
-	borderSize := theme.InputBorderSize()
-	iconInlineSize := theme.IconInlineSize()
+	th := r.item.Theme()
+	innerPadding := th.Size(theme.SizeNameInnerPadding)
+	borderSize := th.Size(theme.SizeNameInputBorder)
+	iconInlineSize := th.Size(theme.SizeNameInlineIcon)
 
 	focusIndicatorSize := fyne.NewSquareSize(iconInlineSize + innerPadding)
 	r.focusIndicator.Resize(focusIndicatorSize)
@@ -156,7 +159,7 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 
 	labelSize := fyne.NewSize(size.Width, size.Height)
 	r.label.Resize(labelSize)
-	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+theme.Padding(), 0))
+	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+th.Size(theme.SizeNamePadding), 0))
 
 	iconPos := fyne.NewPos(innerPadding/2+borderSize, (size.Height-iconInlineSize)/2)
 	iconSize := fyne.NewSquareSize(iconInlineSize)
@@ -167,10 +170,11 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 }
 
 func (r *radioItemRenderer) MinSize() fyne.Size {
-	inPad := theme.InnerPadding() * 2
+	th := r.item.Theme()
+	inPad := th.Size(theme.SizeNameInnerPadding) * 2
 
 	return r.label.MinSize().
-		AddWidthHeight(inPad+theme.IconInlineSize()+theme.Padding(), inPad)
+		AddWidthHeight(inPad+th.Size(theme.SizeNameInlineIcon)+th.Size(theme.SizeNamePadding), inPad)
 }
 
 func (r *radioItemRenderer) Refresh() {
@@ -179,17 +183,20 @@ func (r *radioItemRenderer) Refresh() {
 }
 
 func (r *radioItemRenderer) update() {
+	th := r.item.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	r.label.Text = r.item.Label
-	r.label.TextSize = theme.TextSize()
+	r.label.TextSize = th.Size(theme.SizeNameText)
 	if r.item.Disabled() {
-		r.label.Color = theme.DisabledColor()
+		r.label.Color = th.Color(theme.ColorNameDisabled, v)
 	} else {
-		r.label.Color = theme.ForegroundColor()
+		r.label.Color = th.Color(theme.ColorNameForeground, v)
 	}
 
-	out := theme.NewThemedResource(theme.RadioButtonIcon())
+	out := theme.NewThemedResource(th.Icon(theme.IconNameRadioButton))
 	out.ColorName = theme.ColorNameInputBorder
-	in := theme.NewThemedResource(theme.RadioButtonFillIcon())
+	in := theme.NewThemedResource(th.Icon(theme.IconNameRadioButtonFill))
 	in.ColorName = theme.ColorNameInputBackground
 	if r.item.Selected {
 		in.ColorName = theme.ColorNamePrimary
@@ -209,9 +216,9 @@ func (r *radioItemRenderer) update() {
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = color.Transparent
 	} else if r.item.focused {
-		r.focusIndicator.FillColor = theme.FocusColor()
+		r.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
 	} else if r.item.hovered {
-		r.focusIndicator.FillColor = theme.HoverColor()
+		r.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
 	} else {
 		r.focusIndicator.FillColor = color.Transparent
 	}

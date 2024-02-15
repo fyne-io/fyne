@@ -273,12 +273,14 @@ func TestCheck_Disabled(t *testing.T) {
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
+		th := test.NewTheme()
+		render.applyTheme(th, v)
 		customTextSize = render.label.TextSize
 	})
 
