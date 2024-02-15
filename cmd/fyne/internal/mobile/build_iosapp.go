@@ -523,6 +523,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         GCC_WARN_UNUSED_FUNCTION = YES;
         GCC_WARN_UNUSED_VARIABLE = YES;
         IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+        OS_ACTIVITY_MODE = "disabled";
         MTL_ENABLE_DEBUG_INFO = {{if .Debug}}YES{{else}}NO{{end}};
         PRODUCT_BUNDLE_IDENTIFIER = {{.BundleID}};
         PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
