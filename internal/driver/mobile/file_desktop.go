@@ -11,6 +11,11 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
+func deleteURI(u fyne.URI) error {
+	// no-op as we use the internal FileRepository
+	return nil
+}
+
 func existsURI(fyne.URI) (bool, error) {
 	// no-op as we use the internal FileRepository
 	return false, nil

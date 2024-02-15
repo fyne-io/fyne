@@ -142,6 +142,11 @@ func (s *javaStream) Write(p []byte) (int, error) {
 	return len(p), err
 }
 
+func deleteURI(u fyne.URI) error {
+	// TODO implement this for Android
+	return repository.ErrOperationNotSupported
+}
+
 func existsURI(uri fyne.URI) (bool, error) {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))

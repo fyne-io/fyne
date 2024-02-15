@@ -5,6 +5,11 @@
 
 #import <stdbool.h>
 
+void iosDeletePath(const char* path) {
+    NSString *pathStr = [NSString stringWithUTF8String:path];
+    [[NSFileManager defaultManager] removeItemAtPath:pathStr error:nil];
+}
+
 bool iosExistsPath(const char* path) {
     NSString *pathStr = [NSString stringWithUTF8String:path];
     return [[NSFileManager defaultManager] fileExistsAtPath:pathStr];
