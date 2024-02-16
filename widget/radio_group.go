@@ -241,7 +241,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 			changed = true
 		}
 
-		if refresh && changed {
+		if refresh || changed {
 			item.Refresh()
 		}
 	}

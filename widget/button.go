@@ -221,7 +221,7 @@ func (b *Button) applyButtonTheme(th fyne.Theme) {
 }
 
 func (b *Button) buttonColor() color.Color {
-	th := b.Theme()
+	th := b.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	switch {
@@ -368,11 +368,11 @@ func (r *buttonRenderer) Refresh() {
 	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
 	r.button.propertyLock.RLock()
-	defer r.button.propertyLock.RUnlock()
-
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
+	r.button.propertyLock.RUnlock()
+
 	r.background.Refresh()
 	r.Layout(r.button.Size())
 	canvas.Refresh(r.button.super())
@@ -381,7 +381,7 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock held
 func (r *buttonRenderer) applyTheme() {
-	r.button.applyButtonTheme(r.button.Theme())
+	r.button.applyButtonTheme(r.button.themeWithLock())
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled.Load():

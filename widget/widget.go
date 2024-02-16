@@ -136,14 +136,21 @@ func (w *BaseWidget) Refresh() {
 //
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
-	w.propertyLock.RLock()
+	w.propertyLock.Lock()
+	defer w.propertyLock.Unlock()
+	return w.themeWithLock()
+}
+
+func (w *BaseWidget) themeWithLock() fyne.Theme {
 	cached := w.themeCache
-	w.propertyLock.RUnlock()
 	if cached == nil {
-		cached = theme.CurrentForWidget(w.super())
-		w.propertyLock.Lock()
+		cached = cache.WidgetTheme(w.super())
+		// don't cache the default as it may change
+		if cached == nil {
+			return theme.Current()
+		}
+
 		w.themeCache = cached
-		w.propertyLock.Unlock()
 	}
 
 	return cached

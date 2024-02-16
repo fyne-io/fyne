@@ -98,7 +98,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 
 func (e *SelectEntry) popUpPos() fyne.Position {
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-	return entryPos.Add(fyne.NewPos(0, e.Size().Height-theme.InputBorderSize()))
+	return entryPos.Add(fyne.NewPos(0, e.Size().Height-e.Theme().Size(theme.SizeNameInputBorder)))
 }
 
 func (e *SelectEntry) setupDropDown() *Button {
@@ -110,6 +110,6 @@ func (e *SelectEntry) setupDropDown() *Button {
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.Importance = LowImportance
-	dropDownButton.SetIcon(theme.MenuDropDownIcon())
+	dropDownButton.SetIcon(e.Theme().Icon(theme.IconNameArrowDropDown))
 	return dropDownButton
 }
