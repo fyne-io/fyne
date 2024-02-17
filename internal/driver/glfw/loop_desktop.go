@@ -11,8 +11,11 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+const GLFW_X11_ONTHESPOT glfw.Hint = 0x00052002
+
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
+		glfw.InitHint(GLFW_X11_ONTHESPOT, 1) // enable IME callbacks, hint must be set before Init()
 		err := glfw.Init()
 		if err != nil {
 			fyne.LogError("failed to initialise GLFW", err)

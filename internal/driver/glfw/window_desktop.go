@@ -689,6 +689,7 @@ func (w *window) imeStatus(_ *glfw.Window) {
 		preeditable.ReceiveCursorPositionChangedCallback(func(pos fyne.Position, size fyne.Size) {
 			canvasScale := w.canvas.scale
 			w.viewport.SetPreeditCursorRectangle(int(pos.X*canvasScale), int(pos.Y*canvasScale), 100, int(size.Height))
+			w.viewport.UpdatePreeditCursorRectangle()
 		})
 	}
 }
