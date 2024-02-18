@@ -8,7 +8,7 @@ import (
 )
 
 func createInformationDialog(title, message string, icon fyne.Resource, parent fyne.Window) Dialog {
-	d := newTextDialog(title, message, theme.ErrorIcon(), parent)
+	d := newTextDialog(title, message, icon, parent)
 	d.dismiss = &widget.Button{Text: "OK",
 		OnTapped: d.Hide,
 	}
