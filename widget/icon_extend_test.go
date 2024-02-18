@@ -25,5 +25,5 @@ func TestIcon_Extended_SetResource(t *testing.T) {
 
 	objs := cache.Renderer(icon).Objects()
 	assert.Equal(t, 1, len(objs))
-	assert.Equal(t, theme.ComputerIcon(), objs[0].(*canvas.Image).Resource)
+	assert.Equal(t, theme.ComputerIcon(), objs[0].(*canvas.Image).Resource.(*cache.WidgetResource).ThemedResource)
 }
