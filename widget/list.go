@@ -257,6 +257,23 @@ func (l *List) ScrollToTop() {
 	l.Refresh()
 }
 
+// ScrollToOffset scrolls the list to the given offset position.
+//
+// Since: 2.5
+func (l *List) ScrollToOffset(offset float32) {
+	if l.scroller != nil {
+		l.scroller.Offset.Y = offset
+		l.offsetUpdated(l.scroller.Offset)
+	}
+}
+
+// GetScrollOffset returns the current scroll offset position
+//
+// Since: 2.5
+func (l *List) GetScrollOffset() float32 {
+	return l.offsetY
+}
+
 // TypedKey is called if a key event happens while this List is focused.
 //
 // Implements: fyne.Focusable
