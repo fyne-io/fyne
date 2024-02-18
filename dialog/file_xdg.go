@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -27,7 +28,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	loc = loc[:len(loc)-1]
 	locURI := storage.NewFileURI(string(loc))
 
-	if locURI.String() == homeURI.String() {
+	if strings.TrimRight(locURI.String(), "/") == homeURI.String() {
 		fallback, _ := storage.Child(homeURI, fallbackName)
 		return fallback, fmt.Errorf("this computer does not define a %s folder", name)
 	}
