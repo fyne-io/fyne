@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -96,7 +95,7 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
-	minCache        async.Size
+	minCache        fyne.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -402,7 +401,9 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
-	cached := e.minCache.Load()
+	e.propertyLock.RLock()
+	cached := e.minCache
+	e.propertyLock.RUnlock()
 	if !cached.IsZero() {
 		return cached
 	}
@@ -419,7 +420,9 @@ func (e *Entry) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(iconSpace, 0))
 	}
 
-	e.minCache.Store(min)
+	e.propertyLock.Lock()
+	e.minCache = min
+	e.propertyLock.Unlock()
 	return min
 }
 
@@ -486,7 +489,9 @@ func (e *Entry) Redo() {
 }
 
 func (e *Entry) Refresh() {
-	e.minCache.Store(fyne.Size{})
+	e.propertyLock.Lock()
+	e.minCache = fyne.Size{}
+	e.propertyLock.Unlock()
 
 	e.BaseWidget.Refresh()
 }
