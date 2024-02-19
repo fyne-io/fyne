@@ -630,3 +630,13 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	folderNameInputCreate := folderNameInputUi.Objects[3].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, theme.ConfirmIcon(), folderNameInputCreate.Icon)
 }
+
+func TestSetOnClosedBeforeShow(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	d := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
+	onClosedCalled := false
+	d.SetOnClosed(func() { onClosedCalled = true })
+	d.Show()
+	d.Hide()
+	assert.True(t, onClosedCalled)
+}
