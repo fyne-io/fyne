@@ -335,11 +335,11 @@ char *filePath(char *uriCstr) {
 	memcpy(path, &uriCstr[7], length);
 	path[length] = '\0';
 
-    return path;
+	return path;
 }
 
 bool deleteFileURI(char *uriCstr) {
-    char* path = filePath(uriCstr);
+	char* path = filePath(uriCstr);
 	int result = remove(path);
 
 	free(path);
@@ -357,7 +357,7 @@ bool deleteURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 }
 
 bool existsFileURI(char* uriCstr) {
-    char* path = filePath(uriCstr);
+	char* path = filePath(uriCstr);
 
 	// Stat path to determine if it points to an existing file
 	struct stat statbuf;
