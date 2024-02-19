@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 * iOS files write would fail when over 16KB
+* storage.Delete not supported on Android/iOS (#2120)
 
 
 ## 2.4.4 - 13 February 2024
