@@ -28,7 +28,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	loc = loc[:len(loc)-1]
 	locURI := storage.NewFileURI(string(loc))
 
-	if strings.TrimRight(locURI.String(), "/") == homeURI.String() {
+	if strings.TrimRight(locURI.String(), "/") == strings.TrimRight(homeURI.String(), "/") {
 		fallback, _ := storage.Child(homeURI, fallbackName)
 		return fallback, fmt.Errorf("this computer does not define a %s folder", name)
 	}
