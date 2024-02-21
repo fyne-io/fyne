@@ -896,7 +896,6 @@ func (e *Entry) deleteWord(right bool) {
 	if start == -1 || end == -1 {
 		return
 	}
-	deleteLen := end - start
 
 	// convert start, end to absolute text position
 	b := provider.rowBoundary(cursorRow)
@@ -907,7 +906,7 @@ func (e *Entry) deleteWord(right bool) {
 
 	provider.deleteFromTo(start, end)
 	if !right {
-		e.CursorColumn = cursorCol - deleteLen
+		e.CursorColumn = cursorCol - (end - start)
 	}
 	e.updateTextAndRefresh(provider.String(), false)
 }
