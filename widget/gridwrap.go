@@ -329,7 +329,7 @@ func (l *GridWrap) UnselectAll() {
 func (l *GridWrap) contentMinSize() fyne.Size {
 	padding := theme.Padding()
 	if lenF := l.Length; lenF != nil {
-		cols := l.getColCount()
+		cols := l.ColumnCount()
 		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
 		return fyne.NewSize(l.itemMin.Width,
 			(l.itemMin.Height+padding)*rows-padding)
