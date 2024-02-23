@@ -69,8 +69,8 @@ type Entry struct {
 
 	dirty       bool
 	focused     bool
-	text        *RichText
-	placeholder *RichText
+	text        RichText
+	placeholder RichText
 	content     *entryContent
 	scroll      *widget.Scroll
 
@@ -1074,21 +1074,25 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *RichText {
-	if e.placeholder != nil {
-		return e.placeholder
+	if len(e.placeholder.Segments) > 0 {
+		return &e.placeholder
 	}
+
+	e.placeholder.Scroll = widget.ScrollNone
+	e.placeholder.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
 	style.TextStyle = e.TextStyle
-	text := NewRichText(&TextSegment{
-		Style: style,
-		Text:  e.PlaceHolder,
-	})
-	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
-	e.placeholder = text
-	return e.placeholder
+
+	e.placeholder.Segments = []RichTextSegment{
+		&TextSegment{
+			Style: style,
+			Text:  e.PlaceHolder,
+		},
+	}
+
+	return &e.placeholder
 }
 
 func (e *Entry) registerShortcut() {
@@ -1346,51 +1350,44 @@ func (e *Entry) syncSegments() {
 	if disabled {
 		colName = theme.ColorNameDisabled
 	}
-	e.textProvider().Wrapping = wrap
-	style := RichTextStyle{
-		Alignment: fyne.TextAlignLeading,
-		ColorName: colName,
-		TextStyle: e.TextStyle,
-	}
-	if e.Password {
-		style = RichTextStylePassword
-		style.ColorName = colName
-		style.TextStyle = e.TextStyle
-	}
-	e.textProvider().Segments = []RichTextSegment{&TextSegment{
-		Style: style,
-		Text:  e.Text,
-	}}
+
+	text := e.textProvider()
+	text.Wrapping = wrap
+
+	textSegment := text.Segments[0].(*TextSegment)
+	textSegment.Text = e.Text
+	textSegment.Style.ColorName = colName
+	textSegment.Style.concealed = e.Password
+	textSegment.Style.TextStyle = e.TextStyle
+
 	colName = theme.ColorNamePlaceHolder
 	if disabled {
 		colName = theme.ColorNameDisabled
 	}
-	e.placeholderProvider().Wrapping = wrap
-	e.placeholderProvider().Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: fyne.TextAlignLeading,
-			ColorName: colName,
-			TextStyle: e.TextStyle,
-		},
-		Text: e.PlaceHolder,
-	}}
+
+	placeholder := e.placeholderProvider()
+	placeholder.Wrapping = wrap
+
+	textSegment = placeholder.Segments[0].(*TextSegment)
+	textSegment.Style.ColorName = colName
+	textSegment.Style.TextStyle = e.TextStyle
+	textSegment.Text = e.PlaceHolder
 }
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
-	if e.text != nil {
-		return e.text
+	if len(e.text.Segments) > 0 {
+		return &e.text
 	}
 
 	if e.Text != "" {
 		e.dirty = true
 	}
 
-	text := NewRichTextWithText(e.Text)
-	text.ExtendBaseWidget(text)
-	text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
-	e.text = text
-	return e.text
+	e.text.Scroll = widget.ScrollNone
+	e.text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
+	e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
+	return &e.text
 }
 
 // textWrap calculates the wrapping that we should apply.
