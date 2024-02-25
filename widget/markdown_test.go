@@ -226,6 +226,31 @@ func TestRichTextMarkdown_Separator(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_NewlinesAroundEmphasis(t *testing.T) {
+	r := NewRichTextFromMarkdown("foo\n*bar*\nbaz")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
+func TestRichTextMarkdown_NewlinesAroundStrong(t *testing.T) {
+	r := NewRichTextFromMarkdown("foo\n**bar**\nbaz")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
+func TestRichTextMarkdown_NewlinesAroundHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("foo\n[bar](https://fyne.io/)\nbaz")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
+func TestRichTextMarkdown_SpacesAroundHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("foo [bar](https://fyne.io/) baz")
+	assert.Equal(t, "foo bar baz", r.String())
+}
+
+func TestRichTextMarkdown_NewlineInHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("[foo\nbar](https://fyne.io/)")
+	assert.Equal(t, "foo bar", r.String())
+}
+
 func BenchmarkMarkdownParsing(b *testing.B) {
 	md := `# Test heading
 This is some test markdown. It contains some different markdown
