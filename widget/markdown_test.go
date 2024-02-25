@@ -225,3 +225,22 @@ func TestRichTextMarkdown_Separator(t *testing.T) {
 		t.Error("Segment should be a separator")
 	}
 }
+
+func BenchmarkMarkdownParsing(b *testing.B) {
+	md := `# Test heading
+This is some test markdown. It contains some different markdown
+elements in an effort to put a realistic load onto the parser.
+
+> Here is a quote.
+> It streches over two lines and contains some ` + "`inline code`" + `.
+
+Moreover, we've got a list:
+- foo
+- bar
+- baz
+`
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		NewRichTextFromMarkdown(md)
+	}
+}
