@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -188,15 +189,16 @@ func (d *gLDriver) catchTerm() {
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
+	localQuit := lang.L("Quit")
 	var lastItem *fyne.MenuItem
 	if len(menu.Items) > 0 {
 		lastItem = menu.Items[len(menu.Items)-1]
-		if lastItem.Label == "Quit" {
+		if lastItem.Label == localQuit {
 			lastItem.IsQuit = true
 		}
 	}
 	if lastItem == nil || !lastItem.IsQuit { // make sure the menu always has a quit option
-		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem := fyne.NewMenuItem(localQuit, nil)
 		quitItem.IsQuit = true
 		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
