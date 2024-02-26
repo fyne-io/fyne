@@ -516,7 +516,7 @@ func (w *window) create() {
 	}
 
 	// run the GL init on the draw thread
-	runOnDraw(w, func() {
+	runOnMainWithContext(w, func() {
 		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
 		w.canvas.Painter().Init()
 	})

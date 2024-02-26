@@ -48,7 +48,7 @@ func runOnMain(f func()) {
 }
 
 // force a function f to run on the draw thread
-func runOnDraw(w *window, f func()) {
+func runOnMainWithContext(w *window, f func()) {
 	runOnMain(func() { w.RunWithContext(f) }) // TODO remove this completely
 }
 

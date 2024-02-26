@@ -41,7 +41,7 @@ type glCanvas struct {
 
 func (c *glCanvas) Capture() image.Image {
 	var img image.Image
-	runOnDraw(c.context.(*window), func() {
+	runOnMainWithContext(c.context.(*window), func() {
 		img = c.Painter().Capture(c)
 	})
 	return img
