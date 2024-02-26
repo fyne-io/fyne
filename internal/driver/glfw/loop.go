@@ -151,6 +151,7 @@ func (d *gLDriver) runGL() {
 					}
 				}
 
+				d.animation.TickAnimations()
 				d.drawSingleFrame()
 			}
 			if windowsToRemove > 0 {

@@ -12,6 +12,11 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+func tick(run *Runner) {
+	time.Sleep(time.Millisecond * 5) // wait long enough that we are not at 0 time
+	run.TickAnimations()
+}
+
 func TestGLDriver_StartAnimation(t *testing.T) {
 	done := make(chan float32)
 	run := &Runner{}
@@ -22,6 +27,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	select {
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
@@ -40,6 +46,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	select {
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
@@ -63,6 +70,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Tick:     func(f float32) {},
 	}
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	run.Stop(a)
 
 	// stopping animation inside tick function
@@ -85,7 +93,10 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Tick:     func(f float32) {},
 	}
 	run.Start(c)
+	go tick(run) // simulate a graphics draw loop
+
 	run.Stop(c)
+	go tick(run) // simulate a graphics draw loop
 
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
