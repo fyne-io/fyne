@@ -73,6 +73,9 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	go tick(run) // simulate a graphics draw loop
 	run.Stop(a)
 
+	run = &Runner{}
+	wg = sync.WaitGroup{}
+
 	// stopping animation inside tick function
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
@@ -85,6 +88,9 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 			}}
 		run.Start(b)
 	}
+
+	run = &Runner{}
+	wg = sync.WaitGroup{}
 
 	// Similar to first part, but in this time this animation should be added and then removed
 	// from pendingAnimation slice.
