@@ -84,6 +84,8 @@ func (r *Runner) Stop(a *fyne.Animation) {
 	r.pendingAnimations = newList
 }
 
+// TickAnimations progresses all running animations by one tick.
+// This will be called from the driver to update objects immediately before next paint.
 func (r *Runner) TickAnimations() {
 	if !r.runnerStarted {
 		return
