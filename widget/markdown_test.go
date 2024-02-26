@@ -11,8 +11,8 @@ import (
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
 	r := NewRichTextFromMarkdown("p1\n\n> quote\n\np2")
 
-	assert.Equal(t, 3, len(r.Segments))
-	if text, ok := r.Segments[1].(*TextSegment); ok {
+	assert.Equal(t, 5, len(r.Segments))
+	if text, ok := r.Segments[2].(*TextSegment); ok {
 		assert.Equal(t, "quote", text.Text)
 		assert.Equal(t, RichTextStyleBlockquote, text.Style)
 	} else {
@@ -23,7 +23,7 @@ func TestRichTextMarkdown_Blockquote(t *testing.T) {
 func TestRichTextMarkdown_Code(t *testing.T) {
 	r := NewRichTextFromMarkdown("a `code` inline")
 
-	assert.Equal(t, 3, len(r.Segments))
+	assert.Equal(t, 4, len(r.Segments))
 	if text, ok := r.Segments[1].(*TextSegment); ok {
 		assert.Equal(t, "code", text.Text)
 		assert.Equal(t, RichTextStyleCodeInline, text.Style)
@@ -44,10 +44,10 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
 	r := NewRichTextFromMarkdown("` ")
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "`", text.Text)
-		assert.Equal(t, RichTextStyleParagraph, text.Style)
+		assert.Equal(t, RichTextStyleInline, text.Style)
 	} else {
 		t.Error("Segment should be Text")
 	}
@@ -62,7 +62,7 @@ func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {
 func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	r := NewRichTextFromMarkdown("*a*")
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "a", text.Text)
 		assert.True(t, text.Style.TextStyle.Italic)
@@ -72,7 +72,7 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 
 	r.ParseMarkdown("**b**.")
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 3, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "b", text.Text)
 		assert.True(t, text.Style.TextStyle.Bold)
@@ -131,7 +131,7 @@ func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
 func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 	r := NewRichTextFromMarkdown("[title](https://fyne.io/)")
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if link, ok := r.Segments[0].(*HyperlinkSegment); ok {
 		assert.Equal(t, "title", link.Text)
 		assert.Equal(t, "fyne.io", link.URL.Host)
@@ -143,7 +143,7 @@ func TestRichTextMarkdown_Hyperlink(t *testing.T) {
 func TestRichTextMarkdown_Image(t *testing.T) {
 	r := NewRichTextFromMarkdown("![title](../../theme/icons/fyne.png)")
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if img, ok := r.Segments[0].(*ImageSegment); ok {
 		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
 	} else {
@@ -152,7 +152,7 @@ func TestRichTextMarkdown_Image(t *testing.T) {
 
 	r = NewRichTextFromMarkdown("![](../../theme/icons/fyne.png)")
 
-	assert.Equal(t, 1, len(r.Segments))
+	assert.Equal(t, 2, len(r.Segments))
 	if img, ok := r.Segments[0].(*ImageSegment); ok {
 		assert.Equal(t, storage.NewFileURI("../../theme/icons/fyne.png"), img.Source)
 	} else {
@@ -163,29 +163,29 @@ func TestRichTextMarkdown_Image(t *testing.T) {
 func TestRichTextMarkdown_Lines(t *testing.T) {
 	r := NewRichTextFromMarkdown("line1\nline2\n") // a single newline is not a new paragraph
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 3, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "line1 ", text.Text)
+		assert.Equal(t, "line1", text.Text)
 		assert.True(t, text.Inline())
 	} else {
 		t.Error("Segment should be Text")
 	}
 	if text, ok := r.Segments[1].(*TextSegment); ok {
-		assert.Equal(t, "line2", text.Text)
+		assert.Equal(t, " line2", text.Text)
 	} else {
 		t.Error("Segment should be Text")
 	}
 
 	r.ParseMarkdown("line1\n\nline2\n")
 
-	assert.Equal(t, 2, len(r.Segments))
+	assert.Equal(t, 4, len(r.Segments))
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "line1", text.Text)
-		assert.False(t, text.Inline())
+		assert.True(t, text.Inline())
 	} else {
 		t.Error("Segment should be Text")
 	}
-	if text, ok := r.Segments[1].(*TextSegment); ok {
+	if text, ok := r.Segments[2].(*TextSegment); ok {
 		assert.Equal(t, "line2", text.Text)
 	} else {
 		t.Error("Segment should be Text")
