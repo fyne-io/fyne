@@ -188,6 +188,7 @@ func (hl *Hyperlink) SetText(text string) {
 		return // Not initialized yet.
 	}
 	hl.syncSegments()
+	hl.ResetMinSizeCache()
 	hl.provider.Refresh()
 }
 

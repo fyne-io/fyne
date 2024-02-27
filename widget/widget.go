@@ -141,6 +141,11 @@ func (w *BaseWidget) Refresh() {
 	render.Refresh()
 }
 
+// ResetMinSizeCache resets the cached MinSize for this widget.
+func (w *BaseWidget) ResetMinSizeCache() {
+	w.minCache.Store(fyne.Size{})
+}
+
 // Theme returns a cached Theme instance for this widget (or its extending widget).
 // This will be the app theme in most cases, or a widget specific theme if it is inside a ThemeOverride container.
 //
@@ -181,6 +186,7 @@ func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 		return
 	}
 	impl.Refresh()
+	w.ResetMinSizeCache()
 }
 
 // super will return the actual object that this represents.
