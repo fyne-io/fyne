@@ -34,8 +34,7 @@ func NewActivity() *Activity {
 
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
-
-	return fyne.NewSquareSize(a.Theme().Size(theme.SizeNameInlineIcon))
+	return a.BaseWidget.MinSize()
 }
 
 // Start the activity indicator animation
