@@ -24,8 +24,6 @@ type Check struct {
 	hovered bool
 
 	binder basicBinder
-
-	minSize fyne.Size // cached for hover/tap position calculations
 }
 
 // NewCheck creates a new check widget with the set label and change handler
@@ -119,8 +117,9 @@ func (c *Check) MouseMoved(me *desktop.MouseEvent) {
 
 	// only hovered if cached minSize has not been initialized (test code)
 	// or the pointer is within the "active" area of the widget (its minSize)
-	c.hovered = c.minSize.IsZero() ||
-		(me.Position.X <= c.minSize.Width && me.Position.Y <= c.minSize.Height)
+	minSize := c.MinSize()
+	c.hovered = minSize.IsZero() ||
+		(me.Position.X <= minSize.Width && me.Position.Y <= minSize.Height)
 
 	if oldHovered != c.hovered {
 		c.Refresh()
@@ -132,8 +131,9 @@ func (c *Check) Tapped(pe *fyne.PointEvent) {
 	if c.Disabled() {
 		return
 	}
-	if !c.minSize.IsZero() &&
-		(pe.Position.X > c.minSize.Width || pe.Position.Y > c.minSize.Height) {
+	minSize := c.MinSize()
+	if !minSize.IsZero() &&
+		(pe.Position.X > minSize.Width || pe.Position.Y > minSize.Height) {
 		// tapped outside the active area of the widget
 		return
 	}
@@ -151,8 +151,7 @@ func (c *Check) Tapped(pe *fyne.PointEvent) {
 // MinSize returns the size that this widget should not shrink below
 func (c *Check) MinSize() fyne.Size {
 	c.ExtendBaseWidget(c)
-	c.minSize = c.BaseWidget.MinSize()
-	return c.minSize
+	return c.BaseWidget.MinSize()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
