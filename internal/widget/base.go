@@ -120,9 +120,10 @@ func (w *Base) Refresh() {
 		return
 	}
 
+	w.minCache.Store(fyne.Size{})
+
 	render := cache.Renderer(impl)
 	render.Refresh()
-	w.minCache.Store(fyne.Size{})
 }
 
 // super will return the actual object that this represents.

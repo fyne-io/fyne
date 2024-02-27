@@ -117,6 +117,8 @@ func (c *Container) Position() Position {
 
 // Refresh causes this object to be redrawn in it's current state
 func (c *Container) Refresh() {
+	c.minCache = Size{}
+
 	c.layout()
 
 	for _, child := range c.Objects {
@@ -129,7 +131,6 @@ func (c *Container) Refresh() {
 		return
 	}
 	o.Refresh(c)
-	c.minCache = Size{}
 }
 
 // Remove updates the contents of this container to no longer include the specified object.
