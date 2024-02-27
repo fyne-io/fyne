@@ -75,7 +75,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return minCache
 	}
 
-	return w.MinSizeFromRenderer()
+	min := w.MinSizeFromRenderer()
+	w.minCache.Store(min)
+	return min
 }
 
 // MinSizeFromRenderer returns the MinSize has defined by this widget's renderer.
