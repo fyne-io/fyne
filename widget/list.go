@@ -348,12 +348,10 @@ func (l *List) UnselectAll() {
 func (l *List) contentMinSize() fyne.Size {
 	l.propertyLock.Lock()
 	defer l.propertyLock.Unlock()
-	items := 0
-	if f := l.Length; f == nil {
+	if l.Length == nil  {
 		return fyne.NewSize(0, 0)
-	} else {
-		items = f()
 	}
+	items := l.Length()
 
 	separatorThickness := theme.Padding()
 	if l.itemHeights == nil || len(l.itemHeights) == 0 {
