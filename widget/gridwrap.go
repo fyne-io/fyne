@@ -215,8 +215,17 @@ func (l *GridWrap) ScrollToTop() {
 
 // ScrollToOffset scrolls the list to the given offset position
 func (l *GridWrap) ScrollToOffset(offset float32) {
+	if l.scroller == nil {
+		return
+	}
+	if offset < 0 {
+		offset = 0
+	} else if contentH := l.contentMinSize().Height; offset > contentH {
+		offset = contentH
+	}
 	l.scroller.Offset.Y = offset
 	l.offsetUpdated(l.scroller.Offset)
+	l.Refresh()
 }
 
 // TypedKey is called if a key event happens while this GridWrap is focused.
@@ -315,6 +324,17 @@ func (l *GridWrap) UnselectAll() {
 			f(id)
 		}
 	}
+}
+
+func (l *GridWrap) contentMinSize() fyne.Size {
+	padding := theme.Padding()
+	if l.Length == nil {
+		return fyne.NewSize(0, 0)
+	}
+
+	cols := l.ColumnCount()
+	rows := float32(math.Ceil(float64(l.Length()) / float64(cols)))
+	return fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -495,14 +515,7 @@ func (l *gridWrapLayout) Layout(_ []fyne.CanvasObject, _ fyne.Size) {
 }
 
 func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
-	padding := theme.Padding()
-	if lenF := l.list.Length; lenF != nil {
-		cols := l.list.ColumnCount()
-		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
-		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+padding)*rows-padding)
-	}
-	return fyne.NewSize(0, 0)
+	return l.list.contentMinSize()
 }
 
 func (l *gridWrapLayout) getItem() *gridWrapItem {
