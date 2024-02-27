@@ -1050,7 +1050,12 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	if e.selecting {
 		e.SetFieldsAndRefresh(e.eraseSelection)
 	}
+
 	text := clipboard.Content()
+	if text == "" {
+		return // Nothing to paste into the text content.
+	}
+
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
 		text = strings.Replace(text, "\n", " ", -1)
