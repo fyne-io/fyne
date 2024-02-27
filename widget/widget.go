@@ -75,13 +75,6 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return minCache
 	}
 
-	min := w.MinSizeFromRenderer()
-	w.minCache.Store(min)
-	return min
-}
-
-// MinSizeFromRenderer returns the MinSize has defined by this widget's renderer.
-func (w *BaseWidget) MinSizeFromRenderer() fyne.Size {
 	impl := w.super()
 
 	r := cache.Renderer(impl)
@@ -89,7 +82,9 @@ func (w *BaseWidget) MinSizeFromRenderer() fyne.Size {
 		return fyne.Size{}
 	}
 
-	return r.MinSize()
+	min := r.MinSize()
+	w.minCache.Store(min)
+	return min
 }
 
 // Visible returns whether or not this widget should be visible.
@@ -99,18 +94,6 @@ func (w *BaseWidget) Visible() bool {
 	defer w.propertyLock.RUnlock()
 
 	return !w.Hidden
-}
-
-// GetMinSizeCache returns the currently cached MinSize value.
-// This value is set to zero on calling Refresh().
-func (w *BaseWidget) GetMinSizeCache() fyne.Size {
-	return w.minCache.Load()
-}
-
-// SetMinSizeCache updates the internal cache for the MinSize.
-// This cached value will be used until the next Refresh.
-func (w *BaseWidget) SetMinSizeCache(cache fyne.Size) {
-	w.minCache.Store(cache)
 }
 
 // Show this widget so it becomes visible

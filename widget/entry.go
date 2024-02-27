@@ -400,16 +400,8 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
-	cached := e.GetMinSizeCache()
-	if !cached.IsZero() {
-		return cached
-	}
-
 	e.ExtendBaseWidget(e)
-	min := e.BaseWidget.MinSize()
-
-	e.SetMinSizeCache(min)
-	return min
+	return e.BaseWidget.MinSize()
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
