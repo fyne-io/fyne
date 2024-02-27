@@ -16,6 +16,7 @@ import (
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	size     async.Size
+	minCache async.Size
 	position async.Position
 	Hidden   bool
 
@@ -69,6 +70,16 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
+	minCache := w.minCache.Load()
+	if !minCache.IsZero() {
+		return minCache
+	}
+
+	return w.MinSizeFromRenderer()
+}
+
+// MinSizeFromRenderer returns the MinSize has defined by this widget's renderer.
+func (w *BaseWidget) MinSizeFromRenderer() fyne.Size {
 	impl := w.super()
 
 	r := cache.Renderer(impl)
@@ -86,6 +97,18 @@ func (w *BaseWidget) Visible() bool {
 	defer w.propertyLock.RUnlock()
 
 	return !w.Hidden
+}
+
+// GetMinSizeCache returns the currently cached MinSize value.
+// This value is set to zero on calling Refresh().
+func (w *BaseWidget) GetMinSizeCache() fyne.Size {
+	return w.minCache.Load()
+}
+
+// SetMinSizeCache updates the internal cache for the MinSize.
+// This cached value will be used until the next Refresh.
+func (w *BaseWidget) SetMinSizeCache(cache fyne.Size) {
+	w.minCache.Store(cache)
 }
 
 // Show this widget so it becomes visible
@@ -122,6 +145,8 @@ func (w *BaseWidget) Refresh() {
 	if impl == nil {
 		return
 	}
+
+	w.minCache.Store(fyne.Size{})
 
 	w.propertyLock.Lock()
 	w.themeCache = nil
