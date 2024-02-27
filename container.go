@@ -1,8 +1,6 @@
 package fyne
 
-import (
-	"sync"
-)
+import "sync"
 
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
