@@ -481,8 +481,8 @@ func (e *Entry) Redo() {
 	if !modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText, false)
 	e.propertyLock.Lock()
+	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
@@ -510,7 +510,7 @@ func (e *Entry) SelectedText() string {
 	if start == stop {
 		return ""
 	}
-	r := ([]rune)(e.textProvider().String())
+	r := ([]rune)(e.Text)
 	return string(r[start:stop])
 }
 
@@ -802,8 +802,8 @@ func (e *Entry) Undo() {
 	if modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText, false)
 	e.propertyLock.Lock()
+	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
@@ -1065,10 +1065,10 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		Position: pos,
 		Text:     text,
 	})
+	e.updateText(provider.String(), false)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.propertyLock.Unlock()
 
-	e.updateTextAndRefresh(provider.String(), false)
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.Refresh() // placing the cursor (and refreshing) happens last
 }
 
