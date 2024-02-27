@@ -331,7 +331,7 @@ func (l *GridWrap) contentMinSize() fyne.Size {
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
-	
+
 	cols := l.ColumnCount()
 	rows := float32(math.Ceil(float64(l.Length()) / float64(cols)))
 	return fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
