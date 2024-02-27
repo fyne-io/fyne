@@ -567,7 +567,7 @@ func (e *Entry) Append(text string) {
 	e.propertyLock.Unlock()
 
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -779,7 +779,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	cb := e.OnChanged
 	e.propertyLock.Unlock()
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -923,7 +923,7 @@ func (e *Entry) TypedRune(r rune) {
 	})
 	e.propertyLock.Unlock()
 
-	e.Validate()
+	e.validate()
 	if cb != nil {
 		cb(content)
 	}
@@ -984,15 +984,17 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.SetFieldsAndRefresh(e.eraseSelection)
-	e.propertyLock.RLock()
+	e.propertyLock.Lock()
+	e.eraseSelection()
 	content := e.Text
 	cb := e.OnChanged
-	e.propertyLock.RUnlock()
+	e.propertyLock.Unlock()
+
+	e.validate()
 	if cb != nil {
 		cb(content)
 	}
-	e.Validate()
+	e.Refresh()
 }
 
 // eraseSelection removes the current selected region and moves the cursor
@@ -1264,15 +1266,17 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.SetFieldsAndRefresh(e.eraseSelection)
-		e.propertyLock.RLock()
+		e.propertyLock.Lock()
+		e.eraseSelection()
 		content := e.Text
 		cb := e.OnChanged
-		e.propertyLock.RUnlock()
+		e.propertyLock.Unlock()
+
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
-		e.Validate()
+		e.Refresh()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
@@ -1427,7 +1431,7 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 
 	val, err := textSource.Get()
 	e.conversionError = err
-	e.Validate()
+	e.validate()
 	if err != nil {
 		return
 	}
@@ -1497,19 +1501,20 @@ func (e *Entry) updateText(text string, fromBinding bool) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 	var callback func(string)
-	e.SetFieldsAndRefresh(func() {
-		changed := e.updateText(text, fromBinding)
 
-		if changed {
-			callback = e.OnChanged
-		}
-	})
+	e.propertyLock.Lock()
+	changed := e.updateText(text, fromBinding)
 
-	e.Validate()
+	if changed {
+		callback = e.OnChanged
+	}
+	e.propertyLock.Unlock()
 
+	e.validate()
 	if callback != nil {
 		callback(text)
 	}
+	e.Refresh()
 }
 
 func (e *Entry) writeData(data binding.DataItem) {
@@ -1796,8 +1801,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size.Load())
 
-		r.entry.Validate()
-
+		r.entry.validate()
 		r.Refresh()
 	}
 }
