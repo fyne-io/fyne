@@ -1,6 +1,8 @@
 package fyne
 
-import "sync"
+import (
+	"sync"
+)
 
 // Declare conformity to CanvasObject
 var _ CanvasObject = (*Container)(nil)
@@ -10,7 +12,8 @@ var _ CanvasObject = (*Container)(nil)
 type Container struct {
 	size     Size     // The current size of the Container
 	position Position // The current position of the Container
-	Hidden   bool     // Is this Container hidden
+	minCache Size
+	Hidden   bool // Is this Container hidden
 
 	Layout  Layout // The Layout algorithm for arranging child CanvasObjects
 	lock    sync.Mutex
@@ -86,6 +89,10 @@ func (c *Container) Hide() {
 // MinSize calculates the minimum size of a Container.
 // This is delegated to the Layout, if specified, otherwise it will mimic MaxLayout.
 func (c *Container) MinSize() Size {
+	if !c.minCache.IsZero() {
+		return c.minCache
+	}
+
 	if c.Layout != nil {
 		return c.Layout.MinSize(c.Objects)
 	}
@@ -95,6 +102,7 @@ func (c *Container) MinSize() Size {
 		minSize = minSize.Max(child.MinSize())
 	}
 
+	c.minCache = minSize
 	return minSize
 }
 
@@ -123,6 +131,7 @@ func (c *Container) Refresh() {
 		return
 	}
 	o.Refresh(c)
+	c.minCache = Size{}
 }
 
 // Remove updates the contents of this container to no longer include the specified object.
