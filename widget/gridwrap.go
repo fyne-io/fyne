@@ -328,13 +328,13 @@ func (l *GridWrap) UnselectAll() {
 
 func (l *GridWrap) contentMinSize() fyne.Size {
 	padding := theme.Padding()
-	if lenF := l.Length; lenF != nil {
-		cols := l.ColumnCount()
-		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
-		return fyne.NewSize(l.itemMin.Width,
-			(l.itemMin.Height+padding)*rows-padding)
+	if l.Length == nil {
+		return fyne.NewSize(0, 0)
 	}
-	return fyne.NewSize(0, 0)
+	
+	cols := l.ColumnCount()
+	rows := float32(math.Ceil(float64(l.Length()) / float64(cols)))
+	return fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
 }
 
 // Declare conformity with WidgetRenderer interface.
