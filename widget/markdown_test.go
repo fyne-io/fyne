@@ -226,6 +226,18 @@ func TestRichTextMarkdown_Separator(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_Paragraph(t *testing.T) {
+	r := NewRichTextFromMarkdown("foo")
+
+	assert.Equal(t, 2, len(r.Segments))
+	if text, ok := r.Segments[1].(*TextSegment); ok {
+		assert.Equal(t, "", text.Text)
+		assert.Equal(t, RichTextStyleParagraph, text.Style)
+	} else {
+		t.Error("Last segment of paragraph should be empty text")
+	}
+}
+
 func TestRichTextMarkdown_NewlinesAroundEmphasis(t *testing.T) {
 	r := NewRichTextFromMarkdown("foo\n*bar*\nbaz")
 	assert.Equal(t, "foo bar baz", r.String())
