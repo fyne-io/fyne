@@ -481,8 +481,8 @@ func (e *Entry) Redo() {
 	if !modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText, false)
 	e.propertyLock.Lock()
+	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
@@ -510,7 +510,7 @@ func (e *Entry) SelectedText() string {
 	if start == stop {
 		return ""
 	}
-	r := ([]rune)(e.textProvider().String())
+	r := ([]rune)(e.Text)
 	return string(r[start:stop])
 }
 
@@ -567,7 +567,7 @@ func (e *Entry) Append(text string) {
 	e.propertyLock.Unlock()
 
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -779,7 +779,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	cb := e.OnChanged
 	e.propertyLock.Unlock()
 	if changed {
-		e.Validate()
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
@@ -802,8 +802,8 @@ func (e *Entry) Undo() {
 	if modify.Delete {
 		pos += len(modify.Text)
 	}
-	e.updateTextAndRefresh(newText, false)
 	e.propertyLock.Lock()
+	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
@@ -901,16 +901,13 @@ func (e *Entry) TypedRune(r rune) {
 	// if we've typed a character and we're selecting then replace the selection with the character
 	cb := e.OnChanged
 	if e.selecting {
-		e.OnChanged = nil // don't propagate this change to binding etc
 		e.eraseSelection()
-		e.OnChanged = cb // the change later will then trigger callback
 	}
-
-	provider := e.textProvider()
-	e.selecting = false
 
 	runes := []rune{r}
 	pos := e.cursorTextPos()
+
+	provider := e.textProvider()
 	provider.insertAt(pos, string(runes))
 
 	content := provider.String()
@@ -923,7 +920,7 @@ func (e *Entry) TypedRune(r rune) {
 	})
 	e.propertyLock.Unlock()
 
-	e.Validate()
+	e.validate()
 	if cb != nil {
 		cb(content)
 	}
@@ -984,28 +981,30 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	e.copyToClipboard(clipboard)
-	e.SetFieldsAndRefresh(e.eraseSelection)
-	e.propertyLock.RLock()
+	e.propertyLock.Lock()
+	e.eraseSelectionAndUpdate()
 	content := e.Text
 	cb := e.OnChanged
-	e.propertyLock.RUnlock()
+	e.propertyLock.Unlock()
+
+	e.validate()
 	if cb != nil {
 		cb(content)
 	}
-	e.Validate()
+	e.Refresh()
 }
 
-// eraseSelection removes the current selected region and moves the cursor
-func (e *Entry) eraseSelection() {
+// eraseSelection deletes the selected text and moves the cursor but does not update the text field.
+func (e *Entry) eraseSelection() bool {
 	if e.Disabled() {
-		return
+		return false
 	}
 
 	provider := e.textProvider()
 	posA, posB := e.selection()
 
 	if posA == posB {
-		return
+		return false
 	}
 
 	erasedText := e.Text[posA:posB]
@@ -1014,13 +1013,22 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
-	e.updateText(provider.String(), false)
 
 	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Delete:   true,
 		Position: posA,
 		Text:     erasedText,
 	})
+
+	return true
+}
+
+// eraseSelectionAndUpdate removes the current selected region and moves the cursor.
+// It also updates the text if something has been erased.
+func (e *Entry) eraseSelectionAndUpdate() {
+	if e.eraseSelection() {
+		e.updateText(e.textProvider().String(), false)
+	}
 }
 
 func (e *Entry) getRowCol(p fyne.Position) (int, int) {
@@ -1047,28 +1055,48 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
-	if e.selecting {
-		e.SetFieldsAndRefresh(e.eraseSelection)
-	}
 	text := clipboard.Content()
+	if text == "" {
+		e.propertyLock.Lock()
+		changed := e.selecting && e.eraseSelection()
+		e.propertyLock.Unlock()
+
+		if changed {
+			e.Refresh()
+		}
+
+		return // Nothing to paste into the text content.
+	}
+
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
 		text = strings.Replace(text, "\n", " ", -1)
 	}
-	provider := e.textProvider()
-	runes := []rune(text)
-	pos := e.cursorTextPos()
-	provider.insertAt(pos, text)
 
 	e.propertyLock.Lock()
+	if e.selecting {
+		e.eraseSelection()
+	}
+
+	runes := []rune(text)
+	pos := e.cursorTextPos()
+	provider := e.textProvider()
+	provider.insertAt(pos, text)
+
 	e.undoStack.Add(&entryModifyAction{
 		Position: pos,
 		Text:     text,
 	})
+	content := provider.String()
+	e.updateText(content, false)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	cb := e.OnChanged
 	e.propertyLock.Unlock()
 
-	e.updateTextAndRefresh(provider.String(), false)
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	if cb != nil {
+		cb(content) // We know that the text has changed.
+	}
+
 	e.Refresh() // placing the cursor (and refreshing) happens last
 }
 
@@ -1259,20 +1287,22 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
-		e.SetFieldsAndRefresh(e.eraseSelection)
-		e.propertyLock.RLock()
+		e.propertyLock.Lock()
+		e.eraseSelectionAndUpdate()
 		content := e.Text
 		cb := e.OnChanged
-		e.propertyLock.RUnlock()
+		e.propertyLock.Unlock()
+
+		e.validate()
 		if cb != nil {
 			cb(content)
 		}
-		e.Validate()
+		e.Refresh()
 		return true
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
 			// clear the selection -- return unhandled to add the newline
-			e.SetFieldsAndRefresh(e.eraseSelection)
+			e.SetFieldsAndRefresh(e.eraseSelectionAndUpdate)
 		}
 		return false
 	}
@@ -1422,7 +1452,7 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 
 	val, err := textSource.Get()
 	e.conversionError = err
-	e.Validate()
+	e.validate()
 	if err != nil {
 		return
 	}
@@ -1492,19 +1522,20 @@ func (e *Entry) updateText(text string, fromBinding bool) bool {
 // This should not be called under a property lock
 func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 	var callback func(string)
-	e.SetFieldsAndRefresh(func() {
-		changed := e.updateText(text, fromBinding)
 
-		if changed {
-			callback = e.OnChanged
-		}
-	})
+	e.propertyLock.Lock()
+	changed := e.updateText(text, fromBinding)
 
-	e.Validate()
+	if changed {
+		callback = e.OnChanged
+	}
+	e.propertyLock.Unlock()
 
+	e.validate()
 	if callback != nil {
 		callback(text)
 	}
+	e.Refresh()
 }
 
 func (e *Entry) writeData(data binding.DataItem) {
@@ -1791,8 +1822,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.size.Load())
 
-		r.entry.Validate()
-
+		r.entry.validate()
 		r.Refresh()
 	}
 }
