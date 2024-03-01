@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -599,18 +600,18 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 	super := e.super()
 
-	undoItem := fyne.NewMenuItem("Undo", e.Undo)
-	redoItem := fyne.NewMenuItem("Redo", e.Redo)
-	cutItem := fyne.NewMenuItem("Cut", func() {
+	undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)
+	redoItem := fyne.NewMenuItem(lang.L("Redo"), e.Redo)
+	cutItem := fyne.NewMenuItem(lang.L("Cut"), func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
-	copyItem := fyne.NewMenuItem("Copy", func() {
+	copyItem := fyne.NewMenuItem(lang.L("Copy"), func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	})
-	pasteItem := fyne.NewMenuItem("Paste", func() {
+	pasteItem := fyne.NewMenuItem(lang.L("Paste"), func() {
 		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
 	})
-	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
+	selectAllItem := fyne.NewMenuItem(lang.L("Select all"), e.selectAll)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(super)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
