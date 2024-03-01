@@ -39,6 +39,20 @@ func TestFormLayout(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(120, 80), content2.Size())
 }
 
+func TestFormLayout_Text(t *testing.T) {
+	size := fyne.NewSize(120, 50)
+	label := canvas.NewText("Label", color.Black)
+	content := canvas.NewText("Content", color.Black)
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{label, content},
+	}
+	container.Resize(size)
+	layout.NewFormLayout().Layout(container.Objects, size)
+
+	assert.Equal(t, label.Size().Height, content.Size().Height)
+}
+
 func TestFormLayout_Hidden(t *testing.T) {
 	gridSize := fyne.NewSize(190+theme.Padding(), 125)
 
