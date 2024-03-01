@@ -348,7 +348,7 @@ func (l *List) UnselectAll() {
 func (l *List) contentMinSize() fyne.Size {
 	l.propertyLock.Lock()
 	defer l.propertyLock.Unlock()
-	if l.Length == nil  {
+	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
 	items := l.Length()
