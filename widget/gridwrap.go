@@ -120,7 +120,7 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 	if l.scroller == nil {
 		return
 	}
-	row := math.Floor(float64(id) / float64(l.getColCount()))
+	row := math.Floor(float64(id) / float64(l.ColumnCount()))
 	y := float32(row)*l.itemMin.Height + float32(row)*theme.Padding()
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
@@ -215,8 +215,17 @@ func (l *GridWrap) ScrollToTop() {
 
 // ScrollToOffset scrolls the list to the given offset position
 func (l *GridWrap) ScrollToOffset(offset float32) {
+	if l.scroller == nil {
+		return
+	}
+	if offset < 0 {
+		offset = 0
+	} else if contentH := l.contentMinSize().Height; offset > contentH {
+		offset = contentH
+	}
 	l.scroller.Offset.Y = offset
 	l.offsetUpdated(l.scroller.Offset)
+	l.Refresh()
 }
 
 // TypedKey is called if a key event happens while this GridWrap is focused.
@@ -232,7 +241,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 			count = f()
 		}
 		l.RefreshItem(l.currentFocus)
-		l.currentFocus += l.getColCount()
+		l.currentFocus += l.ColumnCount()
 		if l.currentFocus >= count-1 {
 			l.currentFocus = count - 1
 		}
@@ -242,7 +251,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentFocus <= 0 {
 			return
 		}
-		if l.currentFocus%l.getColCount() == 0 {
+		if l.currentFocus%l.ColumnCount() == 0 {
 			return
 		}
 
@@ -254,7 +263,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
 			return
 		}
-		if (l.currentFocus+1)%l.getColCount() == 0 {
+		if (l.currentFocus+1)%l.ColumnCount() == 0 {
 			return
 		}
 
@@ -267,7 +276,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 			return
 		}
 		l.RefreshItem(l.currentFocus)
-		l.currentFocus -= l.getColCount()
+		l.currentFocus -= l.ColumnCount()
 		if l.currentFocus < 0 {
 			l.currentFocus = 0
 		}
@@ -315,6 +324,17 @@ func (l *GridWrap) UnselectAll() {
 			f(id)
 		}
 	}
+}
+
+func (l *GridWrap) contentMinSize() fyne.Size {
+	padding := theme.Padding()
+	if l.Length == nil {
+		return fyne.NewSize(0, 0)
+	}
+
+	cols := l.ColumnCount()
+	rows := float32(math.Ceil(float64(l.Length()) / float64(cols)))
+	return fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -495,14 +515,7 @@ func (l *gridWrapLayout) Layout(_ []fyne.CanvasObject, _ fyne.Size) {
 }
 
 func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
-	padding := theme.Padding()
-	if lenF := l.list.Length; lenF != nil {
-		cols := l.list.getColCount()
-		rows := float32(math.Ceil(float64(lenF()) / float64(cols)))
-		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+padding)*rows-padding)
-	}
-	return fyne.NewSize(0, 0)
+	return l.list.contentMinSize()
 }
 
 func (l *gridWrapLayout) getItem() *gridWrapItem {
@@ -557,7 +570,11 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 	}
 }
 
-func (l *GridWrap) getColCount() int {
+// ColumnCount returns the number of columns that are/will be shown
+// in this GridWrap, based on the widget's current width.
+//
+// Since: 2.5
+func (l *GridWrap) ColumnCount() int {
 	if l.colCountCache < 1 {
 		padding := theme.Padding()
 		l.colCountCache = 1
@@ -579,7 +596,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 		length = f()
 	}
 
-	colCount := l.list.getColCount()
+	colCount := l.list.ColumnCount()
 	visibleRowsCount := int(math.Ceil(float64(l.list.scroller.Size().Height)/float64(l.list.itemMin.Height+padding))) + 1
 
 	offY := l.list.offsetY - float32(math.Mod(float64(l.list.offsetY), float64(l.list.itemMin.Height+padding)))

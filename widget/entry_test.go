@@ -72,6 +72,7 @@ func TestEntry_Binding_Replace(t *testing.T) {
 	assert.Equal(t, "nt", entry.SelectedText())
 
 	test.Type(entry, "g")
+	waitForBinding()
 	assert.Equal(t, "Cogent", entry.Text)
 }
 

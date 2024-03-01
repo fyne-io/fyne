@@ -279,7 +279,8 @@ func TestEntry_EraseSelection(t *testing.T) {
 	keyPress(&fyne.KeyEvent{Name: fyne.KeyRight})
 	keyPress(&fyne.KeyEvent{Name: fyne.KeyRight})
 
-	e.eraseSelection()
+	_ = e.Theme()
+	e.eraseSelectionAndUpdate()
 	e.updateText(e.textProvider().String(), false)
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
 	a, b := e.selection()
@@ -296,6 +297,7 @@ func TestEntry_CallbackLocking(t *testing.T) {
 		e.propertyLock.Unlock()
 	}
 
+	_ = e.Theme()
 	test.Type(e, "abc123")
 	e.selectAll()
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
@@ -401,6 +403,7 @@ func TestEntry_Tab(t *testing.T) {
 	e.TextStyle.Monospace = true
 	e.SetText("a\n\tb\nc")
 
+	_ = e.Theme()
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
 	assert.Equal(t, 3, len(r.Objects()))
 	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)

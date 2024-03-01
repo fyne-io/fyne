@@ -117,8 +117,11 @@ func New() fyne.App {
 }
 
 func makeStoreDocs(id string, s *store) *internal.Docs {
-	if id != "" {
-		err := os.MkdirAll(s.a.storageRoot(), 0755) // make the space before anyone can use it
+	if id == "" {
+		return &internal.Docs{} // an empty impl to avoid crashes
+	}
+	if root := s.a.storageRoot(); root != "" {
+		err := os.MkdirAll(root, 0755) // make the space before anyone can use it
 		if err != nil {
 			fyne.LogError("Failed to create app storage space", err)
 		}

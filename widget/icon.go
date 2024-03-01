@@ -16,7 +16,7 @@ type iconRenderer struct {
 }
 
 func (i *iconRenderer) MinSize() fyne.Size {
-	return fyne.NewSquareSize(theme.IconInlineSize())
+	return fyne.NewSquareSize(i.image.Theme().Size(theme.SizeNameInlineIcon))
 }
 
 func (i *iconRenderer) Layout(size fyne.Size) {
@@ -34,12 +34,13 @@ func (i *iconRenderer) Refresh() {
 
 	r := i.image.Resource
 	if r != nil {
-		i.image.Resource = cache.OverrideResourceTheme(i.image.Resource, i.image)
+		r = cache.OverrideResourceTheme(i.image.Resource, i.image)
+		i.image.Resource = r
 	}
 
 	i.image.propertyLock.RLock()
-	i.raster.Resource = r
-	i.image.cachedRes = r
+	i.raster.Resource = i.image.Resource
+	i.image.cachedRes = i.image.Resource
 
 	if i.image.Resource == nil {
 		i.raster.Image = nil // reset the internal caching too...
@@ -75,11 +76,13 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	img := canvas.NewImageFromResource(i.Resource)
-	img.FillMode = canvas.ImageFillContain
-	if i.Resource != nil {
-		i.Resource = cache.OverrideResourceTheme(i.Resource, i)
+	res := i.Resource
+	if res != nil {
+		res = cache.OverrideResourceTheme(i.Resource, i)
+		i.Resource = res
 	}
+	img := canvas.NewImageFromResource(res)
+	img.FillMode = canvas.ImageFillContain
 
 	r := &iconRenderer{image: i, raster: img}
 	r.SetObjects([]fyne.CanvasObject{img})

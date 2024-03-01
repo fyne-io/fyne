@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/theme"
@@ -99,15 +100,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
-		saveName.SetPlaceHolder("Enter filename")
+		saveName.SetPlaceHolder(lang.L("Enter filename"))
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
 	}
 
-	label := "Open"
+	label := lang.L("Open")
 	if f.file.save {
-		label = "Save"
+		label = lang.L("Save")
 	}
 	if f.file.confirmText != "" {
 		label = f.file.confirmText
@@ -118,7 +119,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.fileName.SetText(f.initialFileName)
 	}
 
-	dismissLabel := "Cancel"
+	dismissLabel := lang.L("Cancel")
 	if f.file.dismissText != "" {
 		dismissLabel = f.file.dismissText
 	}
@@ -133,9 +134,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	f.breadcrumb = container.NewHBox()
 	f.breadcrumbScroll = container.NewHScroll(container.NewPadded(f.breadcrumb))
-	title := label + " File"
+	title := label + " " + lang.L("File")
 	if f.file.isDirectory() {
-		title = label + " Folder"
+		title = label + " " + lang.L("Folder")
 	}
 
 	view := viewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
@@ -188,9 +189,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
 		newFolderEntry := widget.NewEntry()
-		ShowForm("New Folder", "Create Folder", "Cancel", []*widget.FormItem{
+		ShowForm(lang.L("New Folder"), lang.L("Create Folder"), lang.L("Cancel"), []*widget.FormItem{
 			{
-				Text:   "Name",
+				Text:   lang.X("file.name", "Name"),
 				Widget: newFolderEntry,
 			},
 		}, func(s bool) {
@@ -326,7 +327,7 @@ func (f *fileDialog) makeDismissButton(label string) *widget.Button {
 }
 
 func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
-	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
+	hiddenFiles := widget.NewCheck(lang.L("Show Hidden Files"), func(changed bool) {
 		f.showHidden = changed
 		f.refreshDir(f.dir)
 	})
@@ -722,7 +723,7 @@ func (f *FileDialog) SetDismissText(label string) {
 	f.dialog.win.Refresh()
 }
 
-// SetLocation tells this FileDirectory which location to display.
+// SetLocation tells this FileDialog which location to display.
 // This is normally called before the dialog is shown.
 //
 // Since: 1.4
@@ -736,13 +737,13 @@ func (f *FileDialog) SetLocation(u fyne.ListableURI) {
 // SetOnClosed sets a callback function that is called when
 // the dialog is closed.
 func (f *FileDialog) SetOnClosed(closed func()) {
-	if f.dialog == nil {
-		return
-	}
 	// If there is already a callback set, remember it and call both.
 	originalCallback := f.onClosedCallback
 
 	f.onClosedCallback = func(response bool) {
+		if f.dialog == nil {
+			return
+		}
 		closed()
 		if originalCallback != nil {
 			originalCallback(response)
