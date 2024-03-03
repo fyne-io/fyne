@@ -101,6 +101,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}
 		saveName.SetPlaceHolder(lang.L("Enter filename"))
+		saveName.OnSubmitted = func(s string) {
+			f.open.OnTapped()
+		}
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
