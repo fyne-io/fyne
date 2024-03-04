@@ -128,6 +128,9 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
+	d.systrayLock.Lock()
+	defer d.systrayLock.Unlock()
+
 	d.systrayMenu = m
 	systray.ResetMenu()
 	d.refreshSystrayMenu(m, nil)
