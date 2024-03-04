@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -649,11 +648,8 @@ func showFile(file *FileDialog) *fileDialog {
 	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
 	if file.save {
-		// Focus on the filename Entry as soon as the dialog is shown
-		go func() {
-			time.Sleep(25 * time.Millisecond)
-			file.dialog.win.Canvas.Focus(file.dialog.fileName.(*widget.Entry))
-		}()
+		// Focus on the fileName Entry as soon as the dialog is shown
+		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
 	}
 	return d
 }
