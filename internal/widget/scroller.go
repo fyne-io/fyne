@@ -370,7 +370,7 @@ type Scroll struct {
 	// You should not update the Scroll.Offset from this method.
 	//
 	// Since: 2.0
-	OnScrolled func(fyne.Position)
+	OnScrolled func(fyne.Position) `json:"-"`
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer

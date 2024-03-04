@@ -38,10 +38,10 @@ type Slider struct {
 	Step  float64
 
 	Orientation Orientation
-	OnChanged   func(float64)
+	OnChanged   func(float64) `json:"-"`
 
 	// Since: 2.4
-	OnChangeEnded func(float64)
+	OnChangeEnded func(float64) `json:"-"`
 
 	binder        basicBinder
 	hovered       bool

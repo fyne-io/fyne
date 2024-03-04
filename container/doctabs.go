@@ -23,11 +23,11 @@ type DocTabs struct {
 
 	Items []*TabItem
 
-	CreateTab      func() *TabItem
-	CloseIntercept func(*TabItem)
-	OnClosed       func(*TabItem)
-	OnSelected     func(*TabItem)
-	OnUnselected   func(*TabItem)
+	CreateTab      func() *TabItem `json:"-"`
+	CloseIntercept func(*TabItem)  `json:"-"`
+	OnClosed       func(*TabItem)  `json:"-"`
+	OnSelected     func(*TabItem)  `json:"-"`
+	OnUnselected   func(*TabItem)  `json:"-"`
 
 	current         int
 	location        TabLocation
