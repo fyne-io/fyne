@@ -549,20 +549,17 @@ func (f *fileDialog) setView(view ViewLayout) {
 		}
 	}
 
-	var toggleViewButtonIcon fyne.Resource
 	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
-		toggleViewButtonIcon = theme.ListIcon()
+		f.toggleViewButton.SetIcon(theme.ListIcon())
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
-		toggleViewButtonIcon = theme.GridIcon()
+		f.toggleViewButton.SetIcon(theme.GridIcon())
 	}
-
-	f.toggleViewButton.SetIcon(toggleViewButtonIcon)
 
 	if f.dir != nil {
 		f.refreshDir(f.dir)
