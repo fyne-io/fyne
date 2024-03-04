@@ -648,7 +648,6 @@ func showFile(file *FileDialog) *fileDialog {
 	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
 	if file.save {
-		// Focus on the fileName Entry as soon as the dialog is shown
 		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
 	}
 	return d
