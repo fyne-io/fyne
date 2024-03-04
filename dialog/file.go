@@ -158,21 +158,14 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	}
 
-	var toggleViewButtonIcon fyne.Resource
-	if view == GridView {
-		toggleViewButtonIcon = theme.ListIcon()
-	} else {
-		toggleViewButtonIcon = theme.GridIcon()
-	}
-
-	f.toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
+	// icon of button is set in subsequent setView() call
+	f.toggleViewButton = widget.NewButtonWithIcon("", nil, func() {
 		if f.view == GridView {
 			f.setView(ListView)
 		} else {
 			f.setView(GridView)
 		}
 	})
-
 	f.setView(view)
 
 	f.loadFavorites()
