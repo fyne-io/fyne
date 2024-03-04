@@ -22,9 +22,9 @@ type AppTabs struct {
 	Items []*TabItem
 
 	// Deprecated: Use `OnSelected func(*TabItem)` instead.
-	OnChanged    func(*TabItem)
-	OnSelected   func(*TabItem)
-	OnUnselected func(*TabItem)
+	OnChanged    func(*TabItem) `json:"-"`
+	OnSelected   func(*TabItem) `json:"-"`
+	OnUnselected func(*TabItem) `json:"-"`
 
 	current         int
 	location        TabLocation
