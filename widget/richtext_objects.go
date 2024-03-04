@@ -131,7 +131,7 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
 	link.OnTapped = h.OnTapped
-	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: link}, Objects: []fyne.CanvasObject{link}}
 }
 
 // Update applies the current state of this hyperlink segment to an existing visual.
@@ -525,10 +525,12 @@ func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 type unpadTextWidgetLayout struct {
+	parent fyne.Widget
 }
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
-	pad := theme.InnerPadding() * -1
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * -1
 	pad2 := pad * -2
 
 	o[0].Move(fyne.NewPos(pad, pad))
@@ -536,6 +538,7 @@ func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
 }
 
 func (u *unpadTextWidgetLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
-	pad := theme.InnerPadding() * 2
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * 2
 	return o[0].MinSize().Subtract(fyne.NewSize(pad, pad))
 }

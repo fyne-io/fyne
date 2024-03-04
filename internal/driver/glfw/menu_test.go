@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +31,7 @@ func Test_Menu_AddsQuit(t *testing.T) {
 func Test_Menu_LeaveQuit(t *testing.T) {
 	w := createWindow("Menu Test").(*window)
 	quitFunc := func() {}
-	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem("Quit", quitFunc)))
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem(lang.L("Quit"), quitFunc)))
 	bar := buildMenuOverlay(mainMenu, w)
 	assert.NotNil(t, bar)
 	assert.Equal(t, 1, len(mainMenu.Items[0].Items)) // no separator added
@@ -38,7 +39,7 @@ func Test_Menu_LeaveQuit(t *testing.T) {
 }
 func Test_Menu_LeaveQuit_AddAction(t *testing.T) {
 	w := createWindow("Menu Test").(*window)
-	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem("Quit", nil)))
+	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem(lang.L("Quit"), nil)))
 	bar := buildMenuOverlay(mainMenu, w)
 	assert.NotNil(t, bar)
 	assert.Equal(t, 1, len(mainMenu.Items[0].Items))    // no separator added

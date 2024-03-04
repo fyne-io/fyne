@@ -560,9 +560,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 // MinSize calculates the minimum size of a rich text widget.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
-	textSize := r.obj.Theme().Size(theme.SizeNameText)
-	r.obj.propertyLock.RLock()
 	th := r.obj.Theme()
+	textSize := th.Size(theme.SizeNameText)
+	r.obj.propertyLock.RLock()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	bounds := r.obj.rowBounds
@@ -618,7 +618,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	// Accessing the theme here is slow, so we cache the value
-	lineSpacing := theme.SizeForWidget(theme.SizeNameLineSpacing, r.obj)
+	lineSpacing := th.Size(theme.SizeNameLineSpacing)
 
 	i := 0
 	for row, bound := range bounds {

@@ -3,6 +3,7 @@ package container
 import (
 	"testing"
 
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -27,7 +28,7 @@ func TestTabButton_Icon_Change(t *testing.T) {
 func TestTab_ThemeChange(t *testing.T) {
 	a := test.NewApp()
 	defer test.NewApp()
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	tabs := NewAppTabs(
 		NewTabItem("a", widget.NewLabel("a")),
@@ -37,12 +38,12 @@ func TestTab_ThemeChange(t *testing.T) {
 
 	initial := w.Canvas().Capture()
 
-	a.Settings().SetTheme(theme.DarkTheme())
+	a.Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	tabs.SelectIndex(1)
 	second := w.Canvas().Capture()
 	assert.NotEqual(t, initial, second)
 
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 	tabs.SelectIndex(0)
 	assert.Equal(t, initial, w.Canvas().Capture())
 }

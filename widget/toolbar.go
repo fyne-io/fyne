@@ -5,7 +5,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
 )
 
 // ToolbarItem represents any interface element that can be added to a toolbar
@@ -86,7 +85,7 @@ type ToolbarSeparator struct {
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
-	return canvas.NewRectangle(theme.ForegroundColor())
+	return &Separator{invert: true}
 }
 
 // NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
@@ -152,13 +151,6 @@ func (r *toolbarRenderer) Layout(size fyne.Size) {
 
 func (r *toolbarRenderer) Refresh() {
 	r.resetObjects()
-	for i, item := range r.toolbar.Items {
-		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := r.items[i].(*canvas.Rectangle)
-			rect.FillColor = theme.ForegroundColor()
-		}
-	}
-
 	canvas.Refresh(r.toolbar)
 }
 
