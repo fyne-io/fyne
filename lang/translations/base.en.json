@@ -2,7 +2,9 @@
   "Advanced": "Advanced",
   "Cancel": "Cancel",
   "Confirm": "Confirm",
+  "Copy": "Copy",
   "Create Folder": "Create Folder",
+  "Cut": "Cut",
   "Enter filename": "Enter filename",
   "Error": "Error",
   "Favourites": "Favourites",
@@ -12,9 +14,13 @@
   "No": "No",
   "OK": "OK",
   "Open": "Open",
+  "Paste": "Paste",
   "Quit": "Quit",
+  "Redo": "Redo",
   "Save": "Save",
+  "Select all": "Select all",
   "Show Hidden Files": "Show Hidden Files",
+  "Undo": "Undo",
   "Yes": "Yes",
 
   "file.name": {
