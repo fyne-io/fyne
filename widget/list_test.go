@@ -652,3 +652,23 @@ func TestList_RefreshUpdatesAllItems(t *testing.T) {
 	list.Refresh()
 	assert.Equal(t, "0.0.", printOut)
 }
+
+func TestList_ScrollDownOnePage(t *testing.T) {
+	list := createList(1100)
+
+	offset := 1000
+	list.ScrollDownOnePage()
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
+}
+
+func TestList_ScrollUpOnePage(t *testing.T) {
+	list := createList(1100)
+	list.ScrollDownOnePage()
+	list.ScrollDownOnePage()
+
+	offset := 1000
+	list.ScrollUpOnePage()
+	assert.Equal(t, offset, int(list.offsetY))
+	assert.Equal(t, offset, int(list.scroller.Offset.Y))
+}

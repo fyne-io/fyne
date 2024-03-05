@@ -515,6 +515,38 @@ func TestTable_ScrollToBottom(t *testing.T) {
 	assert.Equal(t, want, table.content.Offset)
 }
 
+func TestTable_ScrollDownOnePage(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	const (
+		maxRows int     = 20
+		maxCols int     = 5
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.NewSize(width, height))
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	w.Resize(fyne.NewSize(200, 200))
+
+	want := fyne.Position{X: 0, Y: 180}
+	table.ScrollDownOnePage()
+
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.content.Offset)
+}
+
 func TestTable_ScrollToLeading(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -569,6 +601,40 @@ func TestTable_ScrollToTop(t *testing.T) {
 	table.ScrollToTop()
 
 	want := fyne.Position{X: prev.X, Y: 0}
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.content.Offset)
+}
+
+func TestTable_ScrollUpOnePage(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	const (
+		maxRows int     = 20
+		maxCols int     = 5
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.NewSize(width, height))
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	w.Resize(fyne.NewSize(200, 200))
+	table.ScrollDownOnePage()
+	table.ScrollDownOnePage()
+
+	want := fyne.Position{X: 0, Y: 180}
+	table.ScrollUpOnePage()
+
 	assert.Equal(t, want, table.offset)
 	assert.Equal(t, want, table.content.Offset)
 }

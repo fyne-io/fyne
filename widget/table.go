@@ -324,6 +324,17 @@ func (t *Table) TouchCancel(*mobile.TouchEvent) {
 // Implements: fyne.Focusable
 func (t *Table) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
+	case fyne.KeyHome:
+		t.ScrollToTop()
+		t.Refresh()
+	case fyne.KeyPageUp:
+		t.ScrollUpOnePage()
+		t.Refresh()
+	case fyne.KeyPageDown:
+		t.ScrollDownOnePage()
+	case fyne.KeyEnd:
+		t.ScrollToBottom()
+		t.Refresh()
 	case fyne.KeySpace:
 		t.Select(t.currentFocus)
 	case fyne.KeyDown:
@@ -519,6 +530,33 @@ func (t *Table) ScrollToTop() {
 	t.content.Offset.Y = 0
 	t.offset.Y = 0
 	t.finishScroll()
+}
+
+// scrollByOnePage scrolls down or up by table height
+func (t *Table) scrollByOnePage(down bool) {
+	if t.Length == nil || t.content == nil {
+		return
+	}
+
+	if down {
+		t.content.Offset.Y += t.size.Height
+	} else {
+		t.content.Offset.Y -= t.size.Height
+	}
+	t.offset.Y = t.content.Offset.Y
+
+	t.content.Refresh()
+	t.finishScroll()
+}
+
+// ScrollUpOnePage scrolls up one page (table height)
+func (t *Table) ScrollUpOnePage() {
+	t.scrollByOnePage(false)
+}
+
+// ScrollDownOnePage scrolls down one page (table height)
+func (t *Table) ScrollDownOnePage() {
+	t.scrollByOnePage(true)
 }
 
 // ScrollToTrailing scrolls horizontally to the trailing edge of the table
