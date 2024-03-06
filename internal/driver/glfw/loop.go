@@ -138,7 +138,7 @@ func (d *gLDriver) runGL() {
 				f.done <- struct{}{}
 			}
 		case <-eventTick.C:
-			d.tryPollEvents()
+			d.pollEvents()
 			windowsToRemove := 0
 			for _, win := range d.windowList() {
 				w := win.(*window)
