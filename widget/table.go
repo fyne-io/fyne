@@ -557,10 +557,11 @@ func (t *Table) scrollByOnePage(down bool) {
 		return
 	}
 
+	height := t.size.Load().Height
 	if down {
-		t.content.Offset.Y += t.size.Height
+		t.content.Offset.Y += height
 	} else {
-		t.content.Offset.Y -= t.size.Height
+		t.content.Offset.Y -= height
 	}
 	t.offset.Y = t.content.Offset.Y
 

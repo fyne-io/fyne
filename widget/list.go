@@ -263,10 +263,11 @@ func (l *List) scrollByOnePage(down bool) {
 		return
 	}
 
+	height := l.size.Load().Height
 	if down {
-		l.scroller.Offset.Y += l.size.Height
+		l.scroller.Offset.Y += height
 	} else {
-		l.scroller.Offset.Y -= l.size.Height
+		l.scroller.Offset.Y -= height
 	}
 	l.offsetUpdated(l.scroller.Offset)
 	l.Refresh()

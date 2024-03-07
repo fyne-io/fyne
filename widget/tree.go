@@ -300,15 +300,16 @@ func (t *Tree) scrollByOnePage(down bool) {
 		return
 	}
 
+	height := t.size.Load().Height
 	if down {
-		t.scroller.Offset.Y += t.size.Height
+		t.scroller.Offset.Y += height
 		y, size := t.findBottom()
 		max := y + size.Height - t.scroller.Size().Height
 		if t.scroller.Offset.Y > max {
 			t.scroller.Offset.Y = max
 		}
 	} else {
-		t.scroller.Offset.Y -= t.size.Height
+		t.scroller.Offset.Y -= height
 		if t.scroller.Offset.Y < 0 {
 			t.scroller.Offset.Y = 0
 		}
