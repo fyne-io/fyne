@@ -41,15 +41,20 @@ const (
 	// Since: 2.0
 	IconNameMenuExpand fyne.ThemeIconName = "menuExpand"
 
+	// IconNameCheckButton is the name of theme lookup for unchecked check button icon.
+	//
+	// Since: 2.0
+	IconNameCheckButton fyne.ThemeIconName = "unchecked"
+
 	// IconNameCheckButtonChecked is the name of theme lookup for checked check button icon.
 	//
 	// Since: 2.0
 	IconNameCheckButtonChecked fyne.ThemeIconName = "checked"
 
-	// IconNameCheckButton is the name of theme lookup for  unchecked check button icon.
+	// InconNameCheckButtonFill is the name of theme lookup for filled check button icon.
 	//
-	// Since: 2.0
-	IconNameCheckButton fyne.ThemeIconName = "unchecked"
+	// Since: 2.5
+	IconNameCheckButtonFill fyne.ThemeIconName = "iconNameCheckButtonFill"
 
 	// IconNameRadioButton is the name of theme lookup for radio button unchecked icon.
 	//
@@ -60,6 +65,11 @@ const (
 	//
 	// Since: 2.0
 	IconNameRadioButtonChecked fyne.ThemeIconName = "radioButtonChecked"
+
+	// InconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
+	//
+	// Since: 2.5
+	IconNameRadioButtonFill fyne.ThemeIconName = "iconNameRadioButtonFill"
 
 	// IconNameColorAchromatic is the name of theme lookup for greyscale color icon.
 	//
@@ -160,6 +170,11 @@ const (
 	//
 	// Since: 2.0
 	IconNameDocumentSave fyne.ThemeIconName = "documentSave"
+
+	// IconNameDragCornerIndicator is the name of the icon used in inner windows to indicate a draggable corner.
+	//
+	// Since: 2.5
+	IconNameDragCornerIndicator fyne.ThemeIconName = "dragCornerIndicator"
 
 	// IconNameMoreHorizontal is the name of theme lookup for horizontal more.
 	//
@@ -455,6 +470,21 @@ const (
 	//
 	// Since: 2.1
 	IconNameGrid fyne.ThemeIconName = "grid"
+
+	// IconNameWindowClose is the name of theme lookup for window close icon.
+	//
+	// Since: 2.5
+	IconNameWindowClose fyne.ThemeIconName = "windowClose"
+
+	// IconNameWindowMaximize is the name of theme lookup for window maximize icon.
+	//
+	// Since: 2.5
+	IconNameWindowMaximize fyne.ThemeIconName = "windowMaximize"
+
+	// IconNameWindowMinimize is the name of theme lookup for window minimize icon.
+	//
+	// Since: 2.5
+	IconNameWindowMinimize fyne.ThemeIconName = "windowMinimize"
 )
 
 var (
@@ -469,10 +499,10 @@ var (
 
 		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
 		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
-		"iconNameCheckButtonFill":  NewThemedResource(checkboxfillIconRes),
+		IconNameCheckButtonFill:    NewThemedResource(checkboxfillIconRes),
 		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
 		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
-		"iconNameRadioButtonFill":  NewThemedResource(radiobuttonfillIconRes),
+		IconNameRadioButtonFill:    NewThemedResource(radiobuttonfillIconRes),
 
 		IconNameContentAdd:    NewThemedResource(contentaddIconRes),
 		IconNameContentClear:  NewThemedResource(cancelIconRes),
@@ -491,6 +521,8 @@ var (
 		IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
 		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
 		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
+
+		IconNameDragCornerIndicator: NewThemedResource(dragcornerindicatorIconRes),
 
 		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
 		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
@@ -567,8 +599,27 @@ var (
 
 		IconNameList: NewThemedResource(listIconRes),
 		IconNameGrid: NewThemedResource(gridIconRes),
+
+		IconNameWindowClose:    NewThemedResource(cancelIconRes),
+		IconNameWindowMaximize: NewThemedResource(maximizeIconRes),
+		IconNameWindowMinimize: NewThemedResource(minimizeIconRes),
 	}
 )
+
+// Icon looks up the specified icon for current theme.
+//
+// Since: 2.5
+func Icon(name fyne.ThemeIconName) fyne.Resource {
+	return safeIconLookup(name)
+}
+
+// IconForWidget looks up the specified icon for requested widget using the current theme.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
+func IconForWidget(name fyne.ThemeIconName, w fyne.Widget) fyne.Resource {
+	return CurrentForWidget(w).Icon(name)
+}
 
 func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
@@ -607,7 +658,7 @@ func NewSuccessThemedResource(src fyne.Resource) *ThemedResource {
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-// By default this will match the foreground color, but it can be changed using the `ColorName` field.
+// By default, this will match the foreground color, but it can be changed using the `ColorName` field.
 func NewThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
@@ -626,24 +677,28 @@ func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	prefix := res.ColorName
+	prefix := res.ThemeColorName()
 	if prefix == "" {
 		prefix = "foreground_"
 	} else {
 		prefix += "_"
 	}
 
-	return string(prefix) + res.source.Name()
+	return string(prefix) + unwrapResource(res.source).Name()
+}
+
+func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
+	return res.ColorName
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	name := res.ColorName
+	name := res.ThemeColorName()
 	if name == "" {
 		name = ColorNameForeground
 	}
 
-	return svg.Colorize(res.source.Content(), safeColorLookup(name, currentVariant()))
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(name))
 }
 
 // Error returns a different resource for indicating an error.
@@ -665,13 +720,17 @@ func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *InvertedThemedResource) Name() string {
-	return "inverted_" + res.source.Name()
+	return "inverted_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
-	clr := BackgroundColor()
-	return svg.Colorize(res.source.Content(), clr)
+	clr := Color(ColorNameBackground)
+	return svg.Colorize(unwrapResource(res.source).Content(), clr)
+}
+
+func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
+	return ColorNameBackground
 }
 
 // Original returns the underlying resource that this inverted themed resource was adapted from
@@ -693,12 +752,12 @@ func NewErrorThemedResource(orig fyne.Resource) *ErrorThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ErrorThemedResource) Name() string {
-	return "error_" + res.source.Name()
+	return "error_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), ErrorColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameError))
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
@@ -720,12 +779,12 @@ func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *PrimaryThemedResource) Name() string {
-	return "primary_" + res.source.Name()
+	return "primary_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), PrimaryColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNamePrimary))
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from
@@ -741,12 +800,12 @@ type DisabledResource struct {
 
 // Name returns the resource source name prefixed with `disabled_` (used for caching)
 func (res *DisabledResource) Name() string {
-	return "disabled_" + res.source.Name()
+	return "disabled_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	return svg.Colorize(res.source.Content(), DisabledColor())
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameDisabled))
 }
 
 // NewDisabledResource creates a resource that adapts to the current theme's DisabledColor setting.
@@ -808,6 +867,13 @@ func CheckButtonCheckedIcon() fyne.Resource {
 	return safeIconLookup(IconNameCheckButtonChecked)
 }
 
+// CheckButtonFillIcon returns a resource containing the filled checkbox icon for the current theme.
+//
+// Since: 2.5
+func CheckButtonFillIcon() fyne.Resource {
+	return safeIconLookup(IconNameCheckButtonFill)
+}
+
 // RadioButtonIcon returns a resource containing the standard radio button icon for the current theme
 func RadioButtonIcon() fyne.Resource {
 	return safeIconLookup(IconNameRadioButton)
@@ -816,6 +882,13 @@ func RadioButtonIcon() fyne.Resource {
 // RadioButtonCheckedIcon returns a resource containing the standard radio button checked icon for the current theme
 func RadioButtonCheckedIcon() fyne.Resource {
 	return safeIconLookup(IconNameRadioButtonChecked)
+}
+
+// RadioButtonFillIcon returns a resource containing the filled checkbox icon for the current theme.
+//
+// Since: 2.5
+func RadioButtonFillIcon() fyne.Resource {
+	return safeIconLookup(IconNameRadioButtonFill)
 }
 
 // ContentAddIcon returns a resource containing the standard content add icon for the current theme
@@ -895,12 +968,12 @@ func DocumentSaveIcon() fyne.Resource {
 
 // MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
 func MoreHorizontalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreHorizontal)
+	return Current().Icon(IconNameMoreHorizontal)
 }
 
 // MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
 func MoreVerticalIcon() fyne.Resource {
-	return current().Icon(IconNameMoreVertical)
+	return Current().Icon(IconNameMoreVertical)
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
@@ -1221,11 +1294,54 @@ func GridIcon() fyne.Resource {
 	return safeIconLookup(IconNameGrid)
 }
 
+// WindowCloseIcon returns a resource containing the window close icon for the current theme
+//
+// Since: 2.5
+func WindowCloseIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowClose)
+}
+
+// WindowMaximizeIcon returns a resource containing the window maximize icon for the current theme
+//
+// Since: 2.5
+func WindowMaximizeIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowMaximize)
+}
+
+// WindowMinimizeIcon returns a resource containing the window minimize icon for the current theme
+//
+// Since: 2.5
+func WindowMinimizeIcon() fyne.Resource {
+	return safeIconLookup(IconNameWindowMinimize)
+}
+
 func safeIconLookup(n fyne.ThemeIconName) fyne.Resource {
-	icon := current().Icon(n)
+	icon := Current().Icon(n)
 	if icon == nil {
 		fyne.LogError("Loaded theme returned nil icon", nil)
 		return fallbackIcon
 	}
 	return icon
+}
+
+// recursively "unwraps" the source of the given resource to extract
+// the "base" resource - to avoid recolorizing SVG multiple times
+// if we for example have a ThemedResource wrapped in an ErrorThemedResource
+func unwrapResource(res fyne.Resource) fyne.Resource {
+	for {
+		switch typedRes := res.(type) {
+		case *DisabledResource:
+			res = typedRes.source
+		case *ErrorThemedResource:
+			res = typedRes.source
+		case *InvertedThemedResource:
+			res = typedRes.source
+		case *PrimaryThemedResource:
+			res = typedRes.source
+		case *ThemedResource:
+			res = typedRes.source
+		default:
+			return res
+		}
+	}
 }

@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const noCellMatch = math.MaxInt32 // TODO make this MaxInt once we move to newer Go version
+const noCellMatch = math.MaxInt
 
 // allTableCellsID represents all table cells when refreshing requested cells
 var allTableCellsID = TableCellID{-1, -1}
@@ -133,6 +133,16 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	t.propertyLock.Lock()
 	t.headerSize = t.createHeader().MinSize()
+	if t.columnWidths != nil {
+		if v, ok := t.columnWidths[-1]; ok {
+			t.headerSize.Width = v
+		}
+	}
+	if t.rowHeights != nil {
+		if v, ok := t.rowHeights[-1]; ok {
+			t.headerSize.Height = v
+		}
+	}
 	t.cellSize = t.templateSize()
 	t.cells = newTableCells(t)
 	t.content = widget.NewScroll(t.cells)
@@ -281,9 +291,14 @@ func (t *Table) Select(id TableCellID) {
 // Since: 1.4.1
 func (t *Table) SetColumnWidth(id int, width float32) {
 	t.propertyLock.Lock()
+	if id < 0 {
+		t.headerSize.Width = width
+	}
+
 	if t.columnWidths == nil {
 		t.columnWidths = make(map[int]float32)
 	}
+
 	t.columnWidths[id] = width
 	t.propertyLock.Unlock()
 
@@ -297,9 +312,14 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 // Since: 2.3
 func (t *Table) SetRowHeight(id int, height float32) {
 	t.propertyLock.Lock()
+	if id < 0 {
+		t.headerSize.Height = height
+	}
+
 	if t.rowHeights == nil {
 		t.rowHeights = make(map[int]float32)
 	}
+
 	t.rowHeights[id] = height
 	t.propertyLock.Unlock()
 
@@ -871,13 +891,14 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyColumnCount
+	size := t.size.Load()
 
 	if len(t.columnWidths) == 0 {
 		paddedWidth := colWidth + padding
 
 		offX = float32(math.Floor(float64(t.offset.X/paddedWidth))) * paddedWidth
 		minCol = int(math.Floor(float64(offX / paddedWidth)))
-		maxCol = int(math.Ceil(float64((t.offset.X + t.size.Width) / paddedWidth)))
+		maxCol = int(math.Ceil(float64((t.offset.X + size.Width) / paddedWidth)))
 
 		if minCol > cols-1 {
 			minCol = cols - 1
@@ -913,7 +934,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			offX = colOffset
 			isVisible = true
 		}
-		if colOffset < t.offset.X+t.size.Width {
+		if colOffset < t.offset.X+size.Width {
 			maxCol = i + 1
 		} else {
 			break
@@ -971,13 +992,14 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	// theme.Padding is a slow call, so we cache it
 	padding := theme.Padding()
 	stick := t.StickyRowCount
+	size := t.size.Load()
 
 	if len(t.rowHeights) == 0 {
 		paddedHeight := rowHeight + padding
 
 		offY = float32(math.Floor(float64(t.offset.Y/paddedHeight))) * paddedHeight
 		minRow = int(math.Floor(float64(offY / paddedHeight)))
-		maxRow = int(math.Ceil(float64((t.offset.Y + t.size.Height) / paddedHeight)))
+		maxRow = int(math.Ceil(float64((t.offset.Y + size.Height) / paddedHeight)))
 
 		if minRow > rows-1 {
 			minRow = rows - 1
@@ -1013,7 +1035,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset < t.offset.Y+t.size.Height {
+		if rowOffset < t.offset.Y+size.Height {
 			maxRow = i + 1
 		} else {
 			break
@@ -1098,6 +1120,16 @@ func (t *tableRenderer) MinSize() fyne.Size {
 func (t *tableRenderer) Refresh() {
 	t.t.propertyLock.Lock()
 	t.t.headerSize = t.t.createHeader().MinSize()
+	if t.t.columnWidths != nil {
+		if v, ok := t.t.columnWidths[-1]; ok {
+			t.t.headerSize.Width = v
+		}
+	}
+	if t.t.rowHeights != nil {
+		if v, ok := t.t.rowHeights[-1]; ok {
+			t.t.headerSize.Height = v
+		}
+	}
 	t.t.cellSize = t.t.templateSize()
 	t.calculateHeaderSizes()
 	t.t.propertyLock.Unlock()
@@ -1448,6 +1480,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.cells.t.dividerLayer.Content.Refresh()
 	}
 
+	size := r.cells.t.size.Load()
+
 	divs := 0
 	i := 0
 	if stickCols > 0 {
@@ -1455,7 +1489,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			xPos := x + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+			r.dividers[divs].Resize(fyne.NewSize(separatorThickness, size.Height))
 			r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 			r.dividers[divs].Show()
 			divs++
@@ -1466,7 +1500,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		xPos := x - r.cells.t.content.Offset.X + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, r.cells.t.size.Height))
+		r.dividers[divs].Resize(fyne.NewSize(separatorThickness, size.Height))
 		r.dividers[divs].Move(fyne.NewPos(xPos, 0))
 		r.dividers[divs].Show()
 		divs++
@@ -1478,7 +1512,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 			i++
 
 			yPos := y + dividerOff
-			r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+			r.dividers[divs].Resize(fyne.NewSize(size.Width, separatorThickness))
 			r.dividers[divs].Move(fyne.NewPos(0, yPos))
 			r.dividers[divs].Show()
 			divs++
@@ -1489,7 +1523,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		i++
 
 		yPos := y - r.cells.t.content.Offset.Y + dividerOff
-		r.dividers[divs].Resize(fyne.NewSize(r.cells.t.size.Width, separatorThickness))
+		r.dividers[divs].Resize(fyne.NewSize(size.Width, separatorThickness))
 		r.dividers[divs].Move(fyne.NewPos(0, yPos))
 		r.dividers[divs].Show()
 		divs++
@@ -1550,7 +1584,8 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	if x2 < 0 || x1 > r.cells.t.size.Width || y2 < 0 || y1 > r.cells.t.size.Height {
+	size := r.cells.t.size.Load()
+	if x2 < 0 || x1 > size.Width || y2 < 0 || y1 > size.Height {
 		marker.Hide()
 	} else {
 		left := x1
@@ -1573,7 +1608,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	startRow, maxRow, startCol, maxCol int, separatorThickness float32) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
-	headerMin := r.cells.t.createHeader().MinSize()
+	headerMin := r.cells.t.headerSize
 	rowHeight := headerMin.Height
 	colWidth := headerMin.Width
 

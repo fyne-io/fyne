@@ -51,6 +51,14 @@ func main() {
 		title.SetText(t.Title)
 		intro.SetText(t.Intro)
 
+		if t.Title == "Welcome" {
+			title.Hide()
+			intro.Hide()
+		} else {
+			title.Show()
+			intro.Show()
+		}
+
 		content.Objects = []fyne.CanvasObject{t.View(w)}
 		content.Refresh()
 	}
@@ -238,10 +246,10 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 
 	themes := container.NewGridWithColumns(2,
 		widget.NewButton("Dark", func() {
-			a.Settings().SetTheme(theme.DarkTheme())
+			a.Settings().SetTheme(&forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantDark})
 		}),
 		widget.NewButton("Light", func() {
-			a.Settings().SetTheme(theme.LightTheme())
+			a.Settings().SetTheme(&forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantLight})
 		}),
 	)
 

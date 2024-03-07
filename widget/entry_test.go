@@ -72,6 +72,7 @@ func TestEntry_Binding_Replace(t *testing.T) {
 	assert.Equal(t, "nt", entry.SelectedText())
 
 	test.Type(entry, "g")
+	waitForBinding()
 	assert.Equal(t, "Cogent", entry.Text)
 }
 
@@ -1315,6 +1316,17 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 	assert.Equal(t, "", e.SelectedText())
 }
 
+func TestEntry_Select_TripleTap(t *testing.T) {
+	e, _ := setupSelection(t, false)
+	e.MultiLine = true
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, "sti", e.SelectedText())
+	test.DoubleTap(e)
+	time.Sleep(50 * time.Millisecond)
+	e.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 1)}})
+	assert.Equal(t, "Testing", e.SelectedText())
+}
+
 func TestEntry_SelectedText(t *testing.T) {
 	e, window := setupImageTest(t, false)
 	defer teardownImageTest(window)
@@ -1692,7 +1704,7 @@ func TestEntry_TextWrap(t *testing.T) {
 			want:   "entry/wrap_single_line_off.xml",
 		},
 		"single line Truncate": {
-			wrap: fyne.TextTruncate,
+			wrap: fyne.TextWrap(fyne.TextTruncateClip),
 			want: "entry/wrap_single_line_truncate.xml",
 		},
 		"single line Scroll": {
@@ -1718,7 +1730,7 @@ func TestEntry_TextWrap(t *testing.T) {
 		// Disallowed - fallback to TextWrapOff
 		"multi line Truncate": {
 			multiLine: true,
-			wrap:      fyne.TextTruncate,
+			wrap:      fyne.TextWrap(fyne.TextTruncateClip),
 			want:      "entry/wrap_multi_line_truncate.xml",
 		},
 		"multi line WrapBreak": {
@@ -1761,7 +1773,7 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	e.SetText("Testing Wrapping")
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 
-	e.Wrapping = fyne.TextTruncate
+	e.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
 	e.Refresh()
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_truncate.xml", c)
 
@@ -1972,6 +1984,43 @@ func TestEntry_CarriageReturn(t *testing.T) {
 	test.AssertImageMatches(t, "entry/carriage_return_text.png", w.Canvas().Capture())
 }
 
+func TestEntry_UndoRedo(t *testing.T) {
+	e, window := setupImageTest(t, true)
+	window.Resize(fyne.NewSize(128, 128))
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	c.Focus(e)
+	runes := "The undo/\nredo function allows you to efficiently fix"
+	for _, r := range runes {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_initial.png", window.Canvas().Capture())
+
+	for _, r := range " mistkaes" {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistkaes.png", window.Canvas().Capture())
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	test.AssertImageMatches(t, "entry/undo_redo_initial.png", window.Canvas().Capture())
+
+	for _, r := range " mistakes" {
+		e.TypedRune(r)
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
+
+	for i := 0; i < 5; i++ {
+		e.TypedShortcut(&fyne.ShortcutUndo{})
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_5undo.png", window.Canvas().Capture())
+
+	for i := 0; i < 5; i++ {
+		e.TypedShortcut(&fyne.ShortcutRedo{})
+	}
+	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
+}
+
 const (
 	entryOffset = 10
 
@@ -2131,7 +2180,7 @@ func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {
 	}
 }
 
-func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}

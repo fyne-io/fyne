@@ -42,6 +42,7 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 	}
 
 	padding := theme.Padding()
+	innerPadding := theme.InnerPadding()
 	lowBound := 0
 	highBound := 2
 	labelCellMaxWidth := float32(0)
@@ -56,7 +57,7 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 
 		labelCell := currentRow[0].MinSize()
 		if _, ok := currentRow[0].(*canvas.Text); ok {
-			labelCell.Width += padding * 4
+			labelCell.Width += innerPadding * 2
 		}
 		labelCellMaxWidth = fyne.Max(labelCellMaxWidth, labelCell.Width)
 

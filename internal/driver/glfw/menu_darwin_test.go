@@ -1,5 +1,4 @@
 //go:build !no_glfw && !no_native_menus && !mobile
-// +build !no_glfw,!no_native_menus,!mobile
 
 package glfw
 

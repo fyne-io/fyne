@@ -2,8 +2,8 @@ package app
 
 import (
 	"encoding/json"
-	"os"
-	"path/filepath"
+	"errors"
+	"io"
 	"sync"
 	"time"
 
@@ -26,8 +26,17 @@ type preferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
 
-// forceImmediateSave writes preferences to file immediately, ignoring the debouncing
-// logic in the change listener. Does nothing if preferences are not backed with a file.
+// sentinel error to signal an empty preferences storage backend was loaded
+var errEmptyPreferencesStore = errors.New("empty preferences store")
+
+// returned from storageWriter() - may be a file, browser local storage, etc
+type writeSyncCloser interface {
+	io.WriteCloser
+	Sync() error
+}
+
+// forceImmediateSave writes preferences to storage immediately, ignoring the debouncing
+// logic in the change listener. Does nothing if preferences are not backed with a persistent store.
 func (p *preferences) forceImmediateSave() {
 	if !p.needsSaveBeforeExit {
 		return
@@ -54,37 +63,28 @@ func (p *preferences) resetSavedRecently() {
 }
 
 func (p *preferences) save() error {
-	return p.saveToFile(p.storagePath())
+	storage, err := p.storageWriter()
+	if err != nil {
+		return err
+	}
+	return p.saveToStorage(storage)
 }
 
-func (p *preferences) saveToFile(path string) error {
+func (p *preferences) saveToStorage(writer writeSyncCloser) error {
 	p.prefLock.Lock()
 	p.savedRecently = true
 	p.prefLock.Unlock()
 	defer p.resetSavedRecently()
-	err := os.MkdirAll(filepath.Dir(path), 0700)
-	if err != nil { // this is not an exists error according to docs
-		return err
-	}
 
-	file, err := os.Create(path)
-	if err != nil {
-		if !os.IsExist(err) {
-			return err
-		}
-		file, err = os.Open(path) // #nosec
-		if err != nil {
-			return err
-		}
-	}
-	defer file.Close()
-	encode := json.NewEncoder(file)
+	defer writer.Close()
+	encode := json.NewEncoder(writer)
 
-	p.InMemoryPreferences.ReadValues(func(values map[string]interface{}) {
+	var err error
+	p.InMemoryPreferences.ReadValues(func(values map[string]any) {
 		err = encode.Encode(&values)
 	})
 
-	err2 := file.Sync()
+	err2 := writer.Sync()
 	if err == nil {
 		err = err2
 	}
@@ -92,35 +92,28 @@ func (p *preferences) saveToFile(path string) error {
 }
 
 func (p *preferences) load() {
-	err := p.loadFromFile(p.storagePath())
-	if err != nil {
+	storage, err := p.storageReader()
+	if err == nil {
+		err = p.loadFromStorage(storage)
+	}
+	if err != nil && err != errEmptyPreferencesStore {
 		fyne.LogError("Preferences load error:", err)
 	}
 }
 
-func (p *preferences) loadFromFile(path string) (err error) {
-	file, err := os.Open(path) // #nosec
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
-				return err
-			}
-			return nil
-		}
-		return err
-	}
+func (p *preferences) loadFromStorage(storage io.ReadCloser) (err error) {
 	defer func() {
-		if r := file.Close(); r != nil && err == nil {
+		if r := storage.Close(); r != nil && err == nil {
 			err = r
 		}
 	}()
-	decode := json.NewDecoder(file)
+	decode := json.NewDecoder(storage)
 
 	p.prefLock.Lock()
 	p.loadingInProgress = true
 	p.prefLock.Unlock()
 
-	p.InMemoryPreferences.WriteValues(func(values map[string]interface{}) {
+	p.InMemoryPreferences.WriteValues(func(values map[string]any) {
 		err = decode.Decode(&values)
 		if err != nil {
 			return
@@ -157,7 +150,7 @@ func newPreferences(app *fyneApp) *preferences {
 		}
 		p.prefLock.Unlock()
 
-		if shouldIgnoreChange { // callback after loading file, or too many updates in a row
+		if shouldIgnoreChange { // callback after loading from storage, or too many updates in a row
 			return
 		}
 
@@ -170,9 +163,9 @@ func newPreferences(app *fyneApp) *preferences {
 	return p
 }
 
-func convertLists(values map[string]interface{}) {
+func convertLists(values map[string]any) {
 	for k, v := range values {
-		if items, ok := v.([]interface{}); ok {
+		if items, ok := v.([]any); ok {
 			if len(items) == 0 {
 				continue
 			}

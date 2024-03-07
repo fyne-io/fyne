@@ -19,28 +19,31 @@ const (
 
 type infProgressRenderer struct {
 	widget.BaseRenderer
-	background, bar *canvas.Rectangle
-	animation       *fyne.Animation
+	background, bar canvas.Rectangle
+	animation       fyne.Animation
 	running         bool
 	progress        *ProgressBarInfinite
 }
 
 // MinSize calculates the minimum size of a progress bar.
 func (p *infProgressRenderer) MinSize() fyne.Size {
+	th := p.progress.Theme()
+	innerPad2 := th.Size(theme.SizeNameInnerPadding) * 2
 	// this is to create the same size infinite progress bar as regular progress bar
-	text := fyne.MeasureText("100%", theme.TextSize(), fyne.TextStyle{})
+	text := fyne.MeasureText("100%", th.Size(theme.SizeNameText), fyne.TextStyle{})
 
-	return fyne.NewSize(text.Width+theme.InnerPadding()*2, text.Height+theme.InnerPadding()*2)
+	return fyne.NewSize(text.Width+innerPad2, text.Height+innerPad2)
 }
 
 func (p *infProgressRenderer) updateBar(done float32) {
-	progressWidth := p.progress.size.Width
+	size := p.progress.size.Load()
+	progressWidth := size.Width
 	spanWidth := progressWidth + (progressWidth * (maxProgressBarInfiniteWidthRatio / 2))
 	maxBarWidth := progressWidth * maxProgressBarInfiniteWidthRatio
 
 	barCenterX := spanWidth*done - (spanWidth-progressWidth)/2
 	barPos := fyne.NewPos(barCenterX-maxBarWidth/2, 0)
-	barSize := fyne.NewSize(maxBarWidth, p.progress.size.Height)
+	barSize := fyne.NewSize(maxBarWidth, size.Height)
 	if barPos.X < 0 {
 		barSize.Width += barPos.X
 		barPos.X = 0
@@ -51,7 +54,7 @@ func (p *infProgressRenderer) updateBar(done float32) {
 
 	p.bar.Resize(barSize)
 	p.bar.Move(barPos)
-	canvas.Refresh(p.bar)
+	canvas.Refresh(&p.bar)
 }
 
 // Layout the components of the infinite progress bar
@@ -65,10 +68,15 @@ func (p *infProgressRenderer) Refresh() {
 		return // we refresh from the goroutine
 	}
 
-	p.background.FillColor = progressBackgroundColor()
-	p.background.CornerRadius = theme.InputRadiusSize()
-	p.bar.FillColor = theme.PrimaryColor()
-	p.bar.CornerRadius = theme.InputRadiusSize()
+	th := p.progress.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	cornerRadius := th.Size(theme.SizeNameInputRadius)
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
+
+	p.background.FillColor = progressBlendColor(primaryColor)
+	p.background.CornerRadius = cornerRadius
+	p.bar.FillColor = primaryColor
+	p.bar.CornerRadius = cornerRadius
 	p.background.Refresh()
 	p.bar.Refresh()
 	canvas.Refresh(p.progress.super())
@@ -89,7 +97,8 @@ func (p *infProgressRenderer) start() {
 
 	p.progress.propertyLock.Lock()
 	defer p.progress.propertyLock.Unlock()
-	p.animation = fyne.NewAnimation(time.Second*3, p.updateBar)
+	p.animation.Duration = time.Second * 3
+	p.animation.Tick = p.updateBar
 	p.animation.Curve = fyne.AnimationLinear
 	p.animation.RepeatCount = fyne.AnimationRepeatForever
 	p.running = true
@@ -156,16 +165,26 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	background := canvas.NewRectangle(progressBackgroundColor())
-	background.CornerRadius = theme.InputRadiusSize()
-	bar := canvas.NewRectangle(theme.PrimaryColor())
-	bar.CornerRadius = theme.InputRadiusSize()
+	th := p.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
+	cornerRadius := th.Size(theme.SizeNameInputRadius)
+
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, bar}),
-		background:   background,
-		bar:          bar,
-		progress:     p,
+		background: canvas.Rectangle{
+			FillColor:    progressBlendColor(primaryColor),
+			CornerRadius: cornerRadius,
+		},
+		bar: canvas.Rectangle{
+			FillColor:    primaryColor,
+			CornerRadius: cornerRadius,
+		},
+		progress: p,
 	}
+
+	render.SetObjects([]fyne.CanvasObject{&render.background, &render.bar})
+
 	render.start()
 	return render
 }

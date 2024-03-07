@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,7 @@ func TestNewIcon(t *testing.T) {
 	if !ok {
 		t.Fail()
 	}
-	assert.Equal(t, theme.ConfirmIcon(), img.Resource)
+	assert.Equal(t, theme.ConfirmIcon(), img.Resource.(*cache.WidgetResource).ThemedResource)
 }
 
 func TestIcon_Nil(t *testing.T) {

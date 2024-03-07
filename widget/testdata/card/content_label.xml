@@ -14,7 +14,9 @@
 			<text bold size="0x0" textSize="23"></text>
 			<text size="0x0"></text>
 			<widget pos="6,6" size="42x35" type="*widget.Label">
-				<text pos="8,8" size="26x19">Test</text>
+				<widget size="42x35" type="*widget.RichText">
+					<text pos="8,8" size="26x19">Test</text>
+				</widget>
 			</widget>
 		</widget>
 	</content>

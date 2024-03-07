@@ -65,14 +65,18 @@ func (c *Check) Bind(data binding.Bool) {
 
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
+	c.propertyLock.Lock()
 	if checked == c.Checked {
+		c.propertyLock.Unlock()
 		return
 	}
 
 	c.Checked = checked
+	onChanged := c.OnChanged
+	c.propertyLock.Unlock()
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
+	if onChanged != nil {
+		onChanged(checked)
 	}
 
 	c.Refresh()
@@ -153,17 +157,19 @@ func (c *Check) MinSize() fyne.Size {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
+	th := c.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	c.ExtendBaseWidget(c)
+	bg := canvas.NewImageFromResource(th.Icon(theme.IconNameCheckButtonFill))
+	icon := canvas.NewImageFromResource(th.Icon(theme.IconNameCheckButton))
+
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
-	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
-	bg := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
-	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
-
-	text := canvas.NewText(c.Text, theme.ForegroundColor())
+	text := canvas.NewText(c.Text, th.Color(theme.ColorNameForeground, v))
 	text.Alignment = fyne.TextAlignLeading
 
-	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
+	focusIndicator := canvas.NewCircle(th.Color(theme.ColorNameBackground, v))
 	r := &checkRenderer{
 		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, bg, icon, text}),
 		bg,
@@ -172,10 +178,10 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 		focusIndicator,
 		c,
 	}
-	r.applyTheme()
+	r.applyTheme(th, v)
 	r.updateLabel()
-	r.updateResource()
-	r.updateFocusIndicator()
+	r.updateResource(th)
+	r.updateFocusIndicator(th, v)
 	return r
 }
 
@@ -213,7 +219,9 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 //
 // Since: 2.4
 func (c *Check) SetText(text string) {
+	c.propertyLock.Lock()
 	c.Text = text
+	c.propertyLock.Unlock()
 	c.Refresh()
 }
 
@@ -273,10 +281,16 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	pad4 := theme.InnerPadding() * 2
-	min := c.label.MinSize().Add(fyne.NewSize(theme.IconInlineSize()+pad4, pad4))
-	if c.check.Text != "" {
-		min.Add(fyne.NewSize(theme.Padding(), 0))
+	th := c.check.Theme()
+
+	pad4 := th.Size(theme.SizeNameInnerPadding) * 2
+	min := c.label.MinSize().Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+pad4, pad4))
+
+	c.check.propertyLock.RLock()
+	text := c.check.Text
+	c.check.propertyLock.RUnlock()
+	if text != "" {
+		min.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
 	}
 
 	return min
@@ -284,59 +298,68 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	focusIndicatorSize := fyne.NewSquareSize(theme.IconInlineSize() + theme.InnerPadding())
-	c.focusIndicator.Resize(focusIndicatorSize)
-	c.focusIndicator.Move(fyne.NewPos(theme.InputBorderSize(), (size.Height-focusIndicatorSize.Height)/2))
+	th := c.check.Theme()
+	innerPadding := th.Size(theme.SizeNameInnerPadding)
+	borderSize := th.Size(theme.SizeNameInputBorder)
+	iconInlineSize := th.Size(theme.SizeNameInlineIcon)
 
-	xOff := focusIndicatorSize.Width + theme.InputBorderSize()*2
+	focusIndicatorSize := fyne.NewSquareSize(iconInlineSize + innerPadding)
+	c.focusIndicator.Resize(focusIndicatorSize)
+	c.focusIndicator.Move(fyne.NewPos(borderSize, (size.Height-focusIndicatorSize.Height)/2))
+
+	xOff := focusIndicatorSize.Width + borderSize*2
 	labelSize := size.SubtractWidthHeight(xOff, 0)
 	c.label.Resize(labelSize)
 	c.label.Move(fyne.NewPos(xOff, 0))
 
-	iconPos := fyne.NewPos(theme.InnerPadding()/2+theme.InputBorderSize(), (size.Height-theme.IconInlineSize())/2)
-	iconSize := fyne.NewSquareSize(theme.IconInlineSize())
+	iconPos := fyne.NewPos(innerPadding/2+borderSize, (size.Height-iconInlineSize)/2)
+	iconSize := fyne.NewSquareSize(iconInlineSize)
 	c.bg.Move(iconPos)
 	c.bg.Resize(iconSize)
-	c.icon.Resize(iconSize)
 	c.icon.Move(iconPos)
+	c.icon.Resize(iconSize)
 }
 
 // applyTheme updates this Check to the current theme
-func (c *checkRenderer) applyTheme() {
-	c.label.Color = theme.ForegroundColor()
-	c.label.TextSize = theme.TextSize()
-	if c.check.disabled {
-		c.label.Color = theme.DisabledColor()
+func (c *checkRenderer) applyTheme(th fyne.Theme, v fyne.ThemeVariant) {
+	c.label.Color = th.Color(theme.ColorNameForeground, v)
+	c.label.TextSize = th.Size(theme.SizeNameText)
+	if c.check.disabled.Load() {
+		c.label.Color = th.Color(theme.ColorNameDisabled, v)
 	}
 }
 
 func (c *checkRenderer) Refresh() {
+	th := c.check.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	c.check.propertyLock.RLock()
-	c.applyTheme()
+	c.applyTheme(th, v)
 	c.updateLabel()
-	c.updateResource()
-	c.updateFocusIndicator()
+	c.updateResource(th)
+	c.updateFocusIndicator(th, v)
 	c.check.propertyLock.RUnlock()
 	canvas.Refresh(c.check.super())
 }
 
+// must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateLabel() {
 	c.label.Text = c.check.Text
 }
 
-func (c *checkRenderer) updateResource() {
-	res := theme.NewThemedResource(theme.CheckButtonIcon())
+// must be called while holding c.check.propertyLock for reading
+func (c *checkRenderer) updateResource(th fyne.Theme) {
+	res := theme.NewThemedResource(th.Icon(theme.IconNameCheckButton))
 	res.ColorName = theme.ColorNameInputBorder
-	// TODO move to `theme.CheckButtonFillIcon()` when we add it in 2.4
-	bgRes := theme.NewThemedResource(fyne.CurrentApp().Settings().Theme().Icon("iconNameCheckButtonFill"))
+	bgRes := theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonFill))
 	bgRes.ColorName = theme.ColorNameInputBackground
 
 	if c.check.Checked {
-		res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
+		res = theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonChecked))
 		res.ColorName = theme.ColorNamePrimary
 		bgRes.ColorName = theme.ColorNameBackground
 	}
-	if c.check.disabled {
+	if c.check.disabled.Load() {
 		if c.check.Checked {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
@@ -347,13 +370,14 @@ func (c *checkRenderer) updateResource() {
 	c.bg.Resource = bgRes
 }
 
-func (c *checkRenderer) updateFocusIndicator() {
-	if c.check.disabled {
+// must be called while holding c.check.propertyLock for reading
+func (c *checkRenderer) updateFocusIndicator(th fyne.Theme, v fyne.ThemeVariant) {
+	if c.check.disabled.Load() {
 		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
-		c.focusIndicator.FillColor = theme.FocusColor()
+		c.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
 	} else if c.check.hovered {
-		c.focusIndicator.FillColor = theme.HoverColor()
+		c.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
 	} else {
 		c.focusIndicator.FillColor = color.Transparent
 	}

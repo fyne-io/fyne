@@ -20,7 +20,7 @@ import (
 // The test `t` fails if the given image is not equal to the loaded master image.
 // In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
 // This path is also reported, thus the file can be used as new master.
-func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
+func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...any) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	masterPath := filepath.Join(wd, "testdata", masterFilename)

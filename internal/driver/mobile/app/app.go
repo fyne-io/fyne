@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build freebsd || linux || darwin || windows || openbsd
-// +build freebsd linux darwin windows openbsd
 
 package app
 
@@ -36,10 +35,10 @@ type App interface {
 	//  - touch.Event
 	// from the golang.org/x/mobile/event/etc packages. Other packages may
 	// define other event types that are carried on this channel.
-	Events() <-chan interface{}
+	Events() <-chan any
 
 	// Send sends an event on the events channel. It does not block.
-	Send(event interface{})
+	Send(event any)
 
 	// Publish flushes any pending drawing commands, such as OpenGL calls, and
 	// swaps the back buffer to the screen.
@@ -48,13 +47,13 @@ type App interface {
 	// TODO: replace filters (and the Events channel) with a NextEvent method?
 
 	// Filter calls each registered event filter function in sequence.
-	Filter(event interface{}) interface{}
+	Filter(event any) any
 
 	// RegisterFilter registers a event filter function to be called by Filter. The
 	// function can return a different event, or return nil to consume the event,
 	// but the function can also return its argument unchanged, where its purpose
 	// is to trigger a side effect rather than modify the event.
-	RegisterFilter(f func(interface{}) interface{})
+	RegisterFilter(f func(any) any)
 
 	ShowVirtualKeyboard(KeyboardType)
 	HideVirtualKeyboard()
@@ -99,7 +98,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 }
 
 type app struct {
-	filters []func(interface{}) interface{}
+	filters []func(any) any
 
 	events         *async.UnboundedInterfaceChan
 	lifecycleStage lifecycle.Stage
@@ -110,11 +109,11 @@ type app struct {
 	worker gl.Worker
 }
 
-func (a *app) Events() <-chan interface{} {
+func (a *app) Events() <-chan any {
 	return a.events.Out()
 }
 
-func (a *app) Send(event interface{}) {
+func (a *app) Send(event any) {
 	a.events.In() <- event
 }
 
@@ -131,14 +130,14 @@ func (a *app) Publish() PublishResult {
 	return <-a.publishResult
 }
 
-func (a *app) Filter(event interface{}) interface{} {
+func (a *app) Filter(event any) any {
 	for _, f := range a.filters {
 		event = f(event)
 	}
 	return event
 }
 
-func (a *app) RegisterFilter(f func(interface{}) interface{}) {
+func (a *app) RegisterFilter(f func(any) any) {
 	a.filters = append(a.filters, f)
 }
 
@@ -163,7 +162,7 @@ func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilt
 // TODO: does Android need this?? It seems to work without it (Nexus 7,
 // KitKat). If only x11 needs this, should we move this to x11.go??
 func (a *app) registerGLViewportFilter() {
-	a.RegisterFilter(func(e interface{}) interface{} {
+	a.RegisterFilter(func(e any) any {
 		if e, ok := e.(size.Event); ok {
 			a.glctx.Viewport(0, 0, e.WidthPx, e.HeightPx)
 		}

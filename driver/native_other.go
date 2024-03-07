@@ -1,5 +1,4 @@
 //go:build !android
-// +build !android
 
 package driver
 
@@ -8,6 +7,6 @@ package driver
 // The call for most platforms will just execute passing an `UnknownContext` and returning any error reported.
 //
 // Since: 2.3
-func RunNative(fn func(interface{}) error) error {
+func RunNative(fn func(any) error) error {
 	return fn(&UnknownContext{})
 }

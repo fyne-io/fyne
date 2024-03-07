@@ -113,7 +113,7 @@ type HyperlinkSegment struct {
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
 	// Since: 2.4
-	OnTapped func()
+	OnTapped func() `json:"-"`
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -131,7 +131,7 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
 	link.OnTapped = h.OnTapped
-	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: link}, Objects: []fyne.CanvasObject{link}}
 }
 
 // Update applies the current state of this hyperlink segment to an existing visual.
@@ -391,6 +391,8 @@ type RichTextSegment interface {
 type TextSegment struct {
 	Style RichTextStyle
 	Text  string
+
+	parent *RichText
 }
 
 // Inline should return true if this text can be included within other elements, or false if it creates a new block.
@@ -440,18 +442,20 @@ func (t *TextSegment) Unselect() {
 
 func (t *TextSegment) color() color.Color {
 	if t.Style.ColorName != "" {
-		return fyne.CurrentApp().Settings().Theme().Color(t.Style.ColorName, fyne.CurrentApp().Settings().ThemeVariant())
+		return theme.ColorForWidget(t.Style.ColorName, t.parent)
 	}
 
-	return theme.ForegroundColor()
+	return theme.ColorForWidget(theme.ColorNameForeground, t.parent)
 }
 
 func (t *TextSegment) size() float32 {
 	if t.Style.SizeName != "" {
-		return fyne.CurrentApp().Settings().Theme().Size(t.Style.SizeName)
+		i := theme.SizeForWidget(t.Style.SizeName, t.parent)
+		return i
 	}
 
-	return theme.TextSize()
+	i := theme.SizeForWidget(theme.SizeNameText, t.parent)
+	return i
 }
 
 type richImage struct {
@@ -521,10 +525,12 @@ func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 type unpadTextWidgetLayout struct {
+	parent fyne.Widget
 }
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
-	pad := theme.InnerPadding() * -1
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * -1
 	pad2 := pad * -2
 
 	o[0].Move(fyne.NewPos(pad, pad))
@@ -532,6 +538,7 @@ func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
 }
 
 func (u *unpadTextWidgetLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
-	pad := theme.InnerPadding() * 2
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * 2
 	return o[0].MinSize().Subtract(fyne.NewSize(pad, pad))
 }

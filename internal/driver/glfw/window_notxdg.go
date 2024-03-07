@@ -1,5 +1,4 @@
 //go:build !linux && !freebsd && !openbsd && !netbsd
-// +build !linux,!freebsd,!openbsd,!netbsd
 
 package glfw
 
@@ -21,4 +20,9 @@ func (w *window) platformResize(canvasSize fyne.Size) {
 			d.repaintWindow(w)
 		})
 	}
+}
+
+// GetWindowHandle returns the window handle. Only implemented for X11 currently.
+func (w *window) GetWindowHandle() string {
+	return ""
 }

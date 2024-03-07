@@ -287,8 +287,10 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render := &textGridRenderer{text: t}
 	render.updateCellSize()
 
+	th := t.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
 
 	return render
 }
@@ -341,7 +343,10 @@ type textGridRenderer struct {
 }
 
 func (t *textGridRenderer) appendTextCell(str rune) {
-	text := canvas.NewText(string(str), theme.ForegroundColor())
+	th := t.text.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	text := canvas.NewText(string(str), th.Color(theme.ColorNameForeground, v))
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -363,9 +368,12 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 		str = ' '
 	}
 
+	th := t.text.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	text := t.objects[pos*2+1].(*canvas.Text)
-	text.TextSize = theme.TextSize()
-	fg := theme.ForegroundColor()
+	text.TextSize = th.Size(theme.SizeNameText)
+	fg := th.Color(theme.ColorNameForeground, v)
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
@@ -536,8 +544,10 @@ func (t *textGridRenderer) Refresh() {
 	// theme could change text size
 	t.updateCellSize()
 
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledColor()}
-	t.updateGridSize(t.text.size)
+	th := t.text.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
+	t.updateGridSize(t.text.Size())
 	t.refreshGrid()
 }
 
@@ -567,11 +577,12 @@ func (t *textGridRenderer) refresh(obj fyne.CanvasObject) {
 }
 
 func (t *textGridRenderer) updateCellSize() {
-	size := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+	th := t.text.Theme()
+	size := fyne.MeasureText("M", th.Size(theme.SizeNameText), fyne.TextStyle{Monospace: true})
 
 	// round it for seamless background
-	size.Width = float32(math.Round(float64((size.Width))))
-	size.Height = float32(math.Round(float64((size.Height))))
+	size.Width = float32(math.Round(float64(size.Width)))
+	size.Height = float32(math.Round(float64(size.Height)))
 
 	t.cellSize = size
 }

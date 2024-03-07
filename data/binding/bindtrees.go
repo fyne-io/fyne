@@ -19,6 +19,7 @@ type BoolTree interface {
 	Get() (map[string][]string, map[string]bool, error)
 	GetValue(id string) (bool, error)
 	Prepend(parent, id string, value bool) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]bool) error
 	SetValue(id string, value bool) error
 }
@@ -118,6 +119,32 @@ func (t *boundBoolTree) Prepend(parent, id string, val bool) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundBoolTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundBoolTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundBoolTree) Reload() error {
@@ -277,6 +304,7 @@ type BytesTree interface {
 	Get() (map[string][]string, map[string][]byte, error)
 	GetValue(id string) ([]byte, error)
 	Prepend(parent, id string, value []byte) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string][]byte) error
 	SetValue(id string, value []byte) error
 }
@@ -376,6 +404,32 @@ func (t *boundBytesTree) Prepend(parent, id string, val []byte) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundBytesTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundBytesTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundBytesTree) Reload() error {
@@ -535,6 +589,7 @@ type FloatTree interface {
 	Get() (map[string][]string, map[string]float64, error)
 	GetValue(id string) (float64, error)
 	Prepend(parent, id string, value float64) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]float64) error
 	SetValue(id string, value float64) error
 }
@@ -634,6 +689,32 @@ func (t *boundFloatTree) Prepend(parent, id string, val float64) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundFloatTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundFloatTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundFloatTree) Reload() error {
@@ -793,6 +874,7 @@ type IntTree interface {
 	Get() (map[string][]string, map[string]int, error)
 	GetValue(id string) (int, error)
 	Prepend(parent, id string, value int) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]int) error
 	SetValue(id string, value int) error
 }
@@ -892,6 +974,32 @@ func (t *boundIntTree) Prepend(parent, id string, val int) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundIntTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundIntTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundIntTree) Reload() error {
@@ -1051,6 +1159,7 @@ type RuneTree interface {
 	Get() (map[string][]string, map[string]rune, error)
 	GetValue(id string) (rune, error)
 	Prepend(parent, id string, value rune) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]rune) error
 	SetValue(id string, value rune) error
 }
@@ -1150,6 +1259,32 @@ func (t *boundRuneTree) Prepend(parent, id string, val rune) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundRuneTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundRuneTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundRuneTree) Reload() error {
@@ -1309,6 +1444,7 @@ type StringTree interface {
 	Get() (map[string][]string, map[string]string, error)
 	GetValue(id string) (string, error)
 	Prepend(parent, id string, value string) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]string) error
 	SetValue(id string, value string) error
 }
@@ -1408,6 +1544,32 @@ func (t *boundStringTree) Prepend(parent, id string, val string) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundStringTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundStringTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundStringTree) Reload() error {
@@ -1557,6 +1719,291 @@ func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 	return nil
 }
 
+// UntypedTree supports binding a tree of any values.
+//
+// Since: 2.4
+type UntypedTree interface {
+	DataTree
+
+	Append(parent, id string, value any) error
+	Get() (map[string][]string, map[string]any, error)
+	GetValue(id string) (any, error)
+	Prepend(parent, id string, value any) error
+	Remove(id string) error
+	Set(ids map[string][]string, values map[string]any) error
+	SetValue(id string, value any) error
+}
+
+// ExternalUntypedTree supports binding a tree of any values from an external variable.
+//
+// Since: 2.4
+type ExternalUntypedTree interface {
+	UntypedTree
+
+	Reload() error
+}
+
+// NewUntypedTree returns a bindable tree of any values.
+//
+// Since: 2.4
+func NewUntypedTree() UntypedTree {
+	t := &boundUntypedTree{val: &map[string]any{}}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+	return t
+}
+
+// BindUntypedTree returns a bound tree of any values, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.4
+func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalUntypedTree {
+	if v == nil {
+		return NewUntypedTree().(ExternalUntypedTree)
+	}
+
+	t := &boundUntypedTree{val: v, updateExternal: true}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+
+	for parent, children := range *ids {
+		for _, leaf := range children {
+			t.appendItem(bindUntypedTreeItem(v, leaf, t.updateExternal), leaf, parent)
+		}
+	}
+
+	return t
+}
+
+type boundUntypedTree struct {
+	treeBase
+
+	updateExternal bool
+	val            *map[string]any
+}
+
+func (t *boundUntypedTree) Append(parent, id string, val any) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append(ids, id)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) Get() (map[string][]string, map[string]any, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	return t.ids, *t.val, nil
+}
+
+func (t *boundUntypedTree) GetValue(id string) (any, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if item, ok := (*t.val)[id]; ok {
+		return item, nil
+	}
+
+	return nil, errOutOfBounds
+}
+
+func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append([]string{id}, ids...)
+	v := *t.val
+	v[id] = val
+
+	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundUntypedTree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
+}
+
+func (t *boundUntypedTree) Reload() error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]any) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	t.ids = ids
+	*t.val = v
+
+	return t.doReload()
+}
+
+func (t *boundUntypedTree) doReload() (retErr error) {
+	updated := []string{}
+	fire := false
+	for id := range *t.val {
+		found := false
+		for child := range t.items {
+			if child == id { // update existing
+				updated = append(updated, id)
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		// append new
+		t.appendItem(bindUntypedTreeItem(t.val, id, t.updateExternal), id, parentIDFor(id, t.ids))
+		updated = append(updated, id)
+		fire = true
+	}
+
+	for id := range t.items {
+		remove := true
+		for _, done := range updated {
+			if done == id {
+				remove = false
+				break
+			}
+		}
+
+		if remove { // remove item no longer present
+			fire = true
+			t.deleteItem(id, parentIDFor(id, t.ids))
+		}
+	}
+	if fire {
+		t.trigger()
+	}
+
+	for id, item := range t.items {
+		var err error
+		if t.updateExternal {
+			item.(*boundExternalUntypedTreeItem).lock.Lock()
+			err = item.(*boundExternalUntypedTreeItem).setIfChanged((*t.val)[id])
+			item.(*boundExternalUntypedTreeItem).lock.Unlock()
+		} else {
+			item.(*boundUntypedTreeItem).lock.Lock()
+			err = item.(*boundUntypedTreeItem).doSet((*t.val)[id])
+			item.(*boundUntypedTreeItem).lock.Unlock()
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (t *boundUntypedTree) SetValue(id string, v any) error {
+	t.lock.Lock()
+	(*t.val)[id] = v
+	t.lock.Unlock()
+
+	item, err := t.GetItem(id)
+	if err != nil {
+		return err
+	}
+	return item.(Untyped).Set(v)
+}
+
+func bindUntypedTreeItem(v *map[string]any, id string, external bool) Untyped {
+	if external {
+		ret := &boundExternalUntypedTreeItem{old: (*v)[id]}
+		ret.val = v
+		ret.id = id
+		return ret
+	}
+
+	return &boundUntypedTreeItem{id: id, val: v}
+}
+
+type boundUntypedTreeItem struct {
+	base
+
+	val *map[string]any
+	id  string
+}
+
+func (t *boundUntypedTreeItem) Get() (any, error) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	v := *t.val
+	if item, ok := v[t.id]; ok {
+		return item, nil
+	}
+
+	return nil, errOutOfBounds
+}
+
+func (t *boundUntypedTreeItem) Set(val any) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	return t.doSet(val)
+}
+
+func (t *boundUntypedTreeItem) doSet(val any) error {
+	(*t.val)[t.id] = val
+
+	t.trigger()
+	return nil
+}
+
+type boundExternalUntypedTreeItem struct {
+	boundUntypedTreeItem
+
+	old any
+}
+
+func (t *boundExternalUntypedTreeItem) setIfChanged(val any) error {
+	if val == t.old {
+		return nil
+	}
+	(*t.val)[t.id] = val
+	t.old = val
+
+	t.trigger()
+	return nil
+}
+
 // URITree supports binding a tree of fyne.URI values.
 //
 // Since: 2.4
@@ -1567,6 +2014,7 @@ type URITree interface {
 	Get() (map[string][]string, map[string]fyne.URI, error)
 	GetValue(id string) (fyne.URI, error)
 	Prepend(parent, id string, value fyne.URI) error
+	Remove(id string) error
 	Set(ids map[string][]string, values map[string]fyne.URI) error
 	SetValue(id string, value fyne.URI) error
 }
@@ -1666,6 +2114,32 @@ func (t *boundURITree) Prepend(parent, id string, val fyne.URI) error {
 	v[id] = val
 
 	return t.doReload()
+}
+
+// Remove takes the specified id out of the tree.
+// It will also remove any child items from the data structure.
+//
+// Since: 2.5
+func (t *boundURITree) Remove(id string) error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	return t.doReload()
+}
+
+func (t *boundURITree) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
 }
 
 func (t *boundURITree) Reload() error {

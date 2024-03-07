@@ -115,9 +115,9 @@ func (s *OverlayStack) TopFocusManager() *app.FocusManager {
 }
 
 func (s *OverlayStack) topFocusManager() *app.FocusManager {
-	var fm *app.FocusManager
-	if len(s.focusManagers) > 0 {
-		fm = s.focusManagers[len(s.focusManagers)-1]
+	if len(s.focusManagers) == 0 {
+		return nil
 	}
-	return fm
+
+	return s.focusManagers[len(s.focusManagers)-1]
 }

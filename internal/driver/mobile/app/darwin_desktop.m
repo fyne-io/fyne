@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !ios
+//go:build darwin && !ios
 
 #include "_cgo_export.h"
 #include <pthread.h>

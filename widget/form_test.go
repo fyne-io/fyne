@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/validation"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -150,7 +151,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 func TestForm_Disabled(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	disabled := NewEntry()
 	disabled.Disable()
@@ -167,7 +168,7 @@ func TestForm_Disabled(t *testing.T) {
 func TestForm_Hints(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry1 := &Entry{}
 	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
@@ -192,7 +193,7 @@ func TestForm_Hints(t *testing.T) {
 func TestForm_Validation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "15-true"}
 	entry2 := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
@@ -224,7 +225,7 @@ func TestForm_Validation(t *testing.T) {
 func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	notEmptyValidator := func(s string) error {
 		if s == "" {
@@ -264,7 +265,7 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 func TestForm_DisableEnable(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	form := &Form{
 		Items: []*FormItem{
@@ -300,7 +301,7 @@ func TestForm_DisableEnable(t *testing.T) {
 func TestForm_Disable_Validation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
 
@@ -332,7 +333,7 @@ func TestForm_Disable_Validation(t *testing.T) {
 func TestForm_HintsRendered(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	f := NewForm()
 

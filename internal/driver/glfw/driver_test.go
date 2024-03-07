@@ -1,5 +1,4 @@
 //go:build !no_glfw && !mobile
-// +build !no_glfw,!mobile
 
 package glfw
 
@@ -39,7 +38,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	)
 	// We want to test the handling of the canvas' Fyne menu here.
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
-	c := w.Canvas().(*glCanvas)
+	c := w.canvas
 	movl := buildMenuOverlay(mm, w)
 	c.Lock()
 	c.setMenuOverlay(movl)

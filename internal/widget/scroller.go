@@ -159,12 +159,11 @@ func (r *scrollBarAreaRenderer) Refresh() {
 }
 
 func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
+	scrollBarSize := theme.ScrollBarSize()
 	if scrollLength < contentLength {
 		portion := scrollLength / contentLength
 		length = float32(int(scrollLength)) * portion
-		if length < theme.ScrollBarSize() {
-			length = theme.ScrollBarSize()
-		}
+		length = fyne.Max(length, scrollBarSize)
 	} else {
 		length = scrollLength
 	}
@@ -172,10 +171,10 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
 	if r.area.isLarge {
-		width = theme.ScrollBarSize()
+		width = scrollBarSize
 	} else {
 		widthOffset = theme.ScrollBarSmallSize()
-		width = theme.ScrollBarSmallSize()
+		width = widthOffset
 	}
 	return
 }
@@ -252,20 +251,21 @@ type scrollContainerRenderer struct {
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
+	scrollerSize := r.scroll.size.Load()
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
-		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
+		r.vertArea.Move(fyne.NewPos(scrollerSize.Width-r.vertArea.Size().Width, 0))
 		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
 		r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
-		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
+		r.bottomShadow.Move(fyne.NewPos(0, scrollerSize.Height))
 	}
 
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
-		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
+		r.horizArea.Move(fyne.NewPos(0, scrollerSize.Height-r.horizArea.Size().Height))
 		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
 		r.rightShadow.Resize(fyne.NewSize(0, size.Height))
-		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
+		r.rightShadow.Move(fyne.NewPos(scrollerSize.Width, 0))
 	}
 
 	r.updatePosition()
@@ -287,14 +287,16 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.Objects()[0] = r.scroll.Content
 	}
-	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
-		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
-		r.layoutBars(r.scroll.Size())
+	size := r.scroll.Size()
+	newMin := r.scroll.Content.MinSize()
+	if r.oldMinSize == newMin && r.oldMinSize == r.scroll.Content.Size() &&
+		(size.Width <= r.oldMinSize.Width && size.Height <= r.oldMinSize.Height) {
+		r.layoutBars(size)
 		return
 	}
 
-	r.oldMinSize = r.scroll.Content.MinSize()
-	r.Layout(r.scroll.Size())
+	r.oldMinSize = newMin
+	r.Layout(size)
 }
 
 func (r *scrollContainerRenderer) handleAreaVisibility(contentSize, scrollSize float32, area *scrollBarArea) {
@@ -325,7 +327,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Content == nil {
 		return
 	}
-	scrollSize := r.scroll.Size()
+	scrollSize := r.scroll.size.Load()
 	contentSize := r.scroll.Content.Size()
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
@@ -333,7 +335,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
 		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
-		cache.Renderer(r.vertArea).Layout(r.scroll.size)
+		cache.Renderer(r.vertArea).Layout(scrollSize)
 	} else {
 		r.vertArea.Hide()
 		r.topShadow.Hide()
@@ -342,7 +344,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction == ScrollHorizontalOnly || r.scroll.Direction == ScrollBoth {
 		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
 		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
-		cache.Renderer(r.horizArea).Layout(r.scroll.size)
+		cache.Renderer(r.horizArea).Layout(scrollSize)
 	} else {
 		r.horizArea.Hide()
 		r.leftShadow.Hide()
@@ -368,7 +370,7 @@ type Scroll struct {
 	// You should not update the Scroll.Offset from this method.
 	//
 	// Since: 2.0
-	OnScrolled func(fyne.Position)
+	OnScrolled func(fyne.Position) `json:"-"`
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -445,7 +447,7 @@ func (s *Scroll) Refresh() {
 
 // Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
 func (s *Scroll) Resize(sz fyne.Size) {
-	if sz == s.size {
+	if sz == s.Size() {
 		return
 	}
 
@@ -463,7 +465,9 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
-	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
+	min := s.Content.MinSize()
+	size := s.Size()
+	if size.Width < min.Width && size.Height >= min.Height && dx == 0 {
 		dx, dy = dy, dx
 	}
 	if s.updateOffset(dx, dy) {
@@ -472,7 +476,9 @@ func (s *Scroll) scrollBy(dx, dy float32) {
 }
 
 func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
-	if s.Content.Size().Width <= s.Size().Width && s.Content.Size().Height <= s.Size().Height {
+	size := s.Size()
+	contentSize := s.Content.Size()
+	if contentSize.Width <= size.Width && contentSize.Height <= size.Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
 			s.Offset.Y = 0
@@ -482,8 +488,9 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	}
 	oldX := s.Offset.X
 	oldY := s.Offset.Y
-	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.MinSize().Width)
-	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.MinSize().Height)
+	min := s.Content.MinSize()
+	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
+	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
 	if f := s.OnScrolled; f != nil && (s.Offset.X != oldX || s.Offset.Y != oldY) {
 		f(s.Offset)
 	}
@@ -495,10 +502,8 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 	if offset+outerWidth >= innerWidth {
 		offset = innerWidth - outerWidth
 	}
-	if offset < 0 {
-		offset = 0
-	}
-	return offset
+
+	return fyne.Max(offset, 0)
 }
 
 // NewScroll creates a scrollable parent wrapping the specified content.

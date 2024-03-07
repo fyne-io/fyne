@@ -5,7 +5,9 @@
 				<widget size="192x292" type="*widget.treeContent">
 					<widget size="192x35" type="*widget.leaf">
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="40x19">11111</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="40x19">11111</text>
+							</widget>
 						</widget>
 					</widget>
 					<widget pos="0,36" size="192x1" type="*widget.Separator">
@@ -14,7 +16,9 @@
 					<widget pos="0,39" size="192x35" type="*widget.leaf">
 						<rectangle fillColor="selection" radius="4" size="192x35"/>
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="80x19">2222222222</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="80x19">2222222222</text>
+							</widget>
 						</widget>
 					</widget>
 					<widget pos="0,75" size="192x1" type="*widget.Separator">
@@ -22,7 +26,9 @@
 					</widget>
 					<widget pos="0,78" size="192x35" type="*widget.leaf">
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="120x19">333333333333333</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="120x19">333333333333333</text>
+							</widget>
 						</widget>
 					</widget>
 					<widget pos="0,114" size="192x1" type="*widget.Separator">
@@ -30,7 +36,9 @@
 					</widget>
 					<widget pos="0,117" size="192x35" type="*widget.leaf">
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="160x19">44444444444444444444</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="160x19">44444444444444444444</text>
+							</widget>
 						</widget>
 					</widget>
 				</widget>

@@ -1,5 +1,7 @@
 package fyne
 
+import "time"
+
 // Driver defines an abstract concept of a Fyne render driver.
 // Any implementation must provide at least these methods.
 type Driver interface {
@@ -29,4 +31,15 @@ type Driver interface {
 	StartAnimation(*Animation)
 	// StopAnimation stops an animation and unregisters from this driver.
 	StopAnimation(*Animation)
+
+	// DoubleTapDelay returns the maximum duration where a second tap after a first one
+	// will be considered a DoubleTap instead of two distinct Tap events.
+	//
+	// Since: 2.5
+	DoubleTapDelay() time.Duration
+
+	// SetDisableScreenBlanking allows an app to ask the device not to sleep/lock/blank displays
+	//
+	// Since: 2.5
+	SetDisableScreenBlanking(bool)
 }

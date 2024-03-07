@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -17,8 +18,7 @@ import (
 )
 
 const (
-	doubleClickDelay  = 300 // ms (maximum interval between clicks for double click detection)
-	dragMoveThreshold = 2   // how far can we move before it is a drag
+	dragMoveThreshold = 2 // how far can we move before it is a drag
 	windowIconSize    = 256
 )
 
@@ -135,11 +135,7 @@ func (w *window) doShow() {
 		return
 	}
 
-	run.L.Lock()
-	for !run.flag {
-		run.Wait()
-	}
-	run.L.Unlock()
+	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
@@ -153,13 +149,15 @@ func (w *window) doShow() {
 		view := w.view()
 		view.SetTitle(w.title)
 
-		if w.centered {
+		if !build.IsWayland && w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
 		}
 		view.Show()
 
 		// save coordinates
-		w.xpos, w.ypos = view.GetPos()
+		if !build.IsWayland {
+			w.xpos, w.ypos = view.GetPos()
+		}
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			go func() {
@@ -234,14 +232,7 @@ func (w *window) ShowAndRun() {
 
 // Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.view() == nil {
-		return nil
-	}
-
-	if w.clipboard == nil {
-		w.clipboard = &clipboard{window: w.viewport}
-	}
-	return w.clipboard
+	return &clipboard{}
 }
 
 func (w *window) Content() fyne.CanvasObject {
@@ -281,7 +272,6 @@ func (w *window) processClosed() {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
-	w.DestroyEventQueue()
 	cache.CleanCanvas(w.canvas)
 
 	if w.master {
@@ -289,6 +279,7 @@ func (w *window) destroy(d *gLDriver) {
 	} else if runtime.GOOS == "darwin" {
 		go d.focusPreviousWindow()
 	}
+	w.DestroyEventQueue()
 }
 
 func (w *window) processMoved(x, y int) {
@@ -466,7 +457,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 	}
 }
 
-func (w *window) objIsDragged(obj interface{}) bool {
+func (w *window) objIsDragged(obj any) bool {
 	if w.mouseDragged != nil && obj != nil {
 		draggedObj, _ := obj.(fyne.Draggable)
 		return draggedObj == w.mouseDragged
@@ -657,7 +648,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	var ctx context.Context
 	w.mouseLock.Lock()
-	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(doubleTapDelay))
 	defer w.mouseCancelFunc()
 	w.mouseLock.Unlock()
 
@@ -808,7 +799,9 @@ func (w *window) processCharInput(char rune) {
 func (w *window) processFocused(focus bool) {
 	if focus {
 		if curWindow == nil {
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerEnteredForeground()
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnEnteredForeground(); f != nil {
+				w.QueueEvent(f)
+			}
 		}
 		curWindow = w
 		w.canvas.FocusGained()
@@ -825,7 +818,9 @@ func (w *window) processFocused(focus bool) {
 			}
 
 			curWindow = nil
-			fyne.CurrentApp().Lifecycle().(*app.Lifecycle).TriggerExitedForeground()
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
+				w.QueueEvent(f)
+			}
 		}()
 	}
 }
@@ -833,7 +828,7 @@ func (w *window) processFocused(focus bool) {
 func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier fyne.KeyModifier) bool {
 	var shortcut fyne.Shortcut
 	ctrlMod := fyne.KeyModifierControl
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		ctrlMod = fyne.KeyModifierSuper
 	}
 	// User pressing physical keys Ctrl+V while using a Russian (or any non-ASCII) keyboard layout
@@ -849,6 +844,12 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 	}
 	if modifier == ctrlMod {
 		switch keyName {
+		case fyne.KeyZ:
+			// detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY:
+			// detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
 		case fyne.KeyV:
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
@@ -929,7 +930,7 @@ func (w *window) RescaleContext() {
 	runOnMain(w.rescaleOnMain)
 }
 
-func (w *window) Context() interface{} {
+func (w *window) Context() any {
 	return nil
 }
 
@@ -979,7 +980,9 @@ func (w *window) doShowAgain() {
 		}
 
 		view := w.view()
-		view.SetPos(w.xpos, w.ypos)
+		if !build.IsWayland {
+			view.SetPos(w.xpos, w.ypos)
+		}
 		view.Show()
 		w.viewLock.Lock()
 		w.visible = true

@@ -123,6 +123,19 @@ func TestStringTree_GetValue(t *testing.T) {
 	assert.Equal(t, "0.5", v)
 }
 
+func TestStringTree_Remove(t *testing.T) {
+	f := NewStringTree()
+	f.Append(DataTreeRootID, "5", "five")
+	f.Append(DataTreeRootID, "3", "three")
+	f.Append("5", "53", "fifty three")
+	assert.Equal(t, 2, len(f.ChildIDs(DataTreeRootID)))
+	assert.Equal(t, 1, len(f.ChildIDs("5")))
+
+	f.Remove("5")
+	assert.Equal(t, 1, len(f.ChildIDs(DataTreeRootID)))
+	assert.Equal(t, 0, len(f.ChildIDs("5")))
+}
+
 func TestFloatTree_Set(t *testing.T) {
 	ids := map[string][]string{"": {"1", "2"}, "1": {"3"}}
 	m := map[string]float64{"1": 1.0, "2": 5.0, "3": 2.3}

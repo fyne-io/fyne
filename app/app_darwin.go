@@ -1,5 +1,4 @@
-//go:build !ci && !js && !wasm && !test_web_driver
-// +build !ci,!js,!wasm,!test_web_driver
+//go:build !ci && !wasm && !test_web_driver
 
 package app
 
@@ -16,11 +15,11 @@ void sendNotification(char *title, char *content);
 import "C"
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
-	"golang.org/x/sys/execabs"
 )
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
@@ -53,7 +52,7 @@ func fallbackNotification(title, content string) {
 	template := `display notification "%s" with title "%s"`
 	script := fmt.Sprintf(template, escapeNotificationString(content), escapeNotificationString(title))
 
-	err := execabs.Command("osascript", "-e", script).Start()
+	err := exec.Command("osascript", "-e", script).Start()
 	if err != nil {
 		fyne.LogError("Failed to launch darwin notify script", err)
 	}

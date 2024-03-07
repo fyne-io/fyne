@@ -1,5 +1,4 @@
 //go:build !mobile
-// +build !mobile
 
 package container_test
 
