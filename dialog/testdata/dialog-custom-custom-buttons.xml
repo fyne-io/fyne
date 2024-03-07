@@ -22,7 +22,9 @@
 					<rectangle fillColor="rgba(34,34,34,230)" size="153x142"/>
 				</widget>
 				<widget pos="16,51" size="121x35" type="*widget.Label">
-					<text pos="8,8" size="105x19">Custom buttons</text>
+					<widget size="121x35" type="*widget.RichText">
+						<text pos="8,8" size="105x19">Custom buttons</text>
+					</widget>
 				</widget>
 				<container pos="36,90" size="80x36">
 					<widget size="24x36" type="*widget.Button">
@@ -48,7 +50,9 @@
 					</widget>
 				</container>
 				<widget size="0x0" type="*widget.Label">
-					<text bold pos="8,8" size="28x19">Test</text>
+					<widget size="0x0" type="*widget.RichText">
+						<text bold pos="8,8" size="28x19">Test</text>
+					</widget>
 				</widget>
 			</container>
 		</widget>

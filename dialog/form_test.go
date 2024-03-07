@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -87,7 +89,7 @@ func TestFormDialog_Hints(t *testing.T) {
 
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 	w := test.NewWindow(nil)
 	w.SetFullScreen(true)
 

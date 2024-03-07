@@ -45,7 +45,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 
 func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
-		i.resource = theme.FileIcon()
+		i.resource = i.themeWithLock().Icon(theme.IconNameFile)
 		return
 	}
 
@@ -62,6 +62,9 @@ func (i *FileIcon) MinSize() fyne.Size {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
+	th := i.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	i.ExtendBaseWidget(i)
 	i.propertyLock.Lock()
 	i.setURI(i.URI)
@@ -71,13 +74,13 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	defer i.propertyLock.RUnlock()
 
 	// TODO remove background when `SetSelected` is gone.
-	background := canvas.NewRectangle(theme.SelectionColor())
+	background := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
 	s.img = canvas.NewImageFromResource(s.file.resource)
 	s.img.FillMode = canvas.ImageFillContain
-	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
+	s.ext = canvas.NewText(s.file.extension, th.Color(theme.ColorNameBackground, v))
 	s.ext.Alignment = fyne.TextAlignCenter
 
 	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
@@ -94,24 +97,28 @@ func (i *FileIcon) SetSelected(selected bool) {
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
+	if icon, ok := uri.(fyne.URIWithIcon); ok {
+		return icon.Icon()
+	}
 	if i.isDir(uri) {
 		return theme.FolderIcon()
 	}
 
+	th := i.themeWithLock()
 	mainMimeType, _ := mime.Split(uri.MimeType())
 	switch mainMimeType {
 	case "application":
-		return theme.FileApplicationIcon()
+		return th.Icon(theme.IconNameFileApplication)
 	case "audio":
-		return theme.FileAudioIcon()
+		return th.Icon(theme.IconNameFileAudio)
 	case "image":
-		return theme.FileImageIcon()
+		return th.Icon(theme.IconNameFileImage)
 	case "text":
-		return theme.FileTextIcon()
+		return th.Icon(theme.IconNameFileText)
 	case "video":
-		return theme.FileVideoIcon()
+		return th.Icon(theme.IconNameFileVideo)
 	default:
-		return theme.FileIcon()
+		return th.Icon(theme.IconNameFile)
 	}
 }
 
@@ -140,7 +147,8 @@ type fileIconRenderer struct {
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
-	return fyne.NewSquareSize(theme.IconInlineSize())
+	th := s.file.Theme()
+	return fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
@@ -167,6 +175,9 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileIconRenderer) Refresh() {
+	th := s.file.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	s.file.propertyLock.Lock()
 	s.file.setURI(s.file.URI)
 	s.file.propertyLock.Unlock()
@@ -178,18 +189,19 @@ func (s *fileIconRenderer) Refresh() {
 
 	if s.file.Selected {
 		s.background.Show()
-		s.ext.Color = theme.SelectionColor()
+		s.ext.Color = th.Color(theme.ColorNameSelection, v)
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}
 	} else {
 		s.background.Hide()
-		s.ext.Color = theme.BackgroundColor()
+		s.ext.Color = th.Color(theme.ColorNameBackground, v)
 		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
 			s.img.Resource = res.Original()
 		}
 	}
 
+	s.img.Refresh()
 	canvas.Refresh(s.file.super())
 	canvas.Refresh(s.ext)
 }

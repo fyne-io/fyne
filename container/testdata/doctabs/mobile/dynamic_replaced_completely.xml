@@ -4,21 +4,21 @@
 			<container size="300x36">
 				<widget size="260x36" type="*widget.Scroll">
 					<container size="260x36">
-						<widget size="84x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="76x19">Test6</text>
-							<widget pos="60,8" size="20x20" type="*container.tabCloseButton">
+						<widget size="76x36" type="*container.tabButton">
+							<text bold color="primary" pos="8,8" size="60x20">Test6</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
-						<widget pos="88,0" size="84x36" type="*container.tabButton">
-							<text bold pos="4,8" size="76x19">Test7</text>
-							<widget pos="60,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="80,0" size="76x36" type="*container.tabButton">
+							<text bold pos="8,8" size="60x20">Test7</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
-						<widget pos="176,0" size="84x36" type="*container.tabButton">
-							<text bold pos="4,8" size="76x19">Test8</text>
-							<widget pos="60,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="160,0" size="76x36" type="*container.tabButton">
+							<text bold pos="8,8" size="60x20">Test8</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
@@ -33,9 +33,11 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,36" radius="4" size="84x4"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="76x4"/>
 			<widget pos="0,40" size="300x110" type="*widget.Label">
-				<text pos="8,8" size="38x19">Text 6</text>
+				<widget size="300x110" type="*widget.RichText">
+					<text pos="8,8" size="38x19">Text 6</text>
+				</widget>
 			</widget>
 		</widget>
 	</content>

@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build darwin || linux || openbsd || freebsd
-// +build darwin linux openbsd freebsd
 
 #include <stdlib.h>
 #include "_cgo_export.h"

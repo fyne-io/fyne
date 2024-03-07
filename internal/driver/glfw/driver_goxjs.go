@@ -1,5 +1,4 @@
-//go:build js
-// +build js
+//go:build wasm
 
 package glfw
 

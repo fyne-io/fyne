@@ -1,11 +1,17 @@
 package widget
 
 import (
+	"image"
+	"image/color"
 	"net/url"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
+	internalTest "fyne.io/fyne/v2/internal/test"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -48,7 +54,8 @@ func TestHyperlink_Cursor(t *testing.T) {
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	hyperlink.CreateRenderer()
-	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink.provider)[0].Alignment)
+
+	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(&hyperlink.provider)[0].Alignment)
 }
 
 func TestHyperlink_Hide(t *testing.T) {
@@ -68,7 +75,7 @@ func TestHyperlink_Hide(t *testing.T) {
 func TestHyperlink_Focus(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	w := test.NewWindow(hyperlink)
@@ -128,7 +135,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)
-	assert.Equal(t, "New", textRenderTexts(hyperlink.provider)[0].Text)
+	assert.Equal(t, "New", richTextRenderTexts(&hyperlink.provider)[0].Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
@@ -144,6 +151,50 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
+}
+
+func TestHyperlink_ThemeOverride(t *testing.T) {
+	_ = test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+
+	hyperlink := &Hyperlink{Text: "Test"}
+	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
+	w := test.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, hyperlink}})
+	w.SetPadded(false)
+	defer w.Close()
+	w.Resize(hyperlink.MinSize())
+
+	light := w.Canvas().Capture()
+	test.ApplyTheme(t, test.Theme())
+	hyperlink.Refresh()
+	ugly := w.Canvas().Capture()
+	assertPixelsMatch(t, false, ugly, light)
+
+	cache.OverrideTheme(hyperlink, internalTest.LightTheme(theme.DefaultTheme()))
+	hyperlink.Refresh()
+	override := w.Canvas().Capture()
+	assertPixelsMatch(t, true, override, light)
+}
+
+func TestHyperlink_Truncate(t *testing.T) {
+	hyperlink := &Hyperlink{Text: "TestingWithLongText"}
+	hyperlink.CreateRenderer()
+	hyperlink.Resize(fyne.NewSize(100, 20))
+
+	texts := richTextRenderTexts(&hyperlink.provider)
+	assert.Equal(t, "TestingWithLongText", texts[0].Text)
+
+	hyperlink.Truncation = fyne.TextTruncateClip
+	hyperlink.Refresh()
+	texts = richTextRenderTexts(&hyperlink.provider)
+	assert.Equal(t, "TestingWith", texts[0].Text)
+
+	hyperlink.Truncation = fyne.TextTruncateEllipsis
+	hyperlink.Refresh()
+	texts = richTextRenderTexts(&hyperlink.provider)
+	assert.Equal(t, "TestingWi…", texts[0].Text)
 }
 
 func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {
@@ -163,4 +214,14 @@ func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {
 	r.Layout(size)
 	assert.Equal(t, size, link.Size())
 	assert.Equal(t, size, link.MinSize())
+}
+
+func assertPixelsMatch(t *testing.T, match bool, img1, img2 image.Image) {
+	pix1 := img1.(*image.NRGBA).Pix
+	pix2 := img2.(*image.NRGBA).Pix
+	if match {
+		assert.Equal(t, pix1, pix2)
+	} else {
+		assert.NotEqual(t, pix1, pix2)
+	}
 }

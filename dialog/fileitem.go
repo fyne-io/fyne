@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -49,7 +50,7 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	}
 
 	if up {
-		i.name = "(Parent)"
+		i.name = "(" + lang.X("file.parent", "Parent") + ")"
 	}
 
 	i.Refresh()
@@ -69,7 +70,7 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 	}
 
 	if up {
-		item.name = "(Parent)"
+		item.name = "(" + lang.X("file.parent", "Parent") + ")"
 	}
 
 	item.ExtendBaseWidget(item)

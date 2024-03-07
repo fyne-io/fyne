@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,19 +47,19 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.Equal(t, fmt.Sprintf("primary_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
 
 	check.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonCheckedIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))
 }
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	render := test.WidgetRenderer(check).(*checkRenderer)
-	assert.Equal(t, fmt.Sprintf("inputBorder_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "inputBorder_"))
 
 	check.Disable()
-	assert.Equal(t, fmt.Sprintf("disabled_%v", theme.CheckButtonIcon().Name()), render.icon.Resource.Name())
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))
 }
 
 func TestCheckIsDisabledByDefault(t *testing.T) {
@@ -147,7 +147,7 @@ func TestCheck_Focused(t *testing.T) {
 	}
 
 	check.Disable()
-	assert.True(t, check.disabled)
+	assert.True(t, check.Disabled())
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
 	check.Enable()
@@ -185,7 +185,7 @@ func TestCheck_Hovered(t *testing.T) {
 	}
 
 	check.Disable()
-	assert.True(t, check.disabled)
+	assert.True(t, check.Disabled())
 	assert.True(t, check.hovered)
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 
@@ -273,12 +273,14 @@ func TestCheck_Disabled(t *testing.T) {
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
+		th := test.NewTheme()
+		render.applyTheme(th, v)
 		customTextSize = render.label.TextSize
 	})
 

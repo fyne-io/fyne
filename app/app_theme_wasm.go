@@ -1,5 +1,4 @@
 //go:build !ci && wasm
-// +build !ci,wasm
 
 package app
 
@@ -23,7 +22,7 @@ func defaultVariant() fyne.ThemeVariant {
 
 func init() {
 	if matchMedia := js.Global().Call("matchMedia", "(prefers-color-scheme: dark)"); matchMedia.Truthy() {
-		matchMedia.Call("addEventListener", "change", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		matchMedia.Call("addEventListener", "change", js.FuncOf(func(this js.Value, args []js.Value) any {
 			fyne.CurrentApp().Settings().(*settings).setupTheme()
 			return nil
 		}))

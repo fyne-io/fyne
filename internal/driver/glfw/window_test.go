@@ -1,5 +1,4 @@
 //go:build !no_glfw && !mobile
-// +build !no_glfw,!mobile
 
 package glfw
 
@@ -17,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/scale"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -36,15 +36,11 @@ func init() {
 // TestMain makes sure that our driver is running on the main thread.
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
-	d.(*gLDriver).initGLFW()
+	d.initGLFW()
 	go func() {
 		// Wait for GLFW loop to be running.
 		// If we try to create windows before the context is created, this will fail with an exception.
-		run.L.Lock()
-		for !run.flag {
-			run.Wait()
-		}
-		run.L.Unlock()
+		<-d.waitForStart
 
 		initMainMenu()
 		os.Exit(m.Run())
@@ -72,9 +68,14 @@ func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
-	d := NewGLDriver().(desktop.Driver)
+	d := NewGLDriver()
 	w := d.CreateSplashWindow().(*window)
 	w.create()
+
+	// Verify that the glfw driver implements desktop.Driver.
+	var driver fyne.Driver = d
+	_, ok := driver.(desktop.Driver)
+	assert.True(t, ok)
 
 	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
 	assert.False(t, w.Padded())
@@ -100,7 +101,7 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
+	c := w.canvas
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
 	menuBar := buildMenuOverlay(m, w).(*MenuBar)
 	c.Lock()
@@ -305,7 +306,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w := createWindow("Test").(*window)
-	test.ApplyTheme(t, theme.DarkTheme())
+	test.ApplyTheme(t, internalTest.DarkTheme(theme.DefaultTheme()))
 	l := widget.NewList(
 		func() int { return 2 },
 		func() fyne.CanvasObject { return widget.NewEntry() },
@@ -1152,7 +1153,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w := createWindow("Test").(*window)
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	tapped := false
@@ -1223,14 +1224,14 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	waitSingleTapped := make(chan struct{})
 	waitDoubleTapped := make(chan struct{})
-	tapped := int32(0) // atomic
+	tapped := atomic.Int32{}
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
-		atomic.StoreInt32(&tapped, 1)
+		tapped.Store(1)
 		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
-		atomic.StoreInt32(&tapped, 2)
+		tapped.Store(2)
 		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
@@ -1243,8 +1244,8 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&tapped), "Single tap should have fired")
-	atomic.StoreInt32(&tapped, 0)
+	assert.Equal(t, int32(1), tapped.Load(), "Single tap should have fired")
+	tapped.Store(0)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
@@ -1255,7 +1256,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.WaitForEvents()
 	time.Sleep(500 * time.Millisecond)
 
-	assert.Equal(t, int32(2), atomic.LoadInt32(&tapped), "Double tap should have fired")
+	assert.Equal(t, int32(2), tapped.Load(), "Double tap should have fired")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -1435,7 +1436,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	} else {
 		menuHeight = canvas.NewText("", color.Black).MinSize().Height + theme.Padding()*2
 	}
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	tests := []struct {
 		name               string
 		padding            bool
@@ -1655,7 +1656,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing", e.SelectedText())
 
 	ctrlMod := glfw.ModControl
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		ctrlMod = glfw.ModSuper
 	}
 	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
@@ -1686,7 +1687,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	// Note: The #Close() is run asynchronously when the window is notified about the viewport close.
 	// Therefore, we have to wait some time before checking its state via the onClosed callback.
 
-	d := NewGLDriver().(*gLDriver)
+	d := NewGLDriver()
 	t.Run("when closing window with #Close()", func(t *testing.T) {
 		w := d.CreateWindow("test").(*window)
 		w.create()
@@ -1813,9 +1814,9 @@ type hoverableObject struct {
 var _ desktop.Hoverable = (*hoverable)(nil)
 
 type hoverable struct {
-	mouseInEvents    []interface{}
-	mouseOutEvents   []interface{}
-	mouseMovedEvents []interface{}
+	mouseInEvents    []any
+	mouseOutEvents   []any
+	mouseMovedEvents []any
 }
 
 func (h *hoverable) MouseIn(e *desktop.MouseEvent) {
@@ -1830,17 +1831,17 @@ func (h *hoverable) MouseOut() {
 	h.mouseOutEvents = append(h.mouseOutEvents, true)
 }
 
-func (h *hoverable) popMouseInEvent() (e interface{}) {
+func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
 	return
 }
 
-func (h *hoverable) popMouseMovedEvent() (e interface{}) {
+func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
 	return
 }
 
-func (h *hoverable) popMouseOutEvent() (e interface{}) {
+func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
 	return
 }
@@ -1853,8 +1854,8 @@ type draggableObject struct {
 var _ fyne.Draggable = (*draggable)(nil)
 
 type draggable struct {
-	events    []interface{}
-	endEvents []interface{}
+	events    []any
+	endEvents []any
 }
 
 func (d *draggable) Dragged(e *fyne.DragEvent) {
@@ -1865,12 +1866,12 @@ func (d *draggable) DragEnd() {
 	d.endEvents = append(d.endEvents, true)
 }
 
-func (d *draggable) popDragEvent() (e interface{}) {
+func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
 	return
 }
 
-func (d *draggable) popDragEndEvent() (e interface{}) {
+func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
 	return
 }
@@ -1889,7 +1890,7 @@ type mouseableObject struct {
 var _ desktop.Mouseable = (*mouseable)(nil)
 
 type mouseable struct {
-	mouseEvents []interface{}
+	mouseEvents []any
 }
 
 func (m *mouseable) MouseDown(e *desktop.MouseEvent) {
@@ -1900,7 +1901,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 	m.mouseEvents = append(m.mouseEvents, e)
 }
 
-func (m *mouseable) popMouseEvent() (e interface{}) {
+func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
 	return
 }
@@ -1919,8 +1920,8 @@ type tappableObject struct {
 var _ fyne.Tappable = (*tappable)(nil)
 
 type tappable struct {
-	tapEvents          []interface{}
-	secondaryTapEvents []interface{}
+	tapEvents          []any
+	secondaryTapEvents []any
 }
 
 func (t *tappable) Tapped(e *fyne.PointEvent) {
@@ -1931,12 +1932,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
 }
 
-func (t *tappable) popTapEvent() (e interface{}) {
+func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
 	return
 }
 
-func (t *tappable) popSecondaryTapEvent() (e interface{}) {
+func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
 }
@@ -2007,14 +2008,14 @@ var _ fyne.Scrollable = (*scrollable)(nil)
 
 type scrollable struct {
 	*canvas.Rectangle
-	events []interface{}
+	events []any
 }
 
 func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 	s.events = append(s.events, e)
 }
 
-func (s *scrollable) popScrollEvent() (e interface{}) {
+func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
 	return
 }
@@ -2023,7 +2024,7 @@ func (s *scrollable) popScrollEvent() (e interface{}) {
 // Test helper
 //
 
-func pop(s []interface{}) (interface{}, []interface{}) {
+func pop(s []any) (any, []any) {
 	if len(s) == 0 {
 		return nil, s
 	}

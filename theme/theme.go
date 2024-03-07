@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
 
 const (
@@ -24,9 +25,12 @@ const (
 	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
 )
 
+var defaultTheme fyne.Theme
+
 // DarkTheme defines the built-in dark theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+// If developers want to ignore user preference for theme variant they can set a custom theme.
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantDark}
 
@@ -48,16 +52,13 @@ func DefaultTheme() fyne.Theme {
 // LightTheme defines the built-in light theme colors and sizes.
 //
 // Deprecated: This method ignores user preference and should not be used, it will be removed in v3.0.
+// If developers want to ignore user preference for theme variant they can set a custom theme.
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{variant: VariantLight}
 
 	theme.initFonts()
 	return theme
 }
-
-var (
-	defaultTheme fyne.Theme
-)
 
 type builtinTheme struct {
 	variant fyne.ThemeVariant
@@ -171,7 +172,11 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	}
 }
 
-func current() fyne.Theme {
+// Current returns the theme that is currently used for the running application.
+// It looks up based on user preferences and application configuration.
+//
+// Since: 2.5
+func Current() fyne.Theme {
 	app := fyne.CurrentApp()
 	if app == nil {
 		return DarkTheme()
@@ -184,8 +189,20 @@ func current() fyne.Theme {
 	return currentTheme
 }
 
+// CurrentForWidget returns the theme that is currently used for the specified widget.
+// It looks for widget overrides and falls back to the application's current theme.
+//
+// Since: 2.5
+func CurrentForWidget(w fyne.Widget) fyne.Theme {
+	if custom := cache.WidgetTheme(w); custom != nil {
+		return custom
+	}
+
+	return Current()
+}
+
 func currentVariant() fyne.ThemeVariant {
-	if std, ok := current().(*builtinTheme); ok {
+	if std, ok := Current().(*builtinTheme); ok {
 		if std.variant != variantNameUserPreference {
 			return std.variant // override if using the old LightTheme() or DarkTheme() constructor
 		}

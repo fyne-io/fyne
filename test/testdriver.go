@@ -3,6 +3,7 @@ package test
 import (
 	"image"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver"
@@ -128,4 +129,12 @@ func (d *testDriver) removeWindow(w *testWindow) {
 
 	d.windows = append(d.windows[:i], d.windows[i+1:]...)
 	d.windowsMutex.Unlock()
+}
+
+func (d *testDriver) DoubleTapDelay() time.Duration {
+	return 300 * time.Millisecond
+}
+
+func (d *testDriver) SetDisableScreenBlanking(_ bool) {
+	// no-op for test
 }

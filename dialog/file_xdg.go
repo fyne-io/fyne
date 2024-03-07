@@ -1,28 +1,24 @@
 //go:build (linux || openbsd || freebsd || netbsd) && !android && !wasm && !js
-// +build linux openbsd freebsd netbsd
-// +build !android
-// +build !wasm
-// +build !js
 
 package dialog
 
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
-
-	"golang.org/x/sys/execabs"
 )
 
 func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI, error) {
 	cmdName := "xdg-user-dir"
-	if _, err := execabs.LookPath(cmdName); err != nil {
+	if _, err := exec.LookPath(cmdName); err != nil {
 		return storage.Child(homeURI, fallbackName) // no lookup possible
 	}
 
-	cmd := execabs.Command(cmdName, name)
+	cmd := exec.Command(cmdName, name)
 	loc, err := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, fallbackName)
@@ -32,7 +28,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	loc = loc[:len(loc)-1]
 	locURI := storage.NewFileURI(string(loc))
 
-	if locURI.String() == homeURI.String() {
+	if strings.TrimRight(locURI.String(), "/") == strings.TrimRight(homeURI.String(), "/") {
 		fallback, _ := storage.Child(homeURI, fallbackName)
 		return fallback, fmt.Errorf("this computer does not define a %s folder", name)
 	}
@@ -63,6 +59,9 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
 		uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
+		if err != nil {
+			continue
+		}
 
 		listURI, err1 := storage.ListerForURI(uri)
 		if err1 != nil {

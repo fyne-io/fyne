@@ -499,7 +499,7 @@ func (r *Releaser) validate() error {
 	return nil
 }
 
-func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData interface{}) (cleanup func(), err error) {
+func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData any) (cleanup func(), err error) {
 	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
 	entitlements, err := os.Create(entitlementPath)
 	if err != nil {

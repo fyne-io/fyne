@@ -1,5 +1,4 @@
 //go:build ios
-// +build ios
 
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>

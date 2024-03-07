@@ -11,14 +11,15 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 type baseObject struct {
-	size     fyne.Size     // The current size of the canvas object
-	position fyne.Position // The current position of the object
-	Hidden   bool          // Is this object currently hidden
+	size     async.Size     // The current size of the canvas object
+	position async.Position // The current position of the object
+	Hidden   bool           // Is this object currently hidden
 
-	min fyne.Size // The minimum size this object can be
+	min async.Size // The minimum size this object can be
 
 	propertyLock sync.RWMutex
 }
@@ -33,46 +34,32 @@ func (o *baseObject) Hide() {
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (o *baseObject) MinSize() fyne.Size {
-	o.propertyLock.RLock()
-	defer o.propertyLock.RUnlock()
-
-	if o.min.Width == 0 && o.min.Height == 0 {
-		return fyne.NewSize(1, 1)
+	min := o.min.Load()
+	if min.IsZero() {
+		return fyne.Size{Width: 1, Height: 1}
 	}
 
-	return o.min
+	return min
 }
 
 // Move the object to a new position, relative to its parent.
 func (o *baseObject) Move(pos fyne.Position) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	o.position = pos
+	o.position.Store(pos)
 }
 
 // Position gets the current position of this canvas object, relative to its parent.
 func (o *baseObject) Position() fyne.Position {
-	o.propertyLock.RLock()
-	defer o.propertyLock.RUnlock()
-
-	return o.position
+	return o.position.Load()
 }
 
 // Resize sets a new size for the canvas object.
 func (o *baseObject) Resize(size fyne.Size) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	o.size = size
+	o.size.Store(size)
 }
 
 // SetMinSize specifies the smallest size this object should be.
 func (o *baseObject) SetMinSize(size fyne.Size) {
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
-
-	o.min = size
+	o.min.Store(size)
 }
 
 // Show will set this object to be visible.
@@ -85,10 +72,7 @@ func (o *baseObject) Show() {
 
 // Size returns the current size of this canvas object.
 func (o *baseObject) Size() fyne.Size {
-	o.propertyLock.RLock()
-	defer o.propertyLock.RUnlock()
-
-	return o.size
+	return o.size.Load()
 }
 
 // Visible returns true if this object is visible, false otherwise.

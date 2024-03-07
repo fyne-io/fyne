@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	fontSizeCache = map[fontSizeEntry]fontMetric{}
+	fontSizeCache = map[fontSizeEntry]*fontMetric{}
 	fontSizeLock  = sync.RWMutex{}
 )
 
@@ -40,7 +40,7 @@ func GetFontMetrics(text string, fontSize float32, style fyne.TextStyle) (size f
 // SetFontMetrics stores a calculated font size and baseline for parameters that were missing from the cache.
 func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, size fyne.Size, base float32) {
 	ent := fontSizeEntry{text, fontSize, style}
-	metric := fontMetric{size: size, baseLine: base}
+	metric := &fontMetric{size: size, baseLine: base}
 	metric.setAlive()
 	fontSizeLock.Lock()
 	fontSizeCache[ent] = metric

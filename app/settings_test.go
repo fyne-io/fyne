@@ -6,10 +6,12 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"github.com/stretchr/testify/assert"
-
+	"fyne.io/fyne/v2/internal/build"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSettingsBuildType(t *testing.T) {
@@ -17,7 +19,7 @@ func TestSettingsBuildType(t *testing.T) {
 	assert.Equal(t, fyne.BuildStandard, set.BuildType()) // during test we should have a normal build
 
 	set = &settings{}
-	assert.Equal(t, buildMode, set.BuildType()) // when testing this package only it could be debug or release
+	assert.Equal(t, build.Mode, set.BuildType()) // when testing this package only it could be debug or release
 }
 
 func TestSettingsLoad(t *testing.T) {
@@ -99,7 +101,7 @@ func TestCustomTheme(t *testing.T) {
 		fyne.Theme
 	}
 	set := &settings{}
-	ctheme := &customTheme{theme.LightTheme()}
+	ctheme := &customTheme{internalTest.LightTheme(theme.DefaultTheme())}
 	set.SetTheme(ctheme)
 
 	set.setupTheme()

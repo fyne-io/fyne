@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -27,7 +28,7 @@ func imageToPlayground(img image.Image) {
 
 // RenderCanvas takes a canvas and converts it into an inline image for showing in the playground
 func RenderCanvas(c fyne.Canvas) {
-	imageToPlayground(software.RenderCanvas(c, theme.DarkTheme()))
+	imageToPlayground(software.RenderCanvas(c, test.DarkTheme(theme.DefaultTheme())))
 }
 
 // RenderWindow takes a window and converts it's canvas into an inline image for showing in the playground
@@ -37,5 +38,5 @@ func RenderWindow(w fyne.Window) {
 
 // Render takes a canvasobject and converts it into an inline image for showing in the playground
 func Render(obj fyne.CanvasObject) {
-	imageToPlayground(software.Render(obj, theme.DarkTheme()))
+	imageToPlayground(software.Render(obj, test.DarkTheme(theme.DefaultTheme())))
 }

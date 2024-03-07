@@ -272,6 +272,23 @@ func (l *List) scrollByOnePage(down bool) {
 	l.Refresh()
 }
 
+// ScrollToOffset scrolls the list to the given offset position.
+//
+// Since: 2.5
+func (l *List) ScrollToOffset(offset float32) {
+	if l.scroller == nil {
+		return
+	}
+	if offset < 0 {
+		offset = 0
+	} else if h := l.contentMinSize().Height; offset > h {
+		offset = h
+	}
+	l.scroller.Offset.Y = offset
+	l.offsetUpdated(l.scroller.Offset)
+	l.Refresh()
+}
+
 // ScrollUpOnePage scrolls up one page (table height)
 func (l *List) ScrollUpOnePage() {
 	l.scrollByOnePage(false)
@@ -280,6 +297,13 @@ func (l *List) ScrollUpOnePage() {
 // ScrollDownOnePage scrolls down one page (table height)
 func (l *List) ScrollDownOnePage() {
 	l.scrollByOnePage(true)
+}
+
+// GetScrollOffset returns the current scroll offset position
+//
+// Since: 2.5
+func (l *List) GetScrollOffset() float32 {
+	return l.offsetY
 }
 
 // TypedKey is called if a key event happens while this List is focused.
@@ -352,6 +376,34 @@ func (l *List) UnselectAll() {
 			f(id)
 		}
 	}
+}
+
+func (l *List) contentMinSize() fyne.Size {
+	l.propertyLock.Lock()
+	defer l.propertyLock.Unlock()
+	if l.Length == nil {
+		return fyne.NewSize(0, 0)
+	}
+	items := l.Length()
+
+	separatorThickness := theme.Padding()
+	if l.itemHeights == nil || len(l.itemHeights) == 0 {
+		return fyne.NewSize(l.itemMin.Width,
+			(l.itemMin.Height+separatorThickness)*float32(items)-separatorThickness)
+	}
+
+	height := float32(0)
+	templateHeight := l.itemMin.Height
+	for item := 0; item < items; item++ {
+		itemHeight, ok := l.itemHeights[item]
+		if ok {
+			height += itemHeight
+		} else {
+			height += templateHeight
+		}
+	}
+
+	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
@@ -578,7 +630,7 @@ type listLayout struct {
 
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
-	l.slicePool.New = func() interface{} {
+	l.slicePool.New = func() any {
 		s := make([]listItemAndID, 0)
 		return &s
 	}
@@ -591,33 +643,7 @@ func (l *listLayout) Layout([]fyne.CanvasObject, fyne.Size) {
 }
 
 func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
-	l.list.propertyLock.Lock()
-	defer l.list.propertyLock.Unlock()
-	items := 0
-	if f := l.list.Length; f == nil {
-		return fyne.NewSize(0, 0)
-	} else {
-		items = f()
-	}
-
-	separatorThickness := theme.Padding()
-	if l.list.itemHeights == nil || len(l.list.itemHeights) == 0 {
-		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+separatorThickness)*float32(items)-separatorThickness)
-	}
-
-	height := float32(0)
-	templateHeight := l.list.itemMin.Height
-	for item := 0; item < items; item++ {
-		itemHeight, ok := l.list.itemHeights[item]
-		if ok {
-			height += itemHeight
-		} else {
-			height += templateHeight
-		}
-	}
-
-	return fyne.NewSize(l.list.itemMin.Width, height+separatorThickness*float32(items-1))
+	return l.list.contentMinSize()
 }
 
 func (l *listLayout) getItem() *listItem {

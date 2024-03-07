@@ -1,5 +1,4 @@
 //go:build !no_native_menus
-// +build !no_native_menus
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>

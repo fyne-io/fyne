@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
@@ -151,6 +152,12 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		if variant == "" {
 			variant = "default"
 		}
+	case *cache.WidgetResource:
+		if _, ok := t.ThemedResource.(*theme.InvertedThemedResource); ok {
+			variant = "inverted"
+		} else {
+			variant = string(t.ThemeColorName())
+		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
@@ -278,7 +285,7 @@ func (r *markupRenderer) writeCloseTag(name string) {
 	r.w.WriteString(">\n")
 }
 
-func (r *markupRenderer) writeContainer(c *fyne.Container, attrs map[string]*string) {
+func (r *markupRenderer) writeContainer(_ *fyne.Container, attrs map[string]*string) {
 	r.writeTag("container", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
@@ -414,6 +421,7 @@ func knownResource(rsc fyne.Resource) string {
 	return map[fyne.Resource]string{
 		theme.CancelIcon():             "cancelIcon",
 		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
+		theme.CheckButtonFillIcon():    "checkButtonFillIcon",
 		theme.CheckButtonIcon():        "checkButtonIcon",
 		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
 		theme.ColorChromaticIcon():     "colorChromaticIcon",
@@ -444,7 +452,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.FolderIcon():             "folderIcon",
 		theme.FolderNewIcon():          "folderNewIcon",
 		theme.FolderOpenIcon():         "folderOpenIcon",
-		theme.FyneLogo():               "fyneLogo",
+		theme.FyneLogo():               "fyneLogo", //lint:ignore SA1019 This needs to stay until the API is removed.
 		theme.HelpIcon():               "helpIcon",
 		theme.HistoryIcon():            "historyIcon",
 		theme.HomeIcon():               "homeIcon",
@@ -473,6 +481,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.NavigateNextIcon():       "navigateNextIcon",
 		theme.QuestionIcon():           "questionIcon",
 		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
+		theme.RadioButtonFillIcon():    "radioButtonFillIcon",
 		theme.RadioButtonIcon():        "radioButtonIcon",
 		theme.SearchIcon():             "searchIcon",
 		theme.SearchReplaceIcon():      "searchReplaceIcon",

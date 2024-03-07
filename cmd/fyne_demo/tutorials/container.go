@@ -107,6 +107,22 @@ func makeGridLayout(_ fyne.Window) fyne.CanvasObject {
 		box1, box2, box3, box4)
 }
 
+func makeInnerWindowTab(_ fyne.Window) fyne.CanvasObject {
+	label := widget.NewLabel("Window content for inner demo")
+	win1 := container.NewInnerWindow("Inner Demo", container.NewVBox(
+		label,
+		widget.NewButton("Tap Me", func() {
+			label.SetText("Tapped")
+		})))
+	win1.Icon = data.FyneLogo
+
+	win2 := container.NewInnerWindow("Inner2", widget.NewLabel("Win 2"))
+
+	multi := container.NewMultipleWindows()
+	multi.Windows = []*container.InnerWindow{win1, win2}
+	return multi
+}
+
 func makeScrollTab(_ fyne.Window) fyne.CanvasObject {
 	hlist := makeButtonList(20)
 	vlist := makeButtonList(50)

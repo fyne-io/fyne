@@ -18,7 +18,10 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
-	items []*radioItem
+	// this index is ONE-BASED so the default zero-value is unselected
+	// use r.selectedIndex(), r.setSelectedIndex(int) to maniupulate this field
+	// as if it were a zero-based index (with -1 == nothing selected)
+	_selIdx int
 }
 
 var _ fyne.Widget = (*RadioGroup)(nil)
@@ -32,7 +35,6 @@ func NewRadioGroup(options []string, changed func(string)) *RadioGroup {
 		OnChanged: changed,
 	}
 	r.ExtendBaseWidget(r)
-	r.update()
 	return r
 }
 
@@ -46,32 +48,25 @@ func (r *RadioGroup) Append(option string) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
 
-	r.update()
-	objects := make([]fyne.CanvasObject, len(r.items))
-	for i, item := range r.items {
-		objects[i] = item
+	items := make([]fyne.CanvasObject, len(r.Options))
+	for i, option := range r.Options {
+		idx := i
+		items[idx] = newRadioItem(option, func(item *radioItem) {
+			r.itemTapped(item, idx)
+		})
 	}
 
-	return &radioGroupRenderer{widget.NewBaseRenderer(objects), r.items, r}
+	render := &radioGroupRenderer{widget.NewBaseRenderer(items), items, r}
+	r.updateSelectedIndex()
+	render.updateItems(false)
+	return render
 }
 
 // MinSize returns the size that this widget should not shrink below
 func (r *RadioGroup) MinSize() fyne.Size {
 	r.ExtendBaseWidget(r)
 	return r.BaseWidget.MinSize()
-}
-
-// Refresh causes this widget to be redrawn in it's current state.
-//
-// Implements: fyne.CanvasObject
-func (r *RadioGroup) Refresh() {
-	r.propertyLock.Lock()
-	r.update()
-	r.propertyLock.Unlock()
-	r.BaseWidget.Refresh()
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.
@@ -81,6 +76,7 @@ func (r *RadioGroup) SetSelected(option string) {
 	}
 
 	r.Selected = option
+	// selectedIndex will be updated on refresh to the first matching item
 
 	if r.OnChanged != nil {
 		r.OnChanged(option)
@@ -89,19 +85,21 @@ func (r *RadioGroup) SetSelected(option string) {
 	r.Refresh()
 }
 
-func (r *RadioGroup) itemTapped(item *radioItem) {
+func (r *RadioGroup) itemTapped(item *radioItem, idx int) {
 	if r.Disabled() {
 		return
 	}
 
-	if r.Selected == item.Label {
+	if r.selectedIndex() == idx {
 		if r.Required {
 			return
 		}
 		r.Selected = ""
+		r.setSelectedIndex(-1)
 		item.SetSelected(false)
 	} else {
 		r.Selected = item.Label
+		r.setSelectedIndex(idx)
 		item.SetSelected(true)
 	}
 
@@ -111,27 +109,47 @@ func (r *RadioGroup) itemTapped(item *radioItem) {
 	r.Refresh()
 }
 
-func (r *RadioGroup) update() {
-	r.Options = removeDuplicates(r.Options)
-	if len(r.items) < len(r.Options) {
-		for i := len(r.items); i < len(r.Options); i++ {
-			item := newRadioItem(r.Options[i], r.itemTapped)
-			r.items = append(r.items, item)
+func (r *RadioGroup) Refresh() {
+	r.updateSelectedIndex()
+	r.BaseWidget.Refresh()
+}
+
+func (r *RadioGroup) selectedIndex() int {
+	return r._selIdx - 1
+}
+
+func (r *RadioGroup) setSelectedIndex(idx int) {
+	r._selIdx = idx + 1
+}
+
+// if selectedIndex does not match the public Selected property,
+// set it to the index of the first radio item whose label matches Selected
+func (r *RadioGroup) updateSelectedIndex() {
+	sel := r.Selected
+	sIdx := r.selectedIndex()
+	if sIdx >= 0 && sIdx < len(r.Options) && r.Options[sIdx] == sel {
+		return // selected index matches Selected
+	}
+	if sIdx == -1 && sel == "" {
+		return // nothing selected
+	}
+
+	sIdx = -1
+	for i, opt := range r.Options {
+		if sel == opt {
+			sIdx = i
+			break
 		}
-	} else if len(r.items) > len(r.Options) {
-		r.items = r.items[:len(r.Options)]
 	}
-	for i, item := range r.items {
-		item.Label = r.Options[i]
-		item.Selected = item.Label == r.Selected
-		item.DisableableWidget.disabled = r.disabled
-		item.Refresh()
-	}
+	r.setSelectedIndex(sIdx)
 }
 
 type radioGroupRenderer struct {
 	widget.BaseRenderer
-	items []*radioItem
+
+	// slice of *radioItem, but using fyne.CanvasObject as the type
+	// so we can directly set it to the BaseRenderer's objects slice
+	items []fyne.CanvasObject
 	radio *RadioGroup
 }
 
@@ -187,41 +205,44 @@ func (r *radioGroupRenderer) MinSize() fyne.Size {
 }
 
 func (r *radioGroupRenderer) Refresh() {
-	r.updateItems()
+	r.updateItems(true)
 	canvas.Refresh(r.radio.super())
 }
 
-func (r *radioGroupRenderer) updateItems() {
+func (r *radioGroupRenderer) updateItems(refresh bool) {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
-			item := newRadioItem(r.radio.Options[i], r.radio.itemTapped)
-			r.SetObjects(append(r.Objects(), item))
+			idx := i
+			item := newRadioItem(r.radio.Options[idx], func(item *radioItem) {
+				r.radio.itemTapped(item, idx)
+			})
 			r.items = append(r.items, item)
 		}
 		r.Layout(r.radio.Size())
 	} else if len(r.items) > len(r.radio.Options) {
 		total := len(r.radio.Options)
 		r.items = r.items[:total]
-		r.SetObjects(r.Objects()[:total])
 	}
+	r.SetObjects(r.items)
+
 	for i, item := range r.items {
-		item.Label = r.radio.Options[i]
-		item.Selected = item.Label == r.radio.Selected
-		item.disabled = r.radio.disabled
-		item.Refresh()
-	}
-}
+		item := item.(*radioItem)
+		changed := false
+		if l := r.radio.Options[i]; l != item.Label {
+			item.Label = r.radio.Options[i]
+			changed = true
+		}
+		if sel := i == r.radio.selectedIndex(); sel != item.Selected {
+			item.Selected = sel
+			changed = true
+		}
+		if d := r.radio.disabled.Load(); d != item.disabled.Load() {
+			item.disabled.Store(d)
+			changed = true
+		}
 
-func removeDuplicates(options []string) []string {
-	var result []string
-	found := make(map[string]bool)
-
-	for _, option := range options {
-		if _, ok := found[option]; !ok {
-			found[option] = true
-			result = append(result, option)
+		if refresh || changed {
+			item.Refresh()
 		}
 	}
-
-	return result
 }

@@ -34,8 +34,10 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
+	th := c.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	header := canvas.NewText(c.Title, theme.ForegroundColor())
+	header := canvas.NewText(c.Title, th.Color(theme.ColorNameForeground, v))
 	header.TextStyle.Bold = true
 	subHeader := canvas.NewText(c.Subtitle, header.Color)
 
@@ -100,7 +102,7 @@ const (
 
 // Layout the components of the card container.
 func (c *cardRenderer) Layout(size fyne.Size) {
-	padding := theme.Padding()
+	padding := c.card.Theme().Size(theme.SizeNamePadding)
 	pos := fyne.NewSquareOffsetPos(padding / 2)
 	size = size.Subtract(fyne.NewSquareSize(padding))
 	c.LayoutShadow(size, pos)
@@ -157,7 +159,7 @@ func (c *cardRenderer) MinSize() fyne.Size {
 	hasImage := c.card.Image != nil
 	hasContent := c.card.Content != nil
 
-	padding := theme.Padding()
+	padding := c.card.Theme().Size(theme.SizeNamePadding)
 	if !hasHeader && !hasSubHeader && !hasContent { // just image, or nothing
 		if c.card.Image == nil {
 			return fyne.NewSize(padding, padding) // empty, just space for border
@@ -220,13 +222,16 @@ func (c *cardRenderer) Refresh() {
 
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
+	th := c.card.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	if c.header != nil {
-		c.header.TextSize = theme.TextHeadingSize()
-		c.header.Color = theme.ForegroundColor()
+		c.header.TextSize = th.Size(theme.SizeNameHeadingText)
+		c.header.Color = th.Color(theme.ColorNameForeground, v)
 	}
 	if c.subHeader != nil {
-		c.subHeader.TextSize = theme.TextSize()
-		c.subHeader.Color = theme.ForegroundColor()
+		c.subHeader.TextSize = th.Size(theme.SizeNameText)
+		c.subHeader.Color = th.Color(theme.ColorNameForeground, v)
 	}
 	if c.card.Content != nil {
 		c.card.Content.Refresh()

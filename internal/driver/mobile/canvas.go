@@ -16,10 +16,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const (
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
-)
-
 var _ fyne.Canvas = (*mobileCanvas)(nil)
 
 type mobileCanvas struct {
@@ -30,8 +26,8 @@ type mobileCanvas struct {
 	scale            float32
 	size             fyne.Size
 
-	touched       map[int]mobile.Touchable
-	padded, debug bool
+	touched map[int]mobile.Touchable
+	padded  bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(event *fyne.KeyEvent)
@@ -50,7 +46,6 @@ type mobileCanvas struct {
 // NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
 	ret := &mobileCanvas{padded: true}
-	ret.debug = fyne.CurrentApp().Settings().BuildType() == fyne.BuildDebug
 	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)
@@ -382,7 +377,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
 	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
 	defer c.touchCancelFunc()
 	<-ctx.Done()
 	if c.touchTapCount == 2 && c.touchLastTapped == co {

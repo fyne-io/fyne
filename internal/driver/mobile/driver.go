@@ -3,6 +3,7 @@ package mobile
 import (
 	"runtime"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
@@ -30,6 +32,7 @@ import (
 const (
 	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
+	tapDoubleDelay    = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
 // Configuration is the system information about the current device
@@ -47,13 +50,14 @@ type mobileDriver struct {
 	glctx gl.Context
 
 	windows     []fyne.Window
-	device      *device
-	animation   *animation.Runner
+	device      device
+	animation   animation.Runner
 	currentSize size.Event
 
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
+	running         atomic.Bool
 }
 
 // Declare conformity with Driver
@@ -137,6 +141,10 @@ func (d *mobileDriver) Quit() {
 }
 
 func (d *mobileDriver) Run() {
+	if !d.running.CompareAndSwap(false, true) {
+		return // Run was called twice.
+	}
+
 	app.Main(func(a app.App) {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
@@ -179,7 +187,7 @@ func (d *mobileDriver) Run() {
 					currentDPI = e.PixelsPerPt * 72
 					d.setTheme(e.DarkMode)
 
-					dev := d.device
+					dev := &d.device
 					dev.safeTop = e.InsetTopPx
 					dev.safeLeft = e.InsetLeftPx
 					dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
@@ -212,7 +220,11 @@ func (d *mobileDriver) Run() {
 	})
 }
 
-func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
+func (*mobileDriver) SetDisableScreenBlanking(disable bool) {
+	setDisableScreenBlank(disable)
+}
+
+func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
 	c := w.Canvas().(*mobileCanvas)
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
@@ -229,7 +241,9 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
 	case lifecycle.CrossOn: // foregrounding
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerEnteredForeground()
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnEnteredForeground(); f != nil {
+			w.QueueEvent(f)
+		}
 	case lifecycle.CrossOff: // will enter background
 		if runtime.GOOS == "darwin" {
 			if d.glctx == nil {
@@ -240,7 +254,9 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w fyne.Window) {
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
-		fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerExitedForeground()
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+			w.QueueEvent(f)
+		}
 	}
 }
 
@@ -272,11 +288,15 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 }
 
 func (d *mobileDriver) onStart() {
-	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStarted()
+	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
+		go f() // don't block main, we don't have window event queue
+	}
 }
 
 func (d *mobileDriver) onStop() {
-	fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).TriggerStopped()
+	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStopped(); f != nil {
+		go f() // don't block main, we don't have window event queue
+	}
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
@@ -309,7 +329,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 			}
 		}
 
-		if c.debug {
+		if build.Mode == fyne.BuildDebug {
 			c.DrawDebugOverlay(node.Obj(), pos, size)
 		}
 	}
@@ -532,23 +552,22 @@ func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.M
 }
 
 func (d *mobileDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &device{}
-	}
-
-	return d.device
+	return &d.device
 }
 
 func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
 }
 
+func (d *mobileDriver) DoubleTapDelay() time.Duration {
+	return tapDoubleDelay
+}
+
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
 	d := &mobileDriver{
-		theme:     fyne.ThemeVariant(2), // unspecified
-		animation: &animation.Runner{},
+		theme: fyne.ThemeVariant(2), // unspecified
 	}
 
 	registerRepository(d)

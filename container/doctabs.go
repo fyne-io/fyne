@@ -23,11 +23,11 @@ type DocTabs struct {
 
 	Items []*TabItem
 
-	CreateTab      func() *TabItem
-	CloseIntercept func(*TabItem)
-	OnClosed       func(*TabItem)
-	OnSelected     func(*TabItem)
-	OnUnselected   func(*TabItem)
+	CreateTab      func() *TabItem `json:"-"`
+	CloseIntercept func(*TabItem)  `json:"-"`
+	OnClosed       func(*TabItem)  `json:"-"`
+	OnSelected     func(*TabItem)  `json:"-"`
+	OnUnselected   func(*TabItem)  `json:"-"`
 
 	current         int
 	location        TabLocation
@@ -321,18 +321,7 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 	buttons.Objects = nil
 
 	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() {
-		cells := count
-		if cells == 0 {
-			cells = 1
-		}
-		if r.docTabs.location == TabLocationTop || r.docTabs.location == TabLocationBottom {
-			buttons.Layout = layout.NewGridLayoutWithColumns(cells)
-		} else {
-			buttons.Layout = layout.NewGridLayoutWithRows(cells)
-		}
-		iconPos = buttonIconTop
-	} else if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
+	if r.docTabs.location == TabLocationLeading || r.docTabs.location == TabLocationTrailing {
 		buttons.Layout = layout.NewVBoxLayout()
 		iconPos = buttonIconTop
 	} else {

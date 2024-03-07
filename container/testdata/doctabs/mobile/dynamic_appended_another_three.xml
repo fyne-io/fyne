@@ -3,28 +3,28 @@
 		<widget size="300x150" type="*container.DocTabs">
 			<container size="300x36">
 				<widget size="260x36" type="*widget.Scroll">
-					<container size="300x36">
-						<widget size="72x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="64x19">Test2</text>
-							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+					<container size="317x36">
+						<widget size="76x36" type="*container.tabButton">
+							<text bold color="primary" pos="8,8" size="60x20">Test2</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
 						</widget>
-						<widget pos="76,0" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x19">Test3</text>
-							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="80,0" size="76x36" type="*container.tabButton">
+							<text bold pos="8,8" size="60x20">Test3</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
-						<widget pos="152,0" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x19">Test4</text>
-							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="160,0" size="76x36" type="*container.tabButton">
+							<text bold pos="8,8" size="60x20">Test4</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
-						<widget pos="228,0" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x19">Test5</text>
-							<widget pos="48,8" size="20x20" type="*container.tabCloseButton">
+						<widget pos="241,0" size="76x36" type="*container.tabButton">
+							<text bold pos="8,8" size="60x20">Test5</text>
+							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize"/>
 							</widget>
 						</widget>
@@ -33,8 +33,8 @@
 						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x36"/>
 					</widget>
 					<widget pos="0,30" size="260x6" type="*widget.scrollBarArea">
-						<widget pos="0,3" size="225x3" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="225x3"/>
+						<widget pos="0,3" size="212x3" type="*widget.scrollBar">
+							<rectangle fillColor="scrollbar" size="212x3"/>
 						</widget>
 					</widget>
 				</widget>
@@ -47,9 +47,11 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,36" radius="4" size="72x4"/>
+			<rectangle fillColor="primary" pos="0,36" radius="4" size="76x4"/>
 			<widget pos="0,40" size="300x110" type="*widget.Label">
-				<text pos="8,8" size="38x19">Text 2</text>
+				<widget size="300x110" type="*widget.RichText">
+					<text pos="8,8" size="38x19">Text 2</text>
+				</widget>
 			</widget>
 		</widget>
 	</content>

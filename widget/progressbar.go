@@ -15,14 +15,16 @@ import (
 
 type progressRenderer struct {
 	widget.BaseRenderer
-	background, bar *canvas.Rectangle
-	label           *canvas.Text
+	background, bar canvas.Rectangle
+	label           canvas.Text
 	progress        *ProgressBar
 }
 
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
+	th := p.progress.Theme()
+
 	var tsize fyne.Size
 	if text := p.progress.TextFormatter; text != nil {
 		tsize = fyne.MeasureText(text(), p.label.TextSize, p.label.TextStyle)
@@ -30,7 +32,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 	}
 
-	padding := theme.InnerPadding() * 2
+	padding := th.Size(theme.SizeNameInnerPadding) * 2
 	return fyne.NewSize(tsize.Width+padding, tsize.Height+padding)
 }
 
@@ -64,12 +66,18 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
-	p.background.FillColor = progressBackgroundColor()
-	p.background.CornerRadius = theme.InputRadiusSize()
-	p.bar.FillColor = theme.PrimaryColor()
-	p.bar.CornerRadius = theme.InputRadiusSize()
-	p.label.Color = theme.BackgroundColor()
-	p.label.TextSize = theme.TextSize()
+	th := p.progress.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
+	inputRadius := th.Size(theme.SizeNameInputRadius)
+
+	p.background.FillColor = progressBlendColor(primaryColor)
+	p.background.CornerRadius = inputRadius
+	p.bar.FillColor = primaryColor
+	p.bar.CornerRadius = inputRadius
+	p.label.Color = th.Color(theme.ColorNameBackground, v)
+	p.label.TextSize = th.Size(theme.SizeNameText)
 }
 
 func (p *progressRenderer) Refresh() {
@@ -125,13 +133,30 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	background := canvas.NewRectangle(progressBackgroundColor())
-	background.CornerRadius = theme.InputRadiusSize()
-	bar := canvas.NewRectangle(theme.PrimaryColor())
-	bar.CornerRadius = theme.InputRadiusSize()
-	label := canvas.NewText("0%", theme.BackgroundColor())
-	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{background, bar, label}), background, bar, label, p}
+	th := p.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	cornerRadius := th.Size(theme.SizeNameInputRadius)
+	primaryColor := th.Color(theme.ColorNamePrimary, v)
+
+	renderer := &progressRenderer{
+		background: canvas.Rectangle{
+			FillColor:    progressBlendColor(primaryColor),
+			CornerRadius: cornerRadius,
+		},
+		bar: canvas.Rectangle{
+			FillColor:    primaryColor,
+			CornerRadius: cornerRadius,
+		},
+		label: canvas.Text{
+			Text:      "0%",
+			Color:     th.Color(theme.ColorNameBackground, v),
+			Alignment: fyne.TextAlignCenter,
+		},
+		progress: p,
+	}
+
+	renderer.SetObjects([]fyne.CanvasObject{&renderer.background, &renderer.bar, &renderer.label})
+	return renderer
 }
 
 // Unbind disconnects any configured data source from this ProgressBar.
@@ -162,8 +187,8 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	return p
 }
 
-func progressBackgroundColor() color.Color {
-	r, g, b, a := col.ToNRGBA(theme.PrimaryColor())
+func progressBlendColor(clr color.Color) color.Color {
+	r, g, b, a := col.ToNRGBA(clr)
 	faded := uint8(a) / 2
 	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
 }

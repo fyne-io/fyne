@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -86,7 +87,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 func TestTable_Filled(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -783,7 +784,7 @@ func TestTable_Select(t *testing.T) {
 func TestTable_SetColumnWidth(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -863,7 +864,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 func TestTable_SetRowHeight(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
