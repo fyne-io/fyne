@@ -326,15 +326,12 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeyHome:
 		t.ScrollToTop()
-		t.Refresh()
 	case fyne.KeyPageUp:
 		t.ScrollUpOnePage()
-		t.Refresh()
 	case fyne.KeyPageDown:
 		t.ScrollDownOnePage()
 	case fyne.KeyEnd:
 		t.ScrollToBottom()
-		t.Refresh()
 	case fyne.KeySpace:
 		t.Select(t.currentFocus)
 	case fyne.KeyDown:
@@ -503,6 +500,7 @@ func (t *Table) ScrollToBottom() {
 
 	t.content.Offset.Y = y
 	t.offset.Y = y
+	t.content.Refresh()
 	t.finishScroll()
 }
 
@@ -529,6 +527,7 @@ func (t *Table) ScrollToTop() {
 
 	t.content.Offset.Y = 0
 	t.offset.Y = 0
+	t.content.Refresh()
 	t.finishScroll()
 }
 
