@@ -10,6 +10,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
+
+	//lint:ignore SA1019 The recommended replacement does not solve the use-case
 	"golang.org/x/tools/go/vcs"
 )
 
