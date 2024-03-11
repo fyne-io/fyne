@@ -10,6 +10,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
+	"golang.org/x/tools/go/vcs"
 )
 
 // Get returns the command which downloads and installs fyne applications.
@@ -57,18 +58,34 @@ func NewGetter() *Getter {
 
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
-	cmd := execabs.Command("go", "get", "-u", "-d", pkg)
-	cmd.Env = append(os.Environ(), "GO111MODULE=off") // cache the downloaded code
+	name := filepath.Base(pkg)
+	path := filepath.Join(os.TempDir(), name)
+	if util.Exists(path) {
+		_ = os.Remove(path)
+	}
+
+	repo, err := vcs.RepoRootForImportPath(pkg, false)
+	if err != nil {
+		return fmt.Errorf("failed to look up source control for package: %w", err)
+	}
+	if repo.VCS.Name != "Git" {
+		return errors.New("unsupported VCS: " + repo.VCS.Name)
+	}
+	cmd := execabs.Command("git", "clone", repo.Repo, "--depth=1", path)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return err
 	}
 
-	path := filepath.Join(goPath(), "src", pkg)
 	if !util.Exists(path) { // the error above may be ignorable, unless the path was not found
 		return err
+	}
+
+	if repo.Root != pkg {
+		dir := strings.Replace(pkg, repo.Root, "", 1)
+		path = filepath.Join(path, dir)
 	}
 
 	install := &Installer{appData: g.appData, srcDir: path, release: true}
@@ -120,16 +137,4 @@ func (g *Getter) Run(args []string) {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
-}
-
-func goPath() string {
-	cmd := execabs.Command("go", "env", "GOPATH")
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, "go")
-	}
-
-	return strings.TrimSpace(string(out[0 : len(out)-1]))
 }
