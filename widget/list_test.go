@@ -242,6 +242,7 @@ func TestList_ScrollToTop(t *testing.T) {
 
 func TestList_ScrollOffset(t *testing.T) {
 	list := createList(10)
+	list.Resize(fyne.NewSize(20, 15))
 
 	offset := float32(25)
 	list.ScrollToOffset(25)
@@ -252,6 +253,11 @@ func TestList_ScrollOffset(t *testing.T) {
 
 	list.ScrollToOffset(1000)
 	assert.LessOrEqual(t, list.GetScrollOffset(), float32(500) /*upper bound on content height*/)
+
+	// list viewport is larger than content size
+	list.Resize(fyne.NewSize(100, 500))
+	list.ScrollToOffset(20)
+	assert.Equal(t, float32(0), list.GetScrollOffset()) // doesn't scroll
 }
 
 func TestList_Selection(t *testing.T) {

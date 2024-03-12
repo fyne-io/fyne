@@ -220,8 +220,13 @@ func (l *GridWrap) ScrollToOffset(offset float32) {
 	}
 	if offset < 0 {
 		offset = 0
-	} else if contentH := l.contentMinSize().Height; offset > contentH {
-		offset = contentH
+	}
+	contentHeight := l.contentMinSize().Height
+	if l.Size().Height >= contentHeight {
+		return // content fully visible - no need to scroll
+	}
+	if offset > contentHeight {
+		offset = contentHeight
 	}
 	l.scroller.Offset.Y = offset
 	l.offsetUpdated(l.scroller.Offset)
