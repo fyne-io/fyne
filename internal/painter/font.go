@@ -75,7 +75,7 @@ func ClearFontCache() {
 }
 
 // DrawString draws a string into an image.
-func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, tabWidth int) {
+func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, style fyne.TextStyle) {
 	r := render.Renderer{
 		FontSize: fontSize,
 		PixScale: scale,
@@ -94,7 +94,7 @@ func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, font
 
 	advance := float32(0)
 	y := int(math.Ceil(float64(fixed266ToFloat32(out.LineBounds.Ascent))))
-	walkString(f, s, float32ToFixed266(fontSize), tabWidth, &advance, scale, func(run shaping.Output, x float32) {
+	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f[0])
@@ -118,8 +118,8 @@ func loadMeasureFont(data fyne.Resource) font.Face {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
-func MeasureString(f []font.Face, s string, textSize float32, tabWidth int) (size fyne.Size, advance float32) {
-	return walkString(f, s, float32ToFixed266(textSize), tabWidth, &advance, 1, func(shaping.Output, float32) {})
+func MeasureString(f []font.Face, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32) {})
 }
 
 // RenderedTextSize looks up how big a string would be if drawn on screen.
@@ -145,7 +145,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 
 func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size, float32) {
 	face := CachedFontFace(style, fontSize, 1)
-	return MeasureString(face.Fonts, text, fontSize, style.TabWidth)
+	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
 func tabStop(spacew, x float32, tabWidth int) float32 {
@@ -158,7 +158,7 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 	return tabw * float32(tabs)
 }
 
-func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth int, advance *float32, scale float32,
+func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
@@ -180,6 +180,9 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 
 	x := float32(0)
 	spacew := scale * fontTabSpaceSize
+	if style.Monospace {
+		spacew = scale * fixed266ToFloat32(out.Advance)
+	}
 	ins := shaping.SplitByFontGlyphs(in, faces)
 	for _, in := range ins {
 		inEnd := in.RunEnd
@@ -192,7 +195,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, tabWidth in
 					out = shaper.Shape(in)
 					x = shapeCallback(shaper, in, out, x, scale, cb)
 				}
-				x = tabStop(spacew, x, tabWidth)
+				x = tabStop(spacew, x, style.TabWidth)
 
 				in.RunStart = i + 1
 				in.RunEnd = inEnd

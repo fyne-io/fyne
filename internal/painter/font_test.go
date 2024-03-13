@@ -77,7 +77,7 @@ func TestDrawString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
 			f := painter.CachedFontFace(tt.style, tt.size, 1)
-			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, tt.tabWidth)
+			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}
@@ -115,7 +115,7 @@ func TestMeasureString(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			face := painter.CachedFontFace(tt.style, tt.size, 1)
-			got, _ := painter.MeasureString(face.Fonts, tt.string, tt.size, tt.tabWidth)
+			got, _ := painter.MeasureString(face.Fonts, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
 			assert.Equal(t, tt.want, got.Width)
 		})
 	}
