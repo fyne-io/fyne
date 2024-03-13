@@ -82,19 +82,12 @@ func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, font
 		Color:    color,
 	}
 
-	// TODO avoid shaping twice!
-	sh := &shaping.HarfbuzzShaper{}
-	out := sh.Shape(shaping.Input{
-		Text:     []rune(s),
-		RunStart: 0,
-		RunEnd:   len(s),
-		Face:     f[0],
-		Size:     fixed.I(int(fontSize * r.PixScale)),
-	})
-
 	advance := float32(0)
-	y := int(math.Ceil(float64(fixed266ToFloat32(out.LineBounds.Ascent))))
+	y := math.MinInt
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
+		if y == math.MinInt {
+			y = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
+		}
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f[0])
@@ -192,8 +185,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.
 			if r == '\t' {
 				if pending {
 					in.RunEnd = i
-					out = shaper.Shape(in)
-					x = shapeCallback(shaper, in, out, x, scale, cb)
+					x = shapeCallback(shaper, in, x, scale, cb)
 				}
 				x = tabStop(spacew, x, style.TabWidth)
 
@@ -205,7 +197,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.
 			}
 		}
 
-		x = shapeCallback(shaper, in, out, x, scale, cb)
+		x = shapeCallback(shaper, in, x, scale, cb)
 	}
 
 	*advance = x
@@ -213,8 +205,8 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.
 		fixed266ToFloat32(out.LineBounds.Ascent)
 }
 
-func shapeCallback(shaper shaping.Shaper, in shaping.Input, out shaping.Output, x, scale float32, cb func(shaping.Output, float32)) float32 {
-	out = shaper.Shape(in)
+func shapeCallback(shaper shaping.Shaper, in shaping.Input, x, scale float32, cb func(shaping.Output, float32)) float32 {
+	out := shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
 	pending := false
