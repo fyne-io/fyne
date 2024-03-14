@@ -11,11 +11,15 @@ import (
 	"github.com/go-text/render"
 	"github.com/go-text/typesetting/di"
 	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/fontscan"
+	"github.com/go-text/typesetting/language"
+	"github.com/go-text/typesetting/opentype/api/metadata"
 	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -26,39 +30,102 @@ const (
 	fontTabSpaceSize = 10
 )
 
+var (
+	fm      *fontscan.FontMap
+	mapLock = sync.Mutex{}
+)
+
+func init() {
+	fm = fontscan.NewFontMap(noopLogger{})
+	err := fm.UseSystemFonts("") // TODO fix for Android cache
+	if err != nil {
+		fm = nil // just don't fallback
+	}
+}
+
+func lookupLangFont(family string, aspect metadata.Aspect) font.Face {
+	mapLock.Lock()
+	defer mapLock.Unlock()
+	if fm == nil {
+		return nil
+	}
+
+	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
+	l, _ := fontscan.NewLangID(language.Language(lang.SystemLocale().LanguageString()))
+	return fm.ResolveFaceForLang(l)
+}
+
+func lookupRuneFont(r rune, family string, aspect metadata.Aspect) font.Face {
+	mapLock.Lock()
+	defer mapLock.Unlock()
+	if fm == nil {
+		return nil
+	}
+
+	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
+	return fm.ResolveFace(r)
+}
+
+func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextStyle) (faces []font.Face) {
+	f1 := loadMeasureFont(theme)
+	if theme == fallback {
+		faces = []font.Face{f1}
+	} else {
+		f2 := loadMeasureFont(fallback)
+		faces = []font.Face{f1, f2}
+	}
+
+	aspect := metadata.Aspect{Style: metadata.StyleNormal}
+	if style.Italic {
+		aspect.Style = metadata.StyleItalic
+	}
+	if style.Bold {
+		aspect.Weight = metadata.WeightBold
+	}
+
+	local := lookupLangFont(family, aspect)
+	if local != nil {
+		faces = append(faces, local)
+	}
+	global := lookupRuneFont('ゑ', family, metadata.Aspect{})
+	if global != nil {
+		faces = append(faces, global)
+	}
+
+	return faces
+}
+
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
 func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *FontCacheItem {
 	val, ok := fontCache.Load(style)
 	if !ok {
-		var f1, f2 font.Face
+		var faces []font.Face
 		switch {
 		case style.Monospace:
-			f1 = loadMeasureFont(theme.TextMonospaceFont())
-			f2 = loadMeasureFont(theme.DefaultTextMonospaceFont())
+			faces = lookupFaces(theme.TextMonospaceFont(), theme.DefaultTextMonospaceFont(), fontscan.Monospace, style)
 		case style.Bold:
 			if style.Italic {
-				f1 = loadMeasureFont(theme.TextBoldItalicFont())
-				f2 = loadMeasureFont(theme.DefaultTextBoldItalicFont())
+				faces = lookupFaces(theme.TextBoldItalicFont(), theme.DefaultTextBoldItalicFont(), fontscan.SansSerif, style)
 			} else {
-				f1 = loadMeasureFont(theme.TextBoldFont())
-				f2 = loadMeasureFont(theme.DefaultTextBoldFont())
+				faces = lookupFaces(theme.TextBoldFont(), theme.DefaultTextBoldFont(), fontscan.SansSerif, style)
 			}
 		case style.Italic:
-			f1 = loadMeasureFont(theme.TextItalicFont())
-			f2 = loadMeasureFont(theme.DefaultTextItalicFont())
+			faces = lookupFaces(theme.TextItalicFont(), theme.DefaultTextItalicFont(), fontscan.SansSerif, style)
 		case style.Symbol:
-			f1 = loadMeasureFont(theme.SymbolFont())
-			f2 = loadMeasureFont(theme.DefaultSymbolFont())
+			th := theme.SymbolFont()
+			fallback := theme.DefaultSymbolFont()
+			f1 := loadMeasureFont(th)
+			if th == fallback {
+				faces = []font.Face{f1}
+			} else {
+				f2 := loadMeasureFont(fallback)
+				faces = []font.Face{f1, f2}
+			}
 		default:
-			f1 = loadMeasureFont(theme.TextFont())
-			f2 = loadMeasureFont(theme.DefaultTextFont())
+			faces = lookupFaces(theme.TextFont(), theme.DefaultTextFont(), fontscan.SansSerif, style)
 		}
 
-		if f1 == nil {
-			f1 = f2
-		}
-		faces := []font.Face{f1, f2}
-		if emoji := theme.DefaultEmojiFont(); emoji != nil {
+		if emoji := theme.DefaultEmojiFont(); !style.Symbol && emoji != nil {
 			faces = append(faces, loadMeasureFont(emoji))
 		}
 		val = &FontCacheItem{Fonts: faces}
@@ -247,3 +314,7 @@ type FontCacheItem struct {
 }
 
 var fontCache = &sync.Map{} // map[fyne.TextStyle]*FontCacheItem
+
+type noopLogger struct{}
+
+func (n noopLogger) Printf(string, ...interface{}) {}
