@@ -41,27 +41,8 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 
 // fetch color variant from dbus portal desktop settings.
 func findFreedestktopColorScheme() fyne.ThemeVariant {
-	dbusConn, err := dbus.SessionBus()
+	colourScheme, err := portalSettings.GetColorScheme()
 	if err != nil {
-		fyne.LogError("Unable to connect to session D-Bus", err)
-		return theme.VariantDark
-	}
-
-	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
-	call := dbusObj.Call(
-		"org.freedesktop.portal.Settings.ReadOne",
-		dbus.FlagNoAutoStart,
-		"org.freedesktop.appearance",
-		"color-scheme",
-	)
-	if call.Err != nil {
-		// many desktops don't have this exported yet
-		return theme.VariantDark
-	}
-
-	var value uint8
-	if err = call.Store(&value); err != nil {
-		fyne.LogError("failed to read theme variant from D-Bus", err)
 		return theme.VariantDark
 	}
 
@@ -69,7 +50,7 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 	// 0: No preference
 	// 1: Prefer dark appearance
 	// 2: Prefer light appearance
-	switch value {
+	switch colourScheme {
 	case 2:
 		return theme.VariantLight
 	case 1:
