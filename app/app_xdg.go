@@ -12,6 +12,7 @@ import (
 	"github.com/godbus/dbus/v5"
 	"github.com/rymdport/portal/notification"
 	"github.com/rymdport/portal/openuri"
+	portalSettings "github.com/rymdport/portal/settings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
@@ -40,38 +41,15 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 
 // fetch color variant from dbus portal desktop settings.
 func findFreedestktopColorScheme() fyne.ThemeVariant {
-	dbusConn, err := dbus.SessionBus()
+	colourScheme, err := portalSettings.GetColorScheme()
 	if err != nil {
-		fyne.LogError("Unable to connect to session D-Bus", err)
 		return theme.VariantDark
 	}
 
-	dbusObj := dbusConn.Object("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop")
-	call := dbusObj.Call(
-		"org.freedesktop.portal.Settings.ReadOne",
-		dbus.FlagNoAutoStart,
-		"org.freedesktop.appearance",
-		"color-scheme",
-	)
-	if call.Err != nil {
-		// many desktops don't have this exported yet
-		return theme.VariantDark
-	}
-
-	var value uint8
-	if err = call.Store(&value); err != nil {
-		fyne.LogError("failed to read theme variant from D-Bus", err)
-		return theme.VariantDark
-	}
-
-	// See: https://github.com/flatpak/xdg-desktop-portal/blob/1.16.0/data/org.freedesktop.impl.portal.Settings.xml#L32-L46
-	// 0: No preference
-	// 1: Prefer dark appearance
-	// 2: Prefer light appearance
-	switch value {
-	case 2:
+	switch colourScheme {
+	case portalSettings.Light:
 		return theme.VariantLight
-	case 1:
+	case portalSettings.Dark:
 		return theme.VariantDark
 	default:
 		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
@@ -109,7 +87,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 var notificationID uint = 0
 
 // See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
-func (a *fyneApp) sendNotificationThroughPortal(conn *dbus.Conn, n *fyne.Notification) error {
+func (a *fyneApp) sendNotificationThroughPortal(_ *dbus.Conn, n *fyne.Notification) error {
 	err := notification.Add(notificationID,
 		&notification.Content{
 			Title: n.Title,
@@ -195,40 +173,12 @@ func rootCacheDir() string {
 }
 
 func watchTheme() {
-	go watchFreedekstopThemeChange()
-}
-
-func themeChanged() {
-	fyne.CurrentApp().Settings().(*settings).setupTheme()
-}
-
-// connect to dbus to detect color-schem theme changes in portal settings.
-func watchFreedekstopThemeChange() {
-	conn, err := dbus.SessionBus()
-	if err != nil {
-		fyne.LogError("Unable to connect to session D-Bus", err)
-		return
-	}
-
-	if err := conn.AddMatchSignal(
-		dbus.WithMatchObjectPath("/org/freedesktop/portal/desktop"),
-		dbus.WithMatchInterface("org.freedesktop.portal.Settings"),
-		dbus.WithMatchMember("SettingChanged"),
-	); err != nil {
-		fyne.LogError("D-Bus signal match failed", err)
-		return
-	}
-	defer conn.Close()
-
-	dbusChan := make(chan *dbus.Signal)
-	conn.Signal(dbusChan)
-
-	for sig := range dbusChan {
-		for _, v := range sig.Body {
+	go portalSettings.WatchSettingsChange(func(body []any) {
+		for _, v := range body {
 			if v == "color-scheme" {
-				themeChanged()
+				fyne.CurrentApp().Settings().(*settings).setupTheme()
 				break
 			}
 		}
-	}
+	})
 }
