@@ -5,6 +5,9 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -33,11 +36,17 @@ const (
 var (
 	fm      *fontscan.FontMap
 	mapLock = sync.Mutex{}
+	load    sync.Once
 )
 
-func init() {
+func loadMap() {
 	fm = fontscan.NewFontMap(noopLogger{})
-	err := fm.UseSystemFonts("") // TODO fix for Android cache
+	cacheDir := ""
+	if runtime.GOOS == "android" {
+		parent := os.Getenv("FILESDIR")
+		cacheDir = filepath.Join(parent, "fontcache")
+	}
+	err := fm.UseSystemFonts(cacheDir)
 	if err != nil {
 		fm = nil // just don't fallback
 	}
@@ -46,6 +55,7 @@ func init() {
 func lookupLangFont(family string, aspect metadata.Aspect) font.Face {
 	mapLock.Lock()
 	defer mapLock.Unlock()
+	load.Do(loadMap)
 	if fm == nil {
 		return nil
 	}
@@ -58,6 +68,7 @@ func lookupLangFont(family string, aspect metadata.Aspect) font.Face {
 func lookupRuneFont(r rune, family string, aspect metadata.Aspect) font.Face {
 	mapLock.Lock()
 	defer mapLock.Unlock()
+	load.Do(loadMap)
 	if fm == nil {
 		return nil
 	}
