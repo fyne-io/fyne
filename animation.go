@@ -1,6 +1,9 @@
 package fyne
 
-import "time"
+import (
+	"sync/atomic"
+	"time"
+)
 
 // AnimationCurve represents an animation algorithm for calculating the progress through a timeline.
 // Custom animations can be provided by implementing the "func(float32) float32" definition.
@@ -32,6 +35,22 @@ var (
 	AnimationLinear = animationLinear
 )
 
+// AnimationState represents the state of an animation.
+//
+// Since: 2.5
+type AnimationState int
+
+const (
+	// AnimationStateNotStarted represents an animation that has been created but not yet started.
+	AnimationStateNotStarted AnimationState = iota
+
+	// AnimationStateRunning represents an animation that is running.
+	AnimationStateRunning
+
+	// AnimationStateStopped represents an animation that has been stopped or has finished running.
+	AnimationStateStopped
+)
+
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
 //
@@ -42,6 +61,8 @@ type Animation struct {
 	Duration    time.Duration
 	RepeatCount int
 	Tick        func(float32)
+
+	state atomic.Int64
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
@@ -55,12 +76,25 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
-	CurrentApp().Driver().StartAnimation(a)
+	old := a.state.Swap(int64(AnimationStateRunning))
+	if old == int64(AnimationStateRunning) {
+		return
+	}
+
+	d := CurrentApp().Driver().(interface{ StartAnimationInternal(*Animation) })
+	d.StartAnimationInternal(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.
 func (a *Animation) Stop() {
-	CurrentApp().Driver().StopAnimation(a)
+	a.state.Store(int64(AnimationStateStopped))
+}
+
+// State returns the state of this animation.
+//
+// Since: 2.5
+func (a *Animation) State() AnimationState {
+	return AnimationState(a.state.Load())
 }
 
 func animationEaseIn(val float32) float32 {
