@@ -3,8 +3,6 @@
 package dialog
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 	"github.com/rymdport/portal/filechooser"
@@ -13,13 +11,12 @@ import (
 func fileOpenOSOverride(d *FileDialog) bool {
 	go func() {
 		folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
-		options := &filechooser.OpenOptions{
-			Modal:       true,
+		options := &filechooser.OpenFileOptions{
 			Directory:   folder,
 			AcceptLabel: d.confirmText,
 		}
 		if d.startingLocation != nil {
-			options.Location = d.startingLocation.Path()
+			options.CurrentFolder = d.startingLocation.Path()
 		}
 
 		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
@@ -70,17 +67,15 @@ func fileOpenOSOverride(d *FileDialog) bool {
 
 func fileSaveOSOverride(d *FileDialog) bool {
 	go func() {
-		options := &filechooser.SaveSingleOptions{
-			Modal:       true,
+		options := &filechooser.SaveFileOptions{
 			AcceptLabel: d.confirmText,
-			FileName:    d.initialFileName,
+			CurrentName: d.initialFileName,
 		}
 		if d.startingLocation != nil {
-			options.Location = d.startingLocation.Path()
+			options.CurrentFolder = d.startingLocation.Path()
 		}
 
 		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
-		fmt.Println(parentWindowHandle)
 
 		callback := d.callback.(func(fyne.URIWriteCloser, error))
 		uris, err := filechooser.SaveFile(parentWindowHandle, "Open File", options)

@@ -8,11 +8,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/rymdport/portal/notification"
 	"github.com/rymdport/portal/openuri"
 	portalSettings "github.com/rymdport/portal/settings"
+	"github.com/rymdport/portal/settings/appearance"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
@@ -27,7 +29,7 @@ func defaultVariant() fyne.ThemeVariant {
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	if build.IsFlatpak {
-		err := openuri.OpenURI("", url.String())
+		err := openuri.OpenURI("", url.String(), nil)
 		if err != nil {
 			fyne.LogError("Opening url in portal failed", err)
 		}
@@ -41,15 +43,15 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 
 // fetch color variant from dbus portal desktop settings.
 func findFreedestktopColorScheme() fyne.ThemeVariant {
-	colourScheme, err := portalSettings.GetColorScheme()
+	colourScheme, err := appearance.GetColorScheme()
 	if err != nil {
 		return theme.VariantDark
 	}
 
 	switch colourScheme {
-	case portalSettings.Light:
+	case appearance.Light:
 		return theme.VariantLight
-	case portalSettings.Dark:
+	case appearance.Dark:
 		return theme.VariantDark
 	default:
 		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
@@ -58,17 +60,17 @@ func findFreedestktopColorScheme() fyne.ThemeVariant {
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
-	conn, err := dbus.SessionBus() // shared connection, don't close
-	if err != nil {
-		fyne.LogError("Unable to connect to session D-Bus", err)
-		return
-	}
-
 	if build.IsFlatpak {
-		err := a.sendNotificationThroughPortal(conn, n)
+		err := a.sendNotificationThroughPortal(n)
 		if err != nil {
 			fyne.LogError("Sending notification using portal failed", err)
 		}
+		return
+	}
+
+	conn, err := dbus.SessionBus() // shared connection, don't close
+	if err != nil {
+		fyne.LogError("Unable to connect to session D-Bus", err)
 		return
 	}
 
@@ -84,23 +86,18 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 // Sending with same ID replaces the old notification.
-var notificationID uint = 0
+var notificationID atomic.Uint64
 
 // See https://flatpak.github.io/xdg-desktop-portal/docs/#gdbus-org.freedesktop.portal.Notification.
-func (a *fyneApp) sendNotificationThroughPortal(_ *dbus.Conn, n *fyne.Notification) error {
-	err := notification.Add(notificationID,
-		&notification.Content{
+func (a *fyneApp) sendNotificationThroughPortal(n *fyne.Notification) error {
+	return notification.Add(
+		uint(notificationID.Add(1)),
+		notification.Content{
 			Title: n.Title,
 			Body:  n.Content,
 			Icon:  a.uniqueID,
 		},
 	)
-	if err != nil {
-		return err
-	}
-
-	notificationID++
-	return nil
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
@@ -173,12 +170,9 @@ func rootCacheDir() string {
 }
 
 func watchTheme() {
-	go portalSettings.WatchSettingsChange(func(body []any) {
-		for _, v := range body {
-			if v == "color-scheme" {
-				fyne.CurrentApp().Settings().(*settings).setupTheme()
-				break
-			}
+	go portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
+		if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+			fyne.CurrentApp().Settings().(*settings).setupTheme()
 		}
 	})
 }
