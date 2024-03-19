@@ -147,13 +147,14 @@ func (g *RadialGradient) Move(pos fyne.Position) {
 	repaint(g)
 }
 
-// Resize the gradient to a new size. Causes a refresh, as cached textures become invalid on resize.
+// Resize resizes the gradient to a new size.
 func (g *RadialGradient) Resize(size fyne.Size) {
 	if size == g.Size() {
 		return
 	}
 	g.baseObject.Resize(size)
 
+	// refresh needed to invalidate cached textures
 	g.Refresh()
 }
 
