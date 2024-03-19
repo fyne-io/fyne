@@ -595,7 +595,7 @@ func TestViewPreferences(t *testing.T) {
 	prefs := fyne.CurrentApp().Preferences()
 
 	// set viewLayout to an invalid value to verify that this situation is handled properly
-	prefs.SetInt(viewLayoutKey, 0)
+	prefs.SetInt(viewLayoutKey, -1)
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		assert.Nil(t, err)
@@ -611,7 +611,7 @@ func TestViewPreferences(t *testing.T) {
 	ui := popup.Content.(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 
-	// viewLayout preference should be 'grid'
+	// default viewLayout preference should be 'grid'
 	view := ViewLayout(prefs.Int(viewLayoutKey))
 	assert.Equal(t, GridView, view)
 

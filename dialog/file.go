@@ -150,6 +150,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	view := ViewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
 
+	// handle invalid values
+	if view != GridView && view != ListView {
+		view = defaultView
+	}
+
 	if view == defaultView {
 		// set GridView as default
 		view = GridView
