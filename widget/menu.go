@@ -16,7 +16,7 @@ type Menu struct {
 	BaseWidget
 	alignment     fyne.TextAlign
 	Items         []fyne.CanvasObject
-	OnDismiss     func()
+	OnDismiss     func() `json:"-"`
 	activeItem    *menuItem
 	customSized   bool
 	containsCheck bool

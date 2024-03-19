@@ -12,7 +12,7 @@ require (
 	github.com/fyne-io/glfw-js v0.0.0-20240101223322-6e1efdc71b7a
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20231223183121-56fa3ac82ce7
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240306074159-ea2d69986ecb
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
 	github.com/go-text/typesetting v0.1.0
@@ -24,7 +24,7 @@ require (
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
-	github.com/rymdport/portal v0.0.0-20231123202536-da45518a87bb
+	github.com/rymdport/portal v0.1.0
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.8.4

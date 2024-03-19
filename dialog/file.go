@@ -110,6 +110,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}
 		saveName.SetPlaceHolder(lang.L("Enter filename"))
+		saveName.OnSubmitted = func(s string) {
+			f.open.OnTapped()
+		}
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
@@ -658,6 +661,9 @@ func showFile(file *FileDialog) *fileDialog {
 
 	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
+	if file.save {
+		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
+	}
 	return d
 }
 
