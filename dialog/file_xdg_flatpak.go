@@ -8,6 +8,47 @@ import (
 	"github.com/rymdport/portal/filechooser"
 )
 
+func openFolder(parentWindowHandle string, callback func(fyne.ListableURI, error), options *filechooser.OpenFileOptions) {
+	uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
+	if err != nil {
+		callback(nil, err)
+	}
+
+	if len(uris) == 0 {
+		callback(nil, nil)
+		return
+	}
+
+	uri, err := storage.ParseURI(uris[0])
+	if err != nil {
+		callback(nil, err)
+		return
+	}
+
+	callback(storage.ListerForURI(uri))
+}
+
+func openFile(parentWindowHandle string, callback func(fyne.URIReadCloser, error), options *filechooser.OpenFileOptions) {
+	uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
+	if err != nil {
+		callback(nil, err)
+		return
+	}
+
+	if len(uris) == 0 {
+		callback(nil, nil)
+		return
+	}
+
+	uri, err := storage.ParseURI(uris[0])
+	if err != nil {
+		callback(nil, err)
+		return
+	}
+
+	callback(storage.Reader(uri))
+}
+
 func fileOpenOSOverride(d *FileDialog) bool {
 	go func() {
 		folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
@@ -22,45 +63,12 @@ func fileOpenOSOverride(d *FileDialog) bool {
 		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
 
 		if folder {
-			uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
-			if err != nil {
-				folderCallback(nil, err)
-			}
-
-			if len(uris) == 0 {
-				folderCallback(nil, nil)
-				return
-			}
-
-			uri, err := storage.ParseURI(uris[0])
-			if err != nil {
-				folderCallback(nil, err)
-				return
-			}
-
-			folderCallback(storage.ListerForURI(uri))
+			openFolder(parentWindowHandle, folderCallback, options)
 			return
 		}
 
-		uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
 		fileCallback := d.callback.(func(fyne.URIReadCloser, error))
-		if err != nil {
-			fileCallback(nil, err)
-			return
-		}
-
-		if len(uris) == 0 {
-			fileCallback(nil, nil)
-			return
-		}
-
-		uri, err := storage.ParseURI(uris[0])
-		if err != nil {
-			fileCallback(nil, err)
-			return
-		}
-
-		fileCallback(storage.Reader(uri))
+		openFile(parentWindowHandle, fileCallback, options)
 	}()
 	return true
 }
