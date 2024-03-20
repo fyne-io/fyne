@@ -1091,7 +1091,7 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 		RunStart:  0,
 		RunEnd:    len(ellipsis),
 		Direction: di.DirectionLTR,
-		Face:      face.Fonts[0],
+		Face:      face.Fonts.ResolveFace('…'),
 		Size:      float32ToFixed266(text.TextSize),
 	}
 	shaper := &shaping.HarfbuzzShaper{}

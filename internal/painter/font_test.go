@@ -28,8 +28,8 @@ func TestCachedFontFace(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			got := painter.CachedFontFace(tt.style, 14, 1)
 			for _, r := range tt.runes {
-				_, ok := got.Fonts[0].NominalGlyph(r)
-				assert.True(t, ok, "symbol Font should include: %c", r)
+				f := got.Fonts.ResolveFace(r)
+				assert.NotNil(t, f, "symbol Font should include: %c", r)
 			}
 		})
 	}

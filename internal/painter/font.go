@@ -77,13 +77,13 @@ func lookupRuneFont(r rune, family string, aspect metadata.Aspect) font.Face {
 	return fm.ResolveFace(r)
 }
 
-func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextStyle) (faces []font.Face) {
+func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextStyle) (faces *dynamicFontMap) {
 	f1 := loadMeasureFont(theme)
 	if theme == fallback {
-		faces = []font.Face{f1}
+		faces = &dynamicFontMap{family: family, faces: []font.Face{f1}}
 	} else {
 		f2 := loadMeasureFont(fallback)
-		faces = []font.Face{f1, f2}
+		faces = &dynamicFontMap{family: family, faces: []font.Face{f1, f2}}
 	}
 
 	aspect := metadata.Aspect{Style: metadata.StyleNormal}
@@ -96,11 +96,7 @@ func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextSt
 
 	local := lookupLangFont(family, aspect)
 	if local != nil {
-		faces = append(faces, local)
-	}
-	global := lookupRuneFont('ゑ', family, metadata.Aspect{})
-	if global != nil {
-		faces = append(faces, global)
+		faces.addFace(local)
 	}
 
 	return faces
@@ -110,7 +106,7 @@ func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextSt
 func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *FontCacheItem {
 	val, ok := fontCache.Load(style)
 	if !ok {
-		var faces []font.Face
+		var faces *dynamicFontMap
 		switch {
 		case style.Monospace:
 			faces = lookupFaces(theme.TextMonospaceFont(), theme.DefaultTextMonospaceFont(), fontscan.Monospace, style)
@@ -127,17 +123,17 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 			fallback := theme.DefaultSymbolFont()
 			f1 := loadMeasureFont(th)
 			if th == fallback {
-				faces = []font.Face{f1}
+				faces = &dynamicFontMap{family: "symbol", faces: []font.Face{f1}}
 			} else {
 				f2 := loadMeasureFont(fallback)
-				faces = []font.Face{f1, f2}
+				faces = &dynamicFontMap{family: "symbol", faces: []font.Face{f1, f2}}
 			}
 		default:
 			faces = lookupFaces(theme.TextFont(), theme.DefaultTextFont(), fontscan.SansSerif, style)
 		}
 
 		if emoji := theme.DefaultEmojiFont(); !style.Symbol && emoji != nil {
-			faces = append(faces, loadMeasureFont(emoji))
+			faces.addFace(loadMeasureFont(emoji)) // TODO only one emoji - maybe others too
 		}
 		val = &FontCacheItem{Fonts: faces}
 		fontCache.Store(style, val)
@@ -153,7 +149,7 @@ func ClearFontCache() {
 }
 
 // DrawString draws a string into an image.
-func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, fontSize, scale float32, style fyne.TextStyle) {
+func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle) {
 	r := render.Renderer{
 		FontSize: fontSize,
 		PixScale: scale,
@@ -168,7 +164,7 @@ func DrawString(dst draw.Image, s string, color color.Color, f []font.Face, font
 		}
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
-				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f[0])
+				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))
 				return
 			}
 		}
@@ -189,7 +185,7 @@ func loadMeasureFont(data fyne.Resource) font.Face {
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
-func MeasureString(f []font.Face, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32) {})
 }
 
@@ -229,7 +225,7 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 	return tabw * float32(tabs)
 }
 
-func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
+func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
 	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
@@ -239,7 +235,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.
 		RunStart:  0,
 		RunEnd:    1,
 		Direction: di.DirectionLTR,
-		Face:      faces[0],
+		Face:      faces.ResolveFace(' '),
 		Size:      textSize,
 	}
 	shaper := &shaping.HarfbuzzShaper{}
@@ -254,7 +250,7 @@ func walkString(faces []font.Face, s string, textSize fixed.Int26_6, style fyne.
 	if style.Monospace {
 		spacew = scale * fixed266ToFloat32(out.Advance)
 	}
-	ins := shaping.SplitByFontGlyphs(in, faces)
+	ins := shaping.SplitByFace(in, faces)
 	for _, in := range ins {
 		inEnd := in.RunEnd
 
@@ -321,7 +317,7 @@ func shapeCallback(shaper shaping.Shaper, in shaping.Input, x, scale float32, cb
 }
 
 type FontCacheItem struct {
-	Fonts []font.Face
+	Fonts shaping.Fontmap
 }
 
 var fontCache = &sync.Map{} // map[fyne.TextStyle]*FontCacheItem
@@ -329,3 +325,29 @@ var fontCache = &sync.Map{} // map[fyne.TextStyle]*FontCacheItem
 type noopLogger struct{}
 
 func (n noopLogger) Printf(string, ...interface{}) {}
+
+type dynamicFontMap struct {
+	faces  []font.Face
+	family string
+}
+
+func (d *dynamicFontMap) ResolveFace(r rune) font.Face {
+
+	for _, f := range d.faces {
+		if _, ok := f.NominalGlyph(r); ok {
+			return f
+		}
+	}
+
+	toAdd := lookupRuneFont(r, d.family, metadata.Aspect{})
+	if toAdd != nil {
+		d.addFace(toAdd)
+		return toAdd
+	}
+
+	return d.faces[0]
+}
+
+func (d *dynamicFontMap) addFace(f font.Face) {
+	d.faces = append(d.faces, f)
+}
