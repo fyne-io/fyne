@@ -5,13 +5,15 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/metadata"
 )
 
 func checkLocalMetadata() {
-	file, _ := filepath.Abs("FyneApp.toml")
+	dir := getProjectPath()
+	file := filepath.Join(dir, "FyneApp.toml")
 	ref, err := os.Open(file)
 	if err != nil { // no worries, this is just an optional fallback
 		return
@@ -37,4 +39,22 @@ func checkLocalMetadata() {
 
 	meta.Release = false
 	meta.Custom = data.Development
+}
+
+func getProjectPath() string {
+	exe, err := os.Executable()
+	work, _ := os.Getwd()
+
+	if err != nil {
+		fyne.LogError("failed to lookup build executable", err)
+		return work
+	}
+
+	temp := os.TempDir()
+	if strings.Contains(exe, temp) { // this happens with "go run"
+		return work
+	}
+
+	// we were called with after "go build" completed
+	return filepath.Dir(exe)
 }
