@@ -18,6 +18,7 @@ func checkLocalMetadata() {
 	if err != nil { // no worries, this is just an optional fallback
 		return
 	}
+	defer ref.Close()
 
 	data, err := metadata.Load(ref)
 	if err != nil || data == nil {
