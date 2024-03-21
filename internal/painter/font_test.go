@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	intTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -77,7 +78,9 @@ func TestDrawString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
 			f := painter.CachedFontFace(tt.style, tt.size, 1)
-			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
+
+			fontMap := &intTest.FontMap{f.Fonts.ResolveFace(' ')} // first (ascii) font
+			painter.DrawString(img, tt.string, tt.color, fontMap, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}
@@ -114,8 +117,9 @@ func TestMeasureString(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			face := painter.CachedFontFace(tt.style, tt.size, 1)
-			got, _ := painter.MeasureString(face.Fonts, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
+			faces := painter.CachedFontFace(tt.style, tt.size, 1)
+			fontMap := &intTest.FontMap{faces.Fonts.ResolveFace(' ')} // first (ascii) font
+			got, _ := painter.MeasureString(fontMap, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
 			assert.Equal(t, tt.want, got.Width)
 		})
 	}

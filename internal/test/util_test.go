@@ -28,7 +28,7 @@ func TestAssertImageMatches(t *testing.T) {
 	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
 	assert.Nil(t, err)
 
-	painter.DrawString(txtImg, "Hello!", color.Black, &fontMap{face}, 25, 1, fyne.TextStyle{TabWidth: 4})
+	painter.DrawString(txtImg, "Hello!", color.Black, &test.FontMap{face}, 25, 1, fyne.TextStyle{TabWidth: 4})
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}
@@ -80,19 +80,4 @@ func readImage(t *testing.T, path string) image.Image {
 	img := image.NewNRGBA(raw.Bounds())
 	draw.Draw(img, img.Bounds(), raw, image.Pt(0, 0), draw.Src)
 	return img
-}
-
-type fontMap []font.Face
-
-func (f fontMap) ResolveFace(r rune) font.Face {
-	if len(f) == 1 {
-		return f[0]
-	}
-
-	face := f.ResolveFace(r)
-	if face != nil {
-		return face
-	}
-
-	return f[0]
 }
