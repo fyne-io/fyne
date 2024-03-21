@@ -1,4 +1,4 @@
-//go:build !no_metadata
+//go:build !no_metadata && !release
 
 package app
 
