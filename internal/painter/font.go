@@ -122,11 +122,12 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 			th := theme.SymbolFont()
 			fallback := theme.DefaultSymbolFont()
 			f1 := loadMeasureFont(th)
+
 			if th == fallback {
-				faces = &dynamicFontMap{family: "symbol", faces: []font.Face{f1}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []font.Face{f1}}
 			} else {
 				f2 := loadMeasureFont(fallback)
-				faces = &dynamicFontMap{family: "symbol", faces: []font.Face{f1, f2}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []font.Face{f1, f2}}
 			}
 		default:
 			faces = lookupFaces(theme.TextFont(), theme.DefaultTextFont(), fontscan.SansSerif, style)
