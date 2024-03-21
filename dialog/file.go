@@ -835,6 +835,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 	if runtime.GOOS == "darwin" {
 		return map[string]fyne.Resource{
 			"Documents": theme.DocumentIcon(),
+			"Desktop":   theme.DesktopIcon(),
 			"Downloads": theme.DownloadIcon(),
 			"Music":     theme.MediaMusicIcon(),
 			"Pictures":  theme.MediaPhotoIcon(),
@@ -844,6 +845,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 
 	return map[string]fyne.Resource{
 		"Documents": theme.DocumentIcon(),
+		"Desktop":   theme.DesktopIcon(),
 		"Downloads": theme.DownloadIcon(),
 		"Music":     theme.MediaMusicIcon(),
 		"Pictures":  theme.MediaPhotoIcon(),
@@ -853,6 +855,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 
 func getFavoriteOrder() []string {
 	order := []string{
+		"Desktop",
 		"Documents",
 		"Downloads",
 		"Music",
