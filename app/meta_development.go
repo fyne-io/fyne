@@ -1,5 +1,3 @@
-//go:build !no_metadata && !release
-
 package app
 
 import (
@@ -8,10 +6,15 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/metadata"
 )
 
 func checkLocalMetadata() {
+	if build.NoMetadata || build.Mode == fyne.BuildRelease {
+		return
+	}
+
 	dir := getProjectPath()
 	file := filepath.Join(dir, "FyneApp.toml")
 	ref, err := os.Open(file)
