@@ -248,14 +248,17 @@ func (s *Select) showPopUp() {
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
-	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
-	s.popUp.alignment = s.Alignment
-	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
-	s.popUp.OnDismiss = func() {
-		s.popUp.Hide()
-		s.popUp = nil
+	pop := NewPopUpMenu(fyne.NewMenu("", items...), c)
+	pop.alignment = s.Alignment
+	pop.ShowAtPosition(s.popUpPos())
+	pop.Resize(fyne.NewSize(s.Size().Width, pop.MinSize().Height))
+	pop.OnDismiss = func() {
+		pop.Hide()
+		if s.popUp == pop {
+			s.popUp = nil
+		}
 	}
+	s.popUp = pop
 }
 
 func (s *Select) tapAnimation() {
