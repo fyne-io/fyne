@@ -16,6 +16,7 @@ func createInformationDialog(title, message string, icon fyne.Resource, parent f
 	}
 	d.create(container.NewGridWithColumns(1, d.dismiss))
 	return d
+}
 
 // NewInformation creates a dialog over the specified window for user information.
 // The title is used for the dialog window and message is the content.
