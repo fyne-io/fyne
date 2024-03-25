@@ -650,7 +650,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 }
 
 func showFile(file *FileDialog) *fileDialog {
-	d := &fileDialog{file: file, initialFileName: file.initialFileName}
+	d := &fileDialog{file: file, initialFileName: file.initialFileName, view: GridView}
 	ui := d.makeUI()
 	pad := theme.Padding()
 	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
