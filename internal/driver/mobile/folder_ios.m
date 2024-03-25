@@ -26,5 +26,5 @@ bool iosCreateListable(const char* urlCstr) {
 char* iosList(const char* url) {
     NSArray *children = listForURL(url);
 
-    return [[children componentsJoinedByString:@"|"] UTF8String];
+    return (char *) [[children componentsJoinedByString:@"|"] UTF8String];
 }
