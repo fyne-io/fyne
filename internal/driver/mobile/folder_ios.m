@@ -9,7 +9,7 @@ NSArray *listForURL(const char* urlCstr) {
     NSString *urlStr = [NSString stringWithUTF8String:urlCstr];
     NSURL *url = [NSURL URLWithString:urlStr];
 
-    return [[NSFileManager defaultManager] contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:nil error:nil];
+    return [[NSFileManager defaultManager] contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:0 error:nil];
 }
 
 bool iosCanList(const char* url) {
