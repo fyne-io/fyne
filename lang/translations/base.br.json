@@ -1,0 +1,32 @@
+{
+  "Advanced": "Avançado",
+  "Cancel": "Cancelar",
+  "Confirm": "Confirmar",
+  "Copy": "Copiar",
+  "Create Folder": "Criar Pasta",
+  "Cut": "Cortar",
+  "Enter filename": "Nome do arquivo",
+  "Error": "Erro",
+  "Favourites": "Favoritos",
+  "File": "Arquivo",
+  "Folder": "Pasta",
+  "New Folder": "Nova Pasta",
+  "No": "Não",
+  "OK": "OK",
+  "Open": "Abrir",
+  "Paste": "Colar",
+  "Quit": "Sair",
+  "Redo": "Refazer",
+  "Save": "Savar",
+  "Select all": "Selecionar todos",
+  "Show Hidden Files": "Mostrar Arquivos Escondidos",
+  "Undo": "Desfazer",
+  "Yes": "Sim",
+
+  "file.name": {
+    "other": "Nome"
+  },
+  "file.parent": {
+    "other": "Parente"
+  }
+}
