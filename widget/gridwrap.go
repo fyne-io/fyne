@@ -112,7 +112,6 @@ func (l *GridWrap) FocusLost() {
 // MinSize returns the size that this widget should not shrink below.
 func (l *GridWrap) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
-
 	return l.BaseWidget.MinSize()
 }
 

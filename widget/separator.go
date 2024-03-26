@@ -55,8 +55,7 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Widget
 func (s *Separator) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
-	t := s.Theme().Size(theme.SizeNameSeparatorThickness)
-	return fyne.NewSize(t, t)
+	return s.BaseWidget.MinSize()
 }
 
 var _ fyne.WidgetRenderer = (*separatorRenderer)(nil)
@@ -68,8 +67,7 @@ type separatorRenderer struct {
 }
 
 func (r *separatorRenderer) MinSize() fyne.Size {
-	t := r.d.Theme().Size(theme.SizeNameSeparatorThickness)
-	return fyne.NewSize(t, t)
+	return fyne.NewSquareSize(r.d.Theme().Size(theme.SizeNameSeparatorThickness))
 }
 
 func (r *separatorRenderer) Refresh() {
