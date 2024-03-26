@@ -97,6 +97,9 @@ And you can run that simply as:
 
     go run main.go
 
+> [!NOTE]  
+> The first compilation of Fyne on Windows _can_ take up to 10 minutes, depending on your hardware. Subsequent builds will be fast.
+
 It should look like this:
 
 <div align="center">
