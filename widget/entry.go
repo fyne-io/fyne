@@ -96,7 +96,6 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
-	minCache        fyne.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -402,29 +401,8 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
-	e.propertyLock.RLock()
-	cached := e.minCache
-	e.propertyLock.RUnlock()
-	if !cached.IsZero() {
-		return cached
-	}
-
 	e.ExtendBaseWidget(e)
-
-	th := e.Theme()
-	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
-	min := e.BaseWidget.MinSize()
-	if e.ActionItem != nil {
-		min = min.Add(fyne.NewSize(iconSpace, 0))
-	}
-	if e.Validator != nil {
-		min = min.Add(fyne.NewSize(iconSpace, 0))
-	}
-
-	e.propertyLock.Lock()
-	e.minCache = min
-	e.propertyLock.Unlock()
-	return min
+	return e.BaseWidget.MinSize()
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -487,14 +465,6 @@ func (e *Entry) Redo() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
-}
-
-func (e *Entry) Refresh() {
-	e.propertyLock.Lock()
-	e.minCache = fyne.Size{}
-	e.propertyLock.Unlock()
-
-	e.BaseWidget.Refresh()
 }
 
 // SelectedText returns the text currently selected in this Entry.
@@ -1711,25 +1681,39 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	if rend := cache.Renderer(r.entry.content); rend != nil {
 		rend.(*entryContentRenderer).updateScrollDirections()
 	}
+
+	th := r.entry.Theme()
+	minSize := fyne.Size{}
+
 	if r.scroll.Direction == widget.ScrollNone {
-		return r.entry.content.MinSize().Add(fyne.NewSize(0, r.entry.Theme().Size(theme.SizeNameInputBorder)*2))
-	}
+		minSize = r.entry.content.MinSize().AddWidthHeight(0, th.Size(theme.SizeNameInputBorder)*2)
+	} else {
+		innerPadding := th.Size(theme.SizeNameInnerPadding)
+		textSize := th.Size(theme.SizeNameText)
+		charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle, textSize)
+		minSize = charMin.Add(fyne.NewSquareSize(innerPadding))
 
-	innerPadding := r.entry.Theme().Size(theme.SizeNameInnerPadding)
-	textSize := r.entry.Theme().Size(theme.SizeNameText)
-	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle, textSize)
-	minSize := charMin.Add(fyne.NewSquareSize(innerPadding))
+		if r.entry.MultiLine {
+			count := r.entry.multiLineRows
+			if count <= 0 {
+				count = multiLineRows
+			}
 
-	if r.entry.MultiLine {
-		count := r.entry.multiLineRows
-		if count <= 0 {
-			count = multiLineRows
+			minSize.Height = charMin.Height*float32(count) + innerPadding
 		}
 
-		minSize.Height = charMin.Height*float32(count) + innerPadding
+		minSize = minSize.AddWidthHeight(innerPadding*2, innerPadding)
 	}
 
-	return minSize.Add(fyne.NewSize(innerPadding*2, innerPadding))
+	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
+	if r.entry.ActionItem != nil {
+		minSize.Width += iconSpace
+	}
+	if r.entry.Validator != nil {
+		minSize.Width += iconSpace
+	}
+
+	return minSize
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {

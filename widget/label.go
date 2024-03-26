@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -77,12 +76,8 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 //
 // Implements: fyne.Widget
 func (l *Label) MinSize() fyne.Size {
-	if l.provider == nil {
-		l.ExtendBaseWidget(l)
-		cache.Renderer(l.super())
-	}
-
-	return l.provider.MinSize()
+	l.ExtendBaseWidget(l)
+	return l.BaseWidget.MinSize()
 }
 
 // Refresh triggers a redraw of the label.

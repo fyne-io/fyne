@@ -16,6 +16,7 @@ import (
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	size     async.Size
+	minCache async.Size
 	position async.Position
 	Hidden   bool
 
@@ -69,6 +70,11 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
+	minCache := w.minCache.Load()
+	if !minCache.IsZero() {
+		return minCache
+	}
+
 	impl := w.super()
 
 	r := cache.Renderer(impl)
@@ -76,7 +82,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return fyne.Size{}
 	}
 
-	return r.MinSize()
+	min := r.MinSize()
+	w.minCache.Store(min)
+	return min
 }
 
 // Visible returns whether or not this widget should be visible.
@@ -123,12 +131,19 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
+	w.minCache.Store(fyne.Size{})
+
 	w.propertyLock.Lock()
 	w.themeCache = nil
 	w.propertyLock.Unlock()
 
 	render := cache.Renderer(impl)
 	render.Refresh()
+}
+
+// ResetMinSizeCache resets the cached MinSize for this widget.
+func (w *BaseWidget) ResetMinSizeCache() {
+	w.minCache.Store(fyne.Size{})
 }
 
 // Theme returns a cached Theme instance for this widget (or its extending widget).
@@ -171,6 +186,7 @@ func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 		return
 	}
 	impl.Refresh()
+	w.ResetMinSizeCache()
 }
 
 // super will return the actual object that this represents.
