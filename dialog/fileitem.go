@@ -44,7 +44,7 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	i.location = l
 	i.name = l.Name()
 
-	if i.picker.view == gridView {
+	if i.picker.view == GridView {
 		ext := filepath.Ext(i.name[1:])
 		i.name = i.name[:len(i.name)-len(ext)]
 	}
@@ -64,7 +64,7 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 		dir:      dir,
 	}
 
-	if f.view == gridView {
+	if f.view == GridView {
 		ext := filepath.Ext(item.name[1:])
 		item.name = item.name[:len(item.name)-len(ext)]
 	}
@@ -87,7 +87,7 @@ type fileItemRenderer struct {
 }
 
 func (s *fileItemRenderer) Layout(size fyne.Size) {
-	if s.item.picker.view == gridView {
+	if s.item.picker.view == GridView {
 		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
 
@@ -106,7 +106,7 @@ func (s *fileItemRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileItemRenderer) MinSize() fyne.Size {
-	if s.item.picker.view == gridView {
+	if s.item.picker.view == GridView {
 		return fyne.NewSize(fileIconCellWidth, fileIconSize+s.fileTextSize)
 	}
 
