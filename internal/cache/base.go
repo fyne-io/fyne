@@ -202,7 +202,7 @@ func destroyExpiredRenderers(now time.Time) {
 }
 
 // matchesACanvas returns true if the canvas represented by the canvasInfo object matches one of
-// the canvases passed in in 'canvases', otherwise false is returned.
+// the canvases passed in 'canvases', otherwise false is returned.
 func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
 	canvas := cinfo.canvas
 
