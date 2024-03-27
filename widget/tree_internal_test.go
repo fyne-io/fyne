@@ -628,6 +628,42 @@ func TestTree_ScrollToBottom(t *testing.T) {
 	assert.Equal(t, want, tree.scroller.Offset.Y)
 }
 
+func TestTree_ScrollDownOnePage(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("B")
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	var (
+		min = getLeaf(t, tree, "A").MinSize()
+		sep = theme.Padding()
+	)
+
+	// Resize tall enough to display two nodes and the separater between them
+	treeHeight := 2*(min.Height) + sep
+	w.Resize(fyne.Size{
+		Width:  400,
+		Height: treeHeight + 2*theme.Padding(),
+	})
+
+	tree.ScrollDownOnePage()
+
+	want := treeHeight
+	assert.Equal(t, want, tree.offset.Y)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
+}
+
 func TestTree_ScrollToSelection(t *testing.T) {
 	data := make(map[string][]string)
 	addTreePath(data, "A")
@@ -683,6 +719,44 @@ func TestTree_ScrollToTop(t *testing.T) {
 	tree.ScrollToTop()
 	assert.Equal(t, float32(0), tree.offset.Y)
 	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
+}
+
+func TestTree_ScrollUpOnePage(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("B")
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	var (
+		min = getLeaf(t, tree, "A").MinSize()
+		sep = theme.Padding()
+	)
+
+	// Resize tall enough to display two nodes and the separater between them
+	treeHeight := 2*(min.Height) + sep
+	w.Resize(fyne.Size{
+		Width:  400,
+		Height: treeHeight + 2*theme.Padding(),
+	})
+
+	tree.ScrollDownOnePage()
+	tree.ScrollDownOnePage()
+	tree.ScrollUpOnePage()
+
+	want := treeHeight
+	assert.Equal(t, want, tree.offset.Y)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
 }
 
 func TestTree_Tap(t *testing.T) {

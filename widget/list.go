@@ -257,6 +257,22 @@ func (l *List) ScrollToTop() {
 	l.Refresh()
 }
 
+// scrollByOnePage scrolls down or up by list height
+func (l *List) scrollByOnePage(down bool) {
+	if l.scroller == nil {
+		return
+	}
+
+	height := l.size.Load().Height
+	if down {
+		l.scroller.Offset.Y += height
+	} else {
+		l.scroller.Offset.Y -= height
+	}
+	l.offsetUpdated(l.scroller.Offset)
+	l.Refresh()
+}
+
 // ScrollToOffset scrolls the list to the given offset position.
 //
 // Since: 2.5
@@ -279,6 +295,16 @@ func (l *List) ScrollToOffset(offset float32) {
 	l.Refresh()
 }
 
+// ScrollUpOnePage scrolls up one page (table height)
+func (l *List) ScrollUpOnePage() {
+	l.scrollByOnePage(false)
+}
+
+// ScrollDownOnePage scrolls down one page (table height)
+func (l *List) ScrollDownOnePage() {
+	l.scrollByOnePage(true)
+}
+
 // GetScrollOffset returns the current scroll offset position
 //
 // Since: 2.5
@@ -291,6 +317,14 @@ func (l *List) GetScrollOffset() float32 {
 // Implements: fyne.Focusable
 func (l *List) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
+	case fyne.KeyHome:
+		l.ScrollToTop()
+	case fyne.KeyPageUp:
+		l.ScrollUpOnePage()
+	case fyne.KeyPageDown:
+		l.ScrollDownOnePage()
+	case fyne.KeyEnd:
+		l.ScrollToBottom()
 	case fyne.KeySpace:
 		l.Select(l.currentFocus)
 	case fyne.KeyDown:
