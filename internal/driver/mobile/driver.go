@@ -271,6 +271,7 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
+	d.animation.TickAnimations()
 	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
 	if canvasNeedRefresh {
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
