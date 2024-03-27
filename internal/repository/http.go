@@ -67,7 +67,7 @@ func constructURI(u fyne.URI) string {
 	return uri
 }
 
-// Exists checks whether the the resource at u returns a
+// Exists checks whether the resource at u returns a
 // non "404 NOT FOUND" response header.
 //
 // Implements: repository.Repository

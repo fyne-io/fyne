@@ -131,7 +131,7 @@ func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
-// a black svg object omits the fill tag, this checks it it still properly updated
+// a black svg object omits the fill tag, this checks if it still properly updated
 func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "cancel_PathsBlackFill.svg")
