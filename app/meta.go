@@ -24,5 +24,9 @@ func SetMetadata(m fyne.AppMetadata) {
 }
 
 func (a *fyneApp) Metadata() fyne.AppMetadata {
+	if meta.ID == "" && meta.Name == "" {
+		checkLocalMetadata()
+	}
+
 	return meta
 }
