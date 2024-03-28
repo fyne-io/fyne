@@ -1,9 +1,10 @@
 package lang
 
 import (
-	"fyne.io/fyne/v2"
 	"github.com/jeandeaual/go-locale"
 	"golang.org/x/text/language"
+
+	"fyne.io/fyne/v2"
 )
 
 // SystemLocale returns the primary locale on the current system.
@@ -12,6 +13,8 @@ func SystemLocale() fyne.Locale {
 	loc, err := locale.GetLocale()
 	if err != nil {
 		fyne.LogError("Failed to look up user locale", err)
+	}
+	if loc == "" {
 		loc = "en"
 	}
 
