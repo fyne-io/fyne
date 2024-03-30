@@ -9,6 +9,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * iOS files write would fail when over 16KB
 * storage.Delete not supported on Android/iOS (#2120)
+* layout.formLayout do not handle canvas.Text well in second column (#4665)
+* Fix building with ios17.4 (#4741)
+* Support template icon for system tray menu icons
+* Fix recognition of missing XDG user directories (#4650)
+* FileDialog.SetOnClosed not always working (#4651)
 
 
 ## 2.4.4 - 13 February 2024
