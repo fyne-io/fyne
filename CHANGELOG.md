@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Support template icon for system tray menu icons
 * Fix recognition of missing XDG user directories (#4650)
 * FileDialog.SetOnClosed not always working (#4651)
+* Upgrade GLFW for performance improvements and bug fixes
 
 
 ## 2.4.4 - 13 February 2024
