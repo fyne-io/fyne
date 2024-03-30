@@ -52,6 +52,21 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 5.0, s.Value)
 }
 
+func TestSlider_Clamp(t *testing.T) {
+	s := &Slider{Min: 0, Max: 1, Step: 0.001}
+	s.Value = 0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, 0.959, s.Value, 0.00001)
+
+	s.Min = -1
+	s.Max = 0
+	s.Value = -0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, -0.959, s.Value, 0.00001)
+}
+
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
