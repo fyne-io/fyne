@@ -31,6 +31,8 @@ type AppTabs struct {
 	isTransitioning bool
 
 	popUpMenu *widget.PopUpMenu
+
+	useMobileLayout bool
 }
 
 // NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
@@ -41,6 +43,11 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	tabs.SetItems(items)
 	return tabs
+}
+
+// UseMobileLayout forces tab buttons to be spaced evenly along the tab bar's axis.
+func (t *AppTabs) UseMobileLayout() {
+	t.useMobileLayout = true
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -349,7 +356,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	buttons := &fyne.Container{}
 
 	var iconPos buttonIconPosition
-	if fyne.CurrentDevice().IsMobile() {
+	if r.appTabs.useMobileLayout || fyne.CurrentDevice().IsMobile() {
 		cells := count
 		if cells == 0 {
 			cells = 1
