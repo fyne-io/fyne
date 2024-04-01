@@ -61,10 +61,11 @@ func NewGetter() *Getter {
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
 	name := filepath.Base(pkg)
-	path := filepath.Join(os.TempDir(), name)
-	if util.Exists(path) {
-		_ = os.Remove(path)
+	path, err := os.MkdirTemp("", fmt.Sprintf("fyne-get-%s-*", name))
+	if err != nil {
+		return err
 	}
+	defer os.RemoveAll(path)
 
 	repo, err := vcs.RepoRootForImportPath(pkg, false)
 	if err != nil {
