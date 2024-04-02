@@ -15,6 +15,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix recognition of missing XDG user directories (#4650)
 * FileDialog.SetOnClosed not always working (#4651)
 * Upgrade GLFW for performance improvements and bug fixes
+* Multiple select popups can crash during background operations (#4730)
+* Controlling a negative slider with the left arrow key blocks after 8 steps (#4736)
 
 
 ## 2.4.4 - 13 February 2024
