@@ -653,7 +653,11 @@ func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
 const treeBindTemplate = `
 // {{ .Name }}Tree supports binding a tree of {{ .Type }} values.
 //
+{{ if eq .Name "Untyped" -}}
+// Since: 2.5
+{{- else -}}
 // Since: 2.4
+{{- end }}
 type {{ .Name }}Tree interface {
 	DataTree
 
@@ -668,7 +672,11 @@ type {{ .Name }}Tree interface {
 
 // External{{ .Name }}Tree supports binding a tree of {{ .Type }} values from an external variable.
 //
+{{ if eq .Name "Untyped" -}}
+// Since: 2.5
+{{- else -}}
 // Since: 2.4
+{{- end }}
 type External{{ .Name }}Tree interface {
 	{{ .Name }}Tree
 
@@ -677,7 +685,11 @@ type External{{ .Name }}Tree interface {
 
 // New{{ .Name }}Tree returns a bindable tree of {{ .Type }} values.
 //
+{{ if eq .Name "Untyped" -}}
+// Since: 2.5
+{{- else -}}
 // Since: 2.4
+{{- end }}
 func New{{ .Name }}Tree() {{ .Name }}Tree {
 	t := &bound{{ .Name }}Tree{val: &map[string]{{ .Type }}{}}
 	t.ids = make(map[string][]string)

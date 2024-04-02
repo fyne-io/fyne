@@ -1721,7 +1721,7 @@ func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 
 // UntypedTree supports binding a tree of any values.
 //
-// Since: 2.4
+// Since: 2.5
 type UntypedTree interface {
 	DataTree
 
@@ -1736,7 +1736,7 @@ type UntypedTree interface {
 
 // ExternalUntypedTree supports binding a tree of any values from an external variable.
 //
-// Since: 2.4
+// Since: 2.5
 type ExternalUntypedTree interface {
 	UntypedTree
 
@@ -1745,7 +1745,7 @@ type ExternalUntypedTree interface {
 
 // NewUntypedTree returns a bindable tree of any values.
 //
-// Since: 2.4
+// Since: 2.5
 func NewUntypedTree() UntypedTree {
 	t := &boundUntypedTree{val: &map[string]any{}}
 	t.ids = make(map[string][]string)
