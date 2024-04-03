@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 
 	"golang.org/x/sys/execabs"
@@ -17,6 +18,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+var once sync.Once
 
 const notificationTemplate = `$title = "%s"
 $content = "%s"
@@ -73,22 +76,56 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
 	appID := a.UniqueID()
-	iconFilePath := filepath.Join(os.TempDir(), fmt.Sprintf("fyne-%s.ico", appID))
+	iconFilePath := a.cachedNotificationIconPath()
 	if appID == "" || strings.Index(appID, "missing-id") == 0 {
 		appID = a.Metadata().Name
 	}
 
-	if a.Icon() != nil {
-		if _, err := os.Stat(iconFilePath); os.IsNotExist(err) {
-			err := os.WriteFile(iconFilePath, a.Icon().Content(), 0600)
-			if err != nil {
-				fyne.LogError("Could not write notification icon temp file", err)
-			}
+	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, appID)
+	go runScript("notify", script)
+}
+
+func (a *fyneApp) saveNotificationIconToCache(dirPath, filePath string) error {
+	err := os.MkdirAll(dirPath, 0700)
+	if err != nil {
+		fyne.LogError("Unable to create application cache directory", err)
+		return err
+	}
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		fyne.LogError("Unable to create notification icon file", err)
+		return err
+	}
+
+	defer file.Close()
+
+	if icon := a.Icon(); icon != nil {
+		_, err = file.Write(icon.Content())
+		if err != nil {
+			fyne.LogError("Unable to write notification icon contents", err)
+			return err
 		}
 	}
 
-	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, appID)
-	go runScript("notify", script)
+	return nil
+}
+
+func (a *fyneApp) cachedNotificationIconPath() string {
+	if a.Icon() == nil {
+		return ""
+	}
+
+	dirPath := filepath.Join(rootConfigDir(), a.UniqueID())
+	filePath := filepath.Join(dirPath, "icon.png")
+	once.Do(func() {
+		err := a.saveNotificationIconToCache(dirPath, filePath)
+		if err != nil {
+			filePath = ""
+		}
+	})
+
+	return filePath
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
