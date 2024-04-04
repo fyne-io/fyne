@@ -59,6 +59,6 @@ func getProjectPath() string {
 		return work
 	}
 
-	// we were called with after "go build" completed
+	// we were called with an executable from "go build"
 	return filepath.Dir(exe)
 }
