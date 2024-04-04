@@ -17,6 +17,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Upgrade GLFW for performance improvements and bug fixes
 * Multiple select popups can crash during background operations (#4730)
 * Controlling a negative slider with the left arrow key blocks after 8 steps (#4736)
+* cmd/fyne: command "get" is broken with Go 1.22 (#4684)
 
 
 ## 2.4.4 - 13 February 2024
