@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sync"
 	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
@@ -20,8 +19,6 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
-
-var once sync.Once
 
 func defaultVariant() fyne.ThemeVariant {
 	return findFreedestktopColorScheme()
@@ -74,7 +71,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	appIcon := a.cachedIconPath()
+	appIcon := a.CachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
@@ -100,49 +97,6 @@ func (a *fyneApp) sendNotificationThroughPortal(n *fyne.Notification) error {
 	)
 }
 
-func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
-	err := os.MkdirAll(dirPath, 0700)
-	if err != nil {
-		fyne.LogError("Unable to create application cache directory", err)
-		return err
-	}
-
-	file, err := os.Create(filePath)
-	if err != nil {
-		fyne.LogError("Unable to create icon file", err)
-		return err
-	}
-
-	defer file.Close()
-
-	if icon := a.Icon(); icon != nil {
-		_, err = file.Write(icon.Content())
-		if err != nil {
-			fyne.LogError("Unable to write icon contents", err)
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (a *fyneApp) cachedIconPath() string {
-	if a.Icon() == nil {
-		return ""
-	}
-
-	dirPath := filepath.Join(rootCacheDir(), a.UniqueID())
-	filePath := filepath.Join(dirPath, "icon.png")
-	once.Do(func() {
-		err := a.saveIconToCache(dirPath, filePath)
-		if err != nil {
-			filePath = ""
-		}
-	})
-
-	return filePath
-}
-
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
 // By default this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
@@ -162,11 +116,6 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 func rootConfigDir() string {
 	desktopConfig, _ := os.UserConfigDir()
 	return filepath.Join(desktopConfig, "fyne")
-}
-
-func rootCacheDir() string {
-	desktopCache, _ := os.UserCacheDir()
-	return filepath.Join(desktopCache, "fyne")
 }
 
 func watchTheme() {
