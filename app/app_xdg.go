@@ -71,7 +71,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	appIcon := a.CachedIconPath()
+	appIcon := a.cachedIconPath()
 	timeout := int32(0) // we don't support this yet
 
 	obj := conn.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")

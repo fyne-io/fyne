@@ -71,7 +71,7 @@ var scriptNum = 0
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
-	iconFilePath := a.CachedIconPath()
+	iconFilePath := a.cachedIconPath()
 	appID := a.UniqueID()
 	if appID == "" || strings.Index(appID, "missing-id") == 0 {
 		appID = a.Metadata().Name

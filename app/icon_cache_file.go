@@ -10,7 +10,7 @@ import (
 
 var once sync.Once
 
-func (a *fyneApp) CachedIconPath() string {
+func (a *fyneApp) cachedIconPath() string {
 	if a.Icon() == nil {
 		return ""
 	}
