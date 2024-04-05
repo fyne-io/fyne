@@ -19,13 +19,13 @@ import (
 
 const notificationTemplate = `$title = "%s"
 $content = "%s"
-
+$iconPath = "file:///%s"
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
-$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+$template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastImageAndText02)
 $toastXml = [xml] $template.GetXml()
 $toastXml.GetElementsByTagName("text")[0].AppendChild($toastXml.CreateTextNode($title)) > $null
 $toastXml.GetElementsByTagName("text")[1].AppendChild($toastXml.CreateTextNode($content)) > $null
-
+$toastXml.GetElementsByTagName("image")[0].SetAttribute("src", $iconPath) > $null
 $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
 $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
@@ -71,12 +71,13 @@ var scriptNum = 0
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
+	iconFilePath := a.cachedIconPath()
 	appID := a.UniqueID()
 	if appID == "" || strings.Index(appID, "missing-id") == 0 {
 		appID = a.Metadata().Name
 	}
 
-	script := fmt.Sprintf(notificationTemplate, title, content, appID)
+	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, appID)
 	go runScript("notify", script)
 }
 
