@@ -226,6 +226,9 @@ func (t *RichText) cachedSegmentVisual(seg RichTextSegment, offset int) fyne.Can
 }
 
 func (t *RichText) cleanVisualCache() {
+	if len(t.visualCache) <= len(t.Segments) {
+		return
+	}
 	var deletingSegs []RichTextSegment
 	for seg1 := range t.visualCache {
 		found := false
