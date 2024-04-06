@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.4.5 - Ongoing
+## 2.4.5 - 10 April 2024
 
 ### Fixed
 
@@ -18,6 +18,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Multiple select popups can crash during background operations (#4730)
 * Controlling a negative slider with the left arrow key blocks after 8 steps (#4736)
 * cmd/fyne: command "get" is broken with Go 1.22 (#4684)
+* Race condition during system tray menu refresh (#4697)
+* Fyne release on Linux does not set Metadata().Release to true (#4711)
+* RichText leaks memory when replacing segments (#4723)
 
 
 ## 2.4.4 - 13 February 2024
