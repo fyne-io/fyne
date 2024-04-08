@@ -76,7 +76,6 @@ import (
 var mimeMap = map[string]string{
 	".txt": "text/plain",
 }
-var currentSize size.Event
 
 // GoBack asks the OS to go to the previous app / activity
 func GoBack() {
@@ -292,8 +291,8 @@ var (
 	windowConfigChange = make(chan windowConfig)
 	activityDestroyed  = make(chan struct{})
 
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
-	darkMode                                                             bool
+	currentSize size.Event
+	darkMode    bool
 )
 
 func init() {
@@ -355,12 +354,10 @@ func filePickerReturned(str *C.char) {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
-
-	currentSize.InsetTopPx = screenInsetTop
-	currentSize.InsetBottomPx = screenInsetBottom
-	currentSize.InsetLeftPx = screenInsetLeft
-	currentSize.InsetRightPx = screenInsetRight
+	currentSize.InsetTopPx = top
+	currentSize.InsetBottomPx = bottom
+	currentSize.InsetLeftPx = left
+	currentSize.InsetRightPx = right
 
 	theApp.events.In() <- currentSize
 }
