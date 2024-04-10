@@ -736,7 +736,9 @@ func (r *textRenderer) Refresh() {
 	r.Layout(r.obj.Size())
 	canvas.Refresh(r.obj.super())
 
+	r.obj.propertyLock.Lock()
 	r.obj.cleanVisualCache()
+	r.obj.propertyLock.Unlock()
 }
 
 func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
