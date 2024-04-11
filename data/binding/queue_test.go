@@ -14,7 +14,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// TestQueryLazyInit resets the current unbounded func queue, and tests
+// TestQueueLazyInit resets the current unbounded func queue, and tests
 // if the queue is lazy initialized.
 //
 // Note that this test may fail, if any of other tests in this package

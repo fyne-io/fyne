@@ -860,7 +860,7 @@ func (e *Entry) cursorTextPos() (pos int) {
 	return e.textPosFromRowCol(e.CursorRow, e.CursorColumn)
 }
 
-// copyToClipboard copies the current selection to a given clipboard and then removes the selected text.
+// cutToClipboard copies the current selection to a given clipboard and then removes the selected text.
 // This does nothing if it is a concealed entry.
 func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	if !e.selecting || e.Password {
