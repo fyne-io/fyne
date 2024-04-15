@@ -583,10 +583,6 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
-	if runtime.GOOS == "darwin" && scancode == 0x69 { // TODO remove once fixed upstream glfw/glfw#1786
-		code = glfw.KeyPrintScreen
-	}
-
 	ret := glfwKeyToKeyName(code)
 	if ret != fyne.KeyUnknown {
 		return ret

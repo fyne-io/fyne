@@ -4,12 +4,10 @@
 package glfw
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 
-	gl "github.com/fyne-io/gl-js"
-	glfw "github.com/fyne-io/glfw-js"
+	"github.com/fyne-io/gl-js"
+	"github.com/fyne-io/glfw-js"
 )
 
 func (d *gLDriver) initGLFW() {
@@ -24,13 +22,7 @@ func (d *gLDriver) initGLFW() {
 	})
 }
 
-func (d *gLDriver) tryPollEvents() {
-	defer func() {
-		if r := recover(); r != nil {
-			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
-		}
-	}()
-
+func (d *gLDriver) pollEvents() {
 	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 

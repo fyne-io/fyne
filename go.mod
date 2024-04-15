@@ -12,9 +12,9 @@ require (
 	github.com/fyne-io/glfw-js v0.0.0-20220120001248-ee7290d23504
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240306074159-ea2d69986ecb
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
+	github.com/go-text/render v0.1.0
 	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/gopherjs/gopherjs v1.17.2
@@ -33,6 +33,7 @@ require (
 	golang.org/x/mod v0.12.0
 	golang.org/x/sys v0.13.0
 	golang.org/x/tools v0.12.0
+	golang.org/x/tools/go/vcs v0.1.0-deprecated
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
 

@@ -256,15 +256,29 @@ func (s *Slider) clampValueToRange() {
 		return
 	}
 
-	rem := math.Mod(s.Value, s.Step)
+	// only work with positive mods so the maths holds up
+	value := s.Value
+	step := s.Step
+	invert := false
+	if s.Value < 0 {
+		invert = true
+		value = -value
+	}
+
+	rem := math.Mod(value, step)
 	if rem == 0 {
 		return
 	}
-	min := s.Value - rem
-	if rem > s.Step/2 {
+	min := value - rem
+	if rem > step/2 {
 		min += s.Step
 	}
-	s.Value = min
+
+	if invert {
+		s.Value = -min
+	} else {
+		s.Value = min
+	}
 }
 
 func (s *Slider) updateValue(ratio float64) {

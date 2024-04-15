@@ -3,6 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.4.5 - 15 April 2024
+
+### Fixed
+
+* iOS files write would fail when over 16KB
+* storage.Delete not supported on Android/iOS (#2120)
+* layout.formLayout do not handle canvas.Text well in second column (#4665)
+* Fix building with ios17.4 (#4741)
+* Support template icon for system tray menu icons
+* Fix recognition of missing XDG user directories (#4650)
+* FileDialog.SetOnClosed not always working (#4651)
+* Upgrade GLFW for performance improvements and bug fixes
+* Multiple select popups can crash during background operations (#4730)
+* Controlling a negative slider with the left arrow key blocks after 8 steps (#4736)
+* cmd/fyne: command "get" is broken with Go 1.22 (#4684)
+* Race condition during system tray menu refresh (#4697)
+* Fyne release on Linux does not set Metadata().Release to true (#4711)
+* RichText leaks memory when replacing segments (#4723)
+
+
 ## 2.4.4 - 13 February 2024
 
 ### Fixed

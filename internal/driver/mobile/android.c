@@ -329,12 +329,36 @@ const char* contentURIGetFileName(uintptr_t jni_env, uintptr_t ctx, char* uriCst
 	return NULL;
 }
 
-bool existsFileURI(char* uriCstr) {
+char *filePath(char *uriCstr) {
 	// Get file path from URI
 	size_t length = strlen(uriCstr)-7;// -7 for 'file://'
 	char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
 	memcpy(path, &uriCstr[7], length);
 	path[length] = '\0';
+
+	return path;
+}
+
+bool deleteFileURI(char *uriCstr) {
+	char* path = filePath(uriCstr);
+	int result = remove(path);
+
+	free(path);
+
+	return result == 0;
+}
+
+bool deleteURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	if (!hasPrefix(uriCstr, "file://")) {
+	    LOG_FATAL("Cannot delete for scheme: %s", uriCstr);
+		return false;
+	}
+
+	return deleteFileURI(uriCstr);
+}
+
+bool existsFileURI(char* uriCstr) {
+	char* path = filePath(uriCstr);
 
 	// Stat path to determine if it points to an existing file
 	struct stat statbuf;

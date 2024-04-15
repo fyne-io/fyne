@@ -219,6 +219,31 @@ func (t *RichText) cachedSegmentVisual(seg RichTextSegment, offset int) fyne.Can
 	return vis
 }
 
+func (t *RichText) cleanVisualCache() {
+	t.cacheLock.Lock()
+	defer t.cacheLock.Unlock()
+	if len(t.visualCache) <= len(t.Segments) {
+		return
+	}
+	var deletingSegs []RichTextSegment
+	for seg1 := range t.visualCache {
+		found := false
+		for _, seg2 := range t.Segments {
+			if seg1 == seg2 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			// cached segment is not currently in t.Segments, clear it
+			deletingSegs = append(deletingSegs, seg1)
+		}
+	}
+	for _, seg := range deletingSegs {
+		delete(t.visualCache, seg)
+	}
+}
+
 // insertAt inserts the text at the specified position
 func (t *RichText) insertAt(pos int, runes string) {
 	index := 0
@@ -712,6 +737,8 @@ func (r *textRenderer) Refresh() {
 
 	r.Layout(r.obj.Size())
 	canvas.Refresh(r.obj.super())
+
+	r.obj.cleanVisualCache()
 }
 
 func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
