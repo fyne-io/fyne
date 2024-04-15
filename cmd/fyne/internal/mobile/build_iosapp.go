@@ -529,6 +529,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
         SDKROOT = iphoneos;
         TARGETED_DEVICE_FAMILY = "1,2";
+        OS_ACTIVITY_MODE = "disable";
         VALIDATE_PRODUCT = YES;
         {{if not .BitcodeEnabled}}ENABLE_BITCODE = NO;{{end}}
       };

@@ -226,6 +226,8 @@ func (t *RichText) cachedSegmentVisual(seg RichTextSegment, offset int) fyne.Can
 }
 
 func (t *RichText) cleanVisualCache() {
+	t.cacheLock.Lock()
+	defer t.cacheLock.Unlock()
 	if len(t.visualCache) <= len(t.Segments) {
 		return
 	}

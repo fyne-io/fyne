@@ -47,7 +47,7 @@ struct utsname sysInfo;
 	updateConfig((int)size.width, (int)size.height, orientation);
 
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-	center.delegate = self;
+	center.delegate = (id) self;
 
 	return YES;
 }
@@ -209,7 +209,7 @@ static void sendTouches(int change, NSSet* touches) {
 }
 
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    keyboardTyped([string UTF8String]);
+    keyboardTyped((char *)[string UTF8String]);
     return NO;
 }
 
@@ -325,12 +325,12 @@ NSMutableArray *docTypesForMimeExts(char *mimes, char *exts) {
         NSString *mimeList = [NSString stringWithUTF8String:mimes];
 
         if ([mimeList isEqualToString:@"application/x-directory"]) {
-            [docTypes addObject:kUTTypeFolder];
+            [docTypes addObject:(NSString*)kUTTypeFolder];
         } else {
             NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
 
             for (NSString *mime in mimeItems)  {
-                CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+                NSString *UTI = (NSString *) UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (CFStringRef)mime, NULL);
 
                 [docTypes addObject:UTI];
             }
@@ -340,7 +340,7 @@ NSMutableArray *docTypesForMimeExts(char *mimes, char *exts) {
         NSArray *extItems = [extList componentsSeparatedByString:@"|"];
 
         for (NSString *ext in extItems)  {
-            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext, NULL);
+            NSString *UTI = (NSString *) UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)ext, NULL);
 
             [docTypes addObject:UTI];
         }
@@ -358,7 +358,7 @@ void showFileOpenPicker(char* mimes, char *exts) {
 
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
         initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
-    documentPicker.delegate = appDelegate;
+    documentPicker.delegate = (id) appDelegate;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
@@ -379,7 +379,7 @@ void showFileSavePicker(char* mimes, char *exts) {
 
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
         initWithURL:temporaryFileURL inMode:UIDocumentPickerModeMoveToService];
-    documentPicker.delegate = appDelegate;
+    documentPicker.delegate = (id) appDelegate;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
