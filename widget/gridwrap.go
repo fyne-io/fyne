@@ -36,6 +36,7 @@ type GridWrap struct {
 	UpdateItem   func(id GridWrapItemID, item fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id GridWrapItemID)                         `json:"-"`
 	OnUnselected func(id GridWrapItemID)                         `json:"-"`
+	GetSelecterd func(listID []GridWrapItemID)
 
 	currentFocus  ListItemID
 	focused       bool
@@ -155,9 +156,37 @@ func (l *GridWrap) Resize(s fyne.Size) {
 	l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
 }
 
+func contains(a []int, x int) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
+func delete(a []int, x int) []int {
+	var ind int = -1
+	for i, n := range a {
+		if x == n {
+			ind = i
+		}
+	}
+	if ind == -1 {
+		return a
+	}
+
+	a[ind] = a[len(a)-1]
+	a[len(a)-1] = 0
+	a = a[:len(a)-1]
+	return a
+}
+
 // Select adds the item identified by the given ID to the selection.
 func (l *GridWrap) Select(id GridWrapItemID) {
-	if len(l.selected) > 0 && id == l.selected[0] {
+	if len(l.selected) > 0 && contains(l.selected, id) {
+		l.selected = delete(l.selected, id)
+		l.Refresh()
 		return
 	}
 	length := 0
@@ -168,7 +197,12 @@ func (l *GridWrap) Select(id GridWrapItemID) {
 		return
 	}
 	old := l.selected
-	l.selected = []GridWrapItemID{id}
+	if len(l.selected) == 0 {
+		l.selected = []GridWrapItemID{id}
+	} else {
+		l.selected = append([]int{id}, l.selected...)
+	}
+
 	defer func() {
 		if f := l.OnUnselected; f != nil && len(old) > 0 {
 			f(old[0])

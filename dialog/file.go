@@ -751,6 +751,10 @@ func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *
 	return dialog
 }
 
+func NewFileMultiOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) string {
+	return "yep"
+}
+
 // NewFileSave creates a file dialog allowing the user to choose a file to save
 // to (new or overwrite). If the user chooses an existing file they will be
 // asked if they are sure. The callback function will run when the dialog
