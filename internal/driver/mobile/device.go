@@ -8,7 +8,7 @@ import (
 )
 
 type device struct {
-	safeTop, safeLeft, safeWidth, safeHeight int
+	safeTop, safeLeft, safeBottom, safeRight int
 }
 
 //lint:file-ignore U1000 Var currentDPI is used in other files, but not here
