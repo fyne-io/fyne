@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// NewRectangle returns a new Rectangle instance
+// NewMinSizeRect returns a new Rectangle instance
 func NewMinSizeRect(min fyne.Size) *canvas.Rectangle {
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(min)

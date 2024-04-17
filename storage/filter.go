@@ -12,7 +12,7 @@ type FileFilter interface {
 	Matches(fyne.URI) bool
 }
 
-// ExtensionFileFilter represents a file filter based on the the ending of file names,
+// ExtensionFileFilter represents a file filter based on the ending of file names,
 // for example ".txt" and ".png".
 type ExtensionFileFilter struct {
 	Extensions []string
