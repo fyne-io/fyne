@@ -363,3 +363,43 @@ func TestURIToString(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///tmp/test.txt", v2.String())
 }
+
+func TestFloatToInt(t *testing.T) {
+	f := NewFloat()
+	i := FloatToInt(f)
+	v, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, v)
+
+	err = f.Set(0.3)
+	assert.Nil(t, err)
+	v, err = i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, v)
+
+	err = i.Set(5)
+	assert.Nil(t, err)
+	v2, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5.0, v2)
+}
+
+func TestIntToFloat(t *testing.T) {
+	i := NewInt()
+	f := IntToFloat(i)
+	v, err := f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 0.0, v)
+
+	err = i.Set(3)
+	assert.Nil(t, err)
+	v, err = f.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 3.0, v)
+
+	err = f.Set(5)
+	assert.Nil(t, err)
+	v2, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, 5, v2)
+}

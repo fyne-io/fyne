@@ -393,8 +393,11 @@ func (s *stringToBool) Set(val bool) error {
 	}
 
 	old, err := s.from.Get()
-	if str == old {
+	if err != nil {
 		return err
+	}
+	if str == old {
+		return nil
 	}
 
 	if err = s.from.Set(str); err != nil {
@@ -635,4 +638,85 @@ func (s *stringToURI) DataChanged() {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	s.trigger()
+}
+type floatToInt struct {
+	base
+
+	from Float
+}
+func (s *floatToInt) Get() (int, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0.0, err
+	}
+	return int(val), nil
+}
+
+func (s *floatToInt) Set(val int) error {
+	f := float64(val)
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if old == f {
+		return nil
+	}
+	if err = s.from.Set(f); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *floatToInt) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+// FloatToInt creates a binding that connects a Float data item to an Int.
+// The conversion is just doing a type cast.
+func FloatToInt(val Float) Int {
+	return &floatToInt{from: val}
+}
+
+type intToFloat struct {
+	base
+
+	from Int
+}
+func (s *intToFloat) Get() (float64, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0, err
+	}
+	return float64(val), nil
+}
+
+func (s *intToFloat) Set(val float64) error {
+	i := int(val)
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if old == i {
+		return nil
+	}
+	if err = s.from.Set(i); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *intToFloat) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+// IntToFloat creates a binding that connects a Int data item to an Float.
+// The conversion is just doing a type cast.
+func IntToFloat(val Int) Float {
+	return &intToFloat{from: val}
 }
