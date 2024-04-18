@@ -58,6 +58,7 @@ func (p *Packager) packageUNIX() error {
 	appsDir := util.EnsureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.Name+".desktop")
 	deskFile, _ := os.Create(desktop)
+	defer deskFile.Close()
 
 	linuxBSD := metadata.LinuxAndBSD{}
 	if p.linuxAndBSDMetadata != nil {
