@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func (a *fyneApp) SendNotification(_ *fyne.Notification) {
+func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	window := js.Global().Get("window")
 	if window.IsUndefined() {
 		fyne.LogError("Current browser does not support notifications.", nil)
@@ -25,7 +25,7 @@ func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 	// check permission
 	permission := notification.Get("permission")
 	showNotification := func() {
-		icon := app.icon.Content()
+		icon := a.icon.Content()
 		base64Str := base64.StdEncoding.EncodeToString(icon)
 		mimeType := http.DetectContentType(icon)
 		base64Img := fmt.Sprintf("data:%s;base64,%s", mimeType, base64Str)
