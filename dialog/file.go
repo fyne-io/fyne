@@ -558,14 +558,17 @@ func (f *fileDialog) setView(view ViewLayout) {
 			o.(*fileDialogItem).setChooseAndOpenCallBack(choose, f.open.OnTapped)
 		}
 	}
-
+	// Acutally, during the real interaction, the choose won't be called.
+	// It will be called only when we directly calls container.select(i)
 	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
+		grid.OnSelected = choose
 		f.files = grid
 		f.toggleViewButton.SetIcon(theme.ListIcon())
 		selectF = grid.Select
 	} else {
 		list := widget.NewList(count, template, update)
+		list.OnSelected = choose
 		f.files = list
 		f.toggleViewButton.SetIcon(theme.GridIcon())
 		selectF = list.Select
