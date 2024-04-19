@@ -2,8 +2,11 @@ package dialog
 
 import (
 	"path/filepath"
+	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -20,8 +23,13 @@ type fileDialogItem struct {
 	picker *fileDialog
 
 	name     string
+	id       int // id in the father container
+	choose   func(id int)
+	open     func()
 	location fyne.URI
 	dir      bool
+
+	lastClick time.Time
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
@@ -39,7 +47,8 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
+func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool, id int) {
+	i.id = id
 	i.dir = dir
 	i.location = l
 	i.name = l.Name()
@@ -54,6 +63,31 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	}
 
 	i.Refresh()
+}
+func (i *fileDialogItem) tapped() {
+	if i.choose != nil {
+		i.choose(i.id)
+	}
+	now := time.Now()
+	if !i.dir && now.Sub(i.lastClick) < fyne.CurrentApp().Driver().DoubleTapDelay() && i.open != nil {
+		// It is a double click, so we ask the dialog to open
+		i.open()
+	}
+	i.lastClick = now
+}
+
+func (i *fileDialogItem) TouchDown(*mobile.TouchEvent) {}
+
+func (i *fileDialogItem) TouchUp(*mobile.TouchEvent) {
+	i.tapped()
+}
+
+func (i *fileDialogItem) TouchCancel(*mobile.TouchEvent) {}
+
+func (i *fileDialogItem) MouseDown(*desktop.MouseEvent) {}
+
+func (i *fileDialogItem) MouseUp(e *desktop.MouseEvent) {
+	i.tapped()
 }
 
 func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogItem {
@@ -75,6 +109,10 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 
 	item.ExtendBaseWidget(item)
 	return item
+}
+func (i *fileDialogItem) setChooseAndOpenCallBack(choose func(id int), open func()) {
+	i.choose = choose
+	i.open = open
 }
 
 type fileItemRenderer struct {
