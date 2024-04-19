@@ -525,8 +525,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 func (s *sliderRenderer) MinSize() fyne.Size {
 	th := s.slider.Theme()
 	pad := fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
-	dia := s.slider.buttonDiameter(th.Size(theme.SizeNameInlineIcon))
-	s1, s2 := minLongSide+dia, dia
+	tap := th.Size(theme.SizeNameInlineIcon)
+	s1, s2 := minLongSide+tap, tap
 
 	switch s.slider.Orientation {
 	case Vertical:
