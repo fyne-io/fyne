@@ -9,6 +9,13 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+func internalFloatToInt(val float64) (int, error) {
+	return int(val), nil
+}
+func internalIntToFloat(val int) (float64, error) {
+	return float64(val), nil
+}
+
 type stringFromBool struct {
 	base
 
@@ -393,11 +400,8 @@ func (s *stringToBool) Set(val bool) error {
 	}
 
 	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
 	if str == old {
-		return nil
+		return err
 	}
 
 	if err = s.from.Set(str); err != nil {
@@ -639,68 +643,42 @@ func (s *stringToURI) DataChanged() {
 	defer s.lock.RUnlock()
 	s.trigger()
 }
-type floatToInt struct {
-	base
 
-	from Float
+type intToFloat struct {
+	base
+	from Int
 }
-func (s *floatToInt) Get() (int, error) {
+
+// IntToFloat creates a binding that connects a Int data item to a Float.
+// Changes to the String will be parsed and pushed to the Float if the parse was successful, and setting
+// the Float update the Int binding.
+//
+// Since: 2.0
+func IntToFloat(val Int) Float {
+	v := &intToFloat{from: val}
+	val.AddListener(v)
+	return v
+}
+
+func (s *intToFloat) Get() (float64, error) {
 	val, err := s.from.Get()
 	if err != nil {
 		return 0.0, err
 	}
-	return int(val), nil
-}
-
-func (s *floatToInt) Set(val int) error {
-	f := float64(val)
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if old == f {
-		return nil
-	}
-	if err = s.from.Set(f); err != nil {
-		return err
-	}
-
-	s.DataChanged()
-	return nil
-}
-
-func (s *floatToInt) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-	s.trigger()
-}
-// FloatToInt creates a binding that connects a Float data item to an Int.
-// The conversion is just doing a type cast.
-func FloatToInt(val Float) Int {
-	return &floatToInt{from: val}
-}
-
-type intToFloat struct {
-	base
-
-	from Int
-}
-func (s *intToFloat) Get() (float64, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return 0, err
-	}
-	return float64(val), nil
+	return internalIntToFloat(val)
 }
 
 func (s *intToFloat) Set(val float64) error {
-	i := int(val)
-	old, err := s.from.Get()
+	i, err := internalFloatToInt(val)
 	if err != nil {
 		return err
 	}
-	if old == i {
+	old, err := s.from.Get()
+	if i == old {
 		return nil
+	}
+	if err != nil {
+		return err
 	}
 	if err = s.from.Set(i); err != nil {
 		return err
@@ -715,8 +693,54 @@ func (s *intToFloat) DataChanged() {
 	defer s.lock.RUnlock()
 	s.trigger()
 }
-// IntToFloat creates a binding that connects a Int data item to an Float.
-// The conversion is just doing a type cast.
-func IntToFloat(val Int) Float {
-	return &intToFloat{from: val}
+
+type intFromFloat struct {
+	base
+	from Float
+}
+
+// FloatToInt creates a binding that connects a Float data item to a String.
+// Changes to the Float will be pushed to the String and setting the string will parse and set the
+// Float if the parse was successful.
+//
+// Since: 2.0
+func FloatToInt(v Float) Int {
+	i := &intFromFloat{from: v}
+	v.AddListener(i)
+	return i
+}
+
+func (s *intFromFloat) Get() (int, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0, err
+	}
+	return internalFloatToInt(val)
+}
+
+func (s *intFromFloat) Set(v int) error {
+	val, err := internalIntToFloat(v)
+	if err != nil {
+		return err
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *intFromFloat) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
 }

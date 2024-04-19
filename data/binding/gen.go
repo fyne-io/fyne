@@ -270,7 +270,109 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 	s.trigger()
 }
 `
+const toIntTemplate = `
+type intFrom{{ .Name }} struct {
+	base
+	from {{ .Name }}
+}
 
+// {{ .Name }}ToInt creates a binding that connects a {{ .Name }} data item to a String.
+// Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
+// {{ .Name }} if the parse was successful.
+//
+// Since: {{ .Since }}
+func {{ .Name }}ToInt(v {{ .Name }}) Int {
+	i := &intFrom{{ .Name }}{from: v}
+	v.AddListener(i)
+	return i
+}
+
+func (s *intFrom{{ .Name }}) Get() (int, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0, err
+	}
+	return {{ .ToInt }}(val)
+}
+
+func (s *intFrom{{ .Name }}) Set(v int) error {
+	val, err := {{ .FromInt }}(v)
+	if err != nil {
+		return err
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *intFrom{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+`
+const fromIntTemplate = `
+type intTo{{ .Name }} struct {
+	base
+	from Int
+}
+
+// IntTo{{ .Name }} creates a binding that connects a Int data item to a {{ .Name }}.
+// Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
+// the {{ .Name }} update the Int binding.
+//
+// Since: {{ .Since }}
+func IntTo{{ .Name }}(val Int) {{ .Name }} {
+	v := &intTo{{ .Name }}{from: val}
+	val.AddListener(v)
+	return v
+}
+
+func (s *intTo{{ .Name }}) Get() ({{ .Type }}, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return {{ .Default }}, err
+	}
+	return {{ .FromInt }}(val)
+}
+
+func (s *intTo{{ .Name }}) Set(val {{ .Type }}) error {
+	i, err := {{ .ToInt }}(val)
+	if err != nil {
+		return err
+	}
+	old, err := s.from.Get()
+	if i == old {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if err = s.from.Set(i); err != nil {
+		return err
+	}
+
+	s.DataChanged()
+	return nil
+}
+
+func (s *intTo{{ .Name }}) DataChanged() {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	s.trigger()
+}
+`
 const fromStringTemplate = `
 type stringTo{{ .Name }} struct {
 	base
@@ -961,6 +1063,7 @@ type bindValues struct {
 	SupportsPreferences  bool
 	FromString, ToString string // function names...
 	Comparator           string // comparator function name
+	FromInt, ToInt       string // function names...
 }
 
 func newFile(name string) (*os.File, error) {
@@ -1011,6 +1114,13 @@ import (
 
 	"fyne.io/fyne/v2"
 )
+
+func internalFloatToInt(val float64) (int, error) {
+	return int(val), nil
+}
+func internalIntToFloat(val int) (float64, error) {
+	return float64(val), nil
+}
 `)
 	prefFile, err := newFile("preference")
 	if err != nil {
@@ -1055,6 +1165,8 @@ import (
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
+	fromInt := template.Must(template.New("fromInt").Parse(fromIntTemplate))
+	toInt := template.Must(template.New("toInt").Parse(toIntTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	list := template.Must(template.New("list").Parse(listBindTemplate))
@@ -1062,7 +1174,7 @@ import (
 	binds := []bindValues{
 		{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
-		{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
+		{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true, ToInt: "internalFloatToInt", FromInt: "internalIntToFloat"},
 		{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
@@ -1097,6 +1209,26 @@ import (
 
 		if b.Format != "" || b.FromString != "" {
 			writeFile(convertFile, fromString, b)
+		}
+	}
+	// add IntTo
+
+	for _, b := range binds {
+		if b.Since == "" {
+			b.Since = "2.0"
+		}
+
+		if b.FromInt != "" {
+			writeFile(convertFile, fromInt, b)
+		}
+	}
+	for _, b := range binds {
+		if b.Since == "" {
+			b.Since = "2.0"
+		}
+
+		if b.ToInt != "" {
+			writeFile(convertFile, toInt, b)
 		}
 	}
 }
