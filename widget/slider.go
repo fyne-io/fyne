@@ -524,15 +524,16 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
 	th := s.slider.Theme()
-	pad := fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
+	pad := th.Size(theme.SizeNameInnerPadding)
+	dia := s.slider.buttonDiameter(th.Size(theme.SizeNameInlineIcon))
 	tap := th.Size(theme.SizeNameInlineIcon)
-	s1, s2 := minLongSide+tap, tap
+	s1, s2 := minLongSide+dia, tap+pad*2
 
 	switch s.slider.Orientation {
 	case Vertical:
-		return pad.AddWidthHeight(s2, s1)
+		return fyne.NewSize(s2, s1)
 	default:
-		return pad.AddWidthHeight(s1, s2)
+		return fyne.NewSize(s1, s2)
 	}
 }
 
