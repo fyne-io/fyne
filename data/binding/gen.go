@@ -276,9 +276,7 @@ type intFrom{{ .Name }} struct {
 	from {{ .Name }}
 }
 
-// {{ .Name }}ToInt creates a binding that connects a {{ .Name }} data item to a String.
-// Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
-// {{ .Name }} if the parse was successful.
+// {{ .Name }}ToInt creates a binding that connects a {{ .Name }} data item to an Int.
 //
 // Since: {{ .Since }}
 func {{ .Name }}ToInt(v {{ .Name }}) Int {
@@ -328,9 +326,7 @@ type intTo{{ .Name }} struct {
 	from Int
 }
 
-// IntTo{{ .Name }} creates a binding that connects a Int data item to a {{ .Name }}.
-// Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
-// the {{ .Name }} update the Int binding.
+// IntTo{{ .Name }} creates a binding that connects an Int data item to a {{ .Name }}.
 //
 // Since: {{ .Since }}
 func IntTo{{ .Name }}(val Int) {{ .Name }} {
@@ -1118,6 +1114,7 @@ import (
 func internalFloatToInt(val float64) (int, error) {
 	return int(val), nil
 }
+
 func internalIntToFloat(val int) (float64, error) {
 	return float64(val), nil
 }
@@ -1211,11 +1208,9 @@ import (
 			writeFile(convertFile, fromString, b)
 		}
 	}
-	// add IntTo
-
 	for _, b := range binds {
 		if b.Since == "" {
-			b.Since = "2.0"
+			b.Since = "2.5"
 		}
 
 		if b.FromInt != "" {
@@ -1224,7 +1219,7 @@ import (
 	}
 	for _, b := range binds {
 		if b.Since == "" {
-			b.Since = "2.0"
+			b.Since = "2.5"
 		}
 
 		if b.ToInt != "" {

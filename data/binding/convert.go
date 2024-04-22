@@ -649,11 +649,9 @@ type intToFloat struct {
 	from Int
 }
 
-// IntToFloat creates a binding that connects a Int data item to a Float.
-// Changes to the String will be parsed and pushed to the Float if the parse was successful, and setting
-// the Float update the Int binding.
+// IntToFloat creates a binding that connects an Int data item to a Float.
 //
-// Since: 2.0
+// Since: 2.5
 func IntToFloat(val Int) Float {
 	v := &intToFloat{from: val}
 	val.AddListener(v)
@@ -699,11 +697,9 @@ type intFromFloat struct {
 	from Float
 }
 
-// FloatToInt creates a binding that connects a Float data item to a String.
-// Changes to the Float will be pushed to the String and setting the string will parse and set the
-// Float if the parse was successful.
+// FloatToInt creates a binding that connects a Float data item to an Int.
 //
-// Since: 2.0
+// Since: 2.5
 func FloatToInt(v Float) Int {
 	i := &intFromFloat{from: v}
 	v.AddListener(i)
