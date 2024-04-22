@@ -525,8 +525,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 func (s *sliderRenderer) MinSize() fyne.Size {
 	th := s.slider.Theme()
 	pad := th.Size(theme.SizeNameInnerPadding)
-	dia := s.slider.buttonDiameter(th.Size(theme.SizeNameInlineIcon))
 	tap := th.Size(theme.SizeNameInlineIcon)
+	dia := s.slider.buttonDiameter(tap)
 	s1, s2 := minLongSide+dia, tap+pad*2
 
 	switch s.slider.Orientation {
