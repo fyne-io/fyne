@@ -114,13 +114,8 @@ func (s *Slider) Tapped(e *fyne.PointEvent) {
 		return
 	}
 
-	driver := fyne.CurrentApp().Driver()
-	if !s.focused && !driver.Device().IsMobile() {
-		impl := s.super()
-
-		if c := driver.CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
+	if !s.focused {
+		focusIfNotMobile(s.super())
 	}
 
 	ratio := s.getRatio(e)
