@@ -285,8 +285,14 @@ func TestSlider_SetValue(t *testing.T) {
 }
 
 func TestSlider_Focus(t *testing.T) {
-	slider := NewSlider(0, 5)
+	slider := NewSlider(0, 10)
+	win := test.NewWindow(slider)
+	test.Tap(slider)
 
+	assert.Equal(t, win.Canvas().Focused(), slider)
+	assert.True(t, slider.focused)
+
+	slider = NewSlider(0, 5)
 	slider.FocusGained()
 	assert.True(t, slider.focused)
 
