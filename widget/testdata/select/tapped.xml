@@ -1,7 +1,7 @@
 <canvas padded size="200x150">
 	<content>
 		<widget pos="4,4" size="127x35" type="*widget.Select">
-			<rectangle fillColor="inputBackground" radius="4" size="127x35"/>
+			<rectangle fillColor="focus" radius="4" size="127x35"/>
 			<rectangle size="127x35"/>
 			<widget pos="4,4" size="95x27" type="*widget.RichText">
 				<text pos="4,4" size="75x19">(Select one)</text>
