@@ -278,7 +278,7 @@ type intFrom{{ .Name }} struct {
 
 // {{ .Name }}ToInt creates a binding that connects a {{ .Name }} data item to an Int.
 //
-// Since: {{ .Since }}
+// Since: 2.5
 func {{ .Name }}ToInt(v {{ .Name }}) Int {
 	i := &intFrom{{ .Name }}{from: v}
 	v.AddListener(i)
@@ -328,7 +328,7 @@ type intTo{{ .Name }} struct {
 
 // IntTo{{ .Name }} creates a binding that connects an Int data item to a {{ .Name }}.
 //
-// Since: {{ .Since }}
+// Since: 2.5
 func IntTo{{ .Name }}(val Int) {{ .Name }} {
 	v := &intTo{{ .Name }}{from: val}
 	val.AddListener(v)
@@ -1197,6 +1197,12 @@ import (
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}
+		if b.FromInt != "" {
+			writeFile(convertFile, fromInt, b)
+		}
+		if b.ToInt != "" {
+			writeFile(convertFile, toInt, b)
+		}
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
@@ -1206,24 +1212,6 @@ import (
 
 		if b.Format != "" || b.FromString != "" {
 			writeFile(convertFile, fromString, b)
-		}
-	}
-	for _, b := range binds {
-		if b.Since == "" {
-			b.Since = "2.5"
-		}
-
-		if b.FromInt != "" {
-			writeFile(convertFile, fromInt, b)
-		}
-	}
-	for _, b := range binds {
-		if b.Since == "" {
-			b.Since = "2.5"
-		}
-
-		if b.ToInt != "" {
-			writeFile(convertFile, toInt, b)
 		}
 	}
 }
