@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -64,7 +62,8 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool, id int) {
 
 	i.Refresh()
 }
-func (i *fileDialogItem) tapped() {
+
+func (i *fileDialogItem) Tapped(*fyne.PointEvent) {
 	if i.choose != nil {
 		i.choose(i.id)
 	}
@@ -74,20 +73,6 @@ func (i *fileDialogItem) tapped() {
 		i.open()
 	}
 	i.lastClick = now
-}
-
-func (i *fileDialogItem) TouchDown(*mobile.TouchEvent) {}
-
-func (i *fileDialogItem) TouchUp(*mobile.TouchEvent) {
-	i.tapped()
-}
-
-func (i *fileDialogItem) TouchCancel(*mobile.TouchEvent) {}
-
-func (i *fileDialogItem) MouseDown(*desktop.MouseEvent) {}
-
-func (i *fileDialogItem) MouseUp(e *desktop.MouseEvent) {
-	i.tapped()
 }
 
 func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogItem {
@@ -110,6 +95,7 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 	item.ExtendBaseWidget(item)
 	return item
 }
+
 func (i *fileDialogItem) setChooseAndOpenCallBack(choose func(id int), open func()) {
 	i.choose = choose
 	i.open = open
