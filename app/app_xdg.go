@@ -25,7 +25,7 @@ var currentVariant atomic.Value
 func defaultVariant() fyne.ThemeVariant {
 	val := currentVariant.Load()
 	if val == nil {
-		return nil
+		return theme.VariantDark
 	}
 
 	return val.(fyne.ThemeVariant)
