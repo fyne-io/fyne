@@ -555,7 +555,8 @@ func (f *fileDialog) setView(view ViewLayout) {
 			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
 			_, isDir := dir.(fyne.ListableURI)
 			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent, id)
-			o.(*fileDialogItem).setChooseAndOpenCallBack(choose, f.open.OnTapped)
+			o.(*fileDialogItem).choose = choose
+			o.(*fileDialogItem).open = f.open.OnTapped
 		}
 	}
 	// Acutally, during the real interaction, the choose won't be called.

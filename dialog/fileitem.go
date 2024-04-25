@@ -96,11 +96,6 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 	return item
 }
 
-func (i *fileDialogItem) setChooseAndOpenCallBack(choose func(id int), open func()) {
-	i.choose = choose
-	i.open = open
-}
-
 type fileItemRenderer struct {
 	item         *fileDialogItem
 	fileTextSize float32
