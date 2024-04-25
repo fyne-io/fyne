@@ -56,6 +56,8 @@ func (s *settings) PrimaryColor() string {
 
 // OverrideTheme allows the settings app to temporarily preview different theme details.
 // Please make sure that you remember the original settings and call this again to revert the change.
+//
+// Deprecated: Use container.NewThemeOverride to change the appearance of part of your application.
 func (s *settings) OverrideTheme(theme fyne.Theme, name string) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
@@ -64,6 +66,10 @@ func (s *settings) OverrideTheme(theme fyne.Theme, name string) {
 }
 
 func (s *settings) Theme() fyne.Theme {
+	if s == nil {
+		fyne.LogError("Attempt to access current Fyne theme when no app is started", nil)
+		return nil
+	}
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	return s.theme
