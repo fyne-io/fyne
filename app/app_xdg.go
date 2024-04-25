@@ -23,7 +23,12 @@ import (
 var currentVariant atomic.Value
 
 func defaultVariant() fyne.ThemeVariant {
-	return currentVariant.Load().(fyne.ThemeVariant)
+	val := currentVariant.Load()
+	if val == nil {
+		return nil
+	}
+
+	return val.(fyne.ThemeVariant)
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
