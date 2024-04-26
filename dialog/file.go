@@ -554,12 +554,13 @@ func (f *fileDialog) setView(view ViewLayout) {
 		if dir, ok := f.getDataItem(id); ok {
 			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
 			_, isDir := dir.(fyne.ListableURI)
-			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent, id)
+			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
 			o.(*fileDialogItem).choose = choose
+			o.(*fileDialogItem).id = id
 			o.(*fileDialogItem).open = f.open.OnTapped
 		}
 	}
-	// Acutally, during the real interaction, the choose won't be called.
+	// Actually, during the real interaction, the OnSelected won't be called.
 	// It will be called only when we directly calls container.select(i)
 	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
