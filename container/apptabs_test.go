@@ -184,6 +184,7 @@ func TestAppTabs_DisableIndex(t *testing.T) {
 func TestAppTabs_ShowAfterAdd(t *testing.T) {
 	tabs := NewAppTabs()
 	renderer := test.WidgetRenderer(tabs).(*appTabsRenderer)
+
 	assert.True(t, renderer.indicator.Hidden)
 
 	tabs.Append(NewTabItem("test", widget.NewLabel("Test")))
