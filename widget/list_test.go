@@ -583,6 +583,10 @@ func TestList_Focus(t *testing.T) {
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.True(t, children[0].(*listItem).selected)
+
+	// https://github.com/fyne-io/fyne/issues/4472
+	list.Select(5)
+	assert.Equal(t, 5, list.currentFocus)
 }
 
 func createList(items int) *List {
