@@ -214,7 +214,7 @@ func currentVariant() fyne.ThemeVariant {
 func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
-		return color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
+		return backgroundColorDark
 	case ColorNameButton:
 		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameDisabled:
@@ -282,7 +282,7 @@ func focusColorNamed(name string) color.NRGBA {
 func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+		return backgroundColorLight
 	case ColorNameButton:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameDisabled:
@@ -304,7 +304,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameMenuBackground:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameOverlayBackground:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+		return backgroundColorLight
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	case ColorNamePressed:
