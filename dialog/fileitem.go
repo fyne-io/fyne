@@ -21,7 +21,7 @@ type fileDialogItem struct {
 	picker *fileDialog
 
 	name     string
-	id       int // id in the father container
+	id       int // id in the parent container
 	choose   func(id int)
 	open     func()
 	location fyne.URI
