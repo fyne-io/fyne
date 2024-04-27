@@ -3,6 +3,7 @@ package container
 import (
 	"fyne.io/fyne/v2"
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -92,6 +93,7 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 }
 
 type multiWinLayout struct {
+	layout.BaseLayout
 }
 
 func (m *multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {

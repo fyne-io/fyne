@@ -6,7 +6,9 @@ import "fyne.io/fyne/v2"
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*stackLayout)(nil)
 
-type stackLayout struct{}
+type stackLayout struct {
+	BaseLayout
+}
 
 // NewStackLayout returns a new StackLayout instance. Objects are stacked
 // on top of each other with later objects on top of those before.
@@ -14,8 +16,12 @@ type stackLayout struct{}
 // fill the available space even without a Stack.
 //
 // Since: 2.4
-func NewStackLayout() fyne.Layout {
-	return stackLayout{}
+func NewStackLayout(options ...LayoutOption) fyne.Layout {
+	l := &stackLayout{}
+	for _, option := range options {
+		option(l)
+	}
+	return l
 }
 
 // NewMaxLayout creates a new MaxLayout instance

@@ -181,6 +181,12 @@ func (c *customLayout) MinSize(objs []CanvasObject) Size {
 	return NewSize(10, float32(10*len(objs)))
 }
 
+func (c *customLayout) GetPaddings() (float32, float32, float32, float32) {
+	return 0, 0, 0, 0
+}
+
+func (c *customLayout) SetPaddingFn(paddingFn func() (float32, float32, float32, float32)) {}
+
 type dummyObject struct {
 	size   Size
 	pos    Position

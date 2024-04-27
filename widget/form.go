@@ -163,7 +163,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	item.helperOutput = text
 	f.updateHelperText(item)
 	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
-	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
+	return &fyne.Container{Layout: &formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
 func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
@@ -383,6 +383,8 @@ func NewForm(items ...*FormItem) *Form {
 }
 
 type formItemLayout struct {
+	layout.BaseLayout
+
 	form *Form
 }
 

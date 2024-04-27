@@ -6,11 +6,16 @@ import "fyne.io/fyne/v2"
 var _ fyne.Layout = (*centerLayout)(nil)
 
 type centerLayout struct {
+	BaseLayout
 }
 
 // NewCenterLayout creates a new CenterLayout instance
-func NewCenterLayout() fyne.Layout {
-	return &centerLayout{}
+func NewCenterLayout(options ...LayoutOption) fyne.Layout {
+	l := &centerLayout{}
+	for _, option := range options {
+		option(l)
+	}
+	return l
 }
 
 // Layout is called to pack all child objects into a specified size.

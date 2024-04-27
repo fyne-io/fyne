@@ -567,6 +567,12 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(6, 9)
 }
 
+func (l *recordingLayout) GetPaddings() (float32, float32, float32, float32) {
+	return 0, 0, 0, 0
+}
+
+func (l *recordingLayout) SetPaddingFn(paddingFn func() (float32, float32, float32, float32)) {}
+
 func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
 	return

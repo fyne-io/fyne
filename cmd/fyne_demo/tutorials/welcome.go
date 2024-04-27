@@ -56,7 +56,7 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	underlay := canvas.NewImageFromResource(data.FyneLogo)
 	bg := canvas.NewRectangle(bgColor)
 	underlayer := underLayout{}
-	slideBG := container.New(underlayer, underlay)
+	slideBG := container.New(&underlayer, underlay)
 	footerBG := canvas.NewRectangle(shadowColor)
 
 	listen := make(chan fyne.Settings)
@@ -81,10 +81,10 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 
 	bgClip := container.NewScroll(slideBG)
 	bgClip.Direction = container.ScrollNone
-	return container.NewStack(container.New(unpad{top: true}, bgClip, bg),
+	return container.NewStack(container.New(&unpad{top: true}, bgClip, bg),
 		container.NewBorder(nil,
 			container.NewStack(footerBG, footer), nil, nil,
-			container.New(unpad{top: true, bottom: true}, scroll)))
+			container.New(&unpad{top: true, bottom: true}, scroll)))
 }
 
 func withAlpha(c color.Color, alpha uint8) color.Color {
@@ -93,6 +93,8 @@ func withAlpha(c color.Color, alpha uint8) color.Color {
 }
 
 type underLayout struct {
+	layout.BaseLayout
+
 	offset float32
 }
 
@@ -107,21 +109,23 @@ func (u underLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 type unpad struct {
+	layout.BaseLayout
+
 	top, bottom bool
 }
 
 func (u unpad) Layout(objs []fyne.CanvasObject, s fyne.Size) {
-	pad := theme.Padding()
+	topPadding, bottomPadding, _, _ := u.GetPaddings()
 	var pos fyne.Position
 	if u.top {
-		pos = fyne.NewPos(0, -pad)
+		pos = fyne.NewPos(0, -topPadding)
 	}
 	size := s
 	if u.top {
-		size = size.AddWidthHeight(0, pad)
+		size = size.AddWidthHeight(0, topPadding)
 	}
 	if u.bottom {
-		size = size.AddWidthHeight(0, pad)
+		size = size.AddWidthHeight(0, bottomPadding)
 	}
 	for _, o := range objs {
 		o.Move(pos)

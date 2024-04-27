@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -589,6 +590,8 @@ type listItemAndID struct {
 }
 
 type listLayout struct {
+	layout.BaseLayout
+
 	list       *List
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject

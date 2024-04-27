@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/theme"
@@ -911,10 +912,12 @@ func storageURI(a fyne.App) fyne.URI {
 // iconPaddingLayout adds padding to the left of a widget.Icon().
 // NOTE: It assumes that the slice only contains one item.
 type iconPaddingLayout struct {
+	layout.BaseLayout
 }
 
 func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	padding := theme.Padding() * 2
+	_, _, leftPadding, _ := i.GetPaddings()
+	padding := leftPadding * 2
 	objects[0].Move(fyne.NewPos(padding, 0))
 	objects[0].Resize(size.SubtractWidthHeight(padding, 0))
 }

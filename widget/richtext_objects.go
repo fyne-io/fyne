@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -476,7 +477,7 @@ func newRichImage(u fyne.URI, align fyne.TextAlign) *richImage {
 }
 
 func (r *richImage) CreateRenderer() fyne.WidgetRenderer {
-	r.layout = &fyne.Container{Layout: &richImageLayout{r}, Objects: []fyne.CanvasObject{r.img}}
+	r.layout = &fyne.Container{Layout: &richImageLayout{r: r}, Objects: []fyne.CanvasObject{r.img}}
 	return NewSimpleRenderer(r.layout)
 }
 
@@ -503,6 +504,8 @@ func (r *richImage) setAlign(a fyne.TextAlign) {
 }
 
 type richImageLayout struct {
+	layout.BaseLayout
+
 	r *richImage
 }
 
@@ -525,6 +528,8 @@ func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 type unpadTextWidgetLayout struct {
+	layout.BaseLayout
+
 	parent fyne.Widget
 }
 

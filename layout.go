@@ -8,4 +8,10 @@ type Layout interface {
 	// MinSize calculates the smallest size that will fit the listed
 	// CanvasObjects using this Layout algorithm.
 	MinSize(objects []CanvasObject) Size
+	// GetPaddings returns the top, bottom, left and right paddings used
+	// by this layout.
+	GetPaddings() (float32, float32, float32, float32)
+	// SetPaddingFn sets the function that will be called to get the
+	// padding values for this layout.
+	SetPaddingFn(fn func() (float32, float32, float32, float32))
 }

@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -496,6 +497,8 @@ type gridItemAndID struct {
 }
 
 type gridWrapLayout struct {
+	layout.BaseLayout
+
 	list *GridWrap
 
 	itemPool   syncPool

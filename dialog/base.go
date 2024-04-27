@@ -197,6 +197,8 @@ func (renderer *themedBackgroundRenderer) Refresh() {
 // ===============================================================
 
 type dialogLayout struct {
+	layout.BaseLayout
+
 	d *dialog
 }
 
