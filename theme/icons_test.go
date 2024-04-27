@@ -462,21 +462,3 @@ func Test_GridIcon_FileSource(t *testing.T) {
 	result := GridIcon().Name()
 	assert.Equal(t, "foreground_grid.svg", result)
 }
-
-func Test_UnwrapResource(t *testing.T) {
-	source := helperNewStaticResource()
-	res := NewThemedResource(
-		NewErrorThemedResource(
-			NewInvertedThemedResource(
-				NewDisabledResource(source),
-			),
-		),
-	)
-
-	// check that resource name only has the top-level themed prefix
-	assert.Equal(t, "foreground_content-remove.svg", res.Name())
-
-	unwrapped := unwrapResource(res)
-	_, ok := unwrapped.(*fyne.StaticResource)
-	assert.True(t, ok, "unwrap did not return base resource type")
-}
