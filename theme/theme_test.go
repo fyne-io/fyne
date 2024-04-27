@@ -10,11 +10,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBuiltinTheme_ShadowColor(t *testing.T) {
-	shadow := theme.ShadowColor()
+func Test_DefaultTheme_ShadowColor(t *testing.T) {
+	t.Run("light", func(t *testing.T) {
+		_, _, _, a := theme.DefaultTheme().Color(theme.ColorNameShadow, theme.VariantLight).RGBA()
+		assert.NotEqual(t, 255, a, "should not be transparent")
+	})
 
-	_, _, _, a := shadow.RGBA()
-	assert.NotEqual(t, 255, a)
+	t.Run("dark", func(t *testing.T) {
+		_, _, _, a := theme.DefaultTheme().Color(theme.ColorNameShadow, theme.VariantDark).RGBA()
+		assert.NotEqual(t, 255, a, "should not be transparent")
+	})
 }
 
 func TestEmptyTheme(t *testing.T) {
