@@ -1,4 +1,4 @@
-package theme
+package theme_test
 
 import (
 	"testing"
@@ -6,24 +6,25 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 func Test_TextSize(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Size(SizeNameText), TextSize(), "wrong text size")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	assert.Equal(t, theme.DarkTheme().Size(theme.SizeNameText), theme.TextSize(), "wrong text size")
 }
 
 func Test_Padding(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Size(SizeNamePadding), Padding(), "wrong padding")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	assert.Equal(t, theme.DarkTheme().Size(theme.SizeNamePadding), theme.Padding(), "wrong padding")
 }
 
 func Test_IconInlineSize(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Size(SizeNameInlineIcon), IconInlineSize(), "wrong inline icon size")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	assert.Equal(t, theme.DarkTheme().Size(theme.SizeNameInlineIcon), theme.IconInlineSize(), "wrong inline icon size")
 }
 
 func Test_ScrollBarSize(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Size(SizeNameScrollBar), ScrollBarSize(), "wrong inline icon size")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	assert.Equal(t, theme.DarkTheme().Size(theme.SizeNameScrollBar), theme.ScrollBarSize(), "wrong inline icon size")
 }
