@@ -9,6 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestBuiltinTheme_ShadowColor(t *testing.T) {
+	shadow := ShadowColor()
+
+	_, _, _, a := shadow.RGBA()
+	assert.NotEqual(t, 255, a)
+}
+
+func TestEmptyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(&emptyTheme{})
+	assert.NotNil(t, ForegroundColor())
+	assert.NotNil(t, TextFont())
+	assert.NotNil(t, HelpIcon())
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+}
+
 func TestThemeChange(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
@@ -27,13 +42,6 @@ func TestTheme_Bootstrapping(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(current)
 }
 
-func TestBuiltinTheme_ShadowColor(t *testing.T) {
-	shadow := ShadowColor()
-
-	_, _, _, a := shadow.RGBA()
-	assert.NotEqual(t, 255, a)
-}
-
 func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
@@ -44,14 +52,6 @@ func TestTheme_Light_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	bg := BackgroundColor()
 	assert.Equal(t, LightTheme().Color(ColorNameBackground, VariantLight), bg, "wrong light theme background color")
-}
-
-func TestEmptyTheme(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(&emptyTheme{})
-	assert.NotNil(t, ForegroundColor())
-	assert.NotNil(t, TextFont())
-	assert.NotNil(t, HelpIcon())
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 }
 
 type emptyTheme struct {
