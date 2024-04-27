@@ -1,9 +1,10 @@
-package theme
+package theme_test
 
 import (
 	"net/url"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 type themedApp struct {
@@ -71,7 +72,7 @@ func (t *themedApp) Metadata() fyne.AppMetadata {
 }
 
 func (t *themedApp) PrimaryColor() string {
-	return ColorBlue
+	return theme.ColorBlue
 }
 
 func (t *themedApp) Theme() fyne.Theme {
@@ -83,7 +84,7 @@ func (t *themedApp) SetTheme(theme fyne.Theme) {
 }
 
 func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
-	return VariantDark
+	return theme.VariantDark
 }
 
 func (t *themedApp) SetCloudProvider(fyne.CloudProvider) {
