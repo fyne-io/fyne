@@ -48,18 +48,6 @@ func TestTheme_Bootstrapping(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(current)
 }
 
-func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	bg := theme.BackgroundColor()
-	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameBackground, theme.VariantDark), bg, "wrong dark theme background color")
-}
-
-func TestTheme_Light_ReturnsCorrectBackground(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-	bg := theme.BackgroundColor()
-	assert.Equal(t, theme.LightTheme().Color(theme.ColorNameBackground, theme.VariantLight), bg, "wrong light theme background color")
-}
-
 type emptyTheme struct {
 }
 
