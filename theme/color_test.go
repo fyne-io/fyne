@@ -1,4 +1,4 @@
-package theme
+package theme_test
 
 import (
 	"testing"
@@ -6,52 +6,53 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 func Test_ButtonColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := ButtonColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameButton, VariantDark), c, "wrong button color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.ButtonColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameButton, theme.VariantDark), c, "wrong button color")
 }
 
 func Test_TextColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := ForegroundColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameForeground, VariantDark), c, "wrong text color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.ForegroundColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameForeground, theme.VariantDark), c, "wrong text color")
 }
 
 func Test_DisabledTextColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := DisabledColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameDisabled, VariantDark), c, "wrong disabled text color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.DisabledColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameDisabled, theme.VariantDark), c, "wrong disabled text color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := PlaceHolderColor()
-	assert.Equal(t, DarkTheme().Color(ColorNamePlaceHolder, VariantDark), c, "wrong placeholder color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.PlaceHolderColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNamePlaceHolder, theme.VariantDark), c, "wrong placeholder color")
 }
 
 func Test_PrimaryColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := PrimaryColor()
-	assert.Equal(t, DarkTheme().Color(ColorNamePrimary, VariantDark), c, "wrong primary color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.PrimaryColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNamePrimary, theme.VariantDark), c, "wrong primary color")
 }
 
 func Test_HoverColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := HoverColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameHover, VariantDark), c, "wrong hover color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.HoverColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameHover, theme.VariantDark), c, "wrong hover color")
 }
 
 func Test_FocusColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := FocusColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameFocus, VariantDark), c, "wrong focus color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.FocusColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameFocus, theme.VariantDark), c, "wrong focus color")
 }
 
 func Test_ScrollBarColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := ScrollBarColor()
-	assert.Equal(t, DarkTheme().Color(ColorNameScrollBar, VariantDark), c, "wrong scrollbar color")
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	c := theme.ScrollBarColor()
+	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameScrollBar, theme.VariantDark), c, "wrong scrollbar color")
 }
