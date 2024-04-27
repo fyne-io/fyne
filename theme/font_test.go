@@ -1,4 +1,4 @@
-package theme
+package theme_test
 
 import (
 	"testing"
@@ -6,87 +6,88 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 func Test_TextFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Regular.ttf"
-	result := TextFont().Name()
+	result := theme.TextFont().Name()
 	assert.Equal(t, expect, result, "wrong regular text font")
 }
 
 func Test_TextBoldFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Bold.ttf"
-	result := TextBoldFont().Name()
+	result := theme.TextBoldFont().Name()
 	assert.Equal(t, expect, result, "wrong bold text font")
 }
 
 func Test_TextItalicFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Italic.ttf"
-	result := TextItalicFont().Name()
+	result := theme.TextItalicFont().Name()
 	assert.Equal(t, expect, result, "wrong italic text font")
 }
 
 func Test_TextBoldItalicFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-BoldItalic.ttf"
-	result := TextBoldItalicFont().Name()
+	result := theme.TextBoldItalicFont().Name()
 	assert.Equal(t, expect, result, "wrong bold italic text font")
 }
 
 func Test_TextMonospaceFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "DejaVuSansMono-Powerline.ttf"
-	result := TextMonospaceFont().Name()
+	result := theme.TextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong monospace font")
 }
 
 func Test_TextSymbolFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "InterSymbols-Regular.ttf"
-	result := SymbolFont().Name()
+	result := theme.SymbolFont().Name()
 	assert.Equal(t, expect, result, "wrong symbol font")
 }
 
 func Test_DefaultSymbolFont(t *testing.T) {
 	expect := "InterSymbols-Regular.ttf"
-	result := DefaultSymbolFont().Name()
+	result := theme.DefaultSymbolFont().Name()
 	assert.Equal(t, expect, result, "wrong default text font")
 }
 
 func Test_DefaultTextFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Regular.ttf"
-	result := DefaultTextFont().Name()
+	result := theme.DefaultTextFont().Name()
 	assert.Equal(t, expect, result, "wrong default text font")
 }
 
 func Test_DefaultTextBoldFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Bold.ttf"
-	result := DefaultTextBoldFont().Name()
+	result := theme.DefaultTextBoldFont().Name()
 	assert.Equal(t, expect, result, "wrong default text bold font")
 }
 
 func Test_DefaultTextBoldItalicFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-BoldItalic.ttf"
-	result := DefaultTextBoldItalicFont().Name()
+	result := theme.DefaultTextBoldItalicFont().Name()
 	assert.Equal(t, expect, result, "wrong default text bold italic font")
 }
 
 func Test_DefaultTextItalicFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "NotoSans-Italic.ttf"
-	result := DefaultTextItalicFont().Name()
+	result := theme.DefaultTextItalicFont().Name()
 	assert.Equal(t, expect, result, "wrong default text italic font")
 }
 
 func Test_DefaultTextMonospaceFont(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	expect := "DejaVuSansMono-Powerline.ttf"
-	result := DefaultTextMonospaceFont().Name()
+	result := theme.DefaultTextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong default monospace font")
 }
