@@ -208,16 +208,6 @@ func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-func (b *Button) applyButtonTheme(th fyne.Theme) {
-	if b.background == nil {
-		return
-	}
-
-	b.background.FillColor = b.buttonColor()
-	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
-	b.background.Refresh()
-}
-
 func (b *Button) buttonColor() color.Color {
 	th := b.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -379,7 +369,13 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock held
 func (r *buttonRenderer) applyTheme() {
-	r.button.applyButtonTheme(r.button.themeWithLock())
+	th := r.button.themeWithLock()
+	if bg := r.button.background; bg != nil {
+		bg.FillColor = r.button.buttonColor()
+		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
+		bg.Refresh()
+	}
+
 	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	switch {
 	case r.button.disabled.Load():
