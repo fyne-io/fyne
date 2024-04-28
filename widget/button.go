@@ -152,8 +152,7 @@ func (b *Button) MinSize() fyne.Size {
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
-
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -163,8 +162,7 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
 	b.hovered = false
-
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -192,7 +190,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
