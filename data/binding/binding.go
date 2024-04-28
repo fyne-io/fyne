@@ -117,8 +117,12 @@ func (b *boundUntyped) Set(val any) error {
 	if b.val.Interface() == val {
 		return nil
 	}
-
-	b.val.Set(reflect.ValueOf(val))
+	if val == nil {
+		zeroValue := reflect.Zero(b.val.Type())
+		b.val.Set(zeroValue)
+	} else {
+		b.val.Set(reflect.ValueOf(val))
+	}
 
 	b.trigger()
 	return nil

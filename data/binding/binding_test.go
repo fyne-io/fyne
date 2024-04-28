@@ -61,3 +61,12 @@ func TestNewDataItemListener(t *testing.T) {
 	fn.DataChanged()
 	assert.True(t, called)
 }
+
+func TestBindAnyWithNil(t *testing.T) {
+	a := NewUntyped()
+	a.Set(nil)
+	b := 1
+	a.Set(b)
+	var tr any = nil
+	a.Set(tr)
+}
