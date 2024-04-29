@@ -51,7 +51,7 @@ const (
 	// Since: 2.0
 	IconNameCheckButtonChecked fyne.ThemeIconName = "checked"
 
-	// InconNameCheckButtonFill is the name of theme lookup for filled check button icon.
+	// IconNameCheckButtonFill is the name of theme lookup for filled check button icon.
 	//
 	// Since: 2.5
 	IconNameCheckButtonFill fyne.ThemeIconName = "iconNameCheckButtonFill"
@@ -66,7 +66,7 @@ const (
 	// Since: 2.0
 	IconNameRadioButtonChecked fyne.ThemeIconName = "radioButtonChecked"
 
-	// InconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
+	// IconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
 	//
 	// Since: 2.5
 	IconNameRadioButtonFill fyne.ThemeIconName = "iconNameRadioButtonFill"
