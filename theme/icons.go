@@ -682,6 +682,8 @@ func (res *ThemedResource) Name() string {
 	return string(res.ThemeColorName()) + "_" + unwrapResource(res.source).Name()
 }
 
+// ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
+// @implements fyne.ThemedResource
 func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
 	if res.ColorName != "" {
 		return res.ColorName
@@ -725,6 +727,8 @@ func (res *InvertedThemedResource) Content() []byte {
 	return svg.Colorize(unwrapResource(res.source).Content(), clr)
 }
 
+// ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
+// @implements fyne.ThemedResource
 func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameBackground
 }
