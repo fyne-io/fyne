@@ -63,7 +63,6 @@ type Button struct {
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
-	background       *canvas.Rectangle
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -103,19 +102,19 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text := NewRichText(seg)
 	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
-	b.background = canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
+	background.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
-		b.background,
+		background,
 		tapBG,
 		text,
 	}
 	r := &buttonRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
-		background:   b.background,
+		background:   background,
 		tapBG:        tapBG,
 		button:       b,
 		label:        text,
@@ -319,7 +318,7 @@ func (r *buttonRenderer) Refresh() {
 // must be called with the button propertyLock held
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
-	if bg := r.button.background; bg != nil {
+	if bg := r.background; bg != nil {
 		bg.FillColor = r.buttonColor()
 		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
 		bg.Refresh()
