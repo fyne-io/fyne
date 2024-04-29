@@ -318,8 +318,17 @@ func (r *buttonRenderer) Refresh() {
 // must be called with the button propertyLock held
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	if bg := r.background; bg != nil {
-		bg.FillColor = r.buttonColor()
+		bgColorName, bgBlendName := r.buttonColorNames()
+		bgColor := color.Color(color.Transparent)
+		if bgColorName != "" {
+			bgColor = th.Color(bgColorName, v)
+		}
+		if bgBlendName != "" {
+			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
+		}
+		bg.FillColor = bgColor
 		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
 		bg.Refresh()
 	}
@@ -353,56 +362,36 @@ func (r *buttonRenderer) applyTheme() {
 	}
 }
 
-func (r *buttonRenderer) buttonColor() color.Color {
+func (r *buttonRenderer) buttonColorNames() (background, backgroundBlend fyne.ThemeColorName) {
 	b := r.button
-	th := b.themeWithLock()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	switch {
-	case b.Disabled():
-		if b.Importance == LowImportance {
-			return color.Transparent
+	if b.Disabled() {
+		if b.Importance != LowImportance {
+			background = theme.ColorNameDisabledButton
 		}
-		return th.Color(theme.ColorNameDisabledButton, v)
-	case b.focused:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameFocus, v))
-	case b.hovered:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameHover, v))
-	case b.Importance == HighImportance:
-		return th.Color(theme.ColorNamePrimary, v)
-	case b.Importance == LowImportance:
-		return color.Transparent
-	case b.Importance == DangerImportance:
-		return th.Color(theme.ColorNameError, v)
-	case b.Importance == WarningImportance:
-		return th.Color(theme.ColorNameWarning, v)
-	case b.Importance == SuccessImportance:
-		return th.Color(theme.ColorNameSuccess, v)
-	default:
-		return th.Color(theme.ColorNameButton, v)
+	} else if b.focused {
+		backgroundBlend = theme.ColorNameFocus
+	} else if b.hovered {
+		backgroundBlend = theme.ColorNameHover
 	}
+	if background == "" {
+		switch b.Importance {
+		case DangerImportance:
+			background = theme.ColorNameError
+		case HighImportance:
+			background = theme.ColorNamePrimary
+		case LowImportance:
+			if backgroundBlend != "" {
+				background = theme.ColorNameButton
+			}
+		case SuccessImportance:
+			background = theme.ColorNameSuccess
+		case WarningImportance:
+			background = theme.ColorNameWarning
+		default:
+			background = theme.ColorNameButton
+		}
+	}
+	return
 }
 
 func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
