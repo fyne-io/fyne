@@ -67,7 +67,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 
 	for _, n := range theme.PrimaryColorNames() {
 		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, n)
+			r.setStringAttr(attrs, name, "primary-"+n)
 			return
 		}
 	}

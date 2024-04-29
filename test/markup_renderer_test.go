@@ -46,7 +46,7 @@ func Test_snapshot(t *testing.T) {
 			content: canvas.NewCircle(theme.PrimaryColorNamed(theme.ColorPurple)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<circle fillColor=\"purple\" size=\"100x100\"/>\n" +
+				"\t\t<circle fillColor=\"primary-purple\" size=\"100x100\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -218,7 +218,7 @@ func Test_snapshot(t *testing.T) {
 			content: canvas.NewLine(theme.PrimaryColorNamed(theme.ColorBrown)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<line size=\"100x100\" strokeColor=\"brown\"/>\n" +
+				"\t\t<line size=\"100x100\" strokeColor=\"primary-brown\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -297,7 +297,7 @@ func Test_snapshot(t *testing.T) {
 			content: canvas.NewRectangle(theme.PrimaryColorNamed(theme.ColorOrange)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<rectangle fillColor=\"orange\" size=\"100x100\"/>\n" +
+				"\t\t<rectangle fillColor=\"primary-orange\" size=\"100x100\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -322,7 +322,7 @@ func Test_snapshot(t *testing.T) {
 			pos:     fyne.NewPos(20, 20),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<text color=\"yellow\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
+				"\t\t<text color=\"primary-yellow\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
