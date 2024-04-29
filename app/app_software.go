@@ -1,4 +1,4 @@
-//go:build ci
+//go:build ci || software
 
 package app
 

@@ -3,18 +3,15 @@ package software
 import (
 	"image"
 	"image/draw"
-	"sync"
-	"sync/atomic"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -26,20 +23,20 @@ var (
 
 // WindowlessCanvas provides functionality for a canvas to operate without a window
 type WindowlessCanvas interface {
-	fyne.Canvas
+	common.SizeableCanvas
 
 	Padded() bool
-	Resize(fyne.Size)
 	SetPadded(bool)
 	SetScale(float32)
 }
 
 type softwareCanvas struct {
+	common.Canvas
+
 	size  fyne.Size
 	scale float32
 
 	content     fyne.CanvasObject
-	overlays    *internal.OverlayStack
 	focusMgr    *app.FocusManager
 	hovered     desktop.Hoverable
 	padded      bool
@@ -47,13 +44,11 @@ type softwareCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+}
 
-	fyne.ShortcutHandler
-	painter      SoftwarePainter
-	propertyLock sync.RWMutex
-
-	refreshQueue *async.CanvasObjectQueue
-	dirty        atomic.Bool
+func (c *softwareCanvas) MinSize() fyne.Size {
+	// TODO implement me
+	panic("implement me")
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
@@ -69,21 +64,19 @@ func Canvas() fyne.Canvas {
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
 	c := &softwareCanvas{
-		focusMgr:     app.NewFocusManager(nil),
-		padded:       true,
-		scale:        1.0,
-		size:         fyne.NewSize(10, 10),
-		refreshQueue: async.NewCanvasObjectQueue(),
+		focusMgr: app.NewFocusManager(nil),
+		padded:   true,
+		scale:    1.0,
+		size:     fyne.NewSize(10, 10),
 	}
-	c.overlays = &internal.OverlayStack{Canvas: c}
 	return c
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
-func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+func NewCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
 	canvas := NewCanvas().(*softwareCanvas)
-	canvas.painter = painter
+	canvas.SetPainter(painter)
 
 	return canvas
 }
@@ -92,7 +85,7 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 // The painter will be used to render in the Capture() call.
 //
 // Since: 2.2
-func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+func NewTransparentCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
 	canvas := NewCanvasWithPainter(painter).(*softwareCanvas)
 	canvas.transparent = true
 
@@ -107,16 +100,16 @@ func (c *softwareCanvas) Capture() image.Image {
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 	}
 
-	if c.painter != nil {
-		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+	if c.Painter() != nil {
+		draw.Draw(img, bounds, c.Painter().Capture(c), image.Point{}, draw.Over)
 	}
 
 	return img
 }
 
 func (c *softwareCanvas) Content() fyne.CanvasObject {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.content
 }
@@ -125,50 +118,27 @@ func (c *softwareCanvas) findObjectAtPositionMatching(pos fyne.Position, test fu
 	return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.content)
 }
 
-func (c *softwareCanvas) Focus(obj fyne.Focusable) {
-	c.focusManager().Focus(obj)
-}
-
-func (c *softwareCanvas) FocusNext() {
-	c.focusManager().FocusNext()
-}
-
-func (c *softwareCanvas) FocusPrevious() {
-	c.focusManager().FocusPrevious()
-}
-
-func (c *softwareCanvas) Focused() fyne.Focusable {
-	return c.focusManager().Focused()
-}
-
 func (c *softwareCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 	return fyne.Position{}, c.Size()
 }
 
 func (c *softwareCanvas) OnTypedKey() func(*fyne.KeyEvent) {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.onTypedKey
 }
 
 func (c *softwareCanvas) OnTypedRune() func(rune) {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.onTypedRune
 }
 
-func (c *softwareCanvas) Overlays() fyne.OverlayStack {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
-
-	return c.overlays
-}
-
 func (c *softwareCanvas) Padded() bool {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.padded
 }
@@ -177,35 +147,13 @@ func (c *softwareCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
-func (c *softwareCanvas) Refresh(obj fyne.CanvasObject) {
-	walkNeeded := false
-	switch obj.(type) {
-	case *fyne.Container:
-		walkNeeded = true
-	case fyne.Widget:
-		walkNeeded = true
-	}
-
-	if walkNeeded {
-		driver.WalkCompleteObjectTree(obj, func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
-			if i, ok := co.(*canvas.Image); ok {
-				i.Refresh()
-			}
-			return false
-		}, nil)
-	}
-
-	c.refreshQueue.In(obj)
-	c.SetDirty()
-}
-
 func (c *softwareCanvas) Resize(size fyne.Size) {
-	c.propertyLock.Lock()
+	c.Lock()
 	content := c.content
-	overlays := c.overlays
+	overlays := c.Overlays()
 	padded := c.padded
 	c.size = size
-	c.propertyLock.Unlock()
+	c.Unlock()
 
 	if content == nil {
 		return
@@ -236,17 +184,19 @@ func (c *softwareCanvas) Resize(size fyne.Size) {
 }
 
 func (c *softwareCanvas) Scale() float32 {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.scale
 }
 
 func (c *softwareCanvas) SetContent(content fyne.CanvasObject) {
-	c.propertyLock.Lock()
+	content.Resize(content.MinSize())
+
+	c.Lock()
 	c.content = content
 	c.focusMgr = app.NewFocusManager(c.content)
-	c.propertyLock.Unlock()
+	c.Unlock()
 
 	if content == nil {
 		return
@@ -257,66 +207,43 @@ func (c *softwareCanvas) SetContent(content fyne.CanvasObject) {
 		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
 	c.Resize(content.MinSize().Add(padding))
-}
-
-// CheckDirtyAndClear returns true if the canvas is dirty and
-// clears the dirty state atomically.
-func (c *softwareCanvas) CheckDirtyAndClear() bool {
-	return c.dirty.Swap(false)
-}
-
-// SetDirty sets canvas dirty flag atomically.
-func (c *softwareCanvas) SetDirty() {
-	c.dirty.Store(true)
+	c.SetDirty()
 }
 
 func (c *softwareCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	c.onTypedKey = handler
 }
 
 func (c *softwareCanvas) SetOnTypedRune(handler func(rune)) {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	c.onTypedRune = handler
 }
 
 func (c *softwareCanvas) SetPadded(padded bool) {
-	c.propertyLock.Lock()
+	c.Lock()
 	c.padded = padded
-	c.propertyLock.Unlock()
+	c.Unlock()
 
 	c.Resize(c.Size())
 }
 
 func (c *softwareCanvas) SetScale(scale float32) {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	c.scale = scale
 }
 
 func (c *softwareCanvas) Size() fyne.Size {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	return c.size
-}
-
-func (c *softwareCanvas) Unfocus() {
-	c.focusManager().Focus(nil)
-}
-
-func (c *softwareCanvas) focusManager() *app.FocusManager {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
-		return focusMgr
-	}
-	return c.focusMgr
 }
 
 func (c *softwareCanvas) objectTrees() []fyne.CanvasObject {

@@ -1,4 +1,4 @@
-//go:build !ci && !ios
+//go:build !ci && !software && !ios
 
 extern void themeChanged();
 

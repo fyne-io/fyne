@@ -15,7 +15,7 @@ import (
 
 // SoftwarePainter describes a simple type that can render canvases
 type SoftwarePainter interface {
-	Paint(fyne.Canvas) image.Image
+	Capture(fyne.Canvas) image.Image
 }
 
 type testDriver struct {

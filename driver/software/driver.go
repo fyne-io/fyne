@@ -21,14 +21,9 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// SoftwarePainter describes a simple type that can render canvases
-type SoftwarePainter interface {
-	Paint(fyne.Canvas) image.Image
-}
-
 type softwareDriver struct {
 	device       fyne.Device
-	painter      SoftwarePainter
+	painter      painter.Painter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 
@@ -94,7 +89,7 @@ func NewDriver(painter func(image.Image), events chan any) fyne.Driver {
 
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
-func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
+func NewDriverWithPainter(painter painter.Painter) fyne.Driver {
 	return &softwareDriver{
 		painter:      painter,
 		windowsMutex: sync.RWMutex{},
@@ -127,10 +122,12 @@ func (d *softwareDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 func (d *softwareDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*softwareCanvas)
 	if d.painter != nil {
-		canvas.painter = d.painter
+		canvas.SetPainter(d.painter)
 	} else {
-		canvas.painter = software.NewPainter()
+		canvas.SetPainter(software.NewPainter())
 	}
+
+	canvas.Initialize(canvas, canvas.SetDirty)
 
 	window := &softwareWindow{canvas: canvas, driver: d}
 	// window.clipboard = &testClipboard{}
@@ -164,14 +161,14 @@ func (d *softwareDriver) handlePaint(w *softwareWindow) {
 
 	c := w.Canvas().(*softwareCanvas)
 	// d.painting = false
-	if c.painter == nil {
-		c.painter = software.NewPainter()
+	if c.Painter() == nil {
+		c.SetPainter(software.NewPainter())
 	}
 
-	canvasNeedRefresh := c.CheckDirtyAndClear()
-	// canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
+	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
 	if canvasNeedRefresh {
 		fmt.Println("painting")
+		t := time.Now()
 
 		// 	newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
@@ -182,6 +179,7 @@ func (d *softwareDriver) handlePaint(w *softwareWindow) {
 		// }
 
 		d.Output(c.Capture())
+		fmt.Println("painting took", time.Since(t))
 	}
 	cache.Clean(canvasNeedRefresh)
 }

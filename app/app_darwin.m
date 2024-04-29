@@ -1,4 +1,4 @@
-//go:build !ci
+//go:build !ci && !software
 
 #import <Foundation/Foundation.h>
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400

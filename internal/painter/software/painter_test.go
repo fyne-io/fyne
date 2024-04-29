@@ -29,7 +29,7 @@ func TestPainter_paintCircle(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_circle.png", p.Capture(c))
 }
 
 func TestPainter_paintCircleStroke(t *testing.T) {
@@ -44,7 +44,7 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Capture(c))
 }
 
 func TestPainter_paintGradient_clipped(t *testing.T) {
@@ -62,7 +62,7 @@ func TestPainter_paintGradient_clipped(t *testing.T) {
 	c.Resize(fyne.NewSize(70, 70))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_gradient_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_gradient_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintImage(t *testing.T) {
@@ -74,7 +74,7 @@ func TestPainter_paintImage(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
@@ -94,7 +94,7 @@ func TestPainter_paintImage_clipped(t *testing.T) {
 	c.Resize(fyne.NewSize(70, 70))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_image_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_image_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintImage_scalePixels(t *testing.T) {
@@ -107,7 +107,7 @@ func TestPainter_paintImage_scalePixels(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScalePixels.png", target)
 }
 
@@ -121,7 +121,7 @@ func TestPainter_paintImage_scaleSmooth(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScaleSmooth.png", target)
 }
 
@@ -135,7 +135,7 @@ func TestPainter_paintImage_scaleFastest(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScaleFastest.png", target)
 }
 
@@ -146,7 +146,7 @@ func TestPainter_paintImage_stretchX(t *testing.T) {
 	c.Resize(fyne.NewSize(100, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_stretchx.png", target)
 }
 
@@ -157,7 +157,7 @@ func TestPainter_paintImage_stretchY(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 100))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_stretchy.png", target)
 }
 
@@ -172,7 +172,7 @@ func TestPainter_paintImage_contain(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_contain.png", target)
 }
 
@@ -188,7 +188,7 @@ func TestPainter_paintImage_containX(t *testing.T) {
 	c.Resize(fyne.NewSize(100, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_containx.png", target)
 }
 
@@ -204,7 +204,7 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 100))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
@@ -219,7 +219,7 @@ func TestPainter_paintLine(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_line.png", p.Capture(c))
 }
 
 func TestPainter_paintLine_thin(t *testing.T) {
@@ -237,7 +237,7 @@ func TestPainter_paintLine_thin(t *testing.T) {
 	c.Resize(fyne.NewSize(109, 28))
 
 	p := software.NewPainter()
-	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_line_thin.png", p.Capture(c))
 }
 
 func TestPainter_paintRaster(t *testing.T) {
@@ -256,7 +256,7 @@ func TestPainter_paintRaster(t *testing.T) {
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_raster.png", target)
 }
 
@@ -277,7 +277,7 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 	c.Resize(fyne.NewSize(5, 5))
 	p := software.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_raster_scale.png", target)
 }
 
@@ -316,7 +316,7 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	c.Resize(fyne.NewSize(70, 70))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintRectangle_stroke(t *testing.T) {
@@ -331,7 +331,7 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Capture(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {
@@ -347,7 +347,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 	c.Resize(fyne.NewSize(70, 70))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintText_boldItalicClip(t *testing.T) {
@@ -362,7 +362,7 @@ func TestPainter_paintText_boldItalicClip(t *testing.T) {
 	c.Resize(fyne.NewSize(70, text.MinSize().Height))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Capture(c))
 }
 
 func TestPainter_paintText_scale2(t *testing.T) {
@@ -377,5 +377,5 @@ func TestPainter_paintText_scale2(t *testing.T) {
 	c.SetScale(2)
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_scale2.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_scale2.png", p.Capture(c))
 }

@@ -98,7 +98,7 @@ func (c *testCanvas) Capture() image.Image {
 	}
 
 	if c.painter != nil {
-		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+		draw.Draw(img, bounds, c.painter.Capture(c), image.Point{}, draw.Over)
 	}
 
 	return img

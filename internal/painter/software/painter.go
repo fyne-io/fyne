@@ -6,8 +6,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 )
+
+var _ painter.Painter = (*Painter)(nil)
 
 // Painter is a simple software painter that can paint a canvas in memory.
 type Painter struct {
@@ -18,10 +21,10 @@ func NewPainter() *Painter {
 	return &Painter{}
 }
 
-// Paint is the main entry point for a simple software painter.
+// Capture is the main entry point for a simple software painter.
 // The canvas to be drawn is passed in as a parameter and the return is an
 // image containing the result of rendering.
-func (*Painter) Paint(c fyne.Canvas) image.Image {
+func (*Painter) Capture(c fyne.Canvas) image.Image {
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
 
@@ -60,4 +63,44 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 	}
 
 	return base
+}
+
+func (p *Painter) Init() {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) Clear() {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) Free(object fyne.CanvasObject) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) Paint(object fyne.CanvasObject, position fyne.Position, size fyne.Size) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) SetFrameBufferScale(f float32) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) SetOutputSize(i int, i2 int) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) StartClipping(position fyne.Position, size fyne.Size) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (p *Painter) StopClipping() {
+	// TODO implement me
+	panic("implement me")
 }
