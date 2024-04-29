@@ -208,7 +208,8 @@ func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-func (b *Button) buttonColor() color.Color {
+func (r *buttonRenderer) buttonColor() color.Color {
+	b := r.button
 	th := b.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
@@ -371,7 +372,7 @@ func (r *buttonRenderer) Refresh() {
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
 	if bg := r.button.background; bg != nil {
-		bg.FillColor = r.button.buttonColor()
+		bg.FillColor = r.buttonColor()
 		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
 		bg.Refresh()
 	}
