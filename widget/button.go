@@ -208,58 +208,6 @@ func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	}
 }
 
-func (r *buttonRenderer) buttonColor() color.Color {
-	b := r.button
-	th := b.themeWithLock()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	switch {
-	case b.Disabled():
-		if b.Importance == LowImportance {
-			return color.Transparent
-		}
-		return th.Color(theme.ColorNameDisabledButton, v)
-	case b.focused:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameFocus, v))
-	case b.hovered:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameHover, v))
-	case b.Importance == HighImportance:
-		return th.Color(theme.ColorNamePrimary, v)
-	case b.Importance == LowImportance:
-		return color.Transparent
-	case b.Importance == DangerImportance:
-		return th.Color(theme.ColorNameError, v)
-	case b.Importance == WarningImportance:
-		return th.Color(theme.ColorNameWarning, v)
-	case b.Importance == SuccessImportance:
-		return th.Color(theme.ColorNameSuccess, v)
-	default:
-		return th.Color(theme.ColorNameButton, v)
-	}
-}
-
 func (b *Button) tapAnimation() {
 	if b.tapAnim == nil {
 		return
@@ -403,6 +351,58 @@ func (r *buttonRenderer) applyTheme() {
 		}
 		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
 		r.icon.Refresh()
+	}
+}
+
+func (r *buttonRenderer) buttonColor() color.Color {
+	b := r.button
+	th := b.themeWithLock()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	switch {
+	case b.Disabled():
+		if b.Importance == LowImportance {
+			return color.Transparent
+		}
+		return th.Color(theme.ColorNameDisabledButton, v)
+	case b.focused:
+		bg := th.Color(theme.ColorNameButton, v)
+		if b.Importance == HighImportance {
+			bg = th.Color(theme.ColorNamePrimary, v)
+		} else if b.Importance == DangerImportance {
+			bg = th.Color(theme.ColorNameError, v)
+		} else if b.Importance == WarningImportance {
+			bg = th.Color(theme.ColorNameWarning, v)
+		} else if b.Importance == SuccessImportance {
+			bg = th.Color(theme.ColorNameSuccess, v)
+		}
+
+		return blendColor(bg, th.Color(theme.ColorNameFocus, v))
+	case b.hovered:
+		bg := th.Color(theme.ColorNameButton, v)
+		if b.Importance == HighImportance {
+			bg = th.Color(theme.ColorNamePrimary, v)
+		} else if b.Importance == DangerImportance {
+			bg = th.Color(theme.ColorNameError, v)
+		} else if b.Importance == WarningImportance {
+			bg = th.Color(theme.ColorNameWarning, v)
+		} else if b.Importance == SuccessImportance {
+			bg = th.Color(theme.ColorNameSuccess, v)
+		}
+
+		return blendColor(bg, th.Color(theme.ColorNameHover, v))
+	case b.Importance == HighImportance:
+		return th.Color(theme.ColorNamePrimary, v)
+	case b.Importance == LowImportance:
+		return color.Transparent
+	case b.Importance == DangerImportance:
+		return th.Color(theme.ColorNameError, v)
+	case b.Importance == WarningImportance:
+		return th.Color(theme.ColorNameWarning, v)
+	case b.Importance == SuccessImportance:
+		return th.Color(theme.ColorNameSuccess, v)
+	default:
+		return th.Color(theme.ColorNameButton, v)
 	}
 }
 
