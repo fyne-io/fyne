@@ -401,7 +401,7 @@ func (r *buttonRenderer) applyTheme() {
 			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
 				icon = res.Original()
 			}
-		case *theme.ThemedResource, fyne.ThemedResource:
+		case fyne.ThemedResource:
 			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
 				icon = theme.NewInvertedThemedResource(res)
 			}
