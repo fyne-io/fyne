@@ -317,20 +317,30 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"text": {
+			content: canvas.NewText("foo", color.NRGBA{R: 123, G: 234, B: 56, A: 0}),
+			size:    fyne.NewSize(50, 50),
+			pos:     fyne.NewPos(20, 20),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<text color=\"rgba(123,234,56,0)\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"text with theme color": {
+			content: canvas.NewText("bar", theme.ForegroundColor()),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<text size=\"100x100\">bar</text>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"text with named primary color": {
 			content: canvas.NewText("foo", theme.PrimaryColorNamed(theme.ColorYellow)),
 			size:    fyne.NewSize(50, 50),
 			pos:     fyne.NewPos(20, 20),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<text color=\"primary-yellow\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"text with text color": {
-			content: canvas.NewText("bar", theme.ForegroundColor()),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<text size=\"100x100\">bar</text>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},

@@ -45,6 +45,11 @@ func Test_HoverColor(t *testing.T) {
 	assert.Equal(t, theme.DarkTheme().Color(theme.ColorNameHover, theme.VariantDark), c, "wrong hover color")
 }
 
+func Test_OnPrimaryColor(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DefaultTheme())
+	assert.Equal(t, theme.DefaultTheme().Color(theme.ColorNameOnPrimary, fyne.CurrentApp().Settings().ThemeVariant()), theme.OnPrimaryColor(), "wrong primary color")
+}
+
 func Test_PlaceHolderColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	c := theme.PlaceHolderColor()

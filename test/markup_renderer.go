@@ -408,6 +408,7 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.InputBackgroundColor()):   "inputBackground",
 		nrgbaColor(theme.InputBorderColor()):       "inputBorder",
 		nrgbaColor(theme.MenuBackgroundColor()):    "menuBackground",
+		nrgbaColor(theme.OnPrimaryColor()):         "onPrimary",
 		nrgbaColor(theme.OverlayBackgroundColor()): "overlayBackground",
 		nrgbaColor(theme.PlaceHolderColor()):       "placeholder",
 		nrgbaColor(theme.PrimaryColor()):           "primary",

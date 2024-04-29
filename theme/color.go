@@ -105,6 +105,11 @@ const (
 	// Since: 2.3
 	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
 
+	// ColorNameOnPrimary is the name of theme lookup for a contrast color to the primary color.
+	//
+	// Since: 2.5
+	ColorNameOnPrimary fyne.ThemeColorName = "onPrimary"
+
 	// ColorNameOverlayBackground is the name of theme lookup for background color of overlays like dialogs.
 	//
 	// Since: 2.3
@@ -263,6 +268,13 @@ func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
 
+// OnPrimaryColor returns the color used for text and icons against the PrimaryColor.
+//
+// Since: 2.5
+func OnPrimaryColor() color.Color {
+	return safeColorLookup(ColorNameOnPrimary, currentVariant())
+}
+
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
 //
 // Since: 2.3
@@ -356,6 +368,29 @@ func SuccessColor() color.Color {
 // Since: 2.3
 func WarningColor() color.Color {
 	return safeColorLookup(ColorNameWarning, currentVariant())
+}
+
+func onPrimaryColorNamed(name string) color.Color {
+	switch name {
+	case ColorRed:
+		return backgroundColorLight
+	case ColorOrange:
+		return backgroundColorDark
+	case ColorYellow:
+		return backgroundColorDark
+	case ColorGreen:
+		return backgroundColorDark
+	case ColorPurple:
+		return backgroundColorLight
+	case ColorBrown:
+		return backgroundColorLight
+	case ColorGray:
+		return backgroundColorDark
+	}
+
+	// We return the “on” value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return backgroundColorLight
 }
 
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
