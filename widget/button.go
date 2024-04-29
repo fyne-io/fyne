@@ -319,8 +319,8 @@ func (r *buttonRenderer) Refresh() {
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
+	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {
-		bgColorName, bgBlendName := r.buttonColorNames()
 		bgColor := color.Color(color.Transparent)
 		if bgColorName != "" {
 			bgColor = th.Color(bgColorName, v)
@@ -333,17 +333,7 @@ func (r *buttonRenderer) applyTheme() {
 		bg.Refresh()
 	}
 
-	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
-	switch {
-	case r.button.disabled.Load():
-		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance:
-		if r.button.focused {
-			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
-		} else {
-			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
-		}
-	}
+	r.label.Segments[0].(*TextSegment).Style.ColorName = fgColorName
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
@@ -362,9 +352,11 @@ func (r *buttonRenderer) applyTheme() {
 	}
 }
 
-func (r *buttonRenderer) buttonColorNames() (background, backgroundBlend fyne.ThemeColorName) {
+func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundBlend fyne.ThemeColorName) {
+	foreground = theme.ColorNameForeground
 	b := r.button
 	if b.Disabled() {
+		foreground = theme.ColorNameDisabled
 		if b.Importance != LowImportance {
 			background = theme.ColorNameDisabledButton
 		}
@@ -376,16 +368,20 @@ func (r *buttonRenderer) buttonColorNames() (background, backgroundBlend fyne.Th
 	if background == "" {
 		switch b.Importance {
 		case DangerImportance:
+			foreground = theme.ColorNameBackground
 			background = theme.ColorNameError
 		case HighImportance:
+			foreground = theme.ColorNameBackground
 			background = theme.ColorNamePrimary
 		case LowImportance:
 			if backgroundBlend != "" {
 				background = theme.ColorNameButton
 			}
 		case SuccessImportance:
+			foreground = theme.ColorNameBackground
 			background = theme.ColorNameSuccess
 		case WarningImportance:
+			foreground = theme.ColorNameBackground
 			background = theme.ColorNameWarning
 		default:
 			background = theme.ColorNameButton
