@@ -337,14 +337,9 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		switch res := r.icon.Resource.(type) {
-		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
-				icon = res.Original()
-			}
-		case fyne.ThemedResource:
-			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
-				icon = theme.NewInvertedThemedResource(res)
+		if thRes, ok := icon.(fyne.ThemedResource); ok {
+			if thRes.ThemeColorName() != fgColorName {
+				icon = theme.NewColoredResource(icon, fgColorName)
 			}
 		}
 		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)

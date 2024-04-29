@@ -50,7 +50,7 @@
 							<widget pos="32,8" size="49x20" type="*widget.RichText">
 								<text alignment="center" bold color="background" size="49x19">Submit</text>
 							</widget>
-							<image fillMode="contain" pos="8,8" rsc="confirmIcon" size="iconInlineSize" themed="inverted"/>
+							<image fillMode="contain" pos="8,8" rsc="confirmIcon" size="iconInlineSize" themed="background"/>
 						</widget>
 					</container>
 				</container>
