@@ -16,7 +16,7 @@
 			<widget pos="82,8" size="20x20" type="*widget.Button">
 				<rectangle radius="4" size="20x20"/>
 				<rectangle size="20x20"/>
-				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 			</widget>
 		</widget>
 	</content>

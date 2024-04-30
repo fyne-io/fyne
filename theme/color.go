@@ -157,9 +157,11 @@ const (
 )
 
 var (
-	errorColor   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	successColor = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
-	warningColor = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	backgroundColorDark  = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
+	backgroundColorLight = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	errorColor           = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	successColor         = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	warningColor         = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )
 
 // BackgroundColor returns the theme's background color.

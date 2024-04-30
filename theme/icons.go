@@ -51,7 +51,7 @@ const (
 	// Since: 2.0
 	IconNameCheckButtonChecked fyne.ThemeIconName = "checked"
 
-	// InconNameCheckButtonFill is the name of theme lookup for filled check button icon.
+	// IconNameCheckButtonFill is the name of theme lookup for filled check button icon.
 	//
 	// Since: 2.5
 	IconNameCheckButtonFill fyne.ThemeIconName = "iconNameCheckButtonFill"
@@ -66,7 +66,7 @@ const (
 	// Since: 2.0
 	IconNameRadioButtonChecked fyne.ThemeIconName = "radioButtonChecked"
 
-	// InconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
+	// IconNameRadioButtonFill is the name of theme lookup for filled radio button icon.
 	//
 	// Since: 2.5
 	IconNameRadioButtonFill fyne.ThemeIconName = "iconNameRadioButtonFill"
@@ -636,6 +636,8 @@ type ThemedResource struct {
 	ColorName fyne.ThemeColorName
 }
 
+var _ fyne.ThemedResource = (*ThemedResource)(nil)
+
 // NewColoredResource creates a resource that adapts to the current theme setting using
 // the color named in the constructor.
 //
@@ -677,28 +679,22 @@ func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ThemedResource) Name() string {
-	prefix := res.ThemeColorName()
-	if prefix == "" {
-		prefix = "foreground_"
-	} else {
-		prefix += "_"
-	}
-
-	return string(prefix) + unwrapResource(res.source).Name()
+	return string(res.ThemeColorName()) + "_" + unwrapResource(res.source).Name()
 }
 
+// ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
+// @implements fyne.ThemedResource
 func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
-	return res.ColorName
+	if res.ColorName != "" {
+		return res.ColorName
+	}
+
+	return ColorNameForeground
 }
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	name := res.ThemeColorName()
-	if name == "" {
-		name = ColorNameForeground
-	}
-
-	return svg.Colorize(unwrapResource(res.source).Content(), Color(name))
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(res.ThemeColorName()))
 }
 
 // Error returns a different resource for indicating an error.
@@ -711,6 +707,8 @@ func (res *ThemedResource) Error() *ErrorThemedResource {
 type InvertedThemedResource struct {
 	source fyne.Resource
 }
+
+var _ fyne.ThemedResource = (*InvertedThemedResource)(nil)
 
 // NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
 func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
@@ -729,6 +727,8 @@ func (res *InvertedThemedResource) Content() []byte {
 	return svg.Colorize(unwrapResource(res.source).Content(), clr)
 }
 
+// ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
+// @implements fyne.ThemedResource
 func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameBackground
 }
