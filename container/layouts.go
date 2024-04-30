@@ -49,6 +49,34 @@ func NewCenter(objects ...fyne.CanvasObject) *fyne.Container {
 	return New(layout.NewCenterLayout(), objects...)
 }
 
+// NewEdge creates a new container with the specified objects and using the edge layout.
+// The top, bottom, left and right parameters specify the items that should be placed around edges,
+// with the center object placed in the center. Nil can be used to an edge if it should not be filled.
+// Items at the top and bottom edges use the item's MinSize height and items at the left and right
+// edges use the item's MinSize width.
+//
+// Since: 2.5
+func NewEdge(top, bottom, left, right, center fyne.CanvasObject) *fyne.Container {
+	objects := make([]fyne.CanvasObject, 0, 5)
+	if top != nil {
+		objects = append(objects, top)
+	}
+	if bottom != nil {
+		objects = append(objects, bottom)
+	}
+	if left != nil {
+		objects = append(objects, left)
+	}
+	if right != nil {
+		objects = append(objects, right)
+	}
+	if center != nil {
+		objects = append(objects, center)
+	}
+
+	return New(layout.NewEdge(top, bottom, left, right, center), objects...)
+}
+
 // NewGridWithColumns creates a new container with the specified objects and using the grid layout with
 // a specified number of columns. The number of rows will depend on how many children are in the container.
 //

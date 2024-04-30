@@ -1,0 +1,172 @@
+package layout_test
+
+import (
+	"image/color"
+	"testing"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewEdgeContainer(t *testing.T) {
+	top := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	top.SetMinSize(fyne.NewSize(10, 10))
+	right := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	right.SetMinSize(fyne.NewSize(10, 10))
+	middle := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+
+	c := container.NewEdge(top, nil, nil, right, middle)
+	assert.Equal(t, 3, len(c.Objects))
+
+	c.Resize(fyne.NewSize(100, 100))
+	assert.Equal(t, float32(0), top.Position().X)
+	assert.Equal(t, float32(0), top.Position().Y)
+	assert.Equal(t, float32(90), right.Position().X)
+	assert.Equal(t, 10+theme.Padding(), right.Position().Y)
+	assert.Equal(t, float32(0), middle.Position().X)
+	assert.Equal(t, 10+theme.Padding(), middle.Position().Y)
+	assert.Equal(t, 90-theme.Padding(), middle.Size().Width)
+	assert.Equal(t, 90-theme.Padding(), middle.Size().Height)
+}
+
+func TestEdgeayout_Size_Empty(t *testing.T) {
+	size := fyne.NewSize(100, 100)
+
+	obj := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{obj},
+	}
+	container.Resize(size)
+
+	layout.NewEdge(nil, nil, nil, nil, obj).Layout(container.Objects, size)
+
+	assert.Equal(t, obj.Size(), size)
+}
+
+func TestEdgeLayout_Size_TopBottom(t *testing.T) {
+	size := fyne.NewSize(100, 100)
+
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
+	}
+	container.Resize(size)
+
+	layout.NewEdge(obj1, obj2, nil, nil, obj3).Layout(container.Objects, size)
+
+	innerSize := fyne.NewSize(size.Width, size.Height-obj1.Size().Height-obj2.Size().Height-theme.Padding()*2)
+	assert.Equal(t, innerSize, obj3.Size())
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
+	assert.Equal(t, fyne.NewPos(0, size.Height-obj2.Size().Height), obj2.Position())
+	assert.Equal(t, fyne.NewPos(0, obj1.Size().Height+theme.Padding()), obj3.Position())
+}
+
+func TestEdgeLayout_Size_LeftRight(t *testing.T) {
+	size := fyne.NewSize(100, 100)
+
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
+	}
+	container.Resize(size)
+
+	layout.NewEdge(nil, nil, obj1, obj2, obj3).Layout(container.Objects, size)
+
+	innerSize := fyne.NewSize(size.Width-obj1.Size().Width-obj2.Size().Width-theme.Padding()*2, size.Height)
+	assert.Equal(t, innerSize, obj3.Size())
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
+	assert.Equal(t, fyne.NewPos(size.Width-obj2.Size().Width, 0), obj2.Position())
+	assert.Equal(t, fyne.NewPos(obj1.Size().Width+theme.Padding(), 0), obj3.Position())
+}
+
+func TestEdgeLayout_MinSize_Center(t *testing.T) {
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	minSize := text.MinSize()
+
+	container := container.NewWithoutLayout(text)
+	layoutMin := layout.NewEdge(nil, nil, nil, nil, text).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestEdgeLayout_MinSize_TopBottom(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text2 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text3 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	minSize := fyne.NewSize(text3.MinSize().Width, text1.MinSize().Height+text2.MinSize().Height+text3.MinSize().Height+theme.Padding()*2)
+
+	container := container.NewWithoutLayout(text1, text2, text3)
+	layoutMin := layout.NewEdge(text1, text2, nil, nil, text3).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestEdgeLayout_MinSize_TopBottomHidden(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text1.Hide()
+	text2 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text2.Hide()
+	text3 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+
+	container := container.NewWithoutLayout(text1, text2, text3)
+	layoutMin := layout.NewEdge(text1, text2, nil, nil, text3).MinSize(container.Objects)
+
+	assert.Equal(t, text1.MinSize(), layoutMin)
+}
+
+func TestEdgeLayout_MinSize_TopOnly(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	minSize := fyne.NewSize(text1.MinSize().Width, text1.MinSize().Height+theme.Padding())
+
+	container := container.NewWithoutLayout(text1)
+	layoutMin := layout.NewEdge(text1, nil, nil, nil, nil).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestEdgeLayout_MinSize_LeftRight(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text2 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text3 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	minSize := fyne.NewSize(text1.MinSize().Width+text2.MinSize().Width+text3.MinSize().Width+theme.Padding()*2, text3.MinSize().Height)
+
+	container := container.NewWithoutLayout(text1, text2, text3)
+	layoutMin := layout.NewEdge(nil, nil, text1, text2, text3).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestEdgeLayout_MinSize_LeftRightHidden(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text1.Hide()
+	text2 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	text2.Hide()
+	text3 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+
+	container := container.NewWithoutLayout(text1, text2, text3)
+	layoutMin := layout.NewEdge(nil, nil, text1, text2, text3).MinSize(container.Objects)
+
+	assert.Equal(t, text3.MinSize(), layoutMin)
+}
+
+func TestEdgeLayout_MinSize_LeftOnly(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
+	minSize := fyne.NewSize(text1.MinSize().Width+theme.Padding(), text1.MinSize().Height)
+
+	container := container.NewWithoutLayout(text1)
+	layoutMin := layout.NewEdge(nil, nil, text1, nil, nil).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
