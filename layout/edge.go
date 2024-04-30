@@ -7,6 +7,8 @@ import (
 
 // NewEdge creates a new edge layout instance with top, bottom, left, right
 // and center objects set.
+//
+// Since: 2.5
 func NewEdge(top, bottom, left, right, center fyne.CanvasObject) fyne.Layout {
 	return edgeLayout{top: top, bottom: bottom, left: left, right: right, center: center}
 }
