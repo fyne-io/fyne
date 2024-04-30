@@ -106,7 +106,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return PrimaryColorNamed(primary)
 	} else if n == ColorNameOnPrimary {
-		return onPrimaryColorNamed(primary)
+		return OnPrimaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {

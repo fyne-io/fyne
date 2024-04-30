@@ -275,6 +275,32 @@ func OnPrimaryColor() color.Color {
 	return safeColorLookup(ColorNameOnPrimary, currentVariant())
 }
 
+// OnPrimaryColorNamed returns a theme specific color used for text and icons against the named primary color.
+//
+// Since: 2.5
+func OnPrimaryColorNamed(name string) color.Color {
+	switch name {
+	case ColorRed:
+		return backgroundColorLight
+	case ColorOrange:
+		return backgroundColorDark
+	case ColorYellow:
+		return backgroundColorDark
+	case ColorGreen:
+		return backgroundColorDark
+	case ColorPurple:
+		return backgroundColorLight
+	case ColorBrown:
+		return backgroundColorLight
+	case ColorGray:
+		return backgroundColorDark
+	}
+
+	// We return the “on” value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return backgroundColorLight
+}
+
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
 //
 // Since: 2.3
@@ -368,29 +394,6 @@ func SuccessColor() color.Color {
 // Since: 2.3
 func WarningColor() color.Color {
 	return safeColorLookup(ColorNameWarning, currentVariant())
-}
-
-func onPrimaryColorNamed(name string) color.Color {
-	switch name {
-	case ColorRed:
-		return backgroundColorLight
-	case ColorOrange:
-		return backgroundColorDark
-	case ColorYellow:
-		return backgroundColorDark
-	case ColorGreen:
-		return backgroundColorDark
-	case ColorPurple:
-		return backgroundColorLight
-	case ColorBrown:
-		return backgroundColorLight
-	case ColorGray:
-		return backgroundColorDark
-	}
-
-	// We return the “on” value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return backgroundColorLight
 }
 
 func safeColorLookup(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
