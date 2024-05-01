@@ -116,21 +116,18 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // the sum of all column children combined with padding between each.
 func (f *formLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	labelWidth, contentWidth, heights := f.tableCellsSize(objects, 0)
-
-	minSize := fyne.NewSize(0, 0)
 	if len(heights) == 0 {
-		return minSize
+		return fyne.Size{}
 	}
 
 	padding := theme.Padding()
-	added := false
-	minSize.Width = labelWidth + contentWidth + padding
+	minSize := fyne.Size{
+		Width:  labelWidth + contentWidth + padding,
+		Height: padding * float32(len(heights)-1),
+	}
+
 	for row := 0; row < len(heights); row++ {
 		minSize.Height += heights[row]
-		if added {
-			minSize.Height += padding
-		}
-		added = true
 	}
 	return minSize
 }
