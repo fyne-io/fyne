@@ -28,22 +28,17 @@ func (f *formLayout) countRows(objects []fyne.CanvasObject) int {
 	return count
 }
 
-type cellHeights struct {
-	labelHeight   float32
-	contentHeight float32
-}
-
 // tableCellsSize defines the size for all the cells of the form table.
 // The height of each row will be set as the max value between the label and content cell heights.
 // The width of the label column will be set as the max width value between all the label cells.
 // The width of the content column will be set as the max width value between all the content cells
 // or the remaining space of the bounding containerWidth, if it is larger.
-func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth float32) (float32, float32, []cellHeights) {
+func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth float32) (float32, float32, []float32) {
 	rows := f.countRows(objects)
-	table := make([]cellHeights, rows)
+	heights := make([]float32, rows)
 
 	if (len(objects))%formLayoutCols != 0 {
-		return 0, 0, table
+		return 0, 0, heights
 	}
 
 	padding := theme.Padding()
@@ -70,18 +65,17 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 		contentCellMaxWidth = fyne.Max(contentCellMaxWidth, contentCell.Width)
 
 		rowHeight := fyne.Max(labelCell.Height, contentCell.Height)
-		table[row].labelHeight = rowHeight
-		table[row].contentHeight = rowHeight
+		heights[row] = rowHeight
 		row++
 	}
 
 	contentCellMaxWidth = fyne.Max(contentCellMaxWidth, containerWidth-labelCellMaxWidth-padding)
-	return labelCellMaxWidth, contentCellMaxWidth, table
+	return labelCellMaxWidth, contentCellMaxWidth, heights
 }
 
 // Layout is called to pack all child objects into a table format with two columns.
 func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	labelWidth, contentWidth, table := f.tableCellsSize(objects, size.Width)
+	labelWidth, contentWidth, heights := f.tableCellsSize(objects, size.Width)
 
 	padding := theme.Padding()
 	innerPadding := theme.InnerPadding()
@@ -93,16 +87,15 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			continue
 		}
 		if row > 0 {
-			y += table[row-1].labelHeight + padding
+			y += heights[row-1] + padding
 		}
 
-		tableRow := table[row]
 		if _, ok := objects[i].(*canvas.Text); ok {
 			objects[i].Move(fyne.NewPos(innerPadding, y+innerPadding))
 			objects[i].Resize(fyne.NewSize(labelWidth-innerPadding*2, objects[i].MinSize().Height))
 		} else {
 			objects[i].Move(fyne.NewPos(0, y))
-			objects[i].Resize(fyne.NewSize(labelWidth, tableRow.labelHeight))
+			objects[i].Resize(fyne.NewSize(labelWidth, heights[row]))
 		}
 
 		if i+1 < len(objects) {
@@ -111,7 +104,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 				objects[i+1].Resize(fyne.NewSize(contentWidth-innerPadding*2, objects[i+1].MinSize().Height))
 			} else {
 				objects[i+1].Move(fyne.NewPos(padding+labelWidth, y))
-				objects[i+1].Resize(fyne.NewSize(contentWidth, tableRow.labelHeight))
+				objects[i+1].Resize(fyne.NewSize(contentWidth, heights[row]))
 			}
 		}
 		row++
@@ -122,18 +115,18 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // For a FormLayout this is the width of the widest label and content items and the height is
 // the sum of all column children combined with padding between each.
 func (f *formLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	labelWidth, contentWidth, table := f.tableCellsSize(objects, 0)
+	labelWidth, contentWidth, heights := f.tableCellsSize(objects, 0)
 
 	minSize := fyne.NewSize(0, 0)
-	if len(table) == 0 {
+	if len(heights) == 0 {
 		return minSize
 	}
 
 	padding := theme.Padding()
 	added := false
 	minSize.Width = labelWidth + contentWidth + padding
-	for row := 0; row < len(table); row++ {
-		minSize.Height += table[row].labelHeight
+	for row := 0; row < len(heights); row++ {
+		minSize.Height += heights[row]
 		if added {
 			minSize.Height += padding
 		}
