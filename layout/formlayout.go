@@ -128,13 +128,12 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (f *formLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	labelWidth, contentWidth, table := f.tableCellsSize(objects, 0)
 
-	padding := theme.Padding()
 	minSize := fyne.NewSize(0, 0)
-
 	if len(table) == 0 {
 		return minSize
 	}
 
+	padding := theme.Padding()
 	added := false
 	minSize.Width = labelWidth + contentWidth + padding
 	for row := 0; row < len(table); row++ {
