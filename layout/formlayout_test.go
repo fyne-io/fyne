@@ -13,6 +13,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var minSize fyne.Size
+
+func BenchmarkFormLayout(b *testing.B) {
+	b.StopTimer()
+
+	min := fyne.Size{}
+	form := layout.NewFormLayout()
+	label1 := canvas.NewRectangle(color.Black)
+	content1 := canvas.NewRectangle(color.Black)
+	label2 := canvas.NewRectangle(color.Black)
+	content2 := canvas.NewRectangle(color.Black)
+
+	objects := []fyne.CanvasObject{label1, content1, label2, content2}
+
+	b.StartTimer()
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		min = form.MinSize(objects)
+	}
+
+	minSize = min
+}
+
 func TestFormLayout(t *testing.T) {
 	gridSize := fyne.NewSize(125, 125)
 
