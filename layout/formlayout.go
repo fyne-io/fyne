@@ -41,7 +41,6 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 		return 0, 0, heights
 	}
 
-	padding := theme.Padding()
 	innerPadding := theme.InnerPadding()
 	lowBound := 0
 	highBound := 2
@@ -69,7 +68,7 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 		row++
 	}
 
-	contentCellMaxWidth = fyne.Max(contentCellMaxWidth, containerWidth-labelCellMaxWidth-padding)
+	contentCellMaxWidth = fyne.Max(contentCellMaxWidth, containerWidth-labelCellMaxWidth-theme.Padding())
 	return labelCellMaxWidth, contentCellMaxWidth, heights
 }
 
@@ -90,22 +89,28 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			y += heights[row-1] + padding
 		}
 
+		pos := fyne.NewPos(0, y)
+		size := fyne.NewSize(labelWidth, heights[row])
 		if _, ok := objects[i].(*canvas.Text); ok {
-			objects[i].Move(fyne.NewPos(innerPadding, y+innerPadding))
-			objects[i].Resize(fyne.NewSize(labelWidth-innerPadding*2, objects[i].MinSize().Height))
-		} else {
-			objects[i].Move(fyne.NewPos(0, y))
-			objects[i].Resize(fyne.NewSize(labelWidth, heights[row]))
+			pos = pos.AddXY(innerPadding, innerPadding)
+			size.Width -= innerPadding * 2
+			size.Height = objects[i].MinSize().Height
 		}
 
+		objects[i].Move(pos)
+		objects[i].Resize(size)
+
 		if i+1 < len(objects) {
+			pos = fyne.NewPos(padding+labelWidth, y)
+			size = fyne.NewSize(contentWidth, heights[row])
 			if _, ok := objects[i+1].(*canvas.Text); ok {
-				objects[i+1].Move(fyne.NewPos(padding+labelWidth+innerPadding, y+innerPadding))
-				objects[i+1].Resize(fyne.NewSize(contentWidth-innerPadding*2, objects[i+1].MinSize().Height))
-			} else {
-				objects[i+1].Move(fyne.NewPos(padding+labelWidth, y))
-				objects[i+1].Resize(fyne.NewSize(contentWidth, heights[row]))
+				pos = pos.AddXY(innerPadding, innerPadding)
+				size.Width -= innerPadding * 2
+				size.Height = objects[i+1].MinSize().Height
 			}
+
+			objects[i+1].Move(pos)
+			objects[i+1].Resize(size)
 		}
 		row++
 	}
