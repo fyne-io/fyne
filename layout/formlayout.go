@@ -75,11 +75,6 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 	}
 
 	contentCellMaxWidth = fyne.Max(contentCellMaxWidth, containerWidth-labelCellMaxWidth-padding)
-	for row := 0; row < rows; row++ {
-		table[row][0].Width = labelCellMaxWidth
-		table[row][1].Width = contentCellMaxWidth
-	}
-
 	return labelCellMaxWidth, contentCellMaxWidth, table
 }
 
@@ -111,10 +106,10 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 		if i+1 < len(objects) {
 			if _, ok := objects[i+1].(*canvas.Text); ok {
-				objects[i+1].Move(fyne.NewPos(padding+tableRow[0].Width+innerPadding, y+innerPadding))
+				objects[i+1].Move(fyne.NewPos(padding+labelWidth+innerPadding, y+innerPadding))
 				objects[i+1].Resize(fyne.NewSize(contentWidth-innerPadding*2, objects[i+1].MinSize().Height))
 			} else {
-				objects[i+1].Move(fyne.NewPos(padding+tableRow[0].Width, y))
+				objects[i+1].Move(fyne.NewPos(padding+labelWidth, y))
 				objects[i+1].Resize(fyne.NewSize(contentWidth, tableRow[0].Height))
 			}
 		}
