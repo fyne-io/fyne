@@ -1,7 +1,9 @@
 package software
 
 import (
+	"fmt"
 	"image"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -14,6 +16,7 @@ var _ painter.Painter = (*Painter)(nil)
 
 // Painter is a simple software painter that can paint a canvas in memory.
 type Painter struct {
+	canvas fyne.Canvas
 }
 
 // NewPainter creates a new Painter.
@@ -21,10 +24,19 @@ func NewPainter() *Painter {
 	return &Painter{}
 }
 
+// NewPainterWithCanvas creates a new Painter with an existing fyne.Canvas.
+func NewPainterWithCanvas(canvas fyne.Canvas) *Painter {
+	return &Painter{
+		canvas: canvas,
+	}
+}
+
 // Capture is the main entry point for a simple software painter.
 // The canvas to be drawn is passed in as a parameter and the return is an
 // image containing the result of rendering.
-func (*Painter) Capture(c fyne.Canvas) image.Image {
+func (p *Painter) Capture(c fyne.Canvas) image.Image {
+	t := time.Now()
+
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
 
@@ -39,19 +51,19 @@ func (*Painter) Capture(c fyne.Canvas) image.Image {
 		)
 		switch o := obj.(type) {
 		case *canvas.Image:
-			drawImage(c, o, pos, base, clip)
+			p.drawImage(c, o, pos, base, clip)
 		case *canvas.Text:
-			drawText(c, o, pos, base, clip)
+			p.drawText(c, o, pos, base, clip)
 		case gradient:
-			drawGradient(c, o, pos, base, clip)
+			p.drawGradient(c, o, pos, base, clip)
 		case *canvas.Circle:
-			drawCircle(c, o, pos, base, clip)
+			p.drawCircle(c, o, pos, base, clip)
 		case *canvas.Line:
-			drawLine(c, o, pos, base, clip)
+			p.drawLine(c, o, pos, base, clip)
 		case *canvas.Raster:
-			drawRaster(c, o, pos, base, clip)
+			p.drawRaster(c, o, pos, base, clip)
 		case *canvas.Rectangle:
-			drawRectangle(c, o, pos, base, clip)
+			p.drawRectangle(c, o, pos, base, clip)
 		}
 
 		return false
@@ -62,6 +74,7 @@ func (*Painter) Capture(c fyne.Canvas) image.Image {
 		driver.WalkVisibleObjectTree(o, paint, nil)
 	}
 
+	fmt.Println("Capture:", time.Since(t))
 	return base
 }
 
@@ -76,8 +89,7 @@ func (p *Painter) Clear() {
 }
 
 func (p *Painter) Free(object fyne.CanvasObject) {
-	// TODO implement me
-	panic("implement me")
+	p.freeTexture(object)
 }
 
 func (p *Painter) Paint(object fyne.CanvasObject, position fyne.Position, size fyne.Size) {
