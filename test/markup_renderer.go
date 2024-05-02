@@ -437,6 +437,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.ContentRemoveIcon():      "contentRemoveIcon",
 		theme.ContentUndoIcon():        "contentUndoIcon",
 		theme.DeleteIcon():             "deleteIcon",
+		theme.DesktopIcon():            "desktopIcon",
 		theme.DocumentCreateIcon():     "documentCreateIcon",
 		theme.DocumentIcon():           "documentIcon",
 		theme.DocumentPrintIcon():      "documentPrintIcon",
