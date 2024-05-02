@@ -75,21 +75,22 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 	remainer := len(objects) % formLayoutCols
 	for i := 0; i < len(objects)-remainer; i += formLayoutCols {
-		if !objects[i].Visible() && !objects[i+1].Visible() {
+		labelCell, contentCell := objects[i], objects[i+1]
+		if !labelCell.Visible() && !contentCell.Visible() {
 			continue
 		}
 
-		labelMin := objects[i].MinSize()
-		contentMin := objects[i+1].MinSize()
+		labelMin := labelCell.MinSize()
+		contentMin := contentCell.MinSize()
 		rowHeight := fyne.Max(labelMin.Height, contentMin.Height)
 
-		pos, size := objectLayout(objects[i], 0, labelWidth, rowHeight, labelMin.Height)
-		objects[i].Move(pos)
-		objects[i].Resize(size)
+		pos, size := objectLayout(labelCell, 0, labelWidth, rowHeight, labelMin.Height)
+		labelCell.Move(pos)
+		labelCell.Resize(size)
 
-		pos, size = objectLayout(objects[i+1], labelWidth+padding, contentWidth, rowHeight, contentMin.Height)
-		objects[i+1].Move(pos)
-		objects[i+1].Resize(size)
+		pos, size = objectLayout(contentCell, labelWidth+padding, contentWidth, rowHeight, contentMin.Height)
+		contentCell.Move(pos)
+		contentCell.Resize(size)
 
 		y += rowHeight + padding
 	}
