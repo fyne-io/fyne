@@ -66,9 +66,13 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			continue
 		}
 
-		rowHeight := objects[i].MinSize().Height
+		labelMin := objects[i].MinSize()
+		contentMin := fyne.Size{}
+
+		rowHeight := labelMin.Height
 		if i+1 < len(objects) {
-			rowHeight = fyne.Max(rowHeight, objects[i+1].MinSize().Height)
+			contentMin = objects[i+1].MinSize()
+			rowHeight = fyne.Max(rowHeight, contentMin.Height)
 		}
 
 		pos := fyne.NewPos(0, y)
@@ -76,7 +80,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		if _, ok := objects[i].(*canvas.Text); ok {
 			pos = pos.AddXY(innerPadding, innerPadding)
 			size.Width -= innerPadding * 2
-			size.Height = objects[i].MinSize().Height
+			size.Height = labelMin.Height
 		}
 
 		objects[i].Move(pos)
@@ -88,7 +92,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			if _, ok := objects[i+1].(*canvas.Text); ok {
 				pos = pos.AddXY(innerPadding, innerPadding)
 				size.Width -= innerPadding * 2
-				size.Height = objects[i+1].MinSize().Height
+				size.Height = contentMin.Height
 			}
 
 			objects[i+1].Move(pos)
