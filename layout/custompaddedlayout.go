@@ -9,6 +9,8 @@ var _ fyne.Layout = (*CustomPaddedLayout)(nil)
 
 // CustomPaddedLayout is a layout similar to PaddedLayout, but uses
 // custom values for padding on each side, rather than the theme padding value.
+//
+// Since: 2.5
 type CustomPaddedLayout struct {
 	TopPadding    float32
 	BottomPadding float32
