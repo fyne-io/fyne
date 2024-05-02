@@ -35,9 +35,9 @@ func (f *formLayout) countRows(objects []fyne.CanvasObject) int {
 // be set as the max width of all the label cells. The width of the content column will be set as
 // the max width of all the content cells or the remaining space of the bounding containerWidth,
 // if it is larger.
-func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (float32, float32, []float32) {
+func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (labelWidth float32, contentWidth float32, heights []float32) {
 	rows := f.countRows(objects)
-	heights := make([]float32, rows)
+	heights = make([]float32, rows)
 
 	if (len(objects))%formLayoutCols != 0 {
 		return 0, 0, heights
@@ -46,8 +46,6 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 	innerPadding := theme.InnerPadding()
 	lowBound := 0
 	highBound := 2
-	labelCellMaxWidth := float32(0)
-	contentCellMaxWidth := float32(0)
 	for row := 0; row < rows; {
 		currentRow := objects[lowBound:highBound]
 		lowBound = highBound
@@ -60,18 +58,18 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 		if _, ok := currentRow[0].(*canvas.Text); ok {
 			labelCell.Width += innerPadding * 2
 		}
-		labelCellMaxWidth = fyne.Max(labelCellMaxWidth, labelCell.Width)
+		labelWidth = fyne.Max(labelWidth, labelCell.Width)
 
 		contentCell := currentRow[1].MinSize()
-		contentCellMaxWidth = fyne.Max(contentCellMaxWidth, contentCell.Width)
+		contentWidth = fyne.Max(contentWidth, contentCell.Width)
 
 		rowHeight := fyne.Max(labelCell.Height, contentCell.Height)
 		heights[row] = rowHeight
 		row++
 	}
 
-	contentCellMaxWidth = fyne.Max(contentCellMaxWidth, containerWidth-labelCellMaxWidth-theme.Padding())
-	return labelCellMaxWidth, contentCellMaxWidth, heights
+	contentWidth = fyne.Max(contentWidth, containerWidth-labelWidth-theme.Padding())
+	return labelWidth, contentWidth, heights
 }
 
 // Layout is called to pack all child objects into a table format with two columns.
@@ -86,9 +84,6 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	for i := 0; i < len(objects); i += formLayoutCols {
 		if !objects[i].Visible() && (i+1 < len(objects) && !objects[i+1].Visible()) {
 			continue
-		}
-		if row > 0 {
-			y += heights[row-1] + padding
 		}
 
 		pos := fyne.NewPos(0, y)
@@ -114,6 +109,8 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 			objects[i+1].Move(pos)
 			objects[i+1].Resize(size)
 		}
+
+		y += heights[row] + padding
 		row++
 	}
 }
