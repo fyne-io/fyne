@@ -55,7 +55,7 @@ func (e *SelectEntry) Disable() {
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
-	return e.Entry.MinSize()
+	return e.BaseWidget.MinSize()
 }
 
 // Move changes the relative position of the select entry.
