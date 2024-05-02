@@ -56,49 +56,49 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	labelWidth, contentWidth, _ := f.calculateTableSizes(objects, size.Width)
 
+	y := float32(0)
 	padding := theme.Padding()
 	innerPadding := theme.InnerPadding()
 
-	y := float32(0)
-	for i := 0; i < len(objects); i += formLayoutCols {
-		if !objects[i].Visible() && (i+1 < len(objects) && !objects[i+1].Visible()) {
+	// Calculate size and position of object. Position and size is returned (instead of calling Move() and Resize()) to make inlineable.
+	objectLayout := func(obj fyne.CanvasObject, offset, width, rowHeight, itemHeight float32) (fyne.Position, fyne.Size) {
+		pos := fyne.NewPos(offset, y)
+		size := fyne.NewSize(width, rowHeight)
+		if _, ok := obj.(*canvas.Text); ok {
+			pos = pos.AddXY(innerPadding, innerPadding)
+			size.Width -= innerPadding * 2
+			size.Height = itemHeight
+		}
+
+		return pos, size
+	}
+
+	remainer := len(objects) % formLayoutCols
+	for i := 0; i < len(objects)-remainer; i += formLayoutCols {
+		if !objects[i].Visible() && !objects[i+1].Visible() {
 			continue
 		}
 
 		labelMin := objects[i].MinSize()
-		contentMin := fyne.Size{}
+		contentMin := objects[i+1].MinSize()
+		rowHeight := fyne.Max(labelMin.Height, contentMin.Height)
 
-		rowHeight := labelMin.Height
-		if i+1 < len(objects) {
-			contentMin = objects[i+1].MinSize()
-			rowHeight = fyne.Max(rowHeight, contentMin.Height)
-		}
-
-		pos := fyne.NewPos(0, y)
-		size := fyne.NewSize(labelWidth, rowHeight)
-		if _, ok := objects[i].(*canvas.Text); ok {
-			pos = pos.AddXY(innerPadding, innerPadding)
-			size.Width -= innerPadding * 2
-			size.Height = labelMin.Height
-		}
-
+		pos, size := objectLayout(objects[i], 0, labelWidth, rowHeight, labelMin.Height)
 		objects[i].Move(pos)
 		objects[i].Resize(size)
 
-		if i+1 < len(objects) {
-			pos = fyne.NewPos(padding+labelWidth, y)
-			size = fyne.NewSize(contentWidth, rowHeight)
-			if _, ok := objects[i+1].(*canvas.Text); ok {
-				pos = pos.AddXY(innerPadding, innerPadding)
-				size.Width -= innerPadding * 2
-				size.Height = contentMin.Height
-			}
-
-			objects[i+1].Move(pos)
-			objects[i+1].Resize(size)
-		}
+		pos, size = objectLayout(objects[i+1], labelWidth+padding, contentWidth, rowHeight, contentMin.Height)
+		objects[i+1].Move(pos)
+		objects[i+1].Resize(size)
 
 		y += rowHeight + padding
+	}
+
+	// Handle remaining item in the case of uneven number of objects:
+	if remainer == 1 {
+		lastCell := objects[len(objects)-1]
+		lastMin := lastCell.MinSize()
+		objectLayout(lastCell, 0, labelWidth, lastMin.Height, lastMin.Height)
 	}
 }
 
