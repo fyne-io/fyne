@@ -82,7 +82,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return fyne.Size{}
 	}
 
-	return r.MinSize()
+	minSize := r.MinSize()
+	w.minCache.Store(minSize)
+	return minSize
 }
 
 // Visible returns whether or not this widget should be visible.
