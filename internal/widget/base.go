@@ -14,6 +14,7 @@ type Base struct {
 	hidden   atomic.Bool
 	position async.Position
 	size     async.Size
+	minCache async.Size
 	impl     atomic.Pointer[fyne.Widget]
 }
 
@@ -63,6 +64,11 @@ func (w *Base) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *Base) MinSize() fyne.Size {
+	minCache := w.minCache.Load()
+	if !minCache.IsZero() {
+		return minCache
+	}
+
 	impl := w.super()
 
 	r := cache.Renderer(impl)
@@ -112,8 +118,16 @@ func (w *Base) Refresh() {
 		return
 	}
 
+	w.minCache.Store(fyne.Size{})
 	render := cache.Renderer(impl)
 	render.Refresh()
+}
+
+// ResetMinSizeCache resets the cached MinSize for this widget.
+//
+// Since: 2.5.0
+func (w *Base) ResetMinSizeCache() {
+	w.minCache.Store(fyne.Size{})
 }
 
 // super will return the actual object that this represents.
