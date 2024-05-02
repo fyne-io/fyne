@@ -59,7 +59,6 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	padding := theme.Padding()
 	innerPadding := theme.InnerPadding()
 
-	row := 0
 	y := float32(0)
 	for i := 0; i < len(objects); i += formLayoutCols {
 		if !objects[i].Visible() && (i+1 < len(objects) && !objects[i+1].Visible()) {
@@ -100,7 +99,6 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 
 		y += rowHeight + padding
-		row++
 	}
 }
 
