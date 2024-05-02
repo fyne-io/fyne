@@ -63,7 +63,6 @@ type Button struct {
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
-	background       *canvas.Rectangle
 }
 
 // NewButton creates a new button widget with the set label and tap handler
@@ -103,19 +102,19 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text := NewRichText(seg)
 	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
-	b.background = canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
+	background.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
-		b.background,
+		background,
 		tapBG,
 		text,
 	}
 	r := &buttonRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
-		background:   b.background,
+		background:   background,
 		tapBG:        tapBG,
 		button:       b,
 		label:        text,
@@ -152,8 +151,7 @@ func (b *Button) MinSize() fyne.Size {
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
-
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -163,8 +161,7 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
 	b.hovered = false
-
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -192,7 +189,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.applyButtonTheme(b.Theme())
+	b.Refresh()
 
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
@@ -207,67 +204,6 @@ func (b *Button) TypedRune(rune) {
 func (b *Button) TypedKey(ev *fyne.KeyEvent) {
 	if ev.Name == fyne.KeySpace {
 		b.Tapped(nil)
-	}
-}
-
-func (b *Button) applyButtonTheme(th fyne.Theme) {
-	if b.background == nil {
-		return
-	}
-
-	b.background.FillColor = b.buttonColor()
-	b.background.CornerRadius = th.Size(theme.SizeNameInputRadius)
-	b.background.Refresh()
-}
-
-func (b *Button) buttonColor() color.Color {
-	th := b.themeWithLock()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	switch {
-	case b.Disabled():
-		if b.Importance == LowImportance {
-			return color.Transparent
-		}
-		return th.Color(theme.ColorNameDisabledButton, v)
-	case b.focused:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameFocus, v))
-	case b.hovered:
-		bg := th.Color(theme.ColorNameButton, v)
-		if b.Importance == HighImportance {
-			bg = th.Color(theme.ColorNamePrimary, v)
-		} else if b.Importance == DangerImportance {
-			bg = th.Color(theme.ColorNameError, v)
-		} else if b.Importance == WarningImportance {
-			bg = th.Color(theme.ColorNameWarning, v)
-		} else if b.Importance == SuccessImportance {
-			bg = th.Color(theme.ColorNameSuccess, v)
-		}
-
-		return blendColor(bg, th.Color(theme.ColorNameHover, v))
-	case b.Importance == HighImportance:
-		return th.Color(theme.ColorNamePrimary, v)
-	case b.Importance == LowImportance:
-		return color.Transparent
-	case b.Importance == DangerImportance:
-		return th.Color(theme.ColorNameError, v)
-	case b.Importance == WarningImportance:
-		return th.Color(theme.ColorNameWarning, v)
-	case b.Importance == SuccessImportance:
-		return th.Color(theme.ColorNameSuccess, v)
-	default:
-		return th.Color(theme.ColorNameButton, v)
 	}
 }
 
@@ -381,34 +317,72 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock held
 func (r *buttonRenderer) applyTheme() {
-	r.button.applyButtonTheme(r.button.themeWithLock())
-	r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
-	switch {
-	case r.button.disabled.Load():
-		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
-	case r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance:
-		if r.button.focused {
-			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
-		} else {
-			r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameBackground
+	th := r.button.themeWithLock()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
+	if bg := r.background; bg != nil {
+		bgColor := color.Color(color.Transparent)
+		if bgColorName != "" {
+			bgColor = th.Color(bgColorName, v)
 		}
+		if bgBlendName != "" {
+			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
+		}
+		bg.FillColor = bgColor
+		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
+		bg.Refresh()
 	}
+
+	r.label.Segments[0].(*TextSegment).Style.ColorName = fgColorName
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		switch res := r.icon.Resource.(type) {
-		case *theme.InvertedThemedResource:
-			if r.button.Importance != HighImportance && r.button.Importance != DangerImportance && r.button.Importance != WarningImportance && r.button.Importance != SuccessImportance {
-				icon = res.Original()
-			}
-		case fyne.ThemedResource:
-			if r.button.Importance == HighImportance || r.button.Importance == DangerImportance || r.button.Importance == WarningImportance || r.button.Importance == SuccessImportance {
-				icon = theme.NewInvertedThemedResource(res)
+		if thRes, ok := icon.(fyne.ThemedResource); ok {
+			if thRes.ThemeColorName() != fgColorName {
+				icon = theme.NewColoredResource(icon, fgColorName)
 			}
 		}
 		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
 		r.icon.Refresh()
 	}
+}
+
+func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundBlend fyne.ThemeColorName) {
+	foreground = theme.ColorNameForeground
+	b := r.button
+	if b.Disabled() {
+		foreground = theme.ColorNameDisabled
+		if b.Importance != LowImportance {
+			background = theme.ColorNameDisabledButton
+		}
+	} else if b.focused {
+		backgroundBlend = theme.ColorNameFocus
+	} else if b.hovered {
+		backgroundBlend = theme.ColorNameHover
+	}
+	if background == "" {
+		switch b.Importance {
+		case DangerImportance:
+			foreground = theme.ColorNameBackground
+			background = theme.ColorNameError
+		case HighImportance:
+			foreground = theme.ColorNameOnPrimary
+			background = theme.ColorNamePrimary
+		case LowImportance:
+			if backgroundBlend != "" {
+				background = theme.ColorNameButton
+			}
+		case SuccessImportance:
+			foreground = theme.ColorNameBackground
+			background = theme.ColorNameSuccess
+		case WarningImportance:
+			foreground = theme.ColorNameBackground
+			background = theme.ColorNameWarning
+		default:
+			background = theme.ColorNameButton
+		}
+	}
+	return
 }
 
 func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {

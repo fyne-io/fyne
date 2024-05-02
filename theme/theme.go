@@ -104,7 +104,9 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary || n == ColorNameHyperlink {
-		return primaryColorNamed(primary)
+		return PrimaryColorNamed(primary)
+	} else if n == ColorNameOnPrimary {
+		return OnPrimaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {
@@ -334,29 +336,6 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	}
 
 	return res
-}
-
-func primaryColorNamed(name string) color.NRGBA {
-	switch name {
-	case ColorRed:
-		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	case ColorOrange:
-		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
-	case ColorYellow:
-		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
-	case ColorGreen:
-		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
-	case ColorPurple:
-		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
-	case ColorBrown:
-		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
-	case ColorGray:
-		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
-	}
-
-	// We return the value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
 }
 
 func selectionColorNamed(name string) color.NRGBA {

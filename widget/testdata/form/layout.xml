@@ -48,9 +48,9 @@
 							<rectangle fillColor="primary" radius="4" size="89x36"/>
 							<rectangle size="89x36"/>
 							<widget pos="32,8" size="49x20" type="*widget.RichText">
-								<text alignment="center" bold color="background" size="49x19">Submit</text>
+								<text alignment="center" bold color="onPrimary" size="49x19">Submit</text>
 							</widget>
-							<image fillMode="contain" pos="8,8" rsc="confirmIcon" size="iconInlineSize" themed="inverted"/>
+							<image fillMode="contain" pos="8,8" rsc="confirmIcon" size="iconInlineSize" themed="onPrimary"/>
 						</widget>
 					</container>
 				</container>

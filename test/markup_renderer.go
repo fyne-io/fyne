@@ -67,7 +67,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 
 	for _, n := range theme.PrimaryColorNames() {
 		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, n)
+			r.setStringAttr(attrs, name, "primary-"+n)
 			return
 		}
 	}
@@ -408,6 +408,7 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.InputBackgroundColor()):   "inputBackground",
 		nrgbaColor(theme.InputBorderColor()):       "inputBorder",
 		nrgbaColor(theme.MenuBackgroundColor()):    "menuBackground",
+		nrgbaColor(theme.OnPrimaryColor()):         "onPrimary",
 		nrgbaColor(theme.OverlayBackgroundColor()): "overlayBackground",
 		nrgbaColor(theme.PlaceHolderColor()):       "placeholder",
 		nrgbaColor(theme.PrimaryColor()):           "primary",

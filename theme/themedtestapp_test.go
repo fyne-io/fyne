@@ -8,7 +8,9 @@ import (
 )
 
 type themedApp struct {
-	theme fyne.Theme
+	primaryColor string
+	theme        fyne.Theme
+	variant      fyne.ThemeVariant
 }
 
 func (t *themedApp) CloudProvider() fyne.CloudProvider {
@@ -72,6 +74,10 @@ func (t *themedApp) Metadata() fyne.AppMetadata {
 }
 
 func (t *themedApp) PrimaryColor() string {
+	if t.primaryColor != "" {
+		return t.primaryColor
+	}
+
 	return theme.ColorBlue
 }
 
@@ -84,7 +90,7 @@ func (t *themedApp) SetTheme(theme fyne.Theme) {
 }
 
 func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
-	return theme.VariantDark
+	return t.variant // The null value is theme.VariantDark
 }
 
 func (t *themedApp) SetCloudProvider(fyne.CloudProvider) {
