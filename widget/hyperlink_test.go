@@ -103,6 +103,19 @@ func TestHyperlink_OnTapped(t *testing.T) {
 	assert.Equal(t, 1, tapped)
 }
 
+func TestHyperlink_TappedOutsideTextBoundary(t *testing.T) {
+	tapped := 0
+	link := &Hyperlink{Text: "Test"}
+	link.OnTapped = func() {
+		tapped++
+	}
+	link.syncSegments()
+	link.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 50 /*past text boundary*/),
+	})
+	assert.Equal(t, 0, tapped)
+}
+
 func TestHyperlink_KeyboardOnTapped(t *testing.T) {
 	tapped := 0
 	link := &Hyperlink{Text: "Test"}
