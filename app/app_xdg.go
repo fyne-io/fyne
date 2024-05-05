@@ -20,15 +20,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var currentVariant atomic.Value
+var currentVariant atomic.Uint64
 
 func defaultVariant() fyne.ThemeVariant {
-	val := currentVariant.Load()
-	if val == nil {
-		return theme.VariantDark
-	}
-
-	return val.(fyne.ThemeVariant)
+	return fyne.ThemeVariant(currentVariant.Load())
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
@@ -128,11 +123,11 @@ func rootConfigDir() string {
 func watchTheme() {
 	go func() {
 		// with portal this may not be immediate, so we update a cache instead
-		currentVariant.Store(findFreedesktopColorScheme())
+		currentVariant.Store(uint64(findFreedesktopColorScheme()))
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
-				currentVariant.Store(findFreedesktopColorScheme())
+				currentVariant.Store(uint64(findFreedesktopColorScheme()))
 				fyne.CurrentApp().Settings().(*settings).setupTheme()
 			}
 		})
