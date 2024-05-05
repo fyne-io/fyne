@@ -31,19 +31,6 @@ func NewCustomPaddedLayout(padTop, padBottom, padLeft, padRight float32) fyne.La
 	}
 }
 
-// NewSquareCustomPaddedLayout creates a new CustomPaddedLayout instance
-// with the same custom padding applied to all four sides.
-//
-// Since: 2.5
-func NewSquareCustomPaddedLayout(pad float32) fyne.Layout {
-	return CustomPaddedLayout{
-		TopPadding:    pad,
-		BottomPadding: pad,
-		LeftPadding:   pad,
-		RightPadding:  pad,
-	}
-}
-
 // Layout is called to pack all child objects into a specified size.
 // For CustomPaddedLayout this sets all children to the full size passed minus the given paddings all around.
 func (c CustomPaddedLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
