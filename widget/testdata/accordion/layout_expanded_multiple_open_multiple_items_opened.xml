@@ -8,7 +8,7 @@
 					<widget pos="32,8" size="9x20" type="*widget.RichText">
 						<text alignment="center" bold size="9x19">A</text>
 					</widget>
-					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="iconInlineSize"/>
+					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="iconInlineSize" themed="foreground"/>
 				</widget>
 				<widget pos="0,75" size="96x36" type="*widget.Button">
 					<rectangle radius="4" size="96x36"/>
@@ -16,7 +16,7 @@
 					<widget pos="32,8" size="9x20" type="*widget.RichText">
 						<text alignment="center" bold size="9x19">B</text>
 					</widget>
-					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="iconInlineSize"/>
+					<image fillMode="contain" pos="8,8" rsc="menuDropUpIcon" size="iconInlineSize" themed="foreground"/>
 				</widget>
 				<widget pos="0,36" size="96x35" type="*widget.Label">
 					<widget size="96x35" type="*widget.RichText">

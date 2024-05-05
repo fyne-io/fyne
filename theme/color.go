@@ -105,6 +105,11 @@ const (
 	// Since: 2.3
 	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
 
+	// ColorNameOnPrimary is the name of theme lookup for a contrast color to the primary color.
+	//
+	// Since: 2.5
+	ColorNameOnPrimary fyne.ThemeColorName = "onPrimary"
+
 	// ColorNameOverlayBackground is the name of theme lookup for background color of overlays like dialogs.
 	//
 	// Since: 2.3
@@ -157,9 +162,11 @@ const (
 )
 
 var (
-	errorColor   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	successColor = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
-	warningColor = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	backgroundColorDark  = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
+	backgroundColorLight = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	errorColor           = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	successColor         = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	warningColor         = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )
 
 // BackgroundColor returns the theme's background color.
@@ -261,6 +268,39 @@ func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
 
+// OnPrimaryColor returns the color used for text and icons against the PrimaryColor.
+//
+// Since: 2.5
+func OnPrimaryColor() color.Color {
+	return safeColorLookup(ColorNameOnPrimary, currentVariant())
+}
+
+// OnPrimaryColorNamed returns a theme specific color used for text and icons against the named primary color.
+//
+// Since: 2.5
+func OnPrimaryColorNamed(name string) color.Color {
+	switch name {
+	case ColorRed:
+		return backgroundColorLight
+	case ColorOrange:
+		return backgroundColorDark
+	case ColorYellow:
+		return backgroundColorDark
+	case ColorGreen:
+		return backgroundColorDark
+	case ColorPurple:
+		return backgroundColorLight
+	case ColorBrown:
+		return backgroundColorLight
+	case ColorGray:
+		return backgroundColorDark
+	}
+
+	// We return the “on” value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return backgroundColorLight
+}
+
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
 //
 // Since: 2.3
@@ -289,7 +329,26 @@ func PrimaryColor() color.Color {
 //
 // Since: 1.4
 func PrimaryColorNamed(name string) color.Color {
-	return primaryColorNamed(name)
+	switch name {
+	case ColorRed:
+		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	case ColorOrange:
+		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	case ColorYellow:
+		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
+	case ColorGreen:
+		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
+	case ColorPurple:
+		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
+	case ColorBrown:
+		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
+	case ColorGray:
+		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
 }
 
 // PrimaryColorNames returns a list of the standard primary color options.

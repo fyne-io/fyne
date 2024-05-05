@@ -8,7 +8,7 @@ import (
 // NewVBoxLayout returns a vertical box layout for stacking a number of child
 // canvas objects or widgets top to bottom. The objects are always displayed
 // at their vertical MinSize. Use a different layout if the objects are intended
-// to be larger then their vertical MinSize.
+// to be larger than their vertical MinSize.
 func NewVBoxLayout() fyne.Layout {
 	return vBoxLayout{}
 }
@@ -16,7 +16,7 @@ func NewVBoxLayout() fyne.Layout {
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child
 // canvas objects or widgets left to right. The objects are always displayed
 // at their horizontal MinSize. Use a different layout if the objects are intended
-// to be larger then their horizontal MinSize.
+// to be larger than their horizontal MinSize.
 func NewHBoxLayout() fyne.Layout {
 	return hBoxLayout{}
 }
@@ -81,7 +81,7 @@ func (v vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a BoxLayout this is the width of the widest item and the height is
-// the sum of of all children combined with padding between each.
+// the sum of all children combined with padding between each.
 func (v vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false
@@ -162,7 +162,7 @@ func (g hBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a BoxLayout this is the width of the widest item and the height is
-// the sum of of all children combined with padding between each.
+// the sum of all children combined with padding between each.
 func (g hBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false

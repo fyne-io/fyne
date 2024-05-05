@@ -96,6 +96,12 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
+func TestSlider_MinSize(t *testing.T) {
+	min := NewSlider(0, 10).MinSize()
+	buttonMin := NewButtonWithIcon("", theme.HomeIcon(), func() {}).MinSize()
+
+	assert.Equal(t, min.Height, buttonMin.Height)
+}
 func TestSlider_OutOfRange(t *testing.T) {
 	slider := NewSlider(2, 5)
 	slider.Resize(fyne.NewSize(100, 10))

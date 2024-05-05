@@ -2,7 +2,7 @@
 	<content>
 		<container pos="4,4" size="142x192">
 			<widget pos="61,86" size="20x20" type="*widget.Icon">
-				<image fillMode="contain" rsc="cancelIcon" size="iconInlineSize"/>
+				<image fillMode="contain" rsc="cancelIcon" size="iconInlineSize" themed="foreground"/>
 			</widget>
 		</container>
 	</content>

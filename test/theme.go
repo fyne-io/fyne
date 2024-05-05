@@ -35,6 +35,7 @@ func Theme() fyne.Theme {
 				theme.ColorNameInputBackground:   color.NRGBA{R: 0x66, G: 0x66, B: 0x66, A: 0xff},
 				theme.ColorNameInputBorder:       color.NRGBA{R: 0x86, G: 0x86, B: 0x86, A: 0xff},
 				theme.ColorNameMenuBackground:    color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff},
+				theme.ColorNameOnPrimary:         color.NRGBA{R: 0x08, G: 0x0c, B: 0x0f, A: 0xff},
 				theme.ColorNameOverlayBackground: color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
 				theme.ColorNamePlaceHolder:       color.NRGBA{R: 0xaa, G: 0xaa, B: 0xaa, A: 0xff},
 				theme.ColorNamePressed:           color.NRGBA{A: 0x33},

@@ -60,6 +60,13 @@ func NewGetter() *Getter {
 
 // Get automates the download and install of a named GUI app package.
 func (g *Getter) Get(pkg string) error {
+	wd, _ := os.Getwd()
+	defer func() {
+		if wd != "" {
+			os.Chdir(wd)
+		}
+	}()
+
 	name := filepath.Base(pkg)
 	path, err := os.MkdirTemp("", fmt.Sprintf("fyne-get-%s-*", name))
 	if err != nil {

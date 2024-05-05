@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"path/filepath"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
@@ -20,8 +21,13 @@ type fileDialogItem struct {
 	picker *fileDialog
 
 	name     string
+	id       int // id in the parent container
+	choose   func(id int)
+	open     func()
 	location fyne.URI
 	dir      bool
+
+	lastClick time.Time
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
@@ -54,6 +60,18 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	}
 
 	i.Refresh()
+}
+
+func (i *fileDialogItem) Tapped(*fyne.PointEvent) {
+	if i.choose != nil {
+		i.choose(i.id)
+	}
+	now := time.Now()
+	if !i.dir && now.Sub(i.lastClick) < fyne.CurrentApp().Driver().DoubleTapDelay() && i.open != nil {
+		// It is a double click, so we ask the dialog to open
+		i.open()
+	}
+	i.lastClick = now
 }
 
 func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogItem {

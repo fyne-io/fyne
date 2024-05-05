@@ -211,6 +211,9 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
+	if len(hl.provider.Segments) != 0 && !hl.isPosOverText(e.Position) {
+		return // tapped outside text area
+	}
 	hl.invokeAction()
 }
 

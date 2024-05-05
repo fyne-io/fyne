@@ -533,7 +533,14 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 func (f *fileDialog) setView(view ViewLayout) {
 	f.view = view
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
-
+	var selectF func(id int)
+	choose := func(id int) {
+		selectF(id)
+		if file, ok := f.getDataItem(id); ok {
+			f.selectedID = id
+			f.setSelected(file, id)
+		}
+	}
 	count := func() int {
 		f.dataLock.RLock()
 		defer f.dataLock.RUnlock()
@@ -548,25 +555,25 @@ func (f *fileDialog) setView(view ViewLayout) {
 			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
 			_, isDir := dir.(fyne.ListableURI)
 			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+			o.(*fileDialogItem).choose = choose
+			o.(*fileDialogItem).id = id
+			o.(*fileDialogItem).open = f.open.OnTapped
 		}
 	}
-	choose := func(id int) {
-		if file, ok := f.getDataItem(id); ok {
-			f.selectedID = id
-			f.setSelected(file, id)
-		}
-	}
-
+	// Actually, during the real interaction, the OnSelected won't be called.
+	// It will be called only when we directly calls container.select(i)
 	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
 		f.toggleViewButton.SetIcon(theme.ListIcon())
+		selectF = grid.Select
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
 		f.toggleViewButton.SetIcon(theme.GridIcon())
+		selectF = list.Select
 	}
 
 	if f.dir != nil {

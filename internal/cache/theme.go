@@ -64,13 +64,8 @@ type WidgetResource struct {
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *WidgetResource) Content() []byte {
-	name := res.ThemeColorName()
-	if name == "" {
-		name = "foreground"
-	}
-
 	th := themeForResource(res)
-	return svg.Colorize(res.ThemedResource.Content(), th.Color(name, fyne.CurrentApp().Settings().ThemeVariant()))
+	return svg.Colorize(res.ThemedResource.Content(), th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant()))
 }
 
 func (res *WidgetResource) Name() string {

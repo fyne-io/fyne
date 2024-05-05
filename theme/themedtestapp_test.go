@@ -1,15 +1,16 @@
-// !build test
-
-package theme
+package theme_test
 
 import (
 	"net/url"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 type themedApp struct {
-	theme fyne.Theme
+	primaryColor string
+	theme        fyne.Theme
+	variant      fyne.ThemeVariant
 }
 
 func (t *themedApp) CloudProvider() fyne.CloudProvider {
@@ -73,7 +74,11 @@ func (t *themedApp) Metadata() fyne.AppMetadata {
 }
 
 func (t *themedApp) PrimaryColor() string {
-	return ColorBlue
+	if t.primaryColor != "" {
+		return t.primaryColor
+	}
+
+	return theme.ColorBlue
 }
 
 func (t *themedApp) Theme() fyne.Theme {
@@ -85,7 +90,7 @@ func (t *themedApp) SetTheme(theme fyne.Theme) {
 }
 
 func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
-	return VariantDark
+	return t.variant // The null value is theme.VariantDark
 }
 
 func (t *themedApp) SetCloudProvider(fyne.CloudProvider) {

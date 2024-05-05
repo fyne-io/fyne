@@ -18,21 +18,27 @@ import (
 
 func TestButton_Style(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := button.buttonColor()
+	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render.applyTheme()
+	bg := render.background.FillColor
 
 	button.Importance = HighImportance
-	assert.NotEqual(t, bg, button.buttonColor())
+	render.applyTheme()
+	assert.NotEqual(t, bg, render.background.FillColor)
 }
 
 func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := button.buttonColor()
+	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render.applyTheme()
+	bg := render.background.FillColor
 	button.Importance = MediumImportance
-	assert.Equal(t, bg, theme.ButtonColor())
+	render.applyTheme()
+	assert.Equal(t, bg, render.background.FillColor)
 
 	button.Disable()
-	bg = button.buttonColor()
-	assert.Equal(t, bg, theme.DisabledButtonColor())
+	render.applyTheme()
+	assert.Equal(t, theme.DisabledButtonColor(), render.background.FillColor)
 }
 
 func TestButton_Hover_Math(t *testing.T) {
@@ -47,7 +53,7 @@ func TestButton_Hover_Math(t *testing.T) {
 	// outC = srcC + dstC*(1-srcA)
 	// outA = srcA + dstA*(1-srcA)
 
-	// the buttonRenderer's buttonColor() currently calls RGBA(), turns the alpha into a 0=<a<=1 float32,
+	// the buttonRenderer currently calls RGBA(), turns the alpha into a 0=<a<=1 float32,
 	// and blends with the premultiplied over operator, storing the result in an RGBA64.
 
 	// We're going to call ToNRGBA instead (which returns 8-bit components), use the unpremultiplied over operator,
@@ -68,7 +74,8 @@ func TestButton_Hover_Math(t *testing.T) {
 	outB := uint32((float32(srcB)*srcAlpha + float32(dstB)*dstAlpha*(1-srcAlpha)) / outAlpha)
 
 	nrgba := color.NRGBA{R: uint8(outR), G: uint8(outG), B: uint8(outB), A: uint8(outAlpha * 0xFF)}
-	bcn := color.NRGBAModel.Convert(button.buttonColor())
+	render.applyTheme()
+	bcn := color.NRGBAModel.Convert(render.background.FillColor)
 
 	assert.Equal(t, nrgba, bcn)
 }
@@ -136,18 +143,20 @@ func TestButton_Focus(t *testing.T) {
 		tapped = true
 	})
 	render := test.WidgetRenderer(button).(*buttonRenderer)
-	assert.Equal(t, theme.ButtonColor(), button.buttonColor())
+	render.applyTheme()
+	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
 
 	assert.Equal(t, false, tapped)
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
-	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), button.buttonColor())
+	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.background.FillColor)
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, true, tapped)
 
 	button.FocusLost()
-	assert.Equal(t, theme.ButtonColor(), button.buttonColor())
+	render.applyTheme()
+	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {
