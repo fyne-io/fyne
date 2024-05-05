@@ -582,4 +582,3 @@ func assertImageMatchesPlatform(t *testing.T, file string, i image.Image) {
 	path := fmt.Sprintf(file, platform)
 	test.AssertImageMatches(t, path, i)
 }
-
