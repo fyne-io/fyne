@@ -32,32 +32,32 @@ type markdownRenderer []RichTextSegment
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
-	segs, err := renderNode(source, n, false, true)
+	segs, err := renderNode(source, n, false)
 	*m = segs
 	return err
 }
 
-func renderNode(source []byte, n ast.Node, blockquote, firstSegInParagraph bool) ([]RichTextSegment, error) {
+func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, error) {
 	switch t := n.(type) {
 	case *ast.Document:
-		return renderChildren(source, n, blockquote, true)
+		return renderChildren(source, n, blockquote)
 	case *ast.Paragraph:
-		children, err := renderChildren(source, n, blockquote, true)
+		children, err := renderChildren(source, n, blockquote)
 		if !blockquote {
 			linebreak := &TextSegment{Style: RichTextStyleParagraph}
 			children = append(children, linebreak)
 		}
 		return children, err
 	case *ast.List:
-		items, err := renderChildren(source, n, blockquote, firstSegInParagraph)
+		items, err := renderChildren(source, n, blockquote)
 		return []RichTextSegment{
 			&ListSegment{Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
 		}, err
 	case *ast.ListItem:
-		texts, err := renderChildren(source, n, blockquote, firstSegInParagraph)
+		texts, err := renderChildren(source, n, blockquote)
 		return []RichTextSegment{&ParagraphSegment{Texts: texts}}, err
 	case *ast.TextBlock:
-		return renderChildren(source, n, blockquote, true)
+		return renderChildren(source, n, blockquote)
 	case *ast.Heading:
 		text := forceIntoHeadingText(source, n)
 		switch t.Level {
@@ -75,8 +75,6 @@ func renderNode(source []byte, n ast.Node, blockquote, firstSegInParagraph bool)
 	case *ast.Link:
 		link, _ := url.Parse(string(t.Destination))
 		text := forceIntoText(source, n)
-		text = prefixSpaceIfAppropriate(text, source, n, firstSegInParagraph)
-		firstSegInParagraph = false
 		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: text, URL: link}}, nil
 	case *ast.CodeSpan:
 		text := forceIntoText(source, n)
@@ -97,8 +95,6 @@ func renderNode(source []byte, n ast.Node, blockquote, firstSegInParagraph bool)
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
 	case *ast.Emphasis:
 		text := string(forceIntoText(source, n))
-		text = prefixSpaceIfAppropriate(text, source, n, firstSegInParagraph)
-		firstSegInParagraph = false
 		switch t.Level {
 		case 2:
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleStrong, Text: text}}, nil
@@ -111,14 +107,13 @@ func renderNode(source []byte, n ast.Node, blockquote, firstSegInParagraph bool)
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
 		}
-		text = prefixSpaceIfAppropriate(text, source, n, firstSegInParagraph)
-		firstSegInParagraph = false
+		text = suffixSpaceIfAppropriate(text, source, n)
 		if blockquote {
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleBlockquote, Text: text}}, nil
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: text}}, nil
 	case *ast.Blockquote:
-		return renderChildren(source, n, true, firstSegInParagraph)
+		return renderChildren(source, n, true)
 	case *ast.Image:
 		dest := string(t.Destination)
 		u, err := storage.ParseURI(dest)
@@ -130,33 +125,18 @@ func renderNode(source []byte, n ast.Node, blockquote, firstSegInParagraph bool)
 	return nil, nil
 }
 
-func prefixSpaceIfAppropriate(text string, source []byte, n ast.Node, firstSegInParagraph bool) string {
-	// No space should be added before the first segment in a paragraph.
-	//
-	// Also, if the previous sibling was not Text (it was Emphasis or
-	// Link), goldmark already indicates whether a space should be added by
-	// emitting an empty Text. This is already handled in renderNode.
-	if !firstSegInParagraph && n.PreviousSibling() != nil {
-		if t, ok := n.PreviousSibling().(*ast.Text); ok {
-			prevText := string(t.Text(source))
-			if prevText == "" {
-				// A spacer was already added in renderNode for this node.
-				return text
-			} else if strings.HasSuffix(prevText, " ") {
-				// There was no linebreak and the previous text contains the space.
-				return text
-			}
-			return " " + text
-		}
+func suffixSpaceIfAppropriate(text string, source []byte, n ast.Node) string {
+	next := n.NextSibling()
+	if next != nil && next.Type() == ast.TypeInline && !strings.HasSuffix(text, " ") {
+		return text + " "
 	}
 	return text
 }
 
-func renderChildren(source []byte, n ast.Node, blockquote, firstSegInParagraph bool) ([]RichTextSegment, error) {
+func renderChildren(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, error) {
 	children := make([]RichTextSegment, 0, n.ChildCount())
 	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
-		segs, err := renderNode(source, child, blockquote, firstSegInParagraph)
-		firstSegInParagraph = false
+		segs, err := renderNode(source, child, blockquote)
 		if err != nil {
 			return children, err
 		}
