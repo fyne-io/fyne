@@ -20,8 +20,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var currentVariant atomic.Uint64
+
 func defaultVariant() fyne.ThemeVariant {
-	return findFreedestktopColorScheme()
+	return fyne.ThemeVariant(currentVariant.Load())
 }
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
@@ -39,7 +41,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 }
 
 // fetch color variant from dbus portal desktop settings.
-func findFreedestktopColorScheme() fyne.ThemeVariant {
+func findFreedesktopColorScheme() fyne.ThemeVariant {
 	colourScheme, err := appearance.GetColorScheme()
 	if err != nil {
 		return theme.VariantDark
@@ -119,9 +121,15 @@ func rootConfigDir() string {
 }
 
 func watchTheme() {
-	go portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
-		if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
-			fyne.CurrentApp().Settings().(*settings).setupTheme()
-		}
-	})
+	go func() {
+		// with portal this may not be immediate, so we update a cache instead
+		currentVariant.Store(uint64(findFreedesktopColorScheme()))
+
+		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
+			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+				currentVariant.Store(uint64(findFreedesktopColorScheme()))
+				fyne.CurrentApp().Settings().(*settings).setupTheme()
+			}
+		})
+	}()
 }
