@@ -290,9 +290,20 @@ func TestSlider_SetValue(t *testing.T) {
 	assert.Equal(t, 2.0, slider.Value)
 }
 
+func TestSlider_FocusDesktop(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+	slider := NewSlider(0, 10)
+	win := test.NewWindow(slider)
+	test.Tap(slider)
+
+	assert.Equal(t, win.Canvas().Focused(), slider)
+	assert.True(t, slider.focused)
+}
+
 func TestSlider_Focus(t *testing.T) {
 	slider := NewSlider(0, 5)
-
 	slider.FocusGained()
 	assert.True(t, slider.focused)
 

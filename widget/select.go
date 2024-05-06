@@ -200,6 +200,10 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		return
 	}
 
+	if !s.focused {
+		focusIfNotMobile(s.super())
+	}
+
 	s.tapAnimation()
 	s.Refresh()
 
