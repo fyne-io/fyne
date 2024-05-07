@@ -294,6 +294,40 @@ func (t *Tree) ScrollToTop() {
 	t.Refresh()
 }
 
+// scrollByOnePage scrolls down or up by tree height
+func (t *Tree) scrollByOnePage(down bool) {
+	if t.scroller == nil {
+		return
+	}
+
+	height := t.size.Load().Height
+	if down {
+		t.scroller.Offset.Y += height
+		y, size := t.findBottom()
+		max := y + size.Height - t.scroller.Size().Height
+		if t.scroller.Offset.Y > max {
+			t.scroller.Offset.Y = max
+		}
+	} else {
+		t.scroller.Offset.Y -= height
+		if t.scroller.Offset.Y < 0 {
+			t.scroller.Offset.Y = 0
+		}
+	}
+	t.offsetUpdated(t.scroller.Offset)
+	t.Refresh()
+}
+
+// ScrollUpOnePage scrolls down or up by tree height
+func (t *Tree) ScrollUpOnePage() {
+	t.scrollByOnePage(false)
+}
+
+// ScrollDownOnePage scrolls down or up by tree height
+func (t *Tree) ScrollDownOnePage() {
+	t.scrollByOnePage(true)
+}
+
 // Select marks the specified node to be selected.
 func (t *Tree) Select(uid TreeNodeID) {
 	if len(t.selected) > 0 {
@@ -325,6 +359,14 @@ func (t *Tree) ToggleBranch(uid string) {
 // Implements: fyne.Focusable
 func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
+	case fyne.KeyHome:
+		t.ScrollToTop()
+	case fyne.KeyPageUp:
+		t.ScrollUpOnePage()
+	case fyne.KeyPageDown:
+		t.ScrollDownOnePage()
+	case fyne.KeyEnd:
+		t.ScrollToBottom()
 	case fyne.KeySpace:
 		t.Select(t.currentFocus)
 	case fyne.KeyDown:
