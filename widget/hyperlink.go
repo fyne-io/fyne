@@ -23,10 +23,16 @@ type Hyperlink struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+
 	// The truncation mode of the hyperlink
 	//
 	// Since: 2.5
 	Truncation fyne.TextTruncation
+
+	// The theme size name for the text size of the hyperlink
+	//
+	// Since: 2.5
+	SizeName fyne.ThemeSizeName
 
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
@@ -283,7 +289,12 @@ func (hl *Hyperlink) syncSegments() {
 	segment.Style.TextStyle = hl.TextStyle
 	segment.Text = hl.Text
 
-	hl.textSize = fyne.MeasureText(hl.Text, th.Size(theme.SizeNameText), hl.TextStyle)
+	sizeName := hl.SizeName
+	if sizeName == "" {
+		sizeName = theme.SizeNameText
+	}
+	segment.Style.SizeName = sizeName
+	hl.textSize = fyne.MeasureText(hl.Text, th.Size(sizeName), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
