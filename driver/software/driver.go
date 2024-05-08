@@ -27,7 +27,7 @@ type softwareDriver struct {
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 
-	Output func(image.Image)
+	Output func(image.Image, []image.Rectangle)
 	Events chan any
 
 	running  atomic.Bool
@@ -72,7 +72,7 @@ func (d *device) IsMobile() bool {
 }
 
 // NewDriver sets up and registers a new dummy driver for test purpose
-func NewDriver(painter func(image.Image), events chan any) fyne.Driver {
+func NewDriver(painter func(image.Image, []image.Rectangle), events chan any) fyne.Driver {
 	drv := &softwareDriver{
 		windowsMutex: sync.RWMutex{},
 		Output:       painter,
@@ -164,9 +164,11 @@ func (d *softwareDriver) handlePaint(w *softwareWindow) {
 	if c.Painter() == nil {
 		c.SetPainter(software.NewPainter())
 	}
-
-	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
-	if canvasNeedRefresh {
+	c.Painter().(*software.Painter).ResetDirtyRects()
+	// these need to always both be done, otherwise we draw twice for no reason
+	canvasNeedRefresh := c.FreeDirtyTextures()
+	setDirty := c.CheckDirtyAndClear()
+	if canvasNeedRefresh > 0 || setDirty {
 		fmt.Println("painting")
 		t := time.Now()
 
@@ -178,10 +180,10 @@ func (d *softwareDriver) handlePaint(w *softwareWindow) {
 		// 	w.Resize(newSize)
 		// }
 
-		d.Output(c.Capture())
+		d.Output(c.Capture(), c.Painter().(*software.Painter).DirtyRects())
 		fmt.Println("painting took", time.Since(t))
 	}
-	cache.Clean(canvasNeedRefresh)
+	cache.Clean(canvasNeedRefresh > 0)
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen

@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -262,6 +263,11 @@ func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.
 		p.drawRectangleStroke(c, rect, pos, base, clip)
 		return
 	}
+
+	// allows us to keep track of if it's been drawn before
+	p.getTexture(rect, func(object fyne.CanvasObject) Texture {
+		return cache.NoTexture
+	})
 
 	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width)
 	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height)

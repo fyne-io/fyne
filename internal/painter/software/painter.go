@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
@@ -16,7 +17,8 @@ var _ painter.Painter = (*Painter)(nil)
 
 // Painter is a simple software painter that can paint a canvas in memory.
 type Painter struct {
-	canvas fyne.Canvas
+	canvas     fyne.Canvas
+	dirtyRects []image.Rectangle
 }
 
 // NewPainter creates a new Painter.
@@ -41,37 +43,52 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	base := image.NewNRGBA(bounds)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
-		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
-		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
-		clip := image.Rect(
-			scale.ToScreenCoordinate(c, clipPos.X),
-			scale.ToScreenCoordinate(c, clipPos.Y),
-			scale.ToScreenCoordinate(c, w),
-			scale.ToScreenCoordinate(c, h),
-		)
-		switch o := obj.(type) {
-		case *canvas.Image:
-			p.drawImage(c, o, pos, base, clip)
-		case *canvas.Text:
-			p.drawText(c, o, pos, base, clip)
-		case gradient:
-			p.drawGradient(c, o, pos, base, clip)
-		case *canvas.Circle:
-			p.drawCircle(c, o, pos, base, clip)
-		case *canvas.Line:
-			p.drawLine(c, o, pos, base, clip)
-		case *canvas.Raster:
-			p.drawRaster(c, o, pos, base, clip)
-		case *canvas.Rectangle:
-			p.drawRectangle(c, o, pos, base, clip)
+		shouldPaint := false
+		shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+			switch obj.(type) {
+			case *fyne.Container, fyne.Widget:
+				return false
+			}
+			if _, ok := cache.GetTexture(obj); !ok {
+				return true
+			}
+			return false
+		}, nil)
+
+		if shouldPaint {
+			w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
+			h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
+			clip := image.Rect(
+				scale.ToScreenCoordinate(c, clipPos.X),
+				scale.ToScreenCoordinate(c, clipPos.Y),
+				scale.ToScreenCoordinate(c, w),
+				scale.ToScreenCoordinate(c, h),
+			)
+
+			switch o := obj.(type) {
+			case *canvas.Image:
+				p.drawImage(c, o, pos, base, clip)
+			case *canvas.Text:
+				p.drawText(c, o, pos, base, clip)
+			case gradient:
+				p.drawGradient(c, o, pos, base, clip)
+			case *canvas.Circle:
+				p.drawCircle(c, o, pos, base, clip)
+			case *canvas.Line:
+				p.drawLine(c, o, pos, base, clip)
+			case *canvas.Raster:
+				p.drawRaster(c, o, pos, base, clip)
+			case *canvas.Rectangle:
+				p.drawRectangle(c, o, pos, base, clip)
+			}
 		}
 
-		return false
+		return !shouldPaint
 	}
 
-	driver.WalkVisibleObjectTree(c.Content(), paint, nil)
+	driver.WalkVisibleObjectTreeIgnoreSibs(c.Content(), paint, nil)
 	for _, o := range c.Overlays().List() {
-		driver.WalkVisibleObjectTree(o, paint, nil)
+		driver.WalkVisibleObjectTreeIgnoreSibs(o, paint, nil)
 	}
 
 	fmt.Println("Capture:", time.Since(t))
@@ -115,4 +132,12 @@ func (p *Painter) StartClipping(position fyne.Position, size fyne.Size) {
 func (p *Painter) StopClipping() {
 	// TODO implement me
 	panic("implement me")
+}
+
+func (p *Painter) ResetDirtyRects() {
+	p.dirtyRects = nil
+}
+
+func (p *Painter) DirtyRects() []image.Rectangle {
+	return p.dirtyRects
 }

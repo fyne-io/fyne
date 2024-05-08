@@ -95,13 +95,21 @@ func NewTransparentCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
 func (c *softwareCanvas) Capture() image.Image {
 	cache.Clean(true)
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
-	img := image.NewNRGBA(bounds)
+	var img *image.NRGBA
 	if !c.transparent {
+		img = image.NewNRGBA(bounds)
+		// TODO: this is slow, and is slower if the bg color is not color.NRGBA
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 	}
 
 	if c.Painter() != nil {
-		draw.Draw(img, bounds, c.Painter().Capture(c), image.Point{}, draw.Over)
+		x := c.Painter().Capture(c)
+		if c.transparent {
+			return x
+		}
+		// TODO: it's slow (and somewhat useless) to draw the image twice (once here, twice the fb).
+		//  Not sure what's a good solution here cause we do care about the bg (or do we?)
+		draw.Draw(img, bounds, x, image.Point{}, draw.Over)
 	}
 
 	return img
