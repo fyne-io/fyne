@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/software"
 	painter "fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
@@ -39,10 +40,12 @@ func TestRectangle_Radius(t *testing.T) {
 	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
 
 	c := software.NewCanvasWithPainter(painter.NewPainter())
+	c.Initialize(c, nil)
 	c.SetContent(rect)
 	c.Resize(fyne.NewSize(60, 60))
 	test.AssertRendersToImage(t, "rounded_rect_stroke.png", c)
 
 	rect.StrokeWidth = 0
+	cache.DeleteTexture(rect)
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
 }

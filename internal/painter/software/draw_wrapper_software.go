@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 )
 
-func (p *Painter) drawCircleWrapper(circle *canvas.Circle, pad float32, scale func(float32) float32) *image.RGBA {
+func (p *Painter) drawCircleWrapper(circle *canvas.Circle, pad float32, scale func(float32) float32) image.Image {
 	raw, _ := p.getTexture(circle, func(object fyne.CanvasObject) Texture {
 		return painter.DrawCircle(circle, pad, scale)
 	})
@@ -25,14 +25,14 @@ func (p *Painter) paintImageWrapper(img *canvas.Image, c fyne.Canvas, width, hei
 	return raw
 }
 
-func (p *Painter) drawLineWrapper(line *canvas.Line, pad float32, scale func(float32) float32) *image.RGBA {
+func (p *Painter) drawLineWrapper(line *canvas.Line, pad float32, scale func(float32) float32) image.Image {
 	raw, _ := p.getTexture(line, func(object fyne.CanvasObject) Texture {
 		return painter.DrawLine(line, pad, scale)
 	})
 	return raw
 }
 
-func (p *Painter) drawStringWrapper(c fyne.Canvas, text *canvas.Text, width, height int, color color.Color) *image.RGBA {
+func (p *Painter) drawStringWrapper(c fyne.Canvas, text *canvas.Text, width, height int, color color.Color) image.Image {
 	txtImg, _ := p.getTexture(text, func(object fyne.CanvasObject) Texture {
 		txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 		face := painter.CachedFontFace(text.TextStyle, text.TextSize*c.Scale(), 1)
@@ -49,9 +49,12 @@ func (p *Painter) drawRasterWrapper(raster *canvas.Raster, width, height int) im
 	return raw
 }
 
-func (p *Painter) drawRectangleStrokeWrapper(rect *canvas.Rectangle, pad float32, scale func(float32) float32) *image.RGBA {
-	raw, _ := p.getTexture(rect, func(object fyne.CanvasObject) Texture {
+func (p *Painter) drawRectangleStrokeWrapper(rect *canvas.Rectangle, pad float32, scale func(float32) float32) image.Image {
+	raw, err := p.getTexture(rect, func(object fyne.CanvasObject) Texture {
 		return painter.DrawRectangle(rect, pad, scale)
 	})
+	if err != nil {
+		panic(err)
+	}
 	return raw
 }
