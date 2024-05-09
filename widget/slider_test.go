@@ -296,7 +296,7 @@ func TestSlider_FocusDesktop(t *testing.T) {
 		return
 	}
 	slider := NewSlider(0, 10)
-	win := test.NewWindow(slider)
+	win := software.NewWindow(slider)
 	test.Tap(slider)
 
 	assert.Equal(t, win.Canvas().Focused(), slider)

@@ -38,6 +38,9 @@ func NewPainterWithCanvas(canvas fyne.Canvas) *Painter {
 // image containing the result of rendering.
 func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	t := time.Now()
+	if p.canvas == nil {
+		p.canvas = c
+	}
 
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
@@ -58,6 +61,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 
 		if shouldTest {
 			// TODO: This breaks a bunch of tests, because by default it'll return mostly blank images
+			//  (which is an issue when it's not painting on a transparent bg)
 			shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
 				switch obj.(type) {
 				case *fyne.Container, fyne.Widget:
@@ -116,8 +120,12 @@ func (p *Painter) Init() {
 }
 
 func (p *Painter) Clear() {
-	// TODO implement me
-	panic("implement me")
+	if p.canvas != nil {
+		driver.WalkCompleteObjectTree(p.canvas.Content(), func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+			cache.DeleteTexture(obj)
+			return false
+		}, nil)
+	}
 }
 
 func (p *Painter) Free(object fyne.CanvasObject) {

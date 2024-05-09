@@ -15,6 +15,9 @@ func RenderCanvas(c fyne.Canvas, t fyne.Theme) image.Image {
 	fyne.CurrentApp().Settings().SetTheme(t)
 	app.ApplyThemeTo(c.Content(), c)
 
+	if sc, ok := c.(*software.SoftwareCanvas); ok {
+		sc.Clear()
+	}
 	return c.Capture()
 }
 
@@ -29,5 +32,6 @@ func Render(obj fyne.CanvasObject, t fyne.Theme) image.Image {
 	c.SetContent(obj)
 
 	app.ApplyThemeTo(obj, c)
+	c.Clear()
 	return c.Capture()
 }

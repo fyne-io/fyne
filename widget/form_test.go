@@ -254,6 +254,8 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	entry1.Refresh()
 	w = software.NewWindow(form)
 
+	assert.Equal(t, "H", entry1.Text)
+
 	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
 
 	entry1.SetText("")

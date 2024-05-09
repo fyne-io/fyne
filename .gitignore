@@ -26,6 +26,7 @@ fyne-cross
 
 ### JetBrains
 .idea
+*.iml
 
 ### VSCode
 .vscode

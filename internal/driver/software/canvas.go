@@ -29,7 +29,8 @@ type WindowlessCanvas interface {
 	SetPadded(bool)
 	SetScale(float32)
 
-	Initialize(common.SizeableCanvas, func())
+	// Initialize(common.SizeableCanvas, func())
+	Clear()
 }
 
 type SoftwareCanvas struct {
@@ -57,7 +58,7 @@ func (c *SoftwareCanvas) MinSize() fyne.Size {
 func Canvas() WindowlessCanvas {
 	if dummyCanvas == nil {
 		dummyCanvas = NewCanvasWithPainter(software.NewPainter())
-		dummyCanvas.Initialize(dummyCanvas, nil)
+		dummyCanvas.(*SoftwareCanvas).Initialize(dummyCanvas, nil)
 	}
 
 	return dummyCanvas
@@ -99,9 +100,11 @@ func NewTransparentCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
 func (c *SoftwareCanvas) Capture() image.Image {
 	cache.Clean(true)
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
-	var img *image.NRGBA
 	c.FreeDirtyTextures()
+	var img *image.NRGBA
 	if !c.transparent {
+		// TODO: this makes the cache useless, we need to find a better way to let the painter know we want it to paint everything
+		c.Clear()
 		img = image.NewNRGBA(bounds)
 		// TODO: this is slow, and is slower if the bg color is not color.NRGBA
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
@@ -118,6 +121,16 @@ func (c *SoftwareCanvas) Capture() image.Image {
 	}
 
 	return img
+}
+
+func (c *SoftwareCanvas) Clear() {
+	driver.WalkCompleteObjectTree(c.content, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+		cache.DeleteTexture(obj)
+		return false
+	}, nil)
+	if c.Painter() != nil {
+		c.Painter().Clear()
+	}
 }
 
 func (c *SoftwareCanvas) Content() fyne.CanvasObject {
@@ -236,11 +249,8 @@ func (c *SoftwareCanvas) Scale() float32 {
 }
 
 func (c *SoftwareCanvas) SetContent(content fyne.CanvasObject) {
-	// if content != nil {
-	// 	content.Resize(content.MinSize())
-	// }
-
 	c.Lock()
+	// newSize := c.size.Max(c.canvasSize(content.MinSize()))
 	c.setContent(content)
 	c.Unlock()
 
@@ -253,6 +263,7 @@ func (c *SoftwareCanvas) SetContent(content fyne.CanvasObject) {
 		padding = fyne.NewSquareSize(theme.Padding() * 2)
 	}
 	c.Resize(content.MinSize().Add(padding))
+	// c.Resize(newSize)
 	c.SetDirty()
 }
 
@@ -463,11 +474,4 @@ func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 	// 		tapAltCallback(wid, ev)
 	// 	}
 	// }
-}
-
-// NewTransparentCanvas creates a new canvas in memory that can render without hardware support without a background color.
-//
-// Since: 2.2
-func NewTransparentCanvas() WindowlessCanvas {
-	return NewTransparentCanvasWithPainter(software.NewPainter())
 }

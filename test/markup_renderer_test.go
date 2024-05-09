@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	canvas2 "fyne.io/fyne/v2/internal/driver/software"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -480,7 +480,7 @@ func Test_snapshot(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			c := canvas2.NewCanvas()
+			c := software.NewCanvas()
 			c.SetPadded(false)
 			c.SetContent(tt.content)
 			c.Resize(fyne.NewSize(100, 100))
@@ -495,7 +495,7 @@ func Test_snapshot(t *testing.T) {
 	}
 
 	t.Run("canvas with padding", func(t *testing.T) {
-		c := canvas2.NewCanvas()
+		c := software.NewCanvas()
 		c.SetPadded(true)
 		c.SetContent(canvas.NewCircle(color.Black))
 		c.Resize(fyne.NewSize(100, 100))
@@ -511,7 +511,7 @@ func Test_snapshot(t *testing.T) {
 	})
 
 	t.Run("canvas with overlays", func(t *testing.T) {
-		c := canvas2.NewCanvas()
+		c := software.NewCanvas()
 		c.SetPadded(true)
 		c.SetContent(canvas.NewCircle(color.Black))
 		c.Overlays().Add(canvas.NewRectangle(color.NRGBA{R: 250, G: 250, B: 250, A: 250}))

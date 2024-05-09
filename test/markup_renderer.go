@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/driver"
-	canvas2 "fyne.io/fyne/v2/internal/driver/software"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -199,7 +199,7 @@ func (r *markupRenderer) setStringAttr(attrs map[string]*string, name string, s 
 func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	attrs := map[string]*string{}
 	r.setSizeAttr(attrs, "size", c.Size())
-	if tc, ok := c.(canvas2.WindowlessCanvas); ok {
+	if tc, ok := c.(software.WindowlessCanvas); ok {
 		r.setBoolAttr(attrs, "padded", tc.Padded())
 	}
 	r.writeTag("canvas", false, attrs)
