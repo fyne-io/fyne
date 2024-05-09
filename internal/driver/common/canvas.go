@@ -537,6 +537,7 @@ type RenderCacheNode struct {
 	// it may for instance point to a GL texture
 	// it should free all associated resources when released
 	// i.e. it should not simply be a texture reference integer
+	//lint:ignore U1000 this is supposed to be used?
 	painterData any
 }
 

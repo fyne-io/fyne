@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 )
 
-var noTexture = Texture(cache.NoTexture)
+// var noTexture = Texture(cache.NoTexture)
 
 // Texture represents a cached image texture
 type Texture cache.TextureType

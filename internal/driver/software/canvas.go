@@ -304,13 +304,13 @@ func (c *SoftwareCanvas) Size() fyne.Size {
 }
 
 // canvasSize computes the needed canvas size for the given content size
-func (c *SoftwareCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
-	canvasSize := contentSize.Add(fyne.NewSize(0, 0))
-	if c.padded {
-		return canvasSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
-	}
-	return canvasSize
-}
+// func (c *SoftwareCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
+// 	canvasSize := contentSize.Add(fyne.NewSize(0, 0))
+// 	if c.padded {
+// 		return canvasSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
+// 	}
+// 	return canvasSize
+// }
 
 func (c *SoftwareCanvas) objectTrees() []fyne.CanvasObject {
 	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
