@@ -38,6 +38,7 @@ func TestRectangle_Radius(t *testing.T) {
 	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
 
 	c := software.NewCanvas()
+	c.Initialize(c, nil)
 	c.SetContent(rect)
 	c.Resize(fyne.NewSize(60, 60))
 	test.AssertRendersToImage(t, "rounded_rect_stroke.png", c)

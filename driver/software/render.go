@@ -24,6 +24,7 @@ func Render(obj fyne.CanvasObject, t fyne.Theme) image.Image {
 	fyne.CurrentApp().Settings().SetTheme(t)
 
 	c := software.NewCanvas()
+	c.Initialize(c, nil)
 	c.SetPadded(false)
 	c.SetContent(obj)
 

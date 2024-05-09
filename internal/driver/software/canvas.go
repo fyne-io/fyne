@@ -28,6 +28,8 @@ type WindowlessCanvas interface {
 	Padded() bool
 	SetPadded(bool)
 	SetScale(float32)
+
+	Initialize(common.SizeableCanvas, func())
 }
 
 type softwareCanvas struct {
@@ -55,6 +57,7 @@ func (c *softwareCanvas) MinSize() fyne.Size {
 func Canvas() fyne.Canvas {
 	if dummyCanvas == nil {
 		dummyCanvas = NewTransparentCanvas()
+		dummyCanvas.(*softwareCanvas).Initialize(dummyCanvas.(*softwareCanvas), nil)
 	}
 
 	return dummyCanvas

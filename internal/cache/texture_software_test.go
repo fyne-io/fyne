@@ -1,8 +1,9 @@
-//go:build !android && !ios && !mobile && !software
+//go:build software
 
 package cache_test
 
 import (
+	"image"
 	"sync"
 	"testing"
 
@@ -10,17 +11,17 @@ import (
 )
 
 // go test -race
-func TestTextureDesktop(t *testing.T) {
+func TestTextureSoftware(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
-		cache.SetTexture(nil, 0, nil)
+		cache.SetTexture(nil, image.White, nil)
 	}()
 	go func() {
 		defer wg.Done()
-		cache.SetTexture(nil, 1, nil)
+		cache.SetTexture(nil, image.Black, nil)
 	}()
 
 	wg.Wait()
