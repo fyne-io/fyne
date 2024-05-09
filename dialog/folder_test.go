@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -16,7 +17,7 @@ import (
 func TestShowFolderOpen(t *testing.T) {
 	var chosen fyne.ListableURI
 	var openErr error
-	win := test.NewWindow(widget.NewLabel("OpenDir"))
+	win := software.NewWindow(widget.NewLabel("OpenDir"))
 	d := NewFolderOpen(func(file fyne.ListableURI, err error) {
 		chosen = file
 		openErr = err

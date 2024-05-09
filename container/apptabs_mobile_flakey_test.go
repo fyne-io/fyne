@@ -15,7 +15,7 @@ func TestAppTabs_ApplyTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(
+	w := software.NewWindow(
 		container.NewAppTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
 	)
 	defer w.Close()
@@ -36,7 +36,7 @@ func TestAppTabs_ChangeItemContent(t *testing.T) {
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
 	tabs := container.NewAppTabs(item1, item2)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(150, 150))

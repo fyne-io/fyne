@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	col "fyne.io/fyne/v2/internal/color"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func TestColorDialog_Theme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(1000, 800))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -47,7 +48,7 @@ func TestColorDialog_Recents(t *testing.T) {
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -65,7 +66,7 @@ func TestColorDialog_Recents(t *testing.T) {
 
 func TestColorDialog_SetColor(t *testing.T) {
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
 	col := color.RGBA{70, 210, 200, 255}
@@ -105,7 +106,7 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -126,7 +127,7 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)

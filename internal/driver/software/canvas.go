@@ -32,7 +32,7 @@ type WindowlessCanvas interface {
 	Initialize(common.SizeableCanvas, func())
 }
 
-type softwareCanvas struct {
+type SoftwareCanvas struct {
 	common.Canvas
 
 	size  fyne.Size
@@ -48,7 +48,7 @@ type softwareCanvas struct {
 	onTypedKey  func(*fyne.KeyEvent)
 }
 
-func (c *softwareCanvas) MinSize() fyne.Size {
+func (c *SoftwareCanvas) MinSize() fyne.Size {
 	// TODO implement me
 	panic("implement me")
 }
@@ -66,19 +66,20 @@ func Canvas() WindowlessCanvas {
 // NewCanvas returns a single use in-memory canvas used for testing.
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
-	c := &softwareCanvas{
+	c := &SoftwareCanvas{
 		focusMgr: app.NewFocusManager(nil),
 		padded:   true,
 		scale:    1.0,
 		size:     fyne.NewSize(10, 10),
 	}
+	c.Initialize(c, nil)
 	return c
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
 func NewCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
-	canvas := NewCanvas().(*softwareCanvas)
+	canvas := NewCanvas().(*SoftwareCanvas)
 	canvas.SetPainter(painter)
 
 	return canvas
@@ -89,16 +90,17 @@ func NewCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
 //
 // Since: 2.2
 func NewTransparentCanvasWithPainter(painter painter.Painter) WindowlessCanvas {
-	canvas := NewCanvasWithPainter(painter).(*softwareCanvas)
+	canvas := NewCanvasWithPainter(painter).(*SoftwareCanvas)
 	canvas.transparent = true
 
 	return canvas
 }
 
-func (c *softwareCanvas) Capture() image.Image {
+func (c *SoftwareCanvas) Capture() image.Image {
 	cache.Clean(true)
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	var img *image.NRGBA
+	c.FreeDirtyTextures()
 	if !c.transparent {
 		img = image.NewNRGBA(bounds)
 		// TODO: this is slow, and is slower if the bg color is not color.NRGBA
@@ -118,47 +120,78 @@ func (c *softwareCanvas) Capture() image.Image {
 	return img
 }
 
-func (c *softwareCanvas) Content() fyne.CanvasObject {
+func (c *SoftwareCanvas) Content() fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.content
 }
 
-func (c *softwareCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+func (c *SoftwareCanvas) Hovered() desktop.Hoverable {
+	c.RLock()
+	defer c.RUnlock()
+
+	return c.hovered
+}
+
+func (c *SoftwareCanvas) IsTransparent() bool {
+	c.RLock()
+	defer c.RUnlock()
+
+	return c.transparent
+}
+
+func (c *SoftwareCanvas) SetTransparent(transparent bool) {
+	c.Lock()
+	c.transparent = transparent
+	c.Unlock()
+}
+
+func (c *SoftwareCanvas) SetHovered(hovered desktop.Hoverable) {
+	c.Lock()
+	defer c.Unlock()
+
+	c.hovered = hovered
+}
+
+func (c *SoftwareCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
 	return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.content)
 }
 
-func (c *softwareCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+func (c *SoftwareCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 	return fyne.Position{}, c.Size()
 }
 
-func (c *softwareCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+func (c *SoftwareCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.onTypedKey
 }
 
-func (c *softwareCanvas) OnTypedRune() func(rune) {
+func (c *SoftwareCanvas) OnTypedRune() func(rune) {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.onTypedRune
 }
 
-func (c *softwareCanvas) Padded() bool {
+func (c *SoftwareCanvas) Padded() bool {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.padded
 }
 
-func (c *softwareCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *SoftwareCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
-func (c *softwareCanvas) Resize(size fyne.Size) {
+func (c *SoftwareCanvas) Resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
 	c.Lock()
 	content := c.content
 	overlays := c.Overlays()
@@ -182,31 +215,33 @@ func (c *softwareCanvas) Resize(size fyne.Size) {
 			p.Refresh()
 		} else {
 			overlay.Resize(size)
+			// overlay.Move(fyne.NewSquareOffsetPos(theme.Padding()))
 		}
 	}
 
 	if padded {
-		content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		content.Resize(size.Subtract(fyne.NewSquareSize(theme.Padding() * 2)))
+		content.Move(fyne.NewSquareOffsetPos(theme.Padding()))
 	} else {
 		content.Resize(size)
 		content.Move(fyne.NewPos(0, 0))
 	}
 }
 
-func (c *softwareCanvas) Scale() float32 {
+func (c *SoftwareCanvas) Scale() float32 {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.scale
 }
 
-func (c *softwareCanvas) SetContent(content fyne.CanvasObject) {
-	content.Resize(content.MinSize())
+func (c *SoftwareCanvas) SetContent(content fyne.CanvasObject) {
+	// if content != nil {
+	// 	content.Resize(content.MinSize())
+	// }
 
 	c.Lock()
-	c.content = content
-	c.focusMgr = app.NewFocusManager(c.content)
+	c.setContent(content)
 	c.Unlock()
 
 	if content == nil {
@@ -215,27 +250,27 @@ func (c *softwareCanvas) SetContent(content fyne.CanvasObject) {
 
 	padding := fyne.NewSize(0, 0)
 	if c.padded {
-		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+		padding = fyne.NewSquareSize(theme.Padding() * 2)
 	}
 	c.Resize(content.MinSize().Add(padding))
 	c.SetDirty()
 }
 
-func (c *softwareCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
+func (c *SoftwareCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.Lock()
 	defer c.Unlock()
 
 	c.onTypedKey = handler
 }
 
-func (c *softwareCanvas) SetOnTypedRune(handler func(rune)) {
+func (c *SoftwareCanvas) SetOnTypedRune(handler func(rune)) {
 	c.Lock()
 	defer c.Unlock()
 
 	c.onTypedRune = handler
 }
 
-func (c *softwareCanvas) SetPadded(padded bool) {
+func (c *SoftwareCanvas) SetPadded(padded bool) {
 	c.Lock()
 	c.padded = padded
 	c.Unlock()
@@ -243,21 +278,30 @@ func (c *softwareCanvas) SetPadded(padded bool) {
 	c.Resize(c.Size())
 }
 
-func (c *softwareCanvas) SetScale(scale float32) {
+func (c *SoftwareCanvas) SetScale(scale float32) {
 	c.Lock()
 	defer c.Unlock()
 
 	c.scale = scale
 }
 
-func (c *softwareCanvas) Size() fyne.Size {
+func (c *SoftwareCanvas) Size() fyne.Size {
 	c.RLock()
 	defer c.RUnlock()
 
 	return c.size
 }
 
-func (c *softwareCanvas) objectTrees() []fyne.CanvasObject {
+// canvasSize computes the needed canvas size for the given content size
+func (c *SoftwareCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
+	canvasSize := contentSize.Add(fyne.NewSize(0, 0))
+	if c.padded {
+		return canvasSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
+	}
+	return canvasSize
+}
+
+func (c *SoftwareCanvas) objectTrees() []fyne.CanvasObject {
 	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
 	if c.content != nil {
 		trees = append(trees, c.content)
@@ -266,27 +310,12 @@ func (c *softwareCanvas) objectTrees() []fyne.CanvasObject {
 	return trees
 }
 
-func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
-	objects = append(objects, o)
-	switch c := o.(type) {
-	case fyne.Widget:
-		r := c.CreateRenderer()
-		r.Layout(size)
-		for _, child := range r.Objects() {
-			objects = layoutAndCollect(objects, child, child.Size())
-		}
-	case *fyne.Container:
-		if c.Layout != nil {
-			c.Layout.Layout(c.Objects, size)
-		}
-		for _, child := range c.Objects {
-			objects = layoutAndCollect(objects, child, child.Size())
-		}
-	}
-	return objects
+func (c *SoftwareCanvas) setContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
 }
 
-func (c *softwareCanvas) tapDown(pos fyne.Position, tapID int) {
+func (c *SoftwareCanvas) tapDown(pos fyne.Position, tapID int) {
 	// c.lastTapDown[tapID] = time.Now()
 	// c.lastTapDownPos[tapID] = pos
 	// c.dragging = nil
@@ -315,7 +344,7 @@ func (c *softwareCanvas) tapDown(pos fyne.Position, tapID int) {
 	}
 }
 
-// func (c *softwareCanvas) tapMove(pos fyne.Position, tapID int,
+// func (c *SoftwareCanvas) tapMove(pos fyne.Position, tapID int,
 //
 //		dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 //		previousPos := c.lastTapDownPos[tapID]
@@ -364,7 +393,7 @@ func (c *softwareCanvas) tapDown(pos fyne.Position, tapID int) {
 //
 //		dragCallback(c.dragging, ev)
 //	}
-func (c *softwareCanvas) tapUp(pos fyne.Position, tapID int,
+func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),

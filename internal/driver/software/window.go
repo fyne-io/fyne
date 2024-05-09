@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/common"
 )
 
-type softwareWindow struct {
+type SoftwareWindow struct {
 	common.Window
 
 	title              string
@@ -15,9 +15,9 @@ type softwareWindow struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	canvas    *softwareCanvas
+	canvas    *SoftwareCanvas
 	clipboard fyne.Clipboard
-	driver    *softwareDriver
+	driver    *SoftwareDriver
 	menu      *fyne.MainMenu
 }
 
@@ -25,22 +25,23 @@ type softwareWindow struct {
 func NewWindow(content fyne.CanvasObject) fyne.Window {
 	window := fyne.CurrentApp().NewWindow("")
 	window.SetContent(content)
+	window.(*SoftwareWindow).clipboard = NewClipboard()
 	return window
 }
 
-func (w *softwareWindow) Canvas() fyne.Canvas {
+func (w *SoftwareWindow) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
-func (w *softwareWindow) CenterOnScreen() {
+func (w *SoftwareWindow) CenterOnScreen() {
 	// no-op
 }
 
-func (w *softwareWindow) Clipboard() fyne.Clipboard {
+func (w *SoftwareWindow) Clipboard() fyne.Clipboard {
 	return w.clipboard
 }
 
-func (w *softwareWindow) Close() {
+func (w *SoftwareWindow) Close() {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
@@ -48,99 +49,99 @@ func (w *softwareWindow) Close() {
 	w.driver.removeWindow(w)
 }
 
-func (w *softwareWindow) Content() fyne.CanvasObject {
+func (w *SoftwareWindow) Content() fyne.CanvasObject {
 	return w.Canvas().Content()
 }
 
-func (w *softwareWindow) FixedSize() bool {
+func (w *SoftwareWindow) FixedSize() bool {
 	return w.fixedSize
 }
 
-func (w *softwareWindow) FullScreen() bool {
+func (w *SoftwareWindow) FullScreen() bool {
 	return w.fullScreen
 }
 
-func (w *softwareWindow) Hide() {
+func (w *SoftwareWindow) Hide() {
 	w.focused = false
 }
 
-func (w *softwareWindow) Icon() fyne.Resource {
+func (w *SoftwareWindow) Icon() fyne.Resource {
 	return fyne.CurrentApp().Icon()
 }
 
-func (w *softwareWindow) MainMenu() *fyne.MainMenu {
+func (w *SoftwareWindow) MainMenu() *fyne.MainMenu {
 	return w.menu
 }
 
-func (w *softwareWindow) Padded() bool {
+func (w *SoftwareWindow) Padded() bool {
 	return w.canvas.Padded()
 }
 
-func (w *softwareWindow) RequestFocus() {
+func (w *SoftwareWindow) RequestFocus() {
 	for _, win := range w.driver.AllWindows() {
-		win.(*softwareWindow).focused = false
+		win.(*SoftwareWindow).focused = false
 	}
 
 	w.focused = true
 }
 
-func (w *softwareWindow) Resize(size fyne.Size) {
+func (w *SoftwareWindow) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
 }
 
-func (w *softwareWindow) SetContent(obj fyne.CanvasObject) {
+func (w *SoftwareWindow) SetContent(obj fyne.CanvasObject) {
 	w.Canvas().SetContent(obj)
 }
 
-func (w *softwareWindow) SetFixedSize(fixed bool) {
+func (w *SoftwareWindow) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 }
 
-func (w *softwareWindow) SetIcon(_ fyne.Resource) {
+func (w *SoftwareWindow) SetIcon(_ fyne.Resource) {
 	// no-op
 }
 
-func (w *softwareWindow) SetFullScreen(fullScreen bool) {
+func (w *SoftwareWindow) SetFullScreen(fullScreen bool) {
 	w.fullScreen = fullScreen
 }
 
-func (w *softwareWindow) SetMainMenu(menu *fyne.MainMenu) {
+func (w *SoftwareWindow) SetMainMenu(menu *fyne.MainMenu) {
 	w.menu = menu
 }
 
-func (w *softwareWindow) SetMaster() {
+func (w *SoftwareWindow) SetMaster() {
 	// no-op
 }
 
-func (w *softwareWindow) SetOnClosed(closed func()) {
+func (w *SoftwareWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *softwareWindow) SetCloseIntercept(callback func()) {
+func (w *SoftwareWindow) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
-func (w *softwareWindow) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+func (w *SoftwareWindow) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
 
 }
 
-func (w *softwareWindow) SetPadded(padded bool) {
+func (w *SoftwareWindow) SetPadded(padded bool) {
 	w.canvas.SetPadded(padded)
 }
 
-func (w *softwareWindow) SetTitle(title string) {
+func (w *SoftwareWindow) SetTitle(title string) {
 	w.title = title
 }
 
-func (w *softwareWindow) Show() {
+func (w *SoftwareWindow) Show() {
 	w.RequestFocus()
 }
 
-func (w *softwareWindow) ShowAndRun() {
+func (w *SoftwareWindow) ShowAndRun() {
 	w.Show()
 	w.driver.Run()
 }
 
-func (w *softwareWindow) Title() string {
+func (w *SoftwareWindow) Title() string {
 	return w.title
 }

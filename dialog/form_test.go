@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -25,7 +26,7 @@ const (
 
 func TestFormDialog_Control(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, software.NewWindow(nil))
 	fd.Show()
 	test.Tap(fd.confirm)
 
@@ -34,7 +35,7 @@ func TestFormDialog_Control(t *testing.T) {
 
 func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, software.NewWindow(nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -46,7 +47,7 @@ func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 
 func TestFormDialog_ValidCanSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, software.NewWindow(nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -65,7 +66,7 @@ func TestFormDialog_ValidCanSubmit(t *testing.T) {
 
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, software.NewWindow(nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -76,7 +77,7 @@ func TestFormDialog_CanCancelInvalid(t *testing.T) {
 
 func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, software.NewWindow(nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -90,7 +91,7 @@ func TestFormDialog_Hints(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
-	w := test.NewWindow(nil)
+	w := software.NewWindow(nil)
 	w.SetFullScreen(true)
 
 	var result formDialogResult
@@ -136,7 +137,7 @@ func TestFormDialog_Submit(t *testing.T) {
 	items := []*widget.FormItem{validatingItem}
 	form := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		confirmed = confirm
-	}, test.NewWindow(nil))
+	}, software.NewWindow(nil))
 
 	form.Show()
 	validatingEntry.SetText("cba")

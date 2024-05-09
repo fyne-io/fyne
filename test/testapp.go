@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
@@ -20,7 +21,7 @@ func init() {
 }
 
 type testApp struct {
-	driver       *testDriver
+	driver       *software.SoftwareDriver
 	settings     *testSettings
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
@@ -152,7 +153,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver),
+	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: software.NewDriver(nil, nil).(*software.SoftwareDriver),
 		lifecycle: &app.Lifecycle{}}
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}

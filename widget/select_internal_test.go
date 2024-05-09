@@ -3,10 +3,12 @@ package widget
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSelect_SetOptions(t *testing.T) {
@@ -41,7 +43,7 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	sel := NewSelect([]string{"one"}, func(s string) {})
-	w := test.NewWindow(sel)
+	w := software.NewWindow(sel)
 	defer w.Close()
 	w.Resize(sel.MinSize().Add(fyne.NewSize(10, 10)))
 	sel.Resize(sel.MinSize())

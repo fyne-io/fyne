@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	canvas2 "fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 )
@@ -43,7 +44,7 @@ func TestRichText_HyperLink(t *testing.T) {
 	linkText := test.WidgetRenderer(richLink).Objects()[0].(*canvas.Text)
 	assert.Equal(t, "Link", linkText.Text)
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetContent(text)
 	assert.Equal(t, texts[0].Position().Y, linkText.Position().Y)
 }

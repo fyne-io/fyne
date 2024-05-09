@@ -3,18 +3,20 @@ package painter_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	canvas2 "fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/internal/painter/software"
+	softwarePainter "fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPaintImage_MinSize(t *testing.T) {
 	img := canvas.NewImageFromFile("testdata/svg-stroke-default.png")
 	img.FillMode = canvas.ImageFillOriginal
-	c := test.NewCanvasWithPainter(software.NewPainter())
+	c := canvas2.NewCanvasWithPainter(softwarePainter.NewPainter())
 	c.SetScale(1.0)
 	c.SetContent(img)
 
@@ -30,7 +32,7 @@ func TestPaintImage_MinSize(t *testing.T) {
 
 func TestPaintImageWithBadSVGElement(t *testing.T) {
 	img := canvas.NewImageFromFile("testdata/stroke-bad-element-data.svg")
-	c := test.NewCanvasWithPainter(software.NewPainter())
+	c := canvas2.NewCanvasWithPainter(softwarePainter.NewPainter())
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(480, 240))
 	img.Refresh()
@@ -75,7 +77,7 @@ func TestPaintImage_SVG(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			img := canvas.NewImageFromFile("testdata/stroke.svg")
-			c := test.NewCanvasWithPainter(software.NewPainter())
+			c := canvas2.NewCanvasWithPainter(softwarePainter.NewPainter())
 			c.SetContent(img)
 			c.Resize(fyne.NewSize(tt.width, tt.height))
 			img.Refresh()

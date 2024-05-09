@@ -47,7 +47,6 @@ func TestRenderCanvas(t *testing.T) {
 		)))
 
 	c := software.NewCanvasWithPainter(painter.NewPainter())
-	c.Initialize(c, nil)
 	c.SetContent(obj)
 
 	if fyne.CurrentDevice().IsMobile() {

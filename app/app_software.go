@@ -6,19 +6,18 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	software2 "fyne.io/fyne/v2/internal/driver/software"
-	"fyne.io/fyne/v2/internal/painter/software"
-	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/internal/driver/software"
+	painter "fyne.io/fyne/v2/internal/painter/software"
 )
 
 // NewWithID returns a new app instance using the test (headless) driver.
 // The ID string should be globally unique to this app.
 func NewWithID(id string) fyne.App {
-	return newAppWithDriver(test.NewDriverWithPainter(software.NewPainter()), id)
+	return newAppWithDriver(software.NewDriverWithPainter(painter.NewPainter()), id)
 }
 
 // NewWithSoftwareDriver returns a new app instance using the Software (custom) driver.
 // The ID string should be globally unique to this app.
 func NewWithSoftwareDriver(id string, painter func(image.Image, []image.Rectangle), events chan any) fyne.App {
-	return newAppWithDriver(software2.NewDriver(painter, events), id)
+	return newAppWithDriver(software.NewDriver(painter, events), id)
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ func TestTable_Hovered(t *testing.T) {
 			c.(*Label).SetText(fmt.Sprintf("Cell %d, %d", id.Row, id.Col))
 		})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 

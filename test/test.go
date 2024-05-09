@@ -13,7 +13,8 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
-	"fyne.io/fyne/v2/internal/painter/software"
+	"fyne.io/fyne/v2/internal/driver/software"
+	painter "fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/test"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 //
 // Since 2.3
 func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
-	c := NewCanvasWithPainter(software.NewPainter())
+	c := software.NewCanvasWithPainter(painter.NewPainter())
 	c.SetPadded(false)
 	size := o.MinSize().Max(o.Size())
 	c.SetContent(o)
@@ -60,7 +61,7 @@ func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.Canv
 //
 // Since 2.3
 func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
-	c := NewCanvas()
+	c := software.NewCanvas()
 	c.SetPadded(false)
 	size := o.MinSize().Max(o.Size())
 	c.SetContent(o)
@@ -153,8 +154,8 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 
 // FocusNext focuses the next focusable on the canvas.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
-		tc.focusManager().FocusNext()
+	if tc, ok := c.(*software.SoftwareCanvas); ok {
+		tc.FocusNext()
 	} else {
 		fyne.LogError("FocusNext can only be called with a test canvas", nil)
 	}
@@ -162,8 +163,8 @@ func FocusNext(c fyne.Canvas) {
 
 // FocusPrevious focuses the previous focusable on the canvas.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
-		tc.focusManager().FocusPrevious()
+	if tc, ok := c.(*software.SoftwareCanvas); ok {
+		tc.FocusPrevious()
 	} else {
 		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
 	}
@@ -183,10 +184,10 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		return
 	}
 
-	tc, _ := c.(*testCanvas)
+	tc, _ := c.(*software.SoftwareCanvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {
-		oldHovered = tc.hovered
+		oldHovered = tc.Hovered()
 	}
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(desktop.Hoverable); ok {
@@ -215,7 +216,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		oldHovered.MouseOut()
 	}
 	if tc != nil {
-		tc.hovered = hovered
+		tc.SetHovered(hovered)
 	}
 }
 
@@ -321,6 +322,26 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 	}
 	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	return
+}
+
+func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
+	objects = append(objects, o)
+	switch c := o.(type) {
+	case fyne.Widget:
+		r := c.CreateRenderer()
+		r.Layout(size)
+		for _, child := range r.Objects() {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	case *fyne.Container:
+		if c.Layout != nil {
+			c.Layout.Layout(c.Objects, size)
+		}
+		for _, child := range c.Objects {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	}
+	return objects
 }
 
 func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {

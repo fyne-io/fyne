@@ -1,4 +1,4 @@
-package test
+package software
 
 import (
 	"fmt"
@@ -55,15 +55,15 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 	return &file{File: f, path: path}, err
 }
 
-func (d *testDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
+func (d *SoftwareDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
+func (d *SoftwareDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
 }
 
-func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+func (d *SoftwareDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
 		return nil, fmt.Errorf("unsupported URL protocol")
 	}

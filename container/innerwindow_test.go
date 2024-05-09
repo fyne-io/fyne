@@ -3,18 +3,20 @@ package container
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestInnerWindow_Close(t *testing.T) {
 	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
 
-	outer := test.NewWindow(w)
+	outer := software.NewWindow(w)
 	outer.SetPadded(false)
 	outer.Resize(w.MinSize())
 	assert.True(t, w.Visible())

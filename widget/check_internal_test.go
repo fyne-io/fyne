@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -127,7 +128,7 @@ func TestCheck_Enable(t *testing.T) {
 
 func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	w := test.NewWindow(check)
+	w := software.NewWindow(check)
 	defer w.Close()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
@@ -166,7 +167,7 @@ func TestCheck_Focused(t *testing.T) {
 
 func TestCheck_Hovered(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	w := test.NewWindow(check)
+	w := software.NewWindow(check)
 	defer w.Close()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
@@ -212,7 +213,7 @@ func TestCheck_Hovered(t *testing.T) {
 
 func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	w := test.NewWindow(check)
+	w := software.NewWindow(check)
 	defer w.Close()
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
@@ -230,7 +231,7 @@ func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
 
 func TestCheck_TappedOutsideActiveArea(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	w := test.NewWindow(check)
+	w := software.NewWindow(check)
 	defer w.Close()
 
 	check.SetChecked(true)
@@ -244,7 +245,7 @@ func TestCheck_TappedOutsideActiveArea(t *testing.T) {
 
 func TestCheck_TypedRune(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	w := test.NewWindow(check)
+	w := software.NewWindow(check)
 	defer w.Close()
 	assert.False(t, check.Checked)
 

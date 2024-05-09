@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -275,7 +276,7 @@ func TestTree_Layout(t *testing.T) {
 			}
 			tree.Select(tt.selected)
 
-			window := test.NewWindow(tree)
+			window := software.NewWindow(tree)
 			defer window.Close()
 			window.Resize(fyne.NewSize(200, 300))
 
@@ -293,7 +294,7 @@ func TestTree_ChangeTheme(t *testing.T) {
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
 
-	window := test.NewWindow(tree)
+	window := software.NewWindow(tree)
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
 
@@ -315,7 +316,7 @@ func TestTree_Move(t *testing.T) {
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
 
-	window := test.NewWindow(tree)
+	window := software.NewWindow(tree)
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
 
@@ -345,7 +346,7 @@ func TestTree_Refresh(t *testing.T) {
 	}
 	tree.OpenBranch("foo")
 
-	window := test.NewWindow(tree)
+	window := software.NewWindow(tree)
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
 

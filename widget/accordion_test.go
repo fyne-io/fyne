@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -39,7 +40,7 @@ func TestAccordion_ChangeTheme(t *testing.T) {
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 
-	w := test.NewWindow(ac)
+	w := software.NewWindow(ac)
 	defer w.Close()
 	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 
@@ -207,7 +208,7 @@ func TestAccordion_Layout(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
+			window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
 			window.Resize(accordion.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
@@ -325,7 +326,7 @@ func TestAccordion_Layout_Expanded(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
+			window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 280)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())

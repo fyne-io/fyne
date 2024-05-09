@@ -21,7 +21,7 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-type softwareDriver struct {
+type SoftwareDriver struct {
 	device       fyne.Device
 	painter      painter.Painter
 	windows      []fyne.Window
@@ -35,7 +35,7 @@ type softwareDriver struct {
 }
 
 // Declare conformity with Driver
-var _ fyne.Driver = (*softwareDriver)(nil)
+var _ fyne.Driver = (*SoftwareDriver)(nil)
 
 type device struct {
 }
@@ -73,7 +73,7 @@ func (d *device) IsMobile() bool {
 
 // NewDriver sets up and registers a new dummy driver for test purpose
 func NewDriver(painter func(image.Image, []image.Rectangle), events chan any) fyne.Driver {
-	drv := &softwareDriver{
+	drv := &SoftwareDriver{
 		windowsMutex: sync.RWMutex{},
 		Output:       painter,
 		device:       &device{},
@@ -90,37 +90,38 @@ func NewDriver(painter func(image.Image, []image.Rectangle), events chan any) fy
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
 func NewDriverWithPainter(painter painter.Painter) fyne.Driver {
-	return &softwareDriver{
+	return &SoftwareDriver{
 		painter:      painter,
 		windowsMutex: sync.RWMutex{},
+		device:       &device{},
 	}
 }
 
-func (d *softwareDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+func (d *SoftwareDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	c := d.CanvasForObject(co)
 	if c == nil {
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*softwareCanvas)
+	tc := c.(*SoftwareCanvas)
 	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
-func (d *softwareDriver) AllWindows() []fyne.Window {
+func (d *SoftwareDriver) AllWindows() []fyne.Window {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
 	return d.windows
 }
 
-func (d *softwareDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
+func (d *SoftwareDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
 	// cheating: probably the last created window is meant
 	return d.windows[len(d.windows)-1].Canvas()
 }
 
-func (d *softwareDriver) CreateWindow(string) fyne.Window {
-	canvas := NewTransparentCanvas().(*softwareCanvas)
+func (d *SoftwareDriver) CreateWindow(string) fyne.Window {
+	canvas := NewCanvas().(*SoftwareCanvas)
 	if d.painter != nil {
 		canvas.SetPainter(d.painter)
 	} else {
@@ -129,8 +130,8 @@ func (d *softwareDriver) CreateWindow(string) fyne.Window {
 
 	canvas.Initialize(canvas, canvas.SetDirty)
 
-	window := &softwareWindow{canvas: canvas, driver: d}
-	// window.clipboard = &testClipboard{}
+	window := &SoftwareWindow{canvas: canvas, driver: d}
+	window.clipboard = NewClipboard()
 	window.InitEventQueue()
 	go window.RunEventQueue()
 
@@ -140,26 +141,26 @@ func (d *softwareDriver) CreateWindow(string) fyne.Window {
 	return window
 }
 
-func (d *softwareDriver) CurrentWindow() *softwareWindow {
+func (d *SoftwareDriver) CurrentWindow() *SoftwareWindow {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
 	if len(d.windows) == 0 {
 		return nil
 	}
-	return d.windows[len(d.windows)-1].(*softwareWindow)
+	return d.windows[len(d.windows)-1].(*SoftwareWindow)
 }
 
-func (d *softwareDriver) Device() fyne.Device {
+func (d *SoftwareDriver) Device() fyne.Device {
 	return d.device
 }
 
-func (d *softwareDriver) handlePaint(w *softwareWindow) {
+func (d *SoftwareDriver) handlePaint(w *SoftwareWindow) {
 	if !d.painting.CompareAndSwap(false, true) {
 		return
 	}
 	defer d.painting.Store(false)
 
-	c := w.Canvas().(*softwareCanvas)
+	c := w.Canvas().(*SoftwareCanvas)
 	// d.painting = false
 	if c.Painter() == nil {
 		c.SetPainter(software.NewPainter())
@@ -180,18 +181,20 @@ func (d *softwareDriver) handlePaint(w *softwareWindow) {
 		// 	w.Resize(newSize)
 		// }
 
-		d.Output(c.Capture(), c.Painter().(*software.Painter).DirtyRects())
+		if d.Output != nil {
+			d.Output(c.Capture(), nil)
+		}
 		fmt.Println("painting took", time.Since(t))
 	}
 	cache.Clean(canvasNeedRefresh > 0)
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *softwareDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
+func (d *SoftwareDriver) RenderedTextSize(text string, size float32, style fyne.TextStyle) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, size, style)
 }
 
-func (d *softwareDriver) Run() {
+func (d *SoftwareDriver) Run() {
 	if !d.running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
@@ -200,10 +203,10 @@ func (d *softwareDriver) Run() {
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 	draw := time.NewTicker(time.Second / 15)
 
-	// make sure we have a theme set
-	painter.ClearFontCache()
-	cache.ResetThemeCaches()
-	intapp.ApplyThemeTo(d.CurrentWindow().Canvas().Content(), d.CurrentWindow().Canvas())
+	// // make sure we have a theme set
+	// painter.ClearFontCache()
+	// cache.ResetThemeCaches()
+	// intapp.ApplyThemeTo(d.CurrentWindow().Canvas().Content(), d.CurrentWindow().Canvas())
 
 	for d.running.Load() {
 		select {
@@ -222,7 +225,7 @@ func (d *softwareDriver) Run() {
 			if current == nil {
 				continue
 			}
-			// c := current.Canvas().(*softwareCanvas)
+			// c := current.Canvas().(*SoftwareCanvas)
 
 			switch e := e.(type) {
 			// case lifecycle.Event:
@@ -260,31 +263,34 @@ func (d *softwareDriver) Run() {
 				case touch.TypeEnd:
 					d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 				}
-				// case key.Event:
-				// 	if e.Direction == key.DirPress {
-				// 		d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
-				// 	} else if e.Direction == key.DirRelease {
-				// 		d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
-				// 	}
+			// case key.Event:
+			// 	if e.Direction == key.DirPress {
+			// 		d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
+			// 	} else if e.Direction == key.DirRelease {
+			// 		d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
+			// 	}
+			case fyne.PointEvent:
+				d.tapDownCanvas(current, e.Position.X, e.Position.Y, 0)
+				d.tapUpCanvas(current, e.Position.X, e.Position.Y, 0)
 			}
 		}
 	}
 }
 
-func (d *softwareDriver) StartAnimation(a *fyne.Animation) {
+func (d *SoftwareDriver) StartAnimation(a *fyne.Animation) {
 	// currently no animations in test app, we just initialise it and leave
 	a.Tick(1.0)
 }
 
-func (d *softwareDriver) StopAnimation(a *fyne.Animation) {
+func (d *SoftwareDriver) StopAnimation(a *fyne.Animation) {
 	// currently no animations in test app, do nothing
 }
 
-func (d *softwareDriver) Quit() {
+func (d *SoftwareDriver) Quit() {
 	d.running.Store(false)
 }
 
-func (d *softwareDriver) removeWindow(w *softwareWindow) {
+func (d *SoftwareDriver) removeWindow(w *SoftwareWindow) {
 	d.windowsMutex.Lock()
 	i := 0
 	for _, window := range d.windows {
@@ -298,14 +304,14 @@ func (d *softwareDriver) removeWindow(w *softwareWindow) {
 	d.windowsMutex.Unlock()
 }
 
-func (d *softwareDriver) DoubleTapDelay() time.Duration {
+func (d *SoftwareDriver) DoubleTapDelay() time.Duration {
 	return 300 * time.Millisecond
 }
 
-func (d *softwareDriver) SetDisableScreenBlanking(_ bool) {
+func (d *SoftwareDriver) SetDisableScreenBlanking(_ bool) {
 	// no-op for test
 }
-func (d *softwareDriver) tapDownCanvas(w *softwareWindow, x, y float32, tapID touch.Sequence) {
+func (d *SoftwareDriver) tapDownCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
@@ -315,7 +321,7 @@ func (d *softwareDriver) tapDownCanvas(w *softwareWindow, x, y float32, tapID to
 	w.canvas.tapDown(pos, int(tapID))
 }
 
-//	func (d *softwareDriver) tapMoveCanvas(w *softwareWindow, x, y float32, tapID touch.Sequence) {
+//	func (d *SoftwareDriver) tapMoveCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
 //		tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 //		tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 //		pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -324,7 +330,7 @@ func (d *softwareDriver) tapDownCanvas(w *softwareWindow, x, y float32, tapID to
 //			w.QueueEvent(func() { wid.Dragged(ev) })
 //		})
 //	}
-func (d *softwareDriver) tapUpCanvas(w *softwareWindow, x, y float32, tapID touch.Sequence) {
+func (d *SoftwareDriver) tapUpCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)

@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver/software"
-
 	painter "fyne.io/fyne/v2/internal/painter/software"
 )
 
@@ -26,7 +25,6 @@ func Render(obj fyne.CanvasObject, t fyne.Theme) image.Image {
 	fyne.CurrentApp().Settings().SetTheme(t)
 
 	c := software.NewCanvasWithPainter(painter.NewPainter())
-	c.Initialize(c, nil)
 	c.SetPadded(false)
 	c.SetContent(obj)
 

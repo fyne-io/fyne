@@ -7,7 +7,8 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/painter/software"
+	"fyne.io/fyne/v2/internal/driver/software"
+	painter "fyne.io/fyne/v2/internal/painter/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -186,7 +187,7 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	c := test.NewCanvasWithPainter(software.NewPainter())
+	c := software.NewCanvasWithPainter(painter.NewPainter())
 	c.SetPadded(false)
 	text := NewLabel("Hello")
 	c.SetContent(text)
@@ -215,7 +216,7 @@ func TestLabelImportance(t *testing.T) {
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	lbl := NewLabel("hello, fyne")
-	w := test.NewWindow(lbl)
+	w := software.NewWindow(lbl)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "label/label_importance_medium.png", w.Canvas().Capture())

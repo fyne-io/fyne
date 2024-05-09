@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -31,7 +32,7 @@ func TestSelect_Align(t *testing.T) {
 
 	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
 	sel.Alignment = fyne.TextAlignCenter
-	w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+	w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
@@ -49,7 +50,7 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	defer test.NewApp()
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindow(combo)
+	w := software.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 220))
 	combo.Resize(combo.MinSize())
@@ -110,7 +111,7 @@ func TestSelect_Disable(t *testing.T) {
 	defer test.NewApp()
 
 	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
-	w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+	w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
@@ -155,7 +156,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 
 	t.Run("gain/lose focus", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
-		w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+		w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 		defer w.Close()
 		w.Resize(fyne.NewSize(200, 150))
 
@@ -176,11 +177,11 @@ func TestSelect_FocusRendering(t *testing.T) {
 	})
 	t.Run("disable/enable focused", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
-		w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+		w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 		defer w.Close()
 		w.Resize(fyne.NewSize(200, 150))
 
-		c := w.Canvas().(test.WindowlessCanvas)
+		c := w.Canvas().(software.WindowlessCanvas)
 		c.FocusNext()
 		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		sel.Disable()
@@ -196,7 +197,7 @@ func TestSelect_KeyboardControl(t *testing.T) {
 
 	t.Run("activate pop-up", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B"}, nil)
-		w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+		w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 		defer w.Close()
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
@@ -224,7 +225,7 @@ func TestSelect_KeyboardControl(t *testing.T) {
 
 	t.Run("traverse options without pop-up", func(t *testing.T) {
 		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
-		w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+		w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 		defer w.Close()
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
@@ -260,7 +261,7 @@ func TestSelect_KeyboardControl(t *testing.T) {
 
 	t.Run("trying to traverse empty options without pop-up", func(t *testing.T) {
 		sel := widget.NewSelect([]string{}, nil)
-		w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
+		w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{sel}})
 		defer w.Close()
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
@@ -288,7 +289,7 @@ func TestSelect_Move(t *testing.T) {
 	defer test.NewApp()
 
 	combo := widget.NewSelect([]string{"1", "2"}, nil)
-	w := test.NewWindow(combo)
+	w := software.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 
@@ -333,7 +334,7 @@ func TestSelect_SetSelected(t *testing.T) {
 		triggered = true
 		triggeredValue = s
 	})
-	w := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
+	w := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 
@@ -421,7 +422,7 @@ func TestSelect_Tapped(t *testing.T) {
 	defer test.NewApp()
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindow(combo)
+	w := software.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())
@@ -437,7 +438,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	defer test.NewApp()
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindow(combo)
+	w := software.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())
@@ -550,7 +551,7 @@ func TestSelect_Layout(t *testing.T) {
 				Selected:    tt.selected,
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
+			window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
 			if tt.expanded {
 				test.Tap(combo)
 			}

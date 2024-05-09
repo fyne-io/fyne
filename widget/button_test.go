@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -75,7 +76,7 @@ func TestButton_Disable(t *testing.T) {
 		tapped = true
 	})
 	button.Disable()
-	w := test.NewWindow(button)
+	w := software.NewWindow(button)
 	defer w.Close()
 
 	test.Tap(button)
@@ -127,7 +128,7 @@ func TestButton_LowImportance(t *testing.T) {
 	defer test.NewApp()
 
 	b := &widget.Button{Text: "Text", Icon: theme.HomeIcon(), Importance: widget.LowImportance}
-	w := test.NewWindow(b)
+	w := software.NewWindow(b)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "button/low_importance.png", w.Canvas().Capture())
@@ -142,7 +143,7 @@ func TestButton_Hover(t *testing.T) {
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
-	w := test.NewWindow(b)
+	w := software.NewWindow(b)
 	defer w.Close()
 
 	if !fyne.CurrentDevice().IsMobile() {
@@ -284,7 +285,7 @@ func TestButton_Layout(t *testing.T) {
 				IconPlacement: tt.placement,
 			}
 
-			window := test.NewWindow(button)
+			window := software.NewWindow(button)
 			defer window.Close()
 			window.Resize(button.MinSize().Max(fyne.NewSize(150, 200)))
 
@@ -298,7 +299,7 @@ func TestButton_ChangeTheme(t *testing.T) {
 	defer test.NewApp()
 
 	b := widget.NewButton("Test", func() {})
-	w := test.NewWindow(b)
+	w := software.NewWindow(b)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 200))
 	b.Resize(b.MinSize())
@@ -328,7 +329,7 @@ func TestButtonSuccess(t *testing.T) {
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	b := widget.NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
-	w := test.NewWindow(b)
+	w := software.NewWindow(b)
 	defer w.Close()
 
 	b.Importance = widget.SuccessImportance

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/driver/glfw"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -46,7 +47,7 @@ func TestMenuBar(t *testing.T) {
 	menu := fyne.NewMainMenu(m1, m2, m3)
 
 	t.Run("mouse control and basic behaviour", func(t *testing.T) {
-		w := test.NewWindow(nil)
+		w := software.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -319,7 +320,7 @@ func TestMenuBar(t *testing.T) {
 	})
 
 	t.Run("keyboard control", func(t *testing.T) {
-		w := test.NewWindow(nil)
+		w := software.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -464,7 +465,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 	menu := fyne.NewMainMenu(m1, m2)
 
 	t.Run("when menu bar is inactive", func(t *testing.T) {
-		w := test.NewWindow(nil)
+		w := software.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -484,7 +485,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 	})
 
 	t.Run("when menu bar is active (first menu item active)", func(t *testing.T) {
-		w := test.NewWindow(nil)
+		w := software.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -505,7 +506,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 	})
 
 	t.Run("when menu bar is active (second menu item active)", func(t *testing.T) {
-		w := test.NewWindow(nil)
+		w := software.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -516,7 +517,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
 		menuBar.Toggle()
-		c.(test.WindowlessCanvas).FocusNext()
+		c.(software.WindowlessCanvas).FocusNext()
 		require.True(t, menuBar.IsActive())
 		test.AssertRendersToMarkup(t, "menu_bar_toggle_second_item_active.xml", c)
 

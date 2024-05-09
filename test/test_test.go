@@ -11,12 +11,13 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	canvas2 "fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
 
 func TestAssertCanvasTappableAt(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	b := widget.NewButton("foo", nil)
 	c.SetContent(b)
 	c.Resize(fyne.NewSize(300, 300))
@@ -47,7 +48,7 @@ func TestAssertObjectRendersToMarkup(t *testing.T) {
 }
 
 func TestAssertRendersToImage(t *testing.T) {
-	c := test.NewCanvas() // no painter, would be cycle - images will be blank
+	c := canvas2.NewCanvas() // no painter, would be cycle - images will be blank
 	c.SetContent(canvas.NewCircle(color.Black))
 	c.Resize(fyne.NewSize(10, 10))
 
@@ -83,7 +84,7 @@ func TestAssertRendersToImage(t *testing.T) {
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetContent(canvas.NewCircle(color.Black))
 
 	markup := "<canvas padded size=\"9x9\">\n" +
@@ -118,7 +119,7 @@ func TestAssertRendersToMarkup(t *testing.T) {
 }
 
 func TestDrag(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	d := &draggable{}
 	c.SetContent(container.NewWithoutLayout(d))
@@ -139,12 +140,13 @@ func TestDrag(t *testing.T) {
 }
 
 func TestFocusNext(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
 	c.SetContent(container.NewWithoutLayout(f1, f2, f3))
 
+	// c.Focus(f1)
 	assert.Nil(t, c.Focused())
 	assert.False(t, f1.focused)
 	assert.False(t, f2.focused)
@@ -176,7 +178,7 @@ func TestFocusNext(t *testing.T) {
 }
 
 func TestFocusPrevious(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	f1 := &focusable{}
 	f2 := &focusable{}
 	f3 := &focusable{}
@@ -213,7 +215,7 @@ func TestFocusPrevious(t *testing.T) {
 }
 
 func TestScroll(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	s := &scrollable{}
 	c.SetContent(container.NewWithoutLayout(s))

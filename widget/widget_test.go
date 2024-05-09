@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -34,7 +35,7 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{refreshed: make(chan bool)}
 
-	window := test.NewWindow(widget)
+	window := software.NewWindow(widget)
 	fyne.CurrentApp().Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	func() {
@@ -52,7 +53,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{refreshed: make(chan bool)}
 	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
-	window := test.NewWindow(parent)
+	window := software.NewWindow(parent)
 	fyne.CurrentApp().Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 	func() {
 		select {
@@ -73,7 +74,7 @@ func TestSimpleRenderer(t *testing.T) {
 		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),
 		newTestWidget(canvas.NewText("Hi", color.Black))}}
 
-	window := test.NewWindow(c)
+	window := software.NewWindow(c)
 	defer window.Close()
 
 	test.AssertImageMatches(t, "simple_renderer.png", window.Canvas().Capture())

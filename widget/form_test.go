@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -107,7 +108,7 @@ func TestForm_Renderer(t *testing.T) {
 			{Text: "test2", Widget: NewEntry()},
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertRendersToMarkup(t, "form/layout.xml", w.Canvas())
@@ -136,7 +137,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 			{Text: "test2", Widget: NewLabel("static")},
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())
@@ -159,7 +160,7 @@ func TestForm_Disabled(t *testing.T) {
 		NewFormItem("Form Item 1", NewEntry()),
 		NewFormItem("Form Item 2", disabled))
 
-	w := test.NewWindow(f)
+	w := software.NewWindow(f)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/disabled.png", w.Canvas().Capture())
@@ -178,7 +179,7 @@ func TestForm_Hints(t *testing.T) {
 	}
 
 	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
@@ -205,19 +206,19 @@ func TestForm_Validation(t *testing.T) {
 	}
 
 	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/validation_initial.png", w.Canvas().Capture())
 
 	test.Type(entry2, "not-")
 	entry1.SetText("incorrect")
-	w = test.NewWindow(form)
+	w = software.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_invalid.png", w.Canvas().Capture())
 
 	entry1.SetText("15-true")
-	w = test.NewWindow(form)
+	w = software.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }
@@ -242,7 +243,7 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	}
 
 	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_initial.png", w.Canvas().Capture())
@@ -251,13 +252,13 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.Type(entry2, "L")
 	entry1.focused = false
 	entry1.Refresh()
-	w = test.NewWindow(form)
+	w = software.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
 
 	entry1.SetText("")
 	entry2.SetText("")
-	w = test.NewWindow(form)
+	w = software.NewWindow(form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_invalid.png", w.Canvas().Capture())
 }
@@ -272,7 +273,7 @@ func TestForm_DisableEnable(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	if form.Disabled() {
@@ -306,7 +307,7 @@ func TestForm_Disable_Validation(t *testing.T) {
 	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
 
 	form := &Form{Items: []*FormItem{{Text: "test", Widget: entry}}, OnSubmit: func() {}, OnCancel: func() {}}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/disable_validation_initial.png", w.Canvas().Capture())
@@ -351,7 +352,7 @@ func TestForm_HintsRendered(t *testing.T) {
 
 	f.AppendItem(fi3)
 
-	w := test.NewWindow(f)
+	w := software.NewWindow(f)
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/hints_rendered.png", w.Canvas().Capture())
@@ -429,7 +430,7 @@ func TestForm_ExtendedEntry(t *testing.T) {
 			{Text: "Extended entry", Widget: extendedEntry},
 		},
 	}
-	w := test.NewWindow(form)
+	w := software.NewWindow(form)
 	defer w.Close()
 
 	test.AssertRendersToMarkup(t, "form/extended_entry.xml", w.Canvas())

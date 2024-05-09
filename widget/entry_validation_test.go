@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/data/validation"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -73,7 +74,7 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 		}
 		return nil
 	}
-	w := test.NewWindow(entry)
+	w := software.NewWindow(entry)
 	defer w.Close()
 
 	test.AssertRendersToMarkup(t, "entry/validator_not_empty_initial.xml", w.Canvas())

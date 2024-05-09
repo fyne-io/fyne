@@ -44,7 +44,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		shouldTest := true
-		shouldPaint := false
+		shouldPaint := true
 
 		switch obj.(type) {
 		case *fyne.Container, fyne.Widget:
@@ -57,6 +57,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 		}
 
 		if shouldTest {
+			// TODO: This breaks a bunch of tests, because by default it'll return mostly blank images
 			shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
 				switch obj.(type) {
 				case *fyne.Container, fyne.Widget:

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 
@@ -17,7 +18,7 @@ func TestShadow_ApplyTheme(t *testing.T) {
 	defer test.NewApp()
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
-	w := test.NewWindow(s)
+	w := software.NewWindow(s)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 
@@ -34,7 +35,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 	defer test.NewApp()
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
-	w := test.NewWindow(s)
+	w := software.NewWindow(s)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 
@@ -48,7 +49,7 @@ func TestShadow_Transparency(t *testing.T) {
 	defer test.NewApp()
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
-	w := test.NewWindow(s)
+	w := software.NewWindow(s)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 
@@ -66,7 +67,7 @@ func TestShadow_BottomShadow(t *testing.T) {
 	defer test.NewApp()
 
 	s := widget.NewShadow(widget.ShadowBottom, shadowLevel)
-	w := test.NewWindow(s)
+	w := software.NewWindow(s)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 
@@ -84,7 +85,7 @@ func TestShadow_TopShadow(t *testing.T) {
 	defer test.NewApp()
 
 	s := widget.NewShadow(widget.ShadowTop, shadowLevel)
-	w := test.NewWindow(s)
+	w := software.NewWindow(s)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 

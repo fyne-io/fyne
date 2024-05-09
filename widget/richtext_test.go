@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -348,7 +349,7 @@ func TestText_Multiline(t *testing.T) {
 		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
 		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
 
-	w := test.NewWindow(text)
+	w := software.NewWindow(text)
 	w.Resize(fyne.NewSize(64, 90))
 	test.AssertImageMatches(t, "richtext/richtext_multiline.png", w.Canvas().Capture())
 }

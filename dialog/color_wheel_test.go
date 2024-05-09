@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -13,7 +14,7 @@ func Test_colorWheel_Layout(t *testing.T) {
 
 	wheel := newColorWheel(nil)
 	wheel.SetHSLA(180, 100, 50, 255)
-	window := test.NewWindow(wheel)
+	window := software.NewWindow(wheel)
 	window.Resize(wheel.MinSize().Max(fyne.NewSize(100, 100)))
 
 	test.AssertRendersToImage(t, "color/wheel_layout.png", window.Canvas())

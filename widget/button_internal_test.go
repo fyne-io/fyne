@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -215,7 +216,7 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 
 	button := NewButton("Hi", func() {})
-	w := test.NewWindow(button)
+	w := software.NewWindow(button)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(20, 20)))
 	button.Resize(fyne.NewSize(50, 50))

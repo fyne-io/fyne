@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -25,7 +26,7 @@ func TestTable_Empty(t *testing.T) {
 }
 
 func TestTable_Cache(t *testing.T) {
-	c := test.NewCanvas()
+	c := software.NewCanvas()
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
@@ -70,7 +71,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 
 	table.Resize(fyne.NewSize(50, 30))
 	content := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
@@ -99,7 +100,7 @@ func TestTable_Filled(t *testing.T) {
 		},
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	w.Content().Refresh()
@@ -119,11 +120,11 @@ func TestTable_Focus(t *testing.T) {
 		},
 		func(TableCellID, fyne.CanvasObject) {})
 
-	window := test.NewWindow(table)
+	window := software.NewWindow(table)
 	defer window.Close()
 	window.Resize(table.MinSize().Max(fyne.NewSize(300, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -179,7 +180,7 @@ func TestTable_JustHeaders(t *testing.T) {
 		func(_ TableCellID, _ fyne.CanvasObject) {
 		})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(120, 120))
 
@@ -315,7 +316,7 @@ func TestTable_Resize(t *testing.T) {
 		},
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	w.Resize(fyne.NewSize(100, 100))
 	test.AssertImageMatches(t, "table/resize.png", w.Canvas().Capture())
 }
@@ -339,7 +340,7 @@ func TestTable_Unselect(t *testing.T) {
 		unselectedColumn = id.Col
 	}
 	table.selectedCell = &TableCellID{1, 1}
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
@@ -407,7 +408,7 @@ func TestTable_ScrollTo(t *testing.T) {
 		func() fyne.CanvasObject { return templ },
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 
 	// these position expectations have a built-in assumption that the window
@@ -501,7 +502,7 @@ func TestTable_ScrollToBottom(t *testing.T) {
 		func() fyne.CanvasObject { return templ },
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 
 	w.Resize(fyne.NewSize(200, 200))
@@ -530,7 +531,7 @@ func TestTable_ScrollToLeading(t *testing.T) {
 			c.(*Label).SetText(text)
 		})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 
 	table.ScrollTo(TableCellID{Row: 8, Col: 4})
@@ -561,7 +562,7 @@ func TestTable_ScrollToTop(t *testing.T) {
 		func() fyne.CanvasObject { return templ },
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 
 	table.ScrollTo(TableCellID{12, 3})
@@ -588,7 +589,7 @@ func TestTable_ScrollToTrailing(t *testing.T) {
 			c.(*Label).SetText(text)
 		})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 
 	w.Resize(fyne.NewSize(200, 200))
@@ -618,7 +619,7 @@ func TestTable_Selection(t *testing.T) {
 		})
 	assert.Nil(t, table.selectedCell)
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
@@ -662,7 +663,7 @@ func TestTable_Selection_OnHeader(t *testing.T) {
 		})
 	assert.Nil(t, table.selectedCell)
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
@@ -691,7 +692,7 @@ func TestTable_Select(t *testing.T) {
 			c.(*Label).SetText(text)
 		})
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
@@ -748,7 +749,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	assert.Equal(t, float32(24), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
 	assert.Equal(t, float32(24)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
 	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
@@ -768,7 +769,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 	table.StickyColumnCount = 0
 	table.Refresh()
 
-	c := test.NewCanvas()
+	c := software.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(table)
 	c.Resize(fyne.NewSize(120, 120))
@@ -828,7 +829,7 @@ func TestTable_SetRowHeight(t *testing.T) {
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
 
-	w := test.NewWindow(table)
+	w := software.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
 	test.AssertImageMatches(t, "table/row_size.png", w.Canvas().Capture())
@@ -848,7 +849,7 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 	table.StickyRowCount = 0
 	table.Refresh()
 
-	c := test.NewCanvas()
+	c := software.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(table)
 	c.Resize(fyne.NewSize(120, 150))

@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -89,7 +90,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	assert.Greater(t, wSize.Width, aSize.Width)
 	assert.Equal(t, theme.InputBorderSize()*2, aSize.Height)
 
-	w := test.NewWindow(slider)
+	w := software.NewWindow(slider)
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 50))
 
@@ -132,7 +133,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	assert.Greater(t, wSize.Height, aSize.Height)
 	assert.Equal(t, theme.InputBorderSize()*2, aSize.Width)
 
-	w := test.NewWindow(slider)
+	w := software.NewWindow(slider)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 220))
 

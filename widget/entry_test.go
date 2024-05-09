@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -252,7 +253,7 @@ func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry.SetText("1234")
 	entry.CursorColumn = 3
 
-	w := test.NewWindow(entry)
+	w := software.NewWindow(entry)
 	w.Resize(fyne.NewSize(72, 64))
 
 	test.Type(entry, "a")
@@ -569,7 +570,7 @@ func TestEntry_OnCopy(t *testing.T) {
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
 
@@ -582,7 +583,7 @@ func TestEntry_OnCopy_Password(t *testing.T) {
 	e.SetText("Testing")
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
 
@@ -595,7 +596,7 @@ func TestEntry_OnCut(t *testing.T) {
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
 
@@ -608,7 +609,7 @@ func TestEntry_OnCut_Password(t *testing.T) {
 	e.SetText("Testing")
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
 
@@ -843,7 +844,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 }
 
 func TestEntry_OnPaste(t *testing.T) {
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
 	tests := []struct {
 		name             string
@@ -990,7 +991,7 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	clipboard.SetContent("Insert")
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
@@ -1004,7 +1005,7 @@ func TestEntry_PasteUnicode(t *testing.T) {
 	e.SetText("line")
 	e.CursorColumn = 4
 
-	clipboard := test.NewClipboard()
+	clipboard := software.NewClipboard()
 	clipboard.SetContent("thing {\n\titem: 'val测试'\n}")
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
 	e.TypedShortcut(shortcut)
@@ -1021,7 +1022,7 @@ func TestEntry_Placeholder(t *testing.T) {
 	entry.Text = "Text"
 	entry.PlaceHolder = "Placehold"
 
-	window := test.NewWindow(entry)
+	window := software.NewWindow(entry)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1874,7 +1875,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
-		window := test.NewWindow(entry)
+		window := software.NewWindow(entry)
 		defer window.Close()
 		window.Resize(fyne.NewSize(150, 100))
 		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
@@ -1922,7 +1923,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	t.Run("Entry with Password field", func(t *testing.T) {
 		entry := &widget.Entry{Password: true, Wrapping: fyne.TextWrapWord}
 		entry.Refresh()
-		window := test.NewWindow(entry)
+		window := software.NewWindow(entry)
 		defer window.Close()
 		window.Resize(fyne.NewSize(150, 100))
 		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
@@ -1977,7 +1978,7 @@ func TestEntry_CarriageReturn(t *testing.T) {
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.SetText("\r\n\r")
-	w := test.NewWindow(entry)
+	w := software.NewWindow(entry)
 	w.Resize(fyne.NewSize(64, 64))
 	test.AssertImageMatches(t, "entry/carriage_return_empty.png", w.Canvas().Capture())
 	entry.SetText("\rH\re\rl\rl\ro\r\n\rW\ro\rr\rl\rd\r!\r")
@@ -2084,7 +2085,7 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	} else {
 		entry = &widget.Entry{Wrapping: fyne.TextWrapOff, Scroll: container.ScrollNone}
 	}
-	w := test.NewWindow(entry)
+	w := software.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 200))
 
 	if multiLine {
@@ -2107,7 +2108,7 @@ func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
 	test.NewApp()
 
 	entry := widget.NewPasswordEntry()
-	w := test.NewWindow(entry)
+	w := software.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 100))
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
