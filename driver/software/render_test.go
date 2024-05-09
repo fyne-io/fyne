@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 
@@ -44,7 +45,7 @@ func TestRenderCanvas(t *testing.T) {
 			widget.NewButton("Button", func() {}),
 		)))
 
-	c := NewCanvas()
+	c := software.NewCanvas()
 	c.SetContent(obj)
 
 	if fyne.CurrentDevice().IsMobile() {

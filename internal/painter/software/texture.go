@@ -1,8 +1,6 @@
 package software
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
 )
@@ -26,11 +24,8 @@ func (p *Painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 	texture, ok := cache.GetTexture(object)
 
 	if !ok {
-		fmt.Println("cache miss")
 		texture = cache.TextureType(creator(object))
 		cache.SetTexture(object, texture, p.canvas)
-	} else {
-		fmt.Println("cache hit")
 	}
 	// TODO: get this to work
 	// if !cache.IsValid(texture) {

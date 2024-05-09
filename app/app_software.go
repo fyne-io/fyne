@@ -6,7 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	software2 "fyne.io/fyne/v2/driver/software"
+	software2 "fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
 )

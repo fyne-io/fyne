@@ -43,17 +43,31 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	base := image.NewNRGBA(bounds)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
+		shouldTest := true
 		shouldPaint := false
-		shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
-			switch obj.(type) {
-			case *fyne.Container, fyne.Widget:
-				return false
-			}
+
+		switch obj.(type) {
+		case *fyne.Container, fyne.Widget:
+			shouldTest = true
+		default:
 			if _, ok := cache.GetTexture(obj); !ok {
-				return true
+				shouldTest = false
+				shouldPaint = true
 			}
-			return false
-		}, nil)
+		}
+
+		if shouldTest {
+			shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+				switch obj.(type) {
+				case *fyne.Container, fyne.Widget:
+					return false
+				}
+				if _, ok := cache.GetTexture(obj); !ok {
+					return true
+				}
+				return false
+			}, nil)
+		}
 
 		if shouldPaint {
 			w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)

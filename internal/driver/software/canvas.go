@@ -54,7 +54,7 @@ func (c *softwareCanvas) MinSize() fyne.Size {
 // Canvas returns a reusable in-memory canvas used for testing
 func Canvas() fyne.Canvas {
 	if dummyCanvas == nil {
-		dummyCanvas = NewCanvas()
+		dummyCanvas = NewTransparentCanvas()
 	}
 
 	return dummyCanvas

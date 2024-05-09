@@ -120,7 +120,7 @@ func (d *softwareDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *softwareDriver) CreateWindow(string) fyne.Window {
-	canvas := NewCanvas().(*softwareCanvas)
+	canvas := NewTransparentCanvas().(*softwareCanvas)
 	if d.painter != nil {
 		canvas.SetPainter(d.painter)
 	} else {

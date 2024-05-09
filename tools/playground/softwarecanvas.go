@@ -1,7 +1,7 @@
 package playground
 
 import (
-	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 )
 
