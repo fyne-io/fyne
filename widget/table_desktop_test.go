@@ -44,6 +44,7 @@ func TestTable_Hovered(t *testing.T) {
 	w.Resize(fyne.NewSize(180, 180))
 	test.MoveMouse(w.Canvas(), fyne.NewPos(35, 58))
 
+	assert.NotNil(t, table.hoveredCell, "cell should be hovered")
 	assert.Equal(t, 0, table.hoveredCell.Col)
 	assert.Equal(t, 1, table.hoveredCell.Row)
 
