@@ -26,23 +26,25 @@ type SoftwareDriver struct {
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 
-	Output func(image.Image, []image.Rectangle)
+	Output func(image.Image)
 	Events chan any
 
-	running  atomic.Bool
-	painting atomic.Bool
+	running     atomic.Bool
+	painting    atomic.Bool
+	transparent bool
 }
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*SoftwareDriver)(nil)
 
 // NewDriver sets up and registers a new dummy driver for test purpose
-func NewDriver(painter func(image.Image, []image.Rectangle), events chan any) fyne.Driver {
+func NewDriver(painter func(image.Image), events chan any, transparent bool) fyne.Driver {
 	drv := &SoftwareDriver{
 		windowsMutex: sync.RWMutex{},
 		Output:       painter,
 		device:       &device{},
 		Events:       events,
+		transparent:  transparent,
 	}
 	repository.Register("file", intRepo.NewFileRepository())
 
@@ -87,6 +89,9 @@ func (d *SoftwareDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 
 func (d *SoftwareDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*SoftwareCanvas)
+	if d.transparent {
+		canvas.SetTransparent(true)
+	}
 	if d.painter != nil {
 		canvas.SetPainter(d.painter)
 	} else {
@@ -130,7 +135,6 @@ func (d *SoftwareDriver) handlePaint(w *SoftwareWindow) {
 	if c.Painter() == nil {
 		c.SetPainter(software.NewPainter())
 	}
-	c.Painter().(*software.Painter).ResetDirtyRects()
 	// these need to always both be done, otherwise we draw twice for no reason
 	canvasNeedRefresh := c.FreeDirtyTextures()
 	setDirty := c.CheckDirtyAndClear()
@@ -147,7 +151,7 @@ func (d *SoftwareDriver) handlePaint(w *SoftwareWindow) {
 		// }
 
 		if d.Output != nil {
-			d.Output(c.Capture(), nil)
+			d.Output(c.Capture())
 		}
 		fmt.Println("painting took", time.Since(t))
 	}

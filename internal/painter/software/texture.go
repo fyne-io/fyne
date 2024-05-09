@@ -15,8 +15,6 @@ func (p *Painter) freeTexture(obj fyne.CanvasObject) {
 	if !ok {
 		return
 	}
-	// TODO: this doesn't work as planned, if needed, we could probably pull it from the draw calls
-	// p.dirtyRects = append(p.dirtyRects, i.Bounds())
 	cache.DeleteTexture(obj)
 }
 

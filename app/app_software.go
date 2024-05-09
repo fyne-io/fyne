@@ -18,6 +18,6 @@ func NewWithID(id string) fyne.App {
 
 // NewWithSoftwareDriver returns a new app instance using the Software (custom) driver.
 // The ID string should be globally unique to this app.
-func NewWithSoftwareDriver(id string, painter func(image.Image, []image.Rectangle), events chan any) fyne.App {
-	return newAppWithDriver(software.NewDriver(painter, events), id)
+func NewWithSoftwareDriver(id string, painter func(image.Image), events chan any, transparent bool) fyne.App {
+	return newAppWithDriver(software.NewDriver(painter, events, transparent), id)
 }

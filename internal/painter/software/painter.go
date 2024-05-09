@@ -156,11 +156,3 @@ func (p *Painter) StopClipping() {
 	// TODO implement me
 	panic("implement me")
 }
-
-func (p *Painter) ResetDirtyRects() {
-	p.dirtyRects = nil
-}
-
-func (p *Painter) DirtyRects() []image.Rectangle {
-	return p.dirtyRects
-}
