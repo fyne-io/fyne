@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	dummyCanvas fyne.Canvas
+	dummyCanvas WindowlessCanvas
 )
 
 // WindowlessCanvas provides functionality for a canvas to operate without a window
@@ -54,10 +54,10 @@ func (c *softwareCanvas) MinSize() fyne.Size {
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
-func Canvas() fyne.Canvas {
+func Canvas() WindowlessCanvas {
 	if dummyCanvas == nil {
-		dummyCanvas = NewTransparentCanvas()
-		dummyCanvas.(*softwareCanvas).Initialize(dummyCanvas.(*softwareCanvas), nil)
+		dummyCanvas = NewCanvasWithPainter(software.NewPainter())
+		dummyCanvas.Initialize(dummyCanvas, nil)
 	}
 
 	return dummyCanvas

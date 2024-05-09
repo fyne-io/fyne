@@ -11,12 +11,12 @@ var noTexture = Texture(cache.NoTexture)
 type Texture cache.TextureType
 
 func (p *Painter) freeTexture(obj fyne.CanvasObject) {
-	i, ok := cache.GetTexture(obj)
+	_, ok := cache.GetTexture(obj)
 	if !ok {
 		return
 	}
 	// TODO: this doesn't work as planned, if needed, we could probably pull it from the draw calls
-	p.dirtyRects = append(p.dirtyRects, i.Bounds())
+	// p.dirtyRects = append(p.dirtyRects, i.Bounds())
 	cache.DeleteTexture(obj)
 }
 

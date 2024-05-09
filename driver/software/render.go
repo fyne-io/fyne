@@ -6,6 +6,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/driver/software"
+
+	painter "fyne.io/fyne/v2/internal/painter/software"
 )
 
 // RenderCanvas takes a canvas and renders it to a regular Go image using the provided Theme.
@@ -23,7 +25,7 @@ func RenderCanvas(c fyne.Canvas, t fyne.Theme) image.Image {
 func Render(obj fyne.CanvasObject, t fyne.Theme) image.Image {
 	fyne.CurrentApp().Settings().SetTheme(t)
 
-	c := software.NewCanvas()
+	c := software.NewCanvasWithPainter(painter.NewPainter())
 	c.Initialize(c, nil)
 	c.SetPadded(false)
 	c.SetContent(obj)

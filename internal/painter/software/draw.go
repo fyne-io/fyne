@@ -29,15 +29,9 @@ func (p *Painter) drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Posi
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw, err := p.getTexture(circle, func(object fyne.CanvasObject) Texture {
-		return painter.DrawCircle(circle, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
+	raw := p.drawCircleWrapper(circle, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
-	if err != nil {
-		return
-	}
-
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
 	if scaledX < 0 {
@@ -70,12 +64,7 @@ func (p *Painter) drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position,
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	origImg, err := p.getTexture(img, func(object fyne.CanvasObject) Texture {
-		return painter.PaintImage(img, c, width, height)
-	})
-	if err != nil {
-		return
-	}
+	origImg := p.paintImageWrapper(img, c, width, height)
 
 	if img.FillMode == canvas.ImageFillContain {
 		imgAspect := img.Aspect()
@@ -130,14 +119,9 @@ func (p *Painter) drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, 
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw, err := p.getTexture(line, func(object fyne.CanvasObject) Texture {
-		return painter.DrawLine(line, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
+	raw := p.drawLineWrapper(line, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
-	if err != nil {
-		return
-	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -171,16 +155,7 @@ func (p *Painter) drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, 
 		color = theme.ForegroundColor()
 	}
 
-	txtImg, err := p.getTexture(text, func(object fyne.CanvasObject) Texture {
-		txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
-		face := painter.CachedFontFace(text.TextStyle, text.TextSize*c.Scale(), 1)
-		painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle.TabWidth)
-		return txtImg
-	})
-	if err != nil {
-		fyne.LogError("Failed to render text", err)
-		return
-	}
+	txtImg := p.drawStringWrapper(c, text, width, height, color)
 
 	size := text.Size()
 	offsetX := float32(0)
@@ -213,12 +188,7 @@ func (p *Painter) drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Positi
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	pix, err := p.getTexture(rast, func(object fyne.CanvasObject) Texture {
-		return rast.Generator(width, height)
-	})
-	if err != nil {
-		return
-	}
+	pix := p.drawRasterWrapper(rast, width, height)
 
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
 		p.drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip)
@@ -236,14 +206,9 @@ func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw, err := p.getTexture(rect, func(object fyne.CanvasObject) Texture {
-		return painter.DrawRectangle(rect, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
+	raw := p.drawRectangleStrokeWrapper(rect, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
-	if err != nil {
-		return
-	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -266,7 +231,7 @@ func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.
 
 	// allows us to keep track of if it's been drawn before
 	p.getTexture(rect, func(object fyne.CanvasObject) Texture {
-		return cache.NoTexture
+		return Texture(cache.NoTexture)
 	})
 
 	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width)
