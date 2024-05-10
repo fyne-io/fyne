@@ -227,8 +227,8 @@ func (d *SoftwareDriver) Run() {
 				switch e.Type {
 				case touch.TypeBegin:
 					d.tapDownCanvas(current, e.X, e.Y, e.Sequence)
-				// case touch.TypeMove:
-				// 	d.tapMoveCanvas(current, e.X, e.Y, e.Sequence)
+				case touch.TypeMove:
+					d.tapMoveCanvas(current, e.X, e.Y, e.Sequence)
 				case touch.TypeEnd:
 					d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 				}
@@ -290,15 +290,18 @@ func (d *SoftwareDriver) tapDownCanvas(w *SoftwareWindow, x, y float32, tapID to
 	w.canvas.tapDown(pos, int(tapID))
 }
 
-//	func (d *SoftwareDriver) tapMoveCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
-//		tapX := scale.ToFyneCoordinate(w.canvas, int(x))
-//		tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-//		pos := fyne.NewPos(tapX, tapY+tapYOffset)
-//
-//		w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-//			w.QueueEvent(func() { wid.Dragged(ev) })
-//		})
-//	}
+func (d *SoftwareDriver) tapMoveCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
+	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
+	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
+	pos := fyne.NewPos(tapX, tapY)
+
+	fmt.Println("tap move", pos)
+
+	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		w.QueueEvent(func() { wid.Dragged(ev) })
+	})
+}
+
 func (d *SoftwareDriver) tapUpCanvas(w *SoftwareWindow, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))

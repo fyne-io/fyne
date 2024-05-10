@@ -1,8 +1,11 @@
 package software
 
 import (
+	"context"
 	"image"
 	"image/draw"
+	"math"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -47,6 +50,17 @@ type SoftwareCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+
+	touched map[int]mobile.Touchable
+
+	lastTapDown           map[int]time.Time
+	lastTapDownPos        map[int]fyne.Position
+	dragging              fyne.Draggable
+	dragStart, dragOffset fyne.Position
+
+	touchTapCount   int
+	touchCancelFunc context.CancelFunc
+	touchLastTapped fyne.CanvasObject
 }
 
 func (c *SoftwareCanvas) MinSize() fyne.Size {
@@ -72,6 +86,10 @@ func NewCanvas() WindowlessCanvas {
 		padded:   true,
 		scale:    1.0,
 		size:     fyne.NewSize(10, 10),
+
+		touched:        make(map[int]mobile.Touchable),
+		lastTapDown:    make(map[int]time.Time),
+		lastTapDownPos: make(map[int]fyne.Position),
 	}
 	c.Initialize(c, nil)
 	return c
@@ -327,9 +345,9 @@ func (c *SoftwareCanvas) setContent(content fyne.CanvasObject) {
 }
 
 func (c *SoftwareCanvas) tapDown(pos fyne.Position, tapID int) {
-	// c.lastTapDown[tapID] = time.Now()
-	// c.lastTapDownPos[tapID] = pos
-	// c.dragging = nil
+	c.lastTapDown[tapID] = time.Now()
+	c.lastTapDownPos[tapID] = pos
+	c.dragging = nil
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -345,7 +363,7 @@ func (c *SoftwareCanvas) tapDown(pos fyne.Position, tapID int) {
 		touchEv.Position = objPos
 		touchEv.AbsolutePosition = pos
 		wid.TouchDown(touchEv)
-		// c.touched[tapID] = wid
+		c.touched[tapID] = wid
 	}
 
 	if layer != 1 { // 0 - overlay, 1 - window head / menu, 2 - content
@@ -355,69 +373,73 @@ func (c *SoftwareCanvas) tapDown(pos fyne.Position, tapID int) {
 	}
 }
 
-// func (c *SoftwareCanvas) tapMove(pos fyne.Position, tapID int,
-//
-//		dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
-//		previousPos := c.lastTapDownPos[tapID]
-//		deltaX := pos.X - previousPos.X
-//		deltaY := pos.Y - previousPos.Y
-//
-//		if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
-//			return
-//		}
-//		c.lastTapDownPos[tapID] = pos
-//
-//		co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-//			if _, ok := object.(fyne.Draggable); ok {
-//				return true
-//			} else if _, ok := object.(mobile.Touchable); ok {
-//				return true
-//			}
-//
-//			return false
-//		})
-//
-//		if c.touched[tapID] != nil {
-//			if touch, ok := co.(mobile.Touchable); !ok || c.touched[tapID] != touch {
-//				touchEv := &mobile.TouchEvent{}
-//				touchEv.Position = objPos
-//				touchEv.AbsolutePosition = pos
-//				c.touched[tapID].TouchCancel(touchEv)
-//				c.touched[tapID] = nil
-//			}
-//		}
-//
-//		if c.dragging == nil {
-//			if drag, ok := co.(fyne.Draggable); ok {
-//				c.dragging = drag
-//				c.dragOffset = previousPos.Subtract(objPos)
-//				c.dragStart = co.Position()
-//			} else {
-//				return
-//			}
-//		}
-//
-//		ev := &fyne.DragEvent{}
-//		draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
-//		ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
-//		ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
-//
-//		dragCallback(c.dragging, ev)
-//	}
+const tapMoveThreshold = 4.0
+
+func (c *SoftwareCanvas) tapMove(pos fyne.Position, tapID int,
+	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	previousPos := c.lastTapDownPos[tapID]
+	deltaX := pos.X - previousPos.X
+	deltaY := pos.Y - previousPos.Y
+
+	if c.dragging == nil && (math.Abs(float64(deltaX)) < tapMoveThreshold && math.Abs(float64(deltaY)) < tapMoveThreshold) {
+		return
+	}
+	c.lastTapDownPos[tapID] = pos
+
+	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
+		} else if _, ok := object.(mobile.Touchable); ok {
+			return true
+		}
+
+		return false
+	})
+
+	if c.touched[tapID] != nil {
+		if touch, ok := co.(mobile.Touchable); !ok || c.touched[tapID] != touch {
+			touchEv := &mobile.TouchEvent{}
+			touchEv.Position = objPos
+			touchEv.AbsolutePosition = pos
+			c.touched[tapID].TouchCancel(touchEv)
+			c.touched[tapID] = nil
+		}
+	}
+
+	if c.dragging == nil {
+		if drag, ok := co.(fyne.Draggable); ok {
+			c.dragging = drag
+			c.dragOffset = previousPos.Subtract(objPos)
+			c.dragStart = co.Position()
+		} else {
+			return
+		}
+	}
+
+	ev := &fyne.DragEvent{}
+	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
+	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
+	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
+
+	dragCallback(c.dragging, ev)
+}
+
+const tapSecondaryDelay = 300 * time.Millisecond
+
 func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
 	dragCallback func(fyne.Draggable)) {
 
-	// if c.dragging != nil {
-	// 	dragCallback(c.dragging)
-	//
-	// 	c.dragging = nil
-	// 	return
-	// }
+	if c.dragging != nil {
+		dragCallback(c.dragging)
 
-	// duration := time.Since(c.lastTapDown[tapID])
+		c.dragging = nil
+		return
+	}
+
+	duration := time.Since(c.lastTapDown[tapID])
 
 	// if c.menu != nil && c.Overlays().Top() == nil && pos.X > c.menu.Size().Width {
 	// 	c.menu.Hide()
@@ -427,7 +449,6 @@ func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 	// }
 
 	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.SecondaryTappable); ok {
@@ -446,7 +467,7 @@ func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 		touchEv.Position = objPos
 		touchEv.AbsolutePosition = pos
 		wid.TouchUp(touchEv)
-		// c.touched[tapID] = nil
+		c.touched[tapID] = nil
 	}
 
 	ev := &fyne.PointEvent{
@@ -454,24 +475,45 @@ func (c *SoftwareCanvas) tapUp(pos fyne.Position, tapID int,
 		AbsolutePosition: pos,
 	}
 
-	// if duration < tapSecondaryDelay {
-	// 	_, doubleTap := co.(fyne.DoubleTappable)
-	// 	if doubleTap {
-	// 		c.touchTapCount++
-	// 		c.touchLastTapped = co
-	// 		if c.touchCancelFunc != nil {
-	// 			c.touchCancelFunc()
-	// 			return
-	// 		}
-	// 		go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
-	// 	} else {
-	if wid, ok := co.(fyne.Tappable); ok {
-		tapCallback(wid, ev)
+	if duration < tapSecondaryDelay {
+		_, doubleTap := co.(fyne.DoubleTappable)
+		if doubleTap {
+			c.touchTapCount++
+			c.touchLastTapped = co
+			if c.touchCancelFunc != nil {
+				c.touchCancelFunc()
+				return
+			}
+			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok {
+				tapCallback(wid, ev)
+			}
+		}
+	} else {
+		if wid, ok := co.(fyne.SecondaryTappable); ok {
+			tapAltCallback(wid, ev)
+		}
 	}
-	// 	}
-	// } else {
-	// 	if wid, ok := co.(fyne.SecondaryTappable); ok {
-	// 		tapAltCallback(wid, ev)
-	// 	}
-	// }
+}
+
+const tapDoubleDelay = 500 * time.Millisecond
+
+func (c *SoftwareCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
+	var ctx context.Context
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
+	defer c.touchCancelFunc()
+	<-ctx.Done()
+	if c.touchTapCount == 2 && c.touchLastTapped == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			doubleTapCallback(wid, ev)
+		}
+	} else {
+		if wid, ok := co.(fyne.Tappable); ok {
+			tapCallback(wid, ev)
+		}
+	}
+	c.touchTapCount = 0
+	c.touchCancelFunc = nil
+	c.touchLastTapped = nil
 }
