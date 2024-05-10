@@ -2178,7 +2178,10 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := strings.IndexByte(toks[endCheck:], c)
+	end := -1
+	if endCheck != -1 {
+		end = strings.IndexByte(toks[endCheck:], c)
+	}
 
 	if end == -1 {
 		end = len(toks) // snap end to len(toks) if it results in -1

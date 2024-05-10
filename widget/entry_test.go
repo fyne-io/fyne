@@ -245,6 +245,12 @@ func TestEntry_Control_DeleteWord(t *testing.T) {
 	entry.SetText("")
 	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
 	assert.Equal(t, "", entry.Text)
+
+	// doesn't crash when trying to delete backward with one space
+	entry.SetText(" ")
+	entry.CursorRow = 0
+	entry.CursorColumn = 1
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
