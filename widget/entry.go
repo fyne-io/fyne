@@ -729,6 +729,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyReturn, fyne.KeyEnter:
 		e.typedKeyReturn(provider, multiLine)
 	case fyne.KeyTab:
+		if dd, ok := fyne.CurrentApp().Driver().(desktop.Driver); ok {
+			if dd.CurrentKeyModifiers()&fyne.KeyModifierShift != 0 {
+				return // don't insert a tab when Shift+Tab typed
+			}
+		}
 		e.TypedRune('\t')
 	case fyne.KeyUp:
 		e.typedKeyUp(provider)
