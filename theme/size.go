@@ -72,6 +72,11 @@ const (
 	//
 	// Since: 2.4
 	SizeNameSelectionRadius fyne.ThemeSizeName = "selectionRadius"
+
+	// SizeNameScrollBarRadius is the name of theme lookup for the scroll bar corner radius.
+	//
+	// Since: 2.5
+	SizeNameScrollBarRadius = "scrollBarRadius"
 )
 
 // CaptionTextSize returns the size for caption text.
@@ -132,6 +137,13 @@ func ScrollBarSmallSize() float32 {
 // Since: 2.4
 func SelectionRadiusSize() float32 {
 	return Current().Size(SizeNameSelectionRadius)
+}
+
+// ScrollBarRadiusSize returns the scroll bar corner radius size.
+//
+// Since: 2.5
+func ScrollBarRadiusSize() float32 {
+	return Current().Size(SizeNameScrollBarRadius)
 }
 
 // SeparatorThicknessSize is the standard thickness of the separator widget.

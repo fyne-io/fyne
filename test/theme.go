@@ -134,6 +134,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameInputBorder:        float32(2),
 				theme.SizeNameInputRadius:        float32(4),
 				theme.SizeNameSelectionRadius:    float32(4),
+				theme.SizeNameScrollBarRadius:    float32(0),
 			},
 		}
 	}
