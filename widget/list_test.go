@@ -129,6 +129,10 @@ func TestList_SetItemHeight(t *testing.T) {
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 200))
 	test.AssertImageMatches(t, "list/list_item_height.png", w.Canvas().Capture())
+
+	// special case of resetting item back to default height
+	list.SetItemHeight(2, 10)
+	assert.Equal(t, 0, len(list.itemHeights))
 }
 
 func TestList_SetItemHeight_InUpdate(t *testing.T) {

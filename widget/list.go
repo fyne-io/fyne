@@ -139,14 +139,22 @@ func (l *List) RefreshItem(id ListItemID) {
 func (l *List) SetItemHeight(id ListItemID, height float32) {
 	l.propertyLock.Lock()
 
-	if l.itemHeights == nil {
-		l.itemHeights = make(map[ListItemID]float32)
+	var refresh bool
+	if height == l.itemMin.Height {
+		// special case - unset custom item height for this item
+		if l.itemHeights != nil {
+			_, refresh = l.itemHeights[id]
+			delete(l.itemHeights, id)
+		}
+	} else {
+		if l.itemHeights == nil {
+			l.itemHeights = make(map[ListItemID]float32)
+		}
+		refresh = l.itemHeights[id] != height
+		l.itemHeights[id] = height
 	}
 
-	refresh := l.itemHeights[id] != height
-	l.itemHeights[id] = height
 	l.propertyLock.Unlock()
-
 	if refresh {
 		l.RefreshItem(id)
 	}
