@@ -169,9 +169,9 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameInputRadius:
 		return 5
 	case SizeNameSelectionRadius:
-		return 4
-	case SizeNameScrollBarRadius:
 		return 3
+	case SizeNameScrollBarRadius:
+		return 4
 	default:
 		return 0
 	}
