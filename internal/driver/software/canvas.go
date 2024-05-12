@@ -234,7 +234,7 @@ func (c *SoftwareCanvas) Resize(size fyne.Size) {
 		return
 	}
 
-	// Ensure testcanvas mimics real canvas.Resize behavior
+	// Ensure SoftwareCanvas mimics real canvas.Resize behavior
 	for _, overlay := range overlays.List() {
 		type popupWidget interface {
 			fyne.CanvasObject

@@ -153,7 +153,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: software.NewDriver(nil, nil).(*software.SoftwareDriver),
+	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: software.NewDriver(nil, nil, false).(*software.SoftwareDriver),
 		lifecycle: &app.Lifecycle{}}
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
