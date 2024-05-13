@@ -729,7 +729,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyReturn, fyne.KeyEnter:
 		e.typedKeyReturn(provider, multiLine)
 	case fyne.KeyTab:
-		e.TypedRune('\t')
+		e.typedKeyTab()
 	case fyne.KeyUp:
 		e.typedKeyUp(provider)
 	case fyne.KeyDown:
@@ -875,6 +875,15 @@ func (e *Entry) typedKeyEnd(provider *RichText) {
 		e.CursorColumn = provider.len()
 	}
 	e.propertyLock.Unlock()
+}
+
+func (e *Entry) typedKeyTab() {
+	if dd, ok := fyne.CurrentApp().Driver().(desktop.Driver); ok {
+		if dd.CurrentKeyModifiers()&fyne.KeyModifierShift != 0 {
+			return // don't insert a tab when Shift+Tab typed
+		}
+	}
+	e.TypedRune('\t')
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
