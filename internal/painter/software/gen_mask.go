@@ -8,8 +8,12 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func genMask(obj fyne.CanvasObject, bounds, clip image.Rectangle) *image.RGBA {
+func genMask(c fyne.Canvas, obj fyne.CanvasObject, bounds image.Rectangle) *image.Alpha {
 	mask := image.NewAlpha(bounds)
+
+	for i := 0; i < len(mask.Pix); i++ {
+		mask.Pix[i] = 0xff
+	}
 
 	return mask
 }

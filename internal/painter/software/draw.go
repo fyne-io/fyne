@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 
 	"golang.org/x/image/draw"
@@ -22,7 +21,7 @@ type gradient interface {
 
 func (p *Painter) drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	t := time.Now()
-	pad, bounds := circleCords(c, circle, pos, clip)
+	pad, bounds, clipBounds := circleCords(c, circle, pos, clip)
 
 	raw := p.drawCircleWrapper(circle, pad, func(in float32) float32 {
 		return float32(math.Round(float64(in) * float64(c.Scale())))
@@ -36,17 +35,16 @@ func (p *Painter) drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Posi
 	if bounds.Min.Y < 0 {
 		offY = -bounds.Min.Y
 	}
-	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+	draw.Draw(base, clipBounds, raw, image.Point{offX, offY}, draw.Over)
 	fmt.Println("drawCircle:", time.Since(t))
 }
 
 func (p *Painter) drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	t := time.Now()
-	bounds := g.Size()
-	width := scale.ToScreenCoordinate(c, bounds.Width)
-	height := scale.ToScreenCoordinate(c, bounds.Height)
-	tex := g.Generate(width, height)
-	p.drawTex(scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y), width, height, base, tex, clip)
+	bounds := gradientCords(c, g, pos)
+	tex := g.Generate(bounds.Dx(), bounds.Dy())
+
+	p.drawTex(bounds.Min.X, bounds.Min.Y, bounds.Dx(), bounds.Dy(), base, tex, clip)
 	fmt.Println("drawGradient:", time.Since(t))
 }
 
@@ -92,7 +90,7 @@ func (p *Painter) drawPixels(x, y, width, height int, mode canvas.ImageScale, ba
 
 func (p *Painter) drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	t := time.Now()
-	pad, bounds := lineCords(c, line, pos, clip)
+	pad, bounds, clipBounds := lineCords(c, line, pos, clip)
 
 	raw := p.drawLineWrapper(line, pad, func(in float32) float32 {
 		return float32(math.Round(float64(in) * float64(c.Scale())))
@@ -106,7 +104,7 @@ func (p *Painter) drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, 
 	if bounds.Min.Y < 0 {
 		offY = -bounds.Min.Y
 	}
-	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+	draw.Draw(base, clipBounds, raw, image.Point{offX, offY}, draw.Over)
 	fmt.Println("drawLine:", time.Since(t))
 }
 
@@ -127,11 +125,11 @@ func (p *Painter) drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, 
 		color = theme.ForegroundColor()
 	}
 
-	width, height, clippedBounds, srcPt := textCords(c, text, pos, clip)
+	bounds, clippedBounds := textCords(c, text, pos, clip)
 
-	txtImg := p.drawStringWrapper(c, text, width, height, color)
+	txtImg := p.drawStringWrapper(c, text, bounds.Dx(), bounds.Dy(), color)
 
-	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
+	draw.Draw(base, clippedBounds, txtImg, image.Point{X: clippedBounds.Min.X - bounds.Min.X, Y: clippedBounds.Min.Y - bounds.Min.Y}, draw.Over)
 	fmt.Println("drawText:", time.Since(t))
 }
 
@@ -156,7 +154,7 @@ func (p *Painter) drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Positi
 
 func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle, mask image.Image) {
 	t := time.Now()
-	pad, bounds := rectangleStrokeCords(c, rect, pos, clip)
+	pad, bounds, clipBounds := rectangleStrokeCords(c, rect, pos, clip)
 
 	raw := p.drawRectangleStrokeWrapper(rect, pad, func(in float32) float32 {
 		return float32(math.Round(float64(in) * float64(c.Scale())))
@@ -170,7 +168,7 @@ func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos
 	if bounds.Min.Y < 0 {
 		offY = -bounds.Min.Y
 	}
-	draw.DrawMask(base, bounds, raw, image.Point{offX, offY}, mask, bounds.Min, draw.Over)
+	draw.DrawMask(base, clipBounds, raw, image.Point{offX, offY}, mask, clipBounds.Min, draw.Over)
 	fmt.Println("drawRectangleStroke:", time.Since(t))
 }
 
@@ -186,7 +184,7 @@ func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.
 		return Texture(cache.NoTexture)
 	})
 
-	bounds := rectangleCords(c, rect, pos, clip)
-	draw.DrawMask(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, mask, bounds.Min, draw.Over)
+	bounds, clipBounds := rectangleCords(c, rect, pos, clip)
+	draw.DrawMask(base, clipBounds, image.NewUniform(rect.FillColor), image.Point{}, mask, bounds.Min, draw.Over)
 	fmt.Println("drawRectangle:", time.Since(t))
 }

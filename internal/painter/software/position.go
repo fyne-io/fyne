@@ -9,14 +9,24 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
-func circleCords(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle) {
+func circleCords(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle, image.Rectangle) {
 	pad := painter.VectorPad(circle)
 	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, circle.Size().Height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+	bounds := image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight)
+	clipBounds := clip.Intersect(bounds)
 
-	return pad, bounds
+	return pad, bounds, clipBounds
+}
+
+func gradientCords(c fyne.Canvas, g gradient, pos fyne.Position) image.Rectangle {
+	bounds := g.Size()
+	width := scale.ToScreenCoordinate(c, bounds.Width)
+	height := scale.ToScreenCoordinate(c, bounds.Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+
+	return image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 }
 
 func imageCords(c fyne.Canvas, img *canvas.Image, pos fyne.Position) (int, int, image.Rectangle) {
@@ -43,17 +53,18 @@ func imageCords(c fyne.Canvas, img *canvas.Image, pos fyne.Position) (int, int, 
 	return width, height, image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 }
 
-func lineCords(c fyne.Canvas, line *canvas.Line, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle) {
+func lineCords(c fyne.Canvas, line *canvas.Line, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle, image.Rectangle) {
 	pad := painter.VectorPad(line)
 	scaledWidth := scale.ToScreenCoordinate(c, line.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, line.Size().Height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+	bounds := image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight)
+	clipBounds := clip.Intersect(bounds)
 
-	return pad, bounds
+	return pad, bounds, clipBounds
 }
 
-func textCords(c fyne.Canvas, text *canvas.Text, pos fyne.Position, clip image.Rectangle) (int, int, image.Rectangle, image.Point) {
+func textCords(c fyne.Canvas, text *canvas.Text, pos fyne.Position, clip image.Rectangle) (image.Rectangle, image.Rectangle) {
 	bounds := text.MinSize()
 	width := scale.ToScreenCoordinate(c, bounds.Width+painter.VectorPad(text))
 	height := scale.ToScreenCoordinate(c, bounds.Height)
@@ -74,9 +85,8 @@ func textCords(c fyne.Canvas, text *canvas.Text, pos fyne.Position, clip image.R
 	scaledY := scale.ToScreenCoordinate(c, pos.Y+offsetY)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	clippedBounds := clip.Intersect(imgBounds)
-	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
 
-	return width, height, clippedBounds, srcPt
+	return imgBounds, clippedBounds
 }
 
 func rasterCords(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position) image.Rectangle {
@@ -88,21 +98,23 @@ func rasterCords(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position) image.Re
 	return image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 }
 
-func rectangleStrokeCords(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle) {
+func rectangleStrokeCords(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle, image.Rectangle) {
 	pad := painter.VectorPad(rect)
 	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+	bounds := image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight)
+	clipBounds := clip.Intersect(bounds)
 
-	return pad, bounds
+	return pad, bounds, clipBounds
 }
 
-func rectangleCords(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, clip image.Rectangle) image.Rectangle {
+func rectangleCords(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, clip image.Rectangle) (image.Rectangle, image.Rectangle) {
 	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width)
 	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
-	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+	bounds := image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight)
+	clipBounds := clip.Intersect(bounds)
 
-	return bounds
+	return bounds, clipBounds
 }

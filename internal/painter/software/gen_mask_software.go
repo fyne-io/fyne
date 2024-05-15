@@ -26,15 +26,16 @@ func genMask(c fyne.Canvas, obj fyne.CanvasObject, bounds image.Rectangle) *imag
 			_, _, b := imageCords(c, o, pos)
 			objStart = b.Min
 		case *canvas.Text:
-			_, _, b, _ := textCords(c, o, pos, bounds)
+			b, _ := textCords(c, o, pos, bounds)
 			objStart = b.Min
 		case gradient:
-			// p.drawGradient(c, o, pos, base, clip)
+			b := gradientCords(c, o, pos)
+			objStart = b.Min
 		case *canvas.Circle:
-			_, b := circleCords(c, o, pos, bounds)
+			_, b, _ := circleCords(c, o, pos, bounds)
 			objStart = b.Min
 		case *canvas.Line:
-			_, b := lineCords(c, o, pos, bounds)
+			_, b, _ := lineCords(c, o, pos, bounds)
 			objStart = b.Min
 		case *canvas.Raster:
 			b := rasterCords(c, o, pos)
@@ -49,10 +50,10 @@ func genMask(c fyne.Canvas, obj fyne.CanvasObject, bounds image.Rectangle) *imag
 				scale.ToScreenCoordinate(c, h),
 			)
 			if o.StrokeWidth > 0 {
-				_, b := rectangleStrokeCords(c, o, pos, clip)
+				_, b, _ := rectangleStrokeCords(c, o, pos, clip)
 				objStart = b.Min
 			} else {
-				b := rectangleCords(c, o, pos, clip)
+				b, _ := rectangleCords(c, o, pos, clip)
 				objStart = b.Min
 			}
 		}
