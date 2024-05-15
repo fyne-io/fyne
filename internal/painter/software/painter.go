@@ -33,6 +33,8 @@ func NewPainterWithCanvas(canvas fyne.Canvas) *Painter {
 	}
 }
 
+// var once = false
+
 // Capture is the main entry point for a simple software painter.
 // The canvas to be drawn is passed in as a parameter and the return is an
 // image containing the result of rendering.
@@ -44,6 +46,18 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
+
+	mask := genMask(c, c.Content(), bounds)
+
+	// if !once {
+	// 	once = true
+	// } else {
+	// 	if mask.Opaque() {
+	// 		panic("mask is opaque")
+	// 	}
+	// 	draw.DrawMask(base, bounds, image.NewUniform(image.Black), image.Point{}, mask, image.Point{}, draw.Src)
+	// 	return base
+	// }
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		shouldTest := true
@@ -60,7 +74,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 		}
 
 		if shouldTest {
-			// TODO: This breaks a bunch of tests, because by default it'll return mostly blank images
+			// TODO: This breaks a bunch of tests, because by default it'll make Capture return mostly blank images
 			//  (which is an issue when it's not painting on a transparent bg)
 			shouldPaint = driver.WalkVisibleObjectTree(obj, func(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
 				switch obj.(type) {
@@ -98,7 +112,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 			case *canvas.Raster:
 				p.drawRaster(c, o, pos, base, clip)
 			case *canvas.Rectangle:
-				p.drawRectangle(c, o, pos, base, clip)
+				p.drawRectangle(c, o, pos, base, clip, mask)
 			}
 		}
 
@@ -109,6 +123,8 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	for _, o := range c.Overlays().List() {
 		driver.WalkVisibleObjectTreeIgnoreSibs(o, paint, nil)
 	}
+
+	// draw.Draw(base, bounds, mask, image.Point{}, draw.Over)
 
 	fmt.Println("Capture:", time.Since(t))
 	return base
