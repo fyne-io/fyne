@@ -9,6 +9,15 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
+func genericCords(c fyne.Canvas, obj fyne.CanvasObject, pos fyne.Position) image.Rectangle {
+	bounds := obj.Size()
+	width := scale.ToScreenCoordinate(c, bounds.Width)
+	height := scale.ToScreenCoordinate(c, bounds.Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+
+	return image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
+}
+
 func circleCords(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, clip image.Rectangle) (float32, image.Rectangle, image.Rectangle) {
 	pad := painter.VectorPad(circle)
 	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)

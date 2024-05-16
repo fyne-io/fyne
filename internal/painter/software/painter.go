@@ -33,8 +33,6 @@ func NewPainterWithCanvas(canvas fyne.Canvas) *Painter {
 	}
 }
 
-// var once = false
-
 // Capture is the main entry point for a simple software painter.
 // The canvas to be drawn is passed in as a parameter and the return is an
 // image containing the result of rendering.
@@ -47,25 +45,13 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
 	base := image.NewNRGBA(bounds)
 
-	mask := genMask(c, c.Content(), bounds)
-
-	// if !once {
-	// 	once = true
-	// } else {
-	// 	if mask.Opaque() {
-	// 		panic("mask is opaque")
-	// 	}
-	// 	draw.DrawMask(base, bounds, image.NewUniform(image.Black), image.Point{}, mask, image.Point{}, draw.Src)
-	// 	return base
-	// }
-
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		shouldTest := true
 		shouldPaint := true
 
 		switch obj.(type) {
 		case *fyne.Container, fyne.Widget:
-			shouldTest = true
+			return false
 		default:
 			if _, ok := cache.GetTexture(obj); !ok {
 				shouldTest = false
@@ -112,7 +98,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 			case *canvas.Raster:
 				p.drawRaster(c, o, pos, base, clip)
 			case *canvas.Rectangle:
-				p.drawRectangle(c, o, pos, base, clip, mask)
+				p.drawRectangle(c, o, pos, base, clip)
 			}
 		}
 
