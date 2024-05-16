@@ -27,6 +27,8 @@ func (p *Painter) drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Posi
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
+	mask := genMask(c, circle, bounds, base.Bounds())
+
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
 	if bounds.Min.X < 0 {
@@ -35,7 +37,7 @@ func (p *Painter) drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Posi
 	if bounds.Min.Y < 0 {
 		offY = -bounds.Min.Y
 	}
-	draw.Draw(base, clipBounds, raw, image.Point{offX, offY}, draw.Over)
+	draw.DrawMask(base, clipBounds, raw, image.Point{offX, offY}, mask, clipBounds.Min, draw.Over)
 	fmt.Println("drawCircle:", time.Since(t))
 }
 
@@ -96,6 +98,8 @@ func (p *Painter) drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, 
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
+	mask := genMask(c, line, bounds, base.Bounds())
+
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
 	if bounds.Min.X < 0 {
@@ -104,7 +108,7 @@ func (p *Painter) drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, 
 	if bounds.Min.Y < 0 {
 		offY = -bounds.Min.Y
 	}
-	draw.Draw(base, clipBounds, raw, image.Point{offX, offY}, draw.Over)
+	draw.DrawMask(base, clipBounds, raw, image.Point{offX, offY}, mask, clipBounds.Min, draw.Over)
 	fmt.Println("drawLine:", time.Since(t))
 }
 
@@ -128,8 +132,9 @@ func (p *Painter) drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, 
 	bounds, clippedBounds := textCords(c, text, pos, clip)
 
 	txtImg := p.drawStringWrapper(c, text, bounds.Dx(), bounds.Dy(), color)
+	mask := genMask(c, text, bounds, base.Bounds())
 
-	draw.Draw(base, clippedBounds, txtImg, image.Point{X: clippedBounds.Min.X - bounds.Min.X, Y: clippedBounds.Min.Y - bounds.Min.Y}, draw.Over)
+	draw.DrawMask(base, clippedBounds, txtImg, image.Point{X: clippedBounds.Min.X - bounds.Min.X, Y: clippedBounds.Min.Y - bounds.Min.Y}, mask, clippedBounds.Min, draw.Over)
 	fmt.Println("drawText:", time.Since(t))
 }
 
@@ -152,13 +157,15 @@ func (p *Painter) drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Positi
 	fmt.Println("drawRaster:", time.Since(t))
 }
 
-func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle, mask image.Image) {
+func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	t := time.Now()
 	pad, bounds, clipBounds := rectangleStrokeCords(c, rect, pos, clip)
 
 	raw := p.drawRectangleStrokeWrapper(rect, pad, func(in float32) float32 {
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
+
+	mask := genMask(c, rect, bounds, base.Bounds())
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -172,10 +179,10 @@ func (p *Painter) drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos
 	fmt.Println("drawRectangleStroke:", time.Since(t))
 }
 
-func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle, mask image.Image) {
+func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	t := time.Now()
 	if (rect.StrokeColor != nil && rect.StrokeWidth > 0) || rect.CornerRadius != 0 { // use a rasterizer if there is a stroke or radius
-		p.drawRectangleStroke(c, rect, pos, base, clip, mask)
+		p.drawRectangleStroke(c, rect, pos, base, clip)
 		return
 	}
 
@@ -185,6 +192,8 @@ func (p *Painter) drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.
 	})
 
 	bounds, clipBounds := rectangleCords(c, rect, pos, clip)
+	mask := genMask(c, rect, bounds, base.Bounds())
+
 	draw.DrawMask(base, clipBounds, image.NewUniform(rect.FillColor), image.Point{}, mask, bounds.Min, draw.Over)
 	fmt.Println("drawRectangle:", time.Since(t))
 }

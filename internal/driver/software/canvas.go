@@ -215,7 +215,7 @@ func (c *SoftwareCanvas) Padded() bool {
 }
 
 func (c *SoftwareCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
 func (c *SoftwareCanvas) Resize(size fyne.Size) {
