@@ -5,8 +5,8 @@ package glfw
 import (
 	"fyne.io/fyne/v2"
 
-	gl "github.com/fyne-io/gl-js"
-	glfw "github.com/fyne-io/glfw-js"
+	"github.com/fyne-io/gl-js"
+	"github.com/fyne-io/glfw-js"
 )
 
 func (d *gLDriver) initGLFW() {

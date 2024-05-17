@@ -291,8 +291,8 @@ var (
 	windowConfigChange = make(chan windowConfig)
 	activityDestroyed  = make(chan struct{})
 
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
-	darkMode                                                             bool
+	currentSize size.Event
+	darkMode    bool
 )
 
 func init() {
@@ -354,7 +354,12 @@ func filePickerReturned(str *C.char) {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
+	currentSize.InsetTopPx = top
+	currentSize.InsetBottomPx = bottom
+	currentSize.InsetLeftPx = left
+	currentSize.InsetRightPx = right
+
+	theApp.events.In() <- currentSize
 }
 
 func mimeStringFromFilter(filter *FileFilter) string {
@@ -457,19 +462,20 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			theApp.sendLifecycle(lifecycle.StageFocused)
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
-			theApp.events.In() <- size.Event{
+			currentSize = size.Event{
 				WidthPx:       widthPx,
 				HeightPx:      heightPx,
 				WidthPt:       float32(widthPx) / pixelsPerPt,
 				HeightPt:      float32(heightPx) / pixelsPerPt,
-				InsetTopPx:    screenInsetTop,
-				InsetBottomPx: screenInsetBottom,
-				InsetLeftPx:   screenInsetLeft,
-				InsetRightPx:  screenInsetRight,
+				InsetTopPx:    currentSize.InsetTopPx,
+				InsetBottomPx: currentSize.InsetBottomPx,
+				InsetLeftPx:   currentSize.InsetLeftPx,
+				InsetRightPx:  currentSize.InsetRightPx,
 				PixelsPerPt:   pixelsPerPt,
 				Orientation:   screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
 				DarkMode:      darkMode,
 			}
+			theApp.events.In() <- currentSize
 			theApp.events.In() <- paint.Event{External: true}
 		case <-windowDestroyed:
 			if C.surface != nil {
@@ -516,7 +522,7 @@ func runInputQueue(vm, jniEnv, ctx uintptr) error {
 
 	var q *C.AInputQueue
 	for {
-		if C.ALooper_pollAll(-1, nil, nil, nil) == C.ALOOPER_POLL_WAKE {
+		if C.ALooper_pollOnce(-1, nil, nil, nil) == C.ALOOPER_POLL_WAKE {
 			select {
 			default:
 			case p := <-pending:

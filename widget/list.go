@@ -23,7 +23,8 @@ var _ fyne.Focusable = (*List)(nil)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
-// List requires that all items are the same size.
+// By default, List requires that all items are the same size, but specific
+// rows can have their heights set with SetItemHeight.
 //
 // Since: 1.4
 type List struct {
@@ -110,7 +111,6 @@ func (l *List) FocusLost() {
 // MinSize returns the size that this widget should not shrink below.
 func (l *List) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
-
 	return l.BaseWidget.MinSize()
 }
 

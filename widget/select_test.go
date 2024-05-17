@@ -1,6 +1,8 @@
 package widget_test
 
 import (
+	"fmt"
+	"image"
 	"testing"
 	"time"
 
@@ -35,11 +37,11 @@ func TestSelect_Align(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 
 	test.Tap(sel)
-	test.AssertRendersToMarkup(t, "select/center.xml", c)
+	assertRendersToPlatformMarkup(t, "select/%s/center.xml", c)
 
 	sel.Alignment = fyne.TextAlignTrailing
 	sel.Refresh()
-	test.AssertRendersToMarkup(t, "select/trailing.xml", c)
+	assertRendersToPlatformMarkup(t, "select/%s/trailing.xml", c)
 }
 
 func TestSelect_ChangeTheme(t *testing.T) {
@@ -54,13 +56,13 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	combo.Move(fyne.NewPos(10, 10))
 	test.Tap(combo)
 
-	test.AssertImageMatches(t, "select/theme_initial.png", w.Canvas().Capture())
+	assertImageMatchesPlatform(t, "select/%s/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		combo.Resize(combo.MinSize())
 		combo.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		test.AssertImageMatches(t, "select/theme_changed.png", w.Canvas().Capture())
+		assertImageMatchesPlatform(t, "select/%s/theme_changed.png", w.Canvas().Capture())
 	})
 }
 
@@ -295,10 +297,10 @@ func TestSelect_Move(t *testing.T) {
 	test.AssertRendersToMarkup(t, "select/move_initial.xml", w.Canvas())
 
 	combo.Tapped(&fyne.PointEvent{})
-	test.AssertRendersToMarkup(t, "select/move_tapped.xml", w.Canvas())
+	assertRendersToPlatformMarkup(t, "select/%s/move_tapped.xml", w.Canvas())
 
 	combo.Move(fyne.NewPos(20, 20))
-	test.AssertRendersToMarkup(t, "select/move_moved.xml", w.Canvas())
+	assertRendersToPlatformMarkup(t, "select/%s/move_moved.xml", w.Canvas())
 }
 
 func TestSelect_PlaceHolder(t *testing.T) {
@@ -427,7 +429,7 @@ func TestSelect_Tapped(t *testing.T) {
 	test.Tap(combo)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertRendersToMarkup(t, "select/tapped.xml", w.Canvas())
+	assertRendersToPlatformMarkup(t, "select/%s/tapped.xml", w.Canvas())
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
@@ -444,7 +446,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertRendersToMarkup(t, "select/tapped_constrained.xml", w.Canvas())
+	assertRendersToPlatformMarkup(t, "select/%s/tapped_constrained.xml", w.Canvas())
 }
 
 func TestSelect_Layout(t *testing.T) {
@@ -554,9 +556,29 @@ func TestSelect_Layout(t *testing.T) {
 			}
 			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertRendersToMarkup(t, "select/layout_"+name+".xml", window.Canvas())
+			assertRendersToPlatformMarkup(t, "select/%s/layout_"+name+".xml", window.Canvas())
 
 			window.Close()
 		})
 	}
+}
+
+func assertRendersToPlatformMarkup(t *testing.T, file string, c fyne.Canvas) {
+	platform := "desktop"
+	if fyne.CurrentDevice().IsMobile() {
+		platform = "mobile"
+	}
+
+	path := fmt.Sprintf(file, platform)
+	test.AssertRendersToMarkup(t, path, c)
+}
+
+func assertImageMatchesPlatform(t *testing.T, file string, i image.Image) {
+	platform := "desktop"
+	if fyne.CurrentDevice().IsMobile() {
+		platform = "mobile"
+	}
+
+	path := fmt.Sprintf(file, platform)
+	test.AssertImageMatches(t, path, i)
 }

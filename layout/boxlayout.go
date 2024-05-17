@@ -8,23 +8,49 @@ import (
 // NewVBoxLayout returns a vertical box layout for stacking a number of child
 // canvas objects or widgets top to bottom. The objects are always displayed
 // at their vertical MinSize. Use a different layout if the objects are intended
-// to be larger then their vertical MinSize.
+// to be larger than their vertical MinSize.
 func NewVBoxLayout() fyne.Layout {
-	return vBoxLayout{}
+	return vBoxLayout{
+		paddingFunc: theme.Padding,
+	}
 }
 
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child
 // canvas objects or widgets left to right. The objects are always displayed
 // at their horizontal MinSize. Use a different layout if the objects are intended
-// to be larger then their horizontal MinSize.
+// to be larger than their horizontal MinSize.
 func NewHBoxLayout() fyne.Layout {
-	return hBoxLayout{}
+	return hBoxLayout{
+		paddingFunc: theme.Padding,
+	}
+}
+
+// NewCustomPaddedHBoxLayout returns a layout similar to HBoxLayout that uses a custom
+// amount of padding in between objects instead of the theme.Padding value.
+//
+// Since: 2.5
+func NewCustomPaddedHBoxLayout(padding float32) fyne.Layout {
+	return hBoxLayout{
+		paddingFunc: func() float32 { return padding },
+	}
+}
+
+// NewCustomPaddedVBoxLayout returns a layout similar to VBoxLayout that uses a custom
+// amount of padding in between objects instead of the theme.Padding value.
+//
+// Since: 2.5
+func NewCustomPaddedVBoxLayout(padding float32) fyne.Layout {
+	return vBoxLayout{
+		paddingFunc: func() float32 { return padding },
+	}
 }
 
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*vBoxLayout)(nil)
 
-type vBoxLayout struct{}
+type vBoxLayout struct {
+	paddingFunc func() float32
+}
 
 // Layout is called to pack all child objects into a specified size.
 // This will pack objects into a single column where each item
@@ -50,7 +76,7 @@ func (v vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		total += child.MinSize().Height
 	}
 
-	padding := theme.Padding()
+	padding := v.paddingFunc()
 
 	// Amount of space not taken up by visible objects and inter-object padding
 	extra := size.Height - total - (padding * float32(visibleObjects-1))
@@ -81,11 +107,11 @@ func (v vBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a BoxLayout this is the width of the widest item and the height is
-// the sum of of all children combined with padding between each.
+// the sum of all children combined with padding between each.
 func (v vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false
-	padding := theme.Padding()
+	padding := v.paddingFunc()
 	for _, child := range objects {
 		if !child.Visible() || isVerticalSpacer(child) {
 			continue
@@ -105,7 +131,9 @@ func (v vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*hBoxLayout)(nil)
 
-type hBoxLayout struct{}
+type hBoxLayout struct {
+	paddingFunc func() float32
+}
 
 // Layout is called to pack all child objects into a specified size.
 // For a VBoxLayout this will pack objects into a single column where each item
@@ -131,7 +159,7 @@ func (g hBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		total += child.MinSize().Width
 	}
 
-	padding := theme.Padding()
+	padding := g.paddingFunc()
 
 	// Amount of space not taken up by visible objects and inter-object padding
 	extra := size.Width - total - (padding * float32(visibleObjects-1))
@@ -162,11 +190,11 @@ func (g hBoxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a BoxLayout this is the width of the widest item and the height is
-// the sum of of all children combined with padding between each.
+// the sum of all children combined with padding between each.
 func (g hBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	addPadding := false
-	padding := theme.Padding()
+	padding := g.paddingFunc()
 	for _, child := range objects {
 		if !child.Visible() || isHorizontalSpacer(child) {
 			continue

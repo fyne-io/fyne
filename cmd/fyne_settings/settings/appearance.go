@@ -2,21 +2,18 @@ package settings
 
 import (
 	"encoding/json"
-	"image"
 	"image/color"
 	"os"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/cache"
+	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/tools/playground"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -28,7 +25,7 @@ const (
 type Settings struct {
 	fyneSettings app.SettingsSchema
 
-	preview *canvas.Image
+	preview *fyne.Container
 	colors  []fyne.CanvasObject
 
 	userTheme fyne.Theme
@@ -51,13 +48,12 @@ func (s *Settings) AppearanceIcon() fyne.Resource {
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
 func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
-	s.userTheme = fyne.CurrentApp().Settings().Theme()
-	if s.userTheme == nil {
-		s.userTheme = theme.DefaultTheme()
+	fallback := fyne.CurrentApp().Settings().Theme()
+	if fallback == nil {
+		fallback = theme.DefaultTheme()
 	}
-
-	s.preview = canvas.NewImageFromImage(s.createPreview())
-	s.preview.FillMode = canvas.ImageFillContain
+	s.userTheme = &previewTheme{s: s, t: fallback}
+	s.preview = s.createPreview()
 
 	def := s.fyneSettings.ThemeName
 	themeNames := []string{"dark", "light"}
@@ -101,7 +97,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 			s.appliedScale(s.fyneSettings.Scale)
 		}})
 
-	return container.NewBorder(box, bottom, nil, nil, s.preview)
+	return container.NewBorder(box, bottom, nil, nil,
+		container.NewCenter(s.preview))
 }
 
 func (s *Settings) chooseTheme(name string) {
@@ -110,45 +107,17 @@ func (s *Settings) chooseTheme(name string) {
 	}
 	s.fyneSettings.ThemeName = name
 
-	s.preview.Image = s.createPreview()
-	canvas.Refresh(s.preview)
+	s.refreshPreview()
 }
 
-type overrideTheme interface {
-	OverrideTheme(fyne.Theme, string)
-}
+func (s *Settings) createPreview() *fyne.Container {
+	preview := createPreviewWidget()
 
-func (s *Settings) createPreview() image.Image {
-	c := playground.NewSoftwareCanvas()
-	oldTheme := fyne.CurrentApp().Settings().Theme()
-	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
+	content := container.NewThemeOverride(preview, s.userTheme)
+	bg := canvas.NewRectangle(s.userTheme.Color(theme.ColorNameBackground, theme.VariantDark))
+	content.Refresh()
 
-	variant := theme.VariantDark
-	if s.fyneSettings.ThemeName == "light" {
-		variant = theme.VariantLight
-	}
-
-	cache.ResetThemeCaches() // reset icon cache
-	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(&previewTheme{s.userTheme, variant}, s.fyneSettings.PrimaryColor)
-
-	empty := widget.NewLabel("")
-	tabs := container.NewAppTabs(
-		container.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
-		container.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
-		container.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
-		container.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
-	tabs.SetTabLocation(container.TabLocationLeading)
-	showOverlay(c)
-
-	c.SetContent(tabs)
-	c.Resize(fyne.NewSize(380, 380))
-	// wait for indicator animation
-	time.Sleep(canvas.DurationShort)
-	img := c.Capture()
-
-	cache.ResetThemeCaches() // ensure we re-create the correct cached assets
-	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(oldTheme, oldColor)
-	return img
+	return container.NewStack(bg, content)
 }
 
 func (s *Settings) load() {
@@ -173,6 +142,11 @@ func (s *Settings) loadFromFile(path string) error {
 	decode := json.NewDecoder(file)
 
 	return decode.Decode(&s.fyneSettings)
+}
+
+func (s *Settings) refreshPreview() {
+	s.preview.Objects[0].(*canvas.Rectangle).FillColor = s.userTheme.Color(theme.ColorNameBackground, theme.VariantDark)
+	s.preview.Refresh()
 }
 
 func (s *Settings) save() error {
@@ -225,8 +199,7 @@ func (c *colorButton) Tapped(_ *fyne.PointEvent) {
 		child.Refresh()
 	}
 
-	c.s.preview.Image = c.s.createPreview()
-	canvas.Refresh(c.s.preview)
+	c.s.refreshPreview()
 }
 
 type colorRenderer struct {
@@ -263,12 +236,24 @@ func (c *colorRenderer) Destroy() {
 }
 
 type previewTheme struct {
+	s *Settings
 	t fyne.Theme
-	v fyne.ThemeVariant
 }
 
-func (p *previewTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	return p.t.Color(n, p.v)
+func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	variant := theme.VariantDark
+	if p.s.fyneSettings.ThemeName == "light" {
+		variant = theme.VariantLight
+	}
+
+	switch n {
+	case theme.ColorNamePrimary:
+		return theme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+	case theme.ColorNameOnPrimary:
+		return theme.OnPrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+	}
+
+	return p.t.Color(n, variant)
 }
 
 func (p *previewTheme) Font(s fyne.TextStyle) fyne.Resource {
@@ -283,7 +268,7 @@ func (p *previewTheme) Size(n fyne.ThemeSizeName) float32 {
 	return p.t.Size(n)
 }
 
-func showOverlay(c fyne.Canvas) {
+func createPreviewWidget() fyne.CanvasObject {
 	username := widget.NewEntry()
 	password := widget.NewPasswordEntry()
 	form := widget.NewForm(widget.NewFormItem("Username", username),
@@ -291,16 +276,10 @@ func showOverlay(c fyne.Canvas) {
 	form.OnCancel = func() {}
 	form.OnSubmit = func() {}
 	content := container.NewVBox(
-		widget.NewLabelWithStyle("Login demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
-	wrap := container.NewWithoutLayout(content)
-	wrap.Resize(content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	content.Resize(content.MinSize())
-	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		widget.NewLabelWithStyle("Theme Preview", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
 
-	over := container.NewStack(
-		canvas.NewRectangle(theme.ShadowColor()), container.NewCenter(wrap),
-	)
+	over := container.NewStack(intWidget.NewShadow(intWidget.ShadowAround, intWidget.DialogLevel),
+		container.NewPadded(content))
 
-	c.Overlays().Add(over)
-	c.Focus(username)
+	return over
 }

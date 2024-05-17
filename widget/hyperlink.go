@@ -163,11 +163,8 @@ func (hl *Hyperlink) Refresh() {
 
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	if len(hl.provider.Segments) == 0 {
-		hl.syncSegments()
-	}
-
-	return hl.provider.MinSize()
+	hl.ExtendBaseWidget(hl)
+	return hl.BaseWidget.MinSize()
 }
 
 // Resize sets a new size for the hyperlink.
@@ -214,6 +211,9 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
+	if len(hl.provider.Segments) != 0 && !hl.isPosOverText(e.Position) {
+		return // tapped outside text area
+	}
 	hl.invokeAction()
 }
 

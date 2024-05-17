@@ -73,6 +73,17 @@ func (g *LinearGradient) Move(pos fyne.Position) {
 	repaint(g)
 }
 
+// Resize resizes the gradient to a new size.
+func (g *LinearGradient) Resize(size fyne.Size) {
+	if size == g.Size() {
+		return
+	}
+	g.baseObject.Resize(size)
+
+	// refresh needed to invalidate cached textures
+	g.Refresh()
+}
+
 // Refresh causes this gradient to be redrawn with its configured state.
 func (g *LinearGradient) Refresh() {
 	Refresh(g)
@@ -134,6 +145,17 @@ func (g *RadialGradient) Move(pos fyne.Position) {
 	g.baseObject.Move(pos)
 
 	repaint(g)
+}
+
+// Resize resizes the gradient to a new size.
+func (g *RadialGradient) Resize(size fyne.Size) {
+	if size == g.Size() {
+		return
+	}
+	g.baseObject.Resize(size)
+
+	// refresh needed to invalidate cached textures
+	g.Refresh()
 }
 
 // Refresh causes this gradient to be redrawn with its configured state.

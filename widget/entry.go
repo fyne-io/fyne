@@ -410,16 +410,7 @@ func (e *Entry) MinSize() fyne.Size {
 	}
 
 	e.ExtendBaseWidget(e)
-
-	th := e.Theme()
-	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	min := e.BaseWidget.MinSize()
-	if e.ActionItem != nil {
-		min = min.Add(fyne.NewSize(iconSpace, 0))
-	}
-	if e.Validator != nil {
-		min = min.Add(fyne.NewSize(iconSpace, 0))
-	}
 
 	e.propertyLock.Lock()
 	e.minCache = min
@@ -738,7 +729,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyReturn, fyne.KeyEnter:
 		e.typedKeyReturn(provider, multiLine)
 	case fyne.KeyTab:
-		e.TypedRune('\t')
+		e.typedKeyTab()
 	case fyne.KeyUp:
 		e.typedKeyUp(provider)
 	case fyne.KeyDown:
@@ -886,6 +877,15 @@ func (e *Entry) typedKeyEnd(provider *RichText) {
 	e.propertyLock.Unlock()
 }
 
+func (e *Entry) typedKeyTab() {
+	if dd, ok := fyne.CurrentApp().Driver().(desktop.Driver); ok {
+		if dd.CurrentKeyModifiers()&fyne.KeyModifierShift != 0 {
+			return // don't insert a tab when Shift+Tab typed
+		}
+	}
+	e.TypedRune('\t')
+}
+
 // TypedRune receives text input events when the Entry widget is focused.
 //
 // Implements: fyne.Focusable
@@ -974,7 +974,7 @@ func (e *Entry) cursorTextPos() (pos int) {
 	return e.textPosFromRowCol(e.CursorRow, e.CursorColumn)
 }
 
-// copyToClipboard copies the current selection to a given clipboard and then removes the selected text.
+// cutToClipboard copies the current selection to a given clipboard and then removes the selected text.
 // This does nothing if it is a concealed entry.
 func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	if !e.selecting || e.Password {
@@ -1711,25 +1711,39 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	if rend := cache.Renderer(r.entry.content); rend != nil {
 		rend.(*entryContentRenderer).updateScrollDirections()
 	}
+
+	th := r.entry.Theme()
+	minSize := fyne.Size{}
+
 	if r.scroll.Direction == widget.ScrollNone {
-		return r.entry.content.MinSize().Add(fyne.NewSize(0, r.entry.Theme().Size(theme.SizeNameInputBorder)*2))
-	}
+		minSize = r.entry.content.MinSize().AddWidthHeight(0, th.Size(theme.SizeNameInputBorder)*2)
+	} else {
+		innerPadding := th.Size(theme.SizeNameInnerPadding)
+		textSize := th.Size(theme.SizeNameText)
+		charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle, textSize)
+		minSize = charMin.Add(fyne.NewSquareSize(innerPadding))
 
-	innerPadding := r.entry.Theme().Size(theme.SizeNameInnerPadding)
-	textSize := r.entry.Theme().Size(theme.SizeNameText)
-	charMin := r.entry.placeholderProvider().charMinSize(r.entry.Password, r.entry.TextStyle, textSize)
-	minSize := charMin.Add(fyne.NewSquareSize(innerPadding))
+		if r.entry.MultiLine {
+			count := r.entry.multiLineRows
+			if count <= 0 {
+				count = multiLineRows
+			}
 
-	if r.entry.MultiLine {
-		count := r.entry.multiLineRows
-		if count <= 0 {
-			count = multiLineRows
+			minSize.Height = charMin.Height*float32(count) + innerPadding
 		}
 
-		minSize.Height = charMin.Height*float32(count) + innerPadding
+		minSize = minSize.AddWidthHeight(innerPadding*2, innerPadding)
 	}
 
-	return minSize.Add(fyne.NewSize(innerPadding*2, innerPadding))
+	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
+	if r.entry.ActionItem != nil {
+		minSize.Width += iconSpace
+	}
+	if r.entry.Validator != nil {
+		minSize.Width += iconSpace
+	}
+
+	return minSize
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {

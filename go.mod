@@ -14,7 +14,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240306074159-ea2d69986ecb
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.0.0-20230619120952-35bccb6164b8
+	github.com/go-text/render v0.1.0
 	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jackmordaunt/icns/v2 v2.2.6
@@ -24,7 +24,7 @@ require (
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
-	github.com/rymdport/portal v0.0.0-20231123202536-da45518a87bb
+	github.com/rymdport/portal v0.2.2
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.8.4
@@ -33,9 +33,10 @@ require (
 	golang.org/x/image v0.14.0
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
 	golang.org/x/mod v0.14.0
-	golang.org/x/sys v0.16.0
+	golang.org/x/sys v0.19.0
 	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.16.1
+	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
 require (
@@ -48,7 +49,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/net v0.24.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

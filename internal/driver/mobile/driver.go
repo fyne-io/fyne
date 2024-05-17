@@ -188,13 +188,18 @@ func (d *mobileDriver) Run() {
 					d.setTheme(e.DarkMode)
 
 					dev := &d.device
+					insetChange := dev.safeTop != e.InsetTopPx || dev.safeBottom != e.InsetBottomPx ||
+						dev.safeLeft != e.InsetLeftPx || dev.safeRight != e.InsetRightPx
 					dev.safeTop = e.InsetTopPx
 					dev.safeLeft = e.InsetLeftPx
-					dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
-					dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
+					dev.safeBottom = e.InsetBottomPx
+					dev.safeRight = e.InsetRightPx
 					c.scale = fyne.CurrentDevice().SystemScaleForWindow(nil)
 					c.Painter().SetFrameBufferScale(1.0)
 
+					if insetChange {
+						current.canvas.sizeContent(current.canvas.size) // even if size didn't change we invalidate
+					}
 					// make sure that we paint on the next frame
 					c.Content().Refresh()
 				case paint.Event:

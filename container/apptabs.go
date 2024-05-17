@@ -396,6 +396,7 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 		r.indicator.Hide()
 		return
 	}
+	r.indicator.Show()
 
 	var selectedPos fyne.Position
 	var selectedSize fyne.Size

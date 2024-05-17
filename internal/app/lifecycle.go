@@ -26,7 +26,7 @@ func (l *Lifecycle) SetOnStoppedHookExecuted(f func()) {
 	l.onStoppedHookExecuted = f
 }
 
-// SetOnEnteredForeground hooks into the the app becoming foreground.
+// SetOnEnteredForeground hooks into the app becoming foreground.
 func (l *Lifecycle) SetOnEnteredForeground(f func()) {
 	l.onForeground.Store(&f)
 }
