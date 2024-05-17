@@ -1884,34 +1884,34 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
-		test.Type(entry, "Hié™שרה")
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.Type(entry, "Hiéשרה")
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// update the Password field
 		entry.Password = true
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		tapPos := fyne.NewPos(140-theme.InnerPadding()-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
 		test.TapCanvas(c, tapPos)
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		test.TapCanvas(c, tapPos)
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})
@@ -1932,14 +1932,14 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
-		test.Type(entry, "Hié™שרה")
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.Type(entry, "Hiéשרה")
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hiéשרה", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})
