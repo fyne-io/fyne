@@ -5,9 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
-	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 
@@ -41,12 +38,7 @@ var (
 
 func loadMap() {
 	fm = fontscan.NewFontMap(noopLogger{})
-	cacheDir := ""
-	if runtime.GOOS == "android" {
-		parent := os.Getenv("FILESDIR")
-		cacheDir = filepath.Join(parent, "fontcache")
-	}
-	err := fm.UseSystemFonts(cacheDir)
+	err := loadSystemFonts(fm)
 	if err != nil {
 		fm = nil // just don't fallback
 	}
