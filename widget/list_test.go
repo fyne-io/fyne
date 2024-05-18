@@ -672,3 +672,29 @@ func TestList_RefreshUpdatesAllItems(t *testing.T) {
 	list.Refresh()
 	assert.Equal(t, "0.0.", printOut)
 }
+
+var minSize fyne.Size
+
+func BenchmarkContentMinSize(b *testing.B) {
+	b.StopTimer()
+
+	l := NewList(
+		func() int { return 1000000 },
+		func() fyne.CanvasObject {
+			return NewLabel("Test")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(fmt.Sprintf("%d", id))
+		},
+	)
+	l.SetItemHeight(10, 55)
+	l.SetItemHeight(12345, 2)
+
+	min := fyne.Size{}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		min = l.contentMinSize()
+	}
+
+	minSize = min
+}
