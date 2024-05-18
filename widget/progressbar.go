@@ -52,6 +52,10 @@ func (p *progressRenderer) layoutBar(size fyne.Size) {
 func (p *progressRenderer) updateBar() {
 	p.layoutBar(p.progress.Size())
 
+	// Don't draw rectangles when they can't be seen.
+	p.background.Hidden = p.ratio == 1.0
+	p.bar.Hidden = p.ratio == 0.0
+
 	if text := p.progress.TextFormatter; text != nil {
 		p.label.Text = text()
 	} else {
