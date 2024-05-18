@@ -12,7 +12,7 @@ import (
 
 var globalProgressRenderer fyne.WidgetRenderer
 
-func BenchmarkProgressbar(b *testing.B) {
+func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 	var renderer fyne.WidgetRenderer
 	widget := &ProgressBar{}
 	b.ReportAllocs()
@@ -23,6 +23,17 @@ func BenchmarkProgressbar(b *testing.B) {
 
 	// Avoid having the value optimized out by the compiler.
 	globalProgressRenderer = renderer
+}
+
+func BenchmarkProgressBarLayout(b *testing.B) {
+	b.ReportAllocs() // We should see zero allocations.
+
+	bar := &ProgressBar{}
+	renderer := bar.CreateRenderer()
+
+	for i := 0; i < b.N; i++ {
+		renderer.Layout(fyne.NewSize(100, 100))
+	}
 }
 
 func TestNewProgressBarWithData(t *testing.T) {
