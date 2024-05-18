@@ -146,16 +146,30 @@ func (p *ProgressBarInfinite) Hide() {
 
 // Start the infinite progress bar animation
 func (p *ProgressBarInfinite) Start() {
-	p.SetFieldsAndRefresh(func() {
-		p.running = true
-	})
+	p.propertyLock.Lock()
+	if p.running {
+		p.propertyLock.Unlock()
+		return
+	}
+
+	p.running = true
+	p.propertyLock.Unlock()
+
+	p.BaseWidget.Refresh()
 }
 
 // Stop the infinite progress bar animation
 func (p *ProgressBarInfinite) Stop() {
-	p.SetFieldsAndRefresh(func() {
-		p.running = false
-	})
+	p.propertyLock.Lock()
+	if !p.running {
+		p.propertyLock.Unlock()
+		return
+	}
+
+	p.running = false
+	p.propertyLock.Unlock()
+
+	p.BaseWidget.Refresh()
 }
 
 // Running returns the current state of the infinite progress animation
