@@ -30,8 +30,7 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
@@ -83,8 +82,7 @@ func TestShowPopUpAtRelativePosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 199))
@@ -326,8 +324,7 @@ func TestPopUp_Layout(t *testing.T) {
 }
 
 func TestPopUp_ApplyThemeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
@@ -350,8 +347,7 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 }
 
 func TestPopUp_ResizeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
@@ -370,8 +366,7 @@ func TestPopUp_ResizeOnShow(t *testing.T) {
 }
 
 func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	// Simulate canvas size {0,0}
 	rect := canvas.NewRectangle(color.Black)
@@ -455,8 +450,7 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 }
 
 func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
@@ -479,8 +473,7 @@ func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
 }
 
 func TestModalPopUp_ResizeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
@@ -499,8 +492,7 @@ func TestModalPopUp_ResizeOnShow(t *testing.T) {
 }
 
 func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	// Simulate canvas size {0,0}
 	rect := canvas.NewRectangle(color.Black)

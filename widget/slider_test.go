@@ -68,8 +68,7 @@ func TestSlider_Clamp(t *testing.T) {
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
+	app := test.NewTempApp(t)
 	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)
@@ -110,8 +109,7 @@ func TestSlider_OutOfRange(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
+	app := test.NewTempApp(t)
 	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	slider := NewSlider(0, 1)

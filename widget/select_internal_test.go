@@ -36,8 +36,7 @@ func TestSelect_SetOptions(t *testing.T) {
 }
 
 func TestSelectRenderer_TapAnimation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	test.ApplyTheme(t, test.NewTheme())
 	sel := NewSelect([]string{"one"}, func(s string) {})

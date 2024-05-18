@@ -11,8 +11,7 @@ import (
 )
 
 func TestSelectEntry_Disableable(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -49,8 +48,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -81,8 +79,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 }
 
 func TestSelectEntry_DropDownMove(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{"one"})
 	w := test.NewWindow(e)
@@ -112,8 +109,7 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 }
 
 func TestSelectEntry_DropDownResize(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -181,8 +177,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{"A", "B", "C"})
 	w := test.NewWindow(e)
@@ -203,8 +198,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions_Empty(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{})
 	w := test.NewWindow(e)

@@ -54,8 +54,7 @@ func TestTable_Cache(t *testing.T) {
 }
 
 func TestTable_ChangeTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -85,8 +84,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 }
 
 func TestTable_Filled(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
@@ -107,7 +105,7 @@ func TestTable_Filled(t *testing.T) {
 }
 
 func TestTable_Focus(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -168,8 +166,7 @@ func TestTable_Headers(t *testing.T) {
 
 func TestTable_JustHeaders(t *testing.T) {
 
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTableWithHeaders(
 		func() (int, int) { return 0, 9 },
@@ -321,8 +318,7 @@ func TestTable_Resize(t *testing.T) {
 }
 
 func TestTable_Unselect(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -385,8 +381,7 @@ func TestTable_Refresh(t *testing.T) {
 }
 
 func TestTable_ScrollTo(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	// for this test the separator thickness is 0
 	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
@@ -482,8 +477,7 @@ func TestTable_ScrollTo(t *testing.T) {
 }
 
 func TestTable_ScrollToBottom(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	const (
@@ -517,8 +511,7 @@ func TestTable_ScrollToBottom(t *testing.T) {
 }
 
 func TestTable_ScrollToLeading(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -543,8 +536,7 @@ func TestTable_ScrollToLeading(t *testing.T) {
 }
 
 func TestTable_ScrollToTop(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	const (
 		maxRows int     = 6
@@ -575,8 +567,7 @@ func TestTable_ScrollToTop(t *testing.T) {
 }
 
 func TestTable_ScrollToTrailing(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 24, 24 },
@@ -604,8 +595,7 @@ func TestTable_ScrollToTrailing(t *testing.T) {
 }
 
 func TestTable_Selection(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -648,8 +638,7 @@ func TestTable_Selection(t *testing.T) {
 }
 
 func TestTable_Selection_OnHeader(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTableWithHeaders(
 		func() (int, int) { return 5, 5 },
@@ -678,8 +667,7 @@ func TestTable_Selection_OnHeader(t *testing.T) {
 }
 
 func TestTable_Select(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -716,8 +704,7 @@ func TestTable_Select(t *testing.T) {
 }
 
 func TestTable_SetColumnWidth(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
@@ -796,8 +783,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 }
 
 func TestTable_SetRowHeight(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	table := NewTable(
@@ -890,8 +876,7 @@ func TestTable_ShowVisible(t *testing.T) {
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
 

@@ -287,8 +287,7 @@ func TestTree_Layout(t *testing.T) {
 }
 
 func TestTree_ChangeTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
@@ -309,8 +308,7 @@ func TestTree_ChangeTheme(t *testing.T) {
 }
 
 func TestTree_Move(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	tree := widget.NewTreeWithStrings(treeData)
 	tree.OpenBranch("foo")
@@ -328,8 +326,7 @@ func TestTree_Move(t *testing.T) {
 }
 
 func TestTree_Refresh(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	value := "Foo Leaf"

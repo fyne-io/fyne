@@ -107,8 +107,7 @@ func TestConfirmDialog_Resize(t *testing.T) {
 }
 
 func TestConfirm_Importance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
