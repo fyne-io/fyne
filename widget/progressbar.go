@@ -17,6 +17,7 @@ type progressRenderer struct {
 	widget.BaseRenderer
 	background, bar canvas.Rectangle
 	label           canvas.Text
+	ratio           float32
 	progress        *ProgressBar
 }
 
@@ -35,7 +36,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 	return size.AddWidthHeight(padding, padding)
 }
 
-func (p *progressRenderer) updateBar() {
+func (p *progressRenderer) layoutBar(size fyne.Size) {
 	if p.progress.Value < p.progress.Min {
 		p.progress.Value = p.progress.Min
 	}
@@ -43,24 +44,26 @@ func (p *progressRenderer) updateBar() {
 		p.progress.Value = p.progress.Max
 	}
 
-	delta := float32(p.progress.Max - p.progress.Min)
-	ratio := float32(p.progress.Value-p.progress.Min) / delta
+	delta := p.progress.Max - p.progress.Min
+	p.ratio = float32((p.progress.Value - p.progress.Min) / delta)
+	p.bar.Resize(fyne.NewSize(size.Width*p.ratio, size.Height))
+}
+
+func (p *progressRenderer) updateBar() {
+	p.layoutBar(p.progress.Size())
 
 	if text := p.progress.TextFormatter; text != nil {
 		p.label.Text = text()
 	} else {
-		p.label.Text = strconv.Itoa(int(ratio*100)) + "%"
+		p.label.Text = strconv.Itoa(int(p.ratio*100)) + "%"
 	}
-
-	size := p.progress.Size()
-	p.bar.Resize(fyne.NewSize(size.Width*ratio, size.Height))
 }
 
 // Layout the components of the check widget
 func (p *progressRenderer) Layout(size fyne.Size) {
 	p.background.Resize(size)
 	p.label.Resize(size)
-	p.updateBar()
+	p.layoutBar(size)
 }
 
 // applyTheme updates the progress bar to match the current theme
