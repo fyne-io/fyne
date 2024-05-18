@@ -32,6 +32,7 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 	assert.False(t, bar.Running())
 
 	win := test.NewWindow(bar)
+	defer win.Close()
 	win.Show()
 
 	// ticker should start automatically once the renderer is created
@@ -41,6 +42,7 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 func TestProgressBarInfinite_Destroy(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	win := test.NewWindow(bar)
+	defer win.Close()
 	win.Show()
 
 	assert.True(t, cache.IsRendered(bar))
@@ -57,6 +59,7 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	win := test.NewWindow(bar)
+	defer win.Close()
 	win.Show()
 
 	assert.True(t, bar.Running())
