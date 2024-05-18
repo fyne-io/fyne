@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -177,10 +176,9 @@ func (p *ProgressBar) Unbind() {
 // The default Min is 0 and Max is 1, Values set should be between those numbers.
 // The display will convert this to a percentage.
 func NewProgressBar() *ProgressBar {
-	p := &ProgressBar{Min: 0, Max: 1}
-
-	cache.Renderer(p).Layout(p.MinSize())
-	return p
+	bar := &ProgressBar{Min: 0, Max: 1}
+	bar.ExtendBaseWidget(bar)
+	return bar
 }
 
 // NewProgressBarWithData returns a progress bar connected with the specified data source.
@@ -189,7 +187,6 @@ func NewProgressBar() *ProgressBar {
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
 	p.Bind(data)
-
 	return p
 }
 
