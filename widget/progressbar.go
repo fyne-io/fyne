@@ -25,15 +25,14 @@ type progressRenderer struct {
 func (p *progressRenderer) MinSize() fyne.Size {
 	th := p.progress.Theme()
 
-	var tsize fyne.Size
-	if text := p.progress.TextFormatter; text != nil {
-		tsize = fyne.MeasureText(text(), p.label.TextSize, p.label.TextStyle)
-	} else {
-		tsize = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
+	text := "100%"
+	if format := p.progress.TextFormatter; format != nil {
+		text = format()
 	}
 
 	padding := th.Size(theme.SizeNameInnerPadding) * 2
-	return fyne.NewSize(tsize.Width+padding, tsize.Height+padding)
+	size := fyne.MeasureText(text, p.label.TextSize, p.label.TextStyle)
+	return size.AddWidthHeight(padding, padding)
 }
 
 func (p *progressRenderer) updateBar() {
