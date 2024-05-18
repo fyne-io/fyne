@@ -41,16 +41,12 @@ func TestFileRepositoryRegistration(t *testing.T) {
 }
 
 func TestFileRepositoryExists(t *testing.T) {
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	existsPath := path.Join(dir, "exists")
 	notExistsPath := path.Join(dir, "notExists")
 
-	err = os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
+	err := os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,18 +61,13 @@ func TestFileRepositoryExists(t *testing.T) {
 }
 
 func TestFileRepositoryReader(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,19 +118,14 @@ func TestFileRepositoryReader(t *testing.T) {
 }
 
 func TestFileRepositoryWriter(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
 	spamHamPath := path.Join(dir, "spam", "ham")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,18 +233,13 @@ func TestFileRepositoryWriter(t *testing.T) {
 }
 
 func TestFileRepositoryCanWrite(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,17 +346,12 @@ func TestFileRepositoryChild(t *testing.T) {
 }
 
 func TestFileRepositoryCopy(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -396,17 +372,12 @@ func TestFileRepositoryCopy(t *testing.T) {
 }
 
 func TestFileRepositoryMove(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -429,12 +400,7 @@ func TestFileRepositoryMove(t *testing.T) {
 }
 
 func TestFileRepositoryListing(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to tests with.
 	fooPath := path.Join(dir, "foo")
@@ -466,12 +432,7 @@ func TestFileRepositoryListing(t *testing.T) {
 }
 
 func TestFileRepositoryCreateListable(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	f := NewFileRepository()
 	repository.Register("file", f)
@@ -482,7 +443,7 @@ func TestFileRepositoryCreateListable(t *testing.T) {
 	fooBar := storage.NewFileURI(fooBarPath)
 
 	// Creating a dir with no parent should fail
-	err = storage.CreateListable(fooBar)
+	err := storage.CreateListable(fooBar)
 	assert.NotNil(t, err)
 
 	// Creating foo should work though
