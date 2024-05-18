@@ -18,6 +18,7 @@ func TestEntry_Password_Extended_CreateRenderer(t *testing.T) {
 	a := test.NewApp()
 	defer test.NewApp()
 	w := a.NewWindow("")
+	defer w.Close()
 	entry := &extendEntry{}
 	entry.ExtendBaseWidget(entry)
 	entry.Password = true

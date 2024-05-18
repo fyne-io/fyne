@@ -338,6 +338,7 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		))
 		m.OnDismiss = func() { dismissed = true }
 		w := fyne.CurrentApp().NewWindow("")
+		t.Cleanup(w.Close)
 		w.SetContent(internalWidget.NewOverlayContainer(m, w.Canvas(), nil))
 		return m
 	}
