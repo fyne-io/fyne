@@ -193,7 +193,7 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 // SetValue() is not defined for infinite progress bar
 // To stop the looping progress and set the progress bar to 100%, call ProgressBarInfinite.Stop()
 func NewProgressBarInfinite() *ProgressBarInfinite {
-	p := &ProgressBarInfinite{}
-	cache.Renderer(p).Layout(p.MinSize())
-	return p
+	bar := &ProgressBarInfinite{}
+	bar.ExtendBaseWidget(bar)
+	return bar
 }
