@@ -21,7 +21,9 @@ type testWindow struct {
 }
 
 // NewTempWindow creates and registers a new window for test purposes.
-// This window will get removed automatically once the test ends.
+// This window will get removed automatically once the running test ends.
+//
+// Since: 2.5
 func NewTempWindow(t testing.TB, content fyne.CanvasObject) fyne.Window {
 	window := fyne.CurrentApp().NewWindow("")
 	window.SetContent(content)
