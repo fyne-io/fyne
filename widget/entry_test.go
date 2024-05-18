@@ -222,6 +222,38 @@ func TestEntry_Control_Word(t *testing.T) {
 	assert.Equal(t, "", entry.SelectedText())
 }
 
+func TestEntry_Control_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("Hello world\nhere is a second line")
+	entry.CursorRow = 1
+	entry.CursorColumn = 10 // right before "second"
+	modifier := fyne.KeyModifierControl
+	if runtime.GOOS == "darwin" {
+		modifier = fyne.KeyModifierAlt
+	}
+	// Ctrl+delete - delete word to right ("second")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyDelete})
+	assert.Equal(t, "Hello world\nhere is a  line", entry.Text)
+	assert.Equal(t, 10, entry.CursorColumn)
+
+	entry.CursorColumn = 8 // right before "a"
+	// Ctrl+backspace - delete word to left ("is")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+	assert.Equal(t, "Hello world\nhere a  line", entry.Text)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	// does nothing when nothing left to delete
+	entry.SetText("")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+	assert.Equal(t, "", entry.Text)
+
+	// doesn't crash when trying to delete backward with one space
+	entry.SetText(" ")
+	entry.CursorRow = 0
+	entry.CursorColumn = 1
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+}
+
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")

@@ -877,6 +877,37 @@ func (e *Entry) typedKeyEnd(provider *RichText) {
 	e.propertyLock.Unlock()
 }
 
+// handler for Ctrl+[backspace/delete] - delete the word
+// to the left or right of the cursor
+func (e *Entry) deleteWord(right bool) {
+	provider := e.textProvider()
+	cursorRow, cursorCol := e.CursorRow, e.CursorColumn
+
+	// start, end relative to text row
+	start, end := getTextWhitespaceRegion(provider.row(cursorRow), cursorCol, true)
+	if right {
+		start = cursorCol
+	} else {
+		end = cursorCol
+	}
+	if start == -1 || end == -1 {
+		return
+	}
+
+	// convert start, end to absolute text position
+	b := provider.rowBoundary(cursorRow)
+	if b != nil {
+		start += b.begin
+		end += b.begin
+	}
+
+	provider.deleteFromTo(start, end)
+	if !right {
+		e.CursorColumn = cursorCol - (end - start)
+	}
+	e.updateTextAndRefresh(provider.String(), false)
+}
+
 func (e *Entry) typedKeyTab() {
 	if dd, ok := fyne.CurrentApp().Driver().(desktop.Driver); ok {
 		if dd.CurrentKeyModifiers()&fyne.KeyModifierShift != 0 {
@@ -1214,6 +1245,11 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: moveWordModifier | fyne.KeyModifierShift}, selectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier | fyne.KeyModifierShift}, selectMoveWord)
+
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier},
+		func(fyne.Shortcut) { e.deleteWord(false) })
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: moveWordModifier},
+		func(fyne.Shortcut) { e.deleteWord(true) })
 }
 
 func (e *Entry) requestFocus() {
@@ -2189,7 +2225,10 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := strings.IndexByte(toks[endCheck:], c)
+	end := -1
+	if endCheck != -1 {
+		end = strings.IndexByte(toks[endCheck:], c)
+	}
 
 	if end == -1 {
 		end = len(toks) // snap end to len(toks) if it results in -1
