@@ -1,6 +1,8 @@
 package test
 
 import (
+	"testing"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -16,6 +18,15 @@ type testWindow struct {
 	clipboard fyne.Clipboard
 	driver    *testDriver
 	menu      *fyne.MainMenu
+}
+
+// NewTempWindow creates and registers a new window for test purposes.
+// This window will get removed automatically once the test ends.
+func NewTempWindow(t testing.TB, content fyne.CanvasObject) fyne.Window {
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(content)
+	t.Cleanup(window.Close)
+	return window
 }
 
 // NewWindow creates and registers a new window for test purposes

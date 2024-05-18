@@ -126,7 +126,7 @@ func TestList_SetItemHeight(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(10, 10*5+(4*theme.Padding())+40), lay.MinSize())
 
 	list.Select(2)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 200))
 	test.AssertImageMatches(t, "list/list_item_height.png", w.Canvas().Capture())
 }
@@ -161,7 +161,7 @@ func TestList_OffsetChange(t *testing.T) {
 	defer test.NewApp()
 
 	list := createList(1000)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 400))
 
 	assert.Equal(t, float32(0), list.offsetY)
@@ -406,7 +406,7 @@ func TestList_SmallList(t *testing.T) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 400))
 
 	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
@@ -457,7 +457,7 @@ func TestList_RemoveItem(t *testing.T) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 400))
 
 	visibleCount := len(list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children)
@@ -491,7 +491,7 @@ func TestList_ScrollThenShrink(t *testing.T) {
 			item.(*Label).SetText(data[id])
 		},
 	)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(300, 300))
 
 	visibles := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -531,7 +531,7 @@ func TestList_ScrollThenResizeWindow(t *testing.T) {
 			item.(*Label).SetText(data[id])
 		},
 	)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(300, 300))
 
 	list.scroller.ScrollToBottom()
@@ -547,7 +547,7 @@ func TestList_ScrollThenResizeWindow(t *testing.T) {
 
 func TestList_NoFunctionsSet(t *testing.T) {
 	list := &List{}
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 400))
 	list.Refresh()
 }
@@ -620,7 +620,7 @@ func changeData(list *List) {
 func setupList(t *testing.T) (*List, fyne.Window) {
 	test.NewApp()
 	list := createList(1000)
-	w := test.NewWindow(list)
+	w := test.NewTempWindow(t, list)
 	w.Resize(fyne.NewSize(200, 400))
 	test.AssertRendersToMarkup(t, "list/initial.xml", w.Canvas())
 	return list, w

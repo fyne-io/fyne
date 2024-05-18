@@ -315,7 +315,7 @@ func TestTable_Resize(t *testing.T) {
 		},
 		func(TableCellID, fyne.CanvasObject) {})
 
-	w := test.NewWindow(table)
+	w := test.NewTempWindow(t, table)
 	w.Resize(fyne.NewSize(100, 100))
 	test.AssertImageMatches(t, "table/resize.png", w.Canvas().Capture())
 }

@@ -16,7 +16,7 @@ func TestColorDialog_Theme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(1000, 800))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -36,8 +36,6 @@ func TestColorDialog_Theme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertRendersToImage(t, "color/dialog_expanded_theme_ugly.png", w.Canvas())
-
-	w.Close()
 }
 
 func TestColorDialog_Recents(t *testing.T) {
@@ -47,7 +45,7 @@ func TestColorDialog_Recents(t *testing.T) {
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -59,13 +57,11 @@ func TestColorDialog_Recents(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertRendersToImage(t, "color/dialog_recents_theme_ugly.png", w.Canvas())
-
-	w.Close()
 }
 
 func TestColorDialog_SetColor(t *testing.T) {
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
 	col := color.RGBA{70, 210, 200, 255}
@@ -98,14 +94,13 @@ func TestColorDialog_SetColor(t *testing.T) {
 	assert.Equal(t, 244, d.picker.Alpha)
 
 	d.Show()
-	w.Close()
 }
 
 func TestColorDialogSimple_Theme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -115,8 +110,6 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertRendersToImage(t, "color/dialog_simple_theme_ugly.png", w.Canvas())
-
-	w.Close()
 }
 
 func TestColorDialogSimple_Recents(t *testing.T) {
@@ -126,7 +119,7 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
@@ -136,8 +129,6 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertRendersToImage(t, "color/dialog_simple_recents_theme_ugly.png", w.Canvas())
-
-	w.Close()
 }
 
 func Test_recent_color(t *testing.T) {

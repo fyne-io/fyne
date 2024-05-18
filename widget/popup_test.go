@@ -33,7 +33,7 @@ func TestShowPopUp(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
 
@@ -69,8 +69,8 @@ func TestShowPopUpAtRelativePosition(t *testing.T) {
 	label := NewLabel("Hi")
 	parent1 := NewLabel("Parent1")
 	parent2 := NewLabel("Parent2")
-	w := test.NewWindow(
-		&fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}})
+	w := test.NewTempWindow(
+		t, &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}})
 	w.Resize(fyne.NewSize(100, 200))
 
 	ShowPopUpAtRelativePosition(label, w.Canvas(), pos, parent2)
@@ -86,7 +86,7 @@ func TestShowModalPopUp(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 199))
 	require.Nil(t, w.Canvas().Overlays().Top())
 
@@ -328,7 +328,7 @@ func TestPopUp_Layout(t *testing.T) {
 func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())
@@ -352,7 +352,7 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 func TestPopUp_ResizeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -376,7 +376,7 @@ func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	// Simulate canvas size {0,0}
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(0, 0))
-	w := test.NewWindow(rect)
+	w := test.NewTempWindow(t, rect)
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(0, 0))
 	assert.Zero(t, w.Canvas().Size())
@@ -443,7 +443,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 
 func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
-	win := test.NewWindow(NewLabel("OK"))
+	win := test.NewTempWindow(t, NewLabel("OK"))
 	win.Resize(fyne.NewSize(80, 80))
 	pop := NewModalPopUp(label, win.Canvas())
 
@@ -457,7 +457,7 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
 	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
@@ -481,7 +481,7 @@ func TestModalPopUp_ApplyThemeOnShow(t *testing.T) {
 func TestModalPopUp_ResizeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -505,7 +505,7 @@ func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	// Simulate canvas size {0,0}
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(0, 0))
-	w := test.NewWindow(rect)
+	w := test.NewTempWindow(t, rect)
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(0, 0))
 	assert.Zero(t, w.Canvas().Size())

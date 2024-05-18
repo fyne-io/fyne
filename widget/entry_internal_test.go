@@ -391,7 +391,7 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	e := NewEntry()
 	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
 
-	w := test.NewWindow(e)
+	w := test.NewTempWindow(t, e)
 	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
 
 	w.Canvas().Focus(e)
@@ -409,7 +409,7 @@ func TestEntry_Tab(t *testing.T) {
 	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)
 	assert.Equal(t, "\tb", r.Objects()[1].(*canvas.Text).Text)
 
-	w := test.NewWindow(e)
+	w := test.NewTempWindow(t, e)
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-content.png", w.Canvas().Capture())
@@ -428,7 +428,7 @@ func TestEntry_TabSelection(t *testing.T) {
 
 	assert.Equal(t, "\tb", e.SelectedText())
 
-	w := test.NewWindow(e)
+	w := test.NewTempWindow(t, e)
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-select.png", w.Canvas().Capture())

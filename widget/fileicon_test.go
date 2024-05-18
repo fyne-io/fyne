@@ -27,7 +27,7 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 
 	icon := widget.NewFileIcon(nil)
 
-	w := test.NewWindow(icon)
+	w := test.NewTempWindow(t, icon)
 	w.Resize(fyne.NewSize(150, 150))
 
 	test.AssertImageMatches(t, "fileicon/fileicon_nil.png", w.Canvas().Capture())
@@ -59,8 +59,6 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 	w.SetContent(icon5)
 	w.Resize(fyne.NewSize(150, 150))
 	test.AssertImageMatches(t, "fileicon/fileicon_folder.png", w.Canvas().Capture())
-
-	w.Close()
 }
 
 func TestFileIcon_Icon(t *testing.T) {

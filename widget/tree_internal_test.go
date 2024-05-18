@@ -878,8 +878,8 @@ func TestTree_RefreshItem(t *testing.T) {
 	}
 	tree.OpenBranch("foo")
 
-	c := test.NewWindow(tree)
-	c.Resize(fyne.NewSize(100, 100))
+	w := test.NewTempWindow(t, tree)
+	w.Resize(fyne.NewSize(100, 100))
 
 	r := test.WidgetRenderer(tree.scroller.Content.(*treeContent)).(*treeContentRenderer)
 

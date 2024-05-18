@@ -348,7 +348,7 @@ func TestText_Multiline(t *testing.T) {
 		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
 		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
 
-	w := test.NewWindow(text)
+	w := test.NewTempWindow(t, text)
 	w.Resize(fyne.NewSize(64, 90))
 	test.AssertImageMatches(t, "richtext/richtext_multiline.png", w.Canvas().Capture())
 }

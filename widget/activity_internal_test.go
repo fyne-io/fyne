@@ -13,8 +13,8 @@ func TestActivity_Animation(t *testing.T) {
 
 	a := NewActivity()
 	w := test.NewWindow(a)
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(a.MinSize())
 
 	render := test.WidgetRenderer(a).(*activityRenderer)
