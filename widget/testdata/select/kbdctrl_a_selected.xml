@@ -8,7 +8,7 @@
 					<text pos="4,4" size="57x19">Option A</text>
 				</widget>
 				<widget pos="99,7" size="20x20" type="*widget.Icon">
-					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 				</widget>
 			</widget>
 		</container>

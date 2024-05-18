@@ -11,17 +11,23 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-type viewLayout int
+// ViewLayout can be passed to SetView() to set the view of
+// a FileDialog
+//
+// Since: 2.5
+type ViewLayout int
 
 const (
-	gridView viewLayout = iota
-	listView
+	defaultView ViewLayout = iota
+	ListView
+	GridView
 )
 
 const viewLayoutKey = "fyne:fileDialogViewLayout"
@@ -56,7 +62,7 @@ type fileDialog struct {
 	favoritesList    *widget.List
 	showHidden       bool
 
-	view viewLayout
+	view ViewLayout
 
 	data     []fyne.URI
 	dataLock sync.RWMutex
@@ -67,6 +73,8 @@ type fileDialog struct {
 	dir        fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+
+	toggleViewButton *widget.Button
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
@@ -84,6 +92,8 @@ type FileDialog struct {
 	startingLocation fyne.ListableURI
 	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
+	// this will be the initial view in a FileDialog
+	initialView ViewLayout
 }
 
 // Declare conformity to Dialog interface
@@ -99,15 +109,18 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
-		saveName.SetPlaceHolder("Enter filename")
+		saveName.SetPlaceHolder(lang.L("Enter filename"))
+		saveName.OnSubmitted = func(s string) {
+			f.open.OnTapped()
+		}
 		f.fileName = saveName
 	} else {
 		f.fileName = widget.NewLabel("")
 	}
 
-	label := "Open"
+	label := lang.L("Open")
 	if f.file.save {
-		label = "Save"
+		label = lang.L("Save")
 	}
 	if f.file.confirmText != "" {
 		label = f.file.confirmText
@@ -118,7 +131,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.fileName.SetText(f.initialFileName)
 	}
 
-	dismissLabel := "Cancel"
+	dismissLabel := lang.L("Cancel")
 	if f.file.dismissText != "" {
 		dismissLabel = f.file.dismissText
 	}
@@ -133,16 +146,35 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	f.breadcrumb = container.NewHBox()
 	f.breadcrumbScroll = container.NewHScroll(container.NewPadded(f.breadcrumb))
-	title := label + " File"
+	title := label + " " + lang.L("File")
 	if f.file.isDirectory() {
-		title = label + " Folder"
+		title = label + " " + lang.L("Folder")
 	}
 
-	view := viewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
-	if view != listView {
-		view = gridView
+	view := ViewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
+
+	// handle invalid values
+	if view != GridView && view != ListView {
+		view = defaultView
 	}
 
+	if view == defaultView {
+		// set GridView as default
+		view = GridView
+
+		if f.file.initialView != defaultView {
+			view = f.file.initialView
+		}
+	}
+
+	// icon of button is set in subsequent setView() call
+	f.toggleViewButton = widget.NewButtonWithIcon("", nil, func() {
+		if f.view == GridView {
+			f.setView(ListView)
+		} else {
+			f.setView(GridView)
+		}
+	})
 	f.setView(view)
 
 	f.loadFavorites()
@@ -168,29 +200,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
-	var toggleViewButtonIcon fyne.Resource
-	if f.view == gridView {
-		toggleViewButtonIcon = theme.ListIcon()
-	} else {
-		toggleViewButtonIcon = theme.GridIcon()
-	}
-
-	var toggleViewButton *widget.Button
-	toggleViewButton = widget.NewButtonWithIcon("", toggleViewButtonIcon, func() {
-		if f.view == gridView {
-			f.setView(listView)
-			toggleViewButton.SetIcon(theme.GridIcon())
-		} else {
-			f.setView(gridView)
-			toggleViewButton.SetIcon(theme.ListIcon())
-		}
-	})
-
 	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
 		newFolderEntry := widget.NewEntry()
-		ShowForm("New Folder", "Create Folder", "Cancel", []*widget.FormItem{
+		ShowForm(lang.L("New Folder"), lang.L("Create Folder"), lang.L("Cancel"), []*widget.FormItem{
 			{
-				Text:   "Name",
+				Text:   lang.X("file.name", "Name"),
 				Widget: newFolderEntry,
 			},
 		}, func(s bool) {
@@ -213,7 +227,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 	optionsbuttons := container.NewHBox(
 		newFolderButton,
-		toggleViewButton,
+		f.toggleViewButton,
 		optionsButton,
 	)
 
@@ -326,7 +340,7 @@ func (f *fileDialog) makeDismissButton(label string) *widget.Button {
 }
 
 func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
-	hiddenFiles := widget.NewCheck("Show Hidden Files", func(changed bool) {
+	hiddenFiles := widget.NewCheck(lang.L("Show Hidden Files"), func(changed bool) {
 		f.showHidden = changed
 		f.refreshDir(f.dir)
 	})
@@ -516,10 +530,17 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 	}
 }
 
-func (f *fileDialog) setView(view viewLayout) {
+func (f *fileDialog) setView(view ViewLayout) {
 	f.view = view
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
-
+	var selectF func(id int)
+	choose := func(id int) {
+		selectF(id)
+		if file, ok := f.getDataItem(id); ok {
+			f.selectedID = id
+			f.setSelected(file, id)
+		}
+	}
 	count := func() int {
 		f.dataLock.RLock()
 		defer f.dataLock.RUnlock()
@@ -534,23 +555,27 @@ func (f *fileDialog) setView(view viewLayout) {
 			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
 			_, isDir := dir.(fyne.ListableURI)
 			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
+			o.(*fileDialogItem).choose = choose
+			o.(*fileDialogItem).id = id
+			o.(*fileDialogItem).open = f.open.OnTapped
 		}
 	}
-	choose := func(id int) {
-		if file, ok := f.getDataItem(id); ok {
-			f.selectedID = id
-			f.setSelected(file, id)
-		}
-	}
-	if f.view == gridView {
+	// Actually, during the real interaction, the OnSelected won't be called.
+	// It will be called only when we directly calls container.select(i)
+	if f.view == GridView {
 		grid := widget.NewGridWrap(count, template, update)
 		grid.OnSelected = choose
 		f.files = grid
+		f.toggleViewButton.SetIcon(theme.ListIcon())
+		selectF = grid.Select
 	} else {
 		list := widget.NewList(count, template, update)
 		list.OnSelected = choose
 		f.files = list
+		f.toggleViewButton.SetIcon(theme.GridIcon())
+		selectF = list.Select
 	}
+
 	if f.dir != nil {
 		f.refreshDir(f.dir)
 	}
@@ -632,7 +657,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 }
 
 func showFile(file *FileDialog) *fileDialog {
-	d := &fileDialog{file: file, initialFileName: file.initialFileName}
+	d := &fileDialog{file: file, initialFileName: file.initialFileName, view: GridView}
 	ui := d.makeUI()
 	pad := theme.Padding()
 	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
@@ -643,6 +668,9 @@ func showFile(file *FileDialog) *fileDialog {
 
 	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
+	if file.save {
+		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
+	}
 	return d
 }
 
@@ -774,6 +802,17 @@ func (f *FileDialog) SetFileName(fileName string) {
 	}
 }
 
+// SetView changes the default display view of the FileDialog
+// This is normally called before the dialog is shown.
+//
+// Since: 2.5
+func (f *FileDialog) SetView(v ViewLayout) {
+	f.initialView = v
+	if f.dialog != nil {
+		f.dialog.setView(v)
+	}
+}
+
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 // The callback function will run when the dialog closes. The URI will be nil
 // when the user cancels or when nothing is selected.
@@ -828,6 +867,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 	if runtime.GOOS == "darwin" {
 		return map[string]fyne.Resource{
 			"Documents": theme.DocumentIcon(),
+			"Desktop":   theme.DesktopIcon(),
 			"Downloads": theme.DownloadIcon(),
 			"Music":     theme.MediaMusicIcon(),
 			"Pictures":  theme.MediaPhotoIcon(),
@@ -837,6 +877,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 
 	return map[string]fyne.Resource{
 		"Documents": theme.DocumentIcon(),
+		"Desktop":   theme.DesktopIcon(),
 		"Downloads": theme.DownloadIcon(),
 		"Music":     theme.MediaMusicIcon(),
 		"Pictures":  theme.MediaPhotoIcon(),
@@ -846,6 +887,7 @@ func getFavoriteIcons() map[string]fyne.Resource {
 
 func getFavoriteOrder() []string {
 	order := []string{
+		"Desktop",
 		"Documents",
 		"Downloads",
 		"Music",

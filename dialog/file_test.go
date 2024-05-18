@@ -505,6 +505,90 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
+func TestSetView(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(defaultView))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.SetConfirmText("Yes")
+	dlg.SetDismissText("Dismiss")
+
+	// set view to list
+	dlg.SetView(ListView)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+
+	// view should be a list
+	_, isList := panel.(*widget.List)
+	assert.True(t, isList)
+	// toggleViewButton should reflect to what it will do (change to a grid view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
+
+	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	assert.Equal(t, "Yes", confirm.Text)
+	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	assert.Equal(t, "Dismiss", dismiss.Text)
+
+	// set view to grid on already opened dialog - should be updated automatically
+	dlg.SetView(GridView)
+
+	// view should be a grid again
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	_, isGrid := panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+}
+
+func TestSetViewPreferences(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	prefs := fyne.CurrentApp().Preferences()
+
+	// set user-saved viewLayout to GridView
+	prefs.SetInt(viewLayoutKey, int(GridView))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	// set default view to be ListView
+	dlg.SetView(ListView)
+
+	dlg.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+
+	// check that preference setting overrules configured default view
+	_, isGrid := panel.(*widget.GridWrap)
+	assert.True(t, isGrid)
+	// toggleViewButton should reflect to what it will do (change to a list view).
+	assert.Equal(t, "", toggleViewButton.Text)
+	assert.Equal(t, theme.ListIcon(), toggleViewButton.Icon)
+}
+
 func TestViewPreferences(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
 
@@ -527,23 +611,23 @@ func TestViewPreferences(t *testing.T) {
 	ui := popup.Content.(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 
-	// viewLayout preference should be 'grid'
-	view := viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, gridView, view)
+	// default viewLayout preference should be 'grid'
+	view := ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, GridView, view)
 
 	// toggle view
 	test.Tap(toggleViewButton)
 
 	// viewLayout preference should be 'list'
-	view = viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, listView, view)
+	view = ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, ListView, view)
 
 	// toggle view
 	test.Tap(toggleViewButton)
 
 	// viewLayout preference should be 'grid' again
-	view = viewLayout(prefs.Int(viewLayoutKey))
-	assert.Equal(t, gridView, view)
+	view = ViewLayout(prefs.Int(viewLayoutKey))
+	assert.Equal(t, GridView, view)
 }
 
 func TestFileFavorites(t *testing.T) {

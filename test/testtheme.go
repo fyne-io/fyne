@@ -29,6 +29,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameInputBackground:   color.RGBA{red.R, red.G, red.B, 30},
 			theme.ColorNameInputBorder:       color.Black,
 			theme.ColorNameMenuBackground:    color.RGBA{red.R, red.G, red.B, 30},
+			theme.ColorNameOnPrimary:         color.RGBA{red.R, red.G, red.B, 200},
 			theme.ColorNameOverlayBackground: color.RGBA{red.R, red.G, red.B, 44},
 			theme.ColorNamePlaceHolder:       blue,
 			theme.ColorNamePressed:           blue,

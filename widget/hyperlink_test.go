@@ -55,7 +55,7 @@ func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	hyperlink.CreateRenderer()
 
-	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(hyperlink.provider)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, richTextRenderTexts(&hyperlink.provider)[0].Alignment)
 }
 
 func TestHyperlink_Hide(t *testing.T) {
@@ -103,6 +103,19 @@ func TestHyperlink_OnTapped(t *testing.T) {
 	assert.Equal(t, 1, tapped)
 }
 
+func TestHyperlink_TappedOutsideTextBoundary(t *testing.T) {
+	tapped := 0
+	link := &Hyperlink{Text: "Test"}
+	link.OnTapped = func() {
+		tapped++
+	}
+	link.syncSegments()
+	link.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(50 /*past text boundary*/, 2),
+	})
+	assert.Equal(t, 0, tapped)
+}
+
 func TestHyperlink_KeyboardOnTapped(t *testing.T) {
 	tapped := 0
 	link := &Hyperlink{Text: "Test"}
@@ -135,7 +148,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)
-	assert.Equal(t, "New", richTextRenderTexts(hyperlink.provider)[0].Text)
+	assert.Equal(t, "New", richTextRenderTexts(&hyperlink.provider)[0].Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
@@ -183,17 +196,17 @@ func TestHyperlink_Truncate(t *testing.T) {
 	hyperlink.CreateRenderer()
 	hyperlink.Resize(fyne.NewSize(100, 20))
 
-	texts := richTextRenderTexts(hyperlink.provider)
+	texts := richTextRenderTexts(&hyperlink.provider)
 	assert.Equal(t, "TestingWithLongText", texts[0].Text)
 
 	hyperlink.Truncation = fyne.TextTruncateClip
 	hyperlink.Refresh()
-	texts = richTextRenderTexts(hyperlink.provider)
+	texts = richTextRenderTexts(&hyperlink.provider)
 	assert.Equal(t, "TestingWith", texts[0].Text)
 
 	hyperlink.Truncation = fyne.TextTruncateEllipsis
 	hyperlink.Refresh()
-	texts = richTextRenderTexts(hyperlink.provider)
+	texts = richTextRenderTexts(&hyperlink.provider)
 	assert.Equal(t, "TestingWi…", texts[0].Text)
 }
 

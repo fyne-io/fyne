@@ -18,9 +18,9 @@ var _ fyne.Widget = (*InnerWindow)(nil)
 type InnerWindow struct {
 	widget.BaseWidget
 
-	CloseIntercept                                      func()
-	OnDragged, OnResized                                func(*fyne.DragEvent)
-	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()
+	CloseIntercept                                      func()                `json:"-"`
+	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
+	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
 
 	title   string

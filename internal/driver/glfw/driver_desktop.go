@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
@@ -120,13 +121,20 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 		if err != nil {
 			fyne.LogError("Failed to convert systray icon", err)
 		} else {
-			item.SetIcon(img)
+			if _, ok := i.Icon.(*theme.ThemedResource); ok {
+				item.SetTemplateIcon(img, img)
+			} else {
+				item.SetIcon(img)
+			}
 		}
 	}
 	return item
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
+	d.systrayLock.Lock()
+	defer d.systrayLock.Unlock()
+
 	d.systrayMenu = m
 	systray.ResetMenu()
 	d.refreshSystrayMenu(m, nil)
@@ -188,15 +196,16 @@ func (d *gLDriver) catchTerm() {
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
+	localQuit := lang.L("Quit")
 	var lastItem *fyne.MenuItem
 	if len(menu.Items) > 0 {
 		lastItem = menu.Items[len(menu.Items)-1]
-		if lastItem.Label == "Quit" {
+		if lastItem.Label == localQuit {
 			lastItem.IsQuit = true
 		}
 	}
 	if lastItem == nil || !lastItem.IsQuit { // make sure the menu always has a quit option
-		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem := fyne.NewMenuItem(localQuit, nil)
 		quitItem.IsQuit = true
 		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
 	}

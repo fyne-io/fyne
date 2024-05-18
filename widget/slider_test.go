@@ -52,6 +52,21 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 5.0, s.Value)
 }
 
+func TestSlider_Clamp(t *testing.T) {
+	s := &Slider{Min: 0, Max: 1, Step: 0.001}
+	s.Value = 0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, 0.959, s.Value, 0.00001)
+
+	s.Min = -1
+	s.Max = 0
+	s.Value = -0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, -0.959, s.Value, 0.00001)
+}
+
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
@@ -81,6 +96,12 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
+func TestSlider_MinSize(t *testing.T) {
+	min := NewSlider(0, 10).MinSize()
+	buttonMin := NewButtonWithIcon("", theme.HomeIcon(), func() {}).MinSize()
+
+	assert.Equal(t, min.Height, buttonMin.Height)
+}
 func TestSlider_OutOfRange(t *testing.T) {
 	slider := NewSlider(2, 5)
 	slider.Resize(fyne.NewSize(100, 10))
@@ -269,9 +290,20 @@ func TestSlider_SetValue(t *testing.T) {
 	assert.Equal(t, 2.0, slider.Value)
 }
 
+func TestSlider_FocusDesktop(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+	slider := NewSlider(0, 10)
+	win := test.NewWindow(slider)
+	test.Tap(slider)
+
+	assert.Equal(t, win.Canvas().Focused(), slider)
+	assert.True(t, slider.focused)
+}
+
 func TestSlider_Focus(t *testing.T) {
 	slider := NewSlider(0, 5)
-
 	slider.FocusGained()
 	assert.True(t, slider.focused)
 

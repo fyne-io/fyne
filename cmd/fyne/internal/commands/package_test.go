@@ -10,7 +10,7 @@ import (
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
+	"fyne.io/fyne/v2/internal/metadata"
 )
 
 func Test_calculateExeName(t *testing.T) {

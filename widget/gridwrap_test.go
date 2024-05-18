@@ -99,6 +99,25 @@ func TestGridWrap_ScrollTo(t *testing.T) {
 	assert.Equal(t, greatest, GridWrapItemID(999))
 }
 
+func TestGridWrap_ScrollToOffset(t *testing.T) {
+	g := createGridWrap(10)
+	g.Resize(fyne.NewSize(10, 10))
+
+	g.ScrollToOffset(2)
+	assert.Equal(t, float32(2), g.GetScrollOffset())
+
+	g.ScrollToOffset(-20)
+	assert.Equal(t, float32(0), g.GetScrollOffset())
+
+	g.ScrollToOffset(10000)
+	assert.LessOrEqual(t, g.GetScrollOffset(), float32(500) /*upper bound on content height*/)
+
+	// GridWrap viewport is larger than content size
+	g.Resize(fyne.NewSize(50, 250))
+	g.ScrollToOffset(20)
+	assert.Equal(t, float32(0), g.GetScrollOffset()) // doesn't scroll
+}
+
 func TestGridWrap_ScrollToTop(t *testing.T) {
 	g := createGridWrap(1000)
 	g.ScrollTo(750)

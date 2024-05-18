@@ -69,12 +69,16 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 
 	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok || dev.safeWidth == 0 || dev.safeHeight == 0 {
+	if !ok {
 		return fyne.NewPos(0, 0), c.Size() // running in test mode
 	}
 
-	return fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale),
-		fyne.NewSize(float32(dev.safeWidth)/scale, float32(dev.safeHeight)/scale)
+	safeLeft := float32(dev.safeLeft) / scale
+	safeTop := float32(dev.safeTop) / scale
+	safeRight := float32(dev.safeRight) / scale
+	safeBottom := float32(dev.safeBottom) / scale
+	return fyne.NewPos(safeLeft, safeTop),
+		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 }
 
 func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {

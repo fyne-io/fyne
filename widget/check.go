@@ -63,7 +63,7 @@ func (c *Check) Bind(data binding.Bool) {
 	}
 }
 
-// SetChecked sets the the checked state and refreshes widget
+// SetChecked sets the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
 	c.propertyLock.Lock()
 	if checked == c.Checked {
@@ -138,12 +138,8 @@ func (c *Check) Tapped(pe *fyne.PointEvent) {
 		return
 	}
 
-	if !c.focused && !fyne.CurrentDevice().IsMobile() {
-		impl := c.super()
-
-		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
+	if !c.focused {
+		focusIfNotMobile(c.super())
 	}
 	c.SetChecked(!c.Checked)
 }
@@ -381,4 +377,13 @@ func (c *checkRenderer) updateFocusIndicator(th fyne.Theme, v fyne.ThemeVariant)
 	} else {
 		c.focusIndicator.FillColor = color.Transparent
 	}
+}
+
+func focusIfNotMobile(w fyne.Widget) {
+	if !fyne.CurrentDevice().IsMobile() {
+		if c := fyne.CurrentApp().Driver().CanvasForObject(w); c != nil {
+			c.Focus(w.(fyne.Focusable))
+		}
+	}
+
 }

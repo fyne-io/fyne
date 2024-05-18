@@ -280,7 +280,7 @@ func TestEntry_EraseSelection(t *testing.T) {
 	keyPress(&fyne.KeyEvent{Name: fyne.KeyRight})
 
 	_ = e.Theme()
-	e.eraseSelection()
+	e.eraseSelectionAndUpdate()
 	e.updateText(e.textProvider().String(), false)
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
 	a, b := e.selection()

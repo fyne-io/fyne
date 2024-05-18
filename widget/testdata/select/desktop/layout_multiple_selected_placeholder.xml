@@ -1,0 +1,16 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="21,78" size="98x35" type="*widget.Select">
+				<rectangle fillColor="inputBackground" radius="4" size="98x35"/>
+				<rectangle size="0x0"/>
+				<widget pos="4,4" size="66x27" type="*widget.RichText">
+					<text pos="4,4" size="24x19">Foo</text>
+				</widget>
+				<widget pos="70,7" size="20x20" type="*widget.Icon">
+					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+				</widget>
+			</widget>
+		</container>
+	</content>
+</canvas>
