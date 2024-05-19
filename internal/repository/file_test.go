@@ -91,6 +91,7 @@ func TestFileRepositoryReader(t *testing.T) {
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
 	assert.Nil(t, err)
+	fooReader.Close()
 
 	// Make sure we can read the file with data.
 	barReader, err := storage.Reader(bar)
@@ -98,10 +99,12 @@ func TestFileRepositoryReader(t *testing.T) {
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
 	assert.Nil(t, err)
+	barReader.Close()
 
 	// Make sure we get an error if the file doesn't exist.
-	_, err = storage.Reader(baz)
+	bazReader, err := storage.Reader(baz)
 	assert.NotNil(t, err)
+	bazReader.Close()
 
 	// Also test that CanRead returns the expected results.
 	fooCanRead, err := storage.CanRead(foo)
