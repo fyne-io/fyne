@@ -119,6 +119,23 @@ func (c *mobileCanvas) MinSize() fyne.Size {
 	return c.size // TODO check
 }
 
+func (c *mobileCanvas) Resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
+	c.sizeContent(size)
+}
+
+func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
+	if c.menu != nil {
+		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+	}
+	if c.windowHead != nil {
+		app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
+	}
+}
+
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
 	if c.menu != nil {
 		return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
@@ -148,14 +165,6 @@ func (c *mobileCanvas) overlayChanged() {
 	c.SetDirty()
 }
 
-func (c *mobileCanvas) Resize(size fyne.Size) {
-	if size == c.size {
-		return
-	}
-
-	c.sizeContent(size)
-}
-
 func (c *mobileCanvas) setContent(content fyne.CanvasObject) {
 	c.content = content
 	c.SetContentTreeAndFocusMgr(content)
@@ -172,15 +181,6 @@ func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
 	}
 	c.windowHead = head
 	c.SetMobileWindowHeadTree(head)
-}
-
-func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
-	if c.menu != nil {
-		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-	}
-	if c.windowHead != nil {
-		app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
-	}
 }
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
