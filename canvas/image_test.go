@@ -43,6 +43,7 @@ func TestNewImageFromReader(t *testing.T) {
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 	read, err := os.Open(path)
 	assert.Nil(t, err)
+	defer read.Close()
 
 	img := canvas.NewImageFromReader(read, "fyne.png")
 	assert.NotNil(t, img)
