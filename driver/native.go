@@ -9,16 +9,34 @@ type AndroidContext struct {
 }
 
 // UnknownContext is passed to the RunNative callback when it is executed
-// on devices without special native context.
+// on devices or windows without special native context.
 //
 // Since: 2.3
 type UnknownContext struct{}
 
-// WindowsContext is passed to the `(desktop.Window).RunNative` callback
-// when it is executed on a Microsoft Windows desktop device.
+// WindowsWindowContext is passed to the `(fyne.NativeWindow).RunNative` callback
+// when it is executed on a Microsoft Windows device.
 //
 // Since: 2.5
-type WindowsContext struct {
-	// HWND is the WinAPI HWND for the window.
+type WindowsWindowContext struct {
+	// HWND is the window handle for the native window.
 	HWND uintptr
+}
+
+// MacWindowContext is passed to the `(fyne.NativeWindow).RunNative` callback
+// when it is executed on a Mac OS device.
+//
+// Since: 2.5
+type MacWindowContext struct {
+	// NSWindow is the window handle for the native window.
+	NSWindow uintptr
+}
+
+// X11WindowContext is passed to the `(fyne.NativeWindow).RunNative` callback
+// when it is executed on a device with the X11 windowing system.
+//
+// Since: 2.5
+type X11WindowContext struct {
+	// WindowHandle is the window handle for the native X11 window.
+	WindowHandle string
 }
