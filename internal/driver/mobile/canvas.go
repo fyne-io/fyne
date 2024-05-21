@@ -189,44 +189,42 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 	c.size = size
 
-	offset := fyne.NewPos(0, 0)
+	var topOffset float32
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
-		topHeight := c.windowHead.MinSize().Height
-
+		headSize := c.windowHead.MinSize()
 		chromeBox := c.windowHead.(*fyne.Container)
 		if c.padded {
 			chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
 		}
 		if len(chromeBox.Objects) > 1 {
-			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
-			offset = fyne.NewPos(0, topHeight)
-			areaSize = areaSize.Subtract(offset)
-		} else {
-			c.windowHead.Resize(c.windowHead.MinSize())
+			headSize = fyne.NewSize(areaSize.Width, headSize.Height)
+			topOffset = headSize.Height
 		}
+		c.windowHead.Resize(headSize)
 		c.windowHead.Move(areaPos)
 	}
 
-	topLeft := areaPos.Add(offset)
+	contentPos := areaPos.AddXY(0, topOffset)
+	contentSize := areaSize.SubtractWidthHeight(0, topOffset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(areaSize)
-			overlay.Move(topLeft)
+			overlay.Resize(contentSize)
+			overlay.Move(contentPos)
 		}
 	}
 
 	if c.padded {
-		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		c.content.Resize(contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(areaSize)
-		c.content.Move(topLeft)
+		c.content.Resize(contentSize)
+		c.content.Move(contentPos)
 	}
 }
 
