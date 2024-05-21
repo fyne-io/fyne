@@ -136,6 +136,22 @@ func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
 	}
 }
 
+func (c *mobileCanvas) chromeBoxVerticalOffset() float32 {
+	if c.windowHead == nil {
+		return 0
+	}
+
+	chromeBox := c.windowHead.(*fyne.Container)
+	if c.padded {
+		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+	}
+	if len(chromeBox.Objects) > 1 {
+		return c.windowHead.MinSize().Height
+	}
+
+	return 0
+}
+
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
 	if c.menu != nil {
 		return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
@@ -189,20 +205,15 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 	c.size = size
 
-	var chromeBoxOffset float32
+	chromeBoxOffset := c.chromeBoxVerticalOffset()
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
-		headSize := c.windowHead.MinSize()
-		chromeBox := c.windowHead.(*fyne.Container)
-		if c.padded {
-			chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
-		}
-		if len(chromeBox.Objects) > 1 {
-			chromeBoxOffset = headSize.Height
-		}
+		var headSize fyne.Size
 		if chromeBoxOffset > 0 {
-			headSize = fyne.NewSize(areaSize.Width, headSize.Height)
+			headSize = fyne.NewSize(areaSize.Width, chromeBoxOffset)
+		} else {
+			headSize = c.windowHead.MinSize()
 		}
 		c.windowHead.Resize(headSize)
 		c.windowHead.Move(areaPos)
