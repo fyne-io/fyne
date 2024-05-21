@@ -123,11 +123,8 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 	pos := driver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
 
-	if mc.windowHead != nil {
-		if len(mc.windowHead.(*fyne.Container).Objects) > 1 {
-			topHeight := mc.windowHead.MinSize().Height
-			pos = pos.Subtract(fyne.NewSize(0, topHeight))
-		}
+	if chromeBoxOffset := mc.chromeBoxVerticalOffset(); chromeBoxOffset > 0 {
+		pos = pos.SubtractXY(0, chromeBoxOffset)
 	}
 	return pos.Subtract(inset)
 }
