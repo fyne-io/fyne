@@ -94,9 +94,15 @@ func (w *BaseWidget) Show() {
 		return
 	}
 
-	w.SetFieldsAndRefresh(func() {
-		w.Hidden = false
-	})
+	w.propertyLock.Lock()
+	w.Hidden = false
+	w.propertyLock.Unlock()
+
+	impl := w.super()
+	if impl == nil {
+		return
+	}
+	impl.Refresh()
 }
 
 // Hide this widget so it is no longer visible
@@ -154,23 +160,6 @@ func (w *BaseWidget) themeWithLock() fyne.Theme {
 	}
 
 	return cached
-}
-
-// SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
-// This method is a guaranteed thread-safe way of directly manipulating widget fields.
-// Widgets extending BaseWidget should use this in their setter functions.
-//
-// Since: 2.5
-func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
-	w.propertyLock.Lock()
-	f()
-	w.propertyLock.Unlock()
-
-	impl := w.super()
-	if impl == nil {
-		return
-	}
-	impl.Refresh()
 }
 
 // super will return the actual object that this represents.
