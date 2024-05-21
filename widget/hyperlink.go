@@ -275,13 +275,12 @@ func (hl *Hyperlink) syncSegments() {
 				Text: hl.Text,
 			},
 		}
-		return
+	} else {
+		segment := hl.provider.Segments[0].(*TextSegment)
+		segment.Style.Alignment = hl.Alignment
+		segment.Style.TextStyle = hl.TextStyle
+		segment.Text = hl.Text
 	}
-
-	segment := hl.provider.Segments[0].(*TextSegment)
-	segment.Style.Alignment = hl.Alignment
-	segment.Style.TextStyle = hl.TextStyle
-	segment.Text = hl.Text
 
 	hl.textSize = fyne.MeasureText(hl.Text, th.Size(theme.SizeNameText), hl.TextStyle)
 }
