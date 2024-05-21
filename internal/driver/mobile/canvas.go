@@ -189,7 +189,7 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 	c.size = size
 
-	var topOffset float32
+	var chromeBoxOffset float32
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
@@ -199,15 +199,17 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 			chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
 		}
 		if len(chromeBox.Objects) > 1 {
+			chromeBoxOffset = headSize.Height
+		}
+		if chromeBoxOffset > 0 {
 			headSize = fyne.NewSize(areaSize.Width, headSize.Height)
-			topOffset = headSize.Height
 		}
 		c.windowHead.Resize(headSize)
 		c.windowHead.Move(areaPos)
 	}
 
-	contentPos := areaPos.AddXY(0, topOffset)
-	contentSize := areaSize.SubtractWidthHeight(0, topOffset)
+	contentPos := areaPos.AddXY(0, chromeBoxOffset)
+	contentSize := areaSize.SubtractWidthHeight(0, chromeBoxOffset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
