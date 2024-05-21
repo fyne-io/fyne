@@ -470,6 +470,10 @@ func startProgress() {
 }
 
 func stopProgress() {
+	if infProgress == nil {
+		return
+	}
+
 	if !infProgress.Running() {
 		return
 	}
