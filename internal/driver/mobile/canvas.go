@@ -81,6 +81,10 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 }
 
+func (c *mobileCanvas) MinSize() fyne.Size {
+	return c.size // TODO check
+}
+
 func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	return c.onTypedKey
 }
@@ -91,6 +95,14 @@ func (c *mobileCanvas) OnTypedRune() func(rune) {
 
 func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+}
+
+func (c *mobileCanvas) Resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
+	c.sizeContent(size)
 }
 
 func (c *mobileCanvas) Scale() float32 {
@@ -113,18 +125,6 @@ func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
 
 func (c *mobileCanvas) Size() fyne.Size {
 	return c.size
-}
-
-func (c *mobileCanvas) MinSize() fyne.Size {
-	return c.size // TODO check
-}
-
-func (c *mobileCanvas) Resize(size fyne.Size) {
-	if size == c.size {
-		return
-	}
-
-	c.sizeContent(size)
 }
 
 func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
