@@ -45,7 +45,6 @@ type RichText struct {
 
 	visualCache map[RichTextSegment][]fyne.CanvasObject
 	cacheLock   sync.Mutex
-	minCache    fyne.Size
 }
 
 // NewRichText returns a new RichText widget that renders the given text and segments.
@@ -89,19 +88,18 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 // MinSize calculates the minimum size of a rich text widget.
 // This is based on the contained text with a standard amount of padding added.
 func (t *RichText) MinSize() fyne.Size {
-	// we don't return the minCache here, as any internal segments could have caused it to change...
 	t.ExtendBaseWidget(t)
 
-	min := t.BaseWidget.MinSize()
-	t.minCache = min
-	return min
+	// We don't return the cached value as any internal segments could have caused it to change...
+	t.ResetMinSizeCache()
+	return t.BaseWidget.MinSize()
 }
 
 // Refresh triggers a redraw of the rich text.
 //
 // Implements: fyne.Widget
 func (t *RichText) Refresh() {
-	t.minCache = fyne.Size{}
+	t.ResetMinSizeCache()
 	t.updateRowBounds()
 
 	for _, s := range t.Segments {
@@ -123,10 +121,11 @@ func (t *RichText) Resize(size fyne.Size) {
 	}
 
 	t.size.Store(size)
+	minSize := t.MinSize()
 
 	t.propertyLock.RLock()
 	segments := t.Segments
-	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
+	skipResize := !minSize.IsZero() && size.Width >= minSize.Width && size.Height >= minSize.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
 	t.propertyLock.RUnlock()
 
 	if skipResize {

@@ -96,7 +96,6 @@ type Entry struct {
 	ActionItem      fyne.CanvasObject `json:"-"`
 	binder          basicBinder
 	conversionError error
-	minCache        fyne.Size
 	multiLineRows   int // override global default number of visible lines
 
 	// undoStack stores the data necessary for undo/redo functionality
@@ -402,20 +401,8 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 //
 // Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
-	e.propertyLock.RLock()
-	cached := e.minCache
-	e.propertyLock.RUnlock()
-	if !cached.IsZero() {
-		return cached
-	}
-
 	e.ExtendBaseWidget(e)
-	min := e.BaseWidget.MinSize()
-
-	e.propertyLock.Lock()
-	e.minCache = min
-	e.propertyLock.Unlock()
-	return min
+	return e.BaseWidget.MinSize()
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -478,14 +465,6 @@ func (e *Entry) Redo() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.propertyLock.Unlock()
 	e.Refresh()
-}
-
-func (e *Entry) Refresh() {
-	e.propertyLock.Lock()
-	e.minCache = fyne.Size{}
-	e.propertyLock.Unlock()
-
-	e.BaseWidget.Refresh()
 }
 
 // SelectedText returns the text currently selected in this Entry.

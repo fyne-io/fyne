@@ -79,21 +79,49 @@ func TestSimpleRenderer(t *testing.T) {
 	test.AssertImageMatches(t, "simple_renderer.png", window.Canvas().Capture())
 }
 
-type testWidget struct {
-	BaseWidget
-	obj fyne.CanvasObject
+func TestMinSizeCache(t *testing.T) {
+	label := NewLabel("a")
+
+	wid := newTestWidget(label)
+	assert.Equal(t, 0, wid.minSizeCalls)
+
+	minSize := wid.MinSize()
+	assert.NotEqual(t, 0, minSize)
+	assert.Equal(t, 1, wid.minSizeCalls)
+
+	wid.MinSize()
+	assert.Equal(t, 1, wid.minSizeCalls)
 }
 
-func newTestWidget(o fyne.CanvasObject) fyne.Widget {
+type testWidget struct {
+	BaseWidget
+	obj          fyne.CanvasObject
+	minSizeCalls int
+}
+
+func newTestWidget(o fyne.CanvasObject) *testWidget {
 	t := &testWidget{obj: o}
 	t.ExtendBaseWidget(t)
 	return t
 }
 
 func (t *testWidget) CreateRenderer() fyne.WidgetRenderer {
-	return NewSimpleRenderer(t.obj)
+	return &testRenderer{
+		WidgetRenderer: NewSimpleRenderer(t.obj),
+		widget:         t,
+	}
 }
 
 func waitForBinding() {
 	time.Sleep(time.Millisecond * 100) // data resolves on background thread
+}
+
+type testRenderer struct {
+	widget *testWidget
+	fyne.WidgetRenderer
+}
+
+func (r *testRenderer) MinSize() fyne.Size {
+	r.widget.minSizeCalls++
+	return r.WidgetRenderer.MinSize()
 }

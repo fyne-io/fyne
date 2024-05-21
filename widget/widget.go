@@ -16,6 +16,7 @@ import (
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	size     async.Size
+	minCache async.Size
 	position async.Position
 	Hidden   bool
 
@@ -69,6 +70,11 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
+	minCache := w.minCache.Load()
+	if !minCache.IsZero() {
+		return minCache
+	}
+
 	impl := w.super()
 
 	r := cache.Renderer(impl)
@@ -76,7 +82,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return fyne.Size{}
 	}
 
-	return r.MinSize()
+	minSize := r.MinSize()
+	w.minCache.Store(minSize)
+	return minSize
 }
 
 // Visible returns whether or not this widget should be visible.
@@ -123,6 +131,7 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
+	w.minCache.Store(fyne.Size{})
 	w.propertyLock.Lock()
 	w.themeCache = nil
 	w.propertyLock.Unlock()
@@ -156,6 +165,13 @@ func (w *BaseWidget) themeWithLock() fyne.Theme {
 	return cached
 }
 
+// ResetMinSizeCache resets the cached MinSize for this widget.
+//
+// Since: 2.5.0
+func (w *BaseWidget) ResetMinSizeCache() {
+	w.minCache.Store(fyne.Size{})
+}
+
 // SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
 // Widgets extending BaseWidget should use this in their setter functions.
@@ -170,6 +186,8 @@ func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 	if impl == nil {
 		return
 	}
+
+	w.minCache.Store(fyne.Size{})
 	impl.Refresh()
 }
 
