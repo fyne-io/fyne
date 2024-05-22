@@ -33,6 +33,10 @@ func NewDriver() fyne.Driver {
 	drv := &testDriver{windowsMutex: sync.RWMutex{}}
 	repository.Register("file", intRepo.NewFileRepository())
 
+	httpHandler := intRepo.NewHTTPRepository()
+	repository.Register("http", httpHandler)
+	repository.Register("https", httpHandler)
+
 	// make a single dummy window for rendering tests
 	drv.CreateWindow("")
 
