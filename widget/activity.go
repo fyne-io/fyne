@@ -42,7 +42,6 @@ func (a *Activity) Start() {
 		return // already started
 	}
 
-
 	a.Refresh()
 }
 
@@ -82,9 +81,9 @@ type activityRenderer struct {
 	dots   []fyne.CanvasObject
 	parent *Activity
 
-	bound  fyne.Size
-	maxCol color.NRGBA
-	maxRad float32
+	bound      fyne.Size
+	maxCol     color.NRGBA
+	maxRad     float32
 	wasStarted bool
 }
 
