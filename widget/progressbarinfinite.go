@@ -71,6 +71,7 @@ func (p *infProgressRenderer) Refresh() {
 		return // we refresh from the goroutine
 	} else if p.wasRunning {
 		p.stop()
+		return
 	}
 
 	th := p.progress.Theme()
