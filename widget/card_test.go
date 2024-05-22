@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -104,7 +105,7 @@ func TestCard_Layout(t *testing.T) {
 				Content:  tt.content,
 			}
 
-			window := test.NewWindow(card)
+			window := software.NewWindow(card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 			if tt.content != nil {
@@ -128,7 +129,7 @@ func TestCard_MinSize(t *testing.T) {
 func TestCard_Refresh(t *testing.T) {
 	text := widget.NewLabel("Test")
 	card := widget.NewCard("", "", text)
-	w := test.NewWindow(card)
+	w := software.NewWindow(card)
 	test.AssertRendersToMarkup(t, "card/content_label.xml", w.Canvas())
 
 	text.Text = "Changed"

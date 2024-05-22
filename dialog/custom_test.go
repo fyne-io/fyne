@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -17,7 +18,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 
 	label := widget.NewLabel("Content")
 	label.Alignment = fyne.TextAlignCenter
@@ -36,7 +37,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 }
 
 func TestShowCustom_Resize(t *testing.T) {
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(300, 300))
 
 	label := widget.NewLabel("Content")
@@ -52,7 +53,7 @@ func TestShowCustom_Resize(t *testing.T) {
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
 	label := widget.NewLabel("Content")
@@ -78,7 +79,7 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 func TestCustom_ResizeOnShow(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -100,7 +101,7 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 func TestConfirm_SetButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -123,7 +124,7 @@ func TestConfirm_SetButtons(t *testing.T) {
 func TestConfirmWithoutButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -136,7 +137,7 @@ func TestConfirmWithoutButtons(t *testing.T) {
 func TestCustomConfirm_Importance(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 

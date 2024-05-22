@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 )
@@ -14,7 +15,7 @@ func TestNewSimpleRenderer(t *testing.T) {
 	r := canvas.NewRectangle(color.Transparent)
 	o := &simpleWidget{obj: r}
 	o.ExtendBaseWidget(o)
-	w := test.NewWindow(o)
+	w := software.NewWindow(o)
 	w.Resize(fyne.NewSize(100, 100))
 
 	test.AssertRendersToMarkup(t, "simple_renderer.xml", w.Canvas())

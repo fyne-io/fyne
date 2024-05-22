@@ -1,4 +1,4 @@
-//go:build !android && !ios && !mobile
+//go:build !android && !ios && !mobile && !software
 
 package cache_test
 

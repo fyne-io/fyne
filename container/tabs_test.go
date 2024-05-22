@@ -3,8 +3,10 @@ package container
 import (
 	"testing"
 
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/internal/driver/software"
+	internalTest "fyne.io/fyne/v2/internal/test"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -33,7 +35,7 @@ func TestTab_ThemeChange(t *testing.T) {
 	tabs := NewAppTabs(
 		NewTabItem("a", widget.NewLabel("a")),
 		NewTabItem("b", widget.NewLabel("b")))
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	w.Resize(fyne.NewSize(180, 120))
 
 	initial := w.Canvas().Capture()

@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -72,7 +73,7 @@ func TestCheck_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
+			window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check/layout_"+name+".xml", window.Canvas())

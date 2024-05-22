@@ -4,9 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
+	"fyne.io/fyne/v2/test"
 )
 
 func TestActivity_Start(t *testing.T) {
@@ -15,7 +17,7 @@ func TestActivity_Start(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 
 	a := NewActivity()
-	w := test.NewWindow(a)
+	w := software.NewWindow(a)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 
@@ -34,7 +36,7 @@ func TestActivity_Stop(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 
 	a := NewActivity()
-	w := test.NewWindow(a)
+	w := software.NewWindow(a)
 	defer w.Close()
 	w.Resize(fyne.NewSize(50, 50))
 

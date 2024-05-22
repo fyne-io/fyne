@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -36,7 +37,7 @@ func Test_colorChannel_Layout(t *testing.T) {
 			color := newColorChannel(tt.name, min, max, tt.value, nil)
 			color.Resize(size)
 
-			window := test.NewWindow(color)
+			window := software.NewWindow(color)
 
 			test.AssertRendersToImage(t, "color/channel_layout_"+name+".png", window.Canvas())
 

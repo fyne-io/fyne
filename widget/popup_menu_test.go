@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
@@ -93,7 +94,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 	test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	w := software.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
 	m := widget.NewPopUpMenu(fyne.NewMenu(
 		"",
@@ -106,7 +107,7 @@ func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 func setupPopUpMenuWithSubmenusTest(callback func(string)) (*widget.PopUpMenu, fyne.Window) {
 	test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	w := software.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(800, 600))
 	itemA := fyne.NewMenuItem("Option A", func() { callback("Option A") })
 	itemB := fyne.NewMenuItem("Option B", func() { callback("Option B") })

@@ -1,4 +1,4 @@
-//go:build !android && !ios && !mobile && !wasm && !test_web_driver
+//go:build !android && !ios && !mobile && !wasm && !test_web_driver && !software
 
 package cache
 

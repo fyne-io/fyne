@@ -1,4 +1,4 @@
-//go:build !ci || !darwin
+//go:build !ci || !software || !darwin
 
 package animation
 

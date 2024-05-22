@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -17,7 +18,7 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 	ch := make(chan int)
 	cnf := NewConfirm("Test", "Test", func(_ bool) {
 		ch <- 42
-	}, test.NewWindow(nil))
+	}, software.NewWindow(nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.SetOnClosed(func() {
@@ -34,7 +35,7 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 
 func TestDialog_ConfirmCallbackOnlyOnClosed(t *testing.T) {
 	ch := make(chan int)
-	cnf := NewConfirm("Test", "Test", nil, test.NewWindow(nil))
+	cnf := NewConfirm("Test", "Test", nil, software.NewWindow(nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.SetOnClosed(func() {
@@ -52,7 +53,7 @@ func TestDialog_ConfirmCallbackOnlyOnConfirm(t *testing.T) {
 	ch := make(chan int)
 	cnf := NewConfirm("Test", "Test", func(_ bool) {
 		ch <- 42
-	}, test.NewWindow(nil))
+	}, software.NewWindow(nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.Show()
@@ -64,7 +65,7 @@ func TestDialog_ConfirmCallbackOnlyOnConfirm(t *testing.T) {
 }
 
 func TestConfirmDialog_Resize(t *testing.T) {
-	window := test.NewWindow(nil)
+	window := software.NewWindow(nil)
 	window.Resize(fyne.NewSize(600, 400))
 	defer window.Close()
 	d := NewConfirm("Test", "Test", nil, window)
@@ -72,32 +73,32 @@ func TestConfirmDialog_Resize(t *testing.T) {
 	theDialog := d.dialog
 	d.dialog.Show() // we cannot check window size if not shown
 
-	//Test resize - normal size scenario
-	size := fyne.NewSize(300, 180) //normal size to fit (600,400)
+	// Test resize - normal size scenario
+	size := fyne.NewSize(300, 180) // normal size to fit (600,400)
 	theDialog.Resize(size)
 	expectedWidth := float32(300)
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
-	//Test resize - normal size scenario again
-	size = fyne.NewSize(310, 280) //normal size to fit (600,400)
+	// Test resize - normal size scenario again
+	size = fyne.NewSize(310, 280) // normal size to fit (600,400)
 	theDialog.Resize(size)
 	expectedWidth = 310
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight = 280
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test resize - greater than max size scenario
+	// Test resize - greater than max size scenario
 	size = fyne.NewSize(800, 600)
 	theDialog.Resize(size)
-	expectedWidth = 600                                        //since win width only 600
-	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) //max, also work
+	expectedWidth = 600                                        // since win width only 600
+	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) // max, also work
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                         //since win heigh only 400
-	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) //max, also work
+	expectedHeight = 400                                         // since win heigh only 400
+	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) // max, also work
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test again - extreme small size
+	// Test again - extreme small size
 	size = fyne.NewSize(1, 1)
 	theDialog.Resize(size)
 	expectedWidth = theDialog.win.Content.MinSize().Width
@@ -109,7 +110,7 @@ func TestConfirmDialog_Resize(t *testing.T) {
 func TestConfirm_Importance(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 

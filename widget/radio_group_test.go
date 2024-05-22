@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -14,11 +15,11 @@ import (
 func TestRadioGroup_FocusRendering(t *testing.T) {
 	t.Run("gain/lose focus", func(t *testing.T) {
 		radio := widget.NewRadioGroup([]string{"Option A", "Option B", "Option C"}, nil)
-		window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
+		window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
 		defer window.Close()
 		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		test.AssertRendersToMarkup(t, "radio_group/focus_none_focused_none_selected.xml", canvas)
 		canvas.FocusNext()
 		test.AssertRendersToMarkup(t, "radio_group/focus_a_focused_none_selected.xml", canvas)
@@ -39,11 +40,11 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 
 	t.Run("disable/enable focused", func(t *testing.T) {
 		radio := &widget.RadioGroup{Options: []string{"Option A", "Option B", "Option C"}}
-		window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
+		window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
 		defer window.Close()
 		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		canvas.FocusNext()
 		radio.Disable()
 		test.AssertRendersToMarkup(t, "radio_group/focus_disabled_none_selected.xml", canvas)
@@ -53,11 +54,11 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 
 	t.Run("append disabled", func(t *testing.T) {
 		radio := &widget.RadioGroup{Options: []string{"Option A", "Option B"}}
-		window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
+		window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
 		defer window.Close()
 		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		radio.Disable()
 		test.AssertRendersToMarkup(t, "radio_group/disabled_none_selected.xml", canvas)
 		radio.Append("Option C")
@@ -155,7 +156,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 				radio.Disable()
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
+			window := software.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
 			window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "radio_group/layout_"+name+".xml", window.Canvas())
@@ -167,12 +168,12 @@ func TestRadioGroup_Layout(t *testing.T) {
 
 func TestRadioGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
 	radio := &widget.RadioGroup{Options: []string{"Option A", "Option B", "Option C"}}
-	window := test.NewWindow(radio)
+	window := software.NewWindow(radio)
 	defer window.Close()
 
 	assert.Equal(t, "", radio.Selected)
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	canvas.FocusNext()
 	canvas.FocusNext()
 	test.Type(canvas.Focused(), " ")

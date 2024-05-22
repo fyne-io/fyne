@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -21,7 +22,7 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(
+	w := software.NewWindow(
 		container.NewDocTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
 	)
 	defer w.Close()
@@ -42,7 +43,7 @@ func TestDocTabs_ChangeItemContent(t *testing.T) {
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
 	tabs := container.NewDocTabs(item1, item2)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(150, 150))
@@ -66,7 +67,7 @@ func TestDocTabs_ChangeItemIcon(t *testing.T) {
 	item1 := &container.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
 	tabs := container.NewDocTabs(item1, item2)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(150, 150))
@@ -90,7 +91,7 @@ func TestDocTabs_ChangeItemText(t *testing.T) {
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
 	tabs := container.NewDocTabs(item1, item2)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(150, 150))
@@ -113,7 +114,7 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	tabs := container.NewDocTabs(item1)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(300, 150))
@@ -167,7 +168,7 @@ func TestDocTabs_HoverButtons(t *testing.T) {
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
 	tabs := container.NewDocTabs(item1, item2)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(150, 150))
@@ -198,7 +199,7 @@ func TestDocTabs_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(nil)
+	w := software.NewWindow(nil)
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
@@ -303,7 +304,7 @@ func TestDocTabs_SetTabLocation(t *testing.T) {
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
 	item3 := &container.TabItem{Text: "Test3", Content: widget.NewLabel("Text 3")}
 	tabs := container.NewDocTabs(item1, item2, item3)
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
@@ -339,7 +340,7 @@ func TestDocTabs_Tapped(t *testing.T) {
 	tabs.CreateTab = func() *container.TabItem {
 		return &container.TabItem{Text: "Another", Content: widget.NewLabel("Another Tab")}
 	}
-	w := test.NewWindow(tabs)
+	w := software.NewWindow(tabs)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(380, 100))

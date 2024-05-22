@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -78,7 +79,7 @@ func TestHyperlink_Focus(t *testing.T) {
 	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	hyperlink := &Hyperlink{Text: "Test"}
-	w := test.NewWindow(hyperlink)
+	w := software.NewWindow(hyperlink)
 	w.SetPadded(false)
 	defer w.Close()
 	w.Resize(hyperlink.MinSize())
@@ -173,7 +174,7 @@ func TestHyperlink_ThemeOverride(t *testing.T) {
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
-	w := test.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
+	w := software.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
 		Objects: []fyne.CanvasObject{bg, hyperlink}})
 	w.SetPadded(false)
 	defer w.Close()

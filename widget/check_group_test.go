@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -13,11 +14,11 @@ import (
 func TestCheckGroup_FocusRendering(t *testing.T) {
 	t.Run("gain/lose focus", func(t *testing.T) {
 		check := widget.NewCheckGroup([]string{"Option A", "Option B", "Option C"}, nil)
-		window := test.NewWindow(check)
+		window := software.NewWindow(check)
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		test.AssertRendersToMarkup(t, "check_group/focus_none_focused_none_selected.xml", canvas)
 		canvas.FocusNext()
 		test.AssertRendersToMarkup(t, "check_group/focus_a_focused_none_selected.xml", canvas)
@@ -38,11 +39,11 @@ func TestCheckGroup_FocusRendering(t *testing.T) {
 
 	t.Run("disable/enable focused", func(t *testing.T) {
 		check := &widget.CheckGroup{Options: []string{"Option A", "Option B", "Option C"}}
-		window := test.NewWindow(check)
+		window := software.NewWindow(check)
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		canvas.FocusNext()
 		check.Disable()
 		test.AssertRendersToMarkup(t, "check_group/focus_disabled_none_selected.xml", canvas)
@@ -52,11 +53,11 @@ func TestCheckGroup_FocusRendering(t *testing.T) {
 
 	t.Run("append disabled", func(t *testing.T) {
 		check := &widget.CheckGroup{Options: []string{"Option A", "Option B"}}
-		window := test.NewWindow(check)
+		window := software.NewWindow(check)
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		check.Disable()
 		test.AssertRendersToMarkup(t, "check_group/disabled_none_selected.xml", canvas)
 		check.Append("Option C")
@@ -154,7 +155,7 @@ func TestCheckGroup_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(check)
+			window := software.NewWindow(check)
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check_group/layout_"+name+".xml", window.Canvas())
@@ -166,13 +167,13 @@ func TestCheckGroup_Layout(t *testing.T) {
 
 func TestCheckGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
 	check := &widget.CheckGroup{Options: []string{"Option A", "Option B", "Option C"}}
-	window := test.NewWindow(check)
+	window := software.NewWindow(check)
 	defer window.Close()
 
 	var empty []string
 	assert.Equal(t, empty, check.Selected)
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	canvas.FocusNext()
 	canvas.FocusNext()
 	test.Type(canvas.Focused(), " ")

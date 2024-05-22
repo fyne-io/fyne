@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -167,11 +168,11 @@ func TestTree_Focus(t *testing.T) {
 		"foo": {"foobar", "barbar"},
 	}
 	tree := NewTreeWithStrings(treeData)
-	window := test.NewWindow(tree)
+	window := software.NewWindow(tree)
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -214,11 +215,11 @@ func TestTree_Keyboard(t *testing.T) {
 		"item_1_2": {"item_1_2_1", "item_1_2_2"},
 	}
 	tree := NewTreeWithStrings(treeData)
-	window := test.NewWindow(tree)
+	window := software.NewWindow(tree)
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(250, 400)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	// Start with a fully collapsed tree
@@ -570,7 +571,7 @@ func TestTree_ScrollTo(t *testing.T) {
 	tree.OpenBranch("D")
 	tree.OpenBranch("E")
 
-	w := test.NewWindow(tree)
+	w := software.NewWindow(tree)
 	defer w.Close()
 
 	var (
@@ -606,7 +607,7 @@ func TestTree_ScrollToBottom(t *testing.T) {
 	tree.OpenBranch("D")
 	tree.OpenBranch("E")
 
-	w := test.NewWindow(tree)
+	w := software.NewWindow(tree)
 	defer w.Close()
 
 	var (
@@ -675,7 +676,7 @@ func TestTree_ScrollToTop(t *testing.T) {
 	tree.OpenBranch("D")
 	tree.OpenBranch("E")
 
-	w := test.NewWindow(tree)
+	w := software.NewWindow(tree)
 	defer w.Close()
 
 	tree.ScrollTo("F")
@@ -878,7 +879,7 @@ func TestTree_RefreshItem(t *testing.T) {
 	}
 	tree.OpenBranch("foo")
 
-	c := test.NewWindow(tree)
+	c := software.NewWindow(tree)
 	c.Resize(fyne.NewSize(100, 100))
 
 	r := test.WidgetRenderer(tree.scroller.Content.(*treeContent)).(*treeContentRenderer)

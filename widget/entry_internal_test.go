@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/driver/software"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -63,7 +64,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
 
-	window := test.NewWindow(entry)
+	window := software.NewWindow(entry)
 	defer window.Close()
 	window.SetPadded(false)
 	window.Resize(entry.MinSize())
@@ -391,7 +392,7 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	e := NewEntry()
 	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
 
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
 
 	w.Canvas().Focus(e)
@@ -409,7 +410,7 @@ func TestEntry_Tab(t *testing.T) {
 	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)
 	assert.Equal(t, "\tb", r.Objects()[1].(*canvas.Text).Text)
 
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-content.png", w.Canvas().Capture())
@@ -428,7 +429,7 @@ func TestEntry_TabSelection(t *testing.T) {
 
 	assert.Equal(t, "\tb", e.SelectedText())
 
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	w.Resize(fyne.NewSize(86, 86))
 	w.Canvas().Focus(e)
 	test.AssertImageMatches(t, "entry/tab-select.png", w.Canvas().Capture())

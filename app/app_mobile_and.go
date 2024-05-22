@@ -1,4 +1,4 @@
-//go:build !ci && android
+//go:build !ci && !software && android
 
 package app
 

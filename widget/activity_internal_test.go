@@ -3,6 +3,7 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -12,7 +13,7 @@ func TestActivity_Animation(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 
 	a := NewActivity()
-	w := test.NewWindow(a)
+	w := software.NewWindow(a)
 	w.SetPadded(false)
 	defer w.Close()
 	w.Resize(a.MinSize())

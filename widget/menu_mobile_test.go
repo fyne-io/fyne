@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/driver/software"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -18,7 +19,7 @@ func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
@@ -138,7 +139,7 @@ func TestMenu_Dragging(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := software.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()

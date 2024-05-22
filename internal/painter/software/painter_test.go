@@ -8,7 +8,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/painter/software"
+	canvas2 "fyne.io/fyne/v2/internal/driver/software"
+	painter "fyne.io/fyne/v2/internal/painter/software"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -23,13 +24,13 @@ func TestPainter_paintCircle(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewCircle(color.Black)
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_circle.png", p.Capture(c))
 }
 
 func TestPainter_paintCircleStroke(t *testing.T) {
@@ -38,13 +39,13 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 	obj.StrokeColor = color.Black
 	obj.StrokeWidth = 4
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Capture(c))
 }
 
 func TestPainter_paintGradient_clipped(t *testing.T) {
@@ -56,25 +57,25 @@ func TestPainter_paintGradient_clipped(t *testing.T) {
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-30, -30)})
 	cont := container.NewWithoutLayout(scroll)
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
 	c.Resize(fyne.NewSize(70, 70))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_gradient_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_gradient_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintImage(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
@@ -88,26 +89,26 @@ func TestPainter_paintImage_clipped(t *testing.T) {
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-15, -15)})
 	cont := container.NewWithoutLayout(scroll)
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
 	c.Resize(fyne.NewSize(70, 70))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_image_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_image_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintImage_scalePixels(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
 	img.ScaleMode = canvas.ImageScalePixels
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScalePixels.png", target)
 }
 
@@ -115,13 +116,13 @@ func TestPainter_paintImage_scaleSmooth(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
 	img.ScaleMode = canvas.ImageScaleSmooth
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScaleSmooth.png", target)
 }
 
@@ -129,35 +130,35 @@ func TestPainter_paintImage_scaleFastest(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
 	img.ScaleMode = canvas.ImageScaleFastest
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_ImageScaleFastest.png", target)
 }
 
 func TestPainter_paintImage_stretchX(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(100, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_stretchx.png", target)
 }
 
 func TestPainter_paintImage_stretchY(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(50, 100))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_stretchy.png", target)
 }
 
@@ -166,13 +167,13 @@ func TestPainter_paintImage_contain(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.ScaleMode = canvas.ImageScalePixels
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_contain.png", target)
 }
 
@@ -182,13 +183,13 @@ func TestPainter_paintImage_containX(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.ScaleMode = canvas.ImageScalePixels
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(100, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_containx.png", target)
 }
 
@@ -198,13 +199,13 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.ScaleMode = canvas.ImageScalePixels
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 100))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
@@ -213,17 +214,17 @@ func TestPainter_paintLine(t *testing.T) {
 	obj := canvas.NewLine(color.Black)
 	obj.StrokeWidth = 6
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_line.png", p.Capture(c))
 }
 
 func TestPainter_paintLine_thin(t *testing.T) {
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	lines := [5]*canvas.Line{}
 	sws := []float32{4, 2, 1, 0.5, 0.3}
 	for i, sw := range sws {
@@ -236,8 +237,8 @@ func TestPainter_paintLine_thin(t *testing.T) {
 	c.SetContent(container.NewWithoutLayout(lines[0], lines[1], lines[2], lines[3], lines[4]))
 	c.Resize(fyne.NewSize(109, 28))
 
-	p := software.NewPainter()
-	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
+	p := painter.NewPainter()
+	test.AssertImageMatches(t, "draw_line_thin.png", p.Capture(c))
 }
 
 func TestPainter_paintRaster(t *testing.T) {
@@ -250,13 +251,13 @@ func TestPainter_paintRaster(t *testing.T) {
 		return color.Black
 	})
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_raster.png", target)
 }
 
@@ -270,14 +271,14 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 		return color.Black
 	})
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
 	c.SetScale(5.0)
 	c.Resize(fyne.NewSize(5, 5))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	target := p.Paint(c)
+	target := p.Capture(c)
 	test.AssertImageMatches(t, "draw_raster_scale.png", target)
 }
 
@@ -310,13 +311,13 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
 	cont := container.NewWithoutLayout(scroll)
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
 	c.Resize(fyne.NewSize(70, 70))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintRectangle_stroke(t *testing.T) {
@@ -325,13 +326,13 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	obj.StrokeWidth = 5
 	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Capture(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {
@@ -341,13 +342,13 @@ func TestPainter_paintText_clipped(t *testing.T) {
 	scroll.Resize(fyne.NewSize(50, 50))
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
 	cont := container.NewWithoutLayout(scroll)
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(cont)
 	c.Resize(fyne.NewSize(70, 70))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_clipped.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_clipped.png", p.Capture(c))
 }
 
 func TestPainter_paintText_boldItalicClip(t *testing.T) {
@@ -356,26 +357,26 @@ func TestPainter_paintText_boldItalicClip(t *testing.T) {
 	text.TextStyle.Bold = true
 	text.TextStyle.Italic = true
 	text.TextSize = 42
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(text)
 	c.Resize(fyne.NewSize(70, text.MinSize().Height))
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_bolditalic.png", p.Capture(c))
 }
 
 func TestPainter_paintText_scale2(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	text := canvas.NewText("scale2", theme.ForegroundColor())
 	text.TextSize = 18
-	c := test.NewCanvas()
+	c := canvas2.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(text)
 	c.Resize(fyne.NewSize(70, text.MinSize().Height))
 
 	c.SetScale(2)
-	p := software.NewPainter()
+	p := painter.NewPainter()
 
-	test.AssertImageMatches(t, "draw_text_scale2.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_text_scale2.png", p.Capture(c))
 }

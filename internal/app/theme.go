@@ -27,6 +27,8 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 		}
 	}
 	content.Refresh()
+	// TODO: This seems wrong
+	canv.Refresh(content)
 }
 
 // ApplySettings ensures that all widgets and themeable objects in an application will be updated for the current theme.

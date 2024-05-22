@@ -8,12 +8,12 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/widget"
 )
 
 func TestOverlayStack(t *testing.T) {
-	s := &internal.OverlayStack{Canvas: test.NewCanvas()}
+	s := &internal.OverlayStack{Canvas: software.NewCanvas()}
 	o1 := widget.NewLabel("A")
 	o2 := widget.NewLabel("B")
 	o3 := widget.NewLabel("C")

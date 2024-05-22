@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -16,7 +17,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
@@ -54,7 +55,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
@@ -85,7 +86,7 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	defer test.NewApp()
 
 	e := NewSelectEntry([]string{"one"})
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	entrySize := e.MinSize()
 	w.Resize(entrySize.Add(fyne.NewSize(100, 100)))
@@ -117,7 +118,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
@@ -185,7 +186,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 	defer test.NewApp()
 
 	e := NewSelectEntry([]string{"A", "B", "C"})
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
@@ -207,7 +208,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 	defer test.NewApp()
 
 	e := NewSelectEntry([]string{})
-	w := test.NewWindow(e)
+	w := software.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
