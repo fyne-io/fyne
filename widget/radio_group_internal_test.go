@@ -317,5 +317,6 @@ func radioGroupTestTapItem(t *testing.T, radio *RadioGroup, item int) {
 }
 
 func radioGroupTestItemRenderer(t *testing.T, radio *RadioGroup, item int) *radioItemRenderer {
+	t.Cleanup(func() { cache.DestroyRenderer(radio) })
 	return cache.Renderer(test.WidgetRenderer(radio).Objects()[item].(fyne.Widget)).(*radioItemRenderer)
 }
