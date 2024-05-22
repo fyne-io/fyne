@@ -989,7 +989,7 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 
 func (b *branch) update(uid string, depth int) {
 	b.treeNode.update(uid, depth)
-	b.icon.(*branchIcon).update(uid, depth)
+	b.icon.(*branchIcon).update(uid)
 }
 
 var _ fyne.Tappable = (*branchIcon)(nil)
@@ -1021,7 +1021,7 @@ func (i *branchIcon) Tapped(*fyne.PointEvent) {
 	i.tree.ToggleBranch(i.uid)
 }
 
-func (i *branchIcon) update(uid string, depth int) {
+func (i *branchIcon) update(uid string) {
 	i.uid = uid
 	i.Refresh()
 }
