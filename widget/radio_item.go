@@ -105,12 +105,8 @@ func (i *radioItem) SetSelected(selected bool) {
 //
 // Implements: fyne.Tappable
 func (i *radioItem) Tapped(_ *fyne.PointEvent) {
-	if !i.focused && !fyne.CurrentDevice().IsMobile() {
-		impl := i.super()
-
-		if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
+	if !i.focused {
+		focusIfNotMobile(i.super())
 	}
 	i.toggle()
 }

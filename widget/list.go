@@ -365,15 +365,15 @@ func (l *List) contentMinSize() fyne.Size {
 	}
 
 	height := float32(0)
+	totalCustom := 0
 	templateHeight := l.itemMin.Height
-	for item := 0; item < items; item++ {
-		itemHeight, ok := l.itemHeights[item]
-		if ok {
+	for id, itemHeight := range l.itemHeights {
+		if id < items {
+			totalCustom++
 			height += itemHeight
-		} else {
-			height += templateHeight
 		}
 	}
+	height += float32(items-totalCustom) * templateHeight
 
 	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
 }

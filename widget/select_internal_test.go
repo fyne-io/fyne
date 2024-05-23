@@ -47,11 +47,16 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 	sel.Resize(sel.MinSize())
 	sel.Refresh()
 
+	path := "select/desktop/tap_animation.png"
+	if fyne.CurrentDevice().IsMobile() {
+		path = "select/mobile/tap_animation.png"
+	}
+
 	render1 := test.WidgetRenderer(sel).(*selectRenderer)
 	test.Tap(sel)
 	sel.popUp.Hide()
 	sel.tapAnim.Tick(0.5)
-	test.AssertImageMatches(t, "select/tap_animation.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, path, w.Canvas().Capture())
 
 	cache.DestroyRenderer(sel)
 	sel.Refresh()
@@ -63,5 +68,5 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 	test.Tap(sel)
 	sel.popUp.Hide()
 	sel.tapAnim.Tick(0.5)
-	test.AssertImageMatches(t, "select/tap_animation.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, path, w.Canvas().Capture())
 }
