@@ -5,7 +5,6 @@ package glfw
 import (
 	"strconv"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
 )
 
@@ -15,8 +14,8 @@ func (w *window) GetWindowHandle() string {
 	return "x11:" + strconv.FormatUint(uint64(xid), 16)
 }
 
-// assert we are implementing fyne.NativeWindow
-var _ fyne.NativeWindow = (*window)(nil)
+// assert we are implementing driver.NativeWindow
+var _ driver.NativeWindow = (*window)(nil)
 
 func (w *window) RunNative(f func(any) error) error {
 	var err error

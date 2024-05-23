@@ -3,7 +3,6 @@
 package glfw
 
 import (
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
 )
 
@@ -12,8 +11,8 @@ func (w *window) GetWindowHandle() string {
 	return "" // TODO: Find a way to get the Wayland handle for xdg_foreign protocol. Return "wayland:{id}".
 }
 
-// assert we are implementing fyne.NativeWindow
-var _ fyne.NativeWindow = (*window)(nil)
+// assert we are implementing driver.NativeWindow
+var _ driver.NativeWindow = (*window)(nil)
 
 func (w *window) RunNative(f func(any) error) error {
 	var err error

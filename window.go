@@ -103,13 +103,3 @@ type Window interface {
 	// Clipboard returns the system clipboard
 	Clipboard() Clipboard
 }
-
-// NativeWindow is an extension interface for Window that gives access
-// to platform-native features of application windows.
-//
-// Since: 2.5
-type NativeWindow interface {
-	// RunNative  provides a way to execute code within the platform-specific runtime context for a window.
-	// The context types are defined in the `driver` package and the specific context passed will differ by platform.
-	RunNative(func(context any) error) error
-}
