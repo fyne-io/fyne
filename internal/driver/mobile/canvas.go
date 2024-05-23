@@ -81,6 +81,10 @@ func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 }
 
+func (c *mobileCanvas) MinSize() fyne.Size {
+	return c.size // TODO check
+}
+
 func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	return c.onTypedKey
 }
@@ -91,6 +95,14 @@ func (c *mobileCanvas) OnTypedRune() func(rune) {
 
 func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+}
+
+func (c *mobileCanvas) Resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
+	c.sizeContent(size)
 }
 
 func (c *mobileCanvas) Scale() float32 {
@@ -115,8 +127,29 @@ func (c *mobileCanvas) Size() fyne.Size {
 	return c.size
 }
 
-func (c *mobileCanvas) MinSize() fyne.Size {
-	return c.size // TODO check
+func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
+	if c.menu != nil {
+		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+	}
+	if c.windowHead != nil {
+		app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
+	}
+}
+
+func (c *mobileCanvas) chromeBoxVerticalOffset() float32 {
+	if c.windowHead == nil {
+		return 0
+	}
+
+	chromeBox := c.windowHead.(*fyne.Container)
+	if c.padded {
+		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+	}
+	if len(chromeBox.Objects) > 1 {
+		return c.windowHead.MinSize().Height
+	}
+
+	return 0
 }
 
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
@@ -148,14 +181,6 @@ func (c *mobileCanvas) overlayChanged() {
 	c.SetDirty()
 }
 
-func (c *mobileCanvas) Resize(size fyne.Size) {
-	if size == c.size {
-		return
-	}
-
-	c.sizeContent(size)
-}
-
 func (c *mobileCanvas) setContent(content fyne.CanvasObject) {
 	c.content = content
 	c.SetContentTreeAndFocusMgr(content)
@@ -174,59 +199,45 @@ func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
 	c.SetMobileWindowHeadTree(head)
 }
 
-func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
-	if c.menu != nil {
-		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-	}
-	if c.windowHead != nil {
-		app.ApplyThemeTo(c.windowHead, c) // Ensure our child windows get the theme change message as it's out-of-tree
-	}
-}
-
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
 	c.size = size
 
-	offset := fyne.NewPos(0, 0)
+	chromeBoxOffset := c.chromeBoxVerticalOffset()
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
-		topHeight := c.windowHead.MinSize().Height
-
-		chromeBox := c.windowHead.(*fyne.Container)
-		if c.padded {
-			chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
-		}
-		if len(chromeBox.Objects) > 1 {
-			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
-			offset = fyne.NewPos(0, topHeight)
-			areaSize = areaSize.Subtract(offset)
+		var headSize fyne.Size
+		if chromeBoxOffset > 0 {
+			headSize = fyne.NewSize(areaSize.Width, chromeBoxOffset)
 		} else {
-			c.windowHead.Resize(c.windowHead.MinSize())
+			headSize = c.windowHead.MinSize()
 		}
+		c.windowHead.Resize(headSize)
 		c.windowHead.Move(areaPos)
 	}
 
-	topLeft := areaPos.Add(offset)
+	contentPos := areaPos.AddXY(0, chromeBoxOffset)
+	contentSize := areaSize.SubtractWidthHeight(0, chromeBoxOffset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(areaSize)
-			overlay.Move(topLeft)
+			overlay.Resize(contentSize)
+			overlay.Move(contentPos)
 		}
 	}
 
 	if c.padded {
-		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		c.content.Resize(contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(areaSize)
-		c.content.Move(topLeft)
+		c.content.Resize(contentSize)
+		c.content.Move(contentPos)
 	}
 }
 
