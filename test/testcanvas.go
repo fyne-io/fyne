@@ -219,11 +219,11 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 		return
 	}
 
-	padding := fyne.NewSize(0, 0)
+	minSize := content.MinSize()
 	if c.padded {
-		padding = fyne.NewSquareSize(theme.Padding() * 2)
+		minSize = minSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
 	}
-	c.Resize(content.MinSize().Add(padding))
+	c.Resize(minSize)
 }
 
 func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
