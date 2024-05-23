@@ -25,8 +25,7 @@ type testWindow struct {
 //
 // Since: 2.5
 func NewTempWindow(t testing.TB, content fyne.CanvasObject) fyne.Window {
-	window := fyne.CurrentApp().NewWindow("")
-	window.SetContent(content)
+	window := NewWindow(content)
 	t.Cleanup(window.Close)
 	return window
 }
