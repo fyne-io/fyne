@@ -134,10 +134,8 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
 func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(fyne.Draggable)
+		return ok
 	}
 	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
@@ -189,10 +187,8 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		oldHovered = tc.hovered
 	}
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(desktop.Hoverable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(desktop.Hoverable)
+		return ok
 	}
 	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
@@ -223,10 +219,8 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
 func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Scrollable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(fyne.Scrollable)
+		return ok
 	}
 	o, _, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
@@ -343,18 +337,15 @@ func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}
-	unfocus := true
+
 	if focus, ok := obj.(fyne.Focusable); ok {
-		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
-			unfocus = false
-			if focus != c.Focused() {
-				unfocus = true
-			}
+		dis, ok := obj.(fyne.Disableable)
+		if (!ok || !dis.Disabled()) && focus == c.Focused() {
+			return
 		}
 	}
-	if unfocus {
-		c.Unfocus()
-	}
+
+	c.Unfocus()
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

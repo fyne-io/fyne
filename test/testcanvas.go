@@ -14,9 +14,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var (
-	dummyCanvas fyne.Canvas
-)
+var dummyCanvas WindowlessCanvas
 
 // WindowlessCanvas provides functionality for a canvas to operate without a window
 type WindowlessCanvas interface {
@@ -91,7 +89,8 @@ func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 
 func (c *testCanvas) Capture() image.Image {
 	cache.Clean(true)
-	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, c.Size().Width), scale.ToScreenCoordinate(c, c.Size().Height))
+	size := c.Size()
+	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
 	img := image.NewNRGBA(bounds)
 	if !c.transparent {
 		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
@@ -194,8 +193,9 @@ func (c *testCanvas) Resize(size fyne.Size) {
 	}
 
 	if padded {
-		content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		padding := theme.Padding()
+		content.Resize(size.Subtract(fyne.NewSquareSize(padding * 2)))
+		content.Move(fyne.NewSquareOffsetPos(padding))
 	} else {
 		content.Resize(size)
 		content.Move(fyne.NewPos(0, 0))
@@ -221,7 +221,7 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 
 	padding := fyne.NewSize(0, 0)
 	if c.padded {
-		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+		padding = fyne.NewSquareSize(theme.Padding() * 2)
 	}
 	c.Resize(content.MinSize().Add(padding))
 }
@@ -276,11 +276,12 @@ func (c *testCanvas) focusManager() *app.FocusManager {
 }
 
 func (c *testCanvas) objectTrees() []fyne.CanvasObject {
-	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
+	overlays := c.Overlays().List()
+	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
 	if c.content != nil {
 		trees = append(trees, c.content)
 	}
-	trees = append(trees, c.Overlays().List()...)
+	trees = append(trees, overlays...)
 	return trees
 }
 
