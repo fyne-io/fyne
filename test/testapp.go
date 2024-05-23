@@ -25,7 +25,7 @@ type testApp struct {
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
-	lifecycle    fyne.Lifecycle
+	lifecycle    app.Lifecycle
 	cloud        fyne.CloudProvider
 
 	// user action variables
@@ -99,7 +99,7 @@ func (a *testApp) Storage() fyne.Storage {
 }
 
 func (a *testApp) Lifecycle() fyne.Lifecycle {
-	return a.lifecycle
+	return &a.lifecycle
 }
 
 func (a *testApp) Metadata() fyne.AppMetadata {
@@ -152,8 +152,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver),
-		lifecycle: &app.Lifecycle{}}
+	test := &testApp{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver)}
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
 	painter.ClearFontCache()

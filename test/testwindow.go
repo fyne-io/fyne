@@ -13,7 +13,7 @@ type testWindow struct {
 	onCloseIntercepted func()
 
 	canvas    *testCanvas
-	clipboard fyne.Clipboard
+	clipboard testClipboard
 	driver    *testDriver
 	menu      *fyne.MainMenu
 }
@@ -34,7 +34,7 @@ func (w *testWindow) CenterOnScreen() {
 }
 
 func (w *testWindow) Clipboard() fyne.Clipboard {
-	return w.clipboard
+	return &w.clipboard
 }
 
 func (w *testWindow) Close() {

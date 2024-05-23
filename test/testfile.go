@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -44,14 +45,16 @@ func (f *file) URI() fyne.URI {
 
 func openFile(uri fyne.URI, create bool) (*file, error) {
 	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
+		return nil, errors.New("unsupported URL protocol")
 	}
 
-	path := uri.String()[7:]
-	f, err := os.Open(path)
-	if err != nil && create {
-		f, err = os.Create(path)
+	path := uri.Path()
+	if create {
+		f, err := os.Create(path)
+		return &file{File: f, path: path}, err
 	}
+
+	f, err := os.Open(path)
 	return &file{File: f, path: path}, err
 }
 
@@ -65,7 +68,7 @@ func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error)
 
 func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
+		return nil, errors.New("unsupported URL protocol")
 	}
 
 	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]

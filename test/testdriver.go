@@ -19,7 +19,7 @@ type SoftwarePainter interface {
 }
 
 type testDriver struct {
-	device       *device
+	device       device
 	painter      SoftwarePainter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
@@ -46,10 +46,7 @@ func NewDriver() fyne.Driver {
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
 func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
-	return &testDriver{
-		painter:      painter,
-		windowsMutex: sync.RWMutex{},
-	}
+	return &testDriver{painter: painter}
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
@@ -84,7 +81,6 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 	}
 
 	window := &testWindow{canvas: canvas, driver: d}
-	window.clipboard = &testClipboard{}
 
 	d.windowsMutex.Lock()
 	d.windows = append(d.windows, window)
@@ -93,10 +89,7 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 }
 
 func (d *testDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &device{}
-	}
-	return d.device
+	return &d.device
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
@@ -131,7 +124,10 @@ func (d *testDriver) removeWindow(w *testWindow) {
 		i++
 	}
 
-	d.windows = append(d.windows[:i], d.windows[i+1:]...)
+	copy(d.windows[i:], d.windows[i+1:])
+	d.windows[len(d.windows)-1] = nil // Allow the garbage collector to reclaim the memory.
+	d.windows = d.windows[:len(d.windows)-1]
+
 	d.windowsMutex.Unlock()
 }
 
