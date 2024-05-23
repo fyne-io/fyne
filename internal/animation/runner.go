@@ -24,7 +24,6 @@ func (r *Runner) Start(a *fyne.Animation) {
 	if !r.runnerStarted {
 		r.runnerStarted = true
 		r.animations = append(r.animations, newAnim(a))
-		r.runAnimations()
 	} else {
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
@@ -61,32 +60,34 @@ func (r *Runner) Stop(a *fyne.Animation) {
 	r.pendingAnimations = newList
 }
 
-func (r *Runner) runAnimations() {
-	draw := time.NewTicker(time.Second / 60)
+// TickAnimations progresses all running animations by one tick.
+// This will be called from the driver to update objects immediately before next paint.
+func (r *Runner) TickAnimations() {
+	if !r.runnerStarted {
+		return
+	}
 
-	go func() {
-		for done := false; !done; {
-			<-draw.C
-			r.animationMutex.Lock()
-			oldList := r.animations
-			r.animationMutex.Unlock()
-			newList := make([]*anim, 0, len(oldList))
-			for _, a := range oldList {
-				if !a.isStopped() && r.tickAnimation(a) {
-					newList = append(newList, a)
-				}
-			}
-			r.animationMutex.Lock()
-			r.animations = append(newList, r.pendingAnimations...)
-			r.pendingAnimations = nil
-			done = len(r.animations) == 0
-			r.animationMutex.Unlock()
+	done := false
+	r.animationMutex.Lock()
+	oldList := r.animations
+	r.animationMutex.Unlock()
+	newList := make([]*anim, 0, len(oldList))
+	for _, a := range oldList {
+		if !a.isStopped() && r.tickAnimation(a) {
+			newList = append(newList, a)
 		}
+	}
+	r.animationMutex.Lock()
+	r.animations = append(newList, r.pendingAnimations...)
+	r.pendingAnimations = nil
+	done = len(r.animations) == 0
+	r.animationMutex.Unlock()
+
+	if done {
 		r.animationMutex.Lock()
 		r.runnerStarted = false
 		r.animationMutex.Unlock()
-		draw.Stop()
-	}()
+	}
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
