@@ -223,6 +223,19 @@ func TestScrollContainer_Scrolled_Back(t *testing.T) {
 	assert.Equal(t, float32(0), scroll.Offset.Y)
 }
 
+func TestScrollContainer_Scrolled_ScrollNone(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(1000, 1000))
+	scroll := NewScroll(rect)
+	scroll.Direction = ScrollNone
+	scroll.Resize(fyne.NewSize(100, 100))
+	assert.Equal(t, float32(0), scroll.Offset.X)
+	assert.Equal(t, float32(0), scroll.Offset.Y)
+	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(-10, -10)})
+	assert.Equal(t, float32(0), scroll.Offset.X)
+	assert.Equal(t, float32(0), scroll.Offset.Y)
+}
+
 func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	scroll := NewScroll(rect)
