@@ -1850,7 +1850,7 @@ func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	b := widget.NewButton("", func() {})
 	b.Icon = theme.CancelIcon()
 	e.ActionItem = b
-	test.WidgetRenderer(e).Layout(e.MinSize())
+	test.TempWidgetRenderer(t, e).Layout(e.MinSize())
 	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
 	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
 }

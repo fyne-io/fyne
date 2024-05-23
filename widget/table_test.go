@@ -20,7 +20,7 @@ func TestTable_Empty(t *testing.T) {
 	table.Resize(fyne.NewSize(120, 120))
 
 	table.CreateRenderer()
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh() // let's not crash :)
 }
 
@@ -39,7 +39,7 @@ func TestTable_Cache(t *testing.T) {
 	c.SetPadded(false)
 	c.Resize(fyne.NewSize(120, 148))
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
@@ -69,7 +69,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 	table.CreateRenderer()
 
 	table.Resize(fyne.NewSize(50, 30))
-	content := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
+	content := test.TempWidgetRenderer(t, table.content.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
@@ -78,7 +78,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
 
 	test.WithTestTheme(t, func() {
-		test.WidgetRenderer(table).Refresh()
+		test.TempWidgetRenderer(t, table).Refresh()
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
 	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
@@ -157,7 +157,7 @@ func TestTable_Headers(t *testing.T) {
 		})
 	table.Resize(fyne.NewSize(120, 120))
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[2].(*Label).Text)
 	assert.Equal(t, "text", cellRenderer.(*tableCellsRenderer).Objects()[5].(*Label).Text)
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "A"))
@@ -197,7 +197,7 @@ func TestTable_Sticky(t *testing.T) {
 		})
 	table.Resize(fyne.NewSize(120, 120))
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells)).(*tableCellsRenderer)
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells)).(*tableCellsRenderer)
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 0,0"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 1,0"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 2,1"))
@@ -371,7 +371,7 @@ func TestTable_Refresh(t *testing.T) {
 		})
 	table.Resize(fyne.NewSize(120, 120))
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	assert.Equal(t, "placeholder", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
 
 	displayText = "replaced"
@@ -737,7 +737,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 	table.Resize(fyne.NewSize(120, 120))
 	table.Select(TableCellID{1, 0})
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
@@ -817,7 +817,7 @@ func TestTable_SetRowHeight(t *testing.T) {
 	table.Resize(fyne.NewSize(120, 120))
 	table.Select(TableCellID{0, 1})
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
 	assert.Equal(t, float32(48), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
@@ -884,7 +884,7 @@ func TestTable_ShowVisible(t *testing.T) {
 		func(TableCellID, fyne.CanvasObject) {})
 	table.Resize(fyne.NewSize(120, 120))
 
-	cellRenderer := test.WidgetRenderer(table.content.Content.(*tableCells))
+	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
 }

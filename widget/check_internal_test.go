@@ -45,7 +45,7 @@ func TestCheckUnChecked(t *testing.T) {
 func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	check.SetChecked(true)
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
 
@@ -55,7 +55,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "inputBorder_"))
 
 	check.Disable()
@@ -129,7 +129,7 @@ func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	assert.False(t, check.focused)
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
@@ -168,7 +168,7 @@ func TestCheck_Hovered(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
@@ -214,7 +214,7 @@ func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
@@ -274,7 +274,7 @@ func TestCheck_Disabled(t *testing.T) {
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize

@@ -290,7 +290,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplit(objA, objB)
 		split.Resize(fyne.NewSize(108, 108))
-		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
+		divider := test.TempWidgetRenderer(t, split).(*splitContainerRenderer).divider
 		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
@@ -324,7 +324,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplit(objA, objB)
 		split.Resize(fyne.NewSize(108, 108))
-		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
+		divider := test.TempWidgetRenderer(t, split).(*splitContainerRenderer).divider
 		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
@@ -366,7 +366,7 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplit(objA, objB)
 		split.Resize(fyne.NewSize(108, 108))
-		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
+		divider := test.TempWidgetRenderer(t, split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 
@@ -391,7 +391,7 @@ func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplit(objA, objB)
 		split.Resize(fyne.NewSize(108, 108))
-		divider := test.WidgetRenderer(split).(*splitContainerRenderer).divider
+		divider := test.TempWidgetRenderer(t, split).(*splitContainerRenderer).divider
 		t.Run("Leading", func(t *testing.T) {
 			split.SetOffset(0.1)
 

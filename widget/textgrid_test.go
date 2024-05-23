@@ -15,7 +15,7 @@ import (
 
 func TestNewTextGrid(t *testing.T) {
 	grid := NewTextGridFromString("A")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.Equal(t, 1, len(grid.Rows))
 	assert.Equal(t, 1, len(grid.Rows[0].Cells))
@@ -24,7 +24,7 @@ func TestNewTextGrid(t *testing.T) {
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
+	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
 	rend.Refresh()
 
 	assert.Equal(t, 12, len(rend.objects))
@@ -32,7 +32,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 
 func TestTextGrid_Row(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.NotNil(t, grid.Row(0))
 	assert.Equal(t, 2, len(grid.Row(0).Cells))
@@ -41,7 +41,7 @@ func TestTextGrid_Row(t *testing.T) {
 
 func TestTextGrid_Rows(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.Equal(t, 2, len(grid.Rows))
 	assert.Equal(t, 2, len(grid.Rows[0].Cells))
@@ -49,7 +49,7 @@ func TestTextGrid_Rows(t *testing.T) {
 
 func TestTextGrid_RowText(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.Equal(t, "Ab", grid.RowText(0))
 	assert.Equal(t, "C", grid.RowText(1))
@@ -140,7 +140,7 @@ func TestTextGridRenderer_Resize(t *testing.T) {
 	grid := NewTextGridFromString("1\n2")
 	grid.ShowLineNumbers = true
 
-	renderer := test.WidgetRenderer(grid)
+	renderer := test.TempWidgetRenderer(t, grid)
 	min := renderer.MinSize()
 
 	grid.Resize(fyne.NewSize(100, 250))
@@ -168,7 +168,7 @@ func TestTextGridRenderer_ShowLineNumbers(t *testing.T) {
 func TestTextGridRender_Size(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(30, 42)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
+	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
 
 	assert.Equal(t, 3, rend.cols)
 	assert.Equal(t, 2, rend.rows)
@@ -222,7 +222,7 @@ func TestTextGridRender_TextColor(t *testing.T) {
 
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	lines := strings.Split(expected, "\n")
-	renderer := test.WidgetRenderer(g).(*textGridRenderer)
+	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
@@ -236,7 +236,7 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 
 func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles map[string]TextGridStyle) {
 	lines := strings.Split(expected, "\n")
-	renderer := test.WidgetRenderer(g).(*textGridRenderer)
+	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes

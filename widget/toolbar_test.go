@@ -45,7 +45,7 @@ func TestToolbar_Replace(t *testing.T) {
 	icon := theme.ContentCutIcon()
 	toolbar := NewToolbar(NewToolbarAction(icon, func() {}))
 	assert.Equal(t, 1, len(toolbar.Items))
-	render := test.WidgetRenderer(toolbar)
+	render := test.TempWidgetRenderer(t, toolbar)
 	assert.Equal(t, icon.Name(), render.Objects()[0].(*Button).Icon.Name())
 
 	toolbar.Items[0] = NewToolbarAction(theme.HelpIcon(), func() {})

@@ -39,7 +39,7 @@ func TestAppTabs_Empty(t *testing.T) {
 	tabs = &AppTabs{}
 	assert.Equal(t, 0, len(tabs.Items))
 	assert.Nil(t, tabs.Selected())
-	assert.NotNil(t, test.WidgetRenderer(tabs)) // doesn't crash
+	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }
 
 func TestAppTabs_Hidden_AsChild(t *testing.T) {
@@ -183,7 +183,7 @@ func TestAppTabs_DisableIndex(t *testing.T) {
 
 func TestAppTabs_ShowAfterAdd(t *testing.T) {
 	tabs := NewAppTabs()
-	renderer := test.WidgetRenderer(tabs).(*appTabsRenderer)
+	renderer := test.TempWidgetRenderer(t, tabs).(*appTabsRenderer)
 
 	assert.True(t, renderer.indicator.Hidden)
 
