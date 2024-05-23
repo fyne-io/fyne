@@ -27,6 +27,13 @@ func (t *RichText) ParseMarkdown(content string) {
 	t.Refresh()
 }
 
+// AppendMarkdown parses the given markdown string and appends the
+// content to the widget, with the appropriate formatting.
+func (t *RichText) AppendMarkdown(content string) {
+	t.Segments = append(t.Segments, parseMarkdown(content)...)
+	t.Refresh()
+}
+
 type markdownRenderer []RichTextSegment
 
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
