@@ -292,7 +292,7 @@ func (hl *Hyperlink) syncSegments() {
 	if sizeName == "" {
 		sizeName = theme.SizeNameText
 	}
-	segment.Style.SizeName = sizeName
+	hl.provider.Segments[0].(*TextSegment).Style.SizeName = sizeName
 	hl.textSize = fyne.MeasureText(hl.Text, th.Size(sizeName), hl.TextStyle)
 }
 
