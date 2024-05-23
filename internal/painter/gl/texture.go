@@ -153,7 +153,7 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 
 	face := paint.CachedFontFace(text.TextStyle, text.TextSize*p.canvas.Scale(), p.texScale)
-	paint.DrawString(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle.TabWidth)
+	paint.DrawString(img, text.Text, color, face.Fonts, text.TextSize, p.pixScale, text.TextStyle)
 	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 

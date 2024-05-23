@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
@@ -27,7 +28,7 @@ func TestAssertImageMatches(t *testing.T) {
 	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
 	assert.Nil(t, err)
 
-	painter.DrawString(txtImg, "Hello!", color.Black, []font.Face{face}, 25, 1, 4)
+	painter.DrawString(txtImg, "Hello!", color.Black, &test.FontMap{face}, 25, 1, fyne.TextStyle{TabWidth: 4})
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}
