@@ -12,6 +12,7 @@ type Runner struct {
 	animationMutex    sync.RWMutex
 	animations        []*anim
 	pendingAnimations []*anim
+	nextAnimations    []*anim // used by runner goroutine only
 
 	runnerStarted bool
 }
@@ -23,9 +24,19 @@ func (r *Runner) Start(a *fyne.Animation) {
 
 	if !r.runnerStarted {
 		r.runnerStarted = true
+		if r.animations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.animations = make([]*anim, 0, 16)
+		}
 		r.animations = append(r.animations, newAnim(a))
 		r.runAnimations()
 	} else {
+		if r.pendingAnimations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.pendingAnimations = make([]*anim, 0, 16)
+		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
 }
@@ -70,15 +81,25 @@ func (r *Runner) runAnimations() {
 			r.animationMutex.Lock()
 			oldList := r.animations
 			r.animationMutex.Unlock()
-			newList := make([]*anim, 0, len(oldList))
 			for _, a := range oldList {
 				if !a.isStopped() && r.tickAnimation(a) {
-					newList = append(newList, a)
+					r.nextAnimations = append(r.nextAnimations, a)
 				}
 			}
+
 			r.animationMutex.Lock()
-			r.animations = append(newList, r.pendingAnimations...)
-			r.pendingAnimations = nil
+			// nil out old r.animations for re-use as next r.nextAnimations
+			tmp := r.animations
+			for i := range tmp {
+				tmp[i] = nil
+			}
+			r.animations = append(r.nextAnimations, r.pendingAnimations...)
+			r.nextAnimations = tmp[:0]
+			// nil out r.pendingAnimations
+			for i := range r.pendingAnimations {
+				r.pendingAnimations[i] = nil
+			}
+			r.pendingAnimations = r.pendingAnimations[:0]
 			done = len(r.animations) == 0
 			r.animationMutex.Unlock()
 		}
