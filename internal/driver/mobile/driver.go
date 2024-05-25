@@ -147,6 +147,11 @@ func (d *mobileDriver) Run() {
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
+		defer func() {
+			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+			l.WaitForEvents()
+			l.DestroyEventQueue()
+		}()
 
 		for {
 			select {
@@ -219,10 +224,6 @@ func (d *mobileDriver) Run() {
 				}
 			}
 		}
-
-		l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
-		l.WaitForEvents()
-		l.DestroyEventQueue()
 	})
 }
 
