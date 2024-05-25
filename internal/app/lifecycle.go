@@ -106,33 +106,33 @@ func (l *Lifecycle) OnStopped() func() {
 
 // DestroyEventQueue destroys the event queue.
 func (l *Lifecycle) DestroyEventQueue() {
-        l.eventQueue.Close()
+	l.eventQueue.Close()
 }
 
 // InitEventQueue initializes the event queue.
 func (l *Lifecycle) InitEventQueue() {
-        // This channel should be closed when the window is closed.
-        l.eventQueue = async.NewUnboundedFuncChan()
+	// This channel should be closed when the window is closed.
+	l.eventQueue = async.NewUnboundedFuncChan()
 }
 
 // QueueEvent uses this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (l *Lifecycle) QueueEvent(fn func()) {
-        l.eventQueue.In() <- fn
+	l.eventQueue.In() <- fn
 }
 
 // RunEventQueue runs the event queue. This should called inside a go routine.
 // This function blocks.
 func (l *Lifecycle) RunEventQueue() {
-        for fn := range l.eventQueue.Out() {
-                fn()
-        }
+	for fn := range l.eventQueue.Out() {
+		fn()
+	}
 }
 
 // WaitForEvents wait for all the events.
 func (l *Lifecycle) WaitForEvents() {
-        done := make(chan struct{})
+	done := make(chan struct{})
 
-        l.eventQueue.In() <- func() { done <- struct{}{} }
-        <-done
+	l.eventQueue.In() <- func() { done <- struct{}{} }
+	<-done
 }
