@@ -219,6 +219,10 @@ func (d *mobileDriver) Run() {
 				}
 			}
 		}
+
+		l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+		l.WaitForEvents()
+		l.DestroyEventQueue()
 	})
 }
 
@@ -296,8 +300,9 @@ func (d *mobileDriver) onStart() {
 }
 
 func (d *mobileDriver) onStop() {
-	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStopped(); f != nil {
-		go f() // don't block main, we don't have window event queue
+	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	if f := l.OnStopped(); f != nil {
+		l.QueueEvent(f)
 	}
 }
 
