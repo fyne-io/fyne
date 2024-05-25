@@ -166,6 +166,10 @@ func (d *gLDriver) Run() {
 
 	go d.catchTerm()
 	d.runGL()
+
+	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l.WaitForEvents()
+	l.DestroyEventQueue()
 }
 
 func (d *gLDriver) DoubleTapDelay() time.Duration {
