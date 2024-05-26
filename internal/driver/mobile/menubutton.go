@@ -2,7 +2,7 @@ package mobile
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -22,12 +22,12 @@ func (w *window) newMenuButton(menu *fyne.MainMenu) *menuButton {
 func (m *menuButton) CreateRenderer() fyne.WidgetRenderer {
 	return &menuButtonRenderer{btn: widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
 		m.win.canvas.showMenu(m.menu)
-	}), bg: canvas.NewRectangle(theme.BackgroundColor())}
+	}), bg: fynecanvas.NewRectangle(theme.BackgroundColor())}
 }
 
 type menuButtonRenderer struct {
 	btn *widget.Button
-	bg  *canvas.Rectangle
+	bg  *fynecanvas.Rectangle
 }
 
 func (m *menuButtonRenderer) Destroy() {

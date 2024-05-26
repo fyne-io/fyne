@@ -20,7 +20,7 @@ type window struct {
 	isChild            bool
 
 	clipboard fyne.Clipboard
-	canvas    *mobileCanvas
+	canvas    *canvas
 	icon      fyne.Resource
 	menu      *fyne.MainMenu
 }
@@ -42,7 +42,7 @@ func (w *window) SetFullScreen(bool) {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.Canvas().(*mobileCanvas).Resize(size)
+	w.Canvas().(*canvas).Resize(size)
 }
 
 func (w *window) RequestFocus() {

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
@@ -62,7 +62,7 @@ func Test_mobileDriver_AbsolutePositionForObject(t *testing.T) {
 			w.SetContent(widget.NewLabel("second child"))
 			w.Resize(size)
 			w = d.CreateWindow("child3")
-			r := canvas.NewRectangle(color.White)
+			r := fynecanvas.NewRectangle(color.White)
 			r.SetMinSize(fyne.NewSize(42, 17))
 			w.SetPadded(tt.windowPadded)
 			w.SetContent(container.NewVBox(r))

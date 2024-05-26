@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
@@ -69,11 +69,11 @@ func init() {
 }
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*mobileCanvas) // silence lint
+	c := NewCanvas().(*canvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	ret.InitEventQueue()
 	go ret.RunEventQueue()
-	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
+	c.setContent(&fynecanvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret
@@ -119,7 +119,7 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 		return fyne.NewPos(0, 0)
 	}
 
-	mc := c.(*mobileCanvas)
+	mc := c.(*canvas)
 	pos := driver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
 
@@ -156,7 +156,7 @@ func (d *mobileDriver) Run() {
 				painter.ClearFontCache()
 				cache.ResetThemeCaches()
 				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-					c, ok := w.Canvas().(*mobileCanvas)
+					c, ok := w.Canvas().(*canvas)
 					if !ok {
 						return
 					}
@@ -170,7 +170,7 @@ func (d *mobileDriver) Run() {
 				if current == nil {
 					continue
 				}
-				c := current.Canvas().(*mobileCanvas)
+				c := current.Canvas().(*canvas)
 
 				switch e := a.Filter(e).(type) {
 				case lifecycle.Event:
@@ -227,7 +227,7 @@ func (*mobileDriver) SetDisableScreenBlanking(disable bool) {
 }
 
 func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
-	c := w.Canvas().(*mobileCanvas)
+	c := w.Canvas().(*canvas)
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
 		d.glctx, _ = e.DrawContext.(gl.Context)
@@ -263,7 +263,7 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
 }
 
 func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
-	c := w.Canvas().(*mobileCanvas)
+	c := w.Canvas().(*canvas)
 	d.painting = false
 	if d.glctx == nil || e.External {
 		return
@@ -303,7 +303,7 @@ func (d *mobileDriver) onStop() {
 
 func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
-	c := window.Canvas().(*mobileCanvas)
+	c := window.Canvas().(*canvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
@@ -506,7 +506,7 @@ func runeToPrintable(r rune) rune {
 	return 0
 }
 
-func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code, mod key.Modifiers) {
+func (d *mobileDriver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.Modifiers) {
 	keyName := keyToName(code)
 	switch keyName {
 	case fyne.KeyTab:
@@ -550,7 +550,7 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 	}
 }
 
-func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.Modifiers) {
+func (d *mobileDriver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
 }
 
 func (d *mobileDriver) Device() fyne.Device {
