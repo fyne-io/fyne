@@ -53,6 +53,104 @@ func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	assert.Equal(t, expectedContentSize, content.Size())
 }
 
+func TestCanvas_Dragged(t *testing.T) {
+	dragged := false
+	var draggedObj fyne.Draggable
+	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(scroll)
+	c.Resize(fyne.NewSize(40, 24))
+	assert.Equal(t, float32(0), scroll.Offset.Y)
+
+	c.tapDown(fyne.NewPos(32, 3), 0)
+	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+		dragged = true
+		draggedObj = wid
+	})
+
+	assert.True(t, dragged)
+	assert.Equal(t, scroll, draggedObj)
+	dragged = false
+	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
+}
+
+func TestCanvas_DraggingOutOfWidget(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	slider := widget.NewSlider(0.0, 100.0)
+	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
+	c.Resize(fyne.NewSize(100, 200))
+
+	assert.Zero(t, slider.Value)
+	lastValue := slider.Value
+
+	dragged := false
+	c.tapDown(fyne.NewPos(23, 13), 0)
+	c.tapMove(fyne.NewPos(30, 13), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
+	lastValue = slider.Value
+
+	dragged = false
+	c.tapMove(fyne.NewPos(40, 120), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		assert.Equal(t, slider, wid)
+		wid.Dragged(ev)
+		dragged = true
+	})
+	assert.True(t, dragged)
+	assert.Greater(t, slider.Value, lastValue)
+}
+
+func TestCanvas_Focusable(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	content := newFocusableEntry(c)
+	c.SetContent(content)
+	content.Resize(fyne.NewSize(25, 25))
+
+	pos := fyne.NewPos(10, 10)
+	c.tapDown(pos, 0)
+	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.tapDown(pos, 1)
+	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, nil, nil, nil)
+	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.Unfocus()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	content.Disable()
+	c.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	c.tapDown(fyne.NewPos(10, 10), 2)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+}
+
 func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 
@@ -61,6 +159,51 @@ func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	x, y := c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, 10, x)
 	assert.Equal(t, 10, y)
+}
+
+func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+
+	c.SetContent(widget.NewLabel("Content"))
+
+	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), c)
+	popupBgSize := fyne.NewSize(200, 200)
+	popup.Show()
+	popup.Resize(popupBgSize)
+
+	canvasSize := fyne.NewSize(600, 700)
+	c.Resize(canvasSize)
+
+	// get popup content padding dynamically
+	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
+
+	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
+	assert.Equal(t, canvasSize, popup.Size())
+}
+
+func TestCanvas_Tappable(t *testing.T) {
+	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
+	content.ExtendBaseWidget(content)
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(content)
+	c.Resize(fyne.NewSize(36, 24))
+	content.Resize(fyne.NewSize(24, 24))
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	assert.True(t, content.down)
+
+	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable) {
+	})
+	assert.True(t, content.up)
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	c.tapMove(fyne.NewPos(35, 15), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+	})
+	assert.True(t, content.cancel)
 }
 
 func TestCanvas_Tapped(t *testing.T) {
@@ -100,6 +243,30 @@ func TestCanvas_Tapped(t *testing.T) {
 		assert.Equal(t, fyne.NewPos(6, 6), pointEvent.AbsolutePosition)
 		assert.Equal(t, fyne.NewPos(3, 3), pointEvent.Position)
 	}
+}
+
+func TestWindow_TappedAndDoubleTapped(t *testing.T) {
+	tapped := 0
+	but := newDoubleTappableButton()
+	but.OnTapped = func() {
+		tapped = 1
+	}
+	but.onDoubleTap = func() {
+		tapped = 2
+	}
+
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(container.NewStack(but))
+	c.Resize(fyne.NewSize(36, 24))
+
+	simulateTap(c)
+	time.Sleep(700 * time.Millisecond)
+	assert.Equal(t, 1, tapped)
+
+	simulateTap(c)
+	simulateTap(c)
+	time.Sleep(700 * time.Millisecond)
+	assert.Equal(t, 2, tapped)
 }
 
 func TestCanvas_Tapped_Multi(t *testing.T) {
@@ -158,173 +325,6 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 		assert.Equal(t, fyne.NewPos(6, 6), pointEvent.AbsolutePosition)
 		assert.Equal(t, fyne.NewPos(3, 3), pointEvent.Position)
 	}
-}
-
-func TestCanvas_Dragged(t *testing.T) {
-	dragged := false
-	var draggedObj fyne.Draggable
-	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
-	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(scroll)
-	c.Resize(fyne.NewSize(40, 24))
-	assert.Equal(t, float32(0), scroll.Offset.Y)
-
-	c.tapDown(fyne.NewPos(32, 3), 0)
-	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		wid.Dragged(ev)
-		dragged = true
-		draggedObj = wid
-	})
-
-	assert.True(t, dragged)
-	assert.Equal(t, scroll, draggedObj)
-	dragged = false
-	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		wid.Dragged(ev)
-		dragged = true
-	})
-	assert.True(t, dragged)
-	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
-}
-
-func TestCanvas_DraggingOutOfWidget(t *testing.T) {
-	c := NewCanvas().(*mobileCanvas)
-	slider := widget.NewSlider(0.0, 100.0)
-	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
-	c.Resize(fyne.NewSize(100, 200))
-
-	assert.Zero(t, slider.Value)
-	lastValue := slider.Value
-
-	dragged := false
-	c.tapDown(fyne.NewPos(23, 13), 0)
-	c.tapMove(fyne.NewPos(30, 13), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		assert.Equal(t, slider, wid)
-		wid.Dragged(ev)
-		dragged = true
-	})
-	assert.True(t, dragged)
-	assert.Greater(t, slider.Value, lastValue)
-	lastValue = slider.Value
-
-	dragged = false
-	c.tapMove(fyne.NewPos(40, 120), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		assert.Equal(t, slider, wid)
-		wid.Dragged(ev)
-		dragged = true
-	})
-	assert.True(t, dragged)
-	assert.Greater(t, slider.Value, lastValue)
-}
-
-func TestCanvas_Tappable(t *testing.T) {
-	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
-	content.ExtendBaseWidget(content)
-	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(content)
-	c.Resize(fyne.NewSize(36, 24))
-	content.Resize(fyne.NewSize(24, 24))
-
-	c.tapDown(fyne.NewPos(15, 15), 0)
-	assert.True(t, content.down)
-
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Draggable) {
-	})
-	assert.True(t, content.up)
-
-	c.tapDown(fyne.NewPos(15, 15), 0)
-	c.tapMove(fyne.NewPos(35, 15), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		wid.Dragged(ev)
-	})
-	assert.True(t, content.cancel)
-}
-
-func TestWindow_TappedAndDoubleTapped(t *testing.T) {
-	tapped := 0
-	but := newDoubleTappableButton()
-	but.OnTapped = func() {
-		tapped = 1
-	}
-	but.onDoubleTap = func() {
-		tapped = 2
-	}
-
-	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(container.NewStack(but))
-	c.Resize(fyne.NewSize(36, 24))
-
-	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 1, tapped)
-
-	simulateTap(c)
-	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 2, tapped)
-}
-
-func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
-	c := NewCanvas().(*mobileCanvas)
-
-	c.SetContent(widget.NewLabel("Content"))
-
-	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), c)
-	popupBgSize := fyne.NewSize(200, 200)
-	popup.Show()
-	popup.Resize(popupBgSize)
-
-	canvasSize := fyne.NewSize(600, 700)
-	c.Resize(canvasSize)
-
-	// get popup content padding dynamically
-	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
-
-	assert.Equal(t, popupBgSize.Subtract(popupContentPadding), popup.Content.Size())
-	assert.Equal(t, canvasSize, popup.Size())
-}
-
-func TestCanvas_Focusable(t *testing.T) {
-	c := NewCanvas().(*mobileCanvas)
-	content := newFocusableEntry(c)
-	c.SetContent(content)
-	content.Resize(fyne.NewSize(25, 25))
-
-	pos := fyne.NewPos(10, 10)
-	c.tapDown(pos, 0)
-	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
-
-	c.tapDown(pos, 1)
-	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
-
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
-
-	c.Unfocus()
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
-
-	content.Disable()
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
-
-	c.tapDown(fyne.NewPos(10, 10), 2)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
 }
 
 type touchableLabel struct {
