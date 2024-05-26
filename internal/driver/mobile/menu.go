@@ -73,7 +73,7 @@ func (c *canvas) showMenu(menu *fyne.MainMenu) {
 	c.setMenu(container.NewWithoutLayout(bg, panel, shadow))
 }
 
-func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
+func (d *driver) findMenu(win *window) *fyne.MainMenu {
 	if win.menu != nil {
 		return win.menu
 	}

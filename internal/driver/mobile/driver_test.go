@@ -42,7 +42,7 @@ func Test_mobileDriver_AbsolutePositionForObject(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			var o fyne.CanvasObject
 			size := fyne.NewSize(100, 100)
-			d := &mobileDriver{}
+			d := &driver{}
 			w := d.CreateWindow("main")
 			w.SetPadded(tt.windowPadded)
 			l := widget.NewLabel("main window")

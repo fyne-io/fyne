@@ -151,7 +151,7 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 	return fileStruct, nil
 }
 
-func registerRepository(d *mobileDriver) {
+func registerRepository(d *driver) {
 	repo := &mobileFileRepo{}
 	repository.Register("file", repo)
 }

@@ -106,7 +106,7 @@ func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
 }
 
 func (w *window) Show() {
-	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
+	menu := fyne.CurrentApp().Driver().(*driver).findMenu(w)
 	menuButton := w.newMenuButton(menu)
 	if menu == nil {
 		menuButton.Hide()
@@ -150,7 +150,7 @@ func (w *window) tryClose() {
 }
 
 func (w *window) Close() {
-	d := fyne.CurrentApp().Driver().(*mobileDriver)
+	d := fyne.CurrentApp().Driver().(*driver)
 	pos := -1
 	for i, win := range d.windows {
 		if win == w {
@@ -219,5 +219,5 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) Context() any {
-	return fyne.CurrentApp().Driver().(*mobileDriver).glctx
+	return fyne.CurrentApp().Driver().(*driver).glctx
 }
