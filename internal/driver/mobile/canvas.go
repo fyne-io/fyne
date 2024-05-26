@@ -43,8 +43,7 @@ type canvas struct {
 	touchLastTapped fyne.CanvasObject
 }
 
-// NewCanvas creates a new mobile canvas. This is a canvas that will render on a mobile device using OpenGL.
-func NewCanvas() fyne.Canvas {
+func newCanvas() fyne.Canvas {
 	ret := &canvas{padded: true}
 	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 	ret.touched = make(map[int]mobile.Touchable)
