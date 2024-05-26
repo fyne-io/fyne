@@ -62,17 +62,15 @@ func (c *canvas) Content() fyne.CanvasObject {
 }
 
 func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
-	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-
 	dev, ok := fyne.CurrentDevice().(*device)
 	if !ok {
 		return fyne.NewPos(0, 0), c.Size() // running in test mode
 	}
 
-	safeLeft := float32(dev.safeLeft) / scale
-	safeTop := float32(dev.safeTop) / scale
-	safeRight := float32(dev.safeRight) / scale
-	safeBottom := float32(dev.safeBottom) / scale
+	safeLeft := float32(dev.safeLeft) / c.scale
+	safeTop := float32(dev.safeTop) / c.scale
+	safeRight := float32(dev.safeRight) / c.scale
+	safeBottom := float32(dev.safeBottom) / c.scale
 	return fyne.NewPos(safeLeft, safeTop),
 		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 }
