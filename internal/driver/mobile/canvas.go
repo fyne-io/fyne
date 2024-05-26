@@ -21,6 +21,7 @@ var _ fyne.Canvas = (*canvas)(nil)
 type canvas struct {
 	common.Canvas
 	content         fyne.CanvasObject
+	device          *device
 	dragOffset      fyne.Position
 	dragStart       fyne.Position
 	dragging        fyne.Draggable
@@ -40,9 +41,10 @@ type canvas struct {
 	windowHead      fyne.CanvasObject
 }
 
-func newCanvas() fyne.Canvas {
+func newCanvas(dev fyne.Device) fyne.Canvas {
 	ret := &canvas{padded: true}
-	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
+	ret.device, _ = dev.(*device)
+	ret.scale = dev.SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
@@ -62,17 +64,15 @@ func (c *canvas) Content() fyne.CanvasObject {
 }
 
 func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
-	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok {
+	if c.device == nil {
 		return fyne.NewPos(0, 0), c.Size() // running in test mode
 	}
 
-	safeLeft := float32(dev.safeLeft) / c.scale
-	safeTop := float32(dev.safeTop) / c.scale
-	safeRight := float32(dev.safeRight) / c.scale
-	safeBottom := float32(dev.safeBottom) / c.scale
-	return fyne.NewPos(safeLeft, safeTop),
-		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
+	safeLeft := float32(c.device.safeLeft) / c.scale
+	safeTop := float32(c.device.safeTop) / c.scale
+	safeRight := float32(c.device.safeRight) / c.scale
+	safeBottom := float32(c.device.safeBottom) / c.scale
+	return fyne.NewPos(safeLeft, safeTop), c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 }
 
 func (c *canvas) MinSize() fyne.Size {

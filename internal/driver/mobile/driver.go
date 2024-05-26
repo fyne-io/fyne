@@ -69,7 +69,7 @@ func init() {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := newCanvas().(*canvas) // silence lint
+	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	ret.InitEventQueue()
 	go ret.RunEventQueue()
