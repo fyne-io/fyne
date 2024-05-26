@@ -161,7 +161,7 @@ func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	assert.Equal(t, 10, y)
 }
 
-func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
+func TestCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 
 	c.SetContent(widget.NewLabel("Content"))
@@ -245,7 +245,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	}
 }
 
-func TestWindow_TappedAndDoubleTapped(t *testing.T) {
+func TestCanvas_TappedAndDoubleTapped(t *testing.T) {
 	tapped := 0
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
@@ -269,7 +269,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	assert.Equal(t, 2, tapped)
 }
 
-func TestCanvas_Tapped_Multi(t *testing.T) {
+func TestCanvas_TappedMulti(t *testing.T) {
 	buttonTap := false
 	button := widget.NewButton("Test", func() {
 		buttonTap = true
