@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	os.Exit(ret)
 }
 
-func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
+func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
@@ -53,7 +53,7 @@ func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	assert.Equal(t, expectedContentSize, content.Size())
 }
 
-func TestCanvas_Dragged(t *testing.T) {
+func Test_canvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
 	scroll := container.NewScroll(widget.NewLabel("Hi\nHi\nHi"))
@@ -80,7 +80,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
 }
 
-func TestCanvas_DraggingOutOfWidget(t *testing.T) {
+func Test_canvas_DraggingOutOfWidget(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 	slider := widget.NewSlider(0.0, 100.0)
 	c.SetContent(container.NewGridWithRows(2, slider, widget.NewLabel("Outside")))
@@ -110,7 +110,7 @@ func TestCanvas_DraggingOutOfWidget(t *testing.T) {
 	assert.Greater(t, slider.Value, lastValue)
 }
 
-func TestCanvas_Focusable(t *testing.T) {
+func Test_canvas_Focusable(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 	content := newFocusableEntry(c)
 	c.SetContent(content)
@@ -151,7 +151,7 @@ func TestCanvas_Focusable(t *testing.T) {
 	assert.Equal(t, 1, content.unfocusedTimes)
 }
 
-func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
+func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 
 	pos := fyne.NewPos(4, 4)
@@ -161,7 +161,7 @@ func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	assert.Equal(t, 10, y)
 }
 
-func TestCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
+func Test_canvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
 
 	c.SetContent(widget.NewLabel("Content"))
@@ -181,7 +181,7 @@ func TestCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	assert.Equal(t, canvasSize, popup.Size())
 }
 
-func TestCanvas_Tappable(t *testing.T) {
+func Test_canvas_Tappable(t *testing.T) {
 	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
 	content.ExtendBaseWidget(content)
 	c := NewCanvas().(*mobileCanvas)
@@ -206,7 +206,7 @@ func TestCanvas_Tappable(t *testing.T) {
 	assert.True(t, content.cancel)
 }
 
-func TestCanvas_Tapped(t *testing.T) {
+func Test_canvas_Tapped(t *testing.T) {
 	tapped := false
 	altTapped := false
 	buttonTap := false
@@ -245,7 +245,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	}
 }
 
-func TestCanvas_TappedAndDoubleTapped(t *testing.T) {
+func Test_canvas_TappedAndDoubleTapped(t *testing.T) {
 	tapped := 0
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
@@ -269,7 +269,7 @@ func TestCanvas_TappedAndDoubleTapped(t *testing.T) {
 	assert.Equal(t, 2, tapped)
 }
 
-func TestCanvas_TappedMulti(t *testing.T) {
+func Test_canvas_TappedMulti(t *testing.T) {
 	buttonTap := false
 	button := widget.NewButton("Test", func() {
 		buttonTap = true
@@ -292,7 +292,7 @@ func TestCanvas_TappedMulti(t *testing.T) {
 	assert.False(t, buttonTap, "button should not be tapped")
 }
 
-func TestCanvas_TappedSecondary(t *testing.T) {
+func Test_canvas_TappedSecondary(t *testing.T) {
 	var pointEvent *fyne.PointEvent
 	var altTappedObj fyne.SecondaryTappable
 	obj := &tappableLabel{}
