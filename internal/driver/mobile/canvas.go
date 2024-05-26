@@ -24,7 +24,7 @@ type canvas struct {
 	dragOffset      fyne.Position
 	dragStart       fyne.Position
 	dragging        fyne.Draggable
-	inited          bool
+	initialized     bool
 	lastTapDown     map[int]time.Time
 	lastTapDownPos  map[int]fyne.Position
 	menu            fyne.CanvasObject

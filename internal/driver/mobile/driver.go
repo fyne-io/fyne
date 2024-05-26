@@ -268,8 +268,8 @@ func (d *driver) handlePaint(e paint.Event, w fyne.Window) {
 	if d.glctx == nil || e.External {
 		return
 	}
-	if !c.inited {
-		c.inited = true
+	if !c.initialized {
+		c.initialized = true
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
