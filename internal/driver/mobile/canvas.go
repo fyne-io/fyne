@@ -45,6 +45,7 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 	d, _ := dev.(*device)
 	ret := &canvas{
 		Canvas: common.Canvas{
+			OnFocus:   handleKeyboard,
 			OnUnfocus: hideVirtualKeyboard,
 		},
 		device:         d,
@@ -54,7 +55,6 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
 		touched:        make(map[int]mobile.Touchable),
 	}
-	ret.OnFocus = ret.handleKeyboard
 	ret.Initialize(ret, ret.overlayChanged)
 	return ret
 }
@@ -158,24 +158,8 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
 }
 
-func (c *canvas) handleKeyboard(obj fyne.Focusable) {
-	isDisabled := false
-	if disWid, ok := obj.(fyne.Disableable); ok {
-		isDisabled = disWid.Disabled()
-	}
-	if obj != nil && !isDisabled {
-		if keyb, ok := obj.(mobile.Keyboardable); ok {
-			showVirtualKeyboard(keyb.Keyboard())
-		} else {
-			showVirtualKeyboard(mobile.DefaultKeyboard)
-		}
-	} else {
-		hideVirtualKeyboard()
-	}
-}
-
 func (c *canvas) overlayChanged() {
-	c.handleKeyboard(c.Focused())
+	handleKeyboard(c.Focused())
 	c.SetDirty()
 }
 
