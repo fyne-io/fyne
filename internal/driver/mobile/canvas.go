@@ -81,8 +81,12 @@ func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		pos = fyne.NewPos(safeLeft, safeTop)
 		size = c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 	}
-	chromeBoxVerticalOffset := c.chromeBoxVerticalOffset()
-	return pos.AddXY(0, chromeBoxVerticalOffset), size.SubtractWidthHeight(0, chromeBoxVerticalOffset)
+	if c.chromeBoxIsDisplacing() {
+		offset := c.windowHead.MinSize().Height
+		pos = pos.AddXY(0, offset)
+		size = size.SubtractWidthHeight(0, offset)
+	}
+	return pos, size
 }
 
 func (c *canvas) MinSize() fyne.Size {
@@ -150,14 +154,6 @@ func (c *canvas) chromeBoxIsDisplacing() bool {
 		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
 	}
 	return len(chromeBox.Objects) > 1
-}
-
-func (c *canvas) chromeBoxVerticalOffset() float32 {
-	if c.chromeBoxIsDisplacing() {
-		return c.windowHead.MinSize().Height
-	}
-
-	return 0
 }
 
 func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
