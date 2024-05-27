@@ -285,8 +285,8 @@ func TypeOnCanvas(c fyne.Canvas, chars string) {
 
 // ApplyTheme sets the given theme and waits for it to be applied to the current app.
 func ApplyTheme(t *testing.T, theme fyne.Theme) {
-	require.IsType(t, &testApp{}, fyne.CurrentApp())
-	a := fyne.CurrentApp().(*testApp)
+	require.IsType(t, &app{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*app)
 	a.Settings().SetTheme(theme)
 	for a.lastAppliedTheme() != theme {
 		time.Sleep(5 * time.Millisecond)

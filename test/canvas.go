@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
-	"fyne.io/fyne/v2/internal/app"
+	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -32,7 +32,7 @@ type canvas struct {
 
 	content     fyne.CanvasObject
 	overlays    *internal.OverlayStack
-	focusMgr    *app.FocusManager
+	focusMgr    *intapp.FocusManager
 	hovered     desktop.Hoverable
 	padded      bool
 	transparent bool
@@ -58,7 +58,7 @@ func Canvas() fyne.Canvas {
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
 	c := &canvas{
-		focusMgr: app.NewFocusManager(nil),
+		focusMgr: intapp.NewFocusManager(nil),
 		padded:   true,
 		scale:    1.0,
 		size:     fyne.NewSize(10, 10),
@@ -212,7 +212,7 @@ func (c *canvas) Scale() float32 {
 func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.propertyLock.Lock()
 	c.content = content
-	c.focusMgr = app.NewFocusManager(c.content)
+	c.focusMgr = intapp.NewFocusManager(c.content)
 	c.propertyLock.Unlock()
 
 	if content == nil {
@@ -266,7 +266,7 @@ func (c *canvas) Unfocus() {
 	c.focusManager().Focus(nil)
 }
 
-func (c *canvas) focusManager() *app.FocusManager {
+func (c *canvas) focusManager() *intapp.FocusManager {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {

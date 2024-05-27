@@ -13,8 +13,8 @@ import (
 // After the content of f has executed this utility will check that the specified notification was sent.
 func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func()) {
 	require.NotNil(t, f, "function has to be specified")
-	require.IsType(t, &testApp{}, fyne.CurrentApp())
-	a := fyne.CurrentApp().(*testApp)
+	require.IsType(t, &app{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*app)
 	a.lastNotification = nil
 
 	f()
