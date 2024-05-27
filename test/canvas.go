@@ -26,7 +26,7 @@ type WindowlessCanvas interface {
 	SetScale(float32)
 }
 
-type testCanvas struct {
+type canvas struct {
 	size  fyne.Size
 	scale float32
 
@@ -57,7 +57,7 @@ func Canvas() fyne.Canvas {
 // NewCanvas returns a single use in-memory canvas used for testing.
 // This canvas has no painter so calls to Capture() will return a blank image.
 func NewCanvas() WindowlessCanvas {
-	c := &testCanvas{
+	c := &canvas{
 		focusMgr: app.NewFocusManager(nil),
 		padded:   true,
 		scale:    1.0,
@@ -70,10 +70,10 @@ func NewCanvas() WindowlessCanvas {
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
 // The painter will be used to render in the Capture() call.
 func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
-	canvas := NewCanvas().(*testCanvas)
-	canvas.painter = painter
+	c := NewCanvas().(*canvas)
+	c.painter = painter
 
-	return canvas
+	return c
 }
 
 // NewTransparentCanvasWithPainter allows creation of an in-memory canvas with a specific painter without a background color.
@@ -81,13 +81,13 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 //
 // Since: 2.2
 func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
-	canvas := NewCanvasWithPainter(painter).(*testCanvas)
-	canvas.transparent = true
+	c := NewCanvasWithPainter(painter).(*canvas)
+	c.transparent = true
 
-	return canvas
+	return c
 }
 
-func (c *testCanvas) Capture() image.Image {
+func (c *canvas) Capture() image.Image {
 	cache.Clean(true)
 	size := c.Size()
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
@@ -103,69 +103,69 @@ func (c *testCanvas) Capture() image.Image {
 	return img
 }
 
-func (c *testCanvas) Content() fyne.CanvasObject {
+func (c *canvas) Content() fyne.CanvasObject {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.content
 }
 
-func (c *testCanvas) Focus(obj fyne.Focusable) {
+func (c *canvas) Focus(obj fyne.Focusable) {
 	c.focusManager().Focus(obj)
 }
 
-func (c *testCanvas) FocusNext() {
+func (c *canvas) FocusNext() {
 	c.focusManager().FocusNext()
 }
 
-func (c *testCanvas) FocusPrevious() {
+func (c *canvas) FocusPrevious() {
 	c.focusManager().FocusPrevious()
 }
 
-func (c *testCanvas) Focused() fyne.Focusable {
+func (c *canvas) Focused() fyne.Focusable {
 	return c.focusManager().Focused()
 }
 
-func (c *testCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
 	return fyne.Position{}, c.Size()
 }
 
-func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.onTypedKey
 }
 
-func (c *testCanvas) OnTypedRune() func(rune) {
+func (c *canvas) OnTypedRune() func(rune) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.onTypedRune
 }
 
-func (c *testCanvas) Overlays() fyne.OverlayStack {
+func (c *canvas) Overlays() fyne.OverlayStack {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
 	return c.overlays
 }
 
-func (c *testCanvas) Padded() bool {
+func (c *canvas) Padded() bool {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.padded
 }
 
-func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
-func (c *testCanvas) Refresh(fyne.CanvasObject) {
+func (c *canvas) Refresh(fyne.CanvasObject) {
 }
 
-func (c *testCanvas) Resize(size fyne.Size) {
+func (c *canvas) Resize(size fyne.Size) {
 	c.propertyLock.Lock()
 	content := c.content
 	overlays := c.overlays
@@ -202,14 +202,14 @@ func (c *testCanvas) Resize(size fyne.Size) {
 	}
 }
 
-func (c *testCanvas) Scale() float32 {
+func (c *canvas) Scale() float32 {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.scale
 }
 
-func (c *testCanvas) SetContent(content fyne.CanvasObject) {
+func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.propertyLock.Lock()
 	c.content = content
 	c.focusMgr = app.NewFocusManager(c.content)
@@ -226,21 +226,21 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.Resize(minSize)
 }
 
-func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
+func (c *canvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
 	c.onTypedKey = handler
 }
 
-func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
+func (c *canvas) SetOnTypedRune(handler func(rune)) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
 	c.onTypedRune = handler
 }
 
-func (c *testCanvas) SetPadded(padded bool) {
+func (c *canvas) SetPadded(padded bool) {
 	c.propertyLock.Lock()
 	c.padded = padded
 	c.propertyLock.Unlock()
@@ -248,25 +248,25 @@ func (c *testCanvas) SetPadded(padded bool) {
 	c.Resize(c.Size())
 }
 
-func (c *testCanvas) SetScale(scale float32) {
+func (c *canvas) SetScale(scale float32) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
 	c.scale = scale
 }
 
-func (c *testCanvas) Size() fyne.Size {
+func (c *canvas) Size() fyne.Size {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.size
 }
 
-func (c *testCanvas) Unfocus() {
+func (c *canvas) Unfocus() {
 	c.focusManager().Focus(nil)
 }
 
-func (c *testCanvas) focusManager() *app.FocusManager {
+func (c *canvas) focusManager() *app.FocusManager {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
@@ -275,7 +275,7 @@ func (c *testCanvas) focusManager() *app.FocusManager {
 	return c.focusMgr
 }
 
-func (c *testCanvas) objectTrees() []fyne.CanvasObject {
+func (c *canvas) objectTrees() []fyne.CanvasObject {
 	overlays := c.Overlays().List()
 	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
 	if c.content != nil {

@@ -151,7 +151,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 
 // FocusNext focuses the next focusable on the canvas.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
+	if tc, ok := c.(*canvas); ok {
 		tc.focusManager().FocusNext()
 	} else {
 		fyne.LogError("FocusNext can only be called with a test canvas", nil)
@@ -160,7 +160,7 @@ func FocusNext(c fyne.Canvas) {
 
 // FocusPrevious focuses the previous focusable on the canvas.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
+	if tc, ok := c.(*canvas); ok {
 		tc.focusManager().FocusPrevious()
 	} else {
 		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
@@ -181,7 +181,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		return
 	}
 
-	tc, _ := c.(*testCanvas)
+	tc, _ := c.(*canvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {
 		oldHovered = tc.hovered

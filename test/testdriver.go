@@ -55,7 +55,7 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*testCanvas)
+	tc := c.(*canvas)
 	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
@@ -73,14 +73,14 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
-	canvas := NewCanvas().(*testCanvas)
+	c := NewCanvas().(*canvas)
 	if d.painter != nil {
-		canvas.painter = d.painter
+		c.painter = d.painter
 	} else {
-		canvas.painter = software.NewPainter()
+		c.painter = software.NewPainter()
 	}
 
-	window := &testWindow{canvas: canvas, driver: d}
+	window := &testWindow{canvas: c, driver: d}
 
 	d.windowsMutex.Lock()
 	d.windows = append(d.windows, window)

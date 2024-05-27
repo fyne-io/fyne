@@ -43,7 +43,7 @@ func TestTestCanvas_TransparentCapture(t *testing.T) {
 }
 
 func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
-	c := NewCanvas().(*testCanvas)
+	c := NewCanvas().(*canvas)
 
 	pos := fyne.NewPos(4, 4)
 	c.scale = 2.5
