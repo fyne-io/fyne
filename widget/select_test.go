@@ -144,8 +144,7 @@ func TestSelect_Enable(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 	ovl := c.Overlays().Top()
 	if assert.NotNil(t, ovl, "pop-up for enabled Select") {
-		areaPos, _ := c.InteractiveArea()
-		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.InnerPadding(), theme.InnerPadding())).Subtract(areaPos))
+		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.InnerPadding(), theme.InnerPadding())))
 		assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 	}
 }

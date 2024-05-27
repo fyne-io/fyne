@@ -61,7 +61,7 @@ func NewCanvas() WindowlessCanvas {
 		focusMgr: intapp.NewFocusManager(nil),
 		padded:   true,
 		scale:    1.0,
-		size:     fyne.NewSize(10, 10),
+		size:     fyne.NewSize(100, 100),
 	}
 	c.overlays = &internal.OverlayStack{Canvas: c}
 	return c
