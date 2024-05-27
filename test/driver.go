@@ -56,7 +56,9 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	}
 
 	tc := c.(*canvas)
-	return intdriver.AbsolutePositionForObject(co, tc.objectTrees())
+	pos := intdriver.AbsolutePositionForObject(co, tc.objectTrees())
+	inset, _ := c.InteractiveArea()
+	return pos.Subtract(inset)
 }
 
 func (d *driver) AllWindows() []fyne.Window {

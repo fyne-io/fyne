@@ -144,7 +144,8 @@ func TestSelect_Enable(t *testing.T) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
 	ovl := c.Overlays().Top()
 	if assert.NotNil(t, ovl, "pop-up for enabled Select") {
-		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.InnerPadding(), theme.InnerPadding())))
+		areaPos, _ := c.InteractiveArea()
+		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.InnerPadding(), theme.InnerPadding())).Subtract(areaPos))
 		assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 	}
 }
@@ -201,21 +202,22 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
+		areaPos, _ := c.InteractiveArea()
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})

@@ -127,7 +127,7 @@ func (c *canvas) Focused() fyne.Focusable {
 }
 
 func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
-	return fyne.Position{}, c.Size()
+	return fyne.NewPos(2, 3), c.Size().SubtractWidthHeight(4, 5)
 }
 
 func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
