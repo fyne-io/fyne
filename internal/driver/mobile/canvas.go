@@ -134,16 +134,20 @@ func (c *canvas) applyThemeOutOfTreeObjects() {
 	}
 }
 
-func (c *canvas) chromeBoxVerticalOffset() float32 {
+func (c *canvas) chromeBoxIsDisplacing() bool {
 	if c.windowHead == nil {
-		return 0
+		return false
 	}
 
 	chromeBox := c.windowHead.(*fyne.Container)
 	if c.padded {
 		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
 	}
-	if len(chromeBox.Objects) > 1 {
+	return len(chromeBox.Objects) > 1
+}
+
+func (c *canvas) chromeBoxVerticalOffset() float32 {
+	if c.chromeBoxIsDisplacing() {
 		return c.windowHead.MinSize().Height
 	}
 
