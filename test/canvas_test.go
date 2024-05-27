@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func TestTestCanvas_Capture(t *testing.T) {
+func Test_canvas_Capture(t *testing.T) {
 	c := NewCanvas()
 	c.Size()
 
@@ -26,7 +26,17 @@ func TestTestCanvas_Capture(t *testing.T) {
 	assert.Equal(t, a1, a2)
 }
 
-func TestTestCanvas_TransparentCapture(t *testing.T) {
+func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
+	c := NewCanvas().(*canvas)
+
+	pos := fyne.NewPos(4, 4)
+	c.scale = 2.5
+	x, y := c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 10, x)
+	assert.Equal(t, 10, y)
+}
+
+func Test_canvas_TransparentCapture(t *testing.T) {
 	c := NewTransparentCanvasWithPainter(nil)
 	c.Size()
 
@@ -40,14 +50,4 @@ func TestTestCanvas_TransparentCapture(t *testing.T) {
 	assert.Equal(t, g1, g2)
 	assert.Equal(t, b1, b2)
 	assert.Equal(t, a1, a2)
-}
-
-func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
-	c := NewCanvas().(*canvas)
-
-	pos := fyne.NewPos(4, 4)
-	c.scale = 2.5
-	x, y := c.PixelCoordinateForPosition(pos)
-	assert.Equal(t, 10, x)
-	assert.Equal(t, 10, y)
 }
