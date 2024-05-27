@@ -80,12 +80,12 @@ func (d *driver) CreateWindow(string) fyne.Window {
 		c.painter = software.NewPainter()
 	}
 
-	window := &testWindow{canvas: c, driver: d}
+	w := &window{canvas: c, driver: d}
 
 	d.windowsMutex.Lock()
-	d.windows = append(d.windows, window)
+	d.windows = append(d.windows, w)
 	d.windowsMutex.Unlock()
-	return window
+	return w
 }
 
 func (d *driver) Device() fyne.Device {
@@ -114,11 +114,11 @@ func (d *driver) Quit() {
 	// no-op
 }
 
-func (d *driver) removeWindow(w *testWindow) {
+func (d *driver) removeWindow(w *window) {
 	d.windowsMutex.Lock()
 	i := 0
-	for _, window := range d.windows {
-		if window == w {
+	for _, win := range d.windows {
+		if win == w {
 			break
 		}
 		i++
