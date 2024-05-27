@@ -36,6 +36,11 @@ type List struct {
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
 
+	// HideSeparators hides the separators between list rows
+	//
+	// Since: 2.5
+	HideSeparators bool
+
 	currentFocus  ListItemID
 	focused       bool
 	scroller      *widget.Scroll
@@ -772,6 +777,10 @@ func (l *listLayout) updateList(newOnly bool) {
 }
 
 func (l *listLayout) updateSeparators() {
+	if l.list.HideSeparators {
+		l.separators = nil
+		return
+	}
 	if lenChildren := len(l.children); lenChildren > 1 {
 		if lenSep := len(l.separators); lenSep > lenChildren {
 			l.separators = l.separators[:lenChildren]
