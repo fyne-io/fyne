@@ -167,6 +167,7 @@ func (d *gLDriver) Run() {
 	go d.catchTerm()
 	d.runGL()
 
+	// Ensure lifecycle events run to completion before the app exits
 	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	l.WaitForEvents()
 	l.DestroyEventQueue()
