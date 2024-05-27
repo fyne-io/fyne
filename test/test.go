@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/test"
 
@@ -137,7 +137,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 		_, ok := object.(fyne.Draggable)
 		return ok
 	}
-	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
 		return
 	}
@@ -190,7 +190,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		_, ok := object.(desktop.Hoverable)
 		return ok
 	}
-	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
@@ -222,7 +222,7 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	}
-	o, _, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, _, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
 		return
 	}
@@ -313,7 +313,7 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 		_, ok := object.(fyne.Tappable)
 		return ok
 	}
-	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ = intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	return
 }
 

@@ -12,7 +12,7 @@ import (
 	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -207,7 +207,7 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	r.writeTag("content", false, nil)
 	r.w.WriteRune('\n')
 	r.indentation++
-	driver.WalkVisibleObjectTree(c.Content(), r.writeCanvasObject, r.writeCloseCanvasObject)
+	intdriver.WalkVisibleObjectTree(c.Content(), r.writeCanvasObject, r.writeCloseCanvasObject)
 	r.indentation--
 	r.writeIndent()
 	r.writeCloseTag("content")
@@ -215,7 +215,7 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 		r.writeTag("overlay", false, nil)
 		r.w.WriteRune('\n')
 		r.indentation++
-		driver.WalkVisibleObjectTree(o, r.writeCanvasObject, r.writeCloseCanvasObject)
+		intdriver.WalkVisibleObjectTree(o, r.writeCanvasObject, r.writeCloseCanvasObject)
 		r.indentation--
 		r.writeIndent()
 		r.writeCloseTag("overlay")

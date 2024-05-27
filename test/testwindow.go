@@ -14,7 +14,7 @@ type testWindow struct {
 
 	canvas    *canvas
 	clipboard clipboard
-	driver    *testDriver
+	driver    *driver
 	menu      *fyne.MainMenu
 }
 

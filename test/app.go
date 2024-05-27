@@ -20,7 +20,7 @@ func init() {
 }
 
 type app struct {
-	driver       *testDriver
+	driver       *driver
 	settings     *testSettings
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
@@ -152,7 +152,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*testDriver)}
+	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver)}
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
 	painter.ClearFontCache()
