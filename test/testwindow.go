@@ -13,7 +13,7 @@ type testWindow struct {
 	onCloseIntercepted func()
 
 	canvas    *canvas
-	clipboard testClipboard
+	clipboard clipboard
 	driver    *testDriver
 	menu      *fyne.MainMenu
 }
