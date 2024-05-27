@@ -81,7 +81,7 @@ func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
 		pos = fyne.NewPos(safeLeft, safeTop)
 		size = c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 	}
-	if c.chromeBoxIsDisplacing() {
+	if c.windowHeadIsDisplacing() {
 		offset := c.windowHead.MinSize().Height
 		pos = pos.AddXY(0, offset)
 		size = size.SubtractWidthHeight(0, offset)
@@ -144,18 +144,6 @@ func (c *canvas) applyThemeOutOfTreeObjects() {
 	}
 }
 
-func (c *canvas) chromeBoxIsDisplacing() bool {
-	if c.windowHead == nil {
-		return false
-	}
-
-	chromeBox := c.windowHead.(*fyne.Container)
-	if c.padded {
-		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
-	}
-	return len(chromeBox.Objects) > 1
-}
-
 func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
 	if c.menu != nil {
 		return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
@@ -198,7 +186,7 @@ func (c *canvas) sizeContent(size fyne.Size) {
 	if c.windowHead != nil {
 		var headSize fyne.Size
 		headPos := areaPos
-		if c.chromeBoxIsDisplacing() {
+		if c.windowHeadIsDisplacing() {
 			headSize = fyne.NewSize(areaSize.Width, c.windowHead.MinSize().Height)
 			headPos = headPos.SubtractXY(0, headSize.Height)
 		} else {
@@ -394,4 +382,16 @@ func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tap
 	c.touchTapCount = 0
 	c.touchCancelFunc = nil
 	c.touchLastTapped = nil
+}
+
+func (c *canvas) windowHeadIsDisplacing() bool {
+	if c.windowHead == nil {
+		return false
+	}
+
+	chromeBox := c.windowHead.(*fyne.Container)
+	if c.padded {
+		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+	}
+	return len(chromeBox.Objects) > 1
 }
