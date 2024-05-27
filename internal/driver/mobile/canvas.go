@@ -42,16 +42,20 @@ type canvas struct {
 }
 
 func newCanvas(dev fyne.Device) fyne.Canvas {
-	ret := &canvas{padded: true}
-	ret.device, _ = dev.(*device)
-	ret.scale = dev.SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-	ret.touched = make(map[int]mobile.Touchable)
-	ret.lastTapDownPos = make(map[int]fyne.Position)
-	ret.lastTapDown = make(map[int]time.Time)
-	ret.Initialize(ret, ret.overlayChanged)
+	d, _ := dev.(*device)
+	ret := &canvas{
+		Canvas: common.Canvas{
+			OnUnfocus: hideVirtualKeyboard,
+		},
+		device:         d,
+		lastTapDown:    make(map[int]time.Time),
+		lastTapDownPos: make(map[int]fyne.Position),
+		padded:         true,
+		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
+		touched:        make(map[int]mobile.Touchable),
+	}
 	ret.OnFocus = ret.handleKeyboard
-	ret.OnUnfocus = hideVirtualKeyboard
-
+	ret.Initialize(ret, ret.overlayChanged)
 	return ret
 }
 
