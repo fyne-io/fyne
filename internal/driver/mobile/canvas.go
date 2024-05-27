@@ -68,15 +68,21 @@ func (c *canvas) Content() fyne.CanvasObject {
 }
 
 func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	var pos fyne.Position
+	var size fyne.Size
 	if c.device == nil {
-		return fyne.NewPos(0, 0), c.Size() // running in test mode
+		// running in test mode
+		size = c.Size()
+	} else {
+		safeLeft := float32(c.device.safeLeft) / c.scale
+		safeTop := float32(c.device.safeTop) / c.scale
+		safeRight := float32(c.device.safeRight) / c.scale
+		safeBottom := float32(c.device.safeBottom) / c.scale
+		pos = fyne.NewPos(safeLeft, safeTop)
+		size = c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 	}
-
-	safeLeft := float32(c.device.safeLeft) / c.scale
-	safeTop := float32(c.device.safeTop) / c.scale
-	safeRight := float32(c.device.safeRight) / c.scale
-	safeBottom := float32(c.device.safeBottom) / c.scale
-	return fyne.NewPos(safeLeft, safeTop), c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
+	chromeBoxVerticalOffset := c.chromeBoxVerticalOffset()
+	return pos.AddXY(0, chromeBoxVerticalOffset), size.SubtractWidthHeight(0, chromeBoxVerticalOffset)
 }
 
 func (c *canvas) MinSize() fyne.Size {
@@ -189,41 +195,40 @@ func (c *canvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
-	c.size = size
 
-	chromeBoxOffset := c.chromeBoxVerticalOffset()
+	c.size = size
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
 		var headSize fyne.Size
-		if chromeBoxOffset > 0 {
-			headSize = fyne.NewSize(areaSize.Width, chromeBoxOffset)
+		headPos := areaPos
+		if c.chromeBoxIsDisplacing() {
+			headSize = fyne.NewSize(areaSize.Width, c.windowHead.MinSize().Height)
+			headPos = headPos.SubtractXY(0, headSize.Height)
 		} else {
 			headSize = c.windowHead.MinSize()
 		}
 		c.windowHead.Resize(headSize)
-		c.windowHead.Move(areaPos)
+		c.windowHead.Move(headPos)
 	}
 
-	contentPos := areaPos.AddXY(0, chromeBoxOffset)
-	contentSize := areaSize.SubtractWidthHeight(0, chromeBoxOffset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(contentSize)
-			overlay.Move(contentPos)
+			overlay.Resize(areaSize)
+			overlay.Move(areaPos)
 		}
 	}
 
 	if c.padded {
-		c.content.Resize(contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(areaPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(contentSize)
-		c.content.Move(contentPos)
+		c.content.Resize(areaSize)
+		c.content.Move(areaPos)
 	}
 }
 

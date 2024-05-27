@@ -122,10 +122,6 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	mc := c.(*canvas)
 	pos := intdriver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
-
-	if chromeBoxOffset := mc.chromeBoxVerticalOffset(); chromeBoxOffset > 0 {
-		pos = pos.SubtractXY(0, chromeBoxOffset)
-	}
 	return pos.Subtract(inset)
 }
 

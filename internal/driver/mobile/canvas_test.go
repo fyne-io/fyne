@@ -162,10 +162,10 @@ func Test_canvas_InteractiveArea(t *testing.T) {
 
 	c := newCanvas(dev)
 	c.SetContent(fynecanvas.NewRectangle(color.Black))
+	canvasSize := fyne.NewSize(600, 800)
+	c.(*canvas).Resize(canvasSize)
 
 	t.Run("for canvas with size", func(t *testing.T) {
-		canvasSize := fyne.NewSize(600, 800)
-		c.(*canvas).Resize(canvasSize)
 		pos, size := c.InteractiveArea()
 		assert.Equal(t, fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale), pos)
 		assert.Equal(t, canvasSize.SubtractWidthHeight(float32(dev.safeLeft+dev.safeRight)/scale, float32(dev.safeTop+dev.safeBottom)/scale), size)
@@ -177,6 +177,31 @@ func Test_canvas_InteractiveArea(t *testing.T) {
 		pos, size := c.InteractiveArea()
 		assert.Equal(t, fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale), pos)
 		assert.Equal(t, changedCanvasSize.SubtractWidthHeight(float32(dev.safeLeft+dev.safeRight)/scale, float32(dev.safeTop+dev.safeBottom)/scale), size)
+	})
+
+	t.Run("when canvas got hovering window head", func(t *testing.T) {
+		c.(*canvas).Resize(canvasSize)
+		hoveringMenu := fynecanvas.NewRectangle(color.Black)
+		hoveringMenu.SetMinSize(fyne.NewSize(17, 17))
+		windowHead := container.NewHBox(hoveringMenu) // a single object in window head is considered to be the hovering menu
+		c.(*canvas).setWindowHead(windowHead)
+		pos, size := c.InteractiveArea()
+		assert.Equal(t, fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale), pos)
+		assert.Equal(t, canvasSize.SubtractWidthHeight(float32(dev.safeLeft+dev.safeRight)/scale, float32(dev.safeTop+dev.safeBottom)/scale), size)
+	})
+
+	t.Run("when canvas got displacing window head", func(t *testing.T) {
+		c.(*canvas).Resize(canvasSize)
+		menu := fynecanvas.NewRectangle(color.Black)
+		menu.SetMinSize(fyne.NewSize(17, 17))
+		title := fynecanvas.NewRectangle(color.Black)
+		title.SetMinSize(fyne.NewSize(42, 20))
+		expectedOffset := 20 + 2*theme.Padding()
+		windowHead := container.NewHBox(menu, title) // two or more objects in window head are considered to be the window title bar
+		c.(*canvas).setWindowHead(windowHead)
+		pos, size := c.InteractiveArea()
+		assert.Equal(t, fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale+expectedOffset), pos)
+		assert.Equal(t, canvasSize.SubtractWidthHeight(float32(dev.safeLeft+dev.safeRight)/scale, float32(dev.safeTop+dev.safeBottom)/scale+expectedOffset), size)
 	})
 }
 
