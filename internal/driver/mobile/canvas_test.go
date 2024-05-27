@@ -151,6 +151,24 @@ func Test_canvas_Focusable(t *testing.T) {
 	assert.Equal(t, 1, content.unfocusedTimes)
 }
 
+func Test_canvas_InteractiveArea(t *testing.T) {
+	canvasSize := fyne.NewSize(600, 800)
+	dev := &device{
+		safeTop:    17,
+		safeLeft:   42,
+		safeBottom: 71,
+		safeRight:  24,
+	}
+	scale := dev.SystemScaleForWindow(nil)
+
+	c := newCanvas(dev)
+	c.SetContent(fynecanvas.NewRectangle(color.Black))
+	c.(*canvas).Resize(canvasSize)
+	pos, size := c.InteractiveArea()
+	assert.Equal(t, fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale), pos)
+	assert.Equal(t, canvasSize.SubtractWidthHeight(float32(dev.safeLeft+dev.safeRight)/scale, float32(dev.safeTop+dev.safeBottom)/scale), size)
+}
+
 func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 
