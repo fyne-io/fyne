@@ -101,7 +101,6 @@ func (f *Form) Refresh() {
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
-	f.BaseWidget.Refresh()
 
 	if f.isVertical() {
 		f.itemGrid.Layout = layout.NewVBoxLayout()
@@ -109,6 +108,7 @@ func (f *Form) Refresh() {
 		f.itemGrid.Layout = layout.NewFormLayout()
 	}
 
+	f.BaseWidget.Refresh()
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
@@ -403,7 +403,11 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
-	f.itemGrid.Layout = layout.NewVBoxLayout()
+	if f.isVertical() {
+		f.itemGrid.Layout = layout.NewVBoxLayout()
+	} else {
+		f.itemGrid.Layout = layout.NewFormLayout()
+	}
 	content := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{f.itemGrid, f.buttonBox}}
 	renderer := NewSimpleRenderer(content)
 	f.ensureRenderItems()
