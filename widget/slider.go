@@ -20,6 +20,12 @@ type Orientation int
 const (
 	Horizontal Orientation = 0
 	Vertical   Orientation = 1
+
+	// Adaptive will switch between horizontal and vertical layouts according to device orientation.
+	// This orientation is not always supported and interpretation can vary per-widget.
+	//
+	// Since: 2.5
+	Adaptive Orientation = 2
 )
 
 var _ fyne.Draggable = (*Slider)(nil)
