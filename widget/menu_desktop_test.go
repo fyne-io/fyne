@@ -220,8 +220,7 @@ func TestMenu_Scrolling(t *testing.T) {
 
 	// 100x100
 	// + 4,5 for canvas’ safe area
-	// - 0,3 for #4068 (wip)
-	w.Resize(fyne.NewSize(104, 102))
+	w.Resize(fyne.NewSize(104, 105))
 	m := widget.NewMenu(menu)
 	o := internalWidget.NewOverlayContainer(m, c, nil)
 	c.Overlays().Add(o)
@@ -266,7 +265,8 @@ func TestMenu_TraverseMenu(t *testing.T) {
 		fyne.NewMenuItem("Baz", nil),
 	))
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
-	w.Resize(m.MinSize())
+	// + 4,5 for canvas’ safe area
+	w.Resize(m.MinSize().AddWidthHeight(4, 5))
 	m.Resize(m.MinSize())
 
 	// going all the way down …
