@@ -29,6 +29,11 @@ func (t *RichText) ParseMarkdown(content string) {
 
 // AppendMarkdown parses the given markdown string and appends the
 // content to the widget, with the appropriate formatting.
+// This API is intended for appending complete markdown documents or
+// standalone fragments, and should not be used to parse a single
+// markdown document piecewise. Use ParseMarkdown for this case.
+//
+// Since: 2.5
 func (t *RichText) AppendMarkdown(content string) {
 	t.Segments = append(t.Segments, parseMarkdown(content)...)
 	t.Refresh()
