@@ -20,12 +20,12 @@ type Runner struct {
 	// by the runner goroutine to be ticked each frame
 	pendingAnimations []*anim
 
-	// nextAnimations is the list of animations that will be ticked in the next frame.
+	// nextFrameAnimations is the list of animations that will be ticked in the next frame.
 	// It is accessed only by the runner goroutine and accumulates the continuing animations
 	// during a tick that are not completed, plus the pendingAnimations picked up at the end of the frame.
 	// At the end of a full frame of animations, the nextAnimations slice is swapped with
 	// the current `animations` slice which is then cleared out, while holding the mutex.
-	nextAnimations []*anim
+	nextFrameAnimations []*anim
 
 	runnerStarted bool
 }
@@ -105,18 +105,18 @@ func (r *Runner) runOneFrame() (done bool) {
 	r.animationMutex.Unlock()
 	for _, a := range oldList {
 		if !a.isStopped() && r.tickAnimation(a) {
-			r.nextAnimations = append(r.nextAnimations, a)
+			r.nextFrameAnimations = append(r.nextFrameAnimations, a)
 		}
 	}
 
 	r.animationMutex.Lock()
-	// nil out old r.animations for re-use as next r.nextAnimations
+	// nil out old r.animations for re-use as next r.nextFrameAnimations
 	tmp := r.animations
 	for i := range tmp {
 		tmp[i] = nil
 	}
-	r.animations = append(r.nextAnimations, r.pendingAnimations...)
-	r.nextAnimations = tmp[:0]
+	r.animations = append(r.nextFrameAnimations, r.pendingAnimations...)
+	r.nextFrameAnimations = tmp[:0]
 	// nil out r.pendingAnimations
 	for i := range r.pendingAnimations {
 		r.pendingAnimations[i] = nil
