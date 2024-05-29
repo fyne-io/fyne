@@ -9,10 +9,23 @@ import (
 
 // Runner is the main driver for animations package
 type Runner struct {
+	// animationMutex synchronizes access to `animations` and `pendingAnimations`
+	// between the runner goroutine and calls to Start and Stop
 	animationMutex    sync.RWMutex
+
+	// animations is the list of animations that are being ticked in the current frame
 	animations        []*anim
+
+	// pendingAnimations is animations that have been started but not yet picked up
+	// by the runner goroutine to be ticked each frame
 	pendingAnimations []*anim
-	nextAnimations    []*anim // used by runner goroutine only
+
+	// nextAnimations is the list of animations that will be ticked in the next frame.
+	// It is accessed only by the runner goroutine and accumulates the continuing animations
+	// during a tick that are not completed, plus the pendingAnimations picked up at the end of the frame.
+	// At the end of a full frame of animations, the nextAnimations slice is swapped with
+	// the current `animations` slice which is then cleared out, while holding the mutex.
+	nextAnimations    []*anim
 
 	runnerStarted bool
 }
