@@ -399,7 +399,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.cancelButton = &Button{Icon: th.Icon(theme.IconNameCancel), OnTapped: f.OnCancel}
 	f.submitButton = &Button{Icon: th.Icon(theme.IconNameConfirm), OnTapped: f.OnSubmit, Importance: HighImportance}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
-	f.buttonBox = &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{layout.NewSpacer(), buttons}}
+	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
@@ -432,17 +432,23 @@ type formLabelLayout struct {
 
 func (f formLabelLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
 	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
+	xPad := innerPad
 	yPos := float32(0)
 	if !f.form.isVertical() {
+		xPad += innerPad
 		yPos = innerPad
 	}
 	objs[0].Move(fyne.NewPos(innerPad, yPos))
-	objs[0].Resize(objs[0].MinSize())
+	objs[0].Resize(fyne.NewSize(size.Width-xPad, objs[0].MinSize().Height))
 }
 
 func (f formLabelLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
 	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
 	min0 := objs[0].MinSize()
+
+	if !f.form.isVertical() {
+		min0 = min0.AddWidthHeight(innerPad, 0)
+	}
 
 	return min0.AddWidthHeight(innerPad, 0)
 }
