@@ -74,40 +74,44 @@ func (r *Runner) Stop(a *fyne.Animation) {
 
 func (r *Runner) runAnimations() {
 	draw := time.NewTicker(time.Second / 60)
-
 	go func() {
 		for done := false; !done; {
 			<-draw.C
-			r.animationMutex.Lock()
-			oldList := r.animations
-			r.animationMutex.Unlock()
-			for _, a := range oldList {
-				if !a.isStopped() && r.tickAnimation(a) {
-					r.nextAnimations = append(r.nextAnimations, a)
-				}
-			}
-
-			r.animationMutex.Lock()
-			// nil out old r.animations for re-use as next r.nextAnimations
-			tmp := r.animations
-			for i := range tmp {
-				tmp[i] = nil
-			}
-			r.animations = append(r.nextAnimations, r.pendingAnimations...)
-			r.nextAnimations = tmp[:0]
-			// nil out r.pendingAnimations
-			for i := range r.pendingAnimations {
-				r.pendingAnimations[i] = nil
-			}
-			r.pendingAnimations = r.pendingAnimations[:0]
-			done = len(r.animations) == 0
-			r.animationMutex.Unlock()
+			done = r.runOneFrame()
 		}
 		r.animationMutex.Lock()
 		r.runnerStarted = false
 		r.animationMutex.Unlock()
 		draw.Stop()
 	}()
+}
+
+func (r *Runner) runOneFrame() (done bool) {
+	r.animationMutex.Lock()
+	oldList := r.animations
+	r.animationMutex.Unlock()
+	for _, a := range oldList {
+		if !a.isStopped() && r.tickAnimation(a) {
+			r.nextAnimations = append(r.nextAnimations, a)
+		}
+	}
+
+	r.animationMutex.Lock()
+	// nil out old r.animations for re-use as next r.nextAnimations
+	tmp := r.animations
+	for i := range tmp {
+		tmp[i] = nil
+	}
+	r.animations = append(r.nextAnimations, r.pendingAnimations...)
+	r.nextAnimations = tmp[:0]
+	// nil out r.pendingAnimations
+	for i := range r.pendingAnimations {
+		r.pendingAnimations[i] = nil
+	}
+	r.pendingAnimations = r.pendingAnimations[:0]
+	done = len(r.animations) == 0
+	r.animationMutex.Unlock()
+	return done
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
