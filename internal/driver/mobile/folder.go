@@ -1,7 +1,7 @@
 package mobile
 
 import (
-	"fmt"
+	"errors"
 
 	"fyne.io/fyne/v2"
 )
@@ -16,7 +16,7 @@ func (l *lister) List() ([]fyne.URI, error) {
 
 func listerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if !canListURI(uri) {
-		return nil, fmt.Errorf("specified URI is not listable")
+		return nil, errors.New("specified URI is not listable")
 	}
 
 	return &lister{uri}, nil
