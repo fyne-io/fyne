@@ -23,7 +23,7 @@ type Runner struct {
 	// nextFrameAnimations is the list of animations that will be ticked in the next frame.
 	// It is accessed only by the runner goroutine and accumulates the continuing animations
 	// during a tick that are not completed, plus the pendingAnimations picked up at the end of the frame.
-	// At the end of a full frame of animations, the nextAnimations slice is swapped with
+	// At the end of a full frame of animations, the nextFrameAnimations slice is swapped with
 	// the current `animations` slice which is then cleared out, while holding the mutex.
 	nextFrameAnimations []*anim
 
