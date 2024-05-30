@@ -9,9 +9,23 @@ import (
 
 // Runner is the main driver for animations package
 type Runner struct {
-	animationMutex    sync.RWMutex
-	animations        []*anim
+	// animationMutex synchronizes access to `animations` and `pendingAnimations`
+	// between the runner goroutine and calls to Start and Stop
+	animationMutex sync.RWMutex
+
+	// animations is the list of animations that are being ticked in the current frame
+	animations []*anim
+
+	// pendingAnimations is animations that have been started but not yet picked up
+	// by the runner goroutine to be ticked each frame
 	pendingAnimations []*anim
+
+	// nextFrameAnimations is the list of animations that will be ticked in the next frame.
+	// It is accessed only by the runner goroutine and accumulates the continuing animations
+	// during a tick that are not completed, plus the pendingAnimations picked up at the end of the frame.
+	// At the end of a full frame of animations, the nextFrameAnimations slice is swapped with
+	// the current `animations` slice which is then cleared out, while holding the mutex.
+	nextFrameAnimations []*anim
 
 	runnerStarted bool
 }
@@ -23,9 +37,19 @@ func (r *Runner) Start(a *fyne.Animation) {
 
 	if !r.runnerStarted {
 		r.runnerStarted = true
+		if r.animations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.animations = make([]*anim, 0, 16)
+		}
 		r.animations = append(r.animations, newAnim(a))
 		r.runAnimations()
 	} else {
+		if r.pendingAnimations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.pendingAnimations = make([]*anim, 0, 16)
+		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
 }
@@ -63,30 +87,44 @@ func (r *Runner) Stop(a *fyne.Animation) {
 
 func (r *Runner) runAnimations() {
 	draw := time.NewTicker(time.Second / 60)
-
 	go func() {
 		for done := false; !done; {
 			<-draw.C
-			r.animationMutex.Lock()
-			oldList := r.animations
-			r.animationMutex.Unlock()
-			newList := make([]*anim, 0, len(oldList))
-			for _, a := range oldList {
-				if !a.isStopped() && r.tickAnimation(a) {
-					newList = append(newList, a)
-				}
-			}
-			r.animationMutex.Lock()
-			r.animations = append(newList, r.pendingAnimations...)
-			r.pendingAnimations = nil
-			done = len(r.animations) == 0
-			r.animationMutex.Unlock()
+			done = r.runOneFrame()
 		}
 		r.animationMutex.Lock()
 		r.runnerStarted = false
 		r.animationMutex.Unlock()
 		draw.Stop()
 	}()
+}
+
+func (r *Runner) runOneFrame() (done bool) {
+	r.animationMutex.Lock()
+	oldList := r.animations
+	r.animationMutex.Unlock()
+	for _, a := range oldList {
+		if !a.isStopped() && r.tickAnimation(a) {
+			r.nextFrameAnimations = append(r.nextFrameAnimations, a)
+		}
+	}
+
+	r.animationMutex.Lock()
+	// nil out old r.animations for re-use as next r.nextFrameAnimations
+	tmp := r.animations
+	for i := range tmp {
+		tmp[i] = nil
+	}
+	r.animations = append(r.nextFrameAnimations, r.pendingAnimations...)
+	r.nextFrameAnimations = tmp[:0]
+	// nil out r.pendingAnimations
+	for i := range r.pendingAnimations {
+		r.pendingAnimations[i] = nil
+	}
+	r.pendingAnimations = r.pendingAnimations[:0]
+	done = len(r.animations) == 0
+	r.animationMutex.Unlock()
+	return done
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
