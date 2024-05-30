@@ -431,7 +431,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		f.files.Unselect(f.selectedID)
 	}
 	if dir == nil {
-		return fmt.Errorf("failed to open nil directory")
+		return errors.New("failed to open nil directory")
 	}
 	list, err := storage.ListerForURI(dir)
 	if err != nil {

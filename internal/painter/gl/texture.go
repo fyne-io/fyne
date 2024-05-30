@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -37,7 +38,7 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 		cache.SetTexture(object, texture, p.canvas)
 	}
 	if !cache.IsValid(texture) {
-		return noTexture, fmt.Errorf("no texture available")
+		return noTexture, errors.New("no texture available")
 	}
 	return Texture(texture), nil
 }
