@@ -29,6 +29,7 @@ type canvas struct {
 	padded         bool
 	scale          float32
 	size           fyne.Size
+	touched        map[int]mobile.Touchable
 	windowHead     fyne.CanvasObject
 
 	dragOffset fyne.Position
@@ -41,7 +42,6 @@ type canvas struct {
 	touchCancelFunc context.CancelFunc
 	touchLastTapped fyne.CanvasObject
 	touchTapCount   int
-	touched         map[int]mobile.Touchable
 }
 
 func newCanvas(dev fyne.Device) fyne.Canvas {
