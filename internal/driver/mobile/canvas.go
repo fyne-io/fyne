@@ -20,25 +20,28 @@ var _ fyne.Canvas = (*canvas)(nil)
 
 type canvas struct {
 	common.Canvas
-	content         fyne.CanvasObject
-	device          *device
-	dragOffset      fyne.Position
-	dragStart       fyne.Position
-	dragging        fyne.Draggable
-	initialized     bool
-	lastTapDown     map[int]time.Time
-	lastTapDownPos  map[int]fyne.Position
-	menu            fyne.CanvasObject
-	onTypedKey      func(event *fyne.KeyEvent)
-	onTypedRune     func(rune)
-	padded          bool
-	scale           float32
-	size            fyne.Size
+	content        fyne.CanvasObject
+	device         *device
+	initialized    bool
+	lastTapDown    map[int]time.Time
+	lastTapDownPos map[int]fyne.Position
+	menu           fyne.CanvasObject
+	padded         bool
+	scale          float32
+	size           fyne.Size
+	windowHead     fyne.CanvasObject
+
+	dragOffset fyne.Position
+	dragStart  fyne.Position
+	dragging   fyne.Draggable
+
+	onTypedKey  func(event *fyne.KeyEvent)
+	onTypedRune func(rune)
+
 	touchCancelFunc context.CancelFunc
 	touchLastTapped fyne.CanvasObject
 	touchTapCount   int
 	touched         map[int]mobile.Touchable
-	windowHead      fyne.CanvasObject
 }
 
 func newCanvas(dev fyne.Device) fyne.Canvas {
