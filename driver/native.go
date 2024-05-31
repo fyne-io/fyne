@@ -50,3 +50,15 @@ type X11WindowContext struct {
 	// WindowHandle is the window handle for the native X11 window.
 	WindowHandle string
 }
+
+// WaylandWindowContext is passed to the NativeWindow.RunNative callback
+// when it is executed on a device with the Wayland windowing system.
+//
+// Since: 2.5
+type WaylandWindowContext struct {
+	// WaylandSurface is the handle to the native Wayland surface.
+	WaylandSurface uintptr
+
+	// EGLSurface is the handle to the native EGL surface.
+	EGLSurface uintptr
+}

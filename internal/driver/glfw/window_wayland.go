@@ -18,8 +18,10 @@ func (w *window) RunNative(f func(any) error) error {
 	var err error
 	done := make(chan struct{})
 	runOnMain(func() {
-		// TODO: define driver.WaylandWindowContext and pass window handle
-		err = f(driver.UnknownContext{})
+		err = f(driver.WaylandWindowContext{
+			WaylandSurface: uintptr(w.view().GetWaylandWindow()),
+			EGLSurface:     uintptr(w.view().GetEGLSurface()),
+		})
 		close(done)
 	})
 	<-done
