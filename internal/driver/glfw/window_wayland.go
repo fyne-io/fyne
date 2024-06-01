@@ -3,6 +3,8 @@
 package glfw
 
 import (
+	"unsafe"
+
 	"fyne.io/fyne/v2/driver"
 )
 
@@ -19,8 +21,8 @@ func (w *window) RunNative(f func(any) error) error {
 	done := make(chan struct{})
 	runOnMain(func() {
 		err = f(driver.WaylandWindowContext{
-			WaylandSurface: uintptr(w.view().GetWaylandWindow()),
-			EGLSurface:     uintptr(w.view().GetEGLSurface()),
+			WaylandSurface: uintptr(unsafe.Pointer(w.view().GetWaylandWindow())),
+			EGLSurface:     uintptr(unsafe.Pointer(w.view().GetEGLSurface())),
 		})
 		close(done)
 	})
