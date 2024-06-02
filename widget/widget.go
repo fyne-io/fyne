@@ -142,8 +142,8 @@ func (w *BaseWidget) Refresh() {
 //
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
 	return w.themeWithLock()
 }
 

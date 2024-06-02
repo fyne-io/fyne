@@ -315,7 +315,7 @@ func (r *buttonRenderer) Refresh() {
 }
 
 // applyTheme updates this button to match the current theme
-// must be called with the button propertyLock held
+// must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -391,7 +391,7 @@ func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
 	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
 }
 
-// must be called with r.button.propertyLock held
+// must be called with r.button.propertyLock RLocked
 func (r *buttonRenderer) updateIconAndText() {
 	if r.button.Icon != nil && r.button.Visible() {
 		icon := r.button.Icon
