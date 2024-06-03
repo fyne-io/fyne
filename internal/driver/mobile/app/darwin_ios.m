@@ -11,6 +11,7 @@
 #include <sys/utsname.h>
 
 #import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <GLKit/GLKit.h>
 #import <UserNotifications/UserNotifications.h>
@@ -30,7 +31,32 @@ struct utsname sysInfo;
 
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    int scale = 1;
+    [self setUpAppDiaplay];
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+    NSString *scheme = [url scheme];
+    
+    if ([scheme caseInsensitiveCompare:@"com.rnsksoft.Pixelcade"] == NSOrderedSame) {
+        NSString *view = [url host];
+        
+        NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+        NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+        
+        for (NSURLQueryItem *queryItem in urlComponents.queryItems) {
+            [parameters setObject:queryItem.value forKey:queryItem.name];
+        }
+	
+	[self setUpAppDisplay];
+        //[self redirectTo:view withParameters:parameters];
+    }
+    
+    return YES;
+}
+
+-(void)setUpAppDisplay() {
+  int scale = 1;
     if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
 		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
 	}
@@ -49,8 +75,6 @@ struct utsname sysInfo;
 
 	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
 	center.delegate = (id) self;
-
-	return YES;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication * )application {
