@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	fyne.io/systray v1.10.1-0.20231230205326-d160fd363db9
-	github.com/BurntSushi/toml v1.3.2
+	github.com/BurntSushi/toml v1.4.0
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
