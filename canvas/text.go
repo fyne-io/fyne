@@ -23,6 +23,8 @@ type Text struct {
 	TextStyle fyne.TextStyle // The style of the text content
 
 	// FontSource defines a resource that can be used instead of the theme for looking up the font.
+	// When a font source is set the `TextStyle` may not be effective, as it will be limited to the styles
+	// present in the data provided.
 	//
 	// Since: 2.5
 	FontSource fyne.Resource
