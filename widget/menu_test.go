@@ -35,7 +35,8 @@ func TestMenu_RefreshOptions(t *testing.T) {
 		itemBaz,
 	))
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
-	w.Resize(m.MinSize())
+	// + 4,5 for canvas’ safe area
+	w.Resize(m.MinSize().AddWidthHeight(4, 5))
 	m.Resize(m.MinSize())
 	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
 
