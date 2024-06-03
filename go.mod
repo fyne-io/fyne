@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	fyne.io/systray v1.10.1-0.20231230205326-d160fd363db9
-	github.com/BurntSushi/toml v1.3.2
+	github.com/BurntSushi/toml v1.4.0
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -18,7 +18,7 @@ require (
 	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jackmordaunt/icns/v2 v2.2.6
-	github.com/jeandeaual/go-locale v0.0.0-20240204043739-672d8d016d9a
+	github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
@@ -29,13 +29,13 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.4.0
-	github.com/yuin/goldmark v1.5.5
+	github.com/yuin/goldmark v1.7.1
 	golang.org/x/image v0.14.0
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
-	golang.org/x/mod v0.14.0
-	golang.org/x/sys v0.19.0
-	golang.org/x/text v0.14.0
-	golang.org/x/tools v0.16.1
+	golang.org/x/mod v0.17.0
+	golang.org/x/sys v0.20.0
+	golang.org/x/text v0.15.0
+	golang.org/x/tools v0.21.0
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
@@ -49,7 +49,8 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
