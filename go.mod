@@ -32,10 +32,10 @@ require (
 	github.com/yuin/goldmark v1.7.1
 	golang.org/x/image v0.14.0
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
-	golang.org/x/mod v0.14.0
-	golang.org/x/sys v0.19.0
-	golang.org/x/text v0.14.0
-	golang.org/x/tools v0.16.1
+	golang.org/x/mod v0.17.0
+	golang.org/x/sys v0.20.0
+	golang.org/x/text v0.15.0
+	golang.org/x/tools v0.21.0
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
@@ -49,7 +49,8 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
