@@ -18,7 +18,7 @@ require (
 	github.com/go-text/typesetting v0.1.0
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jackmordaunt/icns/v2 v2.2.6
-	github.com/jeandeaual/go-locale v0.0.0-20240204043739-672d8d016d9a
+	github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
