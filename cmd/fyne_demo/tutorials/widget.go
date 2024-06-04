@@ -516,9 +516,12 @@ func stopProgress() {
 
 // widgetScreen shows a panel containing widget demos
 func widgetScreen(_ fyne.Window) fyne.CanvasObject {
+	thIcon := theme.NewThemedResource(theme.HomeIcon())
+	thIcon.ColorName = theme.ColorNamePrimary
+	btn := widget.NewButtonWithIcon("Icons", thIcon, func() {})
 	content := container.NewVBox(
 		widget.NewLabel("Labels"),
-		widget.NewButtonWithIcon("Icons", theme.HomeIcon(), func() {}),
+		btn,
 		widget.NewSlider(0, 1))
 	return container.NewCenter(content)
 }
