@@ -27,11 +27,12 @@ struct utsname sysInfo;
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
+@property (strong, nonatomic) NSString *parameters;
 @end
 
 @implementation GoAppAppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [self setUpAppDiaplay];
+    [self setUpAppDisplay];
     return YES;
 }
 
@@ -41,12 +42,14 @@ struct utsname sysInfo;
     if ([scheme caseInsensitiveCompare:@"com.rnsksoft.Pixelcade"] == NSOrderedSame) {
         NSString *view = [url host];
         
-        NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+        _parameters = @"";
         NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         
         for (NSURLQueryItem *queryItem in urlComponents.queryItems) {
-            [parameters setObject:queryItem.value forKey:queryItem.name];
+
+            _parameters = [_parameters stringByAppendingFormat:@":|%@=%@:|", queryItem.name, queryItem.value];
         }
+        NSLog(@"%@",_parameters);
 	
 	[self setUpAppDisplay];
         //[self redirectTo:view withParameters:parameters];
@@ -55,7 +58,7 @@ struct utsname sysInfo;
     return YES;
 }
 
--(void)setUpAppDisplay() {
+-(void)setUpAppDisplay {
   int scale = 1;
     if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
 		scale = (int)[UIScreen mainScreen].scale; // either 1.0, 2.0, or 3.0.
@@ -295,8 +298,12 @@ UIEdgeInsets getDevicePadding() {
 }
 
 bool isDark() {
-    UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    if (@available(iOS 12.0, *)) {
+        UIViewController *rootVC = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+        return rootVC.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+    }
+
+    return NO;
 }
 
 #define DEFAULT_KEYBOARD_CODE 0

@@ -2,9 +2,11 @@
 // +build !ci
 
 #import <Foundation/Foundation.h>
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
+
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400 || TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
 #import <UserNotifications/UserNotifications.h>
 #endif
+
 
 static int notifyNum = 0;
 
@@ -14,7 +16,8 @@ bool isBundled() {
     return [[NSBundle mainBundle] bundleIdentifier] != nil;
 }
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
+
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400 || TARGET_OS_IPHONE && TARGET_IPHONE_SIMULATOR
 void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body) {
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
     [content autorelease];
@@ -54,8 +57,10 @@ void sendNotification(char *cTitle, char *cBody) {
             }
         }];
 }
-#else
+#else {
 void sendNotification(char *cTitle, char *cBody) {
 	fallbackSend(cTitle, cBody);
 }
+}
 #endif
+

@@ -86,6 +86,13 @@ func GoBack() {
 	// Apple do not permit apps to exit in any way other than user pressing home button / gesture
 }
 
+func URLLauchParameters() string {
+	lpstr := ""
+	return lpstr
+}
+
+
+
 //export setDisplayMetrics
 func setDisplayMetrics(width, height int, scale int) {
 	DisplayMetrics.WidthPx = width
@@ -122,6 +129,8 @@ func setScreen(scale int) {
 	pixelsPerPt = v * float32(scale) / 72
 	screenScale = scale
 }
+
+
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {

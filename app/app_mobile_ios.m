@@ -2,6 +2,10 @@
 // +build !ci,ios
 
 #import <UIKit/UIKit.h>
+#import <UserNotifications/UserNotifications.h>
+
+static int notifyNum = 0;
+extern void fallbackSend(char *cTitle, char *cBody);
 
 void openURL(char *urlStr) {
     UIApplication *app = [UIApplication sharedApplication];
@@ -14,3 +18,5 @@ char *documentsPath() {
     NSString *path = paths.firstObject;
     return [path UTF8String];
 }
+
+

@@ -10,6 +10,7 @@ package app
 #include <stdlib.h>
 
 char *documentsPath(void);
+
 void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
@@ -21,6 +22,7 @@ import (
 
 	"fyne.io/fyne/v2"
 )
+
 
 func rootConfigDir() string {
 	root := C.documentsPath()
