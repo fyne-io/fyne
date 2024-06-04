@@ -268,13 +268,6 @@ func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
 
-// OnPrimaryColor returns the color used for text and icons against the PrimaryColor.
-//
-// Since: 2.5
-func OnPrimaryColor() color.Color {
-	return safeColorLookup(ColorNameOnPrimary, currentVariant())
-}
-
 // OnPrimaryColorNamed returns a theme specific color used for text and icons against the named primary color.
 //
 // Since: 2.5
