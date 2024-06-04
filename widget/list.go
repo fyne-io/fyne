@@ -411,11 +411,11 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) 
 			offY = 0
 		}
 
-		if maxRow > length {
-			maxRow = length
+		if maxRow > length-1 {
+			maxRow = length - 1
 		}
 
-		for i := 0; i < maxRow-minRow; i++ {
+		for i := 0; i <= maxRow-minRow; i++ {
 			l.visibleRowHeights = append(l.visibleRowHeights, itemHeight)
 		}
 		return
