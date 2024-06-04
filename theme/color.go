@@ -61,7 +61,7 @@ const (
 	// Since: 2.0
 	ColorNameDisabled fyne.ThemeColorName = "disabled"
 
-	// ColorNameError is the name of theme lookup for foreground error color.
+	// ColorNameError is the name of theme lookup for error color.
 	//
 	// Since: 2.0
 	ColorNameError fyne.ThemeColorName = "error"
@@ -151,12 +151,12 @@ const (
 	// Since: 2.0
 	ColorNameShadow fyne.ThemeColorName = "shadow"
 
-	// ColorNameSuccess is the name of theme lookup for foreground success color.
+	// ColorNameSuccess is the name of theme lookup for success color.
 	//
 	// Since: 2.3
 	ColorNameSuccess fyne.ThemeColorName = "success"
 
-	// ColorNameWarning is the name of theme lookup for foreground warning color.
+	// ColorNameWarning is the name of theme lookup for warning color.
 	//
 	// Since: 2.3
 	ColorNameWarning fyne.ThemeColorName = "warning"
