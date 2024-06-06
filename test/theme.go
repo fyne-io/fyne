@@ -9,14 +9,14 @@ import (
 
 var defaultTheme fyne.Theme
 
-var (
-	red   = &color.RGBA{R: 200, G: 0, B: 0, A: 255}
-	green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
-	blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
-)
-
 // NewTheme returns a new testTheme.
 func NewTheme() fyne.Theme {
+	var (
+		red   = &color.RGBA{R: 200, G: 0, B: 0, A: 255}
+		green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
+	)
+
 	return &configurableTheme{
 		colors: map[fyne.ThemeColorName]color.Color{
 			theme.ColorNameBackground:        red,
