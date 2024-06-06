@@ -11,34 +11,36 @@ var defaultTheme fyne.Theme
 
 // NewTheme returns a new testTheme.
 func NewTheme() fyne.Theme {
+	red := func(alpha uint8) color.Color {
+		return &color.RGBA{R: 200, G: 0, B: 0, A: alpha}
+	}
 	var (
-		red   = &color.RGBA{R: 200, G: 0, B: 0, A: 255}
 		green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
 		blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
 	)
 
 	return &configurableTheme{
 		colors: map[fyne.ThemeColorName]color.Color{
-			theme.ColorNameBackground:        red,
+			theme.ColorNameBackground:        red(255),
 			theme.ColorNameButton:            color.Black,
 			theme.ColorNameDisabled:          color.Black,
 			theme.ColorNameDisabledButton:    color.White,
 			theme.ColorNameError:             blue,
-			theme.ColorNameFocus:             color.RGBA{red.R, red.G, red.B, 66},
+			theme.ColorNameFocus:             red(66),
 			theme.ColorNameForeground:        color.White,
 			theme.ColorNameHover:             green,
-			theme.ColorNameHeaderBackground:  color.RGBA{red.R, red.G, red.B, 22},
-			theme.ColorNameInputBackground:   color.RGBA{red.R, red.G, red.B, 30},
+			theme.ColorNameHeaderBackground:  red(22),
+			theme.ColorNameInputBackground:   red(30),
 			theme.ColorNameInputBorder:       color.Black,
-			theme.ColorNameMenuBackground:    color.RGBA{red.R, red.G, red.B, 30},
-			theme.ColorNameOnPrimary:         color.RGBA{red.R, red.G, red.B, 200},
-			theme.ColorNameOverlayBackground: color.RGBA{red.R, red.G, red.B, 44},
+			theme.ColorNameMenuBackground:    red(30),
+			theme.ColorNameOnPrimary:         red(200),
+			theme.ColorNameOverlayBackground: red(44),
 			theme.ColorNamePlaceHolder:       blue,
 			theme.ColorNamePressed:           blue,
 			theme.ColorNamePrimary:           green,
 			theme.ColorNameScrollBar:         blue,
 			theme.ColorNameSeparator:         color.Black,
-			theme.ColorNameSelection:         color.RGBA{red.R, red.G, red.B, 44},
+			theme.ColorNameSelection:         red(44),
 			theme.ColorNameShadow:            blue,
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
