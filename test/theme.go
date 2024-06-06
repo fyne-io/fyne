@@ -11,37 +11,42 @@ var defaultTheme fyne.Theme
 
 // NewTheme returns a new testTheme.
 func NewTheme() fyne.Theme {
+	blue := func(alpha uint8) color.Color {
+		return &color.RGBA{R: 0, G: 0, B: 255, A: alpha}
+	}
+	gray := func(level uint8) color.Color {
+		return &color.Gray{Y: level}
+	}
+	green := func(alpha uint8) color.Color {
+		return &color.RGBA{R: 0, G: 255, B: 0, A: alpha}
+	}
 	red := func(alpha uint8) color.Color {
 		return &color.RGBA{R: 200, G: 0, B: 0, A: alpha}
 	}
-	var (
-		green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
-		blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
-	)
 
 	return &configurableTheme{
 		colors: map[fyne.ThemeColorName]color.Color{
 			theme.ColorNameBackground:        red(255),
-			theme.ColorNameButton:            color.Black,
-			theme.ColorNameDisabled:          color.Black,
-			theme.ColorNameDisabledButton:    color.White,
-			theme.ColorNameError:             blue,
+			theme.ColorNameButton:            gray(0),
+			theme.ColorNameDisabled:          gray(0),
+			theme.ColorNameDisabledButton:    gray(255),
+			theme.ColorNameError:             blue(255),
 			theme.ColorNameFocus:             red(66),
-			theme.ColorNameForeground:        color.White,
-			theme.ColorNameHover:             green,
+			theme.ColorNameForeground:        gray(255),
+			theme.ColorNameHover:             green(255),
 			theme.ColorNameHeaderBackground:  red(22),
 			theme.ColorNameInputBackground:   red(30),
-			theme.ColorNameInputBorder:       color.Black,
+			theme.ColorNameInputBorder:       gray(0),
 			theme.ColorNameMenuBackground:    red(30),
 			theme.ColorNameOnPrimary:         red(200),
 			theme.ColorNameOverlayBackground: red(44),
-			theme.ColorNamePlaceHolder:       blue,
-			theme.ColorNamePressed:           blue,
-			theme.ColorNamePrimary:           green,
-			theme.ColorNameScrollBar:         blue,
-			theme.ColorNameSeparator:         color.Black,
+			theme.ColorNamePlaceHolder:       blue(255),
+			theme.ColorNamePressed:           blue(255),
+			theme.ColorNamePrimary:           green(255),
+			theme.ColorNameScrollBar:         blue(255),
+			theme.ColorNameSeparator:         gray(0),
 			theme.ColorNameSelection:         red(44),
-			theme.ColorNameShadow:            blue,
+			theme.ColorNameShadow:            blue(255),
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
 			{}:                         theme.DefaultTextBoldFont(),
