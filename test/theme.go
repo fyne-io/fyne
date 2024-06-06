@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -142,10 +143,18 @@ type configurableTheme struct {
 var _ fyne.Theme = (*configurableTheme)(nil)
 
 func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	if t.colors[n] == nil {
+		fyne.LogError(fmt.Sprintf("color %s not defined in theme %s", n, t.name), nil)
+	}
+
 	return t.colors[n]
 }
 
 func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if t.fonts[style] == nil {
+		fyne.LogError(fmt.Sprintf("font for style %#v not defined in theme %s", style, t.name), nil)
+	}
+
 	return t.fonts[style]
 }
 
@@ -154,5 +163,9 @@ func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 }
 
 func (t *configurableTheme) Size(s fyne.ThemeSizeName) float32 {
+	if t.sizes[s] == 0 {
+		fyne.LogError(fmt.Sprintf("size %s not defined in theme %s", s, t.name), nil)
+	}
+
 	return t.sizes[s]
 }
