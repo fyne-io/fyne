@@ -135,6 +135,23 @@ func Theme() fyne.Theme {
 	return defaultTheme
 }
 
+func newConfigurableTheme(name string, colors map[fyne.ThemeColorName]color.Color, fonts map[fyne.TextStyle]fyne.Resource, sizes map[fyne.ThemeSizeName]float32) fyne.Theme {
+	seen := map[color.Color]fyne.ThemeColorName{}
+	for cn, c := range colors {
+		if seen[c] != "" {
+			// This panic will never happen on released code because it will happen on CI runs prior release.
+			panic(fmt.Sprintf("duplicate color value %#v for color %s already used for color %s in theme %s", c, cn, seen[c], name))
+		}
+		seen[c] = cn
+	}
+	return &configurableTheme{
+		colors: colors,
+		fonts:  fonts,
+		name:   name,
+		sizes:  sizes,
+	}
+}
+
 type configurableTheme struct {
 	colors map[fyne.ThemeColorName]color.Color
 	fonts  map[fyne.TextStyle]fyne.Resource
