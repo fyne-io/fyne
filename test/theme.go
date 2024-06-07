@@ -48,6 +48,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameSelection:         red(44),
 			theme.ColorNameShadow:            blue(255),
 		},
+		name: "Ugly Test Theme",
 		fonts: map[fyne.TextStyle]fyne.Resource{
 			{}:                         theme.DefaultTextBoldFont(),
 			{Bold: true}:               theme.DefaultTextItalicFont(),
@@ -109,6 +110,7 @@ func Theme() fyne.Theme {
 				{Italic: true}:             theme.DefaultTextItalicFont(),
 				{Monospace: true}:          theme.DefaultTextMonospaceFont(),
 			},
+			name: "Default Test Theme",
 			sizes: map[fyne.ThemeSizeName]float32{
 				theme.SizeNameInlineIcon:         float32(20),
 				theme.SizeNameInnerPadding:       float32(8),
@@ -133,6 +135,7 @@ func Theme() fyne.Theme {
 type configurableTheme struct {
 	colors map[fyne.ThemeColorName]color.Color
 	fonts  map[fyne.TextStyle]fyne.Resource
+	name   string
 	sizes  map[fyne.ThemeSizeName]float32
 }
 
