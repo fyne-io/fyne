@@ -9,7 +9,7 @@ import (
 
 var defaultTheme fyne.Theme
 
-// NewTheme returns a new testTheme.
+// NewTheme returns a new test theme using quiet ugly colors.
 func NewTheme() fyne.Theme {
 	blue := func(alpha uint8) color.Color {
 		return &color.RGBA{R: 0, G: 0, B: 255, A: alpha}
@@ -74,7 +74,7 @@ func NewTheme() fyne.Theme {
 	}
 }
 
-// Theme returns a theme useful for image based tests.
+// Theme returns a test theme useful for image based tests.
 func Theme() fyne.Theme {
 	if defaultTheme == nil {
 		defaultTheme = &configurableTheme{
