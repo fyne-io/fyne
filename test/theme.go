@@ -25,9 +25,8 @@ func NewTheme() fyne.Theme {
 		return &color.NRGBA{R: 200, G: 0, B: 0, A: alpha}
 	}
 
-	return newConfigurableTheme(
-		"Ugly Test Theme",
-		map[fyne.ThemeColorName]color.Color{
+	return &configurableTheme{
+		colors: map[fyne.ThemeColorName]color.Color{
 			theme.ColorNameBackground:        red(255),
 			theme.ColorNameButton:            gray(100),
 			theme.ColorNameDisabled:          gray(20),
@@ -50,7 +49,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameSelection:         red(55),
 			theme.ColorNameShadow:            blue(150),
 		},
-		map[fyne.TextStyle]fyne.Resource{
+		fonts: map[fyne.TextStyle]fyne.Resource{
 			{}:                         theme.DefaultTextBoldFont(),
 			{Bold: true}:               theme.DefaultTextItalicFont(),
 			{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
@@ -58,7 +57,8 @@ func NewTheme() fyne.Theme {
 			{Monospace: true}:          theme.DefaultTextFont(),
 			{Symbol: true}:             theme.DefaultSymbolFont(),
 		},
-		map[fyne.ThemeSizeName]float32{
+		name: "Ugly Test Theme",
+		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
 			theme.SizeNameInnerPadding:       float32(20),
 			theme.SizeNameLineSpacing:        float32(6),
@@ -74,15 +74,14 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameInputRadius:        float32(2),
 			theme.SizeNameSelectionRadius:    float32(6),
 		},
-	)
+	}
 }
 
 // Theme returns a test theme useful for image based tests.
 func Theme() fyne.Theme {
 	if defaultTheme == nil {
-		defaultTheme = newConfigurableTheme(
-			"Default Test Theme",
-			map[fyne.ThemeColorName]color.Color{
+		defaultTheme = &configurableTheme{
+			colors: map[fyne.ThemeColorName]color.Color{
 				theme.ColorNameBackground:        color.NRGBA{R: 0x44, G: 0x44, B: 0x44, A: 0xff},
 				theme.ColorNameButton:            color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 				theme.ColorNameDisabled:          color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
@@ -106,7 +105,7 @@ func Theme() fyne.Theme {
 				theme.ColorNameSelection:         color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0x99},
 				theme.ColorNameShadow:            color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x88},
 			},
-			map[fyne.TextStyle]fyne.Resource{
+			fonts: map[fyne.TextStyle]fyne.Resource{
 				{}:                         theme.DefaultTextFont(),
 				{Bold: true}:               theme.DefaultTextBoldFont(),
 				{Bold: true, Italic: true}: theme.DefaultTextBoldItalicFont(),
@@ -114,7 +113,8 @@ func Theme() fyne.Theme {
 				{Monospace: true}:          theme.DefaultTextMonospaceFont(),
 				{Symbol: true}:             theme.DefaultSymbolFont(),
 			},
-			map[fyne.ThemeSizeName]float32{
+			name: "Default Test Theme",
+			sizes: map[fyne.ThemeSizeName]float32{
 				theme.SizeNameInlineIcon:         float32(20),
 				theme.SizeNameInnerPadding:       float32(8),
 				theme.SizeNameLineSpacing:        float32(4),
@@ -130,18 +130,9 @@ func Theme() fyne.Theme {
 				theme.SizeNameInputRadius:        float32(4),
 				theme.SizeNameSelectionRadius:    float32(4),
 			},
-		)
+		}
 	}
 	return defaultTheme
-}
-
-func newConfigurableTheme(name string, colors map[fyne.ThemeColorName]color.Color, fonts map[fyne.TextStyle]fyne.Resource, sizes map[fyne.ThemeSizeName]float32) fyne.Theme {
-	return &configurableTheme{
-		colors: colors,
-		fonts:  fonts,
-		name:   name,
-		sizes:  sizes,
-	}
 }
 
 type configurableTheme struct {
