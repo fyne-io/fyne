@@ -20,7 +20,7 @@
 								<text pos="8,8" size="70x19">Foo</text>
 							</widget>
 							<widget pos="0,39" size="86x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="86x1"/>
+								<rectangle fillColor="separator" size="86x1"/>
 							</widget>
 							<widget pos="0,44" size="86x35" type="*widget.menuItem">
 								<text pos="36,8" size="22x19">Bar</text>
@@ -28,7 +28,7 @@
 								<image pos="8,7" rsc="account.svg" size="iconInlineSize" themed="default"/>
 							</widget>
 							<widget pos="0,83" size="86x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="86x1"/>
+								<rectangle fillColor="separator" size="86x1"/>
 							</widget>
 							<widget pos="0,88" size="86x35" type="*widget.menuItem">
 								<text pos="8,8" size="70x19">Baz</text>

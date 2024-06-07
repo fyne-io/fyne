@@ -28,10 +28,10 @@
 						</container>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
+						<rectangle fillColor="separator" size="0x0"/>
 					</widget>
 					<widget pos="0,36" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 				</container>
 			</widget>

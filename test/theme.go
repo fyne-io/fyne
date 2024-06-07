@@ -80,8 +80,9 @@ func NewTheme() fyne.Theme {
 // Theme returns a test theme useful for image based tests.
 func Theme() fyne.Theme {
 	if defaultTheme == nil {
-		defaultTheme = &configurableTheme{
-			colors: map[fyne.ThemeColorName]color.Color{
+		defaultTheme = newConfigurableTheme(
+			"Default Test Theme",
+			map[fyne.ThemeColorName]color.Color{
 				theme.ColorNameBackground:        color.NRGBA{R: 0x44, G: 0x44, B: 0x44, A: 0xff},
 				theme.ColorNameButton:            color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 				theme.ColorNameDisabled:          color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
@@ -90,22 +91,22 @@ func Theme() fyne.Theme {
 				theme.ColorNameFocus:             color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0xff},
 				theme.ColorNameForeground:        color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 				theme.ColorNameHover:             color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
-				theme.ColorNameHeaderBackground:  color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
+				theme.ColorNameHeaderBackground:  color.NRGBA{R: 0x25, G: 0x25, B: 0x25, A: 0xff},
 				theme.ColorNameHyperlink:         color.NRGBA{R: 0xff, G: 0xcc, B: 0x80, A: 0xff},
 				theme.ColorNameInputBackground:   color.NRGBA{R: 0x66, G: 0x66, B: 0x66, A: 0xff},
 				theme.ColorNameInputBorder:       color.NRGBA{R: 0x86, G: 0x86, B: 0x86, A: 0xff},
 				theme.ColorNameMenuBackground:    color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff},
 				theme.ColorNameOnPrimary:         color.NRGBA{R: 0x08, G: 0x0c, B: 0x0f, A: 0xff},
-				theme.ColorNameOverlayBackground: color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
+				theme.ColorNameOverlayBackground: color.NRGBA{R: 0x28, G: 0x28, B: 0x28, A: 0xff},
 				theme.ColorNamePlaceHolder:       color.NRGBA{R: 0xaa, G: 0xaa, B: 0xaa, A: 0xff},
 				theme.ColorNamePressed:           color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33},
-				theme.ColorNamePrimary:           color.NRGBA{R: 0xff, G: 0xcc, B: 0x80, A: 0xff},
+				theme.ColorNamePrimary:           color.NRGBA{R: 0xff, G: 0xc0, B: 0x80, A: 0xff},
 				theme.ColorNameScrollBar:         color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xaa},
-				theme.ColorNameSeparator:         color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
+				theme.ColorNameSeparator:         color.NRGBA{R: 0x90, G: 0x90, B: 0x90, A: 0xff},
 				theme.ColorNameSelection:         color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0x99},
 				theme.ColorNameShadow:            color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x88},
 			},
-			fonts: map[fyne.TextStyle]fyne.Resource{
+			map[fyne.TextStyle]fyne.Resource{
 				{}:                         theme.DefaultTextFont(),
 				{Bold: true}:               theme.DefaultTextBoldFont(),
 				{Bold: true, Italic: true}: theme.DefaultTextBoldItalicFont(),
@@ -113,8 +114,7 @@ func Theme() fyne.Theme {
 				{Monospace: true}:          theme.DefaultTextMonospaceFont(),
 				{Symbol: true}:             theme.DefaultSymbolFont(),
 			},
-			name: "Default Test Theme",
-			sizes: map[fyne.ThemeSizeName]float32{
+			map[fyne.ThemeSizeName]float32{
 				theme.SizeNameInlineIcon:         float32(20),
 				theme.SizeNameInnerPadding:       float32(8),
 				theme.SizeNameLineSpacing:        float32(4),
@@ -130,7 +130,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameInputRadius:        float32(4),
 				theme.SizeNameSelectionRadius:    float32(4),
 			},
-		}
+		)
 	}
 	return defaultTheme
 }

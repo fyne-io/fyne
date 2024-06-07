@@ -23,7 +23,7 @@
 								<text pos="8,8" size="50x19">A</text>
 							</widget>
 							<widget pos="0,39" size="66x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="66x1"/>
+								<rectangle fillColor="separator" size="66x1"/>
 							</widget>
 							<widget pos="0,44" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="50x19">B (long)</text>
@@ -33,7 +33,7 @@
 								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
 							</widget>
 							<widget pos="0,122" size="66x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="66x1"/>
+								<rectangle fillColor="separator" size="66x1"/>
 							</widget>
 							<widget pos="0,127" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="30x19">D</text>

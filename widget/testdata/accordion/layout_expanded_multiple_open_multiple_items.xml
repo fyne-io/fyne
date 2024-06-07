@@ -19,7 +19,7 @@
 					<image fillMode="contain" pos="8,8" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 				</widget>
 				<widget pos="0,37" size="96x1" type="*widget.Separator">
-					<rectangle fillColor="disabled" size="96x1"/>
+					<rectangle fillColor="separator" size="96x1"/>
 				</widget>
 			</widget>
 		</container>
