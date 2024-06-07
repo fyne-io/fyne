@@ -56,6 +56,7 @@ func NewTheme() fyne.Theme {
 			{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
 			{Italic: true}:             theme.DefaultTextBoldItalicFont(),
 			{Monospace: true}:          theme.DefaultTextFont(),
+			{Symbol: true}:             theme.DefaultSymbolFont(),
 		},
 		sizes: map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
@@ -110,6 +111,7 @@ func Theme() fyne.Theme {
 				{Bold: true, Italic: true}: theme.DefaultTextBoldItalicFont(),
 				{Italic: true}:             theme.DefaultTextItalicFont(),
 				{Monospace: true}:          theme.DefaultTextMonospaceFont(),
+				{Symbol: true}:             theme.DefaultSymbolFont(),
 			},
 			name: "Default Test Theme",
 			sizes: map[fyne.ThemeSizeName]float32{
