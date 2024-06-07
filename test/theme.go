@@ -13,44 +13,44 @@ var defaultTheme fyne.Theme
 // NewTheme returns a new test theme using quiet ugly colors.
 func NewTheme() fyne.Theme {
 	blue := func(alpha uint8) color.Color {
-		return &color.RGBA{R: 0, G: 0, B: 255, A: alpha}
+		return &color.NRGBA{R: 0, G: 0, B: 255, A: alpha}
 	}
 	gray := func(level uint8) color.Color {
 		return &color.Gray{Y: level}
 	}
 	green := func(alpha uint8) color.Color {
-		return &color.RGBA{R: 0, G: 255, B: 0, A: alpha}
+		return &color.NRGBA{R: 0, G: 255, B: 0, A: alpha}
 	}
 	red := func(alpha uint8) color.Color {
-		return &color.RGBA{R: 200, G: 0, B: 0, A: alpha}
+		return &color.NRGBA{R: 200, G: 0, B: 0, A: alpha}
 	}
 
-	return &configurableTheme{
-		colors: map[fyne.ThemeColorName]color.Color{
+	return newConfigurableTheme(
+		"Ugly Test Theme",
+		map[fyne.ThemeColorName]color.Color{
 			theme.ColorNameBackground:        red(255),
-			theme.ColorNameButton:            gray(0),
-			theme.ColorNameDisabled:          gray(0),
-			theme.ColorNameDisabledButton:    gray(255),
+			theme.ColorNameButton:            gray(100),
+			theme.ColorNameDisabled:          gray(20),
+			theme.ColorNameDisabledButton:    gray(230),
 			theme.ColorNameError:             blue(255),
 			theme.ColorNameFocus:             red(66),
 			theme.ColorNameForeground:        gray(255),
-			theme.ColorNameHover:             green(255),
+			theme.ColorNameHover:             green(200),
 			theme.ColorNameHeaderBackground:  red(22),
 			theme.ColorNameInputBackground:   red(30),
-			theme.ColorNameInputBorder:       gray(0),
+			theme.ColorNameInputBorder:       gray(10),
 			theme.ColorNameMenuBackground:    red(30),
 			theme.ColorNameOnPrimary:         red(200),
 			theme.ColorNameOverlayBackground: red(44),
-			theme.ColorNamePlaceHolder:       blue(255),
-			theme.ColorNamePressed:           blue(255),
+			theme.ColorNamePlaceHolder:       blue(200),
+			theme.ColorNamePressed:           blue(250),
 			theme.ColorNamePrimary:           green(255),
-			theme.ColorNameScrollBar:         blue(255),
-			theme.ColorNameSeparator:         gray(0),
-			theme.ColorNameSelection:         red(44),
-			theme.ColorNameShadow:            blue(255),
+			theme.ColorNameScrollBar:         blue(200),
+			theme.ColorNameSeparator:         gray(30),
+			theme.ColorNameSelection:         red(55),
+			theme.ColorNameShadow:            blue(150),
 		},
-		name: "Ugly Test Theme",
-		fonts: map[fyne.TextStyle]fyne.Resource{
+		map[fyne.TextStyle]fyne.Resource{
 			{}:                         theme.DefaultTextBoldFont(),
 			{Bold: true}:               theme.DefaultTextItalicFont(),
 			{Bold: true, Italic: true}: theme.DefaultTextMonospaceFont(),
@@ -58,7 +58,7 @@ func NewTheme() fyne.Theme {
 			{Monospace: true}:          theme.DefaultTextFont(),
 			{Symbol: true}:             theme.DefaultSymbolFont(),
 		},
-		sizes: map[fyne.ThemeSizeName]float32{
+		map[fyne.ThemeSizeName]float32{
 			theme.SizeNameInlineIcon:         float32(24),
 			theme.SizeNameInnerPadding:       float32(20),
 			theme.SizeNameLineSpacing:        float32(6),
@@ -74,7 +74,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameInputRadius:        float32(2),
 			theme.SizeNameSelectionRadius:    float32(6),
 		},
-	}
+	)
 }
 
 // Theme returns a test theme useful for image based tests.
