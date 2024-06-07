@@ -39,13 +39,13 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameHeaderBackground:  red(22),
 			theme.ColorNameInputBackground:   red(30),
 			theme.ColorNameInputBorder:       gray(10),
-			theme.ColorNameMenuBackground:    red(30),
+			theme.ColorNameMenuBackground:    red(50),
 			theme.ColorNameOnPrimary:         red(200),
 			theme.ColorNameOverlayBackground: red(44),
 			theme.ColorNamePlaceHolder:       blue(200),
 			theme.ColorNamePressed:           blue(250),
 			theme.ColorNamePrimary:           green(255),
-			theme.ColorNameScrollBar:         blue(200),
+			theme.ColorNameScrollBar:         blue(220),
 			theme.ColorNameSeparator:         gray(30),
 			theme.ColorNameSelection:         red(55),
 			theme.ColorNameShadow:            blue(150),
@@ -136,14 +136,6 @@ func Theme() fyne.Theme {
 }
 
 func newConfigurableTheme(name string, colors map[fyne.ThemeColorName]color.Color, fonts map[fyne.TextStyle]fyne.Resource, sizes map[fyne.ThemeSizeName]float32) fyne.Theme {
-	seen := map[color.Color]fyne.ThemeColorName{}
-	for cn, c := range colors {
-		if seen[c] != "" {
-			// This panic will never happen on released code because it will happen on CI runs prior release.
-			panic(fmt.Sprintf("duplicate color value %#v for color %s already used for color %s in theme %s", c, cn, seen[c], name))
-		}
-		seen[c] = cn
-	}
 	return &configurableTheme{
 		colors: colors,
 		fonts:  fonts,
