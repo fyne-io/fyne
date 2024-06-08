@@ -476,7 +476,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				DarkMode:      darkMode,
 			}
 			theApp.events.In() <- currentSize
-			theApp.events.In() <- paint.Event{External: true}
+			theApp.events.In() <- paint.Event{External: true, Window: uintptr(unsafe.Pointer(w))}
 		case <-windowDestroyed:
 			if C.surface != nil {
 				if errStr := C.destroyEGLSurface(); errStr != nil {

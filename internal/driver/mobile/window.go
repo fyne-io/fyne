@@ -23,6 +23,7 @@ type window struct {
 	canvas    *canvas
 	icon      fyne.Resource
 	menu      *fyne.MainMenu
+	handle    uintptr // the window handle - currently just Android
 }
 
 func (w *window) Title() string {
