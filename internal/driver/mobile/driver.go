@@ -143,6 +143,11 @@ func (d *driver) Run() {
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
+		defer func() {
+			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+			l.WaitForEvents()
+			l.DestroyEventQueue()
+		}()
 
 		for {
 			select {
@@ -292,8 +297,9 @@ func (d *driver) onStart() {
 }
 
 func (d *driver) onStop() {
-	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStopped(); f != nil {
-		go f() // don't block main, we don't have window event queue
+	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	if f := l.OnStopped(); f != nil {
+		l.QueueEvent(f)
 	}
 }
 
