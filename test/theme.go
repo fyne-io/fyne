@@ -36,6 +36,7 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameForeground:        gray(255),
 			theme.ColorNameHeaderBackground:  red(22),
 			theme.ColorNameHover:             green(200),
+			theme.ColorNameHyperlink:         blue(240),
 			theme.ColorNameInputBackground:   red(30),
 			theme.ColorNameInputBorder:       gray(10),
 			theme.ColorNameMenuBackground:    red(50),
@@ -48,6 +49,8 @@ func NewTheme() fyne.Theme {
 			theme.ColorNameSelection:         red(55),
 			theme.ColorNameSeparator:         gray(30),
 			theme.ColorNameShadow:            blue(150),
+			theme.ColorNameSuccess:           green(150),
+			theme.ColorNameWarning:           red(100),
 		},
 		fonts: map[fyne.TextStyle]fyne.Resource{
 			{}:                         theme.DefaultTextBoldFont(),
@@ -104,6 +107,8 @@ func Theme() fyne.Theme {
 				theme.ColorNameSelection:         color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0x99},
 				theme.ColorNameSeparator:         color.NRGBA{R: 0x90, G: 0x90, B: 0x90, A: 0xff},
 				theme.ColorNameShadow:            color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x88},
+				theme.ColorNameSuccess:           color.NRGBA{R: 0x00, G: 0x99, B: 0x00, A: 0xff},
+				theme.ColorNameWarning:           color.NRGBA{R: 0xee, G: 0xee, B: 0x00, A: 0xff},
 			},
 			fonts: map[fyne.TextStyle]fyne.Resource{
 				{}:                         theme.DefaultTextFont(),
