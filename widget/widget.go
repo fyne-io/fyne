@@ -219,3 +219,18 @@ func (w *DisableableWidget) Disabled() bool {
 func NewSimpleRenderer(object fyne.CanvasObject) fyne.WidgetRenderer {
 	return internalWidget.NewSimpleRenderer(object)
 }
+
+// Orientation controls the horizontal/vertical layout of a widget
+type Orientation int
+
+// Orientation constants to control widget layout
+const (
+	Horizontal Orientation = 0
+	Vertical   Orientation = 1
+
+	// Adaptive will switch between horizontal and vertical layouts according to device orientation.
+	// This orientation is not always supported and interpretation can vary per-widget.
+	//
+	// Since: 2.5
+	Adaptive Orientation = 2
+)

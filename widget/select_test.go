@@ -201,21 +201,22 @@ func TestSelect_KeyboardControl(t *testing.T) {
 		w.Resize(fyne.NewSize(150, 200))
 		c := w.Canvas()
 		c.Focus(sel)
+		areaPos, _ := c.InteractiveArea()
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected_popup.xml", c)
-		test.TapCanvas(c, fyne.NewPos(0, 0))
+		test.TapCanvas(c, areaPos)
 
 		test.AssertRendersToMarkup(t, "select/kbdctrl_none_selected.xml", c)
 		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})

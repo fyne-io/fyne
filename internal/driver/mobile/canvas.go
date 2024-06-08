@@ -10,94 +10,105 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-var _ fyne.Canvas = (*mobileCanvas)(nil)
+var _ fyne.Canvas = (*canvas)(nil)
 
-type mobileCanvas struct {
+type canvas struct {
 	common.Canvas
+	content        fyne.CanvasObject
+	device         *device
+	initialized    bool
+	lastTapDown    map[int]time.Time
+	lastTapDownPos map[int]fyne.Position
+	menu           fyne.CanvasObject
+	padded         bool
+	scale          float32
+	size           fyne.Size
+	touched        map[int]mobile.Touchable
+	windowHead     fyne.CanvasObject
 
-	content          fyne.CanvasObject
-	windowHead, menu fyne.CanvasObject
-	scale            float32
-	size             fyne.Size
+	dragOffset fyne.Position
+	dragStart  fyne.Position
+	dragging   fyne.Draggable
 
-	touched map[int]mobile.Touchable
-	padded  bool
-
-	onTypedRune func(rune)
 	onTypedKey  func(event *fyne.KeyEvent)
+	onTypedRune func(rune)
 
-	inited                bool
-	lastTapDown           map[int]time.Time
-	lastTapDownPos        map[int]fyne.Position
-	dragging              fyne.Draggable
-	dragStart, dragOffset fyne.Position
-
-	touchTapCount   int
 	touchCancelFunc context.CancelFunc
 	touchLastTapped fyne.CanvasObject
+	touchTapCount   int
 }
 
-// NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
-func NewCanvas() fyne.Canvas {
-	ret := &mobileCanvas{padded: true}
-	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-	ret.touched = make(map[int]mobile.Touchable)
-	ret.lastTapDownPos = make(map[int]fyne.Position)
-	ret.lastTapDown = make(map[int]time.Time)
+func newCanvas(dev fyne.Device) fyne.Canvas {
+	d, _ := dev.(*device)
+	ret := &canvas{
+		Canvas: common.Canvas{
+			OnFocus:   handleKeyboard,
+			OnUnfocus: hideVirtualKeyboard,
+		},
+		device:         d,
+		lastTapDown:    make(map[int]time.Time),
+		lastTapDownPos: make(map[int]fyne.Position),
+		padded:         true,
+		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
+		touched:        make(map[int]mobile.Touchable),
+	}
 	ret.Initialize(ret, ret.overlayChanged)
-	ret.OnFocus = ret.handleKeyboard
-	ret.OnUnfocus = hideVirtualKeyboard
-
 	return ret
 }
 
-func (c *mobileCanvas) Capture() image.Image {
+func (c *canvas) Capture() image.Image {
 	return c.Painter().Capture(c)
 }
 
-func (c *mobileCanvas) Content() fyne.CanvasObject {
+func (c *canvas) Content() fyne.CanvasObject {
 	return c.content
 }
 
-func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
-	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-
-	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok {
-		return fyne.NewPos(0, 0), c.Size() // running in test mode
+func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	var pos fyne.Position
+	var size fyne.Size
+	if c.device == nil {
+		// running in test mode
+		size = c.Size()
+	} else {
+		safeLeft := float32(c.device.safeLeft) / c.scale
+		safeTop := float32(c.device.safeTop) / c.scale
+		safeRight := float32(c.device.safeRight) / c.scale
+		safeBottom := float32(c.device.safeBottom) / c.scale
+		pos = fyne.NewPos(safeLeft, safeTop)
+		size = c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 	}
-
-	safeLeft := float32(dev.safeLeft) / scale
-	safeTop := float32(dev.safeTop) / scale
-	safeRight := float32(dev.safeRight) / scale
-	safeBottom := float32(dev.safeBottom) / scale
-	return fyne.NewPos(safeLeft, safeTop),
-		c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
+	if c.windowHeadIsDisplacing() {
+		offset := c.windowHead.MinSize().Height
+		pos = pos.AddXY(0, offset)
+		size = size.SubtractWidthHeight(0, offset)
+	}
+	return pos, size
 }
 
-func (c *mobileCanvas) MinSize() fyne.Size {
+func (c *canvas) MinSize() fyne.Size {
 	return c.size // TODO check
 }
 
-func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
 	return c.onTypedKey
 }
 
-func (c *mobileCanvas) OnTypedRune() func(rune) {
+func (c *canvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
-func (c *mobileCanvas) Resize(size fyne.Size) {
+func (c *canvas) Resize(size fyne.Size) {
 	if size == c.size {
 		return
 	}
@@ -105,29 +116,29 @@ func (c *mobileCanvas) Resize(size fyne.Size) {
 	c.sizeContent(size)
 }
 
-func (c *mobileCanvas) Scale() float32 {
+func (c *canvas) Scale() float32 {
 	return c.scale
 }
 
-func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
+func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.setContent(content)
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 	c.SetDirty()
 }
 
-func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+func (c *canvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
 }
 
-func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
+func (c *canvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
 }
 
-func (c *mobileCanvas) Size() fyne.Size {
+func (c *canvas) Size() fyne.Size {
 	return c.size
 }
 
-func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
+func (c *canvas) applyThemeOutOfTreeObjects() {
 	if c.menu != nil {
 		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
 	}
@@ -136,62 +147,30 @@ func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
 	}
 }
 
-func (c *mobileCanvas) chromeBoxVerticalOffset() float32 {
-	if c.windowHead == nil {
-		return 0
-	}
-
-	chromeBox := c.windowHead.(*fyne.Container)
-	if c.padded {
-		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
-	}
-	if len(chromeBox.Objects) > 1 {
-		return c.windowHead.MinSize().Height
-	}
-
-	return 0
-}
-
-func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
 	if c.menu != nil {
-		return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
+		return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
 	}
 
-	return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
+	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
 }
 
-func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
-	isDisabled := false
-	if disWid, ok := obj.(fyne.Disableable); ok {
-		isDisabled = disWid.Disabled()
-	}
-	if obj != nil && !isDisabled {
-		if keyb, ok := obj.(mobile.Keyboardable); ok {
-			showVirtualKeyboard(keyb.Keyboard())
-		} else {
-			showVirtualKeyboard(mobile.DefaultKeyboard)
-		}
-	} else {
-		hideVirtualKeyboard()
-	}
-}
-
-func (c *mobileCanvas) overlayChanged() {
-	c.handleKeyboard(c.Focused())
+func (c *canvas) overlayChanged() {
+	handleKeyboard(c.Focused())
 	c.SetDirty()
 }
 
-func (c *mobileCanvas) setContent(content fyne.CanvasObject) {
+func (c *canvas) setContent(content fyne.CanvasObject) {
 	c.content = content
 	c.SetContentTreeAndFocusMgr(content)
 }
 
-func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
+func (c *canvas) setMenu(menu fyne.CanvasObject) {
 	c.menu = menu
 	c.SetMenuTreeAndFocusMgr(menu)
 }
 
-func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
+func (c *canvas) setWindowHead(head fyne.CanvasObject) {
 	if c.padded {
 		head = container.NewPadded(head)
 	}
@@ -199,49 +178,48 @@ func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
 	c.SetMobileWindowHeadTree(head)
 }
 
-func (c *mobileCanvas) sizeContent(size fyne.Size) {
+func (c *canvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
-	c.size = size
 
-	chromeBoxOffset := c.chromeBoxVerticalOffset()
+	c.size = size
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
 		var headSize fyne.Size
-		if chromeBoxOffset > 0 {
-			headSize = fyne.NewSize(areaSize.Width, chromeBoxOffset)
+		headPos := areaPos
+		if c.windowHeadIsDisplacing() {
+			headSize = fyne.NewSize(areaSize.Width, c.windowHead.MinSize().Height)
+			headPos = headPos.SubtractXY(0, headSize.Height)
 		} else {
 			headSize = c.windowHead.MinSize()
 		}
 		c.windowHead.Resize(headSize)
-		c.windowHead.Move(areaPos)
+		c.windowHead.Move(headPos)
 	}
 
-	contentPos := areaPos.AddXY(0, chromeBoxOffset)
-	contentSize := areaSize.SubtractWidthHeight(0, chromeBoxOffset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
 			p.Refresh()
 		} else {
-			overlay.Resize(contentSize)
-			overlay.Move(contentPos)
+			overlay.Resize(areaSize)
+			overlay.Move(areaPos)
 		}
 	}
 
 	if c.padded {
-		c.content.Resize(contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(areaPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(contentSize)
-		c.content.Move(contentPos)
+		c.content.Resize(areaSize)
+		c.content.Move(areaPos)
 	}
 }
 
-func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
+func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
@@ -270,7 +248,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 	}
 }
 
-func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
+func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 	previousPos := c.lastTapDownPos[tapID]
 	deltaX := pos.X - previousPos.X
@@ -319,7 +297,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback(c.dragging, ev)
 }
 
-func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
+func (c *canvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
@@ -390,7 +368,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	}
 }
 
-func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
+func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
 	var ctx context.Context
 	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
 	defer c.touchCancelFunc()
@@ -407,4 +385,16 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 	c.touchTapCount = 0
 	c.touchCancelFunc = nil
 	c.touchLastTapped = nil
+}
+
+func (c *canvas) windowHeadIsDisplacing() bool {
+	if c.windowHead == nil {
+		return false
+	}
+
+	chromeBox := c.windowHead.(*fyne.Container)
+	if c.padded {
+		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+	}
+	return len(chromeBox.Objects) > 1
 }

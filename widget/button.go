@@ -337,9 +337,11 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		if thRes, ok := icon.(fyne.ThemedResource); ok {
-			if thRes.ThemeColorName() != fgColorName {
-				icon = theme.NewColoredResource(icon, fgColorName)
+		if r.button.Importance != MediumImportance {
+			if thRes, ok := icon.(fyne.ThemedResource); ok {
+				if thRes.ThemeColorName() != fgColorName {
+					icon = theme.NewColoredResource(icon, fgColorName)
+				}
 			}
 		}
 		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)

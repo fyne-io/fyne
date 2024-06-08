@@ -3,7 +3,7 @@
 		<rectangle fillColor="rgba(0,150,150,255)" pos="4,4" size="792x592"/>
 	</content>
 	<overlay>
-		<widget size="800x600" type="*widget.OverlayContainer">
+		<widget pos="2,3" size="796x595" type="*widget.OverlayContainer">
 			<widget pos="13,45" size="94x74" type="*widget.PopUpMenu">
 				<widget size="94x74" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>

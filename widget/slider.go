@@ -13,15 +13,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Orientation controls the horizontal/vertical layout of a widget
-type Orientation int
-
-// Orientation constants to control widget layout
-const (
-	Horizontal Orientation = 0
-	Vertical   Orientation = 1
-)
-
 var _ fyne.Draggable = (*Slider)(nil)
 var _ fyne.Focusable = (*Slider)(nil)
 var _ desktop.Hoverable = (*Slider)(nil)

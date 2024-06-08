@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -15,8 +15,8 @@ import (
 )
 
 func TestMobileCanvas_DismissBar(t *testing.T) {
-	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(canvas.NewRectangle(theme.BackgroundColor()))
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	c.SetContent(fynecanvas.NewRectangle(theme.BackgroundColor()))
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test"))
 	c.showMenu(menu)
@@ -30,9 +30,9 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 }
 
 func TestMobileCanvas_DismissMenu(t *testing.T) {
-	c := NewCanvas().(*mobileCanvas)
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	c.padded = false
-	c.SetContent(canvas.NewRectangle(theme.BackgroundColor()))
+	c.SetContent(fynecanvas.NewRectangle(theme.BackgroundColor()))
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
 	c.showMenu(menu)
@@ -49,7 +49,7 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 }
 
 func TestMobileCanvas_Menu(t *testing.T) {
-	c := &mobileCanvas{}
+	c := &canvas{}
 	labels := []string{"File", "Edit"}
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu(labels[0]),
@@ -71,7 +71,7 @@ func TestMobileCanvas_Menu(t *testing.T) {
 	}
 }
 
-func dummyWin(d *mobileDriver, title string) *window {
+func dummyWin(d *driver, title string) *window {
 	ret := &window{title: title}
 	d.windows = append(d.windows, ret)
 
@@ -82,7 +82,7 @@ func TestMobileDriver_FindMenu(t *testing.T) {
 	m1 := fyne.NewMainMenu(fyne.NewMenu("1"))
 	m2 := fyne.NewMainMenu(fyne.NewMenu("2"))
 
-	d := NewGoMobileDriver().(*mobileDriver)
+	d := NewGoMobileDriver().(*driver)
 	w1 := dummyWin(d, "top")
 	w1.SetMainMenu(m1)
 	assert.Equal(t, m1, d.findMenu(w1))

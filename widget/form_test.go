@@ -55,7 +55,7 @@ func TestForm_Append_Items(t *testing.T) {
 
 	form.Refresh()
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Equal(t, "test2", c.Objects[2].(*canvas.Text).Text)
+	assert.Equal(t, "test2", c.Objects[2].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 }
 
 func TestForm_CustomButtonsText(t *testing.T) {
@@ -119,11 +119,11 @@ func TestForm_ChangeText(t *testing.T) {
 
 	renderer := test.WidgetRenderer(form)
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Equal(t, "Test", c.Objects[0].(*canvas.Text).Text)
+	assert.Equal(t, "Test", c.Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 
 	item.Text = "Changed"
 	form.Refresh()
-	assert.Equal(t, "Changed", c.Objects[0].(*canvas.Text).Text)
+	assert.Equal(t, "Changed", c.Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 }
 
 func TestForm_ChangeTheme(t *testing.T) {
