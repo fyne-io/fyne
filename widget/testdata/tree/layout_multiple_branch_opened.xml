@@ -14,7 +14,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,36" size="199x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="199x1"/>
+						<rectangle fillColor="separator" size="199x1"/>
 					</widget>
 					<widget pos="0,39" size="199x35" type="*widget.leaf">
 						<widget pos="52,0" size="147x35" type="*widget.Label">
@@ -24,7 +24,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,75" size="199x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="199x1"/>
+						<rectangle fillColor="separator" size="199x1"/>
 					</widget>
 					<widget pos="0,78" size="199x35" type="*widget.branch">
 						<widget pos="28,0" size="171x35" type="*widget.Label">
@@ -37,7 +37,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,114" size="199x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="199x1"/>
+						<rectangle fillColor="separator" size="199x1"/>
 					</widget>
 					<widget pos="0,117" size="199x35" type="*widget.leaf">
 						<widget pos="52,0" size="147x35" type="*widget.Label">
@@ -47,7 +47,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,153" size="199x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="199x1"/>
+						<rectangle fillColor="separator" size="199x1"/>
 					</widget>
 					<widget pos="0,156" size="199x35" type="*widget.branch">
 						<widget pos="52,0" size="147x35" type="*widget.Label">
@@ -60,7 +60,7 @@
 						</widget>
 					</widget>
 					<widget pos="0,192" size="199x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="199x1"/>
+						<rectangle fillColor="separator" size="199x1"/>
 					</widget>
 					<widget pos="0,195" size="199x35" type="*widget.leaf">
 						<widget pos="76,0" size="123x35" type="*widget.Label">

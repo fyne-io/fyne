@@ -136,37 +136,37 @@
 						</container>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="0x0"/>
+						<rectangle fillColor="separator" size="0x0"/>
 					</widget>
 					<widget pos="0,310" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,349" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,388" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,427" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,466" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,505" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,544" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,583" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,622" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 					<widget pos="0,661" size="192x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="192x1"/>
+						<rectangle fillColor="separator" size="192x1"/>
 					</widget>
 				</container>
 				<widget size="192x0" type="*widget.Shadow">

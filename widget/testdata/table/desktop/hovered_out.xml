@@ -16,10 +16,10 @@
 			<widget size="172x172" type="*widget.clip">
 				<container size="0x0">
 					<widget pos="95,0" size="1x172" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="1x172"/>
+						<rectangle fillColor="separator" size="1x172"/>
 					</widget>
 					<widget pos="0,36" size="172x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="172x1"/>
+						<rectangle fillColor="separator" size="172x1"/>
 					</widget>
 				</container>
 			</widget>
