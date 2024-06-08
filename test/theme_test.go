@@ -40,27 +40,30 @@ var knownColorNames = []fyne.ThemeColorName{
 }
 
 func Test_NewTheme(t *testing.T) {
-	suite.Run(t, &configurableThemeTestSuite{constructor: func() *configurableTheme {
-		return NewTheme().(*configurableTheme)
-	}})
+	suite.Run(t, &configurableThemeTestSuite{
+		constructor: NewTheme,
+		name:        "Ugly Test Theme",
+	})
 }
 
 func Test_Theme(t *testing.T) {
-	suite.Run(t, &configurableThemeTestSuite{constructor: func() *configurableTheme {
-		return Theme().(*configurableTheme)
-	}})
+	suite.Run(t, &configurableThemeTestSuite{
+		constructor: Theme,
+		name:        "Default Test Theme",
+	})
 }
 
 type configurableThemeTestSuite struct {
 	suite.Suite
-	constructor func() *configurableTheme
+	constructor func() fyne.Theme
+	name        string
 }
 
 func (s *configurableThemeTestSuite) TestAllColorsDefined() {
 	t := s.T()
 	th := s.constructor()
 	for _, cn := range knownColorNames {
-		assert.NotNil(t, th.Color(cn, theme.VariantDark), "undefined color %s in theme %s", cn, th.name)
+		assert.NotNil(t, th.Color(cn, theme.VariantDark), "undefined color %s in theme %s", cn, s.name)
 	}
 }
 
@@ -68,10 +71,11 @@ func (s *configurableThemeTestSuite) TestUniqueColorValues() {
 	t := s.T()
 	th := s.constructor()
 	seen := map[string]fyne.ThemeColorName{}
-	for cn, c := range th.colors {
+	for _, cn := range knownColorNames {
+		c := th.Color(cn, theme.VariantDark)
 		r, g, b, a := c.RGBA()
 		key := fmt.Sprintf("%d %d %d %d", r, g, b, a)
-		assert.True(t, seen[key] == "", "color value %#v for color %s already used for color %s in theme %s", c, cn, seen[key], th.name)
+		assert.True(t, seen[key] == "", "color value %#v for color %s already used for color %s in theme %s", c, cn, seen[key], s.name)
 		seen[key] = cn
 	}
 }
