@@ -39,6 +39,12 @@ var knownColorNames = []fyne.ThemeColorName{
 	theme.ColorNameWarning,
 }
 
+// Try to keep this in sync with the existing variants at theme/theme.go
+var knownVariants = []fyne.ThemeVariant{
+	theme.VariantDark,
+	theme.VariantLight,
+}
+
 func Test_NewTheme(t *testing.T) {
 	suite.Run(t, &configurableThemeTestSuite{
 		constructor: NewTheme,
@@ -62,20 +68,29 @@ type configurableThemeTestSuite struct {
 func (s *configurableThemeTestSuite) TestAllColorsDefined() {
 	t := s.T()
 	th := s.constructor()
-	for _, cn := range knownColorNames {
-		assert.NotNil(t, th.Color(cn, theme.VariantDark), "undefined color %s in theme %s", cn, s.name)
+	for _, variant := range knownVariants {
+		for _, cn := range knownColorNames {
+			assert.NotNil(t, th.Color(cn, variant), "undefined color %s variant %d in theme %s", cn, variant, s.name)
+		}
 	}
 }
 
 func (s *configurableThemeTestSuite) TestUniqueColorValues() {
 	t := s.T()
 	th := s.constructor()
-	seen := map[string]fyne.ThemeColorName{}
-	for _, cn := range knownColorNames {
-		c := th.Color(cn, theme.VariantDark)
-		r, g, b, a := c.RGBA()
-		key := fmt.Sprintf("%d %d %d %d", r, g, b, a)
-		assert.True(t, seen[key] == "", "color value %#v for color %s already used for color %s in theme %s", c, cn, seen[key], s.name)
-		seen[key] = cn
+	seenByVariant := map[fyne.ThemeVariant]map[string]fyne.ThemeColorName{}
+	for _, variant := range knownVariants {
+		seen := seenByVariant[variant]
+		if seen == nil {
+			seen = map[string]fyne.ThemeColorName{}
+			seenByVariant[variant] = seen
+		}
+		for _, cn := range knownColorNames {
+			c := th.Color(cn, theme.VariantDark)
+			r, g, b, a := c.RGBA()
+			key := fmt.Sprintf("%d %d %d %d", r, g, b, a)
+			assert.True(t, seen[key] == "", "color value %#v for color %s variant %d already used for color %s in theme %s", c, cn, variant, seen[key], s.name)
+			seen[key] = cn
+		}
 	}
 }
