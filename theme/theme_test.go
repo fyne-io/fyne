@@ -10,6 +10,51 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// Try to keep these in sync with the existing color names at theme/color.go.
+var knownColorNames = []fyne.ThemeColorName{
+	theme.ColorNameBackground,
+	theme.ColorNameButton,
+	theme.ColorNameDisabledButton,
+	theme.ColorNameDisabled,
+	theme.ColorNameError,
+	theme.ColorNameFocus,
+	theme.ColorNameForeground,
+	theme.ColorNameHeaderBackground,
+	theme.ColorNameHover,
+	theme.ColorNameHyperlink,
+	theme.ColorNameInputBackground,
+	theme.ColorNameInputBorder,
+	theme.ColorNameMenuBackground,
+	theme.ColorNameOnPrimary,
+	theme.ColorNameOverlayBackground,
+	theme.ColorNamePlaceHolder,
+	theme.ColorNamePressed,
+	theme.ColorNamePrimary,
+	theme.ColorNameScrollBar,
+	theme.ColorNameSelection,
+	theme.ColorNameSeparator,
+	theme.ColorNameShadow,
+	theme.ColorNameSuccess,
+	theme.ColorNameWarning,
+}
+
+// Try to keep this in sync with the existing variants at theme/theme.go
+var knownVariants = []fyne.ThemeVariant{
+	theme.VariantDark,
+	theme.VariantLight,
+}
+
+func Test_DefaultTheme_AllColorsDefined(t *testing.T) {
+	th := theme.DefaultTheme()
+	for _, variant := range knownVariants {
+		for _, cn := range knownColorNames {
+			// Transparent is used as fallback for unknown color names.
+			// Built-in color names should have well-defined non-transparent values.
+			assert.NotEqual(t, color.Transparent, th.Color(cn, variant), "undefined color %s variant %d", cn, variant)
+		}
+	}
+}
+
 func Test_DefaultTheme_OnPrimaryColor(t *testing.T) {
 	darkColor := color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
 	defaultTheme := theme.DefaultTheme()
