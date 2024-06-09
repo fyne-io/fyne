@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// Keep in mind to add new constants to the tests at test/theme_test.go.
 const (
 	// ColorRed is the red primary color name.
 	//
