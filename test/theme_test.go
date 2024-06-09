@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Try to keep these in sync with the existing color names at theme/colors.go.
+// Try to keep these in sync with the existing color names at theme/color.go.
 var knownColorNames = []fyne.ThemeColorName{
 	theme.ColorNameBackground,
 	theme.ColorNameButton,
