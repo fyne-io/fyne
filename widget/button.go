@@ -365,7 +365,7 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 	if background == "" {
 		switch b.Importance {
 		case DangerImportance:
-			foreground = theme.ColorNameBackground
+			foreground = theme.ColorNameOnError
 			background = theme.ColorNameError
 		case HighImportance:
 			foreground = theme.ColorNameOnPrimary
