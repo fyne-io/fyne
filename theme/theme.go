@@ -115,10 +115,10 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	}
 
 	if v == VariantLight {
-		return lightPaletColorNamed(n)
+		return lightPaletteColorNamed(n)
 	}
 
-	return darkPaletColorNamed(n)
+	return darkPaletteColorNamed(n)
 }
 
 func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
@@ -214,7 +214,7 @@ func currentVariant() fyne.ThemeVariant {
 	return fyne.CurrentApp().Settings().ThemeVariant()
 }
 
-func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
+func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
 		return colorDarkBackground
@@ -282,7 +282,7 @@ func focusColorNamed(name string) color.NRGBA {
 	return color.NRGBA{R: 0x00, G: 0x6C, B: 0xff, A: 0x2a}
 }
 
-func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
+func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
 		return colorLightBackground
