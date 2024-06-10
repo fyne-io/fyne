@@ -15,6 +15,12 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+func Test_knownColor(t *testing.T) {
+	for _, name := range knownColorNames {
+		assert.NotEmpty(t, knownColor(theme.Color(name)), "color name %s is not known", name)
+	}
+}
+
 func Test_snapshot(t *testing.T) {
 	// content elements
 	for name, tt := range map[string]struct {

@@ -406,17 +406,21 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.ForegroundColor()):                      "foreground",
 		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)): "headerBackground",
 		nrgbaColor(theme.HoverColor()):                           "hover",
+		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):        "hyperlink",
 		nrgbaColor(theme.InputBackgroundColor()):                 "inputBackground",
 		nrgbaColor(theme.InputBorderColor()):                     "inputBorder",
 		nrgbaColor(theme.MenuBackgroundColor()):                  "menuBackground",
 		nrgbaColor(theme.Color(theme.ColorNameOnPrimary)):        "onPrimary",
 		nrgbaColor(theme.OverlayBackgroundColor()):               "overlayBackground",
 		nrgbaColor(theme.PlaceHolderColor()):                     "placeholder",
+		nrgbaColor(theme.Color(theme.ColorNamePressed)):          "pressed",
 		nrgbaColor(theme.PrimaryColor()):                         "primary",
 		nrgbaColor(theme.ScrollBarColor()):                       "scrollbar",
 		nrgbaColor(theme.SelectionColor()):                       "selection",
 		nrgbaColor(theme.Color(theme.ColorNameSeparator)):        "separator",
+		nrgbaColor(theme.Color(theme.ColorNameSuccess)):          "success",
 		nrgbaColor(theme.ShadowColor()):                          "shadow",
+		nrgbaColor(theme.Color(theme.ColorNameWarning)):          "warning",
 	}[nrgbaColor(c)]
 }
 
