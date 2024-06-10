@@ -219,37 +219,37 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameBackground:
 		return colorDarkBackground
 	case ColorNameButton:
-		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+		return colorDarkButton
 	case ColorNameDisabled:
-		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+		return colorDarkDisabled
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+		return colorDarkDisabledButton
 	case ColorNameError:
 		return colorError
 	case ColorNameForeground:
-		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
+		return colorDarkForeground
 	case ColorNameHover:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
+		return colorDarkHover
 	case ColorNameHeaderBackground:
-		return color.NRGBA{R: 0x1b, G: 0x1b, B: 0x1b, A: 0xff}
+		return colorDarkHeaderBackground
 	case ColorNameInputBackground:
-		return color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
+		return colorDarkInputBackground
 	case ColorNameInputBorder:
-		return color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
+		return colorDarkInputBorder
 	case ColorNameMenuBackground:
-		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+		return colorDarkMenuBackground
 	case ColorNameOverlayBackground:
-		return color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
+		return colorDarkOverlayBackground
 	case ColorNamePlaceHolder:
-		return color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
+		return colorDarkPlaceholder
 	case ColorNamePressed:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66}
+		return colorDarkPressed
 	case ColorNameScrollBar:
-		return color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99}
+		return colorDarkScrollBar
 	case ColorNameSeparator:
-		return color.NRGBA{R: 0x0, G: 0x0, B: 0x0, A: 0xff}
+		return colorDarkSeparator
 	case ColorNameShadow:
-		return color.NRGBA{A: 0x66}
+		return colorDarkShadow
 	case ColorNameSuccess:
 		return colorSuccess
 	case ColorNameWarning:
@@ -287,37 +287,37 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameBackground:
 		return colorLightBackground
 	case ColorNameButton:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return colorLightButton
 	case ColorNameDisabled:
-		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+		return colorLightDisabled
 	case ColorNameDisabledButton:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return colorLightDisabledButton
 	case ColorNameError:
 		return colorError
 	case ColorNameForeground:
-		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
+		return colorLightForeground
 	case ColorNameHover:
-		return color.NRGBA{A: 0x0f}
+		return colorLightHover
 	case ColorNameHeaderBackground:
-		return color.NRGBA{R: 0xf9, G: 0xf9, B: 0xf9, A: 0xff}
+		return colorLightHeaderBackground
 	case ColorNameInputBackground:
-		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
+		return colorLightInputBackground
 	case ColorNameInputBorder:
-		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+		return colorLightInputBorder
 	case ColorNameMenuBackground:
-		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+		return colorLightMenuBackground
 	case ColorNameOverlayBackground:
 		return colorLightBackground
 	case ColorNamePlaceHolder:
-		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
+		return colorLightPlaceholder
 	case ColorNamePressed:
-		return color.NRGBA{A: 0x19}
+		return colorLightPressed
 	case ColorNameScrollBar:
-		return color.NRGBA{A: 0x99}
+		return colorLightScrollBar
 	case ColorNameSeparator:
-		return color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
+		return colorLightSeparator
 	case ColorNameShadow:
-		return color.NRGBA{A: 0x33}
+		return colorLightShadow
 	case ColorNameSuccess:
 		return colorSuccess
 	case ColorNameWarning:
