@@ -238,6 +238,12 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkInputBorder
 	case ColorNameMenuBackground:
 		return colorDarkMenuBackground
+	case ColorNameOnError:
+		return colorDarkForeground
+	case ColorNameOnSuccess:
+		return colorDarkForeground
+	case ColorNameOnWarning:
+		return colorDarkForeground
 	case ColorNameOverlayBackground:
 		return colorDarkOverlayBackground
 	case ColorNamePlaceHolder:
@@ -306,6 +312,12 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightInputBorder
 	case ColorNameMenuBackground:
 		return colorLightMenuBackground
+	case ColorNameOnError:
+		return colorLightForeground
+	case ColorNameOnSuccess:
+		return colorLightForeground
+	case ColorNameOnWarning:
+		return colorLightForeground
 	case ColorNameOverlayBackground:
 		return colorLightBackground
 	case ColorNamePlaceHolder:

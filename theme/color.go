@@ -106,10 +106,25 @@ const (
 	// Since: 2.3
 	ColorNameMenuBackground fyne.ThemeColorName = "menuBackground"
 
+	// ColorNameOnError is the name of theme lookup for a contrast color to the error color.
+	//
+	// Since: 2.5
+	ColorNameOnError fyne.ThemeColorName = "onError"
+
 	// ColorNameOnPrimary is the name of theme lookup for a contrast color to the primary color.
 	//
 	// Since: 2.5
 	ColorNameOnPrimary fyne.ThemeColorName = "onPrimary"
+
+	// ColorNameOnSuccess is the name of theme lookup for a contrast color to the success color.
+	//
+	// Since: 2.5
+	ColorNameOnSuccess fyne.ThemeColorName = "onSuccess"
+
+	// ColorNameOnWarning is the name of theme lookup for a contrast color to the warning color.
+	//
+	// Since: 2.5
+	ColorNameOnWarning fyne.ThemeColorName = "onWarning"
 
 	// ColorNameOverlayBackground is the name of theme lookup for background color of overlays like dialogs.
 	//
