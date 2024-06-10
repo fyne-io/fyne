@@ -100,6 +100,9 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, fontDP float32, 
 		val, ok := fontCustomCache.Load(source)
 		if !ok {
 			face := loadMeasureFont(source)
+			if face == nil {
+				face = loadMeasureFont(theme.TextFont())
+			}
 			faces := &dynamicFontMap{family: source.Name(), faces: []font.Face{face}}
 
 			val = &FontCacheItem{Fonts: faces}
