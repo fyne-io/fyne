@@ -217,7 +217,7 @@ func currentVariant() fyne.ThemeVariant {
 func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
-		return backgroundColorDark
+		return colorDarkBackground
 	case ColorNameButton:
 		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameDisabled:
@@ -225,7 +225,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabledButton:
 		return color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	case ColorNameError:
-		return errorColor
+		return colorError
 	case ColorNameForeground:
 		return color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	case ColorNameHover:
@@ -251,9 +251,9 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameShadow:
 		return color.NRGBA{A: 0x66}
 	case ColorNameSuccess:
-		return successColor
+		return colorSuccess
 	case ColorNameWarning:
-		return warningColor
+		return colorWarning
 	}
 
 	return color.Transparent
@@ -285,7 +285,7 @@ func focusColorNamed(name string) color.NRGBA {
 func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	switch name {
 	case ColorNameBackground:
-		return backgroundColorLight
+		return colorLightBackground
 	case ColorNameButton:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameDisabled:
@@ -293,7 +293,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabledButton:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameError:
-		return errorColor
+		return colorError
 	case ColorNameForeground:
 		return color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	case ColorNameHover:
@@ -307,7 +307,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameMenuBackground:
 		return color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	case ColorNameOverlayBackground:
-		return backgroundColorLight
+		return colorLightBackground
 	case ColorNamePlaceHolder:
 		return color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	case ColorNamePressed:
@@ -319,9 +319,9 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameShadow:
 		return color.NRGBA{A: 0x33}
 	case ColorNameSuccess:
-		return successColor
+		return colorSuccess
 	case ColorNameWarning:
-		return warningColor
+		return colorWarning
 	}
 
 	return color.Transparent

@@ -163,11 +163,13 @@ const (
 )
 
 var (
-	backgroundColorDark  = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
-	backgroundColorLight = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
-	errorColor           = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	successColor         = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
-	warningColor         = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	colorDarkBackground = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
+
+	colorLightBackground = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+
+	colorError   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	colorSuccess = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	colorWarning = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )
 
 // BackgroundColor returns the theme's background color.
@@ -275,24 +277,24 @@ func MenuBackgroundColor() color.Color {
 func OnPrimaryColorNamed(name string) color.Color {
 	switch name {
 	case ColorRed:
-		return backgroundColorLight
+		return colorLightBackground
 	case ColorOrange:
-		return backgroundColorDark
+		return colorDarkBackground
 	case ColorYellow:
-		return backgroundColorDark
+		return colorDarkBackground
 	case ColorGreen:
-		return backgroundColorDark
+		return colorDarkBackground
 	case ColorPurple:
-		return backgroundColorLight
+		return colorLightBackground
 	case ColorBrown:
-		return backgroundColorLight
+		return colorLightBackground
 	case ColorGray:
-		return backgroundColorDark
+		return colorDarkBackground
 	}
 
 	// We return the “on” value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
-	return backgroundColorLight
+	return colorLightBackground
 }
 
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.

@@ -3,6 +3,6 @@
 package theme
 
 var (
-	fallbackColor = errorColor
+	fallbackColor = colorError
 	fallbackIcon  = NewErrorThemedResource(errorIconRes)
 )
