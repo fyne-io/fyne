@@ -167,6 +167,7 @@ var (
 	colorDarkButton            = color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	colorDarkDisabled          = color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	colorDarkDisabledButton    = color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
+	colorDarkError             = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
 	colorDarkForeground        = color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	colorDarkHeaderBackground  = color.NRGBA{R: 0x1b, G: 0x1b, B: 0x1b, A: 0xff}
 	colorDarkHover             = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x0f}
@@ -179,11 +180,14 @@ var (
 	colorDarkScrollBar         = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99}
 	colorDarkSeparator         = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff}
 	colorDarkShadow            = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x66}
+	colorDarkSuccess           = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	colorDarkWarning           = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 
 	colorLightBackground       = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightButton           = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	colorLightDisabled         = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightDisabledButton   = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	colorLightError            = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
 	colorLightForeground       = color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	colorLightHeaderBackground = color.NRGBA{R: 0xf9, G: 0xf9, B: 0xf9, A: 0xff}
 	colorLightHover            = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x0f}
@@ -195,10 +199,8 @@ var (
 	colorLightScrollBar        = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}
 	colorLightSeparator        = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightShadow           = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33}
-
-	colorError   = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	colorSuccess = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
-	colorWarning = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	colorLightSuccess          = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
+	colorLightWarning          = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )
 
 // BackgroundColor returns the theme's background color.

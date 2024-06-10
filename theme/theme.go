@@ -225,7 +225,7 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabledButton:
 		return colorDarkDisabledButton
 	case ColorNameError:
-		return colorError
+		return colorDarkError
 	case ColorNameForeground:
 		return colorDarkForeground
 	case ColorNameHover:
@@ -251,9 +251,9 @@ func darkPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameShadow:
 		return colorDarkShadow
 	case ColorNameSuccess:
-		return colorSuccess
+		return colorDarkSuccess
 	case ColorNameWarning:
-		return colorWarning
+		return colorDarkWarning
 	}
 
 	return color.Transparent
@@ -293,7 +293,7 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameDisabledButton:
 		return colorLightDisabledButton
 	case ColorNameError:
-		return colorError
+		return colorLightError
 	case ColorNameForeground:
 		return colorLightForeground
 	case ColorNameHover:
@@ -319,9 +319,9 @@ func lightPaletColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameShadow:
 		return colorLightShadow
 	case ColorNameSuccess:
-		return colorSuccess
+		return colorLightSuccess
 	case ColorNameWarning:
-		return colorWarning
+		return colorLightWarning
 	}
 
 	return color.Transparent
