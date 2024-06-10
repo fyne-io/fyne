@@ -95,10 +95,26 @@ func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextSt
 }
 
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
-func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *FontCacheItem {
+func CachedFontFace(style fyne.TextStyle, source fyne.Resource, fontDP float32, texScale float32) *FontCacheItem {
+	if source != nil {
+		val, ok := fontCustomCache.Load(source)
+		if !ok {
+			face := loadMeasureFont(source)
+			if face == nil {
+				face = loadMeasureFont(theme.TextFont())
+			}
+			faces := &dynamicFontMap{family: source.Name(), faces: []font.Face{face}}
+
+			val = &FontCacheItem{Fonts: faces}
+			fontCustomCache.Store(source, val)
+		}
+		return val.(*FontCacheItem)
+	}
+
 	val, ok := fontCache.Load(style)
 	if !ok {
 		var faces *dynamicFontMap
+
 		switch {
 		case style.Monospace:
 			faces = lookupFaces(theme.TextMonospaceFont(), theme.DefaultTextMonospaceFont(), fontscan.Monospace, style)
@@ -137,8 +153,8 @@ func CachedFontFace(style fyne.TextStyle, fontDP float32, texScale float32) *Fon
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load Font faces
 func ClearFontCache() {
-
 	fontCache = &sync.Map{}
+	fontCustomCache = &sync.Map{}
 }
 
 // DrawString draws a string into an image.
@@ -184,14 +200,14 @@ func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.Tex
 
 // RenderedTextSize looks up how big a string would be if drawn on screen.
 // It also returns the distance from top to the text baseline.
-func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
-	size, base := cache.GetFontMetrics(text, fontSize, style)
+func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	size, base := cache.GetFontMetrics(text, fontSize, style, source)
 	if base != 0 {
 		return size, base
 	}
 
-	size, base = measureText(text, fontSize, style)
-	cache.SetFontMetrics(text, fontSize, style, size, base)
+	size, base = measureText(text, fontSize, style, source)
+	cache.SetFontMetrics(text, fontSize, style, source, size, base)
 	return size, base
 }
 
@@ -203,8 +219,8 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 	return fixed.Int26_6(float64(f) * (1 << 6))
 }
 
-func measureText(text string, fontSize float32, style fyne.TextStyle) (fyne.Size, float32) {
-	face := CachedFontFace(style, fontSize, 1)
+func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	face := CachedFontFace(style, source, fontSize, 1)
 	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
@@ -313,7 +329,8 @@ type FontCacheItem struct {
 	Fonts shaping.Fontmap
 }
 
-var fontCache = &sync.Map{} // map[fyne.TextStyle]*FontCacheItem
+var fontCache = &sync.Map{}       // map[fyne.TextStyle]*FontCacheItem
+var fontCustomCache = &sync.Map{} // map[string]*FontCacheItem for custom resources
 
 type noopLogger struct{}
 
