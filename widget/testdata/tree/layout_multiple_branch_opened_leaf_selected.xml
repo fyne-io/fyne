@@ -10,7 +10,7 @@
 							</widget>
 						</widget>
 						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="foreground"/>
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
 					<widget pos="0,36" size="199x1" type="*widget.Separator">
@@ -33,7 +33,7 @@
 							</widget>
 						</widget>
 						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="foreground"/>
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
 					<widget pos="0,114" size="199x1" type="*widget.Separator">
@@ -57,7 +57,7 @@
 							</widget>
 						</widget>
 						<widget pos="28,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="foreground"/>
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
 						</widget>
 					</widget>
 					<widget pos="0,192" size="199x1" type="*widget.Separator">
