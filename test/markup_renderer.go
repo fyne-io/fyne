@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
@@ -151,12 +150,6 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		variant = string(t.ColorName)
 		if variant == "" {
 			variant = "default"
-		}
-	case *cache.WidgetResource:
-		if _, ok := t.ThemedResource.(*theme.InvertedThemedResource); ok {
-			variant = "inverted"
-		} else {
-			variant = string(t.ThemeColorName())
 		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
