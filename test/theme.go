@@ -172,8 +172,9 @@ func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 }
 
 func (t *configurableTheme) Size(s fyne.ThemeSizeName) float32 {
-	if t.sizes[s] == 0 {
+	if _, ok := t.sizes[s]; !ok {
 		fyne.LogError(fmt.Sprintf("size %s not defined in theme %s", s, t.name), nil)
+		return 0
 	}
 
 	return t.sizes[s]
