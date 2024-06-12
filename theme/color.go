@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
 
 // Keep in mind to add new constants to the tests at theme/theme_test.go as well as test/theme_test.go.
@@ -11,35 +12,35 @@ const (
 	// ColorRed is the red primary color name.
 	//
 	// Since: 1.4
-	ColorRed = "red"
+	ColorRed = internaltheme.ColorRed
 	// ColorOrange is the orange primary color name.
 	//
 	// Since: 1.4
-	ColorOrange = "orange"
+	ColorOrange = internaltheme.ColorOrange
 	// ColorYellow is the yellow primary color name.
 	//
 	// Since: 1.4
-	ColorYellow = "yellow"
+	ColorYellow = internaltheme.ColorYellow
 	// ColorGreen is the green primary color name.
 	//
 	// Since: 1.4
-	ColorGreen = "green"
+	ColorGreen = internaltheme.ColorGreen
 	// ColorBlue is the blue primary color name.
 	//
 	// Since: 1.4
-	ColorBlue = "blue"
+	ColorBlue = internaltheme.ColorBlue
 	// ColorPurple is the purple primary color name.
 	//
 	// Since: 1.4
-	ColorPurple = "purple"
+	ColorPurple = internaltheme.ColorPurple
 	// ColorBrown is the brown primary color name.
 	//
 	// Since: 1.4
-	ColorBrown = "brown"
+	ColorBrown = internaltheme.ColorBrown
 	// ColorGray is the gray primary color name.
 	//
 	// Since: 1.4
-	ColorGray = "gray"
+	ColorGray = internaltheme.ColorGray
 
 	// ColorNameBackground is the name of theme lookup for background color.
 	//
