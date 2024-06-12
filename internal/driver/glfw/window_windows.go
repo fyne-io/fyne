@@ -55,15 +55,14 @@ func (w *window) computeCanvasSize(width, height int) fyne.Size {
 // assert we are implementing driver.NativeWindow
 var _ driver.NativeWindow = (*window)(nil)
 
-func (w *window) RunNative(f func(any) error) error {
-	var err error
-	done := make(chan struct{})
+func (w *window) RunNative(f func(any)) {
+	var hwnd uintptr
+	if v := w.view(); v != nil {
+		hwnd = uintptr(unsafe.Pointer(v.GetWin32Window()))
+	}
 	runOnMain(func() {
-		err = f(driver.WindowsWindowContext{
-			HWND: uintptr(unsafe.Pointer(w.view().GetWin32Window())),
+		f(driver.WindowsWindowContext{
+			HWND: hwnd,
 		})
-		close(done)
 	})
-	<-done
-	return err
 }

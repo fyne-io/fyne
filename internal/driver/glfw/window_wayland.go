@@ -16,16 +16,16 @@ func (w *window) GetWindowHandle() string {
 // assert we are implementing driver.NativeWindow
 var _ driver.NativeWindow = (*window)(nil)
 
-func (w *window) RunNative(f func(any) error) error {
-	var err error
-	done := make(chan struct{})
+func (w *window) RunNative(f func(any)) {
 	runOnMain(func() {
-		err = f(driver.WaylandWindowContext{
-			WaylandSurface: uintptr(unsafe.Pointer(w.view().GetWaylandWindow())),
-			EGLSurface:     uintptr(unsafe.Pointer(w.view().GetEGLSurface())),
+		var waylandSurface, eglSurface uintptr
+		if v := w.view(); v != nil {
+			waylandSurface = uintptr(unsafe.Pointer(v.GetWaylandWindow()))
+			eglSurface = uintptr(unsafe.Pointer(v.GetEGLSurface()))
+		}
+		f(driver.WaylandWindowContext{
+			WaylandSurface: waylandSurface,
+			EGLSurface:     eglSurface,
 		})
-		close(done)
 	})
-	<-done
-	return err
 }

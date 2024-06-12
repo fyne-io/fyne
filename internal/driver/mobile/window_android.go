@@ -10,8 +10,8 @@ import (
 // Assert we are satisfying the driver.NativeWindow interface
 var _ driver.NativeWindow = (*window)(nil)
 
-func (w *window) RunNative(f func(context any) error) error {
-	return app.RunOnJVM(func(vm, env, ctx uintptr) error {
+func (w *window) RunNative(f func(context any)) {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		data := &driver.AndroidWindowContext{
 			NativeWindow: w.handle,
 			AndroidContext: driver.AndroidContext{
@@ -20,6 +20,6 @@ func (w *window) RunNative(f func(context any) error) error {
 				Ctx: ctx,
 			},
 		}
-		return f(data)
+		f(data)
 	})
 }

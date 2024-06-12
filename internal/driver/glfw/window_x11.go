@@ -17,15 +17,14 @@ func (w *window) GetWindowHandle() string {
 // assert we are implementing driver.NativeWindow
 var _ driver.NativeWindow = (*window)(nil)
 
-func (w *window) RunNative(f func(any) error) error {
-	var err error
-	done := make(chan struct{})
+func (w *window) RunNative(f func(any)) {
+	var handle uintptr
+	if v := w.view(); v != nil {
+		handle = v.GetX11Window()
+	}
 	runOnMain(func() {
-		err = f(driver.X11WindowContext{
-			WindowHandle: w.GetWindowHandle(),
+		f(driver.X11WindowContext{
+			WindowHandle: handle,
 		})
-		close(done)
 	})
-	<-done
-	return err
 }

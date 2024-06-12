@@ -9,6 +9,6 @@ import (
 // Assert we are satisfying the driver.NativeWindow interface
 var _ driver.NativeWindow = (*window)(nil)
 
-func (w *window) RunNative(fn func(context any) error) error {
-	return fn(&driver.UnknownContext{})
+func (w *window) RunNative(fn func(context any)) {
+	fn(&driver.UnknownContext{})
 }

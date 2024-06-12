@@ -7,7 +7,7 @@ package driver
 type NativeWindow interface {
 	// RunNative  provides a way to execute code within the platform-specific runtime context for a window.
 	// The context types are defined in the `driver` package and the specific context passed will differ by platform.
-	RunNative(func(context any) error) error
+	RunNative(func(context any))
 }
 
 // AndroidContext is passed to the RunNative callback when it is executed on an Android device.
@@ -58,7 +58,7 @@ type MacWindowContext struct {
 // Since: 2.5
 type X11WindowContext struct {
 	// WindowHandle is the window handle for the native X11 window.
-	WindowHandle string
+	WindowHandle uintptr
 }
 
 // WaylandWindowContext is passed to the NativeWindow.RunNative callback
