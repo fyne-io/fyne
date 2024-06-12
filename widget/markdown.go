@@ -31,7 +31,7 @@ func (t *RichText) ParseMarkdown(content string) {
 // content to the widget, with the appropriate formatting.
 // This API is intended for appending complete markdown documents or
 // standalone fragments, and should not be used to parse a single
-// markdown document piecewise. Use ParseMarkdown for this case.
+// markdown document piecewise.
 //
 // Since: 2.5
 func (t *RichText) AppendMarkdown(content string) {
