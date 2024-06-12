@@ -243,11 +243,15 @@ var (
 )
 
 // BackgroundColor returns the theme's background color.
+//
+// Deprecated: Use Color(theme.ColorNameBackground) instead.
 func BackgroundColor() color.Color {
 	return safeColorLookup(ColorNameBackground, currentVariant())
 }
 
 // ButtonColor returns the theme's standard button color.
+//
+// Deprecated: Use Color(theme.ColorNameButton) instead.
 func ButtonColor() color.Color {
 	return safeColorLookup(ColorNameButton, currentVariant())
 }
@@ -268,6 +272,8 @@ func ColorForWidget(name fyne.ThemeColorName, w fyne.Widget) color.Color {
 }
 
 // DisabledButtonColor returns the theme's disabled button color.
+//
+// Deprecated: Use Color(theme.ColorNameDisabledButton) instead.
 func DisabledButtonColor() color.Color {
 	return safeColorLookup(ColorNameDisabledButton, currentVariant())
 }
@@ -275,13 +281,15 @@ func DisabledButtonColor() color.Color {
 // DisabledColor returns the foreground color for a disabled UI element.
 //
 // Since: 2.0
+//
+// Deprecated: Use Color(theme.ColorNameDisabled) instead.
 func DisabledColor() color.Color {
 	return safeColorLookup(ColorNameDisabled, currentVariant())
 }
 
 // DisabledTextColor returns the theme's disabled text color - this is actually the disabled color since 1.4.
 //
-// Deprecated: Use theme.DisabledColor() colour instead.
+// Deprecated: Use Color(theme.ColorNameDisabled) instead.
 func DisabledTextColor() color.Color {
 	return DisabledColor()
 }
@@ -289,11 +297,15 @@ func DisabledTextColor() color.Color {
 // ErrorColor returns the theme's error foreground color.
 //
 // Since: 2.0
+//
+// Deprecated: Use Color(theme.ColorNameError) instead.
 func ErrorColor() color.Color {
 	return safeColorLookup(ColorNameError, currentVariant())
 }
 
 // FocusColor returns the color used to highlight a focused widget.
+//
+// Deprecated: Use Color(theme.ColorNameFocus) instead.
 func FocusColor() color.Color {
 	return safeColorLookup(ColorNameFocus, currentVariant())
 }
@@ -301,6 +313,8 @@ func FocusColor() color.Color {
 // ForegroundColor returns the theme's standard foreground color for text and icons.
 //
 // Since: 2.0
+//
+// Deprecated: Use Color(theme.ColorNameForeground) instead.
 func ForegroundColor() color.Color {
 	return safeColorLookup(ColorNameForeground, currentVariant())
 }
@@ -308,21 +322,29 @@ func ForegroundColor() color.Color {
 // HeaderBackgroundColor returns the color used to draw underneath collection headers.
 //
 // Since: 2.4
+//
+// Deprecated: Use Color(theme.ColorNameHeaderBackground) instead.
 func HeaderBackgroundColor() color.Color {
 	return Current().Color(ColorNameHeaderBackground, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor.
+//
+// Deprecated: Use Color(theme.ColorNameHover) instead.
 func HoverColor() color.Color {
 	return safeColorLookup(ColorNameHover, currentVariant())
 }
 
 // HyperlinkColor returns the color used for the Hyperlink widget and hyperlink text elements.
+//
+// Deprecated: Use Color(theme.ColorNameHyperlink) instead.
 func HyperlinkColor() color.Color {
 	return safeColorLookup(ColorNameHyperlink, currentVariant())
 }
 
 // InputBackgroundColor returns the color used to draw underneath input elements.
+//
+// Deprecated: Use Color(theme.ColorNameInputBackground) instead.
 func InputBackgroundColor() color.Color {
 	return Current().Color(ColorNameInputBackground, currentVariant())
 }
@@ -330,6 +352,8 @@ func InputBackgroundColor() color.Color {
 // InputBorderColor returns the color used to draw underneath input elements.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameInputBorder) instead.
 func InputBorderColor() color.Color {
 	return Current().Color(ColorNameInputBorder, currentVariant())
 }
@@ -337,6 +361,8 @@ func InputBorderColor() color.Color {
 // MenuBackgroundColor returns the theme's background color for menus.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameMenuBackground) instead.
 func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
@@ -344,11 +370,15 @@ func MenuBackgroundColor() color.Color {
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameOverlayBackground) instead.
 func OverlayBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameOverlayBackground, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color.
+//
+// Deprecated: Use Color(theme.ColorNamePlaceHolder) instead.
 func PlaceHolderColor() color.Color {
 	return safeColorLookup(ColorNamePlaceHolder, currentVariant())
 }
@@ -356,11 +386,15 @@ func PlaceHolderColor() color.Color {
 // PressedColor returns the color used to overlap tapped features.
 //
 // Since: 2.0
+//
+// Deprecated: Use Color(theme.ColorNamePressed) instead.
 func PressedColor() color.Color {
 	return safeColorLookup(ColorNamePressed, currentVariant())
 }
 
 // PrimaryColor returns the color used to highlight primary features.
+//
+// Deprecated: Use Color(theme.ColorNamePrimary) instead.
 func PrimaryColor() color.Color {
 	return safeColorLookup(ColorNamePrimary, currentVariant())
 }
@@ -368,6 +402,8 @@ func PrimaryColor() color.Color {
 // PrimaryColorNamed returns a theme specific color value for a named primary color.
 //
 // Since: 1.4
+//
+// Deprecated: You should not access named primary colors but access the primary color using Color(theme.ColorNamePrimary) instead.
 func PrimaryColorNamed(name string) color.Color {
 	return internaltheme.PrimaryColorNamed(name)
 }
@@ -380,6 +416,8 @@ func PrimaryColorNames() []string {
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar.
+//
+// Deprecated: Use Color(theme.ColorNameScrollBar) instead.
 func ScrollBarColor() color.Color {
 	return safeColorLookup(ColorNameScrollBar, currentVariant())
 }
@@ -387,6 +425,8 @@ func ScrollBarColor() color.Color {
 // SelectionColor returns the color for a selected element.
 //
 // Since: 2.1
+//
+// Deprecated: Use Color(theme.ColorNameSelection) instead.
 func SelectionColor() color.Color {
 	return safeColorLookup(ColorNameSelection, currentVariant())
 }
@@ -394,11 +434,15 @@ func SelectionColor() color.Color {
 // SeparatorColor returns the color for the separator element.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameSeparator) instead.
 func SeparatorColor() color.Color {
 	return safeColorLookup(ColorNameSeparator, currentVariant())
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation.
+//
+// Deprecated: Use Color(theme.ColorNameShadow) instead.
 func ShadowColor() color.Color {
 	return safeColorLookup(ColorNameShadow, currentVariant())
 }
@@ -406,6 +450,8 @@ func ShadowColor() color.Color {
 // SuccessColor returns the theme's success foreground color.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameSuccess) instead.
 func SuccessColor() color.Color {
 	return safeColorLookup(ColorNameSuccess, currentVariant())
 }
@@ -413,6 +459,8 @@ func SuccessColor() color.Color {
 // WarningColor returns the theme's warning foreground color.
 //
 // Since: 2.3
+//
+// Deprecated: Use Color(theme.ColorNameWarning) instead.
 func WarningColor() color.Color {
 	return safeColorLookup(ColorNameWarning, currentVariant())
 }
