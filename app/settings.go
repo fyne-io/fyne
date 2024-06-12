@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	internalapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
@@ -152,7 +153,7 @@ func (s *settings) setupTheme() {
 		name = env
 	}
 
-	variant := defaultVariant()
+	variant := internalapp.DefaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
 		effectiveTheme = s.loadSystemTheme()

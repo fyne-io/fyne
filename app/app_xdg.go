@@ -16,15 +16,10 @@ import (
 	"github.com/rymdport/portal/settings/appearance"
 
 	"fyne.io/fyne/v2"
+	internalapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
-
-var currentVariant atomic.Uint64
-
-func defaultVariant() fyne.ThemeVariant {
-	return fyne.ThemeVariant(currentVariant.Load())
-}
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	if build.IsFlatpak {
@@ -123,11 +118,11 @@ func rootConfigDir() string {
 func watchTheme() {
 	go func() {
 		// with portal this may not be immediate, so we update a cache instead
-		currentVariant.Store(uint64(findFreedesktopColorScheme()))
+		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
-				currentVariant.Store(uint64(findFreedesktopColorScheme()))
+				internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
 				fyne.CurrentApp().Settings().(*settings).setupTheme()
 			}
 		})
