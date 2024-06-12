@@ -375,7 +375,7 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 				background = theme.ColorNameButton
 			}
 		case SuccessImportance:
-			foreground = theme.ColorNameBackground
+			foreground = theme.ColorNameOnSuccess
 			background = theme.ColorNameSuccess
 		case WarningImportance:
 			foreground = theme.ColorNameBackground

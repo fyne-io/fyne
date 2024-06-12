@@ -190,6 +190,7 @@ var (
 	colorDarkInputBorder       = color.NRGBA{R: 0x39, G: 0x39, B: 0x3a, A: 0xff}
 	colorDarkMenuBackground    = color.NRGBA{R: 0x28, G: 0x29, B: 0x2e, A: 0xff}
 	colorDarkOnError           = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
+	colorDarkOnSuccess         = color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
 	colorDarkOverlayBackground = color.NRGBA{R: 0x18, G: 0x1d, B: 0x25, A: 0xff}
 	colorDarkPlaceholder       = color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
 	colorDarkPressed           = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66}
@@ -211,6 +212,7 @@ var (
 	colorLightInputBorder      = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightMenuBackground   = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	colorLightOnError          = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
+	colorLightOnSuccess        = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightPlaceholder      = color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	colorLightPressed          = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x19}
 	colorLightScrollBar        = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}

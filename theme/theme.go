@@ -241,7 +241,7 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameOnError:
 		return colorDarkOnError
 	case ColorNameOnSuccess:
-		return colorDarkForeground
+		return colorDarkOnSuccess
 	case ColorNameOnWarning:
 		return colorDarkForeground
 	case ColorNameOverlayBackground:
@@ -315,7 +315,7 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameOnError:
 		return colorLightOnError
 	case ColorNameOnSuccess:
-		return colorLightForeground
+		return colorLightOnSuccess
 	case ColorNameOnWarning:
 		return colorLightForeground
 	case ColorNameOverlayBackground:
