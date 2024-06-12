@@ -20,7 +20,7 @@ var _ driver.NativeWindow = (*window)(nil)
 func (w *window) RunNative(f func(any)) {
 	var handle uintptr
 	if v := w.view(); v != nil {
-		handle = v.GetX11Window()
+		handle = uintptr(v.GetX11Window())
 	}
 	runOnMain(func() {
 		f(driver.X11WindowContext{
