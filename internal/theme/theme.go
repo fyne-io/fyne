@@ -1,6 +1,10 @@
 package theme
 
-import "image/color"
+import (
+	"image/color"
+
+	"fyne.io/fyne/v2"
+)
 
 // Primary color names.
 const (
@@ -12,6 +16,13 @@ const (
 	ColorPurple = "purple"
 	ColorRed    = "red"
 	ColorYellow = "yellow"
+)
+
+// Theme variants; the public available ones are defined in /theme/theme.go.
+const (
+	VariantDark fyne.ThemeVariant = iota
+	VariantLight
+	VariantNameUserPreference // locally used in builtinTheme for backward compatibility
 )
 
 var (

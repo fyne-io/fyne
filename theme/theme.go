@@ -16,15 +16,12 @@ const (
 	// VariantDark is the version of a theme that satisfies a user preference for a dark look.
 	//
 	// Since: 2.0
-	VariantDark fyne.ThemeVariant = 0
+	VariantDark = internaltheme.VariantDark
 
 	// VariantLight is the version of a theme that satisfies a user preference for a light look.
 	//
 	// Since: 2.0
-	VariantLight fyne.ThemeVariant = 1
-
-	// potential for adding theme types such as high visibility or monochrome...
-	variantNameUserPreference fyne.ThemeVariant = 2 // locally used in builtinTheme for backward compatibility
+	VariantLight = internaltheme.VariantLight
 )
 
 var defaultTheme fyne.Theme
@@ -100,7 +97,7 @@ func (t *builtinTheme) initFonts() {
 }
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	if t.variant != variantNameUserPreference {
+	if t.variant != internaltheme.VariantNameUserPreference {
 		v = t.variant
 	}
 
@@ -207,7 +204,7 @@ func CurrentForWidget(w fyne.CanvasObject) fyne.Theme {
 
 func currentVariant() fyne.ThemeVariant {
 	if std, ok := Current().(*builtinTheme); ok {
-		if std.variant != variantNameUserPreference {
+		if std.variant != internaltheme.VariantNameUserPreference {
 			return std.variant // override if using the old LightTheme() or DarkTheme() constructor
 		}
 	}
@@ -376,7 +373,7 @@ func selectionColorNamed(name string) color.NRGBA {
 }
 
 func setupDefaultTheme() fyne.Theme {
-	theme := &builtinTheme{variant: variantNameUserPreference}
+	theme := &builtinTheme{variant: internaltheme.VariantNameUserPreference}
 
 	theme.initFonts()
 	return theme
