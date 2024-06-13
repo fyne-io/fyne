@@ -139,11 +139,12 @@ func exceptionCallback(e *C.char) {
 
 func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator bool) (*fyne.Menu, int) {
 	for i, item := range menu.Items {
-		if item.Label == "Settings" || item.Label == "Settings…" || item.Label == "Preferences" || item.Label == "Preferences…" {
+		switch item.Label {
+		case "Settings", "Settings…", "Preferences", "Preferences…":
 			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
 			items = append(items, menu.Items[:i]...)
 			items = append(items, menu.Items[i+1:]...)
-			menu, nextItemID = handleSpecialItems(w, fyne.NewMenu(menu.Label, items...), nextItemID, false)
+			menu.Items = items
 
 			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
 			if addSeparator {
@@ -160,7 +161,29 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 				)
 			}
 			nextItemID = registerCallback(w, item, nextItemID)
-			break
+		case "About":
+			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
+			items = append(items, menu.Items[:i]...)
+			if i < len(menu.Items)-1 {
+				items = append(items, menu.Items[i+1:]...)
+			}
+			menu.Items = items
+
+			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
+			if addSeparator {
+				C.insertDarwinMenuItem(
+					C.darwinAppMenu(),
+					C.CString(""),
+					C.CString(""),
+					C.uint(0),
+					C.int(nextItemID),
+					C.int(1),
+					C.bool(true),
+					unsafe.Pointer(nil),
+					C.uint(0),
+				)
+			}
+			nextItemID = registerCallback(w, item, nextItemID)
 		}
 	}
 	return menu, nextItemID

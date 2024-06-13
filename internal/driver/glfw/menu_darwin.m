@@ -109,10 +109,18 @@ const void* insertDarwinMenuItem(const void* m, const char* label, const char* k
         }
     }
 
-    if (index > -1) {
-        [menu insertItem:item atIndex:index];
+    if (strcmp(label, "About") == 0) {
+        item = [menu itemArray][0];
+        [item setAction:@selector(tapped:)];
+        [item setTarget:[FyneMenuHandler class]];
+        [item setTag:id+menuTagMin];
+        return item;
     } else {
-        [menu addItem:item];
+        if (index > -1) {
+            [menu insertItem:item atIndex:index];
+        } else {
+            [menu addItem:item];
+        }
     }
     [item release]; // retained by the menu
     return item;
