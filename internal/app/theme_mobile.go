@@ -1,4 +1,4 @@
-//go:build !ci && (android || ios || mobile)
+//go:build android || ios || mobile
 
 package app
 

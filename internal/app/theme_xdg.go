@@ -1,4 +1,4 @@
-//go:build !ci && !wasm && !test_web_driver && (linux || openbsd || freebsd || netbsd) && !android
+//go:build !wasm && !test_web_driver && !android && (linux || openbsd || freebsd || netbsd)
 
 package app
 

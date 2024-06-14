@@ -1,4 +1,4 @@
-//go:build !ci && wasm
+//go:build wasm
 
 package app
 
