@@ -95,7 +95,7 @@ func Test_snapshot(t *testing.T) {
 			content: fynecanvas.NewImageFromResource(theme.VolumeDownIcon()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"volumeDownIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image rsc=\"volumeDownIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -103,7 +103,7 @@ func Test_snapshot(t *testing.T) {
 			content: fynecanvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}))),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"default\"/>\n" +
+				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -147,7 +147,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" translucency=\"1.3\"/>\n" +
+				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\" translucency=\"1.3\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -159,7 +159,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image fillMode=\"contain\" rsc=\"zoomOutIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image fillMode=\"contain\" rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -171,7 +171,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -183,7 +183,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"viewRestoreIcon\" scaleMode=\"pixels\" size=\"100x100\"/>\n" +
+				"\t\t<image rsc=\"viewRestoreIcon\" scaleMode=\"pixels\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -192,7 +192,7 @@ func Test_snapshot(t *testing.T) {
 			size:    fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"visibilityIcon\" size=\"iconInlineSize\"/>\n" +
+				"\t\t<image rsc=\"visibilityIcon\" size=\"iconInlineSize\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
