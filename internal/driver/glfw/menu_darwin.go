@@ -138,13 +138,18 @@ func exceptionCallback(e *C.char) {
 }
 
 func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator bool) (*fyne.Menu, int) {
-	for i, item := range menu.Items {
+	menu = fyne.NewMenu(menu.Label, menu.Items...) // copy so we can manipulate
+	for i := 0; i < len(menu.Items); i++ {
+		item := menu.Items[i]
 		switch item.Label {
 		case "Settings", "Settings…", "Preferences", "Preferences…":
 			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
 			items = append(items, menu.Items[:i]...)
-			items = append(items, menu.Items[i+1:]...)
+			if i < len(menu.Items)-1 {
+				items = append(items, menu.Items[i+1:]...)
+			}
 			menu.Items = items
+			i--
 
 			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
 			if addSeparator {
@@ -168,6 +173,7 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 				items = append(items, menu.Items[i+1:]...)
 			}
 			menu.Items = items
+			i--
 
 			insertNativeMenuItem(C.darwinAppMenu(), item, nextItemID, 1)
 			if addSeparator {
