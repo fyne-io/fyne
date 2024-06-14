@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	themeNameDark           = "dark"
-	themeNameLight          = "light"
-	themeNameSystemLabel    = "system default"
-	themeNameSystemSettings = ""
+	themeNameDark        = "dark"
+	themeNameLight       = "light"
+	themeNameSystem      = ""
+	themeNameSystemLabel = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -63,7 +63,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	themeNames := []string{themeNameDark, themeNameLight}
 	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
 		themeNames = append(themeNames, themeNameSystemLabel)
-		if s.fyneSettings.ThemeName == themeNameSystemSettings {
+		if s.fyneSettings.ThemeName == themeNameSystem {
 			def = themeNameSystemLabel
 		}
 	}
@@ -107,7 +107,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 func (s *Settings) chooseTheme(name string) {
 	if name == themeNameSystemLabel {
-		name = themeNameSystemSettings
+		name = themeNameSystem
 	}
 	s.fyneSettings.ThemeName = name
 
@@ -249,7 +249,7 @@ func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.C
 	switch p.s.fyneSettings.ThemeName {
 	case themeNameLight:
 		variant = theme.VariantLight
-	case themeNameSystemSettings:
+	case themeNameSystem:
 		variant = internalapp.DefaultVariant()
 	}
 
