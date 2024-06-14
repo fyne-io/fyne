@@ -6,7 +6,7 @@
 					<widget size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -18,7 +18,7 @@
 					<widget pos="0,39" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -30,7 +30,7 @@
 					<widget pos="0,78" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -42,7 +42,7 @@
 					<widget pos="0,117" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -54,7 +54,7 @@
 					<widget pos="0,156" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -66,7 +66,7 @@
 					<widget pos="0,195" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -78,7 +78,7 @@
 					<widget pos="0,234" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -90,7 +90,7 @@
 					<widget pos="0,273" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -102,7 +102,7 @@
 					<widget pos="0,312" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -114,7 +114,7 @@
 					<widget pos="0,351" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -126,7 +126,7 @@
 					<widget pos="0,390" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -138,7 +138,7 @@
 					<widget pos="0,429" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -150,7 +150,7 @@
 					<widget pos="0,468" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -162,7 +162,7 @@
 					<widget pos="0,508" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -174,7 +174,7 @@
 					<widget pos="0,547" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">
@@ -186,7 +186,7 @@
 					<widget pos="0,586" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
 							<widget pos="24,0" size="168x35" type="*widget.Label">
 								<widget size="168x35" type="*widget.RichText">

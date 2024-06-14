@@ -7,7 +7,7 @@
 						<image pos="4,8" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 					</widget>
 					<widget pos="32,0" size="28x36" type="*container.tabButton">
-						<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="default"/>
+						<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 					</widget>
 				</container>
 			</container>

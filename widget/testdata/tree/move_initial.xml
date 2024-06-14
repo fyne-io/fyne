@@ -10,7 +10,7 @@
 							</widget>
 						</widget>
 						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="default"/>
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="foreground"/>
 						</widget>
 					</widget>
 					<widget pos="0,36" size="212x1" type="*widget.Separator">

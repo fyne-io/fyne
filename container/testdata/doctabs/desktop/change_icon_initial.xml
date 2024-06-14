@@ -8,7 +8,7 @@
 							<image pos="4,8" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 						</widget>
 						<widget pos="56,0" size="52x36" type="*container.tabButton">
-							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="default"/>
+							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 						</widget>
 					</container>
 				</widget>
@@ -16,7 +16,7 @@
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
 					</widget>
 				</container>
 			</container>

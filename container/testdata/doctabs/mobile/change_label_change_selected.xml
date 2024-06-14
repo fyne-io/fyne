@@ -13,7 +13,7 @@
 						<widget pos="87,0" size="76x36" type="*container.tabButton">
 							<text bold pos="8,8" size="60x20">Test2</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize" themed="default"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</widget>
 					</container>
@@ -30,7 +30,7 @@
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
 					</widget>
 				</container>
 			</container>

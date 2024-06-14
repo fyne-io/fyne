@@ -30,14 +30,14 @@
 							</widget>
 							<widget pos="0,83" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="30x19">C</text>
-								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="default"/>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 							<widget pos="0,122" size="66x1" type="*widget.Separator">
 								<rectangle fillColor="separator" size="66x1"/>
 							</widget>
 							<widget pos="0,127" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="30x19">D</text>
-								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="default"/>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

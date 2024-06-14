@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -151,10 +150,9 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.ThemedResource:
 		variant = string(t.ColorName)
 		if variant == "" {
-			variant = "default"
+			variant = "foreground"
 		}
 	default:
-		log.Println("TYPE WAS", t)
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
 	}

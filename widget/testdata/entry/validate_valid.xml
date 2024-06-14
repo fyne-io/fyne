@@ -10,7 +10,7 @@
 				<rectangle fillColor="primary" pos="80,6" size="2x19"/>
 			</widget>
 			<widget pos="92,8" size="20x20" type="*widget.validationStatus">
-				<image rsc="confirmIcon" size="iconInlineSize" themed="default"/>
+				<image rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 			</widget>
 		</widget>
 	</content>

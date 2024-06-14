@@ -33,7 +33,7 @@
 							</widget>
 							<widget pos="0,88" size="86x35" type="*widget.menuItem">
 								<text pos="8,8" size="70x19">Baz</text>
-								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="default"/>
+								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

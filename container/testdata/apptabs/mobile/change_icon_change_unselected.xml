@@ -7,7 +7,7 @@
 						<image pos="16,8" rsc="infoIcon" size="40x40" themed="primary"/>
 					</widget>
 					<widget pos="77,0" size="73x56" type="*container.tabButton">
-						<image pos="16,8" rsc="contentAddIcon" size="40x40" themed="default"/>
+						<image pos="16,8" rsc="contentAddIcon" size="40x40" themed="foreground"/>
 					</widget>
 				</container>
 			</container>
