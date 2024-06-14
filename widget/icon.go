@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -30,12 +29,6 @@ func (i *iconRenderer) Layout(size fyne.Size) {
 func (i *iconRenderer) Refresh() {
 	if i.image.Resource == i.image.cachedRes {
 		return
-	}
-
-	r := i.image.Resource
-	if r != nil {
-		r = cache.OverrideResourceTheme(i.image.Resource, i.image)
-		i.image.Resource = r
 	}
 
 	i.image.propertyLock.RLock()
@@ -76,12 +69,7 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	res := i.Resource
-	if res != nil {
-		res = cache.OverrideResourceTheme(i.Resource, i)
-		i.Resource = res
-	}
-	img := canvas.NewImageFromResource(res)
+	img := canvas.NewImageFromResource(i.Resource)
 	img.FillMode = canvas.ImageFillContain
 
 	r := &iconRenderer{image: i, raster: img}

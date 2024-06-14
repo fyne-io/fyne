@@ -270,7 +270,15 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 	i.isSVG = false
 	if i.Resource != nil {
 		i.isSVG = svg.IsResourceSVG(i.Resource)
-		return io.NopCloser(bytes.NewReader(i.Resource.Content())), nil
+		content := i.Resource.Content()
+		if res, ok := i.Resource.(fyne.ThemedResource); i.isSVG && ok {
+			th := cache.WidgetTheme(i)
+			if th != nil {
+				col := th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant())
+				content = svg.Colorize(content, col)
+			}
+		}
+		return io.NopCloser(bytes.NewReader(content)), nil
 	} else if i.File != "" {
 		var err error
 
@@ -347,7 +355,7 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 		screenWidth, screenHeight = c.PixelCoordinateForPosition(fyne.Position{X: width, Y: height})
 	}
 
-	tex := cache.GetSvg(i.name(), screenWidth, screenHeight)
+	tex := cache.GetSvg(i.name(), i, screenWidth, screenHeight)
 	if tex != nil {
 		return tex, nil
 	}
@@ -357,6 +365,6 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	cache.SetSvg(i.name(), tex, screenWidth, screenHeight)
+	cache.SetSvg(i.name(), i, tex, screenWidth, screenHeight)
 	return tex, nil
 }

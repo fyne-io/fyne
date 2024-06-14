@@ -6,7 +6,6 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/svg"
 )
 
 var (
@@ -30,50 +29,13 @@ func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 	overrideTheme(o, s, id)
 }
 
-func WidgetTheme(o fyne.Widget) fyne.Theme {
+func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
 	data, ok := overrides.Load(o)
 	if !ok {
 		return nil
 	}
 
 	return data.(*overrideScope).th
-}
-
-func OverrideResourceTheme(res fyne.Resource, w fyne.Widget) fyne.Resource {
-	if th, ok := res.(fyne.ThemedResource); ok {
-		return &WidgetResource{ThemedResource: th, Owner: w}
-	}
-
-	return res
-}
-
-func themeForResource(res fyne.Resource) fyne.Theme {
-	if th, ok := res.(*WidgetResource); ok {
-		if over, ok := overrides.Load(th.Owner); ok {
-			return over.(*overrideScope).th
-		}
-	}
-
-	return fyne.CurrentApp().Settings().Theme()
-}
-
-type WidgetResource struct {
-	fyne.ThemedResource
-	Owner fyne.Widget
-}
-
-// Content returns the underlying content of the resource adapted to the current text color.
-func (res *WidgetResource) Content() []byte {
-	th := themeForResource(res)
-	return svg.Colorize(res.ThemedResource.Content(), th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant()))
-}
-
-func (res *WidgetResource) Name() string {
-	cacheID := ""
-	if over, ok := overrides.Load(res.Owner); ok {
-		cacheID = over.(*overrideScope).cacheID
-	}
-	return cacheID + res.ThemedResource.Name()
 }
 
 func overrideContainer(c *fyne.Container, s *overrideScope, id uint32) {
@@ -88,6 +50,8 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope, id uint32) {
 		overrideWidget(c, s, id)
 	case *fyne.Container:
 		overrideContainer(c, s, id)
+	default:
+		overrides.Store(c, s)
 	}
 }
 
