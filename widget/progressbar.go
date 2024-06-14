@@ -81,7 +81,7 @@ func (p *progressRenderer) applyTheme() {
 	p.background.CornerRadius = inputRadius
 	p.bar.FillColor = primaryColor
 	p.bar.CornerRadius = inputRadius
-	p.label.Color = th.Color(theme.ColorNameBackground, v)
+	p.label.Color = th.Color(theme.ColorNameForegroundOnPrimary, v)
 	p.label.TextSize = th.Size(theme.SizeNameText)
 }
 
@@ -154,7 +154,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		},
 		label: canvas.Text{
 			Text:      "0%",
-			Color:     th.Color(theme.ColorNameBackground, v),
+			Color:     th.Color(theme.ColorNameForegroundOnPrimary, v),
 			Alignment: fyne.TextAlignCenter,
 		},
 		progress: p,
