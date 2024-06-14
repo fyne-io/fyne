@@ -12,9 +12,9 @@
 						</widget>
 						<widget pos="56,0" size="52x36" type="*container.tabButton">
 							<widget pos="28,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 							</widget>
-							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize"/>
+							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="default"/>
 						</widget>
 					</container>
 				</widget>

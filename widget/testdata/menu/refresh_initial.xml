@@ -24,7 +24,7 @@
 							</widget>
 							<widget pos="0,44" size="86x35" type="*widget.menuItem">
 								<text pos="36,8" size="22x19">Bar</text>
-								<image pos="66,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+								<image pos="66,7" rsc="menuExpandIcon" size="iconInlineSize" themed="default"/>
 								<image pos="8,7" rsc="account.svg" size="iconInlineSize" themed="default"/>
 							</widget>
 							<widget pos="0,83" size="86x1" type="*widget.Separator">

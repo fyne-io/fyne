@@ -7,19 +7,19 @@
 						<widget size="76x36" type="*container.tabButton">
 							<text bold pos="8,8" size="60x20">Test1</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 							</widget>
 						</widget>
 						<widget pos="80,0" size="76x36" type="*container.tabButton">
 							<text bold pos="8,8" size="60x20">Test2</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 							</widget>
 						</widget>
 						<widget pos="160,0" size="76x36" type="*container.tabButton">
 							<text bold pos="8,8" size="60x20">Test3</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 							</widget>
 						</widget>
 						<widget pos="241,0" size="97x36" type="*container.tabButton">
@@ -42,7 +42,7 @@
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
+						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize" themed="default"/>
 					</widget>
 					<widget pos="40,0" size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>

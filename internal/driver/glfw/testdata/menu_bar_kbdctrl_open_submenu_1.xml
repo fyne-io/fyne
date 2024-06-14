@@ -56,7 +56,7 @@
 								<widget pos="0,78" size="80x35" type="*widget.menuItem">
 									<rectangle fillColor="focus" radius="4" size="80x35"/>
 									<text pos="8,8" size="44x19">Recent</text>
-									<image pos="60,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+									<image pos="60,7" rsc="menuExpandIcon" size="iconInlineSize" themed="default"/>
 								</widget>
 							</container>
 						</widget>
@@ -85,7 +85,7 @@
 									</widget>
 									<widget pos="0,78" size="72x35" type="*widget.menuItem">
 										<text pos="8,8" size="36x19">Older</text>
-										<image pos="52,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+										<image pos="52,7" rsc="menuExpandIcon" size="iconInlineSize" themed="default"/>
 									</widget>
 								</container>
 							</widget>

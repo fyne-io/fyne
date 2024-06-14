@@ -6,7 +6,7 @@
 			<widget pos="81,86" size="28x20" type="*widget.RichText">
 				<text alignment="center" bold size="28x19">Test</text>
 			</widget>
-			<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize"/>
+			<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 		</widget>
 	</content>
 </canvas>

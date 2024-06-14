@@ -6,7 +6,7 @@
 					<widget size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
 							</widget>
 							<widget pos="24,0" size="88x35" type="*widget.Label">
 								<widget size="88x35" type="*widget.RichText">
@@ -18,7 +18,7 @@
 					<widget pos="0,39" size="192x35" type="*widget.listItem">
 						<container size="192x35">
 							<widget size="20x35" type="*widget.Icon">
-								<image fillMode="contain" rsc="documentIcon" size="20x35"/>
+								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="default"/>
 							</widget>
 							<widget pos="24,0" size="123x35" type="*widget.Label">
 								<widget size="123x35" type="*widget.RichText">

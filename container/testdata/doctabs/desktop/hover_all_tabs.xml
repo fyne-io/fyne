@@ -24,7 +24,7 @@
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize"/>
+						<image fillMode="contain" pos="8,8" rsc="contentAddIcon" size="iconInlineSize" themed="default"/>
 					</widget>
 					<widget pos="40,0" size="36x36" type="*widget.Button">
 						<rectangle fillColor="rgba(62,78,78,255)" radius="4" size="36x36"/>

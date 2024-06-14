@@ -3,7 +3,7 @@
 		<widget pos="4,4" size="142x192" type="*widget.Button">
 			<rectangle fillColor="button" radius="4" size="142x192"/>
 			<rectangle size="142x192"/>
-			<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize"/>
+			<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize" themed="default"/>
 		</widget>
 	</content>
 </canvas>
