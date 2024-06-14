@@ -272,7 +272,6 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 		i.isSVG = svg.IsResourceSVG(i.Resource)
 		content := i.Resource.Content()
 		if res, ok := i.Resource.(fyne.ThemedResource); i.isSVG && ok {
-
 			th := cache.WidgetTheme(i)
 			if th != nil {
 				col := th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant())
