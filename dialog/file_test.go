@@ -214,17 +214,17 @@ func TestShowFileOpen(t *testing.T) {
 	}
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
-	fileName := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
+	fileName := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
 	id := 0
 	for i, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.dir == false {
 			target = item
 			id = i
@@ -283,12 +283,12 @@ func TestHiddenFiles(t *testing.T) {
 	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
 	var target *fileDialogItem
 	for _, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.name == ".hidden" {
 			target = item
 		}
@@ -299,7 +299,7 @@ func TestHiddenFiles(t *testing.T) {
 	d.dialog.refreshDir(d.dialog.dir)
 
 	for _, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.name == ".hidden" {
 			target = item
 		}
@@ -330,17 +330,17 @@ func TestShowFileSave(t *testing.T) {
 	save := buttons.Objects[1].(*widget.Button)
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
-	item := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
+	item := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
 	assert.Equal(t, "(Parent)", item.name)
 	assert.True(t, save.Disabled())
 
 	var target *fileDialogItem
 	id := -1
 	for i, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.dir == false {
 			target = item
 			id = i

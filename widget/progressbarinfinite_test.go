@@ -80,7 +80,7 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	width := float32(100.0)
 	bar.Resize(fyne.NewSize(width, 10))
 
-	render := test.WidgetRenderer(bar).(*infProgressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*infProgressRenderer)
 
 	render.updateBar(0.0)
 	// start at the smallest size
