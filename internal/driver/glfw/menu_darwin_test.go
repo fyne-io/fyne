@@ -40,7 +40,7 @@ func TestDarwinMenu(t *testing.T) {
 	itemRecent := fyne.NewMenuItem("Recent", nil)
 	itemFoo := fyne.NewMenuItem("Foo", func() { lastAction = "foo" })
 	itemRecent.ChildMenu = fyne.NewMenu("", itemFoo)
-	menuEdit := fyne.NewMenu("File", itemNew, itemOpen, fyne.NewMenuItemSeparator(), itemRecent)
+	menuFile := fyne.NewMenu("File", itemNew, itemOpen, fyne.NewMenuItemSeparator(), itemRecent)
 
 	itemHelp := fyne.NewMenuItem("Help", func() { lastAction = "Help!!!" })
 	itemHelp.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierControl}
@@ -59,7 +59,7 @@ func TestDarwinMenu(t *testing.T) {
 	itemMoreSetings := fyne.NewMenuItem("Settings…", func() { lastAction = "more settings" })
 	menuSettings := fyne.NewMenu("Settings", itemSettings, fyne.NewMenuItemSeparator(), itemMoreSetings)
 
-	mainMenu := fyne.NewMainMenu(menuEdit, menuHelp, menuMore, menuSettings)
+	mainMenu := fyne.NewMainMenu(menuFile, menuHelp, menuMore, menuSettings)
 	runOnMain(func() {
 		setupNativeMenu(w, mainMenu)
 	})
