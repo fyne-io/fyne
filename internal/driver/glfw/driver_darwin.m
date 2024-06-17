@@ -13,6 +13,9 @@ void setDisableDisplaySleep(BOOL disable) {
         return;
     }
 
+    if (currentDisableID != 0) {
+        return;
+    }
     IOPMAssertionID assertionID;
     IOReturn success = IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep,
         kIOPMAssertionLevelOn, (CFStringRef)@"App disabled screensaver", &assertionID);

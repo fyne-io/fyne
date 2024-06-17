@@ -30,6 +30,9 @@ func setDisableScreenBlank(disable bool) {
 		return
 	}
 
+	if inhibitCookie != 0 {
+		return
+	}
 	obj := conn.Object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
 	call := obj.Call("org.freedesktop.ScreenSaver.Inhibit", 0, fyne.CurrentApp().Metadata().Name,
 		"App disabled screensaver")
