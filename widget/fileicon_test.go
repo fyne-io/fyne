@@ -16,8 +16,7 @@ import (
 )
 
 func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	workingDir, err := os.Getwd()
 	if err != nil {

@@ -62,8 +62,7 @@ func TestEntry_Validate(t *testing.T) {
 }
 
 func TestEntry_NotEmptyValidator(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	entry := widget.NewEntry()
 	entry.Validator = func(s string) error {
 		if s == "" {

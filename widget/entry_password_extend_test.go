@@ -15,8 +15,7 @@ type extendEntry struct {
 }
 
 func TestEntry_Password_Extended_CreateRenderer(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
+	a := test.NewTempApp(t)
 	w := a.NewWindow("")
 	defer w.Close()
 	entry := &extendEntry{}

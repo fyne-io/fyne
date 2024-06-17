@@ -62,8 +62,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 }
 
 func TestSimpleRenderer(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	c := &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
 		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),

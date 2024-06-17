@@ -73,8 +73,7 @@ func TestHyperlink_Hide(t *testing.T) {
 }
 
 func TestHyperlink_Focus(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
+	app := test.NewTempApp(t)
 	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	hyperlink := &Hyperlink{Text: "Test"}
@@ -167,8 +166,7 @@ func TestHyperlink_SetUrl(t *testing.T) {
 }
 
 func TestHyperlink_ThemeOverride(t *testing.T) {
-	_ = test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.Theme())
 
 	hyperlink := &Hyperlink{Text: "Test"}

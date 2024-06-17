@@ -8,8 +8,7 @@ import (
 )
 
 func Test_colorWheel_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	wheel := newColorWheel(nil)
 	wheel.SetHSLA(180, 100, 50, 255)

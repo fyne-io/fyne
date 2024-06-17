@@ -11,8 +11,7 @@ import (
 )
 
 func TestIcon_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
 		resource fyne.Resource

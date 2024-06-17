@@ -32,8 +32,7 @@ func TestAccordion_Append(t *testing.T) {
 }
 
 func TestAccordion_ChangeTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))

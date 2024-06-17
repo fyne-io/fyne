@@ -87,8 +87,7 @@ func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 
 func TestFormDialog_Hints(t *testing.T) {
 
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 	w := test.NewTempWindow(t, nil)
 	w.SetFullScreen(true)

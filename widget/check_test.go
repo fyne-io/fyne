@@ -38,8 +38,7 @@ func TestCheck_Binding(t *testing.T) {
 }
 
 func TestCheck_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
 		text     string

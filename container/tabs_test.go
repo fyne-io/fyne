@@ -26,8 +26,7 @@ func TestTabButton_Icon_Change(t *testing.T) {
 }
 
 func TestTab_ThemeChange(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
+	a := test.NewTempApp(t)
 	a.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	tabs := NewAppTabs(

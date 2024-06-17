@@ -13,8 +13,7 @@ import (
 )
 
 func TestColorDialog_Theme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(1000, 800))
@@ -39,9 +38,7 @@ func TestColorDialog_Theme(t *testing.T) {
 }
 
 func TestColorDialog_Recents(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
-
+	a := test.NewTempApp(t)
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
@@ -97,8 +94,7 @@ func TestColorDialog_SetColor(t *testing.T) {
 }
 
 func TestColorDialogSimple_Theme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
@@ -113,8 +109,7 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 }
 
 func TestColorDialogSimple_Recents(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
+	a := test.NewTempApp(t)
 
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
@@ -133,22 +128,19 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 
 func Test_recent_color(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
-		test.NewApp()
-		defer test.NewApp()
+		test.NewTempApp(t)
 		colors := readRecentColors()
 		assert.Equal(t, 0, len(colors))
 	})
 	t.Run("Single", func(t *testing.T) {
-		test.NewApp()
-		defer test.NewApp()
+		test.NewTempApp(t)
 		writeRecentColor("#ff0000") // Red
 		colors := readRecentColors()
 		assert.Equal(t, 1, len(colors))
 		assert.Equal(t, "#ff0000", colors[0])
 	})
 	t.Run("Order", func(t *testing.T) {
-		test.NewApp()
-		defer test.NewApp()
+		test.NewTempApp(t)
 		// Recents are last in, first out
 		writeRecentColor("#ff0000") // Red
 		writeRecentColor("#00ff00") // Green
@@ -160,8 +152,7 @@ func Test_recent_color(t *testing.T) {
 		assert.Equal(t, "#ff0000", colors[2])
 	})
 	t.Run("Deduplicate", func(t *testing.T) {
-		test.NewApp()
-		defer test.NewApp()
+		test.NewTempApp(t)
 		// Ensure no duplicates
 		writeRecentColor("#ff0000") // Red
 		writeRecentColor("#00ff00") // Green
@@ -174,8 +165,7 @@ func Test_recent_color(t *testing.T) {
 		assert.Equal(t, "#00ff00", colors[2]) // Green
 	})
 	t.Run("Limit", func(t *testing.T) {
-		test.NewApp()
-		defer test.NewApp()
+		test.NewTempApp(t)
 		// Max recents is 7
 		writeRecentColor("#000000") // Black
 		writeRecentColor("#bbbbbb") // Dark Grey

@@ -183,8 +183,7 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 }
 
 func TestLabel_ChangeTruncate(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
@@ -210,8 +209,7 @@ func TestNewLabelWithData(t *testing.T) {
 }
 
 func TestLabelImportance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	lbl := NewLabel("hello, fyne")
