@@ -203,6 +203,20 @@ func TestTextGridRender_RowColor(t *testing.T) {
 	assertGridStyle(t, grid, "112", map[string]TextGridStyle{"1": customStyle, "2": TextGridStyleWhitespace})
 }
 
+func TestTextGridRender_Style(t *testing.T) {
+	grid := NewTextGridFromString("Abcd ")
+	boldStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Bold: true}}
+	italicStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Italic: true}}
+	boldItalicStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Bold: true, Italic: true}}
+	grid.Rows[0].Cells[1].Style = boldStyle
+	grid.Rows[0].Cells[2].Style = italicStyle
+	grid.Rows[0].Cells[3].Style = boldItalicStyle
+	grid.ShowWhitespace = true
+	grid.Resize(fyne.NewSize(56, 22)) // causes refresh
+
+	assertGridStyle(t, grid, "0123", map[string]TextGridStyle{"1": boldStyle, "2": italicStyle, "3": boldItalicStyle})
+}
+
 func TestTextGridRender_TextColor(t *testing.T) {
 	grid := NewTextGridFromString("Ab ")
 	customStyle := &CustomTextGridStyle{FGColor: color.Black}
@@ -247,7 +261,7 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 			if r == ' ' {
 				assert.Equal(t, theme.ForegroundColor(), fg.Color)
 				assert.Equal(t, color.Transparent, bg.FillColor)
-			} else {
+			} else if expected != nil {
 				if expected.TextColor() == nil {
 					assert.Equal(t, theme.ForegroundColor(), fg.Color)
 				} else {
@@ -260,6 +274,13 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 					assert.Equal(t, expected.BackgroundColor(), bg.FillColor)
 				}
 			}
+
+			style := fyne.TextStyle{}
+			if expected != nil {
+				style = expected.Style()
+			}
+			style.Monospace = true
+			assert.Equal(t, style, fg.TextStyle)
 			x++
 		}
 	}
