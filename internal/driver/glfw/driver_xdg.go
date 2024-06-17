@@ -4,8 +4,9 @@ package glfw
 
 import "C"
 import (
-	"fyne.io/fyne/v2"
 	"github.com/godbus/dbus/v5"
+
+	"fyne.io/fyne/v2"
 )
 
 var inhibitCookie uint32
@@ -20,7 +21,7 @@ func setDisableScreenBlank(disable bool) {
 	if !disable {
 		if inhibitCookie != 0 {
 			obj := conn.Object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
-			call := obj.Call("org.freedesktop.ScreenSaver.Uninhibit", 0, inhibitCookie)
+			call := obj.Call("org.freedesktop.ScreenSaver.UnInhibit", 0, inhibitCookie)
 			if call.Err != nil {
 				fyne.LogError("Failed to send message to bus", call.Err)
 			}
@@ -31,8 +32,10 @@ func setDisableScreenBlank(disable bool) {
 
 	obj := conn.Object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
 	call := obj.Call("org.freedesktop.ScreenSaver.Inhibit", 0, fyne.CurrentApp().Metadata().Name,
-		"App disabled screensaver", &inhibitCookie)
-	if call.Err != nil {
+		"App disabled screensaver")
+	if call.Err == nil {
+		inhibitCookie = call.Body[0].(uint32)
+	} else {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
 }
