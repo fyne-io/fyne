@@ -10,7 +10,7 @@ import (
 )
 
 func TestGridWrap_Focus(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list := createGridWrap(100)
 	window := test.NewWindow(list)
 	defer window.Close()

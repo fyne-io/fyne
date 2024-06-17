@@ -558,8 +558,7 @@ func TestTree_Select_Unselects(t *testing.T) {
 }
 
 func TestTree_ScrollTo(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)
@@ -593,8 +592,7 @@ func TestTree_ScrollTo(t *testing.T) {
 }
 
 func TestTree_ScrollToBottom(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)
@@ -663,8 +661,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 }
 
 func TestTree_ScrollToTop(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)

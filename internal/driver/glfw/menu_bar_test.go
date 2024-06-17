@@ -17,8 +17,7 @@ import (
 )
 
 func TestMenuBar(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	var lastAction string
 
@@ -450,8 +449,7 @@ func TestMenuBar(t *testing.T) {
 }
 
 func TestMenuBar_Toggle(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	m1i1 := fyne.NewMenuItem("New", nil)
 	m1i2 := fyne.NewMenuItem("Open", nil)

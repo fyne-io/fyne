@@ -10,8 +10,7 @@ import (
 )
 
 func Test_colorGreyscalePicker_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	color := newColorGreyscalePicker(nil)
 
@@ -24,8 +23,7 @@ func Test_colorGreyscalePicker_Layout(t *testing.T) {
 }
 
 func Test_colorBasicPicker_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	color := newColorBasicPicker(nil)
 
@@ -38,8 +36,7 @@ func Test_colorBasicPicker_Layout(t *testing.T) {
 }
 
 func Test_colorRecentPicker_Layout(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
+	a := test.NewTempApp(t)
 
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#0000FF,#008000,#FF0000")
@@ -55,8 +52,7 @@ func Test_colorRecentPicker_Layout(t *testing.T) {
 }
 
 func Test_colorAdvancedPicker_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	color := newColorAdvancedPicker(theme.PrimaryColor(), nil)
 

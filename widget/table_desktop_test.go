@@ -13,8 +13,7 @@ import (
 )
 
 func TestTable_Hovered(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	table := NewTable(
 		func() (int, int) { return 2, 2 },

@@ -15,8 +15,7 @@ import (
 )
 
 func TestCanvas_walkTree(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})

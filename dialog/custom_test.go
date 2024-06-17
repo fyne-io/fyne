@@ -14,8 +14,7 @@ import (
 )
 
 func TestShowCustom_ApplyTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 
@@ -50,8 +49,7 @@ func TestShowCustom_Resize(t *testing.T) {
 }
 
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
@@ -76,8 +74,7 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 }
 
 func TestCustom_ResizeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
@@ -98,8 +95,7 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 }
 
 func TestConfirm_SetButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
@@ -121,8 +117,7 @@ func TestConfirm_SetButtons(t *testing.T) {
 }
 
 func TestConfirmWithoutButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
@@ -134,8 +129,7 @@ func TestConfirmWithoutButtons(t *testing.T) {
 }
 
 func TestCustomConfirm_Importance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)

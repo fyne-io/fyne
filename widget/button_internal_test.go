@@ -210,8 +210,7 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 }
 
 func TestButtonRenderer_TapAnimation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	button := NewButton("Hi", func() {})
