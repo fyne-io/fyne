@@ -386,36 +386,27 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fg := th.Color(theme.ColorNameForeground, v)
 	text.TextSize = th.Size(theme.SizeNameText)
-	textStyle := fyne.TextStyle{}
+
 	var underlineStrokeWidth float32 = 1
 	var underlineStrokeColor color.Color = color.Transparent
+	textStyle := fyne.TextStyle{}
+	if style != nil {
+		textStyle = style.Style()
+	} else if rowStyle != nil {
+		textStyle = rowStyle.Style()
+	}
+	if textStyle.Bold {
+		underlineStrokeWidth = 2
+	}
+	if textStyle.Underline {
+		underlineStrokeColor = fg
+	}
+	textStyle.Monospace = true
 
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
-	}
-
-	if style != nil {
-		if style.Style().Bold {
-			underlineStrokeWidth = 2
-			textStyle = fyne.TextStyle{
-				Bold: true,
-			}
-		}
-		if style.Style().Underline {
-			underlineStrokeColor = fg
-		}
-	} else if rowStyle != nil {
-		if rowStyle.Style().Bold {
-			underlineStrokeWidth = 2
-			textStyle = fyne.TextStyle{
-				Bold: true,
-			}
-		}
-		if rowStyle.Style().Underline {
-			underlineStrokeColor = fg
-		}
 	}
 
 	newStr := string(str)
