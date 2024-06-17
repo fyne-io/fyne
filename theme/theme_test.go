@@ -25,10 +25,10 @@ var knownColorNames = []fyne.ThemeColorName{
 	theme.ColorNameInputBackground,
 	theme.ColorNameInputBorder,
 	theme.ColorNameMenuBackground,
-	theme.ColorNameOnError,
-	theme.ColorNameOnPrimary,
-	theme.ColorNameOnSuccess,
-	theme.ColorNameOnWarning,
+	theme.ColorNameErrorForeground,
+	theme.ColorNamePrimaryForeground,
+	theme.ColorNameSuccessForeground,
+	theme.ColorNameWarningForeground,
 	theme.ColorNameOverlayBackground,
 	theme.ColorNamePlaceHolder,
 	theme.ColorNamePressed,
@@ -58,7 +58,7 @@ func Test_DefaultTheme_AllColorsDefined(t *testing.T) {
 	}
 }
 
-func Test_DefaultTheme_OnPrimaryColor(t *testing.T) {
+func Test_DefaultTheme_PrimaryForegroundColor(t *testing.T) {
 	darkColor := color.NRGBA{R: 0x17, G: 0x17, B: 0x18, A: 0xff}
 	defaultTheme := theme.DefaultTheme()
 	extraColorName := "some unexpected other color name where primary defaults to blue"
@@ -79,15 +79,15 @@ func Test_DefaultTheme_OnPrimaryColor(t *testing.T) {
 		if name != extraColorName {
 			testedColorNames = append(testedColorNames, name)
 		}
-		t.Run("primary color "+name, func(t *testing.T) {
+		t.Run("primary foreground color "+name, func(t *testing.T) {
 			oldApp := fyne.CurrentApp()
 			defer fyne.SetCurrentApp(oldApp)
 			fyne.SetCurrentApp(&themedApp{theme: defaultTheme, primaryColor: name})
 			t.Run("light variant", func(t *testing.T) {
-				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNameOnPrimary, theme.VariantLight))
+				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNamePrimaryForeground, theme.VariantLight))
 			})
 			t.Run("dark variant", func(t *testing.T) {
-				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNameOnPrimary, theme.VariantDark))
+				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNamePrimaryForeground, theme.VariantDark))
 			})
 		})
 	}

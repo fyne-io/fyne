@@ -249,8 +249,8 @@ func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.C
 	switch n {
 	case theme.ColorNamePrimary:
 		return theme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
-	case theme.ColorNameOnPrimary:
-		return theme.OnPrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+	case theme.ColorNamePrimaryForeground:
+		return theme.PrimaryForegroundColorNamed(p.s.fyneSettings.PrimaryColor)
 	}
 
 	return p.t.Color(n, variant)

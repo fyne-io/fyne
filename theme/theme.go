@@ -106,8 +106,8 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return PrimaryColorNamed(primary)
-	} else if n == ColorNameOnPrimary {
-		return OnPrimaryColorNamed(primary)
+	} else if n == ColorNamePrimaryForeground {
+		return PrimaryForegroundColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {
@@ -238,12 +238,12 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkInputBorder
 	case ColorNameMenuBackground:
 		return colorDarkMenuBackground
-	case ColorNameOnError:
-		return colorDarkOnError
-	case ColorNameOnSuccess:
-		return colorDarkOnSuccess
-	case ColorNameOnWarning:
-		return colorDarkOnWarning
+	case ColorNameErrorForeground:
+		return colorDarkErrorForeground
+	case ColorNameSuccessForeground:
+		return colorDarkSuccessForeground
+	case ColorNameWarningForeground:
+		return colorDarkWarningForeground
 	case ColorNameOverlayBackground:
 		return colorDarkOverlayBackground
 	case ColorNamePlaceHolder:
@@ -312,12 +312,12 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightInputBorder
 	case ColorNameMenuBackground:
 		return colorLightMenuBackground
-	case ColorNameOnError:
-		return colorLightOnError
-	case ColorNameOnSuccess:
-		return colorLightOnSuccess
-	case ColorNameOnWarning:
-		return colorLightOnWarning
+	case ColorNameErrorForeground:
+		return colorLightErrorForeground
+	case ColorNameSuccessForeground:
+		return colorLightSuccessForeground
+	case ColorNameWarningForeground:
+		return colorLightWarningForeground
 	case ColorNameOverlayBackground:
 		return colorLightBackground
 	case ColorNamePlaceHolder:
