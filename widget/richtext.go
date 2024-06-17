@@ -1110,7 +1110,7 @@ func splitLines(seg *TextSegment) []rowBoundary {
 }
 
 func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int, bool) {
-	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text.TextSize, 1.0)
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
 
 	runes := []rune(s)
 	in := shaping.Input{

@@ -29,6 +29,15 @@ func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 	overrideTheme(o, s, id)
 }
 
+func WidgetScopeID(o fyne.CanvasObject) string {
+	data, ok := overrides.Load(o)
+	if !ok {
+		return ""
+	}
+
+	return data.(*overrideScope).cacheID
+}
+
 func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
 	data, ok := overrides.Load(o)
 	if !ok {
