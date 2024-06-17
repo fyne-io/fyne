@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	internalapp "fyne.io/fyne/v2/internal/app"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -18,7 +19,10 @@ import (
 )
 
 const (
-	systemThemeName = "system default"
+	themeNameDark        = "dark"
+	themeNameLight       = "light"
+	themeNameSystem      = ""
+	themeNameSystemLabel = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -56,11 +60,11 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview = s.createPreview()
 
 	def := s.fyneSettings.ThemeName
-	themeNames := []string{"dark", "light"}
+	themeNames := []string{themeNameDark, themeNameLight}
 	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
-		themeNames = append(themeNames, systemThemeName)
-		if s.fyneSettings.ThemeName == "" {
-			def = systemThemeName
+		themeNames = append(themeNames, themeNameSystemLabel)
+		if s.fyneSettings.ThemeName == themeNameSystem {
+			def = themeNameSystemLabel
 		}
 	}
 	themes := widget.NewSelect(themeNames, s.chooseTheme)
@@ -102,8 +106,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 }
 
 func (s *Settings) chooseTheme(name string) {
-	if name == systemThemeName {
-		name = ""
+	if name == themeNameSystemLabel {
+		name = themeNameSystem
 	}
 	s.fyneSettings.ThemeName = name
 
@@ -241,8 +245,11 @@ type previewTheme struct {
 
 func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
 	variant := theme.VariantDark
-	if p.s.fyneSettings.ThemeName == "light" {
+	switch p.s.fyneSettings.ThemeName {
+	case themeNameLight:
 		variant = theme.VariantLight
+	case themeNameSystem:
+		variant = internalapp.DefaultVariant()
 	}
 
 	switch n {
