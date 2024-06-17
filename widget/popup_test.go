@@ -325,8 +325,8 @@ func TestPopUp_Layout(t *testing.T) {
 }
 
 func TestPopUp_ApplyThemeOnShow(t *testing.T) {
-  test.NewTempApp(t)
-	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent)) 
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())

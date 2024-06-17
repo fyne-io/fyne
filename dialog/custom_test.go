@@ -117,7 +117,7 @@ func TestConfirm_SetButtons(t *testing.T) {
 }
 
 func TestConfirmWithoutButtons(t *testing.T) {
-  test.NewTempApp(t)
+	test.NewTempApp(t)
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
