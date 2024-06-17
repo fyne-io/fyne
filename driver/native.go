@@ -68,7 +68,4 @@ type X11WindowContext struct {
 type WaylandWindowContext struct {
 	// WaylandSurface is the handle to the native Wayland surface.
 	WaylandSurface uintptr
-
-	// EGLSurface is the handle to the native EGL surface.
-	EGLSurface uintptr
 }

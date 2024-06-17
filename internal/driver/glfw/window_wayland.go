@@ -21,11 +21,9 @@ func (w *window) RunNative(f func(any)) {
 		var waylandSurface, eglSurface uintptr
 		if v := w.view(); v != nil {
 			waylandSurface = uintptr(unsafe.Pointer(v.GetWaylandWindow()))
-			eglSurface = uintptr(unsafe.Pointer(v.GetEGLSurface()))
 		}
 		f(driver.WaylandWindowContext{
 			WaylandSurface: waylandSurface,
-			EGLSurface:     eglSurface,
 		})
 	})
 }
