@@ -1,4 +1,4 @@
-//go:build !ci && !ios
+//go:build !ios && !wasm && !test_web_driver
 
 #import <Foundation/Foundation.h>
 
