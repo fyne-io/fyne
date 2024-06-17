@@ -243,7 +243,7 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		return
 	}
 
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		if !e.selectKeyDown {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
@@ -316,7 +316,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.dirty = true
 		e.focused = true
 	})
@@ -329,7 +329,7 @@ func (e *Entry) FocusGained() {
 //
 // Implements: fyne.Focusable
 func (e *Entry) FocusLost() {
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
@@ -877,6 +877,37 @@ func (e *Entry) typedKeyEnd(provider *RichText) {
 	e.propertyLock.Unlock()
 }
 
+// handler for Ctrl+[backspace/delete] - delete the word
+// to the left or right of the cursor
+func (e *Entry) deleteWord(right bool) {
+	provider := e.textProvider()
+	cursorRow, cursorCol := e.CursorRow, e.CursorColumn
+
+	// start, end relative to text row
+	start, end := getTextWhitespaceRegion(provider.row(cursorRow), cursorCol, true)
+	if right {
+		start = cursorCol
+	} else {
+		end = cursorCol
+	}
+	if start == -1 || end == -1 {
+		return
+	}
+
+	// convert start, end to absolute text position
+	b := provider.rowBoundary(cursorRow)
+	if b != nil {
+		start += b.begin
+		end += b.begin
+	}
+
+	provider.deleteFromTo(start, end)
+	if !right {
+		e.CursorColumn = cursorCol - (end - start)
+	}
+	e.updateTextAndRefresh(provider.String(), false)
+}
+
 func (e *Entry) typedKeyTab() {
 	if dd, ok := fyne.CurrentApp().Driver().(desktop.Driver); ok {
 		if dd.CurrentKeyModifiers()&fyne.KeyModifierShift != 0 {
@@ -1154,7 +1185,7 @@ func (e *Entry) registerShortcut() {
 			return
 		}
 
-		e.SetFieldsAndRefresh(func() {
+		e.setFieldsAndRefresh(func() {
 			if s.(*desktop.CustomShortcut).KeyName == fyne.KeyLeft {
 				if e.CursorColumn == 0 {
 					if e.CursorRow > 0 {
@@ -1214,6 +1245,11 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: moveWordModifier | fyne.KeyModifierShift}, selectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier}, unselectMoveWord)
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyRight, Modifier: moveWordModifier | fyne.KeyModifierShift}, selectMoveWord)
+
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier},
+		func(fyne.Shortcut) { e.deleteWord(false) })
+	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: moveWordModifier},
+		func(fyne.Shortcut) { e.deleteWord(true) })
 }
 
 func (e *Entry) requestFocus() {
@@ -1255,7 +1291,7 @@ func (e *Entry) selectAll() {
 	if e.textProvider().len() == 0 {
 		return
 	}
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
 
@@ -1303,7 +1339,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if e.MultiLine {
 			// clear the selection -- return unhandled to add the newline
-			e.SetFieldsAndRefresh(e.eraseSelectionAndUpdate)
+			e.setFieldsAndRefresh(e.eraseSelectionAndUpdate)
 		}
 		return false
 	}
@@ -1603,6 +1639,18 @@ func (e *Entry) selectCurrentRow() {
 	e.Refresh()
 }
 
+func (e *Entry) setFieldsAndRefresh(f func()) {
+	e.propertyLock.Lock()
+	f()
+	e.propertyLock.Unlock()
+
+	impl := e.super()
+	if impl == nil {
+		return
+	}
+	impl.Refresh()
+}
+
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
@@ -1694,7 +1742,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	resizedTextPos := r.entry.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
 	r.entry.propertyLock.Unlock()
 	if textPos != resizedTextPos {
-		r.entry.SetFieldsAndRefresh(func() {
+		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
 
 			if r.entry.selecting {
@@ -2189,7 +2237,10 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := strings.IndexByte(toks[endCheck:], c)
+	end := -1
+	if endCheck != -1 {
+		end = strings.IndexByte(toks[endCheck:], c)
+	}
 
 	if end == -1 {
 		end = len(toks) // snap end to len(toks) if it results in -1

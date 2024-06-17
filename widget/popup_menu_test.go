@@ -44,7 +44,8 @@ func TestPopUpMenu_Resize(t *testing.T) {
 	largeSize := c.Size().Add(fyne.NewSize(10, 10))
 	m.Resize(largeSize)
 	test.AssertRendersToMarkup(t, "popup_menu/canvas_too_small.xml", c)
-	assert.Equal(t, fyne.NewSize(largeSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
+	_, areaSize := c.InteractiveArea()
+	assert.Equal(t, fyne.NewSize(largeSize.Width, areaSize.Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
 func TestPopUpMenu_Show(t *testing.T) {
@@ -82,12 +83,13 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 
 	m.Hide()
 	test.AssertRendersToMarkup(t, "popup_menu/hidden.xml", c)
-	menuSize := c.Size().Add(fyne.NewSize(10, 10))
-	m.Resize(menuSize)
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
+	menuSize := c.Size().Add(fyne.NewSize(10, 10))
+	m.Resize(menuSize)
 	test.AssertRendersToMarkup(t, "popup_menu/canvas_too_small.xml", c)
-	assert.Equal(t, fyne.NewSize(menuSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
+	_, areaSize := c.InteractiveArea()
+	assert.Equal(t, fyne.NewSize(menuSize.Width, areaSize.Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
 func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {

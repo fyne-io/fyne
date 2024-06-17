@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
@@ -45,7 +45,7 @@ type ConfiguredDriver interface {
 	SetOnConfigurationChanged(func(*Configuration))
 }
 
-type mobileDriver struct {
+type driver struct {
 	app   app.App
 	glctx gl.Context
 
@@ -61,30 +61,30 @@ type mobileDriver struct {
 }
 
 // Declare conformity with Driver
-var _ fyne.Driver = (*mobileDriver)(nil)
-var _ ConfiguredDriver = (*mobileDriver)(nil)
+var _ fyne.Driver = (*driver)(nil)
+var _ ConfiguredDriver = (*driver)(nil)
 
 func init() {
 	runtime.LockOSThread()
 }
 
-func (d *mobileDriver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*mobileCanvas) // silence lint
+func (d *driver) CreateWindow(title string) fyne.Window {
+	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	ret.InitEventQueue()
 	go ret.RunEventQueue()
-	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
+	c.setContent(&fynecanvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret
 }
 
-func (d *mobileDriver) AllWindows() []fyne.Window {
+func (d *driver) AllWindows() []fyne.Window {
 	return d.windows
 }
 
 // currentWindow returns the most recently opened window - we can only show one at a time.
-func (d *mobileDriver) currentWindow() *window {
+func (d *driver) currentWindow() *window {
 	if len(d.windows) == 0 {
 		return nil
 	}
@@ -100,11 +100,11 @@ func (d *mobileDriver) currentWindow() *window {
 	return last
 }
 
-func (d *mobileDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
-	return painter.RenderedTextSize(text, textSize, style)
+func (d *driver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style, source)
 }
 
-func (d *mobileDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+func (d *driver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	if len(d.windows) == 0 {
 		return nil
 	}
@@ -113,34 +113,27 @@ func (d *mobileDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	return d.currentWindow().Canvas()
 }
 
-func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	c := d.CanvasForObject(co)
 	if c == nil {
 		return fyne.NewPos(0, 0)
 	}
 
-	mc := c.(*mobileCanvas)
-	pos := driver.AbsolutePositionForObject(co, mc.ObjectTrees())
+	mc := c.(*canvas)
+	pos := intdriver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
-
-	if mc.windowHead != nil {
-		if len(mc.windowHead.(*fyne.Container).Objects) > 1 {
-			topHeight := mc.windowHead.MinSize().Height
-			pos = pos.Subtract(fyne.NewSize(0, topHeight))
-		}
-	}
 	return pos.Subtract(inset)
 }
 
-func (d *mobileDriver) GoBack() {
+func (d *driver) GoBack() {
 	app.GoBack()
 }
 
-func (d *mobileDriver) Quit() {
+func (d *driver) Quit() {
 	// Android and iOS guidelines say this should not be allowed!
 }
 
-func (d *mobileDriver) Run() {
+func (d *driver) Run() {
 	if !d.running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
@@ -150,6 +143,11 @@ func (d *mobileDriver) Run() {
 		settingsChange := make(chan fyne.Settings)
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
+		defer func() {
+			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+			l.WaitForEvents()
+			l.DestroyEventQueue()
+		}()
 
 		for {
 			select {
@@ -159,7 +157,7 @@ func (d *mobileDriver) Run() {
 				painter.ClearFontCache()
 				cache.ResetThemeCaches()
 				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-					c, ok := w.Canvas().(*mobileCanvas)
+					c, ok := w.Canvas().(*canvas)
 					if !ok {
 						return
 					}
@@ -173,7 +171,7 @@ func (d *mobileDriver) Run() {
 				if current == nil {
 					continue
 				}
-				c := current.Canvas().(*mobileCanvas)
+				c := current.Canvas().(*canvas)
 
 				switch e := a.Filter(e).(type) {
 				case lifecycle.Event:
@@ -225,12 +223,12 @@ func (d *mobileDriver) Run() {
 	})
 }
 
-func (*mobileDriver) SetDisableScreenBlanking(disable bool) {
+func (*driver) SetDisableScreenBlanking(disable bool) {
 	setDisableScreenBlank(disable)
 }
 
-func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
-	c := w.Canvas().(*mobileCanvas)
+func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
+	c := w.Canvas().(*canvas)
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
 		d.glctx, _ = e.DrawContext.(gl.Context)
@@ -265,14 +263,14 @@ func (d *mobileDriver) handleLifecycle(e lifecycle.Event, w *window) {
 	}
 }
 
-func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
-	c := w.Canvas().(*mobileCanvas)
+func (d *driver) handlePaint(e paint.Event, w fyne.Window) {
+	c := w.Canvas().(*canvas)
 	d.painting = false
 	if d.glctx == nil || e.External {
 		return
 	}
-	if !c.inited {
-		c.inited = true
+	if !c.initialized {
+		c.initialized = true
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
@@ -292,21 +290,22 @@ func (d *mobileDriver) handlePaint(e paint.Event, w fyne.Window) {
 	cache.Clean(canvasNeedRefresh)
 }
 
-func (d *mobileDriver) onStart() {
+func (d *driver) onStart() {
 	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
 		go f() // don't block main, we don't have window event queue
 	}
 }
 
-func (d *mobileDriver) onStop() {
-	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStopped(); f != nil {
-		go f() // don't block main, we don't have window event queue
+func (d *driver) onStop() {
+	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	if f := l.OnStopped(); f != nil {
+		l.QueueEvent(f)
 	}
 }
 
-func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
+func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
-	c := window.Canvas().(*mobileCanvas)
+	c := window.Canvas().(*canvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
@@ -342,7 +341,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	c.WalkTrees(draw, afterDraw)
 }
 
-func (d *mobileDriver) sendPaintEvent() {
+func (d *driver) sendPaintEvent() {
 	if d.painting {
 		return
 	}
@@ -350,7 +349,7 @@ func (d *mobileDriver) sendPaintEvent() {
 	d.painting = true
 }
 
-func (d *mobileDriver) setTheme(dark bool) {
+func (d *driver) setTheme(dark bool) {
 	var mode fyne.ThemeVariant
 	if dark {
 		mode = theme.VariantDark
@@ -364,7 +363,7 @@ func (d *mobileDriver) setTheme(dark bool) {
 	d.theme = mode
 }
 
-func (d *mobileDriver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -372,7 +371,7 @@ func (d *mobileDriver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequen
 	w.canvas.tapDown(pos, int(tapID))
 }
 
-func (d *mobileDriver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -382,7 +381,7 @@ func (d *mobileDriver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequen
 	})
 }
 
-func (d *mobileDriver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -509,7 +508,7 @@ func runeToPrintable(r rune) rune {
 	return 0
 }
 
-func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code, mod key.Modifiers) {
+func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.Modifiers) {
 	keyName := keyToName(code)
 	switch keyName {
 	case fyne.KeyTab:
@@ -553,25 +552,25 @@ func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Cod
 	}
 }
 
-func (d *mobileDriver) typeUpCanvas(_ *mobileCanvas, _ rune, _ key.Code, _ key.Modifiers) {
+func (d *driver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
 }
 
-func (d *mobileDriver) Device() fyne.Device {
+func (d *driver) Device() fyne.Device {
 	return &d.device
 }
 
-func (d *mobileDriver) SetOnConfigurationChanged(f func(*Configuration)) {
+func (d *driver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
 }
 
-func (d *mobileDriver) DoubleTapDelay() time.Duration {
+func (d *driver) DoubleTapDelay() time.Duration {
 	return tapDoubleDelay
 }
 
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	d := &mobileDriver{
+	d := &driver{
 		theme: fyne.ThemeVariant(2), // unspecified
 	}
 

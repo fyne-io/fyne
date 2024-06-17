@@ -12,7 +12,8 @@ type Driver interface {
 
 	// RenderedTextSize returns the size required to render the given string of specified
 	// font size and style. It also returns the height to text baseline, measured from the top.
-	RenderedTextSize(text string, fontSize float32, style TextStyle) (size Size, baseline float32)
+	// If the source is specified it will be used, otherwise the current theme will be asked for the font.
+	RenderedTextSize(text string, fontSize float32, style TextStyle, source Resource) (size Size, baseline float32)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas

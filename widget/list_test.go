@@ -28,7 +28,7 @@ func TestNewList(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.TempWidgetRenderer(t, list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, float32(0), list.offsetY)
 }
 
@@ -51,7 +51,7 @@ func TestNewListWithData(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.TempWidgetRenderer(t, list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, float32(0), list.offsetY)
 }
 
@@ -118,7 +118,7 @@ func TestList_SetItemHeight(t *testing.T) {
 		func(ListItemID, fyne.CanvasObject) {
 		})
 
-	lay := test.WidgetRenderer(list).(*listRenderer).layout
+	lay := test.TempWidgetRenderer(t, list).(*listRenderer).layout
 	assert.Equal(t, fyne.NewSize(32, 32), list.MinSize())
 	assert.Equal(t, fyne.NewSize(10, 10*5+(4*theme.Padding())), lay.MinSize())
 
@@ -165,7 +165,7 @@ func TestList_OffsetChange(t *testing.T) {
 
 	assert.Equal(t, float32(0), list.offsetY)
 
-	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
+	scroll := test.TempWidgetRenderer(t, list).(*listRenderer).scroller
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -280)})
 
 	assert.NotEqual(t, 0, list.offsetY)
@@ -664,4 +664,30 @@ func TestList_RefreshUpdatesAllItems(t *testing.T) {
 
 	list.Refresh()
 	assert.Equal(t, "0.0.", printOut)
+}
+
+var minSize fyne.Size
+
+func BenchmarkContentMinSize(b *testing.B) {
+	b.StopTimer()
+
+	l := NewList(
+		func() int { return 1000000 },
+		func() fyne.CanvasObject {
+			return NewLabel("Test")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*Label).SetText(fmt.Sprintf("%d", id))
+		},
+	)
+	l.SetItemHeight(10, 55)
+	l.SetItemHeight(12345, 2)
+
+	min := fyne.Size{}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		min = l.contentMinSize()
+	}
+
+	minSize = min
 }

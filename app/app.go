@@ -64,6 +64,7 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (a *fyneApp) Run() {
+	go a.lifecycle.RunEventQueue()
 	a.driver.Run()
 }
 
@@ -138,6 +139,7 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
+	newApp.lifecycle.InitEventQueue()
 	newApp.lifecycle.SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()

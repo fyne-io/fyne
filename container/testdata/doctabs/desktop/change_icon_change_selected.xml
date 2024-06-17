@@ -8,7 +8,7 @@
 							<image pos="4,8" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
 						</widget>
 						<widget pos="56,0" size="52x36" type="*container.tabButton">
-							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize"/>
+							<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 						</widget>
 					</container>
 				</widget>

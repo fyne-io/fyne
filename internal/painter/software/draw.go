@@ -142,8 +142,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 		color = theme.ForegroundColor()
 	}
 
-	face := painter.CachedFontFace(text.TextStyle, text.TextSize*c.Scale(), 1)
-	painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle.TabWidth)
+	face := painter.CachedFontFace(text.TextStyle, text.FontSource, text)
+	painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
 
 	size := text.Size()
 	offsetX := float32(0)

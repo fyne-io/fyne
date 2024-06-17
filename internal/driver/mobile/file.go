@@ -48,7 +48,7 @@ type hasOpenPicker interface {
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
 func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage.FileFilter) {
-	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	drv := fyne.CurrentApp().Driver().(*driver)
 	if a, ok := drv.app.(hasOpenPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
 			if uri == "" {
@@ -67,7 +67,7 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 // ShowFolderOpenPicker loads the native folder open dialog and calls back the chosen directory path as a ListableURI.
 func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
 	filter := storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
-	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	drv := fyne.CurrentApp().Driver().(*driver)
 	if a, ok := drv.app.(hasOpenPicker); ok {
 		a.ShowFileOpenPicker(func(path string, _ func()) {
 			if path == "" {
@@ -112,7 +112,7 @@ type hasSavePicker interface {
 
 // ShowFileSavePicker loads the native file save dialog and returns the chosen file path via the callback func.
 func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storage.FileFilter, filename string) {
-	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	drv := fyne.CurrentApp().Driver().(*driver)
 	if a, ok := drv.app.(hasSavePicker); ok {
 		a.ShowFileSavePicker(func(path string, closer func()) {
 			if path == "" {

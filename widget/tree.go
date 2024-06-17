@@ -30,6 +30,11 @@ type Tree struct {
 	BaseWidget
 	Root TreeNodeID
 
+	// HideSeparators hides the separators between tree nodes
+	//
+	// Since: 2.5
+	HideSeparators bool
+
 	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     `json:"-"` // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
 	CreateNode     func(branch bool) (o fyne.CanvasObject)                   `json:"-"` // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
 	IsBranch       func(uid TreeNodeID) (ok bool)                            `json:"-"` // Return true if the given TreeNodeID represents a Branch
@@ -624,6 +629,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	separatorThickness := theme.SeparatorThicknessSize()
 	separatorSize := fyne.NewSize(width, separatorThickness)
 	separatorOff := (pad + separatorThickness) / 2
+	hideSeparators := r.treeContent.tree.HideSeparators
 	y := float32(0)
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid, _ string, isBranch bool, depth int) {
@@ -654,10 +660,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		} else {
 			// Node is in viewport
 
-			if addSeparator {
+			if addSeparator && !hideSeparators {
 				var separator fyne.CanvasObject
 				if separatorCount < len(r.separators) {
 					separator = r.separators[separatorCount]
+					separator.Show() // it may previously have been hidden
 				} else {
 					separator = NewSeparator()
 					r.separators = append(r.separators, separator)
@@ -702,6 +709,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		y += m.Height
 	})
 
+	if hideSeparators {
+		// start below iteration from 0 to hide all separators
+		separatorCount = 0
+	}
 	// Hide any separators that haven't been reused
 	for ; separatorCount < len(r.separators); separatorCount++ {
 		r.separators[separatorCount].Hide()
@@ -989,7 +1000,7 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 
 func (b *branch) update(uid string, depth int) {
 	b.treeNode.update(uid, depth)
-	b.icon.(*branchIcon).update(uid, depth)
+	b.icon.(*branchIcon).update(uid)
 }
 
 var _ fyne.Tappable = (*branchIcon)(nil)
@@ -1021,7 +1032,7 @@ func (i *branchIcon) Tapped(*fyne.PointEvent) {
 	i.tree.ToggleBranch(i.uid)
 }
 
-func (i *branchIcon) update(uid string, depth int) {
+func (i *branchIcon) update(uid string) {
 	i.uid = uid
 	i.Refresh()
 }

@@ -51,6 +51,12 @@ type Form struct {
 	SubmitText string
 	CancelText string
 
+	// Orientation allows a form to be vertical (a single column), horizontal (default, label then input)
+	// or to adapt according to the orientation of the mobile device (adaptive).
+	//
+	// Since: 2.5
+	Orientation Orientation
+
 	itemGrid     *fyne.Container
 	buttonBox    *fyne.Container
 	cancelButton *Button
@@ -95,6 +101,13 @@ func (f *Form) Refresh() {
 	f.ensureRenderItems()
 	f.updateButtons()
 	f.updateLabels()
+
+	if f.isVertical() {
+		f.itemGrid.Layout = layout.NewVBoxLayout()
+	} else {
+		f.itemGrid.Layout = layout.NewFormLayout()
+	}
+
 	f.BaseWidget.Refresh()
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
@@ -179,14 +192,19 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	return validator != nil
 }
 
-func (f *Form) createLabel(text string) *canvas.Text {
+func (f *Form) createLabel(text string) fyne.CanvasObject {
 	th := f.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	return &canvas.Text{Text: text,
+	label := &canvas.Text{Text: text,
 		Alignment: fyne.TextAlignTrailing,
 		Color:     th.Color(theme.ColorNameForeground, v),
 		TextSize:  th.Size(theme.SizeNameText),
 		TextStyle: fyne.TextStyle{Bold: true}}
+	if f.isVertical() {
+		label.Alignment = fyne.TextAlignLeading
+	}
+
+	return &fyne.Container{Layout: &formLabelLayout{form: f}, Objects: []fyne.CanvasObject{label}}
 }
 
 func (f *Form) updateButtons() {
@@ -259,6 +277,22 @@ func (f *Form) ensureRenderItems() {
 		off++
 	}
 	f.itemGrid.Objects = append(f.itemGrid.Objects, objects...)
+}
+
+func (f *Form) isVertical() bool {
+	if f.Orientation == Vertical {
+		return true
+	} else if f.Orientation == Horizontal {
+		return false
+	}
+
+	dev := fyne.CurrentDevice()
+	if dev.IsMobile() {
+		orient := dev.Orientation()
+		return orient == fyne.OrientationVertical || orient == fyne.OrientationVerticalUpsideDown
+	}
+
+	return false
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
@@ -335,7 +369,7 @@ func (f *Form) updateLabels() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*canvas.Text)
+		l := f.itemGrid.Objects[i*2].(*fyne.Container).Objects[0].(*canvas.Text)
 		l.TextSize = th.Size(theme.SizeNameText)
 		if dis, ok := item.Widget.(fyne.Disableable); ok {
 			if dis.Disabled() {
@@ -348,6 +382,11 @@ func (f *Form) updateLabels() {
 		}
 
 		l.Text = item.Text
+		if f.isVertical() {
+			l.Alignment = fyne.TextAlignLeading
+		} else {
+			l.Alignment = fyne.TextAlignTrailing
+		}
 		l.Refresh()
 		f.updateHelperText(item)
 	}
@@ -364,6 +403,11 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different
 
 	f.itemGrid = &fyne.Container{Layout: layout.NewFormLayout()}
+	if f.isVertical() {
+		f.itemGrid.Layout = layout.NewVBoxLayout()
+	} else {
+		f.itemGrid.Layout = layout.NewFormLayout()
+	}
 	content := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{f.itemGrid, f.buttonBox}}
 	renderer := NewSimpleRenderer(content)
 	f.ensureRenderItems()
@@ -380,6 +424,33 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
+}
+
+type formLabelLayout struct {
+	form *Form
+}
+
+func (f formLabelLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
+	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
+	xPad := innerPad
+	yPos := float32(0)
+	if !f.form.isVertical() {
+		xPad += innerPad
+		yPos = innerPad
+	}
+	objs[0].Move(fyne.NewPos(innerPad, yPos))
+	objs[0].Resize(fyne.NewSize(size.Width-xPad, objs[0].MinSize().Height))
+}
+
+func (f formLabelLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
+	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
+	min0 := objs[0].MinSize()
+
+	if !f.form.isVertical() {
+		min0 = min0.AddWidthHeight(innerPad, 0)
+	}
+
+	return min0.AddWidthHeight(innerPad, 0)
 }
 
 type formItemLayout struct {

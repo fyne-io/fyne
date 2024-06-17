@@ -43,6 +43,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 	i.Refresh()
 }
 
+// must be called with i.propertyLock RLocked
 func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
 		i.resource = i.themeWithLock().Icon(theme.IconNameFile)
@@ -96,6 +97,7 @@ func (i *FileIcon) SetSelected(selected bool) {
 	i.Refresh()
 }
 
+// must be called with i.propertyLock RLocked
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	if icon, ok := uri.(fyne.URIWithIcon); ok {
 		return icon.Icon()

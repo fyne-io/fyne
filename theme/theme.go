@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 )
 
+// Keep in mind to add new constants to the tests at test/theme_test.go.
 const (
 	// VariantDark is the version of a theme that satisfies a user preference for a dark look.
 	//
@@ -195,7 +196,7 @@ func Current() fyne.Theme {
 // It looks for widget overrides and falls back to the application's current theme.
 //
 // Since: 2.5
-func CurrentForWidget(w fyne.Widget) fyne.Theme {
+func CurrentForWidget(w fyne.CanvasObject) fyne.Theme {
 	if custom := cache.WidgetTheme(w); custom != nil {
 		return custom
 	}

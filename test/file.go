@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 )
+
+var errUnsupportedURLProtocol = errors.New("unsupported URL protocol")
 
 type file struct {
 	*os.File
@@ -44,28 +47,30 @@ func (f *file) URI() fyne.URI {
 
 func openFile(uri fyne.URI, create bool) (*file, error) {
 	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
+		return nil, errUnsupportedURLProtocol
 	}
 
-	path := uri.String()[7:]
-	f, err := os.Open(path)
-	if err != nil && create {
-		f, err = os.Create(path)
+	path := uri.Path()
+	if create {
+		f, err := os.Create(path)
+		return &file{File: f, path: path}, err
 	}
+
+	f, err := os.Open(path)
 	return &file{File: f, path: path}, err
 }
 
-func (d *testDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
+func (d *driver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
+func (d *driver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
 }
 
-func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+func (d *driver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
+		return nil, errUnsupportedURLProtocol
 	}
 
 	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]
@@ -83,7 +88,7 @@ func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 
 func (d *directory) List() ([]fyne.URI, error) {
 	if d.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
+		return nil, errUnsupportedURLProtocol
 	}
 
 	path := d.String()[len(d.Scheme())+3 : len(d.String())]

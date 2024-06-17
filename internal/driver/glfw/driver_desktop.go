@@ -86,15 +86,15 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	var item *systray.MenuItem
 	if i.Checked {
 		if parent != nil {
-			item = parent.AddSubMenuItemCheckbox(i.Label, i.Label, true)
+			item = parent.AddSubMenuItemCheckbox(i.Label, "", true)
 		} else {
-			item = systray.AddMenuItemCheckbox(i.Label, i.Label, true)
+			item = systray.AddMenuItemCheckbox(i.Label, "", true)
 		}
 	} else {
 		if parent != nil {
-			item = parent.AddSubMenuItem(i.Label, i.Label)
+			item = parent.AddSubMenuItem(i.Label, "")
 		} else {
-			item = systray.AddMenuItem(i.Label, i.Label)
+			item = systray.AddMenuItem(i.Label, "")
 		}
 	}
 	if i.Disabled {

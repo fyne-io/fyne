@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -43,9 +42,7 @@ func (a *Activity) Start() {
 		return // already started
 	}
 
-	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
-		r.start()
-	}
+	a.Refresh()
 }
 
 // Stop the activity indicator animation
@@ -54,9 +51,7 @@ func (a *Activity) Stop() {
 		return // already stopped
 	}
 
-	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
-		r.stop()
-	}
+	a.Refresh()
 }
 
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
@@ -86,12 +81,14 @@ type activityRenderer struct {
 	dots   []fyne.CanvasObject
 	parent *Activity
 
-	bound  fyne.Size
-	maxCol color.NRGBA
-	maxRad float32
+	bound      fyne.Size
+	maxCol     color.NRGBA
+	maxRad     float32
+	wasStarted bool
 }
 
 func (a *activityRenderer) Destroy() {
+	a.parent.started.Store(false)
 	a.stop()
 }
 
@@ -109,6 +106,17 @@ func (a *activityRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (a *activityRenderer) Refresh() {
+	started := a.parent.started.Load()
+	if started {
+		if !a.wasStarted {
+			a.start()
+		}
+		return
+	} else if a.wasStarted {
+		a.stop()
+		return
+	}
+
 	a.updateColor()
 }
 
@@ -152,10 +160,12 @@ func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
 }
 
 func (a *activityRenderer) start() {
+	a.wasStarted = true
 	a.anim.Start()
 }
 
 func (a *activityRenderer) stop() {
+	a.wasStarted = false
 	a.anim.Stop()
 }
 

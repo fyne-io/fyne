@@ -72,8 +72,7 @@ func TestPreferences_Save_OverwriteFast(t *testing.T) {
 		val["key"] = "value"
 	})
 
-	path := filepath.Join(os.TempDir(), "fynePrefs2.json")
-	defer os.Remove(path)
+	path := filepath.Join(t.TempDir(), "fynePrefs2.json")
 	p.saveToFile(path)
 
 	p.WriteValues(func(val map[string]any) {

@@ -461,7 +461,9 @@ func (s *Scroll) refreshWithoutOffsetUpdate() {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
-	s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
+	if s.Direction != ScrollNone {
+		s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
+	}
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {

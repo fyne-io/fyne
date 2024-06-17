@@ -787,7 +787,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	for i, text := range texts {
 		var size fyne.Size
 		if txt, ok := text.(*canvas.Text); ok {
-			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle)
+			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
 			if base > tallestBaseline {
 				if tallestBaseline > 0 {
 					realign = true
@@ -799,7 +799,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		} else if c, ok := text.(*fyne.Container); ok {
 			wid := c.Objects[0]
 			if link, ok := wid.(*Hyperlink); ok {
-				s, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, textSize, link.TextStyle)
+				s, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, textSize, link.TextStyle, nil)
 				if base > tallestBaseline {
 					if tallestBaseline > 0 {
 						realign = true
@@ -1110,7 +1110,7 @@ func splitLines(seg *TextSegment) []rowBoundary {
 }
 
 func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int, bool) {
-	face := paint.CachedFontFace(text.TextStyle, text.TextSize, 1.0)
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
 
 	runes := []rune(s)
 	in := shaping.Input{
@@ -1118,7 +1118,7 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 		RunStart:  0,
 		RunEnd:    len(ellipsis),
 		Direction: di.DirectionLTR,
-		Face:      face.Fonts[0],
+		Face:      face.Fonts.ResolveFace('…'),
 		Size:      float32ToFixed266(text.TextSize),
 	}
 	shaper := &shaping.HarfbuzzShaper{}

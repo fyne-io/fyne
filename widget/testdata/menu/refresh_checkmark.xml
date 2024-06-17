@@ -1,6 +1,6 @@
-<canvas size="86x123">
+<canvas size="90x128">
 	<content>
-		<widget size="86x123" type="*widget.OverlayContainer">
+		<widget size="90x128" type="*widget.OverlayContainer">
 			<widget size="86x123" type="*widget.Menu">
 				<widget size="86x123" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
@@ -20,7 +20,7 @@
 								<text pos="8,8" size="70x19">Foo</text>
 							</widget>
 							<widget pos="0,39" size="86x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="86x1"/>
+								<rectangle fillColor="separator" size="86x1"/>
 							</widget>
 							<widget pos="0,44" size="86x35" type="*widget.menuItem">
 								<text color="disabled" pos="36,8" size="22x19">Bar</text>
@@ -28,11 +28,11 @@
 								<image pos="8,7" rsc="account.svg" size="iconInlineSize" themed="disabled"/>
 							</widget>
 							<widget pos="0,83" size="86x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="86x1"/>
+								<rectangle fillColor="separator" size="86x1"/>
 							</widget>
 							<widget pos="0,88" size="86x35" type="*widget.menuItem">
 								<text pos="8,8" size="70x19">Baz</text>
-								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize"/>
+								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

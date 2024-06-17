@@ -25,7 +25,7 @@ func TestFormSize(t *testing.T) {
 
 func TestForm_CreateRenderer(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
-	assert.NotNil(t, test.WidgetRenderer(form))
+	assert.NotNil(t, test.TempWidgetRenderer(t, form))
 	assert.Equal(t, 2, len(form.itemGrid.Objects))
 
 	form.Append("test2", NewEntry())
@@ -48,14 +48,14 @@ func TestForm_Append(t *testing.T) {
 func TestForm_Append_Items(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
 	assert.Equal(t, 1, len(form.Items))
-	renderer := test.WidgetRenderer(form)
+	renderer := test.TempWidgetRenderer(t, form)
 
 	form.Items = append(form.Items, NewFormItem("test2", NewEntry()))
 	assert.True(t, len(form.Items) == 2)
 
 	form.Refresh()
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Equal(t, "test2", c.Objects[2].(*canvas.Text).Text)
+	assert.Equal(t, "test2", c.Objects[2].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 }
 
 func TestForm_CustomButtonsText(t *testing.T) {
@@ -116,13 +116,13 @@ func TestForm_ChangeText(t *testing.T) {
 	item := NewFormItem("Test", NewEntry())
 	form := NewForm(item)
 
-	renderer := test.WidgetRenderer(form)
+	renderer := test.TempWidgetRenderer(t, form)
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Equal(t, "Test", c.Objects[0].(*canvas.Text).Text)
+	assert.Equal(t, "Test", c.Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 
 	item.Text = "Changed"
 	form.Refresh()
-	assert.Equal(t, "Changed", c.Objects[0].(*canvas.Text).Text)
+	assert.Equal(t, "Changed", c.Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 }
 
 func TestForm_ChangeTheme(t *testing.T) {

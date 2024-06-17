@@ -227,7 +227,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	w.driver.Run()
+	fyne.CurrentApp().Run()
 }
 
 // Clipboard returns the system clipboard

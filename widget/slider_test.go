@@ -74,7 +74,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
@@ -116,7 +116,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	slider.Orientation = Vertical
 	slider.Resize(fyne.NewSize(10, 100))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()

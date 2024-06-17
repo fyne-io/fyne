@@ -16,7 +16,7 @@ func TestActivity_Animation(t *testing.T) {
 	defer w.Close()
 	w.Resize(a.MinSize())
 
-	render := test.WidgetRenderer(a).(*activityRenderer)
+	render := test.TempWidgetRenderer(t, a).(*activityRenderer)
 	render.anim.Tick(0)
 	test.AssertImageMatches(t, "activity/animate_0.0.png", w.Canvas().Capture())
 
