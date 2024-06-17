@@ -234,8 +234,8 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	}
 }
 
-func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles map[string]TextGridStyle) {
-	lines := strings.Split(expected, "\n")
+func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles map[string]TextGridStyle) {
+	lines := strings.Split(content, "\n")
 	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
 
 	for y, line := range lines {
