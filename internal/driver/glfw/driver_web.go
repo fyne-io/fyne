@@ -10,3 +10,7 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 
 func (d *gLDriver) catchTerm() {
 }
+
+func setDisableScreenBlank(disable bool) {
+	// awaiting complete support for WakeLock
+}
