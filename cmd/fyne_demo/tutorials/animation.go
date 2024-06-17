@@ -21,11 +21,14 @@ func makeAnimationCanvas() fyne.CanvasObject {
 	rect := canvas.NewRectangle(color.Black)
 	rect.Resize(fyne.NewSize(410, 140))
 
-	a := canvas.NewColorRGBAAnimation(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorGreen),
+	a := canvas.NewColorRGBAAnimation(
+		color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xaa},
+		color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xaa},
 		time.Second*3, func(c color.Color) {
 			rect.FillColor = c
 			canvas.Refresh(rect)
-		})
+		},
+	)
 	a.RepeatCount = fyne.AnimationRepeatForever
 	a.AutoReverse = true
 	a.Start()

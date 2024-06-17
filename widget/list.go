@@ -36,6 +36,11 @@ type List struct {
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
 
+	// HideSeparators hides the separators between list rows
+	//
+	// Since: 2.5
+	HideSeparators bool
+
 	currentFocus  ListItemID
 	focused       bool
 	scroller      *widget.Scroll
@@ -365,15 +370,15 @@ func (l *List) contentMinSize() fyne.Size {
 	}
 
 	height := float32(0)
+	totalCustom := 0
 	templateHeight := l.itemMin.Height
-	for item := 0; item < items; item++ {
-		itemHeight, ok := l.itemHeights[item]
-		if ok {
+	for id, itemHeight := range l.itemHeights {
+		if id < items {
+			totalCustom++
 			height += itemHeight
-		} else {
-			height += templateHeight
 		}
 	}
+	height += float32(items-totalCustom) * templateHeight
 
 	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
 }
@@ -772,6 +777,10 @@ func (l *listLayout) updateList(newOnly bool) {
 }
 
 func (l *listLayout) updateSeparators() {
+	if l.list.HideSeparators {
+		l.separators = nil
+		return
+	}
 	if lenChildren := len(l.children); lenChildren > 1 {
 		if lenSep := len(l.separators); lenSep > lenChildren {
 			l.separators = l.separators[:lenChildren]

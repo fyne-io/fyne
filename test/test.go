@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/internal/test"
 
@@ -134,12 +134,10 @@ func AssertRendersToMarkup(t *testing.T, masterFilename string, c fyne.Canvas, m
 // deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
 func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Draggable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(fyne.Draggable)
+		return ok
 	}
-	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
 		return
 	}
@@ -153,7 +151,7 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 
 // FocusNext focuses the next focusable on the canvas.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
+	if tc, ok := c.(*canvas); ok {
 		tc.focusManager().FocusNext()
 	} else {
 		fyne.LogError("FocusNext can only be called with a test canvas", nil)
@@ -162,7 +160,7 @@ func FocusNext(c fyne.Canvas) {
 
 // FocusPrevious focuses the previous focusable on the canvas.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
+	if tc, ok := c.(*canvas); ok {
 		tc.focusManager().FocusPrevious()
 	} else {
 		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
@@ -183,18 +181,16 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		return
 	}
 
-	tc, _ := c.(*testCanvas)
+	tc, _ := c.(*canvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {
 		oldHovered = tc.hovered
 	}
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(desktop.Hoverable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(desktop.Hoverable)
+		return ok
 	}
-	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
@@ -223,12 +219,10 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
 func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Scrollable); ok {
-			return true
-		}
-		return false
+		_, ok := object.(fyne.Scrollable)
+		return ok
 	}
-	o, _, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, _, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o == nil {
 		return
 	}
@@ -291,12 +285,22 @@ func TypeOnCanvas(c fyne.Canvas, chars string) {
 
 // ApplyTheme sets the given theme and waits for it to be applied to the current app.
 func ApplyTheme(t *testing.T, theme fyne.Theme) {
-	require.IsType(t, &testApp{}, fyne.CurrentApp())
-	a := fyne.CurrentApp().(*testApp)
+	require.IsType(t, &app{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*app)
 	a.Settings().SetTheme(theme)
 	for a.lastAppliedTheme() != theme {
 		time.Sleep(5 * time.Millisecond)
 	}
+}
+
+// TempWidgetRenderer allows test scripts to gain access to the current renderer for a widget.
+// This can be used for verifying correctness of rendered components for a widget in unit tests.
+// The widget renderer is automatically destroyed when the test ends.
+//
+// Since: 2.5
+func TempWidgetRenderer(t *testing.T, wid fyne.Widget) fyne.WidgetRenderer {
+	t.Cleanup(func() { cache.DestroyRenderer(wid) })
+	return cache.Renderer(wid)
 }
 
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
@@ -319,7 +323,7 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 		_, ok := object.(fyne.Tappable)
 		return ok
 	}
-	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ = intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	return
 }
 
@@ -343,18 +347,15 @@ func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
 	}
-	unfocus := true
+
 	if focus, ok := obj.(fyne.Focusable); ok {
-		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
-			unfocus = false
-			if focus != c.Focused() {
-				unfocus = true
-			}
+		dis, ok := obj.(fyne.Disableable)
+		if (!ok || !dis.Disabled()) && focus == c.Focused() {
+			return
 		}
 	}
-	if unfocus {
-		c.Unfocus()
-	}
+
+	c.Unfocus()
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

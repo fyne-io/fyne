@@ -52,7 +52,7 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 		path = "select/mobile/tap_animation.png"
 	}
 
-	render1 := test.WidgetRenderer(sel).(*selectRenderer)
+	render1 := test.TempWidgetRenderer(t, sel).(*selectRenderer)
 	test.Tap(sel)
 	sel.popUp.Hide()
 	sel.tapAnim.Tick(0.5)
@@ -61,7 +61,7 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 	cache.DestroyRenderer(sel)
 	sel.Refresh()
 
-	render2 := test.WidgetRenderer(sel).(*selectRenderer)
+	render2 := test.TempWidgetRenderer(t, sel).(*selectRenderer)
 
 	assert.NotEqual(t, render1, render2)
 

@@ -3,7 +3,7 @@
 		<rectangle size="500x300"/>
 	</content>
 	<overlay>
-		<widget size="500x300" type="*widget.OverlayContainer">
+		<widget pos="2,3" size="496x295" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="66x118" type="*widget.Menu">
 				<widget size="66x118" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
@@ -23,14 +23,14 @@
 								<text pos="8,8" size="50x19">A</text>
 							</widget>
 							<widget pos="0,39" size="66x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="66x1"/>
+								<rectangle fillColor="separator" size="66x1"/>
 							</widget>
 							<widget pos="0,44" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="50x19">B (long)</text>
 							</widget>
 							<widget pos="0,83" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="30x19">C</text>
-								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>
@@ -52,17 +52,17 @@
 							<container size="199x113">
 								<widget size="199x35" type="*widget.menuItem">
 									<text pos="36,8" size="155x19">subitem A</text>
-									<image pos="8,7" rsc="confirmIcon" size="iconInlineSize"/>
+									<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 								<widget pos="0,39" size="199x35" type="*widget.menuItem">
 									<text pos="64,8" size="127x19">subitem B</text>
-									<image pos="36,7" rsc="infoIcon" size="iconInlineSize"/>
-									<image pos="8,7" rsc="confirmIcon" size="iconInlineSize"/>
+									<image pos="36,7" rsc="infoIcon" size="iconInlineSize" themed="foreground"/>
+									<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 								<widget pos="0,78" size="199x35" type="*widget.menuItem">
 									<text pos="64,8" size="107x19">subitem C (long)</text>
-									<image pos="179,7" rsc="menuExpandIcon" size="iconInlineSize"/>
-									<image pos="36,7" rsc="menuIcon" size="iconInlineSize"/>
+									<image pos="179,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
+									<image pos="36,7" rsc="menuIcon" size="iconInlineSize" themed="foreground"/>
 								</widget>
 							</container>
 						</widget>

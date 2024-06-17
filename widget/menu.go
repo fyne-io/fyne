@@ -241,9 +241,8 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	scrollSize := boxSize
 	if c := fyne.CurrentApp().Driver().CanvasForObject(r.m.super()); c != nil {
 		ap := fyne.CurrentApp().Driver().AbsolutePositionForObject(r.m.super())
-		pos, size := c.InteractiveArea()
-		bottomPad := c.Size().Height - pos.Y - size.Height
-		if ah := c.Size().Height - bottomPad - ap.Y; ah < boxSize.Height {
+		_, areaSize := c.InteractiveArea()
+		if ah := areaSize.Height - ap.Y; ah < boxSize.Height {
 			scrollSize = fyne.NewSize(boxSize.Width, ah)
 		}
 	}

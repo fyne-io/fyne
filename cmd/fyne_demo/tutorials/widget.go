@@ -340,7 +340,34 @@ This styled row should also wrap as expected, but only *when required*.
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
-	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
+	selectEntry := widget.NewSelectEntry([]string{
+		"Option A",
+		"Option B",
+		"Option C",
+		"Option D",
+		"Option E",
+		"Option F",
+		"Option G",
+		"Option H",
+		"Option I",
+		"Option J",
+		"Option K",
+		"Option L",
+		"Option M",
+		"Option N",
+		"Option O",
+		"Option P",
+		"Option Q",
+		"Option R",
+		"Option S",
+		"Option T",
+		"Option U",
+		"Option V",
+		"Option W",
+		"Option X",
+		"Option Y",
+		"Option Z",
+	})
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
@@ -470,6 +497,10 @@ func startProgress() {
 }
 
 func stopProgress() {
+	if infProgress == nil {
+		return
+	}
+
 	if !infProgress.Running() {
 		return
 	}

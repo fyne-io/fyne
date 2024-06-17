@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -315,7 +314,7 @@ func (r *buttonRenderer) Refresh() {
 }
 
 // applyTheme updates this button to match the current theme
-// must be called with the button propertyLock held
+// must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.themeWithLock()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -337,12 +336,14 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		if thRes, ok := icon.(fyne.ThemedResource); ok {
-			if thRes.ThemeColorName() != fgColorName {
-				icon = theme.NewColoredResource(icon, fgColorName)
+		if r.button.Importance != MediumImportance {
+			if thRes, ok := icon.(fyne.ThemedResource); ok {
+				if thRes.ThemeColorName() != fgColorName {
+					icon = theme.NewColoredResource(icon, fgColorName)
+				}
 			}
 		}
-		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
+		r.icon.Resource = icon
 		r.icon.Refresh()
 	}
 }
@@ -389,7 +390,7 @@ func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
 	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
 }
 
-// must be called with r.button.propertyLock held
+// must be called with r.button.propertyLock RLocked
 func (r *buttonRenderer) updateIconAndText() {
 	if r.button.Icon != nil && r.button.Visible() {
 		icon := r.button.Icon
@@ -401,7 +402,7 @@ func (r *buttonRenderer) updateIconAndText() {
 		if r.button.Disabled() {
 			icon = theme.NewDisabledResource(icon)
 		}
-		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
+		r.icon.Resource = icon
 		r.icon.Refresh()
 		r.icon.Show()
 	} else if r.icon != nil {

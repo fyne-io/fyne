@@ -61,10 +61,14 @@ type TextStyle struct {
 	Symbol bool // Use the system symbol font.
 	// Since: 2.1
 	TabWidth int // Width of tabs in spaces
+	// Since: 2.5
+	// Currently only supported by the TextGrid widget.
+	Underline bool // Should text be underlined.
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.
+// The font used will be read from the current app's theme.
 func MeasureText(text string, size float32, style TextStyle) Size {
-	s, _ := CurrentApp().Driver().RenderedTextSize(text, size, style)
+	s, _ := CurrentApp().Driver().RenderedTextSize(text, size, style, nil)
 	return s
 }

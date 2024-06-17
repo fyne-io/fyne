@@ -82,6 +82,11 @@ type Table struct {
 	// Since: 2.4
 	StickyColumnCount int
 
+	// HideSeparators hides the separator lines between the table cells
+	//
+	// Since: 2.5
+	HideSeparators bool
+
 	currentFocus              TableCellID
 	focused                   bool
 	selectedCell, hoveredCell *TableCellID
@@ -1043,6 +1048,11 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 	t.t.corner.Resize(fyne.NewSize(off.X, off.Y))
 
 	t.t.dividerLayer.Resize(s)
+	if t.t.HideSeparators {
+		t.t.dividerLayer.Hide()
+	} else {
+		t.t.dividerLayer.Show()
+	}
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {

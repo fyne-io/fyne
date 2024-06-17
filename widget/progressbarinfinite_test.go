@@ -27,12 +27,24 @@ func BenchmarkProgressbarInf(b *testing.B) {
 
 func TestProgressBarInfinite_Creation(t *testing.T) {
 	bar := NewProgressBarInfinite()
-	// ticker should start automatically
+
+	// ticker should be disabled until the widget is shown
+	assert.False(t, bar.Running())
+
+	win := test.NewWindow(bar)
+	defer win.Close()
+	win.Show()
+
+	// ticker should start automatically once the renderer is created
 	assert.True(t, bar.Running())
 }
 
 func TestProgressBarInfinite_Destroy(t *testing.T) {
 	bar := NewProgressBarInfinite()
+	win := test.NewWindow(bar)
+	defer win.Close()
+	win.Show()
+
 	assert.True(t, cache.IsRendered(bar))
 	assert.True(t, bar.Running())
 
@@ -46,6 +58,9 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 
 func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
+	win := test.NewWindow(bar)
+	defer win.Close()
+	win.Show()
 
 	assert.True(t, bar.Running())
 	bar.Hide()
@@ -65,7 +80,7 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	width := float32(100.0)
 	bar.Resize(fyne.NewSize(width, 10))
 
-	render := test.WidgetRenderer(bar).(*infProgressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*infProgressRenderer)
 
 	render.updateBar(0.0)
 	// start at the smallest size

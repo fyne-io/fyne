@@ -78,7 +78,8 @@ func TestShowPopUpAtRelativePosition(t *testing.T) {
 	if assert.NotNil(t, pop) {
 		assert.True(t, pop.Visible())
 		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
-		assert.Equal(t, pos.Add(parent2.Position()).Add(fyne.NewPos(theme.Padding()*2, theme.Padding()*2)), pop.(*PopUp).Content.Position())
+		areaPos, _ := w.Canvas().InteractiveArea()
+		assert.Equal(t, pos.Add(parent2.Position()).Add(fyne.NewPos(theme.Padding()*2, theme.Padding()*2)).Subtract(areaPos), pop.(*PopUp).Content.Position())
 	}
 }
 

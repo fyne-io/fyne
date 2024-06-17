@@ -12,7 +12,7 @@ import (
 
 var globalProgressRenderer fyne.WidgetRenderer
 
-func BenchmarkProgressbar(b *testing.B) {
+func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 	var renderer fyne.WidgetRenderer
 	widget := &ProgressBar{}
 	b.ReportAllocs()
@@ -23,6 +23,17 @@ func BenchmarkProgressbar(b *testing.B) {
 
 	// Avoid having the value optimized out by the compiler.
 	globalProgressRenderer = renderer
+}
+
+func BenchmarkProgressBarLayout(b *testing.B) {
+	b.ReportAllocs() // We should see zero allocations.
+
+	bar := &ProgressBar{}
+	renderer := bar.CreateRenderer()
+
+	for i := 0; i < b.N; i++ {
+		renderer.Layout(fyne.NewSize(100, 100))
+	}
 }
 
 func TestNewProgressBarWithData(t *testing.T) {
@@ -86,7 +97,7 @@ func TestProgressRenderer_Layout(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 	assert.Equal(t, float32(0), render.bar.Size().Width)
 
 	bar.SetValue(.5)
@@ -100,7 +111,7 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 	bar.SetValue(1)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
 
@@ -110,7 +121,7 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 
 func TestProgressRenderer_ApplyTheme(t *testing.T) {
 	bar := NewProgressBar()
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 
 	oldLabelColor := render.label.Color
 	render.Refresh()

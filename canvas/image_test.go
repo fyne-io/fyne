@@ -10,9 +10,8 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/canvas"
-	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage"
-	"fyne.io/fyne/v2/storage/repository"
+	_ "fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -43,6 +42,7 @@ func TestNewImageFromReader(t *testing.T) {
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 	read, err := os.Open(path)
 	assert.Nil(t, err)
+	defer read.Close()
 
 	img := canvas.NewImageFromReader(read, "fyne.png")
 	assert.NotNil(t, img)
@@ -77,9 +77,6 @@ func TestNewImageFromURI_File(t *testing.T) {
 }
 
 func TestNewImageFromURI_HTTP(t *testing.T) {
-	h := intRepo.NewHTTPRepository()
-	repository.Register("http", h)
-
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 	f, _ := os.ReadFile(path)
@@ -95,6 +92,7 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 	}))
 	defer ts.Close()
 
+	// http is mounted in Fyne test handlers by default
 	url, _ := storage.ParseURI(ts.URL)
 	img := canvas.NewImageFromURI(url)
 	assert.NotNil(t, img)

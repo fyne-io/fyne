@@ -72,8 +72,8 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle) (size fyne.Size, baseline float32) {
-	return painter.RenderedTextSize(text, textSize, style)
+func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style, source)
 }
 
 func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
@@ -166,6 +166,11 @@ func (d *gLDriver) Run() {
 
 	go d.catchTerm()
 	d.runGL()
+
+	// Ensure lifecycle events run to completion before the app exits
+	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l.WaitForEvents()
+	l.DestroyEventQueue()
 }
 
 func (d *gLDriver) DoubleTapDelay() time.Duration {

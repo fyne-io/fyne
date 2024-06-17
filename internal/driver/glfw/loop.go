@@ -124,8 +124,9 @@ func (d *gLDriver) runGL() {
 			eventTick.Stop()
 			d.drawDone <- struct{}{} // wait for draw thread to stop
 			d.Terminate()
-			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStopped(); f != nil {
-				go f() // don't block main, we don't have window event queue
+			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+			if f := l.OnStopped(); f != nil {
+				l.QueueEvent(f)
 			}
 			return
 		case f := <-funcQueue:

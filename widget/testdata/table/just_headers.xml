@@ -3,7 +3,7 @@
 		<widget pos="4,4" size="112x112" type="*widget.Table">
 			<widget pos="32,0" size="79x35" type="*widget.clip">
 				<container size="0x0">
-					<rectangle fillColor="overlayBackground" size="112x35"/>
+					<rectangle fillColor="headerBackground" size="112x35"/>
 					<widget size="41x35" type="*widget.Label">
 						<widget size="41x35" type="*widget.RichText">
 							<text alignment="center" bold pos="15,8" size="9x19">A</text>
@@ -23,22 +23,22 @@
 			</widget>
 			<widget pos="0,35" size="32x76" type="*widget.clip">
 				<container size="0x0">
-					<rectangle fillColor="overlayBackground" size="32x112"/>
+					<rectangle fillColor="headerBackground" size="32x112"/>
 				</container>
 			</widget>
 			<widget size="32x35" type="*widget.clip">
 				<container size="0x0">
-					<rectangle fillColor="overlayBackground" size="32x35"/>
-					<rectangle fillColor="overlayBackground" size="32x35"/>
+					<rectangle fillColor="headerBackground" size="32x35"/>
+					<rectangle fillColor="headerBackground" size="32x35"/>
 				</container>
 			</widget>
 			<widget size="112x112" type="*widget.clip">
 				<container size="0x0">
 					<widget pos="74,0" size="1x112" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="1x112"/>
+						<rectangle fillColor="separator" size="1x112"/>
 					</widget>
 					<widget pos="119,0" size="1x112" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="1x112"/>
+						<rectangle fillColor="separator" size="1x112"/>
 					</widget>
 				</container>
 			</widget>

@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// Keep in mind to add new constants to the tests at test/theme_test.go.
 const (
 	// ColorRed is the red primary color name.
 	//
@@ -266,13 +267,6 @@ func InputBorderColor() color.Color {
 // Since: 2.3
 func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
-}
-
-// OnPrimaryColor returns the color used for text and icons against the PrimaryColor.
-//
-// Since: 2.5
-func OnPrimaryColor() color.Color {
-	return safeColorLookup(ColorNameOnPrimary, currentVariant())
 }
 
 // OnPrimaryColorNamed returns a theme specific color used for text and icons against the named primary color.

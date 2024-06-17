@@ -221,6 +221,38 @@ func TestEntry_Control_Word(t *testing.T) {
 	assert.Equal(t, "", entry.SelectedText())
 }
 
+func TestEntry_Control_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+	entry.SetText("Hello world\nhere is a second line")
+	entry.CursorRow = 1
+	entry.CursorColumn = 10 // right before "second"
+	modifier := fyne.KeyModifierControl
+	if runtime.GOOS == "darwin" {
+		modifier = fyne.KeyModifierAlt
+	}
+	// Ctrl+delete - delete word to right ("second")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyDelete})
+	assert.Equal(t, "Hello world\nhere is a  line", entry.Text)
+	assert.Equal(t, 10, entry.CursorColumn)
+
+	entry.CursorColumn = 8 // right before "a"
+	// Ctrl+backspace - delete word to left ("is")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+	assert.Equal(t, "Hello world\nhere a  line", entry.Text)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	// does nothing when nothing left to delete
+	entry.SetText("")
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+	assert.Equal(t, "", entry.Text)
+
+	// doesn't crash when trying to delete backward with one space
+	entry.SetText(" ")
+	entry.CursorRow = 0
+	entry.CursorColumn = 1
+	entry.TypedShortcut(&desktop.CustomShortcut{Modifier: modifier, KeyName: fyne.KeyBackspace})
+}
+
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")
@@ -1790,7 +1822,7 @@ func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	b := widget.NewButton("", func() {})
 	b.Icon = theme.CancelIcon()
 	e.ActionItem = b
-	test.WidgetRenderer(e).Layout(e.MinSize())
+	test.TempWidgetRenderer(t, e).Layout(e.MinSize())
 	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
 	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
 }
@@ -1853,34 +1885,34 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
-		test.Type(entry, "Hié™שרה")
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.Type(entry, "Secret")
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// update the Password field
 		entry.Password = true
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		tapPos := fyne.NewPos(140-theme.InnerPadding()-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
 		test.TapCanvas(c, tapPos)
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
 		test.TapCanvas(c, tapPos)
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})
@@ -1901,14 +1933,14 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		test.AssertRendersToMarkup(t, "password_entry/initial.xml", c)
 
 		c.Focus(entry)
-		test.Type(entry, "Hié™שרה")
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.Type(entry, "Secret")
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/concealed.xml", c)
 
 		// update the Password field
 		entry.Password = false
 		entry.Refresh()
-		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Secret", entry.Text)
 		test.AssertRendersToMarkup(t, "password_entry/revealed.xml", c)
 		assert.Equal(t, entry, c.Focused())
 	})

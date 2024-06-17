@@ -1,6 +1,6 @@
-<canvas size="58x123">
+<canvas size="62x128">
 	<content>
-		<widget size="58x123" type="*widget.OverlayContainer">
+		<widget size="62x128" type="*widget.OverlayContainer">
 			<widget size="58x123" type="*widget.Menu">
 				<widget size="58x123" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
@@ -20,14 +20,14 @@
 								<text pos="8,8" size="42x19">Foo</text>
 							</widget>
 							<widget pos="0,39" size="58x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="58x1"/>
+								<rectangle fillColor="separator" size="58x1"/>
 							</widget>
 							<widget pos="0,44" size="58x35" type="*widget.menuItem">
 								<text pos="8,8" size="22x19">Bar</text>
-								<image pos="38,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+								<image pos="38,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 							<widget pos="0,83" size="58x1" type="*widget.Separator">
-								<rectangle fillColor="disabled" size="58x1"/>
+								<rectangle fillColor="separator" size="58x1"/>
 							</widget>
 							<widget pos="0,88" size="58x35" type="*widget.menuItem">
 								<text pos="8,8" size="42x19">Baz</text>

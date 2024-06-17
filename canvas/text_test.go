@@ -1,6 +1,7 @@
 package canvas_test
 
 import (
+	"image"
 	"image/color"
 	"testing"
 
@@ -11,6 +12,22 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestText_FontSource(t *testing.T) {
+	text := canvas.NewText("Test", color.NRGBA{0, 0, 0, 0xff})
+	c := test.NewWindow(text).Canvas()
+
+	text.FontSource = test.Theme().Font(fyne.TextStyle{Bold: true})
+	img1 := c.Capture()
+	text.FontSource = test.Theme().Font(fyne.TextStyle{Italic: true})
+	img2 := c.Capture()
+	assert.NotEqual(t, img1.(*image.NRGBA).Pix, img2.(*image.NRGBA).Pix)
+
+	text.FontSource = fyne.NewStaticResource("corrupt", []byte{})
+	assert.NotPanics(t, func() {
+		test.NewWindow(text).Canvas().Capture()
+	})
+}
 
 func TestText_MinSize(t *testing.T) {
 	text := canvas.NewText("Test", color.NRGBA{0, 0, 0, 0xff})
