@@ -213,6 +213,7 @@ var (
 	colorLightInputBackground   = color.NRGBA{R: 0xf3, G: 0xf3, B: 0xf3, A: 0xff}
 	colorLightInputBorder       = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightMenuBackground    = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
+	colorLightOverlayBackground = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightPlaceholder       = color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	colorLightPressed           = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x19}
 	colorLightScrollBar         = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}

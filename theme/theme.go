@@ -315,7 +315,7 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 	case ColorNameMenuBackground:
 		return colorLightMenuBackground
 	case ColorNameOverlayBackground:
-		return colorLightBackground
+		return colorLightOverlayBackground
 	case ColorNamePlaceHolder:
 		return colorLightPlaceholder
 	case ColorNamePressed:
