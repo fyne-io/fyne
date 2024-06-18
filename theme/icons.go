@@ -661,7 +661,7 @@ func NewColoredResource(src fyne.Resource, name fyne.ThemeColorName) *ThemedReso
 func NewSuccessThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source:    src,
-		ColorName: ColorNameSuccess,
+		ColorName: ColorNameSuccessOnBackground,
 	}
 }
 

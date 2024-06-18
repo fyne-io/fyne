@@ -136,7 +136,7 @@ func (l *Label) syncSegments() {
 	case WarningImportance:
 		color = theme.ColorNameWarning
 	case SuccessImportance:
-		color = theme.ColorNameSuccess
+		color = theme.ColorNameSuccessOnBackground
 	default:
 		color = theme.ColorNameForeground
 	}
