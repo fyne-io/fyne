@@ -345,26 +345,7 @@ func MenuBackgroundColor() color.Color {
 //
 // Since: 2.5
 func PrimaryForegroundColorNamed(name string) color.Color {
-	switch name {
-	case ColorRed:
-		return colorLightBackground
-	case ColorOrange:
-		return colorDarkBackground
-	case ColorYellow:
-		return colorDarkBackground
-	case ColorGreen:
-		return colorDarkBackground
-	case ColorPurple:
-		return colorLightBackground
-	case ColorBrown:
-		return colorLightBackground
-	case ColorGray:
-		return colorDarkBackground
-	}
-
-	// We return the “on” value for ColorBlue for every other value.
-	// There is no need to have it in the switch above.
-	return colorLightBackground
+	return internaltheme.ForegroundOnPrimaryColorNamed(name)
 }
 
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
