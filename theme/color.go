@@ -341,13 +341,6 @@ func MenuBackgroundColor() color.Color {
 	return safeColorLookup(ColorNameMenuBackground, currentVariant())
 }
 
-// PrimaryForegroundColorNamed returns a theme specific color used for text and icons against the named primary color.
-//
-// Since: 2.5
-func PrimaryForegroundColorNamed(name string) color.Color {
-	return internaltheme.ForegroundOnPrimaryColorNamed(name)
-}
-
 // OverlayBackgroundColor returns the theme's background color for overlays like dialogs.
 //
 // Since: 2.3
