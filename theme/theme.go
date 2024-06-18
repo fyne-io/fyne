@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
 
 // Keep in mind to add new constants to the tests at theme/theme_test.go as well as test/theme_test.go.
@@ -105,9 +106,9 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary || n == ColorNameHyperlink {
-		return PrimaryColorNamed(primary)
+		return internaltheme.PrimaryColorNamed(primary)
 	} else if n == ColorNameForegroundOnPrimary {
-		return PrimaryForegroundColorNamed(primary)
+		return internaltheme.ForegroundOnPrimaryColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {

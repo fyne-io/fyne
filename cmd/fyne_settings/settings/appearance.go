@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	internalapp "fyne.io/fyne/v2/internal/app"
+	internaltheme "fyne.io/fyne/v2/internal/theme"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -185,7 +186,7 @@ func newPrimaryColorButton(name string, s *Settings) *primaryColorButton {
 }
 
 func (c *primaryColorButton) CreateRenderer() fyne.WidgetRenderer {
-	r := canvas.NewRectangle(theme.PrimaryColorNamed(c.name))
+	r := canvas.NewRectangle(internaltheme.PrimaryColorNamed(c.name))
 	r.CornerRadius = theme.SelectionRadiusSize()
 	r.StrokeWidth = 5
 
@@ -225,7 +226,7 @@ func (c *primaryColorButtonRenderer) Refresh() {
 	} else {
 		c.rect.StrokeColor = color.Transparent
 	}
-	c.rect.FillColor = theme.PrimaryColorNamed(c.c.name)
+	c.rect.FillColor = internaltheme.PrimaryColorNamed(c.c.name)
 	c.rect.CornerRadius = theme.SelectionRadiusSize()
 
 	c.rect.Refresh()
@@ -254,9 +255,9 @@ func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.C
 
 	switch n {
 	case theme.ColorNamePrimary:
-		return theme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+		return internaltheme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
 	case theme.ColorNameForegroundOnPrimary:
-		return theme.PrimaryForegroundColorNamed(p.s.fyneSettings.PrimaryColor)
+		return internaltheme.ForegroundOnPrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
 	}
 
 	return p.t.Color(n, variant)
