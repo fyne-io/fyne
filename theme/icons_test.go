@@ -157,11 +157,11 @@ func TestThemedResource_Warning(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
 	custom := theme.NewThemedResource(source)
-	custom.ColorName = theme.ColorNameWarning
+	custom.ColorName = theme.ColorNameWarningOnBackground
 
-	assert.Equal(t, custom.Name(), fmt.Sprintf("warning_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("warningOnBackground_%v", source.Name()))
 	custom = theme.NewWarningThemedResource(source)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("warning_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("warningOnBackground_%v", source.Name()))
 }
 
 func TestDisabledResource_Name(t *testing.T) {

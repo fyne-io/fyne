@@ -679,7 +679,7 @@ func NewThemedResource(src fyne.Resource) *ThemedResource {
 func NewWarningThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source:    src,
-		ColorName: ColorNameWarning,
+		ColorName: ColorNameWarningOnBackground,
 	}
 }
 
