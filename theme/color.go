@@ -206,6 +206,14 @@ var (
 	colorLightDisabled            = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightDisabledButton      = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
 	colorLightError               = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	colorLightFocusBlue           = color.NRGBA{R: 0x00, G: 0x6c, B: 0xff, A: 0x2a}
+	colorLightFocusBrown          = color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x7f}
+	colorLightFocusGray           = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x7f}
+	colorLightFocusGreen          = color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x7f}
+	colorLightFocusOrange         = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x7f}
+	colorLightFocusPurple         = color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x7f}
+	colorLightFocusRed            = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x7f}
+	colorLightFocusYellow         = color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x7f}
 	colorLightForeground          = color.NRGBA{R: 0x56, G: 0x56, B: 0x56, A: 0xff}
 	colorLightForegroundOnError   = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightForegroundOnSuccess = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
@@ -218,7 +226,23 @@ var (
 	colorLightOverlayBackground   = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightPlaceholder         = color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	colorLightPressed             = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x19}
+	colorLightPrimaryBlue         = color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
+	colorLightPrimaryBrown        = color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
+	colorLightPrimaryGray         = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+	colorLightPrimaryGreen        = color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
+	colorLightPrimaryOrange       = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	colorLightPrimaryPurple       = color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
+	colorLightPrimaryRed          = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+	colorLightPrimaryYellow       = color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
 	colorLightScrollBar           = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}
+	colorLightSelectionBlue       = color.NRGBA{R: 0x00, G: 0x6c, B: 0xff, A: 0x40}
+	colorLightSelectionBrown      = color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f}
+	colorLightSelectionGray       = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f}
+	colorLightSelectionGreen      = color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0x3f}
+	colorLightSelectionOrange     = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0x3f}
+	colorLightSelectionPurple     = color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0x3f}
+	colorLightSelectionRed        = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
+	colorLightSelectionYellow     = color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f}
 	colorLightSeparator           = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
 	colorLightShadow              = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33}
 	colorLightSuccess             = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
@@ -380,24 +404,24 @@ func PrimaryColor() color.Color {
 func PrimaryColorNamed(name string) color.Color {
 	switch name {
 	case ColorRed:
-		return color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
+		return colorLightPrimaryRed
 	case ColorOrange:
-		return color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+		return colorLightPrimaryOrange
 	case ColorYellow:
-		return color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
+		return colorLightPrimaryYellow
 	case ColorGreen:
-		return color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
+		return colorLightPrimaryGreen
 	case ColorPurple:
-		return color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff}
+		return colorLightPrimaryPurple
 	case ColorBrown:
-		return color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff}
+		return colorLightPrimaryBrown
 	case ColorGray:
-		return color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+		return colorLightPrimaryGray
 	}
 
 	// We return the value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
-	return color.NRGBA{R: 0x29, G: 0x6f, B: 0xf6, A: 0xff}
+	return colorLightPrimaryBlue
 }
 
 // PrimaryColorNames returns a list of the standard primary color options.
