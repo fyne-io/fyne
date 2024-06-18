@@ -9,11 +9,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 )
 
 type myWidget struct {
@@ -35,7 +33,7 @@ func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{refreshed: make(chan bool)}
 
 	test.NewTempWindow(t, widget)
-	fyne.CurrentApp().Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 
 	func() {
 		select {
@@ -51,7 +49,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
 	test.NewTempWindow(t, parent)
-	fyne.CurrentApp().Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 	func() {
 		select {
 		case <-child.refreshed:

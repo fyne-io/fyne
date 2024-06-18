@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -210,7 +209,7 @@ func TestNewLabelWithData(t *testing.T) {
 
 func TestLabelImportance(t *testing.T) {
 	test.NewTempApp(t)
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.ApplyTheme(t, test.Theme())
 
 	lbl := NewLabel("hello, fyne")
 	w := test.NewWindow(lbl)

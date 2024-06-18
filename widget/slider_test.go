@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -69,7 +68,7 @@ func TestSlider_Clamp(t *testing.T) {
 
 func TestSlider_HorizontalLayout(t *testing.T) {
 	app := test.NewTempApp(t)
-	app.Settings().SetTheme(internalTest.LightTheme(test.Theme()))
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
@@ -110,7 +109,7 @@ func TestSlider_OutOfRange(t *testing.T) {
 
 func TestSlider_VerticalLayout(t *testing.T) {
 	app := test.NewTempApp(t)
-	app.Settings().SetTheme(internalTest.LightTheme(test.Theme()))
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical

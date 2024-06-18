@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -86,9 +84,8 @@ func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 }
 
 func TestFormDialog_Hints(t *testing.T) {
-
 	test.NewTempApp(t)
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.ApplyTheme(t, test.Theme())
 	w := test.NewTempWindow(t, nil)
 	w.SetFullScreen(true)
 
