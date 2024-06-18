@@ -25,7 +25,7 @@ func TestFormSize(t *testing.T) {
 
 func TestForm_CreateRenderer(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
-	assert.NotNil(t, test.WidgetRenderer(form))
+	assert.NotNil(t, test.TempWidgetRenderer(t, form))
 	assert.Equal(t, 2, len(form.itemGrid.Objects))
 
 	form.Append("test2", NewEntry())
@@ -48,7 +48,7 @@ func TestForm_Append(t *testing.T) {
 func TestForm_Append_Items(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
 	assert.Equal(t, 1, len(form.Items))
-	renderer := test.WidgetRenderer(form)
+	renderer := test.TempWidgetRenderer(t, form)
 
 	form.Items = append(form.Items, NewFormItem("test2", NewEntry()))
 	assert.True(t, len(form.Items) == 2)
@@ -98,8 +98,7 @@ func TestForm_AddRemoveButton(t *testing.T) {
 }
 
 func TestForm_Renderer(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	form := &Form{
 		Items: []*FormItem{
@@ -117,7 +116,7 @@ func TestForm_ChangeText(t *testing.T) {
 	item := NewFormItem("Test", NewEntry())
 	form := NewForm(item)
 
-	renderer := test.WidgetRenderer(form)
+	renderer := test.TempWidgetRenderer(t, form)
 	c := renderer.Objects()[0].(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.Equal(t, "Test", c.Objects[0].(*fyne.Container).Objects[0].(*canvas.Text).Text)
 
@@ -127,8 +126,7 @@ func TestForm_ChangeText(t *testing.T) {
 }
 
 func TestForm_ChangeTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	form := &Form{
 		Items: []*FormItem{
@@ -149,8 +147,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 }
 
 func TestForm_Disabled(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	disabled := NewEntry()
@@ -166,8 +163,7 @@ func TestForm_Disabled(t *testing.T) {
 }
 
 func TestForm_Hints(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry1 := &Entry{}
@@ -191,8 +187,7 @@ func TestForm_Hints(t *testing.T) {
 }
 
 func TestForm_Validation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry1 := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "15-true"}
@@ -223,8 +218,7 @@ func TestForm_Validation(t *testing.T) {
 }
 
 func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	notEmptyValidator := func(s string) error {
@@ -263,8 +257,7 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 }
 
 func TestForm_DisableEnable(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	form := &Form{
@@ -299,8 +292,7 @@ func TestForm_DisableEnable(t *testing.T) {
 }
 
 func TestForm_Disable_Validation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	entry := &Entry{Validator: validation.NewRegexp(`^\d{2}-\w{4}$`, "Input is not valid"), Text: "wrong"}
@@ -331,8 +323,7 @@ func TestForm_Disable_Validation(t *testing.T) {
 }
 
 func TestForm_HintsRendered(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
 
 	f := NewForm()
@@ -421,8 +412,7 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 func TestForm_ExtendedEntry(t *testing.T) {
 	extendedEntry := NewSelectEntry([]string{""})
 
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	form := &Form{
 		Items: []*FormItem{

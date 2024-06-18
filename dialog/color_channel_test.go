@@ -8,8 +8,7 @@ import (
 )
 
 func Test_colorChannel_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	min := 0
 	max := 100

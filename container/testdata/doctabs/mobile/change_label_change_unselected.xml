@@ -13,7 +13,7 @@
 						<widget pos="87,0" size="83x36" type="*container.tabButton">
 							<text bold pos="8,8" size="67x20">New 2</text>
 							<widget pos="59,8" size="20x20" type="*container.tabCloseButton">
-								<image rsc="cancelIcon" size="iconInlineSize"/>
+								<image rsc="cancelIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</widget>
 					</container>

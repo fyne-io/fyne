@@ -17,8 +17,6 @@ import (
 	"net/url"
 	"path/filepath"
 	"unsafe"
-
-	"fyne.io/fyne/v2"
 )
 
 func rootConfigDir() string {
@@ -32,8 +30,4 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 	C.free(unsafe.Pointer(urlStr))
 
 	return nil
-}
-
-func defaultVariant() fyne.ThemeVariant {
-	return systemTheme
 }

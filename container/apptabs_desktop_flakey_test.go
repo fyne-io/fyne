@@ -12,8 +12,7 @@ import (
 )
 
 func TestAppTabs_ApplyTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(
 		container.NewAppTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
@@ -30,8 +29,7 @@ func TestAppTabs_ApplyTheme(t *testing.T) {
 }
 
 func TestAppTabs_ChangeItemContent(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}

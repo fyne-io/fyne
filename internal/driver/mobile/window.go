@@ -186,7 +186,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	fyne.CurrentApp().Driver().Run()
+	fyne.CurrentApp().Run()
 }
 
 func (w *window) Content() fyne.CanvasObject {

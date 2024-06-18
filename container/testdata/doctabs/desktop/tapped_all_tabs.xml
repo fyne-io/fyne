@@ -76,7 +76,7 @@
 							</widget>
 							<widget pos="0,117" size="97x35" type="*widget.menuItem">
 								<text pos="36,8" size="53x19">Another</text>
-								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize"/>
+								<image pos="8,7" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

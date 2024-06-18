@@ -13,8 +13,7 @@ import (
 )
 
 func TestMenu_RefreshOptions(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()
@@ -66,8 +65,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 }
 
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()

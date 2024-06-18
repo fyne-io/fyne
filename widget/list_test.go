@@ -28,7 +28,7 @@ func TestNewList(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.TempWidgetRenderer(t, list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, float32(0), list.offsetY)
 }
 
@@ -51,7 +51,7 @@ func TestNewListWithData(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.TempWidgetRenderer(t, list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, float32(0), list.offsetY)
 }
 
@@ -84,7 +84,7 @@ func TestList_MinSize(t *testing.T) {
 }
 
 func TestList_Resize(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list, w := setupList(t)
 
 	assert.Equal(t, float32(0), list.offsetY)
@@ -118,7 +118,7 @@ func TestList_SetItemHeight(t *testing.T) {
 		func(ListItemID, fyne.CanvasObject) {
 		})
 
-	lay := test.WidgetRenderer(list).(*listRenderer).layout
+	lay := test.TempWidgetRenderer(t, list).(*listRenderer).layout
 	assert.Equal(t, fyne.NewSize(32, 32), list.MinSize())
 	assert.Equal(t, fyne.NewSize(10, 10*5+(4*theme.Padding())), lay.MinSize())
 
@@ -157,8 +157,7 @@ func TestList_SetItemHeight_InUpdate(t *testing.T) {
 }
 
 func TestList_OffsetChange(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	list := createList(1000)
 	w := test.NewWindow(list)
@@ -166,7 +165,7 @@ func TestList_OffsetChange(t *testing.T) {
 
 	assert.Equal(t, float32(0), list.offsetY)
 
-	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
+	scroll := test.TempWidgetRenderer(t, list).(*listRenderer).scroller
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(0, -280)})
 
 	assert.NotEqual(t, 0, list.offsetY)
@@ -345,8 +344,7 @@ func TestList_Unselect(t *testing.T) {
 }
 
 func TestList_DataChange(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	list, w := setupList(t)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -360,8 +358,7 @@ func TestList_DataChange(t *testing.T) {
 }
 
 func TestList_ItemDataChange(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	list, _ := setupList(t)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
@@ -373,7 +370,7 @@ func TestList_ItemDataChange(t *testing.T) {
 }
 
 func TestList_ThemeChange(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list, w := setupList(t)
 
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
@@ -386,8 +383,7 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_SmallList(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	var data []string
 	data = append(data, "Test Item 0")
@@ -422,7 +418,7 @@ func TestList_SmallList(t *testing.T) {
 }
 
 func TestList_ClearList(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list, w := setupList(t)
 	assert.Equal(t, 1000, list.Length())
 
@@ -438,8 +434,7 @@ func TestList_ClearList(t *testing.T) {
 }
 
 func TestList_RemoveItem(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	data := []string{"Test Item 0", "Test Item 1", "Test Item 2"}
 
@@ -472,8 +467,7 @@ func TestList_RemoveItem(t *testing.T) {
 }
 
 func TestList_ScrollThenShrink(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	data := make([]string, 0, 20)
 	for i := 0; i < 20; i++ {
@@ -512,8 +506,7 @@ func TestList_ScrollThenShrink(t *testing.T) {
 }
 
 func TestList_ScrollThenResizeWindow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	data := make([]string, 0, 20)
 	for i := 0; i < 20; i++ {
@@ -553,7 +546,7 @@ func TestList_NoFunctionsSet(t *testing.T) {
 }
 
 func TestList_Focus(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list := createList(10)
 	window := test.NewWindow(list)
 	defer window.Close()

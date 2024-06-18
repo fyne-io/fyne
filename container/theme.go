@@ -30,6 +30,7 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 	t.ExtendBaseWidget(t)
 
 	cache.OverrideTheme(obj, th)
+	obj.Refresh() // required as the widgets passed in could have been initially rendered with default theme
 	return t
 }
 

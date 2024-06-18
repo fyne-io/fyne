@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
@@ -132,9 +131,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		return
 	}
 
+	named := false
 	if value := knownResource(rsc); value != "" {
 		r.setStringAttr(attrs, name, value)
-		return
+		named = true
 	}
 
 	var variant string
@@ -150,23 +150,19 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.ThemedResource:
 		variant = string(t.ColorName)
 		if variant == "" {
-			variant = "default"
-		}
-	case *cache.WidgetResource:
-		if _, ok := t.ThemedResource.(*theme.InvertedThemedResource); ok {
-			variant = "inverted"
-		} else {
-			variant = string(t.ThemeColorName())
+			variant = "foreground"
 		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
 	}
 
-	// That’s some magic to access the private `source` field of the themed resource.
-	v := reflect.ValueOf(rsc).Elem().Field(0)
-	src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
-	r.setResourceAttr(attrs, name, src)
+	if !named {
+		// That’s some magic to access the private `source` field of the themed resource.
+		v := reflect.ValueOf(rsc).Elem().Field(0)
+		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
+		r.setResourceAttr(attrs, name, src)
+	}
 	r.setStringAttr(attrs, "themed", variant)
 }
 

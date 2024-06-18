@@ -40,7 +40,7 @@ func TestDocTabs_Empty(t *testing.T) {
 	tabs = &container.DocTabs{}
 	assert.Equal(t, 0, len(tabs.Items))
 	assert.Nil(t, tabs.Selected())
-	assert.NotNil(t, test.WidgetRenderer(tabs)) // doesn't crash
+	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }
 
 func TestDocTabs_Hidden_AsChild(t *testing.T) {

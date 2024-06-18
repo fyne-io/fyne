@@ -44,8 +44,8 @@ func TestShowFolderOpen(t *testing.T) {
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	assert.Greater(t, len(d.dialog.data), 0)
 
-	item := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
-	fileName := test.WidgetRenderer(item.(fyne.Widget)).Objects()[1].(*fileDialogItem).name
+	item := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	fileName := test.TempWidgetRenderer(t, item.(fyne.Widget)).Objects()[1].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.False(t, open.Disabled())
 

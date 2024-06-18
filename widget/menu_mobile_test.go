@@ -15,8 +15,7 @@ import (
 )
 
 func TestMenu_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -135,8 +134,7 @@ func TestMenu_Layout(t *testing.T) {
 }
 
 func TestMenu_Dragging(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()

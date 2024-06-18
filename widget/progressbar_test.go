@@ -97,7 +97,7 @@ func TestProgressRenderer_Layout(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 	assert.Equal(t, float32(0), render.bar.Size().Width)
 
 	bar.SetValue(.5)
@@ -111,7 +111,7 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 	bar.SetValue(1)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
 
@@ -121,7 +121,7 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 
 func TestProgressRenderer_ApplyTheme(t *testing.T) {
 	bar := NewProgressBar()
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	render := test.TempWidgetRenderer(t, bar).(*progressRenderer)
 
 	oldLabelColor := render.label.Color
 	render.Refresh()
