@@ -104,15 +104,13 @@ func TestCard_Layout(t *testing.T) {
 				Content:  tt.content,
 			}
 
-			window := test.NewWindow(card)
+			window := test.NewTempWindow(t, card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())))
 			if tt.content != nil {
 				assert.Equal(t, float32(10), tt.content.Size().Height)
 			}
 			test.AssertRendersToMarkup(t, "card/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }
@@ -128,7 +126,7 @@ func TestCard_MinSize(t *testing.T) {
 func TestCard_Refresh(t *testing.T) {
 	text := widget.NewLabel("Test")
 	card := widget.NewCard("", "", text)
-	w := test.NewWindow(card)
+	w := test.NewTempWindow(t, card)
 	test.AssertRendersToMarkup(t, "card/content_label.xml", w.Canvas())
 
 	text.Text = "Changed"

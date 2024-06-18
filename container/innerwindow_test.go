@@ -14,7 +14,7 @@ import (
 func TestInnerWindow_Close(t *testing.T) {
 	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
 
-	outer := test.NewWindow(w)
+	outer := test.NewTempWindow(t, w)
 	outer.SetPadded(false)
 	outer.Resize(w.MinSize())
 	assert.True(t, w.Visible())

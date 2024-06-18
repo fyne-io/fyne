@@ -25,7 +25,7 @@ const (
 
 func TestFormDialog_Control(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	test.Tap(fd.confirm)
 
@@ -34,7 +34,7 @@ func TestFormDialog_Control(t *testing.T) {
 
 func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -46,7 +46,7 @@ func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 
 func TestFormDialog_ValidCanSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -65,7 +65,7 @@ func TestFormDialog_ValidCanSubmit(t *testing.T) {
 
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -76,7 +76,7 @@ func TestFormDialog_CanCancelInvalid(t *testing.T) {
 
 func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -89,7 +89,7 @@ func TestFormDialog_Hints(t *testing.T) {
 
 	test.NewTempApp(t)
 	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
-	w := test.NewWindow(nil)
+	w := test.NewTempWindow(t, nil)
 	w.SetFullScreen(true)
 
 	var result formDialogResult
@@ -135,7 +135,7 @@ func TestFormDialog_Submit(t *testing.T) {
 	items := []*widget.FormItem{validatingItem}
 	form := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		confirmed = confirm
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 
 	form.Show()
 	validatingEntry.SetText("cba")

@@ -206,12 +206,10 @@ func TestAccordion_Layout(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
+			window := test.NewTempWindow(t, &fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
 			window.Resize(accordion.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }
@@ -324,12 +322,10 @@ func TestAccordion_Layout_Expanded(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
+			window := test.NewTempWindow(t, &fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{accordion}})
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 280)))
 
 			test.AssertRendersToMarkup(t, "accordion/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

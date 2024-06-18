@@ -155,12 +155,10 @@ func TestRadioGroup_Layout(t *testing.T) {
 				radio.Disable()
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
+			window := test.NewTempWindow(t, &fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{radio}})
 			window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "radio_group/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }
