@@ -17,9 +17,12 @@ var knownColorNames = []fyne.ThemeColorName{
 	theme.ColorNameDisabled,
 	theme.ColorNameDisabledButton,
 	theme.ColorNameError,
-	theme.ColorNameErrorForeground,
 	theme.ColorNameFocus,
 	theme.ColorNameForeground,
+	theme.ColorNameForegroundOnError,
+	theme.ColorNameForegroundOnPrimary,
+	theme.ColorNameForegroundOnSuccess,
+	theme.ColorNameForegroundOnWarning,
 	theme.ColorNameHeaderBackground,
 	theme.ColorNameHover,
 	theme.ColorNameHyperlink,
@@ -30,15 +33,12 @@ var knownColorNames = []fyne.ThemeColorName{
 	theme.ColorNamePlaceHolder,
 	theme.ColorNamePressed,
 	theme.ColorNamePrimary,
-	theme.ColorNamePrimaryForeground,
 	theme.ColorNameScrollBar,
 	theme.ColorNameSelection,
 	theme.ColorNameSeparator,
 	theme.ColorNameShadow,
 	theme.ColorNameSuccess,
-	theme.ColorNameSuccessForeground,
 	theme.ColorNameWarning,
-	theme.ColorNameWarningForeground,
 }
 
 // Try to keep this in sync with the existing variants at theme/theme.go
@@ -84,10 +84,10 @@ func Test_DefaultTheme_PrimaryForegroundColor(t *testing.T) {
 			defer fyne.SetCurrentApp(oldApp)
 			fyne.SetCurrentApp(&themedApp{theme: defaultTheme, primaryColor: name})
 			t.Run("light variant", func(t *testing.T) {
-				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNamePrimaryForeground, theme.VariantLight))
+				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNameForegroundOnPrimary, theme.VariantLight))
 			})
 			t.Run("dark variant", func(t *testing.T) {
-				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNamePrimaryForeground, theme.VariantDark))
+				assert.Equal(t, expectedColor, defaultTheme.Color(theme.ColorNameForegroundOnPrimary, theme.VariantDark))
 			})
 		})
 	}

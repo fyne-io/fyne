@@ -106,7 +106,7 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 	primary := fyne.CurrentApp().Settings().PrimaryColor()
 	if n == ColorNamePrimary || n == ColorNameHyperlink {
 		return PrimaryColorNamed(primary)
-	} else if n == ColorNamePrimaryForeground {
+	} else if n == ColorNameForegroundOnPrimary {
 		return PrimaryForegroundColorNamed(primary)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
@@ -226,10 +226,14 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkDisabledButton
 	case ColorNameError:
 		return colorDarkError
-	case ColorNameErrorForeground:
-		return colorDarkErrorForeground
 	case ColorNameForeground:
 		return colorDarkForeground
+	case ColorNameForegroundOnError:
+		return colorDarkForegroundOnError
+	case ColorNameForegroundOnSuccess:
+		return colorDarkForegroundOnSuccess
+	case ColorNameForegroundOnWarning:
+		return colorDarkForegroundOnWarning
 	case ColorNameHover:
 		return colorDarkHover
 	case ColorNameHeaderBackground:
@@ -254,12 +258,8 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkShadow
 	case ColorNameSuccess:
 		return colorDarkSuccess
-	case ColorNameSuccessForeground:
-		return colorDarkSuccessForeground
 	case ColorNameWarning:
 		return colorDarkWarning
-	case ColorNameWarningForeground:
-		return colorDarkWarningForeground
 	}
 
 	return color.Transparent
@@ -300,10 +300,14 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightDisabledButton
 	case ColorNameError:
 		return colorLightError
-	case ColorNameErrorForeground:
-		return colorLightErrorForeground
 	case ColorNameForeground:
 		return colorLightForeground
+	case ColorNameForegroundOnError:
+		return colorLightForegroundOnError
+	case ColorNameForegroundOnSuccess:
+		return colorLightForegroundOnSuccess
+	case ColorNameForegroundOnWarning:
+		return colorLightForegroundOnWarning
 	case ColorNameHover:
 		return colorLightHover
 	case ColorNameHeaderBackground:
@@ -328,12 +332,8 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightShadow
 	case ColorNameSuccess:
 		return colorLightSuccess
-	case ColorNameSuccessForeground:
-		return colorLightSuccessForeground
 	case ColorNameWarning:
 		return colorLightWarning
-	case ColorNameWarningForeground:
-		return colorLightWarningForeground
 	}
 
 	return color.Transparent
