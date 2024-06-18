@@ -77,8 +77,8 @@ func TestHyperlink_Focus(t *testing.T) {
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	w := test.NewWindow(hyperlink)
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(hyperlink.MinSize())
 
 	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
@@ -172,8 +172,8 @@ func TestHyperlink_ThemeOverride(t *testing.T) {
 	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
 	w := test.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
 		Objects: []fyne.CanvasObject{bg, hyperlink}})
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(hyperlink.MinSize())
 
 	light := w.Canvas().Capture()

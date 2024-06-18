@@ -32,7 +32,7 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{refreshed: make(chan bool)}
 
-	window := test.NewWindow(widget)
+	test.NewTempWindow(t, widget)
 	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 
 	func() {
@@ -42,15 +42,13 @@ func TestApplyThemeCalled(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for theme apply")
 		}
 	}()
-
-	window.Close()
 }
 
 func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{refreshed: make(chan bool)}
 	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
-	window := test.NewWindow(parent)
+	test.NewTempWindow(t, parent)
 	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 	func() {
 		select {
@@ -59,8 +57,6 @@ func TestApplyThemeCalledChild(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for child theme apply")
 		}
 	}()
-
-	window.Close()
 }
 
 func TestSimpleRenderer(t *testing.T) {

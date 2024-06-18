@@ -206,12 +206,12 @@ func TestForm_Validation(t *testing.T) {
 
 	test.Type(entry2, "not-")
 	entry1.SetText("incorrect")
-	w = test.NewWindow(form)
+	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_invalid.png", w.Canvas().Capture())
 
 	entry1.SetText("15-true")
-	w = test.NewWindow(form)
+	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }
@@ -244,13 +244,13 @@ func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.Type(entry2, "L")
 	entry1.focused = false
 	entry1.Refresh()
-	w = test.NewWindow(form)
+	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_valid.png", w.Canvas().Capture())
 
 	entry1.SetText("")
 	entry2.SetText("")
-	w = test.NewWindow(form)
+	w = test.NewTempWindow(t, form)
 
 	test.AssertImageMatches(t, "form/validation_entry_first_type_invalid.png", w.Canvas().Capture())
 }

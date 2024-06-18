@@ -541,15 +541,13 @@ func TestSelect_Layout(t *testing.T) {
 				Selected:    tt.selected,
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
+			window := test.NewTempWindow(t, &fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{combo}})
 			if tt.expanded {
 				test.Tap(combo)
 			}
 			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
 
 			assertRendersToPlatformMarkup(t, "select/%s/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

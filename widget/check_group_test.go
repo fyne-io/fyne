@@ -154,12 +154,10 @@ func TestCheckGroup_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(check)
+			window := test.NewTempWindow(t, check)
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check_group/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

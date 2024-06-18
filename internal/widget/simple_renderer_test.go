@@ -14,7 +14,7 @@ func TestNewSimpleRenderer(t *testing.T) {
 	r := canvas.NewRectangle(color.Transparent)
 	o := &simpleWidget{obj: r}
 	o.ExtendBaseWidget(o)
-	w := test.NewWindow(o)
+	w := test.NewTempWindow(t, o)
 	w.Resize(fyne.NewSize(100, 100))
 
 	test.AssertRendersToMarkup(t, "simple_renderer.xml", w.Canvas())
