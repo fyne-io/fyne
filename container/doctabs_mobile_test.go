@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -156,7 +155,7 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 
 func TestDocTabs_HoverButtons(t *testing.T) {
 	test.NewTempApp(t)
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.ApplyTheme(t, test.Theme())
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
