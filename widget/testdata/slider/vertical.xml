@@ -1,8 +1,8 @@
 <canvas padded size="50x220">
 	<content>
 		<widget pos="4,4" size="42x212" type="*widget.Slider">
-			<rectangle fillColor="inputBackground" pos="20,14" size="2x183"/>
-			<rectangle fillColor="foreground" pos="20,197" size="2x0"/>
+			<rectangle fillColor="inputBackground" pos="19,14" size="4x183"/>
+			<rectangle fillColor="foreground" pos="19,197" size="4x0"/>
 			<circle fillColor="foreground" pos="13,189" size="16x16"/>
 			<circle pos="7,183" size="28x28"/>
 		</widget>
