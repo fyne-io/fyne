@@ -70,6 +70,10 @@ static CGFloat keyboardHeight;
 	lifecycleDead();
 }
 
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+	lifecycleMemoryWarning();
+}
+
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray <NSURL *>*)urls {
     if ([urls count] == 0) {
         return;

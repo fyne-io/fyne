@@ -210,6 +210,11 @@ func lifecycleVisible() { theApp.sendLifecycle(lifecycle.StageVisible) }
 //export lifecycleFocused
 func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
 
+//export lifecycleMemoryWarning
+func lifecycleMemoryWarning() {
+	cleanCaches()
+}
+
 //export drawloop
 func drawloop() {
 	runtime.LockOSThread()
