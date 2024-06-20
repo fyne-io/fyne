@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
 func Test_NewTheme(t *testing.T) {
@@ -46,7 +45,7 @@ func (s *configurableThemeTestSuite) TestUniqueColorValues() {
 			seenByVariant[variant] = seen
 		}
 		for _, cn := range knownColorNames {
-			c := th.Color(cn, theme.VariantDark)
+			c := th.Color(cn, variant)
 			r, g, b, a := c.RGBA()
 			key := fmt.Sprintf("%d %d %d %d", r, g, b, a)
 			assert.True(t, seen[key] == "", "color value %#v for color %s variant %d already used for color %s in theme %s", c, cn, variant, seen[key], s.name)
