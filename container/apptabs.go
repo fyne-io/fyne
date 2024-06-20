@@ -338,7 +338,6 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 					r.appTabs.popUpMenu = nil
 				}
 			})
-			// Fixes #4935
 			if ti.Disabled() {
 				mi.Disabled = true
 			}
