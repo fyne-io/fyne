@@ -48,14 +48,6 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
-		"circle with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewCircle(theme.PrimaryColorNamed(theme.ColorPurple)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<circle fillColor=\"primary-purple\" size=\"100x100\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
 		"circle with stroke": {
 			content: func() fyne.CanvasObject {
 				c := fynecanvas.NewCircle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
@@ -220,14 +212,6 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
-		"line with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewLine(theme.PrimaryColorNamed(theme.ColorBrown)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<line size=\"100x100\" strokeColor=\"primary-brown\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
 		"line with stroke width": {
 			content: func() fyne.CanvasObject {
 				l := fynecanvas.NewLine(color.NRGBA{R: 17, G: 42, B: 128, A: 255})
@@ -299,14 +283,6 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
-		"rectangle with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewRectangle(theme.PrimaryColorNamed(theme.ColorOrange)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<rectangle fillColor=\"primary-orange\" size=\"100x100\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
 		"rectangle with stroke": {
 			content: func() fyne.CanvasObject {
 				r := fynecanvas.NewRectangle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
@@ -337,16 +313,6 @@ func Test_snapshot(t *testing.T) {
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<text size=\"100x100\">bar</text>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"text with named primary color": {
-			content: fynecanvas.NewText("foo", theme.PrimaryColorNamed(theme.ColorYellow)),
-			size:    fyne.NewSize(50, 50),
-			pos:     fyne.NewPos(20, 20),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<text color=\"primary-yellow\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},

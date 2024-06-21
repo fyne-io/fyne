@@ -64,13 +64,6 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 		return
 	}
 
-	for _, n := range theme.PrimaryColorNames() {
-		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, "primary-"+n)
-			return
-		}
-	}
-
 	rd, g, b, a := col.ToNRGBA(c)
 	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
