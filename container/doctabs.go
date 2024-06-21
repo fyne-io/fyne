@@ -59,8 +59,8 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(theme.ShadowColor()),
-			indicator: canvas.NewRectangle(theme.PrimaryColor()),
+			divider:   canvas.NewRectangle(theme.Color(theme.ColorNameShadow)),
+			indicator: canvas.NewRectangle(theme.Color(theme.ColorNamePrimary)),
 		},
 		docTabs:  t,
 		scroller: NewScroll(&fyne.Container{}),

@@ -93,7 +93,7 @@ func (c *canvas) Capture() image.Image {
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
 	img := image.NewNRGBA(bounds)
 	if !c.transparent {
-		draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+		draw.Draw(img, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
 	}
 
 	if c.painter != nil {

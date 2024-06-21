@@ -143,7 +143,7 @@ func TestCheck_Focused(t *testing.T) {
 		assert.False(t, check.focused)
 	} else {
 		assert.True(t, check.focused)
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.Disable()
@@ -176,12 +176,12 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.MouseIn(&desktop.MouseEvent{})
 	assert.True(t, check.hovered)
-	assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameHover), render.focusIndicator.FillColor)
 
 	test.Tap(check)
 	assert.True(t, check.hovered)
 	if !fyne.CurrentDevice().IsMobile() {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.Disable()
@@ -192,9 +192,9 @@ func TestCheck_Hovered(t *testing.T) {
 	check.Enable()
 	assert.True(t, check.hovered)
 	if fyne.CurrentDevice().IsMobile() {
-		assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), render.focusIndicator.FillColor)
 	} else {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.MouseOut()
@@ -202,7 +202,7 @@ func TestCheck_Hovered(t *testing.T) {
 	if fyne.CurrentDevice().IsMobile() {
 		assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 	} else {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.FocusLost()

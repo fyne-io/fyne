@@ -48,7 +48,7 @@ func Test_colorRecentPicker_Layout(t *testing.T) {
 func Test_colorAdvancedPicker_Layout(t *testing.T) {
 	test.NewTempApp(t)
 
-	color := newColorAdvancedPicker(theme.PrimaryColor(), nil)
+	color := newColorAdvancedPicker(theme.Color(theme.ColorNamePrimary), nil)
 
 	color.Refresh()
 

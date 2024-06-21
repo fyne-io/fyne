@@ -17,5 +17,5 @@ func TestMenuItem_Disabled(t *testing.T) {
 	w := newMenuItem(i, NewMenu(m))
 	r := cache.Renderer(w)
 
-	assert.Equal(t, theme.DisabledColor(), r.(*menuItemRenderer).text.Color)
+	assert.Equal(t, theme.Color(theme.ColorNameDisabled), r.(*menuItemRenderer).text.Color)
 }

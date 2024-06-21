@@ -234,8 +234,8 @@ func newDivider(split *Split) *divider {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
-	background := canvas.NewRectangle(theme.ShadowColor())
-	foreground := canvas.NewRectangle(theme.ForegroundColor())
+	background := canvas.NewRectangle(theme.Color(theme.ColorNameShadow))
+	foreground := canvas.NewRectangle(theme.Color(theme.ColorNameForeground))
 	return &dividerRenderer{
 		divider:    d,
 		background: background,
@@ -342,12 +342,12 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 
 func (r *dividerRenderer) Refresh() {
 	if r.divider.hovered {
-		r.background.FillColor = theme.HoverColor()
+		r.background.FillColor = theme.Color(theme.ColorNameHover)
 	} else {
-		r.background.FillColor = theme.ShadowColor()
+		r.background.FillColor = theme.Color(theme.ColorNameShadow)
 	}
 	r.background.Refresh()
-	r.foreground.FillColor = theme.ForegroundColor()
+	r.foreground.FillColor = theme.Color(theme.ColorNameForeground)
 	r.foreground.Refresh()
 	r.Layout(r.divider.Size())
 }

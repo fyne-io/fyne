@@ -259,11 +259,11 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 			bg, fg := rendererCell(renderer, y, x)
 
 			if r == ' ' {
-				assert.Equal(t, theme.ForegroundColor(), fg.Color)
+				assert.Equal(t, theme.Color(theme.ColorNameForeground), fg.Color)
 				assert.Equal(t, color.Transparent, bg.FillColor)
 			} else if expected != nil {
 				if expected.TextColor() == nil {
-					assert.Equal(t, theme.ForegroundColor(), fg.Color)
+					assert.Equal(t, theme.Color(theme.ColorNameForeground), fg.Color)
 				} else {
 					assert.Equal(t, expected.TextColor(), fg.Color)
 				}

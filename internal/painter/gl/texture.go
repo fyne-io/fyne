@@ -145,7 +145,7 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 	color := text.Color
 	if color == nil {
-		color = theme.ForegroundColor()
+		color = theme.Color(theme.ColorNameForeground)
 	}
 
 	bounds := text.MinSize()

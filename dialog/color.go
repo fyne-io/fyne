@@ -44,7 +44,7 @@ type ColorPickerDialog struct {
 func NewColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
 	return &ColorPickerDialog{
 		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
-		color:    theme.PrimaryColor(),
+		color:    theme.Color(theme.ColorNamePrimary),
 		callback: callback,
 	}
 }
@@ -84,8 +84,8 @@ func (p *ColorPickerDialog) Show() {
 func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
 	contents = append(contents, newColorBasicPicker(p.selectColor), newColorGreyscalePicker(p.selectColor))
 	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
-		// Add divider and recents if there are any
-		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
+		// Add divider and recents if there are any,
+		contents = append(contents, canvas.NewLine(theme.Color(theme.ColorNameShadow)), recent)
 	}
 	return
 }

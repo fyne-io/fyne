@@ -64,13 +64,6 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 		return
 	}
 
-	for _, n := range theme.PrimaryColorNames() {
-		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, "primary-"+n)
-			return
-		}
-	}
-
 	rd, g, b, a := col.ToNRGBA(c)
 	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
@@ -367,7 +360,7 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 }
 
 func (r *markupRenderer) writeText(t *fynecanvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.Color(theme.ColorNameForeground))
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
 	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
@@ -393,32 +386,32 @@ func nrgbaColor(c color.Color) color.NRGBA {
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		nrgbaColor(theme.BackgroundColor()):                         "background",
-		nrgbaColor(theme.ButtonColor()):                             "button",
-		nrgbaColor(theme.DisabledButtonColor()):                     "disabled button",
-		nrgbaColor(theme.DisabledColor()):                           "disabled",
-		nrgbaColor(theme.ErrorColor()):                              "error",
-		nrgbaColor(theme.FocusColor()):                              "focus",
-		nrgbaColor(theme.ForegroundColor()):                         "foreground",
+		nrgbaColor(theme.Color(theme.ColorNameBackground)):          "background",
+		nrgbaColor(theme.Color(theme.ColorNameButton)):              "button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):      "disabled button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabled)):            "disabled",
+		nrgbaColor(theme.Color(theme.ColorNameError)):               "error",
+		nrgbaColor(theme.Color(theme.ColorNameFocus)):               "focus",
+		nrgbaColor(theme.Color(theme.ColorNameForeground)):          "foreground",
 		nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):   "foregroundOnError",
 		nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)): "foregroundOnPrimary",
 		nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)): "foregroundOnSuccess",
 		nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)): "foregroundOnWarning",
 		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):    "headerBackground",
-		nrgbaColor(theme.HoverColor()):                              "hover",
+		nrgbaColor(theme.Color(theme.ColorNameHover)):               "hover",
 		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):           "hyperlink",
-		nrgbaColor(theme.InputBackgroundColor()):                    "inputBackground",
-		nrgbaColor(theme.InputBorderColor()):                        "inputBorder",
-		nrgbaColor(theme.MenuBackgroundColor()):                     "menuBackground",
-		nrgbaColor(theme.OverlayBackgroundColor()):                  "overlayBackground",
-		nrgbaColor(theme.PlaceHolderColor()):                        "placeholder",
+		nrgbaColor(theme.Color(theme.ColorNameInputBackground)):     "inputBackground",
+		nrgbaColor(theme.Color(theme.ColorNameInputBorder)):         "inputBorder",
+		nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):      "menuBackground",
+		nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):   "overlayBackground",
+		nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):         "placeholder",
 		nrgbaColor(theme.Color(theme.ColorNamePressed)):             "pressed",
-		nrgbaColor(theme.PrimaryColor()):                            "primary",
-		nrgbaColor(theme.ScrollBarColor()):                          "scrollbar",
-		nrgbaColor(theme.SelectionColor()):                          "selection",
+		nrgbaColor(theme.Color(theme.ColorNamePrimary)):             "primary",
+		nrgbaColor(theme.Color(theme.ColorNameScrollBar)):           "scrollbar",
+		nrgbaColor(theme.Color(theme.ColorNameSelection)):           "selection",
 		nrgbaColor(theme.Color(theme.ColorNameSeparator)):           "separator",
 		nrgbaColor(theme.Color(theme.ColorNameSuccess)):             "success",
-		nrgbaColor(theme.ShadowColor()):                             "shadow",
+		nrgbaColor(theme.Color(theme.ColorNameShadow)):              "shadow",
 		nrgbaColor(theme.Color(theme.ColorNameWarning)):             "warning",
 	}[nrgbaColor(c)]
 }

@@ -38,7 +38,7 @@ func TestButton_DisabledColor(t *testing.T) {
 
 	button.Disable()
 	render.applyTheme()
-	assert.Equal(t, theme.DisabledButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameDisabledButton), render.background.FillColor)
 }
 
 func TestButton_Hover_Math(t *testing.T) {
@@ -58,12 +58,12 @@ func TestButton_Hover_Math(t *testing.T) {
 
 	// We're going to call ToNRGBA instead (which returns 8-bit components), use the unpremultiplied over operator,
 	// store the result in an NRGBA, then convert what buttonColor() returns to an nrgba and compare.
-	bg := theme.ButtonColor()
+	bg := theme.Color(theme.ColorNameButton)
 	if render.button.Importance == HighImportance {
-		bg = theme.PrimaryColor()
+		bg = theme.Color(theme.ColorNamePrimary)
 	}
 	dstR, dstG, dstB, dstA := col.ToNRGBA(bg)
-	srcR, srcG, srcB, srcA := col.ToNRGBA(theme.HoverColor())
+	srcR, srcG, srcB, srcA := col.ToNRGBA(theme.Color(theme.ColorNameHover))
 
 	srcAlpha := float32(srcA) / 0xFF
 	dstAlpha := float32(dstA) / 0xFF
@@ -144,19 +144,19 @@ func TestButton_Focus(t *testing.T) {
 	})
 	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.applyTheme()
-	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameButton), render.background.FillColor)
 
 	assert.Equal(t, false, tapped)
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
-	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.background.FillColor)
+	assert.Equal(t, blendColor(theme.Color(theme.ColorNameButton), theme.Color(theme.ColorNameFocus)), render.background.FillColor)
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, true, tapped)
 
 	button.FocusLost()
 	render.applyTheme()
-	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameButton), render.background.FillColor)
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {

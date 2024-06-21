@@ -16,15 +16,15 @@ func TestSyncPool(t *testing.T) {
 	})
 	t.Run("Single", func(t *testing.T) {
 		pool := &syncPool{}
-		rect := canvas.NewRectangle(theme.PrimaryColor())
+		rect := canvas.NewRectangle(theme.Color(theme.ColorNamePrimary))
 		pool.Release(rect)
 		assert.Equal(t, rect, pool.Obtain())
 		assert.Nil(t, pool.Obtain())
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		pool := &syncPool{}
-		rect := canvas.NewRectangle(theme.PrimaryColor())
-		circle := canvas.NewCircle(theme.PrimaryColor())
+		rect := canvas.NewRectangle(theme.Color(theme.ColorNamePrimary))
+		circle := canvas.NewCircle(theme.Color(theme.ColorNamePrimary))
 		pool.Release(rect)
 		pool.Release(circle)
 		a := pool.Obtain()

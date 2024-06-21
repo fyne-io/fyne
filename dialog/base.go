@@ -162,7 +162,7 @@ func newThemedBackground() *themedBackground {
 
 func (t *themedBackground) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	rect := canvas.NewRectangle(theme.OverlayBackgroundColor())
+	rect := canvas.NewRectangle(theme.Color(theme.ColorNameOverlayBackground))
 	return &themedBackgroundRenderer{rect, []fyne.CanvasObject{rect}}
 }
 
@@ -187,7 +187,7 @@ func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (renderer *themedBackgroundRenderer) Refresh() {
-	r, g, b, _ := col.ToNRGBA(theme.OverlayBackgroundColor())
+	r, g, b, _ := col.ToNRGBA(theme.Color(theme.ColorNameOverlayBackground))
 	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	renderer.rect.FillColor = bg
 }
