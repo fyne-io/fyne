@@ -38,7 +38,7 @@ func (s *configurableThemeTestSuite) TestUniqueColorValues() {
 	t := s.T()
 	th := s.constructor()
 	seenByVariant := map[fyne.ThemeVariant]map[string]fyne.ThemeColorName{}
-	for _, variant := range knownVariants {
+	for variantName, variant := range KnownThemeVariants() {
 		seen := seenByVariant[variant]
 		if seen == nil {
 			seen = map[string]fyne.ThemeColorName{}
@@ -48,7 +48,7 @@ func (s *configurableThemeTestSuite) TestUniqueColorValues() {
 			c := th.Color(cn, variant)
 			r, g, b, a := c.RGBA()
 			key := fmt.Sprintf("%d %d %d %d", r, g, b, a)
-			assert.True(t, seen[key] == "", "color value %#v for color %s variant %d already used for color %s in theme %s", c, cn, variant, seen[key], s.name)
+			assert.True(t, seen[key] == "", "color value %#v for color %s variant %s already used for color %s in theme %s", c, cn, variantName, seen[key], s.name)
 			seen[key] = cn
 		}
 	}
