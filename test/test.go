@@ -293,6 +293,16 @@ func ApplyTheme(t *testing.T, theme fyne.Theme) {
 	}
 }
 
+// TempWidgetRenderer allows test scripts to gain access to the current renderer for a widget.
+// This can be used for verifying correctness of rendered components for a widget in unit tests.
+// The widget renderer is automatically destroyed when the test ends.
+//
+// Since: 2.5
+func TempWidgetRenderer(t *testing.T, wid fyne.Widget) fyne.WidgetRenderer {
+	t.Cleanup(func() { cache.DestroyRenderer(wid) })
+	return cache.Renderer(wid)
+}
+
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
 // This can be used for verifying correctness of rendered components for a widget in unit tests.
 func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {

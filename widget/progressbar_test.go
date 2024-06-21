@@ -1,20 +1,23 @@
-package widget
+package widget_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
+	"fyne.io/fyne/v2/widget"
 )
 
 var globalProgressRenderer fyne.WidgetRenderer
 
 func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 	var renderer fyne.WidgetRenderer
-	widget := &ProgressBar{}
+	widget := &widget.ProgressBar{}
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
@@ -28,7 +31,7 @@ func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 func BenchmarkProgressBarLayout(b *testing.B) {
 	b.ReportAllocs() // We should see zero allocations.
 
-	bar := &ProgressBar{}
+	bar := &widget.ProgressBar{}
 	renderer := bar.CreateRenderer()
 
 	for i := 0; i < b.N; i++ {
@@ -40,13 +43,13 @@ func TestNewProgressBarWithData(t *testing.T) {
 	val := binding.NewFloat()
 	val.Set(0.4)
 
-	label := NewProgressBarWithData(val)
+	label := widget.NewProgressBarWithData(val)
 	waitForBinding()
 	assert.Equal(t, 0.4, label.Value)
 }
 
 func TestProgressBar_Binding(t *testing.T) {
-	bar := NewProgressBar()
+	bar := widget.NewProgressBar()
 	assert.Equal(t, 0.0, bar.Value)
 
 	val := binding.NewFloat()
@@ -65,7 +68,7 @@ func TestProgressBar_Binding(t *testing.T) {
 }
 
 func TestProgressBar_SetValue(t *testing.T) {
-	bar := NewProgressBar()
+	bar := widget.NewProgressBar()
 
 	assert.Equal(t, 0.0, bar.Min)
 	assert.Equal(t, 1.0, bar.Max)
@@ -76,7 +79,7 @@ func TestProgressBar_SetValue(t *testing.T) {
 }
 
 func TestProgressBar_TextFormatter(t *testing.T) {
-	bar := NewProgressBar()
+	bar := widget.NewProgressBar()
 	formatted := false
 
 	bar.SetValue(0.2)
@@ -94,46 +97,37 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 }
 
 func TestProgressRenderer_Layout(t *testing.T) {
-	bar := NewProgressBar()
-	bar.Resize(fyne.NewSize(100, 10))
-
-	render := test.WidgetRenderer(bar).(*progressRenderer)
-	assert.Equal(t, float32(0), render.bar.Size().Width)
+	bar, c := barOnCanvas()
+	test.AssertRendersToMarkup(t, "progressbar/empty.xml", c)
 
 	bar.SetValue(.5)
-	assert.Equal(t, float32(50), render.bar.Size().Width)
+	test.AssertRendersToMarkup(t, "progressbar/half.xml", c)
 
 	bar.SetValue(1)
-	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
+	test.AssertRendersToMarkup(t, "progressbar/full.xml", c)
 }
 
 func TestProgressRenderer_Layout_Overflow(t *testing.T) {
-	bar := NewProgressBar()
-	bar.Resize(fyne.NewSize(100, 10))
-
-	render := test.WidgetRenderer(bar).(*progressRenderer)
+	bar, c := barOnCanvas()
 	bar.SetValue(1)
-	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
+	test.AssertRendersToMarkup(t, "progressbar/full.xml", c)
 
 	bar.SetValue(1.2)
-	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
+	test.AssertRendersToMarkup(t, "progressbar/full.xml", c)
 }
 
 func TestProgressRenderer_ApplyTheme(t *testing.T) {
-	bar := NewProgressBar()
-	render := test.WidgetRenderer(bar).(*progressRenderer)
-
-	oldLabelColor := render.label.Color
-	render.Refresh()
-	newLabelColor := render.label.Color
-	assert.Equal(t, oldLabelColor, newLabelColor)
-
-	textSize := render.label.TextSize
-	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
-		customTextSize = render.label.TextSize
+		bar, c := barOnCanvas()
+		bar.SetValue(.2)
+		test.AssertRendersToMarkup(t, "progressbar/themed.xml", c)
 	})
+}
 
-	assert.NotEqual(t, textSize, customTextSize)
+func barOnCanvas() (*widget.ProgressBar, fyne.Canvas) {
+	bar := widget.NewProgressBar()
+	window := test.NewWindow(container.NewVBox(bar))
+	window.SetPadded(false)
+	window.Resize(fyne.NewSize(100, 100))
+	return bar, window.Canvas()
 }

@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -18,8 +17,7 @@ import (
 )
 
 func TestAppTabs_ChangeItemIcon(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
@@ -42,8 +40,7 @@ func TestAppTabs_ChangeItemIcon(t *testing.T) {
 }
 
 func TestAppTabs_ChangeItemText(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -66,8 +63,7 @@ func TestAppTabs_ChangeItemText(t *testing.T) {
 }
 
 func TestAppTabs_DynamicTabs(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	tabs := container.NewAppTabs(item1)
@@ -118,9 +114,8 @@ func TestAppTabs_DynamicTabs(t *testing.T) {
 }
 
 func TestAppTabs_HoverButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -144,8 +139,7 @@ func TestAppTabs_HoverButtons(t *testing.T) {
 }
 
 func TestAppTabs_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(nil)
 	defer w.Close()
@@ -244,8 +238,7 @@ func TestAppTabs_Layout(t *testing.T) {
 }
 
 func TestAppTabs_SetTabLocation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
@@ -277,8 +270,7 @@ func TestAppTabs_SetTabLocation(t *testing.T) {
 }
 
 func TestAppTabs_Tapped(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}

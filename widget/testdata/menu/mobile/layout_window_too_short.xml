@@ -30,7 +30,7 @@
 							</widget>
 							<widget pos="0,83" size="66x35" type="*widget.menuItem">
 								<text pos="8,8" size="30x19">C</text>
-								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+								<image pos="46,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

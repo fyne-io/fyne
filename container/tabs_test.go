@@ -26,14 +26,13 @@ func TestTabButton_Icon_Change(t *testing.T) {
 }
 
 func TestTab_ThemeChange(t *testing.T) {
-	a := test.NewApp()
-	defer test.NewApp()
+	a := test.NewTempApp(t)
 	a.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
 
 	tabs := NewAppTabs(
 		NewTabItem("a", widget.NewLabel("a")),
 		NewTabItem("b", widget.NewLabel("b")))
-	w := test.NewWindow(tabs)
+	w := test.NewTempWindow(t, tabs)
 	w.Resize(fyne.NewSize(180, 120))
 
 	initial := w.Canvas().Capture()

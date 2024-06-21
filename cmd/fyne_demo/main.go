@@ -120,6 +120,12 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		w.Resize(fyne.NewSize(440, 520))
 		w.Show()
 	}
+	showAbout := func() {
+		w := a.NewWindow("About")
+		w.SetContent(widget.NewLabel("About Fyne Demo app..."))
+		w.Show()
+	}
+	aboutItem := fyne.NewMenuItem("About", showAbout)
 	settingsItem := fyne.NewMenuItem("Settings", openSettings)
 	settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
 	settingsItem.Shortcut = settingsShortcut
@@ -170,6 +176,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
+	file.Items = append(file.Items, aboutItem)
 	main := fyne.NewMainMenu(
 		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),

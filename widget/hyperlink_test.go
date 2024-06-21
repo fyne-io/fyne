@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -73,14 +72,13 @@ func TestHyperlink_Hide(t *testing.T) {
 }
 
 func TestHyperlink_Focus(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	app := test.NewTempApp(t)
+	app.Settings().SetTheme(test.Theme())
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	w := test.NewWindow(hyperlink)
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(hyperlink.MinSize())
 
 	test.AssertImageMatches(t, "hyperlink/initial.png", w.Canvas().Capture())
@@ -167,25 +165,24 @@ func TestHyperlink_SetUrl(t *testing.T) {
 }
 
 func TestHyperlink_ThemeOverride(t *testing.T) {
-	_ = test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
 	w := test.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
 		Objects: []fyne.CanvasObject{bg, hyperlink}})
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(hyperlink.MinSize())
 
 	light := w.Canvas().Capture()
-	test.ApplyTheme(t, test.Theme())
+	test.ApplyTheme(t, test.NewTheme())
 	hyperlink.Refresh()
 	ugly := w.Canvas().Capture()
 	assertPixelsMatch(t, false, ugly, light)
 
-	cache.OverrideTheme(hyperlink, internalTest.LightTheme(theme.DefaultTheme()))
+	cache.OverrideTheme(hyperlink, test.Theme())
 	hyperlink.Refresh()
 	override := w.Canvas().Capture()
 	assertPixelsMatch(t, true, override, light)

@@ -65,7 +65,7 @@ func TestDialog_Resize(t *testing.T) {
 }
 
 func TestDialog_TextWrapping(t *testing.T) {
-	window := test.NewWindow(nil)
+	window := test.NewTempWindow(t, nil)
 	window.Resize(fyne.NewSize(600, 400))
 
 	d := NewInformation("Title", "This is a really really long message that will be used to test the dialog text wrapping capabilities", window)
@@ -84,7 +84,7 @@ func TestDialog_TextWrapping(t *testing.T) {
 }
 
 func TestDialog_InformationCallback(t *testing.T) {
-	d := NewInformation("Information", "Hello World", test.NewWindow(nil))
+	d := NewInformation("Information", "Hello World", test.NewTempWindow(t, nil))
 	tapped := false
 	d.SetOnClosed(func() { tapped = true })
 	d.Show()
@@ -98,7 +98,7 @@ func TestDialog_InformationCallback(t *testing.T) {
 
 func TestDialog_ErrorCallback(t *testing.T) {
 	err := errors.New("Error message")
-	d := NewError(err, test.NewWindow(nil))
+	d := NewError(err, test.NewTempWindow(t, nil))
 	tapped := false
 	d.SetOnClosed(func() { tapped = true })
 	d.Show()

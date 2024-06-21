@@ -6,16 +6,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2/canvas"
 	col "fyne.io/fyne/v2/internal/color"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestEntryCursorAnim(t *testing.T) {
-	cursorOpaque := theme.PrimaryColor()
-	r, g, b, _ := col.ToNRGBA(theme.PrimaryColor())
+	cursorOpaque := theme.Color(theme.ColorNamePrimary)
+	r, g, b, _ := col.ToNRGBA(cursorOpaque)
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 
 	alphaEquals := func(color1, color2 color.Color) bool {

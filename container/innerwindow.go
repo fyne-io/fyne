@@ -78,8 +78,8 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	bar := NewBorder(nil, nil, buttons, icon, title)
-	bg := canvas.NewRectangle(theme.OverlayBackgroundColor())
-	contentBG := canvas.NewRectangle(theme.BackgroundColor())
+	bg := canvas.NewRectangle(theme.Color(theme.ColorNameOverlayBackground))
+	contentBG := canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
 	corner := newDraggableCorner(w)
 
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
@@ -154,9 +154,9 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 }
 
 func (i *innerWindowRenderer) Refresh() {
-	i.bg.FillColor = theme.OverlayBackgroundColor()
+	i.bg.FillColor = theme.Color(theme.ColorNameOverlayBackground)
 	i.bg.Refresh()
-	i.contentBG.FillColor = theme.BackgroundColor()
+	i.contentBG.FillColor = theme.Color(theme.ColorNameBackground)
 	i.contentBG.Refresh()
 	i.bar.Refresh()
 

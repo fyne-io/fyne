@@ -509,7 +509,7 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
-	li.background = canvas.NewRectangle(theme.HoverColor())
+	li.background = canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	li.background.CornerRadius = theme.SelectionRadiusSize()
 	li.background.Hide()
 
@@ -573,10 +573,10 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 func (li *listItemRenderer) Refresh() {
 	li.item.background.CornerRadius = theme.SelectionRadiusSize()
 	if li.item.selected {
-		li.item.background.FillColor = theme.SelectionColor()
+		li.item.background.FillColor = theme.Color(theme.ColorNameSelection)
 		li.item.background.Show()
 	} else if li.item.hovered {
-		li.item.background.FillColor = theme.HoverColor()
+		li.item.background.FillColor = theme.Color(theme.ColorNameHover)
 		li.item.background.Show()
 	} else {
 		li.item.background.Hide()

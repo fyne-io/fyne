@@ -38,8 +38,7 @@ func TestCheck_Binding(t *testing.T) {
 }
 
 func TestCheck_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
 		text     string
@@ -72,12 +71,10 @@ func TestCheck_Layout(t *testing.T) {
 				check.Disable()
 			}
 
-			window := test.NewWindow(&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
+			window := test.NewTempWindow(t, &fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{check}})
 			window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertRendersToMarkup(t, "check/layout_"+name+".xml", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

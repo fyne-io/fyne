@@ -18,7 +18,7 @@ import (
 
 func TestButton_Style(t *testing.T) {
 	button := NewButton("Test", nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.applyTheme()
 	bg := render.background.FillColor
 
@@ -29,7 +29,7 @@ func TestButton_Style(t *testing.T) {
 
 func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.applyTheme()
 	bg := render.background.FillColor
 	button.Importance = MediumImportance
@@ -38,12 +38,12 @@ func TestButton_DisabledColor(t *testing.T) {
 
 	button.Disable()
 	render.applyTheme()
-	assert.Equal(t, theme.DisabledButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameDisabledButton), render.background.FillColor)
 }
 
 func TestButton_Hover_Math(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.HomeIcon(), func() {})
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	button.hovered = true
 	// unpremultiplied over operator:
 	// outA = srcA + dstA*(1-srcA)
@@ -58,12 +58,12 @@ func TestButton_Hover_Math(t *testing.T) {
 
 	// We're going to call ToNRGBA instead (which returns 8-bit components), use the unpremultiplied over operator,
 	// store the result in an NRGBA, then convert what buttonColor() returns to an nrgba and compare.
-	bg := theme.ButtonColor()
+	bg := theme.Color(theme.ColorNameButton)
 	if render.button.Importance == HighImportance {
-		bg = theme.PrimaryColor()
+		bg = theme.Color(theme.ColorNamePrimary)
 	}
 	dstR, dstG, dstB, dstA := col.ToNRGBA(bg)
-	srcR, srcG, srcB, srcA := col.ToNRGBA(theme.HoverColor())
+	srcR, srcG, srcB, srcA := col.ToNRGBA(theme.Color(theme.ColorNameHover))
 
 	srcAlpha := float32(srcA) / 0xFF
 	dstAlpha := float32(dstA) / 0xFF
@@ -82,7 +82,7 @@ func TestButton_Hover_Math(t *testing.T) {
 
 func TestButton_DisabledIcon(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	button.Disable()
@@ -94,7 +94,7 @@ func TestButton_DisabledIcon(t *testing.T) {
 
 func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	// assert we are using the disabled original icon
@@ -116,7 +116,7 @@ func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 
 func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	// assert we are using the disabled original icon
@@ -142,26 +142,26 @@ func TestButton_Focus(t *testing.T) {
 	button := NewButton("Test", func() {
 		tapped = true
 	})
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.applyTheme()
-	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameButton), render.background.FillColor)
 
 	assert.Equal(t, false, tapped)
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
-	assert.Equal(t, blendColor(theme.ButtonColor(), theme.FocusColor()), render.background.FillColor)
+	assert.Equal(t, blendColor(theme.Color(theme.ColorNameButton), theme.Color(theme.ColorNameFocus)), render.background.FillColor)
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, true, tapped)
 
 	button.FocusLost()
 	render.applyTheme()
-	assert.Equal(t, theme.ButtonColor(), render.background.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameButton), render.background.FillColor)
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.Layout(render.MinSize())
 
 	assert.True(t, render.icon.Position().X < render.label.Position().X)
@@ -172,7 +172,7 @@ func TestButtonRenderer_Layout(t *testing.T) {
 func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
 	button.Resize(button.MinSize().Add(fyne.NewSize(100, 100)))
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 
 	textHeight := render.label.MinSize().Height
 	minIconHeight := fyne.Max(theme.IconInlineSize(), textHeight)
@@ -186,7 +186,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	button := NewButtonWithIcon("", theme.CancelIcon(), nil)
-	render := test.WidgetRenderer(button).(*buttonRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 
 	button.Resize(fyne.NewSize(100, 100))
 
@@ -196,8 +196,8 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 
 func TestButtonRenderer_ApplyTheme(t *testing.T) {
 	button := &Button{}
-	render := test.WidgetRenderer(button).(*buttonRenderer)
-	textRender := test.WidgetRenderer(render.label).(*textRenderer)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
+	textRender := test.TempWidgetRenderer(t, render.label).(*textRenderer)
 
 	textSize := textRender.Objects()[0].(*canvas.Text).TextSize
 	customTextSize := textSize
@@ -210,8 +210,7 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 }
 
 func TestButtonRenderer_TapAnimation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	button := NewButton("Hi", func() {})
@@ -220,7 +219,7 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 	w.Resize(fyne.NewSize(50, 50).Add(fyne.NewSize(20, 20)))
 	button.Resize(fyne.NewSize(50, 50))
 
-	render1 := test.WidgetRenderer(button).(*buttonRenderer)
+	render1 := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	test.Tap(button)
 	button.tapAnim.Tick(0.5)
 	test.AssertImageMatches(t, "button/tap_animation.png", w.Canvas().Capture())
@@ -228,7 +227,7 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 	cache.DestroyRenderer(button)
 	button.Refresh()
 
-	render2 := test.WidgetRenderer(button).(*buttonRenderer)
+	render2 := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 
 	assert.NotEqual(t, render1, render2)
 

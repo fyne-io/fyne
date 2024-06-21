@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -344,7 +343,7 @@ func (r *buttonRenderer) applyTheme() {
 				}
 			}
 		}
-		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
+		r.icon.Resource = icon
 		r.icon.Refresh()
 	}
 }
@@ -365,20 +364,20 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 	if background == "" {
 		switch b.Importance {
 		case DangerImportance:
-			foreground = theme.ColorNameBackground
+			foreground = theme.ColorNameForegroundOnError
 			background = theme.ColorNameError
 		case HighImportance:
-			foreground = theme.ColorNameOnPrimary
+			foreground = theme.ColorNameForegroundOnPrimary
 			background = theme.ColorNamePrimary
 		case LowImportance:
 			if backgroundBlend != "" {
 				background = theme.ColorNameButton
 			}
 		case SuccessImportance:
-			foreground = theme.ColorNameBackground
+			foreground = theme.ColorNameForegroundOnSuccess
 			background = theme.ColorNameSuccess
 		case WarningImportance:
-			foreground = theme.ColorNameBackground
+			foreground = theme.ColorNameForegroundOnWarning
 			background = theme.ColorNameWarning
 		default:
 			background = theme.ColorNameButton
@@ -403,7 +402,7 @@ func (r *buttonRenderer) updateIconAndText() {
 		if r.button.Disabled() {
 			icon = theme.NewDisabledResource(icon)
 		}
-		r.icon.Resource = cache.OverrideResourceTheme(icon, r.button)
+		r.icon.Resource = icon
 		r.icon.Refresh()
 		r.icon.Show()
 	} else if r.icon != nil {

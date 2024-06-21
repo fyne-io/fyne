@@ -51,8 +51,8 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(theme.ShadowColor()),
-			indicator: canvas.NewRectangle(theme.PrimaryColor()),
+			divider:   canvas.NewRectangle(theme.Color(theme.ColorNameShadow)),
+			indicator: canvas.NewRectangle(theme.Color(theme.ColorNamePrimary)),
 		},
 		appTabs: t,
 	}
@@ -330,13 +330,18 @@ func (r *appTabsRenderer) buildOverflowTabsButton() (overflow *widget.Button) {
 			index := i // capture
 			// FIXME MenuItem doesn't support icons (#1752)
 			// FIXME MenuItem can't show if it is the currently selected tab (#1753)
-			items = append(items, fyne.NewMenuItem(r.appTabs.Items[i].Text, func() {
+			ti := r.appTabs.Items[i]
+			mi := fyne.NewMenuItem(ti.Text, func() {
 				r.appTabs.SelectIndex(index)
 				if r.appTabs.popUpMenu != nil {
 					r.appTabs.popUpMenu.Hide()
 					r.appTabs.popUpMenu = nil
 				}
-			}))
+			})
+			if ti.Disabled() {
+				mi.Disabled = true
+			}
+			items = append(items, mi)
 		}
 
 		r.appTabs.popUpMenu = buildPopUpMenu(r.appTabs, overflow, items)

@@ -18,7 +18,7 @@ func Test_canvas_Capture(t *testing.T) {
 	assert.True(t, img.Bounds().Size().X > 0)
 	assert.True(t, img.Bounds().Size().Y > 0)
 
-	r1, g1, b1, a1 := theme.BackgroundColor().RGBA()
+	r1, g1, b1, a1 := theme.Color(theme.ColorNameBackground).RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()
 	assert.Equal(t, r1, r2)
 	assert.Equal(t, g1, g2)

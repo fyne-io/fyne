@@ -49,7 +49,7 @@ func TestText_Alignment(t *testing.T) {
 	seg := trailingBoldErrorSegment()
 	seg.Text = "Test"
 	text := NewRichText(seg)
-	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).Objects()[0].(*canvas.Text).Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, test.TempWidgetRenderer(t, text).Objects()[0].(*canvas.Text).Alignment)
 }
 
 func TestText_Row(t *testing.T) {
@@ -136,8 +136,8 @@ func TestText_Scroll(t *testing.T) {
 	assert.Less(t, text4.MinSize().Width, text3.MinSize().Width)
 	assert.Equal(t, text4.MinSize().Height, text3.MinSize().Height)
 
-	content3 := test.WidgetRenderer(text3).Objects()[0].(*widget.Scroll).Content
-	content4 := test.WidgetRenderer(text4).Objects()[0].(*widget.Scroll).Content
+	content3 := test.TempWidgetRenderer(t, text3).Objects()[0].(*widget.Scroll).Content
+	content4 := test.TempWidgetRenderer(t, text4).Objects()[0].(*widget.Scroll).Content
 	assert.Less(t, content4.MinSize().Width, content3.MinSize().Width)
 	assert.Greater(t, content4.MinSize().Height, content3.MinSize().Height)
 }
@@ -348,7 +348,7 @@ func TestText_Multiline(t *testing.T) {
 		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
 		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
 
-	w := test.NewWindow(text)
+	w := test.NewTempWindow(t, text)
 	w.Resize(fyne.NewSize(64, 90))
 	test.AssertImageMatches(t, "richtext/richtext_multiline.png", w.Canvas().Capture())
 }
@@ -356,7 +356,7 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.ErrorColor(), richTextRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.Color(theme.ColorNameError), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {

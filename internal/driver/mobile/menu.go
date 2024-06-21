@@ -59,8 +59,8 @@ func (c *canvas) showMenu(menu *fyne.MainMenu) {
 		panel = container.NewPadded(panel)
 	}
 
-	bg := fynecanvas.NewRectangle(theme.BackgroundColor())
-	shadow := fynecanvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
+	bg := fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	shadow := fynecanvas.NewHorizontalGradient(theme.Color(theme.ColorNameShadow), color.Transparent)
 
 	safePos, safeSize := c.InteractiveArea()
 	bg.Move(safePos)
@@ -102,7 +102,7 @@ type menuLabelRenderer struct {
 }
 
 func (m *menuLabelRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+	return theme.Color(theme.ColorNameBackground)
 }
 
 func (m *menuLabelRenderer) Destroy() {

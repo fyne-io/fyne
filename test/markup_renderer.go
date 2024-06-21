@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
@@ -63,13 +62,6 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 	if value := knownColor(c); value != "" {
 		r.setStringAttr(attrs, name, value)
 		return
-	}
-
-	for _, n := range theme.PrimaryColorNames() {
-		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, "primary-"+n)
-			return
-		}
 	}
 
 	rd, g, b, a := col.ToNRGBA(c)
@@ -132,9 +124,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		return
 	}
 
+	named := false
 	if value := knownResource(rsc); value != "" {
 		r.setStringAttr(attrs, name, value)
-		return
+		named = true
 	}
 
 	var variant string
@@ -150,23 +143,19 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.ThemedResource:
 		variant = string(t.ColorName)
 		if variant == "" {
-			variant = "default"
-		}
-	case *cache.WidgetResource:
-		if _, ok := t.ThemedResource.(*theme.InvertedThemedResource); ok {
-			variant = "inverted"
-		} else {
-			variant = string(t.ThemeColorName())
+			variant = "foreground"
 		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
 	}
 
-	// That’s some magic to access the private `source` field of the themed resource.
-	v := reflect.ValueOf(rsc).Elem().Field(0)
-	src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
-	r.setResourceAttr(attrs, name, src)
+	if !named {
+		// That’s some magic to access the private `source` field of the themed resource.
+		v := reflect.ValueOf(rsc).Elem().Field(0)
+		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
+		r.setResourceAttr(attrs, name, src)
+	}
 	r.setStringAttr(attrs, "themed", variant)
 }
 
@@ -371,7 +360,7 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 }
 
 func (r *markupRenderer) writeText(t *fynecanvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.Color(theme.ColorNameForeground))
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
 	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
@@ -397,30 +386,33 @@ func nrgbaColor(c color.Color) color.NRGBA {
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		nrgbaColor(theme.BackgroundColor()):                      "background",
-		nrgbaColor(theme.ButtonColor()):                          "button",
-		nrgbaColor(theme.DisabledButtonColor()):                  "disabled button",
-		nrgbaColor(theme.DisabledColor()):                        "disabled",
-		nrgbaColor(theme.ErrorColor()):                           "error",
-		nrgbaColor(theme.FocusColor()):                           "focus",
-		nrgbaColor(theme.ForegroundColor()):                      "foreground",
-		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)): "headerBackground",
-		nrgbaColor(theme.HoverColor()):                           "hover",
-		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):        "hyperlink",
-		nrgbaColor(theme.InputBackgroundColor()):                 "inputBackground",
-		nrgbaColor(theme.InputBorderColor()):                     "inputBorder",
-		nrgbaColor(theme.MenuBackgroundColor()):                  "menuBackground",
-		nrgbaColor(theme.Color(theme.ColorNameOnPrimary)):        "onPrimary",
-		nrgbaColor(theme.OverlayBackgroundColor()):               "overlayBackground",
-		nrgbaColor(theme.PlaceHolderColor()):                     "placeholder",
-		nrgbaColor(theme.Color(theme.ColorNamePressed)):          "pressed",
-		nrgbaColor(theme.PrimaryColor()):                         "primary",
-		nrgbaColor(theme.ScrollBarColor()):                       "scrollbar",
-		nrgbaColor(theme.SelectionColor()):                       "selection",
-		nrgbaColor(theme.Color(theme.ColorNameSeparator)):        "separator",
-		nrgbaColor(theme.Color(theme.ColorNameSuccess)):          "success",
-		nrgbaColor(theme.ShadowColor()):                          "shadow",
-		nrgbaColor(theme.Color(theme.ColorNameWarning)):          "warning",
+		nrgbaColor(theme.Color(theme.ColorNameBackground)):          "background",
+		nrgbaColor(theme.Color(theme.ColorNameButton)):              "button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):      "disabled button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabled)):            "disabled",
+		nrgbaColor(theme.Color(theme.ColorNameError)):               "error",
+		nrgbaColor(theme.Color(theme.ColorNameFocus)):               "focus",
+		nrgbaColor(theme.Color(theme.ColorNameForeground)):          "foreground",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):   "foregroundOnError",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)): "foregroundOnPrimary",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)): "foregroundOnSuccess",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)): "foregroundOnWarning",
+		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):    "headerBackground",
+		nrgbaColor(theme.Color(theme.ColorNameHover)):               "hover",
+		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):           "hyperlink",
+		nrgbaColor(theme.Color(theme.ColorNameInputBackground)):     "inputBackground",
+		nrgbaColor(theme.Color(theme.ColorNameInputBorder)):         "inputBorder",
+		nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):      "menuBackground",
+		nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):   "overlayBackground",
+		nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):         "placeholder",
+		nrgbaColor(theme.Color(theme.ColorNamePressed)):             "pressed",
+		nrgbaColor(theme.Color(theme.ColorNamePrimary)):             "primary",
+		nrgbaColor(theme.Color(theme.ColorNameScrollBar)):           "scrollbar",
+		nrgbaColor(theme.Color(theme.ColorNameSelection)):           "selection",
+		nrgbaColor(theme.Color(theme.ColorNameSeparator)):           "separator",
+		nrgbaColor(theme.Color(theme.ColorNameSuccess)):             "success",
+		nrgbaColor(theme.Color(theme.ColorNameShadow)):              "shadow",
+		nrgbaColor(theme.Color(theme.ColorNameWarning)):             "warning",
 	}[nrgbaColor(c)]
 }
 

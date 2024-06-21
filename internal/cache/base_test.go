@@ -25,7 +25,7 @@ func TestCacheClean(t *testing.T) {
 	for k := 0; k < 2; k++ {
 		tm.setTime(10, 10+k*10)
 		for i := 0; i < 20; i++ {
-			SetSvg(fmt.Sprintf("%d%d", k, i), nil, i, i+1)
+			SetSvg(fmt.Sprintf("%d%d", k, i), nil, nil, i, i+1)
 			Renderer(&dummyWidget{onDestroy: func() {
 				destroyedRenderersCnt++
 			}})

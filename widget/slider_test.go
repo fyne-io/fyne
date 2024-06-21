@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -68,14 +67,13 @@ func TestSlider_Clamp(t *testing.T) {
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	app := test.NewTempApp(t)
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
@@ -110,15 +108,14 @@ func TestSlider_OutOfRange(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(internalTest.LightTheme(theme.DefaultTheme()))
+	app := test.NewTempApp(t)
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical
 	slider.Resize(fyne.NewSize(10, 100))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
@@ -295,7 +292,7 @@ func TestSlider_FocusDesktop(t *testing.T) {
 		return
 	}
 	slider := NewSlider(0, 10)
-	win := test.NewWindow(slider)
+	win := test.NewTempWindow(t, slider)
 	test.Tap(slider)
 
 	assert.Equal(t, win.Canvas().Focused(), slider)

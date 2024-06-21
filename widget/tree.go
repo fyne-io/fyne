@@ -187,7 +187,7 @@ func (t *Tree) FocusGained() {
 // Implements: fyne.Focusable
 func (t *Tree) FocusLost() {
 	t.focused = false
-	t.Refresh() //Item(t.currentFocus)
+	t.Refresh() // Item(t.currentFocus)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -846,7 +846,7 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.HoverColor())
+	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	return &treeNodeRenderer{
@@ -966,10 +966,10 @@ func (r *treeNodeRenderer) partialRefresh() {
 	}
 	r.background.CornerRadius = theme.SelectionRadiusSize()
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.background.FillColor = theme.SelectionColor()
+		r.background.FillColor = theme.Color(theme.ColorNameSelection)
 		r.background.Show()
 	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentFocus == r.treeNode.uid) {
-		r.background.FillColor = theme.HoverColor()
+		r.background.FillColor = theme.Color(theme.ColorNameHover)
 		r.background.Show()
 	} else {
 		r.background.Hide()

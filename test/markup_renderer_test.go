@@ -41,18 +41,10 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"circle with theme color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewCircle(theme.ScrollBarColor()),
+			content: fynecanvas.NewCircle(theme.Color(theme.ColorNameScrollBar)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<circle fillColor=\"scrollbar\" size=\"100x100\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"circle with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewCircle(theme.PrimaryColorNamed(theme.ColorPurple)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<circle fillColor=\"primary-purple\" size=\"100x100\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -60,7 +52,7 @@ func Test_snapshot(t *testing.T) {
 			content: func() fyne.CanvasObject {
 				c := fynecanvas.NewCircle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				c.StrokeWidth = 3
-				c.StrokeColor = theme.BackgroundColor()
+				c.StrokeColor = theme.Color(theme.ColorNameBackground)
 				return c
 			}(),
 			size: fyne.NewSize(42, 42),
@@ -101,7 +93,7 @@ func Test_snapshot(t *testing.T) {
 			content: fynecanvas.NewImageFromResource(theme.VolumeDownIcon()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"volumeDownIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image rsc=\"volumeDownIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -109,7 +101,7 @@ func Test_snapshot(t *testing.T) {
 			content: fynecanvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}))),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"default\"/>\n" +
+				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -153,7 +145,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" translucency=\"1.3\"/>\n" +
+				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\" translucency=\"1.3\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -165,7 +157,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image fillMode=\"contain\" rsc=\"zoomOutIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image fillMode=\"contain\" rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -177,7 +169,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"100x100\"/>\n" +
+				"\t\t<image fillMode=\"original\" rsc=\"zoomInIcon\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -189,7 +181,7 @@ func Test_snapshot(t *testing.T) {
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"viewRestoreIcon\" scaleMode=\"pixels\" size=\"100x100\"/>\n" +
+				"\t\t<image rsc=\"viewRestoreIcon\" scaleMode=\"pixels\" size=\"100x100\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -198,7 +190,7 @@ func Test_snapshot(t *testing.T) {
 			size:    fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"visibilityIcon\" size=\"iconInlineSize\"/>\n" +
+				"\t\t<image rsc=\"visibilityIcon\" size=\"iconInlineSize\" themed=\"foreground\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -213,18 +205,10 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"line with theme color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewLine(theme.ShadowColor()),
+			content: fynecanvas.NewLine(theme.Color(theme.ColorNameShadow)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<line size=\"100x100\" strokeColor=\"shadow\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"line with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewLine(theme.PrimaryColorNamed(theme.ColorBrown)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<line size=\"100x100\" strokeColor=\"primary-brown\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -243,7 +227,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"linear gradient": {
-			content: fynecanvas.NewLinearGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor(), 13.25),
+			content: fynecanvas.NewLinearGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.Color(theme.ColorNameDisabled), 13.25),
 			pos:     fyne.NewPos(6, 13),
 			size:    fyne.NewSize(50, 10),
 			want: "<canvas size=\"100x100\">\n" +
@@ -253,7 +237,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"radial gradient": {
-			content: fynecanvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor()),
+			content: fynecanvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.Color(theme.ColorNameDisabled)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<radialGradient endColor=\"disabled\" size=\"100x100\" startColor=\"rgba(1,2,3,4)\"/>\n" +
@@ -262,7 +246,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"radial gradient with offset": {
 			content: func() fyne.CanvasObject {
-				g := fynecanvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.DisabledColor())
+				g := fynecanvas.NewRadialGradient(color.NRGBA{R: 1, G: 2, B: 3, A: 4}, theme.Color(theme.ColorNameDisabled))
 				g.CenterOffsetX = 1.5
 				g.CenterOffsetY = -13.7
 				return g
@@ -292,18 +276,10 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"rectangle with theme color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewRectangle(theme.HoverColor()),
+			content: fynecanvas.NewRectangle(theme.Color(theme.ColorNameHover)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<rectangle fillColor=\"hover\" size=\"100x100\"/>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
-		"rectangle with named primary color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewRectangle(theme.PrimaryColorNamed(theme.ColorOrange)),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<rectangle fillColor=\"primary-orange\" size=\"100x100\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
@@ -311,7 +287,7 @@ func Test_snapshot(t *testing.T) {
 			content: func() fyne.CanvasObject {
 				r := fynecanvas.NewRectangle(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				r.StrokeWidth = 6.375
-				r.StrokeColor = theme.PlaceHolderColor()
+				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
 				return r
 			}(),
 			size: fyne.NewSize(42, 42),
@@ -333,26 +309,16 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"text with theme color": {
-			content: fynecanvas.NewText("bar", theme.ForegroundColor()),
+			content: fynecanvas.NewText("bar", theme.Color(theme.ColorNameForeground)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<text size=\"100x100\">bar</text>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
-		"text with named primary color": {
-			content: fynecanvas.NewText("foo", theme.PrimaryColorNamed(theme.ColorYellow)),
-			size:    fyne.NewSize(50, 50),
-			pos:     fyne.NewPos(20, 20),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<text color=\"primary-yellow\" pos=\"20,20\" size=\"50x50\">foo</text>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
 		"text with alignment center": {
 			content: func() fyne.CanvasObject {
-				t := fynecanvas.NewText("bar", theme.ForegroundColor())
+				t := fynecanvas.NewText("bar", theme.Color(theme.ColorNameForeground))
 				t.Alignment = fyne.TextAlignCenter
 				return t
 			}(),
@@ -364,7 +330,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with alignment trailing": {
 			content: func() fyne.CanvasObject {
-				txt := fynecanvas.NewText("bar", theme.ForegroundColor())
+				txt := fynecanvas.NewText("bar", theme.Color(theme.ColorNameForeground))
 				txt.Alignment = fyne.TextAlignTrailing
 				return txt
 			}(),
@@ -376,7 +342,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text with size": {
 			content: func() fyne.CanvasObject {
-				txt := fynecanvas.NewText("big", theme.ForegroundColor())
+				txt := fynecanvas.NewText("big", theme.Color(theme.ColorNameForeground))
 				txt.TextSize = 42
 				return txt
 			}(),
@@ -388,7 +354,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text bold": {
 			content: func() fyne.CanvasObject {
-				txt := fynecanvas.NewText("bold", theme.ForegroundColor())
+				txt := fynecanvas.NewText("bold", theme.Color(theme.ColorNameForeground))
 				txt.TextStyle.Bold = true
 				return txt
 			}(),
@@ -400,7 +366,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text italic": {
 			content: func() fyne.CanvasObject {
-				txt := fynecanvas.NewText("italic", theme.ForegroundColor())
+				txt := fynecanvas.NewText("italic", theme.Color(theme.ColorNameForeground))
 				txt.TextStyle.Italic = true
 				return txt
 			}(),
@@ -412,7 +378,7 @@ func Test_snapshot(t *testing.T) {
 		},
 		"text monospace": {
 			content: func() fyne.CanvasObject {
-				txt := fynecanvas.NewText("mono", theme.ForegroundColor())
+				txt := fynecanvas.NewText("mono", theme.Color(theme.ColorNameForeground))
 				txt.TextStyle.Monospace = true
 				return txt
 			}(),

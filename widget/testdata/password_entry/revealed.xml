@@ -12,7 +12,7 @@
 				</widget>
 			</widget>
 			<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-				<image rsc="visibilityIcon" size="iconInlineSize"/>
+				<image rsc="visibilityIcon" size="iconInlineSize" themed="foreground"/>
 			</widget>
 		</widget>
 	</content>

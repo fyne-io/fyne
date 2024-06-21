@@ -224,7 +224,7 @@ func (t *Table) FocusGained() {
 // Implements: fyne.Focusable
 func (t *Table) FocusLost() {
 	t.focused = false
-	t.Refresh() //Item(t.currentFocus)
+	t.Refresh() // Item(t.currentFocus)
 }
 
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
@@ -1153,15 +1153,15 @@ func newTableCells(t *Table) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	marker := canvas.NewRectangle(theme.SelectionColor())
+	marker := canvas.NewRectangle(theme.Color(theme.ColorNameSelection))
 	marker.CornerRadius = theme.SelectionRadiusSize()
-	hover := canvas.NewRectangle(theme.HoverColor())
+	hover := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	hover.CornerRadius = theme.SelectionRadiusSize()
 
 	r := &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
-		headRowBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
-		headRowStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()), headColStickyBG: canvas.NewRectangle(theme.HeaderBackgroundColor()),
+		headRowBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
+		headRowStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		marker: marker, hover: hover}
 
 	c.t.moveCallback = r.moveIndicators
@@ -1386,10 +1386,10 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	}
 
 	r.moveIndicators()
-	r.marker.FillColor = theme.SelectionColor()
+	r.marker.FillColor = theme.Color(theme.ColorNameSelection)
 	r.marker.CornerRadius = theme.SelectionRadiusSize()
 	r.marker.Refresh()
-	r.hover.FillColor = theme.HoverColor()
+	r.hover.FillColor = theme.Color(theme.ColorNameHover)
 	r.hover.CornerRadius = theme.SelectionRadiusSize()
 	r.hover.Refresh()
 }
@@ -1672,17 +1672,17 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	r.cells.t.left.Content.Refresh()
 
 	r.headColBG.Hidden = !r.cells.t.ShowHeaderColumn
-	r.headColBG.FillColor = theme.HeaderBackgroundColor()
+	r.headColBG.FillColor = theme.Color(theme.ColorNameHeaderBackground)
 	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.Size().Height))
 
 	r.headColStickyBG.Hidden = !r.cells.t.ShowHeaderColumn
-	r.headColStickyBG.FillColor = theme.HeaderBackgroundColor()
+	r.headColStickyBG.FillColor = theme.Color(theme.ColorNameHeaderBackground)
 	r.headColStickyBG.Resize(fyne.NewSize(colWidth, r.cells.t.stuckHeight+rowHeight))
 	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
-	r.headRowBG.FillColor = theme.HeaderBackgroundColor()
+	r.headRowBG.FillColor = theme.Color(theme.ColorNameHeaderBackground)
 	r.headRowBG.Resize(fyne.NewSize(r.cells.t.Size().Width, rowHeight))
 	r.headRowStickyBG.Hidden = !r.cells.t.ShowHeaderRow
-	r.headRowStickyBG.FillColor = theme.HeaderBackgroundColor()
+	r.headRowStickyBG.FillColor = theme.Color(theme.ColorNameHeaderBackground)
 	r.headRowStickyBG.Resize(fyne.NewSize(r.cells.t.stuckWidth+colWidth, rowHeight))
 	r.cells.t.corner.Content.(*fyne.Container).Objects = corner
 	r.cells.t.corner.Content.Refresh()

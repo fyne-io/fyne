@@ -108,7 +108,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 }
 
 func TestFileDialogResize(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	win.Resize(fyne.NewSize(600, 400))
 	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
@@ -161,7 +161,7 @@ func TestFileDialogResize(t *testing.T) {
 func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.URIReadCloser
 	var openErr error
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 		chosen = file
 		openErr = err
@@ -214,17 +214,17 @@ func TestShowFileOpen(t *testing.T) {
 	}
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
-	fileName := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
+	fileName := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
 	id := 0
 	for i, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.dir == false {
 			target = item
 			id = i
@@ -260,7 +260,7 @@ func TestHiddenFiles(t *testing.T) {
 		t.Error("Failed to hide .hidden", err)
 	}
 
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 	}, win)
 	d.SetLocation(dir)
@@ -283,12 +283,12 @@ func TestHiddenFiles(t *testing.T) {
 	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
 	var target *fileDialogItem
 	for _, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.name == ".hidden" {
 			target = item
 		}
@@ -299,7 +299,7 @@ func TestHiddenFiles(t *testing.T) {
 	d.dialog.refreshDir(d.dialog.dir)
 
 	for _, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.name == ".hidden" {
 			target = item
 		}
@@ -310,7 +310,7 @@ func TestHiddenFiles(t *testing.T) {
 func TestShowFileSave(t *testing.T) {
 	var chosen fyne.URIWriteCloser
 	var saveErr error
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	saver := NewFileSave(func(file fyne.URIWriteCloser, err error) {
 		chosen = file
 		saveErr = err
@@ -330,17 +330,17 @@ func TestShowFileSave(t *testing.T) {
 	save := buttons.Objects[1].(*widget.Button)
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	objects := test.WidgetRenderer(files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.Greater(t, len(objects), 0)
 
-	item := test.WidgetRenderer(objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
+	item := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
 	assert.Equal(t, "(Parent)", item.name)
 	assert.True(t, save.Disabled())
 
 	var target *fileDialogItem
 	id := -1
 	for i, icon := range objects {
-		item := test.WidgetRenderer(icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
 		if item.dir == false {
 			target = item
 			id = i
@@ -386,7 +386,7 @@ func TestShowFileSave(t *testing.T) {
 }
 
 func TestFileFilters(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 	}, win)
 
@@ -449,7 +449,7 @@ func TestFileFilters(t *testing.T) {
 }
 
 func TestView(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		assert.Nil(t, err)
@@ -506,7 +506,7 @@ func TestView(t *testing.T) {
 }
 
 func TestSetView(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(defaultView))
 
@@ -556,7 +556,7 @@ func TestSetView(t *testing.T) {
 }
 
 func TestSetViewPreferences(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	prefs := fyne.CurrentApp().Preferences()
 
@@ -590,7 +590,7 @@ func TestSetViewPreferences(t *testing.T) {
 }
 
 func TestViewPreferences(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	prefs := fyne.CurrentApp().Preferences()
 
@@ -631,7 +631,7 @@ func TestViewPreferences(t *testing.T) {
 }
 
 func TestFileFavorites(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 		assert.Nil(t, err)
@@ -676,7 +676,7 @@ func TestFileFavorites(t *testing.T) {
 }
 
 func TestSetFileNameBeforeShow(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	dSave := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
 	dSave.SetFileName("testfile.zip")
 	dSave.Show()
@@ -694,7 +694,7 @@ func TestSetFileNameBeforeShow(t *testing.T) {
 
 func TestSetFileNameAfterShow(t *testing.T) {
 
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	dSave := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
 	dSave.Show()
 	dSave.SetFileName("testfile.zip")
@@ -711,7 +711,7 @@ func TestSetFileNameAfterShow(t *testing.T) {
 }
 
 func TestCreateNewFolderInDir(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	folderDialog := NewFolderOpen(func(lu fyne.ListableURI, err error) {
 		assert.Nil(t, err)
@@ -757,7 +757,7 @@ func TestCreateNewFolderInDir(t *testing.T) {
 }
 
 func TestSetOnClosedBeforeShow(t *testing.T) {
-	win := test.NewWindow(widget.NewLabel("Content"))
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
 	onClosedCalled := false
 	d.SetOnClosed(func() { onClosedCalled = true })

@@ -78,7 +78,6 @@ func TestEntry_Binding_Replace(t *testing.T) {
 
 func TestEntry_Clicked(t *testing.T) {
 	entry, window := setupImageTest(t, true)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.SetText("MMM\nWWW\n")
@@ -284,7 +283,7 @@ func TestEntry_CursorColumn_Wrap2(t *testing.T) {
 	entry.SetText("1234")
 	entry.CursorColumn = 3
 
-	w := test.NewWindow(entry)
+	w := test.NewTempWindow(t, entry)
 	w.Resize(fyne.NewSize(72, 64))
 
 	test.Type(entry, "a")
@@ -334,7 +333,6 @@ func TestEntry_CursorRow(t *testing.T) {
 
 func TestEntry_Disableable(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.False(t, entry.Disabled())
@@ -375,7 +373,6 @@ func TestEntry_Disableable(t *testing.T) {
 
 func TestEntry_Disabled_TextSelection(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	entry.SetText("Testing")
 	entry.Disable()
 	c := window.Canvas()
@@ -418,7 +415,6 @@ func TestEntry_EmptySelection(t *testing.T) {
 
 func TestEntry_Focus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.FocusGained()
@@ -433,7 +429,6 @@ func TestEntry_Focus(t *testing.T) {
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
@@ -530,7 +525,6 @@ func TestEntryMultiline_SetMinRowsVisible(t *testing.T) {
 
 func TestEntry_MultilineSelect(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	// Extend the selection down one row
@@ -849,7 +843,6 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	entry, window := setupImageTest(t, true)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.SetText("Hi")
@@ -956,7 +949,6 @@ func TestEntry_OnPaste(t *testing.T) {
 func TestEntry_PageUpDown(t *testing.T) {
 	t.Run("single line", func(*testing.T) {
 		e, window := setupImageTest(t, false)
-		defer teardownImageTest(window)
 		c := window.Canvas()
 
 		c.Focus(e)
@@ -987,7 +979,6 @@ func TestEntry_PageUpDown(t *testing.T) {
 
 	t.Run("page down single line", func(*testing.T) {
 		e, window := setupImageTest(t, true)
-		defer teardownImageTest(window)
 		c := window.Canvas()
 
 		c.Focus(e)
@@ -1053,8 +1044,8 @@ func TestEntry_Placeholder(t *testing.T) {
 	entry.Text = "Text"
 	entry.PlaceHolder = "Placehold"
 
-	window := test.NewWindow(entry)
-	defer teardownImageTest(window)
+	window := test.NewTempWindow(t, entry)
+	defer test.NewApp()
 	c := window.Canvas()
 
 	assert.Equal(t, "Text", entry.Text)
@@ -1207,7 +1198,6 @@ func TestEntry_Select(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			entry, window := setupSelection(t, tt.setupReverse)
-			defer teardownImageTest(window)
 			c := window.Canvas()
 
 			if tt.text != "" {
@@ -1224,7 +1214,6 @@ func TestEntry_Select(t *testing.T) {
 
 func TestEntry_SelectAll(t *testing.T) {
 	e, window := setupImageTest(t, true)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	c.Focus(e)
@@ -1247,7 +1236,6 @@ func TestEntry_SelectAll_EmptyEntry(t *testing.T) {
 
 func TestEntry_SelectEndWithoutShift(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	// end after releasing shift
@@ -1258,7 +1246,6 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 
 func TestEntry_SelectHomeEnd(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	// Hold shift to continue selection
@@ -1277,7 +1264,6 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 
 func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	// home after releasing shift
@@ -1289,7 +1275,6 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 func TestEntry_SelectSnapDown(t *testing.T) {
 	// down snaps to end, but it also moves
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 1, e.CursorRow)
@@ -1304,7 +1289,6 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 
 func TestEntry_SelectSnapLeft(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 1, e.CursorRow)
@@ -1319,7 +1303,6 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 
 func TestEntry_SelectSnapRight(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 1, e.CursorRow)
@@ -1335,7 +1318,6 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 func TestEntry_SelectSnapUp(t *testing.T) {
 	// up snaps to start, but it also moves
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 1, e.CursorRow)
@@ -1361,7 +1343,6 @@ func TestEntry_Select_TripleTap(t *testing.T) {
 
 func TestEntry_SelectedText(t *testing.T) {
 	e, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	c.Focus(e)
@@ -1394,7 +1375,6 @@ func TestEntry_SelectedText(t *testing.T) {
 
 func TestEntry_SelectionHides(t *testing.T) {
 	e, window := setupSelection(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	c.Unfocus()
@@ -1408,7 +1388,6 @@ func TestEntry_SelectionHides(t *testing.T) {
 
 func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 0, len(entry.Text))
@@ -1424,7 +1403,6 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 
 func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	assert.Equal(t, 0, len(entry.Text))
@@ -1454,7 +1432,6 @@ func TestEntry_Disable_KeyDown(t *testing.T) {
 
 func TestEntry_Disable_OnFocus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.Disable()
@@ -1491,7 +1468,6 @@ func TestEntry_SetText_EmptyString(t *testing.T) {
 
 func TestEntry_SetText_Manual(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.Text = "Test"
@@ -1557,7 +1533,6 @@ func TestEntry_SetText_Overflow_Multiline(t *testing.T) {
 
 func TestEntry_SetTextStyle(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.Text = "Styled Text"
@@ -1697,7 +1672,6 @@ func TestTabable(t *testing.T) {
 
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	tapPos := fyne.NewPos(20, 10)
@@ -1778,7 +1752,6 @@ func TestEntry_TextWrap(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			e, window := setupImageTest(t, tt.multiLine)
-			defer teardownImageTest(window)
 			c := window.Canvas()
 
 			c.Focus(e)
@@ -1796,7 +1769,6 @@ func TestEntry_TextWrap(t *testing.T) {
 
 func TestEntry_TextWrap_Changed(t *testing.T) {
 	e, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	c.Focus(e)
@@ -1850,14 +1822,13 @@ func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	b := widget.NewButton("", func() {})
 	b.Icon = theme.CancelIcon()
 	e.ActionItem = b
-	test.WidgetRenderer(e).Layout(e.MinSize())
+	test.TempWidgetRenderer(t, e).Layout(e.MinSize())
 	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
 	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
 }
 
 func TestPasswordEntry_Disabled(t *testing.T) {
-	entry, window := setupPasswordTest(t)
-	defer teardownImageTest(window)
+	entry, _ := setupPasswordTest(t)
 	entry.Disable()
 
 	test.Tap(entry.ActionItem.(fyne.Tappable))
@@ -1877,7 +1848,6 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 
 func TestPasswordEntry_Obfuscation(t *testing.T) {
 	entry, window := setupPasswordTest(t)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	test.Type(entry, "Hié™שרה")
@@ -1887,7 +1857,6 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry, window := setupPasswordTest(t)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	test.AssertRendersToMarkup(t, "password_entry/initial.xml", window.Canvas())
@@ -1901,8 +1870,7 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
@@ -2009,7 +1977,7 @@ func TestEntry_CarriageReturn(t *testing.T) {
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.SetText("\r\n\r")
-	w := test.NewWindow(entry)
+	w := test.NewTempWindow(t, entry)
 	w.Resize(fyne.NewSize(64, 64))
 	test.AssertImageMatches(t, "entry/carriage_return_empty.png", w.Canvas().Capture())
 	entry.SetText("\rH\re\rl\rl\ro\r\n\rW\ro\rr\rl\rd\r!\r")
@@ -2019,7 +1987,6 @@ func TestEntry_CarriageReturn(t *testing.T) {
 func TestEntry_UndoRedo(t *testing.T) {
 	e, window := setupImageTest(t, true)
 	window.Resize(fyne.NewSize(128, 128))
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	c.Focus(e)
@@ -2109,6 +2076,7 @@ func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	test.NewApp()
+	t.Cleanup(func() { test.NewApp() })
 
 	var entry *widget.Entry
 	if multiLine {
@@ -2116,7 +2084,7 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 	} else {
 		entry = &widget.Entry{Wrapping: fyne.TextWrapOff, Scroll: container.ScrollNone}
 	}
-	w := test.NewWindow(entry)
+	w := test.NewTempWindow(t, entry)
 	w.Resize(fyne.NewSize(150, 200))
 
 	if multiLine {
@@ -2137,9 +2105,10 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 
 func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
 	test.NewApp()
+	t.Cleanup(func() { test.NewApp() })
 
 	entry := widget.NewPasswordEntry()
-	w := test.NewWindow(entry)
+	w := test.NewTempWindow(t, entry)
 	w.Resize(fyne.NewSize(150, 100))
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
@@ -2172,11 +2141,6 @@ func setupSelection(t *testing.T, reverse bool) (*widget.Entry, fyne.Window) {
 	}
 
 	return e, window
-}
-
-func teardownImageTest(w fyne.Window) {
-	w.Close()
-	test.NewApp()
 }
 
 func waitForBinding() {

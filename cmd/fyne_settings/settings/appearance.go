@@ -11,6 +11,8 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	internalapp "fyne.io/fyne/v2/internal/app"
+	internaltheme "fyne.io/fyne/v2/internal/theme"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -18,7 +20,10 @@ import (
 )
 
 const (
-	systemThemeName = "system default"
+	themeNameDark        = "dark"
+	themeNameLight       = "light"
+	themeNameSystem      = ""
+	themeNameSystemLabel = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -56,11 +61,11 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview = s.createPreview()
 
 	def := s.fyneSettings.ThemeName
-	themeNames := []string{"dark", "light"}
+	themeNames := []string{themeNameDark, themeNameLight}
 	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
-		themeNames = append(themeNames, systemThemeName)
-		if s.fyneSettings.ThemeName == "" {
-			def = systemThemeName
+		themeNames = append(themeNames, themeNameSystemLabel)
+		if s.fyneSettings.ThemeName == themeNameSystem {
+			def = themeNameSystemLabel
 		}
 	}
 	themes := widget.NewSelect(themeNames, s.chooseTheme)
@@ -74,7 +79,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	})
 	animations.Checked = !s.fyneSettings.DisableAnimations
 	for _, c := range theme.PrimaryColorNames() {
-		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
+		b := newPrimaryColorButton(c, s)
 		s.colors = append(s.colors, b)
 	}
 	swatch := container.NewGridWithColumns(len(s.colors), s.colors...)
@@ -102,8 +107,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 }
 
 func (s *Settings) chooseTheme(name string) {
-	if name == systemThemeName {
-		name = ""
+	if name == themeNameSystemLabel {
+		name = themeNameSystem
 	}
 	s.fyneSettings.ThemeName = name
 
@@ -167,33 +172,32 @@ func (s *Settings) saveToFile(path string) error {
 	return os.WriteFile(path, data, 0644)
 }
 
-type colorButton struct {
+type primaryColorButton struct {
 	widget.BaseWidget
-	name  string
-	color color.Color
+	name string
 
 	s *Settings
 }
 
-func newColorButton(n string, c color.Color, s *Settings) *colorButton {
-	b := &colorButton{name: n, color: c, s: s}
+func newPrimaryColorButton(name string, s *Settings) *primaryColorButton {
+	b := &primaryColorButton{name: name, s: s}
 	b.ExtendBaseWidget(b)
 	return b
 }
 
-func (c *colorButton) CreateRenderer() fyne.WidgetRenderer {
-	r := canvas.NewRectangle(c.color)
+func (c *primaryColorButton) CreateRenderer() fyne.WidgetRenderer {
+	r := canvas.NewRectangle(internaltheme.PrimaryColorNamed(c.name))
 	r.CornerRadius = theme.SelectionRadiusSize()
 	r.StrokeWidth = 5
 
 	if c.name == c.s.fyneSettings.PrimaryColor {
-		r.StrokeColor = theme.PrimaryColor()
+		r.StrokeColor = theme.Color(theme.ColorNamePrimary)
 	}
 
-	return &colorRenderer{c: c, rect: r, objs: []fyne.CanvasObject{r}}
+	return &primaryColorButtonRenderer{c: c, rect: r, objs: []fyne.CanvasObject{r}}
 }
 
-func (c *colorButton) Tapped(_ *fyne.PointEvent) {
+func (c *primaryColorButton) Tapped(_ *fyne.PointEvent) {
 	c.s.fyneSettings.PrimaryColor = c.name
 	for _, child := range c.s.colors {
 		child.Refresh()
@@ -202,37 +206,37 @@ func (c *colorButton) Tapped(_ *fyne.PointEvent) {
 	c.s.refreshPreview()
 }
 
-type colorRenderer struct {
-	c    *colorButton
+type primaryColorButtonRenderer struct {
+	c    *primaryColorButton
 	rect *canvas.Rectangle
 	objs []fyne.CanvasObject
 }
 
-func (c *colorRenderer) Layout(s fyne.Size) {
+func (c *primaryColorButtonRenderer) Layout(s fyne.Size) {
 	c.rect.Resize(s)
 }
 
-func (c *colorRenderer) MinSize() fyne.Size {
+func (c *primaryColorButtonRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(20, 32)
 }
 
-func (c *colorRenderer) Refresh() {
+func (c *primaryColorButtonRenderer) Refresh() {
 	if c.c.name == c.c.s.fyneSettings.PrimaryColor {
-		c.rect.StrokeColor = theme.PrimaryColor()
+		c.rect.StrokeColor = theme.Color(theme.ColorNamePrimary)
 	} else {
 		c.rect.StrokeColor = color.Transparent
 	}
-	c.rect.FillColor = c.c.color
+	c.rect.FillColor = internaltheme.PrimaryColorNamed(c.c.name)
 	c.rect.CornerRadius = theme.SelectionRadiusSize()
 
 	c.rect.Refresh()
 }
 
-func (c *colorRenderer) Objects() []fyne.CanvasObject {
+func (c *primaryColorButtonRenderer) Objects() []fyne.CanvasObject {
 	return c.objs
 }
 
-func (c *colorRenderer) Destroy() {
+func (c *primaryColorButtonRenderer) Destroy() {
 }
 
 type previewTheme struct {
@@ -242,15 +246,18 @@ type previewTheme struct {
 
 func (p *previewTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
 	variant := theme.VariantDark
-	if p.s.fyneSettings.ThemeName == "light" {
+	switch p.s.fyneSettings.ThemeName {
+	case themeNameLight:
 		variant = theme.VariantLight
+	case themeNameSystem:
+		variant = internalapp.DefaultVariant()
 	}
 
 	switch n {
 	case theme.ColorNamePrimary:
-		return theme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
-	case theme.ColorNameOnPrimary:
-		return theme.OnPrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+		return internaltheme.PrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
+	case theme.ColorNameForegroundOnPrimary:
+		return internaltheme.ForegroundOnPrimaryColorNamed(p.s.fyneSettings.PrimaryColor)
 	}
 
 	return p.t.Color(n, variant)

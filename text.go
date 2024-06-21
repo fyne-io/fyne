@@ -61,6 +61,9 @@ type TextStyle struct {
 	Symbol bool // Use the system symbol font.
 	// Since: 2.1
 	TabWidth int // Width of tabs in spaces
+	// Since: 2.5
+	// Currently only supported by the TextGrid widget.
+	Underline bool // Should text be underlined.
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.

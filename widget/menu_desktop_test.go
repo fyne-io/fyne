@@ -20,8 +20,7 @@ import (
 )
 
 func TestMenu_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -201,8 +200,7 @@ func TestMenu_Layout(t *testing.T) {
 }
 
 func TestMenu_Scrolling(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -244,8 +242,7 @@ func TestMenu_Scrolling(t *testing.T) {
 }
 
 func TestMenu_TraverseMenu(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()
@@ -344,6 +341,7 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		))
 		m.OnDismiss = func() { dismissed = true }
 		w := fyne.CurrentApp().NewWindow("")
+		t.Cleanup(w.Close)
 		w.SetContent(internalWidget.NewOverlayContainer(m, w.Canvas(), nil))
 		return m
 	}

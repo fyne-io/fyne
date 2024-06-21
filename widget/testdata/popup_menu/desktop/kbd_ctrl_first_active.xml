@@ -25,7 +25,7 @@
 							</widget>
 							<widget pos="0,39" size="94x35" type="*widget.menuItem">
 								<text pos="8,8" size="58x19">Option B</text>
-								<image pos="74,7" rsc="menuExpandIcon" size="iconInlineSize"/>
+								<image pos="74,7" rsc="menuExpandIcon" size="iconInlineSize" themed="foreground"/>
 							</widget>
 						</container>
 					</widget>

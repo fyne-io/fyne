@@ -95,7 +95,7 @@ func lookupFaces(theme, fallback fyne.Resource, family string, style fyne.TextSt
 }
 
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
-func CachedFontFace(style fyne.TextStyle, source fyne.Resource, fontDP float32, texScale float32) *FontCacheItem {
+func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObject) *FontCacheItem {
 	if source != nil {
 		val, ok := fontCustomCache.Load(source)
 		if !ok {
@@ -111,21 +111,29 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, fontDP float32, 
 		return val.(*FontCacheItem)
 	}
 
-	val, ok := fontCache.Load(style)
+	scope := ""
+	if o != nil { // for overridden themes get the cache key right
+		scope = cache.WidgetScopeID(o)
+	}
+
+	val, ok := fontCache.Load(cacheID{style: style, scope: scope})
 	if !ok {
 		var faces *dynamicFontMap
 
+		th := theme.CurrentForWidget(o)
+		font1 := th.Font(style)
+
 		switch {
 		case style.Monospace:
-			faces = lookupFaces(theme.TextMonospaceFont(), theme.DefaultTextMonospaceFont(), fontscan.Monospace, style)
+			faces = lookupFaces(font1, theme.DefaultTextMonospaceFont(), fontscan.Monospace, style)
 		case style.Bold:
 			if style.Italic {
-				faces = lookupFaces(theme.TextBoldItalicFont(), theme.DefaultTextBoldItalicFont(), fontscan.SansSerif, style)
+				faces = lookupFaces(font1, theme.DefaultTextBoldItalicFont(), fontscan.SansSerif, style)
 			} else {
-				faces = lookupFaces(theme.TextBoldFont(), theme.DefaultTextBoldFont(), fontscan.SansSerif, style)
+				faces = lookupFaces(font1, theme.DefaultTextBoldFont(), fontscan.SansSerif, style)
 			}
 		case style.Italic:
-			faces = lookupFaces(theme.TextItalicFont(), theme.DefaultTextItalicFont(), fontscan.SansSerif, style)
+			faces = lookupFaces(font1, theme.DefaultTextItalicFont(), fontscan.SansSerif, style)
 		case style.Symbol:
 			th := theme.SymbolFont()
 			fallback := theme.DefaultSymbolFont()
@@ -138,14 +146,14 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, fontDP float32, 
 				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []font.Face{f1, f2}}
 			}
 		default:
-			faces = lookupFaces(theme.TextFont(), theme.DefaultTextFont(), fontscan.SansSerif, style)
+			faces = lookupFaces(font1, theme.DefaultTextFont(), fontscan.SansSerif, style)
 		}
 
 		if emoji := theme.DefaultEmojiFont(); !style.Symbol && emoji != nil {
 			faces.addFace(loadMeasureFont(emoji)) // TODO only one emoji - maybe others too
 		}
 		val = &FontCacheItem{Fonts: faces}
-		fontCache.Store(style, val)
+		fontCache.Store(cacheID{style: style, scope: scope}, val)
 	}
 
 	return val.(*FontCacheItem)
@@ -220,7 +228,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 }
 
 func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
-	face := CachedFontFace(style, source, fontSize, 1)
+	face := CachedFontFace(style, source, nil)
 	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
@@ -329,7 +337,12 @@ type FontCacheItem struct {
 	Fonts shaping.Fontmap
 }
 
-var fontCache = &sync.Map{}       // map[fyne.TextStyle]*FontCacheItem
+type cacheID struct {
+	style fyne.TextStyle
+	scope string
+}
+
+var fontCache = &sync.Map{}       // map[cacheID]*FontCacheItem
 var fontCustomCache = &sync.Map{} // map[string]*FontCacheItem for custom resources
 
 type noopLogger struct{}

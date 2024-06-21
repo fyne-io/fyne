@@ -130,9 +130,9 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := newextendedRadioGroup(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			item1 := test.WidgetRenderer(radio).Objects()[0].(*radioItem)
+			item1 := test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)
 			render1 := cache.Renderer(item1).(*radioItemRenderer)
-			render2 := cache.Renderer(test.WidgetRenderer(radio).Objects()[1].(*radioItem)).(*radioItemRenderer)
+			render2 := cache.Renderer(test.TempWidgetRenderer(t, radio).Objects()[1].(*radioItem)).(*radioItemRenderer)
 
 			assert.False(t, item1.hovered)
 			assert.Equal(t, color.Transparent, render1.focusIndicator.FillColor)
@@ -152,7 +152,7 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 				},
 			})
 			assert.True(t, item1.hovered)
-			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.Color(theme.ColorNameHover), render1.focusIndicator.FillColor)
 			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseOut()
@@ -165,7 +165,7 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 
 func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Test"}, func(string) {})
-	render := cache.Renderer(test.WidgetRenderer(radio).Objects()[0].(*radioItem)).(*radioItemRenderer)
+	render := cache.Renderer(test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)).(*radioItemRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
@@ -179,7 +179,7 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 
 func extendedRadioGroupTestTapItem(t *testing.T, radio *extendedRadioGroup, item int) {
 	t.Helper()
-	renderer := test.WidgetRenderer(radio)
+	renderer := test.TempWidgetRenderer(t, radio)
 	radioItem := renderer.Objects()[item].(*radioItem)
 	radioItem.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 }

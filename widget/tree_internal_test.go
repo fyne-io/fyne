@@ -558,8 +558,7 @@ func TestTree_Select_Unselects(t *testing.T) {
 }
 
 func TestTree_ScrollTo(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)
@@ -593,8 +592,7 @@ func TestTree_ScrollTo(t *testing.T) {
 }
 
 func TestTree_ScrollToBottom(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)
@@ -663,8 +661,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 }
 
 func TestTree_ScrollToTop(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	data := make(map[string][]string)
@@ -878,10 +875,10 @@ func TestTree_RefreshItem(t *testing.T) {
 	}
 	tree.OpenBranch("foo")
 
-	c := test.NewWindow(tree)
-	c.Resize(fyne.NewSize(100, 100))
+	w := test.NewTempWindow(t, tree)
+	w.Resize(fyne.NewSize(100, 100))
 
-	r := test.WidgetRenderer(tree.scroller.Content.(*treeContent)).(*treeContentRenderer)
+	r := test.TempWidgetRenderer(t, tree.scroller.Content.(*treeContent)).(*treeContentRenderer)
 
 	assert.Equal(t, "Leaf", r.leaves["foobar1"].content.(*Label).Text)
 
@@ -899,14 +896,14 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
-		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
-		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		ar := test.TempWidgetRenderer(t, a).(*treeNodeRenderer)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), ar.background.FillColor)
 		assert.False(t, ar.background.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
-		br := test.WidgetRenderer(b).(*treeNodeRenderer)
-		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		br := test.TempWidgetRenderer(t, b).(*treeNodeRenderer)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), br.background.FillColor)
 		assert.False(t, br.background.Visible())
 	})
 }
@@ -919,22 +916,22 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
-		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
+		ar := test.TempWidgetRenderer(t, a).(*treeNodeRenderer)
 		a.MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), ar.background.FillColor)
 		assert.True(t, ar.background.Visible())
 		a.MouseOut()
-		assert.Equal(t, theme.HoverColor(), ar.background.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), ar.background.FillColor)
 		assert.False(t, ar.background.Visible())
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		b := getLeaf(t, tree, "B")
-		br := test.WidgetRenderer(b).(*treeNodeRenderer)
+		br := test.TempWidgetRenderer(t, b).(*treeNodeRenderer)
 		b.MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), br.background.FillColor)
 		assert.True(t, br.background.Visible())
 		b.MouseOut()
-		assert.Equal(t, theme.HoverColor(), br.background.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), br.background.FillColor)
 		assert.False(t, br.background.Visible())
 	})
 }
