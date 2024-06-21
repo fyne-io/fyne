@@ -139,13 +139,6 @@ func SelectionRadiusSize() float32 {
 	return Current().Size(SizeNameSelectionRadius)
 }
 
-// ScrollBarRadiusSize returns the scroll bar corner radius size.
-//
-// Since: 2.5
-func ScrollBarRadiusSize() float32 {
-	return Current().Size(SizeNameScrollBarRadius)
-}
-
 // SeparatorThicknessSize is the standard thickness of the separator widget.
 //
 // Since: 2.0
