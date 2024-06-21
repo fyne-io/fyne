@@ -11,43 +11,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Try to keep these in sync with the existing color names at theme/color.go.
-var knownColorNames = []fyne.ThemeColorName{
-	theme.ColorNameBackground,
-	theme.ColorNameButton,
-	theme.ColorNameDisabled,
-	theme.ColorNameDisabledButton,
-	theme.ColorNameError,
-	theme.ColorNameFocus,
-	theme.ColorNameForeground,
-	theme.ColorNameForegroundOnError,
-	theme.ColorNameForegroundOnPrimary,
-	theme.ColorNameForegroundOnSuccess,
-	theme.ColorNameForegroundOnWarning,
-	theme.ColorNameHeaderBackground,
-	theme.ColorNameHover,
-	theme.ColorNameHyperlink,
-	theme.ColorNameInputBackground,
-	theme.ColorNameInputBorder,
-	theme.ColorNameMenuBackground,
-	theme.ColorNameOverlayBackground,
-	theme.ColorNamePlaceHolder,
-	theme.ColorNamePressed,
-	theme.ColorNamePrimary,
-	theme.ColorNameScrollBar,
-	theme.ColorNameSelection,
-	theme.ColorNameSeparator,
-	theme.ColorNameShadow,
-	theme.ColorNameSuccess,
-	theme.ColorNameWarning,
-}
-
-// Try to keep this in sync with the existing variants at theme/theme.go
-var knownVariants = []fyne.ThemeVariant{
-	theme.VariantDark,
-	theme.VariantLight,
-}
-
 func Test_NewTheme(t *testing.T) {
 	suite.Run(t, &configurableThemeTestSuite{
 		constructor: NewTheme,
@@ -69,13 +32,7 @@ type configurableThemeTestSuite struct {
 }
 
 func (s *configurableThemeTestSuite) TestAllColorsDefined() {
-	t := s.T()
-	th := s.constructor()
-	for _, variant := range knownVariants {
-		for _, cn := range knownColorNames {
-			assert.NotNil(t, th.Color(cn, variant), "undefined color %s variant %d in theme %s", cn, variant, s.name)
-		}
-	}
+	AssertAllColorNamesDefined(s.T(), s.constructor(), s.name)
 }
 
 func (s *configurableThemeTestSuite) TestUniqueColorValues() {

@@ -11,7 +11,7 @@ import (
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
 
-// Keep in mind to add new constants to the tests at theme/theme_test.go as well as test/theme_test.go.
+// Keep in mind to add new constants to the tests at test/theme.go.
 const (
 	// VariantDark is the version of a theme that satisfies a user preference for a dark look.
 	//
