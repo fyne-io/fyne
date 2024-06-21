@@ -22,7 +22,7 @@
 					</widget>
 					<widget pos="0,30" size="220x6" type="*widget.scrollBarArea">
 						<widget pos="77,3" size="142x3" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="142x3"/>
+							<rectangle fillColor="scrollbar" radius="3" size="142x3"/>
 						</widget>
 					</widget>
 				</widget>
@@ -85,7 +85,7 @@
 					</widget>
 					<widget pos="91,0" size="6x98" type="*widget.scrollBarArea">
 						<widget pos="3,0" size="3x63" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="3x63"/>
+							<rectangle fillColor="scrollbar" radius="3" size="3x63"/>
 						</widget>
 					</widget>
 				</widget>
