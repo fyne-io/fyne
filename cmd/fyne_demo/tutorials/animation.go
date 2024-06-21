@@ -117,7 +117,7 @@ func newThemedBox() *themedBox {
 
 func (b *themedBox) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	bg := canvas.NewRectangle(theme.ForegroundColor())
+	bg := canvas.NewRectangle(theme.Color(theme.ColorNameForeground))
 	return &themedBoxRenderer{bg: bg, objects: []fyne.CanvasObject{bg}}
 }
 
@@ -142,6 +142,6 @@ func (r *themedBoxRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *themedBoxRenderer) Refresh() {
-	r.bg.FillColor = theme.ForegroundColor()
+	r.bg.FillColor = theme.Color(theme.ColorNameForeground)
 	r.bg.Refresh()
 }

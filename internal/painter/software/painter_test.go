@@ -352,7 +352,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 
 func TestPainter_paintText_boldItalicClip(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	text := canvas.NewText("Dd", theme.ForegroundColor())
+	text := canvas.NewText("Dd", theme.Color(theme.ColorNameForeground))
 	text.TextStyle.Bold = true
 	text.TextStyle.Italic = true
 	text.TextSize = 42
@@ -367,7 +367,7 @@ func TestPainter_paintText_boldItalicClip(t *testing.T) {
 
 func TestPainter_paintText_scale2(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	text := canvas.NewText("scale2", theme.ForegroundColor())
+	text := canvas.NewText("scale2", theme.Color(theme.ColorNameForeground))
 	text.TextSize = 18
 	c := test.NewCanvas()
 	c.SetPadded(false)

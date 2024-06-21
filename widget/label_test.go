@@ -160,9 +160,9 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	rich := test.TempWidgetRenderer(t, text).Objects()[0].(*RichText)
 
 	render := test.TempWidgetRenderer(t, rich).(*textRenderer)
-	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
+	assert.Equal(t, theme.Color(theme.ColorNameForeground), render.Objects()[0].(*canvas.Text).Color)
 	text.Show()
-	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
+	assert.Equal(t, theme.Color(theme.ColorNameForeground), render.Objects()[0].(*canvas.Text).Color)
 }
 
 func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {

@@ -18,10 +18,10 @@ func Test_colorButton_Layout(t *testing.T) {
 		hovered bool
 	}{
 		"primary": {
-			color: theme.PrimaryColor(),
+			color: theme.Color(theme.ColorNamePrimary),
 		},
 		"primary_hovered": {
-			color:   theme.PrimaryColor(),
+			color:   theme.Color(theme.ColorNamePrimary),
 			hovered: true,
 		},
 	} {

@@ -50,8 +50,8 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 		widget.NewLabelWithStyle("\nWith great thanks to our many kind sponsors\n", fyne.TextAlignCenter, fyne.TextStyle{Italic: true}))
 	scroll := container.NewScroll(content)
 
-	bgColor := withAlpha(theme.BackgroundColor(), 0xe0)
-	shadowColor := withAlpha(theme.BackgroundColor(), 0x33)
+	bgColor := withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
+	shadowColor := withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
 
 	underlay := canvas.NewImageFromResource(data.FyneLogo)
 	bg := canvas.NewRectangle(bgColor)
@@ -63,11 +63,11 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	fyne.CurrentApp().Settings().AddChangeListener(listen)
 	go func() {
 		for range listen {
-			bgColor = withAlpha(theme.BackgroundColor(), 0xe0)
+			bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
 			bg.FillColor = bgColor
 			bg.Refresh()
 
-			shadowColor = withAlpha(theme.BackgroundColor(), 0x33)
+			shadowColor = withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
 			footerBG.FillColor = bgColor
 			footer.Refresh()
 		}

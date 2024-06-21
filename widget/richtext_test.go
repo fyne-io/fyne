@@ -356,7 +356,7 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.ErrorColor(), richTextRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.Color(theme.ColorNameError), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {

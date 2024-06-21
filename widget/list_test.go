@@ -179,7 +179,7 @@ func TestList_Hover(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		assert.False(t, children[i].(*listItem).background.Visible())
 		children[i].(*listItem).MouseIn(&desktop.MouseEvent{})
-		assert.Equal(t, children[i].(*listItem).background.FillColor, theme.HoverColor())
+		assert.Equal(t, children[i].(*listItem).background.FillColor, theme.Color(theme.ColorNameHover))
 		children[i].(*listItem).MouseOut()
 		assert.False(t, children[i].(*listItem).background.Visible())
 	}
@@ -265,12 +265,12 @@ func TestList_Selection(t *testing.T) {
 
 	assert.False(t, children[0].(*listItem).background.Visible())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.SelectionColor())
+	assert.Equal(t, children[0].(*listItem).background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, children[0].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
-	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.SelectionColor())
+	assert.Equal(t, children[1].(*listItem).background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, children[1].(*listItem).background.Visible())
 	assert.Equal(t, 1, len(list.selected))
 	assert.Equal(t, 1, list.selected[0])
@@ -296,13 +296,13 @@ func TestList_Select(t *testing.T) {
 	assert.Equal(t, 988, int(list.offsetY))
 	lo := list.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 	visible50, _ := lo.searchVisible(lo.visible, 50)
-	assert.Equal(t, visible50.background.FillColor, theme.SelectionColor())
+	assert.Equal(t, visible50.background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, visible50.background.Visible())
 
 	list.Select(5)
 	assert.Equal(t, 195, int(list.offsetY))
 	visible5, _ := lo.searchVisible(lo.visible, 5)
-	assert.Equal(t, visible5.background.FillColor, theme.SelectionColor())
+	assert.Equal(t, visible5.background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, visible5.background.Visible())
 
 	list.Select(6)
@@ -310,7 +310,7 @@ func TestList_Select(t *testing.T) {
 	visible5, _ = lo.searchVisible(lo.visible, 5)
 	visible6, _ := lo.searchVisible(lo.visible, 6)
 	assert.False(t, visible5.background.Visible())
-	assert.Equal(t, visible6.background.FillColor, theme.SelectionColor())
+	assert.Equal(t, visible6.background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, visible6.background.Visible())
 }
 
@@ -323,7 +323,7 @@ func TestList_Unselect(t *testing.T) {
 
 	list.Select(10)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
-	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.SelectionColor())
+	assert.Equal(t, children[10].(*listItem).background.FillColor, theme.Color(theme.ColorNameSelection))
 	assert.True(t, children[10].(*listItem).background.Visible())
 
 	list.Unselect(10)

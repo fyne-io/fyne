@@ -50,7 +50,7 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Refresh() {
-	r.background.FillColor = theme.ScrollBarColor()
+	r.background.FillColor = theme.Color(theme.ColorNameScrollBar)
 	r.background.Refresh()
 }
 
@@ -67,7 +67,7 @@ type scrollBar struct {
 }
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.ScrollBarColor())
+	background := canvas.NewRectangle(theme.Color(theme.ColorNameScrollBar))
 	r := &scrollBarRenderer{
 		scrollBar:  b,
 		background: background,

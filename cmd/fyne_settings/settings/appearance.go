@@ -191,7 +191,7 @@ func (c *primaryColorButton) CreateRenderer() fyne.WidgetRenderer {
 	r.StrokeWidth = 5
 
 	if c.name == c.s.fyneSettings.PrimaryColor {
-		r.StrokeColor = theme.PrimaryColor()
+		r.StrokeColor = theme.Color(theme.ColorNamePrimary)
 	}
 
 	return &primaryColorButtonRenderer{c: c, rect: r, objs: []fyne.CanvasObject{r}}
@@ -222,7 +222,7 @@ func (c *primaryColorButtonRenderer) MinSize() fyne.Size {
 
 func (c *primaryColorButtonRenderer) Refresh() {
 	if c.c.name == c.c.s.fyneSettings.PrimaryColor {
-		c.rect.StrokeColor = theme.PrimaryColor()
+		c.rect.StrokeColor = theme.Color(theme.ColorNamePrimary)
 	} else {
 		c.rect.StrokeColor = color.Transparent
 	}

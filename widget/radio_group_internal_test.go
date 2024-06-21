@@ -257,7 +257,7 @@ func TestRadioGroup_Hovered(t *testing.T) {
 				},
 			})
 			assert.True(t, item1.hovered)
-			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.Color(theme.ColorNameHover), render1.focusIndicator.FillColor)
 			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseOut()

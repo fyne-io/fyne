@@ -16,7 +16,7 @@ import (
 
 func TestMobileCanvas_DismissBar(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
-	c.SetContent(fynecanvas.NewRectangle(theme.BackgroundColor()))
+	c.SetContent(fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground)))
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test"))
 	c.showMenu(menu)
@@ -32,7 +32,7 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 func TestMobileCanvas_DismissMenu(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	c.padded = false
-	c.SetContent(fynecanvas.NewRectangle(theme.BackgroundColor()))
+	c.SetContent(fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground)))
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
 	c.showMenu(menu)

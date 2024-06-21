@@ -121,7 +121,7 @@ func TestText_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			text := canvas.NewText(tt.text, theme.ForegroundColor())
+			text := canvas.NewText(tt.text, theme.Color(theme.ColorNameForeground))
 			text.Alignment = tt.align
 			text.Resize(tt.size)
 
@@ -200,7 +200,7 @@ func TestText_CarriageReturn(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			text := canvas.NewText(tt.text, theme.ForegroundColor())
+			text := canvas.NewText(tt.text, theme.Color(theme.ColorNameForeground))
 			text.Alignment = tt.align
 			text.Resize(tt.size)
 

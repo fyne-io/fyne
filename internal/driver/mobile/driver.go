@@ -73,7 +73,7 @@ func (d *driver) CreateWindow(title string) fyne.Window {
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	ret.InitEventQueue()
 	go ret.RunEventQueue()
-	c.setContent(&fynecanvas.Rectangle{FillColor: theme.BackgroundColor()})
+	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret
@@ -307,7 +307,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
 	c := window.Canvas().(*canvas)
 
-	r, g, b, a := theme.BackgroundColor().RGBA()
+	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.ColorBufferBit)

@@ -304,8 +304,8 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	if r.action != nil {
 		r.action.SetIcon(moreIcon(t))
 	}
-	r.divider.FillColor = theme.ShadowColor()
-	r.indicator.FillColor = theme.PrimaryColor()
+	r.divider.FillColor = theme.Color(theme.ColorNameShadow)
+	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
 	r.indicator.CornerRadius = theme.SelectionRadiusSize()
 
 	for _, tab := range r.tabs.items() {
@@ -425,7 +425,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	r.indicator.FillColor = theme.PrimaryColor()
+	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
@@ -507,7 +507,7 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := canvas.NewRectangle(theme.HoverColor())
+	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(b.icon)
@@ -515,7 +515,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		icon.Hide()
 	}
 
-	label := canvas.NewText(b.text, theme.ForegroundColor())
+	label := canvas.NewText(b.text, theme.Color(theme.ColorNameForeground))
 	label.TextStyle.Bold = true
 
 	close := &tabCloseButton{
@@ -658,7 +658,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	if r.button.hovered && !r.button.Disabled() {
-		r.background.FillColor = theme.HoverColor()
+		r.background.FillColor = theme.Color(theme.ColorNameHover)
 		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
@@ -670,12 +670,12 @@ func (r *tabButtonRenderer) Refresh() {
 	r.label.Alignment = r.button.textAlignment
 	if !r.button.Disabled() {
 		if r.button.importance == widget.HighImportance {
-			r.label.Color = theme.PrimaryColor()
+			r.label.Color = theme.Color(theme.ColorNamePrimary)
 		} else {
-			r.label.Color = theme.ForegroundColor()
+			r.label.Color = theme.Color(theme.ColorNameForeground)
 		}
 	} else {
-		r.label.Color = theme.DisabledColor()
+		r.label.Color = theme.Color(theme.ColorNameDisabled)
 	}
 	r.label.TextSize = theme.TextSize()
 	if r.button.text == "" {
@@ -742,7 +742,7 @@ type tabCloseButton struct {
 
 func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := canvas.NewRectangle(theme.HoverColor())
+	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	background.CornerRadius = theme.SelectionRadiusSize()
 	background.Hide()
 	icon := canvas.NewImageFromResource(theme.CancelIcon())
@@ -804,7 +804,7 @@ func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabCloseButtonRenderer) Refresh() {
 	if r.button.hovered {
-		r.background.FillColor = theme.HoverColor()
+		r.background.FillColor = theme.Color(theme.ColorNameHover)
 		r.background.CornerRadius = theme.SelectionRadiusSize()
 		r.background.Show()
 	} else {
