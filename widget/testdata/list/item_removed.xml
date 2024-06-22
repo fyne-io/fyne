@@ -20,8 +20,8 @@
 							<widget size="20x35" type="*widget.Icon">
 								<image fillMode="contain" rsc="documentIcon" size="20x35" themed="foreground"/>
 							</widget>
-							<widget pos="24,0" size="123x35" type="*widget.Label">
-								<widget size="123x35" type="*widget.RichText">
+							<widget pos="24,0" size="88x35" type="*widget.Label">
+								<widget size="88x35" type="*widget.RichText">
 									<text pos="8,8" size="72x19">Test Item 1</text>
 								</widget>
 							</widget>
