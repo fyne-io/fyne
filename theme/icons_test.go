@@ -134,11 +134,11 @@ func TestThemedResource_Error(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
 	custom := theme.NewThemedResource(source)
-	custom.ColorName = theme.ColorNameError
+	custom.ColorName = theme.ColorNameErrorOnBackground
 
-	assert.Equal(t, custom.Name(), fmt.Sprintf("error_%v", source.Name()))
+	assert.Equal(t, fmt.Sprintf("errorOnBackground_%v", source.Name()), custom.Name())
 	custom2 := theme.NewErrorThemedResource(source)
-	assert.Equal(t, custom2.Name(), fmt.Sprintf("error_%v", source.Name()))
+	assert.Equal(t, fmt.Sprintf("errorOnBackground_%v", source.Name()), custom2.Name())
 }
 
 func TestThemedResource_Success(t *testing.T) {

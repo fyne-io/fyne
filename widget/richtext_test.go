@@ -26,7 +26,7 @@ func richTextRenderTexts(rich fyne.Widget) []*canvas.Text {
 func trailingBoldErrorSegment() *TextSegment {
 	return &TextSegment{Style: RichTextStyle{
 		Alignment: fyne.TextAlignTrailing,
-		ColorName: theme.ColorNameError,
+		ColorName: theme.ColorNameErrorOnBackground,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}}
 }
@@ -356,7 +356,7 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.Color(theme.ColorNameError), richTextRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.Color(theme.ColorNameErrorOnBackground), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {

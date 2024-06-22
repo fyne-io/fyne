@@ -359,7 +359,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 		item.helperOutput.Color = th.Color(theme.ColorNamePlaceHolder, v)
 	} else {
 		item.helperOutput.Text = item.validationError.Error()
-		item.helperOutput.Color = th.Color(theme.ColorNameError, v)
+		item.helperOutput.Color = th.Color(theme.ColorNameErrorOnBackground, v)
 	}
 	item.helperOutput.Refresh()
 }

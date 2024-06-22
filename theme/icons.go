@@ -758,12 +758,12 @@ func NewErrorThemedResource(orig fyne.Resource) *ErrorThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *ErrorThemedResource) Name() string {
-	return "error_" + unwrapResource(res.source).Name()
+	return "errorOnBackground_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *ErrorThemedResource) Content() []byte {
-	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameError))
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNameErrorOnBackground))
 }
 
 // Original returns the underlying resource that this error themed resource was adapted from
