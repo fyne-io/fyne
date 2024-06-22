@@ -19,7 +19,7 @@
 					</widget>
 					<widget pos="66,0" size="6x32" type="*widget.scrollBarArea">
 						<widget pos="3,0" size="3x16" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="3x16"/>
+							<rectangle fillColor="scrollbar" radius="3" size="3x16"/>
 						</widget>
 					</widget>
 				</widget>

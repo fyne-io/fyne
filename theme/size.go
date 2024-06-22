@@ -72,6 +72,11 @@ const (
 	//
 	// Since: 2.4
 	SizeNameSelectionRadius fyne.ThemeSizeName = "selectionRadius"
+
+	// SizeNameScrollBarRadius is the name of theme lookup for the scroll bar corner radius.
+	//
+	// Since: 2.5
+	SizeNameScrollBarRadius = "scrollBarRadius"
 )
 
 // CaptionTextSize returns the size for caption text.

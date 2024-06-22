@@ -141,6 +141,7 @@ func NewTheme() fyne.Theme {
 			theme.SizeNameInputBorder:        float32(5),
 			theme.SizeNameInputRadius:        float32(2),
 			theme.SizeNameSelectionRadius:    float32(6),
+			theme.SizeNameScrollBarRadius:    float32(2),
 		},
 	}
 }
@@ -202,6 +203,7 @@ func Theme() fyne.Theme {
 				theme.SizeNameInputBorder:        float32(2),
 				theme.SizeNameInputRadius:        float32(4),
 				theme.SizeNameSelectionRadius:    float32(4),
+				theme.SizeNameScrollBarRadius:    float32(3),
 			},
 		}
 	}
@@ -238,8 +240,9 @@ func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 }
 
 func (t *configurableTheme) Size(s fyne.ThemeSizeName) float32 {
-	if t.sizes[s] == 0 {
+	if _, ok := t.sizes[s]; !ok {
 		fyne.LogError(fmt.Sprintf("size %s not defined in theme %s", s, t.name), nil)
+		return 0
 	}
 
 	return t.sizes[s]

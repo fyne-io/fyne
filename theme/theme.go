@@ -168,6 +168,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 5
 	case SizeNameSelectionRadius:
 		return 3
+	case SizeNameScrollBarRadius:
+		return 3
 	default:
 		return 0
 	}
