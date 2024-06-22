@@ -305,7 +305,7 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 		r.action.SetIcon(moreIcon(t))
 	}
 	r.divider.FillColor = theme.Color(theme.ColorNameShadow)
-	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
+	r.indicator.FillColor = theme.Color(theme.ColorNamePrimaryOnBackground)
 	r.indicator.CornerRadius = theme.SelectionRadiusSize()
 
 	for _, tab := range r.tabs.items() {
@@ -425,7 +425,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
+	r.indicator.FillColor = theme.Color(theme.ColorNamePrimaryOnBackground)
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
@@ -670,7 +670,7 @@ func (r *tabButtonRenderer) Refresh() {
 	r.label.Alignment = r.button.textAlignment
 	if !r.button.Disabled() {
 		if r.button.importance == widget.HighImportance {
-			r.label.Color = theme.Color(theme.ColorNamePrimary)
+			r.label.Color = theme.Color(theme.ColorNamePrimaryOnBackground)
 		} else {
 			r.label.Color = theme.Color(theme.ColorNameForeground)
 		}

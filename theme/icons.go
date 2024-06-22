@@ -785,12 +785,12 @@ func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
 
 // Name returns the underlying resource name (used for caching).
 func (res *PrimaryThemedResource) Name() string {
-	return "primary_" + unwrapResource(res.source).Name()
+	return "primaryOnBackground_" + unwrapResource(res.source).Name()
 }
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *PrimaryThemedResource) Content() []byte {
-	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNamePrimary))
+	return svg.Colorize(unwrapResource(res.source).Content(), Color(ColorNamePrimaryOnBackground))
 }
 
 // Original returns the underlying resource that this primary themed resource was adapted from

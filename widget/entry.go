@@ -1853,7 +1853,7 @@ func (r *entryRenderer) Refresh() {
 	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	r.border.CornerRadius = r.box.CornerRadius
 	if focusedAppearance {
-		r.border.StrokeColor = th.Color(theme.ColorNamePrimary, v)
+		r.border.StrokeColor = th.Color(theme.ColorNamePrimaryOnBackground, v)
 	} else {
 		if r.entry.Disabled() {
 			r.border.StrokeColor = th.Color(theme.ColorNameDisabled, v)

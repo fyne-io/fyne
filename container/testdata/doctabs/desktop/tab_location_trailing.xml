@@ -5,7 +5,7 @@
 				<widget size="72x32" type="*widget.Scroll">
 					<container size="72x116">
 						<widget size="72x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="64x19">Test1</text>
+							<text bold color="primaryOnBackground" pos="4,8" size="64x19">Test1</text>
 						</widget>
 						<widget pos="0,40" size="72x36" type="*container.tabButton">
 							<text bold pos="4,8" size="64x19">Test2</text>
@@ -32,7 +32,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="54,0" size="4x72"/>
-			<rectangle fillColor="primary" pos="54,0" radius="4" size="4x32"/>
+			<rectangle fillColor="primaryOnBackground" pos="54,0" radius="4" size="4x32"/>
 			<widget size="54x72" type="*widget.Label">
 				<widget size="54x72" type="*widget.RichText">
 					<text pos="8,8" size="38x19">Text 1</text>

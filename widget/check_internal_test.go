@@ -47,7 +47,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check.SetChecked(true)
 	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
-	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primaryOnBackground_"))
 
 	check.Disable()
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))

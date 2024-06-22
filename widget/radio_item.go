@@ -195,7 +195,7 @@ func (r *radioItemRenderer) update() {
 	in := theme.NewThemedResource(th.Icon(theme.IconNameRadioButtonFill))
 	in.ColorName = theme.ColorNameInputBackground
 	if r.item.Selected {
-		in.ColorName = theme.ColorNamePrimary
+		in.ColorName = theme.ColorNamePrimaryOnBackground
 		out.ColorName = theme.ColorNameForeground
 	}
 	if r.item.Disabled() {

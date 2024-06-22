@@ -7,7 +7,7 @@
 						<text alignment="center" bold pos="4,8" size="56x19">Test1</text>
 					</widget>
 					<widget pos="68,0" size="64x35" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,8" size="56x19">Test2</text>
+						<text alignment="center" bold color="primaryOnBackground" pos="4,8" size="56x19">Test2</text>
 					</widget>
 					<widget pos="136,0" size="64x35" type="*container.tabButton">
 						<text alignment="center" bold pos="4,8" size="56x19">Test3</text>
@@ -15,7 +15,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,35" size="200x4"/>
-			<rectangle fillColor="primary" pos="68,35" radius="4" size="64x4"/>
+			<rectangle fillColor="primaryOnBackground" pos="68,35" radius="4" size="64x4"/>
 			<widget pos="0,39" size="200x60" type="*widget.Label">
 				<widget size="200x60" type="*widget.RichText">
 					<text pos="8,8" size="38x19">Text 2</text>

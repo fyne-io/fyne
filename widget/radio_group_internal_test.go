@@ -66,7 +66,7 @@ func TestRadioGroup_DisableWhenSelected(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
 	render := radioGroupTestItemRenderer(t, radio, 0)
-	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primaryOnBackground_"))
 
 	radio.Disable()
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"))

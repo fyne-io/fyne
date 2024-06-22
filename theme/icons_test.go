@@ -69,8 +69,8 @@ func TestNewColoredResource(t *testing.T) {
 	assert.Equal(t, theme.ColorNameSuccess, custom.ColorName)
 	assert.Equal(t, custom.Name(), fmt.Sprintf("success_%v", source.Name()))
 
-	custom = theme.NewColoredResource(source, theme.ColorNamePrimary)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("primary_%v", source.Name()))
+	custom = theme.NewColoredResource(source, theme.ColorNamePrimaryOnBackground)
+	assert.Equal(t, custom.Name(), fmt.Sprintf("primaryOnBackground_%v", source.Name()))
 }
 
 func TestNewDisabledResource(t *testing.T) {

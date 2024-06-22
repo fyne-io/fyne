@@ -4,12 +4,12 @@
 			<container size="150x35">
 				<container size="150x35">
 					<widget size="150x35" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,8" size="142x19">Text2</text>
+						<text alignment="center" bold color="primaryOnBackground" pos="4,8" size="142x19">Text2</text>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,35" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,35" radius="4" size="150x4"/>
+			<rectangle fillColor="primaryOnBackground" pos="0,35" radius="4" size="150x4"/>
 			<circle fillColor="background" pos="0,39" size="150x110"/>
 		</widget>
 	</content>
