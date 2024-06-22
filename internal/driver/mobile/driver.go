@@ -248,7 +248,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			w.QueueEvent(f)
 		}
 	case lifecycle.CrossOff: // will enter background
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
 			if d.glctx == nil {
 				return
 			}
