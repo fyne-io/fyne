@@ -7,11 +7,17 @@ import (
 	"unsafe"
 )
 
-type MB uint32
+type (
+	MB uint32
+	ES uint
+)
 
 const (
 	MB_OK        MB = 0x0000_0000
 	MB_ICONERROR MB = 0x0000_0010
+
+	ES_CONTINUOUS       ES = 0x80000000
+	ES_DISPLAY_REQUIRED ES = 0x00000002
 )
 
 func toNativePtr(s string) *uint16 {
@@ -47,4 +53,16 @@ func logError(msg string, err error) {
 	}
 
 	messageBoxError(text, "Fyne Error")
+}
+
+func setDisableScreenBlank(disable bool) {
+	user32 := syscall.NewLazyDLL("kernel32.dll")
+	executionState := user32.NewProc("SetThreadExecutionState")
+
+	uType := ES_CONTINUOUS
+	if disable {
+		uType |= ES_DISPLAY_REQUIRED
+	}
+
+	syscall.Syscall(executionState.Addr(), 1, uintptr(uType), 0, 0)
 }
