@@ -106,6 +106,8 @@ func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		return internaltheme.PrimaryColorNamed(primary)
 	} else if n == ColorNameForegroundOnPrimary {
 		return internaltheme.ForegroundOnPrimaryColorNamed(primary)
+	} else if n == ColorNamePrimaryOnBackground {
+		return primaryOnBackgroundColorNamed(primary, v)
 	} else if n == ColorNameFocus {
 		return focusColorNamed(primary)
 	} else if n == ColorNameSelection {
@@ -226,6 +228,8 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkDisabledButton
 	case ColorNameError:
 		return colorDarkError
+	case ColorNameErrorOnBackground:
+		return colorDarkErrorOnBackground
 	case ColorNameForeground:
 		return colorDarkForeground
 	case ColorNameForegroundOnError:
@@ -258,8 +262,12 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkShadow
 	case ColorNameSuccess:
 		return colorDarkSuccess
+	case ColorNameSuccessOnBackground:
+		return colorDarkSuccessOnBackground
 	case ColorNameWarning:
 		return colorDarkWarning
+	case ColorNameWarningOnBackground:
+		return colorDarkWarningOnBackground
 	}
 
 	return color.Transparent
@@ -300,6 +308,8 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightDisabledButton
 	case ColorNameError:
 		return colorLightError
+	case ColorNameErrorOnBackground:
+		return colorLightErrorOnBackground
 	case ColorNameForeground:
 		return colorLightForeground
 	case ColorNameForegroundOnError:
@@ -332,8 +342,12 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightShadow
 	case ColorNameSuccess:
 		return colorLightSuccess
+	case ColorNameSuccessOnBackground:
+		return colorLightSuccessOnBackground
 	case ColorNameWarning:
 		return colorLightWarning
+	case ColorNameWarningOnBackground:
+		return colorLightWarningOnBackground
 	}
 
 	return color.Transparent
@@ -349,6 +363,52 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	}
 
 	return res
+}
+
+func primaryOnBackgroundColorNamed(name string, variant fyne.ThemeVariant) color.Color {
+	if variant == VariantLight {
+		switch name {
+		case ColorRed:
+			return colorLightPrimaryOnBackgroundRed
+		case ColorOrange:
+			return colorLightPrimaryOnBackgroundOrange
+		case ColorYellow:
+			return colorLightPrimaryOnBackgroundYellow
+		case ColorGreen:
+			return colorLightPrimaryOnBackgroundGreen
+		case ColorPurple:
+			return colorLightPrimaryOnBackgroundPurple
+		case ColorBrown:
+			return colorLightPrimaryOnBackgroundBrown
+		case ColorGray:
+			return colorLightPrimaryOnBackgroundGray
+		}
+
+		// We return the value for ColorBlue for every other value.
+		// There is no need to have it in the switch above.
+		return colorLightPrimaryOnBackgroundBlue
+	}
+
+	switch name {
+	case ColorRed:
+		return colorDarkPrimaryOnBackgroundRed
+	case ColorOrange:
+		return colorDarkPrimaryOnBackgroundOrange
+	case ColorYellow:
+		return colorDarkPrimaryOnBackgroundYellow
+	case ColorGreen:
+		return colorDarkPrimaryOnBackgroundGreen
+	case ColorPurple:
+		return colorDarkPrimaryOnBackgroundPurple
+	case ColorBrown:
+		return colorDarkPrimaryOnBackgroundBrown
+	case ColorGray:
+		return colorDarkPrimaryOnBackgroundGray
+	}
+
+	// We return the value for ColorBlue for every other value.
+	// There is no need to have it in the switch above.
+	return colorDarkPrimaryOnBackgroundBlue
 }
 
 func selectionColorNamed(name string) color.NRGBA {
