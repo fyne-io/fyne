@@ -7,55 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
 
-// Try to keep these in sync with the existing color names at theme/color.go.
-var knownColorNames = []fyne.ThemeColorName{
-	theme.ColorNameBackground,
-	theme.ColorNameButton,
-	theme.ColorNameDisabled,
-	theme.ColorNameDisabledButton,
-	theme.ColorNameError,
-	theme.ColorNameFocus,
-	theme.ColorNameForeground,
-	theme.ColorNameForegroundOnError,
-	theme.ColorNameForegroundOnPrimary,
-	theme.ColorNameForegroundOnSuccess,
-	theme.ColorNameForegroundOnWarning,
-	theme.ColorNameHeaderBackground,
-	theme.ColorNameHover,
-	theme.ColorNameHyperlink,
-	theme.ColorNameInputBackground,
-	theme.ColorNameInputBorder,
-	theme.ColorNameMenuBackground,
-	theme.ColorNameOverlayBackground,
-	theme.ColorNamePlaceHolder,
-	theme.ColorNamePressed,
-	theme.ColorNamePrimary,
-	theme.ColorNameScrollBar,
-	theme.ColorNameSelection,
-	theme.ColorNameSeparator,
-	theme.ColorNameShadow,
-	theme.ColorNameSuccess,
-	theme.ColorNameWarning,
-}
-
-// Try to keep this in sync with the existing variants at theme/theme.go
-var knownVariants = []fyne.ThemeVariant{
-	theme.VariantDark,
-	theme.VariantLight,
-}
-
 func Test_DefaultTheme_AllColorsDefined(t *testing.T) {
-	th := theme.DefaultTheme()
-	for _, variant := range knownVariants {
-		for _, cn := range knownColorNames {
-			// Transparent is used as fallback for unknown color names.
-			// Built-in color names should have well-defined non-transparent values.
-			assert.NotEqual(t, color.Transparent, th.Color(cn, variant), "undefined color %s variant %d", cn, variant)
-		}
-	}
+	test.AssertAllColorNamesDefined(t, theme.DefaultTheme(), "default")
 }
 
 func Test_DefaultTheme_PrimaryForegroundColor(t *testing.T) {

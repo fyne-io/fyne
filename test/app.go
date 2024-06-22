@@ -188,8 +188,9 @@ func NewApp() fyne.App {
 }
 
 type testSettings struct {
-	theme fyne.Theme
-	scale float32
+	primaryColor string
+	scale        float32
+	theme        fyne.Theme
 
 	changeListeners []chan fyne.Settings
 	propertyLock    sync.RWMutex
@@ -206,6 +207,10 @@ func (s *testSettings) BuildType() fyne.BuildType {
 }
 
 func (s *testSettings) PrimaryColor() string {
+	if s.primaryColor != "" {
+		return s.primaryColor
+	}
+
 	return theme.ColorBlue
 }
 
