@@ -18,13 +18,13 @@ func TestSplitContainer_MinSize(t *testing.T) {
 	rectB.SetMinSize(fyne.NewSize(10, 10))
 	t.Run("Horizontal", func(t *testing.T) {
 		min := NewHSplit(rectA, rectB).MinSize()
-		assert.Equal(t, rectA.MinSize().Width+rectB.MinSize().Width+dividerThickness(), min.Width)
-		assert.Equal(t, fyne.Max(rectA.MinSize().Height, fyne.Max(rectB.MinSize().Height, dividerLength())), min.Height)
+		assert.Equal(t, rectA.MinSize().Width+rectB.MinSize().Width+dividerThickness(nil), min.Width)
+		assert.Equal(t, fyne.Max(rectA.MinSize().Height, fyne.Max(rectB.MinSize().Height, dividerLength(nil))), min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		min := NewVSplit(rectA, rectB).MinSize()
-		assert.Equal(t, fyne.Max(rectA.MinSize().Width, fyne.Max(rectB.MinSize().Width, dividerLength())), min.Width)
-		assert.Equal(t, rectA.MinSize().Height+rectB.MinSize().Height+dividerThickness(), min.Height)
+		assert.Equal(t, fyne.Max(rectA.MinSize().Width, fyne.Max(rectB.MinSize().Width, dividerLength(nil))), min.Width)
+		assert.Equal(t, rectA.MinSize().Height+rectB.MinSize().Height+dividerThickness(nil), min.Height)
 	})
 }
 
@@ -41,66 +41,66 @@ func TestSplitContainer_Resize(t *testing.T) {
 			true,
 			fyne.NewSize(100, 100),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(50-dividerThickness()/2, 100),
-			fyne.NewPos(50+dividerThickness()/2, 0),
-			fyne.NewSize(50-dividerThickness()/2, 100),
+			fyne.NewSize(50-dividerThickness(nil)/2, 100),
+			fyne.NewPos(50+dividerThickness(nil)/2, 0),
+			fyne.NewSize(50-dividerThickness(nil)/2, 100),
 		},
 		"vertical": {
 			false,
 			fyne.NewSize(100, 100),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(100, 50-dividerThickness()/2),
-			fyne.NewPos(0, 50+dividerThickness()/2),
-			fyne.NewSize(100, 50-dividerThickness()/2),
+			fyne.NewSize(100, 50-dividerThickness(nil)/2),
+			fyne.NewPos(0, 50+dividerThickness(nil)/2),
+			fyne.NewSize(100, 50-dividerThickness(nil)/2),
 		},
 		"horizontal insufficient width": {
 			true,
 			fyne.NewSize(20, 100),
 			fyne.NewPos(0, 0),
 			// minSize of leading is 1/3 of minSize of trailing
-			fyne.NewSize((20-dividerThickness())/4, 100),
-			fyne.NewPos((20-dividerThickness())/4+dividerThickness(), 0),
-			fyne.NewSize((20-dividerThickness())*3/4, 100),
+			fyne.NewSize((20-dividerThickness(nil))/4, 100),
+			fyne.NewPos((20-dividerThickness(nil))/4+dividerThickness(nil), 0),
+			fyne.NewSize((20-dividerThickness(nil))*3/4, 100),
 		},
 		"vertical insufficient height": {
 			false,
 			fyne.NewSize(100, 20),
 			fyne.NewPos(0, 0),
 			// minSize of leading is 1/3 of minSize of trailing
-			fyne.NewSize(100, (20-dividerThickness())/4),
-			fyne.NewPos(0, (20-dividerThickness())/4+dividerThickness()),
-			fyne.NewSize(100, (20-dividerThickness())*3/4),
+			fyne.NewSize(100, (20-dividerThickness(nil))/4),
+			fyne.NewPos(0, (20-dividerThickness(nil))/4+dividerThickness(nil)),
+			fyne.NewSize(100, (20-dividerThickness(nil))*3/4),
 		},
 		"horizontal zero width": {
 			true,
 			fyne.NewSize(0, 100),
 			fyne.NewPos(0, 0),
 			fyne.NewSize(0, 100),
-			fyne.NewPos(dividerThickness(), 0),
+			fyne.NewPos(dividerThickness(nil), 0),
 			fyne.NewSize(0, 100),
 		},
 		"horizontal zero height": {
 			true,
 			fyne.NewSize(100, 0),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(50-dividerThickness()/2, 0),
-			fyne.NewPos(50+dividerThickness()/2, 0),
-			fyne.NewSize(50-dividerThickness()/2, 0),
+			fyne.NewSize(50-dividerThickness(nil)/2, 0),
+			fyne.NewPos(50+dividerThickness(nil)/2, 0),
+			fyne.NewSize(50-dividerThickness(nil)/2, 0),
 		},
 		"vertical zero width": {
 			false,
 			fyne.NewSize(0, 100),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(0, 50-dividerThickness()/2),
-			fyne.NewPos(0, 50+dividerThickness()/2),
-			fyne.NewSize(0, 50-dividerThickness()/2),
+			fyne.NewSize(0, 50-dividerThickness(nil)/2),
+			fyne.NewPos(0, 50+dividerThickness(nil)/2),
+			fyne.NewSize(0, 50-dividerThickness(nil)/2),
 		},
 		"vertical zero height": {
 			false,
 			fyne.NewSize(100, 0),
 			fyne.NewPos(0, 0),
 			fyne.NewSize(100, 0),
-			fyne.NewPos(0, dividerThickness()),
+			fyne.NewPos(0, dividerThickness(nil)),
 			fyne.NewSize(100, 0),
 		},
 	} {
@@ -127,7 +127,7 @@ func TestSplitContainer_Resize(t *testing.T) {
 
 func TestSplitContainer_SetRatio(t *testing.T) {
 	size := fyne.NewSize(100, 100)
-	usableLength := 100 - float64(dividerThickness())
+	usableLength := 100 - float64(dividerThickness(nil))
 
 	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
@@ -191,7 +191,7 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 			sc.Resize(fyne.NewSize(200, 50))
 			sizeA := objA.Size()
 			sizeB := objB.Size()
-			assert.Equal(t, 150-dividerThickness(), sizeA.Width)
+			assert.Equal(t, 150-dividerThickness(nil), sizeA.Width)
 			assert.Equal(t, float32(50), sizeA.Height)
 			assert.Equal(t, float32(50), sizeB.Width)
 			assert.Equal(t, float32(50), sizeB.Height)
@@ -203,7 +203,7 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 			sizeB := objB.Size()
 			assert.Equal(t, float32(50), sizeA.Width)
 			assert.Equal(t, float32(50), sizeA.Height)
-			assert.Equal(t, 150-dividerThickness(), sizeB.Width)
+			assert.Equal(t, 150-dividerThickness(nil), sizeB.Width)
 			assert.Equal(t, float32(50), sizeB.Height)
 		})
 	})
@@ -215,7 +215,7 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 			sizeA := objA.Size()
 			sizeB := objB.Size()
 			assert.Equal(t, float32(50), sizeA.Width)
-			assert.Equal(t, 150-dividerThickness(), sizeA.Height)
+			assert.Equal(t, 150-dividerThickness(nil), sizeA.Height)
 			assert.Equal(t, float32(50), sizeB.Width)
 			assert.Equal(t, float32(50), sizeB.Height)
 		})
@@ -227,14 +227,14 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 			assert.Equal(t, float32(50), sizeA.Width)
 			assert.Equal(t, float32(50), sizeA.Height)
 			assert.Equal(t, float32(50), sizeB.Width)
-			assert.Equal(t, 150-dividerThickness(), sizeB.Height)
+			assert.Equal(t, 150-dividerThickness(nil), sizeB.Height)
 		})
 	})
 }
 
 func TestSplitContainer_swap_contents(t *testing.T) {
-	dl := dividerLength()
-	dt := dividerThickness()
+	dl := dividerLength(nil)
+	dt := dividerThickness(nil)
 	initialWidth := 10 + 10 + dt
 	initialHeight := fyne.Max(10, dl)
 	expectedWidth := 100 + 10 + dt
@@ -442,19 +442,19 @@ func TestSplitContainer_divider_MinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		divider := newDivider(&Split{Horizontal: true})
 		min := divider.MinSize()
-		assert.Equal(t, dividerThickness(), min.Width)
-		assert.Equal(t, dividerLength(), min.Height)
+		assert.Equal(t, dividerThickness(nil), min.Width)
+		assert.Equal(t, dividerLength(nil), min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		divider := newDivider(&Split{Horizontal: false})
 		min := divider.MinSize()
-		assert.Equal(t, dividerLength(), min.Width)
-		assert.Equal(t, dividerThickness(), min.Height)
+		assert.Equal(t, dividerLength(nil), min.Width)
+		assert.Equal(t, dividerThickness(nil), min.Height)
 	})
 }
 
 func TestSplitContainer_Hidden(t *testing.T) {
-	dt := dividerThickness()
+	dt := dividerThickness(nil)
 	size := fyne.NewSize(10, 10)
 	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objA.SetMinSize(size)

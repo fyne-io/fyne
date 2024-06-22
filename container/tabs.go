@@ -79,6 +79,7 @@ type baseTabs interface {
 
 	items() []*TabItem
 	setItems([]*TabItem)
+	scope() fyne.Widget
 
 	selected() int
 	setSelected(int)
@@ -304,9 +305,12 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	if r.action != nil {
 		r.action.SetIcon(moreIcon(t))
 	}
-	r.divider.FillColor = theme.Color(theme.ColorNameShadow)
-	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
-	r.indicator.CornerRadius = theme.SelectionRadiusSize()
+	th := theme.CurrentForWidget(t.scope())
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	r.divider.FillColor = th.Color(theme.ColorNameShadow, v)
+	r.indicator.FillColor = th.Color(theme.ColorNamePrimary, v)
+	r.indicator.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 
 	for _, tab := range r.tabs.items() {
 		tab.Content.Refresh()
@@ -321,7 +325,8 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 
 	barMin := r.bar.MinSize()
 
-	padding := theme.Padding()
+	th := theme.CurrentForWidget(t.scope())
+	padding := th.Size(theme.SizeNamePadding)
 	switch t.tabLocation() {
 	case TabLocationTop:
 		barHeight := barMin.Height
@@ -337,7 +342,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 		barSize = fyne.NewSize(barWidth, size.Height)
 		dividerPos = fyne.NewPos(barWidth, 0)
 		dividerSize = fyne.NewSize(padding, size.Height)
-		contentPos = fyne.NewPos(barWidth+theme.Padding(), 0)
+		contentPos = fyne.NewPos(barWidth+padding, 0)
 		contentSize = fyne.NewSize(size.Width-barWidth-padding, size.Height)
 	case TabLocationBottom:
 		barHeight := barMin.Height
@@ -374,7 +379,8 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 }
 
 func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
-	pad := theme.Padding()
+	th := theme.CurrentForWidget(t.scope())
+	pad := th.Size(theme.SizeNamePadding)
 	buttonPad := pad
 	barMin := r.bar.MinSize()
 	tabsMin := r.bar.Objects[0].MinSize()
@@ -407,7 +413,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 	}
 }
 
-func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, animate bool) {
+func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fyne.Theme, animate bool) {
 	r.lastIndicatorMutex.RLock()
 	isSameState := r.lastIndicatorPos.Subtract(pos).IsZero() && r.lastIndicatorSize.Subtract(siz).IsZero() &&
 		r.lastIndicatorHidden == r.indicator.Hidden
@@ -425,7 +431,8 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, anima
 		r.sizeAnimation = nil
 	}
 
-	r.indicator.FillColor = theme.Color(theme.ColorNamePrimary)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	r.indicator.FillColor = th.Color(theme.ColorNamePrimary, v)
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
 		r.indicator.Resize(siz)
@@ -507,15 +514,18 @@ type tabButton struct {
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
-	background.CornerRadius = theme.SelectionRadiusSize()
+	th := b.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
+	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	background.Hide()
 	icon := canvas.NewImageFromResource(b.icon)
 	if b.icon == nil {
 		icon.Hide()
 	}
 
-	label := canvas.NewText(b.text, theme.Color(theme.ColorNameForeground))
+	label := canvas.NewText(b.text, th.Color(theme.ColorNameForeground, v))
 	label.TextStyle.Bold = true
 
 	close := &tabCloseButton{
@@ -581,6 +591,8 @@ func (r *tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
+	th := r.button.Theme()
+	pad := th.Size(theme.SizeNamePadding)
 	r.background.Resize(size)
 	padding := r.padding()
 	innerSize := size.Subtract(padding)
@@ -596,7 +608,7 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		}
 		r.icon.Resize(fyne.NewSquareSize(iconSize))
 		r.icon.Move(innerOffset.Add(iconOffset))
-		labelShift = iconSize + theme.Padding()
+		labelShift = iconSize + pad
 	}
 	if r.label.Text != "" {
 		var labelOffset fyne.Position
@@ -611,16 +623,17 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		r.label.Resize(labelSize)
 		r.label.Move(innerOffset.Add(labelOffset))
 	}
-	inlineIconSize := theme.IconInlineSize()
-	r.close.Move(fyne.NewPos(size.Width-inlineIconSize-theme.Padding(), (size.Height-inlineIconSize)/2))
+	inlineIconSize := th.Size(theme.SizeNameInlineIcon)
+	r.close.Move(fyne.NewPos(size.Width-inlineIconSize-pad, (size.Height-inlineIconSize)/2))
 	r.close.Resize(fyne.NewSquareSize(inlineIconSize))
 }
 
 func (r *tabButtonRenderer) MinSize() fyne.Size {
+	th := r.button.Theme()
 	var contentWidth, contentHeight float32
 	textSize := r.label.MinSize()
 	iconSize := r.iconSize()
-	padding := theme.Padding()
+	padding := th.Size(theme.SizeNamePadding)
 	if r.button.iconPosition == buttonIconTop {
 		contentWidth = fyne.Max(textSize.Width, iconSize)
 		if r.icon.Visible() {
@@ -645,7 +658,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 		}
 	}
 	if r.button.onClosed != nil {
-		inlineIconSize := theme.IconInlineSize()
+		inlineIconSize := th.Size(theme.SizeNameInlineIcon)
 		contentWidth += inlineIconSize + padding
 		contentHeight = fyne.Max(contentHeight, inlineIconSize)
 	}
@@ -657,9 +670,12 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	th := r.button.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	if r.button.hovered && !r.button.Disabled() {
-		r.background.FillColor = theme.Color(theme.ColorNameHover)
-		r.background.CornerRadius = theme.SelectionRadiusSize()
+		r.background.FillColor = th.Color(theme.ColorNameHover, v)
+		r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 		r.background.Show()
 	} else {
 		r.background.Hide()
@@ -670,14 +686,14 @@ func (r *tabButtonRenderer) Refresh() {
 	r.label.Alignment = r.button.textAlignment
 	if !r.button.Disabled() {
 		if r.button.importance == widget.HighImportance {
-			r.label.Color = theme.Color(theme.ColorNamePrimary)
+			r.label.Color = th.Color(theme.ColorNamePrimary, v)
 		} else {
-			r.label.Color = theme.Color(theme.ColorNameForeground)
+			r.label.Color = th.Color(theme.ColorNameForeground, v)
 		}
 	} else {
-		r.label.Color = theme.Color(theme.ColorNameDisabled)
+		r.label.Color = th.Color(theme.ColorNameDisabled, v)
 	}
-	r.label.TextSize = theme.TextSize()
+	r.label.TextSize = th.Size(theme.SizeNameText)
 	if r.button.text == "" {
 		r.label.Hide()
 	} else {
@@ -714,15 +730,16 @@ func (r *tabButtonRenderer) Refresh() {
 }
 
 func (r *tabButtonRenderer) iconSize() float32 {
+	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 2 * theme.IconInlineSize()
+		return 2 * iconSize
 	}
 
-	return theme.IconInlineSize()
+	return iconSize
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {
-	padding := theme.InnerPadding()
+	padding := r.button.Theme().Size(theme.SizeNameInnerPadding)
 	if r.label.Text != "" && r.button.iconPosition == buttonIconInline {
 		return fyne.NewSquareSize(padding * 2)
 	}
@@ -742,8 +759,11 @@ type tabCloseButton struct {
 
 func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
-	background.CornerRadius = theme.SelectionRadiusSize()
+	th := b.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
+	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	background.Hide()
 	icon := canvas.NewImageFromResource(theme.CancelIcon())
 
@@ -795,7 +815,7 @@ func (r *tabCloseButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *tabCloseButtonRenderer) MinSize() fyne.Size {
-	return fyne.NewSquareSize(theme.IconInlineSize())
+	return fyne.NewSquareSize(r.button.Theme().Size(theme.SizeNameInlineIcon))
 }
 
 func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
@@ -803,9 +823,12 @@ func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabCloseButtonRenderer) Refresh() {
+	th := r.button.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	if r.button.hovered {
-		r.background.FillColor = theme.Color(theme.ColorNameHover)
-		r.background.CornerRadius = theme.SelectionRadiusSize()
+		r.background.FillColor = th.Color(theme.ColorNameHover, v)
+		r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 		r.background.Show()
 	} else {
 		r.background.Hide()
