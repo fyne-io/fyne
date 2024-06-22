@@ -79,7 +79,7 @@ type baseTabs interface {
 
 	items() []*TabItem
 	setItems([]*TabItem)
-	scope() fyne.Widget
+	scope() fyne.Widget // what widget does this represented - the scope for theme overrides
 
 	selected() int
 	setSelected(int)
