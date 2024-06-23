@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -82,7 +83,12 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
 	if f := l.CreateItem; f != nil && l.itemMin.IsZero() {
-		l.itemMin = f().MinSize()
+		item := f()
+		if cache.OverrideThemeMatchingScope(item, l) {
+			item.Refresh()
+		}
+
+		l.itemMin = item.MinSize()
 	}
 
 	layout := &fyne.Container{Layout: newGridWrapLayout(l)}
@@ -370,7 +376,12 @@ func (l *gridWrapRenderer) MinSize() fyne.Size {
 
 func (l *gridWrapRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.itemMin = f().MinSize()
+		item := f()
+		if cache.OverrideThemeMatchingScope(item, l.list) {
+			item.Refresh()
+		}
+
+		l.list.itemMin = item.MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
@@ -533,7 +544,12 @@ func (l *gridWrapLayout) getItem() *gridWrapItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item = newGridWrapItem(f(), nil)
+			child := f()
+			if cache.OverrideThemeMatchingScope(item, l.list) {
+				child.Refresh()
+			}
+
+			item = newGridWrapItem(child, nil)
 		}
 	}
 	return item.(*gridWrapItem)
