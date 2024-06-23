@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -86,7 +87,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
 	if f := l.CreateItem; f != nil && l.itemMin.IsZero() {
-		l.itemMin = f().MinSize()
+		item := f()
+		if cache.OverrideThemeMatchingScope(item, l) {
+			item.Refresh()
+		}
+		l.itemMin = item.MinSize()
 	}
 
 	layout := &fyne.Container{Layout: newListLayout(l)}
@@ -472,11 +477,20 @@ func (l *listRenderer) MinSize() fyne.Size {
 
 func (l *listRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.itemMin = f().MinSize()
+		item := f()
+		if cache.OverrideThemeMatchingScope(item, l.list) {
+			item.Refresh()
+		}
+		l.list.itemMin = item.MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*listLayout).updateList(false)
+	layout := l.layout.Layout.(*listLayout)
+	layout.updateList(false)
+
+	for _, s := range layout.separators {
+		s.Refresh()
+	}
 	canvas.Refresh(l.list.super())
 }
 
@@ -631,7 +645,12 @@ func (l *listLayout) getItem() *listItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item = newListItem(f(), nil)
+			item2 := f()
+			if cache.OverrideThemeMatchingScope(item, l.list) {
+				item2.Refresh()
+			}
+
+			item = newListItem(item2, nil)
 		}
 	}
 	return item.(*listItem)
@@ -791,7 +810,13 @@ func (l *listLayout) updateSeparators() {
 			l.separators = l.separators[:lenChildren]
 		} else {
 			for i := lenSep; i < lenChildren; i++ {
-				l.separators = append(l.separators, NewSeparator())
+
+				sep := NewSeparator()
+				if cache.OverrideThemeMatchingScope(sep, l.list) {
+					sep.Refresh()
+				}
+
+				l.separators = append(l.separators, sep)
 			}
 		}
 	} else {

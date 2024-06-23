@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -20,6 +23,19 @@ func TestList_ThemeChange(t *testing.T) {
 		list.Refresh()
 		test.AssertImageMatches(t, "list/list_theme_changed.png", w.Canvas().Capture())
 	})
+}
+
+func TestList_ThemeOverride(t *testing.T) {
+	list, w := setupList(t)
+
+	test.ApplyTheme(t, test.NewTheme())
+	test.AssertImageMatches(t, "list/list_theme_changed.png", w.Canvas().Capture())
+
+	normal := test.Theme()
+	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
+	w.SetContent(container.NewStack(bg, container.NewThemeOverride(list, normal)))
+	w.Resize(fyne.NewSize(200, 200))
+	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 }
 
 func setupList(t *testing.T) (*widget.List, fyne.Window) {
