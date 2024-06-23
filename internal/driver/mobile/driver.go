@@ -263,8 +263,11 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	}
 }
 
-func (d *driver) handlePaint(e paint.Event, w fyne.Window) {
+func (d *driver) handlePaint(e paint.Event, w *window) {
 	c := w.Canvas().(*canvas)
+	if e.Window != 0 { // not all paint events come from hardware
+		w.handle = e.Window
+	}
 	d.painting = false
 	if d.glctx == nil || e.External {
 		return
