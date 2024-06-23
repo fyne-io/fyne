@@ -560,7 +560,16 @@ func (r *treeRenderer) Refresh() {
 
 func (r *treeRenderer) updateMinSizes() {
 	if f := r.tree.CreateNode; f != nil {
+		branch := f(true)
+		if cache.OverrideThemeMatchingScope(branch, r.tree) {
+			branch.Refresh()
+		}
 		r.tree.branchMinSize = newBranch(r.tree, f(true)).MinSize()
+
+		leaf := f(false)
+		if cache.OverrideThemeMatchingScope(leaf, r.tree) {
+			leaf.Refresh()
+		}
 		r.tree.leafMinSize = newLeaf(r.tree, f(false)).MinSize()
 	}
 }
@@ -812,6 +821,9 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
 			content = f(true)
+			if cache.OverrideThemeMatchingScope(content, r.treeContent.tree) {
+				content.Refresh()
+			}
 		}
 		b = newBranch(r.treeContent.tree, content)
 	}
@@ -826,6 +838,9 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
 			content = f(false)
+			if cache.OverrideThemeMatchingScope(content, r.treeContent.tree) {
+				content.Refresh()
+			}
 		}
 		l = newLeaf(r.treeContent.tree, content)
 	}
@@ -1014,6 +1029,10 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 		},
 	}
 	b.ExtendBaseWidget(b)
+
+	if cache.OverrideThemeMatchingScope(b, tree) {
+		b.Refresh()
+	}
 	return
 }
 
@@ -1071,5 +1090,9 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		},
 	}
 	l.ExtendBaseWidget(l)
+
+	if cache.OverrideThemeMatchingScope(l, tree) {
+		l.Refresh()
+	}
 	return
 }

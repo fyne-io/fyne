@@ -7,7 +7,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -80,6 +82,13 @@ func TestTable_ChangeTheme(t *testing.T) {
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
 	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
+
+	normal := test.Theme()
+	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
+	w.SetContent(&fyne.Container{Layout: layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(table, normal)}})
+	w.Resize(fyne.NewSize(180, 180))
+	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
 }
 
 func TestTable_Filled(t *testing.T) {
