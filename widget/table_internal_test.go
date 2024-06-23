@@ -336,6 +336,7 @@ func TestTable_Unselect(t *testing.T) {
 	}
 	table.selectedCell = &TableCellID{1, 1}
 	w := test.NewWindow(table)
+	w.SetPadded(false)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
