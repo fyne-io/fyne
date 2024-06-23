@@ -208,10 +208,6 @@ func (t *DocTabs) items() []*TabItem {
 	return t.Items
 }
 
-func (t *DocTabs) scope() fyne.Widget {
-	return t
-}
-
 func (t *DocTabs) selected() int {
 	return t.current
 }

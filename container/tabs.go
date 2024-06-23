@@ -74,12 +74,13 @@ func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObje
 }
 
 type baseTabs interface {
+	fyne.Widget
+
 	onUnselected() func(*TabItem)
 	onSelected() func(*TabItem)
 
 	items() []*TabItem
 	setItems([]*TabItem)
-	scope() fyne.Widget // what widget does this represented - the scope for theme overrides
 
 	selected() int
 	setSelected(int)
@@ -305,7 +306,7 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	if r.action != nil {
 		r.action.SetIcon(moreIcon(t))
 	}
-	th := theme.CurrentForWidget(t.scope())
+	th := theme.CurrentForWidget(t)
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	r.divider.FillColor = th.Color(theme.ColorNameShadow, v)
@@ -325,7 +326,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 
 	barMin := r.bar.MinSize()
 
-	th := theme.CurrentForWidget(t.scope())
+	th := theme.CurrentForWidget(t)
 	padding := th.Size(theme.SizeNamePadding)
 	switch t.tabLocation() {
 	case TabLocationTop:
@@ -379,7 +380,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 }
 
 func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
-	th := theme.CurrentForWidget(t.scope())
+	th := theme.CurrentForWidget(t)
 	pad := th.Size(theme.SizeNamePadding)
 	buttonPad := pad
 	barMin := r.bar.MinSize()
