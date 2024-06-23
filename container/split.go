@@ -151,6 +151,8 @@ func (r *splitContainerRenderer) Refresh() {
 	// [1] is divider which doesn't change
 	r.objects[2] = r.split.Trailing
 	r.Layout(r.split.Size())
+
+	r.divider.Refresh()
 	canvas.Refresh(r.split)
 }
 
