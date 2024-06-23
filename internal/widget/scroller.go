@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"log"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -56,7 +54,6 @@ func (r *scrollBarRenderer) Refresh() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	r.background.FillColor = th.Color(theme.ColorNameScrollBar, v)
-	log.Println("BAR", r.background.FillColor)
 	r.background.CornerRadius = th.Size(theme.SizeNameScrollBarRadius)
 	r.background.Refresh()
 }
