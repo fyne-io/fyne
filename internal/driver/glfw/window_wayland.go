@@ -8,11 +8,6 @@ import (
 	"fyne.io/fyne/v2/driver"
 )
 
-// GetWindowHandle returns the window handle. Only implemented for X11 currently.
-func (w *window) GetWindowHandle() string {
-	return "" // TODO: Find a way to get the Wayland handle for xdg_foreign protocol. Return "wayland:{id}".
-}
-
 // assert we are implementing driver.NativeWindow
 var _ driver.NativeWindow = (*window)(nil)
 

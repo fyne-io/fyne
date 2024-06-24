@@ -2,17 +2,7 @@
 
 package glfw
 
-import (
-	"strconv"
-
-	"fyne.io/fyne/v2/driver"
-)
-
-// GetWindowHandle returns the window handle. Only implemented for X11 currently.
-func (w *window) GetWindowHandle() string {
-	xid := uint(w.viewport.GetX11Window())
-	return "x11:" + strconv.FormatUint(uint64(xid), 16)
-}
+import "fyne.io/fyne/v2/driver"
 
 // assert we are implementing driver.NativeWindow
 var _ driver.NativeWindow = (*window)(nil)

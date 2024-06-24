@@ -3,7 +3,11 @@
 package dialog
 
 import (
+	"strconv"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/storage"
 	"github.com/rymdport/portal/filechooser"
 )
@@ -60,7 +64,13 @@ func fileOpenOSOverride(d *FileDialog) bool {
 			options.CurrentFolder = d.startingLocation.Path()
 		}
 
-		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
+		parentWindowHandle := ""
+		if !build.IsWayland {
+			d.parent.(driver.NativeWindow).RunNative(func(context any) {
+				handle := context.(*driver.X11WindowContext).WindowHandle
+				parentWindowHandle = x11WindowHandleToString(handle)
+			})
+		}
 
 		if folder {
 			openFolder(parentWindowHandle, folderCallback, options)
@@ -83,7 +93,13 @@ func fileSaveOSOverride(d *FileDialog) bool {
 			options.CurrentFolder = d.startingLocation.Path()
 		}
 
-		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
+		parentWindowHandle := ""
+		if !build.IsWayland {
+			d.parent.(driver.NativeWindow).RunNative(func(context any) {
+				handle := context.(driver.X11WindowContext).WindowHandle
+				parentWindowHandle = x11WindowHandleToString(handle)
+			})
+		}
 
 		callback := d.callback.(func(fyne.URIWriteCloser, error))
 		uris, err := filechooser.SaveFile(parentWindowHandle, "Open File", options)
@@ -106,4 +122,9 @@ func fileSaveOSOverride(d *FileDialog) bool {
 		callback(storage.Writer(uri))
 	}()
 	return true
+}
+
+// TODO: We need to get the Wayland handle from the xdg_foreign protocol and convert to string on the form "wayland:{id}".
+func x11WindowHandleToString(handle uintptr) string {
+	return "x11:" + strconv.FormatUint(uint64(handle), 16)
 }
