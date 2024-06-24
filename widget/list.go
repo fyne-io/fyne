@@ -41,6 +41,24 @@ type List struct {
 	// Since: 2.5
 	HideSeparators bool
 
+	// Enable drag-and-drop of rows within the list
+	//
+	// Since: 2.6
+	EnableDragging bool
+
+	// OnDragEnd is the callback that is invoked when a row is dragged and dropped.
+	// The `draggedTo` value is the ListItemID where the dragged row
+	// would be inserted, with a value of  0 meaning before the first item
+	// and a value of list.Length() meaning after the last item in the list.
+	//
+	// Since: 2.6
+	OnDragEnd func(draggedFrom, draggedTo ListItemID) `json:"-"`
+
+	// OnDragBegin is the callback invoked when a row begins dragging.
+	//
+	// Since: 2.6
+	OnDragBegin func(id ListItemID) `json:"-"`
+
 	currentFocus  ListItemID
 	focused       bool
 	scroller      *widget.Scroll
@@ -89,10 +107,11 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 		l.itemMin = f().MinSize()
 	}
 
-	layout := &fyne.Container{Layout: newListLayout(l)}
+	ll := newListLayout(l)
+	layout := &fyne.Container{Layout: ll}
 	l.scroller = widget.NewVScroll(layout)
 	layout.Resize(layout.MinSize())
-	objects := []fyne.CanvasObject{l.scroller}
+	objects := []fyne.CanvasObject{l.scroller, &ll.(*listLayout).dragSeparator}
 	return newListRenderer(objects, l, l.scroller, layout)
 }
 
@@ -383,6 +402,37 @@ func (l *List) contentMinSize() fyne.Size {
 	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
 }
 
+func (l *listLayout) calculateDragSeparatorY(thickness float32) float32 {
+	if l.list.scroller.Size().Height <= 0 {
+		return 0
+	}
+
+	relY := l.dragRelativeY
+	if relY < 0 {
+		relY = 0
+	} else if h := l.list.Size().Height; relY > h {
+		relY = h
+	}
+
+	numItems := 0.0
+	if l.list.Length != nil {
+		numItems = float64(l.list.Length())
+	}
+	if len(l.list.itemHeights) == 0 {
+		padding := theme.Padding()
+		paddedItemHeight := l.list.itemMin.Height + padding
+		beforeItem := math.Round(float64(relY+l.list.offsetY) / float64(paddedItemHeight))
+		if beforeItem > numItems {
+			beforeItem = numItems
+		}
+		y := float32(beforeItem)*paddedItemHeight - padding/2 - thickness
+		l.dragInsertAt = ListItemID(beforeItem)
+		return y
+	}
+	// TODO: support item heights
+	return 0
+}
+
 // fills l.visibleRowHeights and also returns offY and minRow
 func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) (offY float32, minRow int) {
 	rowOffset := float32(0)
@@ -446,6 +496,81 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) 
 	return
 }
 
+const (
+	// max speed (in units per frame) that the list will scroll when dragging above or below
+	maxScrollSpeed = 500
+	minScrollSpeed = 3
+	// how far to drag above or below the top/bottom of the list to reach the max scroll speed
+	scrollAccelerateRange = 250
+)
+
+func (l *listLayout) onRowDragged(id ListItemID, e *fyne.DragEvent) {
+	if !l.list.EnableDragging {
+		return
+	}
+	startedDrag := false
+	if l.draggingRow < 0 /*no drag in progress*/ {
+		l.draggingRow = id
+		startedDrag = true
+	}
+
+	listPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(l.list.scroller)
+	// TODO: this may break if the list itself is positioned outside the window viewport?
+	// don't worry about it now
+	l.dragRelativeY = e.AbsolutePosition.Y - listPos.Y
+
+	animationSpeedCurve := func(x float32) float32 {
+		// scale to domain: x_: [0, 1]
+		x_ := math.Min(math.Abs(float64(x)), scrollAccelerateRange) / scrollAccelerateRange
+		// quadratic, modified by minScrollSpeed
+		return float32(math.Max(x_*x_*maxScrollSpeed, minScrollSpeed))
+	}
+
+	// distance from top or bottom of list that starts to trigger scrolling animation
+	scrollStartThreshold := l.list.itemMin.Height / 2
+
+	if topThresh := l.dragRelativeY - scrollStartThreshold; topThresh < 0 {
+		l.scrollAnimSpeed = -animationSpeedCurve(topThresh)
+		l.ensureStartDragAnim()
+	} else if bottmThresh := l.list.Size().Height - scrollStartThreshold; l.dragRelativeY > bottmThresh {
+		l.scrollAnimSpeed = animationSpeedCurve(l.dragRelativeY - bottmThresh)
+		l.ensureStartDragAnim()
+	} else {
+		l.ensureStopDragAnim()
+	}
+
+	l.updateDragSeparator()
+	if startedDrag && l.list.OnDragBegin != nil {
+		l.list.OnDragBegin(l.draggingRow)
+	}
+}
+
+func (l *listLayout) onDragEnd() {
+	startRow := l.draggingRow
+	l.ensureStopDragAnim()
+	l.draggingRow = -1
+	l.dragSeparator.Hide()
+	if l.list.OnDragEnd != nil {
+		l.list.OnDragEnd(startRow, l.dragInsertAt)
+	}
+}
+
+func (l *listLayout) ensureStartDragAnim() {
+	if l.dragScrollAnim == nil {
+		l.dragScrollAnim = fyne.NewAnimation(math.MaxInt64 /*until stopped*/, func(_ float32) {
+			l.list.scroller.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.Delta{DY: -l.scrollAnimSpeed}})
+		})
+		l.dragScrollAnim.Start()
+	}
+}
+
+func (l *listLayout) ensureStopDragAnim() {
+	if l.dragScrollAnim != nil {
+		l.dragScrollAnim.Stop()
+		l.dragScrollAnim = nil
+	}
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listRenderer)(nil)
 
@@ -477,7 +602,10 @@ func (l *listRenderer) Refresh() {
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*listLayout).updateList(false)
+	layout := l.layout.Layout.(*listLayout)
+	layout.dragSeparator.FillColor = theme.ForegroundColor()
+	layout.dragSeparator.Refresh()
+	layout.updateList(false)
 	canvas.Refresh(l.list.super())
 }
 
@@ -485,20 +613,24 @@ func (l *listRenderer) Refresh() {
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
+var _ fyne.Draggable = (*listItem)(nil)
 
 type listItem struct {
 	BaseWidget
 
+	id                ListItemID
 	onTapped          func()
 	background        *canvas.Rectangle
+	listLayout        *listLayout
 	child             fyne.CanvasObject
 	hovered, selected bool
 }
 
-func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
+func newListItem(child fyne.CanvasObject, listLayout *listLayout, tapped func()) *listItem {
 	li := &listItem{
-		child:    child,
-		onTapped: tapped,
+		listLayout: listLayout,
+		child:      child,
+		onTapped:   tapped,
 	}
 
 	li.ExtendBaseWidget(li)
@@ -526,6 +658,9 @@ func (li *listItem) MinSize() fyne.Size {
 
 // MouseIn is called when a desktop pointer enters the widget.
 func (li *listItem) MouseIn(*desktop.MouseEvent) {
+	if li.listLayout.draggingRow >= 0 {
+		return
+	}
 	li.hovered = true
 	li.Refresh()
 }
@@ -547,6 +682,14 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.Refresh()
 		li.onTapped()
 	}
+}
+
+func (li *listItem) Dragged(e *fyne.DragEvent) {
+	li.listLayout.onRowDragged(li.id, e)
+}
+
+func (li *listItem) DragEnd() {
+	li.listLayout.onDragEnd()
 }
 
 // Declare conformity with the WidgetRenderer interface.
@@ -593,24 +736,36 @@ type listItemAndID struct {
 	id   ListItemID
 }
 
+// thickness: theme.SeparatorThicknessSize() * dragSeparatorThicknessMultiplier
+const dragSeparatorThicknessMultiplier = 1.5
+
 type listLayout struct {
-	list       *List
-	separators []fyne.CanvasObject
-	children   []fyne.CanvasObject
+	list          *List
+	separators    []fyne.CanvasObject
+	children      []fyne.CanvasObject
+	dragSeparator canvas.Rectangle
 
 	itemPool          syncPool
 	visible           []listItemAndID
 	slicePool         sync.Pool // *[]itemAndID
 	visibleRowHeights []float32
 	renderLock        sync.RWMutex
+
+	draggingRow     ListItemID // -1 if no drag
+	dragRelativeY   float32    // 0 == top of list widget
+	dragInsertAt    ListItemID
+	dragScrollAnim  *fyne.Animation
+	scrollAnimSpeed float32
 }
 
 func newListLayout(list *List) fyne.Layout {
-	l := &listLayout{list: list}
+	l := &listLayout{list: list, draggingRow: -1}
 	l.slicePool.New = func() any {
 		s := make([]listItemAndID, 0)
 		return &s
 	}
+	l.dragSeparator.FillColor = theme.ForegroundColor()
+	l.dragSeparator.Hidden = true
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -627,7 +782,7 @@ func (l *listLayout) getItem() *listItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item = newListItem(f(), nil)
+			item = newListItem(f(), l, nil)
 		}
 	}
 	return item.(*listItem)
@@ -637,11 +792,18 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 	if l.list.offsetY == pos.Y {
 		return
 	}
+	l.renderLock.Lock()
 	l.list.offsetY = pos.Y
+	if l.draggingRow >= 0 {
+		l.updateDragSeparator()
+	}
+	l.renderLock.Unlock()
+	// updateList grabs the renderLock
 	l.updateList(true)
 }
 
 func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
+	li.id = id
 	previousIndicator := li.selected
 	li.selected = false
 	for _, s := range l.list.selected {
@@ -776,7 +938,26 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.slicePool.Put(visiblePtr)
 }
 
+func (l *listLayout) updateDragSeparator() {
+	listSize := l.list.Size()
+	thickness := theme.SeparatorThicknessSize() * dragSeparatorThicknessMultiplier
+	l.dragSeparator.Resize(fyne.NewSize(listSize.Width, thickness))
+	sepY := l.calculateDragSeparatorY(thickness) - l.list.offsetY
+	padding := theme.Padding()
+	if sepY > listSize.Height+padding || sepY < -padding {
+		// use margin of [-padding, padding] make sure
+		// it can be shown above/below first and last items
+		l.dragSeparator.Hide()
+		return
+	}
+	l.dragSeparator.Move(fyne.NewPos(0, sepY))
+	l.dragSeparator.Show()
+}
+
 func (l *listLayout) updateSeparators() {
+	if l.draggingRow >= 0 {
+		l.updateDragSeparator()
+	}
 	if l.list.HideSeparators {
 		l.separators = nil
 		return
