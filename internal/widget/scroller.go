@@ -83,6 +83,10 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 
 func (b *scrollBar) DragEnd() {
 	b.area.isDragged = false
+
+	if fyne.CurrentDevice().IsMobile() {
+		b.area.MouseOut()
+	}
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
