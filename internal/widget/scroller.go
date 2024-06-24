@@ -63,7 +63,6 @@ type scrollBar struct {
 	area            *scrollBarArea
 	draggedDistance float32
 	dragStart       float32
-	isDragged       bool
 	orientation     scrollBarOrientation
 }
 
@@ -83,12 +82,14 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 }
 
 func (b *scrollBar) DragEnd() {
-	b.isDragged = false
+	b.area.isDragged = false
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
-	if !b.isDragged {
-		b.isDragged = true
+	if !b.area.isDragged {
+		b.area.isDragged = true
+		b.area.MouseIn(nil)
+
 		switch b.orientation {
 		case scrollBarOrientationHorizontal:
 			b.dragStart = b.Position().X
@@ -186,6 +187,7 @@ var _ desktop.Hoverable = (*scrollBarArea)(nil)
 type scrollBarArea struct {
 	Base
 
+	isDragged   bool
 	isLarge     bool
 	scroll      *Scroll
 	orientation scrollBarOrientation
@@ -205,6 +207,10 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (a *scrollBarArea) MouseOut() {
+	if a.isDragged {
+		return
+	}
+
 	a.isLarge = false
 	a.scroll.Refresh()
 }
