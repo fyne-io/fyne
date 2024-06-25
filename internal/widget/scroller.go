@@ -130,8 +130,8 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 	return b
 }
 
-func (r *scrollBarArea) isLarge() bool {
-	return r.isMouseIn || r.isDragged
+func (a *scrollBarArea) isLarge() bool {
+	return a.isMouseIn || a.isDragged
 }
 
 type scrollBarAreaRenderer struct {
