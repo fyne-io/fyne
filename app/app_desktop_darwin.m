@@ -1,4 +1,4 @@
-//go:build !ci && !ios
+//go:build !ci && !ios && !wasm && !test_web_driver && !mobile
 
 extern void themeChanged();
 
