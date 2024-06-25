@@ -82,7 +82,7 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 }
 
 func (b *scrollBar) DragEnd() {
-	b.area.isDragged = false
+	b.area.isDragging = false
 
 	if fyne.CurrentDevice().IsMobile() {
 		b.area.MouseOut()
@@ -91,8 +91,8 @@ func (b *scrollBar) DragEnd() {
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
-	if !b.area.isDragged {
-		b.area.isDragged = true
+	if !b.area.isDragging {
+		b.area.isDragging = true
 		b.area.MouseIn(nil)
 
 		switch b.orientation {
@@ -131,7 +131,7 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 }
 
 func (a *scrollBarArea) isLarge() bool {
-	return a.isMouseIn || a.isDragged
+	return a.isMouseIn || a.isDragging
 }
 
 type scrollBarAreaRenderer struct {
@@ -196,7 +196,7 @@ var _ desktop.Hoverable = (*scrollBarArea)(nil)
 type scrollBarArea struct {
 	Base
 
-	isDragged   bool
+	isDragging  bool
 	isMouseIn   bool
 	scroll      *Scroll
 	orientation scrollBarOrientation
@@ -217,7 +217,7 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 
 func (a *scrollBarArea) MouseOut() {
 	a.isMouseIn = false
-	if a.isDragged {
+	if a.isDragging {
 		return
 	}
 
