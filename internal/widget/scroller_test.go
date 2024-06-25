@@ -791,19 +791,19 @@ func TestScrollBar_LargeHandleWhileInDrag(t *testing.T) {
 
 	// Make sure that hovering makes the bar large.
 	mouseEvent := &desktop.MouseEvent{}
-	assert.False(t, scrollBarHoriz.area.isLarge)
+	assert.False(t, scrollBarHoriz.area.isLarge())
 	scrollBarHoriz.MouseIn(mouseEvent)
-	assert.True(t, scrollBarHoriz.area.isLarge)
+	assert.True(t, scrollBarHoriz.area.isLarge())
 	scrollBarHoriz.MouseOut()
-	assert.False(t, scrollBarHoriz.area.isLarge)
+	assert.False(t, scrollBarHoriz.area.isLarge())
 
 	// Make sure that the bar stays large when dragging, even if the mouse leaves the bar.
 	dragEvent := &fyne.DragEvent{Dragged: fyne.Delta{DX: 10}}
 	scrollBarHoriz.Dragged(dragEvent)
-	assert.True(t, scrollBarHoriz.area.isLarge)
+	assert.True(t, scrollBarHoriz.area.isLarge())
 	scrollBarHoriz.MouseOut()
-	assert.True(t, scrollBarHoriz.area.isLarge)
+	assert.True(t, scrollBarHoriz.area.isLarge())
 	scrollBarHoriz.DragEnd()
 	scrollBarHoriz.MouseOut()
-	assert.False(t, scrollBarHoriz.area.isLarge)
+	assert.False(t, scrollBarHoriz.area.isLarge())
 }

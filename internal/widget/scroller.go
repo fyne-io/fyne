@@ -87,6 +87,7 @@ func (b *scrollBar) DragEnd() {
 	if fyne.CurrentDevice().IsMobile() {
 		b.area.MouseOut()
 	}
+	b.area.Refresh()
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
@@ -129,6 +130,10 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 	return b
 }
 
+func (r *scrollBarArea) isLarge() bool {
+	return r.isMouseIn || r.isDragged
+}
+
 type scrollBarAreaRenderer struct {
 	BaseRenderer
 	area *scrollBarArea
@@ -149,7 +154,7 @@ func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	min := theme.ScrollBarSize()
-	if !r.area.isLarge {
+	if !r.area.isLarge() {
 		min = theme.ScrollBarSmallSize() * 2
 	}
 	switch r.area.orientation {
@@ -177,7 +182,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 	if contentOffset != 0 {
 		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
-	if r.area.isLarge {
+	if r.area.isLarge() {
 		width = scrollBarSize
 	} else {
 		widthOffset = theme.ScrollBarSmallSize()
@@ -192,7 +197,7 @@ type scrollBarArea struct {
 	Base
 
 	isDragged   bool
-	isLarge     bool
+	isMouseIn   bool
 	scroll      *Scroll
 	orientation scrollBarOrientation
 }
@@ -203,7 +208,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
-	a.isLarge = true
+	a.isMouseIn = true
 	a.scroll.Refresh()
 }
 
@@ -211,11 +216,11 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (a *scrollBarArea) MouseOut() {
+	a.isMouseIn = false
 	if a.isDragged {
 		return
 	}
 
-	a.isLarge = false
 	a.scroll.Refresh()
 }
 
