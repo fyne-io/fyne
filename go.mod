@@ -28,11 +28,11 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.5.5
-	golang.org/x/image v0.11.0
+	golang.org/x/image v0.18.0
 	golang.org/x/mobile v0.0.0-20230531173138-3c911d8e3eda
-	golang.org/x/mod v0.12.0
-	golang.org/x/sys v0.13.0
-	golang.org/x/tools v0.12.0
+	golang.org/x/mod v0.17.0
+	golang.org/x/sys v0.20.0
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 	honnef.co/go/js/dom v0.0.0-20210725211120-f030747120f2
 )
@@ -46,7 +46,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/tevino/abool v1.2.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
