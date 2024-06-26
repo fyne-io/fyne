@@ -86,6 +86,7 @@ func (b *scrollBar) DragEnd() {
 
 	if fyne.CurrentDevice().IsMobile() {
 		b.area.MouseOut()
+		return
 	}
 	b.area.Refresh()
 }
