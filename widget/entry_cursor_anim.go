@@ -33,7 +33,7 @@ func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
 
 // creates fyne animation
 func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
-	cursorOpaque := theme.Color(theme.ColorNamePrimary)
+	cursorOpaque := theme.Color(theme.ColorNamePrimaryOnBackground)
 	ri, gi, bi, ai := col.ToNRGBA(cursorOpaque)
 	r := uint8(ri >> 8)
 	g := uint8(gi >> 8)

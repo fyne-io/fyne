@@ -17,7 +17,7 @@
 							</widget>
 						</widget>
 						<widget pos="160,0" size="76x36" type="*container.tabButton">
-							<text bold color="primary" pos="8,8" size="60x20">Test3</text>
+							<text bold color="primaryOnBackground" pos="8,8" size="60x20">Test3</text>
 							<widget pos="52,8" size="20x20" type="*container.tabCloseButton">
 								<image rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 							</widget>
@@ -38,7 +38,7 @@
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="380x4"/>
-			<rectangle fillColor="primary" pos="160,36" radius="4" size="76x4"/>
+			<rectangle fillColor="primaryOnBackground" pos="160,36" radius="4" size="76x4"/>
 			<widget pos="0,40" size="380x60" type="*widget.Label">
 				<widget size="380x60" type="*widget.RichText">
 					<text pos="8,8" size="38x19">Text 3</text>

@@ -352,7 +352,7 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 
 	if c.check.Checked {
 		res = theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonChecked))
-		res.ColorName = theme.ColorNamePrimary
+		res.ColorName = theme.ColorNamePrimaryOnBackground
 		bgRes.ColorName = theme.ColorNameBackground
 	}
 	if c.check.disabled.Load() {

@@ -15,7 +15,7 @@ import (
 )
 
 func TestEntryCursorAnim(t *testing.T) {
-	cursorOpaque := theme.Color(theme.ColorNamePrimary)
+	cursorOpaque := theme.Color(theme.ColorNamePrimaryOnBackground)
 	r, g, b, _ := col.ToNRGBA(cursorOpaque)
 	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 

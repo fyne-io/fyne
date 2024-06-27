@@ -52,7 +52,7 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
 			divider:   canvas.NewRectangle(theme.Color(theme.ColorNameShadow)),
-			indicator: canvas.NewRectangle(theme.Color(theme.ColorNamePrimary)),
+			indicator: canvas.NewRectangle(theme.Color(theme.ColorNamePrimaryOnBackground)),
 		},
 		appTabs: t,
 	}

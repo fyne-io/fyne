@@ -1853,7 +1853,7 @@ func (r *entryRenderer) Refresh() {
 	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	r.border.CornerRadius = r.box.CornerRadius
 	if focusedAppearance {
-		r.border.StrokeColor = th.Color(theme.ColorNamePrimary, v)
+		r.border.StrokeColor = th.Color(theme.ColorNamePrimaryOnBackground, v)
 	} else {
 		if r.entry.Disabled() {
 			r.border.StrokeColor = th.Color(theme.ColorNameDisabled, v)
@@ -1867,7 +1867,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil {
 		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
-			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
+			r.border.StrokeColor = th.Color(theme.ColorNameErrorOnBackground, v)
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()

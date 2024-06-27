@@ -391,6 +391,7 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):      "disabled button",
 		nrgbaColor(theme.Color(theme.ColorNameDisabled)):            "disabled",
 		nrgbaColor(theme.Color(theme.ColorNameError)):               "error",
+		nrgbaColor(theme.Color(theme.ColorNameErrorOnBackground)):   "errorOnBackground",
 		nrgbaColor(theme.Color(theme.ColorNameFocus)):               "focus",
 		nrgbaColor(theme.Color(theme.ColorNameForeground)):          "foreground",
 		nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):   "foregroundOnError",
@@ -407,12 +408,15 @@ func knownColor(c color.Color) string {
 		nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):         "placeholder",
 		nrgbaColor(theme.Color(theme.ColorNamePressed)):             "pressed",
 		nrgbaColor(theme.Color(theme.ColorNamePrimary)):             "primary",
+		nrgbaColor(theme.Color(theme.ColorNamePrimaryOnBackground)): "primaryOnBackground",
 		nrgbaColor(theme.Color(theme.ColorNameScrollBar)):           "scrollbar",
 		nrgbaColor(theme.Color(theme.ColorNameSelection)):           "selection",
 		nrgbaColor(theme.Color(theme.ColorNameSeparator)):           "separator",
 		nrgbaColor(theme.Color(theme.ColorNameSuccess)):             "success",
+		nrgbaColor(theme.Color(theme.ColorNameSuccessOnBackground)): "successOnBackground",
 		nrgbaColor(theme.Color(theme.ColorNameShadow)):              "shadow",
 		nrgbaColor(theme.Color(theme.ColorNameWarning)):             "warning",
+		nrgbaColor(theme.Color(theme.ColorNameWarningOnBackground)): "warningOnBackground",
 	}[nrgbaColor(c)]
 }
 

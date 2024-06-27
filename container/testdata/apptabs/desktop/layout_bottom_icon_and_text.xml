@@ -4,13 +4,13 @@
 			<container pos="0,114" size="150x36">
 				<container size="150x36">
 					<widget size="77x36" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="32,8" size="37x20">Text1</text>
+						<text alignment="center" bold color="primaryOnBackground" pos="32,8" size="37x20">Text1</text>
 						<image pos="8,8" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,110" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,110" radius="4" size="77x4"/>
+			<rectangle fillColor="primaryOnBackground" pos="0,110" radius="4" size="77x4"/>
 			<circle fillColor="background" size="150x110"/>
 		</widget>
 	</content>

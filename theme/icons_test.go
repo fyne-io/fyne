@@ -64,13 +64,13 @@ func TestNewThemedResource_StaticResourceSupport(t *testing.T) {
 func TestNewColoredResource(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
-	custom := theme.NewColoredResource(source, theme.ColorNameSuccess)
+	custom := theme.NewColoredResource(source, theme.ColorNameSuccessOnBackground)
 
-	assert.Equal(t, theme.ColorNameSuccess, custom.ColorName)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("success_%v", source.Name()))
+	assert.Equal(t, theme.ColorNameSuccessOnBackground, custom.ColorName)
+	assert.Equal(t, custom.Name(), fmt.Sprintf("successOnBackground_%v", source.Name()))
 
-	custom = theme.NewColoredResource(source, theme.ColorNamePrimary)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("primary_%v", source.Name()))
+	custom = theme.NewColoredResource(source, theme.ColorNamePrimaryOnBackground)
+	assert.Equal(t, custom.Name(), fmt.Sprintf("primaryOnBackground_%v", source.Name()))
 }
 
 func TestNewDisabledResource(t *testing.T) {
@@ -134,34 +134,34 @@ func TestThemedResource_Error(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
 	custom := theme.NewThemedResource(source)
-	custom.ColorName = theme.ColorNameError
+	custom.ColorName = theme.ColorNameErrorOnBackground
 
-	assert.Equal(t, custom.Name(), fmt.Sprintf("error_%v", source.Name()))
+	assert.Equal(t, fmt.Sprintf("errorOnBackground_%v", source.Name()), custom.Name())
 	custom2 := theme.NewErrorThemedResource(source)
-	assert.Equal(t, custom2.Name(), fmt.Sprintf("error_%v", source.Name()))
+	assert.Equal(t, fmt.Sprintf("errorOnBackground_%v", source.Name()), custom2.Name())
 }
 
 func TestThemedResource_Success(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
 	custom := theme.NewThemedResource(source)
-	custom.ColorName = theme.ColorNameSuccess
+	custom.ColorName = theme.ColorNameSuccessOnBackground
 
-	assert.Equal(t, custom.Name(), fmt.Sprintf("success_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("successOnBackground_%v", source.Name()))
 
 	custom = theme.NewSuccessThemedResource(source)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("success_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("successOnBackground_%v", source.Name()))
 }
 
 func TestThemedResource_Warning(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	source := helperNewStaticResource()
 	custom := theme.NewThemedResource(source)
-	custom.ColorName = theme.ColorNameWarning
+	custom.ColorName = theme.ColorNameWarningOnBackground
 
-	assert.Equal(t, custom.Name(), fmt.Sprintf("warning_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("warningOnBackground_%v", source.Name()))
 	custom = theme.NewWarningThemedResource(source)
-	assert.Equal(t, custom.Name(), fmt.Sprintf("warning_%v", source.Name()))
+	assert.Equal(t, custom.Name(), fmt.Sprintf("warningOnBackground_%v", source.Name()))
 }
 
 func TestDisabledResource_Name(t *testing.T) {
