@@ -87,10 +87,8 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
 	if f := l.CreateItem; f != nil && l.itemMin.IsZero() {
-		item := f()
-		if cache.OverrideThemeMatchingScope(item, l) {
-			item.Refresh()
-		}
+		item := createItemAndApplyThemeScope(f, l)
+
 		l.itemMin = item.MinSize()
 	}
 
@@ -477,10 +475,7 @@ func (l *listRenderer) MinSize() fyne.Size {
 
 func (l *listRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		item := f()
-		if cache.OverrideThemeMatchingScope(item, l.list) {
-			item.Refresh()
-		}
+		item := createItemAndApplyThemeScope(f, l.list)
 		l.list.itemMin = item.MinSize()
 	}
 	l.Layout(l.list.Size())
@@ -645,10 +640,7 @@ func (l *listLayout) getItem() *listItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item2 := f()
-			if cache.OverrideThemeMatchingScope(item, l.list) {
-				item2.Refresh()
-			}
+			item2 := createItemAndApplyThemeScope(f, l.list)
 
 			item = newListItem(item2, nil)
 		}
@@ -862,4 +854,14 @@ func (l *listLayout) nilOldVisibleSliceData(objs []listItemAndID, len, oldLen in
 			objs[i].item = nil
 		}
 	}
+}
+
+func createItemAndApplyThemeScope(f func() fyne.CanvasObject, scope fyne.Widget) fyne.CanvasObject {
+	item := f()
+	if !cache.OverrideThemeMatchingScope(item, scope) {
+		return item
+	}
+
+	item.Refresh()
+	return item
 }

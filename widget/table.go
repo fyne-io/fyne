@@ -782,7 +782,7 @@ func (t *Table) tapped(pos fyne.Position) {
 
 func (t *Table) templateSize() fyne.Size {
 	if f := t.CreateCell; f != nil {
-		template := f() // don't use cache, we need new template
+		template := createItemAndApplyThemeScope(f, t) // don't use cache, we need new template
 		if !t.ShowHeaderRow && !t.ShowHeaderColumn {
 			return template.MinSize()
 		}
@@ -1301,7 +1301,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 		if !ok {
 			c = r.pool.Obtain()
 			if f := r.cells.t.CreateCell; f != nil && c == nil {
-				c = f()
+				c = createItemAndApplyThemeScope(f, r.cells.t)
 			}
 			if c == nil {
 				return
