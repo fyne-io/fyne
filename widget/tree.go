@@ -440,7 +440,7 @@ func (t *Tree) ensureOpenMap() {
 }
 
 func (t *Tree) findBottom() (y float32, size fyne.Size) {
-	sep := theme.Padding()
+	sep := t.Theme().Size(theme.SizeNamePadding)
 	t.walkAll(func(id, _ TreeNodeID, branch bool, _ int) {
 		size = t.leafMinSize
 		if branch {
@@ -467,6 +467,8 @@ func (t *Tree) findBottom() (y float32, size fyne.Size) {
 }
 
 func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found bool) {
+	pad := t.Theme().Size(theme.SizeNamePadding)
+
 	t.walkAll(func(id, _ TreeNodeID, branch bool, _ int) {
 		m := t.leafMinSize
 		if branch {
@@ -483,7 +485,7 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 			}
 			// If this is not the first item, add a separator
 			if y > 0 {
-				y += theme.Padding()
+				y += pad
 			}
 
 			y += m.Height
@@ -558,8 +560,11 @@ func (r *treeRenderer) Refresh() {
 
 func (r *treeRenderer) updateMinSizes() {
 	if f := r.tree.CreateNode; f != nil {
-		r.tree.branchMinSize = newBranch(r.tree, f(true)).MinSize()
-		r.tree.leafMinSize = newLeaf(r.tree, f(false)).MinSize()
+		branch := createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.tree)
+		r.tree.branchMinSize = newBranch(r.tree, branch).MinSize()
+
+		leaf := createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.tree)
+		r.tree.leafMinSize = newLeaf(r.tree, leaf).MinSize()
 	}
 }
 
@@ -614,6 +619,7 @@ type treeContentRenderer struct {
 }
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
+	th := r.treeContent.Theme()
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
@@ -621,12 +627,12 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
-	pad := theme.Padding()
+	pad := th.Size(theme.SizeNamePadding)
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
 	separatorCount := 0
-	separatorThickness := theme.SeparatorThicknessSize()
+	separatorThickness := th.Size(theme.SizeNameSeparatorThickness)
 	separatorSize := fyne.NewSize(width, separatorThickness)
 	separatorOff := (pad + separatorThickness) / 2
 	hideSeparators := r.treeContent.tree.HideSeparators
@@ -735,8 +741,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
+	th := r.treeContent.Theme()
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
+	pad := th.Size(theme.SizeNamePadding)
+	iconSize := th.Size(theme.SizeNameInlineIcon)
 
 	r.treeContent.tree.walkAll(func(uid, _ string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
@@ -750,14 +759,14 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a separator
 		if min.Height > 0 {
-			min.Height += theme.Padding()
+			min.Height += pad
 		}
 
 		m := r.treeContent.tree.leafMinSize
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
 		}
-		m.Width += float32(depth) * (theme.IconInlineSize() + theme.Padding())
+		m.Width += float32(depth) * (iconSize + pad)
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
@@ -805,7 +814,7 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 	} else {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = f(true)
+			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
 		}
 		b = newBranch(r.treeContent.tree, content)
 	}
@@ -819,7 +828,7 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	} else {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = f(false)
+			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
 		}
 		l = newLeaf(r.treeContent.tree, content)
 	}
@@ -846,8 +855,11 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
-	background.CornerRadius = theme.SelectionRadiusSize()
+	th := n.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
+	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	background.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
@@ -857,7 +869,8 @@ func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (n *treeNode) Indent() float32 {
-	return float32(n.depth) * (theme.IconInlineSize() + theme.Padding())
+	th := n.Theme()
+	return float32(n.depth) * (th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNamePadding))
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -916,15 +929,18 @@ type treeNodeRenderer struct {
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
-	x := theme.Padding() + r.treeNode.Indent()
+	th := r.treeNode.Theme()
+	pad := th.Size(theme.SizeNamePadding)
+	iconSize := th.Size(theme.SizeNameInlineIcon)
+	x := pad + r.treeNode.Indent()
 	y := float32(0)
 	r.background.Resize(size)
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Move(fyne.NewPos(x, y))
-		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), size.Height))
+		r.treeNode.icon.Resize(fyne.NewSize(iconSize, size.Height))
 	}
-	x += theme.IconInlineSize()
-	x += theme.Padding()
+	x += iconSize
+	x += pad
 	if r.treeNode.content != nil {
 		r.treeNode.content.Move(fyne.NewPos(x, y))
 		r.treeNode.content.Resize(fyne.NewSize(size.Width-x, size.Height))
@@ -935,8 +951,11 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	if r.treeNode.content != nil {
 		min = r.treeNode.content.MinSize()
 	}
-	min.Width += theme.InnerPadding() + r.treeNode.Indent() + theme.IconInlineSize()
-	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
+	th := r.treeNode.Theme()
+	iconSize := th.Size(theme.SizeNameInlineIcon)
+
+	min.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
+	min.Height = fyne.Max(min.Height, iconSize)
 	return
 }
 
@@ -961,15 +980,18 @@ func (r *treeNodeRenderer) Refresh() {
 }
 
 func (r *treeNodeRenderer) partialRefresh() {
+	th := r.treeNode.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()
 	}
-	r.background.CornerRadius = theme.SelectionRadiusSize()
+	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.background.FillColor = theme.Color(theme.ColorNameSelection)
+		r.background.FillColor = th.Color(theme.ColorNameSelection, v)
 		r.background.Show()
 	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentFocus == r.treeNode.uid) {
-		r.background.FillColor = theme.Color(theme.ColorNameHover)
+		r.background.FillColor = th.Color(theme.ColorNameHover, v)
 		r.background.Show()
 	} else {
 		r.background.Hide()
@@ -995,6 +1017,10 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 		},
 	}
 	b.ExtendBaseWidget(b)
+
+	if cache.OverrideThemeMatchingScope(b, tree) {
+		b.Refresh()
+	}
 	return
 }
 
@@ -1052,5 +1078,9 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		},
 	}
 	l.ExtendBaseWidget(l)
+
+	if cache.OverrideThemeMatchingScope(l, tree) {
+		l.Refresh()
+	}
 	return
 }

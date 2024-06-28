@@ -69,6 +69,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 	table.Resize(fyne.NewSize(50, 30))
 	content := test.TempWidgetRenderer(t, table.content.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
+	w.SetPadded(false)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
@@ -335,6 +336,7 @@ func TestTable_Unselect(t *testing.T) {
 	}
 	table.selectedCell = &TableCellID{1, 1}
 	w := test.NewWindow(table)
+	w.SetPadded(false)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 

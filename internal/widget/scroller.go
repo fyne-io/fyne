@@ -50,8 +50,11 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Refresh() {
-	r.background.FillColor = theme.Color(theme.ColorNameScrollBar)
-	r.background.CornerRadius = theme.Size(theme.SizeNameScrollBarRadius)
+	th := theme.CurrentForWidget(r.scrollBar)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	r.background.FillColor = th.Color(theme.ColorNameScrollBar, v)
+	r.background.CornerRadius = th.Size(theme.SizeNameScrollBarRadius)
 	r.background.Refresh()
 }
 
@@ -67,8 +70,11 @@ type scrollBar struct {
 }
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.Color(theme.ColorNameScrollBar))
-	background.CornerRadius = theme.Size(theme.SizeNameScrollBarRadius)
+	th := theme.CurrentForWidget(b)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBar, v))
+	background.CornerRadius = th.Size(theme.SizeNameScrollBarRadius)
 	r := &scrollBarRenderer{
 		scrollBar:  b,
 		background: background,
@@ -154,25 +160,31 @@ func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
-	min := theme.ScrollBarSize()
+	th := theme.CurrentForWidget(r.area)
+
+	barSize := th.Size(theme.SizeNameScrollBar)
+	min := barSize
 	if !r.area.isLarge() {
-		min = theme.ScrollBarSmallSize() * 2
+		min = th.Size(theme.SizeNameScrollBarSmall) * 2
 	}
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
-		return fyne.NewSize(theme.ScrollBarSize(), min)
+		return fyne.NewSize(barSize, min)
 	default:
-		return fyne.NewSize(min, theme.ScrollBarSize())
+		return fyne.NewSize(min, barSize)
 	}
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
+	r.bar.Refresh()
 	r.Layout(r.area.Size())
 	canvas.Refresh(r.bar)
 }
 
 func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
-	scrollBarSize := theme.ScrollBarSize()
+	th := theme.CurrentForWidget(r.area)
+
+	scrollBarSize := th.Size(theme.SizeNameScrollBar)
 	if scrollLength < contentLength {
 		portion := scrollLength / contentLength
 		length = float32(int(scrollLength)) * portion
@@ -186,7 +198,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 	if r.area.isLarge() {
 		width = scrollBarSize
 	} else {
-		widthOffset = theme.ScrollBarSmallSize()
+		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
 		width = widthOffset
 	}
 	return
@@ -301,6 +313,13 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	r.horizArea.Refresh()
+	r.vertArea.Refresh()
+	r.leftShadow.Refresh()
+	r.topShadow.Refresh()
+	r.rightShadow.Refresh()
+	r.bottomShadow.Refresh()
+
 	if len(r.BaseRenderer.Objects()) == 0 || r.BaseRenderer.Objects()[0] != r.scroll.Content {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.Objects()[0] = r.scroll.Content

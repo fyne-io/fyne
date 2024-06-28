@@ -82,7 +82,9 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
 	if f := l.CreateItem; f != nil && l.itemMin.IsZero() {
-		l.itemMin = f().MinSize()
+		item := createItemAndApplyThemeScope(f, l)
+
+		l.itemMin = item.MinSize()
 	}
 
 	layout := &fyne.Container{Layout: newGridWrapLayout(l)}
@@ -119,8 +121,10 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 	if l.scroller == nil {
 		return
 	}
+
+	pad := l.Theme().Size(theme.SizeNamePadding)
 	row := math.Floor(float64(id) / float64(l.ColumnCount()))
-	y := float32(row)*l.itemMin.Height + float32(row)*theme.Padding()
+	y := float32(row)*l.itemMin.Height + float32(row)*pad
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if size := l.scroller.Size(); y+l.itemMin.Height > l.scroller.Offset.Y+size.Height {
@@ -331,7 +335,7 @@ func (l *GridWrap) UnselectAll() {
 }
 
 func (l *GridWrap) contentMinSize() fyne.Size {
-	padding := theme.Padding()
+	padding := l.Theme().Size(theme.SizeNamePadding)
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
@@ -368,7 +372,9 @@ func (l *gridWrapRenderer) MinSize() fyne.Size {
 
 func (l *gridWrapRenderer) Refresh() {
 	if f := l.list.CreateItem; f != nil {
-		l.list.itemMin = f().MinSize()
+		item := createItemAndApplyThemeScope(f, l.list)
+
+		l.list.itemMin = item.MinSize()
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
@@ -410,9 +416,11 @@ func newGridWrapItem(child fyne.CanvasObject, tapped func()) *gridWrapItem {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (gw *gridWrapItem) CreateRenderer() fyne.WidgetRenderer {
 	gw.ExtendBaseWidget(gw)
+	th := gw.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	gw.background = canvas.NewRectangle(theme.Color(theme.ColorNameHover))
-	gw.background.CornerRadius = theme.SelectionRadiusSize()
+	gw.background = canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
+	gw.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	gw.background.Hide()
 
 	objects := []fyne.CanvasObject{gw.background, gw.child}
@@ -473,12 +481,15 @@ func (gw *gridWrapItemRenderer) Layout(size fyne.Size) {
 }
 
 func (gw *gridWrapItemRenderer) Refresh() {
-	gw.item.background.CornerRadius = theme.SelectionRadiusSize()
+	th := gw.item.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	gw.item.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	if gw.item.selected {
-		gw.item.background.FillColor = theme.Color(theme.ColorNameSelection)
+		gw.item.background.FillColor = th.Color(theme.ColorNameSelection, v)
 		gw.item.background.Show()
 	} else if gw.item.hovered {
-		gw.item.background.FillColor = theme.Color(theme.ColorNameHover)
+		gw.item.background.FillColor = th.Color(theme.ColorNameHover, v)
 		gw.item.background.Show()
 	} else {
 		gw.item.background.Hide()
@@ -526,7 +537,9 @@ func (l *gridWrapLayout) getItem() *gridWrapItem {
 	item := l.itemPool.Obtain()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
-			item = newGridWrapItem(f(), nil)
+			child := createItemAndApplyThemeScope(f, l.list)
+
+			item = newGridWrapItem(child, nil)
 		}
 	}
 	return item.(*gridWrapItem)
@@ -580,7 +593,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 // Since: 2.5
 func (l *GridWrap) ColumnCount() int {
 	if l.colCountCache < 1 {
-		padding := theme.Padding()
+		padding := l.Theme().Size(theme.SizeNamePadding)
 		l.colCountCache = 1
 		width := l.Size().Width
 		if width > l.itemMin.Width {
@@ -592,7 +605,7 @@ func (l *GridWrap) ColumnCount() int {
 
 func (l *gridWrapLayout) updateGrid(refresh bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
-	padding := theme.Padding()
+	padding := l.list.Theme().Size(theme.SizeNamePadding)
 
 	l.renderLock.Lock()
 	length := 0

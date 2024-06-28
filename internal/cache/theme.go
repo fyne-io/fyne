@@ -26,7 +26,18 @@ type overrideScope struct {
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 	id := overrideCount.Add(1)
 	s := &overrideScope{th: th, cacheID: strconv.Itoa(int(id))}
-	overrideTheme(o, s, id)
+	overrideTheme(o, s)
+}
+
+func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
+	data, ok := overrides.Load(parent)
+	if !ok { // not overridden in parent
+		return false
+	}
+
+	scope := data.(*overrideScope)
+	overrideTheme(o, scope)
+	return true
 }
 
 func WidgetScopeID(o fyne.CanvasObject) string {
@@ -47,24 +58,24 @@ func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
 	return data.(*overrideScope).th
 }
 
-func overrideContainer(c *fyne.Container, s *overrideScope, id uint32) {
+func overrideContainer(c *fyne.Container, s *overrideScope) {
 	for _, o := range c.Objects {
-		overrideTheme(o, s, id)
+		overrideTheme(o, s)
 	}
 }
 
-func overrideTheme(o fyne.CanvasObject, s *overrideScope, id uint32) {
+func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
 	switch c := o.(type) {
 	case fyne.Widget:
-		overrideWidget(c, s, id)
+		overrideWidget(c, s)
 	case *fyne.Container:
-		overrideContainer(c, s, id)
+		overrideContainer(c, s)
 	default:
 		overrides.Store(c, s)
 	}
 }
 
-func overrideWidget(w fyne.Widget, s *overrideScope, id uint32) {
+func overrideWidget(w fyne.Widget, s *overrideScope) {
 	ResetThemeCaches()
 	overrides.Store(w, s)
 
@@ -74,6 +85,6 @@ func overrideWidget(w fyne.Widget, s *overrideScope, id uint32) {
 	}
 
 	for _, o := range r.Objects() {
-		overrideTheme(o, s, id)
+		overrideTheme(o, s)
 	}
 }

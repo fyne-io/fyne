@@ -48,11 +48,14 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 // Implements: fyne.Widget
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
+	th := t.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(theme.Color(theme.ColorNameShadow)),
-			indicator: canvas.NewRectangle(theme.Color(theme.ColorNamePrimary)),
+			divider:   canvas.NewRectangle(th.Color(theme.ColorNameShadow, v)),
+			indicator: canvas.NewRectangle(th.Color(theme.ColorNamePrimary, v)),
 		},
 		appTabs: t,
 	}
@@ -420,23 +423,25 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
+	th := r.appTabs.Theme()
+	pad := th.Size(theme.SizeNamePadding)
 
 	switch r.appTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+		indicatorSize = fyne.NewSize(selectedSize.Width, pad)
 	case TabLocationLeading:
 		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y)
-		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+		indicatorSize = fyne.NewSize(pad, selectedSize.Height)
 	case TabLocationBottom:
-		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.Position().Y-theme.Padding())
-		indicatorSize = fyne.NewSize(selectedSize.Width, theme.Padding())
+		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.Position().Y-pad)
+		indicatorSize = fyne.NewSize(selectedSize.Width, pad)
 	case TabLocationTrailing:
-		indicatorPos = fyne.NewPos(r.bar.Position().X-theme.Padding(), selectedPos.Y)
-		indicatorSize = fyne.NewSize(theme.Padding(), selectedSize.Height)
+		indicatorPos = fyne.NewPos(r.bar.Position().X-pad, selectedPos.Y)
+		indicatorSize = fyne.NewSize(pad, selectedSize.Height)
 	}
 
-	r.moveIndicator(indicatorPos, indicatorSize, animate)
+	r.moveIndicator(indicatorPos, indicatorSize, th, animate)
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {
