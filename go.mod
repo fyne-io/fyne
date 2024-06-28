@@ -30,12 +30,12 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.7.1
-	golang.org/x/image v0.14.0
+	golang.org/x/image v0.18.0
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
 	golang.org/x/mod v0.17.0
 	golang.org/x/sys v0.20.0
-	golang.org/x/text v0.15.0
-	golang.org/x/tools v0.21.0
+	golang.org/x/text v0.16.0
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
