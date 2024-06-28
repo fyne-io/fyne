@@ -24,7 +24,7 @@ func TestNewList(t *testing.T) {
 		NewIcon(theme.DocumentIcon()),
 		NewLabel("Template Object")},
 	}
-	template := newListItem(content, nil)
+	template := newListItem(content, nil, nil)
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
