@@ -66,7 +66,6 @@ type scrollBar struct {
 	area            *scrollBarArea
 	draggedDistance float32
 	dragStart       float32
-	isDragged       bool
 	orientation     scrollBarOrientation
 }
 
@@ -89,12 +88,20 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 }
 
 func (b *scrollBar) DragEnd() {
-	b.isDragged = false
+	b.area.isDragging = false
+
+	if fyne.CurrentDevice().IsMobile() {
+		b.area.MouseOut()
+		return
+	}
+	b.area.Refresh()
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
-	if !b.isDragged {
-		b.isDragged = true
+	if !b.area.isDragging {
+		b.area.isDragging = true
+		b.area.MouseIn(nil)
+
 		switch b.orientation {
 		case scrollBarOrientationHorizontal:
 			b.dragStart = b.Position().X
@@ -130,6 +137,10 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 	return b
 }
 
+func (a *scrollBarArea) isLarge() bool {
+	return a.isMouseIn || a.isDragging
+}
+
 type scrollBarAreaRenderer struct {
 	BaseRenderer
 	area *scrollBarArea
@@ -153,7 +164,7 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 
 	barSize := th.Size(theme.SizeNameScrollBar)
 	min := barSize
-	if !r.area.isLarge {
+	if !r.area.isLarge() {
 		min = th.Size(theme.SizeNameScrollBarSmall) * 2
 	}
 	switch r.area.orientation {
@@ -184,7 +195,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 	if contentOffset != 0 {
 		lengthOffset = (scrollLength - length) * (contentOffset / (contentLength - scrollLength))
 	}
-	if r.area.isLarge {
+	if r.area.isLarge() {
 		width = scrollBarSize
 	} else {
 		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
@@ -198,7 +209,8 @@ var _ desktop.Hoverable = (*scrollBarArea)(nil)
 type scrollBarArea struct {
 	Base
 
-	isLarge     bool
+	isDragging  bool
+	isMouseIn   bool
 	scroll      *Scroll
 	orientation scrollBarOrientation
 }
@@ -209,7 +221,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
-	a.isLarge = true
+	a.isMouseIn = true
 	a.scroll.Refresh()
 }
 
@@ -217,7 +229,11 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (a *scrollBarArea) MouseOut() {
-	a.isLarge = false
+	a.isMouseIn = false
+	if a.isDragging {
+		return
+	}
+
 	a.scroll.Refresh()
 }
 
