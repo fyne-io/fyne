@@ -24,8 +24,8 @@ type ThemeOverride struct {
 // Containers will be traversed and all child widgets will reflect the theme in this container.
 // This should be used sparingly to avoid a jarring user experience.
 //
-// If the content `obj` of this theme override is a container and items are later added to the container
-// ensure that you call `Refresh()` on this `ThemeOverride` to ensure the new items match the theme.
+// If the content `obj` of this theme override is a container and items are later added to the container or any
+// sub-containers ensure that you call `Refresh()` on this `ThemeOverride` to ensure the new items match the theme.
 //
 // Since: 2.5
 func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
