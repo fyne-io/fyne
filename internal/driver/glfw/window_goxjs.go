@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "image/png" // for the icon
 	"runtime"
-	"slices"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -648,7 +647,10 @@ func (w *wrapInner) doClose() {
 		}
 	}
 	if pos != -1 {
-		multi.Windows = slices.Delete(multi.Windows, pos, pos+1)
+		count := len(multi.Windows)
+		copy(multi.Windows[pos:], multi.Windows[pos+1:])
+		multi.Windows[count-1] = nil
+		multi.Windows = multi.Windows[:count-1]
 	}
 
 	if w.onClosed != nil {
