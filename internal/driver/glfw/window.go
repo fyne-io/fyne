@@ -65,7 +65,9 @@ func (w *window) Resize(size fyne.Size) {
 		}
 		w.viewLock.Unlock()
 		w.requestedWidth, w.requestedHeight = width, height
-		w.view().SetSize(width, height)
+		if runtime.GOOS != "js" {
+			w.view().SetSize(width, height)
+		}
 	})
 }
 
