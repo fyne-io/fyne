@@ -203,10 +203,6 @@ func makeTray(a fyne.App) {
 	}
 }
 
-func unsupportedTutorial(t tutorials.Tutorial) bool {
-	return !t.SupportWeb && fyne.CurrentDevice().IsBrowser()
-}
-
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
 	a := fyne.CurrentApp()
 
@@ -229,17 +225,9 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
-			if unsupportedTutorial(t) {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
-			} else {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
-			}
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
-				if unsupportedTutorial(t) {
-					return
-				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}
