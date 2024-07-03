@@ -6,9 +6,11 @@ import (
 	"context"
 	_ "image/png" // for the icon
 	"runtime"
+	"slices"
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -562,4 +564,112 @@ func (w *window) view() *glfw.Window {
 		return nil
 	}
 	return w.viewport
+}
+
+// wrapInner represents a window that is provided by an InnerWindow container in the canvas.
+type wrapInner struct {
+	fyne.Window
+	inner *container.InnerWindow
+	d     *gLDriver
+
+	centered bool
+	onClosed func()
+}
+
+func wrapInnerWindow(w *container.InnerWindow, root fyne.Window, d *gLDriver) fyne.Window {
+	wrapped := &wrapInner{inner: w, d: d}
+	wrapped.Window = root
+	w.CloseIntercept = wrapped.doClose
+	return wrapped
+}
+
+func (w *wrapInner) CenterOnScreen() {
+	w.centered = true
+
+	w.doCenter()
+}
+
+func (w *wrapInner) Close() {
+	w.inner.Close()
+}
+
+func (w *wrapInner) Hide() {
+	w.inner.Hide()
+	w.updateVisibility()
+}
+
+func (w *wrapInner) Move(p fyne.Position) {
+	w.inner.Move(p)
+}
+
+func (w *wrapInner) Resize(s fyne.Size) {
+	w.inner.Resize(s)
+}
+
+func (w *wrapInner) SetContent(o fyne.CanvasObject) {
+	w.inner.SetContent(o)
+}
+
+func (w *wrapInner) SetOnClosed(fn func()) {
+	w.onClosed = fn
+}
+
+func (w *wrapInner) Show() {
+	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+	multi.Show()
+	w.inner.Show()
+
+	if w.centered {
+		w.doCenter()
+	}
+}
+
+func (w *wrapInner) doCenter() {
+	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+
+	min := w.inner.MinSize()
+	min = min.Max(w.inner.Size())
+
+	x := (multi.Size().Width - min.Width) / 2
+	y := (multi.Size().Height - min.Height) / 2
+
+	w.inner.Move(fyne.NewPos(x, y))
+}
+
+func (w *wrapInner) doClose() {
+	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+
+	pos := -1
+	for i, child := range multi.Windows {
+		if child == w.inner {
+			pos = i
+			w.inner.Hide()
+			break
+		}
+	}
+	if pos != -1 {
+		multi.Windows = slices.Delete(multi.Windows, pos, pos+1)
+	}
+
+	if w.onClosed != nil {
+		w.onClosed()
+	}
+	w.updateVisibility()
+}
+
+func (w *wrapInner) updateVisibility() {
+	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+
+	visible := 0
+	for _, win := range multi.Windows {
+		if win.Visible() {
+			visible++
+		}
+	}
+
+	if visible > 0 {
+		multi.Refresh()
+	} else {
+		multi.Hide()
+	}
 }

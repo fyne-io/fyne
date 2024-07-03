@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
@@ -116,6 +117,9 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = nearestSize
 	c.Unlock()
 
+	if c.WebChildWindows != nil {
+		c.WebChildWindows.Resize(size)
+	}
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
@@ -341,5 +345,7 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.WebChildWindows = container.NewMultipleWindows()
+	c.WebChildWindows.Hide()
 	return c
 }

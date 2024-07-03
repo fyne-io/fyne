@@ -2,12 +2,15 @@ package glfw
 
 import (
 	"context"
+	"image/color"
 	_ "image/png" // for the icon
 	"math"
 	"runtime"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
@@ -340,7 +343,11 @@ func (w *window) processRefresh() {
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
+	var wins fyne.CanvasObject
+	if canvas.WebChildWindows != nil && canvas.WebChildWindows.Visible() {
+		wins = canvas.WebChildWindows
+	}
+	return driver.FindObjectAtPositionMatching(mouse, matches, wins, canvas.Overlays().Top(), canvas.menu, canvas.Content())
 }
 
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
@@ -944,6 +951,23 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
+	var root fyne.Window
+	d.windowLock.RLock()
+	count := len(d.windows)
+	if count > 0 {
+		root = d.windows[0] // TODO what about hidden...
+	}
+	d.windowLock.RUnlock()
+
+	if runtime.GOOS == "js" && count > 0 {
+		multi := root.Canvas().(*glCanvas).WebChildWindows
+		inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
+		multi.Add(inner)
+
+		wrap := wrapInnerWindow(inner, root, d)
+		return wrap
+	}
+
 	return d.createWindow(title, true)
 }
 
