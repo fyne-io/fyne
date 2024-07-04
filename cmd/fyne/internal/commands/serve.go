@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"runtime"
 	"strconv"
 
 	"github.com/urfave/cli/v2"
@@ -13,19 +12,15 @@ import (
 // Server serve fyne wasm application over http
 type Server struct {
 	*appData
-	port            int
-	srcDir, dir, os string
+	port        int
+	srcDir, dir string
 }
 
 // Serve return the cli command for serving fyne wasm application over http
 func Serve() *cli.Command {
 	s := &Server{appData: &appData{}}
 
-	target := "web"
-	if runtime.GOOS == "windows" {
-		target = "wasm"
-	}
-
+	target := "wasm"
 	return &cli.Command{
 		Name:        "serve",
 		Usage:       "Package an application using WebAssembly and expose it via a web server.",
@@ -51,9 +46,9 @@ func Serve() *cli.Command {
 			&cli.StringFlag{
 				Name:        "target",
 				Aliases:     []string{"os"},
-				Usage:       "The web runtime to target (wasm, gopherjs, web).",
-				Value:       target,
-				Destination: &s.os,
+				Usage:       "Deprecated: The web runtime to target (only wasm is supported).",
+				Value:       "wasm",
+				Destination: &target,
 			},
 		},
 		Action: s.Server,
@@ -62,7 +57,7 @@ func Serve() *cli.Command {
 
 func (s *Server) requestPackage() error {
 	p := &Packager{
-		os:     s.os,
+		os:     "wasm",
 		srcDir: s.srcDir,
 
 		appData: s.appData,
@@ -84,7 +79,7 @@ func (s *Server) serve() error {
 		return err
 	}
 
-	webDir := util.EnsureSubDir(s.dir, s.os)
+	webDir := util.EnsureSubDir(s.dir, "wasm")
 	fileServer := http.FileServer(http.Dir(webDir))
 
 	http.Handle("/", fileServer)
@@ -110,9 +105,6 @@ func (s *Server) validate() error {
 	}
 	if s.port < 0 || s.port > 65535 {
 		return fmt.Errorf("the port must be a strictly positive number and be strictly smaller than 65536 (Got %v)", s.port)
-	}
-	if s.os != "wasm" && s.os != "gopherjs" && s.os != "web" {
-		return fmt.Errorf("unsupported web runtime (only wasm, gopherjs and web): %v", s.os)
 	}
 	return nil
 }
