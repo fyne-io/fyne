@@ -258,6 +258,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		Size:      textSize,
 	}
 	shaper := &shaping.HarfbuzzShaper{}
+	segmenter := &shaping.Segmenter{}
 	out := shaper.Shape(in)
 
 	in.Text = runes
@@ -269,7 +270,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 	if style.Monospace {
 		spacew = scale * fixed266ToFloat32(out.Advance)
 	}
-	ins := shaping.SplitByFace(in, faces)
+	ins := segmenter.Split(in, faces)
 	for _, in := range ins {
 		inEnd := in.RunEnd
 
