@@ -614,9 +614,12 @@ func (w *wrapInner) SetOnClosed(fn func()) {
 }
 
 func (w *wrapInner) Show() {
-	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+	c := w.Window.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
 	multi.Show()
 	w.inner.Show()
+
+	c.Overlays().Add(multi)
 
 	if w.centered {
 		w.doCenter()
@@ -624,7 +627,8 @@ func (w *wrapInner) Show() {
 }
 
 func (w *wrapInner) doCenter() {
-	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+	c := w.Window.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
 
 	min := w.inner.MinSize()
 	min = min.Max(w.inner.Size())
@@ -636,7 +640,8 @@ func (w *wrapInner) doCenter() {
 }
 
 func (w *wrapInner) doClose() {
-	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+	c := w.Window.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
 
 	pos := -1
 	for i, child := range multi.Windows {
@@ -660,7 +665,8 @@ func (w *wrapInner) doClose() {
 }
 
 func (w *wrapInner) updateVisibility() {
-	multi := w.Window.Canvas().(*glCanvas).WebChildWindows
+	c := w.Window.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
 
 	visible := 0
 	for _, win := range multi.Windows {
@@ -673,5 +679,6 @@ func (w *wrapInner) updateVisibility() {
 		multi.Refresh()
 	} else {
 		multi.Hide()
+		c.Overlays().Remove(multi)
 	}
 }

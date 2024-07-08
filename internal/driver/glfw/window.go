@@ -345,11 +345,7 @@ func (w *window) processRefresh() {
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	var wins fyne.CanvasObject
-	if canvas.WebChildWindows != nil && canvas.WebChildWindows.Visible() {
-		wins = canvas.WebChildWindows
-	}
-	return driver.FindObjectAtPositionMatching(mouse, matches, wins, canvas.Overlays().Top(), canvas.menu, canvas.Content())
+	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
 }
 
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
@@ -962,7 +958,13 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	d.windowLock.RUnlock()
 
 	if runtime.GOOS == "js" && count > 0 {
-		multi := root.Canvas().(*glCanvas).WebChildWindows
+		c := root.Canvas().(*glCanvas)
+		multi := c.webExtraWindows
+		if multi == nil {
+			multi = container.NewMultipleWindows()
+			multi.Resize(c.Size())
+			c.webExtraWindows = multi
+		}
 		inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
 		multi.Add(inner)
 

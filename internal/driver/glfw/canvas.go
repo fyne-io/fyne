@@ -35,7 +35,8 @@ type glCanvas struct {
 
 	scale, detectedScale, texScale float32
 
-	context driver.WithContext
+	context         driver.WithContext
+	webExtraWindows *container.MultipleWindows
 }
 
 func (c *glCanvas) Capture() image.Image {
@@ -117,8 +118,8 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = nearestSize
 	c.Unlock()
 
-	if c.WebChildWindows != nil {
-		c.WebChildWindows.Resize(size)
+	if c.webExtraWindows != nil {
+		c.webExtraWindows.Resize(size)
 	}
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
@@ -345,7 +346,5 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
-	c.WebChildWindows = container.NewMultipleWindows()
-	c.WebChildWindows.Hide()
 	return c
 }

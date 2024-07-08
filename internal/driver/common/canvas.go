@@ -3,13 +3,11 @@ package common
 import (
 	"image/color"
 	"reflect"
-	"runtime"
 	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
@@ -54,8 +52,6 @@ type Canvas struct {
 	dirty        atomic.Bool
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
-
-	WebChildWindows *container.MultipleWindows
 }
 
 // AddShortcut adds a shortcut to the canvas.
@@ -324,10 +320,6 @@ func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 		trees = append(trees, menu)
 	}
 	trees = append(trees, c.Overlays().List()...)
-
-	if runtime.GOOS == "js" && c.WebChildWindows != nil && c.WebChildWindows.Visible() {
-		trees = append(trees, c.WebChildWindows)
-	}
 	return trees
 }
 
@@ -452,10 +444,6 @@ func (c *Canvas) WalkTrees(
 		if tree != nil {
 			c.walkTree(tree, beforeChildren, afterChildren)
 		}
-	}
-	if runtime.GOOS == "js" && c.WebChildWindows != nil && c.WebChildWindows.Visible() {
-		cache := &renderCacheTree{root: &RenderCacheNode{obj: c.WebChildWindows}}
-		c.walkTree(cache, beforeChildren, afterChildren)
 	}
 }
 
