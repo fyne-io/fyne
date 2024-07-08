@@ -951,9 +951,14 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	var root fyne.Window
 	d.windowLock.RLock()
-	count := len(d.windows)
-	if count > 0 {
-		root = d.windows[0] // TODO what about hidden...
+	count := 0
+	for _, w := range d.windows {
+		if w.(*window).visible {
+			count++
+			if count == 1 {
+				root = w
+			}
+		}
 	}
 	d.windowLock.RUnlock()
 
