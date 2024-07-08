@@ -949,35 +949,38 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
+	if runtime.GOOS != "js" {
+		return d.createWindow(title, true)
+	}
+
+	// handling multiple windows by overlaying on the root for web
 	var root fyne.Window
 	d.windowLock.RLock()
-	count := 0
+	hasVisible := false
 	for _, w := range d.windows {
 		if w.(*window).visible {
-			count++
-			if count == 1 {
-				root = w
-			}
+			hasVisible = true
+			root = w
+			break
 		}
 	}
 	d.windowLock.RUnlock()
 
-	if runtime.GOOS == "js" && count > 0 {
-		c := root.Canvas().(*glCanvas)
-		multi := c.webExtraWindows
-		if multi == nil {
-			multi = container.NewMultipleWindows()
-			multi.Resize(c.Size())
-			c.webExtraWindows = multi
-		}
-		inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
-		multi.Add(inner)
-
-		wrap := wrapInnerWindow(inner, root, d)
-		return wrap
+	if !hasVisible {
+		return d.createWindow(title, true)
 	}
 
-	return d.createWindow(title, true)
+	c := root.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
+	if multi == nil {
+		multi = container.NewMultipleWindows()
+		multi.Resize(c.Size())
+		c.webExtraWindows = multi
+	}
+	inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
+	multi.Add(inner)
+
+	return wrapInnerWindow(inner, root, d)
 }
 
 func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
