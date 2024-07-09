@@ -307,15 +307,15 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 func (w *window) detectScale() float32 {
 	if build.IsWayland { // Wayland controls scale through content scaling
-		return 1.0
+		return 1
 	}
 	monitor := w.getMonitorForWindow()
 	if monitor == nil {
-		return 1.0
+		return 1
 	}
 
 	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // some sort of failure - mostly on Steam Deck
+	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
 		return 1
 	}
 	widthPx := monitor.GetVideoMode().Width
