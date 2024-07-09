@@ -315,7 +315,7 @@ func (w *window) detectScale() float32 {
 	}
 
 	widthMm, heightMm := monitor.GetPhysicalSize()
-	if widthMm == 60 && heightMm == 60 { // some sort of failure - mostly on Steam Deck
+	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // some sort of failure - mostly on Steam Deck
 		return 1
 	}
 	widthPx := monitor.GetVideoMode().Width
