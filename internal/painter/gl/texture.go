@@ -85,13 +85,6 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 	}
 }
 
-func (p *painter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
-	circle := obj.(*canvas.Circle)
-	raw := paint.DrawCircle(circle, paint.VectorPad(circle), p.textureScale)
-
-	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
-}
-
 func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
