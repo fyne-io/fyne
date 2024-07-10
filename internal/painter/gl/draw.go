@@ -27,9 +27,6 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
-		1.0, paint.VectorPad(circle))
-
 	size := circle.Size()
 	radius := size.Width / 2
 	if size.Height < size.Width {
