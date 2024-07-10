@@ -158,7 +158,7 @@ func (d *gLDriver) runGL() {
 					w.shouldExpand = false
 					view := w.viewport
 					w.viewLock.Unlock()
-					if shouldExpand {
+					if shouldExpand && runtime.GOOS != "js" {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}

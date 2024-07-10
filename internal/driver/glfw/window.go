@@ -2,12 +2,15 @@ package glfw
 
 import (
 	"context"
+	"image/color"
 	_ "image/png" // for the icon
 	"math"
 	"runtime"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
@@ -62,7 +65,9 @@ func (w *window) Resize(size fyne.Size) {
 		}
 		w.viewLock.Unlock()
 		w.requestedWidth, w.requestedHeight = width, height
-		w.view().SetSize(width, height)
+		if runtime.GOOS != "js" {
+			w.view().SetSize(width, height)
+		}
 	})
 }
 
@@ -944,7 +949,38 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
-	return d.createWindow(title, true)
+	if runtime.GOOS != "js" {
+		return d.createWindow(title, true)
+	}
+
+	// handling multiple windows by overlaying on the root for web
+	var root fyne.Window
+	d.windowLock.RLock()
+	hasVisible := false
+	for _, w := range d.windows {
+		if w.(*window).visible {
+			hasVisible = true
+			root = w
+			break
+		}
+	}
+	d.windowLock.RUnlock()
+
+	if !hasVisible {
+		return d.createWindow(title, true)
+	}
+
+	c := root.Canvas().(*glCanvas)
+	multi := c.webExtraWindows
+	if multi == nil {
+		multi = container.NewMultipleWindows()
+		multi.Resize(c.Size())
+		c.webExtraWindows = multi
+	}
+	inner := container.NewInnerWindow(title, canvas.NewRectangle(color.Transparent))
+	multi.Add(inner)
+
+	return wrapInnerWindow(inner, root, d)
 }
 
 func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {

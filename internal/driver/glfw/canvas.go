@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
@@ -34,7 +35,8 @@ type glCanvas struct {
 
 	scale, detectedScale, texScale float32
 
-	context driver.WithContext
+	context         driver.WithContext
+	webExtraWindows *container.MultipleWindows
 }
 
 func (c *glCanvas) Capture() image.Image {
@@ -116,6 +118,9 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = nearestSize
 	c.Unlock()
 
+	if c.webExtraWindows != nil {
+		c.webExtraWindows.Resize(size)
+	}
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
