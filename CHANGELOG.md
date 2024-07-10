@@ -3,16 +3,70 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.5.0 - Ongoing
+## 2.5.0 - 14 July 2024
 
 ### Added
 
+ * Internationalisation support and translations (#605, #3249)
+ * Look up system fonts for glyphs that cannot be found embedded (#2572, #1579)
+ * Completed support for Wayland on Linux
+ * Completed support for the Web driver (*except file handling)
  * Activity indicator widget
  * InnerWindow and MultipleWindows containers
+ * ThemeOverride container for grouping items with a different theme
+ * Add `NativeWindow.RunNative` to use a native window handle (#4483)
+ * Ability to request display stays on - `SetDisableScreenBlanking` (#4534, #3007)
+ * Add Undo/Redo support for widget.Entry (#436)
+ * Add AppendMarkdown function to RichText
+ * Add option in List to hide separators (#3756)
+ * New CustomPaddedLayout for more fine-grained container padding
+ * Add SizeName property to Hyperlink widget
+ * Support Ctrl+[backspace/delete] to delete the word to the left or right of the cursor
+ * Add IntToFloat (and FloatToInt) in bindings Data binding (#4666)
+ * Add ScrollToOffset/GetScrollOffset APIs for collection widgets
+ * Add ColumnCount API to GridWrap widget
+ * Disable and Enable for Slider widget (#3551)
+ * Function `Remove` added to List bindings (#3100)
+ * Form layout can now be vertical (labels above field) or adaptive for mobile
+ * Add support for Bold, Italic and Underline for TextGrid (#1237)
+ * Add support for setting a custom resource as the font source for text (#808)
 
 ### Changed
 
+ * Round the corners of scroll bars with new theme value
+ * Improve contrast of text on highlight background colours
+ * Layout of iOS and Android apps will adapt when keyboard appears (#566, #2371)
+ * FyneApp.toml will now be loaded with `go build` (#4688)
+ * Text wrapping will now wrap in dialogs (#2602)
+ * System tray and tray menu icons on will now match theme on macOS (#4549)
+ * Triple clicking in an Entry widget now selects current line (#4328)
+ * About menu items will now override the macOS default About
+ * System tray no longer shows tooltips (until we have full support)
+ * Double tapping an item in a file dialog now selects and returns
+ * Widgets should now use `theme.ForWidget()` instead of `theme.Default()` or static helpers
+
 ### Fixed
+
+ * Kannada characters not rendering correctly (#2654)
+ * Notifications are not working on iOS (#4966)
+ * Incorrect scaling on Steam Deck screen Accessibility (#4896)
+ * Sometimes the last list row that should be visible doesn't show (#4909)
+ * RichText swallowing whitespace after Markdown links (#4613, #4340)
+ * Disabled app tabs can still be selected in popup menu (#4935)
+ * Don't show title when mouse hover on Systray menu (#4916)
+ * Trying to access a URL through canvas.NewImageFromURI() in a test results in a panic (#4863)
+ * Don't insert tab character in Entry when Shift+Tab typed
+ * Select Does Not Gain Focus When Tapped (#4767)
+ * binding.Untyped crashes when set to nil bug (#4807)
+ * Label and Slider not aligned in a FormItem (#4714)
+ * Windows: App Icon in Notification (#2592)
+ * Fix possible writing of empty preference data in some quit events
+ * Allow application to set default view (list/grid) of file dialog before showing it (#4595)
+ * Fix ScrollToOffset when viewport is larger than content size
+ * Incorrect row header width in widget.Table (#4370)
+ * Add missed truncation mode for hyperlink (#4335)
+ * AppTab does not display blue indicator line if you create it empty and then Append items to it later.
+ * Many optimisations in animation, draw speed, layout and widget size calculations
 
 
 ## 2.4.5 - 15 April 2024
