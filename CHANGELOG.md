@@ -11,6 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Look up system fonts for glyphs that cannot be found embedded (#2572, #1579)
  * Completed support for Wayland on Linux
  * Completed support for the Web driver (*except file handling)
+ * Add support for XDG Desktop Portals when built with `-tags flatpak` on Linux
  * Activity indicator widget
  * InnerWindow and MultipleWindows containers
  * ThemeOverride container for grouping items with a different theme
@@ -30,9 +31,11 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Form layout can now be vertical (labels above field) or adaptive for mobile
  * Add support for Bold, Italic and Underline for TextGrid (#1237)
  * Add support for setting a custom resource as the font source for text (#808)
+ * New `test` functions `NewTempApp`, `NewTempWindow` and `TempWidgetRenderer` to free resources automatically
 
 ### Changed
 
+ * Fyne now depends on Go 1.19 at a minimum
  * Round the corners of scroll bars with new theme value
  * Improve contrast of text on highlight background colours
  * Layout of iOS and Android apps will adapt when keyboard appears (#566, #2371)
