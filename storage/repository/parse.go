@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -10,6 +11,9 @@ import (
 
 	"fyne.io/fyne/v2"
 )
+
+// Pattern to find Windows drive paths
+var windowsDrivePrefixhPattern = regexp.MustCompile(`(?i)^[a-z]:`)
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
 // should use instead. This is only here because other functions in repository
@@ -22,6 +26,10 @@ func NewFileURI(path string) fyne.URI {
 	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
 	if runtime.GOOS == "windows" {
+		// Make sure that Windows paths (eg "c:\") also correctly start with a "/"
+		if windowsDrivePrefixhPattern.MatchString(path) {
+			path = "/" + path
+		}
 		// seems that sometimes we end up with
 		// double-backslashes
 		path = filepath.ToSlash(path)
