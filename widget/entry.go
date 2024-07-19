@@ -702,8 +702,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 		e.propertyLock.Lock()
 		pos := e.cursorTextPos()
-		deletedText := e.Text[pos-1 : pos]
-		provider.deleteFromTo(pos-1, pos)
+		deletedText := provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
@@ -718,8 +717,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 
 		e.propertyLock.Lock()
-		deletedText := e.Text[pos : pos+1]
-		provider.deleteFromTo(pos, pos+1)
+		deletedText := provider.deleteFromTo(pos, pos+1)
 		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
 			Position: pos,
@@ -792,7 +790,7 @@ func (e *Entry) Undo() {
 	}
 	pos := modify.Position
 	if modify.Delete {
-		pos += len(modify.Text)
+		pos += len([]rune(modify.Text))
 	}
 	e.propertyLock.Lock()
 	e.updateText(newText, false)
@@ -2310,12 +2308,14 @@ func (i *entryModifyAction) Redo(s string) string {
 
 // Inserts Text
 func (i *entryModifyAction) add(s string) string {
-	return s[:i.Position] + i.Text + s[i.Position:]
+	runes := []rune(s)
+	return string(runes[:i.Position]) + i.Text + string(runes[i.Position:])
 }
 
 // Deletes Text
 func (i *entryModifyAction) sub(s string) string {
-	return s[:i.Position] + s[i.Position+len(i.Text):]
+	runes := []rune(s)
+	return string(runes[:i.Position]) + string(runes[i.Position+len([]rune(i.Text)):])
 }
 
 func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
@@ -2344,13 +2344,13 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		if i.Delete {
-			if i.Position == other.Position+len(other.Text) {
+			if i.Position == other.Position+len([]rune(other.Text)) {
 				i.Position = other.Position
 				i.Text = other.Text + i.Text
 				return true
 			}
 		} else {
-			if i.Position+len(i.Text) == other.Position {
+			if i.Position+len([]rune(i.Text)) == other.Position {
 				i.Text += other.Text
 				return true
 			}
