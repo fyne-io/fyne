@@ -308,7 +308,7 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 		t.columnWidths = make(map[int]float32)
 	}
 
-	if t.columnWidths[id] == width {
+	if set, ok := t.columnWidths[id]; ok && set == width {
 		t.propertyLock.Unlock()
 		return
 	}
@@ -337,7 +337,7 @@ func (t *Table) SetRowHeight(id int, height float32) {
 		t.rowHeights = make(map[int]float32)
 	}
 
-	if t.rowHeights[id] == height {
+	if set, ok := t.rowHeights[id]; ok && set == height {
 		t.propertyLock.Unlock()
 		return
 	}
