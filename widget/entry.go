@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -790,7 +791,7 @@ func (e *Entry) Undo() {
 	}
 	pos := modify.Position
 	if modify.Delete {
-		pos += len([]rune(modify.Text))
+		pos += utf8.RuneCountInString(modify.Text)
 	}
 	e.propertyLock.Lock()
 	e.updateText(newText, false)
@@ -2313,7 +2314,7 @@ func (i *entryModifyAction) add(s string) string {
 // Deletes Text
 func (i *entryModifyAction) sub(s string) string {
 	runes := []rune(s)
-	return string(runes[:i.Position]) + string(runes[i.Position+len([]rune(i.Text)):])
+	return string(runes[:i.Position]) + string(runes[i.Position+utf8.RuneCountInString(i.Text):])
 }
 
 func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
@@ -2342,13 +2343,13 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		if i.Delete {
-			if i.Position == other.Position+len([]rune(other.Text)) {
+			if i.Position == other.Position+utf8.RuneCountInString(other.Text) {
 				i.Position = other.Position
 				i.Text = other.Text + i.Text
 				return true
 			}
 		} else {
-			if i.Position+len([]rune(i.Text)) == other.Position {
+			if i.Position+utf8.RuneCountInString(i.Text) == other.Position {
 				i.Text += other.Text
 				return true
 			}
