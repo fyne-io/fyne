@@ -169,7 +169,9 @@ func init() {
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
 	}
+}
 
+func SetLocalizer() {
 	// Find the closest translation from the user's locale list and set it up
 	all, err := locale.GetLocales()
 	if err != nil {
