@@ -155,9 +155,22 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 	return retErr
 }
 
+func setLocalizer() {
+	// Find the closest translation from the user's locale list and set it up
+	all, err := locale.GetLocales()
+	if err != nil {
+		fyne.LogError("Failed to load user locales", err)
+		all = []string{"en"}
+	}
+	str := closestSupportedLocale(all).LanguageString()
+	setupLang(str)
+	localizer = i18n.NewLocalizer(bundle, str)
+}
+
 func addLanguage(data []byte, name string) error {
 	f, err := bundle.ParseMessageFileBytes(data, name)
 	translated = append(translated, f.Tag)
+	setLocalizer()
 	return err
 }
 
@@ -169,18 +182,6 @@ func init() {
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
 	}
-}
-
-func SetLocalizer() {
-	// Find the closest translation from the user's locale list and set it up
-	all, err := locale.GetLocales()
-	if err != nil {
-		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
-	}
-	str := closestSupportedLocale(all).LanguageString()
-	setupLang(str)
-	localizer = i18n.NewLocalizer(bundle, str)
 }
 
 func fallbackWithData(key, fallback string, data any) string {
