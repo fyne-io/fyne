@@ -155,7 +155,10 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 	return retErr
 }
 
-func setLocalizer() {
+func addLanguage(data []byte, name string) error {
+	f, err := bundle.ParseMessageFileBytes(data, name)
+	translated = append(translated, f.Tag)
+
 	// Find the closest translation from the user's locale list and set it up
 	all, err := locale.GetLocales()
 	if err != nil {
@@ -165,12 +168,7 @@ func setLocalizer() {
 	str := closestSupportedLocale(all).LanguageString()
 	setupLang(str)
 	localizer = i18n.NewLocalizer(bundle, str)
-}
 
-func addLanguage(data []byte, name string) error {
-	f, err := bundle.ParseMessageFileBytes(data, name)
-	translated = append(translated, f.Tag)
-	setLocalizer()
 	return err
 }
 
