@@ -84,11 +84,12 @@ func CleanCanvas(canvas fyne.Canvas) {
 		if !ok {
 			continue
 		}
-		winfo, ok := renderers[wid]
+		rinfo, ok := renderers[wid]
 		if !ok {
 			continue
 		}
-		winfo.renderer.Destroy()
+		rinfo.renderer.Destroy()
+		overrides.Delete(wid)
 		delete(renderers, wid)
 	}
 	renderersLock.Unlock()
@@ -135,13 +136,12 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 			continue
 		}
 		rinfo, ok := renderers[wid]
-		if !ok {
+		if !ok || !rinfo.isExpired(now) {
 			continue
 		}
-		if rinfo.isExpired(now) {
-			rinfo.renderer.Destroy()
-			delete(renderers, wid)
-		}
+		rinfo.renderer.Destroy()
+		overrides.Delete(wid)
+		delete(renderers, wid)
 	}
 	renderersLock.Unlock()
 	lastClean = timeNow()
@@ -187,6 +187,7 @@ func destroyExpiredRenderers(now time.Time) {
 	for wid, rinfo := range renderers {
 		if rinfo.isExpired(now) {
 			rinfo.renderer.Destroy()
+			overrides.Delete(wid)
 			expiredObjects = append(expiredObjects, wid)
 		}
 	}
