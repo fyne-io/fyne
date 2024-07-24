@@ -186,8 +186,13 @@ func fallbackWithData(key, fallback string, data any) string {
 	return str.String()
 }
 
+// A utility for setting up languages - available to unit tests for overriding system
+func setupLang(lang string) {
+	localizer = i18n.NewLocalizer(bundle, lang)
+}
+
+// updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
-	// Find the closest translation from the user's locale list and set it up
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
@@ -196,9 +201,4 @@ func updateLocalizer() {
 	str := closestSupportedLocale(all).LanguageString()
 	setupLang(str)
 	localizer = i18n.NewLocalizer(bundle, str)
-}
-
-// A utility for setting up languages - available to unit tests for overriding system
-func setupLang(lang string) {
-	localizer = i18n.NewLocalizer(bundle, lang)
 }
