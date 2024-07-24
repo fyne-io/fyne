@@ -114,14 +114,14 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 // The language that this relates to will be inferred from the resource name, for example "fr.json".
 // The data should be in json format.
 func AddTranslations(r fyne.Resource) error {
-	defer setLocalizer()
+	defer updateLocalizer()
 	return addLanguage(r.Content(), r.Name())
 }
 
 // AddTranslationsForLocale allows an app to load a bundle of translations for a specified locale.
 // The data should be in json format.
 func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
-	defer setLocalizer()
+	defer updateLocalizer()
 	return addLanguage(data, l.String()+".json")
 }
 
@@ -154,7 +154,7 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 		}
 	}
 
-	setLocalizer()
+	updateLocalizer()
 
 	return retErr
 }
@@ -186,7 +186,7 @@ func fallbackWithData(key, fallback string, data any) string {
 	return str.String()
 }
 
-func setLocalizer() {
+func updateLocalizer() {
 	// Find the closest translation from the user's locale list and set it up
 	all, err := locale.GetLocales()
 	if err != nil {
