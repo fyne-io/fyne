@@ -114,14 +114,14 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 // The language that this relates to will be inferred from the resource name, for example "fr.json".
 // The data should be in json format.
 func AddTranslations(r fyne.Resource) error {
-	defer setLocalizer()
+	defer updateLocalizer()
 	return addLanguage(r.Content(), r.Name())
 }
 
 // AddTranslationsForLocale allows an app to load a bundle of translations for a specified locale.
 // The data should be in json format.
 func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
-	defer setLocalizer()
+	defer updateLocalizer()
 	return addLanguage(data, l.String()+".json")
 }
 
@@ -154,7 +154,7 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 		}
 	}
 
-	setLocalizer()
+	updateLocalizer()
 
 	return retErr
 }
@@ -186,8 +186,13 @@ func fallbackWithData(key, fallback string, data any) string {
 	return str.String()
 }
 
-func setLocalizer() {
-	// Find the closest translation from the user's locale list and set it up
+// A utility for setting up languages - available to unit tests for overriding system
+func setupLang(lang string) {
+	localizer = i18n.NewLocalizer(bundle, lang)
+}
+
+// updateLocalizer Finds the closest translation from the user's locale list and sets it up
+func updateLocalizer() {
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
@@ -196,9 +201,4 @@ func setLocalizer() {
 	str := closestSupportedLocale(all).LanguageString()
 	setupLang(str)
 	localizer = i18n.NewLocalizer(bundle, str)
-}
-
-// A utility for setting up languages - available to unit tests for overriding system
-func setupLang(lang string) {
-	localizer = i18n.NewLocalizer(bundle, lang)
 }
