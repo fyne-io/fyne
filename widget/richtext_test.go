@@ -178,7 +178,7 @@ func TestText_InsertAt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichTextWithText(tt.fields.buffer)
-			text.insertAt(tt.args.pos, tt.args.runes)
+			text.insertAt(tt.args.pos, []rune(tt.args.runes))
 			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
@@ -186,11 +186,11 @@ func TestText_InsertAt(t *testing.T) {
 
 func TestText_Insert(t *testing.T) {
 	text := NewRichTextWithText("")
-	text.insertAt(0, "a")
+	text.insertAt(0, []rune("a"))
 	assert.Equal(t, "a", text.String())
-	text.insertAt(1, "\n")
+	text.insertAt(1, []rune("\n"))
 	assert.Equal(t, "a\n", text.String())
-	text.insertAt(2, "b")
+	text.insertAt(2, []rune("b"))
 	assert.Equal(t, "a\nb", text.String())
 }
 
@@ -244,7 +244,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichTextWithText(tt.fields.buffer)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, string(got))
 			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
@@ -332,7 +332,7 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichText(tt.segments...)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, string(got))
 			for _, s := range tt.wantSegments {
 				if txt, ok := s.(*TextSegment); ok {
 					txt.parent = text

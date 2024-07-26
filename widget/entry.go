@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -553,7 +552,7 @@ func (e *Entry) setText(text string, fromBinding bool) {
 func (e *Entry) Append(text string) {
 	e.propertyLock.Lock()
 	provider := e.textProvider()
-	provider.insertAt(provider.len(), text)
+	provider.insertAt(provider.len(), []rune(text))
 	content := provider.String()
 	changed := e.updateText(content, false)
 	cb := e.OnChanged
@@ -791,7 +790,7 @@ func (e *Entry) Undo() {
 	}
 	pos := modify.Position
 	if modify.Delete {
-		pos += utf8.RuneCountInString(modify.Text)
+		pos += len(modify.Text)
 	}
 	e.propertyLock.Lock()
 	e.updateText(newText, false)
@@ -939,7 +938,7 @@ func (e *Entry) TypedRune(r rune) {
 	pos := e.cursorTextPos()
 
 	provider := e.textProvider()
-	provider.insertAt(pos, string(runes))
+	provider.insertAt(pos, runes)
 
 	content := provider.String()
 	e.updateText(content, false)
@@ -947,7 +946,7 @@ func (e *Entry) TypedRune(r rune) {
 
 	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Position: pos,
-		Text:     string(runes),
+		Text:     runes,
 	})
 	e.propertyLock.Unlock()
 
@@ -1038,9 +1037,7 @@ func (e *Entry) eraseSelection() bool {
 		return false
 	}
 
-	erasedText := e.Text[posA:posB]
-
-	provider.deleteFromTo(posA, posB)
+	erasedText := provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.selecting = false
@@ -1112,11 +1109,11 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	runes := []rune(text)
 	pos := e.cursorTextPos()
 	provider := e.textProvider()
-	provider.insertAt(pos, text)
+	provider.insertAt(pos, runes)
 
 	e.undoStack.Add(&entryModifyAction{
 		Position: pos,
-		Text:     text,
+		Text:     runes,
 	})
 	content := provider.String()
 	e.updateText(content, false)
@@ -1610,7 +1607,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		return
 	}
 	e.propertyLock.Lock()
-	s := "\n"
+	s := []rune("\n")
 	pos := e.cursorTextPos()
 	provider.insertAt(pos, s)
 	e.undoStack.MergeOrAdd(&entryModifyAction{
@@ -2286,7 +2283,7 @@ type entryModifyAction struct {
 	// Position represents the start position of Text
 	Position int
 	// Text is the text that is inserted or deleted at Position
-	Text string
+	Text []rune
 }
 
 func (i *entryModifyAction) Undo(s string) string {
@@ -2308,13 +2305,13 @@ func (i *entryModifyAction) Redo(s string) string {
 // Inserts Text
 func (i *entryModifyAction) add(s string) string {
 	runes := []rune(s)
-	return string(runes[:i.Position]) + i.Text + string(runes[i.Position:])
+	return string(runes[:i.Position]) + string(i.Text) + string(runes[i.Position:])
 }
 
 // Deletes Text
 func (i *entryModifyAction) sub(s string) string {
 	runes := []rune(s)
-	return string(runes[:i.Position]) + string(runes[i.Position+utf8.RuneCountInString(i.Text):])
+	return string(runes[:i.Position]) + string(runes[i.Position+len(i.Text):])
 }
 
 func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
@@ -2325,7 +2322,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		// Don't merge two separate words
-		wordSeparators := func(s string) (num int, onlyWordSeparators bool) {
+		wordSeparators := func(s []rune) (num int, onlyWordSeparators bool) {
 			onlyWordSeparators = true
 			for _, r := range s {
 				if isWordSeparator(r) {
@@ -2343,14 +2340,14 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		if i.Delete {
-			if i.Position == other.Position+utf8.RuneCountInString(other.Text) {
+			if i.Position == other.Position+len(other.Text) {
 				i.Position = other.Position
-				i.Text = other.Text + i.Text
+				i.Text = append(other.Text, i.Text...)
 				return true
 			}
 		} else {
-			if i.Position+utf8.RuneCountInString(i.Text) == other.Position {
-				i.Text += other.Text
+			if i.Position+len(i.Text) == other.Position {
+				i.Text = append(i.Text, other.Text...)
 				return true
 			}
 		}
