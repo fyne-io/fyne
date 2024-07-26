@@ -183,7 +183,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		parent += "/"
 	}
 
-	// only root is it's own parent
+	// only root is its own parent
 	if filepath.Clean(parent) == filepath.Clean(s) {
 		return nil, repository.ErrURIRoot
 	}

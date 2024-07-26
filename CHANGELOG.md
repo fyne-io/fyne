@@ -1327,7 +1327,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
 * Don't add a button bar to a form if it has no buttons
 * Moved driver/gl package to internal/driver/gl
 * Clicking/Tapping in an entry will position the cursor
-* A container with no layout will not change the position or size of it's content
+* A container with no layout will not change the position or size of its content
 * Update the fyne_demo app to reflect the expanding feature set
 
 ### Fixed

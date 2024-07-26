@@ -245,7 +245,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			f.breadcrumbScroll, f.filesScroll,
 		),
 	)
-	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only it's minimal width
+	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only its minimal width
 
 	return container.NewBorder(header, footer, nil, nil, body)
 }
