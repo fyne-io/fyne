@@ -1991,21 +1991,21 @@ func TestEntry_UndoRedo_TypeRune(t *testing.T) {
 	entry.TypedShortcut(&fyne.ShortcutUndo{})
 	assert.Equal(t, "", entry.Text)
 
-	for _, r := range "aaa ààà bbb" {
+	for _, r := range "abc éàè 123" {
 		entry.TypedRune(r)
 	}
 
-	assert.Equal(t, "aaa ààà bbb", entry.Text)
+	assert.Equal(t, "abc éàè 123", entry.Text)
 
 	// Check redo when there is nothing to redo
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
-	assert.Equal(t, "aaa ààà bbb", entry.Text)
+	assert.Equal(t, "abc éàè 123", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutUndo{})
-	assert.Equal(t, "aaa ààà", entry.Text)
+	assert.Equal(t, "abc éàè", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutUndo{})
-	assert.Equal(t, "aaa", entry.Text)
+	assert.Equal(t, "abc", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutUndo{})
 	assert.Equal(t, "", entry.Text)
@@ -2015,17 +2015,17 @@ func TestEntry_UndoRedo_TypeRune(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
-	assert.Equal(t, "aaa", entry.Text)
+	assert.Equal(t, "abc", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
-	assert.Equal(t, "aaa ààà", entry.Text)
+	assert.Equal(t, "abc éàè", entry.Text)
 
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
-	assert.Equal(t, "aaa ààà bbb", entry.Text)
+	assert.Equal(t, "abc éàè 123", entry.Text)
 
 	// Check redo when there is nothing to redo
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
-	assert.Equal(t, "aaa ààà bbb", entry.Text)
+	assert.Equal(t, "abc éàè 123", entry.Text)
 }
 
 func TestEntry_UndoRedo_Delete(t *testing.T) {
@@ -2059,6 +2059,29 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 
 	entry.TypedShortcut(&fyne.ShortcutRedo{})
 	assert.Equal(t, "àbf", entry.Text)
+}
+
+func TestEntry_UndoRedo_Replace(t *testing.T) {
+	entry := widget.NewEntry()
+
+	entry.SetText("àbcdéf")
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "cd", entry.SelectedText())
+
+	entry.TypedRune('z')
+	assert.Equal(t, "àbzéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbcdéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbzéf", entry.Text)
 }
 
 func TestEntry_UndoRedoImage(t *testing.T) {
