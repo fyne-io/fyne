@@ -39,7 +39,7 @@ type nodeReaderWriter struct {
 // "virtual repository". In future, we may consider moving this into the public
 // API.
 //
-// Because of it's design, this repository has several quirks:
+// Because of its design, this repository has several quirks:
 //
 // * The Parent() of a path that exists does not necessarily exist
 //

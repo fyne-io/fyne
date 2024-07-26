@@ -23,7 +23,7 @@ func splitNonEmpty(str, sep string) []string {
 // HierarchicalRepository.Parent(). It will create a parent URI based on
 // IETF RFC3986.
 //
-// In short, the URI is separated into it's component parts, the path component
+// In short, the URI is separated into its component parts, the path component
 // is split along instances of '/', and the trailing element is removed. The
 // result is concatenated and parsed as a new URI.
 //
@@ -63,13 +63,13 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
-	// CustomURIRepository that implements it's own ParseURI.
+	// CustomURIRepository that implements its own ParseURI.
 	return ParseURI(newURI)
 }
 
 // GenericChild can be used as a common-case implementation of
 // HierarchicalRepository.Child(). It will create a child URI by separating the
-// URI into it's component parts as described in IETF RFC 3986, then appending
+// URI into its component parts as described in IETF RFC 3986, then appending
 // "/" + component to the path, then concatenating the result and parsing it as
 // a new URI.
 //
@@ -97,7 +97,7 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
-	// CustomURIRepository that implements it's own ParseURI.
+	// CustomURIRepository that implements its own ParseURI.
 	return ParseURI(newURI)
 }
 
