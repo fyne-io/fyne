@@ -556,6 +556,7 @@ func (e *Entry) Append(text string) {
 	content := provider.String()
 	changed := e.updateText(content, false)
 	cb := e.OnChanged
+	e.undoStack.Clear()
 	e.propertyLock.Unlock()
 
 	if changed {
