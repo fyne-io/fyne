@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -108,4 +109,21 @@ func TestDialog_ErrorCallback(t *testing.T) {
 	test.Tap(information.dismiss)
 	assert.True(t, tapped)
 	assert.True(t, information.win.Hidden)
+}
+
+func TestDialog_ErrorCapitalize(t *testing.T) {
+	err := errors.New("here is an error msg")
+	d := NewError(err, test.NewTempWindow(t, nil))
+	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
+		"Here is an error msg")
+
+	err = errors.New("這是一條錯誤訊息")
+	d = NewError(err, test.NewTempWindow(t, nil))
+	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
+		"這是一條錯誤訊息")
+
+	err = errors.New("")
+	d = NewError(err, test.NewTempWindow(t, nil))
+	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
+		"")
 }
