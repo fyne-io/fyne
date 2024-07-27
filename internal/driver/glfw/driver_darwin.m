@@ -1,3 +1,6 @@
+//go:build darwin
+
+#import <AppKit/NSEvent.h>
 #import <IOKit/pwr_mgt/IOPMLib.h>
 
 IOPMAssertionID currentDisableID;
@@ -23,4 +26,8 @@ void setDisableDisplaySleep(BOOL disable) {
     if (success == kIOReturnSuccess) {
         currentDisableID = assertionID;
     }
+}
+
+double doubleClickInterval() {
+    return [NSEvent doubleClickInterval];
 }

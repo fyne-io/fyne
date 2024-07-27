@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -56,8 +57,8 @@ func logError(msg string, err error) {
 }
 
 func setDisableScreenBlank(disable bool) {
-	user32 := syscall.NewLazyDLL("kernel32.dll")
-	executionState := user32.NewProc("SetThreadExecutionState")
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	executionState := kernel32.NewProc("SetThreadExecutionState")
 
 	uType := ES_CONTINUOUS
 	if disable {
@@ -65,4 +66,19 @@ func setDisableScreenBlank(disable bool) {
 	}
 
 	syscall.Syscall(executionState.Addr(), 1, uintptr(uType), 0, 0)
+}
+
+const defaultDoubleTapDelay = 300 * time.Millisecond
+
+func (g *gLDriver) DoubleTapDelay() time.Duration {
+	user32 := syscall.NewLazyDLL("user32.dll")
+	if user32 == nil {
+		return defaultDoubleTapDelay
+	}
+	getDoubleClickTime := user32.NewProc("GetDoubleClickTime")
+	if getDoubleClickTime == nil {
+		return defaultDoubleTapDelay
+	}
+	r1, _, _ := syscall.Syscall(getDoubleClickTime.Addr(), 0, 0, 0, 0)
+	return time.Duration(uint64(r1) * uint64(time.Millisecond))
 }
