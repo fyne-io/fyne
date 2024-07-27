@@ -28,6 +28,7 @@ void setDisableDisplaySleep(BOOL disable) {
     }
 }
 
+// https://developer.apple.com/documentation/appkit/nsevent/1528384-doubleclickinterval?language=objc
 double doubleClickInterval() {
     return [NSEvent doubleClickInterval];
 }

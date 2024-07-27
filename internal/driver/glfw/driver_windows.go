@@ -71,6 +71,7 @@ func setDisableScreenBlank(disable bool) {
 const defaultDoubleTapDelay = 300 * time.Millisecond
 
 func (g *gLDriver) DoubleTapDelay() time.Duration {
+	// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdoubleclicktime
 	user32 := syscall.NewLazyDLL("user32.dll")
 	if user32 == nil {
 		return defaultDoubleTapDelay
