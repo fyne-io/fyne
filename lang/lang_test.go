@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +22,29 @@ func TestAddTranslations(t *testing.T) {
 	setupLang("fr")
 	assert.Nil(t, err)
 	assert.Equal(t, "Match2", L("Test2"))
+}
+
+func TestLocalize_Default(t *testing.T) {
+	setupLang("en")
+	err := AddTranslationsForLocale([]byte(`{
+  "Test": "Match"
+}`), "en")
+	assert.Nil(t, err)
+
+	err = AddTranslationsForLocale([]byte(`{
+  "Test": "Match2"
+}`), "de")
+	assert.Nil(t, err)
+
+	fr := i18n.NewLocalizer(bundle, "fr")
+	ret, err := fr.Localize(&i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{
+			ID: "Test",
+		},
+	})
+
+	assert.NotNil(t, err) // we are falling back
+	assert.Equal(t, "Match", ret)
 }
 
 func TestLocalize_Fallback(t *testing.T) {
