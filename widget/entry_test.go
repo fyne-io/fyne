@@ -1823,8 +1823,9 @@ func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
 	b.Icon = theme.CancelIcon()
 	e.ActionItem = b
 	test.TempWidgetRenderer(t, e).Layout(e.MinSize())
-	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
-	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
+	assert.Equal(t, theme.IconInlineSize()+theme.InnerPadding()*2, b.Size().Width)
+	assert.Greater(t, b.Size().Height, theme.IconInlineSize())
+	assert.Equal(t, fyne.NewPos(e.MinSize().Width-theme.InputBorderSize()-b.Size().Width, theme.InputBorderSize()), b.Position())
 }
 
 func TestPasswordEntry_Disabled(t *testing.T) {
