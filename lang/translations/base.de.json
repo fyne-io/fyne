@@ -1,0 +1,31 @@
+{
+    "Create Folder": "Erstelle Ordner",
+    "Advanced": "Erweitert",
+    "Confirm": "Bestätigen",
+    "Copy": "Kopieren",
+    "Enter filename": "Dateinamen eingeben",
+    "Error": "Fehler",
+    "File": "Datei",
+    "Folder": "Ordner",
+    "New Folder": "Neuer Ordner",
+    "No": "Nein",
+    "Quit": "Beenden",
+    "Redo": "Wiederholen",
+    "Save": "Speichern",
+    "Select all": "Alle auswählen",
+    "Show Hidden Files": "Versteckte Dateien anzeigen",
+    "Undo": "Rückgängig",
+    "Yes": "Ja",
+    "file.name": {
+        "other": "Name"
+    },
+    "file.parent": {
+        "other": "Übergeordneter Ordner"
+    },
+    "Cancel": "Abbrechen",
+    "Favourites": "Favoriten",
+    "Open": "Öffnen",
+    "Paste": "Einfügen",
+    "Cut": "Ausschneiden",
+    "OK": "OK"
+}
