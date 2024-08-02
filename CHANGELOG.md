@@ -16,6 +16,14 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Odd looking SelectEntry with long PlaceHolder (#4430)
 
 
+## 2.5.1 - Ongoing
+
+### Fixed
+
+ * Apps with translations in new languages would not be recognised (#5015)
+ * App ID can be ignored from metadata file with go build/run
+
+
 ## 2.5.0 - 14 July 2024
 
 ### Added
