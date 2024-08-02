@@ -3,6 +3,14 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.5.1 - Ongoing
+
+### Fixed
+
+ * Apps with translations in new languages would not be recognised (#5015)
+ * App ID can be ignored from metadata file with go build/run
+
+
 ## 2.5.0 - 14 July 2024
 
 ### Added
