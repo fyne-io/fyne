@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"time"
 
 	"github.com/fyne-io/image/ico"
 
@@ -35,8 +34,6 @@ var _ fyne.Driver = (*gLDriver)(nil)
 
 // A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
 const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
-
-const doubleTapDelay = 300 * time.Millisecond
 
 type gLDriver struct {
 	windowLock   sync.RWMutex
@@ -171,10 +168,6 @@ func (d *gLDriver) Run() {
 	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	l.WaitForEvents()
 	l.DestroyEventQueue()
-}
-
-func (d *gLDriver) DoubleTapDelay() time.Duration {
-	return doubleTapDelay
 }
 
 func (d *gLDriver) SetDisableScreenBlanking(disable bool) {

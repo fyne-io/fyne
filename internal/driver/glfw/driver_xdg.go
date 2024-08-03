@@ -4,6 +4,8 @@ package glfw
 
 import "C"
 import (
+	"time"
+
 	"github.com/godbus/dbus/v5"
 
 	"fyne.io/fyne/v2"
@@ -41,4 +43,8 @@ func setDisableScreenBlank(disable bool) {
 	} else {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+func (g *gLDriver) DoubleTapDelay() time.Duration {
+	return desktopDefaultDoubleTapDelay
 }
