@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const webDefaultDoubleTapDelay = 300 * time.Millisecond
+
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	// no-op for mobile apps using this driver
 }
@@ -20,5 +22,5 @@ func setDisableScreenBlank(disable bool) {
 }
 
 func (g *gLDriver) DoubleTapDelay() time.Duration {
-	return 300 * time.Millisecond
+	return webDefaultDoubleTapDelay
 }

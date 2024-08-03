@@ -46,5 +46,5 @@ func setDisableScreenBlank(disable bool) {
 }
 
 func (g *gLDriver) DoubleTapDelay() time.Duration {
-	return 300 * time.Millisecond
+	return desktopDefaultDoubleTapDelay
 }
