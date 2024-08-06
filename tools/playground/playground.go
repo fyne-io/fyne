@@ -31,7 +31,7 @@ func RenderCanvas(c fyne.Canvas) {
 	imageToPlayground(software.RenderCanvas(c, test.DarkTheme(theme.DefaultTheme())))
 }
 
-// RenderWindow takes a window and converts it's canvas into an inline image for showing in the playground
+// RenderWindow takes a window and converts its canvas into an inline image for showing in the playground
 func RenderWindow(w fyne.Window) {
 	RenderCanvas(w.Canvas())
 }

@@ -28,7 +28,7 @@ func (c *ClipStack) Length() int {
 }
 
 // Push a new clip onto this stack at position and size specified.
-// The returned clip item is the result of calculating the intersection of the requested clip and it's parent.
+// The returned clip item is the result of calculating the intersection of the requested clip and its parent.
 func (c *ClipStack) Push(p fyne.Position, s fyne.Size) *ClipItem {
 	outer := c.Top()
 	inner := outer.Intersect(p, s)

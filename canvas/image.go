@@ -353,6 +353,9 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	if c != nil {
 		// We want real output pixel count not just the screen coordinate space (i.e. macOS Retina)
 		screenWidth, screenHeight = c.PixelCoordinateForPosition(fyne.Position{X: width, Y: height})
+	} else { // no canvas info, assume HiDPI
+		screenWidth *= 2
+		screenHeight *= 2
 	}
 
 	tex := cache.GetSvg(i.name(), i, screenWidth, screenHeight)

@@ -61,7 +61,7 @@ var (
 			makeSplitTab,
 		},
 		"scroll": {"Scroll",
-			"A container that provides scrolling for it's content.",
+			"A container that provides scrolling for its content.",
 			makeScrollTab,
 		},
 		"innerwindow": {"InnerWindow",

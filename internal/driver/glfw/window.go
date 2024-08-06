@@ -53,7 +53,7 @@ func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	// we cannot perform this until window is prepared as we don't know it's scale!
+	// we cannot perform this until window is prepared as we don't know its scale!
 	bigEnough := size.Max(w.canvas.canvasSize(w.canvas.Content().MinSize()))
 	w.runOnMainWhenCreated(func() {
 		w.viewLock.Lock()
