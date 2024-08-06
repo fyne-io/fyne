@@ -511,7 +511,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable:
 			return true
 		case fyne.Draggable:
 			if mouseDragStarted {
