@@ -11,10 +11,11 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestList_ThemeChange(t *testing.T) {
-	list, w := setupList(t)
+	list, w, _ := setupList(t)
 
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
@@ -26,7 +27,7 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_ThemeOverride(t *testing.T) {
-	list, w := setupList(t)
+	list, w, _ := setupList(t)
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertImageMatches(t, "list/list_theme_changed.png", w.Canvas().Capture())
@@ -38,21 +39,83 @@ func TestList_ThemeOverride(t *testing.T) {
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 }
 
-func setupList(t *testing.T) (*widget.List, fyne.Window) {
+func TestList_Resize(t *testing.T) {
+	l, _, rows := setupList(t)
+
+	var refreshCounts []int
+	var resizeCounts []int
+	for _, row := range rows {
+		refreshCounts = append(refreshCounts, row.refreshCount)
+		resizeCounts = append(resizeCounts, row.resizeCount)
+	}
+
+	l.Resize(fyne.NewSize(250, 200)) // changing width only
+	var newRefreshCounts []int
+	var newResizeCounts []int
+	for _, row := range rows {
+		newRefreshCounts = append(newRefreshCounts, row.refreshCount)
+		newResizeCounts = append(newResizeCounts, row.resizeCount)
+	}
+
+	// resizing width only (no new visible rows) calls Resize on the rows, not Refresh
+	// some rows may not be visible, so their resize does not need to be called
+	assert.Equal(t, refreshCounts, newRefreshCounts)
+	atLeastOneGreaterResizeCount := false
+	resizeCountAllGreaterOrEqual := true
+	for i := range resizeCounts {
+		if newResizeCounts[i] < resizeCounts[i] {
+			resizeCountAllGreaterOrEqual = false
+			break
+		}
+		if newResizeCounts[i] > resizeCounts[i] {
+			atLeastOneGreaterResizeCount = true
+		}
+	}
+	assert.True(t, atLeastOneGreaterResizeCount)
+	assert.True(t, resizeCountAllGreaterOrEqual)
+}
+
+func setupList(t *testing.T) (*widget.List, fyne.Window, []*resizeRefreshCountingLabel) {
+	var rows []*resizeRefreshCountingLabel
 	test.NewTempApp(t)
 	list := widget.NewList(
 		func() int {
 			return 25
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Test Item 55")
+			row := newResizeRefreshCountingLabel("Test Item 55")
+			rows = append(rows, row)
+			return row
 		},
 		func(id widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(fmt.Sprintf("Test Item %d", id))
+			o.(*resizeRefreshCountingLabel).SetText(fmt.Sprintf("Test Item %d", id))
 		})
 	w := test.NewTempWindow(t, list)
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(200, 200))
 
-	return list, w
+	return list, w, rows
+}
+
+type resizeRefreshCountingLabel struct {
+	widget.Label
+	resizeCount  int
+	refreshCount int
+}
+
+func newResizeRefreshCountingLabel(text string) *resizeRefreshCountingLabel {
+	r := &resizeRefreshCountingLabel{}
+	r.Text = text
+	r.ExtendBaseWidget(r)
+	return r
+}
+
+func (r *resizeRefreshCountingLabel) Refresh() {
+	r.refreshCount++
+	r.Label.Refresh()
+}
+
+func (r *resizeRefreshCountingLabel) Resize(s fyne.Size) {
+	r.resizeCount++
+	r.Label.Resize(s)
 }
