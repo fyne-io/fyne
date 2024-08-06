@@ -139,10 +139,12 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	defer d.systrayLock.Unlock()
 
 	d.systrayMenu = m
-	systray.ResetMenu()
-	d.refreshSystrayMenu(m, nil)
+	runOnMain(func() {
+		systray.ResetMenu()
+		d.refreshSystrayMenu(m, nil)
 
-	addMissingQuitForMenu(m, d)
+		addMissingQuitForMenu(m, d)
+	})
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
@@ -175,11 +177,13 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	if _, ok := resource.(*theme.ThemedResource); ok {
-		systray.SetTemplateIcon(img, img)
-	} else {
-		systray.SetIcon(img)
-	}
+	runOnMain(func() {
+		if _, ok := resource.(*theme.ThemedResource); ok {
+			systray.SetTemplateIcon(img, img)
+		} else {
+			systray.SetIcon(img)
+		}
+	})
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
