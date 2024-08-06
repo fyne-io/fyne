@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,6 +21,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
 var (
 	systrayIcon fyne.Resource

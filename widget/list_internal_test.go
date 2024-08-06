@@ -624,11 +624,11 @@ func TestList_LimitUpdateItem(t *testing.T) {
 	)
 	w.SetContent(list)
 	w.ShowAndRun()
-	assert.Equal(t, "0.1.0.1.", printOut)
+	assert.Equal(t, "0.1.", printOut)
 	list.scrollTo(1)
-	assert.Equal(t, "0.1.0.1.2.", printOut)
+	assert.Equal(t, "0.1.2.", printOut)
 	list.scrollTo(2)
-	assert.Equal(t, "0.1.0.1.2.3.", printOut)
+	assert.Equal(t, "0.1.2.3.", printOut)
 }
 
 func TestList_RefreshUpdatesAllItems(t *testing.T) {

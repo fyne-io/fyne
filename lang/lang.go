@@ -169,6 +169,7 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
+	translated = []language.Tag{language.Make("en")} // the first item in this list will be the fallback if none match
 	err := AddTranslationsFS(translations, "translations")
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)

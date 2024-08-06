@@ -23,6 +23,11 @@ func TestAddTranslations(t *testing.T) {
 	assert.Equal(t, "Match2", L("Test2"))
 }
 
+func TestLocalize_Default(t *testing.T) {
+	fallback := closestSupportedLocale([]string{"xx"})
+	assert.Equal(t, fyne.Locale("en"), fallback[0:2])
+}
+
 func TestLocalize_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", L("Missing"))
 }
