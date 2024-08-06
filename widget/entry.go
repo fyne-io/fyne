@@ -1994,19 +1994,21 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
+	th := r.content.entry.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	if focusedAppearance {
-		r.cursor.Show()
 		if fyne.CurrentApp().Settings().ShowAnimations() {
 			r.content.entry.cursorAnim.start()
+		} else {
+			r.cursor.FillColor = th.Color(theme.ColorNamePrimary, v)
 		}
+		r.cursor.Show()
 	} else {
 		r.content.entry.cursorAnim.stop()
 		r.cursor.Hide()
 	}
 	r.moveCursor()
 
-	th := r.content.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	selectionColor := th.Color(theme.ColorNameSelection, v)
 	for _, selection := range selections {
 		rect := selection.(*canvas.Rectangle)

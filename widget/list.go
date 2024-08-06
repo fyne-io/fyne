@@ -198,7 +198,7 @@ func (l *List) Resize(s fyne.Size) {
 	}
 
 	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(false)
+	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
 }
 
 // Select add the item identified by the given ID to the selection.
