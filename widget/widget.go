@@ -122,7 +122,7 @@ func (w *BaseWidget) Hide() {
 	canvas.Refresh(impl)
 }
 
-// Refresh causes this widget to be redrawn in it's current state
+// Refresh causes this widget to be redrawn in its current state
 func (w *BaseWidget) Refresh() {
 	impl := w.super()
 	if impl == nil {

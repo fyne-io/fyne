@@ -109,7 +109,7 @@ func (c *Container) Position() Position {
 	return c.position
 }
 
-// Refresh causes this object to be redrawn in it's current state
+// Refresh causes this object to be redrawn in its current state
 func (c *Container) Refresh() {
 	c.layout()
 
