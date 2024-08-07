@@ -121,7 +121,7 @@ func watchTheme() {
 		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
-			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+			if (changed.Namespace == "org.gnome.desktop.interface" || changed.Namespace == "org.freedesktop.appearance") && changed.Key == "color-scheme" {
 				internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
 				fyne.CurrentApp().Settings().(*settings).setupTheme()
 			}
