@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"fyne.io/fyne/v2"
+	internalapp "fyne.io/fyne/v2/internal/app"
 )
 
 const notificationTemplate = `$title = "%s"
@@ -95,5 +96,5 @@ func runScript(name, script string) {
 	}
 }
 func watchTheme() {
-	// TODO monitor the Windows theme
+	go internalapp.WatchTheme(fyne.CurrentApp().Settings().(*settings).setupTheme)
 }
