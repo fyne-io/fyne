@@ -297,6 +297,10 @@ func (t *Table) Select(id TableCellID) {
 func (t *Table) SetColumnWidth(id int, width float32) {
 	t.propertyLock.Lock()
 	if id < 0 {
+		if t.headerSize.Width == width {
+			t.propertyLock.Unlock()
+			return
+		}
 		t.headerSize.Width = width
 	}
 
@@ -304,6 +308,10 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 		t.columnWidths = make(map[int]float32)
 	}
 
+	if set, ok := t.columnWidths[id]; ok && set == width {
+		t.propertyLock.Unlock()
+		return
+	}
 	t.columnWidths[id] = width
 	t.propertyLock.Unlock()
 
@@ -318,6 +326,10 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 func (t *Table) SetRowHeight(id int, height float32) {
 	t.propertyLock.Lock()
 	if id < 0 {
+		if t.headerSize.Height == height {
+			t.propertyLock.Unlock()
+			return
+		}
 		t.headerSize.Height = height
 	}
 
@@ -325,6 +337,10 @@ func (t *Table) SetRowHeight(id int, height float32) {
 		t.rowHeights = make(map[int]float32)
 	}
 
+	if set, ok := t.rowHeights[id]; ok && set == height {
+		t.propertyLock.Unlock()
+		return
+	}
 	t.rowHeights[id] = height
 	t.propertyLock.Unlock()
 
