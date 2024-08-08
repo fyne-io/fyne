@@ -48,7 +48,6 @@ type gLDriver struct {
 
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
-	systrayLock         sync.Mutex
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
