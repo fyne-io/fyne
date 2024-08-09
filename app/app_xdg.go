@@ -21,10 +21,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func init() {
-	internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
-}
-
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	if build.IsFlatpak {
 		err := openuri.OpenURI("", url.String(), nil)
@@ -124,11 +120,17 @@ func rootConfigDir() string {
 }
 
 func watchTheme() {
-	go portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
-		if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
-			themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
-			internalapp.CurrentVariant.Store(uint64(themeVariant))
-			fyne.CurrentApp().Settings().(*settings).setupTheme()
-		}
-	})
+	go func() {
+		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
+		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
+		fyne.CurrentApp().Settings().(*settings).setupTheme()
+
+		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
+			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
+				internalapp.CurrentVariant.Store(uint64(themeVariant))
+				fyne.CurrentApp().Settings().(*settings).setupTheme()
+			}
+		})
+	}()
 }
