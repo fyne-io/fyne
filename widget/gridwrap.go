@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -509,15 +510,15 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	list *GridWrap
 
-	itemPool   syncPool
-	slicePool  sync.Pool // *[]itemAndID
+	itemPool   async.Pool[fyne.CanvasObject]
+	slicePool  async.Pool[*[]gridItemAndID]
 	visible    []gridItemAndID
 	renderLock sync.Mutex
 }
 
 func newGridWrapLayout(list *GridWrap) fyne.Layout {
 	l := &gridWrapLayout{list: list}
-	l.slicePool.New = func() any {
+	l.slicePool.New = func() *[]gridItemAndID {
 		s := make([]gridItemAndID, 0)
 		return &s
 	}
@@ -534,7 +535,7 @@ func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 func (l *gridWrapLayout) getItem() *gridWrapItem {
-	item := l.itemPool.Obtain()
+	item := l.itemPool.Get()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
 			child := createItemAndApplyThemeScope(f, l.list)
@@ -628,7 +629,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 
 	// Keep pointer reference for copying slice header when returning to the pool
 	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get().(*[]gridItemAndID)
+	wasVisiblePtr := l.slicePool.Get()
 	wasVisible := (*wasVisiblePtr)[:0]
 	wasVisible = append(wasVisible, l.visible...)
 
@@ -669,13 +670,13 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 
 	for _, old := range wasVisible {
 		if _, ok := l.searchVisible(l.visible, old.id); !ok {
-			l.itemPool.Release(old.item)
+			l.itemPool.Put(old.item)
 		}
 	}
 
 	// make a local deep copy of l.visible since rest of this function is unlocked
 	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get().(*[]gridItemAndID)
+	visiblePtr := l.slicePool.Get()
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked

@@ -1,8 +1,6 @@
 package common
 
 import (
-	"sync"
-
 	"fyne.io/fyne/v2/internal/async"
 )
 
@@ -38,15 +36,15 @@ func (w *Window) RunEventQueue() {
 
 // WaitForEvents wait for all the events.
 func (w *Window) WaitForEvents() {
-	done := DonePool.Get().(chan struct{})
+	done := DonePool.Get()
 	defer DonePool.Put(done)
 
 	w.eventQueue.In() <- func() { done <- struct{}{} }
 	<-done
 }
 
-var DonePool = sync.Pool{
-	New: func() any {
+var DonePool = async.Pool[chan struct{}]{
+	New: func() chan struct{} {
 		return make(chan struct{})
 	},
 }
