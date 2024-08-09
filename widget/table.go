@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -1160,7 +1161,7 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 
-	r := &tableCellsRenderer{cells: c, pool: &syncPool{}, headerPool: &syncPool{},
+	r := &tableCellsRenderer{cells: c,
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		headRowStickyBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
@@ -1182,7 +1183,7 @@ type tableCellsRenderer struct {
 	widget.BaseRenderer
 
 	cells            *tableCells
-	pool, headerPool pool
+	pool, headerPool async.Pool[fyne.CanvasObject]
 	visible, headers map[TableCellID]fyne.CanvasObject
 	hover, marker    *canvas.Rectangle
 	dividers         []fyne.CanvasObject
@@ -1299,7 +1300,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 		colWidth := visibleColWidths[col]
 		c, ok := wasVisible[id]
 		if !ok {
-			c = r.pool.Obtain()
+			c = r.pool.Get()
 			if f := r.cells.t.CreateCell; f != nil && c == nil {
 				c = createItemAndApplyThemeScope(f, r.cells.t)
 			}
@@ -1369,7 +1370,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 
 	for id, old := range wasVisible {
 		if _, ok := r.visible[id]; !ok {
-			r.pool.Release(old)
+			r.pool.Put(old)
 		}
 	}
 	visible := r.visible
@@ -1602,7 +1603,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			colWidth := visibleColWidths[col]
 			c, ok := wasVisible[id]
 			if !ok {
-				c = r.headerPool.Obtain()
+				c = r.headerPool.Get()
 				if c == nil {
 					c = r.cells.t.createHeader()
 				}
@@ -1644,7 +1645,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 			rowHeight := visibleRowHeights[row]
 			c, ok := wasVisible[id]
 			if !ok {
-				c = r.headerPool.Obtain()
+				c = r.headerPool.Get()
 				if c == nil {
 					c = r.cells.t.createHeader()
 				}
@@ -1696,7 +1697,7 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 
 	for id, old := range wasVisible {
 		if _, ok := r.headers[id]; !ok {
-			r.headerPool.Release(old)
+			r.headerPool.Put(old)
 		}
 	}
 	return cells
