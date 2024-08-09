@@ -3,16 +3,16 @@
 		<widget pos="10,10" size="130x35" type="*widget.Entry">
 			<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="126x31"/>
 			<rectangle pos="1,1" radius="4" size="127x32" strokeColor="primary" strokeWidth="2"/>
-			<widget pos="0,2" size="106x31" type="*widget.Scroll">
-				<widget size="106x31" type="*widget.entryContent">
-					<widget size="106x31" type="*widget.RichText">
+			<widget pos="0,2" size="94x31" type="*widget.Scroll">
+				<widget size="94x31" type="*widget.entryContent">
+					<widget size="94x31" type="*widget.RichText">
 						<text pos="8,6" size="36x19">•••••••</text>
 					</widget>
 					<rectangle fillColor="primary" pos="43,6" size="2x19"/>
 				</widget>
 			</widget>
-			<widget pos="102,8" size="20x20" type="*widget.passwordRevealer">
-				<image rsc="visibilityOffIcon" size="iconInlineSize" themed="foreground"/>
+			<widget pos="92,2" size="36x31" type="*widget.passwordRevealer">
+				<image pos="8,5" rsc="visibilityOffIcon" size="iconInlineSize" themed="foreground"/>
 			</widget>
 		</widget>
 	</content>

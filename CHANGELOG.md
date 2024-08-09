@@ -3,6 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.6.0 - Ongoing
+
+### Added
+
+### Changed
+
+ * ActionItems in an Entry should now match the standard button size
+
+### Fixed
+
+ * Odd looking SelectEntry with long PlaceHolder (#4430)
+
+
 ## 2.5.1 - Ongoing
 
 ### Fixed
