@@ -535,7 +535,6 @@ func (f *fileDialog) setView(view ViewLayout) {
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(view))
 	var selectF func(id int)
 	choose := func(id int) {
-		selectF(id)
 		if file, ok := f.getDataItem(id); ok {
 			f.selectedID = id
 			f.setSelected(file, id)
@@ -555,7 +554,7 @@ func (f *fileDialog) setView(view ViewLayout) {
 			parent := id == 0 && len(dir.Path()) < len(f.dir.Path())
 			_, isDir := dir.(fyne.ListableURI)
 			o.(*fileDialogItem).setLocation(dir, isDir || parent, parent)
-			o.(*fileDialogItem).choose = choose
+			o.(*fileDialogItem).choose = selectF
 			o.(*fileDialogItem).id = id
 			o.(*fileDialogItem).open = f.open.OnTapped
 		}
