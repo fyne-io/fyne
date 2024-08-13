@@ -24,5 +24,8 @@
     },
     "Folder": "Folder",
     "Create Folder": "Utwórz Folder",
-    "Undo": "Cofnij"
+    "Undo": "Cofnij",
+    "file.parent": {
+        "other": "Rodzic"
+    }
 }
