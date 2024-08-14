@@ -720,8 +720,9 @@ func TestTapParent_GoesUpOne(t *testing.T) {
 	d.Show()
 
 	items := test.WidgetRenderer(d.dialog.files)
-	parent := items.Objects()[0].(*intWidget.Scroll).Content.(*fyne.Container).Objects[0]
-	test.Tap(parent.(fyne.Tappable))
+	item := items.Objects()[0].(*intWidget.Scroll).Content.(*fyne.Container).Objects[0]
+	parent := test.WidgetRenderer(item.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+	test.Tap(parent)
 
 	assert.Equal(t, d.dialog.dir.String(), parentURI.String())
 }
