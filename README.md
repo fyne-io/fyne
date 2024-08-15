@@ -14,13 +14,6 @@
 It is designed to build applications that run on desktop and mobile devices with a
 single codebase.
 
-Version 2.4 is the current release of the Fyne API, it added rounded corners, emoji,
-layout debug support and table headers, along with a large number of
-smaller feature additions.
-We are now working towards the next big release, codenamed
-[Elgin](https://github.com/fyne-io/fyne/milestone/21)
-and more news will follow in our news feeds and GitHub project.
-
 # Prerequisites
 
 To develop apps using Fyne you will need Go version 1.17 or later, a C compiler and your system's development tools.
