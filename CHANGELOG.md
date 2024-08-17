@@ -9,6 +9,12 @@ More detailed release notes can be found on the [releases page](https://github.c
 
  * Apps with translations in new languages would not be recognised (#5015)
  * App ID can be ignored from metadata file with go build/run
+ * Typing Chinese characters in widget.Entry and perform undo/redo crashes the app (#5001)
+ * Assets would render Low-DPI before attaching to a canvas
+ * Single click in file dialog enters two directories (#5053)
+ * Light/Dark mode detection no longer works on Ubuntu with Fyne 2.5 (#5029)
+ * Scroll acceleration logic causes scrolling to "jump" suddenly on MacOS (#5067)
+ * SetSystemTrayMenu doesn't work when run in goroutine (#5039)
 
 
 ## 2.5.0 - 14 July 2024
