@@ -1,6 +1,10 @@
 package container
 
 import (
+	"errors"
+	"fmt"
+	"math"
+	"math/rand"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -17,11 +21,42 @@ import (
 //
 // Since: 1.4
 type TabItem struct {
+	id     string
+	parent fyne.LinkableObject
+
 	Text    string
 	Icon    fyne.Resource
 	Content fyne.CanvasObject
 
 	button *tabButton
+}
+
+// SetId is used to set the object id, then it can be used to retrieve the object from the parent's object map.
+func (ti *TabItem) SetId(id string) error {
+	if ti.id != "" {
+		return errors.New("object ID is already set")
+	} else {
+		ti.id = id
+		return nil
+	}
+}
+
+// ID is used to get the object id, then it can be used to retrieve the object from the parent's object map.
+func (ti *TabItem) ID() string {
+	if ti.id == "" {
+		ti.id = fmt.Sprintf("cntr-%d", rand.Intn(math.MaxInt32))
+	}
+	return ti.id
+}
+
+// SetParent is used to set the parent object pointer. Should be used by the object where this widget is added to.
+func (ti *TabItem) SetParent(parent fyne.LinkableObject) {
+	ti.parent = parent
+}
+
+// Parent is used to get the parent object pointer. Can be used to access the parent object and its object map.
+func (ti *TabItem) Parent() fyne.LinkableObject {
+	return ti.parent
 }
 
 // Disabled returns whether or not the TabItem is disabled.
@@ -63,14 +98,24 @@ const (
 //
 // Since: 1.4
 func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
-	return &TabItem{Text: text, Content: content}
+	var ti *TabItem = new(TabItem)
+	var nObj fyne.LinkableObject
+	var compliant bool
+	ti.Text = text
+	ti.Content = content
+	if nObj, compliant = content.(fyne.LinkableObject); compliant {
+		nObj.SetParent(ti)
+	}
+	return ti
 }
 
 // NewTabItemWithIcon creates a new item for a tabbed widget - each item specifies the content and a label with an icon for its tab.
 //
 // Since: 1.4
 func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObject) *TabItem {
-	return &TabItem{Text: text, Icon: icon, Content: content}
+	var ti *TabItem = NewTabItem(text, content)
+	ti.Icon = icon
+	return ti
 }
 
 type baseTabs interface {

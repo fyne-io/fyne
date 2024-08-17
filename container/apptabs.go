@@ -19,7 +19,8 @@ var _ fyne.Widget = (*AppTabs)(nil)
 type AppTabs struct {
 	widget.BaseWidget
 
-	Items []*TabItem
+	Items      []*TabItem
+	objectsMap map[string]fyne.NameableObject // The map of CanvasObjects this container holds (their Id is the key)
 
 	// Deprecated: Use `OnSelected func(*TabItem)` instead.
 	OnChanged    func(*TabItem) `json:"-"`
@@ -38,9 +39,15 @@ type AppTabs struct {
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
 	tabs := &AppTabs{}
+	tabs.objectsMap = make(map[string]fyne.NameableObject)
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	tabs.SetItems(items)
 	return tabs
+}
+
+// LinkedObject is used to get a linked object, registered by the Add method, called by its ID.
+func (t *AppTabs) LinkedObject(name string) fyne.CanvasObject {
+	return t.objectsMap[name].(fyne.CanvasObject)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -72,6 +79,8 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 
 // Append adds a new TabItem to the end of the tab bar.
 func (t *AppTabs) Append(item *TabItem) {
+	item.SetParent(t)
+	t.objectsMap[item.ID()] = item
 	t.SetItems(append(t.Items, item))
 }
 
@@ -149,11 +158,13 @@ func (t *AppTabs) MinSize() fyne.Size {
 // Remove tab by value.
 func (t *AppTabs) Remove(item *TabItem) {
 	removeItem(t, item)
+	delete(t.objectsMap, item.ID())
 	t.Refresh()
 }
 
 // RemoveIndex removes tab by index.
 func (t *AppTabs) RemoveIndex(index int) {
+	delete(t.objectsMap, t.Items[index].ID())
 	removeIndex(t, index)
 	t.Refresh()
 }
@@ -210,6 +221,10 @@ func (t *AppTabs) SelectedIndex() int {
 // SetItems sets the containers items and refreshes.
 func (t *AppTabs) SetItems(items []*TabItem) {
 	setItems(t, items)
+	for _, item := range items {
+		t.objectsMap[item.ID()] = item
+		item.SetParent(t)
+	}
 	t.Refresh()
 }
 

@@ -2,6 +2,10 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
+	"errors"
+	"fmt"
+	"math"
+	"math/rand"
 	"sync"
 	"sync/atomic"
 
@@ -15,6 +19,8 @@ import (
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
+	id       string
+	parent   fyne.LinkableObject
 	size     async.Size
 	position async.Position
 	Hidden   bool
@@ -22,6 +28,34 @@ type BaseWidget struct {
 	impl         atomic.Pointer[fyne.Widget]
 	propertyLock sync.RWMutex
 	themeCache   fyne.Theme
+}
+
+// SetId is used to set the object id, then it can be used to retrieve the object from the parent's object map.
+func (w *BaseWidget) SetId(id string) error {
+	if w.id != "" {
+		return errors.New("object ID is already set")
+	} else {
+		w.id = id
+		return nil
+	}
+}
+
+// ID is used to get the object id, then it can be used to retrieve the object from the parent's object map.
+func (w *BaseWidget) ID() string {
+	if w.id == "" {
+		w.id = fmt.Sprintf("wid-%d", rand.Intn(math.MaxInt32))
+	}
+	return w.id
+}
+
+// SetParent is used to set the parent object pointer. Should be used by the object where this widget is added to.
+func (w *BaseWidget) SetParent(parent fyne.LinkableObject) {
+	w.parent = parent
+}
+
+// Parent is used to get the parent object pointer. Can be used to access the parent object and its object map.
+func (w *BaseWidget) Parent() fyne.LinkableObject {
+	return w.parent
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
