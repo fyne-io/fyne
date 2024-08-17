@@ -1985,7 +1985,107 @@ func TestEntry_CarriageReturn(t *testing.T) {
 	test.AssertImageMatches(t, "entry/carriage_return_text.png", w.Canvas().Capture())
 }
 
-func TestEntry_UndoRedo(t *testing.T) {
+func TestEntry_UndoRedo_TypeRune(t *testing.T) {
+	entry := widget.NewEntry()
+
+	// Check undo when there is nothing to undo
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+
+	for _, r := range "abc éàè 123" {
+		entry.TypedRune(r)
+	}
+
+	assert.Equal(t, "abc éàè 123", entry.Text)
+
+	// Check redo when there is nothing to redo
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+
+	// Check undo when there is nothing to undo
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+
+	// Check redo when there is nothing to redo
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+}
+
+func TestEntry_UndoRedo_Delete(t *testing.T) {
+	entry := widget.NewEntry()
+
+	// Check Undo when there is nothing to undo
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+
+	for _, r := range "àbcdéf" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "àbcdéf", entry.Text)
+
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDelete})
+
+	assert.Equal(t, "àbf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbcdéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbf", entry.Text)
+}
+
+func TestEntry_UndoRedo_Replace(t *testing.T) {
+	entry := widget.NewEntry()
+
+	entry.SetText("àbcdéf")
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "cd", entry.SelectedText())
+
+	entry.TypedRune('z')
+	assert.Equal(t, "àbzéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "àbcdéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbéf", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "àbzéf", entry.Text)
+}
+
+func TestEntry_UndoRedoImage(t *testing.T) {
 	e, window := setupImageTest(t, true)
 	window.Resize(fyne.NewSize(128, 128))
 	c := window.Canvas()
