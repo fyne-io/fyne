@@ -62,7 +62,8 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 func (s *settings) watchSettings() {
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
 
-	if fyne.CurrentApp() != nil { // ignore if testing
+	a := fyne.CurrentApp()
+	if a != nil && a.Settings() == s { // ignore if testing
 		watchTheme()
 	}
 }
