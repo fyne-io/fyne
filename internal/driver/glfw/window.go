@@ -809,9 +809,9 @@ func (w *window) processFocused(focus bool) {
 			}
 		}
 		curWindow = w
-		w.canvas.FocusGained()
+		w.QueueEvent(w.canvas.FocusGained)
 	} else {
-		w.canvas.FocusLost()
+		w.QueueEvent(w.canvas.FocusLost)
 		w.mouseLock.Lock()
 		w.mousePos = fyne.Position{}
 		w.mouseLock.Unlock()

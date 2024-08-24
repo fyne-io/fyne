@@ -16,12 +16,28 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Odd looking SelectEntry with long PlaceHolder (#4430)
 
 
-## 2.5.1 - Ongoing
+## 2.5.1 - 24 August 2024
 
 ### Fixed
 
  * Apps with translations in new languages would not be recognised (#5015)
  * App ID can be ignored from metadata file with go build/run
+ * Typing Chinese characters in widget.Entry and perform undo/redo crashes the app (#5001)
+ * Assets would render Low-DPI before attaching to a canvas
+ * Single click in file dialog enters two directories (#5053)
+ * Light/Dark mode detection no longer works on Ubuntu with Fyne 2.5 (#5029)
+ * Scroll acceleration logic causes scrolling to "jump" suddenly on macOS (#5067)
+ * SetSystemTrayMenu doesn't work when run in goroutine (#5039)
+ * stack overflow when calling SetRowHeight in table UpdateCell callback (#5007)
+ * Resizing List causes visible items to refresh instead of resize (#4080)
+ * Child widget with Hoverable() interface keeps parent widget's Tapped() function from being called. (#3906)
+ * App Translation file is ignored / tries to load BR (#5015, #5040)
+ * Missing theme variant auto-switching (dark/light) for Windows (#4537)
+ * Get DoubleTapDelay from the OS if an API is available (#4448)
+ * Entry cursor is not visible with animations off (#4508) 
+ * Redundant justify-content properties in CSS for centered-container class (#5045)
+ * Update go-text/render to avoid crashing when rendering certain bitmap fonts (#5042)
+ * Using container.NewThemeOverride leaks memory until window closing (#5000)
 
 
 ## 2.5.0 - 14 July 2024
@@ -91,6 +107,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Add missed truncation mode for hyperlink (#4335)
  * AppTab does not display blue indicator line if you create it empty and then Append items to it later.
  * Many optimisations in animation, draw speed, layout and widget size calculations
+ * DocTabItem update text doesn't update the underline select bar (graphic glitch) (#3106)
 
 
 ## 2.4.5 - 15 April 2024
