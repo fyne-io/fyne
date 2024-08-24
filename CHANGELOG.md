@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.5.1 - 23 August 2024
+## 2.5.1 - 24 August 2024
 
 ### Fixed
 
@@ -13,7 +13,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Assets would render Low-DPI before attaching to a canvas
  * Single click in file dialog enters two directories (#5053)
  * Light/Dark mode detection no longer works on Ubuntu with Fyne 2.5 (#5029)
- * Scroll acceleration logic causes scrolling to "jump" suddenly on MacOS (#5067)
+ * Scroll acceleration logic causes scrolling to "jump" suddenly on macOS (#5067)
  * SetSystemTrayMenu doesn't work when run in goroutine (#5039)
  * stack overflow when calling SetRowHeight in table UpdateCell callback (#5007)
  * Resizing List causes visible items to refresh instead of resize (#4080)
