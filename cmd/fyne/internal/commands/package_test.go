@@ -255,6 +255,8 @@ func Test_PackageWasm(t *testing.T) {
 			{filepath.Join("myTestTarget", "wasm", "spinner_dark.gif"), nil},
 			{filepath.Join("myTestTarget", "wasm", "light.css"), nil},
 			{filepath.Join("myTestTarget", "wasm", "dark.css"), nil},
+			{filepath.Join("myTestTarget", "wasm", "service-worker.js"), nil},
+			{filepath.Join("myTestTarget", "wasm", "manifest.json"), nil},
 			{filepath.Join("myTestTarget", "wasm", "webgl-debug.js"), nil},
 		},
 	}
