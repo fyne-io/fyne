@@ -543,6 +543,7 @@ func (r *treeRenderer) MinSize() (min fyne.Size) {
 func (r *treeRenderer) Layout(size fyne.Size) {
 	r.content.viewport = size
 	r.scroller.Resize(size)
+	r.tree.offsetUpdated(r.scroller.Offset)
 }
 
 func (r *treeRenderer) Refresh() {
