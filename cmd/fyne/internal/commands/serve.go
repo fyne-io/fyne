@@ -12,8 +12,10 @@ import (
 // Server serve fyne wasm application over http
 type Server struct {
 	*appData
-	port        int
-	srcDir, dir string
+	port           int
+	srcDir, dir    string
+	tags           string
+	customMetadata keyValueFlag
 }
 
 // Serve return the cli command for serving fyne wasm application over http
@@ -50,6 +52,16 @@ func Serve() *cli.Command {
 				Value:       "wasm",
 				Destination: &target,
 			},
+			&cli.StringFlag{
+				Name:        "tags",
+				Usage:       "A comma-separated list of build tags.",
+				Destination: &s.tags,
+			},
+			&cli.GenericFlag{
+				Name:  "metadata",
+				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
+				Value: &s.customMetadata,
+			},
 		},
 		Action: s.Server,
 	}
@@ -60,9 +72,14 @@ func (s *Server) requestPackage() error {
 		os:     "wasm",
 		srcDir: s.srcDir,
 
-		appData: s.appData,
+		appData:        s.appData,
+		tags:           s.tags,
+		customMetadata: s.customMetadata,
 	}
 
+	if p.customMetadata.m == nil {
+		p.customMetadata.m = map[string]string{}
+	}
 	err := p.Package()
 	s.dir = p.dir
 	return err

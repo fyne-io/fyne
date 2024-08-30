@@ -1,7 +1,6 @@
 package async
 
 import (
-	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -30,13 +29,13 @@ type itemCanvasObject struct {
 	v    fyne.CanvasObject
 }
 
-var itemCanvasObjectPool = sync.Pool{
-	New: func() any { return &itemCanvasObject{} },
+var itemCanvasObjectPool = Pool[*itemCanvasObject]{
+	New: func() *itemCanvasObject { return &itemCanvasObject{} },
 }
 
 // In puts the given value at the tail of the queue.
 func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
-	i := itemCanvasObjectPool.Get().(*itemCanvasObject)
+	i := itemCanvasObjectPool.Get()
 	i.next.Store(nil)
 	i.v = v
 

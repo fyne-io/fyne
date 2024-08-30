@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -198,7 +199,7 @@ func (l *List) Resize(s fyne.Size) {
 	}
 
 	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(false)
+	l.scroller.Content.(*fyne.Container).Layout.(*listLayout).updateList(true)
 }
 
 // Select add the item identified by the given ID to the selection.
@@ -611,16 +612,16 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool          syncPool
+	itemPool          async.Pool[fyne.CanvasObject]
 	visible           []listItemAndID
-	slicePool         sync.Pool // *[]itemAndID
+	slicePool         async.Pool[*[]listItemAndID]
 	visibleRowHeights []float32
 	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
-	l.slicePool.New = func() any {
+	l.slicePool.New = func() *[]listItemAndID {
 		s := make([]listItemAndID, 0)
 		return &s
 	}
@@ -637,7 +638,7 @@ func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 }
 
 func (l *listLayout) getItem() *listItem {
-	item := l.itemPool.Obtain()
+	item := l.itemPool.Get()
 	if item == nil {
 		if f := l.list.CreateItem; f != nil {
 			item2 := createItemAndApplyThemeScope(f, l.list)
@@ -704,7 +705,7 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	// Keep pointer reference for copying slice header when returning to the pool
 	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get().(*[]listItemAndID)
+	wasVisiblePtr := l.slicePool.Get()
 	wasVisible := (*wasVisiblePtr)[:0]
 	wasVisible = append(wasVisible, l.visible...)
 
@@ -747,7 +748,7 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	for _, wasVis := range wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
-			l.itemPool.Release(wasVis.item)
+			l.itemPool.Put(wasVis.item)
 		}
 	}
 
@@ -762,7 +763,7 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	// make a local deep copy of l.visible since rest of this function is unlocked
 	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get().(*[]listItemAndID)
+	visiblePtr := l.slicePool.Get()
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
 	l.renderLock.Unlock() // user code should not be locked

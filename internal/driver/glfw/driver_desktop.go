@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,6 +21,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
+
+const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
 var (
 	systrayIcon fyne.Resource
@@ -132,14 +135,14 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
-	d.systrayLock.Lock()
-	defer d.systrayLock.Unlock()
+	runOnMain(func() {
+		d.systrayMenu = m
 
-	d.systrayMenu = m
-	systray.ResetMenu()
-	d.refreshSystrayMenu(m, nil)
+		systray.ResetMenu()
+		d.refreshSystrayMenu(m, nil)
 
-	addMissingQuitForMenu(m, d)
+		addMissingQuitForMenu(m, d)
+	})
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
@@ -172,11 +175,13 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	if _, ok := resource.(*theme.ThemedResource); ok {
-		systray.SetTemplateIcon(img, img)
-	} else {
-		systray.SetIcon(img)
-	}
+	runOnMain(func() {
+		if _, ok := resource.(*theme.ThemedResource); ok {
+			systray.SetTemplateIcon(img, img)
+		} else {
+			systray.SetIcon(img)
+		}
+	})
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {

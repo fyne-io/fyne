@@ -1,3 +1,6 @@
+//go:build darwin
+
+#import <AppKit/NSEvent.h>
 #import <IOKit/pwr_mgt/IOPMLib.h>
 
 IOPMAssertionID currentDisableID;
@@ -23,4 +26,9 @@ void setDisableDisplaySleep(BOOL disable) {
     if (success == kIOReturnSuccess) {
         currentDisableID = assertionID;
     }
+}
+
+// https://developer.apple.com/documentation/appkit/nsevent/1528384-doubleclickinterval?language=objc
+double doubleClickInterval() {
+    return [NSEvent doubleClickInterval];
 }

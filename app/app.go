@@ -112,7 +112,10 @@ func (a *fyneApp) newDefaultPreferences() *preferences {
 // New returns a new application instance with the default driver and no unique ID (unless specified in FyneApp.toml)
 func New() fyne.App {
 	if meta.ID == "" {
-		internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+		checkLocalMetadata() // if no ID passed, check if it was in toml
+		if meta.ID == "" {
+			internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+		}
 	}
 	return NewWithID(meta.ID)
 }

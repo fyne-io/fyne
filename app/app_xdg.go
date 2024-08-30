@@ -37,20 +37,24 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 
 // fetch color variant from dbus portal desktop settings.
 func findFreedesktopColorScheme() fyne.ThemeVariant {
-	colourScheme, err := appearance.GetColorScheme()
+	colorScheme, err := appearance.GetColorScheme()
 	if err != nil {
 		return theme.VariantDark
 	}
 
-	switch colourScheme {
+	return colorSchemeToThemeVariant(colorScheme)
+}
+
+func colorSchemeToThemeVariant(colorScheme appearance.ColorScheme) fyne.ThemeVariant {
+	switch colorScheme {
 	case appearance.Light:
 		return theme.VariantLight
 	case appearance.Dark:
 		return theme.VariantDark
-	default:
-		// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
-		return theme.VariantLight
 	}
+
+	// Default to light theme to support Gnome's default see https://github.com/fyne-io/fyne/pull/3561
+	return theme.VariantLight
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
@@ -117,12 +121,14 @@ func rootConfigDir() string {
 
 func watchTheme() {
 	go func() {
-		// with portal this may not be immediate, so we update a cache instead
+		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
 		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
+		fyne.CurrentApp().Settings().(*settings).setupTheme()
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
-				internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
+				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
+				internalapp.CurrentVariant.Store(uint64(themeVariant))
 				fyne.CurrentApp().Settings().(*settings).setupTheme()
 			}
 		})

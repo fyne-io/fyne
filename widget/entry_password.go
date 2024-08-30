@@ -67,7 +67,7 @@ func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
 
 func (r *passwordRevealerRenderer) MinSize() fyne.Size {
 	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
-	return fyne.NewSquareSize(iconSize)
+	return fyne.NewSquareSize(iconSize + r.entry.Theme().Size(theme.SizeNameInnerPadding)*2)
 }
 
 func (r *passwordRevealerRenderer) Refresh() {

@@ -160,9 +160,13 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize fl
 }
 
 // deleteFromTo removes the text between the specified positions
-func (t *RichText) deleteFromTo(lowBound int, highBound int) string {
+func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
+	if lowBound >= highBound {
+		return []rune{}
+	}
+
 	start := 0
-	var ret []rune
+	ret := make([]rune, 0, highBound-lowBound)
 	deleting := false
 	var segs []RichTextSegment
 	for i, seg := range t.Segments {
@@ -181,10 +185,8 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) string {
 
 		startOff := int(math.Max(float64(lowBound-start), 0))
 		endOff := int(math.Min(float64(end), float64(highBound))) - start
-		deleted := make([]rune, endOff-startOff)
 		r := ([]rune)(seg.(*TextSegment).Text)
-		copy(deleted, r[startOff:endOff])
-		ret = append(ret, deleted...)
+		ret = append(ret, r[startOff:endOff]...)
 		r2 := append(r[:startOff], r[endOff:]...)
 		seg.(*TextSegment).Text = string(r2)
 		segs = append(segs, seg)
@@ -200,7 +202,7 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) string {
 	}
 	t.Segments = segs
 	t.Refresh()
-	return string(ret)
+	return ret
 }
 
 // cachedSegmentVisual returns a cached segment visual representation.
@@ -251,7 +253,7 @@ func (t *RichText) cleanVisualCache() {
 }
 
 // insertAt inserts the text at the specified position
-func (t *RichText) insertAt(pos int, runes string) {
+func (t *RichText) insertAt(pos int, runes []rune) {
 	index := 0
 	start := 0
 	var into *TextSegment
@@ -276,7 +278,7 @@ func (t *RichText) insertAt(pos int, runes string) {
 	if pos > len(r) { // safety in case position is out of bounds for the segment
 		pos = len(r)
 	}
-	r2 := append(r[:pos], append([]rune(runes), r[pos:]...)...)
+	r2 := append(r[:pos], append(runes, r[pos:]...)...)
 	into.Text = string(r2)
 	t.Segments[index] = into
 }

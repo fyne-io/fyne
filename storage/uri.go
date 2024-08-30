@@ -494,7 +494,7 @@ func List(u fyne.URI) ([]fyne.URI, error) {
 // Storage repositories which support listing, but not creation of listable
 // objects may return repository.ErrOperationNotSupported.
 //
-// CreateListable should generally fail if the parent of it's operand does not
+// CreateListable should generally fail if the parent of its operand does not
 // exist, however this can vary by the implementation details of the specific
 // storage repository. In filesystem terms, this function is "mkdir" not "mkdir
 // -p".

@@ -114,12 +114,14 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 // The language that this relates to will be inferred from the resource name, for example "fr.json".
 // The data should be in json format.
 func AddTranslations(r fyne.Resource) error {
+	defer updateLocalizer()
 	return addLanguage(r.Content(), r.Name())
 }
 
 // AddTranslationsForLocale allows an app to load a bundle of translations for a specified locale.
 // The data should be in json format.
 func AddTranslationsForLocale(data []byte, l fyne.Locale) error {
+	defer updateLocalizer()
 	return addLanguage(data, l.String()+".json")
 }
 
@@ -152,11 +154,14 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 		}
 	}
 
+	updateLocalizer()
+
 	return retErr
 }
 
 func addLanguage(data []byte, name string) error {
-	_, err := bundle.ParseMessageFileBytes(data, name)
+	f, err := bundle.ParseMessageFileBytes(data, name)
+	translated = append(translated, f.Tag)
 	return err
 }
 
@@ -164,20 +169,11 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
+	translated = []language.Tag{language.Make("en")} // the first item in this list will be the fallback if none match
 	err := AddTranslationsFS(translations, "translations")
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
 	}
-
-	// Find the closest translation from the user's locale list and set it up
-	all, err := locale.GetLocales()
-	if err != nil {
-		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
-	}
-	str := closestSupportedLocale(all).LanguageString()
-	setupLang(str)
-	localizer = i18n.NewLocalizer(bundle, str)
 }
 
 func fallbackWithData(key, fallback string, data any) string {
@@ -194,4 +190,16 @@ func fallbackWithData(key, fallback string, data any) string {
 // A utility for setting up languages - available to unit tests for overriding system
 func setupLang(lang string) {
 	localizer = i18n.NewLocalizer(bundle, lang)
+}
+
+// updateLocalizer Finds the closest translation from the user's locale list and sets it up
+func updateLocalizer() {
+	all, err := locale.GetLocales()
+	if err != nil {
+		fyne.LogError("Failed to load user locales", err)
+		all = []string{"en"}
+	}
+	str := closestSupportedLocale(all).LanguageString()
+	setupLang(str)
+	localizer = i18n.NewLocalizer(bundle, str)
 }
