@@ -374,6 +374,8 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 		"Option Z",
 	})
 	selectEntry.PlaceHolder = "Type or select"
+	dateEntry := widget.NewDateEntry()
+	dateEntry.PlaceHolder = "Choose a date"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
 	checkGroup := widget.NewCheckGroup([]string{"CheckGroup Item 1", "CheckGroup Item 2"}, func(s []string) { fmt.Println("selected", s) })
@@ -388,6 +390,7 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewVBox(
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
+		dateEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		disabledCheck,
 		checkGroup,

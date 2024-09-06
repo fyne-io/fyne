@@ -456,6 +456,11 @@ const (
 	// Since: 2.1
 	IconNameAccount fyne.ThemeIconName = "account"
 
+	// IconNameCalendar is the name of theme lookup for calendar icon.
+	//
+	// Since: 2.6
+	IconNameCalendar fyne.ThemeIconName = "calendar"
+
 	// IconNameLogin is the name of theme lookup for login icon.
 	//
 	// Since: 2.1
@@ -599,9 +604,10 @@ var (
 		IconNameStorage:  NewThemedResource(storageIconRes),
 		IconNameUpload:   NewThemedResource(uploadIconRes),
 
-		IconNameAccount: NewThemedResource(accountIconRes),
-		IconNameLogin:   NewThemedResource(loginIconRes),
-		IconNameLogout:  NewThemedResource(logoutIconRes),
+		IconNameAccount:  NewThemedResource(accountIconRes),
+		IconNameCalendar: NewThemedResource(calendarIconRes),
+		IconNameLogin:    NewThemedResource(loginIconRes),
+		IconNameLogout:   NewThemedResource(logoutIconRes),
 
 		IconNameList: NewThemedResource(listIconRes),
 		IconNameGrid: NewThemedResource(gridIconRes),
@@ -1283,6 +1289,13 @@ func UploadIcon() fyne.Resource {
 // AccountIcon returns a resource containing the standard account icon for the current theme
 func AccountIcon() fyne.Resource {
 	return safeIconLookup(IconNameAccount)
+}
+
+// CalendarIcon returns a resource containing the standard account icon for the current theme
+//
+// Since: 2.6
+func CalendarIcon() fyne.Resource {
+	return safeIconLookup(IconNameCalendar)
 }
 
 // LoginIcon returns a resource containing the standard login icon for the current theme
