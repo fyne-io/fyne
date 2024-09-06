@@ -192,6 +192,7 @@ func main() {
 	bundleIcon("upload", f)
 
 	bundleIcon("account", f)
+	bundleIcon("calendar", f)
 	bundleIcon("login", f)
 	bundleIcon("logout", f)
 
