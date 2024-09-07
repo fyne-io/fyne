@@ -23,6 +23,6 @@ func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Refusing to show notification for unknown operating system", nil)
 }
 
-func watchTheme() {
+func watchTheme(_ *settings) {
 	// no-op
 }
