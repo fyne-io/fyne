@@ -63,8 +63,8 @@ func (s *settings) watchSettings() {
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
 
 	a := fyne.CurrentApp()
-	if a != nil && a.Settings() == s { // ignore if testing
-		watchTheme()
+	if a != nil && s != nil && a.Settings() == s { // ignore if testing
+		watchTheme(s)
 	}
 }
 
