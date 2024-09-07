@@ -9,7 +9,7 @@ var _ fyne.WidgetRenderer = (*SimpleRenderer)(nil)
 //
 // Since: 2.1
 type SimpleRenderer struct {
-	objects []fyne.CanvasObject
+	objects [1]fyne.CanvasObject
 }
 
 // NewSimpleRenderer creates a new SimpleRenderer to render a widget using a
@@ -17,7 +17,7 @@ type SimpleRenderer struct {
 //
 // Since: 2.1
 func NewSimpleRenderer(object fyne.CanvasObject) *SimpleRenderer {
-	return &SimpleRenderer{[]fyne.CanvasObject{object}}
+	return &SimpleRenderer{[1]fyne.CanvasObject{object}}
 }
 
 // Destroy does nothing in this implementation.
@@ -52,7 +52,7 @@ func (r *SimpleRenderer) MinSize() fyne.Size {
 //
 // Since: 2.1
 func (r *SimpleRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
+	return r.objects[:]
 }
 
 // Refresh requests the underlying object to redraw.
