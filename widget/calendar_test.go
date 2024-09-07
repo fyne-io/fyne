@@ -9,7 +9,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/widget"
 )
 
 func TestNewCalendar(t *testing.T) {
@@ -33,7 +32,7 @@ func TestNewCalendar_ButtonDate(t *testing.T) {
 
 	firstDate := firstDateButton(c.dates)
 	assert.Equal(t, "1", firstDate.Text)
-	lastDate := c.dates.Objects[len(c.dates.Objects)-1].(*widget.Button)
+	lastDate := c.dates.Objects[len(c.dates.Objects)-1].(*Button)
 	assert.Equal(t, strconv.Itoa(last.Day()), lastDate.Text)
 }
 
@@ -84,9 +83,9 @@ func TestNewCalendar_Resize(t *testing.T) {
 	assert.Greater(t, layout.cellSize.Height, min.Height)
 }
 
-func firstDateButton(c *fyne.Container) *widget.Button {
+func firstDateButton(c *fyne.Container) *Button {
 	for _, b := range c.Objects {
-		if nonBlank, ok := b.(*widget.Button); ok {
+		if nonBlank, ok := b.(*Button); ok {
 			return nonBlank
 		}
 	}
