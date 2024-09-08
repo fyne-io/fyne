@@ -32,6 +32,11 @@ func TestNewSelectWithData(t *testing.T) {
 
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, "", combo.Selected)
+
+	err := data.Set("2")
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, "2", combo.Selected)
 }
 
 func TestSelect_Align(t *testing.T) {
