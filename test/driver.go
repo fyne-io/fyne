@@ -116,6 +116,10 @@ func (d *driver) Quit() {
 	// no-op
 }
 
+func (d *driver) Clipboard() fyne.Clipboard {
+	return nil
+}
+
 func (d *driver) removeWindow(w *window) {
 	d.windowsMutex.Lock()
 	i := 0

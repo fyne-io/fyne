@@ -14,6 +14,8 @@ import (
 // Declare conformity with Clipboard interface
 var _ fyne.Clipboard = (*clipboard)(nil)
 
+var Clipboard clipboard
+
 // clipboard represents the system clipboard
 type clipboard struct{}
 
