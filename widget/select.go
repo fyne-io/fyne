@@ -1,10 +1,12 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 )
@@ -23,6 +25,8 @@ type Select struct {
 	Options     []string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
+
+	binder basicBinder
 
 	focused bool
 	hovered bool
@@ -45,6 +49,26 @@ func NewSelect(options []string, changed func(string)) *Select {
 	}
 	s.ExtendBaseWidget(s)
 	return s
+}
+
+// NewSelectWithData returns a new select widget connected to the specified data source.
+func NewSelectWithData(options []string, data binding.String) *Select {
+	sel := NewSelect(options, nil)
+	sel.Bind(data)
+
+	return sel
+}
+
+// Bind connects the specified data source to this select.
+// The current value will be displayed and any changes in the data will cause the widget
+// to update.
+func (s *Select) Bind(data binding.String) {
+	s.binder.SetCallback(s.updateFromData)
+	s.binder.Bind(data)
+
+	s.OnChanged = func(_ string) {
+		s.binder.CallWithData(s.writeData)
+	}
 }
 
 // ClearSelected clears the current option of the select widget.  After
@@ -239,6 +263,13 @@ func (s *Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
+// Unbind disconnects any configured data source from this Select.
+// The current value will remain at the last value of the data source.
+func (s *Select) Unbind() {
+	s.OnChanged = nil
+	s.binder.Unbind()
+}
+
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height-s.Theme().Size(theme.SizeNameInputBorder)))
@@ -279,6 +310,23 @@ func (s *Select) tapAnimation() {
 	}
 }
 
+func (s *Select) updateFromData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	stringSource, ok := data.(binding.String)
+	if !ok {
+		return
+	}
+
+	val, err := stringSource.Get()
+	if err != nil {
+		return
+	}
+	s.SetSelected(val)
+
+}
+
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
@@ -287,6 +335,26 @@ func (s *Select) updateSelected(text string) {
 	}
 
 	s.Refresh()
+}
+
+func (s *Select) writeData(data binding.DataItem) {
+	if data == nil {
+		return
+	}
+	stringTarget, ok := data.(binding.String)
+	if !ok {
+		return
+	}
+	currentValue, err := stringTarget.Get()
+	if err != nil {
+		return
+	}
+	if currentValue != s.Selected {
+		err := stringTarget.Set(s.Selected)
+		if err != nil {
+			fyne.LogError(fmt.Sprintf("Failed to set binding value to %s", s.Selected), err)
+		}
+	}
 }
 
 type selectRenderer struct {
