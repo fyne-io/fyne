@@ -477,6 +477,44 @@ func TestTable_ScrollTo(t *testing.T) {
 	}
 }
 
+func TestTable_ScrollToShowHeaders(t *testing.T) {
+	test.NewTempApp(t)
+
+	// for this test the separator thickness is 0
+	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
+
+	// we will test a 20 row x 5 column table where each cell is 50x50
+	const (
+		maxRows int     = 20
+		maxCols int     = 5
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.Size{Width: width, Height: height})
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+	table.ShowHeaderRow = true
+	table.ShowHeaderColumn = true
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	first := TableCellID{}
+	last := TableCellID{Row: maxRows - 1, Col: maxCols - 1}
+	table.ScrollTo(last)
+	lastPos := fyne.NewPos(float32(last.Col)*width, float32(last.Row)*height)
+	assert.Equal(t, lastPos, table.offset)
+	assert.Equal(t, lastPos, table.content.Offset)
+	table.ScrollTo(first)
+	assert.Equal(t, fyne.Position{}, table.offset)
+	assert.Equal(t, fyne.Position{}, table.content.Offset)
+}
+
 func TestTable_ScrollToBottom(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
