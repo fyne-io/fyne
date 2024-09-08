@@ -160,7 +160,7 @@ func TestSelect_ClipValue(t *testing.T) {
 
 	r2 := cache.Renderer(text)
 	assert.Equal(t, 1, len(r2.Objects()))
-	assert.Equal(t, "some…", r2.Objects()[0].(*canvas.Text).Text)
+	assert.Equal(t, "some …", r2.Objects()[0].(*canvas.Text).Text)
 }
 
 func TestSelect_Disable(t *testing.T) {

@@ -3,6 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.6.0 - Ongoing
+
+### Added
+
+### Changed
+
+ * ActionItems in an Entry should now match the standard button size
+
+### Fixed
+
+ * Odd looking SelectEntry with long PlaceHolder (#4430)
+
+
 ## 2.5.1 - 24 August 2024
 
 ### Fixed
@@ -1352,7 +1365,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
 * Don't add a button bar to a form if it has no buttons
 * Moved driver/gl package to internal/driver/gl
 * Clicking/Tapping in an entry will position the cursor
-* A container with no layout will not change the position or size of it's content
+* A container with no layout will not change the position or size of its content
 * Update the fyne_demo app to reflect the expanding feature set
 
 ### Fixed

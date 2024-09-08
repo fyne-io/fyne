@@ -46,7 +46,7 @@ func runOnMain(f func()) {
 		return
 	}
 
-	done := common.DonePool.Get().(chan struct{})
+	done := common.DonePool.Get()
 	defer common.DonePool.Put(done)
 
 	funcQueue <- funcData{f: f, done: done}
@@ -60,7 +60,7 @@ func runOnDraw(w *window, f func()) {
 		runOnMain(func() { w.RunWithContext(f) })
 		return
 	}
-	done := common.DonePool.Get().(chan struct{})
+	done := common.DonePool.Get()
 	defer common.DonePool.Put(done)
 
 	drawFuncQueue <- drawData{f: f, win: w, done: done}

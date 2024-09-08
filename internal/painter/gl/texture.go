@@ -14,6 +14,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const floatEqualityThreshold = 1e-9
+
 var noTexture = Texture(cache.NoTexture)
 
 // Texture represents an uploaded GL texture
@@ -104,10 +106,10 @@ func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 
 	w := gradient.Size().Width
 	h := gradient.Size().Height
-	switch gradient.Angle {
-	case 90, 270:
+	switch a := gradient.Angle; {
+	case almostEqual(a, 90), almostEqual(a, 270):
 		h = 1
-	case 0, 180:
+	case almostEqual(a, 0), almostEqual(a, 180):
 		w = 1
 	}
 	width := p.textureScale(w)
@@ -177,4 +179,8 @@ func (p *painter) textureScale(v float32) float32 {
 	}
 
 	return float32(math.Round(float64(v * p.pixScale)))
+}
+
+func almostEqual(a, b float64) bool {
+	return math.Abs(a-b) < floatEqualityThreshold
 }

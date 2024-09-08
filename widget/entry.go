@@ -1665,14 +1665,14 @@ func (r *entryRenderer) trailingInset() float32 {
 	th := r.entry.Theme()
 	xInset := float32(0)
 
-	iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	if r.entry.ActionItem != nil {
-		xInset = iconSpace
+		xInset = r.entry.ActionItem.MinSize().Width
 	}
 
 	if r.entry.Validator != nil {
+		iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 		if r.entry.ActionItem == nil {
-			xInset = iconSpace
+			xInset = iconSpace + th.Size(theme.SizeNameInnerPadding)
 		} else {
 			xInset += iconSpace
 		}
@@ -1687,7 +1687,6 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
-	lineSpace := th.Size(theme.SizeNameLineSpacing)
 
 	// 0.5 is removed so on low DPI it rounds down on the trailing edge
 	r.border.Resize(fyne.NewSize(size.Width-borderSize-.5, size.Height-borderSize-.5))
@@ -1696,12 +1695,12 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	r.box.Resize(size.Subtract(fyne.NewSquareSize(borderSize * 2)))
 	r.box.Move(fyne.NewSquareOffsetPos(borderSize))
 
-	actionIconSize := fyne.NewSize(0, 0)
+	pad := theme.InputBorderSize()
+	actionIconSize := fyne.NewSize(0, size.Height-pad*2)
 	if r.entry.ActionItem != nil {
-		actionIconSize = fyne.NewSquareSize(iconSize)
-
+		actionIconSize.Width = r.entry.ActionItem.MinSize().Width
 		r.entry.ActionItem.Resize(actionIconSize)
-		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-innerPad, innerPad))
+		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-pad, pad))
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
@@ -1714,7 +1713,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		if r.entry.ActionItem == nil {
 			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-innerPad, innerPad))
 		} else {
-			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-innerPad-lineSpace, innerPad))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width, innerPad))
 		}
 	}
 

@@ -1,0 +1,31 @@
+{
+    "Advanced": "Zaawansowane",
+    "Cancel": "Anuluj",
+    "Confirm": "Potwierdz",
+    "Copy": "Kopiuj",
+    "Cut": "Wytnij",
+    "Error": "Błąd",
+    "Favourites": "Ulubione",
+    "File": "Plik",
+    "New Folder": "Nowy folder",
+    "No": "Nie",
+    "OK": "OK",
+    "Open": "Otwórz",
+    "Paste": "Wklej",
+    "Quit": "Wyjdz",
+    "Redo": "Przerób",
+    "Save": "Zapisz",
+    "Show Hidden Files": "Pokaż Ukryte Pliki",
+    "Enter filename": "Wprowadź Nazwę Pliku",
+    "Select all": "Zaznacz Wszystko",
+    "Yes": "Tak",
+    "file.name": {
+        "other": "Nawza"
+    },
+    "Folder": "Folder",
+    "Create Folder": "Utwórz Folder",
+    "Undo": "Cofnij",
+    "file.parent": {
+        "other": "Rodzic"
+    }
+}

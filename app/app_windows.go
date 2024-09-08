@@ -95,6 +95,7 @@ func runScript(name, script string) {
 		fyne.LogError("Failed to launch windows notify script", err)
 	}
 }
-func watchTheme() {
-	go internalapp.WatchTheme(fyne.CurrentApp().Settings().(*settings).setupTheme)
+
+func watchTheme(s *settings) {
+	go internalapp.WatchTheme(s.setupTheme)
 }
