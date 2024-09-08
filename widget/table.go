@@ -370,39 +370,31 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 	case fyne.KeyDown:
 		if f := t.Length; f != nil {
 			rows, _ := f()
-			if t.currentFocus.Row >= rows-1 {
-				return
+			if t.currentFocus.Row+1 < rows {
+				t.currentFocus.Row++
 			}
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Row++
 		t.ScrollTo(t.currentFocus)
 		t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
-		if t.currentFocus.Col <= 0 {
-			return
+		if t.currentFocus.Col > 0 {
+			t.currentFocus.Col--
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Col--
 		t.ScrollTo(t.currentFocus)
 		t.RefreshItem(t.currentFocus)
 	case fyne.KeyRight:
 		if f := t.Length; f != nil {
 			_, cols := f()
-			if t.currentFocus.Col >= cols-1 {
-				return
+			if t.currentFocus.Col+1 < cols {
+				t.currentFocus.Col++
 			}
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Col++
 		t.ScrollTo(t.currentFocus)
 		t.RefreshItem(t.currentFocus)
 	case fyne.KeyUp:
-		if t.currentFocus.Row <= 0 {
-			return
+		if t.currentFocus.Row > 0 {
+			t.currentFocus.Row--
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Row--
 		t.ScrollTo(t.currentFocus)
 		t.RefreshItem(t.currentFocus)
 	}
