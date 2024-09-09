@@ -39,6 +39,15 @@ func TestAssertObjectRendersToImage(t *testing.T) {
 	test.AssertObjectRendersToImage(t, "circle.png", obj)
 }
 
+func TestRenderObjectToMarkup(t *testing.T) {
+	obj := canvas.NewCircle(color.Black)
+	obj.Resize(fyne.NewSize(20, 20))
+
+	want, err := os.ReadFile("testdata/circle.xml")
+	require.NoError(t, err)
+	assert.Equal(t, string(want), test.RenderObjectToMarkup(obj), "existing master is equal to rendered markup")
+}
+
 func TestAssertObjectRendersToMarkup(t *testing.T) {
 	obj := canvas.NewCircle(color.Black)
 	obj.Resize(fyne.NewSize(20, 20))
@@ -80,6 +89,15 @@ func TestAssertRendersToImage(t *testing.T) {
 	if !t.Failed() {
 		_ = os.RemoveAll("testdata/failed")
 	}
+}
+
+func TestRenderToMarkup(t *testing.T) {
+	c := test.NewCanvas()
+	c.SetContent(canvas.NewCircle(color.Black))
+
+	want, err := os.ReadFile("testdata/markup_master.xml")
+	require.NoError(t, err)
+	assert.Equal(t, string(want), test.RenderToMarkup(c), "existing master is equal to rendered markup")
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {
