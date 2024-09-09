@@ -45,7 +45,7 @@ type Animation struct {
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
-// rendered frame between time.Now() and the specified duration. The callback values start at 0.0 and
+// rendered frame between [time.Now] and the specified duration. The callback values start at 0.0 and
 // will be 1.0 when the animation completes.
 //
 // Since: 2.0
