@@ -47,6 +47,19 @@ func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.Canv
 	return AssertRendersToImage(t, masterFilename, c, msgAndArgs...)
 }
 
+// RenderObjectToMarkup renders the given [fyne.io/fyne/v2.CanvasObject] to a markup string.
+//
+// Since: 2.6
+func RenderObjectToMarkup(o fyne.CanvasObject) string {
+	c := NewCanvas()
+	c.SetPadded(false)
+	size := o.MinSize().Max(o.Size())
+	c.SetContent(o)
+	c.Resize(size) // ensure we are large enough for current size
+
+	return snapshot(c)
+}
+
 // AssertObjectRendersToMarkup asserts that the given `CanvasObject` renders the same markup as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the rendered markup is not equal to the loaded master markup.
@@ -87,6 +100,13 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // Since 2.3
 func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...any) bool {
 	return test.AssertImageMatches(t, masterFilename, c.Capture(), msgAndArgs...)
+}
+
+// RenderToMarkup renders the given [fyne.io/fyne/v2.Canvas] to a markup string.
+//
+// Since: 2.6
+func RenderToMarkup(c fyne.Canvas) string {
+	return snapshot(c)
 }
 
 // AssertRendersToMarkup asserts that the given canvas renders the same markup as the one stored in the master file.
