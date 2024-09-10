@@ -589,7 +589,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 
 	e.requestFocus()
-	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard := fyne.CurrentApp().Clipboard()
 	super := e.super()
 
 	undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)

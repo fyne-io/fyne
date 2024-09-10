@@ -2,6 +2,8 @@ package test
 
 import "fyne.io/fyne/v2"
 
+var Clipboard clipboard
+
 type clipboard struct {
 	content string
 }

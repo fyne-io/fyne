@@ -48,3 +48,25 @@ func TestFyneApp_SetIcon(t *testing.T) {
 
 	assert.Equal(t, setIcon, app.Icon())
 }
+
+func TestFynaApp_Clipboard(t *testing.T) {
+	app := NewWithID("io.fyne.test")
+
+	text := "My content from test window"
+	cb := app.Clipboard()
+
+	cliboardContent := cb.Content()
+	if cliboardContent != "" {
+		// Current environment has some content stored in clipboard,
+		// set temporary to an empty string to allow test and restore later.
+		cb.SetContent("")
+	}
+
+	assert.Empty(t, cb.Content())
+
+	cb.SetContent(text)
+	assert.Equal(t, text, cb.Content())
+
+	// Restore clipboardContent, if any
+	cb.SetContent(cliboardContent)
+}
