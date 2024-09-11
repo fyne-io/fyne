@@ -64,7 +64,7 @@ func (a *app) Quit() {
 }
 
 func (a *app) Clipboard() fyne.Clipboard {
-	return nil
+	return &Clipboard
 }
 
 func (a *app) UniqueID() string {
