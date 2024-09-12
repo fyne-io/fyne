@@ -20,6 +20,8 @@ const (
 	maxWeeksPerMonth = 6
 )
 
+var minCellContent = NewLabel("22")
+
 // Calendar creates a new date time picker which returns a time object
 //
 // Since: 2.6
@@ -193,7 +195,7 @@ func (g *calendarLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // MinSize sets the minimum size for the calendar
 func (g *calendarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	pad := theme.Padding()
-	largestMin := NewLabel("22").MinSize()
+	largestMin := minCellContent.MinSize()
 	return fyne.NewSize(largestMin.Width*daysPerWeek+pad*(daysPerWeek-1),
 		largestMin.Height*maxWeeksPerMonth+pad*(maxWeeksPerMonth-1))
 }
