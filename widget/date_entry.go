@@ -118,10 +118,14 @@ func (e *DateEntry) Resize(size fyne.Size) {
 	}
 }
 
+// SetDate will update the widget to a specific date.
+// You can pass nil to unselect a date.
 func (e *DateEntry) SetDate(d *time.Time) {
 	if d == nil {
 		e.Date = nil
 		e.Entry.SetText("")
+
+		return
 	}
 
 	e.setDate(*d)
