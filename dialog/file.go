@@ -30,7 +30,10 @@ const (
 	GridView
 )
 
-const viewLayoutKey = "fyne:fileDialogViewLayout"
+const (
+	viewLayoutKey = "fyne:fileDialogViewLayout"
+	lastFolderKey = "fyne:fileDialogLastFolder"
+)
 
 type textWidget interface {
 	fyne.Widget
@@ -438,6 +441,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		return err
 	}
 
+	fyne.CurrentApp().Preferences().SetString(lastFolderKey, dir.String())
 	isFav := false
 	for i, fav := range f.favorites {
 		if fav.loc == nil {
@@ -665,7 +669,18 @@ func showFile(file *FileDialog) *fileDialog {
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(size)
 
-	d.setLocation(file.effectiveStartingDir())
+	starting := file.effectiveStartingDir()
+	lastPath := fyne.CurrentApp().Preferences().String(lastFolderKey)
+	if lastPath != "" {
+		parsed, err := storage.ParseURI(lastPath)
+		if err == nil {
+			dir, err := storage.ListerForURI(parsed)
+			if err == nil {
+				starting = dir
+			}
+		}
+	}
+	d.setLocation(starting)
 	d.win.Show()
 	if file.save {
 		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
