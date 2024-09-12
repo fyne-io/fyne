@@ -14,7 +14,9 @@ import (
 // Declare conformity with Clipboard interface
 var _ fyne.Clipboard = (*clipboard)(nil)
 
-var Clipboard clipboard
+func NewClipboard() fyne.Clipboard {
+	return &clipboard{}
+}
 
 // clipboard represents the system clipboard
 type clipboard struct{}

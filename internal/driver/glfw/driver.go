@@ -68,10 +68,6 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (d *gLDriver) Clipboard() fyne.Clipboard {
-	return &clipboard{}
-}
-
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
 	return painter.RenderedTextSize(text, textSize, style, source)
 }

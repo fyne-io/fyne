@@ -237,7 +237,7 @@ func (w *window) ShowAndRun() {
 
 // Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
-	return &clipboard{}
+	return NewClipboard()
 }
 
 func (w *window) Content() fyne.CanvasObject {
@@ -858,17 +858,17 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		case fyne.KeyV:
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
+				Clipboard: NewClipboard(),
 			}
 		case fyne.KeyC, fyne.KeyInsert:
 			// detect copy shortcut
 			shortcut = &fyne.ShortcutCopy{
-				Clipboard: w.Clipboard(),
+				Clipboard: NewClipboard(),
 			}
 		case fyne.KeyX:
 			// detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
+				Clipboard: NewClipboard(),
 			}
 		case fyne.KeyA:
 			// detect selectAll shortcut
@@ -881,12 +881,12 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		case fyne.KeyInsert:
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
+				Clipboard: NewClipboard(),
 			}
 		case fyne.KeyDelete:
 			// detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
+				Clipboard: NewClipboard(),
 			}
 		}
 	}

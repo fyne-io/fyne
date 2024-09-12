@@ -14,10 +14,9 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	canvas    *canvas
-	clipboard clipboard
-	driver    *driver
-	menu      *fyne.MainMenu
+	canvas *canvas
+	driver *driver
+	menu   *fyne.MainMenu
 }
 
 // NewTempWindow creates and registers a new window for test purposes.
@@ -46,7 +45,7 @@ func (w *window) CenterOnScreen() {
 }
 
 func (w *window) Clipboard() fyne.Clipboard {
-	return &w.clipboard
+	return NewClipboard()
 }
 
 func (w *window) Close() {

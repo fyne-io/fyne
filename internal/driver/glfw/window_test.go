@@ -1640,7 +1640,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
 	w.WaitForEvents()
 
-	assert.Equal(t, "Testing", Clipboard.Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	e.SetText("Testing2")
 	e.DoubleTapped(nil)
@@ -1651,14 +1651,14 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w.WaitForEvents()
 
 	assert.Equal(t, "Testing2", e.Text)
-	assert.Equal(t, "Testing", Clipboard.Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	// any other shortcut should be forbidden (Paste)
 	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod)
 	w.WaitForEvents()
 
 	assert.Equal(t, "Testing2", e.Text)
-	assert.Equal(t, "Testing", Clipboard.Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
