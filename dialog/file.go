@@ -605,6 +605,8 @@ func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
 //
 //   - file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
 //     URI scheme
+//   - previously used file open/close folder within this app
+//   - the current app's document storage, if App.Storage() documents have been saved
 //   - os.UserHomeDir()
 //   - os.Getwd()
 //   - "/" (should be filesystem root on all supported platforms)
