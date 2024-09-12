@@ -623,6 +623,18 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 
 	}
 
+	// last used
+	lastPath := fyne.CurrentApp().Preferences().String(lastFolderKey)
+	if lastPath != "" {
+		parsed, err := storage.ParseURI(lastPath)
+		if err == nil {
+			dir, err := storage.ListerForURI(parsed)
+			if err == nil {
+				return dir
+			}
+		}
+	}
+
 	// Try app storage
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
@@ -669,18 +681,7 @@ func showFile(file *FileDialog) *fileDialog {
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
 	d.win.Resize(size)
 
-	starting := file.effectiveStartingDir()
-	lastPath := fyne.CurrentApp().Preferences().String(lastFolderKey)
-	if lastPath != "" {
-		parsed, err := storage.ParseURI(lastPath)
-		if err == nil {
-			dir, err := storage.ListerForURI(parsed)
-			if err == nil {
-				starting = dir
-			}
-		}
-	}
-	d.setLocation(starting)
+	d.setLocation(file.effectiveStartingDir())
 	d.win.Show()
 	if file.save {
 		d.win.Canvas.Focus(d.fileName.(*widget.Entry))
