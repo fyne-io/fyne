@@ -75,7 +75,9 @@ func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.DisableableWidget
 func (e *DateEntry) Enable() {
 	if e.ActionItem != nil {
-		e.ActionItem.(fyne.Disableable).Enable()
+		if d, ok := e.ActionItem.(fyne.Disableable); ok {
+			d.Enable()
+		}
 	}
 	e.Entry.Enable()
 }
@@ -85,7 +87,9 @@ func (e *DateEntry) Enable() {
 // Implements: fyne.DisableableWidget
 func (e *DateEntry) Disable() {
 	if e.ActionItem != nil {
-		e.ActionItem.(fyne.Disableable).Disable()
+		if d, ok := e.ActionItem.(fyne.Disableable); ok {
+			d.Disable()
+		}
 	}
 	e.Entry.Disable()
 }
