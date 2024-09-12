@@ -46,7 +46,6 @@ func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
 }
 
 func TestEffectiveStartingDir(t *testing.T) {
-
 	homeString, err := os.UserHomeDir()
 	if err != nil {
 		t.Skipf("os.Gethome() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
@@ -105,7 +104,28 @@ func TestEffectiveStartingDir(t *testing.T) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
+}
 
+func TestFileDialogStartRemember(t *testing.T) {
+	testPath, err := filepath.Abs("./testdata")
+	assert.Nil(t, err)
+	start, err := storage.ListerForURI(storage.NewFileURI(testPath))
+	if err != nil {
+		t.Skipf("could not get lister for working directory: %s", err)
+	}
+
+	w := test.NewTempWindow(t, widget.NewLabel("Content"))
+	d := NewFileOpen(nil, w)
+	d.SetLocation(start)
+	d.Show()
+
+	assert.Equal(t, start.String(), d.dialog.dir.String())
+	d.Hide()
+
+	d2 := NewFileOpen(nil, w)
+	d2.Show()
+	assert.Equal(t, start.String(), d.dialog.dir.String())
+	d2.Hide()
 }
 
 func TestFileDialogResize(t *testing.T) {

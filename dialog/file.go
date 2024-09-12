@@ -30,7 +30,10 @@ const (
 	GridView
 )
 
-const viewLayoutKey = "fyne:fileDialogViewLayout"
+const (
+	viewLayoutKey = "fyne:fileDialogViewLayout"
+	lastFolderKey = "fyne:fileDialogLastFolder"
+)
 
 type textWidget interface {
 	fyne.Widget
@@ -438,6 +441,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		return err
 	}
 
+	fyne.CurrentApp().Preferences().SetString(lastFolderKey, dir.String())
 	isFav := false
 	for i, fav := range f.favorites {
 		if fav.loc == nil {
@@ -601,6 +605,8 @@ func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
 //
 //   - file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
 //     URI scheme
+//   - previously used file open/close folder within this app
+//   - the current app's document storage, if App.Storage() documents have been saved
 //   - os.UserHomeDir()
 //   - os.Getwd()
 //   - "/" (should be filesystem root on all supported platforms)
@@ -617,6 +623,18 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 			}
 		}
 
+	}
+
+	// last used
+	lastPath := fyne.CurrentApp().Preferences().String(lastFolderKey)
+	if lastPath != "" {
+		parsed, err := storage.ParseURI(lastPath)
+		if err == nil {
+			dir, err := storage.ListerForURI(parsed)
+			if err == nil {
+				return dir
+			}
+		}
 	}
 
 	// Try app storage
@@ -895,7 +913,7 @@ func getFavoriteOrder() []string {
 	}
 
 	if runtime.GOOS == "darwin" {
-		order[4] = "Movies"
+		order[5] = "Movies"
 	}
 
 	return order
