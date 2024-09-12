@@ -14,8 +14,8 @@ const dateFormat = "02 Jan 2006"
 // Since: 2.6
 type DateEntry struct {
 	Entry
-	Date      time.Time
-	OnChanged func(time.Time) `json:"-"`
+	Date      *time.Time
+	OnChanged func(*time.Time) `json:"-"`
 
 	dropDown *Calendar
 	popUp    *PopUp
@@ -41,15 +41,22 @@ func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 		return err
 	}
 	e.Entry.OnChanged = func(in string) {
+		if in == "" {
+			e.Date = nil
+
+			if f := e.OnChanged; f != nil {
+				f(nil)
+			}
+		}
 		t, err := time.Parse(dateFormat, in)
 		if err != nil {
 			return
 		}
 
-		e.Date = t
+		e.Date = &t
 
 		if f := e.OnChanged; f != nil {
-			f(t)
+			f(&t)
 		}
 	}
 
@@ -111,13 +118,22 @@ func (e *DateEntry) Resize(size fyne.Size) {
 	}
 }
 
+func (e *DateEntry) SetDate(d *time.Time) {
+	if d == nil {
+		e.Date = nil
+		e.Entry.SetText("")
+	}
+
+	e.setDate(*d)
+}
+
 func (e *DateEntry) popUpPos() fyne.Position {
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
 	return entryPos.Add(fyne.NewPos(0, e.Size().Height-e.Theme().Size(theme.SizeNameInputBorder)))
 }
 
 func (e *DateEntry) setDate(d time.Time) {
-	e.Date = d
+	e.Date = &d
 	if e.popUp != nil {
 		e.popUp.Hide()
 	}
