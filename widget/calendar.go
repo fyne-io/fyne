@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -90,7 +91,7 @@ func (c *Calendar) calendarObjects() []fyne.CanvasObject {
 			j = 0
 		}
 
-		t := NewLabel(strings.ToUpper(time.Weekday(j).String()[:3]))
+		t := NewLabel(shortDayName(time.Weekday(j).String()))
 		t.Alignment = fyne.TextAlignCenter
 		columnHeadings = append(columnHeadings, t)
 	}
@@ -210,4 +211,11 @@ func (g *calendarLayout) getLeading(row, col int) fyne.Position {
 // The row and col specify where the cell is in the calendar.
 func (g *calendarLayout) getTrailing(row, col int) fyne.Position {
 	return g.getLeading(row+1, col+1)
+}
+
+func shortDayName(in string) string {
+	lower := strings.ToLower(in)
+	key := lower + ".short"
+	long := lang.X(lower, in)
+	return strings.ToUpper(lang.X(key, long[:3]))
 }

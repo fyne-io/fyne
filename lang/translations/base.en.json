@@ -28,5 +28,20 @@
   },
   "file.parent": {
     "other": "Parent"
-  }
+  },
+
+  "monday": "Monday",
+  "monday.short": "Mon",
+  "tuesday": "Tuesday",
+  "tuesday.short": "Tue",
+  "wednesday": "Wednesday",
+  "wednesday.short": "Wed",
+  "thursday": "Thursday",
+  "thursday.short": "Thu",
+  "friday": "Friday",
+  "friday.short": "Fri",
+  "saturday": "Saturday",
+  "saturday.short": "Sat",
+  "sunday": "Sunday",
+  "sunday.short": "Sun"
 }
