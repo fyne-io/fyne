@@ -895,7 +895,7 @@ func getFavoriteOrder() []string {
 	}
 
 	if runtime.GOOS == "darwin" {
-		order[4] = "Movies"
+		order[5] = "Movies"
 	}
 
 	return order
