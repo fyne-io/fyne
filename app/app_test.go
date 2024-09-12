@@ -51,6 +51,7 @@ func TestFyneApp_SetIcon(t *testing.T) {
 
 func TestFynaApp_Clipboard(t *testing.T) {
 	app := NewWithID("io.fyne.test")
+	app.NewWindow("test")
 
 	text := "My content from test window"
 	cb := app.Clipboard()
