@@ -109,6 +109,7 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 	}
 
 	destroyExpiredSvgs(now)
+	destroyExpiredFontMetrics(now)
 
 	deletingObjs := make([]fyne.CanvasObject, 0, 50)
 
