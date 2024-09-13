@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 	_ "fyne.io/fyne/v2/test"
 )
 
@@ -50,8 +51,8 @@ func TestFyneApp_SetIcon(t *testing.T) {
 }
 
 func TestFynaApp_Clipboard(t *testing.T) {
-	app := NewWithID("io.fyne.test")
-	app.NewWindow("test")
+	app := test.NewTempApp(t)
+	test.NewTempWindow(t, nil)
 
 	text := "My content from test window"
 	cb := app.Clipboard()
