@@ -1,8 +1,10 @@
 package test_test
 
 import (
+	"bytes"
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +47,10 @@ func TestRenderObjectToMarkup(t *testing.T) {
 
 	want, err := os.ReadFile("testdata/circle.xml")
 	require.NoError(t, err)
-	assert.Equal(t, string(want), test.RenderObjectToMarkup(obj), "existing master is equal to rendered markup")
+	// Fix Windows newlines
+	want = bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n"))
+	got := strings.ReplaceAll(test.RenderObjectToMarkup(obj), "\r\n", "\n")
+	assert.Equal(t, string(want), got, "existing master is equal to rendered markup")
 }
 
 func TestAssertObjectRendersToMarkup(t *testing.T) {
@@ -97,7 +102,10 @@ func TestRenderToMarkup(t *testing.T) {
 
 	want, err := os.ReadFile("testdata/markup_master.xml")
 	require.NoError(t, err)
-	assert.Equal(t, string(want), test.RenderToMarkup(c), "existing master is equal to rendered markup")
+	// Fix Windows newlines
+	want = bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n"))
+	got := strings.ReplaceAll(test.RenderToMarkup(c), "\r\n", "\n")
+	assert.Equal(t, string(want), got, "existing master is equal to rendered markup")
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {
