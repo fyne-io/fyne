@@ -48,7 +48,6 @@ func NewCalendar(cT time.Time, changed func(time.Time)) *Calendar {
 	}
 
 	c.ExtendBaseWidget(c)
-
 	return c
 }
 
@@ -123,11 +122,9 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 	}
 
 	for d := start; d.Month() == start.Month(); d = d.AddDate(0, 0, 1) {
-
 		dayNum := d.Day()
 		s := strconv.Itoa(dayNum)
 		b := NewButton(s, func() {
-
 			selectedDate := c.dateForButton(dayNum)
 
 			c.OnChanged(selectedDate)
