@@ -389,6 +389,28 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 	assert.Equal(t, 7, entry.CursorColumn)
 }
 
+func TestEntry_PasteFromClipboardValidation(t *testing.T) {
+	entry := NewEntry()
+	var triggered int
+	entry.Validator = func(s string) error {
+		triggered++
+		return nil
+	}
+
+	w := test.NewApp().NewWindow("")
+	defer w.Close()
+	w.SetContent(entry)
+
+	testContent := "test"
+
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent(testContent)
+
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, 2, triggered)
+}
+
 func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	e := NewEntry()
 	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
