@@ -1122,6 +1122,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	cb := e.OnChanged
 	e.propertyLock.Unlock()
 
+	e.validate()
 	if cb != nil {
 		cb(content) // We know that the text has changed.
 	}
