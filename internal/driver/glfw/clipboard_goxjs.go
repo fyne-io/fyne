@@ -8,10 +8,10 @@ import (
 )
 
 // Declare conformity with Clipboard interface
-var _ fyne.Clipboard = (*clipboard)(nil)
+var _ fyne.Clipboard = clipboard{}
 
 func NewClipboard() fyne.Clipboard {
-	return &clipboard{}
+	return clipboard{}
 }
 
 // clipboard represents the system clipboard
@@ -20,7 +20,7 @@ type clipboard struct {
 }
 
 // Content returns the clipboard content
-func (c *clipboard) Content() string {
+func (c clipboard) Content() string {
 	content := ""
 	runOnMain(func() {
 		content, _ = c.window.GetClipboardString()
@@ -29,7 +29,7 @@ func (c *clipboard) Content() string {
 }
 
 // SetContent sets the clipboard content
-func (c *clipboard) SetContent(content string) {
+func (c clipboard) SetContent(content string) {
 	runOnMain(func() {
 		c.window.SetClipboardString(content)
 	})

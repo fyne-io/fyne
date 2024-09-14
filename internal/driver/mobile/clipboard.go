@@ -5,10 +5,10 @@ import (
 )
 
 // Declare conformity with Clipboard interface
-var _ fyne.Clipboard = (*mobileClipboard)(nil)
+var _ fyne.Clipboard = mobileClipboard{}
 
 func NewClipboard() fyne.Clipboard {
-	return &mobileClipboard{}
+	return mobileClipboard{}
 }
 
 // mobileClipboard represents the system mobileClipboard
