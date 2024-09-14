@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
-	_ "fyne.io/fyne/v2/test"
 )
 
 func TestDummyApp(t *testing.T) {
