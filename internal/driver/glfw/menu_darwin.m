@@ -83,11 +83,14 @@ void handleException(const char* m, id e) {
     exceptionCallback([[NSString stringWithFormat:@"%s failed: %@", m, e] UTF8String]);
 }
 
+int replacedAbout = 0;
+
 const void* insertDarwinMenuItem(const void* m, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int nextId, int index, bool isSeparator, const void *imageData, unsigned int imageDataLength) {
     NSMenu* menu = (NSMenu*)m;
     NSMenuItem* item;
 
-    if (strcmp(label, "About") == 0) {
+    if (strcmp(label, "About") == 0 && !replacedAbout) {
+        replacedAbout = 1;
         item = [menu itemArray][0];
         [item setAction:@selector(tapped:)];
         [item setTarget:[FyneMenuHandler class]];
