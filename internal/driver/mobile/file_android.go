@@ -25,6 +25,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
@@ -90,7 +91,7 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 
 	ret := openStream(f.uri.String())
 	if ret == nil {
-		return nil, errors.New("resource not found at URI")
+		return nil, storage.ErrNotExists
 	}
 
 	stream := &javaStream{}
@@ -122,7 +123,7 @@ func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 
 	ret := saveStream(f.uri.String())
 	if ret == nil {
-		return nil, errors.New("resource not found at URI")
+		return nil, storage.ErrNotExists
 	}
 
 	stream := &javaStream{}
