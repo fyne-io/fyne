@@ -235,3 +235,47 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 	button.tapAnim.Tick(0.5)
 	test.AssertImageMatches(t, "button/tap_animation.png", w.Canvas().Capture())
 }
+
+func TestButton_TappedFocus(t *testing.T) {
+	test.NewApp()
+	entry := NewEntry()
+	button := NewButton("ok", nil)
+	w := test.NewTempWindow(t, newCont(entry, button))
+
+	c := w.Canvas()
+	c.Focus(entry)
+	assert.True(t, entry.focused, "entry is not focused")
+
+	// NB. we cannot use test.Tap(button) as it handles focus,
+	// and we want to specifically test Button's handling of focus.
+	button.Tapped(&fyne.PointEvent{})
+	assert.False(t, entry.focused, "entry still has focus")
+	assert.False(t, button.focused, "button still has focus")
+}
+
+type cont struct {
+	BaseWidget
+	objects []fyne.CanvasObject
+}
+
+type contRenderer struct {
+	cont *cont
+}
+
+var _ fyne.CanvasObject = (*cont)(nil)
+
+func newCont(objects ...fyne.CanvasObject) *cont {
+	c := &cont{objects: objects}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+func (c *cont) CreateRenderer() fyne.WidgetRenderer {
+	return &contRenderer{cont: c}
+}
+
+func (r *contRenderer) Destroy()                     {}
+func (r *contRenderer) Layout(fyne.Size)             {}
+func (r *contRenderer) MinSize() fyne.Size           { return fyne.NewSize(10, 10) }
+func (r *contRenderer) Objects() []fyne.CanvasObject { return r.cont.objects }
+func (r *contRenderer) Refresh()                     {}
