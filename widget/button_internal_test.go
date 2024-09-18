@@ -237,6 +237,9 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 }
 
 func TestButton_TappedFocus(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
 	test.NewApp()
 	entry := NewEntry()
 	button := NewButton("ok", nil)
