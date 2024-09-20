@@ -35,6 +35,12 @@ func Get() *cli.Command {
 				Usage:       "For darwin and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
 				Destination: &g.AppID,
 			},
+			&cli.StringFlag{
+				Name:        "installDir",
+				Aliases:     []string{"o"},
+				Usage:       "A specific location to install to, rather than the OS default.",
+				Destination: &g.installDir,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			if ctx.Args().Len() != 1 {
@@ -50,6 +56,7 @@ func Get() *cli.Command {
 // Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter struct {
 	*appData
+	installDir string
 }
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
@@ -98,7 +105,7 @@ func (g *Getter) Get(pkg string) error {
 		path = filepath.Join(path, dir)
 	}
 
-	install := &Installer{appData: g.appData, srcDir: path, release: true}
+	install := &Installer{appData: g.appData, installDir: g.installDir, srcDir: path, release: true}
 	if err := install.validate(); err != nil {
 		return fmt.Errorf("failed to set up installer: %w", err)
 	}
