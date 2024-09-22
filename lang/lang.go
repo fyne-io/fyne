@@ -161,8 +161,12 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 
 func addLanguage(data []byte, name string) error {
 	f, err := bundle.ParseMessageFileBytes(data, name)
+	if err != nil {
+		return err
+	}
+
 	translated = append(translated, f.Tag)
-	return err
+	return nil
 }
 
 func init() {
