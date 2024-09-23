@@ -53,7 +53,7 @@ func NewSelect(options []string, changed func(string)) *Select {
 
 // NewSelectWithData returns a new select widget connected to the specified data source.
 //
-// Since 2.6
+// Since: 2.6
 func NewSelectWithData(options []string, data binding.String) *Select {
 	sel := NewSelect(options, nil)
 	sel.Bind(data)
@@ -65,7 +65,7 @@ func NewSelectWithData(options []string, data binding.String) *Select {
 // The current value will be displayed and any changes in the data will cause the widget
 // to update.
 //
-// Since 2.6
+// Since: 2.6
 func (s *Select) Bind(data binding.String) {
 	s.binder.SetCallback(s.updateFromData)
 	s.binder.Bind(data)
@@ -270,7 +270,7 @@ func (s *Select) TypedRune(_ rune) {
 // Unbind disconnects any configured data source from this Select.
 // The current value will remain at the last value of the data source.
 //
-// Since 2.6
+// Since: 2.6
 func (s *Select) Unbind() {
 	s.OnChanged = nil
 	s.binder.Unbind()
