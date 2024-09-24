@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -23,6 +24,19 @@ func TestNewSelect(t *testing.T) {
 
 	assert.Equal(t, 2, len(combo.Options))
 	assert.Equal(t, "", combo.Selected)
+}
+
+func TestNewSelectWithData(t *testing.T) {
+	data := binding.NewString()
+	combo := widget.NewSelectWithData([]string{"1", "2", "3"}, data)
+
+	assert.Equal(t, 3, len(combo.Options))
+	assert.Equal(t, "", combo.Selected)
+
+	err := data.Set("2")
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, "2", combo.Selected)
 }
 
 func TestSelect_Align(t *testing.T) {
@@ -41,6 +55,52 @@ func TestSelect_Align(t *testing.T) {
 	sel.Alignment = fyne.TextAlignTrailing
 	sel.Refresh()
 	assertRendersToPlatformMarkup(t, "select/%s/trailing.xml", c)
+}
+
+func TestSelect_Options(t *testing.T) {
+	s := widget.NewSelect([]string{"1", "2", "3"}, nil)
+	s.SetSelected("2")
+	assert.Equal(t, "2", s.Selected)
+
+	s.SetOptions([]string{"4", "5"})
+	assert.Equal(t, "2", s.Selected)
+	s.Selected = ""
+	assert.Equal(t, "", s.Selected)
+}
+
+func TestSelect_Binding(t *testing.T) {
+	s := widget.NewSelect([]string{"1", "2", "3"}, nil)
+	s.SetSelected("2")
+	assert.Equal(t, "2", s.Selected)
+	waitForBinding() // this time it is the de-echo before binding
+
+	str := binding.NewString()
+	s.Bind(str)
+	waitForBinding()
+	value, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "", value)
+	assert.Equal(t, "2", s.Selected) // no match to options, so keep previous value
+
+	err = str.Set("3")
+	assert.Nil(t, err)
+	waitForBinding()
+	assert.Equal(t, "3", s.Selected)
+
+	s.Unbind()
+	assert.Nil(t, s.OnChanged)
+	err = str.Set("1")
+	assert.Nil(t, err)
+	val1, err := str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "1", val1)
+	assert.Equal(t, "3", s.Selected)
+
+	s.SetSelected("2")
+	val1, err = str.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "1", val1)
+	assert.Equal(t, "2", s.Selected)
 }
 
 func TestSelect_ChangeTheme(t *testing.T) {
