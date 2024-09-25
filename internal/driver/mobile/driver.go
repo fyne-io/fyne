@@ -101,7 +101,7 @@ func (d *driver) currentWindow() *window {
 }
 
 func (d *driver) Clipboard() fyne.Clipboard {
-	return &mobileClipboard{}
+	return NewClipboard()
 }
 
 func (d *driver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
