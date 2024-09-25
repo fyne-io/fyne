@@ -7,13 +7,13 @@ type systemTrayDriver interface {
 }
 
 // Menu stores the information required for a standard menu.
-// A menu can pop down from a MainMenu or could be a pop out menu.
+// A menu can pop down from a [MainMenu] or could be a pop out menu.
 type Menu struct {
 	Label string
 	Items []*MenuItem
 }
 
-// NewMenu creates a new menu given the specified label (to show in a MainMenu) and list of items to display.
+// NewMenu creates a new menu given the specified label (to show in a [MainMenu]) and list of items to display.
 func NewMenu(label string, items ...*MenuItem) *Menu {
 	return &Menu{Label: label, Items: items}
 }
