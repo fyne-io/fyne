@@ -13,7 +13,6 @@ import (
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/fontscan"
 	"github.com/go-text/typesetting/language"
-	"github.com/go-text/typesetting/opentype/api/metadata"
 	"github.com/go-text/typesetting/shaping"
 	"golang.org/x/image/math/fixed"
 
@@ -44,7 +43,7 @@ func loadMap() {
 	}
 }
 
-func lookupLangFont(family string, aspect metadata.Aspect) font.Face {
+func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	load.Do(loadMap)
@@ -57,7 +56,7 @@ func lookupLangFont(family string, aspect metadata.Aspect) font.Face {
 	return fm.ResolveFaceForLang(l)
 }
 
-func lookupRuneFont(r rune, family string, aspect metadata.Aspect) font.Face {
+func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
 	mapLock.Lock()
 	defer mapLock.Unlock()
 	load.Do(loadMap)
@@ -72,18 +71,18 @@ func lookupRuneFont(r rune, family string, aspect metadata.Aspect) font.Face {
 func lookupFaces(theme, fallback, emoji fyne.Resource, family string, style fyne.TextStyle) (faces *dynamicFontMap) {
 	f1 := loadMeasureFont(theme)
 	if theme == fallback {
-		faces = &dynamicFontMap{family: family, faces: []font.Face{f1}}
+		faces = &dynamicFontMap{family: family, faces: []*font.Face{f1}}
 	} else {
 		f2 := loadMeasureFont(fallback)
-		faces = &dynamicFontMap{family: family, faces: []font.Face{f1, f2}}
+		faces = &dynamicFontMap{family: family, faces: []*font.Face{f1, f2}}
 	}
 
-	aspect := metadata.Aspect{Style: metadata.StyleNormal}
+	aspect := font.Aspect{Style: font.StyleNormal}
 	if style.Italic {
-		aspect.Style = metadata.StyleItalic
+		aspect.Style = font.StyleItalic
 	}
 	if style.Bold {
-		aspect.Weight = metadata.WeightBold
+		aspect.Weight = font.WeightBold
 	}
 
 	if emoji != nil {
@@ -107,7 +106,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			if face == nil {
 				face = loadMeasureFont(theme.TextFont())
 			}
-			faces := &dynamicFontMap{family: source.Name(), faces: []font.Face{face}}
+			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}}
 
 			val = &FontCacheItem{Fonts: faces}
 			fontCustomCache.Store(source, val)
@@ -145,10 +144,10 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			f1 := loadMeasureFont(th)
 
 			if th == fallback {
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []font.Face{f1}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1}}
 			} else {
 				f2 := loadMeasureFont(fallback)
-				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []font.Face{f1, f2}}
+				faces = &dynamicFontMap{family: fontscan.SansSerif, faces: []*font.Face{f1, f2}}
 			}
 		default:
 			faces = lookupFaces(font1, theme.DefaultTextFont(), emoji, fontscan.SansSerif, style)
@@ -192,7 +191,7 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	})
 }
 
-func loadMeasureFont(data fyne.Resource) font.Face {
+func loadMeasureFont(data fyne.Resource) *font.Face {
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
@@ -353,11 +352,11 @@ type noopLogger struct{}
 func (n noopLogger) Printf(string, ...interface{}) {}
 
 type dynamicFontMap struct {
-	faces  []font.Face
+	faces  []*font.Face
 	family string
 }
 
-func (d *dynamicFontMap) ResolveFace(r rune) font.Face {
+func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
 
 	for _, f := range d.faces {
 		if _, ok := f.NominalGlyph(r); ok {
@@ -365,7 +364,7 @@ func (d *dynamicFontMap) ResolveFace(r rune) font.Face {
 		}
 	}
 
-	toAdd := lookupRuneFont(r, d.family, metadata.Aspect{})
+	toAdd := lookupRuneFont(r, d.family, font.Aspect{})
 	if toAdd != nil {
 		d.addFace(toAdd)
 		return toAdd
@@ -374,6 +373,6 @@ func (d *dynamicFontMap) ResolveFace(r rune) font.Face {
 	return d.faces[0]
 }
 
-func (d *dynamicFontMap) addFace(f font.Face) {
+func (d *dynamicFontMap) addFace(f *font.Face) {
 	d.faces = append(d.faces, f)
 }
