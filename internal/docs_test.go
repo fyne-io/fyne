@@ -81,6 +81,46 @@ func TestDocs_Save(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestDocs_Append(t *testing.T) {
+	r := intRepo.NewInMemoryRepository("file")
+	repository.Register("file", r)
+	docs := &Docs{storage.NewFileURI("/tmp/docs/save")}
+	w, err := docs.Create("save.txt")
+	assert.Nil(t, err)
+	_, _ = w.Write([]byte{})
+	_ = w.Close()
+	u := w.URI()
+
+	exist, err := r.Exists(u)
+	assert.Nil(t, err)
+	assert.True(t, exist)
+
+	w, err = docs.Save("save.txt")
+	assert.Nil(t, err)
+	n, err := w.Write([]byte("save"))
+	assert.Nil(t, err)
+	assert.Equal(t, 4, n)
+	err = w.Close()
+	assert.Nil(t, err)
+
+	w, err = docs.Append("save.txt")
+	assert.Nil(t, err)
+	n, err = w.Write([]byte("save"))
+	assert.Nil(t, err)
+	assert.Equal(t, 4, n)
+	err = w.Close()
+	assert.Nil(t, err)
+
+	read, err := docs.Open("save.txt")
+	assert.Nil(t, err)
+	var c []byte
+	n, err = read.Read(c)
+	assert.Nil(t, err)
+	assert.Equal(t, 8, n)
+	err = w.Close()
+	assert.Nil(t, err)
+}
+
 func TestDocs_Save_ErrNotExists(t *testing.T) {
 	r := intRepo.NewInMemoryRepository("file")
 	repository.Register("file", r)
