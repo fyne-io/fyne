@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"io"
 	"testing"
 
 	intRepo "fyne.io/fyne/v2/internal/repository"
@@ -113,9 +114,9 @@ func TestDocs_Append(t *testing.T) {
 
 	read, err := docs.Open("save.txt")
 	assert.Nil(t, err)
-	var c []byte
+	c := make([]byte, 16)
 	n, err = read.Read(c)
-	assert.Nil(t, err)
+	assert.ErrorIs(t, err, io.EOF)
 	assert.Equal(t, 8, n)
 	err = w.Close()
 	assert.Nil(t, err)
