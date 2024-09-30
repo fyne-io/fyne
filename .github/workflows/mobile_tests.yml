@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', '1.22.x']
+        go-version: ['1.19.x', '1.23.x']
 
     steps:
     - uses: actions/checkout@v4
