@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"math"
 	"os"
