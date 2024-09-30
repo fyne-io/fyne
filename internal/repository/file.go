@@ -80,7 +80,7 @@ func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
 		if truncate {
 			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
 		} else {
-			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE, 0666)
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		}
 	} else {
 		f, err = os.Open(path)
