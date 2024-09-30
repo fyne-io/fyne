@@ -815,8 +815,8 @@ func (f *FileDialog) SetView(v ViewLayout) {
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 //
 // The callback function will run when the dialog closes and provide a reader for the chosen file.
-// The reader must be closed by the callback.
-// The reader will be nil, when the user cancels or when nothing is selected.
+// The reader will be nil when the user cancels or when nothing is selected.
+// When the reader isn't nil it must be closed by the callback.
 //
 // The dialog will appear over the window specified when Show() is called.
 func NewFileOpen(callback func(reader fyne.URIReadCloser, err error), parent fyne.Window) *FileDialog {
@@ -829,8 +829,8 @@ func NewFileOpen(callback func(reader fyne.URIReadCloser, err error), parent fyn
 // asked if they are sure.
 //
 // The callback function will run when the dialog closes and provide a writer for the chosen file.
-// The writer must be closed by the callback.
-// The writer will be nil, when the user cancels or when nothing is selected.
+// The writer will be nil when the user cancels or when nothing is selected.
+// When the writer isn't nil it must be closed by the callback.
 //
 // The dialog will appear over the window specified when Show() is called.
 func NewFileSave(callback func(writer fyne.URIWriteCloser, err error), parent fyne.Window) *FileDialog {
@@ -842,8 +842,8 @@ func NewFileSave(callback func(writer fyne.URIWriteCloser, err error), parent fy
 // file to open.
 //
 // The callback function will run when the dialog closes and provide a reader for the chosen file.
-// The reader must be closed by the callback.
-// The reader will be nil, when the user cancels or when nothing is selected.
+// The reader will be nil when the user cancels or when nothing is selected.
+// When the reader isn't nil it must be closed by the callback.
 //
 // The dialog will appear over the window specified.
 func ShowFileOpen(callback func(reader fyne.URIReadCloser, err error), parent fyne.Window) {
@@ -859,8 +859,8 @@ func ShowFileOpen(callback func(reader fyne.URIReadCloser, err error), parent fy
 // will be asked if they are sure.
 //
 // The callback function will run when the dialog closes and provide a writer for the chosen file.
-// The writer must be closed by the callback.
-// The writer will be nil, when the user cancels or when nothing is selected.
+// The writer will be nil when the user cancels or when nothing is selected.
+// When the writer isn't nil it must be closed by the callback.
 //
 // The dialog will appear over the window specified.
 func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent fyne.Window) {
