@@ -54,6 +54,11 @@ func Translate() *cli.Command {
 			sourceDir := ctx.String("sourceDir")
 			translationsFile := ctx.String("translationsFile")
 			files := ctx.Args().Slice()
+			opts := translateOpts{
+				DryRun:  ctx.Bool("dry-run"),
+				Update:  ctx.Bool("update"),
+				Verbose: ctx.Bool("verbose"),
+			}
 
 			// without any argument find all .go files in the source directory
 			if len(files) == 0 {
@@ -65,7 +70,7 @@ func Translate() *cli.Command {
 			}
 
 			// update the translation file by scanning the given source files
-			return updateTranslationsFile(ctx, translationsFile, files)
+			return updateTranslationsFile(&opts, translationsFile, files)
 		},
 	}
 }
@@ -89,8 +94,14 @@ func findFilesExt(dir, ext string) ([]string, error) {
 	return files, err
 }
 
+type translateOpts struct {
+	DryRun  bool
+	Update  bool
+	Verbose bool
+}
+
 // Create or add to translations file by scanning the given files for translation calls
-func updateTranslationsFile(ctx *cli.Context, file string, files []string) error {
+func updateTranslationsFile(opts *translateOpts, file string, files []string) error {
 	translations := make(map[string]interface{})
 
 	// try to get current translations first
@@ -108,12 +119,13 @@ func updateTranslationsFile(ctx *cli.Context, file string, files []string) error
 		}
 	}
 
-	if ctx.Bool("verbose") {
+	//if ctx.Bool("verbose") {
+	if opts.Verbose {
 		fmt.Fprintf(os.Stderr, "scanning files: %v\n", files)
 	}
 
 	// update translations hash
-	if err := updateTranslationsHash(ctx, translations, files); err != nil {
+	if err := updateTranslationsHash(opts, translations, files); err != nil {
 		return err
 	}
 
@@ -130,7 +142,7 @@ func updateTranslationsFile(ctx *cli.Context, file string, files []string) error
 	}
 
 	// stop without making any changes
-	if ctx.Bool("dry-run") {
+	if opts.DryRun {
 		return nil
 	}
 
@@ -185,7 +197,7 @@ func writeTranslationsFile(b []byte, file string, f *os.File) error {
 }
 
 // Update translations hash by scanning the given files
-func updateTranslationsHash(ctx *cli.Context, m map[string]interface{}, srcs []string) error {
+func updateTranslationsHash(opts *translateOpts, m map[string]interface{}, srcs []string) error {
 	for _, src := range srcs {
 		// get AST by parsing source
 		fset := token.NewFileSet()
@@ -195,7 +207,7 @@ func updateTranslationsHash(ctx *cli.Context, m map[string]interface{}, srcs []s
 		}
 
 		// walk AST to find known translation calls
-		ast.Walk(&visitor{ctx: ctx, m: m}, af)
+		ast.Walk(&visitor{opts: opts, m: m}, af)
 	}
 
 	return nil
@@ -203,7 +215,7 @@ func updateTranslationsHash(ctx *cli.Context, m map[string]interface{}, srcs []s
 
 // Visitor pattern with state machine to find translations fallback (and key)
 type visitor struct {
-	ctx      *cli.Context
+	opts     *translateOpts
 	state    stateFn
 	name     string
 	key      string
@@ -333,17 +345,17 @@ func translateFinish(v *visitor, node ast.Node) stateFn {
 	// Ignore existing translations to prevent unintentional overwriting
 	_, found := v.m[v.key]
 	if found {
-		if !v.ctx.Bool("update") {
-			if v.ctx.Bool("verbose") {
+		if !v.opts.Update {
+			if v.opts.Verbose {
 				fmt.Fprintf(os.Stderr, "ignoring: %s\n", v.key)
 			}
 			return nil
 		}
-		if v.ctx.Bool("verbose") {
+		if v.opts.Verbose {
 			fmt.Fprintf(os.Stderr, "updating: %s\n", v.key)
 		}
 	} else {
-		if v.ctx.Bool("verbose") {
+		if v.opts.Verbose {
 			fmt.Fprintf(os.Stderr, "adding: %s\n", v.key)
 		}
 	}
