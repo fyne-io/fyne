@@ -397,14 +397,8 @@ func TestEntry_PasteFromClipboardValidation(t *testing.T) {
 		return nil
 	}
 
-	a := test.NewTempApp(t)
-	w := a.NewWindow("")
-	defer w.Close()
-	w.SetContent(entry)
-
 	testContent := "test"
-
-	clipboard := a.Clipboard()
+	clipboard := test.NewTempApp(t).Clipboard()
 	clipboard.SetContent(testContent)
 
 	entry.pasteFromClipboard(clipboard)
