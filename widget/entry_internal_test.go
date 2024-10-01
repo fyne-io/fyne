@@ -397,17 +397,17 @@ func TestEntry_PasteFromClipboardValidation(t *testing.T) {
 		return nil
 	}
 
-	w := test.NewApp().NewWindow("")
+	a := test.NewTempApp(t)
+	w := a.NewWindow("")
 	defer w.Close()
 	w.SetContent(entry)
 
 	testContent := "test"
 
-	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard := a.Clipboard()
 	clipboard.SetContent(testContent)
 
 	entry.pasteFromClipboard(clipboard)
-
 	assert.Equal(t, 2, triggered)
 }
 
