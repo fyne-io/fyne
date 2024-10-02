@@ -135,17 +135,17 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	cutShortcut := &fyne.ShortcutCut{Clipboard: a.Clipboard()}
 	cutItem := fyne.NewMenuItem("Cut", func() {
-		shortcutFocused(cutShortcut, w.Canvas().Focused())
+		shortcutFocused(cutShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	cutItem.Shortcut = cutShortcut
 	copyShortcut := &fyne.ShortcutCopy{Clipboard: a.Clipboard()}
 	copyItem := fyne.NewMenuItem("Copy", func() {
-		shortcutFocused(copyShortcut, w.Canvas().Focused())
+		shortcutFocused(copyShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	copyItem.Shortcut = copyShortcut
 	pasteShortcut := &fyne.ShortcutPaste{Clipboard: a.Clipboard()}
 	pasteItem := fyne.NewMenuItem("Paste", func() {
-		shortcutFocused(pasteShortcut, w.Canvas().Focused())
+		shortcutFocused(pasteShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	pasteItem.Shortcut = pasteShortcut
 	performFind := func() { fmt.Println("Menu Find") }
@@ -251,7 +251,15 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 	return container.NewBorder(nil, themes, nil, nil, tree)
 }
 
-func shortcutFocused(s fyne.Shortcut, f fyne.Focusable) {
+func shortcutFocused(s fyne.Shortcut, cb fyne.Clipboard, f fyne.Focusable) {
+	switch sh := s.(type) {
+	case *fyne.ShortcutCopy:
+		sh.Clipboard = cb
+	case *fyne.ShortcutCut:
+		sh.Clipboard = cb
+	case *fyne.ShortcutPaste:
+		sh.Clipboard = cb
+	}
 	if focused, ok := f.(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
