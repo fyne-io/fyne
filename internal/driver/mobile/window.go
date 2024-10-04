@@ -19,11 +19,10 @@ type window struct {
 	onCloseIntercepted func()
 	isChild            bool
 
-	clipboard fyne.Clipboard
-	canvas    *canvas
-	icon      fyne.Resource
-	menu      *fyne.MainMenu
-	handle    uintptr // the window handle - currently just Android
+	canvas *canvas
+	icon   fyne.Resource
+	menu   *fyne.MainMenu
+	handle uintptr // the window handle - currently just Android
 }
 
 func (w *window) Title() string {
@@ -203,10 +202,7 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.clipboard == nil {
-		w.clipboard = &mobileClipboard{}
-	}
-	return w.clipboard
+	return NewClipboard()
 }
 
 func (w *window) RunWithContext(f func()) {

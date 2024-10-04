@@ -12,7 +12,7 @@ import (
 // The ID string should be globally unique to this app.
 func NewWithID(id string) fyne.App {
 	d := mobile.NewGoMobileDriver()
-	a := newAppWithDriver(d, id)
+	a := newAppWithDriver(d, mobile.NewClipboard(), id)
 	d.(mobile.ConfiguredDriver).SetOnConfigurationChanged(func(c *mobile.Configuration) {
 		internalapp.SystemTheme = c.SystemTheme
 

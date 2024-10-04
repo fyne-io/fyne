@@ -100,6 +100,10 @@ func (d *driver) currentWindow() *window {
 	return last
 }
 
+func (d *driver) Clipboard() fyne.Clipboard {
+	return NewClipboard()
+}
+
 func (d *driver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
 	return painter.RenderedTextSize(text, textSize, style, source)
 }
