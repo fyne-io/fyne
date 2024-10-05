@@ -212,7 +212,7 @@ func (d *gLDriver) repaintWindow(w *window) {
 			w.shouldExpand = true
 			w.viewLock.Unlock()
 		}
-		canvas.FreeDirtyTextures()
+		refresh := canvas.FreeDirtyTextures() > 0
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
@@ -225,6 +225,7 @@ func (d *gLDriver) repaintWindow(w *window) {
 		if view != nil && visible {
 			view.SwapBuffers()
 		}
+		cache.Clean(refresh)
 	})
 }
 
