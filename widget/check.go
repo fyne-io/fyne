@@ -15,7 +15,9 @@ import (
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	DisableableWidget
-	Text    string
+	Text string
+	// If populated, Display is used when rendering the check. If empty, Text is used.
+	Display string
 	Checked bool
 
 	OnChanged func(bool) `json:"-"`
@@ -162,7 +164,11 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
-	text := canvas.NewText(c.Text, th.Color(theme.ColorNameForeground, v))
+	display := c.Text
+	if c.Display != "" {
+		display = c.Display
+	}
+	text := canvas.NewText(display, th.Color(theme.ColorNameForeground, v))
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(th.Color(theme.ColorNameBackground, v))
@@ -284,6 +290,9 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 	c.check.propertyLock.RLock()
 	text := c.check.Text
+	if c.check.Display != "" {
+		text = c.check.Display
+	}
 	c.check.propertyLock.RUnlock()
 	if text != "" {
 		min.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
@@ -340,6 +349,10 @@ func (c *checkRenderer) Refresh() {
 
 // must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateLabel() {
+	if c.check.Display != "" {
+		c.label.Text = c.check.Display
+		return
+	}
 	c.label.Text = c.check.Text
 }
 

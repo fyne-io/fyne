@@ -42,6 +42,7 @@ func TestCheck_Layout(t *testing.T) {
 
 	for name, tt := range map[string]struct {
 		text     string
+		display  string
 		checked  bool
 		disabled bool
 	}{
@@ -61,10 +62,15 @@ func TestCheck_Layout(t *testing.T) {
 			text:     "Test",
 			disabled: true,
 		},
+		"with_display": {
+			text:    "Test",
+			display: "Display",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			check := &widget.Check{
 				Text:    tt.text,
+				Display: tt.display,
 				Checked: tt.checked,
 			}
 			if tt.disabled {
