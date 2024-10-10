@@ -270,6 +270,14 @@ func TestWriteAndDelete(t *testing.T) {
 	barWriter.Close()
 	bazWriter.Close()
 
+	bazAppender, err := storage.Appender(baz)
+	assert.Nil(t, err)
+	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
+	assert.Nil(t, err)
+	assert.Equal(t, 5, n)
+
+	bazAppender.Close()
+
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
@@ -286,7 +294,7 @@ func TestWriteAndDelete(t *testing.T) {
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
 	bazData, err := io.ReadAll(bazReader)
-	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
+	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
 	assert.Nil(t, err)
 
 	// now let's test deletion
