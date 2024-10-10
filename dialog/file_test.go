@@ -338,6 +338,10 @@ func TestShowFileSave(t *testing.T) {
 	assert.Equal(t, "(Parent)", item.name)
 	assert.True(t, save.Disabled())
 
+	abs, _ := filepath.Abs("./testdata/")
+	dir, _ := storage.ListerForURI(storage.NewFileURI(abs))
+	saver.SetLocation(dir)
+
 	var target *fileDialogItem
 	id := -1
 	for i, icon := range objects {
@@ -354,9 +358,6 @@ func TestShowFileSave(t *testing.T) {
 		return
 	}
 
-	abs, _ := filepath.Abs("./testdata/")
-	dir, _ := storage.ListerForURI(storage.NewFileURI(abs))
-	saver.SetLocation(dir)
 	saver.dialog.files.(*widget.GridWrap).Select(id)
 	assert.Equal(t, target.location.Name(), nameEntry.Text)
 	assert.False(t, save.Disabled())

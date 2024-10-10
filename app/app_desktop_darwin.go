@@ -53,6 +53,6 @@ func themeChanged() {
 	fyne.CurrentApp().Settings().(*settings).setupTheme()
 }
 
-func watchTheme() {
+func watchTheme(_ *settings) {
 	C.watchTheme()
 }

@@ -5,7 +5,7 @@ type Notification struct {
 	Title, Content string
 }
 
-// NewNotification creates a notification that can be passed to App.SendNotification.
+// NewNotification creates a notification that can be passed to [App.SendNotification].
 func NewNotification(title, content string) *Notification {
 	return &Notification{Title: title, Content: content}
 }

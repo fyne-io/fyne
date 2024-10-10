@@ -156,7 +156,7 @@ type radioGroupRenderer struct {
 // Layout the components of the radio widget
 func (r *radioGroupRenderer) Layout(_ fyne.Size) {
 	count := 1
-	if r.items != nil && len(r.items) > 0 {
+	if len(r.items) > 0 {
 		count = len(r.items)
 	}
 	var itemHeight, itemWidth float32

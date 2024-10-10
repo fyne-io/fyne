@@ -119,17 +119,17 @@ func rootConfigDir() string {
 	return filepath.Join(desktopConfig, "fyne")
 }
 
-func watchTheme() {
+func watchTheme(s *settings) {
 	go func() {
 		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
 		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
-		fyne.CurrentApp().Settings().(*settings).setupTheme()
+		s.setupTheme()
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
 				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
-				fyne.CurrentApp().Settings().(*settings).setupTheme()
+				s.setupTheme()
 			}
 		})
 	}()

@@ -65,7 +65,7 @@ type Window interface {
 	SetOnClosed(func())
 
 	// SetCloseIntercept sets a function that runs instead of closing if defined.
-	// Close() should be called explicitly in the interceptor to close the window.
+	// [Window.Close] should be called explicitly in the interceptor to close the window.
 	//
 	// Since: 1.4
 	SetCloseIntercept(func())

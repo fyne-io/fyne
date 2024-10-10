@@ -58,18 +58,11 @@ func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source 
 
 // destroyExpiredFontMetrics destroys expired fontSizeCache entries
 func destroyExpiredFontMetrics(now time.Time) {
-	expiredObjs := make([]fontSizeEntry, 0, 50)
-	fontSizeLock.RLock()
+	fontSizeLock.Lock()
 	for k, v := range fontSizeCache {
 		if v.isExpired(now) {
-			expiredObjs = append(expiredObjs, k)
+			delete(fontSizeCache, k)
 		}
-	}
-	fontSizeLock.RUnlock()
-
-	fontSizeLock.Lock()
-	for _, k := range expiredObjs {
-		delete(fontSizeCache, k)
 	}
 	fontSizeLock.Unlock()
 }

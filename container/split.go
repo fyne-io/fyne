@@ -152,7 +152,9 @@ func (r *splitContainerRenderer) Refresh() {
 	r.objects[2] = r.split.Trailing
 	r.Layout(r.split.Size())
 
+	r.split.Leading.Refresh()
 	r.divider.Refresh()
+	r.split.Trailing.Refresh()
 	canvas.Refresh(r.split)
 }
 

@@ -7,9 +7,9 @@ import (
 
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, by default they will exit when all windows
-// have been closed. This can be modified using SetMaster() or SetCloseIntercept().
-// To start an application you need to call Run() somewhere in your main() function.
-// Alternatively use the window.ShowAndRun() function for your main window.
+// have been closed. This can be modified using SetMaster or SetCloseIntercept.
+// To start an application you need to call Run somewhere in your main function.
+// Alternatively use the [fyne.io/fyne/v2.Window.ShowAndRun] function for your main window.
 type App interface {
 	// Create a new window for the application.
 	// The first window to open is considered the "master" and when closed
@@ -27,7 +27,7 @@ type App interface {
 	// SetIcon sets the icon resource used for this application instance.
 	SetIcon(Resource)
 
-	// Run the application - this starts the event loop and waits until Quit()
+	// Run the application - this starts the event loop and waits until [App.Quit]
 	// is called or the last window closes.
 	// This should be called near the end of a main() function as it will block.
 	Run()
@@ -43,7 +43,7 @@ type App interface {
 	Driver() Driver
 
 	// UniqueID returns the application unique identifier, if set.
-	// This must be set for use of the Preferences() functions... see NewWithId(string)
+	// This must be set for use of the [App.Preferences]. see [NewWithID].
 	UniqueID() string
 
 	// SendNotification sends a system notification that will be displayed in the operating system's notification area.
@@ -75,7 +75,7 @@ type App interface {
 	CloudProvider() CloudProvider // get the (if any) configured provider
 
 	// SetCloudProvider allows developers to specify how this application should integrate with cloud services.
-	// See `fyne.io/cloud` package for implementation details.
+	// See [fyne.io/cloud] package for implementation details.
 	//
 	// Since: 2.3
 	SetCloudProvider(CloudProvider) // configure cloud for this app

@@ -41,7 +41,7 @@ const (
 	// TextTruncate trims the text to the widget's width, no wrapping is applied.
 	// If an entry is asked to truncate it will provide scrolling capabilities.
 	//
-	// Deprecated: Use `TextTruncateClip` value of the widget `Truncation` field instead
+	// Deprecated: Use [TextTruncateClip] value of the widget `Truncation` field instead
 	TextTruncate
 	// TextWrapBreak trims the line of characters to the widget's width adding the excess as new line.
 	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.
@@ -62,7 +62,7 @@ type TextStyle struct {
 	// Since: 2.1
 	TabWidth int // Width of tabs in spaces
 	// Since: 2.5
-	// Currently only supported by the TextGrid widget.
+	// Currently only supported by [fyne.io/fyne/v2/widget.TextGrid].
 	Underline bool // Should text be underlined.
 }
 
