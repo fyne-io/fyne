@@ -7,7 +7,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
-* Sometimes fyne fails to setup dark mode in Windows (#4758)
+* Sometimes fyne fails to setup dark mode on Windows (#4758)
 * Memory leak in fontMetrics cache on desktop driver (#4010)
 * Fix possible crash with badly formatted json translation
 * Tree widget doesn't display higher elements until a user selects one (#5095, #4346)
