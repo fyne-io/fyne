@@ -191,6 +191,12 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	b.tapAnimation()
 	b.Refresh()
 
+	if !b.focused {
+		// Grab the focus to unfocus any previous widget, then release it.
+		focusIfNotMobile(b.super())
+		b.FocusLost()
+	}
+
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
 	}
