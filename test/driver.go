@@ -74,7 +74,7 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	return d.windows[len(d.windows)-1].Canvas()
 }
 
-func (d *driver) CreateWindow(string) fyne.Window {
+func (d *driver) CreateWindow(title string) fyne.Window {
 	c := NewCanvas().(*canvas)
 	if d.painter != nil {
 		c.painter = d.painter
@@ -82,7 +82,7 @@ func (d *driver) CreateWindow(string) fyne.Window {
 		c.painter = software.NewPainter()
 	}
 
-	w := &window{canvas: c, driver: d}
+	w := &window{canvas: c, driver: d, title: title}
 
 	d.windowsMutex.Lock()
 	d.windows = append(d.windows, w)

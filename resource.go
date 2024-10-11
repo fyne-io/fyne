@@ -16,8 +16,8 @@ type Resource interface {
 	Content() []byte
 }
 
-// ThemedResource is a version of a resource that can be updated to match a certain theme colour.
-// The `ThemeColorName` will be used to look up the color for the current theme and colorize the resource.
+// ThemedResource is a version of a resource that can be updated to match a certain theme color.
+// The [ThemeColorName] will be used to look up the color for the current theme and colorize the resource.
 //
 // Since: 2.5
 type ThemedResource interface {
@@ -55,7 +55,7 @@ func NewStaticResource(name string, content []byte) *StaticResource {
 	}
 }
 
-// LoadResourceFromPath creates a new StaticResource in memory using the contents of the specified file.
+// LoadResourceFromPath creates a new [StaticResource] in memory using the contents of the specified file.
 func LoadResourceFromPath(path string) (Resource, error) {
 	bytes, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
@@ -66,7 +66,7 @@ func LoadResourceFromPath(path string) (Resource, error) {
 	return NewStaticResource(name, bytes), nil
 }
 
-// LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
+// LoadResourceFromURLString creates a new [StaticResource] in memory using the body of the specified URL.
 func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	res, err := http.Get(urlStr)
 	if err != nil {
