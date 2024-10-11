@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.5.2 - 14 October 2024
+## 2.5.2 - 15 October 2024
 
 ### Fixed
 
