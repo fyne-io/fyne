@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	tapMoveDecay        = 0.85                   // how much should the scroll continue decay on each frame?
+	tapMoveDecay        = 0.92                   // how much should the scroll continue decay on each frame?
 	tapMoveEndThreshold = 2.0                    // at what offset will we stop decaying?
 	tapMoveThreshold    = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay   = 300 * time.Millisecond // how long before secondary tap
@@ -414,7 +414,7 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 				}
 
 				w.QueueEvent(func() { wid.Dragged(ev) })
-				time.Sleep(time.Millisecond * 12)
+				time.Sleep(time.Millisecond * 16)
 			}
 
 			w.QueueEvent(wid.DragEnd)
