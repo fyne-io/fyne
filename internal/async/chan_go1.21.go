@@ -2,7 +2,11 @@
 
 package async
 
-import "fyne.io/fyne/v2"
+import (
+	"sync"
+
+	"fyne.io/fyne/v2"
+)
 
 // UnboundedFuncChan is a channel with an unbounded buffer for caching
 // Func objects. A channel must be closed via Close method
@@ -34,9 +38,10 @@ func NewUnboundedCanvasObjectChan() *UnboundedChan[fyne.CanvasObject] {
 // UnboundedChan is a channel with an unbounded buffer for caching
 // Func objects. A channel must be closed via Close method.
 type UnboundedChan[T any] struct {
-	in, out chan T
-	close   chan struct{}
-	q       []T
+	in, out   chan T
+	close     chan struct{}
+	closeOnce sync.Once
+	q         []T
 }
 
 // NewUnboundedChan returns a unbounded channel with unlimited capacity.
@@ -61,7 +66,11 @@ func (ch *UnboundedChan[T]) In() chan<- T { return ch.in }
 func (ch *UnboundedChan[T]) Out() <-chan T { return ch.out }
 
 // Close closes the channel.
-func (ch *UnboundedChan[T]) Close() { ch.close <- struct{}{} }
+func (ch *UnboundedChan[T]) Close() {
+	ch.closeOnce.Do(func() {
+		close(ch.close)
+	})
+}
 
 func (ch *UnboundedChan[T]) processing() {
 	// This is a preallocation of the internal unbounded buffer.
@@ -124,5 +133,4 @@ func (ch *UnboundedChan[T]) closed() {
 		}
 	}
 	close(ch.out)
-	close(ch.close)
 }

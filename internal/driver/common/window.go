@@ -23,6 +23,9 @@ func (w *Window) InitEventQueue() {
 // QueueEvent uses this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *Window) QueueEvent(fn func()) {
+	defer func() {
+		recover()
+	}()
 	w.eventQueue.In() <- fn
 }
 

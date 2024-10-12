@@ -82,6 +82,7 @@ func TestUnboundedChann(t *testing.T) {
 				}()
 				ch.Close()
 				<-done
+				ch.Close() // checking if it will panic (it should not)
 				runtime.GC()
 				if runtime.NumGoroutine() > grs+2 {
 					t.Fatalf("leaking goroutines: %v", n)
