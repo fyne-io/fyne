@@ -60,13 +60,14 @@ func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 }
 
 // RangeTexturesFor range over the textures for the specified canvas.
+// It will not return the texture for a `canvas.Text` as their render lifecycle is handled separately.
 //
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
 func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	textures.Range(func(key, value any) bool {
 		if _, ok := key.(FontCacheEntry); ok {
-			return true // TODO what?
+			return true // do nothing, text cache lives outside the scope of an object
 		}
 
 		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
