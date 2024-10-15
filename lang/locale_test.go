@@ -15,7 +15,7 @@ func TestSystemLocale(t *testing.T) {
 		return
 	}
 
-	if len(info) == 0 {
+	if len(info) < 2 {
 		info = "en_US"
 	}
 
