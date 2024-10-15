@@ -32,7 +32,7 @@ func createTestTranslateFiles(t *testing.T, file string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Write([]byte(exampleSource)); err != nil {
+	if _, err := f.Write([]byte(exampleSource)); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.Close(); err != nil {
