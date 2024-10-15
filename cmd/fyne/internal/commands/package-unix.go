@@ -21,6 +21,8 @@ type unixData struct {
 	Comment          string
 	Keywords         string
 	ExecParams       string
+
+	SourceRepo, SourceDir string
 }
 
 func (p *Packager) packageUNIX() error {
@@ -74,6 +76,12 @@ func (p *Packager) packageUNIX() error {
 		Categories:  formatDesktopFileList(linuxBSD.Categories),
 		ExecParams:  linuxBSD.ExecParams,
 	}
+
+	if p.sourceMetadata != nil {
+		tplData.SourceRepo = p.sourceMetadata.Repo
+		tplData.SourceDir = p.sourceMetadata.Dir
+	}
+
 	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
 		return fmt.Errorf("failed to write desktop entry string: %w", err)

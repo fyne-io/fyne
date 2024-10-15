@@ -6,6 +6,7 @@ type FyneApp struct {
 	Details     AppDetails
 	Development map[string]string `toml:",omitempty"`
 	Release     map[string]string `toml:",omitempty"`
+	Source      *AppSource        `toml:",omitempty"`
 	LinuxAndBSD *LinuxAndBSD      `toml:",omitempty"`
 }
 
@@ -15,6 +16,10 @@ type AppDetails struct {
 	Name, ID string `toml:",omitempty"`
 	Version  string `toml:",omitempty"`
 	Build    int    `toml:",omitempty"`
+}
+
+type AppSource struct {
+	Repo, Dir string `toml:",omitempty"`
 }
 
 // LinuxAndBSD describes specific metadata for desktop files on Linux and BSD.

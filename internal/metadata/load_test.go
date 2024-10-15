@@ -24,4 +24,8 @@ func TestLoadAppMetadata(t *testing.T) {
 	assert.Equal(t, data.Development["Test"], "Value2")
 	assert.Equal(t, data.Development["InDevelopmentOnly"], "Value4")
 	assert.NotContains(t, data.Development, "InReleaseOnly")
+
+	assert.NotNil(t, data.Source)
+	assert.Equal(t, data.Source.Repo, "https://github.com/fyne-io/fyne")
+	assert.Equal(t, data.Source.Dir, "internal/metadata/testdata")
 }
