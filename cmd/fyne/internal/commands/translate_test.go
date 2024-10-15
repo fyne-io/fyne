@@ -111,6 +111,7 @@ func TestWriteTranslationsFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer f.Close()
 
 	fi, err := f.Stat()
 	if err != nil {
