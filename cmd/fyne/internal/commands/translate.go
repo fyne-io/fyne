@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/natefinch/atomic"
 	"github.com/urfave/cli/v2"
 )
 
@@ -184,7 +185,7 @@ func writeTranslationsFile(b []byte, file string, f *os.File) error {
 		return err
 	}
 
-	return os.Rename(nf.Name(), file)
+	return atomic.ReplaceFile(nf.Name(), file)
 }
 
 // Update translations hash by scanning the given files, then parsing and walking the AST
