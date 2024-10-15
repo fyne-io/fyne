@@ -21,6 +21,8 @@ func Translate() *cli.Command {
 	return &cli.Command{
 		Name:  "translate",
 		Usage: "Scans for new translation strings.",
+		Description: "Recursively scans for translation strings in the current directory or\n" +
+			"the files given as arguments, and creates or updates the translations file.",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "verbose",
@@ -60,7 +62,6 @@ func Translate() *cli.Command {
 				Verbose: ctx.Bool("verbose"),
 			}
 
-			// without any argument find all .go files in the source directory
 			if len(files) == 0 {
 				sources, err := findFilesExt(sourceDir, ".go")
 				if err != nil {
@@ -69,7 +70,6 @@ func Translate() *cli.Command {
 				files = sources
 			}
 
-			// update the translation file by scanning the given source files
 			return updateTranslationsFile(&opts, translationsFile, files)
 		},
 	}
@@ -100,18 +100,17 @@ type translateOpts struct {
 	Verbose bool
 }
 
-// Create or add to translations file by scanning the given files for translation calls
+// Create or add to translations file by scanning the given files for translation calls.
+// Works with and without existing translations file.
 func updateTranslationsFile(opts *translateOpts, file string, files []string) error {
 	translations := make(map[string]interface{})
 
-	// try to get current translations first
 	f, err := os.Open(file)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	defer f.Close()
 
-	// only try to parse translations that exist
 	if f != nil {
 		dec := json.NewDecoder(f)
 		if err := dec.Decode(&translations); err != nil {
@@ -119,48 +118,42 @@ func updateTranslationsFile(opts *translateOpts, file string, files []string) er
 		}
 	}
 
-	//if ctx.Bool("verbose") {
 	if opts.Verbose {
 		fmt.Fprintf(os.Stderr, "scanning files: %v\n", files)
 	}
 
-	// update translations hash
 	if err := updateTranslationsHash(opts, translations, files); err != nil {
 		return err
 	}
 
-	// serialize in readable format for humas to change
+	if len(translations) == 0 {
+		if opts.Verbose {
+			fmt.Fprintln(os.Stderr, "no translations found")
+		}
+		return nil
+	}
+
 	b, err := json.MarshalIndent(translations, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	// avoid writing an empty file
-	if len(translations) == 0 {
-		fmt.Fprintln(os.Stderr, "No translations found")
-		return nil
-	}
-
-	// stop without making any changes
-	if opts.DryRun {
-		return nil
-	}
-
-	// support writing to stdout
 	if file == "-" {
 		fmt.Printf("%s\n", string(b))
+		return nil
+	}
+
+	if opts.DryRun {
 		return nil
 	}
 
 	return writeTranslationsFile(b, file, f)
 }
 
-// Write data to given file, optionally using same permissions as the original file
+// Write data to given file, using same permissions as the original file if it exists
 func writeTranslationsFile(b []byte, file string, f *os.File) error {
-	// default permissions
 	perm := fs.FileMode(0644)
 
-	// use same permissions as original file when possible
 	if f != nil {
 		fi, err := f.Stat()
 		if err != nil {
@@ -169,7 +162,6 @@ func writeTranslationsFile(b []byte, file string, f *os.File) error {
 		perm = fi.Mode().Perm()
 	}
 
-	// use temporary file to do atomic change
 	nf, err := os.CreateTemp(filepath.Dir(file), filepath.Base(file)+"-*")
 	if err != nil {
 		return err
@@ -192,21 +184,18 @@ func writeTranslationsFile(b []byte, file string, f *os.File) error {
 		return err
 	}
 
-	// atomic switch to new file
 	return os.Rename(nf.Name(), file)
 }
 
-// Update translations hash by scanning the given files
+// Update translations hash by scanning the given files, then parsing and walking the AST
 func updateTranslationsHash(opts *translateOpts, m map[string]interface{}, srcs []string) error {
 	for _, src := range srcs {
-		// get AST by parsing source
 		fset := token.NewFileSet()
 		af, err := parser.ParseFile(fset, src, nil, parser.AllErrors)
 		if err != nil {
 			return err
 		}
 
-		// walk AST to find known translation calls
 		ast.Walk(&visitor{opts: opts, m: m}, af)
 	}
 
@@ -229,7 +218,6 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 		return nil
 	}
 
-	// start over any time there is no state
 	if v.state == nil {
 		v.state = translateNew
 		v.name = ""
@@ -237,7 +225,6 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 		v.fallback = ""
 	}
 
-	// run and get next state
 	v.state = v.state(v, node)
 
 	return v
@@ -260,7 +247,9 @@ func translateNew(v *visitor, node ast.Node) stateFn {
 	return translateCall
 }
 
-// A known translation method needs to be used
+// A known translation method needs to be used. The two supported cases are:
+// - simple cases (L, N): only the first argument is relevant
+// - more complex cases (X, XN): first two arguments matter
 func translateCall(v *visitor, node ast.Node) stateFn {
 	ident, ok := node.(*ast.Ident)
 	if !ok {
@@ -270,12 +259,10 @@ func translateCall(v *visitor, node ast.Node) stateFn {
 	v.name = ident.Name
 
 	switch ident.Name {
-	// simple cases: only the first argument is relevant
 	case "L", "Localize":
 		return translateLocalize
 	case "N", "LocalizePlural":
 		return translateLocalize
-	// more complex cases: first two arguments matter
 	case "X", "LocalizeKey":
 		return translateKey
 	case "XN", "LocalizePluralKey":
@@ -337,12 +324,11 @@ func translateKeyFallback(v *visitor, node ast.Node) stateFn {
 	return translateFinish(v, node)
 }
 
-// Finish scan for translation and add to translation hash with the right type (singular or plural)
+// Finish scan for translation and add to translation hash with the right type (singular or plural).
+// Only adding new keys, ignoring changed or removed ones.
+// Removing is potentially dangerous as there could be dynamic keys that get removed.
+// By default ignore existing translations to prevent accidental overwriting.
 func translateFinish(v *visitor, node ast.Node) stateFn {
-	// only adding new keys, ignoring changed or removed (ha!) ones
-	// removing is dangerous as there could be dynamic keys that get removed
-
-	// Ignore existing translations to prevent unintentional overwriting
 	_, found := v.m[v.key]
 	if found {
 		if !v.opts.Update {
@@ -361,7 +347,6 @@ func translateFinish(v *visitor, node ast.Node) stateFn {
 	}
 
 	switch v.name {
-	// Plural translations use a nested map
 	case "LocalizePlural", "LocalizePluralKey", "N", "XN":
 		m := make(map[string]string)
 		m["other"] = v.fallback
