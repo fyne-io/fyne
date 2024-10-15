@@ -15,6 +15,10 @@ func TestSystemLocale(t *testing.T) {
 		return
 	}
 
+	if len(info) == 0 {
+		info = "en_US"
+	}
+
 	loc := SystemLocale()
 	assert.Equal(t, info[:2], loc.String()[:2])
 }
