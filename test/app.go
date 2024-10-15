@@ -63,6 +63,10 @@ func (a *app) Quit() {
 	// no-op
 }
 
+func (a *app) Clipboard() fyne.Clipboard {
+	return NewClipboard()
+}
+
 func (a *app) UniqueID() string {
 	return "testApp" // TODO should this be randomised?
 }

@@ -68,6 +68,10 @@ func (dummyApp) Metadata() AppMetadata {
 	return AppMetadata{}
 }
 
+func (dummyApp) Clipboard() Clipboard {
+	return nil
+}
+
 func TestSetCurrentApp(t *testing.T) {
 	a := &dummyApp{}
 	SetCurrentApp(a)

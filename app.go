@@ -79,6 +79,11 @@ type App interface {
 	//
 	// Since: 2.3
 	SetCloudProvider(CloudProvider) // configure cloud for this app
+
+	// Clipboard returns the system clipboard.
+	//
+	// Since: 2.6
+	Clipboard() Clipboard
 }
 
 var app atomic.Pointer[App]

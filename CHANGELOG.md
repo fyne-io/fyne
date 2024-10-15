@@ -16,6 +16,28 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Odd looking SelectEntry with long PlaceHolder (#4430)
 
 
+## 2.5.2 - 15 October 2024
+
+### Fixed
+
+* Sometimes fyne fails to setup dark mode on Windows (#4758)
+* Memory leak in fontMetrics cache on desktop driver (#4010)
+* Fix possible crash with badly formatted json translation
+* Tree widget doesn't display higher elements until a user selects one (#5095, #4346)
+* Update to the latest breaking API changes in go-text
+* Fix wrapping / truncation of multi-font text runs (#4998)
+* Test window title is not always set (#5116)
+* Deadlock in Button CreateRenderer() (#5114)
+* Fix possible crash in theme watching for windows
+* Fix issue with Movies folder on darwin file dialog
+* widget.Entry: validate when pasting from clipboard (#5058, #5028)
+* Reduce contention in some widget locks
+* Add Swedish translation
+* Improvements to documentation
+* Improved temp check for windows/msys
+* Fix split in a theme override container
+
+
 ## 2.5.1 - 24 August 2024
 
 ### Fixed

@@ -1621,28 +1621,6 @@ func TestWindow_ManualFocus(t *testing.T) {
 	assert.Equal(t, 1, content.unfocusedTimes)
 }
 
-func TestWindow_Clipboard(t *testing.T) {
-	w := createWindow("Test")
-
-	text := "My content from test window"
-	cb := w.Clipboard()
-
-	cliboardContent := cb.Content()
-	if cliboardContent != "" {
-		// Current environment has some content stored in clipboard,
-		// set temporary to an empty string to allow test and restore later.
-		cb.SetContent("")
-	}
-
-	assert.Empty(t, cb.Content())
-
-	cb.SetContent(text)
-	assert.Equal(t, text, cb.Content())
-
-	// Restore clipboardContent, if any
-	cb.SetContent(cliboardContent)
-}
-
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w := createWindow("Test").(*window)
 	e := widget.NewEntry()
@@ -1662,7 +1640,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
 	w.WaitForEvents()
 
-	assert.Equal(t, "Testing", w.Clipboard().Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	e.SetText("Testing2")
 	e.DoubleTapped(nil)
@@ -1673,14 +1651,14 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w.WaitForEvents()
 
 	assert.Equal(t, "Testing2", e.Text)
-	assert.Equal(t, "Testing", w.Clipboard().Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	// any other shortcut should be forbidden (Paste)
 	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod)
 	w.WaitForEvents()
 
 	assert.Equal(t, "Testing2", e.Text)
-	assert.Equal(t, "Testing", w.Clipboard().Content())
+	assert.Equal(t, "Testing", NewClipboard().Content())
 }
 
 func TestWindow_CloseInterception(t *testing.T) {
