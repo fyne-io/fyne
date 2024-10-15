@@ -32,8 +32,12 @@ func createTestTranslateFiles(t *testing.T, file string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.Write([]byte(exampleSource))
-	f.Close()
+	if err := f.Write([]byte(exampleSource)); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
 
 	return dir
 }
@@ -64,6 +68,7 @@ func TestUpdateTranslationsFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer f.Close()
 
 	translations := make(map[string]interface{})
 	dec := json.NewDecoder(f)
