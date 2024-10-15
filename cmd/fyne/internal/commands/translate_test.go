@@ -56,6 +56,10 @@ func TestUpdateTranslationsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := updateTranslationsFile(&opts, dst, []string{src}); err != nil {
+		t.Fatal(err)
+	}
+
 	f, err := os.Open(dst)
 	if err != nil {
 		t.Fatal(err)
