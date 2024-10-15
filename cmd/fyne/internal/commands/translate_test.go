@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -35,6 +36,13 @@ func createTestTranslateFiles(t *testing.T, file string) string {
 	f.Close()
 
 	return dir
+}
+
+func TestTranslateCommand(t *testing.T) {
+	cmd := Translate()
+	if cmd.Name != "translate" {
+		t.Fatalf("invalid command name: %v", cmd.Name)
+	}
 }
 
 func TestUpdateTranslationsFile(t *testing.T) {
@@ -154,5 +162,85 @@ func TestTranslationsVisitor(t *testing.T) {
 	}
 	if val != "Example" {
 		t.Errorf("invalid value for key: %v: %v", key, val)
+	}
+}
+
+func TestTranslateVisitorNew(t *testing.T) {
+	if translateNew(&visitor{}, ast.NewIdent("whatever")) != nil {
+		t.Fatalf("failed to get the correct state: nil")
+	}
+
+	if translateNew(&visitor{}, ast.NewIdent("lang")) == nil {
+		t.Fatalf("failed to get the correct state")
+	}
+}
+
+func TestTranslateVisitorCall(t *testing.T) {
+	if translateCall(&visitor{}, &ast.IfStmt{}) != nil {
+		t.Fatalf("failed to get the correct state: nil")
+	}
+
+	if translateCall(&visitor{}, ast.NewIdent("X")) == nil {
+		t.Fatalf("failed to get the correct state")
+	}
+}
+
+func TestTranslateVisitorLocalize(t *testing.T) {
+	translations := make(map[string]interface{})
+	v := &visitor{
+		opts: &translateOpts{},
+		m:    translations,
+	}
+	if translateLocalize(v, &ast.IfStmt{}) != nil {
+		t.Fatalf("failed to get the correct state: nil")
+	}
+
+	key := "yay"
+	if translateLocalize(v, &ast.BasicLit{Value: fmt.Sprintf("%q", key)}) != nil {
+		t.Fatalf("failed to get the correct state")
+	}
+
+	if v.key != key {
+		t.Errorf("invalid key: %q", v.key)
+	}
+}
+
+func TestTranslateVisitorKey(t *testing.T) {
+	translations := make(map[string]interface{})
+	v := &visitor{
+		opts: &translateOpts{},
+		m:    translations,
+	}
+	if translateLocalize(v, &ast.IfStmt{}) != nil {
+		t.Fatalf("failed to get the correct state: nil")
+	}
+
+	key := "yay"
+	if translateKey(v, &ast.BasicLit{Value: fmt.Sprintf("%q", key)}) == nil {
+		t.Fatalf("failed to get the correct state")
+	}
+
+	if v.key != key {
+		t.Errorf("invalid key: %q", v.key)
+	}
+}
+
+func TestTranslateVisitorFallback(t *testing.T) {
+	translations := make(map[string]interface{})
+	v := &visitor{
+		opts: &translateOpts{},
+		m:    translations,
+	}
+	if translateLocalize(v, &ast.IfStmt{}) != nil {
+		t.Fatalf("failed to get the correct state: nil")
+	}
+
+	fallback := "yay"
+	if translateLocalize(v, &ast.BasicLit{Value: fmt.Sprintf("%q", fallback)}) != nil {
+		t.Fatalf("failed to get the correct state")
+	}
+
+	if v.fallback != fallback {
+		t.Errorf("invalid fallback: %q", v.fallback)
 	}
 }
