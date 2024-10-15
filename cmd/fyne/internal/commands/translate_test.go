@@ -215,7 +215,7 @@ func TestTranslateVisitorKey(t *testing.T) {
 		t.Fatalf("failed to get the correct state: nil")
 	}
 
-	key := "yay"
+	key := "whee"
 	if translateKey(v, &ast.BasicLit{Value: fmt.Sprintf("%q", key)}) == nil {
 		t.Fatalf("failed to get the correct state")
 	}
@@ -235,7 +235,7 @@ func TestTranslateVisitorFallback(t *testing.T) {
 		t.Fatalf("failed to get the correct state: nil")
 	}
 
-	fallback := "yay"
+	fallback := "WHEE"
 	if translateLocalize(v, &ast.BasicLit{Value: fmt.Sprintf("%q", fallback)}) != nil {
 		t.Fatalf("failed to get the correct state")
 	}
