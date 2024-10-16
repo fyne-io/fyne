@@ -10,7 +10,9 @@ var NoTexture = TextureType(0)
 
 type textureInfo struct {
 	textureCacheBase
-	texture TextureType
+
+	texture  TextureType
+	textFree func()
 }
 
 // IsValid will return true if the passed texture is potentially a texture
