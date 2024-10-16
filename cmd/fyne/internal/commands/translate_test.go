@@ -67,13 +67,13 @@ func TestUpdateTranslationsFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
 
 	translations := make(map[string]interface{})
 	dec := json.NewDecoder(f)
 	if err := dec.Decode(&translations); err != nil {
 		t.Fatal(err)
 	}
+	f.Close()
 
 	key := "example"
 	val, found := translations[key]
