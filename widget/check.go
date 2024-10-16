@@ -393,6 +393,10 @@ func (c *checkRenderer) updateFocusIndicator(th fyne.Theme, v fyne.ThemeVariant)
 }
 
 func focusIfNotMobile(w fyne.Widget) {
+	if w == nil {
+		return
+	}
+
 	if !fyne.CurrentDevice().IsMobile() {
 		if c := fyne.CurrentApp().Driver().CanvasForObject(w); c != nil {
 			c.Focus(w.(fyne.Focusable))
