@@ -21,12 +21,9 @@ func main() {
 
 func createTestTranslateFiles(t *testing.T, file string) string {
 	dir := t.TempDir()
+	src := path.Join(dir, file)
 
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.Create(file)
+	f, err := os.Create(src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,15 +47,16 @@ func TestTranslateCommand(t *testing.T) {
 func TestUpdateTranslationsFile(t *testing.T) {
 	src := "foo.go"
 	dir := createTestTranslateFiles(t, src)
+	srcpath := path.Join(dir, src)
 
 	opts := translateOpts{}
 	dst := path.Join(dir, "en.json")
 
-	if err := updateTranslationsFile(&opts, dst, []string{src}); err != nil {
+	if err := updateTranslationsFile(&opts, dst, []string{srcpath}); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := updateTranslationsFile(&opts, dst, []string{src}); err != nil {
+	if err := updateTranslationsFile(&opts, dst, []string{srcpath}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -111,11 +109,12 @@ func TestWriteTranslationsFile(t *testing.T) {
 
 func TestUpdateTranslationsHash(t *testing.T) {
 	src := "foo.go"
-	createTestTranslateFiles(t, src)
+	dir := createTestTranslateFiles(t, src)
+	srcpath := path.Join(dir, src)
 
 	opts := translateOpts{}
 	translations := make(map[string]interface{})
-	if err := updateTranslationsHash(&opts, translations, []string{src}); err != nil {
+	if err := updateTranslationsHash(&opts, translations, []string{srcpath}); err != nil {
 		t.Fatal(err)
 	}
 
