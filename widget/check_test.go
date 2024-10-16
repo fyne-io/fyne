@@ -100,3 +100,23 @@ func TestCheck_SetText(t *testing.T) {
 
 	assert.Equal(t, "New", check.Text)
 }
+
+func TestCheck_Tapped(t *testing.T) {
+	check := &widget.Check{Text: "test"}
+	assert.False(t, check.Checked)
+
+	test.Tap(check)
+	assert.True(t, check.Checked)
+	test.Tap(check)
+	assert.False(t, check.Checked)
+
+	// and test the resetting from partial as well
+	check.Partial = true
+	test.Tap(check)
+	assert.True(t, check.Checked)
+	assert.False(t, check.Partial)
+	test.Tap(check)
+	assert.False(t, check.Checked)
+	assert.False(t, check.Partial)
+
+}

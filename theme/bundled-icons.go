@@ -60,6 +60,11 @@ var checkboxfillIconRes = &fyne.StaticResource{
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <rect x=\"5\" y=\"5\" width=\"14\" height=\"14\" style=\"fill:#000000;\" />\n</svg>\n"),
 }
 
+var checkboxpartialIconRes = &fyne.StaticResource{
+	StaticName:    "check-box-partial.svg",
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <path\n          d=\"M 4.0859375,3 C 2.9759386,3 3,2.9859386 3,4.0859375 V 19.914062 C 3,21.014061 2.9759386,21 4.0859375,21 H 19.914062 C 21.024061,21 21,21.014061 21,19.914062 V 4.0859375 C 21,2.9859386 21.024061,3 19.914062,3 Z M 18.5,11 v 2 H 12.147368 5.5 v -2 h 6.59251 z\" />\n</svg>\n"),
+}
+
 var radiobuttonIconRes = &fyne.StaticResource{
 	StaticName:    "radio-button.svg",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <path\n     d=\"M 12,2 C 6.48,2 2,6.48 2,12 2,17.52 6.48,22 12,22 17.52,22 22,17.52 22,12 22,6.48 17.52,2 12,2 Z m 0.0097,19.024071 C 6.9997372,21.048238 3,17 2.992626,12.037976 2.985139,7.0000002 6.9673493,2.9584714 12.036063,2.9795211 16.967347,3 21.069769,7.0000004 21.034853,12.004484 21,17 17,21 12.009738,21.024071 Z\" />\n</svg>\n"),

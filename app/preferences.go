@@ -183,12 +183,7 @@ func convertLists(values map[string]any) {
 					floats[i] = item.(float64)
 				}
 				values[k] = floats
-			case int:
-				ints := make([]int, len(items))
-				for i, item := range items {
-					ints[i] = item.(int)
-				}
-				values[k] = ints
+			//case int: // json has no int!
 			case string:
 				strings := make([]string, len(items))
 				for i, item := range items {
