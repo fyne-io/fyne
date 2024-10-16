@@ -14,7 +14,7 @@ func SystemLocale() fyne.Locale {
 	if err != nil {
 		fyne.LogError("Failed to look up user locale", err)
 	}
-	if loc == "" {
+	if len(loc) < 2 {
 		loc = "en"
 	}
 

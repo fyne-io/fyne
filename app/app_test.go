@@ -36,7 +36,7 @@ func TestFyneApp_UniqueID(t *testing.T) {
 func TestFyneApp_SetIcon(t *testing.T) {
 	app := NewWithID("io.fyne.test")
 
-	metaIcon := &fyne.StaticResource{StaticName: "Metadata"}
+	metaIcon := &fyne.StaticResource{StaticName: "Metadata", StaticContent: []byte("?PNG...")}
 	SetMetadata(fyne.AppMetadata{
 		Icon: metaIcon,
 	})
