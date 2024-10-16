@@ -1,0 +1,32 @@
+{
+  "Advanced": "Avanzado",
+  "Cancel": "Cancelar",
+  "Confirm": "Confirmar",
+  "Copy": "Copiar",
+  "Create Folder": "Crear Carpeta",
+  "Cut": "Cortar",
+  "Enter filename": "Introduzca nombre del fichero",
+  "Error": "Error",
+  "Favourites": "Favoritos",
+  "File": "Archivo",
+  "Folder": "Carepta",
+  "New Folder": "Nueva Carpeta",
+  "No": "No",
+  "OK": "OK",
+  "Open": "Abrir",
+  "Paste": "Pegar",
+  "Quit": "Salir",
+  "Redo": "Rehacer",
+  "Save": "Guardar",
+  "Select all": "Seleccionar todo",
+  "Show Hidden Files": "Mostrar archivos ocultos",
+  "Undo": "Deshacer",
+  "Yes": "Si",
+
+  "file.name": {
+    "other": "Nombre"
+  },
+  "file.parent": {
+    "other": "Padre"
+  }
+}
