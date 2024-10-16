@@ -112,9 +112,10 @@ func updateTranslationsFile(opts *translateOpts, file string, files []string) er
 	}
 
 	if f != nil {
-		defer f.Close()
 		dec := json.NewDecoder(f)
-		if err := dec.Decode(&translations); err != nil {
+		err := dec.Decode(&translations)
+		f.Close()
+		if err != nil {
 			return err
 		}
 	}
