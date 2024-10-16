@@ -18,6 +18,13 @@ type Check struct {
 	Text    string
 	Checked bool
 
+	// Partial check is when there is an indeterminate state (usually meaning that child items are some-what checked).
+	// Turning this on will override the checked state and show a dash icon (neither checked nor unchecked).
+	// The user interaction cannot turn this on, tapping a partial check state will set `Checked` to true.
+	//
+	// Since: 2.6
+	Partial bool
+
 	OnChanged func(bool) `json:"-"`
 
 	focused bool
@@ -64,13 +71,15 @@ func (c *Check) Bind(data binding.Bool) {
 }
 
 // SetChecked sets the checked state and refreshes widget
+// If the `Partial` state is set this will be turned off to respect the `checked` bool passed in here.
 func (c *Check) SetChecked(checked bool) {
 	c.propertyLock.Lock()
-	if checked == c.Checked {
+	if checked == c.Checked && !c.Partial {
 		c.propertyLock.Unlock()
 		return
 	}
 
+	c.Partial = false
 	c.Checked = checked
 	onChanged := c.OnChanged
 	c.propertyLock.Unlock()
@@ -350,7 +359,11 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 	bgRes := theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonFill))
 	bgRes.ColorName = theme.ColorNameInputBackground
 
-	if c.check.Checked {
+	if c.check.Partial {
+		res = theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonPartial))
+		res.ColorName = theme.ColorNamePrimary
+		bgRes.ColorName = theme.ColorNameBackground
+	} else if c.check.Checked {
 		res = theme.NewThemedResource(th.Icon(theme.IconNameCheckButtonChecked))
 		res.ColorName = theme.ColorNamePrimary
 		bgRes.ColorName = theme.ColorNameBackground

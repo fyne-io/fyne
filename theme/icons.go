@@ -56,6 +56,11 @@ const (
 	// Since: 2.5
 	IconNameCheckButtonFill fyne.ThemeIconName = "iconNameCheckButtonFill"
 
+	// IconNameCheckButtonPartial is the name of theme lookup for "partially" checked check button icon.
+	//
+	// Since: 2.6
+	IconNameCheckButtonPartial fyne.ThemeIconName = "partial"
+
 	// IconNameRadioButton is the name of theme lookup for radio button unchecked icon.
 	//
 	// Since: 2.0
@@ -510,6 +515,7 @@ var (
 		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
 		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
 		IconNameCheckButtonFill:    NewThemedResource(checkboxfillIconRes),
+		IconNameCheckButtonPartial: NewThemedResource(checkboxpartialIconRes),
 		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
 		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
 		IconNameRadioButtonFill:    NewThemedResource(radiobuttonfillIconRes),
