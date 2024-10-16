@@ -40,6 +40,9 @@ func (a *fyneApp) Icon() fyne.Resource {
 		return a.icon
 	}
 
+	if a.Metadata().Icon == nil || len(a.Metadata().Icon.Content()) == 0 {
+		return nil
+	}
 	return a.Metadata().Icon
 }
 
