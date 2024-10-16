@@ -21,13 +21,12 @@ func main() {
 
 func createTestTranslateFiles(t *testing.T, file string) string {
 	dir := t.TempDir()
-	src := path.Join(dir, file)
 
 	if err := os.Chdir(dir); err != nil {
 		t.Fatal(err)
 	}
 
-	f, err := os.Create(src)
+	f, err := os.Create(file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,10 +49,10 @@ func TestTranslateCommand(t *testing.T) {
 
 func TestUpdateTranslationsFile(t *testing.T) {
 	src := "foo.go"
-	createTestTranslateFiles(t, src)
+	dir := createTestTranslateFiles(t, src)
 
 	opts := translateOpts{}
-	dst := "en.json"
+	dst := path.Join(dir, "en.json")
 
 	if err := updateTranslationsFile(&opts, dst, []string{src}); err != nil {
 		t.Fatal(err)
@@ -87,8 +86,8 @@ func TestUpdateTranslationsFile(t *testing.T) {
 
 func TestTranslateFindFilesExt(t *testing.T) {
 	src := "foo.go"
-	createTestTranslateFiles(t, src)
-	files, err := findFilesExt(".", ".go")
+	dir := createTestTranslateFiles(t, src)
+	files, err := findFilesExt(dir, ".go")
 	if err != nil {
 		t.Fatal(err)
 	}
