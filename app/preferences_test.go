@@ -43,6 +43,7 @@ func TestPreferences_Save(t *testing.T) {
 		val["keyFloatList"] = []float64{1.1, 2.2, 3.3}
 		val["keyBool"] = true
 		val["keyBoolList"] = []bool{true, false, true}
+		val["keyEmptyList"] = []string{}
 	})
 
 	path := p.storagePath()
