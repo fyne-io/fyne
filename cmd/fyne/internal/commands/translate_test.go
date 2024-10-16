@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/fs"
 	"os"
 	"path"
 	"testing"
@@ -101,33 +100,13 @@ func TestTranslateFindFilesExt(t *testing.T) {
 func TestWriteTranslationsFile(t *testing.T) {
 	dir := t.TempDir()
 	dst := path.Join(dir, "foo.json")
-	perm := fs.FileMode(0644)
 
-	if err := writeTranslationsFile([]byte(`{"a":1}`), dst, nil); err != nil {
+	if err := writeTranslationsFile([]byte(`{"a":1}`), dst); err != nil {
 		t.Fatalf("failed to write translations file: %v", err)
 	}
 
-	f, err := os.Open(dst)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-
-	fi, err := f.Stat()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if fi.Mode().Perm() != perm {
-		t.Errorf("invalid file permissions: %v", perm)
-	}
-
-	if err := writeTranslationsFile([]byte(`{"a":2}`), dst, f); err != nil {
+	if err := writeTranslationsFile([]byte(`{"a":2}`), dst); err != nil {
 		t.Fatalf("failed to write translations file: %v", err)
-	}
-
-	if fi.Mode().Perm() != perm {
-		t.Errorf("invalid file permissions: %v", perm)
 	}
 }
 

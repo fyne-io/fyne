@@ -148,21 +148,11 @@ func updateTranslationsFile(opts *translateOpts, file string, files []string) er
 		return nil
 	}
 
-	return writeTranslationsFile(b, file, f)
+	return writeTranslationsFile(b, file)
 }
 
-// Write data to given file, using same permissions as the original file if it exists
-func writeTranslationsFile(b []byte, file string, f *os.File) error {
-	perm := fs.FileMode(0644)
-
-	if f != nil {
-		fi, err := f.Stat()
-		if err != nil {
-			return err
-		}
-		perm = fi.Mode().Perm()
-	}
-
+// Write data to given file and rename atomically to prevent file corruption
+func writeTranslationsFile(b []byte, file string) error {
 	nf, err := os.CreateTemp(filepath.Dir(file), filepath.Base(file)+"-*")
 	if err != nil {
 		return err
@@ -175,10 +165,6 @@ func writeTranslationsFile(b []byte, file string, f *os.File) error {
 
 	if n < len(b) {
 		return io.ErrShortWrite
-	}
-
-	if err := nf.Chmod(perm); err != nil {
-		return err
 	}
 
 	if err := nf.Close(); err != nil {
