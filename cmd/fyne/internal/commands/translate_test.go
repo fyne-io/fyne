@@ -52,11 +52,11 @@ func TestUpdateTranslationsFile(t *testing.T) {
 	opts := translateOpts{}
 	dst := path.Join(dir, "en.json")
 
-	if err := updateTranslationsFile(&opts, dst, []string{srcpath}); err != nil {
+	if err := updateTranslationsFile(dst, []string{srcpath}, &opts); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := updateTranslationsFile(&opts, dst, []string{srcpath}); err != nil {
+	if err := updateTranslationsFile(dst, []string{srcpath}, &opts); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,7 +114,7 @@ func TestUpdateTranslationsHash(t *testing.T) {
 
 	opts := translateOpts{}
 	translations := make(map[string]interface{})
-	if err := updateTranslationsHash(&opts, translations, []string{srcpath}); err != nil {
+	if err := updateTranslationsHash(translations, []string{srcpath}, &opts); err != nil {
 		t.Fatal(err)
 	}
 

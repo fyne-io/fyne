@@ -71,7 +71,7 @@ func Translate() *cli.Command {
 				files = sources
 			}
 
-			return updateTranslationsFile(&opts, translationsFile, files)
+			return updateTranslationsFile(translationsFile, files, &opts)
 		},
 	}
 }
@@ -103,7 +103,7 @@ type translateOpts struct {
 
 // Create or add to translations file by scanning the given files for translation calls.
 // Works with and without existing translations file.
-func updateTranslationsFile(opts *translateOpts, file string, files []string) error {
+func updateTranslationsFile(file string, files []string, opts *translateOpts) error {
 	translations := make(map[string]interface{})
 
 	f, err := os.Open(file)
@@ -124,7 +124,7 @@ func updateTranslationsFile(opts *translateOpts, file string, files []string) er
 		fmt.Fprintf(os.Stderr, "scanning files: %v\n", files)
 	}
 
-	if err := updateTranslationsHash(opts, translations, files); err != nil {
+	if err := updateTranslationsHash(translations, files, opts); err != nil {
 		return err
 	}
 
@@ -176,7 +176,7 @@ func writeTranslationsFile(b []byte, file string) error {
 }
 
 // Update translations hash by scanning the given files, then parsing and walking the AST
-func updateTranslationsHash(opts *translateOpts, m map[string]interface{}, srcs []string) error {
+func updateTranslationsHash(m map[string]interface{}, srcs []string, opts *translateOpts) error {
 	for _, src := range srcs {
 		fset := token.NewFileSet()
 		af, err := parser.ParseFile(fset, src, nil, parser.AllErrors)
