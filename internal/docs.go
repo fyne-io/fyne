@@ -115,6 +115,30 @@ func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
 	return storage.Writer(u)
 }
 
+// Append will open a document ready for writing without truncating it's content,
+// you close the returned writer for the save to complete.
+// If the document for this app with that name does not exist a storage.ErrNotExists error will be returned.
+func (d *Docs) Append(name string) (fyne.URIWriteCloser, error) {
+	if d.RootDocURI == nil {
+		return nil, errNoAppID
+	}
+
+	u, err := storage.Child(d.RootDocURI, name)
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := storage.Exists(u)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, storage.ErrNotExists
+	}
+
+	return storage.Appender(u)
+}
+
 func (d *Docs) ensureRootExists() error {
 	exists, err := storage.Exists(d.RootDocURI)
 	if err != nil {
