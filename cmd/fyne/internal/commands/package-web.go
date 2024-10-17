@@ -84,6 +84,29 @@ func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc s
 		return err
 	}
 
+	tpl.Reset()
+	serviceWorkerDst := filepath.Join(appDir, "service-worker.js")
+	err = templates.ServiceWorkerJs.Execute(&tpl, w)
+	if err != nil {
+		return err
+	}
+	err = util.WriteFile(serviceWorkerDst, tpl.Bytes())
+	if err != nil {
+		return err
+	}
+
+	tpl.Reset()
+	err = templates.ManifestJSON.Execute(&tpl, w)
+	if err != nil {
+		return err
+	}
+
+	manifestJSON := filepath.Join(appDir, "manifest.json")
+	err = util.WriteFile(manifestJSON, tpl.Bytes())
+	if err != nil {
+		return err
+	}
+
 	// Download webgl-debug.js directly from the KhronosGroup repository when needed
 	if !release {
 		webglDebugFile := filepath.Join(appDir, "webgl-debug.js")
