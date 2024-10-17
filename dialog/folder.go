@@ -18,7 +18,10 @@ func NewFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) *
 	dialog := &FileDialog{}
 	dialog.callback = callback
 	dialog.parent = parent
-	dialog.filter = folderFilter
+	if dialog.filter == nil {
+		dialog.filter = []storage.FileFilter{}
+	}
+	dialog.filter = append(dialog.filter, folderFilter)
 	return dialog
 }
 
@@ -38,5 +41,11 @@ func ShowFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) 
 }
 
 func (f *FileDialog) isDirectory() bool {
-	return f.filter == folderFilter
+	for _, filter := range f.filter {
+		if filter == folderFilter {
+			return true
+		}
+	}
+
+	return false
 }

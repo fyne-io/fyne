@@ -24,6 +24,11 @@ type MimeTypeFileFilter struct {
 	MimeTypes []string
 }
 
+// SearchFilter represents a file or directory filter based on user inputted text
+type SearchFilter struct {
+	FilterText string
+}
+
 // Matches returns true if a file URI has one of the filtered extensions.
 func (e *ExtensionFileFilter) Matches(uri fyne.URI) bool {
 	extension := uri.Extension()
@@ -62,4 +67,8 @@ func (mt *MimeTypeFileFilter) Matches(uri fyne.URI) bool {
 // Example: image/*, audio/mp3, text/plain, application/*
 func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 	return &MimeTypeFileFilter{MimeTypes: mimeTypes}
+}
+
+func (s *SearchFilter) Matches(uri fyne.URI) bool {
+	return strings.Contains(uri.Name(), s.FilterText)
 }
