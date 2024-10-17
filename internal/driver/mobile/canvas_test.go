@@ -249,7 +249,7 @@ func Test_canvas_Tappable(t *testing.T) {
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Draggable) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 	assert.True(t, content.up)
 
@@ -286,7 +286,7 @@ func Test_canvas_Tapped(t *testing.T) {
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 
 	assert.True(t, tapped, "tap primary")
@@ -340,7 +340,7 @@ func Test_canvas_TappedMulti(t *testing.T) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 
 	assert.False(t, buttonTap, "button should not be tapped")
@@ -369,7 +369,7 @@ func Test_canvas_TappedSecondary(t *testing.T) {
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 
 	assert.False(t, obj.tap, "don't tap primary")
@@ -464,7 +464,7 @@ func simulateTap(c *canvas) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 }
 

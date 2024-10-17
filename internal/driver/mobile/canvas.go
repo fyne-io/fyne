@@ -25,6 +25,7 @@ type canvas struct {
 	initialized    bool
 	lastTapDown    map[int]time.Time
 	lastTapDownPos map[int]fyne.Position
+	lastTapDelta   map[int]fyne.Delta
 	menu           fyne.CanvasObject
 	padded         bool
 	scale          float32
@@ -54,6 +55,7 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 		device:         d,
 		lastTapDown:    make(map[int]time.Time),
 		lastTapDownPos: make(map[int]fyne.Position),
+		lastTapDelta:   make(map[int]fyne.Delta),
 		padded:         true,
 		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
 		touched:        make(map[int]mobile.Touchable),
@@ -258,6 +260,8 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 		return
 	}
 	c.lastTapDownPos[tapID] = pos
+	offset := fyne.Delta{DX: deltaX, DY: deltaY}
+	c.lastTapDelta[tapID] = offset
 
 	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Draggable); ok {
@@ -292,7 +296,7 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	ev := &fyne.DragEvent{}
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
-	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
+	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
 }
@@ -301,10 +305,11 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
-	dragCallback func(fyne.Draggable)) {
+	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 
 	if c.dragging != nil {
-		dragCallback(c.dragging)
+		previousDelta := c.lastTapDelta[tapID]
+		dragCallback(c.dragging, &fyne.DragEvent{Dragged: previousDelta})
 
 		c.dragging = nil
 		return
