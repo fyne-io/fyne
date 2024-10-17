@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"mime"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"unicode/utf8"
 
@@ -12,6 +14,9 @@ import (
 
 // Declare conformance with fyne.URI interface.
 var _ fyne.URI = &uri{}
+
+// Regex pattern to match Windows drive paths
+var windowsDrivePathPrefixPattern = regexp.MustCompile(`(?i)^/[a-z]:`)
 
 type uri struct {
 	scheme    string
@@ -76,6 +81,9 @@ func (u *uri) Authority() string {
 }
 
 func (u *uri) Path() string {
+	if runtime.GOOS == "windows" && windowsDrivePathPrefixPattern.MatchString(u.path) {
+		return u.path[1:]
+	}
 	return u.path
 }
 
