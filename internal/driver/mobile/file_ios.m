@@ -27,9 +27,13 @@ const void* iosReadFromURL(void* urlPtr, int* len)  {
     return data.bytes;
 }
 
-const void* iosOpenFileWriter(void* urlPtr) {
+const void* iosOpenFileWriter(void* urlPtr, bool truncate) {
     NSURL* url = (NSURL*)urlPtr;
-    [[NSFileManager defaultManager] createFileAtPath:url.path contents:nil attributes:nil];
+    NSData* data = nil;
+    if (!truncate) {
+        data = [NSData dataWithContentsOfURL:url];
+    }
+    [[NSFileManager defaultManager] createFileAtPath:url.path contents:data attributes:nil];
 
     NSError *err = nil;
     // TODO handle error

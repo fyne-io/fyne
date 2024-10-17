@@ -67,11 +67,11 @@ func (m *mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 }
 
 func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return fileWriterForURI(u)
+	return fileWriterForURI(u, true)
 }
 
 // TODO: need someone who understands native code to write this, I'm not sure
 // how it works
 func (m *mobileFileRepo) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return fileWriterForURI(u)
+	return fileWriterForURI(u, false)
 }
