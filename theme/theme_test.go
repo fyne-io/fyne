@@ -107,3 +107,25 @@ func (e *emptyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 func (e *emptyTheme) Size(n fyne.ThemeSizeName) float32 {
 	return 0
 }
+
+func TestCheckFontParsable(t *testing.T) {
+	for name, tt := range map[string]struct {
+		fn string
+		ok bool
+	}{
+		"ttf": {"./testdata/NotoMono-Regular.ttf", true},
+		"ttc": {"./testdata/Sitka.ttc", true},
+		"otf": {"./testdata/teamviewer14.otf", true},
+		"fon": {"./testdata/smaller.fon", false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			res, err := fyne.LoadResourceFromPath(tt.fn)
+			assert.Nil(t, err)
+			checkFunc := assert.Nil
+			if !tt.ok {
+				checkFunc = assert.NotNil
+			}
+			checkFunc(t, theme.CheckFontParsable(res))
+		})
+	}
+}
