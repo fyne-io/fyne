@@ -71,10 +71,17 @@ func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
 func lookupFaces(theme, fallback, emoji fyne.Resource, family string, style fyne.TextStyle) (faces *dynamicFontMap) {
 	f1 := loadMeasureFont(theme)
 	if theme == fallback {
+		if f1 == nil {
+			return nil
+		}
 		faces = &dynamicFontMap{family: family, faces: []*font.Face{f1}}
 	} else {
 		f2 := loadMeasureFont(fallback)
-		faces = &dynamicFontMap{family: family, faces: []*font.Face{f1, f2}}
+		if f1 == nil {
+			faces = &dynamicFontMap{family: family, faces: []*font.Face{f2}}
+		} else {
+			faces = &dynamicFontMap{family: family, faces: []*font.Face{f1, f2}}
+		}
 	}
 
 	aspect := font.Aspect{Style: font.StyleNormal}
@@ -152,6 +159,9 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		default:
 			faces = lookupFaces(font1, theme.DefaultTextFont(), emoji, fontscan.SansSerif, style)
 		}
+		if faces == nil {
+			return nil
+		}
 
 		val = &FontCacheItem{Fonts: faces}
 		fontCache.Store(cacheID{style: style, scope: scope}, val)
@@ -192,13 +202,13 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 }
 
 func loadMeasureFont(data fyne.Resource) *font.Face {
-	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
+	loaded, err := font.ParseTTC(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
 
-	return loaded
+	return loaded[0]
 }
 
 // MeasureString returns how far dot would advance by drawing s with f.
@@ -230,6 +240,9 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 
 func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
 	face := CachedFontFace(style, source, nil)
+	if face == nil {
+		return fyne.NewSize(0, 0), 0
+	}
 	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
