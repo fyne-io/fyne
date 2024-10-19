@@ -469,12 +469,12 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 			buildDir = "/"
 			d = "/"
 		} else if i > 0 {
-			buildDir = filepath.Join(buildDir, d)
+			buildDir = buildDir + "/" + d
 		} else {
 			d = buildDir
-			buildDir = d + string(os.PathSeparator)
+			buildDir = d + "/"
 		}
-		newURL := dir.Scheme() + "://" + filepath.ToSlash(buildDir)
+		newURL := dir.Scheme() + "://" + buildDir
 		newDir, err := storage.ParseURI(newURL)
 		if err != nil {
 			return err
