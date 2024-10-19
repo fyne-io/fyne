@@ -474,8 +474,11 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 			d = buildDir
 			buildDir = d + string(os.PathSeparator)
 		}
-
-		newDir := storage.NewFileURI(buildDir)
+		newURL := dir.Scheme() + "://" + filepath.ToSlash(buildDir)
+		newDir, err := storage.ParseURI(newURL)
+		if err != nil {
+			return err
+		}
 		isDir, err := storage.CanList(newDir)
 		if err != nil {
 			return err
