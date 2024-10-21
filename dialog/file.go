@@ -622,7 +622,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 				return f.startingLocation
 			}
 		}
-
+		return f.startingLocation
 	}
 
 	// last used
