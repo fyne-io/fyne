@@ -38,7 +38,7 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 		if t.FontSource != nil {
 			custom = t.FontSource.Name()
 		}
-		ent := cache.FontCacheEntry{Color: t.Color}
+		ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
 		ent.Text = t.Text
 		ent.Size = t.TextSize
 		ent.Style = t.TextStyle
