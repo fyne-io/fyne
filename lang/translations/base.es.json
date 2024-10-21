@@ -1,0 +1,47 @@
+{
+  "Advanced": "Avanzado",
+  "Cancel": "Cancelar",
+  "Confirm": "Confirmar",
+  "Copy": "Copiar",
+  "Create Folder": "Crear Carpeta",
+  "Cut": "Cortar",
+  "Enter filename": "Introduzca nombres del archivo",
+  "Error": "Error",
+  "Favourites": "Favoritos",
+  "File": "Archivo",
+  "Folder": "Carpeta",
+  "New Folder": "Nueva Carpeta",
+  "No": "No",
+  "OK": "OK",
+  "Open": "Abrir",
+  "Paste": "Pegar",
+  "Quit": "Salir",
+  "Redo": "Rehacer",
+  "Save": "Guardar",
+  "Select all": "Seleccionar todo",
+  "Show Hidden Files": "Mostrar archivos ocultos",
+  "Undo": "Deshacer",
+  "Yes": "Si",
+
+  "file.name": {
+    "other": "Nombre"
+  },
+  "file.parent": {
+    "other": "Padre"
+  },
+
+  "monday": "Lunes",
+  "monday.short": "Lun",
+  "tuesday": "Martes",
+  "tuesday.short": "Mar",
+  "wednesday": "Miércoles",
+  "wednesday.short": "Mie",
+  "thursday": "Jueves",
+  "thursday.short": "Jue",
+  "friday": "Viernes",
+  "friday.short": "Vie",
+  "saturday": "Sábado",
+  "saturday.short": "Sab",
+  "sunday": "Domingo",
+  "sunday.short": "Dom"
+}
