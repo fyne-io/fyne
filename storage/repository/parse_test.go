@@ -8,7 +8,7 @@ import (
 
 func TestNewFileURI(t *testing.T) {
 	assert.Equal(t, "file:///tmp/foo.txt", NewFileURI("/tmp/foo.txt").String())
-	assert.Equal(t, "file://C:/tmp/foo.txt", NewFileURI("C:/tmp/foo.txt").String())
+	assert.Equal(t, "file:///C:/tmp/foo.txt", NewFileURI("C:/tmp/foo.txt").String())
 }
 
 func TestParseURI(t *testing.T) {
@@ -20,9 +20,9 @@ func TestParseURI(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///tmp/foo.txt", uri.String())
 
-	uri, err = ParseURI("file://C:/tmp/foo.txt")
+	uri, err = ParseURI("file:///C:/tmp/foo.txt")
 	assert.Nil(t, err)
-	assert.Equal(t, "file://C:/tmp/foo.txt", uri.String())
+	assert.Equal(t, "file:///C:/tmp/foo.txt", uri.String())
 }
 
 func TestParseInvalidURI(t *testing.T) {

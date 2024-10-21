@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -15,6 +17,9 @@ import (
 // fileSchemePrefix is used for when we need a hard-coded version of "file://"
 // for string processing
 const fileSchemePrefix string = "file://"
+
+// Regex pattern to match Windows drive paths
+var windowsDrivePathPattern = regexp.MustCompile(`(?i)^/[a-z]:$`)
 
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
@@ -170,6 +175,11 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 
 	// trim the scheme
 	s = strings.TrimPrefix(s, fileSchemePrefix)
+
+	// Only for Windows: If the path is a drive root, no parent is possible
+	if runtime.GOOS == "windows" && windowsDrivePathPattern.MatchString(s) {
+		return nil, repository.ErrURIRoot
+	}
 
 	// Completely empty URI with just a scheme
 	if s == "" {
