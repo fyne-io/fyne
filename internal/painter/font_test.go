@@ -28,6 +28,7 @@ func TestCachedFontFace(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			got := painter.CachedFontFace(tt.style, nil, nil)
+			assert.NotNil(t, got, "Font not loaded")
 			for _, r := range tt.runes {
 				f := got.Fonts.ResolveFace(r)
 				assert.NotNil(t, f, "symbol Font should include: %c", r)
@@ -78,6 +79,7 @@ func TestDrawString(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
 			f := painter.CachedFontFace(tt.style, nil, nil)
+			assert.NotNil(t, f, "Font not loaded")
 
 			fontMap := &intTest.FontMap{f.Fonts.ResolveFace(' ')} // first (ascii) font
 			painter.DrawString(img, tt.string, tt.color, fontMap, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
@@ -118,6 +120,7 @@ func TestMeasureString(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			faces := painter.CachedFontFace(tt.style, nil, nil)
+			assert.NotNil(t, faces, "Font not loaded")
 			fontMap := &intTest.FontMap{faces.Fonts.ResolveFace(' ')} // first (ascii) font
 			got, _ := painter.MeasureString(fontMap, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
 			assert.Equal(t, tt.want, got.Width)

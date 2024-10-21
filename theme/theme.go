@@ -204,6 +204,11 @@ func CurrentForWidget(w fyne.CanvasObject) fyne.Theme {
 	return Current()
 }
 
+// CheckFontParsable checks whether a resource is a valid font.
+func CheckFontParsable(data fyne.Resource) error {
+	return internaltheme.CheckFontParsable(data)
+}
+
 func currentVariant() fyne.ThemeVariant {
 	if std, ok := Current().(*builtinTheme); ok {
 		if std.variant != internaltheme.VariantNameUserPreference {

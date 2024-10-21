@@ -1,9 +1,11 @@
 package theme
 
 import (
+	"bytes"
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"github.com/go-text/typesetting/font"
 )
 
 // Primary color names.
@@ -90,4 +92,11 @@ func PrimaryColorNamed(name string) color.Color {
 	// We return the value for ColorBlue for every other value.
 	// There is no need to have it in the switch above.
 	return colorLightPrimaryBlue
+}
+
+// CheckFontParsable checks whether a resource is a valid font.
+// It mimics internal/painter.loadMeasureFont
+func CheckFontParsable(data fyne.Resource) error {
+	_, err := font.ParseTTC(bytes.NewReader(data.Content()))
+	return err
 }
