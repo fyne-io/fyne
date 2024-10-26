@@ -152,7 +152,7 @@ func updateTranslationsFile(file string, files []string, opts *translateOpts) er
 		return nil
 	}
 
-	b, err := json.MarshalIndent(translations, "", "\t")
+	b, err := json.MarshalIndent(translations, "", "    ")
 	if err != nil {
 		return err
 	}
