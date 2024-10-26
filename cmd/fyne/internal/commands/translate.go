@@ -22,8 +22,9 @@ import (
 // Since: 2.6
 func Translate() *cli.Command {
 	return &cli.Command{
-		Name:  "translate",
-		Usage: "Scans for new translation strings.",
+		Name:      "translate",
+		Usage:     "Scans for new translation strings.",
+		ArgsUsage: "translationsFile [source ...]",
 		Description: "Recursively scans the current or given directories/files for \n" +
 			"translation strings, and creates or updates the translations file.",
 		Flags: []cli.Flag{
@@ -42,22 +43,26 @@ func Translate() *cli.Command {
 				Aliases: []string{"n"},
 				Usage:   "Scan without storing the results.",
 			},
-			&cli.StringFlag{
-				Name:    "translationsFile",
-				Aliases: []string{"f"},
-				Usage:   "File to read from and write translations to.",
-				Value:   "translations/en.json",
-			},
 		},
 		Action: func(ctx *cli.Context) error {
-			translationsFile := ctx.String("translationsFile")
+			translationsFile := ctx.Args().First()
 			opts := translateOpts{
 				DryRun:  ctx.Bool("dry-run"),
 				Update:  ctx.Bool("update"),
 				Verbose: ctx.Bool("verbose"),
 			}
 
-			sources, err := findSources(ctx.Args().Slice(), ".go", ".")
+			if translationsFile == "" {
+				fmt.Fprintln(os.Stderr, "Missing argument: translationsFile")
+				fmt.Fprintf(os.Stderr, "usage: %s %s [command options] %s\n",
+					ctx.App.Name,
+					ctx.Command.Name,
+					ctx.Command.ArgsUsage,
+				)
+				os.Exit(1)
+			}
+
+			sources, err := findSources(ctx.Args().Tail(), ".go", ".")
 			if err != nil {
 				return err
 			}
