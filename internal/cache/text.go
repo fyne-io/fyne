@@ -29,7 +29,8 @@ type fontSizeEntry struct {
 type FontCacheEntry struct {
 	fontSizeEntry
 
-	Color color.Color
+	Canvas fyne.Canvas
+	Color  color.Color
 }
 
 // GetFontMetrics looks up a calculated size and baseline required for the specified text parameters.
