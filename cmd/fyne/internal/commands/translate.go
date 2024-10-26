@@ -83,6 +83,9 @@ func findFilesExt(dir, ext string) ([]string, error) {
 	files := []string{}
 	err := filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return nil
+			}
 			return err
 		}
 
