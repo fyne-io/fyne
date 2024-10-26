@@ -19,8 +19,7 @@ func main() {
 }
 `
 
-func createTestTranslateFiles(t *testing.T, file string) string {
-	dir := t.TempDir()
+func createTestTranslateFiles(t *testing.T, dir, file string) {
 	src := path.Join(dir, file)
 
 	f, err := os.Create(src)
@@ -46,7 +45,8 @@ func TestTranslateCommand(t *testing.T) {
 
 func TestUpdateTranslationsFile(t *testing.T) {
 	src := "foo.go"
-	dir := createTestTranslateFiles(t, src)
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, src)
 	srcpath := path.Join(dir, src)
 
 	opts := translateOpts{}
@@ -84,7 +84,8 @@ func TestUpdateTranslationsFile(t *testing.T) {
 
 func TestTranslateFindFilesExt(t *testing.T) {
 	src := "foo.go"
-	dir := createTestTranslateFiles(t, src)
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, src)
 	files, err := findFilesExt(dir, ".go")
 	if err != nil {
 		t.Fatal(err)
@@ -112,7 +113,8 @@ func TestWriteTranslationsFile(t *testing.T) {
 
 func TestUpdateTranslationsHash(t *testing.T) {
 	src := "foo.go"
-	dir := createTestTranslateFiles(t, src)
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, src)
 	srcpath := path.Join(dir, src)
 
 	opts := translateOpts{}
@@ -133,7 +135,8 @@ func TestUpdateTranslationsHash(t *testing.T) {
 
 func TestTranslationsVisitor(t *testing.T) {
 	src := "foo.go"
-	dir := createTestTranslateFiles(t, src)
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, src)
 
 	fset := token.NewFileSet()
 	af, err := parser.ParseFile(fset, path.Join(dir, src), nil, parser.AllErrors)
