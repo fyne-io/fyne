@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"math"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -15,6 +16,7 @@ import (
 type CheckGroup struct {
 	DisableableWidget
 	Horizontal bool
+	numColumns int
 	Required   bool
 	OnChanged  func([]string) `json:"-"`
 	Options    []string
@@ -36,6 +38,10 @@ func NewCheckGroup(options []string, changed func([]string)) *CheckGroup {
 	r.ExtendBaseWidget(r)
 	r.update()
 	return r
+}
+
+func (r *CheckGroup) SetColumns(columns int) {
+	r.numColumns = columns
 }
 
 // Append adds a new option to the end of a CheckGroup widget.
@@ -179,32 +185,66 @@ type checkGroupRenderer struct {
 	checks *CheckGroup
 }
 
+func (r *CheckGroup) countColumns() int {
+	if r.numColumns < 1 {
+		r.numColumns = 1
+	}
+	return r.numColumns
+}
+
+func (r *CheckGroup) countRows() int {
+	return int(math.Ceil(float64(len(r.items)) / float64(r.countColumns())))
+}
+
+func getLeading(size float64, offset int) float32 {
+	return float32(size * float64(offset))
+}
+
+func getTrailing(size float64, offset int) float32 {
+	return getLeading(size, offset+1)
+}
+
 // Layout the components of the checks widget
 func (r *checkGroupRenderer) Layout(_ fyne.Size) {
-	count := 1
-	if len(r.items) > 0 {
-		count = len(r.items)
-	}
-	var itemHeight, itemWidth float32
-	minSize := r.checks.MinSize()
+	cols := r.checks.countColumns()
+
+	primaryObjects := cols
+	secondaryObjects := r.checks.countRows()
 	if r.checks.Horizontal {
-		itemHeight = minSize.Height
-		itemWidth = minSize.Width / float32(count)
-	} else {
-		itemHeight = minSize.Height / float32(count)
-		itemWidth = minSize.Width
+		primaryObjects, secondaryObjects = secondaryObjects, primaryObjects
 	}
 
-	itemSize := fyne.NewSize(itemWidth, itemHeight)
-	x, y := float32(0), float32(0)
-	for _, item := range r.items {
-		item.Resize(itemSize)
-		item.Move(fyne.NewPos(x, y))
+	size := r.checks.MinSize()
+	cellWidth := float64(size.Width) / float64(primaryObjects)
+	cellHeight := float64(size.Height) / float64(secondaryObjects)
+
+	row, col := 0, 0
+	i := 0
+	for _, child := range r.items {
+		x1 := getLeading(cellWidth, col)
+		y1 := getLeading(cellHeight, row)
+		x2 := getTrailing(cellWidth, col)
+		y2 := getTrailing(cellHeight, row)
+
+		child.Move(fyne.NewPos(x1, y1))
+		child.Resize(fyne.NewSize(x2-x1, y2-y1))
+
 		if r.checks.Horizontal {
-			x += itemWidth
+			if (i+1)%cols == 0 {
+				col++
+				row = 0
+			} else {
+				row++
+			}
 		} else {
-			y += itemHeight
+			if (i+1)%cols == 0 {
+				row++
+				col = 0
+			} else {
+				col++
+			}
 		}
+		i++
 	}
 }
 
@@ -212,20 +252,19 @@ func (r *checkGroupRenderer) Layout(_ fyne.Size) {
 // This is based on the contained text, the checks icon and a standard amount of padding
 // between each item.
 func (r *checkGroupRenderer) MinSize() fyne.Size {
-	width := float32(0)
-	height := float32(0)
-	for _, item := range r.items {
-		itemMin := item.MinSize()
-
-		width = fyne.Max(width, itemMin.Width)
-		height = fyne.Max(height, itemMin.Height)
+	minSize := fyne.NewSize(0, 0)
+	for _, child := range r.items {
+		minSize = minSize.Max(child.MinSize())
 	}
 
+	primaryObjects := r.checks.countColumns()
+	secondaryObjects := r.checks.countRows()
 	if r.checks.Horizontal {
-		width = width * float32(len(r.items))
-	} else {
-		height = height * float32(len(r.items))
+		primaryObjects, secondaryObjects = secondaryObjects, primaryObjects
 	}
+
+	width := minSize.Width * float32(primaryObjects)
+	height := minSize.Height * float32(secondaryObjects)
 
 	return fyne.NewSize(width, height)
 }
@@ -245,7 +284,7 @@ func (r *checkGroupRenderer) updateItems() {
 			r.SetObjects(append(r.Objects(), item))
 			r.items = append(r.items, item)
 		}
-		r.Layout(r.checks.Size())
+		r.Layout(r.checks.Size()) // argument is ignored
 	} else if len(r.items) > len(r.checks.Options) {
 		total := len(r.checks.Options)
 		r.items = r.items[:total]
