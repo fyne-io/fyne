@@ -92,6 +92,9 @@ func TestTranslateFindFilesExt(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("invalid number of files: %v", len(files))
 	}
+	if len(files) == 1 && path.Base(files[0]) != src {
+		t.Errorf("invalid file: %v", files[0])
+	}
 }
 
 func TestWriteTranslationsFile(t *testing.T) {
