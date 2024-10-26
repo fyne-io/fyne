@@ -78,6 +78,29 @@ func Translate() *cli.Command {
 	}
 }
 
+// Takes the files/directories, recursively scans them for files with the given extension,
+// and returns them. Uses the current directory when used with an empty list.
+func findSources(files []string, ext, cur string) ([]string, error) {
+	if len(files) == 0 {
+		return findFilesExt(cur, ext)
+	}
+
+	sources := []string{}
+	for _, file := range files {
+		if filepath.Ext(file) == ext {
+			sources = append(sources, file)
+			continue
+		}
+		files, err := findFilesExt(file, ext)
+		if err != nil {
+			return nil, err
+		}
+		sources = append(sources, files...)
+	}
+
+	return sources, nil
+}
+
 // Recursively walk the given directory and return all files with the matching extension
 func findFilesExt(dir, ext string) ([]string, error) {
 	files := []string{}

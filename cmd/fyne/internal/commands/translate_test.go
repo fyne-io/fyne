@@ -43,6 +43,32 @@ func TestTranslateCommand(t *testing.T) {
 	}
 }
 
+func TestFindSourcesDefault(t *testing.T) {
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, "foo.go")
+
+	sources, err := findSources(nil, ".go", dir)
+	if err != nil {
+		t.Fatalf("failed to find sources: %v", err)
+	}
+	if len(sources) != 1 {
+		t.Errorf("wrong number of sources: %v", len(sources))
+	}
+}
+
+func TestFindSourcesNone(t *testing.T) {
+	dir := t.TempDir()
+	createTestTranslateFiles(t, dir, "foo.go")
+
+	sources, err := findSources(nil, ".go", path.Join(dir, "nonexistent"))
+	if err != nil {
+		t.Fatalf("failed to find sources: %v", err)
+	}
+	if len(sources) != 0 {
+		t.Errorf("wrong number of sources: %v", len(sources))
+	}
+}
+
 func TestUpdateTranslationsFile(t *testing.T) {
 	src := "foo.go"
 	dir := t.TempDir()
