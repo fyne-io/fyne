@@ -24,8 +24,8 @@ func Translate() *cli.Command {
 	return &cli.Command{
 		Name:  "translate",
 		Usage: "Scans for new translation strings.",
-		Description: "Recursively scans for translation strings in the current directory or\n" +
-			"the files given as arguments, and creates or updates the translations file.",
+		Description: "Recursively scans the current or given directories/files for \n" +
+			"translation strings, and creates or updates the translations file.",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "verbose",
@@ -43,12 +43,6 @@ func Translate() *cli.Command {
 				Usage:   "Scan without storing the results.",
 			},
 			&cli.StringFlag{
-				Name:    "sourceDir",
-				Aliases: []string{"d"},
-				Usage:   "Directory to scan recursively for go files.",
-				Value:   ".",
-			},
-			&cli.StringFlag{
 				Name:    "translationsFile",
 				Aliases: []string{"f"},
 				Usage:   "File to read from and write translations to.",
@@ -56,24 +50,19 @@ func Translate() *cli.Command {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			sourceDir := ctx.String("sourceDir")
 			translationsFile := ctx.String("translationsFile")
-			files := ctx.Args().Slice()
 			opts := translateOpts{
 				DryRun:  ctx.Bool("dry-run"),
 				Update:  ctx.Bool("update"),
 				Verbose: ctx.Bool("verbose"),
 			}
 
-			if len(files) == 0 {
-				sources, err := findFilesExt(sourceDir, ".go")
-				if err != nil {
-					return err
-				}
-				files = sources
+			sources, err := findSources(ctx.Args().Slice(), ".go", ".")
+			if err != nil {
+				return err
 			}
 
-			return updateTranslationsFile(translationsFile, files, &opts)
+			return updateTranslationsFile(translationsFile, sources, &opts)
 		},
 	}
 }
