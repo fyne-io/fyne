@@ -32,8 +32,6 @@ func createTestTranslateFiles(t *testing.T, dir, file string) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-
-	return dir
 }
 
 func TestTranslateCommand(t *testing.T) {
