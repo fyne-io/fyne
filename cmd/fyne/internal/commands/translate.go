@@ -45,21 +45,30 @@ func Translate() *cli.Command {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			translationsFile := ctx.Args().First()
 			opts := translateOpts{
 				DryRun:  ctx.Bool("dry-run"),
 				Update:  ctx.Bool("update"),
 				Verbose: ctx.Bool("verbose"),
 			}
 
-			if translationsFile == "" {
-				fmt.Fprintln(os.Stderr, "Missing argument: translationsFile")
+			usage := func() {
 				fmt.Fprintf(os.Stderr, "usage: %s %s [command options] %s\n",
 					ctx.App.Name,
 					ctx.Command.Name,
 					ctx.Command.ArgsUsage,
 				)
 				os.Exit(1)
+			}
+
+			translationsFile := ctx.Args().First()
+			if translationsFile == "" {
+				fmt.Fprintln(os.Stderr, "Missing argument: translationsFile")
+				usage()
+			}
+
+			if translationsFile != "-" && filepath.Ext(translationsFile) != ".json" {
+				fmt.Fprintln(os.Stderr, "Need .json extension for translationsFile")
+				usage()
 			}
 
 			sources, err := findSources(ctx.Args().Tail(), ".go", ".")
