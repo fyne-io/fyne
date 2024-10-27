@@ -7,7 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 )
 
@@ -20,7 +20,7 @@ func main() {
 `
 
 func createTestTranslateFiles(t *testing.T, dir, file string) {
-	src := path.Join(dir, file)
+	src := filepath.Join(dir, file)
 
 	f, err := os.Create(src)
 	if err != nil {
@@ -58,7 +58,7 @@ func TestFindSourcesNone(t *testing.T) {
 	dir := t.TempDir()
 	createTestTranslateFiles(t, dir, "foo.go")
 
-	sources, err := findSources(nil, ".go", path.Join(dir, "nonexistent"))
+	sources, err := findSources(nil, ".go", filepath.Join(dir, "nonexistent"))
 	if err != nil {
 		t.Fatalf("failed to find sources: %v", err)
 	}
@@ -71,10 +71,10 @@ func TestUpdateTranslationsFile(t *testing.T) {
 	src := "foo.go"
 	dir := t.TempDir()
 	createTestTranslateFiles(t, dir, src)
-	srcpath := path.Join(dir, src)
+	srcpath := filepath.Join(dir, src)
 
 	opts := translateOpts{}
-	dst := path.Join(dir, "en.json")
+	dst := filepath.Join(dir, "en.json")
 
 	if err := updateTranslationsFile(dst, []string{srcpath}, &opts); err != nil {
 		t.Fatal(err)
@@ -117,14 +117,14 @@ func TestTranslateFindFilesExt(t *testing.T) {
 	if len(files) != 1 {
 		t.Errorf("invalid number of files: %v", len(files))
 	}
-	if len(files) == 1 && path.Base(files[0]) != src {
-		t.Errorf("invalid file: %v", path.Base(files[0]))
+	if len(files) == 1 && filepath.Base(files[0]) != src {
+		t.Errorf("invalid file: %v", filepath.Base(files[0]))
 	}
 }
 
 func TestWriteTranslationsFile(t *testing.T) {
 	dir := t.TempDir()
-	dst := path.Join(dir, "foo.json")
+	dst := filepath.Join(dir, "foo.json")
 
 	if err := writeTranslationsFile([]byte(`{"a":1}`), dst); err != nil {
 		t.Fatalf("failed to write translations file: %v", err)
@@ -139,7 +139,7 @@ func TestUpdateTranslationsHash(t *testing.T) {
 	src := "foo.go"
 	dir := t.TempDir()
 	createTestTranslateFiles(t, dir, src)
-	srcpath := path.Join(dir, src)
+	srcpath := filepath.Join(dir, src)
 
 	opts := translateOpts{}
 	translations := make(map[string]interface{})
@@ -163,7 +163,7 @@ func TestTranslationsVisitor(t *testing.T) {
 	createTestTranslateFiles(t, dir, src)
 
 	fset := token.NewFileSet()
-	af, err := parser.ParseFile(fset, path.Join(dir, src), nil, parser.AllErrors)
+	af, err := parser.ParseFile(fset, filepath.Join(dir, src), nil, parser.AllErrors)
 	if err != nil {
 		t.Fatalf("failed to parse source: %v", err)
 	}
