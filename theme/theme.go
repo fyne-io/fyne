@@ -2,8 +2,10 @@
 package theme // import "fyne.io/fyne/v2/theme"
 
 import (
+	"bytes"
 	"image/color"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -24,7 +26,7 @@ const (
 	VariantLight = internaltheme.VariantLight
 )
 
-var defaultTheme fyne.Theme
+var defaultTheme, systemTheme fyne.Theme
 
 // DarkTheme defines the built-in dark theme colors and sizes.
 //
@@ -43,6 +45,11 @@ func DarkTheme() fyne.Theme {
 func DefaultTheme() fyne.Theme {
 	if defaultTheme == nil {
 		defaultTheme = setupDefaultTheme()
+	}
+
+	// check system too
+	if systemTheme != nil {
+		return systemTheme
 	}
 
 	return defaultTheme
@@ -376,7 +383,32 @@ func selectionColorNamed(name string) color.NRGBA {
 
 func setupDefaultTheme() fyne.Theme {
 	theme := &builtinTheme{variant: internaltheme.VariantNameUserPreference}
-
 	theme.initFonts()
+
+	systemTheme = setupSystemTheme(theme)
+
 	return theme
+}
+
+func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
+	// TODO rootURI code to internal/app
+	home, _ := os.UserHomeDir()
+	root := filepath.Join(home, ".config", "fyne")
+
+	path := filepath.Join(root, "theme.json")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to load user theme file: "+path, err)
+		}
+		return nil
+	}
+	if data != nil && data.Content() != nil {
+		th, err := fromJSONWithFallback(bytes.NewReader(data.Content()), fallback)
+		if err == nil {
+			return th
+		}
+		fyne.LogError("Failed to parse user theme file: "+path, err)
+	}
+	return nil
 }
