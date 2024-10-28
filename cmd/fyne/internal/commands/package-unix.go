@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
@@ -98,7 +97,7 @@ func (p *Packager) packageUNIX() error {
 		}
 
 		tarCmdArgs := []string{"-Jcf", filepath.Join(p.dir, p.Name+".tar.xz")}
-		if runtime.GOOS == "openbsd" {
+		if p.os == "openbsd" {
 			tarCmdArgs = []string{"-zcf", filepath.Join(p.dir, p.Name+".tar.gz")}
 		}
 		tarCmdArgs = append(tarCmdArgs, "-C", filepath.Join(p.dir, tempDir), "usr", "Makefile")
