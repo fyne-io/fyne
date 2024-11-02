@@ -283,7 +283,7 @@ func handleImport(imp types.Importer, spec *ast.ImportSpec, opts *translateOpts)
 		fmt.Fprintf(os.Stderr, "importing: %s\n", path)
 	}
 
-	_, err := imp.Import(path)
+	_, err = imp.Import(path)
 	if err != nil {
 		return err
 	}
