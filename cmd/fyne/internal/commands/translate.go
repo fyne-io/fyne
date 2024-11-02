@@ -155,7 +155,7 @@ func updateTranslationsFile(file string, files []string, opts *translateOpts) er
 		dec := json.NewDecoder(f)
 		err := dec.Decode(&translations)
 		f.Close()
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return err
 		}
 	}
