@@ -29,9 +29,9 @@ func Translate() *cli.Command {
 			"translation strings, and creates or updates the translations file.",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:    "verbose",
-				Aliases: []string{"v"},
-				Usage:   "Show files that are being scanned etc.",
+				Name:    "dry-run",
+				Aliases: []string{"n"},
+				Usage:   "Scan without storing the results.",
 			},
 			&cli.BoolFlag{
 				Name:    "update",
@@ -39,9 +39,9 @@ func Translate() *cli.Command {
 				Usage:   "Update existing translations (use with care).",
 			},
 			&cli.BoolFlag{
-				Name:    "dry-run",
-				Aliases: []string{"n"},
-				Usage:   "Scan without storing the results.",
+				Name:    "verbose",
+				Aliases: []string{"v"},
+				Usage:   "Show files that are being scanned etc.",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
