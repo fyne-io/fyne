@@ -19,6 +19,7 @@ var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
 // declare conformance with repository types
 var _ repository.Repository = (*InMemoryRepository)(nil)
 var _ repository.WritableRepository = (*InMemoryRepository)(nil)
+var _ repository.AppendableRepository = (*InMemoryRepository)(nil)
 var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
 var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
 var _ repository.MovableRepository = (*InMemoryRepository)(nil)
@@ -210,7 +211,7 @@ func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
-// Appender implements repository.WritableRepository.Appender
+// Appender implements repository.AppendableRepository.Appender
 //
 // Since: 2.6
 func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {

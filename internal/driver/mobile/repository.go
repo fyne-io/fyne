@@ -11,6 +11,7 @@ var _ repository.Repository = (*mobileFileRepo)(nil)
 var _ repository.HierarchicalRepository = (*mobileFileRepo)(nil)
 var _ repository.ListableRepository = (*mobileFileRepo)(nil)
 var _ repository.WritableRepository = (*mobileFileRepo)(nil)
+var _ repository.AppendableRepository = (*mobileFileRepo)(nil)
 
 type mobileFileRepo struct {
 }
@@ -70,8 +71,6 @@ func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return fileWriterForURI(u, true)
 }
 
-// TODO: need someone who understands native code to write this, I'm not sure
-// how it works
 func (m *mobileFileRepo) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return fileWriterForURI(u, false)
 }

@@ -305,7 +305,7 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 //     in some way.
 //
 //   - If the scheme of the given URI does not have a registered
-//     WritableRepository instance, then this method will fail with a
+//     AppendableRepository instance, then this method will fail with a
 //     repository.ErrOperationNotSupported.
 //
 // Appender is backed by the repository system - this function calls into a
@@ -318,7 +318,7 @@ func Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 
-	wrepo, ok := repo.(repository.WritableRepository)
+	wrepo, ok := repo.(repository.AppendableRepository)
 	if !ok {
 		return nil, repository.ErrOperationNotSupported
 	}

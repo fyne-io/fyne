@@ -19,6 +19,7 @@ const fileSchemePrefix string = "file://"
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
 var _ repository.WritableRepository = (*FileRepository)(nil)
+var _ repository.AppendableRepository = (*FileRepository)(nil)
 var _ repository.HierarchicalRepository = (*FileRepository)(nil)
 var _ repository.ListableRepository = (*FileRepository)(nil)
 var _ repository.MovableRepository = (*FileRepository)(nil)
@@ -130,7 +131,7 @@ func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true, true)
 }
 
-// Appender implements repository.WritableRepository.Appender
+// Appender implements repository.AppendableRepository.Appender
 //
 // Since: 2.6
 func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
