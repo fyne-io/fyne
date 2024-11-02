@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/importer"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"io"
 	"io/fs"
 	"os"
@@ -34,6 +36,11 @@ func Translate() *cli.Command {
 				Usage:   "Scan without storing the results.",
 			},
 			&cli.BoolFlag{
+				Name:    "imports",
+				Aliases: []string{"i"},
+				Usage:   "Additionally scan all imports (slow).",
+			},
+			&cli.BoolFlag{
 				Name:    "update",
 				Aliases: []string{"u"},
 				Usage:   "Update existing translations (use with care).",
@@ -47,6 +54,7 @@ func Translate() *cli.Command {
 		Action: func(ctx *cli.Context) error {
 			opts := translateOpts{
 				DryRun:  ctx.Bool("dry-run"),
+				Imports: ctx.Bool("imports"),
 				Update:  ctx.Bool("update"),
 				Verbose: ctx.Bool("verbose"),
 			}
@@ -128,6 +136,7 @@ func findFilesExt(dir, ext string) ([]string, error) {
 
 type translateOpts struct {
 	DryRun  bool
+	Imports bool
 	Update  bool
 	Verbose bool
 }
@@ -208,14 +217,75 @@ func writeTranslationsFile(b []byte, file string) error {
 
 // Update translations hash by scanning the given files, then parsing and walking the AST
 func updateTranslationsHash(m map[string]interface{}, srcs []string, opts *translateOpts) error {
+	fset := token.NewFileSet()
+	specs := []*ast.ImportSpec{}
+
 	for _, src := range srcs {
-		fset := token.NewFileSet()
 		af, err := parser.ParseFile(fset, src, nil, parser.AllErrors)
 		if err != nil {
 			return err
 		}
 
+		specs = append(specs, af.Imports...)
+	}
+
+	if opts.Imports {
+		if opts.Verbose {
+			fmt.Fprintf(os.Stderr, "loading imports ...\n")
+		}
+
+		imp := importer.ForCompiler(fset, "source", nil)
+		for _, spec := range specs {
+			if err := handleImport(imp, spec, opts); err != nil {
+				return err
+			}
+		}
+	}
+
+	if opts.Verbose {
+		fmt.Fprintf(os.Stderr, "scanning code ...\n")
+	}
+
+	var r error
+	seen := make(map[string]bool)
+	fset.Iterate(func(f *token.File) bool {
+		fname := f.Name()
+		if seen[fname] {
+			return false
+		}
+		seen[fname] = true
+
+		af, err := parser.ParseFile(fset, fname, nil, parser.AllErrors)
+		if err != nil {
+			if filepath.Base(fname) == "_cgo_gotypes.go" {
+				return true
+			}
+			r = err
+			return false
+		}
+
 		ast.Walk(&visitor{opts: opts, m: m}, af)
+
+		return true
+	})
+
+	return r
+}
+
+// Imports given paths to add to fset
+func handleImport(imp types.Importer, spec *ast.ImportSpec, opts *translateOpts) error {
+	path, err := strconv.Unquote(spec.Path.Value)
+	if err != nil {
+		return err
+	}
+
+	if opts.Verbose {
+		fmt.Fprintf(os.Stderr, "importing: %s\n", path)
+	}
+
+	_, err := imp.Import(path)
+	if err != nil {
+		return err
 	}
 
 	return nil
