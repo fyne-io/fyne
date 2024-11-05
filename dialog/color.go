@@ -141,6 +141,9 @@ func (p *ColorPickerDialog) updateUI() {
 		p.dialog.create(container.NewGridWithColumns(2, p.dialog.dismiss, confirm))
 	} else {
 		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
+		p.dialog.dismiss.OnTapped = func() {
+			p.callback(nil)
+		}
 		p.dialog.create(container.NewGridWithColumns(1, p.dialog.dismiss))
 	}
 }
