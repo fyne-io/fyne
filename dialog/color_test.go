@@ -93,6 +93,54 @@ func TestColorDialog_SetColor(t *testing.T) {
 	d.Show()
 }
 
+func TestColorDialog_Buttons(t *testing.T) {
+	for name, tt := range map[string]struct {
+		action     func(d *ColorPickerDialog, w fyne.Window)
+		expectedCalled  bool
+		expectedColored bool
+	}{
+		"confirm": {
+			action: func(d *ColorPickerDialog, w fyne.Window) {
+				test.FocusNext(w.Canvas()) // advanced accordion
+				test.FocusNext(w.Canvas()) // dismiss button
+				test.FocusNext(w.Canvas()) // confirm button
+				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+			},
+			expectedCalled:  true,
+			expectedColored: true,
+		},
+		"dismiss": {
+			action: func(d *ColorPickerDialog, w fyne.Window) {
+				test.FocusNext(w.Canvas()) // advanced accordion
+				test.FocusNext(w.Canvas()) // dismiss button
+				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+			},
+			expectedCalled:  true,
+			expectedColored: false,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			test.NewTempApp(t)
+			w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+			w.Resize(fyne.NewSize(800, 600))
+
+			called := false
+			colored := false
+			d := NewColorPicker("Color Picker", "Pick a Color", func(c color.Color) {
+				called = true
+				colored = c != nil
+			}, w)
+			d.Advanced = true
+			d.Refresh()
+			d.Show()
+			tt.action(d, w)
+
+			assert.Equal(t, tt.expectedCalled, called, "called isn't equal")
+			assert.Equal(t, tt.expectedColored, colored, "colored isn't equal")
+		})
+	}
+}
+
 func TestColorDialogSimple_Theme(t *testing.T) {
 	test.NewTempApp(t)
 
