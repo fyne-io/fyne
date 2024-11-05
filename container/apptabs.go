@@ -215,7 +215,7 @@ func (t *AppTabs) SetItems(items []*TabItem) {
 
 // SetTabLocation sets the location of the tab bar
 func (t *AppTabs) SetTabLocation(l TabLocation) {
-	t.location = tabsAdjustedLocation(l, t)
+	t.location = tabsAdjustedLocation(l)
 	t.Refresh()
 }
 
@@ -357,7 +357,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 	buttons := &fyne.Container{}
 
 	var iconPos buttonIconPosition
-	if isMobile(r.tabs) {
+	if fyne.CurrentDevice().IsMobile() {
 		cells := count
 		if cells == 0 {
 			cells = 1
@@ -381,7 +381,6 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		if item.button == nil {
 			item.button = &tabButton{
 				onTapped: func() { r.appTabs.Select(item) },
-				tabs:     r.tabs,
 			}
 		}
 		button := item.button

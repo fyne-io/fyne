@@ -12,8 +12,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const sizeNameDeviceForm = "deviceType"
-
 // TabItem represents a single view in a tab view.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
 //
@@ -93,19 +91,10 @@ type baseTabs interface {
 	setTransitioning(bool)
 }
 
-func isMobile(b baseTabs) bool {
-	d := fyne.CurrentDevice()
-	if t := theme.SizeForWidget(sizeNameDeviceForm, b); t != 0 {
-		return t == 1
-	}
-
-	return d.IsMobile()
-}
-
-func tabsAdjustedLocation(l TabLocation, b baseTabs) TabLocation {
+func tabsAdjustedLocation(l TabLocation) TabLocation {
 	// Mobile has limited screen space, so don't put app tab bar on long edges
-	if isMobile(b) {
-		if o := fyne.CurrentDevice().Orientation(); fyne.IsVertical(o) {
+	if d := fyne.CurrentDevice(); d.IsMobile() {
+		if o := d.Orientation(); fyne.IsVertical(o) {
 			if l == TabLocationLeading {
 				return TabLocationTop
 			} else if l == TabLocationTrailing {
@@ -522,8 +511,6 @@ type tabButton struct {
 	onClosed      func()
 	text          string
 	textAlignment fyne.TextAlign
-
-	tabs baseTabs
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -733,7 +720,7 @@ func (r *tabButtonRenderer) Refresh() {
 		r.icon.Hide()
 	}
 
-	if r.button.onClosed != nil && (isMobile(r.button.tabs) || r.button.hovered || r.close.hovered) {
+	if d := fyne.CurrentDevice(); r.button.onClosed != nil && (d.IsMobile() || r.button.hovered || r.close.hovered) {
 		r.close.Show()
 	} else {
 		r.close.Hide()
