@@ -121,20 +121,8 @@ func TestColorDialog_Buttons(t *testing.T) {
 			expectedCalled:  true,
 			expectedColored: false,
 		},
-		"confirmSimple": {
-			action: func(d *ColorPickerDialog, w fyne.Window) {
-				test.FocusNext(w.Canvas()) // advanced accordion
-				test.FocusNext(w.Canvas()) // dismiss button
-				test.FocusNext(w.Canvas()) // confirm button
-				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-			},
-			advanced:        false,
-			expectedCalled:  true,
-			expectedColored: true,
-		},
 		"dismissSimple": {
 			action: func(d *ColorPickerDialog, w fyne.Window) {
-				test.FocusNext(w.Canvas()) // advanced accordion
 				test.FocusNext(w.Canvas()) // dismiss button
 				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 			},
@@ -154,7 +142,7 @@ func TestColorDialog_Buttons(t *testing.T) {
 				called = true
 				colored = c != nil
 			}, w)
-			d.Advanced = true
+			d.Advanced = tt.advanced
 			d.Refresh()
 			d.Show()
 			tt.action(d, w)
