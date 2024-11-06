@@ -15,7 +15,6 @@ import (
 )
 
 func TestURIAuthority(t *testing.T) {
-
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"
 	u, err := storage.ParseURI(s)
@@ -226,7 +225,6 @@ func TestExists(t *testing.T) {
 	fooParent, err := storage.Parent(foo)
 	assert.Nil(t, err)
 	assert.Equal(t, fooExpectedParent.String(), fooParent.String())
-
 }
 
 func TestWriteAndDelete(t *testing.T) {
@@ -310,7 +308,6 @@ func TestWriteAndDelete(t *testing.T) {
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
 	assert.Nil(t, err)
-
 }
 
 func TestCanWrite(t *testing.T) {
