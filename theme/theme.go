@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	internalApp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
@@ -391,9 +392,7 @@ func setupDefaultTheme() fyne.Theme {
 }
 
 func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
-	// TODO rootURI code to internal/app
-	home, _ := os.UserHomeDir()
-	root := filepath.Join(home, ".config", "fyne")
+	root := internalApp.RootConfigDir()
 
 	path := filepath.Join(root, "theme.json")
 	data, err := fyne.LoadResourceFromPath(path)

@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
@@ -112,11 +111,6 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
 		desk.SetSystemTrayIcon(icon)
 	}
-}
-
-func rootConfigDir() string {
-	desktopConfig, _ := os.UserConfigDir()
-	return filepath.Join(desktopConfig, "fyne")
 }
 
 func watchTheme(s *settings) {
