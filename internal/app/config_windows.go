@@ -2,6 +2,11 @@
 
 package app
 
+import (
+	"os"
+	"path/filepath"
+)
+
 func rootConfigDir() string {
 	homeDir, _ := os.UserHomeDir()
 
