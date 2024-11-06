@@ -247,6 +247,8 @@ func TestFileAbs(t *testing.T) {
 
 	assert.Equal(t, abs.Path(), rel.Path())
 	assert.Equal(t, abs.String(), rel.String())
+
+	assert.Equal(t, "file:///", storage.NewFileURI("/").String())
 }
 
 func TestWriteAndDelete(t *testing.T) {
