@@ -8,11 +8,10 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/build"
+	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
-
-const sizeNameDeviceForm = "deviceType"
 
 // TabItem represents a single view in a tab view.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
@@ -95,8 +94,9 @@ type baseTabs interface {
 
 func isMobile(b baseTabs) bool {
 	d := fyne.CurrentDevice()
-	if t := theme.SizeForWidget(sizeNameDeviceForm, b); t != 0 {
-		return t == 1
+	mobile := intTheme.FeatureForWidget(intTheme.FeatureNameDeviceIsMobile, b)
+	if is, ok := mobile.(bool); ok {
+		return is
 	}
 
 	return d.IsMobile()
