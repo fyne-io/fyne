@@ -176,9 +176,8 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 		return nil, repository.ErrURIRoot
 	}
 
-	parent := ""
-	// use the system native path resolution
-	parent = filepath.Dir(s)
+	child := filepath.Base(s)
+	parent := s[:len(s)-len(child)]
 	if parent[len(parent)-1] != filepath.Separator {
 		parent += "/"
 	}
