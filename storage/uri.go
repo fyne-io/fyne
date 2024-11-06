@@ -9,9 +9,16 @@ import (
 
 // NewFileURI creates a new URI from the given file path.
 func NewFileURI(path string) fyne.URI {
-	absolute, err := filepath.Abs(path)
-	if err == nil {
-		path = absolute
+	assumeAbs := false
+	if len(path) >= 2 {
+		assumeAbs = path[1] == ':' || path[0] == '/'
+	}
+
+	if !assumeAbs {
+		absolute, err := filepath.Abs(path)
+		if err == nil {
+			path = absolute
+		}
 	}
 
 	return repository.NewFileURI(path)
