@@ -2,6 +2,11 @@
 
 package app
 
+import (
+	"os"
+	"path/filepath"
+)
+
 func rootConfigDir() string {
 	filesDir := os.Getenv("FILESDIR")
 	if filesDir == "" {
