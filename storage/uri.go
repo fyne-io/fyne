@@ -1,12 +1,19 @@
 package storage
 
 import (
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
 // NewFileURI creates a new URI from the given file path.
 func NewFileURI(path string) fyne.URI {
+	absolute, err := filepath.Abs(path)
+	if err == nil {
+		path = absolute
+	}
+
 	return repository.NewFileURI(path)
 }
 
