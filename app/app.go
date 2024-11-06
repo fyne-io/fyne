@@ -167,6 +167,10 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 	return newApp
 }
 
+func rootConfigDir() string {
+	return app.RootConfigDir()
+}
+
 // marker interface to pass system tray to supporting drivers
 type systrayDriver interface {
 	SetSystemTrayMenu(*fyne.Menu)
