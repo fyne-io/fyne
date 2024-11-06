@@ -11,8 +11,12 @@ import (
 // Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(path string) fyne.URI {
 	assumeAbs := false
-	if len(path) >= 2 {
-		assumeAbs = path[1] == ':' || path[0] == '/'
+	if len(path) >= 1 {
+		if path[0] == '/' {
+			assumeAbs = true
+		} else if len(path) >= 2 {
+			assumeAbs = path[1] == ':'
+		}
 	}
 
 	if !assumeAbs {
