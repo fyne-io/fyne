@@ -153,6 +153,25 @@ func TestColorDialog_Buttons(t *testing.T) {
 	}
 }
 
+func TestColorDialog_DoubleCallback(t *testing.T) {
+	ch := make(chan int)
+	d := NewColorPicker("Color Picker", "Pick a Color", func(_ color.Color) {
+		ch <- 42
+	}, test.NewTempWindow(t, nil))
+	d.SetOnClosed(func() {
+		ch <- 43
+	})
+	d.Refresh()
+	d.Show()
+
+	assert.False(t, d.win.Hidden)
+	go test.Tap(d.dismiss)
+	assert.EqualValues(t, <-ch, 42)
+	assert.EqualValues(t, <-ch, 43)
+	assert.True(t, d.win.Hidden)
+}
+
+
 func TestColorDialogSimple_Theme(t *testing.T) {
 	test.NewTempApp(t)
 

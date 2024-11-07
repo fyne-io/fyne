@@ -91,7 +91,9 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 }
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
-	p.dialog.Hide()
+	if w := p.win; w != nil {
+		w.Hide()
+	}
 	writeRecentColor(colorToString(c))
 	if p.picker != nil {
 		p.picker.SetColor(c)
@@ -99,6 +101,7 @@ func (p *ColorPickerDialog) selectColor(c color.Color) {
 	if f := p.callback; f != nil {
 		f(c)
 	}
+	p.dialog.Hide()
 	p.updateUI()
 }
 
@@ -107,7 +110,10 @@ func (p *ColorPickerDialog) updateUI() {
 		w.Hide()
 	}
 	p.dialog.dismiss = &widget.Button{Text: lang.L("Cancel"), Icon: theme.CancelIcon(),
-		OnTapped: p.dialog.Hide,
+		OnTapped: func() {
+			p.callback(nil)
+			p.dialog.Hide()
+		},
 	}
 	if p.Advanced {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
@@ -135,15 +141,9 @@ func (p *ColorPickerDialog) updateUI() {
 				p.selectColor(p.color)
 			},
 		}
-		p.dialog.dismiss.OnTapped = func() {
-			p.callback(nil)
-		}
 		p.dialog.create(container.NewGridWithColumns(2, p.dialog.dismiss, confirm))
 	} else {
 		p.dialog.content = container.NewVBox(p.createSimplePickers()...)
-		p.dialog.dismiss.OnTapped = func() {
-			p.callback(nil)
-		}
 		p.dialog.create(container.NewGridWithColumns(1, p.dialog.dismiss))
 	}
 }
