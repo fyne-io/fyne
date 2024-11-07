@@ -171,14 +171,14 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	// trim the scheme
 	s = strings.TrimPrefix(s, fileSchemePrefix)
 
-	// Completely empty URI with just a scheme
-	if s == "" {
+	// Completely empty URI or only root component
+	if s == "" || s == "/" || (len(s) == 2 && s[1] == ':') {
 		return nil, repository.ErrURIRoot
 	}
 
 	child := filepath.Base(s)
 	parent := s[:len(s)-len(child)]
-	if parent[len(parent)-1] != filepath.Separator {
+	if parent[len(parent)-1] != '/' {
 		parent += "/"
 	}
 
