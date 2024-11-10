@@ -110,10 +110,7 @@ func (p *ColorPickerDialog) updateUI() {
 		w.Hide()
 	}
 	p.dialog.dismiss = &widget.Button{Text: lang.L("Cancel"), Icon: theme.CancelIcon(),
-		OnTapped: func() {
-			p.callback(nil)
-			p.dialog.Hide()
-		},
+		OnTapped: p.dialog.Hide,
 	}
 	if p.Advanced {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
