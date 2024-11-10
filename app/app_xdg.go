@@ -127,7 +127,7 @@ func watchTheme(s *settings) {
 		s.applyVariant(themeVariant)
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
-			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
 				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
 				s.applyVariant(themeVariant)
