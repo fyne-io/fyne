@@ -97,6 +97,13 @@ func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.apply()
 }
 
+func (s *settings) applyVariant(variant fyne.ThemeVariant) {
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
+	s.variant = variant
+	s.apply()
+}
+
 func (s *settings) Scale() float32 {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
