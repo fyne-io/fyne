@@ -96,8 +96,14 @@ func (p *Packager) packageUNIX() error {
 			return fmt.Errorf("failed to write Makefile string: %w", err)
 		}
 
+		tarCmdArgs := []string{"-Jcf", filepath.Join(p.dir, p.Name+".tar.xz")}
+		if p.os == "openbsd" {
+			tarCmdArgs = []string{"-zcf", filepath.Join(p.dir, p.Name+".tar.gz")}
+		}
+		tarCmdArgs = append(tarCmdArgs, "-C", filepath.Join(p.dir, tempDir), "usr", "Makefile")
+
 		var buf bytes.Buffer
-		tarCmd := execabs.Command("tar", "-Jcf", filepath.Join(p.dir, p.Name+".tar.xz"), "-C", filepath.Join(p.dir, tempDir), "usr", "Makefile")
+		tarCmd := execabs.Command("tar", tarCmdArgs...)
 		tarCmd.Stderr = &buf
 		if err = tarCmd.Run(); err != nil {
 			return fmt.Errorf("failed to create archive with tar: %s - %w", buf.String(), err)
