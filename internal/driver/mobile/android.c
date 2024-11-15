@@ -45,7 +45,7 @@ const char* getString(uintptr_t jni_env, uintptr_t ctx, jstring str) {
 
 	const char *chars = (*env)->GetStringUTFChars(env, str, NULL);
 
-	const char *copy = strdup(chars);
+	const char *copy = strndup(chars, sizeof(chars));
 	(*env)->ReleaseStringUTFChars(env, str, chars);
 	return copy;
 }
@@ -431,13 +431,13 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 		len = len + strlen(uid) + 1;
 		ret = malloc(sizeof(char)*(len+1));
 		if (old != NULL) {
-			strcpy(ret, old);
+			strlcpy(ret, old, sizeof(ret));
 			free(old);
 		} else {
 			ret[0] = '\0';
 		}
-		strcat(ret, uid);
-		strcat(ret, "|");
+		strlcat(ret, uid, sizeof(ret));
+		strlcat(ret, "|", sizeof(ret));
 	}
 
 	if (ret != NULL) {
@@ -475,15 +475,15 @@ char* listFileURI(char* uriCstr) {
 			len = len + uriLength + 1 /* / */ + strlen(dp->d_name) + 1 /* | */;
 			ret = malloc(sizeof(char)*(len+1));
 			if (old != NULL) {
-				strcpy(ret, old);
+				strlcpy(ret, old, sizeof(ret));
 				free(old);
 			} else {
 				ret[0] = '\0';
 			}
-			strcat(ret, uriCstr);
-			strcat(ret, "/");
-			strcat(ret, dp->d_name);
-			strcat(ret, "|");
+			strlcat(ret, uriCstr, sizeof(ret));
+			strlcat(ret, "/", sizeof(ret));
+			strlcat(ret, dp->d_name, sizeof(ret));
+			strlcat(ret, "|", sizeof(ret));
 		}
 		if (ret != NULL) {
 			ret[len-1] = '\0';
