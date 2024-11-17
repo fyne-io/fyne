@@ -3,6 +3,7 @@ package container
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -18,6 +19,8 @@ type ThemeOverride struct {
 	Theme   fyne.Theme
 
 	holder *fyne.Container
+
+	mobile bool
 }
 
 // NewThemeOverride provides a container where the child widgets are themed by the specified theme.
@@ -32,13 +35,13 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 	t := &ThemeOverride{Content: obj, Theme: th, holder: NewStack(obj)}
 	t.ExtendBaseWidget(t)
 
-	cache.OverrideTheme(obj, th)
+	cache.OverrideTheme(obj, addFeatures(th, t))
 	obj.Refresh() // required as the widgets passed in could have been initially rendered with default theme
 	return t
 }
 
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
-	cache.OverrideTheme(t.Content, t.Theme)
+	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
 
 	return widget.NewSimpleRenderer(t.holder)
 }
@@ -49,6 +52,34 @@ func (t *ThemeOverride) Refresh() {
 		t.holder.Refresh()
 	}
 
-	cache.OverrideTheme(t.Content, t.Theme)
+	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
 	t.BaseWidget.Refresh()
+}
+
+// SetDeviceIsMobile allows a ThemeOverride container to shape the contained widgets as a mobile device.
+// This will impact containers such as AppTabs and DocTabs, and more in the future, to display a layout
+// that would automatically be used for a mobile device runtime.
+//
+// Since: 2.6
+func (t *ThemeOverride) SetDeviceIsMobile(on bool) {
+	t.mobile = on
+	t.BaseWidget.Refresh()
+}
+
+type featureTheme struct {
+	fyne.Theme
+
+	over *ThemeOverride
+}
+
+func addFeatures(th fyne.Theme, o *ThemeOverride) fyne.Theme {
+	return &featureTheme{Theme: th, over: o}
+}
+
+func (f *featureTheme) Feature(n intTheme.FeatureName) any {
+	if n == intTheme.FeatureNameDeviceIsMobile {
+		return f.over.mobile
+	}
+
+	return nil
 }

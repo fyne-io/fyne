@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/build"
+	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -91,10 +92,20 @@ type baseTabs interface {
 	setTransitioning(bool)
 }
 
-func tabsAdjustedLocation(l TabLocation) TabLocation {
+func isMobile(b baseTabs) bool {
+	d := fyne.CurrentDevice()
+	mobile := intTheme.FeatureForWidget(intTheme.FeatureNameDeviceIsMobile, b)
+	if is, ok := mobile.(bool); ok {
+		return is
+	}
+
+	return d.IsMobile()
+}
+
+func tabsAdjustedLocation(l TabLocation, b baseTabs) TabLocation {
 	// Mobile has limited screen space, so don't put app tab bar on long edges
-	if d := fyne.CurrentDevice(); d.IsMobile() {
-		if o := d.Orientation(); fyne.IsVertical(o) {
+	if isMobile(b) {
+		if o := fyne.CurrentDevice().Orientation(); fyne.IsVertical(o) {
 			if l == TabLocationLeading {
 				return TabLocationTop
 			} else if l == TabLocationTrailing {
@@ -511,6 +522,8 @@ type tabButton struct {
 	onClosed      func()
 	text          string
 	textAlignment fyne.TextAlign
+
+	tabs baseTabs
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -720,7 +733,7 @@ func (r *tabButtonRenderer) Refresh() {
 		r.icon.Hide()
 	}
 
-	if d := fyne.CurrentDevice(); r.button.onClosed != nil && (d.IsMobile() || r.button.hovered || r.close.hovered) {
+	if r.button.onClosed != nil && (isMobile(r.button.tabs) || r.button.hovered || r.close.hovered) {
 		r.close.Show()
 	} else {
 		r.close.Hide()
