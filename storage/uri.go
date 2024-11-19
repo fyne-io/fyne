@@ -10,7 +10,7 @@ import (
 // NewFileURI creates a new URI from the given file path.
 // Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(path string) fyne.URI {
-	assumeAbs := false
+	assumeAbs := false // avoid filepath.IsAbs as it follows platform rules
 	if len(path) >= 1 {
 		if path[0] == '/' {
 			assumeAbs = true

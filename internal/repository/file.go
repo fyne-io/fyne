@@ -177,8 +177,8 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	child := filepath.Base(s)
-	parent := s[:len(s)-len(child)]
-	if parent[len(parent)-1] != '/' {
+	parent := s[:len(s)-len(child)] // avoid filepath.Dir as it follows platform rules
+	if parent == "" || parent[len(parent)-1] != '/' {
 		parent += "/"
 	}
 
