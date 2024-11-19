@@ -434,6 +434,11 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeHome:            fyne.KeyHome,
 	key.CodeEnd:             fyne.KeyEnd,
 
+	key.CodeLeftArrow:  fyne.KeyLeft,
+	key.CodeRightArrow: fyne.KeyRight,
+	key.CodeUpArrow:    fyne.KeyUp,
+	key.CodeDownArrow:  fyne.KeyDown,
+
 	key.CodeF1:  fyne.KeyF1,
 	key.CodeF2:  fyne.KeyF2,
 	key.CodeF3:  fyne.KeyF3,
