@@ -24,6 +24,14 @@ type darwinData struct {
 	Languages     []string
 }
 
+func darwinLangs(langs []string) []string {
+	r := make([]string, len(langs))
+	for n, lang := range langs {
+		r[n] = strings.Replace(lang, "-", "_", 1)
+	}
+	return r
+}
+
 func (p *Packager) packageDarwin() (err error) {
 	appDir := util.EnsureSubDir(p.dir, p.Name+".app")
 	exeName := filepath.Base(p.exe)
@@ -41,7 +49,7 @@ func (p *Packager) packageDarwin() (err error) {
 	}()
 
 	tplData := darwinData{Name: p.Name, ExeName: exeName, AppID: p.AppID, Version: p.AppVersion, Build: p.AppBuild,
-		Category: strings.ToLower(p.category), Languages: p.langs}
+		Category: strings.ToLower(p.category), Languages: darwinLangs(p.langs)}
 	if err := templates.InfoPlistDarwin.Execute(infoFile, tplData); err != nil {
 		return fmt.Errorf("failed to write plist template: %w", err)
 	}
