@@ -182,3 +182,10 @@ These are optional applications but can help to create a more complete desktop e
 To go all the way with Fyne on your desktop / laptop computer you could install [FyneDesk](https://github.com/fyshos/fynedesk) as well :)
 
 ![FyneDesk screenshopt in dark mode](https://fyshos.com/img/desktop.png)
+
+## Known issues running on Windows
+There is a known issue related with running on Windows. Please refer to this [issue](https://github.com/fyne-io/fyne/issues/3820)
+Steps are generally the following:
+1. Do the steps mentioned in this [page](https://docs.fyne.io/started/) related with MSYS2.
+2. Run `go env -w CGO_ENABLED=1`
+3. You should be good to go try to run `go build` in your project.
