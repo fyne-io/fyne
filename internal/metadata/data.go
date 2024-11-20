@@ -8,6 +8,7 @@ type FyneApp struct {
 	Release     map[string]string `toml:",omitempty"`
 	Source      *AppSource        `toml:",omitempty"`
 	LinuxAndBSD *LinuxAndBSD      `toml:",omitempty"`
+	Languages   []string          `toml:",omitempty"`
 }
 
 // AppDetails describes the build information, this group may be OS or arch specific
