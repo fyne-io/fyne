@@ -1,11 +1,14 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
@@ -21,6 +24,7 @@ type darwinData struct {
 	Version       string
 	Build         int
 	Category      string
+	Languages     []string
 }
 
 func (p *Packager) packageDarwin() (err error) {
@@ -39,8 +43,13 @@ func (p *Packager) packageDarwin() (err error) {
 		}
 	}()
 
+	langs, err := findTranslationLanguages(p.srcDir)
+	if err != nil {
+		return fmt.Errorf("failed to find translation languages: %w", err)
+	}
+
 	tplData := darwinData{Name: p.Name, ExeName: exeName, AppID: p.AppID, Version: p.AppVersion, Build: p.AppBuild,
-		Category: strings.ToLower(p.category)}
+		Category: strings.ToLower(p.category), Languages: langs}
 	if err := templates.InfoPlistDarwin.Execute(infoFile, tplData); err != nil {
 		return fmt.Errorf("failed to write plist template: %w", err)
 	}
@@ -101,4 +110,31 @@ func processMacOSIcon(in image.Image) image.Image {
 	dc.DrawImage(sized, border, border)
 
 	return dc.Image()
+}
+
+func findTranslationLanguages(dir string) ([]string, error) {
+	langs := []string{}
+	re := regexp.MustCompile("(?:^|/)([a-z]{2}(?:[-][A-Z]{2})?)\\.json$")
+	err := filepath.Walk(dir, func(path string, fi fs.FileInfo, err error) error {
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return nil
+			}
+			return err
+		}
+
+		if fi.IsDir() || !fi.Mode().IsRegular() || filepath.Ext(path) != ".json" {
+			return nil
+		}
+
+		m := re.FindStringSubmatch(path)
+		if len(m) < 2 {
+			return nil
+		}
+
+		langs = append(langs, m[1])
+
+		return nil
+	})
+	return langs, err
 }
