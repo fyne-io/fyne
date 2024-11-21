@@ -134,6 +134,7 @@ type Packager struct {
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string
+	langs                          []string
 
 	customMetadata      keyValueFlag
 	linuxAndBSDMetadata *metadata.LinuxAndBSD
@@ -344,6 +345,7 @@ func (p *Packager) validate() (err error) {
 
 		p.appData.mergeMetadata(data)
 		p.sourceMetadata = data.Source
+		p.langs = data.Languages
 
 		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
