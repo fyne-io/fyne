@@ -1023,6 +1023,13 @@ func (w *window) doShowAgain() {
 		w.viewLock.Lock()
 		w.visible = true
 		w.viewLock.Unlock()
+
+		if w.fullScreen { // this does not work if called before viewport.Show()
+			go func() {
+				time.Sleep(time.Millisecond * 100)
+				w.SetFullScreen(true)
+			}()
+		}
 	})
 }
 
