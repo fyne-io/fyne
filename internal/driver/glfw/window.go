@@ -451,8 +451,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 			ev.AbsolutePosition = mousePos
 			ev.Position = mousePos.Subtract(mouseDraggedOffset).Add(draggedObjDelta)
 			ev.Dragged = fyne.NewDelta(mousePos.X-mouseDragPos.X, mousePos.Y-mouseDragPos.Y)
-			wd := mouseDragged
-			w.QueueEvent(fyne.SimpleEventFunc(func() { wd.Dragged(ev) }))
+			w.QueueEvent(fyne.NewDragEventFunc(mouseDragged, ev))
 		}
 
 		w.mouseLock.Lock()

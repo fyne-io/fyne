@@ -45,3 +45,16 @@ type SimpleEventFunc func()
 func (fn SimpleEventFunc) Execute() {
 	fn()
 }
+
+type DragEventFunc struct {
+	wid Draggable
+	ev  *DragEvent
+}
+
+func NewDragEventFunc(wid Draggable, ev *DragEvent) *DragEventFunc {
+	return &DragEventFunc{wid, ev}
+}
+
+func (drag *DragEventFunc) Execute() {
+	drag.wid.Dragged(drag.ev)
+}

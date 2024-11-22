@@ -387,7 +387,7 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		w.QueueEvent(fyne.SimpleEventFunc(func() { wid.Dragged(ev) }))
+		w.QueueEvent(fyne.NewDragEventFunc(wid, ev))
 	})
 }
 

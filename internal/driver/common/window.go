@@ -30,8 +30,32 @@ func (w *Window) QueueEvent(fn fyne.EventFunc) {
 // RunEventQueue runs the event queue. This should called inside a go routine.
 // This function blocks.
 func (w *Window) RunEventQueue() {
-	for fn := range w.eventQueue.Out() {
-		fn.Execute()
+	for evfn := range w.eventQueue.Out() {
+		if dragfn, ok := evfn.(*fyne.DragEventFunc); ok {
+			evfn = nil
+
+			L: for {
+				select {
+				case nevfn := <- w.eventQueue.Out():
+					ndragfn, ok := nevfn.(*fyne.DragEventFunc)
+					if !ok {
+						evfn = nevfn
+						break L
+					}
+					dragfn = ndragfn
+				default:
+					break L
+				}
+			}
+
+			dragfn.Execute()
+			if evfn != nil {
+				evfn.Execute()
+			}
+			continue
+		}
+
+		evfn.Execute()
 	}
 }
 
