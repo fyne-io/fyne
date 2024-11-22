@@ -246,7 +246,7 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 		callbacks = append(callbacks, &menuCallbacks{
 			action: func() {
 				if item.Action != nil {
-					w.QueueEvent(item.Action)
+					w.QueueEvent(fyne.SimpleEventFunc(item.Action))
 				}
 			},
 			enabled: func() bool {

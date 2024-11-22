@@ -252,7 +252,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	switch e.Crosses(lifecycle.StageFocused) {
 	case lifecycle.CrossOn: // foregrounding
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnEnteredForeground(); f != nil {
-			w.QueueEvent(f)
+			w.QueueEvent(fyne.SimpleEventFunc(f))
 		}
 	case lifecycle.CrossOff: // will enter background
 		if runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
@@ -265,7 +265,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			d.app.Publish()
 		}
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			w.QueueEvent(f)
+			w.QueueEvent(fyne.SimpleEventFunc(f))
 		}
 	}
 }
@@ -309,7 +309,7 @@ func (d *driver) onStart() {
 func (d *driver) onStop() {
 	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	if f := l.OnStopped(); f != nil {
-		l.QueueEvent(f)
+		l.QueueEvent(fyne.SimpleEventFunc(f))
 	}
 }
 
@@ -387,7 +387,7 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		w.QueueEvent(func() { wid.Dragged(ev) })
+		w.QueueEvent(fyne.SimpleEventFunc(func() { wid.Dragged(ev) }))
 	})
 }
 
@@ -397,14 +397,14 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.Tapped(ev) })
+		w.QueueEvent(fyne.SimpleEventFunc(func() { wid.Tapped(ev) }))
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.TappedSecondary(ev) })
+		w.QueueEvent(fyne.SimpleEventFunc(func() { wid.TappedSecondary(ev) }))
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.DoubleTapped(ev) })
+		w.QueueEvent(fyne.SimpleEventFunc(func() { wid.DoubleTapped(ev) }))
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
-			w.QueueEvent(wid.DragEnd)
+			w.QueueEvent(fyne.SimpleEventFunc(wid.DragEnd))
 			return
 		}
 
@@ -417,11 +417,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				w.QueueEvent(func() { wid.Dragged(ev) })
+				w.QueueEvent(fyne.SimpleEventFunc(func() { wid.Dragged(ev) }))
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			w.QueueEvent(wid.DragEnd)
+			w.QueueEvent(fyne.SimpleEventFunc(wid.DragEnd))
 		}()
 	})
 }

@@ -35,3 +35,13 @@ type DragEvent struct {
 	PointEvent
 	Dragged Delta
 }
+
+type EventFunc interface {
+	Execute()
+}
+
+type SimpleEventFunc func()
+
+func (fn SimpleEventFunc) Execute() {
+	fn()
+}

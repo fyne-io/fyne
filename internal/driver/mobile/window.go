@@ -142,7 +142,7 @@ func (w *window) Hide() {
 
 func (w *window) tryClose() {
 	if w.onCloseIntercepted != nil {
-		w.QueueEvent(w.onCloseIntercepted)
+		w.QueueEvent(fyne.SimpleEventFunc(w.onCloseIntercepted))
 		return
 	}
 
@@ -169,9 +169,9 @@ func (w *window) Close() {
 		}
 	})
 
-	w.QueueEvent(func() {
+	w.QueueEvent(fyne.SimpleEventFunc(func() {
 		cache.CleanCanvas(w.canvas)
-	})
+	}))
 
 	// Call this in a go routine, because this function could be called
 	// inside a button which callback would be queued in this event queue

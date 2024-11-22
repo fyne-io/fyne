@@ -43,6 +43,11 @@ func main() {
 				Name:    "Interface",
 				Imports: "",
 			},
+			"chan_eventfunc.go": {
+				Type:    "fyne.EventFunc",
+				Name:    "EventFunc",
+				Imports: `import "fyne.io/fyne/v2"`,
+			},
 		},
 	}
 

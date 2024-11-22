@@ -26,9 +26,15 @@ func NewUnboundedInterfaceChan() *UnboundedInterfaceChan {
 // CanvasObject objects. A channel must be closed via Close method.
 type UnboundedCanvasObjectChan = UnboundedChan[fyne.CanvasObject]
 
+type UnboundedEventFuncChan = UnboundedChan[fyne.EventFunc]
+
 // NewUnboundedCanvasObjectChan returns a unbounded channel, of canvas objects, with unlimited capacity.
 func NewUnboundedCanvasObjectChan() *UnboundedChan[fyne.CanvasObject] {
 	return NewUnboundedChan[fyne.CanvasObject]()
+}
+
+func NewUnboundedEventFuncChan() *UnboundedChan[fyne.EventFunc] {
+	return NewUnboundedChan[fyne.EventFunc]()
 }
 
 // UnboundedChan is a channel with an unbounded buffer for caching
