@@ -23,9 +23,10 @@ type URIWriteCloser interface {
 
 // URI represents the identifier of a resource on a target system.  This
 // resource may be a file or another data source such as an app or file sharing
-// system.
+// system. The URI represents an absolute location of a resource, it is up to any
+// parse or constructor implementations to ensure that relative resources are made absolute.
 //
-// In general, it is expected that URI implementations follow IETF RFC3896.
+// In general, it is expected that URI implementations follow IETF RFC3986.
 // Implementations are highly recommended to utilize [net/url] to implement URI
 // parsing methods, especially [net/url/url.Scheme], [net/url/url.Authority],
 // [net/url/url.Path], [net/url/url.Query], and [net/url/url.Fragment].
