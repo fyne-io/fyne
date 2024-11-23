@@ -154,9 +154,9 @@ void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr, bool truncate)
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jstring modes = NULL;
 	if (truncate) {
-		jstring modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
+		modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
 	} else {
-		jstring modes = (*env)->NewStringUTF(env, "wa");
+		modes = (*env)->NewStringUTF(env, "wa");
 	}
 	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri, modes);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
