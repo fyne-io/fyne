@@ -39,7 +39,7 @@ const void* iosOpenFileWriter(void* urlPtr, bool truncate) {
     NSFileHandle* handle = [NSFileHandle fileHandleForWritingToURL:url error:&err];
 
     if (!truncate) {
-        [handle truncateFileAtOffset:[handle seekToEndOfFile]];
+        [handle seekToEndOfFile];
     }
 
     return handle;
