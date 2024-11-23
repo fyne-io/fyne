@@ -303,6 +303,48 @@ func Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return wrepo.Writer(u)
 }
 
+// Appender returns URIWriteCloser set up to write to the resource that the
+// URI references without truncating it first
+//
+// Writing to a non-extant resource should create that resource if possible
+// (and if not possible, this should be reflected in the return of CanWrite()).
+// Writing to an extant resource should NOT overwrite it in-place.
+//
+// This method can fail in several ways:
+//
+//   - Different permissions or credentials are required to write to the
+//     referenced resource.
+//
+//   - This URI scheme could represent some resources that can be
+//     written, but this particular URI references a resources that is
+//     not something that can be written.
+//
+//   - Attempting to set up the writer depended on a lower level
+//     operation such as a network or filesystem access that has failed
+//     in some way.
+//
+//   - If the scheme of the given URI does not have a registered
+//     AppendableRepository instance, then this method will fail with a
+//     repository.ErrOperationNotSupported.
+//
+// Appender is backed by the repository system - this function calls into a
+// scheme-specific implementation from a registered repository.
+//
+// Since: 2.6
+func Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return nil, err
+	}
+
+	wrepo, ok := repo.(repository.AppendableRepository)
+	if !ok {
+		return nil, repository.ErrOperationNotSupported
+	}
+
+	return wrepo.Appender(u)
+}
+
 // CanWrite determines if a given URI could be written to using the Writer()
 // method. It is preferred to check if a URI is writable using this method
 // before calling Writer(), because the underlying operations required to

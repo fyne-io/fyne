@@ -96,9 +96,9 @@ func (f *fileSave) URI() fyne.URI {
 	return f.uri
 }
 
-func fileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
+func fileWriterForURI(u fyne.URI, truncate bool) (fyne.URIWriteCloser, error) {
 	file := &fileSave{uri: u}
-	write, err := nativeFileSave(file)
+	write, err := nativeFileSave(file, truncate)
 	if write == nil {
 		return nil, err
 	}
@@ -126,7 +126,8 @@ func ShowFileSavePicker(callback func(fyne.URIWriteCloser, error), filter storag
 				return
 			}
 
-			f, err := fileWriterForURI(uri)
+			// TODO: does the save dialog want to truncate by default?
+			f, err := fileWriterForURI(uri, true)
 			if f != nil {
 				f.(*fileSave).done = closer
 			}
