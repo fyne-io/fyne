@@ -417,7 +417,7 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				w.QueueEvent(fyne.SimpleEventFunc(func() { wid.Dragged(ev) }))
+				w.QueueEvent(fyne.NewDragEventFunc(wid, ev))
 				time.Sleep(time.Millisecond * 16)
 			}
 
