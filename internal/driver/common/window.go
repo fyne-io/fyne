@@ -34,9 +34,10 @@ func (w *Window) RunEventQueue() {
 		if dragfn, ok := evfn.(*fyne.DragEventFunc); ok {
 			evfn = nil
 
-			L: for {
+		L:
+			for {
 				select {
-				case nevfn := <- w.eventQueue.Out():
+				case nevfn := <-w.eventQueue.Out():
 					ndragfn, ok := nevfn.(*fyne.DragEventFunc)
 					if !ok {
 						evfn = nevfn
