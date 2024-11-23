@@ -124,7 +124,7 @@ type WritableRepository interface {
 // AppendableRepository is an extension of the WritableRepository interface which also
 // supports opening a writer for URIs in append mode, without truncating their contents
 //
-// Since: 2.0
+// Since: 2.6
 type AppendableRepository interface {
 	WritableRepository
 
