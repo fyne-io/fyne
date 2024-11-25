@@ -31,11 +31,6 @@ func Translate() *cli.Command {
 			"translation strings, and creates or updates the translations file.",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:    "dry-run",
-				Aliases: []string{"n"},
-				Usage:   "Scan without storing the results.",
-			},
-			&cli.BoolFlag{
 				Name:    "imports",
 				Aliases: []string{"i"},
 				Usage:   "Additionally scan all imports (slow).",
@@ -53,7 +48,6 @@ func Translate() *cli.Command {
 		},
 		Action: func(ctx *cli.Context) error {
 			opts := translateOpts{
-				DryRun:  ctx.Bool("dry-run"),
 				Imports: ctx.Bool("imports"),
 				Update:  ctx.Bool("update"),
 				Verbose: ctx.Bool("verbose"),
@@ -135,7 +129,6 @@ func findFilesExt(dir, ext string) ([]string, error) {
 }
 
 type translateOpts struct {
-	DryRun  bool
 	Imports bool
 	Update  bool
 	Verbose bool
@@ -182,10 +175,6 @@ func updateTranslationsFile(file string, files []string, opts *translateOpts) er
 
 	if file == "-" {
 		fmt.Printf("%s\n", string(b))
-		return nil
-	}
-
-	if opts.DryRun {
 		return nil
 	}
 
