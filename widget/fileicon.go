@@ -184,11 +184,6 @@ func (s *fileIconRenderer) Refresh() {
 	s.file.setURI(s.file.URI)
 	s.file.propertyLock.Unlock()
 
-	s.file.propertyLock.RLock()
-	s.img.Resource = s.file.resource
-	s.ext.Text = s.file.extension
-	s.file.propertyLock.RUnlock()
-
 	if s.file.Selected {
 		s.background.Show()
 		s.ext.Color = th.Color(theme.ColorNameSelection, v)
@@ -203,9 +198,18 @@ func (s *fileIconRenderer) Refresh() {
 		}
 	}
 
-	s.img.Refresh()
+	s.file.propertyLock.RLock()
+	if s.img.Resource != s.file.resource {
+		s.img.Resource = s.file.resource
+		s.img.Refresh()
+	}
+	if s.ext.Text != s.file.extension {
+		s.ext.Text = s.file.extension
+		s.ext.Refresh()
+	}
+	s.file.propertyLock.RUnlock()
+
 	canvas.Refresh(s.file.super())
-	canvas.Refresh(s.ext)
 }
 
 func trimmedExtension(uri fyne.URI) string {
