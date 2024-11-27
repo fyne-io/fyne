@@ -11,32 +11,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// TODO
-
-const (
-	runeModifierAlt     = '⌥'
-	runeModifierControl = '⌃'
-	runeModifierShift   = '⇧'
-)
-
-var keySymbols = map[fyne.KeyName]rune{
-	fyne.KeyBackspace: '⌫',
-	fyne.KeyDelete:    '⌦',
-	fyne.KeyDown:      '↓',
-	fyne.KeyEnd:       '↘',
-	fyne.KeyEnter:     '↩',
-	fyne.KeyEscape:    '⎋',
-	fyne.KeyHome:      '↖',
-	fyne.KeyLeft:      '←',
-	fyne.KeyPageDown:  '⇟',
-	fyne.KeyPageUp:    '⇞',
-	fyne.KeyReturn:    '↩',
-	fyne.KeyRight:     '→',
-	fyne.KeySpace:     '␣',
-	fyne.KeyTab:       '⇥',
-	fyne.KeyUp:        '↑',
-}
-
 var _ fyne.Widget = (*menuItem)(nil)
 
 // menuItem is a widget for displaying a fyne.menuItem.
@@ -392,33 +366,38 @@ func shortcutColor(th fyne.Theme) color.Color {
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
-func textsForShortcut(s fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.Text) {
+func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.Text) {
+	// add modifier
 	b := strings.Builder{}
-	mods := s.Mod()
+	mods := sc.Mod()
 	if mods&fyne.KeyModifierControl != 0 {
-		b.WriteRune(runeModifierControl)
+		b.WriteString(textModifierControl)
 	}
 	if mods&fyne.KeyModifierAlt != 0 {
-		b.WriteRune(runeModifierAlt)
+		b.WriteString(textModifierAlt)
 	}
 	if mods&fyne.KeyModifierShift != 0 {
-		b.WriteRune(runeModifierShift)
+		b.WriteString(textModifierShift)
 	}
 	if mods&fyne.KeyModifierSuper != 0 {
-		b.WriteRune(runeModifierSuper)
-	}
-	r := keySymbols[s.Key()]
-	if r != 0 {
-		b.WriteRune(r)
+		b.WriteString(textModifierSuper)
 	}
 	shortColor := shortcutColor(th)
-	t := canvas.NewText(b.String(), shortColor)
-	t.TextStyle.Symbol = true
-	texts = append(texts, t)
-	if r == 0 {
-		text := canvas.NewText(string(s.Key()), shortColor)
-		text.TextStyle.Monospace = true
-		texts = append(texts, text)
+	if b.Len() > 0 {
+		t := canvas.NewText(b.String(), shortColor)
+		t.TextStyle = styleModifiers
+		texts = append(texts, t)
 	}
+	// add key
+	style := defaultStyleKeys
+	s, ok := keyTexts[sc.Key()]
+	if !ok {
+		s = string(sc.Key())
+	} else if len(s) == 1 {
+		style = fyne.TextStyle{Symbol: true}
+	}
+	t := canvas.NewText(s, shortColor)
+	t.TextStyle = style
+	texts = append(texts, t)
 	return
 }
