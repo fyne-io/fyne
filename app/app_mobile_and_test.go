@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"fyne.io/fyne/v2/internal/app"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,7 +15,7 @@ func Test_RootConfigDir(t *testing.T) {
 	oldEnv := os.Getenv("FILESPATH")
 	os.Setenv("FILESPATH", "/tmp")
 
-	assert.Equal(t, "/tmp", rootConfigDir())
+	assert.Equal(t, "/tmp", app.RootConfigDir())
 	os.Setenv("FILESPATH", oldEnv)
 }
 
