@@ -207,7 +207,9 @@ func (r *radioItemRenderer) update() {
 		out.ColorName = theme.ColorNameDisabled
 	}
 	r.icon.Resource = in
+	r.icon.Refresh()
 	r.over.Resource = out
+	r.over.Refresh()
 
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = color.Transparent
