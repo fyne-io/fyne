@@ -48,7 +48,7 @@ type MenuItem struct {
 	IsQuit      bool
 	IsSeparator bool
 	Label       string
-	Action      func()
+	Action      func() `json:"-"`
 	// Since: 2.1
 	Disabled bool
 	// Since: 2.1
