@@ -205,5 +205,4 @@ func updateLocalizer() {
 	}
 	str := closestSupportedLocale(all).LanguageString()
 	setupLang(str)
-	localizer = i18n.NewLocalizer(bundle, str)
 }
