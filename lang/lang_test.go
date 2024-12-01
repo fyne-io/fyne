@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 )
@@ -48,12 +49,12 @@ func TestLocalize_Map(t *testing.T) {
 }
 
 func TestLocalizePlural_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
 		"Apple": {
 			"one": "Apple",
 			"other": "Apples"
 		}
-	}`)))
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Missing", N("Missing", 1))
@@ -62,9 +63,9 @@ func TestLocalizePlural_Fallback(t *testing.T) {
 }
 
 func TestLocalizeKey_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
 		"appleID": "Apple Matched"
-	}`)))
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Apple", X("appleIDMissing", "Apple"))
@@ -72,12 +73,12 @@ func TestLocalizeKey_Fallback(t *testing.T) {
 }
 
 func TestLocalizePluralKey_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
 		"appleID": {
 			"one": "Apple",
 			"other": "Apples"
 		}
-	}`)))
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Missing", XN("appleIDMissing", "Missing", 1))
