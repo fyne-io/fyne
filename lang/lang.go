@@ -203,6 +203,5 @@ func updateLocalizer() {
 		fyne.LogError("Failed to load user locales", err)
 		all = []string{"en"}
 	}
-	str := closestSupportedLocale(all).LanguageString()
-	setupLang(str)
+	setupLang(closestSupportedLocale(all).LanguageString())
 }
