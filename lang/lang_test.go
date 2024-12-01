@@ -10,19 +10,19 @@ import (
 )
 
 func TestAddTranslations(t *testing.T) {
-	setupLang("en")
 	err := AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
 		"Test": "Match"
 	}`)))
 	if assert.NoError(t, err) {
+		setupLang("en")
 		assert.Equal(t, "Match", L("Test"))
 	}
 
 	err = AddTranslationsForLocale([]byte(`{
 		"Test2": "Match2"
 	}`), "fr")
-	setupLang("fr")
 	if assert.NoError(t, err) {
+		setupLang("fr")
 		assert.Equal(t, "Match2", L("Test2"))
 	}
 }
