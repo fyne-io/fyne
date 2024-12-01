@@ -3,8 +3,9 @@ package lang
 import (
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2"
 )
 
 func TestAddTranslations(t *testing.T) {
