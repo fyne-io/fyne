@@ -12,12 +12,12 @@ import (
 func Test_BackgroundColor(t *testing.T) {
 	t.Run("dark theme", func(t *testing.T) {
 		fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-		assert.Equal(t, theme.DefaultTheme().Color(theme.ColorNameBackground, theme.VariantDark), theme.BackgroundColor(), "wrong dark theme background color")
+		assert.Equal(t, theme.Current().Color(theme.ColorNameBackground, theme.VariantDark), theme.BackgroundColor(), "wrong dark theme background color")
 	})
 	t.Run("light theme", func(t *testing.T) {
 		fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 		bg := theme.BackgroundColor()
-		assert.Equal(t, theme.DefaultTheme().Color(theme.ColorNameBackground, theme.VariantLight), bg, "wrong light theme background color")
+		assert.Equal(t, theme.Current().Color(theme.ColorNameBackground, theme.VariantLight), bg, "wrong light theme background color")
 	})
 }
 
