@@ -13,15 +13,17 @@ func TestAddTranslations(t *testing.T) {
 	err := AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
 		"Test": "Match"
 	}`)))
-	assert.Nil(t, err)
-	assert.Equal(t, "Match", L("Test"))
+	if assert.NoError(t, err) {
+		assert.Equal(t, "Match", L("Test"))
+	}
 
 	err = AddTranslationsForLocale([]byte(`{
 		"Test2": "Match2"
 	}`), "fr")
 	setupLang("fr")
-	assert.Nil(t, err)
-	assert.Equal(t, "Match2", L("Test2"))
+	if assert.NoError(t, err) {
+		assert.Equal(t, "Match2", L("Test2"))
+	}
 }
 
 func TestLocalize_Default(t *testing.T) {
