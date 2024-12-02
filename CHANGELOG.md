@@ -3,6 +3,29 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.5.3 - 6 November 2024
+
+### Changed
+
+* Smoothly decelerate scroll on mobile
+* Added Spanish translation
+
+### Fixed
+
+* Starting location can be wrong in file dialogs with custom repository (#5200)
+* Improve how shortcut special keys for menu items are rendered on Windows and Linux (#5108)
+* Blank page in Chrome for Android
+* Mobile Entry: cursor arrows don't work (#5258)
+* FileDialog does not handle relative file URIs well. (#5234)
+* [Linux] Only change variant when color scheme changes
+* [Linux] Window with list flickers in Wayland (#5133)
+* Package command fails on OpenBSD (#5195)
+* System theme fallback is not working with custom themes
+* Performance regression when scrolling inside the file dialog (#4307)
+* Empty but visible images consume high CPU on 2.4.x (#4345)
+* Improved performance of text render caching
+
+
 ## 2.5.2 - 15 October 2024
 
 ### Fixed

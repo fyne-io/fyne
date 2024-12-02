@@ -2,7 +2,7 @@
   Icon = "../../theme/icons/fyne.png"
   Name = "Fyne Demo"
   ID = "io.fyne.demo"
-  Version = "2.4.0"
+  Version = "2.5.3"
   Build = 11
 
 [Source]
