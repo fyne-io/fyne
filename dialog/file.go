@@ -55,6 +55,7 @@ type fileDialogPanel interface {
 type fileDialog struct {
 	file             *FileDialog
 	fileName         textWidget
+	title            *widget.Label
 	dismiss          *widget.Button
 	open             *widget.Button
 	breadcrumb       *fyne.Container
@@ -87,6 +88,7 @@ type FileDialog struct {
 	parent           fyne.Window
 	dialog           *fileDialog
 
+	titleText                string
 	confirmText, dismissText string
 	desiredSize              fyne.Size
 	filter                   storage.FileFilter
@@ -153,6 +155,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	if f.file.isDirectory() {
 		title = label + " " + lang.L("Folder")
 	}
+	if f.file.titleText != "" {
+		title = f.file.titleText
+	}
+	f.title = widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
 	view := ViewLayout(fyne.CurrentApp().Preferences().Int(viewLayoutKey))
 
@@ -235,7 +241,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	)
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
-		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		optionsbuttons, f.title,
 	)
 
 	footer := container.NewBorder(nil, nil, nil, buttons,
@@ -743,6 +749,18 @@ func (f *FileDialog) Hide() {
 	if f.onClosedCallback != nil {
 		f.onClosedCallback(false)
 	}
+}
+
+// SetTitleText allows custom text to be set in the dialog title
+//
+// Since: 2.6
+func (f *FileDialog) SetTitleText(label string) {
+	f.titleText = label
+	if f.dialog == nil {
+		return
+	}
+	f.dialog.title.SetText(label)
+	f.dialog.win.Refresh()
 }
 
 // SetConfirmText allows custom text to be set in the confirmation button

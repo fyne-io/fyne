@@ -478,6 +478,7 @@ func TestView(t *testing.T) {
 		assert.Nil(t, reader)
 	}, win)
 
+	dlg.SetTitleText("File Selection")
 	dlg.SetConfirmText("Yes")
 	dlg.SetDismissText("Dismiss")
 	dlg.Show()
@@ -521,6 +522,8 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	assert.Equal(t, "File Selection", title.Text)
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
@@ -537,6 +540,7 @@ func TestSetView(t *testing.T) {
 		assert.Nil(t, reader)
 	}, win)
 
+	dlg.SetTitleText("File Selection")
 	dlg.SetConfirmText("Yes")
 	dlg.SetDismissText("Dismiss")
 
@@ -560,6 +564,8 @@ func TestSetView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
 
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	assert.Equal(t, "File Selection", title.Text)
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
