@@ -89,7 +89,7 @@ type FileDialog struct {
 
 	confirmText, dismissText string
 	desiredSize              fyne.Size
-	filter                   storage.FileFilter
+	filter                   []storage.FileFilter
 	save                     bool
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
@@ -203,6 +203,23 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
 	})
 
+	searchBar := widget.NewEntry()
+	searchBar.OnChanged = func(filterText string) {
+		for _, filter := range f.file.filter {
+			if filter, ok := filter.(*storage.SearchFilter); ok {
+				filter.FilterText = filterText
+			}
+		}
+		f.refreshDir(f.dir)
+	}
+	searchBar.Hidden = true
+	// we should only draw the search bar if we've added a search filter
+	for _, filter := range f.file.filter {
+		if _, ok := filter.(*storage.SearchFilter); ok {
+			searchBar.Hidden = false
+		}
+	}
+
 	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
 		newFolderEntry := widget.NewEntry()
 		ShowForm(lang.L("New Folder"), lang.L("Create Folder"), lang.L("Cancel"), []*widget.FormItem{
@@ -234,8 +251,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		optionsButton,
 	)
 
-	header := container.NewBorder(nil, nil, nil, optionsbuttons,
-		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+	header := container.NewBorder(nil, nil, container.NewHBox(widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}), searchBar), optionsbuttons,
+		optionsbuttons,
 	)
 
 	footer := container.NewBorder(nil, nil, nil, buttons,
@@ -415,8 +432,18 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 			continue
 		} else if err == nil { // URI points to a directory
 			icons = append(icons, listable)
-		} else if f.file.filter == nil || f.file.filter.Matches(file) {
-			icons = append(icons, file)
+		} else {
+			filterMatches := true
+			for _, filter := range f.file.filter {
+				if !filter.Matches(file) {
+					filterMatches = false
+					break
+				}
+			}
+
+			if filterMatches {
+				icons = append(icons, file)
+			}
 		}
 	}
 
@@ -801,10 +828,32 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 		fyne.LogError("Cannot set a filter for a folder dialog", nil)
 		return
 	}
-	f.filter = filter
+	f.filter = []storage.FileFilter{filter}
 	if f.dialog != nil {
 		f.dialog.refreshDir(f.dialog.dir)
 	}
+}
+
+// AddFilter adds to the list of existing filters for limiting files that can be chosen in the file dialog
+func (f *FileDialog) AddFilter(filter storage.FileFilter) {
+	if f.isDirectory() {
+		fyne.LogError("Cannot set a filter for a folder dialog", nil)
+		return
+	}
+	if f.filter == nil {
+		f.filter = []storage.FileFilter{}
+	}
+	f.filter = append(f.filter, filter)
+	if f.dialog != nil {
+		f.dialog.refreshDir(f.dialog.dir)
+	}
+}
+
+type ShowSearchBarArgs struct{}
+
+// ShowSearchBar adds a search bar to the file dialog, and allows filtering for specific text in the local directory
+func (f *FileDialog) ShowSearchBar(ShowSearchBarArgs) {
+	f.AddFilter(&storage.SearchFilter{})
 }
 
 // SetFileName sets the filename in a FileDialog in save mode.
