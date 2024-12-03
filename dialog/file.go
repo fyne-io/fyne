@@ -751,18 +751,6 @@ func (f *FileDialog) Hide() {
 	}
 }
 
-// SetTitleText allows custom text to be set in the dialog title
-//
-// Since: 2.6
-func (f *FileDialog) SetTitleText(label string) {
-	f.titleText = label
-	if f.dialog == nil {
-		return
-	}
-	f.dialog.title.SetText(label)
-	f.dialog.win.Refresh()
-}
-
 // SetConfirmText allows custom text to be set in the confirmation button
 //
 // Since: 2.2
@@ -783,6 +771,17 @@ func (f *FileDialog) SetDismissText(label string) {
 	}
 	f.dialog.dismiss.SetText(label)
 	f.dialog.win.Refresh()
+}
+
+// SetTitleText allows custom text to be set in the dialog title
+//
+// Since: 2.6
+func (f *FileDialog) SetTitleText(label string) {
+	f.titleText = label
+	if f.dialog == nil {
+		return
+	}
+	f.dialog.title.SetText(label)
 }
 
 // SetLocation tells this FileDialog which location to display.
