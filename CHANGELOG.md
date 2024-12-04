@@ -21,6 +21,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * [Linux] Window with list flickers in Wayland (#5133)
 * Package command fails on OpenBSD (#5195)
 * System theme fallback is not working with custom themes
+* Translucency and images with Alpha channel (#1977)
 * Performance regression when scrolling inside the file dialog (#4307)
 * Empty but visible images consume high CPU on 2.4.x (#4345)
 * Improved performance of text render caching
