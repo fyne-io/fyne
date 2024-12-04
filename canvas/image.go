@@ -136,8 +136,6 @@ func (i *Image) Refresh() {
 			return
 		}
 		rc = io.NopCloser(r)
-	} else {
-		return
 	}
 
 	if i.File != "" || i.Resource != nil {
