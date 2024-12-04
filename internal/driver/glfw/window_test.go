@@ -1741,6 +1741,7 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 func TestWindow_SetFullScreen(t *testing.T) {
 	w := d.CreateWindow("Full").(*window)
 	w.SetFullScreen(true)
+	w.create()
 
 	w.create()
 	w.doShow()
@@ -1757,7 +1758,7 @@ func TestWindow_SetFullScreen(t *testing.T) {
 
 // This test makes our developer screens flash, let's not run it regularly...
 // func TestWindow_Shortcut(t *testing.T) {
-//	w := createWindow("Test", false)
+//	w := createWindow("Test")
 //
 //	shortcutFullScreenWindow := &desktop.CustomShortcut{
 //		KeyName: fyne.KeyF12,
