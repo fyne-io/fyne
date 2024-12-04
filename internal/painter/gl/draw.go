@@ -264,8 +264,12 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.defineVertexArray(p.program, "vert", 3, 5, 0)
 	p.defineVertexArray(p.program, "vertTexCoord", 2, 5, 3)
 
-	p.ctx.BlendColor(0xff, 0xff, 0xff, alpha)
-	p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
+	if alpha != 1.0 {
+		p.ctx.BlendColor(alpha, alpha, alpha, alpha)
+		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
+	} else {
+		p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	}
 	p.logError()
 
 	p.ctx.ActiveTexture(texture0)
