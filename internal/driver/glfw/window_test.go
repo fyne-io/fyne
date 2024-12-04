@@ -1114,7 +1114,8 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test", false).(*window)
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	w.SetContent(o)
-	w.Resize(fyne.NewSize(100, 100))
+	w.Resize(fyne.NewSize(120, 120))
+	waitForMain()
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
