@@ -12,7 +12,7 @@ import (
 )
 
 func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test", false)
 	w.SetPadded(false)
 	w.SetMainMenu(
 		fyne.NewMainMenu(

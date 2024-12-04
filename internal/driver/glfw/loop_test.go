@@ -20,7 +20,7 @@ func BenchmarkRunOnMain(b *testing.B) {
 // on the draw thread.
 func BenchmarkRunOnDraw(b *testing.B) {
 	f := func() {}
-	w := createWindow("Test").(*window)
+	w := createWindow("Test", false).(*window)
 	w.create()
 
 	b.ReportAllocs()
