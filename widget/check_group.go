@@ -196,14 +196,6 @@ func (r *CheckGroup) countRows() int {
 	return int(math.Ceil(float64(len(r.items)) / float64(r.countColumns())))
 }
 
-func getLeading(size float64, offset int) float32 {
-	return float32(size * float64(offset))
-}
-
-func getTrailing(size float64, offset int) float32 {
-	return getLeading(size, offset+1)
-}
-
 // Layout the components of the checks widget
 func (r *checkGroupRenderer) Layout(_ fyne.Size) {
 	cols := r.checks.countColumns()
@@ -214,17 +206,18 @@ func (r *checkGroupRenderer) Layout(_ fyne.Size) {
 		primaryObjects, secondaryObjects = secondaryObjects, primaryObjects
 	}
 
-	size := r.checks.MinSize()
-	cellWidth := float64(size.Width) / float64(primaryObjects)
-	cellHeight := float64(size.Height) / float64(secondaryObjects)
+	size := r.checks.Size()
+	cellWidth := size.Width / float32(primaryObjects)
+	cellHeight := size.Height / float32(secondaryObjects)
 
 	row, col := 0, 0
-	i := 0
-	for _, child := range r.items {
-		x1 := getLeading(cellWidth, col)
-		y1 := getLeading(cellHeight, row)
-		x2 := getTrailing(cellWidth, col)
-		y2 := getTrailing(cellHeight, row)
+	for i, child := range r.items {
+		// leading edge
+		x1 := cellWidth * float32(col)
+		y1 := cellHeight * float32(row)
+		// trailing edge
+		x2 := cellWidth * float32(col+1)
+		y2 := cellHeight * float32(row+1)
 
 		child.Move(fyne.NewPos(x1, y1))
 		child.Resize(fyne.NewSize(x2-x1, y2-y1))
@@ -244,7 +237,6 @@ func (r *checkGroupRenderer) Layout(_ fyne.Size) {
 				col++
 			}
 		}
-		i++
 	}
 }
 
