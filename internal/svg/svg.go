@@ -119,8 +119,8 @@ func IsResourceSVG(res fyne.Resource) bool {
 type svg struct {
 	XMLName  xml.Name      `xml:"svg"`
 	XMLNS    string        `xml:"xmlns,attr"`
-	Width    string        `xml:"width,attr"`
-	Height   string        `xml:"height,attr"`
+	Width    string        `xml:"width,attr,omitempty"`
+	Height   string        `xml:"height,attr,omitempty"`
 	ViewBox  string        `xml:"viewBox,attr,omitempty"`
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
