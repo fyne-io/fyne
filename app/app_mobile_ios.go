@@ -8,7 +8,6 @@ package app
 
 #include <stdlib.h>
 
-char *documentsPath(void);
 void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
