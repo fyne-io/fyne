@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         go-version: ['1.19.x', '1.23.x']
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-22.04, macos-latest]
         include:
           - os: ubuntu-latest
             runner: xvfb-run
