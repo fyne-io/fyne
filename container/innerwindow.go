@@ -1,6 +1,8 @@
 package container
 
 import (
+	"runtime"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	intWidget "fyne.io/fyne/v2/internal/widget"
@@ -15,8 +17,9 @@ var _ fyne.Widget = (*InnerWindow)(nil)
 type InnerWindowButtonAlignment int
 
 const (
-	InnerWindowButtonAlignLeft  InnerWindowButtonAlignment = iota // OSX style (default)
-	InnerWindowButtonAlignRight                                   // Linux, Windows style
+	InnerWindowButtonAlignDefault InnerWindowButtonAlignment = iota // Default, OS specific alignment ( macOS: Left, Windows & Linux: Right )
+	InnerWindowButtonAlignLeft                                      // Left, macOS style
+	InnerWindowButtonAlignRight                                     // Right, Windows style
 )
 
 // InnerWindow defines a container that wraps content in a window border - that can then be placed inside
@@ -88,16 +91,15 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	var buttons *fyne.Container
 	var bar *fyne.Container
 
-	switch w.ButtonAlignment {
-	case InnerWindowButtonAlignRight: // Right side
-		buttons = NewHBox(
-			min, max, close,
-		)
+	isLeftSide := w.ButtonAlignment == InnerWindowButtonAlignLeft || (w.ButtonAlignment == InnerWindowButtonAlignDefault && runtime.GOOS == "darwin")
+
+	if isLeftSide {
+		// Left side (macOS default or explicit left alignment)
+		buttons = NewHBox(min, max, close)
 		bar = NewBorder(nil, nil, icon, buttons, title)
-	default: // Left side
-		buttons = NewHBox(
-			close, min, max,
-		)
+	} else {
+		// Right side (Windows/Linux default and explicit right alignment)
+		buttons = NewHBox(close, min, max)
 		bar = NewBorder(nil, nil, buttons, icon, title)
 	}
 
@@ -126,6 +128,10 @@ func (w *InnerWindow) SetPadded(pad bool) {
 		w.content.Layout = layout.NewStackLayout()
 	}
 	w.content.Refresh()
+}
+
+func (w *InnerWindow) Title() string {
+	return w.title
 }
 
 func (w *InnerWindow) SetTitle(title string) {
