@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"time"
 
 	"github.com/fyne-io/image/ico"
 
@@ -32,8 +31,6 @@ var curWindow *window
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
-
-const doubleTapDelay = 300 * time.Millisecond
 
 type gLDriver struct {
 	windowLock   sync.RWMutex
