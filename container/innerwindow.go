@@ -11,6 +11,14 @@ import (
 
 var _ fyne.Widget = (*InnerWindow)(nil)
 
+// InnerWindowButtonAlignment defines the alignment of the buttons in the window title.
+type InnerWindowButtonAlignment int
+
+const (
+	InnerWindowButtonAlignLeft  InnerWindowButtonAlignment = iota // OSX style (default)
+	InnerWindowButtonAlignRight                                   // Linux, Windows style
+)
+
 // InnerWindow defines a container that wraps content in a window border - that can then be placed inside
 // a regular container/canvas.
 //
@@ -18,6 +26,7 @@ var _ fyne.Widget = (*InnerWindow)(nil)
 type InnerWindow struct {
 	widget.BaseWidget
 
+	ButtonAlignment                                     InnerWindowButtonAlignment
 	CloseIntercept                                      func()                `json:"-"`
 	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
@@ -53,15 +62,13 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		max.Disable()
 	}
 
-	buttons := NewHBox(
-		&widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
-			if f := w.CloseIntercept; f != nil {
-				f()
-			} else {
-				w.Close()
-			}
-		}},
-		min, max)
+	close := &widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
+		if f := w.CloseIntercept; f != nil {
+			f()
+		} else {
+			w.Close()
+		}
+	}}
 
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
@@ -74,12 +81,29 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			icon.(*widget.Button).Disable()
 		}
 	}
+
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
+
+	var buttons *fyne.Container
+	var bar *fyne.Container
+
+	switch w.ButtonAlignment {
+	case InnerWindowButtonAlignRight: // Right side
+		buttons = NewHBox(
+			min, max, close,
+		)
+		bar = NewBorder(nil, nil, icon, buttons, title)
+	default: // Left side
+		buttons = NewHBox(
+			close, min, max,
+		)
+		bar = NewBorder(nil, nil, buttons, icon, title)
+	}
+
 	th := w.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	bar := NewBorder(nil, nil, buttons, icon, title)
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
