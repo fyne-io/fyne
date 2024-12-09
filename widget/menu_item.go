@@ -16,16 +16,15 @@ var _ fyne.Widget = (*menuItem)(nil)
 // menuItem is a widget for displaying a fyne.menuItem.
 type menuItem struct {
 	widget.Base
-	Item   *fyne.MenuItem
-	Parent *Menu
+	Item *fyne.MenuItem
 
-	alignment fyne.TextAlign
-	child     *Menu
+	alignment     fyne.TextAlign
+	child, parent *Menu
 }
 
 // newMenuItem creates a new menuItem.
 func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
-	i := &menuItem{Item: item, Parent: parent}
+	i := &menuItem{Item: item, parent: parent}
 	i.alignment = parent.alignment
 	i.ExtendBaseWidget(i)
 	return i
@@ -35,7 +34,7 @@ func (i *menuItem) Child() *Menu {
 	if i.Item.ChildMenu != nil && i.child == nil {
 		child := NewMenu(i.Item.ChildMenu)
 		child.Hide()
-		child.OnDismiss = i.Parent.Dismiss
+		child.OnDismiss = i.parent.Dismiss
 		i.child = child
 	}
 	return i.child
@@ -45,7 +44,7 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	th := i.Parent.Theme()
+	th := i.parent.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
@@ -139,7 +138,7 @@ func (i *menuItem) activate() {
 	if i.Child() != nil {
 		i.Child().Show()
 	}
-	i.Parent.activateItem(i)
+	i.parent.activateItem(i)
 }
 
 func (i *menuItem) activateLastSubmenu() bool {
@@ -158,7 +157,7 @@ func (i *menuItem) deactivate() {
 	if i.Child() != nil {
 		i.Child().Hide()
 	}
-	i.Parent.DeactivateChild()
+	i.parent.DeactivateChild()
 }
 
 func (i *menuItem) deactivateLastSubmenu() bool {
@@ -173,7 +172,7 @@ func (i *menuItem) deactivateLastSubmenu() bool {
 }
 
 func (i *menuItem) isActive() bool {
-	return i.Parent.activeItem == i
+	return i.parent.activeItem == i
 }
 
 func (i *menuItem) isSubmenuOpen() bool {
@@ -181,7 +180,7 @@ func (i *menuItem) isSubmenuOpen() bool {
 }
 
 func (i *menuItem) trigger() {
-	i.Parent.Dismiss()
+	i.parent.Dismiss()
 	if i.Item.Action != nil {
 		i.Item.Action()
 	}
@@ -209,7 +208,7 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	th := r.i.Parent.Theme()
+	th := r.i.parent.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inlineIcon := th.Size(theme.SizeNameInlineIcon)
 
@@ -258,7 +257,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	th := r.i.Parent.Theme()
+	th := r.i.parent.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inlineIcon := th.Size(theme.SizeNameInlineIcon)
 	innerPad2 := innerPad * 2
@@ -282,7 +281,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) updateVisuals() {
-	th := r.i.Parent.Theme()
+	th := r.i.parent.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	if fyne.CurrentDevice().IsMobile() {
@@ -316,14 +315,14 @@ func (r *menuItemRenderer) Refresh() {
 }
 
 func (r *menuItemRenderer) checkSpace() float32 {
-	if r.i.Parent.containsCheck {
+	if r.i.parent.containsCheck {
 		return theme.IconInlineSize() + theme.InnerPadding()
 	}
 	return 0
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
-	th := r.i.Parent.Theme()
+	th := r.i.parent.Theme()
 
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == th.Size(theme.SizeNameText) &&
@@ -343,7 +342,7 @@ func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
-	th := r.i.Parent.Theme()
+	th := r.i.parent.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	text.TextSize = th.Size(theme.SizeNameText)
