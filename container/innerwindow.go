@@ -44,7 +44,11 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: NewPadded(content)}
+	w := &InnerWindow{
+		title:           title,
+		content:         NewPadded(content),
+		ButtonAlignment: InnerWindowButtonAlignDefault,
+	}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -94,13 +98,13 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	isLeftSide := w.ButtonAlignment == InnerWindowButtonAlignLeft || (w.ButtonAlignment == InnerWindowButtonAlignDefault && runtime.GOOS == "darwin")
 
 	if isLeftSide {
-		// Left side (macOS default or explicit left alignment)
-		buttons = NewHBox(min, max, close)
-		bar = NewBorder(nil, nil, icon, buttons, title)
-	} else {
-		// Right side (Windows/Linux default and explicit right alignment)
+		// Left side (darwin default or explicit left alignment)
 		buttons = NewHBox(close, min, max)
 		bar = NewBorder(nil, nil, buttons, icon, title)
+	} else {
+		// Right side (Windows/Linux default and explicit right alignment)
+		buttons = NewHBox(min, max, close)
+		bar = NewBorder(nil, nil, icon, buttons, title)
 	}
 
 	th := w.Theme()
