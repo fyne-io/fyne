@@ -35,7 +35,6 @@ func TestInnerWindowIcon_Tap_Left(t *testing.T) {
 	iconPos := fyne.NewPos(w.Size().Width-10, 10)
 	test.TapCanvas(outer.Canvas(), iconPos)
 	assert.True(t, testValue)
-
 }
 
 func TestInnerWindowIcon_Tap_Right(t *testing.T) {
@@ -56,7 +55,6 @@ func TestInnerWindowIcon_Tap_Right(t *testing.T) {
 	iconPos := fyne.NewPos(10, 10)
 	test.TapCanvas(outer.Canvas(), iconPos)
 	assert.True(t, testValue)
-
 }
 
 func TestInnerWindow_Close_Left(t *testing.T) {
