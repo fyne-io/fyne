@@ -73,7 +73,6 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			w.Close()
 		}
 	}}
-	close.Resize(fyne.NewSize(15, 15))
 
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
