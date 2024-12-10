@@ -22,8 +22,8 @@ type InnerWindow struct {
 
 	// ButtonAlignment specifies where the window buttons (close, minimize, maximize) should be placed.
 	// The default is widget.ButtonAlignCenter which will auto select based on the OS.
-	//	- On Windows and Linux this will be `widget.ButtonAlignTrailing`
 	//	- On Darwin this will be `widget.ButtonAlignLeading`
+	//	- On all other OS this will be `widget.ButtonAlignTrailing`
 	//
 	// Since: 2.6
 	ButtonAlignment                                     widget.ButtonAlign
@@ -42,9 +42,8 @@ type InnerWindow struct {
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
 	w := &InnerWindow{
-		title:           title,
-		content:         NewPadded(content),
-		ButtonAlignment: widget.ButtonAlignCenter,
+		title:   title,
+		content: NewPadded(content),
 	}
 	w.ExtendBaseWidget(w)
 	return w
