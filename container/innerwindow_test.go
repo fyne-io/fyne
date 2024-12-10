@@ -11,9 +11,57 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInnerWindow_Title(t *testing.T) {
+	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
+	w.SetTitle("New Title 123")
+	assert.Equal(t, "New Title 123", w.Title())
+}
+
+func TestInnerWindowIcon_Tap_Left(t *testing.T) {
+	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
+	w.Icon = theme.GridIcon()
+
+	var testValue bool
+	w.OnTappedIcon = func() {
+		testValue = true
+	}
+	w.ButtonAlignment = widget.ButtonAlignLeading
+
+	outer := test.NewTempWindow(t, w)
+	outer.SetPadded(false)
+	outer.Resize(w.MinSize())
+	assert.True(t, w.Visible())
+
+	iconPos := fyne.NewPos(w.Size().Width-10, 10)
+	test.TapCanvas(outer.Canvas(), iconPos)
+	assert.True(t, testValue)
+
+}
+
+func TestInnerWindowIcon_Tap_Right(t *testing.T) {
+	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
+	w.Icon = theme.GridIcon()
+
+	var testValue bool
+	w.OnTappedIcon = func() {
+		testValue = true
+	}
+	w.ButtonAlignment = widget.ButtonAlignTrailing
+
+	outer := test.NewTempWindow(t, w)
+	outer.SetPadded(false)
+	outer.Resize(w.MinSize())
+	assert.True(t, w.Visible())
+
+	iconPos := fyne.NewPos(10, 10)
+	test.TapCanvas(outer.Canvas(), iconPos)
+	assert.True(t, testValue)
+
+}
+
 func TestInnerWindow_Close_Left(t *testing.T) {
 	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
-	w.ButtonAlignment = InnerWindowButtonAlignLeft
+	w.ButtonAlignment = widget.ButtonAlignLeading
 	outer := test.NewTempWindow(t, w)
 	outer.SetPadded(false)
 	outer.Resize(w.MinSize())
@@ -38,7 +86,7 @@ func TestInnerWindow_Close_Left(t *testing.T) {
 
 func TestInnerWindow_Close_Right(t *testing.T) {
 	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
-	w.ButtonAlignment = InnerWindowButtonAlignRight
+	w.ButtonAlignment = widget.ButtonAlignTrailing
 	outer := test.NewTempWindow(t, w)
 	outer.SetPadded(false)
 	outer.Resize(w.MinSize())

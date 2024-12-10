@@ -13,15 +13,6 @@ import (
 
 var _ fyne.Widget = (*InnerWindow)(nil)
 
-// InnerWindowButtonAlignment defines the alignment of the buttons in the window title.
-type InnerWindowButtonAlignment int
-
-const (
-	InnerWindowButtonAlignDefault InnerWindowButtonAlignment = iota // Default, OS specific alignment ( macOS: Left, Windows & Linux: Right )
-	InnerWindowButtonAlignLeft                                      // Left, macOS style
-	InnerWindowButtonAlignRight                                     // Right, Windows style
-)
-
 // InnerWindow defines a container that wraps content in a window border - that can then be placed inside
 // a regular container/canvas.
 //
@@ -29,7 +20,13 @@ const (
 type InnerWindow struct {
 	widget.BaseWidget
 
-	ButtonAlignment                                     InnerWindowButtonAlignment
+	// ButtonAlignment specifies where the window buttons (close, minimize, maximize) should be placed.
+	// The default is widget.ButtonAlignCenter which will auto select based on the OS.
+	//	- On Windows and Linux this will be `widget.ButtonAlignTrailing`
+	//	- On Darwin this will be `widget.ButtonAlignLeading`
+	//
+	// Since: 2.6
+	ButtonAlignment                                     widget.ButtonAlign
 	CloseIntercept                                      func()                `json:"-"`
 	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
@@ -47,7 +44,7 @@ func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
 	w := &InnerWindow{
 		title:           title,
 		content:         NewPadded(content),
-		ButtonAlignment: InnerWindowButtonAlignDefault,
+		ButtonAlignment: widget.ButtonAlignCenter,
 	}
 	w.ExtendBaseWidget(w)
 	return w
@@ -76,6 +73,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			w.Close()
 		}
 	}}
+	close.Resize(fyne.NewSize(15, 15))
 
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
@@ -95,9 +93,9 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	var buttons *fyne.Container
 	var bar *fyne.Container
 
-	isLeftSide := w.ButtonAlignment == InnerWindowButtonAlignLeft || (w.ButtonAlignment == InnerWindowButtonAlignDefault && runtime.GOOS == "darwin")
+	isLeading := w.ButtonAlignment == widget.ButtonAlignLeading || (w.ButtonAlignment == widget.ButtonAlignCenter && runtime.GOOS == "darwin")
 
-	if isLeftSide {
+	if isLeading {
 		// Left side (darwin default or explicit left alignment)
 		buttons = NewHBox(close, min, max)
 		bar = NewBorder(nil, nil, buttons, icon, title)
@@ -134,6 +132,9 @@ func (w *InnerWindow) SetPadded(pad bool) {
 	w.content.Refresh()
 }
 
+// Title returns the current title of the window
+//
+// Since: 2.6
 func (w *InnerWindow) Title() string {
 	return w.title
 }
