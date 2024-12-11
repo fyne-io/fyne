@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -25,9 +26,9 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
-		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
-		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
+		container.NewTabItemWithIcon("Tab 1", theme.HomeIcon(), widget.NewLabel("Content of tab 1")),
+		container.NewTabItemWithIcon("Tab 2 bigger", theme.ComputerIcon(), widget.NewLabel("Content of tab 2")),
+		container.NewTabItemWithIcon("Tab 3", theme.MediaVideoIcon(), widget.NewLabel("Content of tab 3")),
 	)
 	for i := 4; i <= 12; i++ {
 		tabs.Append(container.NewTabItem(fmt.Sprintf("Tab %d", i), widget.NewLabel(fmt.Sprintf("Content of tab %d", i))))
