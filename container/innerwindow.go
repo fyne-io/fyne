@@ -65,14 +65,6 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		max.Disable()
 	}
 
-	close := &widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
-		if f := w.CloseIntercept; f != nil {
-			f()
-		} else {
-			w.Close()
-		}
-	}}
-
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
 		icon = &widget.Button{Icon: w.Icon, Importance: widget.LowImportance, OnTapped: func() {
@@ -88,11 +80,18 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
-	var buttons *fyne.Container
-	var bar *fyne.Container
+	close := &widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
+		if f := w.CloseIntercept; f != nil {
+			f()
+		} else {
+			w.Close()
+		}
+	}}
 
 	isLeading := w.ButtonAlignment == widget.ButtonAlignLeading || (w.ButtonAlignment == widget.ButtonAlignCenter && runtime.GOOS == "darwin")
 
+	var buttons *fyne.Container
+	var bar *fyne.Container
 	if isLeading {
 		// Left side (darwin default or explicit left alignment)
 		buttons = NewHBox(close, min, max)
@@ -130,7 +129,7 @@ func (w *InnerWindow) SetPadded(pad bool) {
 	w.content.Refresh()
 }
 
-// Title returns the current title of the window
+// Title returns the current title of the window.
 //
 // Since: 2.6
 func (w *InnerWindow) Title() string {
