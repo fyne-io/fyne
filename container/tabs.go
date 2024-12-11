@@ -708,14 +708,13 @@ func (r *tabButtonRenderer) Refresh() {
 		case *theme.ThemedResource:
 			if r.button.importance == widget.HighImportance {
 				r.icon.Resource = theme.NewPrimaryThemedResource(res)
-				r.icon.Refresh()
 			}
 		case *theme.PrimaryThemedResource:
 			if r.button.importance != widget.HighImportance {
 				r.icon.Resource = res.Original()
-				r.icon.Refresh()
 			}
 		}
+		r.icon.Refresh()
 	} else {
 		r.icon.Hide()
 	}
