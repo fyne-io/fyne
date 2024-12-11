@@ -256,27 +256,32 @@ func (f *Form) checkValidation(err error) {
 }
 
 func (f *Form) ensureRenderItems() {
-	done := len(f.itemGrid.Objects) / 2
-	if done >= len(f.Items) {
-		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
+	existingItemCount := len(f.itemGrid.Objects) / 2
+	if existingItemCount > len(f.Items) {
+		f.itemGrid.Objects = f.itemGrid.Objects[:len(f.Items)*2]
 		return
 	}
 
-	adding := len(f.Items) - done
-	objects := make([]fyne.CanvasObject, adding*2)
-	off := 0
 	for i, item := range f.Items {
-		if i < done {
-			continue
+		labelIndex := i * 2
+		widgetIndex := labelIndex + 1
+
+		if labelIndex < len(f.itemGrid.Objects) {
+			f.itemGrid.Objects[labelIndex] = f.createLabel(item.Text)
+		} else {
+			f.itemGrid.Objects = append(f.itemGrid.Objects, f.createLabel(item.Text))
 		}
 
-		objects[off] = f.createLabel(item.Text)
-		off++
-		f.setUpValidation(item.Widget, i)
-		objects[off] = f.createInput(item)
-		off++
+		if widgetIndex < len(f.itemGrid.Objects) {
+			f.setUpValidation(item.Widget, i)
+			f.itemGrid.Objects[widgetIndex] = item.Widget
+		} else {
+			f.setUpValidation(item.Widget, i)
+			f.itemGrid.Objects = append(f.itemGrid.Objects, item.Widget)
+		}
 	}
-	f.itemGrid.Objects = append(f.itemGrid.Objects, objects...)
+
+	f.itemGrid.Refresh()
 }
 
 func (f *Form) isVertical() bool {
