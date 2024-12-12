@@ -1,6 +1,8 @@
 package container
 
 import (
+	"runtime"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	intWidget "fyne.io/fyne/v2/internal/widget"
@@ -18,6 +20,13 @@ var _ fyne.Widget = (*InnerWindow)(nil)
 type InnerWindow struct {
 	widget.BaseWidget
 
+	// ButtonAlignment specifies where the window buttons (close, minimize, maximize) should be placed.
+	// The default is widget.ButtonAlignCenter which will auto select based on the OS.
+	//	- On Darwin this will be `widget.ButtonAlignLeading`
+	//	- On all other OS this will be `widget.ButtonAlignTrailing`
+	//
+	// Since: 2.6
+	ButtonAlignment                                     widget.ButtonAlign
 	CloseIntercept                                      func()                `json:"-"`
 	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
@@ -32,7 +41,10 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: NewPadded(content)}
+	w := &InnerWindow{
+		title:   title,
+		content: NewPadded(content),
+	}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -53,16 +65,6 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		max.Disable()
 	}
 
-	buttons := NewHBox(
-		&widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
-			if f := w.CloseIntercept; f != nil {
-				f()
-			} else {
-				w.Close()
-			}
-		}},
-		min, max)
-
 	var icon fyne.CanvasObject
 	if w.Icon != nil {
 		icon = &widget.Button{Icon: w.Icon, Importance: widget.LowImportance, OnTapped: func() {
@@ -74,12 +76,35 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 			icon.(*widget.Button).Disable()
 		}
 	}
+
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
+
+	close := &widget.Button{Icon: theme.WindowCloseIcon(), Importance: widget.DangerImportance, OnTapped: func() {
+		if f := w.CloseIntercept; f != nil {
+			f()
+		} else {
+			w.Close()
+		}
+	}}
+
+	isLeading := w.ButtonAlignment == widget.ButtonAlignLeading || (w.ButtonAlignment == widget.ButtonAlignCenter && runtime.GOOS == "darwin")
+
+	var buttons *fyne.Container
+	var bar *fyne.Container
+	if isLeading {
+		// Left side (darwin default or explicit left alignment)
+		buttons = NewHBox(close, min, max)
+		bar = NewBorder(nil, nil, buttons, icon, title)
+	} else {
+		// Right side (Windows/Linux default and explicit right alignment)
+		buttons = NewHBox(min, max, close)
+		bar = NewBorder(nil, nil, icon, buttons, title)
+	}
+
 	th := w.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	bar := NewBorder(nil, nil, buttons, icon, title)
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
@@ -102,6 +127,13 @@ func (w *InnerWindow) SetPadded(pad bool) {
 		w.content.Layout = layout.NewStackLayout()
 	}
 	w.content.Refresh()
+}
+
+// Title returns the current title of the window.
+//
+// Since: 2.6
+func (w *InnerWindow) Title() string {
+	return w.title
 }
 
 func (w *InnerWindow) SetTitle(title string) {
