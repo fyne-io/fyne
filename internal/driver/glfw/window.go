@@ -176,7 +176,7 @@ func (w *window) doShow() {
 	if content := w.canvas.Content(); content != nil {
 		content.Show()
 
-		runOnDraw(w, func() {
+		runOnMainWithContext(w, func() {
 			w.driver.repaintWindow(w)
 		})
 	}
@@ -214,7 +214,7 @@ func (w *window) Close() {
 	}
 
 	// set w.closing flag inside draw thread to ensure we can free textures
-	runOnDraw(w, func() {
+	runOnMainWithContext(w, func() {
 		w.viewLock.Lock()
 		w.closing = true
 		w.viewLock.Unlock()

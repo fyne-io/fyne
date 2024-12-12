@@ -32,14 +32,10 @@ var curWindow *window
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
 
-// A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
-const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
-
 type gLDriver struct {
 	windowLock   sync.RWMutex
 	windows      []fyne.Window
 	done         chan struct{}
-	drawDone     chan struct{}
 	waitForStart chan struct{}
 
 	animation animation.Runner
@@ -179,7 +175,6 @@ func NewGLDriver() *gLDriver {
 
 	return &gLDriver{
 		done:         make(chan struct{}),
-		drawDone:     make(chan struct{}),
 		waitForStart: make(chan struct{}),
 	}
 }

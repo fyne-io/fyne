@@ -19,15 +19,8 @@ type funcData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
-type drawData struct {
-	f    func()
-	win  *window
-	done chan struct{} // Zero allocation signalling channel
-}
-
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
-var drawFuncQueue = make(chan drawData)
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
@@ -55,16 +48,8 @@ func runOnMain(f func()) {
 }
 
 // force a function f to run on the draw thread
-func runOnDraw(w *window, f func()) {
-	if drawOnMainThread {
-		runOnMain(func() { w.RunWithContext(f) })
-		return
-	}
-	done := common.DonePool.Get()
-	defer common.DonePool.Put(done)
-
-	drawFuncQueue <- drawData{f: f, win: w, done: done}
-	<-done
+func runOnMainWithContext(w *window, f func()) {
+	runOnMain(func() { w.RunWithContext(f) }) // TODO remove this completely
 }
 
 // Preallocate to avoid allocations on every drawSingleFrame.
@@ -117,12 +102,15 @@ func (d *gLDriver) runGL() {
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
 		go f() // don't block main, we don't have window event queue
 	}
+
+	settingsChange := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
-			d.drawDone <- struct{}{} // wait for draw thread to stop
 			d.Terminate()
 			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
@@ -163,9 +151,8 @@ func (d *gLDriver) runGL() {
 					}
 				}
 
-				if drawOnMainThread {
-					d.drawSingleFrame()
-				}
+				d.animation.TickAnimations()
+				d.drawSingleFrame()
 			}
 			if windowsToRemove > 0 {
 				oldWindows := d.windowList()
@@ -200,6 +187,18 @@ func (d *gLDriver) runGL() {
 					d.Quit()
 				}
 			}
+		case set := <-settingsChange:
+			painter.ClearFontCache()
+			cache.ResetThemeCaches()
+			app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+				c, ok := w.Canvas().(*glCanvas)
+				if !ok {
+					return
+				}
+				c.applyThemeOutOfTreeObjects()
+				go c.reloadScale()
+			})
+
 		}
 	}
 }
@@ -226,44 +225,6 @@ func (d *gLDriver) repaintWindow(w *window) {
 			view.SwapBuffers()
 		}
 	})
-}
-
-func (d *gLDriver) startDrawThread() {
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	var drawCh <-chan time.Time
-	if drawOnMainThread {
-		drawCh = make(chan time.Time) // don't tick when on M1
-	} else {
-		drawCh = time.NewTicker(time.Second / 60).C
-	}
-
-	go func() {
-		runtime.LockOSThread()
-
-		for {
-			select {
-			case <-d.drawDone:
-				return
-			case f := <-drawFuncQueue:
-				f.win.RunWithContext(f.f)
-				f.done <- struct{}{}
-			case set := <-settingsChange:
-				painter.ClearFontCache()
-				cache.ResetThemeCaches()
-				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-					c, ok := w.Canvas().(*glCanvas)
-					if !ok {
-						return
-					}
-					c.applyThemeOutOfTreeObjects()
-					go c.reloadScale()
-				})
-			case <-drawCh:
-				d.drawSingleFrame()
-			}
-		}
-	}()
 }
 
 // refreshWindow requests that the specified window be redrawn
