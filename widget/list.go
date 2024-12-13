@@ -130,6 +130,8 @@ func (l *List) RefreshItem(id ListItemID) {
 		return
 	}
 	l.BaseWidget.Refresh()
+
+	l.Unselect(id)
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 	lo.renderLock.RLock() // ensures we are not changing visible info in render code during the search
 	item, ok := lo.searchVisible(lo.visible, id)
