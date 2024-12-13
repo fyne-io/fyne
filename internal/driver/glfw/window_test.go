@@ -2061,3 +2061,45 @@ func (t *tabbable) AcceptsTab() bool {
 	t.acceptTabCallCount++
 	return true
 }
+
+func TestProcessMouseClicked(t *testing.T) {
+	testApp := test.NewApp()
+	defer testApp.Quit()
+
+	testWin := testApp.NewWindow("Test Window")
+	defer testWin.Close()
+
+	tappable := &mockTappable{}
+	tappable.Resize(fyne.NewSize(100, 100))
+	testWin.SetContent(tappable)
+
+	test.Tap(tappable)
+
+	if !tappable.tapped {
+		t.Errorf("Expected tappable object to be tapped")
+	}
+
+	focusable := widget.NewEntry()
+	testWin.SetContent(container.NewVBox(tappable, focusable))
+
+	test.Tap(focusable)
+
+	testWin.Canvas().Focus(focusable)
+
+	if testWin.Canvas().Focused() != focusable {
+		t.Errorf("Expected focusable object to be focused")
+	}
+}
+
+type mockTappable struct {
+	widget.BaseWidget
+	tapped bool
+}
+
+func (m *mockTappable) Tapped(_ *fyne.PointEvent) {
+	m.tapped = true
+}
+
+func (m *mockTappable) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(widget.NewLabel("Tappable"))
+}
