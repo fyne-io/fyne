@@ -256,31 +256,35 @@ func (f *Form) checkValidation(err error) {
 }
 
 func (f *Form) ensureRenderItems() {
-	existingItemCount := len(f.itemGrid.Objects) / 2
-	if existingItemCount > len(f.Items) {
-		f.itemGrid.Objects = f.itemGrid.Objects[:len(f.Items)*2]
-		return
+	// Calculate the required capacity based on the number of items in the form
+	requiredCapacity := len(f.Items) * 2
+
+	// Pre-allocate capacity if necessary
+	if cap(f.itemGrid.Objects) < requiredCapacity {
+		newObjects := make([]fyne.CanvasObject, len(f.itemGrid.Objects), requiredCapacity)
+		copy(newObjects, f.itemGrid.Objects)
+		f.itemGrid.Objects = newObjects
 	}
+
+	// Adjust the length to match the number of items (each with label and widget)
+	f.itemGrid.Objects = f.itemGrid.Objects[:requiredCapacity]
 
 	for i, item := range f.Items {
 		labelIndex := i * 2
 		widgetIndex := labelIndex + 1
 
-		if labelIndex < len(f.itemGrid.Objects) {
+		// Update or create label for the item
+		if labelIndex < len(f.itemGrid.Objects) && f.itemGrid.Objects[labelIndex] != nil {
 			f.itemGrid.Objects[labelIndex] = f.createLabel(item.Text)
 		} else {
-			f.itemGrid.Objects = append(f.itemGrid.Objects, f.createLabel(item.Text))
+			f.itemGrid.Objects[labelIndex] = f.createLabel(item.Text)
 		}
 
-		if widgetIndex < len(f.itemGrid.Objects) {
-			f.setUpValidation(item.Widget, i)
-			f.itemGrid.Objects[widgetIndex] = item.Widget
-		} else {
-			f.setUpValidation(item.Widget, i)
-			f.itemGrid.Objects = append(f.itemGrid.Objects, item.Widget)
-		}
+		f.setUpValidation(item.Widget, i)
+		f.itemGrid.Objects[widgetIndex] = item.Widget
 	}
 
+	// Refresh the grid to apply changes
 	f.itemGrid.Refresh()
 }
 
