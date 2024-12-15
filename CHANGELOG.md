@@ -16,7 +16,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Odd looking SelectEntry with long PlaceHolder (#4430)
 
 
-## 2.5.3 - 12 December 2024
+## 2.5.3 - 15 December 2024
 
 ### Changed
 
