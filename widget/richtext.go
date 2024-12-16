@@ -124,13 +124,10 @@ func (t *RichText) Resize(size fyne.Size) {
 
 	t.size.Store(size)
 
-	t.propertyLock.RLock()
-	segments := t.Segments
 	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
-	t.propertyLock.RUnlock()
 
 	if skipResize {
-		if len(segments) < 2 { // we can simplify :)
+		if len(t.Segments) < 2 { // we can simplify :)
 			cache.Renderer(t).Layout(size)
 			return
 		}
@@ -369,8 +366,6 @@ func (t *RichText) row(row int) []rune {
 // RowBoundary returns the boundary of the row specified.
 // The row parameter should be between 0 and t.Rows()-1.
 func (t *RichText) rowBoundary(row int) *rowBoundary {
-	t.propertyLock.RLock()
-	defer t.propertyLock.RUnlock()
 	if row < 0 || row >= t.rows() {
 		return nil
 	}
@@ -400,7 +395,6 @@ func (t *RichText) updateRowBounds() {
 	}
 	fitSize.Height -= (innerPadding + t.inset.Height) * 2
 
-	t.propertyLock.RLock()
 	var bounds []rowBoundary
 	maxWidth := t.size.Load().Width - 2*innerPadding + 2*t.inset.Width
 	wrapWidth := maxWidth
@@ -493,11 +487,7 @@ func (t *RichText) updateRowBounds() {
 	}
 
 	iterateSegments(t.Segments)
-	t.propertyLock.RUnlock()
-
-	t.propertyLock.Lock()
 	t.rowBounds = bounds
-	t.propertyLock.Unlock()
 }
 
 // RichTextBlock is an extension of a text segment that contains other segments
@@ -515,14 +505,12 @@ type textRenderer struct {
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	th := r.obj.Theme()
-	r.obj.propertyLock.RLock()
 	bounds := r.obj.rowBounds
 	objs := r.Objects()
 	if r.obj.scr != nil {
 		r.obj.scr.Resize(size)
 		objs = r.obj.scr.Content.(*fyne.Container).Objects[1].(*fyne.Container).Objects
 	}
-	r.obj.propertyLock.RUnlock()
 
 	// Accessing theme here is slow, so we cache the value
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
@@ -589,7 +577,6 @@ func (r *textRenderer) Layout(size fyne.Size) {
 func (r *textRenderer) MinSize() fyne.Size {
 	th := r.obj.Theme()
 	textSize := th.Size(theme.SizeNameText)
-	r.obj.propertyLock.RLock()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	bounds := r.obj.rowBounds
@@ -600,7 +587,6 @@ func (r *textRenderer) MinSize() fyne.Size {
 	if r.obj.scr != nil {
 		objs = r.obj.scr.Content.(*fyne.Container).Objects[1].(*fyne.Container).Objects
 	}
-	r.obj.propertyLock.RUnlock()
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{}, textSize)
 	min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
@@ -693,10 +679,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 }
 
 func (r *textRenderer) Refresh() {
-	r.obj.propertyLock.RLock()
 	bounds := r.obj.rowBounds
 	scroll := r.obj.Scroll
-	r.obj.propertyLock.RUnlock()
 
 	var objs []fyne.CanvasObject
 	for _, bound := range bounds {
@@ -739,7 +723,6 @@ func (r *textRenderer) Refresh() {
 		}
 	}
 
-	r.obj.propertyLock.Lock()
 	if r.obj.scr != nil {
 		r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
 			r.obj.prop, &fyne.Container{Objects: objs}}}
@@ -749,7 +732,6 @@ func (r *textRenderer) Refresh() {
 	} else {
 		r.SetObjects(objs)
 	}
-	r.obj.propertyLock.Unlock()
 
 	r.Layout(r.obj.Size())
 	canvas.Refresh(r.obj.super())

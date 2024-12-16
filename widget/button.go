@@ -94,9 +94,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	th := b.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	b.propertyLock.RLock()
-	defer b.propertyLock.RUnlock()
-
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
@@ -166,18 +163,14 @@ func (b *Button) MouseOut() {
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
-	b.propertyLock.Lock()
 	b.Icon = icon
-	b.propertyLock.Unlock()
 
 	b.Refresh()
 }
 
 // SetText allows the button label to be changed
 func (b *Button) SetText(text string) {
-	b.propertyLock.Lock()
 	b.Text = text
-	b.propertyLock.Unlock()
 
 	b.Refresh()
 }
@@ -245,9 +238,6 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
 	labelSize := r.label.MinSize()
 
-	r.button.propertyLock.RLock()
-	defer r.button.propertyLock.RUnlock()
-
 	if hasLabel {
 		if hasIcon {
 			// Both
@@ -303,11 +293,9 @@ func (r *buttonRenderer) Refresh() {
 	th := r.button.Theme()
 	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
-	r.button.propertyLock.RLock()
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
-	r.button.propertyLock.RUnlock()
 
 	r.background.Refresh()
 	r.Layout(r.button.Size())

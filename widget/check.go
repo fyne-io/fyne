@@ -73,16 +73,13 @@ func (c *Check) Bind(data binding.Bool) {
 // SetChecked sets the checked state and refreshes widget
 // If the `Partial` state is set this will be turned off to respect the `checked` bool passed in here.
 func (c *Check) SetChecked(checked bool) {
-	c.propertyLock.Lock()
 	if checked == c.Checked && !c.Partial {
-		c.propertyLock.Unlock()
 		return
 	}
 
 	c.Partial = false
 	c.Checked = checked
 	onChanged := c.OnChanged
-	c.propertyLock.Unlock()
 
 	if onChanged != nil {
 		onChanged(checked)
@@ -169,8 +166,6 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	bg := canvas.NewImageFromResource(th.Icon(theme.IconNameCheckButtonFill))
 	icon := canvas.NewImageFromResource(th.Icon(theme.IconNameCheckButton))
 
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
 	text := canvas.NewText(c.Text, th.Color(theme.ColorNameForeground, v))
 	text.Alignment = fyne.TextAlignLeading
 
@@ -224,9 +219,7 @@ func (c *Check) TypedKey(key *fyne.KeyEvent) {}
 //
 // Since: 2.4
 func (c *Check) SetText(text string) {
-	c.propertyLock.Lock()
 	c.Text = text
-	c.propertyLock.Unlock()
 	c.Refresh()
 }
 
@@ -291,10 +284,7 @@ func (c *checkRenderer) MinSize() fyne.Size {
 	pad4 := th.Size(theme.SizeNameInnerPadding) * 2
 	min := c.label.MinSize().Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+pad4, pad4))
 
-	c.check.propertyLock.RLock()
-	text := c.check.Text
-	c.check.propertyLock.RUnlock()
-	if text != "" {
+	if c.check.Text != "" {
 		min.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
 	}
 
@@ -338,12 +328,10 @@ func (c *checkRenderer) Refresh() {
 	th := c.check.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	c.check.propertyLock.RLock()
 	c.applyTheme(th, v)
 	c.updateLabel()
 	c.updateResource(th)
 	c.updateFocusIndicator(th, v)
-	c.check.propertyLock.RUnlock()
 	canvas.Refresh(c.check.super())
 }
 

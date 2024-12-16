@@ -48,8 +48,6 @@ func (r *CheckGroup) Append(option string) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *CheckGroup) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
 
 	r.update()
 	objects := make([]fyne.CanvasObject, len(r.items))
@@ -70,9 +68,7 @@ func (r *CheckGroup) MinSize() fyne.Size {
 //
 // Implements: fyne.CanvasObject
 func (r *CheckGroup) Refresh() {
-	r.propertyLock.Lock()
 	r.update()
-	r.propertyLock.Unlock()
 	r.BaseWidget.Refresh()
 }
 

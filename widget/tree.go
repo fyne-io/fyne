@@ -119,18 +119,14 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 
 // CloseAllBranches closes all branches in the tree.
 func (t *Tree) CloseAllBranches() {
-	t.propertyLock.Lock()
 	t.open = make(map[TreeNodeID]bool)
-	t.propertyLock.Unlock()
 	t.Refresh()
 }
 
 // CloseBranch closes the branch with the given TreeNodeID.
 func (t *Tree) CloseBranch(uid TreeNodeID) {
 	t.ensureOpenMap()
-	t.propertyLock.Lock()
 	t.open[uid] = false
-	t.propertyLock.Unlock()
 	if f := t.OnBranchClosed; f != nil {
 		f(uid)
 	}
@@ -161,8 +157,6 @@ func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 		return true // Root is always open
 	}
 	t.ensureOpenMap()
-	t.propertyLock.RLock()
-	defer t.propertyLock.RUnlock()
 	return t.open[uid]
 }
 
@@ -217,9 +211,7 @@ func (t *Tree) OpenAllBranches() {
 	t.ensureOpenMap()
 	t.walkAll(func(uid, parent TreeNodeID, branch bool, depth int) {
 		if branch {
-			t.propertyLock.Lock()
 			t.open[uid] = true
-			t.propertyLock.Unlock()
 		}
 	})
 	t.Refresh()
@@ -228,9 +220,7 @@ func (t *Tree) OpenAllBranches() {
 // OpenBranch opens the branch with the given TreeNodeID.
 func (t *Tree) OpenBranch(uid TreeNodeID) {
 	t.ensureOpenMap()
-	t.propertyLock.Lock()
 	t.open[uid] = true
-	t.propertyLock.Unlock()
 	if f := t.OnBranchOpened; f != nil {
 		f(uid)
 	}
@@ -433,8 +423,6 @@ func (t *Tree) UnselectAll() {
 }
 
 func (t *Tree) ensureOpenMap() {
-	t.propertyLock.Lock()
-	defer t.propertyLock.Unlock()
 	if t.open == nil {
 		t.open = make(map[string]bool)
 	}
@@ -620,9 +608,6 @@ type treeContentRenderer struct {
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
 	th := r.treeContent.Theme()
-	r.treeContent.propertyLock.Lock()
-	defer r.treeContent.propertyLock.Unlock()
-
 	r.objects = nil
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
@@ -742,8 +727,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	th := r.treeContent.Theme()
-	r.treeContent.propertyLock.Lock()
-	defer r.treeContent.propertyLock.Unlock()
 	pad := th.Size(theme.SizeNamePadding)
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 
@@ -788,7 +771,6 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	} else {
 		r.Layout(s)
 	}
-	r.treeContent.propertyLock.RLock()
 	for id, b := range r.branches {
 		if toDraw != allTreeNodesID && id != toDraw {
 			continue
@@ -803,7 +785,6 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 
 		l.Refresh()
 	}
-	r.treeContent.propertyLock.RUnlock()
 	canvas.Refresh(r.treeContent.super())
 }
 
@@ -914,9 +895,7 @@ func (n *treeNode) partialRefresh() {
 func (n *treeNode) update(uid string, depth int) {
 	n.uid = uid
 	n.depth = depth
-	n.propertyLock.Lock()
 	n.Hidden = false
-	n.propertyLock.Unlock()
 	n.partialRefresh()
 }
 

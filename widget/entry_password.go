@@ -72,8 +72,6 @@ func (r *passwordRevealerRenderer) MinSize() fyne.Size {
 
 func (r *passwordRevealerRenderer) Refresh() {
 	th := r.entry.Theme()
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
 	if !r.entry.Password {
 		r.icon.Resource = th.Icon(theme.IconNameVisibility)
 	} else {
