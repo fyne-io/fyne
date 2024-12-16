@@ -75,7 +75,6 @@ func (d *driver) CreateWindow(title string) fyne.Window {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	ret.InitEventQueue()
-	go ret.RunEventQueue()
 	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
@@ -178,6 +177,7 @@ func (d *driver) Run() {
 				if current == nil {
 					continue
 				}
+				current.ProcessEventQueue()
 				c := current.Canvas().(*canvas)
 
 				switch e := a.Filter(e).(type) {

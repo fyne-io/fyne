@@ -26,11 +26,15 @@ func (w *Window) QueueEvent(fn func()) {
 	w.eventQueue.In() <- fn
 }
 
-// RunEventQueue runs the event queue. This should called inside a go routine.
-// This function blocks.
-func (w *Window) RunEventQueue() {
-	for fn := range w.eventQueue.Out() {
-		fn()
+// ProcessEventQueue runs all the items in the event queue, returning once it is empty again.
+func (w *Window) ProcessEventQueue() {
+	for {
+		select {
+		case fn := <-w.eventQueue.Out():
+			fn()
+		default:
+			return
+		}
 	}
 }
 
