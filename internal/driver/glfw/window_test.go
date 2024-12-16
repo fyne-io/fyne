@@ -104,9 +104,7 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	c := w.canvas
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
 	menuBar := buildMenuOverlay(m, w).(*MenuBar)
-	c.Lock()
 	c.setMenuOverlay(menuBar)
-	c.Unlock()
 	w.SetContent(canvas.NewRectangle(color.Black))
 
 	altPressingMod := glfw.ModAlt
@@ -324,25 +322,19 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	w.mouseMoved(w.viewport, 15, 48)
 	w.WaitForEvents()
 	repaintWindow(w)
-	w.mouseLock.RLock()
 	assert.NotNil(t, w.mouseOver)
-	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	w.mouseMoved(w.viewport, 42, 48)
 	w.WaitForEvents()
 	repaintWindow(w)
-	w.mouseLock.RLock()
 	assert.NotNil(t, w.mouseOver)
-	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	w.mouseMoved(w.viewport, 42, 100)
 	w.WaitForEvents()
 	repaintWindow(w)
-	w.mouseLock.RLock()
 	assert.Nil(t, w.mouseOver)
-	w.mouseLock.RUnlock()
 	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 }
 
