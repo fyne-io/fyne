@@ -1115,6 +1115,7 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(o)
+	waitForMain()
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -1135,6 +1136,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 		tapped = true
 	})
 	w.SetContent(o)
+	waitForMain()
 	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
 	w.mousePos = fyne.NewPos(10, 25)
@@ -1759,17 +1761,15 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 }
 
 func TestWindow_SetFullScreen(t *testing.T) {
-	w := createWindow("Full").(*window)
+	w := d.CreateWindow("Full").(*window)
 	w.SetFullScreen(true)
+	w.create()
+
 	w.create()
 	w.doShow()
 	waitForMain()
-
-	// initial state - no window size set (except darwin?)
-	if runtime.GOOS != "darwin" {
-		assert.Zero(t, w.width)
-		assert.Zero(t, w.height)
-	}
+	assert.Zero(t, w.width)
+	assert.Zero(t, w.height)
 
 	w.SetFullScreen(false)
 	waitForMain()

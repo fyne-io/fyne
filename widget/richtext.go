@@ -1120,10 +1120,11 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 		RunStart:  0,
 		RunEnd:    len(ellipsis),
 		Direction: di.DirectionLTR,
-		Face:      face.Fonts.ResolveFace('…'),
+		Face:      face.Fonts.ResolveFace(ellipsis[0]),
 		Size:      float32ToFixed266(text.TextSize),
 	}
 	shaper := &shaping.HarfbuzzShaper{}
+	segmenter := &shaping.Segmenter{}
 
 	conf := shaping.WrapConfig{}
 	conf = conf.WithTruncator(shaper, in)
@@ -1133,12 +1134,19 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 
 	in.Text = runes
 	in.RunEnd = len(runes)
-	out := shaper.Shape(in)
+	ins := segmenter.Split(in, face.Fonts)
+	outs := make([]shaping.Output, len(ins))
+	for i, in := range ins {
+		outs[i] = shaper.Shape(in)
+	}
 
-	l.Prepare(conf, runes, shaping.NewSliceIterator([]shaping.Output{out}))
+	l.Prepare(conf, runes, shaping.NewSliceIterator(outs))
 	wrapped, done := l.WrapNextLine(limit)
 
-	count := wrapped.Line[0].Runes.Count
+	count := 0
+	for _, run := range wrapped.Line {
+		count += run.Runes.Count
+	}
 	full := done && count == len(runes)
 	if !full && len(ellipsis) > 0 {
 		count--

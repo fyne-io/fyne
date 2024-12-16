@@ -15,9 +15,9 @@ type Driver interface {
 	// If the source is specified it will be used, otherwise the current theme will be asked for the font.
 	RenderedTextSize(text string, fontSize float32, style TextStyle, source Resource) (size Size, baseline float32)
 
-	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
+	// CanvasForObject returns the canvas that is associated with a given [CanvasObject].
 	CanvasForObject(CanvasObject) Canvas
-	// AbsolutePositionForObject returns the position of a given CanvasObject relative to the top/left of a canvas.
+	// AbsolutePositionForObject returns the position of a given [CanvasObject] relative to the top/left of a canvas.
 	AbsolutePositionForObject(CanvasObject) Position
 
 	// Device returns the device that the application is currently running on.
@@ -34,7 +34,7 @@ type Driver interface {
 	StopAnimation(*Animation)
 
 	// DoubleTapDelay returns the maximum duration where a second tap after a first one
-	// will be considered a DoubleTap instead of two distinct Tap events.
+	// will be considered a [DoubleTap] instead of two distinct [Tap] events.
 	//
 	// Since: 2.5
 	DoubleTapDelay() time.Duration

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"math"
 	"os"
@@ -246,7 +247,7 @@ func compareElements(have, want *XML) error {
 		}
 	}
 	if buf.Len() > 0 {
-		return fmt.Errorf(buf.String())
+		return errors.New(buf.String())
 	}
 	return nil
 }

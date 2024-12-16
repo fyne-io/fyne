@@ -58,7 +58,7 @@ var shaderRoundrectangleesFrag = &fyne.StaticResource{
 var shaderSimpleFrag = &fyne.StaticResource{
 	StaticName: "simple.frag",
 	StaticContent: []byte(
-		"#version 110\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
+		"#version 110\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
 }
 var shaderSimpleVert = &fyne.StaticResource{
 	StaticName: "simple.vert",

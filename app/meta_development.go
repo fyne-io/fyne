@@ -55,7 +55,7 @@ func getProjectPath() string {
 	}
 
 	temp := os.TempDir()
-	if strings.Contains(exe, temp) { // this happens with "go run"
+	if strings.Contains(exe, temp) || strings.Contains(exe, "go-build") { // this happens with "go run"
 		return work
 	}
 

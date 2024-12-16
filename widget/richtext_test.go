@@ -575,7 +575,7 @@ func TestText_lineBounds(t *testing.T) {
 			text:  "foobar foobar",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 8},
+				{0, 9},
 			},
 			ellipses: 1,
 		},
@@ -688,8 +688,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 15},
-				{28, 36},
+				{7, 16},
+				{28, 37},
 			},
 			ellipses: 2,
 		},
@@ -757,8 +757,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 14},
-				{26, 33},
+				{7, 15},
+				{26, 34},
 				{39, 39},
 			},
 			ellipses: 2,
@@ -909,8 +909,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 15},
-				{28, 36},
+				{7, 16},
+				{28, 37},
 				{42, 42},
 			},
 			ellipses: 2,
@@ -1041,7 +1041,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			text:  "iiiiiiiiiimmmmmmmmmm",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 8},
+				{0, 9},
 			},
 		},
 		{

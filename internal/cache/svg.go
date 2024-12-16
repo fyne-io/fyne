@@ -46,18 +46,13 @@ type svgInfo struct {
 
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
-	expiredSvgs := make([]string, 0, 20)
 	svgs.Range(func(key, value any) bool {
-		s, sinfo := key.(string), value.(*svgInfo)
+		sinfo := value.(*svgInfo)
 		if sinfo.isExpired(now) {
-			expiredSvgs = append(expiredSvgs, s)
+			svgs.Delete(key)
 		}
 		return true
 	})
-
-	for _, exp := range expiredSvgs {
-		svgs.Delete(exp)
-	}
 }
 
 func overriddenName(name string, o fyne.CanvasObject) string {

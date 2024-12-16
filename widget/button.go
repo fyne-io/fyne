@@ -393,7 +393,7 @@ func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
 
 // must be called with r.button.propertyLock RLocked
 func (r *buttonRenderer) updateIconAndText() {
-	if r.button.Icon != nil && r.button.Visible() {
+	if r.button.Icon != nil && !r.button.Hidden {
 		icon := r.button.Icon
 		if r.icon == nil {
 			r.icon = canvas.NewImageFromResource(icon)

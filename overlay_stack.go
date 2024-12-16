@@ -1,6 +1,6 @@
 package fyne
 
-// OverlayStack is a stack of CanvasObjects intended to be used as overlays of a Canvas.
+// OverlayStack is a stack of [CanvasObject]s intended to be used as overlays of a [Canvas].
 type OverlayStack interface {
 	// Add adds an overlay on the top of the overlay stack.
 	Add(overlay CanvasObject)

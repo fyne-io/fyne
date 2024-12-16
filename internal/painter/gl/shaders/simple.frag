@@ -5,5 +5,8 @@ uniform sampler2D tex;
 varying vec2 fragTexCoord;
 
 void main() {
-    gl_FragColor = texture2D(tex, fragTexCoord);
+    vec4 texColor = texture2D(tex, fragTexCoord);
+    if(texColor.a < 0.01)
+        discard;
+    gl_FragColor = texColor;
 }

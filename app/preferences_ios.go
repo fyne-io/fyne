@@ -4,6 +4,8 @@ package app
 
 import (
 	"path/filepath"
+
+	"fyne.io/fyne/v2/internal/app"
 )
 import "C"
 
@@ -15,7 +17,7 @@ func (p *preferences) storagePath() string {
 
 // storageRoot returns the location of the app storage
 func (a *fyneApp) storageRoot() string {
-	return rootConfigDir() // we are in a sandbox, so no app ID added to this path
+	return app.RootConfigDir() // we are in a sandbox, so no app ID added to this path
 }
 
 func (p *preferences) watch() {

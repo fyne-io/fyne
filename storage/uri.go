@@ -1,12 +1,31 @@
 package storage
 
 import (
+	"path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
 // NewFileURI creates a new URI from the given file path.
+// Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(path string) fyne.URI {
+	assumeAbs := false // avoid filepath.IsAbs as it follows platform rules
+	if len(path) >= 1 {
+		if path[0] == '/' {
+			assumeAbs = true
+		} else if len(path) >= 2 {
+			assumeAbs = path[1] == ':'
+		}
+	}
+
+	if !assumeAbs {
+		absolute, err := filepath.Abs(path)
+		if err == nil {
+			path = absolute
+		}
+	}
+
 	return repository.NewFileURI(path)
 }
 

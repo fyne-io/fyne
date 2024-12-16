@@ -3,6 +3,55 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.5.3 - 15 December 2024
+
+### Changed
+
+* Smoothly decelerate scroll on mobile
+* Added Spanish translation
+
+### Fixed
+
+* Starting location can be wrong in file dialogs with custom repository (#5200)
+* Improve how shortcut special keys for menu items are rendered on Windows and Linux (#5108)
+* Blank page in Chrome for Android
+* Mobile Entry: cursor arrows don't work (#5258)
+* FileDialog does not handle relative file URIs well. (#5234)
+* [Linux] Only change variant when color scheme changes
+* [Linux] Window with list flickers in Wayland (#5133)
+* Package command fails on OpenBSD (#5195)
+* System theme fallback is not working with custom themes
+* Translucency and images with Alpha channel (#1977)
+* Performance regression when scrolling inside the file dialog (#4307)
+* Empty but visible images consume high CPU on 2.4.x (#4345)
+* Improved performance of text render caching
+* nil pointer dereference in dialog.Resize() for color picker (#5236)
+* Tiny files written in iOS may be empty
+* Some SVG resources don't update appearance correctly with the theme (#3900)
+
+
+## 2.5.2 - 15 October 2024
+
+### Fixed
+
+* Sometimes fyne fails to setup dark mode on Windows (#4758)
+* Memory leak in fontMetrics cache on desktop driver (#4010)
+* Fix possible crash with badly formatted json translation
+* Tree widget doesn't display higher elements until a user selects one (#5095, #4346)
+* Update to the latest breaking API changes in go-text
+* Fix wrapping / truncation of multi-font text runs (#4998)
+* Test window title is not always set (#5116)
+* Deadlock in Button CreateRenderer() (#5114)
+* Fix possible crash in theme watching for windows
+* Fix issue with Movies folder on darwin file dialog
+* widget.Entry: validate when pasting from clipboard (#5058, #5028)
+* Reduce contention in some widget locks
+* Add Swedish translation
+* Improvements to documentation
+* Improved temp check for windows/msys
+* Fix split in a theme override container
+
+
 ## 2.5.1 - 24 August 2024
 
 ### Fixed
@@ -179,7 +228,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Avoid memory leak in Android driver code
 * Entry Field on Android in Landscape Mode Shows "0" (#4036)
 * DocTabs Indicator remains visible after last tab is removed (#4220)
-* Some SVG resources don't update appearance correctly with the theme (#3900)
 * Fix mobile simulation builds on OpenBSD
 * Fix alignment of menu button on mobile
 * Fix Compilation with Android NDK r26

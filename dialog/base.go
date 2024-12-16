@@ -77,7 +77,9 @@ func (d *dialog) Refresh() {
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
 	d.desiredSize = size
-	d.win.Resize(size)
+	if d.win != nil { // could be called before popup is created!
+		d.win.Resize(size)
+	}
 }
 
 // SetDismissText allows custom text to be set in the dismiss button

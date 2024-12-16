@@ -78,6 +78,20 @@ func TestPainter_paintImage(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
+func TestPainter_paintImageAlpha(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.Translucency = 0.5
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_alpha.png", target)
+}
+
 func TestPainter_paintImage_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	img := canvas.NewImageFromImage(makeTestImage(5, 5))

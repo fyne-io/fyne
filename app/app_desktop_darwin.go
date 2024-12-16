@@ -16,7 +16,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"fyne.io/fyne/v2"
 )
@@ -41,18 +40,11 @@ func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	}
 }
 
-func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir()
-
-	desktopConfig := filepath.Join(filepath.Join(homeDir, "Library"), "Preferences")
-	return filepath.Join(desktopConfig, "fyne")
-}
-
 //export themeChanged
 func themeChanged() {
 	fyne.CurrentApp().Settings().(*settings).setupTheme()
 }
 
-func watchTheme() {
+func watchTheme(_ *settings) {
 	C.watchTheme()
 }

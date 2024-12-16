@@ -23,12 +23,13 @@ type URIWriteCloser interface {
 
 // URI represents the identifier of a resource on a target system.  This
 // resource may be a file or another data source such as an app or file sharing
-// system.
+// system. The URI represents an absolute location of a resource, it is up to any
+// parse or constructor implementations to ensure that relative resources are made absolute.
 //
-// In general, it is expected that URI implementations follow IETF RFC3896.
-// Implementations are highly recommended to utilize net/url to implement URI
-// parsing methods, especially Scheme(), AUthority(), Path(), Query(), and
-// Fragment().
+// In general, it is expected that URI implementations follow IETF RFC3986.
+// Implementations are highly recommended to utilize [net/url] to implement URI
+// parsing methods, especially [net/url/url.Scheme], [net/url/url.Authority],
+// [net/url/url.Path], [net/url/url.Query], and [net/url/url.Fragment].
 type URI interface {
 	fmt.Stringer
 
@@ -39,7 +40,7 @@ type URI interface {
 	Extension() string
 
 	// Name should return the base name of the item referenced by the URI.
-	// For example, the Name() of 'file://foo/bar.baz' is 'bar.baz'.
+	// For example, the name of 'file://foo/bar.baz' is 'bar.baz'.
 	Name() string
 
 	// MimeType should return the content type of the resource referenced
@@ -57,8 +58,8 @@ type URI interface {
 	// Authority should return the URI authority, as defined by IETF
 	// RFC3986.
 	//
-	// NOTE: the RFC3986 can be obtained by combining the User and Host
-	// Fields of net/url's URL structure. Consult IETF RFC3986, section
+	// NOTE: the RFC3986 can be obtained by combining the [net/url.URL.User]
+	// and [net/url.URL.Host]. Consult IETF RFC3986, section
 	// 3.2, pp. 17.
 	//
 	// Since: 2.0
@@ -81,7 +82,7 @@ type URI interface {
 	Fragment() string
 }
 
-// ListableURI represents a URI that can have child items, most commonly a
+// ListableURI represents a [URI] that can have child items, most commonly a
 // directory on disk in the native filesystem.
 //
 // Since: 1.4
@@ -92,7 +93,7 @@ type ListableURI interface {
 	List() ([]URI, error)
 }
 
-// URIWithIcon describes a URI that should be rendered with a certain icon in file browsers.
+// URIWithIcon describes a [URI] that should be rendered with a certain icon in file browsers.
 //
 // Since: 2.5
 type URIWithIcon interface {

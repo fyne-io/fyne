@@ -7,6 +7,10 @@ Icon = "https://conf.fyne.io/assets/img/fyne.png"
 Version = "1.0.0"
 Build = 1
 
+[Source]
+Repo = "https://github.com/fyne-io/fyne"
+Dir = "internal/metadata/testdata"
+
 [Release]
 Test = "Value1"
 InReleaseOnly = "Value3"

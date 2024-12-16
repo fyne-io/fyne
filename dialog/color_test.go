@@ -12,6 +12,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestColorDialog_Resize(t *testing.T) {
+	test.NewTempApp(t)
+
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(1000, 800))
+
+	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
+	d.Resize(fyne.NewSize(800, 600))
+	d.Show()
+
+	size := d.dialog.content.Size()
+
+	d.Resize(fyne.NewSize(900, 600))
+	newSize := d.dialog.content.Size()
+
+	assert.Equal(t, float32(100), newSize.Width-size.Width)
+}
+
 func TestColorDialog_Theme(t *testing.T) {
 	test.NewTempApp(t)
 

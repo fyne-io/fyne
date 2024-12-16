@@ -363,7 +363,9 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 		bgRes.ColorName = theme.ColorNameBackground
 	}
 	c.icon.Resource = res
+	c.icon.Refresh()
 	c.bg.Resource = bgRes
+	c.bg.Refresh()
 }
 
 // must be called while holding c.check.propertyLock for reading

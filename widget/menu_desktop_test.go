@@ -162,7 +162,7 @@ func TestMenu_Layout(t *testing.T) {
 			want:       "menu/desktop/layout_window_too_short.xml",
 		},
 		"menu with shortcuts": {
-			windowSize: fyne.NewSize(300, 800),
+			windowSize: fyne.NewSize(450, 800),
 			menuPos:    fyne.NewPos(10, 10),
 			mousePositions: []fyne.Position{
 				fyne.NewPos(32, 143), // open submenu

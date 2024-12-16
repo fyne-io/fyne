@@ -83,5 +83,5 @@ func (r *passwordRevealerRenderer) Refresh() {
 	if r.entry.disabled.Load() {
 		r.icon.Resource = theme.NewDisabledResource(r.icon.Resource)
 	}
-	canvas.Refresh(r.icon)
+	r.icon.Refresh()
 }

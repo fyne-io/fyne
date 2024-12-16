@@ -39,6 +39,7 @@ const void* iosOpenFileWriter(void* urlPtr) {
 void iosCloseFileWriter(void* handlePtr) {
     NSFileHandle* handle = (NSFileHandle*)handlePtr;
 
+    [handle synchronizeFile];
     [handle closeFile];
 }
 

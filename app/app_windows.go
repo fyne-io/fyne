@@ -29,13 +29,6 @@ $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("%s").Show($toast);`
 
-func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir()
-
-	desktopConfig := filepath.Join(filepath.Join(homeDir, "AppData"), "Roaming")
-	return filepath.Join(desktopConfig, "fyne")
-}
-
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -95,6 +88,7 @@ func runScript(name, script string) {
 		fyne.LogError("Failed to launch windows notify script", err)
 	}
 }
-func watchTheme() {
-	go internalapp.WatchTheme(fyne.CurrentApp().Settings().(*settings).setupTheme)
+
+func watchTheme(s *settings) {
+	go internalapp.WatchTheme(s.setupTheme)
 }

@@ -1,1 +1,45 @@
-{}
+{
+    "OK": "OK",
+    "Save": "Spara",
+    "Advanced": "Avancerad",
+    "Confirm": "Bekräfta",
+    "Error": "Fel",
+    "Cancel": "Avbryt",
+    "Copy": "Kopiera",
+    "Create Folder": "Skapa mapp",
+    "Cut": "Klipp ut",
+    "Enter filename": "Ange filnamn",
+    "Favourites": "Favoriter",
+    "File": "Arkiv",
+    "Folder": "Mapp",
+    "New Folder": "Ny mapp",
+    "Open": "Öppna",
+    "Select all": "Markera allt",
+    "Undo": "Ångra",
+    "Yes": "Ja",
+    "file.name": {
+        "other": "Namn"
+    },
+    "Show Hidden Files": "Visa dolda filer",
+    "thursday": "Torsdag",
+    "thursday.short": "Tor",
+    "friday": "Fredag",
+    "friday.short": "Fre",
+    "saturday": "Lördag",
+    "saturday.short": "Lör",
+    "sunday": "Söndag",
+    "sunday.short": "Sön",
+    "No": "Nej",
+    "Paste": "Klistra in",
+    "Quit": "Avsluta",
+    "Redo": "Gör om",
+    "monday": "Måndag",
+    "monday.short": "Mån",
+    "file.parent": {
+        "other": "Överordnad"
+    },
+    "tuesday": "Tisdag",
+    "tuesday.short": "Tis",
+    "wednesday": "Onsdag",
+    "wednesday.short": "Ons"
+}

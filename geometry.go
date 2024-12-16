@@ -1,8 +1,10 @@
 package fyne
 
-var _ Vector2 = (*Delta)(nil)
-var _ Vector2 = (*Position)(nil)
-var _ Vector2 = (*Size)(nil)
+var (
+	_ Vector2 = (*Delta)(nil)
+	_ Vector2 = (*Position)(nil)
+	_ Vector2 = (*Size)(nil)
+)
 
 // Vector2 marks geometry types that can operate as a coordinate vector.
 type Vector2 interface {
@@ -15,12 +17,12 @@ type Delta struct {
 	DX, DY float32
 }
 
-// NewDelta returns a newly allocated Delta representing a movement in the X and Y axis.
+// NewDelta returns a newly allocated [Delta] representing a movement in the X and Y axis.
 func NewDelta(dx float32, dy float32) Delta {
 	return Delta{DX: dx, DY: dy}
 }
 
-// Components returns the X and Y elements of this Delta.
+// Components returns the X and Y elements of v.
 func (v Delta) Components() (float32, float32) {
 	return v.DX, v.DY
 }
@@ -30,26 +32,26 @@ func (v Delta) IsZero() bool {
 	return v.DX == 0.0 && v.DY == 0.0
 }
 
-// Position describes a generic X, Y coordinate relative to a parent Canvas
-// or CanvasObject.
+// Position describes a generic X, Y coordinate relative to a parent [Canvas]
+// or [CanvasObject].
 type Position struct {
 	X float32 // The position from the parent's left edge
 	Y float32 // The position from the parent's top edge
 }
 
-// NewPos returns a newly allocated Position representing the specified coordinates.
+// NewPos returns a newly allocated [Position] representing the specified coordinates.
 func NewPos(x float32, y float32) Position {
 	return Position{x, y}
 }
 
-// NewSquareOffsetPos returns a newly allocated Position with the same x and y position.
+// NewSquareOffsetPos returns a newly allocated [Position] with the same x and y position.
 //
 // Since: 2.4
 func NewSquareOffsetPos(length float32) Position {
 	return Position{length, length}
 }
 
-// Add returns a new Position that is the result of offsetting the current
+// Add returns a new [Position] that is the result of offsetting the current
 // position by p2 X and Y.
 func (p Position) Add(v Vector2) Position {
 	// NOTE: Do not simplify to `return p.AddXY(v.Components())`, it prevents inlining.
@@ -57,12 +59,12 @@ func (p Position) Add(v Vector2) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
-// AddXY returns a new Position by adding x and y to the current one.
+// AddXY returns a new [Position] by adding x and y to the current one.
 func (p Position) AddXY(x, y float32) Position {
 	return Position{p.X + x, p.Y + y}
 }
 
-// Components returns the X and Y elements of this Position
+// Components returns the X and Y elements of p.
 func (p Position) Components() (float32, float32) {
 	return p.X, p.Y
 }
@@ -72,7 +74,7 @@ func (p Position) IsZero() bool {
 	return p.X == 0.0 && p.Y == 0.0
 }
 
-// Subtract returns a new Position that is the result of offsetting the current
+// Subtract returns a new [Position] that is the result of offsetting the current
 // position by p2 -X and -Y.
 func (p Position) Subtract(v Vector2) Position {
 	// NOTE: Do not simplify to `return p.SubtractXY(v.Components())`, it prevents inlining.
@@ -80,7 +82,7 @@ func (p Position) Subtract(v Vector2) Position {
 	return Position{p.X - x, p.Y - y}
 }
 
-// SubtractXY returns a new Position by subtracting x and y from the current one.
+// SubtractXY returns a new [Position] by subtracting x and y from the current one.
 func (p Position) SubtractXY(x, y float32) Position {
 	return Position{p.X - x, p.Y - y}
 }
@@ -121,7 +123,7 @@ func (s Size) IsZero() bool {
 	return s.Width == 0.0 && s.Height == 0.0
 }
 
-// Max returns a new Size that is the maximum of the current Size and s2.
+// Max returns a new [Size] that is the maximum of the current Size and s2.
 func (s Size) Max(v Vector2) Size {
 	x, y := v.Components()
 
@@ -131,7 +133,7 @@ func (s Size) Max(v Vector2) Size {
 	return NewSize(maxW, maxH)
 }
 
-// Min returns a new Size that is the minimum of the current Size and s2.
+// Min returns a new [Size] that is the minimum of s and v.
 func (s Size) Min(v Vector2) Size {
 	x, y := v.Components()
 

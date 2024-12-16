@@ -43,6 +43,7 @@ func TestPreferences_Save(t *testing.T) {
 		val["keyFloatList"] = []float64{1.1, 2.2, 3.3}
 		val["keyBool"] = true
 		val["keyBoolList"] = []bool{true, false, true}
+		val["keyEmptyList"] = []string{}
 	})
 
 	path := p.storagePath()
@@ -97,4 +98,18 @@ func TestPreferences_Load(t *testing.T) {
 	assert.Equal(t, []float64{1.1, 2.2, 3.3}, p.FloatList("keyFloatList"))
 	assert.Equal(t, true, p.Bool("keyBool"))
 	assert.Equal(t, []bool{true, false, true}, p.BoolList("keyBoolList"))
+	assert.Equal(t, 0, len(p.StringList("keyEmptyList")))
+}
+
+func TestPreferences_EmptyLoad(t *testing.T) {
+	p := newPreferences(&fyneApp{uniqueID: ""})
+
+	count := 0
+	p.ReadValues(func(v map[string]any) {
+		for range v {
+			count++
+		}
+	})
+
+	assert.Zero(t, count)
 }

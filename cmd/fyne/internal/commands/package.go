@@ -134,9 +134,11 @@ type Packager struct {
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string
+	langs                          []string
 
 	customMetadata      keyValueFlag
 	linuxAndBSDMetadata *metadata.LinuxAndBSD
+	sourceMetadata      *metadata.AppSource
 }
 
 // NewPackager returns a command that can handle the packaging a GUI apps built using Fyne from local source code.
@@ -342,6 +344,9 @@ func (p *Packager) validate() (err error) {
 		}
 
 		p.appData.mergeMetadata(data)
+		p.sourceMetadata = data.Source
+		p.langs = data.Languages
+
 		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 

@@ -3,6 +3,7 @@ package theme_test
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,6 +49,18 @@ func TestIconThemeChangeContent(t *testing.T) {
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	assert.NotEqual(t, content, cancel.Content())
+}
+
+func TestIconThemeResourceWithViewboxOnly(t *testing.T) {
+	r1 := &fyne.StaticResource{
+		StaticName:    "unsplash.svg",
+		StaticContent: []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z"></path></svg>`),
+	}
+	r2 := theme.NewThemedResource(r1)
+	re := regexp.MustCompile(`\s+fill\S+`)
+	content := re.ReplaceAll(r2.Content(), []byte(""))
+
+	assert.Equal(t, r1.Content(), content)
 }
 
 func TestNewThemedResource_StaticResourceSupport(t *testing.T) {

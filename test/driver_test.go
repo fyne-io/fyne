@@ -27,3 +27,10 @@ func Test_driver_AbsolutePositionForObject(t *testing.T) {
 		assert.Equal(t, fyne.NewPos(-2, -3), d.AbsolutePositionForObject(o), "safe area offset (2,3) is subtracted")
 	})
 }
+
+func TestDriver_CreateWindow(t *testing.T) {
+	d := &driver{}
+	w := d.CreateWindow("Test Window")
+
+	assert.Equal(t, "Test Window", w.Title())
+}

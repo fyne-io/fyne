@@ -9,4 +9,11 @@ Icon={{.Name}}
 Comment={{.Comment}}{{end}}
 {{- if ne .Categories ""}}
 Categories={{.Categories}}{{end}}
-{{if ne .Keywords ""}}Keywords={{.Keywords}}{{else}}Keywords=fyne;{{end}}
+Keywords={{if ne .Keywords ""}}{{.Keywords}}{{else}}fyne;{{end}}
+
+{{if or (ne .SourceRepo "") (ne .SourceDir "") -}}
+[X-Fyne Source]
+Repo={{.SourceRepo}}
+Dir={{.SourceDir}}
+
+{{end -}}

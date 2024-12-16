@@ -140,12 +140,12 @@ func Test_snapshot(t *testing.T) {
 		"image with translucency": {
 			content: func() fyne.CanvasObject {
 				img := fynecanvas.NewImageFromResource(theme.ZoomOutIcon())
-				img.Translucency = 1.3
+				img.Translucency = 0.3
 				return img
 			}(),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\" translucency=\"1.3\"/>\n" +
+				"\t\t<image rsc=\"zoomOutIcon\" size=\"100x100\" themed=\"foreground\" translucency=\"0.3\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
