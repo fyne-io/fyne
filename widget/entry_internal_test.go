@@ -147,15 +147,11 @@ func TestEntry_DragSelectEmpty(t *testing.T) {
 	de = &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
 	entry.Dragged(de)
 
-	entry.propertyLock.RLock()
 	assert.True(t, entry.selecting)
-	entry.propertyLock.RUnlock()
 
 	entry.DragEnd()
 	assert.Equal(t, "", entry.SelectedText())
-	entry.propertyLock.RLock()
 	assert.False(t, entry.selecting)
-	entry.propertyLock.RUnlock()
 
 	// Test non-empty selection - drag from 'T' to 'g' (empty)
 	ev1 = getClickPosition("", 0)
@@ -164,15 +160,11 @@ func TestEntry_DragSelectEmpty(t *testing.T) {
 	de = &fyne.DragEvent{PointEvent: *ev2, Dragged: fyne.NewDelta(1, 0)}
 	entry.Dragged(de)
 
-	entry.propertyLock.RLock()
 	assert.True(t, entry.selecting)
-	entry.propertyLock.RUnlock()
 
 	entry.DragEnd()
 	assert.Equal(t, "Testing", entry.SelectedText())
-	entry.propertyLock.RLock()
 	assert.True(t, entry.selecting)
-	entry.propertyLock.RUnlock()
 }
 
 func TestEntry_DragSelectWithScroll(t *testing.T) {
@@ -292,9 +284,7 @@ func TestEntry_CallbackLocking(t *testing.T) {
 	e := &Entry{}
 	called := 0
 	e.OnChanged = func(_ string) {
-		e.propertyLock.Lock()
 		called++ // Just to not have an empty critical section.
-		e.propertyLock.Unlock()
 	}
 
 	_ = e.Theme()
