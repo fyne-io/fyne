@@ -119,8 +119,8 @@ func IsResourceSVG(res fyne.Resource) bool {
 type svg struct {
 	XMLName  xml.Name      `xml:"svg"`
 	XMLNS    string        `xml:"xmlns,attr"`
-	Width    string        `xml:"width,attr"`
-	Height   string        `xml:"height,attr"`
+	Width    string        `xml:"width,attr,omitempty"`
+	Height   string        `xml:"height,attr,omitempty"`
 	ViewBox  string        `xml:"viewBox,attr,omitempty"`
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
@@ -140,6 +140,7 @@ type pathObj struct {
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
 	D               string   `xml:"d,attr"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type rectObj struct {
@@ -155,6 +156,7 @@ type rectObj struct {
 	Y               string   `xml:"y,attr,omitempty"`
 	Width           string   `xml:"width,attr,omitempty"`
 	Height          string   `xml:"height,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type circleObj struct {
@@ -169,6 +171,7 @@ type circleObj struct {
 	CX              string   `xml:"cx,attr,omitempty"`
 	CY              string   `xml:"cy,attr,omitempty"`
 	R               string   `xml:"r,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type ellipseObj struct {
@@ -184,6 +187,7 @@ type ellipseObj struct {
 	CY              string   `xml:"cy,attr,omitempty"`
 	RX              string   `xml:"rx,attr,omitempty"`
 	RY              string   `xml:"ry,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type polygonObj struct {
@@ -196,6 +200,7 @@ type polygonObj struct {
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
 	Points          string   `xml:"points,attr"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type objGroup struct {
@@ -207,6 +212,7 @@ type objGroup struct {
 	StrokeLineCap   string        `xml:"stroke-linecap,attr,omitempty"`
 	StrokeLineJoin  string        `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string        `xml:"stroke-dasharray,attr,omitempty"`
+	Transform       string        `xml:"transform,attr,omitempty"`
 	Paths           []*pathObj    `xml:"path"`
 	Circles         []*circleObj  `xml:"circle"`
 	Ellipses        []*ellipseObj `xml:"ellipse"`

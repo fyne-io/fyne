@@ -5,15 +5,9 @@ package app
 import (
 	"errors"
 	"net/url"
-	"os"
-	"path/filepath"
 
 	"fyne.io/fyne/v2"
 )
-
-func rootConfigDir() string {
-	return filepath.Join(os.TempDir(), "fyne-test")
-}
 
 func (a *fyneApp) OpenURL(_ *url.URL) error {
 	return errors.New("Unable to open url for unknown operating system")

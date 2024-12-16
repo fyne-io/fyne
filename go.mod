@@ -9,7 +9,7 @@ require (
 	github.com/fredbi/uri v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
-	github.com/fyne-io/glfw-js v0.0.0-20240101223322-6e1efdc71b7a
+	github.com/fyne-io/glfw-js v0.0.0-20241126112943-313d8a0fe1d0
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
 	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
@@ -24,7 +24,7 @@ require (
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
-	github.com/rymdport/portal v0.2.6
+	github.com/rymdport/portal v0.3.0
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.8.4

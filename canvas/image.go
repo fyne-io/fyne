@@ -100,7 +100,9 @@ func (i *Image) Hide() {
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise.
 func (i *Image) MinSize() fyne.Size {
 	if i.Image == nil || i.aspect == 0 {
-		i.Refresh()
+		if i.File != "" || i.Resource != nil {
+			i.Refresh()
+		}
 	}
 	return i.baseObject.MinSize()
 }

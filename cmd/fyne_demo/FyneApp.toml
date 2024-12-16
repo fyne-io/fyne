@@ -2,8 +2,12 @@
   Icon = "../../theme/icons/fyne.png"
   Name = "Fyne Demo"
   ID = "io.fyne.demo"
-  Version = "2.4.0"
+  Version = "2.5.3"
   Build = 11
+
+[Source]
+  Repo = "https://github.com/fyne-io/fyne"
+  Dir = "cmd/fyne_demo"
 
 [Development]
   HelperText = "This binary was built with debug symbols"

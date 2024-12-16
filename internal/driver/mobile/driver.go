@@ -1,6 +1,7 @@
 package mobile
 
 import (
+	"math"
 	"runtime"
 	"strconv"
 	"sync/atomic"
@@ -30,9 +31,11 @@ import (
 )
 
 const (
-	tapMoveThreshold  = 4.0                    // how far can we move before it is a drag
-	tapSecondaryDelay = 300 * time.Millisecond // how long before secondary tap
-	tapDoubleDelay    = 500 * time.Millisecond // max duration between taps for a DoubleTap event
+	tapMoveDecay        = 0.92                   // how much should the scroll continue decay on each frame?
+	tapMoveEndThreshold = 2.0                    // at what offset will we stop decaying?
+	tapMoveThreshold    = 4.0                    // how far can we move before it is a drag
+	tapSecondaryDelay   = 300 * time.Millisecond // how long before secondary tap
+	tapDoubleDelay      = 500 * time.Millisecond // max duration between taps for a DoubleTap event
 )
 
 // Configuration is the system information about the current device
@@ -395,8 +398,27 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 		w.QueueEvent(func() { wid.TappedSecondary(ev) })
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		w.QueueEvent(func() { wid.DoubleTapped(ev) })
-	}, func(wid fyne.Draggable) {
-		w.QueueEvent(wid.DragEnd)
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
+			w.QueueEvent(wid.DragEnd)
+			return
+		}
+
+		go func() {
+			for math.Abs(float64(ev.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(ev.Dragged.DY)) > tapMoveEndThreshold {
+				if math.Abs(float64(ev.Dragged.DX)) > 0 {
+					ev.Dragged.DX *= tapMoveDecay
+				}
+				if math.Abs(float64(ev.Dragged.DY)) > 0 {
+					ev.Dragged.DY *= tapMoveDecay
+				}
+
+				w.QueueEvent(func() { wid.Dragged(ev) })
+				time.Sleep(time.Millisecond * 16)
+			}
+
+			w.QueueEvent(wid.DragEnd)
+		}()
 	})
 }
 
@@ -411,6 +433,11 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodePageDown:        fyne.KeyPageDown,
 	key.CodeHome:            fyne.KeyHome,
 	key.CodeEnd:             fyne.KeyEnd,
+
+	key.CodeLeftArrow:  fyne.KeyLeft,
+	key.CodeRightArrow: fyne.KeyRight,
+	key.CodeUpArrow:    fyne.KeyUp,
+	key.CodeDownArrow:  fyne.KeyDown,
 
 	key.CodeF1:  fyne.KeyF1,
 	key.CodeF2:  fyne.KeyF2,

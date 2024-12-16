@@ -3,6 +3,7 @@ package software
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
@@ -46,7 +47,7 @@ func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGB
 	width := scale.ToScreenCoordinate(c, bounds.Width)
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	tex := g.Generate(width, height)
-	drawTex(scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y), width, height, base, tex, clip)
+	drawTex(scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y), width, height, base, tex, clip, 1.0)
 }
 
 func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -75,13 +76,13 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		}
 	}
 
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip)
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
 }
 
-func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64) {
 	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
 		// do not scale or duplicate image since not needed, draw directly
-		drawTex(x, y, width, height, base, origImg, clip)
+		drawTex(x, y, width, height, base, origImg, clip, alpha)
 		return
 	}
 
@@ -99,7 +100,7 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 		draw.CatmullRom.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	}
 
-	drawTex(x, y, width, height, base, scaledImg, clip)
+	drawTex(x, y, width, height, base, scaledImg, clip, alpha)
 }
 
 func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -124,11 +125,16 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
-func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle) {
+func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle, alpha float64) {
 	outBounds := image.Rect(x, y, x+width, y+height)
 	clippedBounds := clip.Intersect(outBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - outBounds.Min.X, Y: clippedBounds.Min.Y - outBounds.Min.Y}
-	draw.Draw(base, clippedBounds, tex, srcPt, draw.Over)
+	if alpha == 1.0 {
+		draw.Draw(base, clippedBounds, tex, srcPt, draw.Over)
+	} else {
+		mask := &image.Uniform{C: color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: uint8(float64(0xff) * alpha)}}
+		draw.DrawMask(base, clippedBounds, tex, srcPt, mask, srcPt, draw.Over)
+	}
 }
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -176,9 +182,9 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
-		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip)
+		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0)
 	} else {
-		drawTex(scaledX, scaledY, width, height, base, pix, clip)
+		drawTex(scaledX, scaledY, width, height, base, pix, clip, 1.0)
 	}
 }
 

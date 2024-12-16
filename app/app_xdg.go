@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
@@ -114,22 +113,18 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	}
 }
 
-func rootConfigDir() string {
-	desktopConfig, _ := os.UserConfigDir()
-	return filepath.Join(desktopConfig, "fyne")
-}
-
 func watchTheme(s *settings) {
 	go func() {
 		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
-		internalapp.CurrentVariant.Store(uint64(findFreedesktopColorScheme()))
-		s.setupTheme()
+		themeVariant := findFreedesktopColorScheme()
+		internalapp.CurrentVariant.Store(uint64(themeVariant))
+		s.applyVariant(themeVariant)
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
-			if changed.Namespace == "org.freedesktop.appearance" && changed.Key == "color-scheme" {
+			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
 				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
-				s.setupTheme()
+				s.applyVariant(themeVariant)
 			}
 		})
 	}()

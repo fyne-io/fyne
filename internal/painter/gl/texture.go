@@ -33,6 +33,30 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 }
 
 func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
+	if t, ok := object.(*canvas.Text); ok {
+		custom := ""
+		if t.FontSource != nil {
+			custom = t.FontSource.Name()
+		}
+		ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
+		ent.Text = t.Text
+		ent.Size = t.TextSize
+		ent.Style = t.TextStyle
+		ent.Source = custom
+
+		texture, ok := cache.GetTextTexture(ent)
+
+		if !ok {
+			tex := creator(object)
+			texture = cache.TextureType(tex)
+			cache.SetTextTexture(ent, texture, p.canvas, func() {
+				p.ctx.DeleteTexture(tex)
+			})
+		}
+
+		return Texture(texture), nil
+	}
+
 	texture, ok := cache.GetTexture(object)
 
 	if !ok {
