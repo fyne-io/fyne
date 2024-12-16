@@ -64,7 +64,6 @@ type window struct {
 	common.Window
 
 	viewport   *glfw.Window
-	viewLock   sync.RWMutex
 	createLock sync.Once
 	decorate   bool
 	closing    bool
@@ -83,7 +82,6 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mouseLock            sync.RWMutex
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
 	mouseDraggedObjStart fyne.Position
@@ -246,9 +244,7 @@ func (w *window) fitContent() {
 	}
 
 	minWidth, minHeight := w.minSizeOnScreen()
-	w.viewLock.RLock()
 	view := w.viewport
-	w.viewLock.RUnlock()
 	w.shouldWidth, w.shouldHeight = w.width, w.height
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
@@ -257,9 +253,7 @@ func (w *window) fitContent() {
 		if w.height < minHeight {
 			w.shouldHeight = minHeight
 		}
-		w.viewLock.Lock()
 		w.shouldExpand = true // queue the resize to happen on main
-		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
 		if w.shouldWidth > w.requestedWidth {
@@ -750,9 +744,7 @@ func (w *window) create() {
 			return
 		}
 
-		w.viewLock.Lock()
 		w.viewport = win
-		w.viewLock.Unlock()
 	})
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
@@ -804,9 +796,6 @@ func (w *window) create() {
 }
 
 func (w *window) view() *glfw.Window {
-	w.viewLock.RLock()
-	defer w.viewLock.RUnlock()
-
 	if w.closing {
 		return nil
 	}

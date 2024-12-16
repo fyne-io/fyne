@@ -63,11 +63,9 @@ var refreshingCanvases []fyne.Canvas
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
 		w := win.(*window)
-		w.viewLock.RLock()
 		canvas := w.canvas
 		closing := w.closing
 		visible := w.visible
-		w.viewLock.RUnlock()
 
 		// CheckDirtyAndClear must be checked after visibility,
 		// because when a window becomes visible, it could be
@@ -135,18 +133,15 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				w.viewLock.RLock()
 				expand := w.shouldExpand
 				fullScreen := w.fullScreen
-				w.viewLock.RUnlock()
 
 				if expand && !fullScreen {
 					w.fitContent()
-					w.viewLock.Lock()
 					shouldExpand := w.shouldExpand
 					w.shouldExpand = false
 					view := w.viewport
-					w.viewLock.Unlock()
+
 					if shouldExpand && runtime.GOOS != "js" {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
@@ -166,10 +161,8 @@ func (d *gLDriver) runGL() {
 					}
 
 					if w.viewport.ShouldClose() {
-						w.viewLock.Lock()
 						w.visible = false
 						v := w.viewport
-						w.viewLock.Unlock()
 
 						// remove window from window list
 						v.Destroy()
@@ -208,19 +201,15 @@ func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
 		if canvas.EnsureMinSize() {
-			w.viewLock.Lock()
 			w.shouldExpand = true
-			w.viewLock.Unlock()
 		}
 		canvas.FreeDirtyTextures()
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
 
-		w.viewLock.RLock()
 		view := w.viewport
 		visible := w.visible
-		w.viewLock.RUnlock()
 
 		if view != nil && visible {
 			view.SwapBuffers()
