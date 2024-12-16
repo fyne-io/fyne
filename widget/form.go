@@ -281,7 +281,7 @@ func (f *Form) ensureRenderItems() {
 		}
 
 		f.setUpValidation(item.Widget, i)
-		f.itemGrid.Objects[widgetIndex] = item.Widget
+		f.itemGrid.Objects[widgetIndex] = f.createInput(item)
 	}
 
 	// Refresh the grid to apply changes
