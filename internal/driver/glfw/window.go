@@ -742,7 +742,6 @@ func (w *window) processFocused(focus bool) {
 		w.mousePos = fyne.Position{}
 
 		// check whether another window was focused or not
-		time.Sleep(time.Millisecond * 100)
 		if curWindow != w {
 			return
 		}
