@@ -1643,11 +1643,10 @@ func TestWindow_SetFullScreen(t *testing.T) {
 	var w *window
 	runOnMain(func() { // tests launch in a different context
 		w = d.CreateWindow("Full").(*window)
+		w.SetFullScreen(true)
+		w.create()
 	})
-	w.SetFullScreen(true)
-	w.create()
 
-	w.create()
 	w.doShow()
 	waitForMain()
 	assert.Zero(t, w.width)
