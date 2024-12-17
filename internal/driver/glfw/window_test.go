@@ -70,8 +70,8 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	var w *window
 	runOnMain(func() { // tests launch in a different context
 		w = d.CreateSplashWindow().(*window)
+		w.create()
 	})
-	w.create()
 
 	// Verify that the glfw driver implements desktop.Driver.
 	var driver fyne.Driver = d
@@ -1050,7 +1050,6 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(o)
-	waitForMain()
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -1070,7 +1069,6 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 		tapped = true
 	})
 	w.SetContent(o)
-	waitForMain()
 	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
 	w.mousePos = fyne.NewPos(10, 25)
@@ -1648,12 +1646,10 @@ func TestWindow_SetFullScreen(t *testing.T) {
 	})
 
 	w.doShow()
-	waitForMain()
 	assert.Zero(t, w.width)
 	assert.Zero(t, w.height)
 
 	w.SetFullScreen(false)
-	waitForMain()
 	// ensure we realised size now!
 	assert.NotZero(t, w.width)
 	assert.NotZero(t, w.height)
@@ -1930,10 +1926,6 @@ func newDoubleTappableButton() *doubleTappableButton {
 	but.ExtendBaseWidget(but)
 
 	return but
-}
-
-func waitForMain() {
-	runOnMain(func() {}) // this blocks until processed
 }
 
 type tabbable struct {
