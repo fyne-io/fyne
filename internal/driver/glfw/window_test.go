@@ -1683,7 +1683,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 		closed := make(chan bool, 1)
 		w.SetOnClosed(func() { closed <- true })
 		w.closed(w.viewport)
-		w.WaitForEvents()
+
 		assert.True(t, onIntercepted, "the interceptor should have been called")
 		select {
 		case <-closed:
@@ -1700,7 +1700,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 		closed := make(chan bool, 1)
 		w.SetOnClosed(func() { closed <- true })
 		w.closed(w.viewport)
-		w.WaitForEvents()
+
 		select {
 		case <-closed:
 		case <-time.After(20 * time.Millisecond):

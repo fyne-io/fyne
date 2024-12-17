@@ -253,11 +253,11 @@ func (w *window) Canvas() fyne.Canvas {
 
 func (w *window) processClosed() {
 	if w.onCloseIntercepted != nil {
-		w.QueueEvent(w.onCloseIntercepted)
+		w.onCloseIntercepted()
 		return
 	}
 
-	go w.Close() // unsure which thread this comes from, so don't block
+	w.Close()
 }
 
 // destroy this window and, if it's the last window quit the app
