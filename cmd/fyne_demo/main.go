@@ -36,6 +36,8 @@ func main() {
 	title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
+
+	top := container.NewVBox(title, widget.NewSeparator(), intro)
 	setTutorial := func(t tutorials.Tutorial) {
 		if fyne.CurrentDevice().IsMobile() {
 			child := a.NewWindow(t.Title)
@@ -49,14 +51,15 @@ func main() {
 		}
 
 		title.SetText(t.Title)
-		intro.SetText(t.Intro)
+		isMarkdown := len(t.Intro) == 0
+		if !isMarkdown {
+			intro.SetText(t.Intro)
+		}
 
-		if t.Title == "Welcome" {
-			title.Hide()
-			intro.Hide()
+		if t.Title == "Welcome" || isMarkdown {
+			top.Hide()
 		} else {
-			title.Show()
-			intro.Show()
+			top.Show()
 		}
 
 		content.Objects = []fyne.CanvasObject{t.View(w)}
@@ -64,7 +67,7 @@ func main() {
 	}
 
 	tutorial := container.NewBorder(
-		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
+		top, nil, nil, nil, content)
 	if fyne.CurrentDevice().IsMobile() {
 		w.SetContent(makeNav(setTutorial, false))
 	} else {

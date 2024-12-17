@@ -1,13 +1,30 @@
+//go:generate go run gen.go
+
 package tutorials
 
 import (
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/styles"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // Tutorial defines the data structure for a tutorial
 type Tutorial struct {
 	Title, Intro string
 	View         func(w fyne.Window) fyne.CanvasObject
+}
+
+type Tutorial2 struct {
+	title string
+
+	content []string
+	code    []func() fyne.CanvasObject
 }
 
 var (
@@ -82,8 +99,8 @@ var (
 			makeActivityTab,
 		},
 		"button": {"Button",
-			"Simple widget for user tap handling.",
-			makeButtonTab,
+			"",
+			func(fyne.Window) fyne.CanvasObject { return makeNewTutorial("widgets/button.md") },
 		},
 		"card": {"Card",
 			"Group content and widgets.",
@@ -161,3 +178,55 @@ var (
 		"widgets":     {"accordion", "activity", "button", "card", "entry", "form", "input", "progress", "text", "toolbar"},
 	}
 )
+
+func makeNewTutorial(file string) fyne.CanvasObject {
+	tutorial := tutorials[file]
+	top := container.NewVBox(
+		widget.NewLabel(tutorial.title), widget.NewSeparator())
+	details := container.NewVBox()
+
+	for i, p := range tutorial.content {
+		if p == "" {
+			continue
+		}
+		if i%2 == 0 {
+			text := widget.NewRichTextFromMarkdown(p)
+			text.Wrapping = fyne.TextWrapWord
+
+			details.Add(text)
+			continue
+		}
+
+		usage := widget.NewTextGridFromString(p)
+		usage.ShowLineNumbers = true
+		highlightTextGrid(usage)
+
+		codeID := (i - 1) / 2
+		preview := tutorial.code[codeID]()
+
+		tools := widget.NewToolbar(
+			widget.NewToolbarAction(theme.ContentCopyIcon(), func() {
+				fyne.CurrentApp().Clipboard().SetContent(usage.Text())
+			}),
+			widget.NewToolbarAction(theme.MediaPlayIcon(), func() {
+				w := fyne.CurrentApp().NewWindow(tutorial.title + " preview")
+				w.SetContent(tutorial.code[codeID]())
+				w.Show()
+			}),
+		)
+
+		style := styles.Get("solarized-dark")
+		bg := styleBackgroundColor(chroma.Background, style)
+
+		details.Add(container.NewPadded(container.NewPadded(
+			container.NewStack(
+				canvas.NewRectangle(bg),
+				container.NewPadded(usage,
+					container.NewHBox(layout.NewSpacer(), container.NewVBox(
+						tools)))))))
+		details.Add(widget.NewRichTextFromMarkdown("*Preview:*"))
+		details.Add(container.NewPadded(container.NewHBox(preview)))
+	}
+
+	return container.NewBorder(top, nil, nil, nil, container.NewScroll(details))
+}

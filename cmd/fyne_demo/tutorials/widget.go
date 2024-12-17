@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -105,62 +104,17 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		}))))
 }
 
-func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
-	disabled := widget.NewButton("Disabled", func() {})
-	disabled.Disable()
-
-	shareItem := fyne.NewMenuItem("Share via", nil)
-	shareItem.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
-		fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
-	)
-	menuLabel := newContextMenuButton("tap me for pop-up menu with submenus", fyne.NewMenu("",
-		fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
-		shareItem,
-	))
-
-	return container.NewVScroll(container.NewVBox(
-		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
-		&widget.Button{
-			Alignment: widget.ButtonAlignLeading,
-			Text:      "Button (leading-aligned, text only)",
-			OnTapped:  func() { fmt.Println("tapped leading-aligned, text only button") },
-		},
-		&widget.Button{
-			Alignment:     widget.ButtonAlignTrailing,
-			IconPlacement: widget.ButtonIconTrailingText,
-			Text:          "Button (trailing-aligned, text & trailing icon)",
-			Icon:          theme.ConfirmIcon(),
-			OnTapped:      func() { fmt.Println("tapped trailing-aligned, text & trailing icon button") },
-		},
-		disabled,
-		&widget.Button{
-			Text:       "Primary button",
-			Importance: widget.HighImportance,
-			OnTapped:   func() { fmt.Println("high importance button") },
-		},
-		&widget.Button{
-			Text:       "Success button",
-			Importance: widget.SuccessImportance,
-			OnTapped:   func() { fmt.Println("success importance button") },
-		},
-		&widget.Button{
-			Text:       "Danger button",
-			Importance: widget.DangerImportance,
-			OnTapped:   func() { fmt.Println("tapped danger button") },
-		},
-		&widget.Button{
-			Text:       "Warning button",
-			Importance: widget.WarningImportance,
-			OnTapped:   func() { fmt.Println("tapped warning button") },
-		},
-		layout.NewSpacer(),
-		layout.NewSpacer(),
-		menuLabel,
-		layout.NewSpacer(),
-	))
-}
+// TODO find a new home for this example
+//shareItem := fyne.NewMenuItem("Share via", nil)
+//shareItem.ChildMenu = fyne.NewMenu("",
+//	fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
+//	fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
+//)
+//menuLabel := newContextMenuButton("tap me for pop-up menu with submenus", fyne.NewMenu("",
+//	fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
+//	shareItem,
+//))
+//
 
 func makeCardTab(_ fyne.Window) fyne.CanvasObject {
 	card1 := widget.NewCard("Book a table", "Which time suits?",
