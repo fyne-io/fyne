@@ -55,7 +55,6 @@ func TestMain(m *testing.M) {
 
 func TestGLDriver_CreateWindow(t *testing.T) {
 	w := createWindow("Test").(*window)
-	w.create()
 
 	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.Decorated))
 	assert.True(t, w.Padded())
@@ -1574,8 +1573,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 
 	d := NewGLDriver()
 	t.Run("when closing window with #Close()", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		onIntercepted := false
 		onClosed := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
@@ -1589,8 +1587,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside (notified by GLFW callback)", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		onIntercepted := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
 		closed := make(chan bool, 1)
@@ -1608,8 +1605,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside but no interceptor is set", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		closed := make(chan bool, 1)
 		w.SetOnClosed(func() { closed <- true })
 		w.closed(w.viewport)
