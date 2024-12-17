@@ -68,7 +68,10 @@ func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
-	w := createSplashWindow().(*window)
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateSplashWindow().(*window)
+	})
 	w.create()
 
 	// Verify that the glfw driver implements desktop.Driver.
@@ -1641,7 +1644,10 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 }
 
 func TestWindow_SetFullScreen(t *testing.T) {
-	w := d.CreateWindow("Full").(*window)
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateWindow("Full").(*window)
+	})
 	w.SetFullScreen(true)
 	w.create()
 
@@ -1676,18 +1682,9 @@ func TestWindow_SetFullScreen(t *testing.T) {
 //	assert.True(t, w.FullScreen())
 // }
 
-func createSplashWindow() fyne.Window {
-	var w fyne.Window
-	runOnMain(func() {
-		w = d.CreateSplashWindow()
-		w.(*window).create()
-	})
-	return w
-}
-
 func createWindow(title string) fyne.Window {
 	var w fyne.Window
-	runOnMain(func() {
+	runOnMain(func() { // tests launch in a different context
 		w = d.CreateWindow(title)
 		w.(*window).create()
 	})
