@@ -39,11 +39,7 @@ func (c clipboard) Content() string {
 }
 
 func (c clipboard) content() string {
-	content := ""
-	runOnMain(func() {
-		content = glfw.GetClipboardString()
-	})
-	return content
+	return glfw.GetClipboardString()
 }
 
 // SetContent sets the clipboard content
@@ -64,7 +60,5 @@ func (c clipboard) SetContent(content string) {
 }
 
 func (c clipboard) setContent(content string) {
-	runOnMain(func() {
-		glfw.SetClipboardString(content)
-	})
+	glfw.SetClipboardString(content)
 }
