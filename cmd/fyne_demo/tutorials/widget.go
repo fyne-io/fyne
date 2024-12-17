@@ -104,18 +104,6 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		}))))
 }
 
-// TODO find a new home for this example
-//shareItem := fyne.NewMenuItem("Share via", nil)
-//shareItem.ChildMenu = fyne.NewMenu("",
-//	fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
-//	fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
-//)
-//menuLabel := newContextMenuButton("tap me for pop-up menu with submenus", fyne.NewMenu("",
-//	fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
-//	shareItem,
-//))
-//
-
 func makeCardTab(_ fyne.Window) fyne.CanvasObject {
 	card1 := widget.NewCard("Book a table", "Which time suits?",
 		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
@@ -480,23 +468,6 @@ func widgetScreen(_ fyne.Window) fyne.CanvasObject {
 		widget.NewButtonWithIcon("Icons", theme.HomeIcon(), func() {}),
 		widget.NewSlider(0, 1))
 	return container.NewCenter(content)
-}
-
-type contextMenuButton struct {
-	widget.Button
-	menu *fyne.Menu
-}
-
-func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
-	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
-}
-
-func newContextMenuButton(label string, menu *fyne.Menu) *contextMenuButton {
-	b := &contextMenuButton{menu: menu}
-	b.Text = label
-
-	b.ExtendBaseWidget(b)
-	return b
 }
 
 type numEntry struct {
