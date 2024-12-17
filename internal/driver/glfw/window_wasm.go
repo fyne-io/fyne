@@ -463,7 +463,7 @@ func (w *window) DetachCurrentContext() {
 	glfw.DetachCurrentContext()
 }
 
-func (w *window) rescaleOnMain() {
+func (w *window) RescaleContext() {
 	if w.viewport == nil {
 		return
 	}
