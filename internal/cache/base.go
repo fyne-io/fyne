@@ -16,7 +16,7 @@ var (
 	skippedCleanWithCanvasRefresh = false
 
 	// testing purpose only
-	timeNow func() time.Time = time.Now
+	timeNow = time.Now
 )
 
 func init() {
