@@ -1678,8 +1678,11 @@ func TestWindow_SetFullScreen(t *testing.T) {
 // }
 
 func createWindow(title string) fyne.Window {
-	w := d.CreateWindow(title)
-	w.(*window).create()
+	var w fyne.Window
+	runOnMain(func() {
+		w = d.CreateWindow(title)
+		w.(*window).create()
+	})
 	return w
 }
 

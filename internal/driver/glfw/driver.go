@@ -7,7 +7,6 @@ import (
 	"image"
 	"os"
 	"runtime"
-	"sync"
 
 	"github.com/fyne-io/image/ico"
 
@@ -33,7 +32,6 @@ var curWindow *window
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windowLock   sync.RWMutex
 	windows      []fyne.Window
 	done         chan struct{}
 	waitForStart chan struct{}
@@ -104,8 +102,6 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) addWindow(w *window) {
-	d.windowLock.Lock()
-	defer d.windowLock.Unlock()
 	d.windows = append(d.windows, w)
 }
 
@@ -113,12 +109,8 @@ func (d *gLDriver) addWindow(w *window) {
 // This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
 // of an issue, and the added complexity to track focus was not needed at this time.
 func (d *gLDriver) focusPreviousWindow() {
-	d.windowLock.RLock()
-	wins := d.windows
-	d.windowLock.RUnlock()
-
 	var chosen *window
-	for _, w := range wins {
+	for _, w := range d.windows {
 		win := w.(*window)
 		if !win.visible {
 			continue
@@ -136,8 +128,6 @@ func (d *gLDriver) focusPreviousWindow() {
 }
 
 func (d *gLDriver) windowList() []fyne.Window {
-	d.windowLock.RLock()
-	defer d.windowLock.RUnlock()
 	return d.windows
 }
 

@@ -875,7 +875,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	// handling multiple windows by overlaying on the root for web
 	var root fyne.Window
-	d.windowLock.RLock()
 	hasVisible := false
 	for _, w := range d.windows {
 		if w.(*window).visible {
@@ -884,7 +883,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 			break
 		}
 	}
-	d.windowLock.RUnlock()
 
 	if !hasVisible {
 		return d.createWindow(title, true)
