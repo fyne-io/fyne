@@ -105,9 +105,7 @@ func (l *Label) Resize(s fyne.Size) {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
-	l.propertyLock.Lock()
 	l.Text = text
-	l.propertyLock.Unlock()
 	l.Refresh()
 }
 
@@ -120,9 +118,6 @@ func (l *Label) Unbind() {
 }
 
 func (l *Label) syncSegments() {
-	l.propertyLock.RLock()
-	defer l.propertyLock.RUnlock()
-
 	var color fyne.ThemeColorName
 	switch l.Importance {
 	case LowImportance:

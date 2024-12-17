@@ -146,15 +146,12 @@ func (l *List) RefreshItem(id ListItemID) {
 //
 // Since: 2.3
 func (l *List) SetItemHeight(id ListItemID, height float32) {
-	l.propertyLock.Lock()
-
 	if l.itemHeights == nil {
 		l.itemHeights = make(map[ListItemID]float32)
 	}
 
 	refresh := l.itemHeights[id] != height
 	l.itemHeights[id] = height
-	l.propertyLock.Unlock()
 
 	if refresh {
 		l.RefreshItem(id)
@@ -361,8 +358,6 @@ func (l *List) UnselectAll() {
 
 func (l *List) contentMinSize() fyne.Size {
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
-	l.propertyLock.Lock()
-	defer l.propertyLock.Unlock()
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
@@ -709,9 +704,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	wasVisible := (*wasVisiblePtr)[:0]
 	wasVisible = append(wasVisible, l.visible...)
 
-	l.list.propertyLock.Lock()
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
-	l.list.propertyLock.Unlock()
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		l.renderLock.Unlock() // user code should not be locked
 		return

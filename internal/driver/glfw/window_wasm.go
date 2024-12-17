@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
 
@@ -45,8 +44,6 @@ var cursorMap map[desktop.Cursor]*Cursor
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	common.Window
-
 	viewport   *glfw.Window
 	viewLock   sync.RWMutex
 	createLock sync.Once

@@ -15,7 +15,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -61,10 +60,7 @@ func initCursors() {
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	common.Window
-
 	viewport   *glfw.Window
-	viewLock   sync.RWMutex
 	createLock sync.Once
 	decorate   bool
 	closing    bool
@@ -83,7 +79,6 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mouseLock            sync.RWMutex
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
 	mouseDraggedObjStart fyne.Position
@@ -126,7 +121,8 @@ func (w *window) SetFullScreen(full bool) {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
 			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
-				w.width, w.height = w.screenSize(w.canvas.Size())
+				s := w.canvas.Size().Max(w.canvas.MinSize())
+				w.width, w.height = w.screenSize(s)
 			}
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
 		}
@@ -157,9 +153,7 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
-			w.QueueEvent(func() {
-				dropped(w.mousePos, uris)
-			})
+			dropped(w.mousePos, uris)
 		})
 	})
 }
@@ -246,9 +240,7 @@ func (w *window) fitContent() {
 	}
 
 	minWidth, minHeight := w.minSizeOnScreen()
-	w.viewLock.RLock()
 	view := w.viewport
-	w.viewLock.RUnlock()
 	w.shouldWidth, w.shouldHeight = w.width, w.height
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
@@ -257,9 +249,7 @@ func (w *window) fitContent() {
 		if w.height < minHeight {
 			w.shouldHeight = minHeight
 		}
-		w.viewLock.Lock()
 		w.shouldExpand = true // queue the resize to happen on main
-		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
 		if w.shouldWidth > w.requestedWidth {
@@ -750,9 +740,7 @@ func (w *window) create() {
 			return
 		}
 
-		w.viewLock.Lock()
 		w.viewport = win
-		w.viewLock.Unlock()
 	})
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
@@ -804,9 +792,6 @@ func (w *window) create() {
 }
 
 func (w *window) view() *glfw.Window {
-	w.viewLock.RLock()
-	defer w.viewLock.RUnlock()
-
 	if w.closing {
 		return nil
 	}

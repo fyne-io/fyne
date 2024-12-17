@@ -2,7 +2,6 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
-	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -19,9 +18,8 @@ type BaseWidget struct {
 	position async.Position
 	Hidden   bool
 
-	impl         atomic.Pointer[fyne.Widget]
-	propertyLock sync.RWMutex
-	themeCache   fyne.Theme
+	impl       atomic.Pointer[fyne.Widget]
+	themeCache fyne.Theme
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -82,9 +80,6 @@ func (w *BaseWidget) MinSize() fyne.Size {
 // Visible returns whether or not this widget should be visible.
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
 	return !w.Hidden
 }
 
@@ -94,9 +89,7 @@ func (w *BaseWidget) Show() {
 		return
 	}
 
-	w.propertyLock.Lock()
 	w.Hidden = false
-	w.propertyLock.Unlock()
 
 	impl := w.super()
 	if impl == nil {
@@ -111,9 +104,7 @@ func (w *BaseWidget) Hide() {
 		return
 	}
 
-	w.propertyLock.Lock()
 	w.Hidden = true
-	w.propertyLock.Unlock()
 
 	impl := w.super()
 	if impl == nil {
@@ -129,9 +120,7 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
-	w.propertyLock.Lock()
 	w.themeCache = nil
-	w.propertyLock.Unlock()
 
 	render := cache.Renderer(impl)
 	render.Refresh()
@@ -142,8 +131,6 @@ func (w *BaseWidget) Refresh() {
 //
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
 	return w.themeWithLock()
 }
 

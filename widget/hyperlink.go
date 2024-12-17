@@ -186,9 +186,7 @@ func (hl *Hyperlink) Resize(size fyne.Size) {
 
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
-	hl.propertyLock.Lock()
 	hl.Text = text
-	hl.propertyLock.Unlock()
 
 	if len(hl.provider.Segments) == 0 {
 		return // Not initialized yet.
@@ -199,9 +197,6 @@ func (hl *Hyperlink) SetText(text string) {
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
 func (hl *Hyperlink) SetURL(url *url.URL) {
-	hl.propertyLock.Lock()
-	defer hl.propertyLock.Unlock()
-
 	hl.URL = url
 }
 
@@ -224,9 +219,7 @@ func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
 }
 
 func (hl *Hyperlink) invokeAction() {
-	hl.propertyLock.RLock()
 	onTapped := hl.OnTapped
-	hl.propertyLock.RUnlock()
 
 	if onTapped != nil {
 		onTapped()
@@ -247,9 +240,7 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 }
 
 func (hl *Hyperlink) openURL() {
-	hl.propertyLock.RLock()
 	url := hl.URL
-	hl.propertyLock.RUnlock()
 
 	if url != nil {
 		err := fyne.CurrentApp().OpenURL(url)
@@ -261,9 +252,6 @@ func (hl *Hyperlink) openURL() {
 
 func (hl *Hyperlink) syncSegments() {
 	th := hl.Theme()
-
-	hl.propertyLock.RLock()
-	defer hl.propertyLock.RUnlock()
 
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
@@ -311,12 +299,10 @@ func (r *hyperlinkRenderer) Destroy() {
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
 	th := r.hl.Theme()
-	r.hl.propertyLock.RLock()
 	textSize := r.hl.textSize
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	w := r.hl.focusWidth()
 	xposFocus := r.hl.focusXPos()
-	r.hl.propertyLock.RUnlock()
 
 	xposUnderline := xposFocus + innerPad/2
 	lineCount := float32(len(r.hl.provider.rowBounds))
@@ -340,9 +326,6 @@ func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
 	th := r.hl.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	r.hl.propertyLock.RLock()
-	defer r.hl.propertyLock.RUnlock()
 
 	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	r.focus.Hidden = !r.hl.focused

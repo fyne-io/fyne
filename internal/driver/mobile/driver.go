@@ -74,8 +74,6 @@ func init() {
 func (d *driver) CreateWindow(title string) fyne.Window {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
-	ret.InitEventQueue()
-	go ret.RunEventQueue()
 	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
@@ -252,7 +250,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	switch e.Crosses(lifecycle.StageFocused) {
 	case lifecycle.CrossOn: // foregrounding
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnEnteredForeground(); f != nil {
-			w.QueueEvent(f)
+			f()
 		}
 	case lifecycle.CrossOff: // will enter background
 		if runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
@@ -265,7 +263,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			d.app.Publish()
 		}
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			w.QueueEvent(f)
+			f()
 		}
 	}
 }
@@ -388,7 +386,7 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		w.QueueEvent(func() { wid.Dragged(ev) })
+		wid.Dragged(ev)
 	})
 }
 
@@ -398,14 +396,14 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.Tapped(ev) })
+		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.TappedSecondary(ev) })
+		wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-		w.QueueEvent(func() { wid.DoubleTapped(ev) })
+		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
-			w.QueueEvent(wid.DragEnd)
+			wid.DragEnd()
 			return
 		}
 
@@ -418,11 +416,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				w.QueueEvent(func() { wid.Dragged(ev) })
+				wid.Dragged(ev)
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			w.QueueEvent(wid.DragEnd)
+			wid.DragEnd()
 		}()
 	})
 }

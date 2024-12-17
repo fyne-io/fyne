@@ -67,12 +67,7 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	i.ExtendBaseWidget(i)
-	i.propertyLock.Lock()
 	i.setURI(i.URI)
-	i.propertyLock.Unlock()
-
-	i.propertyLock.RLock()
-	defer i.propertyLock.RUnlock()
 
 	// TODO remove background when `SetSelected` is gone.
 	background := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
@@ -180,9 +175,7 @@ func (s *fileIconRenderer) Refresh() {
 	th := s.file.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	s.file.propertyLock.Lock()
 	s.file.setURI(s.file.URI)
-	s.file.propertyLock.Unlock()
 
 	if s.file.Selected {
 		s.background.Show()
@@ -198,7 +191,6 @@ func (s *fileIconRenderer) Refresh() {
 		}
 	}
 
-	s.file.propertyLock.RLock()
 	if s.img.Resource != s.file.resource {
 		s.img.Resource = s.file.resource
 		s.img.Refresh()
@@ -207,7 +199,6 @@ func (s *fileIconRenderer) Refresh() {
 		s.ext.Text = s.file.extension
 		s.ext.Refresh()
 	}
-	s.file.propertyLock.RUnlock()
 
 	canvas.Refresh(s.file.super())
 }

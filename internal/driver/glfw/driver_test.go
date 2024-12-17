@@ -40,9 +40,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
 	c := w.canvas
 	movl := buildMenuOverlay(mm, w)
-	c.Lock()
 	c.setMenuOverlay(movl)
-	c.Unlock()
 	w.SetContent(content)
 	w.Resize(fyne.NewSize(300, 200))
 	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
