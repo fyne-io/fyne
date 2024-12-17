@@ -126,7 +126,6 @@ func (d *gLDriver) runGL() {
 				if w.viewport == nil {
 					continue
 				}
-				w.ProcessEventQueue()
 
 				if w.viewport.ShouldClose() {
 					windowsToRemove++

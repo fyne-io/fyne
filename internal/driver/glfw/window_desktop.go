@@ -15,7 +15,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -61,8 +60,6 @@ func initCursors() {
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	common.Window
-
 	viewport   *glfw.Window
 	createLock sync.Once
 	decorate   bool
@@ -124,7 +121,8 @@ func (w *window) SetFullScreen(full bool) {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
 			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
-				w.width, w.height = w.screenSize(w.canvas.Size())
+				s := w.canvas.Size().Max(w.canvas.MinSize())
+				w.width, w.height = w.screenSize(s)
 			}
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
 		}
@@ -155,9 +153,7 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
-			w.QueueEvent(func() {
-				dropped(w.mousePos, uris)
-			})
+			dropped(w.mousePos, uris)
 		})
 	})
 }
