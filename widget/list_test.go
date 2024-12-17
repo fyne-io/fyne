@@ -125,7 +125,6 @@ type resizeRefreshCountingLabel struct {
 	widget.Label
 	resizeCount  int
 	refreshCount int
-	focusedCount int
 }
 
 func newResizeRefreshCountingLabel(text string) *resizeRefreshCountingLabel {
@@ -143,8 +142,4 @@ func (r *resizeRefreshCountingLabel) Refresh() {
 func (r *resizeRefreshCountingLabel) Resize(s fyne.Size) {
 	r.resizeCount++
 	r.Label.Resize(s)
-}
-
-func (r *resizeRefreshCountingLabel) OnFocused() {
-	r.focusedCount++
 }
