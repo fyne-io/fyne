@@ -37,7 +37,11 @@ type List struct {
 	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
-	OnFocus      func(id ListItemID)                         `json:"-"`
+	// OnFocused fire an event when a listItem is focused
+	// Whenever the list loses focus ListItemId will be equals to -1
+	//
+	// Since: 2.6
+	OnFocused func(id ListItemID) `json:"-"`
 
 	// HideSeparators hides the separators between list rows
 	//
@@ -108,6 +112,7 @@ func (l *List) FocusGained() {
 	l.focused = true
 	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
+	l.onFocused(l.currentFocus)
 }
 
 // FocusLost is called after this List has lost focus.
@@ -115,6 +120,7 @@ func (l *List) FocusGained() {
 // Implements: fyne.Focusable
 func (l *List) FocusLost() {
 	l.focused = false
+	l.onFocused(-1)
 	l.RefreshItem(l.currentFocus)
 }
 
@@ -187,11 +193,6 @@ func (l *List) scrollTo(id ListItemID) {
 		l.scroller.Offset.Y = y + lastItemHeight - l.scroller.Size().Height
 	}
 	l.offsetUpdated(l.scroller.Offset)
-	defer func() {
-		if f := l.OnFocus; f != nil {
-			f(id)
-		}
-	}()
 }
 
 // Resize is called when this list should change size. We refresh to ensure invisible items are drawn.
@@ -311,6 +312,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus++
+		l.onFocused(l.currentFocus)
 		l.scrollTo(l.currentFocus)
 		l.RefreshItem(l.currentFocus)
 	case fyne.KeyUp:
@@ -319,6 +321,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus--
+		l.onFocused(l.currentFocus)
 		l.scrollTo(l.currentFocus)
 		l.RefreshItem(l.currentFocus)
 	}
@@ -864,4 +867,10 @@ func createItemAndApplyThemeScope(f func() fyne.CanvasObject, scope fyne.Widget)
 
 	item.Refresh()
 	return item
+}
+
+func (l *List) onFocused(id ListItemID) {
+	if f := l.OnFocused; f != nil {
+		f(id)
+	}
 }
