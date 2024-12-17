@@ -37,7 +37,7 @@ type List struct {
 	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
-	OnScroll     func(id ListItemID)                         `json:"-"`
+	OnFocus      func(id ListItemID)                         `json:"-"`
 
 	// HideSeparators hides the separators between list rows
 	//
@@ -188,7 +188,7 @@ func (l *List) scrollTo(id ListItemID) {
 	}
 	l.offsetUpdated(l.scroller.Offset)
 	defer func() {
-		if f := l.OnScroll; f != nil {
+		if f := l.OnFocus; f != nil {
 			f(id)
 		}
 	}()
