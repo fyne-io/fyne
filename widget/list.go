@@ -37,6 +37,7 @@ type List struct {
 	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
 	OnSelected   func(id ListItemID)                         `json:"-"`
 	OnUnselected func(id ListItemID)                         `json:"-"`
+	OnScroll     func(id ListItemID)                         `json:"-"`
 
 	// HideSeparators hides the separators between list rows
 	//
@@ -186,6 +187,11 @@ func (l *List) scrollTo(id ListItemID) {
 		l.scroller.Offset.Y = y + lastItemHeight - l.scroller.Size().Height
 	}
 	l.offsetUpdated(l.scroller.Offset)
+	defer func() {
+		if f := l.OnScroll; f != nil {
+			f(id)
+		}
+	}()
 }
 
 // Resize is called when this list should change size. We refresh to ensure invisible items are drawn.
