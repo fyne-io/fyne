@@ -47,11 +47,6 @@ func runOnMain(f func()) {
 	<-done
 }
 
-// force a function f to run on the draw thread
-func runOnMainWithContext(w *window, f func()) {
-	runOnMain(func() { w.RunWithContext(f) }) // TODO remove this completely
-}
-
 // Preallocate to avoid allocations on every drawSingleFrame.
 // Note that the capacity of this slice can only grow,
 // but its length will never be longer than the total number of

@@ -36,7 +36,7 @@ func repaintWindow(w *window) {
 	// If we try to paint windows before the context is created, we will end up on the wrong thread.
 	<-w.driver.waitForStart
 
-	runOnMainWithContext(w, func() {
+	w.RunWithContext(func() {
 		d.repaintWindow(w)
 	})
 
