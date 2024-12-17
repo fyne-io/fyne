@@ -1668,7 +1668,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 		w.SetCloseIntercept(func() { onIntercepted = true })
 		w.SetOnClosed(func() { onClosed = true })
 		w.Close()
-		w.WaitForEvents()
+
 		assert.False(t, onIntercepted, "the interceptor should not have been called")
 		assert.True(t, onClosed, "the on closed handler should have been called")
 		assert.True(t, w.viewport.ShouldClose()) // For #2694

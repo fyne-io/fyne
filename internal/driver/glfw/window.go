@@ -203,17 +203,13 @@ func (w *window) Close() {
 
 	// trigger callbacks - early so window still exists
 	if w.onClosed != nil {
-		w.QueueEvent(w.onClosed)
+		w.onClosed()
 	}
 
-	// set w.closing flag inside draw thread to ensure we can free textures
-	runOnMainWithContext(w, func() {
-		w.closing = true
-		w.viewport.SetShouldClose(true)
+	w.closing = true
+	w.viewport.SetShouldClose(true)
 
-		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
-	})
-
+	cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
 	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 		if wid, ok := node.Obj().(fyne.Widget); ok {
 			cache.DestroyRenderer(wid)
