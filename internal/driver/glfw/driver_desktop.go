@@ -61,7 +61,9 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 			}
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
-			d.refreshSystray(m)
+			runOnMain(func() {
+				d.refreshSystray(m)
+			})
 		}, func() {
 			// anything required for tear-down
 		})
@@ -135,14 +137,12 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
-	runOnMain(func() {
-		d.systrayMenu = m
+	d.systrayMenu = m
 
-		systray.ResetMenu()
-		d.refreshSystrayMenu(m, nil)
+	systray.ResetMenu()
+	d.refreshSystrayMenu(m, nil)
 
-		addMissingQuitForMenu(m, d)
-	})
+	addMissingQuitForMenu(m, d)
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
@@ -175,13 +175,11 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	runOnMain(func() {
-		if _, ok := resource.(*theme.ThemedResource); ok {
-			systray.SetTemplateIcon(img, img)
-		} else {
-			systray.SetIcon(img)
-		}
-	})
+	if _, ok := resource.(*theme.ThemedResource); ok {
+		systray.SetTemplateIcon(img, img)
+	} else {
+		systray.SetIcon(img)
+	}
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {

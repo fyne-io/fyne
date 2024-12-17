@@ -129,7 +129,9 @@ func (w *window) detectTextureScale() float32 {
 }
 
 func (w *window) Show() {
-	go w.doShow()
+	go func() {
+		runOnMain(w.doShow)
+	}()
 }
 
 func (w *window) doShow() {
@@ -145,55 +147,51 @@ func (w *window) doShow() {
 		return
 	}
 
-	runOnMain(func() {
-		w.visible = true
-		view := w.view()
-		view.SetTitle(w.title)
+	w.visible = true
+	view := w.view()
+	view.SetTitle(w.title)
 
-		if !build.IsWayland && w.centered {
-			w.doCenterOnScreen() // lastly center if that was requested
-		}
-		view.Show()
+	if !build.IsWayland && w.centered {
+		w.doCenterOnScreen() // lastly center if that was requested
+	}
+	view.Show()
 
-		// save coordinates
-		if !build.IsWayland {
-			w.xpos, w.ypos = view.GetPos()
-		}
+	// save coordinates
+	if !build.IsWayland {
+		w.xpos, w.ypos = view.GetPos()
+	}
 
-		if w.fullScreen { // this does not work if called before viewport.Show()
-			go func() {
-				time.Sleep(time.Millisecond * 100)
-				w.SetFullScreen(true)
-			}()
-		}
-	})
+	if w.fullScreen { // this does not work if called before viewport.Show()
+		go func() {
+			time.Sleep(time.Millisecond * 100)
+			w.SetFullScreen(true)
+		}()
+	}
 
 	// show top canvas element
 	if content := w.canvas.Content(); content != nil {
 		content.Show()
 
-		runOnMainWithContext(w, func() {
+		w.RunWithContext(func() {
 			w.driver.repaintWindow(w)
 		})
 	}
 }
 
 func (w *window) Hide() {
-	runOnMain(func() {
-		if w.closing || w.viewport == nil {
-			return
-		}
+	if w.closing || w.viewport == nil {
+		return
+	}
 
-		w.visible = false
-		v := w.viewport
+	w.visible = false
+	v := w.viewport
 
-		v.Hide()
+	v.Hide()
 
-		// hide top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Hide()
-		}
-	})
+	// hide top canvas element
+	if content := w.canvas.Content(); content != nil {
+		content.Hide()
+	}
 }
 
 func (w *window) Close() {
@@ -743,17 +741,16 @@ func (w *window) processFocused(focus bool) {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
 
-		go func() { // check whether another window was focused or not
-			time.Sleep(time.Millisecond * 100)
-			if curWindow != w {
-				return
-			}
+		// check whether another window was focused or not
+		time.Sleep(time.Millisecond * 100)
+		if curWindow != w {
+			return
+		}
 
-			curWindow = nil
-			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
-				f()
-			}
-		}()
+		curWindow = nil
+		if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
+			f()
+		}
 	}
 }
 
@@ -858,17 +855,13 @@ func (w *window) RunWithContext(f func()) {
 	w.DetachCurrentContext()
 }
 
-func (w *window) RescaleContext() {
-	runOnMain(w.rescaleOnMain)
-}
-
 func (w *window) Context() any {
 	return nil
 }
 
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.view() != nil {
-		runOnMain(fn)
+		fn()
 		return
 	}
 
@@ -915,15 +908,14 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	if title == "" {
 		title = defaultTitle
 	}
-	runOnMain(func() {
-		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate, driver: d}
-		ret.canvas = newCanvas()
-		ret.canvas.context = ret
-		ret.SetIcon(ret.icon)
-		d.addWindow(ret)
-	})
+	d.initGLFW()
+
+	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.canvas = newCanvas()
+	ret.canvas.context = ret
+	ret.SetIcon(ret.icon)
+	d.addWindow(ret)
 	return ret
 }
 
@@ -932,19 +924,17 @@ func (w *window) doShowAgain() {
 		return
 	}
 
-	runOnMain(func() {
-		// show top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Show()
-		}
+	// show top canvas element
+	if content := w.canvas.Content(); content != nil {
+		content.Show()
+	}
 
-		view := w.view()
-		if !build.IsWayland {
-			view.SetPos(w.xpos, w.ypos)
-		}
-		view.Show()
-		w.visible = true
-	})
+	view := w.view()
+	if !build.IsWayland {
+		view.SetPos(w.xpos, w.ypos)
+	}
+	view.Show()
+	w.visible = true
 }
 
 func (w *window) isClosing() bool {
