@@ -33,10 +33,9 @@ var curWindow *window
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windowLock   sync.RWMutex
-	windows      []fyne.Window
-	done         chan struct{}
-	waitForStart chan struct{}
+	windowLock        sync.RWMutex
+	windows           []fyne.Window
+	waitForTransition chan struct{} // wait for transitioning first from starting and later on to quiting.
 
 	animation animation.Runner
 
@@ -99,7 +98,7 @@ func (d *gLDriver) Quit() {
 
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
-		close(d.done)
+		close(d.waitForTransition)
 	}
 }
 
@@ -174,7 +173,6 @@ func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:         make(chan struct{}),
-		waitForStart: make(chan struct{}),
+		waitForTransition: make(chan struct{}),
 	}
 }

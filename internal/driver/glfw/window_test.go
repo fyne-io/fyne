@@ -38,9 +38,6 @@ func init() {
 func TestMain(m *testing.M) {
 	d.initGLFW()
 	go func() {
-		// Wait for GLFW loop to be running.
-		// If we try to create windows before the context is created, this will fail with an exception.
-		<-d.waitForStart
 
 		initMainMenu()
 		os.Exit(m.Run())

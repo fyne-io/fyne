@@ -140,8 +140,6 @@ func (w *window) doShow() {
 		return
 	}
 
-	<-w.driver.waitForStart
-
 	w.createLock.Do(w.create)
 	if w.view() == nil {
 		return

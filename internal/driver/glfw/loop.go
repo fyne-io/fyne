@@ -93,7 +93,9 @@ func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
-	close(d.waitForStart) // Signal that execution can continue.
+
+	close(d.waitForTransition)                // Signal that execution can continue.
+	d.waitForTransition = make(chan struct{}) // Prepare for transitioning into done.
 
 	d.initGLFW()
 	if d.trayStart != nil {
@@ -109,7 +111,7 @@ func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
-		case <-d.done:
+		case <-d.waitForTransition:
 			eventTick.Stop()
 			d.Terminate()
 			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
