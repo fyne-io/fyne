@@ -68,8 +68,7 @@ func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
-	d := NewGLDriver()
-	w := d.CreateSplashWindow().(*window)
+	w := createSplashWindow().(*window)
 	w.create()
 
 	// Verify that the glfw driver implements desktop.Driver.
@@ -1676,6 +1675,15 @@ func TestWindow_SetFullScreen(t *testing.T) {
 //	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
 //	assert.True(t, w.FullScreen())
 // }
+
+func createSplashWindow() fyne.Window {
+	var w fyne.Window
+	runOnMain(func() {
+		w = d.CreateSplashWindow()
+		w.(*window).create()
+	})
+	return w
+}
 
 func createWindow(title string) fyne.Window {
 	var w fyne.Window
