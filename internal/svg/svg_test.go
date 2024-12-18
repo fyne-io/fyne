@@ -44,6 +44,11 @@ func TestColorize(t *testing.T) {
 			color:     color.NRGBA{R: 100, G: 100, B: 100, A: 200},
 			wantImage: "colorized/rects.png",
 		},
+		"negative rects": {
+			svgFile:   "rects-negative.svg",
+			color:     color.NRGBA{R: 100, G: 100, B: 100, A: 200},
+			wantImage: "colorized/rects.png",
+		},
 		"group of paths": {
 			svgFile:   "check_GroupPaths.svg",
 			color:     color.NRGBA{R: 100, G: 100, A: 100},
@@ -195,7 +200,8 @@ func helperDrawSVG(t *testing.T, data []byte) image.Image {
 
 	width := int(icon.ViewBox.W) * 2
 	height := int(icon.ViewBox.H) * 2
-	icon.SetTarget(0, 0, float64(width), float64(height))
+	x, y := svgOffset(icon, width, height)
+	icon.SetTarget(x, y, float64(width), float64(height))
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(width, height, img, img.Bounds())
 	raster := rasterx.NewDasher(width, height, scanner)
