@@ -511,7 +511,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 
 	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable, desktop.Hoverable:
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, desktop.Mouseable:
 			return true
 		case fyne.Draggable:
 			if mouseDragStarted {
@@ -540,11 +540,9 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
 		ignore := false
 		_, _, _ = w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-			if focusable, isFocusable := object.(fyne.Focusable); isFocusable {
+			switch object.(type) {
+			case fyne.Focusable:
 				ignore = true
-				if focusable != w.canvas.Focused() {
-					w.canvas.Focus(focusable)
-				}
 				return true
 			}
 
@@ -569,10 +567,6 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	shouldMouseOut := w.objIsDragged(mouseOver) && !w.objIsDragged(coMouse)
 	mousePressed := w.mousePressed
 	w.mouseLock.Unlock()
-
-	if mousePressed == nil {
-		w.canvas.Unfocus()
-	}
 
 	if action == release && mouseDragged != nil {
 		if mouseDragStarted {
@@ -599,9 +593,7 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		} else if action == release {
 			if co == mousePressed {
 				if button == desktop.MouseButtonSecondary && altTap {
-					w.QueueEvent(func() {
-						secondary.TappedSecondary(ev)
-					})
+					w.QueueEvent(func() { secondary.TappedSecondary(ev) })
 				}
 			}
 		}
