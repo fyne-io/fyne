@@ -908,6 +908,53 @@ func (e *Entry) Unbind() {
 	e.binder.Unbind()
 }
 
+// Insert inserts the given text into the Entry at the current cursor position.
+// If text is currently selected, the selected text will be replaced
+// with the inserted content.
+//
+// Since: 2.6
+func (e *Entry) Insert(text string) {
+	if text == "" {
+		changed := e.selecting && e.eraseSelection()
+
+		if changed {
+			e.Refresh()
+		}
+
+		return // Nothing to paste into the text content.
+	}
+
+	if !e.MultiLine {
+		// format clipboard content to be compatible with single line entry
+		text = strings.Replace(text, "\n", " ", -1)
+	}
+
+	if e.selecting {
+		e.eraseSelection()
+	}
+
+	runes := []rune(text)
+	pos := e.cursorTextPos()
+	provider := e.textProvider()
+	provider.insertAt(pos, runes)
+
+	e.undoStack.Add(&entryModifyAction{
+		Position: pos,
+		Text:     runes,
+	})
+	content := provider.String()
+	e.updateText(content, false)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	cb := e.OnChanged
+
+	e.validate()
+	if cb != nil {
+		cb(content) // We know that the text has changed.
+	}
+
+	e.Refresh() // placing the cursor (and refreshing) happens last}
+}
+
 // copyToClipboard copies the current selection to a given clipboard.
 // This does nothing if it is a concealed entry.
 func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
@@ -1014,46 +1061,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
-	text := clipboard.Content()
-	if text == "" {
-		changed := e.selecting && e.eraseSelection()
-
-		if changed {
-			e.Refresh()
-		}
-
-		return // Nothing to paste into the text content.
-	}
-
-	if !e.MultiLine {
-		// format clipboard content to be compatible with single line entry
-		text = strings.Replace(text, "\n", " ", -1)
-	}
-
-	if e.selecting {
-		e.eraseSelection()
-	}
-
-	runes := []rune(text)
-	pos := e.cursorTextPos()
-	provider := e.textProvider()
-	provider.insertAt(pos, runes)
-
-	e.undoStack.Add(&entryModifyAction{
-		Position: pos,
-		Text:     runes,
-	})
-	content := provider.String()
-	e.updateText(content, false)
-	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
-	cb := e.OnChanged
-
-	e.validate()
-	if cb != nil {
-		cb(content) // We know that the text has changed.
-	}
-
-	e.Refresh() // placing the cursor (and refreshing) happens last
+	e.Insert(clipboard.Content())
 }
 
 // placeholderProvider returns the placeholder text handler for this entry

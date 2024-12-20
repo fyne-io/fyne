@@ -946,6 +946,82 @@ func TestEntry_OnPaste(t *testing.T) {
 	}
 }
 
+func TestEntry_Insert(t *testing.T) {
+	tests := []struct {
+		name             string
+		entry            *widget.Entry
+		insertText       string
+		wantText         string
+		wantRow, wantCol int
+	}{
+		{
+			name:       "singleline: empty content",
+			entry:      widget.NewEntry(),
+			insertText: "",
+			wantText:   "",
+			wantRow:    0,
+			wantCol:    0,
+		},
+		{
+			name:       "singleline: simple text",
+			entry:      widget.NewEntry(),
+			insertText: "clipboard content",
+			wantText:   "clipboard content",
+			wantRow:    0,
+			wantCol:    17,
+		},
+		{
+			name:       "singleline: UTF8 text",
+			entry:      widget.NewEntry(),
+			insertText: "Hié™שרה",
+			wantText:   "Hié™שרה",
+			wantRow:    0,
+			wantCol:    7,
+		},
+		{
+			name:       "singleline: with new line",
+			entry:      widget.NewEntry(),
+			insertText: "clipboard\ncontent",
+			wantText:   "clipboard content",
+			wantRow:    0,
+			wantCol:    17,
+		},
+		{
+			name:       "singleline: with tab",
+			entry:      widget.NewEntry(),
+			insertText: "clipboard\tcontent",
+			wantText:   "clipboard\tcontent",
+			wantRow:    0,
+			wantCol:    17,
+		},
+		{
+			name:       "password: with new line",
+			entry:      widget.NewPasswordEntry(),
+			insertText: "3SB=y+)z\nkHGK(hx6 -e_\"1TZu q^bF3^$u H[:e\"1O.",
+			wantText:   `3SB=y+)z kHGK(hx6 -e_"1TZu q^bF3^$u H[:e"1O.`,
+			wantRow:    0,
+			wantCol:    44,
+		},
+		{
+			name:       "multiline: with new line",
+			entry:      widget.NewMultiLineEntry(),
+			insertText: "clipboard\ncontent",
+			wantText:   "clipboard\ncontent",
+			wantRow:    1,
+			wantCol:    7,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.entry.Insert(tt.insertText)
+			assert.Equal(t, tt.wantText, tt.entry.Text)
+			assert.Equal(t, tt.wantRow, tt.entry.CursorRow)
+			assert.Equal(t, tt.wantCol, tt.entry.CursorColumn)
+		})
+	}
+}
+
 func TestEntry_PageUpDown(t *testing.T) {
 	t.Run("single line", func(*testing.T) {
 		e, window := setupImageTest(t, false)
