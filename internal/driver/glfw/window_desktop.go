@@ -4,7 +4,6 @@ package glfw
 
 import (
 	"bytes"
-	"context"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -90,7 +89,6 @@ type window struct {
 	mouseLastClick       fyne.CanvasObject
 	mousePressed         fyne.CanvasObject
 	mouseClickCount      int
-	mouseCancelFunc      context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -113,20 +111,18 @@ func (w *window) SetFullScreen(full bool) {
 		return
 	}
 
-	runOnMain(func() {
-		monitor := w.getMonitorForWindow()
-		mode := monitor.GetVideoMode()
+	monitor := w.getMonitorForWindow()
+	mode := monitor.GetVideoMode()
 
-		if full {
-			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
-		} else {
-			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
-				s := w.canvas.Size().Max(w.canvas.MinSize())
-				w.width, w.height = w.screenSize(s)
-			}
-			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+	if full {
+		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
+	} else {
+		if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
+			s := w.canvas.Size().Max(w.canvas.MinSize())
+			w.width, w.height = w.screenSize(s)
 		}
-	})
+		w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+	}
 }
 
 func (w *window) CenterOnScreen() {

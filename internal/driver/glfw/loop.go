@@ -92,7 +92,7 @@ func (d *gLDriver) runGL() {
 		d.trayStart()
 	}
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
-		go f() // don't block main, we don't have window event queue
+		f()
 	}
 
 	settingsChange := make(chan fyne.Settings)
@@ -181,7 +181,7 @@ func (d *gLDriver) runGL() {
 					return
 				}
 				c.applyThemeOutOfTreeObjects()
-				go c.reloadScale()
+				c.reloadScale()
 			})
 
 		}

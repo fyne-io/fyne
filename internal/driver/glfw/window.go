@@ -154,10 +154,7 @@ func (w *window) Show() {
 	}
 
 	if w.fullScreen { // this does not work if called before viewport.Show()
-		go func() {
-			time.Sleep(time.Millisecond * 100)
-			w.SetFullScreen(true)
-		}()
+		w.SetFullScreen(true)
 	}
 
 	// show top canvas element
@@ -257,7 +254,7 @@ func (w *window) destroy(d *gLDriver) {
 	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
-		go d.focusPreviousWindow()
+		d.focusPreviousWindow()
 	}
 }
 
@@ -272,7 +269,7 @@ func (w *window) processMoved(x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	go w.canvas.reloadScale()
+	w.canvas.reloadScale()
 }
 
 func (w *window) processResized(width, height int) {
@@ -562,11 +559,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 	if doubleTap {
 		w.mouseClickCount++
 		w.mouseLastClick = co
-		mouseCancelFunc := w.mouseCancelFunc
-		if mouseCancelFunc != nil {
-			mouseCancelFunc()
-			return
-		}
+
 		go w.waitForDoubleTap(co, ev)
 	} else {
 		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
@@ -577,12 +570,21 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 }
 
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
-	var ctx context.Context
-	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
-	defer w.mouseCancelFunc()
+	ctx, mouseCancelFunc := context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
+	if mouseCancelFunc != nil {
+		defer func() {
+			runOnMain(mouseCancelFunc)
+		}()
+	}
 
 	<-ctx.Done()
 
+	runOnMain(func() {
+		w.waitForDoubleTapEnded(co, ev)
+	})
+}
+
+func (w *window) waitForDoubleTapEnded(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	if w.mouseClickCount == 2 && w.mouseLastClick == co {
 		if wid, ok := co.(fyne.DoubleTappable); ok {
 			wid.DoubleTapped(ev)
@@ -595,7 +597,6 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 
 	w.mouseClickCount = 0
 	w.mousePressed = nil
-	w.mouseCancelFunc = nil
 	w.mouseLastClick = nil
 }
 
