@@ -129,18 +129,10 @@ func (w *window) detectTextureScale() float32 {
 }
 
 func (w *window) Show() {
-	go func() {
-		runOnMain(w.doShow)
-	}()
-}
-
-func (w *window) doShow() {
 	if w.view() != nil {
 		w.doShowAgain()
 		return
 	}
-
-	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {

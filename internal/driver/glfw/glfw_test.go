@@ -32,10 +32,6 @@ func ensureCanvasSize(t *testing.T, w *window, size fyne.Size) {
 }
 
 func repaintWindow(w *window) {
-	// Wait for GLFW loop to be running.
-	// If we try to paint windows before the context is created, we will end up on the wrong thread.
-	<-w.driver.waitForStart
-
 	w.RunWithContext(func() {
 		d.repaintWindow(w)
 	})

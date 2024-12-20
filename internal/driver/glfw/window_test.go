@@ -37,10 +37,13 @@ func init() {
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
 	d.initGLFW()
+
+	waitForStart := make(chan struct{})
 	go func() {
-		// Wait for GLFW loop to be running.
+		// Wait for GLFW loop to be running (plus a moment in case od scheduling switches).
 		// If we try to create windows before the context is created, this will fail with an exception.
-		<-d.waitForStart
+		<-waitForStart
+		time.Sleep(time.Millisecond * 100)
 
 		initMainMenu()
 		os.Exit(m.Run())
@@ -50,6 +53,8 @@ func TestMain(m *testing.M) {
 	master.SetOnClosed(func() {
 		// we do not close, keeping the driver running
 	})
+
+	close(waitForStart) // Signal that execution can continue.
 	d.Run()
 }
 
@@ -1645,7 +1650,7 @@ func TestWindow_SetFullScreen(t *testing.T) {
 		w.create()
 	})
 
-	w.doShow()
+	w.Show()
 	assert.Zero(t, w.width)
 	assert.Zero(t, w.height)
 

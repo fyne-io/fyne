@@ -164,7 +164,6 @@ func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:         make(chan struct{}),
-		waitForStart: make(chan struct{}),
+		done: make(chan struct{}),
 	}
 }

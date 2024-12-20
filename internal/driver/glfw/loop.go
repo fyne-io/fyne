@@ -86,7 +86,6 @@ func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
-	close(d.waitForStart) // Signal that execution can continue.
 
 	d.initGLFW()
 	if d.trayStart != nil {
