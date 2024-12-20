@@ -32,9 +32,8 @@ var curWindow *window
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windows      []fyne.Window
-	done         chan struct{}
-	waitForStart chan struct{}
+	windows []fyne.Window
+	done    chan struct{}
 
 	animation animation.Runner
 
