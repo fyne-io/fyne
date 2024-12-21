@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
 
@@ -474,7 +475,11 @@ func (w *window) rescaleOnMain() {
 		scale.ToFyneCoordinate(w.canvas, w.width),
 		scale.ToFyneCoordinate(w.canvas, w.height))
 	w.canvas.Resize(scaledFull)
-	return
+
+	// Ensure textures re-rasterize at the new scale
+	cache.DeleteTextTexturesFor(w.canvas)
+	w.canvas.content.Refresh()
+	//return
 	//	}
 
 	//	size := w.canvas.size.Union(w.canvas.MinSize())
