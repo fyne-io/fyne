@@ -469,7 +469,6 @@ func (w *window) rescaleOnMain() {
 		return
 	}
 
-	//	if w.fullScreen {
 	w.width, w.height = w.viewport.GetSize()
 	scaledFull := fyne.NewSize(
 		scale.ToFyneCoordinate(w.canvas, w.width),
@@ -479,12 +478,6 @@ func (w *window) rescaleOnMain() {
 	// Ensure textures re-rasterize at the new scale
 	cache.DeleteTextTexturesFor(w.canvas)
 	w.canvas.content.Refresh()
-	//return
-	//	}
-
-	//	size := w.canvas.size.Union(w.canvas.MinSize())
-	//	newWidth, newHeight := w.screenSize(size)
-	//	w.viewport.SetSize(newWidth, newHeight)
 }
 
 func (w *window) create() {
