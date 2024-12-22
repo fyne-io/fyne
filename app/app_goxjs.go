@@ -29,7 +29,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		base64Str := base64.StdEncoding.EncodeToString(icon)
 		mimeType := http.DetectContentType(icon)
 		base64Img := fmt.Sprintf("data:%s;base64,%s", mimeType, base64Str)
-		notification.New(n.Title, map[string]interface{}{
+		notification.New(n.Title, map[string]any{
 			"body": n.Content,
 			"icon": base64Img,
 		})
@@ -37,7 +37,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 	if permission.Type() != js.TypeString || permission.String() != "granted" {
 		// need to request for permission
-		notification.Call("requestPermission", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		notification.Call("requestPermission", js.FuncOf(func(this js.Value, args []js.Value) any {
 			if len(args) > 0 && args[0].Type() == js.TypeString && args[0].String() == "granted" {
 				showNotification()
 			} else {
@@ -50,7 +50,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 }
 
-var themeChanged = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+var themeChanged = js.FuncOf(func(this js.Value, args []js.Value) any {
 	if len(args) > 0 && args[0].Type() == js.TypeObject {
 		fyne.CurrentApp().Settings().(*settings).setupTheme()
 	}

@@ -137,7 +137,7 @@ type translateOpts struct {
 // Create or add to translations file by scanning the given files for translation calls.
 // Works with and without existing translations file.
 func updateTranslationsFile(file string, files []string, opts *translateOpts) error {
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 
 	f, err := os.Open(file)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -205,7 +205,7 @@ func writeTranslationsFile(b []byte, file string) error {
 }
 
 // Update translations hash by scanning the given files, then parsing and walking the AST
-func updateTranslationsHash(m map[string]interface{}, srcs []string, opts *translateOpts) error {
+func updateTranslationsHash(m map[string]any, srcs []string, opts *translateOpts) error {
 	fset := token.NewFileSet()
 	specs := []*ast.ImportSpec{}
 
@@ -287,7 +287,7 @@ type visitor struct {
 	name     string
 	key      string
 	fallback string
-	m        map[string]interface{}
+	m        map[string]any
 }
 
 // Method to walk AST using interface for ast.Walk

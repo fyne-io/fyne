@@ -349,7 +349,7 @@ var fontCustomCache = &sync.Map{} // map[string]*FontCacheItem for custom resour
 
 type noopLogger struct{}
 
-func (n noopLogger) Printf(string, ...interface{}) {}
+func (n noopLogger) Printf(string, ...any) {}
 
 type dynamicFontMap struct {
 	faces  []*font.Face

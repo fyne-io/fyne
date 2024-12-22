@@ -89,7 +89,7 @@ func TestUpdateTranslationsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	dec := json.NewDecoder(f)
 	if err := dec.Decode(&translations); err != nil {
 		t.Fatal(err)
@@ -142,7 +142,7 @@ func TestUpdateTranslationsHash(t *testing.T) {
 	srcpath := filepath.Join(dir, src)
 
 	opts := translateOpts{}
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	if err := updateTranslationsHash(translations, []string{srcpath}, &opts); err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +169,7 @@ func TestTranslationsVisitor(t *testing.T) {
 	}
 
 	opts := translateOpts{}
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	ast.Walk(&visitor{opts: &opts, m: translations}, af)
 
 	key := "example"
@@ -203,7 +203,7 @@ func TestTranslateVisitorCall(t *testing.T) {
 }
 
 func TestTranslateVisitorLocalize(t *testing.T) {
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	v := &visitor{
 		opts: &translateOpts{},
 		m:    translations,
@@ -223,7 +223,7 @@ func TestTranslateVisitorLocalize(t *testing.T) {
 }
 
 func TestTranslateVisitorKey(t *testing.T) {
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	v := &visitor{
 		opts: &translateOpts{},
 		m:    translations,
@@ -243,7 +243,7 @@ func TestTranslateVisitorKey(t *testing.T) {
 }
 
 func TestTranslateVisitorFallback(t *testing.T) {
-	translations := make(map[string]interface{})
+	translations := make(map[string]any)
 	v := &visitor{
 		opts: &translateOpts{},
 		m:    translations,
