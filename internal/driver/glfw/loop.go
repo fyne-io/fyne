@@ -47,11 +47,6 @@ func runOnMain(f func()) {
 	<-done
 }
 
-// force a function f to run on the draw thread
-func runOnMainWithContext(w *window, f func()) {
-	runOnMain(func() { w.RunWithContext(f) }) // TODO remove this completely
-}
-
 // Preallocate to avoid allocations on every drawSingleFrame.
 // Note that the capacity of this slice can only grow,
 // but its length will never be longer than the total number of
@@ -91,14 +86,13 @@ func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
-	close(d.waitForStart) // Signal that execution can continue.
 
 	d.initGLFW()
 	if d.trayStart != nil {
 		d.trayStart()
 	}
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
-		go f() // don't block main, we don't have window event queue
+		f()
 	}
 
 	settingsChange := make(chan fyne.Settings)
@@ -172,9 +166,7 @@ func (d *gLDriver) runGL() {
 					newWindows = append(newWindows, win)
 				}
 
-				d.windowLock.Lock()
 				d.windows = newWindows
-				d.windowLock.Unlock()
 
 				if len(newWindows) == 0 {
 					d.Quit()
@@ -189,7 +181,7 @@ func (d *gLDriver) runGL() {
 					return
 				}
 				c.applyThemeOutOfTreeObjects()
-				go c.reloadScale()
+				c.reloadScale()
 			})
 
 		}

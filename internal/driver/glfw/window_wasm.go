@@ -463,7 +463,7 @@ func (w *window) DetachCurrentContext() {
 	glfw.DetachCurrentContext()
 }
 
-func (w *window) rescaleOnMain() {
+func (w *window) RescaleContext() {
 	if w.viewport == nil {
 		return
 	}
@@ -483,73 +483,68 @@ func (w *window) rescaleOnMain() {
 }
 
 func (w *window) create() {
-	runOnMain(func() {
-		// we can't hide the window in webgl, so there might be some artifact
-		initWindowHints()
+	// we can't hide the window in webgl, so there might be some artifact
+	initWindowHints()
 
-		pixWidth, pixHeight := w.screenSize(w.canvas.size)
-		pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
-		if pixWidth == 0 {
-			pixWidth = 10
-		}
-		pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
-		if pixHeight == 0 {
-			pixHeight = 10
-		}
+	pixWidth, pixHeight := w.screenSize(w.canvas.size)
+	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	if pixWidth == 0 {
+		pixWidth = 10
+	}
+	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	if pixHeight == 0 {
+		pixHeight = 10
+	}
 
-		win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
-		if err != nil {
-			w.driver.initFailed("window creation error", err)
-			return
-		}
+	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
+	if err != nil {
+		w.driver.initFailed("window creation error", err)
+		return
+	}
 
-		w.viewLock.Lock()
-		w.viewport = win
-		w.viewLock.Unlock()
-	})
+	w.viewLock.Lock()
+	w.viewport = win
+	w.viewLock.Unlock()
 
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
 	}
 
 	// run the GL init on the draw thread
-	runOnMainWithContext(w, func() {
+	w.RunWithContext(func() {
 		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
 		w.canvas.Painter().Init()
 	})
 
-	runOnMain(func() {
-		w.setDarkMode()
+	w.setDarkMode()
 
-		win := w.view()
-		win.SetCloseCallback(w.closed)
-		win.SetPosCallback(w.moved)
-		win.SetSizeCallback(w.resized)
-		win.SetFramebufferSizeCallback(w.frameSized)
-		win.SetRefreshCallback(w.refresh)
-		win.SetCursorPosCallback(w.mouseMoved)
-		win.SetMouseButtonCallback(w.mouseClicked)
-		win.SetScrollCallback(w.mouseScrolled)
-		win.SetKeyCallback(w.keyPressed)
-		win.SetCharCallback(w.charInput)
-		win.SetFocusCallback(w.focused)
+	win.SetCloseCallback(w.closed)
+	win.SetPosCallback(w.moved)
+	win.SetSizeCallback(w.resized)
+	win.SetFramebufferSizeCallback(w.frameSized)
+	win.SetRefreshCallback(w.refresh)
+	win.SetCursorPosCallback(w.mouseMoved)
+	win.SetMouseButtonCallback(w.mouseClicked)
+	win.SetScrollCallback(w.mouseScrolled)
+	win.SetKeyCallback(w.keyPressed)
+	win.SetCharCallback(w.charInput)
+	win.SetFocusCallback(w.focused)
 
-		w.canvas.detectedScale = w.detectScale()
-		w.canvas.scale = w.calculatedScale()
-		w.canvas.texScale = w.detectTextureScale()
-		// update window size now we have scaled detected
-		w.fitContent()
+	w.canvas.detectedScale = w.detectScale()
+	w.canvas.scale = w.calculatedScale()
+	w.canvas.texScale = w.detectTextureScale()
+	// update window size now we have scaled detected
+	w.fitContent()
 
-		for _, fn := range w.pending {
-			fn()
-		}
+	for _, fn := range w.pending {
+		fn()
+	}
 
-		w.requestedWidth, w.requestedHeight = w.width, w.height
+	w.requestedWidth, w.requestedHeight = w.width, w.height
 
-		width, height := win.GetSize()
-		w.processFrameSized(width, height)
-		w.processResized(width, height)
-	})
+	width, height := win.GetSize()
+	w.processFrameSized(width, height)
+	w.processResized(width, height)
 }
 
 func (w *window) view() *glfw.Window {

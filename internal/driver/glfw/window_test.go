@@ -37,10 +37,13 @@ func init() {
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
 	d.initGLFW()
+
+	waitForStart := make(chan struct{})
 	go func() {
-		// Wait for GLFW loop to be running.
+		// Wait for GLFW loop to be running (plus a moment in case od scheduling switches).
 		// If we try to create windows before the context is created, this will fail with an exception.
-		<-d.waitForStart
+		<-waitForStart
+		time.Sleep(time.Millisecond * 100)
 
 		initMainMenu()
 		os.Exit(m.Run())
@@ -50,12 +53,13 @@ func TestMain(m *testing.M) {
 	master.SetOnClosed(func() {
 		// we do not close, keeping the driver running
 	})
+
+	close(waitForStart) // Signal that execution can continue.
 	d.Run()
 }
 
 func TestGLDriver_CreateWindow(t *testing.T) {
 	w := createWindow("Test").(*window)
-	w.create()
 
 	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.Decorated))
 	assert.True(t, w.Padded())
@@ -68,9 +72,11 @@ func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
-	d := NewGLDriver()
-	w := d.CreateSplashWindow().(*window)
-	w.create()
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateSplashWindow().(*window)
+		w.create()
+	})
 
 	// Verify that the glfw driver implements desktop.Driver.
 	var driver fyne.Driver = d
@@ -1049,7 +1055,6 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(o)
-	waitForMain()
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -1069,7 +1074,6 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 		tapped = true
 	})
 	w.SetContent(o)
-	waitForMain()
 	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
 	w.mousePos = fyne.NewPos(10, 25)
@@ -1572,8 +1576,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 
 	d := NewGLDriver()
 	t.Run("when closing window with #Close()", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		onIntercepted := false
 		onClosed := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
@@ -1587,8 +1590,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside (notified by GLFW callback)", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		onIntercepted := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
 		closed := make(chan bool, 1)
@@ -1606,8 +1608,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside but no interceptor is set", func(t *testing.T) {
-		w := d.CreateWindow("test").(*window)
-		w.create()
+		w := createWindow("test").(*window)
 		closed := make(chan bool, 1)
 		w.SetOnClosed(func() { closed <- true })
 		w.closed(w.viewport)
@@ -1642,18 +1643,18 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 }
 
 func TestWindow_SetFullScreen(t *testing.T) {
-	w := d.CreateWindow("Full").(*window)
-	w.SetFullScreen(true)
-	w.create()
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateWindow("Full").(*window)
+		w.SetFullScreen(true)
+		w.create()
+	})
 
-	w.create()
-	w.doShow()
-	waitForMain()
+	w.Show()
 	assert.Zero(t, w.width)
 	assert.Zero(t, w.height)
 
 	w.SetFullScreen(false)
-	waitForMain()
 	// ensure we realised size now!
 	assert.NotZero(t, w.width)
 	assert.NotZero(t, w.height)
@@ -1678,8 +1679,11 @@ func TestWindow_SetFullScreen(t *testing.T) {
 // }
 
 func createWindow(title string) fyne.Window {
-	w := d.CreateWindow(title)
-	w.(*window).create()
+	var w fyne.Window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateWindow(title)
+		w.(*window).create()
+	})
 	return w
 }
 
@@ -1927,10 +1931,6 @@ func newDoubleTappableButton() *doubleTappableButton {
 	but.ExtendBaseWidget(but)
 
 	return but
-}
-
-func waitForMain() {
-	runOnMain(func() {}) // this blocks until processed
 }
 
 type tabbable struct {

@@ -4,7 +4,6 @@ package glfw
 
 import (
 	"bytes"
-	"context"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -90,7 +89,6 @@ type window struct {
 	mouseLastClick       fyne.CanvasObject
 	mousePressed         fyne.CanvasObject
 	mouseClickCount      int
-	mouseCancelFunc      context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -113,20 +111,18 @@ func (w *window) SetFullScreen(full bool) {
 		return
 	}
 
-	runOnMain(func() {
-		monitor := w.getMonitorForWindow()
-		mode := monitor.GetVideoMode()
+	monitor := w.getMonitorForWindow()
+	mode := monitor.GetVideoMode()
 
-		if full {
-			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
-		} else {
-			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
-				s := w.canvas.Size().Max(w.canvas.MinSize())
-				w.width, w.height = w.screenSize(s)
-			}
-			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+	if full {
+		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
+	} else {
+		if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
+			s := w.canvas.Size().Max(w.canvas.MinSize())
+			w.width, w.height = w.screenSize(s)
 		}
-	})
+		w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+	}
 }
 
 func (w *window) CenterOnScreen() {
@@ -685,7 +681,7 @@ func (w *window) DetachCurrentContext() {
 	glfw.DetachCurrentContext()
 }
 
-func (w *window) rescaleOnMain() {
+func (w *window) RescaleContext() {
 	if w.isClosing() {
 		return
 	}
@@ -706,89 +702,84 @@ func (w *window) rescaleOnMain() {
 }
 
 func (w *window) create() {
-	runOnMain(func() {
-		if !build.IsWayland {
-			// make the window hidden, we will set it up and then show it later
-			glfw.WindowHint(glfw.Visible, glfw.False)
-		}
-		if w.decorate {
-			glfw.WindowHint(glfw.Decorated, glfw.True)
-		} else {
-			glfw.WindowHint(glfw.Decorated, glfw.False)
-		}
-		if w.fixedSize {
-			glfw.WindowHint(glfw.Resizable, glfw.False)
-		} else {
-			glfw.WindowHint(glfw.Resizable, glfw.True)
-		}
-		glfw.WindowHint(glfw.AutoIconify, glfw.False)
-		initWindowHints()
+	if !build.IsWayland {
+		// make the window hidden, we will set it up and then show it later
+		glfw.WindowHint(glfw.Visible, glfw.False)
+	}
+	if w.decorate {
+		glfw.WindowHint(glfw.Decorated, glfw.True)
+	} else {
+		glfw.WindowHint(glfw.Decorated, glfw.False)
+	}
+	if w.fixedSize {
+		glfw.WindowHint(glfw.Resizable, glfw.False)
+	} else {
+		glfw.WindowHint(glfw.Resizable, glfw.True)
+	}
+	glfw.WindowHint(glfw.AutoIconify, glfw.False)
+	initWindowHints()
 
-		pixWidth, pixHeight := w.screenSize(w.canvas.size)
-		pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
-		if pixWidth == 0 {
-			pixWidth = 10
-		}
-		pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
-		if pixHeight == 0 {
-			pixHeight = 10
-		}
+	pixWidth, pixHeight := w.screenSize(w.canvas.size)
+	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	if pixWidth == 0 {
+		pixWidth = 10
+	}
+	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	if pixHeight == 0 {
+		pixHeight = 10
+	}
 
-		win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
-		if err != nil {
-			w.driver.initFailed("window creation error", err)
-			return
-		}
+	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
+	if err != nil {
+		w.driver.initFailed("window creation error", err)
+		return
+	}
 
-		w.viewport = win
-	})
+	w.viewport = win
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
 	}
 
 	// run the GL init on the draw thread
-	runOnMainWithContext(w, func() {
+	w.RunWithContext(func() {
 		w.canvas.SetPainter(gl.NewPainter(w.canvas, w))
 		w.canvas.Painter().Init()
 	})
 
-	runOnMain(func() {
-		w.setDarkMode()
+	w.setDarkMode()
 
-		win := w.view()
-		win.SetCloseCallback(w.closed)
-		win.SetPosCallback(w.moved)
-		win.SetSizeCallback(w.resized)
-		win.SetFramebufferSizeCallback(w.frameSized)
-		win.SetRefreshCallback(w.refresh)
-		win.SetContentScaleCallback(w.scaled)
-		win.SetCursorPosCallback(w.mouseMoved)
-		win.SetMouseButtonCallback(w.mouseClicked)
-		win.SetScrollCallback(w.mouseScrolled)
-		win.SetKeyCallback(w.keyPressed)
-		win.SetCharCallback(w.charInput)
-		win.SetFocusCallback(w.focused)
+	win.SetCloseCallback(w.closed)
+	win.SetPosCallback(w.moved)
+	win.SetSizeCallback(w.resized)
+	win.SetFramebufferSizeCallback(w.frameSized)
+	win.SetRefreshCallback(w.refresh)
+	win.SetContentScaleCallback(w.scaled)
+	win.SetCursorPosCallback(w.mouseMoved)
+	win.SetMouseButtonCallback(w.mouseClicked)
+	win.SetScrollCallback(w.mouseScrolled)
+	win.SetKeyCallback(w.keyPressed)
+	win.SetCharCallback(w.charInput)
+	win.SetFocusCallback(w.focused)
 
-		w.canvas.detectedScale = w.detectScale()
-		w.canvas.scale = w.calculatedScale()
-		w.canvas.texScale = w.detectTextureScale()
-		// update window size now we have scaled detected
-		w.fitContent()
+	w.canvas.detectedScale = w.detectScale()
+	w.canvas.scale = w.calculatedScale()
+	w.canvas.texScale = w.detectTextureScale()
+	// update window size now we have scaled detected
+	w.fitContent()
 
-		for _, fn := range w.pending {
-			fn()
-		}
+	for _, fn := range w.pending {
+		fn()
+	}
 
-		if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
-			bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-			w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
-			w.shouldWidth, w.shouldHeight = w.width, w.height
-		}
+	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
+		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
+		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.shouldWidth, w.shouldHeight = w.width, w.height
+	}
 
-		w.requestedWidth, w.requestedHeight = w.width, w.height
-		// order of operation matters so we do these last items in order
-		w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
-	})
+	w.requestedWidth, w.requestedHeight = w.width, w.height
+	// order of operation matters so we do these last items in order
+	w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
 }
 
 func (w *window) view() *glfw.Window {

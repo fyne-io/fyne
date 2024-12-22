@@ -129,71 +129,58 @@ func (w *window) detectTextureScale() float32 {
 }
 
 func (w *window) Show() {
-	go w.doShow()
-}
-
-func (w *window) doShow() {
 	if w.view() != nil {
 		w.doShowAgain()
 		return
 	}
-
-	<-w.driver.waitForStart
 
 	w.createLock.Do(w.create)
 	if w.view() == nil {
 		return
 	}
 
-	runOnMain(func() {
-		w.visible = true
-		view := w.view()
-		view.SetTitle(w.title)
+	w.visible = true
+	view := w.view()
+	view.SetTitle(w.title)
 
-		if !build.IsWayland && w.centered {
-			w.doCenterOnScreen() // lastly center if that was requested
-		}
-		view.Show()
+	if !build.IsWayland && w.centered {
+		w.doCenterOnScreen() // lastly center if that was requested
+	}
+	view.Show()
 
-		// save coordinates
-		if !build.IsWayland {
-			w.xpos, w.ypos = view.GetPos()
-		}
+	// save coordinates
+	if !build.IsWayland {
+		w.xpos, w.ypos = view.GetPos()
+	}
 
-		if w.fullScreen { // this does not work if called before viewport.Show()
-			go func() {
-				time.Sleep(time.Millisecond * 100)
-				w.SetFullScreen(true)
-			}()
-		}
-	})
+	if w.fullScreen { // this does not work if called before viewport.Show()
+		w.SetFullScreen(true)
+	}
 
 	// show top canvas element
 	if content := w.canvas.Content(); content != nil {
 		content.Show()
 
-		runOnMainWithContext(w, func() {
+		w.RunWithContext(func() {
 			w.driver.repaintWindow(w)
 		})
 	}
 }
 
 func (w *window) Hide() {
-	runOnMain(func() {
-		if w.closing || w.viewport == nil {
-			return
-		}
+	if w.closing || w.viewport == nil {
+		return
+	}
 
-		w.visible = false
-		v := w.viewport
+	w.visible = false
+	v := w.viewport
 
-		v.Hide()
+	v.Hide()
 
-		// hide top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Hide()
-		}
-	})
+	// hide top canvas element
+	if content := w.canvas.Content(); content != nil {
+		content.Hide()
+	}
 }
 
 func (w *window) Close() {
@@ -267,7 +254,7 @@ func (w *window) destroy(d *gLDriver) {
 	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
-		go d.focusPreviousWindow()
+		d.focusPreviousWindow()
 	}
 }
 
@@ -282,7 +269,7 @@ func (w *window) processMoved(x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	go w.canvas.reloadScale()
+	w.canvas.reloadScale()
 }
 
 func (w *window) processResized(width, height int) {
@@ -572,11 +559,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 	if doubleTap {
 		w.mouseClickCount++
 		w.mouseLastClick = co
-		mouseCancelFunc := w.mouseCancelFunc
-		if mouseCancelFunc != nil {
-			mouseCancelFunc()
-			return
-		}
+
 		go w.waitForDoubleTap(co, ev)
 	} else {
 		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
@@ -587,12 +570,21 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 }
 
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
-	var ctx context.Context
-	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
-	defer w.mouseCancelFunc()
+	ctx, mouseCancelFunc := context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
+	if mouseCancelFunc != nil {
+		defer func() {
+			runOnMain(mouseCancelFunc)
+		}()
+	}
 
 	<-ctx.Done()
 
+	runOnMain(func() {
+		w.waitForDoubleTapEnded(co, ev)
+	})
+}
+
+func (w *window) waitForDoubleTapEnded(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	if w.mouseClickCount == 2 && w.mouseLastClick == co {
 		if wid, ok := co.(fyne.DoubleTappable); ok {
 			wid.DoubleTapped(ev)
@@ -605,7 +597,6 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 
 	w.mouseClickCount = 0
 	w.mousePressed = nil
-	w.mouseCancelFunc = nil
 	w.mouseLastClick = nil
 }
 
@@ -743,17 +734,15 @@ func (w *window) processFocused(focus bool) {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
 
-		go func() { // check whether another window was focused or not
-			time.Sleep(time.Millisecond * 100)
-			if curWindow != w {
-				return
-			}
+		// check whether another window was focused or not
+		if curWindow != w {
+			return
+		}
 
-			curWindow = nil
-			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
-				f()
-			}
-		}()
+		curWindow = nil
+		if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
+			f()
+		}
 	}
 }
 
@@ -858,17 +847,13 @@ func (w *window) RunWithContext(f func()) {
 	w.DetachCurrentContext()
 }
 
-func (w *window) RescaleContext() {
-	runOnMain(w.rescaleOnMain)
-}
-
 func (w *window) Context() any {
 	return nil
 }
 
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.view() != nil {
-		runOnMain(fn)
+		fn()
 		return
 	}
 
@@ -882,7 +867,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	// handling multiple windows by overlaying on the root for web
 	var root fyne.Window
-	d.windowLock.RLock()
 	hasVisible := false
 	for _, w := range d.windows {
 		if w.(*window).visible {
@@ -891,7 +875,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 			break
 		}
 	}
-	d.windowLock.RUnlock()
 
 	if !hasVisible {
 		return d.createWindow(title, true)
@@ -915,15 +898,14 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	if title == "" {
 		title = defaultTitle
 	}
-	runOnMain(func() {
-		d.initGLFW()
 
-		ret = &window{title: title, decorate: decorate, driver: d}
-		ret.canvas = newCanvas()
-		ret.canvas.context = ret
-		ret.SetIcon(ret.icon)
-		d.addWindow(ret)
-	})
+	d.initGLFW()
+
+	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.canvas = newCanvas()
+	ret.canvas.context = ret
+	ret.SetIcon(ret.icon)
+	d.addWindow(ret)
 	return ret
 }
 
@@ -932,19 +914,17 @@ func (w *window) doShowAgain() {
 		return
 	}
 
-	runOnMain(func() {
-		// show top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Show()
-		}
+	// show top canvas element
+	if content := w.canvas.Content(); content != nil {
+		content.Show()
+	}
 
-		view := w.view()
-		if !build.IsWayland {
-			view.SetPos(w.xpos, w.ypos)
-		}
-		view.Show()
-		w.visible = true
-	})
+	view := w.view()
+	if !build.IsWayland {
+		view.SetPos(w.xpos, w.ypos)
+	}
+	view.Show()
+	w.visible = true
 }
 
 func (w *window) isClosing() bool {

@@ -3,8 +3,9 @@
 package glfw
 
 import (
-	"fyne.io/fyne/v2"
 	glfw "github.com/fyne-io/glfw-js"
+
+	"fyne.io/fyne/v2"
 )
 
 // Declare conformity with Clipboard interface
@@ -21,16 +22,11 @@ type clipboard struct {
 
 // Content returns the clipboard content
 func (c clipboard) Content() string {
-	content := ""
-	runOnMain(func() {
-		content, _ = c.window.GetClipboardString()
-	})
+	content, _ := c.window.GetClipboardString()
 	return content
 }
 
 // SetContent sets the clipboard content
 func (c clipboard) SetContent(content string) {
-	runOnMain(func() {
-		c.window.SetClipboardString(content)
-	})
+	c.window.SetClipboardString(content)
 }
