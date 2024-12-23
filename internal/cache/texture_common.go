@@ -78,6 +78,20 @@ func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	})
 }
 
+// DeleteTextTexturesFor deletes all text textures for the given canvas.
+func DeleteTextTexturesFor(canvas fyne.Canvas) {
+	textures.Range(func(key, value any) bool {
+		if _, ok := key.(FontCacheEntry); ok {
+			tinfo := value.(*textureInfo)
+			if tinfo.canvas == canvas {
+				textures.Delete(key)
+				tinfo.textFree()
+			}
+		}
+		return true
+	})
+}
+
 // SetTextTexture sets cached texture for a text run.
 func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas, free func()) {
 	store(ent, texture, canvas, free)
