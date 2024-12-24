@@ -344,6 +344,8 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 			return func() { os.Remove(metadataInitFilePath) }, err
 		}
 
+		res = metadata.ScaleIcon(res, 512)
+
 		// The return type of fyne.LoadResourceFromPath is always a *fyne.StaticResource.
 		app.ResGoString = res.(*fyne.StaticResource).GoString()
 	}
