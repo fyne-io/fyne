@@ -340,7 +340,7 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	if app.icon != "" {
 		res, err := fyne.LoadResourceFromPath(app.icon)
 		if err != nil {
-			fyne.LogError("Unable to load medadata icon file "+app.icon, err)
+			fyne.LogError("Unable to load metadata icon file "+app.icon, err)
 			return func() { os.Remove(metadataInitFilePath) }, err
 		}
 
