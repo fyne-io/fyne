@@ -100,6 +100,8 @@ func (i *IndefiniteAnimation) setupAnimation() {
 			Tick: func(_ float32) {
 				i.Tick()
 			},
+			Curve:       AnimationLinear, // any curve will work
+			Duration:    1 * time.Second, // anything positive here will work
 			RepeatCount: AnimationRepeatForever,
 		}
 		i.isSetup = true
