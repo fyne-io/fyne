@@ -1,0 +1,306 @@
+<canvas padded size="2053x1500">
+	<content>
+		<widget pos="4,4" size="2045x1492" type="*widget.CheckGroup">
+			<widget size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 0</text>
+			</widget>
+			<widget pos="0,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 1</text>
+			</widget>
+			<widget pos="81,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 2</text>
+			</widget>
+			<widget pos="81,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 3</text>
+			</widget>
+			<widget pos="163,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 4</text>
+			</widget>
+			<widget pos="163,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 5</text>
+			</widget>
+			<widget pos="245,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 6</text>
+			</widget>
+			<widget pos="245,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 7</text>
+			</widget>
+			<widget pos="327,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 8</text>
+			</widget>
+			<widget pos="327,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 9</text>
+			</widget>
+			<widget pos="409,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 10</text>
+			</widget>
+			<widget pos="409,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 11</text>
+			</widget>
+			<widget pos="490,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 12</text>
+			</widget>
+			<widget pos="490,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 13</text>
+			</widget>
+			<widget pos="572,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 14</text>
+			</widget>
+			<widget pos="572,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 15</text>
+			</widget>
+			<widget pos="654,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 16</text>
+			</widget>
+			<widget pos="654,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 17</text>
+			</widget>
+			<widget pos="736,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 18</text>
+			</widget>
+			<widget pos="736,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 19</text>
+			</widget>
+			<widget pos="818,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 20</text>
+			</widget>
+			<widget pos="818,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 21</text>
+			</widget>
+			<widget pos="899,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 22</text>
+			</widget>
+			<widget pos="899,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 23</text>
+			</widget>
+			<widget pos="981,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 24</text>
+			</widget>
+			<widget pos="981,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 25</text>
+			</widget>
+			<widget pos="1063,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 26</text>
+			</widget>
+			<widget pos="1063,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 27</text>
+			</widget>
+			<widget pos="1145,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 28</text>
+			</widget>
+			<widget pos="1145,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 29</text>
+			</widget>
+			<widget pos="1227,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 30</text>
+			</widget>
+			<widget pos="1227,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 31</text>
+			</widget>
+			<widget pos="1308,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 32</text>
+			</widget>
+			<widget pos="1308,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 33</text>
+			</widget>
+			<widget pos="1390,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 34</text>
+			</widget>
+			<widget pos="1390,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 35</text>
+			</widget>
+			<widget pos="1472,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 36</text>
+			</widget>
+			<widget pos="1472,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 37</text>
+			</widget>
+			<widget pos="1554,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 38</text>
+			</widget>
+			<widget pos="1554,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 39</text>
+			</widget>
+			<widget pos="1636,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 40</text>
+			</widget>
+			<widget pos="1636,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 41</text>
+			</widget>
+			<widget pos="1717,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 42</text>
+			</widget>
+			<widget pos="1717,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 43</text>
+			</widget>
+			<widget pos="1799,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 44</text>
+			</widget>
+			<widget pos="1799,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 45</text>
+			</widget>
+			<widget pos="1881,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 46</text>
+			</widget>
+			<widget pos="1881,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 47</text>
+			</widget>
+			<widget pos="1963,0" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 48</text>
+			</widget>
+			<widget pos="1963,746" size="81x746" type="*widget.Check">
+				<circle pos="2,359" size="28x28"/>
+				<image pos="6,363" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,363" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="49x746">Test 49</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>
