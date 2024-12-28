@@ -1,17 +1,17 @@
 <canvas padded size="154x200">
 	<content>
 		<widget pos="4,4" size="146x192" type="*widget.CheckGroup">
-			<widget size="77x35" type="*widget.Check">
-				<circle pos="2,3" size="28x28"/>
-				<image pos="6,7" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
-				<image pos="6,7" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
-				<text color="disabled" pos="32,0" size="45x35">Foo</text>
+			<widget size="73x192" type="*widget.Check">
+				<circle pos="2,82" size="28x28"/>
+				<image pos="6,86" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,86" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="41x192">Foo</text>
 			</widget>
-			<widget pos="77,0" size="77x35" type="*widget.Check">
-				<circle pos="2,3" size="28x28"/>
-				<image pos="6,7" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
-				<image pos="6,7" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
-				<text color="disabled" pos="32,0" size="45x35">Barley</text>
+			<widget pos="73,0" size="73x192" type="*widget.Check">
+				<circle pos="2,82" size="28x28"/>
+				<image pos="6,86" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,86" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
+				<text color="disabled" pos="32,0" size="41x192">Barley</text>
 			</widget>
 		</widget>
 	</content>
