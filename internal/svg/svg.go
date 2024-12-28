@@ -29,7 +29,7 @@ func Colorize(src []byte, clr color.Color) []byte {
 func ColorizeError(src []byte, clr color.Color) ([]byte, error) {
 	var err error
 	content := colorizeImpl(src, clr, func(s string, e error) {
-		err = fmt.Errorf("%s: %s", s, e.Error())
+		err = fmt.Errorf("%s %s", s, e.Error())
 	})
 	return content, err
 }
