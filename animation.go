@@ -95,17 +95,19 @@ func (i *IndefiniteAnimation) Stop() {
 }
 
 func (i *IndefiniteAnimation) setupAnimation() {
-	if !i.isSetup {
-		i.animation = Animation{
-			Tick: func(_ float32) {
-				i.Tick()
-			},
-			Curve:       AnimationLinear, // any curve will work
-			Duration:    1 * time.Second, // anything positive here will work
-			RepeatCount: AnimationRepeatForever,
-		}
-		i.isSetup = true
+	if i.isSetup {
+		return
 	}
+
+	i.animation = Animation{
+		Tick: func(_ float32) {
+			i.Tick()
+		},
+		Curve:       AnimationLinear, // any curve will work
+		Duration:    1 * time.Second, // anything positive here will work
+		RepeatCount: AnimationRepeatForever,
+	}
+	i.isSetup = true
 }
 
 func animationEaseIn(val float32) float32 {
