@@ -20,7 +20,7 @@ func Refresh(obj fyne.CanvasObject) {
 	}
 }
 
-// ColorizeSVG takes a fyne.Resource containing SVG content, and returns
+// RecolorSVG takes a fyne.Resource containing SVG content, and returns
 // the raw SVG content, re-colorized to be monochrome with the given color.
 // The content can be assigned to a new fyne.StaticResource with an appropriate name
 // to be used in a widget.Button, canvas.Image, etc.
@@ -29,7 +29,7 @@ func Refresh(obj fyne.CanvasObject) {
 // and a non-nil error is returned.
 //
 // Since: 2.6
-func ColorizeSVG(resource fyne.Resource, color color.Color) ([]byte, error) {
+func RecolorSVG(resource fyne.Resource, color color.Color) ([]byte, error) {
 	return svg.ColorizeError(resource.Content(), color)
 }
 
