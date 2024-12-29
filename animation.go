@@ -77,15 +77,15 @@ func (a *Animation) Start() {
 	CurrentApp().Driver().StartAnimation(a)
 }
 
+// Stop will end this animation and remove it from the run-loop.
+func (a *Animation) Stop() {
+	CurrentApp().Driver().StopAnimation(a)
+}
+
 // Start registers the animation with the application run-loop and starts its execution.
 func (i *IndefiniteAnimation) Start() {
 	i.setupAnimation()
 	i.animation.Start()
-}
-
-// Stop will end this animation and remove it from the run-loop.
-func (a *Animation) Stop() {
-	CurrentApp().Driver().StopAnimation(a)
 }
 
 // Stop will end this animation and remove it from the run-loop.
