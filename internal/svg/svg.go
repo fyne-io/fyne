@@ -26,6 +26,7 @@ func Colorize(src []byte, clr color.Color) []byte {
 	if err != nil {
 		fyne.LogError("", err)
 	}
+	return content
 }
 
 // ColorizeError is the same as Colorize, except returning instead of logging any error.
