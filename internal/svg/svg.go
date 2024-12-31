@@ -22,33 +22,25 @@ import (
 
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
 func Colorize(src []byte, clr color.Color) []byte {
-	return colorizeImpl(src, clr, fyne.LogError)
+	content, err := colorizeImpl(src, clr)
+	if err != nil {
+		fyne.LogError("", err)
+	}
 }
 
 // ColorizeError is the same as Colorize, except returning instead of logging any error.
 func ColorizeError(src []byte, clr color.Color) ([]byte, error) {
-	var err error
-	content := colorizeImpl(src, clr, func(s string, e error) {
-		err = fmt.Errorf("%s %s", s, e.Error())
-	})
-	return content, err
-}
-
-func colorizeImpl(src []byte, clr color.Color, errFn func(string, error)) []byte {
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {
-		errFn("could not load SVG, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not load SVG, falling back to static content: %v", err)
 	}
 	if err := s.replaceFillColor(clr); err != nil {
-		errFn("could not replace fill color, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not replace fill color, falling back to static content: %v", err)
 	}
 	colorized, err := xml.Marshal(s)
 	if err != nil {
-		errFn("could not marshal svg, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not marshal svg, falling back to static content: %v", err)
 	}
 	return colorized
 }
