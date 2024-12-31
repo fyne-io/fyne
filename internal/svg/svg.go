@@ -42,7 +42,7 @@ func ColorizeError(src []byte, clr color.Color) ([]byte, error) {
 	if err != nil {
 		return src, fmt.Errorf("could not marshal svg, falling back to static content: %v", err)
 	}
-	return colorized
+	return colorized, nil
 }
 
 type Decoder struct {
