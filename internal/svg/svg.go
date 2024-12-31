@@ -22,7 +22,7 @@ import (
 
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
 func Colorize(src []byte, clr color.Color) []byte {
-	content, err := colorizeImpl(src, clr)
+	content, err := ColorizeError(src, clr)
 	if err != nil {
 		fyne.LogError("", err)
 	}
