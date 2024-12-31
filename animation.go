@@ -44,6 +44,25 @@ type Animation struct {
 	Tick        func(float32)
 }
 
+// NewAnimation creates a very basic animation where the callback function will be called for every
+// rendered frame between [time.Now] and the specified duration. The callback values start at 0.0 and
+// will be 1.0 when the animation completes.
+//
+// Since: 2.0
+func NewAnimation(d time.Duration, fn func(float32)) *Animation {
+	return &Animation{Duration: d, Tick: fn}
+}
+
+// Start registers the animation with the application run-loop and starts its execution.
+func (a *Animation) Start() {
+	CurrentApp().Driver().StartAnimation(a)
+}
+
+// Stop will end this animation and remove it from the run-loop.
+func (a *Animation) Stop() {
+	CurrentApp().Driver().StopAnimation(a)
+}
+
 // IndefiniteAnimation represents an animation that continues indefinitely. It has no duration
 // or curve, and when started, the Tick function will be called every frame until Stop is invoked.
 //
@@ -55,31 +74,12 @@ type IndefiniteAnimation struct {
 	animation Animation
 }
 
-// NewAnimation creates a very basic animation where the callback function will be called for every
-// rendered frame between [time.Now] and the specified duration. The callback values start at 0.0 and
-// will be 1.0 when the animation completes.
-//
-// Since: 2.0
-func NewAnimation(d time.Duration, fn func(float32)) *Animation {
-	return &Animation{Duration: d, Tick: fn}
-}
-
 // NewIndefiniteAnimation creates an indefinite animation where the callback function will be called
 // for every rendered frame once started, until stopped.
 //
 // Since: 2.6
 func NewIndefiniteAnimation(fn func()) *IndefiniteAnimation {
 	return &IndefiniteAnimation{Tick: fn}
-}
-
-// Start registers the animation with the application run-loop and starts its execution.
-func (a *Animation) Start() {
-	CurrentApp().Driver().StartAnimation(a)
-}
-
-// Stop will end this animation and remove it from the run-loop.
-func (a *Animation) Stop() {
-	CurrentApp().Driver().StopAnimation(a)
 }
 
 // Start registers the animation with the application run-loop and starts its execution.
