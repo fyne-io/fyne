@@ -63,38 +63,38 @@ func (a *Animation) Stop() {
 	CurrentApp().Driver().StopAnimation(a)
 }
 
-// IndefiniteAnimation represents an animation that continues indefinitely. It has no duration
+// InfiniteAnimation represents an animation that continues infinitely unless stopped. It has no duration
 // or curve, and when started, the Tick function will be called every frame until Stop is invoked.
 //
 // Since: 2.6
-type IndefiniteAnimation struct {
+type InfiniteAnimation struct {
 	Tick func()
 
 	isSetup   bool
 	animation Animation
 }
 
-// NewIndefiniteAnimation creates an indefinite animation where the callback function will be called
+// NewInfiniteAnimation creates an infinite animation where the callback function will be called
 // for every rendered frame once started, until stopped.
 //
 // Since: 2.6
-func NewIndefiniteAnimation(fn func()) *IndefiniteAnimation {
-	return &IndefiniteAnimation{Tick: fn}
+func NewInfiniteAnimation(fn func()) *InfiniteAnimation {
+	return &InfiniteAnimation{Tick: fn}
 }
 
 // Start registers the animation with the application run-loop and starts its execution.
-func (i *IndefiniteAnimation) Start() {
+func (i *InfiniteAnimation) Start() {
 	i.setupAnimation()
 	i.animation.Start()
 }
 
 // Stop will end this animation and remove it from the run-loop.
-func (i *IndefiniteAnimation) Stop() {
+func (i *InfiniteAnimation) Stop() {
 	i.setupAnimation()
 	i.animation.Stop()
 }
 
-func (i *IndefiniteAnimation) setupAnimation() {
+func (i *InfiniteAnimation) setupAnimation() {
 	if i.isSetup {
 		return
 	}
