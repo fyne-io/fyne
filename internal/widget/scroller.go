@@ -242,13 +242,15 @@ func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
 		if e.Position.X < a.barLeadingEdge {
 			newOffset.X = fyne.Max(0, newOffset.X-a.scroll.Size().Width*pageScrollFraction)
 		} else if e.Position.X > a.barTrailingEdge {
-			newOffset.X = fyne.Min(a.scroll.Content.Size().Width, newOffset.X+a.scroll.Size().Width*pageScrollFraction)
+			viewWid := a.scroll.Size().Width
+			newOffset.X = fyne.Min(a.scroll.Content.Size().Width-viewWid, newOffset.X+viewWid*pageScrollFraction)
 		}
 	default:
 		if e.Position.Y < a.barLeadingEdge {
 			newOffset.Y = fyne.Max(0, newOffset.Y-a.scroll.Size().Height*pageScrollFraction)
 		} else if e.Position.Y > a.barTrailingEdge {
-			newOffset.Y = fyne.Min(a.scroll.Content.Size().Height, newOffset.Y+a.scroll.Size().Height*pageScrollFraction)
+			viewHt := a.scroll.Size().Height
+			newOffset.Y = fyne.Min(a.scroll.Content.Size().Height-viewHt, newOffset.Y+viewHt*pageScrollFraction)
 		}
 	}
 	if newOffset == a.scroll.Offset {
