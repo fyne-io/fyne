@@ -32,6 +32,9 @@ const (
 	scrollBarOrientationVertical   scrollBarOrientation = 0
 	scrollBarOrientationHorizontal scrollBarOrientation = 1
 	scrollContainerMinSize                              = float32(32) // TODO consider the smallest useful scroll view?
+
+	// what fraction of the page to scroll when tapping on the scroll bar area
+	pageScrollFraction = float32(0.95)
 )
 
 type scrollBarRenderer struct {
@@ -152,8 +155,12 @@ func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
 		barWidth, barHeight, barX, barY = r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
+		r.area.barLeadingEdge = barX
+		r.area.barTrailingEdge = barX + barWidth
 	default:
 		barHeight, barWidth, barY, barX = r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
+		r.area.barLeadingEdge = barY
+		r.area.barTrailingEdge = barY + barHeight
 	}
 	r.bar.Move(fyne.NewPos(barX, barY))
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
@@ -205,6 +212,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 }
 
 var _ desktop.Hoverable = (*scrollBarArea)(nil)
+var _ fyne.Tappable = (*scrollBarArea)(nil)
 
 type scrollBarArea struct {
 	Base
@@ -213,11 +221,45 @@ type scrollBarArea struct {
 	isMouseIn   bool
 	scroll      *Scroll
 	orientation scrollBarOrientation
+
+	// updated from renderer Layout
+	// coordinates Y in vertical orientation, X in horizontal
+	barLeadingEdge  float32
+	barTrailingEdge float32
 }
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(a)
 	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{bar}), area: a, bar: bar}
+}
+
+func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
+	// when tapping above/below or left/right of the bar, scroll the content
+	// nearly a full page (pageScrollFraction) up/down or left/right, respectively
+	newOffset := a.scroll.Offset
+	switch a.orientation {
+	case scrollBarOrientationHorizontal:
+		if e.Position.X < a.barLeadingEdge {
+			newOffset.X = fyne.Max(0, newOffset.X-a.scroll.Size().Width*pageScrollFraction)
+		} else if e.Position.X > a.barTrailingEdge {
+			newOffset.X = fyne.Min(a.scroll.Content.Size().Width, newOffset.X+a.scroll.Size().Width*pageScrollFraction)
+		}
+	default:
+		if e.Position.Y < a.barLeadingEdge {
+			newOffset.Y = fyne.Max(0, newOffset.Y-a.scroll.Size().Height*pageScrollFraction)
+		} else if e.Position.Y > a.barTrailingEdge {
+			newOffset.Y = fyne.Min(a.scroll.Content.Size().Height, newOffset.Y+a.scroll.Size().Height*pageScrollFraction)
+		}
+	}
+	if newOffset == a.scroll.Offset {
+		return
+	}
+
+	a.scroll.Offset = newOffset
+	if f := a.scroll.OnScrolled; f != nil {
+		f(a.scroll.Offset)
+	}
+	a.scroll.refreshWithoutOffsetUpdate()
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
