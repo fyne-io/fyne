@@ -152,6 +152,11 @@ const (
 	// Since: 2.0
 	ColorNameScrollBar fyne.ThemeColorName = "scrollBar"
 
+	// ColorNameScrollBarBackground is the name of theme lookup for scrollbar background color.
+	//
+	// Since: 2.6
+	ColorNameScrollBarBackground fyne.ThemeColorName = "scrollBarBackground"
+
 	// ColorNameSelection is the name of theme lookup for selection color.
 	//
 	// Since: 2.1
@@ -197,6 +202,7 @@ var (
 	colorDarkPlaceholder         = color.NRGBA{R: 0xb2, G: 0xb2, B: 0xb2, A: 0xff}
 	colorDarkPressed             = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x66}
 	colorDarkScrollBar           = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99}
+	colorDarkScrollBarBackground = color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	colorDarkSeparator           = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff}
 	colorDarkShadow              = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x66}
 	colorDarkSuccess             = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
@@ -228,6 +234,7 @@ var (
 	colorLightPlaceholder         = color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff}
 	colorLightPressed             = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x19}
 	colorLightScrollBar           = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x99}
+	colorLightScrollBarBackground = color.NRGBA{R: 0xdb, G: 0xdb, B: 0xdb, A: 0xff}
 	colorLightSelectionBlue       = color.NRGBA{R: 0x00, G: 0x6c, B: 0xff, A: 0x40}
 	colorLightSelectionBrown      = color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0x3f}
 	colorLightSelectionGray       = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0x3f}
