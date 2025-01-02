@@ -946,7 +946,7 @@ func TestEntry_OnPaste(t *testing.T) {
 	}
 }
 
-func TestEntry_Insert(t *testing.T) {
+func TestEntry_InsertAtCursor(t *testing.T) {
 	tests := []struct {
 		name             string
 		entry            *widget.Entry
@@ -1014,7 +1014,7 @@ func TestEntry_Insert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.entry.Insert(tt.insertText)
+			tt.entry.InsertAtCursor(tt.insertText)
 			assert.Equal(t, tt.wantText, tt.entry.Text)
 			assert.Equal(t, tt.wantRow, tt.entry.CursorRow)
 			assert.Equal(t, tt.wantCol, tt.entry.CursorColumn)
