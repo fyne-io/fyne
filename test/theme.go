@@ -175,6 +175,7 @@ func Theme() fyne.Theme {
 				theme.ColorNamePressed:             color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33},
 				theme.ColorNamePrimary:             color.NRGBA{R: 0xff, G: 0xc0, B: 0x80, A: 0xff},
 				theme.ColorNameScrollBar:           color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xaa},
+				theme.ColorNameScrollBarBackground: color.NRGBA{R: 0x67, G: 0x66, B: 0x66, A: 0xff},
 				theme.ColorNameSelection:           color.NRGBA{R: 0x78, G: 0x3a, B: 0x3a, A: 0x99},
 				theme.ColorNameSeparator:           color.NRGBA{R: 0x90, G: 0x90, B: 0x90, A: 0xff},
 				theme.ColorNameShadow:              color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x88},
