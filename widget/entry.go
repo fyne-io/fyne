@@ -908,12 +908,12 @@ func (e *Entry) Unbind() {
 	e.binder.Unbind()
 }
 
-// Insert inserts the given text into the Entry at the current cursor position.
+// InsertAtCursor inserts the given text into the Entry at the current cursor position.
 // If text is currently selected, the selected text will be replaced
 // with the inserted content.
 //
 // Since: 2.6
-func (e *Entry) Insert(text string) {
+func (e *Entry) InsertAtCursor(text string) {
 	if text == "" {
 		changed := e.selecting && e.eraseSelection()
 
@@ -1061,7 +1061,7 @@ func (e *Entry) getRowCol(p fyne.Position) (int, int) {
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
-	e.Insert(clipboard.Content())
+	e.InsertAtCursor(clipboard.Content())
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
