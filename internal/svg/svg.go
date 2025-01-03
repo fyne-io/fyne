@@ -21,16 +21,7 @@ import (
 )
 
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
-func Colorize(src []byte, clr color.Color) []byte {
-	content, err := ColorizeError(src, clr)
-	if err != nil {
-		fyne.LogError("", err)
-	}
-	return content
-}
-
-// ColorizeError is the same as Colorize, except returning instead of logging any error.
-func ColorizeError(src []byte, clr color.Color) ([]byte, error) {
+func Colorize(src []byte, clr color.Color) ([]byte, error) {
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {

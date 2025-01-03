@@ -144,7 +144,8 @@ func TestColorize(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			bytes, err := os.ReadFile(filepath.Join("testdata", tt.svgFile))
 			require.NoError(t, err)
-			got := helperDrawSVG(t, Colorize(bytes, tt.color))
+			content, _ := Colorize(bytes, tt.color)
+			got := helperDrawSVG(t, content)
 			test.AssertImageMatches(t, tt.wantImage, got)
 		})
 	}

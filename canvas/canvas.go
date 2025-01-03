@@ -30,7 +30,7 @@ func Refresh(obj fyne.CanvasObject) {
 //
 // Since: 2.6
 func RecolorSVG(resource fyne.Resource, color color.Color) ([]byte, error) {
-	return svg.ColorizeError(resource.Content(), color)
+	return svg.Colorize(resource.Content(), color)
 }
 
 // repaint instructs the containing canvas to redraw, even if nothing changed.
