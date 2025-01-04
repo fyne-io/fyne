@@ -76,16 +76,18 @@ func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) 
 	withRelativePosition(rel, to, p.ShowAtPosition)
 }
 
-// Tapped is called when the user taps the popUp background - if not modal then dismiss this widget
-func (p *PopUp) Tapped(_ *fyne.PointEvent) {
-	if !p.modal {
+// Tapped is called when the user taps the popUp.
+// If not modal and the tap is outside the content area, then dismiss this widget
+func (p *PopUp) Tapped(e *fyne.PointEvent) {
+	if !p.modal && !p.isInsideContent(e.Position) {
 		p.Hide()
 	}
 }
 
-// TappedSecondary is called when the user right/alt taps the background - if not modal then dismiss this widget
-func (p *PopUp) TappedSecondary(_ *fyne.PointEvent) {
-	if !p.modal {
+// TappedSecondary is called when the user right/alt taps the popUp.
+// If not modal and the tap is outside the content area, then dismiss this widget
+func (p *PopUp) TappedSecondary(e *fyne.PointEvent) {
+	if !p.modal && !p.isInsideContent(e.Position) {
 		p.Hide()
 	}
 }
@@ -117,6 +119,12 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
 		popUpBaseRenderer{popUp: p, background: background},
 	}
+}
+
+func (p *PopUp) isInsideContent(pos fyne.Position) bool {
+	return pos.X >= p.innerPos.X && pos.Y >= p.innerPos.Y &&
+		pos.X <= p.innerPos.X+p.innerSize.Width &&
+		pos.Y <= p.innerPos.Y+p.innerSize.Height
 }
 
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
