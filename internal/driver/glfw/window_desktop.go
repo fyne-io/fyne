@@ -7,6 +7,7 @@ import (
 	"context"
 	"image"
 	_ "image/png" // for the icon
+	"os"
 	"runtime"
 	"sync"
 
@@ -24,7 +25,10 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
-const defaultTitle = "Fyne Application"
+const (
+	defaultTitle              = "Fyne Application"
+	disableDPIDetectionEnvKey = "FYNE_DISABLE_DPI_DETECTION"
+)
 
 // Input modes.
 const (
@@ -297,6 +301,12 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 }
 
 func (w *window) detectScale() float32 {
+	// check if DPI detection is disabled
+	env := os.Getenv(disableDPIDetectionEnvKey)
+	if len(env) > 0 && (env[0] == 'T' || env[0] == 't' || env[0] == '1') {
+		return 1
+	}
+
 	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1
 	}
