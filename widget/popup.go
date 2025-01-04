@@ -78,16 +78,16 @@ func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) 
 
 // Tapped is called when the user taps the popUp outside the content area
 // if not modal then dismiss this widget
-func (p *PopUp) Tapped(_ *fyne.PointEvent) {
-	if !p.modal {
+func (p *PopUp) Tapped(e *fyne.PointEvent) {
+	if !p.modal && !p.isInsideContent(e.Position) {
 		p.Hide()
 	}
 }
 
 // TappedSecondary is called when the user right/alt taps the popUp outside the content area
 // if not modal then dismiss this widget
-func (p *PopUp) TappedSecondary(_ *fyne.PointEvent) {
-	if !p.modal {
+func (p *PopUp) TappedSecondary(e *fyne.PointEvent) {
+	if !p.modal && !p.isInsideContent(e.Position) {
 		p.Hide()
 	}
 }
@@ -104,9 +104,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	p.ExtendBaseWidget(p)
-	background := &popUpBackground{
-		rectangle: canvas.Rectangle{FillColor: th.Color(theme.ColorNameOverlayBackground, v)},
-	}
+	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	if p.modal {
 		underlay := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
 		objects := []fyne.CanvasObject{underlay, background, p.Content}
@@ -121,6 +119,12 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
 		popUpBaseRenderer{popUp: p, background: background},
 	}
+}
+
+func (p *PopUp) isInsideContent(pos fyne.Position) bool {
+	return pos.X >= p.innerPos.X && pos.Y >= p.innerPos.Y &&
+		pos.X <= p.innerPos.X+p.innerSize.Width &&
+		pos.Y <= p.innerPos.Y+p.innerSize.Height
 }
 
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
@@ -176,7 +180,7 @@ func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
 
 type popUpBaseRenderer struct {
 	popUp      *PopUp
-	background *popUpBackground
+	background *canvas.Rectangle
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
@@ -225,7 +229,7 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 func (r *popUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	r.background.rectangle.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
@@ -273,7 +277,7 @@ func (r *modalPopUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.underlay.FillColor = th.Color(theme.ColorNameShadow, v)
-	r.background.rectangle.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldLayout := r.popUp.Content.Size() != expectedContentSize
 
@@ -298,25 +302,4 @@ func withRelativePosition(rel fyne.Position, to fyne.CanvasObject, f func(positi
 
 	pos := d.AbsolutePositionForObject(to).Add(rel)
 	f(pos)
-}
-
-type popUpBackground struct {
-	BaseWidget
-
-	rectangle canvas.Rectangle
-}
-
-func (p *popUpBackground) CreateRenderer() fyne.WidgetRenderer {
-	return NewSimpleRenderer(&p.rectangle)
-}
-
-var _ fyne.Tappable = (*popUpBackground)(nil)
-var _ fyne.SecondaryTappable = (*popUpBackground)(nil)
-
-func (p *popUpBackground) Tapped(*fyne.PointEvent) {
-	// No-op. Just swallow the tap to prevent pop up dismissal
-}
-
-func (p *popUpBackground) TappedSecondary(*fyne.PointEvent) {
-	// No-op. Just swallow the tap to prevent pop up dismissal
 }

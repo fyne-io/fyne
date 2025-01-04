@@ -437,6 +437,27 @@ func TestModalPopUp_Resize(t *testing.T) {
 	assert.Equal(t, float32(80), popSize.Height)
 }
 
+func TestModalPopUp_TappedInside(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
+	win.Resize(fyne.NewSize(80, 80))
+
+	pop := newPopUp(label, win.Canvas())
+	pop.Show()
+	defer test.Canvas().Overlays().Remove(pop)
+
+	size := fyne.NewSize(50, 48)
+	pop.Resize(size)
+	pop.Move(fyne.NewPos(10, 10))
+	assert.Equal(t, size.Subtract(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())), pop.Content.Size())
+
+	pop.Tapped(&fyne.PointEvent{Position: fyne.NewPos(30, 30)})
+	assert.False(t, pop.Hidden)
+	pop.Tapped(&fyne.PointEvent{Position: fyne.NewPos(5, 5)})
+	assert.True(t, pop.Hidden)
+}
+
 func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewTempWindow(t, NewLabel("OK"))
