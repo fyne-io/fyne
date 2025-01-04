@@ -9,6 +9,7 @@ import (
 	_ "image/png" // for the icon
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -301,16 +302,16 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 }
 
 func (w *window) detectScale() float32 {
-	// check if DPI detection is disabled
-	env := os.Getenv(disableDPIDetectionEnvKey)
-	switch env {
-	case "True", "TRUE", "true", "T", "t", "1":
-		return 1
-	}
-
 	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1
 	}
+
+	// check if DPI detection is disabled
+	env := os.Getenv(disableDPIDetectionEnvKey)
+	if strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1" {
+		return 1
+	}
+
 	monitor := w.getMonitorForWindow()
 	if monitor == nil {
 		return 1
