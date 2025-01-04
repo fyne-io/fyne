@@ -303,7 +303,8 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 func (w *window) detectScale() float32 {
 	// check if DPI detection is disabled
 	env := os.Getenv(disableDPIDetectionEnvKey)
-	if len(env) > 0 && (env[0] == 'T' || env[0] == 't' || env[0] == '1') {
+	switch env {
+	case "True", "TRUE", "true", "T", "t", "1":
 		return 1
 	}
 
