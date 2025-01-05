@@ -254,7 +254,7 @@ type Package struct {
 	specs []*TypeSpec
 }
 
-// UnmarshalBinary creates a pakage from binary data
+// UnmarshalBinary creates a package from binary data
 func (pkg *Package) UnmarshalBinary(bin []byte) error {
 	if err := (&pkg.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err

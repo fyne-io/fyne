@@ -314,7 +314,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	return listing, nil
 }
 
-// CreateListable impelements repository.ListableRepository.CreateListable.
+// CreateListable implements repository.ListableRepository.CreateListable.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CreateListable(u fyne.URI) error {

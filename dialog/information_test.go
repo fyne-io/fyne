@@ -52,7 +52,7 @@ func TestDialog_Resize(t *testing.T) {
 	expectedWidth = 600                                        //since win width only 600
 	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) //max, also work
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                         //since win heigh only 400
+	expectedHeight = 400                                         //since win height only 400
 	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) //max, also work
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 

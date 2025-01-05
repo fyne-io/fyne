@@ -1128,7 +1128,7 @@ The import path is now `fyne.io/fyne/v2` when you are ready to make the update.
 * Creating a windows inside onClose handler causes Fyne to panic (#1106)
 * Backspace in entry after SetText("") can crash (#1096)
 * Empty main menu causes panic (#1073)
-* Installing using `fyne install` on Linux now works on distrubutions that don't use `/usr/local`
+* Installing using `fyne install` on Linux now works on distributions that don't use `/usr/local`
 * Fix recommendations from staticcheck
 * Unable to overwrite file when using dialog.ShowFileSave (#1168)
 

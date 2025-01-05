@@ -1622,7 +1622,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 }
 
 // Selects the row where the CursorColumn is currently positioned
-// Do not call while holding the proeprtyLock
+// Do not call while holding the propertyLock
 func (e *Entry) selectCurrentRow() {
 	provider := e.textProvider()
 	e.propertyLock.Lock()

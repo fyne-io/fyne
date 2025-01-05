@@ -202,7 +202,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	assert.NotNil(t, rightColNode.nextSibling, "new node for new object")
 
 	//
-	// test that insertion at the beginnning or in the middle of a children list
+	// test that insertion at the beginning or in the middle of a children list
 	// removes all following siblings and their subtrees
 	//
 	leftNewObj2a := canvas.NewRectangle(color.Gray16{Y: 4})

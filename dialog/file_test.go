@@ -97,7 +97,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// make sure we fail over if the specified directory does not exist
 	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
-		t.Errorf("Should have failed to create lister for nonexistant file")
+		t.Errorf("Should have failed to create lister for nonexistent file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = home
@@ -146,7 +146,7 @@ func TestFileDialogResize(t *testing.T) {
 	expectedWidth = 600                                          //since win width only 600
 	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) //max, also work
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                           //since win heigh only 400
+	expectedHeight = 400                                           //since win height only 400
 	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) //max, also work
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
