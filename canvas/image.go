@@ -279,7 +279,11 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 			th := cache.WidgetTheme(i)
 			if th != nil {
 				col := th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant())
-				content = svg.Colorize(content, col)
+				var err error
+				content, err = svg.Colorize(content, col)
+				if err != nil {
+					fyne.LogError("", err)
+				}
 			}
 		}
 		return io.NopCloser(bytes.NewReader(content)), nil

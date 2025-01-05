@@ -21,23 +21,20 @@ import (
 )
 
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
-func Colorize(src []byte, clr color.Color) []byte {
+func Colorize(src []byte, clr color.Color) ([]byte, error) {
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {
-		fyne.LogError("could not load SVG, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not load SVG, falling back to static content: %v", err)
 	}
 	if err := s.replaceFillColor(clr); err != nil {
-		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not replace fill color, falling back to static content: %v", err)
 	}
 	colorized, err := xml.Marshal(s)
 	if err != nil {
-		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not marshal svg, falling back to static content: %v", err)
 	}
-	return colorized
+	return colorized, nil
 }
 
 type Decoder struct {
