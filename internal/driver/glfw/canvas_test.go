@@ -200,7 +200,7 @@ func TestGlCanvas_Focus(t *testing.T) {
 
 	foreign := &focusable{id: "o2e1"}
 	c.Focus(foreign)
-	assert.False(t, foreign.focused, "does not focus foreign object")
+	assert.False(t, foreign.focused, "does not focus foreign object but logs a Fyne error")
 	assert.True(t, o2e.focused)
 }
 
@@ -209,7 +209,7 @@ func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
 	w.SetPadded(false)
 	e := widget.NewEntry()
 	c := w.Canvas().(*glCanvas)
-	c.Focus(e) // this crashed in the past
+	c.Focus(e) // don’t crash but log a Fyne error
 }
 
 func TestGlCanvas_Focus_SetContent(t *testing.T) {
