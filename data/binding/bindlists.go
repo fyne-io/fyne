@@ -69,7 +69,7 @@ func (l *boundBoolList) Append(val bool) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -100,8 +100,8 @@ func (l *boundBoolList) GetValue(i int) (bool, error) {
 func (l *boundBoolList) Prepend(val bool) error {
 	l.lock.Lock()
 	*l.val = append([]bool{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -113,7 +113,7 @@ func (l *boundBoolList) Prepend(val bool) error {
 
 func (l *boundBoolList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -154,7 +154,7 @@ func (l *boundBoolList) Remove(val bool) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -167,7 +167,7 @@ func (l *boundBoolList) Remove(val bool) error {
 func (l *boundBoolList) Set(v []bool) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -352,7 +352,7 @@ func (l *boundBytesList) Append(val []byte) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -383,8 +383,8 @@ func (l *boundBytesList) GetValue(i int) ([]byte, error) {
 func (l *boundBytesList) Prepend(val []byte) error {
 	l.lock.Lock()
 	*l.val = append([][]byte{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -396,7 +396,7 @@ func (l *boundBytesList) Prepend(val []byte) error {
 
 func (l *boundBytesList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -437,7 +437,7 @@ func (l *boundBytesList) Remove(val []byte) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -450,7 +450,7 @@ func (l *boundBytesList) Remove(val []byte) error {
 func (l *boundBytesList) Set(v [][]byte) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -635,7 +635,7 @@ func (l *boundFloatList) Append(val float64) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -666,8 +666,8 @@ func (l *boundFloatList) GetValue(i int) (float64, error) {
 func (l *boundFloatList) Prepend(val float64) error {
 	l.lock.Lock()
 	*l.val = append([]float64{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -679,7 +679,7 @@ func (l *boundFloatList) Prepend(val float64) error {
 
 func (l *boundFloatList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -720,7 +720,7 @@ func (l *boundFloatList) Remove(val float64) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -733,7 +733,7 @@ func (l *boundFloatList) Remove(val float64) error {
 func (l *boundFloatList) Set(v []float64) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -918,7 +918,7 @@ func (l *boundIntList) Append(val int) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -949,8 +949,8 @@ func (l *boundIntList) GetValue(i int) (int, error) {
 func (l *boundIntList) Prepend(val int) error {
 	l.lock.Lock()
 	*l.val = append([]int{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -962,7 +962,7 @@ func (l *boundIntList) Prepend(val int) error {
 
 func (l *boundIntList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1003,7 +1003,7 @@ func (l *boundIntList) Remove(val int) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1016,7 +1016,7 @@ func (l *boundIntList) Remove(val int) error {
 func (l *boundIntList) Set(v []int) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1201,7 +1201,7 @@ func (l *boundRuneList) Append(val rune) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1232,8 +1232,8 @@ func (l *boundRuneList) GetValue(i int) (rune, error) {
 func (l *boundRuneList) Prepend(val rune) error {
 	l.lock.Lock()
 	*l.val = append([]rune{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1245,7 +1245,7 @@ func (l *boundRuneList) Prepend(val rune) error {
 
 func (l *boundRuneList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1286,7 +1286,7 @@ func (l *boundRuneList) Remove(val rune) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1299,7 +1299,7 @@ func (l *boundRuneList) Remove(val rune) error {
 func (l *boundRuneList) Set(v []rune) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1484,7 +1484,7 @@ func (l *boundStringList) Append(val string) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1515,8 +1515,8 @@ func (l *boundStringList) GetValue(i int) (string, error) {
 func (l *boundStringList) Prepend(val string) error {
 	l.lock.Lock()
 	*l.val = append([]string{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1528,7 +1528,7 @@ func (l *boundStringList) Prepend(val string) error {
 
 func (l *boundStringList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1569,7 +1569,7 @@ func (l *boundStringList) Remove(val string) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1582,7 +1582,7 @@ func (l *boundStringList) Remove(val string) error {
 func (l *boundStringList) Set(v []string) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1767,7 +1767,7 @@ func (l *boundUntypedList) Append(val any) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1798,8 +1798,8 @@ func (l *boundUntypedList) GetValue(i int) (any, error) {
 func (l *boundUntypedList) Prepend(val any) error {
 	l.lock.Lock()
 	*l.val = append([]any{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1811,7 +1811,7 @@ func (l *boundUntypedList) Prepend(val any) error {
 
 func (l *boundUntypedList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1852,7 +1852,7 @@ func (l *boundUntypedList) Remove(val any) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1865,7 +1865,7 @@ func (l *boundUntypedList) Remove(val any) error {
 func (l *boundUntypedList) Set(v []any) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -2050,7 +2050,7 @@ func (l *boundURIList) Append(val fyne.URI) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -2081,8 +2081,8 @@ func (l *boundURIList) GetValue(i int) (fyne.URI, error) {
 func (l *boundURIList) Prepend(val fyne.URI) error {
 	l.lock.Lock()
 	*l.val = append([]fyne.URI{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -2094,7 +2094,7 @@ func (l *boundURIList) Prepend(val fyne.URI) error {
 
 func (l *boundURIList) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -2135,7 +2135,7 @@ func (l *boundURIList) Remove(val fyne.URI) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -2148,7 +2148,7 @@ func (l *boundURIList) Remove(val fyne.URI) error {
 func (l *boundURIList) Set(v []fyne.URI) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {

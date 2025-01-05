@@ -525,7 +525,7 @@ func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	l.lock.Lock()
 	*l.val = append(*l.val, val)
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -556,8 +556,8 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	l.lock.Lock()
 	*l.val = append([]{{ .Type }}{val}, *l.val...)
-	
-	trigger, err :=  l.doReload()
+
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -569,7 +569,7 @@ func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 
 func (l *bound{{ .Name }}List) Reload() error {
 	l.lock.Lock()
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -626,7 +626,7 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -639,7 +639,7 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 	l.lock.Lock()
 	*l.val = v
-	trigger, err :=  l.doReload()
+	trigger, err := l.doReload()
 	l.lock.Unlock()
 
 	if trigger {
@@ -1082,12 +1082,12 @@ func (t *boundExternal{{ .Name }}TreeItem) setIfChanged(val {{ .Type }}) error {
 	t.lock.Lock()
 	{{- if eq .Comparator "" }}
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	{{- else }}
 	if {{ .Comparator }}(val, t.old) {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	{{- end }}

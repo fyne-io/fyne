@@ -305,7 +305,7 @@ type boundExternalBoolTreeItem struct {
 func (t *boundExternalBoolTreeItem) setIfChanged(val bool) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -612,7 +612,7 @@ type boundExternalBytesTreeItem struct {
 func (t *boundExternalBytesTreeItem) setIfChanged(val []byte) error {
 	t.lock.Lock()
 	if bytes.Equal(val, t.old) {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -919,7 +919,7 @@ type boundExternalFloatTreeItem struct {
 func (t *boundExternalFloatTreeItem) setIfChanged(val float64) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -1226,7 +1226,7 @@ type boundExternalIntTreeItem struct {
 func (t *boundExternalIntTreeItem) setIfChanged(val int) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -1533,7 +1533,7 @@ type boundExternalRuneTreeItem struct {
 func (t *boundExternalRuneTreeItem) setIfChanged(val rune) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -1840,7 +1840,7 @@ type boundExternalStringTreeItem struct {
 func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -2147,7 +2147,7 @@ type boundExternalUntypedTreeItem struct {
 func (t *boundExternalUntypedTreeItem) setIfChanged(val any) error {
 	t.lock.Lock()
 	if val == t.old {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
@@ -2454,7 +2454,7 @@ type boundExternalURITreeItem struct {
 func (t *boundExternalURITreeItem) setIfChanged(val fyne.URI) error {
 	t.lock.Lock()
 	if compareURI(val, t.old) {
-	t.lock.Unlock()
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
