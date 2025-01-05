@@ -20,12 +20,6 @@ func TestMain(m *testing.M) {
 // Note that this test may fail, if any of other tests in this package
 // calls t.Parallel().
 func TestQueueLazyInit(t *testing.T) {
-	if queue != nil { // Reset queues
-		queue.Close()
-		queue = nil
-		once = sync.Once{}
-	}
-
 	initialGoRoutines := runtime.NumGoroutine()
 
 	wg := sync.WaitGroup{}
@@ -45,7 +39,6 @@ func TestQueueItem(t *testing.T) {
 	called := 0
 	queueItem(func() { called++ })
 	queueItem(func() { called++ })
-	waitForItems()
 	assert.Equal(t, 2, called)
 }
 

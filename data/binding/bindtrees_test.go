@@ -37,7 +37,6 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	f.AddListener(NewDataListener(func() {
 		calledTree = true
 	}))
-	waitForItems()
 	assert.True(t, calledTree)
 
 	child, err := f.GetItem("2")
@@ -45,7 +44,6 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	child.AddListener(NewDataListener(func() {
 		calledChild = true
 	}))
-	waitForItems()
 	assert.True(t, calledChild)
 
 	assert.NotNil(t, f.(*boundFloatTree).val)
@@ -57,7 +55,6 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	calledTree, calledChild = false, false
 	m["2"] = 4.8
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 4.8, v)
@@ -67,7 +64,6 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	calledTree, calledChild = false, false
 	m = map[string]float64{"1": 1.0, "2": 4.2}
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 4.2, v)
@@ -77,7 +73,6 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	calledTree, calledChild = false, false
 	m = map[string]float64{"1": 1.0, "2": 4.2, "3": 5.3}
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 4.2, v)
@@ -185,36 +180,29 @@ func TestFloatTree_NotifyOnlyOnceWhenChange(t *testing.T) {
 	f.AddListener(NewDataListener(func() {
 		triggered++
 	}))
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Set(map[string][]string{"": {"1", "2"}}, map[string]float64{"1": 55, "2": 77})
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.SetValue("1", 5)
-	waitForItems()
 	assert.Zero(t, triggered)
 
 	triggered = 0
 	f.Set(map[string][]string{"": {"1", "2"}}, map[string]float64{"1": 101, "2": 98})
-	waitForItems()
 	assert.Zero(t, triggered)
 
 	triggered = 0
 	f.Append("1", "3", 88)
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Prepend("", "4", 23)
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Set(map[string][]string{"": {"1"}}, map[string]float64{"1": 32})
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 }

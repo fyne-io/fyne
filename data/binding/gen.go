@@ -70,17 +70,19 @@ func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	{{- if eq .Comparator "" }}
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- else }}
 	if {{ .Comparator }}(*b.val, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- end }}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -94,18 +96,20 @@ type boundExternal{{ .Name }} struct {
 
 func (b *boundExternal{{ .Name }}) Set(val {{ .Type }}) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	{{- if eq .Comparator "" }}
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- else }}
 	if {{ .Comparator }}(b.old, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- end }}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -260,13 +264,11 @@ func (s *stringFrom{{ .Name }}) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFrom{{ .Name }}) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -310,13 +312,11 @@ func (s *intFrom{{ .Name }}) Set(v int) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *intFrom{{ .Name }}) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -359,13 +359,11 @@ func (s *intTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *intTo{{ .Name }}) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -457,13 +455,11 @@ func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringTo{{ .Name }}) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 `
@@ -527,11 +523,16 @@ type bound{{ .Name }}List struct {
 
 func (l *bound{{ .Name }}List) Append(val {{ .Type }}) error {
 	l.lock.Lock()
-	defer l.lock.Unlock()
-
 	*l.val = append(*l.val, val)
 
-	return l.doReload()
+	trigger, err :=  l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
 }
 
 func (l *bound{{ .Name }}List) Get() ([]{{ .Type }}, error) {
@@ -554,17 +555,28 @@ func (l *bound{{ .Name }}List) GetValue(i int) ({{ .Type }}, error) {
 
 func (l *bound{{ .Name }}List) Prepend(val {{ .Type }}) error {
 	l.lock.Lock()
-	defer l.lock.Unlock()
 	*l.val = append([]{{ .Type }}{val}, *l.val...)
+	
+	trigger, err :=  l.doReload()
+	l.lock.Unlock()
 
-	return l.doReload()
+	if trigger {
+		l.trigger()
+	}
+
+	return err
 }
 
 func (l *bound{{ .Name }}List) Reload() error {
 	l.lock.Lock()
-	defer l.lock.Unlock()
+	trigger, err :=  l.doReload()
+	l.lock.Unlock()
 
-	return l.doReload()
+	if trigger {
+		l.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified {{ .Type }} out of the list.
@@ -572,10 +584,10 @@ func (l *bound{{ .Name }}List) Reload() error {
 // Since: 2.5
 func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 	l.lock.Lock()
-	defer l.lock.Unlock()
 
 	v := *l.val
 	if len(v) == 0 {
+		l.lock.Unlock()
 		return nil
 	}
 
@@ -608,35 +620,48 @@ func (l *bound{{ .Name }}List) Remove(val {{ .Type }}) error {
 		}
 
 		if id == -1 {
+			l.lock.Unlock()
 			return nil
 		}
 		*l.val = append(v[:id], v[id+1:]...)
 	}
 
-	return l.doReload()
+	trigger, err :=  l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
 }
 
 func (l *bound{{ .Name }}List) Set(v []{{ .Type }}) error {
 	l.lock.Lock()
-	defer l.lock.Unlock()
 	*l.val = v
+	trigger, err :=  l.doReload()
+	l.lock.Unlock()
 
-	return l.doReload()
+	if trigger {
+		l.trigger()
+	}
+
+	return err
 }
 
-func (l *bound{{ .Name }}List) doReload() (retErr error) {
+func (l *bound{{ .Name }}List) doReload() (trigger bool, retErr error) {
 	oldLen := len(l.items)
 	newLen := len(*l.val)
 	if oldLen > newLen {
 		for i := oldLen - 1; i >= newLen; i-- {
 			l.deleteItem(i)
 		}
-		l.trigger()
+		trigger = true
 	} else if oldLen < newLen {
 		for i := oldLen; i < newLen; i++ {
 			l.appendItem(bind{{ .Name }}ListItem(l.val, i, l.updateExternal))
 		}
-		l.trigger()
+		trigger = true
 	}
 
 	for i, item := range l.items {
@@ -646,13 +671,9 @@ func (l *bound{{ .Name }}List) doReload() (retErr error) {
 
 		var err error
 		if l.updateExternal {
-			item.(*boundExternal{{ .Name }}ListItem).lock.Lock()
 			err = item.(*boundExternal{{ .Name }}ListItem).setIfChanged((*l.val)[i])
-			item.(*boundExternal{{ .Name }}ListItem).lock.Unlock()
 		} else {
-			item.(*bound{{ .Name }}ListItem).lock.Lock()
 			err = item.(*bound{{ .Name }}ListItem).doSet((*l.val)[i])
-			item.(*bound{{ .Name }}ListItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -711,14 +732,13 @@ func (b *bound{{ .Name }}ListItem) Get() ({{ .Type }}, error) {
 }
 
 func (b *bound{{ .Name }}ListItem) Set(val {{ .Type }}) error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
 	return b.doSet(val)
 }
 
 func (b *bound{{ .Name }}ListItem) doSet(val {{ .Type }}) error {
+	b.lock.Lock()
 	(*b.val)[b.index] = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -731,18 +751,22 @@ type boundExternal{{ .Name }}ListItem struct {
 }
 
 func (b *boundExternal{{ .Name }}ListItem) setIfChanged(val {{ .Type }}) error {
+	b.lock.Lock()
 	{{- if eq .Comparator "" }}
 	if val == b.old {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- else }}
 	if {{ .Comparator }}(val, b.old) {
+		b.lock.Unlock()
 		return nil
 	}
 	{{- end }}
 	(*b.val)[b.index] = val
 	b.old = val
 
+	b.lock.Unlock()
 	b.trigger()
 	return nil
 }
@@ -827,7 +851,6 @@ type bound{{ .Name }}Tree struct {
 
 func (t *bound{{ .Name }}Tree) Append(parent, id string, val {{ .Type }}) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -837,7 +860,14 @@ func (t *bound{{ .Name }}Tree) Append(parent, id string, val {{ .Type }}) error 
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *bound{{ .Name }}Tree) Get() (map[string][]string, map[string]{{ .Type }}, error) {
@@ -860,7 +890,6 @@ func (t *bound{{ .Name }}Tree) GetValue(id string) ({{ .Type }}, error) {
 
 func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -870,7 +899,14 @@ func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -879,14 +915,19 @@ func (t *bound{{ .Name }}Tree) Prepend(parent, id string, val {{ .Type }}) error
 // Since: 2.5
 func (t *bound{{ .Name }}Tree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *bound{{ .Name }}Tree) removeChildren(id string) {
@@ -901,23 +942,33 @@ func (t *bound{{ .Name }}Tree) removeChildren(id string) {
 
 func (t *bound{{ .Name }}Tree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *bound{{ .Name }}Tree) Set(ids map[string][]string, v map[string]{{ .Type }}) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *bound{{ .Name }}Tree) doReload() (retErr error) {
+func (t *bound{{ .Name }}Tree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -951,20 +1002,13 @@ func (t *bound{{ .Name }}Tree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternal{{ .Name }}TreeItem).lock.Lock()
 			err = item.(*boundExternal{{ .Name }}TreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternal{{ .Name }}TreeItem).lock.Unlock()
 		} else {
-			item.(*bound{{ .Name }}TreeItem).lock.Lock()
 			err = item.(*bound{{ .Name }}TreeItem).doSet((*t.val)[id])
-			item.(*bound{{ .Name }}TreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1016,14 +1060,13 @@ func (t *bound{{ .Name }}TreeItem) Get() ({{ .Type }}, error) {
 }
 
 func (t *bound{{ .Name }}TreeItem) Set(val {{ .Type }}) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *bound{{ .Name }}TreeItem) doSet(val {{ .Type }}) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1036,17 +1079,21 @@ type boundExternal{{ .Name }}TreeItem struct {
 }
 
 func (t *boundExternal{{ .Name }}TreeItem) setIfChanged(val {{ .Type }}) error {
+	t.lock.Lock()
 	{{- if eq .Comparator "" }}
 	if val == t.old {
+	t.lock.Unlock()
 		return nil
 	}
 	{{- else }}
 	if {{ .Comparator }}(val, t.old) {
+	t.lock.Unlock()
 		return nil
 	}
 	{{- end }}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil

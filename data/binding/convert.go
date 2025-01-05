@@ -94,13 +94,11 @@ func (s *stringFromBool) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromBool) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -181,13 +179,11 @@ func (s *stringFromFloat) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -229,13 +225,11 @@ func (s *intToFloat) Set(val float64) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *intToFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -278,13 +272,11 @@ func (s *intFromFloat) Set(v int) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *intFromFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -365,13 +357,11 @@ func (s *stringFromInt) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromInt) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -418,13 +408,11 @@ func (s *stringFromURI) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromURI) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -506,13 +494,11 @@ func (s *stringToBool) Set(val bool) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToBool) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -594,13 +580,11 @@ func (s *stringToFloat) Set(val float64) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -682,13 +666,11 @@ func (s *stringToInt) Set(val int) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToInt) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -732,12 +714,10 @@ func (s *stringToURI) Set(val fyne.URI) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToURI) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }

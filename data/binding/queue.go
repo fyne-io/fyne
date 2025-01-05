@@ -1,30 +1,33 @@
 package binding
 
 import (
-	"sync"
+	"runtime"
 
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2"
 )
 
-var (
-	once  sync.Once
-	queue *async.UnboundedFuncChan
-)
+var mainGoroutineID uint64
 
-func queueItem(f func()) {
-	once.Do(func() {
-		queue = async.NewUnboundedFuncChan()
-		go func() {
-			for f := range queue.Out() {
-				f()
-			}
-		}()
-	})
-	queue.In() <- f
+func init() {
+	runtime.LockOSThread()
+	mainGoroutineID = goroutineID()
 }
 
-func waitForItems() {
-	done := make(chan struct{})
-	queue.In() <- func() { close(done) }
-	<-done
+func goroutineID() (id uint64) {
+	var buf [30]byte
+	runtime.Stack(buf[:], false)
+	for i := 10; buf[i] != ' '; i++ {
+		id = id*10 + uint64(buf[i]&15)
+	}
+
+	return id
+}
+
+func queueItem(f func()) {
+	if goroutineID() == mainGoroutineID {
+		f()
+		return
+	}
+
+	fyne.CurrentApp().Driver().CallFromGoroutine(f)
 }
