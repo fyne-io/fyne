@@ -766,7 +766,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	assert.Nil(t, dh.popDragEvent())
 	assert.Nil(t, dh.popDragEndEvent())
 
-	// 5. move to  hoverableObject and verify
+	// 5. move to hoverableObject and verify
 	//  - mouseMoved by hoverableObject
 	//  - no events by draggableObject
 	//  - no events by draggableHoverableObject
@@ -782,7 +782,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	assert.Nil(t, dh.popDragEvent())
 	assert.Nil(t, dh.popDragEndEvent())
 
-	// 6. move ouside hoverableObject and verify
+	// 6. move outside hoverableObject and verify
 	//  - mouseOut by hoverableObject
 	//  - no events by draggableObject
 	//  - no events by draggableHoverableObject

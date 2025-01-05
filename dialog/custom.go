@@ -47,7 +47,7 @@ func NewCustomWithoutButtons(title string, content fyne.CanvasObject, parent fyn
 }
 
 // SetButtons sets the row of buttons at the bottom of the dialog.
-// Passing an empy slice will result in a dialog with no buttons.
+// Passing an empty slice will result in a dialog with no buttons.
 //
 // Since: 2.4
 func (d *CustomDialog) SetButtons(buttons []fyne.CanvasObject) {
@@ -55,7 +55,7 @@ func (d *CustomDialog) SetButtons(buttons []fyne.CanvasObject) {
 	d.setButtons(container.NewGridWithRows(1, buttons...))
 }
 
-// ShowCustomWithoutButtons shows a dialog, wihout buttons, over the specified application
+// ShowCustomWithoutButtons shows a dialog, without buttons, over the specified application
 // using custom content.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 //
