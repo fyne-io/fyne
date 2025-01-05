@@ -31,13 +31,13 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 
 	err := str.Set("Updated")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, "Updated", entry.Text)
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 
 	entry.Unbind()
@@ -471,8 +471,8 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
@@ -492,8 +492,8 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
@@ -1390,14 +1390,14 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
 
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 
 	entry.SetPlaceHolder("Test")
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
 
 	entry.SetText("Hi")
-	assert.Equal(t, 2, len(entry.Text))
+	assert.Len(t, entry.Text, 2)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
@@ -1405,15 +1405,15 @@ func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
 
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 
 	entry.PlaceHolder = "Test"
 	entry.Refresh()
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
 
 	entry.SetText("Hi")
-	assert.Equal(t, 2, len(entry.Text))
+	assert.Len(t, entry.Text, 2)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
@@ -1553,16 +1553,16 @@ func TestEntry_Append(t *testing.T) {
 	entry := widget.NewEntry()
 
 	entry.Append("abc")
-	assert.Equal(t, entry.Text, "abc")
+	assert.Equal(t, "abc", entry.Text)
 	entry.Append(" def")
-	assert.Equal(t, entry.Text, "abc def")
+	assert.Equal(t, "abc def", entry.Text)
 
 	entry.SetText("")
 	entry.MultiLine = true
 
 	entry.Append("first line")
 	entry.Append("\nsecond line")
-	assert.Equal(t, entry.Text, "first line\nsecond line")
+	assert.Equal(t, "first line\nsecond line", entry.Text)
 }
 
 func TestEntry_Submit(t *testing.T) {
@@ -1677,13 +1677,13 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	tapPos := fyne.NewPos(20, 10)
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_full_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Disable()
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_read_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Password = true
@@ -1695,7 +1695,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_password_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 }
 
 func TestEntry_TextWrap(t *testing.T) {
@@ -1794,7 +1794,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	multiMin := multi.MinSize()
 
 	assert.Equal(t, singleMin.Width, multiMin.Width)
-	assert.True(t, multiMin.Height > singleMin.Height)
+	assert.Greater(t, multiMin.Height, singleMin.Height)
 
 	multi.MultiLine = false
 	multi.Refresh()
@@ -1805,7 +1805,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 func TestNewEntryWithData(t *testing.T) {
 	str := binding.NewString()
 	err := str.Set("Init")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	entry := widget.NewEntryWithData(str)
 	waitForBinding()
@@ -1813,7 +1813,7 @@ func TestNewEntryWithData(t *testing.T) {
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 }
 
@@ -1960,7 +1960,7 @@ func TestSingleLineEntry_SelectionSubmitted(t *testing.T) {
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 	assert.Equal(t, "abc", entry.SelectedText())
 	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-	assert.Equal(t, entry.Text, "abc")
+	assert.Equal(t, "abc", entry.Text)
 }
 
 func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
@@ -1970,7 +1970,7 @@ func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 	assert.Equal(t, "abc", entry.SelectedText())
 	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-	assert.Equal(t, entry.Text, "\n")
+	assert.Equal(t, "\n", entry.Text)
 }
 
 func TestEntry_CarriageReturn(t *testing.T) {

@@ -367,7 +367,7 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 
 	entry.pasteFromClipboard(clipboard)
 
-	assert.Equal(t, entry.Text, "Testing entry")
+	assert.Equal(t, "Testing entry", entry.Text)
 	assert.Equal(t, 1, entry.CursorRow)
 	assert.Equal(t, 5, entry.CursorColumn)
 
@@ -413,7 +413,7 @@ func TestEntry_Tab(t *testing.T) {
 
 	_ = e.Theme()
 	r := cache.Renderer(e.textProvider()).(*textRenderer)
-	assert.Equal(t, 3, len(r.Objects()))
+	assert.Len(t, r.Objects(), 3)
 	assert.Equal(t, "a", r.Objects()[0].(*canvas.Text).Text)
 	assert.Equal(t, "\tb", r.Objects()[1].(*canvas.Text).Text)
 

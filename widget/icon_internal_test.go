@@ -13,7 +13,7 @@ func TestNewIcon(t *testing.T) {
 	icon := NewIcon(theme.ConfirmIcon())
 	render := test.TempWidgetRenderer(t, icon)
 
-	assert.Equal(t, 1, len(render.Objects()))
+	assert.Len(t, render.Objects(), 1)
 	obj := render.Objects()[0]
 	img, ok := obj.(*canvas.Image)
 	if !ok {
@@ -26,7 +26,7 @@ func TestIcon_Nil(t *testing.T) {
 	icon := NewIcon(nil)
 	render := test.TempWidgetRenderer(t, icon)
 
-	assert.Equal(t, 1, len(render.Objects()))
+	assert.Len(t, render.Objects(), 1)
 	assert.Nil(t, render.Objects()[0].(*canvas.Image).Resource)
 }
 

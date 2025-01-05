@@ -17,23 +17,23 @@ func TestForm_Extended_CreateRenderer(t *testing.T) {
 	form.ExtendBaseWidget(form)
 	form.Items = []*FormItem{{Text: "test1", Widget: NewEntry()}}
 	assert.NotNil(t, test.TempWidgetRenderer(t, form))
-	assert.Equal(t, 2, len(form.itemGrid.Objects))
+	assert.Len(t, form.itemGrid.Objects, 2)
 
 	form.Append("test2", NewEntry())
-	assert.Equal(t, 4, len(form.itemGrid.Objects))
+	assert.Len(t, form.itemGrid.Objects, 4)
 }
 
 func TestForm_Extended_Append(t *testing.T) {
 	form := &extendedForm{}
 	form.ExtendBaseWidget(form)
 	form.Items = []*FormItem{{Text: "test1", Widget: NewEntry()}}
-	assert.Equal(t, 1, len(form.Items))
+	assert.Len(t, form.Items, 1)
 
 	form.Append("test2", NewEntry())
-	assert.True(t, len(form.Items) == 2)
+	assert.Len(t, form.Items, 2)
 
 	item := &FormItem{Text: "test3", Widget: NewEntry()}
 	form.AppendItem(item)
-	assert.True(t, len(form.Items) == 3)
+	assert.Len(t, form.Items, 3)
 	assert.Equal(t, item, form.Items[2])
 }

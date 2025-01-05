@@ -27,8 +27,8 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 43)
-	assert.EqualValues(t, <-ch, 42)
+	assert.EqualValues(t, 43, <-ch)
+	assert.EqualValues(t, 42, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 
@@ -44,7 +44,7 @@ func TestDialog_ConfirmCallbackOnlyOnClosed(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 43)
+	assert.EqualValues(t, 43, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 
@@ -59,7 +59,7 @@ func TestDialog_ConfirmCallbackOnlyOnConfirm(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 42)
+	assert.EqualValues(t, 42, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 

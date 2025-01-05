@@ -17,18 +17,18 @@ func TestAccordion(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	t.Run("Initializer", func(t *testing.T) {
 		ac := &widget.Accordion{Items: []*widget.AccordionItem{ai}}
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Len(t, ac.Items, 1)
 	})
 	t.Run("Constructor", func(t *testing.T) {
 		ac := widget.NewAccordion(ai)
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Len(t, ac.Items, 1)
 	})
 }
 
 func TestAccordion_Append(t *testing.T) {
 	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-	assert.Equal(t, 1, len(ac.Items))
+	assert.Len(t, ac.Items, 1)
 }
 
 func TestAccordion_ChangeTheme(t *testing.T) {
@@ -537,7 +537,7 @@ func TestAccordion_Remove(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	ac := widget.NewAccordion(ai)
 	ac.Remove(ai)
-	assert.Equal(t, 0, len(ac.Items))
+	assert.Empty(t, ac.Items)
 }
 
 func TestAccordion_RemoveIndex(t *testing.T) {
@@ -553,7 +553,7 @@ func TestAccordion_RemoveIndex(t *testing.T) {
 			ac := widget.NewAccordion()
 			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 			ac.RemoveIndex(tt.index)
-			assert.Equal(t, tt.length, len(ac.Items))
+			assert.Len(t, ac.Items, tt.length)
 		})
 	}
 }

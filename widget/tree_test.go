@@ -43,8 +43,8 @@ func TestNewTreeWithData(t *testing.T) {
 
 	template := widget.NewLabel("Template Object")
 
-	assert.Equal(t, 1000, len(tree.ChildUIDs("")))
-	assert.Equal(t, 10, len(tree.ChildUIDs("1")))
+	assert.Len(t, tree.ChildUIDs(""), 1000)
+	assert.Len(t, tree.ChildUIDs("1"), 10)
 	assert.GreaterOrEqual(t, tree.MinSize().Width, template.MinSize().Width)
 }
 

@@ -130,13 +130,13 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*RichText)
 	min2 := textMultiLine.MinSize()
 
-	assert.True(t, min2.Width < min.Width)
-	assert.True(t, min2.Height > min.Height)
+	assert.Less(t, min2.Width, min.Width)
+	assert.Greater(t, min2.Height, min.Height)
 
 	yPos := float32(-1)
 	for _, text := range test.TempWidgetRenderer(t, rich).(*textRenderer).Objects() {
-		assert.True(t, text.Size().Height < min2.Height)
-		assert.True(t, text.Position().Y > yPos)
+		assert.Less(t, text.Size().Height, min2.Height)
+		assert.Greater(t, text.Position().Y, yPos)
 		yPos = text.Position().Y
 	}
 }

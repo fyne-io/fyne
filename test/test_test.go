@@ -70,7 +70,7 @@ func TestAssertRendersToImage(t *testing.T) {
 		assert.False(t, test.AssertRendersToImage(tt, "non_existing_master.png", c), "non existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test failed")
 		_, err := os.Stat("testdata/failed/non_existing_master.png")
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("matching master", func(t *testing.T) {
@@ -88,7 +88,7 @@ func TestAssertRendersToImage(t *testing.T) {
 		assert.False(t, test.AssertRendersToImage(tt, "image_diffing_master.png", c), "existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test should fail")
 		_, err := os.Stat("testdata/failed/image_diffing_master.png")
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	if !t.Failed() {

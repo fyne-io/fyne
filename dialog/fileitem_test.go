@@ -118,11 +118,11 @@ func TestFileItem_Wrap(t *testing.T) {
 	label := test.TempWidgetRenderer(t, item).(*fileItemRenderer).text
 	assert.Equal(t, "filename", label.Text)
 	texts := test.TempWidgetRenderer(t, label).Objects()
-	assert.Equal(t, 1, len(texts))
+	assert.Len(t, texts, 1)
 
 	item.setLocation(storage.NewFileURI("/path/to/averylongfilename.svg"), false, false)
 	rich := test.TempWidgetRenderer(t, label).Objects()[0].(*widget.RichText)
 	texts = test.TempWidgetRenderer(t, rich).Objects()
-	assert.Equal(t, 2, len(texts))
+	assert.Len(t, texts, 2)
 	assert.Equal(t, "averylon", texts[0].(*canvas.Text).Text)
 }

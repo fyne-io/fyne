@@ -83,7 +83,7 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 	formatted := false
 
 	bar.SetValue(0.2)
-	assert.Equal(t, false, formatted)
+	assert.False(t, formatted)
 
 	formatter := func() string {
 		formatted = true
@@ -93,7 +93,7 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 
 	bar.SetValue(0.4)
 
-	assert.Equal(t, true, formatted)
+	assert.True(t, formatted)
 }
 
 func TestProgressRenderer_Layout(t *testing.T) {

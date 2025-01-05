@@ -114,16 +114,13 @@ func TestDialog_ErrorCallback(t *testing.T) {
 func TestDialog_ErrorCapitalize(t *testing.T) {
 	err := errors.New("here is an error msg")
 	d := NewError(err, test.NewTempWindow(t, nil))
-	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
-		"Here is an error msg")
+	assert.Equal(t, "Here is an error msg", d.(*dialog).content.(*widget.Label).Text)
 
 	err = errors.New("這是一條錯誤訊息")
 	d = NewError(err, test.NewTempWindow(t, nil))
-	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
-		"這是一條錯誤訊息")
+	assert.Equal(t, "這是一條錯誤訊息", d.(*dialog).content.(*widget.Label).Text)
 
 	err = errors.New("")
 	d = NewError(err, test.NewTempWindow(t, nil))
-	assert.Equal(t, d.(*dialog).content.(*widget.Label).Text,
-		"")
+	assert.Equal(t, "", d.(*dialog).content.(*widget.Label).Text)
 }

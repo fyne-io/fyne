@@ -40,14 +40,14 @@ func TestTable_Cache(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
 	assert.Equal(t, float32(0), table.content.Offset.Y) // we didn't scroll as data shorter
 	assert.Equal(t, float32(150), table.content.Offset.X)
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
 }
@@ -727,7 +727,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
 	cell1Offset := theme.Padding()
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
@@ -806,7 +806,7 @@ func TestTable_SetRowHeight(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, float32(48), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
 	cell1Offset := theme.Padding()
 	assert.Equal(t, float32(48)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
@@ -873,7 +873,7 @@ func TestTable_ShowVisible(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
