@@ -256,7 +256,7 @@ func (l *ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a list visual.
+// Update doesn't need to change a list visual.
 func (l *ListSegment) Update(fyne.CanvasObject) {
 }
 
@@ -301,7 +301,7 @@ func (p *ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a paragraph container.
+// Update doesn't need to change a paragraph container.
 func (p *ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
@@ -340,7 +340,7 @@ func (s *SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
-// Update doesnt need to change a separator visual.
+// Update doesn't need to change a separator visual.
 func (s *SeparatorSegment) Update(fyne.CanvasObject) {
 }
 

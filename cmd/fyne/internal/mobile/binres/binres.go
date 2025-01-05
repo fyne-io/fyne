@@ -992,7 +992,7 @@ func poolTrim(s string) string {
 }
 
 // byNamespace sorts attributes based on string pool position of namespace.
-// Given that "android" always preceds "" in the pool, this results in the
+// Given that "android" always precedes "" in the pool, this results in the
 // correct ordering of attributes.
 type byNamespace []*Attribute
 

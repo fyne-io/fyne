@@ -73,8 +73,8 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		return pos, size
 	}
 
-	remainer := len(objects) % formLayoutCols
-	for i := 0; i < len(objects)-remainer; i += formLayoutCols {
+	remainder := len(objects) % formLayoutCols
+	for i := 0; i < len(objects)-remainder; i += formLayoutCols {
 		labelCell, contentCell := objects[i], objects[i+1]
 		if !labelCell.Visible() && !contentCell.Visible() {
 			continue
@@ -96,7 +96,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	// Handle remaining item in the case of uneven number of objects:
-	if remainer == 1 {
+	if remainder == 1 {
 		lastCell := objects[len(objects)-1]
 		lastMin := lastCell.MinSize()
 		objectLayout(lastCell, 0, labelWidth, lastMin.Height, lastMin.Height)
