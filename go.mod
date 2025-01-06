@@ -7,7 +7,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
 	github.com/fyne-io/glfw-js v0.0.0-20241126112943-313d8a0fe1d0
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
