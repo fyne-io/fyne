@@ -28,7 +28,7 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 	// test that re-registration also works
 	m2 := NewInMemoryRepository("mem")
 	repository.Register("mem", m2)
-	assert.False(t, m == m2) // this is explicitly intended to be pointer comparison
+	assert.NotSame(t, m, m2) // this is explicitly intended to be pointer comparison
 	repo, err = repository.ForURI(foo)
 	require.NoError(t, err)
 	assert.Equal(t, m2, repo)
@@ -43,7 +43,7 @@ func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 
 	canList, err := storage.CanList(foo)
 	require.Error(t, err)
-	assert.Equal(t, false, canList)
+	assert.False(t, canList)
 
 	listing, err := storage.List(foo)
 	require.NoError(t, err)
@@ -354,7 +354,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	assert.True(t, canList)
 
 	foo, _ := storage.ParseURI("mem:///foo")
-	canList, err := storage.CanList(empty)
+	canList, err = storage.CanList(empty)
 	require.NoError(t, err)
 	assert.True(t, canList)
 

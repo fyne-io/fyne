@@ -223,7 +223,7 @@ func TestNewURI(t *testing.T) {
 	f := NewURI()
 	v, err := f.Get()
 	require.NoError(t, err)
-	assert.Equal(t, nil, v)
+	assert.Nil(t, v)
 
 	err = f.Set(storage.NewFileURI("/var"))
 	require.NoError(t, err)

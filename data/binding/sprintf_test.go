@@ -78,7 +78,7 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	err = sp.Set("Bool false , Float 7.000000 , Int 42 , Rune 67 , String nospacestring , URI file:///var/")
 	require.NoError(t, err)
 
-	assert.Equal(t, false, b)
+	assert.False(t, b)
 	assert.Equal(t, float64(7), f)
 	assert.Equal(t, 42, i)
 	assert.Equal(t, 'C', r)

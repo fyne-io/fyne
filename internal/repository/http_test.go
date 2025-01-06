@@ -67,7 +67,7 @@ func TestHTTPRepositoryExists(t *testing.T) {
 
 	exists, err := storage.Exists(resExists)
 	require.NoError(t, err)
-	assert.Equal(t, true, exists)
+	assert.True(t, exists)
 
 	// test a valid host with an invalid path
 	resNotExists, err := storage.ParseURI(validHost + invalidPath)
@@ -75,7 +75,7 @@ func TestHTTPRepositoryExists(t *testing.T) {
 
 	exists, err = storage.Exists(resNotExists)
 	require.NoError(t, err)
-	assert.Equal(t, false, exists)
+	assert.False(t, exists)
 
 	// test an invalid host
 	resInvalid, err := storage.ParseURI(invalidHost + invalidPath)
@@ -83,7 +83,7 @@ func TestHTTPRepositoryExists(t *testing.T) {
 
 	exists, err = storage.Exists(resInvalid)
 	require.Error(t, err)
-	assert.Equal(t, false, exists)
+	assert.False(t, exists)
 }
 
 func TestHTTPRepositoryReader(t *testing.T) {
@@ -161,7 +161,7 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 
 	canRead, err := storage.CanRead(resExists)
 	require.NoError(t, err)
-	assert.Equal(t, true, canRead)
+	assert.True(t, canRead)
 
 	// test a invalid url for a valid host
 	resNotExists, err := storage.ParseURI(validHost + invalidPath)
@@ -169,7 +169,7 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 
 	canRead, err = storage.CanRead(resNotExists)
 	require.Error(t, err)
-	assert.Equal(t, false, canRead)
+	assert.False(t, canRead)
 
 	// test a invalid host
 	resInvalid, err := storage.ParseURI(invalidHost)
@@ -177,5 +177,5 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 
 	canRead, err = storage.CanRead(resInvalid)
 	require.Error(t, err)
-	assert.Equal(t, false, canRead)
+	assert.False(t, canRead)
 }

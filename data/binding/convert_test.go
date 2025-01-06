@@ -133,7 +133,7 @@ func TestBoolToString(t *testing.T) {
 	require.NoError(t, err)
 	v2, err := b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, false, v2)
+	assert.False(t, v2)
 }
 
 func TestBoolToStringWithFormat(t *testing.T) {
@@ -158,7 +158,7 @@ func TestBoolToStringWithFormat(t *testing.T) {
 	require.NoError(t, err)
 	v2, err := b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, false, v2)
+	assert.False(t, v2)
 }
 
 func TestFloatToString(t *testing.T) {
@@ -266,13 +266,13 @@ func TestStringToBool(t *testing.T) {
 	b := StringToBool(s)
 	v, err := b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, false, v)
+	assert.False(t, v)
 
 	err = s.Set("true")
 	require.NoError(t, err)
 	v, err = b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, true, v)
+	assert.True(t, v)
 
 	err = s.Set("trap") // bug in fmt.SScanf means "wrong" parses as "false"
 	require.NoError(t, err)
@@ -292,13 +292,13 @@ func TestStringToBoolWithFormat(t *testing.T) {
 	b := StringToBoolWithFormat(s, "%tly")
 	v, err := b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, false, v)
+	assert.False(t, v)
 
 	err = s.Set("truely")
 	require.NoError(t, err)
 	v, err = b.Get()
 	require.NoError(t, err)
-	assert.Equal(t, true, v)
+	assert.True(t, v)
 
 	err = s.Set("true") // valid bool but not valid format
 	require.NoError(t, err)
@@ -419,7 +419,7 @@ func TestStringToURI(t *testing.T) {
 	u := StringToURI(s)
 	v, err := u.Get()
 	require.NoError(t, err)
-	assert.Equal(t, nil, v)
+	assert.Nil(t, v)
 
 	err = s.Set("file:///tmp/test.txt")
 	require.NoError(t, err)

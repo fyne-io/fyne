@@ -17,7 +17,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestEntry_Binding(t *testing.T) {
@@ -32,13 +31,13 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 
 	err := str.Set("Updated")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, "Updated", entry.Text)
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 
 	entry.Unbind()
@@ -1806,7 +1805,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 func TestNewEntryWithData(t *testing.T) {
 	str := binding.NewString()
 	err := str.Set("Init")
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	entry := widget.NewEntryWithData(str)
 	waitForBinding()
@@ -1814,7 +1813,7 @@ func TestNewEntryWithData(t *testing.T) {
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	require.NoError(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 }
 

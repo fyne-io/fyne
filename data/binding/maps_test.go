@@ -246,7 +246,7 @@ func TestUntypedMap_Delete(t *testing.T) {
 	assert.Len(t, b.Keys(), 1)
 	v, err = b.GetValue("foo")
 	require.Error(t, err)
-	assert.Equal(t, nil, v)
+	assert.Nil(t, v)
 	v, err = b.GetValue("val")
 	require.NoError(t, err)
 	assert.Equal(t, 5, v)

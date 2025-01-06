@@ -76,7 +76,7 @@ func TestBindFloatList(t *testing.T) {
 	assert.Equal(t, 5.0, v)
 
 	assert.NotNil(t, f.(*boundList[float64]).val)
-	assert.Len(t, *(f.(*boundFloatList).val), 3)
+	assert.Len(t, *(f.(*boundList[float64]).val), 3)
 
 	_, err = f.GetValue(-1)
 	assert.Error(t, err)
