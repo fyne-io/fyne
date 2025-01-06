@@ -42,7 +42,7 @@ func TestShowFolderOpen(t *testing.T) {
 	open := buttons.Objects[1].(*widget.Button)
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
-	assert.Greater(t, len(d.dialog.data), 0)
+	assert.NotEmpty(t, d.dialog.data)
 
 	item := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 	fileName := test.TempWidgetRenderer(t, item.(fyne.Widget)).Objects()[1].(*fileDialogItem).name
@@ -68,7 +68,7 @@ func TestShowFolderOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.Nil(t, openErr)
+	assert.NoError(t, openErr)
 
 	assert.Equal(t, (*target).String(), chosen.String())
 }

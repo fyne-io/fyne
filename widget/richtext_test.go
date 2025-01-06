@@ -40,7 +40,7 @@ func TestRichText_Hyperlink_Endline(t *testing.T) {
 	r.Resize(r.MinSize())
 	view := cache.Renderer(r)
 
-	assert.Equal(t, 2, len(view.Objects()))
+	assert.Len(t, view.Objects(), 2)
 	assert.Equal(t, view.Objects()[0].Position().Y, view.Objects()[1].Position().Y)   // same baseline
 	assert.Greater(t, view.Objects()[1].Position().X, view.Objects()[0].Position().X) // to the right
 }

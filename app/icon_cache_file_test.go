@@ -27,8 +27,8 @@ func TestCachedIcon_PATH(t *testing.T) {
 	}
 
 	info, err := os.Stat(path)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "icon.png", info.Name())
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

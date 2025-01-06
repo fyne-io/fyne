@@ -25,7 +25,7 @@ func TestSlider_Extended_Value(t *testing.T) {
 	slider := newExtendedSlider()
 	slider.Resize(slider.MinSize().Add(fyne.NewSize(20, 0)))
 	objs := cache.Renderer(slider).Objects()
-	assert.Equal(t, 4, len(objs))
+	assert.Len(t, objs, 4)
 	thumb := objs[2]
 	thumbPos := thumb.Position()
 
@@ -38,7 +38,7 @@ func TestSlider_Extended_Value(t *testing.T) {
 func TestSlider_Extended_Drag(t *testing.T) {
 	slider := newExtendedSlider()
 	objs := cache.Renderer(slider).Objects()
-	assert.Equal(t, 4, len(objs))
+	assert.Len(t, objs, 4)
 	thumb := objs[2]
 	thumbPos := thumb.Position()
 

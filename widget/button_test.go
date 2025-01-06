@@ -17,8 +17,8 @@ func TestButton_MinSize(t *testing.T) {
 	button := widget.NewButton("Hi", nil)
 	min := button.MinSize()
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 }
 
 func TestButton_SetText(t *testing.T) {
@@ -28,7 +28,7 @@ func TestButton_SetText(t *testing.T) {
 	button.SetText("Longer")
 	min2 := button.MinSize()
 
-	assert.True(t, min2.Width > min1.Width)
+	assert.Greater(t, min2.Width, min1.Width)
 	assert.Equal(t, min2.Height, min1.Height)
 }
 
@@ -39,7 +39,7 @@ func TestButton_MinSize_Icon(t *testing.T) {
 	button.SetIcon(theme.CancelIcon())
 	min2 := button.MinSize()
 
-	assert.True(t, min2.Width > min1.Width)
+	assert.Greater(t, min2.Width, min1.Width)
 	assert.Equal(t, min2.Height, min1.Height)
 }
 

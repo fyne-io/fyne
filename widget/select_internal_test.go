@@ -14,7 +14,7 @@ func TestSelect_SetOptions(t *testing.T) {
 	test.Tap(sel)
 
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 3, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 3)
 	assert.Equal(t, "10", sel.popUp.Items[0].(*menuItem).Item.Label)
 
 	sel.popUp.Hide()
@@ -22,7 +22,7 @@ func TestSelect_SetOptions(t *testing.T) {
 
 	test.Tap(sel)
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 3, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 3)
 	assert.Equal(t, "16", sel.popUp.Items[1].(*menuItem).Item.Label)
 
 	sel.popUp.Hide()
@@ -31,7 +31,7 @@ func TestSelect_SetOptions(t *testing.T) {
 
 	test.Tap(sel)
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 2, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 2)
 	assert.Equal(t, "20", sel.popUp.Items[0].(*menuItem).Item.Label)
 }
 

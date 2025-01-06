@@ -24,7 +24,7 @@ func TestPreferences_Remove(t *testing.T) {
 
 	p.RemoveValue("keyString")
 	err := p.saveToFile(p.storagePath())
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// check it doesn't write values that were removed
 	p = loadPreferences("dummy")
@@ -49,7 +49,7 @@ func TestPreferences_Save(t *testing.T) {
 	path := p.storagePath()
 	defer os.Remove(path)
 	err := p.saveToFile(path)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected, err := os.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
@@ -64,7 +64,7 @@ func TestPreferences_Save(t *testing.T) {
 	// check it reads the saved output
 	p = loadPreferences("dummy")
 	assert.Equal(t, "value", p.String("keyString"))
-	assert.Equal(t, 3, len(p.StringList("keyStringList")))
+	assert.Len(t, p.StringList("keyStringList"), 3)
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {
@@ -96,9 +96,9 @@ func TestPreferences_Load(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, p.IntList("keyIntList"))
 	assert.Equal(t, 3.5, p.Float("keyFloat"))
 	assert.Equal(t, []float64{1.1, 2.2, 3.3}, p.FloatList("keyFloatList"))
-	assert.Equal(t, true, p.Bool("keyBool"))
+	assert.True(t, p.Bool("keyBool"))
 	assert.Equal(t, []bool{true, false, true}, p.BoolList("keyBoolList"))
-	assert.Equal(t, 0, len(p.StringList("keyEmptyList")))
+	assert.Empty(t, p.StringList("keyEmptyList"))
 }
 
 func TestPreferences_EmptyLoad(t *testing.T) {

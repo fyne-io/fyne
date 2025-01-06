@@ -68,13 +68,13 @@ func TestFyneApp_transitionCloud_Storage(t *testing.T) {
 	a.Storage().Create("nothere")
 
 	l := a.Storage().List()
-	assert.Equal(t, 1, len(l))
+	assert.Len(t, l, 1)
 
 	p := &mockCloud{}
 	a.SetCloudProvider(p)
 
 	l = a.Storage().List()
-	assert.Equal(t, 0, len(l))
+	assert.Empty(t, l)
 }
 
 type mockCloud struct {

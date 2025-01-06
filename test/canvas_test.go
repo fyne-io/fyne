@@ -15,8 +15,8 @@ func Test_canvas_Capture(t *testing.T) {
 	c.Size()
 
 	img := c.Capture()
-	assert.True(t, img.Bounds().Size().X > 0)
-	assert.True(t, img.Bounds().Size().Y > 0)
+	assert.Positive(t, img.Bounds().Size().X)
+	assert.Positive(t, img.Bounds().Size().Y)
 
 	r1, g1, b1, a1 := theme.Color(theme.ColorNameBackground).RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()
@@ -49,8 +49,8 @@ func Test_canvas_TransparentCapture(t *testing.T) {
 	c.Size()
 
 	img := c.Capture()
-	assert.True(t, img.Bounds().Size().X > 0)
-	assert.True(t, img.Bounds().Size().Y > 0)
+	assert.Positive(t, img.Bounds().Size().X)
+	assert.Positive(t, img.Bounds().Size().Y)
 
 	r1, g1, b1, a1 := color.Transparent.RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()

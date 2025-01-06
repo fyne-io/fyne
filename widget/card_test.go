@@ -16,20 +16,20 @@ import (
 func TestCard_SetImage(t *testing.T) {
 	c := widget.NewCard("Title", "sub", widget.NewLabel("Content"))
 	r := test.TempWidgetRenderer(t, c)
-	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
+	assert.Len(t, r.Objects(), 4) // the 3 above plus shadow
 
 	c.SetImage(canvas.NewImageFromResource(theme.ComputerIcon()))
-	assert.Equal(t, 5, len(r.Objects()))
+	assert.Len(t, r.Objects(), 5)
 }
 
 func TestCard_SetContent(t *testing.T) {
 	c := widget.NewCard("Title", "sub", widget.NewLabel("Content"))
 	r := test.TempWidgetRenderer(t, c)
-	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
+	assert.Len(t, r.Objects(), 4) // the 3 above plus shadow
 
 	newContent := widget.NewLabel("New")
 	c.SetContent(newContent)
-	assert.Equal(t, 4, len(r.Objects()))
+	assert.Len(t, r.Objects(), 4)
 	assert.Equal(t, newContent, r.Objects()[3])
 }
 

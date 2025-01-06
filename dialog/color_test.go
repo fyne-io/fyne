@@ -148,13 +148,13 @@ func Test_recent_color(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		test.NewTempApp(t)
 		colors := readRecentColors()
-		assert.Equal(t, 0, len(colors))
+		assert.Empty(t, colors)
 	})
 	t.Run("Single", func(t *testing.T) {
 		test.NewTempApp(t)
 		writeRecentColor("#ff0000") // Red
 		colors := readRecentColors()
-		assert.Equal(t, 1, len(colors))
+		assert.Len(t, colors, 1)
 		assert.Equal(t, "#ff0000", colors[0])
 	})
 	t.Run("Order", func(t *testing.T) {
@@ -164,7 +164,7 @@ func Test_recent_color(t *testing.T) {
 		writeRecentColor("#00ff00") // Green
 		writeRecentColor("#0000ff") // Blue
 		colors := readRecentColors()
-		assert.Equal(t, 3, len(colors))
+		assert.Len(t, colors, 3)
 		assert.Equal(t, "#0000ff", colors[0])
 		assert.Equal(t, "#00ff00", colors[1])
 		assert.Equal(t, "#ff0000", colors[2])
@@ -177,7 +177,7 @@ func Test_recent_color(t *testing.T) {
 		writeRecentColor("#0000ff") // Blue
 		writeRecentColor("#ff0000") // Red again
 		colors := readRecentColors()
-		assert.Equal(t, 3, len(colors))
+		assert.Len(t, colors, 3)
 		assert.Equal(t, "#ff0000", colors[0]) // Red
 		assert.Equal(t, "#0000ff", colors[1]) // Blue
 		assert.Equal(t, "#00ff00", colors[2]) // Green
@@ -196,7 +196,7 @@ func Test_recent_color(t *testing.T) {
 		writeRecentColor("#00ffff") // Cyan
 		writeRecentColor("#ff00ff") // Magenta
 		colors := readRecentColors()
-		assert.Equal(t, 7, len(colors))
+		assert.Len(t, colors, 7)
 		assert.Equal(t, "#ff00ff", colors[0]) // Magenta
 		assert.Equal(t, "#00ffff", colors[1]) // Cyan
 		assert.Equal(t, "#ffff00", colors[2]) // Yellow

@@ -10,22 +10,22 @@ import (
 func TestContainer_Add(t *testing.T) {
 	box := new(dummyObject)
 	container := NewContainerWithLayout(new(customLayout))
-	assert.Equal(t, 0, len(container.Objects))
+	assert.Empty(t, container.Objects)
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(0), container.MinSize().Height)
 
 	container.Add(box)
-	assert.Equal(t, 1, len(container.Objects))
+	assert.Len(t, container.Objects, 1)
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(10), container.MinSize().Height)
 
 	oldLength := len(container.Objects)
 	container.Add(nil)
-	assert.Equal(t, oldLength, len(container.Objects))
+	assert.Len(t, container.Objects, oldLength)
 
 	box2 := new(dummyObject)
 	container.Add(box2)
-	assert.Equal(t, 2, len(container.Objects))
+	assert.Len(t, container.Objects, 2)
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(20), container.MinSize().Height)
 	assert.Equal(t, float32(0), box2.Position().X)
@@ -95,12 +95,12 @@ func TestContainer_Remove(t *testing.T) {
 	box1 := new(dummyObject)
 	box2 := new(dummyObject)
 	container := NewContainerWithLayout(new(customLayout), box1, box2)
-	assert.Equal(t, 2, len(container.Objects))
+	assert.Len(t, container.Objects, 2)
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(20), container.MinSize().Height)
 
 	container.Remove(box1)
-	assert.Equal(t, 1, len(container.Objects))
+	assert.Len(t, container.Objects, 1)
 	assert.Equal(t, float32(10), container.MinSize().Width)
 	assert.Equal(t, float32(10), container.MinSize().Height)
 	assert.Equal(t, float32(0), box2.Position().X)
@@ -125,7 +125,7 @@ func TestContainer_Remove_Race(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	assert.Equal(t, 0, len(container.Objects))
+	assert.Empty(t, container.Objects)
 }
 
 func TestContainer_Add_Race(t *testing.T) {
@@ -139,17 +139,17 @@ func TestContainer_Add_Race(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	assert.Equal(t, 100, len(container.Objects))
+	assert.Len(t, container.Objects, 100)
 }
 
 func TestContainer_RemoveAll(t *testing.T) {
 	box1 := new(dummyObject)
 	box2 := new(dummyObject)
 	container := NewContainerWithLayout(new(customLayout), box1, box2)
-	assert.Equal(t, 2, len(container.Objects))
+	assert.Len(t, container.Objects, 2)
 
 	container.RemoveAll()
-	assert.Equal(t, 0, len(container.Objects))
+	assert.Empty(t, container.Objects)
 }
 
 func TestContainer_Show(t *testing.T) {

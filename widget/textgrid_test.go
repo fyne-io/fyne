@@ -17,8 +17,8 @@ func TestNewTextGrid(t *testing.T) {
 	grid := NewTextGridFromString("A")
 	test.TempWidgetRenderer(t, grid).Refresh()
 
-	assert.Equal(t, 1, len(grid.Rows))
-	assert.Equal(t, 1, len(grid.Rows[0].Cells))
+	assert.Len(t, grid.Rows, 1)
+	assert.Len(t, grid.Rows[0].Cells, 1)
 }
 
 func TestTextGrid_CreateRendererRows(t *testing.T) {
@@ -27,7 +27,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
 	rend.Refresh()
 
-	assert.Equal(t, 18, len(rend.objects))
+	assert.Len(t, rend.objects, 18)
 }
 
 func TestTextGrid_Row(t *testing.T) {
@@ -35,7 +35,7 @@ func TestTextGrid_Row(t *testing.T) {
 	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.NotNil(t, grid.Row(0))
-	assert.Equal(t, 2, len(grid.Row(0).Cells))
+	assert.Len(t, grid.Row(0).Cells, 2)
 	assert.Equal(t, 'b', grid.Row(0).Cells[1].Rune)
 }
 
@@ -43,8 +43,8 @@ func TestTextGrid_Rows(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
 	test.TempWidgetRenderer(t, grid).Refresh()
 
-	assert.Equal(t, 2, len(grid.Rows))
-	assert.Equal(t, 2, len(grid.Rows[0].Cells))
+	assert.Len(t, grid.Rows, 2)
+	assert.Len(t, grid.Rows[0].Cells, 2)
 }
 
 func TestTextGrid_RowText(t *testing.T) {
@@ -61,16 +61,16 @@ func TestTextGrid_SetText(t *testing.T) {
 	text := "\n\n\n\n\n\n\n\n\n\n\n\n"
 	grid.SetText(text) // goes beyond the current view size - don't crash
 
-	assert.Equal(t, 13, len(grid.Rows))
-	assert.Equal(t, 0, len(grid.Rows[1].Cells))
+	assert.Len(t, grid.Rows, 13)
+	assert.Empty(t, grid.Rows[1].Cells)
 }
 
 func TestTextGrid_SetText_Overflow(t *testing.T) {
 	grid := NewTextGrid()
 	grid.SetText("Hello\nthere")
 
-	assert.Equal(t, 2, len(grid.Rows))
-	assert.Equal(t, 5, len(grid.Rows[1].Cells))
+	assert.Len(t, grid.Rows, 2)
+	assert.Len(t, grid.Rows[1].Cells, 5)
 }
 
 func TestTextGrid_SetRowStyle(t *testing.T) {
