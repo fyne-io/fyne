@@ -47,7 +47,7 @@ func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 
 	listing, err := storage.List(foo)
 	require.NoError(t, err)
-	assert.Len(t, listing, 0)
+	assert.Empty(t, listing)
 }
 
 func TestInMemoryRepositoryParsing(t *testing.T) {

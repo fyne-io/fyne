@@ -29,7 +29,7 @@ func TestAppTabs_SelectedIndex(t *testing.T) {
 
 func TestAppTabs_Empty(t *testing.T) {
 	tabs := NewAppTabs()
-	assert.Len(t, tabs.Items, 0)
+	assert.Empty(t, tabs.Items)
 	assert.Equal(t, -1, tabs.SelectedIndex())
 	assert.Nil(t, tabs.Selected())
 	min := tabs.MinSize()
@@ -37,7 +37,7 @@ func TestAppTabs_Empty(t *testing.T) {
 	assert.Equal(t, theme.Padding(), min.Height)
 
 	tabs = &AppTabs{}
-	assert.Len(t, tabs.Items, 0)
+	assert.Empty(t, tabs.Items)
 	assert.Nil(t, tabs.Selected())
 	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }

@@ -11,7 +11,7 @@ import (
 
 func TestMultipleWindows_Add(t *testing.T) {
 	m := NewMultipleWindows()
-	assert.Zero(t, len(m.Windows))
+	assert.Empty(t, m.Windows)
 
 	m.Add(NewInnerWindow("1", widget.NewLabel("Inside")))
 	assert.Len(t, m.Windows, 1)

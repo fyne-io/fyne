@@ -30,7 +30,7 @@ func TestDocTabs_SelectedIndex(t *testing.T) {
 
 func TestDocTabs_Empty(t *testing.T) {
 	tabs := container.NewDocTabs()
-	assert.Len(t, tabs.Items, 0)
+	assert.Empty(t, tabs.Items)
 	assert.Equal(t, -1, tabs.SelectedIndex())
 	assert.Nil(t, tabs.Selected())
 	min := tabs.MinSize()
@@ -38,7 +38,7 @@ func TestDocTabs_Empty(t *testing.T) {
 	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), min.Height)
 
 	tabs = &container.DocTabs{}
-	assert.Len(t, tabs.Items, 0)
+	assert.Empty(t, tabs.Items)
 	assert.Nil(t, tabs.Selected())
 	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }

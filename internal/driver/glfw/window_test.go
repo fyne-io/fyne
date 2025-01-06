@@ -1576,7 +1576,7 @@ func TestWindow_TabWithModifierToTriggersShortcut(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, 0)
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, 0)
 
-	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Empty(t, content.capturedShortcuts)
 
 	// Tab with ctrl or alt is not passed
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl)

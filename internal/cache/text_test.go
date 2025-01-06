@@ -9,7 +9,7 @@ import (
 
 func TestTextCacheGet(t *testing.T) {
 	ResetThemeCaches()
-	assert.Len(t, fontSizeCache, 0)
+	assert.Empty(t, fontSizeCache)
 
 	bound, base := GetFontMetrics("hi", 10, fyne.TextStyle{}, nil)
 	assert.True(t, bound.IsZero())

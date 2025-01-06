@@ -11,7 +11,7 @@ import (
 
 func TestNewBorder_Nil(t *testing.T) {
 	b := NewBorder(nil, nil, nil, nil)
-	assert.Len(t, b.Objects, 0)
+	assert.Empty(t, b.Objects)
 	b = NewBorder(canvas.NewRectangle(color.Black), canvas.NewRectangle(color.Black), canvas.NewRectangle(color.Black), canvas.NewRectangle(color.Black))
 	assert.Len(t, b.Objects, 4)
 

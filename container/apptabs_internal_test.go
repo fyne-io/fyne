@@ -56,11 +56,11 @@ func Test_tabButtonRenderer_EmptyDeleteAdd(t *testing.T) {
 	tabs.Resize(fyne.NewSize(300, 200))
 
 	tabRenderer := cache.Renderer(tabs).(*appTabsRenderer)
-	assert.Len(t, tabRenderer.bar.Objects[0].(*fyne.Container).Objects, 0)
+	assert.Empty(t, tabRenderer.bar.Objects[0].(*fyne.Container).Objects)
 
 	tabs.Append(item1)
 	assert.Len(t, tabRenderer.bar.Objects[0].(*fyne.Container).Objects, 1)
 
 	tabs.Remove(item1)
-	assert.Len(t, tabRenderer.bar.Objects[0].(*fyne.Container).Objects, 0)
+	assert.Empty(t, tabRenderer.bar.Objects[0].(*fyne.Container).Objects)
 }

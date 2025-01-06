@@ -106,8 +106,8 @@ func TestCacheClean(t *testing.T) {
 		tm.setTime(11, 22)
 		Clean(true)
 		assert.Len(t, svgs, 0)
-		assert.Equal(t, 0, renderers.Len())
-		assert.Equal(t, 0, canvases.Len())
+		assert.Empty(t, renderers)
+		assert.Empty(t, canvases)
 		assert.Equal(t, 40, destroyedRenderersCnt)
 	})
 
@@ -131,7 +131,7 @@ func TestCacheClean(t *testing.T) {
 		Clean(false)
 		assert.False(t, skippedCleanWithCanvasRefresh)
 		assert.Equal(t, tm.now, lastClean)
-		assert.Equal(t, 0, renderers.Len())
+		assert.Empty(t, renderers)
 	})
 }
 
@@ -171,8 +171,8 @@ func TestCleanCanvas(t *testing.T) {
 	})
 
 	CleanCanvas(dcanvas2)
-	assert.Equal(t, 0, renderers.Len())
-	assert.Equal(t, 0, canvases.Len())
+	assert.Empty(t, renderers)
+	assert.Empty(t, canvases)
 	assert.Equal(t, 42, destroyedRenderersCnt)
 }
 

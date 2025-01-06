@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
@@ -24,14 +23,14 @@ func TestDesktopFileSource(t *testing.T) {
 
 	err := templates.DesktopFileUNIX.Execute(buf, tplData)
 	require.NoError(t, err)
-	assert.False(t, strings.Contains(buf.String(), "[X-Fyne"))
+	assert.NotContains(t, buf.String(), "[X-Fyne")
 
 	tplData.SourceRepo = "https://example.com"
 	tplData.SourceDir = "cmd/name"
 
 	err = templates.DesktopFileUNIX.Execute(buf, tplData)
 	require.NoError(t, err)
-	assert.True(t, strings.Contains(buf.String(), "[X-Fyne"))
-	assert.True(t, strings.Contains(buf.String(), "Repo=https://example.com"))
-	assert.True(t, strings.Contains(buf.String(), "Dir=cmd/name"))
+	assert.Contains(t, buf.String(), "[X-Fyne")
+	assert.Contains(t, buf.String(), "Repo=https://example.com")
+	assert.Contains(t, buf.String(), "Dir=cmd/name")
 }

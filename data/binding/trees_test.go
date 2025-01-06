@@ -151,7 +151,7 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 
 func TestNewStringTree(t *testing.T) {
 	f := NewStringTree()
-	assert.Len(t, f.ChildIDs(DataTreeRootID), 0)
+	assert.Empty(t, f.ChildIDs(DataTreeRootID))
 
 	_, err := f.GetValue("NaN")
 	require.Error(t, err)
@@ -159,7 +159,7 @@ func TestNewStringTree(t *testing.T) {
 
 func TestStringTree_Append(t *testing.T) {
 	f := NewStringTree()
-	assert.Len(t, f.ChildIDs(DataTreeRootID), 0)
+	assert.Empty(t, f.ChildIDs(DataTreeRootID))
 
 	f.Append(DataTreeRootID, "5", "five")
 	assert.Len(t, f.ChildIDs(DataTreeRootID), 1)
@@ -197,7 +197,7 @@ func TestStringTree_Remove(t *testing.T) {
 
 	f.Remove("5")
 	assert.Len(t, f.ChildIDs(DataTreeRootID), 1)
-	assert.Len(t, f.ChildIDs("5"), 0)
+	assert.Empty(t, f.ChildIDs("5"))
 }
 
 func TestFloatTree_Set(t *testing.T) {

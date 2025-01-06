@@ -370,7 +370,7 @@ func TestCanvas_OverlayStack(t *testing.T) {
 	o.Remove(c)
 	assert.Equal(t, 2, len(o.List()))
 	o.Remove(a)
-	assert.Equal(t, 0, len(o.List()))
+	assert.Empty(t, o.List())
 }
 
 func deleteAt(c *fyne.Container, index int) {

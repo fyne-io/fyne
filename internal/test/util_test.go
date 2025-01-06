@@ -2,7 +2,6 @@ package test_test
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -66,7 +65,7 @@ func TestNewCheckedImage(t *testing.T) {
 	}
 	for y, xv := range expectedColorValues {
 		for x, v := range xv {
-			assert.Equal(t, color.NRGBA{R: v, G: v, B: v, A: 0xff}, img.At(x, y), fmt.Sprintf("color value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{R: v, G: v, B: v, A: 0xff}, img.At(x, y), "color value at %d,%d", x, y)
 		}
 	}
 }
