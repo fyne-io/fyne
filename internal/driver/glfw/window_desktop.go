@@ -6,7 +6,9 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"os"
 	"runtime"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -24,7 +26,10 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
-const defaultTitle = "Fyne Application"
+const (
+	defaultTitle              = "Fyne Application"
+	disableDPIDetectionEnvKey = "FYNE_DISABLE_DPI_DETECTION"
+)
 
 // Input modes.
 const (
@@ -297,6 +302,13 @@ func (w *window) detectScale() float32 {
 	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1
 	}
+
+	// check if DPI detection is disabled
+	env := os.Getenv(disableDPIDetectionEnvKey)
+	if strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1" {
+		return 1
+	}
+
 	monitor := w.getMonitorForWindow()
 	if monitor == nil {
 		return 1
