@@ -46,7 +46,7 @@ func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 
 	listing, err := storage.List(foo)
 	assert.Nil(t, err)
-	assert.Equal(t, 0, len(listing))
+	assert.Len(t, listing, 0)
 }
 
 func TestInMemoryRepositoryParsing(t *testing.T) {

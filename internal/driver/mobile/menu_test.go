@@ -58,7 +58,7 @@ func TestMobileCanvas_Menu(t *testing.T) {
 
 	c.showMenu(menu)
 	menuObjects := c.menu.(*fyne.Container).Objects[1].(*fyne.Container)
-	assert.Equal(t, 3, len(menuObjects.Objects))
+	assert.Len(t, menuObjects.Objects, 3)
 	header, ok := menuObjects.Objects[0].(*fyne.Container)
 	assert.True(t, ok)
 	closed, ok := header.Objects[0].(*widget.Button)

@@ -49,7 +49,7 @@ func TestBindStruct(t *testing.T) {
 
 	b := BindStruct(&s)
 
-	assert.Equal(t, 3, len(b.Keys()))
+	assert.Len(t, b.Keys(), 3)
 	item, err := b.GetItem("Foo")
 	assert.Nil(t, err)
 	v, err := item.(String).Get()
@@ -78,7 +78,7 @@ func TestBindStruct_Reload(t *testing.T) {
 
 	b := BindStruct(&s)
 
-	assert.Equal(t, 3, len(b.Keys()))
+	assert.Len(t, b.Keys(), 3)
 	v, err := b.GetValue("Foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -142,7 +142,7 @@ func TestBindUntypedMap(t *testing.T) {
 
 	b := BindUntypedMap(&m)
 
-	assert.Equal(t, 3, len(b.Keys()))
+	assert.Len(t, b.Keys(), 3)
 	v, err := b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -172,7 +172,7 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 
 	b := BindUntypedMap(&m)
 
-	assert.Equal(t, 3, len(b.Keys()))
+	assert.Len(t, b.Keys(), 3)
 	v, err := b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -233,7 +233,7 @@ func TestUntypedMap_Delete(t *testing.T) {
 
 	b := BindUntypedMap(&m)
 
-	assert.Equal(t, 2, len(b.Keys()))
+	assert.Len(t, b.Keys(), 2)
 	v, err := b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -242,7 +242,7 @@ func TestUntypedMap_Delete(t *testing.T) {
 	assert.Equal(t, 5, v)
 
 	b.Delete("foo")
-	assert.Equal(t, 1, len(b.Keys()))
+	assert.Len(t, b.Keys(), 1)
 	v, err = b.GetValue("foo")
 	assert.NotNil(t, err)
 	assert.Equal(t, nil, v)
@@ -262,7 +262,7 @@ func TestUntypedMap_Set(t *testing.T) {
 	assert.Nil(t, err)
 	data := i.(reflectUntyped)
 
-	assert.Equal(t, 2, len(b.Keys()))
+	assert.Len(t, b.Keys(), 2)
 	v, err := b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -278,7 +278,7 @@ func TestUntypedMap_Set(t *testing.T) {
 	err = b.Set(m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 3, len(b.Keys()))
+	assert.Len(t, b.Keys(), 3)
 	v, err = b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "new", v)
@@ -292,7 +292,7 @@ func TestUntypedMap_Set(t *testing.T) {
 	err = b.Set(m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 1, len(b.Keys()))
+	assert.Len(t, b.Keys(), 1)
 	v, err = b.GetValue("val")
 	assert.Nil(t, err)
 	assert.Equal(t, 9, v)

@@ -79,13 +79,13 @@ func TestBindStringTree(t *testing.T) {
 	l := map[string]string{"1": "one", "5": "five", "2": "two and a half"}
 	f := BindStringTree(&ids, &l)
 
-	assert.Equal(t, 3, len(f.ChildIDs(DataTreeRootID)))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 3)
 	v, err := f.GetValue("5")
 	assert.Nil(t, err)
 	assert.Equal(t, "five", v)
 
 	assert.NotNil(t, f.(*boundTree[string]).val)
-	assert.Equal(t, 3, len(*(f.(*boundTree[string]).val)))
+	assert.Len(t, *(f.(*boundTree[string]).val), 3)
 
 	_, err = f.GetValue("nan")
 	assert.NotNil(t, err)
@@ -96,7 +96,7 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	m := map[string]float64{"1": 1.0, "2": 5.0, "3": 2.3}
 	f := BindFloatTree(&i, &m)
 
-	assert.Equal(t, 2, len(f.ChildIDs("")))
+	assert.Len(t, f.ChildIDs(""), 2)
 	v, err := f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, v)
@@ -115,7 +115,7 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	assert.True(t, calledChild)
 
 	assert.NotNil(t, f.(*boundTree[float64]).val)
-	assert.Equal(t, 3, len(*(f.(*boundTree[float64]).val)))
+	assert.Len(t, *(f.(*boundTree[float64]).val), 3)
 
 	_, err = f.GetValue("-1")
 	assert.NotNil(t, err)
@@ -150,7 +150,7 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 
 func TestNewStringTree(t *testing.T) {
 	f := NewStringTree()
-	assert.Equal(t, 0, len(f.ChildIDs(DataTreeRootID)))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 0)
 
 	_, err := f.GetValue("NaN")
 	assert.NotNil(t, err)
@@ -158,10 +158,10 @@ func TestNewStringTree(t *testing.T) {
 
 func TestStringTree_Append(t *testing.T) {
 	f := NewStringTree()
-	assert.Equal(t, 0, len(f.ChildIDs(DataTreeRootID)))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 0)
 
 	f.Append(DataTreeRootID, "5", "five")
-	assert.Equal(t, 1, len(f.ChildIDs(DataTreeRootID)))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 1)
 }
 
 func TestStringTree_GetValue(t *testing.T) {
@@ -191,12 +191,12 @@ func TestStringTree_Remove(t *testing.T) {
 	f.Append(DataTreeRootID, "5", "five")
 	f.Append(DataTreeRootID, "3", "three")
 	f.Append("5", "53", "fifty three")
-	assert.Equal(t, 2, len(f.ChildIDs(DataTreeRootID)))
-	assert.Equal(t, 1, len(f.ChildIDs("5")))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 2)
+	assert.Len(t, f.ChildIDs("5"), 1)
 
 	f.Remove("5")
-	assert.Equal(t, 1, len(f.ChildIDs(DataTreeRootID)))
-	assert.Equal(t, 0, len(f.ChildIDs("5")))
+	assert.Len(t, f.ChildIDs(DataTreeRootID), 1)
+	assert.Len(t, f.ChildIDs("5"), 0)
 }
 
 func TestFloatTree_Set(t *testing.T) {
@@ -207,7 +207,7 @@ func TestFloatTree_Set(t *testing.T) {
 	assert.Nil(t, err)
 	data := i.(Float)
 
-	assert.Equal(t, 2, len(f.ChildIDs("")))
+	assert.Len(t, f.ChildIDs(""), 2)
 	v, err := f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, v)
@@ -220,7 +220,7 @@ func TestFloatTree_Set(t *testing.T) {
 	err = f.Set(ids, m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 2, len(f.ChildIDs("1")))
+	assert.Len(t, f.ChildIDs("1"), 2)
 	v, err = f.GetValue("2")
 	assert.Nil(t, err)
 	assert.Equal(t, 5.2, v)
@@ -233,7 +233,7 @@ func TestFloatTree_Set(t *testing.T) {
 	err = f.Set(ids, m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, 2, len(f.ChildIDs("")))
+	assert.Len(t, f.ChildIDs(""), 2)
 	v, err = f.GetValue("1")
 	assert.Nil(t, err)
 	assert.Equal(t, 1.3, v)

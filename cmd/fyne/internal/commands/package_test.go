@@ -187,7 +187,7 @@ func Test_buildPackageWasm(t *testing.T) {
 	files, err := p.buildPackage(wasmBuildTest, []string{})
 	assert.Nil(t, err)
 	assert.NotNil(t, files)
-	assert.Equal(t, 1, len(files))
+	assert.Len(t, files, 1)
 }
 
 func Test_PackageWasm(t *testing.T) {
