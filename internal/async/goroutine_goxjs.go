@@ -1,6 +1,6 @@
 //go:build wasm
 
-package glfw
+package async
 
 func goroutineID() uint64 {
 	return mainGoroutineID

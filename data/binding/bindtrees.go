@@ -75,7 +75,6 @@ type boundBoolTree struct {
 
 func (t *boundBoolTree) Append(parent, id string, val bool) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -85,7 +84,14 @@ func (t *boundBoolTree) Append(parent, id string, val bool) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBoolTree) Get() (map[string][]string, map[string]bool, error) {
@@ -108,7 +114,6 @@ func (t *boundBoolTree) GetValue(id string) (bool, error) {
 
 func (t *boundBoolTree) Prepend(parent, id string, val bool) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -118,7 +123,14 @@ func (t *boundBoolTree) Prepend(parent, id string, val bool) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -127,14 +139,19 @@ func (t *boundBoolTree) Prepend(parent, id string, val bool) error {
 // Since: 2.5
 func (t *boundBoolTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBoolTree) removeChildren(id string) {
@@ -149,23 +166,33 @@ func (t *boundBoolTree) removeChildren(id string) {
 
 func (t *boundBoolTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBoolTree) Set(ids map[string][]string, v map[string]bool) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundBoolTree) doReload() (retErr error) {
+func (t *boundBoolTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -199,20 +226,13 @@ func (t *boundBoolTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalBoolTreeItem).lock.Lock()
 			err = item.(*boundExternalBoolTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalBoolTreeItem).lock.Unlock()
 		} else {
-			item.(*boundBoolTreeItem).lock.Lock()
 			err = item.(*boundBoolTreeItem).doSet((*t.val)[id])
-			item.(*boundBoolTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -264,14 +284,13 @@ func (t *boundBoolTreeItem) Get() (bool, error) {
 }
 
 func (t *boundBoolTreeItem) Set(val bool) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundBoolTreeItem) doSet(val bool) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -284,11 +303,14 @@ type boundExternalBoolTreeItem struct {
 }
 
 func (t *boundExternalBoolTreeItem) setIfChanged(val bool) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -360,7 +382,6 @@ type boundBytesTree struct {
 
 func (t *boundBytesTree) Append(parent, id string, val []byte) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -370,7 +391,14 @@ func (t *boundBytesTree) Append(parent, id string, val []byte) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBytesTree) Get() (map[string][]string, map[string][]byte, error) {
@@ -393,7 +421,6 @@ func (t *boundBytesTree) GetValue(id string) ([]byte, error) {
 
 func (t *boundBytesTree) Prepend(parent, id string, val []byte) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -403,7 +430,14 @@ func (t *boundBytesTree) Prepend(parent, id string, val []byte) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -412,14 +446,19 @@ func (t *boundBytesTree) Prepend(parent, id string, val []byte) error {
 // Since: 2.5
 func (t *boundBytesTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBytesTree) removeChildren(id string) {
@@ -434,23 +473,33 @@ func (t *boundBytesTree) removeChildren(id string) {
 
 func (t *boundBytesTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundBytesTree) Set(ids map[string][]string, v map[string][]byte) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundBytesTree) doReload() (retErr error) {
+func (t *boundBytesTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -484,20 +533,13 @@ func (t *boundBytesTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalBytesTreeItem).lock.Lock()
 			err = item.(*boundExternalBytesTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalBytesTreeItem).lock.Unlock()
 		} else {
-			item.(*boundBytesTreeItem).lock.Lock()
 			err = item.(*boundBytesTreeItem).doSet((*t.val)[id])
-			item.(*boundBytesTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -549,14 +591,13 @@ func (t *boundBytesTreeItem) Get() ([]byte, error) {
 }
 
 func (t *boundBytesTreeItem) Set(val []byte) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundBytesTreeItem) doSet(val []byte) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -569,11 +610,14 @@ type boundExternalBytesTreeItem struct {
 }
 
 func (t *boundExternalBytesTreeItem) setIfChanged(val []byte) error {
+	t.lock.Lock()
 	if bytes.Equal(val, t.old) {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -645,7 +689,6 @@ type boundFloatTree struct {
 
 func (t *boundFloatTree) Append(parent, id string, val float64) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -655,7 +698,14 @@ func (t *boundFloatTree) Append(parent, id string, val float64) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundFloatTree) Get() (map[string][]string, map[string]float64, error) {
@@ -678,7 +728,6 @@ func (t *boundFloatTree) GetValue(id string) (float64, error) {
 
 func (t *boundFloatTree) Prepend(parent, id string, val float64) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -688,7 +737,14 @@ func (t *boundFloatTree) Prepend(parent, id string, val float64) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -697,14 +753,19 @@ func (t *boundFloatTree) Prepend(parent, id string, val float64) error {
 // Since: 2.5
 func (t *boundFloatTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundFloatTree) removeChildren(id string) {
@@ -719,23 +780,33 @@ func (t *boundFloatTree) removeChildren(id string) {
 
 func (t *boundFloatTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundFloatTree) Set(ids map[string][]string, v map[string]float64) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundFloatTree) doReload() (retErr error) {
+func (t *boundFloatTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -769,20 +840,13 @@ func (t *boundFloatTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalFloatTreeItem).lock.Lock()
 			err = item.(*boundExternalFloatTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalFloatTreeItem).lock.Unlock()
 		} else {
-			item.(*boundFloatTreeItem).lock.Lock()
 			err = item.(*boundFloatTreeItem).doSet((*t.val)[id])
-			item.(*boundFloatTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -834,14 +898,13 @@ func (t *boundFloatTreeItem) Get() (float64, error) {
 }
 
 func (t *boundFloatTreeItem) Set(val float64) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundFloatTreeItem) doSet(val float64) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -854,11 +917,14 @@ type boundExternalFloatTreeItem struct {
 }
 
 func (t *boundExternalFloatTreeItem) setIfChanged(val float64) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -930,7 +996,6 @@ type boundIntTree struct {
 
 func (t *boundIntTree) Append(parent, id string, val int) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -940,7 +1005,14 @@ func (t *boundIntTree) Append(parent, id string, val int) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundIntTree) Get() (map[string][]string, map[string]int, error) {
@@ -963,7 +1035,6 @@ func (t *boundIntTree) GetValue(id string) (int, error) {
 
 func (t *boundIntTree) Prepend(parent, id string, val int) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -973,7 +1044,14 @@ func (t *boundIntTree) Prepend(parent, id string, val int) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -982,14 +1060,19 @@ func (t *boundIntTree) Prepend(parent, id string, val int) error {
 // Since: 2.5
 func (t *boundIntTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundIntTree) removeChildren(id string) {
@@ -1004,23 +1087,33 @@ func (t *boundIntTree) removeChildren(id string) {
 
 func (t *boundIntTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundIntTree) Set(ids map[string][]string, v map[string]int) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundIntTree) doReload() (retErr error) {
+func (t *boundIntTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -1054,20 +1147,13 @@ func (t *boundIntTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalIntTreeItem).lock.Lock()
 			err = item.(*boundExternalIntTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalIntTreeItem).lock.Unlock()
 		} else {
-			item.(*boundIntTreeItem).lock.Lock()
 			err = item.(*boundIntTreeItem).doSet((*t.val)[id])
-			item.(*boundIntTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1119,14 +1205,13 @@ func (t *boundIntTreeItem) Get() (int, error) {
 }
 
 func (t *boundIntTreeItem) Set(val int) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundIntTreeItem) doSet(val int) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1139,11 +1224,14 @@ type boundExternalIntTreeItem struct {
 }
 
 func (t *boundExternalIntTreeItem) setIfChanged(val int) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1215,7 +1303,6 @@ type boundRuneTree struct {
 
 func (t *boundRuneTree) Append(parent, id string, val rune) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1225,7 +1312,14 @@ func (t *boundRuneTree) Append(parent, id string, val rune) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundRuneTree) Get() (map[string][]string, map[string]rune, error) {
@@ -1248,7 +1342,6 @@ func (t *boundRuneTree) GetValue(id string) (rune, error) {
 
 func (t *boundRuneTree) Prepend(parent, id string, val rune) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1258,7 +1351,14 @@ func (t *boundRuneTree) Prepend(parent, id string, val rune) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -1267,14 +1367,19 @@ func (t *boundRuneTree) Prepend(parent, id string, val rune) error {
 // Since: 2.5
 func (t *boundRuneTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundRuneTree) removeChildren(id string) {
@@ -1289,23 +1394,33 @@ func (t *boundRuneTree) removeChildren(id string) {
 
 func (t *boundRuneTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundRuneTree) Set(ids map[string][]string, v map[string]rune) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundRuneTree) doReload() (retErr error) {
+func (t *boundRuneTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -1339,20 +1454,13 @@ func (t *boundRuneTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalRuneTreeItem).lock.Lock()
 			err = item.(*boundExternalRuneTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalRuneTreeItem).lock.Unlock()
 		} else {
-			item.(*boundRuneTreeItem).lock.Lock()
 			err = item.(*boundRuneTreeItem).doSet((*t.val)[id])
-			item.(*boundRuneTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1404,14 +1512,13 @@ func (t *boundRuneTreeItem) Get() (rune, error) {
 }
 
 func (t *boundRuneTreeItem) Set(val rune) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundRuneTreeItem) doSet(val rune) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1424,11 +1531,14 @@ type boundExternalRuneTreeItem struct {
 }
 
 func (t *boundExternalRuneTreeItem) setIfChanged(val rune) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1500,7 +1610,6 @@ type boundStringTree struct {
 
 func (t *boundStringTree) Append(parent, id string, val string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1510,7 +1619,14 @@ func (t *boundStringTree) Append(parent, id string, val string) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundStringTree) Get() (map[string][]string, map[string]string, error) {
@@ -1533,7 +1649,6 @@ func (t *boundStringTree) GetValue(id string) (string, error) {
 
 func (t *boundStringTree) Prepend(parent, id string, val string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1543,7 +1658,14 @@ func (t *boundStringTree) Prepend(parent, id string, val string) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -1552,14 +1674,19 @@ func (t *boundStringTree) Prepend(parent, id string, val string) error {
 // Since: 2.5
 func (t *boundStringTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundStringTree) removeChildren(id string) {
@@ -1574,23 +1701,33 @@ func (t *boundStringTree) removeChildren(id string) {
 
 func (t *boundStringTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundStringTree) Set(ids map[string][]string, v map[string]string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundStringTree) doReload() (retErr error) {
+func (t *boundStringTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -1624,20 +1761,13 @@ func (t *boundStringTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalStringTreeItem).lock.Lock()
 			err = item.(*boundExternalStringTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalStringTreeItem).lock.Unlock()
 		} else {
-			item.(*boundStringTreeItem).lock.Lock()
 			err = item.(*boundStringTreeItem).doSet((*t.val)[id])
-			item.(*boundStringTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1689,14 +1819,13 @@ func (t *boundStringTreeItem) Get() (string, error) {
 }
 
 func (t *boundStringTreeItem) Set(val string) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundStringTreeItem) doSet(val string) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1709,11 +1838,14 @@ type boundExternalStringTreeItem struct {
 }
 
 func (t *boundExternalStringTreeItem) setIfChanged(val string) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1785,7 +1917,6 @@ type boundUntypedTree struct {
 
 func (t *boundUntypedTree) Append(parent, id string, val any) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1795,7 +1926,14 @@ func (t *boundUntypedTree) Append(parent, id string, val any) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundUntypedTree) Get() (map[string][]string, map[string]any, error) {
@@ -1818,7 +1956,6 @@ func (t *boundUntypedTree) GetValue(id string) (any, error) {
 
 func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -1828,7 +1965,14 @@ func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -1837,14 +1981,19 @@ func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
 // Since: 2.5
 func (t *boundUntypedTree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundUntypedTree) removeChildren(id string) {
@@ -1859,23 +2008,33 @@ func (t *boundUntypedTree) removeChildren(id string) {
 
 func (t *boundUntypedTree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]any) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundUntypedTree) doReload() (retErr error) {
+func (t *boundUntypedTree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -1909,20 +2068,13 @@ func (t *boundUntypedTree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalUntypedTreeItem).lock.Lock()
 			err = item.(*boundExternalUntypedTreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalUntypedTreeItem).lock.Unlock()
 		} else {
-			item.(*boundUntypedTreeItem).lock.Lock()
 			err = item.(*boundUntypedTreeItem).doSet((*t.val)[id])
-			item.(*boundUntypedTreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -1974,14 +2126,13 @@ func (t *boundUntypedTreeItem) Get() (any, error) {
 }
 
 func (t *boundUntypedTreeItem) Set(val any) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundUntypedTreeItem) doSet(val any) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -1994,11 +2145,14 @@ type boundExternalUntypedTreeItem struct {
 }
 
 func (t *boundExternalUntypedTreeItem) setIfChanged(val any) error {
+	t.lock.Lock()
 	if val == t.old {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -2070,7 +2224,6 @@ type boundURITree struct {
 
 func (t *boundURITree) Append(parent, id string, val fyne.URI) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -2080,7 +2233,14 @@ func (t *boundURITree) Append(parent, id string, val fyne.URI) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundURITree) Get() (map[string][]string, map[string]fyne.URI, error) {
@@ -2103,7 +2263,6 @@ func (t *boundURITree) GetValue(id string) (fyne.URI, error) {
 
 func (t *boundURITree) Prepend(parent, id string, val fyne.URI) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	ids, ok := t.ids[parent]
 	if !ok {
 		ids = make([]string, 0)
@@ -2113,7 +2272,14 @@ func (t *boundURITree) Prepend(parent, id string, val fyne.URI) error {
 	v := *t.val
 	v[id] = val
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 // Remove takes the specified id out of the tree.
@@ -2122,14 +2288,19 @@ func (t *boundURITree) Prepend(parent, id string, val fyne.URI) error {
 // Since: 2.5
 func (t *boundURITree) Remove(id string) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	t.removeChildren(id)
 	delete(t.ids, id)
 	v := *t.val
 	delete(v, id)
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundURITree) removeChildren(id string) {
@@ -2144,23 +2315,33 @@ func (t *boundURITree) removeChildren(id string) {
 
 func (t *boundURITree) Reload() error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
 
-	return t.doReload()
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
 func (t *boundURITree) Set(ids map[string][]string, v map[string]fyne.URI) error {
 	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.ids = ids
 	*t.val = v
 
-	return t.doReload()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
 }
 
-func (t *boundURITree) doReload() (retErr error) {
+func (t *boundURITree) doReload() (fire bool, retErr error) {
 	updated := []string{}
-	fire := false
 	for id := range *t.val {
 		found := false
 		for child := range t.items {
@@ -2194,20 +2375,13 @@ func (t *boundURITree) doReload() (retErr error) {
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}
 	}
-	if fire {
-		t.trigger()
-	}
 
 	for id, item := range t.items {
 		var err error
 		if t.updateExternal {
-			item.(*boundExternalURITreeItem).lock.Lock()
 			err = item.(*boundExternalURITreeItem).setIfChanged((*t.val)[id])
-			item.(*boundExternalURITreeItem).lock.Unlock()
 		} else {
-			item.(*boundURITreeItem).lock.Lock()
 			err = item.(*boundURITreeItem).doSet((*t.val)[id])
-			item.(*boundURITreeItem).lock.Unlock()
 		}
 		if err != nil {
 			retErr = err
@@ -2259,14 +2433,13 @@ func (t *boundURITreeItem) Get() (fyne.URI, error) {
 }
 
 func (t *boundURITreeItem) Set(val fyne.URI) error {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
 	return t.doSet(val)
 }
 
 func (t *boundURITreeItem) doSet(val fyne.URI) error {
+	t.lock.Lock()
 	(*t.val)[t.id] = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil
@@ -2279,11 +2452,14 @@ type boundExternalURITreeItem struct {
 }
 
 func (t *boundExternalURITreeItem) setIfChanged(val fyne.URI) error {
+	t.lock.Lock()
 	if compareURI(val, t.old) {
+		t.lock.Unlock()
 		return nil
 	}
 	(*t.val)[t.id] = val
 	t.old = val
+	t.lock.Unlock()
 
 	t.trigger()
 	return nil

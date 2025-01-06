@@ -72,7 +72,7 @@ func setDisableScreenBlank(disable bool) {
 	syscall.Syscall(executionState.Addr(), 1, uintptr(uType), 0, 0)
 }
 
-func (g *gLDriver) DoubleTapDelay() time.Duration {
+func (d *gLDriver) DoubleTapDelay() time.Duration {
 	// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdoubleclicktime
 	if getDoubleClickTime == nil {
 		return desktopDefaultDoubleTapDelay

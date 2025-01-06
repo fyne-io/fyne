@@ -93,13 +93,11 @@ func TestBindStruct_Reload(t *testing.T) {
 	b.AddListener(NewDataListener(func() {
 		calledMap = true
 	}))
-	waitForItems()
 	assert.True(t, calledMap)
 
 	item.AddListener(NewDataListener(func() {
 		calledItem = true
 	}))
-	waitForItems()
 	assert.True(t, calledItem)
 
 	s = struct {
@@ -114,7 +112,6 @@ func TestBindStruct_Reload(t *testing.T) {
 
 	calledMap, calledItem = false, false
 	b.Reload()
-	waitForItems()
 	v, err = b.GetValue("Foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bas", v)
@@ -126,7 +123,6 @@ func TestBindStruct_Reload(t *testing.T) {
 
 	calledMap, calledItem = false, false
 	b.Reload()
-	waitForItems()
 	v, err = b.GetValue("Foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bas", v)
@@ -185,7 +181,6 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 	b.AddListener(NewDataListener(func() {
 		calledMap = true
 	}))
-	waitForItems()
 	assert.True(t, calledMap)
 
 	child, err := b.GetItem("foo")
@@ -193,13 +188,11 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 	child.AddListener(NewDataListener(func() {
 		calledChild = true
 	}))
-	waitForItems()
 	assert.True(t, calledChild)
 
 	calledMap, calledChild = false, false
 	m["foo"] = "boo"
 	b.Reload()
-	waitForItems()
 	v, err = b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "boo", v)
@@ -212,7 +205,6 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 		"val": 5,
 	}
 	b.Reload()
-	waitForItems()
 	v, err = b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)
@@ -226,7 +218,6 @@ func TestExternalUntypedMap_Reload(t *testing.T) {
 		"new": "longer",
 	}
 	b.Reload()
-	waitForItems()
 	v, err = b.GetValue("foo")
 	assert.Nil(t, err)
 	assert.Equal(t, "bar", v)

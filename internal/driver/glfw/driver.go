@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 
+	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
@@ -19,12 +20,6 @@ import (
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
 )
-
-// mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized in main.init because
-// a main goroutine may not equal to 1 due to the
-// influence of a garbage collector.
-var mainGoroutineID uint64
 
 var curWindow *window
 
@@ -59,6 +54,10 @@ func toOSIcon(icon []byte) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func (d *gLDriver) CallFromGoroutine(f func()) {
+	runOnMain(f)
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -141,7 +140,7 @@ func (d *gLDriver) initFailed(msg string, err error) {
 }
 
 func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
+	if !async.IsMainGoroutine() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 

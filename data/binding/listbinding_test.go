@@ -22,7 +22,6 @@ func TestListBase_AddListener(t *testing.T) {
 	assert.Equal(t, 1, syncMapLen(&data.listeners))
 
 	data.trigger()
-	waitForItems()
 	assert.True(t, called)
 }
 
@@ -63,6 +62,5 @@ func TestListBase_RemoveListener(t *testing.T) {
 	assert.Equal(t, 0, syncMapLen(&data.listeners))
 
 	data.trigger()
-	waitForItems()
 	assert.False(t, called)
 }

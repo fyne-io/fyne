@@ -21,6 +21,6 @@ func setDisableScreenBlank(disable bool) {
 	// awaiting complete support for WakeLock
 }
 
-func (g *gLDriver) DoubleTapDelay() time.Duration {
+func (d *gLDriver) DoubleTapDelay() time.Duration {
 	return webDefaultDoubleTapDelay
 }

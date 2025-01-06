@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
 	intapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
@@ -61,6 +62,7 @@ type driver struct {
 	onConfigChanged func(*Configuration)
 	painting        bool
 	running         atomic.Bool
+	queuedFuncs     *async.UnboundedFuncChan
 }
 
 // Declare conformity with Driver
@@ -69,6 +71,10 @@ var _ ConfiguredDriver = (*driver)(nil)
 
 func init() {
 	runtime.LockOSThread()
+}
+
+func (d *driver) CallFromGoroutine(fn func()) {
+	d.queuedFuncs.In() <- fn
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
@@ -146,6 +152,7 @@ func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
+		d.queuedFuncs = async.NewUnboundedFuncChan()
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
@@ -168,6 +175,8 @@ func (d *driver) Run() {
 					}
 					c.applyThemeOutOfTreeObjects()
 				})
+			case fn := <-d.queuedFuncs.Out():
+				fn()
 			case e, ok := <-a.Events():
 				if !ok {
 					return // events channel closed, app done
