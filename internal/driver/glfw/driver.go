@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"sync"
 
+	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
@@ -156,7 +157,7 @@ func (d *gLDriver) initFailed(msg string, err error) {
 }
 
 func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
+	if !async.IsMainGoroutine() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 
