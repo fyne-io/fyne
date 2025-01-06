@@ -77,12 +77,12 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	err = sp.Set("Bool false , Float 7.000000 , Int 42 , Rune 67 , String nospacestring , URI file:///var/")
 	assert.Nil(t, err)
 
-	assert.Equal(t, b, false)
-	assert.Equal(t, f, float64(7))
-	assert.Equal(t, i, 42)
-	assert.Equal(t, r, 'C')
-	assert.Equal(t, s, "nospacestring")
-	assert.Equal(t, u.String(), "file:///var/")
+	assert.Equal(t, false, b)
+	assert.Equal(t, float64(7), f)
+	assert.Equal(t, 42, i)
+	assert.Equal(t, 'C', r)
+	assert.Equal(t, "nospacestring", s)
+	assert.Equal(t, "file:///var/", u.String())
 
 	expectedChange := fmt.Sprintf(format, b, f, i, r, s, u)
 
@@ -111,7 +111,7 @@ func TestNewStringWithFormat(t *testing.T) {
 	err = sp.Set("String nospacestring")
 	assert.Nil(t, err)
 
-	assert.Equal(t, s, "nospacestring")
+	assert.Equal(t, "nospacestring", s)
 	expectedChange := fmt.Sprintf(format, s)
 	sChange, err := sp.Get()
 	assert.Nil(t, err)

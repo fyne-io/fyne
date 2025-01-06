@@ -128,13 +128,13 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_appended.xml", c)
 
 	tabs.RemoveIndex(1)
-	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, 1, len(tabs.Items))
 	assert.Equal(t, "Test1", tabs.Items[0].Text)
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_initial.xml", c)
 
 	tabs.Append(appendedItem)
 	tabs.Remove(tabs.Items[0])
-	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, 1, len(tabs.Items))
 	assert.Equal(t, "Test2", tabs.Items[0].Text)
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_appended_and_removed.xml", c)
 

@@ -68,7 +68,7 @@ func TestGLDriver_CreateWindow(t *testing.T) {
 
 func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 	w := createWindow("")
-	assert.Equal(t, w.Title(), "Fyne Application")
+	assert.Equal(t, "Fyne Application", w.Title())
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {

@@ -42,11 +42,11 @@ func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 
 	canList, err := storage.CanList(foo)
 	assert.NotNil(t, err)
-	assert.Equal(t, canList, false)
+	assert.Equal(t, false, canList)
 
 	listing, err := storage.List(foo)
 	assert.Nil(t, err)
-	assert.Equal(t, len(listing), 0)
+	assert.Equal(t, 0, len(listing))
 }
 
 func TestInMemoryRepositoryParsing(t *testing.T) {
@@ -381,7 +381,7 @@ func TestInMemoryRepositoryCreateListable(t *testing.T) {
 	err := storage.CreateListable(foo)
 	assert.Nil(t, err)
 
-	assert.Equal(t, m.Data["/foo"], []byte{})
+	assert.Equal(t, []byte{}, m.Data["/foo"])
 
 	// trying to create something we already created should fail
 	err = storage.CreateListable(foo)
