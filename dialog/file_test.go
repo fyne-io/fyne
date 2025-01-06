@@ -110,7 +110,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 func TestFileDialogStartRemember(t *testing.T) {
 	testPath, err := filepath.Abs("./testdata")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	start, err := storage.ListerForURI(storage.NewFileURI(testPath))
 	if err != nil {
 		t.Skipf("could not get lister for working directory: %s", err)

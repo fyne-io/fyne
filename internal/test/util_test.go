@@ -26,7 +26,7 @@ func TestAssertImageMatches(t *testing.T) {
 
 	txtImg := image.NewNRGBA(bounds)
 	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	painter.DrawString(txtImg, "Hello!", color.Black, &test.FontMap{face}, 25, 1, fyne.TextStyle{TabWidth: 4})
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)

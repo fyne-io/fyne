@@ -12,9 +12,10 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func checkExistance(path string) bool {
+func checkExistence(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true
@@ -32,11 +33,11 @@ func TestFileRepositoryRegistration(t *testing.T) {
 	// this should never fail, and we assume it doesn't in other tests here
 	// for brevity
 	foo, err := storage.ParseURI("file:///foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// make sure we get the same repo back
 	repo, err := repository.ForURI(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, f, repo)
 }
 
@@ -52,11 +53,11 @@ func TestFileRepositoryExists(t *testing.T) {
 	}
 
 	ex, err := storage.Exists(storage.NewFileURI(existsPath))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, ex)
 
 	ex, err = storage.Exists(storage.NewFileURI(notExistsPath))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, ex)
 }
 
@@ -87,37 +88,37 @@ func TestFileRepositoryReader(t *testing.T) {
 
 	// Make sure we can read the empty file.
 	fooReader, err := storage.Reader(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	fooReader.Close()
 
 	// Make sure we can read the file with data.
 	barReader, err := storage.Reader(bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	barReader.Close()
 
 	// Make sure we get an error if the file doesn't exist.
 	bazReader, err := storage.Reader(baz)
-	assert.Error(t, err)
+	require.Error(t, err)
 	bazReader.Close()
 
 	// Also test that CanRead returns the expected results.
 	fooCanRead, err := storage.CanRead(foo)
 	assert.True(t, fooCanRead)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barCanRead, err := storage.CanRead(bar)
 	assert.True(t, barCanRead)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bazCanRead, err := storage.CanRead(baz)
 	assert.False(t, bazCanRead)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestFileRepositoryWriter(t *testing.T) {
@@ -150,7 +151,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 	// Make sure that spamHam errors, since writing to a non-existent
 	// parent directory should be an error.
 	spamHamWriter, err := storage.Writer(spamHam)
-	assert.Error(t, err)
+	require.Error(t, err)
 	if err == nil {
 		// Keep this from bodging up the Windows tests if this is
 		// created in error, and then we try to delete it while there
@@ -160,27 +161,27 @@ func TestFileRepositoryWriter(t *testing.T) {
 
 	// write some data and assert there are no errors
 	fooWriter, err := storage.Writer(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, fooWriter)
 
 	barWriter, err := storage.Writer(bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, barWriter)
 
 	bazWriter, err := storage.Writer(baz)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, bazWriter)
 
 	n, err := fooWriter.Write([]byte{1, 2, 3, 4, 5})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5, n)
 
 	n, err = barWriter.Write([]byte{6, 7, 8, 9})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 4, n)
 
 	n, err = bazWriter.Write([]byte{5, 4, 3, 2, 1, 0})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 6, n)
 
 	fooWriter.Close()
@@ -188,31 +189,31 @@ func TestFileRepositoryWriter(t *testing.T) {
 	bazWriter.Close()
 
 	bazAppender, err := storage.Appender(baz)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5, n)
 
 	bazAppender.Close()
 
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barReader, err := storage.Reader(bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bazReader, err := storage.Reader(baz)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// close the readers, since Windows won't let us delete things with
 	// open handles to them
@@ -222,25 +223,25 @@ func TestFileRepositoryWriter(t *testing.T) {
 
 	// now let's test deletion
 	err = storage.Delete(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = storage.Delete(bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = storage.Delete(baz)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	fooExists, err := storage.Exists(foo)
 	assert.False(t, fooExists)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barExists, err := storage.Exists(bar)
 	assert.False(t, barExists)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestFileRepositoryCanWrite(t *testing.T) {
@@ -270,15 +271,15 @@ func TestFileRepositoryCanWrite(t *testing.T) {
 
 	fooCanWrite, err := storage.CanWrite(foo)
 	assert.True(t, fooCanWrite)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barCanWrite, err := storage.CanWrite(bar)
 	assert.True(t, barCanWrite)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bazCanWrite, err := storage.CanWrite(baz)
 	assert.True(t, bazCanWrite)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestFileRepositoryParent(t *testing.T) {
@@ -290,15 +291,15 @@ func TestFileRepositoryParent(t *testing.T) {
 	// directory
 
 	parent, err := storage.Parent(storage.NewFileURI("/foo/bar/baz"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewFileURI("/foo/bar/baz/"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewFileURI("C:/foo/bar/baz/"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "file://C:/foo/bar/", parent.String())
 
 	if runtime.GOOS == "windows" {
@@ -310,7 +311,7 @@ func TestFileRepositoryParent(t *testing.T) {
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 
 		parent, err = storage.Parent(uri)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "file://C:/foo/bar/", parent.String())
 	}
 
@@ -330,7 +331,7 @@ func TestFileRepositoryParent(t *testing.T) {
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.
 	parent, err = storage.Parent(storage.NewFileURI("/C:/"))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "file:///", parent.String())
 }
 
@@ -371,13 +372,13 @@ func TestFileRepositoryCopy(t *testing.T) {
 	bar := storage.NewFileURI(barPath)
 
 	err = storage.Copy(foo, bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	fooData, err := os.ReadFile(fooPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barData, err := os.ReadFile(barPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, fooData, barData)
 }
@@ -397,16 +398,16 @@ func TestFileRepositoryMove(t *testing.T) {
 	bar := storage.NewFileURI(barPath)
 
 	err = storage.Move(foo, bar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	barData, err := os.ReadFile(barPath)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, barData)
 
 	// Make sure that the source doesn't exist anymore.
 	ex, err := storage.Exists(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, ex)
 }
 
@@ -456,17 +457,17 @@ func TestFileRepositoryListing(t *testing.T) {
 	foo := storage.NewFileURI(fooPath)
 
 	canList, err := storage.CanList(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, canList)
 
 	// also check the empty dir
 	childDir := storage.NewFileURI(path.Join(fooPath, "baz", "quux"))
 	canList, err = storage.CanList(childDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, canList)
 
 	listing, err := storage.List(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, listing, 2)
 	stringListing := []string{}
 	for _, u := range listing {
@@ -488,17 +489,17 @@ func TestFileRepositoryCreateListable(t *testing.T) {
 
 	// Creating a dir with no parent should fail
 	err := storage.CreateListable(fooBar)
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	// Creating foo should work though
 	err = storage.CreateListable(foo)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// and now we should be able to create fooBar
 	err = storage.CreateListable(fooBar)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// make sure the OS thinks these dirs really exist
-	assert.True(t, checkExistance(fooPath))
-	assert.True(t, checkExistance(fooBarPath))
+	assert.True(t, checkExistence(fooPath))
+	assert.True(t, checkExistence(fooBarPath))
 }

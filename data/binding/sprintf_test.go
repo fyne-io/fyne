@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSprintfConversionRead(t *testing.T) {
@@ -30,7 +31,7 @@ func TestSprintfConversionRead(t *testing.T) {
 	assert.NotNil(t, sp)
 
 	sGenerated, err := sp.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sGenerated)
 	assert.Equal(t, expected, sGenerated)
 
@@ -43,7 +44,7 @@ func TestSprintfConversionRead(t *testing.T) {
 	expectedChange := fmt.Sprintf(format, b, f, i, r, s, u)
 
 	sChange, err := sp.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sChange)
 	assert.Equal(t, expectedChange, sChange)
 	assert.NotEqual(t, sGenerated, sChange)
@@ -70,12 +71,12 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 	assert.NotNil(t, sp)
 
 	sGenerated, err := sp.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sGenerated)
 	assert.Equal(t, expected, sGenerated)
 
 	err = sp.Set("Bool false , Float 7.000000 , Int 42 , Rune 67 , String nospacestring , URI file:///var/")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, false, b)
 	assert.Equal(t, float64(7), f)
@@ -88,7 +89,7 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 
 	sChange, err := sp.Get()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sChange)
 	assert.Equal(t, expectedChange, sChange)
 	assert.NotEqual(t, sGenerated, sChange)
@@ -104,17 +105,17 @@ func TestNewStringWithFormat(t *testing.T) {
 	assert.NotNil(t, sp)
 
 	sGenerated, err := sp.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sGenerated)
 	assert.Equal(t, expected, sGenerated)
 
 	err = sp.Set("String nospacestring")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "nospacestring", s)
 	expectedChange := fmt.Sprintf(format, s)
 	sChange, err := sp.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, sChange)
 	assert.Equal(t, expectedChange, sChange)
 	assert.NotEqual(t, sGenerated, sChange)
