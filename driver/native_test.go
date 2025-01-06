@@ -16,5 +16,5 @@ func TestRunNative(t *testing.T) {
 		return nil
 	})
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

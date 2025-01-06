@@ -21,7 +21,7 @@ func TestFileRepositoryChild(t *testing.T) {
 
 	uri, _ := storage.ParseURI("content://thing")
 	p, err := storage.Child(uri, "new")
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Nil(t, p)
 }
 
@@ -37,6 +37,6 @@ func TestFileRepositoryParent(t *testing.T) {
 
 	uri, _ := storage.ParseURI("content://thing")
 	p, err := storage.Parent(uri)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 	assert.Nil(t, p)
 }

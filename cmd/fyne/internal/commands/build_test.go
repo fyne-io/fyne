@@ -30,7 +30,7 @@ func Test_BuildWasmVersion(t *testing.T) {
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", runner: wasmBuildTest}
 	err := b.build()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -58,7 +58,7 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &Builder{appData: &appData{}, os: "wasm", srcdir: "myTest", release: true, runner: wasmBuildTest}
 	err := b.build()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	wasmBuildTest.verifyExpectation()
 }
 
@@ -88,7 +88,7 @@ func Test_BuildLinuxReleaseVersion(t *testing.T) {
 	linuxBuildTest := &testCommandRuns{runs: expected, t: t}
 	b := &Builder{appData: &appData{}, os: "linux", srcdir: "myTest", release: true, runner: linuxBuildTest, goPackage: relativePath}
 	err := b.build()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	linuxBuildTest.verifyExpectation()
 }
 

@@ -11,7 +11,7 @@ func TestBindTime(t *testing.T) {
 	val := time.Now()
 	f := bindTime(&val)
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, val.Unix(), v.Unix())
 
 	called := false
@@ -24,7 +24,7 @@ func TestBindTime(t *testing.T) {
 	newTime := val.Add(time.Hour)
 	called = false
 	err = f.Set(newTime)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, newTime.Unix(), val.Unix())
 	assert.True(t, called)
 
@@ -34,21 +34,21 @@ func TestBindTime(t *testing.T) {
 	_ = f.Reload()
 	assert.True(t, called)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, newTime.Unix(), v.Unix())
 }
 
 func TestNewTime(t *testing.T) {
 	f := newTime()
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, time.Unix(0, 0), v)
 
 	now := time.Now()
 	err = f.Set(now)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, now.Unix(), v.Unix())
 }
 

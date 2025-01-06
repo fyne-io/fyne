@@ -18,7 +18,7 @@ func TestBindFloat(t *testing.T) {
 	val := 0.5
 	f := BindFloat(&val)
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.5, v)
 
 	called := false
@@ -30,7 +30,7 @@ func TestBindFloat(t *testing.T) {
 
 	called = false
 	err = f.Set(0.3)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.3, val)
 	assert.True(t, called)
 
@@ -39,7 +39,7 @@ func TestBindFloat(t *testing.T) {
 	f.Reload()
 	assert.True(t, called)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1.2, v)
 }
 
@@ -48,7 +48,7 @@ func TestBindUntyped(t *testing.T) {
 	val = 0.5
 	f := BindUntyped(&val)
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.5, v)
 
 	called := false
@@ -60,7 +60,7 @@ func TestBindUntyped(t *testing.T) {
 
 	called = false
 	err = f.Set(0.3)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.3, val)
 	assert.True(t, called)
 
@@ -69,20 +69,20 @@ func TestBindUntyped(t *testing.T) {
 	f.Reload()
 	assert.True(t, called)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1.2, v)
 }
 
 func TestNewFloat(t *testing.T) {
 	f := NewFloat()
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.0, v)
 
 	err = f.Set(0.3)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 0.3, v)
 }
 
@@ -98,18 +98,18 @@ func TestBindFloat_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	for i := 0; i < 5; i++ {
 		err := f.Set(9.0)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
 	err := f.Set(9.1)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	err = f.Set(8.0)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
@@ -136,18 +136,18 @@ func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	for i := 0; i < 5; i++ {
 		err := f.Set(9.0)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
 	err := f.Set(9.1)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	err = f.Set(8.0)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 }
 
@@ -155,7 +155,7 @@ func TestBindURI(t *testing.T) {
 	val := storage.NewFileURI("/tmp")
 	f := BindURI(&val)
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///tmp", v.String())
 
 	called := false
@@ -167,7 +167,7 @@ func TestBindURI(t *testing.T) {
 
 	called = false
 	err = f.Set(storage.NewFileURI("/tmp/test.txt"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///tmp/test.txt", val.String())
 	assert.True(t, called)
 
@@ -176,7 +176,7 @@ func TestBindURI(t *testing.T) {
 	_ = f.Reload()
 	assert.True(t, called)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///hello", v.String())
 }
 
@@ -192,18 +192,18 @@ func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	for i := 0; i < 5; i++ {
 		err := b.Set(storage.NewFileURI("second"))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
 	err := b.Set(storage.NewFileURI("third"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	err = b.Set(storage.NewFileURI("fourth"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
@@ -222,13 +222,13 @@ func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
 func TestNewURI(t *testing.T) {
 	f := NewURI()
 	v, err := f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, nil, v)
 
 	err = f.Set(storage.NewFileURI("/var"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	v, err = f.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///var", v.String())
 }
 
@@ -243,17 +243,17 @@ func TestNewURI_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	for i := 0; i < 5; i++ {
 		err := b.Set(storage.NewFileURI("first"))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, 1, triggered)
 	}
 
 	triggered = 0
 	err := b.Set(storage.NewFileURI("second"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	err = b.Set(storage.NewFileURI("third"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 }

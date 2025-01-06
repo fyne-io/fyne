@@ -10,7 +10,7 @@ func TestBindUserType(t *testing.T) {
 	val := user{name: "Unnamed"}
 	u := bindUserType(&val)
 	v, err := u.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: Unnamed", v.String())
 
 	called := false
@@ -22,7 +22,7 @@ func TestBindUserType(t *testing.T) {
 
 	called = false
 	err = u.Set(user{name: "Replace"})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: Replace", val.String())
 	assert.True(t, called)
 
@@ -31,7 +31,7 @@ func TestBindUserType(t *testing.T) {
 	_ = u.Reload()
 	assert.True(t, called)
 	v, err = u.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: Direct", v.String())
 
 	called = false
@@ -39,20 +39,20 @@ func TestBindUserType(t *testing.T) {
 	_ = u.Reload()
 	assert.True(t, called)
 	v, err = u.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: FieldSet", v.String())
 }
 
 func TestNewUserType(t *testing.T) {
 	u := newUserType()
 	v, err := u.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: ", v.String())
 
 	err = u.Set(user{name: "Dave"})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	v, err = u.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "User: Dave", v.String())
 }
 

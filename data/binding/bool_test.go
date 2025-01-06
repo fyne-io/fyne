@@ -17,12 +17,12 @@ func TestNot(t *testing.T) {
 	assert.NotNil(t, notbb)
 
 	notb, err := notbb.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, !b, notb)
 	assert.False(t, notb)
 
 	err = notbb.Set(true)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.False(t, b)
 }
 
@@ -59,7 +59,7 @@ func TestAnd(t *testing.T) {
 		}
 
 		andb, err := andbb.Get()
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, a, andb)
 	}
 	for _, v := range b {
@@ -100,7 +100,7 @@ func TestOr(t *testing.T) {
 		}
 
 		andb, err := andbb.Get()
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, a, andb)
 	}
 	for _, v := range b {
