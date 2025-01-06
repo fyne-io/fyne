@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //go:embed testdata/fyne.png
@@ -27,8 +28,8 @@ func TestCachedIcon_PATH(t *testing.T) {
 	}
 
 	info, err := os.Stat(path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "icon.png", info.Name())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

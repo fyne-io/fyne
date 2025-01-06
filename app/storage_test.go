@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStore_RootURI(t *testing.T) {
@@ -12,9 +12,9 @@ func TestStore_RootURI(t *testing.T) {
 	d := makeStoreDocs(id, &store{a: a})
 
 	w, err := d.Create("test")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = w.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = d.Remove("test")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

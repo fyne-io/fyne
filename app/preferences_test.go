@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func loadPreferences(id string) *preferences {
@@ -24,7 +25,7 @@ func TestPreferences_Remove(t *testing.T) {
 
 	p.RemoveValue("keyString")
 	err := p.saveToFile(p.storagePath())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// check it doesn't write values that were removed
 	p = loadPreferences("dummy")
@@ -49,7 +50,7 @@ func TestPreferences_Save(t *testing.T) {
 	path := p.storagePath()
 	defer os.Remove(path)
 	err := p.saveToFile(path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	expected, err := os.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {

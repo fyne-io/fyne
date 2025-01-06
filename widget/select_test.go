@@ -34,7 +34,7 @@ func TestNewSelectWithData(t *testing.T) {
 	assert.Equal(t, "", combo.Selected)
 
 	err := data.Set("2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, "2", combo.Selected)
 }
@@ -78,27 +78,27 @@ func TestSelect_Binding(t *testing.T) {
 	s.Bind(str)
 	waitForBinding()
 	value, err := str.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "", value)
 	assert.Equal(t, "2", s.Selected) // no match to options, so keep previous value
 
 	err = str.Set("3")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, "3", s.Selected)
 
 	s.Unbind()
 	assert.Nil(t, s.OnChanged)
 	err = str.Set("1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	val1, err := str.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "1", val1)
 	assert.Equal(t, "3", s.Selected)
 
 	s.SetSelected("2")
 	val1, err = str.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "1", val1)
 	assert.Equal(t, "2", s.Selected)
 }

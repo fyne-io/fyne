@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var validator = validation.NewRegexp(`^\d{4}-\d{2}-\d{2}$`, "Input is not a valid date")
@@ -33,12 +34,12 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/validate_initial.xml", c)
 
 	test.Type(entry, "2020-02")
-	assert.Error(t, r(entry.Text))
+	require.Error(t, r(entry.Text))
 	entry.FocusLost()
 	test.AssertRendersToMarkup(t, "entry/validate_invalid.xml", c)
 
 	test.Type(entry, "-12")
-	assert.NoError(t, r(entry.Text))
+	require.NoError(t, r(entry.Text))
 	test.AssertRendersToMarkup(t, "entry/validate_valid.xml", c)
 }
 
@@ -47,15 +48,15 @@ func TestEntry_Validate(t *testing.T) {
 	entry.Validator = validator
 
 	test.Type(entry, "2020-02")
-	assert.Error(t, entry.Validate())
+	require.Error(t, entry.Validate())
 	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
 
 	test.Type(entry, "-12")
-	assert.NoError(t, entry.Validate())
+	require.NoError(t, entry.Validate())
 	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
 
 	entry.SetText("incorrect")
-	assert.Error(t, entry.Validate())
+	require.Error(t, entry.Validate())
 	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
 }
 

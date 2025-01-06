@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2/storage"
 )
@@ -114,13 +115,13 @@ func TestBindFloat_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	v = 8.0
 	err = f.Reload()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 0, triggered)
 
 	triggered = 0
 	v = 9.2
 	err = f.Reload()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 }
 
@@ -208,13 +209,13 @@ func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
 	triggered = 0
 	v = storage.NewFileURI("fourth")
 	err = b.Reload()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 0, triggered)
 
 	triggered = 0
 	v = storage.NewFileURI("fifth")
 	err = b.Reload()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 1, triggered)
 }
 

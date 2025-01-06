@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2/data/binding"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBasicBinder(t *testing.T) {
@@ -15,7 +16,7 @@ func TestBasicBinder(t *testing.T) {
 
 	callback := func(data binding.DataItem) {
 		val, err := data.(binding.Int).Get()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		value = val
 	}
 	binder.SetCallback(callback)

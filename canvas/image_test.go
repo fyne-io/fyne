@@ -14,6 +14,7 @@ import (
 	_ "fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestImage_AlphaDefault(t *testing.T) {
@@ -41,7 +42,7 @@ func TestNewImageFromReader(t *testing.T) {
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 	read, err := os.Open(path)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	defer read.Close()
 
 	img := canvas.NewImageFromReader(read, "fyne.png")
