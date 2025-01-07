@@ -162,8 +162,14 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load Font faces
 func ClearFontCache() {
-	fontCache = &sync.Map{}
-	fontCustomCache = &sync.Map{}
+	fontCache.Range(func(key, _ any) bool {
+		fontCache.Delete(key)
+		return true
+	})
+	fontCustomCache.Range(func(key, _ any) bool {
+		fontCustomCache.Delete(key)
+		return true
+	})
 }
 
 // DrawString draws a string into an image.
