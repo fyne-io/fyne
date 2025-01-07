@@ -40,8 +40,8 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	c := w.canvas
 	movl := buildMenuOverlay(mm, w)
 	c.setMenuOverlay(movl)
-	w.SetContent(content)
-	w.Resize(fyne.NewSize(300, 200))
+	safeSetContent(w, content)
+	safeResize(w, fyne.NewSize(300, 200))
 	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
 
 	ovli1 := widget.NewLabel("Overlay Item 1")

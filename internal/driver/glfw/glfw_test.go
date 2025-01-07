@@ -32,8 +32,10 @@ func ensureCanvasSize(t *testing.T, w *window, size fyne.Size) {
 }
 
 func repaintWindow(w *window) {
-	w.RunWithContext(func() {
-		d.repaintWindow(w)
+	runOnMain(func() {
+		w.RunWithContext(func() {
+			d.repaintWindow(w)
+		})
 	})
 
 	time.Sleep(time.Millisecond * 150) // wait for the frames to be rendered... o
@@ -51,7 +53,7 @@ func waitForCanvasSize(t *testing.T, w *window, size fyne.Size, resizeIfNecessar
 		}
 		if resizeIfNecessary && attempts%20 == 0 {
 			// sometimes the resize does not seem to reach the actual window at all
-			w.Resize(size)
+			safeResize(w, size)
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
