@@ -179,9 +179,11 @@ func NewApp() fyne.App {
 		for {
 			<-listener
 			test.propertyLock.Lock()
-			painter.ClearFontCache()
-			cache.ResetThemeCaches()
-			intapp.ApplySettings(test.Settings(), test)
+			test.driver.CallFromGoroutine(func() {
+				painter.ClearFontCache()
+				cache.ResetThemeCaches()
+				intapp.ApplySettings(test.Settings(), test)
+			})
 
 			test.appliedTheme = test.Settings().Theme()
 			test.propertyLock.Unlock()
