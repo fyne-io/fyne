@@ -40,7 +40,7 @@ func TestMain(m *testing.M) {
 
 	waitForStart := make(chan struct{})
 	go func() {
-		// Wait for GLFW loop to be running (plus a moment in case od scheduling switches).
+		// Wait for GLFW loop to be running (plus a moment in case of scheduling switches).
 		// If we try to create windows before the context is created, this will fail with an exception.
 		<-waitForStart
 		time.Sleep(time.Millisecond * 100)
