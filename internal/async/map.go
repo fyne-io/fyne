@@ -7,15 +7,6 @@ type Map[K, V any] struct {
 	sync.Map
 }
 
-// Clear deletes all the entries, resulting in an empty Map.
-func (m *Map[K, V]) Clear() {
-	// TODO: Use m.Map.Clear() when Go 1.23 is base.
-	m.Map.Range(func(key, _ any) bool {
-		m.Map.Delete(key)
-		return true
-	})
-}
-
 // Delete deletes the value for a key.
 func (m *Map[K, V]) Delete(key K) {
 	m.Map.Delete(key)
