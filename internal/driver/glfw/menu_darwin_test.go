@@ -26,7 +26,6 @@ func TestDarwinMenu(t *testing.T) {
 
 	var lastAction string
 	assertLastAction := func(wantAction string) {
-		w.WaitForEvents()
 		assert.Equal(t, wantAction, lastAction)
 	}
 
