@@ -167,28 +167,12 @@ func NewApp() fyne.App {
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
 	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver)}
+	settings.app = test
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
 	painter.ClearFontCache()
 	cache.ResetThemeCaches()
 	fyne.SetCurrentApp(test)
-
-	listener := make(chan fyne.Settings)
-	test.Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			test.propertyLock.Lock()
-			test.driver.CallFromGoroutine(func() {
-				painter.ClearFontCache()
-				cache.ResetThemeCaches()
-				intapp.ApplySettings(test.Settings(), test)
-			})
-
-			test.appliedTheme = test.Settings().Theme()
-			test.propertyLock.Unlock()
-		}
-	}()
 
 	return test
 }
@@ -200,6 +184,7 @@ type testSettings struct {
 
 	changeListeners []chan fyne.Settings
 	propertyLock    sync.RWMutex
+	app             *app
 }
 
 func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
@@ -259,11 +244,16 @@ func (s *testSettings) apply() {
 	s.propertyLock.RUnlock()
 
 	for _, listener := range listeners {
-		select {
-		case listener <- s:
-		default:
-			l := listener
-			go func() { l <- s }()
-		}
+		listener <- s
 	}
+
+	s.app.propertyLock.Lock()
+	s.app.driver.CallFromGoroutine(func() {
+		painter.ClearFontCache()
+		cache.ResetThemeCaches()
+		intapp.ApplySettings(s, s.app)
+	})
+
+	s.app.appliedTheme = s.Theme()
+	s.app.propertyLock.Unlock()
 }
