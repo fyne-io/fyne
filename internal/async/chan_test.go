@@ -19,7 +19,7 @@ func TestUnboundedChann(t *testing.T) {
 		t.Run("any", func(t *testing.T) {
 			t.Run("send", func(t *testing.T) {
 				// Ensure send to an unbounded channel does not block.
-				c := async.NewUnboundedInterfaceChan()
+				c := async.NewUnboundedChan[any]()
 				blocked := false
 				wg.Add(1)
 				go func() {
@@ -40,7 +40,7 @@ func TestUnboundedChann(t *testing.T) {
 			t.Run("recv", func(t *testing.T) {
 				// Ensure that receive op from unbounded chan can happen on
 				// the same goroutine of send op.
-				c := async.NewUnboundedInterfaceChan()
+				c := async.NewUnboundedChan[any]()
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
@@ -53,7 +53,7 @@ func TestUnboundedChann(t *testing.T) {
 
 			t.Run("order", func(t *testing.T) {
 				// Ensure that the unbounded channel processes everything FIFO.
-				c := async.NewUnboundedInterfaceChan()
+				c := async.NewUnboundedChan[any]()
 				for i := 0; i < 1<<11; i++ {
 					c.In() <- i
 				}
@@ -70,7 +70,7 @@ func TestUnboundedChann(t *testing.T) {
 				N := 10
 				n := 0
 				done := make(chan struct{})
-				ch := async.NewUnboundedInterfaceChan()
+				ch := async.NewUnboundedChan[any]()
 				for i := 0; i < N; i++ {
 					ch.In() <- true
 				}
@@ -177,7 +177,7 @@ func TestUnboundedChann(t *testing.T) {
 func BenchmarkUnboundedChann(b *testing.B) {
 	b.Run("any", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
-			c := async.NewUnboundedInterfaceChan()
+			c := async.NewUnboundedChan[any]()
 			b.ResetTimer()
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
@@ -186,7 +186,7 @@ func BenchmarkUnboundedChann(b *testing.B) {
 			}
 		})
 		b.Run("async", func(b *testing.B) {
-			c := async.NewUnboundedInterfaceChan()
+			c := async.NewUnboundedChan[any]()
 			b.ResetTimer()
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
