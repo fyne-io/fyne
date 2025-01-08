@@ -24,11 +24,13 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 		for {
 			time.Sleep(time.Second)
 
-			gradient.Angle += 45
-			if gradient.Angle >= 360 {
-				gradient.Angle -= 360
-			}
-			canvas.Refresh(gradient)
+			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+				gradient.Angle += 45
+				if gradient.Angle >= 360 {
+					gradient.Angle -= 360
+				}
+				canvas.Refresh(gradient)
+			})
 		}
 	}()
 
