@@ -20,7 +20,7 @@ func syncMapLen(m *sync.Map) (n int) {
 func TestSvgCacheGet(t *testing.T) {
 	ResetThemeCaches()
 	img := addToCache("empty.svg", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>", 25, 25)
-	assert.Equal(t, 1, syncMapLen(svgs))
+	assert.Equal(t, 1, syncMapLen(&svgs.Map))
 
 	newImg := GetSvg("empty.svg", nil, 25, 25)
 	assert.Equal(t, img, newImg)
@@ -34,7 +34,7 @@ func TestSvgCacheGet(t *testing.T) {
 func TestSvgCacheGet_File(t *testing.T) {
 	ResetThemeCaches()
 	img := addFileToCache("testdata/stroke.svg", 25, 25)
-	assert.Equal(t, 1, syncMapLen(svgs))
+	assert.Equal(t, 1, syncMapLen(&svgs.Map))
 
 	newImg := GetSvg("testdata/stroke.svg", nil, 25, 25)
 	assert.Equal(t, img, newImg)
@@ -48,10 +48,10 @@ func TestSvgCacheGet_File(t *testing.T) {
 func TestSvgCacheReset(t *testing.T) {
 	ResetThemeCaches()
 	_ = addToCache("empty.svg", "<svg xmlns=\"http://www.w3.org/2000/svg\"/>", 25, 25)
-	assert.Equal(t, 1, syncMapLen(svgs))
+	assert.Equal(t, 1, syncMapLen(&svgs.Map))
 
 	ResetThemeCaches()
-	assert.Equal(t, 0, syncMapLen(svgs))
+	assert.Equal(t, 0, syncMapLen(&svgs.Map))
 }
 
 func addFileToCache(path string, w, h int) image.Image {

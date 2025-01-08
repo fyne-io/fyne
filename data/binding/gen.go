@@ -135,7 +135,7 @@ type prefBound{{ .Name }} struct {
 func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 	binds := prefBinds.getBindings(p)
 	if binds != nil {
-		if listen := binds.getItem(key); listen != nil {
+		if listen, ok := binds.Load(key); listen != nil && ok {
 			if l, ok := listen.({{ .Name }}); ok {
 				return l
 			}
@@ -145,7 +145,7 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
 	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.setItem(key, listen)
+	binds.Store(key, listen)
 	return listen
 }
 

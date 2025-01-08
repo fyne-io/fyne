@@ -2,15 +2,15 @@ package cache
 
 import (
 	"strconv"
-	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 var (
-	overrides     = &sync.Map{} // map[fyne.Widget]*overrideScope
-	overrideCount = atomic.Uint32{}
+	overrides     async.Map[fyne.CanvasObject, *overrideScope]
+	overrideCount atomic.Uint32
 )
 
 type overrideScope struct {
@@ -30,32 +30,31 @@ func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 }
 
 func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
-	data, ok := overrides.Load(parent)
+	scope, ok := overrides.Load(parent)
 	if !ok { // not overridden in parent
 		return false
 	}
 
-	scope := data.(*overrideScope)
 	overrideTheme(o, scope)
 	return true
 }
 
 func WidgetScopeID(o fyne.CanvasObject) string {
-	data, ok := overrides.Load(o)
+	scope, ok := overrides.Load(o)
 	if !ok {
 		return ""
 	}
 
-	return data.(*overrideScope).cacheID
+	return scope.cacheID
 }
 
 func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
-	data, ok := overrides.Load(o)
+	scope, ok := overrides.Load(o)
 	if !ok {
 		return nil
 	}
 
-	return data.(*overrideScope).th
+	return scope.th
 }
 
 func overrideContainer(c *fyne.Container, s *overrideScope) {
