@@ -44,7 +44,7 @@ func TestQueueItem(t *testing.T) {
 
 func TestMakeInfiniteQueue(t *testing.T) {
 	var wg sync.WaitGroup
-	queue := async.NewUnboundedFuncChan()
+	queue := async.NewUnboundedChan[func()]()
 
 	wg.Add(1)
 	c := 0

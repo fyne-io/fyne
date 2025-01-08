@@ -20,7 +20,7 @@ type Lifecycle struct {
 
 	onStoppedHookExecuted func()
 
-	eventQueue *async.UnboundedFuncChan
+	eventQueue *async.UnboundedChan[func()]
 }
 
 // SetOnStoppedHookExecuted is an internal function that lets Fyne schedule a clean-up after
@@ -112,7 +112,7 @@ func (l *Lifecycle) DestroyEventQueue() {
 // InitEventQueue initializes the event queue.
 func (l *Lifecycle) InitEventQueue() {
 	// This channel should be closed when the window is closed.
-	l.eventQueue = async.NewUnboundedFuncChan()
+	l.eventQueue = async.NewUnboundedChan[func()]()
 }
 
 // QueueEvent uses this method to queue up a callback that handles an event. This ensures
