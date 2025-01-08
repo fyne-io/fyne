@@ -37,6 +37,11 @@ jobs:
         libxkbcommon-dev
         xorg-dev
         xvfb
+        language-pack-en
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Set environment variable LANG
+      run: export LANG=en_EN.UTF-8
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
