@@ -61,20 +61,16 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		a2.Start()
 		a2.Show()
 
-		defer func() {
-			go func() {
-				time.Sleep(time.Second * 10)
+		time.AfterFunc(10*time.Second, func() {
+			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+				a1.Stop()
+				a1.Hide()
+				a2.Stop()
+				a2.Hide()
 
-				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
-					a1.Stop()
-					a1.Hide()
-					a2.Stop()
-					a2.Hide()
-
-					button.Enable()
-				})
-			}()
-		}()
+				button.Enable()
+			})
+		})
 	}
 
 	button = widget.NewButton("Animate", start)
@@ -93,14 +89,12 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 			a3.Start()
 			d.Show()
 
-			go func() {
-				time.Sleep(time.Second * 5)
-
+			time.AfterFunc(5*time.Second, func() {
 				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
 					a3.Stop()
 					d.Hide()
 				})
-			}()
+			})
 		}))))
 }
 
