@@ -23,8 +23,6 @@ type driver struct {
 	painter      SoftwarePainter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
-
-	threadLock sync.Mutex
 }
 
 // Declare conformity with Driver
@@ -52,9 +50,7 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 }
 
 func (d *driver) CallFromGoroutine(f func()) {
-	d.threadLock.Lock()
-	f() // This is a simplification of main thread - just ensure that execution is sequential...
-	d.threadLock.Unlock()
+	f() // Tests all run on a single (but potentially different per-test) thread
 }
 
 func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
