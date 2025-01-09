@@ -1082,8 +1082,10 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 
 	assert.False(t, tapped)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	})
 
 	assert.True(t, tapped)
 }
@@ -1128,21 +1130,23 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
 	w.SetContent(container.NewVBox(b1, b2))
 
-	w.mouseMoved(w.viewport, 17, 27)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 17, 27)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	assert.Equal(t, 1, tapped, "Button 1 should be tapped")
-	tapped = 0
+		assert.Equal(t, 1, tapped, "Button 1 should be tapped")
+		tapped = 0
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 17, 59)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseMoved(w.viewport, 17, 59)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
+		assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	})
 
 	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 }
@@ -1414,15 +1418,17 @@ func TestWindow_Focus(t *testing.T) {
 	w.SetContent(container.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
-	w.charInput(w.viewport, 'a')
-	w.charInput(w.viewport, 'b')
-	w.charInput(w.viewport, 'c')
-	w.charInput(w.viewport, 'd')
-	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
+	runOnMain(func() {
+		w.charInput(w.viewport, 'a')
+		w.charInput(w.viewport, 'b')
+		w.charInput(w.viewport, 'c')
+		w.charInput(w.viewport, 'd')
+		w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
 
-	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
-	w.charInput(w.viewport, 'e')
-	w.charInput(w.viewport, 'f')
+		w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
+		w.charInput(w.viewport, 'e')
+		w.charInput(w.viewport, 'f')
+	})
 
 	assert.Equal(t, "abcd", e1.Text)
 	assert.Equal(t, "ef", e2.Text)
