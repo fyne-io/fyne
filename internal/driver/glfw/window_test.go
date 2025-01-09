@@ -1167,9 +1167,11 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	}
 	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
-	w.mouseMoved(w.viewport, 15, 25)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 15, 25)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	})
 
 	<-waitSingleTapped
 	time.Sleep(500 * time.Millisecond)
@@ -1177,10 +1179,12 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	assert.Equal(t, int32(1), tapped.Load(), "Single tap should have fired")
 	tapped.Store(0)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	})
 
 	<-waitDoubleTapped
 	time.Sleep(500 * time.Millisecond)
@@ -1985,5 +1989,11 @@ func (s *safeWindow) SetFixedSize(fixed bool) {
 func (s *safeWindow) SetPadded(padded bool) {
 	runOnMain(func() {
 		s.window.SetPadded(padded)
+	})
+}
+
+func (s *safeWindow) closed(v *glfw.Window) {
+	runOnMain(func() {
+		s.window.closed(v)
 	})
 }
