@@ -281,7 +281,7 @@ type scrollContainerRenderer struct {
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
-	scrollerSize := r.scroll.size.Load()
+	scrollerSize := r.scroll.Size()
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(scrollerSize.Width-r.vertArea.Size().Width, 0))
@@ -364,7 +364,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Content == nil {
 		return
 	}
-	scrollSize := r.scroll.size.Load()
+	scrollSize := r.scroll.Size()
 	contentSize := r.scroll.Content.Size()
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
