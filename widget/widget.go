@@ -131,10 +131,6 @@ func (w *BaseWidget) Refresh() {
 //
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
-	return w.themeWithLock()
-}
-
-func (w *BaseWidget) themeWithLock() fyne.Theme {
 	cached := w.themeCache
 	if cached == nil {
 		cached = cache.WidgetTheme(w.super())

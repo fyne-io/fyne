@@ -415,7 +415,7 @@ func (s *selectRenderer) Refresh() {
 	s.updateLabel()
 	s.updateIcon(th)
 	s.background.FillColor = s.bgColor(th, v)
-	s.background.CornerRadius = s.combo.themeWithLock().Size(theme.SizeNameInputRadius)
+	s.background.CornerRadius = s.combo.Theme().Size(theme.SizeNameInputRadius)
 
 	s.Layout(s.combo.Size())
 	if s.combo.popUp != nil {

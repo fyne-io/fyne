@@ -919,7 +919,7 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 }
 
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
-	th := e.themeWithLock()
+	th := e.Theme()
 	textSize := th.Size(theme.SizeNameText)
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
@@ -1063,7 +1063,7 @@ func (e *Entry) placeholderProvider() *RichText {
 	}
 
 	e.placeholder.Scroll = widget.ScrollNone
-	e.placeholder.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
+	e.placeholder.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
@@ -1367,7 +1367,7 @@ func (e *Entry) textProvider() *RichText {
 	}
 
 	e.text.Scroll = widget.ScrollNone
-	e.text.inset = fyne.NewSize(0, e.themeWithLock().Size(theme.SizeNameInputBorder))
+	e.text.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
 	e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
 	return &e.text
 }

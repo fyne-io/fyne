@@ -299,7 +299,7 @@ func (r *menuRenderer) layoutActiveChild() {
 				cp.X = c.Size().Width - absPos.X - childSize.Width
 			}
 		}
-		requiredHeight := childSize.Height - r.m.themeWithLock().Size(theme.SizeNamePadding)
+		requiredHeight := childSize.Height - r.m.Theme().Size(theme.SizeNamePadding)
 		availableHeight := c.Size().Height - absPos.Y
 		missingHeight := requiredHeight - availableHeight
 		if missingHeight > 0 {

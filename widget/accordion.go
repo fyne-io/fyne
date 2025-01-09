@@ -207,7 +207,7 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
-	th := r.container.themeWithLock()
+	th := r.container.Theme()
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)
