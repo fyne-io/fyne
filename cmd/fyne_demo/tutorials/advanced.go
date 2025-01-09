@@ -25,11 +25,6 @@ func prependTo(g *fyne.Container, s string) {
 	g.Refresh()
 }
 
-func setScaleText(scale, tex *widget.Label, canvas fyne.Canvas) {
-	scale.SetText(scaleToString(canvas))
-	tex.SetText(textureScaleToString(canvas))
-}
-
 // advancedScreen loads a panel that shows details and settings that are a bit
 // more detailed than normally needed.
 func advancedScreen(win fyne.Window) fyne.CanvasObject {
@@ -41,15 +36,14 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		&widget.FormItem{Text: "Texture Scale", Widget: tex},
 	))
 
-	canvas := win.Canvas()
-	setScaleText(scale, tex, canvas)
 	go func(canvas fyne.Canvas) {
 		for range time.NewTicker(time.Second).C {
 			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
-				setScaleText(scale, tex, canvas)
+				scale.SetText(scaleToString(canvas))
+				tex.SetText(textureScaleToString(canvas))
 			})
 		}
-	}(canvas)
+	}(win.Canvas())
 
 	label := widget.NewLabel("Just type...")
 	generic := container.NewVBox()
