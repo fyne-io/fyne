@@ -5,7 +5,6 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
@@ -90,12 +89,7 @@ func (w *BaseWidget) Show() {
 	}
 
 	w.Hidden = false
-
-	impl := w.super()
-	if impl == nil {
-		return
-	}
-	impl.Refresh()
+	w.refreshSuper()
 }
 
 // Hide this widget so it is no longer visible
@@ -105,12 +99,7 @@ func (w *BaseWidget) Hide() {
 	}
 
 	w.Hidden = true
-
-	impl := w.super()
-	if impl == nil {
-		return
-	}
-	canvas.Refresh(impl)
+	w.refreshSuper()
 }
 
 // Refresh causes this widget to be redrawn in its current state
@@ -121,9 +110,7 @@ func (w *BaseWidget) Refresh() {
 	}
 
 	w.themeCache = nil
-
-	render := cache.Renderer(impl)
-	render.Refresh()
+	cache.Renderer(impl).Refresh()
 }
 
 // Theme returns a cached Theme instance for this widget (or its extending widget).
@@ -132,6 +119,27 @@ func (w *BaseWidget) Refresh() {
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
 	return w.themeWithLock()
+}
+
+// refreshSuper does a refresh of the widget that this represents.
+func (w *BaseWidget) refreshSuper() {
+	impl := w.super()
+	if impl == nil {
+		return
+	}
+
+	impl.Refresh()
+}
+
+// super will return the actual object that this represents.
+// If extended then this is the extending widget, otherwise it is nil.
+func (w *BaseWidget) super() fyne.Widget {
+	impl := w.impl.Load()
+	if impl == nil {
+		return nil
+	}
+
+	return *impl
 }
 
 func (w *BaseWidget) themeWithLock() fyne.Theme {
@@ -149,17 +157,6 @@ func (w *BaseWidget) themeWithLock() fyne.Theme {
 	return cached
 }
 
-// super will return the actual object that this represents.
-// If extended then this is the extending widget, otherwise it is nil.
-func (w *BaseWidget) super() fyne.Widget {
-	impl := w.impl.Load()
-	if impl == nil {
-		return nil
-	}
-
-	return *impl
-}
-
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
 // Disabled widgets should have a visually distinct style when disabled, normally using theme.DisabledButtonColor.
 type DisableableWidget struct {
@@ -174,11 +171,7 @@ func (w *DisableableWidget) Enable() {
 		return // Enabled already
 	}
 
-	impl := w.super()
-	if impl == nil {
-		return
-	}
-	impl.Refresh()
+	w.refreshSuper()
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
@@ -187,11 +180,7 @@ func (w *DisableableWidget) Disable() {
 		return // Disabled already
 	}
 
-	impl := w.super()
-	if impl == nil {
-		return
-	}
-	impl.Refresh()
+	w.refreshSuper()
 }
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
