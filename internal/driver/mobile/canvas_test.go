@@ -24,6 +24,9 @@ func TestMain(m *testing.M) {
 	tester := newTestMobileApp()
 	fyne.SetCurrentApp(tester)
 	go func() {
+		// ust like the GLFW tests, wait a short while for the driver to start
+		time.Sleep(time.Millisecond * 100)
+
 		ret := m.Run()
 		fyne.SetCurrentApp(currentApp)
 		os.Exit(ret)
