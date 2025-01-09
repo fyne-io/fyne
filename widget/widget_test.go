@@ -30,7 +30,7 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func TestApplyThemeCalled(t *testing.T) {
-	widget := &myWidget{refreshed: make(chan bool)}
+	widget := &myWidget{refreshed: make(chan bool, 10)}
 
 	test.NewTempWindow(t, widget)
 	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
@@ -45,7 +45,7 @@ func TestApplyThemeCalled(t *testing.T) {
 }
 
 func TestApplyThemeCalledChild(t *testing.T) {
-	child := &myWidget{refreshed: make(chan bool)}
+	child := &myWidget{refreshed: make(chan bool, 10)}
 	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
 	test.NewTempWindow(t, parent)
