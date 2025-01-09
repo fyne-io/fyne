@@ -51,20 +51,3 @@ func NewError(err error, parent fyne.Window) Dialog {
 func ShowError(err error, parent fyne.Window) {
 	NewError(err, parent).Show()
 }
-
-// NewCustomMessage creates a dialog over the specified window with the desired icon, title and message.
-// The title is used for the dialog window, message for the content and icon for the resource on the right side.
-// After creation you should call Show().
-// 
-// Since: 
-func NewCustomMessage(title, message string, icon fyne.Resource, parent fyne.Window) Dialog {
-	return createInformationDialog(title, message, icon, parent)
-}
-
-// ShowCustomMessage shows a dialog over the specified window with the desired icon, title and message.
-// The title is used for the dialog window, message for the content and icon for the resource on the right side.
-//
-// Since: 
-func ShowCustomMessage(title, message string, icon fyne.Resource, parent fyne.Window) {
-	NewCustomMessage(title, message, icon, parent).Show()
-}
