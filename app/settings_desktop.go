@@ -45,7 +45,7 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 
 				watchFileAddTarget(watcher, path)
 			} else {
-				callback()
+				fyne.CurrentApp().Driver().CallFromGoroutine(callback)
 			}
 		}
 
