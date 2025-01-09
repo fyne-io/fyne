@@ -1,13 +1,11 @@
 package cache
 
 import (
-	"sync"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
-var renderersLock sync.RWMutex
-var renderers = map[fyne.Widget]*rendererInfo{}
+var renderers async.Map[fyne.Widget, *rendererInfo]
 
 type isBaseWidget interface {
 	ExtendBaseWidget(fyne.Widget)
@@ -26,14 +24,10 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 		}
 	}
 
-	renderersLock.RLock()
-	rinfo, ok := renderers[wid]
-	renderersLock.RUnlock()
+	rinfo, ok := renderers.Load(wid)
 	if !ok {
 		rinfo = &rendererInfo{renderer: wid.CreateRenderer()}
-		renderersLock.Lock()
-		renderers[wid] = rinfo
-		renderersLock.Unlock()
+		renderers.Store(wid, rinfo)
 	}
 
 	if rinfo == nil {
@@ -48,9 +42,7 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 // DestroyRenderer frees a render implementation for a widget.
 // This is typically for internal use only.
 func DestroyRenderer(wid fyne.Widget) {
-	renderersLock.RLock()
-	rinfo, ok := renderers[wid]
-	renderersLock.RUnlock()
+	rinfo, ok := renderers.LoadAndDelete(wid)
 	if !ok {
 		return
 	}
@@ -58,18 +50,12 @@ func DestroyRenderer(wid fyne.Widget) {
 		rinfo.renderer.Destroy()
 	}
 	overrides.Delete(wid)
-
-	renderersLock.Lock()
-	delete(renderers, wid)
-	renderersLock.Unlock()
 }
 
 // IsRendered returns true of the widget currently has a renderer.
 // One will be created the first time a widget is shown but may be removed after it is hidden.
 func IsRendered(wid fyne.Widget) bool {
-	renderersLock.RLock()
-	_, found := renderers[wid]
-	renderersLock.RUnlock()
+	_, found := renderers.Load(wid)
 	return found
 }
 

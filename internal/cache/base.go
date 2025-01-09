@@ -77,21 +77,18 @@ func CleanCanvas(canvas fyne.Canvas) {
 	}
 	canvasesLock.Unlock()
 
-	renderersLock.Lock()
 	for _, dobj := range deletingObjs {
 		wid, ok := dobj.(fyne.Widget)
 		if !ok {
 			continue
 		}
-		rinfo, ok := renderers[wid]
+		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok {
 			continue
 		}
 		rinfo.renderer.Destroy()
 		overrides.Delete(wid)
-		delete(renderers, wid)
 	}
-	renderersLock.Unlock()
 }
 
 // CleanCanvases runs cache clean tasks for canvases that are being refreshed. This is called on paint events.
@@ -129,21 +126,18 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 	}
 	canvasesLock.Unlock()
 
-	renderersLock.Lock()
 	for _, dobj := range deletingObjs {
 		wid, ok := dobj.(fyne.Widget)
 		if !ok {
 			continue
 		}
-		rinfo, ok := renderers[wid]
+		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok || !rinfo.isExpired(now) {
 			continue
 		}
 		rinfo.renderer.Destroy()
 		overrides.Delete(wid)
-		delete(renderers, wid)
 	}
-	renderersLock.Unlock()
 	lastClean = timeNow()
 }
 
@@ -167,15 +161,14 @@ func destroyExpiredCanvases(now time.Time) {
 // destroyExpiredRenderers deletes the renderer from the cache and calls
 // renderer.Destroy()
 func destroyExpiredRenderers(now time.Time) {
-	renderersLock.Lock()
-	for wid, rinfo := range renderers {
+	renderers.Range(func(wid fyne.Widget, rinfo *rendererInfo) bool {
 		if rinfo.isExpired(now) {
 			rinfo.renderer.Destroy()
 			overrides.Delete(wid)
-			delete(renderers, wid)
+			renderers.Delete(wid)
 		}
-	}
-	renderersLock.Unlock()
+		return true
+	})
 }
 
 // matchesACanvas returns true if the canvas represented by the canvasInfo object matches one of
