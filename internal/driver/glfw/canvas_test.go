@@ -17,7 +17,7 @@ import (
 )
 
 func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
@@ -31,7 +31,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := container.NewHBox(leftCol, rightCol)
 
-	safeSetContent(w, content)
+	w.SetContent(content)
 	repaintWindow(w)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
@@ -46,7 +46,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 }
 
 func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -61,12 +61,9 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	rightColScroll := container.NewScroll(rightCol)
 	content := container.NewHBox(leftCol, rightColScroll)
 
-	runOnMain(func() {
-		w.SetContent(content)
-	})
-
+	w.SetContent(content)
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
-	safeResize(w, oldCanvasSize)
+	w.Resize(oldCanvasSize)
 	repaintWindow(w)
 
 	// child size change affects ancestors up to scroll
@@ -84,7 +81,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 }
 
 func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -99,15 +96,13 @@ func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	rightColScroll := container.NewScroll(rightCol)
 	content := container.NewHBox(leftColScroll, rightColScroll)
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(
 		2*leftColScroll.MinSize().Width+3*theme.Padding(),
 		leftColScroll.MinSize().Height+2*theme.Padding(),
 	)
-	safeResize(w, oldCanvasSize)
+	w.Resize(oldCanvasSize)
 	repaintWindow(w)
 
 	oldLeftColSize := leftCol.Size()
@@ -132,15 +127,13 @@ func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(
 func TestGlCanvas_Content(t *testing.T) {
 	content := &canvas.Circle{}
 	w := createWindow("Test")
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	assert.Equal(t, content, w.Content())
 }
 
 func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -155,9 +148,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	content := container.NewWithoutLayout(leftCol, rightCol)
 	layout := &recordingLayout{}
 	content.Layout = layout
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	repaintWindow(w)
 	// clear the recorded layouts
@@ -177,7 +168,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 
 func TestGlCanvas_Focus(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 	c := w.Canvas().(*glCanvas)
 
 	ce := &focusable{id: "ce1"}
@@ -188,9 +179,7 @@ func TestGlCanvas_Focus(t *testing.T) {
 	overlay1 := container.NewVBox(o1e)
 	o2e := &focusable{id: "o2e1"}
 	overlay2 := container.NewVBox(o2e)
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 	c.setMenuOverlay(menuOverlay)
 	c.Overlays().Add(overlay1)
 	c.Overlays().Add(overlay2)
@@ -218,7 +207,7 @@ func TestGlCanvas_Focus(t *testing.T) {
 
 func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 	e := widget.NewEntry()
 	c := w.Canvas().(*glCanvas)
 	c.Focus(e) // this crashed in the past
@@ -226,11 +215,9 @@ func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
 
 func TestGlCanvas_Focus_SetContent(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 	e := widget.NewEntry()
-	runOnMain(func() {
-		w.SetContent(container.NewHBox(e))
-	})
+	w.SetContent(container.NewHBox(e))
 	c := w.Canvas().(*glCanvas)
 	c.Focus(e)
 	assert.Equal(t, e, c.Focused())
@@ -241,7 +228,7 @@ func TestGlCanvas_Focus_SetContent(t *testing.T) {
 
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 	c := w.Canvas().(*glCanvas)
 
 	ce1 := &focusable{id: "ce1"}
@@ -253,9 +240,7 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	o2e1 := &focusable{id: "o2e1"}
 	o2e2 := &focusable{id: "o2e2"}
 	overlay2 := container.NewVBox(o2e1, o2e2)
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	assert.Nil(t, c.Focused())
 
@@ -313,10 +298,10 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 }
 
 func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	canvasSize := fyne.NewSize(200, 100)
-	safeResize(w, canvasSize)
+	w.Resize(canvasSize)
 	ensureCanvasSize(t, w, canvasSize)
 	popUpContent := canvas.NewRectangle(color.Black)
 	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
@@ -337,7 +322,7 @@ func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *
 }
 
 func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
@@ -350,9 +335,7 @@ func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	rightObj2.SetMinSize(fyne.NewSize(100, 50))
 	rightCol := container.NewVBox(rightObj1, rightObj2)
 	content := container.NewHBox(leftCol, rightCol)
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())
@@ -382,7 +365,7 @@ func TestGlCanvas_NilContent(t *testing.T) {
 }
 
 func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 
 	pos := fyne.NewPos(4, 4)
@@ -399,34 +382,30 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 
 func TestGlCanvas_Resize(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
-	runOnMain(func() {
-		w.SetContent(content)
-	})
-	ensureCanvasSize(t, w.(*window), fyne.NewSize(69, 36))
+	w.SetContent(content)
+	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
 	assert.NotEqual(t, size, content.Size())
 
-	safeResize(w, size)
-	ensureCanvasSize(t, w.(*window), size)
+	w.Resize(size)
+	ensureCanvasSize(t, w, size)
 	assert.Equal(t, size, content.Size())
 }
 
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 	w.Canvas().Overlays().Add(over)
-	ensureCanvasSize(t, w.(*window), fyne.NewSize(69, 36))
+	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 	// TODO: address #707; overlays should always be canvas size
 	over.Resize(w.Canvas().Size())
 
@@ -434,27 +413,25 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	assert.NotEqual(t, size, content.Size())
 	assert.NotEqual(t, size, over.Size())
 
-	safeResize(w, size)
-	ensureCanvasSize(t, w.(*window), size)
+	w.Resize(size)
+	ensureCanvasSize(t, w, size)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 }
 
 func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
 	o1 := widget.NewLabel("o1")
 	o2 := widget.NewLabel("o2")
 	o3 := widget.NewLabel("o3")
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 	w.Canvas().Overlays().Add(o1)
 	w.Canvas().Overlays().Add(o2)
 	w.Canvas().Overlays().Add(o3)
-	ensureCanvasSize(t, w.(*window), fyne.NewSize(69, 36))
+	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
 	assert.NotEqual(t, size, content.Size())
@@ -462,8 +439,8 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	assert.NotEqual(t, size, o2.Size())
 	assert.NotEqual(t, size, o3.Size())
 
-	safeResize(w, size)
-	ensureCanvasSize(t, w.(*window), size)
+	w.Resize(size)
+	ensureCanvasSize(t, w, size)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, o1.Size(), "canvas overlay 1 is resized")
 	assert.Equal(t, size, o2.Size(), "canvas overlay 2 is resized")
@@ -473,15 +450,13 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
 	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 	over.Show()
-	ensureCanvasSize(t, w.(*window), fyne.NewSize(69, 36))
+	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
 	overContentSize := over.Content.Size()
@@ -490,8 +465,8 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	assert.NotEqual(t, size, over.Size())
 	assert.NotEqual(t, size, overContentSize)
 
-	safeResize(w, size)
-	ensureCanvasSize(t, w.(*window), size)
+	w.Resize(size)
+	ensureCanvasSize(t, w, size)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
@@ -499,22 +474,20 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 
 func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
-	runOnMain(func() {
-		w.SetContent(content)
-	})
+	w.SetContent(content)
 
 	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), w.Canvas())
 	popupBgSize := fyne.NewSize(975, 575)
 	popup.Show()
 	popup.Resize(popupBgSize)
-	ensureCanvasSize(t, w.(*window), fyne.NewSize(69, 36))
+	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	winSize := fyne.NewSize(1000, 600)
-	safeResize(w, winSize)
-	ensureCanvasSize(t, w.(*window), winSize)
+	w.Resize(winSize)
+	ensureCanvasSize(t, w, winSize)
 
 	// get popup content padding dynamically
 	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
@@ -524,7 +497,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 }
 
 func TestGlCanvas_Scale(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.Canvas().(*glCanvas)
 
 	c.scale = 2.5
@@ -553,10 +526,8 @@ func TestGlCanvas_SetContent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := createWindow("Test").(*window)
-			runOnMain(func() {
-				w.SetPadded(tt.padding)
-			})
+			w := createWindow("Test")
+			w.SetPadded(tt.padding)
 			if tt.menu {
 				runOnMain(func() {
 					w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
@@ -565,10 +536,8 @@ func TestGlCanvas_SetContent(t *testing.T) {
 			ensureCanvasSize(t, w, fyne.NewSize(69, 37))
 			content := canvas.NewCircle(color.Black)
 			canvasSize := float32(200)
-			runOnMain(func() {
-				w.SetContent(content)
-			})
-			safeResize(w, fyne.NewSize(canvasSize, canvasSize))
+			w.SetContent(content)
+			w.Resize(fyne.NewSize(canvasSize, canvasSize))
 			ensureCanvasSize(t, w, fyne.NewSize(canvasSize, canvasSize))
 
 			newContent := canvas.NewCircle(color.White)

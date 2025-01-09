@@ -59,7 +59,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGLDriver_CreateWindow(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.Decorated))
 	assert.True(t, w.Padded())
@@ -67,7 +67,7 @@ func TestGLDriver_CreateWindow(t *testing.T) {
 }
 
 func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
-	w := createWindow("").(*window)
+	w := createWindow("")
 	assert.Equal(t, w.Title(), "Fyne Application")
 }
 
@@ -89,29 +89,29 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 }
 
 func TestWindow_MinSize_Fixed(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	r := canvas.NewRectangle(color.White)
 	minSize := fyne.NewSize(100, 100)
 	minSizePlusPadding := minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2)
 	r.SetMinSize(minSize)
-	safeSetContent(w, r)
-	safeSetFixed(w)
+	w.SetContent(r)
+	w.SetFixedSize(true)
 	assertCanvasSize(t, w, minSizePlusPadding)
 
-	w = createWindow("Test").(*window)
+	w = createWindow("Test")
 	r.SetMinSize(fyne.NewSize(100, 100))
-	safeSetFixed(w)
-	safeSetContent(w, r)
+	w.SetFixedSize(true)
+	w.SetContent(r)
 	assertCanvasSize(t, w, minSizePlusPadding)
 }
 
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	c := w.canvas
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
-	menuBar := buildMenuOverlay(m, w).(*MenuBar)
+	menuBar := buildMenuOverlay(m, w.window).(*MenuBar)
 	c.setMenuOverlay(menuBar)
-	safeSetContent(w, canvas.NewRectangle(color.Black))
+	w.SetContent(canvas.NewRectangle(color.Black))
 
 	altPressingMod := glfw.ModAlt
 	altReleasingMod := glfw.ModifierKey(0)
@@ -226,8 +226,8 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	})
 
 	t.Run("when canvas has no menu", func(t *testing.T) {
-		w = createWindow("Test").(*window)
-		safeSetContent(w, canvas.NewRectangle(color.Black))
+		w = createWindow("Test")
+		w.SetContent(canvas.NewRectangle(color.Black))
 
 		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Press, altPressingMod)
 		w.keyPressed(w.viewport, glfw.KeyLeftAlt, 0, glfw.Release, altReleasingMod)
@@ -236,13 +236,13 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 }
 
 func TestWindow_Cursor(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	e := widget.NewEntry()
 	u, _ := url.Parse("https://testing.fyne")
 	h := widget.NewHyperlink("Testing", u)
 	b := widget.NewButton("Test", nil)
 
-	safeSetContent(w, container.NewVBox(e, h, b))
+	w.SetContent(container.NewVBox(e, h, b))
 	repaintWindow(w)
 	ensureCanvasSize(t, w, fyne.NewSize(72, 123))
 
@@ -264,13 +264,13 @@ func TestWindow_Cursor(t *testing.T) {
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	h1.SetMinSize(fyne.NewSize(10, 10))
 	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	h2.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, container.NewHBox(h1, h2))
-	safeResize(w, fyne.NewSize(30, 20))
+	w.SetContent(container.NewHBox(h1, h2))
+	w.Resize(fyne.NewSize(30, 20))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
@@ -305,7 +305,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 }
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	test.ApplyTheme(t, internalTest.DarkTheme(theme.DefaultTheme()))
 	l := widget.NewList(
 		func() int { return 2 },
@@ -313,10 +313,10 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 		func(lii widget.ListItemID, co fyne.CanvasObject) {},
 	)
 	l.Resize(fyne.NewSize(200, 300))
-	safeSetContent(w, l)
-	safeSetFixed(w)
+	w.SetContent(l)
+	w.SetFixedSize(true)
 	ensureCanvasSize(t, w, fyne.NewSize(45, 44))
-	safeResize(w, fyne.NewSize(200, 300))
+	w.Resize(fyne.NewSize(200, 300))
 	repaintWindow(w)
 	ensureCanvasSize(t, w, fyne.NewSize(200, 300))
 	repaintWindow(w)
@@ -338,12 +338,12 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 }
 
 func TestWindow_HandleDragging(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, container.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -467,10 +467,10 @@ func TestWindow_HandleDragging(t *testing.T) {
 }
 
 func TestWindow_DragObjectThatMoves(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(20, 20))
-	safeSetContent(w, container.NewHBox(d1))
+	w.SetContent(container.NewHBox(d1))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -505,12 +505,12 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 }
 
 func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	d1 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(20, 20))
 	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d2.SetMinSize(fyne.NewSize(20, 20))
-	safeSetContent(w, container.NewHBox(d1, d2))
+	w.SetContent(container.NewHBox(d1, d2))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
@@ -543,10 +543,10 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 }
 
 func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	do := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	do.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, do)
+	w.SetContent(do)
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(4, 4), do.Position())
@@ -562,11 +562,11 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 }
 
 func TestWindow_HoverableOnDragging(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	c := container.NewWithoutLayout(dh)
 	dh.Resize(fyne.NewSize(20, 20))
-	safeSetContent(w, c)
+	w.SetContent(c)
 
 	repaintWindow(w)
 	w.mouseMoved(w.viewport, 10, 10)
@@ -627,7 +627,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 }
 
 func TestWindow_HoverableUnderDraggable(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
@@ -640,7 +640,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	dh.Resize(fyne.NewSize(10, 10))
 	dh.Move(fyne.NewPos(20, 20))
 
-	safeSetContent(w, c)
+	w.SetContent(c)
 
 	repaintWindow(w)
 
@@ -800,7 +800,7 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 }
 
 func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
@@ -813,7 +813,7 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 	dh.Resize(fyne.NewSize(10, 10))
 	dh.Move(fyne.NewPos(20, 20))
 
-	safeSetContent(w, c)
+	w.SetContent(c)
 	repaintWindow(w)
 
 	// 1. drag across hoverable
@@ -906,7 +906,7 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 }
 
 func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	h := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
@@ -919,7 +919,7 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	dh.Resize(fyne.NewSize(10, 10))
 	dh.Move(fyne.NewPos(20, 20))
 
-	safeSetContent(w, c)
+	w.SetContent(c)
 	repaintWindow(w)
 
 	// 1. drag of draggableHoverable
@@ -993,10 +993,10 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 }
 
 func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	do := &draggableTappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	do.SetMinSize(fyne.NewSize(14, 14))
-	safeSetContent(w, do)
+	w.SetContent(do)
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(4, 4), do.Position())
@@ -1015,11 +1015,11 @@ func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 }
 
 func TestWindow_Scrolled(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	o := &scrollable{Rectangle: canvas.NewRectangle(color.White)}
 	minSize := fyne.NewSize(100, 100)
 	o.SetMinSize(minSize)
-	safeSetContent(w, o)
+	w.SetContent(o)
 	ensureCanvasSize(t, w, minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2))
 
 	w.mousePos = fyne.NewPos(50, 60)
@@ -1032,12 +1032,12 @@ func TestWindow_Scrolled(t *testing.T) {
 }
 
 func TestWindow_Tapped(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
-	safeSetContent(w, container.NewVBox(rect, o))
+	w.SetContent(container.NewVBox(rect, o))
 
 	w.mousePos = fyne.NewPos(50, 160)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -1051,10 +1051,10 @@ func TestWindow_Tapped(t *testing.T) {
 }
 
 func TestWindow_TappedSecondary(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
-	safeSetContent(w, o)
+	w.SetContent(o)
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -1068,12 +1068,12 @@ func TestWindow_TappedSecondary(t *testing.T) {
 }
 
 func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	tapped := false
 	o := widget.NewButton("Test", func() {
 		tapped = true
 	})
-	safeSetContent(w, o)
+	w.SetContent(o)
 	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
 	w.mousePos = fyne.NewPos(10, 25)
@@ -1089,7 +1089,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 }
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
@@ -1104,8 +1104,8 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	scroll.Offset = fyne.NewPos(0, 50)
 
 	base := container.New(layout.NewGridLayout(1), rect, scroll)
-	safeSetContent(w, base)
-	refreshWindow(w) // ensure any async resize is done
+	w.SetContent(base)
+	refreshWindow(w.window) // ensure any async resize is done
 	ensureCanvasSize(t, w, fyne.NewSize(108, 212))
 
 	w.mousePos = fyne.NewPos(10, 80)
@@ -1122,11 +1122,11 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 }
 
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	tapped := 0
 	b1 := widget.NewButton("Tap", func() { tapped = 1 })
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
-	safeSetContent(w, container.NewVBox(b1, b2))
+	w.SetContent(container.NewVBox(b1, b2))
 
 	w.mouseMoved(w.viewport, 17, 27)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -1148,7 +1148,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 }
 
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	waitSingleTapped := make(chan struct{})
 	waitDoubleTapped := make(chan struct{})
 	tapped := atomic.Int32{}
@@ -1161,7 +1161,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 		tapped.Store(2)
 		waitDoubleTapped <- struct{}{}
 	}
-	safeSetContent(w, container.NewBorder(nil, nil, nil, nil, but))
+	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -1185,11 +1185,11 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	m := &mouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	minSize := fyne.NewSize(20, 20)
 	m.SetMinSize(minSize)
-	safeSetContent(w, m)
+	w.SetContent(m)
 	repaintWindow(w)
 	ensureCanvasSize(t, w, minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2))
 
@@ -1310,14 +1310,14 @@ func TestWindow_SetIcon(t *testing.T) {
 
 func TestWindow_PixelSize(t *testing.T) {
 	w := createWindow("Test")
-	safeUnpad(w)
+	w.SetPadded(false)
 
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	safeSetContent(w, container.NewWithoutLayout(rect))
+	w.SetContent(container.NewWithoutLayout(rect))
 	w.Canvas().Refresh(w.Content())
 
-	winW, winH := w.(*window).minSizeOnScreen()
+	winW, winH := w.minSizeOnScreen()
 	assert.Equal(t, scale.ToScreenCoordinate(w.Canvas(), 100), winW)
 	assert.Equal(t, scale.ToScreenCoordinate(w.Canvas(), 100), winH)
 }
@@ -1348,9 +1348,9 @@ func TestWindow_calculateScale(t *testing.T) {
 func TestWindow_Padded(t *testing.T) {
 	w := createWindow("Test")
 	content := canvas.NewRectangle(color.White)
-	safeSetContent(w, content)
+	w.SetContent(content)
 
-	width, _ := w.(*window).minSizeOnScreen()
+	width, _ := w.minSizeOnScreen()
 	assert.Equal(t, int(theme.Padding()*2+content.MinSize().Width), width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }
@@ -1377,18 +1377,17 @@ func TestWindow_SetPadded(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := createWindow("Test").(*window)
+			w := createWindow("Test")
+			w.SetPadded(tt.padding)
 			runOnMain(func() {
-				w.SetPadded(tt.padding)
-
 				if tt.menu {
 					w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 				}
 			})
 			content := canvas.NewRectangle(color.White)
-			safeSetContent(w, content)
+			w.SetContent(content)
 			oldCanvasSize := fyne.NewSize(100, 100)
-			safeResize(w, oldCanvasSize)
+			w.Resize(oldCanvasSize)
 			ensureCanvasSize(t, w, oldCanvasSize)
 
 			repaintWindow(w)
@@ -1397,9 +1396,7 @@ func TestWindow_SetPadded(t *testing.T) {
 				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
 				Add(fyne.NewSize(0, tt.expectedMenuHeight))
 
-			runOnMain(func() {
-				w.SetPadded(tt.padding)
-			})
+			w.SetPadded(tt.padding)
 			repaintWindow(w)
 			assert.Equal(t, contentSize, content.Size())
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
@@ -1409,12 +1406,12 @@ func TestWindow_SetPadded(t *testing.T) {
 }
 
 func TestWindow_Focus(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	e1 := widget.NewEntry()
 	e2 := widget.NewEntry()
 
-	safeSetContent(w, container.NewVBox(e1, e2))
+	w.SetContent(container.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
 	w.charInput(w.viewport, 'a')
@@ -1432,10 +1429,10 @@ func TestWindow_Focus(t *testing.T) {
 }
 
 func TestWindow_CaptureTypedShortcut(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	content := &typedShortcutable{}
 	content.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, content)
+	w.SetContent(content)
 	repaintWindow(w)
 
 	w.Canvas().Focus(content)
@@ -1452,10 +1449,10 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 }
 
 func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	content := &tabbable{}
 	content.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, content)
+	w.SetContent(content)
 	repaintWindow(w)
 
 	w.Canvas().Focus(content)
@@ -1477,10 +1474,10 @@ func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
 }
 
 func TestWindow_TabWithModifierToTriggersShortcut(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	content := &typedShortcutable{}
 	content.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, content)
+	w.SetContent(content)
 	repaintWindow(w)
 
 	w.Canvas().Focus(content)
@@ -1505,10 +1502,10 @@ func TestWindow_TabWithModifierToTriggersShortcut(t *testing.T) {
 }
 
 func TestWindow_ManualFocus(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	content := &focusable{}
 	content.SetMinSize(fyne.NewSize(10, 10))
-	safeSetContent(w, content)
+	w.SetContent(content)
 	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 9, 9)
@@ -1541,11 +1538,11 @@ func TestWindow_ManualFocus(t *testing.T) {
 }
 
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	e := widget.NewEntry()
 	e.SetText("Testing")
 	e.Disable()
-	safeSetContent(w, e)
+	w.SetContent(e)
 	repaintWindow(w)
 
 	w.canvas.Focus(e)
@@ -1583,7 +1580,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 
 	d := NewGLDriver()
 	t.Run("when closing window with #Close()", func(t *testing.T) {
-		w := createWindow("test").(*window)
+		w := createWindow("test")
 		onIntercepted := false
 		onClosed := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
@@ -1597,7 +1594,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside (notified by GLFW callback)", func(t *testing.T) {
-		w := createWindow("test").(*window)
+		w := createWindow("test")
 		onIntercepted := false
 		w.SetCloseIntercept(func() { onIntercepted = true })
 		closed := make(chan bool, 1)
@@ -1615,7 +1612,7 @@ func TestWindow_CloseInterception(t *testing.T) {
 	})
 
 	t.Run("when window is closed from the outside but no interceptor is set", func(t *testing.T) {
-		w := createWindow("test").(*window)
+		w := createWindow("test")
 		closed := make(chan bool, 1)
 		w.SetOnClosed(func() { closed <- true })
 		w.closed(w.viewport)
@@ -1630,22 +1627,22 @@ func TestWindow_CloseInterception(t *testing.T) {
 }
 
 func TestWindow_ClosedBeforeShow(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	// viewport will be nil if window is closed before show
 	assert.NotPanics(t, func() { w.closed(nil) })
 }
 
 func TestWindow_SetContent_Twice(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	e1 := widget.NewLabel("1")
 	e2 := widget.NewLabel("2")
 
-	safeSetContent(w, e1)
+	w.SetContent(e1)
 	assert.True(t, e1.Visible())
-	safeSetContent(w, e2)
+	w.SetContent(e2)
 	assert.True(t, e2.Visible())
-	safeSetContent(w, e1)
+	w.SetContent(e1)
 	assert.True(t, e1.Visible())
 }
 
@@ -1685,13 +1682,13 @@ func TestWindow_SetFullScreen(t *testing.T) {
 //	assert.True(t, w.FullScreen())
 // }
 
-func createWindow(title string) fyne.Window {
-	var w fyne.Window
+func createWindow(title string) *safeWindow {
+	var w *window
 	runOnMain(func() { // tests launch in a different context
-		w = d.CreateWindow(title)
-		w.(*window).create()
+		w = d.CreateWindow(title).(*window)
+		w.create()
 	})
-	return w
+	return &safeWindow{window: w}
 }
 
 //
@@ -1950,26 +1947,30 @@ func (t *tabbable) AcceptsTab() bool {
 	return true
 }
 
-func safeResize(w fyne.Window, size fyne.Size) {
+type safeWindow struct {
+	*window
+}
+
+func (s *safeWindow) Resize(size fyne.Size) {
 	runOnMain(func() {
-		w.Resize(size)
+		s.window.Resize(size)
 	})
 }
 
-func safeSetContent(w fyne.Window, content fyne.CanvasObject) {
+func (s *safeWindow) SetContent(content fyne.CanvasObject) {
 	runOnMain(func() {
-		w.SetContent(content)
+		s.window.SetContent(content)
 	})
 }
 
-func safeSetFixed(w fyne.Window) {
+func (s *safeWindow) SetFixedSize(fixed bool) {
 	runOnMain(func() {
-		w.SetFixedSize(true)
+		s.window.SetFixedSize(fixed)
 	})
 }
 
-func safeUnpad(w fyne.Window) {
+func (s *safeWindow) SetPadded(padded bool) {
 	runOnMain(func() {
-		w.SetPadded(false)
+		s.window.SetPadded(padded)
 	})
 }

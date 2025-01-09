@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func assertCanvasSize(t *testing.T, w *window, size fyne.Size) {
+func assertCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
 	if runtime.GOOS == "linux" {
 		// TODO: find the root cause for these problems and solve them without additional repaint
 		// fixes issues where the window does not have the correct size
@@ -22,7 +22,7 @@ func assertCanvasSize(t *testing.T, w *window, size fyne.Size) {
 	assert.Equal(t, size, w.canvas.Size())
 }
 
-func ensureCanvasSize(t *testing.T, w *window, size fyne.Size) {
+func ensureCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		// TODO: find the root cause for these problems and solve them without additional repaint
 		// fixes issues where the window does not have the correct size
@@ -31,17 +31,17 @@ func ensureCanvasSize(t *testing.T, w *window, size fyne.Size) {
 	require.Equal(t, size, w.canvas.Size())
 }
 
-func repaintWindow(w *window) {
+func repaintWindow(w *safeWindow) {
 	runOnMain(func() {
 		w.RunWithContext(func() {
-			d.repaintWindow(w)
+			d.repaintWindow(w.window)
 		})
 	})
 
 	time.Sleep(time.Millisecond * 150) // wait for the frames to be rendered... o
 }
 
-func waitForCanvasSize(t *testing.T, w *window, size fyne.Size, resizeIfNecessary bool) {
+func waitForCanvasSize(t *testing.T, w *safeWindow, size fyne.Size, resizeIfNecessary bool) {
 	attempts := 0
 	for {
 		if w.canvas.Size() == size {
@@ -53,7 +53,7 @@ func waitForCanvasSize(t *testing.T, w *window, size fyne.Size, resizeIfNecessar
 		}
 		if resizeIfNecessary && attempts%20 == 0 {
 			// sometimes the resize does not seem to reach the actual window at all
-			safeResize(w, size)
+			w.Resize(size)
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
