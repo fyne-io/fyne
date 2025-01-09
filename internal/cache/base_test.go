@@ -3,7 +3,6 @@ package cache
 import (
 	"fmt"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -270,7 +269,8 @@ func testClearAll() {
 		svgs.Delete(key)
 		return true
 	})
-	textures = sync.Map{}
+	textTextures.Clear()
+	objectTextures.Clear()
 	renderers = map[fyne.Widget]*rendererInfo{}
 	timeNow = time.Now
 }
