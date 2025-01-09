@@ -1525,16 +1525,16 @@ func TestWindow_ManualFocus(t *testing.T) {
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
-	w.canvas.Focus(content)
+	w.Canvas().Focus(content)
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
-	w.canvas.Unfocus()
+	w.Canvas().Unfocus()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 1, content.unfocusedTimes)
 
 	content.Disable()
-	w.canvas.Focus(content)
+	w.Canvas().Focus(content)
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 1, content.unfocusedTimes)
 
@@ -1551,7 +1551,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w.SetContent(e)
 	repaintWindow(w)
 
-	w.canvas.Focus(e)
+	w.Canvas().Focus(e)
 	e.DoubleTapped(nil)
 	assert.Equal(t, "Testing", e.SelectedText())
 

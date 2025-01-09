@@ -19,7 +19,7 @@ func assertCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
 		// fixes issues where the window does not have the correct size
 		waitForCanvasSize(t, w, size, false)
 	}
-	assert.Equal(t, size, w.canvas.Size())
+	assert.Equal(t, size, w.Canvas().Size())
 }
 
 func ensureCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
@@ -28,7 +28,7 @@ func ensureCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
 		// fixes issues where the window does not have the correct size
 		waitForCanvasSize(t, w, size, true)
 	}
-	require.Equal(t, size, w.canvas.Size())
+	require.Equal(t, size, w.Canvas().Size())
 }
 
 func repaintWindow(w *safeWindow) {
@@ -44,7 +44,7 @@ func repaintWindow(w *safeWindow) {
 func waitForCanvasSize(t *testing.T, w *safeWindow, size fyne.Size, resizeIfNecessary bool) {
 	attempts := 0
 	for {
-		if w.canvas.Size() == size {
+		if w.Canvas().Size() == size {
 			break
 		}
 		attempts++
