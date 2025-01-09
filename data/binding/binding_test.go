@@ -1,19 +1,10 @@
 package binding
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func syncMapLen(m *sync.Map) (n int) {
-	m.Range(func(_, _ any) bool {
-		n++
-		return true
-	})
-	return
-}
 
 type simpleItem struct {
 	base
@@ -21,14 +12,14 @@ type simpleItem struct {
 
 func TestBase_AddListener(t *testing.T) {
 	data := &simpleItem{}
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, data.listeners.Len())
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
+	assert.Equal(t, 1, data.listeners.Len())
 	assert.True(t, called)
 }
 
@@ -40,9 +31,9 @@ func TestBase_RemoveListener(t *testing.T) {
 	data := &simpleItem{}
 	data.listeners.Store(fn, true)
 
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
+	assert.Equal(t, 1, data.listeners.Len())
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, data.listeners.Len())
 
 	data.trigger()
 	assert.False(t, called)
