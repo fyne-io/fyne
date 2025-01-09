@@ -3,6 +3,7 @@
 package glfw
 
 import (
+	"image"
 	"image/color"
 	"testing"
 
@@ -572,6 +573,14 @@ func (l *recordingLayout) popLayoutEvent() (e any) {
 
 type safeCanvas struct {
 	*glCanvas
+}
+
+func (s *safeCanvas) Capture() (ret image.Image) {
+	runOnMain(func() {
+		ret = s.glCanvas.Capture()
+	})
+
+	return ret
 }
 
 func (s *safeCanvas) Focus(o fyne.Focusable) {
