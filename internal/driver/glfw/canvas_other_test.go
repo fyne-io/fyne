@@ -20,7 +20,7 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 			fyne.NewMenu("other", fyne.NewMenuItem("item", func() {})),
 		),
 	)
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 
 	ce1 := &focusable{id: "ce1"}
 	ce2 := &focusable{id: "ce2"}
