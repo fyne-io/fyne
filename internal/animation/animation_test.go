@@ -99,10 +99,10 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Tick:     func(f float32) {},
 	}
 	run.Start(c)
-	go tick(run) // simulate a graphics draw loop
+	tick(run) // simulate a graphics draw loop
 
 	run.Stop(c)
-	go tick(run) // simulate a graphics draw loop
+	tick(run) // simulate a graphics draw loop
 
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
