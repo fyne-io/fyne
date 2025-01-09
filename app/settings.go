@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
@@ -37,8 +38,8 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	changeListeners sync.Map // map[chan fyne.Settings]bool
-	watcher         any      // normally *fsnotify.Watcher or nil - avoid import in this file
+	changeListeners async.Map[chan fyne.Settings, bool]
+	watcher         any // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
 }
@@ -116,8 +117,7 @@ func (s *settings) AddChangeListener(listener chan fyne.Settings) {
 }
 
 func (s *settings) apply() {
-	s.changeListeners.Range(func(key, _ any) bool {
-		listener := key.(chan fyne.Settings)
+	s.changeListeners.Range(func(listener chan fyne.Settings, _ bool) bool {
 		select {
 		case listener <- s:
 		default:

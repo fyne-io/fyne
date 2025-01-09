@@ -17,6 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -111,7 +112,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			val = &FontCacheItem{Fonts: faces}
 			fontCustomCache.Store(source, val)
 		}
-		return val.(*FontCacheItem)
+		return val
 	}
 
 	scope := ""
@@ -157,19 +158,13 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		fontCache.Store(cacheID{style: style, scope: scope}, val)
 	}
 
-	return val.(*FontCacheItem)
+	return val
 }
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load Font faces
 func ClearFontCache() {
-	fontCache.Range(func(key, _ any) bool {
-		fontCache.Delete(key)
-		return true
-	})
-	fontCustomCache.Range(func(key, _ any) bool {
-		fontCustomCache.Delete(key)
-		return true
-	})
+	fontCache.Clear()
+	fontCustomCache.Clear()
 }
 
 // DrawString draws a string into an image.
@@ -350,8 +345,8 @@ type cacheID struct {
 	scope string
 }
 
-var fontCache = &sync.Map{}       // map[cacheID]*FontCacheItem
-var fontCustomCache = &sync.Map{} // map[string]*FontCacheItem for custom resources
+var fontCache async.Map[cacheID, *FontCacheItem]
+var fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
 
 type noopLogger struct{}
 

@@ -62,7 +62,7 @@ type driver struct {
 	onConfigChanged func(*Configuration)
 	painting        bool
 	running         atomic.Bool
-	queuedFuncs     *async.UnboundedFuncChan
+	queuedFuncs     *async.UnboundedChan[func()]
 }
 
 // Declare conformity with Driver
@@ -152,7 +152,7 @@ func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
-		d.queuedFuncs = async.NewUnboundedFuncChan()
+		d.queuedFuncs = async.NewUnboundedChan[func()]()
 		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {

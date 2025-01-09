@@ -2,21 +2,21 @@ package cache
 
 import (
 	"image"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
-var svgs = &sync.Map{} // make(map[string]*svgInfo)
+var svgs async.Map[string, *svgInfo]
 
 // GetSvg gets svg image from cache if it exists.
 func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {
-	sinfo, ok := svgs.Load(overriddenName(name, o))
-	if !ok || sinfo == nil {
+	svginfo, ok := svgs.Load(overriddenName(name, o))
+	if !ok || svginfo == nil {
 		return nil
 	}
-	svginfo := sinfo.(*svgInfo)
+
 	if svginfo.w != w || svginfo.h != h {
 		return nil
 	}
@@ -46,8 +46,7 @@ type svgInfo struct {
 
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
-	svgs.Range(func(key, value any) bool {
-		sinfo := value.(*svgInfo)
+	svgs.Range(func(key string, sinfo *svgInfo) bool {
 		if sinfo.isExpired(now) {
 			svgs.Delete(key)
 		}
@@ -58,7 +57,7 @@ func destroyExpiredSvgs(now time.Time) {
 func overriddenName(name string, o fyne.CanvasObject) string {
 	if o != nil { // for overridden themes get the cache key right
 		if over, ok := overrides.Load(o); ok {
-			return over.(*overrideScope).cacheID + name
+			return over.cacheID + name
 		}
 	}
 

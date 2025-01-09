@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 var (
@@ -57,7 +58,7 @@ func (l *listener) DataChanged() {
 }
 
 type base struct {
-	listeners sync.Map // map[DataListener]bool
+	listeners async.Map[DataListener, bool]
 
 	lock sync.RWMutex
 }
@@ -75,8 +76,8 @@ func (b *base) RemoveListener(l DataListener) {
 
 func (b *base) trigger() {
 	var listeners []DataListener
-	b.listeners.Range(func(key, _ any) bool {
-		listeners = append(listeners, key.(DataListener))
+	b.listeners.Range(func(listener DataListener, _ bool) bool {
+		listeners = append(listeners, listener)
 		return true
 	})
 
