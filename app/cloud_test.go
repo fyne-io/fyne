@@ -71,7 +71,9 @@ func TestFyneApp_transitionCloud_Storage(t *testing.T) {
 	assert.Len(t, l, 1)
 
 	p := &mockCloud{}
-	a.SetCloudProvider(p)
+	fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+		a.SetCloudProvider(p)
+	})
 
 	l = a.Storage().List()
 	assert.Empty(t, l)

@@ -589,6 +589,14 @@ func (s *safeCanvas) Focus(o fyne.Focusable) {
 	})
 }
 
+func (s *safeCanvas) FocusNext() {
+	runOnMain(s.glCanvas.FocusNext)
+}
+
+func (s *safeCanvas) FocusPrevious() {
+	runOnMain(s.glCanvas.FocusPrevious)
+}
+
 func (s *safeCanvas) Focussed() (ret fyne.Focusable) {
 	runOnMain(func() {
 		ret = s.glCanvas.Focused()
