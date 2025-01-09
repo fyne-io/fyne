@@ -71,12 +71,15 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		defer func() {
 			go func() {
 				time.Sleep(time.Second * 10)
-				a1.Stop()
-				a1.Hide()
-				a2.Stop()
-				a2.Hide()
 
-				button.Enable()
+				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+					a1.Stop()
+					a1.Hide()
+					a2.Stop()
+					a2.Hide()
+
+					button.Enable()
+				})
 			}()
 		}()
 	}
@@ -99,8 +102,11 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				time.Sleep(time.Second * 5)
-				a3.Stop()
-				d.Hide()
+
+				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+					a3.Stop()
+					d.Hide()
+				})
 			}()
 		}))))
 }
@@ -492,16 +498,20 @@ func startProgress() {
 			default:
 			}
 
-			progress.SetValue(num)
-			fprogress.SetValue(num)
+			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+				progress.SetValue(num)
+				fprogress.SetValue(num)
+			})
 			num += 0.002
 		}
 
-		progress.SetValue(1)
-		fprogress.SetValue(1)
+		fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+			progress.SetValue(1)
+			fprogress.SetValue(1)
 
-		// TODO make sure this resets when we hide etc...
-		stopProgress()
+			// TODO make sure this resets when we hide etc...
+			stopProgress()
+		})
 	}()
 	infProgress.Start()
 }

@@ -73,7 +73,7 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 
 				go func() {
 					time.Sleep(time.Second * 3)
-					w.Close()
+					fyne.CurrentApp().Driver().CallFromGoroutine(w.Close)
 				}()
 			}))
 	}
