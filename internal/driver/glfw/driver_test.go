@@ -37,7 +37,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	)
 	// We want to test the handling of the canvas' Fyne menu here.
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
-	c := w.canvas
+	c := w.Canvas()
 	movl := buildMenuOverlay(mm, w.window)
 	c.setMenuOverlay(movl)
 	w.SetContent(content)

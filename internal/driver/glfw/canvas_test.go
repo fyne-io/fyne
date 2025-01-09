@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/async"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -18,7 +19,7 @@ import (
 
 func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -47,7 +48,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 
 func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -82,7 +83,7 @@ func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 
 func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -134,7 +135,7 @@ func TestGlCanvas_Content(t *testing.T) {
 
 func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -169,7 +170,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 func TestGlCanvas_Focus(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 
 	ce := &focusable{id: "ce1"}
 	content := container.NewVBox(ce)
@@ -209,7 +210,7 @@ func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
 	e := widget.NewEntry()
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	c.Focus(e) // this crashed in the past
 }
 
@@ -218,7 +219,7 @@ func TestGlCanvas_Focus_SetContent(t *testing.T) {
 	w.SetPadded(false)
 	e := widget.NewEntry()
 	w.SetContent(container.NewHBox(e))
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	c.Focus(e)
 	assert.Equal(t, e, c.Focused())
 
@@ -229,7 +230,7 @@ func TestGlCanvas_Focus_SetContent(t *testing.T) {
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 
 	ce1 := &focusable{id: "ce1"}
 	ce2 := &focusable{id: "ce2"}
@@ -299,7 +300,7 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 
 func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	canvasSize := fyne.NewSize(200, 100)
 	w.Resize(canvasSize)
 	ensureCanvasSize(t, w, canvasSize)
@@ -323,7 +324,7 @@ func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *
 
 func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(100, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -366,15 +367,15 @@ func TestGlCanvas_NilContent(t *testing.T) {
 
 func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 
 	pos := fyne.NewPos(4, 4)
-	c.scale = 2.5
+	c.SetScale(2.5)
 	x, y := c.PixelCoordinateForPosition(pos)
-	assert.Equal(t, int(10*c.texScale), x)
-	assert.Equal(t, int(10*c.texScale), y)
+	assert.Equal(t, int(10*c.TexScale()), x)
+	assert.Equal(t, int(10*c.TexScale()), y)
 
-	c.texScale = 2.0
+	c.SetTexScale(2.0)
 	x, y = c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, 20, x)
 	assert.Equal(t, 20, y)
@@ -498,7 +499,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 func TestGlCanvas_Scale(t *testing.T) {
 	w := createWindow("Test")
-	c := w.Canvas().(*glCanvas)
+	c := w.Canvas()
 
 	c.scale = 2.5
 	assert.Equal(t, 5, int(2*c.Scale()))
@@ -567,4 +568,80 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
 	return
+}
+
+type safeCanvas struct {
+	*glCanvas
+}
+
+func (s *safeCanvas) Focus(o fyne.Focusable) {
+	runOnMain(func() {
+		s.glCanvas.Focus(o)
+	})
+}
+
+func (s *safeCanvas) Focussed() (ret fyne.Focusable) {
+	runOnMain(func() {
+		ret = s.glCanvas.Focused()
+	})
+
+	return ret
+}
+
+func (s *safeCanvas) setMenuOverlay(o fyne.CanvasObject) {
+	runOnMain(func() {
+		s.glCanvas.setMenuOverlay(o)
+	})
+}
+
+func (s *safeCanvas) Padded() (ret bool) {
+	runOnMain(func() {
+		ret = s.glCanvas.Padded()
+	})
+
+	return ret
+}
+
+func (s *safeCanvas) Resize(size fyne.Size) {
+	runOnMain(func() {
+		s.glCanvas.Resize(size)
+	})
+}
+
+func (s *safeCanvas) SetPadded(pad bool) {
+	runOnMain(func() {
+		s.glCanvas.SetPadded(pad)
+	})
+}
+
+func (s *safeCanvas) SetScale(scale float32) {
+	runOnMain(func() {
+		s.glCanvas.scale = scale
+	})
+}
+
+func (s *safeCanvas) SetTexScale(scale float32) {
+	runOnMain(func() {
+		s.glCanvas.texScale = scale
+	})
+}
+
+func (s *safeCanvas) Size() (ret fyne.Size) {
+	if async.IsMainGoroutine() {
+		ret = s.glCanvas.Size()
+	} else {
+		runOnMain(func() {
+			ret = s.glCanvas.Size()
+		})
+	}
+
+	return ret
+}
+
+func (s *safeCanvas) TexScale() (ret float32) {
+	runOnMain(func() {
+		ret = s.glCanvas.texScale
+	})
+
+	return ret
 }

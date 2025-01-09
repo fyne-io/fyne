@@ -107,7 +107,7 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test")
-	c := w.canvas
+	c := w.Canvas()
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
 	menuBar := buildMenuOverlay(m, w.window).(*MenuBar)
 	c.setMenuOverlay(menuBar)
@@ -1949,6 +1949,13 @@ func (t *tabbable) AcceptsTab() bool {
 
 type safeWindow struct {
 	*window
+}
+
+func (s *safeWindow) Canvas() (ret *safeCanvas) {
+	runOnMain(func() {
+		ret = &safeCanvas{glCanvas: s.window.Canvas().(*glCanvas)}
+	})
+	return ret
 }
 
 func (s *safeWindow) Resize(size fyne.Size) {
