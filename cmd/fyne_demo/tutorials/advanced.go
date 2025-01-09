@@ -2,6 +2,7 @@ package tutorials
 
 import (
 	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -9,11 +10,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func scaleString(c fyne.Canvas) string {
+func scaleToString(c fyne.Canvas) string {
 	return strconv.FormatFloat(float64(c.Scale()), 'f', 2, 32)
 }
 
-func texScaleString(c fyne.Canvas) string {
+func textureScaleToString(c fyne.Canvas) string {
 	pixels, _ := c.PixelCoordinateForPosition(fyne.NewPos(1, 1))
 	texScale := float32(pixels) / c.Scale()
 	return strconv.FormatFloat(float64(texScale), 'f', 2, 32)
@@ -25,8 +26,8 @@ func prependTo(g *fyne.Container, s string) {
 }
 
 func setScaleText(scale, tex *widget.Label, canvas fyne.Canvas) {
-	scale.SetText(scaleString(canvas))
-	tex.SetText(texScaleString(canvas))
+	scale.SetText(scaleToString(canvas))
+	tex.SetText(textureScaleToString(canvas))
 }
 
 // advancedScreen loads a panel that shows details and settings that are a bit
@@ -40,16 +41,15 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		&widget.FormItem{Text: "Texture Scale", Widget: tex},
 	))
 
-	setScaleText(scale, tex, win.Canvas())
-	listen := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listen)
+	canvas := win.Canvas()
+	setScaleText(scale, tex, canvas)
 	go func(canvas fyne.Canvas) {
-		for range listen {
+		for range time.NewTicker(time.Second).C {
 			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
 				setScaleText(scale, tex, canvas)
 			})
 		}
-	}(win.Canvas())
+	}(canvas)
 
 	label := widget.NewLabel("Just type...")
 	generic := container.NewVBox()
