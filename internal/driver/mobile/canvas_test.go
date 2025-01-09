@@ -21,10 +21,15 @@ import (
 
 func TestMain(m *testing.M) {
 	currentApp := fyne.CurrentApp()
-	fyne.SetCurrentApp(newTestMobileApp())
-	ret := m.Run()
-	fyne.SetCurrentApp(currentApp)
-	os.Exit(ret)
+	tester := newTestMobileApp()
+	fyne.SetCurrentApp(tester)
+	go func() {
+		ret := m.Run()
+		fyne.SetCurrentApp(currentApp)
+		os.Exit(ret)
+	}()
+
+	tester.Run()
 }
 
 func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
