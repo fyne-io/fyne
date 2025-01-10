@@ -10,6 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         go-version: ['1.19.x', '1.23.x']
+        include:
+          - os: ubuntu-latest
+            runner: xvfb-run
 
     steps:
     - uses: actions/checkout@v4
