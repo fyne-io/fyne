@@ -55,7 +55,7 @@ func (d *CustomDialog) SetButtons(buttons []fyne.CanvasObject) {
 	d.setButtons(container.NewGridWithRows(1, buttons...))
 }
 
-// SetIcon sets an icon to be shown on the right of the dialog, like the NewInformation dialog.
+// SetIcon sets an icon to be shown in the top right of the dialog.
 // Passing a nil resource will remove the icon from the dialog.
 //
 // Since: 2.6
