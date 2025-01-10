@@ -1039,15 +1039,17 @@ func TestWindow_Tapped(t *testing.T) {
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(container.NewVBox(rect, o))
 
-	w.mousePos = fyne.NewPos(50, 160)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mousePos = fyne.NewPos(50, 160)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
-	if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
-		assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
-		assert.Equal(t, fyne.NewPos(46, 52), e.Position)
-	}
+		assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
+		if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
+			assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
+			assert.Equal(t, fyne.NewPos(46, 52), e.Position)
+		}
+	})
 }
 
 func TestWindow_TappedSecondary(t *testing.T) {

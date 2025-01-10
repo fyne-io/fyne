@@ -153,10 +153,12 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	w.SetContent(content)
 
 	repaintWindow(w)
-	// clear the recorded layouts
-	for layout.popLayoutEvent() != nil {
-	}
-	assert.Nil(t, layout.popLayoutEvent())
+	runOnMain(func() {
+		// clear the recorded layouts
+		for layout.popLayoutEvent() != nil {
+		}
+		assert.Nil(t, layout.popLayoutEvent())
+	})
 
 	leftObj1.FillColor = color.White
 	rightObj1.FillColor = color.White
@@ -583,6 +585,14 @@ func (s *safeCanvas) Capture() (ret image.Image) {
 	return ret
 }
 
+func (s *safeCanvas) DismissMenu() (ret bool) {
+	runOnMain(func() {
+		ret = s.glCanvas.DismissMenu()
+	})
+
+	return ret
+}
+
 func (s *safeCanvas) Focus(o fyne.Focusable) {
 	runOnMain(func() {
 		s.glCanvas.Focus(o)
@@ -661,4 +671,8 @@ func (s *safeCanvas) TexScale() (ret float32) {
 	})
 
 	return ret
+}
+
+func (s *safeCanvas) ToggleMenu() {
+	runOnMain(s.glCanvas.ToggleMenu)
 }
