@@ -51,7 +51,8 @@ func (p *preferences) resetSavedRecently() {
 	go func() {
 		time.Sleep(time.Millisecond * 100) // writes are not always atomic. 10ms worked, 100 is safer.
 
-		p.app.driver.CallFromGoroutine(func() {
+		// For test reasons we need to use current app not what we were initialised with as they can differ
+		fyne.CurrentApp().Driver().CallFromGoroutine(func() {
 			p.prefLock.Lock()
 			p.savedRecently = false
 			changedDuringSaving := p.changedDuringSaving
