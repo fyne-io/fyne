@@ -97,4 +97,38 @@ func TestDefaultLocalizations(t *testing.T) {
 		assert.Contains(t, languages, fyne.Locale("en-US-Latn"))
 		assert.Contains(t, languages, fyne.Locale("de-DE-Latn"))
 	})
+
+	t.Run("registering custom localizations should wipe default localizations first", func(t *testing.T) {
+		err := AddTranslations(fyne.NewStaticResource("de.json", []byte(`{
+		  "Test": "Passt"
+		}`)))
+		require.NoError(t, err)
+
+		err = AddTranslations(fyne.NewStaticResource("en_GB.json", []byte(`{
+		  "Test": "Match"
+		}`)))
+		require.NoError(t, err)
+
+		languages := RegisteredLanguages()
+		assert.Equal(t, []fyne.Locale{"de-DE-Latn", "en-GB-Latn"}, languages)
+
+		setupLang("de")
+		assert.Equal(t, "Passt", L("Test"))
+
+		setupLang("en-GB")
+		assert.Equal(t, "Match", L("Test"))
+
+		t.Run("first registered language becomes default", func(t *testing.T) {
+			setupLang("it")
+			assert.Equal(t, "Passt", L("Test"))
+		})
+
+		t.Run("base translations are still present", func(t *testing.T) {
+			setupLang("de")
+			assert.Equal(t, "Beenden", L("Quit"))
+
+			setupLang("en-GB")
+			assert.Equal(t, "Name", X("file.name", "nope"))
+		})
+	})
 }
