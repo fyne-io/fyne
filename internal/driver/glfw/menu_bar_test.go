@@ -1,6 +1,6 @@
 //go:build !mobile && (!no_glfw || !windows)
 
-package glfw_test
+package glfw
 
 import (
 	"image"
@@ -9,7 +9,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/driver/glfw"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -52,7 +51,7 @@ func TestMenuBar(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		themeCounter := 0
 		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
@@ -297,7 +296,7 @@ func TestMenuBar(t *testing.T) {
 				test.MoveMouse(c, fyne.NewPos(0, 0))
 				test.TapCanvas(c, fyne.NewPos(0, 0))
 				var capture image.Image
-				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+				runOnMain(func() {
 					capture = c.Capture()
 				})
 				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
@@ -329,7 +328,7 @@ func TestMenuBar(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		themeCounter := 0
 		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
@@ -472,7 +471,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -492,7 +491,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -513,7 +512,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
