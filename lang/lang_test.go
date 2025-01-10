@@ -3,10 +3,9 @@ package lang
 import (
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"fyne.io/fyne/v2"
 )
 
 func TestAddTranslations(t *testing.T) {
@@ -84,4 +83,18 @@ func TestLocalizePluralKey_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", XN("appleIDMissing", "Missing", 1))
 	assert.Equal(t, "Apple", XN("appleID", "Apple", 1))
 	assert.Equal(t, "Apples", XN("appleID", "Apple", 2))
+}
+
+func TestDefaultLocalizations(t *testing.T) {
+	t.Run("base localizations are loaded by default", func(t *testing.T) {
+		languages := RegisteredLanguages()
+
+		translationFiles, err := translations.ReadDir("translations")
+		require.NoError(t, err)
+		assert.Len(t, languages, len(translationFiles))
+
+		// Two samples for sanity check.
+		assert.Contains(t, languages, fyne.Locale("en-US-Latn"))
+		assert.Contains(t, languages, fyne.Locale("de-DE-Latn"))
+	})
 }
