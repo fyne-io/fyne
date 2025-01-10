@@ -504,7 +504,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 	w := createWindow("Test")
 	c := w.Canvas()
 
-	c.scale = 2.5
+	c.SetScale(2.5)
 	assert.Equal(t, 5, int(2*c.Scale()))
 }
 

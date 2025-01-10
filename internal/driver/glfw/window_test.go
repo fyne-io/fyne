@@ -276,32 +276,34 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
 
-	w.mouseMoved(w.viewport, 9, 9)
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5),
-		AbsolutePosition: fyne.NewPos(9, 9)}}, h1.popMouseInEvent())
-	assert.Nil(t, h1.popMouseMovedEvent())
-	assert.Nil(t, h1.popMouseOutEvent())
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 9, 9)
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5),
+			AbsolutePosition: fyne.NewPos(9, 9)}}, h1.popMouseInEvent())
+		assert.Nil(t, h1.popMouseMovedEvent())
+		assert.Nil(t, h1.popMouseOutEvent())
 
-	w.mouseMoved(w.viewport, 9, 8)
-	assert.Nil(t, h1.popMouseInEvent())
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4),
-		AbsolutePosition: fyne.NewPos(9, 8)}}, h1.popMouseMovedEvent())
-	assert.Nil(t, h1.popMouseOutEvent())
+		w.mouseMoved(w.viewport, 9, 8)
+		assert.Nil(t, h1.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4),
+			AbsolutePosition: fyne.NewPos(9, 8)}}, h1.popMouseMovedEvent())
+		assert.Nil(t, h1.popMouseOutEvent())
 
-	w.mouseMoved(w.viewport, 23, 11)
-	assert.Nil(t, h1.popMouseInEvent())
-	assert.Nil(t, h1.popMouseMovedEvent())
-	assert.NotNil(t, h1.popMouseOutEvent())
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 7),
-		AbsolutePosition: fyne.NewPos(23, 11)}}, h2.popMouseInEvent())
-	assert.Nil(t, h2.popMouseMovedEvent())
-	assert.Nil(t, h2.popMouseOutEvent())
+		w.mouseMoved(w.viewport, 23, 11)
+		assert.Nil(t, h1.popMouseInEvent())
+		assert.Nil(t, h1.popMouseMovedEvent())
+		assert.NotNil(t, h1.popMouseOutEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 7),
+			AbsolutePosition: fyne.NewPos(23, 11)}}, h2.popMouseInEvent())
+		assert.Nil(t, h2.popMouseMovedEvent())
+		assert.Nil(t, h2.popMouseOutEvent())
 
-	w.mouseMoved(w.viewport, 23, 10)
-	assert.Nil(t, h2.popMouseInEvent())
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 6),
-		AbsolutePosition: fyne.NewPos(23, 10)}}, h2.popMouseMovedEvent())
-	assert.Nil(t, h2.popMouseOutEvent())
+		w.mouseMoved(w.viewport, 23, 10)
+		assert.Nil(t, h2.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 6),
+			AbsolutePosition: fyne.NewPos(23, 10)}}, h2.popMouseMovedEvent())
+		assert.Nil(t, h2.popMouseOutEvent())
+	})
 }
 
 func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
@@ -321,17 +323,23 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	ensureCanvasSize(t, w, fyne.NewSize(200, 300))
 	repaintWindow(w)
 
-	w.mouseMoved(w.viewport, 15, 48)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 15, 48)
+	})
 	repaintWindow(w)
 	assert.NotNil(t, w.mouseOver)
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
-	w.mouseMoved(w.viewport, 42, 48)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 42, 48)
+	})
 	repaintWindow(w)
 	assert.NotNil(t, w.mouseOver)
 	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
-	w.mouseMoved(w.viewport, 42, 100)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 42, 100)
+	})
 	repaintWindow(w)
 	assert.Nil(t, w.mouseOver)
 	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
@@ -1474,17 +1482,15 @@ func TestWindow_Focus(t *testing.T) {
 	w.SetContent(container.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
-	runOnMain(func() {
-		w.charInput(w.viewport, 'a')
-		w.charInput(w.viewport, 'b')
-		w.charInput(w.viewport, 'c')
-		w.charInput(w.viewport, 'd')
-		w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
+	w.charInput(w.viewport, 'a')
+	w.charInput(w.viewport, 'b')
+	w.charInput(w.viewport, 'c')
+	w.charInput(w.viewport, 'd')
+	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
 
-		w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
-		w.charInput(w.viewport, 'e')
-		w.charInput(w.viewport, 'f')
-	})
+	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
+	w.charInput(w.viewport, 'e')
+	w.charInput(w.viewport, 'f')
 
 	assert.Equal(t, "abcd", e1.Text)
 	assert.Equal(t, "ef", e2.Text)
@@ -2020,6 +2026,10 @@ func (s *safeWindow) Canvas() (ret *safeCanvas) {
 	return ret
 }
 
+func (s *safeWindow) Close() {
+	runOnMain(s.window.Close)
+}
+
 func (s *safeWindow) Resize(size fyne.Size) {
 	runOnMain(func() {
 		s.window.Resize(size)
@@ -2038,6 +2048,12 @@ func (s *safeWindow) SetFixedSize(fixed bool) {
 	})
 }
 
+func (s *safeWindow) SetOnClosed(fn func()) {
+	runOnMain(func() {
+		s.window.SetOnClosed(fn)
+	})
+}
+
 func (s *safeWindow) SetPadded(padded bool) {
 	runOnMain(func() {
 		s.window.SetPadded(padded)
@@ -2047,5 +2063,17 @@ func (s *safeWindow) SetPadded(padded bool) {
 func (s *safeWindow) closed(v *glfw.Window) {
 	runOnMain(func() {
 		s.window.closed(v)
+	})
+}
+
+func (s *safeWindow) charInput(viewport *glfw.Window, char rune) {
+	runOnMain(func() {
+		s.window.charInput(viewport, char)
+	})
+}
+
+func (s *safeWindow) keyPressed(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	runOnMain(func() {
+		s.window.keyPressed(w, key, scancode, action, mods)
 	})
 }
