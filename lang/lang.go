@@ -212,10 +212,13 @@ func setupLang(lang string) {
 
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
+	var languageStr string
 	all, err := locale.GetLocales()
-	if err != nil {
+	if err == nil {
+		languageStr = closestSupportedLocale(all).LanguageString()
+	} else {
 		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
+		languageStr = translated[0].String()
 	}
-	setupLang(closestSupportedLocale(all).LanguageString())
+	setupLang(languageStr)
 }
