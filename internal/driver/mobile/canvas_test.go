@@ -510,11 +510,8 @@ func (a *mobileApp) Driver() fyne.Driver {
 func (a *mobileApp) Run() {
 	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
 	// TODO replace with a full mobileApp.Run() once that is resolved
-	for {
-		select {
-		case fn := <-d.queuedFuncs.Out():
-			fn()
-		}
+	for fn := range d.queuedFuncs.Out() {
+		fn()
 	}
 }
 
