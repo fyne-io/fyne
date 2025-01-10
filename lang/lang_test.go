@@ -89,7 +89,7 @@ func TestDefaultLocalizations(t *testing.T) {
 	t.Run("base localizations are loaded by default", func(t *testing.T) {
 		languages := RegisteredLanguages()
 
-		translationFiles, err := translations.ReadDir("translations")
+		translationFiles, err := defaultTranslationFS.ReadDir("translations")
 		require.NoError(t, err)
 		assert.Len(t, languages, len(translationFiles))
 
@@ -127,7 +127,7 @@ func TestDefaultLocalizations(t *testing.T) {
 			setupLang("de")
 			assert.Equal(t, "Beenden", L("Quit"))
 
-			setupLang("en-GB")
+			setupLang("en")
 			assert.Equal(t, "Name", X("file.name", "nope"))
 		})
 	})
