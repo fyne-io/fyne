@@ -159,6 +159,15 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 	return retErr
 }
 
+// RegisteredLanguages returns the list of locales we have localization for.
+func RegisteredLanguages() []fyne.Locale {
+	var ret []fyne.Locale
+	for _, l := range translated {
+		ret = append(ret, localeFromTag(l))
+	}
+	return ret
+}
+
 func addLanguage(data []byte, name string) error {
 	f, err := bundle.ParseMessageFileBytes(data, name)
 	if err != nil {
