@@ -174,6 +174,11 @@ func addLanguage(data []byte, name string) error {
 		return err
 	}
 
+	for _, t := range translated {
+		if t == f.Tag {
+			return nil
+		}
+	}
 	translated = append(translated, f.Tag)
 	return nil
 }
