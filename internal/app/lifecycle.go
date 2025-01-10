@@ -123,9 +123,9 @@ func (l *Lifecycle) QueueEvent(fn func()) {
 
 // RunEventQueue runs the event queue. This should called inside a go routine.
 // This function blocks.
-func (l *Lifecycle) RunEventQueue() {
+func (l *Lifecycle) RunEventQueue(d fyne.Driver) {
 	for fn := range l.eventQueue.Out() {
-		fn()
+		d.CallFromGoroutine(fn)
 	}
 }
 

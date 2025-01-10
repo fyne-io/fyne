@@ -318,7 +318,7 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 
 func (d *driver) onStart() {
 	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
-		go f() // don't block main, we don't have window event queue
+		f()
 	}
 }
 
@@ -433,11 +433,15 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				wid.Dragged(ev)
+				d.CallFromGoroutine(func() {
+					wid.Dragged(ev)
+				})
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			wid.DragEnd()
+			d.CallFromGoroutine(func() {
+				wid.DragEnd()
+			})
 		}()
 	})
 }

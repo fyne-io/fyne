@@ -3,6 +3,7 @@ package app
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +18,7 @@ func TestLifecycle(t *testing.T) {
 
 	var entered, exited, start, stop, hookedStop, called bool
 	life.InitEventQueue()
-	go life.RunEventQueue()
+	go life.RunEventQueue(test.NewDriver())
 	life.QueueEvent(func() { called = true })
 	life.SetOnEnteredForeground(func() { entered = true })
 	life.OnEnteredForeground()()
