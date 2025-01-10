@@ -19,12 +19,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var d *driver
+
 func TestMain(m *testing.M) {
 	currentApp := fyne.CurrentApp()
 	tester := newTestMobileApp()
+	d = tester.Driver().(*driver)
 	fyne.SetCurrentApp(tester)
+
+	waitForStart := make(chan struct{})
 	go func() {
-		// ust like the GLFW tests, wait a short while for the driver to start
+		// Wait for app loop to be running (plus a moment in case of scheduling switches).
+		<-waitForStart
+
+		// Just like the GLFW tests, wait a short while for the driver to start
 		time.Sleep(time.Millisecond * 100)
 
 		ret := m.Run()
@@ -32,6 +40,7 @@ func TestMain(m *testing.M) {
 		os.Exit(ret)
 	}()
 
+	close(waitForStart) // Signal that execution can continue.
 	tester.Run()
 }
 
@@ -125,38 +134,50 @@ func Test_canvas_Focusable(t *testing.T) {
 	content.Resize(fyne.NewSize(25, 25))
 
 	pos := fyne.NewPos(10, 10)
-	c.tapDown(pos, 0)
-	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	d.CallFromGoroutine(func() {
+		c.tapDown(pos, 0)
+		c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+			wid.Tapped(ev)
+		}, nil, nil, nil)
+	})
 
-	c.tapDown(pos, 1)
-	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	d.CallFromGoroutine(func() {
+		c.tapDown(pos, 1)
+		c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+			wid.Tapped(ev)
+		}, nil, nil, nil)
+	})
+	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
-	c.Unfocus()
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	waitForCheck := make(chan struct{})
+	d.CallFromGoroutine(func() {
+		c.Focus(content)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
 
-	content.Disable()
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+		c.Unfocus()
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
 
-	c.tapDown(fyne.NewPos(10, 10), 2)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+		content.Disable()
+		c.Focus(content)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+
+		c.tapDown(fyne.NewPos(10, 10), 2)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+		close(waitForCheck)
+	})
+	<-waitForCheck
 }
 
 func Test_canvas_InteractiveArea(t *testing.T) {
@@ -322,13 +343,15 @@ func Test_canvas_TappedAndDoubleTapped(t *testing.T) {
 	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 1, tapped)
+	waitAndCheck(700, func() {
+		assert.Equal(t, 1, tapped)
+	})
 
 	simulateTap(c)
 	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 2, tapped)
+	waitAndCheck(700, func() {
+		assert.Equal(t, 2, tapped)
+	})
 }
 
 func Test_canvas_TappedMulti(t *testing.T) {
@@ -485,9 +508,26 @@ func (a *mobileApp) Driver() fyne.Driver {
 	return a.driver
 }
 
+func (a *mobileApp) Run() {
+	a.driver.Run()
+}
+
 func newTestMobileApp() fyne.App {
 	return &mobileApp{
 		App:    fyne.CurrentApp(),
 		driver: NewGoMobileDriver(),
 	}
+}
+
+func waitAndCheck(msWait time.Duration, fn func()) {
+	waitForCheck := make(chan struct{})
+	go func() {
+		time.Sleep(msWait * time.Millisecond)
+		d.CallFromGoroutine(func() {
+			fn()
+
+			close(waitForCheck)
+		})
+	}()
+	<-waitForCheck
 }
