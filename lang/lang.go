@@ -1,5 +1,10 @@
 // Package lang introduces a translation and localisation API for Fyne applications
 //
+// By default, a few custom localisation keys for a few default languages are included.
+// They can be overwritten with custom localisations.
+// Without further intervention, the default language will be English. This is overwritten
+// with the language of the first translation that is being registered explicitly.
+//
 // Since 2.5
 package lang
 
@@ -183,6 +188,12 @@ func addLanguage(data []byte, name string) error {
 
 func addLanguageByMessages(msgs []*i18n.Message, tag language.Tag) error {
 	if bundleIsDefault {
+		// This is the first time, the user adds a language on their own. This implies, that
+		// they are aware of localizations and how to use them.
+		// To prevent half-translated applications, we "forget" our base translations and only
+		// use languages for resolution, that the user supplied.
+		// The bundle will still contain our base translations; if a language overlaps with those,
+		// our base strings will be there unless they explicitly get overwritten.
 		bundleIsDefault = false
 		if err := setupBundle(tag); err != nil {
 			return err
