@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/language"
 )
 
 func TestAddTranslations(t *testing.T) {
@@ -86,6 +87,11 @@ func TestLocalizePluralKey_Fallback(t *testing.T) {
 }
 
 func TestDefaultLocalizations(t *testing.T) {
+	// Not ideal, but other tests might manipulate the global state.
+	// Reset it manually.
+	require.NoError(t, setupBundle(language.English))
+	bundleIsDefault = true
+
 	t.Run("base localizations are loaded by default", func(t *testing.T) {
 		languages := RegisteredLanguages()
 
