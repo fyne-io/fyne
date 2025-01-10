@@ -12,6 +12,7 @@ import (
 	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -25,6 +26,7 @@ func TestMain(m *testing.M) {
 	currentApp := fyne.CurrentApp()
 	tester := newTestMobileApp()
 	d = tester.Driver().(*driver)
+	d.queuedFuncs = async.NewUnboundedChan[func()]()
 	fyne.SetCurrentApp(tester)
 
 	waitForStart := make(chan struct{})
@@ -506,7 +508,14 @@ func (a *mobileApp) Driver() fyne.Driver {
 }
 
 func (a *mobileApp) Run() {
-	a.driver.Run()
+	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
+	// TODO replace with a full mobileApp.Run() once that is resolved
+	for {
+		select {
+		case fn := <-d.queuedFuncs.Out():
+			fn()
+		}
+	}
 }
 
 func newTestMobileApp() fyne.App {
