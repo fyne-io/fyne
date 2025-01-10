@@ -3,6 +3,7 @@
 package glfw_test
 
 import (
+	"image"
 	"strconv"
 	"testing"
 
@@ -295,7 +296,11 @@ func TestMenuBar(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				test.MoveMouse(c, fyne.NewPos(0, 0))
 				test.TapCanvas(c, fyne.NewPos(0, 0))
-				if test.AssertImageMatches(t, "menu_bar_initial.png", c.Capture()) {
+				var capture image.Image
+				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+					capture = c.Capture()
+				})
+				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
 					for i, s := range tt.steps {
 						t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
 							lastAction = ""
