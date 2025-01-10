@@ -74,7 +74,15 @@ func init() {
 }
 
 func (d *driver) CallFromGoroutine(fn func()) {
-	d.queuedFuncs.In() <- fn
+	done := common.DonePool.Get()
+	defer common.DonePool.Put(done)
+
+	d.queuedFuncs.In() <- func() {
+		fn()
+		done <- struct{}{}
+	}
+
+	<-done
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {

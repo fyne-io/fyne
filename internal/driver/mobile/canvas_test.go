@@ -157,7 +157,6 @@ func Test_canvas_Focusable(t *testing.T) {
 		assert.Equal(t, 0, content.unfocusedTimes)
 	})
 
-	waitForCheck := make(chan struct{})
 	d.CallFromGoroutine(func() {
 		c.Focus(content)
 		assert.Equal(t, 1, content.focusedTimes)
@@ -175,9 +174,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		c.tapDown(fyne.NewPos(10, 10), 2)
 		assert.Equal(t, 1, content.focusedTimes)
 		assert.Equal(t, 1, content.unfocusedTimes)
-		close(waitForCheck)
 	})
-	<-waitForCheck
 }
 
 func Test_canvas_InteractiveArea(t *testing.T) {
