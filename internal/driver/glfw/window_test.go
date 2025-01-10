@@ -1206,15 +1206,15 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	})
 
-	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
+		assert.Equal(t, 2, tapped, "Button 2 should be tapped")
+	})
 }
 
 func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test")
-	waitSingleTapped := make(chan struct{})
-	waitDoubleTapped := make(chan struct{})
+	waitSingleTapped := make(chan struct{}, 1)
+	waitDoubleTapped := make(chan struct{}, 1)
 	tapped := atomic.Int32{}
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
@@ -1225,7 +1225,8 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 		tapped.Store(2)
 		waitDoubleTapped <- struct{}{}
 	}
-	w.SetContent(container.NewBorder(nil, nil, nil, nil, but))
+	w.SetContent(but)
+	but.Resize(fyne.NewSquareSize(50))
 
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 15, 25)

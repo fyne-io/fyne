@@ -485,8 +485,10 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), w.Canvas())
 	popupBgSize := fyne.NewSize(975, 575)
-	popup.Show()
-	popup.Resize(popupBgSize)
+	runOnMain(func() {
+		popup.Show()
+		popup.Resize(popupBgSize)
+	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	winSize := fyne.NewSize(1000, 600)

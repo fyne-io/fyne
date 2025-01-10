@@ -14,12 +14,14 @@ import (
 func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
-	w.SetMainMenu(
-		fyne.NewMainMenu(
-			fyne.NewMenu("test", fyne.NewMenuItem("item", func() {})),
-			fyne.NewMenu("other", fyne.NewMenuItem("item", func() {})),
-		),
-	)
+	runOnMain(func() {
+		w.SetMainMenu(
+			fyne.NewMainMenu(
+				fyne.NewMenu("test", fyne.NewMenuItem("item", func() {})),
+				fyne.NewMenu("other", fyne.NewMenuItem("item", func() {})),
+			),
+		)
+	})
 	c := w.Canvas()
 
 	ce1 := &focusable{id: "ce1"}
