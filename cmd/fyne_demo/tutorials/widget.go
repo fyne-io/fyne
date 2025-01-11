@@ -62,7 +62,7 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		a2.Show()
 
 		time.AfterFunc(10*time.Second, func() {
-			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+			fyne.Do(func() {
 				a1.Stop()
 				a1.Hide()
 				a2.Stop()
@@ -90,7 +90,7 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 			d.Show()
 
 			time.AfterFunc(5*time.Second, func() {
-				fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+				fyne.Do(func() {
 					a3.Stop()
 					d.Hide()
 				})

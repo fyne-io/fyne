@@ -44,8 +44,10 @@ type Driver interface {
 	// Since: 2.5
 	SetDisableScreenBlanking(bool)
 
-	// CallFromGoroutine provides a way to queue a function that is running on a goroutine back to the main thread.
+	// DoFromGoroutine provides a way to queue a function that is running on a goroutine back to
+	// the central thread for Fyne updates.
 	// This is required when background tasks want to execute code safely in the graphical context.
+	//
 	// Since: 2.6
-	CallFromGoroutine(func())
+	DoFromGoroutine(func())
 }

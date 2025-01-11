@@ -38,7 +38,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 
 	go func(canvas fyne.Canvas) {
 		for range time.NewTicker(time.Second).C {
-			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+			fyne.Do(func() {
 				scale.SetText(scaleToString(canvas))
 				tex.SetText(textureScaleToString(canvas))
 			})
