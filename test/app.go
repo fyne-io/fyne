@@ -247,7 +247,7 @@ func (s *testSettings) apply() {
 		listener <- s
 	}
 
-	s.app.driver.CallFromGoroutine(func() {
+	s.app.driver.DoFromGoroutine(func() {
 		s.app.propertyLock.Lock()
 		painter.ClearFontCache()
 		cache.ResetThemeCaches()

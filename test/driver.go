@@ -49,7 +49,7 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 	return &driver{painter: painter}
 }
 
-func (d *driver) CallFromGoroutine(f func()) {
+func (d *driver) DoFromGoroutine(f func()) {
 	f() // Tests all run on a single (but potentially different per-test) thread
 }
 

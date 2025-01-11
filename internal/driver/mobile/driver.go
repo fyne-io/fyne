@@ -73,7 +73,7 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func (d *driver) CallFromGoroutine(fn func()) {
+func (d *driver) DoFromGoroutine(fn func()) {
 	done := common.DonePool.Get()
 	defer common.DonePool.Put(done)
 
@@ -433,15 +433,13 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				d.CallFromGoroutine(func() {
+				d.DoFromGoroutine(func() {
 					wid.Dragged(ev)
 				})
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			d.CallFromGoroutine(func() {
-				wid.DragEnd()
-			})
+			d.DoFromGoroutine(wid.DragEnd)
 		}()
 	})
 }
