@@ -218,20 +218,6 @@ func (e *Entry) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
-// Disable this widget so that it cannot be interacted with, updating any style appropriately.
-//
-// Implements: fyne.Disableable
-func (e *Entry) Disable() {
-	e.DisableableWidget.Disable()
-}
-
-// Disabled returns whether the entry is disabled or read-only.
-//
-// Implements: fyne.Disableable
-func (e *Entry) Disabled() bool {
-	return e.DisableableWidget.disabled.Load()
-}
-
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
 //
 // Implements: fyne.DoubleTappable
@@ -287,13 +273,6 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 		e.selecting = true
 	}
 	e.updateMousePointer(pos, false)
-}
-
-// Enable this widget, updating any style or features appropriately.
-//
-// Implements: fyne.Disableable
-func (e *Entry) Enable() {
-	e.DisableableWidget.Enable()
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
