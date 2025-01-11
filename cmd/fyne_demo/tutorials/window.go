@@ -72,7 +72,7 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 				w.Show()
 
 				time.AfterFunc(3*time.Second, func() {
-					fyne.CurrentApp().Driver().CallFromGoroutine(w.Close)
+					fyne.Do(w.Close)
 				})
 			}))
 	}

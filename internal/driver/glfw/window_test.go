@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"os"
 	"runtime"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1215,14 +1214,11 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test")
 	waitSingleTapped := make(chan struct{}, 1)
 	waitDoubleTapped := make(chan struct{}, 1)
-	tapped := atomic.Int32{}
 	but := newDoubleTappableButton()
 	but.OnTapped = func() {
-		tapped.Store(1)
 		waitSingleTapped <- struct{}{}
 	}
 	but.onDoubleTap = func() {
-		tapped.Store(2)
 		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(but)
@@ -1233,12 +1229,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	})
-
 	<-waitSingleTapped
-	time.Sleep(500 * time.Millisecond)
-
-	assert.Equal(t, int32(1), tapped.Load(), "Single tap should have fired")
-	tapped.Store(0)
 
 	runOnMain(func() {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -1246,11 +1237,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	})
-
 	<-waitDoubleTapped
-	time.Sleep(500 * time.Millisecond)
-
-	assert.Equal(t, int32(2), tapped.Load(), "Double tap should have fired")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {

@@ -10,13 +10,10 @@ import (
 var _ driver.NativeWindow = (*window)(nil)
 
 func (w *window) RunNative(f func(any)) {
-	runOnMain(func() {
-		var nsWindow uintptr
-		if v := w.view(); v != nil {
-			nsWindow = uintptr(v.GetCocoaWindow())
-		}
-		f(driver.MacWindowContext{
-			NSWindow: nsWindow,
-		})
-	})
+	context := driver.MacWindowContext{}
+	if v := w.view(); v != nil {
+		context.NSWindow = uintptr(v.GetCocoaWindow())
+	}
+
+	f(context)
 }

@@ -28,6 +28,6 @@ func (p *preferences) watch() {
 			return
 		}
 
-		fyne.CurrentApp().Driver().CallFromGoroutine(p.load)
+		fyne.Do(p.load)
 	})
 }

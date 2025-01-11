@@ -22,7 +22,7 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 	gradient := canvas.NewHorizontalGradient(color.NRGBA{0x80, 0, 0, 0xff}, color.NRGBA{0, 0x80, 0, 0xff})
 	go func() {
 		for range time.NewTicker(time.Second).C {
-			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+			fyne.Do(func() {
 				gradient.Angle += 45
 				if gradient.Angle >= 360 {
 					gradient.Angle -= 360

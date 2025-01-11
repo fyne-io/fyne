@@ -386,7 +386,7 @@ func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tap
 	defer cancel()
 
 	<-ctx.Done()
-	fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+	fyne.CurrentApp().Driver().DoFromGoroutine(func() {
 		c.touchCancelLock.Lock()
 		touchCount := c.touchTapCount
 		touchLast := c.touchLastTapped
