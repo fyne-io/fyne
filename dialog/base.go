@@ -143,6 +143,7 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 func (d *dialog) setIcon(icon fyne.Resource) {
 	if icon == nil {
 		d.win.Content.(*fyne.Container).Objects[0] = &layout.Spacer{}
+		d.win.Refresh()
 		return
 	}
 	d.win.Content.(*fyne.Container).Objects[0] = &canvas.Image{Resource: icon}
