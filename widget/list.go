@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -132,9 +131,7 @@ func (l *List) RefreshItem(id ListItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	lo.renderLock.RLock() // ensures we are not changing visible info in render code during the search
 	item, ok := lo.searchVisible(lo.visible, id)
-	lo.renderLock.RUnlock()
 	if ok {
 		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
@@ -611,7 +608,6 @@ type listLayout struct {
 	visible           []listItemAndID
 	slicePool         async.Pool[*[]listItemAndID]
 	visibleRowHeights []float32
-	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
@@ -688,7 +684,6 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 func (l *listLayout) updateList(newOnly bool) {
 	th := l.list.Theme()
 	separatorThickness := th.Size(theme.SizeNamePadding)
-	l.renderLock.Lock()
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
@@ -706,7 +701,6 @@ func (l *listLayout) updateList(newOnly bool) {
 
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
-		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
@@ -759,7 +753,6 @@ func (l *listLayout) updateList(newOnly bool) {
 	visiblePtr := l.slicePool.Get()
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
-	l.renderLock.Unlock() // user code should not be locked
 
 	if newOnly {
 		for _, vis := range visible {
