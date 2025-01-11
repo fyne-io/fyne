@@ -85,30 +85,18 @@ func TestButton_Disable(t *testing.T) {
 }
 
 func TestButton_Enable(t *testing.T) {
-	tapped := make(chan bool)
+	tapped := false
 	button := widget.NewButton("Test", func() {
-		tapped <- true
+		tapped = true
 	})
 
 	button.Disable()
-	go test.Tap(button)
-	func() {
-		select {
-		case <-tapped:
-			assert.Fail(t, "Button should have been disabled")
-		case <-time.After(1 * time.Second):
-		}
-	}()
+	test.Tap(button)
+	assert.False(t, tapped, "Button should be disabled")
 
 	button.Enable()
-	go test.Tap(button)
-	func() {
-		select {
-		case <-tapped:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Button should have been re-enabled")
-		}
-	}()
+	test.Tap(button)
+	assert.True(t, tapped, "Button should have been re-enabled")
 }
 
 func TestButton_Disabled(t *testing.T) {
