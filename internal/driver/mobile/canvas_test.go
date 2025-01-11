@@ -525,14 +525,15 @@ func newTestMobileApp() fyne.App {
 
 func waitAndCheck(msWait time.Duration, fn func()) {
 	waitForCheck := common.DonePool.Get()
-	defer common.DonePool.Put(waitForCheck)
 
 	go func() {
+		defer common.DonePool.Put(waitForCheck)
+
 		time.Sleep(msWait * time.Millisecond)
 		d.CallFromGoroutine(func() {
 			fn()
 
-			close(waitForCheck)
+			waitForCheck <- struct{}{}
 		})
 	}()
 	<-waitForCheck
