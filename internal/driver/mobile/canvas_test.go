@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/driver/common"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -523,7 +524,9 @@ func newTestMobileApp() fyne.App {
 }
 
 func waitAndCheck(msWait time.Duration, fn func()) {
-	waitForCheck := make(chan struct{})
+	waitForCheck := common.DonePool.Get()
+	defer common.DonePool.Put(waitForCheck)
+
 	go func() {
 		time.Sleep(msWait * time.Millisecond)
 		d.CallFromGoroutine(func() {

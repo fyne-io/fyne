@@ -105,8 +105,6 @@ func (a *entryCursorAnimation) start() {
 	isStopped := a.anim == nil
 	if isStopped {
 		a.anim = a.createAnim(false)
-	}
-	if isStopped {
 		a.anim.Start()
 	}
 }

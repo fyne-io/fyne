@@ -14,7 +14,7 @@ import (
 )
 
 func TestFyneApp_SetCloudProvider(t *testing.T) {
-	a := test.NewApp()
+	a := test.NewTempApp(t)
 	p := &mockCloud{}
 	a.SetCloudProvider(p)
 
@@ -23,7 +23,7 @@ func TestFyneApp_SetCloudProvider(t *testing.T) {
 }
 
 func TestFyneApp_SetCloudProvider_Cleanup(t *testing.T) {
-	a := test.NewApp()
+	a := test.NewTempApp(t)
 	p1 := &mockCloud{}
 	p2 := &mockCloud{}
 	a.SetCloudProvider(p1)
@@ -38,7 +38,7 @@ func TestFyneApp_SetCloudProvider_Cleanup(t *testing.T) {
 }
 
 func TestFyneApp_transitionCloud(t *testing.T) {
-	a := test.NewApp()
+	a := test.NewTempApp(t)
 	p := &mockCloud{}
 	preferenceChanged := false
 	settingsChan := make(chan fyne.Settings)
@@ -59,7 +59,7 @@ func TestFyneApp_transitionCloud(t *testing.T) {
 }
 
 func TestFyneApp_transitionCloud_Preferences(t *testing.T) {
-	a := test.NewApp()
+	a := test.NewTempApp(t)
 	a.Preferences().SetString("key", "blank")
 
 	assert.Equal(t, "blank", a.Preferences().String("key"))
@@ -71,7 +71,7 @@ func TestFyneApp_transitionCloud_Preferences(t *testing.T) {
 }
 
 func TestFyneApp_transitionCloud_Storage(t *testing.T) {
-	a := test.NewApp()
+	a := test.NewTempApp(t)
 	a.Storage().Create("nothere")
 
 	l := a.Storage().List()

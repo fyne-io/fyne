@@ -247,13 +247,15 @@ func (s *testSettings) apply() {
 		listener <- s
 	}
 
-	s.app.propertyLock.Lock()
 	s.app.driver.CallFromGoroutine(func() {
+		s.app.propertyLock.Lock()
 		painter.ClearFontCache()
 		cache.ResetThemeCaches()
 		intapp.ApplySettings(s, s.app)
+		s.app.propertyLock.Unlock()
 	})
 
+	s.app.propertyLock.Lock()
 	s.app.appliedTheme = s.Theme()
 	s.app.propertyLock.Unlock()
 }
