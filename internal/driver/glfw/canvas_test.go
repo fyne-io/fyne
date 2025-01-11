@@ -411,16 +411,20 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w.Canvas().Overlays().Add(over)
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 	// TODO: address #707; overlays should always be canvas size
-	over.Resize(w.Canvas().Size())
+	size := w.Canvas().Size()
+	runOnMain(func() {
+		over.Resize(size)
+	})
 
-	size := fyne.NewSize(200, 100)
+	size = fyne.NewSize(200, 100)
 	assert.NotEqual(t, size, content.Size())
-	assert.NotEqual(t, size, over.Size())
 
 	w.Resize(size)
 	ensureCanvasSize(t, w, size)
-	assert.Equal(t, size, content.Size(), "canvas content is resized")
-	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
+	runOnMain(func() {
+		assert.Equal(t, size, content.Size(), "canvas content is resized")
+		assert.Equal(t, size, over.Size(), "canvas overlay is resized")
+	})
 }
 
 func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
