@@ -22,7 +22,7 @@ func TestDarwinMenu(t *testing.T) {
 		resetMainMenu()
 	})
 
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	var lastAction string
 	assertLastAction := func(wantAction string) {
@@ -63,7 +63,7 @@ func TestDarwinMenu(t *testing.T) {
 
 	mainMenu := fyne.NewMainMenu(menuFile, menuHelp, menuMore, menuSettings)
 	runOnMain(func() {
-		setupNativeMenu(w, mainMenu)
+		setupNativeMenu(w.window, mainMenu)
 	})
 
 	mm := testDarwinMainMenu()
@@ -257,13 +257,13 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 			runOnMain(func() {
 				resetMainMenu()
 			})
-			w := createWindow("Test").(*window)
+			w := createWindow("Test")
 			item := fyne.NewMenuItem("Special", func() {})
 			item.Shortcut = &desktop.CustomShortcut{KeyName: tt.key, Modifier: fyne.KeyModifierShortcutDefault}
 			menu := fyne.NewMenu("Special", item)
 			mainMenu := fyne.NewMainMenu(menu)
 			runOnMain(func() {
-				setupNativeMenu(w, mainMenu)
+				setupNativeMenu(w.window, mainMenu)
 			})
 
 			mm := testDarwinMainMenu()

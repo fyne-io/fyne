@@ -50,7 +50,7 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 }
 
 func (d *driver) CallFromGoroutine(f func()) {
-	f() // This is a simplification that works for now, may have to review if tests are multi-threaded
+	f() // Tests all run on a single (but potentially different per-test) thread
 }
 
 func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {

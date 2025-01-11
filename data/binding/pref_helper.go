@@ -1,6 +1,8 @@
 package binding
 
 import (
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/async"
 )
@@ -26,6 +28,7 @@ type preferencesMap struct {
 	prefs async.Map[fyne.Preferences, *preferenceBindings]
 
 	appPrefs fyne.Preferences // the main application prefs, to check if it changed...
+	appLock  sync.Mutex
 }
 
 func newPreferencesMap() *preferencesMap {
@@ -44,10 +47,14 @@ func (m *preferencesMap) ensurePreferencesAttached(p fyne.Preferences) *preferen
 
 func (m *preferencesMap) getBindings(p fyne.Preferences) *preferenceBindings {
 	if p == fyne.CurrentApp().Preferences() {
+		m.appLock.Lock()
+		prefs := m.appPrefs
 		if m.appPrefs == nil {
 			m.appPrefs = p
-		} else if m.appPrefs != p {
-			m.migratePreferences(m.appPrefs, p)
+		}
+		m.appLock.Unlock()
+		if prefs != p {
+			m.migratePreferences(prefs, p)
 		}
 	}
 	binds, _ := m.prefs.Load(p)
@@ -72,7 +79,9 @@ func (m *preferencesMap) migratePreferences(src, dst fyne.Preferences) {
 
 	m.prefs.Store(dst, old)
 	m.prefs.Delete(src)
+	m.appLock.Lock()
 	m.appPrefs = dst
+	m.appLock.Unlock()
 
 	binds := m.getBindings(dst)
 	if binds == nil {

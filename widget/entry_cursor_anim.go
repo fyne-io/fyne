@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -20,7 +19,6 @@ const (
 )
 
 type entryCursorAnimation struct {
-	mu                sync.RWMutex
 	cursor            *canvas.Rectangle
 	anim              *fyne.Animation
 	lastInterruptTime time.Time
@@ -53,9 +51,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
-		a.mu.RLock()
 		shouldInterrupt := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptTime
-		a.mu.RUnlock()
 		if shouldInterrupt {
 			if !interrupted {
 				a.cursor.FillColor = cursorOpaque
@@ -65,21 +61,15 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 			return
 		}
 		if interrupted {
-			a.mu.Lock()
 			a.anim.Stop()
 			if !inverted {
 				a.anim = a.createAnim(true)
 			}
 			interrupted = false
-			a.mu.Unlock()
-			go func() {
-				a.mu.RLock()
-				canStart := a.anim != nil
-				a.mu.RUnlock()
-				if canStart {
-					a.anim.Start()
-				}
-			}()
+			canStart := a.anim != nil
+			if canStart {
+				a.anim.Start()
+			}
 			return
 		}
 
@@ -112,30 +102,22 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 
 // starts cursor animation.
 func (a *entryCursorAnimation) start() {
-	a.mu.Lock()
 	isStopped := a.anim == nil
 	if isStopped {
 		a.anim = a.createAnim(false)
-	}
-	a.mu.Unlock()
-	if isStopped {
 		a.anim.Start()
 	}
 }
 
 // temporarily stops the animation by "cursorInterruptTime".
 func (a *entryCursorAnimation) interrupt() {
-	a.mu.Lock()
 	a.lastInterruptTime = timeNow()
-	a.mu.Unlock()
 }
 
 // stops cursor animation.
 func (a *entryCursorAnimation) stop() {
-	a.mu.Lock()
 	if a.anim != nil {
 		a.anim.Stop()
 		a.anim = nil
 	}
-	a.mu.Unlock()
 }
