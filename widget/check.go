@@ -322,7 +322,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 func (c *checkRenderer) applyTheme(th fyne.Theme, v fyne.ThemeVariant) {
 	c.label.Color = th.Color(theme.ColorNameForeground, v)
 	c.label.TextSize = th.Size(theme.SizeNameText)
-	if c.check.disabled.Load() {
+	if c.check.Disabled() {
 		c.label.Color = th.Color(theme.ColorNameDisabled, v)
 	}
 }
@@ -359,7 +359,7 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 		res.ColorName = theme.ColorNamePrimary
 		bgRes.ColorName = theme.ColorNameBackground
 	}
-	if c.check.disabled.Load() {
+	if c.check.Disabled() {
 		if c.check.Checked {
 			res = theme.NewThemedResource(theme.CheckButtonCheckedIcon())
 		}
@@ -374,7 +374,7 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 
 // must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateFocusIndicator(th fyne.Theme, v fyne.ThemeVariant) {
-	if c.check.disabled.Load() {
+	if c.check.Disabled() {
 		c.focusIndicator.FillColor = color.Transparent
 	} else if c.check.focused {
 		c.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)

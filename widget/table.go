@@ -861,7 +861,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
 	stick := t.StickyColumnCount
-	size := t.size.Load()
+	size := t.Size()
 
 	if len(t.columnWidths) == 0 {
 		paddedWidth := colWidth + padding
@@ -961,7 +961,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
 	stick := t.StickyRowCount
-	size := t.size.Load()
+	size := t.Size()
 
 	if len(t.rowHeights) == 0 {
 		paddedHeight := rowHeight + padding
@@ -1448,7 +1448,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.cells.t.dividerLayer.Content.Refresh()
 	}
 
-	size := r.cells.t.size.Load()
+	size := r.cells.t.Size()
 
 	divs := 0
 	i := 0
@@ -1552,7 +1552,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	size := r.cells.t.size.Load()
+	size := r.cells.t.Size()
 	if x2 < 0 || x1 > size.Width || y2 < 0 || y1 > size.Height {
 		marker.Hide()
 	} else {

@@ -164,7 +164,7 @@ func (r *CheckGroup) update() {
 
 		item.Text = r.Options[i]
 		item.Checked = contains
-		item.DisableableWidget.disabled.Store(r.disabled.Load())
+		item.DisableableWidget.disabled = r.Disabled()
 		item.Refresh()
 	}
 }
@@ -257,7 +257,7 @@ func (r *checkGroupRenderer) updateItems() {
 		}
 		item.Text = r.checks.Options[i]
 		item.Checked = contains
-		item.disabled.Store(r.checks.disabled.Load())
+		item.disabled = r.checks.Disabled()
 		item.Refresh()
 	}
 }

@@ -230,7 +230,7 @@ func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
 
 	x := e.Position.X
 	y := e.Position.Y
-	size := s.size.Load()
+	size := s.Size()
 
 	switch s.Orientation {
 	case Vertical:

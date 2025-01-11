@@ -125,7 +125,7 @@ func (hl *Hyperlink) focusWidth() float32 {
 	th := hl.Theme()
 
 	innerPad := th.Size(theme.SizeNameInnerPadding)
-	return fyne.Min(hl.size.Load().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
+	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
@@ -135,9 +135,9 @@ func (hl *Hyperlink) focusXPos() float32 {
 	case fyne.TextAlignLeading:
 		return innerPad / 2
 	case fyne.TextAlignCenter:
-		return (hl.size.Load().Width - hl.focusWidth()) / 2
+		return (hl.Size().Width - hl.focusWidth()) / 2
 	case fyne.TextAlignTrailing:
-		return (hl.size.Load().Width - hl.focusWidth()) - innerPad/2
+		return (hl.Size().Width - hl.focusWidth()) - innerPad/2
 	default:
 		return 0 // unreached
 	}
