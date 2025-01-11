@@ -659,6 +659,7 @@ func TestViewPreferences(t *testing.T) {
 }
 
 func TestFileFavorites(t *testing.T) {
+	_ = test.NewApp()
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {

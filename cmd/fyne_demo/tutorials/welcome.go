@@ -63,13 +63,15 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	fyne.CurrentApp().Settings().AddChangeListener(listen)
 	go func() {
 		for range listen {
-			bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
-			bg.FillColor = bgColor
-			bg.Refresh()
+			fyne.Do(func() {
+				bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
+				bg.FillColor = bgColor
+				bg.Refresh()
 
-			shadowColor = withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
-			footerBG.FillColor = bgColor
-			footer.Refresh()
+				shadowColor = withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
+				footerBG.FillColor = bgColor
+				footer.Refresh()
+			})
 		}
 	}()
 

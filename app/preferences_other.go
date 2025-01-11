@@ -5,6 +5,7 @@ package app
 import (
 	"path/filepath"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
 )
 
@@ -27,6 +28,6 @@ func (p *preferences) watch() {
 			return
 		}
 
-		p.load()
+		fyne.Do(p.load)
 	})
 }

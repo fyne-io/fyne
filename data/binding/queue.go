@@ -11,5 +11,5 @@ func queueItem(f func()) {
 		return
 	}
 
-	fyne.CurrentApp().Driver().CallFromGoroutine(f)
+	fyne.Do(f)
 }

@@ -73,8 +73,16 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func (d *driver) CallFromGoroutine(fn func()) {
-	d.queuedFuncs.In() <- fn
+func (d *driver) DoFromGoroutine(fn func()) {
+	done := common.DonePool.Get()
+	defer common.DonePool.Put(done)
+
+	d.queuedFuncs.In() <- func() {
+		fn()
+		done <- struct{}{}
+	}
+
+	<-done
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
@@ -310,7 +318,7 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 
 func (d *driver) onStart() {
 	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
-		go f() // don't block main, we don't have window event queue
+		f()
 	}
 }
 
@@ -425,11 +433,13 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 					ev.Dragged.DY *= tapMoveDecay
 				}
 
-				wid.Dragged(ev)
+				d.DoFromGoroutine(func() {
+					wid.Dragged(ev)
+				})
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			wid.DragEnd()
+			d.DoFromGoroutine(wid.DragEnd)
 		}()
 	})
 }

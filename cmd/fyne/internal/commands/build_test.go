@@ -170,4 +170,5 @@ func Test_NormaliseVersion(t *testing.T) {
 	assert.Equal(t, "2.3.0.0", normaliseVersion("v2.3"))
 	assert.Equal(t, "2.4.0.0", normaliseVersion("v2.4.0"))
 	assert.Equal(t, "2.3.6.0-dev", normaliseVersion("v2.3.6-0.20230711180435-d4b95e1cb1eb"))
+	assert.Equal(t, "2.4.1.0-dev", normaliseVersion("v2.4.1-rc7.0.20230711180435-d4b95e1cb1eb"))
 }
