@@ -266,6 +266,7 @@ func setupBundle(lng language.Tag) error {
 			return err
 		}
 	}
+	updateLocalizer()
 
 	return nil
 }
