@@ -68,7 +68,7 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (a *fyneApp) Run() {
-	go a.lifecycle.RunEventQueue(a.driver.CallFromGoroutine)
+	go a.lifecycle.RunEventQueue(a.driver.DoFromGoroutine)
 	a.driver.Run()
 }
 

@@ -63,7 +63,7 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	fyne.CurrentApp().Settings().AddChangeListener(listen)
 	go func() {
 		for range listen {
-			fyne.CurrentApp().Driver().CallFromGoroutine(func() {
+			fyne.Do(func() {
 				bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
 				bg.FillColor = bgColor
 				bg.Refresh()

@@ -137,7 +137,7 @@ func Test_canvas_Focusable(t *testing.T) {
 	content.Resize(fyne.NewSize(25, 25))
 
 	pos := fyne.NewPos(10, 10)
-	d.CallFromGoroutine(func() {
+	d.DoFromGoroutine(func() {
 		c.tapDown(pos, 0)
 		c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 			wid.Tapped(ev)
@@ -149,7 +149,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		assert.Equal(t, 0, content.unfocusedTimes)
 	})
 
-	d.CallFromGoroutine(func() {
+	d.DoFromGoroutine(func() {
 		c.tapDown(pos, 1)
 		c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 			wid.Tapped(ev)
@@ -160,7 +160,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		assert.Equal(t, 0, content.unfocusedTimes)
 	})
 
-	d.CallFromGoroutine(func() {
+	d.DoFromGoroutine(func() {
 		c.Focus(content)
 		assert.Equal(t, 1, content.focusedTimes)
 		assert.Equal(t, 0, content.unfocusedTimes)
@@ -530,7 +530,7 @@ func waitAndCheck(msWait time.Duration, fn func()) {
 		defer common.DonePool.Put(waitForCheck)
 
 		time.Sleep(msWait * time.Millisecond)
-		d.CallFromGoroutine(func() {
+		d.DoFromGoroutine(func() {
 			fn()
 
 			waitForCheck <- struct{}{}
