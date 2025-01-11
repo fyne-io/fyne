@@ -5,7 +5,8 @@ import "time"
 // Driver defines an abstract concept of a Fyne render driver.
 // Any implementation must provide at least these methods.
 type Driver interface {
-	// CreateWindow creates a new UI Window.
+	// CreateWindow creates a new UI Window for a certain implementation.
+	// Developers should use [App.NewWindow].
 	CreateWindow(string) Window
 	// AllWindows returns a slice containing all app windows.
 	AllWindows() []Window
@@ -29,8 +30,10 @@ type Driver interface {
 	Quit()
 
 	// StartAnimation registers a new animation with this driver and requests it be started.
+	// Developers should use the [Animation.Start] function.
 	StartAnimation(*Animation)
 	// StopAnimation stops an animation and unregisters from this driver.
+	// Developers should use the [Animation.Stop] function.
 	StopAnimation(*Animation)
 
 	// DoubleTapDelay returns the maximum duration where a second tap after a first one
@@ -46,6 +49,7 @@ type Driver interface {
 
 	// DoFromGoroutine provides a way to queue a function that is running on a goroutine back to
 	// the central thread for Fyne updates.
+	// The driver provides the implementation normally accessed through [fyne.Do].
 	// This is required when background tasks want to execute code safely in the graphical context.
 	//
 	// Since: 2.6
