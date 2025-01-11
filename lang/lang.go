@@ -12,7 +12,7 @@ import (
 	"embed"
 	"encoding/json"
 	"log"
-	"path/filepath"
+	"path"
 	"strings"
 	"text/template"
 
@@ -146,7 +146,7 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 
 	for _, f := range files {
 		name := f.Name()
-		data, err := fs.ReadFile(filepath.Join(dir, name))
+		data, err := fs.ReadFile(path.Join(dir, name))
 		if err != nil {
 			if retErr == nil {
 				retErr = err
@@ -242,7 +242,7 @@ func loadDefaultTranslations() error {
 	}
 	for _, f := range files {
 		name := f.Name()
-		data, err := defaultTranslationFS.ReadFile(filepath.Join(dir, name))
+		data, err := defaultTranslationFS.ReadFile(path.Join(dir, name))
 		if err != nil {
 			return err
 		}
