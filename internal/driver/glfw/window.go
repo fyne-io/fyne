@@ -189,8 +189,9 @@ func (w *window) Close() {
 	}
 
 	// trigger callbacks - early so window still exists
-	if w.onClosed != nil {
-		w.onClosed()
+	if fn := w.onClosed; fn != nil {
+		w.onClosed = nil // avoid possibility of calling twice
+		fn()
 	}
 
 	w.closing = true
