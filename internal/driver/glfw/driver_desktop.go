@@ -150,7 +150,7 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 		go func() {
 			for range item.ClickedCh {
 				if fn != nil {
-					fn()
+					runOnMain(fn)
 				}
 			}
 		}()
