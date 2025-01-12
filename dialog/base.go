@@ -140,6 +140,16 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.win.Refresh()
 }
 
+func (d *dialog) setIcon(icon fyne.Resource) {
+	if icon == nil {
+		d.win.Content.(*fyne.Container).Objects[0] = &layout.Spacer{}
+		d.win.Refresh()
+		return
+	}
+	d.win.Content.(*fyne.Container).Objects[0] = &canvas.Image{Resource: icon}
+	d.win.Refresh()
+}
+
 // The method .create() needs to be called before the dialog can be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterWrappedLabel(message), title: title, icon: icon, parent: parent}

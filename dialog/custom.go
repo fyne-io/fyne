@@ -55,6 +55,14 @@ func (d *CustomDialog) SetButtons(buttons []fyne.CanvasObject) {
 	d.setButtons(container.NewGridWithRows(1, buttons...))
 }
 
+// SetIcon sets an icon to be shown in the top right of the dialog.
+// Passing a nil resource will remove the icon from the dialog.
+//
+// Since: 2.6
+func (d *CustomDialog) SetIcon(icon fyne.Resource) {
+	d.setIcon(icon)
+}
+
 // ShowCustomWithoutButtons shows a dialog, without buttons, over the specified application
 // using custom content.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.

@@ -142,3 +142,24 @@ func TestCustomConfirm_Importance(t *testing.T) {
 	d.Show()
 	test.AssertRendersToImage(t, "dialog-custom-confirm-importance.png", w.Canvas())
 }
+
+func TestCustom_SetIcon(t *testing.T) {
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	test.ApplyTheme(t, test.Theme())
+	label := widget.NewLabel("Test was successful.")
+	d := NewCustom("Test result", "Close", label, w)
+	d.SetIcon(theme.ConfirmIcon())
+	d.Show()
+
+	test.AssertRendersToImage(t, "dialog-custom-seticon-success.png", w.Canvas())
+
+	d.Hide()
+	d.SetIcon(nil)
+	d.Show()
+
+	test.AssertRendersToImage(t, "dialog-custom-seticon-nil.png", w.Canvas())
+}
