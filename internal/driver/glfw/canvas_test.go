@@ -107,23 +107,28 @@ func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(
 	w.Resize(oldCanvasSize)
 	repaintWindow(w)
 
-	oldLeftColSize := leftCol.Size()
-	oldLeftScrollSize := leftColScroll.Size()
-	oldRightColSize := rightCol.Size()
-	oldRightScrollSize := rightColScroll.Size()
-	leftObj2.SetMinSize(fyne.NewSize(50, 100))
-	rightObj2.SetMinSize(fyne.NewSize(50, 200))
+	var oldLeftColSize, oldLeftScrollSize, oldRightColSize, oldRightScrollSize fyne.Size
+	runOnMain(func() {
+		oldLeftColSize = leftCol.Size()
+		oldLeftScrollSize = leftColScroll.Size()
+		oldRightColSize = rightCol.Size()
+		oldRightScrollSize = rightColScroll.Size()
+		leftObj2.SetMinSize(fyne.NewSize(50, 100))
+		rightObj2.SetMinSize(fyne.NewSize(50, 200))
+	})
 	c.Refresh(leftObj2)
 	c.Refresh(rightObj2)
 	repaintWindow(w)
 
-	assert.Equal(t, oldCanvasSize, c.Size())
-	assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
-	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
-	expectedLeftColSize := oldLeftColSize.Add(fyne.NewSize(0, 50))
-	assert.Equal(t, expectedLeftColSize, leftCol.Size())
-	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
-	assert.Equal(t, expectedRightColSize, rightCol.Size())
+	runOnMain(func() {
+		assert.Equal(t, oldCanvasSize, c.Size())
+		assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
+		assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
+		expectedLeftColSize := oldLeftColSize.Add(fyne.NewSize(0, 50))
+		assert.Equal(t, expectedLeftColSize, leftCol.Size())
+		expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
+		assert.Equal(t, expectedRightColSize, rightCol.Size())
+	})
 }
 
 func TestGlCanvas_Content(t *testing.T) {
@@ -417,7 +422,9 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	})
 
 	size = fyne.NewSize(200, 100)
-	assert.NotEqual(t, size, content.Size())
+	runOnMain(func() {
+		assert.NotEqual(t, size, content.Size())
+	})
 
 	w.Resize(size)
 	ensureCanvasSize(t, w, size)

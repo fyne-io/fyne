@@ -98,7 +98,9 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 	assertCanvasSize(t, w, minSizePlusPadding)
 
 	w = createWindow("Test")
-	r.SetMinSize(fyne.NewSize(100, 100))
+	runOnMain(func() {
+		r.SetMinSize(fyne.NewSize(100, 100))
+	})
 	w.SetFixedSize(true)
 	w.SetContent(r)
 	assertCanvasSize(t, w, minSizePlusPadding)
@@ -272,8 +274,10 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	w.Resize(fyne.NewSize(30, 20))
 
 	repaintWindow(w)
-	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
-	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
+	runOnMain(func() {
+		require.Equal(t, fyne.NewPos(0, 0), h1.Position())
+		require.Equal(t, fyne.NewPos(14, 0), h2.Position())
+	})
 
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 9, 9)
@@ -1054,7 +1058,9 @@ func TestWindow_DragEndWithoutTappedEvent(t *testing.T) {
 	w.SetContent(do)
 
 	repaintWindow(w)
-	require.Equal(t, fyne.NewPos(4, 4), do.Position())
+	runOnMain(func() {
+		require.Equal(t, fyne.NewPos(4, 4), do.Position())
+	})
 
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 11, 11)
@@ -1447,16 +1453,24 @@ func TestWindow_SetPadded(t *testing.T) {
 			ensureCanvasSize(t, w, oldCanvasSize)
 
 			repaintWindow(w)
-			contentSize := content.Size()
-			expectedCanvasSize := contentSize.
-				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
-				Add(fyne.NewSize(0, tt.expectedMenuHeight))
+
+			var contentSize, expectedCanvasSize fyne.Size
+			runOnMain(func() {
+				contentSize = content.Size()
+				expectedCanvasSize = contentSize.
+					Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
+					Add(fyne.NewSize(0, tt.expectedMenuHeight))
+			})
 
 			w.SetPadded(tt.padding)
 			repaintWindow(w)
-			assert.Equal(t, contentSize, content.Size())
-			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
-			assert.Equal(t, expectedCanvasSize, w.Canvas().Size())
+
+			canvas := w.Canvas()
+			runOnMain(func() {
+				assert.Equal(t, contentSize, content.Size())
+				assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
+				assert.Equal(t, expectedCanvasSize, canvas.Size())
+			})
 		})
 	}
 }
@@ -1564,33 +1578,45 @@ func TestWindow_ManualFocus(t *testing.T) {
 	w.SetContent(content)
 	repaintWindow(w)
 
-	w.mouseMoved(w.viewport, 9, 9)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	runOnMain(func() {
+		w.mouseMoved(w.viewport, 9, 9)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
 	w.Canvas().Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+
+	runOnMain(func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
 	w.Canvas().Unfocus()
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
 
-	content.Disable()
+	runOnMain(func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+
+		content.Disable()
+	})
+
 	w.Canvas().Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	runOnMain(func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+	})
 }
 
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
