@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -203,7 +204,7 @@ func TestShowFileOpen(t *testing.T) {
 	ui := popup.Content.(*fyne.Container)
 	//header
 	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
-	assert.Equal(t, "Open File", title.Text)
+	assert.Equal(t, lang.L("Open")+" "+lang.L("File"), title.Text)
 	//optionsbuttons
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
@@ -239,7 +240,7 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotEmpty(t, objects)
 
 	fileName := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
-	assert.Equal(t, "(Parent)", fileName)
+	assert.Equal(t, lang.L("(Parent)"), fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
@@ -355,7 +356,7 @@ func TestShowFileSave(t *testing.T) {
 	assert.NotEmpty(t, objects)
 
 	item := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
-	assert.Equal(t, "(Parent)", item.name)
+	assert.Equal(t, lang.L("(Parent)"), item.name)
 	assert.True(t, save.Disabled())
 
 	abs, _ := filepath.Abs("./testdata/")
