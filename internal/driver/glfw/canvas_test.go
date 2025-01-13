@@ -398,11 +398,16 @@ func TestGlCanvas_Resize(t *testing.T) {
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
-	assert.NotEqual(t, size, content.Size())
+	runOnMain(func() {
+		assert.NotEqual(t, size, content.Size())
+	})
 
 	w.Resize(size)
 	ensureCanvasSize(t, w, size)
-	assert.Equal(t, size, content.Size())
+
+	runOnMain(func() {
+		assert.Equal(t, size, content.Size())
+	})
 }
 
 // TODO: this can be removed when #707 is addressed
