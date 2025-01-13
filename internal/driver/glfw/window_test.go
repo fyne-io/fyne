@@ -1232,9 +1232,10 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 		waitDoubleTapped <- struct{}{}
 	}
 	w.SetContent(but)
-	but.Resize(fyne.NewSquareSize(50))
 
 	runOnMain(func() {
+		but.Resize(fyne.NewSquareSize(50))
+
 		w.mouseMoved(w.viewport, 15, 25)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
