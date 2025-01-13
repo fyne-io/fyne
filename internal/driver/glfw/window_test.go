@@ -1143,18 +1143,18 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w.SetContent(o)
 	ensureCanvasSize(t, w, fyne.NewSize(53, 44))
 
-	w.mousePos = fyne.NewPos(10, 25)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
-
-	assert.False(t, tapped)
-
 	runOnMain(func() {
+		w.mousePos = fyne.NewPos(10, 25)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+
+		assert.False(t, tapped)
+
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-	})
 
-	assert.True(t, tapped)
+		assert.True(t, tapped)
+	})
 }
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
@@ -1177,17 +1177,19 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	refreshWindow(w.window) // ensure any async resize is done
 	ensureCanvasSize(t, w, fyne.NewSize(108, 212))
 
-	w.mousePos = fyne.NewPos(10, 80)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	runOnMain(func() {
+		w.mousePos = fyne.NewPos(10, 80)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	assert.False(t, tapped, "Tapped button that was clipped")
+		assert.False(t, tapped, "Tapped button that was clipped")
 
-	w.mousePos = fyne.NewPos(10, 120)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		w.mousePos = fyne.NewPos(10, 120)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	assert.True(t, tapped, "Tapped button that was clipped")
+		assert.True(t, tapped, "Tapped button that was clipped")
+	})
 }
 
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
