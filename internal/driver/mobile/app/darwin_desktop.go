@@ -160,8 +160,18 @@ func eventMouseDragged(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 //export eventMouseEnd
 func eventMouseEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
 
+var stopped = false
+
 //export lifecycleDead
-func lifecycleDead() { theApp.sendLifecycle(lifecycle.StageDead) }
+func lifecycleDead() {
+	if stopped {
+		return
+	}
+	stopped = true
+
+	theApp.sendLifecycle(lifecycle.StageDead)
+	theApp.events.Close()
+}
 
 //export eventKey
 func eventKey(runeVal int32, direction uint8, code uint16, flags uint32) {
