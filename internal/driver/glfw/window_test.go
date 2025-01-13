@@ -1412,9 +1412,11 @@ func TestWindow_Padded(t *testing.T) {
 	content := canvas.NewRectangle(color.White)
 	w.SetContent(content)
 
-	width, _ := w.minSizeOnScreen()
-	assert.Equal(t, int(theme.Padding()*2+content.MinSize().Width), width)
-	assert.Equal(t, theme.Padding(), content.Position().X)
+	runOnMain(func() {
+		width, _ := w.minSizeOnScreen()
+		assert.Equal(t, int(theme.Padding()*2+content.MinSize().Width), width)
+		assert.Equal(t, theme.Padding(), content.Position().X)
+	})
 }
 
 func TestWindow_SetPadded(t *testing.T) {
