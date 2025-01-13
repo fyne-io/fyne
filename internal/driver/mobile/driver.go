@@ -165,7 +165,16 @@ func (d *driver) Run() {
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
 			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
-			l.WaitForEvents()
+
+			// exhaust the event queue
+			go func() {
+				l.WaitForEvents()
+				d.queuedFuncs.Close()
+			}()
+			for fn := range d.queuedFuncs.Out() {
+				fn()
+			}
+
 			l.DestroyEventQueue()
 		}()
 
