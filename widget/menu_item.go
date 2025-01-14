@@ -125,6 +125,10 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 		i.activate()
 	}
 
+	if i.Item.Action == nil && i.Item.ChildMenu == nil {
+		return
+	}
+
 	i.trigger()
 }
 
