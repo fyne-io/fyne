@@ -1,20 +1,17 @@
 package widget
 
 import (
-	"sync/atomic"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 )
 
 // Base provides a helper that handles basic widget behaviours.
 type Base struct {
-	hidden   atomic.Bool
-	position async.Position
-	size     async.Size
-	impl     atomic.Pointer[fyne.Widget]
+	hidden   bool
+	position fyne.Position
+	size     fyne.Size
+	impl     fyne.Widget
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -24,12 +21,12 @@ func (w *Base) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
-	w.impl.Store(&wid)
+	w.impl = wid
 }
 
 // Size gets the current size of this widget.
 func (w *Base) Size() fyne.Size {
-	return w.size.Load()
+	return w.size
 }
 
 // Resize sets a new size for a widget.
@@ -39,7 +36,7 @@ func (w *Base) Resize(size fyne.Size) {
 		return
 	}
 
-	w.size.Store(size)
+	w.size = size
 
 	impl := w.super()
 	if impl == nil {
@@ -50,13 +47,13 @@ func (w *Base) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *Base) Position() fyne.Position {
-	return w.position.Load()
+	return w.position
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *Base) Move(pos fyne.Position) {
-	w.position.Store(pos)
+	w.position = pos
 
 	Repaint(w.super())
 }
@@ -76,14 +73,16 @@ func (w *Base) MinSize() fyne.Size {
 // Visible returns whether or not this widget should be visible.
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *Base) Visible() bool {
-	return !w.hidden.Load()
+	return !w.hidden
 }
 
 // Show this widget so it becomes visible
 func (w *Base) Show() {
-	if !w.hidden.CompareAndSwap(true, false) {
+	if !w.hidden {
 		return // Visible already
 	}
+
+	w.hidden = false
 
 	impl := w.super()
 	if impl == nil {
@@ -94,9 +93,11 @@ func (w *Base) Show() {
 
 // Hide this widget so it is no longer visible
 func (w *Base) Hide() {
-	if !w.hidden.CompareAndSwap(false, true) {
+	if w.hidden {
 		return // Hidden already
 	}
+
+	w.hidden = true
 
 	impl := w.super()
 	if impl == nil {
@@ -112,19 +113,13 @@ func (w *Base) Refresh() {
 		return
 	}
 
-	render := cache.Renderer(impl)
-	render.Refresh()
+	cache.Renderer(impl).Refresh()
 }
 
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is nil.
 func (w *Base) super() fyne.Widget {
-	impl := w.impl.Load()
-	if impl == nil {
-		return nil
-	}
-
-	return *impl
+	return w.impl
 }
 
 // Repaint instructs the containing canvas to redraw, even if nothing changed.

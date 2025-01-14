@@ -116,7 +116,7 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 
 func (r *validationStatusRenderer) Refresh() {
 	th := r.entry.Theme()
-	if r.entry.disabled.Load() {
+	if r.entry.Disabled() {
 		r.icon.Hide()
 		return
 	}

@@ -305,7 +305,7 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
-	th := r.button.themeWithLock()
+	th := r.button.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {

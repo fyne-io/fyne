@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -143,9 +142,7 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
-	lo.renderLock.Lock() // ensures we are not changing visible info in render code during the search
 	item, ok := lo.searchVisible(lo.visible, id)
-	lo.renderLock.Unlock()
 	if ok {
 		lo.setupGridItem(item, id, l.focused && l.currentFocus == id)
 	}
@@ -510,10 +507,9 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	list *GridWrap
 
-	itemPool   async.Pool[fyne.CanvasObject]
-	slicePool  async.Pool[*[]gridItemAndID]
-	visible    []gridItemAndID
-	renderLock sync.Mutex
+	itemPool  async.Pool[fyne.CanvasObject]
+	slicePool async.Pool[*[]gridItemAndID]
+	visible   []gridItemAndID
 }
 
 func newGridWrapLayout(list *GridWrap) fyne.Layout {
@@ -608,7 +604,6 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
 	padding := l.list.Theme().Size(theme.SizeNamePadding)
 
-	l.renderLock.Lock()
 	length := 0
 	if f := l.list.Length; f != nil {
 		length = f()
@@ -679,7 +674,6 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 	visiblePtr := l.slicePool.Get()
 	visible := (*visiblePtr)[:0]
 	visible = append(visible, l.visible...)
-	l.renderLock.Unlock() // user code should not be locked
 
 	for _, obj := range visible {
 		l.setupGridItem(obj.item, obj.id, l.list.focused && l.list.currentFocus == obj.id)

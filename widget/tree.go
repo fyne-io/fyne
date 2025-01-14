@@ -229,11 +229,11 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 
 // Resize sets a new size for a widget.
 func (t *Tree) Resize(size fyne.Size) {
-	if size == t.size.Load() {
+	if size == t.Size() {
 		return
 	}
 
-	t.size.Store(size)
+	t.size = size
 
 	t.Refresh() // trigger a redraw
 }
@@ -584,11 +584,11 @@ func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (c *treeContent) Resize(size fyne.Size) {
-	if size == c.size.Load() {
+	if size == c.Size() {
 		return
 	}
 
-	c.size.Store(size)
+	c.size = size
 
 	c.Refresh() // trigger a redraw
 }

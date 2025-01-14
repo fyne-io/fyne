@@ -4,7 +4,6 @@ import (
 	"image/color"
 	"math"
 	"strings"
-	"sync"
 	"unicode"
 
 	"github.com/go-text/typesetting/di"
@@ -44,7 +43,6 @@ type RichText struct {
 	prop      *canvas.Rectangle // used to apply text minsize to the scroller `scr`, if present - TODO improve #2464
 
 	visualCache map[RichTextSegment][]fyne.CanvasObject
-	cacheLock   sync.Mutex
 	minCache    fyne.Size
 }
 
@@ -118,11 +116,11 @@ func (t *RichText) Refresh() {
 //
 // Implements: fyne.Widget
 func (t *RichText) Resize(size fyne.Size) {
-	if size == t.size.Load() {
+	if size == t.Size() {
 		return
 	}
 
-	t.size.Store(size)
+	t.size = size
 
 	skipResize := !t.minCache.IsZero() && size.Width >= t.minCache.Width && size.Height >= t.minCache.Height && t.Wrapping == fyne.TextWrapOff && t.Truncation == fyne.TextTruncateOff
 
@@ -205,8 +203,6 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
 // cachedSegmentVisual returns a cached segment visual representation.
 // The offset value is > 0 if the segment had been split and so we need multiple objects.
 func (t *RichText) cachedSegmentVisual(seg RichTextSegment, offset int) fyne.CanvasObject {
-	t.cacheLock.Lock()
-	defer t.cacheLock.Unlock()
 	if t.visualCache == nil {
 		t.visualCache = make(map[RichTextSegment][]fyne.CanvasObject)
 	}
@@ -225,8 +221,6 @@ func (t *RichText) cachedSegmentVisual(seg RichTextSegment, offset int) fyne.Can
 }
 
 func (t *RichText) cleanVisualCache() {
-	t.cacheLock.Lock()
-	defer t.cacheLock.Unlock()
 	if len(t.visualCache) <= len(t.Segments) {
 		return
 	}
@@ -389,14 +383,14 @@ func (t *RichText) rows() int {
 func (t *RichText) updateRowBounds() {
 	th := t.Theme()
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
-	fitSize := t.size.Load()
+	fitSize := t.Size()
 	if t.scr != nil {
 		fitSize = t.scr.Content.MinSize()
 	}
 	fitSize.Height -= (innerPadding + t.inset.Height) * 2
 
 	var bounds []rowBoundary
-	maxWidth := t.size.Load().Width - 2*innerPadding + 2*t.inset.Width
+	maxWidth := t.Size().Width - 2*innerPadding + 2*t.inset.Width
 	wrapWidth := maxWidth
 
 	var currentBound *rowBoundary

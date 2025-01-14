@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
@@ -62,7 +61,6 @@ type Image struct {
 	aspect float32
 	icon   *svg.Decoder
 	isSVG  bool
-	lock   sync.Mutex
 
 	// one of the following sources will provide our image data
 	File     string        // Load the image from a file
@@ -116,9 +114,6 @@ func (i *Image) Move(pos fyne.Position) {
 
 // Refresh causes this image to be redrawn with its configured state.
 func (i *Image) Refresh() {
-	i.lock.Lock()
-	defer i.lock.Unlock()
-
 	rc, err := i.updateReader()
 	if err != nil {
 		fyne.LogError("Failed to load image", err)

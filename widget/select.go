@@ -96,7 +96,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
-	if s.disabled.Load() {
+	if s.Disabled() {
 		txtProv.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	}
 
@@ -415,13 +415,13 @@ func (s *selectRenderer) Refresh() {
 	s.updateLabel()
 	s.updateIcon(th)
 	s.background.FillColor = s.bgColor(th, v)
-	s.background.CornerRadius = s.combo.themeWithLock().Size(theme.SizeNameInputRadius)
+	s.background.CornerRadius = s.combo.Theme().Size(theme.SizeNameInputRadius)
 
 	s.Layout(s.combo.Size())
 	if s.combo.popUp != nil {
 		s.combo.popUp.alignment = s.combo.Alignment
 		s.combo.popUp.Move(s.combo.popUpPos())
-		s.combo.popUp.Resize(fyne.NewSize(s.combo.size.Load().Width, s.combo.popUp.MinSize().Height))
+		s.combo.popUp.Resize(fyne.NewSize(s.combo.Size().Width, s.combo.popUp.MinSize().Height))
 		s.combo.popUp.Refresh()
 	}
 	s.background.Refresh()
@@ -429,7 +429,7 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) bgColor(th fyne.Theme, v fyne.ThemeVariant) color.Color {
-	if s.combo.disabled.Load() {
+	if s.combo.Disabled() {
 		return th.Color(theme.ColorNameDisabledButton, v)
 	}
 	if s.combo.focused {
@@ -443,7 +443,7 @@ func (s *selectRenderer) bgColor(th fyne.Theme, v fyne.ThemeVariant) color.Color
 
 func (s *selectRenderer) updateIcon(th fyne.Theme) {
 	icon := th.Icon(theme.IconNameArrowDropDown)
-	if s.combo.disabled.Load() {
+	if s.combo.Disabled() {
 		s.icon.Resource = theme.NewDisabledResource(icon)
 	} else {
 		s.icon.Resource = icon
@@ -456,16 +456,17 @@ func (s *selectRenderer) updateLabel() {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}
 
-	s.label.Segments[0].(*TextSegment).Style.Alignment = s.combo.Alignment
-	if s.combo.disabled.Load() {
-		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
+	segment := s.label.Segments[0].(*TextSegment)
+	segment.Style.Alignment = s.combo.Alignment
+	if s.combo.Disabled() {
+		segment.Style.ColorName = theme.ColorNameDisabled
 	} else {
-		s.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
+		segment.Style.ColorName = theme.ColorNameForeground
 	}
 	if s.combo.Selected == "" {
-		s.label.Segments[0].(*TextSegment).Text = s.combo.PlaceHolder
+		segment.Text = s.combo.PlaceHolder
 	} else {
-		s.label.Segments[0].(*TextSegment).Text = s.combo.Selected
+		segment.Text = s.combo.Selected
 	}
 	s.label.Refresh()
 }

@@ -23,9 +23,7 @@ type Circle struct {
 
 // NewCircle returns a new Circle instance
 func NewCircle(color color.Color) *Circle {
-	return &Circle{
-		FillColor: color,
-	}
+	return &Circle{FillColor: color}
 }
 
 // Hide will set this circle to not be visible
@@ -45,7 +43,8 @@ func (c *Circle) MinSize() fyne.Size {
 func (c *Circle) Move(pos fyne.Position) {
 	size := c.Size()
 	c.Position1 = pos
-	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
+	c.Position2 = c.Position1.Add(size)
+
 	repaint(c)
 }
 
@@ -66,7 +65,7 @@ func (c *Circle) Resize(size fyne.Size) {
 		return
 	}
 
-	c.Position2 = fyne.NewPos(c.Position1.X+size.Width, c.Position1.Y+size.Height)
+	c.Position2 = c.Position1.Add(size)
 
 	Refresh(c)
 }
@@ -80,8 +79,10 @@ func (c *Circle) Show() {
 
 // Size returns the current size of bounding box for this circle object
 func (c *Circle) Size() fyne.Size {
-	return fyne.NewSize(float32(math.Abs(float64(c.Position2.X)-float64(c.Position1.X))),
-		float32(math.Abs(float64(c.Position2.Y)-float64(c.Position1.Y))))
+	return fyne.NewSize(
+		float32(math.Abs(float64(c.Position2.X)-float64(c.Position1.X))),
+		float32(math.Abs(float64(c.Position2.Y)-float64(c.Position1.Y))),
+	)
 }
 
 // Visible returns true if this circle is visible, false otherwise

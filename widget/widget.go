@@ -2,11 +2,8 @@
 package widget // import "fyne.io/fyne/v2/widget"
 
 import (
-	"sync/atomic"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -14,27 +11,26 @@ import (
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
-	size     async.Size
-	position async.Position
+	size     fyne.Size
+	position fyne.Position
 	Hidden   bool
 
-	impl       atomic.Pointer[fyne.Widget]
+	impl       fyne.Widget
 	themeCache fyne.Theme
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	impl := w.super()
-	if impl != nil {
+	if w.super() != nil {
 		return
 	}
 
-	w.impl.Store(&wid)
+	w.impl = wid
 }
 
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
-	return w.size.Load()
+	return w.size
 }
 
 // Resize sets a new size for a widget.
@@ -44,7 +40,7 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 		return
 	}
 
-	w.size.Store(size)
+	w.size = size
 
 	impl := w.super()
 	if impl == nil {
@@ -55,13 +51,13 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *BaseWidget) Position() fyne.Position {
-	return w.position.Load()
+	return w.position
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
-	w.position.Store(pos)
+	w.position = pos
 	internalWidget.Repaint(w.super())
 }
 
@@ -122,8 +118,7 @@ func (w *BaseWidget) Refresh() {
 
 	w.themeCache = nil
 
-	render := cache.Renderer(impl)
-	render.Refresh()
+	cache.Renderer(impl).Refresh()
 }
 
 // Theme returns a cached Theme instance for this widget (or its extending widget).
@@ -131,33 +126,25 @@ func (w *BaseWidget) Refresh() {
 //
 // Since: 2.5
 func (w *BaseWidget) Theme() fyne.Theme {
-	return w.themeWithLock()
-}
-
-func (w *BaseWidget) themeWithLock() fyne.Theme {
 	cached := w.themeCache
-	if cached == nil {
-		cached = cache.WidgetTheme(w.super())
-		// don't cache the default as it may change
-		if cached == nil {
-			return theme.Current()
-		}
-
-		w.themeCache = cached
+	if cached != nil {
+		return cached
 	}
 
+	cached = cache.WidgetTheme(w.super())
+	// don't cache the default as it may change
+	if cached == nil {
+		return theme.Current()
+	}
+
+	w.themeCache = cached
 	return cached
 }
 
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is nil.
 func (w *BaseWidget) super() fyne.Widget {
-	impl := w.impl.Load()
-	if impl == nil {
-		return nil
-	}
-
-	return *impl
+	return w.impl
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
@@ -165,14 +152,16 @@ func (w *BaseWidget) super() fyne.Widget {
 type DisableableWidget struct {
 	BaseWidget
 
-	disabled atomic.Bool
+	disabled bool
 }
 
 // Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
-	if !w.disabled.CompareAndSwap(true, false) {
+	if !w.Disabled() {
 		return // Enabled already
 	}
+
+	w.disabled = false
 
 	impl := w.super()
 	if impl == nil {
@@ -183,9 +172,11 @@ func (w *DisableableWidget) Enable() {
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
-	if !w.disabled.CompareAndSwap(false, true) {
+	if w.Disabled() {
 		return // Disabled already
 	}
+
+	w.disabled = true
 
 	impl := w.super()
 	if impl == nil {
@@ -196,7 +187,7 @@ func (w *DisableableWidget) Disable() {
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
-	return w.disabled.Load()
+	return w.disabled
 }
 
 // NewSimpleRenderer creates a new SimpleRenderer to render a widget using a
