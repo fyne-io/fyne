@@ -59,8 +59,7 @@ type ExternalBytes interface {
 //
 // Since: 2.2
 func NewBytes() Bytes {
-	var blank []byte = nil
-	return &boundBytes{val: &blank}
+	return &boundBytes{val: new([]byte)}
 }
 
 // BindBytes returns a new bindable value that controls the contents of the provided []byte variable.
@@ -69,8 +68,7 @@ func NewBytes() Bytes {
 // Since: 2.2
 func BindBytes(v *[]byte) ExternalBytes {
 	if v == nil {
-		var blank []byte = nil
-		v = &blank // never allow a nil value pointer
+		v = new([]byte) // never allow a nil value pointer
 	}
 	b := &boundExternalBytes{}
 	b.val = v
@@ -280,8 +278,7 @@ type ExternalURI interface {
 //
 // Since: 2.1
 func NewURI() URI {
-	var blank fyne.URI = fyne.URI(nil)
-	return &boundURI{val: &blank}
+	return &boundURI{val: new(fyne.URI)}
 }
 
 // BindURI returns a new bindable value that controls the contents of the provided fyne.URI variable.
@@ -290,8 +287,7 @@ func NewURI() URI {
 // Since: 2.1
 func BindURI(v *fyne.URI) ExternalURI {
 	if v == nil {
-		var blank fyne.URI = fyne.URI(nil)
-		v = &blank // never allow a nil value pointer
+		v = new(fyne.URI)
 	}
 	b := &boundExternalURI{}
 	b.val = v
