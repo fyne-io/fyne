@@ -94,14 +94,13 @@ func (b *boundBytes) Get() ([]byte, error) {
 
 func (b *boundBytes) Set(val []byte) error {
 	b.lock.Lock()
-	if bytes.Equal(*b.val, val) {
-		b.lock.Unlock()
-		return nil
-	}
+	equal := bytes.Equal(*b.val, val)
 	*b.val = val
 	b.lock.Unlock()
 
-	b.trigger()
+	if !equal {
+		b.trigger()
+	}
 	return nil
 }
 
@@ -313,14 +312,13 @@ func (b *boundURI) Get() (fyne.URI, error) {
 
 func (b *boundURI) Set(val fyne.URI) error {
 	b.lock.Lock()
-	if compareURI(*b.val, val) {
-		b.lock.Unlock()
-		return nil
-	}
+	equal := compareURI(*b.val, val)
 	*b.val = val
 	b.lock.Unlock()
 
-	b.trigger()
+	if !equal {
+		b.trigger()
+	}
 	return nil
 }
 
