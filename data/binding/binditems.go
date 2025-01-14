@@ -1,6 +1,3 @@
-// auto-generated
-// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
-
 package binding
 
 import (
@@ -30,8 +27,7 @@ type ExternalBool interface {
 //
 // Since: 2.0
 func NewBool() Bool {
-	var blank bool = false
-	return &boundBool{val: &blank}
+	return newBaseItem[bool]()
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -39,67 +35,7 @@ func NewBool() Bool {
 //
 // Since: 2.0
 func BindBool(v *bool) ExternalBool {
-	if v == nil {
-		var blank bool = false
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternalBool{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundBool struct {
-	base
-
-	val *bool
-}
-
-func (b *boundBool) Get() (bool, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return false, nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundBool) Set(val bool) error {
-	b.lock.Lock()
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalBool struct {
-	boundBool
-
-	old bool
-}
-
-func (b *boundExternalBool) Set(val bool) error {
-	b.lock.Lock()
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalBool) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v)
 }
 
 // Bytes supports binding a []byte value.
@@ -216,8 +152,7 @@ type ExternalFloat interface {
 //
 // Since: 2.0
 func NewFloat() Float {
-	var blank float64 = 0.0
-	return &boundFloat{val: &blank}
+	return newBaseItem[float64]()
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -225,67 +160,7 @@ func NewFloat() Float {
 //
 // Since: 2.0
 func BindFloat(v *float64) ExternalFloat {
-	if v == nil {
-		var blank float64 = 0.0
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternalFloat{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundFloat struct {
-	base
-
-	val *float64
-}
-
-func (b *boundFloat) Get() (float64, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return 0.0, nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundFloat) Set(val float64) error {
-	b.lock.Lock()
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalFloat struct {
-	boundFloat
-
-	old float64
-}
-
-func (b *boundExternalFloat) Set(val float64) error {
-	b.lock.Lock()
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalFloat) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v)
 }
 
 // Int supports binding a int value.
@@ -309,8 +184,7 @@ type ExternalInt interface {
 //
 // Since: 2.0
 func NewInt() Int {
-	var blank int = 0
-	return &boundInt{val: &blank}
+	return newBaseItem[int]()
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -318,67 +192,7 @@ func NewInt() Int {
 //
 // Since: 2.0
 func BindInt(v *int) ExternalInt {
-	if v == nil {
-		var blank int = 0
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternalInt{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundInt struct {
-	base
-
-	val *int
-}
-
-func (b *boundInt) Get() (int, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return 0, nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundInt) Set(val int) error {
-	b.lock.Lock()
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalInt struct {
-	boundInt
-
-	old int
-}
-
-func (b *boundExternalInt) Set(val int) error {
-	b.lock.Lock()
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalInt) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v)
 }
 
 // Rune supports binding a rune value.
@@ -402,8 +216,7 @@ type ExternalRune interface {
 //
 // Since: 2.0
 func NewRune() Rune {
-	var blank rune = rune(0)
-	return &boundRune{val: &blank}
+	return newBaseItem[rune]()
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -411,67 +224,7 @@ func NewRune() Rune {
 //
 // Since: 2.0
 func BindRune(v *rune) ExternalRune {
-	if v == nil {
-		var blank rune = rune(0)
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternalRune{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundRune struct {
-	base
-
-	val *rune
-}
-
-func (b *boundRune) Get() (rune, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return rune(0), nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundRune) Set(val rune) error {
-	b.lock.Lock()
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalRune struct {
-	boundRune
-
-	old rune
-}
-
-func (b *boundExternalRune) Set(val rune) error {
-	b.lock.Lock()
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalRune) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v)
 }
 
 // String supports binding a string value.
@@ -495,8 +248,7 @@ type ExternalString interface {
 //
 // Since: 2.0
 func NewString() String {
-	var blank string = ""
-	return &boundString{val: &blank}
+	return newBaseItem[string]()
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -504,67 +256,7 @@ func NewString() String {
 //
 // Since: 2.0
 func BindString(v *string) ExternalString {
-	if v == nil {
-		var blank string = ""
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternalString{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundString struct {
-	base
-
-	val *string
-}
-
-func (b *boundString) Get() (string, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return "", nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundString) Set(val string) error {
-	b.lock.Lock()
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternalString struct {
-	boundString
-
-	old string
-}
-
-func (b *boundExternalString) Set(val string) error {
-	b.lock.Lock()
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalString) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v)
 }
 
 // URI supports binding a fyne.URI value.
