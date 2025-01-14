@@ -2,8 +2,6 @@ package binding
 
 import (
 	"sync/atomic"
-
-	"fyne.io/fyne/v2"
 )
 
 func newBaseItem[T bool | float64 | int | rune | string]() *baseItem[T] {
@@ -71,33 +69,6 @@ func (b *baseExternalItem[T]) Set(val T) error {
 
 func (b *baseExternalItem[T]) Reload() error {
 	return b.Set(*b.val)
-}
-
-func lookupExistingBinding(key string, p fyne.Preferences) (preferenceItem, bool) {
-	binds := prefBinds.getBindings(p)
-	if binds == nil {
-		return nil, false
-	}
-
-	if listen, ok := binds.Load(key); listen != nil && ok {
-		return listen, true
-	}
-
-	return nil, false
-}
-
-type prefBoundItem interface {
-	preferenceItem
-	setKey(string)
-	replaceProvider(fyne.Preferences)
-}
-
-func setupPrefItem(listen prefBoundItem, key string, p fyne.Preferences) preferenceItem {
-	listen.setKey(key)
-	listen.replaceProvider(p)
-	binds := prefBinds.ensurePreferencesAttached(p)
-	binds.Store(key, listen)
-	return listen
 }
 
 type prefBoundBase[T bool | float64 | int | string] struct {
