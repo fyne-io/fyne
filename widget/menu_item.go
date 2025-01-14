@@ -121,11 +121,8 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Disabled {
 		return
 	}
-	if i.Item.Action == nil {
-		if fyne.CurrentDevice().IsMobile() {
-			i.activate()
-		}
-		return
+	if fyne.CurrentDevice().IsMobile() {
+		i.activate()
 	}
 
 	i.trigger()
@@ -180,7 +177,9 @@ func (i *menuItem) isSubmenuOpen() bool {
 }
 
 func (i *menuItem) trigger() {
-	i.parent.Dismiss()
+	if i.Item.ChildMenu == nil {
+		i.parent.Dismiss()
+	}
 	if i.Item.Action != nil {
 		i.Item.Action()
 	}
