@@ -11,63 +11,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-const prefTemplate = `
-type prefBound{{ .Name }} struct {
-	base
-	key   string
-	p     fyne.Preferences
-	cache atomic.Pointer[{{ .Type }}]
-}
-
-// BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
-// Changes to this value will be saved to application storage and when the app starts the previous values will be read.
-//
-// Since: {{ .Since }}
-func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	binds := prefBinds.getBindings(p)
-	if binds != nil {
-		if listen, ok := binds.Load(key); listen != nil && ok {
-			if l, ok := listen.({{ .Name }}); ok {
-				return l
-			}
-			fyne.LogError(keyTypeMismatchError+key, nil)
-		}
-	}
-
-	listen := &prefBound{{ .Name }}{key: key, p: p}
-	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.Store(key, listen)
-	return listen
-}
-
-func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
-	cache := b.p.{{ .Name }}(b.key)
-	b.cache.Store(&cache)
-	return cache, nil
-}
-
-func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
-	b.p.Set{{ .Name }}(b.key, v)
-
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-	b.trigger()
-	return nil
-}
-
-func (b *prefBound{{ .Name }}) checkForChange() {
-	val := b.cache.Load()
-	if val != nil && b.p.{{ .Name }}(b.key) == *val {
-		return
-	}
-	b.trigger()
-}
-
-func (b *prefBound{{ .Name }}) replaceProvider(p fyne.Preferences) {
-	b.p = p
-}
-`
-
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
@@ -1045,20 +988,6 @@ func internalIntToFloat(val int) (float64, error) {
 	return float64(val), nil
 }
 `)
-	prefFile, err := newFile("preference")
-	if err != nil {
-		return
-	}
-	defer prefFile.Close()
-	prefFile.WriteString(`
-import (
-	"sync/atomic"
-
-	"fyne.io/fyne/v2"
-)
-
-const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
-`)
 
 	listFile, err := newFile("bindlists")
 	if err != nil {
@@ -1090,7 +1019,6 @@ import (
 	fromInt := template.Must(template.New("fromInt").Parse(fromIntTemplate))
 	toInt := template.Must(template.New("toInt").Parse(toIntTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
-	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	list := template.Must(template.New("list").Parse(listBindTemplate))
 	tree := template.Must(template.New("tree").Parse(treeBindTemplate))
 	binds := []bindValues{
@@ -1115,9 +1043,6 @@ import (
 			continue // any is special, we have it in binding.go instead
 		}
 
-		if b.SupportsPreferences {
-			writeFile(prefFile, preference, b)
-		}
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}

@@ -1,5 +1,11 @@
 package binding
 
+import (
+	"sync/atomic"
+
+	"fyne.io/fyne/v2"
+)
+
 func newBaseItem[T bool | float64 | int | rune | string]() *baseItem[T] {
 	return &baseItem[T]{val: new(T)}
 }
@@ -65,4 +71,66 @@ func (b *baseExternalItem[T]) Set(val T) error {
 
 func (b *baseExternalItem[T]) Reload() error {
 	return b.Set(*b.val)
+}
+
+func lookupExistingBinding(key string, p fyne.Preferences) (preferenceItem, bool) {
+	binds := prefBinds.getBindings(p)
+	if binds == nil {
+		return nil, false
+	}
+
+	if listen, ok := binds.Load(key); listen != nil && ok {
+		return listen, true
+	}
+
+	return nil, false
+}
+
+type prefBoundItem interface {
+	preferenceItem
+	setKey(string)
+	replaceProvider(fyne.Preferences)
+}
+
+func setupPrefItem(listen prefBoundItem, key string, p fyne.Preferences) preferenceItem {
+	listen.setKey(key)
+	listen.replaceProvider(p)
+	binds := prefBinds.ensurePreferencesAttached(p)
+	binds.Store(key, listen)
+	return listen
+}
+
+type prefBoundBase[T bool | float64 | int | string] struct {
+	base
+	key   string
+	get   func(string) T
+	set   func(string, T)
+	cache atomic.Pointer[T]
+}
+
+func (b *prefBoundBase[T]) Get() (T, error) {
+	cache := b.get(b.key)
+	b.cache.Store(&cache)
+	return cache, nil
+}
+
+func (b *prefBoundBase[T]) Set(v T) error {
+	b.set(b.key, v)
+
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	b.trigger()
+	return nil
+}
+
+func (b *prefBoundBase[T]) setKey(key string) {
+	b.key = key
+}
+
+func (b *prefBoundBase[T]) checkForChange() {
+	val := b.cache.Load()
+	if val != nil && b.get(b.key) == *val {
+		return
+	}
+	b.trigger()
 }
