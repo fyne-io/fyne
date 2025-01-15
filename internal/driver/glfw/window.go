@@ -868,9 +868,12 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 	w.pending = append(w.pending, fn)
 }
 
-func (d *gLDriver) CreateWindow(title string) fyne.Window {
+func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
 	if runtime.GOOS != "js" {
-		return d.createWindow(title, true)
+		async.EnsureMain(func() {
+			win = d.createWindow(title, true)
+		})
+		return win
 	}
 
 	// handling multiple windows by overlaying on the root for web
