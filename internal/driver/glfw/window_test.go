@@ -1242,13 +1242,22 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	})
 	<-waitSingleTapped
 
+	time.Sleep(d.DoubleTapDelay()) // reset
+
 	runOnMain(func() {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+		time.Sleep(time.Millisecond * 100)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	})
-	<-waitDoubleTapped
+
+	mustBeBefore := time.NewTimer(d.DoubleTapDelay())
+	select {
+	case <-waitDoubleTapped:
+	case <-mustBeBefore.C:
+		t.Error("Double tap took too long")
+	}
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
