@@ -1,0 +1,45 @@
+<canvas padded size="150x200">
+	<content>
+		<container pos="4,4" size="142x192">
+			<widget pos="7,78" size="127x35" type="*widget.Select">
+				<rectangle fillColor="inputBackground" radius="4" size="127x35"/>
+				<rectangle size="127x35"/>
+				<widget pos="4,4" size="95x27" type="*widget.RichText">
+					<text pos="4,4" size="75x19">(Select one)</text>
+				</widget>
+				<widget pos="99,7" size="20x20" type="*widget.Icon">
+					<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+				</widget>
+			</widget>
+		</container>
+	</content>
+	<overlay>
+		<widget pos="2,3" size="150x200" type="*widget.OverlayContainer">
+			<widget pos="9,112" size="127x74" type="*widget.PopUpMenu">
+				<widget size="127x74" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-4" size="127x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="127,-4" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="127,0" size="4x74" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="127,74" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,74" size="127x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-4,74" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x74"/>
+				</widget>
+				<widget size="127x74" type="*widget.Scroll">
+					<widget size="127x74" type="*widget.menuBox">
+						<rectangle fillColor="menuBackground" size="127x74"/>
+						<container size="127x74">
+							<widget size="127x35" type="*widget.menuItem">
+								<text pos="8,8" size="111x19">Foo</text>
+							</widget>
+							<widget pos="0,39" size="127x35" type="*widget.menuItem">
+								<text pos="8,8" size="111x19">Bar</text>
+							</widget>
+						</container>
+					</widget>
+				</widget>
+			</widget>
+		</widget>
+	</overlay>
+</canvas>

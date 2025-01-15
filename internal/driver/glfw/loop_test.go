@@ -20,12 +20,12 @@ func BenchmarkRunOnMain(b *testing.B) {
 // on the draw thread.
 func BenchmarkRunOnDraw(b *testing.B) {
 	f := func() {}
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 	w.create()
 
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		runOnDraw(w, f)
+		w.RunWithContext(f)
 	}
 }

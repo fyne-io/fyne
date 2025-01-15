@@ -8,17 +8,16 @@ import (
 
 func TestTreeBase_AddListener(t *testing.T) {
 	data := newSimpleTree()
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, data.listeners.Len())
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
+	assert.Equal(t, 1, data.listeners.Len())
 
 	data.trigger()
-	waitForItems()
 	assert.True(t, called)
 }
 
@@ -55,12 +54,11 @@ func TestTreeBase_RemoveListener(t *testing.T) {
 	data := newSimpleTree()
 	data.listeners.Store(fn, true)
 
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
+	assert.Equal(t, 1, data.listeners.Len())
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, data.listeners.Len())
 
 	data.trigger()
-	waitForItems()
 	assert.False(t, called)
 }
 

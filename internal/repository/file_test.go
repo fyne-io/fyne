@@ -41,16 +41,12 @@ func TestFileRepositoryRegistration(t *testing.T) {
 }
 
 func TestFileRepositoryExists(t *testing.T) {
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	existsPath := path.Join(dir, "exists")
 	notExistsPath := path.Join(dir, "notExists")
 
-	err = os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
+	err := os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,18 +61,13 @@ func TestFileRepositoryExists(t *testing.T) {
 }
 
 func TestFileRepositoryReader(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,6 +91,7 @@ func TestFileRepositoryReader(t *testing.T) {
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
 	assert.Nil(t, err)
+	fooReader.Close()
 
 	// Make sure we can read the file with data.
 	barReader, err := storage.Reader(bar)
@@ -107,10 +99,12 @@ func TestFileRepositoryReader(t *testing.T) {
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
 	assert.Nil(t, err)
+	barReader.Close()
 
 	// Make sure we get an error if the file doesn't exist.
-	_, err = storage.Reader(baz)
+	bazReader, err := storage.Reader(baz)
 	assert.NotNil(t, err)
+	bazReader.Close()
 
 	// Also test that CanRead returns the expected results.
 	fooCanRead, err := storage.CanRead(foo)
@@ -127,19 +121,14 @@ func TestFileRepositoryReader(t *testing.T) {
 }
 
 func TestFileRepositoryWriter(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
 	spamHamPath := path.Join(dir, "spam", "ham")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,6 +187,14 @@ func TestFileRepositoryWriter(t *testing.T) {
 	barWriter.Close()
 	bazWriter.Close()
 
+	bazAppender, err := storage.Appender(baz)
+	assert.Nil(t, err)
+	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
+	assert.Nil(t, err)
+	assert.Equal(t, 5, n)
+
+	bazAppender.Close()
+
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
@@ -214,7 +211,7 @@ func TestFileRepositoryWriter(t *testing.T) {
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
 	bazData, err := io.ReadAll(bazReader)
-	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
+	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
 	assert.Nil(t, err)
 
 	// close the readers, since Windows won't let us delete things with
@@ -247,18 +244,13 @@ func TestFileRepositoryWriter(t *testing.T) {
 }
 
 func TestFileRepositoryCanWrite(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err = os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,17 +357,12 @@ func TestFileRepositoryChild(t *testing.T) {
 }
 
 func TestFileRepositoryCopy(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -396,17 +383,12 @@ func TestFileRepositoryCopy(t *testing.T) {
 }
 
 func TestFileRepositoryMove(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err = os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -429,12 +411,7 @@ func TestFileRepositoryMove(t *testing.T) {
 }
 
 func TestFileRepositoryListing(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	// Create some files to tests with.
 	fooPath := path.Join(dir, "foo")
@@ -466,12 +443,7 @@ func TestFileRepositoryListing(t *testing.T) {
 }
 
 func TestFileRepositoryCreateListable(t *testing.T) {
-	// Set up a temporary directory.
-	dir, err := os.MkdirTemp("", "FyneInternalRepositoryFileTest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 
 	f := NewFileRepository()
 	repository.Register("file", f)
@@ -482,7 +454,7 @@ func TestFileRepositoryCreateListable(t *testing.T) {
 	fooBar := storage.NewFileURI(fooBarPath)
 
 	// Creating a dir with no parent should fail
-	err = storage.CreateListable(fooBar)
+	err := storage.CreateListable(fooBar)
 	assert.NotNil(t, err)
 
 	// Creating foo should work though

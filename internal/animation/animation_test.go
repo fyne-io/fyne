@@ -12,6 +12,11 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+func tick(run *Runner) {
+	time.Sleep(time.Millisecond * 5) // wait long enough that we are not at 0 time
+	run.TickAnimations()
+}
+
 func TestGLDriver_StartAnimation(t *testing.T) {
 	done := make(chan float32)
 	run := &Runner{}
@@ -22,6 +27,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	select {
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
@@ -40,6 +46,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	select {
 	case d := <-done:
 		assert.Greater(t, d, float32(0))
@@ -47,11 +54,9 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	run.Stop(a)
-	// Animations are really stopped asynchronously
-	time.Sleep(time.Second/60 + 100*time.Millisecond)
-	run.animationMutex.Lock()
+	run.animationMutex.RLock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.Unlock()
+	run.animationMutex.RUnlock()
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
@@ -65,7 +70,11 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Tick:     func(f float32) {},
 	}
 	run.Start(a)
+	go tick(run) // simulate a graphics draw loop
 	run.Stop(a)
+
+	run = &Runner{}
+	wg = sync.WaitGroup{}
 
 	// stopping animation inside tick function
 	for i := 0; i < 10; i++ {
@@ -80,6 +89,9 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		run.Start(b)
 	}
 
+	run = &Runner{}
+	wg = sync.WaitGroup{}
+
 	// Similar to first part, but in this time this animation should be added and then removed
 	// from pendingAnimation slice.
 	c := &fyne.Animation{
@@ -87,12 +99,15 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		Tick:     func(f float32) {},
 	}
 	run.Start(c)
+	tick(run) // simulate a graphics draw loop
+
 	run.Stop(c)
+	tick(run) // simulate a graphics draw loop
 
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
 	time.Sleep(time.Second/60 + 100*time.Millisecond)
-	run.animationMutex.Lock()
+	run.animationMutex.RLock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.Unlock()
+	run.animationMutex.RUnlock()
 }

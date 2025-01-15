@@ -6,10 +6,12 @@
 					<widget size="192x35" type="*widget.branch">
 						<rectangle fillColor="selection" radius="4" size="192x35"/>
 						<widget pos="28,0" size="164x35" type="*widget.Label">
-							<text pos="8,8" size="8x19">A</text>
+							<widget size="164x35" type="*widget.RichText">
+								<text pos="8,8" size="8x19">A</text>
+							</widget>
 						</widget>
 						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="navigateNextIcon" size="20x35"/>
+							<image fillMode="contain" rsc="navigateNextIcon" size="20x35" themed="foreground"/>
 						</widget>
 					</widget>
 				</widget>

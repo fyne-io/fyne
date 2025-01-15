@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
-	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/test"
 )
 
 func TestDummyApp(t *testing.T) {
@@ -36,7 +36,7 @@ func TestFyneApp_UniqueID(t *testing.T) {
 func TestFyneApp_SetIcon(t *testing.T) {
 	app := NewWithID("io.fyne.test")
 
-	metaIcon := &fyne.StaticResource{StaticName: "Metadata"}
+	metaIcon := &fyne.StaticResource{StaticName: "Metadata", StaticContent: []byte("?PNG...")}
 	SetMetadata(fyne.AppMetadata{
 		Icon: metaIcon,
 	})
@@ -47,4 +47,27 @@ func TestFyneApp_SetIcon(t *testing.T) {
 	app.SetIcon(setIcon)
 
 	assert.Equal(t, setIcon, app.Icon())
+}
+
+func TestFynaApp_Clipboard(t *testing.T) {
+	app := test.NewTempApp(t)
+	test.NewTempWindow(t, nil)
+
+	text := "My content from test window"
+	cb := app.Clipboard()
+
+	cliboardContent := cb.Content()
+	if cliboardContent != "" {
+		// Current environment has some content stored in clipboard,
+		// set temporary to an empty string to allow test and restore later.
+		cb.SetContent("")
+	}
+
+	assert.Empty(t, cb.Content())
+
+	cb.SetContent(text)
+	assert.Equal(t, text, cb.Content())
+
+	// Restore clipboardContent, if any
+	cb.SetContent(cliboardContent)
 }

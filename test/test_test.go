@@ -1,8 +1,10 @@
 package test_test
 
 import (
+	"bytes"
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,6 +41,18 @@ func TestAssertObjectRendersToImage(t *testing.T) {
 	test.AssertObjectRendersToImage(t, "circle.png", obj)
 }
 
+func TestRenderObjectToMarkup(t *testing.T) {
+	obj := canvas.NewCircle(color.Black)
+	obj.Resize(fyne.NewSize(20, 20))
+
+	want, err := os.ReadFile("testdata/circle.xml")
+	require.NoError(t, err)
+	// Fix Windows newlines
+	want = bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n"))
+	got := strings.ReplaceAll(test.RenderObjectToMarkup(obj), "\r\n", "\n")
+	assert.Equal(t, string(want), got, "existing master is equal to rendered markup")
+}
+
 func TestAssertObjectRendersToMarkup(t *testing.T) {
 	obj := canvas.NewCircle(color.Black)
 	obj.Resize(fyne.NewSize(20, 20))
@@ -56,7 +70,7 @@ func TestAssertRendersToImage(t *testing.T) {
 		assert.False(t, test.AssertRendersToImage(tt, "non_existing_master.png", c), "non existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test failed")
 		_, err := os.Stat("testdata/failed/non_existing_master.png")
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("matching master", func(t *testing.T) {
@@ -74,12 +88,24 @@ func TestAssertRendersToImage(t *testing.T) {
 		assert.False(t, test.AssertRendersToImage(tt, "image_diffing_master.png", c), "existing master is not equal to rendered image")
 		assert.True(t, tt.Failed(), "test should fail")
 		_, err := os.Stat("testdata/failed/image_diffing_master.png")
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	})
 
 	if !t.Failed() {
 		_ = os.RemoveAll("testdata/failed")
 	}
+}
+
+func TestRenderToMarkup(t *testing.T) {
+	c := test.NewCanvas()
+	c.SetContent(canvas.NewCircle(color.Black))
+
+	want, err := os.ReadFile("testdata/markup_master.xml")
+	require.NoError(t, err)
+	// Fix Windows newlines
+	want = bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n"))
+	got := strings.ReplaceAll(test.RenderToMarkup(c), "\r\n", "\n")
+	assert.Equal(t, string(want), got, "existing master is equal to rendered markup")
 }
 
 func TestAssertRendersToMarkup(t *testing.T) {

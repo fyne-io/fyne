@@ -19,22 +19,14 @@ type funcData struct {
 	done chan struct{} // Zero allocation signalling channel
 }
 
-type drawData struct {
-	f    func()
-	win  *window
-	done chan struct{} // Zero allocation signalling channel
-}
-
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
-var drawFuncQueue = make(chan drawData)
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
-	mainGoroutineID = goroutineID()
 }
 
 // force a function f to run on the main thread
@@ -46,24 +38,11 @@ func runOnMain(f func()) {
 		return
 	}
 
-	done := common.DonePool.Get().(chan struct{})
+	done := common.DonePool.Get()
 	defer common.DonePool.Put(done)
 
 	funcQueue <- funcData{f: f, done: done}
 
-	<-done
-}
-
-// force a function f to run on the draw thread
-func runOnDraw(w *window, f func()) {
-	if drawOnMainThread {
-		runOnMain(func() { w.RunWithContext(f) })
-		return
-	}
-	done := common.DonePool.Get().(chan struct{})
-	defer common.DonePool.Put(done)
-
-	drawFuncQueue <- drawData{f: f, win: w, done: done}
 	<-done
 }
 
@@ -78,11 +57,9 @@ var refreshingCanvases []fyne.Canvas
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
 		w := win.(*window)
-		w.viewLock.RLock()
 		canvas := w.canvas
 		closing := w.closing
 		visible := w.visible
-		w.viewLock.RUnlock()
 
 		// CheckDirtyAndClear must be checked after visibility,
 		// because when a window becomes visible, it could be
@@ -108,31 +85,34 @@ func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
 	}
-	close(d.waitForStart) // Signal that execution can continue.
 
 	d.initGLFW()
 	if d.trayStart != nil {
 		d.trayStart()
 	}
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
-		go f() // don't block main, we don't have window event queue
+		f()
 	}
+
+	settingsChange := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
 		case <-d.done:
 			eventTick.Stop()
-			d.drawDone <- struct{}{} // wait for draw thread to stop
 			d.Terminate()
-			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStopped(); f != nil {
-				go f() // don't block main, we don't have window event queue
+			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+			if f := l.OnStopped(); f != nil {
+				l.QueueEvent(f)
 			}
 			return
 		case f := <-funcQueue:
 			f.f()
 			f.done <- struct{}{}
 		case <-eventTick.C:
-			d.tryPollEvents()
+			d.pollEvents()
 			windowsToRemove := 0
 			for _, win := range d.windowList() {
 				w := win.(*window)
@@ -145,26 +125,22 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				w.viewLock.RLock()
 				expand := w.shouldExpand
 				fullScreen := w.fullScreen
-				w.viewLock.RUnlock()
 
 				if expand && !fullScreen {
 					w.fitContent()
-					w.viewLock.Lock()
 					shouldExpand := w.shouldExpand
 					w.shouldExpand = false
 					view := w.viewport
-					w.viewLock.Unlock()
-					if shouldExpand {
+
+					if shouldExpand && runtime.GOOS != "js" {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}
 
-				if drawOnMainThread {
-					d.drawSingleFrame()
-				}
+				d.animation.TickAnimations()
+				d.drawSingleFrame()
 			}
 			if windowsToRemove > 0 {
 				oldWindows := d.windowList()
@@ -177,10 +153,8 @@ func (d *gLDriver) runGL() {
 					}
 
 					if w.viewport.ShouldClose() {
-						w.viewLock.Lock()
 						w.visible = false
 						v := w.viewport
-						w.viewLock.Unlock()
 
 						// remove window from window list
 						v.Destroy()
@@ -191,14 +165,24 @@ func (d *gLDriver) runGL() {
 					newWindows = append(newWindows, win)
 				}
 
-				d.windowLock.Lock()
 				d.windows = newWindows
-				d.windowLock.Unlock()
 
 				if len(newWindows) == 0 {
 					d.Quit()
 				}
 			}
+		case set := <-settingsChange:
+			painter.ClearFontCache()
+			cache.ResetThemeCaches()
+			app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+				c, ok := w.Canvas().(*glCanvas)
+				if !ok {
+					return
+				}
+				c.applyThemeOutOfTreeObjects()
+				c.reloadScale()
+			})
+
 		}
 	}
 }
@@ -207,62 +191,20 @@ func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
 		if canvas.EnsureMinSize() {
-			w.viewLock.Lock()
 			w.shouldExpand = true
-			w.viewLock.Unlock()
 		}
 		canvas.FreeDirtyTextures()
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
 
-		w.viewLock.RLock()
 		view := w.viewport
 		visible := w.visible
-		w.viewLock.RUnlock()
 
 		if view != nil && visible {
 			view.SwapBuffers()
 		}
 	})
-}
-
-func (d *gLDriver) startDrawThread() {
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	var drawCh <-chan time.Time
-	if drawOnMainThread {
-		drawCh = make(chan time.Time) // don't tick when on M1
-	} else {
-		drawCh = time.NewTicker(time.Second / 60).C
-	}
-
-	go func() {
-		runtime.LockOSThread()
-
-		for {
-			select {
-			case <-d.drawDone:
-				return
-			case f := <-drawFuncQueue:
-				f.win.RunWithContext(f.f)
-				f.done <- struct{}{}
-			case set := <-settingsChange:
-				painter.ClearFontCache()
-				cache.ResetThemeCaches()
-				app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-					c, ok := w.Canvas().(*glCanvas)
-					if !ok {
-						return
-					}
-					c.applyThemeOutOfTreeObjects()
-					go c.reloadScale()
-				})
-			case <-drawCh:
-				d.drawSingleFrame()
-			}
-		}
-	}()
 }
 
 // refreshWindow requests that the specified window be redrawn

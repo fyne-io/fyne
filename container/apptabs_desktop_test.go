@@ -16,51 +16,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func TestAppTabs_ApplyTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-
-	w := test.NewWindow(
-		container.NewAppTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
-	)
-	defer w.Close()
-	w.SetPadded(false)
-	w.Resize(fyne.NewSize(150, 150))
-	c := w.Canvas()
-
-	test.AssertRendersToImage(t, "apptabs/desktop/single_initial.png", c)
-
-	test.ApplyTheme(t, test.NewTheme())
-	test.AssertRendersToImage(t, "apptabs/desktop/single_custom_theme.png", c)
-}
-
-func TestAppTabs_ChangeItemContent(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-
-	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
-	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
-	tabs := container.NewAppTabs(item1, item2)
-	w := test.NewWindow(tabs)
-	defer w.Close()
-	w.SetPadded(false)
-	w.Resize(fyne.NewSize(150, 150))
-	c := w.Canvas()
-
-	test.AssertRendersToMarkup(t, "apptabs/desktop/change_content_initial.xml", c)
-
-	item1.Content = widget.NewLabel("Text3")
-	tabs.Refresh()
-	test.AssertRendersToMarkup(t, "apptabs/desktop/change_content_change_visible.xml", c)
-
-	item2.Content = widget.NewLabel("Text4")
-	tabs.Refresh()
-	test.AssertRendersToMarkup(t, "apptabs/desktop/change_content_change_hidden.xml", c)
-}
-
 func TestAppTabs_ChangeItemIcon(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
@@ -83,8 +40,7 @@ func TestAppTabs_ChangeItemIcon(t *testing.T) {
 }
 
 func TestAppTabs_ChangeItemText(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -107,8 +63,7 @@ func TestAppTabs_ChangeItemText(t *testing.T) {
 }
 
 func TestAppTabs_DynamicTabs(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	tabs := container.NewAppTabs(item1)
@@ -137,9 +92,9 @@ func TestAppTabs_DynamicTabs(t *testing.T) {
 	assert.Equal(t, "Test2", tabs.Items[0].Text)
 	test.AssertRendersToMarkup(t, "apptabs/desktop/dynamic_appended_and_removed.xml", c)
 
-	tabs.Append(container.NewTabItem("Test3", canvas.NewCircle(theme.BackgroundColor())))
-	tabs.Append(container.NewTabItem("Test4", canvas.NewCircle(theme.BackgroundColor())))
-	tabs.Append(container.NewTabItem("Test5", canvas.NewCircle(theme.BackgroundColor())))
+	tabs.Append(container.NewTabItem("Test3", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
+	tabs.Append(container.NewTabItem("Test4", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
+	tabs.Append(container.NewTabItem("Test5", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
 	assert.Equal(t, 4, len(tabs.Items))
 	assert.Equal(t, "Test3", tabs.Items[1].Text)
 	assert.Equal(t, "Test4", tabs.Items[2].Text)
@@ -159,8 +114,7 @@ func TestAppTabs_DynamicTabs(t *testing.T) {
 }
 
 func TestAppTabs_HoverButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -190,8 +144,7 @@ func TestAppTabs_HoverButtons(t *testing.T) {
 }
 
 func TestAppTabs_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(nil)
 	defer w.Close()
@@ -206,73 +159,73 @@ func TestAppTabs_Layout(t *testing.T) {
 	}{
 		{
 			name:     "top: tab with icon and text",
-			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTop,
 			want:     "apptabs/desktop/layout_top_icon_and_text.xml",
 		},
 		{
 			name:     "top: tab with text only",
-			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTop,
 			want:     "apptabs/desktop/layout_top_text.xml",
 		},
 		{
 			name:     "top: tab with icon only",
-			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTop,
 			want:     "apptabs/desktop/layout_top_icon.xml",
 		},
 		{
 			name:     "bottom: tab with icon and text",
-			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationBottom,
 			want:     "apptabs/desktop/layout_bottom_icon_and_text.xml",
 		},
 		{
 			name:     "bottom: tab with text only",
-			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationBottom,
 			want:     "apptabs/desktop/layout_bottom_text.xml",
 		},
 		{
 			name:     "bottom: tab with icon only",
-			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationBottom,
 			want:     "apptabs/desktop/layout_bottom_icon.xml",
 		},
 		{
 			name:     "leading: tab with icon and text",
-			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationLeading,
 			want:     "apptabs/desktop/layout_leading_icon_and_text.xml",
 		},
 		{
 			name:     "leading: tab with text only",
-			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationLeading,
 			want:     "apptabs/desktop/layout_leading_text.xml",
 		},
 		{
 			name:     "leading: tab with icon only",
-			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationLeading,
 			want:     "apptabs/desktop/layout_leading_icon.xml",
 		},
 		{
 			name:     "trailing: tab with icon and text",
-			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTrailing,
 			want:     "apptabs/desktop/layout_trailing_icon_and_text.xml",
 		},
 		{
 			name:     "trailing: tab with text only",
-			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItem("Text2", canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTrailing,
 			want:     "apptabs/desktop/layout_trailing_text.xml",
 		},
 		{
 			name:     "trailing: tab with icon only",
-			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			item:     container.NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.Color(theme.ColorNameBackground))),
 			location: container.TabLocationTrailing,
 			want:     "apptabs/desktop/layout_trailing_icon.xml",
 		},
@@ -290,8 +243,7 @@ func TestAppTabs_Layout(t *testing.T) {
 }
 
 func TestAppTabs_SetTabLocation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
@@ -323,8 +275,7 @@ func TestAppTabs_SetTabLocation(t *testing.T) {
 }
 
 func TestAppTabs_Tapped(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
@@ -355,4 +306,25 @@ func TestAppTabs_Tapped(t *testing.T) {
 
 	test.TapCanvas(c, fyne.NewPos(186, 10))
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs.xml", c)
+}
+
+func TestAppTabs_TappedAndDisabled(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
+	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
+	item3 := &container.TabItem{Text: "Test3", Content: widget.NewLabel("Text 3")}
+	tabs := container.NewAppTabs(item1, item2, item3)
+	tabs.DisableItem(item3)
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(200, 100))
+	c := w.Canvas()
+
+	tabs.Append(&container.TabItem{Text: "Test4", Content: widget.NewLabel("Text 4")})
+
+	test.TapCanvas(c, fyne.NewPos(186, 10))
+	test.AssertRendersToMarkup(t, "apptabs/desktop/tapped_overflow_tabs_disabled.xml", c)
 }

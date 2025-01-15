@@ -19,6 +19,7 @@ const fileSchemePrefix string = "file://"
 // declare conformance with repository types
 var _ repository.Repository = (*FileRepository)(nil)
 var _ repository.WritableRepository = (*FileRepository)(nil)
+var _ repository.AppendableRepository = (*FileRepository)(nil)
 var _ repository.HierarchicalRepository = (*FileRepository)(nil)
 var _ repository.ListableRepository = (*FileRepository)(nil)
 var _ repository.MovableRepository = (*FileRepository)(nil)
@@ -72,12 +73,16 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	return ok, err
 }
 
-func openFile(uri fyne.URI, create bool) (*file, error) {
+func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
 	path := uri.Path()
 	var f *os.File
 	var err error
-	if create {
-		f, err = os.Create(path) // If it exists this will truncate which is what we wanted
+	if write {
+		if truncate {
+			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
+		} else {
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+		}
 	} else {
 		f, err = os.Open(path)
 	}
@@ -88,7 +93,7 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	return openFile(u, false)
+	return openFile(u, false, false)
 }
 
 // CanRead implements repository.Repository.CanRead
@@ -123,7 +128,14 @@ func (r *FileRepository) Destroy(scheme string) {
 //
 // Since: 2.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return openFile(u, true)
+	return openFile(u, true, true)
+}
+
+// Appender implements repository.AppendableRepository.Appender
+//
+// Since: 2.6
+func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+	return openFile(u, true, false)
 }
 
 // CanWrite implements repository.WritableRepository.CanWrite
@@ -171,19 +183,18 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	// trim the scheme
 	s = strings.TrimPrefix(s, fileSchemePrefix)
 
-	// Completely empty URI with just a scheme
-	if s == "" {
+	// Completely empty URI or only root component
+	if s == "" || s == "/" || (len(s) == 2 && s[1] == ':') {
 		return nil, repository.ErrURIRoot
 	}
 
-	parent := ""
-	// use the system native path resolution
-	parent = filepath.Dir(s)
-	if parent[len(parent)-1] != filepath.Separator {
+	child := filepath.Base(s)
+	parent := s[:len(s)-len(child)] // avoid filepath.Dir as it follows platform rules
+	if parent == "" || parent[len(parent)-1] != '/' {
 		parent += "/"
 	}
 
-	// only root is it's own parent
+	// only root is its own parent
 	if filepath.Clean(parent) == filepath.Clean(s) {
 		return nil, repository.ErrURIRoot
 	}

@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 type DataItem interface {
 	// AddListener attaches a new change listener to this DataItem.
 	// Listeners are called each time the data inside this DataItem changes.
-	// Additionally the listener will be triggered upon successful connection to get the current value.
+	// Additionally, the listener will be triggered upon successful connection to get the current value.
 	AddListener(DataListener)
 	// RemoveListener will detach the specified change listener from the DataItem.
 	// Disconnected listener will no longer be triggered when changes occur.
@@ -57,7 +58,7 @@ func (l *listener) DataChanged() {
 }
 
 type base struct {
-	listeners sync.Map // map[DataListener]bool
+	listeners async.Map[DataListener, bool]
 
 	lock sync.RWMutex
 }
@@ -74,9 +75,16 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	b.listeners.Range(func(key, _ any) bool {
-		queueItem(key.(DataListener).DataChanged)
+	var listeners []DataListener
+	b.listeners.Range(func(listener DataListener, _ bool) bool {
+		listeners = append(listeners, listener)
 		return true
+	})
+
+	queueItem(func() {
+		for _, listen := range listeners {
+			listen.DataChanged()
+		}
 	})
 }
 
@@ -117,8 +125,12 @@ func (b *boundUntyped) Set(val any) error {
 	if b.val.Interface() == val {
 		return nil
 	}
-
-	b.val.Set(reflect.ValueOf(val))
+	if val == nil {
+		zeroValue := reflect.Zero(b.val.Type())
+		b.val.Set(zeroValue)
+	} else {
+		b.val.Set(reflect.ValueOf(val))
+	}
 
 	b.trigger()
 	return nil

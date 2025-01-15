@@ -156,7 +156,7 @@ type radioGroupRenderer struct {
 // Layout the components of the radio widget
 func (r *radioGroupRenderer) Layout(_ fyne.Size) {
 	count := 1
-	if r.items != nil && len(r.items) > 0 {
+	if len(r.items) > 0 {
 		count = len(r.items)
 	}
 	var itemHeight, itemWidth float32
@@ -236,12 +236,12 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 			item.Selected = sel
 			changed = true
 		}
-		if d := r.radio.disabled.Load(); d != item.disabled.Load() {
-			item.disabled.Store(d)
+		if d := r.radio.Disabled(); d != item.Disabled() {
+			item.disabled = d
 			changed = true
 		}
 
-		if refresh && changed {
+		if refresh || changed {
 			item.Refresh()
 		}
 	}

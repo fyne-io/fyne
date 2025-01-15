@@ -27,9 +27,6 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
-		1.0, paint.VectorPad(circle))
-
 	size := circle.Size()
 	radius := size.Width / 2
 	if size.Height < size.Width {
@@ -267,10 +264,8 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.defineVertexArray(p.program, "vert", 3, 5, 0)
 	p.defineVertexArray(p.program, "vertTexCoord", 2, 5, 3)
 
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
 	if alpha != 1.0 {
-		p.ctx.BlendColor(0, 0, 0, alpha)
+		p.ctx.BlendColor(alpha, alpha, alpha, alpha)
 		p.ctx.BlendFunc(constantAlpha, oneMinusConstantAlpha)
 	} else {
 		p.ctx.BlendFunc(one, oneMinusSrcAlpha)

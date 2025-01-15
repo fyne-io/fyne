@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -22,10 +23,16 @@ type Hyperlink struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+
 	// The truncation mode of the hyperlink
 	//
 	// Since: 2.5
 	Truncation fyne.TextTruncation
+
+	// The theme size name for the text size of the hyperlink
+	//
+	// Since: 2.5
+	SizeName fyne.ThemeSizeName
 
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
@@ -34,7 +41,7 @@ type Hyperlink struct {
 
 	textSize         fyne.Size // updated in syncSegments
 	focused, hovered bool
-	provider         *RichText
+	provider         RichText
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -57,17 +64,18 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
-	hl.provider = NewRichTextWithText(hl.Text)
-	hl.provider.ExtendBaseWidget(hl.provider)
+	hl.provider.ExtendBaseWidget(&hl.provider)
 	hl.syncSegments()
 
+	th := hl.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	focus := canvas.NewRectangle(color.Transparent)
-	focus.StrokeColor = theme.FocusColor()
+	focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	focus.StrokeWidth = 2
 	focus.Hide()
-	under := canvas.NewRectangle(theme.HyperlinkColor())
+	under := canvas.NewRectangle(th.Color(theme.ColorNameHyperlink, v))
 	under.Hide()
-	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{hl.provider, focus, under}, focus: focus, under: under}
+	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{&hl.provider, focus, under}, focus: focus, under: under}
 }
 
 // Cursor returns the cursor type of this widget
@@ -114,31 +122,32 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
-	innerPad := theme.InnerPadding()
-	return fyne.Min(hl.size.Load().Width, hl.textSize.Width+innerPad+theme.Padding()*2) - innerPad
+	th := hl.Theme()
+
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
+	innerPad := hl.Theme().Size(theme.SizeNameInnerPadding)
+
 	switch hl.Alignment {
 	case fyne.TextAlignLeading:
-		return theme.InnerPadding() / 2
+		return innerPad / 2
 	case fyne.TextAlignCenter:
-		return (hl.size.Load().Width - hl.focusWidth()) / 2
+		return (hl.Size().Width - hl.focusWidth()) / 2
 	case fyne.TextAlignTrailing:
-		return (hl.size.Load().Width - hl.focusWidth()) - theme.InnerPadding()/2
+		return (hl.Size().Width - hl.focusWidth()) - innerPad/2
 	default:
 		return 0 // unreached
 	}
 }
 
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
-	innerPad := theme.InnerPadding()
-	pad := theme.Padding()
-	// If not rendered yet provider will be nil
-	lineCount := float32(1)
-	if hl.provider != nil {
-		lineCount = fyne.Max(lineCount, float32(len(hl.provider.rowBounds)))
-	}
+	th := hl.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	pad := th.Size(theme.SizeNamePadding)
+	lineCount := fyne.Max(1, float32(len(hl.provider.rowBounds)))
 
 	xpos := hl.focusXPos()
 	return pos.X >= xpos && pos.X <= xpos+hl.focusWidth() &&
@@ -149,30 +158,28 @@ func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 //
 // Implements: fyne.Widget
 func (hl *Hyperlink) Refresh() {
-	if hl.provider == nil { // not created until visible
-		return
+	if len(hl.provider.Segments) == 0 {
+		return // Not initialized yet.
 	}
-	hl.syncSegments()
 
+	hl.syncSegments()
 	hl.provider.Refresh()
 	hl.BaseWidget.Refresh()
 }
 
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	if hl.provider == nil {
-		hl.CreateRenderer()
-	}
-
-	return hl.provider.MinSize()
+	hl.ExtendBaseWidget(hl)
+	return hl.BaseWidget.MinSize()
 }
 
 // Resize sets a new size for the hyperlink.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (hl *Hyperlink) Resize(size fyne.Size) {
 	hl.BaseWidget.Resize(size)
-	if hl.provider == nil { // not created until visible
-		return
+
+	if len(hl.provider.Segments) == 0 {
+		return // Not initialized yet.
 	}
 	hl.provider.Resize(size)
 }
@@ -180,8 +187,9 @@ func (hl *Hyperlink) Resize(size fyne.Size) {
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	if hl.provider == nil { // not created until visible
-		return
+
+	if len(hl.provider.Segments) == 0 {
+		return // Not initialized yet.
 	}
 	hl.syncSegments()
 	hl.provider.Refresh()
@@ -198,23 +206,23 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 	if err != nil {
 		return err
 	}
-	hl.URL = u
+	hl.SetURL(u)
 	return nil
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(e *fyne.PointEvent) {
-	// If not rendered yet (hl.provider == nil), register all taps
-	// in practice this probably only happens in our unit tests
-	if hl.provider != nil && !hl.isPosOverText(e.Position) {
-		return
+	if len(hl.provider.Segments) != 0 && !hl.isPosOverText(e.Position) {
+		return // tapped outside text area
 	}
 	hl.invokeAction()
 }
 
 func (hl *Hyperlink) invokeAction() {
-	if hl.OnTapped != nil {
-		hl.OnTapped()
+	onTapped := hl.OnTapped
+
+	if onTapped != nil {
+		onTapped()
 		return
 	}
 	hl.openURL()
@@ -232,8 +240,10 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 }
 
 func (hl *Hyperlink) openURL() {
-	if hl.URL != nil {
-		err := fyne.CurrentApp().OpenURL(hl.URL)
+	url := hl.URL
+
+	if url != nil {
+		err := fyne.CurrentApp().OpenURL(url)
 		if err != nil {
 			fyne.LogError("Failed to open url", err)
 		}
@@ -241,18 +251,37 @@ func (hl *Hyperlink) openURL() {
 }
 
 func (hl *Hyperlink) syncSegments() {
+	th := hl.Theme()
+
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
-	hl.provider.Segments = []RichTextSegment{&TextSegment{
-		Style: RichTextStyle{
-			Alignment: hl.Alignment,
-			ColorName: theme.ColorNameHyperlink,
-			Inline:    true,
-			TextStyle: hl.TextStyle,
-		},
-		Text: hl.Text,
-	}}
-	hl.textSize = fyne.MeasureText(hl.Text, theme.TextSize(), hl.TextStyle)
+
+	if len(hl.provider.Segments) == 0 {
+		hl.provider.Scroll = widget.ScrollNone
+		hl.provider.Segments = []RichTextSegment{
+			&TextSegment{
+				Style: RichTextStyle{
+					Alignment: hl.Alignment,
+					ColorName: theme.ColorNameHyperlink,
+					Inline:    true,
+					TextStyle: hl.TextStyle,
+				},
+				Text: hl.Text,
+			},
+		}
+	} else {
+		segment := hl.provider.Segments[0].(*TextSegment)
+		segment.Style.Alignment = hl.Alignment
+		segment.Style.TextStyle = hl.TextStyle
+		segment.Text = hl.Text
+	}
+
+	sizeName := hl.SizeName
+	if sizeName == "" {
+		sizeName = theme.SizeNameText
+	}
+	hl.provider.Segments[0].(*TextSegment).Style.SizeName = sizeName
+	hl.textSize = fyne.MeasureText(hl.Text, th.Size(sizeName), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
@@ -269,16 +298,19 @@ func (r *hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {
-	innerPad := theme.InnerPadding()
+	th := r.hl.Theme()
+	textSize := r.hl.textSize
+	innerPad := th.Size(theme.SizeNameInnerPadding)
 	w := r.hl.focusWidth()
 	xposFocus := r.hl.focusXPos()
+
 	xposUnderline := xposFocus + innerPad/2
+	lineCount := float32(len(r.hl.provider.rowBounds))
 
 	r.hl.provider.Resize(s)
-	lineCount := float32(len(r.hl.provider.rowBounds))
 	r.focus.Move(fyne.NewPos(xposFocus, innerPad/2))
-	r.focus.Resize(fyne.NewSize(w, r.hl.textSize.Height*lineCount+innerPad))
-	r.under.Move(fyne.NewPos(xposUnderline, r.hl.textSize.Height*lineCount+theme.Padding()*2))
+	r.focus.Resize(fyne.NewSize(w, textSize.Height*lineCount+innerPad))
+	r.under.Move(fyne.NewPos(xposUnderline, textSize.Height*lineCount+th.Size(theme.SizeNamePadding)*2))
 	r.under.Resize(fyne.NewSize(w-innerPad, 1))
 }
 
@@ -292,8 +324,13 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 
 func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
-	r.focus.StrokeColor = theme.FocusColor()
+	th := r.hl.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
 	r.focus.Hidden = !r.hl.focused
-	r.under.StrokeColor = theme.HyperlinkColor()
+	r.focus.Refresh()
+	r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
 	r.under.Hidden = !r.hl.hovered
+	r.under.Refresh()
 }

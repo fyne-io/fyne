@@ -26,7 +26,7 @@ func colorPicked(c color.Color, w fyne.Window) {
 	rectangle := canvas.NewRectangle(c)
 	size := 2 * theme.IconInlineSize()
 	rectangle.SetMinSize(fyne.NewSize(size, size))
-	dialog.ShowCustom("Color Picked", "Ok", rectangle, w)
+	dialog.ShowCustom("Color Picked", "OK", rectangle, w)
 }
 
 // dialogScreen loads demos of the dialogs we support

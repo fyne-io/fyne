@@ -27,12 +27,16 @@ func FromJSON(data string) (fyne.Theme, error) {
 //
 // Since: 2.2
 func FromJSONReader(r io.Reader) (fyne.Theme, error) {
+	return fromJSONWithFallback(r, DefaultTheme())
+}
+
+func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) {
 	var th *schema
 	if err := json.NewDecoder(r).Decode(&th); err != nil {
-		return DefaultTheme(), err
+		return fallback, err
 	}
 
-	return &jsonTheme{data: th, fallback: DefaultTheme()}, nil
+	return &jsonTheme{data: th, fallback: fallback}, nil
 }
 
 type hexColor string

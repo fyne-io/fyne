@@ -13,15 +13,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Orientation controls the horizontal/vertical layout of a widget
-type Orientation int
-
-// Orientation constants to control widget layout
-const (
-	Horizontal Orientation = 0
-	Vertical   Orientation = 1
-)
-
 var _ fyne.Draggable = (*Slider)(nil)
 var _ fyne.Focusable = (*Slider)(nil)
 var _ desktop.Hoverable = (*Slider)(nil)
@@ -38,10 +29,10 @@ type Slider struct {
 	Step  float64
 
 	Orientation Orientation
-	OnChanged   func(float64)
+	OnChanged   func(float64) `json:"-"`
 
 	// Since: 2.4
-	OnChangeEnded func(float64)
+	OnChangeEnded func(float64) `json:"-"`
 
 	binder        basicBinder
 	hovered       bool
@@ -114,13 +105,8 @@ func (s *Slider) Tapped(e *fyne.PointEvent) {
 		return
 	}
 
-	driver := fyne.CurrentApp().Driver()
-	if !s.focused && !driver.Device().IsMobile() {
-		impl := s.super()
-
-		if c := driver.CanvasForObject(impl); c != nil {
-			c.Focus(impl.(fyne.Focusable))
-		}
+	if !s.focused {
+		focusIfNotMobile(s.super())
 	}
 
 	ratio := s.getRatio(e)
@@ -239,11 +225,12 @@ func (s *Slider) endOffset(inlineIconSize, innerPadding float32) float32 {
 }
 
 func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
-	pad := s.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	th := s.Theme()
+	pad := s.endOffset(th.Size(theme.SizeNameInlineIcon), th.Size(theme.SizeNameInnerPadding))
 
 	x := e.Position.X
 	y := e.Position.Y
-	size := s.size.Load()
+	size := s.Size()
 
 	switch s.Orientation {
 	case Vertical:
@@ -279,15 +266,29 @@ func (s *Slider) clampValueToRange() {
 		return
 	}
 
-	rem := math.Mod(s.Value, s.Step)
+	// only work with positive mods so the maths holds up
+	value := s.Value
+	step := s.Step
+	invert := false
+	if s.Value < 0 {
+		invert = true
+		value = -value
+	}
+
+	rem := math.Mod(value, step)
 	if rem == 0 {
 		return
 	}
-	min := s.Value - rem
-	if rem > s.Step/2 {
+	min := value - rem
+	if rem > step/2 {
 		min += s.Step
 	}
-	s.Value = min
+
+	if invert {
+		s.Value = -min
+	} else {
+		s.Value = min
+	}
 }
 
 func (s *Slider) updateValue(ratio float64) {
@@ -346,9 +347,12 @@ func (s *Slider) Disabled() bool {
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	track := canvas.NewRectangle(theme.InputBackgroundColor())
-	active := canvas.NewRectangle(theme.ForegroundColor())
-	thumb := &canvas.Circle{FillColor: theme.ForegroundColor()}
+	th := s.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	track := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
+	active := canvas.NewRectangle(th.Color(theme.ColorNameForeground, v))
+	thumb := &canvas.Circle{FillColor: th.Color(theme.ColorNameForeground, v)}
 	focusIndicator := &canvas.Circle{FillColor: color.Transparent}
 
 	objects := []fyne.CanvasObject{track, active, thumb, focusIndicator}
@@ -422,18 +426,21 @@ type sliderRenderer struct {
 
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
-	s.track.FillColor = theme.InputBackgroundColor()
+	th := s.slider.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	s.track.FillColor = th.Color(theme.ColorNameInputBackground, v)
 	if s.slider.disabled {
-		s.thumb.FillColor = theme.DisabledColor()
+		s.thumb.FillColor = th.Color(theme.ColorNameDisabled, v)
 	} else {
-		s.thumb.FillColor = theme.ForegroundColor()
+		s.thumb.FillColor = th.Color(theme.ColorNameForeground, v)
 	}
 	s.active.FillColor = s.thumb.FillColor
 
 	if s.slider.focused && !s.slider.disabled {
-		s.focusIndicator.FillColor = theme.FocusColor()
+		s.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
 	} else if s.slider.hovered && !s.slider.disabled {
-		s.focusIndicator.FillColor = theme.HoverColor()
+		s.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
 	} else {
 		s.focusIndicator.FillColor = color.Transparent
 	}
@@ -447,10 +454,12 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	inputBorderSize := theme.InputBorderSize()
+	th := s.slider.Theme()
+
+	inputBorderSize := th.Size(theme.SizeNameInputBorder)
 	trackWidth := inputBorderSize * 2
-	inlineIconSize := theme.IconInlineSize()
-	innerPadding := theme.InnerPadding()
+	inlineIconSize := th.Size(theme.SizeNameInlineIcon)
+	innerPadding := th.Size(theme.SizeNameInnerPadding)
 	diameter := s.slider.buttonDiameter(inlineIconSize)
 	endPad := s.slider.endOffset(inlineIconSize, innerPadding)
 
@@ -500,17 +509,18 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
-	dia := s.slider.buttonDiameter(theme.IconInlineSize())
-	s1, s2 := minLongSide+dia, dia
+	th := s.slider.Theme()
+	pad := th.Size(theme.SizeNameInnerPadding)
+	tap := th.Size(theme.SizeNameInlineIcon)
+	dia := s.slider.buttonDiameter(tap)
+	s1, s2 := minLongSide+dia, tap+pad*2
 
 	switch s.slider.Orientation {
 	case Vertical:
 		return fyne.NewSize(s2, s1)
-	case Horizontal:
+	default:
 		return fyne.NewSize(s1, s2)
 	}
-
-	return fyne.Size{Width: 0, Height: 0}
 }
 
 func (s *sliderRenderer) getOffset(iconInlineSize, innerPadding float32) float32 {

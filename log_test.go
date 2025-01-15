@@ -32,17 +32,17 @@ func TestLogError(t *testing.T) {
 	err := errors.New("dummy error")
 	output := bufferLog(t, "Testing errors", err)
 
-	assert.Equal(t, 3, len(output))
-	assert.True(t, strings.Contains(output[0], "Testing errors"))
-	assert.True(t, strings.Contains(output[1], "Cause"))
-	assert.True(t, strings.Contains(output[1], "dummy"))
-	assert.True(t, strings.Contains(output[2], "At"))
+	assert.Len(t, output, 3)
+	assert.Contains(t, output[0], "Testing errors")
+	assert.Contains(t, output[1], "Cause")
+	assert.Contains(t, output[1], "dummy")
+	assert.Contains(t, output[2], "At")
 }
 
 func TestLogErrorNoErr(t *testing.T) {
 	output := bufferLog(t, "Testing errors", nil)
 
-	assert.Equal(t, 2, len(output))
-	assert.True(t, strings.Contains(output[0], "Testing errors"))
-	assert.True(t, strings.Contains(output[1], "At"))
+	assert.Len(t, output, 2)
+	assert.Contains(t, output[0], "Testing errors")
+	assert.Contains(t, output[1], "At")
 }

@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +23,7 @@ const (
 
 func TestFormDialog_Control(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	test.Tap(fd.confirm)
 
@@ -34,7 +32,7 @@ func TestFormDialog_Control(t *testing.T) {
 
 func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -46,7 +44,7 @@ func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 
 func TestFormDialog_ValidCanSubmit(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 
 	assert.False(t, fd.win.Hidden)
@@ -65,7 +63,7 @@ func TestFormDialog_ValidCanSubmit(t *testing.T) {
 
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
 	var result formDialogResult
-	fd := validatingFormDialog(&result, test.NewWindow(nil))
+	fd := validatingFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -76,7 +74,7 @@ func TestFormDialog_CanCancelInvalid(t *testing.T) {
 
 func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	var result formDialogResult
-	fd := controlFormDialog(&result, test.NewWindow(nil))
+	fd := controlFormDialog(&result, test.NewTempWindow(t, nil))
 	fd.Show()
 	assert.False(t, fd.win.Hidden)
 
@@ -86,11 +84,9 @@ func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 }
 
 func TestFormDialog_Hints(t *testing.T) {
-
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
-	w := test.NewWindow(nil)
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
+	w := test.NewTempWindow(t, nil)
 	w.SetFullScreen(true)
 
 	var result formDialogResult
@@ -136,20 +132,20 @@ func TestFormDialog_Submit(t *testing.T) {
 	items := []*widget.FormItem{validatingItem}
 	form := NewForm("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		confirmed = confirm
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 
 	form.Show()
 	validatingEntry.SetText("cba")
 
 	form.Submit()
-	assert.Equal(t, false, confirmed)
-	assert.Equal(t, false, form.win.Hidden)
+	assert.False(t, confirmed)
+	assert.False(t, form.win.Hidden)
 
 	validatingEntry.SetText("abc")
 
 	form.Submit()
-	assert.Equal(t, true, confirmed)
-	assert.Equal(t, true, form.win.Hidden)
+	assert.True(t, confirmed)
+	assert.True(t, form.win.Hidden)
 }
 
 func validatingFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {

@@ -19,7 +19,7 @@
 					</widget>
 					<widget pos="0,30" size="32x6" type="*widget.scrollBarArea">
 						<widget pos="0,3" size="16x3" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="16x3"/>
+							<rectangle fillColor="scrollbar" radius="3" size="16x3"/>
 						</widget>
 					</widget>
 				</widget>
@@ -27,14 +27,16 @@
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
-						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+						<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
 					</widget>
 				</container>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="72x4"/>
 			<rectangle fillColor="primary" pos="0,36" radius="4" size="32x4"/>
 			<widget pos="0,40" size="72x35" type="*widget.Label">
-				<text pos="8,8" size="38x19">Text 1</text>
+				<widget size="72x35" type="*widget.RichText">
+					<text pos="8,8" size="38x19">Text 1</text>
+				</widget>
 			</widget>
 		</widget>
 	</content>

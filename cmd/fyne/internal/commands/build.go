@@ -2,7 +2,6 @@ package commands
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,8 +12,8 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
+	"fyne.io/fyne/v2/internal/metadata"
 )
 
 // Builder generate the executables.
@@ -126,37 +125,8 @@ func (b *Builder) Build() error {
 	return b.build()
 }
 
-func checkVersion(output string, versionConstraint *version.ConstraintGroup) error {
-	split := strings.Split(output, " ")
-	// We are expecting something like: `go version goX.Y OS`
-	if len(split) != 4 || split[0] != "go" || split[1] != "version" || len(split[2]) < 5 || split[2][:2] != "go" {
-		return fmt.Errorf("invalid output for `go version`: `%s`", output)
-	}
-
-	normalized := version.Normalize(split[2][2:len(split[2])])
-	if !versionConstraint.Match(normalized) {
-		return fmt.Errorf("expected go version %v got `%v`", versionConstraint.GetConstraints(), normalized)
-	}
-
-	return nil
-}
-
 func isWeb(goos string) bool {
-	return goos == "js" || goos == "wasm"
-}
-
-func checkGoVersion(runner runner, versionConstraint *version.ConstraintGroup) error {
-	if versionConstraint == nil {
-		return nil
-	}
-
-	goVersion, err := runner.runOutput("version")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", string(goVersion))
-		return err
-	}
-
-	return checkVersion(string(goVersion), versionConstraint)
+	return goos == "js" || goos == "wasm" || goos == "web"
 }
 
 type goModEdit struct {
@@ -195,15 +165,9 @@ func getFyneGoModVersion(runner runner) (string, error) {
 }
 
 func (b *Builder) build() error {
-	var versionConstraint *version.ConstraintGroup
-
 	goos := b.os
 	if goos == "" {
 		goos = targetOS()
-	}
-
-	if goos == "js" && runtime.GOOS == "windows" {
-		return errors.New("gopherjs doesn't support Windows. Only wasm target is supported for the web output. You can also use fyne-cross to solve this")
 	}
 
 	fyneGoModRunner := b.updateAndGetGoExecutable(goos)
@@ -267,12 +231,7 @@ func (b *Builder) build() error {
 		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
-		if goos == "js" {
-			args = append(args, "--tags")
-		} else {
-			args = append(args, "-tags")
-		}
-		args = append(args, strings.Join(tags, ","))
+		args = append(args, "-tags", strings.Join(tags, ","))
 	}
 
 	if b.goPackage != "" {
@@ -281,20 +240,9 @@ func (b *Builder) build() error {
 
 	if goos != "ios" && goos != "android" && !isWeb(goos) {
 		env = append(env, "GOOS="+goos)
-	} else if goos == "wasm" {
-		versionConstraint = version.NewConstrainGroupFromString(">=1.17")
+	} else if goos == "web" || goos == "wasm" {
 		env = append(env, "GOARCH=wasm")
 		env = append(env, "GOOS=js")
-	} else if goos == "js" {
-		_, err := b.runner.runOutput("version")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Can not execute `gopherjs version`. Please do `go install github.com/gopherjs/gopherjs@latest`.\n")
-			return err
-		}
-	}
-
-	if err := checkGoVersion(b.runner, versionConstraint); err != nil {
-		return err
 	}
 
 	b.runner.setDir(b.srcdir)
@@ -364,11 +312,7 @@ func (b *Builder) updateAndGetGoExecutable(goos string) runner {
 			fyneGoModRunner = newCommand(goBin)
 			b.runner = fyneGoModRunner
 		} else {
-			if goos != "js" {
-				b.runner = newCommand("go")
-			} else {
-				b.runner = newCommand("gopherjs")
-			}
+			b.runner = newCommand("go")
 		}
 	}
 	return fyneGoModRunner
@@ -396,9 +340,11 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	if app.icon != "" {
 		res, err := fyne.LoadResourceFromPath(app.icon)
 		if err != nil {
-			fyne.LogError("Unable to load medadata icon file "+app.icon, err)
+			fyne.LogError("Unable to load metadata icon file "+app.icon, err)
 			return func() { os.Remove(metadataInitFilePath) }, err
 		}
+
+		res = metadata.ScaleIcon(res, 512)
 
 		// The return type of fyne.LoadResourceFromPath is always a *fyne.StaticResource.
 		app.ResGoString = res.(*fyne.StaticResource).GoString()
@@ -497,6 +443,8 @@ func normaliseVersion(str string) string {
 	}
 
 	if pos := strings.Index(str, "-0.20"); pos != -1 {
+		str = str[:pos] + "-dev"
+	} else if pos = strings.Index(str, "-rc"); pos != -1 {
 		str = str[:pos] + "-dev"
 	}
 	return version.Normalize(str)

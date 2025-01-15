@@ -8,8 +8,7 @@ import (
 )
 
 func Test_colorChannel_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	min := 0
 	max := 100
@@ -36,11 +35,9 @@ func Test_colorChannel_Layout(t *testing.T) {
 			color := newColorChannel(tt.name, min, max, tt.value, nil)
 			color.Resize(size)
 
-			window := test.NewWindow(color)
+			window := test.NewTempWindow(t, color)
 
 			test.AssertRendersToImage(t, "color/channel_layout_"+name+".png", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

@@ -70,10 +70,10 @@ func checkerPattern(x, y, _, _ int) color.Color {
 	y /= 20
 
 	if x%2 == y%2 {
-		return theme.BackgroundColor()
+		return theme.Color(theme.ColorNameBackground)
 	}
 
-	return theme.ShadowColor()
+	return theme.Color(theme.ColorNameShadow)
 }
 
 func iconList(icons []iconInfo) []string {
@@ -187,6 +187,7 @@ func loadIcons() []iconInfo {
 		{"VolumeUp", theme.VolumeUpIcon()},
 
 		{"AccountIcon", theme.AccountIcon()},
+		{"CalendarIcon", theme.CalendarIcon()},
 		{"LoginIcon", theme.LoginIcon()},
 		{"LogoutIcon", theme.LogoutIcon()},
 

@@ -8,7 +8,7 @@ const (
 	BuildStandard BuildType = iota
 	// BuildDebug is used when a developer would like more information and visual output for app debugging.
 	BuildDebug
-	// BuildRelease is a final production build, it is like BuildStandard but will use distribution certificates.
+	// BuildRelease is a final production build, it is like [BuildStandard] but will use distribution certificates.
 	// A release build is typically going to connect to live services and is not usually used during development.
 	BuildRelease
 )

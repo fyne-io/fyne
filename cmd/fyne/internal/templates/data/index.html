@@ -15,7 +15,6 @@
 			.centered-container {
   				display: flex;
   				flex-direction: column;
-  				justify-content: flex-start;
   				align-items: center;
 				justify-content: center;
 				min-height: 100vh;
@@ -41,7 +40,6 @@
 		{{if not .IsReleased}}
 			<script src="webgl-debug.js"></script>
 		{{end}}
-		{{if .HasWasm}}
 			<script>
 				function getChromeVersion() {
 					var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
@@ -56,14 +54,6 @@
 					}
 				}
 			</script>
-		{{else}}
-			<script>var wasmBuild = false;</script>
-		{{end}}
-		{{if .HasGopherJS}}
-			<script>var gopherJSBuild = true;</script>
-		{{else}}
-			<script>var gopherJSBuild = false;</script>
-		{{end}}
 		<script>
 			function async_load(file, cb) {
 				var d = document, t = 'script',
@@ -108,12 +98,6 @@
 								go.run(result.instance);
 							});
 						})
-					} else if (gopherJSBuild) {
-						action.innerHTML = "Downloading GopherJS file.";
-
-						async_load("{{.GopherJSFile}}", function(){
-							main.innerHTML = "";
-						});
 					} else {
 						action.innerHTML = "WebAssembly is not supported in your browser";
 						action.className = "action-error"

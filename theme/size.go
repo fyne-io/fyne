@@ -72,90 +72,110 @@ const (
 	//
 	// Since: 2.4
 	SizeNameSelectionRadius fyne.ThemeSizeName = "selectionRadius"
+
+	// SizeNameScrollBarRadius is the name of theme lookup for the scroll bar corner radius.
+	//
+	// Since: 2.5
+	SizeNameScrollBarRadius = "scrollBarRadius"
 )
 
 // CaptionTextSize returns the size for caption text.
 func CaptionTextSize() float32 {
-	return current().Size(SizeNameCaptionText)
+	return Current().Size(SizeNameCaptionText)
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() float32 {
-	return current().Size(SizeNameInlineIcon)
+	return Current().Size(SizeNameInlineIcon)
 }
 
 // InnerPadding is the standard gap between element content and the outside edge of a widget.
 //
 // Since: 2.3
 func InnerPadding() float32 {
-	return current().Size(SizeNameInnerPadding)
+	return Current().Size(SizeNameInnerPadding)
 }
 
 // InputBorderSize returns the input border size (or underline size for an entry).
 //
 // Since: 2.0
 func InputBorderSize() float32 {
-	return current().Size(SizeNameInputBorder)
+	return Current().Size(SizeNameInputBorder)
 }
 
 // InputRadiusSize returns the input radius size.
 //
 // Since: 2.4
 func InputRadiusSize() float32 {
-	return current().Size(SizeNameInputRadius)
+	return Current().Size(SizeNameInputRadius)
 }
 
 // LineSpacing is the default gap between multiple lines of text.
 //
 // Since: 2.3
 func LineSpacing() float32 {
-	return current().Size(SizeNameLineSpacing)
+	return Current().Size(SizeNameLineSpacing)
 }
 
 // Padding is the standard gap between elements and the border around interface elements.
 func Padding() float32 {
-	return current().Size(SizeNamePadding)
+	return Current().Size(SizeNamePadding)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer.
 func ScrollBarSize() float32 {
-	return current().Size(SizeNameScrollBar)
+	return Current().Size(SizeNameScrollBar)
 }
 
 // ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer.
 func ScrollBarSmallSize() float32 {
-	return current().Size(SizeNameScrollBarSmall)
+	return Current().Size(SizeNameScrollBarSmall)
 }
 
 // SelectionRadiusSize returns the selection highlight radius size.
 //
 // Since: 2.4
 func SelectionRadiusSize() float32 {
-	return current().Size(SizeNameSelectionRadius)
+	return Current().Size(SizeNameSelectionRadius)
 }
 
 // SeparatorThicknessSize is the standard thickness of the separator widget.
 //
 // Since: 2.0
 func SeparatorThicknessSize() float32 {
-	return current().Size(SizeNameSeparatorThickness)
+	return Current().Size(SizeNameSeparatorThickness)
+}
+
+// Size looks up the specified size for current theme.
+//
+// Since: 2.5
+func Size(name fyne.ThemeSizeName) float32 {
+	return Current().Size(name)
+}
+
+// SizeForWidget looks up the specified size for the requested widget using the current theme.
+// If the widget theme has been overridden that theme will be used.
+//
+// Since: 2.5
+func SizeForWidget(name fyne.ThemeSizeName, w fyne.Widget) float32 {
+	return CurrentForWidget(w).Size(name)
 }
 
 // TextHeadingSize returns the text size for header text.
 //
 // Since: 2.1
 func TextHeadingSize() float32 {
-	return current().Size(SizeNameHeadingText)
+	return Current().Size(SizeNameHeadingText)
 }
 
 // TextSize returns the standard text size.
 func TextSize() float32 {
-	return current().Size(SizeNameText)
+	return Current().Size(SizeNameText)
 }
 
 // TextSubHeadingSize returns the text size for sub-header text.
 //
 // Since: 2.1
 func TextSubHeadingSize() float32 {
-	return current().Size(SizeNameSubHeadingText)
+	return Current().Size(SizeNameSubHeadingText)
 }

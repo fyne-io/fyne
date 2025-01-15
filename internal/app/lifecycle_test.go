@@ -15,7 +15,12 @@ func TestLifecycle(t *testing.T) {
 	assert.Nil(t, life.OnStarted())
 	assert.Nil(t, life.OnStopped())
 
-	var entered, exited, start, stop, hookedStop bool
+	var entered, exited, start, stop, hookedStop, called bool
+	life.InitEventQueue()
+	go life.RunEventQueue(func(fn func()) {
+		fn()
+	})
+	life.QueueEvent(func() { called = true })
 	life.SetOnEnteredForeground(func() { entered = true })
 	life.OnEnteredForeground()()
 	assert.True(t, entered)
@@ -48,4 +53,8 @@ func TestLifecycle(t *testing.T) {
 	assert.Nil(t, life.OnExitedForeground())
 	assert.Nil(t, life.OnStarted())
 	assert.Nil(t, life.OnStopped())
+
+	life.WaitForEvents()
+	life.DestroyEventQueue()
+	assert.True(t, called)
 }

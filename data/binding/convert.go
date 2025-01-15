@@ -9,6 +9,14 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+func internalFloatToInt(val float64) (int, error) {
+	return int(val), nil
+}
+
+func internalIntToFloat(val int) (float64, error) {
+	return float64(val), nil
+}
+
 type stringFromBool struct {
 	base
 
@@ -86,13 +94,11 @@ func (s *stringFromBool) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromBool) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -173,13 +179,104 @@ func (s *stringFromFloat) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
+	s.trigger()
+}
+
+type intToFloat struct {
+	base
+	from Int
+}
+
+// IntToFloat creates a binding that connects an Int data item to a Float.
+//
+// Since: 2.5
+func IntToFloat(val Int) Float {
+	v := &intToFloat{from: val}
+	val.AddListener(v)
+	return v
+}
+
+func (s *intToFloat) Get() (float64, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0.0, err
+	}
+	return internalIntToFloat(val)
+}
+
+func (s *intToFloat) Set(val float64) error {
+	i, err := internalFloatToInt(val)
+	if err != nil {
+		return err
+	}
+	old, err := s.from.Get()
+	if i == old {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if err = s.from.Set(i); err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *intToFloat) DataChanged() {
+	s.trigger()
+}
+
+type intFromFloat struct {
+	base
+	from Float
+}
+
+// FloatToInt creates a binding that connects a Float data item to an Int.
+//
+// Since: 2.5
+func FloatToInt(v Float) Int {
+	i := &intFromFloat{from: v}
+	v.AddListener(i)
+	return i
+}
+
+func (s *intFromFloat) Get() (int, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0, err
+	}
+	return internalFloatToInt(val)
+}
+
+func (s *intFromFloat) Set(v int) error {
+	val, err := internalIntToFloat(v)
+	if err != nil {
+		return err
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *intFromFloat) DataChanged() {
 	s.trigger()
 }
 
@@ -260,13 +357,11 @@ func (s *stringFromInt) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromInt) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -313,13 +408,11 @@ func (s *stringFromURI) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringFromURI) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -401,13 +494,11 @@ func (s *stringToBool) Set(val bool) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToBool) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -489,13 +580,11 @@ func (s *stringToFloat) Set(val float64) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToFloat) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -577,13 +666,11 @@ func (s *stringToInt) Set(val int) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToInt) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }
 
@@ -627,12 +714,10 @@ func (s *stringToURI) Set(val fyne.URI) error {
 		return err
 	}
 
-	s.DataChanged()
+	queueItem(s.DataChanged)
 	return nil
 }
 
 func (s *stringToURI) DataChanged() {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
 	s.trigger()
 }

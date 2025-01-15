@@ -3,6 +3,8 @@
 package glfw
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"unsafe"
 
@@ -20,11 +22,10 @@ func TestDarwinMenu(t *testing.T) {
 		resetMainMenu()
 	})
 
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	var lastAction string
 	assertLastAction := func(wantAction string) {
-		w.WaitForEvents()
 		assert.Equal(t, wantAction, lastAction)
 	}
 
@@ -40,7 +41,8 @@ func TestDarwinMenu(t *testing.T) {
 	itemRecent := fyne.NewMenuItem("Recent", nil)
 	itemFoo := fyne.NewMenuItem("Foo", func() { lastAction = "foo" })
 	itemRecent.ChildMenu = fyne.NewMenu("", itemFoo)
-	menuEdit := fyne.NewMenu("File", itemNew, itemOpen, fyne.NewMenuItemSeparator(), itemRecent)
+	itemAbout := fyne.NewMenuItem("About", func() { lastAction = "about" })
+	menuFile := fyne.NewMenu("File", itemNew, itemOpen, fyne.NewMenuItemSeparator(), itemRecent, itemAbout)
 
 	itemHelp := fyne.NewMenuItem("Help", func() { lastAction = "Help!!!" })
 	itemHelp.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: fyne.KeyModifierControl}
@@ -59,9 +61,9 @@ func TestDarwinMenu(t *testing.T) {
 	itemMoreSetings := fyne.NewMenuItem("Settings…", func() { lastAction = "more settings" })
 	menuSettings := fyne.NewMenu("Settings", itemSettings, fyne.NewMenuItemSeparator(), itemMoreSetings)
 
-	mainMenu := fyne.NewMainMenu(menuEdit, menuHelp, menuMore, menuSettings)
+	mainMenu := fyne.NewMainMenu(menuFile, menuHelp, menuMore, menuSettings)
 	runOnMain(func() {
-		setupNativeMenu(w, mainMenu)
+		setupNativeMenu(w.window, mainMenu)
 	})
 
 	mm := testDarwinMainMenu()
@@ -70,7 +72,9 @@ func TestDarwinMenu(t *testing.T) {
 	assert.Equal(t, 5, testNSMenuNumberOfItems(mm), "two built-in + three custom")
 
 	m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 0))
-	assert.Equal(t, "", testNSMenuTitle(m), "app menu doesn’t have a title")
+	assert.Equal(t, "", testNSMenuTitle(m), "app menu doesn't have a title")
+	assertNSMenuItem(t, "About "+filepath.Base(os.Args[0]), "", 0, m, 0)
+	assertLastAction("about")
 	assertNSMenuItemSeparator(m, 1)
 	assertNSMenuItem(t, "Preferences", "", 0, m, 2)
 	assertLastAction("prefs")
@@ -253,13 +257,13 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 			runOnMain(func() {
 				resetMainMenu()
 			})
-			w := createWindow("Test").(*window)
+			w := createWindow("Test")
 			item := fyne.NewMenuItem("Special", func() {})
 			item.Shortcut = &desktop.CustomShortcut{KeyName: tt.key, Modifier: fyne.KeyModifierShortcutDefault}
 			menu := fyne.NewMenu("Special", item)
 			mainMenu := fyne.NewMainMenu(menu)
 			runOnMain(func() {
-				setupNativeMenu(w, mainMenu)
+				setupNativeMenu(w.window, mainMenu)
 			})
 
 			mm := testDarwinMainMenu()

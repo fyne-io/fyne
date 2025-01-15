@@ -7,17 +7,16 @@ import (
 )
 
 func TestActivity_Animation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
 	a := NewActivity()
 	w := test.NewWindow(a)
-	w.SetPadded(false)
 	defer w.Close()
+	w.SetPadded(false)
 	w.Resize(a.MinSize())
 
-	render := test.WidgetRenderer(a).(*activityRenderer)
+	render := test.TempWidgetRenderer(t, a).(*activityRenderer)
 	render.anim.Tick(0)
 	test.AssertImageMatches(t, "activity/animate_0.0.png", w.Canvas().Capture())
 

@@ -38,7 +38,7 @@ func (p *Packager) packageIOS(target string, tags []string) error {
 
 	iconDir := util.EnsureSubDir(assetDir, "AppIcon.appiconset")
 	contentFile, _ := os.Create(filepath.Join(iconDir, "Contents.json"))
-
+	defer contentFile.Close()
 	err = templates.XCAssetsDarwin.Execute(contentFile, nil)
 	if err != nil {
 		return fmt.Errorf("failed to write xcassets content template: %w", err)

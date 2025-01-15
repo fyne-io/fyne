@@ -21,6 +21,13 @@ type Text struct {
 	Text      string         // The string content of this Text
 	TextSize  float32        // Size of the text - if the Canvas scale is 1.0 this will be equivalent to point size
 	TextStyle fyne.TextStyle // The style of the text content
+
+	// FontSource defines a resource that can be used instead of the theme for looking up the font.
+	// When a font source is set the `TextStyle` may not be effective, as it will be limited to the styles
+	// present in the data provided.
+	//
+	// Since: 2.5
+	FontSource fyne.Resource
 }
 
 // Hide will set this text to not be visible
@@ -33,7 +40,8 @@ func (t *Text) Hide() {
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	return fyne.MeasureText(t.Text, t.TextSize, t.TextStyle)
+	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	return s
 }
 
 // Move the text to a new position, relative to its parent / canvas

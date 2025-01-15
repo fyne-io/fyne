@@ -120,6 +120,12 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		w.Resize(fyne.NewSize(440, 520))
 		w.Show()
 	}
+	showAbout := func() {
+		w := a.NewWindow("About")
+		w.SetContent(widget.NewLabel("About Fyne Demo app..."))
+		w.Show()
+	}
+	aboutItem := fyne.NewMenuItem("About", showAbout)
 	settingsItem := fyne.NewMenuItem("Settings", openSettings)
 	settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
 	settingsItem.Shortcut = settingsShortcut
@@ -127,19 +133,19 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		openSettings()
 	})
 
-	cutShortcut := &fyne.ShortcutCut{Clipboard: w.Clipboard()}
+	cutShortcut := &fyne.ShortcutCut{Clipboard: a.Clipboard()}
 	cutItem := fyne.NewMenuItem("Cut", func() {
-		shortcutFocused(cutShortcut, w)
+		shortcutFocused(cutShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	cutItem.Shortcut = cutShortcut
-	copyShortcut := &fyne.ShortcutCopy{Clipboard: w.Clipboard()}
+	copyShortcut := &fyne.ShortcutCopy{Clipboard: a.Clipboard()}
 	copyItem := fyne.NewMenuItem("Copy", func() {
-		shortcutFocused(copyShortcut, w)
+		shortcutFocused(copyShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	copyItem.Shortcut = copyShortcut
-	pasteShortcut := &fyne.ShortcutPaste{Clipboard: w.Clipboard()}
+	pasteShortcut := &fyne.ShortcutPaste{Clipboard: a.Clipboard()}
 	pasteItem := fyne.NewMenuItem("Paste", func() {
-		shortcutFocused(pasteShortcut, w)
+		shortcutFocused(pasteShortcut, a.Clipboard(), w.Canvas().Focused())
 	})
 	pasteItem.Shortcut = pasteShortcut
 	performFind := func() { fmt.Println("Menu Find") }
@@ -170,6 +176,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	if !device.IsMobile() && !device.IsBrowser() {
 		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), settingsItem)
 	}
+	file.Items = append(file.Items, aboutItem)
 	main := fyne.NewMainMenu(
 		file,
 		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, fyne.NewMenuItemSeparator(), findItem),
@@ -196,10 +203,6 @@ func makeTray(a fyne.App) {
 	}
 }
 
-func unsupportedTutorial(t tutorials.Tutorial) bool {
-	return !t.SupportWeb && fyne.CurrentDevice().IsBrowser()
-}
-
 func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
 	a := fyne.CurrentApp()
 
@@ -222,17 +225,9 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 				return
 			}
 			obj.(*widget.Label).SetText(t.Title)
-			if unsupportedTutorial(t) {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{Italic: true}
-			} else {
-				obj.(*widget.Label).TextStyle = fyne.TextStyle{}
-			}
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
-				if unsupportedTutorial(t) {
-					return
-				}
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}
@@ -256,16 +251,16 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 	return container.NewBorder(nil, themes, nil, nil, tree)
 }
 
-func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
+func shortcutFocused(s fyne.Shortcut, cb fyne.Clipboard, f fyne.Focusable) {
 	switch sh := s.(type) {
 	case *fyne.ShortcutCopy:
-		sh.Clipboard = w.Clipboard()
+		sh.Clipboard = cb
 	case *fyne.ShortcutCut:
-		sh.Clipboard = w.Clipboard()
+		sh.Clipboard = cb
 	case *fyne.ShortcutPaste:
-		sh.Clipboard = w.Clipboard()
+		sh.Clipboard = cb
 	}
-	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
+	if focused, ok := f.(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
 }

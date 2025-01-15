@@ -11,18 +11,17 @@ import (
 )
 
 func Test_colorButton_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
 		color   color.Color
 		hovered bool
 	}{
 		"primary": {
-			color: theme.PrimaryColor(),
+			color: theme.Color(theme.ColorNamePrimary),
 		},
 		"primary_hovered": {
-			color:   theme.PrimaryColor(),
+			color:   theme.Color(theme.ColorNamePrimary),
 			hovered: true,
 		},
 	} {
@@ -33,12 +32,10 @@ func Test_colorButton_Layout(t *testing.T) {
 				color.MouseIn(nil)
 			}
 
-			window := test.NewWindow(container.NewCenter(color))
+			window := test.NewTempWindow(t, container.NewCenter(color))
 			window.Resize(color.MinSize().Max(fyne.NewSize(50, 50)))
 
 			test.AssertRendersToImage(t, "color/button_layout_"+name+".png", window.Canvas())
-
-			window.Close()
 		})
 	}
 }

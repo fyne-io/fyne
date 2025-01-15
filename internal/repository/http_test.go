@@ -25,7 +25,7 @@ func registerRepositories() (*HTTPRepository, *HTTPRepository) {
 func TestHTTPRepositoryRegistration(t *testing.T) {
 	http, https := registerRepositories()
 
-	// Test HTTPRespository registeration for http scheme
+	// Test HTTPRespository registration for http scheme
 	httpurl, err := storage.ParseURI("http://foo.com/bar")
 	assert.Nil(t, err)
 
@@ -33,7 +33,7 @@ func TestHTTPRepositoryRegistration(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http, httpRepo)
 
-	// test HTTPRepository registeration for https scheme
+	// test HTTPRepository registration for https scheme
 	httpsurl, err := storage.ParseURI("https://foo.com/bar")
 	assert.Nil(t, err)
 

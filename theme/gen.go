@@ -99,6 +99,7 @@ func main() {
 	bundleIcon("check-box", f)
 	bundleIcon("check-box-checked", f)
 	bundleIcon("check-box-fill", f)
+	bundleIcon("check-box-partial", f)
 	bundleIcon("radio-button", f)
 	bundleIcon("radio-button-checked", f)
 	bundleIcon("radio-button-fill", f)
@@ -187,10 +188,12 @@ func main() {
 
 	bundleIcon("download", f)
 	bundleIcon("computer", f)
+	bundleIcon("desktop", f)
 	bundleIcon("storage", f)
 	bundleIcon("upload", f)
 
 	bundleIcon("account", f)
+	bundleIcon("calendar", f)
 	bundleIcon("login", f)
 	bundleIcon("logout", f)
 

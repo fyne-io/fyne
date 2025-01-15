@@ -7,9 +7,10 @@
 	<application android:label="{{.Name}}" android:debuggable="{{.Debug}}">
 	<activity android:name="org.golang.app.GoNativeActivity"
 		android:label="{{.Name}}"
-		android:configChanges="orientation|keyboardHidden|uiMode"
+		android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode"
 		android:exported="true"
-		android:theme="@android:style/Theme">
+		android:theme="@android:style/Theme"
+		android:windowSoftInputMode="adjustResize">
 		<meta-data android:name="android.app.lib_name" android:value="{{.LibName}}" />
 		<intent-filter>
 			<action android:name="android.intent.action.MAIN" />

@@ -17,8 +17,8 @@ func TestCheckSize(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	min := check.MinSize()
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 }
 
 func TestCheckChecked(t *testing.T) {
@@ -45,7 +45,7 @@ func TestCheckUnChecked(t *testing.T) {
 func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	check.SetChecked(true)
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "primary_"))
 
@@ -55,7 +55,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "inputBorder_"))
 
 	check.Disable()
@@ -91,7 +91,7 @@ func TestCheckStateIsCorrectAfterMultipleUpdates(t *testing.T) {
 	expectedCheckedState := false
 	for i := 0; i < 5; i++ {
 		check.SetChecked(expectedCheckedState)
-		assert.True(t, checkedStateFromCallback == expectedCheckedState)
+		assert.Equal(t, expectedCheckedState, checkedStateFromCallback)
 
 		expectedCheckedState = !expectedCheckedState
 	}
@@ -129,7 +129,7 @@ func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	assert.False(t, check.focused)
 	assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
@@ -143,7 +143,7 @@ func TestCheck_Focused(t *testing.T) {
 		assert.False(t, check.focused)
 	} else {
 		assert.True(t, check.focused)
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.Disable()
@@ -168,7 +168,7 @@ func TestCheck_Hovered(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
@@ -176,12 +176,12 @@ func TestCheck_Hovered(t *testing.T) {
 
 	check.MouseIn(&desktop.MouseEvent{})
 	assert.True(t, check.hovered)
-	assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
+	assert.Equal(t, theme.Color(theme.ColorNameHover), render.focusIndicator.FillColor)
 
 	test.Tap(check)
 	assert.True(t, check.hovered)
 	if !fyne.CurrentDevice().IsMobile() {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.Disable()
@@ -192,9 +192,9 @@ func TestCheck_Hovered(t *testing.T) {
 	check.Enable()
 	assert.True(t, check.hovered)
 	if fyne.CurrentDevice().IsMobile() {
-		assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameHover), render.focusIndicator.FillColor)
 	} else {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.MouseOut()
@@ -202,7 +202,7 @@ func TestCheck_Hovered(t *testing.T) {
 	if fyne.CurrentDevice().IsMobile() {
 		assert.Equal(t, color.Transparent, render.focusIndicator.FillColor)
 	} else {
-		assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameFocus), render.focusIndicator.FillColor)
 	}
 
 	check.FocusLost()
@@ -214,7 +214,7 @@ func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
@@ -273,12 +273,14 @@ func TestCheck_Disabled(t *testing.T) {
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
-	render := test.WidgetRenderer(check).(*checkRenderer)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
+		th := test.NewTheme()
+		render.applyTheme(th, v)
 		customTextSize = render.label.TextSize
 	})
 

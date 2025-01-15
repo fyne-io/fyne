@@ -71,10 +71,9 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 					fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 				w.Show()
 
-				go func() {
-					time.Sleep(time.Second * 3)
-					w.Close()
-				}()
+				time.AfterFunc(3*time.Second, func() {
+					fyne.Do(w.Close)
+				})
 			}))
 	}
 

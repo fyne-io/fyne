@@ -48,8 +48,6 @@ func (r *CheckGroup) Append(option string) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *CheckGroup) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
 
 	r.update()
 	objects := make([]fyne.CanvasObject, len(r.items))
@@ -70,9 +68,7 @@ func (r *CheckGroup) MinSize() fyne.Size {
 //
 // Implements: fyne.CanvasObject
 func (r *CheckGroup) Refresh() {
-	r.propertyLock.Lock()
 	r.update()
-	r.propertyLock.Unlock()
 	r.BaseWidget.Refresh()
 }
 
@@ -168,7 +164,7 @@ func (r *CheckGroup) update() {
 
 		item.Text = r.Options[i]
 		item.Checked = contains
-		item.DisableableWidget.disabled.Store(r.disabled.Load())
+		item.DisableableWidget.disabled = r.Disabled()
 		item.Refresh()
 	}
 }
@@ -182,7 +178,7 @@ type checkGroupRenderer struct {
 // Layout the components of the checks widget
 func (r *checkGroupRenderer) Layout(_ fyne.Size) {
 	count := 1
-	if r.items != nil && len(r.items) > 0 {
+	if len(r.items) > 0 {
 		count = len(r.items)
 	}
 	var itemHeight, itemWidth float32
@@ -261,7 +257,7 @@ func (r *checkGroupRenderer) updateItems() {
 		}
 		item.Text = r.checks.Options[i]
 		item.Checked = contains
-		item.disabled.Store(r.checks.disabled.Load())
+		item.disabled = r.checks.Disabled()
 		item.Refresh()
 	}
 }

@@ -22,7 +22,7 @@ func TestFavoriteLocations(t *testing.T) {
 	}
 
 	homeDir, err := os.UserHomeDir()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	homeURI := storage.NewFileURI(homeDir)
 
 	for name, subdir := range expected {

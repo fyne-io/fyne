@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -18,8 +17,7 @@ import (
 )
 
 func TestDocTabs_ApplyTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(
 		container.NewDocTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
@@ -36,8 +34,7 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 }
 
 func TestDocTabs_ChangeItemContent(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -60,8 +57,7 @@ func TestDocTabs_ChangeItemContent(t *testing.T) {
 }
 
 func TestDocTabs_ChangeItemIcon(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
@@ -84,8 +80,7 @@ func TestDocTabs_ChangeItemIcon(t *testing.T) {
 }
 
 func TestDocTabs_ChangeItemText(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -108,8 +103,7 @@ func TestDocTabs_ChangeItemText(t *testing.T) {
 }
 
 func TestDocTabs_DynamicTabs(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	tabs := container.NewDocTabs(item1)
@@ -160,9 +154,8 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 }
 
 func TestDocTabs_HoverButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -195,8 +188,7 @@ func TestDocTabs_HoverButtons(t *testing.T) {
 }
 
 func TestDocTabs_Layout(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := test.NewWindow(nil)
 	defer w.Close()
@@ -296,8 +288,7 @@ func TestDocTabs_Layout(t *testing.T) {
 }
 
 func TestDocTabs_SetTabLocation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
@@ -329,8 +320,7 @@ func TestDocTabs_SetTabLocation(t *testing.T) {
 }
 
 func TestDocTabs_Tapped(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	item1 := &container.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}

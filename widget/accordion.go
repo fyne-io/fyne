@@ -28,37 +28,26 @@ func NewAccordion(items ...*AccordionItem) *Accordion {
 
 // Append adds the given item to this Accordion.
 func (a *Accordion) Append(item *AccordionItem) {
-	a.propertyLock.Lock()
 	a.Items = append(a.Items, item)
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // Close collapses the item at the given index.
 func (a *Accordion) Close(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
-
-	if index < 0 || index >= numItems {
+	if index < 0 || index >= len(a.Items) {
 		return
 	}
-
-	a.propertyLock.Lock()
 	a.Items[index].Open = false
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // CloseAll collapses all items.
 func (a *Accordion) CloseAll() {
-	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = false
 	}
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
@@ -79,15 +68,10 @@ func (a *Accordion) MinSize() fyne.Size {
 
 // Open expands the item at the given index.
 func (a *Accordion) Open(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
-
-	if index < 0 || index >= numItems {
+	if index < 0 || index >= len(a.Items) {
 		return
 	}
 
-	a.propertyLock.Lock()
 	for i, ai := range a.Items {
 		if i == index {
 			ai.Open = true
@@ -95,35 +79,27 @@ func (a *Accordion) Open(index int) {
 			ai.Open = false
 		}
 	}
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // OpenAll expands all items.
 func (a *Accordion) OpenAll() {
-	a.propertyLock.RLock()
 	multiOpen := a.MultiOpen
-	a.propertyLock.RUnlock()
 
 	if !multiOpen {
 		return
 	}
 
-	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = true
 	}
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // Remove deletes the given item from this Accordion.
 func (a *Accordion) Remove(item *AccordionItem) {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
 	for i, ai := range a.Items {
 		if ai == item {
 			a.Items = append(a.Items[:i], a.Items[i+1:]...)
@@ -134,17 +110,10 @@ func (a *Accordion) Remove(item *AccordionItem) {
 
 // RemoveIndex deletes the item at the given index from this Accordion.
 func (a *Accordion) RemoveIndex(index int) {
-	a.propertyLock.RLock()
-	numItems := len(a.Items)
-	a.propertyLock.RUnlock()
-
-	if index < 0 || index >= numItems {
+	if index < 0 || index >= len(a.Items) {
 		return
 	}
-
-	a.propertyLock.Lock()
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
@@ -157,14 +126,13 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
-	pad := theme.Padding()
-	dividerOff := (pad + theme.SeparatorThicknessSize()) / 2
+	th := r.container.Theme()
+	pad := th.Size(theme.SizeNamePadding)
+	separator := th.Size(theme.SizeNameSeparatorThickness)
+	dividerOff := (pad + separator) / 2
 	x := float32(0)
 	y := float32(0)
 	hasOpen := 0
-
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
 
 	for i, ai := range r.container.Items {
 		h := r.headers[i]
@@ -188,7 +156,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			if i > 0 {
 				div.Move(fyne.NewPos(x, y-dividerOff))
 			}
-			div.Resize(fyne.NewSize(size.Width, theme.SeparatorThicknessSize()))
+			div.Resize(fyne.NewSize(size.Width, separator))
 		}
 
 		h := r.headers[i]
@@ -210,11 +178,9 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 }
 
 func (r *accordionRenderer) MinSize() fyne.Size {
-	pad := theme.Padding()
+	th := r.container.Theme()
+	pad := th.Size(theme.SizeNamePadding)
 	size := fyne.Size{}
-
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
 
 	for i, ai := range r.container.Items {
 		if i != 0 {
@@ -241,9 +207,7 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
-
+	th := r.container.Theme()
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)
@@ -273,10 +237,10 @@ func (r *accordionRenderer) updateObjects() {
 			}
 		}
 		if ai.Open {
-			h.Icon = theme.MenuDropUpIcon()
+			h.Icon = th.Icon(theme.IconNameArrowDropUp)
 			ai.Detail.Show()
 		} else {
-			h.Icon = theme.MenuDropDownIcon()
+			h.Icon = th.Icon(theme.IconNameArrowDropDown)
 			ai.Detail.Hide()
 		}
 		h.Refresh()

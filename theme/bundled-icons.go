@@ -60,6 +60,11 @@ var checkboxfillIconRes = &fyne.StaticResource{
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <rect x=\"5\" y=\"5\" width=\"14\" height=\"14\" style=\"fill:#000000;\" />\n</svg>\n"),
 }
 
+var checkboxpartialIconRes = &fyne.StaticResource{
+	StaticName:    "check-box-partial.svg",
+	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <path\n          d=\"M 4.0859375,3 C 2.9759386,3 3,2.9859386 3,4.0859375 V 19.914062 C 3,21.014061 2.9759386,21 4.0859375,21 H 19.914062 C 21.024061,21 21,21.014061 21,19.914062 V 4.0859375 C 21,2.9859386 21.024061,3 19.914062,3 Z M 18.5,11 v 2 H 12.147368 5.5 v -2 h 6.59251 z\" />\n</svg>\n"),
+}
+
 var radiobuttonIconRes = &fyne.StaticResource{
 	StaticName:    "radio-button.svg",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns=\"http://www.w3.org/2000/svg\"\n   width=\"24\"\n   height=\"24\"\n   viewBox=\"0 0 24 24\">\n  <path\n     d=\"M 12,2 C 6.48,2 2,6.48 2,12 2,17.52 6.48,22 12,22 17.52,22 22,17.52 22,12 22,6.48 17.52,2 12,2 Z m 0.0097,19.024071 C 6.9997372,21.048238 3,17 2.992626,12.037976 2.985139,7.0000002 6.9673493,2.9584714 12.036063,2.9795211 16.967347,3 21.069769,7.0000004 21.034853,12.004484 21,17 17,21 12.009738,21.024071 Z\" />\n</svg>\n"),
@@ -430,6 +435,11 @@ var computerIconRes = &fyne.StaticResource{
 	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"black\" width=\"24px\" height=\"24px\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z\"/></svg>"),
 }
 
+var desktopIconRes = &fyne.StaticResource{
+	StaticName:    "desktop.svg",
+	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"black\" width=\"24px\" height=\"24px\"><path d=\"M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z\"/></svg>\n"),
+}
+
 var storageIconRes = &fyne.StaticResource{
 	StaticName:    "storage.svg",
 	StaticContent: []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"black\" width=\"24px\" height=\"24px\"><path d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z\"/></svg>"),
@@ -443,6 +453,11 @@ var uploadIconRes = &fyne.StaticResource{
 var accountIconRes = &fyne.StaticResource{
 	StaticName:    "account.svg",
 	StaticContent: []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z\" /></svg>"),
+}
+
+var calendarIconRes = &fyne.StaticResource{
+	StaticName:    "calendar.svg",
+	StaticContent: []byte("<svg height=\"24\" viewBox=\"0 0 960 960\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\">\n  <path\n     d=\"M 200,880 Q 167,880 143.5,856.5 120,833 120,800 V 240 q 0,-33 23.5,-56.5 Q 167,160 200,160 h 40 V 80 h 80 v 80 H 640 V 80 h 80 v 80 h 40 q 33,0 56.5,23.5 Q 840,207 840,240 v 560 q 0,33 -23.5,56.5 Q 793,880 760,880 Z m 0,-80 H 760 V 400 H 200 Z m 0,-480 H 760 V 240 H 200 Z m 0,0 V 240 Z M 480,560 Q 463,560 451.5,548.5 440,537 440,520 440,503 451.5,491.5 463,480 480,480 q 17,0 28.5,11.5 Q 520,503 520,520 520,537 508.5,548.5 497,560 480,560 Z m -160,0 Q 303,560 291.5,548.5 280,537 280,520 280,503 291.5,491.5 303,480 320,480 q 17,0 28.5,11.5 Q 360,503 360,520 360,537 348.5,548.5 337,560 320,560 Z m 320,0 Q 623,560 611.5,548.5 600,537 600,520 600,503 611.5,491.5 623,480 640,480 q 17,0 28.5,11.5 Q 680,503 680,520 680,537 668.5,548.5 657,560 640,560 Z M 480,720 Q 463,720 451.5,708.5 440,697 440,680 440,663 451.5,651.5 463,640 480,640 q 17,0 28.5,11.5 Q 520,663 520,680 520,697 508.5,708.5 497,720 480,720 Z m -160,0 Q 303,720 291.5,708.5 280,697 280,680 280,663 291.5,651.5 303,640 320,640 q 17,0 28.5,11.5 Q 360,663 360,680 360,697 348.5,708.5 337,720 320,720 Z m 320,0 Q 623,720 611.5,708.5 600,697 600,680 600,663 611.5,651.5 623,640 640,640 q 17,0 28.5,11.5 Q 680,663 680,680 680,697 668.5,708.5 657,720 640,720 Z\"\n     id=\"path132\" />\n</svg>\n"),
 }
 
 var loginIconRes = &fyne.StaticResource{

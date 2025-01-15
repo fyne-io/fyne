@@ -4,6 +4,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 var _ fyne.Lifecycle = (*Lifecycle)(nil)
@@ -18,6 +19,8 @@ type Lifecycle struct {
 	onStopped    atomic.Pointer[func()]
 
 	onStoppedHookExecuted func()
+
+	eventQueue *async.UnboundedChan[func()]
 }
 
 // SetOnStoppedHookExecuted is an internal function that lets Fyne schedule a clean-up after
@@ -26,7 +29,7 @@ func (l *Lifecycle) SetOnStoppedHookExecuted(f func()) {
 	l.onStoppedHookExecuted = f
 }
 
-// SetOnEnteredForeground hooks into the the app becoming foreground.
+// SetOnEnteredForeground hooks into the app becoming foreground.
 func (l *Lifecycle) SetOnEnteredForeground(f func()) {
 	l.onForeground.Store(&f)
 }
@@ -82,7 +85,7 @@ func (l *Lifecycle) OnStarted() func() {
 func (l *Lifecycle) OnStopped() func() {
 	stopped := l.onStopped.Load()
 	stopHook := l.onStoppedHookExecuted
-	if stopped == nil && stopHook == nil {
+	if (stopped == nil || *stopped == nil) && stopHook == nil {
 		return nil
 	}
 
@@ -90,7 +93,7 @@ func (l *Lifecycle) OnStopped() func() {
 		return *stopped
 	}
 
-	if *stopped == nil {
+	if stopped == nil || *stopped == nil {
 		return stopHook
 	}
 
@@ -99,4 +102,37 @@ func (l *Lifecycle) OnStopped() func() {
 		(*stopped)()
 		stopHook()
 	}
+}
+
+// DestroyEventQueue destroys the event queue.
+func (l *Lifecycle) DestroyEventQueue() {
+	l.eventQueue.Close()
+}
+
+// InitEventQueue initializes the event queue.
+func (l *Lifecycle) InitEventQueue() {
+	// This channel should be closed when the window is closed.
+	l.eventQueue = async.NewUnboundedChan[func()]()
+}
+
+// QueueEvent uses this method to queue up a callback that handles an event. This ensures
+// user interaction events for a given window are processed in order.
+func (l *Lifecycle) QueueEvent(fn func()) {
+	l.eventQueue.In() <- fn
+}
+
+// RunEventQueue runs the event queue. This should called inside a go routine.
+// This function blocks.
+func (l *Lifecycle) RunEventQueue(run func(func())) {
+	for fn := range l.eventQueue.Out() {
+		run(fn)
+	}
+}
+
+// WaitForEvents wait for all the events.
+func (l *Lifecycle) WaitForEvents() {
+	done := make(chan struct{})
+
+	l.eventQueue.In() <- func() { done <- struct{}{} }
+	<-done
 }

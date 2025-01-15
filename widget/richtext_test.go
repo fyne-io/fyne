@@ -14,8 +14,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func textRenderTexts(p fyne.Widget) []*canvas.Text {
-	renderer := cache.Renderer(p).(*textRenderer)
+func richTextRenderTexts(rich fyne.Widget) []*canvas.Text {
+	renderer := cache.Renderer(rich).(*textRenderer)
 	texts := make([]*canvas.Text, len(renderer.Objects()))
 	for i, obj := range renderer.Objects() {
 		texts[i] = obj.(*canvas.Text)
@@ -40,7 +40,7 @@ func TestRichText_Hyperlink_Endline(t *testing.T) {
 	r.Resize(r.MinSize())
 	view := cache.Renderer(r)
 
-	assert.Equal(t, 2, len(view.Objects()))
+	assert.Len(t, view.Objects(), 2)
 	assert.Equal(t, view.Objects()[0].Position().Y, view.Objects()[1].Position().Y)   // same baseline
 	assert.Greater(t, view.Objects()[1].Position().X, view.Objects()[0].Position().X) // to the right
 }
@@ -49,7 +49,7 @@ func TestText_Alignment(t *testing.T) {
 	seg := trailingBoldErrorSegment()
 	seg.Text = "Test"
 	text := NewRichText(seg)
-	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).Objects()[0].(*canvas.Text).Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, test.TempWidgetRenderer(t, text).Objects()[0].(*canvas.Text).Alignment)
 }
 
 func TestText_Row(t *testing.T) {
@@ -136,8 +136,8 @@ func TestText_Scroll(t *testing.T) {
 	assert.Less(t, text4.MinSize().Width, text3.MinSize().Width)
 	assert.Equal(t, text4.MinSize().Height, text3.MinSize().Height)
 
-	content3 := test.WidgetRenderer(text3).Objects()[0].(*widget.Scroll).Content
-	content4 := test.WidgetRenderer(text4).Objects()[0].(*widget.Scroll).Content
+	content3 := test.TempWidgetRenderer(t, text3).Objects()[0].(*widget.Scroll).Content
+	content4 := test.TempWidgetRenderer(t, text4).Objects()[0].(*widget.Scroll).Content
 	assert.Less(t, content4.MinSize().Width, content3.MinSize().Width)
 	assert.Greater(t, content4.MinSize().Height, content3.MinSize().Height)
 }
@@ -178,7 +178,7 @@ func TestText_InsertAt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichTextWithText(tt.fields.buffer)
-			text.insertAt(tt.args.pos, tt.args.runes)
+			text.insertAt(tt.args.pos, []rune(tt.args.runes))
 			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
@@ -186,11 +186,11 @@ func TestText_InsertAt(t *testing.T) {
 
 func TestText_Insert(t *testing.T) {
 	text := NewRichTextWithText("")
-	text.insertAt(0, "a")
+	text.insertAt(0, []rune("a"))
 	assert.Equal(t, "a", text.String())
-	text.insertAt(1, "\n")
+	text.insertAt(1, []rune("\n"))
 	assert.Equal(t, "a\n", text.String())
-	text.insertAt(2, "b")
+	text.insertAt(2, []rune("b"))
 	assert.Equal(t, "a\nb", text.String())
 }
 
@@ -244,7 +244,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichTextWithText(tt.fields.buffer)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, string(got))
 			assert.Equal(t, tt.wantBuffer, text.String())
 		})
 	}
@@ -332,7 +332,12 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			text := NewRichText(tt.segments...)
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want, string(got))
+			for _, s := range tt.wantSegments {
+				if txt, ok := s.(*TextSegment); ok {
+					txt.parent = text
+				}
+			}
 			assert.Equal(t, tt.wantSegments, text.Segments)
 		})
 	}
@@ -343,7 +348,7 @@ func TestText_Multiline(t *testing.T) {
 		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
 		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
 
-	w := test.NewWindow(text)
+	w := test.NewTempWindow(t, text)
 	w.Resize(fyne.NewSize(64, 90))
 	test.AssertImageMatches(t, "richtext/richtext_multiline.png", w.Canvas().Capture())
 }
@@ -351,23 +356,23 @@ func TestText_Multiline(t *testing.T) {
 func TestText_Color(t *testing.T) {
 	text := NewRichText(trailingBoldErrorSegment())
 
-	assert.Equal(t, theme.ErrorColor(), textRenderTexts(text)[0].Color)
+	assert.Equal(t, theme.Color(theme.ColorNameError), richTextRenderTexts(text)[0].Color)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
-	render := test.WidgetRenderer(label).(*textRenderer)
+	texts := labelTextRenderTexts(label)
 
-	text1 := render.Objects()[0].(*canvas.Text)
-	text2 := render.Objects()[1].(*canvas.Text)
+	text1 := texts[0]
+	text2 := texts[1]
 	textSize1 := text1.TextSize
 	textSize2 := text2.TextSize
 	customTextSize1 := textSize1
 	customTextSize2 := textSize2
 	test.WithTestTheme(t, func() {
 		label.Refresh()
-		text1 := render.Objects()[0].(*canvas.Text)
-		text2 := render.Objects()[1].(*canvas.Text)
+		text1 := texts[0]
+		text2 := texts[1]
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})
@@ -381,12 +386,14 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
 	provider := label.provider
 
-	fullSize := provider.lineSizeToColumn(4, 0)
-	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
-	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+	inPad := theme.InnerPadding()
+	textSize := theme.TextSize()
+	fullSize := provider.lineSizeToColumn(4, 0, textSize, inPad)
+	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0, textSize, inPad))
+	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0, textSize, inPad).Width)
 
-	out := provider.lineSizeToColumn(-1, -1)
-	assert.Equal(t, out, provider.lineSizeToColumn(0, 0))
+	out := provider.lineSizeToColumn(-1, -1, textSize, inPad)
+	assert.Equal(t, out, provider.lineSizeToColumn(0, 0, textSize, inPad))
 }
 
 func TestText_splitLines(t *testing.T) {
@@ -568,7 +575,7 @@ func TestText_lineBounds(t *testing.T) {
 			text:  "foobar foobar",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 8},
+				{0, 9},
 			},
 			ellipses: 1,
 		},
@@ -681,8 +688,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 15},
-				{28, 36},
+				{7, 16},
+				{28, 37},
 			},
 			ellipses: 2,
 		},
@@ -750,8 +757,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 14},
-				{26, 33},
+				{7, 15},
+				{26, 34},
 				{39, 39},
 			},
 			ellipses: 2,
@@ -902,8 +909,8 @@ func TestText_lineBounds(t *testing.T) {
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
 				{0, 6},
-				{7, 15},
-				{28, 36},
+				{7, 16},
+				{28, 37},
 				{42, 42},
 			},
 			ellipses: 2,
@@ -1034,7 +1041,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			text:  "iiiiiiiiiimmmmmmmmmm",
 			trunc: fyne.TextTruncateEllipsis,
 			want: [][2]int{
-				{0, 8},
+				{0, 9},
 			},
 		},
 		{

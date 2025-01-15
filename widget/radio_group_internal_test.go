@@ -19,8 +19,8 @@ func TestRadioGroup_MinSize(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 	min := radio.MinSize()
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 
 	radio2 := NewRadioGroup([]string{"Hi", "H"}, nil)
 	min2 := radio2.MinSize()
@@ -37,7 +37,7 @@ func TestRadioGroup_MinSize_Horizontal(t *testing.T) {
 	radio2.Horizontal = true
 	min2 := radio2.MinSize()
 
-	assert.True(t, min2.Width > min.Width)
+	assert.Greater(t, min2.Width, min.Width)
 	assert.Equal(t, min.Height, min2.Height)
 }
 
@@ -94,27 +94,27 @@ func TestRadioGroup_SelectedOther(t *testing.T) {
 func TestRadioGroup_Append(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
 
-	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 1)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 1)
 
 	radio.Options = append(radio.Options, "Another")
 	radio.Refresh()
 
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 2)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 2)
 }
 
 func TestRadioGroup_Remove(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi", "Another"}, nil)
 
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 2)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 2)
 
 	radio.Options = radio.Options[:1]
 	radio.Refresh()
 
-	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 1)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 1)
 }
 
 func TestRadioGroup_SetSelected(t *testing.T) {
@@ -127,7 +127,7 @@ func TestRadioGroup_SetSelected(t *testing.T) {
 	radio.SetSelected("Another")
 
 	assert.Equal(t, "Another", radio.Selected)
-	assert.Equal(t, true, changed)
+	assert.True(t, changed)
 }
 
 func TestRadioGroup_SetSelectedWithSameOption(t *testing.T) {
@@ -155,16 +155,16 @@ func TestRadioGroup_SetSelectedEmpty(t *testing.T) {
 func TestRadioGroup_DuplicatedOptions(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi", "Hi", "Hi", "Another", "Another"}, nil)
 
-	assert.Equal(t, 5, len(radio.Options))
-	assert.Equal(t, 5, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 5)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 5)
 
 	radioGroupTestTapItem(t, radio, 1)
 	assert.Equal(t, "Hi", radio.Selected)
 	assert.Equal(t, 1, radio.selectedIndex())
-	item0 := test.WidgetRenderer(radio).Objects()[0].(*radioItem)
-	assert.Equal(t, false, item0.focused)
-	item1 := test.WidgetRenderer(radio).Objects()[0].(*radioItem)
-	assert.Equal(t, false, item1.focused)
+	item0 := test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)
+	assert.False(t, item0.focused)
+	item1 := test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)
+	assert.False(t, item1.focused)
 }
 
 func TestRadioGroup_AppendDuplicate(t *testing.T) {
@@ -172,8 +172,8 @@ func TestRadioGroup_AppendDuplicate(t *testing.T) {
 
 	radio.Append("Hi")
 
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 2)
+	assert.Len(t, test.TempWidgetRenderer(t, radio).(*radioGroupRenderer).items, 2)
 }
 
 func TestRadioGroup_Disable(t *testing.T) {
@@ -235,7 +235,7 @@ func TestRadioGroup_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := NewRadioGroup(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			item1 := test.WidgetRenderer(radio).Objects()[0].(*radioItem)
+			item1 := test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)
 			render1 := radioGroupTestItemRenderer(t, radio, 0)
 			render2 := radioGroupTestItemRenderer(t, radio, 1)
 
@@ -257,7 +257,7 @@ func TestRadioGroup_Hovered(t *testing.T) {
 				},
 			})
 			assert.True(t, item1.hovered)
-			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.Color(theme.ColorNameHover), render1.focusIndicator.FillColor)
 			assert.Equal(t, color.Transparent, render2.focusIndicator.FillColor)
 
 			item1.MouseOut()
@@ -311,11 +311,12 @@ func TestRadioGroupRenderer_ApplyTheme(t *testing.T) {
 
 func radioGroupTestTapItem(t *testing.T, radio *RadioGroup, item int) {
 	t.Helper()
-	renderer := test.WidgetRenderer(radio)
+	renderer := test.TempWidgetRenderer(t, radio)
 	radioItem := renderer.Objects()[item].(*radioItem)
 	radioItem.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 }
 
 func radioGroupTestItemRenderer(t *testing.T, radio *RadioGroup, item int) *radioItemRenderer {
-	return cache.Renderer(test.WidgetRenderer(radio).Objects()[item].(fyne.Widget)).(*radioItemRenderer)
+	t.Cleanup(func() { cache.DestroyRenderer(radio) })
+	return cache.Renderer(test.TempWidgetRenderer(t, radio).Objects()[item].(fyne.Widget)).(*radioItemRenderer)
 }

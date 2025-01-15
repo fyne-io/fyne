@@ -3,104 +3,137 @@
 package dialog
 
 import (
-	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/storage"
 	"github.com/rymdport/portal/filechooser"
 )
 
+func openFolder(parentWindowHandle string, options *filechooser.OpenFileOptions) (fyne.ListableURI, error) {
+	uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(uris) == 0 {
+		return nil, nil
+	}
+
+	uri, err := storage.ParseURI(uris[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return storage.ListerForURI(uri)
+}
+
+func openFile(parentWindowHandle string, options *filechooser.OpenFileOptions) (fyne.URIReadCloser, error) {
+	uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(uris) == 0 {
+		return nil, nil
+	}
+
+	uri, err := storage.ParseURI(uris[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return storage.Reader(uri)
+}
+
+func saveFile(parentWindowHandle string, options *filechooser.SaveFileOptions) (fyne.URIWriteCloser, error) {
+	uris, err := filechooser.SaveFile(parentWindowHandle, "Save File", options)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(uris) == 0 {
+		return nil, nil
+	}
+
+	uri, err := storage.ParseURI(uris[0])
+	if err != nil {
+		return nil, err
+	}
+
+	return storage.Writer(uri)
+}
+
 func fileOpenOSOverride(d *FileDialog) bool {
-	go func() {
-		folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
-		options := &filechooser.OpenOptions{
-			Modal:       true,
-			Directory:   folder,
-			AcceptLabel: d.confirmText,
-		}
-		if d.startingLocation != nil {
-			options.Location = d.startingLocation.Path()
-		}
+	folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
+	fileCallback, _ := d.callback.(func(fyne.URIReadCloser, error))
+	options := &filechooser.OpenFileOptions{
+		Directory:   folder,
+		AcceptLabel: d.confirmText,
+	}
 
-		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
+	if d.startingLocation != nil {
+		options.CurrentFolder = d.startingLocation.Path()
+	}
 
-		if folder {
-			uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
-			if err != nil {
-				folderCallback(nil, err)
-			}
+	windowHandle := windowHandleForPortal(d.parent)
 
-			if len(uris) == 0 {
-				folderCallback(nil, nil)
-				return
-			}
+	if folder {
+		go func() {
+			folder, err := openFolder(windowHandle, options)
+			fyne.Do(func() {
+				folderCallback(folder, err)
+			})
+		}()
+	} else {
+		go func() {
+			file, err := openFile(windowHandle, options)
+			fyne.Do(func() {
+				fileCallback(file, err)
+			})
+		}()
+	}
 
-			uri, err := storage.ParseURI(uris[0])
-			if err != nil {
-				folderCallback(nil, err)
-				return
-			}
-
-			folderCallback(storage.ListerForURI(uri))
-			return
-		}
-
-		uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
-		fileCallback := d.callback.(func(fyne.URIReadCloser, error))
-		if err != nil {
-			fileCallback(nil, err)
-			return
-		}
-
-		if len(uris) == 0 {
-			fileCallback(nil, nil)
-			return
-		}
-
-		uri, err := storage.ParseURI(uris[0])
-		if err != nil {
-			fileCallback(nil, err)
-			return
-		}
-
-		fileCallback(storage.Reader(uri))
-	}()
 	return true
 }
 
 func fileSaveOSOverride(d *FileDialog) bool {
+	options := &filechooser.SaveFileOptions{
+		AcceptLabel: d.confirmText,
+		CurrentName: d.initialFileName,
+	}
+	if d.startingLocation != nil {
+		options.CurrentFolder = d.startingLocation.Path()
+	}
+
+	callback := d.callback.(func(fyne.URIWriteCloser, error))
+	windowHandle := windowHandleForPortal(d.parent)
+
 	go func() {
-		options := &filechooser.SaveSingleOptions{
-			Modal:       true,
-			AcceptLabel: d.confirmText,
-			FileName:    d.initialFileName,
-		}
-		if d.startingLocation != nil {
-			options.Location = d.startingLocation.Path()
-		}
-
-		parentWindowHandle := d.parent.(interface{ GetWindowHandle() string }).GetWindowHandle()
-		fmt.Println(parentWindowHandle)
-
-		callback := d.callback.(func(fyne.URIWriteCloser, error))
-		uris, err := filechooser.SaveFile(parentWindowHandle, "Open File", options)
-		if err != nil {
-			callback(nil, err)
-			return
-		}
-
-		if len(uris) == 0 {
-			callback(nil, nil)
-			return
-		}
-
-		uri, err := storage.ParseURI(uris[0])
-		if err != nil {
-			callback(nil, err)
-			return
-		}
-
-		callback(storage.Writer(uri))
+		file, err := saveFile(windowHandle, options)
+		fyne.Do(func() {
+			callback(file, err)
+		})
 	}()
+
 	return true
+}
+
+func x11WindowHandleToString(handle uintptr) string {
+	return "x11:" + strconv.FormatUint(uint64(handle), 16)
+}
+
+func windowHandleForPortal(window fyne.Window) string {
+	windowHandle := ""
+	if !build.IsWayland {
+		window.(driver.NativeWindow).RunNative(func(context any) {
+			handle := context.(driver.X11WindowContext).WindowHandle
+			windowHandle = x11WindowHandleToString(handle)
+		})
+	}
+
+	// TODO: We need to get the Wayland handle from the xdg_foreign protocol and convert to string on the form "wayland:{id}".
+	return windowHandle
 }

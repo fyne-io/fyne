@@ -17,7 +17,9 @@ func watchFile(path string, callback func()) {
 }
 
 func (s *settings) watchSettings() {
+	watchTheme(s)
 }
 
 func (s *settings) stopWatching() {
+	stopWatchingTheme()
 }

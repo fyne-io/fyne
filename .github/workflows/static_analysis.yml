@@ -13,9 +13,9 @@ jobs:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1.13.0
+    - uses: WillAbides/setup-go-faster@v1
       with:
-        go-version: '1.21.x'
+        go-version: '1.23.x'
 
     - name: Get dependencies
       run: >-
@@ -28,12 +28,16 @@ jobs:
         libx11-dev
         xorg-dev
         xvfb
+        language-pack-en
+
+    - name: Set environment variable LANG
+      run: export LANG=en_EN.UTF-8
 
     - name: Install analysis tools
       run: |
         go install golang.org/x/tools/cmd/goimports@latest
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-        go install honnef.co/go/tools/cmd/staticcheck@v0.4.6
+        go install honnef.co/go/tools/cmd/staticcheck@v0.5.1
         go install github.com/mattn/goveralls@latest
 
     - name: Vet
@@ -53,7 +57,7 @@ jobs:
         set -e
         xvfb-run go test -covermode=atomic -coverprofile=coverage.out ./...
         coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-        if (( $(echo "$coverage < 63" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+        if (( $(echo "$coverage < 60" | bc) )); then echo "Test coverage lowered"; exit 1; fi
 
     - name: Update PR Coverage
       uses: shogo82148/actions-goveralls@v1

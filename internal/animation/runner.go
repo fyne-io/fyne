@@ -2,7 +2,6 @@ package animation
 
 import (
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -10,11 +9,25 @@ import (
 
 // Runner is the main driver for animations package
 type Runner struct {
-	animationMutex    sync.Mutex
-	animations        []*anim
+	// animationMutex synchronizes access to `animations` and `pendingAnimations`
+	// between the runner goroutine and calls to Start and Stop
+	animationMutex sync.RWMutex
+
+	// animations is the list of animations that are being ticked in the current frame
+	animations []*anim
+
+	// pendingAnimations is animations that have been started but not yet picked up
+	// by the runner goroutine to be ticked each frame
 	pendingAnimations []*anim
 
-	runnerStarted atomic.Bool
+	// nextFrameAnimations is the list of animations that will be ticked in the next frame.
+	// It is accessed only by the runner goroutine and accumulates the continuing animations
+	// during a tick that are not completed, plus the pendingAnimations picked up at the end of the frame.
+	// At the end of a full frame of animations, the nextFrameAnimations slice is swapped with
+	// the current `animations` slice which is then cleared out, while holding the mutex.
+	nextFrameAnimations []*anim
+
+	runnerStarted bool
 }
 
 // Start will register the passed application and initiate its ticking.
@@ -22,73 +35,97 @@ func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
 
-	if r.runnerStarted.CompareAndSwap(false, true) {
+	if !r.runnerStarted {
+		r.runnerStarted = true
+		if r.animations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.animations = make([]*anim, 0, 16)
+		}
 		r.animations = append(r.animations, newAnim(a))
-		go r.runAnimations()
 	} else {
+		if r.pendingAnimations == nil {
+			// initialize with excess capacity to avoid re-allocations
+			// on subsequent Starts
+			r.pendingAnimations = make([]*anim, 0, 16)
+		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
 }
 
 // Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
 func (r *Runner) Stop(a *fyne.Animation) {
-	// Since the runner needs to lock for the whole duration of a tick, which invokes user code,
-	// we must stop asynchronously to avoid possible deadlock if Stop is called within an animation tick callback.
-	// Since stopping animations should occur much less frequently than ticking them, the performance
-	// penalty of spawning a goroutine for stop should be acceptable to achieve a zero-allocation tick implementation.
-	go func() {
-		r.animationMutex.Lock()
-		defer r.animationMutex.Unlock()
+	r.animationMutex.Lock()
+	defer r.animationMutex.Unlock()
 
-		// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
-		// to filter the animation slice without allocating a new slice
-		newList := r.animations[:0]
-		stopped := false
-		for _, item := range r.animations {
-			if item.a != a {
-				newList = append(newList, item)
-			} else {
-				item.setStopped()
-				stopped = true
-			}
+	newList := make([]*anim, 0, len(r.animations))
+	stopped := false
+	for _, item := range r.animations {
+		if item.a != a {
+			newList = append(newList, item)
+		} else {
+			item.setStopped()
+			stopped = true
 		}
-		r.animations = newList
-		if stopped {
-			return
-		}
+	}
+	r.animations = newList
+	if stopped {
+		return
+	}
 
-		newList = r.pendingAnimations[:0]
-		for _, item := range r.pendingAnimations {
-			if item.a != a {
-				newList = append(newList, item)
-			} else {
-				item.setStopped()
-			}
+	newList = make([]*anim, 0, len(r.pendingAnimations))
+	for _, item := range r.pendingAnimations {
+		if item.a != a {
+			newList = append(newList, item)
+		} else {
+			item.setStopped()
 		}
-		r.pendingAnimations = newList
-	}()
+	}
+	r.pendingAnimations = newList
 }
 
-func (r *Runner) runAnimations() {
-	draw := time.NewTicker(time.Second / 60)
-	for done := false; !done; {
-		<-draw.C
-		// use technique from https://github.com/golang/go/wiki/SliceTricks#filtering-without-allocating
-		// to filter the still-running animations for the next iteration without allocating a new slice
+// TickAnimations progresses all running animations by one tick.
+// This will be called from the driver to update objects immediately before next paint.
+func (r *Runner) TickAnimations() {
+	if !r.runnerStarted {
+		return
+	}
+
+	done := r.runOneFrame()
+
+	if done {
 		r.animationMutex.Lock()
-		newList := r.animations[:0]
-		for _, a := range r.animations {
-			if !a.isStopped() && r.tickAnimation(a) {
-				newList = append(newList, a)
-			}
-		}
-		r.animations = append(newList, r.pendingAnimations...)
-		r.pendingAnimations = r.pendingAnimations[:0]
-		done = len(r.animations) == 0
+		r.runnerStarted = false
 		r.animationMutex.Unlock()
 	}
-	r.runnerStarted.Store(false)
-	draw.Stop()
+}
+
+func (r *Runner) runOneFrame() (done bool) {
+	r.animationMutex.Lock()
+	oldList := r.animations
+	r.animationMutex.Unlock()
+	for _, a := range oldList {
+		if !a.isStopped() && r.tickAnimation(a) {
+			r.nextFrameAnimations = append(r.nextFrameAnimations, a)
+		}
+	}
+
+	r.animationMutex.Lock()
+	// nil out old r.animations for re-use as next r.nextFrameAnimations
+	tmp := r.animations
+	for i := range tmp {
+		tmp[i] = nil
+	}
+	r.animations = append(r.nextFrameAnimations, r.pendingAnimations...)
+	r.nextFrameAnimations = tmp[:0]
+	// nil out r.pendingAnimations
+	for i := range r.pendingAnimations {
+		r.pendingAnimations[i] = nil
+	}
+	r.pendingAnimations = r.pendingAnimations[:0]
+	done = len(r.animations) == 0
+	r.animationMutex.Unlock()
+	return done
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating

@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -81,19 +81,19 @@ func TestLabel_Text(t *testing.T) {
 	label.Refresh()
 
 	assert.Equal(t, "Test", label.Text)
-	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
+	assert.Equal(t, "Test", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_Text_Refresh(t *testing.T) {
 	label := &Label{Text: ""}
 
 	assert.Equal(t, "", label.Text)
-	assert.Equal(t, "", textRenderTexts(label)[0].Text)
+	assert.Equal(t, "", labelTextRenderTexts(label)[0].Text)
 
 	label.Text = "Test"
 	label.Refresh()
 	assert.Equal(t, "Test", label.Text)
-	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
+	assert.Equal(t, "Test", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_SetText(t *testing.T) {
@@ -103,39 +103,40 @@ func TestLabel_SetText(t *testing.T) {
 	label.SetText("New")
 
 	assert.Equal(t, "New", label.Text)
-	assert.Equal(t, "New", textRenderTexts(label)[0].Text)
+	assert.Equal(t, "New", labelTextRenderTexts(label)[0].Text)
 }
 
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	label.Refresh()
 
-	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, labelTextRenderTexts(label)[0].Alignment)
 }
 
 func TestLabel_Alignment_Later(t *testing.T) {
 	label := &Label{Text: "Test"}
 	label.Refresh()
-	assert.Equal(t, fyne.TextAlignLeading, textRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignLeading, labelTextRenderTexts(label)[0].Alignment)
 
 	label.Alignment = fyne.TextAlignTrailing
 	label.Refresh()
-	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, labelTextRenderTexts(label)[0].Alignment)
 }
 
 func TestText_MinSize_MultiLine(t *testing.T) {
 	textOneLine := NewLabel("Break")
 	min := textOneLine.MinSize()
 	textMultiLine := NewLabel("Bre\nak")
+	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*RichText)
 	min2 := textMultiLine.MinSize()
 
-	assert.True(t, min2.Width < min.Width)
-	assert.True(t, min2.Height > min.Height)
+	assert.Less(t, min2.Width, min.Width)
+	assert.Greater(t, min2.Height, min.Height)
 
 	yPos := float32(-1)
-	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).Objects() {
-		assert.True(t, text.Size().Height < min2.Height)
-		assert.True(t, text.Position().Y > yPos)
+	for _, text := range test.TempWidgetRenderer(t, rich).(*textRenderer).Objects() {
+		assert.Less(t, text.Size().Height, min2.Height)
+		assert.Greater(t, text.Position().Y, yPos)
 		yPos = text.Position().Y
 	}
 }
@@ -156,11 +157,12 @@ func TestText_MinSizeAdjustsWithContent(t *testing.T) {
 func TestLabel_ApplyTheme(t *testing.T) {
 	text := NewLabel("Line 1")
 	text.Hide()
+	rich := test.TempWidgetRenderer(t, text).Objects()[0].(*RichText)
 
-	render := test.WidgetRenderer(text).(*textRenderer)
-	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
+	render := test.TempWidgetRenderer(t, rich).(*textRenderer)
+	assert.Equal(t, theme.Color(theme.ColorNameForeground), render.Objects()[0].(*canvas.Text).Color)
 	text.Show()
-	assert.Equal(t, theme.ForegroundColor(), render.Objects()[0].(*canvas.Text).Color)
+	assert.Equal(t, theme.Color(theme.ColorNameForeground), render.Objects()[0].(*canvas.Text).Color)
 }
 
 func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
@@ -180,8 +182,7 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 }
 
 func TestLabel_ChangeTruncate(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
@@ -207,9 +208,8 @@ func TestNewLabelWithData(t *testing.T) {
 }
 
 func TestLabelImportance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
 
 	lbl := NewLabel("hello, fyne")
 	w := test.NewWindow(lbl)
@@ -240,4 +240,9 @@ func TestLabelImportance(t *testing.T) {
 	lbl.Importance = SuccessImportance
 	lbl.Refresh()
 	test.AssertImageMatches(t, "label/label_importance_success.png", w.Canvas().Capture())
+}
+
+func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
+	rich := cache.Renderer(p).Objects()[0].(*RichText)
+	return richTextRenderTexts(rich)
 }

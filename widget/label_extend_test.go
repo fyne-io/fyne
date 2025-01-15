@@ -22,11 +22,12 @@ func newExtendedLabel(text string) *extendedLabel {
 
 func TestLabel_Extended_SetText(t *testing.T) {
 	label := newExtendedLabel("Start")
-	objs := cache.Renderer(label).Objects()
-	assert.Equal(t, 1, len(objs))
+	rich := cache.Renderer(label).Objects()[0].(*RichText)
+	objs := cache.Renderer(rich).Objects()
+	assert.Len(t, objs, 1)
 	assert.Equal(t, "Start", objs[0].(*canvas.Text).Text)
 
 	label.SetText("Replace")
-	objs = cache.Renderer(label).Objects()
+	objs = cache.Renderer(rich).Objects()
 	assert.Equal(t, "Replace", objs[0].(*canvas.Text).Text)
 }

@@ -14,13 +14,15 @@ import (
 func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
-	w.SetMainMenu(
-		fyne.NewMainMenu(
-			fyne.NewMenu("test", fyne.NewMenuItem("item", func() {})),
-			fyne.NewMenu("other", fyne.NewMenuItem("item", func() {})),
-		),
-	)
-	c := w.Canvas().(*glCanvas)
+	runOnMain(func() {
+		w.SetMainMenu(
+			fyne.NewMainMenu(
+				fyne.NewMenu("test", fyne.NewMenuItem("item", func() {})),
+				fyne.NewMenu("other", fyne.NewMenuItem("item", func() {})),
+			),
+		)
+	})
+	c := w.Canvas()
 
 	ce1 := &focusable{id: "ce1"}
 	ce2 := &focusable{id: "ce2"}
@@ -35,7 +37,9 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 	assert.Equal(t, ce2, c.Focused())
 	assert.True(t, ce2.focused)
 
-	m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+	runOnMain(func() {
+		m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+	})
 	assert.True(t, m.IsActive())
 	ctxt := "activating the menu changes focus handler and focuses the menu bar item but does not remove focus from content"
 	assert.True(t, ce2.focused, ctxt)
@@ -46,7 +50,9 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 	assert.True(t, ce2.focused, ctxt)
 	assert.Equal(t, m.Items[1], c.Focused(), ctxt)
 
-	m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+	runOnMain(func() {
+		m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+	})
 	assert.False(t, m.IsActive())
 	ctxt = "deactivating the menu restores focus handler from content"
 	assert.True(t, ce2.focused, ctxt)

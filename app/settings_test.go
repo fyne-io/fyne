@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	internalapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
@@ -43,7 +44,7 @@ func TestSettingsLoad(t *testing.T) {
 func TestOverrideTheme(t *testing.T) {
 	set := &settings{}
 	set.setupTheme()
-	assert.Equal(t, defaultVariant(), set.ThemeVariant())
+	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
 	set.schema.ThemeName = "light"
 	set.setupTheme()
@@ -57,7 +58,7 @@ func TestOverrideTheme(t *testing.T) {
 
 	set = &settings{}
 	set.setupTheme()
-	assert.Equal(t, defaultVariant(), set.ThemeVariant())
+	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
 	err := os.Setenv("FYNE_THEME", "light")
 	if err != nil {
@@ -105,15 +106,15 @@ func TestCustomTheme(t *testing.T) {
 	set.SetTheme(ctheme)
 
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
-	assert.Equal(t, defaultVariant(), set.ThemeVariant())
+	assert.Equal(t, set.Theme(), ctheme)
+	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
 	err := set.loadFromFile(filepath.Join("testdata", "light-theme.json"))
 	if err != nil {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
@@ -121,7 +122,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "light")
@@ -129,7 +130,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "dark")
@@ -137,7 +138,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "")
@@ -145,6 +146,6 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 }

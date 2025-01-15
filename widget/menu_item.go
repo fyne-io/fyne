@@ -11,45 +11,20 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const (
-	runeModifierAlt     = '⌥'
-	runeModifierControl = '⌃'
-	runeModifierShift   = '⇧'
-)
-
-var keySymbols = map[fyne.KeyName]rune{
-	fyne.KeyBackspace: '⌫',
-	fyne.KeyDelete:    '⌦',
-	fyne.KeyDown:      '↓',
-	fyne.KeyEnd:       '↘',
-	fyne.KeyEnter:     '↩',
-	fyne.KeyEscape:    '⎋',
-	fyne.KeyHome:      '↖',
-	fyne.KeyLeft:      '←',
-	fyne.KeyPageDown:  '⇟',
-	fyne.KeyPageUp:    '⇞',
-	fyne.KeyReturn:    '↩',
-	fyne.KeyRight:     '→',
-	fyne.KeySpace:     '␣',
-	fyne.KeyTab:       '⇥',
-	fyne.KeyUp:        '↑',
-}
-
 var _ fyne.Widget = (*menuItem)(nil)
 
 // menuItem is a widget for displaying a fyne.menuItem.
 type menuItem struct {
 	widget.Base
-	Item   *fyne.MenuItem
-	Parent *Menu
+	Item *fyne.MenuItem
 
-	alignment fyne.TextAlign
-	child     *Menu
+	alignment     fyne.TextAlign
+	child, parent *Menu
 }
 
 // newMenuItem creates a new menuItem.
 func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
-	i := &menuItem{Item: item, Parent: parent}
+	i := &menuItem{Item: item, parent: parent}
 	i.alignment = parent.alignment
 	i.ExtendBaseWidget(i)
 	return i
@@ -59,7 +34,7 @@ func (i *menuItem) Child() *Menu {
 	if i.Item.ChildMenu != nil && i.child == nil {
 		child := NewMenu(i.Item.ChildMenu)
 		child.Hide()
-		child.OnDismiss = i.Parent.Dismiss
+		child.OnDismiss = i.parent.Dismiss
 		i.child = child
 	}
 	return i.child
@@ -69,18 +44,21 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	background := canvas.NewRectangle(theme.HoverColor())
-	background.CornerRadius = theme.SelectionRadiusSize()
+	th := i.parent.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
+	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	background.Hide()
-	text := canvas.NewText(i.Item.Label, theme.ForegroundColor())
+	text := canvas.NewText(i.Item.Label, th.Color(theme.ColorNameForeground, v))
 	text.Alignment = i.alignment
 	objects := []fyne.CanvasObject{background, text}
 	var expandIcon *canvas.Image
 	if i.Item.ChildMenu != nil {
-		expandIcon = canvas.NewImageFromResource(theme.MenuExpandIcon())
+		expandIcon = canvas.NewImageFromResource(th.Icon(theme.IconNameMenuExpand))
 		objects = append(objects, expandIcon)
 	}
-	checkIcon := canvas.NewImageFromResource(theme.ConfirmIcon())
+	checkIcon := canvas.NewImageFromResource(th.Icon(theme.IconNameConfirm))
 	if !i.Item.Checked {
 		checkIcon.Hide()
 	}
@@ -91,7 +69,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 	var shortcutTexts []*canvas.Text
 	if s, ok := i.Item.Shortcut.(fyne.KeyboardShortcut); ok {
-		shortcutTexts = textsForShortcut(s)
+		shortcutTexts = textsForShortcut(s, th)
 		for _, t := range shortcutTexts {
 			objects = append(objects, t)
 		}
@@ -160,7 +138,7 @@ func (i *menuItem) activate() {
 	if i.Child() != nil {
 		i.Child().Show()
 	}
-	i.Parent.activateItem(i)
+	i.parent.activateItem(i)
 }
 
 func (i *menuItem) activateLastSubmenu() bool {
@@ -179,7 +157,7 @@ func (i *menuItem) deactivate() {
 	if i.Child() != nil {
 		i.Child().Hide()
 	}
-	i.Parent.DeactivateChild()
+	i.parent.DeactivateChild()
 }
 
 func (i *menuItem) deactivateLastSubmenu() bool {
@@ -194,7 +172,7 @@ func (i *menuItem) deactivateLastSubmenu() bool {
 }
 
 func (i *menuItem) isActive() bool {
-	return i.Parent.activeItem == i
+	return i.parent.activeItem == i
 }
 
 func (i *menuItem) isSubmenuOpen() bool {
@@ -202,7 +180,7 @@ func (i *menuItem) isSubmenuOpen() bool {
 }
 
 func (i *menuItem) trigger() {
-	i.Parent.Dismiss()
+	i.parent.Dismiss()
 	if i.Item.Action != nil {
 		i.Item.Action()
 	}
@@ -230,42 +208,46 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	leftOffset := theme.InnerPadding() + r.checkSpace()
+	th := r.i.parent.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inlineIcon := th.Size(theme.SizeNameInlineIcon)
+
+	leftOffset := innerPad + r.checkSpace()
 	rightOffset := size.Width
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	iconTopOffset := (size.Height - theme.IconInlineSize()) / 2
+	iconSize := fyne.NewSquareSize(inlineIcon)
+	iconTopOffset := (size.Height - inlineIcon) / 2
 
 	if r.expandIcon != nil {
-		rightOffset -= theme.IconInlineSize()
+		rightOffset -= inlineIcon
 		r.expandIcon.Resize(iconSize)
 		r.expandIcon.Move(fyne.NewPos(rightOffset, iconTopOffset))
 	}
 
-	rightOffset -= theme.InnerPadding()
+	rightOffset -= innerPad
 	textHeight := r.text.MinSize().Height
 	for i := len(r.shortcutTexts) - 1; i >= 0; i-- {
 		text := r.shortcutTexts[i]
 		text.Resize(text.MinSize())
 		rightOffset -= text.MinSize().Width
-		text.Move(fyne.NewPos(rightOffset, theme.InnerPadding()+(textHeight-text.Size().Height)))
+		text.Move(fyne.NewPos(rightOffset, innerPad+(textHeight-text.Size().Height)))
 
 		if i == 0 {
-			rightOffset -= theme.InnerPadding()
+			rightOffset -= innerPad
 		}
 	}
 
 	r.checkIcon.Resize(iconSize)
-	r.checkIcon.Move(fyne.NewPos(theme.InnerPadding(), iconTopOffset))
+	r.checkIcon.Move(fyne.NewPos(innerPad, iconTopOffset))
 
 	if r.icon != nil {
 		r.icon.Resize(iconSize)
 		r.icon.Move(fyne.NewPos(leftOffset, iconTopOffset))
-		leftOffset += theme.IconInlineSize()
-		leftOffset += theme.InnerPadding()
+		leftOffset += inlineIcon
+		leftOffset += innerPad
 	}
 
 	r.text.Resize(fyne.NewSize(rightOffset-leftOffset, textHeight))
-	r.text.Move(fyne.NewPos(leftOffset, theme.InnerPadding()))
+	r.text.Move(fyne.NewPos(leftOffset, innerPad))
 
 	r.background.Resize(size)
 }
@@ -275,30 +257,37 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().AddWidthHeight(theme.InnerPadding()*2+r.checkSpace(), theme.InnerPadding()*2)
+	th := r.i.parent.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inlineIcon := th.Size(theme.SizeNameInlineIcon)
+	innerPad2 := innerPad * 2
+
+	minSize := r.text.MinSize().AddWidthHeight(innerPad2+r.checkSpace(), innerPad2)
 	if r.expandIcon != nil {
-		minSize = minSize.AddWidthHeight(theme.IconInlineSize(), 0)
+		minSize = minSize.AddWidthHeight(inlineIcon, 0)
 	}
 	if r.icon != nil {
-		minSize = minSize.AddWidthHeight(theme.IconInlineSize()+theme.InnerPadding(), 0)
+		minSize = minSize.AddWidthHeight(inlineIcon+innerPad, 0)
 	}
 	if r.shortcutTexts != nil {
 		var textWidth float32
 		for _, text := range r.shortcutTexts {
 			textWidth += text.MinSize().Width
 		}
-		minSize = minSize.AddWidthHeight(textWidth+theme.InnerPadding(), 0)
+		minSize = minSize.AddWidthHeight(textWidth+innerPad, 0)
 	}
 	r.minSize = minSize
 	return r.minSize
 }
 
 func (r *menuItemRenderer) updateVisuals() {
-	r.background.CornerRadius = theme.SelectionRadiusSize()
+	th := r.i.parent.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
-		r.background.FillColor = theme.FocusColor()
+		r.background.FillColor = th.Color(theme.ColorNameFocus, v)
 		r.background.Show()
 	} else {
 		r.background.Hide()
@@ -315,8 +304,8 @@ func (r *menuItemRenderer) updateVisuals() {
 	} else {
 		r.checkIcon.Hide()
 	}
-	r.updateIcon(r.checkIcon, theme.ConfirmIcon())
-	r.updateIcon(r.expandIcon, theme.MenuExpandIcon())
+	r.updateIcon(r.checkIcon, th.Icon(theme.IconNameConfirm))
+	r.updateIcon(r.expandIcon, th.Icon(theme.IconNameMenuExpand))
 	r.updateIcon(r.icon, r.i.Item.Icon)
 }
 
@@ -326,17 +315,19 @@ func (r *menuItemRenderer) Refresh() {
 }
 
 func (r *menuItemRenderer) checkSpace() float32 {
-	if r.i.Parent.containsCheck {
+	if r.i.parent.containsCheck {
 		return theme.IconInlineSize() + theme.InnerPadding()
 	}
 	return 0
 }
 
 func (r *menuItemRenderer) minSizeUnchanged() bool {
+	th := r.i.parent.Theme()
+
 	return !r.minSize.IsZero() &&
-		r.text.TextSize == theme.TextSize() &&
-		(r.expandIcon == nil || r.expandIcon.Size().Width == theme.IconInlineSize()) &&
-		r.lastThemePadding == theme.InnerPadding()
+		r.text.TextSize == th.Size(theme.SizeNameText) &&
+		(r.expandIcon == nil || r.expandIcon.Size().Width == th.Size(theme.SizeNameInlineIcon)) &&
+		r.lastThemePadding == th.Size(theme.SizeNameInnerPadding)
 }
 
 func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
@@ -351,52 +342,61 @@ func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
-	text.TextSize = theme.TextSize()
+	th := r.i.parent.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
+	text.TextSize = th.Size(theme.SizeNameText)
 	if r.i.Item.Disabled {
-		text.Color = theme.DisabledColor()
+		text.Color = th.Color(theme.ColorNameDisabled, v)
 	} else {
 		if shortcut {
-			text.Color = shortcutColor()
+			text.Color = shortcutColor(th)
 		} else {
-			text.Color = theme.ForegroundColor()
+			text.Color = th.Color(theme.ColorNameForeground, v)
 		}
 	}
 	text.Refresh()
 }
 
-func shortcutColor() color.Color {
-	r, g, b, a := theme.ForegroundColor().RGBA()
+func shortcutColor(th fyne.Theme) color.Color {
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	r, g, b, a := th.Color(theme.ColorNameForeground, v).RGBA()
 	a = uint32(float32(a) * 0.95)
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
-func textsForShortcut(s fyne.KeyboardShortcut) (texts []*canvas.Text) {
+func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.Text) {
+	// add modifier
 	b := strings.Builder{}
-	mods := s.Mod()
+	mods := sc.Mod()
 	if mods&fyne.KeyModifierControl != 0 {
-		b.WriteRune(runeModifierControl)
+		b.WriteString(textModifierControl)
 	}
 	if mods&fyne.KeyModifierAlt != 0 {
-		b.WriteRune(runeModifierAlt)
+		b.WriteString(textModifierAlt)
 	}
 	if mods&fyne.KeyModifierShift != 0 {
-		b.WriteRune(runeModifierShift)
+		b.WriteString(textModifierShift)
 	}
 	if mods&fyne.KeyModifierSuper != 0 {
-		b.WriteRune(runeModifierSuper)
+		b.WriteString(textModifierSuper)
 	}
-	r := keySymbols[s.Key()]
-	if r != 0 {
-		b.WriteRune(r)
+	shortColor := shortcutColor(th)
+	if b.Len() > 0 {
+		t := canvas.NewText(b.String(), shortColor)
+		t.TextStyle = styleModifiers
+		texts = append(texts, t)
 	}
-	shortColor := shortcutColor()
-	t := canvas.NewText(b.String(), shortColor)
-	t.TextStyle.Symbol = true
+	// add key
+	style := defaultStyleKeys
+	s, ok := keyTexts[sc.Key()]
+	if !ok {
+		s = string(sc.Key())
+	} else if len(s) == 1 {
+		style = fyne.TextStyle{Symbol: true}
+	}
+	t := canvas.NewText(s, shortColor)
+	t.TextStyle = style
 	texts = append(texts, t)
-	if r == 0 {
-		text := canvas.NewText(string(s.Key()), shortColor)
-		text.TextStyle.Monospace = true
-		texts = append(texts, text)
-	}
 	return
 }

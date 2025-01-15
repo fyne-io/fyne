@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/data/validation"
-	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +15,6 @@ var validator = validation.NewRegexp(`^\d{4}-\d{2}-\d{2}$`, "Input is not a vali
 
 func TestEntry_DisabledHideValidation(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	entry.Validator = validator
@@ -29,7 +26,6 @@ func TestEntry_DisabledHideValidation(t *testing.T) {
 
 func TestEntry_ValidatedEntry(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	defer teardownImageTest(window)
 	c := window.Canvas()
 
 	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
@@ -64,8 +60,7 @@ func TestEntry_Validate(t *testing.T) {
 }
 
 func TestEntry_NotEmptyValidator(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 	entry := widget.NewEntry()
 	entry.Validator = func(s string) error {
 		if s == "" {
@@ -73,8 +68,7 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 		}
 		return nil
 	}
-	w := test.NewWindow(entry)
-	defer w.Close()
+	w := test.NewTempWindow(t, entry)
 
 	test.AssertRendersToMarkup(t, "entry/validator_not_empty_initial.xml", w.Canvas())
 
@@ -89,8 +83,7 @@ func TestEntry_NotEmptyValidator(t *testing.T) {
 
 func TestEntry_SetValidationError(t *testing.T) {
 	entry, window := setupImageTest(t, false)
-	test.ApplyTheme(t, internalTest.LightTheme(theme.DefaultTheme()))
-	defer teardownImageTest(window)
+	test.ApplyTheme(t, test.Theme())
 	c := window.Canvas()
 
 	entry.Validator = validator

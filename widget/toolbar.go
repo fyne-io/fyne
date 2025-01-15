@@ -5,7 +5,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
 )
 
 // ToolbarItem represents any interface element that can be added to a toolbar
@@ -17,14 +16,18 @@ type ToolbarItem interface {
 type ToolbarAction struct {
 	Icon        fyne.Resource
 	OnActivated func() `json:"-"`
+	button      Button
 }
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
-	button.Importance = LowImportance
+	t.button.Importance = LowImportance
 
-	return button
+	// synchronize properties
+	t.button.Icon = t.Icon
+	t.button.OnTapped = t.OnActivated
+
+	return &t.button
 }
 
 // SetIcon updates the icon on a ToolbarItem
@@ -32,12 +35,33 @@ func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 // Since: 2.2
 func (t *ToolbarAction) SetIcon(icon fyne.Resource) {
 	t.Icon = icon
-	t.ToolbarObject().Refresh()
+	t.button.SetIcon(t.Icon)
+}
+
+// Enable this ToolbarAction, updating any style or features appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Enable() {
+	t.button.Enable()
+}
+
+// Disable this ToolbarAction so that it cannot be interacted with, updating any style appropriately.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disable() {
+	t.button.Disable()
+}
+
+// Disabled returns true if this ToolbarAction is currently disabled or false if it can currently be interacted with.
+//
+// Since: 2.5
+func (t *ToolbarAction) Disabled() bool {
+	return t.button.Disabled()
 }
 
 // NewToolbarAction returns a new push button style ToolbarItem
 func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
-	return &ToolbarAction{icon, onActivated}
+	return &ToolbarAction{Icon: icon, OnActivated: onActivated}
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
@@ -63,7 +87,7 @@ type ToolbarSeparator struct {
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
-	return canvas.NewRectangle(theme.ForegroundColor())
+	return &Separator{invert: true}
 }
 
 // NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
@@ -129,13 +153,6 @@ func (r *toolbarRenderer) Layout(size fyne.Size) {
 
 func (r *toolbarRenderer) Refresh() {
 	r.resetObjects()
-	for i, item := range r.toolbar.Items {
-		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := r.items[i].(*canvas.Rectangle)
-			rect.FillColor = theme.ForegroundColor()
-		}
-	}
-
 	canvas.Refresh(r.toolbar)
 }
 

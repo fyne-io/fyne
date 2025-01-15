@@ -18,7 +18,7 @@ import (
 )
 
 // Content returns the clipboard content for Android
-func (c *mobileClipboard) Content() string {
+func (c mobileClipboard) Content() string {
 	content := ""
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		chars := C.getClipboardContent(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx))
@@ -34,7 +34,7 @@ func (c *mobileClipboard) Content() string {
 }
 
 // SetContent sets the clipboard content for Android
-func (c *mobileClipboard) SetContent(content string) {
+func (c mobileClipboard) SetContent(content string) {
 	contentStr := C.CString(content)
 	defer C.free(unsafe.Pointer(contentStr))
 

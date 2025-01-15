@@ -13,13 +13,15 @@
 				<widget pos="114,0" size="36x36" type="*widget.Button">
 					<rectangle fillColor="rgba(62,78,78,255)" radius="4" size="36x36"/>
 					<rectangle size="36x36"/>
-					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="default"/>
+					<image fillMode="contain" pos="8,8" rsc="more-horizontal.svg" size="iconInlineSize" themed="foreground"/>
 				</widget>
 			</container>
 			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
 			<rectangle fillColor="primary" pos="0,36" radius="4" size="52x4"/>
 			<widget pos="0,40" size="150x110" type="*widget.Label">
-				<text pos="8,8" size="34x19">Text1</text>
+				<widget size="150x110" type="*widget.RichText">
+					<text pos="8,8" size="34x19">Text1</text>
+				</widget>
 			</widget>
 		</widget>
 	</content>

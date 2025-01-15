@@ -75,7 +75,7 @@ type PublishResult struct {
 }
 
 var theApp = &app{
-	events:         async.NewUnboundedInterfaceChan(),
+	events:         async.NewUnboundedChan[any](),
 	lifecycleStage: lifecycle.StageDead,
 	publish:        make(chan struct{}),
 	publishResult:  make(chan PublishResult),
@@ -100,7 +100,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 type app struct {
 	filters []func(any) any
 
-	events         *async.UnboundedInterfaceChan
+	events         *async.UnboundedChan[any]
 	lifecycleStage lifecycle.Stage
 	publish        chan struct{}
 	publishResult  chan PublishResult

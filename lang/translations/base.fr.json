@@ -1,0 +1,31 @@
+{
+    "Quit": "Quitter",
+    "Create Folder": "Créer un dossier",
+    "Cut": "Couper",
+    "Folder": "Dossier",
+    "Advanced": "Avancé",
+    "Cancel": "Annuler",
+    "Confirm": "Confirmer",
+    "Copy": "Copier",
+    "Enter filename": "Entrez un nom de fichier",
+    "Error": "Erreur",
+    "Favourites": "Favoris",
+    "File": "Fichier",
+    "New Folder": "Nouveau dossier",
+    "No": "Non",
+    "OK": "OK",
+    "Open": "Ouvrir",
+    "Paste": "Coller",
+    "Redo": "Rétablir",
+    "Save": "Enregistrer",
+    "Select all": "Tout sélectionner",
+    "Show Hidden Files": "Afficher les fichiers cachés",
+    "Undo": "Annuler",
+    "Yes": "Oui",
+    "file.name": {
+        "other": "Nom"
+    },
+    "file.parent": {
+        "other": "Parent"
+    }
+}

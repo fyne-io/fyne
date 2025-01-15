@@ -67,11 +67,12 @@ func (b *boundBool) Get() (bool, error) {
 
 func (b *boundBool) Set(val bool) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -85,12 +86,13 @@ type boundExternalBool struct {
 
 func (b *boundExternalBool) Set(val bool) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -158,11 +160,12 @@ func (b *boundBytes) Get() ([]byte, error) {
 
 func (b *boundBytes) Set(val []byte) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if bytes.Equal(*b.val, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -176,12 +179,13 @@ type boundExternalBytes struct {
 
 func (b *boundExternalBytes) Set(val []byte) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if bytes.Equal(b.old, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -249,11 +253,12 @@ func (b *boundFloat) Get() (float64, error) {
 
 func (b *boundFloat) Set(val float64) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -267,12 +272,13 @@ type boundExternalFloat struct {
 
 func (b *boundExternalFloat) Set(val float64) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -340,11 +346,12 @@ func (b *boundInt) Get() (int, error) {
 
 func (b *boundInt) Set(val int) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -358,12 +365,13 @@ type boundExternalInt struct {
 
 func (b *boundExternalInt) Set(val int) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -431,11 +439,12 @@ func (b *boundRune) Get() (rune, error) {
 
 func (b *boundRune) Set(val rune) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -449,12 +458,13 @@ type boundExternalRune struct {
 
 func (b *boundExternalRune) Set(val rune) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -522,11 +532,12 @@ func (b *boundString) Get() (string, error) {
 
 func (b *boundString) Set(val string) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if *b.val == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -540,12 +551,13 @@ type boundExternalString struct {
 
 func (b *boundExternalString) Set(val string) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -613,11 +625,12 @@ func (b *boundURI) Get() (fyne.URI, error) {
 
 func (b *boundURI) Set(val fyne.URI) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if compareURI(*b.val, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -631,12 +644,13 @@ type boundExternalURI struct {
 
 func (b *boundExternalURI) Set(val fyne.URI) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if compareURI(b.old, val) {
+		b.lock.Unlock()
 		return nil
 	}
 	*b.val = val
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil

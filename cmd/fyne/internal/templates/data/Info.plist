@@ -26,6 +26,14 @@
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	{{- if .Languages}}
+	<key>CFBundleLocalizations</key>
+	<array>
+		{{- range .Languages}}
+		<string>{{.}}</string>
+		{{- end}}
+	</array>
+	{{- end}}
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.{{.Category}}</string>
 	<key>LSMinimumSystemVersion</key>
