@@ -75,6 +75,30 @@ func TestList_Resize(t *testing.T) {
 	assert.True(t, resizeCountAllGreaterOrEqual)
 }
 
+func TestList_OnFocused(t *testing.T) {
+	l, _, rows := setupList(t)
+	var selectedId widget.ListItemID
+	l.OnFocused = func(id widget.ListItemID) {
+		selectedId = id
+	}
+	l.FocusGained()
+	assert.Equal(t, selectedId, 0)
+	l.FocusLost()
+	assert.Equal(t, selectedId, -1)
+	l.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	assert.Equal(t, selectedId, 1)
+	l.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+	assert.Equal(t, selectedId, 0)
+	for index, _ := range rows {
+		l.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+		assert.Equal(t, selectedId, index+1)
+	}
+	for index, _ := range rows {
+		l.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+		assert.Equal(t, selectedId, len(rows)-(index+1))
+	}
+}
+
 func setupList(t *testing.T) (*widget.List, fyne.Window, []*resizeRefreshCountingLabel) {
 	var rows []*resizeRefreshCountingLabel
 	test.NewTempApp(t)
