@@ -2,6 +2,8 @@ package binding
 
 import (
 	"sync/atomic"
+
+	"fyne.io/fyne/v2"
 )
 
 func newBaseItem[T bool | float64 | int | rune | string]() *baseItem[T] {
@@ -104,4 +106,26 @@ func (b *prefBoundBase[T]) checkForChange() {
 		return
 	}
 	b.trigger()
+}
+
+type genericItem[T any] interface {
+	DataItem
+	Get() (T, error)
+	Set(T) error
+}
+
+func lookupExistingBinding[T any](key string, p fyne.Preferences) (genericItem[T], bool) {
+	binds := prefBinds.getBindings(p)
+	if binds == nil {
+		return nil, false
+	}
+
+	if listen, ok := binds.Load(key); listen != nil && ok {
+		if l, ok := listen.(genericItem[T]); ok {
+			return l, ok
+		}
+		fyne.LogError(keyTypeMismatchError+key, nil)
+	}
+
+	return nil, false
 }

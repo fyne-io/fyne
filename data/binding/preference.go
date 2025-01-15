@@ -13,15 +13,15 @@ type prefBoundBool struct {
 //
 // Since: 2.0
 func BindPreferenceBool(key string, p fyne.Preferences) Bool {
-	if found, ok := lookupExistingBinding(key, p); ok {
-		if l, ok := found.(Bool); ok {
-			return l
-		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
+	if found, ok := lookupExistingBinding[bool](key, p); ok {
+		return found
 	}
 
 	listen := &prefBoundBool{}
-	setupPrefItem(listen, key, p)
+	listen.setKey(key)
+	listen.replaceProvider(p)
+	binds := prefBinds.ensurePreferencesAttached(p)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -39,15 +39,15 @@ type prefBoundFloat struct {
 //
 // Since: 2.0
 func BindPreferenceFloat(key string, p fyne.Preferences) Float {
-	if found, ok := lookupExistingBinding(key, p); ok {
-		if l, ok := found.(Float); ok {
-			return l
-		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
+	if found, ok := lookupExistingBinding[float64](key, p); ok {
+		return found
 	}
 
 	listen := &prefBoundFloat{}
-	setupPrefItem(listen, key, p)
+	listen.setKey(key)
+	listen.replaceProvider(p)
+	binds := prefBinds.ensurePreferencesAttached(p)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -65,15 +65,15 @@ type prefBoundInt struct {
 //
 // Since: 2.0
 func BindPreferenceInt(key string, p fyne.Preferences) Int {
-	if found, ok := lookupExistingBinding(key, p); ok {
-		if l, ok := found.(Int); ok {
-			return l
-		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
+	if found, ok := lookupExistingBinding[int](key, p); ok {
+		return found
 	}
 
 	listen := &prefBoundInt{}
-	setupPrefItem(listen, key, p)
+	listen.setKey(key)
+	listen.replaceProvider(p)
+	binds := prefBinds.ensurePreferencesAttached(p)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -91,46 +91,19 @@ type prefBoundString struct {
 //
 // Since: 2.0
 func BindPreferenceString(key string, p fyne.Preferences) String {
-	if found, ok := lookupExistingBinding(key, p); ok {
-		if l, ok := found.(String); ok {
-			return l
-		}
-		fyne.LogError(keyTypeMismatchError+key, nil)
+	if found, ok := lookupExistingBinding[string](key, p); ok {
+		return found
 	}
 
 	listen := &prefBoundString{}
-	setupPrefItem(listen, key, p)
+	listen.setKey(key)
+	listen.replaceProvider(p)
+	binds := prefBinds.ensurePreferencesAttached(p)
+	binds.Store(key, listen)
 	return listen
 }
 
 func (b *prefBoundString) replaceProvider(p fyne.Preferences) {
 	b.get = p.String
 	b.set = p.SetString
-}
-
-func lookupExistingBinding(key string, p fyne.Preferences) (preferenceItem, bool) {
-	binds := prefBinds.getBindings(p)
-	if binds == nil {
-		return nil, false
-	}
-
-	if listen, ok := binds.Load(key); listen != nil && ok {
-		return listen, true
-	}
-
-	return nil, false
-}
-
-type prefBoundItem interface {
-	preferenceItem
-	setKey(string)
-	replaceProvider(fyne.Preferences)
-}
-
-func setupPrefItem(listen prefBoundItem, key string, p fyne.Preferences) preferenceItem {
-	listen.setKey(key)
-	listen.replaceProvider(p)
-	binds := prefBinds.ensurePreferencesAttached(p)
-	binds.Store(key, listen)
-	return listen
 }
