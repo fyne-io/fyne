@@ -242,3 +242,14 @@ func TestGridWrap_Selection(t *testing.T) {
 	assert.Equal(t, -1, selected)
 	assert.Equal(t, 9, unselected)
 }
+
+func TestGridWrap_ResizeToSameSizeBeforeRender(t *testing.T) {
+	g := NewGridWrap(
+		func() int { return 1 },
+		func() fyne.CanvasObject { return NewLabel("") },
+		func(gwii GridWrapItemID, co fyne.CanvasObject) { co.(*Label).SetText("foo") },
+	)
+	// will not create renderer.
+	// will crash if GridWrap scroller (not yet created) is accessed
+	g.Resize(fyne.NewSize(0, 0))
+}
