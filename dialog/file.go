@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -68,8 +67,7 @@ type fileDialog struct {
 
 	view ViewLayout
 
-	data     []fyne.URI
-	dataLock sync.RWMutex
+	data []fyne.URI
 
 	win        *widget.PopUp
 	selected   fyne.URI
@@ -391,9 +389,7 @@ func (f *fileDialog) loadFavorites() {
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
-	f.dataLock.Lock()
 	f.data = nil
-	f.dataLock.Unlock()
 
 	files, err := dir.List()
 	if err != nil {
@@ -426,9 +422,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		}
 	}
 
-	f.dataLock.Lock()
 	f.data = icons
-	f.dataLock.Unlock()
 
 	f.files.Refresh()
 	f.filesScroll.Offset = fyne.NewPos(0, 0)
@@ -551,9 +545,6 @@ func (f *fileDialog) setView(view ViewLayout) {
 		}
 	}
 	count := func() int {
-		f.dataLock.RLock()
-		defer f.dataLock.RUnlock()
-
 		return len(f.data)
 	}
 	template := func() fyne.CanvasObject {
@@ -593,9 +584,6 @@ func (f *fileDialog) setView(view ViewLayout) {
 }
 
 func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
-	f.dataLock.RLock()
-	defer f.dataLock.RUnlock()
-
 	if id >= len(f.data) {
 		return nil, false
 	}

@@ -3,7 +3,6 @@ package common
 import (
 	"image/color"
 	"reflect"
-	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -436,8 +435,6 @@ func (c *Canvas) walkTree(
 	beforeChildren func(*RenderCacheNode, fyne.Position),
 	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
-	tree.Lock()
-	defer tree.Unlock()
 	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
@@ -538,7 +535,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 }
 
 type renderCacheTree struct {
-	sync.RWMutex
 	root *RenderCacheNode
 }
 
