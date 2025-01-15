@@ -561,6 +561,12 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 		w.mouseClickCount++
 		w.mouseLastClick = co
 
+		mouseCancelFunc := w.mouseCancelFunc
+		if mouseCancelFunc != nil {
+			mouseCancelFunc()
+			return
+		}
+
 		go w.waitForDoubleTap(co, ev)
 	} else {
 		if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
@@ -572,11 +578,10 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	ctx, mouseCancelFunc := context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
-	if mouseCancelFunc != nil {
-		defer func() {
-			runOnMain(mouseCancelFunc)
-		}()
-	}
+	defer runOnMain(mouseCancelFunc)
+	runOnMain(func() {
+		w.mouseCancelFunc = mouseCancelFunc
+	})
 
 	<-ctx.Done()
 
@@ -598,6 +603,7 @@ func (w *window) waitForDoubleTapEnded(co fyne.CanvasObject, ev *fyne.PointEvent
 
 	w.mouseClickCount = 0
 	w.mousePressed = nil
+	w.mouseCancelFunc = nil
 	w.mouseLastClick = nil
 }
 
