@@ -578,9 +578,7 @@ func (w *window) mouseClickedHandleTapDoubleTap(co fyne.CanvasObject, ev *fyne.P
 
 func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	ctx, mouseCancelFunc := context.WithDeadline(context.TODO(), time.Now().Add(w.driver.DoubleTapDelay()))
-	defer func() {
-		runOnMain(mouseCancelFunc)
-	}()
+	defer runOnMain(mouseCancelFunc)
 	runOnMain(func() {
 		w.mouseCancelFunc = mouseCancelFunc
 	})
