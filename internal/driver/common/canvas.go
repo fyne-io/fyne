@@ -508,7 +508,6 @@ type activatableMenu interface {
 type overlayStack struct {
 	internal.OverlayStack
 
-	propertyLock sync.RWMutex
 	renderCaches []*renderCacheTree
 }
 
@@ -516,8 +515,6 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.add(overlay)
 }
 
@@ -525,8 +522,6 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(o.List()) == 0 {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.remove(overlay)
 }
 

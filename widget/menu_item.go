@@ -125,6 +125,13 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 		if fyne.CurrentDevice().IsMobile() {
 			i.activate()
 		}
+
+		return
+	} else if i.Item.ChildMenu != nil {
+		if fyne.CurrentDevice().IsMobile() {
+			i.activate()
+		}
+
 		return
 	}
 
