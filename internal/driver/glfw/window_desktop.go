@@ -4,6 +4,7 @@ package glfw
 
 import (
 	"bytes"
+	"context"
 	"image"
 	_ "image/png" // for the icon
 	"os"
@@ -95,6 +96,7 @@ type window struct {
 	mouseLastClick       fyne.CanvasObject
 	mousePressed         fyne.CanvasObject
 	mouseClickCount      int
+	mouseCancelFunc      context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
