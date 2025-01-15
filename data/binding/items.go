@@ -27,7 +27,7 @@ type ExternalBool interface {
 //
 // Since: 2.0
 func NewBool() Bool {
-	return newBaseItem[bool]()
+	return newBaseItemComparable[bool]()
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -35,7 +35,7 @@ func NewBool() Bool {
 //
 // Since: 2.0
 func BindBool(v *bool) ExternalBool {
-	return baseBindExternal(v)
+	return baseBindExternalComparable(v)
 }
 
 // Bytes supports binding a []byte value.
@@ -59,7 +59,7 @@ type ExternalBytes interface {
 //
 // Since: 2.2
 func NewBytes() Bytes {
-	return &boundBytes{val: new([]byte)}
+	return newBaseItem(bytes.Equal)
 }
 
 // BindBytes returns a new bindable value that controls the contents of the provided []byte variable.
@@ -67,65 +67,7 @@ func NewBytes() Bytes {
 //
 // Since: 2.2
 func BindBytes(v *[]byte) ExternalBytes {
-	if v == nil {
-		v = new([]byte) // never allow a nil value pointer
-	}
-	b := &boundExternalBytes{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundBytes struct {
-	base
-
-	val *[]byte
-}
-
-func (b *boundBytes) Get() ([]byte, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return nil, nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundBytes) Set(val []byte) error {
-	b.lock.Lock()
-	equal := bytes.Equal(*b.val, val)
-	*b.val = val
-	b.lock.Unlock()
-
-	if !equal {
-		b.trigger()
-	}
-	return nil
-}
-
-type boundExternalBytes struct {
-	boundBytes
-
-	old []byte
-}
-
-func (b *boundExternalBytes) Set(val []byte) error {
-	b.lock.Lock()
-	if bytes.Equal(b.old, val) {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalBytes) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v, bytes.Equal)
 }
 
 // Float supports binding a float64 value.
@@ -149,7 +91,7 @@ type ExternalFloat interface {
 //
 // Since: 2.0
 func NewFloat() Float {
-	return newBaseItem[float64]()
+	return newBaseItemComparable[float64]()
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -157,7 +99,7 @@ func NewFloat() Float {
 //
 // Since: 2.0
 func BindFloat(v *float64) ExternalFloat {
-	return baseBindExternal(v)
+	return baseBindExternalComparable(v)
 }
 
 // Int supports binding a int value.
@@ -181,7 +123,7 @@ type ExternalInt interface {
 //
 // Since: 2.0
 func NewInt() Int {
-	return newBaseItem[int]()
+	return newBaseItemComparable[int]()
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -189,7 +131,7 @@ func NewInt() Int {
 //
 // Since: 2.0
 func BindInt(v *int) ExternalInt {
-	return baseBindExternal(v)
+	return baseBindExternalComparable(v)
 }
 
 // Rune supports binding a rune value.
@@ -213,7 +155,7 @@ type ExternalRune interface {
 //
 // Since: 2.0
 func NewRune() Rune {
-	return newBaseItem[rune]()
+	return newBaseItemComparable[rune]()
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -221,7 +163,7 @@ func NewRune() Rune {
 //
 // Since: 2.0
 func BindRune(v *rune) ExternalRune {
-	return baseBindExternal(v)
+	return baseBindExternalComparable(v)
 }
 
 // String supports binding a string value.
@@ -245,7 +187,7 @@ type ExternalString interface {
 //
 // Since: 2.0
 func NewString() String {
-	return newBaseItem[string]()
+	return newBaseItemComparable[string]()
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -253,7 +195,7 @@ func NewString() String {
 //
 // Since: 2.0
 func BindString(v *string) ExternalString {
-	return baseBindExternal(v)
+	return baseBindExternalComparable(v)
 }
 
 // URI supports binding a fyne.URI value.
@@ -277,7 +219,7 @@ type ExternalURI interface {
 //
 // Since: 2.1
 func NewURI() URI {
-	return &boundURI{val: new(fyne.URI)}
+	return newBaseItem(compareURI)
 }
 
 // BindURI returns a new bindable value that controls the contents of the provided fyne.URI variable.
@@ -285,63 +227,5 @@ func NewURI() URI {
 //
 // Since: 2.1
 func BindURI(v *fyne.URI) ExternalURI {
-	if v == nil {
-		v = new(fyne.URI)
-	}
-	b := &boundExternalURI{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type boundURI struct {
-	base
-
-	val *fyne.URI
-}
-
-func (b *boundURI) Get() (fyne.URI, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return fyne.URI(nil), nil
-	}
-	return *b.val, nil
-}
-
-func (b *boundURI) Set(val fyne.URI) error {
-	b.lock.Lock()
-	equal := compareURI(*b.val, val)
-	*b.val = val
-	b.lock.Unlock()
-
-	if !equal {
-		b.trigger()
-	}
-	return nil
-}
-
-type boundExternalURI struct {
-	boundURI
-
-	old fyne.URI
-}
-
-func (b *boundExternalURI) Set(val fyne.URI) error {
-	b.lock.Lock()
-	if compareURI(b.old, val) {
-		b.lock.Unlock()
-		return nil
-	}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternalURI) Reload() error {
-	return b.Set(*b.val)
+	return baseBindExternal(v, compareURI)
 }

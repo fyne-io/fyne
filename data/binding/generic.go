@@ -6,14 +6,19 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func newBaseItem[T bool | float64 | int | rune | string]() *baseItem[T] {
-	return &baseItem[T]{val: new(T)}
+func newBaseItem[T any](comparator func(T, T) bool) *baseItem[T] {
+	return &baseItem[T]{val: new(T), comparator: comparator}
 }
 
-type baseItem[T bool | float64 | int | rune | string] struct {
+func newBaseItemComparable[T bool | float64 | int | rune | string]() *baseItem[T] {
+	return newBaseItem[T](func(a, b T) bool { return a == b })
+}
+
+type baseItem[T any] struct {
 	base
 
-	val *T
+	comparator func(T, T) bool
+	val        *T
 }
 
 func (b *baseItem[T]) Get() (T, error) {
@@ -28,28 +33,40 @@ func (b *baseItem[T]) Get() (T, error) {
 
 func (b *baseItem[T]) Set(val T) error {
 	b.lock.Lock()
-	oldVal := *b.val
+	equal := b.comparator(*b.val, val)
 	*b.val = val
 	b.lock.Unlock()
 
-	if oldVal != val {
+	if !equal {
 		b.trigger()
 	}
 
 	return nil
 }
 
-func baseBindExternal[T bool | float64 | int | rune | string](val *T) *baseExternalItem[T] {
+func baseBindExternal[T any](val *T, comparator func(T, T) bool) *baseExternalItem[T] {
 	if val == nil {
 		val = new(T) // never allow a nil value pointer
 	}
 	b := &baseExternalItem[T]{}
+	b.comparator = comparator
 	b.val = val
 	b.old = *val
 	return b
 }
 
-type baseExternalItem[T bool | float64 | int | rune | string] struct {
+func baseBindExternalComparable[T bool | float64 | int | rune | string](val *T) *baseExternalItem[T] {
+	if val == nil {
+		val = new(T) // never allow a nil value pointer
+	}
+	b := &baseExternalItem[T]{}
+	b.comparator = func(a, b T) bool { return a == b }
+	b.val = val
+	b.old = *val
+	return b
+}
+
+type baseExternalItem[T any] struct {
 	baseItem[T]
 
 	old T
@@ -57,7 +74,7 @@ type baseExternalItem[T bool | float64 | int | rune | string] struct {
 
 func (b *baseExternalItem[T]) Set(val T) error {
 	b.lock.Lock()
-	if b.old == val {
+	if b.comparator(b.old, val) {
 		b.lock.Unlock()
 		return nil
 	}
