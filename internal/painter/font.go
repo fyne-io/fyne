@@ -31,9 +31,8 @@ const (
 )
 
 var (
-	fm      *fontscan.FontMap
-	mapLock = sync.Mutex{}
-	load    sync.Once
+	fm   *fontscan.FontMap
+	load sync.Once
 )
 
 func loadMap() {
@@ -45,8 +44,6 @@ func loadMap() {
 }
 
 func lookupLangFont(family string, aspect font.Aspect) *font.Face {
-	mapLock.Lock()
-	defer mapLock.Unlock()
 	load.Do(loadMap)
 	if fm == nil {
 		return nil
@@ -58,8 +55,6 @@ func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 }
 
 func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
-	mapLock.Lock()
-	defer mapLock.Unlock()
 	load.Do(loadMap)
 	if fm == nil {
 		return nil

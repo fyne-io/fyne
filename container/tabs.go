@@ -1,8 +1,6 @@
 package container
 
 import (
-	"sync"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -298,7 +296,6 @@ func enableItem(t baseTabs, item *TabItem) {
 type baseTabsRenderer struct {
 	positionAnimation, sizeAnimation *fyne.Animation
 
-	lastIndicatorMutex  sync.RWMutex
 	lastIndicatorPos    fyne.Position
 	lastIndicatorSize   fyne.Size
 	lastIndicatorHidden bool
@@ -426,10 +423,8 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 }
 
 func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fyne.Theme, animate bool) {
-	r.lastIndicatorMutex.RLock()
 	isSameState := r.lastIndicatorPos.Subtract(pos).IsZero() && r.lastIndicatorSize.Subtract(siz).IsZero() &&
 		r.lastIndicatorHidden == r.indicator.Hidden
-	r.lastIndicatorMutex.RUnlock()
 	if isSameState {
 		return
 	}
@@ -452,11 +447,9 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fy
 		return
 	}
 
-	r.lastIndicatorMutex.Lock()
 	r.lastIndicatorPos = pos
 	r.lastIndicatorSize = siz
 	r.lastIndicatorHidden = r.indicator.Hidden
-	r.lastIndicatorMutex.Unlock()
 
 	if animate && fyne.CurrentApp().Settings().ShowAnimations() {
 		r.positionAnimation = canvas.NewPositionAnimation(r.indicator.Position(), pos, canvas.DurationShort, func(p fyne.Position) {
