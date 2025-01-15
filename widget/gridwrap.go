@@ -154,8 +154,10 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 func (l *GridWrap) Resize(s fyne.Size) {
 	l.colCountCache = 0
 	l.BaseWidget.Resize(s)
-	l.offsetUpdated(l.scroller.Offset)
-	l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
+	if l.scroller != nil {
+		l.offsetUpdated(l.scroller.Offset)
+		l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
+	}
 }
 
 // Select adds the item identified by the given ID to the selection.
