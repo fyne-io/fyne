@@ -6,7 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var overrides = make(map[fyne.CanvasObject]*overrideScope)
+var (
+	overrides = make(map[fyne.CanvasObject]*overrideScope)
+	scopeID   int
+)
 
 type overrideScope struct {
 	th      fyne.Theme
@@ -19,7 +22,8 @@ type overrideScope struct {
 //
 // Since: 2.5
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
-	s := &overrideScope{th: th, cacheID: strconv.Itoa(len(overrides))}
+	s := &overrideScope{th: th, cacheID: strconv.Itoa(scopeID)}
+	scopeID++
 	overrideTheme(o, s)
 }
 
