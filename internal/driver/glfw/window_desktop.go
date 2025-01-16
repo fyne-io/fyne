@@ -789,6 +789,7 @@ func (w *window) create() {
 	for _, fn := range w.pending {
 		fn()
 	}
+	w.pending = nil // Clear out any pending operations.
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
