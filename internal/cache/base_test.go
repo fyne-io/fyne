@@ -192,23 +192,6 @@ func Test_expiringCache(t *testing.T) {
 	assert.True(t, c.isExpired(tm.now))
 }
 
-func Test_expiringCacheNoLock(t *testing.T) {
-	tm := &timeMock{}
-	tm.setTime(10, 10)
-
-	c := &expiringCacheNoLock{}
-	assert.True(t, c.isExpired(tm.now))
-
-	c.setAlive()
-
-	tm.setTime(10, 20)
-	assert.False(t, c.isExpired(tm.now))
-
-	tm.setTime(10, 11)
-	tm.now = tm.now.Add(cacheDuration)
-	assert.True(t, c.isExpired(tm.now))
-}
-
 type dummyCanvas struct {
 	fyne.Canvas
 }

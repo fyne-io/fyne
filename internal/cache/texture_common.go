@@ -99,6 +99,6 @@ func prepareTexture(texture TextureType, canvas fyne.Canvas, free func()) *textu
 
 // textureCacheBase defines base texture cache object.
 type textureCacheBase struct {
-	expiringCacheNoLock
+	expiringCache
 	canvas fyne.Canvas
 }

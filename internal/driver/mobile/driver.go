@@ -4,7 +4,6 @@ import (
 	"math"
 	"runtime"
 	"strconv"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -61,7 +60,7 @@ type driver struct {
 	theme           fyne.ThemeVariant
 	onConfigChanged func(*Configuration)
 	painting        bool
-	running         atomic.Bool
+	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
 }
 
@@ -153,9 +152,10 @@ func (d *driver) Quit() {
 }
 
 func (d *driver) Run() {
-	if !d.running.CompareAndSwap(false, true) {
+	if d.running {
 		return // Run was called twice.
 	}
+	d.running = true
 
 	app.Main(func(a app.App) {
 		d.app = a

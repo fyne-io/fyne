@@ -2,7 +2,6 @@ package cache
 
 import (
 	"os"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -181,35 +180,15 @@ func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
 }
 
 type expiringCache struct {
-	expires atomic.Pointer[time.Time]
-}
-
-// isExpired check if the cache data is expired.
-func (c *expiringCache) isExpired(now time.Time) bool {
-	t := c.expires.Load()
-	if t == nil {
-		return (time.Time{}).Before(now)
-	}
-	return (*t).Before(now)
-}
-
-// setAlive updates expiration time.
-func (c *expiringCache) setAlive() {
-	time := timeNow().Add(cacheDuration)
-	c.expires.Store(&time)
-}
-
-type expiringCacheNoLock struct {
 	expires time.Time
 }
 
 // isExpired check if the cache data is expired.
-func (c *expiringCacheNoLock) isExpired(now time.Time) bool {
+func (c *expiringCache) isExpired(now time.Time) bool {
 	return c.expires.Before(now)
 }
 
 // setAlive updates expiration time.
-func (c *expiringCacheNoLock) setAlive() {
-	t := timeNow().Add(cacheDuration)
-	c.expires = t
+func (c *expiringCache) setAlive() {
+	c.expires = timeNow().Add(cacheDuration)
 }
