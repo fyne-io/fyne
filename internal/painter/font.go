@@ -17,6 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -95,7 +96,7 @@ func lookupFaces(theme, fallback, emoji fyne.Resource, family string, style fyne
 // CachedFontFace returns a Font face held in memory. These are loaded from the current theme.
 func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObject) *FontCacheItem {
 	if source != nil {
-		val, ok := fontCustomCache[source]
+		val, ok := fontCustomCache.Load(source)
 		if !ok {
 			face := loadMeasureFont(source)
 			if face == nil {
@@ -104,7 +105,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			faces := &dynamicFontMap{family: source.Name(), faces: []*font.Face{face}}
 
 			val = &FontCacheItem{Fonts: faces}
-			fontCustomCache[source] = val
+			fontCustomCache.Store(source, val)
 		}
 		return val
 	}
@@ -114,7 +115,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		scope = cache.WidgetScopeID(o)
 	}
 
-	val, ok := fontCache[cacheID{style: style, scope: scope}]
+	val, ok := fontCache.Load(cacheID{style: style, scope: scope})
 	if !ok {
 		var faces *dynamicFontMap
 
@@ -149,7 +150,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		}
 
 		val = &FontCacheItem{Fonts: faces}
-		fontCache[cacheID{style: style, scope: scope}] = val
+		fontCache.Store(cacheID{style: style, scope: scope}, val)
 	}
 
 	return val
@@ -157,13 +158,8 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load Font faces
 func ClearFontCache() {
-	for key := range fontCache {
-		delete(fontCache, key)
-	}
-
-	for key := range fontCustomCache {
-		delete(fontCustomCache, key)
-	}
+	fontCache.Clear()
+	fontCustomCache.Clear()
 }
 
 // DrawString draws a string into an image.
@@ -344,8 +340,8 @@ type cacheID struct {
 	scope string
 }
 
-var fontCache = make(map[cacheID]*FontCacheItem)
-var fontCustomCache = make(map[fyne.Resource]*FontCacheItem) // for custom resources
+var fontCache async.Map[cacheID, *FontCacheItem]
+var fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
 
 type noopLogger struct{}
 

@@ -77,13 +77,12 @@ func CleanCanvas(canvas fyne.Canvas) {
 		if !ok {
 			continue
 		}
-		rinfo, ok := renderers[wid]
+		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok {
 			continue
 		}
 		rinfo.renderer.Destroy()
-		delete(renderers, wid)
-		delete(overrides, wid)
+		overrides.Delete(wid)
 	}
 }
 
@@ -123,26 +122,20 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 		if !ok {
 			continue
 		}
-		rinfo, ok := renderers[wid]
+		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok || !rinfo.isExpired(now) {
 			continue
 		}
 		rinfo.renderer.Destroy()
-		delete(renderers, wid)
-		delete(overrides, wid)
+		overrides.Delete(wid)
 	}
 	lastClean = timeNow()
 }
 
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
-	for k := range svgs {
-		delete(svgs, k)
-	}
-
-	for k := range fontSizeCache {
-		delete(fontSizeCache, k)
-	}
+	svgs.Clear()
+	fontSizeCache.Clear()
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
@@ -157,13 +150,14 @@ func destroyExpiredCanvases(now time.Time) {
 // destroyExpiredRenderers deletes the renderer from the cache and calls
 // renderer.Destroy()
 func destroyExpiredRenderers(now time.Time) {
-	for wid, rinfo := range renderers {
+	renderers.Range(func(wid fyne.Widget, rinfo *rendererInfo) bool {
 		if rinfo.isExpired(now) {
 			rinfo.renderer.Destroy()
-			delete(overrides, wid)
-			delete(renderers, wid)
+			overrides.Delete(wid)
+			renderers.Delete(wid)
 		}
-	}
+		return true
+	})
 }
 
 // matchesACanvas returns true if the canvas represented by the canvasInfo object matches one of
