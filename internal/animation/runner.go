@@ -104,6 +104,13 @@ func (r *Runner) runOneFrame() (done bool) {
 	r.animationMutex.Lock()
 	oldList := r.animations
 	r.animationMutex.Unlock()
+
+	if len(oldList) > 0 {
+		if drv, ok := fyne.CurrentApp().Driver().(interface{ PostEmptyEvent() }); ok {
+			drv.PostEmptyEvent()
+		}
+	}
+
 	for _, a := range oldList {
 		if !a.isStopped() && r.tickAnimation(a) {
 			r.nextFrameAnimations = append(r.nextFrameAnimations, a)
