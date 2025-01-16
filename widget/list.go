@@ -31,11 +31,26 @@ var _ fyne.Focusable = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length       func() int                                  `json:"-"`
-	CreateItem   func() fyne.CanvasObject                    `json:"-"`
-	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
-	OnSelected   func(id ListItemID)                         `json:"-"`
-	OnUnselected func(id ListItemID)                         `json:"-"`
+	// Length is a callback for returning the number of items in the list.
+	Length func() int `json:"-"`
+
+	// CreateItem is a callback invoked to create a new widget to render
+	// a row in the list.
+	CreateItem func() fyne.CanvasObject `json:"-"`
+
+	// UpdateItem is a callback invoked to update a list row widget
+	// to display a new row in the list. The UpdateItem callback should
+	// only update the given item, it should not invoke APIs that would
+	// change other properties of the list itself.
+	UpdateItem func(id ListItemID, item fyne.CanvasObject) `json:"-"`
+
+	// OnSelected is a callback to be notified when a given item
+	// in the list has been selected.
+	OnSelected func(id ListItemID) `json:"-"`
+
+	// OnSelected is a callback to be notified when a given item
+	// in the list has been unselected.
+	OnUnselected func(id ListItemID) `json:"-"`
 
 	// HideSeparators hides the separators between list rows
 	//
@@ -606,16 +621,12 @@ type listLayout struct {
 
 	itemPool          async.Pool[fyne.CanvasObject]
 	visible           []listItemAndID
-	slicePool         async.Pool[*[]listItemAndID]
+	wasVisible        []listItemAndID
 	visibleRowHeights []float32
 }
 
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
-	l.slicePool.New = func() *[]listItemAndID {
-		s := make([]listItemAndID, 0)
-		return &s
-	}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -693,19 +704,16 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	// Keep pointer reference for copying slice header when returning to the pool
-	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get()
-	wasVisible := (*wasVisiblePtr)[:0]
-	wasVisible = append(wasVisible, l.visible...)
+	// l.wasVisible now represents the currently visible items, while
+	// l.visible will be updated to represent what is visible *after* the update
+	l.wasVisible = append(l.wasVisible, l.visible...)
+	l.visible = l.visible[:0]
 
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		return
 	}
 
-	oldVisibleLen := len(l.visible)
-	l.visible = l.visible[:0]
 	oldChildrenLen := len(l.children)
 	l.children = l.children[:0]
 
@@ -714,7 +722,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		c, ok := l.searchVisible(wasVisible, row)
+		c, ok := l.searchVisible(l.wasVisible, row)
 		if !ok {
 			c = l.getItem()
 			if c == nil {
@@ -731,9 +739,8 @@ func (l *listLayout) updateList(newOnly bool) {
 		l.children = append(l.children, c)
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
-	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
-	for _, wasVis := range wasVisible {
+	for _, wasVis := range l.wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
 			l.itemPool.Put(wasVis.item)
 		}
@@ -748,35 +755,24 @@ func (l *listLayout) updateList(newOnly bool) {
 	c.Objects = append(c.Objects, l.separators...)
 	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
 
-	// make a local deep copy of l.visible since rest of this function is unlocked
-	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get()
-	visible := (*visiblePtr)[:0]
-	visible = append(visible, l.visible...)
-
 	if newOnly {
-		for _, vis := range visible {
-			if _, ok := l.searchVisible(wasVisible, vis.id); !ok {
+		for _, vis := range l.visible {
+			if _, ok := l.searchVisible(l.wasVisible, vis.id); !ok {
 				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 			}
 		}
 	} else {
-		for _, vis := range visible {
+		for _, vis := range l.visible {
 			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
 	}
 
-	// nil out all references before returning slices to pool
-	for i := 0; i < len(wasVisible); i++ {
-		wasVisible[i].item = nil
+	// we don't need wasVisible now until next call to update
+	// nil out all references before truncating slice
+	for i := 0; i < len(l.wasVisible); i++ {
+		l.wasVisible[i].item = nil
 	}
-	for i := 0; i < len(visible); i++ {
-		visible[i].item = nil
-	}
-	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
-	*visiblePtr = visible
-	l.slicePool.Put(wasVisiblePtr)
-	l.slicePool.Put(visiblePtr)
+	l.wasVisible = l.wasVisible[:0]
 }
 
 func (l *listLayout) updateSeparators() {
@@ -830,15 +826,6 @@ func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) 
 		objs = objs[:oldLen] // gain view into old data
 		for i := len; i < oldLen; i++ {
 			objs[i] = nil
-		}
-	}
-}
-
-func (l *listLayout) nilOldVisibleSliceData(objs []listItemAndID, len, oldLen int) {
-	if oldLen > len {
-		objs = objs[:oldLen] // gain view into old data
-		for i := len; i < oldLen; i++ {
-			objs[i].item = nil
 		}
 	}
 }
