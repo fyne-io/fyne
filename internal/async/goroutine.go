@@ -23,6 +23,18 @@ func IsMainGoroutine() bool {
 	return goroutineID() == mainGoroutineID
 }
 
+func EnsureNotMain(fn func()) {
+	if build.DisableThreadChecks || !IsMainGoroutine() {
+		fn()
+		return
+	}
+
+	log.Println("*** Error in Fyne call thread, fyne.Do called from main goroutine ***")
+
+	logStackTop(2)
+	go fn()
+}
+
 func EnsureMain(fn func()) {
 	if build.DisableThreadChecks || IsMainGoroutine() {
 		fn()
@@ -31,8 +43,13 @@ func EnsureMain(fn func()) {
 
 	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do ***")
 
+	logStackTop(1)
+	fyne.Do(fn)
+}
+
+func logStackTop(skip int) {
 	pc := make([]uintptr, 2)
-	count := runtime.Callers(3, pc)
+	count := runtime.Callers(2+skip, pc)
 	frames := runtime.CallersFrames(pc)
 	frame, more := frames.Next()
 	if more && count > 1 {
@@ -42,6 +59,4 @@ func EnsureMain(fn func()) {
 		}
 	}
 	log.Printf("  From: %s:%d", frame.File, frame.Line)
-
-	fyne.Do(fn)
 }
