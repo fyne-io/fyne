@@ -1745,9 +1745,8 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 }
 
 func TestWindow_SetFullScreen(t *testing.T) {
-	var w *window
 	runOnMain(func() { // tests launch in a different context
-		w = d.CreateWindow("Full").(*window)
+		w := d.CreateWindow("Full").(*window)
 		w.SetFullScreen(true)
 		w.create()
 
