@@ -690,16 +690,13 @@ func TestTree_Tap(t *testing.T) {
 
 		tree.Refresh() // Force layout
 
-		selected := make(chan bool)
+		selected := false
 		tree.OnSelected = func(uid string) {
-			selected <- true
+			selected = true
 		}
-		go test.Tap(getBranch(t, tree, "A"))
-		select {
-		case <-selected:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Branch should have been selected")
-		}
+
+		test.Tap(getBranch(t, tree, "A"))
+		assert.True(t, selected, "Branch should have been selected")
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -708,17 +705,12 @@ func TestTree_Tap(t *testing.T) {
 
 		tree.Refresh() // Force layout
 
-		tapped := make(chan bool)
+		tapped := false
 		tree.OnBranchOpened = func(uid TreeNodeID) {
-			tapped <- true
+			tapped = true
 		}
-		go test.Tap(getBranch(t, tree, "A").icon.(*branchIcon))
-		select {
-		case open := <-tapped:
-			assert.True(t, open, "Branch should be open")
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Branch should have been changed")
-		}
+		test.Tap(getBranch(t, tree, "A").icon.(*branchIcon))
+		assert.True(t, tapped, "Branch should be open")
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -727,16 +719,12 @@ func TestTree_Tap(t *testing.T) {
 
 		tree.Refresh() // Force layout
 
-		selected := make(chan bool)
+		selected := false
 		tree.OnSelected = func(uid TreeNodeID) {
-			selected <- true
+			selected = true
 		}
-		go test.Tap(getLeaf(t, tree, "A"))
-		select {
-		case <-selected:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Leaf should have been selected")
-		}
+		test.Tap(getLeaf(t, tree, "A"))
+		assert.True(t, selected, "Leaf should have been selected")
 	})
 }
 
@@ -748,19 +736,14 @@ func TestTree_Unselect(t *testing.T) {
 	tree.Refresh() // Force layout
 	tree.Select("A")
 
-	unselection := make(chan string, 1)
+	unselection := ""
 	tree.OnUnselected = func(uid TreeNodeID) {
-		unselection <- uid
+		unselection = uid
 	}
 
 	tree.Unselect("A")
 	assert.Empty(t, tree.selected)
-	select {
-	case s := <-unselection:
-		assert.Equal(t, "A", s)
-	case <-time.After(1 * time.Second):
-		assert.Fail(t, "Selection should have been cleared")
-	}
+	assert.Equal(t, "A", unselection, "Selection should have been cleared")
 }
 
 func TestTree_Walk(t *testing.T) {
