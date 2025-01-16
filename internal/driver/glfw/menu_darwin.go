@@ -1,4 +1,4 @@
-//go:build !no_native_menus && !wasm && !test_web_driver
+//go:build darwin && !no_native_menus
 
 package glfw
 
@@ -267,10 +267,6 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 
 func setExceptionCallback(cb func(string)) {
 	ecb = cb
-}
-
-func hasNativeMenu() bool {
-	return true
 }
 
 //export menuCallback

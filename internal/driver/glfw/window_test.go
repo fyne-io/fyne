@@ -14,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/scale"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
@@ -1435,7 +1436,7 @@ func TestWindow_Padded(t *testing.T) {
 
 func TestWindow_SetPadded(t *testing.T) {
 	var menuHeight float32
-	if hasNativeMenu() {
+	if build.HasNativeMenu {
 		menuHeight = 0
 	} else {
 		menuHeight = canvas.NewText("", color.Black).MinSize().Height + theme.Padding()*2

@@ -3,7 +3,6 @@ package common
 import (
 	"image/color"
 	"reflect"
-	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -46,7 +45,7 @@ type Canvas struct {
 	// the refreshQueue is an unbounded queue which is able to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
-	dirty        atomic.Bool
+	dirty        bool
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
 }
@@ -342,12 +341,14 @@ func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 // CheckDirtyAndClear returns true if the canvas is dirty and
 // clears the dirty state atomically.
 func (c *Canvas) CheckDirtyAndClear() bool {
-	return c.dirty.Swap(false)
+	wasDirty := c.dirty
+	c.dirty = false
+	return wasDirty
 }
 
 // SetDirty sets canvas dirty flag atomically.
 func (c *Canvas) SetDirty() {
-	c.dirty.Store(true)
+	c.dirty = true
 }
 
 // SetMenuTreeAndFocusMgr sets menu tree and focus manager.

@@ -192,23 +192,6 @@ func Test_expiringCache(t *testing.T) {
 	assert.True(t, c.isExpired(tm.now))
 }
 
-func Test_expiringCacheNoLock(t *testing.T) {
-	tm := &timeMock{}
-	tm.setTime(10, 10)
-
-	c := &expiringCacheNoLock{}
-	assert.True(t, c.isExpired(tm.now))
-
-	c.setAlive()
-
-	tm.setTime(10, 20)
-	assert.False(t, c.isExpired(tm.now))
-
-	tm.setTime(10, 11)
-	tm.now = tm.now.Add(cacheDuration)
-	assert.True(t, c.isExpired(tm.now))
-}
-
 type dummyCanvas struct {
 	fyne.Canvas
 }
@@ -265,10 +248,7 @@ func (t *timeMock) setTime(min, sec int) {
 func testClearAll() {
 	skippedCleanWithCanvasRefresh = false
 	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
-	svgs.Range(func(key string, _ *svgInfo) bool {
-		svgs.Delete(key)
-		return true
-	})
+	svgs.Clear()
 	textTextures.Clear()
 	objectTextures.Clear()
 	renderers.Clear()

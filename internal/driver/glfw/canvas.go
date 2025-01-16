@@ -198,7 +198,7 @@ func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
 	if m == nil {
 		return
 	}
-	if hasNativeMenu() {
+	if build.HasNativeMenu {
 		setupNativeMenu(w, m)
 	} else {
 		c.setMenuOverlay(buildMenuOverlay(m, w))

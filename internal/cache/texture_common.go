@@ -87,17 +87,17 @@ func DeleteTextTexturesFor(canvas fyne.Canvas) {
 
 // SetTextTexture sets cached texture for a text run.
 func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas, free func()) {
-	tinfo := prepareTexture(ent, texture, canvas, free)
+	tinfo := prepareTexture(texture, canvas, free)
 	textTextures.Store(ent, tinfo)
 }
 
 // SetTexture sets cached texture.
 func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) {
-	tinfo := prepareTexture(obj, texture, canvas, nil)
+	tinfo := prepareTexture(texture, canvas, nil)
 	objectTextures.Store(obj, tinfo)
 }
 
-func prepareTexture(obj any, texture TextureType, canvas fyne.Canvas, free func()) *textureInfo {
+func prepareTexture(texture TextureType, canvas fyne.Canvas, free func()) *textureInfo {
 	tinfo := &textureInfo{texture: texture, textFree: free}
 	tinfo.canvas = canvas
 	tinfo.setAlive()
@@ -106,6 +106,6 @@ func prepareTexture(obj any, texture TextureType, canvas fyne.Canvas, free func(
 
 // textureCacheBase defines base texture cache object.
 type textureCacheBase struct {
-	expiringCacheNoLock
+	expiringCache
 	canvas fyne.Canvas
 }

@@ -65,9 +65,12 @@ func TestMenuBar(t *testing.T) {
 		container := container.NewWithoutLayout(button, menuBar)
 		w.SetContent(container)
 		w.Resize(fyne.NewSize(300, 300))
-		button.Resize(button.MinSize())
-		button.Move(fyne.NewPos(100, 50))
-		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+
+		runOnMain(func() {
+			button.Resize(button.MinSize())
+			button.Move(fyne.NewPos(100, 50))
+			menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+		})
 
 		buttonPos := fyne.NewPos(110, 60)
 		fileMenuPos := fyne.NewPos(20, 10)

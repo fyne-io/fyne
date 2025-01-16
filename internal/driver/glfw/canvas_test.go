@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/build"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -531,7 +532,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 func TestGlCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
 	var menuHeight float32
-	if hasNativeMenu() {
+	if build.HasNativeMenu {
 		menuHeight = 0
 	} else {
 		menuHeight = NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
