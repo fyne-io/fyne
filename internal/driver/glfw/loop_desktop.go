@@ -31,3 +31,7 @@ func (d *gLDriver) Terminate() {
 func (d *gLDriver) PostEmptyEvent() {
 	glfw.PostEmptyEvent()
 }
+
+func postEmptyEvent() {
+	glfw.PostEmptyEvent()
+}

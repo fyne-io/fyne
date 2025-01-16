@@ -50,9 +50,11 @@ func runOnMainWithWait(f func(), wait bool) {
 		defer common.DonePool.Put(done)
 
 		funcQueue.In() <- funcData{f: f, done: done}
+		postEmptyEvent()
 		<-done
 	} else {
 		funcQueue.In() <- funcData{f: f}
+		postEmptyEvent()
 	}
 }
 
