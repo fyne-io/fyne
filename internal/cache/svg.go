@@ -5,14 +5,13 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
 )
 
-var svgs async.Map[string, *svgInfo]
+var svgs = make(map[string]*svgInfo)
 
 // GetSvg gets svg image from cache if it exists.
 func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {
-	svginfo, ok := svgs.Load(overriddenName(name, o))
+	svginfo, ok := svgs[overriddenName(name, o)]
 	if !ok || svginfo == nil {
 		return nil
 	}
@@ -33,7 +32,7 @@ func SetSvg(name string, o fyne.CanvasObject, pix *image.NRGBA, w int, h int) {
 		h:   h,
 	}
 	sinfo.setAlive()
-	svgs.Store(overriddenName(name, o), sinfo)
+	svgs[overriddenName(name, o)] = sinfo
 }
 
 type svgInfo struct {
@@ -46,17 +45,16 @@ type svgInfo struct {
 
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
-	svgs.Range(func(key string, sinfo *svgInfo) bool {
+	for key, sinfo := range svgs {
 		if sinfo.isExpired(now) {
-			svgs.Delete(key)
+			delete(svgs, key)
 		}
-		return true
-	})
+	}
 }
 
 func overriddenName(name string, o fyne.CanvasObject) string {
 	if o != nil { // for overridden themes get the cache key right
-		if over, ok := overrides.Load(o); ok {
+		if over, ok := overrides[o]; ok {
 			return over.cacheID + name
 		}
 	}
