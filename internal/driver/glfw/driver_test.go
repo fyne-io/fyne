@@ -115,9 +115,11 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			pos := d.AbsolutePositionForObject(tt.object)
-			assert.Equal(t, tt.wantX, int(pos.X))
-			assert.Equal(t, tt.wantY, int(pos.Y))
+			runOnMain(func() {
+				pos := d.AbsolutePositionForObject(tt.object)
+				assert.Equal(t, tt.wantX, int(pos.X))
+				assert.Equal(t, tt.wantY, int(pos.Y))
+			})
 		})
 	}
 }
