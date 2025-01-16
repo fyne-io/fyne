@@ -248,10 +248,7 @@ func (t *timeMock) setTime(min, sec int) {
 func testClearAll() {
 	skippedCleanWithCanvasRefresh = false
 	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
-	svgs.Range(func(key string, _ *svgInfo) bool {
-		svgs.Delete(key)
-		return true
-	})
+	svgs.Clear()
 	textTextures.Clear()
 	objectTextures.Clear()
 	renderers.Clear()
