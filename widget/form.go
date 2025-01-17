@@ -340,7 +340,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 	}
 
 	ev, ok := item.Widget.(fyne.ExpandedValidator)
-	showHintIfError := ok && ev.ShouldDisplayValidation()
+	showHintIfError := ok && ev.ValidationVisible()
 
 	if item.validationError == nil || showHintIfError {
 		item.helperOutput.Text = item.HintText

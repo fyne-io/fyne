@@ -77,11 +77,11 @@ func (e *Entry) setValidationError(err error) bool {
 	return true
 }
 
-// ShouldDisplayValidation returns true if the entry has not been interacted with
+// ValidationVisible returns true if the entry has not been interacted with
 // or is currently focused.
 //
-// Since: 2.5
-func (e *Entry) ShouldDisplayValidation() bool {
+// Since: 2.6
+func (e *Entry) ValidationVisible() bool {
 	return !e.dirty || e.focused
 }
 
