@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
@@ -129,79 +130,85 @@ func (w *window) detectTextureScale() float32 {
 }
 
 func (w *window) Show() {
-	if w.view() != nil {
-		w.doShowAgain()
-		return
-	}
+	async.EnsureMain(func() {
+		if w.view() != nil {
+			w.doShowAgain()
+			return
+		}
 
-	w.createLock.Do(w.create)
-	if w.view() == nil {
-		return
-	}
+		w.createLock.Do(w.create)
+		if w.view() == nil {
+			return
+		}
 
-	w.visible = true
-	view := w.view()
-	view.SetTitle(w.title)
+		w.visible = true
+		view := w.view()
+		view.SetTitle(w.title)
 
-	if !build.IsWayland && w.centered {
-		w.doCenterOnScreen() // lastly center if that was requested
-	}
-	view.Show()
+		if !build.IsWayland && w.centered {
+			w.doCenterOnScreen() // lastly center if that was requested
+		}
+		view.Show()
 
-	// save coordinates
-	if !build.IsWayland {
-		w.xpos, w.ypos = view.GetPos()
-	}
+		// save coordinates
+		if !build.IsWayland {
+			w.xpos, w.ypos = view.GetPos()
+		}
 
-	if w.fullScreen { // this does not work if called before viewport.Show()
-		w.SetFullScreen(true)
-	}
+		if w.fullScreen { // this does not work if called before viewport.Show()
+			w.SetFullScreen(true)
+		}
 
-	// show top canvas element
-	if content := w.canvas.Content(); content != nil {
-		content.Show()
+		// show top canvas element
+		if content := w.canvas.Content(); content != nil {
+			content.Show()
 
-		w.RunWithContext(func() {
-			w.driver.repaintWindow(w)
-		})
-	}
+			w.RunWithContext(func() {
+				w.driver.repaintWindow(w)
+			})
+		}
+	})
 }
 
 func (w *window) Hide() {
-	if w.closing || w.viewport == nil {
-		return
-	}
+	async.EnsureMain(func() {
+		if w.closing || w.viewport == nil {
+			return
+		}
 
-	w.visible = false
-	v := w.viewport
+		w.visible = false
+		v := w.viewport
 
-	v.Hide()
+		v.Hide()
 
-	// hide top canvas element
-	if content := w.canvas.Content(); content != nil {
-		content.Hide()
-	}
+		// hide top canvas element
+		if content := w.canvas.Content(); content != nil {
+			content.Hide()
+		}
+	})
 }
 
 func (w *window) Close() {
-	if w.isClosing() {
-		return
-	}
-
-	// trigger callbacks - early so window still exists
-	if fn := w.onClosed; fn != nil {
-		w.onClosed = nil // avoid possibility of calling twice
-		fn()
-	}
-
-	w.closing = true
-	w.viewport.SetShouldClose(true)
-
-	cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
-	w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
-		if wid, ok := node.Obj().(fyne.Widget); ok {
-			cache.DestroyRenderer(wid)
+	async.EnsureMain(func() {
+		if w.isClosing() {
+			return
 		}
+
+		// trigger callbacks - early so window still exists
+		if fn := w.onClosed; fn != nil {
+			w.onClosed = nil // avoid possibility of calling twice
+			fn()
+		}
+
+		w.closing = true
+		w.viewport.SetShouldClose(true)
+
+		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
+		w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
+			if wid, ok := node.Obj().(fyne.Widget); ok {
+				cache.DestroyRenderer(wid)
+			}
+		})
 	})
 }
 
@@ -232,7 +239,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	if content != nil {
 		content.Show()
 	}
-	w.RescaleContext()
+	async.EnsureMain(w.RescaleContext)
 }
 
 func (w *window) Canvas() fyne.Canvas {
@@ -860,16 +867,19 @@ func (w *window) Context() any {
 
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.view() != nil {
-		fn()
+		async.EnsureMain(fn)
 		return
 	}
 
 	w.pending = append(w.pending, fn)
 }
 
-func (d *gLDriver) CreateWindow(title string) fyne.Window {
+func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
 	if runtime.GOOS != "js" {
-		return d.createWindow(title, true)
+		async.EnsureMain(func() {
+			win = d.createWindow(title, true)
+		})
+		return win
 	}
 
 	// handling multiple windows by overlaying on the root for web
