@@ -56,6 +56,10 @@ var refreshingCanvases []fyne.Canvas
 
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
+		if win == nil {
+			continue
+		}
+
 		w := win.(*window)
 		canvas := w.canvas
 		closing := w.closing
