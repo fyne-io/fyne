@@ -9,6 +9,7 @@ type FyneApp struct {
 	Source      *AppSource        `toml:",omitempty"`
 	LinuxAndBSD *LinuxAndBSD      `toml:",omitempty"`
 	Languages   []string          `toml:",omitempty"`
+	Migrations  map[string]bool   `toml:",omitempty"`
 }
 
 // AppDetails describes the build information, this group may be OS or arch specific
