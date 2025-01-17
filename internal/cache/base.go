@@ -107,7 +107,6 @@ func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 			deletingObjs = append(deletingObjs, obj)
 			canvases.Delete(obj)
 		}
-
 		return true
 	})
 	if len(deletingObjs) == 0 {
