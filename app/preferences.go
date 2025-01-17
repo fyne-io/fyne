@@ -15,7 +15,6 @@ type preferences struct {
 	*internal.InMemoryPreferences
 
 	prefLock            sync.RWMutex
-	loadingInProgress   bool
 	savedRecently       bool
 	changedDuringSaving bool
 
@@ -113,10 +112,6 @@ func (p *preferences) loadFromStorage(storage io.ReadCloser) (err error) {
 	}()
 	decode := json.NewDecoder(storage)
 
-	p.prefLock.Lock()
-	p.loadingInProgress = true
-	p.prefLock.Unlock()
-
 	p.InMemoryPreferences.WriteValues(func(values map[string]any) {
 		err = decode.Decode(&values)
 		if err != nil {
@@ -124,10 +119,6 @@ func (p *preferences) loadFromStorage(storage io.ReadCloser) (err error) {
 		}
 		convertLists(values)
 	})
-
-	p.prefLock.Lock()
-	p.loadingInProgress = false
-	p.prefLock.Unlock()
 
 	return err
 }
@@ -148,8 +139,8 @@ func newPreferences(app *fyneApp) *preferences {
 			return
 		}
 		p.prefLock.Lock()
-		shouldIgnoreChange := p.savedRecently || p.loadingInProgress
-		if p.savedRecently && !p.loadingInProgress {
+		shouldIgnoreChange := p.savedRecently
+		if p.savedRecently {
 			p.changedDuringSaving = true
 		}
 		p.prefLock.Unlock()
