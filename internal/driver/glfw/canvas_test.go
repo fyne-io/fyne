@@ -365,9 +365,10 @@ func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	})
 	repaintWindow(w)
 
+	assert.Equal(t, oldCanvasSize, c.Size())
+	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
+
 	runOnMain(func() {
-		assert.Equal(t, oldCanvasSize, c.Size())
-		expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
 		assert.Equal(t, expectedRightColSize, rightCol.Size())
 		assert.Equal(t, fyne.NewSize(100, 40), leftObj1.Size())
 		assert.Equal(t, fyne.NewSize(80, 30), rightObj1.Size())
