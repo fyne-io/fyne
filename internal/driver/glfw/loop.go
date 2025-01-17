@@ -306,36 +306,40 @@ func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, an
 	d.drawSingleFrame()
 
 	if windowsToRemove > 0 {
-		oldWindows := d.windowList()
-		newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
-
-		for _, win := range oldWindows {
-			w := win.(*window)
-			if w.viewport == nil {
-				continue
-			}
-
-			if w.viewport.ShouldClose() {
-				w.visible = false
-				v := w.viewport
-
-				// remove window from window list
-				v.Destroy()
-				w.destroy(d)
-				continue
-			}
-
-			newWindows = append(newWindows, win)
-		}
-
-		d.windows = newWindows
-
-		if len(newWindows) == 0 {
-			d.Quit()
-		}
+		d.removeWindows(windowsToRemove)
 	}
 
 	return false, animationsDone
+}
+
+func (d *gLDriver) removeWindows(count int) {
+	oldWindows := d.windowList()
+	newWindows := make([]fyne.Window, 0, len(oldWindows)-count)
+
+	for _, win := range oldWindows {
+		w := win.(*window)
+		if w.viewport == nil {
+			continue
+		}
+
+		if w.viewport.ShouldClose() {
+			w.visible = false
+			v := w.viewport
+
+			// remove window from window list
+			v.Destroy()
+			w.destroy(d)
+			continue
+		}
+
+		newWindows = append(newWindows, win)
+	}
+
+	d.windows = newWindows
+
+	if len(newWindows) == 0 {
+		d.Quit()
+	}
 }
 
 func (d *gLDriver) repaintWindow(w *window) {
