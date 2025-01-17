@@ -7,7 +7,6 @@ import (
 	"image"
 	"os"
 	"runtime"
-	"sync/atomic"
 
 	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
@@ -29,7 +28,6 @@ var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
 	windows []fyne.Window
-	done    atomic.Bool
 
 	animation animation.Runner
 
@@ -102,7 +100,6 @@ func (d *gLDriver) Quit() {
 
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
-		d.done.Store(true)
 		d.PostEmptyEvent()
 	}
 }

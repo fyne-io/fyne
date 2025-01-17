@@ -239,7 +239,7 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 =======
 func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, animationsDone bool) {
 	// check if we're shutting down
-	if d.done.Load() {
+	if !running.Load() {
 		d.Terminate()
 		l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 		if f := l.OnStopped(); f != nil {
