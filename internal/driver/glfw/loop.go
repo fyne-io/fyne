@@ -136,6 +136,7 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
+<<<<<<< HEAD
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {
@@ -183,10 +184,40 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
+=======
+	settingsChange := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
+	for {
+		d.waitEvents()
+
+		if d.animation.HasAnimations() {
+			// Switch to running at 60 fps with d.pollEvents
+			// until we have no more animations to tick
+			t := time.NewTicker(time.Second / 60)
+			for range t.C {
+				d.pollEvents()
+				exit, animationsDone := d.runSingleFrame(settingsChange)
+				if exit {
+					return
+				}
+				if animationsDone {
+					t.Stop()
+					break
+				}
+			}
+		} else {
+			// idle mode: run single frame and sleep on d.waitEvents() above
+			exit, _ := d.runSingleFrame(settingsChange)
+			if exit {
+				return
+			}
+>>>>>>> 58a8be1bf (Update loop.go - switch between waitEvents and pollEvents at 60fps with animations)
 		}
 	}
 }
 
+<<<<<<< HEAD
 func (d *gLDriver) destroyWindow(w *window, index int) {
 	w.visible = false
 	w.viewport.Destroy()
@@ -204,6 +235,111 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 }
 
 func (d *gLDriver) repaintWindow(w *window) bool {
+=======
+func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, animationsDone bool) {
+	// check if we're shutting down
+	select {
+	case <-d.done:
+		d.Terminate()
+		l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+		if f := l.OnStopped(); f != nil {
+			l.QueueEvent(f)
+		}
+		return true, false
+	default:
+		break
+	}
+
+	// run func queued to main
+	select {
+	case f := <-funcQueue:
+		f.f()
+		f.done <- struct{}{}
+	default:
+		break
+	}
+
+	// apply settings change if any
+	select {
+	case set := <-settingsChange:
+		painter.ClearFontCache()
+		cache.ResetThemeCaches()
+		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+			c, ok := w.Canvas().(*glCanvas)
+			if !ok {
+				return
+			}
+			c.applyThemeOutOfTreeObjects()
+			c.reloadScale()
+		})
+	default:
+		break
+	}
+
+	windowsToRemove := 0
+	for _, win := range d.windowList() {
+		w := win.(*window)
+		if w.viewport == nil {
+			continue
+		}
+
+		if w.viewport.ShouldClose() {
+			windowsToRemove++
+			continue
+		}
+
+		expand := w.shouldExpand
+		fullScreen := w.fullScreen
+
+		if expand && !fullScreen {
+			w.fitContent()
+			shouldExpand := w.shouldExpand
+			w.shouldExpand = false
+			view := w.viewport
+
+			if shouldExpand && runtime.GOOS != "js" {
+				view.SetSize(w.shouldWidth, w.shouldHeight)
+			}
+		}
+	}
+	animationsDone = d.animation.TickAnimations()
+	d.drawSingleFrame()
+
+	if windowsToRemove > 0 {
+		oldWindows := d.windowList()
+		newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
+
+		for _, win := range oldWindows {
+			w := win.(*window)
+			if w.viewport == nil {
+				continue
+			}
+
+			if w.viewport.ShouldClose() {
+				w.visible = false
+				v := w.viewport
+
+				// remove window from window list
+				v.Destroy()
+				w.destroy(d)
+				continue
+			}
+
+			newWindows = append(newWindows, win)
+		}
+
+		d.windows = newWindows
+
+		if len(newWindows) == 0 {
+			d.Quit()
+		}
+	}
+
+	return false, animationsDone
+}
+
+func (d *gLDriver) repaintWindow(w *window) {
+>>>>>>> 58a8be1bf (Update loop.go - switch between waitEvents and pollEvents at 60fps with animations)
 	canvas := w.canvas
 	freed := false
 	w.RunWithContext(func() {
