@@ -148,9 +148,11 @@ func (d *gLDriver) runGL() {
 					}
 				}
 
-				d.animation.TickAnimations()
-				d.drawSingleFrame()
 			}
+
+			d.animation.TickAnimations()
+			d.drawSingleFrame()
+
 			if runWindowCleanup {
 				d.removeDestroyedWindows()
 			}
