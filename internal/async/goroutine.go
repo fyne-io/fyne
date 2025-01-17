@@ -20,8 +20,6 @@ func init() {
 }
 
 // IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
-//
-// Since: 2.6
 func IsMainGoroutine() bool {
 	return goroutineID() == mainGoroutineID
 }
@@ -30,7 +28,7 @@ func IsMainGoroutine() bool {
 // If the context is running on a goroutine or the transition has been disabled this will blindly run.
 // Otherwise, an error will be logged and the function will be called on a new goroutine.
 //
-// Since: 2.6, will be removed later and should never be public
+// This will be removed later and should never be public
 func EnsureNotMain(fn func()) {
 	if build.DisableThreadChecks || !IsMainGoroutine() {
 		fn()
@@ -47,7 +45,7 @@ func EnsureNotMain(fn func()) {
 // If the context is main or the transition has been disabled this will blindly run.
 // Otherwise, an error will be logged and the function will be called on the main goroutine.
 //
-// Since: 2.6, will be removed later and should never be public
+// This will be removed later and should never be public
 func EnsureMain(fn func()) {
 	if build.DisableThreadChecks || IsMainGoroutine() {
 		fn()
