@@ -315,7 +315,9 @@ func TestMenuBar(t *testing.T) {
 									test.TapCanvas(c, a.pos)
 								}
 							}
-							test.AssertImageMatches(t, s.wantImage, c.Capture())
+							runOnMain(func() {
+								test.AssertImageMatches(t, s.wantImage, c.Capture())
+							})
 							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
 						})
 					}
