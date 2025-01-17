@@ -136,84 +136,19 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-<<<<<<< HEAD
-	eventTick := time.NewTicker(time.Second / 60)
-	for {
-		select {
-		case <-d.done:
-			eventTick.Stop()
-			d.Terminate()
-			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
-			if f := l.OnStopped(); f != nil {
-				l.QueueEvent(f)
-			}
-			return
-		case f := <-funcQueue.Out():
-			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
-			}
-		case <-eventTick.C:
-			d.pollEvents()
-			for i := 0; i < len(d.windows); i++ {
-				w := d.windows[i].(*window)
-				if w.viewport == nil {
-					continue
-				}
-
-				if w.viewport.ShouldClose() {
-					d.destroyWindow(w, i)
-					i-- // Trailing windows are moved forward one step.
-					continue
-				}
-
-				expand := w.shouldExpand
-				fullScreen := w.fullScreen
-
-				if expand && !fullScreen {
-					w.fitContent()
-					shouldExpand := w.shouldExpand
-					w.shouldExpand = false
-					view := w.viewport
-
-					if shouldExpand && runtime.GOOS != "js" {
-						view.SetSize(w.shouldWidth, w.shouldHeight)
-					}
-				}
-			}
-
-			d.animation.TickAnimations()
-			d.drawSingleFrame()
-=======
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-
 	for {
 		d.waitEvents()
 
 		if d.animation.HasAnimations() {
-			// Switch to running at 60 fps with d.pollEvents
-			// until we have no more animations to tick
-			t := time.NewTicker(time.Second / 60)
-			for range t.C {
-				d.pollEvents()
-				exit, animationsDone := d.runSingleFrame(settingsChange)
-				if exit {
-					t.Stop()
-					return
-				}
-				if animationsDone {
-					t.Stop()
-					break
-				}
+			// run animations while available
+			if exit := d.runAnimationLoop(settingsChange); exit {
+				return
 			}
 		} else {
 			// idle mode: run single frame and sleep on d.waitEvents() above
-			exit, _ := d.runSingleFrame(settingsChange)
-			if exit {
+			if exit, _ := d.runSingleFrame(settingsChange); exit {
 				return
 			}
->>>>>>> 58a8be1bf (Update loop.go - switch between waitEvents and pollEvents at 60fps with animations)
 		}
 	}
 }
@@ -235,8 +170,23 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) bool {
-=======
+// runs a loop that invokes runSingleFrame at 60 fps until there are no more animations
+// uses pollEvents to check for events every frame
+func (d *gLDriver) runAnimationLoop(settingsChange <-chan fyne.Settings) bool {
+	t := time.NewTicker(time.Second / 60)
+	defer t.Stop()
+	for range t.C {
+		d.pollEvents()
+		exit, animationsDone := d.runSingleFrame(settingsChange)
+		if exit {
+			return exit
+		} else if animationsDone {
+			break
+		}
+	}
+	return false
+}
+
 func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, animationsDone bool) {
 	// check if we're shutting down
 	if !running.Load() {
@@ -344,7 +294,6 @@ func (d *gLDriver) removeWindows(count int) {
 }
 
 func (d *gLDriver) repaintWindow(w *window) {
->>>>>>> 58a8be1bf (Update loop.go - switch between waitEvents and pollEvents at 60fps with animations)
 	canvas := w.canvas
 	freed := false
 	w.RunWithContext(func() {
