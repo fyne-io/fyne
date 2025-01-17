@@ -2,4 +2,4 @@
 
 package build
 
-const DisableThreadChecks = true
+var DisableThreadChecks = true

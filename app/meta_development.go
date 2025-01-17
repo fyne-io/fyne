@@ -44,6 +44,7 @@ func checkLocalMetadata() {
 	meta.Release = false
 	meta.Custom = data.Development
 	meta.Migrations = data.Migrations
+	setupMigrations(data.Migrations)
 }
 
 func getProjectPath() string {

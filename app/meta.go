@@ -2,6 +2,7 @@ package app
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/build"
 )
 
 var meta = fyne.AppMetadata{
@@ -24,6 +25,8 @@ func SetMetadata(m fyne.AppMetadata) {
 	}
 	if meta.Migrations == nil {
 		meta.Migrations = map[string]bool{}
+	} else {
+		setupMigrations(m.Migrations)
 	}
 }
 
@@ -33,4 +36,10 @@ func (a *fyneApp) Metadata() fyne.AppMetadata {
 	}
 
 	return meta
+}
+
+func setupMigrations(data map[string]bool) {
+	if done, ok := data["fyneDo"]; ok && done {
+		build.DisableThreadChecks = true
+	}
 }
