@@ -238,25 +238,25 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 =======
 func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, animationsDone bool) {
 	// check if we're shutting down
-	select {
-	case <-d.done:
+	if d.done.Load() {
 		d.Terminate()
 		l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 		if f := l.OnStopped(); f != nil {
 			l.QueueEvent(f)
 		}
 		return true, false
-	default:
-		break
 	}
 
-	// run func queued to main
-	select {
-	case f := <-funcQueue:
-		f.f()
-		f.done <- struct{}{}
-	default:
-		break
+	// run funcs queued to main
+	funcsDone := false
+	for !funcsDone {
+		select {
+		case f := <-funcQueue:
+			f.f()
+			f.done <- struct{}{}
+		default:
+			funcsDone = true
+		}
 	}
 
 	// apply settings change if any
