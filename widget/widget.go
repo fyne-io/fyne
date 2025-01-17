@@ -4,6 +4,7 @@ package widget // import "fyne.io/fyne/v2/widget"
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -111,14 +112,16 @@ func (w *BaseWidget) Hide() {
 
 // Refresh causes this widget to be redrawn in its current state
 func (w *BaseWidget) Refresh() {
-	impl := w.super()
-	if impl == nil {
-		return
-	}
+	async.EnsureMain(func() {
+		impl := w.super()
+		if impl == nil {
+			return
+		}
 
-	w.themeCache = nil
+		w.themeCache = nil
 
-	cache.Renderer(impl).Refresh()
+		cache.Renderer(impl).Refresh()
+	})
 }
 
 // Theme returns a cached Theme instance for this widget (or its extending widget).
