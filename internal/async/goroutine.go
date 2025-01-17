@@ -19,10 +19,18 @@ func init() {
 	mainGoroutineID = goroutineID()
 }
 
+// IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
+//
+// Since: 2.6
 func IsMainGoroutine() bool {
 	return goroutineID() == mainGoroutineID
 }
 
+// EnsureNotMain is part of our thread transition and makes sure that the passed function runs off main.
+// If the context is running on a goroutine or the transition has been disabled this will blindly run.
+// Otherwise, an error will be logged and the function will be called on a new goroutine.
+//
+// Since: 2.6, will be removed later and should never be public
 func EnsureNotMain(fn func()) {
 	if build.DisableThreadChecks || !IsMainGoroutine() {
 		fn()
@@ -35,6 +43,11 @@ func EnsureNotMain(fn func()) {
 	go fn()
 }
 
+// EnsureMain is part of our thread transition and makes sure that the passed function runs on main.
+// If the context is main or the transition has been disabled this will blindly run.
+// Otherwise, an error will be logged and the function will be called on the main goroutine.
+//
+// Since: 2.6, will be removed later and should never be public
 func EnsureMain(fn func()) {
 	if build.DisableThreadChecks || IsMainGoroutine() {
 		fn()
