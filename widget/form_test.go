@@ -60,13 +60,14 @@ func TestForm_Append_Items(t *testing.T) {
 func TestForm_CustomButtonsText(t *testing.T) {
 	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
 	form.Append("test", NewEntry())
-	assert.Equal(t, "Submit", form.SubmitText)
-	assert.Equal(t, "Cancel", form.CancelText)
+	assert.Equal(t, "Submit", form.submitButton.Text)
+	assert.Equal(t, "Cancel", form.cancelButton.Text)
 
-	form = &Form{OnSubmit: func() {}, SubmitText: "Apply",
-		OnCancel: func() {}, CancelText: "Close"}
-	assert.Equal(t, "Apply", form.SubmitText)
-	assert.Equal(t, "Close", form.CancelText)
+	form.SubmitText = "Apply"
+	form.CancelText = "Close"
+	form.Refresh()
+	assert.Equal(t, "Apply", form.submitButton.Text)
+	assert.Equal(t, "Close", form.cancelButton.Text)
 }
 
 func TestForm_AddRemoveButton(t *testing.T) {
