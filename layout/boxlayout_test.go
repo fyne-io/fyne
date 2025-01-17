@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// NewRectangle returns a new Rectangle instance
+// NewMinSizeRect returns a new Rectangle instance
 func NewMinSizeRect(min fyne.Size) *canvas.Rectangle {
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(min)
@@ -38,6 +38,28 @@ func TestHBoxLayout_Simple(t *testing.T) {
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(100+theme.Padding()*2, 0)
+	assert.Equal(t, cell3Pos, obj3.Position())
+}
+
+func TestCustomPaddedHBoxLayout_Simple(t *testing.T) {
+	cellSize := fyne.NewSize(50, 50)
+
+	obj1 := NewMinSizeRect(cellSize)
+	obj2 := NewMinSizeRect(cellSize)
+	obj3 := NewMinSizeRect(cellSize)
+
+	padding := float32(15)
+	container := container.New(layout.NewCustomPaddedHBoxLayout(padding), obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
+	assert.Equal(t, container.MinSize(), fyne.NewSize(150+padding*2, 50))
+
+	assert.Equal(t, obj1.Size(), cellSize)
+	cell2Pos := fyne.NewPos(50+padding, 0)
+	assert.Equal(t, cell2Pos, obj2.Position())
+	cell3Pos := fyne.NewPos(100+padding*2, 0)
 	assert.Equal(t, cell3Pos, obj3.Position())
 }
 
@@ -158,6 +180,28 @@ func TestVBoxLayout_Simple(t *testing.T) {
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 100+theme.Padding()*2)
+	assert.Equal(t, cell3Pos, obj3.Position())
+}
+
+func TestCustomPaddedVBoxLayout_Simple(t *testing.T) {
+	cellSize := fyne.NewSize(50, 50)
+
+	obj1 := NewMinSizeRect(cellSize)
+	obj2 := NewMinSizeRect(cellSize)
+	obj3 := NewMinSizeRect(cellSize)
+
+	padding := float32(15)
+	container := container.New(layout.NewCustomPaddedVBoxLayout(padding), obj1, obj2, obj3)
+
+	// We are not in a window. Resize the container to a default size.
+	container.Resize(container.MinSize())
+
+	assert.Equal(t, container.MinSize(), fyne.NewSize(50, 150+padding*2))
+
+	assert.Equal(t, obj1.Size(), cellSize)
+	cell2Pos := fyne.NewPos(0, 50+padding)
+	assert.Equal(t, cell2Pos, obj2.Position())
+	cell3Pos := fyne.NewPos(0, 100+padding*2)
 	assert.Equal(t, cell3Pos, obj3.Position())
 }
 

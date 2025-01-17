@@ -52,7 +52,7 @@ type Event struct {
 	// For OpenGL apps, a non-nil DrawContext is a gl.Context.
 	//
 	// TODO: make this an App method if we move away from an event channel?
-	DrawContext interface{}
+	DrawContext any
 }
 
 func (e Event) String() string {

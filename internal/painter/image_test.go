@@ -39,8 +39,7 @@ func TestPaintImageWithBadSVGElement(t *testing.T) {
 }
 
 func TestPaintImage_SVG(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	for name, tt := range map[string]struct {
 		width     float32

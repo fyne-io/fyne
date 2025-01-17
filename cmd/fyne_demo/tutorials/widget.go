@@ -31,13 +31,6 @@ Mauris erat urna, fermentum et quam rhoncus, fringilla consequat ante. Vivamus c
 Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat tempus purus.`
 )
 
-var (
-	progress    *widget.ProgressBar
-	fprogress   *widget.ProgressBar
-	infProgress *widget.ProgressBarInfinite
-	endProgress chan interface{}
-)
-
 func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
@@ -68,17 +61,16 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		a2.Start()
 		a2.Show()
 
-		defer func() {
-			go func() {
-				time.Sleep(time.Second * 10)
+		time.AfterFunc(10*time.Second, func() {
+			fyne.Do(func() {
 				a1.Stop()
 				a1.Hide()
 				a2.Stop()
 				a2.Hide()
 
 				button.Enable()
-			}()
-		}()
+			})
+		})
 	}
 
 	button = widget.NewButton("Animate", start)
@@ -97,11 +89,12 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 			a3.Start()
 			d.Show()
 
-			go func() {
-				time.Sleep(time.Second * 5)
-				a3.Stop()
-				d.Hide()
-			}()
+			time.AfterFunc(5*time.Second, func() {
+				fyne.Do(func() {
+					a3.Stop()
+					d.Hide()
+				})
+			})
 		}))))
 }
 
@@ -139,6 +132,11 @@ func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 			Text:       "Primary button",
 			Importance: widget.HighImportance,
 			OnTapped:   func() { fmt.Println("high importance button") },
+		},
+		&widget.Button{
+			Text:       "Success button",
+			Importance: widget.SuccessImportance,
+			OnTapped:   func() { fmt.Println("success importance button") },
 		},
 		&widget.Button{
 			Text:       "Danger button",
@@ -340,10 +338,41 @@ This styled row should also wrap as expected, but only *when required*.
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
-	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
+	selectEntry := widget.NewSelectEntry([]string{
+		"Option A",
+		"Option B",
+		"Option C",
+		"Option D",
+		"Option E",
+		"Option F",
+		"Option G",
+		"Option H",
+		"Option I",
+		"Option J",
+		"Option K",
+		"Option L",
+		"Option M",
+		"Option N",
+		"Option O",
+		"Option P",
+		"Option Q",
+		"Option R",
+		"Option S",
+		"Option T",
+		"Option U",
+		"Option V",
+		"Option W",
+		"Option X",
+		"Option Y",
+		"Option Z",
+	})
 	selectEntry.PlaceHolder = "Type or select"
+	dateEntry := widget.NewDateEntry()
+	dateEntry.PlaceHolder = "Choose a date"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
+	partialCheck := widget.NewCheck("Partial check", func(bool) {})
+	partialCheck.Partial = true
 	checkGroup := widget.NewCheckGroup([]string{"CheckGroup Item 1", "CheckGroup Item 2"}, func(s []string) { fmt.Println("selected", s) })
 	checkGroup.Horizontal = true
 	radio := widget.NewRadioGroup([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
@@ -356,29 +385,27 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewVBox(
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
+		dateEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
-		disabledCheck,
+		partialCheck,
 		checkGroup,
 		radio,
-		disabledRadio,
+		container.NewGridWithColumns(2, disabledCheck, disabledRadio),
 		container.NewBorder(nil, nil, widget.NewLabel("Slider"), nil, widget.NewSlider(0, 1000)),
 		container.NewBorder(nil, nil, widget.NewLabel("Disabled slider"), nil, disabledSlider),
 	)
 }
 
 func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
-	stopProgress()
+	progress := widget.NewProgressBar()
 
-	progress = widget.NewProgressBar()
-
-	fprogress = widget.NewProgressBar()
+	fprogress := widget.NewProgressBar()
 	fprogress.TextFormatter = func() string {
 		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
 	}
 
-	infProgress = widget.NewProgressBarInfinite()
-	endProgress = make(chan interface{}, 1)
-	startProgress()
+	infProgress := widget.NewProgressBarInfinite()
+	startProgress(progress, fprogress)
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -436,46 +463,18 @@ func makeToolbarTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewBorder(t, nil, nil, nil)
 }
 
-func startProgress() {
-	progress.SetValue(0)
-	fprogress.SetValue(0)
-	select { // ignore stale end message
-	case <-endProgress:
-	default:
+func startProgress(progress, fprogress *widget.ProgressBar) {
+	progressAnimation := fyne.Animation{
+		Curve:    fyne.AnimationLinear,
+		Duration: 10 * time.Second,
+		Tick: func(percentage float32) {
+			value := float64(percentage)
+			progress.SetValue(value)
+			fprogress.SetValue(value)
+		},
 	}
 
-	go func() {
-		end := endProgress
-		num := 0.0
-		for num < 1.0 {
-			time.Sleep(16 * time.Millisecond)
-			select {
-			case <-end:
-				return
-			default:
-			}
-
-			progress.SetValue(num)
-			fprogress.SetValue(num)
-			num += 0.002
-		}
-
-		progress.SetValue(1)
-		fprogress.SetValue(1)
-
-		// TODO make sure this resets when we hide etc...
-		stopProgress()
-	}()
-	infProgress.Start()
-}
-
-func stopProgress() {
-	if !infProgress.Running() {
-		return
-	}
-
-	infProgress.Stop()
-	endProgress <- struct{}{}
+	progressAnimation.Start()
 }
 
 // widgetScreen shows a panel containing widget demos

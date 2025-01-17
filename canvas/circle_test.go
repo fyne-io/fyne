@@ -14,8 +14,8 @@ func TestCircle_MinSize(t *testing.T) {
 	circle := canvas.NewCircle(color.Black)
 	min := circle.MinSize()
 
-	assert.True(t, min.Width > 0)
-	assert.True(t, min.Height > 0)
+	assert.Positive(t, min.Width)
+	assert.Positive(t, min.Height)
 }
 
 func TestCircle_FillColor(t *testing.T) {
@@ -44,9 +44,9 @@ func TestCircle_Move(t *testing.T) {
 	circle.Resize(fyne.NewSize(50, 50))
 
 	start := fyne.Position{X: 0, Y: 0}
-	assert.True(t, circle.Position() == start)
+	assert.Equal(t, circle.Position(), start)
 
 	target := fyne.Position{X: 10, Y: 75}
 	circle.Move(target)
-	assert.True(t, circle.Position() == target)
+	assert.Equal(t, circle.Position(), target)
 }

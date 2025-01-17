@@ -121,6 +121,20 @@ type WritableRepository interface {
 	Delete(u fyne.URI) error
 }
 
+// AppendableRepository is an extension of the WritableRepository interface which also
+// supports opening a writer for URIs in append mode, without truncating their contents
+//
+// Since: 2.6
+type AppendableRepository interface {
+	WritableRepository
+
+	// Appender will be used to call a Writer without truncating the
+	// file if it exists
+	//
+	// Since: 2.6
+	Appender(u fyne.URI) (fyne.URIWriteCloser, error)
+}
+
 // ListableRepository is an extension of the Repository interface which also
 // supports obtaining directory listings (generally analogous to a directory
 // listing) for URIs of the scheme it is registered to.

@@ -3,22 +3,28 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
 	BaseWidget
-	Text       string
-	Alignment  fyne.TextAlign      // The alignment of the text
-	Wrapping   fyne.TextWrap       // The wrapping of the text
-	TextStyle  fyne.TextStyle      // The style of the label text
-	Truncation fyne.TextTruncation // The truncation mode of the text
-	provider   *RichText
+	Text      string
+	Alignment fyne.TextAlign // The alignment of the text
+	Wrapping  fyne.TextWrap  // The wrapping of the text
+	TextStyle fyne.TextStyle // The style of the label text
+
+	// The truncation mode of the text
+	//
+	// Since: 2.4
+	Truncation fyne.TextTruncation
+	// Importance informs how the label should be styled, i.e. warning or disabled
+	//
+	// Since: 2.4
 	Importance Importance
 
-	binder basicBinder
+	provider *RichText
+	binder   basicBinder
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -63,30 +69,15 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	return l.provider.CreateRenderer()
-}
-
-// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
-func (l *Label) ExtendBaseWidget(w fyne.Widget) {
-	if w == nil {
-		w = l
-	}
-	l.BaseWidget.ExtendBaseWidget(w)
-	if l.provider != nil {
-		l.provider.ExtendBaseWidget(l.super())
-	}
+	return NewSimpleRenderer(l.provider)
 }
 
 // MinSize returns the size that this label should not shrink below.
 //
 // Implements: fyne.Widget
 func (l *Label) MinSize() fyne.Size {
-	if l.provider == nil {
-		l.ExtendBaseWidget(l)
-		cache.Renderer(l.super())
-	}
-
-	return l.provider.MinSize()
+	l.ExtendBaseWidget(l)
+	return l.BaseWidget.MinSize()
 }
 
 // Refresh triggers a redraw of the label.

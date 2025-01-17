@@ -21,4 +21,7 @@ type Event struct {
 	// should ignore external paint events to avoid a backlog of paint
 	// events building up.
 	External bool
+
+	// Window specifies a native handle for the window being painted into.
+	Window uintptr
 }

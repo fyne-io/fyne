@@ -13,8 +13,7 @@ import (
 )
 
 func TestMenu_RefreshOptions(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()
@@ -35,7 +34,8 @@ func TestMenu_RefreshOptions(t *testing.T) {
 		itemBaz,
 	))
 	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
-	w.Resize(m.MinSize())
+	// + 4,5 for canvas’ safe area
+	w.Resize(m.MinSize().AddWidthHeight(4, 5))
 	m.Resize(m.MinSize())
 	test.AssertRendersToMarkup(t, "menu/refresh_initial.xml", c)
 
@@ -65,8 +65,7 @@ func TestMenu_RefreshOptions(t *testing.T) {
 }
 
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	w := fyne.CurrentApp().NewWindow("")
 	defer w.Close()

@@ -51,7 +51,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	infoplist := new(bytes.Buffer)
 	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
 		BundleID: bundleID,
-		Name:     strings.Title(appName),
+		Name:     strings.Title(appName), //lint:ignore SA1019 This is fine for our use case.
 		Version:  version,
 		Build:    build,
 		Legacy:   len(allArchs["ios"]) > 2,
@@ -523,11 +523,13 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         GCC_WARN_UNUSED_FUNCTION = YES;
         GCC_WARN_UNUSED_VARIABLE = YES;
         IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+        OS_ACTIVITY_MODE = "disabled";
         MTL_ENABLE_DEBUG_INFO = {{if .Debug}}YES{{else}}NO{{end}};
         PRODUCT_BUNDLE_IDENTIFIER = {{.BundleID}};
         PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
         SDKROOT = iphoneos;
         TARGETED_DEVICE_FAMILY = "1,2";
+        OS_ACTIVITY_MODE = "disable";
         VALIDATE_PRODUCT = YES;
         {{if not .BitcodeEnabled}}ENABLE_BITCODE = NO;{{end}}
       };

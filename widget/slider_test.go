@@ -14,7 +14,7 @@ import (
 func TestNewSliderWithData(t *testing.T) {
 	val := binding.NewFloat()
 	err := val.Set(4)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
@@ -22,7 +22,7 @@ func TestNewSliderWithData(t *testing.T) {
 
 	s.SetValue(2.0)
 	f, err := val.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 2.0, f)
 }
 
@@ -37,13 +37,13 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 0.0, s.Value)
 
 	err := val.Set(3)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, 3.0, s.Value)
 
 	s.SetValue(5)
 	f, err := val.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 5.0, f)
 
 	s.Unbind()
@@ -51,22 +51,37 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 5.0, s.Value)
 }
 
+func TestSlider_Clamp(t *testing.T) {
+	s := &Slider{Min: 0, Max: 1, Step: 0.001}
+	s.Value = 0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, 0.959, s.Value, 0.00001)
+
+	s.Min = -1
+	s.Max = 0
+	s.Value = -0.959
+
+	s.clampValueToRange()
+	assert.InEpsilon(t, -0.959, s.Value, 0.00001)
+}
+
 func TestSlider_HorizontalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app := test.NewTempApp(t)
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Width, wSize.Height)
 
-	assert.Equal(t, wSize.Width-slider.endOffset()*2, tSize.Width)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Width-endOffset*2, tSize.Width)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Height)
 
 	assert.Greater(t, wSize.Width, aSize.Width)
@@ -79,6 +94,12 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	test.AssertRendersToMarkup(t, "slider/horizontal.xml", w.Canvas())
 }
 
+func TestSlider_MinSize(t *testing.T) {
+	min := NewSlider(0, 10).MinSize()
+	buttonMin := NewButtonWithIcon("", theme.HomeIcon(), func() {}).MinSize()
+
+	assert.Equal(t, min.Height, buttonMin.Height)
+}
 func TestSlider_OutOfRange(t *testing.T) {
 	slider := NewSlider(2, 5)
 	slider.Resize(fyne.NewSize(100, 10))
@@ -87,22 +108,22 @@ func TestSlider_OutOfRange(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app := test.NewTempApp(t)
+	app.Settings().SetTheme(test.Theme())
 
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical
 	slider.Resize(fyne.NewSize(10, 100))
 
-	render := test.WidgetRenderer(slider).(*sliderRenderer)
+	render := test.TempWidgetRenderer(t, slider).(*sliderRenderer)
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
 	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Height, wSize.Width)
 
-	assert.Equal(t, wSize.Height-slider.endOffset()*2, tSize.Height)
+	endOffset := slider.endOffset(theme.IconInlineSize(), theme.InnerPadding())
+	assert.Equal(t, wSize.Height-endOffset*2, tSize.Height)
 	assert.Equal(t, theme.InputBorderSize()*2, tSize.Width)
 
 	assert.Greater(t, wSize.Height, aSize.Height)
@@ -266,9 +287,20 @@ func TestSlider_SetValue(t *testing.T) {
 	assert.Equal(t, 2.0, slider.Value)
 }
 
+func TestSlider_FocusDesktop(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+	slider := NewSlider(0, 10)
+	win := test.NewTempWindow(t, slider)
+	test.Tap(slider)
+
+	assert.Equal(t, win.Canvas().Focused(), slider)
+	assert.True(t, slider.focused)
+}
+
 func TestSlider_Focus(t *testing.T) {
 	slider := NewSlider(0, 5)
-
 	slider.FocusGained()
 	assert.True(t, slider.focused)
 

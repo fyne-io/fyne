@@ -11,8 +11,7 @@ import (
 )
 
 func TestSelectEntry_Disableable(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -30,7 +29,8 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	test.TapCanvas(c, switchPos)
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
 
-	test.TapCanvas(c, fyne.NewPos(0, 0))
+	areaPos, _ := c.InteractiveArea()
+	test.TapCanvas(c, areaPos)
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped_selected.xml", c)
 
 	e.Disable()
@@ -49,8 +49,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -81,8 +80,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 }
 
 func TestSelectEntry_DropDownMove(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{"one"})
 	w := test.NewWindow(e)
@@ -90,6 +88,7 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	entrySize := e.MinSize()
 	w.Resize(entrySize.Add(fyne.NewSize(100, 100)))
 	e.Resize(entrySize)
+	inset, _ := w.Canvas().InteractiveArea()
 
 	// open the popup
 	test.Tap(e.ActionItem.(fyne.Tappable))
@@ -98,7 +97,7 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	assert.Equal(t, fyne.NewPos(10, 10), e.Entry.Position())
 	assert.Equal(t,
-		fyne.NewPos(10, 10+entrySize.Height-theme.InputBorderSize()),
+		fyne.NewPos(10, 10+entrySize.Height-theme.InputBorderSize()).Subtract(inset),
 		e.popUp.Position(),
 	)
 
@@ -106,14 +105,13 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	e.Move(fyne.NewPos(30, 27))
 	assert.Equal(t, fyne.NewPos(30, 27), e.Entry.Position())
 	assert.Equal(t,
-		fyne.NewPos(30, 27+entrySize.Height-theme.InputBorderSize()),
+		fyne.NewPos(30, 27+entrySize.Height-theme.InputBorderSize()).Subtract(inset),
 		e.popUp.Position(),
 	)
 }
 
 func TestSelectEntry_DropDownResize(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	options := []string{"A", "B", "C"}
 	e := NewSelectEntry(options)
@@ -181,8 +179,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{"A", "B", "C"})
 	w := test.NewWindow(e)
@@ -203,8 +200,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions_Empty(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	e := NewSelectEntry([]string{})
 	w := test.NewWindow(e)

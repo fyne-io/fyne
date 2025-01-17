@@ -35,7 +35,7 @@ func (customTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color
 }
 
 func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return theme.DarkTheme().Font(style)
+	return theme.DefaultTheme().Font(style)
 }
 
 func (customTheme) Icon(n fyne.ThemeIconName) fyne.Resource {

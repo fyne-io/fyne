@@ -1,6 +1,4 @@
 // Run a command line helper for various Fyne tools.
-//
-// Deprecated: Install fyne.io/tools/cmd/fyne for latest version.
 package main
 
 import (
@@ -13,9 +11,6 @@ import (
 )
 
 func main() {
-	fmt.Println("NOTE: This tool is deprecated and has migrated to fyne.io/tools/cmd/fyne.")
-	fmt.Println("The new tool can be installed by running the following command:\n\tgo install fyne.io/tools/cmd/fyne@latest")
-
 	app := &cli.App{
 		Name:        "fyne",
 		Usage:       "A command line helper for various Fyne tools.",
@@ -29,10 +24,11 @@ func main() {
 			commands.Release(),
 			commands.Version(),
 			commands.Serve(),
+			commands.Translate(),
 			commands.Build(),
 
 			// Deprecated: Use "go mod vendor" instead.
-			commands.Vendor(),
+			commands.Vendor(), //lint:ignore SA1019 This whole tool is deprecated.
 		},
 	}
 

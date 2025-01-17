@@ -14,10 +14,9 @@ import (
 )
 
 func TestShowCustom_ApplyTheme(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 
 	label := widget.NewLabel("Content")
 	label.Alignment = fyne.TextAlignCenter
@@ -36,7 +35,7 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 }
 
 func TestShowCustom_Resize(t *testing.T) {
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(300, 300))
 
 	label := widget.NewLabel("Content")
@@ -50,9 +49,8 @@ func TestShowCustom_Resize(t *testing.T) {
 }
 
 func TestCustom_ApplyThemeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 300))
 
 	label := widget.NewLabel("Content")
@@ -76,9 +74,8 @@ func TestCustom_ApplyThemeOnShow(t *testing.T) {
 }
 
 func TestCustom_ResizeOnShow(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -98,9 +95,8 @@ func TestCustom_ResizeOnShow(t *testing.T) {
 }
 
 func TestConfirm_SetButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -121,9 +117,8 @@ func TestConfirm_SetButtons(t *testing.T) {
 }
 
 func TestConfirmWithoutButtons(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -134,9 +129,8 @@ func TestConfirmWithoutButtons(t *testing.T) {
 }
 
 func TestCustomConfirm_Importance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 
@@ -147,4 +141,25 @@ func TestCustomConfirm_Importance(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
 	test.AssertRendersToImage(t, "dialog-custom-confirm-importance.png", w.Canvas())
+}
+
+func TestCustom_SetIcon(t *testing.T) {
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+	size := fyne.NewSize(200, 300)
+	w.Resize(size)
+
+	test.ApplyTheme(t, test.Theme())
+	label := widget.NewLabel("Test was successful.")
+	d := NewCustom("Test result", "Close", label, w)
+	d.SetIcon(theme.ConfirmIcon())
+	d.Show()
+
+	test.AssertRendersToImage(t, "dialog-custom-seticon-success.png", w.Canvas())
+
+	d.Hide()
+	d.SetIcon(nil)
+	d.Show()
+
+	test.AssertRendersToImage(t, "dialog-custom-seticon-nil.png", w.Canvas())
 }

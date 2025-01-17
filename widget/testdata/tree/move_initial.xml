@@ -5,18 +5,22 @@
 				<widget size="212x212" type="*widget.treeContent">
 					<widget size="212x35" type="*widget.branch">
 						<widget pos="28,0" size="184x35" type="*widget.Label">
-							<text pos="8,8" size="21x19">foo</text>
+							<widget size="184x35" type="*widget.RichText">
+								<text pos="8,8" size="21x19">foo</text>
+							</widget>
 						</widget>
 						<widget pos="4,0" size="20x35" type="*widget.branchIcon">
-							<image fillMode="contain" rsc="moveDownIcon" size="20x35"/>
+							<image fillMode="contain" rsc="moveDownIcon" size="20x35" themed="foreground"/>
 						</widget>
 					</widget>
 					<widget pos="0,36" size="212x1" type="*widget.Separator">
-						<rectangle fillColor="disabled" size="212x1"/>
+						<rectangle fillColor="separator" size="212x1"/>
 					</widget>
 					<widget pos="0,39" size="212x35" type="*widget.leaf">
 						<widget pos="52,0" size="160x35" type="*widget.Label">
-							<text pos="8,8" size="44x19">foobar</text>
+							<widget size="160x35" type="*widget.RichText">
+								<text pos="8,8" size="44x19">foobar</text>
+							</widget>
 						</widget>
 					</widget>
 				</widget>

@@ -2,8 +2,10 @@ package dialog
 
 import (
 	"path/filepath"
+	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -19,8 +21,13 @@ type fileDialogItem struct {
 	picker *fileDialog
 
 	name     string
+	id       int // id in the parent container
+	choose   func(id int)
+	open     func()
 	location fyne.URI
 	dir      bool
+
+	lastClick time.Time
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
@@ -43,16 +50,28 @@ func (i *fileDialogItem) setLocation(l fyne.URI, dir, up bool) {
 	i.location = l
 	i.name = l.Name()
 
-	if i.picker.view == gridView {
+	if i.picker.view == GridView {
 		ext := filepath.Ext(i.name[1:])
 		i.name = i.name[:len(i.name)-len(ext)]
 	}
 
 	if up {
-		i.name = "(Parent)"
+		i.name = "(" + lang.X("file.parent", "Parent") + ")"
 	}
 
 	i.Refresh()
+}
+
+func (i *fileDialogItem) Tapped(*fyne.PointEvent) {
+	if i.choose != nil {
+		i.choose(i.id)
+	}
+	now := time.Now()
+	if !i.dir && now.Sub(i.lastClick) < fyne.CurrentApp().Driver().DoubleTapDelay() && i.open != nil {
+		// It is a double click, so we ask the dialog to open
+		i.open()
+	}
+	i.lastClick = now
 }
 
 func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogItem {
@@ -63,13 +82,13 @@ func (f *fileDialog) newFileItem(location fyne.URI, dir, up bool) *fileDialogIte
 		dir:      dir,
 	}
 
-	if f.view == gridView {
+	if f.view == GridView {
 		ext := filepath.Ext(item.name[1:])
 		item.name = item.name[:len(item.name)-len(ext)]
 	}
 
 	if up {
-		item.name = "(Parent)"
+		item.name = "(" + lang.X("file.parent", "Parent") + ")"
 	}
 
 	item.ExtendBaseWidget(item)
@@ -86,7 +105,7 @@ type fileItemRenderer struct {
 }
 
 func (s *fileItemRenderer) Layout(size fyne.Size) {
-	if s.item.picker.view == gridView {
+	if s.item.picker.view == GridView {
 		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
 
@@ -105,7 +124,7 @@ func (s *fileItemRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileItemRenderer) MinSize() fyne.Size {
-	if s.item.picker.view == gridView {
+	if s.item.picker.view == GridView {
 		return fyne.NewSize(fileIconCellWidth, fileIconSize+s.fileTextSize)
 	}
 

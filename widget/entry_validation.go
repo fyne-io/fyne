@@ -10,7 +10,15 @@ import (
 
 var _ fyne.Validatable = (*Entry)(nil)
 
-// Validate validates the current text in the widget
+// HasValidator makes it possible for a parent that cares about child validation (e.g. widget.Form)
+// to know if the developer has attached a validator or not.
+//
+// Since: 2.6
+func (e *Entry) HasValidator() bool {
+	return e.Validator != nil
+}
+
+// Validate validates the current text in the widget.
 func (e *Entry) Validate() error {
 	if e.Validator == nil {
 		return nil
@@ -21,20 +29,14 @@ func (e *Entry) Validate() error {
 	return err
 }
 
-// HasValidator makes it possible for a parent that cares about child validation (e.g. widget.Form)
-// to know if the developer has attached a validator or not.
-//
-// Since: 2.5
-func (e *Entry) HasValidator() bool {
-	return e.Validator != nil
-}
+// validate works like Validate but only updates the internal state and does not refresh.
+func (e *Entry) validate() {
+	if e.Validator == nil {
+		return
+	}
 
-// SetOnFocusChanged is intended for parent widgets or containers to hook into the change of focus.
-// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
-//
-// Since: 2.5
-func (e *Entry) SetOnFocusChanged(callback func(bool)) {
-	e.onFocusChanged = callback
+	err := e.Validator(e.Text)
+	e.setValidationError(err)
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -48,19 +50,31 @@ func (e *Entry) SetValidationError(err error) {
 	if e.Validator == nil {
 		return
 	}
-	if err == nil && e.validationError == nil {
+
+	if !e.setValidationError(err) {
 		return
 	}
 
-	if !errors.Is(err, e.validationError) {
-		e.validationError = err
+	e.Refresh()
+}
 
-		if e.onValidationChanged != nil {
-			e.onValidationChanged(err)
-		}
-
-		e.Refresh()
+// setValidationError sets the validation error and returns a bool to indicate if it changes.
+// It assumes that the widget has a validator.
+func (e *Entry) setValidationError(err error) bool {
+	if err == nil && e.validationError == nil {
+		return false
 	}
+	if errors.Is(err, e.validationError) {
+		return false
+	}
+
+	e.validationError = err
+
+	if e.onValidationChanged != nil {
+		e.onValidationChanged(err)
+	}
+
+	return true
 }
 
 // ShouldDisplayValidation returns true if the entry has not been interacted with
@@ -106,27 +120,28 @@ type validationStatusRenderer struct {
 }
 
 func (r *validationStatusRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
+	r.icon.Resize(fyne.NewSquareSize(iconSize))
+	r.icon.Move(fyne.NewPos((size.Width-iconSize)/2, (size.Height-iconSize)/2))
 }
 
 func (r *validationStatusRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
+	return fyne.NewSquareSize(iconSize)
 }
 
 func (r *validationStatusRenderer) Refresh() {
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
-	if r.entry.disabled {
+	th := r.entry.Theme()
+	if r.entry.Disabled() {
 		r.icon.Hide()
 		return
 	}
 
 	if r.entry.validationError == nil && r.entry.Text != "" {
-		r.icon.Resource = theme.ConfirmIcon()
+		r.icon.Resource = th.Icon(theme.IconNameConfirm)
 		r.icon.Show()
 	} else if r.entry.validationError != nil && !r.entry.focused && r.entry.dirty {
-		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
+		r.icon.Resource = theme.NewErrorThemedResource(th.Icon(theme.IconNameError))
 		r.icon.Show()
 	} else {
 		r.icon.Hide()

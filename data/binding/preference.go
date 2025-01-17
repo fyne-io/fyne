@@ -25,7 +25,7 @@ type prefBoundBool struct {
 func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 	binds := prefBinds.getBindings(p)
 	if binds != nil {
-		if listen := binds.getItem(key); listen != nil {
+		if listen, ok := binds.Load(key); listen != nil && ok {
 			if l, ok := listen.(Bool); ok {
 				return l
 			}
@@ -35,7 +35,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 
 	listen := &prefBoundBool{key: key, p: p}
 	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.setItem(key, listen)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -80,7 +80,7 @@ type prefBoundFloat struct {
 func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 	binds := prefBinds.getBindings(p)
 	if binds != nil {
-		if listen := binds.getItem(key); listen != nil {
+		if listen, ok := binds.Load(key); listen != nil && ok {
 			if l, ok := listen.(Float); ok {
 				return l
 			}
@@ -90,7 +90,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 
 	listen := &prefBoundFloat{key: key, p: p}
 	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.setItem(key, listen)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -135,7 +135,7 @@ type prefBoundInt struct {
 func BindPreferenceInt(key string, p fyne.Preferences) Int {
 	binds := prefBinds.getBindings(p)
 	if binds != nil {
-		if listen := binds.getItem(key); listen != nil {
+		if listen, ok := binds.Load(key); listen != nil && ok {
 			if l, ok := listen.(Int); ok {
 				return l
 			}
@@ -145,7 +145,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 
 	listen := &prefBoundInt{key: key, p: p}
 	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.setItem(key, listen)
+	binds.Store(key, listen)
 	return listen
 }
 
@@ -190,7 +190,7 @@ type prefBoundString struct {
 func BindPreferenceString(key string, p fyne.Preferences) String {
 	binds := prefBinds.getBindings(p)
 	if binds != nil {
-		if listen := binds.getItem(key); listen != nil {
+		if listen, ok := binds.Load(key); listen != nil && ok {
 			if l, ok := listen.(String); ok {
 				return l
 			}
@@ -200,7 +200,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 
 	listen := &prefBoundString{key: key, p: p}
 	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.setItem(key, listen)
+	binds.Store(key, listen)
 	return listen
 }
 

@@ -13,8 +13,7 @@ import (
 )
 
 func TestPopUpMenu_Move(t *testing.T) {
-	m, w := setupPopUpMenuTest()
-	defer tearDownPopUpMenuTest(w)
+	m, w := setupPopUpMenuTest(t)
 	c := w.Canvas()
 
 	m.Show()
@@ -31,8 +30,7 @@ func TestPopUpMenu_Move(t *testing.T) {
 }
 
 func TestPopUpMenu_Resize(t *testing.T) {
-	m, w := setupPopUpMenuTest()
-	defer tearDownPopUpMenuTest(w)
+	m, w := setupPopUpMenuTest(t)
 	c := w.Canvas()
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
@@ -44,12 +42,12 @@ func TestPopUpMenu_Resize(t *testing.T) {
 	largeSize := c.Size().Add(fyne.NewSize(10, 10))
 	m.Resize(largeSize)
 	test.AssertRendersToMarkup(t, "popup_menu/canvas_too_small.xml", c)
-	assert.Equal(t, fyne.NewSize(largeSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
+	_, areaSize := c.InteractiveArea()
+	assert.Equal(t, fyne.NewSize(largeSize.Width, areaSize.Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
 func TestPopUpMenu_Show(t *testing.T) {
-	m, w := setupPopUpMenuTest()
-	defer tearDownPopUpMenuTest(w)
+	m, w := setupPopUpMenuTest(t)
 	c := w.Canvas()
 
 	test.AssertRendersToMarkup(t, "popup_menu/hidden.xml", c)
@@ -59,8 +57,7 @@ func TestPopUpMenu_Show(t *testing.T) {
 }
 
 func TestPopUpMenu_ShowAtPosition(t *testing.T) {
-	m, w := setupPopUpMenuTest()
-	defer tearDownPopUpMenuTest(w)
+	m, w := setupPopUpMenuTest(t)
 	c := w.Canvas()
 
 	test.AssertRendersToMarkup(t, "popup_menu/hidden.xml", c)
@@ -82,18 +79,21 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 
 	m.Hide()
 	test.AssertRendersToMarkup(t, "popup_menu/hidden.xml", c)
-	menuSize := c.Size().Add(fyne.NewSize(10, 10))
-	m.Resize(menuSize)
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
+	menuSize := c.Size().Add(fyne.NewSize(10, 10))
+	m.Resize(menuSize)
 	test.AssertRendersToMarkup(t, "popup_menu/canvas_too_small.xml", c)
-	assert.Equal(t, fyne.NewSize(menuSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
+	_, areaSize := c.InteractiveArea()
+	assert.Equal(t, fyne.NewSize(menuSize.Width, areaSize.Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
-func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
+func setupPopUpMenuTest(t *testing.T) (*widget.PopUpMenu, fyne.Window) {
 	test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	t.Cleanup(func() { test.NewApp() })
+
 	w.Resize(fyne.NewSize(200, 200))
 	m := widget.NewPopUpMenu(fyne.NewMenu(
 		"",
@@ -103,10 +103,12 @@ func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 	return m, w
 }
 
-func setupPopUpMenuWithSubmenusTest(callback func(string)) (*widget.PopUpMenu, fyne.Window) {
+func setupPopUpMenuWithSubmenusTest(t *testing.T, callback func(string)) (*widget.PopUpMenu, fyne.Window) {
 	test.NewApp()
 
-	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
+	t.Cleanup(func() { test.NewApp() })
+
 	w.Resize(fyne.NewSize(800, 600))
 	itemA := fyne.NewMenuItem("Option A", func() { callback("Option A") })
 	itemB := fyne.NewMenuItem("Option B", func() { callback("Option B") })
@@ -118,9 +120,4 @@ func setupPopUpMenuWithSubmenusTest(callback func(string)) (*widget.PopUpMenu, f
 	itemBB.ChildMenu = fyne.NewMenu("", itemBBA, itemBBB)
 	m := widget.NewPopUpMenu(fyne.NewMenu("", itemA, itemB), w.Canvas())
 	return m, w
-}
-
-func tearDownPopUpMenuTest(w fyne.Window) {
-	w.Close()
-	test.NewApp()
 }

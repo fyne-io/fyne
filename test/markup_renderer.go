@@ -9,9 +9,9 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -64,25 +64,18 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 		return
 	}
 
-	for _, n := range theme.PrimaryColorNames() {
-		if c == theme.PrimaryColorNamed(n) {
-			r.setStringAttr(attrs, name, n)
-			return
-		}
-	}
-
 	rd, g, b, a := col.ToNRGBA(c)
 	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
 
-func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m canvas.ImageFill) {
+func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m fynecanvas.ImageFill) {
 	var fillMode string
 	switch m {
-	case canvas.ImageFillStretch:
+	case fynecanvas.ImageFillStretch:
 		// default mode, don’t add an attr
-	case canvas.ImageFillContain:
+	case fynecanvas.ImageFillContain:
 		fillMode = "contain"
-	case canvas.ImageFillOriginal:
+	case fynecanvas.ImageFillOriginal:
 		fillMode = "original"
 	default:
 		fillMode = fmt.Sprintf("unknown fill mode: %d", m)
@@ -131,9 +124,10 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		return
 	}
 
+	named := false
 	if value := knownResource(rsc); value != "" {
 		r.setStringAttr(attrs, name, value)
-		return
+		named = true
 	}
 
 	var variant string
@@ -149,26 +143,28 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	case *theme.ThemedResource:
 		variant = string(t.ColorName)
 		if variant == "" {
-			variant = "default"
+			variant = "foreground"
 		}
 	default:
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
 	}
 
-	// That’s some magic to access the private `source` field of the themed resource.
-	v := reflect.ValueOf(rsc).Elem().Field(0)
-	src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
-	r.setResourceAttr(attrs, name, src)
+	if !named {
+		// That’s some magic to access the private `source` field of the themed resource.
+		v := reflect.ValueOf(rsc).Elem().Field(0)
+		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
+		r.setResourceAttr(attrs, name, src)
+	}
 	r.setStringAttr(attrs, "themed", variant)
 }
 
-func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string, m canvas.ImageScale) {
+func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string, m fynecanvas.ImageScale) {
 	var scaleMode string
 	switch m {
-	case canvas.ImageScaleSmooth:
+	case fynecanvas.ImageScaleSmooth:
 		// default mode, don’t add an attr
-	case canvas.ImageScalePixels:
+	case fynecanvas.ImageScalePixels:
 		scaleMode = "pixels"
 	default:
 		scaleMode = fmt.Sprintf("unknown scale mode: %d", m)
@@ -200,7 +196,7 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	r.writeTag("content", false, nil)
 	r.w.WriteRune('\n')
 	r.indentation++
-	driver.WalkVisibleObjectTree(c.Content(), r.writeCanvasObject, r.writeCloseCanvasObject)
+	intdriver.WalkVisibleObjectTree(c.Content(), r.writeCanvasObject, r.writeCloseCanvasObject)
 	r.indentation--
 	r.writeIndent()
 	r.writeCloseTag("content")
@@ -208,7 +204,7 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 		r.writeTag("overlay", false, nil)
 		r.w.WriteRune('\n')
 		r.indentation++
-		driver.WalkVisibleObjectTree(o, r.writeCanvasObject, r.writeCloseCanvasObject)
+		intdriver.WalkVisibleObjectTree(o, r.writeCanvasObject, r.writeCloseCanvasObject)
 		r.indentation--
 		r.writeIndent()
 		r.writeCloseTag("overlay")
@@ -223,21 +219,21 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 	r.setPosAttr(attrs, "pos", obj.Position())
 	r.setSizeAttr(attrs, "size", obj.Size())
 	switch o := obj.(type) {
-	case *canvas.Circle:
+	case *fynecanvas.Circle:
 		r.writeCircle(o, attrs)
-	case *canvas.Image:
+	case *fynecanvas.Image:
 		r.writeImage(o, attrs)
-	case *canvas.Line:
+	case *fynecanvas.Line:
 		r.writeLine(o, attrs)
-	case *canvas.LinearGradient:
+	case *fynecanvas.LinearGradient:
 		r.writeLinearGradient(o, attrs)
-	case *canvas.RadialGradient:
+	case *fynecanvas.RadialGradient:
 		r.writeRadialGradient(o, attrs)
-	case *canvas.Raster:
+	case *fynecanvas.Raster:
 		r.writeRaster(o, attrs)
-	case *canvas.Rectangle:
+	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
-	case *canvas.Text:
+	case *fynecanvas.Text:
 		r.writeText(o, attrs)
 	case *fyne.Container:
 		r.writeContainer(o, attrs)
@@ -252,7 +248,7 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 	return false
 }
 
-func (r *markupRenderer) writeCircle(c *canvas.Circle, attrs map[string]*string) {
+func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", c.FillColor)
 	r.setColorAttr(attrs, "strokeColor", c.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(c.StrokeWidth))
@@ -278,7 +274,7 @@ func (r *markupRenderer) writeCloseTag(name string) {
 	r.w.WriteString(">\n")
 }
 
-func (r *markupRenderer) writeContainer(c *fyne.Container, attrs map[string]*string) {
+func (r *markupRenderer) writeContainer(_ *fyne.Container, attrs map[string]*string) {
 	r.writeTag("container", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
@@ -290,7 +286,7 @@ func (r *markupRenderer) writeIndent() {
 	}
 }
 
-func (r *markupRenderer) writeImage(i *canvas.Image, attrs map[string]*string) {
+func (r *markupRenderer) writeImage(i *fynecanvas.Image, attrs map[string]*string) {
 	r.setStringAttr(attrs, "file", i.File)
 	r.setResourceAttr(attrs, "rsc", i.Resource)
 	if i.File == "" && i.Resource == nil {
@@ -305,32 +301,32 @@ func (r *markupRenderer) writeImage(i *canvas.Image, attrs map[string]*string) {
 	r.writeTag("image", true, attrs)
 }
 
-func (r *markupRenderer) writeLine(l *canvas.Line, attrs map[string]*string) {
+func (r *markupRenderer) writeLine(l *fynecanvas.Line, attrs map[string]*string) {
 	r.setColorAttr(attrs, "strokeColor", l.StrokeColor)
 	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(l.StrokeWidth), 1)
 	r.writeTag("line", true, attrs)
 }
 
-func (r *markupRenderer) writeLinearGradient(g *canvas.LinearGradient, attrs map[string]*string) {
+func (r *markupRenderer) writeLinearGradient(g *fynecanvas.LinearGradient, attrs map[string]*string) {
 	r.setColorAttr(attrs, "startColor", g.StartColor)
 	r.setColorAttr(attrs, "endColor", g.EndColor)
 	r.setFloatAttr(attrs, "angle", g.Angle)
 	r.writeTag("linearGradient", true, attrs)
 }
 
-func (r *markupRenderer) writeRadialGradient(g *canvas.RadialGradient, attrs map[string]*string) {
+func (r *markupRenderer) writeRadialGradient(g *fynecanvas.RadialGradient, attrs map[string]*string) {
 	r.setColorAttr(attrs, "startColor", g.StartColor)
 	r.setColorAttr(attrs, "endColor", g.EndColor)
 	r.setFloatPosAttr(attrs, "centerOffset", g.CenterOffsetX, g.CenterOffsetY)
 	r.writeTag("radialGradient", true, attrs)
 }
 
-func (r *markupRenderer) writeRaster(rst *canvas.Raster, attrs map[string]*string) {
+func (r *markupRenderer) writeRaster(rst *fynecanvas.Raster, attrs map[string]*string) {
 	r.setFloatAttr(attrs, "translucency", rst.Translucency)
 	r.writeTag("raster", true, attrs)
 }
 
-func (r *markupRenderer) writeRectangle(rct *canvas.Rectangle, attrs map[string]*string) {
+func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
@@ -363,8 +359,8 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 	}
 }
 
-func (r *markupRenderer) writeText(t *canvas.Text, attrs map[string]*string) {
-	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.ForegroundColor())
+func (r *markupRenderer) writeText(t *fynecanvas.Text, attrs map[string]*string) {
+	r.setColorAttrWithDefault(attrs, "color", t.Color, theme.Color(theme.ColorNameForeground))
 	r.setAlignmentAttr(attrs, "alignment", t.Alignment)
 	r.setSizeAttrWithDefault(attrs, "textSize", t.TextSize, theme.TextSize())
 	r.setBoolAttr(attrs, "bold", t.TextStyle.Bold)
@@ -390,23 +386,33 @@ func nrgbaColor(c color.Color) color.NRGBA {
 
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		nrgbaColor(theme.BackgroundColor()):        "background",
-		nrgbaColor(theme.ButtonColor()):            "button",
-		nrgbaColor(theme.DisabledButtonColor()):    "disabled button",
-		nrgbaColor(theme.DisabledColor()):          "disabled",
-		nrgbaColor(theme.ErrorColor()):             "error",
-		nrgbaColor(theme.FocusColor()):             "focus",
-		nrgbaColor(theme.ForegroundColor()):        "foreground",
-		nrgbaColor(theme.HoverColor()):             "hover",
-		nrgbaColor(theme.InputBackgroundColor()):   "inputBackground",
-		nrgbaColor(theme.InputBorderColor()):       "inputBorder",
-		nrgbaColor(theme.MenuBackgroundColor()):    "menuBackground",
-		nrgbaColor(theme.OverlayBackgroundColor()): "overlayBackground",
-		nrgbaColor(theme.PlaceHolderColor()):       "placeholder",
-		nrgbaColor(theme.PrimaryColor()):           "primary",
-		nrgbaColor(theme.ScrollBarColor()):         "scrollbar",
-		nrgbaColor(theme.SelectionColor()):         "selection",
-		nrgbaColor(theme.ShadowColor()):            "shadow",
+		nrgbaColor(theme.Color(theme.ColorNameBackground)):          "background",
+		nrgbaColor(theme.Color(theme.ColorNameButton)):              "button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):      "disabled button",
+		nrgbaColor(theme.Color(theme.ColorNameDisabled)):            "disabled",
+		nrgbaColor(theme.Color(theme.ColorNameError)):               "error",
+		nrgbaColor(theme.Color(theme.ColorNameFocus)):               "focus",
+		nrgbaColor(theme.Color(theme.ColorNameForeground)):          "foreground",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):   "foregroundOnError",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)): "foregroundOnPrimary",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)): "foregroundOnSuccess",
+		nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)): "foregroundOnWarning",
+		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):    "headerBackground",
+		nrgbaColor(theme.Color(theme.ColorNameHover)):               "hover",
+		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):           "hyperlink",
+		nrgbaColor(theme.Color(theme.ColorNameInputBackground)):     "inputBackground",
+		nrgbaColor(theme.Color(theme.ColorNameInputBorder)):         "inputBorder",
+		nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):      "menuBackground",
+		nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):   "overlayBackground",
+		nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):         "placeholder",
+		nrgbaColor(theme.Color(theme.ColorNamePressed)):             "pressed",
+		nrgbaColor(theme.Color(theme.ColorNamePrimary)):             "primary",
+		nrgbaColor(theme.Color(theme.ColorNameScrollBar)):           "scrollbar",
+		nrgbaColor(theme.Color(theme.ColorNameSelection)):           "selection",
+		nrgbaColor(theme.Color(theme.ColorNameSeparator)):           "separator",
+		nrgbaColor(theme.Color(theme.ColorNameSuccess)):             "success",
+		nrgbaColor(theme.Color(theme.ColorNameShadow)):              "shadow",
+		nrgbaColor(theme.Color(theme.ColorNameWarning)):             "warning",
 	}[nrgbaColor(c)]
 }
 
@@ -414,6 +420,7 @@ func knownResource(rsc fyne.Resource) string {
 	return map[fyne.Resource]string{
 		theme.CancelIcon():             "cancelIcon",
 		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
+		theme.CheckButtonFillIcon():    "checkButtonFillIcon",
 		theme.CheckButtonIcon():        "checkButtonIcon",
 		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
 		theme.ColorChromaticIcon():     "colorChromaticIcon",
@@ -429,6 +436,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.ContentRemoveIcon():      "contentRemoveIcon",
 		theme.ContentUndoIcon():        "contentUndoIcon",
 		theme.DeleteIcon():             "deleteIcon",
+		theme.DesktopIcon():            "desktopIcon",
 		theme.DocumentCreateIcon():     "documentCreateIcon",
 		theme.DocumentIcon():           "documentIcon",
 		theme.DocumentPrintIcon():      "documentPrintIcon",
@@ -444,7 +452,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.FolderIcon():             "folderIcon",
 		theme.FolderNewIcon():          "folderNewIcon",
 		theme.FolderOpenIcon():         "folderOpenIcon",
-		theme.FyneLogo():               "fyneLogo",
+		theme.FyneLogo():               "fyneLogo", //lint:ignore SA1019 This needs to stay until the API is removed.
 		theme.HelpIcon():               "helpIcon",
 		theme.HistoryIcon():            "historyIcon",
 		theme.HomeIcon():               "homeIcon",
@@ -473,6 +481,7 @@ func knownResource(rsc fyne.Resource) string {
 		theme.NavigateNextIcon():       "navigateNextIcon",
 		theme.QuestionIcon():           "questionIcon",
 		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
+		theme.RadioButtonFillIcon():    "radioButtonFillIcon",
 		theme.RadioButtonIcon():        "radioButtonIcon",
 		theme.SearchIcon():             "searchIcon",
 		theme.SearchReplaceIcon():      "searchReplaceIcon",

@@ -19,12 +19,13 @@ import (
 var _ fyne.App = (*fyneApp)(nil)
 
 type fyneApp struct {
-	driver   fyne.Driver
-	icon     fyne.Resource
-	uniqueID string
+	driver    fyne.Driver
+	clipboard fyne.Clipboard
+	icon      fyne.Resource
+	uniqueID  string
 
 	cloud     fyne.CloudProvider
-	lifecycle fyne.Lifecycle
+	lifecycle app.Lifecycle
 	settings  *settings
 	storage   fyne.Storage
 	prefs     fyne.Preferences
@@ -39,6 +40,9 @@ func (a *fyneApp) Icon() fyne.Resource {
 		return a.icon
 	}
 
+	if a.Metadata().Icon == nil || len(a.Metadata().Icon.Content()) == 0 {
+		return nil
+	}
 	return a.Metadata().Icon
 }
 
@@ -64,6 +68,7 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (a *fyneApp) Run() {
+	go a.lifecycle.RunEventQueue(a.driver.DoFromGoroutine)
 	a.driver.Run()
 }
 
@@ -97,7 +102,7 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 }
 
 func (a *fyneApp) Lifecycle() fyne.Lifecycle {
-	return a.lifecycle
+	return &a.lifecycle
 }
 
 func (a *fyneApp) newDefaultPreferences() *preferences {
@@ -108,17 +113,27 @@ func (a *fyneApp) newDefaultPreferences() *preferences {
 	return p
 }
 
+func (a *fyneApp) Clipboard() fyne.Clipboard {
+	return a.clipboard
+}
+
 // New returns a new application instance with the default driver and no unique ID (unless specified in FyneApp.toml)
 func New() fyne.App {
 	if meta.ID == "" {
-		internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+		checkLocalMetadata() // if no ID passed, check if it was in toml
+		if meta.ID == "" {
+			internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+		}
 	}
 	return NewWithID(meta.ID)
 }
 
 func makeStoreDocs(id string, s *store) *internal.Docs {
-	if id != "" {
-		err := os.MkdirAll(s.a.storageRoot(), 0755) // make the space before anyone can use it
+	if id == "" {
+		return &internal.Docs{} // an empty impl to avoid crashes
+	}
+	if root := s.a.storageRoot(); root != "" {
+		err := os.MkdirAll(root, 0755) // make the space before anyone can use it
 		if err != nil {
 			fyne.LogError("Failed to create app storage space", err)
 		}
@@ -130,12 +145,13 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 	}
 }
 
-func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	newApp := &fyneApp{uniqueID: id, driver: d, lifecycle: &app.Lifecycle{}}
+func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.App {
+	newApp := &fyneApp{uniqueID: id, clipboard: clipboard, driver: d}
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
-	newApp.lifecycle.(*app.Lifecycle).SetOnStoppedHookExecuted(func() {
+	newApp.lifecycle.InitEventQueue()
+	newApp.lifecycle.SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()
 		}

@@ -2,6 +2,7 @@ package storage_test
 
 import (
 	"io"
+	"os"
 	"runtime"
 	"testing"
 
@@ -15,17 +16,16 @@ import (
 )
 
 func TestURIAuthority(t *testing.T) {
-
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"
 	u, err := storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "example.com:8042", u.Authority())
 
 	// from IETF RFC 3986
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "", u.Authority())
 }
 
@@ -33,12 +33,12 @@ func TestURIPath(t *testing.T) {
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"
 	u, err := storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "/over/there", u.Path())
 
 	s = "foo:///over/there"
 	u, err = storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "/over/there", u.Path())
 
 	// NOTE: if net/url supported RFC3986, this would pass
@@ -50,7 +50,7 @@ func TestURIPath(t *testing.T) {
 	// from IETF RFC 3986
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "example:animal:ferret:nose", u.Path())
 }
 
@@ -58,13 +58,13 @@ func TestURIQuery(t *testing.T) {
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"
 	u, err := storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "name=ferret", u.Query())
 
 	// from IETF RFC 3986
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "", u.Query())
 }
 
@@ -72,13 +72,13 @@ func TestURIFragment(t *testing.T) {
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"
 	u, err := storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "nose", u.Fragment())
 
 	// from IETF RFC 3986
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "", u.Fragment())
 }
 
@@ -123,15 +123,15 @@ func TestURI_Parent(t *testing.T) {
 	// directory
 
 	parent, err := storage.Parent(storage.NewURI("file:///foo/bar/baz"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewFileURI("/foo/bar/baz/"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file://C:/foo/bar/", parent.String())
 
 	// TODO hook in an http/https handler
@@ -162,7 +162,7 @@ func TestURI_Parent(t *testing.T) {
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 
 		parent, err = storage.Parent(uri)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "file://C:/foo/bar/", parent.String())
 	}
 
@@ -182,7 +182,7 @@ func TestURI_Parent(t *testing.T) {
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.
 	parent, err = storage.Parent(storage.NewURI("file:///C:/"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "file:///", parent.String())
 }
 
@@ -221,12 +221,34 @@ func TestExists(t *testing.T) {
 	fooExpectedParent, _ := storage.ParseURI("uritest:///foo/bar")
 	fooExists, err := storage.Exists(foo)
 	assert.True(t, fooExists)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	fooParent, err := storage.Parent(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, fooExpectedParent.String(), fooParent.String())
+}
 
+func TestFileAbs(t *testing.T) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		t.Error("Could not get working directory")
+		defer os.Chdir(pwd)
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Error("Could not get user home directory")
+	}
+
+	os.Chdir(home)
+
+	abs := storage.NewFileURI(home)
+	rel := storage.NewFileURI(".")
+
+	assert.Equal(t, abs.Path(), rel.Path())
+	assert.Equal(t, abs.String(), rel.String())
+
+	assert.Equal(t, "file:///", storage.NewFileURI("/").String())
 }
 
 func TestWriteAndDelete(t *testing.T) {
@@ -243,74 +265,81 @@ func TestWriteAndDelete(t *testing.T) {
 
 	// write some data and assert there are no errors
 	fooWriter, err := storage.Writer(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, fooWriter)
 
 	barWriter, err := storage.Writer(bar)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, barWriter)
 
 	bazWriter, err := storage.Writer(baz)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.NotNil(t, bazWriter)
 
 	n, err := fooWriter.Write([]byte{1, 2, 3, 4, 5})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 5, n)
 
 	n, err = barWriter.Write([]byte{6, 7, 8, 9})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 4, n)
 
 	n, err = bazWriter.Write([]byte{5, 4, 3, 2, 1, 0})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 6, n)
 
 	fooWriter.Close()
 	barWriter.Close()
 	bazWriter.Close()
 
+	bazAppender, err := storage.Appender(baz)
+	assert.NoError(t, err)
+	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
+	assert.NoError(t, err)
+	assert.Equal(t, 5, n)
+
+	bazAppender.Close()
+
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	barReader, err := storage.Reader(bar)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	bazReader, err := storage.Reader(baz)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	bazData, err := io.ReadAll(bazReader)
-	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
-	assert.Nil(t, err)
+	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
+	assert.NoError(t, err)
 
 	// now let's test deletion
 	err = storage.Delete(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	err = storage.Delete(bar)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	err = storage.Delete(baz)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	fooExists, err := storage.Exists(foo)
 	assert.False(t, fooExists)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	barExists, err := storage.Exists(bar)
 	assert.False(t, barExists)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
-	assert.Nil(t, err)
-
+	assert.NoError(t, err)
 }
 
 func TestCanWrite(t *testing.T) {
@@ -327,15 +356,15 @@ func TestCanWrite(t *testing.T) {
 
 	fooCanWrite, err := storage.CanWrite(foo)
 	assert.True(t, fooCanWrite)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	barCanWrite, err := storage.CanWrite(bar)
 	assert.True(t, barCanWrite)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	bazCanWrite, err := storage.CanWrite(baz)
 	assert.True(t, bazCanWrite)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestCanRead(t *testing.T) {
@@ -352,15 +381,15 @@ func TestCanRead(t *testing.T) {
 
 	fooCanRead, err := storage.CanRead(foo)
 	assert.True(t, fooCanRead)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	barCanRead, err := storage.CanRead(bar)
 	assert.True(t, barCanRead)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	bazCanRead, err := storage.CanRead(baz)
 	assert.False(t, bazCanRead)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestCopy(t *testing.T) {
@@ -373,7 +402,7 @@ func TestCopy(t *testing.T) {
 	bar, _ := storage.ParseURI("uritest:///bar")
 
 	err := storage.Copy(foo, bar)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
 }
@@ -388,12 +417,12 @@ func TestRepositoryMove(t *testing.T) {
 	bar, _ := storage.ParseURI("uritest:///bar")
 
 	err := storage.Move(foo, bar)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, []byte{1, 2, 3}, m.Data["/bar"])
 
 	exists, err := m.Exists(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.False(t, exists)
 }
 
@@ -409,11 +438,11 @@ func TestRepositoryListing(t *testing.T) {
 	foo, _ := storage.ParseURI("uritest:///foo")
 
 	canList, err := storage.CanList(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.True(t, canList)
 
 	listing, err := storage.List(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	stringListing := []string{}
 	for _, u := range listing {
 		stringListing = append(stringListing, u.String())
@@ -429,13 +458,13 @@ func TestCreateListable(t *testing.T) {
 	foo, _ := storage.ParseURI("uritest:///foo")
 
 	err := storage.CreateListable(foo)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	assert.Equal(t, m.Data["/foo"], []byte{})
+	assert.Equal(t, []byte{}, m.Data["/foo"])
 
 	// trying to create something we already created should fail
 	err = storage.CreateListable(foo)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 
 	// NOTE: creating an InMemoryRepository path with a non-extant parent
 	// is specifically not an error, so that case is not tested.

@@ -113,7 +113,7 @@ type HyperlinkSegment struct {
 	// OnTapped overrides the default `fyne.OpenURL` call when the link is tapped
 	//
 	// Since: 2.4
-	OnTapped func()
+	OnTapped func() `json:"-"`
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -126,12 +126,12 @@ func (h *HyperlinkSegment) Textual() string {
 	return h.Text
 }
 
-// Visual returns the hyperlink widget required to render this segment.
+// Visual returns a new instance of a hyperlink widget required to render this segment.
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
 	link.OnTapped = h.OnTapped
-	return &fyne.Container{Layout: &unpadTextWidgetLayout{}, Objects: []fyne.CanvasObject{link}}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: link}, Objects: []fyne.CanvasObject{link}}
 }
 
 // Update applies the current state of this hyperlink segment to an existing visual.
@@ -182,7 +182,7 @@ func (i *ImageSegment) Textual() string {
 	return "Image " + i.Title
 }
 
-// Visual returns the image widget required to render this segment.
+// Visual returns a new instance of an image widget required to render this segment.
 func (i *ImageSegment) Visual() fyne.CanvasObject {
 	return newRichImage(i.Source, i.Alignment)
 }
@@ -256,7 +256,7 @@ func (l *ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a list visual.
+// Update doesn't need to change a list visual.
 func (l *ListSegment) Update(fyne.CanvasObject) {
 }
 
@@ -301,7 +301,7 @@ func (p *ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a paragraph container.
+// Update doesn't need to change a paragraph container.
 func (p *ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
@@ -335,12 +335,12 @@ func (s *SeparatorSegment) Textual() string {
 	return ""
 }
 
-// Visual returns the separator element for this segment.
+// Visual returns a new instance of a separator widget for this segment.
 func (s *SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
-// Update doesnt need to change a separator visual.
+// Update doesn't need to change a separator visual.
 func (s *SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
@@ -391,6 +391,8 @@ type RichTextSegment interface {
 type TextSegment struct {
 	Style RichTextStyle
 	Text  string
+
+	parent *RichText
 }
 
 // Inline should return true if this text can be included within other elements, or false if it creates a new block.
@@ -403,7 +405,7 @@ func (t *TextSegment) Textual() string {
 	return t.Text
 }
 
-// Visual returns the graphical elements required to render this segment.
+// Visual returns a new instance of a graphical element required to render this segment.
 func (t *TextSegment) Visual() fyne.CanvasObject {
 	obj := canvas.NewText(t.Text, t.color())
 
@@ -440,18 +442,20 @@ func (t *TextSegment) Unselect() {
 
 func (t *TextSegment) color() color.Color {
 	if t.Style.ColorName != "" {
-		return fyne.CurrentApp().Settings().Theme().Color(t.Style.ColorName, fyne.CurrentApp().Settings().ThemeVariant())
+		return theme.ColorForWidget(t.Style.ColorName, t.parent)
 	}
 
-	return theme.ForegroundColor()
+	return theme.ColorForWidget(theme.ColorNameForeground, t.parent)
 }
 
 func (t *TextSegment) size() float32 {
 	if t.Style.SizeName != "" {
-		return fyne.CurrentApp().Settings().Theme().Size(t.Style.SizeName)
+		i := theme.SizeForWidget(t.Style.SizeName, t.parent)
+		return i
 	}
 
-	return theme.TextSize()
+	i := theme.SizeForWidget(theme.SizeNameText, t.parent)
+	return i
 }
 
 type richImage struct {
@@ -521,10 +525,12 @@ func (r *richImageLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 type unpadTextWidgetLayout struct {
+	parent fyne.Widget
 }
 
 func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
-	pad := theme.InnerPadding() * -1
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * -1
 	pad2 := pad * -2
 
 	o[0].Move(fyne.NewPos(pad, pad))
@@ -532,6 +538,7 @@ func (u *unpadTextWidgetLayout) Layout(o []fyne.CanvasObject, s fyne.Size) {
 }
 
 func (u *unpadTextWidgetLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
-	pad := theme.InnerPadding() * 2
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, u.parent)
+	pad := innerPad * 2
 	return o[0].MinSize().Subtract(fyne.NewSize(pad, pad))
 }

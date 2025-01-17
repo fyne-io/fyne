@@ -100,14 +100,21 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
+		jmethodID getfilesdir = find_method(env, current_class, "getFilesDir", "()Ljava/io/File;");
+		jobject filesdirfile = (jobject)(*env)->CallObjectMethod(env, activity->clazz, getfilesdir, NULL);
+		jclass file_class = (*env)->GetObjectClass(env, filesdirfile);
+		jmethodID getabsolutepath = find_method(env, file_class, "getAbsolutePath", "()Ljava/lang/String;");
+		jstring jpath = (jstring)(*env)->CallObjectMethod(env, filesdirfile, getabsolutepath, NULL);
+		const char* filesdir = (*env)->GetStringUTFChars(env, jpath, NULL);
+
 		// Set FILESDIR
-		if (setenv("FILESDIR", activity->internalDataPath, 1) != 0) {
+		if (setenv("FILESDIR", filesdir, 1) != 0) {
 			LOG_INFO("setenv(\"FILESDIR\", \"%s\", 1) failed: %d", activity->internalDataPath, errno);
 		}
 
 		// Set TMPDIR.
 		jmethodID gettmpdir = find_method(env, current_class, "getTmpdir", "()Ljava/lang/String;");
-		jstring jpath = (jstring)(*env)->CallObjectMethod(env, activity->clazz, gettmpdir, NULL);
+		jpath = (jstring)(*env)->CallObjectMethod(env, activity->clazz, gettmpdir, NULL);
 		const char* tmpdir = (*env)->GetStringUTFChars(env, jpath, NULL);
 		if (setenv("TMPDIR", tmpdir, 1) != 0) {
 			LOG_INFO("setenv(\"TMPDIR\", \"%s\", 1) failed: %d", tmpdir, errno);

@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 
@@ -21,7 +20,7 @@ import (
 
 	"fyne.io/fyne/v2"
 
-	"fyne.io/fyne/v2/cmd/fyne/internal/metadata"
+	"fyne.io/fyne/v2/internal/metadata"
 )
 
 const (
@@ -135,9 +134,11 @@ type Packager struct {
 	certificate, profile           string // optional flags for releasing
 	tags, category                 string
 	tempDir                        string
+	langs                          []string
 
 	customMetadata      keyValueFlag
 	linuxAndBSDMetadata *metadata.LinuxAndBSD
+	sourceMetadata      *metadata.AppSource
 }
 
 // NewPackager returns a command that can handle the packaging a GUI apps built using Fyne from local source code.
@@ -212,25 +213,12 @@ func (p *Packager) packageWithoutValidate() error {
 }
 
 func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) {
-	if p.os != "web" {
-		b := &Builder{
-			os:      p.os,
-			srcdir:  p.srcDir,
-			target:  p.exe,
-			release: p.release,
-			tags:    tags,
-			runner:  runner,
+	target := p.exe
 
-			appData: p.appData,
-		}
-
-		return []string{p.exe}, b.build()
-	}
-
-	bWasm := &Builder{
-		os:      "wasm",
+	b := &Builder{
+		os:      p.os,
 		srcdir:  p.srcDir,
-		target:  p.exe + ".wasm",
+		target:  target,
 		release: p.release,
 		tags:    tags,
 		runner:  runner,
@@ -238,32 +226,7 @@ func (p *Packager) buildPackage(runner runner, tags []string) ([]string, error) 
 		appData: p.appData,
 	}
 
-	err := bWasm.build()
-	if err != nil {
-		return nil, err
-	}
-
-	if runtime.GOOS == "windows" {
-		return []string{bWasm.target}, nil
-	}
-
-	bGopherJS := &Builder{
-		os:      "js",
-		srcdir:  p.srcDir,
-		target:  p.exe + ".js",
-		release: p.release,
-		tags:    tags,
-		runner:  runner,
-
-		appData: p.appData,
-	}
-
-	err = bGopherJS.build()
-	if err != nil {
-		return nil, err
-	}
-
-	return []string{bWasm.target, bGopherJS.target}, nil
+	return []string{target}, b.build()
 }
 
 func (p *Packager) combinedVersion() string {
@@ -325,12 +288,8 @@ func (p *Packager) doPackage(runner runner) error {
 		return p.packageAndroid(p.os, tags)
 	case "ios", "iossimulator":
 		return p.packageIOS(p.os, tags)
-	case "wasm":
+	case "web", "wasm":
 		return p.packageWasm()
-	case "js":
-		return p.packageGopherJS()
-	case "web":
-		return p.packageWeb()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
@@ -375,6 +334,7 @@ func (p *Packager) validate() (err error) {
 	os.Chdir(p.srcDir)
 
 	p.appData.CustomMetadata = p.customMetadata.m
+	p.appData.Release = p.release
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
@@ -383,8 +343,10 @@ func (p *Packager) validate() (err error) {
 			data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
 		}
 
-		p.appData.Release = p.release
 		p.appData.mergeMetadata(data)
+		p.sourceMetadata = data.Source
+		p.langs = data.Languages
+
 		p.linuxAndBSDMetadata = data.LinuxAndBSD
 	}
 

@@ -4,147 +4,115 @@ import (
 	"context"
 	"image"
 	"math"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/driver"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-var _ fyne.Canvas = (*mobileCanvas)(nil)
+var _ fyne.Canvas = (*canvas)(nil)
 
-type mobileCanvas struct {
+type canvas struct {
 	common.Canvas
+	content        fyne.CanvasObject
+	device         *device
+	initialized    bool
+	lastTapDown    map[int]time.Time
+	lastTapDownPos map[int]fyne.Position
+	lastTapDelta   map[int]fyne.Delta
+	menu           fyne.CanvasObject
+	padded         bool
+	scale          float32
+	size           fyne.Size
+	touched        map[int]mobile.Touchable
+	windowHead     fyne.CanvasObject
 
-	content          fyne.CanvasObject
-	windowHead, menu fyne.CanvasObject
-	scale            float32
-	size             fyne.Size
+	dragOffset fyne.Position
+	dragStart  fyne.Position
+	dragging   fyne.Draggable
 
-	touched map[int]mobile.Touchable
-	padded  bool
-
-	onTypedRune func(rune)
 	onTypedKey  func(event *fyne.KeyEvent)
+	onTypedRune func(rune)
 
-	inited                bool
-	lastTapDown           map[int]time.Time
-	lastTapDownPos        map[int]fyne.Position
-	dragging              fyne.Draggable
-	dragStart, dragOffset fyne.Position
-
-	touchTapCount   int
 	touchCancelFunc context.CancelFunc
+	touchCancelLock sync.Mutex
 	touchLastTapped fyne.CanvasObject
+	touchTapCount   int
 }
 
-// NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
-func NewCanvas() fyne.Canvas {
-	ret := &mobileCanvas{padded: true}
-	ret.scale = fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-	ret.touched = make(map[int]mobile.Touchable)
-	ret.lastTapDownPos = make(map[int]fyne.Position)
-	ret.lastTapDown = make(map[int]time.Time)
+func newCanvas(dev fyne.Device) fyne.Canvas {
+	d, _ := dev.(*device)
+	ret := &canvas{
+		Canvas: common.Canvas{
+			OnFocus:   handleKeyboard,
+			OnUnfocus: hideVirtualKeyboard,
+		},
+		device:         d,
+		lastTapDown:    make(map[int]time.Time),
+		lastTapDownPos: make(map[int]fyne.Position),
+		lastTapDelta:   make(map[int]fyne.Delta),
+		padded:         true,
+		scale:          dev.SystemScaleForWindow(nil), // we don't need a window parameter on mobile,
+		touched:        make(map[int]mobile.Touchable),
+	}
 	ret.Initialize(ret, ret.overlayChanged)
-	ret.OnFocus = ret.handleKeyboard
-	ret.OnUnfocus = hideVirtualKeyboard
-
 	return ret
 }
 
-func (c *mobileCanvas) Capture() image.Image {
+func (c *canvas) Capture() image.Image {
 	return c.Painter().Capture(c)
 }
 
-func (c *mobileCanvas) Content() fyne.CanvasObject {
+func (c *canvas) Content() fyne.CanvasObject {
 	return c.content
 }
 
-func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
-	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-
-	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok || dev.safeWidth == 0 || dev.safeHeight == 0 {
-		return fyne.NewPos(0, 0), c.Size() // running in test mode
+func (c *canvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	var pos fyne.Position
+	var size fyne.Size
+	if c.device == nil {
+		// running in test mode
+		size = c.Size()
+	} else {
+		safeLeft := float32(c.device.safeLeft) / c.scale
+		safeTop := float32(c.device.safeTop) / c.scale
+		safeRight := float32(c.device.safeRight) / c.scale
+		safeBottom := float32(c.device.safeBottom) / c.scale
+		pos = fyne.NewPos(safeLeft, safeTop)
+		size = c.size.SubtractWidthHeight(safeLeft+safeRight, safeTop+safeBottom)
 	}
-
-	return fyne.NewPos(float32(dev.safeLeft)/scale, float32(dev.safeTop)/scale),
-		fyne.NewSize(float32(dev.safeWidth)/scale, float32(dev.safeHeight)/scale)
+	if c.windowHeadIsDisplacing() {
+		offset := c.windowHead.MinSize().Height
+		pos = pos.AddXY(0, offset)
+		size = size.SubtractWidthHeight(0, offset)
+	}
+	return pos, size
 }
 
-func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
-	return c.onTypedKey
-}
-
-func (c *mobileCanvas) OnTypedRune() func(rune) {
-	return c.onTypedRune
-}
-
-func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
-}
-
-func (c *mobileCanvas) Scale() float32 {
-	return c.scale
-}
-
-func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
-	c.setContent(content)
-	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
-	c.SetDirty()
-}
-
-func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
-	c.onTypedKey = typed
-}
-
-func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
-	c.onTypedRune = typed
-}
-
-func (c *mobileCanvas) Size() fyne.Size {
-	return c.size
-}
-
-func (c *mobileCanvas) MinSize() fyne.Size {
+func (c *canvas) MinSize() fyne.Size {
 	return c.size // TODO check
 }
 
-func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	if c.menu != nil {
-		return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
-	}
-
-	return driver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
+func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
 }
 
-func (c *mobileCanvas) handleKeyboard(obj fyne.Focusable) {
-	isDisabled := false
-	if disWid, ok := obj.(fyne.Disableable); ok {
-		isDisabled = disWid.Disabled()
-	}
-	if obj != nil && !isDisabled {
-		if keyb, ok := obj.(mobile.Keyboardable); ok {
-			showVirtualKeyboard(keyb.Keyboard())
-		} else {
-			showVirtualKeyboard(mobile.DefaultKeyboard)
-		}
-	} else {
-		hideVirtualKeyboard()
-	}
+func (c *canvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
-func (c *mobileCanvas) overlayChanged() {
-	c.handleKeyboard(c.Focused())
-	c.SetDirty()
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
-func (c *mobileCanvas) Resize(size fyne.Size) {
+func (c *canvas) Resize(size fyne.Size) {
 	if size == c.size {
 		return
 	}
@@ -152,25 +120,29 @@ func (c *mobileCanvas) Resize(size fyne.Size) {
 	c.sizeContent(size)
 }
 
-func (c *mobileCanvas) setContent(content fyne.CanvasObject) {
-	c.content = content
-	c.SetContentTreeAndFocusMgr(content)
+func (c *canvas) Scale() float32 {
+	return c.scale
 }
 
-func (c *mobileCanvas) setMenu(menu fyne.CanvasObject) {
-	c.menu = menu
-	c.SetMenuTreeAndFocusMgr(menu)
+func (c *canvas) SetContent(content fyne.CanvasObject) {
+	c.setContent(content)
+	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
+	c.SetDirty()
 }
 
-func (c *mobileCanvas) setWindowHead(head fyne.CanvasObject) {
-	if c.padded {
-		head = container.NewPadded(head)
-	}
-	c.windowHead = head
-	c.SetMobileWindowHeadTree(head)
+func (c *canvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
 }
 
-func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
+func (c *canvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *canvas) Size() fyne.Size {
+	return c.size
+}
+
+func (c *canvas) applyThemeOutOfTreeObjects() {
 	if c.menu != nil {
 		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
 	}
@@ -179,29 +151,58 @@ func (c *mobileCanvas) applyThemeOutOfTreeObjects() {
 	}
 }
 
-func (c *mobileCanvas) sizeContent(size fyne.Size) {
+func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	if c.menu != nil {
+		return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
+	}
+
+	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
+}
+
+func (c *canvas) overlayChanged() {
+	handleKeyboard(c.Focused())
+	c.SetDirty()
+}
+
+func (c *canvas) setContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
+}
+
+func (c *canvas) setMenu(menu fyne.CanvasObject) {
+	c.menu = menu
+	c.SetMenuTreeAndFocusMgr(menu)
+}
+
+func (c *canvas) setWindowHead(head fyne.CanvasObject) {
+	if c.padded {
+		head = container.NewPadded(head)
+	}
+	c.windowHead = head
+	c.SetMobileWindowHeadTree(head)
+}
+
+func (c *canvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
-	c.size = size
 
-	offset := fyne.NewPos(0, 0)
+	c.size = size
 	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
-		topHeight := c.windowHead.MinSize().Height
-
-		if len(c.windowHead.(*fyne.Container).Objects) > 1 {
-			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
-			offset = fyne.NewPos(0, topHeight)
-			areaSize = areaSize.Subtract(offset)
+		var headSize fyne.Size
+		headPos := areaPos
+		if c.windowHeadIsDisplacing() {
+			headSize = fyne.NewSize(areaSize.Width, c.windowHead.MinSize().Height)
+			headPos = headPos.SubtractXY(0, headSize.Height)
 		} else {
-			c.windowHead.Resize(c.windowHead.MinSize())
+			headSize = c.windowHead.MinSize()
 		}
-		c.windowHead.Move(areaPos)
+		c.windowHead.Resize(headSize)
+		c.windowHead.Move(headPos)
 	}
 
-	topLeft := areaPos.Add(offset)
 	for _, overlay := range c.Overlays().List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
@@ -209,20 +210,20 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 			p.Refresh()
 		} else {
 			overlay.Resize(areaSize)
-			overlay.Move(topLeft)
+			overlay.Move(areaPos)
 		}
 	}
 
 	if c.padded {
 		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		c.content.Move(areaPos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
 		c.content.Resize(areaSize)
-		c.content.Move(topLeft)
+		c.content.Move(areaPos)
 	}
 }
 
-func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
+func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
@@ -251,7 +252,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 	}
 }
 
-func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
+func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 	previousPos := c.lastTapDownPos[tapID]
 	deltaX := pos.X - previousPos.X
@@ -261,6 +262,8 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 		return
 	}
 	c.lastTapDownPos[tapID] = pos
+	offset := fyne.Delta{DX: deltaX, DY: deltaY}
+	c.lastTapDelta[tapID] = offset
 
 	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Draggable); ok {
@@ -295,19 +298,20 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	ev := &fyne.DragEvent{}
 	draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
 	ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
-	ev.Dragged = fyne.Delta{DX: deltaX, DY: deltaY}
+	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
 }
 
-func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
+func (c *canvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
-	dragCallback func(fyne.Draggable)) {
+	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 
 	if c.dragging != nil {
-		dragCallback(c.dragging)
+		previousDelta := c.lastTapDelta[tapID]
+		dragCallback(c.dragging, &fyne.DragEvent{Dragged: previousDelta})
 
 		c.dragging = nil
 		return
@@ -352,10 +356,13 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	if duration < tapSecondaryDelay {
 		_, doubleTap := co.(fyne.DoubleTappable)
 		if doubleTap {
+			c.touchCancelLock.Lock()
 			c.touchTapCount++
 			c.touchLastTapped = co
-			if c.touchCancelFunc != nil {
-				c.touchCancelFunc()
+			cancel := c.touchCancelFunc
+			c.touchCancelLock.Unlock()
+			if cancel != nil {
+				cancel()
 				return
 			}
 			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
@@ -371,21 +378,46 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	}
 }
 
-func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
-	var ctx context.Context
-	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
-	defer c.touchCancelFunc()
+func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
+	ctx, cancel := context.WithDeadline(context.TODO(), time.Now().Add(tapDoubleDelay))
+	c.touchCancelLock.Lock()
+	c.touchCancelFunc = cancel
+	c.touchCancelLock.Unlock()
+	defer cancel()
+
 	<-ctx.Done()
-	if c.touchTapCount == 2 && c.touchLastTapped == co {
-		if wid, ok := co.(fyne.DoubleTappable); ok {
-			doubleTapCallback(wid, ev)
+	fyne.CurrentApp().Driver().DoFromGoroutine(func() {
+		c.touchCancelLock.Lock()
+		touchCount := c.touchTapCount
+		touchLast := c.touchLastTapped
+		c.touchCancelLock.Unlock()
+
+		if touchCount == 2 && touchLast == co {
+			if wid, ok := co.(fyne.DoubleTappable); ok {
+				doubleTapCallback(wid, ev)
+			}
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok {
+				tapCallback(wid, ev)
+			}
 		}
-	} else {
-		if wid, ok := co.(fyne.Tappable); ok {
-			tapCallback(wid, ev)
-		}
+
+		c.touchCancelLock.Lock()
+		c.touchTapCount = 0
+		c.touchCancelFunc = nil
+		c.touchLastTapped = nil
+		c.touchCancelLock.Unlock()
+	})
+}
+
+func (c *canvas) windowHeadIsDisplacing() bool {
+	if c.windowHead == nil {
+		return false
 	}
-	c.touchTapCount = 0
-	c.touchCancelFunc = nil
-	c.touchLastTapped = nil
+
+	chromeBox := c.windowHead.(*fyne.Container)
+	if c.padded {
+		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+	}
+	return len(chromeBox.Objects) > 1
 }

@@ -23,7 +23,7 @@ func TestClipStack_Intersect(t *testing.T) {
 
 	assert.Equal(t, fyne.NewPos(25, 25), i.pos)
 	assert.Equal(t, fyne.NewSize(50, 25), i.size)
-	assert.Equal(t, 2, len(c.clips))
+	assert.Len(t, c.clips, 2)
 
 	_ = c.Pop()
 	p2 = fyne.NewPos(50, 50)
@@ -32,7 +32,7 @@ func TestClipStack_Intersect(t *testing.T) {
 
 	assert.Equal(t, fyne.NewPos(50, 50), i.pos)
 	assert.Equal(t, fyne.NewSize(55, 50), i.size)
-	assert.Equal(t, 2, len(c.clips))
+	assert.Len(t, c.clips, 2)
 }
 
 func TestClipStack_Pop(t *testing.T) {
@@ -47,7 +47,7 @@ func TestClipStack_Pop(t *testing.T) {
 	i := c.Pop()
 	assert.Equal(t, p, i.pos)
 	assert.Equal(t, s, i.size)
-	assert.Equal(t, 0, len(c.clips))
+	assert.Empty(t, c.clips)
 }
 
 func TestClipStack_Push(t *testing.T) {
@@ -58,5 +58,5 @@ func TestClipStack_Push(t *testing.T) {
 	i := c.Push(p, s)
 	assert.Equal(t, p, i.pos)
 	assert.Equal(t, s, i.size)
-	assert.Equal(t, 1, len(c.clips))
+	assert.Len(t, c.clips, 1)
 }

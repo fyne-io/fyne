@@ -1,25 +1,36 @@
 package cache
 
 import (
-	"sync"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
-var textures = sync.Map{} // map[fyne.CanvasObject]*textureInfo
+var (
+	textTextures   async.Map[FontCacheEntry, *textureInfo]
+	objectTextures async.Map[fyne.CanvasObject, *textureInfo]
+)
 
 // DeleteTexture deletes the texture from the cache map.
 func DeleteTexture(obj fyne.CanvasObject) {
-	textures.Delete(obj)
+	objectTextures.Delete(obj)
+}
+
+// GetTextTexture gets cached texture for a text run.
+func GetTextTexture(ent FontCacheEntry) (TextureType, bool) {
+	texInfo, ok := textTextures.Load(ent)
+	if texInfo == nil || !ok {
+		return NoTexture, false
+	}
+	texInfo.setAlive()
+	return texInfo.texture, true
 }
 
 // GetTexture gets cached texture.
 func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
-	t, ok := textures.Load(obj)
-	if t == nil || !ok {
+	texInfo, ok := objectTextures.Load(obj)
+	if texInfo == nil || !ok {
 		return NoTexture, false
 	}
-	texInfo := t.(*textureInfo)
 	texInfo.setAlive()
 	return texInfo.texture, true
 }
@@ -30,8 +41,17 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 // gl context to ensure textures are deleted from gl.
 func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	now := timeNow()
-	textures.Range(func(key, value interface{}) bool {
-		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
+
+	textTextures.Range(func(key FontCacheEntry, tinfo *textureInfo) bool {
+		// Just free text directly when that string/style combo is done.
+		if tinfo.isExpired(now) && tinfo.canvas == canvas {
+			textTextures.Delete(key)
+			tinfo.textFree()
+		}
+		return true
+	})
+
+	objectTextures.Range(func(obj fyne.CanvasObject, tinfo *textureInfo) bool {
 		if tinfo.isExpired(now) && tinfo.canvas == canvas {
 			f(obj)
 		}
@@ -40,12 +60,13 @@ func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 }
 
 // RangeTexturesFor range over the textures for the specified canvas.
+// It will not return the texture for a `canvas.Text` as their render lifecycle is handled separately.
 //
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
 func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
-	textures.Range(func(key, value interface{}) bool {
-		obj, tinfo := key.(fyne.CanvasObject), value.(*textureInfo)
+	// Do nothing for texture cache, it lives outside the scope of an object.
+	objectTextures.Range(func(obj fyne.CanvasObject, tinfo *textureInfo) bool {
 		if tinfo.canvas == canvas {
 			f(obj)
 		}
@@ -53,12 +74,34 @@ func RangeTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	})
 }
 
+// DeleteTextTexturesFor deletes all text textures for the given canvas.
+func DeleteTextTexturesFor(canvas fyne.Canvas) {
+	textTextures.Range(func(key FontCacheEntry, tinfo *textureInfo) bool {
+		if tinfo.canvas == canvas {
+			textTextures.Delete(key)
+			tinfo.textFree()
+		}
+		return true
+	})
+}
+
+// SetTextTexture sets cached texture for a text run.
+func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas, free func()) {
+	tinfo := prepareTexture(ent, texture, canvas, free)
+	textTextures.Store(ent, tinfo)
+}
+
 // SetTexture sets cached texture.
 func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) {
-	texInfo := &textureInfo{texture: texture}
-	texInfo.canvas = canvas
-	texInfo.setAlive()
-	textures.Store(obj, texInfo)
+	tinfo := prepareTexture(obj, texture, canvas, nil)
+	objectTextures.Store(obj, tinfo)
+}
+
+func prepareTexture(obj any, texture TextureType, canvas fyne.Canvas, free func()) *textureInfo {
+	tinfo := &textureInfo{texture: texture, textFree: free}
+	tinfo.canvas = canvas
+	tinfo.setAlive()
+	return tinfo
 }
 
 // textureCacheBase defines base texture cache object.

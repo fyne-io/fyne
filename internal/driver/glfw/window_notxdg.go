@@ -11,18 +11,6 @@ func (w *window) platformResize(canvasSize fyne.Size) {
 		return
 	}
 
-	if drawOnMainThread {
-		w.canvas.Resize(canvasSize)
-		d.repaintWindow(w)
-	} else {
-		runOnDraw(w, func() {
-			w.canvas.Resize(canvasSize)
-			d.repaintWindow(w)
-		})
-	}
-}
-
-// GetWindowHandle returns the window handle. Only implemented for X11 currently.
-func (w *window) GetWindowHandle() string {
-	return ""
+	w.canvas.Resize(canvasSize)
+	d.repaintWindow(w)
 }

@@ -19,6 +19,7 @@ var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
 // declare conformance with repository types
 var _ repository.Repository = (*InMemoryRepository)(nil)
 var _ repository.WritableRepository = (*InMemoryRepository)(nil)
+var _ repository.AppendableRepository = (*InMemoryRepository)(nil)
 var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
 var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
 var _ repository.MovableRepository = (*InMemoryRepository)(nil)
@@ -39,7 +40,7 @@ type nodeReaderWriter struct {
 // "virtual repository". In future, we may consider moving this into the public
 // API.
 //
-// Because of it's design, this repository has several quirks:
+// Because of its design, this repository has several quirks:
 //
 // * The Parent() of a path that exists does not necessarily exist
 //
@@ -210,6 +211,18 @@ func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
+// Appender implements repository.AppendableRepository.Appender
+//
+// Since: 2.6
+func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+	path := u.Path()
+	if path == "" {
+		return nil, fmt.Errorf("invalid path '%s'", path)
+	}
+
+	return &nodeReaderWriter{path: path, repo: m, writing: true, writeCursor: len(m.Data[path])}, nil
+}
+
 // CanWrite implements repository.WritableRepository.CanWrite
 //
 // Since: 2.0
@@ -314,7 +327,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	return listing, nil
 }
 
-// CreateListable impelements repository.ListableRepository.CreateListable.
+// CreateListable implements repository.ListableRepository.CreateListable.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CreateListable(u fyne.URI) error {

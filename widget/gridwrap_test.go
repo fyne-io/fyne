@@ -10,7 +10,7 @@ import (
 )
 
 func TestGridWrap_Focus(t *testing.T) {
-	defer test.NewApp()
+	test.NewTempApp(t)
 	list := createGridWrap(100)
 	window := test.NewWindow(list)
 	defer window.Close()
@@ -99,12 +99,31 @@ func TestGridWrap_ScrollTo(t *testing.T) {
 	assert.Equal(t, greatest, GridWrapItemID(999))
 }
 
+func TestGridWrap_ScrollToOffset(t *testing.T) {
+	g := createGridWrap(10)
+	g.Resize(fyne.NewSize(10, 10))
+
+	g.ScrollToOffset(2)
+	assert.Equal(t, float32(2), g.GetScrollOffset())
+
+	g.ScrollToOffset(-20)
+	assert.Equal(t, float32(0), g.GetScrollOffset())
+
+	g.ScrollToOffset(10000)
+	assert.LessOrEqual(t, g.GetScrollOffset(), float32(500) /*upper bound on content height*/)
+
+	// GridWrap viewport is larger than content size
+	g.Resize(fyne.NewSize(50, 250))
+	g.ScrollToOffset(20)
+	assert.Equal(t, float32(0), g.GetScrollOffset()) // doesn't scroll
+}
+
 func TestGridWrap_ScrollToTop(t *testing.T) {
 	g := createGridWrap(1000)
 	g.ScrollTo(750)
-	assert.NotEqual(t, g.offsetY, float32(0))
+	assert.NotEqual(t, float32(0), g.offsetY)
 	g.ScrollToTop()
-	assert.Equal(t, g.offsetY, float32(0))
+	assert.Equal(t, float32(0), g.offsetY)
 }
 
 func createGridWrap(items int) *GridWrap {
@@ -183,13 +202,13 @@ func TestGridWrap_RefreshItem(t *testing.T) {
 	list.RefreshItem(2)
 
 	children := list.scroller.Content.(*fyne.Container).Objects
-	assert.Equal(t, children[1].(*gridWrapItem).child.(*Label).Text, "Text")
-	assert.Equal(t, children[2].(*gridWrapItem).child.(*Label).Text, "Replace")
+	assert.Equal(t, "Text", children[1].(*gridWrapItem).child.(*Label).Text)
+	assert.Equal(t, "Replace", children[2].(*gridWrapItem).child.(*Label).Text)
 }
 
 func TestGridWrap_Selection(t *testing.T) {
 	g := createGridWrap(10)
-	assert.Zero(t, len(g.selected))
+	assert.Empty(t, g.selected)
 
 	selected := -1
 	unselected := -1
@@ -204,22 +223,33 @@ func TestGridWrap_Selection(t *testing.T) {
 	}
 
 	g.Select(0)
-	assert.Equal(t, 1, len(g.selected))
+	assert.Len(t, g.selected, 1)
 	assert.Zero(t, selected)
 	assert.Equal(t, -1, unselected)
 
 	g.UnselectAll()
-	assert.Zero(t, len(g.selected))
+	assert.Empty(t, g.selected)
 	assert.Equal(t, -1, selected)
 	assert.Zero(t, unselected)
 
 	g.Select(9)
-	assert.Equal(t, 1, len(g.selected))
+	assert.Len(t, g.selected, 1)
 	assert.Equal(t, 9, selected)
 	assert.Equal(t, -1, unselected)
 
 	g.Unselect(9)
-	assert.Zero(t, len(g.selected))
+	assert.Empty(t, g.selected)
 	assert.Equal(t, -1, selected)
 	assert.Equal(t, 9, unselected)
+}
+
+func TestGridWrap_ResizeToSameSizeBeforeRender(t *testing.T) {
+	g := NewGridWrap(
+		func() int { return 1 },
+		func() fyne.CanvasObject { return NewLabel("") },
+		func(gwii GridWrapItemID, co fyne.CanvasObject) { co.(*Label).SetText("foo") },
+	)
+	// will not create renderer.
+	// will crash if GridWrap scroller (not yet created) is accessed
+	g.Resize(fyne.NewSize(0, 0))
 }

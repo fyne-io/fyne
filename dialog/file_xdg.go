@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -27,7 +28,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	loc = loc[:len(loc)-1]
 	locURI := storage.NewFileURI(string(loc))
 
-	if locURI.String() == homeURI.String() {
+	if strings.TrimRight(locURI.String(), "/") == strings.TrimRight(homeURI.String(), "/") {
 		fallback, _ := storage.Child(homeURI, fallbackName)
 		return fallback, fmt.Errorf("this computer does not define a %s folder", name)
 	}
@@ -44,6 +45,7 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 
 	favoriteNames := getFavoriteOrder()
 	arguments := map[string]string{
+		"Desktop":   "DESKTOP",
 		"Documents": "DOCUMENTS",
 		"Downloads": "DOWNLOAD",
 		"Music":     "MUSIC",
@@ -58,6 +60,9 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
 		uri, err = getFavoriteLocation(homeURI, arguments[favName], favName)
+		if err != nil {
+			continue
+		}
 
 		listURI, err1 := storage.ListerForURI(uri)
 		if err1 != nil {

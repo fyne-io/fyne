@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	intTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/test"
 )
 
@@ -26,10 +27,10 @@ func TestCachedFontFace(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := painter.CachedFontFace(tt.style, 14, 1)
+			got := painter.CachedFontFace(tt.style, nil, nil)
 			for _, r := range tt.runes {
-				_, ok := got.Fonts[0].NominalGlyph(r)
-				assert.True(t, ok, "symbol Font should include: %c", r)
+				f := got.Fonts.ResolveFace(r)
+				assert.NotNil(t, f, "symbol Font should include: %c", r)
 			}
 		})
 	}
@@ -76,8 +77,10 @@ func TestDrawString(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			img := image.NewNRGBA(image.Rect(0, 0, 300, 100))
-			f := painter.CachedFontFace(tt.style, tt.size, 1)
-			painter.DrawString(img, tt.string, tt.color, f.Fonts, tt.size, 1, tt.tabWidth)
+			f := painter.CachedFontFace(tt.style, nil, nil)
+
+			fontMap := &intTest.FontMap{f.Fonts.ResolveFace(' ')} // first (ascii) font
+			painter.DrawString(img, tt.string, tt.color, fontMap, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
 			test.AssertImageMatches(t, "font/"+tt.want, img)
 		})
 	}
@@ -114,16 +117,17 @@ func TestMeasureString(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			face := painter.CachedFontFace(tt.style, tt.size, 1)
-			got, _ := painter.MeasureString(face.Fonts, tt.string, tt.size, tt.tabWidth)
+			faces := painter.CachedFontFace(tt.style, nil, nil)
+			fontMap := &intTest.FontMap{faces.Fonts.ResolveFace(' ')} // first (ascii) font
+			got, _ := painter.MeasureString(fontMap, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
 			assert.Equal(t, tt.want, got.Width)
 		})
 	}
 }
 
 func TestRenderedTextSize(t *testing.T) {
-	size1, baseline1 := painter.RenderedTextSize("Hello World!", 20, fyne.TextStyle{})
-	size2, baseline2 := painter.RenderedTextSize("\rH\re\rl\rl\ro\r \rW\ro\rr\rl\rd\r!\r", 20, fyne.TextStyle{})
+	size1, baseline1 := painter.RenderedTextSize("Hello World!", 20, fyne.TextStyle{}, nil)
+	size2, baseline2 := painter.RenderedTextSize("\rH\re\rl\rl\ro\r \rW\ro\rr\rl\rd\r!\r", 20, fyne.TextStyle{}, nil)
 	assert.Equal(t, int(size1.Width), int(size2.Width))
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)

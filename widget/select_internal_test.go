@@ -14,7 +14,7 @@ func TestSelect_SetOptions(t *testing.T) {
 	test.Tap(sel)
 
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 3, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 3)
 	assert.Equal(t, "10", sel.popUp.Items[0].(*menuItem).Item.Label)
 
 	sel.popUp.Hide()
@@ -22,7 +22,7 @@ func TestSelect_SetOptions(t *testing.T) {
 
 	test.Tap(sel)
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 3, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 3)
 	assert.Equal(t, "16", sel.popUp.Items[1].(*menuItem).Item.Label)
 
 	sel.popUp.Hide()
@@ -31,13 +31,12 @@ func TestSelect_SetOptions(t *testing.T) {
 
 	test.Tap(sel)
 	assert.NotNil(t, sel.popUp)
-	assert.Equal(t, 2, len(sel.popUp.Items))
+	assert.Len(t, sel.popUp.Items, 2)
 	assert.Equal(t, "20", sel.popUp.Items[0].(*menuItem).Item.Label)
 }
 
 func TestSelectRenderer_TapAnimation(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	test.ApplyTheme(t, test.NewTheme())
 	sel := NewSelect([]string{"one"}, func(s string) {})
@@ -47,21 +46,26 @@ func TestSelectRenderer_TapAnimation(t *testing.T) {
 	sel.Resize(sel.MinSize())
 	sel.Refresh()
 
-	render1 := test.WidgetRenderer(sel).(*selectRenderer)
+	path := "select/desktop/tap_animation.png"
+	if fyne.CurrentDevice().IsMobile() {
+		path = "select/mobile/tap_animation.png"
+	}
+
+	render1 := test.TempWidgetRenderer(t, sel).(*selectRenderer)
 	test.Tap(sel)
 	sel.popUp.Hide()
 	sel.tapAnim.Tick(0.5)
-	test.AssertImageMatches(t, "select/tap_animation.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, path, w.Canvas().Capture())
 
 	cache.DestroyRenderer(sel)
 	sel.Refresh()
 
-	render2 := test.WidgetRenderer(sel).(*selectRenderer)
+	render2 := test.TempWidgetRenderer(t, sel).(*selectRenderer)
 
 	assert.NotEqual(t, render1, render2)
 
 	test.Tap(sel)
 	sel.popUp.Hide()
 	sel.tapAnim.Tick(0.5)
-	test.AssertImageMatches(t, "select/tap_animation.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, path, w.Canvas().Capture())
 }

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/widget"
 )
 
 func TestFileItem_Name(t *testing.T) {
@@ -28,7 +29,7 @@ func TestFileItem_Name(t *testing.T) {
 	assert.Equal(t, "noext", item.name)
 
 	// Test that the extension remains for the list view.
-	f.view = listView
+	f.view = ListView
 
 	item = f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false, false)
 	assert.Equal(t, "filename.txt", item.name)
@@ -57,7 +58,7 @@ func TestFileItem_FolderName(t *testing.T) {
 	assert.Equal(t, ".maybeHidden", item.name)
 
 	// Test that the extension remains for the list view.
-	f.view = listView
+	f.view = ListView
 	item = f.newFileItem(storage.NewFileURI("/path/to/myapp.app/"), true, false)
 	assert.Equal(t, "myapp.app", item.name)
 }
@@ -114,13 +115,14 @@ func TestFileItem_Wrap(t *testing.T) {
 	_ = f.makeUI()
 	item := f.newFileItem(storage.NewFileURI("/path/to/filename.txt"), false, false)
 	item.Resize(item.MinSize())
-	label := test.WidgetRenderer(item).(*fileItemRenderer).text
+	label := test.TempWidgetRenderer(t, item).(*fileItemRenderer).text
 	assert.Equal(t, "filename", label.Text)
-	texts := test.WidgetRenderer(label).Objects()
-	assert.Equal(t, 1, len(texts))
+	texts := test.TempWidgetRenderer(t, label).Objects()
+	assert.Len(t, texts, 1)
 
 	item.setLocation(storage.NewFileURI("/path/to/averylongfilename.svg"), false, false)
-	texts = test.WidgetRenderer(label).Objects()
-	assert.Equal(t, 2, len(texts))
+	rich := test.TempWidgetRenderer(t, label).Objects()[0].(*widget.RichText)
+	texts = test.TempWidgetRenderer(t, rich).Objects()
+	assert.Len(t, texts, 2)
 	assert.Equal(t, "averylon", texts[0].(*canvas.Text).Text)
 }

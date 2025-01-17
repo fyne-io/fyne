@@ -3,7 +3,6 @@
 package glfw
 
 import (
-	"sync"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -15,7 +14,7 @@ import (
 )
 
 func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	cr1c1 := widget.NewLabel("row 1 col 1")
 	cr1c2 := widget.NewLabel("row 1 col 2")
@@ -38,11 +37,9 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	)
 	// We want to test the handling of the canvas' Fyne menu here.
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
-	c := w.canvas
-	movl := buildMenuOverlay(mm, w)
-	c.Lock()
+	c := w.Canvas()
+	movl := buildMenuOverlay(mm, w.window)
 	c.setMenuOverlay(movl)
-	c.Unlock()
 	w.SetContent(content)
 	w.Resize(fyne.NewSize(300, 200))
 	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
@@ -123,35 +120,4 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 			assert.Equal(t, tt.wantY, int(pos.Y))
 		})
 	}
-}
-
-var mainRoutineID uint64
-
-func init() {
-	mainRoutineID = goroutineID()
-}
-
-func TestGoroutineID(t *testing.T) {
-	assert.Equal(t, uint64(1), mainRoutineID)
-
-	var childID1, childID2 uint64
-	testID1 := goroutineID()
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		childID1 = goroutineID()
-		wg.Done()
-	}()
-	go func() {
-		childID2 = goroutineID()
-		wg.Done()
-	}()
-	wg.Wait()
-	testID2 := goroutineID()
-
-	assert.Equal(t, testID1, testID2)
-	assert.Greater(t, childID1, uint64(0))
-	assert.NotEqual(t, testID1, childID1)
-	assert.Greater(t, childID2, uint64(0))
-	assert.NotEqual(t, childID1, childID2)
 }

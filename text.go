@@ -41,7 +41,7 @@ const (
 	// TextTruncate trims the text to the widget's width, no wrapping is applied.
 	// If an entry is asked to truncate it will provide scrolling capabilities.
 	//
-	// Deprecated: Use `TextTruncateClip` value of the widget `Truncation` field instead
+	// Deprecated: Use [TextTruncateClip] value of the widget `Truncation` field instead
 	TextTruncate
 	// TextWrapBreak trims the line of characters to the widget's width adding the excess as new line.
 	// An Entry with text wrapping will scroll vertically if there is not enough space for all the text.
@@ -61,10 +61,14 @@ type TextStyle struct {
 	Symbol bool // Use the system symbol font.
 	// Since: 2.1
 	TabWidth int // Width of tabs in spaces
+	// Since: 2.5
+	// Currently only supported by [fyne.io/fyne/v2/widget.TextGrid].
+	Underline bool // Should text be underlined.
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.
+// The font used will be read from the current app's theme.
 func MeasureText(text string, size float32, style TextStyle) Size {
-	s, _ := CurrentApp().Driver().RenderedTextSize(text, size, style)
+	s, _ := CurrentApp().Driver().RenderedTextSize(text, size, style, nil)
 	return s
 }

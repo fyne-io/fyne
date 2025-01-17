@@ -2,19 +2,21 @@ package cache
 
 import (
 	"image"
-	"sync"
 	"time"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
-var svgs = &sync.Map{} // make(map[string]*svgInfo)
+var svgs async.Map[string, *svgInfo]
 
 // GetSvg gets svg image from cache if it exists.
-func GetSvg(name string, w int, h int) *image.NRGBA {
-	sinfo, ok := svgs.Load(name)
-	if !ok || sinfo == nil {
+func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {
+	svginfo, ok := svgs.Load(overriddenName(name, o))
+	if !ok || svginfo == nil {
 		return nil
 	}
-	svginfo := sinfo.(*svgInfo)
+
 	if svginfo.w != w || svginfo.h != h {
 		return nil
 	}
@@ -24,14 +26,14 @@ func GetSvg(name string, w int, h int) *image.NRGBA {
 }
 
 // SetSvg sets a svg into the cache map.
-func SetSvg(name string, pix *image.NRGBA, w int, h int) {
+func SetSvg(name string, o fyne.CanvasObject, pix *image.NRGBA, w int, h int) {
 	sinfo := &svgInfo{
 		pix: pix,
 		w:   w,
 		h:   h,
 	}
 	sinfo.setAlive()
-	svgs.Store(name, sinfo)
+	svgs.Store(overriddenName(name, o), sinfo)
 }
 
 type svgInfo struct {
@@ -44,16 +46,20 @@ type svgInfo struct {
 
 // destroyExpiredSvgs destroys expired svgs cache data.
 func destroyExpiredSvgs(now time.Time) {
-	expiredSvgs := make([]string, 0, 20)
-	svgs.Range(func(key, value interface{}) bool {
-		s, sinfo := key.(string), value.(*svgInfo)
+	svgs.Range(func(key string, sinfo *svgInfo) bool {
 		if sinfo.isExpired(now) {
-			expiredSvgs = append(expiredSvgs, s)
+			svgs.Delete(key)
 		}
 		return true
 	})
+}
 
-	for _, exp := range expiredSvgs {
-		svgs.Delete(exp)
+func overriddenName(name string, o fyne.CanvasObject) string {
+	if o != nil { // for overridden themes get the cache key right
+		if over, ok := overrides.Load(o); ok {
+			return over.cacheID + name
+		}
 	}
+
+	return name
 }

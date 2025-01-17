@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -16,7 +16,7 @@ type menuLabel struct {
 
 	menu   *fyne.Menu
 	bar    *fyne.Container
-	canvas *mobileCanvas
+	canvas *canvas
 }
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
@@ -39,13 +39,13 @@ func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
 	return &menuLabelRenderer{menu: m, content: box}
 }
 
-func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *mobileCanvas) *menuLabel {
+func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *canvas) *menuLabel {
 	l := &menuLabel{menu: item, bar: parent, canvas: c}
 	l.ExtendBaseWidget(l)
 	return l
 }
 
-func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
+func (c *canvas) showMenu(menu *fyne.MainMenu) {
 	var panel *fyne.Container
 	top := container.NewHBox(widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 		panel.Hide()
@@ -59,8 +59,8 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 		panel = container.NewPadded(panel)
 	}
 
-	bg := canvas.NewRectangle(theme.BackgroundColor())
-	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
+	bg := fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	shadow := fynecanvas.NewHorizontalGradient(theme.Color(theme.ColorNameShadow), color.Transparent)
 
 	safePos, safeSize := c.InteractiveArea()
 	bg.Move(safePos)
@@ -73,7 +73,7 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	c.setMenu(container.NewWithoutLayout(bg, panel, shadow))
 }
 
-func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
+func (d *driver) findMenu(win *window) *fyne.MainMenu {
 	if win.menu != nil {
 		return win.menu
 	}
@@ -102,7 +102,7 @@ type menuLabelRenderer struct {
 }
 
 func (m *menuLabelRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+	return theme.Color(theme.ColorNameBackground)
 }
 
 func (m *menuLabelRenderer) Destroy() {

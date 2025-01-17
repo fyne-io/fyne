@@ -11,18 +11,16 @@ import (
 )
 
 type window struct {
-	common.Window
-
 	title              string
 	visible            bool
 	onClosed           func()
 	onCloseIntercepted func()
 	isChild            bool
 
-	clipboard fyne.Clipboard
-	canvas    *mobileCanvas
-	icon      fyne.Resource
-	menu      *fyne.MainMenu
+	canvas *canvas
+	icon   fyne.Resource
+	menu   *fyne.MainMenu
+	handle uintptr // the window handle - currently just Android
 }
 
 func (w *window) Title() string {
@@ -42,7 +40,7 @@ func (w *window) SetFullScreen(bool) {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.Canvas().(*mobileCanvas).Resize(size)
+	w.Canvas().(*canvas).Resize(size)
 }
 
 func (w *window) RequestFocus() {
@@ -106,7 +104,7 @@ func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
 }
 
 func (w *window) Show() {
-	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
+	menu := fyne.CurrentApp().Driver().(*driver).findMenu(w)
 	menuButton := w.newMenuButton(menu)
 	if menu == nil {
 		menuButton.Hide()
@@ -142,7 +140,7 @@ func (w *window) Hide() {
 
 func (w *window) tryClose() {
 	if w.onCloseIntercepted != nil {
-		w.QueueEvent(w.onCloseIntercepted)
+		w.onCloseIntercepted()
 		return
 	}
 
@@ -150,7 +148,7 @@ func (w *window) tryClose() {
 }
 
 func (w *window) Close() {
-	d := fyne.CurrentApp().Driver().(*mobileDriver)
+	d := fyne.CurrentApp().Driver().(*driver)
 	pos := -1
 	for i, win := range d.windows {
 		if win == w {
@@ -168,16 +166,7 @@ func (w *window) Close() {
 			cache.DestroyRenderer(wid)
 		}
 	})
-
-	w.QueueEvent(func() {
-		cache.CleanCanvas(w.canvas)
-	})
-
-	// Call this in a go routine, because this function could be called
-	// inside a button which callback would be queued in this event queue
-	// and it will lead to a deadlock if this is performed in the same go
-	// routine.
-	go w.DestroyEventQueue()
+	cache.CleanCanvas(w.canvas)
 
 	if w.onClosed != nil {
 		w.onClosed()
@@ -186,7 +175,7 @@ func (w *window) Close() {
 
 func (w *window) ShowAndRun() {
 	w.Show()
-	fyne.CurrentApp().Driver().Run()
+	fyne.CurrentApp().Run()
 }
 
 func (w *window) Content() fyne.CanvasObject {
@@ -202,10 +191,7 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) Clipboard() fyne.Clipboard {
-	if w.clipboard == nil {
-		w.clipboard = &mobileClipboard{}
-	}
-	return w.clipboard
+	return NewClipboard()
 }
 
 func (w *window) RunWithContext(f func()) {
@@ -218,6 +204,6 @@ func (w *window) RescaleContext() {
 	// TODO
 }
 
-func (w *window) Context() interface{} {
-	return fyne.CurrentApp().Driver().(*mobileDriver).glctx
+func (w *window) Context() any {
+	return fyne.CurrentApp().Driver().(*driver).glctx
 }

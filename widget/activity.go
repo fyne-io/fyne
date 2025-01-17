@@ -2,11 +2,11 @@ package widget
 
 import (
 	"image/color"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -18,6 +18,8 @@ var _ fyne.Widget = (*Activity)(nil)
 // Since: 2.5
 type Activity struct {
 	BaseWidget
+
+	started atomic.Bool
 }
 
 // NewActivity returns a widget for indicating activity
@@ -31,50 +33,62 @@ func NewActivity() *Activity {
 
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
-
-	return fyne.NewSquareSize(theme.IconInlineSize())
+	return a.BaseWidget.MinSize()
 }
 
 // Start the activity indicator animation
 func (a *Activity) Start() {
-	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
-		r.start()
+	if !a.started.CompareAndSwap(false, true) {
+		return // already started
 	}
+
+	a.Refresh()
 }
 
 // Stop the activity indicator animation
 func (a *Activity) Stop() {
-	if r, ok := cache.Renderer(a.super()).(*activityRenderer); ok {
-		r.stop()
+	if !a.started.CompareAndSwap(true, false) {
+		return // already stopped
 	}
+
+	a.Refresh()
 }
 
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	for i := range dots {
-		dots[i] = canvas.NewCircle(theme.ForegroundColor())
+		dots[i] = canvas.NewCircle(a.Theme().Color(theme.ColorNameForeground, v))
 	}
-	r := &activityRenderer{dots: dots}
+	r := &activityRenderer{dots: dots, parent: a}
 	r.anim = &fyne.Animation{
 		Duration:    time.Second * 2,
 		RepeatCount: fyne.AnimationRepeatForever,
 		Tick:        r.animate}
 	r.updateColor()
+
+	if a.started.Load() {
+		r.start()
+	}
+
 	return r
 }
 
 var _ fyne.WidgetRenderer = (*activityRenderer)(nil)
 
 type activityRenderer struct {
-	anim *fyne.Animation
-	dots []fyne.CanvasObject
+	anim   *fyne.Animation
+	dots   []fyne.CanvasObject
+	parent *Activity
 
-	bound  fyne.Size
-	maxCol color.NRGBA
-	maxRad float32
+	bound      fyne.Size
+	maxCol     color.NRGBA
+	maxRad     float32
+	wasStarted bool
 }
 
 func (a *activityRenderer) Destroy() {
+	a.parent.started.Store(false)
 	a.stop()
 }
 
@@ -84,7 +98,7 @@ func (a *activityRenderer) Layout(size fyne.Size) {
 }
 
 func (a *activityRenderer) MinSize() fyne.Size {
-	return fyne.NewSquareSize(theme.IconInlineSize())
+	return fyne.NewSquareSize(a.parent.Theme().Size(theme.SizeNameInlineIcon))
 }
 
 func (a *activityRenderer) Objects() []fyne.CanvasObject {
@@ -92,6 +106,17 @@ func (a *activityRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (a *activityRenderer) Refresh() {
+	started := a.parent.started.Load()
+	if started {
+		if !a.wasStarted {
+			a.start()
+		}
+		return
+	} else if a.wasStarted {
+		a.stop()
+		return
+	}
+
 	a.updateColor()
 }
 
@@ -135,14 +160,17 @@ func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
 }
 
 func (a *activityRenderer) start() {
+	a.wasStarted = true
 	a.anim.Start()
 }
 
 func (a *activityRenderer) stop() {
+	a.wasStarted = false
 	a.anim.Stop()
 }
 
 func (a *activityRenderer) updateColor() {
-	rr, gg, bb, aa := theme.ForegroundColor().RGBA()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	rr, gg, bb, aa := a.parent.Theme().Color(theme.ColorNameForeground, v).RGBA()
 	a.maxCol = color.NRGBA{R: uint8(rr >> 8), G: uint8(gg >> 8), B: uint8(bb >> 8), A: uint8(aa >> 8)}
 }

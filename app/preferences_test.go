@@ -17,14 +17,14 @@ func loadPreferences(id string) *preferences {
 
 func TestPreferences_Remove(t *testing.T) {
 	p := loadPreferences("dummy")
-	p.WriteValues(func(val map[string]interface{}) {
+	p.WriteValues(func(val map[string]any) {
 		val["keyString"] = "value"
 		val["keyInt"] = 4
 	})
 
 	p.RemoveValue("keyString")
 	err := p.saveToFile(p.storagePath())
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// check it doesn't write values that were removed
 	p = loadPreferences("dummy")
@@ -34,7 +34,7 @@ func TestPreferences_Remove(t *testing.T) {
 
 func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
-	p.WriteValues(func(val map[string]interface{}) {
+	p.WriteValues(func(val map[string]any) {
 		val["keyString"] = "value"
 		val["keyStringList"] = []string{"1", "2", "3"}
 		val["keyInt"] = 4
@@ -43,12 +43,13 @@ func TestPreferences_Save(t *testing.T) {
 		val["keyFloatList"] = []float64{1.1, 2.2, 3.3}
 		val["keyBool"] = true
 		val["keyBoolList"] = []bool{true, false, true}
+		val["keyEmptyList"] = []string{}
 	})
 
 	path := p.storagePath()
 	defer os.Remove(path)
 	err := p.saveToFile(path)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected, err := os.ReadFile(filepath.Join("testdata", "preferences.json"))
 	if err != nil {
@@ -63,20 +64,19 @@ func TestPreferences_Save(t *testing.T) {
 	// check it reads the saved output
 	p = loadPreferences("dummy")
 	assert.Equal(t, "value", p.String("keyString"))
-	assert.Equal(t, 3, len(p.StringList("keyStringList")))
+	assert.Len(t, p.StringList("keyStringList"), 3)
 }
 
 func TestPreferences_Save_OverwriteFast(t *testing.T) {
 	p := loadPreferences("dummy2")
-	p.WriteValues(func(val map[string]interface{}) {
+	p.WriteValues(func(val map[string]any) {
 		val["key"] = "value"
 	})
 
-	path := filepath.Join(os.TempDir(), "fynePrefs2.json")
-	defer os.Remove(path)
+	path := filepath.Join(t.TempDir(), "fynePrefs2.json")
 	p.saveToFile(path)
 
-	p.WriteValues(func(val map[string]interface{}) {
+	p.WriteValues(func(val map[string]any) {
 		val["key2"] = "value2"
 	})
 	p.saveToFile(path)
@@ -96,6 +96,20 @@ func TestPreferences_Load(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, p.IntList("keyIntList"))
 	assert.Equal(t, 3.5, p.Float("keyFloat"))
 	assert.Equal(t, []float64{1.1, 2.2, 3.3}, p.FloatList("keyFloatList"))
-	assert.Equal(t, true, p.Bool("keyBool"))
+	assert.True(t, p.Bool("keyBool"))
 	assert.Equal(t, []bool{true, false, true}, p.BoolList("keyBoolList"))
+	assert.Empty(t, p.StringList("keyEmptyList"))
+}
+
+func TestPreferences_EmptyLoad(t *testing.T) {
+	p := newPreferences(&fyneApp{uniqueID: ""})
+
+	count := 0
+	p.ReadValues(func(v map[string]any) {
+		for range v {
+			count++
+		}
+	})
+
+	assert.Zero(t, count)
 }

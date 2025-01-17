@@ -7,32 +7,36 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
+
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 func TestRender(t *testing.T) {
 	obj := widget.NewLabel("Hi")
-	test.AssertImageMatches(t, "label_dark.png", Render(obj, theme.DarkTheme()))
-	test.AssertImageMatches(t, "label_light.png", Render(obj, theme.LightTheme()))
+	test.AssertImageMatches(t, "label.png", Render(obj, test.Theme()))
+	painter.ClearFontCache() // avoid side effects of the cause of #4937
+	test.AssertImageMatches(t, "label_ugly_theme.png", Render(obj, test.NewTheme()))
+	painter.ClearFontCache() // avoid side effects of the cause of #4937
 }
 
 func TestRender_State(t *testing.T) {
 	obj := widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {})
-	test.AssertImageMatches(t, "button.png", Render(obj, theme.DarkTheme()))
+	test.AssertImageMatches(t, "button.png", Render(obj, test.Theme()))
 
 	obj.Importance = widget.HighImportance
 	obj.Refresh()
-	test.AssertImageMatches(t, "button_important.png", Render(obj, theme.DarkTheme()))
+	test.AssertImageMatches(t, "button_important.png", Render(obj, test.Theme()))
 }
 
 func TestRender_Focus(t *testing.T) {
 	obj := widget.NewEntry()
-	test.AssertImageMatches(t, "entry.png", Render(obj, theme.DarkTheme()))
+	test.AssertImageMatches(t, "entry.png", Render(obj, test.Theme()))
 
 	obj.FocusGained()
-	test.AssertImageMatches(t, "entry_focus.png", Render(obj, theme.DarkTheme()))
+	test.AssertImageMatches(t, "entry_focus.png", Render(obj, test.Theme()))
 }
 
 func TestRenderCanvas(t *testing.T) {
@@ -46,9 +50,9 @@ func TestRenderCanvas(t *testing.T) {
 	c.SetContent(obj)
 
 	if fyne.CurrentDevice().IsMobile() {
-		test.AssertImageMatches(t, "canvas_mobile.png", RenderCanvas(c, theme.LightTheme()))
+		test.AssertImageMatches(t, "canvas_mobile.png", RenderCanvas(c, test.Theme()))
 	} else {
-		test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, theme.LightTheme()))
+		test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, test.Theme()))
 	}
 }
 
@@ -61,5 +65,5 @@ func TestRender_ImageSize(t *testing.T) {
 
 	c := container.NewStack(image, bg)
 
-	test.AssertImageMatches(t, "image_size.png", Render(c, theme.LightTheme()))
+	test.AssertImageMatches(t, "image_size.png", Render(c, test.Theme()))
 }

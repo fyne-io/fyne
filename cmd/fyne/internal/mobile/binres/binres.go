@@ -686,7 +686,7 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 				return fmt.Errorf("invalid bool value %q", attr.Value)
 			}
 		case DataIntDec, DataFloat, DataFraction:
-			// TODO DataFraction needs it's own case statement. minSdkVersion identifies as DataFraction
+			// TODO DataFraction needs its own case statement. minSdkVersion identifies as DataFraction
 			// but has accepted input in the past such as android:minSdkVersion="L"
 			// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
 			// but this provides minimum support for writing out minSdkVersion="15" correctly.
@@ -851,7 +851,7 @@ func (bx *XML) kind(t ResType) (unmarshaler, error) {
 	}
 }
 
-// MarshalBinary formats the XML in memory to it's text appearance
+// MarshalBinary formats the XML in memory to its text appearance
 func (bx *XML) MarshalBinary() ([]byte, error) {
 	bx.typ = ResXML
 	bx.headerByteSize = 8
@@ -992,7 +992,7 @@ func poolTrim(s string) string {
 }
 
 // byNamespace sorts attributes based on string pool position of namespace.
-// Given that "android" always preceds "" in the pool, this results in the
+// Given that "android" always precedes "" in the pool, this results in the
 // correct ordering of attributes.
 type byNamespace []*Attribute
 

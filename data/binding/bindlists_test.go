@@ -35,7 +35,6 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	f.AddListener(NewDataListener(func() {
 		calledList = true
 	}))
-	waitForItems()
 	assert.True(t, calledList)
 
 	child, err := f.GetItem(1)
@@ -43,7 +42,6 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	child.AddListener(NewDataListener(func() {
 		calledChild = true
 	}))
-	waitForItems()
 	assert.True(t, calledChild)
 
 	assert.NotNil(t, f.(*boundFloatList).val)
@@ -55,7 +53,6 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	calledList, calledChild = false, false
 	l[1] = 4.8
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue(1)
 	assert.Nil(t, err)
 	assert.Equal(t, 4.8, v)
@@ -65,7 +62,6 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	calledList, calledChild = false, false
 	l = []float64{1.0, 4.2}
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue(1)
 	assert.Nil(t, err)
 	assert.Equal(t, 4.2, v)
@@ -75,7 +71,6 @@ func TestExternalFloatList_Reload(t *testing.T) {
 	calledList, calledChild = false, false
 	l = []float64{1.0, 4.2, 5.3}
 	f.Reload()
-	waitForItems()
 	v, err = f.GetValue(1)
 	assert.Nil(t, err)
 	assert.Equal(t, 4.2, v)
@@ -180,36 +175,29 @@ func TestFloatList_NotifyOnlyOnceWhenChange(t *testing.T) {
 	f.AddListener(NewDataListener(func() {
 		triggered++
 	}))
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Set([]float64{55, 77})
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.SetValue(0, 5)
-	waitForItems()
 	assert.Zero(t, triggered)
 
 	triggered = 0
 	f.Set([]float64{101, 98})
-	waitForItems()
 	assert.Zero(t, triggered)
 
 	triggered = 0
 	f.Append(88)
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Prepend(23)
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
 	f.Set([]float64{32})
-	waitForItems()
 	assert.Equal(t, 1, triggered)
 }

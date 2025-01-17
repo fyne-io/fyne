@@ -45,7 +45,7 @@ type Animation struct {
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
-// rendered frame between time.Now() and the specified duration. The callback values start at 0.0 and
+// rendered frame between [time.Now] and the specified duration. The callback values start at 0.0 and
 // will be 1.0 when the animation completes.
 //
 // Since: 2.0
@@ -61,6 +61,53 @@ func (a *Animation) Start() {
 // Stop will end this animation and remove it from the run-loop.
 func (a *Animation) Stop() {
 	CurrentApp().Driver().StopAnimation(a)
+}
+
+// InfiniteAnimation represents an animation that continues infinitely unless stopped. It has no duration
+// or curve, and when started, the Tick function will be called every frame until Stop is invoked.
+//
+// Since: 2.6
+type InfiniteAnimation struct {
+	Tick func()
+
+	isSetup   bool
+	animation Animation
+}
+
+// NewInfiniteAnimation creates an infinite animation where the callback function will be called
+// for every rendered frame once started, until stopped.
+//
+// Since: 2.6
+func NewInfiniteAnimation(fn func()) *InfiniteAnimation {
+	return &InfiniteAnimation{Tick: fn}
+}
+
+// Start registers the animation with the application run-loop and starts its execution.
+func (i *InfiniteAnimation) Start() {
+	i.setupAnimation()
+	i.animation.Start()
+}
+
+// Stop will end this animation and remove it from the run-loop.
+func (i *InfiniteAnimation) Stop() {
+	i.setupAnimation()
+	i.animation.Stop()
+}
+
+func (i *InfiniteAnimation) setupAnimation() {
+	if i.isSetup {
+		return
+	}
+
+	i.animation = Animation{
+		Tick: func(_ float32) {
+			i.Tick()
+		},
+		Curve:       AnimationLinear, // any curve will work
+		Duration:    1 * time.Second, // anything positive here will work
+		RepeatCount: AnimationRepeatForever,
+	}
+	i.isSetup = true
 }
 
 func animationEaseIn(val float32) float32 {

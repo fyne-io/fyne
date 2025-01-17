@@ -10,29 +10,24 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/systray"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
 
+const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
+
 var (
 	systrayIcon fyne.Resource
 	setup       sync.Once
 )
-
-func goroutineID() (id uint64) {
-	var buf [30]byte
-	runtime.Stack(buf[:], false)
-	for i := 10; buf[i] != ' '; i++ {
-		id = id*10 + uint64(buf[i]&15)
-	}
-	return id
-}
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	setup.Do(func() {
@@ -57,7 +52,9 @@ func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 			}
 
 			// it must be refreshed after init, so an earlier call would have been ineffective
-			d.refreshSystray(m)
+			runOnMain(func() {
+				d.refreshSystray(m)
+			})
 		}, func() {
 			// anything required for tear-down
 		})
@@ -85,15 +82,15 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	var item *systray.MenuItem
 	if i.Checked {
 		if parent != nil {
-			item = parent.AddSubMenuItemCheckbox(i.Label, i.Label, true)
+			item = parent.AddSubMenuItemCheckbox(i.Label, "", true)
 		} else {
-			item = systray.AddMenuItemCheckbox(i.Label, i.Label, true)
+			item = systray.AddMenuItemCheckbox(i.Label, "", true)
 		}
 	} else {
 		if parent != nil {
-			item = parent.AddSubMenuItem(i.Label, i.Label)
+			item = parent.AddSubMenuItem(i.Label, "")
 		} else {
-			item = systray.AddMenuItem(i.Label, i.Label)
+			item = systray.AddMenuItem(i.Label, "")
 		}
 	}
 	if i.Disabled {
@@ -120,7 +117,11 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 		if err != nil {
 			fyne.LogError("Failed to convert systray icon", err)
 		} else {
-			item.SetIcon(img)
+			if _, ok := i.Icon.(*theme.ThemedResource); ok {
+				item.SetTemplateIcon(img, img)
+			} else {
+				item.SetIcon(img)
+			}
 		}
 	}
 	return item
@@ -128,6 +129,7 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 	d.systrayMenu = m
+
 	systray.ResetMenu()
 	d.refreshSystrayMenu(m, nil)
 
@@ -148,7 +150,7 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 		go func() {
 			for range item.ClickedCh {
 				if fn != nil {
-					fn()
+					runOnMain(fn)
 				}
 			}
 		}()
@@ -164,7 +166,11 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	systray.SetIcon(img)
+	if _, ok := resource.(*theme.ThemedResource); ok {
+		systray.SetTemplateIcon(img, img)
+	} else {
+		systray.SetIcon(img)
+	}
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
@@ -184,15 +190,16 @@ func (d *gLDriver) catchTerm() {
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
+	localQuit := lang.L("Quit")
 	var lastItem *fyne.MenuItem
 	if len(menu.Items) > 0 {
 		lastItem = menu.Items[len(menu.Items)-1]
-		if lastItem.Label == "Quit" {
+		if lastItem.Label == localQuit {
 			lastItem.IsQuit = true
 		}
 	}
 	if lastItem == nil || !lastItem.IsQuit { // make sure the menu always has a quit option
-		quitItem := fyne.NewMenuItem("Quit", nil)
+		quitItem := fyne.NewMenuItem(localQuit, nil)
 		quitItem.IsQuit = true
 		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
 	}

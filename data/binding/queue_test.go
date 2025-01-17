@@ -14,18 +14,12 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// TestQueryLazyInit resets the current unbounded func queue, and tests
+// TestQueueLazyInit resets the current unbounded func queue, and tests
 // if the queue is lazy initialized.
 //
 // Note that this test may fail, if any of other tests in this package
 // calls t.Parallel().
 func TestQueueLazyInit(t *testing.T) {
-	if queue != nil { // Reset queues
-		queue.Close()
-		queue = nil
-		once = sync.Once{}
-	}
-
 	initialGoRoutines := runtime.NumGoroutine()
 
 	wg := sync.WaitGroup{}
@@ -45,13 +39,12 @@ func TestQueueItem(t *testing.T) {
 	called := 0
 	queueItem(func() { called++ })
 	queueItem(func() { called++ })
-	waitForItems()
 	assert.Equal(t, 2, called)
 }
 
 func TestMakeInfiniteQueue(t *testing.T) {
 	var wg sync.WaitGroup
-	queue := async.NewUnboundedFuncChan()
+	queue := async.NewUnboundedChan[func()]()
 
 	wg.Add(1)
 	c := 0

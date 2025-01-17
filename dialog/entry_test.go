@@ -11,22 +11,22 @@ func TestEntryDialog_Confirm(t *testing.T) {
 	value := ""
 	ed := NewEntryDialog("Test", "message", func(v string) {
 		value = v
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 	ed.Show()
 	test.Type(ed.entry, "123")
 	test.Tap(ed.confirm)
 
-	assert.Equal(t, value, "123", "Control form should be confirmed with no validation")
+	assert.Equal(t, "123", value, "Control form should be confirmed with no validation")
 }
 
 func TestEntryDialog_Dismiss(t *testing.T) {
 	value := "123"
 	ed := NewEntryDialog("Test", "message", func(v string) {
 		value = v
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 	ed.Show()
 	test.Type(ed.entry, "XYZ")
 	test.Tap(ed.cancel)
 
-	assert.Equal(t, value, "123", "Control form should not change value on dismiss")
+	assert.Equal(t, "123", value, "Control form should not change value on dismiss")
 }

@@ -3,7 +3,6 @@ package common
 import (
 	"image/color"
 	"reflect"
-	"sync"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -25,8 +24,6 @@ type SizeableCanvas interface {
 
 // Canvas defines common canvas implementation.
 type Canvas struct {
-	sync.RWMutex
-
 	OnFocus   func(obj fyne.Focusable)
 	OnUnfocus func()
 
@@ -40,13 +37,13 @@ type Canvas struct {
 
 	painter gl.Painter
 
-	// Any object that requestes to enter to the refresh queue should
+	// Any object that requests to enter to the refresh queue should
 	// not be omitted as it is always a rendering task's decision
 	// for skipping frames or drawing calls.
 	//
 	// If an object failed to ender the refresh queue, the object may
 	// disappear or blink from the view at any frames. As of this reason,
-	// the refreshQueue is an unbounded queue which is bale to cache
+	// the refreshQueue is an unbounded queue which is able to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
 	dirty        atomic.Bool
@@ -91,18 +88,13 @@ func (c *Canvas) EnsureMinSize() bool {
 	csize := c.impl.Size()
 	min := c.impl.MinSize()
 
-	c.RLock()
-	defer c.RUnlock()
-
 	var parentNeedingUpdate *RenderCacheNode
 
 	ensureMinSize := func(node *RenderCacheNode, pos fyne.Position) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl, func() {
 			if img, ok := obj.(*canvas.Image); ok {
-				c.RUnlock()
 				img.Refresh() // this may now have a different texScale
-				c.RLock()
 			}
 		})
 
@@ -111,13 +103,10 @@ func (c *Canvas) EnsureMinSize() bool {
 			parentNeedingUpdate = nil
 		}
 
-		c.RUnlock()
 		if !obj.Visible() {
-			c.RLock()
 			return
 		}
 		minSize := obj.MinSize()
-		c.RLock()
 
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
@@ -126,14 +115,10 @@ func (c *Canvas) EnsureMinSize() bool {
 				parentNeedingUpdate = node.parent
 			} else {
 				windowNeedsMinSizeUpdate = true
-				c.RUnlock()
 				size := obj.Size()
-				c.RLock()
 				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != csize {
-					c.RUnlock()
 					obj.Resize(expectedSize)
-					c.RLock()
 				} else {
 					c.updateLayout(obj)
 				}
@@ -144,9 +129,7 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {
-		c.RUnlock()
 		c.impl.Resize(csize.Max(min))
-		c.RLock()
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -161,9 +144,7 @@ func (c *Canvas) Focus(obj fyne.Focusable) {
 		return
 	}
 
-	c.RLock()
 	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
-	c.RUnlock()
 
 	for _, mgr := range focusMgrs {
 		if mgr == nil {
@@ -305,7 +286,6 @@ func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 //
 // This function uses lock.
 func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
-	c.RLock()
 	var content, menu fyne.CanvasObject
 	if c.contentTree != nil && c.contentTree.root != nil {
 		content = c.contentTree.root.obj
@@ -313,7 +293,6 @@ func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 	if c.menuTree != nil && c.menuTree.root != nil {
 		menu = c.menuTree.root.obj
 	}
-	c.RUnlock()
 	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
 	trees = append(trees, content)
 	if menu != nil {
@@ -336,23 +315,6 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	walkNeeded := false
-	switch obj.(type) {
-	case *fyne.Container:
-		walkNeeded = true
-	case fyne.Widget:
-		walkNeeded = true
-	}
-
-	if walkNeeded {
-		driver.WalkCompleteObjectTree(obj, func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
-			if i, ok := co.(*canvas.Image); ok {
-				i.Refresh()
-			}
-			return false
-		}, nil)
-	}
-
 	c.refreshQueue.In(obj)
 	c.SetDirty()
 }
@@ -451,8 +413,6 @@ func (c *Canvas) focusManager() *app.FocusManager {
 	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
 		return focusMgr
 	}
-	c.RLock()
-	defer c.RUnlock()
 	if c.isMenuActive() {
 		return c.menuFocusMgr
 	}
@@ -475,8 +435,6 @@ func (c *Canvas) walkTree(
 	beforeChildren func(*RenderCacheNode, fyne.Position),
 	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
-	tree.Lock()
-	defer tree.Unlock()
 	var node, parent, prev *RenderCacheNode
 	node = tree.root
 
@@ -533,11 +491,6 @@ type RenderCacheNode struct {
 	parent      *RenderCacheNode
 	// cache data
 	minSize fyne.Size
-	// painterData is some data from the painter associated with the drawed node
-	// it may for instance point to a GL texture
-	// it should free all associated resources when released
-	// i.e. it should not simply be a texture reference integer
-	painterData interface{}
 }
 
 // Obj returns the node object.
@@ -552,7 +505,6 @@ type activatableMenu interface {
 type overlayStack struct {
 	internal.OverlayStack
 
-	propertyLock sync.RWMutex
 	renderCaches []*renderCacheTree
 }
 
@@ -560,8 +512,6 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.add(overlay)
 }
 
@@ -569,8 +519,6 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(o.List()) == 0 {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.remove(overlay)
 }
 
@@ -587,7 +535,6 @@ func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 }
 
 type renderCacheTree struct {
-	sync.RWMutex
 	root *RenderCacheNode
 }
 
@@ -597,14 +544,10 @@ func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 		if cont.Layout != nil {
 			layout := cont.Layout
 			objects := cont.Objects
-			c.RUnlock()
 			layout.Layout(objects, cont.Size())
-			c.RLock()
 		}
 	case fyne.Widget:
 		renderer := cache.Renderer(cont)
-		c.RUnlock()
 		renderer.Layout(cont.Size())
-		c.RLock()
 	}
 }

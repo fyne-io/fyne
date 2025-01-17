@@ -150,7 +150,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		target := 33
+		target := 35
 		if !buildRelease {
 			target = 29 // TODO once we have gomobile debug signing working for v2 android signs
 		}
@@ -232,7 +232,7 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 
 var xout io.Writer = os.Stderr
 
-func printcmd(format string, args ...interface{}) {
+func printcmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
 	if tmpdir != "" {
 		cmd = strings.Replace(cmd, tmpdir, "$WORK", -1)

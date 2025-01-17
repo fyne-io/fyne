@@ -188,13 +188,13 @@ func (r *Releaser) PrintHelp(indent string) {
 //
 // Deprecated: A better version will be exposed in the future.
 func (r *Releaser) Run(params []string) {
+	r.Packager.distribution = true
+	r.Packager.release = true
+
 	if err := r.validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
-
-	r.Packager.distribution = true
-	r.Packager.release = true
 
 	if err := r.beforePackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -207,12 +207,12 @@ func (r *Releaser) Run(params []string) {
 }
 
 func (r *Releaser) releaseAction(_ *cli.Context) error {
+	r.Packager.distribution = true
+	r.Packager.release = true
+
 	if err := r.validate(); err != nil {
 		return err
 	}
-
-	r.Packager.distribution = true
-	r.Packager.release = true
 
 	if err := r.beforePackage(); err != nil {
 		return err
@@ -499,7 +499,7 @@ func (r *Releaser) validate() error {
 	return nil
 }
 
-func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData interface{}) (cleanup func(), err error) {
+func (r *Releaser) writeEntitlements(tmpl *template.Template, entitlementData any) (cleanup func(), err error) {
 	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
 	entitlements, err := os.Create(entitlementPath)
 	if err != nil {

@@ -17,7 +17,7 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 	ch := make(chan int)
 	cnf := NewConfirm("Test", "Test", func(_ bool) {
 		ch <- 42
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.SetOnClosed(func() {
@@ -27,14 +27,14 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 43)
-	assert.EqualValues(t, <-ch, 42)
+	assert.EqualValues(t, 43, <-ch)
+	assert.EqualValues(t, 42, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 
 func TestDialog_ConfirmCallbackOnlyOnClosed(t *testing.T) {
 	ch := make(chan int)
-	cnf := NewConfirm("Test", "Test", nil, test.NewWindow(nil))
+	cnf := NewConfirm("Test", "Test", nil, test.NewTempWindow(t, nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.SetOnClosed(func() {
@@ -44,7 +44,7 @@ func TestDialog_ConfirmCallbackOnlyOnClosed(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 43)
+	assert.EqualValues(t, 43, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 
@@ -52,21 +52,21 @@ func TestDialog_ConfirmCallbackOnlyOnConfirm(t *testing.T) {
 	ch := make(chan int)
 	cnf := NewConfirm("Test", "Test", func(_ bool) {
 		ch <- 42
-	}, test.NewWindow(nil))
+	}, test.NewTempWindow(t, nil))
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.Show()
 
 	assert.False(t, cnf.win.Hidden)
 	go test.Tap(cnf.dismiss)
-	assert.EqualValues(t, <-ch, 42)
+	assert.EqualValues(t, 42, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 
 func TestConfirmDialog_Resize(t *testing.T) {
 	window := test.NewWindow(nil)
-	window.Resize(fyne.NewSize(600, 400))
 	defer window.Close()
+	window.Resize(fyne.NewSize(600, 400))
 	d := NewConfirm("Test", "Test", nil, window)
 
 	theDialog := d.dialog
@@ -93,7 +93,7 @@ func TestConfirmDialog_Resize(t *testing.T) {
 	expectedWidth = 600                                        //since win width only 600
 	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) //max, also work
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                         //since win heigh only 400
+	expectedHeight = 400                                         //since win height only 400
 	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) //max, also work
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 
@@ -107,9 +107,8 @@ func TestConfirmDialog_Resize(t *testing.T) {
 }
 
 func TestConfirm_Importance(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	size := fyne.NewSize(200, 300)
 	w.Resize(size)
 

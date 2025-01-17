@@ -15,41 +15,41 @@ import (
 
 func TestNewTextGrid(t *testing.T) {
 	grid := NewTextGridFromString("A")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
-	assert.Equal(t, 1, len(grid.Rows))
-	assert.Equal(t, 1, len(grid.Rows[0].Cells))
+	assert.Len(t, grid.Rows, 1)
+	assert.Len(t, grid.Rows[0].Cells, 1)
 }
 
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
+	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
 	rend.Refresh()
 
-	assert.Equal(t, 12, len(rend.objects))
+	assert.Len(t, rend.objects, 18)
 }
 
 func TestTextGrid_Row(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.NotNil(t, grid.Row(0))
-	assert.Equal(t, 2, len(grid.Row(0).Cells))
+	assert.Len(t, grid.Row(0).Cells, 2)
 	assert.Equal(t, 'b', grid.Row(0).Cells[1].Rune)
 }
 
 func TestTextGrid_Rows(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
-	assert.Equal(t, 2, len(grid.Rows))
-	assert.Equal(t, 2, len(grid.Rows[0].Cells))
+	assert.Len(t, grid.Rows, 2)
+	assert.Len(t, grid.Rows[0].Cells, 2)
 }
 
 func TestTextGrid_RowText(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
+	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.Equal(t, "Ab", grid.RowText(0))
 	assert.Equal(t, "C", grid.RowText(1))
@@ -61,16 +61,16 @@ func TestTextGrid_SetText(t *testing.T) {
 	text := "\n\n\n\n\n\n\n\n\n\n\n\n"
 	grid.SetText(text) // goes beyond the current view size - don't crash
 
-	assert.Equal(t, 13, len(grid.Rows))
-	assert.Equal(t, 0, len(grid.Rows[1].Cells))
+	assert.Len(t, grid.Rows, 13)
+	assert.Empty(t, grid.Rows[1].Cells)
 }
 
 func TestTextGrid_SetText_Overflow(t *testing.T) {
 	grid := NewTextGrid()
 	grid.SetText("Hello\nthere")
 
-	assert.Equal(t, 2, len(grid.Rows))
-	assert.Equal(t, 5, len(grid.Rows[1].Cells))
+	assert.Len(t, grid.Rows, 2)
+	assert.Len(t, grid.Rows[1].Cells, 5)
 }
 
 func TestTextGrid_SetRowStyle(t *testing.T) {
@@ -140,7 +140,7 @@ func TestTextGridRenderer_Resize(t *testing.T) {
 	grid := NewTextGridFromString("1\n2")
 	grid.ShowLineNumbers = true
 
-	renderer := test.WidgetRenderer(grid)
+	renderer := test.TempWidgetRenderer(t, grid)
 	min := renderer.MinSize()
 
 	grid.Resize(fyne.NewSize(100, 250))
@@ -168,7 +168,7 @@ func TestTextGridRenderer_ShowLineNumbers(t *testing.T) {
 func TestTextGridRender_Size(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(30, 42)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
+	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
 
 	assert.Equal(t, 3, rend.cols)
 	assert.Equal(t, 2, rend.rows)
@@ -203,6 +203,20 @@ func TestTextGridRender_RowColor(t *testing.T) {
 	assertGridStyle(t, grid, "112", map[string]TextGridStyle{"1": customStyle, "2": TextGridStyleWhitespace})
 }
 
+func TestTextGridRender_Style(t *testing.T) {
+	grid := NewTextGridFromString("Abcd ")
+	boldStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Bold: true}}
+	italicStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Italic: true}}
+	boldItalicStyle := &CustomTextGridStyle{TextStyle: fyne.TextStyle{Bold: true, Italic: true}}
+	grid.Rows[0].Cells[1].Style = boldStyle
+	grid.Rows[0].Cells[2].Style = italicStyle
+	grid.Rows[0].Cells[3].Style = boldItalicStyle
+	grid.ShowWhitespace = true
+	grid.Resize(fyne.NewSize(56, 22)) // causes refresh
+
+	assertGridStyle(t, grid, "0123", map[string]TextGridStyle{"1": boldStyle, "2": italicStyle, "3": boldItalicStyle})
+}
+
 func TestTextGridRender_TextColor(t *testing.T) {
 	grid := NewTextGridFromString("Ab ")
 	customStyle := &CustomTextGridStyle{FGColor: color.Black}
@@ -222,7 +236,7 @@ func TestTextGridRender_TextColor(t *testing.T) {
 
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	lines := strings.Split(expected, "\n")
-	renderer := test.WidgetRenderer(g).(*textGridRenderer)
+	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
@@ -234,9 +248,9 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	}
 }
 
-func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles map[string]TextGridStyle) {
-	lines := strings.Split(expected, "\n")
-	renderer := test.WidgetRenderer(g).(*textGridRenderer)
+func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles map[string]TextGridStyle) {
+	lines := strings.Split(content, "\n")
+	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
@@ -245,11 +259,11 @@ func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles 
 			bg, fg := rendererCell(renderer, y, x)
 
 			if r == ' ' {
-				assert.Equal(t, theme.ForegroundColor(), fg.Color)
+				assert.Equal(t, theme.Color(theme.ColorNameForeground), fg.Color)
 				assert.Equal(t, color.Transparent, bg.FillColor)
-			} else {
+			} else if expected != nil {
 				if expected.TextColor() == nil {
-					assert.Equal(t, theme.ForegroundColor(), fg.Color)
+					assert.Equal(t, theme.Color(theme.ColorNameForeground), fg.Color)
 				} else {
 					assert.Equal(t, expected.TextColor(), fg.Color)
 				}
@@ -260,12 +274,19 @@ func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles 
 					assert.Equal(t, expected.BackgroundColor(), bg.FillColor)
 				}
 			}
+
+			style := fyne.TextStyle{}
+			if expected != nil {
+				style = expected.Style()
+			}
+			style.Monospace = true
+			assert.Equal(t, style, fg.TextStyle)
 			x++
 		}
 	}
 }
 
 func rendererCell(r *textGridRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
-	i := (row*r.cols + col) * 2
+	i := (row*r.cols + col) * 3
 	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
 }

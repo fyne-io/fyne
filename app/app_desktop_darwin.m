@@ -1,13 +1,8 @@
-//go:build !ci && !ios
+//go:build !ci && !ios && !wasm && !test_web_driver && !mobile
 
 extern void themeChanged();
 
 #import <Foundation/Foundation.h>
-
-bool isDarkMode() {
-    NSString *style = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
-    return [@"Dark" isEqualToString:style];
-}
 
 void watchTheme() {
     [[NSDistributedNotificationCenter defaultCenter] addObserverForName:@"AppleInterfaceThemeChangedNotification" object:nil queue:nil

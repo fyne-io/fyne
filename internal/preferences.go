@@ -9,7 +9,7 @@ import (
 
 // InMemoryPreferences provides an implementation of the fyne.Preferences API that is stored in memory.
 type InMemoryPreferences struct {
-	values          map[string]interface{}
+	values          map[string]any
 	lock            sync.RWMutex
 	changeListeners []func()
 }
@@ -161,7 +161,7 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 
 // ReadValues provides read access to the underlying value map - for internal use only...
 // You should not retain a reference to the map nor write to the values in the callback function
-func (p *InMemoryPreferences) ReadValues(fn func(map[string]interface{})) {
+func (p *InMemoryPreferences) ReadValues(fn func(map[string]any)) {
 	p.lock.RLock()
 	fn(p.values)
 	p.lock.RUnlock()
@@ -244,7 +244,7 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 
 // WriteValues provides write access to the underlying value map - for internal use only...
 // You should not retain a reference to the map passed to the callback function
-func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
+func (p *InMemoryPreferences) WriteValues(fn func(map[string]any)) {
 	p.lock.Lock()
 	fn(p.values)
 	p.lock.Unlock()
@@ -254,7 +254,7 @@ func (p *InMemoryPreferences) WriteValues(fn func(map[string]interface{})) {
 
 // NewInMemoryPreferences creates a new preferences implementation stored in memory
 func NewInMemoryPreferences() *InMemoryPreferences {
-	return &InMemoryPreferences{values: make(map[string]interface{})}
+	return &InMemoryPreferences{values: make(map[string]any)}
 }
 
 func (p *InMemoryPreferences) fireChange() {
@@ -262,20 +262,12 @@ func (p *InMemoryPreferences) fireChange() {
 	listeners := p.changeListeners
 	p.lock.RUnlock()
 
-	var wg sync.WaitGroup
-
 	for _, l := range listeners {
-		wg.Add(1)
-		go func(listener func()) {
-			defer wg.Done()
-			listener()
-		}(l)
+		l()
 	}
-
-	wg.Wait()
 }
 
-func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
+func (p *InMemoryPreferences) get(key string) (any, bool) {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
@@ -291,7 +283,7 @@ func (p *InMemoryPreferences) remove(key string) {
 	p.fireChange()
 }
 
-func (p *InMemoryPreferences) set(key string, value interface{}) {
+func (p *InMemoryPreferences) set(key string, value any) {
 	p.lock.Lock()
 
 	if reflect.TypeOf(value).Kind() == reflect.Slice {

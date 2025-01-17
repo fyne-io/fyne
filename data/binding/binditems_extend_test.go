@@ -19,14 +19,12 @@ func TestBindTime(t *testing.T) {
 		called = true
 	})
 	f.AddListener(fn)
-	waitForItems()
 	assert.True(t, called)
 
 	newTime := val.Add(time.Hour)
 	called = false
 	err = f.Set(newTime)
 	assert.Nil(t, err)
-	waitForItems()
 	assert.Equal(t, newTime.Unix(), val.Unix())
 	assert.True(t, called)
 
@@ -34,7 +32,6 @@ func TestBindTime(t *testing.T) {
 	called = false
 	val = newTime
 	_ = f.Reload()
-	waitForItems()
 	assert.True(t, called)
 	v, err = f.Get()
 	assert.Nil(t, err)

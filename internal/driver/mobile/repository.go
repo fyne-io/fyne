@@ -11,6 +11,7 @@ var _ repository.Repository = (*mobileFileRepo)(nil)
 var _ repository.HierarchicalRepository = (*mobileFileRepo)(nil)
 var _ repository.ListableRepository = (*mobileFileRepo)(nil)
 var _ repository.WritableRepository = (*mobileFileRepo)(nil)
+var _ repository.AppendableRepository = (*mobileFileRepo)(nil)
 
 type mobileFileRepo struct {
 }
@@ -40,8 +41,7 @@ func (m *mobileFileRepo) CreateListable(u fyne.URI) error {
 }
 
 func (m *mobileFileRepo) Delete(u fyne.URI) error {
-	// TODO: implement this
-	return repository.ErrOperationNotSupported
+	return deleteURI(u)
 }
 
 func (m *mobileFileRepo) Destroy(string) {
@@ -68,5 +68,9 @@ func (m *mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 }
 
 func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	return fileWriterForURI(u)
+	return fileWriterForURI(u, true)
+}
+
+func (m *mobileFileRepo) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+	return fileWriterForURI(u, false)
 }

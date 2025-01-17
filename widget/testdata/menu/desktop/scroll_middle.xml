@@ -1,9 +1,9 @@
-<canvas size="100x100">
+<canvas size="104x105">
 	<content>
-		<rectangle size="100x100"/>
+		<rectangle size="104x105"/>
 	</content>
 	<overlay>
-		<widget size="100x100" type="*widget.OverlayContainer">
+		<widget pos="2,3" size="100x100" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="26x90" type="*widget.Menu">
 				<widget size="26x90" type="*widget.Shadow">
 					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
@@ -47,7 +47,7 @@
 					</widget>
 					<widget pos="20,0" size="6x90" type="*widget.scrollBarArea">
 						<widget pos="3,19" size="3x35" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" size="3x35"/>
+							<rectangle fillColor="scrollbar" radius="3" size="3x35"/>
 						</widget>
 					</widget>
 				</widget>

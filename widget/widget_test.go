@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
-	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 type myWidget struct {
@@ -30,10 +30,10 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func TestApplyThemeCalled(t *testing.T) {
-	widget := &myWidget{refreshed: make(chan bool)}
+	widget := &myWidget{refreshed: make(chan bool, 10)}
 
-	window := test.NewWindow(widget)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	test.NewTempWindow(t, widget)
+	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 
 	func() {
 		select {
@@ -42,16 +42,14 @@ func TestApplyThemeCalled(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for theme apply")
 		}
 	}()
-
-	window.Close()
 }
 
 func TestApplyThemeCalledChild(t *testing.T) {
-	child := &myWidget{refreshed: make(chan bool)}
+	child := &myWidget{refreshed: make(chan bool, 10)}
 	parent := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{child}}
 
-	window := test.NewWindow(parent)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	test.NewTempWindow(t, parent)
+	fyne.CurrentApp().Settings().SetTheme(test.NewTheme())
 	func() {
 		select {
 		case <-child.refreshed:
@@ -59,13 +57,10 @@ func TestApplyThemeCalledChild(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for child theme apply")
 		}
 	}()
-
-	window.Close()
 }
 
 func TestSimpleRenderer(t *testing.T) {
-	test.NewApp()
-	defer test.NewApp()
+	test.NewTempApp(t)
 
 	c := &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
 		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),

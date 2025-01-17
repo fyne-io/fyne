@@ -4,6 +4,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
 var _ fyne.Lifecycle = (*Lifecycle)(nil)
@@ -18,6 +19,8 @@ type Lifecycle struct {
 	onStopped    atomic.Pointer[func()]
 
 	onStoppedHookExecuted func()
+
+	eventQueue *async.UnboundedChan[func()]
 }
 
 // SetOnStoppedHookExecuted is an internal function that lets Fyne schedule a clean-up after
@@ -26,7 +29,7 @@ func (l *Lifecycle) SetOnStoppedHookExecuted(f func()) {
 	l.onStoppedHookExecuted = f
 }
 
-// SetOnEnteredForeground hooks into the the app becoming foreground.
+// SetOnEnteredForeground hooks into the app becoming foreground.
 func (l *Lifecycle) SetOnEnteredForeground(f func()) {
 	l.onForeground.Store(&f)
 }
@@ -48,45 +51,88 @@ func (l *Lifecycle) SetOnStopped(f func()) {
 	l.onStopped.Store(&f)
 }
 
-// TriggerEnteredForeground will call the focus gained hook, if one is registered.
-func (l *Lifecycle) TriggerEnteredForeground() {
+// OnEnteredForeground returns the focus gained hook, if one is registered.
+func (l *Lifecycle) OnEnteredForeground() func() {
 	f := l.onForeground.Load()
 	if f == nil {
-		return
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerExitedForeground will call the focus lost hook, if one is registered.
-func (l *Lifecycle) TriggerExitedForeground() {
+// OnExitedForeground returns the focus lost hook, if one is registered.
+func (l *Lifecycle) OnExitedForeground() func() {
 	f := l.onBackground.Load()
 	if f == nil {
-		return
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerStarted will call the started hook, if one is registered.
-func (l *Lifecycle) TriggerStarted() {
+// OnStarted returns the started hook, if one is registered.
+func (l *Lifecycle) OnStarted() func() {
 	f := l.onStarted.Load()
 	if f == nil {
-		return
+		return nil
 	}
 
-	(*f)()
+	return *f
 }
 
-// TriggerStopped will call the stopped hook, if one is registered,
-// and an internal stopped hook after that.
-func (l *Lifecycle) TriggerStopped() {
-	f := l.onStopped.Load()
-	if f != nil {
-		(*f)()
+// OnStopped returns the stopped hook, if one is registered.
+func (l *Lifecycle) OnStopped() func() {
+	stopped := l.onStopped.Load()
+	stopHook := l.onStoppedHookExecuted
+	if (stopped == nil || *stopped == nil) && stopHook == nil {
+		return nil
 	}
 
-	if l.onStoppedHookExecuted != nil {
-		l.onStoppedHookExecuted()
+	if stopHook == nil {
+		return *stopped
 	}
+
+	if stopped == nil || *stopped == nil {
+		return stopHook
+	}
+
+	// we have a stopped handle and the onStoppedHook
+	return func() {
+		(*stopped)()
+		stopHook()
+	}
+}
+
+// DestroyEventQueue destroys the event queue.
+func (l *Lifecycle) DestroyEventQueue() {
+	l.eventQueue.Close()
+}
+
+// InitEventQueue initializes the event queue.
+func (l *Lifecycle) InitEventQueue() {
+	// This channel should be closed when the window is closed.
+	l.eventQueue = async.NewUnboundedChan[func()]()
+}
+
+// QueueEvent uses this method to queue up a callback that handles an event. This ensures
+// user interaction events for a given window are processed in order.
+func (l *Lifecycle) QueueEvent(fn func()) {
+	l.eventQueue.In() <- fn
+}
+
+// RunEventQueue runs the event queue. This should called inside a go routine.
+// This function blocks.
+func (l *Lifecycle) RunEventQueue(run func(func())) {
+	for fn := range l.eventQueue.Out() {
+		run(fn)
+	}
+}
+
+// WaitForEvents wait for all the events.
+func (l *Lifecycle) WaitForEvents() {
+	done := make(chan struct{})
+
+	l.eventQueue.In() <- func() { done <- struct{}{} }
+	<-done
 }

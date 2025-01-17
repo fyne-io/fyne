@@ -33,7 +33,7 @@ func EnsureSubDir(parent, name string) string {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, os.ModePerm)
 		if err != nil {
-			fyne.LogError("Failed to create dirrectory", err)
+			fyne.LogError("Failed to create directory", err)
 		}
 	}
 	return path

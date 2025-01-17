@@ -7,13 +7,14 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFyneApp_SetCloudProvider(t *testing.T) {
-	a := NewWithID("io.fyne.test")
+	a := test.NewTempApp(t)
 	p := &mockCloud{}
 	a.SetCloudProvider(p)
 
@@ -22,7 +23,7 @@ func TestFyneApp_SetCloudProvider(t *testing.T) {
 }
 
 func TestFyneApp_SetCloudProvider_Cleanup(t *testing.T) {
-	a := NewWithID("io.fyne.test")
+	a := test.NewTempApp(t)
 	p1 := &mockCloud{}
 	p2 := &mockCloud{}
 	a.SetCloudProvider(p1)
@@ -37,7 +38,7 @@ func TestFyneApp_SetCloudProvider_Cleanup(t *testing.T) {
 }
 
 func TestFyneApp_transitionCloud(t *testing.T) {
-	a := NewWithID("io.fyne.test")
+	a := test.NewTempApp(t)
 	p := &mockCloud{}
 	preferenceChanged := false
 	settingsChan := make(chan fyne.Settings)
@@ -45,14 +46,20 @@ func TestFyneApp_transitionCloud(t *testing.T) {
 		preferenceChanged = true
 	})
 	a.Settings().AddChangeListener(settingsChan)
-	a.SetCloudProvider(p)
 
-	<-settingsChan // settings were updated
-	assert.True(t, preferenceChanged)
+	done := make(chan struct{})
+	go func() {
+		<-settingsChan // settings were updated
+		assert.True(t, preferenceChanged)
+		close(done)
+	}()
+
+	a.SetCloudProvider(p)
+	<-done
 }
 
 func TestFyneApp_transitionCloud_Preferences(t *testing.T) {
-	a := NewWithID("io.fyne.test")
+	a := test.NewTempApp(t)
 	a.Preferences().SetString("key", "blank")
 
 	assert.Equal(t, "blank", a.Preferences().String("key"))
@@ -64,17 +71,17 @@ func TestFyneApp_transitionCloud_Preferences(t *testing.T) {
 }
 
 func TestFyneApp_transitionCloud_Storage(t *testing.T) {
-	a := NewWithID("io.fyne.test")
+	a := test.NewTempApp(t)
 	a.Storage().Create("nothere")
 
 	l := a.Storage().List()
-	assert.Equal(t, 1, len(l))
+	assert.Len(t, l, 1)
 
 	p := &mockCloud{}
 	a.SetCloudProvider(p)
 
 	l = a.Storage().List()
-	assert.Equal(t, 0, len(l))
+	assert.Empty(t, l)
 }
 
 type mockCloud struct {

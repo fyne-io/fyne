@@ -18,9 +18,9 @@ var _ fyne.Widget = (*InnerWindow)(nil)
 type InnerWindow struct {
 	widget.BaseWidget
 
-	CloseIntercept                                      func()
-	OnDragged, OnResized                                func(*fyne.DragEvent)
-	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()
+	CloseIntercept                                      func()                `json:"-"`
+	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
+	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
 
 	title   string
@@ -76,10 +76,12 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	}
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
+	th := w.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	bar := NewBorder(nil, nil, buttons, icon, title)
-	bg := canvas.NewRectangle(theme.OverlayBackgroundColor())
-	contentBG := canvas.NewRectangle(theme.BackgroundColor())
+	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
+	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
@@ -119,7 +121,9 @@ type innerWindowRenderer struct {
 }
 
 func (i *innerWindowRenderer) Layout(size fyne.Size) {
-	pad := theme.Padding()
+	th := i.win.Theme()
+	pad := th.Size(theme.SizeNamePadding)
+
 	pos := fyne.NewSquareOffsetPos(pad / 2)
 	size = size.Subtract(fyne.NewSquareSize(pad))
 	i.LayoutShadow(size, pos)
@@ -144,7 +148,8 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 }
 
 func (i *innerWindowRenderer) MinSize() fyne.Size {
-	pad := theme.Padding()
+	th := i.win.Theme()
+	pad := th.Size(theme.SizeNamePadding)
 	contentMin := i.win.content.MinSize()
 	barMin := i.bar.MinSize()
 
@@ -154,9 +159,11 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 }
 
 func (i *innerWindowRenderer) Refresh() {
-	i.bg.FillColor = theme.OverlayBackgroundColor()
+	th := i.win.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	i.bg.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	i.bg.Refresh()
-	i.contentBG.FillColor = theme.BackgroundColor()
+	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
 	i.bar.Refresh()
 

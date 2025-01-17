@@ -41,7 +41,7 @@ func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) 
 	m.ShowAtPosition(pos)
 }
 
-// ShowPopUpMenuAtRelativePosition creates a PopUp menu populated with meny items from the passed menu structure.
+// ShowPopUpMenuAtRelativePosition creates a PopUp menu populated with menu items from the passed menu structure.
 // It will automatically be positioned at the given position relative to stated object and shown as an overlay on the specified canvas.
 //
 // Since 2.4
@@ -140,14 +140,15 @@ func (p *PopUpMenu) TypedRune(rune) {}
 func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Position {
 	x := pos.X
 	y := pos.Y
-	if x+size.Width > p.canvas.Size().Width {
-		x = p.canvas.Size().Width - size.Width
+	_, areaSize := p.canvas.InteractiveArea()
+	if x+size.Width > areaSize.Width {
+		x = areaSize.Width - size.Width
 		if x < 0 {
 			x = 0 // TODO here we may need a scroller as it's wider than our canvas
 		}
 	}
-	if y+size.Height > p.canvas.Size().Height {
-		y = p.canvas.Size().Height - size.Height
+	if y+size.Height > areaSize.Height {
+		y = areaSize.Height - size.Height
 		if y < 0 {
 			y = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
