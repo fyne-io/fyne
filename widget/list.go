@@ -171,14 +171,18 @@ func (l *List) scrollTo(id ListItemID) {
 	if len(l.itemHeights) == 0 {
 		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	} else {
-		for i := 0; i < id; i++ {
+		i := 0
+		for ; i < id; i++ {
 			height := l.itemMin.Height
 			if h, ok := l.itemHeights[i]; ok {
 				height = h
 			}
 
 			y += height + separatorThickness
-			lastItemHeight = height
+		}
+		lastItemHeight = l.itemMin.Height
+		if h, ok := l.itemHeights[i]; ok {
+			lastItemHeight = h
 		}
 	}
 
