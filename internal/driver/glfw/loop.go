@@ -199,6 +199,7 @@ func (d *gLDriver) runGL() {
 				d.pollEvents()
 				exit, animationsDone := d.runSingleFrame(settingsChange)
 				if exit {
+					t.Stop()
 					return
 				}
 				if animationsDone {
