@@ -425,16 +425,19 @@ func TestMenuBar(t *testing.T) {
 				test.TapCanvas(c, fyne.NewPos(0, 0))
 				test.TapCanvas(c, fileMenuPos) // activate menu
 				require.Equal(t, menuBar.Items[0], c.Focused())
-				if test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture()) {
-					lastAction = ""
-					for _, key := range tt.keys {
-						c.Focused().TypedKey(&fyne.KeyEvent{
-							Name: key,
-						})
+
+				runOnMain(func() {
+					if test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture()) {
+						lastAction = ""
+						for _, key := range tt.keys {
+							c.Focused().TypedKey(&fyne.KeyEvent{
+								Name: key,
+							})
+						}
+						test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
+						assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
 					}
-					test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
-					assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
-				}
+				})
 			})
 		}
 
@@ -450,7 +453,10 @@ func TestMenuBar(t *testing.T) {
 
 			test.MoveMouse(c, fileMenuPos.Add(fyne.NewPos(1, 0)))
 			assert.Equal(t, menuBar.Items[0], c.Focused())
-			test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture())
+
+			runOnMain(func() {
+				test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture())
+			})
 		})
 	})
 }
