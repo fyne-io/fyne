@@ -47,7 +47,9 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 	rend.Refresh()
 
-	assert.Len(t, rend.objects, 18)
+	row := rend.rowObjects[0].(fyne.Widget)
+	rr := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
+	assert.Len(t, rr.objects, 18)
 }
 
 func TestTextGrid_Row(t *testing.T) {
@@ -191,8 +193,11 @@ func TestTextGridRender_Size(t *testing.T) {
 	wrap := test.TempWidgetRenderer(t, grid).(*textGridRenderer).text
 	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
-	assert.Equal(t, 3, rend.cols)
-	assert.Equal(t, 2, rend.rows)
+	assert.Equal(t, 2, rend.text.rows)
+
+	row := rend.rowObjects[0].(fyne.Widget)
+	rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
+	assert.Equal(t, 3, rend2.cols)
 }
 
 func TestTextGridRender_Whitespace(t *testing.T) {
@@ -263,8 +268,11 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 		for _, r := range line {
-			_, fg := rendererCell(renderer, y, x)
-			assert.Equal(t, r, []rune(fg.Text)[0])
+			row := renderer.rowObjects[y].(fyne.Widget)
+			rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
+
+			_, fg := rendererCell(rend2, x)
+			assert.Equal(t, string(r), string([]rune(fg.Text)[0]))
 			x++
 		}
 	}
@@ -277,9 +285,13 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
+
+		row := renderer.rowObjects[y].(fyne.Widget)
+		rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
+
 		for _, r := range line {
 			expected := expectedStyles[string(r)]
-			bg, fg := rendererCell(renderer, y, x)
+			bg, fg := rendererCell(rend2, x)
 
 			if r == ' ' {
 				assert.Equal(t, theme.Color(theme.ColorNameForeground), fg.Color)
@@ -309,7 +321,7 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 	}
 }
 
-func rendererCell(r *textGridContentRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
-	i := (row*r.cols + col) * 3
+func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
+	i := col * 3
 	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
 }
