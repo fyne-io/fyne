@@ -40,6 +40,9 @@ type settings struct {
 	changeListeners async.Map[chan fyne.Settings, bool]
 	watcher         any // normally *fsnotify.Watcher or nil - avoid import in this file
 
+	changeListenerFuncsMutex sync.Mutex
+	changeListenerFuncs      []func(fyne.Settings)
+
 	schema SettingsSchema
 }
 

@@ -109,6 +109,11 @@ func (d *gLDriver) drawSingleFrame() {
 	refreshingCanvases = refreshingCanvases[:0]
 }
 
+var (
+	settingsToApply fyne.Settings
+	settingsMutex   sync.Mutex
+)
+
 func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
@@ -141,19 +146,18 @@ func (d *gLDriver) runGL() {
 
 		if d.animation.HasAnimations() {
 			// run animations while available
-			if exit := d.runAnimationLoop(settingsChange); exit {
+			if exit := d.runAnimationLoop(); exit {
 				return
 			}
 		} else {
 			// idle mode: run single frame and sleep on d.waitEvents() above
-			if exit, _ := d.runSingleFrame(settingsChange); exit {
+			if exit, _ := d.runSingleFrame(); exit {
 				return
 			}
 		}
 	}
 }
 
-<<<<<<< HEAD
 func (d *gLDriver) destroyWindow(w *window, index int) {
 	w.visible = false
 	w.viewport.Destroy()
@@ -172,12 +176,12 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 
 // runs a loop that invokes runSingleFrame at 60 fps until there are no more animations
 // uses pollEvents to check for events every frame
-func (d *gLDriver) runAnimationLoop(settingsChange <-chan fyne.Settings) bool {
+func (d *gLDriver) runAnimationLoop() bool {
 	t := time.NewTicker(time.Second / 60)
 	defer t.Stop()
 	for range t.C {
 		d.pollEvents()
-		exit, animationsDone := d.runSingleFrame(settingsChange)
+		exit, animationsDone := d.runSingleFrame()
 		if exit {
 			return exit
 		} else if animationsDone {
@@ -187,7 +191,7 @@ func (d *gLDriver) runAnimationLoop(settingsChange <-chan fyne.Settings) bool {
 	return false
 }
 
-func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, animationsDone bool) {
+func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 	// check if we're shutting down
 	if !running.Load() {
 		d.Terminate()
@@ -211,8 +215,11 @@ func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, an
 	}
 
 	// apply settings change if any
-	select {
-	case set := <-settingsChange:
+	settingsMutex.Lock()
+	set := settingsToApply
+	settingsToApply = nil
+	settingsMutex.Unlock()
+	if set != nil {
 		painter.ClearFontCache()
 		cache.ResetThemeCaches()
 		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
@@ -223,8 +230,6 @@ func (d *gLDriver) runSingleFrame(settingsChange <-chan fyne.Settings) (exit, an
 			c.applyThemeOutOfTreeObjects()
 			c.reloadScale()
 		})
-	default:
-		break
 	}
 
 	windowsToRemove := 0

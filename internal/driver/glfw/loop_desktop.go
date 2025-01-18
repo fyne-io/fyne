@@ -33,13 +33,9 @@ func (d *gLDriver) Terminate() {
 }
 
 func (d *gLDriver) PostEmptyEvent() {
-	if running.Load() {
-		glfw.PostEmptyEvent()
-	}
+	glfw.PostEmptyEvent()
 }
 
 func postEmptyEvent() {
-	if running.Load() {
-		glfw.PostEmptyEvent()
-	}
+	glfw.PostEmptyEvent()
 }
