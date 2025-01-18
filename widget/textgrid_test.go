@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -15,16 +16,35 @@ import (
 
 func TestNewTextGrid(t *testing.T) {
 	grid := NewTextGridFromString("A")
-	test.TempWidgetRenderer(t, grid).Refresh()
 
 	assert.Len(t, grid.Rows, 1)
 	assert.Len(t, grid.Rows[0].Cells, 1)
 }
 
+func TestTextGrid_Scroll(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Refresh()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.SetText("Something\nElse")
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling.Scroll = widget.ScrollNone
+	scrolling.Refresh()
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+}
+
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
-	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
+	wrap := test.TempWidgetRenderer(t, grid).(*textGridRenderer).text
+	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 	rend.Refresh()
 
 	assert.Len(t, rend.objects, 18)
@@ -168,7 +188,8 @@ func TestTextGridRenderer_ShowLineNumbers(t *testing.T) {
 func TestTextGridRender_Size(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(30, 42)) // causes refresh
-	rend := test.TempWidgetRenderer(t, grid).(*textGridRenderer)
+	wrap := test.TempWidgetRenderer(t, grid).(*textGridRenderer).text
+	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
 	assert.Equal(t, 3, rend.cols)
 	assert.Equal(t, 2, rend.rows)
@@ -236,7 +257,8 @@ func TestTextGridRender_TextColor(t *testing.T) {
 
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	lines := strings.Split(expected, "\n")
-	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
+	wrap := test.TempWidgetRenderer(t, g).(*textGridRenderer).text
+	renderer := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
@@ -250,7 +272,8 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 
 func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles map[string]TextGridStyle) {
 	lines := strings.Split(content, "\n")
-	renderer := test.TempWidgetRenderer(t, g).(*textGridRenderer)
+	wrap := test.TempWidgetRenderer(t, g).(*textGridRenderer).text
+	renderer := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
@@ -286,7 +309,7 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 	}
 }
 
-func rendererCell(r *textGridRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
+func rendererCell(r *textGridContentRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := (row*r.cols + col) * 3
 	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
 }
