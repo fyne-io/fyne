@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 )
 
 func tick(run *Runner) {
@@ -18,6 +19,7 @@ func tick(run *Runner) {
 }
 
 func TestGLDriver_StartAnimation(t *testing.T) {
+	test.NewTempApp(t)
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -37,6 +39,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
+	test.NewTempApp(t)
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -60,6 +63,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
+	test.NewTempApp(t)
 	var wg sync.WaitGroup
 	run := &Runner{}
 
