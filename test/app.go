@@ -182,6 +182,8 @@ type testSettings struct {
 	scale        float32
 	theme        fyne.Theme
 
+	listenersLock   sync.Mutex
+	listeners       []func(fyne.Settings)
 	changeListeners []chan fyne.Settings
 	propertyLock    sync.RWMutex
 	app             *app
@@ -191,6 +193,12 @@ func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
 	s.changeListeners = append(s.changeListeners, listener)
+}
+
+func (s *testSettings) AddListener(listener func(fyne.Settings)) {
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
+	s.listeners = append(s.listeners, listener)
 }
 
 func (s *testSettings) BuildType() fyne.BuildType {
@@ -253,6 +261,12 @@ func (s *testSettings) apply() {
 		cache.ResetThemeCaches()
 		intapp.ApplySettings(s, s.app)
 		s.app.propertyLock.Unlock()
+
+		s.listenersLock.Lock()
+		defer s.listenersLock.Unlock()
+		for _, l := range s.listeners {
+			l(s)
+		}
 	})
 
 	s.app.propertyLock.Lock()

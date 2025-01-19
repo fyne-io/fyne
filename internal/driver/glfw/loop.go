@@ -81,6 +81,10 @@ func (d *gLDriver) drawSingleFrame() {
 	refreshingCanvases = refreshingCanvases[:0]
 }
 
+var (
+	pendingSettings fyne.Settings
+)
+
 func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
@@ -94,8 +98,9 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
+		pendingSettings = set
+	})
 
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
@@ -142,6 +147,7 @@ func (d *gLDriver) runGL() {
 				d.animation.TickAnimations()
 				d.drawSingleFrame()
 			}
+
 			if windowsToRemove > 0 {
 				oldWindows := d.windowList()
 				newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
@@ -171,10 +177,12 @@ func (d *gLDriver) runGL() {
 					d.Quit()
 				}
 			}
-		case set := <-settingsChange:
+		}
+
+		if pendingSettings != nil {
 			painter.ClearFontCache()
 			cache.ResetThemeCaches()
-			app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+			app.ApplySettingsWithCallback(pendingSettings, fyne.CurrentApp(), func(w fyne.Window) {
 				c, ok := w.Canvas().(*glCanvas)
 				if !ok {
 					return
@@ -182,7 +190,7 @@ func (d *gLDriver) runGL() {
 				c.applyThemeOutOfTreeObjects()
 				c.reloadScale()
 			})
-
+			pendingSettings = nil
 		}
 	}
 }

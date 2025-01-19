@@ -38,6 +38,8 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
+	listenersLock   sync.Mutex
+	listeners       []func(fyne.Settings)
 	changeListeners async.Map[chan fyne.Settings, bool]
 	watcher         any // normally *fsnotify.Watcher or nil - avoid import in this file
 
@@ -116,6 +118,13 @@ func (s *settings) AddChangeListener(listener chan fyne.Settings) {
 	s.changeListeners.Store(listener, true) // the boolean is just a dummy value here.
 }
 
+func (s *settings) AddListener(listener func(fyne.Settings)) {
+	s.listenersLock.Lock()
+	defer s.listenersLock.Unlock()
+	s.listeners = append(s.listeners, listener)
+}
+
+// must be called from main goroutine
 func (s *settings) apply() {
 	s.changeListeners.Range(func(listener chan fyne.Settings, _ bool) bool {
 		select {
@@ -126,6 +135,12 @@ func (s *settings) apply() {
 		}
 		return true
 	})
+
+	s.listenersLock.Lock()
+	defer s.listenersLock.Unlock()
+	for _, l := range s.listeners {
+		l(s)
+	}
 }
 
 func (s *settings) fileChanged() {
@@ -170,7 +185,13 @@ func (s *settings) setupTheme() {
 		variant = theme.VariantDark
 	}
 
-	s.applyTheme(effectiveTheme, variant)
+	if async.IsMainGoroutine() {
+		s.applyTheme(effectiveTheme, variant)
+	} else {
+		fyne.Do(func() {
+			s.applyTheme(effectiveTheme, variant)
+		})
+	}
 }
 
 func loadSettings() *settings {
