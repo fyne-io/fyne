@@ -81,10 +81,6 @@ func (d *gLDriver) drawSingleFrame() {
 	refreshingCanvases = refreshingCanvases[:0]
 }
 
-var (
-	pendingSettings fyne.Settings
-)
-
 func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
@@ -98,6 +94,7 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
+	var pendingSettings fyne.Settings
 	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
 		pendingSettings = set
 	})
