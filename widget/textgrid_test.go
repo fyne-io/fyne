@@ -21,6 +21,13 @@ func TestNewTextGrid(t *testing.T) {
 	assert.Len(t, grid.Rows[0].Cells, 1)
 }
 
+func TestTextGrid_Append(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Append("Newline")
+
+	assert.Equal(t, "Something\nElse\nNewline", grid.Text())
+}
+
 func TestTextGrid_Scroll(t *testing.T) {
 	grid := NewTextGridFromString("Something\nElse")
 	grid.Resize(fyne.NewSize(50, 20))

@@ -88,6 +88,17 @@ type TextGrid struct {
 	Scroll widget.ScrollDirection
 }
 
+// Append will add new lines to the end of this TextGrid.
+// The first character will be at the beginning of a new line and any newline characters will split the text further.
+//
+// Since: 2.6
+func (t *TextGrid) Append(text string) {
+	rows := t.parseRows(text)
+
+	t.Rows = append(t.Rows, rows...)
+	t.Refresh()
+}
+
 // MinSize returns the smallest size this widget can shrink to
 func (t *TextGrid) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
@@ -105,22 +116,7 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // The grid will use default text style and any previous content and style will be removed.
 // Tab characters are padded with spaces to the next tab stop.
 func (t *TextGrid) SetText(text string) {
-	lines := strings.Split(text, "\n")
-	rows := make([]TextGridRow, len(lines))
-	for i, line := range lines {
-		cells := make([]TextGridCell, 0, len(line))
-		for _, r := range line {
-			cells = append(cells, TextGridCell{Rune: r})
-			if r == '\t' {
-				col := len(cells)
-				next := nextTab(col-1, t.tabWidth())
-				for i := col; i < next; i++ {
-					cells = append(cells, TextGridCell{Rune: ' '})
-				}
-			}
-		}
-		rows[i] = TextGridRow{Cells: cells}
-	}
+	rows := t.parseRows(text)
 
 	t.Rows = rows
 	t.Refresh()
@@ -332,6 +328,27 @@ func (t *TextGrid) ensureCells(row, col int) {
 		data.Cells = append(data.Cells, TextGridCell{})
 		t.Rows[row] = data
 	}
+}
+
+func (t *TextGrid) parseRows(text string) []TextGridRow {
+	lines := strings.Split(text, "\n")
+	rows := make([]TextGridRow, len(lines))
+	for i, line := range lines {
+		cells := make([]TextGridCell, 0, len(line))
+		for _, r := range line {
+			cells = append(cells, TextGridCell{Rune: r})
+			if r == '\t' {
+				col := len(cells)
+				next := nextTab(col-1, t.tabWidth())
+				for i := col; i < next; i++ {
+					cells = append(cells, TextGridCell{Rune: ' '})
+				}
+			}
+		}
+		rows[i] = TextGridRow{Cells: cells}
+	}
+
+	return rows
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
