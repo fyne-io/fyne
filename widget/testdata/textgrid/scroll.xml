@@ -1,9 +1,9 @@
-<canvas size="32x32">
+<canvas size="50x32">
 	<content>
-		<widget size="32x32" type="*widget.TextGrid">
-			<widget size="32x32" type="*widget.Scroll">
-				<widget size="32x32" type="*widget.textGridContent">
-					<widget size="32x16" type="*widget.textGridRow">
+		<widget size="50x32" type="*widget.TextGrid">
+			<widget size="50x32" type="*widget.Scroll">
+				<widget size="50x32" type="*widget.textGridContent">
+					<widget size="50x16" type="*widget.textGridRow">
 						<rectangle size="0x0"/>
 						<text monospace size="0x0">S</text>
 						<line size="0x0"/>
@@ -32,7 +32,7 @@
 						<text monospace size="0x0">g</text>
 						<line size="0x0"/>
 					</widget>
-					<widget pos="0,16" size="32x16" type="*widget.textGridRow">
+					<widget pos="0,16" size="50x16" type="*widget.textGridRow">
 						<rectangle size="0x0"/>
 						<text monospace size="0x0">E</text>
 						<line size="0x0"/>
@@ -61,13 +61,42 @@
 						<text monospace size="0x0"> </text>
 						<line size="0x0"/>
 					</widget>
+					<widget pos="0,32" size="50x16" type="*widget.textGridRow">
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+						<rectangle size="0x0"/>
+						<text monospace size="0x0"> </text>
+						<line size="0x0"/>
+					</widget>
 				</widget>
-				<widget pos="32,0" size="0x32" type="*widget.Shadow">
+				<widget pos="50,0" size="0x32" type="*widget.Shadow">
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x32"/>
 				</widget>
-				<widget pos="0,26" size="32x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="16x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" radius="3" size="16x3"/>
+				<widget pos="0,26" size="50x6" type="*widget.scrollBarArea">
+					<widget pos="0,3" size="34x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" radius="3" size="34x3"/>
 					</widget>
 				</widget>
 			</widget>

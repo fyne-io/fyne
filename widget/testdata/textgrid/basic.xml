@@ -60,6 +60,35 @@
 					<text monospace size="0x0"> </text>
 					<line size="0x0"/>
 				</widget>
+				<widget pos="0,32" size="72x16" type="*widget.textGridRow">
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+				</widget>
 			</widget>
 		</widget>
 	</content>

@@ -23,19 +23,25 @@ func TestNewTextGrid(t *testing.T) {
 
 func TestTextGrid_Scroll(t *testing.T) {
 	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
 	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
 
 	scrolling := NewTextGridFromString("Something\nElse")
 	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
+	scrolling.scroll.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
 	scrolling = NewTextGrid()
 	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.SetText("Something\nElse")
+	scrolling.scroll.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
 	scrolling.Scroll = widget.ScrollNone
+	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
 	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
 }
@@ -47,7 +53,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 	rend.Refresh()
 
-	row := rend.rowObjects[0].(fyne.Widget)
+	row := rend.visible[0].(fyne.Widget)
 	rr := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 	assert.Len(t, rr.objects, 18)
 }
@@ -195,7 +201,7 @@ func TestTextGridRender_Size(t *testing.T) {
 
 	assert.Equal(t, 2, rend.text.rows)
 
-	row := rend.rowObjects[0].(fyne.Widget)
+	row := rend.visible[0].(fyne.Widget)
 	rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 	assert.Equal(t, 3, rend2.cols)
 }
@@ -268,7 +274,7 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 		for _, r := range line {
-			row := renderer.rowObjects[y].(fyne.Widget)
+			row := renderer.visible[y].(fyne.Widget)
 			rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 
 			_, fg := rendererCell(rend2, x)
@@ -286,7 +292,7 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 
-		row := renderer.rowObjects[y].(fyne.Widget)
+		row := renderer.visible[y].(fyne.Widget)
 		rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 
 		for _, r := range line {
