@@ -112,7 +112,7 @@ func (d *gLDriver) focusPreviousWindow() {
 	var chosen *window
 	for _, w := range d.windows {
 		win := w.(*window)
-		if !win.visible {
+		if win == nil || !win.visible {
 			continue
 		}
 		chosen = win
