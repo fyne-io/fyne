@@ -427,7 +427,10 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
 	w.SetContent(content)
-	w.Canvas().Overlays().Add(over)
+	overlays := w.Canvas().Overlays()
+	runOnMain(func() {
+		overlays.Add(over)
+	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 	// TODO: address #707; overlays should always be canvas size
 	size := w.Canvas().Size()
