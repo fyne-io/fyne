@@ -475,7 +475,6 @@ type textGridContentRenderer struct {
 
 	visible  []fyne.CanvasObject
 	itemPool async.Pool[*textGridRow]
-	current  fyne.Canvas
 }
 
 func (t *textGridContentRenderer) Destroy() {
@@ -611,7 +610,6 @@ type textGridRowRenderer struct {
 	cols int
 
 	objects []fyne.CanvasObject
-	current fyne.Canvas
 }
 
 func (t *textGridRowRenderer) appendTextCell(str rune) {
@@ -678,12 +676,12 @@ func (t *textGridRowRenderer) setCellRune(str rune, pos int, style, rowStyle Tex
 		text.Text = newStr
 		text.Color = fg
 		text.TextStyle = textStyle
-		t.refresh(text)
+		text.Refresh()
 	}
 
 	if underlineStrokeWidth != underline.StrokeWidth || underlineStrokeColor != underline.StrokeColor {
 		underline.StrokeWidth, underline.StrokeColor = underlineStrokeWidth, underlineStrokeColor
-		t.refresh(underline)
+		underline.Refresh()
 	}
 
 	bg := color.Color(color.Transparent)
@@ -694,7 +692,7 @@ func (t *textGridRowRenderer) setCellRune(str rune, pos int, style, rowStyle Tex
 	}
 	if rect.FillColor != bg {
 		rect.FillColor = bg
-		t.refresh(rect)
+		rect.Refresh()
 	}
 }
 
@@ -833,11 +831,6 @@ func (t *textGridRowRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRowRenderer) Refresh() {
-	// we may be on a new canvas, so just update it to be sure
-	if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
-		t.current = fyne.CurrentApp().Driver().CanvasForObject(t.obj.text.text)
-	}
-
 	th := t.obj.text.text.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
@@ -853,19 +846,4 @@ func (t *textGridRowRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *textGridRowRenderer) Destroy() {
-}
-
-func (t *textGridRowRenderer) refresh(obj fyne.CanvasObject) {
-	if t.current == nil {
-		if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
-			// cache canvas for this widget, so we don't look it up many times for every cell/row refresh!
-			t.current = fyne.CurrentApp().Driver().CanvasForObject(t.obj.text.text)
-		}
-
-		if t.current == nil {
-			return // not yet set up perhaps?
-		}
-	}
-
-	t.current.Refresh(obj)
 }
