@@ -57,78 +57,61 @@ func Clean(canvasRefreshed bool) {
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
 // canvas. Usually used to free all objects from a closing windows.
 func CleanCanvas(canvas fyne.Canvas) {
-	deletingObjs := make([]fyne.CanvasObject, 0, 50)
-
-	for obj, cinfo := range canvases {
-		if cinfo.canvas == canvas {
-			deletingObjs = append(deletingObjs, obj)
+	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
+		if cinfo.canvas != canvas {
+			return true
 		}
-	}
-	if len(deletingObjs) == 0 {
-		return
-	}
 
-	for _, dobj := range deletingObjs {
-		delete(canvases, dobj)
-	}
+		canvases.Delete(obj)
 
-	for _, dobj := range deletingObjs {
-		wid, ok := dobj.(fyne.Widget)
+		wid, ok := obj.(fyne.Widget)
 		if !ok {
-			continue
+			return true
 		}
 		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok {
-			continue
+			return true
 		}
 		rinfo.renderer.Destroy()
 		overrides.Delete(wid)
-	}
+		return true
+	})
 }
 
 // CleanCanvases runs cache clean tasks for canvases that are being refreshed. This is called on paint events.
 func CleanCanvases(refreshingCanvases []fyne.Canvas) {
 	now := timeNow()
+	delta := now.Sub(lastClean)
 
-	// do not run clean task too fast
-	if now.Sub(lastClean) < 10*time.Second {
-		return
-	}
-
-	if now.Sub(lastClean) < cleanTaskInterval {
-		return
+	if delta < 10*time.Second || delta < cleanTaskInterval {
+		return // Do not clean too fast.
 	}
 
 	destroyExpiredSvgs(now)
 	destroyExpiredFontMetrics(now)
 
-	deletingObjs := make([]fyne.CanvasObject, 0, 50)
-
-	for obj, cinfo := range canvases {
-		if cinfo.isExpired(now) && matchesACanvas(cinfo, refreshingCanvases) {
-			deletingObjs = append(deletingObjs, obj)
+	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
+		if !cinfo.isExpired(now) || !matchesACanvas(cinfo, refreshingCanvases) {
+			return true
 		}
-	}
-	if len(deletingObjs) == 0 {
-		return
-	}
 
-	for _, dobj := range deletingObjs {
-		delete(canvases, dobj)
-	}
+		canvases.Delete(obj)
 
-	for _, dobj := range deletingObjs {
-		wid, ok := dobj.(fyne.Widget)
+		wid, ok := obj.(fyne.Widget)
 		if !ok {
-			continue
+			return true
 		}
+
 		rinfo, ok := renderers.LoadAndDelete(wid)
 		if !ok || !rinfo.isExpired(now) {
-			continue
+			return true
 		}
+
 		rinfo.renderer.Destroy()
 		overrides.Delete(wid)
-	}
+		return true
+	})
+
 	lastClean = timeNow()
 }
 
@@ -140,11 +123,12 @@ func ResetThemeCaches() {
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
-	for obj, cinfo := range canvases {
+	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
 		if cinfo.isExpired(now) {
-			delete(canvases, obj)
+			canvases.Delete(obj)
 		}
-	}
+		return true
+	})
 }
 
 // destroyExpiredRenderers deletes the renderer from the cache and calls
