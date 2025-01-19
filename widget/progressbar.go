@@ -47,7 +47,7 @@ func (p *progressRenderer) calculateRatio() {
 }
 
 func (p *progressRenderer) updateBar() {
-	p.calculateRatio()
+	p.Layout(p.progress.Size()) // Make sure that bar length updates.
 
 	// Don't draw rectangles when they can't be seen.
 	p.background.Hidden = p.ratio == 1.0

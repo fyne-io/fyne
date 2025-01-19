@@ -3,7 +3,7 @@
 		<container size="100x100">
 			<widget size="100x35" type="*widget.ProgressBar">
 				<rectangle fillColor="rgba(255,192,128,127)" radius="4" size="100x35"/>
-				<rectangle fillColor="primary" radius="4" size="0x35"/>
+				<rectangle fillColor="primary" radius="4" size="50x35"/>
 				<text alignment="center" color="foregroundOnPrimary" size="100x35">50%</text>
 			</widget>
 		</container>
