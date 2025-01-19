@@ -655,6 +655,25 @@ func TestList_RefreshUpdatesAllItems(t *testing.T) {
 	assert.Equal(t, "0.0.", printOut)
 }
 
+func TestList_ScrollToLargeItem(t *testing.T) {
+	list := NewList(
+		func() int {
+			return 10
+		},
+		func() fyne.CanvasObject {
+			return NewLabel("Row")
+		},
+		func(id ListItemID, item fyne.CanvasObject) {
+		},
+	)
+	list.SetItemHeight(9, 50)
+	w := test.NewTempWindow(t, list)
+
+	w.SetContent(list)
+	list.scrollTo(9)
+	assert.Equal(t, list.scroller.Content.MinSize().Height-list.Size().Height, list.scroller.Offset.Y)
+}
+
 var minSize fyne.Size
 
 func BenchmarkContentMinSize(b *testing.B) {
