@@ -138,27 +138,9 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	th := p.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	cornerRadius := th.Size(theme.SizeNameInputRadius)
-	primaryColor := th.Color(theme.ColorNamePrimary, v)
-
-	renderer := &progressRenderer{
-		background: canvas.Rectangle{
-			FillColor:    progressBlendColor(primaryColor),
-			CornerRadius: cornerRadius,
-		},
-		bar: canvas.Rectangle{
-			FillColor:    primaryColor,
-			CornerRadius: cornerRadius,
-		},
-		label: canvas.Text{
-			Text:      "0%",
-			Color:     th.Color(theme.ColorNameForegroundOnPrimary, v),
-			Alignment: fyne.TextAlignCenter,
-		},
-		progress: p,
-	}
+	renderer := &progressRenderer{progress: p}
+	renderer.label.Alignment = fyne.TextAlignCenter
+	renderer.applyTheme()
 
 	renderer.SetObjects([]fyne.CanvasObject{&renderer.background, &renderer.bar, &renderer.label})
 	return renderer
