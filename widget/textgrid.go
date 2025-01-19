@@ -481,14 +481,11 @@ func (t *textGridContentRenderer) Destroy() {
 }
 
 func (t *textGridContentRenderer) Layout(s fyne.Size) {
-	pos := fyne.NewPos(0, 0)
 	size := fyne.NewSize(s.Width, t.text.cellSize.Height)
 	t.updateGridSize(s)
 
 	for _, o := range t.visible {
-		pos = fyne.NewPos(0, float32(o.(*textGridRow).row)*t.text.cellSize.Height)
-
-		o.Move(pos)
+		o.Move(fyne.NewPos(0, float32(o.(*textGridRow).row)*t.text.cellSize.Height))
 		o.Resize(size)
 	}
 }
