@@ -1,11 +1,15 @@
 package fyne
 
+import "fyne.io/fyne/v2/internal/types"
+
 // Declare conformity to [CanvasObject]
 var _ CanvasObject = (*Container)(nil)
 
 // Container is a [CanvasObject] that contains a collection of child objects.
 // The layout of the children is set by the specified Layout.
 type Container struct {
+	types.ContainerRoot
+
 	size     Size     // The current size of the Container
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
