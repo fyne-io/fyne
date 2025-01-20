@@ -70,133 +70,6 @@ func main() {
 		fyne.LogError("unable to write file", err)
 		os.Exit(1)
 	}
-
-	fmt.Println("Bundle icons…")
-	f = &bytes.Buffer{}
-	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
-	icon := path.Join(iconDir(), "fyne.png")
-	bundleFile("fyne-logo", icon, f)
-
-	bundleIcon("cancel", f)
-	bundleIcon("check", f)
-	bundleIcon("delete", f)
-	bundleIcon("search", f)
-	bundleIcon("search-replace", f)
-	bundleIcon("menu", f)
-	bundleIcon("menu-expand", f)
-
-	bundleIcon("check-box", f)
-	bundleIcon("check-box-checked", f)
-	bundleIcon("check-box-fill", f)
-	bundleIcon("check-box-partial", f)
-	bundleIcon("radio-button", f)
-	bundleIcon("radio-button-checked", f)
-	bundleIcon("radio-button-fill", f)
-
-	bundleIcon("content-add", f)
-	bundleIcon("content-remove", f)
-	bundleIcon("content-cut", f)
-	bundleIcon("content-copy", f)
-	bundleIcon("content-paste", f)
-	bundleIcon("content-redo", f)
-	bundleIcon("content-undo", f)
-
-	bundleIcon("color-achromatic", f)
-	bundleIcon("color-chromatic", f)
-	bundleIcon("color-palette", f)
-
-	bundleIcon("document", f)
-	bundleIcon("document-create", f)
-	bundleIcon("document-print", f)
-	bundleIcon("document-save", f)
-
-	bundleIcon("drag-corner-indicator", f)
-
-	bundleIcon("more-horizontal", f)
-	bundleIcon("more-vertical", f)
-
-	bundleIcon("info", f)
-	bundleIcon("question", f)
-	bundleIcon("warning", f)
-	bundleIcon("error", f)
-	bundleIcon("broken-image", f)
-
-	bundleIcon("arrow-back", f)
-	bundleIcon("arrow-down", f)
-	bundleIcon("arrow-forward", f)
-	bundleIcon("arrow-up", f)
-	bundleIcon("arrow-drop-down", f)
-	bundleIcon("arrow-drop-up", f)
-
-	bundleIcon("file", f)
-	bundleIcon("file-application", f)
-	bundleIcon("file-audio", f)
-	bundleIcon("file-image", f)
-	bundleIcon("file-text", f)
-	bundleIcon("file-video", f)
-	bundleIcon("folder", f)
-	bundleIcon("folder-new", f)
-	bundleIcon("folder-open", f)
-	bundleIcon("help", f)
-	bundleIcon("history", f)
-	bundleIcon("home", f)
-	bundleIcon("settings", f)
-
-	bundleIcon("mail-attachment", f)
-	bundleIcon("mail-compose", f)
-	bundleIcon("mail-forward", f)
-	bundleIcon("mail-reply", f)
-	bundleIcon("mail-reply_all", f)
-	bundleIcon("mail-send", f)
-
-	bundleIcon("media-music", f)
-	bundleIcon("media-photo", f)
-	bundleIcon("media-video", f)
-	bundleIcon("media-fast-forward", f)
-	bundleIcon("media-fast-rewind", f)
-	bundleIcon("media-pause", f)
-	bundleIcon("media-play", f)
-	bundleIcon("media-record", f)
-	bundleIcon("media-replay", f)
-	bundleIcon("media-skip-next", f)
-	bundleIcon("media-skip-previous", f)
-	bundleIcon("media-stop", f)
-
-	bundleIcon("view-fullscreen", f)
-	bundleIcon("view-refresh", f)
-	bundleIcon("view-zoom-fit", f)
-	bundleIcon("view-zoom-in", f)
-	bundleIcon("view-zoom-out", f)
-
-	bundleIcon("volume-down", f)
-	bundleIcon("volume-mute", f)
-	bundleIcon("volume-up", f)
-
-	bundleIcon("visibility", f)
-	bundleIcon("visibility-off", f)
-
-	bundleIcon("download", f)
-	bundleIcon("computer", f)
-	bundleIcon("desktop", f)
-	bundleIcon("storage", f)
-	bundleIcon("upload", f)
-
-	bundleIcon("account", f)
-	bundleIcon("calendar", f)
-	bundleIcon("login", f)
-	bundleIcon("logout", f)
-
-	bundleIcon("list", f)
-	bundleIcon("grid", f)
-
-	bundleIcon("maximize", f)
-	bundleIcon("minimize", f)
-
-	err = writeFile("bundled-icons.go", f.Bytes())
-	if err != nil {
-		fyne.LogError("unable to write file", err)
-		os.Exit(1)
-	}
 }
 
 func bundleFile(name string, filepath string, f io.Writer) {
@@ -221,13 +94,6 @@ func bundleFile(name string, filepath string, f io.Writer) {
 func bundleFont(fontFile, varName string, f io.Writer) {
 	path := fontPath(fontFile)
 	bundleFile(varName, path, f)
-}
-
-func bundleIcon(name string, f io.Writer) {
-	path := path.Join(iconDir(), fmt.Sprintf("%s.svg", name))
-
-	formatted := fmt.Sprintf("%sIconRes", strings.ToLower(name))
-	bundleFile(formatted, path, f)
 }
 
 func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
@@ -259,11 +125,6 @@ func fontPath(filename string) string {
 func formatVariable(name string) string {
 	str := strings.Replace(name, "-", "", -1)
 	return strings.Replace(str, "_", "", -1)
-}
-
-func iconDir() string {
-	_, dirname, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(dirname), "icons")
 }
 
 func writeFile(filename string, contents []byte) error {
