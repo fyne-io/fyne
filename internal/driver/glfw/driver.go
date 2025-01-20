@@ -111,7 +111,7 @@ func (d *gLDriver) addWindow(w *window) {
 func (d *gLDriver) focusPreviousWindow() {
 	var chosen *window
 	for _, w := range d.windows {
-		if win == nil {
+		if w == nil {
 			continue
 		}
 		win := w.(*window)
