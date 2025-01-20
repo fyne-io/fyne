@@ -13,13 +13,13 @@ func TestBindPreference_DataRace(t *testing.T) {
 	a := test.NewApp()
 	p := a.Preferences()
 	key := "test-key"
-
 	const n = 100
+
 	var wg sync.WaitGroup
-	wg.Add(n)
 
 	binds := make([]Int, n)
 	for i := 0; i < n; i++ {
+		wg.Add(1)
 		go func(index int) {
 			bind := BindPreferenceInt(key, p)
 			binds[index] = bind
