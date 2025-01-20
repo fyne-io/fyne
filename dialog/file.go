@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -422,6 +423,18 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		}
 	}
 
+	toSort := icons
+	if parent != nil {
+		toSort = icons[1:]
+	}
+	sort.Slice(toSort, func(i, j int) bool {
+		if parent != nil { // avoiding the parent in [0]
+			i++
+			j++
+		}
+
+		return strings.ToLower(icons[i].Name()) < strings.ToLower(icons[j].Name())
+	})
 	f.data = icons
 
 	f.files.Refresh()
