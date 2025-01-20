@@ -56,10 +56,6 @@ var refreshingCanvases []fyne.Canvas
 
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
-		if win == nil {
-			continue
-		}
-
 		w := win.(*window)
 		canvas := w.canvas
 		closing := w.closing
@@ -117,20 +113,15 @@ func (d *gLDriver) runGL() {
 			f.done <- struct{}{}
 		case <-eventTick.C:
 			d.pollEvents()
-			runWindowCleanup := false
-			for i, win := range d.windowList() {
-				if win == nil {
-					continue
-				}
-
-				w := win.(*window)
+			for i := 0; i < len(d.windows); i++ {
+				w := d.windows[i].(*window)
 				if w.viewport == nil {
 					continue
 				}
 
 				if w.viewport.ShouldClose() {
 					d.destroyWindow(w, i)
-					runWindowCleanup = true
+					i-- // Trailing windows are moved forward one step.
 					continue
 				}
 
@@ -152,10 +143,6 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
-
-			if runWindowCleanup {
-				d.removeDestroyedWindows()
-			}
 		case set := <-settingsChange:
 			painter.ClearFontCache()
 			cache.ResetThemeCaches()
@@ -174,26 +161,14 @@ func (d *gLDriver) runGL() {
 
 func (d *gLDriver) destroyWindow(w *window, index int) {
 	w.visible = false
-
-	// Remove window from window list:
-	d.windows[index] = nil
 	w.viewport.Destroy()
 	w.destroy(d)
-}
 
-func (d *gLDriver) removeDestroyedWindows() {
-	// Copy items from front to back to move as few objects as possible.
-	for i := len(d.windows) - 1; i >= 0; i-- {
-		if d.windows[i] != nil {
-			continue
-		}
-
-		if i < len(d.windows)-1 {
-			copy(d.windows[i:], d.windows[i+1:])
-		}
-		d.windows[len(d.windows)-1] = nil
-		d.windows = d.windows[:len(d.windows)-1]
+	if index < len(d.windows)-1 {
+		copy(d.windows[index:], d.windows[index+1:])
 	}
+	d.windows[len(d.windows)-1] = nil
+	d.windows = d.windows[:len(d.windows)-1]
 
 	if len(d.windows) == 0 {
 		d.Quit()
