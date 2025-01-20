@@ -71,17 +71,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Bundle emoji…")
-	f = &bytes.Buffer{}
-	f.WriteString(fileHeader + "//go:build !no_emoji\n\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
-	bundleFont("EmojiOneColor.otf", "emoji", f)
-
-	err = writeFile("bundled-emoji.go", f.Bytes())
-	if err != nil {
-		fyne.LogError("unable to write file", err)
-		os.Exit(1)
-	}
-
 	fmt.Println("Bundle icons…")
 	f = &bytes.Buffer{}
 	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
