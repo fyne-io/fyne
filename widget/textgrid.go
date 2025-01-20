@@ -607,7 +607,7 @@ func (t *textGridRenderer) refresh(obj fyne.CanvasObject) {
 	if t.current == nil {
 		if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
 			// cache canvas for this widget, so we don't look it up many times for every cell/row refresh!
-			t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text)
+			t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text.super())
 		}
 
 		if t.current == nil {
