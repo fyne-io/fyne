@@ -2,13 +2,14 @@ package cache
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 )
 
-var canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
+var canvases async.Map[fyne.CanvasObject, *canvasInfo]
 
 // GetCanvasForObject returns the canvas for the specified object.
 func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	cinfo, ok := canvases[obj]
+	cinfo, ok := canvases.Load(obj)
 	if cinfo == nil || !ok {
 		return nil
 	}
@@ -21,9 +22,8 @@ func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
 	cinfo := &canvasInfo{canvas: c}
 	cinfo.setAlive()
-	old, found := canvases[obj]
-	canvases[obj] = cinfo
 
+	old, found := canvases.LoadOrStore(obj, cinfo)
 	if (!found || old.canvas != c) && setup != nil {
 		setup()
 	}

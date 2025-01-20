@@ -348,24 +348,32 @@ func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
-	assert.Equal(t, oldCanvasSize, c.Size())
+	runOnMain(func() {
+		assert.Equal(t, oldCanvasSize, c.Size())
+	})
 	repaintWindow(w)
 
-	oldRightColSize := rightCol.Size()
-	leftObj1.SetMinSize(fyne.NewSize(90, 40))
-	rightObj1.SetMinSize(fyne.NewSize(80, 30))
-	rightObj2.SetMinSize(fyne.NewSize(80, 20))
-	c.Refresh(leftObj1)
-	c.Refresh(rightObj1)
-	c.Refresh(rightObj2)
+	var oldRightColSize fyne.Size
+	runOnMain(func() {
+		oldRightColSize = rightCol.Size()
+		leftObj1.SetMinSize(fyne.NewSize(90, 40))
+		rightObj1.SetMinSize(fyne.NewSize(80, 30))
+		rightObj2.SetMinSize(fyne.NewSize(80, 20))
+		c.Refresh(leftObj1)
+		c.Refresh(rightObj1)
+		c.Refresh(rightObj2)
+	})
 	repaintWindow(w)
 
 	assert.Equal(t, oldCanvasSize, c.Size())
 	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
-	assert.Equal(t, expectedRightColSize, rightCol.Size())
-	assert.Equal(t, fyne.NewSize(100, 40), leftObj1.Size())
-	assert.Equal(t, fyne.NewSize(80, 30), rightObj1.Size())
-	assert.Equal(t, fyne.NewSize(80, 20), rightObj2.Size())
+
+	runOnMain(func() {
+		assert.Equal(t, expectedRightColSize, rightCol.Size())
+		assert.Equal(t, fyne.NewSize(100, 40), leftObj1.Size())
+		assert.Equal(t, fyne.NewSize(80, 30), rightObj1.Size())
+		assert.Equal(t, fyne.NewSize(80, 20), rightObj2.Size())
+	})
 }
 
 func TestGlCanvas_NilContent(t *testing.T) {
@@ -419,7 +427,10 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
 	w.SetContent(content)
-	w.Canvas().Overlays().Add(over)
+	overlays := w.Canvas().Overlays()
+	runOnMain(func() {
+		overlays.Add(over)
+	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 	// TODO: address #707; overlays should always be canvas size
 	size := w.Canvas().Size()

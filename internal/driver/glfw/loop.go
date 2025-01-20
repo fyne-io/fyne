@@ -56,6 +56,10 @@ var refreshingCanvases []fyne.Canvas
 
 func (d *gLDriver) drawSingleFrame() {
 	for _, win := range d.windowList() {
+		if win == nil {
+			continue
+		}
+
 		w := win.(*window)
 		canvas := w.canvas
 		closing := w.closing
@@ -115,15 +119,20 @@ func (d *gLDriver) runGL() {
 			f.done <- struct{}{}
 		case <-eventTick.C:
 			d.pollEvents()
-			windowsToRemove := 0
-			for _, win := range d.windowList() {
+			runWindowCleanup := false
+			for i, win := range d.windowList() {
+				if win == nil {
+					continue
+				}
+
 				w := win.(*window)
 				if w.viewport == nil {
 					continue
 				}
 
 				if w.viewport.ShouldClose() {
-					windowsToRemove++
+					d.destroyWindow(w, i)
+					runWindowCleanup = true
 					continue
 				}
 
@@ -140,39 +149,13 @@ func (d *gLDriver) runGL() {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}
-
-				d.animation.TickAnimations()
-				d.drawSingleFrame()
 			}
 
-			if windowsToRemove > 0 {
-				oldWindows := d.windowList()
-				newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
+			d.animation.TickAnimations()
+			d.drawSingleFrame()
 
-				for _, win := range oldWindows {
-					w := win.(*window)
-					if w.viewport == nil {
-						continue
-					}
-
-					if w.viewport.ShouldClose() {
-						w.visible = false
-						v := w.viewport
-
-						// remove window from window list
-						v.Destroy()
-						w.destroy(d)
-						continue
-					}
-
-					newWindows = append(newWindows, win)
-				}
-
-				d.windows = newWindows
-
-				if len(newWindows) == 0 {
-					d.Quit()
-				}
+			if runWindowCleanup {
+				d.removeDestroyedWindows()
 			}
 		}
 
@@ -189,6 +172,34 @@ func (d *gLDriver) runGL() {
 			})
 			pendingSettings = nil
 		}
+	}
+}
+
+func (d *gLDriver) destroyWindow(w *window, index int) {
+	w.visible = false
+
+	// Remove window from window list:
+	d.windows[index] = nil
+	w.viewport.Destroy()
+	w.destroy(d)
+}
+
+func (d *gLDriver) removeDestroyedWindows() {
+	// Copy items from front to back to move as few objects as possible.
+	for i := len(d.windows) - 1; i >= 0; i-- {
+		if d.windows[i] != nil {
+			continue
+		}
+
+		if i < len(d.windows)-1 {
+			copy(d.windows[i:], d.windows[i+1:])
+		}
+		d.windows[len(d.windows)-1] = nil
+		d.windows = d.windows[:len(d.windows)-1]
+	}
+
+	if len(d.windows) == 0 {
+		d.Quit()
 	}
 }
 
@@ -226,5 +237,5 @@ func updateGLContext(w *window) {
 	winHeight := float32(scale.ToScreenCoordinate(canvas, size.Height)) * canvas.texScale
 
 	canvas.Painter().SetFrameBufferScale(canvas.texScale)
-	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
+	canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
 }

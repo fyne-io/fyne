@@ -57,7 +57,9 @@ func toOSIcon(icon []byte) ([]byte, error) {
 }
 
 func (d *gLDriver) DoFromGoroutine(f func()) {
-	async.EnsureNotMain(f)
+	async.EnsureNotMain(func() {
+		runOnMain(f)
+	})
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -109,6 +111,9 @@ func (d *gLDriver) addWindow(w *window) {
 func (d *gLDriver) focusPreviousWindow() {
 	var chosen *window
 	for _, w := range d.windows {
+		if w == nil {
+			continue
+		}
 		win := w.(*window)
 		if !win.visible {
 			continue
