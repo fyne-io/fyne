@@ -533,6 +533,15 @@ func TestAccordion_OpenAll(t *testing.T) {
 	assert.True(t, ac.Items[2].Open)
 }
 
+func TestAccordion_Prepend(t *testing.T) {
+	ac := widget.NewAccordion(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+	assert.Len(t, ac.Items, 1)
+
+	ac.Prepend(widget.NewAccordionItem("bar", widget.NewLabel("more bar")))
+	assert.Len(t, ac.Items, 2)
+	assert.Equal(t, "bar", ac.Items[0].Title)
+}
+
 func TestAccordion_Remove(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	ac := widget.NewAccordion(ai)

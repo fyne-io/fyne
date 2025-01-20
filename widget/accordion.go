@@ -98,6 +98,15 @@ func (a *Accordion) OpenAll() {
 	a.Refresh()
 }
 
+// Prepend adds the given item to the beginning of this Accordion.
+//
+// Since: 2.6
+func (a *Accordion) Prepend(item *AccordionItem) {
+	a.Items = append([]*AccordionItem{item}, a.Items...)
+
+	a.Refresh()
+}
+
 // Remove deletes the given item from this Accordion.
 func (a *Accordion) Remove(item *AccordionItem) {
 	for i, ai := range a.Items {
