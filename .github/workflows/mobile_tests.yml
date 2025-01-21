@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', 'stable']
+        go-version: ['', 'stable']
         include:
           - os: ubuntu-latest
             runner: xvfb-run
@@ -21,6 +21,7 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        go-version-file: 'go.mod'
 
     - name: Get dependencies
       run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
