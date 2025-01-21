@@ -9,9 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -78,9 +76,8 @@ func bundleFile(name string, filepath string, f io.Writer) {
 		fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
 		return
 	}
-	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(%q),\n}\n\n",
+	_, err = fmt.Fprintf(f, "var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(%q),\n}\n\n",
 		formatVariable(name), staticRes.StaticName, staticRes.StaticContent)
-	_, err = f.Write([]byte(v))
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
 	}
@@ -92,7 +89,7 @@ func bundleFont(fontFile, varName string, f io.Writer) {
 }
 
 func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
-	unicodes := []string{}
+	unicodes := make([]string, len(runes))
 	for _, r := range runes {
 		unicodes = append(unicodes, fmt.Sprintf(`%04X`, r))
 	}
@@ -112,9 +109,8 @@ func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
 }
 
 func fontPath(filename string) string {
-	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "font", filename)
-	return path
+	dirname, _ := os.Getwd()
+	return filepath.Join(dirname, "font", filename)
 }
 
 func formatVariable(name string) string {
@@ -127,6 +123,6 @@ func writeFile(filename string, contents []byte) error {
 	if err != nil {
 		return err
 	}
-	_, dirname, _, _ := runtime.Caller(0)
-	return os.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
+	dirname, _ := os.Getwd()
+	return os.WriteFile(filepath.Join(dirname, filename), formatted, 0644)
 }
