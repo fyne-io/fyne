@@ -17,7 +17,7 @@ func TestLifecycle(t *testing.T) {
 
 	var entered, exited, start, stop, hookedStop, called bool
 	life.InitEventQueue()
-	go life.RunEventQueue(func(fn func()) {
+	go life.RunEventQueue(func(fn func(), _ bool) {
 		fn()
 	})
 	life.QueueEvent(func() { called = true })
