@@ -89,7 +89,7 @@ func bundleFont(fontFile, varName string, f io.Writer) {
 }
 
 func createFontByStripping(newFontFile, fontFile string, runes []rune) error {
-	unicodes := make([]string, len(runes))
+	unicodes := make([]string, 0, len(runes))
 	for _, r := range runes {
 		unicodes = append(unicodes, fmt.Sprintf(`%04X`, r))
 	}
