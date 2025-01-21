@@ -31,6 +31,11 @@ func init() {
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
+	runOnMainWithWait(f, true)
+}
+
+// force a function f to run on the main thread and specify if we should wait for it to return
+func runOnMainWithWait(f func(), wait bool) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
 	if !running.Load() {
@@ -38,12 +43,16 @@ func runOnMain(f func()) {
 		return
 	}
 
-	done := common.DonePool.Get()
-	defer common.DonePool.Put(done)
+	var done chan struct{}
+	if wait {
+		done = common.DonePool.Get()
+		defer common.DonePool.Put(done)
+	}
 
 	funcQueue <- funcData{f: f, done: done}
-
-	<-done
+	if wait {
+		<-done
+	}
 }
 
 // Preallocate to avoid allocations on every drawSingleFrame.
@@ -110,7 +119,9 @@ func (d *gLDriver) runGL() {
 			return
 		case f := <-funcQueue:
 			f.f()
-			f.done <- struct{}{}
+			if f.done != nil {
+				f.done <- struct{}{}
+			}
 		case <-eventTick.C:
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
