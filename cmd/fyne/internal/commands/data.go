@@ -9,6 +9,7 @@ type appData struct {
 	ResGoString       string
 	Release, rawIcon  bool
 	CustomMetadata    map[string]string
+	Migrations        map[string]bool
 	VersionAtLeast2_3 bool
 }
 
@@ -47,4 +48,5 @@ func (a *appData) mergeMetadata(data *metadata.FyneApp) {
 	} else {
 		a.appendCustomMetadata(data.Development)
 	}
+	a.Migrations = data.Migrations
 }

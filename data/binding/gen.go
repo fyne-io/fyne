@@ -11,172 +11,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-const itemBindTemplate = `
-// {{ .Name }} supports binding a {{ .Type }} value.
-//
-// Since: {{ .Since }}
-type {{ .Name }} interface {
-	DataItem
-	Get() ({{ .Type }}, error)
-	Set({{ .Type }}) error
-}
-
-// External{{ .Name }} supports binding a {{ .Type }} value to an external value.
-//
-// Since: {{ .Since }}
-type External{{ .Name }} interface {
-	{{ .Name }}
-	Reload() error
-}
-
-// New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
-//
-// Since: {{ .Since }}
-func New{{ .Name }}() {{ .Name }} {
-	var blank {{ .Type }} = {{ .Default }}
-	return &bound{{ .Name }}{val: &blank}
-}
-
-// Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
-// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
-//
-// Since: {{ .Since }}
-func Bind{{ .Name }}(v *{{ .Type }}) External{{ .Name }} {
-	if v == nil {
-		var blank {{ .Type }} = {{ .Default }}
-		v = &blank // never allow a nil value pointer
-	}
-	b := &boundExternal{{ .Name }}{}
-	b.val = v
-	b.old = *v
-	return b
-}
-
-type bound{{ .Name }} struct {
-	base
-
-	val *{{ .Type }}
-}
-
-func (b *bound{{ .Name }}) Get() ({{ .Type }}, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	if b.val == nil {
-		return {{ .Default }}, nil
-	}
-	return *b.val, nil
-}
-
-func (b *bound{{ .Name }}) Set(val {{ .Type }}) error {
-	b.lock.Lock()
-	{{- if eq .Comparator "" }}
-	if *b.val == val {
-		b.lock.Unlock()
-		return nil
-	}
-	{{- else }}
-	if {{ .Comparator }}(*b.val, val) {
-		b.lock.Unlock()
-		return nil
-	}
-	{{- end }}
-	*b.val = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-type boundExternal{{ .Name }} struct {
-	bound{{ .Name }}
-
-	old {{ .Type }}
-}
-
-func (b *boundExternal{{ .Name }}) Set(val {{ .Type }}) error {
-	b.lock.Lock()
-	{{- if eq .Comparator "" }}
-	if b.old == val {
-		b.lock.Unlock()
-		return nil
-	}
-	{{- else }}
-	if {{ .Comparator }}(b.old, val) {
-		b.lock.Unlock()
-		return nil
-	}
-	{{- end }}
-	*b.val = val
-	b.old = val
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
-}
-
-func (b *boundExternal{{ .Name }}) Reload() error {
-	return b.Set(*b.val)
-}
-`
-
-const prefTemplate = `
-type prefBound{{ .Name }} struct {
-	base
-	key   string
-	p     fyne.Preferences
-	cache atomic.Pointer[{{ .Type }}]
-}
-
-// BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
-// Changes to this value will be saved to application storage and when the app starts the previous values will be read.
-//
-// Since: {{ .Since }}
-func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
-	binds := prefBinds.getBindings(p)
-	if binds != nil {
-		if listen, ok := binds.Load(key); listen != nil && ok {
-			if l, ok := listen.({{ .Name }}); ok {
-				return l
-			}
-			fyne.LogError(keyTypeMismatchError+key, nil)
-		}
-	}
-
-	listen := &prefBound{{ .Name }}{key: key, p: p}
-	binds = prefBinds.ensurePreferencesAttached(p)
-	binds.Store(key, listen)
-	return listen
-}
-
-func (b *prefBound{{ .Name }}) Get() ({{ .Type }}, error) {
-	cache := b.p.{{ .Name }}(b.key)
-	b.cache.Store(&cache)
-	return cache, nil
-}
-
-func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) error {
-	b.p.Set{{ .Name }}(b.key, v)
-
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-	b.trigger()
-	return nil
-}
-
-func (b *prefBound{{ .Name }}) checkForChange() {
-	val := b.cache.Load()
-	if val != nil && b.p.{{ .Name }}(b.key) == *val {
-		return
-	}
-	b.trigger()
-}
-
-func (b *prefBound{{ .Name }}) replaceProvider(p fyne.Preferences) {
-	b.p = p
-}
-`
-
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
@@ -1134,18 +968,6 @@ func writeFile(f *os.File, t *template.Template, d any) {
 }
 
 func main() {
-	itemFile, err := newFile("binditems")
-	if err != nil {
-		return
-	}
-	defer itemFile.Close()
-	itemFile.WriteString(`
-import (
-	"bytes"
-
-	"fyne.io/fyne/v2"
-)
-`)
 	convertFile, err := newFile("convert")
 	if err != nil {
 		return
@@ -1165,20 +987,6 @@ func internalFloatToInt(val float64) (int, error) {
 func internalIntToFloat(val int) (float64, error) {
 	return float64(val), nil
 }
-`)
-	prefFile, err := newFile("preference")
-	if err != nil {
-		return
-	}
-	defer prefFile.Close()
-	prefFile.WriteString(`
-import (
-	"sync/atomic"
-
-	"fyne.io/fyne/v2"
-)
-
-const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 `)
 
 	listFile, err := newFile("bindlists")
@@ -1207,12 +1015,10 @@ import (
 )
 `)
 
-	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	fromInt := template.Must(template.New("fromInt").Parse(fromIntTemplate))
 	toInt := template.Must(template.New("toInt").Parse(toIntTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
-	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	list := template.Must(template.New("list").Parse(listBindTemplate))
 	tree := template.Must(template.New("tree").Parse(treeBindTemplate))
 	binds := []bindValues{
@@ -1237,10 +1043,6 @@ import (
 			continue // any is special, we have it in binding.go instead
 		}
 
-		writeFile(itemFile, item, b)
-		if b.SupportsPreferences {
-			writeFile(prefFile, preference, b)
-		}
 		if b.Format != "" || b.ToString != "" {
 			writeFile(convertFile, toString, b)
 		}

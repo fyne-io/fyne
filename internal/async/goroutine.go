@@ -30,7 +30,7 @@ func IsMainGoroutine() bool {
 //
 // This will be removed later and should never be public
 func EnsureNotMain(fn func()) {
-	if build.DisableThreadChecks || !IsMainGoroutine() {
+	if build.MigratedToFyneDo() || !build.HasHints || !IsMainGoroutine() {
 		fn()
 		return
 	}
@@ -47,7 +47,7 @@ func EnsureNotMain(fn func()) {
 //
 // This will be removed later and should never be public
 func EnsureMain(fn func()) {
-	if build.DisableThreadChecks || IsMainGoroutine() {
+	if build.MigratedToFyneDo() || !build.HasHints || IsMainGoroutine() {
 		fn()
 		return
 	}

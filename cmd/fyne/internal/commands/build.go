@@ -230,6 +230,9 @@ func (b *Builder) build() error {
 	if b.release {
 		tags = append(tags, "release")
 	}
+	if ok, set := b.appData.Migrations["fyneDo"]; ok && set {
+		tags = append(tags, "migrated_fynedo")
+	}
 	if len(tags) > 0 {
 		args = append(args, "-tags", strings.Join(tags, ","))
 	}
