@@ -81,12 +81,14 @@ func (s *settings) ThemeVariant() fyne.ThemeVariant {
 	return s.variant
 }
 
+// must be called from main goroutine
 func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.variant = variant
 	s.theme = theme
 	s.apply()
 }
 
+// must be called from main goroutine
 func (s *settings) applyVariant(variant fyne.ThemeVariant) {
 	s.variant = variant
 	s.apply()

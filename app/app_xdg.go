@@ -118,13 +118,13 @@ func watchTheme(s *settings) {
 		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
 		themeVariant := findFreedesktopColorScheme()
 		internalapp.CurrentVariant.Store(uint64(themeVariant))
-		s.applyVariant(themeVariant)
+		fyne.Do(func() { s.applyVariant(themeVariant) })
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
 				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
-				s.applyVariant(themeVariant)
+				fyne.Do(func() { s.applyVariant(themeVariant) })
 			}
 		})
 	}()
