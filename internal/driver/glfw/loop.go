@@ -144,7 +144,7 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
-    }
+		}
 
 		if pendingSettings != nil {
 			painter.ClearFontCache()
