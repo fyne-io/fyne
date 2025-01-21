@@ -58,14 +58,9 @@ func main() {
 	fmt.Println("Bundle fonts…")
 	f := &bytes.Buffer{}
 	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne/v2\"\n\n")
-	bundleFont(fontFace+"-Regular.ttf", "regular", f)
-	bundleFont(fontFace+"-Bold.ttf", "bold", f)
-	bundleFont(fontFace+"-Italic.ttf", "italic", f)
-	bundleFont(fontFace+"-BoldItalic.ttf", "bolditalic", f)
-	bundleFont("DejaVuSansMono-Powerline.ttf", "monospace", f)
 	bundleFont(symbolFont, "symbol", f)
 
-	err = writeFile("bundled-fonts.go", f.Bytes())
+	err = writeFile("bundled-symbol-font.go", f.Bytes())
 	if err != nil {
 		fyne.LogError("unable to write file", err)
 		os.Exit(1)
