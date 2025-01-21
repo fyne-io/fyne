@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', '1.23.x']
+        go-version: ['1.19.x', 'stable']
         os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.20.x', '1.22.x']
+        go-version: ['1.20.x', 'stable']
     steps:
       - uses: actions/checkout@v4
         with:

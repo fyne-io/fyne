@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', '1.23.x']
+        go-version: ['1.19.x', 'stable']
         include:
           - os: ubuntu-latest
             runner: xvfb-run
