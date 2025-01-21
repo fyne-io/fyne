@@ -39,6 +39,7 @@ jobs:
         go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
         go install honnef.co/go/tools/cmd/staticcheck@latest
         go install github.com/mattn/goveralls@latest
+        go install lucor.dev/lian@latest
 
     - name: Vet
       run: go vet ./...
@@ -51,6 +52,9 @@ jobs:
 
     - name: Staticcheck
       run: staticcheck ./...
+
+    - name: Check license of dependencies
+      run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT, ISC" --excluded=github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e
 
     - name: Update coverage
       run: |
