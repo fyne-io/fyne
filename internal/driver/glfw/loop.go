@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,7 +21,7 @@ type funcData struct {
 }
 
 // channel for queuing functions on the main thread
-var funcQueue = make(chan funcData)
+var funcQueue = async.NewUnboundedChan[funcData]()
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
@@ -43,15 +44,14 @@ func runOnMainWithWait(f func(), wait bool) {
 		return
 	}
 
-	var done chan struct{}
 	if wait {
-		done = common.DonePool.Get()
+		done := common.DonePool.Get()
 		defer common.DonePool.Put(done)
-	}
 
-	funcQueue <- funcData{f: f, done: done}
-	if wait {
+		funcQueue.In() <- funcData{f: f, done: done}
 		<-done
+	} else {
+		funcQueue.In() <- funcData{f: f}
 	}
 }
 
@@ -117,7 +117,7 @@ func (d *gLDriver) runGL() {
 				l.QueueEvent(f)
 			}
 			return
-		case f := <-funcQueue:
+		case f := <-funcQueue.Out():
 			f.f()
 			if f.done != nil {
 				f.done <- struct{}{}
