@@ -405,7 +405,25 @@ func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 	}
 
 	infProgress := widget.NewProgressBarInfinite()
-	startProgress(progress, fprogress)
+
+	progressAnimation := fyne.Animation{
+		Curve:    fyne.AnimationLinear,
+		Duration: 10 * time.Second,
+		Tick: func(percentage float32) {
+			value := float64(percentage)
+			progress.SetValue(value)
+			fprogress.SetValue(value)
+		},
+	}
+
+	progressAnimation.Start()
+
+	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
+		if page != "progress" {
+			progressAnimation.Stop()
+			infProgress.Stop()
+		}
+	})
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -461,20 +479,6 @@ func makeToolbarTab(_ fyne.Window) fyne.CanvasObject {
 	)
 
 	return container.NewBorder(t, nil, nil, nil)
-}
-
-func startProgress(progress, fprogress *widget.ProgressBar) {
-	progressAnimation := fyne.Animation{
-		Curve:    fyne.AnimationLinear,
-		Duration: 10 * time.Second,
-		Tick: func(percentage float32) {
-			value := float64(percentage)
-			progress.SetValue(value)
-			fprogress.SetValue(value)
-		},
-	}
-
-	progressAnimation.Start()
 }
 
 // widgetScreen shows a panel containing widget demos

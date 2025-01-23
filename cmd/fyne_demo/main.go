@@ -230,6 +230,10 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 			if t, ok := tutorials.Tutorials[uid]; ok {
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
+
+				for _, f := range tutorials.OnChangeFuncs {
+					f(uid)
+				}
 			}
 		},
 	}

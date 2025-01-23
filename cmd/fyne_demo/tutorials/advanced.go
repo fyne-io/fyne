@@ -1,6 +1,7 @@
 package tutorials
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -36,8 +37,17 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 		&widget.FormItem{Text: "Texture Scale", Widget: tex},
 	))
 
+	ticker := time.NewTicker(time.Second)
+
+	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
+		if page != "advanced" {
+			fmt.Println("Stopped ticker")
+			ticker.Stop()
+		}
+	})
+
 	go func(canvas fyne.Canvas) {
-		for range time.NewTicker(time.Second).C {
+		for range ticker.C {
 			fyne.Do(func() {
 				scale.SetText(scaleToString(canvas))
 				tex.SetText(textureScaleToString(canvas))
