@@ -867,11 +867,7 @@ func (w *window) Context() any {
 
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.view() != nil {
-		if async.IsMainGoroutine() {
-			fn()
-			return
-		}
-		fyne.Do(fn)
+		async.EnsureMain(fn)
 		return
 	}
 

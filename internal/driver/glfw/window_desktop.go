@@ -114,10 +114,11 @@ type window struct {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.fullScreen = full
-	if !w.visible {
-		return
-	}
+	w.runOnMainWhenCreated(func() {
+		w.fullScreen = full
+		if !w.visible {
+			return
+		}
 
 	w.doSetFullScreen(full)
 }

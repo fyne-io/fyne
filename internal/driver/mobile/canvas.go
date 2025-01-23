@@ -407,7 +407,7 @@ func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tap
 		c.touchCancelFunc = nil
 		c.touchLastTapped = nil
 		c.touchCancelLock.Unlock()
-	})
+	}, true)
 }
 
 func (c *canvas) windowHeadIsDisplacing() bool {

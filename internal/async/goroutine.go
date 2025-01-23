@@ -35,7 +35,7 @@ func EnsureNotMain(fn func()) {
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, fyne.Do called from main goroutine ***")
+	log.Println("*** Error in Fyne call thread, fyne.Do[AndWait] called from main goroutine ***")
 
 	logStackTop(2)
 	go fn()
@@ -52,10 +52,10 @@ func EnsureMain(fn func()) {
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do ***")
+	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***")
 
 	logStackTop(1)
-	fyne.Do(fn)
+	fyne.DoAndWait(fn)
 }
 
 func logStackTop(skip int) {

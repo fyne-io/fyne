@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,7 +21,7 @@ type funcData struct {
 }
 
 // channel for queuing functions on the main thread
-var funcQueue = make(chan funcData)
+var funcQueue = async.NewUnboundedChan[funcData]()
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
@@ -31,6 +32,11 @@ func init() {
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
+	runOnMainWithWait(f, true)
+}
+
+// force a function f to run on the main thread and specify if we should wait for it to return
+func runOnMainWithWait(f func(), wait bool) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
 	if !running.Load() {
@@ -38,12 +44,15 @@ func runOnMain(f func()) {
 		return
 	}
 
-	done := common.DonePool.Get()
-	defer common.DonePool.Put(done)
+	if wait {
+		done := common.DonePool.Get()
+		defer common.DonePool.Put(done)
 
-	funcQueue <- funcData{f: f, done: done}
-
-	<-done
+		funcQueue.In() <- funcData{f: f, done: done}
+		<-done
+	} else {
+		funcQueue.In() <- funcData{f: f}
+	}
 }
 
 // Preallocate to avoid allocations on every drawSingleFrame.
@@ -108,9 +117,11 @@ func (d *gLDriver) runGL() {
 				l.QueueEvent(f)
 			}
 			return
-		case f := <-funcQueue:
+		case f := <-funcQueue.Out():
 			f.f()
-			f.done <- struct{}{}
+			if f.done != nil {
+				f.done <- struct{}{}
+			}
 		case <-eventTick.C:
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
