@@ -385,10 +385,7 @@ type textGridRenderer struct {
 }
 
 func (t *textGridRenderer) Layout(s fyne.Size) {
-	if t.scroll.Content != nil {
-		t.scroll.Resize(s)
-	}
-	t.text.Resize(s)
+	t.Objects()[0].Resize(s)
 }
 
 func (t *textGridRenderer) MinSize() fyne.Size {
@@ -528,7 +525,6 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 	for _, row := range t.visible {
 		if row.(*textGridRow).row < start || row.(*textGridRow).row > end {
 			toRemove = append(toRemove, row.(*textGridRow))
-			break
 		}
 	}
 
@@ -706,7 +702,7 @@ func (t *textGridRowRenderer) addCellsIfRequired() {
 func (t *textGridRowRenderer) refreshCells() {
 	x := 0
 	if t.obj.row >= len(t.obj.text.text.Rows) {
-		return // empty?
+		return // we can have more rows than content rows (filling space)
 	}
 
 	row := t.obj.text.text.Rows[t.obj.row]
