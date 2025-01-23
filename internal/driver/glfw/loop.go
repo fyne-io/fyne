@@ -232,15 +232,15 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 		})
 	}
 
-	windowsToRemove := 0
-	for _, win := range d.windowList() {
-		w := win.(*window)
+	for i := 0; i < len(d.windows); i++ {
+		w := d.windows[i].(*window)
 		if w.viewport == nil {
 			continue
 		}
 
 		if w.viewport.ShouldClose() {
-			windowsToRemove++
+			d.destroyWindow(w, i)
+			i-- // Trailing windows are moved forward one position.
 			continue
 		}
 
@@ -260,10 +260,6 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 	}
 	animationsDone = d.animation.TickAnimations()
 	d.drawSingleFrame()
-
-	if windowsToRemove > 0 {
-		d.removeWindows(windowsToRemove)
-	}
 
 	return false, animationsDone
 }
