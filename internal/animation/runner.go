@@ -55,8 +55,8 @@ func (r *Runner) Start(a *fyne.Animation) {
 
 	if !hadAnimations {
 		// wake up main thread if needed to begin running animations
-		if drv, ok := fyne.CurrentApp().Driver().(interface{ PostEmptyEvent() }); ok {
-			drv.PostEmptyEvent()
+		if drv, ok := fyne.CurrentApp().Driver().(interface{ WakeUp() }); ok {
+			drv.WakeUp()
 		}
 	}
 }

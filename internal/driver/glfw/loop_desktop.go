@@ -32,10 +32,12 @@ func (d *gLDriver) Terminate() {
 	glfw.Terminate()
 }
 
-func (d *gLDriver) PostEmptyEvent() {
-	glfw.PostEmptyEvent()
+// WakeUp tells the driver to wake up from an idle state.
+func (d *gLDriver) WakeUp() {
+	wakeUpDriver()
 }
 
-func postEmptyEvent() {
+// wakeUpDriver wakes up the driver but in the case a reference to it is not easily available.
+func wakeUpDriver() {
 	glfw.PostEmptyEvent()
 }

@@ -353,8 +353,8 @@ func (c *Canvas) SetDirty() {
 	// wake up main thread in case we were called from goroutine
 	// TODO: hide this behind the migration flag introduced in
 	// https://github.com/fyne-io/fyne/pull/5425
-	if drv, ok := fyne.CurrentApp().Driver().(interface{ PostEmptyEvent() }); ok {
-		drv.PostEmptyEvent()
+	if drv, ok := fyne.CurrentApp().Driver().(interface{ WakeUp() }); ok {
+		drv.WakeUp()
 	}
 }
 

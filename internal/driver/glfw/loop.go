@@ -50,11 +50,11 @@ func runOnMainWithWait(f func(), wait bool) {
 		defer common.DonePool.Put(done)
 
 		funcQueue.In() <- funcData{f: f, done: done}
-		postEmptyEvent()
+		wakeUpDriver()
 		<-done
 	} else {
 		funcQueue.In() <- funcData{f: f}
-		postEmptyEvent()
+		wakeUpDriver()
 	}
 }
 
@@ -141,6 +141,18 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
+<<<<<<< HEAD
+=======
+	if stg, ok := fyne.CurrentApp().Settings().(interface{ AddChangeListenerFunc(func(fyne.Settings)) }); ok {
+		stg.AddChangeListenerFunc(func(s fyne.Settings) {
+			settingsMutex.Lock()
+			settingsToApply = s
+			settingsMutex.Unlock()
+			wakeUpDriver()
+		})
+	}
+
+>>>>>>> 3174f9b66 (Nicer naming for waking up driver)
 	for {
 		d.waitEvents()
 
