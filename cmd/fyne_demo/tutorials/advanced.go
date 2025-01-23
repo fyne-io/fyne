@@ -1,7 +1,6 @@
 package tutorials
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -41,7 +40,6 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 
 	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
 		if page != "advanced" {
-			fmt.Println("Stopped ticker")
 			ticker.Stop()
 		}
 	})
