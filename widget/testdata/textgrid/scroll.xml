@@ -2,8 +2,8 @@
 	<content>
 		<widget size="50x32" type="*widget.TextGrid">
 			<widget size="50x32" type="*widget.Scroll">
-				<widget size="50x32" type="*widget.textGridContent">
-					<widget size="50x16" type="*widget.textGridRow">
+				<widget size="72x32" type="*widget.textGridContent">
+					<widget size="72x16" type="*widget.textGridRow">
 						<rectangle size="0x0"/>
 						<text monospace size="0x0">S</text>
 						<line size="0x0"/>
@@ -32,7 +32,7 @@
 						<text monospace size="0x0">g</text>
 						<line size="0x0"/>
 					</widget>
-					<widget pos="0,16" size="50x16" type="*widget.textGridRow">
+					<widget pos="0,16" size="72x16" type="*widget.textGridRow">
 						<rectangle size="0x0"/>
 						<text monospace size="0x0">E</text>
 						<line size="0x0"/>
@@ -61,7 +61,7 @@
 						<text monospace size="0x0"> </text>
 						<line size="0x0"/>
 					</widget>
-					<widget pos="0,32" size="50x16" type="*widget.textGridRow">
+					<widget pos="0,32" size="72x16" type="*widget.textGridRow">
 						<rectangle size="0x0"/>
 						<text monospace size="0x0"> </text>
 						<line size="0x0"/>
