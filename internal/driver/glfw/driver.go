@@ -56,9 +56,9 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (d *gLDriver) DoFromGoroutine(f func()) {
+func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
 	async.EnsureNotMain(func() {
-		runOnMain(f)
+		runOnMainWithWait(f, wait)
 	})
 }
 

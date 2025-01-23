@@ -114,23 +114,25 @@ type window struct {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.fullScreen = full
-	if !w.visible {
-		return
-	}
-
-	monitor := w.getMonitorForWindow()
-	mode := monitor.GetVideoMode()
-
-	if full {
-		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
-	} else {
-		if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
-			s := w.canvas.Size().Max(w.canvas.MinSize())
-			w.width, w.height = w.screenSize(s)
+	w.runOnMainWhenCreated(func() {
+		w.fullScreen = full
+		if !w.visible {
+			return
 		}
-		w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
-	}
+
+		monitor := w.getMonitorForWindow()
+		mode := monitor.GetVideoMode()
+
+		if full {
+			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
+		} else {
+			if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
+				s := w.canvas.Size().Max(w.canvas.MinSize())
+				w.width, w.height = w.screenSize(s)
+			}
+			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+		}
+	})
 }
 
 func (w *window) CenterOnScreen() {

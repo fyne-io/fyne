@@ -253,7 +253,7 @@ func (s *testSettings) apply() {
 		cache.ResetThemeCaches()
 		intapp.ApplySettings(s, s.app)
 		s.app.propertyLock.Unlock()
-	})
+	}, false)
 
 	s.app.propertyLock.Lock()
 	s.app.appliedTheme = s.Theme()
