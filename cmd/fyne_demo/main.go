@@ -228,12 +228,13 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
-				a.Preferences().SetString(preferenceCurrentTutorial, uid)
-				setTutorial(t)
-
 				for _, f := range tutorials.OnChangeFuncs {
 					f(uid)
 				}
+				tutorials.OnChangeFuncs = nil // Loading a page registers a new cleanup.
+
+				a.Preferences().SetString(preferenceCurrentTutorial, uid)
+				setTutorial(t)
 			}
 		},
 	}
