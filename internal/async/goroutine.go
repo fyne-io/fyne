@@ -4,22 +4,32 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
 )
 
-// mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized during setup by calling `SetMainGoroutine` because
-// a main goroutine may not equal to 1 due to the influence of a garbage collector.
-var mainGoroutineID uint64
+var (
+	// mainGoroutineID stores the main goroutine ID.
+	// This ID must be initialized during setup by calling `SetMainGoroutine` because
+	// a main goroutine may not equal to 1 due to the influence of a garbage collector.
+	mainGoroutineID uint64
+
+	mainIDLock sync.RWMutex
+)
 
 func SetMainGoroutine() {
+	mainIDLock.Lock()
 	mainGoroutineID = goroutineID()
+	mainIDLock.Unlock()
 }
 
 // IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
 func IsMainGoroutine() bool {
+	mainIDLock.RLock()
+	defer mainIDLock.RUnlock()
+
 	return goroutineID() == mainGoroutineID
 }
 
