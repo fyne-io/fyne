@@ -50,7 +50,8 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 	return &driver{painter: painter}
 }
 
-func (d *driver) DoFromGoroutine(f func()) {
+// DoFromGoroutine on a test driver ignores the wait flag as our threading is simple
+func (d *driver) DoFromGoroutine(f func(), _ bool) {
 	// Tests all run on a single (but potentially different per-test) thread
 	async.EnsureNotMain(f)
 }

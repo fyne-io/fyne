@@ -267,7 +267,7 @@ func (s *testSettings) apply() {
 		for _, l := range s.listeners {
 			l(s)
 		}
-	})
+	}, false)
 
 	s.app.propertyLock.Lock()
 	s.app.appliedTheme = s.Theme()

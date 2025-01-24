@@ -72,17 +72,24 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func (d *driver) DoFromGoroutine(fn func()) {
+func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	async.EnsureNotMain(func() {
-		done := common.DonePool.Get()
-		defer common.DonePool.Put(done)
+		var done chan struct{}
+		if wait {
+			done = common.DonePool.Get()
+			defer common.DonePool.Put(done)
+		}
 
 		d.queuedFuncs.In() <- func() {
 			fn()
-			done <- struct{}{}
+			if wait {
+				done <- struct{}{}
+			}
 		}
 
-		<-done
+		if wait {
+			<-done
+		}
 	})
 }
 
@@ -451,11 +458,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 
 				d.DoFromGoroutine(func() {
 					wid.Dragged(ev)
-				})
+				}, true)
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			d.DoFromGoroutine(wid.DragEnd)
+			d.DoFromGoroutine(wid.DragEnd, true)
 		}()
 	})
 }

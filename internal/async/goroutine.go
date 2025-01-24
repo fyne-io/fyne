@@ -30,12 +30,12 @@ func IsMainGoroutine() bool {
 //
 // This will be removed later and should never be public
 func EnsureNotMain(fn func()) {
-	if build.MigratedToFyneDo() || !build.HasHints || !IsMainGoroutine() {
+	if build.MigratedToFyneDo() || !IsMainGoroutine() {
 		fn()
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, fyne.Do called from main goroutine ***")
+	log.Println("*** Error in Fyne call thread, fyne.Do[AndWait] called from main goroutine ***")
 
 	logStackTop(2)
 	go fn()
@@ -47,15 +47,15 @@ func EnsureNotMain(fn func()) {
 //
 // This will be removed later and should never be public
 func EnsureMain(fn func()) {
-	if build.MigratedToFyneDo() || !build.HasHints || IsMainGoroutine() {
+	if build.MigratedToFyneDo() || IsMainGoroutine() {
 		fn()
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do ***")
+	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***")
 
 	logStackTop(1)
-	fyne.Do(fn)
+	fyne.DoAndWait(fn)
 }
 
 func logStackTop(skip int) {
