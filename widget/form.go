@@ -158,24 +158,18 @@ func (f *Form) Validate() error {
 }
 
 func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
-	_, ok := item.Widget.(fyne.Validatable)
-	if item.HintText == "" {
-		if !ok {
-			return item.Widget
-		}
-		if !f.itemWidgetHasValidator(item.Widget) { // we don't have validation
-			return item.Widget
-		}
+	if item.helperOutput == nil {
+		// Always initialize helperOutput to show validation errors or hints
+		th := f.Theme()
+		v := fyne.CurrentApp().Settings().ThemeVariant()
+		text := canvas.NewText("", th.Color(theme.ColorNamePlaceHolder, v))
+		text.TextSize = th.Size(theme.SizeNameCaptionText)
+		item.helperOutput = text
 	}
+	f.updateHelperText(item) // Ensure the helper text is updated
 
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	text := canvas.NewText(item.HintText, th.Color(theme.ColorNamePlaceHolder, v))
-	text.TextSize = th.Size(theme.SizeNameCaptionText)
-	item.helperOutput = text
-	f.updateHelperText(item)
-	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
+	// Wrap the input widget and helperOutput in a container
+	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{item.helperOutput}}
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
@@ -344,23 +338,26 @@ func (f *Form) setValidationError(err error) {
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
+	if item.helperOutput == nil {
+		return // Exit early if helperOutput is not initialized (shouldn't happen with the updated createInput)
+	}
+
 	th := f.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	if item.helperOutput == nil {
-		return // testing probably, either way not rendered yet
-	}
-	showHintIfError := false
-	if e, ok := item.Widget.(*Entry); ok && (!e.dirty || e.focused) {
-		showHintIfError = true
-	}
-	if item.validationError == nil || showHintIfError {
+	if item.validationError != nil {
+		// Show the validation error message
+		item.helperOutput.Text = item.validationError.Error()
+		item.helperOutput.Color = th.Color(theme.ColorNameError, v)
+	} else if item.HintText != "" {
+		// Show the hint text if there's no validation error
 		item.helperOutput.Text = item.HintText
 		item.helperOutput.Color = th.Color(theme.ColorNamePlaceHolder, v)
 	} else {
-		item.helperOutput.Text = item.validationError.Error()
-		item.helperOutput.Color = th.Color(theme.ColorNameError, v)
+		// Clear the text if neither validation error nor hint exists
+		item.helperOutput.Text = ""
 	}
+
 	item.helperOutput.Refresh()
 }
 
