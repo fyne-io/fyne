@@ -5,7 +5,7 @@ void setFullScreen(bool full, void *win) {
     NSWindow *window = (NSWindow*)win;
 
     NSUInteger masks = [window styleMask];
-    bool isFull = masks & NSFullScreenWindowMask;
+    bool isFull = masks & NSWindowStyleMaskFullScreen;
     if (isFull == full) {
         return;
     }
