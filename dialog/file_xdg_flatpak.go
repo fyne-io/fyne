@@ -83,14 +83,14 @@ func fileOpenOSOverride(d *FileDialog) bool {
 	if folder {
 		go func() {
 			folder, err := openFolder(windowHandle, options)
-			fyne.Do(func() {
+			fyne.DoAndWait(func() {
 				folderCallback(folder, err)
 			})
 		}()
 	} else {
 		go func() {
 			file, err := openFile(windowHandle, options)
-			fyne.Do(func() {
+			fyne.DoAndWait(func() {
 				fileCallback(file, err)
 			})
 		}()
@@ -113,7 +113,7 @@ func fileSaveOSOverride(d *FileDialog) bool {
 
 	go func() {
 		file, err := saveFile(windowHandle, options)
-		fyne.Do(func() {
+		fyne.DoAndWait(func() {
 			callback(file, err)
 		})
 	}()

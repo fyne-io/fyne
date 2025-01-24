@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', '1.23.x']
+        go-version: ['', 'stable']
         include:
           - os: ubuntu-latest
             runner: xvfb-run
@@ -18,12 +18,13 @@ jobs:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        go-version-file: 'go.mod'
 
     - name: Get dependencies
       run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
     - name: Tests
-      run: go test -race -test.benchtime 10ms -tags "ci mobile" ./...
+      run: go test -race -tags "ci mobile" ./...
