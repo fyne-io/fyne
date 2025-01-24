@@ -37,12 +37,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 	))
 
 	ticker := time.NewTicker(time.Second)
-
-	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
-		if page != "advanced" {
-			ticker.Stop()
-		}
-	})
+	OnChangeFuncs = append(OnChangeFuncs, ticker.Stop)
 
 	go func(canvas fyne.Canvas) {
 		for range ticker.C {

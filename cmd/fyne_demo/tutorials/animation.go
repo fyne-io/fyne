@@ -46,12 +46,7 @@ func makeAnimationCanvas() fyne.CanvasObject {
 	a2.Curve = fyne.AnimationLinear
 	a2.Start()
 
-	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
-		if page != "animations" {
-			a.Stop()
-			a2.Stop()
-		}
-	})
+	OnChangeFuncs = append(OnChangeFuncs, a.Stop, a2.Stop)
 
 	running := true
 	var toggle *widget.Button
@@ -78,14 +73,7 @@ func makeAnimationCurves() fyne.CanvasObject {
 	label3, box3, a3 := makeAnimationCurveItem("EaseOut", fyne.AnimationEaseOut, 60+theme.Padding()*2)
 	label4, box4, a4 := makeAnimationCurveItem("Linear", fyne.AnimationLinear, 90+theme.Padding()*3)
 
-	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
-		if page != "animations" {
-			a1.Stop()
-			a2.Stop()
-			a3.Stop()
-			a4.Stop()
-		}
-	})
+	OnChangeFuncs = append(OnChangeFuncs, a1.Stop, a2.Stop, a3.Stop, a4.Stop)
 
 	start := widget.NewButton("Compare", func() {
 		a1.Start()
