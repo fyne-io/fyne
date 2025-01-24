@@ -48,6 +48,7 @@ type Tree struct {
 	branchMinSize fyne.Size
 	currentFocus  TreeNodeID
 	focused       bool
+	itemHeights   map[TreeNodeID]float32
 	leafMinSize   fyne.Size
 	offset        fyne.Position
 	open          map[TreeNodeID]bool
@@ -253,6 +254,22 @@ func (t *Tree) ScrollToBottom() {
 	t.Refresh()
 }
 
+// SetItemHeight supports changing the height of the specified list item. Items normally take the height of the template
+// returned from the CreateItem callback. The height parameter uses the same units as a fyne.Size type and refers
+// to the internal content height not including the divider size.
+//
+// Since: 2.x
+func (t *Tree) SetItemHeight(id TreeNodeID, height float32) {
+	t.propertyLock.Lock()
+
+	if t.itemHeights == nil {
+		t.itemHeights = make(map[TreeNodeID]float32)
+	}
+
+	t.itemHeights[id] = height
+	t.propertyLock.Unlock()
+}
+
 // ScrollTo scrolls to the node with the given id.
 //
 // Since 2.1
@@ -435,6 +452,9 @@ func (t *Tree) findBottom() (y float32, size fyne.Size) {
 		if branch {
 			size = t.branchMinSize
 		}
+		if n, ok := t.itemHeights[id]; ok {
+			size.Height = n
+		}
 
 		// Root node is not rendered unless it has been customized
 		if t.Root == "" && id == "" {
@@ -462,6 +482,9 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 		m := t.leafMinSize
 		if branch {
 			m = t.branchMinSize
+		}
+		if n, ok := t.itemHeights[id]; ok {
+			m.Height = n
 		}
 		if id == uid {
 			found = true
@@ -644,6 +667,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
 		}
+		if n, ok := r.treeContent.tree.itemHeights[uid]; ok {
+			m.Height = n
+		}
 		if y+m.Height < offsetY {
 			// Node is above viewport and not visible
 		} else if y > offsetY+viewport.Height {
@@ -748,6 +774,9 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		m := r.treeContent.tree.leafMinSize
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
+		}
+		if n, ok := r.treeContent.tree.itemHeights[uid]; ok {
+			m.Height = n
 		}
 		m.Width += float32(depth) * (iconSize + pad)
 		min.Width = fyne.Max(min.Width, m.Width)
