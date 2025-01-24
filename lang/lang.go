@@ -1,5 +1,10 @@
 // Package lang introduces a translation and localisation API for Fyne applications
 //
+// By default, a few custom localisation keys for a few default languages are included.
+// They can be overwritten with custom localisations.
+// Without further intervention, the default language will be English. This is overwritten
+// with the language of the first translation that is being registered explicitly.
+//
 // Since 2.5
 package lang
 
@@ -7,6 +12,7 @@ import (
 	"embed"
 	"encoding/json"
 	"log"
+	"path"
 	"strings"
 	"text/template"
 
@@ -35,12 +41,15 @@ var (
 	// More info available on the `LocalizePluralKey` function.
 	XN = LocalizePluralKey
 
-	bundle    *i18n.Bundle
-	localizer *i18n.Localizer
+	bundle          *i18n.Bundle
+	localizer       *i18n.Localizer
+	bundleIsDefault bool
+	unmarshallers   map[string]i18n.UnmarshalFunc
 
 	//go:embed translations
-	translations embed.FS
-	translated   []language.Tag
+	defaultTranslationFS embed.FS
+	defaultTranslations  map[language.Tag]*i18n.MessageFile
+	translated           []language.Tag
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
@@ -137,7 +146,7 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 
 	for _, f := range files {
 		name := f.Name()
-		data, err := fs.ReadFile(dir + "/" + name)
+		data, err := fs.ReadFile(path.Join(dir, name))
 		if err != nil {
 			if retErr == nil {
 				retErr = err
@@ -159,25 +168,107 @@ func AddTranslationsFS(fs embed.FS, dir string) (retErr error) {
 	return retErr
 }
 
+// RegisteredLanguages returns the list of locales we have localization for.
+func RegisteredLanguages() []fyne.Locale {
+	var ret []fyne.Locale
+	for _, l := range translated {
+		ret = append(ret, localeFromTag(l))
+	}
+	return ret
+}
+
 func addLanguage(data []byte, name string) error {
-	f, err := bundle.ParseMessageFileBytes(data, name)
+	mf, err := i18n.ParseMessageFileBytes(data, name, unmarshallers)
 	if err != nil {
 		return err
 	}
 
-	translated = append(translated, f.Tag)
+	return addLanguageByMessages(mf.Messages, mf.Tag)
+}
+
+func addLanguageByMessages(msgs []*i18n.Message, tag language.Tag) error {
+	if bundleIsDefault {
+		// This is the first time, the user adds a language on their own. This implies, that
+		// they are aware of localizations and how to use them.
+		// To prevent half-translated applications, we "forget" our base translations and only
+		// use languages for resolution, that the user supplied.
+		// The bundle will still contain our base translations; if a language overlaps with those,
+		// our base strings will be there unless they explicitly get overwritten.
+		bundleIsDefault = false
+		if err := setupBundle(tag); err != nil {
+			return err
+		}
+		translated = []language.Tag{tag}
+	}
+
+	languageKnown := false
+	for _, t := range translated {
+		if t == tag {
+			languageKnown = true
+			break
+		}
+	}
+	if err := bundle.AddMessages(tag, msgs...); err != nil {
+		return err
+	}
+	if !languageKnown {
+		translated = append(translated, tag)
+	}
 	return nil
 }
 
 func init() {
-	bundle = i18n.NewBundle(language.English)
-	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+	unmarshallers = map[string]i18n.UnmarshalFunc{
+		"json": json.Unmarshal,
+	}
 
-	translated = []language.Tag{language.Make("en")} // the first item in this list will be the fallback if none match
-	err := AddTranslationsFS(translations, "translations")
-	if err != nil {
+	// Put English first as our preferred fallback language.
+	translated = []language.Tag{language.English}
+	if err := loadDefaultTranslations(); err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
 	}
+	if err := setupBundle(language.English); err != nil {
+		fyne.LogError("Error occurred loading built-in translations", err)
+	}
+	bundleIsDefault = true
+}
+
+func loadDefaultTranslations() error {
+	defaultTranslations = map[language.Tag]*i18n.MessageFile{}
+	const dir = "translations"
+	files, err := defaultTranslationFS.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		name := f.Name()
+		data, err := defaultTranslationFS.ReadFile(path.Join(dir, name))
+		if err != nil {
+			return err
+		}
+
+		mf, err := i18n.ParseMessageFileBytes(data, name, unmarshallers)
+		if err != nil {
+			return err
+		}
+		defaultTranslations[mf.Tag] = mf
+	}
+	return nil
+}
+
+func setupBundle(lng language.Tag) error {
+	bundle = i18n.NewBundle(lng)
+	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+
+	translated = []language.Tag{lng} // the first item in this list will be the fallback if none match
+	for tag, mf := range defaultTranslations {
+		if err := addLanguageByMessages(mf.Messages, tag); err != nil {
+			return err
+		}
+	}
+	updateLocalizer()
+
+	return nil
 }
 
 func fallbackWithData(key, fallback string, data any) string {
@@ -198,10 +289,13 @@ func setupLang(lang string) {
 
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
+	var languageStr string
 	all, err := locale.GetLocales()
-	if err != nil {
+	if err == nil {
+		languageStr = closestSupportedLocale(all).LanguageString()
+	} else {
 		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
+		languageStr = translated[0].String()
 	}
-	setupLang(closestSupportedLocale(all).LanguageString())
+	setupLang(languageStr)
 }

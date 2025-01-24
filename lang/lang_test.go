@@ -3,10 +3,10 @@ package lang
 import (
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"fyne.io/fyne/v2"
+	"golang.org/x/text/language"
 )
 
 func TestAddTranslations(t *testing.T) {
@@ -84,4 +84,57 @@ func TestLocalizePluralKey_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", XN("appleIDMissing", "Missing", 1))
 	assert.Equal(t, "Apple", XN("appleID", "Apple", 1))
 	assert.Equal(t, "Apples", XN("appleID", "Apple", 2))
+}
+
+func TestDefaultLocalizations(t *testing.T) {
+	// Not ideal, but other tests might manipulate the global state.
+	// Reset it manually.
+	require.NoError(t, setupBundle(language.English))
+	bundleIsDefault = true
+
+	t.Run("base localizations are loaded by default", func(t *testing.T) {
+		languages := RegisteredLanguages()
+
+		translationFiles, err := defaultTranslationFS.ReadDir("translations")
+		require.NoError(t, err)
+		assert.Len(t, languages, len(translationFiles))
+
+		// Two samples for sanity check.
+		assert.Contains(t, languages, fyne.Locale("en-US-Latn"))
+		assert.Contains(t, languages, fyne.Locale("de-DE-Latn"))
+	})
+
+	t.Run("registering custom localizations should wipe default localizations first", func(t *testing.T) {
+		err := AddTranslations(fyne.NewStaticResource("de.json", []byte(`{
+		  "Test": "Passt"
+		}`)))
+		require.NoError(t, err)
+
+		err = AddTranslations(fyne.NewStaticResource("en_GB.json", []byte(`{
+		  "Test": "Match"
+		}`)))
+		require.NoError(t, err)
+
+		languages := RegisteredLanguages()
+		assert.Equal(t, []fyne.Locale{"de-DE-Latn", "en-GB-Latn"}, languages)
+
+		setupLang("de")
+		assert.Equal(t, "Passt", L("Test"))
+
+		setupLang("en-GB")
+		assert.Equal(t, "Match", L("Test"))
+
+		t.Run("first registered language becomes default", func(t *testing.T) {
+			setupLang("it")
+			assert.Equal(t, "Passt", L("Test"))
+		})
+
+		t.Run("base translations are still present", func(t *testing.T) {
+			setupLang("de")
+			assert.Equal(t, "Beenden", L("Quit"))
+
+			setupLang("en")
+			assert.Equal(t, "Name", X("file.name", "nope"))
+		})
+	})
 }
