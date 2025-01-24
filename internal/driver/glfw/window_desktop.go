@@ -116,11 +116,9 @@ type window struct {
 func (w *window) SetFullScreen(full bool) {
 	w.runOnMainWhenCreated(func() {
 		w.fullScreen = full
-		if !w.visible {
-			return
-		}
 
-	w.doSetFullScreen(full)
+		w.doSetFullScreen(full)
+	})
 }
 
 func (w *window) CenterOnScreen() {
