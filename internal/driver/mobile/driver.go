@@ -74,6 +74,10 @@ func init() {
 
 func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	async.EnsureNotMain(func() {
+		if d.queuedFuncs == nil {
+			fn() // before the app actually starts
+			return
+		}
 		var done chan struct{}
 		if wait {
 			done = common.DonePool.Get()
@@ -167,6 +171,7 @@ func (d *driver) Run() {
 	d.running = true
 
 	app.Main(func(a app.App) {
+		async.SetMainGoroutine()
 		d.app = a
 		settingsChange := make(chan fyne.Settings)
 		d.queuedFuncs = async.NewUnboundedChan[func()]()

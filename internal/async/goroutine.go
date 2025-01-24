@@ -10,12 +10,11 @@ import (
 )
 
 // mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized in main.init because
-// a main goroutine may not equal to 1 due to the
-// influence of a garbage collector.
+// This ID must be initialized during setup by calling `SetMainGoroutine` because
+// a main goroutine may not equal to 1 due to the influence of a garbage collector.
 var mainGoroutineID uint64
 
-func init() {
+func SetMainGoroutine() {
 	mainGoroutineID = goroutineID()
 }
 
