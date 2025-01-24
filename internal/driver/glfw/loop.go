@@ -220,7 +220,9 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 		select {
 		case f := <-funcQueue:
 			f.f()
-			f.done <- struct{}{}
+			if f.done != nil {
+				f.done <- struct{}{}
+			}
 		default:
 			funcsDone = true
 		}
