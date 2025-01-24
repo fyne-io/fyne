@@ -152,7 +152,6 @@ func (t *DocTabs) Select(item *TabItem) {
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *DocTabs) SelectIndex(index int) {
 	selectIndex(t, index)
-	t.Refresh()
 }
 
 // Selected returns the currently selected TabItem.
