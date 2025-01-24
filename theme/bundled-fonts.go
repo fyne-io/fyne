@@ -40,3 +40,10 @@ var monospace = &fyne.StaticResource{
 	StaticName:    "DejaVuSansMono-Powerline.ttf",
 	StaticContent: dejaVuSansMono,
 }
+
+//go:embed font/InterSymbols-Regular.ttf
+var interSymbolsRegular []byte
+var symbol = &fyne.StaticResource{
+	StaticName:    "InterSymbols-Regular.ttf",
+	StaticContent: interSymbolsRegular,
+}
