@@ -11,5 +11,5 @@ func queueItem(f func()) {
 		return
 	}
 
-	fyne.DoAndWait(f)
+	fyne.Do(f)
 }

@@ -4,6 +4,10 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// OnChangeFuncs is a slice of functions that can be registered
+// to run when the user switches tutorial.
+var OnChangeFuncs []func()
+
 // Tutorial defines the data structure for a tutorial
 type Tutorial struct {
 	Title, Intro string

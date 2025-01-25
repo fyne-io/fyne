@@ -161,13 +161,11 @@ func (t *AppTabs) RemoveIndex(index int) {
 // Select sets the specified TabItem to be selected and its content visible.
 func (t *AppTabs) Select(item *TabItem) {
 	selectItem(t, item)
-	t.Refresh()
 }
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *AppTabs) SelectIndex(index int) {
 	selectIndex(t, index)
-	t.Refresh()
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.

@@ -28,6 +28,7 @@ var initOnce = &sync.Once{}
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
+	async.SetMainGoroutine()
 }
 
 // force a function f to run on the main thread

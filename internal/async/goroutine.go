@@ -4,24 +4,24 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
 )
 
 // mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized in main.init because
-// a main goroutine may not equal to 1 due to the
-// influence of a garbage collector.
-var mainGoroutineID uint64
+// This ID must be initialized during setup by calling `SetMainGoroutine` because
+// a main goroutine may not equal to 1 due to the influence of a garbage collector.
+var mainGoroutineID atomic.Uint64
 
-func init() {
-	mainGoroutineID = goroutineID()
+func SetMainGoroutine() {
+	mainGoroutineID.Store(goroutineID())
 }
 
 // IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
 func IsMainGoroutine() bool {
-	return goroutineID() == mainGoroutineID
+	return goroutineID() == mainGoroutineID.Load()
 }
 
 // EnsureNotMain is part of our thread transition and makes sure that the passed function runs off main.

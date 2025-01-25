@@ -1,0 +1,95 @@
+<canvas size="72x32">
+	<content>
+		<widget size="72x32" type="*widget.TextGrid">
+			<widget size="72x32" type="*widget.textGridContent">
+				<widget size="72x16" type="*widget.textGridRow">
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">S</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">o</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">m</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">e</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">t</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">h</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">i</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">n</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">g</text>
+					<line size="0x0"/>
+				</widget>
+				<widget pos="0,16" size="72x16" type="*widget.textGridRow">
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">E</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">l</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">s</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0">e</text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+				</widget>
+				<widget pos="0,32" size="72x16" type="*widget.textGridRow">
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+					<rectangle size="0x0"/>
+					<text monospace size="0x0"> </text>
+					<line size="0x0"/>
+				</widget>
+			</widget>
+		</widget>
+	</content>
+</canvas>
