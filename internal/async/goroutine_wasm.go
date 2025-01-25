@@ -3,5 +3,5 @@
 package async
 
 func goroutineID() uint64 {
-	return mainGoroutineID
+	return mainGoroutineID.Load()
 }
