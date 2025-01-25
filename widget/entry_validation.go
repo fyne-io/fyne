@@ -10,6 +10,14 @@ import (
 
 var _ fyne.Validatable = (*Entry)(nil)
 
+// HasValidator makes it possible for a parent that cares about child validation (e.g. widget.Form)
+// to know if the developer has attached a validator or not.
+//
+// Since: 2.6
+func (e *Entry) HasValidator() bool {
+	return e.Validator != nil
+}
+
 // Validate validates the current text in the widget.
 func (e *Entry) Validate() error {
 	if e.Validator == nil {
@@ -67,6 +75,14 @@ func (e *Entry) setValidationError(err error) bool {
 	}
 
 	return true
+}
+
+// ValidationVisible returns true if the entry has not been interacted with
+// or is currently focused.
+//
+// Since: 2.6
+func (e *Entry) ValidationVisible() bool {
+	return !e.dirty || e.focused
 }
 
 var _ fyne.Widget = (*validationStatus)(nil)
