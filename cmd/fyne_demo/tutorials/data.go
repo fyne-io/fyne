@@ -6,7 +6,7 @@ import (
 
 // OnChangeFuncs is a slice of functions that can be registered
 // to run when the user switches tutorial.
-var OnChangeFuncs []func(string)
+var OnChangeFuncs []func()
 
 // Tutorial defines the data structure for a tutorial
 type Tutorial struct {

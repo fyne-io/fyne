@@ -418,12 +418,7 @@ func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 
 	progressAnimation.Start()
 
-	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
-		if page != "progress" {
-			progressAnimation.Stop()
-			infProgress.Stop()
-		}
-	})
+	OnChangeFuncs = append(OnChangeFuncs, progressAnimation.Stop, infProgress.Stop)
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,

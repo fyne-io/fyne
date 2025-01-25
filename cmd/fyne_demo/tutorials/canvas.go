@@ -22,11 +22,7 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 	gradient := canvas.NewHorizontalGradient(color.NRGBA{0x80, 0, 0, 0xff}, color.NRGBA{0, 0x80, 0, 0xff})
 	ticker := time.NewTicker(time.Second)
 
-	OnChangeFuncs = append(OnChangeFuncs, func(page string) {
-		if page != "canvas" {
-			ticker.Stop()
-		}
-	})
+	OnChangeFuncs = append(OnChangeFuncs, ticker.Stop)
 
 	go func() {
 		for range ticker.C {
