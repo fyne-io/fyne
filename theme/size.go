@@ -76,7 +76,27 @@ const (
 	// SizeNameScrollBarRadius is the name of theme lookup for the scroll bar corner radius.
 	//
 	// Since: 2.5
-	SizeNameScrollBarRadius = "scrollBarRadius"
+	SizeNameScrollBarRadius fyne.ThemeSizeName = "scrollBarRadius"
+
+	// SizeNameWindowButtonHeight is the name of the height for an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonHeight fyne.ThemeSizeName = "windowButtonHeight"
+
+	// SizeNameWindowButtonRadius is the name of the radius for an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonRadius fyne.ThemeSizeName = "windowButtonRadius"
+
+	// SizeNameWindowButtonIcon is the name of the width of an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonIcon fyne.ThemeSizeName = "windowButtonIcon"
+
+	// SizeNameWindowTitleBarHeight is the height for inner window titleBars.
+	//
+	// Since: 2.6
+	SizeNameWindowTitleBarHeight fyne.ThemeSizeName = "windowTitleBarHeight"
 )
 
 // CaptionTextSize returns the size for caption text.
@@ -212,6 +232,15 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 3
 	case SizeNameScrollBarRadius:
 		return 3
+	case SizeNameWindowButtonHeight:
+		return 16
+	case SizeNameWindowButtonRadius:
+		return 8
+	case SizeNameWindowButtonIcon:
+		return 14
+	case SizeNameWindowTitleBarHeight:
+		return 26
+
 	default:
 		return 0
 	}

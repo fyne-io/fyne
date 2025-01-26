@@ -176,6 +176,11 @@ const (
 	//
 	// Since: 2.3
 	ColorNameWarning fyne.ThemeColorName = "warning"
+
+	// ColorNameWindowButton is the name of the colour that window buttons should be until hovered.
+	//
+	// Since: 2.6
+	ColorNameWindowButton fyne.ThemeColorName = "windowButton"
 )
 
 var (
@@ -201,6 +206,7 @@ var (
 	colorDarkShadow              = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x66}
 	colorDarkSuccess             = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
 	colorDarkWarning             = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	colorDarkWindowButton        = color.Gray{Y: 0x4b}
 
 	colorLightBackground          = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	colorLightButton              = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff}
@@ -240,6 +246,7 @@ var (
 	colorLightShadow              = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33}
 	colorLightSuccess             = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
 	colorLightWarning             = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
+	colorLightWindowButton        = color.Gray{Y: 0xcb}
 )
 
 // BackgroundColor returns the theme's background color.

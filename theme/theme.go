@@ -231,6 +231,8 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkSuccess
 	case ColorNameWarning:
 		return colorDarkWarning
+	case ColorNameWindowButton:
+		return colorDarkWindowButton
 	}
 
 	return color.Transparent
@@ -305,6 +307,8 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightSuccess
 	case ColorNameWarning:
 		return colorLightWarning
+	case ColorNameWindowButton:
+		return colorLightWindowButton
 	}
 
 	return color.Transparent
