@@ -146,43 +146,6 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.regular
 }
 
-func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
-	switch s {
-	case SizeNameSeparatorThickness:
-		return 1
-	case SizeNameInlineIcon:
-		return 20
-	case SizeNameInnerPadding:
-		return 8
-	case SizeNameLineSpacing:
-		return 4
-	case SizeNamePadding:
-		return 4
-	case SizeNameScrollBar:
-		return 12
-	case SizeNameScrollBarSmall:
-		return 3
-	case SizeNameText:
-		return 14
-	case SizeNameHeadingText:
-		return 24
-	case SizeNameSubHeadingText:
-		return 18
-	case SizeNameCaptionText:
-		return 11
-	case SizeNameInputBorder:
-		return 1
-	case SizeNameInputRadius:
-		return 5
-	case SizeNameSelectionRadius:
-		return 3
-	case SizeNameScrollBarRadius:
-		return 3
-	default:
-		return 0
-	}
-}
-
 // Current returns the theme that is currently used for the running application.
 // It looks up based on user preferences and application configuration.
 //
