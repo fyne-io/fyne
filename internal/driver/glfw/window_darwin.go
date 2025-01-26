@@ -2,7 +2,18 @@
 
 package glfw
 
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -framework Foundation -framework AppKit
+
+#import <stdbool.h>
+
+void setFullScreen(bool full, void *window);
+*/
+import "C"
 import (
+	"runtime"
+
 	"fyne.io/fyne/v2/driver"
 )
 
@@ -16,4 +27,12 @@ func (w *window) RunNative(f func(any)) {
 	}
 
 	f(context)
+}
+
+func (w *window) doSetFullScreen(full bool) {
+	if runtime.GOOS == "darwin" {
+		win := w.view().GetCocoaWindow()
+		C.setFullScreen(C.bool(full), win)
+		return
+	}
 }
