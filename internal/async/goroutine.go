@@ -4,24 +4,24 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync/atomic"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
 )
 
 // mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized in main.init because
-// a main goroutine may not equal to 1 due to the
-// influence of a garbage collector.
-var mainGoroutineID uint64
+// This ID must be initialized during setup by calling `SetMainGoroutine` because
+// a main goroutine may not equal to 1 due to the influence of a garbage collector.
+var mainGoroutineID atomic.Uint64
 
-func init() {
-	mainGoroutineID = goroutineID()
+func SetMainGoroutine() {
+	mainGoroutineID.Store(goroutineID())
 }
 
 // IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
 func IsMainGoroutine() bool {
-	return goroutineID() == mainGoroutineID
+	return goroutineID() == mainGoroutineID.Load()
 }
 
 // EnsureNotMain is part of our thread transition and makes sure that the passed function runs off main.
@@ -30,12 +30,12 @@ func IsMainGoroutine() bool {
 //
 // This will be removed later and should never be public
 func EnsureNotMain(fn func()) {
-	if build.DisableThreadChecks || !IsMainGoroutine() {
+	if build.MigratedToFyneDo() || !IsMainGoroutine() {
 		fn()
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, fyne.Do called from main goroutine ***")
+	log.Println("*** Error in Fyne call thread, fyne.Do[AndWait] called from main goroutine ***")
 
 	logStackTop(2)
 	go fn()
@@ -47,15 +47,15 @@ func EnsureNotMain(fn func()) {
 //
 // This will be removed later and should never be public
 func EnsureMain(fn func()) {
-	if build.DisableThreadChecks || IsMainGoroutine() {
+	if build.MigratedToFyneDo() || IsMainGoroutine() {
 		fn()
 		return
 	}
 
-	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do ***")
+	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***")
 
 	logStackTop(1)
-	fyne.Do(fn)
+	fyne.DoAndWait(fn)
 }
 
 func logStackTop(skip int) {

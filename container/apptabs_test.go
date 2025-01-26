@@ -97,6 +97,20 @@ func TestAppTabs_Select(t *testing.T) {
 	assert.Equal(t, tab2, tabs.Selected())
 }
 
+func TestAppTabs_SelectFocus(t *testing.T) {
+	tab1 := &TabItem{Text: "Test1", Content: widget.NewEntry()}
+	tab2 := &TabItem{Text: "Test2", Content: widget.NewEntry()}
+	tabs := NewAppTabs(tab1, tab2)
+	w := test.NewTempWindow(t, tabs)
+
+	tabs.OnSelected = func(t *TabItem) {
+		w.Canvas().Focus(t.Content.(*widget.Entry))
+	}
+
+	tabs.Select(tab2)
+	assert.Equal(t, tab2.Content, w.Canvas().Focused())
+}
+
 func TestAppTabs_SelectIndex(t *testing.T) {
 	tabs := NewAppTabs(&TabItem{Text: "Test1", Content: widget.NewLabel("Test1")},
 		&TabItem{Text: "Test2", Content: widget.NewLabel("Test2")})

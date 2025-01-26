@@ -16,6 +16,7 @@ func TestBindPreference_DataRace(t *testing.T) {
 	const n = 100
 
 	var wg sync.WaitGroup
+
 	binds := make([]Int, n)
 	for i := 0; i < n; i++ {
 		wg.Add(1)

@@ -20,8 +20,12 @@ func rgbGradient(x, y, w, h int) color.Color {
 // canvasScreen loads a graphics example panel for the demo app
 func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 	gradient := canvas.NewHorizontalGradient(color.NRGBA{0x80, 0, 0, 0xff}, color.NRGBA{0, 0x80, 0, 0xff})
+	ticker := time.NewTicker(time.Second)
+
+	OnChangeFuncs = append(OnChangeFuncs, ticker.Stop)
+
 	go func() {
-		for range time.NewTicker(time.Second).C {
+		for range ticker.C {
 			fyne.Do(func() {
 				gradient.Angle += 45
 				if gradient.Angle >= 360 {

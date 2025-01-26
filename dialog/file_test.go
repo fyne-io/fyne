@@ -276,7 +276,7 @@ func TestHiddenFiles(t *testing.T) {
 		t.Error("Failed to open testdata dir", err)
 	}
 
-	// git does not preserve windows hidden flag so we have to set it.
+	// git does not preserve windows hidden flag, so we have to set it.
 	// just an empty function for non windows builds
 	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
 		t.Error("Failed to hide .hidden", err)
@@ -326,7 +326,7 @@ func TestHiddenFiles(t *testing.T) {
 			target = item
 		}
 	}
-	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
+	assert.NotNil(t, target, "Failed, .hidden not found in testdata")
 }
 
 func TestShowFileSave(t *testing.T) {
@@ -469,6 +469,47 @@ func TestFileFilters(t *testing.T) {
 
 	// NOTE: This count needs to be updated when more test images are added.
 	assert.Equal(t, 11, count)
+}
+
+func TestFileSort(t *testing.T) {
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	d.SetLocation(dir)
+	d.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.NotEmpty(t, objects)
+
+	binPos := -1
+	capitalPos := -1
+	for i, icon := range objects {
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		switch item.name {
+		case "bin":
+			binPos = i
+		case "Capitalised":
+			capitalPos = i
+		}
+	}
+
+	assert.NotEqual(t, -1, binPos, "bin file not found")
+	assert.NotEqual(t, -1, capitalPos, "Capitalised.txt file not found")
+	assert.Less(t, binPos, capitalPos)
 }
 
 func TestView(t *testing.T) {

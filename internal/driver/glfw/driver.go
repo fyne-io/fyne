@@ -56,8 +56,10 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (d *gLDriver) DoFromGoroutine(f func()) {
-	async.EnsureNotMain(f)
+func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
+	async.EnsureNotMain(func() {
+		runOnMainWithWait(f, wait)
+	})
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {

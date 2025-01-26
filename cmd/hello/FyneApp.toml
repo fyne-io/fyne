@@ -4,3 +4,6 @@
   ID = "io.fyne.hello"
   Version = "2.5.3"
   Build = 2
+
+[Migrations]
+  fyneDo = true

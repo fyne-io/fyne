@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,17 +21,23 @@ type funcData struct {
 }
 
 // channel for queuing functions on the main thread
-var funcQueue = make(chan funcData)
+var funcQueue = async.NewUnboundedChan[funcData]()
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
+	async.SetMainGoroutine()
 }
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
+	runOnMainWithWait(f, true)
+}
+
+// force a function f to run on the main thread and specify if we should wait for it to return
+func runOnMainWithWait(f func(), wait bool) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
 	if !running.Load() {
@@ -38,12 +45,15 @@ func runOnMain(f func()) {
 		return
 	}
 
-	done := common.DonePool.Get()
-	defer common.DonePool.Put(done)
+	if wait {
+		done := common.DonePool.Get()
+		defer common.DonePool.Put(done)
 
-	funcQueue <- funcData{f: f, done: done}
-
-	<-done
+		funcQueue.In() <- funcData{f: f, done: done}
+		<-done
+	} else {
+		funcQueue.In() <- funcData{f: f}
+	}
 }
 
 // Preallocate to avoid allocations on every drawSingleFrame.
@@ -124,20 +134,22 @@ func (d *gLDriver) runGL() {
 				l.QueueEvent(f)
 			}
 			return
-		case f := <-funcQueue:
+		case f := <-funcQueue.Out():
 			f.f()
-			f.done <- struct{}{}
+			if f.done != nil {
+				f.done <- struct{}{}
+			}
 		case <-eventTick.C:
 			d.pollEvents()
-			windowsToRemove := 0
-			for _, win := range d.windowList() {
-				w := win.(*window)
+			for i := 0; i < len(d.windows); i++ {
+				w := d.windows[i].(*window)
 				if w.viewport == nil {
 					continue
 				}
 
 				if w.viewport.ShouldClose() {
-					windowsToRemove++
+					d.destroyWindow(w, i)
+					i-- // Trailing windows are moved forward one step.
 					continue
 				}
 
@@ -155,38 +167,10 @@ func (d *gLDriver) runGL() {
 					}
 				}
 
-				d.animation.TickAnimations()
-				d.drawSingleFrame()
 			}
-			if windowsToRemove > 0 {
-				oldWindows := d.windowList()
-				newWindows := make([]fyne.Window, 0, len(oldWindows)-windowsToRemove)
 
-				for _, win := range oldWindows {
-					w := win.(*window)
-					if w.viewport == nil {
-						continue
-					}
-
-					if w.viewport.ShouldClose() {
-						w.visible = false
-						v := w.viewport
-
-						// remove window from window list
-						v.Destroy()
-						w.destroy(d)
-						continue
-					}
-
-					newWindows = append(newWindows, win)
-				}
-
-				d.windows = newWindows
-
-				if len(newWindows) == 0 {
-					d.Quit()
-				}
-			}
+			d.animation.TickAnimations()
+			d.drawSingleFrame()
 		case set := <-settingsChange:
 			painter.ClearFontCache()
 			cache.ResetThemeCaches()
@@ -200,6 +184,22 @@ func (d *gLDriver) runGL() {
 			})
 
 		}
+	}
+}
+
+func (d *gLDriver) destroyWindow(w *window, index int) {
+	w.visible = false
+	w.viewport.Destroy()
+	w.destroy(d)
+
+	if index < len(d.windows)-1 {
+		copy(d.windows[index:], d.windows[index+1:])
+	}
+	d.windows[len(d.windows)-1] = nil
+	d.windows = d.windows[:len(d.windows)-1]
+
+	if len(d.windows) == 0 {
+		d.Quit()
 	}
 }
 
@@ -243,5 +243,5 @@ func updateGLContext(w *window) {
 	winHeight := float32(scale.ToScreenCoordinate(canvas, size.Height)) * canvas.texScale
 
 	canvas.Painter().SetFrameBufferScale(canvas.texScale)
-	w.canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
+	canvas.Painter().SetOutputSize(int(winWidth), int(winHeight))
 }

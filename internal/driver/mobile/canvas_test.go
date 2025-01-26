@@ -142,7 +142,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 			wid.Tapped(ev)
 		}, nil, nil, nil)
-	})
+	}, true)
 
 	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
 		assert.Equal(t, 1, content.focusedTimes)
@@ -154,7 +154,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 			wid.Tapped(ev)
 		}, nil, nil, nil)
-	})
+	}, true)
 	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
 		assert.Equal(t, 1, content.focusedTimes)
 		assert.Equal(t, 0, content.unfocusedTimes)
@@ -177,7 +177,7 @@ func Test_canvas_Focusable(t *testing.T) {
 		c.tapDown(fyne.NewPos(10, 10), 2)
 		assert.Equal(t, 1, content.focusedTimes)
 		assert.Equal(t, 1, content.unfocusedTimes)
-	})
+	}, true)
 }
 
 func Test_canvas_InteractiveArea(t *testing.T) {
@@ -511,6 +511,8 @@ func (a *mobileApp) Driver() fyne.Driver {
 func (a *mobileApp) Run() {
 	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
 	// TODO replace with a full mobileApp.Run() once that is resolved
+	async.SetMainGoroutine()
+
 	for fn := range d.queuedFuncs.Out() {
 		fn()
 	}
@@ -534,7 +536,7 @@ func waitAndCheck(msWait time.Duration, fn func()) {
 			fn()
 
 			waitForCheck <- struct{}{}
-		})
+		}, true)
 	}()
 	<-waitForCheck
 }
