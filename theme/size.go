@@ -179,3 +179,40 @@ func TextSize() float32 {
 func TextSubHeadingSize() float32 {
 	return Current().Size(SizeNameSubHeadingText)
 }
+
+func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+	switch s {
+	case SizeNameSeparatorThickness:
+		return 1
+	case SizeNameInlineIcon:
+		return 20
+	case SizeNameInnerPadding:
+		return 8
+	case SizeNameLineSpacing:
+		return 4
+	case SizeNamePadding:
+		return 4
+	case SizeNameScrollBar:
+		return 12
+	case SizeNameScrollBarSmall:
+		return 3
+	case SizeNameText:
+		return 14
+	case SizeNameHeadingText:
+		return 24
+	case SizeNameSubHeadingText:
+		return 18
+	case SizeNameCaptionText:
+		return 11
+	case SizeNameInputBorder:
+		return 1
+	case SizeNameInputRadius:
+		return 5
+	case SizeNameSelectionRadius:
+		return 3
+	case SizeNameScrollBarRadius:
+		return 3
+	default:
+		return 0
+	}
+}
