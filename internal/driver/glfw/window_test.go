@@ -1746,8 +1746,9 @@ func TestWindow_SetContent_Twice(t *testing.T) {
 }
 
 func TestWindow_SetFullScreen(t *testing.T) {
+	var w *window
 	runOnMain(func() { // tests launch in a different context
-		w := d.CreateWindow("Full").(*window)
+		w = d.CreateWindow("Full").(*window)
 		w.SetFullScreen(true)
 		w.create()
 
@@ -1756,6 +1757,10 @@ func TestWindow_SetFullScreen(t *testing.T) {
 		assert.Zero(t, w.height)
 
 		w.SetFullScreen(false)
+	})
+
+	time.Sleep(time.Second) // macOS fullscreen transition takes time
+	runOnMain(func() {
 		// ensure we realised size now!
 		assert.NotZero(t, w.width)
 		assert.NotZero(t, w.height)
