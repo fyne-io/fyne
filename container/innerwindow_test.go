@@ -37,14 +37,14 @@ func TestInnerWindow_Close(t *testing.T) {
 }
 
 func TestInnerWindow_MinSize(t *testing.T) {
-	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
+	content := widget.NewLabel("Content")
+	w := NewInnerWindow("Thing", content)
 
-	btnMin := widget.NewButtonWithIcon("", theme.WindowCloseIcon(), func() {}).MinSize()
-	labelMin := widget.NewLabel("Inner").MinSize()
+	btnMin := theme.Size(theme.SizeNameWindowButtonHeight)
 
 	winMin := w.MinSize()
-	assert.Equal(t, btnMin.Height+labelMin.Height+theme.Padding()*4, winMin.Height)
-	assert.Greater(t, winMin.Width, btnMin.Width*3+theme.Padding()*5)
+	assert.Equal(t, content.MinSize().Height+theme.Size(theme.SizeNameWindowTitleBarHeight)+theme.Padding()*3, winMin.Height)
+	assert.Greater(t, winMin.Width, btnMin*3+theme.Padding()*5)
 
 	w2 := NewInnerWindow("Much longer title that will truncate", widget.NewLabel("Content"))
 	assert.Equal(t, winMin, w2.MinSize())
@@ -74,7 +74,7 @@ func TestInnerWindow_SetPadded(t *testing.T) {
 func TestInnerWindow_SetTitle(t *testing.T) {
 	w := NewInnerWindow("Title1", widget.NewLabel("Content"))
 	r := cache.Renderer(w).(*innerWindowRenderer)
-	title := r.bar.Objects[0].(*draggableLabel)
+	title := r.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
 	assert.Equal(t, "Title1", title.Text)
 
 	w.SetTitle("Title2")

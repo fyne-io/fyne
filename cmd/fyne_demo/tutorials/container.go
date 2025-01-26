@@ -3,6 +3,7 @@ package tutorials
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -116,6 +117,12 @@ func makeInnerWindowTab(_ fyne.Window) fyne.CanvasObject {
 			label.SetText("Tapped")
 		})))
 	win1.Icon = data.FyneLogo
+	win1.OnMaximized = func() {
+		log.Println("Should maximize here")
+	}
+	win1.OnMinimized = func() {
+		log.Println("Should minimize here")
+	}
 
 	win2 := container.NewInnerWindow("Inner2", widget.NewLabel("Win 2"))
 
