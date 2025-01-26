@@ -83,7 +83,7 @@ func (d *gLDriver) drawSingleFrame() {
 			// cache alive if it hasn't been done recently
 			// n.b. we need to make sure threshold is a bit *after*
 			// time.Now() - CacheDuration()
-			threshold := time.Now().Add(-cache.CacheDuration()).Add(1 * time.Second)
+			threshold := time.Now().Add(-cache.CacheDuration).Add(1 * time.Second)
 			if w.lastWalked().Before(threshold) {
 				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 					// marks canvas for widget cache entry alive

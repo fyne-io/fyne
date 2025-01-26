@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	cacheDuration     = 1 * time.Minute
-	cleanTaskInterval = cacheDuration / 2
+	CacheDuration     = 1 * time.Minute
+	cleanTaskInterval = CacheDuration / 2
 
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
@@ -20,14 +20,9 @@ var (
 
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
-		cacheDuration = t
-		cleanTaskInterval = cacheDuration / 2
+		CacheDuration = t
+		cleanTaskInterval = CacheDuration / 2
 	}
-}
-
-// CacheDuration returns the validity duration for cache entries.
-func CacheDuration() time.Duration {
-	return cacheDuration
 }
 
 // Clean run cache clean task, it should be called on paint events.
@@ -173,5 +168,5 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = timeNow().Add(cacheDuration)
+	c.expires = timeNow().Add(CacheDuration)
 }

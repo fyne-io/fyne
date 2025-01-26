@@ -189,7 +189,7 @@ func Test_expiringCache(t *testing.T) {
 	assert.False(t, c.isExpired(tm.now))
 
 	tm.setTime(10, 11)
-	tm.now = tm.now.Add(cacheDuration)
+	tm.now = tm.now.Add(CacheDuration)
 	assert.True(t, c.isExpired(tm.now))
 }
 
