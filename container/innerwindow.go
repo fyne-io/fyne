@@ -259,7 +259,7 @@ type borderButton struct {
 }
 
 func newBorderButton(icon fyne.Resource, mode titleBarButtonMode, th fyne.Theme, fn func()) *borderButton {
-	buttonImportance := widget.DangerImportance
+	buttonImportance := widget.MediumImportance
 	if mode == modeIcon {
 		buttonImportance = widget.LowImportance
 	}
@@ -295,8 +295,6 @@ type buttonTheme struct {
 
 func (b *buttonTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	switch n {
-	case theme.ColorNameError:
-		n = theme.ColorNameWindowButton
 	case theme.ColorNameHover:
 		if b.mode == modeClose {
 			n = theme.ColorNameError
