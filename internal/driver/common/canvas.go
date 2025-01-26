@@ -314,10 +314,8 @@ func (c *Canvas) Painter() gl.Painter {
 
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
-	async.EnsureMain(func() {
-		c.refreshQueue.In(obj)
-		c.SetDirty()
-	})
+        c.refreshQueue.In(obj)
+	async.EnsureMain(c.SetDirty)
 }
 
 // RemoveShortcut removes a shortcut from the canvas.
