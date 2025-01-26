@@ -139,9 +139,7 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	th := i.win.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 
-	pos := fyne.NewSquareOffsetPos(pad / -2)
-	size = size.Add(fyne.NewSquareSize(pad))
-	i.LayoutShadow(size, pos)
+	i.LayoutShadow(size, fyne.Position{})
 	i.bg.Resize(size)
 
 	barHeight := i.win.Theme().Size(theme.SizeNameWindowTitleBarHeight)
@@ -156,7 +154,7 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	i.win.content.Resize(innerSize)
 
 	cornerSize := i.corner.MinSize()
-	i.corner.Move(pos.Add(size).Subtract(cornerSize).AddXY(1, 1))
+	i.corner.Move(fyne.NewPos(size.Components()).Subtract(cornerSize).AddXY(1, 1))
 	i.corner.Resize(cornerSize)
 }
 
@@ -164,11 +162,11 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	th := i.win.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	contentMin := i.win.content.MinSize()
-	barMin := i.bar.MinSize()
+	barHeight := th.Size(theme.SizeNameWindowTitleBarHeight)
 
-	innerWidth := fyne.Max(barMin.Width, contentMin.Width)
+	innerWidth := fyne.Max(i.bar.MinSize().Width, contentMin.Width)
 
-	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barMin.Height).Add(fyne.NewSquareSize(pad))
+	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barHeight)
 }
 
 func (i *innerWindowRenderer) Refresh() {
