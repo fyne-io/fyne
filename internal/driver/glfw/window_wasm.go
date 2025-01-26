@@ -7,6 +7,7 @@ import (
 	_ "image/png" // for the icon
 	"runtime"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -92,6 +93,8 @@ type window struct {
 	shouldExpand                    bool
 
 	pending []func()
+
+	lastWalkedTime time.Time
 }
 
 func (w *window) SetFullScreen(full bool) {
@@ -204,6 +207,14 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 	}
 
 	w.processMouseScrolled(xoff, yoff)
+}
+
+func (w *window) lastWalked() time.Time {
+	return w.lastWalkedTime
+}
+
+func (w *window) markWalked() {
+	w.lastWalkedTime = time.Now()
 }
 
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
