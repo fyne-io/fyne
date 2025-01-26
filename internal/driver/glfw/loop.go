@@ -55,24 +55,37 @@ func runOnMain(f func()) {
 var refreshingCanvases []fyne.Canvas
 
 func (d *gLDriver) drawSingleFrame() {
+	refreshed := false
 	for _, win := range d.windowList() {
 		w := win.(*window)
+		if w.closing {
+			continue
+		}
+
 		canvas := w.canvas
-		closing := w.closing
-		visible := w.visible
 
 		// CheckDirtyAndClear must be checked after visibility,
 		// because when a window becomes visible, it could be
 		// showing old content without a dirty flag set to true.
 		// Do the clear if and only if the window is visible.
-		if closing || !visible || !canvas.CheckDirtyAndClear() {
+		if !w.visible || !canvas.CheckDirtyAndClear() {
+			// Window hidden or not being redrawn, mark renderers alive
+			// if it hasn't been done in the last minute
+			if w.lastWalked().Before(time.Now().Add(-1 * time.Minute)) {
+				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
+					// marks canvas for widget cache entry alive
+					_ = cache.GetCanvasForObject(node.Obj())
+				})
+				w.markWalked()
+			}
 			continue
 		}
 
-		d.repaintWindow(w)
+		refreshed = refreshed || d.repaintWindow(w)
 		refreshingCanvases = append(refreshingCanvases, canvas)
 	}
 	cache.CleanCanvases(refreshingCanvases)
+	cache.Clean(refreshed)
 
 	// cleanup refreshingCanvases slice
 	for i := 0; i < len(refreshingCanvases); i++ {
@@ -187,13 +200,14 @@ func (d *gLDriver) runGL() {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) {
+func (d *gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
+	freed := false
 	w.RunWithContext(func() {
 		if canvas.EnsureMinSize() {
 			w.shouldExpand = true
 		}
-		canvas.FreeDirtyTextures()
+		freed = canvas.FreeDirtyTextures() > 0
 
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
@@ -204,7 +218,12 @@ func (d *gLDriver) repaintWindow(w *window) {
 		if view != nil && visible {
 			view.SwapBuffers()
 		}
+
+		// mark that we have walked the window and don't
+		// need to walk it again to mark caches alive
+		w.markWalked()
 	})
+	return freed
 }
 
 // refreshWindow requests that the specified window be redrawn
