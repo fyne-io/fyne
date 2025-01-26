@@ -25,6 +25,11 @@ func init() {
 	}
 }
 
+// CacheDuration returns the validity duration for cache entries.
+func CacheDuration() time.Duration {
+	return cacheDuration
+}
+
 // Clean run cache clean task, it should be called on paint events.
 func Clean(canvasRefreshed bool) {
 	now := timeNow()

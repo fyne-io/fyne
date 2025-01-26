@@ -69,9 +69,12 @@ func (d *gLDriver) drawSingleFrame() {
 		// showing old content without a dirty flag set to true.
 		// Do the clear if and only if the window is visible.
 		if !w.visible || !canvas.CheckDirtyAndClear() {
-			// Window hidden or not being redrawn, mark renderers alive
-			// if it hasn't been done in the last minute
-			if w.lastWalked().Before(time.Now().Add(-1 * time.Minute)) {
+			// Window hidden or not being redrawn, mark canvasForObject
+			// cache alive if it hasn't been done recently
+			// n.b. we need to make sure threshold is a bit *after*
+			// time.Now() - CacheDuration()
+			threshold := time.Now().Add(-cache.CacheDuration()).Add(1 * time.Second)
+			if w.lastWalked().Before(threshold) {
 				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
 					// marks canvas for widget cache entry alive
 					_ = cache.GetCanvasForObject(node.Obj())
