@@ -10,14 +10,6 @@
 					</widget>
 					<rectangle fillColor="primary" pos="7,6" size="2x19"/>
 				</widget>
-				<widget pos="120,0" size="0x31" type="*widget.Shadow">
-					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x31"/>
-				</widget>
-				<widget pos="0,25" size="120x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="109x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" radius="3" size="109x3"/>
-					</widget>
-				</widget>
 			</widget>
 		</widget>
 	</content>

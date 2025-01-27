@@ -222,7 +222,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 	a.isMouseIn = true
-	a.scroll.Refresh()
+	a.scroll.refreshBars()
 }
 
 func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
@@ -234,7 +234,7 @@ func (a *scrollBarArea) MouseOut() {
 		return
 	}
 
-	a.scroll.Refresh()
+	a.scroll.refreshBars()
 }
 
 func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
@@ -432,12 +432,13 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 // ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
 	s.scrollBy(0, -1*(s.Content.MinSize().Height-s.Size().Height-s.Offset.Y))
-	s.Refresh()
+	s.refreshBars()
 }
 
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
 	s.scrollBy(0, -s.Offset.Y)
+	s.refreshBars()
 }
 
 // DragEnd will stop scrolling on mobile has stopped
@@ -478,8 +479,11 @@ func (s *Scroll) SetMinSize(size fyne.Size) {
 
 // Refresh causes this widget to be redrawn in it's current state
 func (s *Scroll) Refresh() {
-	s.updateOffset(0, 0)
-	s.refreshWithoutOffsetUpdate()
+	s.refreshBars()
+
+	if s.Content != nil {
+		s.Content.Refresh()
+	}
 }
 
 // Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
@@ -492,6 +496,18 @@ func (s *Scroll) Resize(sz fyne.Size) {
 	s.Refresh()
 }
 
+// SetOffset will update the location of the content of this scroll container.
+//
+// Since: 2.6
+func (s *Scroll) SetOffset(p fyne.Position) {
+	if s.Offset.Subtract(p).IsZero() {
+		return
+	}
+
+	s.Offset = p
+	s.refreshBars()
+}
+
 func (s *Scroll) refreshWithoutOffsetUpdate() {
 	s.Base.Refresh()
 }
@@ -501,6 +517,11 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	if s.Direction != ScrollNone {
 		s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
 	}
+}
+
+func (s *Scroll) refreshBars() {
+	s.updateOffset(0, 0)
+	s.refreshWithoutOffsetUpdate()
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
@@ -530,10 +551,12 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	min := s.Content.MinSize()
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
-	if f := s.OnScrolled; f != nil && (s.Offset.X != oldX || s.Offset.Y != oldY) {
+
+	moved := s.Offset.X != oldX || s.Offset.Y != oldY
+	if f := s.OnScrolled; f != nil && moved {
 		f(s.Offset)
 	}
-	return true
+	return moved
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
