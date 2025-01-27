@@ -149,6 +149,8 @@ func BindFloatList(v *[]float64) ExternalFloatList {
 	}
 
 	b := newListComparable[float64]()
+	b.val = v
+	b.updateExternal = true
 
 	for i := range *v {
 		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
