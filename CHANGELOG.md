@@ -3,6 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.5.4 - 31 January 2025
+
+### Changed
+
+* Added Tamil translation
+
+### Fixed
+
+* Checkbox not responding to click because it is too "large"? (#5331)
+* Fix progressbar not showing label until first refresh
+* FyneApp.toml causes BadLength error (#5272)
+* Test suite: failure with locale/language different from 'en' (#5362)
+* fix GridWrap crash when resizing to same size without creating renderer
+* Submenus not working on mobile (#5398)
+* Subtle scrolling bug in List when the last two items are of different size (#5281)
+* File picker does not ignore case (#5113)
+* Tab "OnSelected" doesn't appear to allow focussing tab content (#5454)
+* Documentation fixes
+
+
 ## 2.5.3 - 15 December 2024
 
 ### Changed
