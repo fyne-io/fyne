@@ -487,9 +487,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
-	runOnMain(func() {
-		over.Show()
-	})
+	over.Show()
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
@@ -515,8 +513,8 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 	popup := widget.NewModalPopUp(widget.NewLabel("PopUp"), w.Canvas())
 	popupBgSize := fyne.NewSize(975, 575)
+	popup.Show()
 	runOnMain(func() {
-		popup.Show()
 		popup.Resize(popupBgSize)
 	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
@@ -651,6 +649,14 @@ func (s *safeCanvas) setMenuOverlay(o fyne.CanvasObject) {
 	runOnMain(func() {
 		s.glCanvas.setMenuOverlay(o)
 	})
+}
+
+func (s *safeCanvas) Overlays() (ret fyne.OverlayStack) {
+	runOnMain(func() {
+		ret = s.glCanvas.Overlays()
+	})
+
+	return ret
 }
 
 func (s *safeCanvas) Padded() (ret bool) {
