@@ -46,10 +46,7 @@ func BindBoolList(v *[]bool) ExternalBoolList {
 		return NewBoolList().(ExternalBoolList)
 	}
 
-	b := newListComparable[bool]()
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalListComparable(v)
 	for i := range *v {
 		b.appendItem(bindListItemComparable[bool](v, i, b.updateExternal))
 	}
@@ -97,10 +94,7 @@ func BindBytesList(v *[][]byte) ExternalBytesList {
 		return NewBytesList().(ExternalBytesList)
 	}
 
-	b := newList(bytes.Equal)
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalList(v, bytes.Equal)
 	for i := range *v {
 		b.appendItem(bindListItem(v, i, b.updateExternal, bytes.Equal))
 	}
@@ -148,10 +142,7 @@ func BindFloatList(v *[]float64) ExternalFloatList {
 		return NewFloatList().(ExternalFloatList)
 	}
 
-	b := newListComparable[float64]()
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalListComparable(v)
 	for i := range *v {
 		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
 	}
@@ -199,10 +190,7 @@ func BindIntList(v *[]int) ExternalIntList {
 		return NewIntList().(ExternalIntList)
 	}
 
-	b := newListComparable[int]()
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalListComparable(v)
 	for i := range *v {
 		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
 	}
@@ -301,10 +289,7 @@ func BindStringList(v *[]string) ExternalStringList {
 		return NewStringList().(ExternalStringList)
 	}
 
-	b := newListComparable[string]()
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalListComparable(v)
 	for i := range *v {
 		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
 	}
@@ -353,10 +338,7 @@ func BindUntypedList(v *[]any) ExternalUntypedList {
 	}
 
 	comparator := func(t1, t2 any) bool { return t1 == t2 }
-	b := newList(comparator)
-	b.val = v
-	b.updateExternal = true
-
+	b := newExternalList(v, comparator)
 	for i := range *v {
 		b.appendItem(bindListItem(v, i, b.updateExternal, comparator))
 	}
@@ -404,8 +386,7 @@ func BindURIList(v *[]fyne.URI) ExternalURIList {
 		return NewURIList().(ExternalURIList)
 	}
 
-	b := newList(compareURI)
-
+	b := newExternalList(v, compareURI)
 	for i := range *v {
 		b.appendItem(bindListItem(v, i, b.updateExternal, compareURI))
 	}

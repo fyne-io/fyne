@@ -164,7 +164,15 @@ func newList[T any](comparator func(T, T) bool) *boundList[T] {
 }
 
 func newListComparable[T bool | float64 | int | rune | string]() *boundList[T] {
-	return &boundList[T]{val: new([]T), comparator: func(t1, t2 T) bool { return t1 == t2 }}
+	return newList(func(t1, t2 T) bool { return t1 == t2 })
+}
+
+func newExternalList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	return &boundList[T]{val: v, comparator: comparator, updateExternal: true}
+}
+
+func newExternalListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
+	return newExternalList(v, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type boundList[T any] struct {
