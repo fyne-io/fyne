@@ -1,6 +1,3 @@
-// auto-generated
-// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
-
 package binding
 
 import (
@@ -341,7 +338,7 @@ type ExternalUntypedList interface {
 //
 // Since: 2.1
 func NewUntypedList() UntypedList {
-	return newList(func(t1, t2 any) bool {return t1 == t2})
+	return newList(func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // BindUntypedList returns a bound list of any values, based on the contents of the passed slice.
@@ -353,7 +350,7 @@ func BindUntypedList(v *[]any) ExternalUntypedList {
 		return NewUntypedList().(ExternalUntypedList)
 	}
 
-	comparator := func(t1, t2 any) bool {return t1 == t2}
+	comparator := func(t1, t2 any) bool { return t1 == t2 }
 	b := newList(comparator)
 	b.val = v
 	b.updateExternal = true
