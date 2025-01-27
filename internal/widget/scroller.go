@@ -493,7 +493,7 @@ func (s *Scroll) Resize(sz fyne.Size) {
 	}
 
 	s.Base.Resize(sz)
-	s.Refresh()
+	s.refreshBars()
 }
 
 // SetOffset will update the location of the content of this scroll container.
