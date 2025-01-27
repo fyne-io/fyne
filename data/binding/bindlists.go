@@ -42,16 +42,7 @@ func NewBoolList() BoolList {
 //
 // Since: 2.0
 func BindBoolList(v *[]bool) ExternalBoolList {
-	if v == nil {
-		return NewBoolList().(ExternalBoolList)
-	}
-
-	b := newExternalListComparable(v)
-	for i := range *v {
-		b.appendItem(bindListItemComparable[bool](v, i, b.updateExternal))
-	}
-
-	return b
+	return bindListComparable(v)
 }
 
 // BytesList supports binding a list of []byte values.
@@ -90,16 +81,7 @@ func NewBytesList() BytesList {
 //
 // Since: 2.2
 func BindBytesList(v *[][]byte) ExternalBytesList {
-	if v == nil {
-		return NewBytesList().(ExternalBytesList)
-	}
-
-	b := newExternalList(v, bytes.Equal)
-	for i := range *v {
-		b.appendItem(bindListItem(v, i, b.updateExternal, bytes.Equal))
-	}
-
-	return b
+	return bindList(v, bytes.Equal)
 }
 
 // FloatList supports binding a list of float64 values.
@@ -138,16 +120,7 @@ func NewFloatList() FloatList {
 //
 // Since: 2.0
 func BindFloatList(v *[]float64) ExternalFloatList {
-	if v == nil {
-		return NewFloatList().(ExternalFloatList)
-	}
-
-	b := newExternalListComparable(v)
-	for i := range *v {
-		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
-	}
-
-	return b
+	return bindListComparable(v)
 }
 
 // IntList supports binding a list of int values.
@@ -186,16 +159,7 @@ func NewIntList() IntList {
 //
 // Since: 2.0
 func BindIntList(v *[]int) ExternalIntList {
-	if v == nil {
-		return NewIntList().(ExternalIntList)
-	}
-
-	b := newExternalListComparable(v)
-	for i := range *v {
-		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
-	}
-
-	return b
+	return bindListComparable(v)
 }
 
 // RuneList supports binding a list of rune values.
@@ -285,16 +249,7 @@ func NewStringList() StringList {
 //
 // Since: 2.0
 func BindStringList(v *[]string) ExternalStringList {
-	if v == nil {
-		return NewStringList().(ExternalStringList)
-	}
-
-	b := newExternalListComparable(v)
-	for i := range *v {
-		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
-	}
-
-	return b
+	return bindListComparable(v)
 }
 
 // UntypedList supports binding a list of any values.
@@ -382,14 +337,5 @@ func NewURIList() URIList {
 //
 // Since: 2.1
 func BindURIList(v *[]fyne.URI) ExternalURIList {
-	if v == nil {
-		return NewURIList().(ExternalURIList)
-	}
-
-	b := newExternalList(v, compareURI)
-	for i := range *v {
-		b.appendItem(bindListItem(v, i, b.updateExternal, compareURI))
-	}
-
-	return b
+	return bindList(v, compareURI)
 }

@@ -147,18 +147,6 @@ func lookupExistingBinding[T any](key string, p fyne.Preferences) (genericItem[T
 	return nil, false
 }
 
-type List[T any] interface {
-	DataList
-
-	Append(value T) error
-	Get() ([]T, error)
-	GetValue(index int) (T, error)
-	Prepend(value T) error
-	Remove(value T) error
-	Set(list []T) error
-	SetValue(index int, value T) error
-}
-
 func newList[T any](comparator func(T, T) bool) *boundList[T] {
 	return &boundList[T]{val: new([]T), comparator: comparator}
 }
@@ -171,8 +159,21 @@ func newExternalList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 	return &boundList[T]{val: v, comparator: comparator, updateExternal: true}
 }
 
-func newExternalListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
-	return newExternalList(v, func(t1, t2 T) bool { return t1 == t2 })
+func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	if v == nil {
+		return newList(comparator)
+	}
+
+	l := newExternalList(v, comparator)
+	for i := range *v {
+		l.appendItem(bindListItem(v, i, l.updateExternal, comparator))
+	}
+
+	return l
+}
+
+func bindListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
+	return bindList(v, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type boundList[T any] struct {
