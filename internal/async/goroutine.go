@@ -59,14 +59,21 @@ func EnsureMain(fn func()) {
 }
 
 func logStackTop(skip int) {
-	pc := make([]uintptr, 2)
-	count := runtime.Callers(2+skip, pc)
+	pc := make([]uintptr, 16)
+	_ = runtime.Callers(skip, pc)
 	frames := runtime.CallersFrames(pc)
 	frame, more := frames.Next()
-	if more && count > 1 {
-		nextFrame, _ := frames.Next()                     // skip an occasional driver call to itself
-		if !strings.Contains(nextFrame.File, "runtime") { // don't descend into Go
-			frame = nextFrame
+
+	var nextFrame runtime.Frame
+	for more {
+		nextFrame, more = frames.Next()
+		if nextFrame.File == "" || strings.Contains(nextFrame.File, "runtime") { // don't descend into Go
+			break
+		}
+
+		frame = nextFrame
+		if !strings.Contains(nextFrame.File, "/fyne/") { // skip library lines
+			break
 		}
 	}
 	log.Printf("  From: %s:%d", frame.File, frame.Line)
