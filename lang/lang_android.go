@@ -6,6 +6,6 @@ import (
 	"github.com/jeandeaual/go-locale"
 )
 
-func init() {
+func initRuntime() {
 	locale.SetRunOnJVM(app.RunOnJVM)
 }

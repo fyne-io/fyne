@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/jeandeaual/go-locale"
@@ -37,6 +38,7 @@ var (
 
 	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
+	setupOnce sync.Once
 
 	//go:embed translations
 	translations embed.FS
@@ -198,6 +200,8 @@ func setupLang(lang string) {
 
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
+	setupOnce.Do(initRuntime)
+
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
