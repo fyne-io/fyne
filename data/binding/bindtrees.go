@@ -74,7 +74,7 @@ type ExternalBytesTree interface {
 //
 // Since: 2.4
 func NewBytesTree() BytesTree {
-	return newTree[[]byte](bytes.Equal)
+	return newTree(bytes.Equal)
 }
 
 // BindBytesTree returns a bound tree of []byte values, based on the contents of the passed values.
@@ -274,10 +274,7 @@ type ExternalUntypedTree interface {
 //
 // Since: 2.5
 func NewUntypedTree() UntypedTree {
-	t := &boundUntypedTree{val: &map[string]any{}}
-	t.ids = make(map[string][]string)
-	t.items = make(map[string]DataItem)
-	return t
+	return newTree(func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // BindUntypedTree returns a bound tree of any values, based on the contents of the passed values.
@@ -286,271 +283,7 @@ func NewUntypedTree() UntypedTree {
 //
 // Since: 2.4
 func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalUntypedTree {
-	if v == nil {
-		return NewUntypedTree().(ExternalUntypedTree)
-	}
-
-	t := &boundUntypedTree{val: v, updateExternal: true}
-	t.ids = make(map[string][]string)
-	t.items = make(map[string]DataItem)
-
-	for parent, children := range *ids {
-		for _, leaf := range children {
-			t.appendItem(bindUntypedTreeItem(v, leaf, t.updateExternal), leaf, parent)
-		}
-	}
-
-	return t
-}
-
-type boundUntypedTree struct {
-	treeBase
-
-	updateExternal bool
-	val            *map[string]any
-}
-
-func (t *boundUntypedTree) Append(parent, id string, val any) error {
-	t.lock.Lock()
-	ids, ok := t.ids[parent]
-	if !ok {
-		ids = make([]string, 0)
-	}
-
-	t.ids[parent] = append(ids, id)
-	v := *t.val
-	v[id] = val
-
-	trigger, err := t.doReload()
-	t.lock.Unlock()
-
-	if trigger {
-		t.trigger()
-	}
-
-	return err
-}
-
-func (t *boundUntypedTree) Get() (map[string][]string, map[string]any, error) {
-	t.lock.RLock()
-	defer t.lock.RUnlock()
-
-	return t.ids, *t.val, nil
-}
-
-func (t *boundUntypedTree) GetValue(id string) (any, error) {
-	t.lock.RLock()
-	defer t.lock.RUnlock()
-
-	if item, ok := (*t.val)[id]; ok {
-		return item, nil
-	}
-
-	return nil, errOutOfBounds
-}
-
-func (t *boundUntypedTree) Prepend(parent, id string, val any) error {
-	t.lock.Lock()
-	ids, ok := t.ids[parent]
-	if !ok {
-		ids = make([]string, 0)
-	}
-
-	t.ids[parent] = append([]string{id}, ids...)
-	v := *t.val
-	v[id] = val
-
-	trigger, err := t.doReload()
-	t.lock.Unlock()
-
-	if trigger {
-		t.trigger()
-	}
-
-	return err
-}
-
-// Remove takes the specified id out of the tree.
-// It will also remove any child items from the data structure.
-//
-// Since: 2.5
-func (t *boundUntypedTree) Remove(id string) error {
-	t.lock.Lock()
-	t.removeChildren(id)
-	delete(t.ids, id)
-	v := *t.val
-	delete(v, id)
-
-	trigger, err := t.doReload()
-	t.lock.Unlock()
-
-	if trigger {
-		t.trigger()
-	}
-
-	return err
-}
-
-func (t *boundUntypedTree) removeChildren(id string) {
-	for _, cid := range t.ids[id] {
-		t.removeChildren(cid)
-
-		delete(t.ids, cid)
-		v := *t.val
-		delete(v, cid)
-	}
-}
-
-func (t *boundUntypedTree) Reload() error {
-	t.lock.Lock()
-	trigger, err := t.doReload()
-	t.lock.Unlock()
-
-	if trigger {
-		t.trigger()
-	}
-
-	return err
-}
-
-func (t *boundUntypedTree) Set(ids map[string][]string, v map[string]any) error {
-	t.lock.Lock()
-	t.ids = ids
-	*t.val = v
-
-	trigger, err := t.doReload()
-	t.lock.Unlock()
-
-	if trigger {
-		t.trigger()
-	}
-
-	return err
-}
-
-func (t *boundUntypedTree) doReload() (fire bool, retErr error) {
-	updated := []string{}
-	for id := range *t.val {
-		found := false
-		for child := range t.items {
-			if child == id { // update existing
-				updated = append(updated, id)
-				found = true
-				break
-			}
-		}
-		if found {
-			continue
-		}
-
-		// append new
-		t.appendItem(bindUntypedTreeItem(t.val, id, t.updateExternal), id, parentIDFor(id, t.ids))
-		updated = append(updated, id)
-		fire = true
-	}
-
-	for id := range t.items {
-		remove := true
-		for _, done := range updated {
-			if done == id {
-				remove = false
-				break
-			}
-		}
-
-		if remove { // remove item no longer present
-			fire = true
-			t.deleteItem(id, parentIDFor(id, t.ids))
-		}
-	}
-
-	for id, item := range t.items {
-		var err error
-		if t.updateExternal {
-			err = item.(*boundExternalUntypedTreeItem).setIfChanged((*t.val)[id])
-		} else {
-			err = item.(*boundUntypedTreeItem).doSet((*t.val)[id])
-		}
-		if err != nil {
-			retErr = err
-		}
-	}
-	return
-}
-
-func (t *boundUntypedTree) SetValue(id string, v any) error {
-	t.lock.Lock()
-	(*t.val)[id] = v
-	t.lock.Unlock()
-
-	item, err := t.GetItem(id)
-	if err != nil {
-		return err
-	}
-	return item.(Untyped).Set(v)
-}
-
-func bindUntypedTreeItem(v *map[string]any, id string, external bool) Untyped {
-	if external {
-		ret := &boundExternalUntypedTreeItem{old: (*v)[id]}
-		ret.val = v
-		ret.id = id
-		return ret
-	}
-
-	return &boundUntypedTreeItem{id: id, val: v}
-}
-
-type boundUntypedTreeItem struct {
-	base
-
-	val *map[string]any
-	id  string
-}
-
-func (t *boundUntypedTreeItem) Get() (any, error) {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-
-	v := *t.val
-	if item, ok := v[t.id]; ok {
-		return item, nil
-	}
-
-	return nil, errOutOfBounds
-}
-
-func (t *boundUntypedTreeItem) Set(val any) error {
-	return t.doSet(val)
-}
-
-func (t *boundUntypedTreeItem) doSet(val any) error {
-	t.lock.Lock()
-	(*t.val)[t.id] = val
-	t.lock.Unlock()
-
-	t.trigger()
-	return nil
-}
-
-type boundExternalUntypedTreeItem struct {
-	boundUntypedTreeItem
-
-	old any
-}
-
-func (t *boundExternalUntypedTreeItem) setIfChanged(val any) error {
-	t.lock.Lock()
-	if val == t.old {
-		t.lock.Unlock()
-		return nil
-	}
-	(*t.val)[t.id] = val
-	t.old = val
-	t.lock.Unlock()
-
-	t.trigger()
-	return nil
+	return bindTree(ids, v, func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // URITree supports binding a tree of fyne.URI values.
@@ -581,7 +314,7 @@ type ExternalURITree interface {
 //
 // Since: 2.4
 func NewURITree() URITree {
-	return newTree[fyne.URI](compareURI)
+	return newTree(compareURI)
 }
 
 // BindURITree returns a bound tree of fyne.URI values, based on the contents of the passed values.
