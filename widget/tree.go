@@ -440,33 +440,6 @@ func (t *Tree) ensureOpenMap() {
 	}
 }
 
-func (t *Tree) findBottom() (y float32, size fyne.Size) {
-	sep := t.Theme().Size(theme.SizeNamePadding)
-	t.walkAll(func(id, _ TreeNodeID, branch bool, _ int) {
-		size = t.leafMinSize
-		if branch {
-			size = t.branchMinSize
-		}
-
-		// Root node is not rendered unless it has been customized
-		if t.Root == "" && id == "" {
-			// This is root node, skip
-			return
-		}
-
-		// If this is not the first item, add a separator
-		if y > 0 {
-			y += sep
-		}
-
-		y += size.Height
-	})
-	if y > 0 {
-		y -= sep
-	}
-	return
-}
-
 func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found bool) {
 	pad := t.Theme().Size(theme.SizeNamePadding)
 
