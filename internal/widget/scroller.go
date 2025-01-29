@@ -437,7 +437,7 @@ func (s *Scroll) ScrollToBottom() {
 
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
-	s.scrollBy(0, -s.Offset.Y)
+	s.ScrollToOffset(fyne.Position{})
 	s.refreshBars()
 }
 
