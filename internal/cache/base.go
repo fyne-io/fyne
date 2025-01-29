@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	cacheDuration     = 1 * time.Minute
-	cleanTaskInterval = cacheDuration / 2
+	ValidDuration     = 1 * time.Minute
+	cleanTaskInterval = ValidDuration / 2
 
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
@@ -20,8 +20,8 @@ var (
 
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
-		cacheDuration = t
-		cleanTaskInterval = cacheDuration / 2
+		ValidDuration = t
+		cleanTaskInterval = ValidDuration / 2
 	}
 }
 
@@ -168,5 +168,5 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = timeNow().Add(cacheDuration)
+	c.expires = timeNow().Add(ValidDuration)
 }
