@@ -16,8 +16,8 @@ func TestBindStringTree(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "five", v)
 
-	assert.NotNil(t, f.(*boundStringTree).val)
-	assert.Equal(t, 3, len(*(f.(*boundStringTree).val)))
+	assert.NotNil(t, f.(*boundTree[string]).val)
+	assert.Equal(t, 3, len(*(f.(*boundTree[string]).val)))
 
 	_, err = f.GetValue("nan")
 	assert.NotNil(t, err)
@@ -46,8 +46,8 @@ func TestExternalFloatTree_Reload(t *testing.T) {
 	}))
 	assert.True(t, calledChild)
 
-	assert.NotNil(t, f.(*boundFloatTree).val)
-	assert.Equal(t, 3, len(*(f.(*boundFloatTree).val)))
+	assert.NotNil(t, f.(*boundTree[float64]).val)
+	assert.Equal(t, 3, len(*(f.(*boundTree[float64]).val)))
 
 	_, err = f.GetValue("-1")
 	assert.NotNil(t, err)
