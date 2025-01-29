@@ -301,7 +301,6 @@ func (s *stringTo{{ .Name }}) DataChanged() {
 type bindValues struct {
 	Name, Type, Default  string
 	Format, Since        string
-	SupportsPreferences  bool
 	FromString, ToString string // function names...
 	Comparator           string // comparator function name
 	FromInt, ToInt       string // function names...
@@ -358,12 +357,12 @@ func internalIntToFloat(val int) (float64, error) {
 	toInt := template.Must(template.New("toInt").Parse(toIntTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	binds := []bindValues{
-		{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
 		{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
-		{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true, ToInt: "internalFloatToInt", FromInt: "internalIntToFloat"},
-		{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
+		{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", ToInt: "internalFloatToInt", FromInt: "internalIntToFloat"},
+		{Name: "Int", Type: "int", Default: "0", Format: "%d"},
 		{Name: "Rune", Type: "rune", Default: "rune(0)"},
-		{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
+		{Name: "String", Type: "string", Default: "\"\""},
 		{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
