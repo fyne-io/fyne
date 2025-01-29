@@ -9,7 +9,7 @@ import (
 )
 
 // ScrollDirection represents the directions in which a Scroll can scroll its child content.
-type ScrollDirection int
+type ScrollDirection = fyne.ScrollDirection
 
 // Constants for valid values of ScrollDirection.
 const (

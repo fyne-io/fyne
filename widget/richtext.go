@@ -30,7 +30,7 @@ type RichText struct {
 	BaseWidget
 	Segments []RichTextSegment
 	Wrapping fyne.TextWrap
-	Scroll   widget.ScrollDirection
+	Scroll   fyne.ScrollDirection
 
 	// The truncation mode of the text
 	//
