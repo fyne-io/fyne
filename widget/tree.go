@@ -878,7 +878,8 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
 	if !fyne.CurrentDevice().IsMobile() {
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree)
-		if canvas != nil {
+		if canvas != nil && canvas.Focused() != n.tree {
+			n.tree.currentFocus = n.uid
 			canvas.Focus(n.tree)
 		}
 		n.tree.currentFocus = n.uid
