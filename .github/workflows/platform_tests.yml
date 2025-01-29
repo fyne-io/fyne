@@ -14,8 +14,9 @@ jobs:
         include:
           - os: ubuntu-latest
             runner: xvfb-run
+            tags: ci
           - os: macos-latest
-            tags: no_glfw
+            tags: no_glfw,ci
 
     steps:
     - uses: actions/checkout@v4
