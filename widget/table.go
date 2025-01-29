@@ -536,6 +536,19 @@ func (t *Table) ScrollToLeading() {
 	t.finishScroll()
 }
 
+// ScrollToOffset scrolls the table to a specific position
+//
+// Since: 2.6
+func (t *Table) ScrollToOffset(off fyne.Position) {
+	if t.content == nil {
+		return
+	}
+
+	t.content.ScrollToOffset(off)
+	t.offset = t.content.Offset
+	t.finishScroll()
+}
+
 // ScrollToTop scrolls to the first row in the table
 //
 // Since: 2.1

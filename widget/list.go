@@ -260,23 +260,16 @@ func (l *List) ScrollTo(id ListItemID) {
 //
 // Since: 2.1
 func (l *List) ScrollToBottom() {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
-	if length > 0 {
-		length--
-	}
-	l.scrollTo(length)
-	l.Refresh()
+	l.scroller.ScrollToBottom()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToTop scrolls to the start of the list
 //
 // Since: 2.1
 func (l *List) ScrollToTop() {
-	l.scrollTo(0)
-	l.Refresh()
+	l.scroller.ScrollToTop()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToOffset scrolls the list to the given offset position.
@@ -296,9 +289,8 @@ func (l *List) ScrollToOffset(offset float32) {
 	if offset > contentHeight {
 		offset = contentHeight
 	}
-	l.scroller.Offset.Y = offset
+	l.scroller.ScrollToOffset(fyne.NewPos(0, offset))
 	l.offsetUpdated(l.scroller.Offset)
-	l.Refresh()
 }
 
 // GetScrollOffset returns the current scroll offset position
