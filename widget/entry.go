@@ -1996,7 +1996,7 @@ func (r *entryContentRenderer) ensureCursorVisible() {
 		move.DY += cy2 - (offset.Y + size.Height)
 	}
 	if r.content.scroll.Content != nil {
-		r.content.scroll.SetOffset(r.content.scroll.Offset.Add(move))
+		r.content.scroll.ScrollToOffset(r.content.scroll.Offset.Add(move))
 	}
 }
 
