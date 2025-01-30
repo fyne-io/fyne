@@ -81,14 +81,12 @@ func (s *settings) ThemeVariant() fyne.ThemeVariant {
 	return s.variant
 }
 
-// must be called from main goroutine
 func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.variant = variant
 	s.theme = theme
 	s.apply()
 }
 
-// must be called from main goroutine
 func (s *settings) applyVariant(variant fyne.ThemeVariant) {
 	s.variant = variant
 	s.apply()
@@ -168,13 +166,7 @@ func (s *settings) setupTheme() {
 		variant = theme.VariantDark
 	}
 
-	if async.IsMainGoroutine() {
-		s.applyTheme(effectiveTheme, variant)
-	} else {
-		fyne.Do(func() {
-			s.applyTheme(effectiveTheme, variant)
-		})
-	}
+	s.applyTheme(effectiveTheme, variant)
 }
 
 func loadSettings() *settings {

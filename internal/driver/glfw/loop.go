@@ -99,14 +99,23 @@ func (d *gLDriver) runGL() {
 	if d.trayStart != nil {
 		d.trayStart()
 	}
+
+	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
+		painter.ClearFontCache()
+		cache.ResetThemeCaches()
+		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+			c, ok := w.Canvas().(*glCanvas)
+			if !ok {
+				return
+			}
+			c.applyThemeOutOfTreeObjects()
+			c.reloadScale()
+		})
+	})
+
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
 		f()
 	}
-
-	var pendingSettings fyne.Settings
-	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
-		pendingSettings = set
-	})
 
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
@@ -155,20 +164,6 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
-		}
-
-		if pendingSettings != nil {
-			painter.ClearFontCache()
-			cache.ResetThemeCaches()
-			app.ApplySettingsWithCallback(pendingSettings, fyne.CurrentApp(), func(w fyne.Window) {
-				c, ok := w.Canvas().(*glCanvas)
-				if !ok {
-					return
-				}
-				c.applyThemeOutOfTreeObjects()
-				c.reloadScale()
-			})
-			pendingSettings = nil
 		}
 	}
 }
