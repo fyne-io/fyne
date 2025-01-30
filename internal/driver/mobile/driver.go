@@ -169,10 +169,19 @@ func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
 		d.queuedFuncs = async.NewUnboundedChan[func()]()
-		var pendingSettings fyne.Settings
+
 		fyne.CurrentApp().Settings().AddListener(func(s fyne.Settings) {
-			pendingSettings = s
+			painter.ClearFontCache()
+			cache.ResetThemeCaches()
+			intapp.ApplySettingsWithCallback(s, fyne.CurrentApp(), func(w fyne.Window) {
+				c, ok := w.Canvas().(*canvas)
+				if !ok {
+					return
+				}
+				c.applyThemeOutOfTreeObjects()
+			})
 		})
+
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
 			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
@@ -249,19 +258,6 @@ func (d *driver) Run() {
 					} else if e.Direction == key.DirRelease {
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
-				}
-
-				if pendingSettings != nil {
-					painter.ClearFontCache()
-					cache.ResetThemeCaches()
-					intapp.ApplySettingsWithCallback(pendingSettings, fyne.CurrentApp(), func(w fyne.Window) {
-						c, ok := w.Canvas().(*canvas)
-						if !ok {
-							return
-						}
-						c.applyThemeOutOfTreeObjects()
-					})
-					pendingSettings = nil
 				}
 			}
 		}
