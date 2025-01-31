@@ -121,7 +121,6 @@ func (b *boundUntyped) Get() (any, error) {
 
 func (b *boundUntyped) Set(val any) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.val.Interface() == val {
 		return nil
 	}
@@ -131,6 +130,7 @@ func (b *boundUntyped) Set(val any) error {
 	} else {
 		b.val.Set(reflect.ValueOf(val))
 	}
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
@@ -174,12 +174,12 @@ type boundExternalUntyped struct {
 
 func (b *boundExternalUntyped) Set(val any) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
 		return nil
 	}
 	b.val.Set(reflect.ValueOf(val))
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil
