@@ -42,50 +42,13 @@ func FloatToStringWithFormat(v Float, format string) String {
 	return toStringWithFormatComparable[float64](v, format, "%f", formatFloat, parseFloat)
 }
 
-type intToFloat struct {
-	base
-	from Int
-}
-
 // IntToFloat creates a binding that connects an Int data item to a Float.
 //
 // Since: 2.5
 func IntToFloat(val Int) Float {
-	v := &intToFloat{from: val}
+	v := &fromIntTo[float64]{from: val, parser: internalFloatToInt, formatter: internalIntToFloat}
 	val.AddListener(v)
 	return v
-}
-
-func (s *intToFloat) Get() (float64, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return 0.0, err
-	}
-	return internalIntToFloat(val)
-}
-
-func (s *intToFloat) Set(val float64) error {
-	i, err := internalFloatToInt(val)
-	if err != nil {
-		return err
-	}
-	old, err := s.from.Get()
-	if i == old {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	if err = s.from.Set(i); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *intToFloat) DataChanged() {
-	s.trigger()
 }
 
 // FloatToInt creates a binding that connects a Float data item to an Int.

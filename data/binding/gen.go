@@ -11,53 +11,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-const fromIntTemplate = `
-type intTo{{ .Name }} struct {
-	base
-	from Int
-}
-
-// IntTo{{ .Name }} creates a binding that connects an Int data item to a {{ .Name }}.
-//
-// Since: 2.5
-func IntTo{{ .Name }}(val Int) {{ .Name }} {
-	v := &intTo{{ .Name }}{from: val}
-	val.AddListener(v)
-	return v
-}
-
-func (s *intTo{{ .Name }}) Get() ({{ .Type }}, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return {{ .Default }}, err
-	}
-	return {{ .FromInt }}(val)
-}
-
-func (s *intTo{{ .Name }}) Set(val {{ .Type }}) error {
-	i, err := {{ .ToInt }}(val)
-	if err != nil {
-		return err
-	}
-	old, err := s.from.Get()
-	if i == old {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	if err = s.from.Set(i); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *intTo{{ .Name }}) DataChanged() {
-	s.trigger()
-}
-`
 const fromStringTemplate = `
 type stringTo{{ .Name }} struct {
 	base
@@ -210,7 +163,6 @@ func internalIntToFloat(val int) (float64, error) {
 `)
 
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
-	fromInt := template.Must(template.New("fromInt").Parse(fromIntTemplate))
 	binds := []bindValues{
 		{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
 		{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
@@ -221,15 +173,7 @@ func internalIntToFloat(val int) (float64, error) {
 		{Name: "URI", Type: "fyne.URI", Default: "fyne.URI(nil)", Since: "2.1",
 			FromString: "uriFromString", ToString: "uriToString", Comparator: "compareURI"},
 	}
-	for _, b := range binds {
-		if b.Since == "" {
-			b.Since = "2.0"
-		}
 
-		if b.FromInt != "" {
-			writeFile(convertFile, fromInt, b)
-		}
-	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
 	for _, b := range binds {
 		if b.Since == "" {

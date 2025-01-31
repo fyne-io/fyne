@@ -829,3 +829,44 @@ func (s *toInt[T]) Set(v int) error {
 func (s *toInt[T]) DataChanged() {
 	s.trigger()
 }
+
+type fromIntTo[T float64] struct {
+	base
+
+	formatter func(int) (T, error)
+	parser    func(T) (int, error)
+	from      bindableItem[int]
+}
+
+func (s *fromIntTo[T]) Get() (T, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0.0, err
+	}
+	return s.formatter(val)
+}
+
+func (s *fromIntTo[T]) Set(val T) error {
+	i, err := s.parser(val)
+	if err != nil {
+		return err
+	}
+	old, err := s.from.Get()
+	if i == old {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	err = s.from.Set(i)
+	if err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *fromIntTo[T]) DataChanged() {
+	s.trigger()
+}
