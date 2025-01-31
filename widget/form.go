@@ -362,19 +362,17 @@ func (f *Form) updateHelperText(item *FormItem) {
 	}
 
 	if item.validationError == nil || showHintIfError {
-		if item.helperOutput.Text != item.HintText {
-			item.helperOutput.Text = item.HintText
-			item.helperOutput.Color = th.Color(theme.ColorNamePlaceHolder, v)
+		item.helperOutput.Text = item.HintText
+		item.helperOutput.Color = th.Color(theme.ColorNamePlaceHolder, v)
+	} else {
+		item.helperOutput.Text = item.validationError.Error()
+		item.helperOutput.Color = th.Color(theme.ColorNameError, v)
+	}
 
-			f.Refresh()
-		}
-	} else if err := item.validationError.Error(); err != "" {
-		if item.helperOutput.Text != err {
-			item.helperOutput.Text = err
-			item.helperOutput.Color = th.Color(theme.ColorNameError, v)
-
-			f.Refresh()
-		}
+	if item.helperOutput.Text == "" {
+		item.helperOutput.Hide()
+	} else {
+		item.helperOutput.Show()
 	}
 	item.helperOutput.Refresh()
 }

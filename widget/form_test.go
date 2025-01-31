@@ -177,12 +177,15 @@ func TestForm_Hints(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/hint_initial.png", w.Canvas().Capture())
 
 	test.Type(entry2, "n")
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/hint_invalid.png", w.Canvas().Capture())
 
 	test.Type(entry2, "ot-")
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/hint_valid.png", w.Canvas().Capture())
 }
 
@@ -301,17 +304,21 @@ func TestForm_Disable_Validation(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/disable_validation_initial.png", w.Canvas().Capture())
 
 	form.Disable()
 
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/disable_validation_disabled_invalid.png", w.Canvas().Capture())
 
 	form.Enable()
 
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/disable_validation_enabled_invalid.png", w.Canvas().Capture())
 
 	entry.SetText("15-true")
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/disable_validation_enabled_valid.png", w.Canvas().Capture())
 
 	// ensure we don't re-enable the form when entering something valid
@@ -319,6 +326,7 @@ func TestForm_Disable_Validation(t *testing.T) {
 	form.Disable()
 	entry.SetText("15-true")
 
+	w.Resize(form.MinSize().Add(fyne.NewSquareSize(theme.Padding() * 2)))
 	test.AssertImageMatches(t, "form/disable_validation_disabled_valid.png", w.Canvas().Capture())
 }
 
