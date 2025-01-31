@@ -1,6 +1,3 @@
-// auto-generated
-// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
-
 package binding
 
 import (
@@ -9,31 +6,13 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func internalFloatToInt(val float64) (int, error) {
-	return int(val), nil
-}
-
-func internalIntToFloat(val int) (float64, error) {
-	return float64(val), nil
-}
-
-type stringFromBool struct {
-	base
-
-	format string
-
-	from Bool
-}
-
 // BoolToString creates a binding that connects a Bool data item to a String.
 // Changes to the Bool will be pushed to the String and setting the string will parse and set the
 // Bool if the parse was successful.
 //
 // Since: 2.0
 func BoolToString(v Bool) String {
-	str := &stringFromBool{from: v}
-	v.AddListener(str)
-	return str
+	return toStringComparable[bool](v, formatBool, parseBool)
 }
 
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
@@ -42,72 +21,7 @@ func BoolToString(v Bool) String {
 //
 // Since: 2.0
 func BoolToStringWithFormat(v Bool, format string) String {
-	if format == "%t" { // Same as not using custom formatting.
-		return BoolToString(v)
-	}
-
-	str := &stringFromBool{from: v, format: format}
-	v.AddListener(str)
-	return str
-}
-
-func (s *stringFromBool) Get() (string, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return "", err
-	}
-
-	if s.format != "" {
-		return fmt.Sprintf(s.format, val), nil
-	}
-
-	return formatBool(val), nil
-}
-
-func (s *stringFromBool) Set(str string) error {
-	var val bool
-	if s.format != "" {
-		safe := stripFormatPrecision(s.format)
-		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return err
-		}
-		if n != 1 {
-			return errParseFailed
-		}
-	} else {
-		new, err := parseBool(str)
-		if err != nil {
-			return err
-		}
-		val = new
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringFromBool) DataChanged() {
-	s.trigger()
-}
-
-type stringFromFloat struct {
-	base
-
-	format string
-
-	from Float
+	return toStringWithFormatComparable[bool](v, format, "%t", formatBool, parseBool)
 }
 
 // FloatToString creates a binding that connects a Float data item to a String.
@@ -116,9 +30,7 @@ type stringFromFloat struct {
 //
 // Since: 2.0
 func FloatToString(v Float) String {
-	str := &stringFromFloat{from: v}
-	v.AddListener(str)
-	return str
+	return toStringComparable[float64](v, formatFloat, parseFloat)
 }
 
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
@@ -127,64 +39,7 @@ func FloatToString(v Float) String {
 //
 // Since: 2.0
 func FloatToStringWithFormat(v Float, format string) String {
-	if format == "%f" { // Same as not using custom formatting.
-		return FloatToString(v)
-	}
-
-	str := &stringFromFloat{from: v, format: format}
-	v.AddListener(str)
-	return str
-}
-
-func (s *stringFromFloat) Get() (string, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return "", err
-	}
-
-	if s.format != "" {
-		return fmt.Sprintf(s.format, val), nil
-	}
-
-	return formatFloat(val), nil
-}
-
-func (s *stringFromFloat) Set(str string) error {
-	var val float64
-	if s.format != "" {
-		safe := stripFormatPrecision(s.format)
-		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return err
-		}
-		if n != 1 {
-			return errParseFailed
-		}
-	} else {
-		new, err := parseFloat(str)
-		if err != nil {
-			return err
-		}
-		val = new
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringFromFloat) DataChanged() {
-	s.trigger()
+	return toStringWithFormatComparable[float64](v, format, "%f", formatFloat, parseFloat)
 }
 
 type intToFloat struct {

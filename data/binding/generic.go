@@ -1,6 +1,7 @@
 package binding
 
 import (
+	"fmt"
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
@@ -699,4 +700,90 @@ func (t *boundExternalTreeItem[T]) setIfChanged(val T) error {
 
 	t.trigger()
 	return nil
+}
+
+func toString[T any](v bindableItem[T], formatter func(T) string, comparator func(T, T) bool, parser func(string) (T, error)) *stringFrom[T] {
+	str := &stringFrom[T]{from: v, formatter: formatter, comparator: comparator, parser: parser}
+	v.AddListener(str)
+	return str
+}
+
+func toStringComparable[T bool | float64 | int](v bindableItem[T], formatter func(T) string, parser func(string) (T, error)) *stringFrom[T] {
+	return toString(v, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
+}
+
+func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, formatter func(T) string, comparator func(T, T) bool, parser func(string) (T, error)) String {
+	str := toString(v, formatter, comparator, parser)
+	if format != defaultFormat { // Same as not using custom formatting.
+		str.format = format
+	}
+
+	return str
+}
+
+func toStringWithFormatComparable[T bool | float64 | int](v bindableItem[T], format, defaultFormat string, formatter func(T) string, parser func(string) (T, error)) String {
+	return toStringWithFormat(v, format, defaultFormat, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
+}
+
+type stringFrom[T any] struct {
+	base
+
+	format string
+
+	formatter  func(T) string
+	comparator func(T, T) bool
+	parser     func(string) (T, error)
+
+	from bindableItem[T]
+}
+
+func (s *stringFrom[T]) Get() (string, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
+
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return s.formatter(val), nil
+}
+
+func (s *stringFrom[T]) Set(str string) error {
+	var val T
+	if s.format != "" {
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := s.parser(str)
+		if err != nil {
+			return err
+		}
+		val = new
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if s.comparator(val, old) {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *stringFrom[T]) DataChanged() {
+	s.trigger()
 }

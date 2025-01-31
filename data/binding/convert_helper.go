@@ -101,3 +101,11 @@ func formatFloat(in float64) string {
 func formatInt(in int) string {
 	return strconv.FormatInt(int64(in), 10)
 }
+
+func internalFloatToInt(val float64) (int, error) {
+	return int(val), nil
+}
+
+func internalIntToFloat(val int) (float64, error) {
+	return float64(val), nil
+}
