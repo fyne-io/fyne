@@ -697,6 +697,7 @@ func TestTree_Tap(t *testing.T) {
 
 		test.Tap(getBranch(t, tree, "A"))
 		assert.True(t, selected, "Branch should have been selected")
+		assert.Equal(t, "A", tree.currentFocus)
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -725,6 +726,7 @@ func TestTree_Tap(t *testing.T) {
 		}
 		test.Tap(getLeaf(t, tree, "A"))
 		assert.True(t, selected, "Leaf should have been selected")
+		assert.Equal(t, "A", tree.currentFocus)
 	})
 }
 
