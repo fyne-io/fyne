@@ -60,9 +60,10 @@ func (e *Entry) setValidationError(err error) bool {
 		return false
 	}
 
+	changed := e.validationError != err
 	e.validationError = err
 
-	if e.onValidationChanged != nil {
+	if e.onValidationChanged != nil && changed {
 		e.onValidationChanged(err)
 	}
 
