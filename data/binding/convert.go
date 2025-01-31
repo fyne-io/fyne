@@ -88,51 +88,13 @@ func (s *intToFloat) DataChanged() {
 	s.trigger()
 }
 
-type intFromFloat struct {
-	base
-	from Float
-}
-
 // FloatToInt creates a binding that connects a Float data item to an Int.
 //
 // Since: 2.5
 func FloatToInt(v Float) Int {
-	i := &intFromFloat{from: v}
+	i := &toInt[float64]{from: v, parser: internalFloatToInt, formatter: internalIntToFloat}
 	v.AddListener(i)
 	return i
-}
-
-func (s *intFromFloat) Get() (int, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return 0, err
-	}
-	return internalFloatToInt(val)
-}
-
-func (s *intFromFloat) Set(v int) error {
-	val, err := internalIntToFloat(v)
-	if err != nil {
-		return err
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *intFromFloat) DataChanged() {
-	s.trigger()
 }
 
 type stringFromInt struct {

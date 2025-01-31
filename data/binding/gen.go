@@ -11,149 +11,6 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-const toStringTemplate = `
-type stringFrom{{ .Name }} struct {
-	base
-{{ if .Format }}
-	format string
-{{ end }}
-	from {{ .Name }}
-}
-
-// {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
-// Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
-// {{ .Name }} if the parse was successful.
-//
-// Since: {{ .Since }}
-func {{ .Name }}ToString(v {{ .Name }}) String {
-	str := &stringFrom{{ .Name }}{from: v}
-	v.AddListener(str)
-	return str
-}
-{{ if .Format }}
-// {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
-// presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
-// the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
-//
-// Since: {{ .Since }}
-func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
-	if format == "{{ .Format }}" { // Same as not using custom formatting.
-		return {{ .Name }}ToString(v)
-	}
-
-	str := &stringFrom{{ .Name }}{from: v, format: format}
-	v.AddListener(str)
-	return str
-}
-{{ end }}
-func (s *stringFrom{{ .Name }}) Get() (string, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return "", err
-	}
-{{ if .ToString }}
-	return {{ .ToString }}(val)
-{{- else }}
-	if s.format != "" {
-		return fmt.Sprintf(s.format, val), nil
-	}
-
-	return format{{ .Name }}(val), nil
-{{- end }}
-}
-
-func (s *stringFrom{{ .Name }}) Set(str string) error {
-{{- if .FromString }}
-	val, err := {{ .FromString }}(str)
-	if err != nil {
-		return err
-	}
-{{ else }}
-	var val {{ .Type }}
-	if s.format != "" {
-		safe := stripFormatPrecision(s.format)
-		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return err
-		}
-		if n != 1 {
-			return errParseFailed
-		}
-	} else {
-		new, err := parse{{ .Name }}(str)
-		if err != nil {
-			return err
-		}
-		val = new
-	}
-{{ end }}
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringFrom{{ .Name }}) DataChanged() {
-	s.trigger()
-}
-`
-const toIntTemplate = `
-type intFrom{{ .Name }} struct {
-	base
-	from {{ .Name }}
-}
-
-// {{ .Name }}ToInt creates a binding that connects a {{ .Name }} data item to an Int.
-//
-// Since: 2.5
-func {{ .Name }}ToInt(v {{ .Name }}) Int {
-	i := &intFrom{{ .Name }}{from: v}
-	v.AddListener(i)
-	return i
-}
-
-func (s *intFrom{{ .Name }}) Get() (int, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return 0, err
-	}
-	return {{ .ToInt }}(val)
-}
-
-func (s *intFrom{{ .Name }}) Set(v int) error {
-	val, err := {{ .FromInt }}(v)
-	if err != nil {
-		return err
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *intFrom{{ .Name }}) DataChanged() {
-	s.trigger()
-}
-`
 const fromIntTemplate = `
 type intTo{{ .Name }} struct {
 	base
@@ -354,8 +211,6 @@ func internalIntToFloat(val int) (float64, error) {
 
 	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	fromInt := template.Must(template.New("fromInt").Parse(fromIntTemplate))
-	toInt := template.Must(template.New("toInt").Parse(toIntTemplate))
-	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	binds := []bindValues{
 		{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
 		{Name: "Bytes", Type: "[]byte", Default: "nil", Since: "2.2", Comparator: "bytes.Equal"},
@@ -371,14 +226,8 @@ func internalIntToFloat(val int) (float64, error) {
 			b.Since = "2.0"
 		}
 
-		if b.Format != "" || b.ToString != "" {
-			writeFile(convertFile, toString, b)
-		}
 		if b.FromInt != "" {
 			writeFile(convertFile, fromInt, b)
-		}
-		if b.ToInt != "" {
-			writeFile(convertFile, toInt, b)
 		}
 	}
 	// add StringTo... at the bottom of the convertFile for correct ordering
