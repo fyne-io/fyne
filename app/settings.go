@@ -107,7 +107,6 @@ func (s *settings) AddListener(listener func(fyne.Settings)) {
 	s.listeners = append(s.listeners, listener)
 }
 
-// must be called from main goroutine
 func (s *settings) apply() {
 	s.changeListeners.Range(func(listener chan fyne.Settings, _ bool) bool {
 		select {
