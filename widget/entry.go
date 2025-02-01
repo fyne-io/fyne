@@ -54,7 +54,7 @@ type Entry struct {
 	// Scroll can be used to turn off the scrolling of our entry when Wrapping is WrapNone.
 	//
 	// Since: 2.4
-	Scroll widget.ScrollDirection
+	Scroll fyne.ScrollDirection
 
 	// Set a validator that this entry will check against
 	// Since: 1.4

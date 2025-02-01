@@ -536,6 +536,33 @@ func TestTable_ScrollToLeading(t *testing.T) {
 	assert.Equal(t, want, table.content.Offset)
 }
 
+func TestTable_ScrollToOffset(t *testing.T) {
+	test.NewTempApp(t)
+
+	const (
+		maxRows int     = 6
+		maxCols int     = 10
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.Size{Width: width, Height: height})
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	want := fyne.NewPos(48, 25)
+	table.ScrollToOffset(want)
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.content.Offset)
+}
+
 func TestTable_ScrollToTop(t *testing.T) {
 	test.NewTempApp(t)
 

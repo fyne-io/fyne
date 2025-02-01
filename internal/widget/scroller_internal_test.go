@@ -46,8 +46,14 @@ func TestScrollContainer_MinSize(t *testing.T) {
 
 func TestScrollContainer_ScrollToTop(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	rect.SetMinSize(fyne.NewSize(500, 50))
+	rect.SetMinSize(fyne.NewSize(500, 150))
 	scroll := NewScroll(rect)
+	scroll.Resize(fyne.NewSize(25, 25))
+
+	tmpOffset := fyne.NewPos(25, 50)
+	scroll.ScrollToOffset(tmpOffset)
+	assert.Equal(t, tmpOffset, scroll.Offset)
+
 	scroll.ScrollToTop()
 	Y := scroll.Offset.Y
 	assert.Equal(t, float32(0), Y)

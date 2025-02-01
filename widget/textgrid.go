@@ -85,7 +85,7 @@ type TextGrid struct {
 	// Scroll can be used to turn off the scrolling of our TextGrid.
 	//
 	// Since: 2.6
-	Scroll widget.ScrollDirection
+	Scroll fyne.ScrollDirection
 }
 
 // Append will add new lines to the end of this TextGrid.

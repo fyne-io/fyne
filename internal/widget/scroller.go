@@ -9,7 +9,7 @@ import (
 )
 
 // ScrollDirection represents the directions in which a Scroll can scroll its child content.
-type ScrollDirection int
+type ScrollDirection = fyne.ScrollDirection
 
 // Constants for valid values of ScrollDirection.
 const (
@@ -437,7 +437,7 @@ func (s *Scroll) ScrollToBottom() {
 
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
-	s.scrollBy(0, -s.Offset.Y)
+	s.ScrollToOffset(fyne.Position{})
 	s.refreshBars()
 }
 

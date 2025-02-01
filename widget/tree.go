@@ -246,11 +246,8 @@ func (t *Tree) ScrollToBottom() {
 		return
 	}
 
-	y, size := t.findBottom()
-	t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
-
+	t.scroller.ScrollToBottom()
 	t.offsetUpdated(t.scroller.Offset)
-	t.Refresh()
 }
 
 // ScrollTo scrolls to the node with the given id.
@@ -267,14 +264,30 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 	}
 
 	// TODO scrolling to a node should open all parents if they aren't already
+	newY := t.scroller.Offset.Y
 	if y < t.scroller.Offset.Y {
-		t.scroller.Offset.Y = y
+		newY = y
 	} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
-		t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
+		newY = y + size.Height - t.scroller.Size().Height
 	}
 
+	t.scroller.ScrollToOffset(fyne.NewPos(0, newY))
 	t.offsetUpdated(t.scroller.Offset)
-	t.Refresh()
+}
+
+// ScrollToOffset scrolls the tree to the given offset position.
+//
+// Since: 2.6
+func (t *Tree) ScrollToOffset(offset float32) {
+	if t.scroller == nil {
+		return
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	t.scroller.ScrollToOffset(fyne.NewPos(0, offset))
+	t.offsetUpdated(t.scroller.Offset)
 }
 
 // ScrollToTop scrolls to the top of the tree.
@@ -285,9 +298,8 @@ func (t *Tree) ScrollToTop() {
 		return
 	}
 
-	t.scroller.Offset.Y = 0
+	t.scroller.ScrollToTop()
 	t.offsetUpdated(t.scroller.Offset)
-	t.Refresh()
 }
 
 // Select marks the specified node to be selected.
@@ -426,33 +438,6 @@ func (t *Tree) ensureOpenMap() {
 	if t.open == nil {
 		t.open = make(map[string]bool)
 	}
-}
-
-func (t *Tree) findBottom() (y float32, size fyne.Size) {
-	sep := t.Theme().Size(theme.SizeNamePadding)
-	t.walkAll(func(id, _ TreeNodeID, branch bool, _ int) {
-		size = t.leafMinSize
-		if branch {
-			size = t.branchMinSize
-		}
-
-		// Root node is not rendered unless it has been customized
-		if t.Root == "" && id == "" {
-			// This is root node, skip
-			return
-		}
-
-		// If this is not the first item, add a separator
-		if y > 0 {
-			y += sep
-		}
-
-		y += size.Height
-	})
-	if y > 0 {
-		y -= sep
-	}
-	return
 }
 
 func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found bool) {
