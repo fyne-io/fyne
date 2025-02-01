@@ -68,7 +68,7 @@ var shaderSimpleVert = &fyne.StaticResource{
 var shaderSimpleesFrag = &fyne.StaticResource{
 	StaticName: "simple_es.frag",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    gl_FragColor = texture2D(tex, fragTexCoord);\n}\n"),
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
 }
 var shaderSimpleesVert = &fyne.StaticResource{
 	StaticName: "simple_es.vert",

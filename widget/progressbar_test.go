@@ -124,6 +124,14 @@ func TestProgressRenderer_ApplyTheme(t *testing.T) {
 	})
 }
 
+func TestProgressBar_FromStruct(t *testing.T) {
+	bar := &widget.ProgressBar{Max: 10, Value: 5}
+	w := test.NewTempWindow(t, bar)
+	w.Resize(bar.MinSize().AddWidthHeight(100, 0))
+
+	test.AssertRendersToImage(t, "progressbar/initial.png", w.Canvas())
+}
+
 func barOnCanvas() (*widget.ProgressBar, fyne.Canvas) {
 	bar := widget.NewProgressBar()
 	window := test.NewWindow(container.NewVBox(bar))

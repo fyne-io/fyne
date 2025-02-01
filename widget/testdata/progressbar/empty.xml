@@ -1,10 +1,9 @@
 <canvas size="100x100">
 	<content>
 		<container size="100x100">
-			<widget size="100x16" type="*widget.ProgressBar">
-				<rectangle fillColor="rgba(255,192,128,127)" radius="4" size="100x16"/>
-				<rectangle fillColor="primary" radius="4" size="0x16"/>
-				<text alignment="center" color="foregroundOnPrimary" size="100x16" textSize="0">0%</text>
+			<widget size="100x35" type="*widget.ProgressBar">
+				<rectangle fillColor="rgba(255,192,128,127)" radius="4" size="100x35"/>
+				<text alignment="center" color="foregroundOnPrimary" size="100x35">0%</text>
 			</widget>
 		</container>
 	</content>

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -97,7 +98,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// make sure we fail over if the specified directory does not exist
 	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
-		t.Errorf("Should have failed to create lister for nonexistant file")
+		t.Errorf("Should have failed to create lister for nonexistent file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = home
@@ -146,7 +147,7 @@ func TestFileDialogResize(t *testing.T) {
 	expectedWidth = 600                                          //since win width only 600
 	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) //max, also work
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                           //since win heigh only 400
+	expectedHeight = 400                                           //since win height only 400
 	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) //max, also work
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
@@ -183,7 +184,7 @@ func TestShowFileOpen(t *testing.T) {
 	ui := popup.Content.(*fyne.Container)
 	//header
 	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
-	assert.Equal(t, "Open File", title.Text)
+	assert.Equal(t, lang.L("Open")+" "+lang.L("File"), title.Text)
 	//optionsbuttons
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
@@ -219,7 +220,7 @@ func TestShowFileOpen(t *testing.T) {
 	assert.Greater(t, len(objects), 0)
 
 	fileName := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
-	assert.Equal(t, "(Parent)", fileName)
+	assert.Equal(t, lang.L("(Parent)"), fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
@@ -255,7 +256,7 @@ func TestHiddenFiles(t *testing.T) {
 		t.Error("Failed to open testdata dir", err)
 	}
 
-	// git does not preserve windows hidden flag so we have to set it.
+	// git does not preserve windows hidden flag, so we have to set it.
 	// just an empty function for non windows builds
 	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
 		t.Error("Failed to hide .hidden", err)
@@ -305,7 +306,7 @@ func TestHiddenFiles(t *testing.T) {
 			target = item
 		}
 	}
-	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
+	assert.NotNil(t, target, "Failed, .hidden not found in testdata")
 }
 
 func TestShowFileSave(t *testing.T) {
@@ -335,7 +336,7 @@ func TestShowFileSave(t *testing.T) {
 	assert.Greater(t, len(objects), 0)
 
 	item := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
-	assert.Equal(t, "(Parent)", item.name)
+	assert.Equal(t, lang.L("(Parent)"), item.name)
 	assert.True(t, save.Disabled())
 
 	abs, _ := filepath.Abs("./testdata/")
@@ -448,6 +449,47 @@ func TestFileFilters(t *testing.T) {
 
 	// NOTE: This count needs to be updated when more test images are added.
 	assert.Equal(t, 9, count)
+}
+
+func TestFileSort(t *testing.T) {
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	d.SetLocation(dir)
+	d.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.NotEmpty(t, objects)
+
+	binPos := -1
+	capitalPos := -1
+	for i, icon := range objects {
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		switch item.name {
+		case "bin":
+			binPos = i
+		case "Capitalised":
+			capitalPos = i
+		}
+	}
+
+	assert.NotEqual(t, -1, binPos, "bin file not found")
+	assert.NotEqual(t, -1, capitalPos, "Capitalised.txt file not found")
+	assert.Less(t, binPos, capitalPos)
 }
 
 func TestView(t *testing.T) {
@@ -633,6 +675,7 @@ func TestViewPreferences(t *testing.T) {
 }
 
 func TestFileFavorites(t *testing.T) {
+	_ = test.NewApp()
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {

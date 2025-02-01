@@ -1,32 +1,32 @@
 {
-  "Advanced": "Advanced",
-  "Cancel": "Cancel",
-  "Confirm": "Confirm",
-  "Copy": "Copy",
-  "Create Folder": "Create Folder",
-  "Cut": "Cut",
-  "Enter filename": "Enter filename",
-  "Error": "Error",
-  "Favourites": "Favourites",
-  "File": "File",
-  "Folder": "Folder",
-  "New Folder": "New Folder",
-  "No": "No",
-  "OK": "OK",
-  "Open": "Open",
-  "Paste": "Paste",
-  "Quit": "Quit",
-  "Redo": "Redo",
-  "Save": "Save",
-  "Select all": "Select all",
-  "Show Hidden Files": "Show Hidden Files",
-  "Undo": "Undo",
-  "Yes": "Yes",
+    "Advanced": "Advanced",
+    "Cancel": "Cancel",
+    "Confirm": "Confirm",
+    "Copy": "Copy",
+    "Create Folder": "Create Folder",
+    "Cut": "Cut",
+    "Enter filename": "Enter filename",
+    "Error": "Error",
+    "Favourites": "Favourites",
+    "File": "File",
+    "Folder": "Folder",
+    "New Folder": "New Folder",
+    "No": "No",
+    "OK": "OK",
+    "Open": "Open",
+    "Paste": "Paste",
+    "Quit": "Quit",
+    "Redo": "Redo",
+    "Save": "Save",
+    "Select all": "Select all",
+    "Show Hidden Files": "Show Hidden Files",
+    "Undo": "Undo",
+    "Yes": "Yes",
 
-  "file.name": {
-    "other": "Name"
-  },
-  "file.parent": {
-    "other": "Parent"
-  }
+    "file.name": {
+        "other": "Name"
+    },
+    "file.parent": {
+        "other": "Parent"
+    }
 }

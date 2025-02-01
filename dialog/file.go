@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 
@@ -417,6 +418,18 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		}
 	}
 
+	toSort := icons
+	if parent != nil {
+		toSort = icons[1:]
+	}
+	sort.Slice(toSort, func(i, j int) bool {
+		if parent != nil { // avoiding the parent in [0]
+			i++
+			j++
+		}
+
+		return strings.ToLower(icons[i].Name()) < strings.ToLower(icons[j].Name())
+	})
 	f.dataLock.Lock()
 	f.data = icons
 	f.dataLock.Unlock()
@@ -911,6 +924,10 @@ func getFavoriteOrder() []string {
 }
 
 func hasAppFiles(a fyne.App) bool {
+	if a.UniqueID() == "testApp" {
+		return false
+	}
+
 	return len(a.Storage().List()) > 0
 }
 

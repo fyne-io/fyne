@@ -140,7 +140,7 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.win.Refresh()
 }
 
-// The method .create() needs to be called before the dialog cna be shown.
+// The method .create() needs to be called before the dialog can be shown.
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newCenterWrappedLabel(message), title: title, icon: icon, parent: parent}
 	d.callback = callback

@@ -56,7 +56,7 @@ func WatchTheme(onChanged func()) {
 		return // on older versions of windows the key may not exist
 	}
 	for {
-		// blocks until the reigstry key has been changed
+		// blocks until the registry key has been changed
 		regNotifyChangeKeyValue.Call(uintptr(k), 0, 0x00000001|0x00000004, 0, 0)
 		onChanged()
 	}

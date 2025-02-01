@@ -126,7 +126,7 @@ func (h *HyperlinkSegment) Textual() string {
 	return h.Text
 }
 
-// Visual returns the hyperlink widget required to render this segment.
+// Visual returns a new instance of a hyperlink widget required to render this segment.
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
@@ -182,7 +182,7 @@ func (i *ImageSegment) Textual() string {
 	return "Image " + i.Title
 }
 
-// Visual returns the image widget required to render this segment.
+// Visual returns a new instance of an image widget required to render this segment.
 func (i *ImageSegment) Visual() fyne.CanvasObject {
 	return newRichImage(i.Source, i.Alignment)
 }
@@ -256,7 +256,7 @@ func (l *ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a list visual.
+// Update doesn't need to change a list visual.
 func (l *ListSegment) Update(fyne.CanvasObject) {
 }
 
@@ -301,7 +301,7 @@ func (p *ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a paragraph container.
+// Update doesn't need to change a paragraph container.
 func (p *ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
@@ -335,12 +335,12 @@ func (s *SeparatorSegment) Textual() string {
 	return ""
 }
 
-// Visual returns the separator element for this segment.
+// Visual returns a new instance of a separator widget for this segment.
 func (s *SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
-// Update doesnt need to change a separator visual.
+// Update doesn't need to change a separator visual.
 func (s *SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
@@ -405,7 +405,7 @@ func (t *TextSegment) Textual() string {
 	return t.Text
 }
 
-// Visual returns the graphical elements required to render this segment.
+// Visual returns a new instance of a graphical element required to render this segment.
 func (t *TextSegment) Visual() fyne.CanvasObject {
 	obj := canvas.NewText(t.Text, t.color())
 

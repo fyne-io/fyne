@@ -132,8 +132,11 @@ func (c *Check) Tapped(pe *fyne.PointEvent) {
 	if c.Disabled() {
 		return
 	}
+
+	minHeight := c.minSize.Height
+	minY := (c.Size().Height - minHeight) / 2
 	if !c.minSize.IsZero() &&
-		(pe.Position.X > c.minSize.Width || pe.Position.Y > c.minSize.Height) {
+		(pe.Position.X > c.minSize.Width || pe.Position.Y < minY || pe.Position.Y > minY+minHeight) {
 		// tapped outside the active area of the widget
 		return
 	}

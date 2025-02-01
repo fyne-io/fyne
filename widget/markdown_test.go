@@ -269,7 +269,7 @@ This is some test markdown. It contains some different markdown
 elements in an effort to put a realistic load onto the parser.
 
 > Here is a quote.
-> It streches over two lines and contains some ` + "`inline code`" + `.
+> It stretches over two lines and contains some ` + "`inline code`" + `.
 
 Moreover, we've got a list:
 - foo

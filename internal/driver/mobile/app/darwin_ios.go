@@ -227,7 +227,7 @@ func drawloop() {
 		case <-theApp.publish:
 			theApp.publishResult <- PublishResult{}
 			return
-		case <-time.After(100 * time.Millisecond): // incase the method blocked!!
+		case <-time.After(100 * time.Millisecond): // in case the method blocked!!
 			return
 		}
 	}

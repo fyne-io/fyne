@@ -41,7 +41,7 @@ func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) 
 	m.ShowAtPosition(pos)
 }
 
-// ShowPopUpMenuAtRelativePosition creates a PopUp menu populated with meny items from the passed menu structure.
+// ShowPopUpMenuAtRelativePosition creates a PopUp menu populated with menu items from the passed menu structure.
 // It will automatically be positioned at the given position relative to stated object and shown as an overlay on the specified canvas.
 //
 // Since 2.4

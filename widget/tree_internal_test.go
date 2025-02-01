@@ -612,7 +612,7 @@ func TestTree_ScrollToBottom(t *testing.T) {
 		sep = theme.Padding()
 	)
 
-	// Resize tall enough to display two nodes and the separater between them
+	// Resize tall enough to display two nodes and the separator between them
 	treeHeight := 2*(min.Height) + sep
 	w.Resize(fyne.Size{
 		Width:  400,

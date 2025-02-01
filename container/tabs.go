@@ -195,6 +195,7 @@ func selectIndex(t baseTabs, index int) {
 
 	t.setTransitioning(true)
 	t.setSelected(index)
+	t.Refresh()
 
 	if f := t.onSelected(); f != nil {
 		// Notification of selected

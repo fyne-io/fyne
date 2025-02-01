@@ -11,6 +11,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var timeNow = time.Now // used in tests
+
 const (
 	cursorInterruptTime = 300 * time.Millisecond
 	cursorFadeAlpha     = uint8(0x16)
@@ -18,17 +20,14 @@ const (
 )
 
 type entryCursorAnimation struct {
-	mu                *sync.RWMutex
+	mu                sync.RWMutex
 	cursor            *canvas.Rectangle
 	anim              *fyne.Animation
 	lastInterruptTime time.Time
-
-	timeNow func() time.Time // useful for testing
 }
 
 func newEntryCursorAnimation(cursor *canvas.Rectangle) *entryCursorAnimation {
-	a := &entryCursorAnimation{mu: &sync.RWMutex{}, cursor: cursor, timeNow: time.Now}
-	return a
+	return &entryCursorAnimation{cursor: cursor}
 }
 
 // creates fyne animation
@@ -55,7 +54,7 @@ func (a *entryCursorAnimation) createAnim(inverted bool) *fyne.Animation {
 	interrupted := false
 	anim := fyne.NewAnimation(time.Second/2, func(f float32) {
 		a.mu.RLock()
-		shouldInterrupt := a.timeNow().Sub(a.lastInterruptTime) <= cursorInterruptTime
+		shouldInterrupt := timeNow().Sub(a.lastInterruptTime) <= cursorInterruptTime
 		a.mu.RUnlock()
 		if shouldInterrupt {
 			if !interrupted {
@@ -127,7 +126,7 @@ func (a *entryCursorAnimation) start() {
 // temporarily stops the animation by "cursorInterruptTime".
 func (a *entryCursorAnimation) interrupt() {
 	a.mu.Lock()
-	a.lastInterruptTime = a.timeNow()
+	a.lastInterruptTime = timeNow()
 	a.mu.Unlock()
 }
 

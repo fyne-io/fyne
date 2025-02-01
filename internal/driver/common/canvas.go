@@ -40,13 +40,13 @@ type Canvas struct {
 
 	painter gl.Painter
 
-	// Any object that requestes to enter to the refresh queue should
+	// Any object that requests to enter to the refresh queue should
 	// not be omitted as it is always a rendering task's decision
 	// for skipping frames or drawing calls.
 	//
 	// If an object failed to ender the refresh queue, the object may
 	// disappear or blink from the view at any frames. As of this reason,
-	// the refreshQueue is an unbounded queue which is bale to cache
+	// the refreshQueue is an unbounded queue which is able to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
 	refreshQueue *async.CanvasObjectQueue
 	dirty        atomic.Bool
@@ -516,7 +516,7 @@ type RenderCacheNode struct {
 	parent      *RenderCacheNode
 	// cache data
 	minSize fyne.Size
-	// painterData is some data from the painter associated with the drawed node
+	// painterData is some data from the painter associated with the drawn node
 	// it may for instance point to a GL texture
 	// it should free all associated resources when released
 	// i.e. it should not simply be a texture reference integer
@@ -535,7 +535,6 @@ type activatableMenu interface {
 type overlayStack struct {
 	internal.OverlayStack
 
-	propertyLock sync.RWMutex
 	renderCaches []*renderCacheTree
 }
 
@@ -543,8 +542,6 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.add(overlay)
 }
 
@@ -552,8 +549,6 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(o.List()) == 0 {
 		return
 	}
-	o.propertyLock.Lock()
-	defer o.propertyLock.Unlock()
 	o.remove(overlay)
 }
 
