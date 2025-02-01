@@ -492,6 +492,11 @@ type RenderCacheNode struct {
 	parent      *RenderCacheNode
 	// cache data
 	minSize fyne.Size
+	// painterData is some data from the painter associated with the drawn node
+	// it may for instance point to a GL texture
+	// it should free all associated resources when released
+	// i.e. it should not simply be a texture reference integer
+	painterData any
 }
 
 // Obj returns the node object.

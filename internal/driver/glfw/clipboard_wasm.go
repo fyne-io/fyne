@@ -3,8 +3,6 @@
 package glfw
 
 import (
-	glfw "github.com/fyne-io/glfw-js"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -17,16 +15,22 @@ func NewClipboard() fyne.Clipboard {
 
 // clipboard represents the system clipboard
 type clipboard struct {
-	window *glfw.Window
 }
 
 // Content returns the clipboard content
-func (c clipboard) Content() string {
-	content, _ := c.window.GetClipboardString()
+func (c *clipboard) Content() string {
+	content := ""
+	runOnMain(func() {
+		win := fyne.CurrentApp().Driver().AllWindows()[0].(*window).viewport
+		content, _ = win.GetClipboardString()
+	})
 	return content
 }
 
 // SetContent sets the clipboard content
-func (c clipboard) SetContent(content string) {
-	c.window.SetClipboardString(content)
+func (c *clipboard) SetContent(content string) {
+	runOnMain(func() {
+		win := fyne.CurrentApp().Driver().AllWindows()[0].(*window).viewport
+		win.SetClipboardString(content)
+	})
 }
