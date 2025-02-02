@@ -90,16 +90,16 @@ func parseInt(in string) (int, error) {
 	return int(out), nil
 }
 
-func formatBool(in bool) string {
-	return strconv.FormatBool(in)
+func formatBool(in bool) (string, error) {
+	return strconv.FormatBool(in), nil
 }
 
-func formatFloat(in float64) string {
-	return strconv.FormatFloat(in, 'f', 6, 64)
+func formatFloat(in float64) (string, error) {
+	return strconv.FormatFloat(in, 'f', 6, 64), nil
 }
 
-func formatInt(in int) string {
-	return strconv.FormatInt(int64(in), 10)
+func formatInt(in int) (string, error) {
+	return strconv.FormatInt(int64(in), 10), nil
 }
 
 func internalFloatToInt(val float64) (int, error) {

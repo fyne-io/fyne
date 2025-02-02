@@ -702,17 +702,17 @@ func (t *boundExternalTreeItem[T]) setIfChanged(val T) error {
 	return nil
 }
 
-func toString[T any](v bindableItem[T], formatter func(T) string, comparator func(T, T) bool, parser func(string) (T, error)) *stringFrom[T] {
-	str := &stringFrom[T]{from: v, formatter: formatter, comparator: comparator, parser: parser}
+func toString[T any](v bindableItem[T], formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) *toStringFrom[T] {
+	str := &toStringFrom[T]{from: v, formatter: formatter, comparator: comparator, parser: parser}
 	v.AddListener(str)
 	return str
 }
 
-func toStringComparable[T bool | float64 | int](v bindableItem[T], formatter func(T) string, parser func(string) (T, error)) *stringFrom[T] {
+func toStringComparable[T bool | float64 | int](v bindableItem[T], formatter func(T) (string, error), parser func(string) (T, error)) *toStringFrom[T] {
 	return toString(v, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
 }
 
-func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, formatter func(T) string, comparator func(T, T) bool, parser func(string) (T, error)) String {
+func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) String {
 	str := toString(v, formatter, comparator, parser)
 	if format != defaultFormat { // Same as not using custom formatting.
 		str.format = format
@@ -721,23 +721,23 @@ func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, 
 	return str
 }
 
-func toStringWithFormatComparable[T bool | float64 | int](v bindableItem[T], format, defaultFormat string, formatter func(T) string, parser func(string) (T, error)) String {
+func toStringWithFormatComparable[T bool | float64 | int](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), parser func(string) (T, error)) String {
 	return toStringWithFormat(v, format, defaultFormat, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
 }
 
-type stringFrom[T any] struct {
+type toStringFrom[T any] struct {
 	base
 
 	format string
 
-	formatter  func(T) string
+	formatter  func(T) (string, error)
 	comparator func(T, T) bool
 	parser     func(string) (T, error)
 
 	from bindableItem[T]
 }
 
-func (s *stringFrom[T]) Get() (string, error) {
+func (s *toStringFrom[T]) Get() (string, error) {
 	val, err := s.from.Get()
 	if err != nil {
 		return "", err
@@ -747,10 +747,10 @@ func (s *stringFrom[T]) Get() (string, error) {
 		return fmt.Sprintf(s.format, val), nil
 	}
 
-	return s.formatter(val), nil
+	return s.formatter(val)
 }
 
-func (s *stringFrom[T]) Set(str string) error {
+func (s *toStringFrom[T]) Set(str string) error {
 	var val T
 	if s.format != "" {
 		safe := stripFormatPrecision(s.format)
@@ -784,7 +784,81 @@ func (s *stringFrom[T]) Set(str string) error {
 	return nil
 }
 
-func (s *stringFrom[T]) DataChanged() {
+func (s *toStringFrom[T]) DataChanged() {
+	s.trigger()
+}
+
+type fromStringTo[T any] struct {
+	base
+
+	format    string
+	formatter func(string) (T, error)
+	parser    func(T) (string, error)
+
+	from String
+}
+
+func (s *fromStringTo[T]) Get() (T, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return *new(T), err
+	}
+
+	if s.formatter != nil {
+		return s.formatter(str)
+	}
+
+	var val T
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return *new(T), err
+		}
+		if n != 1 {
+			return *new(T), errParseFailed
+		}
+	} else {
+		formatted, err := s.formatter(str)
+		if err != nil {
+			return *new(T), err
+		}
+		val = formatted
+	}
+
+	return val, nil
+}
+
+func (s *fromStringTo[T]) Set(val T) error {
+	var str string
+	if s.parser != nil {
+		parsed, err := s.parser(val)
+		if err != nil {
+			return err
+		}
+		str = parsed
+	} else {
+		if s.format != "" {
+			str = fmt.Sprintf(s.format, val)
+		} else {
+			str, _ = s.parser(val)
+		}
+	}
+
+	old, err := s.from.Get()
+	if str == old {
+		return err
+	}
+
+	err = s.from.Set(str)
+	if err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *fromStringTo[T]) DataChanged() {
 	s.trigger()
 }
 

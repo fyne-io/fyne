@@ -1,8 +1,6 @@
 package binding
 
 import (
-	"fmt"
-
 	"fyne.io/fyne/v2"
 )
 
@@ -60,23 +58,13 @@ func FloatToInt(v Float) Int {
 	return i
 }
 
-type stringFromInt struct {
-	base
-
-	format string
-
-	from Int
-}
-
 // IntToString creates a binding that connects a Int data item to a String.
 // Changes to the Int will be pushed to the String and setting the string will parse and set the
 // Int if the parse was successful.
 //
 // Since: 2.0
 func IntToString(v Int) String {
-	str := &stringFromInt{from: v}
-	v.AddListener(str)
-	return str
+	return toStringComparable[int](v, formatInt, parseInt)
 }
 
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
@@ -85,70 +73,7 @@ func IntToString(v Int) String {
 //
 // Since: 2.0
 func IntToStringWithFormat(v Int, format string) String {
-	if format == "%d" { // Same as not using custom formatting.
-		return IntToString(v)
-	}
-
-	str := &stringFromInt{from: v, format: format}
-	v.AddListener(str)
-	return str
-}
-
-func (s *stringFromInt) Get() (string, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return "", err
-	}
-
-	if s.format != "" {
-		return fmt.Sprintf(s.format, val), nil
-	}
-
-	return formatInt(val), nil
-}
-
-func (s *stringFromInt) Set(str string) error {
-	var val int
-	if s.format != "" {
-		safe := stripFormatPrecision(s.format)
-		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return err
-		}
-		if n != 1 {
-			return errParseFailed
-		}
-	} else {
-		new, err := parseInt(str)
-		if err != nil {
-			return err
-		}
-		val = new
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringFromInt) DataChanged() {
-	s.trigger()
-}
-
-type stringFromURI struct {
-	base
-
-	from URI
+	return toStringWithFormatComparable[int](v, format, "%d", formatInt, parseInt)
 }
 
 // URIToString creates a binding that connects a URI data item to a String.
@@ -157,51 +82,7 @@ type stringFromURI struct {
 //
 // Since: 2.1
 func URIToString(v URI) String {
-	str := &stringFromURI{from: v}
-	v.AddListener(str)
-	return str
-}
-
-func (s *stringFromURI) Get() (string, error) {
-	val, err := s.from.Get()
-	if err != nil {
-		return "", err
-	}
-
-	return uriToString(val)
-}
-
-func (s *stringFromURI) Set(str string) error {
-	val, err := uriFromString(str)
-	if err != nil {
-		return err
-	}
-
-	old, err := s.from.Get()
-	if err != nil {
-		return err
-	}
-	if val == old {
-		return nil
-	}
-	if err = s.from.Set(val); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringFromURI) DataChanged() {
-	s.trigger()
-}
-
-type stringToBool struct {
-	base
-
-	format string
-
-	from String
+	return toString[fyne.URI](v, uriToString, compareURI, uriFromString)
 }
 
 // StringToBool creates a binding that connects a String data item to a Bool.
@@ -210,7 +91,7 @@ type stringToBool struct {
 //
 // Since: 2.0
 func StringToBool(str String) Bool {
-	v := &stringToBool{from: str}
+	v := &fromStringTo[bool]{from: str, formatter: parseBool, parser: formatBool}
 	str.AddListener(v)
 	return v
 }
@@ -226,68 +107,9 @@ func StringToBoolWithFormat(str String, format string) Bool {
 		return StringToBool(str)
 	}
 
-	v := &stringToBool{from: str, format: format}
+	v := &fromStringTo[bool]{from: str, format: format}
 	str.AddListener(v)
 	return v
-}
-
-func (s *stringToBool) Get() (bool, error) {
-	str, err := s.from.Get()
-	if str == "" || err != nil {
-		return false, err
-	}
-
-	var val bool
-	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return false, err
-		}
-		if n != 1 {
-			return false, errParseFailed
-		}
-	} else {
-		new, err := parseBool(str)
-		if err != nil {
-			return false, err
-		}
-		val = new
-	}
-
-	return val, nil
-}
-
-func (s *stringToBool) Set(val bool) error {
-	var str string
-	if s.format != "" {
-		str = fmt.Sprintf(s.format, val)
-	} else {
-		str = formatBool(val)
-	}
-
-	old, err := s.from.Get()
-	if str == old {
-		return err
-	}
-
-	if err = s.from.Set(str); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringToBool) DataChanged() {
-	s.trigger()
-}
-
-type stringToFloat struct {
-	base
-
-	format string
-
-	from String
 }
 
 // StringToFloat creates a binding that connects a String data item to a Float.
@@ -296,7 +118,7 @@ type stringToFloat struct {
 //
 // Since: 2.0
 func StringToFloat(str String) Float {
-	v := &stringToFloat{from: str}
+	v := &fromStringTo[float64]{from: str, formatter: parseFloat, parser: formatFloat}
 	str.AddListener(v)
 	return v
 }
@@ -312,68 +134,9 @@ func StringToFloatWithFormat(str String, format string) Float {
 		return StringToFloat(str)
 	}
 
-	v := &stringToFloat{from: str, format: format}
+	v := &fromStringTo[float64]{from: str, format: format}
 	str.AddListener(v)
 	return v
-}
-
-func (s *stringToFloat) Get() (float64, error) {
-	str, err := s.from.Get()
-	if str == "" || err != nil {
-		return 0.0, err
-	}
-
-	var val float64
-	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return 0.0, err
-		}
-		if n != 1 {
-			return 0.0, errParseFailed
-		}
-	} else {
-		new, err := parseFloat(str)
-		if err != nil {
-			return 0.0, err
-		}
-		val = new
-	}
-
-	return val, nil
-}
-
-func (s *stringToFloat) Set(val float64) error {
-	var str string
-	if s.format != "" {
-		str = fmt.Sprintf(s.format, val)
-	} else {
-		str = formatFloat(val)
-	}
-
-	old, err := s.from.Get()
-	if str == old {
-		return err
-	}
-
-	if err = s.from.Set(str); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringToFloat) DataChanged() {
-	s.trigger()
-}
-
-type stringToInt struct {
-	base
-
-	format string
-
-	from String
 }
 
 // StringToInt creates a binding that connects a String data item to a Int.
@@ -382,7 +145,7 @@ type stringToInt struct {
 //
 // Since: 2.0
 func StringToInt(str String) Int {
-	v := &stringToInt{from: str}
+	v := &fromStringTo[int]{from: str, parser: formatInt, formatter: parseInt}
 	str.AddListener(v)
 	return v
 }
@@ -398,66 +161,9 @@ func StringToIntWithFormat(str String, format string) Int {
 		return StringToInt(str)
 	}
 
-	v := &stringToInt{from: str, format: format}
+	v := &fromStringTo[int]{from: str, format: format}
 	str.AddListener(v)
 	return v
-}
-
-func (s *stringToInt) Get() (int, error) {
-	str, err := s.from.Get()
-	if str == "" || err != nil {
-		return 0, err
-	}
-
-	var val int
-	if s.format != "" {
-		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
-		if err != nil {
-			return 0, err
-		}
-		if n != 1 {
-			return 0, errParseFailed
-		}
-	} else {
-		new, err := parseInt(str)
-		if err != nil {
-			return 0, err
-		}
-		val = new
-	}
-
-	return val, nil
-}
-
-func (s *stringToInt) Set(val int) error {
-	var str string
-	if s.format != "" {
-		str = fmt.Sprintf(s.format, val)
-	} else {
-		str = formatInt(val)
-	}
-
-	old, err := s.from.Get()
-	if str == old {
-		return err
-	}
-
-	if err = s.from.Set(str); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringToInt) DataChanged() {
-	s.trigger()
-}
-
-type stringToURI struct {
-	base
-
-	from String
 }
 
 // StringToURI creates a binding that connects a String data item to a URI.
@@ -466,38 +172,7 @@ type stringToURI struct {
 //
 // Since: 2.1
 func StringToURI(str String) URI {
-	v := &stringToURI{from: str}
+	v := &fromStringTo[fyne.URI]{from: str, parser: uriToString, formatter: uriFromString}
 	str.AddListener(v)
 	return v
-}
-
-func (s *stringToURI) Get() (fyne.URI, error) {
-	str, err := s.from.Get()
-	if str == "" || err != nil {
-		return fyne.URI(nil), err
-	}
-
-	return uriFromString(str)
-}
-
-func (s *stringToURI) Set(val fyne.URI) error {
-	str, err := uriToString(val)
-	if err != nil {
-		return err
-	}
-	old, err := s.from.Get()
-	if str == old {
-		return err
-	}
-
-	if err = s.from.Set(str); err != nil {
-		return err
-	}
-
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *stringToURI) DataChanged() {
-	s.trigger()
 }
