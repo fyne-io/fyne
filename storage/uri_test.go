@@ -15,6 +15,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestURIEqual(t *testing.T) {
+	first := storage.NewFileURI("first")
+	second := storage.NewFileURI("second")
+	assert.False(t, storage.EqualURI(first, second))
+	assert.True(t, storage.EqualURI(first, first))
+
+	assert.True(t, storage.EqualURI(first, storage.NewFileURI("first")))
+
+	assert.True(t, storage.EqualURI(nil, nil))
+	assert.False(t, storage.EqualURI(first, nil))
+	assert.False(t, storage.EqualURI(nil, second))
+}
+
 func TestURIAuthority(t *testing.T) {
 	// from IETF RFC 3986
 	s := "foo://example.com:8042/over/there?name=ferret#nose"

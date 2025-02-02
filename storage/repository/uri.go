@@ -10,6 +10,23 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+// EqualURI returns true if the two URIs are equal.
+//
+// Since: 2.6
+func EqualURI(t1, t2 fyne.URI) bool {
+	if t1 == nil || t2 == nil {
+		return t1 == t2
+	}
+
+	u1, ok1 := t1.(*uri)
+	u2, ok2 := t2.(*uri)
+	if ok1 && ok2 {
+		return *u1 == *u2 // Compare fields directly without allocating a string.
+	}
+
+	return t1.String() == t2.String()
+}
+
 // Declare conformance with fyne.URI interface.
 var _ fyne.URI = &uri{}
 
