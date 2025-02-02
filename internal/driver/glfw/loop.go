@@ -109,11 +109,6 @@ func (d *gLDriver) drawSingleFrame() {
 	refreshingCanvases = refreshingCanvases[:0]
 }
 
-var (
-	settingsToApply fyne.Settings
-	settingsMutex   sync.Mutex
-)
-
 func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
