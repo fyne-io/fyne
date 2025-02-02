@@ -107,6 +107,9 @@ func (t *themedApp) ShowAnimations() bool {
 func (t *themedApp) AddChangeListener(chan fyne.Settings) {
 }
 
+func (t *themedApp) AddListener(func(fyne.Settings)) {
+}
+
 func (t *themedApp) Clipboard() fyne.Clipboard {
 	return nil
 }
