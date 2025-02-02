@@ -12,14 +12,14 @@ type simpleList struct {
 
 func TestListBase_AddListener(t *testing.T) {
 	data := &simpleList{}
-	assert.Equal(t, 0, data.listeners.Len())
+	assert.Equal(t, 0, len(data.listeners))
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, data.listeners.Len())
+	assert.Equal(t, 1, len(data.listeners))
 
 	data.trigger()
 	assert.True(t, called)
@@ -55,11 +55,11 @@ func TestListBase_RemoveListener(t *testing.T) {
 		called = true
 	})
 	data := &simpleList{}
-	data.listeners.Store(fn, true)
+	data.listeners = append(data.listeners, fn)
 
-	assert.Equal(t, 1, data.listeners.Len())
+	assert.Equal(t, 1, len(data.listeners))
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, data.listeners.Len())
+	assert.Equal(t, 0, len(data.listeners))
 
 	data.trigger()
 	assert.False(t, called)

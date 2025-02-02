@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
 )
 
 var (
@@ -58,31 +57,43 @@ func (l *listener) DataChanged() {
 }
 
 type base struct {
-	listeners async.Map[DataListener, bool]
+	listenerLock sync.Mutex
+	listeners    []DataListener
 
 	lock sync.RWMutex
 }
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataListener) {
-	b.listeners.Store(l, true)
+	b.listenerLock.Lock()
+	b.listeners = append(b.listeners, l)
+	b.listenerLock.Unlock()
 	queueItem(l.DataChanged)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataListener) {
-	b.listeners.Delete(l)
+	b.listenerLock.Lock()
+	defer b.listenerLock.Unlock()
+
+	for i, listener := range b.listeners {
+		if listener == l {
+			// Delete without preserving order:
+			lastIndex := len(b.listeners) - 1
+			b.listeners[i] = b.listeners[lastIndex]
+			b.listeners[lastIndex] = nil
+			b.listeners = b.listeners[:lastIndex]
+			return
+		}
+	}
+
 }
 
 func (b *base) trigger() {
-	var listeners []DataListener
-	b.listeners.Range(func(listener DataListener, _ bool) bool {
-		listeners = append(listeners, listener)
-		return true
-	})
-
 	queueItem(func() {
-		for _, listen := range listeners {
+		b.listenerLock.Lock()
+		defer b.listenerLock.Unlock()
+		for _, listen := range b.listeners {
 			listen.DataChanged()
 		}
 	})
