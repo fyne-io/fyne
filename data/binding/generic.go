@@ -804,10 +804,6 @@ func (s *fromStringTo[T]) Get() (T, error) {
 		return *new(T), err
 	}
 
-	if s.formatter != nil {
-		return s.formatter(str)
-	}
-
 	var val T
 	if s.format != "" {
 		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
@@ -830,18 +826,14 @@ func (s *fromStringTo[T]) Get() (T, error) {
 
 func (s *fromStringTo[T]) Set(val T) error {
 	var str string
-	if s.parser != nil {
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
 		parsed, err := s.parser(val)
 		if err != nil {
 			return err
 		}
 		str = parsed
-	} else {
-		if s.format != "" {
-			str = fmt.Sprintf(s.format, val)
-		} else {
-			str, _ = s.parser(val)
-		}
 	}
 
 	old, err := s.from.Get()
@@ -892,7 +884,8 @@ func (s *toInt[T]) Set(v int) error {
 	if val == old {
 		return nil
 	}
-	if err = s.from.Set(val); err != nil {
+	err = s.from.Set(val)
+	if err != nil {
 		return err
 	}
 
@@ -915,7 +908,7 @@ type fromIntTo[T float64] struct {
 func (s *fromIntTo[T]) Get() (T, error) {
 	val, err := s.from.Get()
 	if err != nil {
-		return 0.0, err
+		return *new(T), err
 	}
 	return s.formatter(val)
 }
