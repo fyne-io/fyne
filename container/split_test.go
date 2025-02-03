@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -520,4 +521,32 @@ func TestSplitContainer_Hidden(t *testing.T) {
 		sc.SetOffset(1)
 		assert.Equal(t, float32(0), sc.Trailing.Size().Height)
 	})
+}
+
+func TestSplitContainer_UpdateOffsetDoesNotRefreshContent(t *testing.T) {
+	objA := &refreshCountingWidget{}
+	objB := &refreshCountingWidget{}
+	split := NewHSplit(objA, objB)
+	split.SetOffset(0.4)
+	assert.Equal(t, 0, objA.refreshCount)
+	assert.Equal(t, 0, objB.refreshCount)
+
+	split.Refresh()
+	assert.Equal(t, 1, objA.refreshCount)
+	assert.Equal(t, 1, objB.refreshCount)
+}
+
+type refreshCountingWidget struct {
+	widget.BaseWidget
+
+	refreshCount int
+}
+
+func (r *refreshCountingWidget) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(canvas.NewRectangle(color.Transparent))
+}
+
+func (r *refreshCountingWidget) Refresh() {
+	r.refreshCount += 1
+	r.BaseWidget.Refresh()
 }
