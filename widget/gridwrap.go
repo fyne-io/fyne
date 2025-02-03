@@ -165,7 +165,16 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
 func (l *GridWrap) Resize(s fyne.Size) {
+	oldColCount := l.ColumnCount()
 	l.colCountCache = 0
+	newColCount := l.ColumnCount()
+
+	if oldColCount == newColCount && l.size.Height == s.Height {
+		// no content update needed if resizing only horizontally and col count is unchanged
+		l.BaseWidget.Resize(s)
+		return
+	}
+
 	l.BaseWidget.Resize(s)
 	if l.scroller != nil {
 		l.offsetUpdated(l.scroller.Offset)
@@ -393,7 +402,7 @@ func (l *gridWrapRenderer) Refresh() {
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*gridWrapLayout).updateGrid(true)
+	l.layout.Layout.(*gridWrapLayout).updateGrid(false)
 	canvas.Refresh(l.list)
 }
 
@@ -560,7 +569,7 @@ func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
 		return
 	}
 	l.gw.offsetY = pos.Y
-	l.updateGrid(false)
+	l.updateGrid(true)
 }
 
 func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focus bool) {
@@ -613,7 +622,7 @@ func (l *GridWrap) ColumnCount() int {
 	return l.colCountCache
 }
 
-func (l *gridWrapLayout) updateGrid(refresh bool) {
+func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
 	padding := l.gw.Theme().Size(theme.SizeNamePadding)
 
@@ -658,9 +667,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 			}
 
 			item.Move(fyne.NewPos(x, y))
-			if refresh {
-				item.Resize(l.gw.itemMin)
-			}
+			item.Resize(l.gw.itemMin)
 
 			x += l.gw.itemMin.Width + padding
 			l.visible = append(l.visible, gridItemAndID{item: item, id: curItemID})
@@ -677,8 +684,16 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 		}
 	}
 
-	for _, obj := range l.visible {
-		l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+	if newOnly {
+		for _, obj := range l.visible {
+			if _, ok := l.searchVisible(l.wasVisible, obj.id); !ok {
+				l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+			}
+		}
+	} else {
+		for _, obj := range l.visible {
+			l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+		}
 	}
 
 	// we don't need wasVisible now until next call to update
