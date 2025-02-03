@@ -1268,11 +1268,6 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 		return
 	}
 
-	updateCell := r.cells.t.UpdateCell
-	if updateCell == nil {
-		fyne.LogError("Missing UpdateCell callback required for Table", nil)
-	}
-
 	var cellXOffset, cellYOffset float32
 	stickRows := r.cells.t.StickyRowCount
 	if r.cells.t.ShowHeaderRow {
@@ -1372,29 +1367,11 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			r.pool.Put(old)
 		}
 	}
-	visible := r.visible
-	headers := r.headers
 
 	r.SetObjects(cells)
 
-	if updateCell != nil {
-		if toDraw == onlyNewTableCellsID {
-			for id, cell := range visible {
-				if _, ok := wasVisible[id]; !ok {
-					updateCell(id, cell)
-				}
-			}
-		} else {
-			for id, cell := range visible {
-				if toDraw != allTableCellsID && toDraw != id {
-					continue
-				}
-
-				updateCell(id, cell)
-			}
-		}
-	}
-	for id, head := range headers {
+	r.updateCells(toDraw, r.visible, wasVisible)
+	for id, head := range r.headers {
 		r.cells.t.updateHeader(id, head)
 	}
 
@@ -1405,6 +1382,31 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	r.hover.FillColor = th.Color(theme.ColorNameHover, v)
 	r.hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	r.hover.Refresh()
+}
+
+func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible map[TableCellID]fyne.CanvasObject) {
+	updateCell := r.cells.t.UpdateCell
+	if updateCell == nil {
+		fyne.LogError("Missing UpdateCell callback required for Table", nil)
+		return
+	}
+
+	if toDraw == onlyNewTableCellsID {
+		for id, cell := range visible {
+			if _, ok := wasVisible[id]; !ok {
+				updateCell(id, cell)
+			}
+		}
+	} else {
+		for id, cell := range visible {
+			if toDraw != allTableCellsID && toDraw != id {
+				continue
+			}
+
+			updateCell(id, cell)
+		}
+	}
+
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
