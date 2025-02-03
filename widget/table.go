@@ -9,15 +9,19 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
 const noCellMatch = math.MaxInt
 
-// allTableCellsID represents all table cells when refreshing requested cells
-var allTableCellsID = TableCellID{-1, -1}
+var (
+	// allTableCellsID represents all table cells when refreshing requested cells
+	allTableCellsID = TableCellID{-1, -1}
+
+	// onlyNewTableCellsID represents newly visible table cells when refreshing requested cells
+	onlyNewTableCellsID = TableCellID{-2, -2}
+)
 
 // Declare conformity with interfaces
 var _ desktop.Cursorable = (*Table)(nil)
@@ -162,7 +166,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
 	t.content.OnScrolled = func(pos fyne.Position) {
 		t.offset = pos
-		t.cells.Refresh()
+		t.cells.RefreshForID(onlyNewTableCellsID)
 	}
 
 	r.Layout(t.Size())
@@ -252,12 +256,7 @@ func (t *Table) RefreshItem(id TableCellID) {
 	if t.cells == nil {
 		return
 	}
-	r := cache.Renderer(t.cells)
-	if r == nil {
-		return
-	}
-
-	r.(*tableCellsRenderer).refreshForID(id)
+	t.cells.RefreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
@@ -1140,10 +1139,12 @@ var _ fyne.Widget = (*tableCells)(nil)
 type tableCells struct {
 	BaseWidget
 	t *Table
+
+	nextRefreshCellsID TableCellID
 }
 
 func newTableCells(t *Table) *tableCells {
-	c := &tableCells{t: t}
+	c := &tableCells{t: t, nextRefreshCellsID: allTableCellsID}
 	c.ExtendBaseWidget(c)
 	return c
 }
@@ -1168,7 +1169,17 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 
 func (c *tableCells) Resize(s fyne.Size) {
 	c.BaseWidget.Resize(s)
-	c.Refresh() // trigger a redraw
+	c.RefreshForID(onlyNewTableCellsID) // trigger a redraw
+}
+
+func (c *tableCells) RefreshForID(id TableCellID) {
+	c.nextRefreshCellsID = id
+	c.BaseWidget.Refresh()
+}
+
+func (c *tableCells) Refresh() {
+	c.nextRefreshCellsID = allTableCellsID
+	c.BaseWidget.Refresh()
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -1236,7 +1247,7 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	r.refreshForID(allTableCellsID)
+	r.refreshForID(r.cells.nextRefreshCellsID)
 }
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
@@ -1367,12 +1378,20 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	r.SetObjects(cells)
 
 	if updateCell != nil {
-		for id, cell := range visible {
-			if toDraw != allTableCellsID && toDraw != id {
-				continue
+		if toDraw == onlyNewTableCellsID {
+			for id, cell := range visible {
+				if _, ok := wasVisible[id]; !ok {
+					updateCell(id, cell)
+				}
 			}
+		} else {
+			for id, cell := range visible {
+				if toDraw != allTableCellsID && toDraw != id {
+					continue
+				}
 
-			updateCell(id, cell)
+				updateCell(id, cell)
+			}
 		}
 	}
 	for id, head := range headers {
