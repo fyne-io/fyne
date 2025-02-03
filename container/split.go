@@ -24,7 +24,7 @@ type Split struct {
 	// to communicate to the renderer that the next refresh
 	// is just an offset update (ie a resize and move only)
 	// cleared by renderer in Refresh()
-	nextRefreshIsOffsetUpdate bool
+	offsetUpdated bool
 }
 
 // NewHSplit creates a horizontally arranged container with the specified leading and trailing elements.
@@ -81,7 +81,7 @@ func (s *Split) SetOffset(offset float64) {
 		return
 	}
 	s.Offset = offset
-	s.nextRefreshIsOffsetUpdate = true
+	s.offsetUpdated = true
 	s.Refresh()
 }
 
@@ -153,9 +153,9 @@ func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *splitContainerRenderer) Refresh() {
-	if r.split.nextRefreshIsOffsetUpdate {
+	if r.split.offsetUpdated {
 		r.Layout(r.split.Size())
-		r.split.nextRefreshIsOffsetUpdate = false
+		r.split.offsetUpdated = false
 		return
 	}
 
