@@ -381,3 +381,270 @@ func (b *listBase) appendItem(i DataItem) {
 func (b *listBase) deleteItem(i int) {
 	b.items = append(b.items[:i], b.items[i+1:]...)
 }
+
+func newList[T any](comparator func(T, T) bool) *boundList[T] {
+	return &boundList[T]{val: new([]T), comparator: comparator}
+}
+
+func newListComparable[T bool | float64 | int | rune | string]() *boundList[T] {
+	return newList(func(t1, t2 T) bool { return t1 == t2 })
+}
+
+func newExternalList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	return &boundList[T]{val: v, comparator: comparator, updateExternal: true}
+}
+
+func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	if v == nil {
+		return newList(comparator)
+	}
+
+	l := newExternalList(v, comparator)
+	for i := range *v {
+		l.appendItem(bindListItem(v, i, l.updateExternal, comparator))
+	}
+
+	return l
+}
+
+func bindListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
+	return bindList(v, func(t1, t2 T) bool { return t1 == t2 })
+}
+
+type boundList[T any] struct {
+	listBase
+
+	comparator     func(T, T) bool
+	updateExternal bool
+	val            *[]T
+}
+
+func (l *boundList[T]) Append(val T) error {
+	l.lock.Lock()
+	*l.val = append(*l.val, val)
+
+	trigger, err := l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
+}
+
+func (l *boundList[T]) Get() ([]T, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	return *l.val, nil
+}
+
+func (l *boundList[T]) GetValue(i int) (T, error) {
+	l.lock.RLock()
+	defer l.lock.RUnlock()
+
+	if i < 0 || i >= l.Length() {
+		return *new(T), errOutOfBounds
+	}
+
+	return (*l.val)[i], nil
+}
+
+func (l *boundList[T]) Prepend(val T) error {
+	l.lock.Lock()
+	*l.val = append([]T{val}, *l.val...)
+
+	trigger, err := l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
+}
+
+func (l *boundList[T]) Reload() error {
+	l.lock.Lock()
+	trigger, err := l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
+}
+
+func (l *boundList[T]) Remove(val T) error {
+	l.lock.Lock()
+
+	v := *l.val
+	if len(v) == 0 {
+		l.lock.Unlock()
+		return nil
+	}
+	if l.comparator(v[0], val) {
+		*l.val = v[1:]
+	} else if l.comparator(v[len(v)-1], val) {
+		*l.val = v[:len(v)-1]
+	} else {
+		id := -1
+		for i, v := range v {
+			if l.comparator(v, val) {
+				id = i
+				break
+			}
+		}
+
+		if id == -1 {
+			l.lock.Unlock()
+			return nil
+		}
+		*l.val = append(v[:id], v[id+1:]...)
+	}
+
+	trigger, err := l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
+}
+
+func (l *boundList[T]) Set(v []T) error {
+	l.lock.Lock()
+	*l.val = v
+	trigger, err := l.doReload()
+	l.lock.Unlock()
+
+	if trigger {
+		l.trigger()
+	}
+
+	return err
+}
+
+func (l *boundList[T]) doReload() (trigger bool, retErr error) {
+	oldLen := len(l.items)
+	newLen := len(*l.val)
+	if oldLen > newLen {
+		for i := oldLen - 1; i >= newLen; i-- {
+			l.deleteItem(i)
+		}
+		trigger = true
+	} else if oldLen < newLen {
+		for i := oldLen; i < newLen; i++ {
+			l.appendItem(bindListItem(l.val, i, l.updateExternal, l.comparator))
+		}
+		trigger = true
+	}
+
+	for i, item := range l.items {
+		if i > oldLen || i > newLen {
+			break
+		}
+
+		var err error
+		if l.updateExternal {
+			err = item.(*boundExternalListItem[T]).setIfChanged((*l.val)[i])
+		} else {
+			err = item.(*boundListItem[T]).doSet((*l.val)[i])
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (l *boundList[T]) SetValue(i int, v T) error {
+	l.lock.RLock()
+	len := l.Length()
+	l.lock.RUnlock()
+
+	if i < 0 || i >= len {
+		return errOutOfBounds
+	}
+
+	l.lock.Lock()
+	(*l.val)[i] = v
+	l.lock.Unlock()
+
+	item, err := l.GetItem(i)
+	if err != nil {
+		return err
+	}
+	return item.(bindableItem[T]).Set(v)
+}
+
+func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) bool) bindableItem[T] {
+	if external {
+		ret := &boundExternalListItem[T]{old: (*v)[i]}
+		ret.val = v
+		ret.index = i
+		ret.comparator = comparator
+		return ret
+	}
+
+	return &boundListItem[T]{val: v, index: i, comparator: comparator}
+}
+
+func bindListItemComparable[T bool | float64 | int | rune | string](v *[]T, i int, external bool) bindableItem[T] {
+	return bindListItem(v, i, external, func(t1, t2 T) bool { return t1 == t2 })
+}
+
+type boundListItem[T any] struct {
+	base
+
+	comparator func(T, T) bool
+	val        *[]T
+	index      int
+}
+
+func (b *boundListItem[T]) Get() (T, error) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.index < 0 || b.index >= len(*b.val) {
+		return *new(T), errOutOfBounds
+	}
+
+	return (*b.val)[b.index], nil
+}
+
+func (b *boundListItem[T]) Set(val T) error {
+	return b.doSet(val)
+}
+
+func (b *boundListItem[T]) doSet(val T) error {
+	b.lock.Lock()
+	(*b.val)[b.index] = val
+	b.lock.Unlock()
+
+	b.trigger()
+	return nil
+}
+
+type boundExternalListItem[T any] struct {
+	boundListItem[T]
+
+	old T
+}
+
+func (b *boundExternalListItem[T]) setIfChanged(val T) error {
+	b.lock.Lock()
+	if b.comparator(val, b.old) {
+		b.lock.Unlock()
+		return nil
+	}
+	(*b.val)[b.index] = val
+	b.old = val
+
+	b.lock.Unlock()
+	b.trigger()
+	return nil
+}

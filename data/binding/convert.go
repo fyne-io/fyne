@@ -1,6 +1,8 @@
 package binding
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 )
 
@@ -175,4 +177,240 @@ func StringToURI(str String) URI {
 	v := &fromStringTo[fyne.URI]{from: str, parser: uriToString, formatter: uriFromString}
 	str.AddListener(v)
 	return v
+}
+
+func toString[T any](v bindableItem[T], formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) *toStringFrom[T] {
+	str := &toStringFrom[T]{from: v, formatter: formatter, comparator: comparator, parser: parser}
+	v.AddListener(str)
+	return str
+}
+
+func toStringComparable[T bool | float64 | int](v bindableItem[T], formatter func(T) (string, error), parser func(string) (T, error)) *toStringFrom[T] {
+	return toString(v, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
+}
+
+func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) String {
+	str := toString(v, formatter, comparator, parser)
+	if format != defaultFormat { // Same as not using custom formatting.
+		str.format = format
+	}
+
+	return str
+}
+
+func toStringWithFormatComparable[T bool | float64 | int](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), parser func(string) (T, error)) String {
+	return toStringWithFormat(v, format, defaultFormat, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
+}
+
+type toStringFrom[T any] struct {
+	base
+
+	format string
+
+	formatter  func(T) (string, error)
+	comparator func(T, T) bool
+	parser     func(string) (T, error)
+
+	from bindableItem[T]
+}
+
+func (s *toStringFrom[T]) Get() (string, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return "", err
+	}
+
+	if s.format != "" {
+		return fmt.Sprintf(s.format, val), nil
+	}
+
+	return s.formatter(val)
+}
+
+func (s *toStringFrom[T]) Set(str string) error {
+	var val T
+	if s.format != "" {
+		safe := stripFormatPrecision(s.format)
+		n, err := fmt.Sscanf(str, safe+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return err
+		}
+		if n != 1 {
+			return errParseFailed
+		}
+	} else {
+		new, err := s.parser(str)
+		if err != nil {
+			return err
+		}
+		val = new
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if s.comparator(val, old) {
+		return nil
+	}
+	if err = s.from.Set(val); err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *toStringFrom[T]) DataChanged() {
+	s.trigger()
+}
+
+type fromStringTo[T any] struct {
+	base
+
+	format    string
+	formatter func(string) (T, error)
+	parser    func(T) (string, error)
+
+	from String
+}
+
+func (s *fromStringTo[T]) Get() (T, error) {
+	str, err := s.from.Get()
+	if str == "" || err != nil {
+		return *new(T), err
+	}
+
+	var val T
+	if s.format != "" {
+		n, err := fmt.Sscanf(str, s.format+" ", &val) // " " denotes match to end of string
+		if err != nil {
+			return *new(T), err
+		}
+		if n != 1 {
+			return *new(T), errParseFailed
+		}
+	} else {
+		formatted, err := s.formatter(str)
+		if err != nil {
+			return *new(T), err
+		}
+		val = formatted
+	}
+
+	return val, nil
+}
+
+func (s *fromStringTo[T]) Set(val T) error {
+	var str string
+	if s.format != "" {
+		str = fmt.Sprintf(s.format, val)
+	} else {
+		parsed, err := s.parser(val)
+		if err != nil {
+			return err
+		}
+		str = parsed
+	}
+
+	old, err := s.from.Get()
+	if str == old {
+		return err
+	}
+
+	err = s.from.Set(str)
+	if err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *fromStringTo[T]) DataChanged() {
+	s.trigger()
+}
+
+type toInt[T float64] struct {
+	base
+
+	formatter func(int) (T, error)
+	parser    func(T) (int, error)
+
+	from bindableItem[T]
+}
+
+func (s *toInt[T]) Get() (int, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return 0, err
+	}
+	return s.parser(val)
+}
+
+func (s *toInt[T]) Set(v int) error {
+	val, err := s.formatter(v)
+	if err != nil {
+		return err
+	}
+
+	old, err := s.from.Get()
+	if err != nil {
+		return err
+	}
+	if val == old {
+		return nil
+	}
+	err = s.from.Set(val)
+	if err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *toInt[T]) DataChanged() {
+	s.trigger()
+}
+
+type fromIntTo[T float64] struct {
+	base
+
+	formatter func(int) (T, error)
+	parser    func(T) (int, error)
+	from      bindableItem[int]
+}
+
+func (s *fromIntTo[T]) Get() (T, error) {
+	val, err := s.from.Get()
+	if err != nil {
+		return *new(T), err
+	}
+	return s.formatter(val)
+}
+
+func (s *fromIntTo[T]) Set(val T) error {
+	i, err := s.parser(val)
+	if err != nil {
+		return err
+	}
+	old, err := s.from.Get()
+	if i == old {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	err = s.from.Set(i)
+	if err != nil {
+		return err
+	}
+
+	queueItem(s.DataChanged)
+	return nil
+}
+
+func (s *fromIntTo[T]) DataChanged() {
+	s.trigger()
 }
