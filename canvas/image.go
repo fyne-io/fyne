@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"image"
+	gif2 "image/gif"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/gif"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/storage"
@@ -59,10 +62,13 @@ var _ fyne.CanvasObject = (*Image)(nil)
 type Image struct {
 	baseObject
 
-	aspect float32
-	icon   *svg.Decoder
-	isSVG  bool
-	lock   sync.Mutex
+	aspect   float32
+	icon     *svg.Decoder
+	isSVG    bool
+	isGIF    bool
+	gif      *gif2.GIF
+	gifStart bool
+	lock     sync.Mutex
 
 	// one of the following sources will provide our image data
 	File     string        // Load the image from a file
@@ -154,6 +160,12 @@ func (i *Image) Refresh() {
 				return
 			}
 			i.Image = tex
+		} else if i.isGIF {
+			if !i.gifStart {
+				i.gifStart = true
+				go i.startGIF()
+			}
+			return
 		} else {
 			if rc == nil {
 				return
@@ -184,7 +196,7 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
-	if i.isSVG || i.Image == nil {
+	if i.isSVG || i.isGIF || i.Image == nil {
 		i.Refresh() // we need to rasterise at the new size
 	} else {
 		Refresh(i) // just re-size using GPU scaling
@@ -270,8 +282,10 @@ func (i *Image) name() string {
 
 func (i *Image) updateReader() (io.ReadCloser, error) {
 	i.isSVG = false
+	i.isGIF = false
 	if i.Resource != nil {
 		i.isSVG = svg.IsResourceSVG(i.Resource)
+		i.isGIF = gif.IsResourceGIF(i.Resource)
 		content := i.Resource.Content()
 		if res, ok := i.Resource.(fyne.ThemedResource); i.isSVG && ok {
 			th := cache.WidgetTheme(i)
@@ -289,6 +303,7 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 			return nil, err
 		}
 		i.isSVG = svg.IsFileSVG(i.File)
+		i.isGIF = gif.IsFileGIF(i.File)
 		return fd, nil
 	}
 	return nil, nil
@@ -334,6 +349,13 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, widt
 		config := i.icon.Config()
 		width, height = config.Width, config.Height
 		aspect = config.Aspect
+	} else if i.isGIF {
+		i.gif, err = gif2.DecodeAll(source)
+		if err != nil {
+			return nil, 0, 0, 0, err
+		}
+		width, height = i.gif.Config.Width, i.gif.Config.Height
+		aspect = float32(width) / float32(height)
 	} else {
 		var buf bytes.Buffer
 		tee := io.TeeReader(source, &buf)
@@ -372,4 +394,33 @@ func (i *Image) renderSVG(width, height float32) (image.Image, error) {
 	}
 	cache.SetSvg(i.name(), i, tex, screenWidth, screenHeight)
 	return tex, nil
+}
+
+func (i *Image) startGIF() {
+	loopCount := 0
+	frame := 0
+	for {
+		var d time.Duration
+		func() {
+			i.lock.Lock()
+			defer i.lock.Unlock()
+			if i.Hidden {
+				return
+			}
+			i.Image = i.gif.Image[frame]
+			// Calculate the delay time for the current frame. The delay is in 1/100 seconds, so multiply by 10ms for proper duration.
+			d = time.Duration(i.gif.Delay[frame]) * 10 * time.Millisecond
+			frame++
+			if frame == len(i.gif.Image) {
+				frame = 0
+				loopCount++
+				// If the loop count reaches the specified LoopCount, and it’s not 0 (infinite), stop the animation
+				if loopCount == i.gif.LoopCount && i.gif.LoopCount != 0 {
+					return
+				}
+			}
+			Refresh(i)
+		}()
+		time.Sleep(d)
+	}
 }
