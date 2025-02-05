@@ -166,11 +166,12 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
 func (l *GridWrap) Resize(s fyne.Size) {
 	oldColCount := l.ColumnCount()
+	oldHeight := l.size.Height
 	l.colCountCache = 0
 	l.BaseWidget.Resize(s)
 	newColCount := l.ColumnCount()
 
-	if oldColCount == newColCount && l.size.Height == s.Height {
+	if oldColCount == newColCount && oldHeight == s.Height {
 		// no content update needed if resizing only horizontally and col count is unchanged
 		return
 	}
