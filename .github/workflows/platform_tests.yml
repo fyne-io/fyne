@@ -14,9 +14,9 @@ jobs:
         include:
           - os: ubuntu-latest
             runner: xvfb-run
-            tags: ci
+            tags: ci,migrated_fynedo
           - os: macos-latest
-            tags: no_glfw,ci
+            tags: no_glfw,ci,migrated_fynedo
 
     steps:
     - uses: actions/checkout@v4
@@ -68,4 +68,4 @@ jobs:
           go-version: ${{ matrix.go-version }}
     
       - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags no_glfw ./...
+        run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...
