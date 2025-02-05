@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fmt"
-	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -794,7 +793,7 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 
 	if toDraw == onlyNewTreeNodesID {
 		for id, b := range r.branches {
-			if slices.Contains(r.visible, id) && !slices.Contains(r.wasVisible, id) {
+			if contains(r.visible, id) && !contains(r.wasVisible, id) {
 				b.Refresh()
 			}
 		}
@@ -1092,4 +1091,13 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		l.Refresh()
 	}
 	return
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
