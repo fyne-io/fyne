@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // DataTreeRootID const is the value used as ID for the root of any tree binding.
@@ -326,7 +327,7 @@ type ExternalURITree interface {
 //
 // Since: 2.4
 func NewURITree() URITree {
-	return newTree(compareURI)
+	return newTree(storage.EqualURI)
 }
 
 // BindURITree returns a bound tree of fyne.URI values, based on the contents of the passed values.
@@ -335,7 +336,7 @@ func NewURITree() URITree {
 //
 // Since: 2.4
 func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalURITree {
-	return bindTree(ids, v, compareURI)
+	return bindTree(ids, v, storage.EqualURI)
 }
 
 type treeBase struct {

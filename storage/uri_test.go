@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
@@ -14,6 +15,33 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+type otherURI struct {
+	fyne.URI
+}
+
+func (*otherURI) String() string {
+	return "file:///other"
+}
+
+func TestURIEqual(t *testing.T) {
+	first := storage.NewFileURI("first")
+	second := storage.NewFileURI("second")
+	assert.False(t, storage.EqualURI(first, second))
+	assert.True(t, storage.EqualURI(first, first))
+
+	assert.True(t, storage.EqualURI(first, storage.NewFileURI("first")))
+
+	assert.True(t, storage.EqualURI(nil, nil))
+	assert.False(t, storage.EqualURI(first, nil))
+	assert.False(t, storage.EqualURI(nil, second))
+
+	otherURI := &otherURI{}
+	assert.True(t, storage.EqualURI(otherURI, otherURI))
+	assert.False(t, storage.EqualURI(otherURI, first))
+	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
+
+}
 
 func TestURIAuthority(t *testing.T) {
 	// from IETF RFC 3986

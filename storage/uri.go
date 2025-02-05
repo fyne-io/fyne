@@ -7,6 +7,13 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
+// EqualURI returns true if the two URIs are equal.
+//
+// Since: 2.6
+func EqualURI(t1, t2 fyne.URI) bool {
+	return repository.EqualURI(t1, t2)
+}
+
 // NewFileURI creates a new URI from the given file path.
 // Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(path string) fyne.URI {

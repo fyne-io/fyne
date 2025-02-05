@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // Bool supports binding a bool value.
@@ -220,7 +221,7 @@ type ExternalURI interface {
 //
 // Since: 2.1
 func NewURI() URI {
-	return newBaseItem(compareURI)
+	return newBaseItem(storage.EqualURI)
 }
 
 // BindURI returns a new bindable value that controls the contents of the provided fyne.URI variable.
@@ -228,7 +229,7 @@ func NewURI() URI {
 //
 // Since: 2.1
 func BindURI(v *fyne.URI) ExternalURI {
-	return baseBindExternal(v, compareURI)
+	return baseBindExternal(v, storage.EqualURI)
 }
 
 type bindableItem[T any] interface {
