@@ -166,7 +166,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
 	t.content.OnScrolled = func(pos fyne.Position) {
 		t.offset = pos
-		t.cells.RefreshForID(onlyNewTableCellsID)
+		t.cells.refreshForID(onlyNewTableCellsID)
 	}
 
 	r.Layout(t.Size())
@@ -256,7 +256,7 @@ func (t *Table) RefreshItem(id TableCellID) {
 	if t.cells == nil {
 		return
 	}
-	t.cells.RefreshForID(id)
+	t.cells.refreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
@@ -1169,10 +1169,10 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 
 func (c *tableCells) Resize(s fyne.Size) {
 	c.BaseWidget.Resize(s)
-	c.RefreshForID(onlyNewTableCellsID) // trigger a redraw
+	c.refreshForID(onlyNewTableCellsID) // trigger a redraw
 }
 
-func (c *tableCells) RefreshForID(id TableCellID) {
+func (c *tableCells) refreshForID(id TableCellID) {
 	c.nextRefreshCellsID = id
 	c.BaseWidget.Refresh()
 }
@@ -1397,14 +1397,14 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 				updateCell(id, cell)
 			}
 		}
-	} else {
-		for id, cell := range visible {
-			if toDraw != allTableCellsID && toDraw != id {
-				continue
-			}
+		return
+	}
 
-			updateCell(id, cell)
+	for id, cell := range visible {
+		if toDraw != allTableCellsID && toDraw != id {
+			continue
 		}
+		updateCell(id, cell)
 	}
 
 }
