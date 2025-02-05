@@ -279,7 +279,18 @@ func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanList(u fyne.URI) (bool, error) {
-	return m.Exists(u)
+	path := u.Path()
+	exist, err := m.Exists(u)
+	if err != nil || !exist {
+		return false, err
+	}
+
+	if path == "" || path[len(path)-1] == '/' {
+		return true, nil
+	}
+
+	children, err := m.List(u)
+	return len(children) > 0, err
 }
 
 // List implements repository.ListableRepository.List()

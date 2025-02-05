@@ -341,14 +341,19 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.Data[""] = []byte{1, 2, 3}
+	m.Data["/empty/"] = []byte{1, 2, 3}
 	m.Data["/foo"] = []byte{1, 2, 3}
 	m.Data["/foo/bar"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/quux"] = []byte{1, 2, 3}
 
-	foo, _ := storage.ParseURI("mem:///foo")
+	empty, _ := storage.ParseURI("mem:///empty/")
+	canList, err := storage.CanList(empty)
+	assert.Nil(t, err)
+	assert.True(t, canList)
 
-	canList, err := storage.CanList(foo)
+	foo, _ := storage.ParseURI("mem:///foo")
+	canList, err = storage.CanList(foo)
 	assert.Nil(t, err)
 	assert.True(t, canList)
 
@@ -360,7 +365,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	}
 	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
 
-	empty, _ := storage.ParseURI("mem:") // invalid path
+	empty, _ = storage.ParseURI("mem:") // invalid path
 	canList, err = storage.CanList(empty)
 	assert.NotNil(t, err)
 	assert.False(t, canList)
