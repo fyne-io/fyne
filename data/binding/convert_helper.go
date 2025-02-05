@@ -10,7 +10,7 @@ import (
 
 func stripFormatPrecision(in string) string {
 	// quick exit if certainly not float
-	if !strings.ContainsAny(in, "f") {
+	if !strings.ContainsRune(in, 'f') {
 		return in
 	}
 
