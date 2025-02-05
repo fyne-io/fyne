@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // BoolToString creates a binding that connects a Bool data item to a String.
@@ -84,7 +85,7 @@ func IntToStringWithFormat(v Int, format string) String {
 //
 // Since: 2.1
 func URIToString(v URI) String {
-	return toString[fyne.URI](v, uriToString, compareURI, uriFromString)
+	return toString[fyne.URI](v, uriToString, storage.EqualURI, uriFromString)
 }
 
 // StringToBool creates a binding that connects a String data item to a Bool.
