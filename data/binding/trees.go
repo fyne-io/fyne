@@ -632,10 +632,10 @@ func (t *boundTree[T]) SetValue(id string, v T) error {
 	if err != nil {
 		return err
 	}
-	return item.(bindableItem[T]).Set(v)
+	return item.(Item[T]).Set(v)
 }
 
-func bindTreeItem[T any](v *map[string]T, id string, external bool, comparator func(T, T) bool) bindableItem[T] {
+func bindTreeItem[T any](v *map[string]T, id string, external bool, comparator func(T, T) bool) Item[T] {
 	if external {
 		ret := &boundExternalTreeItem[T]{old: (*v)[id], comparator: comparator}
 		ret.val = v
