@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
 
 // DataList is the base interface for all bindable data lists.
@@ -338,7 +339,7 @@ type ExternalURIList interface {
 //
 // Since: 2.1
 func NewURIList() URIList {
-	return newList(compareURI)
+	return newList(storage.EqualURI)
 }
 
 // BindURIList returns a bound list of fyne.URI values, based on the contents of the passed slice.
@@ -346,7 +347,7 @@ func NewURIList() URIList {
 //
 // Since: 2.1
 func BindURIList(v *[]fyne.URI) ExternalURIList {
-	return bindList(v, compareURI)
+	return bindList(v, storage.EqualURI)
 }
 
 type listBase struct {
