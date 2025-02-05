@@ -32,6 +32,21 @@ func NewItem[T any](comparator func(T, T) bool) Item[T] {
 	return &item[T]{val: new(T), comparator: comparator}
 }
 
+// BindItem returns a new bindable value that controls the contents of the provided variable of type T.
+// If your code changes the content of the variable this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.6
+func BindItem[T any](val *T, comparator func(T, T) bool) ExternalItem[T] {
+	if val == nil {
+		val = new(T) // never allow a nil value pointer
+	}
+	b := &externalItem[T]{}
+	b.comparator = comparator
+	b.val = val
+	b.old = *val
+	return b
+}
+
 // Bool supports binding a bool value.
 //
 // Since: 2.0
@@ -79,7 +94,7 @@ func NewBytes() Bytes {
 //
 // Since: 2.2
 func BindBytes(v *[]byte) ExternalBytes {
-	return bindExternal(v, bytes.Equal)
+	return BindItem(v, bytes.Equal)
 }
 
 // Float supports binding a float64 value.
@@ -204,7 +219,7 @@ func NewURI() URI {
 //
 // Since: 2.1
 func BindURI(v *fyne.URI) ExternalURI {
-	return bindExternal(v, storage.EqualURI)
+	return BindItem(v, storage.EqualURI)
 }
 
 func newItemComparable[T bool | float64 | int | rune | string]() Item[T] {
@@ -241,19 +256,8 @@ func (b *item[T]) Set(val T) error {
 	return nil
 }
 
-func bindExternal[T any](val *T, comparator func(T, T) bool) *externalItem[T] {
-	if val == nil {
-		val = new(T) // never allow a nil value pointer
-	}
-	b := &externalItem[T]{}
-	b.comparator = comparator
-	b.val = val
-	b.old = *val
-	return b
-}
-
-func bindExternalComparable[T bool | float64 | int | rune | string](val *T) *externalItem[T] {
-	return bindExternal(val, func(t1, t2 T) bool { return t1 == t2 })
+func bindExternalComparable[T bool | float64 | int | rune | string](val *T) ExternalItem[T] {
+	return BindItem(val, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type externalItem[T any] struct {
