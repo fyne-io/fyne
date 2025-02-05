@@ -99,11 +99,7 @@ func (b *base) trigger() {
 // Since: 2.1
 //
 // Deprecated: Use the [Item] interface instead.
-type Untyped interface {
-	DataItem
-	Get() (any, error)
-	Set(any) error
-}
+type Untyped = Item[any]
 
 // NewUntyped returns a bindable any value that is managed internally.
 //
@@ -150,10 +146,7 @@ func (b *boundUntyped) Set(val any) error {
 // Since: 2.1
 //
 // Deprecated: Use the [ExternalItem] interface instead.
-type ExternalUntyped interface {
-	Untyped
-	Reload() error
-}
+type ExternalUntyped = ExternalItem[any]
 
 // BindUntyped returns a bindable any value that is bound to an external type.
 // The parameter must be a pointer to the type you wish to bind.
