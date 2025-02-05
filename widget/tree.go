@@ -231,10 +231,11 @@ func (t *Tree) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return
 	}
-
-	t.size = size
-
-	t.Refresh() // trigger a redraw
+	t.BaseWidget.Resize(size)
+	if t.scroller == nil {
+		return
+	}
+	t.scroller.Content.(*treeContent).refreshForID(onlyNewTreeNodesID)
 }
 
 // ScrollToBottom scrolls to the bottom of the tree.
