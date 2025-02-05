@@ -65,29 +65,16 @@ func uriToString(in fyne.URI) (string, error) {
 }
 
 func parseBool(in string) (bool, error) {
-	out, err := strconv.ParseBool(in)
-	if err != nil {
-		return false, err
-	}
-
-	return out, nil
+	return strconv.ParseBool(in)
 }
 
 func parseFloat(in string) (float64, error) {
-	out, err := strconv.ParseFloat(in, 64)
-	if err != nil {
-		return 0, err
-	}
-
-	return out, nil
+	return strconv.ParseFloat(in, 64)
 }
 
 func parseInt(in string) (int, error) {
 	out, err := strconv.ParseInt(in, 0, 64)
-	if err != nil {
-		return 0, err
-	}
-	return int(out), nil
+	return int(out), err
 }
 
 func formatBool(in bool) (string, error) {
