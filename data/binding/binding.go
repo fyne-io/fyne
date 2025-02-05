@@ -97,6 +97,8 @@ func (b *base) trigger() {
 // Untyped supports binding a any value.
 //
 // Since: 2.1
+//
+// Deprecated: Use the [Item] interface instead.
 type Untyped interface {
 	DataItem
 	Get() (any, error)
@@ -106,10 +108,10 @@ type Untyped interface {
 // NewUntyped returns a bindable any value that is managed internally.
 //
 // Since: 2.1
+//
+// Deprecated: Use the [NewItem] function instead.
 func NewUntyped() Untyped {
-	var blank any = nil
-	v := &blank
-	return &boundUntyped{val: reflect.ValueOf(v).Elem()}
+	return &boundUntyped{val: reflect.ValueOf(new(any)).Elem()}
 }
 
 type boundUntyped struct {
@@ -146,6 +148,8 @@ func (b *boundUntyped) Set(val any) error {
 // ExternalUntyped supports binding a any value to an external value.
 //
 // Since: 2.1
+//
+// Deprecated: Use the [ExternalItem] interface instead.
 type ExternalUntyped interface {
 	Untyped
 	Reload() error
@@ -155,6 +159,8 @@ type ExternalUntyped interface {
 // The parameter must be a pointer to the type you wish to bind.
 //
 // Since: 2.1
+//
+// Deprecated: Use the [BindItem] function instead.
 func BindUntyped(v any) ExternalUntyped {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Ptr {
@@ -163,8 +169,7 @@ func BindUntyped(v any) ExternalUntyped {
 	}
 
 	if v == nil {
-		var blank any
-		v = &blank // never allow a nil value pointer
+		v = new(any) // never allow a nil value pointer
 	}
 
 	b := &boundExternalUntyped{}
