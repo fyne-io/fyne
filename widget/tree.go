@@ -13,11 +13,14 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// allTreeNodesID represents all tree nodes when refreshing requested nodes
-const allTreeNodesID = "_ALLNODES"
-
 // TreeNodeID represents the unique id of a tree node.
 type TreeNodeID = string
+
+const (
+	// allTreeNodesID represents all tree nodes when refreshing requested nodes
+	allTreeNodesID     TreeNodeID = "_ALLNODES"
+	onlyNewTreeNodesID TreeNodeID = "_ONLYNEWNODES"
+)
 
 // Declare conformity with interfaces
 var _ fyne.Focusable = (*Tree)(nil)
@@ -198,12 +201,7 @@ func (t *Tree) RefreshItem(id TreeNodeID) {
 	if t.scroller == nil {
 		return
 	}
-	r := cache.Renderer(t.scroller.Content.(*treeContent))
-	if r == nil {
-		return
-	}
-
-	r.(*treeContentRenderer).refreshForID(id)
+	t.scroller.Content.(*treeContent).refreshForID(id)
 }
 
 // OpenAllBranches opens all branches in the tree.
@@ -232,10 +230,11 @@ func (t *Tree) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return
 	}
-
-	t.size = size
-
-	t.Refresh() // trigger a redraw
+	t.BaseWidget.Resize(size)
+	if t.scroller == nil {
+		return
+	}
+	t.scroller.Content.(*treeContent).refreshForID(onlyNewTreeNodesID)
 }
 
 // ScrollToBottom scrolls to the bottom of the tree.
@@ -473,7 +472,7 @@ func (t *Tree) offsetUpdated(pos fyne.Position) {
 		return
 	}
 	t.offset = pos
-	t.scroller.Content.Refresh()
+	t.scroller.Content.(*treeContent).refreshForID(onlyNewTreeNodesID)
 }
 
 func (t *Tree) walk(uid, parent TreeNodeID, depth int, onNode func(TreeNodeID, TreeNodeID, bool, int)) {
@@ -549,6 +548,8 @@ type treeContent struct {
 	BaseWidget
 	tree     *Tree
 	viewport fyne.Size
+
+	nextRefreshID TreeNodeID
 }
 
 func newTreeContent(tree *Tree) (c *treeContent) {
@@ -578,6 +579,16 @@ func (c *treeContent) Resize(size fyne.Size) {
 	c.Refresh() // trigger a redraw
 }
 
+func (c *treeContent) refreshForID(id TreeNodeID) {
+	c.nextRefreshID = id
+	c.BaseWidget.Refresh()
+}
+
+func (c *treeContent) Refresh() {
+	c.nextRefreshID = allTreeNodesID
+	c.BaseWidget.Refresh()
+}
+
 var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 
 type treeContentRenderer struct {
@@ -589,6 +600,9 @@ type treeContentRenderer struct {
 	leaves      map[string]*leaf
 	branchPool  async.Pool[fyne.CanvasObject]
 	leafPool    async.Pool[fyne.CanvasObject]
+
+	wasVisible []TreeNodeID
+	visible    []TreeNodeID
 }
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
@@ -607,6 +621,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	separatorOff := (pad + separatorThickness) / 2
 	hideSeparators := r.treeContent.tree.HideSeparators
 	y := float32(0)
+
+	r.wasVisible, r.visible = r.visible, r.wasVisible
+	r.visible = r.visible[:0]
+
 	// walkAll open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.walkAll(func(uid, _ string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
@@ -635,6 +653,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
+			r.visible = append(r.visible, uid)
 
 			if addSeparator && !hideSeparators {
 				var separator fyne.CanvasObject
@@ -746,7 +765,7 @@ func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *treeContentRenderer) Refresh() {
-	r.refreshForID(allTreeNodesID)
+	r.refreshForID(r.treeContent.nextRefreshID)
 }
 
 func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
@@ -756,6 +775,16 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	} else {
 		r.Layout(s)
 	}
+
+	if toDraw == onlyNewTreeNodesID {
+		for id, b := range r.branches {
+			if contains(r.visible, id) && !contains(r.wasVisible, id) {
+				b.Refresh()
+			}
+		}
+		return
+	}
+
 	for id, b := range r.branches {
 		if toDraw != allTreeNodesID && id != toDraw {
 			continue
@@ -1047,4 +1076,13 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		l.Refresh()
 	}
 	return
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
