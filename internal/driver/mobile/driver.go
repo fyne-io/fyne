@@ -97,9 +97,7 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	}
 
 	if wait {
-		async.EnsureNotMain(func() {
-			caller()
-		})
+		async.EnsureNotMain(caller)
 	} else {
 		caller()
 	}
