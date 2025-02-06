@@ -136,18 +136,6 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-<<<<<<< HEAD
-=======
-	if stg, ok := fyne.CurrentApp().Settings().(interface{ AddChangeListenerFunc(func(fyne.Settings)) }); ok {
-		stg.AddChangeListenerFunc(func(s fyne.Settings) {
-			settingsMutex.Lock()
-			settingsToApply = s
-			settingsMutex.Unlock()
-			wakeUpDriver()
-		})
-	}
-
->>>>>>> 3174f9b66 (Nicer naming for waking up driver)
 	for {
 		d.waitEvents()
 
@@ -213,7 +201,7 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 	funcsDone := false
 	for !funcsDone {
 		select {
-		case f := <-funcQueue:
+		case f := <-funcQueue.Out():
 			f.f()
 			if f.done != nil {
 				f.done <- struct{}{}
@@ -221,24 +209,6 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 		default:
 			funcsDone = true
 		}
-	}
-
-	// apply settings change if any
-	settingsMutex.Lock()
-	set := settingsToApply
-	settingsToApply = nil
-	settingsMutex.Unlock()
-	if set != nil {
-		painter.ClearFontCache()
-		cache.ResetThemeCaches()
-		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-			c, ok := w.Canvas().(*glCanvas)
-			if !ok {
-				return
-			}
-			c.applyThemeOutOfTreeObjects()
-			c.reloadScale()
-		})
 	}
 
 	for i := 0; i < len(d.windows); i++ {
@@ -303,7 +273,7 @@ func (d *gLDriver) removeWindows(count int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) {
+func (d *gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
 	freed := false
 	w.RunWithContext(func() {
