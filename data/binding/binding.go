@@ -64,7 +64,7 @@ type base struct {
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataListener) {
-	queueItem(func() {
+	fyne.Do(func() {
 		b.listeners = append(b.listeners, l)
 		l.DataChanged()
 	})
@@ -72,7 +72,7 @@ func (b *base) AddListener(l DataListener) {
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataListener) {
-	queueItem(func() {
+	fyne.Do(func() {
 		for i, listener := range b.listeners {
 			if listener == l {
 				// Delete without preserving order:
@@ -87,7 +87,7 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	queueItem(func() {
+	fyne.Do(func() {
 		for _, listen := range b.listeners {
 			listen.DataChanged()
 		}
