@@ -11,12 +11,11 @@ import (
 // To start an application you need to call Run somewhere in your main function.
 // Alternatively use the [fyne.io/fyne/v2.Window.ShowAndRun] function for your main window.
 type App interface {
-	// Create a new window for the application.
-	// The first window to open is considered the "master" and when closed
-	// the application will exit.
+	// NewWindow creates a new window for the application.
+	// The first window to open is considered the "master" and when closed the application will exit.
 	NewWindow(title string) Window
 
-	// Open a URL in the default browser application.
+	// OpenURL opens a URL in the default browser application for the current system.
 	OpenURL(url *url.URL) error
 
 	// Icon returns the application icon, this is used in various ways
@@ -32,9 +31,8 @@ type App interface {
 	// This should be called near the end of a main() function as it will block.
 	Run()
 
-	// Calling Quit on the application will cause the application to exit
-	// cleanly, closing all open windows.
-	// This function does no thing on a mobile device as the application lifecycle is
+	// Quit can be used to cause the application to exit cleanly, closing all open windows.
+	// This function does nothing on a mobile device as the application lifecycle is
 	// managed by the operating system.
 	Quit()
 
@@ -115,7 +113,7 @@ type AppMetadata struct {
 	Name string
 	// Version represents the version of this application, normally following semantic versioning.
 	Version string
-	// Build is the build number of this app, some times appended to the version number.
+	// Build is the build number of this app, sometimes appended to the version number.
 	Build int
 	// Icon contains, if present, a resource of the icon that was bundled at build time.
 	Icon Resource
