@@ -258,7 +258,7 @@ func (s *toStringFrom[T]) Set(str string) error {
 		return err
 	}
 
-	s.DataChanged()
+	s.trigger()
 	return nil
 }
 
@@ -324,7 +324,7 @@ func (s *fromStringTo[T]) Set(val T) error {
 		return err
 	}
 
-	s.DataChanged()
+	s.trigger()
 	return nil
 }
 
@@ -367,7 +367,7 @@ func (s *toInt[T]) Set(v int) error {
 		return err
 	}
 
-	s.DataChanged()
+	s.trigger()
 	return nil
 }
 
@@ -408,7 +408,7 @@ func (s *fromIntTo[T]) Set(val T) error {
 		return err
 	}
 
-	s.DataChanged()
+	s.trigger()
 	return nil
 }
 
