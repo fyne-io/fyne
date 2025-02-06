@@ -1,8 +1,10 @@
 package fyne
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"net/url"
 )
 
 // URIReadCloser represents a cross platform data stream from a file or provider of data.
@@ -100,4 +102,22 @@ type URIWithIcon interface {
 	URI
 
 	Icon() Resource
+}
+
+// OpenURI asks the operating system to open the specified resource.
+// This is commonly used for a URL or a file URI to open the appropriate system application.
+//
+// Since: 2.6
+func OpenURI(u URI) error {
+	a := CurrentApp()
+	if a == nil {
+		return errors.New("oepnURI requires a running Fyne application")
+	}
+
+	parsed, err := url.Parse(u.String())
+	if err != nil {
+		return err
+	}
+
+	return a.OpenURL(parsed)
 }
