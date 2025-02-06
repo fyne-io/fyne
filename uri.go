@@ -111,7 +111,7 @@ type URIWithIcon interface {
 func OpenURI(u URI) error {
 	a := CurrentApp()
 	if a == nil {
-		return errors.New("oepnURI requires a running Fyne application")
+		return errors.New("calling openURI requires a running Fyne application")
 	}
 
 	parsed, err := url.Parse(u.String())
