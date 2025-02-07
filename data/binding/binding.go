@@ -87,11 +87,13 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	fyne.Do(func() {
-		for _, listen := range b.listeners {
-			listen.DataChanged()
-		}
-	})
+	fyne.Do(b.triggerFromMain)
+}
+
+func (b *base) triggerFromMain() {
+	for _, listen := range b.listeners {
+		listen.DataChanged()
+	}
 }
 
 // Untyped supports binding a any value.

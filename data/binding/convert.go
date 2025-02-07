@@ -208,7 +208,7 @@ type convertBaseItem struct {
 }
 
 func (s *convertBaseItem) DataChanged() {
-	s.trigger()
+	s.triggerFromMain()
 }
 
 type toStringFrom[T any] struct {
