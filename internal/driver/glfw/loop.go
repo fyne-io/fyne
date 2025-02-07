@@ -15,13 +15,8 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
-type funcData struct {
-	f    func()
-	done chan struct{} // Zero allocation signalling channel
-}
-
 // channel for queuing functions on the main thread
-var funcQueue = async.NewUnboundedChan[funcData]()
+var funcQueue = newGlfwFuncQueue()
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
@@ -45,17 +40,7 @@ func runOnMainWithWait(f func(), wait bool) {
 		return
 	}
 
-	if wait {
-		done := common.DonePool.Get()
-		defer common.DonePool.Put(done)
-
-		funcQueue.In() <- funcData{f: f, done: done}
-		wakeUpDriver()
-		<-done
-	} else {
-		funcQueue.In() <- funcData{f: f}
-		wakeUpDriver()
-	}
+	funcQueue.Push(f, wait)
 }
 
 // Preallocate to avoid allocations on every drawSingleFrame.
@@ -198,17 +183,18 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 	}
 
 	// run funcs queued to main
+	var buf [16]funcData
 	funcsDone := false
 	for !funcsDone {
-		select {
-		case f := <-funcQueue.Out():
-			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
+		n := funcQueue.PullN(buf[:])
+		for i := 0; i < n; i++ {
+			buf[i].f()
+			if buf[i].done != nil {
+				buf[i].done <- struct{}{}
 			}
-		default:
-			funcsDone = true
+			buf[i] = funcData{}
 		}
+		funcsDone = n == 0
 	}
 
 	for i := 0; i < len(d.windows); i++ {
