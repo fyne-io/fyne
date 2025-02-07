@@ -33,7 +33,12 @@ type InnerWindow struct {
 	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
-	Alignment                                           widget.ButtonAlign
+
+	// Alignment allows an inner window to specify if the buttons should be on the left
+	// (`ButtonAlignLeading`) or right of the window border.
+	//
+	// Since: 2.6
+	Alignment widget.ButtonAlign
 
 	title      string
 	borderIcon *borderButton
