@@ -34,8 +34,10 @@ type InnerWindow struct {
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
 
-	title   string
-	content *fyne.Container
+	title      string
+	borderIcon *borderButton
+	content    *fyne.Container
+	maximized  bool
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
@@ -75,16 +77,15 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	})
 	buttons := NewCenter(NewHBox(close, min, max))
 
-	var icon fyne.CanvasObject
-
+	var borderIcon *borderButton
 	if w.Icon != nil {
-		icon = newBorderButton(w.Icon, modeIcon, th, func() {
+		borderIcon = newBorderButton(w.Icon, modeIcon, th, func() {
 			if f := w.OnTappedIcon; f != nil {
 				f()
 			}
 		})
 		if w.OnTappedIcon == nil {
-			icon.(*borderButton).Disable()
+			borderIcon.Disable()
 		}
 	}
 	title := newDraggableLabel(w.title, w)
@@ -92,21 +93,33 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
 	off := (height - title.labelMinSize().Height) / 2
-	bar := NewBorder(nil, nil, buttons, icon,
+	bar := NewBorder(nil, nil, buttons, w.borderIcon,
 		New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title))
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 
+	if w.content == nil {
+		w.content = NewPadded(canvas.NewRectangle(color.Transparent))
+	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
-		win: w, bar: bar, buttons: []*borderButton{min, max, close}, bg: bg, corner: corner, contentBG: contentBG}
+		win: w, bar: bar, buttons: []*borderButton{min, max, close}, bg: bg, corner: corner, contentBG: contentBG,
+		icon: borderIcon}
 }
 
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
 	w.content.Objects[0] = obj
 
 	w.content.Refresh()
+}
+
+// SetMaximized tells the window if the maximized state should be set or not.
+//
+// Since: 2.6
+func (w *InnerWindow) SetMaximized(max bool) {
+	w.maximized = max
+	w.Refresh()
 }
 
 func (w *InnerWindow) SetPadded(pad bool) {
@@ -131,6 +144,7 @@ type innerWindowRenderer struct {
 	win           *InnerWindow
 	bar           *fyne.Container
 	buttons       []*borderButton
+	icon          *borderButton
 	bg, contentBG *canvas.Rectangle
 	corner        fyne.CanvasObject
 }
@@ -182,9 +196,30 @@ func (i *innerWindowRenderer) Refresh() {
 	}
 	i.bar.Refresh()
 
+	if i.win.OnMinimized == nil {
+		i.buttons[0].Disable()
+	} else {
+		i.buttons[0].SetOnTapped(i.win.OnMinimized)
+		i.buttons[0].Enable()
+	}
+	if i.win.OnMaximized == nil {
+		i.buttons[1].Disable()
+	} else {
+		max := i.buttons[1]
+		max.SetOnTapped(i.win.OnMaximized)
+		max.Enable()
+
+		if i.win.maximized {
+			max.b.SetIcon(theme.ViewRestoreIcon())
+		} else {
+			max.b.SetIcon(theme.WindowMaximizeIcon())
+		}
+	}
+
 	title := i.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
+	i.icon.b.SetIcon(i.win.Icon)
 }
 
 type draggableLabel struct {
@@ -277,6 +312,14 @@ func (b *borderButton) CreateRenderer() fyne.WidgetRenderer {
 
 func (b *borderButton) Disable() {
 	b.b.Disable()
+}
+
+func (b *borderButton) Enable() {
+	b.b.Enable()
+}
+
+func (b *borderButton) SetOnTapped(fn func()) {
+	b.b.OnTapped = fn
 }
 
 func (b *borderButton) MinSize() fyne.Size {
