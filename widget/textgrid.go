@@ -75,8 +75,10 @@ func (c *CustomTextGridStyle) Style() fyne.TextStyle {
 // This is designed to be used by a text editor, code preview or terminal emulator.
 type TextGrid struct {
 	BaseWidget
-	Rows   []TextGridRow
-	scroll *widget.Scroll
+	Rows []TextGridRow
+
+	scroll  *widget.Scroll
+	content *textGridContent
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
@@ -97,6 +99,42 @@ func (t *TextGrid) Append(text string) {
 
 	t.Rows = append(t.Rows, rows...)
 	t.Refresh()
+}
+
+// CursorLocationForPosition returns the location where a cursor would be if it was located in the cell under the
+// requested position. If the grid is scrolled the position will refer to the visible offset and not the distance
+// from the top left of the overall document.
+//
+// Since: 2.6
+func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
+	y := t.content.cellSize.Height
+	x := t.content.cellSize.Width
+
+	if t.scroll != nil && t.scroll.Visible() {
+		y += t.scroll.Offset.Y
+		x += t.scroll.Offset.X
+	}
+
+	row = int(p.Y / y)
+	col = int(p.X / x)
+	return
+}
+
+// PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
+// If the grid has been scrolled this will be taken into account so that the position compared to top left will
+// refer to the requested location.
+//
+// Since: 2.6
+func (t *TextGrid) PositionForCursorLocation(row, col int) fyne.Position {
+	y := float32(row) * t.content.cellSize.Height
+	x := float32(col) * t.content.cellSize.Width
+
+	if t.scroll != nil && t.scroll.Visible() {
+		y -= t.scroll.Offset.Y
+		x -= t.scroll.Offset.X
+	}
+
+	return fyne.NewPos(x, y)
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -313,6 +351,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 		objs[0] = scroll
 	}
 	t.scroll = scroll
+	t.content = content
 	r := &textGridRenderer{text: content, scroll: scroll}
 	r.SetObjects(objs)
 	return r
