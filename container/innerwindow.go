@@ -33,6 +33,7 @@ type InnerWindow struct {
 	OnDragged, OnResized                                func(*fyne.DragEvent) `json:"-"`
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
+	Alignment                                           widget.ButtonAlign
 
 	title      string
 	borderIcon *borderButton
@@ -77,6 +78,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	})
 	buttons := NewCenter(NewHBox(close, min, max))
 
+	var iconObj fyne.CanvasObject
 	var borderIcon *borderButton
 	if w.Icon != nil {
 		borderIcon = newBorderButton(w.Icon, modeIcon, th, func() {
@@ -87,14 +89,21 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		if w.OnTappedIcon == nil {
 			borderIcon.Disable()
 		}
+		iconObj = borderIcon
+		w.borderIcon = borderIcon
 	}
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
 	off := (height - title.labelMinSize().Height) / 2
-	bar := NewBorder(nil, nil, buttons, w.borderIcon,
-		New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title))
+	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
+	bar := NewBorder(nil, nil, buttons, iconObj, barMid)
+	if w.Alignment == widget.ButtonAlignTrailing {
+		buttons := NewCenter(NewHBox(min, max, close))
+		bar.Layout = layout.NewBorderLayout(nil, nil, iconObj, buttons)
+	}
+
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
@@ -104,8 +113,8 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
-		win: w, bar: bar, buttons: []*borderButton{min, max, close}, bg: bg, corner: corner, contentBG: contentBG,
-		icon: borderIcon}
+		win: w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
+		corner: corner, contentBG: contentBG, icon: borderIcon}
 }
 
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
@@ -141,12 +150,12 @@ var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 type innerWindowRenderer struct {
 	*intWidget.ShadowingRenderer
 
-	win           *InnerWindow
-	bar           *fyne.Container
-	buttons       []*borderButton
-	icon          *borderButton
-	bg, contentBG *canvas.Rectangle
-	corner        fyne.CanvasObject
+	win            *InnerWindow
+	bar, buttonBox *fyne.Container
+	buttons        []*borderButton
+	icon           *borderButton
+	bg, contentBG  *canvas.Rectangle
+	corner         fyne.CanvasObject
 }
 
 func (i *innerWindowRenderer) Layout(size fyne.Size) {
@@ -191,21 +200,32 @@ func (i *innerWindowRenderer) Refresh() {
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
 
+	var icon fyne.CanvasObject
+	if i.icon != nil {
+		icon = i.icon
+	}
+	if i.win.Alignment == widget.ButtonAlignTrailing {
+		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[1], i.buttons[2], i.buttons[0]}
+		i.bar.Layout = layout.NewBorderLayout(nil, nil, icon, i.buttonBox)
+	} else {
+		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[0], i.buttons[1], i.buttons[2]}
+		i.bar.Layout = layout.NewBorderLayout(nil, nil, i.buttonBox, icon)
+	}
 	for _, b := range i.buttons {
 		b.setTheme(th)
 	}
 	i.bar.Refresh()
 
 	if i.win.OnMinimized == nil {
-		i.buttons[0].Disable()
-	} else {
-		i.buttons[0].SetOnTapped(i.win.OnMinimized)
-		i.buttons[0].Enable()
-	}
-	if i.win.OnMaximized == nil {
 		i.buttons[1].Disable()
 	} else {
-		max := i.buttons[1]
+		i.buttons[1].SetOnTapped(i.win.OnMinimized)
+		i.buttons[1].Enable()
+	}
+	if i.win.OnMaximized == nil {
+		i.buttons[2].Disable()
+	} else {
+		max := i.buttons[2]
 		max.SetOnTapped(i.win.OnMaximized)
 		max.Enable()
 
@@ -219,7 +239,9 @@ func (i *innerWindowRenderer) Refresh() {
 	title := i.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
-	i.icon.b.SetIcon(i.win.Icon)
+	if i.icon != nil {
+		i.icon.b.SetIcon(i.win.Icon)
+	}
 }
 
 type draggableLabel struct {
