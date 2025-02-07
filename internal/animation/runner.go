@@ -103,7 +103,7 @@ func (r *Runner) Stop(a *fyne.Animation) {
 // This will be called from the driver to update objects immediately before next paint.
 func (r *Runner) TickAnimations() (done bool) {
 	if !r.runnerStarted {
-		return
+		return true
 	}
 
 	done = r.runOneFrame()

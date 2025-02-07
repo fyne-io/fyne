@@ -15,7 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
-// channel for queuing functions on the main thread
+// for queuing functions on the main thread
 var funcQueue = newGlfwFuncQueue()
 var running atomic.Bool
 var initOnce = &sync.Once{}
@@ -122,18 +122,11 @@ func (d *gLDriver) runGL() {
 	}
 
 	for {
+		// idle until input events or funcs queued to main
 		d.waitEvents()
-
-		if d.animation.HasAnimations() {
-			// run animations while available
-			if exit := d.runAnimationLoop(); exit {
-				return
-			}
-		} else {
-			// idle mode: run single frame and sleep on d.waitEvents() above
-			if exit, _ := d.runSingleFrame(); exit {
-				return
-			}
+		// run active loop until we are exiting, or idle again
+		if exit := d.runActiveLoop(); exit {
+			return
 		}
 	}
 }
@@ -154,9 +147,9 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-// runs a loop that invokes runSingleFrame at 60 fps until there are no more animations
-// uses pollEvents to check for events every frame
-func (d *gLDriver) runAnimationLoop() bool {
+// runs a loop that invokes runSingleFrame at 60 fps until there are no more
+// animations or events. uses pollEvents to check for events every frame.
+func (d *gLDriver) runActiveLoop() bool {
 	t := time.NewTicker(time.Second / 60)
 	defer t.Stop()
 	for range t.C {
@@ -171,7 +164,7 @@ func (d *gLDriver) runAnimationLoop() bool {
 	return false
 }
 
-func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
+func (d *gLDriver) runSingleFrame() (exit, idle bool) {
 	// check if we're shutting down
 	if !running.Load() {
 		d.Terminate()
@@ -180,6 +173,17 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 			l.QueueEvent(f)
 		}
 		return true, false
+	}
+
+	// process received glfw events
+	noEvents := true
+	for {
+		evt, ok := eventQueue.Pull()
+		if !ok {
+			break
+		}
+		noEvents = false
+		processEvent(evt)
 	}
 
 	// run funcs queued to main
@@ -223,10 +227,10 @@ func (d *gLDriver) runSingleFrame() (exit, animationsDone bool) {
 			}
 		}
 	}
-	animationsDone = d.animation.TickAnimations()
+	animationsDone := d.animation.TickAnimations()
 	d.drawSingleFrame()
 
-	return false, animationsDone
+	return false, animationsDone && noEvents
 }
 
 func (d *gLDriver) repaintWindow(w *window) bool {
