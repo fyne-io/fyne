@@ -122,8 +122,9 @@ func (d *gLDriver) runGL() {
 	}
 
 	for {
-		// idle until input events or funcs queued to main
+		// idle until events (or d.wakeUp()) received
 		d.waitEvents()
+
 		// run active loop until we are exiting, or idle again
 		if exit := d.runActiveLoop(); exit {
 			return
@@ -154,10 +155,10 @@ func (d *gLDriver) runActiveLoop() bool {
 	defer t.Stop()
 	for range t.C {
 		d.pollEvents()
-		exit, animationsDone := d.runSingleFrame()
+		exit, idle := d.runSingleFrame()
 		if exit {
 			return exit
-		} else if animationsDone {
+		} else if idle {
 			break
 		}
 	}

@@ -761,23 +761,21 @@ func (w *window) create() {
 
 	w.setDarkMode()
 
+	// window size and refresh callbacks are processed
+	// synchronously since GLFW does not return from
+	// waitEvents until a resize is completed
+	win.SetSizeCallback(w.resized)
+	win.SetFramebufferSizeCallback(w.frameSized)
+	win.SetRefreshCallback(w.refresh)
+	win.SetContentScaleCallback(w.scaled)
+
+	// rest of callbacks queue events to be handled in main loop
 	win.SetCloseCallback(func(_ *glfw.Window) {
 		eventQueue.Push(newCloseEvent(w))
 	})
 	win.SetPosCallback(func(_ *glfw.Window, xpos, ypos int) {
 		eventQueue.Push(newMoveEvent(w, xpos, ypos))
 	})
-	win.SetFramebufferSizeCallback(func(_ *glfw.Window, width, height int) {
-		eventQueue.Push(newFrameSizeEvent(w, width, height))
-	})
-	win.SetRefreshCallback(func(_ *glfw.Window) {
-		eventQueue.Push(newRefreshEvent(w))
-	})
-	// window size callbacks must be handled synchronously
-	// instead of queued, since GLFW will not allow waitEvents
-	// to return until a resize is *completed*
-	win.SetSizeCallback(w.resized)
-	win.SetContentScaleCallback(w.scaled)
 	win.SetCursorPosCallback(func(_ *glfw.Window, xpos, ypos float64) {
 		eventQueue.Push(newMouseMoveEvent(w, xpos, ypos))
 	})

@@ -9,11 +9,7 @@ type eventType int
 const (
 	emptyEvent eventType = iota
 	moveEvent
-	resizeEvent
-	frameSizeEvent
-	refreshEvent
 	closeEvent
-	//contentScaleEvent
 	mouseMoveEvent
 	mouseClickEvent
 	mouseScrollEvent
@@ -44,25 +40,12 @@ func newCloseEvent(win *window) event {
 	return event{eventType: closeEvent, window: win}
 }
 
-func newRefreshEvent(win *window) event {
-	return event{eventType: refreshEvent, window: win}
-}
-
 func newMoveEvent(win *window, x, y int) event {
 	return event{
 		eventType: moveEvent,
 		window:    win,
 		intArg1:   x,
 		intArg2:   y,
-	}
-}
-
-func newFrameSizeEvent(win *window, width, height int) event {
-	return event{
-		eventType: frameSizeEvent,
-		window:    win,
-		intArg1:   width,
-		intArg2:   height,
 	}
 }
 
@@ -129,10 +112,6 @@ func processEvent(e event) {
 	switch e.eventType {
 	case closeEvent:
 		e.window.closed(e.window.viewport)
-	case refreshEvent:
-		e.window.refresh(e.window.viewport)
-	case frameSizeEvent:
-		e.window.frameSized(e.window.viewport, e.intArg1, e.intArg2)
 	case moveEvent:
 		e.window.moved(e.window.viewport, e.intArg1, e.intArg2)
 	case mouseMoveEvent:
