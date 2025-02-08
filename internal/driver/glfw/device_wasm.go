@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	isMobile = regexp.MustCompile("Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile").
+	isMobile = regexp.MustCompile("Android|iPhone|iPad|iPod|Opera Mini").
 			MatchString(js.Global().Get("navigator").Get("userAgent").String())
 	isMacOS = strings.Contains(js.Global().Get("window").Get("navigator").Get("platform").String(), "Mac")
 )
