@@ -8,10 +8,10 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/fyne-io/gl-js v0.0.0-20220119005834-d2da28d9ccfe
+	github.com/fyne-io/gl-js v0.1.0
 	github.com/fyne-io/glfw-js v0.0.0-20241126112943-313d8a0fe1d0
 	github.com/fyne-io/image v0.0.0-20220602074514-4956b0afb3d2
-	github.com/go-gl/gl v0.0.0-20211210172815-726fda9656d6
+	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.2.0
@@ -45,7 +45,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
