@@ -2,6 +2,8 @@ package container
 
 import (
 	"image/color"
+	"runtime"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -104,7 +106,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	off := (height - title.labelMinSize().Height) / 2
 	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
 	bar := NewBorder(nil, nil, buttons, iconObj, barMid)
-	if w.Alignment == widget.ButtonAlignTrailing {
+	if w.buttonPosition() == widget.ButtonAlignTrailing {
 		buttons := NewCenter(NewHBox(min, max, close))
 		bar.Layout = layout.NewBorderLayout(nil, nil, iconObj, buttons)
 	}
@@ -148,6 +150,18 @@ func (w *InnerWindow) SetPadded(pad bool) {
 func (w *InnerWindow) SetTitle(title string) {
 	w.title = title
 	w.Refresh()
+}
+
+func (w *InnerWindow) buttonPosition() widget.ButtonAlign {
+	if w.Alignment != widget.ButtonAlignCenter {
+		return w.Alignment
+	}
+
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" || strings.Contains(runtime.GOOS, "bsd") {
+		return widget.ButtonAlignTrailing
+	}
+	// macOS
+	return widget.ButtonAlignLeading
 }
 
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
@@ -209,7 +223,7 @@ func (i *innerWindowRenderer) Refresh() {
 	if i.icon != nil {
 		icon = i.icon
 	}
-	if i.win.Alignment == widget.ButtonAlignTrailing {
+	if i.win.buttonPosition() == widget.ButtonAlignTrailing {
 		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[1], i.buttons[2], i.buttons[0]}
 		i.bar.Layout = layout.NewBorderLayout(nil, nil, icon, i.buttonBox)
 	} else {
