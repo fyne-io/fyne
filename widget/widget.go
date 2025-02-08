@@ -17,7 +17,7 @@ func (*noCopy) Unlock() {}
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
-	noCopy // so `go vet` can complain if a widget is passed by value (copied)
+	noCopy noCopy // so `go vet` can complain if a widget is passed by value (copied)
 
 	size     fyne.Size
 	position fyne.Position
