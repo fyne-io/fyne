@@ -232,6 +232,7 @@ type scrollBarArea struct {
 	isDragging  bool
 	isMouseIn   bool
 	scroll      *Scroll
+	bar         *scrollBar
 	orientation scrollBarOrientation
 
 	// updated from renderer Layout
@@ -243,13 +244,28 @@ type scrollBarArea struct {
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	th := theme.CurrentForWidget(a)
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	bar := newScrollBar(a)
+	a.bar = newScrollBar(a)
 	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBarBackground, v))
 	background.Hidden = !a.isLarge()
-	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{background, bar}), area: a, bar: bar, background: background}
+	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{background, a.bar}), area: a, bar: a.bar, background: background}
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
+	if false /*todo - read MacOS system setting for scroll by page*/ {
+		a.scrollFullPageOnTap(e)
+		return
+	}
+
+	// scroll to tapped position
+	switch a.orientation {
+	case scrollBarOrientationHorizontal:
+		a.moveBar(e.Position.X, a.bar.Size())
+	case scrollBarOrientationVertical:
+		a.moveBar(e.Position.Y, a.bar.Size())
+	}
+}
+
+func (a *scrollBarArea) scrollFullPageOnTap(e *fyne.PointEvent) {
 	// when tapping above/below or left/right of the bar, scroll the content
 	// nearly a full page (pageScrollFraction) up/down or left/right, respectively
 	newOffset := a.scroll.Offset
