@@ -257,11 +257,16 @@ func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
 	}
 
 	// scroll to tapped position
+	barSize := a.bar.Size()
 	switch a.orientation {
 	case scrollBarOrientationHorizontal:
-		a.moveBar(e.Position.X, a.bar.Size())
+		if e.Position.X < a.barLeadingEdge || e.Position.X > a.barTrailingEdge {
+			a.moveBar(fyne.Max(0, e.Position.X-barSize.Width/2), barSize)
+		}
 	case scrollBarOrientationVertical:
-		a.moveBar(e.Position.Y, a.bar.Size())
+		if e.Position.Y < a.barLeadingEdge || e.Position.Y > a.barTrailingEdge {
+			a.moveBar(fyne.Max(0, e.Position.Y-barSize.Height/2), a.bar.Size())
+		}
 	}
 }
 
