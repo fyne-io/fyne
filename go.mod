@@ -15,7 +15,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.2.0
-	github.com/go-text/typesetting v0.2.0
+	github.com/go-text/typesetting v0.2.1
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/jackmordaunt/icns/v2 v2.2.6
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08
