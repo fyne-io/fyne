@@ -19,8 +19,8 @@ github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nos
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/fyne-io/gl-js v0.1.0 h1:8luJzNs0ntEAJo+8x8kfUOXujUlP8gB3QMOxO2mUdpM=
 github.com/fyne-io/gl-js v0.1.0/go.mod h1:ZcepK8vmOYLu96JoxbCKJy2ybr+g1pTnaBDdl7c3ajI=
-github.com/fyne-io/glfw-js v0.0.0-20241126112943-313d8a0fe1d0 h1:/1YRWFv9bAWkoo3SuxpFfzpXH0D/bQnTjNXyF4ih7Os=
-github.com/fyne-io/glfw-js v0.0.0-20241126112943-313d8a0fe1d0/go.mod h1:gsGA2dotD4v0SR6PmPCYvS9JuOeMwAtmfvDE7mbYXMY=
+github.com/fyne-io/glfw-js v0.1.0 h1:RGGMmVjcsG17Oifl3X2UJ5vH3PgS4B1UY3ASeN5BXbI=
+github.com/fyne-io/glfw-js v0.1.0/go.mod h1:Ri6te7rdZtBgBpxLW19uBpp3Dl6K9K/bRaYdJ22G8Jk=
 github.com/fyne-io/image v0.1.0 h1:Vm2TQJ2PWGHCf3jYi1/XroaNNMu+GfI/O2QpSbZd4XQ=
 github.com/fyne-io/image v0.1.0/go.mod h1:xrfYBh6yspc+KjkgdZU/ifUC9sPA5Iv7WYUBzQKK7JM=
 github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 h1:5BVwOaUSBTlVZowGO6VZGw2H/zl9nrd3eCZfYV+NfQA=
