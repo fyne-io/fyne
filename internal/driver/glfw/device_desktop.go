@@ -23,3 +23,7 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 
 	return scaleAuto
 }
+
+func isMacOSRuntime() bool {
+	return runtime.GOOS == "darwin"
+}
