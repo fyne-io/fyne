@@ -3,13 +3,30 @@ package container
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestInnerWindow_Alignment(t *testing.T) {
+	w := NewInnerWindow("Title", widget.NewLabel("Content"))
+	w.Resize(fyne.NewSize(150, 100))
+	assert.Equal(t, widget.ButtonAlignCenter, w.Alignment)
+	assert.NotEqual(t, widget.ButtonAlignCenter, w.buttonPosition())
+
+	buttons := test.WidgetRenderer(w).(*innerWindowRenderer).buttonBox
+	w.Alignment = widget.ButtonAlignLeading
+	w.Refresh()
+	assert.Zero(t, buttons.Position().X)
+
+	w.Alignment = widget.ButtonAlignTrailing
+	w.Refresh()
+	assert.Greater(t, buttons.Position().X, float32(100))
+}
 
 func TestInnerWindow_Close(t *testing.T) {
 	w := NewInnerWindow("Thing", widget.NewLabel("Content"))
@@ -58,6 +75,16 @@ func TestInnerWindow_SetContent(t *testing.T) {
 
 	w.SetContent(widget.NewLabel("Content2"))
 	assert.Equal(t, "Content2", title.Objects[0].(*widget.Label).Text)
+}
+
+func TestInnerWindow_SetMaximized(t *testing.T) {
+	w := NewInnerWindow("Title", widget.NewLabel("Content"))
+
+	icon := test.WidgetRenderer(w).(*innerWindowRenderer).buttons[2]
+	assert.Equal(t, "foreground_maximize.svg", icon.b.Icon.Name())
+
+	w.SetMaximized(true)
+	assert.Equal(t, "foreground_view-zoom-fit.svg", icon.b.Icon.Name())
 }
 
 func TestInnerWindow_SetPadded(t *testing.T) {

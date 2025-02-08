@@ -2,6 +2,8 @@ package container
 
 import (
 	"image/color"
+	"runtime"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -34,8 +36,16 @@ type InnerWindow struct {
 	OnMinimized, OnMaximized, OnTappedBar, OnTappedIcon func()                `json:"-"`
 	Icon                                                fyne.Resource
 
-	title   string
-	content *fyne.Container
+	// Alignment allows an inner window to specify if the buttons should be on the left
+	// (`ButtonAlignLeading`) or right of the window border.
+	//
+	// Since: 2.6
+	Alignment widget.ButtonAlign
+
+	title      string
+	borderIcon *borderButton
+	content    *fyne.Container
+	maximized  bool
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
@@ -75,38 +85,57 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	})
 	buttons := NewCenter(NewHBox(close, min, max))
 
-	var icon fyne.CanvasObject
-
+	var iconObj fyne.CanvasObject
+	var borderIcon *borderButton
 	if w.Icon != nil {
-		icon = newBorderButton(w.Icon, modeIcon, th, func() {
+		borderIcon = newBorderButton(w.Icon, modeIcon, th, func() {
 			if f := w.OnTappedIcon; f != nil {
 				f()
 			}
 		})
 		if w.OnTappedIcon == nil {
-			icon.(*borderButton).Disable()
+			borderIcon.Disable()
 		}
+		iconObj = borderIcon
+		w.borderIcon = borderIcon
 	}
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
 	off := (height - title.labelMinSize().Height) / 2
-	bar := NewBorder(nil, nil, buttons, icon,
-		New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title))
+	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
+	bar := NewBorder(nil, nil, buttons, iconObj, barMid)
+	if w.buttonPosition() == widget.ButtonAlignTrailing {
+		buttons := NewCenter(NewHBox(min, max, close))
+		bar.Layout = layout.NewBorderLayout(nil, nil, iconObj, buttons)
+	}
+
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 
+	if w.content == nil {
+		w.content = NewPadded(canvas.NewRectangle(color.Transparent))
+	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
 	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
-		win: w, bar: bar, buttons: []*borderButton{min, max, close}, bg: bg, corner: corner, contentBG: contentBG}
+		win: w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
+		corner: corner, contentBG: contentBG, icon: borderIcon}
 }
 
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
 	w.content.Objects[0] = obj
 
 	w.content.Refresh()
+}
+
+// SetMaximized tells the window if the maximized state should be set or not.
+//
+// Since: 2.6
+func (w *InnerWindow) SetMaximized(max bool) {
+	w.maximized = max
+	w.Refresh()
 }
 
 func (w *InnerWindow) SetPadded(pad bool) {
@@ -123,16 +152,29 @@ func (w *InnerWindow) SetTitle(title string) {
 	w.Refresh()
 }
 
+func (w *InnerWindow) buttonPosition() widget.ButtonAlign {
+	if w.Alignment != widget.ButtonAlignCenter {
+		return w.Alignment
+	}
+
+	if runtime.GOOS == "windows" || runtime.GOOS == "linux" || strings.Contains(runtime.GOOS, "bsd") {
+		return widget.ButtonAlignTrailing
+	}
+	// macOS
+	return widget.ButtonAlignLeading
+}
+
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 
 type innerWindowRenderer struct {
 	*intWidget.ShadowingRenderer
 
-	win           *InnerWindow
-	bar           *fyne.Container
-	buttons       []*borderButton
-	bg, contentBG *canvas.Rectangle
-	corner        fyne.CanvasObject
+	win            *InnerWindow
+	bar, buttonBox *fyne.Container
+	buttons        []*borderButton
+	icon           *borderButton
+	bg, contentBG  *canvas.Rectangle
+	corner         fyne.CanvasObject
 }
 
 func (i *innerWindowRenderer) Layout(size fyne.Size) {
@@ -177,14 +219,48 @@ func (i *innerWindowRenderer) Refresh() {
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
 
+	var icon fyne.CanvasObject
+	if i.icon != nil {
+		icon = i.icon
+	}
+	if i.win.buttonPosition() == widget.ButtonAlignTrailing {
+		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[1], i.buttons[2], i.buttons[0]}
+		i.bar.Layout = layout.NewBorderLayout(nil, nil, icon, i.buttonBox)
+	} else {
+		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[0], i.buttons[1], i.buttons[2]}
+		i.bar.Layout = layout.NewBorderLayout(nil, nil, i.buttonBox, icon)
+	}
 	for _, b := range i.buttons {
 		b.setTheme(th)
 	}
 	i.bar.Refresh()
 
+	if i.win.OnMinimized == nil {
+		i.buttons[1].Disable()
+	} else {
+		i.buttons[1].SetOnTapped(i.win.OnMinimized)
+		i.buttons[1].Enable()
+	}
+
+	max := i.buttons[2]
+	if i.win.OnMaximized == nil {
+		i.buttons[2].Disable()
+	} else {
+		max.SetOnTapped(i.win.OnMaximized)
+		max.Enable()
+	}
+	if i.win.maximized {
+		max.b.SetIcon(theme.ViewRestoreIcon())
+	} else {
+		max.b.SetIcon(theme.WindowMaximizeIcon())
+	}
+
 	title := i.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
+	if i.icon != nil {
+		i.icon.b.SetIcon(i.win.Icon)
+	}
 }
 
 type draggableLabel struct {
@@ -277,6 +353,14 @@ func (b *borderButton) CreateRenderer() fyne.WidgetRenderer {
 
 func (b *borderButton) Disable() {
 	b.b.Disable()
+}
+
+func (b *borderButton) Enable() {
+	b.b.Enable()
+}
+
+func (b *borderButton) SetOnTapped(fn func()) {
+	b.b.OnTapped = fn
 }
 
 func (b *borderButton) MinSize() fyne.Size {
