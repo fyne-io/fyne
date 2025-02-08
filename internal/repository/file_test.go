@@ -410,6 +410,39 @@ func TestFileRepositoryMove(t *testing.T) {
 	assert.False(t, ex)
 }
 
+func TestFileRepositoryMoveDirectory(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a file in a dir to test with
+	parentPath := path.Join(dir, "parent")
+	fooPath := path.Join(parentPath, "foo")
+	newParentPath := path.Join(dir, "newParent")
+	newFooPath := path.Join(newParentPath, "foo")
+
+	_ = os.Mkdir(parentPath, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parent := storage.NewFileURI(parentPath)
+	foo := storage.NewFileURI(fooPath)
+	newParent := storage.NewFileURI(newParentPath)
+
+	err = storage.Move(parent, newParent)
+	assert.Nil(t, err)
+
+	newData, err := os.ReadFile(newFooPath)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte{1, 2, 3, 4, 5}, newData)
+
+	// Make sure that the source doesn't exist anymore.
+	ex, err := storage.Exists(foo)
+	assert.Nil(t, err)
+	assert.False(t, ex)
+}
+
 func TestFileRepositoryListing(t *testing.T) {
 	dir := t.TempDir()
 
