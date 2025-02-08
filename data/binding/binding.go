@@ -1,6 +1,7 @@
 //go:generate go run gen.go
 
 // Package binding provides support for binding data to widgets.
+// All APIs in the binding package are safe to invoke directly from any goroutine.
 package binding
 
 import (
@@ -21,6 +22,7 @@ var (
 )
 
 // DataItem is the base interface for all bindable data items.
+// All APIs on bindable data items are safe to invoke directly fron any goroutine.
 //
 // Since: 2.0
 type DataItem interface {
