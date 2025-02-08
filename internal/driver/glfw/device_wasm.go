@@ -9,14 +9,11 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-var isMobile = regexp.MustCompile("Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile")
-
-var navigator = js.Global().Get("navigator")
-var userAgent = navigator.Get("userAgent").String()
-var mobileCheck = isMobile.MatchString(userAgent)
+var isMobile = regexp.MustCompile("Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile").
+	MatchString(js.Global().Get("navigator").Get("userAgent").String())
 
 func (*glDevice) IsMobile() bool {
-	return mobileCheck
+	return isMobile
 }
 
 func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
