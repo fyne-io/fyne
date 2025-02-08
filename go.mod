@@ -31,7 +31,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.7.1
-	golang.org/x/image v0.23.0
+	golang.org/x/image v0.24.0
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a
 	golang.org/x/mod v0.17.0
 	golang.org/x/sys v0.27.0
