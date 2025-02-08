@@ -241,18 +241,18 @@ func (i *innerWindowRenderer) Refresh() {
 		i.buttons[1].SetOnTapped(i.win.OnMinimized)
 		i.buttons[1].Enable()
 	}
+
+	max := i.buttons[2]
 	if i.win.OnMaximized == nil {
 		i.buttons[2].Disable()
 	} else {
-		max := i.buttons[2]
 		max.SetOnTapped(i.win.OnMaximized)
 		max.Enable()
-
-		if i.win.maximized {
-			max.b.SetIcon(theme.ViewRestoreIcon())
-		} else {
-			max.b.SetIcon(theme.WindowMaximizeIcon())
-		}
+	}
+	if i.win.maximized {
+		max.b.SetIcon(theme.ViewRestoreIcon())
+	} else {
+		max.b.SetIcon(theme.WindowMaximizeIcon())
 	}
 
 	title := i.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
