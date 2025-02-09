@@ -9,12 +9,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-type noCopy struct{}
-
-func (*noCopy) Lock() {}
-
-func (*noCopy) Unlock() {}
-
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	noCopy noCopy // so `go vet` can complain if a widget is passed by value (copied)
@@ -220,3 +214,9 @@ const (
 	// Since: 2.5
 	Adaptive Orientation = 2
 )
+
+type noCopy struct{}
+
+func (*noCopy) Lock() {}
+
+func (*noCopy) Unlock() {}
