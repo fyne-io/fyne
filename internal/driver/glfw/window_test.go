@@ -1803,11 +1803,11 @@ func TestWindow_Shortcut(t *testing.T) {
 		assert.Equal(t, "menu", called)
 	}
 
-	called = ""
+	called = "obj"
 	w.Canvas().Focus(content)
 	trigger()
 	assert.Equal(t, 1, len(content.capturedShortcuts))
-	assert.Equal(t, "", called)
+	assert.Equal(t, "obj", called)
 }
 
 func createWindow(title string) *safeWindow {

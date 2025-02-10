@@ -855,7 +855,7 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 
 func (w *window) triggerMenuShortcut(sh fyne.Shortcut, m *fyne.Menu) bool {
 	for _, i := range m.Items {
-		if i.Shortcut == sh {
+		if i.Shortcut.ShortcutName() == sh.ShortcutName() {
 			if f := i.Action; f != nil {
 				f()
 				return true
