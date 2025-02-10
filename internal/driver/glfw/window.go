@@ -829,6 +829,9 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 	}
 
 	if shortcut != nil {
+		if w.triggerMainMenuShortcut(shortcut) {
+			return true
+		}
 		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
 			shouldRunShortcut := true
 			type selectableText interface {
@@ -845,6 +848,37 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 		}
 		w.canvas.TypedShortcut(shortcut)
 		return true
+	}
+
+	return false
+}
+
+func (w *window) triggerMenuShortcut(sh fyne.Shortcut, m *fyne.Menu) bool {
+	for _, i := range m.Items {
+		if i.Shortcut == sh {
+			if f := i.Action; f != nil {
+				f()
+				return true
+			}
+		}
+
+		if i.ChildMenu != nil && w.triggerMenuShortcut(sh, i.ChildMenu) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (w *window) triggerMainMenuShortcut(sh fyne.Shortcut) bool {
+	if w.mainmenu == nil {
+		return false
+	}
+
+	for _, m := range w.mainmenu.Items {
+		if w.triggerMenuShortcut(sh, m) {
+			return true
+		}
 	}
 
 	return false

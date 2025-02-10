@@ -1767,23 +1767,48 @@ func TestWindow_SetFullScreen(t *testing.T) {
 	})
 }
 
-// This test makes our developer screens flash, let's not run it regularly...
-// func TestWindow_Shortcut(t *testing.T) {
-//	w := createWindow("Test")
-//
-//	shortcutFullScreenWindow := &desktop.CustomShortcut{
-//		KeyName: fyne.KeyF12,
-//	}
-//
-//	w.Canvas().AddShortcut(shortcutFullScreenWindow, func(sc fyne.Shortcut) {
-//		w.SetFullScreen(true)
-//	})
-//
-//	assert.False(t, w.FullScreen())
-//
-//	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
-//	assert.True(t, w.FullScreen())
-// }
+func TestWindow_Shortcut(t *testing.T) {
+	testShortcut := &desktop.CustomShortcut{
+		KeyName:  fyne.Key9,
+		Modifier: fyne.KeyModifierSuper,
+	}
+
+	w := createWindow("Test")
+	content := &typedShortcutable{}
+	w.SetContent(content)
+
+	called := ""
+	w.Canvas().AddShortcut(testShortcut, func(sc fyne.Shortcut) {
+		called = "canvas"
+	})
+
+	trigger := func() {
+		w.triggersShortcut("9", fyne.Key9, fyne.KeyModifierSuper)
+	}
+
+	trigger()
+	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Equal(t, "canvas", called)
+
+	if runtime.GOOS != "darwin" { // macOS does this builtin
+		item := fyne.NewMenuItem("Test", func() {
+			called = "menu"
+		})
+		item.Shortcut = testShortcut
+		file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
+
+		w.SetMainMenu(fyne.NewMainMenu(file))
+		trigger()
+		assert.Equal(t, 0, len(content.capturedShortcuts))
+		assert.Equal(t, "menu", called)
+	}
+
+	called = ""
+	w.Canvas().Focus(content)
+	trigger()
+	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Equal(t, "", called)
+}
 
 func createWindow(title string) *safeWindow {
 	var w *window
