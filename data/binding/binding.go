@@ -98,62 +98,22 @@ func (b *base) triggerFromMain() {
 	}
 }
 
-// Untyped supports binding a any value.
+// Untyped supports binding an any value.
 //
 // Since: 2.1
-type Untyped interface {
-	DataItem
-	Get() (any, error)
-	Set(any) error
-}
+type Untyped = Item[any]
 
 // NewUntyped returns a bindable any value that is managed internally.
 //
 // Since: 2.1
 func NewUntyped() Untyped {
-	var blank any = nil
-	v := &blank
-	return &boundUntyped{val: reflect.ValueOf(v).Elem()}
-}
-
-type boundUntyped struct {
-	base
-
-	val reflect.Value
-}
-
-func (b *boundUntyped) Get() (any, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	return b.val.Interface(), nil
-}
-
-func (b *boundUntyped) Set(val any) error {
-	b.lock.Lock()
-	if b.val.Interface() == val {
-		b.lock.Unlock()
-		return nil
-	}
-	if val == nil {
-		zeroValue := reflect.Zero(b.val.Type())
-		b.val.Set(zeroValue)
-	} else {
-		b.val.Set(reflect.ValueOf(val))
-	}
-	b.lock.Unlock()
-
-	fyne.Do(b.trigger)
-	return nil
+	return NewItem(func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // ExternalUntyped supports binding a any value to an external value.
 //
 // Since: 2.1
-type ExternalUntyped interface {
-	Untyped
-	Reload() error
-}
+type ExternalUntyped = ExternalItem[any]
 
 // BindUntyped returns a bindable any value that is bound to an external type.
 // The parameter must be a pointer to the type you wish to bind.
@@ -167,8 +127,7 @@ func BindUntyped(v any) ExternalUntyped {
 	}
 
 	if v == nil {
-		var blank any
-		v = &blank // never allow a nil value pointer
+		v = new(any) // never allow a nil value pointer
 	}
 
 	b := &boundExternalUntyped{}
@@ -178,9 +137,17 @@ func BindUntyped(v any) ExternalUntyped {
 }
 
 type boundExternalUntyped struct {
-	boundUntyped
+	base
 
+	val reflect.Value
 	old any
+}
+
+func (b *boundExternalUntyped) Get() (any, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	return b.val.Interface(), nil
 }
 
 func (b *boundExternalUntyped) Set(val any) error {
@@ -193,7 +160,7 @@ func (b *boundExternalUntyped) Set(val any) error {
 	b.old = val
 	b.lock.Unlock()
 
-	fyne.Do(b.trigger)
+	b.trigger()
 	return nil
 }
 

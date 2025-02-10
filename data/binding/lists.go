@@ -579,10 +579,10 @@ func (l *boundList[T]) SetValue(i int, v T) error {
 	if err != nil {
 		return err
 	}
-	return item.(bindableItem[T]).Set(v)
+	return item.(Item[T]).Set(v)
 }
 
-func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) bool) bindableItem[T] {
+func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) bool) Item[T] {
 	if external {
 		ret := &boundExternalListItem[T]{old: (*v)[i]}
 		ret.val = v
@@ -594,7 +594,7 @@ func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) boo
 	return &boundListItem[T]{val: v, index: i, comparator: comparator}
 }
 
-func bindListItemComparable[T bool | float64 | int | rune | string](v *[]T, i int, external bool) bindableItem[T] {
+func bindListItemComparable[T bool | float64 | int | rune | string](v *[]T, i int, external bool) Item[T] {
 	return bindListItem(v, i, external, func(t1, t2 T) bool { return t1 == t2 })
 }
 

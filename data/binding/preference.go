@@ -55,7 +55,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 		})
 }
 
-func bindPreferenceItem[T bool | float64 | int | string](key string, p fyne.Preferences, setLookup preferenceLookupSetter[T]) bindableItem[T] {
+func bindPreferenceItem[T bool | float64 | int | string](key string, p fyne.Preferences, setLookup preferenceLookupSetter[T]) Item[T] {
 	if found, ok := lookupExistingBinding[T](key, p); ok {
 		return found
 	}
@@ -67,14 +67,14 @@ func bindPreferenceItem[T bool | float64 | int | string](key string, p fyne.Pref
 	return listen
 }
 
-func lookupExistingBinding[T any](key string, p fyne.Preferences) (bindableItem[T], bool) {
+func lookupExistingBinding[T any](key string, p fyne.Preferences) (Item[T], bool) {
 	binds := prefBinds.getBindings(p)
 	if binds == nil {
 		return nil, false
 	}
 
 	if listen, ok := binds.Load(key); listen != nil && ok {
-		if l, ok := listen.(bindableItem[T]); ok {
+		if l, ok := listen.(Item[T]); ok {
 			return l, ok
 		}
 		fyne.LogError(keyTypeMismatchError+key, nil)

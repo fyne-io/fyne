@@ -180,17 +180,17 @@ func StringToURI(str String) URI {
 	return v
 }
 
-func toString[T any](v bindableItem[T], formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) *toStringFrom[T] {
+func toString[T any](v Item[T], formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) *toStringFrom[T] {
 	str := &toStringFrom[T]{from: v, formatter: formatter, comparator: comparator, parser: parser}
 	v.AddListener(str)
 	return str
 }
 
-func toStringComparable[T bool | float64 | int](v bindableItem[T], formatter func(T) (string, error), parser func(string) (T, error)) *toStringFrom[T] {
+func toStringComparable[T bool | float64 | int](v Item[T], formatter func(T) (string, error), parser func(string) (T, error)) *toStringFrom[T] {
 	return toString(v, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
 }
 
-func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) String {
+func toStringWithFormat[T any](v Item[T], format, defaultFormat string, formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) String {
 	str := toString(v, formatter, comparator, parser)
 	if format != defaultFormat { // Same as not using custom formatting.
 		str.format = format
@@ -199,7 +199,7 @@ func toStringWithFormat[T any](v bindableItem[T], format, defaultFormat string, 
 	return str
 }
 
-func toStringWithFormatComparable[T bool | float64 | int](v bindableItem[T], format, defaultFormat string, formatter func(T) (string, error), parser func(string) (T, error)) String {
+func toStringWithFormatComparable[T bool | float64 | int](v Item[T], format, defaultFormat string, formatter func(T) (string, error), parser func(string) (T, error)) String {
 	return toStringWithFormat(v, format, defaultFormat, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
 }
 
@@ -220,7 +220,7 @@ type toStringFrom[T any] struct {
 	comparator func(T, T) bool
 	parser     func(string) (T, error)
 
-	from bindableItem[T]
+	from Item[T]
 }
 
 func (s *toStringFrom[T]) Get() (string, error) {
@@ -338,7 +338,7 @@ type toInt[T float64] struct {
 	formatter func(int) (T, error)
 	parser    func(T) (int, error)
 
-	from bindableItem[T]
+	from Item[T]
 }
 
 func (s *toInt[T]) Get() (int, error) {
@@ -376,7 +376,7 @@ type fromIntTo[T float64] struct {
 
 	formatter func(int) (T, error)
 	parser    func(T) (int, error)
-	from      bindableItem[int]
+	from      Item[int]
 }
 
 func (s *fromIntTo[T]) Get() (T, error) {

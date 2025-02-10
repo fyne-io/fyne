@@ -56,4 +56,17 @@ func TestBindAnyWithNil(t *testing.T) {
 	a.Set(b)
 	var tr any = nil
 	a.Set(tr)
+
+	a.Set(0)
+
+	ival, err := a.Get()
+	assert.NoError(t, err)
+	val, ok := ival.(int)
+	assert.Equal(t, 0, val)
+	assert.True(t, ok)
+
+	a.Set(nil)
+	ival, err = a.Get()
+	assert.NoError(t, err)
+	assert.Equal(t, nil, ival)
 }
