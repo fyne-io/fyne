@@ -156,7 +156,7 @@ func (w *window) Show() {
 		}
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
-			w.SetFullScreen(true)
+			w.doSetFullScreen(true)
 		}
 
 		// show top canvas element
