@@ -1807,6 +1807,11 @@ func TestWindow_Shortcut(t *testing.T) {
 	w.Canvas().Focus(content)
 	trigger()
 	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Equal(t, "menu", called)
+
+	called = "obj"
+	w.triggersShortcut("9", fyne.KeyD, fyne.KeyModifierSuper) // not in the menu
+	assert.Equal(t, 2, len(content.capturedShortcuts))
 	assert.Equal(t, "obj", called)
 }
 
