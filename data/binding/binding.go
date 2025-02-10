@@ -101,15 +101,11 @@ func (b *base) triggerFromMain() {
 // Untyped supports binding an any value.
 //
 // Since: 2.1
-//
-// Deprecated: Use the [Item] interface with a specific type to get type safety.
 type Untyped = Item[any]
 
 // NewUntyped returns a bindable any value that is managed internally.
 //
 // Since: 2.1
-//
-// Deprecated: Use the [NewItem] function with a specific type to get type safety.
 func NewUntyped() Untyped {
 	return &boundUntyped{val: reflect.ValueOf(new(any)).Elem()}
 }
@@ -148,16 +144,12 @@ func (b *boundUntyped) Set(val any) error {
 // ExternalUntyped supports binding a any value to an external value.
 //
 // Since: 2.1
-//
-// Deprecated: Use the [ExternalItem] interface with a specific type to get type safety.
 type ExternalUntyped = ExternalItem[any]
 
 // BindUntyped returns a bindable any value that is bound to an external type.
 // The parameter must be a pointer to the type you wish to bind.
 //
 // Since: 2.1
-//
-// Deprecated: Use the [BindItem] function with a specific type to get type safety.
 func BindUntyped(v any) ExternalUntyped {
 	t := reflect.TypeOf(v)
 	if t.Kind() != reflect.Ptr {
