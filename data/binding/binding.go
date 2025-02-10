@@ -137,7 +137,7 @@ func (b *boundUntyped) Set(val any) error {
 	}
 	b.lock.Unlock()
 
-	fyne.Do(b.trigger)
+	b.trigger()
 	return nil
 }
 
@@ -183,7 +183,7 @@ func (b *boundExternalUntyped) Set(val any) error {
 	b.old = val
 	b.lock.Unlock()
 
-	fyne.Do(b.trigger)
+	b.trigger()
 	return nil
 }
 
