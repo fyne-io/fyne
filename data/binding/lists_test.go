@@ -13,14 +13,14 @@ type simpleList struct {
 
 func TestListBase_AddListener(t *testing.T) {
 	data := &simpleList{}
-	assert.Equal(t, 0, len(data.listeners))
+	assert.Empty(t, data.listeners)
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, len(data.listeners))
+	assert.Len(t, data.listeners, 1)
 
 	data.trigger()
 	assert.True(t, called)
@@ -30,16 +30,16 @@ func TestListBase_GetItem(t *testing.T) {
 	data := &simpleList{}
 	f := 0.5
 	data.appendItem(BindFloat(&f))
-	assert.Equal(t, 1, len(data.items))
+	assert.Len(t, data.items, 1)
 
 	item, err := data.GetItem(0)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	val, err := item.(Float).Get()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, f, val)
 
 	_, err = data.GetItem(5)
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 }
 
 func TestListBase_Length(t *testing.T) {
@@ -58,9 +58,9 @@ func TestListBase_RemoveListener(t *testing.T) {
 	data := &simpleList{}
 	data.listeners = append(data.listeners, fn)
 
-	assert.Equal(t, 1, len(data.listeners))
+	assert.Len(t, data.listeners, 1)
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, len(data.listeners))
+	assert.Empty(t, data.listeners)
 
 	data.trigger()
 	assert.False(t, called)

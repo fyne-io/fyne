@@ -88,7 +88,7 @@ func TestMobileCanvas_MenuChild(t *testing.T) {
 	assert.Equal(t, "Top", topObj.menu.Label)
 
 	test.Tap(topObj)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 	rootOverlay := c.Overlays().Top()
 	parentItem := rootOverlay.(*internalWidget.OverlayContainer).Content.(*widget.PopUpMenu).Items[0]
 	parentDetails := test.WidgetRenderer(parentItem.(fyne.Widget))
@@ -101,7 +101,7 @@ func TestMobileCanvas_MenuChild(t *testing.T) {
 	childMenu := parentItem.(interface{ Child() *widget.Menu }).Child()
 	assert.NotNil(t, childMenu)
 	assert.True(t, childMenu.Visible())
-	assert.Equal(t, 1, len(childMenu.Items))
+	assert.Len(t, childMenu.Items, 1)
 
 	childDetails := test.WidgetRenderer(childMenu.Items[0].(fyne.Widget))
 	text = childDetails.Objects()[1].(*fynecanvas.Text)

@@ -431,16 +431,16 @@ func TestFileRepositoryMoveDirectory(t *testing.T) {
 	newParent := storage.NewFileURI(newParentPath)
 
 	err = storage.Move(parent, newParent)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	newData, err := os.ReadFile(newFooPath)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, newData)
 
 	// Make sure that the source doesn't exist anymore.
 	ex, err := storage.Exists(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, ex)
 }
 

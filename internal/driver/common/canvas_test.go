@@ -366,9 +366,9 @@ func TestCanvas_OverlayStack(t *testing.T) {
 	o.Add(a)
 	o.Add(b)
 	o.Add(c)
-	assert.Equal(t, 3, len(o.List()))
+	assert.Len(t, o.List(), 3)
 	o.Remove(c)
-	assert.Equal(t, 2, len(o.List()))
+	assert.Len(t, o.List(), 2)
 	o.Remove(a)
 	assert.Empty(t, o.List())
 }

@@ -9,14 +9,14 @@ import (
 
 func TestTreeBase_AddListener(t *testing.T) {
 	data := newSimpleTree()
-	assert.Equal(t, 0, len(data.listeners))
+	assert.Empty(t, data.listeners)
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, len(data.listeners))
+	assert.Len(t, data.listeners, 1)
 
 	data.trigger()
 	assert.True(t, called)
@@ -26,24 +26,24 @@ func TestTreeBase_GetItem(t *testing.T) {
 	data := newSimpleTree()
 	f := 0.5
 	data.appendItem(BindFloat(&f), "f", "")
-	assert.Equal(t, 1, len(data.items))
+	assert.Len(t, data.items, 1)
 
 	item, err := data.GetItem("f")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	val, err := item.(Float).Get()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, f, val)
 
 	_, err = data.GetItem("g")
-	assert.NotNil(t, err)
+	assert.Error(t, err)
 }
 
 func TestListBase_IDs(t *testing.T) {
 	data := newSimpleTree()
-	assert.Equal(t, 0, len(data.ChildIDs("")))
+	assert.Empty(t, data.ChildIDs(""))
 
 	data.appendItem(NewFloat(), "1", "")
-	assert.Equal(t, 1, len(data.ChildIDs("")))
+	assert.Len(t, data.ChildIDs(""), 1)
 	assert.Equal(t, "1", data.ChildIDs("")[0])
 }
 
@@ -55,9 +55,9 @@ func TestTreeBase_RemoveListener(t *testing.T) {
 	data := newSimpleTree()
 	data.listeners = append(data.listeners, fn)
 
-	assert.Equal(t, 1, len(data.listeners))
+	assert.Len(t, data.listeners, 1)
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, len(data.listeners))
+	assert.Empty(t, data.listeners)
 
 	data.trigger()
 	assert.False(t, called)

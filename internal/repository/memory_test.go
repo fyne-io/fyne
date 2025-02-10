@@ -350,7 +350,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 
 	empty, _ := storage.ParseURI("mem:///empty/")
 	canList, err := storage.CanList(empty)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, canList)
 
 	foo, _ := storage.ParseURI("mem:///foo")
