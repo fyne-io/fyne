@@ -131,6 +131,17 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 		return ErrOperationNotSupported
 	}
 
+	if listable, ok := srcrepo.(ListableRepository); ok {
+		isParent, err := listable.CanList(source)
+		if err == nil && isParent {
+			if srcrepo != destwrepo { // cannot copy folders between repositories
+				return ErrOperationNotSupported
+			}
+
+			return genericCopyMoveListable(source, destination, srcrepo, false)
+		}
+	}
+
 	// Create a reader and a writer.
 	srcReader, err := srcrepo.Reader(source)
 	if err != nil {
@@ -188,6 +199,17 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 		return ErrOperationNotSupported
 	}
 
+	if listable, ok := srcrepo.(ListableRepository); ok {
+		isParent, err := listable.CanList(source)
+		if err == nil && isParent {
+			if srcrepo != destwrepo { // cannot move between repositories
+				return ErrOperationNotSupported
+			}
+
+			return genericCopyMoveListable(source, destination, srcrepo, true)
+		}
+	}
+
 	// Create the reader and writer to perform the copy operation.
 	srcReader, err := srcrepo.Reader(source)
 	if err != nil {
@@ -209,4 +231,42 @@ func GenericMove(source fyne.URI, destination fyne.URI) error {
 	// Finally, delete the source only if the move finished without error.
 	srcReader.Close()
 	return srcwrepo.Delete(source)
+}
+
+func genericCopyMoveListable(source, destination fyne.URI, repo Repository, deleteSource bool) error {
+	lister, ok1 := repo.(ListableRepository)
+	mover, ok2 := repo.(MovableRepository)
+	copier, ok3 := repo.(CopyableRepository)
+
+	if !ok1 || (deleteSource && !ok2) || (!deleteSource && !ok3) {
+		return ErrOperationNotSupported // cannot move a lister in a non-listable/movable repo
+	}
+
+	err := lister.CreateListable(destination)
+	if err != nil {
+		return err
+	}
+
+	list, err := lister.List(source)
+	if err != nil {
+		return err
+	}
+	for _, child := range list {
+		newChild, _ := repo.(HierarchicalRepository).Child(destination, child.Name())
+		if deleteSource {
+			err = mover.Move(child, newChild)
+		} else {
+			err = copier.Copy(child, newChild)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if !deleteSource {
+		return nil
+	}
+	// we know the repo is writable as well from earlier checks
+	writer, _ := repo.(WritableRepository)
+	return writer.Delete(source)
 }

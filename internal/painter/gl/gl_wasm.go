@@ -3,10 +3,9 @@
 package gl
 
 import (
-	"encoding/binary"
+	"math"
 
 	"github.com/fyne-io/gl-js"
-	"golang.org/x/mobile/exp/f32"
 )
 
 const (
@@ -97,7 +96,7 @@ func (c *xjsContext) BlendFunc(srcFactor, destFactor uint32) {
 }
 
 func (c *xjsContext) BufferData(target uint32, points []float32, usage uint32) {
-	gl.BufferData(gl.Enum(target), f32.Bytes(binary.LittleEndian, points...), gl.Enum(usage))
+	gl.BufferData(gl.Enum(target), toLEByteOrder(points...), gl.Enum(usage))
 }
 
 func (c *xjsContext) Clear(mask uint32) {
@@ -237,4 +236,17 @@ func (c *xjsContext) VertexAttribPointerWithOffset(attribute Attribute, size int
 
 func (c *xjsContext) Viewport(x, y, width, height int) {
 	gl.Viewport(x, y, width, height)
+}
+
+// toLEByteOrder returns the byte representation of float32 values in little endian byte order.
+func toLEByteOrder(values ...float32) []byte {
+	b := make([]byte, 4*len(values))
+	for i, v := range values {
+		u := math.Float32bits(v)
+		b[4*i+0] = byte(u >> 0)
+		b[4*i+1] = byte(u >> 8)
+		b[4*i+2] = byte(u >> 16)
+		b[4*i+3] = byte(u >> 24)
+	}
+	return b
 }

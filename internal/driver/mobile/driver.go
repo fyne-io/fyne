@@ -73,7 +73,7 @@ func init() {
 }
 
 func (d *driver) DoFromGoroutine(fn func(), wait bool) {
-	async.EnsureNotMain(func() {
+	caller := func() {
 		if d.queuedFuncs == nil {
 			fn() // before the app actually starts
 			return
@@ -94,7 +94,14 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 		if wait {
 			<-done
 		}
-	})
+	}
+
+	if wait {
+		async.EnsureNotMain(caller)
+	} else {
+		caller()
+	}
+
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {

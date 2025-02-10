@@ -435,6 +435,28 @@ func TestCopy(t *testing.T) {
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
 }
 
+func TestRepositoryCopyListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/parent1"] = []byte{}
+	m.Data["/parent1/child"] = []byte("content")
+
+	parent, _ := storage.ParseURI("uritest:///parent1")
+	newParent, _ := storage.ParseURI("uritest:///parent2")
+
+	err := storage.Copy(parent, newParent)
+	assert.NoError(t, err)
+	exists, err := m.Exists(parent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	exists, err = m.Exists(newParent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	assert.Equal(t, []byte("content"), m.Data["/parent1/child"])
+	assert.Equal(t, []byte("content"), m.Data["/parent2/child"])
+}
+
 func TestRepositoryMove(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := intRepo.NewInMemoryRepository("uritest")
@@ -452,6 +474,27 @@ func TestRepositoryMove(t *testing.T) {
 	exists, err := m.Exists(foo)
 	assert.NoError(t, err)
 	assert.False(t, exists)
+}
+
+func TestRepositoryMoveListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/parent1"] = []byte{}
+	m.Data["/parent1/child"] = []byte("content")
+
+	parent, _ := storage.ParseURI("uritest:///parent1")
+	newParent, _ := storage.ParseURI("uritest:///parent2")
+
+	err := storage.Move(parent, newParent)
+	assert.NoError(t, err)
+	exists, err := m.Exists(parent)
+	assert.NoError(t, err)
+	assert.False(t, exists)
+	exists, err = m.Exists(newParent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	assert.Equal(t, []byte("content"), m.Data["/parent2/child"])
 }
 
 func TestRepositoryListing(t *testing.T) {

@@ -1,6 +1,7 @@
 //go:generate go run gen.go
 
 // Package binding provides support for binding data to widgets.
+// All APIs in the binding package are safe to invoke directly from any goroutine.
 package binding
 
 import (
@@ -21,6 +22,7 @@ var (
 )
 
 // DataItem is the base interface for all bindable data items.
+// All APIs on bindable data items are safe to invoke directly fron any goroutine.
 //
 // Since: 2.0
 type DataItem interface {
@@ -64,7 +66,7 @@ type base struct {
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataListener) {
-	queueItem(func() {
+	fyne.Do(func() {
 		b.listeners = append(b.listeners, l)
 		l.DataChanged()
 	})
@@ -72,7 +74,7 @@ func (b *base) AddListener(l DataListener) {
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataListener) {
-	queueItem(func() {
+	fyne.Do(func() {
 		for i, listener := range b.listeners {
 			if listener == l {
 				// Delete without preserving order:
@@ -87,11 +89,13 @@ func (b *base) RemoveListener(l DataListener) {
 }
 
 func (b *base) trigger() {
-	queueItem(func() {
-		for _, listen := range b.listeners {
-			listen.DataChanged()
-		}
-	})
+	fyne.Do(b.triggerFromMain)
+}
+
+func (b *base) triggerFromMain() {
+	for _, listen := range b.listeners {
+		listen.DataChanged()
+	}
 }
 
 // Untyped supports binding a any value.
@@ -137,7 +141,7 @@ func (b *boundUntyped) Set(val any) error {
 	}
 	b.lock.Unlock()
 
-	b.trigger()
+	fyne.Do(b.trigger)
 	return nil
 }
 
@@ -187,7 +191,7 @@ func (b *boundExternalUntyped) Set(val any) error {
 	b.old = val
 	b.lock.Unlock()
 
-	b.trigger()
+	fyne.Do(b.trigger)
 	return nil
 }
 

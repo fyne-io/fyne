@@ -203,8 +203,16 @@ func toStringWithFormatComparable[T bool | float64 | int](v Item[T], format, def
 	return toStringWithFormat(v, format, defaultFormat, formatter, func(t1, t2 T) bool { return t1 == t2 }, parser)
 }
 
-type toStringFrom[T any] struct {
+type convertBaseItem struct {
 	base
+}
+
+func (s *convertBaseItem) DataChanged() {
+	s.triggerFromMain()
+}
+
+type toStringFrom[T any] struct {
+	convertBaseItem
 
 	format string
 
@@ -258,16 +266,12 @@ func (s *toStringFrom[T]) Set(str string) error {
 		return err
 	}
 
-	queueItem(s.DataChanged)
+	s.trigger()
 	return nil
 }
 
-func (s *toStringFrom[T]) DataChanged() {
-	s.trigger()
-}
-
 type fromStringTo[T any] struct {
-	base
+	convertBaseItem
 
 	format    string
 	formatter func(string) (T, error)
@@ -324,16 +328,12 @@ func (s *fromStringTo[T]) Set(val T) error {
 		return err
 	}
 
-	queueItem(s.DataChanged)
+	s.trigger()
 	return nil
 }
 
-func (s *fromStringTo[T]) DataChanged() {
-	s.trigger()
-}
-
 type toInt[T float64] struct {
-	base
+	convertBaseItem
 
 	formatter func(int) (T, error)
 	parser    func(T) (int, error)
@@ -367,16 +367,12 @@ func (s *toInt[T]) Set(v int) error {
 		return err
 	}
 
-	queueItem(s.DataChanged)
+	s.trigger()
 	return nil
 }
 
-func (s *toInt[T]) DataChanged() {
-	s.trigger()
-}
-
 type fromIntTo[T float64] struct {
-	base
+	convertBaseItem
 
 	formatter func(int) (T, error)
 	parser    func(T) (int, error)
@@ -408,10 +404,6 @@ func (s *fromIntTo[T]) Set(val T) error {
 		return err
 	}
 
-	queueItem(s.DataChanged)
-	return nil
-}
-
-func (s *fromIntTo[T]) DataChanged() {
 	s.trigger()
+	return nil
 }

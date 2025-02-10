@@ -28,6 +28,38 @@ func TestTextGrid_Append(t *testing.T) {
 	assert.Equal(t, "Something\nElse\nNewline", grid.Text())
 }
 
+func TestTextGrid_CursorLocationForPosition(t *testing.T) {
+	grid := NewTextGridFromString("Position\nTest")
+
+	row, col := grid.CursorLocationForPosition(fyne.NewPos(2, 2))
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 0, col)
+
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(12, 12))
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 1, col)
+
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(20, 20))
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 2, col)
+}
+
+func TestTextGrid_PositionForCursorLocation(t *testing.T) {
+	grid := NewTextGridFromString("Position\nTest")
+
+	pos := grid.PositionForCursorLocation(0, 0)
+	assert.True(t, pos.IsZero())
+
+	col1Pos := grid.PositionForCursorLocation(0, 1)
+	col2Pos := grid.PositionForCursorLocation(0, 2)
+	assert.Equal(t, col1Pos.Y, col2Pos.Y)
+	assert.Greater(t, col2Pos.X, col1Pos.X)
+
+	col1Row1Pos := grid.PositionForCursorLocation(1, 1)
+	assert.Equal(t, col1Row1Pos.X, col1Pos.X)
+	assert.Greater(t, col1Row1Pos.Y, col1Pos.Y)
+}
+
 func TestTextGrid_Scroll(t *testing.T) {
 	grid := NewTextGridFromString("Something\nElse")
 	grid.Resize(fyne.NewSize(50, 20))

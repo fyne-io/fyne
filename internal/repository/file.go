@@ -301,6 +301,15 @@ func (r *FileRepository) Copy(source, destination fyne.URI) error {
 //
 // Since: 2.0
 func (r *FileRepository) Move(source, destination fyne.URI) error {
+	listSrc, _ := r.CanList(source)
+	if listSrc {
+		err := os.Rename(source.Path(), destination.Path())
+		if err == nil {
+			return nil
+		}
+		// fallthrough to slow move
+	}
+
 	// NOTE: as far as I can tell, golang does not have an optimized Move
 	// function - everything I can find on the 'net suggests doing more
 	// or less the equivalent of GenericMove(), hence why that is used.
