@@ -107,38 +107,7 @@ type Untyped = Item[any]
 //
 // Since: 2.1
 func NewUntyped() Untyped {
-	return &boundUntyped{val: reflect.ValueOf(new(any)).Elem()}
-}
-
-type boundUntyped struct {
-	base
-
-	val reflect.Value
-}
-
-func (b *boundUntyped) Get() (any, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	return b.val.Interface(), nil
-}
-
-func (b *boundUntyped) Set(val any) error {
-	b.lock.Lock()
-	if b.val.Interface() == val {
-		b.lock.Unlock()
-		return nil
-	}
-	if val == nil {
-		zeroValue := reflect.Zero(b.val.Type())
-		b.val.Set(zeroValue)
-	} else {
-		b.val.Set(reflect.ValueOf(val))
-	}
-	b.lock.Unlock()
-
-	b.trigger()
-	return nil
+	return NewItem(func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // ExternalUntyped supports binding a any value to an external value.
@@ -168,9 +137,17 @@ func BindUntyped(v any) ExternalUntyped {
 }
 
 type boundExternalUntyped struct {
-	boundUntyped
+	base
 
+	val reflect.Value
 	old any
+}
+
+func (b *boundExternalUntyped) Get() (any, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	return b.val.Interface(), nil
 }
 
 func (b *boundExternalUntyped) Set(val any) error {
