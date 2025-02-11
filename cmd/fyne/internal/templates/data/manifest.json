@@ -1,0 +1,15 @@
+{
+    "name": "{{.AppName}}",
+    "short_name": "{{.AppName}}",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#007bff",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        }
+    ]
+}

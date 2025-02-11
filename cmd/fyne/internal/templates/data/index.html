@@ -35,7 +35,9 @@
 		</style>
 		<link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)" />
 		<link rel="stylesheet" href="light.css" media="(prefers-color-scheme: light)" />
+		<link rel="manifest" href="manifest.json" />
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" type="image/png" href="icon.png">
 		{{if not .IsReleased}}
 			<script src="webgl-debug.js"></script>
@@ -106,6 +108,17 @@
 					action.innerHTML = "WebGL is not supported in your browser";
 					action.className = "action-error"
 				}
+			}
+		</script>
+		<script>
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('/service-worker.js')
+					.then(registration => {
+						console.log('Service Worker registered with scope:', registration.scope);
+					})
+					.catch(error => {
+						console.error('Service Worker registration failed:', error);
+					});
 			}
 		</script>
 	</head>
