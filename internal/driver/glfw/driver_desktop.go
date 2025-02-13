@@ -181,12 +181,13 @@ func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
 	return d.currentKeyModifiers
 }
 
+// this function should be invoked from a goroutine
 func (d *gLDriver) catchTerm() {
 	terminateSignal := make(chan os.Signal, 1)
 	signal.Notify(terminateSignal, syscall.SIGINT, syscall.SIGTERM)
 
 	<-terminateSignal
-	d.Quit()
+	fyne.Do(d.Quit)
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
