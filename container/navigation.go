@@ -43,7 +43,7 @@ func NewNavigation(root fyne.CanvasObject) *Navigation {
 	return NewNavigationWithTitle(root, "")
 }
 
-// NewNavigation creates a new navigation container with a given root object and a default title.
+// NewNavigationWithTitle creates a new navigation container with a given root object and a default title.
 //
 // Since: 2.6
 func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
