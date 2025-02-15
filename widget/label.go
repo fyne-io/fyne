@@ -3,6 +3,8 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -23,8 +25,15 @@ type Label struct {
 	// Since: 2.4
 	Importance Importance
 
+	// If set to true, Selectable indicates that this label should support select interaction
+	// to allow the text to be copied.
+	//
+	//Since: 2.6
+	Selectable bool
+
 	provider *RichText
 	binder   basicBinder
+	hover    *labelHover
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -69,7 +78,13 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	return NewSimpleRenderer(l.provider)
+	l.hover = &labelHover{l: l}
+	if !l.Selectable {
+		l.hover.Hide()
+	}
+	return NewSimpleRenderer(
+		&fyne.Container{Layout: layout.NewStackLayout(),
+			Objects: []fyne.CanvasObject{l.provider, l.hover}})
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -84,6 +99,8 @@ func (l *Label) MinSize() fyne.Size {
 //
 // Implements: fyne.Widget
 func (l *Label) Refresh() {
+	l.hover.Hidden = !l.Selectable
+	l.hover.Refresh()
 	if l.provider == nil { // not created until visible
 		return
 	}
@@ -161,4 +178,18 @@ func (l *Label) updateFromData(data binding.DataItem) {
 		return
 	}
 	l.SetText(val)
+}
+
+type labelHover struct {
+	BaseWidget
+
+	l *Label
+}
+
+func (l *labelHover) Cursor() desktop.Cursor {
+	if l.l.Selectable {
+		return desktop.TextCursor
+	}
+
+	return desktop.DefaultCursor
 }
