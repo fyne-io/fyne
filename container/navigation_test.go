@@ -8,97 +8,86 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNavigation_Basics(t *testing.T) {
+func TestNavigation_RootWithTitle(t *testing.T) {
 	l := widget.NewLabel("something")
-	nav := NewNavigation("Title", l)
+	nav := NewNavigationWithTitle(l, "Title")
 
-	assert.Equal(t, true, nav.button.Disabled())
+	assert.Equal(t, true, nav.Back.Disabled())
 	assert.Equal(t, 1, len(nav.stack.Objects))
 	assert.Equal(t, 1, len(nav.titles))
 
-	assert.Equal(t, l, nav.Pop())
+	assert.Nil(t, nav.Pop())
 
-	assert.Equal(t, "Title", nav.label.Text)
+	assert.Equal(t, "Title", nav.Label.Text)
 }
 
-func TestNavigation_NewWithMultiple(t *testing.T) {
+func TestNavigation_EmptyPushWithTitle(t *testing.T) {
 	a := widget.NewLabel("a")
 	b := widget.NewLabel("b")
 	c := widget.NewLabel("c")
-	nav := NewNavigation("Title", a, b, c)
+	nav := NewNavigationWithTitle(nil, "Title")
 
-	assert.Equal(t, false, nav.button.Disabled())
+	assert.Equal(t, true, nav.Back.Disabled())
+	assert.Equal(t, 0, len(nav.stack.Objects))
+	assert.Equal(t, 0, len(nav.titles))
+	assert.Equal(t, 0, nav.level)
+
+	nav.PushWithTitle(a, "A")
+	assert.Equal(t, 1, len(nav.stack.Objects))
+	assert.Equal(t, 1, nav.level)
+	assert.Equal(t, "A", nav.Label.Text)
+	assert.Equal(t, false, nav.Back.Disabled())
+
+	nav.PushWithTitle(b, "B")
+	assert.Equal(t, 2, len(nav.stack.Objects))
+	assert.Equal(t, 2, nav.level)
+	assert.Equal(t, "B", nav.Label.Text)
+	assert.Equal(t, false, nav.Back.Disabled())
+
+	nav.PushWithTitle(c, "C")
 	assert.Equal(t, 3, len(nav.stack.Objects))
+	assert.Equal(t, 3, nav.level)
+	assert.Equal(t, "C", nav.Label.Text)
+	assert.Equal(t, false, nav.Back.Disabled())
+
 	assert.Equal(t, 3, len(nav.titles))
 
 	assert.Equal(t, c, nav.Pop())
-	assert.Equal(t, "Title", nav.label.Text)
-	assert.Equal(t, 2, len(nav.stack.Objects))
-	assert.Equal(t, 2, len(nav.titles))
-	assert.Equal(t, false, nav.button.Disabled())
+	assert.Equal(t, 3, len(nav.stack.Objects))
+	assert.Equal(t, 2, nav.level)
+	assert.Equal(t, "B", nav.Label.Text)
+	assert.Equal(t, false, nav.Back.Disabled())
 
 	assert.Equal(t, b, nav.Pop())
-	assert.Equal(t, "Title", nav.label.Text)
-	assert.Equal(t, 1, len(nav.stack.Objects))
-	assert.Equal(t, 1, len(nav.titles))
-	assert.Equal(t, true, nav.button.Disabled())
-}
-
-func TestNavigation_PushWithTitle(t *testing.T) {
-	a := widget.NewLabel("a")
-	b := widget.NewLabel("b")
-	c := widget.NewLabel("c")
-	nav := NewNavigation("Title")
-
-	assert.Equal(t, true, nav.button.Disabled())
-	assert.Equal(t, 0, len(nav.stack.Objects))
-	assert.Equal(t, 0, len(nav.titles))
-
-	nav.PushWithTitle(a, "A")
-	assert.Equal(t, "A", nav.label.Text)
-	assert.Equal(t, true, nav.button.Disabled())
-
-	nav.PushWithTitle(b, "B")
-	assert.Equal(t, "B", nav.label.Text)
-	assert.Equal(t, false, nav.button.Disabled())
-
-	nav.PushWithTitle(c, "C")
-	assert.Equal(t, "C", nav.label.Text)
-	assert.Equal(t, false, nav.button.Disabled())
-
-	assert.Equal(t, c, nav.Pop())
-	assert.Equal(t, "B", nav.label.Text)
-	assert.Equal(t, 2, len(nav.stack.Objects))
-	assert.Equal(t, 2, len(nav.titles))
-	assert.Equal(t, false, nav.button.Disabled())
-
-	assert.Equal(t, b, nav.Pop())
-	assert.Equal(t, "A", nav.label.Text)
-	assert.Equal(t, 1, len(nav.stack.Objects))
-	assert.Equal(t, 1, len(nav.titles))
-	assert.Equal(t, true, nav.button.Disabled())
+	assert.Equal(t, "A", nav.Label.Text)
+	assert.Equal(t, 3, len(nav.stack.Objects))
+	assert.Equal(t, 3, len(nav.titles))
+	assert.Equal(t, 1, nav.level)
+	assert.Equal(t, false, nav.Back.Disabled())
 
 	assert.Equal(t, a, nav.Pop())
-	assert.Equal(t, "Title", nav.label.Text)
-	assert.Equal(t, 0, len(nav.stack.Objects))
-	assert.Equal(t, 0, len(nav.titles))
-	assert.Equal(t, true, nav.button.Disabled())
+	assert.Equal(t, "Title", nav.Label.Text)
+	assert.Equal(t, 3, len(nav.stack.Objects))
+	assert.Equal(t, 3, len(nav.titles))
+	assert.Equal(t, 0, nav.level)
+	assert.Equal(t, true, nav.Back.Disabled())
 
 	assert.Nil(t, nav.Pop())
-	assert.Equal(t, "Title", nav.label.Text)
-	assert.Equal(t, 0, len(nav.stack.Objects))
-	assert.Equal(t, 0, len(nav.titles))
-	assert.Equal(t, true, nav.button.Disabled())
+	assert.Equal(t, "Title", nav.Label.Text)
+	assert.Equal(t, 3, len(nav.stack.Objects))
+	assert.Equal(t, 3, len(nav.titles))
+	assert.Equal(t, 0, nav.level)
+	assert.Equal(t, true, nav.Back.Disabled())
 }
 
 func TestNavigation_Empty(t *testing.T) {
-	nav := NewNavigation("Title")
+	nav := NewNavigationWithTitle(nil, "Title")
 
-	assert.Equal(t, true, nav.button.Disabled())
+	assert.Equal(t, true, nav.Back.Disabled())
 	assert.Equal(t, 0, len(nav.stack.Objects))
 	assert.Equal(t, 0, len(nav.titles))
 
 	assert.Nil(t, nav.Pop())
 
-	assert.Equal(t, "Title", nav.label.Text)
+	assert.Equal(t, "Title", nav.Label.Text)
 }

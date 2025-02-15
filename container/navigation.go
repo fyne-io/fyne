@@ -2,6 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -12,39 +13,61 @@ import (
 // Since: 2.6
 type Navigation struct {
 	widget.BaseWidget
-	control *fyne.Container
-	stack   *fyne.Container
-	button  *widget.Button
-	label   *widget.Label
-	title   string
-	titles  []string
+
+	Root  fyne.CanvasObject
+	Title string
+	Back  NavigationObject
+	Next  NavigationObject
+	Label *widget.Label
+
+	level  int
+	stack  *fyne.Container
+	titles []string
 }
 
-// NewNavigation creates a new navigation container allowing to pass in one or more objects.
+// NavigationObject allows using any object implementing the `fyne.Disableable`,
+// `fyne.CanvasObject`, and `fyne.Tappable` interfaces to be used as Back/Next
+// navigation control.
 //
 // Since: 2.6
-func NewNavigation(s string, objs ...fyne.CanvasObject) *Navigation {
-	button := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), nil)
+type NavigationObject interface {
+	fyne.CanvasObject
+	fyne.Disableable
+	fyne.Tappable
+}
+
+// NewNavigation creates a new navigation container with a given root object.
+//
+// Since: 2.6
+func NewNavigation(root fyne.CanvasObject) *Navigation {
+	return NewNavigationWithTitle(root, "")
+}
+
+// NewNavigation creates a new navigation container with a given root object and a default title.
+//
+// Since: 2.6
+func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 	label := widget.NewLabelWithStyle(s, fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	titles := make([]string, len(objs))
-	for n := 0; n < len(objs); n++ {
-		titles[n] = s
+	objs := []fyne.CanvasObject{}
+	titles := []string{}
+	if root != nil {
+		objs = append(objs, root)
+		titles = append(titles, s)
 	}
+
 	nav := &Navigation{
-		button:  button,
-		control: NewStack(NewHBox(button), label),
-		stack:   NewStack(objs...),
-		label:   label,
-		title:   s,
-		titles:  titles,
+		Root:   root,
+		Title:  s,
+		Label:  label,
+		level:  len(objs),
+		stack:  NewStack(objs...),
+		titles: titles,
 	}
 	nav.ExtendBaseWidget(nav)
-	nav.button.OnTapped = func() {
-		nav.Pop()
-	}
-	if len(objs) <= 1 {
-		nav.button.Disable()
-	}
+	nav.Back = widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() { _ = nav.Pop() })
+	nav.Back.Disable()
+	nav.Next = widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() { _ = nav.Forward() })
+	nav.Next.Disable()
 
 	return nav
 }
@@ -53,24 +76,34 @@ func NewNavigation(s string, objs ...fyne.CanvasObject) *Navigation {
 //
 // Since: 2.6
 func (nav *Navigation) Push(obj fyne.CanvasObject) {
-	nav.PushWithTitle(obj, nav.titles[len(nav.titles)-1])
+	s := nav.Title
+	if nav.level > 0 {
+		s = nav.titles[nav.level-1]
+	}
+	nav.PushWithTitle(obj, s)
 }
 
 // PushWithTitle puts the given CanvasObject on top, hides the object below, and uses the given title as label text.
 //
 // Since: 2.6
 func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
-	objs := nav.stack.Objects
+	objs := nav.stack.Objects[:nav.level]
 	if len(objs) > 0 {
 		objs[len(objs)-1].Hide()
 	}
 	nav.stack.Objects = append(objs, obj)
-	if len(nav.stack.Objects) > 1 {
-		nav.button.Enable()
+	if len(nav.stack.Objects) > 0 {
+		if nav.Back != nil {
+			nav.Back.Enable()
+		}
 	}
-
-	nav.titles = append(nav.titles, s)
-	nav.label.SetText(s)
+	nav.titles = append(nav.titles[:nav.level], s)
+	nav.level++
+	nav.Label.SetText(s)
+	if nav.Next != nil {
+		nav.Next.Disable()
+	}
+	obj.Show()
 }
 
 // Pop return the top level CanvasObject, adjusts the title accordingly, and disabled the back button
@@ -78,41 +111,70 @@ func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
 //
 // Since: 2.6
 func (nav *Navigation) Pop() fyne.CanvasObject {
-	objs := nav.stack.Objects
-	if len(objs) == 0 {
+	if nav.level == 0 || nav.level == 1 && nav.Root != nil {
 		return nil
 	}
-	obj := objs[len(objs)-1]
-	objs = objs[:len(objs)-1]
-	if len(objs) > 0 {
-		objs[len(objs)-1].Show()
+
+	title := nav.Title
+	objs := nav.stack.Objects
+	objs[nav.level-1].Hide()
+	if nav.level > 1 {
+		objs[nav.level-2].Show()
+		title = nav.titles[nav.level-2]
 	}
-	nav.stack.Objects = objs
-	if len(nav.stack.Objects) <= 1 {
-		nav.button.Disable()
+	nav.Label.SetText(title)
+
+	if nav.level == 1 || nav.level == 2 && nav.Root != nil {
+		if nav.Back != nil {
+			nav.Back.Disable()
+		}
 	}
 
-	if len(nav.titles) > 0 {
-		nav.titles = nav.titles[:len(nav.titles)-1]
+	if nav.Next != nil {
+		nav.Next.Enable()
 	}
-	title := nav.title
-	if len(nav.titles) > 0 {
-		title = nav.titles[len(nav.titles)-1]
-	}
-	nav.label.SetText(title)
+	nav.level--
 
-	return obj
+	return objs[nav.level]
+}
+
+// Forward shows the next object in the again.
+//
+// Since: 2.6
+func (nav *Navigation) Forward() fyne.CanvasObject {
+	nav.stack.Objects[nav.level-1].Hide()
+	nav.stack.Objects[nav.level].Show()
+
+	s := nav.Title
+	if len(nav.titles) > 0 {
+		s = nav.titles[nav.level]
+	}
+	nav.level++
+	nav.Label.SetText(s)
+
+	if nav.level == len(nav.stack.Objects) {
+		if nav.Next != nil {
+			nav.Next.Disable()
+		}
+	}
+	if nav.level > 0 {
+		if nav.Back != nil {
+			nav.Back.Enable()
+		}
+	}
+
+	return nav.stack.Objects[nav.level-1]
 }
 
 // SetTitle changes the navigation title and the title for the current object.
 //
 // Since: 2.6
 func (nav *Navigation) SetTitle(s string) {
-	nav.title = s
-	nav.titles[len(nav.titles)-1] = s
-	nav.label.SetText(s)
+	nav.titles[nav.level] = s
+	nav.Label.SetText(s)
 }
 
 func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(NewBorder(nav.control, nil, nil, nil, nav.stack))
+	control := NewStack(NewHBox(nav.Back, layout.NewSpacer(), nav.Next), nav.Label)
+	return widget.NewSimpleRenderer(NewBorder(control, nil, nil, nil, nav.stack))
 }
