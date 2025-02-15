@@ -9,15 +9,19 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
 const noCellMatch = math.MaxInt
 
-// allTableCellsID represents all table cells when refreshing requested cells
-var allTableCellsID = TableCellID{-1, -1}
+var (
+	// allTableCellsID represents all table cells when refreshing requested cells
+	allTableCellsID = TableCellID{-1, -1}
+
+	// onlyNewTableCellsID represents newly visible table cells when refreshing requested cells
+	onlyNewTableCellsID = TableCellID{-2, -2}
+)
 
 // Declare conformity with interfaces
 var _ desktop.Cursorable = (*Table)(nil)
@@ -162,7 +166,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
 	t.content.OnScrolled = func(pos fyne.Position) {
 		t.offset = pos
-		t.cells.Refresh()
+		t.cells.refreshForID(onlyNewTableCellsID)
 	}
 
 	r.Layout(t.Size())
@@ -252,12 +256,7 @@ func (t *Table) RefreshItem(id TableCellID) {
 	if t.cells == nil {
 		return
 	}
-	r := cache.Renderer(t.cells)
-	if r == nil {
-		return
-	}
-
-	r.(*tableCellsRenderer).refreshForID(id)
+	t.cells.refreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
@@ -533,6 +532,19 @@ func (t *Table) ScrollToLeading() {
 
 	t.content.Offset.X = 0
 	t.offset.X = 0
+	t.finishScroll()
+}
+
+// ScrollToOffset scrolls the table to a specific position
+//
+// Since: 2.6
+func (t *Table) ScrollToOffset(off fyne.Position) {
+	if t.content == nil {
+		return
+	}
+
+	t.content.ScrollToOffset(off)
+	t.offset = t.content.Offset
 	t.finishScroll()
 }
 
@@ -1140,10 +1152,12 @@ var _ fyne.Widget = (*tableCells)(nil)
 type tableCells struct {
 	BaseWidget
 	t *Table
+
+	nextRefreshCellsID TableCellID
 }
 
 func newTableCells(t *Table) *tableCells {
-	c := &tableCells{t: t}
+	c := &tableCells{t: t, nextRefreshCellsID: allTableCellsID}
 	c.ExtendBaseWidget(c)
 	return c
 }
@@ -1168,7 +1182,17 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 
 func (c *tableCells) Resize(s fyne.Size) {
 	c.BaseWidget.Resize(s)
-	c.Refresh() // trigger a redraw
+	c.refreshForID(onlyNewTableCellsID) // trigger a redraw
+}
+
+func (c *tableCells) refreshForID(id TableCellID) {
+	c.nextRefreshCellsID = id
+	c.BaseWidget.Refresh()
+}
+
+func (c *tableCells) Refresh() {
+	c.nextRefreshCellsID = allTableCellsID
+	c.BaseWidget.Refresh()
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -1236,7 +1260,7 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	r.refreshForID(allTableCellsID)
+	r.refreshForID(r.cells.nextRefreshCellsID)
 }
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
@@ -1255,11 +1279,6 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.t.cellSize.Height, dataRows)
 	if len(visibleRowHeights) == 0 && dataRows > 0 { // we can't show anything until we have some dimensions
 		return
-	}
-
-	updateCell := r.cells.t.UpdateCell
-	if updateCell == nil {
-		fyne.LogError("Missing UpdateCell callback required for Table", nil)
 	}
 
 	var cellXOffset, cellYOffset float32
@@ -1361,21 +1380,11 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			r.pool.Put(old)
 		}
 	}
-	visible := r.visible
-	headers := r.headers
 
 	r.SetObjects(cells)
 
-	if updateCell != nil {
-		for id, cell := range visible {
-			if toDraw != allTableCellsID && toDraw != id {
-				continue
-			}
-
-			updateCell(id, cell)
-		}
-	}
-	for id, head := range headers {
+	r.updateCells(toDraw, r.visible, wasVisible)
+	for id, head := range r.headers {
 		r.cells.t.updateHeader(id, head)
 	}
 
@@ -1386,6 +1395,31 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	r.hover.FillColor = th.Color(theme.ColorNameHover, v)
 	r.hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	r.hover.Refresh()
+}
+
+func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible map[TableCellID]fyne.CanvasObject) {
+	updateCell := r.cells.t.UpdateCell
+	if updateCell == nil {
+		fyne.LogError("Missing UpdateCell callback required for Table", nil)
+		return
+	}
+
+	if toDraw == onlyNewTableCellsID {
+		for id, cell := range visible {
+			if _, ok := wasVisible[id]; !ok {
+				updateCell(id, cell)
+			}
+		}
+		return
+	}
+
+	for id, cell := range visible {
+		if toDraw != allTableCellsID && toDraw != id {
+			continue
+		}
+		updateCell(id, cell)
+	}
+
 }
 
 func (r *tableCellsRenderer) moveIndicators() {

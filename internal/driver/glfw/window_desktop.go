@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
@@ -117,11 +118,13 @@ type window struct {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.runOnMainWhenCreated(func() {
-		w.fullScreen = full
+	w.fullScreen = full
 
-		w.doSetFullScreen(full)
-	})
+	if w.view() != nil {
+		async.EnsureMain(func() {
+			w.doSetFullScreen(full)
+		})
+	}
 }
 
 func (w *window) CenterOnScreen() {
@@ -367,7 +370,9 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 }
 
 func (w *window) SetCursor(cursor *glfw.Cursor) {
-	w.viewport.SetCursor(cursor)
+	async.EnsureMain(func() {
+		w.viewport.SetCursor(cursor)
+	})
 }
 
 func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {

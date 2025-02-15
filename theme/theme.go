@@ -223,6 +223,8 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkPressed
 	case ColorNameScrollBar:
 		return colorDarkScrollBar
+	case ColorNameScrollBarBackground:
+		return colorDarkScrollBarBackground
 	case ColorNameSeparator:
 		return colorDarkSeparator
 	case ColorNameShadow:
@@ -297,6 +299,8 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightPressed
 	case ColorNameScrollBar:
 		return colorLightScrollBar
+	case ColorNameScrollBarBackground:
+		return colorLightScrollBarBackground
 	case ColorNameSeparator:
 		return colorLightSeparator
 	case ColorNameShadow:

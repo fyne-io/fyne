@@ -23,7 +23,9 @@ func TestFyneApp_transitionCloud(t *testing.T) {
 	a.Preferences().AddChangeListener(func() {
 		preferenceChanged = true
 	})
-	a.Settings().AddChangeListener(settingsChan)
+	a.Settings().AddListener(func(s fyne.Settings) {
+		go func() { settingsChan <- s }()
+	})
 	a.SetCloudProvider(p)
 
 	<-settingsChan // settings were updated

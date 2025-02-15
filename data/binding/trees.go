@@ -4,7 +4,20 @@ import (
 	"bytes"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
 )
+
+// DataTreeRootID const is the value used as ID for the root of any tree binding.
+const DataTreeRootID = ""
+
+// DataTree is the base interface for all bindable data trees.
+//
+// Since: 2.4
+type DataTree interface {
+	DataItem
+	GetItem(id string) (DataItem, error)
+	ChildIDs(string) []string
+}
 
 // BoolTree supports binding a tree of bool values.
 //
@@ -314,7 +327,7 @@ type ExternalURITree interface {
 //
 // Since: 2.4
 func NewURITree() URITree {
-	return newTree(compareURI)
+	return newTree(storage.EqualURI)
 }
 
 // BindURITree returns a bound tree of fyne.URI values, based on the contents of the passed values.
@@ -323,5 +336,365 @@ func NewURITree() URITree {
 //
 // Since: 2.4
 func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalURITree {
-	return bindTree(ids, v, compareURI)
+	return bindTree(ids, v, storage.EqualURI)
+}
+
+type treeBase struct {
+	base
+
+	ids   map[string][]string
+	items map[string]DataItem
+}
+
+// GetItem returns the DataItem at the specified id.
+func (t *treeBase) GetItem(id string) (DataItem, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if item, ok := t.items[id]; ok {
+		return item, nil
+	}
+
+	return nil, errOutOfBounds
+}
+
+// ChildIDs returns the ordered IDs of items in this data tree that are children of the specified ID.
+func (t *treeBase) ChildIDs(id string) []string {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if ids, ok := t.ids[id]; ok {
+		return ids
+	}
+
+	return []string{}
+}
+
+func (t *treeBase) appendItem(i DataItem, id, parent string) {
+	t.items[id] = i
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	for _, in := range ids {
+		if in == id {
+			return
+		}
+	}
+	t.ids[parent] = append(ids, id)
+}
+
+func (t *treeBase) deleteItem(id, parent string) {
+	delete(t.items, id)
+
+	ids, ok := t.ids[parent]
+	if !ok {
+		return
+	}
+
+	off := -1
+	for i, id2 := range ids {
+		if id2 == id {
+			off = i
+			break
+		}
+	}
+	if off == -1 {
+		return
+	}
+	t.ids[parent] = append(ids[:off], ids[off+1:]...)
+}
+
+func parentIDFor(id string, ids map[string][]string) string {
+	for parent, list := range ids {
+		for _, child := range list {
+			if child == id {
+				return parent
+			}
+		}
+	}
+
+	return ""
+}
+
+func newTree[T any](comparator func(T, T) bool) *boundTree[T] {
+	t := &boundTree[T]{val: &map[string]T{}, comparator: comparator}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+	return t
+}
+
+func newTreeComparable[T bool | float64 | int | rune | string]() *boundTree[T] {
+	return newTree(func(t1, t2 T) bool { return t1 == t2 })
+}
+
+func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) *boundTree[T] {
+	if v == nil {
+		return newTree[T](comparator)
+	}
+
+	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+
+	for parent, children := range *ids {
+		for _, leaf := range children {
+			t.appendItem(bindTreeItem(v, leaf, t.updateExternal, t.comparator), leaf, parent)
+		}
+	}
+
+	return t
+}
+
+func bindTreeComparable[T bool | float64 | int | rune | string](ids *map[string][]string, v *map[string]T) *boundTree[T] {
+	return bindTree(ids, v, func(t1, t2 T) bool { return t1 == t2 })
+}
+
+type boundTree[T any] struct {
+	treeBase
+
+	comparator     func(T, T) bool
+	val            *map[string]T
+	updateExternal bool
+}
+
+func (t *boundTree[T]) Append(parent, id string, val T) error {
+	t.lock.Lock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append(ids, id)
+	v := *t.val
+	v[id] = val
+
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
+}
+
+func (t *boundTree[T]) Get() (map[string][]string, map[string]T, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	return t.ids, *t.val, nil
+}
+
+func (t *boundTree[T]) GetValue(id string) (T, error) {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	if item, ok := (*t.val)[id]; ok {
+		return item, nil
+	}
+
+	return *new(T), errOutOfBounds
+}
+
+func (t *boundTree[T]) Prepend(parent, id string, val T) error {
+	t.lock.Lock()
+	ids, ok := t.ids[parent]
+	if !ok {
+		ids = make([]string, 0)
+	}
+
+	t.ids[parent] = append([]string{id}, ids...)
+	v := *t.val
+	v[id] = val
+
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
+}
+
+func (t *boundTree[T]) Remove(id string) error {
+	t.lock.Lock()
+	t.removeChildren(id)
+	delete(t.ids, id)
+	v := *t.val
+	delete(v, id)
+
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
+}
+
+func (t *boundTree[T]) removeChildren(id string) {
+	for _, cid := range t.ids[id] {
+		t.removeChildren(cid)
+
+		delete(t.ids, cid)
+		v := *t.val
+		delete(v, cid)
+	}
+}
+
+func (t *boundTree[T]) Reload() error {
+	t.lock.Lock()
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
+}
+
+func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
+	t.lock.Lock()
+	t.ids = ids
+	*t.val = v
+
+	trigger, err := t.doReload()
+	t.lock.Unlock()
+
+	if trigger {
+		t.trigger()
+	}
+
+	return err
+}
+
+func (t *boundTree[T]) doReload() (fire bool, retErr error) {
+	updated := []string{}
+	for id := range *t.val {
+		found := false
+		for child := range t.items {
+			if child == id { // update existing
+				updated = append(updated, id)
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+
+		// append new
+		t.appendItem(bindTreeItem(t.val, id, t.updateExternal, t.comparator), id, parentIDFor(id, t.ids))
+		updated = append(updated, id)
+		fire = true
+	}
+
+	for id := range t.items {
+		remove := true
+		for _, done := range updated {
+			if done == id {
+				remove = false
+				break
+			}
+		}
+
+		if remove { // remove item no longer present
+			fire = true
+			t.deleteItem(id, parentIDFor(id, t.ids))
+		}
+	}
+
+	for id, item := range t.items {
+		var err error
+		if t.updateExternal {
+			err = item.(*boundExternalTreeItem[T]).setIfChanged((*t.val)[id])
+		} else {
+			err = item.(*boundTreeItem[T]).doSet((*t.val)[id])
+		}
+		if err != nil {
+			retErr = err
+		}
+	}
+	return
+}
+
+func (t *boundTree[T]) SetValue(id string, v T) error {
+	t.lock.Lock()
+	(*t.val)[id] = v
+	t.lock.Unlock()
+
+	item, err := t.GetItem(id)
+	if err != nil {
+		return err
+	}
+	return item.(Item[T]).Set(v)
+}
+
+func bindTreeItem[T any](v *map[string]T, id string, external bool, comparator func(T, T) bool) Item[T] {
+	if external {
+		ret := &boundExternalTreeItem[T]{old: (*v)[id], comparator: comparator}
+		ret.val = v
+		ret.id = id
+		return ret
+	}
+
+	return &boundTreeItem[T]{id: id, val: v}
+}
+
+type boundTreeItem[T any] struct {
+	base
+
+	val *map[string]T
+	id  string
+}
+
+func (t *boundTreeItem[T]) Get() (T, error) {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+
+	v := *t.val
+	if item, ok := v[t.id]; ok {
+		return item, nil
+	}
+
+	return *new(T), errOutOfBounds
+}
+
+func (t *boundTreeItem[T]) Set(val T) error {
+	return t.doSet(val)
+}
+
+func (t *boundTreeItem[T]) doSet(val T) error {
+	t.lock.Lock()
+	(*t.val)[t.id] = val
+	t.lock.Unlock()
+
+	t.trigger()
+	return nil
+}
+
+type boundExternalTreeItem[T any] struct {
+	boundTreeItem[T]
+
+	comparator func(T, T) bool
+	old        T
+}
+
+func (t *boundExternalTreeItem[T]) setIfChanged(val T) error {
+	t.lock.Lock()
+	if t.comparator(val, t.old) {
+		t.lock.Unlock()
+		return nil
+	}
+	(*t.val)[t.id] = val
+	t.old = val
+	t.lock.Unlock()
+
+	t.trigger()
+	return nil
 }

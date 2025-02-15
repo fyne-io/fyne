@@ -116,12 +116,23 @@ func (d *gLDriver) runGL() {
 	if d.trayStart != nil {
 		d.trayStart()
 	}
+
+	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
+		painter.ClearFontCache()
+		cache.ResetThemeCaches()
+		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+			c, ok := w.Canvas().(*glCanvas)
+			if !ok {
+				return
+			}
+			c.applyThemeOutOfTreeObjects()
+			c.reloadScale()
+		})
+	})
+
 	if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnStarted(); f != nil {
 		f()
 	}
-
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
@@ -166,23 +177,10 @@ func (d *gLDriver) runGL() {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}
-
 			}
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
-		case set := <-settingsChange:
-			painter.ClearFontCache()
-			cache.ResetThemeCaches()
-			app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-				c, ok := w.Canvas().(*glCanvas)
-				if !ok {
-					return
-				}
-				c.applyThemeOutOfTreeObjects()
-				c.reloadScale()
-			})
-
 		}
 	}
 }

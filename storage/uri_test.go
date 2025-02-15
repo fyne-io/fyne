@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
@@ -14,6 +15,33 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+type otherURI struct {
+	fyne.URI
+}
+
+func (*otherURI) String() string {
+	return "file:///other"
+}
+
+func TestURIEqual(t *testing.T) {
+	first := storage.NewFileURI("first")
+	second := storage.NewFileURI("second")
+	assert.False(t, storage.EqualURI(first, second))
+	assert.True(t, storage.EqualURI(first, first))
+
+	assert.True(t, storage.EqualURI(first, storage.NewFileURI("first")))
+
+	assert.True(t, storage.EqualURI(nil, nil))
+	assert.False(t, storage.EqualURI(first, nil))
+	assert.False(t, storage.EqualURI(nil, second))
+
+	otherURI := &otherURI{}
+	assert.True(t, storage.EqualURI(otherURI, otherURI))
+	assert.False(t, storage.EqualURI(otherURI, first))
+	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
+
+}
 
 func TestURIAuthority(t *testing.T) {
 	// from IETF RFC 3986
@@ -407,6 +435,28 @@ func TestCopy(t *testing.T) {
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
 }
 
+func TestRepositoryCopyListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/parent1"] = []byte{}
+	m.Data["/parent1/child"] = []byte("content")
+
+	parent, _ := storage.ParseURI("uritest:///parent1")
+	newParent, _ := storage.ParseURI("uritest:///parent2")
+
+	err := storage.Copy(parent, newParent)
+	assert.NoError(t, err)
+	exists, err := m.Exists(parent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	exists, err = m.Exists(newParent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	assert.Equal(t, []byte("content"), m.Data["/parent1/child"])
+	assert.Equal(t, []byte("content"), m.Data["/parent2/child"])
+}
+
 func TestRepositoryMove(t *testing.T) {
 	// set up our repository - it's OK if we already registered it
 	m := intRepo.NewInMemoryRepository("uritest")
@@ -424,6 +474,27 @@ func TestRepositoryMove(t *testing.T) {
 	exists, err := m.Exists(foo)
 	assert.NoError(t, err)
 	assert.False(t, exists)
+}
+
+func TestRepositoryMoveListable(t *testing.T) {
+	// set up our repository - it's OK if we already registered it
+	m := intRepo.NewInMemoryRepository("uritest")
+	repository.Register("uritest", m)
+	m.Data["/parent1"] = []byte{}
+	m.Data["/parent1/child"] = []byte("content")
+
+	parent, _ := storage.ParseURI("uritest:///parent1")
+	newParent, _ := storage.ParseURI("uritest:///parent2")
+
+	err := storage.Move(parent, newParent)
+	assert.NoError(t, err)
+	exists, err := m.Exists(parent)
+	assert.NoError(t, err)
+	assert.False(t, exists)
+	exists, err = m.Exists(newParent)
+	assert.NoError(t, err)
+	assert.True(t, exists)
+	assert.Equal(t, []byte("content"), m.Data["/parent2/child"])
 }
 
 func TestRepositoryListing(t *testing.T) {

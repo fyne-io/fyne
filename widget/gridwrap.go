@@ -165,8 +165,17 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 
 // Resize is called when this GridWrap should change size. We refresh to ensure invisible items are drawn.
 func (l *GridWrap) Resize(s fyne.Size) {
+	oldColCount := l.ColumnCount()
+	oldHeight := l.size.Height
 	l.colCountCache = 0
 	l.BaseWidget.Resize(s)
+	newColCount := l.ColumnCount()
+
+	if oldColCount == newColCount && oldHeight == s.Height {
+		// no content update needed if resizing only horizontally and col count is unchanged
+		return
+	}
+
 	if l.scroller != nil {
 		l.offsetUpdated(l.scroller.Offset)
 		l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).updateGrid(true)
@@ -214,21 +223,14 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 
 // ScrollToBottom scrolls to the end of the list
 func (l *GridWrap) ScrollToBottom() {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
-	if length > 0 {
-		length--
-	}
-	l.scrollTo(GridWrapItemID(length))
-	l.Refresh()
+	l.scroller.ScrollToBottom()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToTop scrolls to the start of the list
 func (l *GridWrap) ScrollToTop() {
-	l.scrollTo(0)
-	l.Refresh()
+	l.scroller.ScrollToTop()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToOffset scrolls the list to the given offset position
@@ -246,9 +248,8 @@ func (l *GridWrap) ScrollToOffset(offset float32) {
 	if offset > contentHeight {
 		offset = contentHeight
 	}
-	l.scroller.Offset.Y = offset
+	l.scroller.ScrollToOffset(fyne.NewPos(0, offset))
 	l.offsetUpdated(l.scroller.Offset)
-	l.Refresh()
 }
 
 // TypedKey is called if a key event happens while this GridWrap is focused.
@@ -393,7 +394,7 @@ func (l *gridWrapRenderer) Refresh() {
 	}
 	l.Layout(l.list.Size())
 	l.scroller.Refresh()
-	l.layout.Layout.(*gridWrapLayout).updateGrid(true)
+	l.layout.Layout.(*gridWrapLayout).updateGrid(false)
 	canvas.Refresh(l.list)
 }
 
@@ -560,7 +561,7 @@ func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
 		return
 	}
 	l.gw.offsetY = pos.Y
-	l.updateGrid(false)
+	l.updateGrid(true)
 }
 
 func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focus bool) {
@@ -613,7 +614,7 @@ func (l *GridWrap) ColumnCount() int {
 	return l.colCountCache
 }
 
-func (l *gridWrapLayout) updateGrid(refresh bool) {
+func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	// code here is a mashup of listLayout.updateList and gridWrapLayout.Layout
 	padding := l.gw.Theme().Size(theme.SizeNamePadding)
 
@@ -658,9 +659,7 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 			}
 
 			item.Move(fyne.NewPos(x, y))
-			if refresh {
-				item.Resize(l.gw.itemMin)
-			}
+			item.Resize(l.gw.itemMin)
 
 			x += l.gw.itemMin.Width + padding
 			l.visible = append(l.visible, gridItemAndID{item: item, id: curItemID})
@@ -677,8 +676,16 @@ func (l *gridWrapLayout) updateGrid(refresh bool) {
 		}
 	}
 
-	for _, obj := range l.visible {
-		l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+	if newOnly {
+		for _, obj := range l.visible {
+			if _, ok := l.searchVisible(l.wasVisible, obj.id); !ok {
+				l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+			}
+		}
+	} else {
+		for _, obj := range l.visible {
+			l.setupGridItem(obj.item, obj.id, l.gw.focused && l.gw.currentFocus == obj.id)
+		}
 	}
 
 	// we don't need wasVisible now until next call to update

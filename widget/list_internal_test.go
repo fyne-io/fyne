@@ -233,6 +233,11 @@ func TestList_ScrollToBottom(t *testing.T) {
 func TestList_ScrollToTop(t *testing.T) {
 	list := createList(1000)
 
+	tmpOffset := float32(50)
+	list.ScrollToOffset(tmpOffset)
+	assert.Equal(t, tmpOffset, list.offsetY)
+	assert.Equal(t, tmpOffset, list.scroller.Offset.Y)
+
 	offset := float32(0)
 	list.ScrollToTop()
 	assert.Equal(t, offset, list.offsetY)

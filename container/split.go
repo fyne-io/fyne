@@ -20,6 +20,11 @@ type Split struct {
 	Horizontal bool
 	Leading    fyne.CanvasObject
 	Trailing   fyne.CanvasObject
+
+	// to communicate to the renderer that the next refresh
+	// is just an offset update (ie a resize and move only)
+	// cleared by renderer in Refresh()
+	offsetUpdated bool
 }
 
 // NewHSplit creates a horizontally arranged container with the specified leading and trailing elements.
@@ -76,6 +81,7 @@ func (s *Split) SetOffset(offset float64) {
 		return
 	}
 	s.Offset = offset
+	s.offsetUpdated = true
 	s.Refresh()
 }
 
@@ -147,6 +153,12 @@ func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *splitContainerRenderer) Refresh() {
+	if r.split.offsetUpdated {
+		r.Layout(r.split.Size())
+		r.split.offsetUpdated = false
+		return
+	}
+
 	r.objects[0] = r.split.Leading
 	// [1] is divider which doesn't change
 	r.objects[2] = r.split.Trailing

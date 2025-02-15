@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -73,6 +74,12 @@ func main() {
 		w.SetContent(split)
 	}
 	w.Resize(fyne.NewSize(640, 460))
+
+	notice := widget.NewRichTextFromMarkdown(
+		"This demo has been moved to a new repository.\n\n[Fyne demo on GitHub](https://github.com/fyne-io/demo)")
+	notice.Segments[2].(*widget.HyperlinkSegment).Alignment = fyne.TextAlignCenter
+	dialog.ShowCustom("Fyne Demo Moved", "OK", notice, w)
+
 	w.ShowAndRun()
 }
 

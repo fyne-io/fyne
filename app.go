@@ -64,6 +64,8 @@ type App interface {
 	Lifecycle() Lifecycle
 
 	// Metadata returns the application metadata that was set at compile time.
+	// The items of metadata are available after "fyne package" or when running "go run"
+	// Building with "go build" may cause this to be unavailable.
 	//
 	// Since: 2.2
 	Metadata() AppMetadata

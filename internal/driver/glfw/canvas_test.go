@@ -539,7 +539,9 @@ func TestGlCanvas_Scale(t *testing.T) {
 }
 
 func TestGlCanvas_SetContent(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
+	runOnMain(func() {
+		fyne.CurrentApp().Settings().SetTheme(internalTest.DarkTheme(theme.DefaultTheme()))
+	})
 	var menuHeight float32
 	if build.HasNativeMenu {
 		menuHeight = 0

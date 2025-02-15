@@ -626,6 +626,29 @@ func TestTree_ScrollToBottom(t *testing.T) {
 	assert.Equal(t, want, tree.scroller.Offset.Y)
 }
 
+func TestTree_ScrollOffset(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.NewTheme())
+
+	data := make(map[string][]string)
+	addTreePath(data, "A")
+	addTreePath(data, "B", "C")
+	addTreePath(data, "D", "E", "F")
+	tree := NewTreeWithStrings(data)
+	tree.OpenBranch("B")
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	w.Resize(fyne.NewSize(100, 100))
+	tree.ScrollToOffset(20)
+
+	assert.Equal(t, float32(20), tree.offset.Y)
+	assert.Equal(t, float32(20), tree.scroller.Offset.Y)
+}
+
 func TestTree_ScrollToSelection(t *testing.T) {
 	data := make(map[string][]string)
 	addTreePath(data, "A")
@@ -697,6 +720,7 @@ func TestTree_Tap(t *testing.T) {
 
 		test.Tap(getBranch(t, tree, "A"))
 		assert.True(t, selected, "Branch should have been selected")
+		assert.Equal(t, "A", tree.currentFocus)
 	})
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -725,6 +749,7 @@ func TestTree_Tap(t *testing.T) {
 		}
 		test.Tap(getLeaf(t, tree, "A"))
 		assert.True(t, selected, "Leaf should have been selected")
+		assert.Equal(t, "A", tree.currentFocus)
 	})
 }
 

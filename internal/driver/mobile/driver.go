@@ -73,7 +73,7 @@ func init() {
 }
 
 func (d *driver) DoFromGoroutine(fn func(), wait bool) {
-	async.EnsureNotMain(func() {
+	caller := func() {
 		if d.queuedFuncs == nil {
 			fn() // before the app actually starts
 			return
@@ -94,7 +94,14 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 		if wait {
 			<-done
 		}
-	})
+	}
+
+	if wait {
+		async.EnsureNotMain(caller)
+	} else {
+		caller()
+	}
+
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
@@ -173,9 +180,20 @@ func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		async.SetMainGoroutine()
 		d.app = a
-		settingsChange := make(chan fyne.Settings)
 		d.queuedFuncs = async.NewUnboundedChan[func()]()
-		fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
+		fyne.CurrentApp().Settings().AddListener(func(s fyne.Settings) {
+			painter.ClearFontCache()
+			cache.ResetThemeCaches()
+			intapp.ApplySettingsWithCallback(s, fyne.CurrentApp(), func(w fyne.Window) {
+				c, ok := w.Canvas().(*canvas)
+				if !ok {
+					return
+				}
+				c.applyThemeOutOfTreeObjects()
+			})
+		})
+
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
 			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
@@ -196,16 +214,6 @@ func (d *driver) Run() {
 			select {
 			case <-draw.C:
 				d.sendPaintEvent()
-			case set := <-settingsChange:
-				painter.ClearFontCache()
-				cache.ResetThemeCaches()
-				intapp.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
-					c, ok := w.Canvas().(*canvas)
-					if !ok {
-						return
-					}
-					c.applyThemeOutOfTreeObjects()
-				})
 			case fn := <-d.queuedFuncs.Out():
 				fn()
 			case e, ok := <-a.Events():

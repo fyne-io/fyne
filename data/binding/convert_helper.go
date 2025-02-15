@@ -10,7 +10,7 @@ import (
 
 func stripFormatPrecision(in string) string {
 	// quick exit if certainly not float
-	if !strings.ContainsAny(in, "f") {
+	if !strings.ContainsRune(in, 'f') {
 		return in
 	}
 
@@ -65,39 +65,34 @@ func uriToString(in fyne.URI) (string, error) {
 }
 
 func parseBool(in string) (bool, error) {
-	out, err := strconv.ParseBool(in)
-	if err != nil {
-		return false, err
-	}
-
-	return out, nil
+	return strconv.ParseBool(in)
 }
 
 func parseFloat(in string) (float64, error) {
-	out, err := strconv.ParseFloat(in, 64)
-	if err != nil {
-		return 0, err
-	}
-
-	return out, nil
+	return strconv.ParseFloat(in, 64)
 }
 
 func parseInt(in string) (int, error) {
 	out, err := strconv.ParseInt(in, 0, 64)
-	if err != nil {
-		return 0, err
-	}
-	return int(out), nil
+	return int(out), err
 }
 
-func formatBool(in bool) string {
-	return strconv.FormatBool(in)
+func formatBool(in bool) (string, error) {
+	return strconv.FormatBool(in), nil
 }
 
-func formatFloat(in float64) string {
-	return strconv.FormatFloat(in, 'f', 6, 64)
+func formatFloat(in float64) (string, error) {
+	return strconv.FormatFloat(in, 'f', 6, 64), nil
 }
 
-func formatInt(in int) string {
-	return strconv.FormatInt(int64(in), 10)
+func formatInt(in int) (string, error) {
+	return strconv.FormatInt(int64(in), 10), nil
+}
+
+func internalFloatToInt(val float64) (int, error) {
+	return int(val), nil
+}
+
+func internalIntToFloat(val int) (float64, error) {
+	return float64(val), nil
 }

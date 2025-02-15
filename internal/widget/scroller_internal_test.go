@@ -46,8 +46,14 @@ func TestScrollContainer_MinSize(t *testing.T) {
 
 func TestScrollContainer_ScrollToTop(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	rect.SetMinSize(fyne.NewSize(500, 50))
+	rect.SetMinSize(fyne.NewSize(500, 150))
 	scroll := NewScroll(rect)
+	scroll.Resize(fyne.NewSize(25, 25))
+
+	tmpOffset := fyne.NewPos(25, 50)
+	scroll.ScrollToOffset(tmpOffset)
+	assert.Equal(t, tmpOffset, scroll.Offset)
+
 	scroll.ScrollToTop()
 	Y := scroll.Offset.Y
 	assert.Equal(t, float32(0), Y)
@@ -806,4 +812,59 @@ func TestScrollBar_LargeHandleWhileInDrag(t *testing.T) {
 	scrollBarHoriz.DragEnd()
 	scrollBarHoriz.MouseOut()
 	assert.False(t, scrollBarHoriz.area.isLarge())
+}
+
+func TestScrollContainer_TapToScroll(t *testing.T) {
+	rect := canvas.NewRectangle(color.Transparent)
+	rect.SetMinSize(fyne.NewSize(250, 250))
+	s := NewScroll(rect)
+	s.Resize(fyne.NewSize(100, 100))
+	r := s.CreateRenderer().(*scrollContainerRenderer)
+
+	// Testing the vertical scroll bar...
+	// tapping on the scroll bar itself does nothing
+	r.vertArea.MouseIn(nil)
+	r.vertArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 2),
+	})
+	assert.Equal(t, fyne.NewPos(0, 0), s.Offset)
+
+	// tapping below the bar scrolls down
+	r.vertArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 50),
+	})
+	assert.Greater(t, s.Offset.Y, float32(0))
+	oldY := s.Offset.Y
+
+	// tapping above the bar scrolls up
+	r.Refresh() // updates bar location
+	r.vertArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 2),
+	})
+	assert.Less(t, s.Offset.Y, oldY)
+
+	// Testing the horizontal scroll bar...
+	s.Offset = fyne.NewPos(0, 0)
+	s.Refresh()
+	r.horizArea.MouseIn(nil)
+
+	// tapping on the scroll bar itself does nothing
+	r.horizArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 2),
+	})
+	assert.Equal(t, fyne.NewPos(0, 0), s.Offset)
+
+	// tapping right of bar scrolls right
+	r.horizArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(50, 2),
+	})
+	assert.Greater(t, s.Offset.X, float32(0))
+	oldX := s.Offset.X
+
+	// tapping left of the bar scrolls left
+	r.Refresh() // updates bar location
+	r.horizArea.Tapped(&fyne.PointEvent{
+		Position: fyne.NewPos(2, 2),
+	})
+	assert.Less(t, s.Offset.X, oldX)
 }

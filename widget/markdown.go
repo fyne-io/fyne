@@ -114,7 +114,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleEmphasis, Text: text}}, nil
 		}
 	case *ast.Text:
-		text := string(t.Text(source))
+		text := string(t.Value(source))
 		if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
@@ -164,7 +164,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 		if entering {
 			switch t := n2.(type) {
 			case *ast.Text:
-				texts = append(texts, string(t.Text(source)))
+				texts = append(texts, string(t.Value(source)))
 			}
 		}
 		return ast.WalkContinue, nil
@@ -178,7 +178,7 @@ func forceIntoHeadingText(source []byte, n ast.Node) string {
 		if entering {
 			switch t := n2.(type) {
 			case *ast.Text:
-				text.Write(t.Text(source))
+				text.Write(t.Value(source))
 			}
 		}
 		return ast.WalkContinue, nil
