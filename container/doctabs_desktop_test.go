@@ -123,25 +123,25 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 
 	appendedItem := container.NewTabItem("Test2", widget.NewLabel("Text 2"))
 	tabs.Append(appendedItem)
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, "Test2", tabs.Items[1].Text)
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_appended.xml", c)
 
 	tabs.RemoveIndex(1)
-	assert.Equal(t, len(tabs.Items), 1)
+	assert.Len(t, tabs.Items, 1)
 	assert.Equal(t, "Test1", tabs.Items[0].Text)
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_initial.xml", c)
 
 	tabs.Append(appendedItem)
 	tabs.Remove(tabs.Items[0])
-	assert.Equal(t, len(tabs.Items), 1)
+	assert.Len(t, tabs.Items, 1)
 	assert.Equal(t, "Test2", tabs.Items[0].Text)
 	test.AssertRendersToMarkup(t, "doctabs/desktop/dynamic_appended_and_removed.xml", c)
 
 	tabs.Append(container.NewTabItem("Test3", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
 	tabs.Append(container.NewTabItem("Test4", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
 	tabs.Append(container.NewTabItem("Test5", canvas.NewCircle(theme.Color(theme.ColorNameBackground))))
-	assert.Equal(t, 4, len(tabs.Items))
+	assert.Len(t, tabs.Items, 4)
 	assert.Equal(t, "Test3", tabs.Items[1].Text)
 	assert.Equal(t, "Test4", tabs.Items[2].Text)
 	assert.Equal(t, "Test5", tabs.Items[3].Text)
@@ -152,7 +152,7 @@ func TestDocTabs_DynamicTabs(t *testing.T) {
 		container.NewTabItem("Test7", widget.NewLabel("Text 7")),
 		container.NewTabItem("Test8", widget.NewLabel("Text 8")),
 	})
-	assert.Equal(t, 3, len(tabs.Items))
+	assert.Len(t, tabs.Items, 3)
 	assert.Equal(t, "Test6", tabs.Items[0].Text)
 	assert.Equal(t, "Test7", tabs.Items[1].Text)
 	assert.Equal(t, "Test8", tabs.Items[2].Text)

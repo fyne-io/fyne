@@ -11,17 +11,17 @@ import (
 
 func TestMultipleWindows_Add(t *testing.T) {
 	m := NewMultipleWindows()
-	assert.Zero(t, len(m.Windows))
+	assert.Empty(t, m.Windows)
 
 	m.Add(NewInnerWindow("1", widget.NewLabel("Inside")))
-	assert.Equal(t, 1, len(m.Windows))
+	assert.Len(t, m.Windows, 1)
 }
 
 func TestMultipleWindows_Drag(t *testing.T) {
 	w := NewInnerWindow("1", widget.NewLabel("Inside"))
 	m := NewMultipleWindows(w)
 	_ = test.TempWidgetRenderer(t, m) // initialise display
-	assert.Equal(t, 1, len(m.Windows))
+	assert.Len(t, m.Windows, 1)
 
 	assert.True(t, w.Position().IsZero())
 	w.OnDragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 10, DY: 5}})

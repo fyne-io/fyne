@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestColorDialog_Resize(t *testing.T) {
@@ -310,7 +311,7 @@ func Test_stringToColor(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			c, err := stringToColor(tt.hex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.hex, colorToString(c))
 		})
 	}

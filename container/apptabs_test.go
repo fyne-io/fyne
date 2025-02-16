@@ -16,20 +16,20 @@ func TestAppTabs_Selected(t *testing.T) {
 	tab2 := &TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
 	tabs := NewAppTabs(tab1, tab2)
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, tab1, tabs.Selected())
 }
 
 func TestAppTabs_SelectedIndex(t *testing.T) {
 	tabs := NewAppTabs(&TabItem{Text: "Test", Content: widget.NewLabel("Test")})
 
-	assert.Equal(t, 1, len(tabs.Items))
+	assert.Len(t, tabs.Items, 1)
 	assert.Equal(t, 0, tabs.SelectedIndex())
 }
 
 func TestAppTabs_Empty(t *testing.T) {
 	tabs := NewAppTabs()
-	assert.Equal(t, 0, len(tabs.Items))
+	assert.Empty(t, tabs.Items)
 	assert.Equal(t, -1, tabs.SelectedIndex())
 	assert.Nil(t, tabs.Selected())
 	min := tabs.MinSize()
@@ -37,7 +37,7 @@ func TestAppTabs_Empty(t *testing.T) {
 	assert.Equal(t, theme.Padding(), min.Height)
 
 	tabs = &AppTabs{}
-	assert.Equal(t, 0, len(tabs.Items))
+	assert.Empty(t, tabs.Items)
 	assert.Nil(t, tabs.Selected())
 	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }
@@ -71,7 +71,7 @@ func TestAppTabs_Select(t *testing.T) {
 	tab2 := &TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
 	tabs := NewAppTabs(tab1, tab2)
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, tab1, tabs.Selected())
 
 	var selectedTab *TabItem
@@ -115,7 +115,7 @@ func TestAppTabs_SelectIndex(t *testing.T) {
 	tabs := NewAppTabs(&TabItem{Text: "Test1", Content: widget.NewLabel("Test1")},
 		&TabItem{Text: "Test2", Content: widget.NewLabel("Test2")})
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, 0, tabs.SelectedIndex())
 
 	var selectedTab *TabItem
