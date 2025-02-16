@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -41,10 +42,10 @@ func (s *selectable) DragEnd() {
 		s.selecting = false
 	}
 
-	//shouldRefresh := !s.selecting
-	//if shouldRefresh {
-	s.Refresh()
-	//	}
+	shouldRefresh := !s.selecting
+	if shouldRefresh {
+		s.Refresh()
+	}
 }
 
 func (s *selectable) Dragged(d *fyne.DragEvent) {
@@ -72,7 +73,22 @@ func (s *selectable) MouseDown(m *desktop.MouseEvent) {
 	}
 }
 
-func (s *selectable) MouseUp(_ *desktop.MouseEvent) {
+func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
+	if ev.Button == desktop.MouseButtonSecondary {
+		c := fyne.CurrentApp().Driver().CanvasForObject(s)
+		if c == nil {
+			return
+		}
+
+		m := fyne.NewMenu("",
+			fyne.NewMenuItem(lang.L("Copy"), func() {
+				fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
+			}))
+		ShowPopUpMenuAtPosition(m, c, ev.AbsolutePosition)
+
+		return
+	}
+
 	start, _ := s.selection()
 	if start == -1 && s.selecting {
 		s.selecting = false
