@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -31,9 +30,9 @@ type Label struct {
 	//Since: 2.6
 	Selectable bool
 
-	provider *RichText
-	binder   basicBinder
-	hover    *labelHover
+	provider  *RichText
+	binder    basicBinder
+	selection *selectable
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -78,13 +77,18 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	l.hover = &labelHover{l: l}
+	l.selection = &selectable{}
+	l.selection.ExtendBaseWidget(l.selection)
+	l.selection.style = l.TextStyle
+	l.selection.theme = l.Theme()
+	l.selection.provider = l.provider
+
 	if !l.Selectable {
-		l.hover.Hide()
+		l.selection.Hide()
 	}
 	return NewSimpleRenderer(
 		&fyne.Container{Layout: layout.NewStackLayout(),
-			Objects: []fyne.CanvasObject{l.provider, l.hover}})
+			Objects: []fyne.CanvasObject{l.selection, l.provider}})
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -99,25 +103,26 @@ func (l *Label) MinSize() fyne.Size {
 //
 // Implements: fyne.Widget
 func (l *Label) Refresh() {
-	l.hover.Hidden = !l.Selectable
-	l.hover.Refresh()
 	if l.provider == nil { // not created until visible
 		return
 	}
 	l.syncSegments()
 	l.provider.Refresh()
 	l.BaseWidget.Refresh()
+
+	l.selection.Hidden = !l.Selectable
+	l.selection.style = l.TextStyle
+	l.selection.theme = l.Theme()
+	l.selection.Refresh()
 }
 
-// Resize sets a new size for the label.
-// This should only be called if it is not in a container with a layout manager.
+// SelectedText returns the text currently selected in this Label.
+// If the label is not Selectable it will return an empty string.
+// If there is no selection it will return the empty string.
 //
-// Implements: fyne.Widget
-func (l *Label) Resize(s fyne.Size) {
-	l.BaseWidget.Resize(s)
-	if l.provider != nil {
-		l.provider.Resize(s)
-	}
+// Since: 2.6
+func (l *Label) SelectedText() string {
+	return l.selection.SelectedText()
 }
 
 // SetText sets the text of the label
@@ -178,18 +183,4 @@ func (l *Label) updateFromData(data binding.DataItem) {
 		return
 	}
 	l.SetText(val)
-}
-
-type labelHover struct {
-	BaseWidget
-
-	l *Label
-}
-
-func (l *labelHover) Cursor() desktop.Cursor {
-	if l.l.Selectable {
-		return desktop.TextCursor
-	}
-
-	return desktop.DefaultCursor
 }

@@ -147,11 +147,11 @@ func TestEntry_DragSelectEmpty(t *testing.T) {
 	de = &fyne.DragEvent{PointEvent: *ev1, Dragged: fyne.NewDelta(1, 0)}
 	entry.Dragged(de)
 
-	assert.True(t, entry.selecting)
+	assert.True(t, entry.sel.selecting)
 
 	entry.DragEnd()
 	assert.Equal(t, "", entry.SelectedText())
-	assert.False(t, entry.selecting)
+	assert.False(t, entry.sel.selecting)
 
 	// Test non-empty selection - drag from 'T' to 'g' (empty)
 	ev1 = getClickPosition("", 0)
@@ -160,11 +160,11 @@ func TestEntry_DragSelectEmpty(t *testing.T) {
 	de = &fyne.DragEvent{PointEvent: *ev2, Dragged: fyne.NewDelta(1, 0)}
 	entry.Dragged(de)
 
-	assert.True(t, entry.selecting)
+	assert.True(t, entry.sel.selecting)
 
 	entry.DragEnd()
 	assert.Equal(t, "Testing", entry.SelectedText())
-	assert.True(t, entry.selecting)
+	assert.True(t, entry.sel.selecting)
 }
 
 func TestEntry_DragSelectWithScroll(t *testing.T) {
@@ -258,6 +258,7 @@ func TestEntry_EraseSelection(t *testing.T) {
 	e.SetText("Testing\nTesting\nTesting")
 	e.CursorRow = 1
 	e.CursorColumn = 2
+	e.sel.cursorRow, e.sel.cursorRow = e.CursorRow, e.CursorColumn
 	var keyDown = func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
@@ -275,7 +276,7 @@ func TestEntry_EraseSelection(t *testing.T) {
 	e.eraseSelectionAndUpdate()
 	e.updateText(e.textProvider().String(), false)
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
-	a, b := e.selection()
+	a, b := e.sel.selection()
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
 }
@@ -307,7 +308,7 @@ func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {
 	de := &fyne.DragEvent{PointEvent: *ev, Dragged: fyne.NewDelta(1, 0)}
 	entry.Dragged(de)
 	entry.MouseUp(me)
-	assert.False(t, entry.selecting)
+	assert.False(t, entry.sel.selecting)
 }
 
 func TestEntry_MouseDownOnSelect(t *testing.T) {
@@ -429,6 +430,7 @@ func TestEntry_TabSelection(t *testing.T) {
 	e.TextStyle.Monospace = true
 
 	e.CursorRow = 1
+	e.sel.cursorRow = 1
 	e.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
