@@ -127,7 +127,7 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	textOneLine := NewLabel("Break")
 	min := textOneLine.MinSize()
 	textMultiLine := NewLabel("Bre\nak")
-	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*RichText)
+	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*fyne.Container).Objects[0].(*selectable).provider
 	min2 := textMultiLine.MinSize()
 
 	assert.Less(t, min2.Width, min.Width)
@@ -157,7 +157,7 @@ func TestText_MinSizeAdjustsWithContent(t *testing.T) {
 func TestLabel_ApplyTheme(t *testing.T) {
 	text := NewLabel("Line 1")
 	text.Hide()
-	rich := test.TempWidgetRenderer(t, text).Objects()[0].(*RichText)
+	rich := test.TempWidgetRenderer(t, text).Objects()[0].(*fyne.Container).Objects[0].(*selectable).provider
 
 	render := test.TempWidgetRenderer(t, rich).(*textRenderer)
 	assert.Equal(t, theme.Color(theme.ColorNameForeground), render.Objects()[0].(*canvas.Text).Color)
@@ -243,6 +243,6 @@ func TestLabelImportance(t *testing.T) {
 }
 
 func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
-	rich := cache.Renderer(p).Objects()[0].(*RichText)
+	rich := cache.Renderer(p).Objects()[0].(*fyne.Container).Objects[0].(*selectable).provider
 	return richTextRenderTexts(rich)
 }
