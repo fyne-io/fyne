@@ -28,7 +28,6 @@ var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
 	windows []fyne.Window
-	done    chan struct{}
 
 	animation animation.Runner
 
@@ -101,7 +100,7 @@ func (d *gLDriver) Quit() {
 
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
-		close(d.done)
+		d.WakeUp()
 	}
 }
 
@@ -167,7 +166,5 @@ func (d *gLDriver) SetDisableScreenBlanking(disable bool) {
 func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
-	return &gLDriver{
-		done: make(chan struct{}),
-	}
+	return &gLDriver{}
 }

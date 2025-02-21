@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/test"
 )
 
 func tick(run *Runner) {
@@ -18,6 +19,7 @@ func tick(run *Runner) {
 }
 
 func TestGLDriver_StartAnimation(t *testing.T) {
+	test.NewTempApp(t)
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -37,6 +39,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
+	test.NewTempApp(t)
 	done := make(chan float32)
 	run := &Runner{}
 	a := &fyne.Animation{
@@ -54,12 +57,13 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		t.Error("animation was not ticked")
 	}
 	run.Stop(a)
-	run.animationMutex.RLock()
+	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.RUnlock()
+	run.animationMutex.Unlock()
 }
 
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
+	test.NewTempApp(t)
 	var wg sync.WaitGroup
 	run := &Runner{}
 
@@ -107,7 +111,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	wg.Wait()
 	// animations stopped inside tick are really stopped in the next runner cycle
 	time.Sleep(time.Second/60 + 100*time.Millisecond)
-	run.animationMutex.RLock()
+	run.animationMutex.Lock()
 	assert.Zero(t, len(run.animations))
-	run.animationMutex.RUnlock()
+	run.animationMutex.Unlock()
 }
