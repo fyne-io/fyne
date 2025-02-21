@@ -706,6 +706,18 @@ func TestTable_Select(t *testing.T) {
 	assert.Equal(t, 3, selectedCol)
 	assert.Equal(t, 4, selectedRow)
 	test.AssertRendersToMarkup(t, "table/selected_scrolled.xml", w.Canvas())
+
+	table.Select(TableCellID{1, -1})
+	assert.Equal(t, 3, table.selectedCell.Col)
+	assert.Equal(t, 4, table.selectedCell.Row)
+	assert.Equal(t, 3, selectedCol)
+	assert.Equal(t, 4, selectedRow)
+
+	table.Select(TableCellID{-1, -1})
+	assert.Equal(t, 3, table.selectedCell.Col)
+	assert.Equal(t, 4, table.selectedCell.Row)
+	assert.Equal(t, 3, selectedCol)
+	assert.Equal(t, 4, selectedRow)
 }
 
 func TestTable_SetColumnWidth(t *testing.T) {
