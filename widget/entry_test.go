@@ -410,6 +410,7 @@ func TestEntry_EmptySelection(t *testing.T) {
 	// manually setting to empty selection
 	typeKeys(entry, keyShiftLeftDown, fyne.KeyRight)
 	entry.CursorColumn = 1
+	entry.Refresh()
 	assert.Equal(t, "", entry.SelectedText())
 }
 
