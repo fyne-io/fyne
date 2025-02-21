@@ -56,14 +56,6 @@ func runOnMainWithWait(f func(), wait bool) {
 	}
 }
 
-// Preallocate to avoid allocations on every drawSingleFrame.
-// Note that the capacity of this slice can only grow,
-// but its length will never be longer than the total number of
-// window canvases that are dirty on a single frame.
-// So its memory impact should be negligible and does not
-// need periodic shrinking.
-var refreshingCanvases []fyne.Canvas
-
 func (d *gLDriver) drawSingleFrame() {
 	refreshed := false
 	for _, win := range d.windowList() {
@@ -72,13 +64,11 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		canvas := w.canvas
-
 		// CheckDirtyAndClear must be checked after visibility,
 		// because when a window becomes visible, it could be
 		// showing old content without a dirty flag set to true.
 		// Do the clear if and only if the window is visible.
-		if !w.visible || !canvas.CheckDirtyAndClear() {
+		if !w.visible || !w.canvas.CheckDirtyAndClear() {
 			// Window hidden or not being redrawn, mark canvasForObject
 			// cache alive if it hasn't been done recently
 			// n.b. we need to make sure threshold is a bit *after*
@@ -99,16 +89,8 @@ func (d *gLDriver) drawSingleFrame() {
 		}
 
 		refreshed = refreshed || d.repaintWindow(w)
-		refreshingCanvases = append(refreshingCanvases, canvas)
 	}
-	cache.CleanCanvases(refreshingCanvases)
 	cache.Clean(refreshed)
-
-	// cleanup refreshingCanvases slice
-	for i := 0; i < len(refreshingCanvases); i++ {
-		refreshingCanvases[i] = nil
-	}
-	refreshingCanvases = refreshingCanvases[:0]
 }
 
 func (d *gLDriver) runGL() {

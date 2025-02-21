@@ -78,43 +78,6 @@ func CleanCanvas(canvas fyne.Canvas) {
 	})
 }
 
-// CleanCanvases runs cache clean tasks for canvases that are being refreshed. This is called on paint events.
-func CleanCanvases(refreshingCanvases []fyne.Canvas) {
-	now := timeNow()
-	delta := now.Sub(lastClean)
-
-	if delta < 10*time.Second || delta < cleanTaskInterval {
-		return // Do not clean too fast.
-	}
-
-	destroyExpiredSvgs(now)
-	destroyExpiredFontMetrics(now)
-
-	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
-		if !cinfo.isExpired(now) || !matchesACanvas(cinfo, refreshingCanvases) {
-			return true
-		}
-
-		canvases.Delete(obj)
-
-		wid, ok := obj.(fyne.Widget)
-		if !ok {
-			return true
-		}
-
-		rinfo, ok := renderers.LoadAndDelete(wid)
-		if !ok || !rinfo.isExpired(now) {
-			return true
-		}
-
-		rinfo.renderer.Destroy()
-		overrides.Delete(wid)
-		return true
-	})
-
-	lastClean = timeNow()
-}
-
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
 	svgs.Clear()
