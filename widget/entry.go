@@ -105,6 +105,8 @@ type Entry struct {
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
+
+	e.syncSelectable()
 	return e
 }
 
@@ -167,7 +169,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	// initialise
 	e.textProvider()
 	e.placeholderProvider()
-	e.sel = &selectable{theme: th, provider: e.textProvider(), password: e.Password, style: e.TextStyle}
+	e.syncSelectable()
 
 	box := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
 	box.CornerRadius = th.Size(theme.SizeNameInputRadius)
@@ -216,6 +218,8 @@ func (e *Entry) Cursor() desktop.Cursor {
 //
 // Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
+	e.requestFocus()
+	e.syncSelectable()
 	e.doubleTappedAtUnixMillis = time.Now().UnixMilli()
 	row := e.textProvider().row(e.CursorRow)
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
@@ -234,6 +238,8 @@ func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
 		} else {
 			e.CursorColumn = end
 		}
+
+		e.syncSelectable()
 		e.sel.selecting = true
 	})
 }
@@ -246,6 +252,8 @@ func (e *Entry) isTripleTap(nowMilli int64) bool {
 //
 // Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
+	e.syncSelectable()
+
 	if e.CursorColumn == e.sel.selectColumn && e.CursorRow == e.sel.selectRow {
 		e.sel.selecting = false
 	}
@@ -371,6 +379,9 @@ func (e *Entry) MinSize() fyne.Size {
 //
 // Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
+	e.requestFocus()
+	e.syncSelectable()
+
 	if e.isTripleTap(time.Now().UnixMilli()) {
 		e.selectCurrentRow()
 		return
@@ -395,6 +406,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 //
 // Implements: desktop.Mouseable
 func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	e.syncSelectable()
 	start, _ := e.sel.selection()
 	if start == -1 && e.sel.selecting && !e.selectKeyDown {
 		e.sel.selecting = false
@@ -416,7 +428,7 @@ func (e *Entry) Redo() {
 	}
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 	e.Refresh()
 }
 
@@ -498,6 +510,7 @@ func (e *Entry) Append(text string) {
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
+
 	if fyne.CurrentDevice().IsMobile() && e.sel.selecting {
 		e.sel.selecting = false
 	}
@@ -623,7 +636,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		pos := e.cursorTextPos()
 		deletedText := provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
-		e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+		e.syncSelectable()
 		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
 			Position: pos - 1,
@@ -662,7 +675,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			e.CursorRow = 0
 		}
 		e.CursorColumn = 0
-		e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+		e.syncSelectable()
 	case fyne.KeyPageDown:
 		if e.MultiLine {
 			e.CursorRow = provider.rows() - 1
@@ -670,7 +683,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		} else {
 			e.CursorColumn = provider.len()
 		}
-		e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+		e.syncSelectable()
 	default:
 		return
 	}
@@ -705,7 +718,7 @@ func (e *Entry) Undo() {
 	}
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 	e.Refresh()
 }
 
@@ -720,7 +733,7 @@ func (e *Entry) typedKeyUp(provider *RichText) {
 	if e.CursorColumn > rowLength {
 		e.CursorColumn = rowLength
 	}
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 }
 
 func (e *Entry) typedKeyDown(provider *RichText) {
@@ -736,7 +749,7 @@ func (e *Entry) typedKeyDown(provider *RichText) {
 	if e.CursorColumn > rowLength {
 		e.CursorColumn = rowLength
 	}
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 }
 
 func (e *Entry) typedKeyLeft(provider *RichText) {
@@ -746,7 +759,7 @@ func (e *Entry) typedKeyLeft(provider *RichText) {
 		e.CursorRow--
 		e.CursorColumn = provider.rowLength(e.CursorRow)
 	}
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 }
 
 func (e *Entry) typedKeyRight(provider *RichText) {
@@ -761,7 +774,7 @@ func (e *Entry) typedKeyRight(provider *RichText) {
 	} else if e.CursorColumn < provider.len() {
 		e.CursorColumn++
 	}
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 }
 
 func (e *Entry) typedKeyHome() {
@@ -824,6 +837,7 @@ func (e *Entry) TypedRune(r rune) {
 		return
 	}
 
+	e.syncSelectable()
 	if e.popUp != nil {
 		e.popUp.Hide()
 	}
@@ -843,7 +857,7 @@ func (e *Entry) TypedRune(r rune) {
 	content := provider.String()
 	e.updateText(content, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 
 	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Position: pos,
@@ -884,7 +898,7 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 }
 
 func (e *Entry) cursorTextPos() (pos int) {
-	return e.sel.textPosFromRowCol(e.CursorRow, e.CursorColumn)
+	return textPosFromRowCol(e.CursorRow, e.CursorColumn, e.textProvider())
 }
 
 // cutToClipboard copies the current selection to a given clipboard and then removes the selected text.
@@ -921,7 +935,7 @@ func (e *Entry) eraseSelection() bool {
 
 	erasedText := provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 	e.sel.selectRow, e.sel.selectColumn = e.CursorRow, e.CursorColumn
 	e.sel.selecting = false
 
@@ -945,6 +959,7 @@ func (e *Entry) eraseSelectionAndUpdate() {
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
+	e.syncSelectable()
 	text := clipboard.Content()
 	if text == "" {
 		changed := e.sel.selecting && e.eraseSelection()
@@ -977,7 +992,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	content := provider.String()
 	e.updateText(content, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 	cb := e.OnChanged
 
 	e.validate()
@@ -1061,7 +1076,7 @@ func (e *Entry) registerShortcut() {
 					e.CursorColumn = end
 				}
 			}
-			e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+			e.syncSelectable()
 		})
 	}
 	selectMoveWord := func(se fyne.Shortcut) {
@@ -1152,7 +1167,7 @@ func (e *Entry) selectAll() {
 		lastRow := e.textProvider().rows() - 1
 		e.CursorColumn = e.textProvider().rowLength(lastRow)
 		e.CursorRow = lastRow
-		e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+		e.syncSelectable()
 		e.sel.selecting = true
 	})
 }
@@ -1203,14 +1218,14 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 			// seek to the start of the selection -- return handled
 			selectStart, _ := e.sel.selection()
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
-			e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+			e.syncSelectable()
 			e.sel.selecting = false
 			return true
 		case fyne.KeyRight:
 			// seek to the end of the selection -- return handled
 			_, selectEnd := e.sel.selection()
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
-			e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+			e.syncSelectable()
 			e.sel.selecting = false
 			return true
 		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome, fyne.KeyPageUp, fyne.KeyPageDown:
@@ -1254,6 +1269,15 @@ func (e *Entry) syncSegments() {
 	textSegment.Text = e.PlaceHolder
 }
 
+func (e *Entry) syncSelectable() {
+	if e.sel == nil {
+		e.sel = &selectable{theme: e.Theme(), provider: e.textProvider(), password: e.Password, style: e.TextStyle}
+		e.sel.ExtendBaseWidget(e.sel)
+	}
+
+	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+}
+
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
 	if len(e.text.Segments) > 0 {
@@ -1286,7 +1310,8 @@ func (e *Entry) textWrap() fyne.TextWrap {
 
 func (e *Entry) updateCursorAndSelection() {
 	e.CursorRow, e.CursorColumn = e.truncatePosition(e.CursorRow, e.CursorColumn)
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+
+	e.syncSelectable()
 	e.sel.selectRow, e.sel.selectColumn = e.truncatePosition(e.sel.selectRow, e.sel.selectColumn)
 }
 
@@ -1331,7 +1356,7 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 		e.CursorRow = row
 		e.CursorColumn = col
 
-		e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+		e.syncSelectable()
 	}
 
 	if !e.sel.selecting {
@@ -1427,7 +1452,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	})
 	e.CursorColumn = 0
 	e.CursorRow++
-	e.sel.cursorRow, e.sel.cursorColumn = e.CursorRow, e.CursorColumn
+	e.syncSelectable()
 }
 
 // Selects the row where the CursorColumn is currently positioned
@@ -1527,8 +1552,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
 	entryPos := fyne.NewPos(0, inputBorder)
 
-	textPos := r.entry.sel.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
-	selectPos := r.entry.sel.textPosFromRowCol(r.entry.sel.selectRow, r.entry.sel.selectColumn)
+	prov := r.entry.textProvider()
+	textPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
+	selectPos := textPosFromRowCol(r.entry.sel.selectRow, r.entry.sel.selectColumn, prov)
 	if r.entry.Wrapping == fyne.TextWrapOff && r.entry.Scroll == widget.ScrollNone {
 		r.entry.content.Resize(entrySize)
 		r.entry.content.Move(entryPos)
@@ -1537,7 +1563,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.scroll.Move(entryPos)
 	}
 
-	resizedTextPos := r.entry.sel.textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn)
+	resizedTextPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
 	if textPos != resizedTextPos {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)

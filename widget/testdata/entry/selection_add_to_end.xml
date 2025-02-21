@@ -5,7 +5,9 @@
 			<rectangle pos="1,1" radius="4" size="117x97" strokeColor="primary" strokeWidth="2"/>
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
-					<rectangle fillColor="selection" pos="21,25" size="33x19"/>
+					<widget size="0x0" type="*widget.selectable">
+						<rectangle fillColor="selection" pos="21,25" size="33x19"/>
+					</widget>
 					<widget size="120x96" type="*widget.RichText">
 						<text pos="8,6" size="47x19">Testing</text>
 						<text pos="8,25" size="47x19">Testing</text>

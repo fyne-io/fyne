@@ -171,13 +171,13 @@ func (s *selectable) selection() (int, int) {
 		rowB, colB = s.cursorRow, s.cursorColumn
 	}
 
-	return s.textPosFromRowCol(rowA, colA), s.textPosFromRowCol(rowB, colB)
+	return textPosFromRowCol(rowA, colA, s.provider), textPosFromRowCol(rowB, colB, s.provider)
 }
 
 // Obtains textual position from a given row and col
 // expects a read or write lock to be held by the caller
-func (s *selectable) textPosFromRowCol(row, col int) int {
-	b := s.provider.rowBoundary(row)
+func textPosFromRowCol(row, col int, prov *RichText) int {
+	b := prov.rowBoundary(row)
 	if b == nil {
 		return col
 	}
@@ -209,8 +209,6 @@ func (r *selectableRenderer) MinSize() fyne.Size {
 }
 
 func (r *selectableRenderer) Objects() []fyne.CanvasObject {
-	r.buildSelection()
-
 	return r.sel.selections
 }
 
