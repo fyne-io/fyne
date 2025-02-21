@@ -40,7 +40,7 @@ func NewLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
-// NewLabelWithData returns an Label widget connected to the specified data source.
+// NewLabelWithData returns a Label widget connected to the specified data source.
 //
 // Since: 2.0
 func NewLabelWithData(data binding.String) *Label {
@@ -84,8 +84,9 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.selection.provider = l.provider
 
 	if !l.Selectable {
-		l.selection.Hide()
+		return NewSimpleRenderer(l.provider)
 	}
+
 	return NewSimpleRenderer(
 		&fyne.Container{Layout: layout.NewStackLayout(),
 			Objects: []fyne.CanvasObject{l.selection, l.provider}})

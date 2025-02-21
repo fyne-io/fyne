@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 )
@@ -23,7 +22,7 @@ func newExtendedLabel(text string) *extendedLabel {
 
 func TestLabel_Extended_SetText(t *testing.T) {
 	label := newExtendedLabel("Start")
-	rich := cache.Renderer(label).Objects()[0].(*fyne.Container).Objects[0].(*selectable).provider
+	rich := cache.Renderer(label).Objects()[0].(*RichText)
 	objs := cache.Renderer(rich).Objects()
 	assert.Len(t, objs, 1)
 	assert.Equal(t, "Start", objs[0].(*canvas.Text).Text)
