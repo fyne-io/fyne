@@ -177,9 +177,7 @@ func (w *window) Hide() {
 		}
 
 		w.visible = false
-		v := w.viewport
-
-		v.Hide()
+		w.viewport.Hide()
 
 		// hide top canvas element
 		if content := w.canvas.Content(); content != nil {
