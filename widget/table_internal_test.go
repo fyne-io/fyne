@@ -143,6 +143,10 @@ func TestTable_Focus(t *testing.T) {
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
+
+	table.Select(TableCellID{Row: 1, Col: 1})
+	assert.Equal(t, &TableCellID{1, 1}, table.selectedCell)
+	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
 }
 
 func TestTable_Headers(t *testing.T) {

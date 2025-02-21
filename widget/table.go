@@ -281,6 +281,7 @@ func (t *Table) Select(id TableCellID) {
 		f(*t.selectedCell)
 	}
 	t.selectedCell = &id
+	t.currentFocus = id
 
 	t.ScrollTo(id)
 
@@ -589,7 +590,6 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		if canvas != nil {
 			canvas.Focus(t)
 		}
-		t.currentFocus = TableCellID{row, col}
 		t.RefreshItem(t.currentFocus)
 	}
 }
