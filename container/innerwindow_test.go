@@ -36,7 +36,7 @@ func TestInnerWindow_Close(t *testing.T) {
 	outer.Resize(w.MinSize())
 	assert.True(t, w.Visible())
 
-	closePos := fyne.NewPos(10, 10)
+	closePos := fyne.NewPos(w.Size().Width-10, 10)
 	test.TapCanvas(outer.Canvas(), closePos)
 	assert.False(t, w.Visible())
 
@@ -101,7 +101,7 @@ func TestInnerWindow_SetPadded(t *testing.T) {
 func TestInnerWindow_SetTitle(t *testing.T) {
 	w := NewInnerWindow("Title1", widget.NewLabel("Content"))
 	r := cache.Renderer(w).(*innerWindowRenderer)
-	title := r.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
+	title := r.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	assert.Equal(t, "Title1", title.Text)
 
 	w.SetTitle("Title2")
