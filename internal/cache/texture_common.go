@@ -10,7 +10,9 @@ import (
 var (
 	textTextures             async.Map[FontCacheEntry, *textureInfo]
 	textTextureLastCleanSize int
-	objectTextures           async.Map[fyne.CanvasObject, *textureInfo]
+	shouldCleanTextTextures  bool
+
+	objectTextures async.Map[fyne.CanvasObject, *textureInfo]
 )
 
 // DeleteTexture deletes the texture from the cache map.
@@ -86,7 +88,7 @@ func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas,
 	tinfo := prepareTexture(texture, canvas, free)
 	textTextures.Store(ent, tinfo)
 	if textTextures.Len() > 2*textTextureLastCleanSize {
-		cleanTextTextureCache(nil)
+		shouldCleanTextTextures = true
 	}
 }
 
@@ -109,14 +111,17 @@ type textureCacheBase struct {
 	canvas fyne.Canvas
 }
 
-func cleanTextTextureCache(forCanvas fyne.Canvas) {
+func cleanCanvasTextTextureCache(c fyne.Canvas) {
 	textTextures.Range(func(key FontCacheEntry, tinfo *textureInfo) bool {
 		// Just free text directly when that string/style combo is done.
-		if tinfo.isExpired(time.Time{}) && (forCanvas == nil || tinfo.canvas == forCanvas) {
+		if tinfo.isExpired(time.Time{}) && (c == nil || tinfo.canvas == c) {
 			textTextures.Delete(key)
 			tinfo.textFree()
 		}
 		return true
 	})
+}
+
+func markTextCacheCleanFinished() {
 	textTextureLastCleanSize = textTextures.Len()
 }
