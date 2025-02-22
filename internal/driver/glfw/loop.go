@@ -9,7 +9,8 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/common"
+	drvcommon "fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 )
@@ -44,8 +45,8 @@ func runOnMainWithWait(f func(), wait bool) {
 	}
 
 	if wait {
-		done := common.DonePool.Get()
-		defer common.DonePool.Put(done)
+		done := drvcommon.DonePool.Get()
+		defer drvcommon.DonePool.Put(done)
 
 		funcQueue.In() <- funcData{f: f, done: done}
 		<-done
@@ -73,7 +74,7 @@ func (d *gLDriver) drawSingleFrame() {
 			// time.Now() - CacheDuration()
 			threshold := time.Now().Add(10*time.Second - cache.ValidDuration)
 			if w.lastWalkedTime.Before(threshold) {
-				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
+				w.canvas.WalkTrees(nil, func(node *drvcommon.RenderCacheNode, _ fyne.Position) {
 					// marks canvas for object cache entry alive
 					_ = cache.GetCanvasForObject(node.Obj())
 					// marks renderer cache entry alive
@@ -165,6 +166,7 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
+			common.IncrementFrameCounter()
 		}
 	}
 }
