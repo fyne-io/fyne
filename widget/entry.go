@@ -217,8 +217,8 @@ func (e *Entry) Cursor() desktop.Cursor {
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
 //
 // Implements: fyne.DoubleTappable
-func (e *Entry) DoubleTapped(p *fyne.PointEvent) {
-	e.requestFocus()
+func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
+	e.focused = true
 	e.syncSelectable()
 	e.doubleTappedAtUnixMillis = time.Now().UnixMilli()
 	row := e.textProvider().row(e.CursorRow)
