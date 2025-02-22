@@ -37,6 +37,8 @@ var (
 )
 
 func loadMap() {
+	loaded = true
+
 	fm = fontscan.NewFontMap(noopLogger{})
 	err := loadSystemFonts(fm)
 	if err != nil {
