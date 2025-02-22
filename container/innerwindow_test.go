@@ -36,7 +36,10 @@ func TestInnerWindow_Close(t *testing.T) {
 	outer.Resize(w.MinSize())
 	assert.True(t, w.Visible())
 
-	closePos := fyne.NewPos(w.Size().Width-10, 10)
+	closePos := fyne.NewPos(10, 10)
+	if w.buttonPosition() == widget.ButtonAlignTrailing {
+		closePos = fyne.NewPos(w.Size().Width-10, 10)
+	}
 	test.TapCanvas(outer.Canvas(), closePos)
 	assert.False(t, w.Visible())
 
