@@ -26,34 +26,46 @@ func init() {
 	}
 }
 
-// Clean run cache clean task, it should be called on paint events.
+// ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
+// should be invoked during the current iteration of the main loop.
+func ShouldClean() bool {
+	return shouldFullClean() || shouldCleanTextTextures
+}
+
+// CleanTextTextures runs the per-canvas cache clean text for the text texture cache.
+// It should be run with a current GL context for each existing canvas
+// during the main run loop if ShouldClean() returns true.
+// Within the same iteration, Clean should be run once (not per-window)
+// to clean the non-texture caches and mark the clean as complete.
+func CleanTextTextures(canvas fyne.Canvas) {
+	if shouldFullClean() || shouldCleanTextTextures {
+		cleanCanvasTextTextureCache(canvas)
+	}
+}
+
+// Clean runs the non-texture cache clean task, it should be run during the
+// main loop, along with CleanTextTextures, if ShouldClean() returns true.
 func Clean(canvasRefreshed bool) {
-	now := timeNow()
-	// do not run clean task too fast
-	if now.Sub(lastClean) < 10*time.Second {
+	now := time.Now()
+	full := shouldFullClean()
+
+	if full {
+		destroyExpiredSvgs(now)
+		destroyExpiredFontMetrics(now)
 		if canvasRefreshed {
-			skippedCleanWithCanvasRefresh = true
+			// Destroy renderers on canvas refresh to avoid flickering screen.
+			destroyExpiredRenderers(now)
+			// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
+			// be a way to recover them later
+			destroyExpiredCanvases(now)
 		}
-		return
 	}
-	if skippedCleanWithCanvasRefresh {
-		skippedCleanWithCanvasRefresh = false
-		canvasRefreshed = true
+
+	textTextureLastCleanSize = textTextures.Len()
+	shouldCleanTextTextures = false
+	if full {
+		lastClean = timeNow()
 	}
-	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
-		return
-	}
-	destroyExpiredSvgs(now)
-	destroyExpiredFontMetrics(now)
-	cleanTextTextureCache(nil)
-	if canvasRefreshed {
-		// Destroy renderers on canvas refresh to avoid flickering screen.
-		destroyExpiredRenderers(now)
-		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
-		// be a way to recover them later
-		destroyExpiredCanvases(now)
-	}
-	lastClean = timeNow()
 }
 
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
@@ -107,6 +119,10 @@ func destroyExpiredRenderers(now time.Time) {
 		}
 		return true
 	})
+}
+
+func shouldFullClean() bool {
+	return lastClean.Add(ValidDuration).Before(timeNow())
 }
 
 type expiringCache struct {
