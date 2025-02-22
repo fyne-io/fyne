@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/common"
 )
 
 var (
@@ -44,6 +45,7 @@ func Clean(canvasRefreshed bool) {
 	}
 	destroyExpiredSvgs(now)
 	destroyExpiredFontMetrics(now)
+	cleanTextTextureCache(nil)
 	if canvasRefreshed {
 		// Destroy renderers on canvas refresh to avoid flickering screen.
 		destroyExpiredRenderers(now)
@@ -109,6 +111,20 @@ func destroyExpiredRenderers(now time.Time) {
 
 type expiringCache struct {
 	expires time.Time
+}
+
+type frameCounterCache struct {
+	lastAccessedFrame uint64
+}
+
+// setAlive updates expiration time.
+func (c *frameCounterCache) setAlive() {
+	c.lastAccessedFrame = common.CurrentFrameCounter()
+}
+
+// isExpired check if the cache data is expired.
+func (c *frameCounterCache) isExpired(now time.Time) bool {
+	return c.lastAccessedFrame < common.CurrentFrameCounter()-1
 }
 
 // isExpired check if the cache data is expired.
