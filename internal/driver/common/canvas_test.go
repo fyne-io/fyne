@@ -78,7 +78,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	afterCalls := []afterCall{}
 
 	var i int
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkVisibleTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		var parent fyne.CanvasObject
 		if node.parent != nil {
 			parent = node.parent.obj
@@ -123,7 +123,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	secondRunAfterPainterData := []nodeInfo{}
 	nodes := []*RenderCacheNode{}
 
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkVisibleTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		secondRunBeforePainterData = append(secondRunBeforePainterData, painterData[node])
 		nodes = append(nodes, node)
 	}, func(node *RenderCacheNode, _ fyne.Position) {
@@ -171,7 +171,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	thirdRunAfterPainterData := []nodeInfo{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkVisibleTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		thirdRunBeforePainterData = append(thirdRunBeforePainterData, painterData[node])
@@ -216,7 +216,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	nodes = []*RenderCacheNode{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkVisibleTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		fourthRunBeforePainterData = append(fourthRunBeforePainterData, painterData[node])
@@ -298,7 +298,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	nodes = []*RenderCacheNode{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkVisibleTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		fifthRunBeforePainterData = append(fifthRunBeforePainterData, painterData[node])

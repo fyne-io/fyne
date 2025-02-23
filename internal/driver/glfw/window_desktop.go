@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -112,8 +113,6 @@ type window struct {
 	shouldExpand                    bool
 
 	pending []func()
-
-	lastWalkedTime time.Time
 }
 
 func (w *window) SetFullScreen(full bool) {

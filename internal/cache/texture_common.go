@@ -12,7 +12,9 @@ var (
 	textTextureLastCleanSize int
 	shouldCleanTextTextures  bool
 
-	objectTextures async.Map[fyne.CanvasObject, *textureInfo]
+	objectTextures              async.Map[fyne.CanvasObject, *textureInfo]
+	objectTexturesLastCleanSize int
+	shouldCleanObjectTextures   bool
 )
 
 // DeleteTexture deletes the texture from the cache map.
@@ -40,13 +42,13 @@ func GetTexture(obj fyne.CanvasObject) (TextureType, bool) {
 	return texInfo.texture, true
 }
 
-// RangeExpiredTexturesFor range over the expired textures for the specified canvas.
+// rangeExpiredTexturesFor range over the expired textures for the specified canvas.
 // Note that this function *does not* range over text textures, which are cleaned
 // on a different schedule.
 //
 // Note: If this is used to free textures, then it should be called inside a current
 // gl context to ensure textures are deleted from gl.
-func RangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
+func rangeExpiredTexturesFor(canvas fyne.Canvas, f func(fyne.CanvasObject)) {
 	now := timeNow()
 
 	objectTextures.Range(func(obj fyne.CanvasObject, tinfo *textureInfo) bool {
@@ -96,6 +98,9 @@ func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas,
 func SetTexture(obj fyne.CanvasObject, texture TextureType, canvas fyne.Canvas) {
 	tinfo := prepareTexture(texture, canvas, nil)
 	objectTextures.Store(obj, tinfo)
+	if objectTextures.Len() > 2*objectTexturesLastCleanSize {
+		shouldCleanObjectTextures = true
+	}
 }
 
 func prepareTexture(texture TextureType, canvas fyne.Canvas, free func()) *textureInfo {
@@ -111,17 +116,13 @@ type textureCacheBase struct {
 	canvas fyne.Canvas
 }
 
-func cleanCanvasTextTextureCache(c fyne.Canvas) {
+func cleanTextTextureCache(forCanvas fyne.Canvas) {
 	textTextures.Range(func(key FontCacheEntry, tinfo *textureInfo) bool {
 		// Just free text directly when that string/style combo is done.
-		if tinfo.isExpired(time.Time{}) && (c == nil || tinfo.canvas == c) {
+		if tinfo.isExpired(time.Time{}) && (forCanvas == nil || tinfo.canvas == forCanvas) {
 			textTextures.Delete(key)
 			tinfo.textFree()
 		}
 		return true
 	})
-}
-
-func markTextCacheCleanFinished() {
-	textTextureLastCleanSize = textTextures.Len()
 }
