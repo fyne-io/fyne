@@ -30,11 +30,20 @@ func init() {
 // ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
 // should be invoked during the current iteration of the main loop.
 func ShouldClean() bool {
-	return shouldFullClean() ||
-		shouldCleanTextTextures ||
+	return shouldCleanTextTextures ||
 		shouldCleanObjectTextures ||
 		shouldCleanRenderers ||
-		shouldCleanCanvases
+		shouldCleanCanvases ||
+		shouldFullClean()
+}
+
+// ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
+// should be invoked during the current iteration of the main loop,
+// AND the clean task will include a clean of the CanvasForObject map.
+// If so, the driver should be sure to mark all objects -
+// both visible and invisible, as alive before invoking the clean tasks.
+func ShouldCleanCanvases() bool {
+	return shouldCleanCanvases || shouldFullClean()
 }
 
 // CleanTextures runs the per-canvas cache clean text for the texture caches.

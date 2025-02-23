@@ -58,6 +58,7 @@ func runOnMainWithWait(f func(), wait bool) {
 func (d *gLDriver) drawSingleFrame() {
 	refreshed := false
 	shouldClean := cache.ShouldClean()
+	shouldCleanCanvases := cache.ShouldCleanCanvases()
 
 	for _, win := range d.windowList() {
 		w := win.(*window)
@@ -65,9 +66,11 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		if shouldClean {
-			// perform a complete walk of the canvas
-			// to mark all contained CanvasObjects as alive
+		// Perform a complete walk of the canvas, including invisible,
+		// to mark all contained CanvasObjects as alive
+		// We do not need to do this if the clean tasks do not
+		// include the canvases (CanvasForObject) clean
+		if shouldCleanCanvases {
 			w.canvas.markObjectsAlive()
 		}
 
