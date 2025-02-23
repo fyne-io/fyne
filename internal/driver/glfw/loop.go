@@ -65,14 +65,6 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		// Perform a complete walk of the canvas, including invisible,
-		// to mark all contained CanvasObjects as alive
-		// We do not need to do this if the clean tasks do not
-		// include the canvases (CanvasForObject) clean
-		if shouldCleanCanvases {
-			w.canvas.markObjectsAlive()
-		}
-
 		canvas := w.canvas
 
 		// CheckDirtyAndClear must be checked after visibility,
@@ -81,7 +73,7 @@ func (d *gLDriver) drawSingleFrame() {
 		// Do the clear if and only if the window is visible.
 		if !w.visible || !canvas.CheckDirtyAndClear() {
 			if shouldClean {
-				d.cleanInactiveWindowTextures(w)
+				d.cleanInactiveWindowTextures(w, !shouldCleanCanvases /*walkVisibleOnly*/)
 			}
 			continue
 		}
@@ -189,11 +181,11 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) cleanInactiveWindowTextures(w *window) {
+func (d *gLDriver) cleanInactiveWindowTextures(w *window, walkVisibleOnly bool) {
 	w.RunWithContext(func() {
 		// Walk trees of inactive window and mark its visible contents
 		// as alive in all caches, so they are not cleaned.
-		w.canvas.markAlive()
+		w.canvas.markAlive(walkVisibleOnly)
 		var texFree func(fyne.CanvasObject)
 		if w.canvas.Painter() != nil {
 			texFree = w.canvas.Painter().Free
@@ -222,6 +214,9 @@ func (d *gLDriver) repaintWindow(w *window, cleanTextures bool) bool {
 		}
 
 		if cleanTextures {
+			// the object tree walks in EnsureMinSize and canvas.paint
+			// will have ensured all alive objects are marked in the caches
+			// No need to call canvas.markAlive
 			var texFree func(fyne.CanvasObject)
 			if canvas.Painter() != nil {
 				texFree = canvas.Painter().Free

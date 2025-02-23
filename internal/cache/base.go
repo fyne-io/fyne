@@ -145,6 +145,7 @@ func ResetThemeCaches() {
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
+	log.Printf("pre-clean canvases size was %d", canvases.Len())
 	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
 		if cinfo.isExpired(now) {
 			canvases.Delete(obj)
