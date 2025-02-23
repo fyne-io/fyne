@@ -244,7 +244,9 @@ func (c *glCanvas) overlayChanged() {
 	c.SetDirty()
 }
 
-// markAlive walks the object trees for this canvas and marks all cached entries as alive
+// markAlive walks the object trees for this canvas and marks
+// all cache entries for visible objects alive.
+// It should be called on inactive windows when a clean is requested.
 func (c *glCanvas) markAlive() {
 	mark := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
@@ -261,6 +263,16 @@ func (c *glCanvas) markAlive() {
 	}
 
 	c.WalkTrees(mark, nil)
+}
+
+// markObjectsAlive marks the CanvasForObject cache as alive for
+// the canvas's full contents, including invisible widgets.
+// It should be called for all windows when a clean is requested.
+func (c *glCanvas) markObjectsAlive() {
+	mark := func(node *common.RenderCacheNode, pos fyne.Position) {
+		_ = cache.GetCanvasForObject(node.Obj())
+	}
+	c.WalkCompleteTrees(mark, nil)
 }
 
 func (c *glCanvas) paint(size fyne.Size) {

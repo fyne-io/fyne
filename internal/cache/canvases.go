@@ -5,7 +5,11 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var canvases async.Map[fyne.CanvasObject, *canvasInfo]
+var (
+	canvases                 async.Map[fyne.CanvasObject, *canvasInfo]
+	canvasCacheLastCleanSize int
+	shouldCleanCanvases      bool
+)
 
 // GetCanvasForObject returns the canvas for the specified object.
 func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
@@ -27,9 +31,12 @@ func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
 	if (!found || old.canvas != c) && setup != nil {
 		setup()
 	}
+	if canvases.Len() > 2*canvasCacheLastCleanSize {
+		shouldCleanCanvases = true
+	}
 }
 
 type canvasInfo struct {
-	expiringCache
+	frameCounterCache
 	canvas fyne.Canvas
 }
