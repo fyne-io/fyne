@@ -98,7 +98,7 @@ func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (s *selectable) SelectedText() string {
-	if !s.selecting {
+	if s == nil || !s.selecting {
 		return ""
 	}
 

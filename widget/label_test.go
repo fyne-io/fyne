@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
 	"fyne.io/fyne/v2/test"
@@ -196,6 +197,23 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	text.Truncation = fyne.TextTruncateClip
 	text.Refresh()
 	test.AssertRendersToMarkup(t, "label/truncate.xml", c)
+}
+
+func TestLabel_Select(t *testing.T) {
+	l := NewLabel("Hello")
+	l.Selectable = true
+
+	assert.Empty(t, l.SelectedText())
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*fyne.Container).Objects[0].(*selectable)
+	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
+	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel.DragEnd()
+	sel.MouseUp(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	assert.Equal(t, "el", l.SelectedText())
 }
 
 func TestNewLabelWithData(t *testing.T) {
