@@ -6,15 +6,15 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/common"
 )
 
 var (
-	ValidDuration     = 1 * time.Minute
-	cleanTaskInterval = ValidDuration / 2
+	ValidDuration = 2 * time.Minute
 
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
+
+	framecounter uint64 = 1
 
 	// testing purpose only
 	timeNow = time.Now
@@ -23,8 +23,14 @@ var (
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
 		ValidDuration = t
-		cleanTaskInterval = ValidDuration / 2
 	}
+}
+
+// IncrementFrameCounter increments the current frame counter
+// that is used to track which cached objects were accessed in the last frame.
+// It should be called at the end of each iteration of the main loop.
+func IncrementFrameCounter() {
+	framecounter += 1
 }
 
 // ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
@@ -174,12 +180,12 @@ type frameCounterCache struct {
 
 // setAlive updates expiration time.
 func (c *frameCounterCache) setAlive() {
-	c.lastAccessedFrame = common.CurrentFrameCounter()
+	c.lastAccessedFrame = framecounter
 }
 
 // isExpired check if the cache data is expired.
 func (c *frameCounterCache) isExpired(now time.Time) bool {
-	return c.lastAccessedFrame < common.CurrentFrameCounter()
+	return c.lastAccessedFrame < framecounter
 }
 
 // isExpired check if the cache data is expired.

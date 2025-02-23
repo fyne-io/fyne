@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/common"
 	drvcommon "fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
@@ -169,7 +168,7 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
-			common.IncrementFrameCounter()
+			cache.IncrementFrameCounter()
 		}
 	}
 }
