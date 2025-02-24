@@ -40,6 +40,7 @@ func ShouldClean() bool {
 		shouldCleanObjectTextures ||
 		shouldCleanRenderers ||
 		shouldCleanCanvases ||
+		shouldCleanFontSizeCache ||
 		shouldFullClean()
 }
 
@@ -93,6 +94,12 @@ func Clean() {
 		canvasCacheLastCleanSize = canvases.Len()
 		shouldCleanCanvases = false
 		log.Printf("cleaned canvases cache, new size %d", canvasCacheLastCleanSize)
+	}
+	if full || shouldCleanFontSizeCache {
+		destroyExpiredFontMetrics(now)
+		fontSizeCacheLastCleanSize = fontSizeCache.Len()
+		shouldCleanFontSizeCache = false
+		log.Printf("cleaned font size cache, new size %d", fontSizeCacheLastCleanSize)
 	}
 
 	// CleanTextures should have been called for each canvas
