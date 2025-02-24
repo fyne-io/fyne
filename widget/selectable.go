@@ -2,6 +2,7 @@ package widget
 
 import (
 	"math"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -27,6 +28,10 @@ type selectable struct {
 
 	// TODO maybe render?
 	selections []fyne.CanvasObject
+
+	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
+	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
+	doubleTappedAtUnixMillis int64
 }
 
 func (s *selectable) CreateRenderer() fyne.WidgetRenderer {
@@ -35,6 +40,22 @@ func (s *selectable) CreateRenderer() fyne.WidgetRenderer {
 
 func (s *selectable) Cursor() desktop.Cursor {
 	return desktop.TextCursor
+}
+
+func (s *selectable) DoubleTapped(_ *fyne.PointEvent) {
+	s.doubleTappedAtUnixMillis = time.Now().UnixMilli()
+	row := s.provider.row(s.cursorRow)
+	start, end := getTextWhitespaceRegion(row, s.cursorColumn, false)
+	if start == -1 || end == -1 {
+		return
+	}
+
+	s.selectRow = s.cursorRow
+	s.selectColumn = start
+	s.cursorColumn = end
+
+	s.selecting = true
+	s.Refresh()
 }
 
 func (s *selectable) DragEnd() {
@@ -68,10 +89,10 @@ func (s *selectable) FocusLost() {
 }
 
 func (s *selectable) MouseDown(m *desktop.MouseEvent) {
-	//if e.isTripleTap(time.Now().UnixMilli()) {
-	//	e.selectCurrentRow()
-	//	return
-	//}
+	if isTripleTap(s.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
+		s.selectCurrentRow()
+		return
+	}
 	if !fyne.CurrentDevice().IsMobile() {
 		if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
 			c.Focus(s) // ready for copy shortcut
@@ -172,6 +193,15 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 	}
 
 	return row, col
+}
+
+// Selects the row where the cursorColumn is currently positioned
+func (s *selectable) selectCurrentRow() {
+	provider := s.provider
+	s.selectRow = s.cursorRow
+	s.selectColumn = 0
+	s.cursorColumn = provider.rowLength(s.cursorRow)
+	s.Refresh()
 }
 
 // selection returns the start and end text positions for the selected span of text
@@ -339,4 +369,8 @@ func (r *selectableRenderer) buildSelection() {
 		r.sel.selections[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
 		r.sel.selections[i].Move(fyne.NewPos(x1-1, y1))
 	}
+}
+
+func isTripleTap(double, nowMilli int64) bool {
+	return nowMilli-double <= fyne.CurrentApp().Driver().DoubleTapDelay().Milliseconds()
 }

@@ -225,6 +225,34 @@ func TestLabel_Select(t *testing.T) {
 	assert.Empty(t, l.SelectedText())
 }
 
+func TestLabel_SelectWord(t *testing.T) {
+	l := NewLabel("Hello")
+	l.Selectable = true
+
+	assert.Empty(t, l.SelectedText())
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel.DoubleTapped(&fyne.PointEvent{Position: fyne.NewPos(15, 10)})
+	assert.Equal(t, "Hello", l.SelectedText())
+}
+
+func TestLabel_SelectLine(t *testing.T) {
+	l := NewLabel("Longer line")
+	l.Selectable = true
+
+	assert.Empty(t, l.SelectedText())
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	pointEvent := fyne.PointEvent{Position: fyne.NewPos(15, 10)}
+	tapEvent := &desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
+		PointEvent: pointEvent}
+	sel.DoubleTapped(&pointEvent)
+	sel.MouseDown(tapEvent)
+	sel.MouseUp(tapEvent)
+
+	assert.Equal(t, "Longer line", l.SelectedText())
+}
+
 func TestNewLabelWithData(t *testing.T) {
 	str := binding.NewString()
 	str.Set("Init")

@@ -95,10 +95,6 @@ type Entry struct {
 	// undoStack stores the data necessary for undo/redo functionality
 	// See entryUndoStack for implementation details.
 	undoStack entryUndoStack
-
-	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
-	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
-	doubleTappedAtUnixMillis int64
 }
 
 // NewEntry creates a new single line entry widget.
@@ -220,7 +216,7 @@ func (e *Entry) Cursor() desktop.Cursor {
 func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	e.focused = true
 	e.syncSelectable()
-	e.doubleTappedAtUnixMillis = time.Now().UnixMilli()
+	e.sel.doubleTappedAtUnixMillis = time.Now().UnixMilli()
 	row := e.textProvider().row(e.CursorRow)
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn, false)
 	if start == -1 || end == -1 {
@@ -242,10 +238,6 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 		e.syncSelectable()
 		e.sel.selecting = true
 	})
-}
-
-func (e *Entry) isTripleTap(nowMilli int64) bool {
-	return nowMilli-e.doubleTappedAtUnixMillis <= fyne.CurrentApp().Driver().DoubleTapDelay().Milliseconds()
 }
 
 // DragEnd is called at end of a drag event.
@@ -382,8 +374,10 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.requestFocus()
 	e.syncSelectable()
 
-	if e.isTripleTap(time.Now().UnixMilli()) {
-		e.selectCurrentRow()
+	if isTripleTap(e.sel.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
+		e.sel.selectCurrentRow()
+		e.CursorColumn = e.sel.cursorColumn
+		e.Refresh()
 		return
 	}
 	if e.selectKeyDown {
@@ -579,11 +573,14 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // Implements: mobile.Touchable
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 	now := time.Now().UnixMilli()
+	e.syncSegments()
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-	if e.isTripleTap(now) {
-		e.selectCurrentRow()
+	if isTripleTap(e.sel.doubleTappedAtUnixMillis, now) {
+		e.sel.selectCurrentRow()
+		e.CursorColumn = e.sel.cursorColumn
+		e.Refresh()
 		return
 	}
 
@@ -1453,19 +1450,6 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	e.CursorColumn = 0
 	e.CursorRow++
 	e.syncSelectable()
-}
-
-// Selects the row where the CursorColumn is currently positioned
-func (e *Entry) selectCurrentRow() {
-	provider := e.textProvider()
-	e.sel.selectRow = e.CursorRow
-	e.sel.selectColumn = 0
-	if e.MultiLine {
-		e.CursorColumn = provider.rowLength(e.CursorRow)
-	} else {
-		e.CursorColumn = provider.len()
-	}
-	e.Refresh()
 }
 
 func (e *Entry) setFieldsAndRefresh(f func()) {
