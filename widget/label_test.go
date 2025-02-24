@@ -204,8 +204,9 @@ func TestLabel_Select(t *testing.T) {
 	l.Selectable = true
 
 	assert.Empty(t, l.SelectedText())
+	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*fyne.Container).Objects[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
 	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
 		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
 	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
@@ -217,6 +218,11 @@ func TestLabel_Select(t *testing.T) {
 
 	sel.TypedShortcut(&fyne.ShortcutCopy{})
 	assert.Equal(t, "el", fyne.CurrentApp().Clipboard().Content())
+
+	l.Selectable = false
+	l.Refresh()
+	assert.Equal(t, 1, len(test.WidgetRenderer(l).Objects()))
+	assert.Empty(t, l.SelectedText())
 }
 
 func TestNewLabelWithData(t *testing.T) {

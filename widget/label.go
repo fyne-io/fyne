@@ -3,7 +3,6 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -83,13 +82,7 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.selection.theme = l.Theme()
 	l.selection.provider = l.provider
 
-	if !l.Selectable {
-		return NewSimpleRenderer(l.provider)
-	}
-
-	return NewSimpleRenderer(
-		&fyne.Container{Layout: layout.NewStackLayout(),
-			Objects: []fyne.CanvasObject{l.selection, l.provider}})
+	return &labelRenderer{l}
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -110,11 +103,6 @@ func (l *Label) Refresh() {
 	l.syncSegments()
 	l.provider.Refresh()
 	l.BaseWidget.Refresh()
-
-	l.selection.Hidden = !l.Selectable
-	l.selection.style = l.TextStyle
-	l.selection.theme = l.Theme()
-	l.selection.Refresh()
 }
 
 // SelectedText returns the text currently selected in this Label.
@@ -123,6 +111,10 @@ func (l *Label) Refresh() {
 //
 // Since: 2.6
 func (l *Label) SelectedText() string {
+	if l.Selectable == false {
+		return ""
+	}
+
 	return l.selection.SelectedText()
 }
 
@@ -184,4 +176,37 @@ func (l *Label) updateFromData(data binding.DataItem) {
 		return
 	}
 	l.SetText(val)
+}
+
+type labelRenderer struct {
+	l *Label
+}
+
+func (r *labelRenderer) Destroy() {
+}
+
+func (r *labelRenderer) Layout(s fyne.Size) {
+	r.l.selection.Resize(s)
+	r.l.provider.Resize(s)
+}
+
+func (r *labelRenderer) MinSize() fyne.Size {
+	return r.l.provider.MinSize()
+}
+
+func (r *labelRenderer) Objects() []fyne.CanvasObject {
+	if !r.l.Selectable {
+		return []fyne.CanvasObject{r.l.provider}
+	}
+
+	return []fyne.CanvasObject{r.l.selection, r.l.provider}
+}
+
+func (r *labelRenderer) Refresh() {
+	r.l.provider.Refresh()
+
+	sel := r.l.selection
+	sel.style = r.l.TextStyle
+	sel.theme = r.l.Theme()
+	sel.Refresh()
 }
