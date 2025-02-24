@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -72,6 +73,10 @@ func (w webData) packageWebInternal(appDir string, exeWasmSrc string, exeJSSrc s
 	}
 
 	wasmExecSrc := filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js")
+	// go1.24 changed the location of wasm_exec.js so we need to check both paths
+	if _, err := os.Stat(wasmExecSrc); err != nil && os.IsNotExist(err) {
+		wasmExecSrc = filepath.Join(runtime.GOROOT(), "lib", "wasm", "wasm_exec.js")
+	}
 	wasmExecDst := filepath.Join(appDir, "wasm_exec.js")
 	err = util.CopyFile(wasmExecSrc, wasmExecDst)
 	if err != nil {

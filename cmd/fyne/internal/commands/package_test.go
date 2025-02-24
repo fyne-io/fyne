@@ -265,7 +265,7 @@ func Test_PackageWasm(t *testing.T) {
 	expectedCopyFileRuns := mockCopyFileRuns{
 		expected: []mockCopyFile{
 			{source: "myTest.png", target: filepath.Join("myTestTarget", "wasm", "icon.png")},
-			{source: filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js"), target: filepath.Join("myTestTarget", "wasm", "wasm_exec.js")},
+			{source: filepath.Join(runtime.GOROOT(), "lib", "wasm", "wasm_exec.js"), target: filepath.Join("myTestTarget", "wasm", "wasm_exec.js")},
 			{source: "myTest.wasm", target: filepath.Join("myTestTarget", "wasm", "myTest.wasm")},
 		},
 	}
