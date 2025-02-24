@@ -111,7 +111,7 @@ func (l *Label) Refresh() {
 //
 // Since: 2.6
 func (l *Label) SelectedText() string {
-	if l.Selectable == false {
+	if !l.Selectable {
 		return ""
 	}
 
