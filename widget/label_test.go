@@ -214,6 +214,9 @@ func TestLabel_Select(t *testing.T) {
 	sel.MouseUp(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
 		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
 	assert.Equal(t, "el", l.SelectedText())
+
+	sel.TypedShortcut(&fyne.ShortcutCopy{})
+	assert.Equal(t, "el", fyne.CurrentApp().Clipboard().Content())
 }
 
 func TestNewLabelWithData(t *testing.T) {

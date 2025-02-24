@@ -59,11 +59,24 @@ func (s *selectable) Dragged(d *fyne.DragEvent) {
 	s.Refresh()
 }
 
+func (s *selectable) FocusGained() {
+	// no difference visually
+}
+
+func (s *selectable) FocusLost() {
+	// no difference visually
+}
+
 func (s *selectable) MouseDown(m *desktop.MouseEvent) {
 	//if e.isTripleTap(time.Now().UnixMilli()) {
 	//	e.selectCurrentRow()
 	//	return
 	//}
+	if !fyne.CurrentDevice().IsMobile() {
+		if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
+			c.Focus(s) // ready for copy shortcut
+		}
+	}
 	if s.selecting && m.Button == desktop.MouseButtonPrimary {
 		s.selecting = false
 	}
@@ -108,6 +121,21 @@ func (s *selectable) SelectedText() string {
 	}
 	r := ([]rune)(s.provider.String())
 	return string(r[start:stop])
+}
+
+func (s *selectable) TypedRune(rune) {
+	// read-only
+}
+
+func (s *selectable) TypedKey(*fyne.KeyEvent) {
+	// read-only
+}
+
+func (s *selectable) TypedShortcut(sh fyne.Shortcut) {
+	switch sh.(type) {
+	case *fyne.ShortcutCopy:
+		fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
+	}
 }
 
 func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
