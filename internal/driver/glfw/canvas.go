@@ -258,7 +258,7 @@ func (c *glCanvas) markAlive(visibleOnly bool) {
 		case *canvas.Text:
 			_, _ = cache.GetTextTexture(glcommon.FontCacheEntryForText(obj, c))
 		case fyne.Widget:
-			_ = cache.Renderer(obj)
+			_, _ = cache.CachedRenderer(obj)
 		}
 	}
 
