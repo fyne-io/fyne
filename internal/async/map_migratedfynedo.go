@@ -53,7 +53,9 @@ func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 // Range calls f sequentially for each key and value present in the map. If f returns false, range stops the iteration.
 func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 	for k, v := range m.m {
-		f(k.(K), v)
+		if !f(k.(K), v) {
+			return
+		}
 	}
 }
 
