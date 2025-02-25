@@ -238,14 +238,25 @@ func Test_PackageWasm(t *testing.T) {
 		return expectedEnsureSubDirRuns.verifyExpectation(t, parent, name)
 	}
 
+	// Handle lookup for wasm_exec.js from lib folder in Go 1.24 and newer:
+	goroot := runtime.GOROOT()
+	wasmExecJSPath := filepath.Join(goroot, "lib", "wasm", "wasm_exec.js")
+	_, err := os.Stat(wasmExecJSPath)
+	execJSLibExists := err == nil || !os.IsNotExist(err)
+
 	expectedExistRuns := mockExistRuns{
 		expected: []mockExist{
 			{"myTest.wasm", false},
 			{"myTest.wasm", true},
+			{wasmExecJSPath, execJSLibExists},
 		},
 	}
 	utilExistsMock = func(path string) bool {
 		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
+	if !execJSLibExists { // Expect location from Go < 1.24 to have been copied:
+		wasmExecJSPath = filepath.Join(goroot, "misc", "wasm", "wasm_exec.js")
 	}
 
 	expectedWriteFileRuns := mockWriteFileRuns{
@@ -265,7 +276,7 @@ func Test_PackageWasm(t *testing.T) {
 	expectedCopyFileRuns := mockCopyFileRuns{
 		expected: []mockCopyFile{
 			{source: "myTest.png", target: filepath.Join("myTestTarget", "wasm", "icon.png")},
-			{source: filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js"), target: filepath.Join("myTestTarget", "wasm", "wasm_exec.js")},
+			{source: wasmExecJSPath, target: filepath.Join("myTestTarget", "wasm", "wasm_exec.js")},
 			{source: "myTest.wasm", target: filepath.Join("myTestTarget", "wasm", "myTest.wasm")},
 		},
 	}
@@ -273,7 +284,7 @@ func Test_PackageWasm(t *testing.T) {
 		return expectedCopyFileRuns.verifyExpectation(t, false, source, target)
 	}
 
-	err := p.doPackage(wasmBuildTest)
+	err = p.doPackage(wasmBuildTest)
 	assert.Nil(t, err)
 	wasmBuildTest.verifyExpectation()
 	expectedTotalCount(t, len(expectedEnsureSubDirRuns.expected), expectedEnsureSubDirRuns.current)
