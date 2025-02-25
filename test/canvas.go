@@ -61,7 +61,6 @@ func NewCanvas() WindowlessCanvas {
 		focusMgr: intapp.NewFocusManager(nil),
 		padded:   true,
 		scale:    1.0,
-		size:     fyne.NewSize(100, 100),
 	}
 	c.overlays = &internal.OverlayStack{Canvas: c}
 	return c
@@ -223,7 +222,7 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	if c.padded {
 		minSize = minSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
 	}
-	c.Resize(minSize)
+	c.Resize(c.Size().Max(minSize))
 }
 
 func (c *canvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
