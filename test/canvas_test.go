@@ -63,11 +63,12 @@ func Test_canvas_TransparentCapture(t *testing.T) {
 
 func Test_canvas_Resize(t *testing.T) {
 	c := NewCanvas()
-	assert.True(t, c.Size().IsZero())
+	assert.Equal(t, float32(100), c.Size().Width) // backwards compatible
 
 	smallSize := fyne.NewSize(10, 5)
 	c.Resize(smallSize)
 	c.SetContent(widget.NewLabel("Bigger"))
+	assert.NotEqual(t, float32(100), c.Size().Width) // backwards compatible
 	assert.Greater(t, c.Size().Width, smallSize.Width)
 	assert.Greater(t, c.Size().Height, smallSize.Height)
 

@@ -28,14 +28,20 @@ func TestList_ThemeChange(t *testing.T) {
 
 func TestList_ThemeOverride(t *testing.T) {
 	list, w, _ := setupList(t)
+	ugly := test.NewTheme()
+	bg := canvas.NewRectangle(ugly.Color(theme.ColorNameBackground, theme.VariantDark))
+	override := container.NewThemeOverride(list, ugly)
+	w.SetContent(container.NewStack(bg, override))
 
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertImageMatches(t, "list/list_theme_changed.png", w.Canvas().Capture())
 
 	normal := test.Theme()
-	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
-	w.SetContent(container.NewStack(bg, container.NewThemeOverride(list, normal)))
-	w.Resize(fyne.NewSize(200, 200))
+	bg.FillColor = normal.Color(theme.ColorNameBackground, theme.VariantDark)
+	bg.Refresh()
+	override.Theme = normal
+	override.Refresh()
+	list.Refresh()
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 }
 
