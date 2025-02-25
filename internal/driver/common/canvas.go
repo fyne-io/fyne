@@ -124,7 +124,7 @@ func (c *Canvas) EnsureMinSize() bool {
 			}
 		}
 	}
-	c.WalkCompleteTrees(nil, ensureMinSize)
+	c.WalkTrees(nil, ensureMinSize)
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {

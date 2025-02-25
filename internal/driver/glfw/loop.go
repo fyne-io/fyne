@@ -76,6 +76,11 @@ func (d *gLDriver) drawSingleFrame() {
 				d.cleanInactiveWindowTextures(w, !shouldCleanCanvases /*walkVisibleOnly*/)
 			}
 			continue
+		} else if shouldCleanCanvases {
+			// EnsureMinSize and paint only walk visible trees.
+			// Walk entire trees of window and mark alive,
+			// so that we do not clean CanvasForObject entries of hidden objects.
+			w.canvas.markAlive(false /*visibleOnly*/)
 		}
 
 		refreshed = refreshed || d.repaintWindow(w, shouldClean)
