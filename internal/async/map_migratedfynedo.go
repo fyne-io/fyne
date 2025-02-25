@@ -1,67 +1,71 @@
-//go:build !migrated_fynedo
+//go:build migrated_fynedo
 
 package async
 
-import "sync"
-
 // Map is a generic wrapper around [sync.Map].
-type Map[K, V any] struct {
-	sync.Map
+type Map[K any, V any] struct {
+	// once go1.20 is base, can use map[K]V
+	// with K being Comparable instead of any
+	// (CanvasObject, etc aren't Comparable for go1.19)
+	m map[any]V
 }
 
 // Delete deletes the value for a key.
 func (m *Map[K, V]) Delete(key K) {
-	m.Map.Delete(key)
+	delete(m.m, key)
 }
 
 // Len returns the length of the map. It is O(n) over the number of items.
 func (m *Map[K, V]) Len() (count int) {
-	m.Map.Range(func(_, _ any) bool {
-		count++
-		return true
-	})
-	return count
+	return len(m.m)
 }
 
 // Load returns the value stored in the map for a key, or nil if no value is present.
 // The ok result indicates whether value was found in the map.
 func (m *Map[K, V]) Load(key K) (value V, ok bool) {
-	val, ok := m.Map.Load(key)
-	if val == nil {
-		return *new(V), ok
-	}
-	return val.(V), ok
+	val, ok := m.m[key]
+	return val, ok
 }
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
 func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool) {
-	val, loaded := m.Map.LoadAndDelete(key)
-	if val == nil {
-		return *new(V), loaded
-	}
-	return val.(V), loaded
+	val, ok := m.m[key]
+	delete(m.m, key)
+	return val, ok
 }
 
 // LoadOrStore returns the existing value for the key if present.
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
 func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
-	act, loaded := m.Map.LoadOrStore(key, value)
-	if act == nil {
-		return *new(V), loaded
+	if m.m == nil {
+		m.m = make(map[any]V)
 	}
-	return act.(V), loaded
+
+	if val, ok := m.m[key]; ok {
+		return val, true
+	}
+	m.m[key] = value
+	return value, false
 }
 
 // Range calls f sequentially for each key and value present in the map. If f returns false, range stops the iteration.
 func (m *Map[K, V]) Range(f func(key K, value V) bool) {
-	m.Map.Range(func(key, value any) bool {
-		return f(key.(K), value.(V))
-	})
+	for k, v := range m.m {
+		f(k.(K), v)
+	}
 }
 
 // Store sets the value for a key.
 func (m *Map[K, V]) Store(key K, value V) {
-	m.Map.Store(key, value)
+	if m.m == nil {
+		m.m = make(map[any]V)
+	}
+	m.m[key] = value
+}
+
+// Clear removes all entries from the map.
+func (m *Map[K, V]) Clear() {
+	m.m = make(map[any]V)
 }
