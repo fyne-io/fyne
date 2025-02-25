@@ -119,7 +119,6 @@ func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 				fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
 			}))
 		ShowPopUpMenuAtPosition(m, c, ev.AbsolutePosition)
-
 		return
 	}
 
@@ -306,7 +305,6 @@ func (r *selectableRenderer) buildSelection() {
 
 	if selectRow == -1 || (cursorRow == selectRow && cursorCol == selectCol) {
 		r.sel.selections = r.sel.selections[:0]
-
 		return
 	}
 

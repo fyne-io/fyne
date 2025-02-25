@@ -101,8 +101,6 @@ type Entry struct {
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
 	e.ExtendBaseWidget(e)
-
-	e.syncSelectable()
 	return e
 }
 
