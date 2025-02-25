@@ -761,6 +761,10 @@ func (l *listLayout) updateList(newOnly bool) {
 		for _, vis := range l.visible {
 			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
+
+		// a full refresh means drain the pool of excess old items as well
+		for l.itemPool.Get() != nil {
+		}
 	}
 
 	// we don't need wasVisible now until next call to update
