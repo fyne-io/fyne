@@ -3,12 +3,12 @@
 package dialog
 
 import (
-	"strconv"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/storage"
+
+	"github.com/rymdport/portal"
 	"github.com/rymdport/portal/filechooser"
 )
 
@@ -121,16 +121,12 @@ func fileSaveOSOverride(d *FileDialog) bool {
 	return true
 }
 
-func x11WindowHandleToString(handle uintptr) string {
-	return "x11:" + strconv.FormatUint(uint64(handle), 16)
-}
-
 func windowHandleForPortal(window fyne.Window) string {
 	windowHandle := ""
 	if !build.IsWayland {
 		window.(driver.NativeWindow).RunNative(func(context any) {
 			handle := context.(driver.X11WindowContext).WindowHandle
-			windowHandle = x11WindowHandleToString(handle)
+			windowHandle = portal.FormatX11WindowHandle(handle)
 		})
 	}
 
