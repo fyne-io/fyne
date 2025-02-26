@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"log"
 	"runtime"
 	"strings"
 	"time"
@@ -272,6 +273,8 @@ func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
 		e.dirty = true
 		e.focused = true
+
+		log.Println("FOCUS")
 	})
 	if e.onFocusChanged != nil {
 		e.onFocusChanged(true)
@@ -430,6 +433,7 @@ func (e *Entry) Refresh() {
 	if e.sel != nil {
 		e.sel.style = e.TextStyle
 		e.sel.theme = e.Theme()
+		e.sel.focussed = e.focused
 		e.sel.Refresh()
 	}
 	e.BaseWidget.Refresh()
