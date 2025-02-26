@@ -762,7 +762,7 @@ func (l *listLayout) updateList(newOnly bool) {
 			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 		}
 
-		// a full refresh means drain the pool of excess old items as well
+		// a full refresh may change theme, we should drain the pool of unused items instead of refreshing them.
 		for l.itemPool.Get() != nil {
 		}
 	}
