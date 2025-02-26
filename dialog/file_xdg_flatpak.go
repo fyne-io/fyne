@@ -1,8 +1,10 @@
-//go:build flatpak && !windows && !android && !ios && !wasm && !js
+//go:build !flatpak && !windows && !android && !ios && !wasm && !js
 
 package dialog
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/internal/build"
@@ -72,10 +74,10 @@ func fileOpenOSOverride(d *FileDialog) bool {
 		Directory:   folder,
 		AcceptLabel: d.confirmText,
 	}
-
 	if d.startingLocation != nil {
 		options.CurrentFolder = d.startingLocation.Path()
 	}
+	options.Filters, options.CurrentFilter = convertFilterForPortal(d.filter)
 
 	windowHandle := windowHandleForPortal(d.parent)
 
@@ -104,6 +106,7 @@ func fileSaveOSOverride(d *FileDialog) bool {
 	if d.startingLocation != nil {
 		options.CurrentFolder = d.startingLocation.Path()
 	}
+	options.Filters, options.CurrentFilter = convertFilterForPortal(d.filter)
 
 	callback := d.callback.(func(fyne.URIWriteCloser, error))
 	windowHandle := windowHandleForPortal(d.parent)
@@ -129,4 +132,41 @@ func windowHandleForPortal(window fyne.Window) string {
 
 	// TODO: We need to get the Wayland handle from the xdg_foreign protocol and convert to string on the form "wayland:{id}".
 	return windowHandle
+}
+
+func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.Filter, current *filechooser.Filter) {
+	if fyneFilter == nil {
+		return nil, nil
+	}
+
+	out := &filechooser.Filter{Name: lang.L("Filter")}
+
+	if filter, ok := fyneFilter.(*storage.ExtensionFileFilter); ok {
+		out.Rules = make([]filechooser.Rule, 0, 2*len(filter.Extensions))
+		for _, ext := range filter.Extensions {
+			lowercase := filechooser.Rule{
+				Type:    filechooser.GlobPattern,
+				Pattern: "*" + strings.ToLower(ext),
+			}
+			uppercase := filechooser.Rule{
+				Type:    filechooser.GlobPattern,
+				Pattern: "*" + strings.ToUpper(ext),
+			}
+			out.Rules = append(out.Rules, lowercase, uppercase)
+		}
+		return []*filechooser.Filter{out}, out
+	}
+
+	if filter, ok := fyneFilter.(*storage.MimeTypeFileFilter); ok {
+		out.Rules = make([]filechooser.Rule, len(filter.MimeTypes))
+		for i, mime := range filter.MimeTypes {
+			out.Rules[i] = filechooser.Rule{
+				Type:    filechooser.MIMEType,
+				Pattern: mime,
+			}
+		}
+		return []*filechooser.Filter{out}, out
+	}
+
+	return nil, nil
 }
