@@ -27,9 +27,6 @@ type selectable struct {
 	provider *RichText
 	theme    fyne.Theme
 
-	// TODO maybe render?
-	selections []fyne.CanvasObject
-
 	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
 	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
 	doubleTappedAtUnixMillis int64
@@ -301,6 +298,8 @@ func (s *selectable) updateMousePointer(p fyne.Position) {
 
 type selectableRenderer struct {
 	sel *selectable
+
+	selections []fyne.CanvasObject
 }
 
 func (r *selectableRenderer) Destroy() {
@@ -314,12 +313,12 @@ func (r *selectableRenderer) MinSize() fyne.Size {
 }
 
 func (r *selectableRenderer) Objects() []fyne.CanvasObject {
-	return r.sel.selections
+	return r.selections
 }
 
 func (r *selectableRenderer) Refresh() {
 	r.buildSelection()
-	selections := r.sel.selections
+	selections := r.selections
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	selectionColor := r.sel.theme.Color(theme.ColorNameSelection, v)
@@ -357,7 +356,7 @@ func (r *selectableRenderer) buildSelection() {
 	}
 
 	if selectRow == -1 || (cursorRow == selectRow && cursorCol == selectCol) {
-		r.sel.selections = r.sel.selections[:0]
+		r.selections = r.selections[:0]
 		return
 	}
 
@@ -391,15 +390,15 @@ func (r *selectableRenderer) buildSelection() {
 	rowCount := selectEndRow - selectStartRow + 1
 
 	// trim r.selection to remove unwanted old rectangles
-	if len(r.sel.selections) > rowCount {
-		r.sel.selections = r.sel.selections[:rowCount]
+	if len(r.selections) > rowCount {
+		r.selections = r.selections[:rowCount]
 	}
 
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
-		if len(r.sel.selections) <= i {
+		if len(r.selections) <= i {
 			box := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
-			r.sel.selections = append(r.sel.selections, box)
+			r.selections = append(r.selections, box)
 		}
 
 		// determine starting/ending columns for this rectangle
@@ -417,8 +416,8 @@ func (r *selectableRenderer) buildSelection() {
 		x2, _ := getCoordinates(endCol, row)
 
 		// resize and reposition each rectangle
-		r.sel.selections[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-		r.sel.selections[i].Move(fyne.NewPos(x1-1, y1))
+		r.selections[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
+		r.selections[i].Move(fyne.NewPos(x1-1, y1))
 	}
 }
 
