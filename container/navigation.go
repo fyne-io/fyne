@@ -21,7 +21,7 @@ type Navigation struct {
 	Label *widget.Label
 
 	level  int
-	stack  *fyne.Container
+	stack  fyne.Container
 	titles []string
 }
 
@@ -47,23 +47,12 @@ func NewNavigation(root fyne.CanvasObject) *Navigation {
 //
 // Since: 2.6
 func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
-	label := widget.NewLabelWithStyle(s, fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	objs := []fyne.CanvasObject{}
-	titles := []string{}
-	if root != nil {
-		objs = append(objs, root)
-		titles = append(titles, s)
-	}
-
 	nav := &Navigation{
-		Root:   root,
-		Title:  s,
-		Label:  label,
-		level:  len(objs),
-		stack:  NewStack(objs...),
-		titles: titles,
+		Root:  root,
+		Title: s,
+		Label: widget.NewLabelWithStyle(s, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 	}
-	nav.ExtendBaseWidget(nav)
+	nav.setup()
 	nav.Back = widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() { _ = nav.Pop() })
 	nav.Back.Disable()
 	nav.Next = widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() { _ = nav.Forward() })
@@ -99,7 +88,9 @@ func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
 	}
 	nav.titles = append(nav.titles[:nav.level], s)
 	nav.level++
-	nav.Label.SetText(s)
+	if nav.Label != nil {
+		nav.Label.SetText(s)
+	}
 	if nav.Next != nil {
 		nav.Next.Disable()
 	}
@@ -174,7 +165,32 @@ func (nav *Navigation) SetTitle(s string) {
 	nav.Label.SetText(s)
 }
 
+func (nav *Navigation) setup() {
+	objs := []fyne.CanvasObject{}
+	titles := []string{}
+	if nav.Root != nil {
+		objs = append(objs, nav.Root)
+		titles = append(titles, nav.Title)
+	}
+	nav.level = len(objs)
+	nav.stack.Layout = layout.NewStackLayout()
+	nav.stack.Objects = objs
+	nav.titles = titles
+	nav.ExtendBaseWidget(nav)
+}
+
 func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
-	control := NewStack(NewHBox(nav.Back, layout.NewSpacer(), nav.Next), nav.Label)
-	return widget.NewSimpleRenderer(NewBorder(control, nil, nil, nil, nav.stack))
+	nav.setup()
+	box := []fyne.CanvasObject{}
+	if nav.Back != nil {
+		box = append(box, nav.Back)
+	}
+	if nav.Next != nil {
+		box = append(box, layout.NewSpacer(), nav.Next)
+	}
+	control := NewStack(NewHBox(box...))
+	if nav.Label != nil {
+		control.Objects = append(control.Objects, nav.Label)
+	}
+	return widget.NewSimpleRenderer(NewBorder(control, nil, nil, nil, &nav.stack))
 }

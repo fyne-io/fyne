@@ -3,6 +3,7 @@ package container
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -90,4 +91,40 @@ func TestNavigation_Empty(t *testing.T) {
 	assert.Nil(t, nav.Pop())
 
 	assert.Equal(t, "Title", nav.Label.Text)
+}
+
+func TestNavigation_WithoutConstructor(t *testing.T) {
+	nav := &Navigation{Title: "Nav Test"}
+
+	assert.Equal(t, 0, len(nav.stack.Objects))
+	assert.Equal(t, 0, len(nav.titles))
+
+	assert.Nil(t, nav.Pop())
+
+	assert.Nil(t, nav.Back)
+	assert.Nil(t, nav.Next)
+	assert.Nil(t, nav.Label)
+	assert.Equal(t, "Nav Test", nav.Title)
+}
+
+func TestNavigation_StructWithRootAndTitle(t *testing.T) {
+	nav := &Navigation{
+		Title: "Nav Test",
+		Root:  widget.NewLabel("Something"),
+	}
+
+	assert.Equal(t, 0, len(nav.stack.Objects))
+	assert.Equal(t, 0, len(nav.titles))
+
+	_ = test.TempWidgetRenderer(t, nav)
+
+	assert.Equal(t, 1, len(nav.stack.Objects))
+	assert.Equal(t, 1, len(nav.titles))
+
+	assert.Nil(t, nav.Pop())
+
+	assert.Nil(t, nav.Back)
+	assert.Nil(t, nav.Next)
+	assert.Nil(t, nav.Label)
+	assert.Equal(t, "Nav Test", nav.Title)
 }
