@@ -68,10 +68,8 @@ func saveFile(parentWindowHandle string, options *filechooser.SaveFileOptions) (
 }
 
 func fileOpenOSOverride(d *FileDialog) bool {
-	folderCallback, folder := d.callback.(func(fyne.ListableURI, error))
-	fileCallback, _ := d.callback.(func(fyne.URIReadCloser, error))
 	options := &filechooser.OpenFileOptions{
-		Directory:   folder,
+		Directory:   d.isDirectory(),
 		AcceptLabel: d.confirmText,
 	}
 	if d.startingLocation != nil {
@@ -82,14 +80,16 @@ func fileOpenOSOverride(d *FileDialog) bool {
 	windowHandle := windowHandleForPortal(d.parent)
 
 	go func() {
-		if folder {
+		if options.Directory {
 			folder, err := openFolder(windowHandle, options)
 			fyne.Do(func() {
+				folderCallback := d.callback.(func(fyne.ListableURI, error))
 				folderCallback(folder, err)
 			})
 		} else {
 			file, err := openFile(windowHandle, options)
 			fyne.Do(func() {
+				fileCallback := d.callback.(func(fyne.URIReadCloser, error))
 				fileCallback(file, err)
 			})
 		}
@@ -135,7 +135,7 @@ func windowHandleForPortal(window fyne.Window) string {
 }
 
 func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.Filter, current *filechooser.Filter) {
-	if fyneFilter == nil {
+	if fyneFilter == nil || fyneFilter == folderFilter {
 		return nil, nil
 	}
 
