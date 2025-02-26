@@ -20,8 +20,8 @@ type selectable struct {
 	// position may occur before or after the select start position in the text.
 	selectRow, selectColumn int
 
-	selecting, password bool
-	style               fyne.TextStyle
+	focussed, selecting, password bool
+	style                         fyne.TextStyle
 
 	provider *RichText
 	theme    fyne.Theme
@@ -81,11 +81,13 @@ func (s *selectable) Dragged(d *fyne.DragEvent) {
 }
 
 func (s *selectable) FocusGained() {
-	// no difference visually
+	s.focussed = true
+	s.Refresh()
 }
 
 func (s *selectable) FocusLost() {
-	// no difference visually
+	s.focussed = false
+	s.Refresh()
 }
 
 func (s *selectable) MouseDown(m *desktop.MouseEvent) {
@@ -126,6 +128,7 @@ func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 	if start == -1 && s.selecting {
 		s.selecting = false
 	}
+	s.Refresh()
 }
 
 // SelectedText returns the text currently selected in this Entry.
@@ -141,6 +144,11 @@ func (s *selectable) SelectedText() string {
 	}
 	r := ([]rune)(s.provider.String())
 	return string(r[start:stop])
+}
+
+func (s *selectable) Tapped(*fyne.PointEvent) {
+	s.selecting = false
+	s.Refresh()
 }
 
 func (s *selectable) TypedRune(rune) {
@@ -271,7 +279,6 @@ func (r *selectableRenderer) Objects() []fyne.CanvasObject {
 
 func (r *selectableRenderer) Refresh() {
 	r.buildSelection()
-
 	selections := r.sel.selections
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
@@ -279,6 +286,12 @@ func (r *selectableRenderer) Refresh() {
 	for _, selection := range selections {
 		rect := selection.(*canvas.Rectangle)
 		rect.FillColor = selectionColor
+
+		if r.sel.focussed {
+			rect.Show()
+		} else {
+			rect.Hide()
+		}
 	}
 
 	canvas.Refresh(r.sel)
