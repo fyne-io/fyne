@@ -6,50 +6,49 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/storage"
 
 	"github.com/rymdport/portal"
 	"github.com/rymdport/portal/filechooser"
 )
 
-func openFolder(parentWindowHandle string, options *filechooser.OpenFileOptions) (fyne.ListableURI, error) {
-	uris, err := filechooser.OpenFile(parentWindowHandle, "Open Folder", options)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(uris) == 0 {
-		return nil, nil
-	}
-
-	uri, err := storage.ParseURI(uris[0])
-	if err != nil {
-		return nil, err
-	}
-
-	return storage.ListerForURI(uri)
-}
-
 func openFile(parentWindowHandle string, options *filechooser.OpenFileOptions) (fyne.URIReadCloser, error) {
-	uris, err := filechooser.OpenFile(parentWindowHandle, "Open File", options)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(uris) == 0 {
-		return nil, nil
-	}
-
-	uri, err := storage.ParseURI(uris[0])
-	if err != nil {
+	title := lang.L("Open") + " " + lang.L("File")
+	uri, err := open(parentWindowHandle, title, options)
+	if err != nil || uri == nil {
 		return nil, err
 	}
 
 	return storage.Reader(uri)
 }
 
+func openFolder(parentWindowHandle string, options *filechooser.OpenFileOptions) (fyne.ListableURI, error) {
+	title := lang.L("Open") + " " + lang.L("Folder")
+	uri, err := open(parentWindowHandle, title, options)
+	if err != nil || uri == nil {
+		return nil, err
+	}
+
+	return storage.ListerForURI(uri)
+}
+
+func open(parentWindowHandle, title string, options *filechooser.OpenFileOptions) (fyne.URI, error) {
+	uris, err := filechooser.OpenFile(parentWindowHandle, title, options)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(uris) == 0 {
+		return nil, nil
+	}
+
+	return storage.ParseURI(uris[0])
+}
+
 func saveFile(parentWindowHandle string, options *filechooser.SaveFileOptions) (fyne.URIWriteCloser, error) {
-	uris, err := filechooser.SaveFile(parentWindowHandle, "Save File", options)
+	title := lang.L("Save") + " " + lang.L("File")
+	uris, err := filechooser.SaveFile(parentWindowHandle, title, options)
 	if err != nil {
 		return nil, err
 	}
@@ -80,21 +79,19 @@ func fileOpenOSOverride(d *FileDialog) bool {
 
 	windowHandle := windowHandleForPortal(d.parent)
 
-	if folder {
-		go func() {
+	go func() {
+		if folder {
 			folder, err := openFolder(windowHandle, options)
-			fyne.DoAndWait(func() {
+			fyne.Do(func() {
 				folderCallback(folder, err)
 			})
-		}()
-	} else {
-		go func() {
+		} else {
 			file, err := openFile(windowHandle, options)
-			fyne.DoAndWait(func() {
+			fyne.Do(func() {
 				fileCallback(file, err)
 			})
-		}()
-	}
+		}
+	}()
 
 	return true
 }
