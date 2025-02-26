@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
@@ -20,8 +21,8 @@ type selectable struct {
 	// position may occur before or after the select start position in the text.
 	selectRow, selectColumn int
 
-	focussed, selecting, password bool
-	style                         fyne.TextStyle
+	focussed, selecting, selectEnded, password bool
+	style                                      fyne.TextStyle
 
 	provider *RichText
 	theme    fyne.Theme
@@ -42,8 +43,9 @@ func (s *selectable) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
-func (s *selectable) DoubleTapped(_ *fyne.PointEvent) {
+func (s *selectable) DoubleTapped(p *fyne.PointEvent) {
 	s.doubleTappedAtUnixMillis = time.Now().UnixMilli()
+	s.updateMousePointer(p.Position)
 	row := s.provider.row(s.cursorRow)
 	start, end := getTextWhitespaceRegion(row, s.cursorColumn, false)
 	if start == -1 || end == -1 {
@@ -55,6 +57,10 @@ func (s *selectable) DoubleTapped(_ *fyne.PointEvent) {
 	s.cursorColumn = end
 
 	s.selecting = true
+	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
+		c.Focus(s)
+	}
+
 	s.Refresh()
 }
 
@@ -67,13 +73,25 @@ func (s *selectable) DragEnd() {
 	if shouldRefresh {
 		s.Refresh()
 	}
+	s.selectEnded = true
 }
 
 func (s *selectable) Dragged(d *fyne.DragEvent) {
-	if !s.selecting {
+	s.dragged(d, true)
+}
+
+func (s *selectable) dragged(d *fyne.DragEvent, focus bool) {
+	if !s.selecting || s.selectEnded {
+		s.selectEnded = false
+		s.updateMousePointer(d.Position)
+
 		startPos := d.Position.Subtract(d.Dragged)
 		s.selectRow, s.selectColumn = s.getRowCol(startPos)
 		s.selecting = true
+
+		if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil && focus {
+			c.Focus(s)
+		}
 	}
 
 	s.updateMousePointer(d.Position)
@@ -92,40 +110,24 @@ func (s *selectable) FocusLost() {
 
 func (s *selectable) MouseDown(m *desktop.MouseEvent) {
 	if isTripleTap(s.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
-		s.selectCurrentRow()
+		s.selectCurrentRow(false)
 		return
 	}
-	if !fyne.CurrentDevice().IsMobile() {
-		if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
-			c.Focus(s) // ready for copy shortcut
-		}
+	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
+		c.Focus(s) // ready for copy shortcut
 	}
 	if s.selecting && m.Button == desktop.MouseButtonPrimary {
 		s.selecting = false
-	}
-
-	if m.Button == desktop.MouseButtonPrimary {
-		s.updateMousePointer(m.Position)
 	}
 }
 
 func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 	if ev.Button == desktop.MouseButtonSecondary {
-		c := fyne.CurrentApp().Driver().CanvasForObject(s)
-		if c == nil {
-			return
-		}
-
-		m := fyne.NewMenu("",
-			fyne.NewMenuItem(lang.L("Copy"), func() {
-				fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
-			}))
-		ShowPopUpMenuAtPosition(m, c, ev.AbsolutePosition)
 		return
 	}
 
 	start, _ := s.selection()
-	if start == -1 && s.selecting {
+	if (start == -1 || (s.selectRow == s.cursorRow && s.selectColumn == s.cursorColumn)) && s.selecting {
 		s.selecting = false
 	}
 	s.Refresh()
@@ -147,8 +149,43 @@ func (s *selectable) SelectedText() string {
 }
 
 func (s *selectable) Tapped(*fyne.PointEvent) {
+	if !fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
+	if s.doubleTappedAtUnixMillis != 0 {
+		s.doubleTappedAtUnixMillis = 0
+		return // was a triple (TappedDouble plus Tapped)
+	}
 	s.selecting = false
 	s.Refresh()
+}
+
+func (s *selectable) TappedSecondary(ev *fyne.PointEvent) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(s)
+	if c == nil {
+		return
+	}
+
+	m := fyne.NewMenu("",
+		fyne.NewMenuItem(lang.L("Copy"), func() {
+			fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
+		}))
+	ShowPopUpMenuAtPosition(m, c, ev.AbsolutePosition)
+}
+
+func (s *selectable) TouchCancel(m *mobile.TouchEvent) {
+	s.TouchUp(m)
+}
+
+func (s *selectable) TouchDown(m *mobile.TouchEvent) {
+	if isTripleTap(s.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
+		s.selectCurrentRow(true)
+		return
+	}
+}
+
+func (s *selectable) TouchUp(*mobile.TouchEvent) {
 }
 
 func (s *selectable) TypedRune(rune) {
@@ -203,7 +240,10 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 }
 
 // Selects the row where the cursorColumn is currently positioned
-func (s *selectable) selectCurrentRow() {
+func (s *selectable) selectCurrentRow(focus bool) {
+	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil && focus {
+		c.Focus(s)
+	}
 	provider := s.provider
 	s.selectRow = s.cursorRow
 	s.selectColumn = 0

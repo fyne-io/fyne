@@ -255,7 +255,7 @@ func (e *Entry) DragEnd() {
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.Dragged(d)
+	e.sel.dragged(d, false)
 	e.updateMousePointer(d.Position, false)
 }
 
@@ -373,7 +373,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.syncSelectable()
 
 	if isTripleTap(e.sel.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
-		e.sel.selectCurrentRow()
+		e.sel.selectCurrentRow(false)
 		e.CursorColumn = e.sel.cursorColumn
 		e.Refresh()
 		return
@@ -576,7 +576,7 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 		e.requestFocus()
 	}
 	if isTripleTap(e.sel.doubleTappedAtUnixMillis, now) {
-		e.sel.selectCurrentRow()
+		e.sel.selectCurrentRow(false)
 		e.CursorColumn = e.sel.cursorColumn
 		e.Refresh()
 		return
