@@ -251,6 +251,13 @@ func (c *glCanvas) markAlive(visibleOnly bool) {
 	mark := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
 		_ = cache.GetCanvasForObject(obj)
+
+		// Only CanvasForObject cache needs to be kept alive for invisible objects.
+		// Others may be allowed to expire.
+		if !obj.Visible() {
+			return
+		}
+
 		switch obj := obj.(type) {
 		case *canvas.LinearGradient, *canvas.RadialGradient, *canvas.Image, *canvas.Raster:
 			// these object types may have a cached texture, mark it alive if any
