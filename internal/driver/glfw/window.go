@@ -136,7 +136,11 @@ func (w *window) Show() {
 			return
 		}
 
-		w.createLock.Do(w.create)
+		if !w.created {
+			w.create()
+			w.created = true
+		}
+
 		if w.view() == nil {
 			return
 		}

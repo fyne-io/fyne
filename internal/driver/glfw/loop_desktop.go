@@ -8,8 +8,10 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+var glfwInited bool
+
 func (d *gLDriver) initGLFW() {
-	initOnce.Do(func() {
+	if !glfwInited {
 		err := glfw.Init()
 		if err != nil {
 			fyne.LogError("failed to initialise GLFW", err)
@@ -17,7 +19,9 @@ func (d *gLDriver) initGLFW() {
 		}
 
 		initCursors()
-	})
+		glfwInited = true
+	}
+
 }
 
 func (d *gLDriver) pollEvents() {

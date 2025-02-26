@@ -2,7 +2,6 @@ package glfw
 
 import (
 	"runtime"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -23,7 +22,6 @@ type funcData struct {
 // channel for queuing functions on the main thread
 var funcQueue = async.NewUnboundedChan[funcData]()
 var running atomic.Bool
-var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
 func init() {
