@@ -266,7 +266,7 @@ func (t *Table) Select(id TableCellID) {
 	}
 
 	rows, cols := t.Length()
-	if id.Row >= rows || id.Col >= cols {
+	if id.Row < 0 || id.Row >= rows || id.Col < 0 || id.Col >= cols {
 		return
 	}
 
@@ -277,6 +277,7 @@ func (t *Table) Select(id TableCellID) {
 		f(*t.selectedCell)
 	}
 	t.selectedCell = &id
+	t.currentFocus = id
 
 	t.ScrollTo(id)
 
@@ -589,11 +590,11 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 
 	col := t.columnAt(e.Position)
-	if col == noCellMatch {
+	if col == noCellMatch || col < 0 {
 		return // out of col range
 	}
 	row := t.rowAt(e.Position)
-	if row == noCellMatch {
+	if row == noCellMatch || row < 0 {
 		return // out of row range
 	}
 	t.Select(TableCellID{row, col})
@@ -604,7 +605,6 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		if canvas != nil {
 			canvas.Focus(t)
 		}
-		t.currentFocus = TableCellID{row, col}
 		t.RefreshItem(t.currentFocus)
 	}
 }
