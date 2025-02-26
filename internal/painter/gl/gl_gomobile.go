@@ -57,7 +57,7 @@ type (
 var compiled []Program // avoid multiple compilations with the re-used mobile GUI context
 var noBuffer = Buffer{}
 var noShader = Shader{}
-var textureFilterToGL = []int32{gl.Linear, gl.Nearest}
+var textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
 
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
