@@ -111,7 +111,7 @@ func (l *Label) Refresh() {
 //
 // Since: 2.6
 func (l *Label) SelectedText() string {
-	if !l.Selectable {
+	if !l.Selectable || l.selection == nil {
 		return ""
 	}
 
@@ -206,6 +206,10 @@ func (r *labelRenderer) Refresh() {
 	r.l.provider.Refresh()
 
 	sel := r.l.selection
+	if !r.l.Selectable || sel == nil {
+		return
+	}
+
 	sel.style = r.l.TextStyle
 	sel.theme = r.l.Theme()
 	sel.Refresh()
