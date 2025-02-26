@@ -18,6 +18,8 @@ func (d *gLDriver) initGLFW() {
 			fyne.LogError("failed to initialise GLFW", err)
 			return
 		}
+
+		glfwInited = true
 	}
 }
 

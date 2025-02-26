@@ -21,7 +21,6 @@ func (d *gLDriver) initGLFW() {
 		initCursors()
 		glfwInited = true
 	}
-
 }
 
 func (d *gLDriver) pollEvents() {
