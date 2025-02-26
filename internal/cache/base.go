@@ -78,43 +78,6 @@ func CleanCanvas(canvas fyne.Canvas) {
 	})
 }
 
-// CleanCanvases runs cache clean tasks for canvases that are being refreshed. This is called on paint events.
-func CleanCanvases(refreshingCanvases []fyne.Canvas) {
-	now := timeNow()
-	delta := now.Sub(lastClean)
-
-	if delta < 10*time.Second || delta < cleanTaskInterval {
-		return // Do not clean too fast.
-	}
-
-	destroyExpiredSvgs(now)
-	destroyExpiredFontMetrics(now)
-
-	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
-		if !cinfo.isExpired(now) || !matchesACanvas(cinfo, refreshingCanvases) {
-			return true
-		}
-
-		canvases.Delete(obj)
-
-		wid, ok := obj.(fyne.Widget)
-		if !ok {
-			return true
-		}
-
-		rinfo, ok := renderers.LoadAndDelete(wid)
-		if !ok || !rinfo.isExpired(now) {
-			return true
-		}
-
-		rinfo.renderer.Destroy()
-		overrides.Delete(wid)
-		return true
-	})
-
-	lastClean = timeNow()
-}
-
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
 	svgs.Clear()
@@ -142,19 +105,6 @@ func destroyExpiredRenderers(now time.Time) {
 		}
 		return true
 	})
-}
-
-// matchesACanvas returns true if the canvas represented by the canvasInfo object matches one of
-// the canvases passed in 'canvases', otherwise false is returned.
-func matchesACanvas(cinfo *canvasInfo, canvases []fyne.Canvas) bool {
-	canvas := cinfo.canvas
-
-	for _, obj := range canvases {
-		if obj == canvas {
-			return true
-		}
-	}
-	return false
 }
 
 type expiringCache struct {

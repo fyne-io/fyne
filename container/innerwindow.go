@@ -102,23 +102,25 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
 	off := (height - title.labelMinSize().Height) / 2
 	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
-	bar := NewBorder(nil, nil, buttons, borderIcon, barMid)
 	if w.buttonPosition() == widget.ButtonAlignTrailing {
-		buttons := NewCenter(NewHBox(min, max, close))
-		bar.Layout = layout.NewBorderLayout(nil, nil, borderIcon, buttons)
+		buttons = NewCenter(NewHBox(min, max, close))
 	}
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
+	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},
+		buttons, borderIcon, barMid)
 
 	if w.content == nil {
 		w.content = NewPadded(canvas.NewRectangle(color.Transparent))
 	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
-	return &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
+	r := &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
 		win: w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
 		corner: corner, contentBG: contentBG, icon: borderIcon}
+	r.Layout(w.Size())
+	return r
 }
 
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
@@ -218,10 +220,8 @@ func (i *innerWindowRenderer) Refresh() {
 
 	if i.win.buttonPosition() == widget.ButtonAlignTrailing {
 		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[1], i.buttons[2], i.buttons[0]}
-		i.bar.Layout = layout.NewBorderLayout(nil, nil, i.icon, i.buttonBox)
 	} else {
 		i.buttonBox.Objects[0].(*fyne.Container).Objects = []fyne.CanvasObject{i.buttons[0], i.buttons[1], i.buttons[2]}
-		i.bar.Layout = layout.NewBorderLayout(nil, nil, i.buttonBox, i.icon)
 	}
 	for _, b := range i.buttons {
 		b.setTheme(th)
@@ -248,7 +248,7 @@ func (i *innerWindowRenderer) Refresh() {
 		max.b.SetIcon(theme.WindowMaximizeIcon())
 	}
 
-	title := i.bar.Objects[0].(*fyne.Container).Objects[0].(*draggableLabel)
+	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
 	if i.win.Icon != nil {
@@ -395,4 +395,43 @@ func (b *buttonTheme) Size(n fyne.ThemeSizeName) float32 {
 	}
 
 	return b.Theme.Size(n)
+}
+
+type titleBarLayout struct {
+	win                  *InnerWindow
+	buttons, icon, title fyne.CanvasObject
+}
+
+func (t *titleBarLayout) Layout(_ []fyne.CanvasObject, s fyne.Size) {
+	buttonMinWidth := t.buttons.MinSize().Width
+	t.buttons.Resize(fyne.NewSize(buttonMinWidth, s.Height))
+	t.icon.Resize(fyne.NewSquareSize(s.Height))
+	usedWidth := buttonMinWidth
+	if t.icon.Visible() {
+		usedWidth += s.Height
+	}
+	t.title.Resize(fyne.NewSize(s.Width-usedWidth, s.Height))
+
+	if t.win.buttonPosition() == widget.ButtonAlignTrailing {
+		t.buttons.Move(fyne.NewPos(s.Width-buttonMinWidth, 0))
+		t.icon.Move(fyne.Position{})
+		if t.icon.Visible() {
+			t.title.Move(fyne.NewPos(s.Height, 0))
+		} else {
+			t.title.Move(fyne.Position{})
+		}
+	} else {
+		t.buttons.Move(fyne.NewPos(0, 0))
+		t.icon.Move(fyne.NewPos(s.Width-s.Height, 0))
+		t.title.Move(fyne.NewPos(buttonMinWidth, 0))
+	}
+}
+
+func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+	buttonMin := t.buttons.MinSize()
+	iconMin := t.icon.MinSize()
+	titleMin := t.title.MinSize() // can truncate
+
+	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
+		fyne.Max(fyne.Max(buttonMin.Height, iconMin.Height), titleMin.Height))
 }
