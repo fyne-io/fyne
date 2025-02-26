@@ -110,7 +110,7 @@ func fileSaveOSOverride(d *FileDialog) bool {
 
 	go func() {
 		file, err := saveFile(windowHandle, options)
-		fyne.DoAndWait(func() {
+		fyne.Do(func() {
 			callback(file, err)
 		})
 	}()
