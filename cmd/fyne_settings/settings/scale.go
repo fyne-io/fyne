@@ -15,7 +15,7 @@ type scaleItems struct {
 	button  *widget.Button
 }
 
-var scales = []*scaleItems{
+var scales = [...]*scaleItems{
 	{scale: 0.5, name: "Tiny"},
 	{scale: 0.8, name: "Small"},
 	{scale: 1, name: "Normal"},

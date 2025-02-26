@@ -14,7 +14,7 @@ import (
 var defaultTheme fyne.Theme
 
 // Try to keep these in sync with the existing color names at theme/color.go.
-var knownColorNames = []fyne.ThemeColorName{
+var knownColorNames = [...]fyne.ThemeColorName{
 	theme.ColorNameBackground,
 	theme.ColorNameButton,
 	theme.ColorNameDisabled,
