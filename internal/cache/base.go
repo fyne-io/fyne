@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -87,19 +86,16 @@ func Clean() {
 		destroyExpiredRenderers(now)
 		rendererCacheLastCleanSize = renderers.Len()
 		shouldCleanRenderers = false
-		log.Printf("cleaned renderers cache, new size %d", rendererCacheLastCleanSize)
 	}
 	if full || shouldCleanCanvases {
 		destroyExpiredCanvases(now)
 		canvasCacheLastCleanSize = canvases.Len()
 		shouldCleanCanvases = false
-		log.Printf("cleaned canvases cache, new size %d", canvasCacheLastCleanSize)
 	}
 	if full || shouldCleanFontSizeCache {
 		destroyExpiredFontMetrics(now)
 		fontSizeCacheLastCleanSize = fontSizeCache.Len()
 		shouldCleanFontSizeCache = false
-		log.Printf("cleaned font size cache, new size %d", fontSizeCacheLastCleanSize)
 	}
 
 	// CleanTextures should have been called for each canvas
@@ -107,12 +103,10 @@ func Clean() {
 	if full || shouldCleanTextTextures {
 		textTextureLastCleanSize = textTextures.Len()
 		shouldCleanTextTextures = false
-		log.Printf("cleaned text textures cache, new size %d", textTextureLastCleanSize)
 	}
 	if full || shouldCleanObjectTextures {
 		objectTexturesLastCleanSize = objectTextures.Len()
 		shouldCleanObjectTextures = false
-		log.Printf("cleaned object textures cache, new size %d", objectTexturesLastCleanSize)
 	}
 
 	if full {
@@ -152,7 +146,6 @@ func ResetThemeCaches() {
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
-	log.Printf("pre-clean canvases size was %d", canvases.Len())
 	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
 		if cinfo.isExpired(now) {
 			canvases.Delete(obj)
