@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 	"runtime"
 	"strings"
 	"time"
