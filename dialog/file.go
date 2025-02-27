@@ -698,6 +698,13 @@ func showFile(file *FileDialog) *fileDialog {
 	return d
 }
 
+// Dismiss instructs the dialog to close without any affirmative action.
+//
+// Since: 2.6
+func (f *FileDialog) Dismiss() {
+	f.dialog.dismiss.OnTapped()
+}
+
 // MinSize returns the size that this dialog should not shrink below
 //
 // Since: 2.1
