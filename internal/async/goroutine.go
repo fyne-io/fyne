@@ -21,7 +21,8 @@ func SetMainGoroutine() {
 
 // IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
 func IsMainGoroutine() bool {
-	return goroutineID() == mainGoroutineID.Load()
+	routineID := mainGoroutineID.Load()
+	return routineID == 0 || goroutineID() == routineID
 }
 
 // EnsureNotMain is part of our thread transition and makes sure that the passed function runs off main.
