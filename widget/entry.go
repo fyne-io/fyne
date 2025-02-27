@@ -273,8 +273,6 @@ func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
 		e.dirty = true
 		e.focused = true
-
-		log.Println("FOCUS")
 	})
 	if e.onFocusChanged != nil {
 		e.onFocusChanged(true)
