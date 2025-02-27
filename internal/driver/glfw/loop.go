@@ -96,7 +96,7 @@ func (d *gLDriver) runGL() {
 		return // Run was called twice.
 	}
 
-	d.initGLFW()
+	d.init()
 	if d.trayStart != nil {
 		d.trayStart()
 	}

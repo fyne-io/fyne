@@ -137,8 +137,8 @@ func (w *window) Show() {
 		}
 
 		if !w.created {
-			w.create()
 			w.created = true
+			w.create()
 		}
 
 		if w.view() == nil {
@@ -952,7 +952,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		title = defaultTitle
 	}
 
-	d.initGLFW()
+	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
 	ret.canvas = newCanvas()

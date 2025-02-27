@@ -30,8 +30,8 @@ var (
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
 	if !systrayRunning {
-		d.runSystray(m)
 		systrayRunning = true
+		d.runSystray(m)
 	}
 
 	d.refreshSystray(m)
