@@ -5,7 +5,11 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var canvases async.Map[fyne.CanvasObject, *canvasInfo]
+var (
+	canvases                 async.Map[fyne.CanvasObject, *canvasInfo]
+	canvasCacheLastCleanSize int
+	shouldCleanCanvases      bool
+)
 
 // GetCanvasForObject returns the canvas for the specified object.
 func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
@@ -20,16 +24,30 @@ func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 // SetCanvasForObject sets the canvas for the specified object.
 // The passed function will be called if the item was not previously attached to this canvas
 func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
-	cinfo := &canvasInfo{canvas: c}
-	cinfo.setAlive()
-
-	old, found := canvases.LoadOrStore(obj, cinfo)
-	if (!found || old.canvas != c) && setup != nil {
+	old, found := canvases.Load(obj)
+	needSetup := false
+	if found {
+		old.setAlive()
+		if old.canvas != c {
+			old.canvas = c
+			needSetup = setup != nil
+		}
+	} else {
+		needSetup = setup != nil
+		cinfo := &canvasInfo{canvas: c}
+		cinfo.setAlive()
+		canvases.Store(obj, cinfo)
+	}
+	if needSetup {
 		setup()
+	}
+
+	if canvases.Len() > 2*canvasCacheLastCleanSize {
+		shouldCleanCanvases = true
 	}
 }
 
 type canvasInfo struct {
-	expiringCache
+	frameCounterCache
 	canvas fyne.Canvas
 }
