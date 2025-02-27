@@ -15,6 +15,13 @@ type ConfirmDialog struct {
 	confirm *widget.Button
 }
 
+// Confirm instructs the dialog to close agreeing with whatever content was displayed.
+//
+// Since: 2.6
+func (d *ConfirmDialog) Confirm() {
+	d.hideWithResponse(true)
+}
+
 // SetConfirmText allows custom text to be set in the confirmation button
 func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.confirm.SetText(label)

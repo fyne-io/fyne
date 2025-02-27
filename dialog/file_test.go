@@ -743,7 +743,7 @@ func TestFileFavorites(t *testing.T) {
 		assert.True(t, ok)
 	}
 
-	test.Tap(dlg.dialog.dismiss)
+	dlg.Dismiss()
 }
 
 func TestSetFileNameBeforeShow(t *testing.T) {
