@@ -31,9 +31,6 @@ func BindPreferenceBoolList(key string, p fyne.Preferences) BoolList {
 		func(p fyne.Preferences) (func(string) []bool, func(string, []bool)) {
 			return p.BoolList, p.SetBoolList
 		},
-		func(a, b bool) bool {
-			return a == b
-		},
 	)
 }
 
@@ -56,9 +53,6 @@ func BindPreferenceFloatList(key string, p fyne.Preferences) FloatList {
 	return bindPreferenceListComparable[float64](key, p,
 		func(p fyne.Preferences) (func(string) []float64, func(string, []float64)) {
 			return p.FloatList, p.SetFloatList
-		},
-		func(a, b float64) bool {
-			return a == b
 		},
 	)
 }
@@ -83,9 +77,6 @@ func BindPreferenceIntList(key string, p fyne.Preferences) IntList {
 		func(p fyne.Preferences) (func(string) []int, func(string, []int)) {
 			return p.IntList, p.SetIntList
 		},
-		func(a, b int) bool {
-			return a == b
-		},
 	)
 }
 
@@ -108,9 +99,6 @@ func BindPreferenceStringList(key string, p fyne.Preferences) StringList {
 	return bindPreferenceListComparable[string](key, p,
 		func(p fyne.Preferences) (func(string) []string, func(string, []string)) {
 			return p.StringList, p.SetStringList
-		},
-		func(a, b string) bool {
-			return a == b
 		},
 	)
 }
@@ -235,7 +223,7 @@ func (b *prefBoundList[T]) replaceProvider(p fyne.Preferences) {
 type internalPrefs = interface{ WriteValues(func(map[string]any)) }
 
 func bindPreferenceListComparable[T bool | float64 | int | string](key string, p fyne.Preferences,
-	setLookup preferenceLookupSetter[[]T], compare func(T, T) bool) *prefBoundList[T] {
+	setLookup preferenceLookupSetter[[]T]) *prefBoundList[T] {
 	if found, ok := lookupExistingListBinding[T](key, p); ok {
 		return found
 	}
@@ -244,7 +232,7 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 	listen.replaceProvider(p)
 
 	items := listen.get(listen.key)
-	listen.boundList = *bindList(nil, compare)
+	listen.boundList = *bindList(nil, func(t1, t2 T) bool { return t1 == t2 })
 
 	listen.boundList.AddListener(NewDataListener(func() {
 		cached := *listen.val
