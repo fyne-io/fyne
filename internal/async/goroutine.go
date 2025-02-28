@@ -19,11 +19,6 @@ func SetMainGoroutine() {
 	mainGoroutineID.Store(goroutineID())
 }
 
-// IsMainGoroutine returns true if it is called from the main goroutine, false otherwise.
-func IsMainGoroutine() bool {
-	return goroutineID() == mainGoroutineID.Load()
-}
-
 // EnsureNotMain is part of our thread transition and makes sure that the passed function runs off main.
 // If the context is running on a goroutine or the transition has been disabled this will blindly run.
 // Otherwise, an error will be logged and the function will be called on a new goroutine.
@@ -77,4 +72,14 @@ func logStackTop(skip int) {
 		}
 	}
 	log.Printf("  From: %s:%d", frame.File, frame.Line)
+}
+
+func goroutineID() (id uint64) {
+	var buf [30]byte
+	runtime.Stack(buf[:], false)
+	for i := 10; buf[i] != ' '; i++ {
+		id = id*10 + uint64(buf[i]&15)
+	}
+
+	return id
 }
