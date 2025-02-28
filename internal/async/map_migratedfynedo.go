@@ -69,5 +69,7 @@ func (m *Map[K, V]) Store(key K, value V) {
 
 // Clear removes all entries from the map.
 func (m *Map[K, V]) Clear() {
-	m.m = make(map[any]V)
+	for k := range m.m {
+		delete(m.m, k)
+	}
 }
