@@ -1,0 +1,306 @@
+<canvas padded size="1500x1500">
+	<content>
+		<widget pos="4,4" size="1492x1492" type="*widget.CheckGroup">
+			<widget size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,64" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
+				<text pos="32,0" size="266x149">Test 0</text>
+			</widget>
+			<widget pos="298,0" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 1</text>
+			</widget>
+			<widget pos="596,0" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 2</text>
+			</widget>
+			<widget pos="895,0" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 3</text>
+			</widget>
+			<widget pos="1193,0" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 4</text>
+			</widget>
+			<widget pos="0,149" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+				<image pos="6,64" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
+				<text pos="32,0" size="266x149">Test 5</text>
+			</widget>
+			<widget pos="298,149" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 6</text>
+			</widget>
+			<widget pos="596,149" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 7</text>
+			</widget>
+			<widget pos="895,149" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 8</text>
+			</widget>
+			<widget pos="1193,149" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 9</text>
+			</widget>
+			<widget pos="0,298" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 10</text>
+			</widget>
+			<widget pos="298,298" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 11</text>
+			</widget>
+			<widget pos="596,298" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 12</text>
+			</widget>
+			<widget pos="895,298" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 13</text>
+			</widget>
+			<widget pos="1193,298" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 14</text>
+			</widget>
+			<widget pos="0,447" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 15</text>
+			</widget>
+			<widget pos="298,447" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 16</text>
+			</widget>
+			<widget pos="596,447" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 17</text>
+			</widget>
+			<widget pos="895,447" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 18</text>
+			</widget>
+			<widget pos="1193,447" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 19</text>
+			</widget>
+			<widget pos="0,596" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 20</text>
+			</widget>
+			<widget pos="298,596" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 21</text>
+			</widget>
+			<widget pos="596,596" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 22</text>
+			</widget>
+			<widget pos="895,596" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 23</text>
+			</widget>
+			<widget pos="1193,596" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 24</text>
+			</widget>
+			<widget pos="0,746" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 25</text>
+			</widget>
+			<widget pos="298,746" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 26</text>
+			</widget>
+			<widget pos="596,746" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 27</text>
+			</widget>
+			<widget pos="895,746" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 28</text>
+			</widget>
+			<widget pos="1193,746" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 29</text>
+			</widget>
+			<widget pos="0,895" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 30</text>
+			</widget>
+			<widget pos="298,895" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 31</text>
+			</widget>
+			<widget pos="596,895" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 32</text>
+			</widget>
+			<widget pos="895,895" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 33</text>
+			</widget>
+			<widget pos="1193,895" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 34</text>
+			</widget>
+			<widget pos="0,1044" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 35</text>
+			</widget>
+			<widget pos="298,1044" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 36</text>
+			</widget>
+			<widget pos="596,1044" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 37</text>
+			</widget>
+			<widget pos="895,1044" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 38</text>
+			</widget>
+			<widget pos="1193,1044" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 39</text>
+			</widget>
+			<widget pos="0,1193" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 40</text>
+			</widget>
+			<widget pos="298,1193" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 41</text>
+			</widget>
+			<widget pos="596,1193" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 42</text>
+			</widget>
+			<widget pos="895,1193" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 43</text>
+			</widget>
+			<widget pos="1193,1193" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 44</text>
+			</widget>
+			<widget pos="0,1342" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 45</text>
+			</widget>
+			<widget pos="298,1342" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 46</text>
+			</widget>
+			<widget pos="596,1342" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 47</text>
+			</widget>
+			<widget pos="895,1342" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 48</text>
+			</widget>
+			<widget pos="1193,1342" size="298x149" type="*widget.Check">
+				<circle pos="2,60" size="28x28"/>
+				<image pos="6,64" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+				<image pos="6,64" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+				<text pos="32,0" size="266x149">Test 49</text>
+			</widget>
+		</widget>
+	</content>
+</canvas>
