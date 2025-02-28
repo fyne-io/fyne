@@ -23,6 +23,11 @@ type Label struct {
 	// Since: 2.4
 	Importance Importance
 
+	// The theme size name for the text size of the label
+	//
+	// Since: 2.6
+	SizeName fyne.ThemeSizeName
+
 	// If set to true, Selectable indicates that this label should support select interaction
 	// to allow the text to be copied.
 	//
@@ -151,6 +156,10 @@ func (l *Label) syncSegments() {
 		color = theme.ColorNameForeground
 	}
 
+	sizeName := l.SizeName
+	if sizeName == "" {
+		sizeName = theme.SizeNameText
+	}
 	l.provider.Wrapping = l.Wrapping
 	l.provider.Truncation = l.Truncation
 	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
@@ -158,6 +167,7 @@ func (l *Label) syncSegments() {
 		ColorName: color,
 		Inline:    true,
 		TextStyle: l.TextStyle,
+		SizeName:  sizeName,
 	}
 	l.provider.Segments[0].(*TextSegment).Text = l.Text
 }
