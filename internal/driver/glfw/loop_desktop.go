@@ -24,6 +24,20 @@ func (d *gLDriver) pollEvents() {
 	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
+func (d *gLDriver) waitEvents() {
+	glfw.WaitEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
+}
+
 func (d *gLDriver) Terminate() {
 	glfw.Terminate()
+}
+
+// WakeUp tells the driver to wake up from an idle state.
+func (d *gLDriver) WakeUp() {
+	wakeUpDriver()
+}
+
+// wakeUpDriver wakes up the driver but in the case a reference to it is not easily available.
+func wakeUpDriver() {
+	glfw.PostEmptyEvent()
 }

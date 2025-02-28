@@ -390,9 +390,9 @@ func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
 	w.processMouseMoved(xpos, ypos)
 }
 
-func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	button, modifiers := convertMouseButton(btn, mods)
-	mouseAction := convertAction(action)
+func (w *window) mouseClicked(_ *glfw.Window, btn int, action int, mods int) {
+	button, modifiers := convertMouseButton(glfw.MouseButton(btn), glfw.ModifierKey(mods))
+	mouseAction := convertAction(glfw.Action(action))
 
 	w.processMouseClicked(button, mouseAction, modifiers)
 }
@@ -623,12 +623,15 @@ func convertASCII(key glfw.Key) fyne.KeyName {
 	return fyne.KeyName(rune(key))
 }
 
-func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	keyName := keyToName(key, scancode)
-	keyDesktopModifier := desktopModifier(mods)
-	w.driver.currentKeyModifiers = desktopModifierCorrected(mods, key, action)
-	keyAction := convertAction(action)
-	keyASCII := convertASCII(key)
+func (w *window) keyPressed(_ *glfw.Window, key int, scancode int, action int, mods int) {
+	k := glfw.Key(key)
+	a := glfw.Action(action)
+	m := glfw.ModifierKey(mods)
+	keyName := keyToName(k, scancode)
+	keyDesktopModifier := desktopModifier(m)
+	w.driver.currentKeyModifiers = desktopModifierCorrected(m, k, a)
+	keyAction := convertAction(a)
+	keyASCII := convertASCII(k)
 
 	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
 }
@@ -763,18 +766,39 @@ func (w *window) create() {
 
 	w.setDarkMode()
 
-	win.SetCloseCallback(w.closed)
-	win.SetPosCallback(w.moved)
+	// window size and refresh callbacks are processed
+	// synchronously since GLFW does not return from
+	// waitEvents until a resize is completed
 	win.SetSizeCallback(w.resized)
 	win.SetFramebufferSizeCallback(w.frameSized)
 	win.SetRefreshCallback(w.refresh)
 	win.SetContentScaleCallback(w.scaled)
-	win.SetCursorPosCallback(w.mouseMoved)
-	win.SetMouseButtonCallback(w.mouseClicked)
-	win.SetScrollCallback(w.mouseScrolled)
-	win.SetKeyCallback(w.keyPressed)
-	win.SetCharCallback(w.charInput)
-	win.SetFocusCallback(w.focused)
+
+	// rest of callbacks queue events to be handled in main loop
+	win.SetCloseCallback(func(_ *glfw.Window) {
+		eventQueue.Push(newCloseEvent(w))
+	})
+	win.SetPosCallback(func(_ *glfw.Window, xpos, ypos int) {
+		eventQueue.Push(newMoveEvent(w, xpos, ypos))
+	})
+	win.SetCursorPosCallback(func(_ *glfw.Window, xpos, ypos float64) {
+		eventQueue.Push(newMouseMoveEvent(w, xpos, ypos))
+	})
+	win.SetMouseButtonCallback(func(_ *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+		eventQueue.Push(newMouseClickEvent(w, int(button), int(action), int(mods)))
+	})
+	win.SetScrollCallback(func(_ *glfw.Window, xoff, yoff float64) {
+		eventQueue.Push(newMouseScrollEvent(w, xoff, yoff))
+	})
+	win.SetKeyCallback(func(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+		eventQueue.Push(newKeyPressEvent(w, int(key), scancode, int(action), int(mods)))
+	})
+	win.SetCharCallback(func(_ *glfw.Window, char rune) {
+		eventQueue.Push(newCharInputEvent(w, char))
+	})
+	win.SetFocusCallback(func(_ *glfw.Window, focused bool) {
+		eventQueue.Push(newFocusEvent(w, focused))
+	})
 
 	w.canvas.detectedScale = w.detectScale()
 	w.canvas.scale = w.calculatedScale()

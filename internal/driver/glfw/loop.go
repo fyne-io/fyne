@@ -15,13 +15,8 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
-type funcData struct {
-	f    func()
-	done chan struct{} // Zero allocation signalling channel
-}
-
-// channel for queuing functions on the main thread
-var funcQueue = async.NewUnboundedChan[funcData]()
+// for queuing functions on the main thread
+var funcQueue = newGlfwFuncQueue()
 var running atomic.Bool
 var initOnce = &sync.Once{}
 
@@ -45,15 +40,7 @@ func runOnMainWithWait(f func(), wait bool) {
 		return
 	}
 
-	if wait {
-		done := common.DonePool.Get()
-		defer common.DonePool.Put(done)
-
-		funcQueue.In() <- funcData{f: f, done: done}
-		<-done
-	} else {
-		funcQueue.In() <- funcData{f: f}
-	}
+	funcQueue.Push(f, wait)
 }
 
 func (d *gLDriver) drawSingleFrame() {
@@ -120,53 +107,13 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	eventTick := time.NewTicker(time.Second / 60)
 	for {
-		select {
-		case <-d.done:
-			eventTick.Stop()
-			d.Terminate()
-			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
-			if f := l.OnStopped(); f != nil {
-				l.QueueEvent(f)
-			}
+		// idle until events (or d.wakeUp()) received
+		d.waitEvents()
+
+		// run active loop until we are exiting, or idle again
+		if exit := d.runActiveLoop(); exit {
 			return
-		case f := <-funcQueue.Out():
-			f.f()
-			if f.done != nil {
-				f.done <- struct{}{}
-			}
-		case <-eventTick.C:
-			d.pollEvents()
-			for i := 0; i < len(d.windows); i++ {
-				w := d.windows[i].(*window)
-				if w.viewport == nil {
-					continue
-				}
-
-				if w.viewport.ShouldClose() {
-					d.destroyWindow(w, i)
-					i-- // Trailing windows are moved forward one step.
-					continue
-				}
-
-				expand := w.shouldExpand
-				fullScreen := w.fullScreen
-
-				if expand && !fullScreen {
-					w.fitContent()
-					shouldExpand := w.shouldExpand
-					w.shouldExpand = false
-					view := w.viewport
-
-					if shouldExpand && runtime.GOOS != "js" {
-						view.SetSize(w.shouldWidth, w.shouldHeight)
-					}
-				}
-			}
-
-			d.animation.TickAnimations()
-			d.drawSingleFrame()
 		}
 	}
 }
@@ -185,6 +132,92 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	if len(d.windows) == 0 {
 		d.Quit()
 	}
+}
+
+// runs a loop that invokes runSingleFrame at 60 fps until there are no more
+// animations or events. uses pollEvents to check for events every frame.
+func (d *gLDriver) runActiveLoop() bool {
+	t := time.NewTicker(time.Second / 60)
+	defer t.Stop()
+	for range t.C {
+		d.pollEvents()
+		exit, idle := d.runSingleFrame()
+		if exit {
+			return exit
+		} else if idle {
+			break
+		}
+	}
+	return false
+}
+
+func (d *gLDriver) runSingleFrame() (exit, idle bool) {
+	// check if we're shutting down
+	if !running.Load() {
+		d.Terminate()
+		l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+		if f := l.OnStopped(); f != nil {
+			l.QueueEvent(f)
+		}
+		return true, false
+	}
+
+	// process received glfw events
+	noEvents := true
+	for {
+		evt, ok := eventQueue.Pull()
+		if !ok {
+			break
+		}
+		noEvents = false
+		processEvent(evt)
+	}
+
+	// run funcs queued to main
+	var buf [16]funcData
+	funcsDone := false
+	for !funcsDone {
+		n := funcQueue.PullN(buf[:])
+		for i := 0; i < n; i++ {
+			buf[i].f()
+			if buf[i].done != nil {
+				buf[i].done <- struct{}{}
+			}
+			buf[i] = funcData{}
+		}
+		funcsDone = n == 0
+	}
+
+	for i := 0; i < len(d.windows); i++ {
+		w := d.windows[i].(*window)
+		if w.viewport == nil {
+			continue
+		}
+
+		if w.viewport.ShouldClose() {
+			d.destroyWindow(w, i)
+			i-- // Trailing windows are moved forward one position.
+			continue
+		}
+
+		expand := w.shouldExpand
+		fullScreen := w.fullScreen
+
+		if expand && !fullScreen {
+			w.fitContent()
+			shouldExpand := w.shouldExpand
+			w.shouldExpand = false
+			view := w.viewport
+
+			if shouldExpand && runtime.GOOS != "js" {
+				view.SetSize(w.shouldWidth, w.shouldHeight)
+			}
+		}
+	}
+	animationsDone := d.animation.TickAnimations()
+	d.drawSingleFrame()
+
+	return false, animationsDone && noEvents
 }
 
 func (d *gLDriver) repaintWindow(w *window) bool {

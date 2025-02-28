@@ -11,7 +11,7 @@ import (
 type Runner struct {
 	// animationMutex synchronizes access to `animations` and `pendingAnimations`
 	// between the runner goroutine and calls to Start and Stop
-	animationMutex sync.RWMutex
+	animationMutex sync.Mutex
 
 	// animations is the list of animations that are being ticked in the current frame
 	animations []*anim
@@ -33,7 +33,7 @@ type Runner struct {
 // Start will register the passed application and initiate its ticking.
 func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
-	defer r.animationMutex.Unlock()
+	hadAnimations := len(r.pendingAnimations) > 0 || len(r.animations) > 0
 
 	if !r.runnerStarted {
 		r.runnerStarted = true
@@ -51,6 +51,21 @@ func (r *Runner) Start(a *fyne.Animation) {
 		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
+	r.animationMutex.Unlock()
+
+	if !hadAnimations {
+		// wake up main thread if needed to begin running animations
+		if drv, ok := fyne.CurrentApp().Driver().(interface{ WakeUp() }); ok {
+			drv.WakeUp()
+		}
+	}
+}
+
+func (r *Runner) HasAnimations() bool {
+	r.animationMutex.Lock()
+	defer r.animationMutex.Unlock()
+
+	return len(r.pendingAnimations) > 0 || len(r.animations) > 0
 }
 
 // Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
@@ -86,18 +101,19 @@ func (r *Runner) Stop(a *fyne.Animation) {
 
 // TickAnimations progresses all running animations by one tick.
 // This will be called from the driver to update objects immediately before next paint.
-func (r *Runner) TickAnimations() {
+func (r *Runner) TickAnimations() (done bool) {
 	if !r.runnerStarted {
-		return
+		return true
 	}
 
-	done := r.runOneFrame()
+	done = r.runOneFrame()
 
 	if done {
 		r.animationMutex.Lock()
 		r.runnerStarted = false
 		r.animationMutex.Unlock()
 	}
+	return done
 }
 
 func (r *Runner) runOneFrame() (done bool) {
