@@ -27,6 +27,7 @@ type app struct {
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
 	lifecycle    intapp.Lifecycle
+	clip         fyne.Clipboard
 	cloud        fyne.CloudProvider
 
 	// user action variables
@@ -64,7 +65,7 @@ func (a *app) Quit() {
 }
 
 func (a *app) Clipboard() fyne.Clipboard {
-	return NewClipboard()
+	return a.clip
 }
 
 func (a *app) UniqueID() string {
@@ -166,7 +167,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
-	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver)}
+	test := &app{settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard()}
 	settings.app = test
 	root, _ := store.docRootURI()
 	store.Docs = &internal.Docs{RootDocURI: root}
