@@ -22,6 +22,7 @@ type selectable struct {
 	selectRow, selectColumn int
 
 	focussed, selecting, selectEnded, password bool
+	sizeName                                   fyne.ThemeSizeName
 	style                                      fyne.TextStyle
 
 	provider *RichText
@@ -202,7 +203,7 @@ func (s *selectable) TypedShortcut(sh fyne.Shortcut) {
 
 func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
 	th := s.theme
-	textSize := th.Size(theme.SizeNameText)
+	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	for i := 0; i < len(text); i++ {
@@ -218,7 +219,7 @@ func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
 
 func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 	th := s.theme
-	textSize := th.Size(theme.SizeNameText)
+	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	rowHeight := s.provider.charMinSize(false, fyne.TextStyle{}, textSize).Height // TODO (e.Password, e.TextStyle, textSize).Height
@@ -296,6 +297,13 @@ func (s *selectable) updateMousePointer(p fyne.Position) {
 	}
 }
 
+func (s *selectable) getSizeName() fyne.ThemeSizeName {
+	if s.sizeName != "" {
+		return s.sizeName
+	}
+	return theme.SizeNameText
+}
+
 type selectableRenderer struct {
 	sel *selectable
 
@@ -346,7 +354,7 @@ func (r *selectableRenderer) Refresh() {
 func (r *selectableRenderer) buildSelection() {
 	th := r.sel.theme
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	textSize := th.Size(theme.SizeNameText)
+	textSize := th.Size(r.sel.getSizeName())
 
 	cursorRow, cursorCol := r.sel.cursorRow, r.sel.cursorColumn
 	selectRow, selectCol := -1, -1
