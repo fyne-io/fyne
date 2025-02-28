@@ -220,6 +220,7 @@ func (r *labelRenderer) Refresh() {
 		return
 	}
 
+	sel.sizeName = r.l.SizeName
 	sel.style = r.l.TextStyle
 	sel.theme = r.l.Theme()
 	sel.Refresh()
