@@ -4,9 +4,8 @@ package async
 
 // Map is a generic wrapper around [sync.Map].
 type Map[K any, V any] struct {
-	// once go1.20 is base, can use map[K]V
-	// with K being Comparable instead of any
-	// (CanvasObject, etc aren't Comparable for go1.19)
+	// Use "comparable" as type constraint and map[K]V as the inner type
+	// once Go 1.20 is our minimum version so interfaces can be used as keys.
 	m map[any]V
 }
 
@@ -69,5 +68,5 @@ func (m *Map[K, V]) Store(key K, value V) {
 
 // Clear removes all entries from the map.
 func (m *Map[K, V]) Clear() {
-	m.m = make(map[any]V)
+	m.m = make(map[any]V) // Use range-and-delete loop once Go 1.20 is the minimum version.
 }
