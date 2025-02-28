@@ -9,7 +9,7 @@ import (
 func Test_Device(t *testing.T) {
 	dev := &device{}
 
-	assert.Equal(t, true, dev.IsMobile())
-	assert.Equal(t, false, dev.IsBrowser())
-	assert.Equal(t, false, dev.HasKeyboard())
+	assert.True(t, dev.IsMobile())
+	assert.False(t, dev.IsBrowser())
+	assert.False(t, dev.HasKeyboard())
 }

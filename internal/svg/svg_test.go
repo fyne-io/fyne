@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/srwiley/oksvg"
@@ -170,7 +169,7 @@ func TestSVG_ReplaceFillColor(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.NotEqual(t, string(src), string(res))
-	assert.True(t, strings.Contains(string(res), "#ff0000"))
+	assert.Contains(t, string(res), "#ff0000")
 }
 
 func TestSVG_ReplaceFillColor_Ellipse(t *testing.T) {
@@ -192,7 +191,7 @@ func TestSVG_ReplaceFillColor_Ellipse(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.NotEqual(t, string(src), string(res))
-	assert.True(t, strings.Contains(string(res), "#ff0000"))
+	assert.Contains(t, string(res), "#ff0000")
 }
 
 func helperDrawSVG(t *testing.T, data []byte) image.Image {

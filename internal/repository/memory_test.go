@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInMemoryRepositoryRegistration(t *testing.T) {
@@ -17,19 +18,19 @@ func TestInMemoryRepositoryRegistration(t *testing.T) {
 	// this should never fail, and we assume it doesn't in other tests here
 	// for brevity
 	foo, err := storage.ParseURI("mem://foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// make sure we get the same repo back
 	repo, err := repository.ForURI(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, m, repo)
 
 	// test that re-registration also works
 	m2 := NewInMemoryRepository("mem")
 	repository.Register("mem", m2)
-	assert.False(t, m == m2) // this is explicitly intended to be pointer comparison
+	assert.NotSame(t, m, m2) // this is explicitly intended to be pointer comparison
 	repo, err = repository.ForURI(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, m2, repo)
 }
 
@@ -38,15 +39,15 @@ func TestInMemoryRepositoryParsingWithEmptyList(t *testing.T) {
 	repository.Register("dht", m)
 
 	foo, err := storage.ParseURI("dht:?00000")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	canList, err := storage.CanList(foo)
-	assert.NotNil(t, err)
-	assert.Equal(t, canList, false)
+	require.Error(t, err)
+	assert.False(t, canList)
 
 	listing, err := storage.List(foo)
-	assert.Nil(t, err)
-	assert.Equal(t, len(listing), 0)
+	require.NoError(t, err)
+	assert.Empty(t, listing)
 }
 
 func TestInMemoryRepositoryParsing(t *testing.T) {
@@ -58,19 +59,19 @@ func TestInMemoryRepositoryParsing(t *testing.T) {
 	// without error, lets also explicitly test to make sure
 
 	foo, err := storage.ParseURI("mem:///foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, foo)
 
 	bar, err := storage.ParseURI("mem:///bar")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, bar)
 
 	baz, _ := storage.ParseURI("mem:///baz")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, baz)
 
 	empty, _ := storage.ParseURI("mem:")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, empty)
 }
 
@@ -88,15 +89,15 @@ func TestInMemoryRepositoryExists(t *testing.T) {
 
 	fooExists, err := storage.Exists(foo)
 	assert.True(t, fooExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barExists, err := storage.Exists(bar)
 	assert.True(t, barExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestInMemoryRepositoryReader(t *testing.T) {
@@ -112,20 +113,20 @@ func TestInMemoryRepositoryReader(t *testing.T) {
 	baz, _ := storage.ParseURI("mem:///baz")
 
 	fooReader, err := storage.Reader(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{}, fooData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barReader, err := storage.Reader(bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{1, 2, 3}, barData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, bazReader)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestInMemoryRepositoryCanRead(t *testing.T) {
@@ -142,15 +143,15 @@ func TestInMemoryRepositoryCanRead(t *testing.T) {
 
 	fooCanRead, err := storage.CanRead(foo)
 	assert.True(t, fooCanRead)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barCanRead, err := storage.CanRead(bar)
 	assert.True(t, barCanRead)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazCanRead, err := storage.CanRead(baz)
 	assert.False(t, bazCanRead)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestInMemoryRepositoryWriter(t *testing.T) {
@@ -167,27 +168,27 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 
 	// write some data and assert there are no errors
 	fooWriter, err := storage.Writer(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, fooWriter)
 
 	barWriter, err := storage.Writer(bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, barWriter)
 
 	bazWriter, err := storage.Writer(baz)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, bazWriter)
 
 	n, err := fooWriter.Write([]byte{1, 2, 3, 4, 5})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5, n)
 
 	n, err = barWriter.Write([]byte{6, 7, 8, 9})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 4, n)
 
 	n, err = bazWriter.Write([]byte{5, 4, 3, 2, 1, 0})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 6, n)
 
 	fooWriter.Close()
@@ -195,53 +196,53 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	bazWriter.Close()
 
 	bazAppender, err := storage.Appender(baz)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5, n)
 
 	bazAppender.Close()
 
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	fooData, err := io.ReadAll(fooReader)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5}, fooData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barReader, err := storage.Reader(bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	barData, err := io.ReadAll(barReader)
 	assert.Equal(t, []byte{6, 7, 8, 9}, barData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazReader, err := storage.Reader(baz)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	bazData, err := io.ReadAll(bazReader)
 	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// now let's test deletion
 	err = storage.Delete(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = storage.Delete(bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = storage.Delete(baz)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	fooExists, err := storage.Exists(foo)
 	assert.False(t, fooExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barExists, err := storage.Exists(bar)
 	assert.False(t, barExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 }
 
@@ -259,15 +260,15 @@ func TestInMemoryRepositoryCanWrite(t *testing.T) {
 
 	fooCanWrite, err := storage.CanWrite(foo)
 	assert.True(t, fooCanWrite)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	barCanWrite, err := storage.CanWrite(bar)
 	assert.True(t, barCanWrite)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bazCanWrite, err := storage.CanWrite(baz)
 	assert.True(t, bazCanWrite)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestInMemoryRepositoryParent(t *testing.T) {
@@ -281,10 +282,10 @@ func TestInMemoryRepositoryParent(t *testing.T) {
 	fooExpectedParent, _ := storage.ParseURI("mem:///foo/bar")
 	fooExists, err := storage.Exists(foo)
 	assert.True(t, fooExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	fooParent, err := storage.Parent(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fooExpectedParent.String(), fooParent.String())
 }
 
@@ -298,7 +299,7 @@ func TestInMemoryRepositoryChild(t *testing.T) {
 	fooExpectedChild, _ := storage.ParseURI("mem:///foo/bar/baz/quux")
 
 	fooChild, err := storage.Child(foo, "quux")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fooExpectedChild.String(), fooChild.String())
 }
 
@@ -312,7 +313,7 @@ func TestInMemoryRepositoryCopy(t *testing.T) {
 	bar, _ := storage.ParseURI("mem:///bar")
 
 	err := storage.Copy(foo, bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, m.Data["/foo"], m.Data["/bar"])
 }
@@ -327,12 +328,12 @@ func TestInMemoryRepositoryMove(t *testing.T) {
 	bar, _ := storage.ParseURI("mem:///bar")
 
 	err := storage.Move(foo, bar)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte{1, 2, 3}, m.Data["/bar"])
 
 	exists, err := m.Exists(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, exists)
 }
 
@@ -349,16 +350,16 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 
 	empty, _ := storage.ParseURI("mem:///empty/")
 	canList, err := storage.CanList(empty)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, canList)
 
 	foo, _ := storage.ParseURI("mem:///foo")
 	canList, err = storage.CanList(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, canList)
 
 	listing, err := storage.List(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	stringListing := []string{}
 	for _, u := range listing {
 		stringListing = append(stringListing, u.String())
@@ -367,7 +368,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 
 	empty, _ = storage.ParseURI("mem:") // invalid path
 	canList, err = storage.CanList(empty)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, canList)
 }
 
@@ -379,13 +380,13 @@ func TestInMemoryRepositoryCreateListable(t *testing.T) {
 	foo, _ := storage.ParseURI("mem:///foo")
 
 	err := storage.CreateListable(foo)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, m.Data["/foo"], []byte{})
+	assert.Equal(t, []byte{}, m.Data["/foo"])
 
 	// trying to create something we already created should fail
 	err = storage.CreateListable(foo)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	// NOTE: creating an InMemoryRepository path with a non-extant parent
 	// is specifically not an error, so that case is not tested.
