@@ -46,11 +46,11 @@ var cursorMap map[desktop.Cursor]*Cursor
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	viewport   *glfw.Window
-	createLock sync.Once
-	decorate   bool
-	closing    bool
-	fixedSize  bool
+	viewport  *glfw.Window
+	created   bool
+	decorate  bool
+	closing   bool
+	fixedSize bool
 
 	cursor   desktop.Cursor
 	canvas   *glCanvas

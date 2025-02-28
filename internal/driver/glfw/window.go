@@ -136,7 +136,11 @@ func (w *window) Show() {
 			return
 		}
 
-		w.createLock.Do(w.create)
+		if !w.created {
+			w.created = true
+			w.create()
+		}
+
 		if w.view() == nil {
 			return
 		}
@@ -948,7 +952,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		title = defaultTitle
 	}
 
-	d.initGLFW()
+	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
 	ret.canvas = newCanvas()

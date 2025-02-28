@@ -36,7 +36,7 @@ func init() {
 // TestMain makes sure that our driver is running on the main thread.
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
-	d.initGLFW()
+	d.init()
 
 	waitForStart := make(chan struct{})
 	go func() {

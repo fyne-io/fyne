@@ -27,8 +27,9 @@ var curWindow *window
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windows []fyne.Window
-	done    chan struct{}
+	windows     []fyne.Window
+	initialized bool
+	done        chan struct{}
 
 	animation animation.Runner
 
@@ -36,6 +37,13 @@ type gLDriver struct {
 
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
+}
+
+func (d *gLDriver) init() {
+	if !d.initialized {
+		d.initialized = true
+		d.initGLFW()
+	}
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
