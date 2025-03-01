@@ -251,6 +251,11 @@ func (i *innerWindowRenderer) Refresh() {
 	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.title)
 	i.ShadowingRenderer.RefreshShadow()
+	if i.win.OnTappedIcon == nil {
+		i.icon.Disable()
+	} else {
+		i.icon.Enable()
+	}
 	if i.win.Icon != nil {
 		i.icon.b.SetIcon(i.win.Icon)
 		i.icon.Show()
