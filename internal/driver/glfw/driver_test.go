@@ -49,7 +49,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovli3 := widget.NewLabel("Overlay Item 3")
 	ovlContent := container.NewVBox(ovli1, ovli2, ovli3)
 	ovl := widget.NewModalPopUp(ovlContent, c)
-	ovl.Show()
+	runOnMain(ovl.Show)
 
 	// This helps to detect size changes which might happen when the font size or rendering are changed.
 	// It gives also a hint on the expected offset for the overlay components.
