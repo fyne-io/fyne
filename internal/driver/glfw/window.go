@@ -66,6 +66,7 @@ func (w *window) Resize(size fyne.Size) {
 		w.requestedWidth, w.requestedHeight = width, height
 		if runtime.GOOS != "js" {
 			w.view().SetSize(width, height)
+			w.processResized(width, height)
 		}
 	})
 }
@@ -76,9 +77,10 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	if w.view() != nil {
-		w.runOnMainWhenCreated(w.fitContent)
-	}
+	w.runOnMainWhenCreated(func() {
+		w.fitContent()
+		w.processResized(w.width, w.height)
+	})
 }
 
 func (w *window) Padded() bool {
