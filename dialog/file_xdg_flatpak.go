@@ -139,7 +139,7 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 		return nil, nil
 	}
 
-	out := &filechooser.Filter{Name: "Filter"}
+	out := &filechooser.Filter{Name: lang.L("Filter")}
 
 	if filter, ok := fyneFilter.(*storage.ExtensionFileFilter); ok {
 		out.Rules = make([]filechooser.Rule, 0, 2*len(filter.Extensions))
