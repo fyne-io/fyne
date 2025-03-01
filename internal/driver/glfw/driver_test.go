@@ -48,7 +48,8 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovli2 := widget.NewLabel("Overlay Item 2")
 	ovli3 := widget.NewLabel("Overlay Item 3")
 	ovlContent := container.NewVBox(ovli1, ovli2, ovli3)
-	ovl := widget.NewModalPopUp(ovlContent, c)
+	// use the unsafe canvas so we can wrap the whole show in safety without deadlock
+	ovl := widget.NewModalPopUp(ovlContent, w.window.Canvas())
 	runOnMain(ovl.Show)
 
 	// This helps to detect size changes which might happen when the font size or rendering are changed.
