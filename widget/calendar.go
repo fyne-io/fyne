@@ -12,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const weekStartKey = "settings.date.startweek"
+
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*calendarLayout)(nil)
 
@@ -85,20 +87,22 @@ func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (c *Calendar) calendarObjects() []fyne.CanvasObject {
+	offset := 0
+	switch lang.X(weekStartKey, "Monday") {
+	case "Saturday":
+		offset = 6
+	case "Sunday":
+	default:
+		offset = 1
+	}
+
 	var columnHeadings []fyne.CanvasObject
 	for i := 0; i < daysPerWeek; i++ {
-		j := i + 1
-		if j == daysPerWeek {
-			j = 0
-		}
-
-		t := NewLabel(shortDayName(time.Weekday(j).String()))
+		t := NewLabel(shortDayName(time.Weekday((i + offset) % daysPerWeek).String()))
 		t.Alignment = fyne.TextAlignCenter
 		columnHeadings = append(columnHeadings, t)
 	}
-	columnHeadings = append(columnHeadings, c.daysOfMonth()...)
-
-	return columnHeadings
+	return append(columnHeadings, c.daysOfMonth()...)
 }
 
 func (c *Calendar) dateForButton(dayNum int) time.Time {
@@ -110,14 +114,26 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 	start := time.Date(c.currentTime.Year(), c.currentTime.Month(), 1, 0, 0, 0, 0, c.currentTime.Location())
 	var buttons []fyne.CanvasObject
 
-	//account for Go time pkg starting on sunday at index 0
 	dayIndex := int(start.Weekday())
-	if dayIndex == 0 {
-		dayIndex += daysPerWeek
+	//account for Go time pkg starting on sunday at index 0
+	switch lang.X(weekStartKey, "Monday") {
+	case "Saturday":
+		if dayIndex == daysPerWeek-1 {
+			dayIndex = 0
+		} else {
+			dayIndex++
+		}
+	case "Sunday": // nothing to do
+	default:
+		if dayIndex == 0 {
+			dayIndex += daysPerWeek - 1
+		} else {
+			dayIndex--
+		}
 	}
 
 	//add spacers if week doesn't start on Monday
-	for i := 0; i < dayIndex-1; i++ {
+	for i := 0; i < dayIndex; i++ {
 		buttons = append(buttons, layout.NewSpacer())
 	}
 

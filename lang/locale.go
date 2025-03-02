@@ -41,9 +41,16 @@ func closestSupportedLocale(locs []string) fyne.Locale {
 }
 
 func localeFromTag(in language.Tag) fyne.Locale {
-	b, _ := in.Base()
-	r, _ := in.Region()
-	s, _ := in.Script()
+	b, s, r := in.Raw()
+	ret := b.String()
 
-	return fyne.Locale(b.String() + "-" + r.String() + "-" + s.String())
+	if r.String() != "ZZ" {
+		ret += "-" + r.String()
+
+		if s.String() != "Zzzz" {
+			ret += "-" + s.String()
+		}
+	}
+
+	return fyne.Locale(ret)
 }
