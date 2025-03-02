@@ -139,10 +139,8 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 		return nil, nil
 	}
 
-	out := &filechooser.Filter{Name: lang.L("Filter")}
-
 	if filter, ok := fyneFilter.(*storage.ExtensionFileFilter); ok {
-		out.Rules = make([]filechooser.Rule, 0, 2*len(filter.Extensions))
+		rules := make([]filechooser.Rule, 0, 2*len(filter.Extensions))
 		for _, ext := range filter.Extensions {
 			lowercase := filechooser.Rule{
 				Type:    filechooser.GlobPattern,
@@ -152,20 +150,24 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 				Type:    filechooser.GlobPattern,
 				Pattern: "*" + strings.ToUpper(ext),
 			}
-			out.Rules = append(out.Rules, lowercase, uppercase)
+			rules = append(rules, lowercase, uppercase)
 		}
-		return []*filechooser.Filter{out}, out
+
+		converted := &filechooser.Filter{Name: lang.L("File Extension Filter"), Rules: rules}
+		return []*filechooser.Filter{converted}, converted
 	}
 
 	if filter, ok := fyneFilter.(*storage.MimeTypeFileFilter); ok {
-		out.Rules = make([]filechooser.Rule, len(filter.MimeTypes))
+		rules := make([]filechooser.Rule, len(filter.MimeTypes))
 		for i, mime := range filter.MimeTypes {
-			out.Rules[i] = filechooser.Rule{
+			rules[i] = filechooser.Rule{
 				Type:    filechooser.MIMEType,
 				Pattern: mime,
 			}
 		}
-		return []*filechooser.Filter{out}, out
+
+		converted := &filechooser.Filter{Name: lang.L("MimeType Filter"), Rules: rules}
+		return []*filechooser.Filter{converted}, converted
 	}
 
 	return nil, nil
