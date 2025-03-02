@@ -32,8 +32,8 @@ func TestGoroutineID(t *testing.T) {
 	testID2 := goroutineID()
 
 	assert.Equal(t, testID1, testID2)
-	assert.Greater(t, childID1, uint64(0))
+	assert.Positive(t, childID1)
 	assert.NotEqual(t, testID1, childID1)
-	assert.Greater(t, childID2, uint64(0))
+	assert.Positive(t, childID2)
 	assert.NotEqual(t, childID1, childID2)
 }

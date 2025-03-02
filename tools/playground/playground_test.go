@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRender(t *testing.T) {
@@ -22,10 +23,10 @@ func TestRender(t *testing.T) {
 	assert.NotNil(t, img)
 
 	enc, err := encodeImage(img)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII=", enc)
 
 	bytes, err := base64.StdEncoding.DecodeString(enc)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "PNG", string(bytes)[1:4])
 }

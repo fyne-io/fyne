@@ -80,10 +80,10 @@ func (t *testCommandRuns) verifyExpectation() {
 
 	for _, value := range t.runs {
 		if value.dir != nil {
-			assert.Equal(t.t, true, value.dirSet)
+			assert.True(t.t, value.dirSet)
 		}
 		if len(value.env) > 0 {
-			assert.Equal(t.t, true, value.envSet)
+			assert.True(t.t, value.envSet)
 		}
 	}
 }

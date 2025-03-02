@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2/storage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFavoriteLocations(t *testing.T) {
@@ -22,7 +23,7 @@ func TestFavoriteLocations(t *testing.T) {
 	}
 
 	homeDir, err := os.UserHomeDir()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	homeURI := storage.NewFileURI(homeDir)
 
 	for name, subdir := range expected {

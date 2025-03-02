@@ -68,7 +68,7 @@ func TestGLDriver_CreateWindow(t *testing.T) {
 
 func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
 	w := createWindow("")
-	assert.Equal(t, w.Title(), "Fyne Application")
+	assert.Equal(t, "Fyne Application", w.Title())
 }
 
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
@@ -1531,7 +1531,7 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
 	w.keyPressed(nil, glfw.KeyF, 0, glfw.Release, glfw.ModControl)
 
-	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Len(t, content.capturedShortcuts, 1)
 	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
 }
 
@@ -1576,14 +1576,14 @@ func TestWindow_TabWithModifierToTriggersShortcut(t *testing.T) {
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, 0)
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, 0)
 
-	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Empty(t, content.capturedShortcuts)
 
 	// Tab with ctrl or alt is not passed
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl)
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl)
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Press, glfw.ModControl|glfw.ModShift)
 	w.keyPressed(nil, glfw.KeyTab, 0, glfw.Release, glfw.ModControl|glfw.ModShift)
-	assert.Equal(t, 2, len(content.capturedShortcuts))
+	assert.Len(t, content.capturedShortcuts, 2)
 	assert.Equal(t, "CustomDesktop:Control+Tab", content.capturedShortcuts[0].ShortcutName())
 	assert.Equal(t, "CustomDesktop:Shift+Control+Tab", content.capturedShortcuts[1].ShortcutName())
 }
@@ -1787,7 +1787,7 @@ func TestWindow_Shortcut(t *testing.T) {
 	}
 
 	trigger()
-	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Empty(t, content.capturedShortcuts)
 	assert.Equal(t, "canvas", called)
 
 	if runtime.GOOS != "darwin" { // macOS does this builtin
@@ -1799,19 +1799,19 @@ func TestWindow_Shortcut(t *testing.T) {
 
 		w.SetMainMenu(fyne.NewMainMenu(file))
 		trigger()
-		assert.Equal(t, 0, len(content.capturedShortcuts))
+		assert.Empty(t, content.capturedShortcuts)
 		assert.Equal(t, "menu", called)
 	}
 
 	called = "obj"
 	w.Canvas().Focus(content)
 	trigger()
-	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Empty(t, content.capturedShortcuts)
 	assert.Equal(t, "menu", called)
 
 	called = "obj"
 	w.triggersShortcut("D", fyne.KeyD, fyne.KeyModifierSuper) // not in the menu
-	assert.Equal(t, 1, len(content.capturedShortcuts))
+	assert.Len(t, content.capturedShortcuts, 1)
 	assert.Equal(t, "obj", called)
 }
 
