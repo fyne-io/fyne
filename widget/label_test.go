@@ -297,6 +297,35 @@ func TestLabelImportance(t *testing.T) {
 	test.AssertImageMatches(t, "label/label_importance_success.png", w.Canvas().Capture())
 }
 
+func TestLabelSizeNameWithSelection(t *testing.T) {
+	l := NewLabel("Hello")
+	l.Selectable = true
+
+	w := test.NewWindow(l)
+	defer w.Close()
+
+	assert.Empty(t, l.SelectedText())
+	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
+	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel.DragEnd()
+	sel.MouseUp(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	assert.Equal(t, "el", l.SelectedText())
+
+	test.AssertRendersToImage(t, "label/label_selection_defaultsize.png", w.Canvas())
+
+	l.SizeName = theme.SizeNameHeadingText
+	l.Refresh()
+	w.SetContent(l) // updates window size
+
+	test.AssertRendersToImage(t, "label/label_selection_headersize.png", w.Canvas())
+}
+
 func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
 	rich := cache.Renderer(p).Objects()[0].(*RichText)
 	return richTextRenderTexts(rich)
