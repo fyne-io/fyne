@@ -321,6 +321,7 @@ func TestLabelSizeNameWithSelection(t *testing.T) {
 
 	l.SizeName = theme.SizeNameHeadingText
 	l.Refresh()
+	w.SetContent(l) // updates window size
 
 	test.AssertRendersToImage(t, "label/label_selection_headersize.png", w.Canvas())
 }
