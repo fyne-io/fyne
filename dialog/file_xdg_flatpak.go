@@ -153,7 +153,8 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 			rules = append(rules, lowercase, uppercase)
 		}
 
-		converted := &filechooser.Filter{Name: lang.L("File Extension Filter"), Rules: rules}
+		name := formatFilterName(filter.Extensions, 3)
+		converted := &filechooser.Filter{Name: name, Rules: rules}
 		return []*filechooser.Filter{converted}, converted
 	}
 
@@ -166,9 +167,23 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 			}
 		}
 
-		converted := &filechooser.Filter{Name: lang.L("MimeType Filter"), Rules: rules}
+		name := formatFilterName(filter.MimeTypes, 3)
+		converted := &filechooser.Filter{Name: name, Rules: rules}
 		return []*filechooser.Filter{converted}, converted
 	}
 
 	return nil, nil
+}
+
+func formatFilterName(patterns []string, count int) string {
+	if len(patterns) < count {
+		count = len(patterns) - 1
+	}
+
+	name := strings.Join(patterns[:count], ", ")
+	if len(patterns) > count {
+		name += "…"
+	}
+
+	return name
 }
