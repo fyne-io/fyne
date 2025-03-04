@@ -177,7 +177,7 @@ func convertFilterForPortal(fyneFilter storage.FileFilter) (list []*filechooser.
 
 func formatFilterName(patterns []string, count int) string {
 	if len(patterns) < count {
-		count = len(patterns) - 1
+		count = len(patterns)
 	}
 
 	name := strings.Join(patterns[:count], ", ")
