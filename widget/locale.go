@@ -17,8 +17,64 @@ var localeSettings = map[string]map[string]string{
 		localeDateFormatKey: "02/01/2006",
 		localeWeekStartKey:  "Monday",
 	},
+	"BR": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"BZ": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"CA": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"CO": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"DO": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"GT": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"JP": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"MX": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"NI": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"PE": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"PA": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"PY": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
 	"US": {
 		localeDateFormatKey: "01/02/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"VE": {
+		localeDateFormatKey: "02/01/2006",
+		localeWeekStartKey:  "Sunday",
+	},
+	"ZA": {
+		localeDateFormatKey: "02/01/2006",
 		localeWeekStartKey:  "Sunday",
 	},
 }
