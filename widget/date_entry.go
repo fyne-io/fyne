@@ -4,13 +4,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
-)
-
-const (
-	dateFormatKey     = "settings.date.format"
-	defaultDateFormat = "02/01/2006"
 )
 
 // DateEntry is an input field which supports selecting from a fixed set of options.
@@ -41,7 +35,7 @@ func NewDateEntry() *DateEntry {
 func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	dateFormat := lang.X(dateFormatKey, defaultDateFormat)
+	dateFormat := getLocaleDateFormat()
 	e.Validator = func(in string) error {
 		_, err := time.Parse(dateFormat, in)
 		return err
@@ -152,7 +146,7 @@ func (e *DateEntry) setDate(d time.Time) {
 		e.popUp.Hide()
 	}
 
-	e.Entry.SetText(d.Format(lang.X(dateFormatKey, defaultDateFormat)))
+	e.Entry.SetText(d.Format(getLocaleDateFormat()))
 }
 
 func (e *DateEntry) setupDropDown() *Button {

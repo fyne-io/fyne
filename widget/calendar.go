@@ -12,8 +12,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const weekStartKey = "settings.date.startweek"
-
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*calendarLayout)(nil)
 
@@ -88,7 +86,7 @@ func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 
 func (c *Calendar) calendarObjects() []fyne.CanvasObject {
 	offset := 0
-	switch lang.X(weekStartKey, "Monday") {
+	switch getLocaleWeekStart() {
 	case "Saturday":
 		offset = 6
 	case "Sunday":
@@ -116,7 +114,7 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 
 	dayIndex := int(start.Weekday())
 	//account for Go time pkg starting on sunday at index 0
-	switch lang.X(weekStartKey, "Monday") {
+	switch getLocaleWeekStart() {
 	case "Saturday":
 		if dayIndex == daysPerWeek-1 {
 			dayIndex = 0
