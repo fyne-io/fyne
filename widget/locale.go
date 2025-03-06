@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	localeDateFormatKey = "locale.date.format"
-	localeWeekStartKey  = "locale.date.startweek"
+	localeDateFormatKey = "dateformat"
+	localeWeekStartKey  = "startofweek"
 )
 
 var localeSettings = map[string]map[string]string{
@@ -18,64 +18,50 @@ var localeSettings = map[string]map[string]string{
 		localeWeekStartKey:  "Monday",
 	},
 	"BR": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"BZ": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"CA": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"CO": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"DO": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"GT": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"JP": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"MX": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"NI": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"PE": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"PA": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"PY": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"US": {
 		localeDateFormatKey: "01/02/2006",
 		localeWeekStartKey:  "Sunday",
 	},
 	"VE": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 	"ZA": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Sunday",
+		localeWeekStartKey: "Sunday",
 	},
 }
 
