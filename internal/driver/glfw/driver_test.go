@@ -54,8 +54,12 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 	// This helps to detect size changes which might happen when the font size or rendering are changed.
 	// It gives also a hint on the expected offset for the overlay components.
-	assert.InDelta(t, 112, ovlContent.Size().Width, 1)
-	assert.InDelta(t, 113, ovlContent.Size().Height, 1)
+	var size fyne.Size
+	runOnMain(func() {
+		size = ovlContent.Size()
+	})
+	assert.InDelta(t, 112, size.Width, 1)
+	assert.InDelta(t, 113, size.Height, 1)
 
 	repaintWindow(w)
 	ensureCanvasSize(t, w, fyne.NewSize(300, 200))

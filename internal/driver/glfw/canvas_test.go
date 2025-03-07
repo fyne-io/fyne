@@ -191,8 +191,11 @@ func TestGlCanvas_Focus(t *testing.T) {
 	overlay2 := container.NewVBox(o2e)
 	w.SetContent(content)
 	c.setMenuOverlay(menuOverlay)
-	c.Overlays().Add(overlay1)
-	c.Overlays().Add(overlay2)
+	overs := c.Overlays()
+	runOnMain(func() {
+		overs.Add(overlay1)
+		overs.Add(overlay2)
+	})
 
 	c.Focus(ce)
 	assert.True(t, ce.focused, "focuses content object even if content is not in focus")
