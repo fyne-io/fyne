@@ -45,7 +45,7 @@ func TestMenuBar(t *testing.T) {
 	menu := fyne.NewMainMenu(m1, m2, m3)
 
 	t.Run("mouse control and basic behaviour", func(t *testing.T) {
-		w := createWindow("menutest")
+		w := test.NewWindow(nil)
 		defer w.Close()
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
@@ -63,10 +63,10 @@ func TestMenuBar(t *testing.T) {
 			themeCounter++
 		})
 		container := container.NewWithoutLayout(button, menuBar)
-		w.SetContent(container)
-		w.Resize(fyne.NewSize(300, 300))
-
 		runOnMain(func() {
+			w.SetContent(container)
+			w.Resize(fyne.NewSize(300, 300))
+
 			button.Resize(button.MinSize())
 			button.Move(fyne.NewPos(100, 50))
 			menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -298,7 +298,10 @@ func TestMenuBar(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				test.MoveMouse(c, fyne.NewPos(0, 0))
 				test.TapCanvas(c, fyne.NewPos(0, 0))
-				capture := c.Capture()
+				var capture image.Image
+				runOnMain(func() {
+					capture = c.Capture()
+				})
 				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
 					for i, s := range tt.steps {
 						t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
@@ -312,7 +315,11 @@ func TestMenuBar(t *testing.T) {
 									test.TapCanvas(c, a.pos)
 								}
 							}
-							test.AssertImageMatches(t, s.wantImage, c.Capture())
+							var capture2 image.Image
+							runOnMain(func() {
+								capture2 = c.Capture()
+							})
+							test.AssertImageMatches(t, s.wantImage, capture2)
 							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
 						})
 					}
