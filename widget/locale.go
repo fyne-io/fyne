@@ -7,84 +7,108 @@ import (
 	"fyne.io/fyne/v2/lang"
 )
 
+type weekday int
+
 const (
-	localeDateFormatKey = "dateformat"
-	localeWeekStartKey  = "startofweek"
+	monday weekday = iota // default
+	sunday
+	saturday
 )
 
-var localeSettings = map[string]map[string]string{
+func (w weekday) String() string {
+	switch w {
+	case sunday:
+		return "Sunday"
+	case saturday:
+		return "Saturday"
+	default:
+		return "Monday"
+	}
+}
+
+type localeSetting struct {
+	dateFormat   string
+	weekStartDay weekday
+}
+
+const defaultDateFormat = "02/01/2006"
+
+var localeSettings = map[string]localeSetting{
 	"": {
-		localeDateFormatKey: "02/01/2006",
-		localeWeekStartKey:  "Monday",
+		dateFormat:   defaultDateFormat,
+		weekStartDay: monday,
 	},
 	"BR": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"BZ": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"CA": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"CO": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"DO": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"GT": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"JP": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"MX": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"NI": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"PE": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"PA": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"PY": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"US": {
-		localeDateFormatKey: "01/02/2006",
-		localeWeekStartKey:  "Sunday",
+		dateFormat:   "01/02/2006",
+		weekStartDay: sunday,
 	},
 	"VE": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 	"ZA": {
-		localeWeekStartKey: "Sunday",
+		weekStartDay: sunday,
 	},
 }
 
 func getLocaleDateFormat() string {
-	return lookupLocaleSetting(localeDateFormatKey, lang.SystemLocale())
+	s := lookupLocaleSetting(lang.SystemLocale())
+	if d := s.dateFormat; d != "" {
+		return d
+	}
+	return defaultDateFormat
 }
 
 func getLocaleWeekStart() string {
-	return lookupLocaleSetting(localeWeekStartKey, lang.SystemLocale())
+	s := lookupLocaleSetting(lang.SystemLocale())
+	return s.weekStartDay.String()
 }
 
-func lookupLocaleSetting(key string, l fyne.Locale) string {
+func lookupLocaleSetting(l fyne.Locale) localeSetting {
 	region := ""
 	lang := l.LanguageString()
 	if pos := strings.Index(lang, "-"); pos != -1 {
 		region = strings.Split(lang, "-")[1]
 	}
 
-	if settings, ok := localeSettings[region]; ok {
-		if setting, ok := settings[key]; ok {
-			return setting
-		}
+	if setting, ok := localeSettings[region]; ok {
+		return setting
 	}
 
-	return localeSettings[""][key]
+	return localeSettings[""]
 }
