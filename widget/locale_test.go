@@ -16,6 +16,8 @@ func TestGetLocaleWeekStart(t *testing.T) {
 
 func TestGetLocaleDateFormat(t *testing.T) {
 	assert.Equal(t, "02/01/2006", lookupLocaleSetting("").dateFormat)
+	assert.Equal(t, "02/01/2006", lookupLocaleSetting("en").dateFormat)
+	assert.Equal(t, "02/01/2006", lookupLocaleSetting("en-GB").dateFormat)
 	assert.Equal(t, "01/02/2006", lookupLocaleSetting("en-US").dateFormat)
 	assert.Equal(t, "01/02/2006", lookupLocaleSetting("es-US").dateFormat)
 }
