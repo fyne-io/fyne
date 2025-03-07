@@ -2,6 +2,7 @@ package widget
 
 import (
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
@@ -73,6 +74,9 @@ var localeSettings = map[string]localeSetting{
 	},
 	"PY": {
 		weekStartDay: sunday,
+	},
+	"SE": {
+		dateFormat: time.DateOnly,
 	},
 	"US": {
 		dateFormat:   "01/02/2006",
