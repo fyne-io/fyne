@@ -429,11 +429,13 @@ func TestMenuBar(t *testing.T) {
 				})
 				if test.AssertImageMatches(t, "menu_bar_active_file.png", captured) {
 					lastAction = ""
-					for _, key := range tt.keys {
-						c.Focused().TypedKey(&fyne.KeyEvent{
-							Name: key,
-						})
-					}
+					runOnMain(func() {
+						for _, key := range tt.keys {
+							c.Focused().TypedKey(&fyne.KeyEvent{
+								Name: key,
+							})
+						}
+					})
 					test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
 					assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
 				}
