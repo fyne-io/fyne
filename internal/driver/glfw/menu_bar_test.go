@@ -296,10 +296,11 @@ func TestMenuBar(t *testing.T) {
 			},
 		} {
 			t.Run(name, func(t *testing.T) {
-				test.MoveMouse(c, fyne.NewPos(0, 0))
-				test.TapCanvas(c, fyne.NewPos(0, 0))
 				var capture image.Image
 				runOnMain(func() {
+					test.MoveMouse(c, fyne.NewPos(0, 0))
+					test.TapCanvas(c, fyne.NewPos(0, 0))
+
 					capture = c.Capture()
 				})
 				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
