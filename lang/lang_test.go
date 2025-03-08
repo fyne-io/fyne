@@ -85,3 +85,9 @@ func TestLocalizePluralKey_Fallback(t *testing.T) {
 	assert.Equal(t, "Apple", XN("appleID", "Apple", 1))
 	assert.Equal(t, "Apples", XN("appleID", "Apple", 2))
 }
+
+func TestLoadBuiltInTranslations(t *testing.T) {
+	assert.NoError(t, AddTranslationsFS(translations, "translations"))
+	setupLang("en")
+	assert.Equal(t, "OK", X("OK", "FAIL"))
+}
