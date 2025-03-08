@@ -8,11 +8,12 @@ import (
 )
 
 var (
-	ValidDuration     = 1 * time.Minute
-	cleanTaskInterval = ValidDuration / 2
+	ValidDuration = 2 * time.Minute
 
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
+
+	framecounter uint64 = 1
 
 	// testing purpose only
 	timeNow = time.Now
@@ -21,37 +22,93 @@ var (
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
 		ValidDuration = t
-		cleanTaskInterval = ValidDuration / 2
 	}
 }
 
-// Clean run cache clean task, it should be called on paint events.
-func Clean(canvasRefreshed bool) {
-	now := timeNow()
-	// do not run clean task too fast
-	if now.Sub(lastClean) < 10*time.Second {
-		if canvasRefreshed {
-			skippedCleanWithCanvasRefresh = true
-		}
-		return
+// IncrementFrameCounter increments the current frame counter
+// that is used to track which cached objects were accessed in the last frame.
+// It should be called at the end of each iteration of the main loop.
+func IncrementFrameCounter() {
+	framecounter += 1
+}
+
+// ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
+// should be invoked during the current iteration of the main loop.
+func ShouldClean() bool {
+	return shouldCleanTextTextures ||
+		shouldCleanObjectTextures ||
+		shouldCleanRenderers ||
+		shouldCleanCanvases ||
+		shouldCleanFontSizeCache ||
+		shouldFullClean()
+}
+
+// ShouldClean returns whether the clean tasks (CleanTextTextures and Clean)
+// should be invoked during the current iteration of the main loop,
+// AND the clean task will include a clean of the CanvasForObject map.
+// If so, the driver should be sure to mark all objects -
+// both visible and invisible, as alive before invoking the clean tasks.
+func ShouldCleanCanvases() bool {
+	return shouldCleanCanvases || shouldFullClean()
+}
+
+// CleanTextures runs the per-canvas cache clean text for the texture caches.
+// It should be run with a current GL context for each existing canvas
+// during the main run loop if ShouldClean() returns true.
+// Within the same iteration, Clean should be run once (not per-window)
+// after CleanTextures has been called for all canvases
+// to clean the non-texture caches and mark the texture caches clean as complete.
+func CleanTextures(canvas fyne.Canvas, texFree func(fyne.CanvasObject)) {
+	full := shouldFullClean()
+	if full || shouldCleanTextTextures {
+		cleanTextTextureCache(canvas)
 	}
-	if skippedCleanWithCanvasRefresh {
-		skippedCleanWithCanvasRefresh = false
-		canvasRefreshed = true
+	if (full || shouldCleanObjectTextures) && texFree != nil {
+		rangeExpiredTexturesFor(canvas, texFree)
 	}
-	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
-		return
+}
+
+// Clean runs the non-texture cache clean task, if ShouldClean() returns true,
+// it should be run during the main loop, after having called
+// CleanTextures for each canvas.
+func Clean() {
+	now := time.Now()
+	full := shouldFullClean()
+
+	if full {
+		destroyExpiredSvgs(now)
+		destroyExpiredFontMetrics(now)
 	}
-	destroyExpiredSvgs(now)
-	destroyExpiredFontMetrics(now)
-	if canvasRefreshed {
-		// Destroy renderers on canvas refresh to avoid flickering screen.
+	if full || shouldCleanRenderers {
 		destroyExpiredRenderers(now)
-		// canvases cache should be invalidated only on canvas refresh, otherwise there wouldn't
-		// be a way to recover them later
-		destroyExpiredCanvases(now)
+		rendererCacheLastCleanSize = renderers.Len()
+		shouldCleanRenderers = false
 	}
-	lastClean = timeNow()
+	if full || shouldCleanCanvases {
+		destroyExpiredCanvases(now)
+		canvasCacheLastCleanSize = canvases.Len()
+		shouldCleanCanvases = false
+	}
+	if full || shouldCleanFontSizeCache {
+		destroyExpiredFontMetrics(now)
+		fontSizeCacheLastCleanSize = fontSizeCache.Len()
+		shouldCleanFontSizeCache = false
+	}
+
+	// CleanTextures should have been called for each canvas
+	// update the sizes of the texture caches
+	if full || shouldCleanTextTextures {
+		textTextureLastCleanSize = textTextures.Len()
+		shouldCleanTextTextures = false
+	}
+	if full || shouldCleanObjectTextures {
+		objectTexturesLastCleanSize = objectTextures.Len()
+		shouldCleanObjectTextures = false
+	}
+
+	if full {
+		lastClean = now
+	}
 }
 
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
@@ -107,8 +164,26 @@ func destroyExpiredRenderers(now time.Time) {
 	})
 }
 
+func shouldFullClean() bool {
+	return lastClean.Add(ValidDuration).Before(timeNow())
+}
+
 type expiringCache struct {
 	expires time.Time
+}
+
+type frameCounterCache struct {
+	lastAccessedFrame uint64
+}
+
+// setAlive updates expiration time.
+func (c *frameCounterCache) setAlive() {
+	c.lastAccessedFrame = framecounter
+}
+
+// isExpired check if the cache data is expired.
+func (c *frameCounterCache) isExpired(now time.Time) bool {
+	return c.lastAccessedFrame < framecounter
 }
 
 // isExpired check if the cache data is expired.

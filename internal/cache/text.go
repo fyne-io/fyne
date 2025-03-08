@@ -8,10 +8,14 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var fontSizeCache async.Map[fontSizeEntry, *fontMetric]
+var (
+	fontSizeCache              async.Map[fontSizeEntry, *fontMetric]
+	fontSizeCacheLastCleanSize int
+	shouldCleanFontSizeCache   bool
+)
 
 type fontMetric struct {
-	expiringCache
+	frameCounterCache
 	size     fyne.Size
 	baseLine float32
 }
@@ -55,6 +59,9 @@ func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source 
 	metric := &fontMetric{size: size, baseLine: base}
 	metric.setAlive()
 	fontSizeCache.Store(ent, metric)
+	if fontSizeCache.Len() > 2*fontSizeCacheLastCleanSize {
+		shouldCleanFontSizeCache = true
+	}
 }
 
 // destroyExpiredFontMetrics destroys expired fontSizeCache entries
