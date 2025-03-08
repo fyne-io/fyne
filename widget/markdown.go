@@ -3,7 +3,9 @@ package widget
 import (
 	"io"
 	"net/url"
+	"runtime"
 	"strings"
+	"syscall/js"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -130,7 +132,18 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 		dest := string(t.Destination)
 		u, err := storage.ParseURI(dest)
 		if err != nil {
-			u = storage.NewFileURI(dest)
+			if runtime.GOOS == "js" || runtime.GOOS == "wasip1" {
+				if !strings.HasPrefix(dest, "/") {
+					dest = "/" + dest
+				}
+				origin := js.Global().Get("location").Get("origin").String()
+				u, err = storage.ParseURI(origin + dest)
+				if err != nil {
+					return nil, nil
+				}
+			} else {
+				u = storage.NewFileURI(dest)
+			}
 		}
 		return []RichTextSegment{&ImageSegment{Source: u, Title: string(t.Title), Alignment: fyne.TextAlignCenter}}, nil
 	}
