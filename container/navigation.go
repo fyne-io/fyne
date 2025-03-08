@@ -127,7 +127,6 @@ var _ fyne.WidgetRenderer = (*navigatorRenderer)(nil)
 
 type navigatorRenderer struct {
 	nav    *Navigation
-	stack  fyne.Container
 	back   widget.Button
 	next   widget.Button
 	title  widget.Label
