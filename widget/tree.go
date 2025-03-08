@@ -766,6 +766,9 @@ func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
 
 func (r *treeContentRenderer) Refresh() {
 	r.refreshForID(r.treeContent.nextRefreshID)
+	for _, s := range r.separators {
+		s.Refresh()
+	}
 }
 
 func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {

@@ -27,8 +27,15 @@ type Dialog interface {
 	Refresh()
 	Resize(size fyne.Size)
 
+	// MinSize returns the size that this dialog should not shrink below.
+	//
 	// Since: 2.1
 	MinSize() fyne.Size
+
+	// Dismiss instructs the dialog to close without any affirmative action.
+	//
+	// Since: 2.6
+	Dismiss()
 }
 
 // Declare conformity to Dialog interface
@@ -49,11 +56,15 @@ type dialog struct {
 	beforeShowHook func()
 }
 
+func (d *dialog) Dismiss() {
+	d.Hide()
+}
+
 func (d *dialog) Hide() {
 	d.hideWithResponse(false)
 }
 
-// MinSize returns the size that this dialog should not shrink below
+// MinSize returns the size that this dialog should not shrink below.
 //
 // Since: 2.1
 func (d *dialog) MinSize() fyne.Size {

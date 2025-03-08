@@ -28,7 +28,7 @@
 				</container>
 			</widget>
 			<widget size="172x172" type="*widget.Scroll">
-				<widget size="484x172" type="*widget.tableCells">
+				<widget size="191x172" type="*widget.tableCells">
 					<widget size="93x35" type="*widget.Label">
 						<widget size="93x35" type="*widget.RichText">
 							<text pos="8,8" size="51x19">Cell 0, 0</text>
@@ -64,8 +64,8 @@
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x172"/>
 				</widget>
 				<widget pos="0,166" size="172x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="61x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" radius="3" size="61x3"/>
+					<widget pos="0,3" size="154x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" radius="3" size="154x3"/>
 					</widget>
 				</widget>
 			</widget>

@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"sync"
 	"syscall"
 	"time"
 
@@ -25,48 +24,53 @@ import (
 const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
 var (
-	systrayIcon fyne.Resource
-	setup       sync.Once
+	systrayIcon    fyne.Resource
+	systrayRunning bool
 )
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	setup.Do(func() {
-		d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-			if systrayIcon != nil {
-				d.SetSystemTrayIcon(systrayIcon)
-			} else if fyne.CurrentApp().Icon() != nil {
-				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
-			} else {
-				d.SetSystemTrayIcon(theme.BrokenImageIcon())
-			}
-
-			// Some XDG systray crash without a title (See #3678)
-			if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
-				app := fyne.CurrentApp()
-				title := app.Metadata().Name
-				if title == "" {
-					title = app.UniqueID()
-				}
-
-				systray.SetTitle(title)
-			}
-
-			// it must be refreshed after init, so an earlier call would have been ineffective
-			runOnMain(func() {
-				d.refreshSystray(m)
-			})
-		}, func() {
-			// anything required for tear-down
-		})
-
-		// the only way we know the app was asked to quit is if this window is asked to close...
-		w := d.CreateWindow("SystrayMonitor")
-		w.(*window).create()
-		w.SetCloseIntercept(d.Quit)
-		w.SetOnClosed(systray.Quit)
-	})
+	if !systrayRunning {
+		systrayRunning = true
+		d.runSystray(m)
+	}
 
 	d.refreshSystray(m)
+}
+
+func (d *gLDriver) runSystray(m *fyne.Menu) {
+	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
+		if systrayIcon != nil {
+			d.SetSystemTrayIcon(systrayIcon)
+		} else if fyne.CurrentApp().Icon() != nil {
+			d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
+		} else {
+			d.SetSystemTrayIcon(theme.BrokenImageIcon())
+		}
+
+		// Some XDG systray crash without a title (See #3678)
+		if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
+			app := fyne.CurrentApp()
+			title := app.Metadata().Name
+			if title == "" {
+				title = app.UniqueID()
+			}
+
+			systray.SetTitle(title)
+		}
+
+		// it must be refreshed after init, so an earlier call would have been ineffective
+		runOnMain(func() {
+			d.refreshSystray(m)
+		})
+	}, func() {
+		// anything required for tear-down
+	})
+
+	// the only way we know the app was asked to quit is if this window is asked to close...
+	w := d.CreateWindow("SystrayMonitor")
+	w.(*window).create()
+	w.SetCloseIntercept(d.Quit)
+	w.SetOnClosed(systray.Quit)
 }
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {

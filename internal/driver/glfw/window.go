@@ -66,6 +66,7 @@ func (w *window) Resize(size fyne.Size) {
 		w.requestedWidth, w.requestedHeight = width, height
 		if runtime.GOOS != "js" {
 			w.view().SetSize(width, height)
+			w.processResized(width, height)
 		}
 	})
 }
@@ -76,9 +77,10 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	if w.view() != nil {
-		w.runOnMainWhenCreated(w.fitContent)
-	}
+	w.runOnMainWhenCreated(func() {
+		w.fitContent()
+		w.processResized(w.width, w.height)
+	})
 }
 
 func (w *window) Padded() bool {
@@ -136,7 +138,11 @@ func (w *window) Show() {
 			return
 		}
 
-		w.createLock.Do(w.create)
+		if !w.created {
+			w.created = true
+			w.create()
+		}
+
 		if w.view() == nil {
 			return
 		}
@@ -948,7 +954,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		title = defaultTitle
 	}
 
-	d.initGLFW()
+	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
 	ret.canvas = newCanvas()

@@ -48,13 +48,18 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	ovli2 := widget.NewLabel("Overlay Item 2")
 	ovli3 := widget.NewLabel("Overlay Item 3")
 	ovlContent := container.NewVBox(ovli1, ovli2, ovli3)
-	ovl := widget.NewModalPopUp(ovlContent, c)
-	ovl.Show()
+	// use the unsafe canvas so we can wrap the whole show in safety without deadlock
+	ovl := widget.NewModalPopUp(ovlContent, w.window.Canvas())
+	runOnMain(ovl.Show)
 
 	// This helps to detect size changes which might happen when the font size or rendering are changed.
 	// It gives also a hint on the expected offset for the overlay components.
-	assert.InDelta(t, 112, ovlContent.Size().Width, 1)
-	assert.InDelta(t, 113, ovlContent.Size().Height, 1)
+	var size fyne.Size
+	runOnMain(func() {
+		size = ovlContent.Size()
+	})
+	assert.InDelta(t, 112, size.Width, 1)
+	assert.InDelta(t, 113, size.Height, 1)
 
 	repaintWindow(w)
 	ensureCanvasSize(t, w, fyne.NewSize(300, 200))
@@ -63,8 +68,11 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// 1 is the menu bar’s underlay
 	// 2 is the menu bar's background
 	// 3 is the container holding the items
-	mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[3].(*fyne.Container)
-	m2 := mbarCont.Objects[1]
+	var m2 fyne.CanvasObject
+	runOnMain(func() {
+		mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[3].(*fyne.Container)
+		m2 = mbarCont.Objects[1]
+	})
 
 	tests := map[string]struct {
 		object       fyne.CanvasObject

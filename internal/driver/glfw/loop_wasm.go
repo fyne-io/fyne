@@ -10,13 +10,11 @@ import (
 )
 
 func (d *gLDriver) initGLFW() {
-	initOnce.Do(func() {
-		err := glfw.Init(gl.ContextWatcher)
-		if err != nil {
-			fyne.LogError("failed to initialise GLFW", err)
-			return
-		}
-	})
+	err := glfw.Init(gl.ContextWatcher)
+	if err != nil {
+		fyne.LogError("failed to initialise GLFW", err)
+		return
+	}
 }
 
 func (d *gLDriver) pollEvents() {

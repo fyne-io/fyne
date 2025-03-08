@@ -1,4 +1,4 @@
-//go:build !mobile && (!no_glfw || !windows)
+//go:build !mobile && !no_glfw && !windows
 
 package glfw
 
@@ -63,10 +63,10 @@ func TestMenuBar(t *testing.T) {
 			themeCounter++
 		})
 		container := container.NewWithoutLayout(button, menuBar)
-		w.SetContent(container)
-		w.Resize(fyne.NewSize(300, 300))
-
 		runOnMain(func() {
+			w.SetContent(container)
+			w.Resize(fyne.NewSize(300, 300))
+
 			button.Resize(button.MinSize())
 			button.Move(fyne.NewPos(100, 50))
 			menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -296,10 +296,11 @@ func TestMenuBar(t *testing.T) {
 			},
 		} {
 			t.Run(name, func(t *testing.T) {
-				test.MoveMouse(c, fyne.NewPos(0, 0))
-				test.TapCanvas(c, fyne.NewPos(0, 0))
 				var capture image.Image
 				runOnMain(func() {
+					test.MoveMouse(c, fyne.NewPos(0, 0))
+					test.TapCanvas(c, fyne.NewPos(0, 0))
+
 					capture = c.Capture()
 				})
 				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
@@ -315,9 +316,11 @@ func TestMenuBar(t *testing.T) {
 									test.TapCanvas(c, a.pos)
 								}
 							}
+							var capture2 image.Image
 							runOnMain(func() {
-								test.AssertImageMatches(t, s.wantImage, c.Capture())
+								capture2 = c.Capture()
 							})
+							test.AssertImageMatches(t, s.wantImage, capture2)
 							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
 						})
 					}
@@ -434,11 +437,13 @@ func TestMenuBar(t *testing.T) {
 				})
 				if test.AssertImageMatches(t, "menu_bar_active_file.png", captured) {
 					lastAction = ""
-					for _, key := range tt.keys {
-						c.Focused().TypedKey(&fyne.KeyEvent{
-							Name: key,
-						})
-					}
+					runOnMain(func() {
+						for _, key := range tt.keys {
+							c.Focused().TypedKey(&fyne.KeyEvent{
+								Name: key,
+							})
+						}
+					})
 					test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
 					assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
 				}

@@ -191,8 +191,11 @@ func TestGlCanvas_Focus(t *testing.T) {
 	overlay2 := container.NewVBox(o2e)
 	w.SetContent(content)
 	c.setMenuOverlay(menuOverlay)
-	c.Overlays().Add(overlay1)
-	c.Overlays().Add(overlay2)
+	overs := c.Overlays()
+	runOnMain(func() {
+		overs.Add(overlay1)
+		overs.Add(overlay2)
+	})
 
 	c.Focus(ce)
 	assert.True(t, ce.focused, "focuses content object even if content is not in focus")
@@ -580,8 +583,15 @@ func TestGlCanvas_SetContent(t *testing.T) {
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
 			assert.Equal(t, fyne.NewSize(0, 0), newContent.Size())
 			w.SetContent(newContent)
-			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), newContent.Position())
-			assert.Equal(t, fyne.NewSize(canvasSize-2*tt.expectedPad, canvasSize-2*tt.expectedPad-tt.expectedMenuHeight), newContent.Size())
+
+			var newSize fyne.Size
+			var newPos fyne.Position
+			runOnMain(func() {
+				newSize = newContent.Size()
+				newPos = newContent.Position()
+			})
+			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), newPos)
+			assert.Equal(t, fyne.NewSize(canvasSize-2*tt.expectedPad, canvasSize-2*tt.expectedPad-tt.expectedMenuHeight), newSize)
 		})
 	}
 }

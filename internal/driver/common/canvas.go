@@ -531,6 +531,12 @@ func (o *overlayStack) add(overlay fyne.CanvasObject) {
 func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
+
+	// it is possible that overlays are removed implicitly and render caches already cleared out
+	if overlayCount >= len(o.renderCaches) {
+		return
+	}
+
 	o.renderCaches[overlayCount] = nil // release memory reference to removed element
 	o.renderCaches = o.renderCaches[:overlayCount]
 }
