@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
-	drvcommon "fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 )
@@ -44,8 +44,8 @@ func runOnMainWithWait(f func(), wait bool) {
 	}
 
 	if wait {
-		done := drvcommon.DonePool.Get()
-		defer drvcommon.DonePool.Put(done)
+		done := common.DonePool.Get()
+		defer common.DonePool.Put(done)
 
 		funcQueue.In() <- funcData{f: f, done: done}
 		<-done
@@ -65,13 +65,11 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		canvas := w.canvas
-
 		// CheckDirtyAndClear must be checked after visibility,
 		// because when a window becomes visible, it could be
 		// showing old content without a dirty flag set to true.
 		// Do the clear if and only if the window is visible.
-		if !w.visible || !canvas.CheckDirtyAndClear() {
+		if !w.visible || !w.canvas.CheckDirtyAndClear() {
 			if shouldClean {
 				d.cleanInactiveWindowTextures(w, !shouldCleanCanvases /*walkVisibleOnly*/)
 			}

@@ -10,8 +10,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"sync"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"

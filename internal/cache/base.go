@@ -72,9 +72,6 @@ func CleanTextures(canvas fyne.Canvas, texFree func(fyne.CanvasObject)) {
 // it should be run during the main loop, after having called
 // CleanTextures for each canvas.
 func Clean() {
-
-	// TODO: remove debug prints
-
 	now := time.Now()
 	full := shouldFullClean()
 
