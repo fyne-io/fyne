@@ -3,16 +3,13 @@ package widget
 import (
 	"io"
 	"net/url"
-	"runtime"
 	"strings"
-	"syscall/js"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/storage"
 )
 
 // NewRichTextFromMarkdown configures a RichText widget by parsing the provided markdown content.
@@ -129,23 +126,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 	case *ast.Blockquote:
 		return renderChildren(source, n, true)
 	case *ast.Image:
-		dest := string(t.Destination)
-		u, err := storage.ParseURI(dest)
-		if err != nil {
-			if runtime.GOOS == "js" || runtime.GOOS == "wasip1" {
-				if !strings.HasPrefix(dest, "/") {
-					dest = "/" + dest
-				}
-				origin := js.Global().Get("location").Get("origin").String()
-				u, err = storage.ParseURI(origin + dest)
-				if err != nil {
-					return nil, nil
-				}
-			} else {
-				u = storage.NewFileURI(dest)
-			}
-		}
-		return []RichTextSegment{&ImageSegment{Source: u, Title: string(t.Title), Alignment: fyne.TextAlignCenter}}, nil
+		return parseMarkdownImage(t), nil
 	}
 	return nil, nil
 }
