@@ -3,11 +3,12 @@
 package widget
 
 import (
+	"strings"
+	"syscall/js"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 	"github.com/yuin/goldmark/ast"
-	"strings"
-	"syscall/js"
 )
 
 func parseMarkdownImage(t *ast.Image) []RichTextSegment {
