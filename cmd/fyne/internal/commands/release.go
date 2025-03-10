@@ -103,6 +103,12 @@ func Release() *cli.Command {
 				Usage:       "Windows: the developer identity for your Microsoft store account",
 				Destination: &r.developer,
 			},
+			&cli.BoolFlag{
+				Name:        "verbose",
+				Aliases:     []string{"v"},
+				Usage:       "verbose output of used commands",
+				Destination: &r.Packager.verbose,
+			},
 			&cli.StringFlag{
 				Name:        "password",
 				Aliases:     []string{"passw"},
@@ -172,6 +178,7 @@ func (r *Releaser) AddFlags() {
 	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
+	flag.BoolVar(&r.verbose, "verbose", false, "verbose output of used commands")
 	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
 	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
 	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
