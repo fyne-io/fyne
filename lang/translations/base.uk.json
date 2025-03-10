@@ -1,5 +1,5 @@
 {
-    "Folder": "Тека",
+    "Advanced": "Розширені",
     "Cancel": "Скасувати",
     "Confirm": "Підтвердити",
     "Copy": "Скопіювати",
@@ -9,15 +9,18 @@
     "Error": "Помилка",
     "Favourites": "Обране",
     "File": "Файл",
+    "Folder": "Тека",
     "New Folder": "Нова тека",
     "No": "Ні",
     "OK": "Добре",
     "Open": "Відкрити",
     "Paste": "Вставити",
     "Quit": "Вийти",
+    "Redo": "Повторити",
     "Save": "Зберегти",
     "Select all": "Обрати все",
     "Show Hidden Files": "Показувати приховані файли",
+    "Undo": "Відмінити",
     "Yes": "Так",
     "file.name": {
         "other": "Назва"
@@ -25,7 +28,18 @@
     "file.parent": {
         "other": "Батьківська"
     },
-    "Advanced": "Розширені",
-    "Undo": "Відмінити",
-    "Redo": "Повторити"
+    "friday": "П'ятниця",
+    "friday.short": "П'ят",
+    "monday": "Понеділок",
+    "monday.short": "Пон",
+    "saturday": "Субота",
+    "saturday.short": "Суб",
+    "sunday": "Неділя",
+    "sunday.short": "Нед",
+    "thursday": "Четвер",
+    "thursday.short": "Чет",
+    "tuesday": "Вівторок",
+    "tuesday.short": "Віт",
+    "wednesday": "Середа",
+    "wednesday.short": "Сер"
 }
