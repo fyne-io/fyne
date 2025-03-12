@@ -63,6 +63,10 @@ type Entry struct {
 	onValidationChanged func(error)
 	validationError     error
 
+	// When true, the entry will always display an error (if there is any) without user interaction.
+	// Validator is called when rendered
+	AlwaysShowValidationError bool
+
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
 
@@ -1863,8 +1867,8 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 
-	if r.entry.Validator != nil {
-		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
+		if !r.entry.focused && !r.entry.Disabled() && (r.entry.dirty || r.entry.AlwaysShowValidationError) && r.entry.validationError != nil {
 			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
 		}
 		r.ensureValidationSetup()

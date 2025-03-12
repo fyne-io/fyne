@@ -39,7 +39,7 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 
 // SetValidationError manually updates the validation status until the next input change.
 func (e *Entry) SetValidationError(err error) {
-	if e.Validator == nil {
+	if e.Validator == nil && !e.AlwaysShowValidationError {
 		return
 	}
 
