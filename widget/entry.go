@@ -62,9 +62,8 @@ type Entry struct {
 	onValidationChanged func(error)
 	validationError     error
 
-	// If true, the Validator runs automatically on render without user interaction.
-	// It will reflect any validation errors found or those explicitly set via SetValidationError().
-	// Since: 2.7
+	// When true, the entry will always display an error (if there is any) without user interaction.
+	// Validator is called when rendered
 	AlwaysShowValidationError bool
 
 	CursorRow, CursorColumn int
