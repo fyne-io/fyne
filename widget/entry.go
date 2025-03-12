@@ -1710,7 +1710,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
-	if r.entry.Validator != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
 		validatorIconSize = fyne.NewSquareSize(iconSize)
 
 		r.ensureValidationSetup()

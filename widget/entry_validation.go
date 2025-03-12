@@ -123,10 +123,10 @@ func (r *validationStatusRenderer) Refresh() {
 		return
 	}
 
-	if r.entry.validationError == nil && r.entry.Text != "" {
+	if r.entry.validationError == nil && r.entry.Text != "" && r.entry.Validator != nil {
 		r.icon.Resource = th.Icon(theme.IconNameConfirm)
 		r.icon.Show()
-	} else if r.entry.validationError != nil && !r.entry.focused && r.entry.dirty {
+	} else if r.entry.validationError != nil && !r.entry.focused && (r.entry.dirty || r.entry.AlwaysShowValidationError) {
 		r.icon.Resource = theme.NewErrorThemedResource(th.Icon(theme.IconNameError))
 		r.icon.Show()
 	} else {
