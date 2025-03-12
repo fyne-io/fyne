@@ -63,8 +63,8 @@ type Entry struct {
 	onValidationChanged func(error)
 	validationError     error
 
-	// When true, the entry will always display an error (if there is any) without user interaction.
-	// Validator is called when rendered
+	// When true, the entry will always display an validation error (if there is any) without user interaction.
+	// Since: 2.5
 	AlwaysShowValidationError bool
 
 	CursorRow, CursorColumn int
