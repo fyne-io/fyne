@@ -243,7 +243,9 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	if content != nil {
 		content.Show()
 	}
-	async.EnsureMain(w.RescaleContext)
+	async.EnsureMain(func() {
+		w.RunWithContext(w.RescaleContext)
+	})
 }
 
 func (w *window) Canvas() fyne.Canvas {
