@@ -64,7 +64,7 @@ type Entry struct {
 	validationError     error
 
 	// When true, the entry will always display an validation error (if there is any) without user interaction.
-	// Since: 2.5
+	// Since: 2.6
 	AlwaysShowValidationError bool
 
 	CursorRow, CursorColumn int
