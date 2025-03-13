@@ -23,11 +23,6 @@ func TestAddTranslations(t *testing.T) {
 	assert.Equal(t, "Match2", L("Test2"))
 }
 
-func TestLocalize_Default(t *testing.T) {
-	fallback := closestSupportedLocale([]string{"xx"})
-	assert.Equal(t, fyne.Locale("en"), fallback[0:2])
-}
-
 func TestLocalize_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", L("Missing"))
 }
@@ -80,4 +75,32 @@ func TestLocalizePluralKey_Fallback(t *testing.T) {
 	assert.Equal(t, "Missing", XN("appleIDMissing", "Missing", 1))
 	assert.Equal(t, "Apple", XN("appleID", "Apple", 1))
 	assert.Equal(t, "Apples", XN("appleID", "Apple", 2))
+}
+
+func TestSetPreferredLocale(t *testing.T) {
+	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+  "Test": "Match"
+}`)))
+	_ = AddTranslations(fyne.NewStaticResource("fr.json", []byte(`{
+  "Test2": "Match2"
+}`)))
+	setupLang("fr")
+	assert.Equal(t, "Match2", L("Test2"))
+	SetPreferredLocale("en")
+	assert.Equal(t, "Match", L("Test"))
+}
+
+func TestSetLanguageOrder(t *testing.T) {
+	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+  "Test": "Match"
+}`)))
+	_ = AddTranslations(fyne.NewStaticResource("fr.json", []byte(`{
+  "Test2": "Match2"
+}`)))
+	setupLang("en")
+	SetPreferredLocale("xyz") // invalid language to test fallback
+	SetLanguageOrder([]string{"fr", "en"})
+	assert.Equal(t, "Match2", L("Test2"))
+	SetLanguageOrder([]string{"en", "fr"})
+	assert.Equal(t, "Match", L("Test"))
 }
