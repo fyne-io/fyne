@@ -3,6 +3,13 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.5.5 - 13 March 2025
+
+### Fixed
+
+* Correct wasm build for Go 1.24 onwards
+
+
 ## 2.5.4 - 1 February 2025
 
 ### Changed
