@@ -603,7 +603,7 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		t.RefreshItem(t.currentFocus)
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
 		if canvas != nil {
-			canvas.Focus(t)
+			canvas.Focus(t.impl.(fyne.Focusable))
 		}
 		t.RefreshItem(t.currentFocus)
 	}

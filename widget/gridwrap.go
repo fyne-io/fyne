@@ -588,7 +588,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 			l.gw.RefreshItem(l.gw.currentFocus)
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.gw)
 			if canvas != nil {
-				canvas.Focus(l.gw)
+				canvas.Focus(l.gw.impl.(fyne.Focusable))
 			}
 
 			l.gw.currentFocus = id
