@@ -678,7 +678,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		if !fyne.CurrentDevice().IsMobile() {
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
 			if canvas != nil {
-				canvas.Focus(l.list)
+				canvas.Focus(l.list.impl.(fyne.Focusable))
 			}
 
 			l.list.currentFocus = id
