@@ -326,10 +326,10 @@ func (r *IndexDBRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	}
 
 	return &file{
-		db:       r.db,
-		path:     u.Path(),
-		parent:   pu.Path(),
-		add:      true,
+		db:     r.db,
+		path:   u.Path(),
+		parent: pu.Path(),
+		add:    true,
 	}, nil
 }
 
