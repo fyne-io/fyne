@@ -173,12 +173,7 @@ func (r *IndexDBRepository) CanRead(u fyne.URI) (bool, error) {
 		return false, nil
 	}
 
-	isDir := v.Get("isDir")
-	if isDir.IsUndefined() {
-		return false, nil
-	}
-
-	return !isDir.Bool(), nil
+	return true, nil
 }
 
 func (r *IndexDBRepository) Destroy(scheme string) {
