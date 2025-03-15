@@ -15,7 +15,7 @@ import (
 
 // fileSchemePrefix is used for when we need a hard-coded version of "idbfile://"
 // for string processing
-const fileSchemePrefix string = "idbfile://"
+const idbfileSchemePrefix string = "idbfile://"
 
 var _ repository.Repository = (*IndexDBRepository)(nil)
 var _ repository.WritableRepository = (*IndexDBRepository)(nil)
@@ -214,7 +214,7 @@ func (r *IndexDBRepository) List(u fyne.URI) ([]fyne.URI, error) {
 		if err != nil {
 			return err
 		}
-		paths = append(paths, fileSchemePrefix+k.String())
+		paths = append(paths, idbfileSchemePrefix+k.String())
 		return nil
 	}); err != nil {
 		return nil, err

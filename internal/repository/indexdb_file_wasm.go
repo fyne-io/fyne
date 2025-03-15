@@ -44,7 +44,7 @@ func (f *idbfile) Close() error {
 }
 
 func (f *idbfile) URI() fyne.URI {
-	u, _ := storage.ParseURI(fileSchemePrefix + f.path)
+	u, _ := storage.ParseURI(idbfileSchemePrefix + f.path)
 	return u
 }
 
