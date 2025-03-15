@@ -20,3 +20,7 @@ func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 func watchTheme(_ *settings) {
 	// no-op
 }
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
+}

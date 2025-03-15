@@ -20,3 +20,7 @@ func NewWithID(id string) fyne.App {
 	})
 	return a
 }
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
+}
