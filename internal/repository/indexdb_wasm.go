@@ -13,9 +13,9 @@ import (
 	"github.com/hack-pad/go-indexeddb/idb"
 )
 
-// fileSchemePrefix is used for when we need a hard-coded version of "file://"
+// fileSchemePrefix is used for when we need a hard-coded version of "idbfile://"
 // for string processing
-const fileSchemePrefix string = "file://"
+const fileSchemePrefix string = "idbfile://"
 
 var _ repository.Repository = (*IndexDBRepository)(nil)
 var _ repository.WritableRepository = (*IndexDBRepository)(nil)
@@ -298,7 +298,7 @@ func (r *IndexDBRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 		return nil, err
 	}
 
-	return &file{
+	return &idbfile{
 		db:     r.db,
 		path:   u.Path(),
 		parent: pu.Path(),
@@ -311,7 +311,7 @@ func (r *IndexDBRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 
-	return &file{
+	return &idbfile{
 		db:       r.db,
 		path:     u.Path(),
 		parent:   pu.Path(),
@@ -325,7 +325,7 @@ func (r *IndexDBRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 
-	return &file{
+	return &idbfile{
 		db:     r.db,
 		path:   u.Path(),
 		parent: pu.Path(),

@@ -24,10 +24,10 @@ func init() {
 	uint8Array = js.Global().Get("Uint8Array")
 }
 
-var _ fyne.URIReadCloser = (*file)(nil)
-var _ fyne.URIWriteCloser = (*file)(nil)
+var _ fyne.URIReadCloser = (*idbfile)(nil)
+var _ fyne.URIWriteCloser = (*idbfile)(nil)
 
-type file struct {
+type idbfile struct {
 	db          *idb.Database
 	path        string
 	parent      string
@@ -39,16 +39,16 @@ type file struct {
 	isAdding    bool
 }
 
-func (f *file) Close() error {
+func (f *idbfile) Close() error {
 	return nil
 }
 
-func (f *file) URI() fyne.URI {
+func (f *idbfile) URI() fyne.URI {
 	u, _ := storage.ParseURI(fileSchemePrefix + f.path)
 	return u
 }
 
-func (f *file) rwstore(name string) (*idb.ObjectStore, error) {
+func (f *idbfile) rwstore(name string) (*idb.ObjectStore, error) {
 	txn, err := f.db.Transaction(idb.TransactionReadWrite, name)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (f *file) rwstore(name string) (*idb.ObjectStore, error) {
 	return store, nil
 }
 
-func (f *file) Write(data []byte) (int, error) {
+func (f *idbfile) Write(data []byte) (int, error) {
 	p := f.path
 	ctx := context.Background()
 
@@ -141,7 +141,7 @@ func (f *file) Write(data []byte) (int, error) {
 	return n, err
 }
 
-func (f *file) Read(data []byte) (int, error) {
+func (f *idbfile) Read(data []byte) (int, error) {
 	ctx := context.Background()
 	txn, err := f.db.Transaction(idb.TransactionReadOnly, "data")
 	if err != nil {
@@ -163,7 +163,7 @@ func (f *file) Read(data []byte) (int, error) {
 	}
 
 	if b.IsUndefined() {
-		return 0, fmt.Errorf("file undefined")
+		return 0, fmt.Errorf("idbfile undefined")
 	}
 
 	bytes := b.Call("bytes")
