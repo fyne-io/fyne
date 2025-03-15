@@ -63,3 +63,13 @@ func watchTheme(_ *settings) {
 func stopWatchingTheme() {
 	js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Call("removeEventListener", "change", themeChanged)
 }
+
+func (a *fyneApp) registerRepositories() {
+	repo, err := repository.NewIndexDBRepository()
+	if err != nil {
+		fyne.LogError("failed to create repository: %v", err)
+		return
+	}
+
+	repository.Register("idbfile", repo)
+}
