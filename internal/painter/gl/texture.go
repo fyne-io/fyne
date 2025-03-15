@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
+	glcommon "fyne.io/fyne/v2/internal/common/gl"
 	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 )
@@ -34,16 +35,7 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 
 func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	if t, ok := object.(*canvas.Text); ok {
-		custom := ""
-		if t.FontSource != nil {
-			custom = t.FontSource.Name()
-		}
-		ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
-		ent.Text = t.Text
-		ent.Size = t.TextSize
-		ent.Style = t.TextStyle
-		ent.Source = custom
-
+		ent := glcommon.FontCacheEntryForText(t, p.canvas)
 		texture, ok := cache.GetTextTexture(ent)
 
 		if !ok {
