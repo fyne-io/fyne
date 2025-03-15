@@ -177,29 +177,36 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 	f.setView(view)
-
-	f.loadFavorites()
-
-	f.favoritesList = widget.NewList(
-		func() int {
-			return len(f.favorites)
-		},
-		func() fyne.CanvasObject {
-			return container.NewHBox(container.New(&iconPaddingLayout{}, widget.NewIcon(theme.DocumentIcon())), widget.NewLabel("Template Object"))
-		},
-		func(id widget.ListItemID, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(f.favorites[id].locName)
-		},
-	)
-	f.favoritesList.OnSelected = func(id widget.ListItemID) {
-		f.setLocation(f.favorites[id].loc)
+	fileinfo := f.file
+	createFavorites := true
+	if fileinfo.startingLocation != nil {
+		if fileinfo.startingLocation.Scheme() != "file" {
+			createFavorites = false
+		}
 	}
-
 	var optionsButton *widget.Button
-	optionsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
-	})
+	if createFavorites {
+		f.loadFavorites()
+
+		f.favoritesList = widget.NewList(
+			func() int {
+				return len(f.favorites)
+			},
+			func() fyne.CanvasObject {
+				return container.NewHBox(container.New(&iconPaddingLayout{}, widget.NewIcon(theme.DocumentIcon())), widget.NewLabel("Template Object"))
+			},
+			func(id widget.ListItemID, item fyne.CanvasObject) {
+				item.(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Icon).SetResource(f.favorites[id].locIcon)
+				item.(*fyne.Container).Objects[1].(*widget.Label).SetText(f.favorites[id].locName)
+			},
+		)
+		f.favoritesList.OnSelected = func(id widget.ListItemID) {
+			f.setLocation(f.favorites[id].loc)
+		}
+		optionsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+			f.optionsMenu(fyne.CurrentApp().Driver().AbsolutePositionForObject(optionsButton), optionsButton.Size())
+		})
+	}
 
 	newFolderButton := widget.NewButtonWithIcon("", theme.FolderNewIcon(), func() {
 		newFolderEntry := widget.NewEntry()
@@ -225,12 +232,17 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			f.refreshDir(f.dir)
 		}, f.file.parent)
 	})
-
-	optionsbuttons := container.NewHBox(
-		newFolderButton,
-		f.toggleViewButton,
-		optionsButton,
-	)
+	var optionsbuttons *fyne.Container
+	if optionsButton != nil {
+		optionsbuttons = container.NewHBox(
+			newFolderButton,
+			f.toggleViewButton,
+			optionsButton)
+	} else {
+		optionsbuttons = container.NewHBox(
+			newFolderButton,
+			f.toggleViewButton)
+	}
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
 		optionsbuttons, widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
@@ -239,16 +251,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	footer := container.NewBorder(nil, nil, nil, buttons,
 		buttons, container.NewHScroll(f.fileName),
 	)
-
-	body := container.NewHSplit(
-		f.favoritesList,
-		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
-			f.breadcrumbScroll, f.filesScroll,
-		),
+	fileList := container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
+		f.breadcrumbScroll, f.filesScroll,
 	)
-	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only it's minimal width
-
-	return container.NewBorder(header, footer, nil, nil, body)
+	if f.favoritesList != nil {
+		body := container.NewHSplit(f.favoritesList, fileList)
+		body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only it's minimal width
+		return container.NewBorder(header, footer, nil, nil, body)
+	} else {
+		return container.NewBorder(header, footer, nil, nil, fileList)
+	}
 }
 
 func (f *fileDialog) makeOpenButton(label string) *widget.Button {
@@ -456,13 +468,13 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		if fav.loc == nil {
 			continue
 		}
-		if fav.loc.Path() == dir.Path() {
+		if (fav.loc.Path() == dir.Path()) && (f.favoritesList != nil) {
 			f.favoritesList.Select(i)
 			isFav = true
 			break
 		}
 	}
-	if !isFav {
+	if !isFav && (f.favoritesList != nil) {
 		f.favoritesList.UnselectAll()
 	}
 
@@ -482,13 +494,16 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 			buildDir = "/"
 			d = "/"
 		} else if i > 0 {
-			buildDir = filepath.Join(buildDir, d)
+			buildDir = buildDir + "/" + d
 		} else {
 			d = buildDir
-			buildDir = d + string(os.PathSeparator)
+			buildDir = d + "/"
 		}
-
-		newDir := storage.NewFileURI(buildDir)
+		newURL := dir.Scheme() + "://" + buildDir
+		newDir, err := storage.ParseURI(newURL)
+		if err != nil {
+			return err
+		}
 		isDir, err := storage.CanList(newDir)
 		if err != nil {
 			return err
