@@ -55,7 +55,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	}
 	run.Stop(a)
 	run.animationMutex.RLock()
-	assert.Zero(t, len(run.animations))
+	assert.Empty(t, run.animations)
 	run.animationMutex.RUnlock()
 }
 
@@ -108,6 +108,6 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	// animations stopped inside tick are really stopped in the next runner cycle
 	time.Sleep(time.Second/60 + 100*time.Millisecond)
 	run.animationMutex.RLock()
-	assert.Zero(t, len(run.animations))
+	assert.Empty(t, run.animations)
 	run.animationMutex.RUnlock()
 }

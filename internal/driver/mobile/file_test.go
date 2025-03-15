@@ -10,14 +10,14 @@ import (
 
 func TestMobileFilter(t *testing.T) {
 	f := mobileFilter(nil)
-	assert.Equal(t, 0, len(f.Extensions))
-	assert.Equal(t, 0, len(f.MimeTypes))
+	assert.Empty(t, f.Extensions)
+	assert.Empty(t, f.MimeTypes)
 
 	f = mobileFilter(storage.NewExtensionFileFilter([]string{".png"}))
-	assert.Equal(t, 1, len(f.Extensions))
-	assert.Equal(t, 0, len(f.MimeTypes))
+	assert.Len(t, f.Extensions, 1)
+	assert.Empty(t, f.MimeTypes)
 
 	f = mobileFilter(storage.NewMimeTypeFileFilter([]string{"text/plain"}))
-	assert.Equal(t, 0, len(f.Extensions))
-	assert.Equal(t, 1, len(f.MimeTypes))
+	assert.Empty(t, f.Extensions)
+	assert.Len(t, f.MimeTypes, 1)
 }

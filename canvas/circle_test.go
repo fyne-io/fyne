@@ -30,13 +30,14 @@ func TestCircle_Resize(t *testing.T) {
 	targetHeight := float32(50)
 	circle := canvas.NewCircle(color.White)
 	start := circle.Size()
-	assert.True(t, start.Height == 0)
-	assert.True(t, start.Width == 0)
+	assert.Equal(t, float32(0), start.Height)
+	assert.Equal(t, float32(0), start.Width)
 
 	circle.Resize(fyne.NewSize(targetWidth, targetHeight))
 	target := circle.Size()
-	assert.True(t, target.Height == targetHeight)
-	assert.True(t, target.Width == targetWidth)
+	assert.Equal(t, targetWidth, target.Width)
+	assert.Equal(t, targetHeight, target.Height)
+
 }
 
 func TestCircle_Move(t *testing.T) {

@@ -20,7 +20,7 @@ import (
 
 func TestHyperlink_MinSize(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	hyperlink := NewHyperlink("Test", u)
 	hyperlink.CreateRenderer()
@@ -43,7 +43,7 @@ func TestHyperlink_Cursor(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
 	hyperlink := NewHyperlink("Test", u)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, desktop.DefaultCursor, hyperlink.Cursor())
 
 	hyperlink.hovered = true
@@ -139,7 +139,7 @@ func TestHyperlink_Resize(t *testing.T) {
 
 func TestHyperlink_SetText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	hyperlink := &Hyperlink{Text: "Test", URL: u}
 	hyperlink.CreateRenderer()
@@ -151,7 +151,7 @@ func TestHyperlink_SetText(t *testing.T) {
 
 func TestHyperlink_SetUrl(t *testing.T) {
 	sURL, err := url.Parse("https://github.com/fyne-io/fyne")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// test constructor
 	hyperlink := NewHyperlink("Test", sURL)
@@ -159,7 +159,7 @@ func TestHyperlink_SetUrl(t *testing.T) {
 
 	// test setting functions
 	sURL, err = url.Parse("https://fyne.io")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
 }

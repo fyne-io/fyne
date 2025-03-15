@@ -10,6 +10,7 @@ import (
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -109,7 +110,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 func TestFileDialogStartRemember(t *testing.T) {
 	testPath, err := filepath.Abs("./testdata")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	start, err := storage.ListerForURI(storage.NewFileURI(testPath))
 	if err != nil {
 		t.Skipf("could not get lister for working directory: %s", err)
@@ -223,7 +224,7 @@ func TestShowFileOpen(t *testing.T) {
 	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.NotEmpty(t, breadcrumb.Objects)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	components := strings.Split(testData.String()[7:], "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
@@ -260,12 +261,12 @@ func TestShowFileOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.NoError(t, openErr)
+	require.NoError(t, openErr)
 
 	assert.Equal(t, target.location.String(), chosen.URI().String())
 
 	err = chosen.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestHiddenFiles(t *testing.T) {
@@ -393,7 +394,7 @@ func TestShowFileSave(t *testing.T) {
 	test.Type(nameEntry, "v2_")
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.NoError(t, saveErr)
+	require.NoError(t, saveErr)
 	targetParent, err := storage.Parent(target.location)
 	if err != nil {
 		t.Error(err)
@@ -402,10 +403,10 @@ func TestShowFileSave(t *testing.T) {
 	assert.Equal(t, expectedPath.String(), chosen.URI().String())
 
 	err = chosen.Close()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pathString := expectedPath.String()[len(expectedPath.Scheme())+3:]
 	err = os.Remove(pathString)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestFileFilters(t *testing.T) {
@@ -516,7 +517,7 @@ func TestView(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -578,7 +579,7 @@ func TestSetView(t *testing.T) {
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(defaultView))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -634,7 +635,7 @@ func TestSetViewPreferences(t *testing.T) {
 	prefs.SetInt(viewLayoutKey, int(GridView))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -668,7 +669,7 @@ func TestViewPreferences(t *testing.T) {
 	prefs.SetInt(viewLayoutKey, -1)
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -705,7 +706,7 @@ func TestFileFavorites(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -739,7 +740,7 @@ func TestFileFavorites(t *testing.T) {
 		}
 
 		ok, err := storage.Exists(dlg.dialog.dir)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	}
 
@@ -801,7 +802,7 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	folderDialog := NewFolderOpen(func(lu fyne.ListableURI, err error) {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}, win)
 	folderDialog.SetConfirmText("Choose")
 	folderDialog.SetDismissText("Cancel")

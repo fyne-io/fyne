@@ -2,7 +2,6 @@ package test_test
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -26,7 +25,7 @@ func TestAssertImageMatches(t *testing.T) {
 
 	txtImg := image.NewNRGBA(bounds)
 	face, err := font.ParseTTF(bytes.NewReader(theme.TextFont().Content()))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	painter.DrawString(txtImg, "Hello!", color.Black, &test.FontMap{face}, 25, 1, fyne.TextStyle{TabWidth: 4})
 	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
@@ -66,7 +65,7 @@ func TestNewCheckedImage(t *testing.T) {
 	}
 	for y, xv := range expectedColorValues {
 		for x, v := range xv {
-			assert.Equal(t, color.NRGBA{R: v, G: v, B: v, A: 0xff}, img.At(x, y), fmt.Sprintf("color value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{R: v, G: v, B: v, A: 0xff}, img.At(x, y), "color value at %d,%d", x, y)
 		}
 	}
 }
