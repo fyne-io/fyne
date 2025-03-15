@@ -41,6 +41,12 @@ var (
 	// IndexHTML is the index.html used to serve web package
 	IndexHTML = template.Must(template.New("index.html").Parse(string(resourceIndexHtml.StaticContent)))
 
+	// ServiceWorkerJs is the service-worker.js used to install the PWA
+	ServiceWorkerJs = template.Must(template.New("service-worker.js").Parse(string(resourceServiceWorkerJs.StaticContent)))
+
+	// ManifestJson is the manifest.json used to install the PWA
+	ManifestJSON = template.Must(template.New("manifest.json").Parse(string(resourceManifestJson.StaticContent)))
+
 	// WebGLDebugJs is the content of https://raw.githubusercontent.com/KhronosGroup/WebGLDeveloperTools/b42e702487d02d5278814e0fe2e2888d234893e6/src/debug/webgl-debug.js
 	WebGLDebugJs = resourceWebglDebugJs.StaticContent
 
