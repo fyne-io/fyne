@@ -22,5 +22,5 @@ func NewWithID(id string) fyne.App {
 }
 
 func (a *fyneApp) registerRepositories() {
-        // no-op
+	// no-op
 }

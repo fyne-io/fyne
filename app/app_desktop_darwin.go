@@ -50,5 +50,5 @@ func watchTheme(_ *settings) {
 }
 
 func (a *fyneApp) registerRepositories() {
-        // no-op
+	// no-op
 }
