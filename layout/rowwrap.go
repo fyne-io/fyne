@@ -15,7 +15,7 @@ type rowWrapLayout struct {
 // Object visibility is supported.
 //
 // Since: 2.7
-func NewRowWrapLayout() *rowWrapLayout {
+func NewRowWrapLayout() fyne.Layout {
 	return &rowWrapLayout{}
 }
 
