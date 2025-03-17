@@ -170,7 +170,7 @@ func (w *window) Show() {
 			content.Show()
 
 			w.RunWithContext(func() {
-				w.driver.repaintWindow(w)
+				w.driver.repaintWindow(w, false)
 			})
 		}
 	})
