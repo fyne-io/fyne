@@ -560,12 +560,16 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 		end = int(math.Ceil(float64(off / t.text.cellSize.Height)))
 	}
 
-	var toRemove []*textGridRow
+	remain := t.visible[:0]
 	for _, row := range t.visible {
 		if row.(*textGridRow).row < start || row.(*textGridRow).row > end {
-			toRemove = append(toRemove, row.(*textGridRow))
+			t.itemPool.Put(row.(*textGridRow))
+			continue
 		}
+
+		remain = append(remain, row.(*textGridRow))
 	}
+	t.visible = remain
 
 	var newItems []fyne.CanvasObject
 	for i := start; i <= end; i++ {
@@ -588,11 +592,6 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 			newRow.setRow(i)
 		}
 		newItems = append(newItems, newRow)
-	}
-
-	for i, row := range toRemove {
-		t.visible = append(t.visible[:i], t.visible[i+1:]...)
-		t.itemPool.Put(row)
 	}
 
 	if len(newItems) > 0 {
