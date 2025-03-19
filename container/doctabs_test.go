@@ -17,20 +17,20 @@ func TestDocTabs_Selected(t *testing.T) {
 	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
 	tabs := container.NewDocTabs(tab1, tab2)
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, tab1, tabs.Selected())
 }
 
 func TestDocTabs_SelectedIndex(t *testing.T) {
 	tabs := container.NewDocTabs(&container.TabItem{Text: "Test", Content: widget.NewLabel("Test")})
 
-	assert.Equal(t, 1, len(tabs.Items))
+	assert.Len(t, tabs.Items, 1)
 	assert.Equal(t, 0, tabs.SelectedIndex())
 }
 
 func TestDocTabs_Empty(t *testing.T) {
 	tabs := container.NewDocTabs()
-	assert.Equal(t, 0, len(tabs.Items))
+	assert.Empty(t, tabs.Items)
 	assert.Equal(t, -1, tabs.SelectedIndex())
 	assert.Nil(t, tabs.Selected())
 	min := tabs.MinSize()
@@ -38,7 +38,7 @@ func TestDocTabs_Empty(t *testing.T) {
 	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), min.Height)
 
 	tabs = &container.DocTabs{}
-	assert.Equal(t, 0, len(tabs.Items))
+	assert.Empty(t, tabs.Items)
 	assert.Nil(t, tabs.Selected())
 	assert.NotNil(t, test.TempWidgetRenderer(t, tabs)) // doesn't crash
 }
@@ -72,7 +72,7 @@ func TestDocTabs_Select(t *testing.T) {
 	tab2 := &container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
 	tabs := container.NewDocTabs(tab1, tab2)
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, tab1, tabs.Selected())
 
 	var selectedTab *container.TabItem
@@ -102,7 +102,7 @@ func TestDocTabs_SelectIndex(t *testing.T) {
 	tabs := container.NewDocTabs(&container.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")},
 		&container.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")})
 
-	assert.Equal(t, 2, len(tabs.Items))
+	assert.Len(t, tabs.Items, 2)
 	assert.Equal(t, 0, tabs.SelectedIndex())
 
 	var selectedTab *container.TabItem

@@ -9,6 +9,7 @@ import (
 
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2/internal/metadata"
 )
@@ -116,44 +117,44 @@ func Test_MergeMetata(t *testing.T) {
 
 func Test_validateAppID(t *testing.T) {
 	id, err := validateAppID("myApp", "windows", "myApp", false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "myApp", id)
 
 	id, err = validateAppID("", "darwin", "myApp", true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "com.example.myApp", id) // this was in for compatibility
 
 	id, err = validateAppID("com.myApp", "darwin", "myApp", true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "com.myApp", id)
 
 	_, err = validateAppID("", "ios", "myApp", false)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	_, err = validateAppID("myApp", "ios", "myApp", false)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	id, err = validateAppID("com.myApp", "android", "myApp", true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "com.myApp", id)
 
 	_, err = validateAppID("myApp", "android", "myApp", true)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	_, err = validateAppID("com._server.myApp", "android", "myApp", true)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	_, err = validateAppID("com.5server.myApp", "android", "myApp", true)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	_, err = validateAppID("0com.server.myApp", "android", "myApp", true)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	_, err = validateAppID("......", "android", "myApp", true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	_, err = validateAppID(".....myApp", "android", "myApp", true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func Test_buildPackageWasm(t *testing.T) {
@@ -185,9 +186,9 @@ func Test_buildPackageWasm(t *testing.T) {
 	}
 	wasmBuildTest := &testCommandRuns{runs: expected, t: t}
 	files, err := p.buildPackage(wasmBuildTest, []string{})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, files)
-	assert.Equal(t, 1, len(files))
+	assert.Len(t, files, 1)
 }
 
 func Test_PackageWasm(t *testing.T) {
@@ -274,7 +275,7 @@ func Test_PackageWasm(t *testing.T) {
 	}
 
 	err := p.doPackage(wasmBuildTest)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	wasmBuildTest.verifyExpectation()
 	expectedTotalCount(t, len(expectedEnsureSubDirRuns.expected), expectedEnsureSubDirRuns.current)
 	expectedTotalCount(t, len(expectedExistRuns.expected), expectedExistRuns.current)

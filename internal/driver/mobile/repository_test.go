@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
@@ -21,7 +22,7 @@ func TestFileRepositoryChild(t *testing.T) {
 
 	uri, _ := storage.ParseURI("content://thing")
 	p, err := storage.Child(uri, "new")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, p)
 }
 
@@ -37,6 +38,6 @@ func TestFileRepositoryParent(t *testing.T) {
 
 	uri, _ := storage.ParseURI("content://thing")
 	p, err := storage.Parent(uri)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, p)
 }

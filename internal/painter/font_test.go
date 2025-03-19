@@ -38,7 +38,7 @@ func TestCachedFontFace(t *testing.T) {
 	// check the wide symbol rune
 	symbol := canvas.NewText("⌘", color.Black)
 	symbol.TextStyle.Symbol = true
-	assert.True(t, symbol.MinSize().Width > 10)
+	assert.Greater(t, symbol.MinSize().Width, float32(10))
 }
 
 func TestDrawString(t *testing.T) {

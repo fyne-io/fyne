@@ -35,11 +35,11 @@ func TestMap_LoadAndStore(t *testing.T) {
 	assert.Equal(t, 2, m2.Len())
 
 	strptr, ok = m2.Load(1)
-	assert.True(t, strptr == nil)
+	assert.Nil(t, strptr)
 	assert.True(t, ok)
 
 	strptr, ok = m2.Load(3)
-	assert.True(t, strptr == nil)
+	assert.Nil(t, strptr)
 	assert.False(t, ok)
 }
 
@@ -78,19 +78,19 @@ func TestMap_CombinedLoad(t *testing.T) {
 
 	m.Store(1, nil)
 	actual, ok = m.LoadOrStore(1, nil)
-	assert.True(t, actual == nil)
+	assert.Nil(t, actual)
 	assert.True(t, ok)
 
 	actual, ok = m.LoadOrStore(2, nil)
-	assert.True(t, actual == nil)
+	assert.Nil(t, actual)
 	assert.False(t, ok)
 
 	actual, ok = m.LoadAndDelete(1)
-	assert.True(t, actual == nil)
+	assert.Nil(t, actual)
 	assert.True(t, ok)
 
 	actual, ok = m.LoadAndDelete(1)
-	assert.True(t, actual == nil)
+	assert.Nil(t, actual)
 	assert.False(t, ok)
 
 	m.Store(1, &str)

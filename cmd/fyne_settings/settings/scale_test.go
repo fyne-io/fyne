@@ -26,7 +26,7 @@ func TestMakeScaleButtons(t *testing.T) {
 	s.fyneSettings.Scale = 1.0
 	buttons := s.makeScaleButtons()
 
-	assert.Equal(t, 5, len(buttons))
+	assert.Len(t, buttons, 5)
 	assert.Equal(t, widget.MediumImportance, buttons[0].(*widget.Button).Importance)
 	assert.Equal(t, widget.HighImportance, buttons[2].(*widget.Button).Importance)
 }
@@ -36,7 +36,7 @@ func TestMakeScalePreviews(t *testing.T) {
 	s.fyneSettings.Scale = 1.0
 	previews := s.makeScalePreviews(1.0)
 
-	assert.Equal(t, 5, len(previews))
+	assert.Len(t, previews, 5)
 	assert.Equal(t, theme.TextSize(), previews[2].(*canvas.Text).TextSize)
 
 	s.appliedScale(1.5)
