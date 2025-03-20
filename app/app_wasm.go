@@ -9,6 +9,8 @@ import (
 	"syscall/js"
 
 	"fyne.io/fyne/v2"
+	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage/repository"
 )
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
@@ -62,4 +64,14 @@ func watchTheme(_ *settings) {
 }
 func stopWatchingTheme() {
 	js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Call("removeEventListener", "change", themeChanged)
+}
+
+func (a *fyneApp) registerRepositories() {
+	repo, err := intRepo.NewIndexDBRepository()
+	if err != nil {
+		fyne.LogError("failed to create repository: %v", err)
+		return
+	}
+
+	repository.Register("idbfile", repo)
 }
