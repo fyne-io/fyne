@@ -70,37 +70,43 @@ type shadowRenderer struct {
 
 func (r *shadowRenderer) Layout(size fyne.Size) {
 	depth := float32(r.s.level)
+	sideOff, topOff := float32(0.0), float32(0.0)
+	if r.s.typ == ShadowAround {
+		sideOff = depth * 0.2
+		topOff = sideOff * 2
+	}
+
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(depth, depth))
-		r.tl.Move(fyne.NewPos(-depth, -depth))
+		r.tl.Move(fyne.NewPos(-depth+sideOff, -depth+topOff))
 	}
 	if r.t != nil {
-		r.t.Resize(fyne.NewSize(size.Width, depth))
-		r.t.Move(fyne.NewPos(0, -depth))
+		r.t.Resize(fyne.NewSize(size.Width-sideOff*2, depth))
+		r.t.Move(fyne.NewPos(sideOff, -depth+topOff))
 	}
 	if r.tr != nil {
 		r.tr.Resize(fyne.NewSize(depth, depth))
-		r.tr.Move(fyne.NewPos(size.Width, -depth))
+		r.tr.Move(fyne.NewPos(size.Width-sideOff, -depth+topOff))
 	}
 	if r.r != nil {
-		r.r.Resize(fyne.NewSize(depth, size.Height))
-		r.r.Move(fyne.NewPos(size.Width, 0))
+		r.r.Resize(fyne.NewSize(depth, size.Height-topOff))
+		r.r.Move(fyne.NewPos(size.Width-sideOff, topOff))
 	}
 	if r.br != nil {
 		r.br.Resize(fyne.NewSize(depth, depth))
-		r.br.Move(fyne.NewPos(size.Width, size.Height))
+		r.br.Move(fyne.NewPos(size.Width-sideOff, size.Height))
 	}
 	if r.b != nil {
-		r.b.Resize(fyne.NewSize(size.Width, depth))
-		r.b.Move(fyne.NewPos(0, size.Height))
+		r.b.Resize(fyne.NewSize(size.Width-sideOff*2, depth))
+		r.b.Move(fyne.NewPos(sideOff, size.Height))
 	}
 	if r.bl != nil {
 		r.bl.Resize(fyne.NewSize(depth, depth))
-		r.bl.Move(fyne.NewPos(-depth, size.Height))
+		r.bl.Move(fyne.NewPos(-depth+sideOff, size.Height))
 	}
 	if r.l != nil {
-		r.l.Resize(fyne.NewSize(depth, size.Height))
-		r.l.Move(fyne.NewPos(-depth, 0))
+		r.l.Resize(fyne.NewSize(depth, size.Height-topOff))
+		r.l.Move(fyne.NewPos(-depth+sideOff, topOff))
 	}
 }
 

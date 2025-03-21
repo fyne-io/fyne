@@ -6,14 +6,14 @@
 		<widget pos="2,3" size="196x195" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="84x84" type="*widget.PopUpMenu">
 				<widget size="84x84" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-4" size="84x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="84,-4" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="84,0" size="4x84" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="84,84" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,84" size="84x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-4,84" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x84"/>
+					<radialGradient centerOffset="0.5,0.5" pos="-3,-2" size="4x4" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="0,-2" size="82x4"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="83,-2" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" pos="83,1" size="4x82" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="83,84" size="4x4" startColor="shadow"/>
+					<linearGradient pos="0,84" size="82x4" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-3,84" size="4x4" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x82"/>
 				</widget>
 				<widget size="84x84" type="*widget.Scroll">
 					<widget size="84x84" type="*widget.menuBox">
