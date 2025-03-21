@@ -119,3 +119,64 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 	test.Type(entry, "invalid")
 	assert.False(t, modified)
 }
+
+func TestEntry_AlwaysShowValidationError_WithValidator_Error(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := widget.NewEntry()
+	entry.AlwaysShowValidationError = true
+	entry.Validator = func(s string) error {
+		if s == "success" {
+			return nil
+		}
+
+		return errors.New("mocking failed validation")
+	}
+
+	w := test.NewTempWindow(t, entry)
+	test.AssertRendersToMarkup(t, "entry/always_on_with_validator_error.xml", w.Canvas())
+}
+
+func TestEntry_AlwaysShowValidationError_WithValidator_Success(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := widget.NewEntry()
+	entry.AlwaysShowValidationError = true
+	entry.Validator = func(s string) error {
+		if s == "success" {
+			return nil
+		}
+
+		return errors.New("error")
+	}
+
+	entry.SetText("success")
+
+	w := test.NewTempWindow(t, entry)
+	test.AssertRendersToMarkup(t, "entry/always_on_with_validator_success.xml", w.Canvas())
+}
+
+func TestEntry_AlwaysShowValidationError_WithoutValidator_Error(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := widget.NewEntry()
+	entry.AlwaysShowValidationError = true
+
+	entry.SetValidationError(errors.New("error"))
+
+	w := test.NewTempWindow(t, entry)
+	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_error.xml", w.Canvas())
+}
+
+func TestEntry_AlwaysShowValidationError_WithoutValidator_Success(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := widget.NewEntry()
+	entry.AlwaysShowValidationError = true
+
+	entry.SetValidationError(errors.New("error"))
+	entry.SetValidationError(nil)
+
+	w := test.NewTempWindow(t, entry)
+	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_success.xml", w.Canvas())
+}
