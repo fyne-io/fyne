@@ -8,7 +8,7 @@ var app atomic.Pointer[App]
 
 // SetCurrentApp is an internal function to set the app instance currently running.
 func SetCurrentApp(current App) {
-	app.Store(current)
+	app.Store(&current)
 }
 
 // CurrentApp returns the current application, for which there is only 1 per process.
