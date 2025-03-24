@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migration"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
@@ -36,9 +36,10 @@ type settings struct {
 	themeSpecified bool
 	variant        fyne.ThemeVariant
 
-	listeners       []func(fyne.Settings)
-	changeListeners async.Map[chan fyne.Settings, bool]
-	watcher         any // normally *fsnotify.Watcher or nil - avoid import in this file
+	listeners           []func(fyne.Settings)
+	changeListeners     map[chan fyne.Settings]struct{}
+	changeListenersLock migration.Mutex
+	watcher             any // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
 }
@@ -100,7 +101,9 @@ func (s *settings) Scale() float32 {
 }
 
 func (s *settings) AddChangeListener(listener chan fyne.Settings) {
-	s.changeListeners.Store(listener, true) // the boolean is just a dummy value here.
+	s.changeListenersLock.Lock()
+	s.changeListeners[listener] = struct{}{}
+	s.changeListenersLock.Unlock()
 }
 
 func (s *settings) AddListener(listener func(fyne.Settings)) {
@@ -108,15 +111,16 @@ func (s *settings) AddListener(listener func(fyne.Settings)) {
 }
 
 func (s *settings) apply() {
-	s.changeListeners.Range(func(listener chan fyne.Settings, _ bool) bool {
+	s.changeListenersLock.Lock()
+	for listener := range s.changeListeners {
 		select {
 		case listener <- s:
 		default:
 			l := listener
 			go func() { l <- s }()
 		}
-		return true
-	})
+	}
+	s.changeListenersLock.Unlock()
 
 	for _, l := range s.listeners {
 		l(s)
@@ -169,7 +173,7 @@ func (s *settings) setupTheme() {
 }
 
 func loadSettings() *settings {
-	s := &settings{}
+	s := &settings{changeListeners: make(map[chan fyne.Settings]struct{})}
 	s.load()
 
 	return s

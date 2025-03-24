@@ -57,54 +57,84 @@ func Clean(canvasRefreshed bool) {
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
 // canvas. Usually used to free all objects from a closing windows.
 func CleanCanvas(canvas fyne.Canvas) {
-	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
+	canvasesLock.Lock()
+	defer canvasesLock.Unlock()
+
+	for obj, cinfo := range canvases {
 		if cinfo.canvas != canvas {
-			return true
+			continue
 		}
 
-		canvases.Delete(obj)
+		delete(canvases, obj)
 
 		wid, ok := obj.(fyne.Widget)
 		if !ok {
-			return true
+			continue
 		}
-		rinfo, ok := renderers.LoadAndDelete(wid)
+
+		renderersLock.Lock()
+		rinfo, ok := renderers[wid]
 		if !ok {
-			return true
+			renderersLock.Unlock()
+			continue
 		}
+
+		delete(renderers, wid)
+		renderersLock.Unlock()
+
 		rinfo.renderer.Destroy()
-		overrides.Delete(wid)
-		return true
-	})
+
+		overridesLock.Lock()
+		delete(overrides, wid)
+		overridesLock.Unlock()
+	}
 }
 
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
-	svgs.Clear()
-	fontSizeCache.Clear()
+	canvasesLock.Lock()
+	for k := range svgs {
+		delete(svgs, k)
+	}
+	canvasesLock.Unlock()
+
+	fontSizeLock.Lock()
+	for k := range fontSizeCache {
+		delete(fontSizeCache, k)
+	}
+	fontSizeLock.Unlock()
+
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
 func destroyExpiredCanvases(now time.Time) {
-	canvases.Range(func(obj fyne.CanvasObject, cinfo *canvasInfo) bool {
+	canvasesLock.Lock()
+	defer canvasesLock.Unlock()
+
+	for obj, cinfo := range canvases {
 		if cinfo.isExpired(now) {
-			canvases.Delete(obj)
+			delete(canvases, obj)
 		}
-		return true
-	})
+	}
 }
 
 // destroyExpiredRenderers deletes the renderer from the cache and calls
 // renderer.Destroy()
 func destroyExpiredRenderers(now time.Time) {
-	renderers.Range(func(wid fyne.Widget, rinfo *rendererInfo) bool {
+	renderersLock.Lock()
+	defer renderersLock.Unlock()
+
+	for wid, rinfo := range renderers {
 		if rinfo.isExpired(now) {
 			rinfo.renderer.Destroy()
-			overrides.Delete(wid)
-			renderers.Delete(wid)
+
+			overridesLock.Lock()
+			delete(overrides, wid)
+			overridesLock.Unlock()
+
+			delete(renderers, wid)
 		}
-		return true
-	})
+	}
 }
 
 type expiringCache struct {
