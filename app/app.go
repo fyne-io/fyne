@@ -69,6 +69,11 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 
 func (a *fyneApp) Run() {
 	go a.lifecycle.RunEventQueue(a.driver.DoFromGoroutine)
+
+	if !a.driver.Device().IsMobile() {
+		a.settings.watchSettings()
+	}
+
 	a.driver.Run()
 }
 
@@ -160,10 +165,6 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)
 	newApp.storage = store
-
-	if !d.Device().IsMobile() {
-		newApp.settings.watchSettings()
-	}
 
 	httpHandler := intRepo.NewHTTPRepository()
 	repository.Register("http", httpHandler)
