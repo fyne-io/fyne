@@ -48,3 +48,7 @@ func themeChanged() {
 func watchTheme(_ *settings) {
 	C.watchTheme()
 }
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
+}

@@ -170,6 +170,8 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	repository.Register("http", httpHandler)
 	repository.Register("https", httpHandler)
 
+	newApp.registerRepositories()
+
 	return newApp
 }
 

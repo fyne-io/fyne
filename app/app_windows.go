@@ -94,3 +94,7 @@ func watchTheme(s *settings) {
 		fyne.Do(s.setupTheme)
 	})
 }
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
+}
