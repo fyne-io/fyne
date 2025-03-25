@@ -112,14 +112,7 @@ func (f *idbfile) Write(data []byte) (int, error) {
 			return 0, err
 		}
 
-		bytes := b.Call("bytes")
-		outch := make(chan js.Value)
-		bytes.Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			outch <- args[0]
-			return nil
-		}))
-		a := <-outch
-		f.parts = []interface{}{a}
+		f.parts = []interface{}{getbytes(b)}
 		f.isAdding = true
 	}
 
@@ -139,6 +132,16 @@ func (f *idbfile) Write(data []byte) (int, error) {
 
 	_, err = req.Await(ctx)
 	return n, err
+}
+
+func getbytes(b js.Value) js.Value {
+	outch := make(chan js.Value)
+	b.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		outch <- args[0]
+		return nil
+	}))
+	buf := <-outch
+	return uint8Array.New(buf)
 }
 
 func (f *idbfile) Read(data []byte) (int, error) {
@@ -166,13 +169,9 @@ func (f *idbfile) Read(data []byte) (int, error) {
 		return 0, fmt.Errorf("idbfile undefined")
 	}
 
-	bytes := b.Call("bytes")
-	outch := make(chan js.Value)
-	bytes.Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		outch <- args[0]
-		return nil
-	}))
-	out := <-outch
+	if !b.InstanceOf(blob) {
+		return 0, fmt.Errorf("returned object not of type blob")
+	}
 
-	return js.CopyBytesToGo(data, out), io.EOF
+	return js.CopyBytesToGo(data, getbytes(b)), io.EOF
 }
