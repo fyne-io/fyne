@@ -119,7 +119,6 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Focusable
 func (l *List) FocusGained() {
 	l.focused = true
-	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
 }
 
@@ -178,6 +177,7 @@ func (l *List) scrollTo(id ListItemID) {
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
 	y := float32(0)
 	lastItemHeight := l.itemMin.Height
+
 	if len(l.itemHeights) == 0 {
 		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	} else {
@@ -195,7 +195,6 @@ func (l *List) scrollTo(id ListItemID) {
 			lastItemHeight = h
 		}
 	}
-
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
