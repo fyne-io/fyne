@@ -145,22 +145,7 @@ func getbytes(b js.Value) js.Value {
 }
 
 func (f *idbfile) Read(data []byte) (int, error) {
-	ctx := context.Background()
-	txn, err := f.db.Transaction(idb.TransactionReadOnly, "data")
-	if err != nil {
-		return 0, err
-	}
-
-	store, err := txn.ObjectStore("data")
-	if err != nil {
-		return 0, err
-	}
-	req, err := store.Get(js.ValueOf(f.path))
-	if err != nil {
-		return 0, err
-	}
-
-	b, err := req.Await(ctx)
+	b, err := get(f.db, "data", f.path)
 	if err != nil {
 		return 0, err
 	}

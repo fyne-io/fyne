@@ -82,23 +82,34 @@ func (r *IndexDBRepository) Exists(u fyne.URI) (bool, error) {
 	return n != 0, nil
 }
 
-func (r *IndexDBRepository) CanList(u fyne.URI) (bool, error) {
-	p := u.Path()
+func get(db *idb.Database, s, p string) (js.Value, error) {
 	ctx := context.Background()
-	txn, err := r.db.Transaction(idb.TransactionReadOnly, "meta")
+
+	txn, err := db.Transaction(idb.TransactionReadOnly, s)
 	if err != nil {
-		return false, err
+		return js.Undefined(), err
 	}
-	store, err := txn.ObjectStore("meta")
+	store, err := txn.ObjectStore(s)
 	if err != nil {
-		return false, err
+		return js.Undefined(), err
 	}
 	req, err := store.Get(js.ValueOf(p))
 	if err != nil {
-		return false, err
+		return js.Undefined(), err
 	}
 
 	v, err := req.Await(ctx)
+	if err != nil {
+		return js.Undefined(), err
+	}
+
+	return v, nil
+}
+
+func (r *IndexDBRepository) CanList(u fyne.URI) (bool, error) {
+	p := u.Path()
+
+	v, err := get(r.db, "meta", p)
 	if err != nil {
 		return false, err
 	}
@@ -148,23 +159,8 @@ func (r *IndexDBRepository) CreateListable(u fyne.URI) error {
 
 func (r *IndexDBRepository) CanRead(u fyne.URI) (bool, error) {
 	p := u.Path()
-	ctx := context.Background()
-	txn, err := r.db.Transaction(idb.TransactionReadOnly, "meta")
-	if err != nil {
-		return false, err
-	}
 
-	store, err := txn.ObjectStore("meta")
-	if err != nil {
-		return false, err
-	}
-
-	req, err := store.Get(js.ValueOf(p))
-	if err != nil {
-		return false, err
-	}
-
-	v, err := req.Await(ctx)
+	v, err := get(r.db, "meta", p)
 	if err != nil {
 		return false, err
 	}
@@ -224,21 +220,7 @@ func (r *IndexDBRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 func (r *IndexDBRepository) CanWrite(u fyne.URI) (bool, error) {
 	p := u.Path()
-	ctx := context.Background()
-	txn, err := r.db.Transaction(idb.TransactionReadOnly, "meta")
-	if err != nil {
-		return false, err
-	}
-	store, err := txn.ObjectStore("meta")
-	if err != nil {
-		return false, err
-	}
-	req, err := store.Get(js.ValueOf(p))
-	if err != nil {
-		return false, err
-	}
-
-	v, err := req.Await(ctx)
+	v, err := get(r.db, "meta", p)
 	if err != nil {
 		return false, err
 	}
