@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"syscall/js"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -64,23 +65,11 @@ func (f *idbfile) Write(data []byte) (int, error) {
 	p := f.path
 	ctx := context.Background()
 
-	if f.truncate && !f.isTruncated || f.add && !f.isAdding {
-		store, err := f.rwstore("meta")
-		if err != nil {
-			return 0, err
-		}
-
-		f := map[string]interface{}{
-			"parent": f.parent,
-		}
-		req, err := store.PutKey(js.ValueOf(p), js.ValueOf(f))
-		if err != nil {
-			return 0, err
-		}
-
-		if _, err := req.Await(ctx); err != nil {
-			return 0, err
-		}
+	m := map[string]interface{}{
+		"parent": f.parent,
+		"size":   0,
+		"ctime":  0,
+		"mtime":  0,
 	}
 
 	if f.truncate && !f.isTruncated {
@@ -96,24 +85,27 @@ func (f *idbfile) Write(data []byte) (int, error) {
 			return 0, err
 		}
 		f.isTruncated = true
+
+		m["ctime"] = time.Now().UnixMilli()
+		m["mtime"] = m["ctime"]
 	}
 
 	if f.add && !f.isAdding {
-		store, err := f.rwstore("data")
-		if err != nil {
-			return 0, err
-		}
-		req, err := store.Get(js.ValueOf(f.path))
-		if err != nil {
-			return 0, err
-		}
-		b, err := req.Await(ctx)
+		b, err := get(f.db, "data", f.path)
 		if err != nil {
 			return 0, err
 		}
 
 		f.parts = []interface{}{getbytes(b)}
 		f.isAdding = true
+
+		meta, err := get(f.db, "meta", f.path)
+		if err != nil {
+			return 0, err
+		}
+
+		m["ctime"] = meta.Get("ctime").Int()
+		m["mtime"] = time.Now().UnixMilli()
 	}
 
 	a := uint8Array.New(len(data))
@@ -121,12 +113,28 @@ func (f *idbfile) Write(data []byte) (int, error) {
 	f.parts = append(f.parts, a)
 	b := blob.New(js.ValueOf(f.parts))
 
+	m["size"] = b.Get("size").Int()
+
+	metastore, err := f.rwstore("meta")
+	if err != nil {
+		return 0, err
+	}
+
+	metareq, err := metastore.PutKey(js.ValueOf(p), js.ValueOf(m))
+	if err != nil {
+		return 0, err
+	}
+
 	store, err := f.rwstore("data")
 	if err != nil {
 		return 0, err
 	}
 	req, err := store.PutKey(js.ValueOf(p), b)
 	if err != nil {
+		return 0, err
+	}
+
+	if _, err := metareq.Await(ctx); err != nil {
 		return 0, err
 	}
 
