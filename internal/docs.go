@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"net/url"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -28,7 +29,7 @@ func (d *Docs) Create(name string) (fyne.URIWriteCloser, error) {
 		return nil, err
 	}
 
-	u, err := storage.Child(d.RootDocURI, name)
+	u, err := d.childURI(name)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +60,9 @@ func (d *Docs) List() []string {
 	ret := make([]string, len(uris))
 	for i, u := range uris {
 		ret[i] = u.Name()
+		if d.RootDocURI.Scheme() != "file" {
+			ret[i], _ = url.PathUnescape(u.Name())
+		}
 	}
 
 	return ret
@@ -70,7 +74,7 @@ func (d *Docs) Open(name string) (fyne.URIReadCloser, error) {
 		return nil, errNoAppID
 	}
 
-	u, err := storage.Child(d.RootDocURI, name)
+	u, err := d.childURI(name)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +88,7 @@ func (d *Docs) Remove(name string) error {
 		return errNoAppID
 	}
 
-	u, err := storage.Child(d.RootDocURI, name)
+	u, err := d.childURI(name)
 	if err != nil {
 		return err
 	}
@@ -99,7 +103,7 @@ func (d *Docs) Save(name string) (fyne.URIWriteCloser, error) {
 		return nil, errNoAppID
 	}
 
-	u, err := storage.Child(d.RootDocURI, name)
+	u, err := d.childURI(name)
 	if err != nil {
 		return nil, err
 	}
@@ -125,4 +129,13 @@ func (d *Docs) ensureRootExists() error {
 	}
 
 	return storage.CreateListable(d.RootDocURI)
+}
+
+func (d *Docs) childURI(name string) (fyne.URI, error) {
+	encoded := name
+	if d.RootDocURI.Scheme() != "file" {
+		encoded = url.PathEscape(name)
+	}
+
+	return storage.Child(d.RootDocURI, encoded)
 }
