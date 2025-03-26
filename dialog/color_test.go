@@ -111,6 +111,106 @@ func TestColorDialog_SetColor(t *testing.T) {
 	d.Show()
 }
 
+func TestColorDialog_Buttons(t *testing.T) {
+	for name, tt := range map[string]struct {
+		action         func(d *ColorPickerDialog, w fyne.Window)
+		advanced       bool
+		expectedCalled bool
+		expectedClosed bool
+	}{
+		"confirmAdvanced": {
+			action: func(d *ColorPickerDialog, w fyne.Window) {
+				test.FocusNext(w.Canvas()) // advanced accordion
+				test.FocusNext(w.Canvas()) // dismiss button
+				test.FocusNext(w.Canvas()) // confirm button
+				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+			},
+			advanced:       true,
+			expectedCalled: true,
+			expectedClosed: true,
+		},
+		"dismissAdvanced": {
+			action: func(d *ColorPickerDialog, w fyne.Window) {
+				test.FocusNext(w.Canvas()) // advanced accordion
+				test.FocusNext(w.Canvas()) // dismiss button
+				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+			},
+			advanced:       true,
+			expectedCalled: false,
+			expectedClosed: true,
+		},
+		"dismissSimple": {
+			action: func(d *ColorPickerDialog, w fyne.Window) {
+				test.FocusNext(w.Canvas()) // dismiss button
+				w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+			},
+			advanced:       false,
+			expectedCalled: false,
+			expectedClosed: true,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			test.NewTempApp(t)
+			w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+			w.Resize(fyne.NewSize(800, 600))
+
+			called := false
+			closed := false
+			d := NewColorPicker("Color Picker", "Pick a Color", func(_ color.Color) {
+				called = true
+			}, w)
+			d.Advanced = tt.advanced
+			d.SetOnClosed(func() {
+				closed = true
+			})
+			d.Refresh()
+			d.Show()
+			tt.action(d, w)
+
+			assert.Equal(t, tt.expectedCalled, called, "called isn't equal")
+			assert.Equal(t, tt.expectedClosed, closed, "closed isn't equal")
+		})
+	}
+}
+
+func TestColorDialog_DoubleCallback(t *testing.T) {
+	ch := make(chan int, 2)
+	d := NewColorPicker("Color Picker", "Pick a Color", func(_ color.Color) {
+		ch <- 42
+	}, test.NewTempWindow(t, nil))
+	d.SetOnClosed(func() {
+		ch <- 43
+	})
+	d.Refresh()
+	d.Show()
+	assert.False(t, d.win.Hidden)
+	go test.Tap(d.dismiss)
+	assert.EqualValues(t, <-ch, 43)
+	assert.True(t, d.win.Hidden)
+	close(ch)
+
+	ch = make(chan int, 2)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+	d = NewColorPicker("Color Picker", "Pick a Color", func(_ color.Color) {
+		ch <- 52
+	}, w)
+	d.Advanced = true
+	d.SetOnClosed(func() {
+		ch <- 53
+	})
+	d.Refresh()
+	d.Show()
+	assert.False(t, d.win.Hidden)
+	test.FocusNext(w.Canvas()) // advanced accordion
+	test.FocusNext(w.Canvas()) // dismiss button
+	test.FocusNext(w.Canvas()) // confirm button
+	w.Canvas().Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.EqualValues(t, <-ch, 52)
+	assert.EqualValues(t, <-ch, 53)
+	//assert.True(t, d.win.Hidden, "hidden status of window") shouldn't this work???
+	close(ch)
+}
+
 func TestColorDialogSimple_Theme(t *testing.T) {
 	test.NewTempApp(t)
 
