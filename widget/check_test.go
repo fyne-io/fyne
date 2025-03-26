@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
@@ -23,13 +24,13 @@ func TestCheck_Binding(t *testing.T) {
 	assert.False(t, c.Checked)
 
 	err := val.Set(true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	waitForBinding()
 	assert.True(t, c.Checked)
 
 	c.SetChecked(false)
 	v, err := val.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, v)
 
 	c.Unbind()
@@ -82,7 +83,7 @@ func TestCheck_Layout(t *testing.T) {
 func TestNewCheckWithData(t *testing.T) {
 	val := binding.NewBool()
 	err := val.Set(true)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	c := widget.NewCheckWithData("", val)
 	waitForBinding()
@@ -90,7 +91,7 @@ func TestNewCheckWithData(t *testing.T) {
 
 	c.SetChecked(false)
 	v, err := val.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, v)
 }
 

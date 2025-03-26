@@ -13,7 +13,7 @@ import "github.com/go-text/typesetting/fontscan"
 //		chosen := &mockFace{CloseFunc: func() error { return nil }}
 //		fallback := &mockFace{CloseFunc: func() error { return nil }}
 //		c := newFontWithFallback(chosen, fallback, chosenFont, fallbackFont)
-//		if assert.NoError(t, c.Close()) {
+//		if require.NoError(t, c.Close()) {
 //			assert.True(t, chosen.CloseInvoked)
 //			assert.True(t, fallback.CloseInvoked)
 //		}

@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -69,7 +70,7 @@ func TestShowFolderOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.NoError(t, openErr)
+	require.NoError(t, openErr)
 
 	assert.Equal(t, (*target).String(), chosen.String())
 }

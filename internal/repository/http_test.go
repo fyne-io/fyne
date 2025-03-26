@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // helper function to register the HTTP and HTTPS repositories
@@ -27,18 +28,18 @@ func TestHTTPRepositoryRegistration(t *testing.T) {
 
 	// Test HTTPRespository registration for http scheme
 	httpurl, err := storage.ParseURI("http://foo.com/bar")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	httpRepo, err := repository.ForURI(httpurl)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, http, httpRepo)
 
 	// test HTTPRepository registration for https scheme
 	httpsurl, err := storage.ParseURI("https://foo.com/bar")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	httpsRepo, err := repository.ForURI(httpsurl)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, https, httpsRepo)
 }
 
@@ -62,27 +63,27 @@ func TestHTTPRepositoryExists(t *testing.T) {
 
 	// test a valid url
 	resExists, err := storage.ParseURI(validHost)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	exists, err := storage.Exists(resExists)
-	assert.Nil(t, err)
-	assert.Equal(t, true, exists)
+	require.NoError(t, err)
+	assert.True(t, exists)
 
 	// test a valid host with an invalid path
 	resNotExists, err := storage.ParseURI(validHost + invalidPath)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	exists, err = storage.Exists(resNotExists)
-	assert.Nil(t, err)
-	assert.Equal(t, false, exists)
+	require.NoError(t, err)
+	assert.False(t, exists)
 
 	// test an invalid host
 	resInvalid, err := storage.ParseURI(invalidHost + invalidPath)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	exists, err = storage.Exists(resInvalid)
-	assert.NotNil(t, err)
-	assert.Equal(t, false, exists)
+	require.Error(t, err)
+	assert.False(t, exists)
 }
 
 func TestHTTPRepositoryReader(t *testing.T) {
@@ -108,12 +109,12 @@ func TestHTTPRepositoryReader(t *testing.T) {
 
 	// test a valid url returning a valid response body
 	resExists, err := storage.ParseURI(validHost)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	data := make([]byte, len(testData))
 	// the reader should be obtained without an error
 	reader, err := storage.Reader(resExists)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// data read from the reader should be equal to testData
 	n, err := reader.Read(data)
@@ -123,16 +124,16 @@ func TestHTTPRepositoryReader(t *testing.T) {
 
 	// test a invalid url returning an error
 	resInvalid, err := storage.ParseURI(invalidHost)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	data = make([]byte, len(testData))
 	// the reader should not have any data and an error should be obtained
 	reader, err = storage.Reader(resInvalid)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	// no data should be read from the reader
 	n, err = reader.Read(data)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 0, n)
 }
 
@@ -156,25 +157,25 @@ func TestHTTPRepositoryCanRead(t *testing.T) {
 
 	// test a valid url returning a valid response body
 	resExists, err := storage.ParseURI(validHost)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	canRead, err := storage.CanRead(resExists)
-	assert.Nil(t, err)
-	assert.Equal(t, true, canRead)
+	require.NoError(t, err)
+	assert.True(t, canRead)
 
 	// test a invalid url for a valid host
 	resNotExists, err := storage.ParseURI(validHost + invalidPath)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	canRead, err = storage.CanRead(resNotExists)
-	assert.NotNil(t, err)
-	assert.Equal(t, false, canRead)
+	require.Error(t, err)
+	assert.False(t, canRead)
 
 	// test a invalid host
 	resInvalid, err := storage.ParseURI(invalidHost)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	canRead, err = storage.CanRead(resInvalid)
-	assert.NotNil(t, err)
-	assert.Equal(t, false, canRead)
+	require.Error(t, err)
+	assert.False(t, canRead)
 }

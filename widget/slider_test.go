@@ -9,12 +9,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewSliderWithData(t *testing.T) {
 	val := binding.NewFloat()
 	err := val.Set(4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
@@ -22,7 +23,7 @@ func TestNewSliderWithData(t *testing.T) {
 
 	s.SetValue(2.0)
 	f, err := val.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2.0, f)
 }
 
@@ -37,13 +38,13 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 0.0, s.Value)
 
 	err := val.Set(3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, 3.0, s.Value)
 
 	s.SetValue(5)
 	f, err := val.Get()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5.0, f)
 
 	s.Unbind()

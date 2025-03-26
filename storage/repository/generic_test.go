@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenericParent(t *testing.T) {
@@ -21,7 +22,7 @@ func TestGenericParent(t *testing.T) {
 		t.Logf("case %d, input='%s', expect='%s', err='%v'\n", i, c.input, c.expect, c.err)
 
 		u, err := ParseURI(c.input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		res, err := GenericParent(u)
 		assert.Equal(t, c.err, err)
@@ -51,7 +52,7 @@ func TestGenericChild(t *testing.T) {
 		t.Logf("case %d, input='%s', component='%s', expect='%s', err='%v'\n", i, c.input, c.component, c.expect, c.err)
 
 		u, err := ParseURI(c.input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		res, err := GenericChild(u, c.component)
 		assert.Equal(t, c.err, err)

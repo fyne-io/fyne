@@ -48,7 +48,7 @@ func TestText_MinSize_NoMultiLine(t *testing.T) {
 	text = canvas.NewText("Bre\nak", color.NRGBA{0, 0, 0, 0xff})
 	min2 := text.MinSize()
 	assert.Greater(t, min2.Width, min.Width)
-	assert.True(t, min2.Height == min.Height)
+	assert.Equal(t, min2.Height, min.Height)
 }
 
 func TestText_Layout(t *testing.T) {

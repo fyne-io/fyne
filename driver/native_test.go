@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunNative(t *testing.T) {
@@ -16,5 +17,5 @@ func TestRunNative(t *testing.T) {
 		return nil
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
