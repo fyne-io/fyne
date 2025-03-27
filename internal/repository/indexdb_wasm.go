@@ -56,6 +56,11 @@ func NewIndexDBRepository() (*IndexDBRepository, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if err := mkdir(db, "/", ""); err != nil {
+		return nil, err
+	}
+
 	return &IndexDBRepository{db: db}, nil
 }
 
@@ -126,15 +131,9 @@ func (r *IndexDBRepository) CanList(u fyne.URI) (bool, error) {
 	return isDir.Bool(), nil
 }
 
-func (r *IndexDBRepository) CreateListable(u fyne.URI) error {
-	p := u.Path()
-	pu, err := storage.Parent(u)
-	if err != nil {
-		return err
-	}
-
+func mkdir(db *idb.Database, dir, parent string) error {
 	ctx := context.Background()
-	txn, err := r.db.Transaction(idb.TransactionReadWrite, "meta")
+	txn, err := db.Transaction(idb.TransactionReadWrite, "meta")
 	if err != nil {
 		return err
 	}
@@ -146,15 +145,23 @@ func (r *IndexDBRepository) CreateListable(u fyne.URI) error {
 
 	f := map[string]interface{}{
 		"isDir":  true,
-		"parent": pu.Path(),
+		"parent": parent,
 	}
-	req, err := store.PutKey(js.ValueOf(p), js.ValueOf(f))
+	req, err := store.PutKey(js.ValueOf(dir), js.ValueOf(f))
 	if err != nil {
 		return err
 	}
 
 	_, err = req.Await(ctx)
 	return err
+}
+
+func (r *IndexDBRepository) CreateListable(u fyne.URI) error {
+	pu, err := storage.Parent(u)
+	if err != nil {
+		return err
+	}
+	return mkdir(r.db, u.Path(), pu.Path())
 }
 
 func (r *IndexDBRepository) CanRead(u fyne.URI) (bool, error) {
