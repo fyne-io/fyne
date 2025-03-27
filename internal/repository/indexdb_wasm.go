@@ -213,7 +213,10 @@ func (r *IndexDBRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 	us := make([]fyne.URI, len(paths))
 	for n, path := range paths {
-		us[n], _ = storage.ParseURI(path)
+		us[n], err = storage.ParseURI(path)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return us, nil
 }
