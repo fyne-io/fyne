@@ -13,9 +13,9 @@ import (
 	"github.com/hack-pad/go-indexeddb/idb"
 )
 
-// fileSchemePrefix is used for when we need a hard-coded version of "idb://"
+// fileSchemePrefix is used for when we need a hard-coded version of "idbfile://"
 // for string processing
-const idbfileSchemePrefix string = "idb://"
+const idbfileSchemePrefix string = "idbfile://"
 
 var _ repository.Repository = (*IndexDBRepository)(nil)
 var _ repository.WritableRepository = (*IndexDBRepository)(nil)
