@@ -27,8 +27,8 @@ func TestDialog_ConfirmDoubleCallback(t *testing.T) {
 
 	assert.False(t, cnf.win.Hidden)
 	go cnf.Dismiss()
-	assert.EqualValues(t, 43, <-ch)
 	assert.EqualValues(t, 42, <-ch)
+	assert.EqualValues(t, 43, <-ch)
 	assert.True(t, cnf.win.Hidden)
 }
 

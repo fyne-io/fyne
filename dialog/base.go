@@ -111,10 +111,10 @@ func (d *dialog) SetOnClosed(closed func()) {
 	originalCallback := d.callback
 
 	d.callback = func(response bool) {
-		closed()
 		if originalCallback != nil {
 			originalCallback(response)
 		}
+		closed()
 	}
 }
 

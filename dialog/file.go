@@ -813,10 +813,10 @@ func (f *FileDialog) SetOnClosed(closed func()) {
 		if f.dialog == nil {
 			return
 		}
-		closed()
 		if originalCallback != nil {
 			originalCallback(response)
 		}
+		closed()
 	}
 }
 
