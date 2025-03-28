@@ -4,7 +4,6 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
-	"os"
 	"strconv"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
@@ -138,7 +138,12 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 		return &internal.Docs{} // an empty impl to avoid crashes
 	}
 	if root := s.a.storageRoot(); root != "" {
-		err := os.MkdirAll(root, 0755) // make the space before anyone can use it
+		uri, err := storage.ParseURI(root)
+		if err != nil {
+			uri = storage.NewFileURI(root)
+		}
+
+		err = storage.CreateListable(uri)
 		if err != nil {
 			fyne.LogError("Failed to create app storage space", err)
 		}
@@ -161,6 +166,8 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 			prefs.forceImmediateSave()
 		}
 	})
+
+	newApp.registerRepositories() // for web this may provide docs / settings
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)
@@ -169,7 +176,6 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	httpHandler := intRepo.NewHTTPRepository()
 	repository.Register("http", httpHandler)
 	repository.Register("https", httpHandler)
-
 	return newApp
 }
 

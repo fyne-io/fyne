@@ -12,7 +12,7 @@ import (
 const preferencesLocalStorageKey = "fyne-preferences.json"
 
 func (a *fyneApp) storageRoot() string {
-	return "" // no storage root for web driver yet
+	return "idbfile:///fyne/"
 }
 
 func (p *preferences) storageReader() (io.ReadCloser, error) {
