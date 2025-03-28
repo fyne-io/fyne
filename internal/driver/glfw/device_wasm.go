@@ -25,6 +25,23 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 	return float32(js.Global().Get("devicePixelRatio").Float())
 }
 
+func (*glDevice) hideVirtualKeyboard() {
+	dummyEntry().Call("blur")
+}
+
+func (*glDevice) showVirtualKeyboard() {
+	dummyEntry().Call("focus")
+}
+
+func connectKeyboard(c *glCanvas) {
+	c.OnFocus = handleKeyboard
+	c.OnUnfocus = hideVirtualKeyboard
+}
+
+func dummyEntry() js.Value {
+	return js.Global().Get("document").Call("getElementById", "dummyEntry")
+}
+
 func isMacOSRuntime() bool {
 	return isMacOS // Value depends on which OS the browser is running on.
 }

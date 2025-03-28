@@ -305,6 +305,7 @@ func (c *glCanvas) applyThemeOutOfTreeObjects() {
 
 func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
+	connectKeyboard(c)
 	c.Initialize(c, c.overlayChanged)
 	c.setContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	return c
