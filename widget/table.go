@@ -216,7 +216,6 @@ func (t *Table) DragEnd() {
 // Implements: fyne.Focusable
 func (t *Table) FocusGained() {
 	t.focused = true
-	t.ScrollTo(t.currentFocus)
 	t.RefreshItem(t.currentFocus)
 }
 

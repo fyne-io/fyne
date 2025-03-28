@@ -114,7 +114,6 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Focusable
 func (l *GridWrap) FocusGained() {
 	l.focused = true
-	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
 }
 

@@ -176,7 +176,6 @@ func (t *Tree) FocusGained() {
 	}
 
 	t.focused = true
-	t.ScrollTo(t.currentFocus)
 	t.RefreshItem(t.currentFocus)
 }
 
