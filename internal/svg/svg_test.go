@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/srwiley/oksvg"
+	"github.com/fyne-io/oksvg"
 	"github.com/srwiley/rasterx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

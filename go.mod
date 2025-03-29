@@ -10,7 +10,8 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/fyne-io/gl-js v0.1.0
 	github.com/fyne-io/glfw-js v0.2.0
-	github.com/fyne-io/image v0.1.0
+	github.com/fyne-io/image v0.1.1
+	github.com/fyne-io/oksvg v0.0.0-20250329173316-7ddb0d1149d1
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
@@ -27,7 +28,6 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/rymdport/portal v0.4.1
-	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.4.0
@@ -50,6 +50,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
