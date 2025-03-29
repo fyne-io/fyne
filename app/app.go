@@ -143,9 +143,12 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 			uri = storage.NewFileURI(root)
 		}
 
-		err = storage.CreateListable(uri)
-		if err != nil {
-			fyne.LogError("Failed to create app storage space", err)
+		exists, err := storage.Exists(uri)
+		if !exists || err != nil {
+			err = storage.CreateListable(uri)
+			if err != nil {
+				fyne.LogError("Failed to create app storage space", err)
+			}
 		}
 
 		root, _ := s.docRootURI()
