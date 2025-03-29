@@ -62,6 +62,10 @@ type Entry struct {
 	onValidationChanged func(error)
 	validationError     error
 
+	// When true, the entry will always display an validation error (if there is any) without user interaction.
+	// Since: 2.6
+	AlwaysShowValidationError bool
+
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
 
@@ -1517,7 +1521,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
-	if r.entry.Validator != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
 		validatorIconSize = fyne.NewSquareSize(iconSize)
 
 		r.ensureValidationSetup()
@@ -1667,8 +1671,8 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 
-	if r.entry.Validator != nil {
-		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
+		if !r.entry.focused && !r.entry.Disabled() && (r.entry.dirty || r.entry.AlwaysShowValidationError) && r.entry.validationError != nil {
 			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
 		}
 		r.ensureValidationSetup()
