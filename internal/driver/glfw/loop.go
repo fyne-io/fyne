@@ -86,7 +86,9 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
-		refreshed = refreshed || d.repaintWindow(w)
+		w.RunWithContext(func() {
+			refreshed = refreshed || w.driver.repaintWindow(w)
+		})
 	}
 	cache.Clean(refreshed)
 }
@@ -188,26 +190,25 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 func (d *gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
 	freed := false
-	w.RunWithContext(func() {
-		if canvas.EnsureMinSize() {
-			w.shouldExpand = true
-		}
-		freed = canvas.FreeDirtyTextures() > 0
+	if canvas.EnsureMinSize() {
+		w.shouldExpand = true
+	}
+	freed = canvas.FreeDirtyTextures() > 0
 
-		updateGLContext(w)
-		canvas.paint(canvas.Size())
+	updateGLContext(w)
+	canvas.paint(canvas.Size())
 
-		view := w.viewport
-		visible := w.visible
+	view := w.viewport
+	visible := w.visible
 
-		if view != nil && visible {
-			view.SwapBuffers()
-		}
+	if view != nil && visible {
+		view.SwapBuffers()
+	}
 
-		// mark that we have walked the window and don't
-		// need to walk it again to mark caches alive
-		w.lastWalkedTime = time.Now()
-	})
+	// mark that we have walked the window and don't
+	// need to walk it again to mark caches alive
+	w.lastWalkedTime = time.Now()
+	w.lastWalkedTime = time.Now()
 	return freed
 }
 

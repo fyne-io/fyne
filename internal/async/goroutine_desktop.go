@@ -1,4 +1,4 @@
-//go:build !wasm && !mobile
+//go:build !mobile
 
 package async
 
