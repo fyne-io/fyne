@@ -3,18 +3,18 @@
 		<widget pos="4,4" size="60x35" type="*widget.Entry">
 			<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="56x31"/>
 			<rectangle pos="1,1" radius="4" size="58x32" strokeColor="inputBorder" strokeWidth="2"/>
-			<widget pos="0,2" size="36x31" type="*widget.Scroll">
+			<widget pos="0,2" size="28x31" type="*widget.Scroll">
 				<widget size="66x31" type="*widget.entryContent">
 					<widget size="66x31" type="*widget.RichText">
 						<text pos="8,6" size="50x19">success</text>
 					</widget>
 				</widget>
-				<widget pos="36,0" size="0x31" type="*widget.Shadow">
+				<widget pos="28,0" size="0x31" type="*widget.Shadow">
 					<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x31"/>
 				</widget>
-				<widget pos="0,25" size="36x6" type="*widget.scrollBarArea">
-					<widget pos="0,3" size="19x3" type="*widget.scrollBar">
-						<rectangle fillColor="scrollbar" radius="3" size="19x3"/>
+				<widget pos="0,25" size="28x6" type="*widget.scrollBarArea">
+					<widget pos="0,3" size="16x3" type="*widget.scrollBar">
+						<rectangle fillColor="scrollbar" radius="3" size="16x3"/>
 					</widget>
 				</widget>
 			</widget>
