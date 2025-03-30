@@ -1,4 +1,4 @@
-//go:build ci || (mobile && !android && !ios) || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd && !wasm && !test_web_driver)
+//go:build ci || (!ios && !android && !linux && !darwin && !windows && !freebsd && !openbsd && !netbsd && !wasm && !test_web_driver)
 
 package app
 
