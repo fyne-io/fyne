@@ -208,7 +208,6 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 	// mark that we have walked the window and don't
 	// need to walk it again to mark caches alive
 	w.lastWalkedTime = time.Now()
-	w.lastWalkedTime = time.Now()
 	return freed
 }
 
