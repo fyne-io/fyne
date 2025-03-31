@@ -27,6 +27,7 @@ type selectable struct {
 
 	provider *RichText
 	theme    fyne.Theme
+	focus    fyne.Focusable
 
 	// doubleTappedAtUnixMillis stores the time the entry was last DoubleTapped
 	// used for deciding whether the next MouseDown/TouchDown is a triple-tap or not
@@ -55,10 +56,7 @@ func (s *selectable) DoubleTapped(p *fyne.PointEvent) {
 	s.cursorColumn = end
 
 	s.selecting = true
-	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
-		c.Focus(s)
-	}
-
+	s.grabFocus()
 	s.Refresh()
 }
 
@@ -87,22 +85,10 @@ func (s *selectable) dragged(d *fyne.DragEvent, focus bool) {
 		s.selectRow, s.selectColumn = s.getRowCol(startPos)
 		s.selecting = true
 
-		if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil && focus {
-			c.Focus(s)
-		}
+		s.grabFocus()
 	}
 
 	s.updateMousePointer(d.Position)
-	s.Refresh()
-}
-
-func (s *selectable) FocusGained() {
-	s.focussed = true
-	s.Refresh()
-}
-
-func (s *selectable) FocusLost() {
-	s.focussed = false
 	s.Refresh()
 }
 
@@ -111,9 +97,7 @@ func (s *selectable) MouseDown(m *desktop.MouseEvent) {
 		s.selectCurrentRow(false)
 		return
 	}
-	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil {
-		c.Focus(s) // ready for copy shortcut
-	}
+	s.grabFocus()
 	if s.selecting && m.Button == desktop.MouseButtonPrimary {
 		s.selecting = false
 	}
@@ -160,7 +144,7 @@ func (s *selectable) Tapped(*fyne.PointEvent) {
 }
 
 func (s *selectable) TappedSecondary(ev *fyne.PointEvent) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(s)
+	c := fyne.CurrentApp().Driver().CanvasForObject(s.focus.(fyne.CanvasObject))
 	if c == nil {
 		return
 	}
@@ -184,14 +168,6 @@ func (s *selectable) TouchDown(m *mobile.TouchEvent) {
 }
 
 func (s *selectable) TouchUp(*mobile.TouchEvent) {
-}
-
-func (s *selectable) TypedRune(rune) {
-	// read-only
-}
-
-func (s *selectable) TypedKey(*fyne.KeyEvent) {
-	// read-only
 }
 
 func (s *selectable) TypedShortcut(sh fyne.Shortcut) {
@@ -239,9 +215,7 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 
 // Selects the row where the cursorColumn is currently positioned
 func (s *selectable) selectCurrentRow(focus bool) {
-	if c := fyne.CurrentApp().Driver().CanvasForObject(s); c != nil && focus {
-		c.Focus(s)
-	}
+	s.grabFocus()
 	provider := s.provider
 	s.selectRow = s.cursorRow
 	s.selectColumn = 0
@@ -341,7 +315,7 @@ func (r *selectableRenderer) Refresh() {
 		}
 	}
 
-	canvas.Refresh(r.sel)
+	canvas.Refresh(r.sel.impl)
 }
 
 // This process builds a slice of rectangles:
@@ -426,6 +400,12 @@ func (r *selectableRenderer) buildSelection() {
 		// resize and reposition each rectangle
 		r.selections[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
 		r.selections[i].Move(fyne.NewPos(x1-1, y1))
+	}
+}
+
+func (s *selectable) grabFocus() {
+	if c := fyne.CurrentApp().Driver().CanvasForObject(s.focus.(fyne.CanvasObject)); c != nil {
+		c.Focus(s.focus)
 	}
 }
 

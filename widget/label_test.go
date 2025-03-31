@@ -206,7 +206,7 @@ func TestLabel_Select(t *testing.T) {
 	assert.Empty(t, l.SelectedText())
 	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
 		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
 	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
@@ -231,7 +231,7 @@ func TestLabel_SelectWord(t *testing.T) {
 
 	assert.Empty(t, l.SelectedText())
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	sel.DoubleTapped(&fyne.PointEvent{Position: fyne.NewPos(15, 10)})
 	assert.Equal(t, "Hello", l.SelectedText())
 }
@@ -242,7 +242,7 @@ func TestLabel_SelectLine(t *testing.T) {
 
 	assert.Empty(t, l.SelectedText())
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	pointEvent := fyne.PointEvent{Position: fyne.NewPos(15, 10)}
 	tapEvent := &desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
 		PointEvent: pointEvent}
@@ -307,7 +307,7 @@ func TestLabelSizeNameWithSelection(t *testing.T) {
 	assert.Empty(t, l.SelectedText())
 	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
 		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
 	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},

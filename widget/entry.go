@@ -1267,7 +1267,7 @@ func (e *Entry) syncSegments() {
 
 func (e *Entry) syncSelectable() {
 	if e.sel == nil {
-		e.sel = &selectable{theme: e.Theme(), provider: e.textProvider(), password: e.Password, style: e.TextStyle}
+		e.sel = &selectable{theme: e.Theme(), provider: e.textProvider(), focus: e, password: e.Password, style: e.TextStyle}
 		e.sel.ExtendBaseWidget(e.sel)
 	}
 
