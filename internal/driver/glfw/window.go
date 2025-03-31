@@ -305,7 +305,9 @@ func (w *window) processResized(width, height int) {
 		return
 	}
 
-	w.platformResize(canvasSize)
+	w.RunWithContext(func() {
+		w.platformResize(canvasSize)
+	})
 }
 
 func (w *window) processFrameSized(width, height int) {
