@@ -28,3 +28,7 @@ jobs:
 
     - name: Tests
       run: go test -race -tags mobile,ci,migrated_fynedo ./...
+
+    - name: Compile
+      working-directory: cmd/fyne_demo
+      run: go build -tags mobile
