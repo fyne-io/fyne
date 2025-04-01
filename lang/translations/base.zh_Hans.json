@@ -1,1 +1,45 @@
-{}
+{
+    "Advanced": "高级",
+    "Cancel": "取消",
+    "Confirm": "确认",
+    "Copy": "复制",
+    "Create Folder": "新建文件夹",
+    "Cut": "剪切",
+    "Enter filename": "输入文件名",
+    "Error": "错误",
+    "Favourites": "收藏",
+    "File": "文件",
+    "Folder": "文件夹",
+    "New Folder": "新文件夹",
+    "No": "不",
+    "OK": "好",
+    "Open": "打开",
+    "Paste": "粘贴",
+    "Quit": "退出",
+    "Redo": "重做",
+    "Save": "保存",
+    "Select all": "选择全部",
+    "Show Hidden Files": "显示隐藏的文件",
+    "Undo": "撤消",
+    "Yes": "是",
+    "file.name": {
+        "other": "名字"
+    },
+    "file.parent": {
+        "other": "父母"
+    },
+    "friday": "星期五",
+    "friday.short": "周五",
+    "monday": "星期一",
+    "monday.short": "周一",
+    "saturday": "星期六",
+    "saturday.short": "周六",
+    "sunday": "星期日",
+    "sunday.short": "周日",
+    "thursday": "星期四",
+    "thursday.short": "周四",
+    "tuesday": "星期二",
+    "tuesday.short": "周二",
+    "wednesday": "星期三",
+    "wednesday.short": "周三"
+}
