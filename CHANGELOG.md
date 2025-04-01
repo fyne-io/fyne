@@ -16,6 +16,13 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Odd looking SelectEntry with long PlaceHolder (#4430)
 
 
+## 2.5.5 - 13 March 2025
+
+### Fixed
+
+* Correct wasm build for Go 1.24 onwards
+
+
 ## 2.5.4 - 1 February 2025
 
 ### Changed
@@ -34,7 +41,6 @@ More detailed release notes can be found on the [releases page](https://github.c
 * File picker does not ignore case (#5113)
 * Tab "OnSelected" doesn't appear to allow focussing tab content (#5454)
 * Documentation fixes
->>>>>>> master
 
 
 ## 2.5.3 - 15 December 2024
