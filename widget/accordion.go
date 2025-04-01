@@ -141,6 +141,27 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	dividerOff := (pad + separator) / 2
 	x := float32(0)
 	y := float32(0)
+	hasOpen := 0
+
+	for i, ai := range r.container.Items {
+		h := r.headers[i]
+		min := h.MinSize().Height
+		y += min
+
+		if ai.Open {
+			y += pad + ai.Detail.MinSize().Height
+			hasOpen++
+		}
+		if i < len(r.container.Items)-1 {
+			y += pad
+		}
+	}
+
+	extra := (size.Height - y) / float32(hasOpen)
+	if extra < 0 {
+		extra = 0
+	}
+	y = 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
 			div := r.dividers[i-1]
@@ -161,7 +182,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			d := ai.Detail
 			d.Move(fyne.NewPos(x, y))
 
-			openSize := ai.Detail.MinSize().Height
+			openSize := ai.Detail.MinSize().Height + extra
 			d.Resize(fyne.NewSize(size.Width, openSize))
 			y += openSize
 		}
