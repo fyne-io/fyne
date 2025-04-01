@@ -311,6 +311,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		}
 	}
 	t.selected = []TreeNodeID{uid}
+	t.Refresh()
 	t.ScrollTo(uid)
 	if f := t.OnSelected; f != nil {
 		f(uid)
