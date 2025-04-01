@@ -11,7 +11,7 @@ require (
 	github.com/fyne-io/gl-js v0.1.0
 	github.com/fyne-io/glfw-js v0.2.0
 	github.com/fyne-io/image v0.1.1
-	github.com/fyne-io/oksvg v0.0.0-20250329173316-7ddb0d1149d1
+	github.com/fyne-io/oksvg v0.1.0
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
@@ -51,7 +51,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
-	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
