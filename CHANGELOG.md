@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.6.0 - 5 April 2025
+## 2.6.0 - 6 April 2025
 
 ### Added
 
@@ -28,7 +28,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Support custom titles in file dialogs using `SetTitleText`
  * Add utility methods to handle colouring of SVG images
  * Add preference bind APIs for list (slice) types
- * Add Greek & Ukrainian translations
+ * Added Greek, Ukrainian & Chinese (Simplified) translations
 
 ### Changed
 
@@ -44,6 +44,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * load markdown images from origin when not a URL
  * Debug now disabled by default for WASM builds
  * Updated theme of inner window borders with circle style and more customisations
+ * Change Accordion.OpenAll when used with single-open accordion to open the first item instead of none
 
 ### Fixed
 
@@ -74,6 +75,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * After scrolling, first selection in a list jumps that item to the bottom of the container (#5605)
  * Accordion could have incorrect layout with multiple items open
  * Prevent tapping within a popup from dismissing it, even if non-modal (#5360)
+ * Resolved performance issues in text and custom theme handling
 
 
 ## 2.5.5 - 13 March 2025
