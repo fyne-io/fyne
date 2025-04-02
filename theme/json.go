@@ -39,9 +39,15 @@ func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) 
 	return &jsonTheme{data: th, fallback: fallback}, nil
 }
 
+var parsedColors = map[hexColor]color.Color{}
+
 type hexColor string
 
 func (h hexColor) color() (color.Color, error) {
+	if parsed, ok := parsedColors[h]; ok {
+		return parsed, nil
+	}
+
 	data := h
 	switch len([]rune(h)) {
 	case 8, 6:
@@ -77,6 +83,7 @@ func (h hexColor) color() (color.Color, error) {
 		ret.A = 0xff
 	}
 
+	parsedColors[h] = ret
 	return ret, nil
 }
 
