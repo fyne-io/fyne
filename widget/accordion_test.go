@@ -520,8 +520,8 @@ func TestAccordion_OpenAll(t *testing.T) {
 	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
 
 	ac.OpenAll()
-	// Cannot open all items if !accordion.MultiOpen
-	assert.False(t, ac.Items[0].Open)
+	// Can only open first item if !accordion.MultiOpen
+	assert.True(t, ac.Items[0].Open)
 	assert.False(t, ac.Items[1].Open)
 	assert.False(t, ac.Items[2].Open)
 
