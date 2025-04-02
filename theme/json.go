@@ -36,15 +36,13 @@ func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) 
 		return fallback, err
 	}
 
-	return &jsonTheme{data: th, fallback: fallback}, nil
+	return &jsonTheme{data: th, fallback: fallback, parsedColors: map[hexColor]color.Color{}}, nil
 }
-
-var parsedColors = map[hexColor]color.Color{}
 
 type hexColor string
 
-func (h hexColor) color() (color.Color, error) {
-	if parsed, ok := parsedColors[h]; ok {
+func (h hexColor) color(cache map[hexColor]color.Color) (color.Color, error) {
+	if parsed, ok := cache[h]; ok {
 		return parsed, nil
 	}
 
@@ -83,7 +81,9 @@ func (h hexColor) color() (color.Color, error) {
 		ret.A = 0xff
 	}
 
-	parsedColors[h] = ret
+	if cache != nil {
+		cache[h] = ret
+	}
 	return ret, nil
 }
 
@@ -116,13 +116,15 @@ type schema struct {
 type jsonTheme struct {
 	data     *schema
 	fallback fyne.Theme
+
+	parsedColors map[hexColor]color.Color
 }
 
 func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch variant {
 	case VariantLight:
 		if val, ok := t.data.LightColors[string(name)]; ok {
-			c, err := val.color()
+			c, err := val.color(t.parsedColors)
 			if err != nil {
 				fyne.LogError("Failed to parse color", err)
 			} else {
@@ -131,7 +133,7 @@ func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) c
 		}
 	case VariantDark:
 		if val, ok := t.data.DarkColors[string(name)]; ok {
-			c, err := val.color()
+			c, err := val.color(t.parsedColors)
 			if err != nil {
 				fyne.LogError("Failed to parse color", err)
 			} else {
@@ -141,7 +143,7 @@ func (t *jsonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) c
 	}
 
 	if val, ok := t.data.Colors[string(name)]; ok {
-		c, err := val.color()
+		c, err := val.color(t.parsedColors)
 		if err != nil {
 			fyne.LogError("Failed to parse color", err)
 		} else {
