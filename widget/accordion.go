@@ -83,11 +83,11 @@ func (a *Accordion) Open(index int) {
 	a.Refresh()
 }
 
-// OpenAll expands all items.
+// OpenAll expands all items, note that your Accordion should have [MultiOpen] set to `true` for this to operate as
+// expected. For single-open accordions it will open only the first item.
 func (a *Accordion) OpenAll() {
-	multiOpen := a.MultiOpen
-
-	if !multiOpen {
+	if !a.MultiOpen {
+		a.Open(0)
 		return
 	}
 
