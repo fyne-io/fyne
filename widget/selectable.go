@@ -184,8 +184,8 @@ func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
 
 	for i := 0; i < len(text); i++ {
 		str := string(text[0:i])
-		wid := fyne.MeasureText(str, textSize, fyne.TextStyle{}).Width                 // todo e.TextStyle
-		charWid := fyne.MeasureText(string(text[i]), textSize, fyne.TextStyle{}).Width // todo e.TextStyle
+		wid := fyne.MeasureText(str, textSize, s.style).Width
+		charWid := fyne.MeasureText(string(text[i]), textSize, s.style).Width
 		if pos.X < innerPad+wid+(charWid/2) {
 			return i
 		}
@@ -198,7 +198,7 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
-	rowHeight := s.provider.charMinSize(false, fyne.TextStyle{}, textSize).Height // TODO (e.Password, e.TextStyle, textSize).Height
+	rowHeight := s.provider.charMinSize(false, s.style, textSize).Height // TODO handle Password
 	row := int(math.Floor(float64(p.Y-innerPad+th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
 	col := 0
 	if row < 0 {
