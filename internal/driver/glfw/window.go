@@ -985,6 +985,10 @@ func (w *window) doShowAgain() {
 	}
 	view.Show()
 	w.visible = true
+
+	w.RunWithContext(func() {
+		w.driver.repaintWindow(w)
+	})
 }
 
 func (w *window) isClosing() bool {
