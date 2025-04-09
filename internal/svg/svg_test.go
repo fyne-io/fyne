@@ -147,7 +147,7 @@ func TestColorize(t *testing.T) {
 		"circle mask normal": {
 			svgFile:   "circle-mask-normal.svg",
 			color:     color.Gray{Y: 0xff},
-			wantImage: "colorized/circle-mask-simplified_white.png",
+			wantImage: "colorized/circle-mask-normal_white.png",
 		},
 	}
 	for name, tt := range tests {
