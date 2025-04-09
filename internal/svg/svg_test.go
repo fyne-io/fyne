@@ -140,12 +140,12 @@ func TestColorize(t *testing.T) {
 			wantImage: "colorized/circles_white.png",
 		},
 		"circle mask simplified": {
-			svgFile: "circle-mask-simplified.svg",
+			svgFile:   "circle-mask-simplified.svg",
 			color:     color.Gray{Y: 0xff},
 			wantImage: "colorized/circle-mask-simplified_white.png",
 		},
 		"circle mask normal": {
-			svgFile: "circle-mask-normal.svg",
+			svgFile:   "circle-mask-normal.svg",
 			color:     color.Gray{Y: 0xff},
 			wantImage: "colorized/circle-mask-simplified_white.png",
 		},
