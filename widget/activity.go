@@ -113,10 +113,8 @@ func (a *activityRenderer) Refresh() {
 		if !a.wasStarted {
 			a.start()
 		}
-		return
 	} else if a.wasStarted {
 		a.stop()
-		return
 	}
 
 	a.updateColor()
