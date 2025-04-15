@@ -34,6 +34,10 @@ func closestSupportedLocale(locs []string) fyne.Locale {
 		if err != nil {
 			fyne.LogError("Error parsing user locale "+loc, err)
 		}
+
+		if lang, _, _ := tag.Raw(); lang.String() == "ru" { // #5671 TODO remove when we get russian translation
+			continue
+		}
 		tags[i] = tag
 	}
 	best, _, _ := matcher.Match(tags...)
