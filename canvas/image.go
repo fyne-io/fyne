@@ -135,6 +135,9 @@ func (i *Image) Refresh() {
 		rc = io.NopCloser(r)
 	} else if i.previousRender {
 		i.previousRender = false
+
+		Refresh(i)
+		return
 	} else {
 		return
 	}
