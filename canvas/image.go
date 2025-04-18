@@ -70,6 +70,8 @@ type Image struct {
 	Translucency float64    // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill  // Specify how the image should expand to fill or fit the available space
 	ScaleMode    ImageScale // Specify the type of scaling interpolation applied to the image
+
+	previousRender bool // did we successfully draw before? if so a nil content will need a reset
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
@@ -131,6 +133,11 @@ func (i *Image) Refresh() {
 			return
 		}
 		rc = io.NopCloser(r)
+	} else if i.previousRender {
+		i.previousRender = false
+
+		Refresh(i)
+		return
 	} else {
 		return
 	}
@@ -165,6 +172,7 @@ func (i *Image) Refresh() {
 		}
 	}
 
+	i.previousRender = true
 	Refresh(i)
 }
 
