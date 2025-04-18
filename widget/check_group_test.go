@@ -1,6 +1,7 @@
 package widget_test
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -216,4 +217,112 @@ func TestCheckGroup_ManipulateOptions(t *testing.T) {
 	assert.True(t, removed)
 	assert.Len(t, check.Options, 1)
 	assert.Empty(t, check.Selected)
+}
+
+func TestCheckGroup_LayoutColumns(t *testing.T) {
+	lotsofoptions := []string{}
+	for i := 0; i < 50; i++ {
+		lotsofoptions = append(lotsofoptions, fmt.Sprintf("Test %d", i))
+	}
+
+	testmap := map[string]struct {
+		disabled   bool
+		horizontal bool
+		options    []string
+		selected   []string
+	}{
+		"single": {
+			options: []string{"Test"},
+		},
+		"single_disabled": {
+			disabled: true,
+			options:  []string{"Test"},
+		},
+		"single_horizontal": {
+			horizontal: true,
+			options:    []string{"Test"},
+		},
+		"single_horizontal_disabled": {
+			disabled:   true,
+			horizontal: true,
+			options:    []string{"Test"},
+		},
+		"single_selected": {
+			options:  []string{"Test"},
+			selected: []string{"Test"},
+		},
+		"single_selected_disabled": {
+			disabled: true,
+			options:  []string{"Test"},
+			selected: []string{"Test"},
+		},
+		"single_selected_horizontal": {
+			horizontal: true,
+			options:    []string{"Test"},
+			selected:   []string{"Test"},
+		},
+		"single_selected_horizontal_disabled": {
+			disabled:   true,
+			horizontal: true,
+			options:    []string{"Test"},
+			selected:   []string{"Test"},
+		},
+		"multiple": {
+			options: lotsofoptions,
+		},
+		"multiple_disabled": {
+			disabled: true,
+			options:  lotsofoptions,
+		},
+		"multiple_horizontal": {
+			horizontal: true,
+			options:    lotsofoptions,
+		},
+		"multiple_horizontal_disabled": {
+			disabled:   true,
+			horizontal: true,
+			options:    lotsofoptions,
+		},
+		"multiple_selected": {
+			options:  lotsofoptions,
+			selected: []string{lotsofoptions[0], lotsofoptions[5]},
+		},
+		"multiple_selected_disabled": {
+			disabled: true,
+			options:  lotsofoptions,
+			selected: []string{lotsofoptions[0], lotsofoptions[5]},
+		},
+		"multiple_selected_horizontal": {
+			horizontal: true,
+			options:    lotsofoptions,
+			selected:   []string{lotsofoptions[0], lotsofoptions[5]},
+		},
+		"multiple_selected_horizontal_disabled": {
+			disabled:   true,
+			horizontal: true,
+			options:    lotsofoptions,
+			selected:   []string{lotsofoptions[0], lotsofoptions[5]},
+		},
+	}
+
+	for _, i := range []int{-2, 2, 5} {
+		for name, tt := range testmap {
+			t.Run(name, func(t *testing.T) {
+				check := &widget.CheckGroup{
+					Horizontal: tt.horizontal,
+					Options:    tt.options,
+					Selected:   tt.selected,
+				}
+				check.SetColumns(i)
+				if tt.disabled {
+					check.Disable()
+				}
+
+				window := test.NewTempWindow(t, check)
+				window.Resize(check.MinSize().Max(fyne.NewSize(1500, 1500)))
+
+				test.AssertRendersToMarkup(t, fmt.Sprintf("check_group/layout_columns_%d_%s.xml", i, name), window.Canvas())
+			})
+		}
+	}
 }
