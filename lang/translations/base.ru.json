@@ -3,12 +3,12 @@
     "Cancel": "Отмена",
     "Confirm": "Подтвердить",
     "Copy": "Копировать",
-    "Create Folder": "Создать файл",
+    "Create Folder": "Создать папку",
     "Cut": "Вырезать",
     "Enter filename": "Введите имя файла",
     "Error": "Ошибка",
     "Favourites": "Избранное",
-    "File": "Фвайл",
+    "File": "Файл",
     "Folder": "Папка",
     "New Folder": "Новая папка",
     "No": "Нет",
@@ -26,20 +26,20 @@
         "other": "Имя"
     },
     "file.parent": {
-        "other": "Исходный"
+        "other": "Вверх"
     },
     "friday": "Пятница",
-    "friday.short": "Пят",
+    "friday.short": "Пт",
     "monday": "Понедельник",
-    "monday.short": "Пон",
+    "monday.short": "Пн",
     "saturday": "Суббота",
-    "saturday.short": "Суб",
+    "saturday.short": "Сб",
     "sunday": "Воскресенье",
-    "sunday.short": "Воскр",
+    "sunday.short": "Вс",
     "thursday": "Четверг",
-    "thursday.short": "Чтв",
+    "thursday.short": "Чт",
     "tuesday": "Вторник",
     "tuesday.short": "Вт",
     "wednesday": "Среда",
-    "wednesday.short": "Срд"
+    "wednesday.short": "Ср"
 }
