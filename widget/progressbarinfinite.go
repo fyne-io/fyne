@@ -94,6 +94,7 @@ func (p *infProgressRenderer) start() {
 	p.animation.Tick = p.updateBar
 	p.animation.Curve = fyne.AnimationLinear
 	p.animation.RepeatCount = fyne.AnimationRepeatForever
+	p.animation.AutoReverse = true
 
 	p.wasRunning = true
 	p.animation.Start()
