@@ -211,6 +211,38 @@ func Delete(u fyne.URI) error {
 
 }
 
+func DeleteRecursive(u fyne.URI) error {
+	list, err := List(u)
+
+	if err != nil {
+		return err
+	}
+
+	for _, v := range list {
+		listable, err := CanList(v)
+		if err != nil {
+			return err
+		}
+		if !listable {
+			err = Delete(v)
+			if err != nil {
+				return err
+			}
+			continue
+		} else {
+			DeleteRecursive(v)
+		}
+	}
+
+	err = Delete(u)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Reader returns URIReadCloser set up to read from the resource that the
 // URI references.
 //
