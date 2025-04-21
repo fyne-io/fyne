@@ -230,7 +230,11 @@ func DeleteRecursive(u fyne.URI) error {
 			}
 			continue
 		} else {
-			DeleteRecursive(v)
+			err = DeleteRecursive(v)
+
+			if err != nil {
+				return err
+			}
 		}
 	}
 
