@@ -119,33 +119,133 @@ func onTouchMove(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 func onTouchEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
 
 //export onKeyPress
-func onKeyPress(keycode int) {
+func onKeyPress(keySym int) {
+	keyCode := X11KeySymToFyneKeyCode(keySym)
 	theApp.events.In() <- key.Event{
 		Direction: key.DirPress,
-		Code:      X11KeySymToFyneKeyCode(keycode),
-		Rune:      X11KeySymToRune(keycode),
+		Code:      keyCode,
+		Rune:      codeToRune(keyCode),
 	}
 }
 
 //export onKeyRelease
-func onKeyRelease(keycode int) {
-	parsedRune := X11KeySymToRune(keycode)
+func onKeyRelease(keySym int) {
+	keyCode := X11KeySymToFyneKeyCode(keySym)
 	theApp.events.In() <- key.Event{
 		Direction: key.DirRelease,
-		Code:      X11KeySymToFyneKeyCode(keycode),
-		Rune:      parsedRune,
+		Code:      keyCode,
+		Rune:      codeToRune(keyCode),
 	}
 }
 
-func X11KeySymToRune(keysym int) rune {
-	if keysym >= 0x0061 && keysym <= 0x007A { // Lowercase a-z
-		return rune(keysym - 0x0061 + 'a')
-	} else if keysym >= 0x0041 && keysym <= 0x005A { // Uppercase A-Z
-		return rune(keysym - 0x0041 + 'A')
-	} else if keysym >= 0x0030 && keysym <= 0x0039 { // 0-9
-		return rune(keysym - 0x0030 + '0')
-	} else {
-		return 0
+func codeToRune(c key.Code) rune {
+	switch c {
+	case key.CodeA:
+		return 'a'
+	case key.CodeB:
+		return 'b'
+	case key.CodeC:
+		return 'c'
+	case key.CodeD:
+		return 'd'
+	case key.CodeE:
+		return 'e'
+	case key.CodeF:
+		return 'f'
+	case key.CodeG:
+		return 'g'
+	case key.CodeH:
+		return 'h'
+	case key.CodeI:
+		return 'i'
+	case key.CodeJ:
+		return 'j'
+	case key.CodeK:
+		return 'k'
+	case key.CodeL:
+		return 'l'
+	case key.CodeM:
+		return 'm'
+	case key.CodeN:
+		return 'n'
+	case key.CodeO:
+		return 'o'
+	case key.CodeP:
+		return 'p'
+	case key.CodeQ:
+		return 'q'
+	case key.CodeR:
+		return 'r'
+	case key.CodeS:
+		return 's'
+	case key.CodeT:
+		return 't'
+	case key.CodeU:
+		return 'u'
+	case key.CodeV:
+		return 'v'
+	case key.CodeW:
+		return 'w'
+	case key.CodeX:
+		return 'x'
+	case key.CodeY:
+		return 'y'
+	case key.CodeZ:
+		return 'z'
+
+	case key.Code1:
+		return '1'
+	case key.Code2:
+		return '2'
+	case key.Code3:
+		return '3'
+	case key.Code4:
+		return '4'
+	case key.Code5:
+		return '5'
+	case key.Code6:
+		return '6'
+	case key.Code7:
+		return '7'
+	case key.Code8:
+		return '8'
+	case key.Code9:
+		return '9'
+	case key.Code0:
+		return '0'
+
+	case key.CodeSpacebar:
+		return ' '
+	case key.CodeHyphenMinus:
+		return '-'
+	case key.CodeEqualSign:
+		return '='
+	case key.CodeLeftSquareBracket:
+		return '['
+	case key.CodeRightSquareBracket:
+		return ']'
+	case key.CodeBackslash:
+		return '\\'
+	case key.CodeSemicolon:
+		return ';'
+	case key.CodeApostrophe:
+		return '\''
+	case key.CodeGraveAccent:
+		return '`'
+	case key.CodeComma:
+		return ','
+	case key.CodeFullStop:
+		return '.'
+	case key.CodeSlash:
+		return '/'
+
+	case key.CodeReturnEnter:
+		return '\n'
+	case key.CodeTab:
+		return '\t'
+
+	default:
+		return 0 // Unsupported code or non-printable character
 	}
 }
 
