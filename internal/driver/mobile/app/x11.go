@@ -23,7 +23,6 @@ void swapBuffers(void);
 */
 import "C"
 import (
-	"fmt"
 	"runtime"
 	"time"
 
@@ -131,7 +130,6 @@ func onKeyPress(keycode int) {
 //export onKeyRelease
 func onKeyRelease(keycode int) {
 	parsedRune := X11KeySymToRune(keycode)
-	fmt.Println("onKeyRelease", keycode, parsedRune)
 	theApp.events.In() <- key.Event{
 		Direction: key.DirRelease,
 		Code:      X11KeySymToFyneKeyCode(keycode),
