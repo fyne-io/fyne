@@ -257,8 +257,11 @@ func X11KeySymToFyneKeyCode(keysym int) key.Code {
 	if keysym >= 0x0041 && keysym <= 0x005A { // Uppercase A-Z
 		return key.Code(0x04 + (keysym - 0x0041))
 	}
-	if keysym >= 0x0030 && keysym <= 0x0039 { // 0-9
-		return key.Code(30 + (keysym - 0x0030))
+	if keysym == 0x0030 {
+		return key.Code0
+	}
+	if keysym >= 0x0031 && keysym <= 0x0039 { // 1-9
+		return key.Code(30 + (keysym - 0x0031))
 	}
 
 	switch keysym {
