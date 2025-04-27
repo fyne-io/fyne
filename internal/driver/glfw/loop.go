@@ -21,7 +21,7 @@ type funcData struct {
 
 // channel for queuing functions on the main thread
 var funcQueue = async.NewUnboundedChan[funcData]()
-var running atomic.Bool
+var running, drained atomic.Bool
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -38,7 +38,7 @@ func runOnMain(f func()) {
 func runOnMainWithWait(f func(), wait bool) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if !running.Load() {
+	if (!running.Load() && async.IsMainGoroutine()) || drained.Load() {
 		f()
 		return
 	}
@@ -130,6 +130,15 @@ func (d *gLDriver) runGL() {
 			if f := l.OnStopped(); f != nil {
 				l.QueueEvent(f)
 			}
+
+			for len(funcQueue.Out()) > 0 {
+				f := <-funcQueue.Out()
+				if f.done != nil {
+					f.done <- struct{}{}
+				}
+			}
+			drained.Store(true)
+			funcQueue.Close()
 			return
 		case f := <-funcQueue.Out():
 			f.f()
