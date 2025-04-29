@@ -36,7 +36,7 @@ func runOnMain(f func()) {
 
 // force a function f to run on the main thread and specify if we should wait for it to return
 func runOnMainWithWait(f func(), wait bool) {
-	// If we are on main during app run just execute - otherwise add it to the main queue and wait.
+	// If we are on main before app run just execute - otherwise add it to the main queue and wait.
 	// We also need to run it as-is if the app is in the process of shutting down as the queue will be stopped.
 	if (!running.Load() && async.IsMainGoroutine()) || drained.Load() {
 		f()
