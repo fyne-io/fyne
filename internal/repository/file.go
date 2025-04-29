@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -266,8 +267,12 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, nil
 	}
 
+	if runtime.GOOS == "windows" && len(p) <= 3 {
+		return true, nil // assume drives can be read, avoids hang if the drive is temporarily unresponsive
+	}
+
 	// We know it is a directory, but we don't know if we can read it, so
-	// we'll just try to do so and see if we get a permissions error.
+	// we'll just try to do so and see if we get a permission error.
 	f, err := os.Open(p)
 	if err == nil {
 		_, err = f.Readdir(1)
