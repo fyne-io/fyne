@@ -426,9 +426,8 @@ func (e *Entry) Redo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
-	cb := e.OnChanged
-	if cb != nil {
-		cb(newText) // We know that the text has changed.
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
 	}
 	e.Refresh()
 }
@@ -724,9 +723,8 @@ func (e *Entry) Undo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
-	cb := e.OnChanged
-	if cb != nil {
-		cb(newText) // We know that the text has changed.
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
 	}
 	e.Refresh()
 }
