@@ -58,20 +58,20 @@ var shaderRoundrectangleesFrag = &fyne.StaticResource{
 var shaderSimpleFrag = &fyne.StaticResource{
 	StaticName: "simple.frag",
 	StaticContent: []byte(
-		"#version 110\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
+		"#version 110\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\nvarying float fragAlpha;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    texColor.a *= fragAlpha;\n    texColor.r *= fragAlpha;\n    texColor.g *= fragAlpha;\n    texColor.b *= fragAlpha;\n\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
 }
 var shaderSimpleVert = &fyne.StaticResource{
 	StaticName: "simple.vert",
 	StaticContent: []byte(
-		"#version 110\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
+		"#version 110\n\nuniform float alpha;\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\n\nvarying vec2 fragTexCoord;\nvarying float fragAlpha;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n    fragAlpha = alpha;\n\n    gl_Position = vec4(vert, 1);\n}"),
 }
 var shaderSimpleesFrag = &fyne.StaticResource{
 	StaticName: "simple_es.frag",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform sampler2D tex;\n\nvarying vec2 fragTexCoord;\nvarying float fragAlpha;\n\nvoid main() {\n    vec4 texColor = texture2D(tex, fragTexCoord);\n    texColor.a *= fragAlpha;\n    texColor.r *= fragAlpha;\n    texColor.g *= fragAlpha;\n    texColor.b *= fragAlpha;\n\n    if(texColor.a < 0.01)\n        discard;\n    gl_FragColor = texColor;\n}\n"),
 }
 var shaderSimpleesVert = &fyne.StaticResource{
 	StaticName: "simple_es.vert",
 	StaticContent: []byte(
-		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\nvarying vec2 fragTexCoord;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n\n    gl_Position = vec4(vert, 1);\n}"),
+		"#version 100\n\n#ifdef GL_ES\n# ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n# else\nprecision mediump float;\n#endif\nprecision mediump int;\nprecision lowp sampler2D;\n#endif\n\nuniform float alpha;\n\nattribute vec3 vert;\nattribute vec2 vertTexCoord;\n\nvarying vec2 fragTexCoord;\nvarying float fragAlpha;\n\nvoid main() {\n    fragTexCoord = vertTexCoord;\n    fragAlpha = alpha;\n\n    gl_Position = vec4(vert, 1);\n}"),
 }
