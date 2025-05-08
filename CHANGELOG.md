@@ -3,6 +3,23 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.6.1 - 8 May 2025
+
+### Changed
+
+ * Added Russian translations
+
+### Fixed
+
+ * Activity indicator is light and not visible when a light theme is active (#5661)
+ * Unsafe use of map in RichText on 2.6.0 (#5639)
+ * Image translucency causes blurriness on small icons (#5476)
+ * Infinite progress bar snapping and doesn't loop nicely (#5433)
+ * RichTextSegment SizeName is not SizeNameText by default (#5307)
+ * When there is an offline netdrive, the file dialog will freeze (#2411)
+ * Correctly reset image cache when Resource goes to nil
+ * Data race after migration to v2.6.0 (#5713)
+
 ## 2.6.0 - 10 April 2025
 
 ### Added
