@@ -2063,6 +2063,26 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 	assert.Equal(t, "àbf", entry.Text)
 }
 
+func TestEntry_UndoRedo_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+
+	for _, r := range "Line 1\nline 2" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
+	entry.TypedShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier})
+	assert.Equal(t, "Line 1\n", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+}
+
 func TestEntry_UndoRedo_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 
