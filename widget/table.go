@@ -1331,10 +1331,8 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			displayCol(row, col, rowHeight, cells)
 		}
 		cellXOffset = r.cells.t.content.Offset.X
-		stick := r.cells.t.StickyColumnCount
 		if r.cells.t.ShowHeaderColumn {
 			cellXOffset += r.cells.t.headerSize.Width
-			stick--
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
