@@ -56,3 +56,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace fyne.io/systray => github.com/andydotxyz/systray v1.1.1-0.20250510062519-c41e566a7b8b

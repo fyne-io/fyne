@@ -177,6 +177,11 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	}
 }
 
+func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
+	w.SetCloseIntercept(w.Hide)
+	systray.SetOnTapped(w.Show)
+}
+
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
 }
