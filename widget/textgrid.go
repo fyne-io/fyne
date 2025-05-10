@@ -740,6 +740,10 @@ func (t *textGridRowRenderer) addCellsIfRequired() {
 func (t *textGridRowRenderer) refreshCells() {
 	x := 0
 	if t.obj.row >= len(t.obj.text.text.Rows) {
+		for ; x < len(t.objects)/3; x++ {
+			t.setCellRune(' ', x, TextGridStyleDefault, nil) // blank rows no longer needed
+		}
+
 		return // we can have more rows than content rows (filling space)
 	}
 
