@@ -2,6 +2,7 @@ package painter
 
 import (
 	"image"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -87,9 +88,16 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	return drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, rWidth, rHeight, vectorPad, scale)
+}
+func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	return drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, rWidth, rHeight, vectorPad, scale)
+}
+
+func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth, radius, aspect float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
-	stroke := scale(rect.StrokeWidth)
+	stroke := scale(strokeWidth)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(rWidth), int(rHeight), raw, raw.Bounds())
@@ -100,23 +108,23 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 	p3x, p3y := scale(rWidth)+scaledPad, scale(rHeight)+scaledPad
 	p4x, p4y := scaledPad, scale(rHeight)+scaledPad
 
-	if rect.FillColor != nil {
+	if fill != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
-		filler.SetColor(rect.FillColor)
-		if rect.CornerRadius == 0 {
+		filler.SetColor(fill)
+		if radius == 0 {
 			rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
 		} else {
-			r := float64(scale(rect.CornerRadius))
+			r := float64(scale(radius))
 			rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
 		}
 		filler.Draw()
 	}
 
-	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-		r := scale(rect.CornerRadius)
+	if strokeCol != nil && strokeWidth > 0 {
+		r := scale(radius)
 		c := quarterCircleControl * r
 		dasher := rasterx.NewDasher(width, height, scanner)
-		dasher.SetColor(rect.StrokeColor)
+		dasher.SetColor(strokeCol)
 		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
 		if c != 0 {
 			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+r)))

@@ -188,16 +188,24 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 }
 
-func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, width, height float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	pad := painter.VectorPad(rect)
+func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(obj)
 	scaledWidth := scale.ToScreenCoordinate(c, width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawRectangle(rect, width, height, pad, func(in float32) float32 {
-		return float32(math.Round(float64(in) * float64(c.Scale())))
-	})
+	var raw *image.RGBA
+	switch o := obj.(type) {
+	case *canvas.Square:
+		raw = painter.DrawSquare(o, width, height, pad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	default:
+		raw = painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -211,17 +219,25 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, width, height fl
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	width, height := rect.Size().Components()
-	if rect.Aspect != 0 {
+	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, base, clip)
+}
+
+func drawSquare(c fyne.Canvas, sq *canvas.Square, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, base, clip)
+}
+
+func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	width, height := obj.Size().Components()
+	if aspect != 0 {
 		frameAspect := width / height
 
 		xPad, yPad := float32(0), float32(0)
-		if frameAspect > rect.Aspect {
-			newWidth := height * rect.Aspect
+		if frameAspect > aspect {
+			newWidth := height * aspect
 			xPad = (width - newWidth) / 2
 			width = newWidth
-		} else if frameAspect < rect.Aspect {
-			newHeight := width / rect.Aspect
+		} else if frameAspect < aspect {
+			newHeight := width / aspect
 			yPad = (height - newHeight) / 2
 			height = newHeight
 		}
@@ -229,8 +245,8 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 		pos = pos.AddXY(xPad, yPad)
 	}
 
-	if (rect.StrokeColor != nil && rect.StrokeWidth > 0) || rect.CornerRadius != 0 { // use a rasterizer if there is a stroke or radius
-		drawRectangleStroke(c, rect, width, height, pos, base, clip)
+	if (stroke != nil && strokeWidth > 0) || radius != 0 { // use a rasterizer if there is a stroke or radius
+		drawOblongStroke(c, obj, width, height, pos, base, clip)
 		return
 	}
 
@@ -238,5 +254,5 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 	scaledHeight := scale.ToScreenCoordinate(c, height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
-	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, draw.Over)
+	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }

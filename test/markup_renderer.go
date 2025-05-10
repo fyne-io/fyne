@@ -233,6 +233,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeRaster(o, attrs)
 	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
+	case *fynecanvas.Square:
+		r.writeSquare(o, attrs)
 	case *fynecanvas.Text:
 		r.writeText(o, attrs)
 	case *fyne.Container:
@@ -331,7 +333,16 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
 	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "aspect", float64(rct.Aspect))
 	r.writeTag("rectangle", true, attrs)
+}
+
+func (r *markupRenderer) writeSquare(sq *fynecanvas.Square, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", sq.FillColor)
+	r.setColorAttr(attrs, "strokeColor", sq.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(sq.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(sq.CornerRadius))
+	r.writeTag("square", true, attrs)
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {
