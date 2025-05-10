@@ -162,7 +162,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, rect, frame)
+	bounds, points := p.vecRectCoords(pos, rect, frame, rect.Aspect)
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -389,8 +389,22 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
-func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) ([4]float32, []float32) {
-	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
+func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size, aspect float32) ([4]float32, []float32) {
+	xPad, yPad := float32(0), float32(0)
+
+	if aspect != 0 {
+		frameAspect := frame.Width / frame.Height
+
+		if frameAspect > aspect {
+			newWidth := frame.Height * aspect
+			xPad = (frame.Width - newWidth) / 2
+		} else if frameAspect < aspect {
+			newHeight := frame.Width / aspect
+			yPad = (frame.Height - newHeight) / 2
+		}
+	}
+
+	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
 }
 
 func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32) ([4]float32, []float32) {
@@ -424,15 +438,7 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 }
 
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
-	xPad, yPad := float32(0), float32(0)
-	size := rect.Size()
-	if size.Width > size.Height {
-		xPad = (size.Width - size.Height) / 2
-	} else {
-		yPad = (size.Height - size.Width) / 2
-	}
-
-	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
+	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
 }
 
 func roundToPixel(v float32, pixScale float32) float32 {

@@ -44,4 +44,7 @@ func TestRectangle_Radius(t *testing.T) {
 
 	rect.StrokeWidth = 0
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
+
+	rect.Aspect = 2.0
+	test.AssertRendersToImage(t, "rounded_rect_aspect.png", c)
 }

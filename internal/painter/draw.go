@@ -86,20 +86,19 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // DrawRectangle rasterizes the given rectangle object with stroke border into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
-func DrawRectangle(rect *canvas.Rectangle, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	size := rect.Size()
-	width := int(scale(size.Width + vectorPad*2))
-	height := int(scale(size.Height + vectorPad*2))
+func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	width := int(scale(rWidth + vectorPad*2))
+	height := int(scale(rHeight + vectorPad*2))
 	stroke := scale(rect.StrokeWidth)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+	scanner := rasterx.NewScannerGV(int(rWidth), int(rHeight), raw, raw.Bounds())
 
 	scaledPad := scale(vectorPad)
 	p1x, p1y := scaledPad, scaledPad
-	p2x, p2y := scale(size.Width)+scaledPad, scaledPad
-	p3x, p3y := scale(size.Width)+scaledPad, scale(size.Height)+scaledPad
-	p4x, p4y := scaledPad, scale(rect.Size().Height)+scaledPad
+	p2x, p2y := scale(rWidth)+scaledPad, scaledPad
+	p3x, p3y := scale(rWidth)+scaledPad, scale(rHeight)+scaledPad
+	p4x, p4y := scaledPad, scale(rHeight)+scaledPad
 
 	if rect.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
