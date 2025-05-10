@@ -307,17 +307,16 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
-	if w, ok := widget.(fyne.Validatable); ok {
+	if w, ok := widget.(fyne.FormValidatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok {
-			e.onFocusChanged = func(bool) {
-				updateValidation(e.validationError)
-			}
-			if e.Validator != nil && f.Items[i].invalid {
-				// set initial state error to guarantee next error (if triggers) is always different
-				e.SetValidationError(errFormItemInitialState)
-			}
+		w.SetOnFocusChanged(func(bool) {
+			updateValidation(w.GetValidationError())
+		})
+		if w.GetValidator() != nil && f.Items[i].invalid {
+			// set initial state error to guarantee next error (if triggers) is always different
+			w.SetValidationError(errFormItemInitialState)
 		}
+
 		w.SetOnValidationChanged(updateValidation)
 	}
 }

@@ -17,7 +17,7 @@ func TestEntry_DisabledHideValidation(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
 
-	entry.Validator = validator
+	entry.SetValidator(validator)
 	entry.SetText("invalid text")
 	entry.Disable()
 
@@ -29,7 +29,7 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	c := window.Canvas()
 
 	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
-	entry.Validator = r
+	entry.SetValidator(r)
 	test.AssertRendersToMarkup(t, "entry/validate_initial.xml", c)
 
 	test.Type(entry, "2020-02")
@@ -44,30 +44,30 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 
 func TestEntry_Validate(t *testing.T) {
 	entry := widget.NewEntry()
-	entry.Validator = validator
+	entry.SetValidator(validator)
 
 	test.Type(entry, "2020-02")
 	assert.Error(t, entry.Validate())
-	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
+	assert.Equal(t, entry.Validate(), entry.GetValidator()(entry.Text))
 
 	test.Type(entry, "-12")
 	assert.NoError(t, entry.Validate())
-	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
+	assert.Equal(t, entry.Validate(), entry.GetValidator()(entry.Text))
 
 	entry.SetText("incorrect")
 	assert.Error(t, entry.Validate())
-	assert.Equal(t, entry.Validate(), entry.Validator(entry.Text))
+	assert.Equal(t, entry.Validate(), entry.GetValidator()(entry.Text))
 }
 
 func TestEntry_NotEmptyValidator(t *testing.T) {
 	test.NewTempApp(t)
 	entry := widget.NewEntry()
-	entry.Validator = func(s string) error {
+	entry.SetValidator(func(s string) error {
 		if s == "" {
 			return errors.New("should not be empty")
 		}
 		return nil
-	}
+	})
 	w := test.NewTempWindow(t, entry)
 
 	test.AssertRendersToMarkup(t, "entry/validator_not_empty_initial.xml", w.Canvas())
@@ -86,7 +86,7 @@ func TestEntry_SetValidationError(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	c := window.Canvas()
 
-	entry.Validator = validator
+	entry.SetValidator(validator)
 
 	entry.SetText("2020-30-30")
 	entry.SetValidationError(errors.New("set invalid"))
@@ -99,11 +99,11 @@ func TestEntry_SetValidationError(t *testing.T) {
 
 func TestEntry_SetOnValidationChanged(t *testing.T) {
 	entry := widget.NewEntry()
-	entry.Validator = validator
+	entry.SetValidator(validator)
 
 	modified := false
 	entry.SetOnValidationChanged(func(err error) {
-		assert.Equal(t, err, entry.Validator(entry.Text))
+		assert.Equal(t, err, entry.GetValidator()(entry.Text))
 		modified = true
 	})
 
@@ -125,13 +125,13 @@ func TestEntry_AlwaysShowValidationError_WithValidator_Error(t *testing.T) {
 
 	entry := widget.NewEntry()
 	entry.AlwaysShowValidationError = true
-	entry.Validator = func(s string) error {
+	entry.SetValidator(func(s string) error {
 		if s == "success" {
 			return nil
 		}
 
 		return errors.New("mocking failed validation")
-	}
+	})
 
 	w := test.NewTempWindow(t, entry)
 	test.AssertRendersToMarkup(t, "entry/always_on_with_validator_error.xml", w.Canvas())
@@ -142,13 +142,13 @@ func TestEntry_AlwaysShowValidationError_WithValidator_Success(t *testing.T) {
 
 	entry := widget.NewEntry()
 	entry.AlwaysShowValidationError = true
-	entry.Validator = func(s string) error {
+	entry.SetValidator(func(s string) error {
 		if s == "success" {
 			return nil
 		}
 
 		return errors.New("error")
-	}
+	})
 
 	entry.SetText("success")
 

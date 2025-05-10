@@ -461,6 +461,11 @@ func (e *Entry) SetMinRowsVisible(count int) {
 	e.Refresh()
 }
 
+// SetOnFocusChanged sets the function that is called when focus is gained or lost.
+func (e *Entry) SetOnFocusChanged(f func(bool)) {
+	e.onFocusChanged = f
+}
+
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
 	e.Theme() // setup theme cache before locking

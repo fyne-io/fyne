@@ -119,12 +119,12 @@ func TestFormDialog_Hints(t *testing.T) {
 
 func TestFormDialog_Submit(t *testing.T) {
 	validatingEntry := widget.NewEntry()
-	validatingEntry.Validator = func(input string) error {
+	validatingEntry.SetValidator (func(input string) error {
 		if input != "abc" {
 			return errors.New("only accepts 'abc'")
 		}
 		return nil
-	}
+	})
 	validatingItem := &widget.FormItem{Widget: validatingEntry}
 
 	confirmed := false
@@ -150,12 +150,12 @@ func TestFormDialog_Submit(t *testing.T) {
 
 func validatingFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
-	validatingEntry.Validator = func(input string) error {
+	validatingEntry.SetValidator(func(input string) error {
 		if input != "abc" {
 			return errors.New("only accepts 'abc'")
 		}
 		return nil
-	}
+	})
 	validatingItem := &widget.FormItem{
 		Text:   "Only accepts 'abc'",
 		Widget: validatingEntry,
@@ -199,12 +199,12 @@ func controlFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog
 
 func hintsFormDialog(result *formDialogResult, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
-	validatingEntry.Validator = func(input string) error {
+	validatingEntry.SetValidator(func(input string) error {
 		if input != "abc" {
 			return errors.New("only accepts 'abc'")
 		}
 		return nil
-	}
+	})
 	validatingItem := &widget.FormItem{
 		Text:     "Only accepts 'abc'",
 		Widget:   validatingEntry,

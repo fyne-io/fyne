@@ -8,7 +8,23 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Validatable = (*Entry)(nil)
+var _ fyne.FormValidatable = (*Entry)(nil)
+
+// GetValidationError retrieves the Entry widget's validation error.
+func (e *Entry) GetValidationError() error {
+	return e.validationError
+}
+
+// GetValidator returns the Validator function, or nil if there is none.
+func (e *Entry) GetValidator() fyne.StringValidator {
+	return e.Validator
+}
+
+// SetValidator sets the function that validates Entry text. This function should be called
+// by the Validate method.
+func (e *Entry) SetValidator(f fyne.StringValidator) {
+	e.Validator = f
+}
 
 // Validate validates the current text in the widget.
 func (e *Entry) Validate() error {
@@ -48,6 +64,11 @@ func (e *Entry) SetValidationError(err error) {
 	}
 
 	e.Refresh()
+}
+
+// ValidationError returns the Entry widget's validation error.
+func (e *Entry) ValidationError() error {
+	return e.validationError
 }
 
 // setValidationError sets the validation error and returns a bool to indicate if it changes.
