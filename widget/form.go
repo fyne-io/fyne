@@ -2,7 +2,6 @@ package widget
 
 import (
 	"errors"
-	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -181,16 +180,10 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 }
 
 func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
-	value := reflect.ValueOf(w).Elem()
-	validatorField := value.FieldByName("Validator")
-	if validatorField == (reflect.Value{}) {
-		return false
+	if v, ok := w.(fyne.FormValidatable); ok {
+		return v.GetValidator() != nil
 	}
-	validator, ok := validatorField.Interface().(fyne.StringValidator)
-	if !ok {
-		return false
-	}
-	return validator != nil
+	return false
 }
 
 func (f *Form) createLabel(text string) fyne.CanvasObject {
