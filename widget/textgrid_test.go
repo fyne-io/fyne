@@ -134,10 +134,30 @@ func TestTextGrid_SetText(t *testing.T) {
 
 func TestTextGrid_SetText_Overflow(t *testing.T) {
 	grid := NewTextGrid()
-	grid.SetText("Hello\nthere")
+	grid.Scroll = widget.ScrollNone
+	grid.SetText("Hello Long\nthere")
 
 	assert.Len(t, grid.Rows, 2)
 	assert.Len(t, grid.Rows[1].Cells, 5)
+	render := test.WidgetRenderer(test.WidgetRenderer(grid).(*textGridRenderer).text).(*textGridContentRenderer)
+	assert.Equal(t, 3, len(render.visible))
+	row0 := test.WidgetRenderer(render.visible[0].(*textGridRow)).(*textGridRowRenderer)
+	row1 := test.WidgetRenderer(render.visible[1].(*textGridRow)).(*textGridRowRenderer)
+	row2 := test.WidgetRenderer(render.visible[2].(*textGridRow)).(*textGridRowRenderer)
+	assert.Equal(t, "H", row0.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, "g", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, "t", row1.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, " ", row2.objects[1].(*canvas.Text).Text)
+
+	grid.SetText("Replace")
+
+	assert.Len(t, grid.Rows, 1)
+	assert.Equal(t, 2, len(render.visible))
+	assert.Len(t, grid.Rows[0].Cells, 7)
+
+	assert.Equal(t, "R", row0.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, " ", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, " ", row1.objects[1].(*canvas.Text).Text)
 }
 
 func TestTextGrid_SetRowStyle(t *testing.T) {
