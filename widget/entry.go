@@ -462,6 +462,10 @@ func (e *Entry) SetMinRowsVisible(count int) {
 }
 
 // SetOnFocusChanged sets the function that is called when focus is gained or lost.
+//
+// Since: 2.7
+//
+// Implements fyne.FormValidatable
 func (e *Entry) SetOnFocusChanged(f func(bool)) {
 	e.onFocusChanged = f
 }
