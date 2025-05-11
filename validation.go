@@ -24,6 +24,12 @@ type FormValidatable interface {
 	// GetValidator retrieves the validator function.
 	GetValidator() StringValidator
 
+	// IsFocused indicates that the widget has focus.
+	HasFocus() bool
+
+	// IsDirty indicates that the widget's contents have changed.
+	IsDirty() bool
+
 	// SetValidator sets the validator function. This function should be called from within the Validate function.
 	SetValidator(StringValidator)
 
