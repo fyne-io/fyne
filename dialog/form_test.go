@@ -119,7 +119,7 @@ func TestFormDialog_Hints(t *testing.T) {
 
 func TestFormDialog_Submit(t *testing.T) {
 	validatingEntry := widget.NewEntry()
-	validatingEntry.SetValidator (func(input string) error {
+	validatingEntry.SetValidator(func(input string) error {
 		if input != "abc" {
 			return errors.New("only accepts 'abc'")
 		}
