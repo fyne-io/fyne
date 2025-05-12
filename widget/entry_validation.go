@@ -82,11 +82,6 @@ func (e *Entry) SetValidationError(err error) {
 	e.Refresh()
 }
 
-// ValidationError returns the Entry widget's validation error.
-func (e *Entry) ValidationError() error {
-	return e.validationError
-}
-
 // setValidationError sets the validation error and returns a bool to indicate if it changes.
 // It assumes that the widget has a validator.
 func (e *Entry) setValidationError(err error) bool {
