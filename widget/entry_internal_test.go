@@ -383,10 +383,10 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 func TestEntry_PasteFromClipboardValidation(t *testing.T) {
 	entry := NewEntry()
 	var triggered int
-	entry.Validator = func(s string) error {
+	entry.SetValidator(func(s string) error {
 		triggered++
 		return nil
-	}
+	})
 
 	testContent := "test"
 	clipboard := test.NewTempApp(t).Clipboard()

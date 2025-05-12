@@ -432,7 +432,7 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 
 	email := widget.NewEntry()
 	email.SetPlaceHolder("test@example.com")
-	email.Validator = validation.NewRegexp(`\w{1,}@\w{1,}\.\w{1,4}`, "not a valid email")
+	email.SetValidator(validation.NewRegexp(`\w{1,}@\w{1,}\.\w{1,4}`, "not a valid email"))
 
 	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
@@ -513,6 +513,6 @@ func (n *numEntry) Keyboard() mobile.KeyboardType {
 func newNumEntry() *numEntry {
 	e := &numEntry{}
 	e.ExtendBaseWidget(e)
-	e.Validator = validation.NewRegexp(`\d`, "Must contain a number")
+	e.SetValidator(validation.NewRegexp(`\d`, "Must contain a number"))
 	return e
 }
