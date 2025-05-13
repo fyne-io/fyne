@@ -12,30 +12,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRectangle_MinSize(t *testing.T) {
-	rect := canvas.NewRectangle(color.Black)
-	min := rect.MinSize()
-
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
-}
-
-func TestRectangle_FillColor(t *testing.T) {
+func TestSquare_FillColor(t *testing.T) {
 	c := color.White
-	rect := canvas.NewRectangle(c)
+	rect := canvas.NewSquare(c)
 
 	assert.Equal(t, c, rect.FillColor)
 }
 
-func TestRectangle_Radius(t *testing.T) {
-	rect := &canvas.Rectangle{
+func TestSquare_Radius(t *testing.T) {
+	rect := &canvas.Square{
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
 		CornerRadius: 12}
 
 	rect.Resize(fyne.NewSize(50, 50))
-	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
+	test.AssertObjectRendersToMarkup(t, "rounded_square.xml", rect)
 
 	c := software.NewCanvas()
 	c.SetContent(rect)
@@ -44,7 +36,4 @@ func TestRectangle_Radius(t *testing.T) {
 
 	rect.StrokeWidth = 0
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
-
-	rect.Aspect = 2.0
-	test.AssertRendersToImage(t, "rounded_rect_aspect.png", c)
 }
