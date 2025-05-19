@@ -107,16 +107,16 @@ func (t *TextGrid) Append(text string) {
 //
 // Since: 2.6
 func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
-	y := t.content.cellSize.Height
-	x := t.content.cellSize.Width
+	y := p.Y
+	x := p.X
 
 	if t.scroll != nil && t.scroll.Visible() {
 		y += t.scroll.Offset.Y
 		x += t.scroll.Offset.X
 	}
 
-	row = int(p.Y / y)
-	col = int(p.X / x)
+	row = int(y / t.content.cellSize.Height)
+	col = int(x / t.content.cellSize.Width)
 	return
 }
 
