@@ -42,6 +42,17 @@ func TestTextGrid_CursorLocationForPosition(t *testing.T) {
 	row, col = grid.CursorLocationForPosition(fyne.NewPos(20, 20))
 	assert.Equal(t, 1, row)
 	assert.Equal(t, 2, col)
+
+	grid.Scroll = widget.ScrollBoth
+	grid.SetText("Really Long Really Long Really Long Really Long Really Long")
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(20, 20))
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 2, col)
+
+	grid.scroll.ScrollToOffset(fyne.NewPos(20, 0))
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(0, 20))
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 2, col)
 }
 
 func TestTextGrid_PositionForCursorLocation(t *testing.T) {
