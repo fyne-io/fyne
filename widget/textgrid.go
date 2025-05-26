@@ -496,13 +496,13 @@ func (t *textGridContent) refreshCell(row, col int) {
 
 func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.text.Rows)
-	bufCols := 0
-	for _, row := range t.text.text.Rows {
-		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
-	}
-	sizeRows := math.Floor(float64(size.Height) / float64(t.text.cellSize.Height))
+	sizeRows := int(size.Height / t.text.cellSize.Height)
 
-	t.text.rows = int(math.Max(sizeRows, float64(bufRows)))
+	if sizeRows > bufRows {
+		t.text.rows = sizeRows
+	} else {
+		t.text.rows = bufRows
+	}
 	t.addRowsIfRequired()
 }
 
@@ -818,11 +818,13 @@ func (t *textGridRowRenderer) lineNumberWidth() int {
 }
 
 func (t *textGridRowRenderer) updateGridSize(size fyne.Size) {
-	bufCols := 0
+	bufCols := int(size.Width / t.obj.text.cellSize.Width)
 	for _, row := range t.obj.text.text.Rows {
-		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
+		lenCells := len(row.Cells)
+		if lenCells > bufCols {
+			bufCols = lenCells	
+		}
 	}
-	sizeCols := math.Floor(float64(size.Width) / float64(t.obj.text.cellSize.Width))
 
 	if t.obj.text.text.ShowWhitespace {
 		bufCols++
@@ -831,7 +833,7 @@ func (t *textGridRowRenderer) updateGridSize(size fyne.Size) {
 		bufCols += t.lineNumberWidth()
 	}
 
-	t.cols = int(math.Max(sizeCols, float64(bufCols)))
+	t.cols = bufCols
 	t.addCellsIfRequired()
 }
 
