@@ -822,7 +822,7 @@ func (t *textGridRowRenderer) updateGridSize(size fyne.Size) {
 	for _, row := range t.obj.text.text.Rows {
 		lenCells := len(row.Cells)
 		if lenCells > bufCols {
-			bufCols = lenCells	
+			bufCols = lenCells
 		}
 	}
 
