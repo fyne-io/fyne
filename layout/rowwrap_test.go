@@ -82,10 +82,11 @@ func TestRowWrapLayout_MinSize(t *testing.T) {
 		layout := layout.NewRowWrapLayout()
 
 		// when/then
-		minSize := layout.MinSize(container.Objects)
+		got := layout.MinSize(container.Objects)
 
 		// then
-		assert.Equal(t, o.MinSize(), minSize)
+		want := o.MinSize()
+		assert.Equal(t, want, got)
 	})
 	t.Run("should return size 0 when container is empty", func(t *testing.T) {
 		// given
@@ -93,10 +94,11 @@ func TestRowWrapLayout_MinSize(t *testing.T) {
 		layout := layout.NewRowWrapLayout()
 
 		// when/then
-		minSize := layout.MinSize(container.Objects)
+		got := layout.MinSize(container.Objects)
 
 		// then
-		assert.Equal(t, fyne.NewSize(0, 0), minSize)
+		want := fyne.NewSize(0, 0)
+		assert.Equal(t, want, got)
 	})
 	t.Run("should initially return height of first object and width of widest object", func(t *testing.T) {
 		// given
@@ -109,12 +111,13 @@ func TestRowWrapLayout_MinSize(t *testing.T) {
 		layout := layout.NewRowWrapLayout()
 
 		// when/then
-		minSize := layout.MinSize(container.Objects)
+		got := layout.MinSize(container.Objects)
 
 		// then
-		assert.Equal(t, fyne.NewSize(20, h), minSize)
+		want := fyne.NewSize(20, h)
+		assert.Equal(t, want, got)
 	})
-	t.Run("should return height of arranged objects after layout was calculated", func(t *testing.T) {
+	t.Run("should return actual size of arranged objects after layout was calculated", func(t *testing.T) {
 		// given
 		h := float32(10)
 		o1 := canvas.NewRectangle(color.Opaque)
@@ -125,9 +128,10 @@ func TestRowWrapLayout_MinSize(t *testing.T) {
 		container.Resize(fyne.NewSize(15, 50))
 
 		// when/then
-		minSize := container.MinSize()
+		got := container.MinSize()
 
 		// then
-		assert.Equal(t, fyne.NewSize(o2.Size().Width, (o1.Size().Height*2)+theme.Padding()), minSize)
+		want := fyne.NewSize(o2.Size().Width, (o1.Size().Height*2)+theme.Padding())
+		assert.Equal(t, want, got)
 	})
 }
