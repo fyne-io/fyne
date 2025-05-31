@@ -120,6 +120,13 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 	return
 }
 
+// ScrollToTop will scroll content to container top
+//
+// Since: 2.6
+func (t *TextGrid) ScrollToTop() {
+	t.scroll.ScrollToTop()
+}
+
 // PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
 // If the grid has been scrolled this will be taken into account so that the position compared to top left will
 // refer to the requested location.
