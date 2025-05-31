@@ -122,7 +122,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 
 // ScrollToTop will scroll content to container top
 //
-// Since: 2.6
+// Since: 2.7
 func (t *TextGrid) ScrollToTop() {
 	t.scroll.ScrollToTop()
 }
