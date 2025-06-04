@@ -118,6 +118,27 @@ func TestTextGrid_ScrollToTop(t *testing.T) {
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
 
+func TestTextGrid_ScrollToBottom(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.Refresh()
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.SetText("Something\nElse")
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+}
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
