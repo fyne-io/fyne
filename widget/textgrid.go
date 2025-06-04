@@ -127,6 +127,13 @@ func (t *TextGrid) ScrollToTop() {
 	t.scroll.ScrollToTop()
 }
 
+// ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+//
+// Since: 2.7
+func (t *TextGrid) ScrollToBottom() {
+	t.scroll.ScrollToBottom()
+}
+
 // PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
 // If the grid has been scrolled this will be taken into account so that the position compared to top left will
 // refer to the requested location.
