@@ -2,6 +2,7 @@ package cache
 
 import (
 	"os"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -108,15 +109,19 @@ func destroyExpiredRenderers(now time.Time) {
 }
 
 type expiringCache struct {
-	expires time.Time
+	expires atomic.Value
 }
 
 // isExpired check if the cache data is expired.
 func (c *expiringCache) isExpired(now time.Time) bool {
-	return c.expires.Before(now)
+	exp := c.expires.Load()
+	if exp == nil {
+		return time.Time{}.Before(now)
+	}
+	return exp.(time.Time).Before(now)
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = timeNow().Add(ValidDuration)
+	c.expires.Store(timeNow().Add(ValidDuration))
 }
