@@ -19,8 +19,10 @@ import (
 type ListItemID = int
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*List)(nil)
-var _ fyne.Focusable = (*List)(nil)
+var (
+	_ fyne.Widget    = (*List)(nil)
+	_ fyne.Focusable = (*List)(nil)
+)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
@@ -493,9 +495,11 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*listItem)(nil)
-var _ fyne.Tappable = (*listItem)(nil)
-var _ desktop.Hoverable = (*listItem)(nil)
+var (
+	_ fyne.Widget       = (*listItem)(nil)
+	_ fyne.Tappable     = (*listItem)(nil)
+	_ desktop.Hoverable = (*listItem)(nil)
+)
 
 type listItem struct {
 	BaseWidget

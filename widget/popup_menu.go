@@ -5,8 +5,10 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 )
 
-var _ fyne.Widget = (*PopUpMenu)(nil)
-var _ fyne.Focusable = (*PopUpMenu)(nil)
+var (
+	_ fyne.Widget    = (*PopUpMenu)(nil)
+	_ fyne.Focusable = (*PopUpMenu)(nil)
+)
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.
 type PopUpMenu struct {

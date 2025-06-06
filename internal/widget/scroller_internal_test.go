@@ -252,7 +252,6 @@ func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 	scroll.Scrolled(&fyne.ScrollEvent{Scrolled: fyne.NewDelta(20, 20)})
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
-
 }
 
 func TestScrollContainer_Resize(t *testing.T) {
@@ -264,7 +263,6 @@ func TestScrollContainer_Resize(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, float32(0), scroll.Offset.X)
 	assert.Equal(t, float32(0), scroll.Offset.Y)
-
 }
 
 func TestScrollContainer_ResizeOffset(t *testing.T) {
@@ -346,7 +344,6 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Size().Width)
 	assert.Equal(t, theme.ScrollBarSmallSize(), barHoriz.Position().Y)
 	assert.Equal(t, theme.ScrollBarSmallSize(), barVert.Position().X)
-
 }
 
 func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing.T) {

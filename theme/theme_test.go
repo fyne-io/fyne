@@ -89,8 +89,7 @@ func TestTheme_Bootstrapping(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(current)
 }
 
-type emptyTheme struct {
-}
+type emptyTheme struct{}
 
 func (e *emptyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	return nil

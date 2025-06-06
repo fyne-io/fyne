@@ -78,7 +78,6 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-
 	// split into components and add the new one
 	components := splitNonEmpty(u.Path(), "/")
 	components = append(components, component)

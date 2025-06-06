@@ -52,9 +52,11 @@ type (
 	Uniform gl.Uniform
 )
 
-var noBuffer = Buffer(gl.NoBuffer)
-var noShader = Shader(gl.NoShader)
-var textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST}
+var (
+	noBuffer          = Buffer(gl.NoBuffer)
+	noShader          = Shader(gl.NoShader)
+	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST}
+)
 
 func (p *painter) Init() {
 	p.ctx = &xjsContext{}

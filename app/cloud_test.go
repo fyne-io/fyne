@@ -119,8 +119,7 @@ func (c *mockCloud) Setup(_ fyne.App) error {
 	return nil
 }
 
-type mockCloudStorage struct {
-}
+type mockCloudStorage struct{}
 
 func (s *mockCloudStorage) Create(name string) (fyne.URIWriteCloser, error) {
 	return nil, errors.New("not implemented")

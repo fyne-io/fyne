@@ -2191,7 +2191,7 @@ const (
 )
 
 var typeKeys = func(e *widget.Entry, keys ...fyne.KeyName) {
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}

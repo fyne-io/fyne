@@ -25,8 +25,10 @@ func init() {
 	uint8Array = js.Global().Get("Uint8Array")
 }
 
-var _ fyne.URIReadCloser = (*idbfile)(nil)
-var _ fyne.URIWriteCloser = (*idbfile)(nil)
+var (
+	_ fyne.URIReadCloser  = (*idbfile)(nil)
+	_ fyne.URIWriteCloser = (*idbfile)(nil)
+)
 
 type idbfile struct {
 	db          *idb.Database

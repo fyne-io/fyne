@@ -226,10 +226,12 @@ func (r *splitContainerRenderer) minTrailingHeight() float32 {
 }
 
 // Declare conformity with interfaces
-var _ fyne.CanvasObject = (*divider)(nil)
-var _ fyne.Draggable = (*divider)(nil)
-var _ desktop.Cursorable = (*divider)(nil)
-var _ desktop.Hoverable = (*divider)(nil)
+var (
+	_ fyne.CanvasObject  = (*divider)(nil)
+	_ fyne.Draggable     = (*divider)(nil)
+	_ desktop.Cursorable = (*divider)(nil)
+	_ desktop.Hoverable  = (*divider)(nil)
+)
 
 type divider struct {
 	widget.BaseWidget
@@ -395,7 +397,6 @@ func dividerLength(d *divider) float32 {
 func handleThickness(d *divider) float32 {
 	th := dividerTheme(d)
 	return th.Size(theme.SizeNamePadding) / 2
-
 }
 
 func handleLength(d *divider) float32 {
