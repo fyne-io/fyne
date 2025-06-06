@@ -34,11 +34,13 @@ type Select struct {
 	tapAnim *fyne.Animation
 }
 
-var _ fyne.Widget = (*Select)(nil)
-var _ desktop.Hoverable = (*Select)(nil)
-var _ fyne.Tappable = (*Select)(nil)
-var _ fyne.Focusable = (*Select)(nil)
-var _ fyne.Disableable = (*Select)(nil)
+var (
+	_ fyne.Widget       = (*Select)(nil)
+	_ desktop.Hoverable = (*Select)(nil)
+	_ fyne.Tappable     = (*Select)(nil)
+	_ fyne.Focusable    = (*Select)(nil)
+	_ fyne.Disableable  = (*Select)(nil)
+)
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
@@ -328,7 +330,6 @@ func (s *Select) updateFromData(data binding.DataItem) {
 		return
 	}
 	s.SetSelected(val)
-
 }
 
 func (s *Select) updateSelected(text string) {

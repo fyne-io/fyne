@@ -385,8 +385,8 @@ func typeChars(chars []rune, keyDown func(rune)) {
 }
 
 func writeMarkup(path string, markup string) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(markup), 0644)
+	return os.WriteFile(path, []byte(markup), 0o644)
 }

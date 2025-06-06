@@ -17,13 +17,15 @@ import (
 // for string processing
 const idbfileSchemePrefix string = "idbfile://"
 
-var _ repository.Repository = (*IndexDBRepository)(nil)
-var _ repository.WritableRepository = (*IndexDBRepository)(nil)
-var _ repository.AppendableRepository = (*IndexDBRepository)(nil)
-var _ repository.HierarchicalRepository = (*IndexDBRepository)(nil)
-var _ repository.ListableRepository = (*IndexDBRepository)(nil)
-var _ repository.MovableRepository = (*IndexDBRepository)(nil)
-var _ repository.CopyableRepository = (*IndexDBRepository)(nil)
+var (
+	_ repository.Repository             = (*IndexDBRepository)(nil)
+	_ repository.WritableRepository     = (*IndexDBRepository)(nil)
+	_ repository.AppendableRepository   = (*IndexDBRepository)(nil)
+	_ repository.HierarchicalRepository = (*IndexDBRepository)(nil)
+	_ repository.ListableRepository     = (*IndexDBRepository)(nil)
+	_ repository.MovableRepository      = (*IndexDBRepository)(nil)
+	_ repository.CopyableRepository     = (*IndexDBRepository)(nil)
+)
 
 type IndexDBRepository struct {
 	db *idb.Database

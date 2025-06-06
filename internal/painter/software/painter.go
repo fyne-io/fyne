@@ -10,8 +10,7 @@ import (
 )
 
 // Painter is a simple software painter that can paint a canvas in memory.
-type Painter struct {
-}
+type Painter struct{}
 
 // NewPainter creates a new Painter.
 func NewPainter() *Painter {

@@ -65,8 +65,10 @@ type driver struct {
 }
 
 // Declare conformity with Driver
-var _ fyne.Driver = (*driver)(nil)
-var _ ConfiguredDriver = (*driver)(nil)
+var (
+	_ fyne.Driver      = (*driver)(nil)
+	_ ConfiguredDriver = (*driver)(nil)
+)
 
 func init() {
 	runtime.LockOSThread()
@@ -101,7 +103,6 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	} else {
 		caller()
 	}
-
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {

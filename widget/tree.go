@@ -23,8 +23,10 @@ const (
 )
 
 // Declare conformity with interfaces
-var _ fyne.Focusable = (*Tree)(nil)
-var _ fyne.Widget = (*Tree)(nil)
+var (
+	_ fyne.Focusable = (*Tree)(nil)
+	_ fyne.Widget    = (*Tree)(nil)
+)
 
 // Tree widget displays hierarchical data.
 // Each node of the tree must be identified by a Unique TreeNodeID.
@@ -833,9 +835,11 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
-var _ desktop.Hoverable = (*treeNode)(nil)
-var _ fyne.CanvasObject = (*treeNode)(nil)
-var _ fyne.Tappable = (*treeNode)(nil)
+var (
+	_ desktop.Hoverable = (*treeNode)(nil)
+	_ fyne.CanvasObject = (*treeNode)(nil)
+	_ fyne.Tappable     = (*treeNode)(nil)
+)
 
 type treeNode struct {
 	BaseWidget

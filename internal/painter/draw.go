@@ -90,6 +90,7 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	return drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, rWidth, rHeight, vectorPad, scale)
 }
+
 func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	return drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, rWidth, rHeight, vectorPad, scale)
 }

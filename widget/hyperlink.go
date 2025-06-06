@@ -11,8 +11,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Focusable = (*Hyperlink)(nil)
-var _ fyne.Widget = (*Hyperlink)(nil)
+var (
+	_ fyne.Focusable = (*Hyperlink)(nil)
+	_ fyne.Widget    = (*Hyperlink)(nil)
+)
 
 // Hyperlink widget is a text component with appropriate padding and layout.
 // When clicked, the default web browser should open with a URL

@@ -105,7 +105,8 @@ func TestForm_Renderer(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -133,7 +134,8 @@ func TestForm_ChangeTheme(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewLabel("static")},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -267,7 +269,8 @@ func TestForm_DisableEnable(t *testing.T) {
 		Items: []*FormItem{
 			{Text: "test1", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -387,7 +390,6 @@ func TestForm_Validate(t *testing.T) {
 	entry2.SetText("not-wrong")
 	err = form.Validate()
 	assert.NoError(t, err)
-
 }
 
 func TestForm_SetOnValidationChanged(t *testing.T) {
@@ -414,7 +416,6 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	entry1.SetText("15-true")
 	assert.NoError(t, form.Validate())
 	assert.False(t, validationError)
-
 }
 
 func TestForm_ExtendedEntry(t *testing.T) {
@@ -443,5 +444,4 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 	assert.NotPanics(t, func() {
 		form.Refresh()
 	})
-
 }

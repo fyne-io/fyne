@@ -324,8 +324,10 @@ func TestTree_OverrideTheme(t *testing.T) {
 
 	normal := test.Theme()
 	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
-	window.SetContent(&fyne.Container{Layout: layout.NewStackLayout(),
-		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)}})
+	window.SetContent(&fyne.Container{
+		Layout:  layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)},
+	})
 	test.AssertImageMatches(t, "tree/theme_initial.png", window.Canvas().Capture())
 }
 

@@ -62,6 +62,7 @@ var themeChanged = js.FuncOf(func(this js.Value, args []js.Value) any {
 func watchTheme(_ *settings) {
 	js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Call("addEventListener", "change", themeChanged)
 }
+
 func stopWatchingTheme() {
 	js.Global().Call("matchMedia", "(prefers-color-scheme: dark)").Call("removeEventListener", "change", themeChanged)
 }

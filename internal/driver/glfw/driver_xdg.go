@@ -3,6 +3,7 @@
 package glfw
 
 import "C"
+
 import (
 	"time"
 

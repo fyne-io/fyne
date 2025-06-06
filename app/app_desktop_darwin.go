@@ -12,6 +12,7 @@ bool isBundled();
 void watchTheme();
 */
 import "C"
+
 import (
 	"net/url"
 	"os"

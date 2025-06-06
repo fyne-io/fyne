@@ -254,8 +254,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
-
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32,
+) {
 	texture, err := p.getTexture(o, creator)
 	if err != nil {
 		return
@@ -354,7 +354,8 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
+	fill canvas.ImageFill, aspect float32, pad float32,
+) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 	size, pos = roundToPixelCoords(size, pos, p.pixScale)
 
@@ -442,7 +443,8 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 		0, 0, x1Norm, y1Norm, // first triangle
 		0, 0, x2Norm, y1Norm, // second triangle
 		0, 0, x1Norm, y2Norm,
-		0, 0, x2Norm, y2Norm}
+		0, 0, x2Norm, y2Norm,
+	}
 
 	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
