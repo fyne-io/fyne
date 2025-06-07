@@ -391,7 +391,7 @@ func (t *TextGrid) parseRows(text string) []TextGridRow {
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
-	r := cache.Renderer(t).(*textGridRenderer).text
+	r := t.content
 	r.refreshCell(row, col)
 }
 
@@ -663,8 +663,10 @@ func (t *textGridRowRenderer) refreshCell(col int) {
 		return
 	}
 
-	cell := t.obj.text.text.Rows[t.obj.row].Cells[col]
-	t.setCellRune(cell.Rune, pos, cell.Style, t.obj.text.text.Rows[t.obj.row].Style)
+	if len(t.obj.text.text.Rows[t.obj.row].Cells) > col {
+		cell := t.obj.text.text.Rows[t.obj.row].Cells[col]
+		t.setCellRune(cell.Rune, pos, cell.Style, t.obj.text.text.Rows[t.obj.row].Style)
+	}
 }
 
 func (t *textGridRowRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
