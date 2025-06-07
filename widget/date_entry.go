@@ -36,10 +36,10 @@ func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
 	dateFormat := getLocaleDateFormat()
-	e.Validator = func(in string) error {
+	e.SetValidator(func(in string) error {
 		_, err := time.Parse(dateFormat, in)
 		return err
-	}
+	})
 	e.Entry.OnChanged = func(in string) {
 		if in == "" {
 			e.Date = nil
