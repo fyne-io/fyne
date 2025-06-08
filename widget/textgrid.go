@@ -663,9 +663,11 @@ func (t *textGridRowRenderer) refreshCell(col int) {
 		return
 	}
 
-	if len(t.obj.text.text.Rows[t.obj.row].Cells) > col {
-		cell := t.obj.text.text.Rows[t.obj.row].Cells[col]
-		t.setCellRune(cell.Rune, pos, cell.Style, t.obj.text.text.Rows[t.obj.row].Style)
+	row := t.obj.text.text.Rows[t.obj.row]
+
+	if len(row.Cells) > col {
+		cell := row.Cells[col]
+		t.setCellRune(cell.Rune, pos, cell.Style, row.Style)
 	}
 }
 
