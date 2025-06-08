@@ -125,6 +125,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 // Since: 2.7
 func (t *TextGrid) ScrollToTop() {
 	t.scroll.ScrollToTop()
+	t.Refresh()
 }
 
 // ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
@@ -132,6 +133,7 @@ func (t *TextGrid) ScrollToTop() {
 // Since: 2.7
 func (t *TextGrid) ScrollToBottom() {
 	t.scroll.ScrollToBottom()
+	t.Refresh()
 }
 
 // PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
