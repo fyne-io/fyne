@@ -2,6 +2,8 @@ name: Static Analysis
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  CC: "clang"
 
 jobs:
   static_analysis:
@@ -18,17 +20,9 @@ jobs:
         go-version: 'stable'
 
     - name: Get dependencies
-      run: >-
-        sudo apt-get update &&
-        sudo apt-get install
-        gcc
-        libegl1-mesa-dev
-        libgl1-mesa-dev
-        libgles2-mesa-dev
-        libx11-dev
-        xorg-dev
-        xvfb
-        language-pack-en
+      run: |
+        sudo apt-get update
+        sudo apt-get install clang libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
 
     - name: Set environment variable LANG
       run: export LANG=en_EN.UTF-8
