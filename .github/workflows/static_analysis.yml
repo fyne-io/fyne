@@ -2,6 +2,8 @@ name: Static Analysis
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  CC: "clang"
 
 jobs:
   static_analysis:
