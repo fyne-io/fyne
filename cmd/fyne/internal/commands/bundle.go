@@ -136,30 +136,6 @@ func (b *Bundler) doBundle(filepath string, out *os.File) {
 	writeResource(filepath, b.name, out)
 }
 
-func openOutputFile(filePath string, noheader bool) (file *os.File, close func() error, err error) {
-	fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
-	if noheader {
-		fileModes = os.O_RDWR | os.O_APPEND
-	}
-
-	f, err := os.OpenFile(filePath, fileModes, 0o666)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			fyne.LogError("Unable to open output file", err)
-			return nil, nil, err
-		}
-
-		// try creating the file
-		f, err = os.Create(filePath)
-		if err != nil {
-			fyne.LogError("Unable to read, or create, output file : "+filePath, err)
-			return nil, nil, err
-		}
-	}
-
-	return f, f.Close, nil
-}
-
 func sanitiseName(file, prefix string) string {
 	titled := strings.Title(file) //lint:ignore SA1019 This is fine for our use case.
 	name := filenameRegex.ReplaceAllString(titled, "")

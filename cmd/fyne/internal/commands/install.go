@@ -176,7 +176,7 @@ func (i *Installer) installToIOSSimulator(target string) error {
 		"booted", // Install to the booted simulator.
 		target)
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("Install to a simulator error: %s%s", out, err)
+		return fmt.Errorf("install to a simulator error: %s%s", out, err)
 	}
 
 	i.runInIOSSimulator()
