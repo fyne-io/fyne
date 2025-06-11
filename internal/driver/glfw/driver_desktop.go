@@ -190,7 +190,8 @@ func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
 	}
 
 	w.SetCloseIntercept(w.Hide)
-	systray.SetOnTapped(w.Show)
+	glw := w.(*window)
+	systray.SetOnTapped(glw.toggleVisible)
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
