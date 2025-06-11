@@ -8,50 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 
 	//lint:ignore SA1019 The recommended replacement does not solve the use-case
 	"golang.org/x/tools/go/vcs"
 )
-
-// Get returns the command which downloads and installs fyne applications.
-func Get() *cli.Command {
-	g := &Getter{appData: &appData{}}
-	return &cli.Command{
-		Name:        "get",
-		Usage:       "Downloads and installs a Fyne application",
-		Description: "A single parameter is required to specify the Go package, as with \"go get\".",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "icon",
-				Usage:       "The name of the application icon file.",
-				Value:       "",
-				Destination: &g.icon,
-			},
-			&cli.StringFlag{
-				Name:        "appID",
-				Aliases:     []string{"id"},
-				Usage:       "For darwin and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &g.AppID,
-			},
-			&cli.StringFlag{
-				Name:        "installDir",
-				Aliases:     []string{"o"},
-				Usage:       "A specific location to install to, rather than the OS default.",
-				Destination: &g.installDir,
-			},
-		},
-		Action: func(ctx *cli.Context) error {
-			if ctx.Args().Len() != 1 {
-				return errors.New("missing \"package\" argument to define the application to get")
-			}
-
-			pkg := ctx.Args().Slice()[0]
-			return g.Get(pkg)
-		},
-	}
-}
 
 // Getter is the command that can handle downloading and installing Fyne apps to the current platform.
 type Getter struct {

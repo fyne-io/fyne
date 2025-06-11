@@ -11,59 +11,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 
-	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 )
-
-// Install returns the cli command for installing fyne applications
-func Install() *cli.Command {
-	i := NewInstaller()
-
-	return &cli.Command{
-		Name:  "install",
-		Usage: "Packages an application and installs an application.",
-		Description: `The install command packages an application for the current platform or one of the mobile targets.
-It will copy the package to the system location for applications or a location specified by installDir.`,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "target",
-				Aliases:     []string{"os"},
-				Usage:       "Instead of the current system, target a mobile platform (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
-				Destination: &i.os,
-			},
-			&cli.StringFlag{
-				Name:        "installDir",
-				Aliases:     []string{"o"},
-				Usage:       "A specific location to install to, rather than the OS default.",
-				Destination: &i.installDir,
-			},
-			&cli.StringFlag{
-				Name:        "icon",
-				Usage:       "The name of the application icon file.",
-				Value:       "",
-				Destination: &i.icon,
-			},
-			&cli.BoolFlag{
-				Name:        "use-raw-icon",
-				Usage:       "Skip any OS-specific icon pre-processing",
-				Value:       false,
-				Destination: &i.rawIcon,
-			},
-			&cli.StringFlag{
-				Name:        "appID",
-				Aliases:     []string{"id"},
-				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &i.AppID,
-			},
-			&cli.BoolFlag{
-				Name:        "release",
-				Usage:       "Enable installation in release mode (disable debug, etc).",
-				Destination: &i.release,
-			},
-		},
-		Action: i.bundleAction,
-	}
-}
 
 // Installer installs locally built Fyne apps.
 type Installer struct {
@@ -118,24 +67,6 @@ func (i *Installer) Run(args []string) {
 		fyne.LogError("Unable to install application", err)
 		os.Exit(1)
 	}
-}
-
-func (i *Installer) bundleAction(ctx *cli.Context) error {
-	if ctx.Args().Len() != 0 {
-		return errors.New("unexpected parameter after flags")
-	}
-
-	err := i.validate()
-	if err != nil {
-		return err
-	}
-
-	err = i.install()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (i *Installer) install() error {

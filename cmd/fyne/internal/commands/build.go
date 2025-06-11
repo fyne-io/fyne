@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/mcuadros/go-version"
-	"github.com/urfave/cli/v2"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
@@ -27,81 +26,12 @@ type Builder struct {
 	tags               []string
 	tagsToParse        string
 
-	customMetadata keyValueFlag
-
 	runner runner
 }
 
 // NewBuilder returns a command that can handle the build of GUI apps built using Fyne.
 func NewBuilder() *Builder {
 	return &Builder{appData: &appData{}}
-}
-
-// Build returns the cli command for building fyne applications
-func Build() *cli.Command {
-	b := NewBuilder()
-
-	return &cli.Command{
-		Name:        "build",
-		Usage:       "Build an application.",
-		Description: "You can specify --target to define the OS to build for. The executable file will default to an appropriate name but can be overridden using -o.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "target",
-				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator).",
-				Destination: &b.os,
-			},
-			&cli.StringFlag{
-				Name:        "sourceDir",
-				Aliases:     []string{"src"},
-				Usage:       "The directory to package, if executable is not set.",
-				Destination: &b.srcdir,
-			},
-			&cli.StringFlag{
-				Name:        "tags",
-				Usage:       "A comma-separated list of build tags.",
-				Destination: &b.tagsToParse,
-			},
-			&cli.BoolFlag{
-				Name:        "release",
-				Usage:       "Enable installation in release mode (disable debug etc).",
-				Destination: &b.release,
-			},
-			&cli.StringFlag{
-				Name:        "o",
-				Usage:       "Specify a name for the output file, default is based on the current directory.",
-				Destination: &b.target,
-			},
-			&cli.BoolFlag{
-				Name:        "pprof",
-				Usage:       "Enable pprof profiling.",
-				Destination: &b.pprof,
-			},
-			&cli.IntFlag{
-				Name:        "pprof-port",
-				Usage:       "Specify the port to use for pprof profiling.",
-				Value:       6060,
-				Destination: &b.pprofPort,
-			},
-			&cli.GenericFlag{
-				Name:  "metadata",
-				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
-				Value: &b.customMetadata,
-			},
-		},
-		Action: func(ctx *cli.Context) error {
-			argCount := ctx.Args().Len()
-			if argCount > 0 {
-				if argCount != 1 {
-					return fmt.Errorf("incorrect amount of path provided")
-				}
-				b.goPackage = ctx.Args().First()
-			}
-
-			return b.Build()
-		},
-	}
 }
 
 // Build parse the tags and start building
@@ -120,7 +50,6 @@ func (b *Builder) Build() error {
 		b.tags = strings.Split(b.tagsToParse, ",")
 	}
 	b.appData.Release = b.release
-	b.appData.CustomMetadata = b.customMetadata.m
 
 	return b.build()
 }

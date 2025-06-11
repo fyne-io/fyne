@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 
-	"github.com/urfave/cli/v2"
 	"golang.org/x/sys/execabs"
 )
 
@@ -24,116 +23,6 @@ var macAppStoreCategories = []string{
 	"role-playing-games", "simulation-games", "sports-games", "strategy-games", "trivia-games", "word-games",
 	"graphics-design", "healthcare-fitness", "lifestyle", "medical", "music", "news", "photography",
 	"productivity", "reference", "social-networking", "sports", "travel", "utilities", "video", "weather",
-}
-
-// Release returns the cli command for bundling release builds of fyne applications
-func Release() *cli.Command {
-	r := NewReleaser()
-
-	return &cli.Command{
-		Name:  "release",
-		Usage: "Prepares an application for public distribution.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "target",
-				Aliases:     []string{"os"},
-				Usage:       "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)",
-				Destination: &r.os,
-			},
-			&cli.StringFlag{
-				Name:        "keyStore",
-				Usage:       "Android: location of .keystore file containing signing information",
-				Destination: &r.keyStore,
-			},
-			&cli.StringFlag{
-				Name:        "keyStorePass",
-				Usage:       "Android: password for the .keystore file, default take the password from stdin",
-				Destination: &r.keyStorePass,
-			},
-			&cli.StringFlag{
-				Name:        "keyName",
-				Usage:       "Android: alias for the signer's private key, which is needed when reading a .keystore file",
-				Destination: &r.keyName,
-			},
-			&cli.StringFlag{
-				Name:        "keyPass",
-				Usage:       "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin",
-				Destination: &r.keyStorePass,
-			},
-			&cli.StringFlag{
-				Name:        "name",
-				Usage:       "The name of the application, default is the executable file name",
-				Destination: &r.Name,
-			},
-			&cli.StringFlag{
-				Name:        "tags",
-				Usage:       "A comma-separated list of build tags.",
-				Destination: &r.tags,
-			},
-			&cli.StringFlag{
-				Name:        "appVersion",
-				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
-				Destination: &r.AppVersion,
-			},
-			&cli.IntFlag{
-				Name:        "appBuild",
-				Usage:       "Build number, should be greater than 0 and incremented for each build",
-				Destination: &r.AppBuild,
-			},
-			&cli.StringFlag{
-				Name:        "appID",
-				Aliases:     []string{"id"},
-				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &r.AppID,
-			},
-			&cli.StringFlag{
-				Name:        "certificate",
-				Aliases:     []string{"cert"},
-				Usage:       "iOS/macOS/Windows: name of the certificate to sign the build",
-				Destination: &r.certificate,
-			},
-			&cli.StringFlag{
-				Name:        "profile",
-				Usage:       "iOS/macOS: name of the provisioning profile for this release build",
-				Destination: &r.profile,
-			},
-			&cli.StringFlag{
-				Name:        "developer",
-				Aliases:     []string{"dev"},
-				Usage:       "Windows: the developer identity for your Microsoft store account",
-				Destination: &r.developer,
-			},
-			&cli.StringFlag{
-				Name:        "password",
-				Aliases:     []string{"passw"},
-				Usage:       "Windows: password for the certificate used to sign the build",
-				Destination: &r.password,
-			},
-			&cli.StringFlag{
-				Name:        "category",
-				Usage:       "macOS: category of the app for store listing",
-				Destination: &r.category,
-			},
-			&cli.StringFlag{
-				Name:        "icon",
-				Usage:       "The name of the application icon file.",
-				Value:       "",
-				Destination: &r.icon,
-			},
-			&cli.BoolFlag{
-				Name:        "use-raw-icon",
-				Usage:       "Skip any OS-specific icon pre-processing",
-				Value:       false,
-				Destination: &r.rawIcon,
-			},
-			&cli.GenericFlag{
-				Name:  "metadata",
-				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
-				Value: &r.customMetadata,
-			},
-		},
-		Action: r.releaseAction,
-	}
 }
 
 // Releaser adapts app packages form distribution.
@@ -204,29 +93,6 @@ func (r *Releaser) Run(params []string) {
 	if err := r.afterPackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 	}
-}
-
-func (r *Releaser) releaseAction(_ *cli.Context) error {
-	r.Packager.distribution = true
-	r.Packager.release = true
-
-	if err := r.validate(); err != nil {
-		return err
-	}
-
-	if err := r.beforePackage(); err != nil {
-		return err
-	}
-
-	if err := r.Packager.packageWithoutValidate(); err != nil {
-		return err
-	}
-
-	if err := r.afterPackage(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *Releaser) afterPackage() error {
