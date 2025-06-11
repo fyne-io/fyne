@@ -156,7 +156,16 @@ func (t *TextGrid) Resize(size fyne.Size) {
 func (t *TextGrid) SetText(text string) {
 	rows := t.parseRows(text)
 
+	oldRowsLen := len(t.Rows)
 	t.Rows = rows
+
+	// Update scroll position if new text is shorter than previous text
+	if t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen {
+		offset := t.PositionForCursorLocation(len(rows), 0)
+		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
+		t.scroll.Refresh()
+	}
+
 	t.Refresh()
 }
 
