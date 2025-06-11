@@ -159,8 +159,9 @@ func (t *TextGrid) SetText(text string) {
 	oldRowsLen := len(t.Rows)
 	t.Rows = rows
 
-	// Update scroll position if new text is shorter than previous text
-	if t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen {
+	// If we don't update the scroll offset when the text is shorter,
+	// we may end up with no text displayed or text appearing partially cut off
+	if t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroll.Content != nil {
 		offset := t.PositionForCursorLocation(len(rows), 0)
 		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
 		t.scroll.Refresh()
