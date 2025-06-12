@@ -89,6 +89,9 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		"-o", filepath.Join(tmpdir, "main/main"),
 		"-create",
 	)
+	if buildX {
+		printcmd("xcrun lipo -o %s -create", filepath.Join(tmpdir, "main/main"))
+	}
 	var nmpkgs map[string]bool
 	for _, arch := range archs {
 		path := filepath.Join(tmpdir, arch)
@@ -125,6 +128,9 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	cmd = execabs.Command("xcrun", cmdStrings...)
+	if buildX {
+		printcmd("xcrun %s", strings.Join(cmdStrings, " "))
+	}
 	if err := runCmd(cmd); err != nil {
 		return nil, err
 	}
