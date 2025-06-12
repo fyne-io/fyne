@@ -6,14 +6,14 @@ import (
 )
 
 type rowWrapLayout struct {
-	rowCount          int
 	horizontalPadding float32
+	minSize           fyne.Size
 	verticalPadding   float32
 }
 
 // NewRowWrapLayout returns a layout that dynamically arranges objects of similar height
-// in rows and wraps them as necessary.
-// The height of the rows is determined by the tallest object and the same for all rows.
+// in rows and wraps them dynamically.
+// Objects are separated with horizontal and vertical inner padding.
 //
 // Since: 2.7
 func NewRowWrapLayout() fyne.Layout {
@@ -24,8 +24,8 @@ func NewRowWrapLayout() fyne.Layout {
 	}
 }
 
-// NewRowWrapLayoutWithCustomPadding creates a new RowWrapLayout instance
-// with the specified paddings.
+// NewRowWrapLayoutWithCustomPadding returns a new RowWrapLayout instance
+// with custom horizontal and vertical inner padding.
 //
 // Since: 2.7
 func NewRowWrapLayoutWithCustomPadding(horizontal, vertical float32) fyne.Layout {
@@ -38,61 +38,70 @@ func NewRowWrapLayoutWithCustomPadding(horizontal, vertical float32) fyne.Layout
 var _ fyne.Layout = (*rowWrapLayout)(nil)
 
 // MinSize finds the smallest size that satisfies all the child objects.
-// For a RowWrapLayout this is the width of the widest child
+// For a RowWrapLayout this is initially the width of the widest child
 // and the height of the tallest child multiplied by the number of children,
 // with appropriate padding between them.
+// After Layout() has run it returns the actual min size.
 func (l *rowWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if len(objects) == 0 {
 		return fyne.NewSize(0, 0)
 	}
-	rows := l.rowCount
-	if rows == 0 {
-		rows = 1
+	if !l.minSize.IsZero() {
+		return l.minSize
 	}
-	var w, h float32
+	var maxW, maxH float32
+	var objCount int
 	for _, o := range objects {
 		if !o.Visible() {
 			continue
 		}
+		objCount++
 		s := o.MinSize()
-		w = fyne.Max(w, s.Width)
-		h = fyne.Max(h, s.Height)
+		maxW = fyne.Max(maxW, s.Width)
+		maxH = fyne.Max(maxH, s.Height)
 	}
-	return fyne.NewSize(w, h*float32(rows)+l.verticalPadding*float32(rows-1))
+	return fyne.NewSize(maxW, l.minHeight(maxH, objCount))
+}
+
+func (l *rowWrapLayout) minHeight(rowHeight float32, rowCount int) float32 {
+	height := rowHeight*float32(rowCount) + l.verticalPadding*float32(rowCount-1)
+	return height
 }
 
 // Layout is called to pack all child objects into a specified size.
-// For RowWrapLayout this will arrange all objects into rows of equal size.
+// For RowWrapLayout this will arrange all objects into rows of equal size
+// and wrap objects into additional rows as needed.
 func (l *rowWrapLayout) Layout(objects []fyne.CanvasObject, containerSize fyne.Size) {
 	if len(objects) == 0 {
 		return
 	}
-	var h float32
+	var maxH float32
 	for _, o := range objects {
 		if !o.Visible() {
 			continue
 		}
-		h = fyne.Max(h, o.MinSize().Height)
+		maxH = fyne.Max(maxH, o.MinSize().Height)
 	}
 	var minSize fyne.Size
 	pos := fyne.NewPos(0, 0)
 	rows := 1
+	isFirst := true
 	for _, o := range objects {
 		if !o.Visible() {
 			continue
 		}
 		size := o.MinSize()
 		o.Resize(size)
-		w := size.Width + l.horizontalPadding
-		if pos.X+w > containerSize.Width {
-			y := float32(rows) * (h + l.verticalPadding)
+		if !isFirst && pos.X+size.Width+l.horizontalPadding >= containerSize.Width {
+			y := float32(rows) * (maxH + l.verticalPadding)
 			pos = fyne.NewPos(0, y)
-			minSize.Height = fyne.Max(minSize.Height, y)
 			rows++
 		}
+		isFirst = false
+		minSize.Width = fyne.Max(minSize.Width, pos.X+size.Width)
+		minSize.Height = l.minHeight(maxH, rows)
 		o.Move(pos)
-		pos = pos.Add(fyne.NewPos(w, 0))
-		minSize.Width = fyne.Max(minSize.Width, w)
+		pos = pos.Add(fyne.NewPos(size.Width+l.horizontalPadding, 0))
 	}
-	l.rowCount = rows
+	l.minSize = minSize
 }
