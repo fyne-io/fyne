@@ -1787,6 +1787,52 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
+func TestEntry_SetIcon(t *testing.T) {
+	entry := widget.NewEntry()
+	assert.Nil(t, entry.Icon)
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	assert.Equal(t, icon, entry.Icon)
+}
+
+func TestEntry_Icon_MinSize(t *testing.T) {
+	entryWithIcon := widget.NewEntry()
+	entryWithIcon.SetIcon(theme.MailComposeIcon())
+	entryWithIcon.SetText("Test")
+	minSizeWithIcon := entryWithIcon.MinSize()
+
+	entryWithoutIcon := widget.NewEntry()
+	entryWithoutIcon.SetText("Test")
+	minSizeWithoutIcon := entryWithoutIcon.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_MinSize_IncreasesWidth(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Test")
+	minSizeWithoutIcon := entry.MinSize()
+
+	entry.SetIcon(theme.MailComposeIcon())
+	minSizeWithIcon := entry.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_ReplaceAndRemove(t *testing.T) {
+	entry := widget.NewEntry()
+	icon1 := theme.MailComposeIcon()
+	icon2 := theme.InfoIcon()
+	entry.SetIcon(icon1)
+	assert.Equal(t, icon1, entry.Icon)
+	entry.Icon = icon2
+	assert.Equal(t, icon2, entry.Icon)
+	entry.SetIcon(nil)
+	assert.Nil(t, entry.Icon)
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
 	singleMin := entry.MinSize()
