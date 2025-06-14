@@ -89,7 +89,9 @@ func (d *gLDriver) drawSingleFrame() {
 		}
 
 		w.RunWithContext(func() {
-			refreshed = refreshed || w.driver.repaintWindow(w)
+			if w.driver.repaintWindow(w) {
+				refreshed = true
+			}
 		})
 	}
 	cache.Clean(refreshed)
