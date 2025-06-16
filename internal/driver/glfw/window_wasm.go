@@ -169,9 +169,7 @@ func (w *window) frameSized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(_ *glfw.Window) {
-	runOnMain(func() {
-		w.processRefresh()
-	})
+	runOnMain(w.processRefresh)
 }
 
 func (w *window) closed(viewport *glfw.Window) {
