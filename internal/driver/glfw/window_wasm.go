@@ -20,6 +20,8 @@ import (
 	"github.com/fyne-io/glfw-js"
 )
 
+var style = js.Global().Get("document").Get("body").Get("style")
+
 type Cursor struct {
 	JSName string
 }
@@ -215,7 +217,6 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
 }
 
 func (w *window) SetCursor(cursor *Cursor) {
-	style := js.Global().Get("document").Get("body").Get("style")
 	style.Call("setProperty", "cursor", cursor.JSName)
 }
 
