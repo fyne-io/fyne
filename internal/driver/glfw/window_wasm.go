@@ -5,7 +5,6 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -57,14 +56,11 @@ type window struct {
 	icon     fyne.Resource
 	mainmenu *fyne.MainMenu
 
-	clipboard fyne.Clipboard
-
 	master     bool
 	fullScreen bool
 	centered   bool
 	visible    bool
 
-	mouseLock            sync.RWMutex
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
 	mouseDraggedObjStart fyne.Position
