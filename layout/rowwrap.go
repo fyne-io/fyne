@@ -13,7 +13,7 @@ type rowWrapLayout struct {
 
 // NewRowWrapLayout returns a layout that dynamically arranges objects of similar height
 // in rows and wraps them dynamically.
-// Objects are separated with horizontal and vertical inner padding.
+// Objects are separated with horizontal and vertical padding.
 //
 // Since: 2.7
 func NewRowWrapLayout() fyne.Layout {
@@ -25,7 +25,7 @@ func NewRowWrapLayout() fyne.Layout {
 }
 
 // NewRowWrapLayoutWithCustomPadding returns a new RowWrapLayout instance
-// with custom horizontal and vertical inner padding.
+// with custom horizontal and inner padding.
 //
 // Since: 2.7
 func NewRowWrapLayoutWithCustomPadding(horizontal, vertical float32) fyne.Layout {
