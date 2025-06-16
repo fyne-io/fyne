@@ -191,8 +191,8 @@ func TestGlCanvas_Focus(t *testing.T) {
 	overlay2 := container.NewVBox(o2e)
 	w.SetContent(content)
 	c.setMenuOverlay(menuOverlay)
-	overs := c.Overlays()
 	runOnMain(func() {
+		overs := c.Overlays()
 		overs.Add(overlay1)
 		overs.Add(overlay2)
 	})
@@ -261,7 +261,11 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.Equal(t, ce2, c.Focused())
 	assert.True(t, ce2.focused)
 
-	c.Overlays().Add(overlay1)
+	var overs fyne.OverlayStack
+	runOnMain(func() {
+		overs = c.Overlays()
+	})
+	overs.Add(overlay1)
 	ctxt := "adding overlay changes focus handler but does not remove focus from content"
 	assert.Nil(t, c.Focused(), ctxt)
 	assert.True(t, ce2.focused, ctxt)
@@ -273,7 +277,7 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.True(t, ce2.focused, ctxt)
 	assert.True(t, o1e1.focused, ctxt)
 
-	c.Overlays().Add(overlay2)
+	overs.Add(overlay2)
 	ctxt = "adding overlay changes focus handler but does not remove focus from previous overlay"
 	assert.Nil(t, c.Focused(), ctxt)
 	assert.True(t, o1e1.focused, ctxt)
@@ -290,7 +294,7 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.False(t, o2e2.focused)
 	assert.True(t, o2e1.focused)
 
-	c.Overlays().Remove(overlay2)
+	overs.Remove(overlay2)
 	ctxt = "removing overlay restores focus handler from previous overlay but does not remove focus from removed overlay"
 	assert.Equal(t, o1e1, c.Focused(), ctxt)
 	assert.True(t, o2e1.focused, ctxt)
@@ -302,7 +306,7 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.False(t, o1e1.focused)
 	assert.True(t, o1e2.focused)
 
-	c.Overlays().Remove(overlay1)
+	overs.Remove(overlay1)
 	ctxt = "removing last overlay restores focus handler from content but does not remove focus from removed overlay"
 	assert.Equal(t, ce2, c.Focused(), ctxt)
 	assert.False(t, o1e1.focused, ctxt)
@@ -430,9 +434,9 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewLabel("Over")
 	w.SetContent(content)
-	overlays := w.Canvas().Overlays()
+	c := w.Canvas()
 	runOnMain(func() {
-		overlays.Add(over)
+		c.Overlays().Add(over)
 	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 	// TODO: address #707; overlays should always be canvas size
@@ -463,9 +467,13 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	o2 := widget.NewLabel("o2")
 	o3 := widget.NewLabel("o3")
 	w.SetContent(content)
-	w.Canvas().Overlays().Add(o1)
-	w.Canvas().Overlays().Add(o2)
-	w.Canvas().Overlays().Add(o3)
+	c := w.Canvas()
+	runOnMain(func() {
+		overs := c.Overlays()
+		overs.Add(o1)
+		overs.Add(o2)
+		overs.Add(o3)
+	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
@@ -661,14 +669,6 @@ func (s *safeCanvas) setMenuOverlay(o fyne.CanvasObject) {
 	runOnMain(func() {
 		s.glCanvas.setMenuOverlay(o)
 	})
-}
-
-func (s *safeCanvas) Overlays() (ret fyne.OverlayStack) {
-	runOnMain(func() {
-		ret = s.glCanvas.Overlays()
-	})
-
-	return ret
 }
 
 func (s *safeCanvas) Padded() (ret bool) {
