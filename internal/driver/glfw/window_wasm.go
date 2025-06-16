@@ -5,7 +5,6 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
-	"runtime"
 	"sync"
 	"time"
 
@@ -214,7 +213,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 	runOnMain(func() {
-		if runtime.GOOS != "darwin" && xoff == 0 &&
+		if xoff == 0 &&
 			(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
 				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
 			xoff, yoff = yoff, xoff
@@ -227,26 +226,12 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
 	var button desktop.MouseButton
-	rightClick := false
-	if runtime.GOOS == "darwin" {
-		if modifier&fyne.KeyModifierControl != 0 {
-			rightClick = true
-			modifier &^= fyne.KeyModifierControl
-		}
-		if modifier&fyne.KeyModifierSuper != 0 {
-			modifier |= fyne.KeyModifierControl
-			modifier &^= fyne.KeyModifierSuper
-		}
-	}
+
 	switch btn {
 	case glfw.MouseButton1:
-		if rightClick {
-			button = desktop.RightMouseButton
-		} else {
-			button = desktop.LeftMouseButton
-		}
+		button = desktop.MouseButtonPrimary
 	case glfw.MouseButton2:
-		button = desktop.RightMouseButton
+		button = desktop.MouseButtonSecondary
 	}
 	return button, modifier
 }
@@ -552,6 +537,7 @@ func (w *window) create() {
 	for _, fn := range w.pending {
 		fn()
 	}
+	w.pending = nil
 
 	w.requestedWidth, w.requestedHeight = w.width, w.height
 
