@@ -64,8 +64,7 @@ func (l *rowWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 }
 
 func (l *rowWrapLayout) minHeight(rowHeight float32, rowCount int) float32 {
-	height := rowHeight*float32(rowCount) + l.verticalPadding*float32(rowCount-1)
-	return height
+	return rowHeight*float32(rowCount) + l.verticalPadding*float32(rowCount-1)
 }
 
 // Layout is called to pack all child objects into a specified size.
