@@ -498,7 +498,9 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	content := widget.NewLabel("Content")
 	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
-	over.Show()
+	runOnMain(func() {
+		over.Show()
+	})
 	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
 
 	size := fyne.NewSize(200, 100)
