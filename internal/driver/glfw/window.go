@@ -275,6 +275,13 @@ func (w *window) destroy(d *gLDriver) {
 	}
 }
 
+func (w *window) drainPendingEvents() {
+	for _, fn := range w.pending {
+		fn()
+	}
+	w.pending = nil
+}
+
 func (w *window) processMoved(x, y int) {
 	if !w.fullScreen { // don't save the move to top left when changing to fullscreen
 		// save coordinates
@@ -510,9 +517,10 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		}
 	}
 
-	if action == press {
+	switch action {
+	case press:
 		w.mouseButton |= button
-	} else if action == release {
+	case release:
 		w.mouseButton &= ^button
 	}
 
@@ -536,13 +544,12 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	_, tap := co.(fyne.Tappable)
 	secondary, altTap := co.(fyne.SecondaryTappable)
 	if tap || altTap {
-		if action == press {
+		switch action {
+		case press:
 			w.mousePressed = co
-		} else if action == release {
-			if co == mousePressed {
-				if button == desktop.MouseButtonSecondary && altTap {
-					secondary.TappedSecondary(ev)
-				}
+		case release:
+			if co == mousePressed && button == desktop.MouseButtonSecondary && altTap {
+				secondary.TappedSecondary(ev)
 			}
 		}
 	}
@@ -555,9 +562,10 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 
 func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action action, wid desktop.Mouseable) {
 	mousePos := mev.AbsolutePosition
-	if action == press {
+	switch action {
+	case press:
 		wid.MouseDown(mev)
-	} else if action == release {
+	case release:
 		mouseDragged := w.mouseDragged
 		mouseDraggedOffset := w.mouseDraggedOffset
 		if mouseDragged == nil {
@@ -649,23 +657,18 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 }
 
 func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
-	captures := false
-
-	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
-		captures = ent.AcceptsTab()
-	}
-	if !captures {
-		switch modifier {
-		case 0:
-			w.canvas.FocusNext()
-			return false
-		case fyne.KeyModifierShift:
-			w.canvas.FocusPrevious()
-			return false
-		}
+	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && ent.AcceptsTab() {
+		return true
 	}
 
-	return captures
+	switch modifier {
+	case 0:
+		w.canvas.FocusNext()
+	case fyne.KeyModifierShift:
+		w.canvas.FocusPrevious()
+	}
+
+	return false
 }
 
 func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier fyne.KeyModifier) {

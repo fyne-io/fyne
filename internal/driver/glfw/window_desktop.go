@@ -780,10 +780,7 @@ func (w *window) create() {
 	// update window size now we have scaled detected
 	w.fitContent()
 
-	for _, fn := range w.pending {
-		fn()
-	}
-	w.pending = nil
+	w.drainPendingEvents()
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())

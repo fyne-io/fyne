@@ -528,10 +528,7 @@ func (w *window) create() {
 	// update window size now we have scaled detected
 	w.fitContent()
 
-	for _, fn := range w.pending {
-		fn()
-	}
-	w.pending = nil
+	w.drainPendingEvents()
 
 	w.requestedWidth, w.requestedHeight = w.width, w.height
 
