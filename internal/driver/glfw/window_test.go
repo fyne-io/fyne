@@ -1241,7 +1241,10 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 
 	base := container.New(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
-	refreshWindow(w.window) // ensure any async resize is done
+	runOnMain(func() {
+		refreshWindow(w.window) // ensure any async resize is done
+	})
+
 	ensureCanvasSize(t, w, fyne.NewSize(108, 212))
 
 	runOnMain(func() {
@@ -1856,18 +1859,20 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.Equal(t, 0, len(content.capturedShortcuts))
 	assert.Equal(t, "canvas", called)
 
-	if runtime.GOOS != "darwin" { // macOS does this builtin
-		item := fyne.NewMenuItem("Test", func() {
-			called = "menu"
-		})
-		item.Shortcut = testShortcut
-		file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
-
-		w.SetMainMenu(fyne.NewMainMenu(file))
-		trigger()
-		assert.Equal(t, 0, len(content.capturedShortcuts))
-		assert.Equal(t, "menu", called)
+	if runtime.GOOS == "darwin" { // macOS menus are special
+		return
 	}
+
+	item := fyne.NewMenuItem("Test", func() {
+		called = "menu"
+	})
+	item.Shortcut = testShortcut
+	file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
+
+	w.SetMainMenu(fyne.NewMainMenu(file))
+	trigger()
+	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Equal(t, "menu", called)
 
 	called = "obj"
 	w.Canvas().Focus(content)

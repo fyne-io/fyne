@@ -139,6 +139,7 @@ func TestTextGrid_ScrollToBottom(t *testing.T) {
 	scrolling.scroll.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
+
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
