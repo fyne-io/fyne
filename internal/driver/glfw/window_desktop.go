@@ -555,7 +555,7 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 
 	char := code[0]
 	if char >= 'a' && char <= 'z' {
-		return fyne.KeyName(char ^ 32) // Simple conversion to uppercase by adding 32.
+		return fyne.KeyName(char ^ ('a' - 'A')) // Corresponding KeyName is uppercase. Convert with simple bit flip.
 	}
 
 	switch char {
