@@ -344,3 +344,12 @@ func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
 	rich := cache.Renderer(p).Objects()[0].(*RichText)
 	return richTextRenderTexts(rich)
 }
+
+func TestLabel_SelectableHighlightOffset(t *testing.T) {
+	label := NewLabel("Centered Text")
+	label.Alignment = fyne.TextAlignCenter
+	label.Selectable = true
+	label.Refresh()
+
+	assert.NotNil(t, test.WidgetRenderer(label))
+}
