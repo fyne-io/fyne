@@ -259,6 +259,21 @@ func (w *window) fitContent() {
 	}
 }
 
+// getScaledMonitorSize returns the monitor dimensions adjusted for scaling
+func getScaledMonitorSize(monitor *glfw.Monitor) (int, int) {
+	videoMode := monitor.GetVideoMode()
+	widthMm, heightMm := monitor.GetPhysicalSize()
+
+	var scale float32 = 1.0
+	if runtime.GOOS != "linux" || widthMm != 60 || heightMm != 60 { // Steam Deck incorrectly reports 6cm square!
+		scale = calculateDetectedScale(widthMm, videoMode.Width)
+	}
+
+	scaledWidth := int(float32(videoMode.Width) / scale)
+	scaledHeight := int(float32(videoMode.Height) / scale)
+	return scaledWidth, scaledHeight
+}
+
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	if !build.IsWayland {
 		x, y := w.xpos, w.ypos
@@ -274,7 +289,9 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 			if x > xOff || y > yOff {
 				continue
 			}
-			if videoMode := monitor.GetVideoMode(); x+videoMode.Width <= xOff || y+videoMode.Height <= yOff {
+
+			scaledWidth, scaledHeight := getScaledMonitorSize(monitor)
+			if x+scaledWidth <= xOff || y+scaledHeight <= yOff {
 				continue
 			}
 
