@@ -133,9 +133,7 @@ func (w *window) CenterOnScreen() {
 
 	w.centered = true
 
-	if w.view() != nil {
-		runOnMain(w.doCenterOnScreen)
-	}
+	w.runOnMainWhenCreated(w.doCenterOnScreen)
 }
 
 func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
