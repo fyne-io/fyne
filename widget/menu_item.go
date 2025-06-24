@@ -139,6 +139,15 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	}
 }
 
+func (i *menuItem) TappedSecondary(*fyne.PointEvent) {
+	if i.Item.Disabled {
+		return
+	}
+	if fyne.CurrentDevice().IsMobile() && i.Item.Action != nil {
+		i.trigger()
+	}
+}
+
 func (i *menuItem) activate() {
 	if i.Item.Disabled {
 		return
