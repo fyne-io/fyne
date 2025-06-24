@@ -7,5 +7,5 @@ import (
 )
 
 func TestDevice_HideVirtualKeyboard_BeforeRun(t *testing.T) {
-	hideVirtualKeyboard() // should not crash!
+	(&device{}).hideVirtualKeyboard() // should not crash!
 }
