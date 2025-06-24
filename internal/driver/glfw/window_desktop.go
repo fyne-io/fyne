@@ -261,15 +261,20 @@ func (w *window) fitContent() {
 	}
 }
 
+// getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
+func getMonitorScale(monitor *glfw.Monitor) float32 {
+	widthMm, heightMm := monitor.GetPhysicalSize()
+	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
+		return 1.0
+	}
+	widthPx := monitor.GetVideoMode().Width
+	return calculateDetectedScale(widthMm, widthPx)
+}
+
 // getScaledMonitorSize returns the monitor dimensions adjusted for scaling
 func getScaledMonitorSize(monitor *glfw.Monitor) (int, int) {
 	videoMode := monitor.GetVideoMode()
-	widthMm, heightMm := monitor.GetPhysicalSize()
-
-	var scale float32 = 1.0
-	if runtime.GOOS != "linux" || widthMm != 60 || heightMm != 60 { // Steam Deck incorrectly reports 6cm square!
-		scale = calculateDetectedScale(widthMm, videoMode.Width)
-	}
+	scale := getMonitorScale(monitor)
 
 	scaledWidth := int(float32(videoMode.Width) / scale)
 	scaledHeight := int(float32(videoMode.Height) / scale)
@@ -326,13 +331,7 @@ func (w *window) detectScale() float32 {
 		return 1
 	}
 
-	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
-		return 1
-	}
-	widthPx := monitor.GetVideoMode().Width
-
-	return calculateDetectedScale(widthMm, widthPx)
+	return getMonitorScale(monitor)
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
