@@ -117,6 +117,11 @@ func (i *menuItem) MouseOut() {
 // Tapped performs the action of the item and dismisses the menu.
 // It does nothing if the item doesn’t have an action.
 //
+// When an item have a SubMenu, Action is called on desktop,
+// but not on mobile (where it rather activates the item).
+// To trigger Action on mobile, SecondaryTap the item
+// (typically: long tap).
+//
 // Implements: fyne.Tappable
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Disabled {
