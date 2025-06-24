@@ -102,7 +102,7 @@ public class GoNativeActivity extends NativeActivity {
                         break;
                     case PASSWORD_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+                        inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
                     default:
                         Log.e("Fyne", "unknown keyboard type, use default");
                 }
