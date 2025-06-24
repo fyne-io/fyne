@@ -122,21 +122,21 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Disabled {
 		return
 	}
-	if i.Item.Action == nil {
-		if fyne.CurrentDevice().IsMobile() {
+	if fyne.CurrentDevice().IsMobile() {
+		// idea to discuss: if the item is already activated, then call trigger
+		if i.Item.Action == nil || i.Item.ChildMenu != nil {
 			i.activate()
+			return
 		}
 
-		return
-	} else if i.Item.ChildMenu != nil {
-		if fyne.CurrentDevice().IsMobile() {
-			i.activate()
+		i.trigger()
+	} else {
+		if i.Item.Action == nil {
+			return
 		}
 
-		return
+		i.trigger()
 	}
-
-	i.trigger()
 }
 
 func (i *menuItem) activate() {
