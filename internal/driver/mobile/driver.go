@@ -265,6 +265,10 @@ func (d *driver) Run() {
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
 				case key.Event:
+					if runtime.GOOS == "android" && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
+						break // we are getting release/press on backspace during soft backspace
+					}
+
 					if e.Direction == key.DirPress {
 						d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
 					} else if e.Direction == key.DirRelease {
