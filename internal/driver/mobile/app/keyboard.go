@@ -35,10 +35,12 @@ func keyboardDelete() {
 	theApp.events.In() <- key.Event{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirPress,
+		Rune:      '\x00',
 	}
 	theApp.events.In() <- key.Event{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirRelease,
+		Rune:      '\x00',
 	}
 }
 
