@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -12,7 +14,7 @@ import (
 // Since: 2.6
 type DateEntry struct {
 	Entry
-	Date      *time.Time // TODO discuss: why not just use time.Time{} (Zero-time) ?
+	Date      *time.Time       // TODO discuss: why not just use time.Time{} (Zero-time) ?
 	OnChanged func(*time.Time) `json:"-"`
 
 	dropDown *Calendar
@@ -168,7 +170,15 @@ func (e *DateEntry) setupDropDown() *Button {
 
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
-		e.popUp = NewPopUp(e.dropDown, c)
+		e.popUp = NewPopUp(&fyne.Container{
+			Layout: layout.NewVBoxLayout(),
+			Objects: []fyne.CanvasObject{
+				e.dropDown,
+				&Button{Text: lang.X("today", "Today"), OnTapped: func() {
+					e.setDate(time.Now())
+				}},
+			},
+		}, c)
 		e.popUp.ShowAtPosition(e.popUpPos())
 		//e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
