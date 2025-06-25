@@ -28,10 +28,16 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 }
 
 func (*glDevice) hideVirtualKeyboard() {
+	if dummyEntry.IsNull() {
+		return
+	}
 	dummyEntry.Call("blur")
 }
 
 func (*glDevice) showVirtualKeyboard() {
+	if dummyEntry.IsNull() {
+		return
+	}
 	dummyEntry.Call("focus")
 }
 
