@@ -561,7 +561,6 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 }
 
 func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action action, wid desktop.Mouseable) {
-	mousePos := mev.AbsolutePosition
 	switch action {
 	case press:
 		wid.MouseDown(mev)
@@ -572,7 +571,7 @@ func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action act
 			wid.MouseUp(mev)
 		} else {
 			if dragged, ok := mouseDragged.(desktop.Mouseable); ok {
-				mev.Position = mousePos.Subtract(mouseDraggedOffset)
+				mev.Position = mev.AbsolutePosition.Subtract(mouseDraggedOffset)
 				dragged.MouseUp(mev)
 			} else {
 				wid.MouseUp(mev)
@@ -675,8 +674,8 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}}
 
 	pendingMenuToggle := w.menuTogglePending
-	pendingMenuDeactivation := w.menuDeactivationPending
 	w.menuTogglePending = desktop.KeyNone
+	pendingMenuDeactivation := w.menuDeactivationPending
 	w.menuDeactivationPending = desktop.KeyNone
 	switch action {
 	case release:
@@ -775,7 +774,6 @@ func (w *window) processFocused(focus bool) {
 }
 
 func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyName, modifier fyne.KeyModifier) bool {
-	var shortcut fyne.Shortcut
 	ctrlMod := fyne.KeyModifierControl
 	if isMacOSRuntime() {
 		ctrlMod = fyne.KeyModifierSuper
@@ -786,49 +784,41 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 	// See https://github.com/fyne-io/fyne/pull/2587 for discussion.
 	keyName := localizedKeyName
 	resemblesShortcut := (modifier&(fyne.KeyModifierControl|fyne.KeyModifierSuper) != 0)
-	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut {
-		if key != fyne.KeyUnknown {
-			keyName = key
-		}
+	if (localizedKeyName == fyne.KeyUnknown) && resemblesShortcut && key != fyne.KeyUnknown {
+		keyName = key
 	}
+
+	var shortcut fyne.Shortcut
 	if modifier == ctrlMod {
 		switch keyName {
-		case fyne.KeyZ:
-			// detect undo shortcut
+		case fyne.KeyZ: // detect undo shortcut
 			shortcut = &fyne.ShortcutUndo{}
-		case fyne.KeyY:
-			// detect redo shortcut
+		case fyne.KeyY: // detect redo shortcut
 			shortcut = &fyne.ShortcutRedo{}
-		case fyne.KeyV:
-			// detect paste shortcut
+		case fyne.KeyV: // detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyC, fyne.KeyInsert:
-			// detect copy shortcut
+		case fyne.KeyC, fyne.KeyInsert: // detect copy shortcut
 			shortcut = &fyne.ShortcutCopy{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyX:
-			// detect cut shortcut
+		case fyne.KeyX: // detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyA:
-			// detect selectAll shortcut
+		case fyne.KeyA: // detect selectAll shortcut
 			shortcut = &fyne.ShortcutSelectAll{}
 		}
 	}
 
 	if modifier == fyne.KeyModifierShift {
 		switch keyName {
-		case fyne.KeyInsert:
-			// detect paste shortcut
+		case fyne.KeyInsert: // detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyDelete:
-			// detect cut shortcut
+		case fyne.KeyDelete: // detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: NewClipboard(),
 			}
@@ -997,8 +987,7 @@ func (w *window) doShowAgain() {
 }
 
 func (w *window) isClosing() bool {
-	closing := w.closing || w.viewport == nil
-	return closing
+	return w.closing || w.viewport == nil
 }
 
 func (w *window) toggleVisible() {
