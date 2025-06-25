@@ -14,9 +14,9 @@ import (
 func TestNewCalendar(t *testing.T) {
 	now := time.Now()
 	c := NewCalendar(now, func(time.Time) {})
-	assert.Equal(t, now.Day(), c.currentTime.Day())
-	assert.Equal(t, int(now.Month()), int(c.currentTime.Month()))
-	assert.Equal(t, now.Year(), c.currentTime.Year())
+	assert.Equal(t, now.Day(), c.displayedMonth.Day())
+	assert.Equal(t, int(now.Month()), int(c.displayedMonth.Month()))
+	assert.Equal(t, now.Year(), c.displayedMonth.Year())
 
 	_ = test.WidgetRenderer(c) // and render
 	assert.Equal(t, now.Format("January 2006"), c.monthLabel.Text)

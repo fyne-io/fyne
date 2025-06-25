@@ -1,10 +1,12 @@
 package widget
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
@@ -27,13 +29,17 @@ var minCellContent = NewLabel("22")
 // Since: 2.6
 type Calendar struct {
 	BaseWidget
-	currentTime time.Time
+	displayedMonth time.Time
 
 	monthPrevious *Button
 	monthNext     *Button
 	monthLabel    *Label
 
 	dates *fyne.Container
+
+	SelectedDate time.Time // currently selected date
+
+	// TODO discuss a config variable WeekStart time.Weekday to override week's first day
 
 	OnChanged func(time.Time) `json:"-"`
 }
@@ -43,30 +49,49 @@ type Calendar struct {
 // Since: 2.6
 func NewCalendar(cT time.Time, changed func(time.Time)) *Calendar {
 	c := &Calendar{
-		currentTime: cT,
-		OnChanged:   changed,
+		displayedMonth: cT,
+		OnChanged:      changed,
 	}
 
 	c.ExtendBaseWidget(c)
 	return c
 }
 
+// SetDisplayedDate sets the currently displayed year and month
+func (c *Calendar) SetDisplayedDate(date time.Time) {
+	if date.IsZero() {
+		date = time.Now()
+	}
+
+	// Dates are 'normalised', forcing date to start from the start of the month ensures move from March to February
+	c.displayedMonth = time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, time.Local)
+
+	// check if label has been created to avoid nil pointer access panic if function is called before
+	// widget instanciation
+	if c.monthLabel != nil {
+		c.monthLabel.SetText(c.monthYear())
+		c.dates.Objects = c.calendarObjects()
+	}
+}
+
+// SetSelectedDate sets the currently selected date
+//
+// Date selection works only if .Selectable = true
+func (c *Calendar) SetSelectedDate(date time.Time) {
+	c.SelectedDate = date
+	c.updateSelection()
+}
+
 // CreateRenderer returns a new WidgetRenderer for this widget.
 // This should not be called by regular code, it is used internally to render a widget.
 func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 	c.monthPrevious = NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
-		c.currentTime = c.currentTime.AddDate(0, -1, 0)
-		// Dates are 'normalised', forcing date to start from the start of the month ensures move from March to February
-		c.currentTime = time.Date(c.currentTime.Year(), c.currentTime.Month(), 1, 0, 0, 0, 0, c.currentTime.Location())
-		c.monthLabel.SetText(c.monthYear())
-		c.dates.Objects = c.calendarObjects()
+		c.SetDisplayedDate(c.displayedMonth.AddDate(0, -1, 0))
 	})
 	c.monthPrevious.Importance = LowImportance
 
 	c.monthNext = NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
-		c.currentTime = c.currentTime.AddDate(0, 1, 0)
-		c.monthLabel.SetText(c.monthYear())
-		c.dates.Objects = c.calendarObjects()
+		c.SetDisplayedDate(c.displayedMonth.AddDate(0, 1, 0))
 	})
 	c.monthNext.Importance = LowImportance
 
@@ -110,12 +135,12 @@ func (c *Calendar) calendarObjects() []fyne.CanvasObject {
 }
 
 func (c *Calendar) dateForButton(dayNum int) time.Time {
-	oldName, off := c.currentTime.Zone()
-	return time.Date(c.currentTime.Year(), c.currentTime.Month(), dayNum, c.currentTime.Hour(), c.currentTime.Minute(), 0, 0, time.FixedZone(oldName, off)).In(c.currentTime.Location())
+	oldName, off := c.displayedMonth.Zone()
+	return time.Date(c.displayedMonth.Year(), c.displayedMonth.Month(), dayNum, c.displayedMonth.Hour(), c.displayedMonth.Minute(), 0, 0, time.FixedZone(oldName, off)).In(c.displayedMonth.Location())
 }
 
 func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
-	start := time.Date(c.currentTime.Year(), c.currentTime.Month(), 1, 0, 0, 0, 0, c.currentTime.Location())
+	start := time.Date(c.displayedMonth.Year(), c.displayedMonth.Month(), 1, 0, 0, 0, 0, c.displayedMonth.Location())
 	var buttons []fyne.CanvasObject
 
 	dayIndex := int(start.Weekday())
@@ -145,11 +170,26 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 		dayNum := d.Day()
 		s := strconv.Itoa(dayNum)
 		b := NewButton(s, func() {
-			selectedDate := c.dateForButton(dayNum)
+			// TODO discuss if it is a good idea to unset selection when tapping the selected date
+			/*if selDate := c.dateForButton(dayNum); selDate.Format("02012006") != c.SelectedDate.Format("02012006") {
+				c.SelectedDate = selDate
+			} else {
+				c.SelectedDate = time.Time{}
+			}*/
 
-			c.OnChanged(selectedDate)
+			c.SelectedDate = c.dateForButton(dayNum)
+			c.updateSelection()
+
+			if c.OnChanged != nil {
+				c.OnChanged(c.SelectedDate)
+			}
 		})
-		b.Importance = LowImportance
+
+		if !c.SelectedDate.IsZero() && c.SelectedDate.Year() == c.displayedMonth.Year() && c.SelectedDate.Month() == c.displayedMonth.Month() && c.SelectedDate.Day() == dayNum {
+			b.Importance = HighImportance
+		} else {
+			b.Importance = LowImportance
+		}
 
 		buttons = append(buttons, b)
 	}
@@ -157,8 +197,38 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 	return buttons
 }
 
+func (c *Calendar) updateSelection() {
+	if c.dates == nil || len(c.dates.Objects) <= 0 {
+		return
+	}
+
+	defer c.dates.Refresh()
+
+	if c.SelectedDate.IsZero() || c.SelectedDate.Month() != c.displayedMonth.Month() || c.SelectedDate.Year() != c.displayedMonth.Year() {
+		for i := 0; i < len(c.dates.Objects); i++ {
+			if b, ok := c.dates.Objects[i].(*Button); ok {
+				b.Importance = LowImportance
+				b.Refresh()
+			}
+		}
+		return
+	}
+
+	for i := 0; i < len(c.dates.Objects); i++ {
+		if b, ok := c.dates.Objects[i].(*Button); ok {
+			dayNum, _ := strconv.Atoi(b.Text)
+			if dayNum == c.SelectedDate.Day() {
+				b.Importance = HighImportance
+			} else {
+				b.Importance = LowImportance
+			}
+			b.Refresh()
+		}
+	}
+}
+
 func (c *Calendar) monthYear() string {
-	return c.currentTime.Format("January 2006")
+	return monthName(c.displayedMonth.Format("January")) + fmt.Sprintf(" %04d", c.displayedMonth.Year())
 }
 
 type calendarLayout struct {
@@ -237,4 +307,10 @@ func shortDayName(in string) string {
 	key := lower + ".short"
 	long := lang.X(lower, in)
 	return strings.ToUpper(lang.X(key, long[:3]))
+}
+
+func monthName(in string) string {
+	r := []rune(lang.X(strings.ToLower(in), in))
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
 }
