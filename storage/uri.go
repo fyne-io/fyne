@@ -197,6 +197,111 @@ func Exists(u fyne.URI) (bool, error) {
 //
 // Since: 2.0
 func Delete(u fyne.URI) error {
+	listable, err := CanList(u)
+	if err != nil {
+		return err
+	}
+
+	// will delete if target is not a folder OR will delele if it is an empty folder
+	if !listable {
+		repo, err := repository.ForURI(u)
+		if err != nil {
+			return err
+		}
+
+		wrepo, ok := repo.(repository.WritableRepository)
+		if !ok {
+			return repository.ErrOperationNotSupported
+		}
+
+		return wrepo.Delete(u)
+	}
+
+	list, err := List(u)
+	if err != nil {
+		return err
+	}
+
+	// will delele if it is an empty folder
+	if list == nil {
+		repo, err := repository.ForURI(u)
+		if err != nil {
+			return err
+		}
+
+		wrepo, ok := repo.(repository.WritableRepository)
+		if !ok {
+			return repository.ErrOperationNotSupported
+		}
+
+		return wrepo.Delete(u)
+	}
+
+	// Will delete all contents of target folder then delete the folder itself
+	queue := list
+	var folders []fyne.URI
+	var files []fyne.URI
+
+	for len(queue) > 0 {
+		currentPath := queue[0]
+		queue = queue[1:]
+
+		listable, _ := CanList(currentPath)
+
+		if listable {
+			list, err = List(currentPath)
+			if err != nil {
+				return err
+			}
+			folders = append(folders, currentPath)
+			queue = append(queue, list...)
+		} else {
+			files = append(files, currentPath)
+		}
+	}
+
+	for len(files) > 0 {
+		fileToDelete := files[len(files)-1]
+		files = files[:len(files)-1]
+
+		repo, err := repository.ForURI(fileToDelete)
+		if err != nil {
+			return err
+		}
+
+		wrepo, ok := repo.(repository.WritableRepository)
+		if !ok {
+			return repository.ErrOperationNotSupported
+		}
+
+		err = wrepo.Delete(fileToDelete)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	for len(folders) > 0 {
+		folderToDelete := folders[len(folders)-1]
+		folders = folders[:len(folders)-1]
+
+		repo, err := repository.ForURI(folderToDelete)
+		if err != nil {
+			return err
+		}
+
+		wrepo, ok := repo.(repository.WritableRepository)
+		if !ok {
+			return repository.ErrOperationNotSupported
+		}
+
+		err = wrepo.Delete(folderToDelete)
+		if err != nil {
+			return err
+		}
+
+	}
+
 	repo, err := repository.ForURI(u)
 	if err != nil {
 		return err
@@ -207,39 +312,7 @@ func Delete(u fyne.URI) error {
 		return repository.ErrOperationNotSupported
 	}
 
-	return wrepo.Delete(u)
-
-}
-
-func DeleteRecursive(u fyne.URI) error {
-	list, err := List(u)
-
-	if err != nil {
-		return err
-	}
-
-	for _, v := range list {
-		listable, err := CanList(v)
-		if err != nil {
-			return err
-		}
-		if !listable {
-			err = Delete(v)
-			if err != nil {
-				return err
-			}
-			continue
-		} else {
-			err = DeleteRecursive(v)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	err = Delete(u)
-
+	err = wrepo.Delete(u)
 	if err != nil {
 		return err
 	}
