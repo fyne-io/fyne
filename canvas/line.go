@@ -57,6 +57,11 @@ func (l *Line) Position() fyne.Position {
 // Move the line object to a new position, relative to its parent / canvas
 func (l *Line) Move(pos fyne.Position) {
 	oldPos := l.Position()
+
+	if oldPos.X == pos.X && oldPos.Y == pos.Y {
+		return
+	}
+
 	deltaX := pos.X - oldPos.X
 	deltaY := pos.Y - oldPos.Y
 

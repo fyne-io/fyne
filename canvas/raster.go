@@ -40,6 +40,9 @@ func (r *Raster) Hide() {
 
 // Move the raster to a new position, relative to its parent / canvas
 func (r *Raster) Move(pos fyne.Position) {
+	if r.Position().X == pos.X && r.Position().Y == pos.Y {
+		return
+	}
 	r.baseObject.Move(pos)
 
 	repaint(r)
