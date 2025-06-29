@@ -112,6 +112,7 @@ func (i *Image) Move(pos fyne.Position) {
 	if i.Position() == pos {
 		return
 	}
+
 	i.baseObject.Move(pos)
 
 	repaint(i)

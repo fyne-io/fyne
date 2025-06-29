@@ -43,6 +43,7 @@ func (r *Raster) Move(pos fyne.Position) {
 	if r.Position() == pos {
 		return
 	}
+
 	r.baseObject.Move(pos)
 
 	repaint(r)
