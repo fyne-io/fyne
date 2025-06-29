@@ -56,6 +56,7 @@ func (w *Base) Move(pos fyne.Position) {
 	if w.Position() == pos {
 		return
 	}
+
 	w.position = pos
 
 	Repaint(w.super())

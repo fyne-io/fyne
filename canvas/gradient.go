@@ -71,6 +71,7 @@ func (g *LinearGradient) Move(pos fyne.Position) {
 	if g.Position() == pos {
 		return
 	}
+
 	g.baseObject.Move(pos)
 
 	repaint(g)
