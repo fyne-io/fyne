@@ -49,6 +49,7 @@ func (t *Text) Move(pos fyne.Position) {
 	if t.Position() == pos {
 		return
 	}
+
 	t.baseObject.Move(pos)
 
 	repaint(t)

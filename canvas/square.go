@@ -35,6 +35,7 @@ func (s *Square) Move(pos fyne.Position) {
 	if s.Position() == pos {
 		return
 	}
+
 	s.baseObject.Move(pos)
 
 	repaint(s)
