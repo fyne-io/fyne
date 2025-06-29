@@ -58,7 +58,7 @@ func (l *Line) Position() fyne.Position {
 func (l *Line) Move(pos fyne.Position) {
 	oldPos := l.Position()
 
-	if oldPos.X == pos.X && oldPos.Y == pos.Y {
+	if oldPos == pos {
 		return
 	}
 

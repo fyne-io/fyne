@@ -37,7 +37,7 @@ func (r *Rectangle) Hide() {
 
 // Move the rectangle to a new position, relative to its parent / canvas
 func (r *Rectangle) Move(pos fyne.Position) {
-	if r.position.X == pos.X && r.position.Y == pos.Y {
+	if r.Position() == pos {
 		return
 	}
 	r.baseObject.Move(pos)

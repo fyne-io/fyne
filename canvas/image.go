@@ -109,7 +109,7 @@ func (i *Image) MinSize() fyne.Size {
 
 // Move the image object to a new position, relative to its parent top, left corner.
 func (i *Image) Move(pos fyne.Position) {
-	if i.Position().X == pos.X && i.Position().Y == pos.Y {
+	if i.Position() == pos {
 		return
 	}
 	i.baseObject.Move(pos)
