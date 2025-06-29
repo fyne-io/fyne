@@ -68,7 +68,7 @@ func (g *LinearGradient) Hide() {
 
 // Move the gradient to a new position, relative to its parent / canvas
 func (g *LinearGradient) Move(pos fyne.Position) {
-	if g.Position().X == pos.X && g.Position().Y == pos.Y {
+	if g.Position() == pos {
 		return
 	}
 	g.baseObject.Move(pos)
