@@ -424,7 +424,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 }
 
 func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fyne.Theme, animate bool) {
-	isSameState := r.lastIndicatorPos.Subtract(pos).IsZero() && r.lastIndicatorSize.Subtract(siz).IsZero() &&
+	isSameState := r.lastIndicatorPos == pos && r.lastIndicatorSize == siz &&
 		r.lastIndicatorHidden == r.indicator.Hidden
 	if isSameState {
 		return
