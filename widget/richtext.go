@@ -642,8 +642,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 			min := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
-				if !img.MinSize().Subtract(img.oldMin).IsZero() {
-					img.oldMin = img.MinSize()
+				if newMin := img.MinSize(); newMin != img.oldMin {
+					img.oldMin = newMin
 
 					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
