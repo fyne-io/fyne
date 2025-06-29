@@ -2,6 +2,9 @@ package theme
 
 import (
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +14,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// 2025/06/28 13:49:37 Fyne error:  Failed to parse color
+// 2025/06/28 13:49:37   Cause: invalid color format: �
+// 2025/06/28 13:49:37   At: /home/cpustejovsky/development/go/foss/fyne/theme/json.go:148
+
 func TestFromJSON(t *testing.T) {
+	//discarding log output for tests
+	// the following method logs an error:
+	// th.Color(ColorNameForeground, VariantLight)
+	log.SetOutput(io.Discard)
+	defer log.SetOutput(os.Stderr)
 	repository.Register("file", intRepo.NewFileRepository()) // file uri resolving (avoid test import loop)
 	th, err := FromJSON(`{
 "Colors": {"background": "#c0c0c0ff"},
