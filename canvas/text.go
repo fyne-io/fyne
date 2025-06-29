@@ -46,6 +46,9 @@ func (t *Text) MinSize() fyne.Size {
 
 // Move the text to a new position, relative to its parent / canvas
 func (t *Text) Move(pos fyne.Position) {
+	if t.Position().X == pos.X && t.Position().Y == pos.Y {
+		return
+	}
 	t.baseObject.Move(pos)
 
 	repaint(t)

@@ -32,6 +32,9 @@ func (s *Square) Hide() {
 
 // Move the square to a new position, relative to its parent / canvas
 func (s *Square) Move(pos fyne.Position) {
+	if s.Position().X == pos.X && s.Position().Y == pos.Y {
+		return
+	}
 	s.baseObject.Move(pos)
 
 	repaint(s)
