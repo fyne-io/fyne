@@ -1,0 +1,26 @@
+//go:build tamago || noos
+
+package app
+
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/noos"
+	intNoos "fyne.io/fyne/v2/internal/driver/noos"
+	"fyne.io/fyne/v2/theme"
+	"image"
+)
+
+func NewWithID(id string) fyne.App {
+	return newAppWithDriver(nil, nil, id)
+}
+
+// SetNoOSDriver provides the required information to our app to run without a standard
+// driver. This is useful for embedded devices like GOOS=tamago or GOOS=noos.
+//
+// Since: 2.7
+func SetNoOSDriver(render func(img image.Image), events chan noos.Event) {
+	a := fyne.CurrentApp().(*fyneApp)
+
+	a.Settings().SetTheme(theme.DefaultTheme())
+	a.driver = intNoos.NewNoOSDriver(render, events)
+}
