@@ -7,7 +7,6 @@ import (
 	_ "image/png" // for the icon
 	"runtime"
 	"sync"
-	"syscall/js"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,8 +18,6 @@ import (
 
 	"github.com/fyne-io/glfw-js"
 )
-
-var style = js.Global().Get("document").Get("body").Get("style")
 
 type Cursor struct {
 	JSName string
@@ -217,7 +214,7 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
 }
 
 func (w *window) SetCursor(cursor *Cursor) {
-	style.Call("setProperty", "cursor", cursor.JSName)
+	setCursor(cursor.JSName)
 }
 
 func (w *window) setCustomCursor(rawCursor *Cursor, isCustomCursor bool) {
