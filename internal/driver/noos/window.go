@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
-	"slices"
 )
 
 type noosWindow struct {
@@ -93,9 +92,20 @@ func (w *noosWindow) Show() {
 func (w *noosWindow) Hide() {}
 
 func (w *noosWindow) Close() {
-	w.d.wins = slices.DeleteFunc(w.d.wins, func(child fyne.Window) bool {
-		return child == w
-	})
+	i := -1
+	for _, win := range w.d.wins {
+		if win == w {
+			break
+		}
+		i++
+	}
+	if i == -1 {
+		return
+	}
+
+	copy(w.d.wins[i:], w.d.wins[i+1:])
+	w.d.wins[len(w.d.wins)-1] = nil // Allow the garbage collector to reclaim the memory.
+	w.d.wins = w.d.wins[:len(w.d.wins)-1]
 
 	if w.d.current > 0 {
 		w.d.current--
