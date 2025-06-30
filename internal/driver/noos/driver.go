@@ -62,9 +62,31 @@ func (n *noosDriver) Run() {
 			if fn.done != nil {
 				fn.done <- struct{}{}
 			}
-		case <-n.events:
-			// TODO actually process events, shared keyboard event code for a start
-			n.renderWindow(n.wins[n.current])
+		case e := <-n.events:
+			w := n.wins[n.current].(*noosWindow)
+
+			switch t := e.(type) {
+			case *noos2.CharacterEvent:
+				if focused := w.c.Focused(); focused != nil {
+					focused.TypedRune(t.Rune)
+				} else if tr := w.c.OnTypedRune(); tr != nil {
+					tr(t.Rune)
+				}
+
+				n.renderWindow(n.wins[n.current])
+			case *noos2.KeyEvent:
+				keyEvent := &fyne.KeyEvent{Name: t.Name}
+
+				// No shortcut detected, pass down to TypedKey
+				focused := w.c.Focused()
+				if focused != nil {
+					focused.TypedKey(keyEvent)
+				} else if tk := w.c.OnTypedKey(); tk != nil {
+					tk(keyEvent)
+				}
+
+				n.renderWindow(n.wins[n.current])
+			}
 		}
 	}
 }

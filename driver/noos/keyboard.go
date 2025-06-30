@@ -9,9 +9,15 @@ const (
 	KeyReleased
 )
 
-type HardwareKeyEvent struct {
+type KeyEvent struct {
 	Name      fyne.KeyName
 	Direction KeyDirection
 }
 
-func (d *HardwareKeyEvent) isEvent() {}
+func (d *KeyEvent) isEvent() {}
+
+type CharacterEvent struct {
+	Rune rune
+}
+
+func (c *CharacterEvent) isEvent() {}
