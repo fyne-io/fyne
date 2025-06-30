@@ -85,6 +85,9 @@ type Entry struct {
 	placeholder RichText
 	content     *entryContent
 	scroll      *widget.Scroll
+	box         *canvas.Rectangle
+	border      *canvas.Rectangle
+	objects     []fyne.CanvasObject
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
@@ -177,25 +180,22 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 	e.syncSelectable()
 
-	box := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
-	box.CornerRadius = th.Size(theme.SizeNameInputRadius)
-	border := canvas.NewRectangle(color.Transparent)
-	border.StrokeWidth = th.Size(theme.SizeNameInputBorder)
-	border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
-	border.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	e.box = canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
+	e.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	e.border = canvas.NewRectangle(color.Transparent)
+	e.border.StrokeWidth = th.Size(theme.SizeNameInputBorder)
+	e.border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
+	e.border.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
 	e.scroll = widget.NewScroll(nil)
-	objects := []fyne.CanvasObject{box, border}
 	if e.Wrapping != fyne.TextWrapOff || e.Scroll != widget.ScrollNone {
 		e.scroll.Content = e.content
-		objects = append(objects, e.scroll)
 	} else {
 		e.scroll.Hide()
-		objects = append(objects, e.content)
 	}
 	e.content.scroll = e.scroll
 
@@ -472,6 +472,8 @@ func (e *Entry) Redo() {
 
 func (e *Entry) Refresh() {
 	e.minCache = fyne.Size{}
+
+	e.setObjects()
 
 	if e.sel != nil {
 		e.sel.style = e.TextStyle
@@ -1527,8 +1529,7 @@ type entryRenderer struct {
 	scroll      *widget.Scroll
 	icon        *canvas.Image
 
-	objects []fyne.CanvasObject
-	entry   *Entry
+	entry *Entry
 }
 
 func (r *entryRenderer) Destroy() {
@@ -1681,11 +1682,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
-	objs := r.objects
-	if r.entry.ActionItem != nil {
-		objs = append(objs, r.entry.ActionItem)
-	}
-	return objs
+	return r.entry.objects
 }
 
 func (r *entryRenderer) Refresh() {
@@ -1712,9 +1709,9 @@ func (r *entryRenderer) Refresh() {
 		content.Move(fyne.NewPos(0, inputBorder))
 		content.Resize(entrySize)
 
-		for i, o := range r.objects {
+		for i, o := range r.entry.objects {
 			if o == r.scroll {
-				r.objects[i] = content
+				r.entry.objects[i] = content
 				break
 			}
 		}
@@ -1725,9 +1722,9 @@ func (r *entryRenderer) Refresh() {
 		r.scroll.Resize(entrySize)
 		r.scroll.Show()
 
-		for i, o := range r.objects {
+		for i, o := range r.entry.objects {
 			if o == content {
-				r.objects[i] = r.scroll
+				r.entry.objects[i] = r.scroll
 				break
 			}
 		}
@@ -1777,7 +1774,7 @@ func (r *entryRenderer) Refresh() {
 func (r *entryRenderer) ensureValidationSetup() {
 	if r.entry.validationStatus == nil {
 		r.entry.validationStatus = newValidationStatus(r.entry)
-		r.objects = append(r.objects, r.entry.validationStatus)
+		r.entry.objects = append(r.entry.objects, r.entry.validationStatus)
 		r.Layout(r.entry.Size())
 
 		r.entry.validate()
