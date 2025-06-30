@@ -93,7 +93,7 @@ func (w *noosWindow) Show() {
 func (w *noosWindow) Hide() {}
 
 func (w *noosWindow) Close() {
-	slices.DeleteFunc(w.d.wins, func(child fyne.Window) bool {
+	w.d.wins = slices.DeleteFunc(w.d.wins, func(child fyne.Window) bool {
 		return child == w
 	})
 

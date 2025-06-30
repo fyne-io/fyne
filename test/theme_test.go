@@ -2,14 +2,12 @@ package test
 
 import (
 	"fmt"
-	"image/color"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 )
 
 func Test_NewTheme(t *testing.T) {
