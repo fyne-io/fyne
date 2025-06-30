@@ -3,11 +3,12 @@
 package test
 
 import (
+	"image/color"
+	"testing"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
-	"image/color"
-	"testing"
 )
 
 // AssertAllColorNamesDefined asserts that all known color names are defined for the given theme.

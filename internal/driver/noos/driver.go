@@ -1,13 +1,14 @@
 package noos
 
 import (
+	"image"
+	"time"
+
 	"fyne.io/fyne/v2"
 	noos2 "fyne.io/fyne/v2/driver/noos"
 	"fyne.io/fyne/v2/internal/async"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
-	"image"
-	"time"
 )
 
 type noosDriver struct {

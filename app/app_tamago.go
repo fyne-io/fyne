@@ -3,11 +3,12 @@
 package app
 
 import (
+	"image"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/noos"
 	intNoos "fyne.io/fyne/v2/internal/driver/noos"
 	"fyne.io/fyne/v2/theme"
-	"image"
 )
 
 func NewWithID(id string) fyne.App {
