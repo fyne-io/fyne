@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	noos2 "fyne.io/fyne/v2/driver/noos"
 	"fyne.io/fyne/v2/internal/async"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"image"
 	"time"
@@ -36,13 +37,19 @@ func (n *noosDriver) RenderedTextSize(text string, fontSize float32, style fyne.
 }
 
 func (n *noosDriver) CanvasForObject(_ fyne.CanvasObject) fyne.Canvas {
-	//TODO implement me
-	return n.AllWindows()[n.current].Canvas()
+	//TODO don't assume object is in current canvas
+	return n.wins[n.current].Canvas()
 }
 
 func (n *noosDriver) AbsolutePositionForObject(o fyne.CanvasObject) fyne.Position {
-	//TODO implement me
-	return fyne.Position{}
+	c := n.CanvasForObject(o)
+	if c == nil {
+		return fyne.NewPos(0, 0)
+	}
+
+	pos := intdriver.AbsolutePositionForObject(o, []fyne.CanvasObject{c.Content()})
+	inset, _ := c.InteractiveArea()
+	return pos.Subtract(inset)
 }
 
 func (n *noosDriver) Device() fyne.Device {
