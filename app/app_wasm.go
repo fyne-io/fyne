@@ -22,14 +22,16 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 
 	permission := notification.Get("permission")
 	if permission.Type() != js.TypeString || permission.String() != "granted" {
-		notification.Call("requestPermission", js.FuncOf(func(this js.Value, args []js.Value) any {
+		request := js.FuncOf(func(this js.Value, args []js.Value) any {
 			if len(args) > 0 && args[0].Type() == js.TypeString && args[0].String() == "granted" {
 				a.showNotification(n, &notification)
 			} else {
 				fyne.LogError("User rejected the request for notifications.", nil)
 			}
 			return nil
-		}))
+		})
+		defer request.Release()
+		notification.Call("requestPermission", request)
 		return
 	}
 
@@ -45,7 +47,6 @@ func (a *fyneApp) showNotification(data *fyne.Notification, notification *js.Val
 		"body": data.Content,
 		"icon": base64Img,
 	})
-	fyne.LogError("done show...", nil)
 }
 
 var themeChanged = js.FuncOf(func(this js.Value, args []js.Value) any {
