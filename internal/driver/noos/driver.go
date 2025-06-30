@@ -77,6 +77,11 @@ func (n *noosDriver) Run() {
 			case *noos2.KeyEvent:
 				keyEvent := &fyne.KeyEvent{Name: t.Name}
 
+				if t.Direction == noos2.KeyReleased {
+					// No desktop events so key/up down not reported
+					return // ignore key up in other core events
+				}
+
 				// No shortcut detected, pass down to TypedKey
 				focused := w.c.Focused()
 				if focused != nil {
