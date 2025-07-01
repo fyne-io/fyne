@@ -264,17 +264,7 @@ func Delete(u fyne.URI) error {
 		fileToDelete := files[len(files)-1]
 		files = files[:len(files)-1]
 
-		repo, err := repository.ForURI(fileToDelete)
-		if err != nil {
-			return err
-		}
-
-		wrepo, ok := repo.(repository.WritableRepository)
-		if !ok {
-			return repository.ErrOperationNotSupported
-		}
-
-		err = wrepo.Delete(fileToDelete)
+		err = delete(fileToDelete)
 		if err != nil {
 			return err
 		}
@@ -285,23 +275,16 @@ func Delete(u fyne.URI) error {
 		folderToDelete := folders[len(folders)-1]
 		folders = folders[:len(folders)-1]
 
-		repo, err := repository.ForURI(folderToDelete)
+		err = delete(folderToDelete)
 		if err != nil {
 			return err
 		}
-
-		wrepo, ok := repo.(repository.WritableRepository)
-		if !ok {
-			return repository.ErrOperationNotSupported
-		}
-
-		err = wrepo.Delete(folderToDelete)
-		if err != nil {
-			return err
-		}
-
 	}
 
+	return delete(u)
+}
+
+func delete(u fyne.URI) error {
 	repo, err := repository.ForURI(u)
 	if err != nil {
 		return err
@@ -312,12 +295,7 @@ func Delete(u fyne.URI) error {
 		return repository.ErrOperationNotSupported
 	}
 
-	err = wrepo.Delete(u)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return wrepo.Delete(u)
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the
