@@ -202,39 +202,20 @@ func Delete(u fyne.URI) error {
 		return err
 	}
 
-	// will delete if target is not a folder OR will delele if it is an empty folder
+	// Will delete if target is not a folder
 	if !listable {
-		repo, err := repository.ForURI(u)
-		if err != nil {
-			return err
-		}
-
-		wrepo, ok := repo.(repository.WritableRepository)
-		if !ok {
-			return repository.ErrOperationNotSupported
-		}
-
-		return wrepo.Delete(u)
+		return delete(u)
 	}
 
+	// Makes list of all contents of the folder
 	list, err := List(u)
 	if err != nil {
 		return err
 	}
 
-	// will delele if it is an empty folder
+	// Will delele if it is an empty folder
 	if list == nil {
-		repo, err := repository.ForURI(u)
-		if err != nil {
-			return err
-		}
-
-		wrepo, ok := repo.(repository.WritableRepository)
-		if !ok {
-			return repository.ErrOperationNotSupported
-		}
-
-		return wrepo.Delete(u)
+		return delete(u)
 	}
 
 	// Will delete all contents of target folder then delete the folder itself
@@ -260,6 +241,7 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
+	// Deletes all the files inside the fodler
 	for len(files) > 0 {
 		fileToDelete := files[len(files)-1]
 		files = files[:len(files)-1]
@@ -271,6 +253,7 @@ func Delete(u fyne.URI) error {
 
 	}
 
+	// Deletes all the sub-folders
 	for len(folders) > 0 {
 		folderToDelete := folders[len(folders)-1]
 		folders = folders[:len(folders)-1]
@@ -281,6 +264,7 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
+	// Deletes the target folder
 	return delete(u)
 }
 
