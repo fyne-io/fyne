@@ -223,6 +223,7 @@ func Delete(u fyne.URI) error {
 	var folders []fyne.URI
 	var files []fyne.URI
 
+	// Lists paths of all sub-folders and files
 	for len(queue) > 0 {
 		currentPath := queue[0]
 		queue = queue[1:]
@@ -241,7 +242,7 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
-	// Deletes all the files inside the fodler
+	// Deletes all the files inside the folder
 	for len(files) > 0 {
 		fileToDelete := files[len(files)-1]
 		files = files[:len(files)-1]
@@ -250,7 +251,6 @@ func Delete(u fyne.URI) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	// Deletes all the sub-folders
