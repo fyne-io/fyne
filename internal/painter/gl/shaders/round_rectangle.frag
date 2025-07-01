@@ -5,15 +5,33 @@ uniform vec2 frame_size;
 uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
-uniform float radius;
+uniform vec4 radius;
+uniform float edge_softness;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
+/* shadow params*/
+uniform float add_shadow;
+uniform float shadow_softness;
+uniform vec2 shadow_offset;
+uniform vec4 shadow_color;
+uniform float shadow_type;
 
-float calc_distance(vec2 p, vec2 b, float r)
+float calc_distance(vec2 p, vec2 b, vec4 r)
 {
-    vec2 d = abs(p) - b + vec2(r);
-	return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   
+    r.xy = (p.x > 0.0) ? r.xy : r.zw;
+    r.x  = (p.y > 0.0) ? r.x  : r.y;
+    
+    vec2 d = abs(p) - b + r.x;
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r.x;
+}
+
+vec4 blendShadow(vec4 color, vec4 shadow) {
+    float alpha = color.a + shadow.a * (1.0 - color.a);
+    return vec4(
+        (color.rgb * color.a + shadow.rgb * shadow.a * (1.0 - color.a)) / alpha,
+        alpha
+    );
 }
 
 void main() {
@@ -36,12 +54,31 @@ void main() {
     if (distance < 0.0)
     {
         to_color = fill_color;
-    } 
+    }
 
     distance = abs(distance) - stroke_width_half;
 
-    float blend_amount = smoothstep(-1.0, 1.0, distance);
+    float blend_amount = smoothstep(0.0, edge_softness, distance);
 
     // final color
-    gl_FragColor = mix(from_color, to_color, blend_amount);
+    vec4 final_color = mix(from_color, to_color, blend_amount);
+
+    if (add_shadow == 1.0)
+    {
+        // Apply shadow effect
+        float distance_shadow = smoothstep(0.0, shadow_softness, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+        float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
+
+        if (shadow_type == 0.0)
+        {
+            // remove shadow inside rectangle
+            float d_shape = calc_distance(vec_centered_pos, rect_size_half + stroke_width_half, radius);
+            float mask = smoothstep(-2.0, 0.0, d_shape);
+            shadow_alpha *= mask;
+        }
+
+        final_color = blendShadow(final_color, vec4(shadow_color.rgb, shadow_alpha));
+    }
+
+    gl_FragColor = final_color;
 }

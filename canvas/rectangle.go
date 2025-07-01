@@ -10,8 +10,9 @@ import (
 var _ fyne.CanvasObject = (*Rectangle)(nil)
 
 // Rectangle describes a colored rectangle primitive in a Fyne canvas
+// Shadow support since 2.7
 type Rectangle struct {
-	baseObject
+	baseShadow
 
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
@@ -26,6 +27,24 @@ type Rectangle struct {
 	//
 	// Since: 2.7
 	Aspect float32
+
+	// The `CornerRadius` field sets the default radius for all corners. If a specific corner
+	// radius (such as `TopRightCornerRadius`, `TopLeftCornerRadius`, `BottomRightCornerRadius`,
+	// or `BottomLeftCornerRadius`) is set to a value greater than `CornerRadius`, that value
+	// will override `CornerRadius` for the respective corner. Otherwise, `CornerRadius` is used.
+	//
+	// Since: 2.7
+	TopRightCornerRadius    float32
+	TopLeftCornerRadius     float32
+	BottomRightCornerRadius float32
+	BottomLeftCornerRadius  float32
+
+	// When true, the rectangle keeps the requested size for its content, and the total object size expands to include the shadow.
+	// This means the rectangle will be properly scaled and moved to fit the requested size and position.
+	// The total size including the shadow will be larger than the requested size.
+	//
+	// Since: 2.7
+	ExpandForShadow bool
 }
 
 // Hide will set this rectangle to not be visible
@@ -36,7 +55,13 @@ func (r *Rectangle) Hide() {
 }
 
 // Move the rectangle to a new position, relative to its parent / canvas
+// If ExpandForShadow is true, the position is adjusted to account for the shadow paddings.
+// The rectangle position is then updated accordingly to reflect the new position.
 func (r *Rectangle) Move(pos fyne.Position) {
+	if r.ExpandForShadow {
+		_, p := r.SizeAndPositionWithShadow(r.Size())
+		pos = pos.Add(p)
+	}
 	r.baseObject.Move(pos)
 
 	repaint(r)
@@ -50,8 +75,17 @@ func (r *Rectangle) Refresh() {
 // Resize on a rectangle updates the new size of this object.
 // If it has a stroke width this will cause it to Refresh.
 // If Aspect is non-zero it may cause the rectangle to be smaller than the requested size.
+// If ExpandForShadow is true, the size is adjusted to accommodate the shadow,
+// ensuring the rectangle size matches the requested size.
+// The total size including the shadow will be larger than the requested size.
 func (r *Rectangle) Resize(s fyne.Size) {
-	if s == r.Size() {
+	if r.ExpandForShadow {
+		if s == r.ContentSize() {
+			return
+		}
+		size, _ := r.SizeAndPositionWithShadow(s)
+		s = size
+	} else if s == r.Size() {
 		return
 	}
 

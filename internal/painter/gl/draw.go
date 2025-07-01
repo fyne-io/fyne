@@ -27,15 +27,14 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	size := circle.Size()
-	radius := size.Width / 2
-	if size.Height < size.Width {
-		radius = size.Height / 2
-	}
+	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && circle.ShadowSoftness > 0
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
 	bounds, points := p.vecSquareCoords(pos, circle, frame)
+	if shadow {
+		bounds = p.vecShadowCoords(bounds, frame, circle)
+	}
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -58,14 +57,19 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
+	edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
 	rectSizeUniform := p.ctx.GetUniformLocation(program, "rect_size_half")
-	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
+	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
 	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
+	radius := getFullyRoundedRadius(fyne.NewSize(rectSizeWidthScaled, rectSizeHeightScaled))
 	radiusUniform := p.ctx.GetUniformLocation(program, "radius")
 	radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
-	p.ctx.Uniform1f(radiusUniform, radiusScaled)
+	p.ctx.Uniform4f(radiusUniform, radiusScaled, radiusScaled, radiusScaled, radiusScaled)
 
 	var r, g, b, a float32
 	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
@@ -79,6 +83,27 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+
+	var addShadow float32
+	if shadow {
+		shadowColorUniform := p.ctx.GetUniformLocation(program, "shadow_color")
+		r, g, b, a = getFragmentColor(circle.ShadowColor)
+		p.ctx.Uniform4f(shadowColorUniform, r, g, b, a)
+
+		shadowOffsetUniform := p.ctx.GetUniformLocation(program, "shadow_offset")
+		p.ctx.Uniform2f(shadowOffsetUniform, roundToPixel(circle.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.ShadowOffset.Y*p.pixScale, 1.0))
+
+		shadowSoftnessUniform := p.ctx.GetUniformLocation(program, "shadow_softness")
+		p.ctx.Uniform1f(shadowSoftnessUniform, roundToPixel(circle.ShadowSoftness*p.pixScale, 1.0))
+
+		shadowTypeUniform := p.ctx.GetUniformLocation(program, "shadow_type")
+		p.ctx.Uniform1f(shadowTypeUniform, float32(circle.ShadowType))
+
+		addShadow = 1.0
+	}
+	addShadowUniform := p.ctx.GetUniformLocation(program, "add_shadow")
+	p.ctx.Uniform1f(addShadowUniform, addShadow)
+
 	p.logError()
 	// Fragment: END
 
@@ -151,19 +176,28 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, frame)
+	topRightRadius := fyne.Max(sq.CornerRadius, sq.TopRightCornerRadius)
+	topLeftRadius := fyne.Max(sq.CornerRadius, sq.TopLeftCornerRadius)
+	bottomRightRadius := fyne.Max(sq.CornerRadius, sq.BottomRightCornerRadius)
+	bottomLeftRadius := fyne.Max(sq.CornerRadius, sq.BottomLeftCornerRadius)
+	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, sq.ShadowSoftness, sq.ShadowOffset, sq.ShadowColor, sq.ShadowType, pos, frame)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, frame)
+	topRightRadius := fyne.Max(rect.CornerRadius, rect.TopRightCornerRadius)
+	topLeftRadius := fyne.Max(rect.CornerRadius, rect.TopLeftCornerRadius)
+	bottomRightRadius := fyne.Max(rect.CornerRadius, rect.BottomRightCornerRadius)
+	bottomLeftRadius := fyne.Max(rect.CornerRadius, rect.BottomLeftCornerRadius)
+	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.ShadowSoftness, rect.ShadowOffset, rect.ShadowColor, rect.ShadowType, pos, frame)
 }
 
-func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, frame fyne.Size) {
-	if (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
+func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, frame fyne.Size) {
+	if (shadowColor == color.Transparent || shadowColor == nil || shadowSoftness == 0) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
-	roundedCorners := radius != 0
+	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
+	shadow := shadowColor != color.Transparent && shadowColor != nil && shadowSoftness > 0
 	var program Program
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -173,6 +207,10 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, obj, frame, aspect)
+	if shadow {
+		bounds = p.vecShadowCoords(bounds, frame, obj)
+	}
+
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -196,14 +234,42 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
+		edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+		edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+		p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
 		rectSizeUniform := p.ctx.GetUniformLocation(program, "rect_size_half")
-		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
+		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
 		p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
+		fullyRoundedRadius := getFullyRoundedRadius(fyne.NewSize(
+			rectSizeWidthScaled, rectSizeHeightScaled,
+		))
+
+		if topRightRadius == fyne.FullyRoundedCornerRadius {
+			topRightRadius = fullyRoundedRadius
+		}
+
+		if topLeftRadius == fyne.FullyRoundedCornerRadius {
+			topLeftRadius = fullyRoundedRadius
+		}
+
+		if bottomRightRadius == fyne.FullyRoundedCornerRadius {
+			bottomRightRadius = fullyRoundedRadius
+		}
+
+		if bottomLeftRadius == fyne.FullyRoundedCornerRadius {
+			bottomLeftRadius = fullyRoundedRadius
+		}
+
 		radiusUniform := p.ctx.GetUniformLocation(program, "radius")
-		radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
-		p.ctx.Uniform1f(radiusUniform, radiusScaled)
+		p.ctx.Uniform4f(radiusUniform,
+			roundToPixel(topRightRadius*p.pixScale, 1.0),
+			roundToPixel(bottomRightRadius*p.pixScale, 1.0),
+			roundToPixel(topLeftRadius*p.pixScale, 1.0),
+			roundToPixel(bottomLeftRadius*p.pixScale, 1.0),
+		)
 	} else {
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
@@ -221,6 +287,27 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+
+	var addShadow float32
+	if shadow {
+		shadowColorUniform := p.ctx.GetUniformLocation(program, "shadow_color")
+		r, g, b, a = getFragmentColor(shadowColor)
+		p.ctx.Uniform4f(shadowColorUniform, r, g, b, a)
+
+		shadowOffsetUniform := p.ctx.GetUniformLocation(program, "shadow_offset")
+		p.ctx.Uniform2f(shadowOffsetUniform, roundToPixel(shadowOffset.X*p.pixScale, 1.0), roundToPixel(shadowOffset.Y*p.pixScale, 1.0))
+
+		shadowSoftnessUniform := p.ctx.GetUniformLocation(program, "shadow_softness")
+		p.ctx.Uniform1f(shadowSoftnessUniform, roundToPixel(shadowSoftness*p.pixScale, 1.0))
+
+		shadowTypeUniform := p.ctx.GetUniformLocation(program, "shadow_type")
+		p.ctx.Uniform1f(shadowTypeUniform, float32(shadowType))
+
+		addShadow = 1.0
+	}
+	addShadowUniform := p.ctx.GetUniformLocation(program, "add_shadow")
+	p.ctx.Uniform1f(addShadowUniform, addShadow)
+
 	p.logError()
 	// Fragment: END
 
@@ -449,6 +536,36 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
 
+func (p *painter) vecShadowCoords(bounds [4]float32, frameSize fyne.Size, obj fyne.CanvasObject) [4]float32 {
+	var padLeft, padRight, padTop, padBottom float32
+
+	if s, ok := obj.(canvas.Shadowable); !ok {
+		return bounds
+	} else {
+		pads := s.ShadowPaddings()
+		padLeft = roundToPixel(pads[0]*p.pixScale, 1.0)
+		padRight = roundToPixel(pads[2]*p.pixScale, 1.0)
+		padTop = roundToPixel(pads[1]*p.pixScale, 1.0)
+		padBottom = roundToPixel(pads[3]*p.pixScale, 1.0)
+	}
+
+	clamp := func(val, min, max float32) float32 {
+		return float32(math.Max(float64(min), math.Min(float64(max), float64(val))))
+	}
+
+	x1 := bounds[0] + padLeft
+	x2 := bounds[2] - padRight
+	y1 := bounds[1] + padTop
+	y2 := bounds[3] - padBottom
+
+	x1 = clamp(x1, 0, float32(frameSize.Width))
+	x2 = clamp(x2, 0, float32(frameSize.Width))
+	y1 = clamp(y1, 0, float32(frameSize.Height))
+	y2 = clamp(y2, 0, float32(frameSize.Height))
+
+	return [4]float32{x1, y1, x2, y2}
+}
+
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
 	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
 }
@@ -459,6 +576,10 @@ func roundToPixel(v float32, pixScale float32) float32 {
 	}
 
 	return float32(math.Round(float64(v*pixScale))) / pixScale
+}
+
+func getFullyRoundedRadius(size fyne.Size) float32 {
+	return fyne.Min(size.Height, size.Width) / 2
 }
 
 func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fyne.Size, fyne.Position) {
