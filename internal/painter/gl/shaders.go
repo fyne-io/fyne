@@ -1,123 +1,47 @@
 package gl
 
-import (
-	_ "embed"
-
-	"fyne.io/fyne/v2"
-)
+import _ "embed"
 
 var (
 	//go:embed shaders/line.frag
-	lineFrag []byte
+	shaderLineFrag []byte
 
 	//go:embed shaders/line.vert
-	lineVert []byte
+	shaderLineVert []byte
 
 	//go:embed shaders/line_es.frag
-	lineesFrag []byte
+	shaderLineesFrag []byte
 
 	//go:embed shaders/line_es.vert
-	lineesVert []byte
+	shaderLineesVert []byte
 
 	//go:embed shaders/rectangle.frag
-	rectangleFrag []byte
+	shaderRectangleFrag []byte
 
 	//go:embed shaders/rectangle.vert
-	rectangleVert []byte
+	shaderRectangleVert []byte
 
 	//go:embed shaders/rectangle_es.frag
-	rectangleesFrag []byte
+	shaderRectangleesFrag []byte
 
 	//go:embed shaders/rectangle_es.vert
-	rectangleesVert []byte
+	shaderRectangleesVert []byte
 
 	//go:embed shaders/round_rectangle.frag
-	roundrectangleFrag []byte
+	shaderRoundrectangleFrag []byte
 
 	//go:embed shaders/round_rectangle_es.frag
-	roundrectangleesFrag []byte
+	shaderRoundrectangleesFrag []byte
 
 	//go:embed shaders/simple.frag
-	simpleFrag []byte
+	shaderSimpleFrag []byte
 
 	//go:embed shaders/simple.vert
-	simpleVert []byte
+	shaderSimpleVert []byte
 
 	//go:embed shaders/simple_es.frag
-	simpleesFrag []byte
+	shaderSimpleesFrag []byte
 
 	//go:embed shaders/simple_es.vert
-	simpleesVert []byte
-)
-
-var (
-	shaderLineFrag = &fyne.StaticResource{
-		StaticName:    "line.frag",
-		StaticContent: lineFrag,
-	}
-
-	shaderLineVert = &fyne.StaticResource{
-		StaticName:    "line.vert",
-		StaticContent: lineVert,
-	}
-
-	shaderLineesFrag = &fyne.StaticResource{
-		StaticName:    "line_es.frag",
-		StaticContent: lineesFrag,
-	}
-
-	shaderLineesVert = &fyne.StaticResource{
-		StaticName:    "line_es.vert",
-		StaticContent: lineesVert,
-	}
-
-	shaderRectangleFrag = &fyne.StaticResource{
-		StaticName:    "rectangle.frag",
-		StaticContent: rectangleFrag,
-	}
-
-	shaderRectangleVert = &fyne.StaticResource{
-		StaticName:    "rectangle.vert",
-		StaticContent: rectangleVert,
-	}
-
-	shaderRectangleesFrag = &fyne.StaticResource{
-		StaticName:    "rectangle_es.frag",
-		StaticContent: rectangleesFrag,
-	}
-
-	shaderRectangleesVert = &fyne.StaticResource{
-		StaticName:    "rectangle_es.vert",
-		StaticContent: rectangleesVert,
-	}
-
-	shaderRoundrectangleFrag = &fyne.StaticResource{
-		StaticName:    "round_rectangle.frag",
-		StaticContent: roundrectangleFrag,
-	}
-
-	shaderRoundrectangleesFrag = &fyne.StaticResource{
-		StaticName:    "round_rectangle_es.frag",
-		StaticContent: roundrectangleesFrag,
-	}
-
-	shaderSimpleFrag = &fyne.StaticResource{
-		StaticName:    "simple.frag",
-		StaticContent: simpleFrag,
-	}
-
-	shaderSimpleVert = &fyne.StaticResource{
-		StaticName:    "simple.vert",
-		StaticContent: simpleVert,
-	}
-
-	shaderSimpleesFrag = &fyne.StaticResource{
-		StaticName:    "simple_es.frag",
-		StaticContent: simpleesFrag,
-	}
-
-	shaderSimpleesVert = &fyne.StaticResource{
-		StaticName:    "simple_es.vert",
-		StaticContent: simpleesVert,
-	}
+	shaderSimpleesVert []byte
 )

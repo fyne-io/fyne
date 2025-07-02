@@ -13,21 +13,21 @@ import (
 func shaderSourceNamed(name string) ([]byte, []byte) {
 	switch name {
 	case "line":
-		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
+		return shaderLineVert, shaderLineFrag
 	case "line_es":
-		return shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent
+		return shaderLineesVert, shaderLineesFrag
 	case "simple":
-		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
+		return shaderSimpleVert, shaderSimpleFrag
 	case "simple_es":
-		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
+		return shaderSimpleesVert, shaderSimpleesFrag
 	case "rectangle":
-		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
+		return shaderRectangleVert, shaderRectangleFrag
 	case "round_rectangle":
-		return shaderRectangleVert.StaticContent, shaderRoundrectangleFrag.StaticContent
+		return shaderRectangleVert, shaderRoundrectangleFrag
 	case "rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
+		return shaderRectangleesVert, shaderRectangleesFrag
 	case "round_rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRoundrectangleesFrag.StaticContent
+		return shaderRectangleesVert, shaderRoundrectangleesFrag
 	}
 	return nil, nil
 }
