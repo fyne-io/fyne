@@ -69,7 +69,7 @@ func (s *Square) Refresh() {
 // The square may have transparent padding on the top/bottom or left/right
 // so that it is still a square shape in the specified size.
 // If ExpandForShadow is true, the size is adjusted to accommodate the shadow,
-// ensuring the square size matches the requested size. 
+// ensuring the square size matches the requested size.
 // The total size including the shadow will be larger than the requested size.
 func (s *Square) Resize(size fyne.Size) {
 	if s.ExpandForShadow {
