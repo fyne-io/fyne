@@ -346,6 +346,11 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
+
+	obj.Aspect = 2
+	test.AssertImageMatches(t, "draw_rectangle_stroke_wide.png", p.Paint(c))
+	obj.Aspect = 0.5
+	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {

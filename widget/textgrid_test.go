@@ -42,6 +42,17 @@ func TestTextGrid_CursorLocationForPosition(t *testing.T) {
 	row, col = grid.CursorLocationForPosition(fyne.NewPos(20, 20))
 	assert.Equal(t, 1, row)
 	assert.Equal(t, 2, col)
+
+	grid.Scroll = widget.ScrollBoth
+	grid.SetText("Really Long Really Long Really Long Really Long Really Long")
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(20, 20))
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 2, col)
+
+	grid.scroll.ScrollToOffset(fyne.NewPos(20, 0))
+	row, col = grid.CursorLocationForPosition(fyne.NewPos(0, 20))
+	assert.Equal(t, 1, row)
+	assert.Equal(t, 2, col)
 }
 
 func TestTextGrid_PositionForCursorLocation(t *testing.T) {
@@ -83,6 +94,50 @@ func TestTextGrid_Scroll(t *testing.T) {
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
 	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+}
+
+func TestTextGrid_ScrollToTop(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.Refresh()
+	scrolling.scroll.ScrollToBottom()
+	scrolling.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.SetText("Something\nElse")
+	scrolling.scroll.ScrollToBottom()
+	scrolling.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+}
+
+func TestTextGrid_ScrollToBottom(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.Refresh()
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.SetText("Something\nElse")
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
 
 func TestTextGrid_CreateRendererRows(t *testing.T) {
@@ -134,10 +189,30 @@ func TestTextGrid_SetText(t *testing.T) {
 
 func TestTextGrid_SetText_Overflow(t *testing.T) {
 	grid := NewTextGrid()
-	grid.SetText("Hello\nthere")
+	grid.Scroll = widget.ScrollNone
+	grid.SetText("Hello Long\nthere")
 
 	assert.Len(t, grid.Rows, 2)
 	assert.Len(t, grid.Rows[1].Cells, 5)
+	render := test.WidgetRenderer(test.WidgetRenderer(grid).(*textGridRenderer).text).(*textGridContentRenderer)
+	assert.Equal(t, 3, len(render.visible))
+	row0 := test.WidgetRenderer(render.visible[0].(*textGridRow)).(*textGridRowRenderer)
+	row1 := test.WidgetRenderer(render.visible[1].(*textGridRow)).(*textGridRowRenderer)
+	row2 := test.WidgetRenderer(render.visible[2].(*textGridRow)).(*textGridRowRenderer)
+	assert.Equal(t, "H", row0.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, "g", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, "t", row1.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, " ", row2.objects[1].(*canvas.Text).Text)
+
+	grid.SetText("Replace")
+
+	assert.Len(t, grid.Rows, 1)
+	assert.Equal(t, 2, len(render.visible))
+	assert.Len(t, grid.Rows[0].Cells, 7)
+
+	assert.Equal(t, "R", row0.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, " ", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, " ", row1.objects[1].(*canvas.Text).Text)
 }
 
 func TestTextGrid_SetRowStyle(t *testing.T) {

@@ -13,6 +13,7 @@ bool isBundled();
 void sendNotification(char *title, char *content);
 */
 import "C"
+
 import (
 	"fmt"
 	"os/exec"

@@ -54,10 +54,12 @@ type (
 	Uniform gl.Uniform
 )
 
-var compiled []Program // avoid multiple compilations with the re-used mobile GUI context
-var noBuffer = Buffer{}
-var noShader = Shader{}
-var textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
+var (
+	compiled          []Program // avoid multiple compilations with the re-used mobile GUI context
+	noBuffer          = Buffer{}
+	noShader          = Shader{}
+	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
+)
 
 func (p *painter) glctx() gl.Context {
 	return p.contextProvider.Context().(gl.Context)
@@ -72,7 +74,8 @@ func (p *painter) Init() {
 			p.createProgram("simple_es"),
 			p.createProgram("line_es"),
 			p.createProgram("rectangle_es"),
-			p.createProgram("round_rectangle_es")}
+			p.createProgram("round_rectangle_es"),
+		}
 	}
 	p.program = compiled[0]
 	p.lineProgram = compiled[1]

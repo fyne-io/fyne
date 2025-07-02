@@ -146,9 +146,11 @@ func TestFocusManager_FocusPrevious(t *testing.T) {
 	assert.False(t, entry1.focused)
 }
 
-var _ fyne.Widget = (*focusable)(nil)
-var _ fyne.Focusable = (*focusable)(nil)
-var _ fyne.Disableable = (*focusable)(nil)
+var (
+	_ fyne.Widget      = (*focusable)(nil)
+	_ fyne.Focusable   = (*focusable)(nil)
+	_ fyne.Disableable = (*focusable)(nil)
+)
 
 type focusable struct {
 	widget.DisableableWidget

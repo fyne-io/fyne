@@ -10,8 +10,7 @@ import (
 )
 
 // Painter is a simple software painter that can paint a canvas in memory.
-type Painter struct {
-}
+type Painter struct{}
 
 // NewPainter creates a new Painter.
 func NewPainter() *Painter {
@@ -49,6 +48,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawRaster(c, o, pos, base, clip)
 		case *canvas.Rectangle:
 			drawRectangle(c, o, pos, base, clip)
+		case *canvas.Square:
+			drawSquare(c, o, pos, base, clip)
 		}
 
 		return false

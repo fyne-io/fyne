@@ -40,7 +40,6 @@ func toNativePtr(s string) *uint16 {
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messageboxw
 func messageBoxError(text, caption string) {
-
 	uType := MB_OK | MB_ICONERROR
 
 	syscall.Syscall6(MessageBox.Addr(), 4,

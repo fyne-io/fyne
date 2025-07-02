@@ -20,6 +20,12 @@ type Rectangle struct {
 	//
 	// Since: 2.4
 	CornerRadius float32
+
+	// Enforce an aspect ratio for the rectangle, the content will be made shorter or narrower
+	// to meet the requested aspect, if set.
+	//
+	// Since: 2.7
+	Aspect float32
 }
 
 // Hide will set this rectangle to not be visible
@@ -31,6 +37,10 @@ func (r *Rectangle) Hide() {
 
 // Move the rectangle to a new position, relative to its parent / canvas
 func (r *Rectangle) Move(pos fyne.Position) {
+	if r.Position() == pos {
+		return
+	}
+
 	r.baseObject.Move(pos)
 
 	repaint(r)
@@ -43,6 +53,7 @@ func (r *Rectangle) Refresh() {
 
 // Resize on a rectangle updates the new size of this object.
 // If it has a stroke width this will cause it to Refresh.
+// If Aspect is non-zero it may cause the rectangle to be smaller than the requested size.
 func (r *Rectangle) Resize(s fyne.Size) {
 	if s == r.Size() {
 		return

@@ -15,8 +15,10 @@ import (
 )
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*GridWrap)(nil)
-var _ fyne.Focusable = (*GridWrap)(nil)
+var (
+	_ fyne.Widget    = (*GridWrap)(nil)
+	_ fyne.Focusable = (*GridWrap)(nil)
+)
 
 // GridWrapItemID is the ID of an individual item in the GridWrap widget.
 //
@@ -405,9 +407,11 @@ func (l *gridWrapRenderer) Objects() []fyne.CanvasObject {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*gridWrapItem)(nil)
-var _ fyne.Tappable = (*gridWrapItem)(nil)
-var _ desktop.Hoverable = (*gridWrapItem)(nil)
+var (
+	_ fyne.Widget       = (*gridWrapItem)(nil)
+	_ fyne.Tappable     = (*gridWrapItem)(nil)
+	_ desktop.Hoverable = (*gridWrapItem)(nil)
+)
 
 type gridWrapItem struct {
 	BaseWidget

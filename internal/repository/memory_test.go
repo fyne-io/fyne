@@ -242,7 +242,6 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
 	assert.Nil(t, err)
-
 }
 
 func TestInMemoryRepositoryCanWrite(t *testing.T) {

@@ -12,6 +12,7 @@ bool isBundled();
 void watchTheme();
 */
 import "C"
+
 import (
 	"net/url"
 	"os"
@@ -30,6 +31,10 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	a.Driver().(systrayDriver).SetSystemTrayIcon(icon)
+}
+
+func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
+	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.

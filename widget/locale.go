@@ -50,6 +50,9 @@ var localeSettings = map[string]localeSetting{
 	"CO": {
 		weekStartDay: sunday,
 	},
+	"DE": {
+		dateFormat: "02.01.2006",
+	},
 	"DO": {
 		weekStartDay: sunday,
 	},

@@ -3,11 +3,11 @@ module fyne.io/fyne/v2
 go 1.19
 
 require (
-	fyne.io/systray v1.11.0
-	github.com/BurntSushi/toml v1.4.0
+	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58
+	github.com/BurntSushi/toml v1.5.0
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.0
-	github.com/fsnotify/fsnotify v1.7.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/fyne-io/gl-js v0.1.0
 	github.com/fyne-io/glfw-js v0.2.0
 	github.com/fyne-io/image v0.1.1
@@ -20,7 +20,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/hack-pad/go-indexeddb v0.3.2
 	github.com/jackmordaunt/icns/v2 v2.2.6
-	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08
+	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
 	github.com/josephspurrier/goversioninfo v1.4.0
 	github.com/lucor/goinfo v0.9.0
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2

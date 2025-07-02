@@ -259,11 +259,11 @@ func TestEntry_EraseSelection(t *testing.T) {
 	e.CursorRow = 1
 	e.CursorColumn = 2
 	e.sel.cursorRow, e.sel.cursorRow = e.CursorRow, e.CursorColumn
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}
-	var keyPress = func(key *fyne.KeyEvent) {
+	keyPress := func(key *fyne.KeyEvent) {
 		keyDown(key)
 		e.KeyUp(key)
 	}

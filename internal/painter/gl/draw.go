@@ -135,6 +135,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
 		p.drawRectangle(obj, pos, frame)
+	case *canvas.Square:
+		p.drawSquare(obj, pos, frame)
 	case *canvas.Text:
 		p.drawText(obj, pos, frame)
 	case *canvas.LinearGradient:
@@ -148,12 +150,20 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
 }
 
+func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
+	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, frame)
+}
+
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if (rect.FillColor == color.Transparent || rect.FillColor == nil) && (rect.StrokeColor == color.Transparent || rect.StrokeColor == nil || rect.StrokeWidth == 0) {
+	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, frame)
+}
+
+func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, frame fyne.Size) {
+	if (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
-	roundedCorners := rect.CornerRadius != 0
+	roundedCorners := radius != 0
 	var program Program
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -162,7 +172,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, rect, frame)
+	bounds, points := p.vecRectCoords(pos, obj, frame, aspect)
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -181,7 +191,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
-	strokeWidthScaled := roundToPixel(rect.StrokeWidth*p.pixScale, 1.0)
+	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	if roundedCorners {
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
@@ -192,7 +202,7 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 		p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 		radiusUniform := p.ctx.GetUniformLocation(program, "radius")
-		radiusScaled := roundToPixel(rect.CornerRadius*p.pixScale, 1.0)
+		radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
 		p.ctx.Uniform1f(radiusUniform, radiusScaled)
 	} else {
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
@@ -201,11 +211,11 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 
 	var r, g, b, a float32
 	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
-	r, g, b, a = getFragmentColor(rect.FillColor)
+	r, g, b, a = getFragmentColor(fill)
 	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
 
 	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
-	strokeColor := rect.StrokeColor
+	strokeColor := stroke
 	if strokeColor == nil {
 		strokeColor = color.Transparent
 	}
@@ -244,8 +254,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 }
 
 func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32) {
-
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha float32, pad float32,
+) {
 	texture, err := p.getTexture(o, creator)
 	if err != nil {
 		return
@@ -344,7 +354,8 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad float32) []float32 {
+	fill canvas.ImageFill, aspect float32, pad float32,
+) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 	size, pos = roundToPixelCoords(size, pos, p.pixScale)
 
@@ -389,8 +400,23 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
-func (p *painter) vecRectCoords(pos fyne.Position, rect *canvas.Rectangle, frame fyne.Size) ([4]float32, []float32) {
-	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
+func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, aspect float32) ([4]float32, []float32) {
+	xPad, yPad := float32(0), float32(0)
+
+	if aspect != 0 {
+		inner := rect.Size()
+		frameAspect := inner.Width / inner.Height
+
+		if frameAspect > aspect {
+			newWidth := inner.Height * aspect
+			xPad = (inner.Width - newWidth) / 2
+		} else if frameAspect < aspect {
+			newHeight := inner.Width / aspect
+			yPad = (inner.Height - newHeight) / 2
+		}
+	}
+
+	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
 }
 
 func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32) ([4]float32, []float32) {
@@ -418,21 +444,14 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 		0, 0, x1Norm, y1Norm, // first triangle
 		0, 0, x2Norm, y1Norm, // second triangle
 		0, 0, x1Norm, y2Norm,
-		0, 0, x2Norm, y2Norm}
+		0, 0, x2Norm, y2Norm,
+	}
 
 	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
 
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
-	xPad, yPad := float32(0), float32(0)
-	size := rect.Size()
-	if size.Width > size.Height {
-		xPad = (size.Width - size.Height) / 2
-	} else {
-		yPad = (size.Height - size.Width) / 2
-	}
-
-	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
+	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
 }
 
 func roundToPixel(v float32, pixScale float32) float32 {

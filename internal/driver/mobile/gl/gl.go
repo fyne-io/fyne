@@ -151,7 +151,8 @@ func (ctx *context) CreateProgram() Program {
 			},
 			blocking: true,
 		},
-		))}
+		)),
+	}
 }
 
 func (ctx *context) CreateShader(ty Enum) Shader {

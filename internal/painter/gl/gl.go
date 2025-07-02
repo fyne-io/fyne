@@ -10,8 +10,10 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 )
 
-const floatSize = 4
-const max16bit = float32(255 * 255)
+const (
+	floatSize = 4
+	max16bit  = float32(255 * 255)
+)
 
 // logGLError logs error in the GL renderer.
 //

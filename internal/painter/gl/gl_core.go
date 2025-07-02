@@ -41,8 +41,10 @@ const (
 	vertexShader          = gl.VERTEX_SHADER
 )
 
-const noBuffer = Buffer(0)
-const noShader = Shader(0)
+const (
+	noBuffer = Buffer(0)
+	noShader = Shader(0)
+)
 
 type (
 	// Attribute represents a GL attribute

@@ -32,7 +32,8 @@ func TestRectangle_Radius(t *testing.T) {
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
-		CornerRadius: 12}
+		CornerRadius: 12,
+	}
 
 	rect.Resize(fyne.NewSize(50, 50))
 	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
@@ -44,4 +45,7 @@ func TestRectangle_Radius(t *testing.T) {
 
 	rect.StrokeWidth = 0
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
+
+	rect.Aspect = 2.0
+	test.AssertRendersToImage(t, "rounded_rect_aspect.png", c)
 }

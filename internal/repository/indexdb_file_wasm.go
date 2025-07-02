@@ -25,8 +25,10 @@ func init() {
 	uint8Array = js.Global().Get("Uint8Array")
 }
 
-var _ fyne.URIReadCloser = (*idbfile)(nil)
-var _ fyne.URIWriteCloser = (*idbfile)(nil)
+var (
+	_ fyne.URIReadCloser  = (*idbfile)(nil)
+	_ fyne.URIWriteCloser = (*idbfile)(nil)
+)
 
 type idbfile struct {
 	db          *idb.Database
@@ -35,7 +37,7 @@ type idbfile struct {
 	isDir       bool
 	truncate    bool
 	isTruncated bool
-	parts       []interface{}
+	parts       []any
 	add         bool
 	isAdding    bool
 }
@@ -65,7 +67,7 @@ func (f *idbfile) Write(data []byte) (int, error) {
 	p := f.path
 	ctx := context.Background()
 
-	m := map[string]interface{}{
+	m := map[string]any{
 		"parent": f.parent,
 		"size":   0,
 		"ctime":  0,
@@ -96,7 +98,7 @@ func (f *idbfile) Write(data []byte) (int, error) {
 			return 0, err
 		}
 
-		f.parts = []interface{}{getbytes(b)}
+		f.parts = []any{getbytes(b)}
 		f.isAdding = true
 
 		meta, err := get(f.db, "meta", f.path)
@@ -144,7 +146,7 @@ func (f *idbfile) Write(data []byte) (int, error) {
 
 func getbytes(b js.Value) js.Value {
 	outch := make(chan js.Value)
-	b.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	b.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) any {
 		outch <- args[0]
 		return nil
 	}))

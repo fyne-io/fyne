@@ -182,7 +182,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.Refresh()
 
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
@@ -325,7 +324,7 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		if r.button.Importance != MediumImportance {
+		if r.button.Importance != MediumImportance && r.button.Importance != LowImportance {
 			if thRes, ok := icon.(fyne.ThemedResource); ok {
 				if thRes.ThemeColorName() != fgColorName {
 					icon = theme.NewColoredResource(icon, fgColorName)
@@ -433,7 +432,6 @@ func blendColor(under, over color.Color) color.Color {
 	outB := srcB + uint32(float32(dstB)*(1-srcAlpha))
 	// We create an RGBA64 here because the color components are already alpha-premultiplied 16-bit values (they're just stored in uint32s).
 	return color.RGBA64{R: uint16(outR), G: uint16(outG), B: uint16(outB), A: uint16(outAlpha * 0xFFFF)}
-
 }
 
 func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *fyne.Animation {
