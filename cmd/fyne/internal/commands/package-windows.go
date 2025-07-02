@@ -51,57 +51,67 @@ func (p *Packager) packageWindows(tags []string) error {
 		return fmt.Errorf("failed to close image file: %w", err)
 	}
 
-	// write manifest
-	manifest := p.exe + ".manifest"
-	manifestGenerated := false
-	if _, err := os.Stat(manifest); os.IsNotExist(err) {
-		manifestGenerated = true
-		manifestFile, _ := os.Create(manifest)
-
-		tplData := windowsData{
-			Name:            encodeXMLString(p.Name),
-			CombinedVersion: p.combinedVersion(),
-		}
-		err := templates.ManifestWindows.Execute(manifestFile, tplData)
-		if err != nil {
-			return fmt.Errorf("failed to write manifest template: %w", err)
-		}
-		manifestFile.Close()
-	}
-
-	// launch rsrc to generate the object file
-	outPath := filepath.Join(exePath, "fyne.syso")
-
-	vi := &goversioninfo.VersionInfo{}
-	vi.ProductName = p.Name
-	vi.IconPath = icoPath
-	vi.ManifestPath = manifest
-	vi.StringFileInfo.ProductVersion = p.combinedVersion()
-	vi.StringFileInfo.FileDescription = p.Name
-	vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
-
-	vi.Build()
-	vi.Walk()
-
-	arch, ok := os.LookupEnv("GOARCH")
-	if !ok {
-		arch = runtime.GOARCH
-	}
-
-	err = vi.WriteSyso(outPath, arch)
+	// check for existing syso file
+	files, err := os.ReadDir(exePath)
 	if err != nil {
-		return fmt.Errorf("failed to write .syso file: %w", err)
+		return fmt.Errorf("failed to read executable path: %w", err)
 	}
-	defer os.Remove(outPath)
+
+	existingSyso := false
+
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), "syso") {
+			existingSyso = true
+		}
+	}
+
+	// skip generation of manifest if syso already exists
+	if existingSyso {
+		// write manifest
+		manifest := p.exe + ".manifest"
+		if _, err := os.Stat(manifest); os.IsNotExist(err) {
+			manifestFile, _ := os.Create(manifest)
+
+			tplData := windowsData{
+				Name:            encodeXMLString(p.Name),
+				CombinedVersion: p.combinedVersion(),
+			}
+			err := templates.ManifestWindows.Execute(manifestFile, tplData)
+			if err != nil {
+				return fmt.Errorf("failed to write manifest template: %w", err)
+			}
+			manifestFile.Close()
+		}
+
+		// launch rsrc to generate the object file
+		outPath := filepath.Join(exePath, "fyne.syso")
+
+		vi := &goversioninfo.VersionInfo{}
+		vi.ProductName = p.Name
+		vi.IconPath = icoPath
+		vi.ManifestPath = manifest
+		vi.StringFileInfo.ProductVersion = p.combinedVersion()
+		vi.StringFileInfo.FileDescription = p.Name
+		vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
+
+		vi.Build()
+		vi.Walk()
+
+		arch, ok := os.LookupEnv("GOARCH")
+		if !ok {
+			arch = runtime.GOARCH
+		}
+
+		err = vi.WriteSyso(outPath, arch)
+		if err != nil {
+			return fmt.Errorf("failed to write .syso file: %w", err)
+		}
+		defer os.Remove(outPath)
+	}
 
 	err = os.Remove(icoPath)
 	if err != nil {
 		return fmt.Errorf("failed to remove icon: %w", err)
-	} else if manifestGenerated {
-		err := os.Remove(manifest)
-		if err != nil {
-			return fmt.Errorf("failed to remove manifest: %w", err)
-		}
 	}
 
 	_, err = p.buildPackage(nil, tags)

@@ -307,3 +307,79 @@ func Test_PowerShellArguments(t *testing.T) {
 		assert.Equal(t, test.expected, result)
 	}
 }
+
+func Test_PackageWindows(t *testing.T) {
+	expected := []mockRunner{
+		{
+			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
+			mockReturn: mockReturn{
+				ret: []byte("{ \"Module\": { \"Path\": \"fyne.io/fyne/v2\"} }"),
+			},
+		},
+		{
+			expectedValue: expectedValue{
+				args:  []string{"build", "-o", "myTest.exe"},
+				env:   []string{"GOARCH=amd64", "GOOS=windows"},
+				osEnv: true,
+				dir:   "myTest",
+			},
+			mockReturn: mockReturn{
+				ret: []byte(""),
+			},
+		},
+	}
+
+	p := &Packager{
+		appData: &appData{
+			Name: "myTest",
+			icon: "myTest.png",
+		},
+		os:     "windows",
+		srcDir: "myTest",
+		dir:    "myTestTarget",
+		exe:    "myTest.exe",
+	}
+	windowsBuildTest := &testCommandRuns{runs: expected, t: t}
+
+	util = mockUtil{}
+
+	utilIsMobileMock = func(_ string) bool {
+		return false
+	}
+
+	expectedEnsureSubDirRuns := mockEnsureSubDirRuns{
+		expected: []mockEnsureSubDir{
+			{"myTestTarget", "windows", "myTestTarget/windows"},
+		},
+	}
+	utilEnsureSubDirMock = func(parent, name string) string {
+		return expectedEnsureSubDirRuns.verifyExpectation(t, parent, name)
+	}
+
+	expectedExistRuns := mockExistRuns{
+		expected: []mockExist{
+			{"myTest.exe", false},
+			{"myTest.exe", true},
+		},
+	}
+	utilExistsMock = func(path string) bool {
+		return expectedExistRuns.verifyExpectation(t, path)
+	}
+
+	expectedCopyFileRuns := mockCopyFileRuns{
+		expected: []mockCopyFile{
+			{source: "myTest.png", target: filepath.Join("myTestTarget", "windows", "icon.png")},
+			{source: "myTest.exe", target: filepath.Join("myTestTarget", "windows", "myTest.exe")},
+		},
+	}
+	utilCopyFileMock = func(source, target string) error {
+		return expectedCopyFileRuns.verifyExpectation(t, false, source, target)
+	}
+
+	err := p.doPackage(windowsBuildTest)
+	assert.Nil(t, err)
+	windowsBuildTest.verifyExpectation()
+	expectedTotalCount(t, len(expectedEnsureSubDirRuns.expected), expectedEnsureSubDirRuns.current)
+	expectedTotalCount(t, len(expectedExistRuns.expected), expectedExistRuns.current)
+	expectedTotalCount(t, len(expectedCopyFileRuns.expected), expectedCopyFileRuns.current)
+}
