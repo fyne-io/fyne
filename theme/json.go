@@ -21,6 +21,15 @@ func FromJSON(data string) (fyne.Theme, error) {
 	return FromJSONReader(strings.NewReader(data))
 }
 
+// FromJSONWithFallback returns a Theme created from the given JSON metadata.
+// Any values not present in the data will fall back to the specified theme.
+// If a parse error occurs it will be returned along with a specified fallback theme.
+//
+// Since: 2.7
+func FromJSONWithFallback(data string, fallback fyne.Theme) (fyne.Theme, error) {
+	return fromJSONWithFallback(strings.NewReader(data), fallback)
+}
+
 // FromJSONReader returns a Theme created from the given JSON metadata through the reader.
 // Any values not present in the data will fall back to the default theme.
 // If a parse error occurs it will be returned along with a default theme.
@@ -28,6 +37,15 @@ func FromJSON(data string) (fyne.Theme, error) {
 // Since: 2.2
 func FromJSONReader(r io.Reader) (fyne.Theme, error) {
 	return fromJSONWithFallback(r, DefaultTheme())
+}
+
+// FromJSONReaderWithFallback returns a Theme created from the given JSON metadata through the reader.
+// Any values not present in the data will fall back to the specified theme.
+// If a parse error occurs it will be returned along with a specified fallback theme.
+//
+// Since: 2.7
+func FromJSONReaderWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) {
+	return fromJSONWithFallback(r, fallback)
 }
 
 func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) {

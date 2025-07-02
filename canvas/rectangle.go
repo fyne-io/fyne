@@ -58,10 +58,15 @@ func (r *Rectangle) Hide() {
 // If ExpandForShadow is true, the position is adjusted to account for the shadow paddings.
 // The rectangle position is then updated accordingly to reflect the new position.
 func (r *Rectangle) Move(pos fyne.Position) {
+	if r.Position() == pos {
+		return
+	}
+
 	if r.ExpandForShadow {
 		_, p := r.SizeAndPositionWithShadow(r.Size())
 		pos = pos.Add(p)
 	}
+
 	r.baseObject.Move(pos)
 
 	repaint(r)

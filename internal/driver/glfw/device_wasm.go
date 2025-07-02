@@ -16,6 +16,8 @@ var (
 	isMacOS = strings.Contains(js.Global().Get("window").Get("navigator").Get("platform").String(), "Mac")
 )
 
+var dummyEntry = js.Global().Get("document").Call("getElementById", "dummyEntry")
+
 func (*glDevice) IsMobile() bool {
 	return isMobile
 }
@@ -26,30 +28,22 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 }
 
 func (*glDevice) hideVirtualKeyboard() {
-	d := dummyEntry()
-	if d.IsNull() {
+	if dummyEntry.IsNull() {
 		return
 	}
-
-	d.Call("blur")
+	dummyEntry.Call("blur")
 }
 
 func (*glDevice) showVirtualKeyboard() {
-	d := dummyEntry()
-	if d.IsNull() {
+	if dummyEntry.IsNull() {
 		return
 	}
-
-	d.Call("focus")
+	dummyEntry.Call("focus")
 }
 
 func connectKeyboard(c *glCanvas) {
 	c.OnFocus = handleKeyboard
 	c.OnUnfocus = hideVirtualKeyboard
-}
-
-func dummyEntry() js.Value {
-	return js.Global().Get("document").Call("getElementById", "dummyEntry")
 }
 
 func isMacOSRuntime() bool {

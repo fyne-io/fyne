@@ -491,14 +491,15 @@ func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame
 	xPad, yPad := float32(0), float32(0)
 
 	if aspect != 0 {
-		frameAspect := frame.Width / frame.Height
+		inner := rect.Size()
+		frameAspect := inner.Width / inner.Height
 
 		if frameAspect > aspect {
-			newWidth := frame.Height * aspect
-			xPad = (frame.Width - newWidth) / 2
+			newWidth := inner.Height * aspect
+			xPad = (inner.Width - newWidth) / 2
 		} else if frameAspect < aspect {
-			newHeight := frame.Width / aspect
-			yPad = (frame.Height - newHeight) / 2
+			newHeight := inner.Width / aspect
+			yPad = (inner.Height - newHeight) / 2
 		}
 	}
 

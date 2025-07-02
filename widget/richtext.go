@@ -53,7 +53,6 @@ type RichText struct {
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
 	t.Scroll = widget.ScrollNone
-	t.updateRowBounds()
 	return t
 }
 
@@ -376,6 +375,9 @@ func (t *RichText) rowLength(row int) int {
 // rows returns the number of text rows in this text entry.
 // The entry may be longer than required to show this amount of content.
 func (t *RichText) rows() int {
+	if t.rowBounds == nil { // if the widget API is used before it is shown
+		t.updateRowBounds()
+	}
 	return len(t.rowBounds)
 }
 
@@ -640,8 +642,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 			min := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
-				if !img.MinSize().Subtract(img.oldMin).IsZero() {
-					img.oldMin = img.MinSize()
+				if newMin := img.MinSize(); newMin != img.oldMin {
+					img.oldMin = newMin
 
 					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {

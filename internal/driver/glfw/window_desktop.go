@@ -49,10 +49,10 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var cursorMap map[desktop.StandardCursor]*glfw.Cursor
+var cursors [desktop.HiddenCursor + 1]*glfw.Cursor
 
 func initCursors() {
-	cursorMap = map[desktop.StandardCursor]*glfw.Cursor{
+	cursors = [desktop.HiddenCursor + 1]*glfw.Cursor{
 		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
 		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
 		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
@@ -352,20 +352,20 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
-	switch v := cursor.(type) {
-	case desktop.StandardCursor:
-		ret, ok := cursorMap[v]
-		if !ok {
-			return cursorMap[desktop.DefaultCursor], false
-		}
-		return ret, false
-	default:
+	cursorType, standard := cursor.(desktop.StandardCursor)
+	if !standard {
 		img, x, y := cursor.Image()
 		if img == nil {
 			return nil, true
 		}
 		return glfw.CreateCursor(img, x, y), true
 	}
+
+	if cursorType < 0 || cursorType >= desktop.StandardCursor(len(cursors)) {
+		return cursors[desktop.DefaultCursor], false
+	}
+
+	return cursors[cursorType], false
 }
 
 func (w *window) SetCursor(cursor *glfw.Cursor) {
@@ -555,8 +555,7 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 
 	char := code[0]
 	if char >= 'a' && char <= 'z' {
-		// Our alphabetical keys are all upper case characters.
-		return fyne.KeyName('A' + char - 'a')
+		return fyne.KeyName(char ^ ('a' - 'A')) // Corresponding KeyName is uppercase. Convert with simple bit flip.
 	}
 
 	switch char {

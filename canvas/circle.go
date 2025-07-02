@@ -52,6 +52,10 @@ func (c *Circle) MinSize() fyne.Size {
 // If ExpandForShadow is true, the position is adjusted to account for the shadow paddings.
 // The circle position is then updated accordingly to reflect the new position.
 func (c *Circle) Move(pos fyne.Position) {
+	if c.Position1 == pos {
+		return
+	}
+
 	size := c.Size()
 	if c.ExpandForShadow {
 		_, p := c.SizeAndPositionWithShadow(size)
