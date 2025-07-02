@@ -22,7 +22,8 @@ const (
 //
 // Since: 2.7
 type Shadowable interface {
-	// SizeAndPositionWithShadow returns the total size and position including shadow paddings.
+	// SizeAndPositionWithShadow returns the total size and position needed to render the shadow around the content
+	// with the input size. Total size is larger than the input size.
 	SizeAndPositionWithShadow(size fyne.Size) (fyne.Size, fyne.Position)
 	// ShadowPaddings returns the paddings (left, top, right, bottom) for the shadow.
 	ShadowPaddings() [4]float32
