@@ -519,6 +519,11 @@ func (t *textGridContent) refreshCell(row, col int) {
 	wid.refreshCell(col)
 }
 
+type textGridContentRenderer struct {
+	text     *textGridContent
+	itemPool async.Pool[*textGridRow]
+}
+
 func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.text.Rows)
 	sizeRows := int(size.Height / t.text.cellSize.Height)
@@ -529,11 +534,6 @@ func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 		t.text.rows = bufRows
 	}
 	t.addRowsIfRequired()
-}
-
-type textGridContentRenderer struct {
-	text     *textGridContent
-	itemPool async.Pool[*textGridRow]
 }
 
 func (t *textGridContentRenderer) Destroy() {
@@ -660,10 +660,6 @@ func (t *textGridRow) CreateRenderer() fyne.WidgetRenderer {
 func (t *textGridRow) setRow(row int) {
 	t.row = row
 	t.Refresh()
-}
-
-type textGridRowRenderer struct {
-	obj *textGridRow
 }
 
 func (t *textGridRow) appendTextCell(str rune) {
@@ -864,6 +860,10 @@ func (t *textGridRow) updateGridSize(size fyne.Size) {
 
 	t.cols = bufCols
 	t.addCellsIfRequired()
+}
+
+type textGridRowRenderer struct {
+	obj *textGridRow
 }
 
 func (t *textGridRowRenderer) Layout(size fyne.Size) {
