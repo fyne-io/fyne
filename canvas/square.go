@@ -50,13 +50,14 @@ func (s *Square) Hide() {
 // If ExpandForShadow is true, the position is adjusted to account for the shadow paddings.
 // The square position is then updated accordingly to reflect the new position.
 func (s *Square) Move(pos fyne.Position) {
-	if s.Position() == pos {
-		return
-	}
-
 	if s.ExpandForShadow {
+		if pos == s.ContentPos() {
+			return
+		}
 		_, p := s.SizeAndPositionWithShadow(s.Size())
 		pos = pos.Add(p)
+	} else if s.Position() == pos {
+		return
 	}
 
 	s.baseObject.Move(pos)
