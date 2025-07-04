@@ -47,14 +47,14 @@ func (*device) HasKeyboard() bool {
 	return false
 }
 
-func (dev *device) ShowVirtualKeyboard() {
-	dev.showVirtualKeyboard(mobile.DefaultKeyboard)
+func (d *device) ShowVirtualKeyboard() {
+	d.showVirtualKeyboard(mobile.DefaultKeyboard)
 }
 
-func (dev *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
-	dev.showVirtualKeyboard(keyboard)
+func (d *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
+	d.showVirtualKeyboard(keyboard)
 }
 
-func (dev *device) HideVirtualKeyboard() {
-	dev.hideVirtualKeyboard()
+func (d *device) HideVirtualKeyboard() {
+	d.hideVirtualKeyboard()
 }
