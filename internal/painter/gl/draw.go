@@ -58,9 +58,13 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
+	edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
 	rectSizeUniform := p.ctx.GetUniformLocation(program, "rect_size_half")
-	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
+	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
 	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 	radiusUniform := p.ctx.GetUniformLocation(program, "radius")
@@ -196,9 +200,13 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
+		edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+		edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+		p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
 		rectSizeUniform := p.ctx.GetUniformLocation(program, "rect_size_half")
-		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
+		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
+		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled - 2*edgeSoftnessScaled
 		p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 		radiusUniform := p.ctx.GetUniformLocation(program, "radius")

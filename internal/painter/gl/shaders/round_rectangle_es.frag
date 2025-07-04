@@ -16,6 +16,7 @@ uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_f
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
 uniform float radius;
+uniform float edge_softness;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
@@ -46,11 +47,11 @@ void main() {
     if (distance < 0.0)
     {
         to_color = fill_color;
-    } 
+    }
 
     distance = abs(distance) - stroke_width_half;
 
-    float blend_amount = smoothstep(-1.0, 1.0, distance);
+    float blend_amount = smoothstep(0.0, edge_softness, distance);
 
     // final color
     gl_FragColor = mix(from_color, to_color, blend_amount);
