@@ -35,6 +35,12 @@ func NewCircle(color color.Color) *Circle {
 	return &Circle{FillColor: color}
 }
 
+func (c *Circle) ContentPos() fyne.Position {
+	paddings := c.ShadowPaddings()
+	position := c.Position()
+	return fyne.NewPos(position.X+paddings[0], position.Y+paddings[1])
+}
+
 // Hide will set this circle to not be visible
 func (c *Circle) Hide() {
 	c.Hidden = true
@@ -54,6 +60,7 @@ func (c *Circle) MinSize() fyne.Size {
 func (c *Circle) Move(pos fyne.Position) {
 	size := c.Size()
 	if c.ExpandForShadow {
+		// Note: added Circle custom ContentPos() method because Circle has custom Position() method
 		if pos == c.ContentPos() {
 			return
 		}
