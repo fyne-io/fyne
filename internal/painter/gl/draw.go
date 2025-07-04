@@ -27,11 +27,6 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	size := circle.Size()
-	radius := size.Width / 2
-	if size.Height < size.Width {
-		radius = size.Height / 2
-	}
 	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && circle.ShadowSoftness > 0
 	program := p.roundRectangleProgram
 
@@ -67,6 +62,10 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
+	radius := rectSizeWidthScaled / 2
+	if rectSizeHeightScaled < rectSizeWidthScaled {
+		radius = rectSizeHeightScaled / 2
+	}
 	radiusUniform := p.ctx.GetUniformLocation(program, "radius")
 	radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
