@@ -9,6 +9,12 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
+const (
+	defaultEdgeSoftness  float32 = 1.0
+	noEdgeSoftness       float32 = 0.0 // needed to draw thin border
+	strokeWidthThreshold float32 = 0.5
+)
+
 func (p *painter) createBuffer(points []float32) Buffer {
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
@@ -58,7 +64,12 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
-	edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+	edgeSoftness := defaultEdgeSoftness
+	if circle.StrokeWidth >= strokeWidthThreshold {
+		edgeSoftness = noEdgeSoftness
+	}
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
 	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 
@@ -200,7 +211,12 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width_half")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled*0.5)
 
-		edgeSoftnessScaled := roundToPixel(2.0*p.pixScale, 1.0)
+		edgeSoftness := defaultEdgeSoftness
+		if strokeWidth >= strokeWidthThreshold {
+			edgeSoftness = noEdgeSoftness
+		}
+
+		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 		edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
 		p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 

@@ -51,7 +51,7 @@ void main() {
 
     distance = abs(distance) - stroke_width_half;
 
-    float blend_amount = smoothstep(0.0, edge_softness, distance);
+    float blend_amount = smoothstep(edge_softness - 1.0, edge_softness + 1.0, distance);
 
     // final color
     gl_FragColor = mix(from_color, to_color, blend_amount);
