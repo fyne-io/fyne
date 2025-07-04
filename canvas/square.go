@@ -15,12 +15,19 @@ var _ fyne.CanvasObject = (*Square)(nil)
 //
 // Since: 2.7
 type Square struct {
-	baseObject
+	baseShadow
 
 	FillColor    color.Color // The square fill color
 	StrokeColor  color.Color // The square stroke color
 	StrokeWidth  float32     // The stroke width of the square
 	CornerRadius float32     // How large the corner radius should be
+
+	// When true, the square keeps the requested size for its content, and the total object size expands to include the shadow.
+	// This means the square will be properly scaled and moved to fit the requested size and position.
+	// The total size including the shadow will be larger than the requested size.
+	//
+	// Since: 2.7
+	ExpandForShadow bool
 }
 
 // Hide will set this square to not be visible
@@ -31,8 +38,16 @@ func (s *Square) Hide() {
 }
 
 // Move the square to a new position, relative to its parent / canvas
+// If ExpandForShadow is true, the position is adjusted to account for the shadow paddings.
+// The square position is then updated accordingly to reflect the new position.
 func (s *Square) Move(pos fyne.Position) {
-	if s.Position() == pos {
+	if s.ExpandForShadow {
+		if pos == s.ContentPos() {
+			return
+		}
+		_, p := s.SizeAndPositionWithShadow(s.Size())
+		pos = pos.Add(p)
+	} else if s.Position() == pos {
 		return
 	}
 
@@ -50,8 +65,17 @@ func (s *Square) Refresh() {
 // If it has a stroke width this will cause it to Refresh.
 // The square may have transparent padding on the top/bottom or left/right
 // so that it is still a square shape in the specified size.
+// If ExpandForShadow is true, the size is adjusted to accommodate the shadow,
+// ensuring the square size matches the requested size.
+// The total size including the shadow will be larger than the requested size.
 func (s *Square) Resize(size fyne.Size) {
-	if size == s.Size() {
+	if s.ExpandForShadow {
+		if size == s.ContentSize() {
+			return
+		}
+		sizeWithShadow, _ := s.SizeAndPositionWithShadow(size)
+		size = sizeWithShadow
+	} else if size == s.Size() {
 		return
 	}
 
