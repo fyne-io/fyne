@@ -5,15 +5,18 @@ uniform vec2 frame_size;
 uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_frame
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
-uniform float radius;
+uniform vec4 radius;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
 
-float calc_distance(vec2 p, vec2 b, float r)
+float calc_distance(vec2 p, vec2 b, vec4 r)
 {
-    vec2 d = abs(p) - b + vec2(r);
-	return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;   
+    r.xy = (p.x > 0.0) ? r.xy : r.zw;
+    r.x  = (p.y > 0.0) ? r.x  : r.y;
+
+    vec2 d = abs(p) - b + r.x;
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r.x;
 }
 
 void main() {
