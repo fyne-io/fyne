@@ -27,11 +27,6 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	size := circle.Size()
-	radius := size.Width / 2
-	if size.Height < size.Width {
-		radius = size.Height / 2
-	}
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -63,6 +58,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 	p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
+	radius := getFullyRoundedRadius(fyne.NewSize(rectSizeWidthScaled, rectSizeHeightScaled))
 	radiusUniform := p.ctx.GetUniformLocation(program, "radius")
 	radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
 	p.ctx.Uniform1f(radiusUniform, radiusScaled)
@@ -200,6 +196,14 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.ctx.Uniform2f(rectSizeUniform, rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+
+		fullyRoundedRadius := getFullyRoundedRadius(fyne.NewSize(
+			rectSizeWidthScaled, rectSizeHeightScaled,
+		))
+
+		if radius == fyne.FullyRoundedCornerRadius {
+			radius = fullyRoundedRadius
+		}
 
 		radiusUniform := p.ctx.GetUniformLocation(program, "radius")
 		radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
@@ -472,6 +476,10 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 	size.Height = end.Y - pos.Y
 
 	return size, pos
+}
+
+func getFullyRoundedRadius(size fyne.Size) float32 {
+	return fyne.Min(size.Height, size.Width) / 2
 }
 
 // Returns FragmentColor(red,green,blue,alpha) from fyne.Color

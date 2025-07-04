@@ -1,6 +1,16 @@
 package fyne
 
-import "image"
+import (
+	"image"
+	"math"
+)
+
+const (
+	// FullyRoundedCornerRadius can be applied to a canvas corner radius to achieve fully rounded corners.
+	// This constant represents the maximum possible corner radius, resulting in a pill or circular appearance.
+	// Since: 2.7
+	FullyRoundedCornerRadius float32 = math.MaxFloat32
+)
 
 // Canvas defines a graphical canvas to which a [CanvasObject] or Container can be added.
 // Each canvas has a scale which is automatically applied during the render process.
