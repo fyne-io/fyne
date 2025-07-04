@@ -174,6 +174,33 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorPosition(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TextStyle.Monospace = true
+	entry.SetText("mmmmmm")
+
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.TypedKey(right)
+	firstX, firstY := entry.CursorPosition().Components()
+
+	entry.TypedKey(right)
+	secondX := entry.CursorPosition().X
+	assert.Greater(t, secondX, firstX)
+
+	entry.TypedKey(right)
+	entry.TypedKey(right)
+	fourthX := entry.CursorPosition().X
+	assert.Equal(t, (secondX-firstX)*3, fourthX-firstX)
+
+	entry.SetText("mmmmmm\nmm\nmm")
+	entry.CursorRow = 1
+	secondY := entry.CursorPosition().Y
+
+	entry.CursorRow = 2
+	thirdY := entry.CursorPosition().Y
+	assert.Equal(t, secondY-firstY, thirdY-secondY)
+}
+
 func TestEntry_Control_Word(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")
