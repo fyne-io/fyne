@@ -87,7 +87,7 @@ func (n *noosDriver) Run() {
 
 				if t.Direction == noos2.KeyReleased {
 					// No desktop events so key/up down not reported
-					return // ignore key up in other core events
+					continue // ignore key up in other core events
 				}
 
 				// No shortcut detected, pass down to TypedKey
@@ -105,10 +105,11 @@ func (n *noosDriver) Run() {
 }
 
 func (n *noosDriver) Quit() {
-	n.queue <- funcData{
-		f: func() {
-			n.done = true
-		}}
+	n.done = true
+
+	go func() {
+		n.queue <- funcData{f: func() {}}
+	}()
 }
 
 func (n *noosDriver) StartAnimation(anim *fyne.Animation) {
