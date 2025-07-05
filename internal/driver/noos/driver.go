@@ -19,6 +19,7 @@ type noosDriver struct {
 
 	wins    []fyne.Window
 	current int
+	device  noosDevice
 }
 
 func (n *noosDriver) CreateWindow(_ string) fyne.Window {
@@ -54,8 +55,7 @@ func (n *noosDriver) AbsolutePositionForObject(o fyne.CanvasObject) fyne.Positio
 }
 
 func (n *noosDriver) Device() fyne.Device {
-	//TODO implement me
-	panic("implement me")
+	return &n.device
 }
 
 func (n *noosDriver) Run() {
