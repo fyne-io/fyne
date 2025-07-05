@@ -41,5 +41,18 @@
     "tuesday": "Dienstag",
     "tuesday.short": "Di",
     "wednesday": "Mittwoch",
-    "wednesday.short": "Mi"
+    "wednesday.short": "Mi",
+    "today": "Heute",
+    "january": "Januar",
+    "february": "Februar",
+    "march": "März",
+    "april": "April",
+    "may": "Mai",
+    "june": "Juni",
+    "july": "Juli",
+    "august": "August",
+    "september": "September",
+    "october": "Oktober",
+    "november": "November",
+    "december": "Dezember"
 }

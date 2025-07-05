@@ -57,8 +57,8 @@ func NewCalendar(cT time.Time, changed func(time.Time)) *Calendar {
 	return c
 }
 
-// SetDisplayedDate sets the currently displayed year and month
-func (c *Calendar) SetDisplayedDate(date time.Time) {
+// SetDisplayedMonth sets the currently displayed year and month
+func (c *Calendar) SetDisplayedMonth(date time.Time) {
 	if date.IsZero() {
 		date = time.Now()
 	}
@@ -75,8 +75,6 @@ func (c *Calendar) SetDisplayedDate(date time.Time) {
 }
 
 // SetSelectedDate sets the currently selected date
-//
-// Date selection works only if .Selectable = true
 func (c *Calendar) SetSelectedDate(date time.Time) {
 	c.SelectedDate = date
 	c.updateSelection()
@@ -86,12 +84,12 @@ func (c *Calendar) SetSelectedDate(date time.Time) {
 // This should not be called by regular code, it is used internally to render a widget.
 func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 	c.monthPrevious = NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
-		c.SetDisplayedDate(c.displayedMonth.AddDate(0, -1, 0))
+		c.SetDisplayedMonth(c.displayedMonth.AddDate(0, -1, 0))
 	})
 	c.monthPrevious.Importance = LowImportance
 
 	c.monthNext = NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
-		c.SetDisplayedDate(c.displayedMonth.AddDate(0, 1, 0))
+		c.SetDisplayedMonth(c.displayedMonth.AddDate(0, 1, 0))
 	})
 	c.monthNext.Importance = LowImportance
 
@@ -170,13 +168,6 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 		dayNum := d.Day()
 		s := strconv.Itoa(dayNum)
 		b := NewButton(s, func() {
-			// TODO discuss if it is a good idea to unset selection when tapping the selected date
-			/*if selDate := c.dateForButton(dayNum); selDate.Format("02012006") != c.SelectedDate.Format("02012006") {
-				c.SelectedDate = selDate
-			} else {
-				c.SelectedDate = time.Time{}
-			}*/
-
 			c.SelectedDate = c.dateForButton(dayNum)
 			c.updateSelection()
 

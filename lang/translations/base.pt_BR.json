@@ -27,5 +27,32 @@
     },
     "file.parent": {
         "other": "Origem"
-    }
+    },
+    "monday": "Segunda-feira",
+    "monday.short": "Seg",
+    "tuesday": "Terça-feira",
+    "tuesday.short": "Ter",
+    "wednesday": "Quarta-feira",
+    "wednesday.short": "Qua",
+    "thursday": "Quinta-feira",
+    "thursday.short": "Qui",
+    "friday": "Sexta-feira",
+    "friday.short": "Sex",
+    "saturday": "Sábado",
+    "saturday.short": "Sáb",
+    "sunday": "Domingo",
+    "sunday.short": "Dom",
+    "today": "Hoje",
+    "january": "Janeiro",
+    "february": "Fevereiro",
+    "march": "Março",
+    "april": "Abril",
+    "may": "Maio",
+    "june": "Junho",
+    "july": "Julho",
+    "august": "Agosto",
+    "september": "Setembro",
+    "october": "Outubro",
+    "november": "Novembro",
+    "december": "Dezembro"
 }

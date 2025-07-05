@@ -41,5 +41,18 @@
     "tuesday": "செவ்வாய்க்கிழமை",
     "tuesday.short": "செவ்வாய்",
     "wednesday": "புதன்கிழமை",
-    "wednesday.short": "அறிவன்"
+    "wednesday.short": "அறிவன்",
+    "today": "இன்று",
+    "january": "ஜனவரி",
+    "february": "பிப்ரவரி",
+    "march": "மார்ச்",
+    "april": "ஏப்ரல்",
+    "may": "மே",
+    "june": "ஜூன்",
+    "july": "ஜூலை",
+    "august": "ஆகஸ்ட்",
+    "september": "செப்டம்பர்",
+    "october": "அக்டோபர்",
+    "november": "நவம்பர்",
+    "december": "டிசம்பர்"
 }

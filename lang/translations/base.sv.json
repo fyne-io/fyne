@@ -14,11 +14,18 @@
   "Folder": "Mapp",
   "New Folder": "Ny mapp",
   "Open": "Öppna",
+  "Paste": "Klistra in",
+  "Quit": "Avsluta",
+  "Redo": "Gör om",
   "Select all": "Markera allt",
   "Undo": "Ångra",
   "Yes": "Ja",
+  "No": "Nej",
   "file.name": {
     "other": "Namn"
+  },
+  "file.parent": {
+    "other": "Överordnad"
   },
   "Show Hidden Files": "Visa dolda filer",
   "thursday": "Torsdag",
@@ -29,17 +36,23 @@
   "saturday.short": "Lör",
   "sunday": "Söndag",
   "sunday.short": "Sön",
-  "No": "Nej",
-  "Paste": "Klistra in",
-  "Quit": "Avsluta",
-  "Redo": "Gör om",
   "monday": "Måndag",
   "monday.short": "Mån",
-  "file.parent": {
-    "other": "Överordnad"
-  },
   "tuesday": "Tisdag",
   "tuesday.short": "Tis",
   "wednesday": "Onsdag",
-  "wednesday.short": "Ons"
+  "wednesday.short": "Ons",
+  "today": "Idag",
+  "january": "Januari",
+  "february": "Februari",
+  "march": "Mars",
+  "april": "April",
+  "may": "Maj",
+  "june": "Juni",
+  "july": "Juli",
+  "august": "Augusti",
+  "september": "September",
+  "october": "Oktober",
+  "november": "November",
+  "december": "December"
 }

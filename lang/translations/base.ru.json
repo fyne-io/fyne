@@ -41,5 +41,18 @@
     "tuesday": "Четверг",
     "tuesday.short": "Чт",
     "wednesday": "Среда",
-    "wednesday.short": "Ср"
+    "wednesday.short": "Ср",
+    "today": "Сегодня",
+    "january": "Январь",
+    "february": "Февраль",
+    "march": "Март",
+    "april": "Апрель",
+    "may": "Май",
+    "june": "Июнь",
+    "july": "Июль",
+    "august": "Август",
+    "september": "Сентябрь",
+    "october": "Октябрь",
+    "november": "Ноябрь",
+    "december": "Декабрь"
 }
