@@ -3,8 +3,6 @@
 package gl
 
 import (
-	"encoding/binary"
-	"fmt"
 	"math"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
@@ -83,36 +81,6 @@ func (p *painter) Init() {
 	p.roundRectangleProgram = compiled[3]
 }
 
-// f32Bytes returns the byte representation of float32 values in the given byte
-// order. byteOrder must be either binary.BigEndian or binary.LittleEndian.
-func f32Bytes(byteOrder binary.ByteOrder, values ...float32) []byte {
-	le := false
-	switch byteOrder {
-	case binary.BigEndian:
-	case binary.LittleEndian:
-		le = true
-	default:
-		panic(fmt.Sprintf("invalid byte order %v", byteOrder))
-	}
-
-	b := make([]byte, 4*len(values))
-	for i, v := range values {
-		u := math.Float32bits(v)
-		if le {
-			b[4*i+0] = byte(u >> 0)
-			b[4*i+1] = byte(u >> 8)
-			b[4*i+2] = byte(u >> 16)
-			b[4*i+3] = byte(u >> 24)
-		} else {
-			b[4*i+0] = byte(u >> 24)
-			b[4*i+1] = byte(u >> 16)
-			b[4*i+2] = byte(u >> 8)
-			b[4*i+3] = byte(u >> 0)
-		}
-	}
-	return b
-}
-
 type mobileContext struct {
 	glContext gl.Context
 }
@@ -144,7 +112,7 @@ func (c *mobileContext) BlendFunc(srcFactor, destFactor uint32) {
 }
 
 func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {
-	data := f32Bytes(binary.LittleEndian, points...)
+	data := toLEByteOrder(points...)
 	c.glContext.BufferData(gl.Enum(target), data, gl.Enum(usage))
 }
 
@@ -286,4 +254,17 @@ func (c *mobileContext) VertexAttribPointerWithOffset(attribute Attribute, size 
 
 func (c *mobileContext) Viewport(x, y, width, height int) {
 	c.glContext.Viewport(x, y, width, height)
+}
+
+// toLEByteOrder returns the byte representation of float32 values in little endian byte order.
+func toLEByteOrder(values ...float32) []byte {
+	b := make([]byte, 4*len(values))
+	for i, v := range values {
+		u := math.Float32bits(v)
+		b[4*i+0] = byte(u >> 0)
+		b[4*i+1] = byte(u >> 8)
+		b[4*i+2] = byte(u >> 16)
+		b[4*i+3] = byte(u >> 24)
+	}
+	return b
 }
