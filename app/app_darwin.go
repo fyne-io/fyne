@@ -1,4 +1,4 @@
-//go:build !ci && !wasm && !test_web_driver && !mobile
+//go:build !ci && !wasm && !test_web_driver && !mobile && !tinygo
 
 package app
 
