@@ -145,7 +145,7 @@ func mkdir(db *idb.Database, dir, parent string) error {
 		return err
 	}
 
-	f := map[string]interface{}{
+	f := map[string]any{
 		"isDir":  true,
 		"parent": parent,
 	}

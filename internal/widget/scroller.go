@@ -585,7 +585,7 @@ func (s *Scroll) Resize(sz fyne.Size) {
 //
 // Since: 2.6
 func (s *Scroll) ScrollToOffset(p fyne.Position) {
-	if s.Offset.Subtract(p).IsZero() {
+	if s.Offset == p {
 		return
 	}
 
