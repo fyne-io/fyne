@@ -219,15 +219,31 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
-	var button desktop.MouseButton
+	rightClick := false
+	if isMacOSRuntime() {
+		if modifier&fyne.KeyModifierControl != 0 {
+			rightClick = true
+			modifier &^= fyne.KeyModifierControl
+		}
+		if modifier&fyne.KeyModifierSuper != 0 {
+			modifier |= fyne.KeyModifierControl
+			modifier &^= fyne.KeyModifierSuper
+		}
+	}
 
 	switch btn {
 	case glfw.MouseButton1:
-		button = desktop.MouseButtonPrimary
+		if rightClick {
+			return desktop.MouseButtonSecondary, modifier
+		}
+		return desktop.MouseButtonPrimary, modifier
 	case glfw.MouseButton2:
-		button = desktop.MouseButtonSecondary
+		return desktop.MouseButtonSecondary, modifier
+	case glfw.MouseButton3:
+		return desktop.MouseButtonTertiary, modifier
+	default:
+		return 0, modifier
 	}
-	return button, modifier
 }
 
 //gocyclo:ignore
