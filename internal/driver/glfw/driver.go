@@ -144,7 +144,7 @@ func (d *gLDriver) windowList() []fyne.Window {
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
-	logError(msg, err)
+	fyne.LogError(msg, err)
 
 	if !running.Load() {
 		d.Quit()
