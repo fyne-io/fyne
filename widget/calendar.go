@@ -30,15 +30,13 @@ type Calendar struct {
 	BaseWidget
 	displayedMonth time.Time
 
+	selectedDate time.Time // currently selected date
+
 	monthPrevious *Button
 	monthNext     *Button
 	monthLabel    *Label
 
 	dates *fyne.Container
-
-	SelectedDate time.Time // currently selected date
-
-	// TODO discuss a config variable WeekStart time.Weekday to override week's first day
 
 	OnChanged func(time.Time) `json:"-"`
 }
@@ -73,10 +71,15 @@ func (c *Calendar) SetDisplayedMonth(date time.Time) {
 	}
 }
 
-// SetSelectedDate sets the currently selected date
+// SetSelectedDate sets the currently selected date. Passing ZeroDate (time.Time{}) will cause no selection.
 func (c *Calendar) SetSelectedDate(date time.Time) {
-	c.SelectedDate = date
+	c.selectedDate = date
 	c.updateSelection()
+}
+
+// GetSelectedDate returns the currently selected date, or ZeroTime (time.Time{}) if no date is selected.
+func (c *Calendar) GetSelectedDate() time.Time {
+	return c.selectedDate
 }
 
 // CreateRenderer returns a new WidgetRenderer for this widget.
@@ -167,15 +170,15 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 		dayNum := d.Day()
 		s := strconv.Itoa(dayNum)
 		b := NewButton(s, func() {
-			c.SelectedDate = c.dateForButton(dayNum)
+			c.selectedDate = c.dateForButton(dayNum)
 			c.updateSelection()
 
 			if c.OnChanged != nil {
-				c.OnChanged(c.SelectedDate)
+				c.OnChanged(c.selectedDate)
 			}
 		})
 
-		if !c.SelectedDate.IsZero() && c.SelectedDate.Year() == c.displayedMonth.Year() && c.SelectedDate.Month() == c.displayedMonth.Month() && c.SelectedDate.Day() == dayNum {
+		if !c.selectedDate.IsZero() && c.selectedDate.Year() == c.displayedMonth.Year() && c.selectedDate.Month() == c.displayedMonth.Month() && c.selectedDate.Day() == dayNum {
 			b.Importance = HighImportance
 		} else {
 			b.Importance = LowImportance
@@ -194,7 +197,7 @@ func (c *Calendar) updateSelection() {
 
 	defer c.dates.Refresh()
 
-	if c.SelectedDate.IsZero() || c.SelectedDate.Month() != c.displayedMonth.Month() || c.SelectedDate.Year() != c.displayedMonth.Year() {
+	if c.selectedDate.IsZero() || c.selectedDate.Month() != c.displayedMonth.Month() || c.selectedDate.Year() != c.displayedMonth.Year() {
 		for i := 0; i < len(c.dates.Objects); i++ {
 			if b, ok := c.dates.Objects[i].(*Button); ok {
 				b.Importance = LowImportance
@@ -207,7 +210,7 @@ func (c *Calendar) updateSelection() {
 	for i := 0; i < len(c.dates.Objects); i++ {
 		if b, ok := c.dates.Objects[i].(*Button); ok {
 			dayNum, _ := strconv.Atoi(b.Text)
-			if dayNum == c.SelectedDate.Day() {
+			if dayNum == c.selectedDate.Day() {
 				b.Importance = HighImportance
 			} else {
 				b.Importance = LowImportance
