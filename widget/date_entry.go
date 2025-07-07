@@ -14,7 +14,7 @@ import (
 // Since: 2.6
 type DateEntry struct {
 	Entry
-	Date      *time.Time       // TODO discuss: using time.Time
+	Date      *time.Time
 	OnChanged func(*time.Time) `json:"-"`
 
 	dropDown *Calendar
