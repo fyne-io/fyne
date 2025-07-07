@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"
@@ -297,11 +296,9 @@ func shortDayName(in string) string {
 	lower := strings.ToLower(in)
 	key := lower + ".short"
 	long := lang.X(lower, in)
-	return strings.ToUpper(lang.X(key, long[:3]))
+	return lang.X(key, long[:3])
 }
 
 func monthName(in string) string {
-	r := []rune(lang.X(strings.ToLower(in), in))
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
+	return lang.X(strings.ToLower(in), in)
 }
