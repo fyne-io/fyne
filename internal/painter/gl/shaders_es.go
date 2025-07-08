@@ -35,6 +35,8 @@ var (
 
 func shaderSourceNamed(name string) ([]byte, []byte) {
 	switch name {
+	case "blur_es":
+		return shaderBluresVert, shaderBluresFrag
 	case "line_es":
 		return shaderLineesVert, shaderLineesFrag
 	case "simple_es":
