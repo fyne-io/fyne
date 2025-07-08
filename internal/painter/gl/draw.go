@@ -73,16 +73,10 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	vertAttrib = p.ctx.GetUniformLocation(p.blurProgram, "size")
 	p.ctx.Uniform2f(vertAttrib, w, h)
 
-	sum := float32(0.0)
-	length := int(radius)*2 + 1
-	values := make([]float32, length)
-	for i, x := 0, float64(-radius); i < length; i, x = i+1, x+1 {
-		value := float32(math.Exp(-(x * x / 4 / float64(radius))))
-		values[i] = value
-		sum += value
-	}
-	for i := 0; i < length; i++ {
-		values[i] /= sum
+	values, ok := p.blurKernels[radius]
+	if !ok {
+		values = createKernel(radius)
+		p.blurKernels[radius] = values
 	}
 
 	kernel := p.ctx.GetUniformLocation(p.blurProgram, "kernel")
@@ -576,4 +570,20 @@ func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, flo
 	y1Scaled := roundToPixel(y1*p.pixScale, 1.0)
 	y2Scaled := roundToPixel(y2*p.pixScale, 1.0)
 	return x1Scaled, x2Scaled, y1Scaled, y2Scaled
+}
+
+func createKernel(radius float32) []float32 {
+	sum := float32(0.0)
+	length := int(radius)*2 + 1
+	values := make([]float32, length)
+	for i, x := 0, float64(-radius); i < length; i, x = i+1, x+1 {
+		value := float32(math.Exp(-(x * x / 4 / float64(radius))))
+		values[i] = value
+		sum += value
+	}
+	for i := 0; i < length; i++ {
+		values[i] /= sum
+	}
+
+	return values
 }
