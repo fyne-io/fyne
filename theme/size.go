@@ -68,6 +68,11 @@ const (
 	// Since: 2.4
 	SizeNameInputRadius fyne.ThemeSizeName = "inputRadius"
 
+	// SizeNameModalBlurRadius is the name of theme lookup for blurring modal popup backgrounds.
+	//
+	// Since: 2.7
+	SizeNameModalBlurRadius fyne.ThemeSizeName = "modalBlurRadius"
+
 	// SizeNameSelectionRadius is the name of theme lookup for selection corner radius.
 	//
 	// Since: 2.4
@@ -228,6 +233,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInputRadius:
 		return 5
+	case SizeNameModalBlurRadius:
+		return 1.5
 	case SizeNameSelectionRadius:
 		return 3
 	case SizeNameScrollBarRadius:

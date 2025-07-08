@@ -28,6 +28,9 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 }
 
 func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
+	if b.Radius == 0 {
+		return
+	}
 	radius := b.Radius * p.pixScale
 
 	w := roundToPixel(frame.Width*p.pixScale, 1.0)

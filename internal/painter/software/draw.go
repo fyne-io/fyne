@@ -23,6 +23,10 @@ type gradient interface {
 }
 
 func drawBlur(c fyne.Canvas, blurObj *canvas.Blur, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if blurObj.Radius == 0 {
+		return
+	}
+
 	scaledWidth := scale.ToScreenCoordinate(c, blurObj.Size().Width)
 	scaledHeight := scale.ToScreenCoordinate(c, blurObj.Size().Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
