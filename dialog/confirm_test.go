@@ -143,7 +143,6 @@ func TestConfirm_Importance_Blur(t *testing.T) {
 	d := NewConfirm("Delete me?", "This is dangerous!", nil, w)
 	d.SetConfirmImportance(widget.DangerImportance)
 
-	test.ApplyTheme(t, theme.LightTheme())
 	d.Show()
 	test.AssertRendersToImage(t, "dialog-confirm-blur.png", w.Canvas())
 }
