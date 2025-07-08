@@ -7,7 +7,7 @@ uniform float radius;
 uniform vec2 size;
 
 // 50 on either side, scaled up to 4x pixel density plus 1
-uniform float[401] kernel;
+uniform float kernel[401];
 
 void main() {
     vec2 inverseSize = vec2(1.0/size.x, 1.0/size.y);
