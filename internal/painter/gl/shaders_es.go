@@ -5,6 +5,12 @@ package gl
 import _ "embed"
 
 var (
+	//go:embed shaders/blur_es.frag
+	shaderBluresFrag []byte
+
+	//go:embed shaders/blur_es.vert
+	shaderBluresVert []byte
+
 	//go:embed shaders/line_es.frag
 	shaderLineesFrag []byte
 

@@ -73,6 +73,7 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple")
+	p.blurProgram = p.createProgram("blur")
 	p.lineProgram = p.createProgram("line")
 	p.rectangleProgram = p.createProgram("rectangle")
 	p.roundRectangleProgram = p.createProgram("round_rectangle")
@@ -249,6 +250,10 @@ func (c *coreContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *coreContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *coreContext) Uniform1fv(uniform Uniform, v []float32) {
+	gl.Uniform1fv(int32(uniform), int32(len(v)), &v[0])
 }
 
 func (c *coreContext) Uniform2f(uniform Uniform, v0, v1 float32) {

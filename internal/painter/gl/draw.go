@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"image"
 	"image/color"
 	"math"
 
@@ -24,6 +25,76 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 	p.ctx.EnableVertexAttribArray(vertAttrib)
 	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
 	p.logError()
+}
+
+func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
+	radius := b.Radius * p.pixScale
+
+	w := roundToPixel(frame.Width*p.pixScale, 1.0)
+	h := roundToPixel(frame.Height*p.pixScale, 1.0)
+	pixels := make([]uint8, int(w*h)*4)
+
+	p.ctx.ReadPixels(0, 0, int(w), int(h), colorFormatRGBA, unsignedByte, pixels)
+	p.logError()
+
+	img := &captureImage{
+		pix:    pixels,
+		width:  int(w),
+		height: int(h),
+	}
+
+	x := roundToPixel(pos.X*p.pixScale, 1.0)
+	y := roundToPixel(pos.Y*p.pixScale, 1.0)
+	w = roundToPixel(b.Size().Width*p.pixScale, 1.0)
+	h = roundToPixel(b.Size().Height*p.pixScale, 1.0)
+	bounds := image.Rect(int(x), int(y), int(x+w), int(y+h))
+	crop := img.SubImage(bounds)
+	texture := p.imgToTexture(crop, canvas.ImageScaleFastest)
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	points := p.rectCoords(b.Size(), pos, frame, canvas.ImageFillStretch, 1.0, 0)
+	p.ctx.UseProgram(p.blurProgram)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(p.blurProgram, "vert", 3, 5, 0)
+	p.defineVertexArray(p.blurProgram, "vertTexCoord", 2, 5, 3)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+
+	vertAttrib := p.ctx.GetUniformLocation(p.blurProgram, "radius")
+	p.ctx.Uniform1f(vertAttrib, radius)
+
+	vertAttrib = p.ctx.GetUniformLocation(p.blurProgram, "size")
+	p.ctx.Uniform2f(vertAttrib, w, h)
+
+	sum := float32(0.0)
+	length := int(radius)*2 + 1
+	values := make([]float32, length)
+	for i, x := 0, float64(-radius); i < length; i, x = i+1, x+1 {
+		value := float32(math.Exp(-(x * x / 4 / float64(radius))))
+		values[i] = value
+		sum += value
+	}
+	for i := 0; i < length; i++ {
+		values[i] /= sum
+	}
+
+	kernel := p.ctx.GetUniformLocation(p.blurProgram, "kernel")
+	p.ctx.Uniform1fv(kernel, values)
+
+	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	p.logError()
+
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, texture)
+	p.logError()
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+	p.freeBuffer(vbo)
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
@@ -125,6 +196,8 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
 	switch obj := o.(type) {
+	case *canvas.Blur:
+		p.drawBlur(obj, pos, frame)
 	case *canvas.Circle:
 		p.drawCircle(obj, pos, frame)
 	case *canvas.Line:

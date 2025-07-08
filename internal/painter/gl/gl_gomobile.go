@@ -73,12 +73,14 @@ func (p *painter) Init() {
 			p.createProgram("line_es"),
 			p.createProgram("rectangle_es"),
 			p.createProgram("round_rectangle_es"),
+			p.createProgram("blur_es"),
 		}
 	}
 	p.program = compiled[0]
 	p.lineProgram = compiled[1]
 	p.rectangleProgram = compiled[2]
 	p.roundRectangleProgram = compiled[3]
+	p.blurProgram = compiled[4]
 }
 
 type mobileContext struct {
@@ -234,6 +236,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {
+	c.glContext.Uniform1fv(gl.Uniform(uniform), v)
 }
 
 func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {

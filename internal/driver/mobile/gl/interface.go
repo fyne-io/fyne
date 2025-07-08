@@ -203,6 +203,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
 
+	// Uniform1fv writes a float array uniform variable.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1fv(dst Uniform, v []float32)
+
 	// Uniform2f writes a vec2 uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml

@@ -12,7 +12,7 @@
 #include <GLES3/gl3.h> // install on Ubuntu with: sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libx11-dev
 #elif os_openbsd
 #include <GLES3/gl3.h>
-#elif os_freebsd
+#elif os_freebsdUniform4
 #include <GLES3/gl3.h>
 #endif
 
@@ -76,6 +76,7 @@ typedef enum {
 	glfnTexImage2D,
 	glfnTexParameteri,
 	glfnUniform1f,
+	glfnUniform1fv,
 	glfnUniform2f,
 	glfnUniform4f,
 	glfnUniform4fv,
