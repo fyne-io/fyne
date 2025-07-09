@@ -102,7 +102,7 @@ public class GoNativeActivity extends NativeActivity {
                         break;
                     case PASSWORD_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+                        inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
                     default:
                         Log.e("Fyne", "unknown keyboard type, use default");
                 }
@@ -121,7 +121,7 @@ public class GoNativeActivity extends NativeActivity {
 
                 // always place one character so all keyboards can send backspace
                 ignoreKey = true;
-                mTextEdit.setText("0");
+                mTextEdit.setText(" ");
                 mTextEdit.setSelection(mTextEdit.getText().length());
                 ignoreKey = false;
 
@@ -257,7 +257,7 @@ public class GoNativeActivity extends NativeActivity {
                 addContentView(mTextEdit, mEditTextLayoutParams);
 
                 // always place one character so all keyboards can send backspace
-                mTextEdit.setText("0");
+                mTextEdit.setText(" ");
                 mTextEdit.setSelection(mTextEdit.getText().length());
 
                 mTextEdit.addTextChangedListener(new TextWatcher() {
@@ -289,7 +289,7 @@ public class GoNativeActivity extends NativeActivity {
                         // always place one character so all keyboards can send backspace
                         if (s.length() < 1) {
                             ignoreKey = true;
-                            mTextEdit.setText("0");
+                            mTextEdit.setText(" ");
                             mTextEdit.setSelection(mTextEdit.getText().length());
                             ignoreKey = false;
                             return;
