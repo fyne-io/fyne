@@ -27,6 +27,8 @@ func (p *painter) defineVertexArray(prog Program, name string, size, stride, off
 	p.logError()
 }
 
+var blurPixbuf []uint8
+
 func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	if b.Radius == 0 {
 		return
@@ -35,13 +37,18 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 
 	w := roundToPixel(frame.Width*p.pixScale, 1.0)
 	h := roundToPixel(frame.Height*p.pixScale, 1.0)
-	pixels := make([]uint8, int(w*h)*4)
 
-	p.ctx.ReadPixels(0, 0, int(w), int(h), colorFormatRGBA, unsignedByte, pixels)
+	if pixSize := int(w*h)*4; cap(blurPixbuf) < pixSize {
+		blurPixbuf = make([]uint8, pixSize)
+	} else {
+		blurPixbuf = blurPixbuf[:pixSize]
+	}
+
+	p.ctx.ReadPixels(0, 0, int(w), int(h), colorFormatRGBA, unsignedByte, blurPixbuf)
 	p.logError()
 
 	img := &captureImage{
-		pix:    pixels,
+		pix:    blurPixbuf,
 		width:  int(w),
 		height: int(h),
 	}
