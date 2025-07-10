@@ -223,7 +223,9 @@ type ListSegment struct {
 	Items   []RichTextSegment
 	Ordered bool
 
-	// Start is the number an ordered list will start counting from
+	// Start is the number an ordered list will start counting from.
+	// Setting Start to a number less than 1 will result in an ordered list
+	// starting at 1.
 	//
 	// Since: 2.7
 	Start int
@@ -237,13 +239,14 @@ func (l *ListSegment) Inline() bool {
 // Segments returns the segments required to draw bullets before each item
 func (l *ListSegment) Segments() []RichTextSegment {
 	out := make([]RichTextSegment, len(l.Items))
-	if l.Start == 0 {
-		l.Start = 1
+	start := l.Start
+	if start < 1 {
+		start = 1
 	}
 	for i, in := range l.Items {
 		txt := "• "
 		if l.Ordered {
-			txt = strconv.Itoa(i+l.Start) + "."
+			txt = strconv.Itoa(i+start) + "."
 		}
 		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
 		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
