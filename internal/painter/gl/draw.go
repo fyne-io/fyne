@@ -38,7 +38,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	w := roundToPixel(frame.Width*p.pixScale, 1.0)
 	h := roundToPixel(frame.Height*p.pixScale, 1.0)
 
-	if pixSize := int(w*h)*4; cap(blurPixbuf) < pixSize {
+	if pixSize := int(w*h) * 4; cap(blurPixbuf) < pixSize {
 		blurPixbuf = make([]uint8, pixSize)
 	} else {
 		blurPixbuf = blurPixbuf[:pixSize]
