@@ -62,7 +62,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 	case *ast.List:
 		items, err := renderChildren(source, n, blockquote)
 		return []RichTextSegment{
-			&ListSegment{Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
+			&ListSegment{Start: t.Start, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
 		}, err
 	case *ast.ListItem:
 		texts, err := renderChildren(source, n, blockquote)

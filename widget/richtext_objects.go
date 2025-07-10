@@ -222,6 +222,11 @@ func (i *ImageSegment) Unselect() {
 type ListSegment struct {
 	Items   []RichTextSegment
 	Ordered bool
+
+	// Start is the number an ordered list will start counting from
+	//
+	// Since: 2.7
+	Start int
 }
 
 // Inline returns false as a list should be in a block.
@@ -232,10 +237,13 @@ func (l *ListSegment) Inline() bool {
 // Segments returns the segments required to draw bullets before each item
 func (l *ListSegment) Segments() []RichTextSegment {
 	out := make([]RichTextSegment, len(l.Items))
+	if l.Start == 0 {
+		l.Start = 1
+	}
 	for i, in := range l.Items {
 		txt := "• "
 		if l.Ordered {
-			txt = strconv.Itoa(i+1) + "."
+			txt = strconv.Itoa(i+l.Start) + "."
 		}
 		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
 		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
