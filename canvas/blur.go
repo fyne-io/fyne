@@ -26,6 +26,9 @@ func (b *Blur) Hide() {
 
 // Move the blur to a new position, relative to its parent / canvas
 func (b *Blur) Move(pos fyne.Position) {
+	if b.Position() == pos {
+		return
+	}
 	b.baseObject.Move(pos)
 
 	repaint(b)
