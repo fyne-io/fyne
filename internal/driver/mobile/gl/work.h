@@ -12,7 +12,7 @@
 #include <GLES3/gl3.h> // install on Ubuntu with: sudo apt-get install libegl1-mesa-dev libgles2-mesa-dev libx11-dev
 #elif os_openbsd
 #include <GLES3/gl3.h>
-#elif os_freebsdUniform4
+#elif os_freebsd
 #include <GLES3/gl3.h>
 #endif
 
