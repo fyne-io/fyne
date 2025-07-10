@@ -10,28 +10,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func shaderSourceNamed(name string) ([]byte, []byte) {
-	switch name {
-	case "line":
-		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
-	case "line_es":
-		return shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent
-	case "simple":
-		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
-	case "simple_es":
-		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
-	case "rectangle":
-		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
-	case "round_rectangle":
-		return shaderRectangleVert.StaticContent, shaderRoundrectangleFrag.StaticContent
-	case "rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
-	case "round_rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRoundrectangleesFrag.StaticContent
-	}
-	return nil, nil
-}
-
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
 	// Init tell a new painter to initialise, usually called after a context is available
