@@ -45,7 +45,6 @@ void main() {
     }
     else
     {
-        // --- Fill-Only Rectangle (No Stroke) ---
         final_color = fill_color;
         final_alpha = 1.0 - smoothstep(-edge_softness, edge_softness, distance);
     }
