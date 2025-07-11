@@ -247,7 +247,6 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.updateAllTabs()
 	r.updateCreateTab()
 	r.updateTabs()
-	r.bar.Refresh()
 	r.layout(r.docTabs, size)
 
 	// lay out buttons before updating indicator, which is relative to their position
@@ -489,4 +488,5 @@ func (r *docTabsRenderer) updateTabs() {
 	}
 
 	r.bar.Objects = []fyne.CanvasObject{r.scroller, r.box}
+	r.bar.Refresh()
 }

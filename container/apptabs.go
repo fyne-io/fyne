@@ -298,7 +298,6 @@ func (r *appTabsRenderer) Layout(size fyne.Size) {
 		}
 	}
 
-	r.bar.Refresh()
 	r.layout(r.appTabs, size)
 	r.updateIndicator(r.appTabs.transitioning())
 	if r.appTabs.transitioning() {
@@ -469,4 +468,6 @@ func (r *appTabsRenderer) updateTabs(max int) {
 	if a := r.action; a != nil {
 		r.bar.Objects = append(r.bar.Objects, a)
 	}
+
+	r.bar.Refresh()
 }
