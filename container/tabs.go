@@ -321,10 +321,6 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 	r.divider.FillColor = th.Color(theme.ColorNameShadow, v)
 	r.indicator.FillColor = th.Color(theme.ColorNamePrimary, v)
 	r.indicator.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
-
-	for _, tab := range r.tabs.items() {
-		tab.Content.Refresh()
-	}
 }
 
 func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
@@ -489,6 +485,10 @@ func (r *baseTabsRenderer) objects(t baseTabs) []fyne.CanvasObject {
 
 func (r *baseTabsRenderer) refresh(t baseTabs) {
 	r.applyTheme(t)
+
+	for _, tab := range r.tabs.items() {
+		tab.Content.Refresh()
+	}
 
 	r.bar.Refresh()
 	r.divider.Refresh()
