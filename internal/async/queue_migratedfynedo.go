@@ -2,9 +2,9 @@
 
 package async
 
-import (
-	"fyne.io/fyne/v2"
-)
+import "fyne.io/fyne/v2"
+
+const defaultQueueCapacity = 64
 
 // CanvasObjectQueue represents a single-threaded queue for managing canvas objects using a ring buffer.
 type CanvasObjectQueue struct {
@@ -15,7 +15,7 @@ type CanvasObjectQueue struct {
 
 // NewCanvasObjectQueue returns a queue for caching values with an initial capacity.
 func NewCanvasObjectQueue() *CanvasObjectQueue {
-	return &CanvasObjectQueue{buffer: make([]fyne.CanvasObject, 64)}
+	return &CanvasObjectQueue{buffer: make([]fyne.CanvasObject, defaultQueueCapacity)}
 }
 
 // In adds the given value to the tail of the queue.
@@ -45,6 +45,11 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 	q.buffer[q.head] = nil
 	q.head = (q.head + 1) % len(q.buffer)
 	q.size--
+
+	if q.size == 0 && len(q.buffer) > 4*defaultQueueCapacity {
+		q.buffer = make([]fyne.CanvasObject, defaultQueueCapacity)
+	}
+
 	return first
 }
 
