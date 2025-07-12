@@ -2,7 +2,9 @@
 
 package async
 
-import "fyne.io/fyne/v2"
+import (
+	"fyne.io/fyne/v2"
+)
 
 // CanvasObjectQueue represents a single-threaded queue for managing canvas objects using a ring buffer.
 type CanvasObjectQueue struct {
@@ -13,7 +15,7 @@ type CanvasObjectQueue struct {
 
 // NewCanvasObjectQueue returns a queue for caching values with an initial capacity.
 func NewCanvasObjectQueue() *CanvasObjectQueue {
-	return &CanvasObjectQueue{buffer: make([]fyne.CanvasObject, 32)}
+	return &CanvasObjectQueue{buffer: make([]fyne.CanvasObject, 64)}
 }
 
 // In adds the given value to the tail of the queue.
