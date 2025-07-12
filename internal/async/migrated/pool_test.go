@@ -1,4 +1,4 @@
-package async
+package migrated
 
 import (
 	"testing"
@@ -22,10 +22,9 @@ func TestPool(t *testing.T) {
 var sink int
 
 func BenchmarkPool(b *testing.B) {
-	p := &Pool[int]{
-		New: func() int {
-			return 0
-		},
+	p := &Pool[int]{}
+	p.New = func() int {
+		return 0
 	}
 
 	b.Run("GetOnly", func(b *testing.B) {

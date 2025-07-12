@@ -1,6 +1,6 @@
 //go:build migrated_fynedo
 
-package async
+package migrated
 
 // Pool (when migrated) is just a simple single threaded data buffer.
 type Pool[T any] struct {

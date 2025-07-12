@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -1205,7 +1205,7 @@ type tableCellsRenderer struct {
 	widget.BaseRenderer
 
 	cells            *tableCells
-	pool, headerPool async.Pool[fyne.CanvasObject]
+	pool, headerPool migrated.Pool[fyne.CanvasObject]
 	visible, headers map[TableCellID]fyne.CanvasObject
 	hover, marker    *canvas.Rectangle
 	dividers         []fyne.CanvasObject

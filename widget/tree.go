@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -600,8 +600,8 @@ type treeContentRenderer struct {
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
-	branchPool  async.Pool[fyne.CanvasObject]
-	leafPool    async.Pool[fyne.CanvasObject]
+	branchPool  migrated.Pool[fyne.CanvasObject]
+	leafPool    migrated.Pool[fyne.CanvasObject]
 
 	wasVisible []TreeNodeID
 	visible    []TreeNodeID

@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -618,7 +618,7 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool          async.Pool[fyne.CanvasObject]
+	itemPool          migrated.Pool[fyne.CanvasObject]
 	visible           []listItemAndID
 	wasVisible        []listItemAndID
 	visibleRowHeights []float32

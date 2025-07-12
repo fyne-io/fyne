@@ -8,7 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -521,7 +521,7 @@ func (t *textGridContent) refreshCell(row, col int) {
 
 type textGridContentRenderer struct {
 	text     *textGridContent
-	itemPool async.Pool[*textGridRow]
+	itemPool migrated.Pool[*textGridRow]
 }
 
 func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
