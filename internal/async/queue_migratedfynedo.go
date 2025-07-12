@@ -4,35 +4,49 @@ package async
 
 import "fyne.io/fyne/v2"
 
-// CanvasObjectQueue represents a simple single threaded queue for managing canvas objects.
+// CanvasObjectQueue represents a single-threaded queue for managing canvas objects using a ring buffer.
 type CanvasObjectQueue struct {
-	items []fyne.CanvasObject
+	buffer []fyne.CanvasObject
+	head   int
+	size   int
 }
 
-// NewCanvasObjectQueue returns a queue for caching values.
+// NewCanvasObjectQueue returns a queue for caching values with an initial capacity.
 func NewCanvasObjectQueue() *CanvasObjectQueue {
-	return &CanvasObjectQueue{items: make([]fyne.CanvasObject, 0, 32)}
+	return &CanvasObjectQueue{buffer: make([]fyne.CanvasObject, 32)}
 }
 
-// In puts the given value at the tail of the queue.
+// In adds the given value to the tail of the queue.
+// If the queue is full, it grows the buffer dynamically.
 func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
-	q.items = append(q.items, v)
+	if q.size == len(q.buffer) {
+		buffer := make([]fyne.CanvasObject, len(q.buffer)*2)
+		copy(buffer, q.buffer[q.head:])
+		copy(buffer[len(q.buffer)-q.head:], q.buffer[:q.head])
+		q.buffer = buffer
+		q.head = 0
+	}
+
+	tail := (q.head + q.size) % len(q.buffer)
+	q.buffer[tail] = v
+	q.size++
 }
 
 // Out removes and returns the value at the head of the queue.
 // It returns nil if the queue is empty.
 func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
-	if len(q.items) == 0 {
+	if q.size == 0 {
 		return nil
 	}
 
-	head := q.items[0]
-	q.items[0] = nil
-	q.items = q.items[1:]
-	return head
+	first := q.buffer[q.head]
+	q.buffer[q.head] = nil
+	q.head = (q.head + 1) % len(q.buffer)
+	q.size--
+	return first
 }
 
 // Len returns the number of items in the queue.
 func (q *CanvasObjectQueue) Len() uint64 {
-	return uint64(len(q.items))
+	return uint64(q.size)
 }
