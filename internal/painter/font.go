@@ -17,7 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -355,8 +355,8 @@ type cacheID struct {
 }
 
 var (
-	fontCache       async.Map[cacheID, *FontCacheItem]
-	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+	fontCache       migrated.Map[cacheID, *FontCacheItem]
+	fontCustomCache migrated.Map[fyne.Resource, *FontCacheItem] // for custom resources
 )
 
 type noopLogger struct{}

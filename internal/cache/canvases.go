@@ -2,10 +2,10 @@ package cache
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
-var canvases async.Map[fyne.CanvasObject, *canvasInfo]
+var canvases migrated.Map[fyne.CanvasObject, *canvasInfo]
 
 // GetCanvasForObject returns the canvas for the specified object.
 func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {

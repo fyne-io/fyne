@@ -1,4 +1,4 @@
-//go:build !go1.23 && !migrated_fynedo
+//go:build !go1.23
 
 package async
 

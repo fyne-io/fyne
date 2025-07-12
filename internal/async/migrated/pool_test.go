@@ -1,13 +1,14 @@
-package migrated
+package migrated_test
 
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPool(t *testing.T) {
-	pool := Pool[int]{}
+	pool := migrated.Pool[int]{}
 
 	item := pool.Get()
 	assert.Equal(t, 0, item)
@@ -22,7 +23,7 @@ func TestPool(t *testing.T) {
 var sink int
 
 func BenchmarkPool(b *testing.B) {
-	p := &Pool[int]{}
+	p := &migrated.Pool[int]{}
 	p.New = func() int {
 		return 0
 	}

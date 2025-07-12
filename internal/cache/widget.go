@@ -2,10 +2,10 @@ package cache
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
-var renderers async.Map[fyne.Widget, *rendererInfo]
+var renderers migrated.Map[fyne.Widget, *rendererInfo]
 
 type isBaseWidget interface {
 	ExtendBaseWidget(fyne.Widget)

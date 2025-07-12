@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
-var fontSizeCache async.Map[fontSizeEntry, *fontMetric]
+var fontSizeCache migrated.Map[fontSizeEntry, *fontMetric]
 
 type fontMetric struct {
 	expiringCache

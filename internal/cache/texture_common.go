@@ -2,12 +2,12 @@ package cache
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
 var (
-	textTextures   async.Map[FontCacheEntry, *textureInfo]
-	objectTextures async.Map[fyne.CanvasObject, *textureInfo]
+	textTextures   migrated.Map[FontCacheEntry, *textureInfo]
+	objectTextures migrated.Map[fyne.CanvasObject, *textureInfo]
 )
 
 // DeleteTexture deletes the texture from the cache map.

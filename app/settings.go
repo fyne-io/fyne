@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
@@ -37,7 +37,7 @@ type settings struct {
 	variant        fyne.ThemeVariant
 
 	listeners       []func(fyne.Settings)
-	changeListeners async.Map[chan fyne.Settings, bool]
+	changeListeners migrated.Map[chan fyne.Settings, bool]
 	watcher         any // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema

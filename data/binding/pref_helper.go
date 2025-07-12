@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
 type preferenceItem interface {
@@ -12,7 +12,7 @@ type preferenceItem interface {
 }
 
 type preferenceBindings struct {
-	async.Map[string, preferenceItem]
+	migrated.Map[string, preferenceItem]
 }
 
 func (b *preferenceBindings) list() []preferenceItem {
@@ -25,7 +25,7 @@ func (b *preferenceBindings) list() []preferenceItem {
 }
 
 type preferencesMap struct {
-	prefs async.Map[fyne.Preferences, *preferenceBindings]
+	prefs migrated.Map[fyne.Preferences, *preferenceBindings]
 
 	appPrefs fyne.Preferences // the main application prefs, to check if it changed...
 	appLock  sync.Mutex

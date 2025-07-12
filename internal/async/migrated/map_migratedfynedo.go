@@ -1,6 +1,6 @@
 //go:build migrated_fynedo
 
-package async
+package migrated
 
 // Map is a generic wrapper around [sync.Map].
 type Map[K any, V any] struct {

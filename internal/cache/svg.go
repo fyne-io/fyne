@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/async/migrated"
 )
 
-var svgs async.Map[string, *svgInfo]
+var svgs migrated.Map[string, *svgInfo]
 
 // GetSvg gets svg image from cache if it exists.
 func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {

@@ -1,4 +1,4 @@
-package async_test
+package migrated_test
 
 import (
 	"testing"
