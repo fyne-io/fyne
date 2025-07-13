@@ -12,6 +12,7 @@ precision lowp sampler2D;
 
 uniform sampler2D tex;
 uniform float cornerRadius;  // in pixels
+uniform vec2 size;           // in pixels: size of the rendered image quad
 
 varying vec2 fragTexCoord;
 varying float fragAlpha;
