@@ -71,6 +71,11 @@ type Image struct {
 	FillMode     ImageFill  // Specify how the image should expand to fill or fit the available space
 	ScaleMode    ImageScale // Specify the type of scaling interpolation applied to the image
 
+	// CornerRadius specifies a radius to apply to round corners of the image.
+	//
+	// Since: 2.7
+	CornerRadius float32
+
 	previousRender bool // did we successfully draw before? if so a nil content will need a reset
 }
 

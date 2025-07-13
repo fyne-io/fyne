@@ -11,11 +11,22 @@ precision lowp sampler2D;
 #endif
 
 uniform sampler2D tex;
+uniform float cornerRadius;  // in pixels
 
 varying vec2 fragTexCoord;
 varying float fragAlpha;
 
 void main() {
+    if (cornerRadius > 0.5) {
+        float r = cornerRadius;
+        vec2 pos = fragTexCoord * size;
+
+        if (pos.x < r && pos.y < r && distance(pos, vec2(r, r)) > r) discard;
+        if (pos.x > size.x - r && pos.y < r && distance(pos, vec2(size.x - r, r)) > r) discard;
+        if (pos.x < r && pos.y > size.y - r && distance(pos, vec2(r, size.y - r)) > r) discard;
+        if (pos.x > size.x - r && pos.y > size.y - r && distance(pos, vec2(size.x - r, size.y - r)) > r) discard;
+    }
+
     vec4 texColor = texture2D(tex, fragTexCoord);
     texColor.a *= fragAlpha;
     texColor.r *= fragAlpha;

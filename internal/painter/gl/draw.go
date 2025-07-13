@@ -261,18 +261,30 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 		return
 	}
 
+	cornerRadius := float32(0)
 	aspect := float32(0)
 	if img, ok := o.(*canvas.Image); ok {
 		aspect = img.Aspect()
 		if aspect == 0 {
 			aspect = 1 // fallback, should not occur - normally an image load error
 		}
+		if img.CornerRadius > 0 {
+			cornerRadius = img.CornerRadius
+		}
 	}
+
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
 	p.ctx.UseProgram(p.program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(p.program, "vert", 3, 5, 0)
 	p.defineVertexArray(p.program, "vertTexCoord", 2, 5, 3)
+
+	// Set corner radius and texture size in pixels
+	cornerLoc := p.ctx.GetUniformLocation(p.program, "cornerRadius")
+	p.ctx.Uniform1f(cornerLoc, cornerRadius*p.pixScale)
+	sizeLoc := p.ctx.GetUniformLocation(p.program, "size")
+	pxSizeW, pxSizeH := size.Width*p.pixScale, size.Height*p.pixScale
+	p.ctx.Uniform2f(sizeLoc, pxSizeW, pxSizeH)
 
 	vertAttrib := p.ctx.GetUniformLocation(p.program, "alpha")
 	p.ctx.Uniform1f(vertAttrib, alpha)
