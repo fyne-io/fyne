@@ -25,5 +25,6 @@ func PushRenderingTheme(th fyne.Theme) {
 // PopRenderingTheme is used by the ThemeOverride container to remove an overridden theme during rendering
 // and calculations.
 func PopRenderingTheme() {
+	themeStack[len(themeStack)-1] = nil
 	themeStack = themeStack[:len(themeStack)-1]
 }
