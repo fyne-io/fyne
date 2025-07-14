@@ -97,7 +97,7 @@ func (r *overrideRenderer) Layout(s fyne.Size) {
 	intTheme.PushRenderingTheme(r.parent.Theme)
 	defer intTheme.PopRenderingTheme()
 
-	r.parent.Content.Resize(s)
+	r.parent.holder.Resize(s)
 }
 
 func (r *overrideRenderer) MinSize() fyne.Size {
