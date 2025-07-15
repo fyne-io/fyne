@@ -1,5 +1,11 @@
 package fyne
 
+import (
+	"image"
+
+	"fyne.io/fyne"
+)
+
 // CanvasObject describes any graphical object that can be added to a canvas.
 // Objects have a size and position that can be controlled through this API.
 // MinSize is used to determine the minimum size which this object should be displayed.
@@ -104,4 +110,82 @@ type Tabbable interface {
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type Tappable interface {
 	Tapped(*PointEvent)
+}
+
+type DragItem interface {
+	MimeType() string
+	URI() fyne.URI
+}
+
+type DragItemCursor interface {
+	// Image returns the image for the given cursor, or nil if none should be shown.
+	// It also returns the x and y pixels that should act as the hot-spot (measured from top left corner).
+	Image() (image.Image, int, int)
+}
+
+type DragSource interface {
+	// DragSourceBegin is invoked when a drag and drop is initiated on this DragSource.
+	// It should return the DragItems it is sourcing, and optionally a non-nil DragItemCursor
+	// which will be used to visually represent the sourced content during the in-progress drag.
+	//
+	// Once a drag begins, either DropAccepted or DropCanceled
+	// will be invoked to notify this DragSource of the outcome of the drag.
+	// This is guaranteed to happen before another invocation of DragSourceBegin may be called.
+	DragSourceBegin(*PointEvent) ([]DragItem, DragItemCursor)
+
+	// DragSourceDragged is invoked when a drag and drop continues within this DragSource
+	// and has not yet entered over a potential DropTarget.
+	DragSourceDragged(*PointEvent)
+
+	// DropPending is invoked the first time an in progress drag and drop enters
+	// over a specific potential DropTarget that may accept the drop.
+	// The items that the drop target can accept are passed to this invocation,
+	// which MAY be a subset of the items returned by DragSourceBegin.
+	// Implementations may wish to use this hook to update rendering to
+	// highlight the item(s) which may be about to be dropped.
+	DropPending([]DragItem)
+
+	// DropUnpending is invoked when an in progress drag and drop which had previously
+	// entered a potential DropTarget (and having invoked DropPending()) leaves
+	// that DropTarget, but the drag still remains in progress.
+	// Implementations may wish to cancel any visual changes made in response
+	// to the corresponding DropPending invocation.
+	DropUnpending()
+
+	// DropCanceled is invoked when a drag and drop ends without being
+	// accepted by a DropTarget.
+	DropCanceled()
+
+	// DropCanceled is invoked when a drag and drop ends with the content
+	// being accepted by a DropTarget. Implementations may wish to update
+	// their visual rendering and backend state to reflect that the dragged
+	// content has been moved.
+	DropAccepted([]DragItem)
+}
+
+type DropTarget interface {
+	// DropBegin is invoked when a drag and drop beginning from a DragSource
+	// enters over this DropTarget. Implementations should return the (sub)-set of items that
+	// the drop can accept, (possibly based on the content types of the DragItems),
+	// and optionally a non-nil cursor to visually represent the content which may be
+	// dropped onto this DropTarget.
+	// If a nil or zero-length DragItem slice is returned, this DropTarget is considered
+	// to not accept the drag and drop, and no further callbacks will be invoked for
+	// the in-progress drag and drop operation.
+	// If both the DragSource and this DropTarget return a cursor, the DropTarget
+	// cursor will be used to represent the drag and drop while it is dragged over this target.
+	DropBegin(*PointEvent, []DragItem) (accept []DragItem, cursor DragItemCursor)
+
+	// DropDragged is invoked when a drag and drop that had entered this DropTarget
+	// (resulting in a DropBegin invocation) continues to be dragged within this DropTarget.
+	// Implementations may wish to update rendering to show where the dragged content
+	// would land if dropped.
+	DropDragged(*PointEvent)
+
+	// DropEnd is invoked when a drag and drop that had entered this DropTarget
+	// leaves without being dropped.
+	DropEnd()
+
+	// Dropped is invoked when a drag and drop ends by being dropped on this DropTarget.
+	Dropped(*PointEvent)
 }
