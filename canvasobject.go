@@ -2,8 +2,6 @@ package fyne
 
 import (
 	"image"
-
-	"fyne.io/fyne"
 )
 
 // CanvasObject describes any graphical object that can be added to a canvas.
@@ -114,7 +112,7 @@ type Tappable interface {
 
 type DragItem interface {
 	MimeType() string
-	URI() fyne.URI
+	URI() URI
 }
 
 type DragItemCursor interface {
