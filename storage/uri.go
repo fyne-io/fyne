@@ -197,70 +197,6 @@ func Exists(u fyne.URI) (bool, error) {
 //
 // Since: 2.0
 func Delete(u fyne.URI) error {
-	listable, err := CanList(u)
-	if err != nil {
-		return err
-	}
-
-	if !listable {
-		return delete(u)
-	}
-
-	list, err := List(u)
-	if err != nil {
-		return err
-	}
-
-	if list == nil {
-		return delete(u)
-	}
-
-	queue := list
-	var folders []fyne.URI
-	var files []fyne.URI
-
-	for len(queue) > 0 {
-		currentPath := queue[0]
-		queue = queue[1:]
-
-		listable, _ := CanList(currentPath)
-
-		if listable {
-			list, err = List(currentPath)
-			if err != nil {
-				return err
-			}
-			folders = append(folders, currentPath)
-			queue = append(queue, list...)
-		} else {
-			files = append(files, currentPath)
-		}
-	}
-
-	for len(files) > 0 {
-		fileToDelete := files[len(files)-1]
-		files = files[:len(files)-1]
-
-		err = delete(fileToDelete)
-		if err != nil {
-			return err
-		}
-	}
-
-	for len(folders) > 0 {
-		folderToDelete := folders[len(folders)-1]
-		folders = folders[:len(folders)-1]
-
-		err = delete(folderToDelete)
-		if err != nil {
-			return err
-		}
-	}
-
-	return delete(u)
-}
-
-func delete(u fyne.URI) error {
 	repo, err := repository.ForURI(u)
 	if err != nil {
 		return err
@@ -272,6 +208,59 @@ func delete(u fyne.URI) error {
 	}
 
 	return wrepo.Delete(u)
+}
+
+func DeleteAll(u fyne.URI) error {
+	listable, err := CanList(u)
+	if err != nil {
+		return err
+	}
+
+	if !listable {
+		return Delete(u)
+	}
+
+	children, err := List(u)
+	if err != nil {
+		return err
+	}
+
+	if len(children) == 0 {
+		return Delete(u)
+	}
+
+	var folders []fyne.URI
+	var files []fyne.URI
+	for i := 0; i < len(children); i++ {
+		listable, _ := CanList(children[i])
+
+		if listable {
+			grandChildren, err := List(children[i])
+			if err != nil {
+				return err
+			}
+			folders = append(folders, children[i])
+			children = append(children, grandChildren...)
+		} else {
+			files = append(files, children[i])
+		}
+	}
+
+	for i := len(files) - 1; i >= 0; i-- {
+		err = Delete(files[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	for i := len(folders) - 1; i >= 0; i-- {
+		err = Delete(folders[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return Delete(u)
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the
