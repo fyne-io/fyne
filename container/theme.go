@@ -53,6 +53,7 @@ func (t *ThemeOverride) Refresh() {
 	}
 
 	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.Content.Refresh()
 	t.BaseWidget.Refresh()
 }
 
