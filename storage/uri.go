@@ -202,28 +202,23 @@ func Delete(u fyne.URI) error {
 		return err
 	}
 
-	// Will delete if target is not a folder
 	if !listable {
 		return delete(u)
 	}
 
-	// Makes list of all contents of the folder
 	list, err := List(u)
 	if err != nil {
 		return err
 	}
 
-	// Will delele if it is an empty folder
 	if list == nil {
 		return delete(u)
 	}
 
-	// Will delete all contents of target folder then delete the folder itself
 	queue := list
 	var folders []fyne.URI
 	var files []fyne.URI
 
-	// Lists paths of all sub-folders and files
 	for len(queue) > 0 {
 		currentPath := queue[0]
 		queue = queue[1:]
@@ -242,7 +237,6 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
-	// Deletes all the files inside the folder
 	for len(files) > 0 {
 		fileToDelete := files[len(files)-1]
 		files = files[:len(files)-1]
@@ -253,7 +247,6 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
-	// Deletes all the sub-folders
 	for len(folders) > 0 {
 		folderToDelete := folders[len(folders)-1]
 		folders = folders[:len(folders)-1]
@@ -264,7 +257,6 @@ func Delete(u fyne.URI) error {
 		}
 	}
 
-	// Deletes the target folder
 	return delete(u)
 }
 
