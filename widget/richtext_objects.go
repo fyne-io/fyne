@@ -231,11 +231,6 @@ type ListSegment struct {
 //
 // Since: 2.7
 func (l *ListSegment) SetStart(s int) {
-	if s < 0 {
-		l.startIndex = -1
-		return
-	}
-
 	l.startIndex = s - 1
 }
 
