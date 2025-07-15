@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -89,6 +90,7 @@ public class GoNativeActivity extends NativeActivity {
             public void run() {
                 int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 int inputType = DEFAULT_INPUT_TYPE;
+                String keys = "";
                 switch (keyboardType) {
                     case DEFAULT_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
@@ -99,6 +101,7 @@ public class GoNativeActivity extends NativeActivity {
                     case NUMBER_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
                         inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                        keys = "0123456789.,-'"; // work around android bug where some number keys are blocked
                         break;
                     case PASSWORD_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
@@ -108,6 +111,9 @@ public class GoNativeActivity extends NativeActivity {
                 }
                 mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
                 mTextEdit.setInputType(inputType);
+                if (keys != "") {
+                    mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
+                }
 
                 mTextEdit.setOnEditorActionListener(new OnEditorActionListener() {
                     @Override
