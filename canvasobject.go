@@ -121,6 +121,8 @@ type DragItemCursor interface {
 	Image() (image.Image, int, int)
 }
 
+// DragSource is implemented by CanvasObjects to indicate that they can be dragged and dropped
+// onto another CanvasObject which implements DropTarget.
 type DragSource interface {
 	// DragSourceBegin is invoked when a drag and drop is initiated on this DragSource.
 	// It should return the DragItems it is sourcing, and optionally a non-nil DragItemCursor
@@ -161,6 +163,8 @@ type DragSource interface {
 	DropAccepted([]DragItem)
 }
 
+// DropTarget is implemented by CanvasObjects to signify that they can accept items dropped
+// from another CanvasObject implementing DragSource.
 type DropTarget interface {
 	// DropBegin is invoked when a drag and drop beginning from a DragSource
 	// enters over this DropTarget. Implementations should return the (sub)-set of items that
