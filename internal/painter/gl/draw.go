@@ -32,9 +32,6 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	// Vertex: BEG
 	bounds, points := p.vecSquareCoords(pos, circle, frame)
-	if shadow {
-		bounds = p.vecShadowCoords(bounds, frame, circle)
-	}
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -198,9 +195,6 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, obj, frame, aspect)
-	if shadow {
-		bounds = p.vecShadowCoords(bounds, frame, obj)
-	}
 	p.ctx.UseProgram(program)
 	vbo := p.createBuffer(points)
 	p.defineVertexArray(program, "vert", 2, 4, 0)
@@ -488,6 +482,19 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - y2Pos*2/frame.Height
 
+	if s, ok := rect.(canvas.Shadowable); ok {
+		pads := s.ShadowPaddings()
+		padLeft := roundToPixel(pads[0]*p.pixScale, 1.0)
+		padRight := roundToPixel(pads[2]*p.pixScale, 1.0)
+		padTop := roundToPixel(pads[1]*p.pixScale, 1.0)
+		padBottom := roundToPixel(pads[3]*p.pixScale, 1.0)
+
+		x1Norm -= padLeft
+		x2Norm += padRight
+		y1Norm += padTop
+		y2Norm -= padBottom
+	}
+
 	// output a norm for the fill and the vert is unused, but we pass 0 to avoid optimisation issues
 	coords := []float32{
 		0, 0, x1Norm, y1Norm, // first triangle
@@ -499,35 +506,6 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
 
-func (p *painter) vecShadowCoords(bounds [4]float32, frameSize fyne.Size, obj fyne.CanvasObject) [4]float32 {
-	var padLeft, padRight, padTop, padBottom float32
-
-	if s, ok := obj.(canvas.Shadowable); !ok {
-		return bounds
-	} else {
-		pads := s.ShadowPaddings()
-		padLeft = roundToPixel(pads[0]*p.pixScale, 1.0)
-		padRight = roundToPixel(pads[2]*p.pixScale, 1.0)
-		padTop = roundToPixel(pads[1]*p.pixScale, 1.0)
-		padBottom = roundToPixel(pads[3]*p.pixScale, 1.0)
-	}
-
-	clamp := func(val, min, max float32) float32 {
-		return float32(math.Max(float64(min), math.Min(float64(max), float64(val))))
-	}
-
-	x1 := bounds[0] + padLeft
-	x2 := bounds[2] - padRight
-	y1 := bounds[1] + padTop
-	y2 := bounds[3] - padBottom
-
-	x1 = clamp(x1, 0, float32(frameSize.Width))
-	x2 = clamp(x2, 0, float32(frameSize.Width))
-	y1 = clamp(y1, 0, float32(frameSize.Height))
-	y2 = clamp(y2, 0, float32(frameSize.Height))
-
-	return [4]float32{x1, y1, x2, y2}
-}
 
 func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
 	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
