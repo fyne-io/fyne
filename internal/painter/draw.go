@@ -96,6 +96,10 @@ func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale fun
 }
 
 func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth, radius, aspect float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	if radius == fyne.RadiusMaximum {
+		radius = fyne.Min(rWidth, rHeight) / 2
+	}
+
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
 	stroke := scale(strokeWidth)
