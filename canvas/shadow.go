@@ -23,7 +23,7 @@ type Shadowable interface {
 	ShadowPaddings() [4]float32
 }
 
-// Ensure baseShadow implements Shadowable.
+// Ensure shadow implements Shadowable.
 var _ Shadowable = (*shadow)(nil)
 
 // shadow provides base functionality for objects that can have a shadow.
