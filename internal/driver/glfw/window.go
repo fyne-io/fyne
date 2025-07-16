@@ -170,8 +170,6 @@ func (w *window) Show() {
 
 		// show top canvas element
 		if content := w.canvas.Content(); content != nil {
-			content.Show()
-
 			w.RunWithContext(func() {
 				w.driver.repaintWindow(w)
 			})
@@ -187,11 +185,6 @@ func (w *window) Hide() {
 
 		w.visible = false
 		w.viewport.Hide()
-
-		// hide top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Hide()
-		}
 	})
 }
 
@@ -234,18 +227,8 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
-	visible := w.visible
-	// hide old canvas element
-	if visible && w.canvas.Content() != nil {
-		w.canvas.Content().Hide()
-	}
-
 	w.canvas.SetContent(content)
 
-	// show new canvas element
-	if content != nil {
-		content.Show()
-	}
 	async.EnsureMain(func() {
 		w.RunWithContext(w.RescaleContext)
 	})
@@ -273,6 +256,13 @@ func (w *window) destroy(d *gLDriver) {
 	} else if runtime.GOOS == "darwin" {
 		d.focusPreviousWindow()
 	}
+}
+
+func (w *window) drainPendingEvents() {
+	for _, fn := range w.pending {
+		fn()
+	}
+	w.pending = nil
 }
 
 func (w *window) processMoved(x, y int) {
@@ -541,10 +531,8 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		case press:
 			w.mousePressed = co
 		case release:
-			if co == mousePressed {
-				if button == desktop.MouseButtonSecondary && altTap {
-					secondary.TappedSecondary(ev)
-				}
+			if co == mousePressed && button == desktop.MouseButtonSecondary && altTap {
+				secondary.TappedSecondary(ev)
 			}
 		}
 	}
@@ -651,23 +639,18 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 }
 
 func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
-	captures := false
-
-	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok {
-		captures = ent.AcceptsTab()
-	}
-	if !captures {
-		switch modifier {
-		case 0:
-			w.canvas.FocusNext()
-			return false
-		case fyne.KeyModifierShift:
-			w.canvas.FocusPrevious()
-			return false
-		}
+	if ent, ok := w.canvas.Focused().(fyne.Tabbable); ok && ent.AcceptsTab() {
+		return true
 	}
 
-	return captures
+	switch modifier {
+	case 0:
+		w.canvas.FocusNext()
+	case fyne.KeyModifierShift:
+		w.canvas.FocusPrevious()
+	}
+
+	return false
 }
 
 func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier fyne.KeyModifier) {
@@ -967,11 +950,6 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 func (w *window) doShowAgain() {
 	if w.isClosing() {
 		return
-	}
-
-	// show top canvas element
-	if content := w.canvas.Content(); content != nil {
-		content.Show()
 	}
 
 	view := w.view()

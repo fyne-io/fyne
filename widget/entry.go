@@ -208,6 +208,30 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	return &entryRenderer{box, border, e.scroll, objects, e}
 }
 
+// CursorPosition returns the relative position of this Entry widget's cursor.
+//
+// Since: 2.7
+func (e *Entry) CursorPosition() fyne.Position {
+	provider := e.textProvider()
+	th := e.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inputBorder := th.Size(theme.SizeNameInputBorder)
+	textSize := th.Size(theme.SizeNameText)
+
+	size := provider.lineSizeToColumn(e.CursorColumn, e.CursorRow, textSize, innerPad)
+	xPos := size.Width
+	yPos := size.Height * float32(e.CursorRow)
+
+	return fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder)
+}
+
+// CursorTextOffset returns how many runes into the source text the cursor is positioned at.
+//
+// Since: 2.7
+func (e *Entry) CursorTextOffset() (pos int) {
+	return textPosFromRowCol(e.CursorRow, e.CursorColumn, e.textProvider())
+}
+
 // Cursor returns the cursor type of this widget
 //
 // Implements: desktop.Cursorable
@@ -638,7 +662,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			return
 		}
 
-		pos := e.cursorTextPos()
+		pos := e.CursorTextOffset()
 		deletedText := provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.syncSelectable()
@@ -648,7 +672,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			Text:     deletedText,
 		})
 	case fyne.KeyDelete:
-		pos := e.cursorTextPos()
+		pos := e.CursorTextOffset()
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
@@ -863,7 +887,7 @@ func (e *Entry) TypedRune(r rune) {
 	}
 
 	runes := []rune{r}
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 
 	provider := e.textProvider()
 	provider.insertAt(pos, runes)
@@ -909,10 +933,6 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	clipboard.SetContent(e.sel.SelectedText())
-}
-
-func (e *Entry) cursorTextPos() (pos int) {
-	return textPosFromRowCol(e.CursorRow, e.CursorColumn, e.textProvider())
 }
 
 // cutToClipboard copies the current selection to a given clipboard and then removes the selected text.
@@ -995,7 +1015,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 
 	runes := []rune(text)
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 	provider := e.textProvider()
 	provider.insertAt(pos, runes)
 
@@ -1457,7 +1477,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		return
 	}
 	s := []rune("\n")
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 	provider.insertAt(pos, s)
 	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Position: pos,
@@ -1869,16 +1889,11 @@ func (r *entryContentRenderer) moveCursor() {
 
 	th := r.content.entry.Theme()
 	textSize := th.Size(theme.SizeNameText)
-	provider := r.content.entry.textProvider()
-	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
-	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, textSize, innerPad)
-	xPos := size.Width
-	yPos := size.Height * float32(r.content.entry.CursorRow)
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder))
+	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
 	r.ensureCursorVisible()
