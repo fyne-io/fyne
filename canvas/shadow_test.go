@@ -9,7 +9,7 @@ import (
 )
 
 func TestShadow_ShadowPaddings(t *testing.T) {
-	b := &shadow{
+	b := &Shadow{
 		ShadowColor:    color.NRGBA{0, 0, 0, 128},
 		ShadowSoftness: 4,
 		ShadowOffset:   fyne.NewPos(2, 3),

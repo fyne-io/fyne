@@ -16,7 +16,7 @@ var _ fyne.CanvasObject = (*Square)(nil)
 // Since: 2.7
 type Square struct {
 	baseObject
-	shadow // Shadow configuration
+	Shadow // Shadow configuration
 
 	FillColor    color.Color // The square fill color
 	StrokeColor  color.Color // The square stroke color

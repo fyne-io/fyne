@@ -15,7 +15,7 @@ type Circle struct {
 	// Support shadow configuration
 	//
 	// Since: 2.7
-	shadow
+	Shadow
 
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle

@@ -87,3 +87,45 @@ func TestInnerRect_Original(t *testing.T) {
 	assert.Equal(t, innerSize2, innerSize1)
 	assert.Equal(t, innerPos2, innerPos1)
 }
+func TestVecRectCoordsWithPad_NoShadow(t *testing.T) {
+	p := &painter{pixScale: 1.0}
+	rect := &canvas.Rectangle{}
+	pos := fyne.NewPos(5, 5)
+	frame := fyne.NewSize(100, 100)
+
+	bounds, coords := p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
+
+	assert.Len(t, coords, 16)
+	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
+	assert.Equal(t, []float32{
+		0, 0, -0.9, 0.9,
+		0, 0, -0.9, 0.9,
+		0, 0, -0.9, 0.9,
+		0, 0, -0.9, 0.9,
+	}, coords)
+}
+
+func TestVecRectCoordsWithPad_WithShadow(t *testing.T) {
+	p := &painter{pixScale: 1.0}
+	rect := &canvas.Rectangle{
+		Shadow: canvas.Shadow{
+			ShadowColor:    color.NRGBA{R: 0, G: 0, B: 0, A: 255},
+			ShadowOffset:   fyne.NewPos(-30, -20),
+			ShadowSoftness: 80,
+		},
+	}
+	pos := fyne.NewPos(5, 5)
+	frame := fyne.NewSize(100, 100)
+
+	bounds, coords := p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
+
+	assert.Len(t, coords, 16)
+	// Check that shadow paddings affect the normalized coordinates
+	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
+	assert.Equal(t, []float32{
+		0, 0, -50.9, 100.9,
+		0, 0, 109.1, 100.9,
+		0, 0, -50.9, -59.1,
+		0, 0, 109.1, -59.1,
+	}, coords)
+}

@@ -24,11 +24,11 @@ type Shadowable interface {
 }
 
 // Ensure shadow implements Shadowable.
-var _ Shadowable = (*shadow)(nil)
+var _ Shadowable = (*Shadow)(nil)
 
-// shadow provides base functionality for objects that can have a shadow.
-// Intended to be embedded in other structs to add shadow support.
-type shadow struct {
+// Shadow provides base functionality for objects that can have a Shadow.
+// Intended to be embedded in other structs to add Shadow support.
+type Shadow struct {
 	ShadowColor    color.Color   // Color of the shadow.
 	ShadowSoftness float32       // Softness (blur radius) of the shadow.
 	ShadowOffset   fyne.Position // Offset of the shadow relative to the content.
@@ -36,7 +36,7 @@ type shadow struct {
 }
 
 // ShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset and softness.
-func (r *shadow) ShadowPaddings() [4]float32 {
+func (r *Shadow) ShadowPaddings() [4]float32 {
 	offsetX := r.ShadowOffset.X
 	offsetY := r.ShadowOffset.Y
 	softness := r.ShadowSoftness

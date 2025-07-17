@@ -15,7 +15,7 @@ type Rectangle struct {
 	// Support shadow configuration
 	//
 	// Since: 2.7
-	shadow
+	Shadow
 
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
