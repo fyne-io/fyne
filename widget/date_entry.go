@@ -36,10 +36,17 @@ func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
 	dateFormat := getLocaleDateFormat()
-	e.Validator = func(in string) error {
-		_, err := time.Parse(dateFormat, in)
-		return err
+	if e.Validator == nil {
+		e.Validator = func(in string) error {
+			if in == "" {
+				return nil
+			}
+
+			_, err := time.Parse(dateFormat, in)
+			return err
+		}
 	}
+
 	e.Entry.OnChanged = func(in string) {
 		if in == "" {
 			e.Date = nil
@@ -163,4 +170,8 @@ func (e *DateEntry) setupDropDown() *Button {
 	dropDownButton.Importance = LowImportance
 	dropDownButton.SetIcon(e.Theme().Icon(theme.IconNameCalendar))
 	return dropDownButton
+}
+
+func (e *DateEntry) DateFormat() string {
+	return getLocaleDateFormat()
 }
