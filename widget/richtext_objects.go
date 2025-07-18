@@ -223,6 +223,12 @@ type ListSegment struct {
 	Items   []RichTextSegment
 	Ordered bool
 
+	// startIndex is the starting number - 1 (If it is ordered). Unordered lists
+	// ignore startIndex.
+	//
+	// startIndex is set to start - 1 to allow the empty value of ListSegment to have a starting
+	// number of 1, while also allowing the caller to override the starting
+	// number to any int, including 0.
 	startIndex int
 }
 
