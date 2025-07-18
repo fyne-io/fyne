@@ -172,6 +172,10 @@ func (e *DateEntry) setupDropDown() *Button {
 	return dropDownButton
 }
 
+// DateFormat returns the date format used to display the selected date,
+// this also the format in which date srtings are passed to the validator.
+//
+// Since: TODO: I am unsure what to put here.
 func (e *DateEntry) DateFormat() string {
 	return getLocaleDateFormat()
 }
