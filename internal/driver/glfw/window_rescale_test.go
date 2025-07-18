@@ -1,4 +1,4 @@
-//go:build !wasm && !test_web_driver && !mobile
+//go:build !wasm && !test_web_driver && !mobile && !no_glfw
 
 package glfw
 
