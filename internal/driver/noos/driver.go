@@ -90,6 +90,20 @@ func (n *noosDriver) Run() {
 					continue // ignore key up in other core events
 				}
 
+				if t.Name == fyne.KeyTab {
+					captures := false
+
+					if ent, ok := w.Canvas().Focused().(fyne.Tabbable); ok {
+						captures = ent.AcceptsTab()
+					}
+					if !captures {
+						// TODO handle shift
+						w.Canvas().FocusNext()
+						n.renderWindow(n.wins[n.current])
+						continue
+					}
+				}
+
 				// No shortcut detected, pass down to TypedKey
 				focused := w.c.Focused()
 				if focused != nil {
