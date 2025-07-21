@@ -16,6 +16,7 @@ uniform vec4 rect_coords; //x1 [0], x2 [1], y1 [2], y2 [3]; coords of the rect_f
 uniform float stroke_width_half;
 uniform vec2 rect_size_half;
 uniform float radius;
+uniform float edge_softness;
 /* colors params*/
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
@@ -32,7 +33,6 @@ void main() {
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
     float distance = calc_distance(vec_centered_pos, rect_size_half, radius - stroke_width_half);
-    float edge_softness = 1.0;
 
     vec4 final_color;
     float final_alpha;
