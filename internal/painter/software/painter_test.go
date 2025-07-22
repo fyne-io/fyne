@@ -47,6 +47,23 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Paint(c))
 }
 
+func TestPainter_paintCircleShadow(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewCircle(color.Black)
+	obj.ShadowColor = color.White
+	obj.ShadowOffset = fyne.NewPos(10, -5)
+	obj.ShadowSoftness = 3
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(100+2*theme.Padding(), 100+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(80, 80))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_circle_shadow.png", p.Paint(c))
+}
+
 func TestPainter_paintGradient_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})

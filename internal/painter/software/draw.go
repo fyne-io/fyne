@@ -12,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 
+	"github.com/anthonynsimon/bild/blur"
+
 	"golang.org/x/image/draw"
 )
 
@@ -30,6 +32,42 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	raw := painter.DrawCircle(circle, pad, func(in float32) float32 {
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
+
+	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil {
+		// circle.ShadowType has no effect, always BoxShadow is drawn
+		shadowCircle := &canvas.Circle{FillColor: circle.ShadowColor}
+		shadowCircle.Resize(circle.Size())
+		shadow := painter.DrawCircle(shadowCircle, pad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+
+		pads := circle.ShadowPaddings()
+		shadowPadLeft := scale.ToScreenCoordinate(c, pads[0])
+		shadowPadRight := scale.ToScreenCoordinate(c, pads[2])
+		shadowPadTop := scale.ToScreenCoordinate(c, pads[1])
+		shadowPadBottom := scale.ToScreenCoordinate(c, pads[3])
+		shadowRect := image.Rect(
+			scaledX+shadowPadLeft,
+			scaledY+shadowPadTop,
+			scaledX+scaledWidth+shadowPadRight+shadowPadLeft,
+			scaledY+scaledHeight+shadowPadBottom+shadowPadTop,
+		)
+		bounds = clip.Intersect(shadowRect)
+
+		offset := image.Point{
+			X: scale.ToScreenCoordinate(c, float32(circle.ShadowOffset.X)),
+			Y: scale.ToScreenCoordinate(c, float32(-circle.ShadowOffset.Y)),
+		}
+		shadowBounds := clip.Intersect(
+			image.Rect(
+				shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
+				shadowRect.Max.X, shadowRect.Max.Y,
+			),
+		)
+
+		blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, circle.ShadowSoftness)))
+		draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
+	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
