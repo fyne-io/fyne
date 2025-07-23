@@ -226,23 +226,71 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 }
 
-func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(obj)
 	scaledWidth := scale.ToScreenCoordinate(c, width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+	addShadow := shadowColor != color.Transparent && shadowColor != nil
 
 	var raw *image.RGBA
+	var shadow *image.RGBA
 	switch o := obj.(type) {
 	case *canvas.Square:
 		raw = painter.DrawSquare(o, width, height, pad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
+		if addShadow {
+			shadow = painter.DrawSquare(canvas.NewSquare(shadowColor), width, height, pad+shadowSoftness, func(in float32) float32 {
+				return float32(math.Round(float64(in) * float64(c.Scale())))
+			})
+		}
 	default:
 		raw = painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
+		if addShadow {
+			shadow = painter.DrawRectangle(canvas.NewRectangle(shadowColor), width, height, pad+shadowSoftness, func(in float32) float32 {
+				return float32(math.Round(float64(in) * float64(c.Scale())))
+			})
+		}
+	}
+
+	if addShadow {
+		// shadowType has no effect, always BoxShadow is drawn
+		var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom int
+		if s, ok := obj.(canvas.Shadowable); ok {
+			pads := s.ShadowPaddings()
+			shadowPadLeft = scale.ToScreenCoordinate(c, pads[0])
+			shadowPadRight = scale.ToScreenCoordinate(c, pads[2])
+			shadowPadTop = scale.ToScreenCoordinate(c, pads[1])
+			shadowPadBottom = scale.ToScreenCoordinate(c, pads[3])
+		}
+
+		shadowRect := image.Rect(
+			scaledX+shadowPadLeft,
+			scaledY+shadowPadTop,
+			scaledX+scaledWidth+shadowPadRight+shadowPadLeft,
+			scaledY+scaledHeight+shadowPadBottom+shadowPadTop,
+		)
+		bounds = clip.Intersect(shadowRect)
+
+		// shadowSoftness is used as a vector pad so the position is affected by this value
+		// adding shadow softness to the offset restore initial position
+		offset := image.Point{
+			X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowSoftness)),
+			Y: scale.ToScreenCoordinate(c, float32(-shadowOffset.Y+shadowSoftness)),
+		}
+		shadowBounds := clip.Intersect(
+			image.Rect(
+				shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
+				shadowRect.Max.X, shadowRect.Max.Y,
+			),
+		)
+
+		blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
+		draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -284,7 +332,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	}
 
 	if (stroke != nil && strokeWidth > 0) || radius != 0 { // use a rasterizer if there is a stroke or radius
-		drawOblongStroke(c, obj, width, height, pos, base, clip)
+		drawOblongStroke(c, obj, width, height, shadowSoftness, shadowOffset, shadowColor, pos, base, clip)
 		return
 	}
 
@@ -295,8 +343,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 
 	if shadowColor != color.Transparent && shadowColor != nil {
 		// shadowType has no effect, always BoxShadow is drawn
-		shadowRectangle := &canvas.Rectangle{FillColor: shadowColor}
-		shadowRectangle.Resize(obj.Size())
+		shadowRectangle := &canvas.Rectangle{FillColor: shadowColor, Aspect: aspect}
 		shadow := painter.DrawRectangle(shadowRectangle, width, height, shadowSoftness, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
@@ -318,7 +365,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		)
 		bounds = clip.Intersect(shadowRect)
 
-		// shadowSoftness is used as a vector pad so the position is affected by this value 
+		// shadowSoftness is used as a vector pad so the position is affected by this value
 		// adding shadow softness to the offset restore initial position
 		offset := image.Point{
 			X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowSoftness)),
