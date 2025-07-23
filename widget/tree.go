@@ -304,6 +304,7 @@ func (t *Tree) ScrollToTop() {
 
 // Select marks the specified node to be selected.
 func (t *Tree) Select(uid TreeNodeID) {
+	t.setItemFocus(uid)
 	if len(t.selected) > 0 {
 		if uid == t.selected[0] {
 			return // no change
@@ -888,14 +889,9 @@ func (n *treeNode) MouseOut() {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
-	if n.tree.currentFocus != "" {
-		n.tree.RefreshItem(n.tree.currentFocus)
-	}
-
 	n.tree.Select(n.uid)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree)
 	if canvas != nil && canvas.Focused() != n.tree {
-		n.tree.currentFocus = n.uid
 		if !fyne.CurrentDevice().IsMobile() {
 			canvas.Focus(n.tree.impl.(fyne.Focusable))
 		}
