@@ -32,7 +32,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	if size.Height < size.Width {
 		radius = size.Height / 2
 	}
-	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && circle.ShadowSoftness > 0
+	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -186,7 +186,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	roundedCorners := radius != 0
-	shadow := shadowColor != color.Transparent && shadowColor != nil && shadowSoftness > 0
+	shadow := shadowColor != color.Transparent && shadowColor != nil
 	var program Program
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -474,27 +474,23 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
 	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
 
-	x1Pos := pos1.X
-	x1Norm := -1 + x1Pos*2/frame.Width
-	x2Pos := pos1.X + size.Width
-	x2Norm := -1 + x2Pos*2/frame.Width
-	y1Pos := pos1.Y
-	y1Norm := 1 - y1Pos*2/frame.Height
-	y2Pos := pos1.Y + size.Height
-	y2Norm := 1 - y2Pos*2/frame.Height
-
+	var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom float32
 	if s, ok := rect.(canvas.Shadowable); ok {
 		pads := s.ShadowPaddings()
-		padLeft := roundToPixel(pads[0]*p.pixScale, 1.0)
-		padRight := roundToPixel(pads[2]*p.pixScale, 1.0)
-		padTop := roundToPixel(pads[1]*p.pixScale, 1.0)
-		padBottom := roundToPixel(pads[3]*p.pixScale, 1.0)
-
-		x1Norm -= padLeft
-		x2Norm += padRight
-		y1Norm += padTop
-		y2Norm -= padBottom
+		shadowPadLeft = roundToPixel(pads[0], p.pixScale)
+		shadowPadRight = roundToPixel(pads[2], p.pixScale)
+		shadowPadTop = roundToPixel(pads[1], p.pixScale)
+		shadowPadBottom = roundToPixel(pads[3], p.pixScale)
 	}
+
+	x1Pos := pos1.X
+	x1Norm := -1 + (x1Pos-shadowPadLeft)*2/frame.Width
+	x2Pos := pos1.X + size.Width
+	x2Norm := -1 + (x2Pos+shadowPadRight)*2/frame.Width
+	y1Pos := pos1.Y
+	y1Norm := 1 - (y1Pos-shadowPadTop)*2/frame.Height
+	y2Pos := pos1.Y + size.Height
+	y2Norm := 1 - (y2Pos+shadowPadBottom)*2/frame.Height
 
 	// output a norm for the fill and the vert is unused, but we pass 0 to avoid optimisation issues
 	coords := []float32{
