@@ -172,7 +172,7 @@ func (t *Tree) FocusGained() {
 	if t.currentFocus == "" {
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
 			if ids := childUIDs(""); len(ids) > 0 {
-				t.currentFocus = ids[0]
+				t.setItemFocus(ids[0])
 			}
 		}
 	}
@@ -320,6 +320,18 @@ func (t *Tree) Select(uid TreeNodeID) {
 	}
 }
 
+func (t *Tree) setItemFocus(uid TreeNodeID) {
+	if t.currentFocus == uid {
+		return
+	}
+
+	previous := t.currentFocus
+	t.currentFocus = uid
+	t.RefreshItem(previous)
+	t.ScrollTo(t.currentFocus)
+	t.RefreshItem(t.currentFocus)
+}
+
 // ToggleBranch flips the state of the branch with the given TreeNodeID.
 func (t *Tree) ToggleBranch(uid string) {
 	if t.IsBranchOpen(uid) {
@@ -337,19 +349,15 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 	case fyne.KeySpace:
 		t.Select(t.currentFocus)
 	case fyne.KeyDown:
-		t.RefreshItem(t.currentFocus)
 		next := false
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
 			if next {
-				t.currentFocus = id
+				t.setItemFocus(id)
 				next = false
 			} else if id == t.currentFocus {
 				next = true
 			}
 		})
-
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
 		// If the current focus is on a branch which is open, just close it
 		if t.IsBranch(t.currentFocus) && t.IsBranchOpen(t.currentFocus) {
@@ -358,14 +366,10 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 			// Every other case should move the focus to the current parent node
 			t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
 				if id == t.currentFocus && p != "" {
-					t.currentFocus = p
+					t.setItemFocus(p)
 				}
 			})
 		}
-
-		t.RefreshItem(t.currentFocus)
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyRight:
 		if t.IsBranch(t.currentFocus) {
 			t.OpenBranch(t.currentFocus)
@@ -376,24 +380,16 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		}
 
 		if len(children) > 0 {
-			t.currentFocus = children[0]
+			t.setItemFocus(children[0])
 		}
-
-		t.RefreshItem(t.currentFocus)
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyUp:
-		t.RefreshItem(t.currentFocus)
 		previous := ""
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
 			if id == t.currentFocus && previous != "" {
-				t.currentFocus = previous
+				t.setItemFocus(previous)
 			}
 			previous = id
 		})
-
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	}
 }
 
