@@ -34,39 +34,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	})
 
 	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil {
-		// circle.ShadowType has no effect, always BoxShadow is drawn
-		shadowCircle := &canvas.Circle{FillColor: circle.ShadowColor}
-		shadowCircle.Resize(circle.Size())
-		shadow := painter.DrawCircle(shadowCircle, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
-
-		pads := circle.ShadowPaddings()
-		shadowPadLeft := scale.ToScreenCoordinate(c, pads[0])
-		shadowPadRight := scale.ToScreenCoordinate(c, pads[2])
-		shadowPadTop := scale.ToScreenCoordinate(c, pads[1])
-		shadowPadBottom := scale.ToScreenCoordinate(c, pads[3])
-		shadowRect := image.Rect(
-			scaledX+shadowPadLeft,
-			scaledY+shadowPadTop,
-			scaledX+scaledWidth+shadowPadRight+shadowPadLeft,
-			scaledY+scaledHeight+shadowPadBottom+shadowPadTop,
-		)
-		bounds = clip.Intersect(shadowRect)
-
-		offset := image.Point{
-			X: scale.ToScreenCoordinate(c, float32(circle.ShadowOffset.X)),
-			Y: scale.ToScreenCoordinate(c, float32(-circle.ShadowOffset.Y)),
-		}
-		shadowBounds := clip.Intersect(
-			image.Rect(
-				shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
-				shadowRect.Max.X, shadowRect.Max.Y,
-			),
-		)
-
-		blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, circle.ShadowSoftness)))
-		draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
+		bounds = drawShadow(c, circle, circle.Size(), circle.ShadowSoftness, circle.ShadowOffset, circle.ShadowColor, pad, bounds, base, clip)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -232,65 +200,21 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
-	addShadow := shadowColor != color.Transparent && shadowColor != nil
 
 	var raw *image.RGBA
-	var shadow *image.RGBA
 	switch o := obj.(type) {
 	case *canvas.Square:
 		raw = painter.DrawSquare(o, width, height, pad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
-		if addShadow {
-			shadow = painter.DrawSquare(canvas.NewSquare(shadowColor), width, height, pad+shadowSoftness, func(in float32) float32 {
-				return float32(math.Round(float64(in) * float64(c.Scale())))
-			})
-		}
 	default:
 		raw = painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
-		if addShadow {
-			shadow = painter.DrawRectangle(canvas.NewRectangle(shadowColor), width, height, pad+shadowSoftness, func(in float32) float32 {
-				return float32(math.Round(float64(in) * float64(c.Scale())))
-			})
-		}
 	}
 
-	if addShadow {
-		// shadowType has no effect, always BoxShadow is drawn
-		var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom int
-		if s, ok := obj.(canvas.Shadowable); ok {
-			pads := s.ShadowPaddings()
-			shadowPadLeft = scale.ToScreenCoordinate(c, pads[0])
-			shadowPadRight = scale.ToScreenCoordinate(c, pads[2])
-			shadowPadTop = scale.ToScreenCoordinate(c, pads[1])
-			shadowPadBottom = scale.ToScreenCoordinate(c, pads[3])
-		}
-
-		shadowRect := image.Rect(
-			scaledX+shadowPadLeft,
-			scaledY+shadowPadTop,
-			scaledX+scaledWidth+shadowPadRight+shadowPadLeft,
-			scaledY+scaledHeight+shadowPadBottom+shadowPadTop,
-		)
-		bounds = clip.Intersect(shadowRect)
-
-		// shadowSoftness is used as a vector pad so the position is affected by this value
-		// adding shadow softness to the offset restore initial position
-		offset := image.Point{
-			X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowSoftness)),
-			Y: scale.ToScreenCoordinate(c, float32(-shadowOffset.Y+shadowSoftness)),
-		}
-		shadowBounds := clip.Intersect(
-			image.Rect(
-				shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
-				shadowRect.Max.X, shadowRect.Max.Y,
-			),
-		)
-
-		blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
-		draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
+	if shadowColor != color.Transparent && shadowColor != nil {
+		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, pad, bounds, base, clip)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -342,45 +266,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
 	if shadowColor != color.Transparent && shadowColor != nil {
-		// shadowType has no effect, always BoxShadow is drawn
-		shadowRectangle := &canvas.Rectangle{FillColor: shadowColor, Aspect: aspect}
-		shadow := painter.DrawRectangle(shadowRectangle, width, height, shadowSoftness, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
-
-		var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom int
-		if s, ok := obj.(canvas.Shadowable); ok {
-			pads := s.ShadowPaddings()
-			shadowPadLeft = scale.ToScreenCoordinate(c, pads[0])
-			shadowPadRight = scale.ToScreenCoordinate(c, pads[2])
-			shadowPadTop = scale.ToScreenCoordinate(c, pads[1])
-			shadowPadBottom = scale.ToScreenCoordinate(c, pads[3])
-		}
-
-		shadowRect := image.Rect(
-			scaledX+shadowPadLeft,
-			scaledY+shadowPadTop,
-			scaledX+scaledWidth+shadowPadRight+shadowPadLeft,
-			scaledY+scaledHeight+shadowPadBottom+shadowPadTop,
-		)
-		bounds = clip.Intersect(shadowRect)
-
-		// shadowSoftness is used as a vector pad so the position is affected by this value
-		// adding shadow softness to the offset restore initial position
-		offset := image.Point{
-			X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowSoftness)),
-			Y: scale.ToScreenCoordinate(c, float32(-shadowOffset.Y+shadowSoftness)),
-		}
-		shadowBounds := clip.Intersect(
-			image.Rect(
-				shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
-				shadowRect.Max.X, shadowRect.Max.Y,
-			),
-		)
-
-		blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
-		draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
-
+		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, 0, bounds, base, clip)
 		// due to shadow draw rectangle with a certain width and height
 		raw := painter.DrawRectangle(canvas.NewRectangle(fill), width, height, 0, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
@@ -389,4 +275,65 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	} else {
 		draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 	}
+}
+
+// shadow type has no effect, always BoxShadow is drawn
+func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, pad float32, bounds image.Rectangle, base *image.NRGBA, clip image.Rectangle) image.Rectangle {
+	var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom int
+	if s, ok := obj.(canvas.Shadowable); ok {
+		pads := s.ShadowPaddings()
+		shadowPadLeft = scale.ToScreenCoordinate(c, pads[0])
+		shadowPadRight = scale.ToScreenCoordinate(c, pads[2])
+		shadowPadTop = scale.ToScreenCoordinate(c, pads[1])
+		shadowPadBottom = scale.ToScreenCoordinate(c, pads[3])
+	} else {
+		return bounds
+	}
+
+	var shadow *image.RGBA
+	switch o := obj.(type) {
+	case *canvas.Square:
+		shadow = painter.DrawSquare(&canvas.Square{FillColor: shadowColor, CornerRadius: o.CornerRadius}, objSize.Width, objSize.Height, pad+shadowSoftness, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	case *canvas.Rectangle:
+		shadow = painter.DrawRectangle(&canvas.Rectangle{FillColor: shadowColor, CornerRadius: obj.(*canvas.Rectangle).CornerRadius}, objSize.Width, objSize.Height, pad+shadowSoftness, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	case *canvas.Circle:
+		shadowCircle := &canvas.Circle{FillColor: shadowColor}
+		shadowCircle.Resize(objSize)
+		shadow = painter.DrawCircle(shadowCircle, pad+shadowSoftness, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	}
+
+	shadowRect := image.Rect(
+		bounds.Min.X+shadowPadLeft,
+		bounds.Min.Y+shadowPadTop,
+		bounds.Max.X+shadowPadRight+shadowPadLeft,
+		bounds.Max.Y+shadowPadBottom+shadowPadTop,
+	)
+
+	bounds = clip.Intersect(shadowRect)
+
+	// shadowSoftness is used as a vector pad so the position is affected by this value
+	// adding shadow softness to the offset restore initial position
+	offset := image.Point{
+		X: scale.ToScreenCoordinate(c, float32(shadowOffset.X+shadowSoftness)),
+		Y: scale.ToScreenCoordinate(c, float32(-shadowOffset.Y+shadowSoftness)),
+	}
+
+	shadowBounds := clip.Intersect(
+		image.Rect(
+			shadowRect.Min.X-offset.X, shadowRect.Min.Y-offset.Y,
+			shadowRect.Max.X, shadowRect.Max.Y,
+		),
+	)
+
+	blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
+	draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
+
+	// returns changed bounds of the original canvas object
+	return bounds
 }
