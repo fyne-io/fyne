@@ -377,3 +377,24 @@ func TestTree_Refresh(t *testing.T) {
 
 	test.AssertImageMatches(t, "tree/refresh_replaced.png", window.Canvas().Capture())
 }
+
+func TestTree_FocusItem(t *testing.T) {
+	test.NewTempApp(t)
+
+	data := map[string][]string{
+		"": {"foo0", "foo1", "foo2"},
+	}
+
+	tree := widget.NewTreeWithStrings(data)
+	tree.OpenBranch("foo")
+
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+	window.Canvas().Focus(tree)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+
+	test.AssertImageMatches(t, "tree/tree_focus_item.png", window.Canvas().Capture())
+}
