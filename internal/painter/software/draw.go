@@ -33,7 +33,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
-	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil {
+	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0) {
 		bounds = drawShadow(c, circle, circle.Size(), circle.ShadowSoftness, circle.ShadowOffset, circle.ShadowColor, pad, bounds, base, clip)
 	}
 
@@ -213,7 +213,7 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 		})
 	}
 
-	if shadowColor != color.Transparent && shadowColor != nil {
+	if shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0) {
 		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, pad, bounds, base, clip)
 	}
 
@@ -265,7 +265,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	if shadowColor != color.Transparent && shadowColor != nil {
+	if shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0) {
 		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, 0, bounds, base, clip)
 		// due to shadow draw rectangle with a certain width and height
 		raw := painter.DrawRectangle(canvas.NewRectangle(fill), width, height, 0, func(in float32) float32 {

@@ -32,7 +32,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	if size.Height < size.Width {
 		radius = size.Height / 2
 	}
-	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil
+	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0)
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -181,12 +181,12 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 }
 
 func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, frame fyne.Size) {
-	if (shadowColor == color.Transparent || shadowColor == nil) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
+	if (shadowColor == color.Transparent || shadowColor == nil || (shadowOffset.IsZero() && shadowSoftness == 0.0)) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
 	roundedCorners := radius != 0
-	shadow := shadowColor != color.Transparent && shadowColor != nil
+	shadow := shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0)
 	var program Program
 	if roundedCorners {
 		program = p.roundRectangleProgram
