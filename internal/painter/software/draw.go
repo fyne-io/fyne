@@ -315,8 +315,6 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowS
 		bounds.Max.Y+shadowPadBottom+shadowPadTop,
 	)
 
-	bounds = clip.Intersect(shadowRect)
-
 	// shadowSoftness is used as a vector pad so the position is affected by this value
 	// adding shadow softness to the offset restore initial position
 	offset := image.Point{
@@ -334,6 +332,6 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowS
 	blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
 	draw.Draw(base, shadowBounds, blurred, image.Point{}, draw.Over)
 
-	// returns changed bounds of the original canvas object
-	return bounds
+	// returns changed bounds of the original canvas object with added shadow
+	return clip.Intersect(shadowRect)
 }
