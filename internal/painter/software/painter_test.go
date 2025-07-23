@@ -370,6 +370,28 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
 }
 
+func TestPainter_paintRectangle_shadow(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewRectangle(color.Black)
+	obj.ShadowColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.ShadowOffset = fyne.NewPos(-3, -4)
+	obj.ShadowSoftness = 8
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(100+2*theme.Padding(), 100+2*theme.Padding()))
+	obj.Resize(fyne.NewSize(80, 80))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_rectangle_shadow.png", p.Paint(c))
+
+	obj.Aspect = 2
+	test.AssertImageMatches(t, "draw_rectangle_wide_shadow.png", p.Paint(c))
+	obj.Aspect = 0.5
+	test.AssertImageMatches(t, "draw_rectangle_narrow_shadow.png", p.Paint(c))
+}
+
 func TestPainter_paintText_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	scroll := container.NewScroll(widget.NewLabel("some text\nis here\nand here"))
