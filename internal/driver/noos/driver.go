@@ -7,8 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 	noos2 "fyne.io/fyne/v2/driver/noos"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 )
 
@@ -40,7 +40,7 @@ func (n *noosDriver) RenderedTextSize(text string, fontSize float32, style fyne.
 }
 
 func (n *noosDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	return common.CanvasForObject(obj)
+	return cache.GetCanvasForObject(obj)
 }
 
 func (n *noosDriver) AbsolutePositionForObject(o fyne.CanvasObject) fyne.Position {
