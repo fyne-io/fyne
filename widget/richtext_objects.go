@@ -232,18 +232,18 @@ type ListSegment struct {
 	startIndex int
 }
 
-// SetStart sets the starting number for an ordered list.
+// SetStartNumber sets the starting number for an ordered list.
 // Unordered lists are not affected.
 //
 // Since: 2.7
-func (l *ListSegment) SetStart(s int) {
+func (l *ListSegment) SetStartNumber(s int) {
 	l.startIndex = s - 1
 }
 
-// Start return the starting number for an ordered list.
+// StartNumber return the starting number for an ordered list.
 //
 // Since: 2.7
-func (l *ListSegment) Start() int {
+func (l *ListSegment) StartNumber() int {
 	return l.startIndex + 1
 }
 

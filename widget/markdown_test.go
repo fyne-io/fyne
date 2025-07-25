@@ -232,7 +232,7 @@ func TestRichTextMarkdown_ListWithDifferentStartingIndex(t *testing.T) {
 
 			assert.Len(t, r.Segments, 1)
 			if list, ok := r.Segments[0].(*ListSegment); ok {
-				assert.Equal(t, tt.Start, list.Start())
+				assert.Equal(t, tt.Start, list.StartNumber())
 				assert.Equal(t, tt.startIndex, list.startIndex)
 			} else {
 				t.Error("Segment should be a List")

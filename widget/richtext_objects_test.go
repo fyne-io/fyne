@@ -86,7 +86,7 @@ func TestRichText_OrderedListDifferentIndex(t *testing.T) {
 				&TextSegment{Text: "One"},
 				&TextSegment{Text: "Two"},
 			}}
-			listSegment.SetStart(tt.index)
+			listSegment.SetStartNumber(tt.index)
 			text := NewRichText(listSegment)
 			texts := test.TempWidgetRenderer(t, text).Objects()
 
