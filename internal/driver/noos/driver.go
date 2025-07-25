@@ -8,6 +8,7 @@ import (
 	noos2 "fyne.io/fyne/v2/driver/noos"
 	"fyne.io/fyne/v2/internal/async"
 	intdriver "fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 )
 
@@ -38,9 +39,8 @@ func (n *noosDriver) RenderedTextSize(text string, fontSize float32, style fyne.
 	return painter.RenderedTextSize(text, fontSize, style, source)
 }
 
-func (n *noosDriver) CanvasForObject(_ fyne.CanvasObject) fyne.Canvas {
-	//TODO don't assume object is in current canvas
-	return n.wins[n.current].Canvas()
+func (n *noosDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	return common.CanvasForObject(obj)
 }
 
 func (n *noosDriver) AbsolutePositionForObject(o fyne.CanvasObject) fyne.Position {
@@ -126,12 +126,12 @@ func (n *noosDriver) Quit() {
 	}()
 }
 
-func (n *noosDriver) StartAnimation(anim *fyne.Animation) {
-	//TODO implement me
+func (n *noosDriver) StartAnimation(*fyne.Animation) {
+	// no animations on noos
 }
 
-func (n *noosDriver) StopAnimation(anim *fyne.Animation) {
-	//TODO implement me
+func (n *noosDriver) StopAnimation(*fyne.Animation) {
+	// no animations on noos
 }
 
 func (n *noosDriver) DoubleTapDelay() time.Duration {
