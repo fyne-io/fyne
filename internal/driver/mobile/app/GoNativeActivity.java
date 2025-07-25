@@ -101,7 +101,7 @@ public class GoNativeActivity extends NativeActivity {
                     case NUMBER_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
                         inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
-                        keys = "0123456789.,-'"; // work around android bug where some number keys are blocked
+                        keys = "0123456789.,-' "; // work around android bug where some number keys are blocked
                         break;
                     case PASSWORD_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
