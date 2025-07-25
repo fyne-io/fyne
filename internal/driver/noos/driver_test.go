@@ -28,7 +28,7 @@ func TestNoOSDriver(t *testing.T) {
 
 	queue = make(chan noos.Event, 1)
 	d = intNoos.NewNoOSDriver(render, queue)
-	w := d.CreateWindow("Test")
+	_ = d.CreateWindow("Test")
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		close(queue)
@@ -39,7 +39,7 @@ func TestNoOSDriver(t *testing.T) {
 	count = 0
 	queue = make(chan noos.Event, 1)
 	d = intNoos.NewNoOSDriver(render, queue)
-	w = d.CreateWindow("Test")
+	w := d.CreateWindow("Test")
 	keyed := make(chan bool)
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		keyed <- true
