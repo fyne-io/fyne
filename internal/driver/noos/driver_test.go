@@ -3,6 +3,7 @@ package noos_test
 import (
 	"image"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/noos"
@@ -18,24 +19,41 @@ func TestNoOSDriver(t *testing.T) {
 	queue := make(chan noos.Event, 1)
 	d := intNoos.NewNoOSDriver(render, queue)
 
-	go d.Run()
-	d.Quit()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		close(queue)
+	}()
+	d.Run()
 	assert.Equal(t, 0, count)
 
+	queue = make(chan noos.Event, 1)
 	d = intNoos.NewNoOSDriver(render, queue)
 	w := d.CreateWindow("Test")
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		close(queue)
+	}()
+	d.Run()
+	assert.Equal(t, 1, count)
+
+	count = 0
+	queue = make(chan noos.Event, 1)
+	d = intNoos.NewNoOSDriver(render, queue)
+	w = d.CreateWindow("Test")
 	keyed := make(chan bool)
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		keyed <- true
 	})
-	go d.Run()
-	queue <- &noos.CharacterEvent{
-		Rune: 'a',
-	}
-	queue <- &noos.KeyEvent{
-		Name: fyne.KeyEscape,
-	}
-	<-keyed
-	d.Quit()
-	assert.Equal(t, 2, count)
+	go func() {
+		queue <- &noos.CharacterEvent{
+			Rune: 'a',
+		}
+		queue <- &noos.KeyEvent{
+			Name: fyne.KeyEscape,
+		}
+		<-keyed
+		close(queue)
+	}()
+	d.Run()
+	assert.Equal(t, 3, count)
 }

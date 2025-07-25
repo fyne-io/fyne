@@ -71,6 +71,12 @@ func (n *noosDriver) Run() {
 				fn.done <- struct{}{}
 			}
 		case e := <-n.events:
+			if e == nil {
+				// closing
+				n.Quit()
+				continue
+			}
+
 			w := n.wins[n.current].(*noosWindow)
 
 			switch t := e.(type) {
