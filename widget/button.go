@@ -182,7 +182,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.Refresh()
 
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
@@ -325,7 +324,7 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		if r.button.Importance != MediumImportance {
+		if r.button.Importance != MediumImportance && r.button.Importance != LowImportance {
 			if thRes, ok := icon.(fyne.ThemedResource); ok {
 				if thRes.ThemeColorName() != fgColorName {
 					icon = theme.NewColoredResource(icon, fgColorName)

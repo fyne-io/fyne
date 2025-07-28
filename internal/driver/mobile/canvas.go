@@ -51,8 +51,8 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 	d, _ := dev.(*device)
 	ret := &canvas{
 		Canvas: common.Canvas{
-			OnFocus:   handleKeyboard,
-			OnUnfocus: hideVirtualKeyboard,
+			OnFocus:   d.handleKeyboard,
+			OnUnfocus: d.hideVirtualKeyboard,
 		},
 		device:         d,
 		lastTapDown:    make(map[int]time.Time),
@@ -160,7 +160,7 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 }
 
 func (c *canvas) overlayChanged() {
-	handleKeyboard(c.Focused())
+	c.device.handleKeyboard(c.Focused())
 	c.SetDirty()
 }
 

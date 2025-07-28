@@ -3,6 +3,38 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.6.2 - 28 July 2025
+
+### Changed
+
+* Added Czechoslovakia translations
+
+### Fixed
+
+* bounds check panic on undo after ctrl-deleting text on last line from MultiLineEntry (#5714)
+* Entry OnChanged does not get triggered on undo and redo (#5710)
+* SetText in TextGrid leaves trailing content (#5722)
+* Desktop app with system tray hangs on app.Quit (#5724)
+* CenterOnScreen Regression (#5733)
+* TextGrid CursorLocationForPosition reports wrong location when scrolled (#5745)
+* Language is always "en" on macOS (#5760)
+* TextGrid is glitchy when calling SetText on a scrolled container. (#5762)
+* When running for the second time in window.CenterOnScreen(), it will get stuck when running on the main thread (#5766)
+* Text entry widget backspace deletes two characters on Android (#2774)
+* Secondary windows is not refreshed correctly (#5782)
+* Clicking a button rapidly causes the click animation to extend outside of the button (#5785)
+* WASM cursor was ignored
+* Corrected date format for Germany
+* Hide() doesn't work at startup for widgets/containers (#5597)
+* Android GBoard: first character typed into Entry is prefixed with "0" after focus (#5666)
+* Use Scaled Monitor Size For Monitor Detection (#5802)
+* Don't override user choice if a) xdg lookup fails or b) system updates (#5851)
+* Entry with mobile.NumberKeyboard does not Type comma and separators (#5101)
+* Padding value is ignored in ThemeOverride container
+* Performance improvements in TextGrid and object positioning
+* Improvements in WASM rendering performance
+
+
 ## 2.6.1 - 8 May 2025
 
 ### Changed

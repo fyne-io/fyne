@@ -80,7 +80,9 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 	w.runOnMainWhenCreated(func() {
 		w.fitContent()
-		w.processResized(w.width, w.height)
+		if !w.centered {
+			w.processResized(w.width, w.height)
+		}
 	})
 }
 
@@ -168,8 +170,6 @@ func (w *window) Show() {
 
 		// show top canvas element
 		if content := w.canvas.Content(); content != nil {
-			content.Show()
-
 			w.RunWithContext(func() {
 				w.driver.repaintWindow(w)
 			})
@@ -185,11 +185,6 @@ func (w *window) Hide() {
 
 		w.visible = false
 		w.viewport.Hide()
-
-		// hide top canvas element
-		if content := w.canvas.Content(); content != nil {
-			content.Hide()
-		}
 	})
 }
 
@@ -232,18 +227,8 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
-	visible := w.visible
-	// hide old canvas element
-	if visible && w.canvas.Content() != nil {
-		w.canvas.Content().Hide()
-	}
-
 	w.canvas.SetContent(content)
 
-	// show new canvas element
-	if content != nil {
-		content.Show()
-	}
 	async.EnsureMain(func() {
 		w.RunWithContext(w.RescaleContext)
 	})
@@ -972,11 +957,6 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 func (w *window) doShowAgain() {
 	if w.isClosing() {
 		return
-	}
-
-	// show top canvas element
-	if content := w.canvas.Content(); content != nil {
-		content.Show()
 	}
 
 	view := w.view()

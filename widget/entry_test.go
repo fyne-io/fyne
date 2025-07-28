@@ -2063,6 +2063,26 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 	assert.Equal(t, "àbf", entry.Text)
 }
 
+func TestEntry_UndoRedo_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+
+	for _, r := range "Line 1\nline 2" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
+	entry.TypedShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier})
+	assert.Equal(t, "Line 1\n", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+}
+
 func TestEntry_UndoRedo_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -2120,6 +2140,45 @@ func TestEntry_UndoRedoImage(t *testing.T) {
 		e.TypedShortcut(&fyne.ShortcutRedo{})
 	}
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
+}
+
+func TestEntry_UndoRedo_Callback(t *testing.T) {
+	entry := widget.NewEntry()
+	changed := ""
+	entry.OnChanged = func(s string) {
+		changed = s
+	}
+
+	for _, r := range "abc éàè 123" {
+		entry.TypedRune(r)
+	}
+
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, "", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
 }
 
 const (

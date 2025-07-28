@@ -6,39 +6,41 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 )
 
-func hideVirtualKeyboard() {
+func (dev *device) hideVirtualKeyboard() {
 	if d, ok := fyne.CurrentApp().Driver().(*driver); ok {
 		if d.app == nil { // not yet running
 			return
 		}
 
 		d.app.HideVirtualKeyboard()
+		dev.keyboardShown = false
 	}
 }
 
-func handleKeyboard(obj fyne.Focusable) {
+func (dev *device) handleKeyboard(obj fyne.Focusable) {
 	isDisabled := false
 	if disWid, ok := obj.(fyne.Disableable); ok {
 		isDisabled = disWid.Disabled()
 	}
 	if obj != nil && !isDisabled {
 		if keyb, ok := obj.(mobile.Keyboardable); ok {
-			showVirtualKeyboard(keyb.Keyboard())
+			dev.showVirtualKeyboard(keyb.Keyboard())
 		} else {
-			showVirtualKeyboard(mobile.DefaultKeyboard)
+			dev.showVirtualKeyboard(mobile.DefaultKeyboard)
 		}
 	} else {
-		hideVirtualKeyboard()
+		dev.hideVirtualKeyboard()
 	}
 }
 
-func showVirtualKeyboard(keyboard mobile.KeyboardType) {
+func (dev *device) showVirtualKeyboard(keyboard mobile.KeyboardType) {
 	if d, ok := fyne.CurrentApp().Driver().(*driver); ok {
 		if d.app == nil { // not yet running
 			fyne.LogError("Cannot show keyboard before app is running", nil)
 			return
 		}
 
+		dev.keyboardShown = true
 		d.app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
 	}
 }

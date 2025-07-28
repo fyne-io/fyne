@@ -53,7 +53,6 @@ type RichText struct {
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
 	t.Scroll = widget.ScrollNone
-	t.updateRowBounds()
 	return t
 }
 
@@ -375,6 +374,9 @@ func (t *RichText) rowLength(row int) int {
 // rows returns the number of text rows in this text entry.
 // The entry may be longer than required to show this amount of content.
 func (t *RichText) rows() int {
+	if t.rowBounds == nil { // if the widget API is used before it is shown
+		t.updateRowBounds()
+	}
 	return len(t.rowBounds)
 }
 

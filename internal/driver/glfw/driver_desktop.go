@@ -70,7 +70,6 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 	w := d.CreateWindow("SystrayMonitor")
 	w.(*window).create()
 	w.SetCloseIntercept(d.Quit)
-	w.SetOnClosed(systray.Quit)
 }
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {

@@ -421,6 +421,9 @@ func (e *Entry) Redo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
+	}
 	e.Refresh()
 }
 
@@ -715,6 +718,9 @@ func (e *Entry) Undo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
+	}
 	e.Refresh()
 }
 
@@ -809,7 +815,13 @@ func (e *Entry) deleteWord(right bool) {
 		end += b.begin
 	}
 
-	provider.deleteFromTo(start, end)
+	erased := provider.deleteFromTo(start, end)
+	e.undoStack.MergeOrAdd(&entryModifyAction{
+		Delete:   true,
+		Position: start,
+		Text:     erased,
+	})
+
 	if !right {
 		e.CursorColumn = cursorCol - (end - start)
 	}

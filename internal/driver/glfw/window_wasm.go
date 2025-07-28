@@ -20,6 +20,7 @@ import (
 )
 
 type Cursor struct {
+	JSName string
 }
 
 const defaultTitle = "Fyne Application"
@@ -39,8 +40,6 @@ const (
 	CursorHidden   int = glfw.CursorHidden
 	CursorDisabled int = glfw.CursorDisabled
 )
-
-var cursorMap map[desktop.Cursor]*Cursor
 
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
@@ -189,10 +188,33 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
-	return nil, false
+	if _, ok := cursor.(desktop.StandardCursor); !ok {
+		return nil, false // Custom cursors not implemented yet.
+	}
+
+	name := "default"
+	switch cursor {
+	case desktop.TextCursor:
+		name = "text"
+	case desktop.CrosshairCursor:
+		name = "crosshair"
+	case desktop.DefaultCursor:
+		name = "default"
+	case desktop.PointerCursor:
+		name = "pointer"
+	case desktop.HResizeCursor:
+		name = "ew-resize"
+	case desktop.VResizeCursor:
+		name = "ns-resize"
+	case desktop.HiddenCursor:
+		name = "none"
+	}
+
+	return &Cursor{JSName: name}, false
 }
 
-func (w *window) SetCursor(_ *Cursor) {
+func (w *window) SetCursor(cursor *Cursor) {
+	setCursor(cursor.JSName)
 }
 
 func (w *window) setCustomCursor(rawCursor *Cursor, isCustomCursor bool) {

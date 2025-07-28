@@ -107,16 +107,16 @@ func (t *TextGrid) Append(text string) {
 //
 // Since: 2.6
 func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
-	y := t.content.cellSize.Height
-	x := t.content.cellSize.Width
+	y := p.Y
+	x := p.X
 
 	if t.scroll != nil && t.scroll.Visible() {
 		y += t.scroll.Offset.Y
 		x += t.scroll.Offset.X
 	}
 
-	row = int(p.Y / y)
-	col = int(p.X / x)
+	row = int(y / t.content.cellSize.Height)
+	col = int(x / t.content.cellSize.Width)
 	return
 }
 
@@ -156,7 +156,17 @@ func (t *TextGrid) Resize(size fyne.Size) {
 func (t *TextGrid) SetText(text string) {
 	rows := t.parseRows(text)
 
+	oldRowsLen := len(t.Rows)
 	t.Rows = rows
+
+	// If we don't update the scroll offset when the text is shorter,
+	// we may end up with no text displayed or text appearing partially cut off
+	if t.scroll != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroll.Content != nil {
+		offset := t.PositionForCursorLocation(len(rows), 0)
+		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
+		t.scroll.Refresh()
+	}
+
 	t.Refresh()
 }
 
@@ -391,7 +401,7 @@ func (t *TextGrid) parseRows(text string) []TextGridRow {
 }
 
 func (t *TextGrid) refreshCell(row, col int) {
-	r := cache.Renderer(t).(*textGridRenderer).text
+	r := t.content
 	r.refreshCell(row, col)
 }
 
@@ -496,13 +506,13 @@ func (t *textGridContent) refreshCell(row, col int) {
 
 func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.text.Rows)
-	bufCols := 0
-	for _, row := range t.text.text.Rows {
-		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
-	}
-	sizeRows := math.Floor(float64(size.Height) / float64(t.text.cellSize.Height))
+	sizeRows := int(size.Height / t.text.cellSize.Height)
 
-	t.text.rows = int(math.Max(sizeRows, float64(bufRows)))
+	if sizeRows > bufRows {
+		t.text.rows = sizeRows
+	} else {
+		t.text.rows = bufRows
+	}
 	t.addRowsIfRequired()
 }
 
@@ -663,8 +673,12 @@ func (t *textGridRowRenderer) refreshCell(col int) {
 		return
 	}
 
-	cell := t.obj.text.text.Rows[t.obj.row].Cells[col]
-	t.setCellRune(cell.Rune, pos, cell.Style, t.obj.text.text.Rows[t.obj.row].Style)
+	row := t.obj.text.text.Rows[t.obj.row]
+
+	if len(row.Cells) > col {
+		cell := row.Cells[col]
+		t.setCellRune(cell.Rune, pos, cell.Style, row.Style)
+	}
 }
 
 func (t *textGridRowRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
@@ -740,6 +754,10 @@ func (t *textGridRowRenderer) addCellsIfRequired() {
 func (t *textGridRowRenderer) refreshCells() {
 	x := 0
 	if t.obj.row >= len(t.obj.text.text.Rows) {
+		for ; x < len(t.objects)/3; x++ {
+			t.setCellRune(' ', x, TextGridStyleDefault, nil) // blank rows no longer needed
+		}
+
 		return // we can have more rows than content rows (filling space)
 	}
 
@@ -814,11 +832,13 @@ func (t *textGridRowRenderer) lineNumberWidth() int {
 }
 
 func (t *textGridRowRenderer) updateGridSize(size fyne.Size) {
-	bufCols := 0
+	bufCols := int(size.Width / t.obj.text.cellSize.Width)
 	for _, row := range t.obj.text.text.Rows {
-		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
+		lenCells := len(row.Cells)
+		if lenCells > bufCols {
+			bufCols = lenCells
+		}
 	}
-	sizeCols := math.Floor(float64(size.Width) / float64(t.obj.text.cellSize.Width))
 
 	if t.obj.text.text.ShowWhitespace {
 		bufCols++
@@ -827,7 +847,7 @@ func (t *textGridRowRenderer) updateGridSize(size fyne.Size) {
 		bufCols += t.lineNumberWidth()
 	}
 
-	t.cols = int(math.Max(sizeCols, float64(bufCols)))
+	t.cols = bufCols
 	t.addCellsIfRequired()
 }
 
