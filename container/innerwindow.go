@@ -108,7 +108,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	bg.ShadowColor = th.Color(theme.ColorNameShadow, v)
-	//TODO update initial shadow offset and softness to match ShadowingRenderer
+	// TODO update initial shadow offset and softness to match ShadowingRenderer
 	bg.ShadowSoftness = 8
 	bg.ShadowOffset = fyne.NewPos(-float32(intWidget.DialogLevel)*0.1, float32(intWidget.DialogLevel)*0.05)
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
