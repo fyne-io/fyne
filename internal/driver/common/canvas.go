@@ -6,12 +6,14 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
+	"fyne.io/fyne/v2/internal/theme"
 )
 
 // SizeableCanvas defines a canvas with size related functions.
@@ -89,6 +91,14 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	var parentNeedingUpdate *RenderCacheNode
 
+	setup := func(node *RenderCacheNode, pos fyne.Position) {
+		if !node.obj.Visible() {
+			return
+		}
+		if th, ok := node.Obj().(*container.ThemeOverride); ok {
+			theme.PushRenderingTheme(th.Theme)
+		}
+	}
 	ensureMinSize := func(node *RenderCacheNode, pos fyne.Position) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl, func() {
@@ -123,8 +133,12 @@ func (c *Canvas) EnsureMinSize() bool {
 				}
 			}
 		}
+
+		if _, ok := node.Obj().(*container.ThemeOverride); ok {
+			theme.PopRenderingTheme()
+		}
 	}
-	c.WalkTrees(nil, ensureMinSize)
+	c.WalkTrees(setup, ensureMinSize)
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
 	if shouldResize {

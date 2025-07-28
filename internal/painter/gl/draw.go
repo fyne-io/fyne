@@ -9,6 +9,8 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
+const edgeSoftness = 1.0
+
 func (p *painter) createBuffer(points []float32) Buffer {
 	vbo := p.ctx.CreateBuffer()
 	p.logError()
@@ -80,6 +82,10 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+
+	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 
 	var addShadow float32
 	if shadow {
@@ -244,6 +250,10 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+
+	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 
 	var addShadow float32
 	if shadow {
@@ -483,14 +493,16 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 		shadowPadBottom = roundToPixel(pads[3], p.pixScale)
 	}
 
+	// without edge softness adjustment the rectangle has cropped edges
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	x1Pos := pos1.X
-	x1Norm := -1 + (x1Pos-shadowPadLeft)*2/frame.Width
+	x1Norm := -1 + (x1Pos-edgeSoftnessScaled-shadowPadLeft)*2/frame.Width
 	x2Pos := pos1.X + size.Width
-	x2Norm := -1 + (x2Pos+shadowPadRight)*2/frame.Width
+	x2Norm := -1 + (x2Pos+edgeSoftnessScaled+shadowPadRight)*2/frame.Width
 	y1Pos := pos1.Y
-	y1Norm := 1 - (y1Pos-shadowPadTop)*2/frame.Height
+	y1Norm := 1 - (y1Pos-edgeSoftnessScaled-shadowPadTop)*2/frame.Height
 	y2Pos := pos1.Y + size.Height
-	y2Norm := 1 - (y2Pos+shadowPadBottom)*2/frame.Height
+	y2Norm := 1 - (y2Pos+edgeSoftnessScaled+shadowPadBottom)*2/frame.Height
 
 	// output a norm for the fill and the vert is unused, but we pass 0 to avoid optimisation issues
 	coords := []float32{
