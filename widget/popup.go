@@ -245,7 +245,6 @@ func (r *popUpRenderer) Refresh() {
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
-	// r.ShadowingRenderer.RefreshShadow()
 }
 
 type modalPopUpRenderer struct {
