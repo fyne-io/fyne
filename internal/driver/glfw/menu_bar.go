@@ -41,8 +41,9 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := container.NewHBox(b.Items...)
 	background := canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
 	background.ShadowColor = theme.Color(theme.ColorNameShadow)
-	background.ShadowSoftness = 10
-	background.ShadowOffset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.2)
+	//TODO update initial shadow offset and softness to match ShadowingRenderer
+	background.ShadowSoftness = 3
+	background.ShadowOffset = fyne.NewPos(0, float32(widget.MenuLevel)*0.2)
 	underlay := &menuBarUnderlay{action: b.deactivate}
 	underlay.ExtendBaseWidget(underlay)
 	objects := []fyne.CanvasObject{underlay, background, cont}
