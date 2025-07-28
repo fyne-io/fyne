@@ -5,6 +5,9 @@ package glfw
 import (
 	"image"
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -177,10 +180,15 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 }
 
 func TestGlCanvas_Focus(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// foreign := &focusable{id: "o2e1"}
+	// c.Focus(foreign)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Test")
 	w.SetPadded(false)
 	c := w.Canvas()
-
 	ce := &focusable{id: "ce1"}
 	content := container.NewVBox(ce)
 	me := &focusable{id: "o2e1"}
@@ -219,6 +227,11 @@ func TestGlCanvas_Focus(t *testing.T) {
 }
 
 func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// c.Focus(e)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Test")
 	w.SetPadded(false)
 	e := widget.NewEntry()
