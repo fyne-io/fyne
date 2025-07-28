@@ -70,7 +70,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// 3 is the container holding the items
 	var m2 fyne.CanvasObject
 	runOnMain(func() {
-		mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[3].(*fyne.Container)
+		mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[2].(*fyne.Container)
 		m2 = mbarCont.Objects[1]
 	})
 

@@ -7,19 +7,9 @@
 				</widget>
 			</widget>
 			<widget size="300x27" type="*glfw.MenuBar">
-				<widget size="300x27" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-3,-2" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-2" size="298x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="299,-2" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="299,1" size="4x25" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="299,27" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,27" size="298x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-3,27" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x25"/>
-				</widget>
 				<widget size="300x300" type="*glfw.menuBarUnderlay">
 				</widget>
-				<rectangle fillColor="background" size="300x27"/>
+				<rectangle fillColor="background" shadowColor="shadow" shadowSoftness="3" size="300x27"/>
 				<container pos="8,0" size="284x27">
 					<widget size="38x27" type="*glfw.menuBarItem">
 						<rectangle fillColor="focus" radius="4" size="38x27"/>
@@ -33,16 +23,7 @@
 					</widget>
 				</container>
 				<widget pos="8,27" size="80x113" type="*widget.Menu">
-					<widget size="80x113" type="*widget.Shadow">
-						<radialGradient centerOffset="0.5,0.5" pos="-3,-2" size="4x4" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="79x4"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="80,-2" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="80,1" size="4x111" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="80,113" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,113" size="79x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-3,113" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x111"/>
-					</widget>
+					<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowSoftness="1" size="80x113"/>
 					<widget size="80x113" type="*widget.Scroll">
 						<widget size="80x113" type="*widget.menuBox">
 							<rectangle fillColor="menuBackground" size="80x113"/>
