@@ -12,10 +12,6 @@ var _ fyne.CanvasObject = (*Rectangle)(nil)
 // Rectangle describes a colored rectangle primitive in a Fyne canvas
 type Rectangle struct {
 	baseObject
-	// Support shadow configuration
-	//
-	// Since: 2.7
-	Shadow
 
 	FillColor   color.Color // The rectangle fill color
 	StrokeColor color.Color // The rectangle stroke color
@@ -30,6 +26,11 @@ type Rectangle struct {
 	//
 	// Since: 2.7
 	Aspect float32
+
+	// Support shadow configuration
+	//
+	// Since: 2.7
+	Shadow
 }
 
 // Hide will set this rectangle to not be visible

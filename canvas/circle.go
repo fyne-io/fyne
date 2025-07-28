@@ -12,11 +12,6 @@ var _ fyne.CanvasObject = (*Circle)(nil)
 
 // Circle describes a colored circle primitive in a Fyne canvas
 type Circle struct {
-	// Support shadow configuration
-	//
-	// Since: 2.7
-	Shadow
-
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle
 	Hidden    bool          // Is this circle currently hidden
@@ -24,6 +19,11 @@ type Circle struct {
 	FillColor   color.Color // The circle fill color
 	StrokeColor color.Color // The circle stroke color
 	StrokeWidth float32     // The stroke width of the circle
+
+	// Support shadow configuration
+	//
+	// Since: 2.7
+	Shadow
 }
 
 // NewCircle returns a new Circle instance

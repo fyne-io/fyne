@@ -16,12 +16,12 @@ var _ fyne.CanvasObject = (*Square)(nil)
 // Since: 2.7
 type Square struct {
 	baseObject
-	Shadow // Shadow configuration
 
 	FillColor    color.Color // The square fill color
 	StrokeColor  color.Color // The square stroke color
 	StrokeWidth  float32     // The stroke width of the square
 	CornerRadius float32     // How large the corner radius should be
+	Shadow                   // Shadow configuration
 }
 
 // Hide will set this square to not be visible
