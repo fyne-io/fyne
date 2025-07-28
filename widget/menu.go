@@ -101,10 +101,17 @@ func (m *Menu) ActivatePrevious() {
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
+	th := m.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+
 	box := newMenuBox(m.Items)
 	scroll := widget.NewVScroll(box)
 	scroll.SetMinSize(box.MinSize())
-	objects := []fyne.CanvasObject{scroll}
+	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
+	background.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	background.ShadowSoftness = 3
+	background.ShadowOffset = fyne.NewPos(-float32(widget.MenuLevel)*0.4, float32(widget.MenuLevel)*0.2)
+	objects := []fyne.CanvasObject{background, scroll}
 	for _, i := range m.Items {
 		if item, ok := i.(*menuItem); ok && item.Child() != nil {
 			objects = append(objects, item.Child())
@@ -112,10 +119,11 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	return &menuRenderer{
-		widget.NewShadowingRenderer(objects, widget.MenuLevel),
+		widget.NewBaseRenderer(objects),
 		box,
 		m,
 		scroll,
+		background,
 	}
 }
 
@@ -226,10 +234,11 @@ func (m *Menu) setMenu(menu *fyne.Menu) {
 }
 
 type menuRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 	box    *menuBox
 	m      *Menu
 	scroll *widget.Scroll
+	b      *canvas.Rectangle
 }
 
 func (r *menuRenderer) Layout(s fyne.Size) {
@@ -253,7 +262,9 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	r.LayoutShadow(scrollSize, fyne.NewPos(0, 0))
+	r.b.Move(fyne.NewPos(0, 0))
+	r.b.Resize(scrollSize)
+
 	r.scroll.Resize(scrollSize)
 	r.box.Resize(boxSize)
 	r.layoutActiveChild()
@@ -265,7 +276,10 @@ func (r *menuRenderer) MinSize() fyne.Size {
 
 func (r *menuRenderer) Refresh() {
 	r.layoutActiveChild()
-	r.ShadowingRenderer.RefreshShadow()
+	th := r.m.Theme()
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	r.b.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	r.b.ShadowColor = th.Color(theme.ColorNameShadow, v)
 
 	for _, i := range r.m.Items {
 		if txt, ok := i.(*menuItem); ok {
