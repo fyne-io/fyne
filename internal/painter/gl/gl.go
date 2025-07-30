@@ -1,5 +1,3 @@
-//go:generate go run ../../../cmd/fyne bundle -o shaders.go --prefix shader --package gl shaders/
-
 package gl
 
 import (

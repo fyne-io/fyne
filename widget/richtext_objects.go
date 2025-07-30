@@ -222,6 +222,29 @@ func (i *ImageSegment) Unselect() {
 type ListSegment struct {
 	Items   []RichTextSegment
 	Ordered bool
+
+	// startIndex is the starting number - 1 (If it is ordered). Unordered lists
+	// ignore startIndex.
+	//
+	// startIndex is set to start - 1 to allow the empty value of ListSegment to have a starting
+	// number of 1, while also allowing the caller to override the starting
+	// number to any int, including 0.
+	startIndex int
+}
+
+// SetStartNumber sets the starting number for an ordered list.
+// Unordered lists are not affected.
+//
+// Since: 2.7
+func (l *ListSegment) SetStartNumber(s int) {
+	l.startIndex = s - 1
+}
+
+// StartNumber return the starting number for an ordered list.
+//
+// Since: 2.7
+func (l *ListSegment) StartNumber() int {
+	return l.startIndex + 1
 }
 
 // Inline returns false as a list should be in a block.
@@ -235,7 +258,7 @@ func (l *ListSegment) Segments() []RichTextSegment {
 	for i, in := range l.Items {
 		txt := "• "
 		if l.Ordered {
-			txt = strconv.Itoa(i+1) + "."
+			txt = strconv.Itoa(i+l.startIndex+1) + "."
 		}
 		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
 		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
