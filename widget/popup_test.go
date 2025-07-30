@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -310,18 +309,16 @@ func TestPopUp_Layout(t *testing.T) {
 	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
 	r := cache.Renderer(pop)
-	require.GreaterOrEqual(t, len(r.Objects()), 3)
+	require.GreaterOrEqual(t, len(r.Objects()), 2)
 
-	if s, ok := r.Objects()[0].(*widget.Shadow); assert.True(t, ok, "first rendered object is a shadow") {
-		assert.Equal(t, size, s.Size())
-		assert.Equal(t, pos, s.Position())
-	}
-	if bg, ok := r.Objects()[1].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
+	if bg, ok := r.Objects()[0].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle with shadow is rendered before the content") {
 		assert.Equal(t, size, bg.Size())
 		assert.Equal(t, pos, bg.Position())
 		assert.Equal(t, theme.Color(theme.ColorNameOverlayBackground), bg.FillColor)
+		assert.Equal(t, theme.Color(theme.ColorNameShadow), bg.ShadowColor)
+		assert.Equal(t, float32(6), bg.ShadowSoftness)
 	}
-	assert.Equal(t, r.Objects()[2], content)
+	assert.Equal(t, r.Objects()[1], content)
 }
 
 func TestPopUp_ApplyThemeOnShow(t *testing.T) {

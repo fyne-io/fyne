@@ -98,10 +98,10 @@ func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 	assert.Len(t, coords, 16)
 	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
 	assert.Equal(t, []float32{
-		0, 0, -0.9, 0.9,
-		0, 0, -0.9, 0.9,
-		0, 0, -0.9, 0.9,
-		0, 0, -0.9, 0.9,
+		0, 0, -0.92, 0.92,
+		0, 0, -0.88, 0.92,
+		0, 0, -0.92, 0.88,
+		0, 0, -0.88, 0.88,
 	}, coords)
 
 	rect.Shadow = canvas.Shadow{
@@ -115,9 +115,9 @@ func TestVecRectCoordsWithPad_Shadow(t *testing.T) {
 	// Check that shadow paddings affect the normalized coordinates
 	assert.Equal(t, [4]float32{5, 5, 5, 5}, bounds)
 	assert.Equal(t, []float32{
-		0, 0, -1.9, 2.9,
-		0, 0, 1.3, 2.9,
-		0, 0, -1.9, -0.29999995,
-		0, 0, 1.3, -0.29999995,
+		0, 0, -1.9200001, 2.92,
+		0, 0, 1.3199999, 2.92,
+		0, 0, -1.9200001, -0.32000005,
+		0, 0, 1.3199999, -0.32000005,
 	}, coords)
 }
