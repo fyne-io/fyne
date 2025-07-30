@@ -37,13 +37,6 @@ const (
 	pageScrollFraction = float32(0.95)
 )
 
-type scrollBarTapBehavior int
-
-const (
-	scrollBarTapBehaviorScrollToPosition scrollBarTapBehavior = 0
-	scrollBarTapBehaviorScrollOnePage    scrollBarTapBehavior = 1
-)
-
 type scrollBarRenderer struct {
 	BaseRenderer
 	scrollBar  *scrollBar
@@ -262,7 +255,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
-	if getScrollerPagingBehavior() == scrollBarTapBehaviorScrollOnePage {
+	if isScrollerPageOnTap() {
 		a.scrollFullPageOnTap(e)
 		return
 	}

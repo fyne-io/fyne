@@ -1,3 +1,5 @@
+//go:build darwin
+
 package widget
 
 /*
@@ -5,9 +7,9 @@ int getScrollerPagingBehavior();
 */
 import "C"
 
-func getScrollerPagingBehavior() scrollBarTapBehavior {
+func isScrollerPageOnTap() bool {
 	if C.getScrollerPagingBehavior() == 0 {
-		return scrollBarTapBehaviorScrollOnePage
+		return true
 	}
-	return scrollBarTapBehaviorScrollToPosition
+	return false
 }
