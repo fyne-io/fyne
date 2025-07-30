@@ -17,19 +17,14 @@ var _ fyne.CanvasObject = (*Square)(nil)
 type Square struct {
 	baseObject
 
-	FillColor    color.Color // The square fill color
-	StrokeColor  color.Color // The square stroke color
-	StrokeWidth  float32     // The stroke width of the square
-	CornerRadius float32     // How large the corner radius should be
-
-	// The `CornerRadius` field sets the default radius for all corners. If a specific corner
-	// radius (such as `TopRightCornerRadius`, `TopLeftCornerRadius`, `BottomRightCornerRadius`,
-	// or `BottomLeftCornerRadius`) is set to a value greater than `CornerRadius`, that value
-	// will override `CornerRadius` for the respective corner. Otherwise, `CornerRadius` is used.
-	TopRightCornerRadius    float32
-	TopLeftCornerRadius     float32
-	BottomRightCornerRadius float32
-	BottomLeftCornerRadius  float32
+	FillColor               color.Color // The square fill color
+	StrokeColor             color.Color // The square stroke color
+	StrokeWidth             float32     // The stroke width of the square
+	CornerRadius            float32     // How large the corner radius should be
+	TopRightCornerRadius    float32     // The radius of the rectangle top-right corner only
+	TopLeftCornerRadius     float32     // The radius of the rectangle top-left corner only
+	BottomRightCornerRadius float32     // The radius of the rectangle bottom-right corner only
+	BottomLeftCornerRadius  float32     // The radius of the rectangle bottom-left corner only
 }
 
 // Hide will set this square to not be visible

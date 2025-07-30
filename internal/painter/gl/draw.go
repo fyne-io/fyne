@@ -157,18 +157,18 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
-	topRightRadius := fyne.Max(sq.CornerRadius, sq.TopRightCornerRadius)
-	topLeftRadius := fyne.Max(sq.CornerRadius, sq.TopLeftCornerRadius)
-	bottomRightRadius := fyne.Max(sq.CornerRadius, sq.BottomRightCornerRadius)
-	bottomLeftRadius := fyne.Max(sq.CornerRadius, sq.BottomLeftCornerRadius)
+	topRightRadius := getOblongCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := getOblongCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := getOblongCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := getOblongCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
 	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, frame)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	topRightRadius := fyne.Max(rect.CornerRadius, rect.TopRightCornerRadius)
-	topLeftRadius := fyne.Max(rect.CornerRadius, rect.TopLeftCornerRadius)
-	bottomRightRadius := fyne.Max(rect.CornerRadius, rect.BottomRightCornerRadius)
-	bottomLeftRadius := fyne.Max(rect.CornerRadius, rect.BottomLeftCornerRadius)
+	topRightRadius := getOblongCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := getOblongCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := getOblongCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := getOblongCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
 	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, frame)
 }
 
@@ -496,6 +496,18 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 	size.Height = end.Y - pos.Y
 
 	return size, pos
+}
+
+// Returns the effective corner radius for a rectangle or square corner.
+// If the specific corner radius (perCornerRadius) is zero, it falls back to the baseCornerRadius.
+// Otherwise, it uses the specific corner radius provided.
+//
+// This allows for per-corner customization while maintaining a default overall radius.
+func getOblongCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
+	if perCornerRadius == 0.0 {
+		return baseCornerRadius
+	}
+	return perCornerRadius
 }
 
 // Returns FragmentColor(red,green,blue,alpha) from fyne.Color

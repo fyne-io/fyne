@@ -27,16 +27,25 @@ type Rectangle struct {
 	// Since: 2.7
 	Aspect float32
 
-	// The `CornerRadius` field sets the default radius for all corners. If a specific corner
-	// radius (such as `TopRightCornerRadius`, `TopLeftCornerRadius`, `BottomRightCornerRadius`,
-	// or `BottomLeftCornerRadius`) is set to a value greater than `CornerRadius`, that value
-	// will override `CornerRadius` for the respective corner. Otherwise, `CornerRadius` is used.
+	// The radius of the rectangle top-right corner only.
 	//
 	// Since: 2.7
-	TopRightCornerRadius    float32
-	TopLeftCornerRadius     float32
+	TopRightCornerRadius float32
+
+	// The radius of the rectangle top-left corner only.
+	//
+	// Since: 2.7
+	TopLeftCornerRadius float32
+
+	// The radius of the rectangle bottom-right corner only.
+	//
+	// Since: 2.7
 	BottomRightCornerRadius float32
-	BottomLeftCornerRadius  float32
+
+	// The radius of the rectangle bottom-left corner only.
+	//
+	// Since: 2.7
+	BottomLeftCornerRadius float32
 }
 
 // Hide will set this rectangle to not be visible
