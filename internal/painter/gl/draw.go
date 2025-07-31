@@ -34,6 +34,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	if size.Height < size.Width {
 		radius = size.Height / 2
 	}
+	shadow := circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0)
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -85,6 +86,27 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
+	var addShadow float32
+	if shadow {
+		shadowColorUniform := p.ctx.GetUniformLocation(program, "shadow_color")
+		r, g, b, a = getFragmentColor(circle.ShadowColor)
+		p.ctx.Uniform4f(shadowColorUniform, r, g, b, a)
+
+		shadowOffsetUniform := p.ctx.GetUniformLocation(program, "shadow_offset")
+		p.ctx.Uniform2f(shadowOffsetUniform, roundToPixel(circle.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(circle.ShadowOffset.Y*p.pixScale, 1.0))
+
+		shadowSoftnessUniform := p.ctx.GetUniformLocation(program, "shadow_softness")
+		p.ctx.Uniform1f(shadowSoftnessUniform, roundToPixel(circle.ShadowSoftness*p.pixScale, 1.0))
+
+		shadowTypeUniform := p.ctx.GetUniformLocation(program, "shadow_type")
+		p.ctx.Uniform1f(shadowTypeUniform, float32(circle.ShadowType))
+
+		addShadow = 1.0
+	}
+	addShadowUniform := p.ctx.GetUniformLocation(program, "add_shadow")
+	p.ctx.Uniform1f(addShadowUniform, addShadow)
+
 	p.logError()
 	// Fragment: END
 
@@ -157,19 +179,20 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, frame)
+	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, sq.ShadowSoftness, sq.ShadowOffset, sq.ShadowColor, sq.ShadowType, pos, frame)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, frame)
+	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, rect.ShadowSoftness, rect.ShadowOffset, rect.ShadowColor, rect.ShadowType, pos, frame)
 }
 
-func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, frame fyne.Size) {
-	if (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
+func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, frame fyne.Size) {
+	if (shadowColor == color.Transparent || shadowColor == nil || (shadowOffset.IsZero() && shadowSoftness == 0.0)) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
 	roundedCorners := radius != 0
+	shadow := shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0)
 	var program Program
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -231,6 +254,27 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
+	var addShadow float32
+	if shadow {
+		shadowColorUniform := p.ctx.GetUniformLocation(program, "shadow_color")
+		r, g, b, a = getFragmentColor(shadowColor)
+		p.ctx.Uniform4f(shadowColorUniform, r, g, b, a)
+
+		shadowOffsetUniform := p.ctx.GetUniformLocation(program, "shadow_offset")
+		p.ctx.Uniform2f(shadowOffsetUniform, roundToPixel(shadowOffset.X*p.pixScale, 1.0), roundToPixel(shadowOffset.Y*p.pixScale, 1.0))
+
+		shadowSoftnessUniform := p.ctx.GetUniformLocation(program, "shadow_softness")
+		p.ctx.Uniform1f(shadowSoftnessUniform, roundToPixel(shadowSoftness*p.pixScale, 1.0))
+
+		shadowTypeUniform := p.ctx.GetUniformLocation(program, "shadow_type")
+		p.ctx.Uniform1f(shadowTypeUniform, float32(shadowType))
+
+		addShadow = 1.0
+	}
+	addShadowUniform := p.ctx.GetUniformLocation(program, "add_shadow")
+	p.ctx.Uniform1f(addShadowUniform, addShadow)
+
 	p.logError()
 	// Fragment: END
 
@@ -440,16 +484,25 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
 	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
 
+	var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom float32
+	if s, ok := rect.(canvas.Shadowable); ok {
+		pads := s.ShadowPaddings()
+		shadowPadLeft = roundToPixel(pads[0], p.pixScale)
+		shadowPadRight = roundToPixel(pads[2], p.pixScale)
+		shadowPadTop = roundToPixel(pads[1], p.pixScale)
+		shadowPadBottom = roundToPixel(pads[3], p.pixScale)
+	}
+
 	// without edge softness adjustment the rectangle has cropped edges
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	x1Pos := pos1.X
-	x1Norm := -1 + (x1Pos-edgeSoftnessScaled)*2/frame.Width
+	x1Norm := -1 + (x1Pos-edgeSoftnessScaled-shadowPadLeft)*2/frame.Width
 	x2Pos := pos1.X + size.Width
-	x2Norm := -1 + (x2Pos+edgeSoftnessScaled)*2/frame.Width
+	x2Norm := -1 + (x2Pos+edgeSoftnessScaled+shadowPadRight)*2/frame.Width
 	y1Pos := pos1.Y
-	y1Norm := 1 - (y1Pos-edgeSoftnessScaled)*2/frame.Height
+	y1Norm := 1 - (y1Pos-edgeSoftnessScaled-shadowPadTop)*2/frame.Height
 	y2Pos := pos1.Y + size.Height
-	y2Norm := 1 - (y2Pos+edgeSoftnessScaled)*2/frame.Height
+	y2Norm := 1 - (y2Pos+edgeSoftnessScaled+shadowPadBottom)*2/frame.Height
 
 	// output a norm for the fill and the vert is unused, but we pass 0 to avoid optimisation issues
 	coords := []float32{

@@ -21,6 +21,7 @@ type Square struct {
 	StrokeColor  color.Color // The square stroke color
 	StrokeWidth  float32     // The stroke width of the square
 	CornerRadius float32     // How large the corner radius should be
+	Shadow                   // Shadow configuration
 }
 
 // Hide will set this square to not be visible

@@ -5,16 +5,7 @@
 	<overlay>
 		<widget pos="2,3" size="496x295" type="*widget.OverlayContainer">
 			<widget pos="10,10" size="66x118" type="*widget.Menu">
-				<widget size="66x118" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-3,-2" size="4x4" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="0,-2" size="64x4"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="65,-2" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" pos="65,1" size="4x116" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="65,118" size="4x4" startColor="shadow"/>
-					<linearGradient pos="0,118" size="64x4" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-3,118" size="4x4" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x116"/>
-				</widget>
+				<rectangle fillColor="overlayBackground" shadowColor="shadow" shadowOffset="-1,1" shadowSoftness="1" size="66x118"/>
 				<widget size="66x118" type="*widget.Scroll">
 					<widget size="66x118" type="*widget.menuBox">
 						<rectangle fillColor="menuBackground" size="66x118"/>
