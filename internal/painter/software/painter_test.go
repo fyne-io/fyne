@@ -353,6 +353,36 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
 }
 
+func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewRectangle(color.Black)
+	obj.StrokeWidth = 5
+	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+
+	obj.CornerRadius = 35
+	obj.TopRightCornerRadius = 2
+	obj.TopLeftCornerRadius = 8
+	obj.BottomLeftCornerRadius = 14
+	obj.BottomRightCornerRadius = 20
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius.png", p.Paint(c))
+
+	obj.Aspect = 2
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_wide.png", p.Paint(c))
+	obj.Aspect = 0.5
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_narrow.png", p.Paint(c))
+
+	obj.TopLeftCornerRadius = 0
+	obj.Aspect = 0
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_base.png", p.Paint(c))
+}
+
 func TestPainter_paintText_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	scroll := container.NewScroll(widget.NewLabel("some text\nis here\nand here"))
