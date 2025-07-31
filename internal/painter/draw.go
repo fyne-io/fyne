@@ -130,72 +130,45 @@ func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth 
 				rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
 			}
 		} else {
-			rTL := scale(topLeftRadius)
-			rTR := scale(topRightRadius)
-			rBR := scale(bottomRightRadius)
-			rBL := scale(bottomLeftRadius)
+			rTL, rTR, rBR, rBL := scale(topLeftRadius), scale(topRightRadius), scale(bottomRightRadius), scale(bottomLeftRadius)
 			// Top-left corner
-			if rTL > 0 {
-				c := 0.55228475 * rTL
+			c := quarterCircleControl * rTL
+			if c != 0 {
 				filler.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))
-				filler.CubeBezier(
-					rasterx.ToFixedP(float64(p1x), float64(p1y+rTL-c)),
-					rasterx.ToFixedP(float64(p1x+rTL-c), float64(p1y)),
-					rasterx.ToFixedP(float64(p1x+rTL), float64(p1y)),
-				)
+				filler.CubeBezier(rasterx.ToFixedP(float64(p1x), float64(p1y+c)), rasterx.ToFixedP(float64(p1x+c), float64(p1y)), rasterx.ToFixedP(float64(p1x+rTL), float64(p1y)))
 			} else {
 				filler.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
 			}
-
 			// Top edge to top-right
+			c = quarterCircleControl * rTR
 			filler.Line(rasterx.ToFixedP(float64(p2x-rTR), float64(p2y)))
-			if rTR > 0 {
-				c := 0.55228475 * rTR
-				filler.CubeBezier(
-					rasterx.ToFixedP(float64(p2x-rTR+c), float64(p2y)),
-					rasterx.ToFixedP(float64(p2x), float64(p2y+rTR-c)),
-					rasterx.ToFixedP(float64(p2x), float64(p2y+rTR)),
-				)
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p2x-c), float64(p2y)), rasterx.ToFixedP(float64(p2x), float64(p2y+c)), rasterx.ToFixedP(float64(p2x), float64(p2y+rTR)))
 			}
-
 			// Right edge to bottom-right
+			c = quarterCircleControl * rBR
 			filler.Line(rasterx.ToFixedP(float64(p3x), float64(p3y-rBR)))
-			if rBR > 0 {
-				c := 0.55228475 * rBR
-				filler.CubeBezier(
-					rasterx.ToFixedP(float64(p3x), float64(p3y-rBR+c)),
-					rasterx.ToFixedP(float64(p3x-rBR+c), float64(p3y)),
-					rasterx.ToFixedP(float64(p3x-rBR), float64(p3y)),
-				)
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p3x), float64(p3y-c)), rasterx.ToFixedP(float64(p3x-c), float64(p3y)), rasterx.ToFixedP(float64(p3x-rBR), float64(p3y)))
 			}
-
 			// Bottom edge to bottom-left
+			c = quarterCircleControl * rBL
 			filler.Line(rasterx.ToFixedP(float64(p4x+rBL), float64(p4y)))
-			if rBL > 0 {
-				c := 0.55228475 * rBL
-				filler.CubeBezier(
-					rasterx.ToFixedP(float64(p4x+rBL-c), float64(p4y)),
-					rasterx.ToFixedP(float64(p4x), float64(p4y-rBL+c)),
-					rasterx.ToFixedP(float64(p4x), float64(p4y-rBL)),
-				)
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p4x+c), float64(p4y)), rasterx.ToFixedP(float64(p4x), float64(p4y-c)), rasterx.ToFixedP(float64(p4x), float64(p4y-rBL)))
 			}
-
-			// Close path
+			// Left edge to top-left
 			filler.Line(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))
 			filler.Stop(true)
 		}
-
 		filler.Draw()
 	}
 
 	if strokeCol != nil && strokeWidth > 0 {
-		rTL := scale(topLeftRadius)
-		rTR := scale(topRightRadius)
-		rBR := scale(bottomRightRadius)
-		rBL := scale(bottomLeftRadius)
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(strokeCol)
 		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+		rTL, rTR, rBR, rBL := scale(topLeftRadius), scale(topRightRadius), scale(bottomRightRadius), scale(bottomLeftRadius)
 		c := quarterCircleControl * rTL
 		if c != 0 {
 			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))

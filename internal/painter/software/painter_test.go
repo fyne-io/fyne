@@ -381,6 +381,11 @@ func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
 	obj.TopLeftCornerRadius = 0
 	obj.Aspect = 0
 	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_base.png", p.Paint(c))
+
+	// additional test for zero stroke width and base corner radius to check all per-corner values are effective
+	obj.CornerRadius = 0
+	obj.StrokeWidth = 0
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_zero_base.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {
