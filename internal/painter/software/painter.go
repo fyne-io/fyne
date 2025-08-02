@@ -50,6 +50,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawRectangle(c, o, pos, base, clip)
 		case *canvas.Square:
 			drawSquare(c, o, pos, base, clip)
+		case *canvas.Arc:
+			drawArc(c, o, pos, base, clip)
 		}
 
 		return false

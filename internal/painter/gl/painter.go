@@ -45,6 +45,7 @@ type painter struct {
 	ctx                   context
 	contextProvider       driver.WithContext
 	program               Program
+	arcProgram            Program
 	lineProgram           Program
 	rectangleProgram      Program
 	roundRectangleProgram Program

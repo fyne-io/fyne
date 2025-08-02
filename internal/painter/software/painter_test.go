@@ -19,6 +19,52 @@ func makeTestImage(w, h int) image.Image {
 	return internalTest.NewCheckedImage(w, h, w, h)
 }
 
+func TestPainter_paintArc(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewArc(color.Black)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_arc_full.png", p.Paint(c))
+
+	obj.InnerRadius = 15
+	test.AssertImageMatches(t, "draw_arc_full_inner_radius.png", p.Paint(c))
+
+	obj.StartAngle = 0
+	obj.EndAngle = 0
+	test.AssertImageMatches(t, "draw_arc_empty.png", p.Paint(c))
+
+	obj.StartAngle = -80
+	obj.EndAngle = 95
+	test.AssertImageMatches(t, "draw_arc_-80_95.png", p.Paint(c))
+
+	obj.StartAngle = 180
+	obj.EndAngle = 0
+	test.AssertImageMatches(t, "draw_arc_180_0.png", p.Paint(c))
+
+	obj.InnerRadius = 5
+	obj.StartAngle = 115
+	obj.EndAngle = 130
+	test.AssertImageMatches(t, "draw_arc_115_130.png", p.Paint(c))
+
+	obj.InnerRadius = 0
+	obj.StartAngle = 0
+	obj.EndAngle = -230
+	test.AssertImageMatches(t, "draw_arc_0_-230.png", p.Paint(c))
+
+	obj.StartAngle = -180
+	obj.EndAngle = 0
+	test.AssertImageMatches(t, "draw_arc_-180_0.png", p.Paint(c))
+
+	obj.StrokeColor = color.White
+	obj.StrokeWidth = 2
+	test.AssertImageMatches(t, "draw_arc_-180_0_stroke.png", p.Paint(c))
+}
+
 func TestPainter_paintCircle(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewCircle(color.Black)

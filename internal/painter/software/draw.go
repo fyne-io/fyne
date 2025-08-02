@@ -20,6 +20,28 @@ type gradient interface {
 	Size() fyne.Size
 }
 
+func drawArc(c fyne.Canvas, arc *canvas.Arc, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(arc)
+	scaledWidth := scale.ToScreenCoordinate(c, arc.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, arc.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawArc(arc, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+}
+
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(circle)
 	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)

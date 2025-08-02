@@ -3,6 +3,7 @@ package painter
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -12,6 +13,143 @@ import (
 )
 
 const quarterCircleControl = 1 - 0.55228
+
+// DrawArc rasterizes the given arc object into an image.
+// The scale function is used to understand how many pixels are required per unit of size.
+// The arc is drawn from StartAngle to EndAngle (in degrees).
+// 0°/360 is right, 90° is top, 180° is left, 270° is bottom
+// 0°/-360 is right, -90° is bottom, -180° is left, -270° is top
+func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := arc.Size()
+	radius := fyne.Min(size.Width, size.Height) / 2
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	stroke := scale(arc.StrokeWidth)
+	// cornerRadius := float64(scale(arc.CornerRadius)) // TODO rounded corners have not been implemented yet
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	centerX := float64(width) / 2
+	centerY := float64(height) / 2
+	outerRadius := float64(scale(radius))
+	innerRadius := float64(scale(arc.InnerRadius))
+
+	// Convert to radians
+	startRad := float64(arc.StartAngle) * (math.Pi / 180.0)
+	endRad := float64(arc.EndAngle) * (math.Pi / 180.0)
+
+	if arc.EndAngle < arc.StartAngle {
+		// Ensure always draw counter-clockwise
+		startRad, endRad = endRad, startRad
+	}
+
+	angleDiff := endRad - startRad
+
+	// Normalize angleDiff to [-2π, 2π]
+	angleDiff = math.Mod(angleDiff+2*math.Pi, 2*math.Pi)
+	if angleDiff == 0 && arc.StartAngle != arc.EndAngle {
+		angleDiff = 2 * math.Pi // full circle
+	}
+
+	if math.Abs(angleDiff) < 1e-6 {
+		return raw // empty
+	}
+
+	// Avoid full circle becoming zero-length
+	if math.Abs(angleDiff) >= 2*math.Pi {
+		angleDiff = 2*math.Pi - 1e-6
+	}
+
+	endRad = startRad + angleDiff
+
+	if arc.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(arc.FillColor)
+
+		point := func(r, angle float64) (x, y float64) {
+			x = centerX + r*math.Cos(angle)
+			y = centerY - r*math.Sin(angle)
+			return
+		}
+
+		startX, startY := point(innerRadius, startRad)
+		filler.Start(rasterx.ToFixedP(startX, startY))
+
+		outerStartX, outerStartY := point(outerRadius, startRad)
+		filler.Line(rasterx.ToFixedP(outerStartX, outerStartY))
+		outerEndX, outerEndY := point(outerRadius, endRad)
+		outerArc := []float64{
+			outerRadius, outerRadius, 0, 0, 0,
+			outerEndX, outerEndY,
+		}
+		rasterx.AddArc(outerArc, centerX, centerY, outerStartX, outerStartY, filler)
+
+		innerEndX, innerEndY := point(innerRadius, endRad)
+		filler.Line(rasterx.ToFixedP(innerEndX, innerEndY))
+		innerArc := []float64{
+			innerRadius, innerRadius, 0, 1, 1,
+			startX, startY,
+		}
+		rasterx.AddArc(innerArc, centerX, centerY, innerEndX, innerEndY, filler)
+
+		filler.Stop(true)
+		filler.Draw()
+	}
+
+	if arc.StrokeColor != nil && arc.StrokeWidth > 0 {
+		dasher := rasterx.NewDasher(width, height, scanner)
+		dasher.SetColor(arc.StrokeColor)
+		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+
+		point := func(r, angle float64) (x, y float64) {
+			x = centerX + r*math.Cos(angle)
+			y = centerY - r*math.Sin(angle)
+			return
+		}
+
+		// Outer arc
+		outerStartX, outerStartY := point(outerRadius, startRad)
+		outerEndX, outerEndY := point(outerRadius, endRad)
+		dasher.Start(rasterx.ToFixedP(outerStartX, outerStartY))
+		outerArc := []float64{
+			outerRadius, outerRadius, 0, 0, 0,
+			outerEndX, outerEndY,
+		}
+		rasterx.AddArc(outerArc, centerX, centerY, outerStartX, outerStartY, dasher)
+
+		// If it's a ring, draw the inner arc and the connecting lines
+		fullCircle := math.Abs(angleDiff-2*math.Pi) < 1e-4
+
+		innerEndX, innerEndY := point(innerRadius, endRad)
+		innerStartX, innerStartY := point(innerRadius, startRad)
+
+		// Only draw connecting lines if not full circle
+		if !fullCircle {
+			dasher.Line(rasterx.ToFixedP(innerEndX, innerEndY))
+		} else {
+			dasher.Start(rasterx.ToFixedP(innerEndX, innerEndY)) // <-- KEY FIX
+		}
+
+		// Inner arc (reverse direction)
+		innerArc := []float64{
+			innerRadius, innerRadius, 0, 1, 1,
+			innerStartX, innerStartY,
+		}
+		rasterx.AddArc(innerArc, centerX, centerY, innerEndX, innerEndY, dasher)
+
+		if !fullCircle {
+			// Line from inner start to outer start
+			dasher.Line(rasterx.ToFixedP(outerStartX, outerStartY))
+		}
+
+		dasher.Stop(true)
+		dasher.Draw()
+	}
+
+	return raw
+}
 
 // DrawCircle rasterizes the given circle object into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.

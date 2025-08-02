@@ -149,6 +149,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
+	case *canvas.Arc:
+		p.drawArc(obj, pos, frame)
 	}
 }
 
@@ -231,6 +233,79 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+	p.freeBuffer(vbo)
+}
+
+func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
+	if ((arc.FillColor == color.Transparent || arc.FillColor == nil) && (arc.StrokeColor == color.Transparent || arc.StrokeColor == nil || arc.StrokeWidth == 0)) || arc.StartAngle == arc.EndAngle {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, arc, frame, 0.0)
+	program := p.arcProgram
+	p.ctx.UseProgram(program)
+	vbo := p.createBuffer(points)
+	p.defineVertexArray(program, "vert", 2, 4, 0)
+	p.defineVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameSizeUniform := p.ctx.GetUniformLocation(program, "frame_size")
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
+
+	rectCoordsUniform := p.ctx.GetUniformLocation(program, "rect_coords")
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+
+	innerRadiusUniform := p.ctx.GetUniformLocation(program, "inner_radius")
+	innerRadiusScaled := roundToPixel(arc.InnerRadius*p.pixScale, 1.0)
+	p.ctx.Uniform1f(innerRadiusUniform, innerRadiusScaled)
+
+	outerRadiusUniform := p.ctx.GetUniformLocation(program, "outer_radius")
+	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
+	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
+	p.ctx.Uniform1f(outerRadiusUniform, outerRadiusScaled)
+
+	startAngleUniform := p.ctx.GetUniformLocation(program, "start_angle")
+	p.ctx.Uniform1f(startAngleUniform, arc.StartAngle)
+
+	endAngleUniform := p.ctx.GetUniformLocation(program, "end_angle")
+	p.ctx.Uniform1f(endAngleUniform, arc.EndAngle)
+
+	cornerRadiusUniform := p.ctx.GetUniformLocation(program, "corner_radius")
+	cornerRadiusScaled := roundToPixel(arc.CornerRadius*p.pixScale, 1.0)
+	p.ctx.Uniform1f(cornerRadiusUniform, cornerRadiusScaled)
+
+	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
+	strokeWidthScaled := roundToPixel(arc.StrokeWidth*p.pixScale, 1.0)
+	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
+
+	strokeColor := arc.StrokeColor
+	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
+	if strokeColor == nil {
+		strokeColor = color.Transparent
+	}
+	r, g, b, a := getFragmentColor(strokeColor)
+	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
+
+	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
+	r, g, b, a = getFragmentColor(arc.FillColor)
+	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
+
 	p.logError()
 	// Fragment: END
 

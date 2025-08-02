@@ -1,0 +1,5 @@
+<canvas size="50x50">
+	<content>
+		<arc cornerRadius="5" endAngle="180" fillColor="rgba(255,200,0,180)" innerRadius="15" size="50x50" startAngle="90" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+	</content>
+</canvas>
