@@ -8,8 +8,5 @@ int getScrollerPagingBehavior();
 import "C"
 
 func isScrollerPageOnTap() bool {
-	if C.getScrollerPagingBehavior() == 0 {
-		return true
-	}
-	return false
+	return C.getScrollerPagingBehavior() == 0
 }
