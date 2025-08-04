@@ -255,7 +255,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
-	if false /*todo - read MacOS system setting for scroll by page*/ {
+	if isScrollerPageOnTap() {
 		a.scrollFullPageOnTap(e)
 		return
 	}
