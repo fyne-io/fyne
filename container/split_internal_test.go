@@ -512,6 +512,21 @@ func TestSplitContainer_UpdateOffsetDoesNotRefreshContent(t *testing.T) {
 	assert.Equal(t, 1, objB.refreshCount)
 }
 
+func TestSplitContainer_HoverDividerDoesNotRefreshContent(t *testing.T) {
+	objA := &refreshCountingWidget{}
+	objB := &refreshCountingWidget{}
+	split := NewHSplit(objA, objB)
+	r := cache.Renderer(split).(*splitContainerRenderer)
+	r.divider.MouseIn(&desktop.MouseEvent{})
+
+	assert.Equal(t, 0, objA.refreshCount)
+	assert.Equal(t, 0, objB.refreshCount)
+
+	split.Refresh()
+	assert.Equal(t, 1, objA.refreshCount)
+	assert.Equal(t, 1, objB.refreshCount)
+}
+
 type refreshCountingWidget struct {
 	widget.BaseWidget
 
