@@ -37,9 +37,8 @@ type AppTabs struct {
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{}
+	tabs := &AppTabs{Items: items}
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
-	tabs.SetItems(items)
 	return tabs
 }
 
