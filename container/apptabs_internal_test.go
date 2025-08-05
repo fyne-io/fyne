@@ -64,3 +64,14 @@ func Test_tabButtonRenderer_EmptyDeleteAdd(t *testing.T) {
 	tabs.Remove(item1)
 	assert.Equal(t, 0, len(tabRenderer.bar.Objects[0].(*fyne.Container).Objects))
 }
+
+func TestAppTabs_ShowAfterAdd(t *testing.T) {
+	tabs := NewAppTabs()
+	renderer := cache.Renderer(tabs).(*appTabsRenderer)
+
+	assert.True(t, renderer.indicator.Hidden)
+
+	tabs.Append(NewTabItem("test", widget.NewLabel("Test")))
+
+	assert.False(t, renderer.indicator.Hidden)
+}

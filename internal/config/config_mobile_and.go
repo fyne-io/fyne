@@ -1,6 +1,6 @@
 //go:build !ci && android
 
-package app
+package config
 
 import (
 	"log"

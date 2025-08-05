@@ -1,6 +1,6 @@
 //go:build ci || (mobile && !android && !ios) || (!linux && !darwin && !windows && !freebsd && !openbsd && !netbsd && !wasm && !test_web_driver)
 
-package app
+package config
 
 import (
 	"os"

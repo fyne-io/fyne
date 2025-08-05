@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/config"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -25,7 +26,7 @@ type SettingsSchema struct {
 
 // StoragePath returns the location of the settings storage
 func (sc *SettingsSchema) StoragePath() string {
-	return filepath.Join(app.RootConfigDir(), "settings.json")
+	return filepath.Join(config.RootConfigDir(), "settings.json")
 }
 
 // Declare conformity with Settings interface
@@ -129,7 +130,7 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) loadSystemTheme() fyne.Theme {
-	path := filepath.Join(app.RootConfigDir(), "theme.json")
+	path := filepath.Join(config.RootConfigDir(), "theme.json")
 	data, err := fyne.LoadResourceFromPath(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
