@@ -475,6 +475,18 @@ func (ctx *context) Uniform1f(dst Uniform, v float32) {
 	})
 }
 
+func (ctx *context) Uniform1fv(dst Uniform, src []float32) {
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnUniform1fv,
+			a0: dst.c(),
+			a1: uintptr(len(src)),
+		},
+		parg:     unsafe.Pointer(&src[0]),
+		blocking: true,
+	})
+}
+
 func (ctx *context) Uniform2f(dst Uniform, v0, v1 float32) {
 	ctx.enqueue(call{
 		args: fnargs{

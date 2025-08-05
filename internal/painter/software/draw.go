@@ -12,12 +12,29 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 
+	"github.com/anthonynsimon/bild/blur"
+
 	"golang.org/x/image/draw"
 )
 
 type gradient interface {
 	Generate(int, int) image.Image
 	Size() fyne.Size
+}
+
+func drawBlur(c fyne.Canvas, blurObj *canvas.Blur, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	if blurObj.Radius == 0 {
+		return
+	}
+
+	scaledWidth := scale.ToScreenCoordinate(c, blurObj.Size().Width)
+	scaledHeight := scale.ToScreenCoordinate(c, blurObj.Size().Height)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	crop := base.SubImage(bounds)
+	blurred := blur.Gaussian(crop, float64(blurObj.Radius*c.Scale()))
+	draw.Draw(base, base.Bounds(), blurred, image.Point{}, draw.Over)
 }
 
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {

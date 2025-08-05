@@ -64,6 +64,7 @@ func (p *painter) Init() {
 	gl.Enable(gl.BLEND)
 	p.logError()
 	p.program = p.createProgram("simple_es")
+	p.blurProgram = p.createProgram("blur_es")
 	p.lineProgram = p.createProgram("line_es")
 	p.rectangleProgram = p.createProgram("rectangle_es")
 	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
@@ -218,6 +219,10 @@ func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
+	gl.Uniform1fv(gl.Uniform(uniform), v)
 }
 
 func (c *xjsContext) Uniform2f(uniform Uniform, v0, v1 float32) {

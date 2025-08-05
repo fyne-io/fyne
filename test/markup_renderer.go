@@ -219,6 +219,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 	r.setPosAttr(attrs, "pos", obj.Position())
 	r.setSizeAttr(attrs, "size", obj.Size())
 	switch o := obj.(type) {
+	case *fynecanvas.Blur:
+		r.writeBlur(o, attrs)
 	case *fynecanvas.Circle:
 		r.writeCircle(o, attrs)
 	case *fynecanvas.Image:
@@ -248,6 +250,11 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 	}
 
 	return false
+}
+
+func (r *markupRenderer) writeBlur(b *fynecanvas.Blur, attrs map[string]*string) {
+	r.setFloatAttr(attrs, "radius", float64(b.Radius))
+	r.writeTag("blur", true, attrs)
 }
 
 func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*string) {

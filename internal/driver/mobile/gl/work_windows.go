@@ -248,6 +248,10 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 		syscall.Syscall6(glUniform1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
 		return
 	},
+	glfnUniform1fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
 	glfnUniform2f: func(c call) (ret uintptr) {
 		syscall.Syscall6(glUniform2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
 		return
@@ -335,6 +339,7 @@ var (
 	glTexImage2D              = libGLESv2.NewProc("glTexImage2D")
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
+	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
 	glUniform2f               = libGLESv2.NewProc("glUniform2f")
 	glUniform4f               = libGLESv2.NewProc("glUniform4f")
 	glUniform4fv              = libGLESv2.NewProc("glUniform4fv")

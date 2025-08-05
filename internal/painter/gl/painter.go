@@ -36,6 +36,8 @@ type Painter interface {
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &painter{canvas: c, contextProvider: ctx}
+	p.blurKernels = make(map[float32][]float32)
+
 	p.SetFrameBufferScale(1.0)
 	return p
 }
@@ -45,11 +47,13 @@ type painter struct {
 	ctx                   context
 	contextProvider       driver.WithContext
 	program               Program
+	blurProgram           Program
 	lineProgram           Program
 	rectangleProgram      Program
 	roundRectangleProgram Program
 	texScale              float32
 	pixScale              float32 // pre-calculate scale*texScale for each draw
+	blurKernels           map[float32][]float32
 }
 
 // Declare conformity to Painter interface
