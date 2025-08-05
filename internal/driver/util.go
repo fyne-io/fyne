@@ -4,6 +4,8 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+
 	"fyne.io/fyne/v2/internal/cache"
 )
 
@@ -162,7 +164,9 @@ func walkObjectTree(
 		}
 	}
 
-	if _, ok := obj.(fyne.Scrollable); ok {
+	_, scroll := obj.(fyne.Scrollable)
+	_, clip := obj.(*container.Clip)
+	if scroll || clip {
 		clipPos = pos
 		clipSize = obj.Size()
 	}

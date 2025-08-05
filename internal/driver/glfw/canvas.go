@@ -251,7 +251,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	paint := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if _, ok := obj.(fyne.Scrollable); ok {
+		_, scroll := obj.(fyne.Scrollable)
+		_, clip := obj.(*container.Clip)
+		if scroll || clip {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -261,7 +263,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterPaint := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if _, ok := node.Obj().(fyne.Scrollable); ok {
+		_, scroll := node.Obj().(fyne.Scrollable)
+		_, clip := node.Obj().(*container.Clip)
+		if scroll || clip {
 			clips.Pop()
 			if top := clips.Top(); top != nil {
 				c.Painter().StartClipping(top.Rect())

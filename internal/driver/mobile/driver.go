@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
@@ -376,7 +377,9 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 
 	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if _, ok := obj.(fyne.Scrollable); ok {
+		_, scroll := obj.(fyne.Scrollable)
+		_, clip := obj.(*container.Clip)
+		if scroll || clip {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -387,7 +390,9 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if _, ok := node.Obj().(fyne.Scrollable); ok {
+		_, scroll := node.Obj().(fyne.Scrollable)
+		_, clip := node.Obj().(*container.Clip)
+		if scroll || clip {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
