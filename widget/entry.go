@@ -322,6 +322,15 @@ func (e *Entry) FocusLost() {
 	}
 }
 
+// HasFocus indicates if the widget has focus.
+//
+// Since: 2.7
+//
+// Implements fyne.FormValidatable
+func (e *Entry) HasFocus() bool {
+	return e.focused
+}
+
 // Hide hides the entry.
 //
 // Implements: fyne.Widget
@@ -331,6 +340,15 @@ func (e *Entry) Hide() {
 		e.popUp = nil
 	}
 	e.DisableableWidget.Hide()
+}
+
+// IsDirty indicates if the widget's text has changed.
+//
+// Since: 2.7
+//
+// Implements fyne.FormValidatable
+func (e *Entry) IsDirty() bool {
+	return e.dirty
 }
 
 // Keyboard implements the Keyboardable interface
@@ -485,6 +503,15 @@ func (e *Entry) SelectedText() string {
 func (e *Entry) SetMinRowsVisible(count int) {
 	e.multiLineRows = count
 	e.Refresh()
+}
+
+// SetOnFocusChanged sets the function that is called when focus is gained or lost.
+//
+// Since: 2.7
+//
+// Implements fyne.FormValidatable
+func (e *Entry) SetOnFocusChanged(f func(bool)) {
+	e.onFocusChanged = f
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty

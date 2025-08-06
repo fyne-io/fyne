@@ -2,7 +2,6 @@ package widget
 
 import (
 	"errors"
-	"reflect"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -181,16 +180,10 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 }
 
 func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
-	value := reflect.ValueOf(w).Elem()
-	validatorField := value.FieldByName("Validator")
-	if validatorField == (reflect.Value{}) {
-		return false
+	if v, ok := w.(fyne.FormValidatable); ok {
+		return v.GetValidator() != nil
 	}
-	validator, ok := validatorField.Interface().(fyne.StringValidator)
-	if !ok {
-		return false
-	}
-	return validator != nil
+	return false
 }
 
 func (f *Form) createLabel(text string) fyne.CanvasObject {
@@ -309,17 +302,16 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 		f.checkValidation(err)
 		f.updateHelperText(f.Items[i])
 	}
-	if w, ok := widget.(fyne.Validatable); ok {
+	if w, ok := widget.(fyne.FormValidatable); ok {
 		f.Items[i].invalid = w.Validate() != nil
-		if e, ok := w.(*Entry); ok {
-			e.onFocusChanged = func(bool) {
-				updateValidation(e.validationError)
-			}
-			if e.Validator != nil && f.Items[i].invalid {
-				// set initial state error to guarantee next error (if triggers) is always different
-				e.SetValidationError(errFormItemInitialState)
-			}
+		w.SetOnFocusChanged(func(bool) {
+			updateValidation(w.GetValidationError())
+		})
+		if w.GetValidator() != nil && f.Items[i].invalid {
+			// set initial state error to guarantee next error (if triggers) is always different
+			w.SetValidationError(errFormItemInitialState)
 		}
+
 		w.SetOnValidationChanged(updateValidation)
 	}
 }
@@ -354,11 +346,11 @@ func (f *Form) updateHelperText(item *FormItem) {
 		return // testing probably, either way not rendered yet
 	}
 	showHintIfError := false
-	if e, ok := item.Widget.(*Entry); ok {
-		if !e.dirty || (e.focused && !item.wasFocused) {
+	if w, ok := item.Widget.(fyne.FormValidatable); ok {
+		if !w.IsDirty() || (w.HasFocus() && !item.wasFocused) {
 			showHintIfError = true
 		}
-		if e.dirty && !e.focused {
+		if w.IsDirty() && !w.HasFocus() {
 			item.wasFocused = true
 		}
 	}
