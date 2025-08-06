@@ -17,10 +17,10 @@ func TestArc_FillColorEndAngle(t *testing.T) {
 	arc := canvas.NewArc(c)
 
 	assert.Equal(t, c, arc.FillColor)
-	assert.Equal(t, 0.0, arc.InnerRadius)
-	assert.Equal(t, 0.0, arc.StartAngle)
-	assert.Equal(t, 360.0, arc.EndAngle)
-	assert.Equal(t, 0.0, arc.CornerRadius)
+	assert.Equal(t, float32(0.0), arc.InnerRadius)
+	assert.Equal(t, float32(0.0), arc.StartAngle)
+	assert.Equal(t, float32(360.0), arc.EndAngle)
+	assert.Equal(t, float32(0.0), arc.CornerRadius)
 }
 
 func TestArc_InnerRadiusStartEndAngles(t *testing.T) {
