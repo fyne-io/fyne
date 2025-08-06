@@ -222,6 +222,10 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 			roundToPixel(topLeftRadius*p.pixScale, 1.0),
 			roundToPixel(bottomLeftRadius*p.pixScale, 1.0),
 		)
+
+		edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
+		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+		p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 	} else {
 		strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
 		p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
@@ -239,10 +243,6 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
-
-	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
-	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
 	p.logError()
 	// Fragment: END
 
