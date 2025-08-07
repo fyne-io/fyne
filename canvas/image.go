@@ -34,7 +34,7 @@ const (
 	// Note that the minSize may be smaller than the image dimensions if scale > 1.
 	ImageFillOriginal
 
-	// ImageFillCover maintains the iamge aspect ratio whilst filling the space.
+	// ImageFillCover maintains the image aspect ratio whilst filling the space.
 	// The image content will be centered on the available space meaning that an equal amount of top and bottom
 	// or left and right will be clipped if the output aspect ratio does not match the source image.
 	// Since: 2.7
