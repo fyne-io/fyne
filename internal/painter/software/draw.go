@@ -59,7 +59,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	origImg := painter.PaintImage(img, c, width, height)
+	origImg := img.Image
+	if img.FillMode != canvas.ImageFillCover {
+		origImg = painter.PaintImage(img, c, width, height)
+	}
 
 	if img.FillMode == canvas.ImageFillContain {
 		imgAspect := img.Aspect()
@@ -74,6 +77,28 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 			scaledY += (height - newHeight) / 2
 			height = newHeight
 		}
+	} else if img.FillMode == canvas.ImageFillCover {
+		inner := origImg.Bounds()
+		imgAspect := img.Aspect()
+		objAspect := float32(width) / float32(height)
+
+		if objAspect > imgAspect {
+			newHeight := float32(width) / imgAspect
+			heightPad := (newHeight - float32(height)) / 2
+			pixPad := int((heightPad / newHeight) * float32(inner.Dy()))
+
+			inner = image.Rect(inner.Min.X, inner.Min.Y+pixPad, inner.Max.X, inner.Max.Y-pixPad)
+		} else if objAspect < imgAspect {
+			newWidth := float32(height) * imgAspect
+			widthPad := (newWidth - float32(width)) / 2
+			pixPad := int((widthPad / newWidth) * float32(inner.Dx()))
+
+			inner = image.Rect(inner.Min.X+pixPad, inner.Min.Y, inner.Max.X-pixPad, inner.Max.Y)
+		}
+
+		subImg := image.NewRGBA(inner.Bounds())
+		draw.Copy(subImg, inner.Min, origImg, inner, draw.Over, nil)
+		origImg = subImg
 	}
 
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
