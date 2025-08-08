@@ -218,6 +218,28 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
+func drawPolygon(c fyne.Canvas, polygon *canvas.Polygon, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(polygon)
+	scaledWidth := scale.ToScreenCoordinate(c, polygon.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, polygon.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawPolygon(polygon, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+}
+
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, base, clip)
 }

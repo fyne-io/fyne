@@ -74,6 +74,7 @@ func (p *painter) Init() {
 	p.logError()
 	p.program = p.createProgram("simple")
 	p.lineProgram = p.createProgram("line")
+	p.polygonProgram = p.createProgram("polygon")
 	p.rectangleProgram = p.createProgram("rectangle")
 	p.roundRectangleProgram = p.createProgram("round_rectangle")
 }

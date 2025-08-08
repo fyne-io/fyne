@@ -46,6 +46,7 @@ type painter struct {
 	contextProvider       driver.WithContext
 	program               Program
 	lineProgram           Program
+	polygonProgram        Program
 	rectangleProgram      Program
 	roundRectangleProgram Program
 	texScale              float32
