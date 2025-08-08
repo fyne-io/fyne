@@ -21,25 +21,26 @@ type TabItem struct {
 	Content fyne.CanvasObject
 
 	button *tabButton
+
+	disabled bool
 }
 
 // Disabled returns whether or not the TabItem is disabled.
 //
 // Since: 2.3
 func (ti *TabItem) Disabled() bool {
-	if ti.button != nil {
-		return ti.button.Disabled()
-	}
-	return false
+	return ti.disabled
 }
 
 func (ti *TabItem) disable() {
+	ti.disabled = true
 	if ti.button != nil {
 		ti.button.Disable()
 	}
 }
 
 func (ti *TabItem) enable() {
+	ti.disabled = false
 	if ti.button != nil {
 		ti.button.Enable()
 	}
