@@ -134,10 +134,15 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 		// Inner arc (reverse direction)
 		innerArc := []float64{
-			innerRadius, innerRadius, 0, 1, 1,
+			innerRadius, innerRadius, 1, 1, 1,
 			innerStartX, innerStartY,
 		}
 		rasterx.AddArc(innerArc, centerX, centerY, innerEndX, innerEndY, dasher)
+
+		if !fullCircle {
+			// Line from inner start to outer start
+			dasher.Line(rasterx.ToFixedP(outerStartX, outerStartY))
+		}
 
 		dasher.Stop(true)
 		dasher.Draw()
