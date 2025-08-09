@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/build"
 	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/theme"
@@ -222,7 +223,7 @@ func selectItem(t baseTabs, item *TabItem) {
 
 func setItems(t baseTabs, items []*TabItem) {
 	if build.HasHints && mismatchedTabItems(items) {
-		build.LogHint("Tab items should all have the same type of content (text, icons or both)")
+		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
 	t.setItems(items)
 	selected := t.selected()

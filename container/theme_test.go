@@ -1,4 +1,4 @@
-package container_test
+package container
 
 import (
 	"image"
@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/internal/cache"
@@ -17,8 +16,8 @@ import (
 
 func TestThemeOverride_AddChild(t *testing.T) {
 	b := widget.NewButton("Test", func() {})
-	group := container.NewHBox(b)
-	override := container.NewThemeOverride(group, test.Theme())
+	group := NewHBox(b)
+	override := NewThemeOverride(group, test.Theme())
 
 	child := widget.NewLabel("Added")
 	assert.NotEqual(t, cache.WidgetTheme(b), cache.WidgetTheme(child))
@@ -30,7 +29,7 @@ func TestThemeOverride_AddChild(t *testing.T) {
 
 func TestThemeOverride_Icons(t *testing.T) {
 	b := widget.NewButtonWithIcon("", theme.HomeIcon(), func() {})
-	o := container.NewThemeOverride(b, test.Theme())
+	o := NewThemeOverride(b, test.Theme())
 	w := test.NewWindow(o)
 	plain := w.Canvas().Capture().(*image.NRGBA)
 	test.AssertImageMatches(t, "theme/icon-test-theme.png", plain)
@@ -43,7 +42,7 @@ func TestThemeOverride_Icons(t *testing.T) {
 
 func TestThemeOverride_Refresh(t *testing.T) {
 	b := widget.NewButton("Test", func() {})
-	o := container.NewThemeOverride(b, test.Theme())
+	o := NewThemeOverride(b, test.Theme())
 	w := test.NewWindow(o)
 	plain := w.Canvas().Capture().(*image.NRGBA)
 	test.AssertImageMatches(t, "theme/text-test-theme.png", plain)
@@ -62,7 +61,7 @@ func TestThemeOverride_CurrentTheme(t *testing.T) {
 	text := test.WidgetRenderer(l).Objects()[0].(*widget.RichText).Segments[0].Visual()
 	assert.Equal(t, color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}, text.(*canvas.Text).Color)
 
-	o := container.NewThemeOverride(l, custom)
+	o := NewThemeOverride(l, custom)
 	o.Refresh()
 
 	text = test.WidgetRenderer(l).Objects()[0].(*widget.RichText).Segments[0].Visual()

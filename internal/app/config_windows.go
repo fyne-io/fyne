@@ -1,6 +1,6 @@
 //go:build !ci && !android && !ios && !wasm && !test_web_driver
 
-package config
+package app
 
 import (
 	"os"

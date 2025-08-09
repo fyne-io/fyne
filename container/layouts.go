@@ -2,7 +2,7 @@ package container // import "fyne.io/fyne/v2/container"
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/layout"
 )
 
@@ -39,7 +39,7 @@ func NewBorder(top, bottom, left, right fyne.CanvasObject, objects ...fyne.Canva
 	}
 
 	if len(objects) == 1 && objects[0] == nil {
-		build.LogHint("Border layout requires only 4 parameters, optional items cannot be nil")
+		internal.LogHint("Border layout requires only 4 parameters, optional items cannot be nil")
 		all = all[1:]
 	}
 	return New(layout.NewBorderLayout(top, bottom, left, right), all...)

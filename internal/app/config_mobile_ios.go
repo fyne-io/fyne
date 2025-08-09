@@ -1,6 +1,6 @@
 //go:build !ci && ios && !mobile
 
-package config
+package app
 
 import (
 	"path/filepath"
