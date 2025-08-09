@@ -9,7 +9,10 @@ import (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Polygon)(nil)
 
-// Polygon describes a colored regular polygon primitive in a Fyne canvas
+// Polygon describes a colored regular polygon primitive in a Fyne canvas.
+// The rendered portion will be in the center of the available space.
+//
+// Since: 2.7
 type Polygon struct {
 	baseObject
 
