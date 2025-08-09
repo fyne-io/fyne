@@ -379,12 +379,29 @@ func (p *painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	y2Pos := (pos.Y + size.Height + pad) / frame.Height
 	y2 := 1 - y2Pos*2
 
+	xInset := float32(0.0)
+	yInset := float32(0.0)
+
+	if fill == canvas.ImageFillCover {
+		viewAspect := size.Width / size.Height
+
+		if viewAspect > aspect {
+			newHeight := size.Width / aspect
+			heightPad := (newHeight - size.Height) / 2
+			yInset = heightPad / newHeight
+		} else if viewAspect < aspect {
+			newWidth := size.Height * aspect
+			widthPad := (newWidth - size.Width) / 2
+			xInset = widthPad / newWidth
+		}
+	}
+
 	return []float32{
 		// coord x, y, z texture x, y
-		x1, y2, 0, 0.0, 1.0, // top left
-		x1, y1, 0, 0.0, 0.0, // bottom left
-		x2, y2, 0, 1.0, 1.0, // top right
-		x2, y1, 0, 1.0, 0.0, // bottom right
+		x1, y2, 0, xInset, 1.0 - yInset, // top left
+		x1, y1, 0, xInset, yInset, // bottom left
+		x2, y2, 0, 1.0 - xInset, 1.0 - yInset, // top right
+		x2, y1, 0, 1.0 - xInset, yInset, // bottom right
 	}
 }
 

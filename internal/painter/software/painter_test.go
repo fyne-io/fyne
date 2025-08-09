@@ -222,6 +222,26 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
+func TestPainter_paintImage_cover(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(50, 50))
+	img.FillMode = canvas.ImageFillCover
+	img.ScaleMode = canvas.ImageScalePixels
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(250, 375))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_cover_vertical.png", target)
+
+	c.Resize(fyne.NewSize(375, 250))
+
+	target = p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_cover_horizontal.png", target)
+}
+
 func TestPainter_paintLine(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewLine(color.Black)
