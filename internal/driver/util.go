@@ -4,8 +4,6 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-
 	"fyne.io/fyne/v2/internal/cache"
 )
 
@@ -164,9 +162,7 @@ func walkObjectTree(
 		}
 	}
 
-	_, scroll := obj.(fyne.Scrollable)
-	_, clip := obj.(*container.Clip)
-	if scroll || clip {
+	if IsClip(obj) {
 		clipPos = pos
 		clipSize = obj.Size()
 	}
@@ -203,4 +199,22 @@ func walkObjectTree(
 		afterChildren(obj, pos, parent)
 	}
 	return cancelled
+}
+
+func IsClip(o fyne.CanvasObject) bool {
+	_, scroll := o.(fyne.Scrollable)
+	if scroll {
+		return true
+	}
+
+	if _, isWid := o.(fyne.Widget); !isWid {
+		return false
+	}
+	r, rendered := cache.CachedRenderer(o.(fyne.Widget))
+	if !rendered {
+		return false
+	}
+
+	_, clip := r.(interface{ IsClip() })
+	return clip
 }

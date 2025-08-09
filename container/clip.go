@@ -65,3 +65,6 @@ func (r *clipRenderer) Refresh() {
 	r.Layout(r.c.Size())
 	r.objects[0].Refresh()
 }
+
+// IsClip marks this widget as clipping. It is on the renderer to avoid a public API addition.
+func (r *clipRenderer) IsClip() {}
