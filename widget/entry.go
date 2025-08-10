@@ -211,10 +211,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 // Since: 2.7
 func (e *Entry) CursorPosition() fyne.Position {
 	provider := e.textProvider()
-	th := e.Theme()
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	inputBorder := th.Size(theme.SizeNameInputBorder)
-	textSize := th.Size(theme.SizeNameText)
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, e)
+	inputBorder := theme.SizeForWidget(theme.SizeNameInputBorder, e)
+	textSize := theme.SizeForWidget(theme.SizeNameText, e)
 
 	size := provider.lineSizeToColumn(e.CursorColumn, e.CursorRow, textSize, innerPad)
 	xPos := size.Width
@@ -1510,7 +1509,6 @@ func (r *entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) trailingInset() float32 {
-	th := r.entry.Theme()
 	xInset := float32(0)
 
 	if r.entry.ActionItem != nil {
@@ -1518,9 +1516,9 @@ func (r *entryRenderer) trailingInset() float32 {
 	}
 
 	if r.entry.Validator != nil {
-		iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
+		iconSpace := theme.SizeForWidget(theme.SizeNameInlineIcon, r.entry) + theme.SizeForWidget(theme.SizeNameLineSpacing, r.entry)
 		if r.entry.ActionItem == nil {
-			xInset = iconSpace + th.Size(theme.SizeNameInnerPadding)
+			xInset = iconSpace + theme.SizeForWidget(theme.SizeNameInnerPadding, r.entry)
 		} else {
 			xInset += iconSpace
 		}
@@ -1530,11 +1528,10 @@ func (r *entryRenderer) trailingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	th := r.entry.Theme()
-	borderSize := th.Size(theme.SizeNameInputBorder)
-	iconSize := th.Size(theme.SizeNameInlineIcon)
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	inputBorder := th.Size(theme.SizeNameInputBorder)
+	borderSize := theme.SizeForWidget(theme.SizeNameInputBorder, r.entry)
+	iconSize := theme.SizeForWidget(theme.SizeNameInlineIcon, r.entry)
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, r.entry)
+	inputBorder := theme.SizeForWidget(theme.SizeNameInputBorder, r.entry)
 
 	// 0.5 is removed so on low DPI it rounds down on the trailing edge
 	r.border.Resize(fyne.NewSize(size.Width-borderSize-.5, size.Height-borderSize-.5))

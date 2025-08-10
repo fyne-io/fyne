@@ -279,13 +279,11 @@ type checkRenderer struct {
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
 func (c *checkRenderer) MinSize() fyne.Size {
-	th := c.check.Theme()
-
-	pad4 := th.Size(theme.SizeNameInnerPadding) * 2
-	min := c.label.MinSize().Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+pad4, pad4))
+	pad4 := theme.SizeForWidget(theme.SizeNameInnerPadding, c.check) * 2
+	min := c.label.MinSize().Add(fyne.NewSize(theme.SizeForWidget(theme.SizeNameInlineIcon, c.check)+pad4, pad4))
 
 	if c.check.Text != "" {
-		min.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
+		min.Add(fyne.NewSize(theme.SizeForWidget(theme.SizeNamePadding, c.check), 0))
 	}
 
 	return min
@@ -293,10 +291,9 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	th := c.check.Theme()
-	innerPadding := th.Size(theme.SizeNameInnerPadding)
-	borderSize := th.Size(theme.SizeNameInputBorder)
-	iconInlineSize := th.Size(theme.SizeNameInlineIcon)
+	innerPadding := theme.SizeForWidget(theme.SizeNameInnerPadding, c.check)
+	borderSize := theme.SizeForWidget(theme.SizeNameInputBorder, c.check)
+	iconInlineSize := theme.SizeForWidget(theme.SizeNameInlineIcon, c.check)
 
 	focusIndicatorSize := fyne.NewSquareSize(iconInlineSize + innerPadding)
 	c.focusIndicator.Resize(focusIndicatorSize)

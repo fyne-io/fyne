@@ -371,30 +371,18 @@ func (r *dividerRenderer) Refresh() {
 	r.Layout(r.divider.Size())
 }
 
-func dividerTheme(d *divider) fyne.Theme {
-	if d == nil {
-		return theme.Current()
-	}
-
-	return d.Theme()
-}
-
 func dividerThickness(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 2
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 2
 }
 
 func dividerLength(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 6
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 6
 }
 
 func handleThickness(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) / 2
+	return theme.SizeForWidget(theme.SizeNamePadding, d) / 2
 }
 
 func handleLength(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 4
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 4
 }

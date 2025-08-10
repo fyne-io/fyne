@@ -21,9 +21,8 @@ type passwordRevealer struct {
 }
 
 func newPasswordRevealer(e *Entry) *passwordRevealer {
-	th := e.Theme()
 	pr := &passwordRevealer{
-		icon:  canvas.NewImageFromResource(th.Icon(theme.IconNameVisibilityOff)),
+		icon:  canvas.NewImageFromResource(theme.IconForWidget(theme.IconNameVisibilityOff, e)),
 		entry: e,
 	}
 	pr.ExtendBaseWidget(pr)
@@ -62,22 +61,21 @@ type passwordRevealerRenderer struct {
 }
 
 func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
-	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
+	iconSize := theme.SizeForWidget(theme.SizeNameInlineIcon, r.entry)
 	r.icon.Resize(fyne.NewSquareSize(iconSize))
 	r.icon.Move(fyne.NewPos((size.Width-iconSize)/2, (size.Height-iconSize)/2))
 }
 
 func (r *passwordRevealerRenderer) MinSize() fyne.Size {
-	iconSize := r.entry.Theme().Size(theme.SizeNameInlineIcon)
-	return fyne.NewSquareSize(iconSize + r.entry.Theme().Size(theme.SizeNameInnerPadding)*2)
+	iconSize := theme.SizeForWidget(theme.SizeNameInlineIcon, r.entry)
+	return fyne.NewSquareSize(iconSize + theme.SizeForWidget(theme.SizeNameInnerPadding, r.entry)*2)
 }
 
 func (r *passwordRevealerRenderer) Refresh() {
-	th := r.entry.Theme()
 	if !r.entry.Password {
-		r.icon.Resource = th.Icon(theme.IconNameVisibility)
+		r.icon.Resource = theme.IconForWidget(theme.IconNameVisibility, r.entry)
 	} else {
-		r.icon.Resource = th.Icon(theme.IconNameVisibilityOff)
+		r.icon.Resource = theme.IconForWidget(theme.IconNameVisibilityOff, r.entry)
 	}
 
 	if r.entry.Disabled() {

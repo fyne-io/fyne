@@ -102,7 +102,7 @@ const (
 
 // Layout the components of the card container.
 func (c *cardRenderer) Layout(size fyne.Size) {
-	padding := c.card.Theme().Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, c.card)
 	pos := fyne.NewSquareOffsetPos(padding / 2)
 	size = size.Subtract(fyne.NewSquareSize(padding))
 	c.LayoutShadow(size, pos)
@@ -159,7 +159,7 @@ func (c *cardRenderer) MinSize() fyne.Size {
 	hasImage := c.card.Image != nil
 	hasContent := c.card.Content != nil
 
-	padding := c.card.Theme().Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, c.card)
 	if !hasHeader && !hasSubHeader && !hasContent { // just image, or nothing
 		if c.card.Image == nil {
 			return fyne.NewSize(padding, padding) // empty, just space for border

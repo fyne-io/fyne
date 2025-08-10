@@ -399,9 +399,8 @@ func (f *Form) updateLabels() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
-	th := f.Theme()
-	f.cancelButton = &Button{Icon: th.Icon(theme.IconNameCancel), OnTapped: f.OnCancel}
-	f.submitButton = &Button{Icon: th.Icon(theme.IconNameConfirm), OnTapped: f.OnSubmit, Importance: HighImportance}
+	f.cancelButton = &Button{Icon: theme.IconForWidget(theme.IconNameCancel, f), OnTapped: f.OnCancel}
+	f.submitButton = &Button{Icon: theme.IconForWidget(theme.IconNameConfirm, f), OnTapped: f.OnSubmit, Importance: HighImportance}
 	buttons := &fyne.Container{Layout: layout.NewGridLayoutWithRows(1), Objects: []fyne.CanvasObject{f.cancelButton, f.submitButton}}
 	f.buttonBox = &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, nil, buttons), Objects: []fyne.CanvasObject{buttons}}
 	f.validationError = errFormItemInitialState // set initial state error to guarantee next error (if triggers) is always different

@@ -102,7 +102,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	background := &canvas.Rectangle{}
 	tapBG := canvas.NewRectangle(color.Transparent)
-	s.tapAnim = newButtonTapAnimation(tapBG, s, theme.CurrentForWidget(s))
+	s.tapAnim = newButtonTapAnimation(tapBG, s)
 	s.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{background, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, objects, s}

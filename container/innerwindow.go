@@ -98,7 +98,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
-	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
+	height := theme.SizeForWidget(theme.SizeNameWindowTitleBarHeight, w)
 	off := (height - title.labelMinSize().Height) / 2
 	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
 	if w.buttonPosition() == widget.ButtonAlignTrailing {

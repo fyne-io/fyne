@@ -98,21 +98,20 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 		return theme.FolderIcon()
 	}
 
-	th := i.Theme()
 	mainMimeType, _ := mime.Split(uri.MimeType())
 	switch mainMimeType {
 	case "application":
-		return th.Icon(theme.IconNameFileApplication)
+		return theme.IconForWidget(theme.IconNameFileApplication, i)
 	case "audio":
-		return th.Icon(theme.IconNameFileAudio)
+		return theme.IconForWidget(theme.IconNameFileAudio, i)
 	case "image":
-		return th.Icon(theme.IconNameFileImage)
+		return theme.IconForWidget(theme.IconNameFileImage, i)
 	case "text":
-		return th.Icon(theme.IconNameFileText)
+		return theme.IconForWidget(theme.IconNameFileText, i)
 	case "video":
-		return th.Icon(theme.IconNameFileVideo)
+		return theme.IconForWidget(theme.IconNameFileVideo, i)
 	default:
-		return th.Icon(theme.IconNameFile)
+		return theme.IconForWidget(theme.IconNameFile, i)
 	}
 }
 
@@ -141,8 +140,7 @@ type fileIconRenderer struct {
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
-	th := s.file.Theme()
-	return fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
+	return fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInlineIcon, s.file))
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {

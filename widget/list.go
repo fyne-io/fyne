@@ -687,8 +687,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 }
 
 func (l *listLayout) updateList(newOnly bool) {
-	th := l.list.Theme()
-	separatorThickness := th.Size(theme.SizeNamePadding)
+	separatorThickness := theme.SizeForWidget(theme.SizeNamePadding, l.list)
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {

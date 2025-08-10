@@ -122,10 +122,8 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
-	th := hl.Theme()
-
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, hl)
+	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+theme.SizeForWidget(theme.SizeNamePadding, hl)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
@@ -144,9 +142,8 @@ func (hl *Hyperlink) focusXPos() float32 {
 }
 
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
-	th := hl.Theme()
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	pad := th.Size(theme.SizeNamePadding)
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, hl)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, hl)
 	lineCount := fyne.Max(1, float32(len(hl.provider.rowBounds)))
 
 	xpos := hl.focusXPos()
@@ -251,8 +248,6 @@ func (hl *Hyperlink) openURL() {
 }
 
 func (hl *Hyperlink) syncSegments() {
-	th := hl.Theme()
-
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
 
@@ -281,7 +276,7 @@ func (hl *Hyperlink) syncSegments() {
 		sizeName = theme.SizeNameText
 	}
 	hl.provider.Segments[0].(*TextSegment).Style.SizeName = sizeName
-	hl.textSize = fyne.MeasureText(hl.Text, th.Size(sizeName), hl.TextStyle)
+	hl.textSize = fyne.MeasureText(hl.Text, theme.SizeForWidget(sizeName, hl), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)

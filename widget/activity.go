@@ -59,9 +59,8 @@ func (a *Activity) Stop() {
 
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	for i := range dots {
-		dots[i] = canvas.NewCircle(a.Theme().Color(theme.ColorNameForeground, v))
+		dots[i] = canvas.NewCircle(theme.ColorForWidget(theme.ColorNameForeground, a))
 	}
 	r := &activityRenderer{dots: dots, parent: a}
 	r.anim = &fyne.Animation{
@@ -171,7 +170,6 @@ func (a *activityRenderer) stop() {
 }
 
 func (a *activityRenderer) updateColor() {
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	rr, gg, bb, aa := a.parent.Theme().Color(theme.ColorNameForeground, v).RGBA()
+	rr, gg, bb, aa := theme.ColorForWidget(theme.ColorNameForeground, a.parent).RGBA()
 	a.maxCol = color.NRGBA{R: uint8(rr >> 8), G: uint8(gg >> 8), B: uint8(bb >> 8), A: uint8(aa >> 8)}
 }
