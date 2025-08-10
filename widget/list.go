@@ -392,7 +392,7 @@ func (l *List) contentMinSize() fyne.Size {
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
-func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, th fyne.Theme) (offY float32, minRow int) {
+func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) (offY float32, minRow int) {
 	rowOffset := float32(0)
 	isVisible := false
 	l.visibleRowHeights = l.visibleRowHeights[:0]
@@ -401,7 +401,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 		return
 	}
 
-	padding := th.Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, l.list)
 
 	if len(l.list.itemHeights) == 0 {
 		paddedItemHeight := itemHeight + padding
@@ -702,7 +702,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.wasVisible = append(l.wasVisible, l.visible...)
 	l.visible = l.visible[:0]
 
-	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
+	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		return
 	}
