@@ -169,11 +169,8 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 		}
 	}
 
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	text := canvas.NewText(item.HintText, th.Color(theme.ColorNamePlaceHolder, v))
-	text.TextSize = th.Size(theme.SizeNameCaptionText)
+	text := canvas.NewText(item.HintText, theme.ColorForWidget(theme.ColorNamePlaceHolder, f))
+	text.TextSize = theme.SizeForWidget(theme.SizeNameCaptionText, f)
 	item.helperOutput = text
 	f.updateHelperText(item)
 	textContainer := &fyne.Container{Objects: []fyne.CanvasObject{text}}
@@ -194,13 +191,11 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 }
 
 func (f *Form) createLabel(text string) fyne.CanvasObject {
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	label := &canvas.Text{
 		Text:      text,
 		Alignment: fyne.TextAlignTrailing,
-		Color:     th.Color(theme.ColorNameForeground, v),
-		TextSize:  th.Size(theme.SizeNameText),
+		Color:     theme.ColorForWidget(theme.ColorNameForeground, f),
+		TextSize:  theme.SizeForWidget(theme.SizeNameText, f),
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
 	if f.isVertical() {
@@ -347,9 +342,6 @@ func (f *Form) setValidationError(err error) {
 }
 
 func (f *Form) updateHelperText(item *FormItem) {
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
 	}
@@ -365,10 +357,10 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 	if item.validationError == nil || showHintIfError {
 		item.helperOutput.Text = item.HintText
-		item.helperOutput.Color = th.Color(theme.ColorNamePlaceHolder, v)
+		item.helperOutput.Color = theme.ColorForWidget(theme.ColorNamePlaceHolder, f)
 	} else {
 		item.helperOutput.Text = item.validationError.Error()
-		item.helperOutput.Color = th.Color(theme.ColorNameError, v)
+		item.helperOutput.Color = theme.ColorForWidget(theme.ColorNameError, f)
 	}
 
 	if item.helperOutput.Text == "" {
@@ -380,20 +372,17 @@ func (f *Form) updateHelperText(item *FormItem) {
 }
 
 func (f *Form) updateLabels() {
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	for i, item := range f.Items {
 		l := f.itemGrid.Objects[i*2].(*fyne.Container).Objects[0].(*canvas.Text)
-		l.TextSize = th.Size(theme.SizeNameText)
+		l.TextSize = theme.SizeForWidget(theme.SizeNameText, f)
 		if dis, ok := item.Widget.(fyne.Disableable); ok {
 			if dis.Disabled() {
-				l.Color = th.Color(theme.ColorNameDisabled, v)
+				l.Color = theme.ColorForWidget(theme.ColorNameDisabled, f)
 			} else {
-				l.Color = th.Color(theme.ColorNameForeground, v)
+				l.Color = theme.ColorForWidget(theme.ColorNameForeground, f)
 			}
 		} else {
-			l.Color = th.Color(theme.ColorNameForeground, v)
+			l.Color = theme.ColorForWidget(theme.ColorNameForeground, f)
 		}
 
 		l.Text = item.Text

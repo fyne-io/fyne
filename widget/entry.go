@@ -163,8 +163,6 @@ func (e *Entry) Bind(data binding.String) {
 //
 // Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	th := e.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	e.ExtendBaseWidget(e)
 
 	// initialise
@@ -172,12 +170,12 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.placeholderProvider()
 	e.syncSelectable()
 
-	box := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
-	box.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	box := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameInputBackground, e))
+	box.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, e)
 	border := canvas.NewRectangle(color.Transparent)
-	border.StrokeWidth = th.Size(theme.SizeNameInputBorder)
-	border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
-	border.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	border.StrokeWidth = theme.SizeForWidget(theme.SizeNameInputBorder, e)
+	border.StrokeColor = theme.ColorForWidget(theme.ColorNameInputBorder, e)
+	border.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, e)
 	cursor := canvas.NewRectangle(color.Transparent)
 	cursor.Hide()
 
@@ -1654,9 +1652,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.text.Refresh()
 	r.entry.placeholder.Refresh()
 
-	th := r.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	inputBorder := th.Size(theme.SizeNameInputBorder)
+	inputBorder := theme.SizeForWidget(theme.SizeNameInputBorder, r.entry)
 
 	// correct our scroll wrappers if the wrap mode changed
 	entrySize := r.entry.Size().Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
@@ -1688,16 +1684,16 @@ func (r *entryRenderer) Refresh() {
 	}
 	r.entry.updateCursorAndSelection()
 
-	r.box.FillColor = th.Color(theme.ColorNameInputBackground, v)
-	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	r.box.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, r.entry)
+	r.box.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, r.entry)
 	r.border.CornerRadius = r.box.CornerRadius
 	if focusedAppearance {
-		r.border.StrokeColor = th.Color(theme.ColorNamePrimary, v)
+		r.border.StrokeColor = theme.ColorForWidget(theme.ColorNamePrimary, r.entry)
 	} else {
 		if r.entry.Disabled() {
-			r.border.StrokeColor = th.Color(theme.ColorNameDisabled, v)
+			r.border.StrokeColor = theme.ColorForWidget(theme.ColorNameDisabled, r.entry)
 		} else {
-			r.border.StrokeColor = th.Color(theme.ColorNameInputBorder, v)
+			r.border.StrokeColor = theme.ColorForWidget(theme.ColorNameInputBorder, r.entry)
 		}
 	}
 	if r.entry.ActionItem != nil {
@@ -1706,7 +1702,7 @@ func (r *entryRenderer) Refresh() {
 
 	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
 		if !r.entry.focused && !r.entry.Disabled() && (r.entry.dirty || r.entry.AlwaysShowValidationError) && r.entry.validationError != nil {
-			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
+			r.border.StrokeColor = theme.ColorForWidget(theme.ColorNameError, r.entry)
 		}
 		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()
@@ -1828,13 +1824,11 @@ func (r *entryContentRenderer) Refresh() {
 		placeholder.Hide()
 	}
 
-	th := r.content.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	if focusedAppearance {
 		if fyne.CurrentApp().Settings().ShowAnimations() {
 			r.content.entry.cursorAnim.start()
 		} else {
-			r.cursor.FillColor = th.Color(theme.ColorNamePrimary, v)
+			r.cursor.FillColor = theme.ColorForWidget(theme.ColorNamePrimary, r.content.entry)
 		}
 		r.cursor.Show()
 	} else {

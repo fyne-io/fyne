@@ -69,13 +69,11 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.provider.ExtendBaseWidget(&hl.provider)
 	hl.syncSegments()
 
-	th := hl.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	focus := canvas.NewRectangle(color.Transparent)
-	focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
+	focus.StrokeColor = theme.ColorForWidget(theme.ColorNameFocus, hl)
 	focus.StrokeWidth = 2
 	focus.Hide()
-	under := canvas.NewRectangle(th.Color(theme.ColorNameHyperlink, v))
+	under := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHyperlink, hl))
 	under.Hide()
 	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{&hl.provider, focus, under}, focus: focus, under: under}
 }
@@ -326,13 +324,11 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 
 func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
-	th := r.hl.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
+	r.focus.StrokeColor = theme.ColorForWidget(theme.ColorNameFocus, r.hl)
 	r.focus.Hidden = !r.hl.focused
 	r.focus.Refresh()
-	r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
+	r.under.FillColor = theme.ColorForWidget(theme.ColorNameHyperlink, r.hl)
 	r.under.Hidden = !r.hl.hovered
 	r.under.Refresh()
 }

@@ -121,9 +121,7 @@ func (r *shadowRenderer) Refresh() {
 }
 
 func (r *shadowRenderer) createShadows() {
-	th := theme.CurrentForWidget(r.s)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	fg := th.Color(theme.ColorNameShadow, v)
+	fg := theme.ColorForWidget(theme.ColorNameShadow, r.s)
 
 	switch r.s.typ {
 	case ShadowLeft:
@@ -160,9 +158,7 @@ func (r *shadowRenderer) createShadows() {
 }
 
 func (r *shadowRenderer) refreshShadows() {
-	th := theme.CurrentForWidget(r.s)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	fg := th.Color(theme.ColorNameShadow, v)
+	fg := theme.ColorForWidget(theme.ColorNameShadow, r.s)
 
 	updateShadowEnd(r.l, fg)
 	updateShadowStart(r.r, fg)

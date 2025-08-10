@@ -72,18 +72,15 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 
 // applyTheme updates the progress bar to match the current theme
 func (p *progressRenderer) applyTheme() {
-	th := p.progress.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	primaryColor := th.Color(theme.ColorNamePrimary, v)
-	inputRadius := th.Size(theme.SizeNameInputRadius)
+	primaryColor := theme.ColorForWidget(theme.ColorNamePrimary, p.progress)
+	inputRadius := theme.SizeForWidget(theme.SizeNameInputRadius, p.progress)
 
 	p.background.FillColor = progressBlendColor(primaryColor)
 	p.background.CornerRadius = inputRadius
 	p.bar.FillColor = primaryColor
 	p.bar.CornerRadius = inputRadius
-	p.label.Color = th.Color(theme.ColorNameForegroundOnPrimary, v)
-	p.label.TextSize = th.Size(theme.SizeNameText)
+	p.label.Color = theme.ColorForWidget(theme.ColorNameForegroundOnPrimary, p.progress)
+	p.label.TextSize = theme.SizeForWidget(theme.SizeNameText, p.progress)
 }
 
 func (p *progressRenderer) Refresh() {

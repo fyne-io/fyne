@@ -523,11 +523,9 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
-	th := li.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	li.background = canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	li.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	li.background = canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, li))
+	li.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, li)
 	li.background.Hide()
 
 	objects := []fyne.CanvasObject{li.background, li.child}
@@ -588,15 +586,12 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 }
 
 func (li *listItemRenderer) Refresh() {
-	th := li.item.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	li.item.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	li.item.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, li.item)
 	if li.item.selected {
-		li.item.background.FillColor = th.Color(theme.ColorNameSelection, v)
+		li.item.background.FillColor = theme.ColorForWidget(theme.ColorNameSelection, li.item)
 		li.item.background.Show()
 	} else if li.item.hovered {
-		li.item.background.FillColor = th.Color(theme.ColorNameHover, v)
+		li.item.background.FillColor = theme.ColorForWidget(theme.ColorNameHover, li.item)
 		li.item.background.Show()
 	} else {
 		li.item.background.Hide()

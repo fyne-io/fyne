@@ -435,11 +435,9 @@ func newGridWrapItem(child fyne.CanvasObject, tapped func()) *gridWrapItem {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (gw *gridWrapItem) CreateRenderer() fyne.WidgetRenderer {
 	gw.ExtendBaseWidget(gw)
-	th := gw.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	gw.background = canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	gw.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	gw.background = canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, gw))
+	gw.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, gw)
 	gw.background.Hide()
 
 	objects := []fyne.CanvasObject{gw.background, gw.child}
@@ -500,15 +498,12 @@ func (gw *gridWrapItemRenderer) Layout(size fyne.Size) {
 }
 
 func (gw *gridWrapItemRenderer) Refresh() {
-	th := gw.item.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	gw.item.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	gw.item.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, gw.item)
 	if gw.item.selected {
-		gw.item.background.FillColor = th.Color(theme.ColorNameSelection, v)
+		gw.item.background.FillColor = theme.ColorForWidget(theme.ColorNameSelection, gw.item)
 		gw.item.background.Show()
 	} else if gw.item.hovered {
-		gw.item.background.FillColor = th.Color(theme.ColorNameHover, v)
+		gw.item.background.FillColor = theme.ColorForWidget(theme.ColorNameHover, gw.item)
 		gw.item.background.Show()
 	} else {
 		gw.item.background.Hide()

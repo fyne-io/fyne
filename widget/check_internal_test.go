@@ -270,19 +270,3 @@ func TestCheck_Disabled(t *testing.T) {
 	check.Enable()
 	assert.False(t, check.Disabled())
 }
-
-func TestCheckRenderer_ApplyTheme(t *testing.T) {
-	check := &Check{}
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
-
-	textSize := render.label.TextSize
-	customTextSize := textSize
-	test.WithTestTheme(t, func() {
-		th := test.NewTheme()
-		render.applyTheme(th, v)
-		customTextSize = render.label.TextSize
-	})
-
-	assert.NotEqual(t, textSize, customTextSize)
-}

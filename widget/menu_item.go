@@ -45,21 +45,18 @@ func (i *menuItem) Child() *Menu {
 //
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
-	th := i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, i.parent))
+	background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, i.parent)
 	background.Hide()
-	text := canvas.NewText(i.Item.Label, th.Color(theme.ColorNameForeground, v))
+	text := canvas.NewText(i.Item.Label, theme.ColorForWidget(theme.ColorNameForeground, i.parent))
 	text.Alignment = i.alignment
 	objects := []fyne.CanvasObject{background, text}
 	var expandIcon *canvas.Image
 	if i.Item.ChildMenu != nil {
-		expandIcon = canvas.NewImageFromResource(th.Icon(theme.IconNameMenuExpand))
+		expandIcon = canvas.NewImageFromResource(theme.IconForWidget(theme.IconNameMenuExpand, i.parent))
 		objects = append(objects, expandIcon)
 	}
-	checkIcon := canvas.NewImageFromResource(th.Icon(theme.IconNameConfirm))
+	checkIcon := canvas.NewImageFromResource(theme.IconForWidget(theme.IconNameConfirm, i.parent))
 	if !i.Item.Checked {
 		checkIcon.Hide()
 	}
@@ -70,7 +67,7 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 	var shortcutTexts []*canvas.Text
 	if s, ok := i.Item.Shortcut.(fyne.KeyboardShortcut); ok {
-		shortcutTexts = textsForShortcut(s, th)
+		shortcutTexts = i.textsForShortcut(s)
 		for _, t := range shortcutTexts {
 			objects = append(objects, t)
 		}
@@ -289,13 +286,11 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuItemRenderer) updateVisuals() {
-	th := r.i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	r.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, r.i.parent)
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
 	} else if r.i.isActive() {
-		r.background.FillColor = th.Color(theme.ColorNameFocus, v)
+		r.background.FillColor = theme.ColorForWidget(theme.ColorNameFocus, r.i.parent)
 		r.background.Show()
 	} else {
 		r.background.Hide()
@@ -312,8 +307,8 @@ func (r *menuItemRenderer) updateVisuals() {
 	} else {
 		r.checkIcon.Hide()
 	}
-	r.updateIcon(r.checkIcon, th.Icon(theme.IconNameConfirm))
-	r.updateIcon(r.expandIcon, th.Icon(theme.IconNameMenuExpand))
+	r.updateIcon(r.checkIcon, theme.IconForWidget(theme.IconNameConfirm, r.i.parent))
+	r.updateIcon(r.expandIcon, theme.IconForWidget(theme.IconNameMenuExpand, r.i.parent))
 	r.updateIcon(r.icon, r.i.Item.Icon)
 }
 
@@ -350,30 +345,26 @@ func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 }
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
-	th := r.i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	text.TextSize = th.Size(theme.SizeNameText)
+	text.TextSize = theme.SizeForWidget(theme.SizeNameText, r.i.parent)
 	if r.i.Item.Disabled {
-		text.Color = th.Color(theme.ColorNameDisabled, v)
+		text.Color = theme.ColorForWidget(theme.ColorNameDisabled, r.i.parent)
 	} else {
 		if shortcut {
-			text.Color = shortcutColor(th)
+			text.Color = r.i.shortcutColor()
 		} else {
-			text.Color = th.Color(theme.ColorNameForeground, v)
+			text.Color = theme.ColorForWidget(theme.ColorNameForeground, r.i.parent)
 		}
 	}
 	text.Refresh()
 }
 
-func shortcutColor(th fyne.Theme) color.Color {
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	r, g, b, a := th.Color(theme.ColorNameForeground, v).RGBA()
+func (i *menuItem) shortcutColor() color.Color {
+	r, g, b, a := theme.ColorForWidget(theme.ColorNameForeground, i.parent).RGBA()
 	a = uint32(float32(a) * 0.95)
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
-func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.Text) {
+func (i *menuItem) textsForShortcut(sc fyne.KeyboardShortcut) (texts []*canvas.Text) {
 	// add modifier
 	b := strings.Builder{}
 	mods := sc.Mod()
@@ -389,7 +380,7 @@ func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.
 	if mods&fyne.KeyModifierSuper != 0 {
 		b.WriteString(textModifierSuper)
 	}
-	shortColor := shortcutColor(th)
+	shortColor := i.shortcutColor()
 	if b.Len() > 0 {
 		t := canvas.NewText(b.String(), shortColor)
 		t.TextStyle = styleModifiers

@@ -63,20 +63,17 @@ func (i *FileIcon) MinSize() fyne.Size {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
-	th := i.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	i.ExtendBaseWidget(i)
 	i.setURI(i.URI)
 
 	// TODO remove background when `SetSelected` is gone.
-	background := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameSelection, i))
 	background.Hide()
 
 	s := &fileIconRenderer{file: i, background: background}
 	s.img = canvas.NewImageFromResource(s.file.resource)
 	s.img.FillMode = canvas.ImageFillContain
-	s.ext = canvas.NewText(s.file.extension, th.Color(theme.ColorNameBackground, v))
+	s.ext = canvas.NewText(s.file.extension, theme.ColorForWidget(theme.ColorNameBackground, i))
 	s.ext.Alignment = fyne.TextAlignCenter
 
 	s.SetObjects([]fyne.CanvasObject{s.background, s.img, s.ext})
@@ -172,20 +169,17 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 }
 
 func (s *fileIconRenderer) Refresh() {
-	th := s.file.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	s.file.setURI(s.file.URI)
 
 	if s.file.Selected {
 		s.background.Show()
-		s.ext.Color = th.Color(theme.ColorNameSelection, v)
+		s.ext.Color = theme.ColorForWidget(theme.ColorNameSelection, s.file)
 		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
 			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
 		}
 	} else {
 		s.background.Hide()
-		s.ext.Color = th.Color(theme.ColorNameBackground, v)
+		s.ext.Color = theme.ColorForWidget(theme.ColorNameBackground, s.file)
 		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
 			s.img.Resource = res.Original()
 		}

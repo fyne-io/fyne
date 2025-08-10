@@ -74,10 +74,8 @@ func (p *infProgressRenderer) Refresh() {
 		return
 	}
 
-	th := p.progress.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	cornerRadius := th.Size(theme.SizeNameInputRadius)
-	primaryColor := th.Color(theme.ColorNamePrimary, v)
+	cornerRadius := theme.SizeForWidget(theme.SizeNameInputRadius, p.progress)
+	primaryColor := theme.ColorForWidget(theme.ColorNamePrimary, p.progress)
 
 	p.background.FillColor = progressBlendColor(primaryColor)
 	p.background.CornerRadius = cornerRadius
@@ -167,11 +165,9 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
-	th := p.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	primaryColor := th.Color(theme.ColorNamePrimary, v)
-	cornerRadius := th.Size(theme.SizeNameInputRadius)
+	primaryColor := theme.ColorForWidget(theme.ColorNamePrimary, p)
+	cornerRadius := theme.SizeForWidget(theme.SizeNameInputRadius, p)
 
 	render := &infProgressRenderer{
 		background: canvas.Rectangle{
