@@ -86,13 +86,13 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
 	case *fyne.Container:
 		overrideContainer(c, s)
 	default:
-		overrides.Store(c, s)
+		storeOverride(c, s)
 	}
 }
 
 func overrideWidget(w fyne.Widget, s *overrideScope) {
 	ResetThemeCaches()
-	overrides.Store(w, s)
+	storeOverride(w, s)
 
 	r := Renderer(w)
 	if r == nil {
@@ -112,4 +112,11 @@ func lookupOverride(o fyne.CanvasObject) (*overrideScope, bool) {
 	currentOverrideObj = o
 	currentOverrideScope = s
 	return s, ok
+}
+
+func storeOverride(o fyne.CanvasObject, s *overrideScope) {
+	if currentOverrideObj == o {
+		currentOverrideScope = s
+	}
+	overrides.Store(o, s)
 }
