@@ -87,15 +87,13 @@ func (s *Select) ClearSelected() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	th := s.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	icon := NewIcon(th.Icon(theme.IconNameArrowDropDown))
+	icon := NewIcon(theme.IconForWidget(theme.IconNameArrowDropDown, s))
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
 	txtProv := NewRichTextWithText(s.Selected)
-	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
+	txtProv.inset = fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNamePadding, s))
 	txtProv.ExtendBaseWidget(txtProv)
 	txtProv.Truncation = fyne.TextTruncateEllipsis
 	if s.Disabled() {
@@ -104,13 +102,13 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	background := &canvas.Rectangle{}
 	tapBG := canvas.NewRectangle(color.Transparent)
-	s.tapAnim = newButtonTapAnimation(tapBG, s, th)
+	s.tapAnim = newButtonTapAnimation(tapBG, s, theme.CurrentForWidget(s))
 	s.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{background, tapBG, txtProv, icon}
 	r := &selectRenderer{icon, txtProv, background, objects, s}
-	background.FillColor = r.bgColor(th, v)
-	background.CornerRadius = th.Size(theme.SizeNameInputRadius)
-	r.updateIcon(th)
+	background.FillColor = r.bgColor()
+	background.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, s)
+	r.updateIcon()
 	r.updateLabel()
 	return r
 }
@@ -410,12 +408,9 @@ func (s *selectRenderer) MinSize() fyne.Size {
 }
 
 func (s *selectRenderer) Refresh() {
-	th := s.combo.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	s.updateLabel()
-	s.updateIcon(th)
-	s.background.FillColor = s.bgColor(th, v)
+	s.updateIcon()
+	s.background.FillColor = s.bgColor()
 	s.background.CornerRadius = s.combo.Theme().Size(theme.SizeNameInputRadius)
 
 	s.Layout(s.combo.Size())
@@ -429,21 +424,21 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-func (s *selectRenderer) bgColor(th fyne.Theme, v fyne.ThemeVariant) color.Color {
+func (s *selectRenderer) bgColor() color.Color {
 	if s.combo.Disabled() {
-		return th.Color(theme.ColorNameDisabledButton, v)
+		return theme.ColorForWidget(theme.ColorNameDisabledButton, s.combo)
 	}
 	if s.combo.focused {
-		return th.Color(theme.ColorNameFocus, v)
+		return theme.ColorForWidget(theme.ColorNameFocus, s.combo)
 	}
 	if s.combo.hovered {
-		return th.Color(theme.ColorNameHover, v)
+		return theme.ColorForWidget(theme.ColorNameHover, s.combo)
 	}
-	return th.Color(theme.ColorNameInputBackground, v)
+	return theme.ColorForWidget(theme.ColorNameInputBackground, s.combo)
 }
 
-func (s *selectRenderer) updateIcon(th fyne.Theme) {
-	icon := th.Icon(theme.IconNameArrowDropDown)
+func (s *selectRenderer) updateIcon() {
+	icon := theme.IconForWidget(theme.IconNameArrowDropDown, s.combo)
 	if s.combo.Disabled() {
 		s.icon.Resource = theme.NewDisabledResource(icon)
 	} else {

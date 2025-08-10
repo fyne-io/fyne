@@ -1164,18 +1164,16 @@ func newTableCells(t *Table) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	th := c.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	marker := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
-	marker.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
-	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	marker := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameSelection, c))
+	marker.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, c)
+	hover := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, c))
+	hover.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, c)
 
 	r := &tableCellsRenderer{
 		cells:   c,
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
-		headRowBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
-		headRowStickyBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
+		headRowBG: canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHeaderBackground, c)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
+		headRowStickyBG: canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHeaderBackground, c)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		marker: marker, hover: hover,
 	}
 
@@ -1267,10 +1265,7 @@ func (r *tableCellsRenderer) Refresh() {
 }
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
-	th := r.cells.t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	separatorThickness := th.Size(theme.SizeNamePadding)
+	separatorThickness := theme.SizeForWidget(theme.SizeNamePadding, r.cells.t)
 	dataRows, dataCols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		dataRows, dataCols = r.cells.t.Length()
@@ -1347,7 +1342,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	}
 
 	inline := r.refreshHeaders(visibleRowHeights, visibleColWidths, offX, offY, startRow, maxRow, startCol, maxCol,
-		separatorThickness, th, v)
+		separatorThickness)
 	cells = append(cells, inline...)
 
 	offX -= r.cells.t.content.Offset.X
@@ -1390,11 +1385,11 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	}
 
 	r.moveIndicators()
-	r.marker.FillColor = th.Color(theme.ColorNameSelection, v)
-	r.marker.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	r.marker.FillColor = theme.ColorForWidget(theme.ColorNameSelection, r.cells.t)
+	r.marker.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, r.cells.t)
 	r.marker.Refresh()
-	r.hover.FillColor = th.Color(theme.ColorNameHover, v)
-	r.hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	r.hover.FillColor = theme.ColorForWidget(theme.ColorNameHover, r.cells.t)
+	r.hover.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, r.cells.t)
 	r.hover.Refresh()
 }
 
@@ -1607,7 +1602,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 }
 
 func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32,
-	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant,
+	startRow, maxRow, startCol, maxCol int, separatorThickness float32,
 ) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
@@ -1701,18 +1696,19 @@ func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths 
 	r.cells.t.left.Content.(*fyne.Container).Objects = over
 	r.cells.t.left.Content.Refresh()
 
+	table := r.cells.t
 	r.headColBG.Hidden = !r.cells.t.ShowHeaderColumn
-	r.headColBG.FillColor = th.Color(theme.ColorNameHeaderBackground, v)
+	r.headColBG.FillColor = theme.ColorForWidget(theme.ColorNameHeaderBackground, table)
 	r.headColBG.Resize(fyne.NewSize(colWidth, r.cells.t.Size().Height))
 
 	r.headColStickyBG.Hidden = !r.cells.t.ShowHeaderColumn
-	r.headColStickyBG.FillColor = th.Color(theme.ColorNameHeaderBackground, v)
+	r.headColStickyBG.FillColor = theme.ColorForWidget(theme.ColorNameHeaderBackground, table)
 	r.headColStickyBG.Resize(fyne.NewSize(colWidth, r.cells.t.stuckHeight+rowHeight))
 	r.headRowBG.Hidden = !r.cells.t.ShowHeaderRow
-	r.headRowBG.FillColor = th.Color(theme.ColorNameHeaderBackground, v)
+	r.headRowBG.FillColor = theme.ColorForWidget(theme.ColorNameHeaderBackground, table)
 	r.headRowBG.Resize(fyne.NewSize(r.cells.t.Size().Width, rowHeight))
 	r.headRowStickyBG.Hidden = !r.cells.t.ShowHeaderRow
-	r.headRowStickyBG.FillColor = th.Color(theme.ColorNameHeaderBackground, v)
+	r.headRowStickyBG.FillColor = theme.ColorForWidget(theme.ColorNameHeaderBackground, table)
 	r.headRowStickyBG.Resize(fyne.NewSize(r.cells.t.stuckWidth+colWidth, rowHeight))
 	r.cells.t.corner.Content.(*fyne.Container).Objects = corner
 	r.cells.t.corner.Content.Refresh()
