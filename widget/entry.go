@@ -164,7 +164,7 @@ func (e *Entry) Bind(data binding.String) {
 // Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	th := e.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	e.ExtendBaseWidget(e)
 
 	// initialise
@@ -1655,7 +1655,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 
 	th := r.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 
 	// correct our scroll wrappers if the wrap mode changed
@@ -1829,7 +1829,7 @@ func (r *entryContentRenderer) Refresh() {
 	}
 
 	th := r.content.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	if focusedAppearance {
 		if fyne.CurrentApp().Settings().ShowAnimations() {
 			r.content.entry.cursorAnim.start()

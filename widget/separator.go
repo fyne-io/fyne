@@ -34,7 +34,7 @@ func NewSeparator() *Separator {
 func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	th := s.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	var col color.Color
 	if s.invert {
 		col = th.Color(theme.ColorNameForeground, v)
@@ -72,7 +72,7 @@ func (r *separatorRenderer) MinSize() fyne.Size {
 
 func (r *separatorRenderer) Refresh() {
 	th := r.d.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if r.d.invert {
 		r.bar.FillColor = th.Color(theme.ColorNameForeground, v)

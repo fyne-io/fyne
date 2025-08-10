@@ -301,7 +301,7 @@ func (r *selectableRenderer) Objects() []fyne.CanvasObject {
 func (r *selectableRenderer) Refresh() {
 	r.buildSelection()
 	selections := r.selections
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	selectionColor := r.sel.theme.Color(theme.ColorNameSelection, v)
 	for _, selection := range selections {
@@ -327,7 +327,7 @@ func (r *selectableRenderer) Refresh() {
 // all rectangles to comply with the occurrence order as stated above.
 func (r *selectableRenderer) buildSelection() {
 	th := r.sel.theme
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	textSize := th.Size(r.sel.getSizeName())
 
 	cursorRow, cursorCol := r.sel.cursorRow, r.sel.cursorColumn

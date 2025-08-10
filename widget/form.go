@@ -170,7 +170,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	}
 
 	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	text := canvas.NewText(item.HintText, th.Color(theme.ColorNamePlaceHolder, v))
 	text.TextSize = th.Size(theme.SizeNameCaptionText)
@@ -195,7 +195,7 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 
 func (f *Form) createLabel(text string) fyne.CanvasObject {
 	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	label := &canvas.Text{
 		Text:      text,
 		Alignment: fyne.TextAlignTrailing,
@@ -348,7 +348,7 @@ func (f *Form) setValidationError(err error) {
 
 func (f *Form) updateHelperText(item *FormItem) {
 	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if item.helperOutput == nil {
 		return // testing probably, either way not rendered yet
@@ -381,7 +381,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	for i, item := range f.Items {
 		l := f.itemGrid.Objects[i*2].(*fyne.Container).Objects[0].(*canvas.Text)

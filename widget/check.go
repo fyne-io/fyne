@@ -163,7 +163,7 @@ func (c *Check) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	th := c.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	c.ExtendBaseWidget(c)
 	bg := canvas.NewImageFromResource(th.Icon(theme.IconNameCheckButtonFill))
@@ -329,7 +329,7 @@ func (c *checkRenderer) applyTheme(th fyne.Theme, v fyne.ThemeVariant) {
 
 func (c *checkRenderer) Refresh() {
 	th := c.check.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	c.applyTheme(th, v)
 	c.updateLabel()

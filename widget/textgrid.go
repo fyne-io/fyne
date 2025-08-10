@@ -360,7 +360,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 
 	th := t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	TextGridStyleDefault = &CustomTextGridStyle{}
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
 
@@ -664,7 +664,7 @@ func (t *textGridRow) setRow(row int) {
 
 func (t *textGridRow) appendTextCell(str rune) {
 	th := t.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	text := canvas.NewText(string(str), th.Color(theme.ColorNameForeground, v))
 	text.TextStyle.Monospace = true
@@ -699,7 +699,7 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	underline := t.objects[pos*3+2].(*canvas.Line)
 
 	th := t.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	fg := th.Color(theme.ColorNameForeground, v)
 	text.TextSize = th.Size(theme.SizeNameText)
 
@@ -898,7 +898,7 @@ func (t *textGridRowRenderer) MinSize() fyne.Size {
 
 func (t *textGridRowRenderer) Refresh() {
 	th := t.obj.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
 	t.obj.updateGridSize(t.obj.text.text.Size())
 	t.obj.refreshCells()

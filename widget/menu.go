@@ -326,7 +326,7 @@ func newMenuBox(items []fyne.CanvasObject) *menuBox {
 
 func (b *menuBox) CreateRenderer() fyne.WidgetRenderer {
 	th := b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameMenuBackground, v))
 	cont := &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: b.items}
@@ -359,7 +359,7 @@ func (r *menuBoxRenderer) MinSize() fyne.Size {
 
 func (r *menuBoxRenderer) Refresh() {
 	th := r.b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	r.background.FillColor = th.Color(theme.ColorNameMenuBackground, v)
 	r.background.Refresh()

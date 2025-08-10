@@ -88,7 +88,7 @@ func (s *Select) ClearSelected() {
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	th := s.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	icon := NewIcon(th.Icon(theme.IconNameArrowDropDown))
 	if s.PlaceHolder == "" {
@@ -411,7 +411,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 
 func (s *selectRenderer) Refresh() {
 	th := s.combo.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	s.updateLabel()
 	s.updateIcon(th)

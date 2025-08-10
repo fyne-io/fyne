@@ -57,7 +57,7 @@ func (t *DocTabs) Append(item *TabItem) {
 func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	th := t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{

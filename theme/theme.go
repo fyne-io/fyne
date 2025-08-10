@@ -67,6 +67,15 @@ func LightTheme() fyne.Theme {
 	return theme
 }
 
+// CurrentVariant returns the current [fyne.ThemeVariant] which is
+// determined by user and/or system settings.
+// It is a shorthand for `fyne.CurrentApp().Settings().ThemeVariant()`
+//
+// Since: 2.7
+func CurrentVariant() fyne.ThemeVariant {
+	return fyne.CurrentApp().Settings().ThemeVariant()
+}
+
 type builtinTheme struct {
 	variant fyne.ThemeVariant
 

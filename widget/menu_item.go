@@ -46,7 +46,7 @@ func (i *menuItem) Child() *Menu {
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	th := i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
@@ -290,7 +290,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 
 func (r *menuItemRenderer) updateVisuals() {
 	th := r.i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	if fyne.CurrentDevice().IsMobile() {
 		r.background.Hide()
@@ -351,7 +351,7 @@ func (r *menuItemRenderer) updateIcon(img *canvas.Image, rsc fyne.Resource) {
 
 func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
 	th := r.i.parent.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	text.TextSize = th.Size(theme.SizeNameText)
 	if r.i.Item.Disabled {
@@ -367,7 +367,7 @@ func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
 }
 
 func shortcutColor(th fyne.Theme) color.Color {
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	r, g, b, a := th.Color(theme.ColorNameForeground, v).RGBA()
 	a = uint32(float32(a) * 0.95)
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}

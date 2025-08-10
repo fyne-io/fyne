@@ -858,7 +858,7 @@ func (n *treeNode) Content() fyne.CanvasObject {
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 	th := n.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
@@ -981,7 +981,7 @@ func (r *treeNodeRenderer) Refresh() {
 
 func (r *treeNodeRenderer) partialRefresh() {
 	th := r.treeNode.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()

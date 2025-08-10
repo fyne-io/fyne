@@ -350,7 +350,7 @@ func (s *Slider) Disabled() bool {
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	th := s.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	track := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
 	active := canvas.NewRectangle(th.Color(theme.ColorNameForeground, v))
@@ -429,7 +429,7 @@ type sliderRenderer struct {
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
 	th := s.slider.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	s.track.FillColor = th.Color(theme.ColorNameInputBackground, v)
 	if s.slider.disabled {

@@ -273,7 +273,7 @@ func TestCheck_Disabled(t *testing.T) {
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
 
 	textSize := render.label.TextSize

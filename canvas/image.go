@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
 )
 
 // ImageFill defines the different type of ways an image can stretch to fill its space.
@@ -285,7 +286,7 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 		if res, ok := i.Resource.(fyne.ThemedResource); i.isSVG && ok {
 			th := cache.WidgetTheme(i)
 			if th != nil {
-				col := th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant())
+				col := th.Color(res.ThemeColorName(), theme.CurrentVariant())
 				var err error
 				content, err = svg.Colorize(content, col)
 				if err != nil {

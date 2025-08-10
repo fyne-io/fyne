@@ -92,7 +92,7 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	th := b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
@@ -305,7 +305,7 @@ func (r *buttonRenderer) Refresh() {
 // must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {
 		bgColor := color.Color(color.Transparent)

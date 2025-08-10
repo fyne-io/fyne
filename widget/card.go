@@ -35,7 +35,7 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	th := c.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	header := canvas.NewText(c.Title, th.Color(theme.ColorNameForeground, v))
 	header.TextStyle.Bold = true
@@ -225,7 +225,7 @@ func (c *cardRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
 	th := c.card.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if c.header != nil {
 		c.header.TextSize = th.Size(theme.SizeNameHeadingText)

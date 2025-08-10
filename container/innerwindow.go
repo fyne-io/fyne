@@ -64,7 +64,7 @@ func (w *InnerWindow) Close() {
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
 	th := w.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	min := newBorderButton(theme.WindowMinimizeIcon(), modeMinimize, th, w.OnMinimized)
 	if w.OnMinimized == nil {
@@ -214,7 +214,7 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 
 func (i *innerWindowRenderer) Refresh() {
 	th := i.win.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	i.bg.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)

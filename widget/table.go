@@ -1165,7 +1165,7 @@ func newTableCells(t *Table) *tableCells {
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	th := c.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	marker := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
 	marker.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
@@ -1268,7 +1268,7 @@ func (r *tableCellsRenderer) Refresh() {
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	th := r.cells.t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	separatorThickness := th.Size(theme.SizeNamePadding)
 	dataRows, dataCols := 0, 0

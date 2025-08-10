@@ -253,7 +253,7 @@ func newDivider(split *Split) *divider {
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
 	th := d.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
 	foreground := canvas.NewRectangle(th.Color(theme.ColorNameForeground, v))
@@ -363,7 +363,7 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 
 func (r *dividerRenderer) Refresh() {
 	th := r.divider.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if r.divider.hovered {
 		r.background.FillColor = th.Color(theme.ColorNameHover, v)

@@ -316,7 +316,7 @@ func (r *baseTabsRenderer) applyTheme(t baseTabs) {
 		r.action.SetIcon(moreIcon(t))
 	}
 	th := theme.CurrentForWidget(t)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	r.divider.FillColor = th.Color(theme.ColorNameShadow, v)
 	r.indicator.FillColor = th.Color(theme.ColorNamePrimary, v)
@@ -439,7 +439,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fy
 		r.sizeAnimation = nil
 	}
 
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	r.indicator.FillColor = th.Color(theme.ColorNamePrimary, v)
 	if r.indicator.Position().IsZero() {
 		r.indicator.Move(pos)
@@ -525,7 +525,7 @@ type tabButton struct {
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	th := b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
@@ -679,7 +679,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	th := r.button.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if r.button.hovered && !r.button.Disabled() {
 		r.background.FillColor = th.Color(theme.ColorNameHover, v)
@@ -769,7 +769,7 @@ type tabCloseButton struct {
 func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	th := b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
@@ -831,7 +831,7 @@ func (r *tabCloseButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabCloseButtonRenderer) Refresh() {
 	th := r.button.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	if r.button.hovered {
 		r.background.FillColor = th.Color(theme.ColorNameHover, v)

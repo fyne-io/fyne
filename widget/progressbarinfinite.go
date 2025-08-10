@@ -75,7 +75,7 @@ func (p *infProgressRenderer) Refresh() {
 	}
 
 	th := p.progress.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 	cornerRadius := th.Size(theme.SizeNameInputRadius)
 	primaryColor := th.Color(theme.ColorNamePrimary, v)
 
@@ -168,7 +168,7 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	th := p.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	primaryColor := th.Color(theme.ColorNamePrimary, v)
 	cornerRadius := th.Size(theme.SizeNameInputRadius)

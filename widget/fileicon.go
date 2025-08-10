@@ -64,7 +64,7 @@ func (i *FileIcon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	th := i.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	i.ExtendBaseWidget(i)
 	i.setURI(i.URI)
@@ -173,7 +173,7 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 
 func (s *fileIconRenderer) Refresh() {
 	th := s.file.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+	v := theme.CurrentVariant()
 
 	s.file.setURI(s.file.URI)
 
