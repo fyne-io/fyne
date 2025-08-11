@@ -76,6 +76,7 @@ func (p *painter) Init() {
 	p.lineProgram = p.createProgram("line_es")
 	p.rectangleProgram = p.createProgram("rectangle_es")
 	p.roundRectangleProgram = p.createProgram("round_rectangle_es")
+	p.arcProgram = p.createProgram("arc_es")
 }
 
 type esContext struct{}
