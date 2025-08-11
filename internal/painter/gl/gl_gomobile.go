@@ -53,7 +53,7 @@ type (
 )
 
 var (
-	compiled          []Program // avoid multiple compilations with the re-used mobile GUI context
+	compiled          []ProgramState // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
 	noShader          = Shader{}
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
@@ -68,17 +68,76 @@ func (p *painter) Init() {
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {
-		compiled = []Program{
-			p.createProgram("simple_es"),
-			p.createProgram("line_es"),
-			p.createProgram("rectangle_es"),
-			p.createProgram("round_rectangle_es"),
+		p.program = ProgramState{
+			ref:        p.createProgram("simple_es"),
+			buff:       p.createBuffer(20),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.program, "text", "alpha")
+		p.enableAttribArrays(p.program, "vert", "vertTexCoord")
+
+		p.lineProgram = ProgramState{
+			ref:        p.createProgram("line_es"),
+			buff:       p.createBuffer(24),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.lineProgram, "color", "feather", "lineWidth")
+		p.enableAttribArrays(p.lineProgram, "vert", "normal")
+
+		p.rectangleProgram = ProgramState{
+			ref:        p.createProgram("rectangle_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(
+			p.rectangleProgram,
+			"frame_size", "rect_coords", "stroke_width", "fill_color", "stroke_color",
+		)
+		p.enableAttribArrays(p.rectangleProgram, "vert", "normal")
+
+		p.roundRectangleProgram = ProgramState{
+			ref:        p.createProgram("round_rectangle_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.roundRectangleProgram,
+			"frame_size", "rect_coords",
+			"stroke_width_half", "rect_size_half",
+			"radius", "edge_softness",
+			"fill_color", "stroke_color",
+		)
+		p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
+		compiled = []ProgramState{
+			p.program,
+			p.lineProgram,
+			p.rectangleProgram,
+			p.roundRectangleProgram,
 		}
 	}
+
 	p.program = compiled[0]
 	p.lineProgram = compiled[1]
 	p.rectangleProgram = compiled[2]
 	p.roundRectangleProgram = compiled[3]
+}
+
+func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
+	for _, name := range names {
+		u := p.ctx.GetUniformLocation(pState.ref, name)
+		pState.uniforms[name] = &UniformState{ref: u}
+	}
+}
+
+func (p *painter) enableAttribArrays(pState ProgramState, names ...string) {
+	for _, name := range names {
+		a := p.ctx.GetAttribLocation(pState.ref, name)
+		p.ctx.EnableVertexAttribArray(a)
+		pState.attributes[name] = a
+	}
 }
 
 type mobileContext struct {
@@ -114,6 +173,11 @@ func (c *mobileContext) BlendFunc(srcFactor, destFactor uint32) {
 func (c *mobileContext) BufferData(target uint32, points []float32, usage uint32) {
 	data := toLEByteOrder(points...)
 	c.glContext.BufferData(gl.Enum(target), data, gl.Enum(usage))
+}
+
+func (c *mobileContext) BufferSubData(target uint32, points []float32) {
+	data := toLEByteOrder(points...)
+	c.glContext.BufferSubData(gl.Enum(target), data)
 }
 
 func (c *mobileContext) Clear(mask uint32) {

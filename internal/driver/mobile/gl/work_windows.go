@@ -124,6 +124,10 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 		syscall.Syscall6(glBufferData.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), c.args.a2, 0, 0)
 		return
 	},
+	glfnBufferSubData: func(c call) (ret uintptr) {
+		syscall.Syscall6(glBufferSubData.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, uintptr(c.parg), 0, 0)
+		return
+	},
 	glfnClear: func(c call) (ret uintptr) {
 		syscall.Syscall(glClear.Addr(), 1, c.args.a0, 0, 0)
 		return
@@ -303,6 +307,7 @@ var (
 	glBlendColor              = libGLESv2.NewProc("glBlendColor")
 	glBlendFunc               = libGLESv2.NewProc("glBlendFunc")
 	glBufferData              = libGLESv2.NewProc("glBufferData")
+	glBufferSubData           = libGLESv2.NewProc("glBufferSubData")
 	glClear                   = libGLESv2.NewProc("glClear")
 	glClearColor              = libGLESv2.NewProc("glClearColor")
 	glCompileShader           = libGLESv2.NewProc("glCompileShader")
