@@ -81,7 +81,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	origImg := painter.PaintImage(img, c, width, height)
+	origImg := img.Image
+	if img.FillMode != canvas.ImageFillCover {
+		origImg = painter.PaintImage(img, c, width, height)
+	}
 
 	if img.FillMode == canvas.ImageFillContain {
 		imgAspect := img.Aspect()
@@ -96,6 +99,28 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 			scaledY += (height - newHeight) / 2
 			height = newHeight
 		}
+	} else if img.FillMode == canvas.ImageFillCover {
+		inner := origImg.Bounds()
+		imgAspect := img.Aspect()
+		objAspect := float32(width) / float32(height)
+
+		if objAspect > imgAspect {
+			newHeight := float32(width) / imgAspect
+			heightPad := (newHeight - float32(height)) / 2
+			pixPad := int((heightPad / newHeight) * float32(inner.Dy()))
+
+			inner = image.Rect(inner.Min.X, inner.Min.Y+pixPad, inner.Max.X, inner.Max.Y-pixPad)
+		} else if objAspect < imgAspect {
+			newWidth := float32(height) * imgAspect
+			widthPad := (newWidth - float32(width)) / 2
+			pixPad := int((widthPad / newWidth) * float32(inner.Dx()))
+
+			inner = image.Rect(inner.Min.X+pixPad, inner.Min.Y, inner.Max.X-pixPad, inner.Max.Y)
+		}
+
+		subImg := image.NewRGBA(inner.Bounds())
+		draw.Copy(subImg, inner.Min, origImg, inner, draw.Over, nil)
+		origImg = subImg
 	}
 
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
@@ -241,14 +266,22 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, base, clip)
+	topRightRadius := painter.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, base, clip)
 }
 
 func drawSquare(c fyne.Canvas, sq *canvas.Square, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, base, clip)
+	topRightRadius := painter.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
+	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, base, clip)
 }
 
-func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	width, height := obj.Size().Components()
 	if aspect != 0 {
 		frameAspect := width / height
@@ -267,7 +300,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		pos = pos.AddXY(xPad, yPad)
 	}
 
-	if (stroke != nil && strokeWidth > 0) || radius != 0 { // use a rasterizer if there is a stroke or radius
+	if (stroke != nil && strokeWidth > 0) || topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0 { // use a rasterizer if there is a stroke or radius
 		drawOblongStroke(c, obj, width, height, pos, base, clip)
 		return
 	}

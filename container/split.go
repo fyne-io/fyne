@@ -310,14 +310,14 @@ func (d *divider) Dragged(e *fyne.DragEvent) {
 
 func (d *divider) MouseIn(event *desktop.MouseEvent) {
 	d.hovered = true
-	d.split.Refresh()
+	d.Refresh()
 }
 
 func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
 
 func (d *divider) MouseOut() {
 	d.hovered = false
-	d.split.Refresh()
+	d.Refresh()
 }
 
 var _ fyne.WidgetRenderer = (*dividerRenderer)(nil)

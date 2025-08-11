@@ -471,11 +471,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 
 				d.DoFromGoroutine(func() {
 					wid.Dragged(ev)
-				}, true)
+				}, false)
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			d.DoFromGoroutine(wid.DragEnd, true)
+			d.DoFromGoroutine(wid.DragEnd, false)
 		}()
 	})
 }
