@@ -137,3 +137,8 @@ func watchTheme(s *settings) {
 func (a *fyneApp) registerRepositories() {
 	// no-op
 }
+
+func (s *settings) applyVariant(variant fyne.ThemeVariant) {
+	s.variant = variant
+	s.apply()
+}

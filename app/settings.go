@@ -87,11 +87,6 @@ func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
 	s.apply()
 }
 
-func (s *settings) applyVariant(variant fyne.ThemeVariant) {
-	s.variant = variant
-	s.apply()
-}
-
 func (s *settings) Scale() float32 {
 	if s.schema.Scale < 0.0 {
 		return 1.0 // catching any really old data still using the `-1`  value for "auto" scale
