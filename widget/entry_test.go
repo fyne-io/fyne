@@ -1787,6 +1787,23 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
+func TestEntry_IconSizeAndPlacement(t *testing.T) {
+	entry := widget.NewEntry()
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	entry.SetText("SomeText")
+	r := test.TempWidgetRenderer(t, entry)
+	r.Layout(entry.MinSize())
+
+	iconObj := r.Objects()[3].(*canvas.Image)
+	// Icon should be at the left, with correct size
+	assert.NotNil(t, iconObj)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Width)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Height)
+	assert.Equal(t, fyne.NewPos(theme.InnerPadding(), theme.InnerPadding()), iconObj.Position())
+	assert.Equal(t, icon, iconObj.Resource)
+}
+
 func TestEntry_SetIcon(t *testing.T) {
 	entry := widget.NewEntry()
 	assert.Nil(t, entry.Icon)

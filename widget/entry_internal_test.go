@@ -295,31 +295,22 @@ func TestEntry_CallbackLocking(t *testing.T) {
 	assert.Equal(t, 7, called)
 }
 
-func TestEntry_IconContentSizeAndPlacement(t *testing.T) {
+func TestEntry_ContentSizeAndPlacementWithIcon(t *testing.T) {
 	entry := NewEntry()
+	entry.SetIcon(theme.MailComposeIcon())
+	entry.SetText("SomeText")
+	renderer := entry.CreateRenderer()
+	contentPos := fyne.NewPos(theme.InnerPadding()+theme.LineSpacing()+theme.IconInlineSize(), theme.InputBorderSize())
+
+	renderer.Layout(entry.MinSize())
+	// Scrollable content should be positioned after the icon, with correct padding
+	assert.Equal(t, contentPos, entry.scroll.Position())
+
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = fyne.ScrollNone
-	icon := theme.MailComposeIcon()
-	entry.SetIcon(icon)
-	entry.SetText("SomeText")
-	r := test.TempWidgetRenderer(t, entry)
-	r.Layout(entry.MinSize())
-
-	var iconObj *canvas.Image
-	for _, obj := range r.Objects() {
-		if img, ok := obj.(*canvas.Image); ok && img.Resource == icon {
-			iconObj = img
-			break
-		}
-	}
-
-	// Icon should be at the left, with correct size
-	assert.NotNil(t, iconObj)
-	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Width)
-	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Height)
-	assert.Equal(t, fyne.NewPos(theme.InnerPadding(), theme.InnerPadding()), iconObj.Position())
+	renderer.Layout(entry.MinSize())
 	// Content should be positioned after the icon, with correct padding
-	assert.Equal(t, fyne.NewPos(theme.InnerPadding()+theme.LineSpacing()+theme.IconInlineSize(), theme.InputBorderSize()), entry.content.Position())
+	assert.Equal(t, contentPos, entry.content.Position())
 }
 
 func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {
