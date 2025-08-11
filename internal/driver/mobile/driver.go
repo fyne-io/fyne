@@ -376,7 +376,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 
 	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if _, ok := obj.(fyne.Scrollable); ok {
+		if intdriver.IsClip(obj) {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -387,7 +387,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if _, ok := node.Obj().(fyne.Scrollable); ok {
+		if intdriver.IsClip(node.Obj()) {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
