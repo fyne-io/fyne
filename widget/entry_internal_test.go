@@ -300,7 +300,7 @@ func TestEntry_ContentSizeAndPlacementWithIcon(t *testing.T) {
 	entry.SetIcon(theme.MailComposeIcon())
 	entry.SetText("SomeText")
 	renderer := entry.CreateRenderer()
-	contentPos := fyne.NewPos(theme.InnerPadding()+theme.LineSpacing()+theme.IconInlineSize(), theme.InputBorderSize())
+	contentPos := fyne.NewPos(theme.LineSpacing()+theme.IconInlineSize(), theme.InputBorderSize())
 
 	renderer.Layout(entry.MinSize())
 	// Scrollable content should be positioned after the icon, with correct padding

@@ -69,13 +69,13 @@ type Entry struct {
 	// Since: 2.7
 	AlwaysShowValidationError bool
 
+	CursorRow, CursorColumn int
+	OnCursorChanged         func() `json:"-"`
+
 	// Icon is displayed at the outer left of the entry.
 	// It is not clickable, but can be used to indicate the purpose of the entry.
 	// Since: 2.7
 	Icon fyne.Resource `json:"-"`
-
-	CursorRow, CursorColumn int
-	OnCursorChanged         func() `json:"-"`
 
 	cursorAnim *entryCursorAnimation
 
@@ -1539,8 +1539,7 @@ func (r *entryRenderer) leadingInset() float32 {
 	xInset := float32(0)
 
 	if r.entry.Icon != nil {
-		iconSpace := th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing) + th.Size(theme.SizeNameInnerPadding)
-		xInset = iconSpace
+		xInset = th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	}
 
 	return xInset
