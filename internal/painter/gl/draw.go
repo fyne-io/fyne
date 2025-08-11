@@ -62,7 +62,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 	radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "radius", radiusScaled)
+	p.SetUniform4f(program, "radius", radiusScaled, radiusScaled, radiusScaled, radiusScaled)
 
 	r, g, b, a := getFragmentColor(circle.FillColor)
 	p.SetUniform4f(program, "fill_color", r, g, b, a)
@@ -143,19 +143,27 @@ func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.S
 }
 
 func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, frame)
+	topRightRadius := paint.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := paint.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := paint.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := paint.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
+	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, frame)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, frame)
+	topRightRadius := paint.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := paint.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := paint.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := paint.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, frame)
 }
 
-func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, frame fyne.Size) {
+func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, pos fyne.Position, frame fyne.Size) {
 	if (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
-	roundedCorners := radius != 0
+	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
 	var program ProgramState
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -189,8 +197,12 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
-		radiusScaled := roundToPixel(radius*p.pixScale, 1.0)
-		p.SetUniform1f(program, "radius", radiusScaled)
+		p.SetUniform4f(program, "radius",
+			roundToPixel(topRightRadius*p.pixScale, 1.0),
+			roundToPixel(bottomRightRadius*p.pixScale, 1.0),
+			roundToPixel(topLeftRadius*p.pixScale, 1.0),
+			roundToPixel(bottomLeftRadius*p.pixScale, 1.0),
+		)
 
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 		p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)

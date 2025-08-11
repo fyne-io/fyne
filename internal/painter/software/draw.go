@@ -244,14 +244,22 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, pos, base, clip)
+	topRightRadius := painter.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, base, clip)
 }
 
 func drawSquare(c fyne.Canvas, sq *canvas.Square, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, pos, base, clip)
+	topRightRadius := painter.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
+	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, base, clip)
 }
 
-func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, radius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	width, height := obj.Size().Components()
 	if aspect != 0 {
 		frameAspect := width / height
@@ -270,7 +278,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		pos = pos.AddXY(xPad, yPad)
 	}
 
-	if (stroke != nil && strokeWidth > 0) || radius != 0 { // use a rasterizer if there is a stroke or radius
+	if (stroke != nil && strokeWidth > 0) || topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0 { // use a rasterizer if there is a stroke or radius
 		drawOblongStroke(c, obj, width, height, pos, base, clip)
 		return
 	}
