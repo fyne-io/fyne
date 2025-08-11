@@ -5,8 +5,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// Declare conformity with CanvasObject interface
-var _ fyne.CanvasObject = (*Clip)(nil)
+// Declare conformity with Widget interface
+var _ fyne.Widget = (*Clip)(nil)
 
 // Clip describes a rectangular region  that will clip anything outside its bounds.
 //
