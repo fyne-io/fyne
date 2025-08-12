@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
@@ -20,8 +19,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 )
-
-const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
 var (
 	systrayIcon    fyne.Resource
@@ -58,10 +55,12 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 			systray.SetTitle(title)
 		}
 
-		// it must be refreshed after init, so an earlier call would have been ineffective
-		runOnMain(func() {
-			d.refreshSystray(m)
-		})
+		if m != nil {
+			// it must be refreshed after init, so an earlier call would have been ineffective
+			runOnMain(func() {
+				d.refreshSystray(m)
+			})
+		}
 	}, func() {
 		// anything required for tear-down
 	})
@@ -70,7 +69,6 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 	w := d.CreateWindow("SystrayMonitor")
 	w.(*window).create()
 	w.SetCloseIntercept(d.Quit)
-	w.SetOnClosed(systray.Quit)
 }
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
@@ -141,6 +139,10 @@ func (d *gLDriver) refreshSystray(m *fyne.Menu) {
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
+	if m == nil {
+		return
+	}
+
 	for _, i := range m.Items {
 		item := itemForMenuItem(i, parent)
 		if item == nil {
@@ -174,6 +176,21 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		systray.SetTemplateIcon(img, img)
 	} else {
 		systray.SetIcon(img)
+	}
+}
+
+func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
+	if !systrayRunning {
+		systrayRunning = true
+		d.runSystray(nil)
+	}
+
+	w.SetCloseIntercept(w.Hide)
+	glw := w.(*window)
+	if glw.decorate {
+		systray.SetOnTapped(glw.Show)
+	} else {
+		systray.SetOnTapped(glw.toggleVisible)
 	}
 }
 

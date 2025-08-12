@@ -8,6 +8,7 @@ type context interface {
 	BlendColor(r, g, b, a float32)
 	BlendFunc(srcFactor, destFactor uint32)
 	BufferData(target uint32, points []float32, usage uint32)
+	BufferSubData(target uint32, points []float32)
 	Clear(mask uint32)
 	ClearColor(r, g, b, a float32)
 	CompileShader(shader Shader)

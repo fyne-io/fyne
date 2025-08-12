@@ -40,7 +40,6 @@ func TestURIEqual(t *testing.T) {
 	assert.True(t, storage.EqualURI(otherURI, otherURI))
 	assert.False(t, storage.EqualURI(otherURI, first))
 	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
-
 }
 
 func TestURIAuthority(t *testing.T) {

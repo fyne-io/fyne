@@ -19,8 +19,10 @@ import (
 type ListItemID = int
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*List)(nil)
-var _ fyne.Focusable = (*List)(nil)
+var (
+	_ fyne.Widget    = (*List)(nil)
+	_ fyne.Focusable = (*List)(nil)
+)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
@@ -119,7 +121,6 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Focusable
 func (l *List) FocusGained() {
 	l.focused = true
-	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
 }
 
@@ -178,6 +179,7 @@ func (l *List) scrollTo(id ListItemID) {
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
 	y := float32(0)
 	lastItemHeight := l.itemMin.Height
+
 	if len(l.itemHeights) == 0 {
 		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	} else {
@@ -195,7 +197,6 @@ func (l *List) scrollTo(id ListItemID) {
 			lastItemHeight = h
 		}
 	}
-
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -494,9 +495,11 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*listItem)(nil)
-var _ fyne.Tappable = (*listItem)(nil)
-var _ desktop.Hoverable = (*listItem)(nil)
+var (
+	_ fyne.Widget       = (*listItem)(nil)
+	_ fyne.Tappable     = (*listItem)(nil)
+	_ desktop.Hoverable = (*listItem)(nil)
+)
 
 type listItem struct {
 	BaseWidget
@@ -678,7 +681,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		if !fyne.CurrentDevice().IsMobile() {
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
 			if canvas != nil {
-				canvas.Focus(l.list)
+				canvas.Focus(l.list.impl.(fyne.Focusable))
 			}
 
 			l.list.currentFocus = id

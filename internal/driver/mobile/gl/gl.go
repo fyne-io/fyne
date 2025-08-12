@@ -103,6 +103,23 @@ func (ctx *context) BufferData(target Enum, src []byte, usage Enum) {
 	})
 }
 
+func (ctx *context) BufferSubData(target Enum, src []byte) {
+	parg := unsafe.Pointer(nil)
+	if len(src) > 0 {
+		parg = unsafe.Pointer(&src[0])
+	}
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnBufferSubData,
+			a0: target.c(),
+			a1: 0,
+			a2: uintptr(len(src)),
+		},
+		parg:     parg,
+		blocking: true,
+	})
+}
+
 func (ctx *context) Clear(mask Enum) {
 	ctx.enqueue(call{
 		args: fnargs{
@@ -151,7 +168,8 @@ func (ctx *context) CreateProgram() Program {
 			},
 			blocking: true,
 		},
-		))}
+		)),
+	}
 }
 
 func (ctx *context) CreateShader(ty Enum) Shader {

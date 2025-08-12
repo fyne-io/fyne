@@ -51,8 +51,8 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 	d, _ := dev.(*device)
 	ret := &canvas{
 		Canvas: common.Canvas{
-			OnFocus:   handleKeyboard,
-			OnUnfocus: hideVirtualKeyboard,
+			OnFocus:   d.handleKeyboard,
+			OnUnfocus: d.hideVirtualKeyboard,
 		},
 		device:         d,
 		lastTapDown:    make(map[int]time.Time),
@@ -160,7 +160,7 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 }
 
 func (c *canvas) overlayChanged() {
-	handleKeyboard(c.Focused())
+	c.device.handleKeyboard(c.Focused())
 	c.SetDirty()
 }
 
@@ -253,7 +253,8 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 }
 
 func (c *canvas) tapMove(pos fyne.Position, tapID int,
-	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	dragCallback func(fyne.Draggable, *fyne.DragEvent),
+) {
 	previousPos := c.lastTapDownPos[tapID]
 	deltaX := pos.X - previousPos.X
 	deltaY := pos.Y - previousPos.Y
@@ -307,11 +308,15 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
 	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
-	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
-
+	dragCallback func(fyne.Draggable, *fyne.DragEvent),
+) {
 	if c.dragging != nil {
 		previousDelta := c.lastTapDelta[tapID]
-		dragCallback(c.dragging, &fyne.DragEvent{Dragged: previousDelta})
+		ev := &fyne.DragEvent{Dragged: previousDelta}
+		draggedObjDelta := c.dragStart.Subtract(c.dragging.(fyne.CanvasObject).Position())
+		ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
+		ev.AbsolutePosition = pos
+		dragCallback(c.dragging, ev)
 
 		c.dragging = nil
 		return

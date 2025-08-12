@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/srwiley/oksvg"
+	"github.com/fyne-io/oksvg"
 	"github.com/srwiley/rasterx"
 
 	"fyne.io/fyne/v2"

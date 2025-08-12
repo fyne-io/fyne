@@ -11,19 +11,23 @@ import (
 )
 
 // declare conformance to interfaces
-var _ io.ReadCloser = (*nodeReaderWriter)(nil)
-var _ io.WriteCloser = (*nodeReaderWriter)(nil)
-var _ fyne.URIReadCloser = (*nodeReaderWriter)(nil)
-var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
+var (
+	_ io.ReadCloser       = (*nodeReaderWriter)(nil)
+	_ io.WriteCloser      = (*nodeReaderWriter)(nil)
+	_ fyne.URIReadCloser  = (*nodeReaderWriter)(nil)
+	_ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
+)
 
 // declare conformance with repository types
-var _ repository.Repository = (*InMemoryRepository)(nil)
-var _ repository.WritableRepository = (*InMemoryRepository)(nil)
-var _ repository.AppendableRepository = (*InMemoryRepository)(nil)
-var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
-var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
-var _ repository.MovableRepository = (*InMemoryRepository)(nil)
-var _ repository.ListableRepository = (*InMemoryRepository)(nil)
+var (
+	_ repository.Repository             = (*InMemoryRepository)(nil)
+	_ repository.WritableRepository     = (*InMemoryRepository)(nil)
+	_ repository.AppendableRepository   = (*InMemoryRepository)(nil)
+	_ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
+	_ repository.CopyableRepository     = (*InMemoryRepository)(nil)
+	_ repository.MovableRepository      = (*InMemoryRepository)(nil)
+	_ repository.ListableRepository     = (*InMemoryRepository)(nil)
+)
 
 // nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
@@ -62,7 +66,6 @@ type InMemoryRepository struct {
 
 // Read implements io.Reader.Read
 func (n *nodeReaderWriter) Read(p []byte) (int, error) {
-
 	// first make sure the requested path actually exists
 	data, ok := n.repo.Data[n.path]
 	if !ok {
@@ -101,7 +104,6 @@ func (n *nodeReaderWriter) Close() error {
 // This implementation automatically creates the path n.path if it does not
 // exist. If it does exist, it is overwritten.
 func (n *nodeReaderWriter) Write(p []byte) (int, error) {
-
 	// guarantee that the path exists
 	_, ok := n.repo.Data[n.path]
 	if !ok {
@@ -131,7 +133,6 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 
 // Name implements fyne.URIReadCloser.URI and fyne.URIWriteCloser.URI
 func (n *nodeReaderWriter) URI() fyne.URI {
-
 	// discarding the error because this should never fail
 	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
 

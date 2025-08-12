@@ -28,18 +28,10 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Get dependencies
-      run: >-
-        sudo apt-get update &&
-        sudo apt-get install
-        bc
-        gcc
-        libgl1-mesa-dev
-        libwayland-dev
-        libx11-dev
-        libxkbcommon-dev
-        xorg-dev
-        xvfb
-        language-pack-en
+      run: |
+        sudo apt-get update
+        sudo apt-get install bc clang libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
+        echo "CC=clang" >> "$GITHUB_ENV"
       if: ${{ runner.os == 'Linux' }}
 
     - name: Set environment variable LANG

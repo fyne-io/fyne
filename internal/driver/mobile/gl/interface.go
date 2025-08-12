@@ -53,6 +53,12 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glBufferData.xhtml
 	BufferData(target Enum, src []byte, usage Enum)
+
+	// BufferSubData updates the data store for a bound buffer object.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glBufferSubData.xhtml
+	BufferSubData(target Enum, src []byte)
+
 	// Clear clears the window.
 	//
 	// The behavior of Clear is influenced by the pixel ownership test,

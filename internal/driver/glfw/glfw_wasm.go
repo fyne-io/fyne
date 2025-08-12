@@ -2,5 +2,4 @@
 
 package glfw
 
-func initWindowHints() {
-}
+func initWindowHints() {}

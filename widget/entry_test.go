@@ -174,6 +174,33 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorPosition(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TextStyle.Monospace = true
+	entry.SetText("mmmmmm")
+
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.TypedKey(right)
+	firstX, firstY := entry.CursorPosition().Components()
+
+	entry.TypedKey(right)
+	secondX := entry.CursorPosition().X
+	assert.Greater(t, secondX, firstX)
+
+	entry.TypedKey(right)
+	entry.TypedKey(right)
+	fourthX := entry.CursorPosition().X
+	assert.Equal(t, (secondX-firstX)*3, fourthX-firstX)
+
+	entry.SetText("mmmmmm\nmm\nmm")
+	entry.CursorRow = 1
+	secondY := entry.CursorPosition().Y
+
+	entry.CursorRow = 2
+	thirdY := entry.CursorPosition().Y
+	assert.Equal(t, secondY-firstY, thirdY-secondY)
+}
+
 func TestEntry_Control_Word(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")
@@ -2063,6 +2090,26 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 	assert.Equal(t, "àbf", entry.Text)
 }
 
+func TestEntry_UndoRedo_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+
+	for _, r := range "Line 1\nline 2" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
+	entry.TypedShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier})
+	assert.Equal(t, "Line 1\n", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+}
+
 func TestEntry_UndoRedo_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -2122,6 +2169,45 @@ func TestEntry_UndoRedoImage(t *testing.T) {
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
 }
 
+func TestEntry_UndoRedo_Callback(t *testing.T) {
+	entry := widget.NewEntry()
+	changed := ""
+	entry.OnChanged = func(s string) {
+		changed = s
+	}
+
+	for _, r := range "abc éàè 123" {
+		entry.TypedRune(r)
+	}
+
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, "", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+}
+
 const (
 	entryOffset = 10
 
@@ -2132,7 +2218,7 @@ const (
 )
 
 var typeKeys = func(e *widget.Entry, keys ...fyne.KeyName) {
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}

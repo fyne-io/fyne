@@ -48,10 +48,10 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var cursorMap map[desktop.StandardCursor]*glfw.Cursor
+var cursors [desktop.HiddenCursor + 1]*glfw.Cursor
 
 func initCursors() {
-	cursorMap = map[desktop.StandardCursor]*glfw.Cursor{
+	cursors = [desktop.HiddenCursor + 1]*glfw.Cursor{
 		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
 		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
 		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
@@ -130,9 +130,7 @@ func (w *window) CenterOnScreen() {
 
 	w.centered = true
 
-	if w.view() != nil {
-		runOnMain(w.doCenterOnScreen)
-	}
+	w.runOnMainWhenCreated(w.doCenterOnScreen)
 }
 
 func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI)) {
@@ -258,6 +256,26 @@ func (w *window) fitContent() {
 	}
 }
 
+// getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
+func getMonitorScale(monitor *glfw.Monitor) float32 {
+	widthMm, heightMm := monitor.GetPhysicalSize()
+	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
+		return 1.0
+	}
+	widthPx := monitor.GetVideoMode().Width
+	return calculateDetectedScale(widthMm, widthPx)
+}
+
+// getScaledMonitorSize returns the monitor dimensions adjusted for scaling
+func getScaledMonitorSize(monitor *glfw.Monitor) fyne.Size {
+	videoMode := monitor.GetVideoMode()
+	scale := getMonitorScale(monitor)
+
+	scaledWidth := float32(videoMode.Width) / scale
+	scaledHeight := float32(videoMode.Height) / scale
+	return fyne.NewSize(scaledWidth, scaledHeight)
+}
+
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	if !build.IsWayland {
 		x, y := w.xpos, w.ypos
@@ -273,7 +291,9 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 			if x > xOff || y > yOff {
 				continue
 			}
-			if videoMode := monitor.GetVideoMode(); x+videoMode.Width <= xOff || y+videoMode.Height <= yOff {
+
+			scaledSize := getScaledMonitorSize(monitor)
+			if x+int(scaledSize.Width) <= xOff || y+int(scaledSize.Height) <= yOff {
 				continue
 			}
 
@@ -306,13 +326,7 @@ func (w *window) detectScale() float32 {
 		return 1
 	}
 
-	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
-		return 1
-	}
-	widthPx := monitor.GetVideoMode().Width
-
-	return calculateDetectedScale(widthMm, widthPx)
+	return getMonitorScale(monitor)
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
@@ -349,20 +363,20 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
-	switch v := cursor.(type) {
-	case desktop.StandardCursor:
-		ret, ok := cursorMap[v]
-		if !ok {
-			return cursorMap[desktop.DefaultCursor], false
-		}
-		return ret, false
-	default:
+	cursorType, standard := cursor.(desktop.StandardCursor)
+	if !standard {
 		img, x, y := cursor.Image()
 		if img == nil {
 			return nil, true
 		}
 		return glfw.CreateCursor(img, x, y), true
 	}
+
+	if cursorType < 0 || cursorType >= desktop.StandardCursor(len(cursors)) {
+		return cursors[desktop.DefaultCursor], false
+	}
+
+	return cursors[cursorType], false
 }
 
 func (w *window) SetCursor(cursor *glfw.Cursor) {
@@ -379,7 +393,6 @@ func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {
 	if isCustomCursor {
 		w.customCursor = rawCursor
 	}
-
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
@@ -405,7 +418,6 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
-	var button desktop.MouseButton
 	rightClick := false
 	if runtime.GOOS == "darwin" {
 		if modifier&fyne.KeyModifierControl != 0 {
@@ -417,19 +429,20 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 			modifier &^= fyne.KeyModifierSuper
 		}
 	}
+
 	switch btn {
 	case glfw.MouseButton1:
 		if rightClick {
-			button = desktop.MouseButtonSecondary
-		} else {
-			button = desktop.MouseButtonPrimary
+			return desktop.MouseButtonSecondary, modifier
 		}
+		return desktop.MouseButtonPrimary, modifier
 	case glfw.MouseButton2:
-		button = desktop.MouseButtonSecondary
+		return desktop.MouseButtonSecondary, modifier
 	case glfw.MouseButton3:
-		button = desktop.MouseButtonTertiary
+		return desktop.MouseButtonTertiary, modifier
+	default:
+		return 0, modifier
 	}
-	return button, modifier
 }
 
 //gocyclo:ignore
@@ -553,8 +566,7 @@ func keyCodeToKeyName(code string) fyne.KeyName {
 
 	char := code[0]
 	if char >= 'a' && char <= 'z' {
-		// Our alphabetical keys are all upper case characters.
-		return fyne.KeyName('A' + char - 'a')
+		return fyne.KeyName(char ^ ('a' - 'A')) // Corresponding KeyName is uppercase. Convert with simple bit flip.
 	}
 
 	switch char {
@@ -658,18 +670,18 @@ func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.A
 }
 
 func glfwKeyToModifier(key glfw.Key) glfw.ModifierKey {
-	var m glfw.ModifierKey
 	switch key {
 	case glfw.KeyLeftControl, glfw.KeyRightControl:
-		m = glfw.ModControl
+		return glfw.ModControl
 	case glfw.KeyLeftAlt, glfw.KeyRightAlt:
-		m = glfw.ModAlt
+		return glfw.ModAlt
 	case glfw.KeyLeftShift, glfw.KeyRightShift:
-		m = glfw.ModShift
+		return glfw.ModShift
 	case glfw.KeyLeftSuper, glfw.KeyRightSuper:
-		m = glfw.ModSuper
+		return glfw.ModSuper
+	default:
+		return 0
 	}
-	return m
 }
 
 // charInput defines the character with modifiers callback which is called when a
@@ -778,10 +790,7 @@ func (w *window) create() {
 	// update window size now we have scaled detected
 	w.fitContent()
 
-	for _, fn := range w.pending {
-		fn()
-	}
-	w.pending = nil
+	w.drainPendingEvents()
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())

@@ -20,8 +20,10 @@ type funcData struct {
 }
 
 // channel for queuing functions on the main thread
-var funcQueue = async.NewUnboundedChan[funcData]()
-var running atomic.Bool
+var (
+	funcQueue        = async.NewUnboundedChan[funcData]()
+	running, drained atomic.Bool
+)
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -36,9 +38,9 @@ func runOnMain(f func()) {
 
 // force a function f to run on the main thread and specify if we should wait for it to return
 func runOnMainWithWait(f func(), wait bool) {
-	// If we are on main just execute - otherwise add it to the main queue and wait.
-	// The "running" variable is normally false when we are on the main thread.
-	if !running.Load() {
+	// If we are on main before app run just execute - otherwise add it to the main queue and wait.
+	// We also need to run it as-is if the app is in the process of shutting down as the queue will be stopped.
+	if (!running.Load() && async.IsMainGoroutine()) || drained.Load() {
 		f()
 		return
 	}
@@ -81,7 +83,11 @@ func (d *gLDriver) drawSingleFrame() {
 			w.canvas.markAlive(false /*visibleOnly*/)
 		}
 
-		refreshed = refreshed || d.repaintWindow(w, shouldClean)
+		w.RunWithContext(func() {
+			if w.driver.repaintWindow(w) {
+				refreshed = true
+			}
+		})
 	}
 
 	if shouldClean {
@@ -126,6 +132,16 @@ func (d *gLDriver) runGL() {
 			if f := l.OnStopped(); f != nil {
 				l.QueueEvent(f)
 			}
+
+			// as we are shutting down make sure we drain the pending funcQueue and close it out.
+			for len(funcQueue.Out()) > 0 {
+				f := <-funcQueue.Out()
+				if f.done != nil {
+					f.done <- struct{}{}
+				}
+			}
+			drained.Store(true)
+			funcQueue.Close()
 			return
 		case f := <-funcQueue.Out():
 			f.f()
@@ -200,21 +216,20 @@ func (d *gLDriver) cleanInactiveWindowTextures(w *window, walkVisibleOnly bool) 
 func (d *gLDriver) repaintWindow(w *window, cleanTextures bool) bool {
 	canvas := w.canvas
 	freed := false
-	w.RunWithContext(func() {
-		if canvas.EnsureMinSize() {
-			w.shouldExpand = true
-		}
-		freed = canvas.FreeDirtyTextures() > 0
+	if canvas.EnsureMinSize() {
+		w.shouldExpand = true
+	}
+	freed = canvas.FreeDirtyTextures() > 0
 
-		updateGLContext(w)
-		canvas.paint(canvas.Size())
+	updateGLContext(w)
+	canvas.paint(canvas.Size())
 
-		view := w.viewport
-		visible := w.visible
+	view := w.viewport
+	visible := w.visible
 
-		if view != nil && visible {
-			view.SwapBuffers()
-		}
+	if view != nil && visible {
+		view.SwapBuffers()
+	}
 
 		if cleanTextures {
 			// the object tree walks in EnsureMinSize and canvas.paint
@@ -227,6 +242,7 @@ func (d *gLDriver) repaintWindow(w *window, cleanTextures bool) bool {
 			cache.CleanTextures(canvas, texFree)
 		}
 	})
+
 	return freed
 }
 

@@ -206,14 +206,20 @@ func TestLabel_Select(t *testing.T) {
 	assert.Empty(t, l.SelectedText())
 	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
-	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
-	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
+	sel.MouseDown(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)},
+	})
+	sel.Dragged(&fyne.DragEvent{
+		Dragged:    fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
 	sel.DragEnd()
-	sel.MouseUp(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel.MouseUp(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
 	assert.Equal(t, "el", l.SelectedText())
 
 	sel.TypedShortcut(&fyne.ShortcutCopy{})
@@ -231,7 +237,7 @@ func TestLabel_SelectWord(t *testing.T) {
 
 	assert.Empty(t, l.SelectedText())
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	sel.DoubleTapped(&fyne.PointEvent{Position: fyne.NewPos(15, 10)})
 	assert.Equal(t, "Hello", l.SelectedText())
 }
@@ -242,10 +248,12 @@ func TestLabel_SelectLine(t *testing.T) {
 
 	assert.Empty(t, l.SelectedText())
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
 	pointEvent := fyne.PointEvent{Position: fyne.NewPos(15, 10)}
-	tapEvent := &desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
-		PointEvent: pointEvent}
+	tapEvent := &desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: pointEvent,
+	}
 	sel.DoubleTapped(&pointEvent)
 	sel.MouseDown(tapEvent)
 	sel.MouseUp(tapEvent)
@@ -307,14 +315,20 @@ func TestLabelSizeNameWithSelection(t *testing.T) {
 	assert.Empty(t, l.SelectedText())
 	assert.Equal(t, 2, len(test.WidgetRenderer(l).Objects()))
 
-	sel := test.WidgetRenderer(l).Objects()[0].(*selectable)
-	sel.MouseDown(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)}})
-	sel.Dragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 15, DY: 0},
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
+	sel.MouseDown(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)},
+	})
+	sel.Dragged(&fyne.DragEvent{
+		Dragged:    fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
 	sel.DragEnd()
-	sel.MouseUp(&desktop.MouseEvent{Button: desktop.MouseButtonPrimary,
-		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)}})
+	sel.MouseUp(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
 	assert.Equal(t, "el", l.SelectedText())
 
 	test.AssertRendersToImage(t, "label/label_selection_defaultsize.png", w.Canvas())

@@ -59,7 +59,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	height := scale.ToScreenCoordinate(c, bounds.Height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 
-	origImg := painter.PaintImage(img, c, width, height)
+	origImg := img.Image
+	if img.FillMode != canvas.ImageFillCover {
+		origImg = painter.PaintImage(img, c, width, height)
+	}
 
 	if img.FillMode == canvas.ImageFillContain {
 		imgAspect := img.Aspect()
@@ -74,6 +77,28 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 			scaledY += (height - newHeight) / 2
 			height = newHeight
 		}
+	} else if img.FillMode == canvas.ImageFillCover {
+		inner := origImg.Bounds()
+		imgAspect := img.Aspect()
+		objAspect := float32(width) / float32(height)
+
+		if objAspect > imgAspect {
+			newHeight := float32(width) / imgAspect
+			heightPad := (newHeight - float32(height)) / 2
+			pixPad := int((heightPad / newHeight) * float32(inner.Dy()))
+
+			inner = image.Rect(inner.Min.X, inner.Min.Y+pixPad, inner.Max.X, inner.Max.Y-pixPad)
+		} else if objAspect < imgAspect {
+			newWidth := float32(height) * imgAspect
+			widthPad := (newWidth - float32(width)) / 2
+			pixPad := int((widthPad / newWidth) * float32(inner.Dx()))
+
+			inner = image.Rect(inner.Min.X+pixPad, inner.Min.Y, inner.Max.X-pixPad, inner.Max.Y)
+		}
+
+		subImg := image.NewRGBA(inner.Bounds())
+		draw.Copy(subImg, inner.Min, origImg, inner, draw.Over, nil)
+		origImg = subImg
 	}
 
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
@@ -188,16 +213,24 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 }
 
-func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	pad := painter.VectorPad(rect)
-	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width+pad*2)
-	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height+pad*2)
+func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(obj)
+	scaledWidth := scale.ToScreenCoordinate(c, width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawRectangle(rect, pad, func(in float32) float32 {
-		return float32(math.Round(float64(in) * float64(c.Scale())))
-	})
+	var raw *image.RGBA
+	switch o := obj.(type) {
+	case *canvas.Square:
+		raw = painter.DrawSquare(o, width, height, pad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	default:
+		raw = painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
+			return float32(math.Round(float64(in) * float64(c.Scale())))
+		})
+	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -211,14 +244,48 @@ func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Positio
 }
 
 func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	if (rect.StrokeColor != nil && rect.StrokeWidth > 0) || rect.CornerRadius != 0 { // use a rasterizer if there is a stroke or radius
-		drawRectangleStroke(c, rect, pos, base, clip)
+	topRightRadius := painter.GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, base, clip)
+}
+
+func drawSquare(c fyne.Canvas, sq *canvas.Square, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	topRightRadius := painter.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := painter.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := painter.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := painter.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
+	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, base, clip)
+}
+
+func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	width, height := obj.Size().Components()
+	if aspect != 0 {
+		frameAspect := width / height
+
+		xPad, yPad := float32(0), float32(0)
+		if frameAspect > aspect {
+			newWidth := height * aspect
+			xPad = (width - newWidth) / 2
+			width = newWidth
+		} else if frameAspect < aspect {
+			newHeight := width / aspect
+			yPad = (height - newHeight) / 2
+			height = newHeight
+		}
+
+		pos = pos.AddXY(xPad, yPad)
+	}
+
+	if (stroke != nil && strokeWidth > 0) || topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0 { // use a rasterizer if there is a stroke or radius
+		drawOblongStroke(c, obj, width, height, pos, base, clip)
 		return
 	}
 
-	scaledWidth := scale.ToScreenCoordinate(c, rect.Size().Width)
-	scaledHeight := scale.ToScreenCoordinate(c, rect.Size().Height)
+	scaledWidth := scale.ToScreenCoordinate(c, width)
+	scaledHeight := scale.ToScreenCoordinate(c, height)
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
-	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.Point{}, draw.Over)
+	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }

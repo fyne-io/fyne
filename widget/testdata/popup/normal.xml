@@ -5,14 +5,14 @@
 	<overlay>
 		<widget size="200x200" type="*widget.PopUp">
 			<widget size="37x43" type="*widget.Shadow">
-				<radialGradient centerOffset="0.5,0.5" pos="-8,-8" size="8x8" startColor="shadow"/>
-				<linearGradient endColor="shadow" pos="0,-8" size="37x8"/>
-				<radialGradient centerOffset="-0.5,0.5" pos="37,-8" size="8x8" startColor="shadow"/>
-				<linearGradient angle="270" pos="37,0" size="8x43" startColor="shadow"/>
-				<radialGradient centerOffset="-0.5,-0.5" pos="37,43" size="8x8" startColor="shadow"/>
-				<linearGradient pos="0,43" size="37x8" startColor="shadow"/>
-				<radialGradient centerOffset="0.5,-0.5" pos="-8,43" size="8x8" startColor="shadow"/>
-				<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x43"/>
+				<radialGradient centerOffset="0.5,0.5" pos="-6,-4" size="8x8" startColor="shadow"/>
+				<linearGradient endColor="shadow" pos="1,-4" size="34x8"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="36,-4" size="8x8" startColor="shadow"/>
+				<linearGradient angle="270" pos="36,3" size="8x39" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="36,43" size="8x8" startColor="shadow"/>
+				<linearGradient pos="1,43" size="34x8" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="-6,43" size="8x8" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" pos="-6,3" size="8x39"/>
 			</widget>
 			<rectangle fillColor="overlayBackground" size="37x43"/>
 			<widget pos="4,4" size="29x35" type="*widget.Label">

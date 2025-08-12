@@ -221,7 +221,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 
 			newFolderPath := filepath.Join(f.dir.Path(), newFolderEntry.Text)
-			createFolderErr := os.MkdirAll(newFolderPath, 0750)
+			createFolderErr := os.MkdirAll(newFolderPath, 0o750)
 			if createFolderErr != nil {
 				fyne.LogError(
 					fmt.Sprintf("Failed to create folder with path %s", newFolderPath),
@@ -370,7 +370,8 @@ func (f *fileDialog) loadFavorites() {
 	favoriteOrder := getFavoriteOrder()
 
 	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
+		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]},
+	}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
 		f.favorites = append(f.favorites,
@@ -813,10 +814,10 @@ func (f *FileDialog) SetOnClosed(closed func()) {
 		if f.dialog == nil {
 			return
 		}
-		closed()
 		if originalCallback != nil {
 			originalCallback(response)
 		}
+		closed()
 	}
 }
 
@@ -837,7 +838,7 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 func (f *FileDialog) SetFileName(fileName string) {
 	if f.save {
 		f.initialFileName = fileName
-		//Update entry if fileDialog has already been created
+		// Update entry if fileDialog has already been created
 		if f.dialog != nil {
 			f.dialog.fileName.SetText(fileName)
 		}
@@ -968,8 +969,7 @@ func storageURI(a fyne.App) fyne.URI {
 
 // iconPaddingLayout adds padding to the left of a widget.Icon().
 // NOTE: It assumes that the slice only contains one item.
-type iconPaddingLayout struct {
-}
+type iconPaddingLayout struct{}
 
 func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	padding := theme.Padding() * 2

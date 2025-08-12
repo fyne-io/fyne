@@ -23,8 +23,10 @@ const (
 )
 
 // Declare conformity with interfaces
-var _ fyne.Focusable = (*Tree)(nil)
-var _ fyne.Widget = (*Tree)(nil)
+var (
+	_ fyne.Focusable = (*Tree)(nil)
+	_ fyne.Widget    = (*Tree)(nil)
+)
 
 // Tree widget displays hierarchical data.
 // Each node of the tree must be identified by a Unique TreeNodeID.
@@ -176,7 +178,6 @@ func (t *Tree) FocusGained() {
 	}
 
 	t.focused = true
-	t.ScrollTo(t.currentFocus)
 	t.RefreshItem(t.currentFocus)
 }
 
@@ -312,6 +313,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 		}
 	}
 	t.selected = []TreeNodeID{uid}
+	t.Refresh()
 	t.ScrollTo(uid)
 	if f := t.OnSelected; f != nil {
 		f(uid)
@@ -833,9 +835,11 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
-var _ desktop.Hoverable = (*treeNode)(nil)
-var _ fyne.CanvasObject = (*treeNode)(nil)
-var _ fyne.Tappable = (*treeNode)(nil)
+var (
+	_ desktop.Hoverable = (*treeNode)(nil)
+	_ fyne.CanvasObject = (*treeNode)(nil)
+	_ fyne.Tappable     = (*treeNode)(nil)
+)
 
 type treeNode struct {
 	BaseWidget
@@ -897,7 +901,7 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	if canvas != nil && canvas.Focused() != n.tree {
 		n.tree.currentFocus = n.uid
 		if !fyne.CurrentDevice().IsMobile() {
-			canvas.Focus(n.tree)
+			canvas.Focus(n.tree.impl.(fyne.Focusable))
 		}
 	}
 	n.Refresh()

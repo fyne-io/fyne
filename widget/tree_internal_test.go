@@ -162,7 +162,7 @@ func TestTree(t *testing.T) {
 }
 
 func TestTree_Focus(t *testing.T) {
-	var treeData = map[string][]string{
+	treeData := map[string][]string{
 		"":    {"foo", "bar"},
 		"foo": {"foobar", "barbar"},
 	}
@@ -206,7 +206,7 @@ func TestTree_Keyboard(t *testing.T) {
 	// item_2
 	//   |- item_2_1
 	//   |- item_2_2
-	var treeData = map[string][]string{
+	treeData := map[string][]string{
 		"":         {"item_1", "item_2"},
 		"item_1":   {"item_1_1", "item_1_2"},
 		"item_2":   {"item_2_1", "item_2_2"},
@@ -865,7 +865,7 @@ func TestTreeNode_Hovered(t *testing.T) {
 }
 
 func TestTree_RefreshItem(t *testing.T) {
-	var data = map[string][]string{
+	data := map[string][]string{
 		"":    {"foo"},
 		"foo": {"foobar1", "foobar2", "foobar3"},
 	}

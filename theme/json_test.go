@@ -2,6 +2,9 @@ package theme
 
 import (
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +15,11 @@ import (
 )
 
 func TestFromJSON(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// th.Color(ColorNameForeground, VariantLight)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	repository.Register("file", intRepo.NewFileRepository()) // file uri resolving (avoid test import loop)
 	th, err := FromJSON(`{
 "Colors": {"background": "#c0c0c0ff"},
@@ -47,26 +55,26 @@ func TestFromTOML_Resource(t *testing.T) {
 }
 
 func TestHexColor(t *testing.T) {
-	c, err := hexColor("#abc").color()
+	c, err := hexColor("#abc").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c)
-	c, err = hexColor("abc").color()
+	c, err = hexColor("abc").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c)
-	c, err = hexColor("#abcd").color()
+	c, err = hexColor("#abcd").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xdd}, c)
 
-	c, err = hexColor("#a1b2c3").color()
+	c, err = hexColor("#a1b2c3").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c)
-	c, err = hexColor("a1b2c3").color()
+	c, err = hexColor("a1b2c3").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c)
-	c, err = hexColor("#a1b2c3f4").color()
+	c, err = hexColor("#a1b2c3f4").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c)
-	c, err = hexColor("a1b2c3f4").color()
+	c, err = hexColor("a1b2c3f4").color(nil)
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c)
 }

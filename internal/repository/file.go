@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -17,16 +18,20 @@ import (
 const fileSchemePrefix string = "file://"
 
 // declare conformance with repository types
-var _ repository.Repository = (*FileRepository)(nil)
-var _ repository.WritableRepository = (*FileRepository)(nil)
-var _ repository.AppendableRepository = (*FileRepository)(nil)
-var _ repository.HierarchicalRepository = (*FileRepository)(nil)
-var _ repository.ListableRepository = (*FileRepository)(nil)
-var _ repository.MovableRepository = (*FileRepository)(nil)
-var _ repository.CopyableRepository = (*FileRepository)(nil)
+var (
+	_ repository.Repository             = (*FileRepository)(nil)
+	_ repository.WritableRepository     = (*FileRepository)(nil)
+	_ repository.AppendableRepository   = (*FileRepository)(nil)
+	_ repository.HierarchicalRepository = (*FileRepository)(nil)
+	_ repository.ListableRepository     = (*FileRepository)(nil)
+	_ repository.MovableRepository      = (*FileRepository)(nil)
+	_ repository.CopyableRepository     = (*FileRepository)(nil)
+)
 
-var _ fyne.URIReadCloser = (*file)(nil)
-var _ fyne.URIWriteCloser = (*file)(nil)
+var (
+	_ fyne.URIReadCloser  = (*file)(nil)
+	_ fyne.URIWriteCloser = (*file)(nil)
+)
 
 type file struct {
 	*os.File
@@ -44,8 +49,7 @@ func (f *file) URI() fyne.URI {
 // This repository is suitable to handle the file:// scheme.
 //
 // Since: 2.0
-type FileRepository struct {
-}
+type FileRepository struct{}
 
 // NewFileRepository creates a new FileRepository instance.
 // The caller needs to call repository.Register() with the result of this function.
@@ -81,7 +85,7 @@ func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
 		if truncate {
 			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
 		} else {
-			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
 		}
 	} else {
 		f, err = os.Open(path)
@@ -100,7 +104,7 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Since: 2.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0666)
+	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0o666)
 	if err == nil {
 		f.Close()
 	} else {
@@ -142,7 +146,7 @@ func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since: 2.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0666)
+	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0o666)
 	if err == nil {
 		f.Close()
 	} else {
@@ -224,7 +228,6 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 //
 // Since: 2.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
-
 	path := u.Path()
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -244,7 +247,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 // CreateListable implements repository.ListableRepository.CreateListable.
 func (r *FileRepository) CreateListable(u fyne.URI) error {
 	path := u.Path()
-	err := os.Mkdir(path, 0755)
+	err := os.Mkdir(path, 0o755)
 	return err
 }
 
@@ -254,7 +257,6 @@ func (r *FileRepository) CreateListable(u fyne.URI) error {
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	p := u.Path()
 	info, err := os.Stat(p)
-
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
@@ -266,8 +268,12 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, nil
 	}
 
+	if runtime.GOOS == "windows" && len(p) <= 3 {
+		return true, nil // assume drives can be read, avoids hang if the drive is temporarily unresponsive
+	}
+
 	// We know it is a directory, but we don't know if we can read it, so
-	// we'll just try to do so and see if we get a permissions error.
+	// we'll just try to do so and see if we get a permission error.
 	f, err := os.Open(p)
 	if err == nil {
 		_, err = f.Readdir(1)

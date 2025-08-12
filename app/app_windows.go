@@ -73,7 +73,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := os.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := os.WriteFile(tmpFilePath, []byte(script), 0o600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return
@@ -93,4 +93,8 @@ func watchTheme(s *settings) {
 	go internalapp.WatchTheme(func() {
 		fyne.Do(s.setupTheme)
 	})
+}
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
 }
