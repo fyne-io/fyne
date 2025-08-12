@@ -1163,30 +1163,30 @@ func TestWindow_Scrolled(t *testing.T) {
 
 func TestWindow_Tapped(t *testing.T) {
 	w := createWindow("Test")
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(container.NewVBox(rect, o))
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
-		w.mousePos = fyne.NewPos(50, 160)
+		w.mousePos = fyne.NewPos(50, 60)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
 		if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
-			assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
-			assert.Equal(t, fyne.NewPos(46, 52), e.Position)
+			assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+			assert.Equal(t, fyne.NewPos(46, 56), e.Position)
 		}
 	})
 }
 
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(o)
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
 		w.mousePos = fyne.NewPos(50, 60)
