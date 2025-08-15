@@ -100,32 +100,43 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerPos, leadingPos, trailingPos fyne.Position
 	var dividerSize, leadingSize, trailingSize fyne.Size
 
-	if r.split.Horizontal {
-		lw, tw := r.computeSplitLengths(size.Width, r.minLeadingWidth(), r.minTrailingWidth())
-		leadingPos.X = 0
-		leadingSize.Width = lw
-		leadingSize.Height = size.Height
-		dividerPos.X = lw
-		dividerSize.Width = dividerThickness(r.divider)
-		dividerSize.Height = size.Height
-		trailingPos.X = lw + dividerSize.Width
-		trailingSize.Width = tw
-		trailingSize.Height = size.Height
-	} else {
-		lh, th := r.computeSplitLengths(size.Height, r.minLeadingHeight(), r.minTrailingHeight())
-		leadingPos.Y = 0
-		leadingSize.Width = size.Width
-		leadingSize.Height = lh
-		dividerPos.Y = lh
-		dividerSize.Width = size.Width
-		dividerSize.Height = dividerThickness(r.divider)
-		trailingPos.Y = lh + dividerSize.Height
-		trailingSize.Width = size.Width
-		trailingSize.Height = th
+	dividerVisible := r.split.Leading.Visible() && r.split.Trailing.Visible()
+	if !r.split.Leading.Visible() {
+		trailingPos = fyne.NewPos(0, 0)
+		trailingSize = size
+	} else if !r.split.Trailing.Visible() {
+		leadingPos = fyne.NewPos(0, 0)
+		leadingSize = size
+	} else if dividerVisible {
+		if r.split.Horizontal {
+			lw, tw := r.computeSplitLengths(size.Width, r.minLeadingWidth(), r.minTrailingWidth())
+			leadingPos.X = 0
+			leadingSize.Width = lw
+			leadingSize.Height = size.Height
+			dividerPos.X = lw
+			dividerSize.Width = dividerThickness(r.divider)
+			dividerSize.Height = size.Height
+			trailingPos.X = lw + dividerSize.Width
+			trailingSize.Width = tw
+			trailingSize.Height = size.Height
+		} else {
+			lh, th := r.computeSplitLengths(size.Height, r.minLeadingHeight(), r.minTrailingHeight())
+			leadingPos.Y = 0
+			leadingSize.Width = size.Width
+			leadingSize.Height = lh
+			dividerPos.Y = lh
+			dividerSize.Width = size.Width
+			dividerSize.Height = dividerThickness(r.divider)
+			trailingPos.Y = lh + dividerSize.Height
+			trailingSize.Width = size.Width
+			trailingSize.Height = th
+		}
 	}
 
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
+	r.divider.Hidden = !dividerVisible
+
 	r.split.Leading.Move(leadingPos)
 	r.split.Leading.Resize(leadingSize)
 	r.split.Trailing.Move(trailingPos)
@@ -135,7 +146,11 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 
 func (r *splitContainerRenderer) MinSize() fyne.Size {
 	s := fyne.NewSize(0, 0)
-	for _, o := range r.objects {
+	dividerVisible := r.split.Leading.Visible() && r.split.Trailing.Visible()
+	for i, o := range r.objects {
+		if (i == 1 /*divider*/ && !dividerVisible) || (i != 1 && !o.Visible()) {
+			continue
+		}
 		min := o.MinSize()
 		if r.split.Horizontal {
 			s.Width += min.Width

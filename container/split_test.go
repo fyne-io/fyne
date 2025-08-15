@@ -489,38 +489,50 @@ func TestSplitContainer_Hidden(t *testing.T) {
 	t.Run("Horizontal_Leading", func(t *testing.T) {
 		sc := NewHSplit(objA, objB)
 		sc.Resize(fyne.NewSize(100, 100))
-		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Width)
-
-		objA.Hide()
-		sc.SetOffset(0)
-		assert.Equal(t, float32(0), sc.Leading.Size().Width)
-	})
-	t.Run("Horizontal_Trailing", func(t *testing.T) {
-		sc := NewHSplit(objA, objB)
-		sc.Resize(fyne.NewSize(100, 100))
 		assert.Equal(t, 50-(dt/2), sc.Trailing.Size().Width)
 
+		objA.Hide()
+		sc.Refresh()
+		// sole visible object should take up all space
+		// (none reserved for other obj or divider)
+		assert.Equal(t, float32(100), sc.Trailing.Size().Width)
+	})
+	t.Run("Horizontal_Trailing", func(t *testing.T) {
+		objA.Show()
+		sc := NewHSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Width)
+
 		objB.Hide()
-		sc.SetOffset(1)
-		assert.Equal(t, float32(0), sc.Trailing.Size().Width)
+		sc.Refresh()
+		assert.Equal(t, float32(100), sc.Leading.Size().Width)
 	})
 	t.Run("Vertical_Leading", func(t *testing.T) {
-		sc := NewVSplit(objA, objB)
-		sc.Resize(fyne.NewSize(100, 100))
-		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Height)
-
-		objA.Hide()
-		sc.SetOffset(0)
-		assert.Equal(t, float32(0), sc.Leading.Size().Height)
-	})
-	t.Run("Vertical_Trailing", func(t *testing.T) {
+		objB.Show()
 		sc := NewVSplit(objA, objB)
 		sc.Resize(fyne.NewSize(100, 100))
 		assert.Equal(t, 50-(dt/2), sc.Trailing.Size().Height)
 
+		objA.Hide()
+		sc.Refresh()
+		assert.Equal(t, float32(100), sc.Trailing.Size().Height)
+	})
+	t.Run("Vertical_Trailing", func(t *testing.T) {
+		objA.Show()
+		sc := NewVSplit(objA, objB)
+		sc.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 50-(dt/2), sc.Leading.Size().Height)
+
 		objB.Hide()
-		sc.SetOffset(1)
-		assert.Equal(t, float32(0), sc.Trailing.Size().Height)
+		sc.Refresh()
+		assert.Equal(t, float32(100), sc.Leading.Size().Height)
+	})
+	t.Run("MinSize", func(t *testing.T) {
+		objA.Show()
+		objB.Hide()
+		objB.SetMinSize(fyne.NewSize(10, 10))
+		sc := NewVSplit(objA, objB)
+		assert.Equal(t, objA.MinSize(), sc.MinSize())
 	})
 }
 
