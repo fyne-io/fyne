@@ -18,7 +18,7 @@ jobs:
           - os: macos-latest
             tags: no_glfw,ci,migrated_fynedo
           - os: windows-latest
-            tags: no_glfw,ci,migrated_fynedo
+            tags: no_glfw,migrated_fynedo
 
     steps:
     - uses: actions/checkout@v4
