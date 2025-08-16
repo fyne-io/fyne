@@ -2,8 +2,6 @@ module fyne.io/fyne/v2
 
 go 1.23.0
 
-toolchain go1.23.7
-
 require (
 	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58
 	github.com/BurntSushi/toml v1.5.0
