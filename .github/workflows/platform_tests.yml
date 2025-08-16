@@ -17,7 +17,7 @@ jobs:
             tags: ci,migrated_fynedo
           - os: macos-latest
             tags: no_glfw,ci,migrated_fynedo
-		  - os: windows-latest
+          - os: windows-latest
             tags: no_glfw,ci,migrated_fynedo
 
     steps:
