@@ -53,6 +53,7 @@ static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
 static jmethodID show_file_save_method;
+static jmethodID show_camera_open_method;
 static jmethodID finish_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
@@ -95,6 +96,8 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
+		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "(Ljava/lang/String;)V");
+		//show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "()V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
@@ -277,6 +280,16 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename) {
 		show_file_save_method,
 		mimesJString,
 		filenameJString
+	);
+}
+
+void showCameraOpen(JNIEnv* env) {
+    jstring f = (*env)->NewStringUTF(env, " ");
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		show_camera_open_method,
+		f
 	);
 }
 

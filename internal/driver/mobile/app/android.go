@@ -47,6 +47,7 @@ void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
+void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
@@ -417,6 +418,20 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showFileSave(env, mimeStr, filenameStr)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(save); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func NativeShowCameraOpen(callback func(string, func())) {
+	fileCallback = callback // TODO: actually, set a camera callback variable, and have the intent handler call that instead
+
+	save := func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.showCameraOpen(env)
 		return nil
 	}
 

@@ -1,5 +1,8 @@
 package org.golang.app;
 
+import java.util.Base64;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
@@ -8,9 +11,12 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -29,16 +35,17 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 public class GoNativeActivity extends NativeActivity {
-	private static GoNativeActivity goNativeActivity;
-	private static final int FILE_OPEN_CODE = 1;
-	private static final int FILE_SAVE_CODE = 2;
+    private static GoNativeActivity goNativeActivity;
+    private static final int FILE_OPEN_CODE = 1;
+    private static final int FILE_SAVE_CODE = 2;
+    private static final int CAMERA_OPEN_CODE = 3;
 
-	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+    private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
-	private static final int DEFAULT_KEYBOARD_CODE = 0;
-	private static final int SINGLELINE_KEYBOARD_CODE = 1;
-	private static final int NUMBER_KEYBOARD_CODE = 2;
-	private static final int PASSWORD_KEYBOARD_CODE = 3;
+    private static final int DEFAULT_KEYBOARD_CODE = 0;
+    private static final int SINGLELINE_KEYBOARD_CODE = 1;
+    private static final int NUMBER_KEYBOARD_CODE = 2;
+    private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
@@ -47,21 +54,21 @@ public class GoNativeActivity extends NativeActivity {
     private native void backPressed();
     private native void setDarkMode(boolean dark);
 
-	private EditText mTextEdit;
-	private boolean ignoreKey = false;
-	private boolean keyboardUp = false;
+    private EditText mTextEdit;
+    private boolean ignoreKey = false;
+    private boolean keyboardUp = false;
 
-	public GoNativeActivity() {
-		super();
-		goNativeActivity = this;
-	}
+    public GoNativeActivity() {
+        super();
+        goNativeActivity = this;
+    }
 
-	String getTmpdir() {
-		return getCacheDir().getAbsolutePath();
-	}
+    String getTmpdir() {
+        return getCacheDir().getAbsolutePath();
+    }
 
-	void updateLayout() {
-	    try {
+    void updateLayout() {
+        try {
             WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
             if (insets == null) {
                 return;
@@ -70,7 +77,7 @@ public class GoNativeActivity extends NativeActivity {
             insetsChanged(insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetBottom(),
                 insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetRight());
         } catch (java.lang.NoSuchMethodError e) {
-    	    Rect insets = new Rect();
+            Rect insets = new Rect();
             getWindow().getDecorView().getWindowVisibleDisplayFrame(insets);
 
             View view = findViewById(android.R.id.content).getRootView();
@@ -179,6 +186,15 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
+    static void showCameraOpen(String f) { // TODO: this has to take a string argument because the ()V signature doesn't work for unknown reasons
+        goNativeActivity.doShowCameraOpen();
+    }
+
+    void doShowCameraOpen() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, CAMERA_OPEN_CODE);
+    }
+
     static void showFileSave(String mimes, String filename) {
         goNativeActivity.doShowFileSave(mimes, filename);
     }
@@ -195,58 +211,58 @@ public class GoNativeActivity extends NativeActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
     }
-	static int getRune(int deviceId, int keyCode, int metaState) {
-		try {
-			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
-			if (rune == 0) {
-				return -1;
-			}
-			return rune;
-		} catch (KeyCharacterMap.UnavailableException e) {
-			return -1;
-		} catch (Exception e) {
-			Log.e("Fyne", "exception reading KeyCharacterMap", e);
-			return -1;
-		}
-	}
+    static int getRune(int deviceId, int keyCode, int metaState) {
+        try {
+            int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
+            if (rune == 0) {
+                return -1;
+            }
+            return rune;
+        } catch (KeyCharacterMap.UnavailableException e) {
+            return -1;
+        } catch (Exception e) {
+            Log.e("Fyne", "exception reading KeyCharacterMap", e);
+            return -1;
+        }
+    }
 
-	private void load() {
-		// Interestingly, NativeActivity uses a different method
-		// to find native code to execute, avoiding
-		// System.loadLibrary. The result is Java methods
-		// implemented in C with JNIEXPORT (and JNI_OnLoad) are not
-		// available unless an explicit call to System.loadLibrary
-		// is done. So we do it here, borrowing the name of the
-		// library from the same AndroidManifest.xml metadata used
-		// by NativeActivity.
-		try {
-			ActivityInfo ai = getPackageManager().getActivityInfo(
-					getIntent().getComponent(), PackageManager.GET_META_DATA);
-			if (ai.metaData == null) {
-				Log.e("Fyne", "loadLibrary: no manifest metadata found");
-				return;
-			}
-			String libName = ai.metaData.getString("android.app.lib_name");
-			System.loadLibrary(libName);
-		} catch (Exception e) {
-			Log.e("Fyne", "loadLibrary failed", e);
-		}
-	}
+    private void load() {
+        // Interestingly, NativeActivity uses a different method
+        // to find native code to execute, avoiding
+        // System.loadLibrary. The result is Java methods
+        // implemented in C with JNIEXPORT (and JNI_OnLoad) are not
+        // available unless an explicit call to System.loadLibrary
+        // is done. So we do it here, borrowing the name of the
+        // library from the same AndroidManifest.xml metadata used
+        // by NativeActivity.
+        try {
+            ActivityInfo ai = getPackageManager().getActivityInfo(
+                    getIntent().getComponent(), PackageManager.GET_META_DATA);
+            if (ai.metaData == null) {
+                Log.e("Fyne", "loadLibrary: no manifest metadata found");
+                return;
+            }
+            String libName = ai.metaData.getString("android.app.lib_name");
+            System.loadLibrary(libName);
+        } catch (Exception e) {
+            Log.e("Fyne", "loadLibrary failed", e);
+        }
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		load();
-		super.onCreate(savedInstanceState);
-		setupEntry();
-		updateTheme(getResources().getConfiguration());
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        load();
+        super.onCreate(savedInstanceState);
+        setupEntry();
+        updateTheme(getResources().getConfiguration());
 
-		View view = findViewById(android.R.id.content).getRootView();
-		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-			public void onLayoutChange (View v, int left, int top, int right, int bottom,
-			                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-				GoNativeActivity.this.updateLayout();
-			}
-		});
+        View view = findViewById(android.R.id.content).getRootView();
+        view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            public void onLayoutChange (View v, int left, int top, int right, int bottom,
+                                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                GoNativeActivity.this.updateLayout();
+            }
+        });
     }
 
     private void setupEntry() {
@@ -304,18 +320,36 @@ public class GoNativeActivity extends NativeActivity {
                 });
             }
         });
-	}
+    }
 
-	@Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // unhandled request
-        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
+        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE && requestCode != CAMERA_OPEN_CODE) {
             return;
         }
 
         // dialog was cancelled
         if (resultCode != Activity.RESULT_OK) {
             filePickerReturned("");
+            return;
+        }
+
+        if (requestCode == CAMERA_OPEN_CODE) {
+            Bitmap photo = (Bitmap)data.getExtras().get("data");
+
+            int size = photo.getRowBytes() * photo.getHeight();
+            ByteBuffer buf = ByteBuffer.allocate(size);
+            photo.copyPixelsToBuffer(buf);
+            byte[] byteArray = buf.array();
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            photo.compress(CompressFormat.JPEG, 90, out);
+
+            //String dataAsString = out.toString();
+            String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
+
+            filePickerReturned(dataAsString);
             return;
         }
 
