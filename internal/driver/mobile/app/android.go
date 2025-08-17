@@ -51,6 +51,7 @@ void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
+void Java_org_golang_app_GoNativeActivity_capturePhotoReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
 
@@ -351,6 +352,20 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
+/*
+var capturePhotoCallback func(string)
+
+//export capturePhotoReturned
+func capturePhotoReturned(str *C.char) {
+	if capturePhotoCallback == nil {
+		return
+	}
+
+	capturePhotoCallback(C.GoString(str))
+	capturePhotoCallback = nil
+}
+*/
+
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	currentSize.InsetTopPx = top
@@ -426,8 +441,11 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	}
 }
 
-func NativeShowCameraOpen(callback func(string, func())) {
-	fileCallback = callback // TODO: actually, set a camera callback variable, and have the intent handler call that instead
+func NativeShowCameraOpen(callback func(string)) {
+	//capturePhotoCallback = callback
+	fileCallback = func(s string, _ func()) {
+		callback(s)
+	}
 
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer

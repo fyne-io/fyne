@@ -48,6 +48,7 @@ public class GoNativeActivity extends NativeActivity {
     private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
+    //private native void capturePhotoReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
@@ -349,6 +350,7 @@ public class GoNativeActivity extends NativeActivity {
             //String dataAsString = out.toString();
             String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
 
+            //capturePhotoReturned(dataAsString);
             filePickerReturned(dataAsString);
             return;
         }
