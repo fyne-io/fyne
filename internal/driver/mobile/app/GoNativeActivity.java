@@ -48,7 +48,7 @@ public class GoNativeActivity extends NativeActivity {
     private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
-    //private native void capturePhotoReturned(String str);
+    private native void capturePhotoReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
@@ -187,7 +187,7 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
-    static void showCameraOpen(String f) { // TODO: this has to take a string argument because the ()V signature doesn't work for unknown reasons
+    static void showCameraOpen() {
         goNativeActivity.doShowCameraOpen();
     }
 
@@ -330,13 +330,13 @@ public class GoNativeActivity extends NativeActivity {
             return;
         }
 
-        // dialog was cancelled
-        if (resultCode != Activity.RESULT_OK) {
-            filePickerReturned("");
-            return;
-        }
-
         if (requestCode == CAMERA_OPEN_CODE) {
+            if (resultCode != Activity.RESULT_OK) {
+                // dialog was cancelled
+                capturePhotoReturned("");
+                return;
+            }
+
             Bitmap photo = (Bitmap)data.getExtras().get("data");
 
             int size = photo.getRowBytes() * photo.getHeight();
@@ -349,13 +349,17 @@ public class GoNativeActivity extends NativeActivity {
 
             String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
 
-            //capturePhotoReturned(dataAsString);
-            filePickerReturned(dataAsString);
-            return;
-        }
+            capturePhotoReturned(dataAsString);
+        } else {
+            if (resultCode != Activity.RESULT_OK) {
+                // dialog was cancelled
+                filePickerReturned("");
+                return;
+            }
 
-        Uri uri = data.getData();
-        filePickerReturned(uri.toString());
+            Uri uri = data.getData();
+            filePickerReturned(uri.toString());
+	}
     }
 
     @Override

@@ -352,7 +352,6 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
-/*
 var capturePhotoCallback func(string)
 
 //export capturePhotoReturned
@@ -364,7 +363,6 @@ func capturePhotoReturned(str *C.char) {
 	capturePhotoCallback(C.GoString(str))
 	capturePhotoCallback = nil
 }
-*/
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
@@ -442,10 +440,7 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 }
 
 func NativeCapturePhoto(callback func(string)) {
-	//capturePhotoCallback = callback
-	fileCallback = func(s string, _ func()) {
-		callback(s)
-	}
+	capturePhotoCallback = callback
 
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer

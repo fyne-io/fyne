@@ -96,8 +96,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
-		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "(Ljava/lang/String;)V");
-		//show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "()V");  // TODO: can't be found for some reason
+		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "()V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
@@ -288,8 +287,7 @@ void showCameraOpen(JNIEnv* env) {
     (*env)->CallStaticVoidMethod(
 		env,
 		current_class,
-		show_camera_open_method,
-		f // TODO: figure out how to allow for this to not take parameters
+		show_camera_open_method
 	);
 }
 
@@ -298,10 +296,10 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 	filePickerReturned((char*)cstr);
 }
 
-//void Java_org_golang_app_GoNativeActivity_capturePhotoReturned(JNIEnv *env, jclass clazz, jstring str) {
-//    const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
-//	capturePhotoReturned((char*)cstr);
-//}
+void Java_org_golang_app_GoNativeActivity_capturePhotoReturned(JNIEnv *env, jclass clazz, jstring str) {
+    const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	capturePhotoReturned((char*)cstr);
+}
 
 void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
     insetsChanged(top, bottom, left, right);
