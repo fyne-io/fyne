@@ -347,7 +347,6 @@ public class GoNativeActivity extends NativeActivity {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             photo.compress(CompressFormat.JPEG, 90, out);
 
-            //String dataAsString = out.toString();
             String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
 
             //capturePhotoReturned(dataAsString);

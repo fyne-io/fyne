@@ -15,7 +15,7 @@ func (*device) CapturePhoto() (image.Image, bool, error) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	var result string
-	app.NativeShowCameraOpen(func(data string) {
+	app.NativeCapturePhoto(func(data string) {
 		result = data
 		wg.Done()
 	})

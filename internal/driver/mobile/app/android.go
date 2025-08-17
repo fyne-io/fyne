@@ -441,7 +441,7 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	}
 }
 
-func NativeShowCameraOpen(callback func(string)) {
+func NativeCapturePhoto(callback func(string)) {
 	//capturePhotoCallback = callback
 	fileCallback = func(s string, _ func()) {
 		callback(s)
