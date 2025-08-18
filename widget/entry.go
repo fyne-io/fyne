@@ -209,13 +209,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	e.actionWrapper = &fyne.Container{Layout: layout.NewStackLayout()}
 	objects = append(objects, e.actionWrapper)
-	//if e.ActionItem != nil {
-	//	e.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{e.ActionItem}
-	//	e.actionWrapper.Show()
-	//} else {
-	//	e.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{}
-	//	e.actionWrapper.Hide()
-	//}
 
 	icon := canvas.NewImageFromResource(e.Icon)
 	icon.FillMode = canvas.ImageFillContain
