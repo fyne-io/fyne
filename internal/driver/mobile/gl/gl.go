@@ -115,8 +115,7 @@ func (ctx *context) BufferSubData(target Enum, src []byte) {
 			a1: 0,
 			a2: uintptr(len(src)),
 		},
-		parg:     parg,
-		blocking: true,
+		parg: parg,
 	})
 }
 
