@@ -9,13 +9,13 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -207,13 +207,15 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
-	e.actionWrapper = container.NewStack()
+	e.actionWrapper = &fyne.Container{Layout: layout.NewStackLayout()}
 	objects = append(objects, e.actionWrapper)
-	e.actionWrapper.Hide()
-	if e.ActionItem != nil {
-		e.actionWrapper.Objects = []fyne.CanvasObject{e.ActionItem}
-		e.actionWrapper.Show()
-	}
+	//if e.ActionItem != nil {
+	//	e.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{e.ActionItem}
+	//	e.actionWrapper.Show()
+	//} else {
+	//	e.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{}
+	//	e.actionWrapper.Hide()
+	//}
 
 	icon := canvas.NewImageFromResource(e.Icon)
 	icon.FillMode = canvas.ImageFillContain
@@ -1572,6 +1574,14 @@ func (r *entryRenderer) leadingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
+	if r.entry.ActionItem != nil {
+		r.entry.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{r.entry.ActionItem}
+		r.entry.actionWrapper.Show()
+	} else {
+		r.entry.actionWrapper.(*fyne.Container).Objects = []fyne.CanvasObject{}
+		r.entry.actionWrapper.Hide()
+	}
+
 	th := r.entry.Theme()
 	borderSize := th.Size(theme.SizeNameInputBorder)
 	iconSize := th.Size(theme.SizeNameInlineIcon)
@@ -1587,11 +1597,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 
 	pad := theme.InputBorderSize()
 	actionIconSize := fyne.NewSize(0, size.Height-pad*2)
-	if r.entry.ActionItem != nil {
-		actionIconSize.Width = r.entry.ActionItem.MinSize().Width
-		r.entry.ActionItem.Resize(actionIconSize)
-		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-pad, pad))
-	}
+	actionIconSize.Width = r.entry.actionWrapper.MinSize().Width
+	r.entry.actionWrapper.Resize(actionIconSize)
+	r.entry.actionWrapper.Move(fyne.NewPos(size.Width-actionIconSize.Width-pad, pad))
 
 	validatorIconSize := fyne.NewSize(0, 0)
 	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
