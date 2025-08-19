@@ -339,11 +339,6 @@ public class GoNativeActivity extends NativeActivity {
 
             Bitmap photo = (Bitmap)data.getExtras().get("data");
 
-            int size = photo.getRowBytes() * photo.getHeight();
-            ByteBuffer buf = ByteBuffer.allocate(size);
-            photo.copyPixelsToBuffer(buf);
-            byte[] byteArray = buf.array();
-
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             photo.compress(CompressFormat.JPEG, 90, out);
 
