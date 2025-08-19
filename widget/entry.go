@@ -1579,14 +1579,6 @@ func (r *entryRenderer) leadingInset() float32 {
 }
 
 func (r *entryRenderer) Layout(size fyne.Size) {
-	if r.entry.ActionItem != nil {
-		r.actionWrapper.Objects = []fyne.CanvasObject{r.entry.ActionItem}
-		r.actionWrapper.Show()
-	} else {
-		r.actionWrapper.Objects = []fyne.CanvasObject{}
-		r.actionWrapper.Hide()
-	}
-
 	th := r.entry.Theme()
 	borderSize := th.Size(theme.SizeNameInputBorder)
 	iconSize := th.Size(theme.SizeNameInlineIcon)
@@ -1706,6 +1698,14 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *entryRenderer) Refresh() {
+	if r.entry.ActionItem != nil {
+		r.actionWrapper.Objects = []fyne.CanvasObject{r.entry.ActionItem}
+		r.actionWrapper.Show()
+	} else {
+		r.actionWrapper.Objects = []fyne.CanvasObject{}
+		r.actionWrapper.Hide()
+	}
+
 	content := r.entry.content
 	focusedAppearance := r.entry.focused && !r.entry.Disabled()
 	scroll := r.entry.Scroll
