@@ -98,8 +98,7 @@ func (ctx *context) BufferData(target Enum, src []byte, usage Enum) {
 			a1: uintptr(len(src)),
 			a2: usage.c(),
 		},
-		parg:     parg,
-		blocking: true,
+		parg: parg,
 	})
 }
 
@@ -522,8 +521,7 @@ func (ctx *context) Uniform4fv(dst Uniform, src []float32) {
 			a0: dst.c(),
 			a1: uintptr(len(src) / 4),
 		},
-		parg:     unsafe.Pointer(&src[0]),
-		blocking: true,
+		parg: unsafe.Pointer(&src[0]),
 	})
 }
 
