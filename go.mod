@@ -33,10 +33,10 @@ require (
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/image v0.24.0
-	golang.org/x/mod v0.17.0
+	golang.org/x/mod v0.20.0
 	golang.org/x/sys v0.30.0
 	golang.org/x/text v0.22.0
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
+	golang.org/x/tools v0.24.1
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
