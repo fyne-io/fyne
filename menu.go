@@ -64,6 +64,13 @@ func NewMenuItem(label string, action func()) *MenuItem {
 	return &MenuItem{Label: label, Action: action}
 }
 
+// NewMenuItemWithIcon creates a new menu item from the passed label, icon, and action parameters.
+//
+// Since: 2.7
+func NewMenuItemWithIcon(label string, icon Resource, action func()) *MenuItem {
+	return &MenuItem{Label: label, Icon: icon, Action: action}
+}
+
 // NewMenuItemSeparator creates a menu item that is to be used as a separator.
 func NewMenuItemSeparator() *MenuItem {
 	return &MenuItem{IsSeparator: true, Action: func() {}}
