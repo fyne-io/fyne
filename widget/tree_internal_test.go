@@ -192,6 +192,10 @@ func TestTree_Focus(t *testing.T) {
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, "foo", tree.selected[0])
+
+	tree.Select("foobar")
+	assert.Equal(t, "foobar", tree.currentFocus)
+	assert.Equal(t, "foobar", tree.selected[0])
 }
 
 func TestTree_Keyboard(t *testing.T) {
