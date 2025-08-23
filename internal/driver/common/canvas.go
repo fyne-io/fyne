@@ -163,13 +163,11 @@ func (c *Canvas) Focus(obj fyne.Focusable) {
 		if mgr == nil {
 			continue
 		}
-		if focusMgr != mgr {
-			if mgr.Focus(obj) {
-				if c.OnFocus != nil {
-					c.OnFocus(obj)
-				}
-				return
+		if focusMgr != mgr && mgr.Focus(obj) {
+			if c.OnFocus != nil {
+				c.OnFocus(obj)
 			}
+			return
 		}
 	}
 
@@ -295,14 +293,15 @@ func (c *Canvas) RemoveShortcut(shortcut fyne.Shortcut) {
 // This function does not use the canvas lock.
 func (c *Canvas) SetContentTreeAndFocusMgr(content fyne.CanvasObject) {
 	c.contentTree = &renderCacheTree{root: &RenderCacheNode{obj: content}}
-	var focused fyne.Focusable
+
+	newFocusMgr := app.NewFocusManager(content)
 	if c.contentFocusMgr != nil {
-		focused = c.contentFocusMgr.Focused() // keep old focus if possible
+		focused := c.contentFocusMgr.Focused()
+		if focused != nil {
+			newFocusMgr.Focus(focused) // Focus old object if possible.
+		}
 	}
-	c.contentFocusMgr = app.NewFocusManager(content)
-	if focused != nil {
-		c.contentFocusMgr.Focus(focused)
-	}
+	c.contentFocusMgr = newFocusMgr
 }
 
 // CheckDirtyAndClear returns true if the canvas is dirty and
