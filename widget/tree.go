@@ -597,8 +597,8 @@ type treeContentRenderer struct {
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
-	branchPool  async.ObjectPool
-	leafPool    async.ObjectPool
+	branchPool  async.ObjectPool[*branch]
+	leafPool    async.ObjectPool[*leaf]
 
 	wasVisible []TreeNodeID
 	visible    []TreeNodeID
@@ -814,7 +814,7 @@ func (r *treeContentRenderer) getBranch() *branch {
 		return newBranch(r.treeContent.tree, content)
 	}
 
-	return o.(*branch)
+	return o
 }
 
 func (r *treeContentRenderer) getLeaf() *leaf {
@@ -827,7 +827,7 @@ func (r *treeContentRenderer) getLeaf() *leaf {
 		return newLeaf(r.treeContent.tree, content)
 	}
 
-	return o.(*leaf)
+	return o
 }
 
 var (

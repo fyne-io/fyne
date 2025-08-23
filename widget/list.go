@@ -618,7 +618,7 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool          async.ObjectPool
+	itemPool          async.ObjectPool[*listItem]
 	visible           []listItemAndID
 	wasVisible        []listItemAndID
 	visibleRowHeights []float32
@@ -640,14 +640,12 @@ func (l *listLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 func (l *listLayout) getItem() *listItem {
 	item := l.itemPool.Get()
-	if item == nil {
-		if f := l.list.CreateItem; f != nil {
-			item2 := createItemAndApplyThemeScope(f, l.list)
-
-			item = newListItem(item2, nil)
-		}
+	if item == nil && l.list.CreateItem != nil {
+		withScope := createItemAndApplyThemeScope(l.list.CreateItem, l.list)
+		item = newListItem(withScope, nil)
 	}
-	return item.(*listItem)
+
+	return item
 }
 
 func (l *listLayout) offsetUpdated(pos fyne.Position) {

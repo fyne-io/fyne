@@ -2,14 +2,13 @@
 
 package async
 
-import "fyne.io/fyne/v2"
-
 // ObjectPool represents a pool of reusable canvas objects.
-type ObjectPool struct {
-	Pool[fyne.CanvasObject]
+type ObjectPool[T comparable] struct {
+	Pool[T]
 }
 
-func (p *ObjectPool) Clear() {
-	for p.Get() != nil {
+func (p *ObjectPool[T]) Clear() {
+	var zero T
+	for p.Get() != zero {
 	}
 }

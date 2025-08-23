@@ -528,7 +528,7 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	gw *GridWrap
 
-	itemPool   async.ObjectPool
+	itemPool   async.ObjectPool[*gridWrapItem]
 	visible    []gridItemAndID
 	wasVisible []gridItemAndID
 }
@@ -556,7 +556,7 @@ func (l *gridWrapLayout) getItem() *gridWrapItem {
 			item = newGridWrapItem(child, nil)
 		}
 	}
-	return item.(*gridWrapItem)
+	return item
 }
 
 func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {

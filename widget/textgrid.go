@@ -521,7 +521,7 @@ func (t *textGridContent) refreshCell(row, col int) {
 
 type textGridContentRenderer struct {
 	text     *textGridContent
-	itemPool async.Pool[*textGridRow]
+	itemPool async.ObjectPool[*textGridRow]
 }
 
 func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
