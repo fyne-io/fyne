@@ -46,7 +46,7 @@ type Canvas struct {
 	// disappear or blink from the view at any frames. As of this reason,
 	// the refreshQueue is an unbounded queue which is able to cache
 	// arbitrary number of fyne.CanvasObject for the rendering.
-	refreshQueue *async.CanvasObjectQueue
+	refreshQueue deduplicatedObjectQueue
 	dirty        bool
 
 	mWindowHeadTree, contentTree, menuTree *renderCacheTree
@@ -224,69 +224,41 @@ func (c *Canvas) FocusPrevious() {
 }
 
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
-func (c *Canvas) FreeDirtyTextures() (freed uint64) {
-	freeObject := func(object fyne.CanvasObject) {
-		freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-			// No image refresh while recursing to avoid double texture upload.
-			if _, ok := obj.(*canvas.Image); ok {
-				return false
-			}
-			if c.painter != nil {
+func (c *Canvas) FreeDirtyTextures() uint64 {
+	free := func(object fyne.CanvasObject) {
+		// Image.Refresh will trigger a refresh specific to the object, while recursing on parent widget would just lead to
+		// a double texture upload.
+		img, ok := object.(*canvas.Image)
+		if ok && c.painter != nil {
+			c.painter.Free(img)
+			return
+		}
+
+		driver.WalkCompleteObjectTree(object, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+			_, isImage := obj.(*canvas.Image) // No image refresh while recursing to avoid double texture upload.
+			if !isImage && c.painter != nil {
 				c.painter.Free(obj)
 			}
 			return false
-		}
-
-		// Image.Refresh will trigger a refresh specific to the object, while recursing on parent widget would just lead to
-		// a double texture upload.
-		if img, ok := object.(*canvas.Image); ok {
-			if c.painter != nil {
-				c.painter.Free(img)
-			}
-		} else {
-			driver.WalkCompleteObjectTree(object, freeWalked, nil)
-		}
+		}, nil)
 	}
 
-	// Within a frame, refresh tasks are requested from the Refresh method,
-	// and we desire to clear out all requested operations within a frame.
-	// See https://github.com/fyne-io/fyne/issues/2548.
-	tasksToDo := c.refreshQueue.Len()
-
-	shouldFilterDuplicates := (tasksToDo > 200) // filtering has overhead, not worth enabling for few tasks
-	var refreshSet map[fyne.CanvasObject]struct{}
-	if shouldFilterDuplicates {
-		refreshSet = make(map[fyne.CanvasObject]struct{})
-	}
-
-	for c.refreshQueue.Len() > 0 {
-		object := c.refreshQueue.Out()
-		if !shouldFilterDuplicates {
-			freed++
-			freeObject(object)
-		} else {
-			refreshSet[object] = struct{}{}
-			tasksToDo--
-			if tasksToDo == 0 {
-				shouldFilterDuplicates = false // stop collecting messages to avoid starvation
-				for object := range refreshSet {
-					freed++
-					freeObject(object)
-				}
-			}
-		}
+	objectsToFree := c.refreshQueue.Len()
+	for object := c.refreshQueue.Out(); object != nil; object = c.refreshQueue.Out() {
+		free(object)
 	}
 
 	if c.painter != nil {
 		cache.RangeExpiredTexturesFor(c.impl, c.painter.Free)
 	}
-	return
+	return objectsToFree
 }
 
 // Initialize initializes the canvas.
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
-	c.refreshQueue = async.NewCanvasObjectQueue()
+	c.refreshQueue.queue = async.NewCanvasObjectQueue()
+	c.refreshQueue.dedup = make(map[fyne.CanvasObject]struct{})
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
@@ -571,4 +543,39 @@ func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 		renderer := cache.Renderer(cont)
 		renderer.Layout(cont.Size())
 	}
+}
+
+type deduplicatedObjectQueue struct {
+	queue *async.CanvasObjectQueue
+	dedup map[fyne.CanvasObject]struct{}
+}
+
+// In adds an object to the queue if it is not already present.
+func (q *deduplicatedObjectQueue) In(obj fyne.CanvasObject) {
+	_, exists := q.dedup[obj]
+	if exists {
+		return
+	}
+
+	q.queue.In(obj)
+	q.dedup[obj] = struct{}{}
+}
+
+// Out removes and returns the next object from the queue.
+// It assumes that the whole queue is drained and defers clearing
+// the deduplication map until it is empty.
+func (q *deduplicatedObjectQueue) Out() fyne.CanvasObject {
+	if q.queue.Len() == 0 {
+		for k := range q.dedup {
+			delete(q.dedup, k)
+		}
+		return nil
+	}
+
+	return q.queue.Out()
+}
+
+// Len returns the number of elements in the queue.
+func (q *deduplicatedObjectQueue) Len() uint64 {
+	return q.queue.Len()
 }
