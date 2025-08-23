@@ -4,7 +4,7 @@ import "sync"
 
 // Implementation inspired by https://github.com/tailscale/tailscale/blob/main/syncs/pool.go.
 
-// Pool is the generic version of sync.Pool.
+// Pool is the generic version of sync.Pool. It does not become single threaded when migrated.
 type Pool[T any] struct {
 	pool sync.Pool
 
