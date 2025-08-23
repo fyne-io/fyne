@@ -642,7 +642,7 @@ func (l *listLayout) getItem() *listItem {
 	item := l.itemPool.Get()
 	if item == nil && l.list.CreateItem != nil {
 		withScope := createItemAndApplyThemeScope(l.list.CreateItem, l.list)
-		item = newListItem(withScope, nil)
+		return newListItem(withScope, nil)
 	}
 
 	return item
