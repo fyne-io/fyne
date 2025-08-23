@@ -618,7 +618,7 @@ type listLayout struct {
 	separators []fyne.CanvasObject
 	children   []fyne.CanvasObject
 
-	itemPool          async.Pool[fyne.CanvasObject]
+	itemPool          async.ObjectPool
 	visible           []listItemAndID
 	wasVisible        []listItemAndID
 	visibleRowHeights []float32
@@ -766,8 +766,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		}
 
 		// a full refresh may change theme, we should drain the pool of unused items instead of refreshing them.
-		for l.itemPool.Get() != nil {
-		}
+		l.itemPool.Clear()
 	}
 
 	// we don't need wasVisible now until next call to update

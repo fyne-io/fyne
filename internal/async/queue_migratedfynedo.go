@@ -21,6 +21,10 @@ func NewCanvasObjectQueue() *CanvasObjectQueue {
 // In adds the given value to the tail of the queue.
 // If the queue is full, it grows the buffer dynamically.
 func (q *CanvasObjectQueue) In(v fyne.CanvasObject) {
+	if q.buffer == nil {
+		q.Clear()
+	}
+
 	if q.size == len(q.buffer) {
 		buffer := make([]fyne.CanvasObject, len(q.buffer)*2)
 		copy(buffer, q.buffer[q.head:])
@@ -47,8 +51,7 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 	q.size--
 
 	if q.size == 0 && len(q.buffer) > 4*defaultQueueCapacity {
-		q.buffer = make([]fyne.CanvasObject, defaultQueueCapacity)
-		q.head = 0
+		q.Clear()
 	}
 
 	return first
@@ -57,4 +60,11 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 // Len returns the number of items in the queue.
 func (q *CanvasObjectQueue) Len() uint64 {
 	return uint64(q.size)
+}
+
+// Clear removes all items from the queue.
+func (q *CanvasObjectQueue) Clear() {
+	q.buffer = make([]fyne.CanvasObject, defaultQueueCapacity)
+	q.head = 0
+	q.size = 0
 }

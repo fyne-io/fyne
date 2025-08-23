@@ -597,8 +597,8 @@ type treeContentRenderer struct {
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
-	branchPool  async.Pool[fyne.CanvasObject]
-	leafPool    async.Pool[fyne.CanvasObject]
+	branchPool  async.ObjectPool
+	leafPool    async.ObjectPool
 
 	wasVisible []TreeNodeID
 	visible    []TreeNodeID

@@ -1205,7 +1205,7 @@ type tableCellsRenderer struct {
 	widget.BaseRenderer
 
 	cells            *tableCells
-	pool, headerPool async.Pool[fyne.CanvasObject]
+	pool, headerPool async.ObjectPool
 	visible, headers map[TableCellID]fyne.CanvasObject
 	hover, marker    *canvas.Rectangle
 	dividers         []fyne.CanvasObject

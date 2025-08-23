@@ -528,7 +528,7 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	gw *GridWrap
 
-	itemPool   async.Pool[fyne.CanvasObject]
+	itemPool   async.ObjectPool
 	visible    []gridItemAndID
 	wasVisible []gridItemAndID
 }
