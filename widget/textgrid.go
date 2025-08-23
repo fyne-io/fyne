@@ -585,12 +585,13 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 
 	remain := t.text.visible[:0]
 	for _, row := range t.text.visible {
-		if row.(*textGridRow).row < start || row.(*textGridRow).row > end {
-			t.itemPool.Put(row.(*textGridRow))
+		current := row.(*textGridRow)
+		if current.row < start || current.row > end {
+			t.itemPool.Put(current)
 			continue
 		}
 
-		remain = append(remain, row.(*textGridRow))
+		remain = append(remain, current)
 	}
 	t.text.visible = remain
 

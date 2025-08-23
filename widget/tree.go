@@ -804,32 +804,30 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	canvas.Refresh(r.treeContent.super())
 }
 
-func (r *treeContentRenderer) getBranch() (b *branch) {
+func (r *treeContentRenderer) getBranch() *branch {
 	o := r.branchPool.Get()
-	if o != nil {
-		b = o.(*branch)
-	} else {
+	if o == nil {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
 			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
 		}
-		b = newBranch(r.treeContent.tree, content)
+		return newBranch(r.treeContent.tree, content)
 	}
-	return
+
+	return o.(*branch)
 }
 
-func (r *treeContentRenderer) getLeaf() (l *leaf) {
+func (r *treeContentRenderer) getLeaf() *leaf {
 	o := r.leafPool.Get()
-	if o != nil {
-		l = o.(*leaf)
-	} else {
+	if o == nil {
 		var content fyne.CanvasObject
 		if f := r.treeContent.tree.CreateNode; f != nil {
 			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
 		}
-		l = newLeaf(r.treeContent.tree, content)
+		return newLeaf(r.treeContent.tree, content)
 	}
-	return
+
+	return o.(*leaf)
 }
 
 var (
