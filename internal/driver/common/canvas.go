@@ -240,7 +240,6 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
 	c.refreshQueue.queue = async.NewCanvasObjectQueue()
-	c.refreshQueue.dedup = make(map[fyne.CanvasObject]struct{})
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: onOverlayChanged,
@@ -547,18 +546,18 @@ func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 
 type deduplicatedObjectQueue struct {
 	queue *async.CanvasObjectQueue
-	dedup map[fyne.CanvasObject]struct{}
+	dedup async.Map[fyne.CanvasObject, struct{}]
 }
 
 // In adds an object to the queue if it is not already present.
 func (q *deduplicatedObjectQueue) In(obj fyne.CanvasObject) {
-	_, exists := q.dedup[obj]
+	_, exists := q.dedup.Load(obj)
 	if exists {
 		return
 	}
 
 	q.queue.In(obj)
-	q.dedup[obj] = struct{}{}
+	q.dedup.Store(obj, struct{}{})
 }
 
 // Out removes and returns the next object from the queue.
@@ -566,9 +565,7 @@ func (q *deduplicatedObjectQueue) In(obj fyne.CanvasObject) {
 // the deduplication map until it is empty.
 func (q *deduplicatedObjectQueue) Out() fyne.CanvasObject {
 	if q.queue.Len() == 0 {
-		for k := range q.dedup {
-			delete(q.dedup, k)
-		}
+		q.dedup.Clear()
 		return nil
 	}
 
