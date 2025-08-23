@@ -468,66 +468,8 @@ func (c *Canvas) walkTree(
 	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
 }
 
-// RenderCacheNode represents a node in a render cache tree.
-type RenderCacheNode struct {
-	// structural data
-	firstChild  *RenderCacheNode
-	nextSibling *RenderCacheNode
-	obj         fyne.CanvasObject
-	parent      *RenderCacheNode
-	// cache data
-	minSize fyne.Size
-}
-
-// Obj returns the node object.
-func (r *RenderCacheNode) Obj() fyne.CanvasObject {
-	return r.obj
-}
-
 type activatableMenu interface {
 	IsActive() bool
-}
-
-type overlayStack struct {
-	internal.OverlayStack
-
-	renderCaches []*renderCacheTree
-}
-
-func (o *overlayStack) Add(overlay fyne.CanvasObject) {
-	if overlay == nil {
-		return
-	}
-	o.add(overlay)
-}
-
-func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
-	if overlay == nil || len(o.List()) == 0 {
-		return
-	}
-	o.remove(overlay)
-}
-
-func (o *overlayStack) add(overlay fyne.CanvasObject) {
-	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
-	o.OverlayStack.Add(overlay)
-}
-
-func (o *overlayStack) remove(overlay fyne.CanvasObject) {
-	o.OverlayStack.Remove(overlay)
-	overlayCount := len(o.List())
-
-	// it is possible that overlays are removed implicitly and render caches already cleared out
-	if overlayCount >= len(o.renderCaches) {
-		return
-	}
-
-	o.renderCaches[overlayCount] = nil // release memory reference to removed element
-	o.renderCaches = o.renderCaches[:overlayCount]
-}
-
-type renderCacheTree struct {
-	root *RenderCacheNode
 }
 
 func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
