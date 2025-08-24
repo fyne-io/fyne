@@ -33,7 +33,7 @@ func (q *deduplicatedObjectQueue) Out() fyne.CanvasObject {
 	}
 
 	out := q.queue.Out()
-	if !build.DisableThreadChecks {
+	if !build.MigratedToFyneDo() {
 		q.dedup.Delete(out)
 	}
 	return out
