@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/build"
 )
 
 type deduplicatedObjectQueue struct {
@@ -31,7 +32,11 @@ func (q *deduplicatedObjectQueue) Out() fyne.CanvasObject {
 		return nil
 	}
 
-	return q.queue.Out()
+	out := q.queue.Out()
+	if !build.DisableThreadChecks {
+		q.dedup.Delete(out)
+	}
+	return out
 }
 
 // Len returns the number of elements in the queue.
