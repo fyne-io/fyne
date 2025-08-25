@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"image/color"
 	"reflect"
 
@@ -225,7 +224,6 @@ func (c *Canvas) FocusPrevious() {
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
 func (c *Canvas) FreeDirtyTextures() uint64 {
 	if c.painter == nil {
-		fmt.Println("No painter yet!")
 		return 0
 	}
 
