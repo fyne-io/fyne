@@ -109,7 +109,7 @@ func (c *canvas) OnTypedRune() func(rune) {
 }
 
 func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
 func (c *canvas) Resize(size fyne.Size) {

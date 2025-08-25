@@ -105,7 +105,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
 	case *ast.Emphasis:
-		text := string(forceIntoText(source, n))
+		text := forceIntoText(source, n)
 		switch t.Level {
 		case 2:
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleStrong, Text: text}}, nil

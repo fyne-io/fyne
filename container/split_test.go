@@ -275,24 +275,24 @@ func TestSplitContainer_swap_contents(t *testing.T) {
 	t.Run("Leading", func(t *testing.T) {
 		sc := NewHSplit(objA, objB)
 		min := sc.MinSize()
-		assert.Equal(t, float32(initialWidth), min.Width)
-		assert.Equal(t, float32(initialHeight), min.Height)
+		assert.Equal(t, initialWidth, min.Width)
+		assert.Equal(t, initialHeight, min.Height)
 		sc.Leading = objC
 		sc.Refresh()
 		min = sc.MinSize()
-		assert.Equal(t, float32(expectedWidth), min.Width)
-		assert.Equal(t, float32(expectedHeight), min.Height)
+		assert.Equal(t, expectedWidth, min.Width)
+		assert.Equal(t, expectedHeight, min.Height)
 	})
 	t.Run("Trailing", func(t *testing.T) {
 		sc := NewHSplit(objA, objB)
 		min := sc.MinSize()
-		assert.Equal(t, float32(initialWidth), min.Width)
-		assert.Equal(t, float32(initialHeight), min.Height)
+		assert.Equal(t, initialWidth, min.Width)
+		assert.Equal(t, initialHeight, min.Height)
 		sc.Trailing = objC
 		sc.Refresh()
 		min = sc.MinSize()
-		assert.Equal(t, float32(expectedWidth), min.Width)
-		assert.Equal(t, float32(expectedHeight), min.Height)
+		assert.Equal(t, expectedWidth, min.Width)
+		assert.Equal(t, expectedHeight, min.Height)
 	})
 }
 
