@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"image/color"
 	"reflect"
 
@@ -223,14 +224,17 @@ func (c *Canvas) FocusPrevious() {
 
 // FreeDirtyTextures frees dirty textures and returns the number of freed textures.
 func (c *Canvas) FreeDirtyTextures() uint64 {
+	if c.painter == nil {
+		fmt.Println("No painter yet!")
+		return 0
+	}
+
 	objectsToFree := c.refreshQueue.Len()
 	for object := c.refreshQueue.Out(); object != nil; object = c.refreshQueue.Out() {
 		c.freeObject(object)
 	}
 
-	if c.painter != nil {
-		cache.RangeExpiredTexturesFor(c.impl, c.painter.Free)
-	}
+	cache.RangeExpiredTexturesFor(c.impl, c.painter.Free)
 	return objectsToFree
 }
 
@@ -389,15 +393,13 @@ func (c *Canvas) focusManager() *app.FocusManager {
 func (c *Canvas) freeObject(object fyne.CanvasObject) {
 	// Image.Refresh will trigger a refresh specific to the object,
 	// while recursing on parent widget would just lead to a double texture upload.
-	img, ok := object.(*canvas.Image)
-	if ok && c.painter != nil {
+	if img, ok := object.(*canvas.Image); ok {
 		c.painter.Free(img)
 		return
 	}
 
 	driver.WalkCompleteObjectTree(object, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		_, isImage := obj.(*canvas.Image) // No image refresh while recursing to avoid double texture upload.
-		if !isImage && c.painter != nil {
+		if _, ok := obj.(*canvas.Image); !ok { // No image refresh while recursing to avoid double texture upload.
 			c.painter.Free(obj)
 		}
 		return false
