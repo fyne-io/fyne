@@ -10,6 +10,8 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
+	glcommon "fyne.io/fyne/v2/internal/common/gl"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/theme"
@@ -240,6 +242,38 @@ func (c *glCanvas) menuHeight() float32 {
 
 func (c *glCanvas) overlayChanged() {
 	c.SetDirty()
+}
+
+// markAlive walks the object trees for this canvas and marks
+// all cache entries for visible objects alive.
+// It should be called on inactive windows when a clean is requested.
+func (c *glCanvas) markAlive(visibleOnly bool) {
+	mark := func(node *common.RenderCacheNode, pos fyne.Position) {
+		obj := node.Obj()
+		_ = cache.GetCanvasForObject(obj)
+
+		// Only CanvasForObject cache needs to be kept alive for invisible objects.
+		// Others may be allowed to expire.
+		if !obj.Visible() {
+			return
+		}
+
+		switch obj := obj.(type) {
+		case *canvas.LinearGradient, *canvas.RadialGradient, *canvas.Image, *canvas.Raster:
+			// these object types may have a cached texture, mark it alive if any
+			_, _ = cache.GetTexture(obj)
+		case *canvas.Text:
+			_, _ = cache.GetTextTexture(glcommon.FontCacheEntryForText(obj, c))
+		case fyne.Widget:
+			_, _ = cache.CachedRenderer(obj)
+		}
+	}
+
+	if visibleOnly {
+		c.WalkTrees(mark, nil)
+	} else {
+		c.WalkCompleteTrees(mark, nil)
+	}
 }
 
 func (c *glCanvas) paint(size fyne.Size) {

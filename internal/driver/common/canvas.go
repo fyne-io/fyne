@@ -277,9 +277,6 @@ func (c *Canvas) FreeDirtyTextures() (freed uint64) {
 		}
 	}
 
-	if c.painter != nil {
-		cache.RangeExpiredTexturesFor(c.impl, c.painter.Free)
-	}
 	return
 }
 
@@ -405,21 +402,38 @@ func (c *Canvas) Unfocus() {
 	}
 }
 
-// WalkTrees walks over the trees.
+// WalkTrees walks over visible objects in all the trees.
 func (c *Canvas) WalkTrees(
 	beforeChildren func(*RenderCacheNode, fyne.Position),
 	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
-	c.walkTree(c.contentTree, beforeChildren, afterChildren)
+	c.walkTrees(beforeChildren, afterChildren, true)
+}
+
+// WalkCompleteTrees walks over all objects, including not visible,
+// in all the trees.
+func (c *Canvas) WalkCompleteTrees(
+	beforeChildren func(*RenderCacheNode, fyne.Position),
+	afterChildren func(*RenderCacheNode, fyne.Position),
+) {
+	c.walkTrees(beforeChildren, afterChildren, false)
+}
+
+func (c *Canvas) walkTrees(
+	beforeChildren func(*RenderCacheNode, fyne.Position),
+	afterChildren func(*RenderCacheNode, fyne.Position),
+	requireVisible bool,
+) {
+	c.walkTree(c.contentTree, requireVisible, beforeChildren, afterChildren)
 	if c.mWindowHeadTree != nil && c.mWindowHeadTree.root.obj != nil {
-		c.walkTree(c.mWindowHeadTree, beforeChildren, afterChildren)
+		c.walkTree(c.mWindowHeadTree, requireVisible, beforeChildren, afterChildren)
 	}
 	if c.menuTree != nil && c.menuTree.root.obj != nil {
-		c.walkTree(c.menuTree, beforeChildren, afterChildren)
+		c.walkTree(c.menuTree, requireVisible, beforeChildren, afterChildren)
 	}
 	for _, tree := range c.overlays.renderCaches {
 		if tree != nil {
-			c.walkTree(tree, beforeChildren, afterChildren)
+			c.walkTree(tree, requireVisible, beforeChildren, afterChildren)
 		}
 	}
 }
@@ -445,8 +459,17 @@ func (c *Canvas) isMenuActive() bool {
 	return true
 }
 
+func (c *Canvas) walkVisibleTree(
+	tree *renderCacheTree,
+	beforeChildren func(*RenderCacheNode, fyne.Position),
+	afterChildren func(*RenderCacheNode, fyne.Position),
+) {
+	c.walkTree(tree, true, beforeChildren, afterChildren)
+}
+
 func (c *Canvas) walkTree(
 	tree *renderCacheTree,
+	requireVisible bool,
 	beforeChildren func(*RenderCacheNode, fyne.Position),
 	afterChildren func(*RenderCacheNode, fyne.Position),
 ) {
@@ -494,7 +517,11 @@ func (c *Canvas) walkTree(
 		prev = node
 		node = node.nextSibling
 	}
-	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
+	if requireVisible {
+		driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
+	} else {
+		driver.WalkCompleteObjectTree(tree.root.obj, bc, ac)
+	}
 }
 
 // RenderCacheNode represents a node in a render cache tree.
