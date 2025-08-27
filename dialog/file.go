@@ -505,8 +505,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 
 	f.breadcrumb.Objects = nil
 
-	localdir := dir.String()[len(dir.Scheme())+3:]
-
+	localdir := dir.Path()
 	buildDir := filepath.VolumeName(localdir)
 	for i, d := range strings.Split(localdir, "/") {
 		if d == "" {
@@ -564,7 +563,7 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 	f.selected = file
 	f.selectedID = id
 
-	if file == nil || file.String()[len(file.Scheme())+3:] == "" {
+	if file == nil || file.Path() == "" {
 		// keep user input while navigating
 		// in a FileSave dialog
 		if !f.file.save {

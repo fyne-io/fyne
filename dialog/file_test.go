@@ -30,8 +30,8 @@ import (
 //
 // You should only call this function on paths that you expect to be valid.
 func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
-	p1 := u1.String()[len(u1.Scheme())+3:]
-	p2 := u2.String()[len(u2.Scheme())+3:]
+	p1 := u1.Path()
+	p2 := u2.Path()
 
 	a1, err := filepath.Abs(p1)
 	if err != nil {
@@ -403,7 +403,7 @@ func TestShowFileSave(t *testing.T) {
 
 	err = chosen.Close()
 	assert.NoError(t, err)
-	pathString := expectedPath.String()[len(expectedPath.Scheme())+3:]
+	pathString := expectedPath.Path()
 	err = os.Remove(pathString)
 	assert.NoError(t, err)
 }
