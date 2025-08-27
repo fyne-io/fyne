@@ -210,6 +210,10 @@ func Delete(u fyne.URI) error {
 	return wrepo.Delete(u)
 }
 
+// DeleteAll destroys, deletes, or otherwise removes the resource referenced
+// by the URI even if the resource is a non-empty directory.
+//
+// Since: 2.7
 func DeleteAll(u fyne.URI) error {
 	listable, err := CanList(u)
 	if err != nil {
@@ -232,7 +236,11 @@ func DeleteAll(u fyne.URI) error {
 	var folders []fyne.URI
 	var files []fyne.URI
 	for i := 0; i < len(children); i++ {
-		listable, _ := CanList(children[i])
+		listable, err = CanList(children[i])
+
+		if err != nil {
+			return err
+		}
 
 		if listable {
 			grandChildren, err := List(children[i])
