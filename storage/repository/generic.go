@@ -40,38 +40,28 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		return nil, ErrURIRoot
 	}
 
-	newURI := strings.Builder{}
-	scheme := u.Scheme()
-	authority := u.Authority()
-	query := u.Query()
-	fragment := u.Fragment()
+	newURI := uri{
+		scheme:    u.Scheme(),
+		authority: u.Authority(),
+		query:     u.Query(),
+		fragment:  u.Fragment(),
+	}
 
-	newURI.Grow(len(p) + len(scheme) + len(authority) + len(query) + len(fragment) + len("://?#"))
-
-	newURI.WriteString(scheme)
-	newURI.WriteString("://")
-	newURI.WriteString(authority)
+	newPath := strings.Builder{}
+	newPath.Grow(len(p))
 
 	// there will be at least one component, since we know we don't have '/' or ''.
-	newURI.WriteByte('/')
+	newPath.WriteByte('/')
 	components := splitNonEmpty(p, "/")
 	if len(components) > 1 {
-		newURI.WriteString(strings.Join(components[:len(components)-1], "/"))
+		newPath.WriteString(strings.Join(components[:len(components)-1], "/"))
 	}
-
-	// stick the query and fragment back on the end
-	if len(query) > 0 {
-		newURI.WriteByte('?')
-		newURI.WriteString(query)
-	}
-	if len(fragment) > 0 {
-		newURI.WriteByte('#')
-		newURI.WriteString(fragment)
-	}
+	newURI.path = newPath.String()
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
+	// However, we can reuse &uri.String() to not duplicate string creation.
 	return ParseURI(newURI.String())
 }
 
@@ -86,41 +76,31 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-	newURI := strings.Builder{}
+	newURI := uri{
+		scheme:    u.Scheme(),
+		authority: u.Authority(),
+		query:     u.Query(),
+		fragment:  u.Fragment(),
+	}
+
+	newPath := strings.Builder{}
 	p := u.Path()
-	scheme := u.Scheme()
-	authority := u.Authority()
-	query := u.Query()
-	fragment := u.Fragment()
+	newPath.Grow(len(p) + len(component) + 1)
 
-	newURI.Grow(len(p) + len(scheme) + len(authority) + len(query) + len(fragment) + len(component) + len("://?#"))
-
-	newURI.WriteString(scheme)
-	newURI.WriteString("://")
-	newURI.WriteString(authority)
-
-	newURI.WriteByte('/')
+	newPath.WriteByte('/')
 	for _, v := range strings.Split(p, "/") {
 		if len(v) > 0 {
-			newURI.WriteString(v)
-			newURI.WriteByte('/')
+			newPath.WriteString(v)
+			newPath.WriteByte('/')
 		}
 	}
-	newURI.WriteString(component)
-
-	// stick the query and fragment back on the end
-	if len(query) > 0 {
-		newURI.WriteByte('?')
-		newURI.WriteString(query)
-	}
-	if len(fragment) > 0 {
-		newURI.WriteByte('#')
-		newURI.WriteString(fragment)
-	}
+	newPath.WriteString(component)
+	newURI.path = newPath.String()
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
+	// However, we can reuse &uri.String() to not duplicate string creation.
 	return ParseURI(newURI.String())
 }
 
