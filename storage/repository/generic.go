@@ -36,35 +36,39 @@ func splitNonEmpty(str, sep string) []string {
 // Since: 2.0
 func GenericParent(u fyne.URI) (fyne.URI, error) {
 	p := u.Path()
-
 	if p == "" || p == "/" {
 		return nil, ErrURIRoot
 	}
 
-	components := splitNonEmpty(p, "/")
+	newURI := strings.Builder{}
+	newURI.Grow(len(p))
 
-	newURI := u.Scheme() + "://" + u.Authority()
+	newURI.WriteString(u.Scheme())
+	newURI.WriteString("://")
+	newURI.WriteString(u.Authority())
 
 	// there will be at least one component, since we know we don't have
 	// '/' or ''.
-	newURI += "/"
+	newURI.WriteByte('/')
+	components := splitNonEmpty(p, "/")
 	if len(components) > 1 {
-		newURI += strings.Join(components[:len(components)-1], "/")
+		newURI.WriteString(strings.Join(components[:len(components)-1], "/"))
 	}
 
 	// stick the query and fragment back on the end
 	if q := u.Query(); len(q) > 0 {
-		newURI += "?" + q
+		newURI.WriteByte('?')
+		newURI.WriteString(q)
 	}
-
 	if f := u.Fragment(); len(f) > 0 {
-		newURI += "#" + f
+		newURI.WriteByte('#')
+		newURI.WriteString(f)
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
-	return ParseURI(newURI)
+	return ParseURI(newURI.String())
 }
 
 // GenericChild can be used as a common-case implementation of
@@ -78,26 +82,34 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-	// split into components and add the new one
-	components := splitNonEmpty(u.Path(), "/")
+	p := u.Path()
+	newURI := strings.Builder{}
+	newURI.Grow(len(p))
+
+	newURI.WriteString(u.Scheme())
+	newURI.WriteString("://")
+	newURI.WriteString(u.Authority())
+
+	components := splitNonEmpty(p, "/")
 	components = append(components, component)
 
-	// generate the scheme, authority, and path
-	newURI := u.Scheme() + "://" + u.Authority()
-	newURI += "/" + strings.Join(components, "/")
+	newURI.WriteByte('/')
+	newURI.WriteString(strings.Join(components, "/"))
 
 	// stick the query and fragment back on the end
 	if q := u.Query(); len(q) > 0 {
-		newURI += "?" + q
+		newURI.WriteByte('?')
+		newURI.WriteString(q)
 	}
 	if f := u.Fragment(); len(f) > 0 {
-		newURI += "#" + f
+		newURI.WriteByte('#')
+		newURI.WriteString(f)
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
-	return ParseURI(newURI)
+	return ParseURI(newURI.String())
 }
 
 // GenericCopy can be used a common-case implementation of
