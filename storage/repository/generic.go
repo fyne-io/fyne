@@ -41,14 +41,18 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	newURI := strings.Builder{}
-	newURI.Grow(len(p))
+	scheme := u.Scheme()
+	authority := u.Authority()
+	query := u.Query()
+	fragment := u.Fragment()
 
-	newURI.WriteString(u.Scheme())
+	newURI.Grow(len(p) + len(scheme) + len(authority) + len(query) + len(fragment) + len("://?#"))
+
+	newURI.WriteString(scheme)
 	newURI.WriteString("://")
-	newURI.WriteString(u.Authority())
+	newURI.WriteString(authority)
 
-	// there will be at least one component, since we know we don't have
-	// '/' or ''.
+	// there will be at least one component, since we know we don't have '/' or ''.
 	newURI.WriteByte('/')
 	components := splitNonEmpty(p, "/")
 	if len(components) > 1 {
@@ -56,13 +60,13 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	// stick the query and fragment back on the end
-	if q := u.Query(); len(q) > 0 {
+	if len(query) > 0 {
 		newURI.WriteByte('?')
-		newURI.WriteString(q)
+		newURI.WriteString(query)
 	}
-	if f := u.Fragment(); len(f) > 0 {
+	if len(fragment) > 0 {
 		newURI.WriteByte('#')
-		newURI.WriteString(f)
+		newURI.WriteString(fragment)
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
@@ -82,28 +86,36 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-	p := u.Path()
 	newURI := strings.Builder{}
-	newURI.Grow(len(p))
+	p := u.Path()
+	scheme := u.Scheme()
+	authority := u.Authority()
+	query := u.Query()
+	fragment := u.Fragment()
 
-	newURI.WriteString(u.Scheme())
+	newURI.Grow(len(p) + len(scheme) + len(authority) + len(query) + len(fragment) + len(component) + len("://?#"))
+
+	newURI.WriteString(scheme)
 	newURI.WriteString("://")
-	newURI.WriteString(u.Authority())
-
-	components := splitNonEmpty(p, "/")
-	components = append(components, component)
+	newURI.WriteString(authority)
 
 	newURI.WriteByte('/')
-	newURI.WriteString(strings.Join(components, "/"))
+	for _, v := range strings.Split(p, "/") {
+		if len(v) > 0 {
+			newURI.WriteString(v)
+			newURI.WriteByte('/')
+		}
+	}
+	newURI.WriteString(component)
 
 	// stick the query and fragment back on the end
-	if q := u.Query(); len(q) > 0 {
+	if len(query) > 0 {
 		newURI.WriteByte('?')
-		newURI.WriteString(q)
+		newURI.WriteString(query)
 	}
-	if f := u.Fragment(); len(f) > 0 {
+	if len(fragment) > 0 {
 		newURI.WriteByte('#')
-		newURI.WriteString(f)
+		newURI.WriteString(fragment)
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
