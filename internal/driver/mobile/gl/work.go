@@ -150,8 +150,10 @@ func (ctx *context) DoWork() {
 }
 
 // If C.GLint is not int32, one of these will cause a division by zero compile error.
-const _ = 1 / int(unsafe.Sizeof(C.GLint(0))/unsafe.Sizeof(int32(0)))
-const _ = 1 / int(unsafe.Sizeof(int32(0))/unsafe.Sizeof(C.GLint(0)))
+const (
+	_ = 1 / int(unsafe.Sizeof(C.GLint(0))/unsafe.Sizeof(int32(0)))
+	_ = 1 / int(unsafe.Sizeof(int32(0))/unsafe.Sizeof(C.GLint(0)))
+)
 
 // cString creates C string off the Go heap.
 // ret is a *char.
