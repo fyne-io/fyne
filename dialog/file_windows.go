@@ -21,7 +21,7 @@ func driveMask() uint32 {
 		return 0
 	}
 
-	ret, _, err := syscall.Syscall(uintptr(handle), 0, 0, 0, 0)
+	ret, _, err := syscall.SyscallN(uintptr(handle))
 	if err != syscall.Errno(0) { // for some reason Syscall returns something not nil on success
 		fyne.LogError("Error calling GetLogicalDrives", err)
 		return 0
