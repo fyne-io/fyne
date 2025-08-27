@@ -91,7 +91,7 @@ func (ctx *context) cStringPtr(str string) (uintptr, func()) {
 	return uintptr(ret), func() { sfree(); delete(ctx.cStrings, id) }
 }
 
-var glfnMap = map[glfn]func(c call) (ret uintptr){
+var glfnFuncs = [...]func(c call) (ret uintptr){
 	glfnActiveTexture: func(c call) (ret uintptr) {
 		syscall.SyscallN(glActiveTexture.Addr(), c.args.a0)
 		return
@@ -279,8 +279,8 @@ var glfnMap = map[glfn]func(c call) (ret uintptr){
 }
 
 func (ctx *context) doWork(c call) (ret uintptr) {
-	if f, ok := glfnMap[c.args.fn]; ok {
-		return f(c)
+	if int(c.args.fn) < len(glfnFuncs) {
+		return glfnFuncs[c.args.fn](c)
 	}
 	panic("unknown GL function")
 }
