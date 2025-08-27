@@ -16,7 +16,8 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	}
 	homeURI := storage.NewFileURI(homeDir)
 
-	favoriteNames := append(getFavoriteOrder(), "Home")
+	favoritesOrder := getFavoritesOrder()
+	favoriteNames := append(favoritesOrder[:], "Home")
 	favoriteLocations := make(map[string]fyne.ListableURI)
 	for _, favName := range favoriteNames {
 		var uri fyne.URI
