@@ -361,6 +361,33 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 	widget.ShowPopUpAtPosition(content, f.win.Canvas, pos)
 }
 
+func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	homeURI := storage.NewFileURI(homeDir)
+	home, _ := storage.ListerForURI(homeURI)
+
+	favoriteLocations := map[string]fyne.ListableURI{"Home": home}
+	for _, favName := range getFavoritesOrder() {
+		uri, err1 := getFavoriteLocation(homeURI, favName)
+		if err != nil {
+			err = err1
+			continue
+		}
+
+		listURI, err1 := storage.ListerForURI(uri)
+		if err1 != nil {
+			err = err1
+			continue
+		}
+		favoriteLocations[favName] = listURI
+	}
+
+	return favoriteLocations, err
+}
+
 func (f *fileDialog) loadFavorites() {
 	favoriteLocations, err := getFavoriteLocations()
 	if err != nil {
