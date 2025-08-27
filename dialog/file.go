@@ -362,6 +362,10 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 }
 
 func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
+	if runtime.GOOS == "js" {
+		return make(map[string]fyne.ListableURI), nil
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
