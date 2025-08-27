@@ -6,8 +6,8 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/noos"
-	intNoos "fyne.io/fyne/v2/internal/driver/noos"
+	"fyne.io/fyne/v2/driver/embedded"
+	intNoos "fyne.io/fyne/v2/internal/driver/embedded"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -19,7 +19,7 @@ func NewWithID(id string) fyne.App {
 // driver. This is useful for embedded devices like GOOS=tamago or GOOS=noos.
 //
 // Since: 2.7
-func SetNoOSDriver(render func(img image.Image), events chan noos.Event) {
+func SetDriverDetails(render func(img image.Image), events chan embedded.Event) {
 	a := fyne.CurrentApp().(*fyneApp)
 
 	a.Settings().SetTheme(theme.DefaultTheme())

@@ -1,11 +1,11 @@
-package noos
+package embedded
 
 import (
 	"image"
 	"time"
 
 	"fyne.io/fyne/v2"
-	noos2 "fyne.io/fyne/v2/driver/noos"
+	noos2 "fyne.io/fyne/v2/driver/embedded"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
@@ -133,11 +133,11 @@ func (n *noosDriver) Quit() {
 }
 
 func (n *noosDriver) StartAnimation(*fyne.Animation) {
-	// no animations on noos
+	// no animations on embedded
 }
 
 func (n *noosDriver) StopAnimation(*fyne.Animation) {
-	// no animations on noos
+	// no animations on embedded
 }
 
 func (n *noosDriver) DoubleTapDelay() time.Duration {

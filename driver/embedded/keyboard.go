@@ -1,4 +1,4 @@
-package noos
+package embedded
 
 import "fyne.io/fyne/v2"
 

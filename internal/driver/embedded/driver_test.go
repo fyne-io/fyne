@@ -1,4 +1,4 @@
-package noos_test
+package embedded_test
 
 import (
 	"image"
@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/noos"
-	intNoos "fyne.io/fyne/v2/internal/driver/noos"
+	"fyne.io/fyne/v2/driver/embedded"
+	intNoos "fyne.io/fyne/v2/internal/driver/embedded"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestNoOSDriver(t *testing.T) {
 	render := func(img image.Image) {
 		count++
 	}
-	queue := make(chan noos.Event, 1)
+	queue := make(chan embedded.Event, 1)
 	d := intNoos.NewNoOSDriver(render, queue)
 
 	go func() {
@@ -26,7 +26,7 @@ func TestNoOSDriver(t *testing.T) {
 	d.Run()
 	assert.Equal(t, 0, count)
 
-	queue = make(chan noos.Event, 1)
+	queue = make(chan embedded.Event, 1)
 	d = intNoos.NewNoOSDriver(render, queue)
 	_ = d.CreateWindow("Test")
 	go func() {
@@ -37,7 +37,7 @@ func TestNoOSDriver(t *testing.T) {
 	assert.Equal(t, 1, count)
 
 	count = 0
-	queue = make(chan noos.Event, 1)
+	queue = make(chan embedded.Event, 1)
 	d = intNoos.NewNoOSDriver(render, queue)
 	w := d.CreateWindow("Test")
 	keyed := make(chan bool)
@@ -45,10 +45,10 @@ func TestNoOSDriver(t *testing.T) {
 		keyed <- true
 	})
 	go func() {
-		queue <- &noos.CharacterEvent{
+		queue <- &embedded.CharacterEvent{
 			Rune: 'a',
 		}
-		queue <- &noos.KeyEvent{
+		queue <- &embedded.KeyEvent{
 			Name: fyne.KeyEscape,
 		}
 		<-keyed
