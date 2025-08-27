@@ -10,7 +10,7 @@ import (
 
 // repositoryTable stores the mapping of schemes to Repository implementations.
 // It should only ever be used by ForURI() and Register().
-var repositoryTable map[string]Repository = map[string]Repository{}
+var repositoryTable = map[string]Repository{}
 
 // Repository represents a storage repository, which is a set of methods which
 // implement specific functions on a URI. Repositories are registered to handle
@@ -247,9 +247,7 @@ type MovableRepository interface {
 func Register(scheme string, repository Repository) {
 	scheme = strings.ToLower(scheme)
 
-	prev, ok := repositoryTable[scheme]
-
-	if ok {
+	if prev, ok := repositoryTable[scheme]; ok {
 		prev.Destroy(scheme)
 	}
 
@@ -279,7 +277,6 @@ func ForURI(u fyne.URI) (Repository, error) {
 // Since: 2.0
 func ForScheme(scheme string) (Repository, error) {
 	repo, ok := repositoryTable[scheme]
-
 	if !ok {
 		return nil, fmt.Errorf("no repository registered for scheme '%s'", scheme)
 	}
