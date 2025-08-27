@@ -50,7 +50,7 @@ func (f *fileDialog) getPlaces() []favoriteItem {
 	places := make([]favoriteItem, len(drives))
 	for i, drive := range drives {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
-		driveRootURI, _ := storage.ListerForURI(storage.NewURI("file://" + driveRoot))
+		driveRootURI, _ := storage.ListerForURI(storage.NewFileURI(driveRoot))
 		places[i] = favoriteItem{
 			drive,
 			theme.StorageIcon(),
@@ -66,9 +66,7 @@ func isHidden(file fyne.URI) bool {
 		return false
 	}
 
-	path := file.String()[len(file.Scheme())+3:]
-
-	point, err := syscall.UTF16PtrFromString(path)
+	point, err := syscall.UTF16PtrFromString(file.Path())
 	if err != nil {
 		fyne.LogError("Error making string pointer", err)
 		return false
