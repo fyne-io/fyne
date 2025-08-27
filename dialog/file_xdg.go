@@ -12,16 +12,17 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI, error) {
-	cmdName := "xdg-user-dir"
+func getFavoriteLocation(homeURI fyne.URI, name string) (fyne.URI, error) {
+	const cmdName = "xdg-user-dir"
 	if _, err := exec.LookPath(cmdName); err != nil {
-		return storage.Child(homeURI, fallbackName) // no lookup possible
+		return storage.Child(homeURI, name) // no lookup possible
 	}
 
-	cmd := exec.Command(cmdName, name)
+	lookupName := strings.ToUpper(name)
+	cmd := exec.Command(cmdName, lookupName)
 	loc, err := cmd.Output()
 	if err != nil {
-		return storage.Child(homeURI, fallbackName)
+		return storage.Child(homeURI, name)
 	}
 
 	// Remove \n at the end
@@ -29,8 +30,8 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	locURI := storage.NewFileURI(string(loc))
 
 	if strings.TrimRight(locURI.String(), "/") == strings.TrimRight(homeURI.String(), "/") {
-		fallback, _ := storage.Child(homeURI, fallbackName)
-		return fallback, fmt.Errorf("this computer does not define a %s folder", name)
+		fallback, _ := storage.Child(homeURI, name)
+		return fallback, fmt.Errorf("this computer does not define a %s folder", lookupName)
 	}
 
 	return locURI, nil
@@ -46,7 +47,7 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 
 	favoriteLocations := map[string]fyne.ListableURI{"Home": home}
 	for _, favName := range getFavoritesOrder() {
-		uri, err1 := getFavoriteLocation(homeURI, strings.ToUpper(favName), favName)
+		uri, err1 := getFavoriteLocation(homeURI, favName)
 		if err != nil {
 			err = err1
 			continue
