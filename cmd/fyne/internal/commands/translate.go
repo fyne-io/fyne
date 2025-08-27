@@ -406,7 +406,7 @@ func translateKeyFallback(v *visitor, node ast.Node) stateFn {
 // Only adding new keys, ignoring changed or removed ones.
 // Removing is potentially dangerous as there could be dynamic keys that get removed.
 // By default ignore existing translations to prevent accidental overwriting.
-func translateFinish(v *visitor, node ast.Node) stateFn {
+func translateFinish(v *visitor) stateFn {
 	_, found := v.m[v.key]
 	if found {
 		if !v.opts.Update {

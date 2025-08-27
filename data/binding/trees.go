@@ -431,7 +431,7 @@ func newTreeComparable[T bool | float64 | int | rune | string]() *boundTree[T] {
 
 func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) *boundTree[T] {
 	if v == nil {
-		return newTree[T](comparator)
+		return newTree(comparator)
 	}
 
 	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
