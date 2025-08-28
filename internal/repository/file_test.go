@@ -388,10 +388,14 @@ func TestFileRepositoryCopyDirectory(t *testing.T) {
 	// Create a file in a dir to test with
 	parentPath := path.Join(dir, "parentDir")
 	fooPath := path.Join(parentPath, "foo")
+	childDirPath := path.Join(parentPath, "childDir")
+
 	newParentPath := path.Join(dir, "newParentDir")
 	newFooPath := path.Join(newParentPath, "foo")
+	newChildDirPath := path.Join(newParentPath, "childDir")
 
 	_ = os.Mkdir(parentPath, 0o755)
+	_ = os.Mkdir(childDirPath, 0o755)
 	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0o755)
 	if err != nil {
 		t.Fatal(err)
@@ -400,6 +404,7 @@ func TestFileRepositoryCopyDirectory(t *testing.T) {
 	parent := storage.NewFileURI(parentPath)
 	foo := storage.NewFileURI(fooPath)
 	newParent := storage.NewFileURI(newParentPath)
+	newChildDir := storage.NewFileURI(newChildDirPath)
 
 	err = storage.Copy(parent, newParent)
 	assert.Nil(t, err)
@@ -416,6 +421,11 @@ func TestFileRepositoryCopyDirectory(t *testing.T) {
 
 	// Make sure that the destination exists.
 	ex, err = storage.Exists(newParent)
+	assert.Nil(t, err)
+	assert.True(t, ex)
+
+	// Make sure that the child directory exists.
+	ex, err = storage.Exists(newChildDir)
 	assert.Nil(t, err)
 	assert.True(t, ex)
 }

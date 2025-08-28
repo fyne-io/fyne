@@ -316,13 +316,21 @@ func fastCopy(dst, src string) error {
 			return err
 		}
 
-		if d.IsDir() {
-			return nil
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
 		}
 
-		srcPath := filepath.Join(src, d.Name())
-		dstPath := filepath.Join(dst, d.Name())
-		return copyFile(dstPath, srcPath)
+		dstPath := filepath.Join(dst, rel)
+		if d.IsDir() {
+			info, err := d.Info()
+			if err != nil {
+				return err
+			}
+			return os.MkdirAll(dstPath, info.Mode())
+		}
+
+		return copyFile(dstPath, path)
 	})
 }
 
