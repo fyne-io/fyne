@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -212,15 +211,15 @@ func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 //
 // Since: 2.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
-	path := u.Path()
-	files, err := os.ReadDir(path)
+	p := u.Path()
+	files, err := os.ReadDir(p)
 	if err != nil {
 		return nil, err
 	}
 
 	urilist := make([]fyne.URI, 0, len(files))
 	for _, f := range files {
-		uri := storage.NewFileURI(filepath.Join(path, f.Name()))
+		uri := storage.NewFileURI(path.Join(p, f.Name()))
 		urilist = append(urilist, uri)
 	}
 
