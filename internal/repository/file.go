@@ -12,10 +12,6 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// fileSchemePrefix is used for when we need a hard-coded version of "file://"
-// for string processing
-const fileSchemePrefix string = "file://"
-
 // declare conformance with repository types
 var (
 	_ repository.Repository             = (*FileRepository)(nil)
