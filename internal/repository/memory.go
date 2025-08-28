@@ -135,7 +135,6 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 func (n *nodeReaderWriter) URI() fyne.URI {
 	// discarding the error because this should never fail
 	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
-
 	return u
 }
 

@@ -64,17 +64,14 @@ func NewFileRepository() *FileRepository {
 // Since: 2.0
 func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	p := u.Path()
-
 	_, err := os.Stat(p)
-	ok := false
-
 	if err == nil {
-		ok = true
+		return true, nil
 	} else if os.IsNotExist(err) {
-		err = nil
+		return false, nil
 	}
 
-	return ok, err
+	return false, err
 }
 
 func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
@@ -105,22 +102,15 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // Since: 2.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0o666)
-	if err == nil {
-		f.Close()
-	} else {
-
-		if os.IsPermission(err) {
-			return false, nil
-		}
-
-		if os.IsNotExist(err) {
+	if err != nil {
+		if os.IsPermission(err) || os.IsNotExist(err) {
 			return false, nil
 		}
 
 		return false, err
 	}
 
-	return true, nil
+	return true, f.Close()
 }
 
 // Destroy implements repository.Repository.Destroy
@@ -147,10 +137,7 @@ func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 // Since: 2.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0o666)
-	if err == nil {
-		f.Close()
-	} else {
-
+	if err != nil {
 		if os.IsPermission(err) {
 			return false, nil
 		}
@@ -165,7 +152,7 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 		return false, err
 	}
 
-	return true, nil
+	return true, f.Close()
 }
 
 // Delete implements repository.WritableRepository.Delete
@@ -210,18 +197,24 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
-	newURI := u.Scheme() + "://" + u.Authority()
-	newURI += path.Join(u.Path(), component)
+	child := strings.Builder{}
+
+	child.WriteString(u.Scheme())
+	child.WriteString("://")
+	child.WriteString(u.Authority())
+	child.WriteString(path.Join(u.Path(), component))
 
 	// stick the query and fragment back on the end
 	if query := u.Query(); len(query) > 0 {
-		newURI += "?" + query
+		child.WriteByte('?')
+		child.WriteString(query)
 	}
 	if fragment := u.Fragment(); len(fragment) > 0 {
-		newURI += "#" + fragment
+		child.WriteByte('#')
+		child.WriteString(fragment)
 	}
 
-	return storage.ParseURI(newURI)
+	return storage.ParseURI(child.String())
 }
 
 // List implements repository.ListableRepository.List()
@@ -234,8 +227,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 		return nil, err
 	}
 
-	urilist := []fyne.URI{}
-
+	urilist := make([]fyne.URI, 0, len(files))
 	for _, f := range files {
 		uri := storage.NewFileURI(filepath.Join(path, f.Name()))
 		urilist = append(urilist, uri)
@@ -247,8 +239,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 // CreateListable implements repository.ListableRepository.CreateListable.
 func (r *FileRepository) CreateListable(u fyne.URI) error {
 	path := u.Path()
-	err := os.Mkdir(path, 0o755)
-	return err
+	return os.Mkdir(path, 0o755)
 }
 
 // CanList implements repository.ListableRepository.CanList()
@@ -296,7 +287,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Copy(source, destination fyne.URI) error {
-	// NOTE: as far as I can tell, golang does not have an optimized Copy
+	// NOTE: as far as I can tell, Go does not have an optimized Copy
 	// function - everything I can find on the 'net suggests doing more
 	// or less the equivalent of GenericCopy(), hence why that is used.
 
@@ -316,7 +307,7 @@ func (r *FileRepository) Move(source, destination fyne.URI) error {
 		// fallthrough to slow move
 	}
 
-	// NOTE: as far as I can tell, golang does not have an optimized Move
+	// NOTE: as far as I can tell, Go does not have an optimized Move
 	// function - everything I can find on the 'net suggests doing more
 	// or less the equivalent of GenericMove(), hence why that is used.
 
