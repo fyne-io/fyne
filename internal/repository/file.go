@@ -2,8 +2,10 @@ package repository
 
 import (
 	"io"
+	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -257,12 +259,9 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Copy(source, destination fyne.URI) error {
-	isDir, err := r.CanList(source)
-	if !isDir && err == nil {
-		err := copyFile(destination.Path(), source.Path())
-		if err == nil {
-			return nil
-		}
+	err := fastCopy(destination.Path(), source.Path())
+	if err == nil {
+		return nil
 	}
 
 	return repository.GenericCopy(source, destination)
@@ -295,6 +294,36 @@ func copyFile(dst, src string) error {
 
 	_, err = io.Copy(dstFile, srcFile)
 	return err
+}
+
+func fastCopy(dst, src string) error {
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if !srcInfo.IsDir() {
+		return copyFile(dst, src)
+	}
+
+	err = os.MkdirAll(dst, srcInfo.Mode())
+	if err != nil {
+		return err
+	}
+
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		srcPath := filepath.Join(src, d.Name())
+		dstPath := filepath.Join(dst, d.Name())
+		return copyFile(dstPath, srcPath)
+	})
 }
 
 func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {

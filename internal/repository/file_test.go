@@ -382,6 +382,44 @@ func TestFileRepositoryCopy(t *testing.T) {
 	assert.Equal(t, fooData, barData)
 }
 
+func TestFileRepositoryCopyDirectory(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a file in a dir to test with
+	parentPath := path.Join(dir, "parentDir")
+	fooPath := path.Join(parentPath, "foo")
+	newParentPath := path.Join(dir, "newParentDir")
+	newFooPath := path.Join(newParentPath, "foo")
+
+	_ = os.Mkdir(parentPath, 0o755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0o755)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parent := storage.NewFileURI(parentPath)
+	foo := storage.NewFileURI(fooPath)
+	newParent := storage.NewFileURI(newParentPath)
+
+	err = storage.Copy(parent, newParent)
+	assert.Nil(t, err)
+
+	newData, err := os.ReadFile(newFooPath)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []byte{1, 2, 3, 4, 5}, newData)
+
+	// Make sure that the source still exists.
+	ex, err := storage.Exists(foo)
+	assert.Nil(t, err)
+	assert.True(t, ex)
+
+	// Make sure that the destination exists.
+	ex, err = storage.Exists(newParent)
+	assert.Nil(t, err)
+	assert.True(t, ex)
+}
+
 func TestFileRepositoryMove(t *testing.T) {
 	dir := t.TempDir()
 
