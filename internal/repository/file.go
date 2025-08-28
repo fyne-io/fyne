@@ -69,22 +69,6 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	return false, err
 }
 
-func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
-	path := uri.Path()
-	var f *os.File
-	var err error
-	if write {
-		if truncate {
-			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
-		} else {
-			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
-		}
-	} else {
-		f, err = os.Open(path)
-	}
-	return &file{File: f, uri: uri}, err
-}
-
 // Reader implements repository.Repository.Reader
 //
 // Since: 2.0
@@ -273,9 +257,13 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Copy(source, destination fyne.URI) error {
-	// NOTE: as far as I can tell, Go does not have an optimized Copy
-	// function - everything I can find on the 'net suggests doing more
-	// or less the equivalent of GenericCopy(), hence why that is used.
+	isDir, err := r.CanList(source)
+	if !isDir && err == nil {
+		err := copyFile(destination.Path(), source.Path())
+		if err == nil {
+			return nil
+		}
+	}
 
 	return repository.GenericCopy(source, destination)
 }
@@ -284,18 +272,43 @@ func (r *FileRepository) Copy(source, destination fyne.URI) error {
 //
 // Since: 2.0
 func (r *FileRepository) Move(source, destination fyne.URI) error {
-	listSrc, _ := r.CanList(source)
-	if listSrc {
-		err := os.Rename(source.Path(), destination.Path())
-		if err == nil {
-			return nil
-		}
-		// fallthrough to slow move
+	err := os.Rename(source.Path(), destination.Path())
+	if err == nil {
+		return nil
 	}
 
-	// NOTE: as far as I can tell, Go does not have an optimized Move
-	// function - everything I can find on the 'net suggests doing more
-	// or less the equivalent of GenericMove(), hence why that is used.
-
 	return repository.GenericMove(source, destination)
+}
+
+func copyFile(dst, src string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
+	return err
+}
+
+func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
+	path := uri.Path()
+	var f *os.File
+	var err error
+	if write {
+		if truncate {
+			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
+		} else {
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
+		}
+	} else {
+		f, err = os.Open(path)
+	}
+	return &file{File: f, uri: uri}, err
 }
