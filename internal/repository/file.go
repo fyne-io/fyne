@@ -166,27 +166,18 @@ func (r *FileRepository) Delete(u fyne.URI) error {
 //
 // Since: 2.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
-	s := u.String()
-
-	// trim trailing slash
-	s = strings.TrimSuffix(s, "/")
-
-	// trim the scheme
-	s = strings.TrimPrefix(s, fileSchemePrefix)
-
-	// Completely empty URI or only root component
-	if s == "" || s == "/" || (len(s) == 2 && s[1] == ':') {
+	p := path.Clean(u.Path())
+	if p == "" || p == "/" || (len(p) == 2 && p[1] == ':') {
 		return nil, repository.ErrURIRoot
 	}
 
-	child := filepath.Base(s)
-	parent := s[:len(s)-len(child)] // avoid filepath.Dir as it follows platform rules
-	if parent == "" || parent[len(parent)-1] != '/' {
+	parent := path.Dir(p)
+	if parent != "/" {
 		parent += "/"
 	}
 
 	// only root is its own parent
-	if filepath.Clean(parent) == filepath.Clean(s) {
+	if parent == p {
 		return nil, repository.ErrURIRoot
 	}
 
