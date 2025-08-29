@@ -33,7 +33,7 @@ func (w *noosWindow) Resize(s fyne.Size) {
 }
 
 func (w *noosWindow) RequestFocus() {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -54,33 +54,33 @@ func (w *noosWindow) SetPadded(pad bool) {
 }
 
 func (w *noosWindow) Icon() fyne.Resource {
-	//TODO implement me
+	// TODO implement me
 	return nil
 }
 
 func (w *noosWindow) SetIcon(fyne.Resource) {
-	//TODO implement me
+	// TODO implement me
 }
 
 func (w *noosWindow) SetMaster() {
-	//TODO implement me
+	// TODO implement me
 }
 
 func (w *noosWindow) MainMenu() *fyne.MainMenu {
-	//TODO implement me
+	// TODO implement me
 	return nil
 }
 
 func (w *noosWindow) SetMainMenu(menu *fyne.MainMenu) {
-	//TODO implement me
+	// TODO implement me
 }
 
 func (w *noosWindow) SetOnClosed(f func()) {
-	//TODO implement me
+	// TODO implement me
 }
 
 func (w *noosWindow) SetCloseIntercept(f func()) {
-	//TODO implement me
+	// TODO implement me
 }
 
 func (w *noosWindow) SetOnDropped(func(fyne.Position, []fyne.URI)) {}
@@ -130,7 +130,7 @@ func (w *noosWindow) Canvas() fyne.Canvas {
 }
 
 func (w *noosWindow) Clipboard() fyne.Clipboard {
-	//TODO implement me
+	// TODO implement me
 	return nil
 }
 
