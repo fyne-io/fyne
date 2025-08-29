@@ -300,11 +300,8 @@ func (t *treeBase) ChildIDs(id string) []string {
 
 func (t *treeBase) appendItem(i DataItem, id, parent string) {
 	t.items[id] = i
-	ids, ok := t.ids[parent]
-	if !ok {
-		ids = make([]string, 0)
-	}
 
+	ids := t.ids[parent]
 	for _, in := range ids {
 		if in == id {
 			return
@@ -389,12 +386,8 @@ type boundTree[T any] struct {
 
 func (t *boundTree[T]) Append(parent, id string, val T) error {
 	t.lock.Lock()
-	ids, ok := t.ids[parent]
-	if !ok {
-		ids = make([]string, 0)
-	}
 
-	t.ids[parent] = append(ids, id)
+	t.ids[parent] = append(t.ids[parent], id)
 	v := *t.val
 	v[id] = val
 
@@ -428,12 +421,8 @@ func (t *boundTree[T]) GetValue(id string) (T, error) {
 
 func (t *boundTree[T]) Prepend(parent, id string, val T) error {
 	t.lock.Lock()
-	ids, ok := t.ids[parent]
-	if !ok {
-		ids = make([]string, 0)
-	}
 
-	t.ids[parent] = append([]string{id}, ids...)
+	t.ids[parent] = append([]string{id}, t.ids[parent]...)
 	v := *t.val
 	v[id] = val
 
