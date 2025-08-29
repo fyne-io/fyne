@@ -68,7 +68,7 @@ type ExternalBoolList = ExternalList[bool]
 // NewBoolList returns a bindable list of bool values.
 //
 // Since: 2.0
-func NewBoolList() BoolList {
+func NewBoolList() List[bool] {
 	return newListComparable[bool]()
 }
 
@@ -76,7 +76,7 @@ func NewBoolList() BoolList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindBoolList(v *[]bool) ExternalBoolList {
+func BindBoolList(v *[]bool) ExternalList[bool] {
 	return bindListComparable(v)
 }
 
@@ -93,7 +93,7 @@ type ExternalBytesList = ExternalList[[]byte]
 // NewBytesList returns a bindable list of []byte values.
 //
 // Since: 2.2
-func NewBytesList() BytesList {
+func NewBytesList() List[[]byte] {
 	return newList(bytes.Equal)
 }
 
@@ -101,7 +101,7 @@ func NewBytesList() BytesList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.2
-func BindBytesList(v *[][]byte) ExternalBytesList {
+func BindBytesList(v *[][]byte) ExternalList[[]byte] {
 	return bindList(v, bytes.Equal)
 }
 
@@ -118,7 +118,7 @@ type ExternalFloatList = ExternalList[float64]
 // NewFloatList returns a bindable list of float64 values.
 //
 // Since: 2.0
-func NewFloatList() FloatList {
+func NewFloatList() List[float64] {
 	return newListComparable[float64]()
 }
 
@@ -126,7 +126,7 @@ func NewFloatList() FloatList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindFloatList(v *[]float64) ExternalFloatList {
+func BindFloatList(v *[]float64) ExternalList[float64] {
 	return bindListComparable(v)
 }
 
@@ -143,7 +143,7 @@ type ExternalIntList = ExternalList[int]
 // NewIntList returns a bindable list of int values.
 //
 // Since: 2.0
-func NewIntList() IntList {
+func NewIntList() List[int] {
 	return newListComparable[int]()
 }
 
@@ -151,7 +151,7 @@ func NewIntList() IntList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindIntList(v *[]int) ExternalIntList {
+func BindIntList(v *[]int) ExternalList[int] {
 	return bindListComparable(v)
 }
 
@@ -168,7 +168,7 @@ type ExternalRuneList = ExternalList[rune]
 // NewRuneList returns a bindable list of rune values.
 //
 // Since: 2.0
-func NewRuneList() RuneList {
+func NewRuneList() List[rune] {
 	return newListComparable[rune]()
 }
 
@@ -176,20 +176,8 @@ func NewRuneList() RuneList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindRuneList(v *[]rune) ExternalRuneList {
-	if v == nil {
-		return NewRuneList().(ExternalRuneList)
-	}
-
-	b := newListComparable[rune]()
-	b.val = v
-	b.updateExternal = true
-
-	for i := range *v {
-		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
-	}
-
-	return b
+func BindRuneList(v *[]rune) ExternalList[rune] {
+	return bindListComparable(v)
 }
 
 // StringList supports binding a list of string values.
@@ -205,7 +193,7 @@ type ExternalStringList = ExternalList[string]
 // NewStringList returns a bindable list of string values.
 //
 // Since: 2.0
-func NewStringList() StringList {
+func NewStringList() List[string] {
 	return newListComparable[string]()
 }
 
@@ -213,7 +201,7 @@ func NewStringList() StringList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindStringList(v *[]string) ExternalStringList {
+func BindStringList(v *[]string) ExternalList[string] {
 	return bindListComparable(v)
 }
 
@@ -230,7 +218,7 @@ type ExternalUntypedList = ExternalList[any]
 // NewUntypedList returns a bindable list of any values.
 //
 // Since: 2.1
-func NewUntypedList() UntypedList {
+func NewUntypedList() List[any] {
 	return newList(func(t1, t2 any) bool { return t1 == t2 })
 }
 
@@ -238,18 +226,8 @@ func NewUntypedList() UntypedList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.1
-func BindUntypedList(v *[]any) ExternalUntypedList {
-	if v == nil {
-		return NewUntypedList().(ExternalUntypedList)
-	}
-
-	comparator := func(t1, t2 any) bool { return t1 == t2 }
-	b := newExternalList(v, comparator)
-	for i := range *v {
-		b.appendItem(bindListItem(v, i, b.updateExternal, comparator))
-	}
-
-	return b
+func BindUntypedList(v *[]any) ExternalList[any] {
+	return bindList(v, func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // URIList supports binding a list of fyne.URI values.
@@ -265,7 +243,7 @@ type ExternalURIList = ExternalList[fyne.URI]
 // NewURIList returns a bindable list of fyne.URI values.
 //
 // Since: 2.1
-func NewURIList() URIList {
+func NewURIList() List[fyne.URI] {
 	return newList(storage.EqualURI)
 }
 
@@ -273,7 +251,7 @@ func NewURIList() URIList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.1
-func BindURIList(v *[]fyne.URI) ExternalURIList {
+func BindURIList(v *[]fyne.URI) ExternalList[fyne.URI] {
 	return bindList(v, storage.EqualURI)
 }
 
@@ -314,7 +292,7 @@ func newList[T any](comparator func(T, T) bool) *boundList[T] {
 	return &boundList[T]{val: new([]T), comparator: comparator}
 }
 
-func newListComparable[T bool | float64 | int | rune | string]() *boundList[T] {
+func newListComparable[T comparable]() *boundList[T] {
 	return newList(func(t1, t2 T) bool { return t1 == t2 })
 }
 
@@ -335,7 +313,7 @@ func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 	return l
 }
 
-func bindListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
+func bindListComparable[T comparable](v *[]T) *boundList[T] {
 	return bindList(v, func(t1, t2 T) bool { return t1 == t2 })
 }
 

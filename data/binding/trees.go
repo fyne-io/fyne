@@ -72,7 +72,7 @@ type ExternalBoolTree = ExternalTree[bool]
 // NewBoolTree returns a bindable tree of bool values.
 //
 // Since: 2.4
-func NewBoolTree() BoolTree {
+func NewBoolTree() Tree[bool] {
 	return newTreeComparable[bool]()
 }
 
@@ -81,7 +81,7 @@ func NewBoolTree() BoolTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindBoolTree(ids *map[string][]string, v *map[string]bool) ExternalBoolTree {
+func BindBoolTree(ids *map[string][]string, v *map[string]bool) ExternalTree[bool] {
 	return bindTreeComparable(ids, v)
 }
 
@@ -98,7 +98,7 @@ type ExternalBytesTree = ExternalTree[[]byte]
 // NewBytesTree returns a bindable tree of []byte values.
 //
 // Since: 2.4
-func NewBytesTree() BytesTree {
+func NewBytesTree() Tree[[]byte] {
 	return newTree(bytes.Equal)
 }
 
@@ -107,7 +107,7 @@ func NewBytesTree() BytesTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindBytesTree(ids *map[string][]string, v *map[string][]byte) ExternalBytesTree {
+func BindBytesTree(ids *map[string][]string, v *map[string][]byte) ExternalTree[[]byte] {
 	return bindTree(ids, v, bytes.Equal)
 }
 
@@ -124,7 +124,7 @@ type ExternalFloatTree = ExternalTree[float64]
 // NewFloatTree returns a bindable tree of float64 values.
 //
 // Since: 2.4
-func NewFloatTree() FloatTree {
+func NewFloatTree() Tree[float64] {
 	return newTreeComparable[float64]()
 }
 
@@ -133,7 +133,7 @@ func NewFloatTree() FloatTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindFloatTree(ids *map[string][]string, v *map[string]float64) ExternalFloatTree {
+func BindFloatTree(ids *map[string][]string, v *map[string]float64) ExternalTree[float64] {
 	return bindTreeComparable(ids, v)
 }
 
@@ -150,7 +150,7 @@ type ExternalIntTree = ExternalTree[int]
 // NewIntTree returns a bindable tree of int values.
 //
 // Since: 2.4
-func NewIntTree() IntTree {
+func NewIntTree() Tree[int] {
 	return newTreeComparable[int]()
 }
 
@@ -159,7 +159,7 @@ func NewIntTree() IntTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindIntTree(ids *map[string][]string, v *map[string]int) ExternalIntTree {
+func BindIntTree(ids *map[string][]string, v *map[string]int) ExternalTree[int] {
 	return bindTreeComparable(ids, v)
 }
 
@@ -176,7 +176,7 @@ type ExternalRuneTree = ExternalTree[rune]
 // NewRuneTree returns a bindable tree of rune values.
 //
 // Since: 2.4
-func NewRuneTree() RuneTree {
+func NewRuneTree() Tree[rune] {
 	return newTreeComparable[rune]()
 }
 
@@ -185,7 +185,7 @@ func NewRuneTree() RuneTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindRuneTree(ids *map[string][]string, v *map[string]rune) ExternalRuneTree {
+func BindRuneTree(ids *map[string][]string, v *map[string]rune) ExternalTree[rune] {
 	return bindTreeComparable(ids, v)
 }
 
@@ -202,7 +202,7 @@ type ExternalStringTree = ExternalTree[string]
 // NewStringTree returns a bindable tree of string values.
 //
 // Since: 2.4
-func NewStringTree() StringTree {
+func NewStringTree() Tree[string] {
 	return newTreeComparable[string]()
 }
 
@@ -211,7 +211,7 @@ func NewStringTree() StringTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindStringTree(ids *map[string][]string, v *map[string]string) ExternalStringTree {
+func BindStringTree(ids *map[string][]string, v *map[string]string) ExternalTree[string] {
 	return bindTreeComparable(ids, v)
 }
 
@@ -228,7 +228,7 @@ type ExternalUntypedTree = ExternalTree[any]
 // NewUntypedTree returns a bindable tree of any values.
 //
 // Since: 2.5
-func NewUntypedTree() UntypedTree {
+func NewUntypedTree() Tree[any] {
 	return newTree(func(a1, a2 any) bool { return a1 == a2 })
 }
 
@@ -237,7 +237,7 @@ func NewUntypedTree() UntypedTree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalUntypedTree {
+func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalTree[any] {
 	return bindTree(ids, v, func(a1, a2 any) bool { return a1 == a2 })
 }
 
@@ -254,7 +254,7 @@ type ExternalURITree = ExternalTree[fyne.URI]
 // NewURITree returns a bindable tree of fyne.URI values.
 //
 // Since: 2.4
-func NewURITree() URITree {
+func NewURITree() Tree[fyne.URI] {
 	return newTree(storage.EqualURI)
 }
 
@@ -263,7 +263,7 @@ func NewURITree() URITree {
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.4
-func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalURITree {
+func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalTree[fyne.URI] {
 	return bindTree(ids, v, storage.EqualURI)
 }
 
