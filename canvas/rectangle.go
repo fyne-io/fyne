@@ -26,6 +26,26 @@ type Rectangle struct {
 	//
 	// Since: 2.7
 	Aspect float32
+
+	// The radius of the rectangle top-right corner only.
+	//
+	// Since: 2.7
+	TopRightCornerRadius float32
+
+	// The radius of the rectangle top-left corner only.
+	//
+	// Since: 2.7
+	TopLeftCornerRadius float32
+
+	// The radius of the rectangle bottom-right corner only.
+	//
+	// Since: 2.7
+	BottomRightCornerRadius float32
+
+	// The radius of the rectangle bottom-left corner only.
+	//
+	// Since: 2.7
+	BottomLeftCornerRadius float32
 }
 
 // Hide will set this rectangle to not be visible
@@ -37,6 +57,10 @@ func (r *Rectangle) Hide() {
 
 // Move the rectangle to a new position, relative to its parent / canvas
 func (r *Rectangle) Move(pos fyne.Position) {
+	if r.Position() == pos {
+		return
+	}
+
 	r.baseObject.Move(pos)
 
 	repaint(r)

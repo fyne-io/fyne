@@ -65,6 +65,7 @@ func TestBindStruct(t *testing.T) {
 	_, err = b.GetItem("Missing")
 	assert.NotNil(t, err)
 }
+
 func TestBindStruct_Reload(t *testing.T) {
 	s := struct {
 		Foo string

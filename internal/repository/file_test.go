@@ -46,7 +46,7 @@ func TestFileRepositoryExists(t *testing.T) {
 	existsPath := path.Join(dir, "exists")
 	notExistsPath := path.Join(dir, "notExists")
 
-	err := os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0755)
+	err := os.WriteFile(existsPath, []byte{1, 2, 3, 4}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,11 +67,11 @@ func TestFileRepositoryReader(t *testing.T) {
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err := os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,11 +128,11 @@ func TestFileRepositoryWriter(t *testing.T) {
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
 	spamHamPath := path.Join(dir, "spam", "ham")
-	err := os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -250,11 +250,11 @@ func TestFileRepositoryCanWrite(t *testing.T) {
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
 	bazPath := path.Join(dir, "baz")
-	err := os.WriteFile(fooPath, []byte{}, 0755)
+	err := os.WriteFile(fooPath, []byte{}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0755)
+	err = os.WriteFile(barPath, []byte{1, 2, 3}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -362,7 +362,7 @@ func TestFileRepositoryCopy(t *testing.T) {
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -388,7 +388,7 @@ func TestFileRepositoryMove(t *testing.T) {
 	// Create some files to test with.
 	fooPath := path.Join(dir, "foo")
 	barPath := path.Join(dir, "bar")
-	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -419,8 +419,8 @@ func TestFileRepositoryMoveDirectory(t *testing.T) {
 	newParentPath := path.Join(dir, "newParent")
 	newFooPath := path.Join(newParentPath, "foo")
 
-	_ = os.Mkdir(parentPath, 0755)
-	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0755)
+	_ = os.Mkdir(parentPath, 0o755)
+	err := os.WriteFile(fooPath, []byte{1, 2, 3, 4, 5}, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -448,10 +448,10 @@ func TestFileRepositoryListing(t *testing.T) {
 
 	// Create some files to tests with.
 	fooPath := path.Join(dir, "foo")
-	os.Mkdir(fooPath, 0755)
-	os.Mkdir(path.Join(fooPath, "bar"), 0755)
-	os.Mkdir(path.Join(fooPath, "baz"), 0755)
-	os.Mkdir(path.Join(fooPath, "baz", "quux"), 0755)
+	os.Mkdir(fooPath, 0o755)
+	os.Mkdir(path.Join(fooPath, "bar"), 0o755)
+	os.Mkdir(path.Join(fooPath, "baz"), 0o755)
+	os.Mkdir(path.Join(fooPath, "baz", "quux"), 0o755)
 
 	foo := storage.NewFileURI(fooPath)
 

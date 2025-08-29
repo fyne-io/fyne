@@ -217,6 +217,30 @@ func TestRichTextMarkdown_List(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_ListWithDifferentStartingIndex(t *testing.T) {
+	for name, tt := range map[string]struct {
+		text       string
+		Start      int
+		startIndex int
+	}{
+		"Start at 2": {"2. line1\n3. line2", 2, 1},
+		"Start at 1": {"1. line1\n2. line2", 1, 0},
+		"Start at 0": {"0. line1\n1. line2", 0, -1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			r := NewRichTextFromMarkdown(tt.text)
+
+			assert.Len(t, r.Segments, 1)
+			if list, ok := r.Segments[0].(*ListSegment); ok {
+				assert.Equal(t, tt.Start, list.StartNumber())
+				assert.Equal(t, tt.startIndex, list.startIndex)
+			} else {
+				t.Error("Segment should be a List")
+			}
+		})
+	}
+}
+
 func TestRichTextMarkdown_Separator(t *testing.T) {
 	r := NewRichTextFromMarkdown("---\n")
 

@@ -24,7 +24,8 @@ func TestSquare_Radius(t *testing.T) {
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
-		CornerRadius: 12}
+		CornerRadius: 12,
+	}
 
 	rect.Resize(fyne.NewSize(50, 50))
 	test.AssertObjectRendersToMarkup(t, "rounded_square.xml", rect)

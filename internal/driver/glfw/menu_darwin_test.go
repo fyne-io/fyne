@@ -273,8 +273,10 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 	}
 }
 
-var initialAppMenuItems []string
-var initialMenus []string
+var (
+	initialAppMenuItems []string
+	initialMenus        []string
+)
 
 func assertNSMenuItem(t *testing.T, wantTitle, wantKey string, wantModifier uint64, m unsafe.Pointer, i int) {
 	item := testNSMenuItemAtIndex(m, i)

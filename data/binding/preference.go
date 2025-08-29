@@ -223,7 +223,8 @@ func (b *prefBoundList[T]) replaceProvider(p fyne.Preferences) {
 type internalPrefs = interface{ WriteValues(func(map[string]any)) }
 
 func bindPreferenceListComparable[T bool | float64 | int | string](key string, p fyne.Preferences,
-	setLookup preferenceLookupSetter[[]T]) *prefBoundList[T] {
+	setLookup preferenceLookupSetter[[]T],
+) *prefBoundList[T] {
 	if found, ok := lookupExistingListBinding[T](key, p); ok {
 		return found
 	}

@@ -38,18 +38,23 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 
 	return container.NewGridWrap(fyne.NewSize(90, 90),
 		canvas.NewImageFromResource(data.FyneLogo),
-		&canvas.Rectangle{FillColor: color.NRGBA{0x80, 0, 0, 0xff},
+		&canvas.Rectangle{
+			FillColor:   color.NRGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.NRGBA{R: 255, G: 120, B: 0, A: 255},
-			StrokeWidth: 1},
+			StrokeWidth: 1,
+		},
 		&canvas.Rectangle{
 			FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 			StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 			StrokeWidth:  4.0,
-			CornerRadius: 20},
+			CornerRadius: 20,
+		},
 		&canvas.Line{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
-		&canvas.Circle{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff},
+		&canvas.Circle{
+			StrokeColor: color.NRGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.NRGBA{0x30, 0x30, 0x30, 0x60},
-			StrokeWidth: 2},
+			StrokeWidth: 2,
+		},
 		canvas.NewText("Text", color.NRGBA{0, 0x80, 0, 0xff}),
 		canvas.NewRasterWithPixels(rgbGradient),
 		gradient,

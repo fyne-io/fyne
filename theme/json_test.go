@@ -2,6 +2,9 @@ package theme
 
 import (
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +15,11 @@ import (
 )
 
 func TestFromJSON(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// th.Color(ColorNameForeground, VariantLight)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	repository.Register("file", intRepo.NewFileRepository()) // file uri resolving (avoid test import loop)
 	th, err := FromJSON(`{
 "Colors": {"background": "#c0c0c0ff"},

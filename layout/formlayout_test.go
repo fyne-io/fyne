@@ -125,7 +125,6 @@ func TestFormLayout_StretchX(t *testing.T) {
 }
 
 func TestFormLayout_MinSize(t *testing.T) {
-
 	label1 := canvas.NewRectangle(color.Black)
 	label1.SetMinSize(fyne.NewSize(50, 50))
 	content1 := canvas.NewRectangle(color.Black)
@@ -155,7 +154,6 @@ func TestFormLayout_MinSize(t *testing.T) {
 }
 
 func TestFormLayout_MinSize_Hidden(t *testing.T) {
-
 	label1 := canvas.NewRectangle(color.Black)
 	label1.SetMinSize(fyne.NewSize(50, 50))
 	content1 := canvas.NewRectangle(color.Black)

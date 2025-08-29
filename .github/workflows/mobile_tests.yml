@@ -2,6 +2,8 @@ name: Mobile Tests
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  CC: "clang"
 
 jobs:
   mobile_tests:
@@ -24,7 +26,7 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install gcc libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      run: sudo apt-get update && sudo apt-get install clang libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
     - name: Tests
       run: go test -race -tags mobile,ci,migrated_fynedo ./...

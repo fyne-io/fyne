@@ -28,7 +28,7 @@ func (a *fyneApp) cachedIconPath() string {
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
-	err := os.MkdirAll(dirPath, 0700)
+	err := os.MkdirAll(dirPath, 0o700)
 	if err != nil {
 		fyne.LogError("Unable to create application cache directory", err)
 		return err

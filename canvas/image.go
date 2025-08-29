@@ -33,6 +33,12 @@ const (
 	// as with ImageFillContain there may be transparent areas around the image.
 	// Note that the minSize may be smaller than the image dimensions if scale > 1.
 	ImageFillOriginal
+
+	// ImageFillCover maintains the image aspect ratio whilst filling the space.
+	// The image content will be centered on the available space meaning that an equal amount of top and bottom
+	// or left and right will be clipped if the output aspect ratio does not match the source image.
+	// Since: 2.7
+	ImageFillCover
 )
 
 // ImageScale defines the different scaling filters used to scaling images
@@ -109,6 +115,10 @@ func (i *Image) MinSize() fyne.Size {
 
 // Move the image object to a new position, relative to its parent top, left corner.
 func (i *Image) Move(pos fyne.Position) {
+	if i.Position() == pos {
+		return
+	}
+
 	i.baseObject.Move(pos)
 
 	repaint(i)

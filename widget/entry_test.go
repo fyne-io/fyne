@@ -174,6 +174,33 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
+func TestEntry_CursorPosition(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TextStyle.Monospace = true
+	entry.SetText("mmmmmm")
+
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.TypedKey(right)
+	firstX, firstY := entry.CursorPosition().Components()
+
+	entry.TypedKey(right)
+	secondX := entry.CursorPosition().X
+	assert.Greater(t, secondX, firstX)
+
+	entry.TypedKey(right)
+	entry.TypedKey(right)
+	fourthX := entry.CursorPosition().X
+	assert.Equal(t, (secondX-firstX)*3, fourthX-firstX)
+
+	entry.SetText("mmmmmm\nmm\nmm")
+	entry.CursorRow = 1
+	secondY := entry.CursorPosition().Y
+
+	entry.CursorRow = 2
+	thirdY := entry.CursorPosition().Y
+	assert.Equal(t, secondY-firstY, thirdY-secondY)
+}
+
 func TestEntry_Control_Word(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")
@@ -1787,6 +1814,69 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
+func TestEntry_IconSizeAndPlacement(t *testing.T) {
+	entry := widget.NewEntry()
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	entry.SetText("SomeText")
+	r := test.TempWidgetRenderer(t, entry)
+	r.Layout(entry.MinSize())
+
+	iconObj := r.Objects()[3].(*canvas.Image)
+	// Icon should be at the left, with correct size
+	assert.NotNil(t, iconObj)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Width)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Height)
+	assert.Equal(t, fyne.NewPos(theme.InnerPadding(), theme.InnerPadding()), iconObj.Position())
+	assert.Equal(t, icon, iconObj.Resource)
+}
+
+func TestEntry_SetIcon(t *testing.T) {
+	entry := widget.NewEntry()
+	assert.Nil(t, entry.Icon)
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	assert.Equal(t, icon, entry.Icon)
+}
+
+func TestEntry_Icon_MinSize(t *testing.T) {
+	entryWithIcon := widget.NewEntry()
+	entryWithIcon.SetIcon(theme.MailComposeIcon())
+	entryWithIcon.SetText("Test")
+	minSizeWithIcon := entryWithIcon.MinSize()
+
+	entryWithoutIcon := widget.NewEntry()
+	entryWithoutIcon.SetText("Test")
+	minSizeWithoutIcon := entryWithoutIcon.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_MinSize_IncreasesWidth(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Test")
+	minSizeWithoutIcon := entry.MinSize()
+
+	entry.SetIcon(theme.MailComposeIcon())
+	minSizeWithIcon := entry.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_ReplaceAndRemove(t *testing.T) {
+	entry := widget.NewEntry()
+	icon1 := theme.MailComposeIcon()
+	icon2 := theme.InfoIcon()
+	entry.SetIcon(icon1)
+	assert.Equal(t, icon1, entry.Icon)
+	entry.Icon = icon2
+	assert.Equal(t, icon2, entry.Icon)
+	entry.SetIcon(nil)
+	assert.Nil(t, entry.Icon)
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
 	singleMin := entry.MinSize()
@@ -2063,6 +2153,26 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 	assert.Equal(t, "àbf", entry.Text)
 }
 
+func TestEntry_UndoRedo_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+
+	for _, r := range "Line 1\nline 2" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
+	entry.TypedShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier})
+	assert.Equal(t, "Line 1\n", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+}
+
 func TestEntry_UndoRedo_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -2171,7 +2281,7 @@ const (
 )
 
 var typeKeys = func(e *widget.Entry, keys ...fyne.KeyName) {
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}

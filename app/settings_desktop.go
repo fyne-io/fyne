@@ -25,7 +25,7 @@ func ensureDirExists(dir string) {
 		return
 	}
 
-	err := os.MkdirAll(dir, 0700)
+	err := os.MkdirAll(dir, 0o700)
 	if err != nil {
 		fyne.LogError("Unable to create settings storage:", err)
 	}
@@ -60,6 +60,9 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 }
 
 func (s *settings) watchSettings() {
+	if s.themeSpecified {
+		return // we only watch for theme changes at this time so don't bother
+	}
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
 
 	a := fyne.CurrentApp()

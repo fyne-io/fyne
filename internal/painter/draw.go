@@ -88,13 +88,22 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	return drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, rect.CornerRadius, rect.Aspect, rWidth, rHeight, vectorPad, scale)
-}
-func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	return drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, sq.CornerRadius, 1.0, rWidth, rHeight, vectorPad, scale)
+	topRightRadius := GetCornerRadius(rect.TopRightCornerRadius, rect.CornerRadius)
+	topLeftRadius := GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
+	bottomRightRadius := GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
+	bottomLeftRadius := GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	return drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rWidth, rHeight, vectorPad, scale)
 }
 
-func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth, radius, aspect float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	topRightRadius := GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
+	topLeftRadius := GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
+	bottomRightRadius := GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
+	bottomLeftRadius := GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
+	return drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, rWidth, rHeight, vectorPad, scale)
+}
+
+func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth float32, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius float32, aspect float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
 	stroke := scale(strokeWidth)
@@ -111,42 +120,92 @@ func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth,
 	if fill != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(fill)
-		if radius == 0 {
-			rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
+		if topRightRadius == topLeftRadius && bottomRightRadius == bottomLeftRadius && topRightRadius == bottomRightRadius {
+			// If all corners are the same, we can draw a simple rectangle
+			radius := topRightRadius
+			if radius == 0 {
+				rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
+			} else {
+				r := float64(scale(radius))
+				rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
+			}
 		} else {
-			r := float64(scale(radius))
-			rasterx.AddRoundRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), r, r, 0, rasterx.RoundGap, filler)
+			rTL, rTR, rBR, rBL := scale(topLeftRadius), scale(topRightRadius), scale(bottomRightRadius), scale(bottomLeftRadius)
+			// Top-left corner
+			c := quarterCircleControl * rTL
+			if c != 0 {
+				filler.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))
+				filler.CubeBezier(rasterx.ToFixedP(float64(p1x), float64(p1y+c)), rasterx.ToFixedP(float64(p1x+c), float64(p1y)), rasterx.ToFixedP(float64(p1x+rTL), float64(p1y)))
+			} else {
+				filler.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
+			}
+			// Top edge to top-right
+			c = quarterCircleControl * rTR
+			filler.Line(rasterx.ToFixedP(float64(p2x-rTR), float64(p2y)))
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p2x-c), float64(p2y)), rasterx.ToFixedP(float64(p2x), float64(p2y+c)), rasterx.ToFixedP(float64(p2x), float64(p2y+rTR)))
+			}
+			// Right edge to bottom-right
+			c = quarterCircleControl * rBR
+			filler.Line(rasterx.ToFixedP(float64(p3x), float64(p3y-rBR)))
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p3x), float64(p3y-c)), rasterx.ToFixedP(float64(p3x-c), float64(p3y)), rasterx.ToFixedP(float64(p3x-rBR), float64(p3y)))
+			}
+			// Bottom edge to bottom-left
+			c = quarterCircleControl * rBL
+			filler.Line(rasterx.ToFixedP(float64(p4x+rBL), float64(p4y)))
+			if c != 0 {
+				filler.CubeBezier(rasterx.ToFixedP(float64(p4x+c), float64(p4y)), rasterx.ToFixedP(float64(p4x), float64(p4y-c)), rasterx.ToFixedP(float64(p4x), float64(p4y-rBL)))
+			}
+			// Left edge to top-left
+			filler.Line(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))
+			filler.Stop(true)
 		}
 		filler.Draw()
 	}
 
 	if strokeCol != nil && strokeWidth > 0 {
-		r := scale(radius)
-		c := quarterCircleControl * r
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(strokeCol)
 		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+		rTL, rTR, rBR, rBL := scale(topLeftRadius), scale(topRightRadius), scale(bottomRightRadius), scale(bottomLeftRadius)
+		c := quarterCircleControl * rTL
 		if c != 0 {
-			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+r)))
-			dasher.CubeBezier(rasterx.ToFixedP(float64(p1x), float64(p1y+c)), rasterx.ToFixedP(float64(p1x+c), float64(p1y)), rasterx.ToFixedP(float64(p1x+r), float64(p2y)))
+			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y+rTL)))
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p1x), float64(p1y+c)), rasterx.ToFixedP(float64(p1x+c), float64(p1y)), rasterx.ToFixedP(float64(p1x+rTL), float64(p2y)))
 		} else {
 			dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
 		}
-		dasher.Line(rasterx.ToFixedP(float64(p2x-r), float64(p2y)))
+		c = quarterCircleControl * rTR
+		dasher.Line(rasterx.ToFixedP(float64(p2x-rTR), float64(p2y)))
 		if c != 0 {
-			dasher.CubeBezier(rasterx.ToFixedP(float64(p2x-c), float64(p2y)), rasterx.ToFixedP(float64(p2x), float64(p2y+c)), rasterx.ToFixedP(float64(p2x), float64(p2y+r)))
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p2x-c), float64(p2y)), rasterx.ToFixedP(float64(p2x), float64(p2y+c)), rasterx.ToFixedP(float64(p2x), float64(p2y+rTR)))
 		}
-		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y-r)))
+		c = quarterCircleControl * rBR
+		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y-rBR)))
 		if c != 0 {
-			dasher.CubeBezier(rasterx.ToFixedP(float64(p3x), float64(p3y-c)), rasterx.ToFixedP(float64(p3x-c), float64(p3y)), rasterx.ToFixedP(float64(p3x-r), float64(p3y)))
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p3x), float64(p3y-c)), rasterx.ToFixedP(float64(p3x-c), float64(p3y)), rasterx.ToFixedP(float64(p3x-rBR), float64(p3y)))
 		}
-		dasher.Line(rasterx.ToFixedP(float64(p4x+r), float64(p4y)))
+		c = quarterCircleControl * rBL
+		dasher.Line(rasterx.ToFixedP(float64(p4x+rBL), float64(p4y)))
 		if c != 0 {
-			dasher.CubeBezier(rasterx.ToFixedP(float64(p4x+c), float64(p4y)), rasterx.ToFixedP(float64(p4x), float64(p4y-c)), rasterx.ToFixedP(float64(p4x), float64(p4y-r)))
+			dasher.CubeBezier(rasterx.ToFixedP(float64(p4x+c), float64(p4y)), rasterx.ToFixedP(float64(p4x), float64(p4y-c)), rasterx.ToFixedP(float64(p4x), float64(p4y-rBL)))
 		}
 		dasher.Stop(true)
 		dasher.Draw()
 	}
 
 	return raw
+}
+
+// GetCornerRadius returns the effective corner radius for a rectangle or square corner.
+// If the specific corner radius (perCornerRadius) is zero, it falls back to the baseCornerRadius.
+// Otherwise, it uses the specific corner radius provided.
+//
+// This allows for per-corner customization while maintaining a default overall radius.
+func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
+	if perCornerRadius == 0.0 {
+		return baseCornerRadius
+	}
+	return perCornerRadius
 }

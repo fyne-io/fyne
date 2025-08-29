@@ -502,8 +502,10 @@ type scrollable struct {
 	size fyne.Size
 }
 
-var _ fyne.CanvasObject = (*scrollable)(nil)
-var _ fyne.Scrollable = (*scrollable)(nil)
+var (
+	_ fyne.CanvasObject = (*scrollable)(nil)
+	_ fyne.Scrollable   = (*scrollable)(nil)
+)
 
 func (s *scrollable) Hide() {
 	panic("implement me")

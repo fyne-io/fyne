@@ -24,16 +24,18 @@ const (
 )
 
 // Declare conformity with interfaces
-var _ fyne.Disableable = (*Entry)(nil)
-var _ fyne.Draggable = (*Entry)(nil)
-var _ fyne.Focusable = (*Entry)(nil)
-var _ fyne.Tappable = (*Entry)(nil)
-var _ fyne.Widget = (*Entry)(nil)
-var _ desktop.Mouseable = (*Entry)(nil)
-var _ desktop.Keyable = (*Entry)(nil)
-var _ mobile.Keyboardable = (*Entry)(nil)
-var _ mobile.Touchable = (*Entry)(nil)
-var _ fyne.Tabbable = (*Entry)(nil)
+var (
+	_ fyne.Disableable    = (*Entry)(nil)
+	_ fyne.Draggable      = (*Entry)(nil)
+	_ fyne.Focusable      = (*Entry)(nil)
+	_ fyne.Tappable       = (*Entry)(nil)
+	_ fyne.Widget         = (*Entry)(nil)
+	_ desktop.Mouseable   = (*Entry)(nil)
+	_ desktop.Keyable     = (*Entry)(nil)
+	_ mobile.Keyboardable = (*Entry)(nil)
+	_ mobile.Touchable    = (*Entry)(nil)
+	_ fyne.Tabbable       = (*Entry)(nil)
+)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -69,6 +71,11 @@ type Entry struct {
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
+
+	// Icon is displayed at the outer left of the entry.
+	// It is not clickable, but can be used to indicate the purpose of the entry.
+	// Since: 2.7
+	Icon fyne.Resource `json:"-"`
 
 	cursorAnim *entryCursorAnimation
 
@@ -202,8 +209,39 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
+	icon := canvas.NewImageFromResource(e.Icon)
+	icon.FillMode = canvas.ImageFillContain
+	objects = append(objects, icon)
+	if e.Icon == nil {
+		icon.Hide()
+	}
+
 	e.syncSegments()
-	return &entryRenderer{box, border, e.scroll, objects, e}
+	return &entryRenderer{box, border, e.scroll, icon, objects, e}
+}
+
+// CursorPosition returns the relative position of this Entry widget's cursor.
+//
+// Since: 2.7
+func (e *Entry) CursorPosition() fyne.Position {
+	provider := e.textProvider()
+	th := e.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	inputBorder := th.Size(theme.SizeNameInputBorder)
+	textSize := th.Size(theme.SizeNameText)
+
+	size := provider.lineSizeToColumn(e.CursorColumn, e.CursorRow, textSize, innerPad)
+	xPos := size.Width
+	yPos := size.Height * float32(e.CursorRow)
+
+	return fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder)
+}
+
+// CursorTextOffset returns how many runes into the source text the cursor is positioned at.
+//
+// Since: 2.7
+func (e *Entry) CursorTextOffset() (pos int) {
+	return textPosFromRowCol(e.CursorRow, e.CursorColumn, e.textProvider())
 }
 
 // Cursor returns the cursor type of this widget
@@ -450,6 +488,16 @@ func (e *Entry) SelectedText() string {
 	return e.sel.SelectedText()
 }
 
+// SetIcon sets the leading icon resource for the entry.
+// The icon will be displayed at the outer left of the entry, but is not clickable.
+// This can be used to indicate the purpose of the entry, such as an email or password field.
+//
+// Since: 2.7
+func (e *Entry) SetIcon(res fyne.Resource) {
+	e.Icon = res
+	e.Refresh()
+}
+
 // SetMinRowsVisible forces a multi-line entry to show `count` number of rows without scrolling.
 // This is not a validation or requirement, it just impacts the minimum visible size.
 // Use this carefully as Fyne apps can run on small screens so you may wish to add a scroll container if
@@ -511,7 +559,6 @@ func (e *Entry) Append(text string) {
 //
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
-
 	if fyne.CurrentDevice().IsMobile() && e.sel.selecting {
 		e.sel.selecting = false
 	}
@@ -637,7 +684,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			return
 		}
 
-		pos := e.cursorTextPos()
+		pos := e.CursorTextOffset()
 		deletedText := provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.syncSelectable()
@@ -647,7 +694,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			Text:     deletedText,
 		})
 	case fyne.KeyDelete:
-		pos := e.cursorTextPos()
+		pos := e.CursorTextOffset()
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
@@ -820,7 +867,13 @@ func (e *Entry) deleteWord(right bool) {
 		end += b.begin
 	}
 
-	provider.deleteFromTo(start, end)
+	erased := provider.deleteFromTo(start, end)
+	e.undoStack.MergeOrAdd(&entryModifyAction{
+		Delete:   true,
+		Position: start,
+		Text:     erased,
+	})
+
 	if !right {
 		e.CursorColumn = cursorCol - (end - start)
 	}
@@ -856,7 +909,7 @@ func (e *Entry) TypedRune(r rune) {
 	}
 
 	runes := []rune{r}
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 
 	provider := e.textProvider()
 	provider.insertAt(pos, runes)
@@ -902,10 +955,6 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 	}
 
 	clipboard.SetContent(e.sel.SelectedText())
-}
-
-func (e *Entry) cursorTextPos() (pos int) {
-	return textPosFromRowCol(e.CursorRow, e.CursorColumn, e.textProvider())
 }
 
 // cutToClipboard copies the current selection to a given clipboard and then removes the selected text.
@@ -988,7 +1037,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	}
 
 	runes := []rune(text)
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 	provider := e.textProvider()
 	provider.insertAt(pos, runes)
 
@@ -1183,7 +1232,6 @@ func (e *Entry) selectAll() {
 // is either a) in progress or b) about to start
 // returns true if the keypress has been fully handled
 func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
-
 	if e.selectKeyDown && !e.sel.selecting {
 		switch key.Name {
 		case fyne.KeyUp, fyne.KeyDown,
@@ -1451,7 +1499,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 		return
 	}
 	s := []rune("\n")
-	pos := e.cursorTextPos()
+	pos := e.CursorTextOffset()
 	provider.insertAt(pos, s)
 	e.undoStack.MergeOrAdd(&entryModifyAction{
 		Position: pos,
@@ -1477,6 +1525,7 @@ var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 type entryRenderer struct {
 	box, border *canvas.Rectangle
 	scroll      *widget.Scroll
+	icon        *canvas.Image
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1500,6 +1549,17 @@ func (r *entryRenderer) trailingInset() float32 {
 		} else {
 			xInset += iconSpace
 		}
+	}
+
+	return xInset
+}
+
+func (r *entryRenderer) leadingInset() float32 {
+	th := r.entry.Theme()
+	xInset := float32(0)
+
+	if r.entry.Icon != nil {
+		xInset = th.Size(theme.SizeNameInlineIcon) + th.Size(theme.SizeNameLineSpacing)
 	}
 
 	return xInset
@@ -1541,10 +1601,15 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		}
 	}
 
+	if r.entry.Icon != nil {
+		r.icon.Resize(fyne.NewSquareSize(iconSize))
+		r.icon.Move(fyne.NewPos(innerPad, innerPad))
+	}
+
 	r.entry.textProvider().inset = fyne.NewSize(0, inputBorder)
 	r.entry.placeholderProvider().inset = fyne.NewSize(0, inputBorder)
-	entrySize := size.Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
-	entryPos := fyne.NewPos(0, inputBorder)
+	entrySize := size.Subtract(fyne.NewSize(r.trailingInset()+r.leadingInset(), inputBorder*2))
+	entryPos := fyne.NewPos(r.leadingInset(), inputBorder)
 
 	prov := r.entry.textProvider()
 	textPos := textPosFromRowCol(r.entry.CursorRow, r.entry.CursorColumn, prov)
@@ -1608,6 +1673,9 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	if r.entry.Validator != nil {
 		minSize.Width += iconSpace
 	}
+	if r.entry.Icon != nil {
+		minSize.Width += iconSpace
+	}
 
 	return minSize
 }
@@ -1633,7 +1701,7 @@ func (r *entryRenderer) Refresh() {
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 
 	// correct our scroll wrappers if the wrap mode changed
-	entrySize := r.entry.Size().Subtract(fyne.NewSize(r.trailingInset(), inputBorder*2))
+	entrySize := r.entry.Size().Subtract(fyne.NewSize(r.trailingInset()+r.leadingInset(), inputBorder*2))
 	if wrapping == fyne.TextWrapOff && scroll == widget.ScrollNone && r.scroll.Content != nil {
 		r.scroll.Hide()
 		r.scroll.Content = nil
@@ -1688,6 +1756,14 @@ func (r *entryRenderer) Refresh() {
 		r.entry.validationStatus.Hide()
 	}
 
+	if r.entry.Icon != nil {
+		r.icon.Resource = r.entry.Icon
+		r.icon.Refresh()
+		r.icon.Show()
+	} else {
+		r.icon.Hide()
+	}
+
 	r.entry.sel.Hidden = !r.entry.focused
 
 	cache.Renderer(r.entry.content).Refresh()
@@ -1724,8 +1800,10 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 	}
 	objects := []fyne.CanvasObject{placeholder, provider, e.entry.cursorAnim.cursor}
 
-	r := &entryContentRenderer{e.entry.cursorAnim.cursor, objects,
-		provider, placeholder, e}
+	r := &entryContentRenderer{
+		e.entry.cursorAnim.cursor, objects,
+		provider, placeholder, e,
+	}
 	r.updateScrollDirections()
 	r.Layout(e.Size())
 	return r
@@ -1861,16 +1939,11 @@ func (r *entryContentRenderer) moveCursor() {
 
 	th := r.content.entry.Theme()
 	textSize := th.Size(theme.SizeNameText)
-	provider := r.content.entry.textProvider()
-	innerPad := th.Size(theme.SizeNameInnerPadding)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
-	size := provider.lineSizeToColumn(r.content.entry.CursorColumn, r.content.entry.CursorRow, textSize, innerPad)
-	xPos := size.Width
-	yPos := size.Height * float32(r.content.entry.CursorRow)
 
 	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
-	r.cursor.Move(fyne.NewPos(xPos-(inputBorder/2), yPos+innerPad-inputBorder))
+	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
 	r.ensureCursorVisible()

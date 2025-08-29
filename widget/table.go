@@ -24,12 +24,14 @@ var (
 )
 
 // Declare conformity with interfaces
-var _ desktop.Cursorable = (*Table)(nil)
-var _ fyne.Draggable = (*Table)(nil)
-var _ fyne.Focusable = (*Table)(nil)
-var _ desktop.Hoverable = (*Table)(nil)
-var _ fyne.Tappable = (*Table)(nil)
-var _ fyne.Widget = (*Table)(nil)
+var (
+	_ desktop.Cursorable = (*Table)(nil)
+	_ fyne.Draggable     = (*Table)(nil)
+	_ fyne.Focusable     = (*Table)(nil)
+	_ desktop.Hoverable  = (*Table)(nil)
+	_ fyne.Tappable      = (*Table)(nil)
+	_ fyne.Widget        = (*Table)(nil)
+)
 
 // TableCellID is a type that represents a cell's position in a table based on its row and column location.
 type TableCellID struct {
@@ -1169,11 +1171,13 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 
-	r := &tableCellsRenderer{cells: c,
+	r := &tableCellsRenderer{
+		cells:   c,
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		headRowStickyBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
-		marker: marker, hover: hover}
+		marker: marker, hover: hover,
+	}
 
 	c.t.moveCallback = r.moveIndicators
 	return r
@@ -1416,7 +1420,6 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 		}
 		updateCell(id, cell)
 	}
-
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
@@ -1604,7 +1607,8 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 }
 
 func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32,
-	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant) []fyne.CanvasObject {
+	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant,
+) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
 	headerMin := r.cells.t.headerSize

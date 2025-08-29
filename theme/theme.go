@@ -160,7 +160,7 @@ func Current() fyne.Theme {
 		return DarkTheme()
 	}
 
-	return currentTheme
+	return internaltheme.CurrentlyRenderingWithFallback(currentTheme)
 }
 
 // CurrentForWidget returns the theme that is currently used for the specified widget.

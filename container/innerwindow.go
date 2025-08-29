@@ -116,9 +116,11 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 		w.content = NewPadded(canvas.NewRectangle(color.Transparent))
 	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
-	r := &innerWindowRenderer{ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
-		win: w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
-		corner: corner, contentBG: contentBG, icon: borderIcon}
+	r := &innerWindowRenderer{
+		ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
+		win:               w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
+		corner: corner, contentBG: contentBG, icon: borderIcon,
+	}
 	r.Layout(w.Size())
 	return r
 }
