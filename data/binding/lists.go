@@ -7,6 +7,30 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
+// List supports binding a list of values with type T.
+//
+// Since: 2.7
+type List[T any] interface {
+	DataList
+
+	Append(value T) error
+	Get() ([]T, error)
+	GetValue(index int) (T, error)
+	Prepend(value T) error
+	Remove(value T) error
+	Set(list []T) error
+	SetValue(index int, value T) error
+}
+
+// ExternalList supports binding a list of values, with type T, from an external variable.
+//
+// Since: 2.7
+type ExternalList[T any] interface {
+	List[T]
+
+	Reload() error
+}
+
 // DataList is the base interface for all bindable data lists.
 //
 // Since: 2.0
@@ -19,26 +43,12 @@ type DataList interface {
 // BoolList supports binding a list of bool values.
 //
 // Since: 2.0
-type BoolList interface {
-	DataList
-
-	Append(value bool) error
-	Get() ([]bool, error)
-	GetValue(index int) (bool, error)
-	Prepend(value bool) error
-	Remove(value bool) error
-	Set(list []bool) error
-	SetValue(index int, value bool) error
-}
+type BoolList = List[bool]
 
 // ExternalBoolList supports binding a list of bool values from an external variable.
 //
 // Since: 2.0
-type ExternalBoolList interface {
-	BoolList
-
-	Reload() error
-}
+type ExternalBoolList = ExternalList[bool]
 
 // NewBoolList returns a bindable list of bool values.
 //
@@ -58,26 +68,12 @@ func BindBoolList(v *[]bool) ExternalBoolList {
 // BytesList supports binding a list of []byte values.
 //
 // Since: 2.2
-type BytesList interface {
-	DataList
-
-	Append(value []byte) error
-	Get() ([][]byte, error)
-	GetValue(index int) ([]byte, error)
-	Prepend(value []byte) error
-	Remove(value []byte) error
-	Set(list [][]byte) error
-	SetValue(index int, value []byte) error
-}
+type BytesList = List[[]byte]
 
 // ExternalBytesList supports binding a list of []byte values from an external variable.
 //
 // Since: 2.2
-type ExternalBytesList interface {
-	BytesList
-
-	Reload() error
-}
+type ExternalBytesList = ExternalList[[]byte]
 
 // NewBytesList returns a bindable list of []byte values.
 //
@@ -97,26 +93,12 @@ func BindBytesList(v *[][]byte) ExternalBytesList {
 // FloatList supports binding a list of float64 values.
 //
 // Since: 2.0
-type FloatList interface {
-	DataList
-
-	Append(value float64) error
-	Get() ([]float64, error)
-	GetValue(index int) (float64, error)
-	Prepend(value float64) error
-	Remove(value float64) error
-	Set(list []float64) error
-	SetValue(index int, value float64) error
-}
+type FloatList = List[float64]
 
 // ExternalFloatList supports binding a list of float64 values from an external variable.
 //
 // Since: 2.0
-type ExternalFloatList interface {
-	FloatList
-
-	Reload() error
-}
+type ExternalFloatList = ExternalList[float64]
 
 // NewFloatList returns a bindable list of float64 values.
 //
@@ -136,26 +118,12 @@ func BindFloatList(v *[]float64) ExternalFloatList {
 // IntList supports binding a list of int values.
 //
 // Since: 2.0
-type IntList interface {
-	DataList
-
-	Append(value int) error
-	Get() ([]int, error)
-	GetValue(index int) (int, error)
-	Prepend(value int) error
-	Remove(value int) error
-	Set(list []int) error
-	SetValue(index int, value int) error
-}
+type IntList = List[int]
 
 // ExternalIntList supports binding a list of int values from an external variable.
 //
 // Since: 2.0
-type ExternalIntList interface {
-	IntList
-
-	Reload() error
-}
+type ExternalIntList = ExternalList[int]
 
 // NewIntList returns a bindable list of int values.
 //
@@ -175,26 +143,12 @@ func BindIntList(v *[]int) ExternalIntList {
 // RuneList supports binding a list of rune values.
 //
 // Since: 2.0
-type RuneList interface {
-	DataList
-
-	Append(value rune) error
-	Get() ([]rune, error)
-	GetValue(index int) (rune, error)
-	Prepend(value rune) error
-	Remove(value rune) error
-	Set(list []rune) error
-	SetValue(index int, value rune) error
-}
+type RuneList = List[rune]
 
 // ExternalRuneList supports binding a list of rune values from an external variable.
 //
 // Since: 2.0
-type ExternalRuneList interface {
-	RuneList
-
-	Reload() error
-}
+type ExternalRuneList = ExternalList[rune]
 
 // NewRuneList returns a bindable list of rune values.
 //
@@ -226,26 +180,12 @@ func BindRuneList(v *[]rune) ExternalRuneList {
 // StringList supports binding a list of string values.
 //
 // Since: 2.0
-type StringList interface {
-	DataList
-
-	Append(value string) error
-	Get() ([]string, error)
-	GetValue(index int) (string, error)
-	Prepend(value string) error
-	Remove(value string) error
-	Set(list []string) error
-	SetValue(index int, value string) error
-}
+type StringList = List[string]
 
 // ExternalStringList supports binding a list of string values from an external variable.
 //
 // Since: 2.0
-type ExternalStringList interface {
-	StringList
-
-	Reload() error
-}
+type ExternalStringList = ExternalList[string]
 
 // NewStringList returns a bindable list of string values.
 //
@@ -265,26 +205,12 @@ func BindStringList(v *[]string) ExternalStringList {
 // UntypedList supports binding a list of any values.
 //
 // Since: 2.1
-type UntypedList interface {
-	DataList
-
-	Append(value any) error
-	Get() ([]any, error)
-	GetValue(index int) (any, error)
-	Prepend(value any) error
-	Remove(value any) error
-	Set(list []any) error
-	SetValue(index int, value any) error
-}
+type UntypedList = List[any]
 
 // ExternalUntypedList supports binding a list of any values from an external variable.
 //
 // Since: 2.1
-type ExternalUntypedList interface {
-	UntypedList
-
-	Reload() error
-}
+type ExternalUntypedList = ExternalList[any]
 
 // NewUntypedList returns a bindable list of any values.
 //
@@ -314,26 +240,12 @@ func BindUntypedList(v *[]any) ExternalUntypedList {
 // URIList supports binding a list of fyne.URI values.
 //
 // Since: 2.1
-type URIList interface {
-	DataList
-
-	Append(value fyne.URI) error
-	Get() ([]fyne.URI, error)
-	GetValue(index int) (fyne.URI, error)
-	Prepend(value fyne.URI) error
-	Remove(value fyne.URI) error
-	Set(list []fyne.URI) error
-	SetValue(index int, value fyne.URI) error
-}
+type URIList = List[fyne.URI]
 
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
 //
 // Since: 2.1
-type ExternalURIList interface {
-	URIList
-
-	Reload() error
-}
+type ExternalURIList = ExternalList[fyne.URI]
 
 // NewURIList returns a bindable list of fyne.URI values.
 //
