@@ -510,10 +510,6 @@ func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) boo
 	return &boundListItem[T]{val: v, index: i, comparator: comparator}
 }
 
-func bindListItemComparable[T bool | float64 | int | rune | string](v *[]T, i int, external bool) Item[T] {
-	return bindListItem(v, i, external, func(t1, t2 T) bool { return t1 == t2 })
-}
-
 type boundListItem[T any] struct {
 	base
 
