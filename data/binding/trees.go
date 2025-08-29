@@ -34,6 +34,22 @@ type ExternalTree[T any] interface {
 	Reload() error
 }
 
+// NewTree returns a bindable tree of values with type T.
+//
+// Since: 2.7
+func NewTree[T any](comparator func(T, T) bool) Tree[T] {
+	return newTree[T](comparator)
+}
+
+// BindTree returns a bound tree of values with type T, based on the contents of the passed values.
+// The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
+// If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.7
+func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) ExternalTree[T] {
+	return bindTree(ids, v, comparator)
+}
+
 // DataTree is the base interface for all bindable data trees.
 //
 // Since: 2.4
@@ -337,7 +353,7 @@ func newTree[T any](comparator func(T, T) bool) *boundTree[T] {
 	return t
 }
 
-func newTreeComparable[T bool | float64 | int | rune | string]() *boundTree[T] {
+func newTreeComparable[T comparable]() *boundTree[T] {
 	return newTree(func(t1, t2 T) bool { return t1 == t2 })
 }
 
@@ -359,7 +375,7 @@ func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(
 	return t
 }
 
-func bindTreeComparable[T bool | float64 | int | rune | string](ids *map[string][]string, v *map[string]T) *boundTree[T] {
+func bindTreeComparable[T comparable](ids *map[string][]string, v *map[string]T) *boundTree[T] {
 	return bindTree(ids, v, func(t1, t2 T) bool { return t1 == t2 })
 }
 

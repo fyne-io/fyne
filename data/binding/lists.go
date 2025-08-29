@@ -31,6 +31,21 @@ type ExternalList[T any] interface {
 	Reload() error
 }
 
+// NewList returns a bindable list of values with type T.
+//
+// Since: 2.7
+func NewList[T any](comparator func(T, T) bool) List[T] {
+	return newList[T](comparator)
+}
+
+// BindList returns a bound list of values with type T, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.7
+func BindList[T any](v *[]T, comparator func(T, T) bool) ExternalList[T] {
+	return bindList(v, comparator)
+}
+
 // DataList is the base interface for all bindable data lists.
 //
 // Since: 2.0
