@@ -2122,6 +2122,45 @@ func TestEntry_UndoRedoImage(t *testing.T) {
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
 }
 
+func TestEntry_UndoRedo_Callback(t *testing.T) {
+	entry := widget.NewEntry()
+	changed := ""
+	entry.OnChanged = func(s string) {
+		changed = s
+	}
+
+	for _, r := range "abc éàè 123" {
+		entry.TypedRune(r)
+	}
+
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, "", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+}
+
 const (
 	entryOffset = 10
 

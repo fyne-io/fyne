@@ -62,6 +62,11 @@ type Entry struct {
 	onValidationChanged func(error)
 	validationError     error
 
+	// If true, the Validator runs automatically on render without user interaction.
+	// It will reflect any validation errors found or those explicitly set via SetValidationError().
+	// Since: 2.7
+	AlwaysShowValidationError bool
+
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
 
@@ -421,6 +426,9 @@ func (e *Entry) Redo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
+	}
 	e.Refresh()
 }
 
@@ -715,6 +723,9 @@ func (e *Entry) Undo() {
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
 	e.syncSelectable()
+	if e.OnChanged != nil {
+		e.OnChanged(newText)
+	}
 	e.Refresh()
 }
 
@@ -1517,7 +1528,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
-	if r.entry.Validator != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
 		validatorIconSize = fyne.NewSquareSize(iconSize)
 
 		r.ensureValidationSetup()
@@ -1667,8 +1678,8 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 
-	if r.entry.Validator != nil {
-		if !r.entry.focused && !r.entry.Disabled() && r.entry.dirty && r.entry.validationError != nil {
+	if r.entry.Validator != nil || r.entry.AlwaysShowValidationError {
+		if !r.entry.focused && !r.entry.Disabled() && (r.entry.dirty || r.entry.AlwaysShowValidationError) && r.entry.validationError != nil {
 			r.border.StrokeColor = th.Color(theme.ColorNameError, v)
 		}
 		r.ensureValidationSetup()
