@@ -92,7 +92,7 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 	topLeftRadius := GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
-	return drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rWidth, rHeight, vectorPad, scale)
+	return drawOblong(rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
 }
 
 func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
@@ -100,10 +100,10 @@ func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale fun
 	topLeftRadius := GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
 	bottomRightRadius := GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
 	bottomLeftRadius := GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
-	return drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, rWidth, rHeight, vectorPad, scale)
+	return drawOblong(sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
 }
 
-func drawOblong(obj fyne.CanvasObject, fill, strokeCol color.Color, strokeWidth float32, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius float32, aspect float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+func drawOblong(fill, strokeCol color.Color, strokeWidth float32, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
 	stroke := scale(strokeWidth)

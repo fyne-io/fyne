@@ -298,7 +298,7 @@ func (e *Entry) DragEnd() {
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.dragged(d, false)
+	e.sel.dragged(d)
 	e.updateMousePointer(d.Position, false)
 }
 
