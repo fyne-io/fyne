@@ -64,7 +64,6 @@ func (w *InnerWindow) Close() {
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
 	th := w.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	min := newBorderButton(theme.WindowMinimizeIcon(), modeMinimize, th, w.OnMinimized)
 	if w.OnMinimized == nil {
@@ -99,15 +98,15 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	title := newDraggableLabel(w.title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
-	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
+	height := theme.SizeForWidget(theme.SizeNameWindowTitleBarHeight, w)
 	off := (height - title.labelMinSize().Height) / 2
 	barMid := New(layout.NewCustomPaddedLayout(off, 0, 0, 0), title)
 	if w.buttonPosition() == widget.ButtonAlignTrailing {
 		buttons = NewCenter(NewHBox(min, max, close))
 	}
 
-	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
-	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
+	bg := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameOverlayBackground, w))
+	contentBG := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameBackground, w))
 	corner := newDraggableCorner(w)
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},
 		buttons, borderIcon, barMid)
@@ -214,10 +213,9 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 
 func (i *innerWindowRenderer) Refresh() {
 	th := i.win.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	i.bg.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	i.bg.FillColor = theme.ColorForWidget(theme.ColorNameOverlayBackground, i.win)
 	i.bg.Refresh()
-	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
+	i.contentBG.FillColor = theme.ColorForWidget(theme.ColorNameBackground, i.win)
 	i.contentBG.Refresh()
 
 	if i.win.buttonPosition() == widget.ButtonAlignTrailing {

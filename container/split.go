@@ -267,11 +267,9 @@ func newDivider(split *Split) *divider {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (d *divider) CreateRenderer() fyne.WidgetRenderer {
 	d.ExtendBaseWidget(d)
-	th := d.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	background := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
-	foreground := canvas.NewRectangle(th.Color(theme.ColorNameForeground, v))
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameShadow, d))
+	foreground := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameForeground, d))
 	return &dividerRenderer{
 		divider:    d,
 		background: background,
@@ -377,44 +375,29 @@ func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *dividerRenderer) Refresh() {
-	th := r.divider.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	if r.divider.hovered {
-		r.background.FillColor = th.Color(theme.ColorNameHover, v)
+		r.background.FillColor = theme.ColorForWidget(theme.ColorNameHover, r.divider)
 	} else {
-		r.background.FillColor = th.Color(theme.ColorNameShadow, v)
+		r.background.FillColor = theme.ColorForWidget(theme.ColorNameShadow, r.divider)
 	}
 	r.background.Refresh()
-	r.foreground.FillColor = th.Color(theme.ColorNameForeground, v)
+	r.foreground.FillColor = theme.ColorForWidget(theme.ColorNameForeground, r.divider)
 	r.foreground.Refresh()
 	r.Layout(r.divider.Size())
 }
 
-func dividerTheme(d *divider) fyne.Theme {
-	if d == nil {
-		return theme.Current()
-	}
-
-	return d.Theme()
-}
-
 func dividerThickness(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 2
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 2
 }
 
 func dividerLength(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 6
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 6
 }
 
 func handleThickness(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) / 2
+	return theme.SizeForWidget(theme.SizeNamePadding, d) / 2
 }
 
 func handleLength(d *divider) float32 {
-	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 4
+	return theme.SizeForWidget(theme.SizeNamePadding, d) * 4
 }

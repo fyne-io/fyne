@@ -392,7 +392,7 @@ func (l *List) contentMinSize() fyne.Size {
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
-func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, th fyne.Theme) (offY float32, minRow int) {
+func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int) (offY float32, minRow int) {
 	rowOffset := float32(0)
 	isVisible := false
 	l.visibleRowHeights = l.visibleRowHeights[:0]
@@ -401,7 +401,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 		return
 	}
 
-	padding := th.Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, l.list)
 
 	if len(l.list.itemHeights) == 0 {
 		paddedItemHeight := itemHeight + padding
@@ -523,11 +523,9 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
-	th := li.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	li.background = canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	li.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	li.background = canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, li))
+	li.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, li)
 	li.background.Hide()
 
 	objects := []fyne.CanvasObject{li.background, li.child}
@@ -588,15 +586,12 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 }
 
 func (li *listItemRenderer) Refresh() {
-	th := li.item.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	li.item.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	li.item.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, li.item)
 	if li.item.selected {
-		li.item.background.FillColor = th.Color(theme.ColorNameSelection, v)
+		li.item.background.FillColor = theme.ColorForWidget(theme.ColorNameSelection, li.item)
 		li.item.background.Show()
 	} else if li.item.hovered {
-		li.item.background.FillColor = th.Color(theme.ColorNameHover, v)
+		li.item.background.FillColor = theme.ColorForWidget(theme.ColorNameHover, li.item)
 		li.item.background.Show()
 	} else {
 		li.item.background.Hide()
@@ -692,8 +687,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 }
 
 func (l *listLayout) updateList(newOnly bool) {
-	th := l.list.Theme()
-	separatorThickness := th.Size(theme.SizeNamePadding)
+	separatorThickness := theme.SizeForWidget(theme.SizeNamePadding, l.list)
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
@@ -708,7 +702,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	l.wasVisible = append(l.wasVisible, l.visible...)
 	l.visible = l.visible[:0]
 
-	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
+	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length)
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
 		return
 	}

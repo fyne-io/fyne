@@ -349,12 +349,10 @@ func (s *Slider) Disabled() bool {
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	th := s.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	track := canvas.NewRectangle(th.Color(theme.ColorNameInputBackground, v))
-	active := canvas.NewRectangle(th.Color(theme.ColorNameForeground, v))
-	thumb := &canvas.Circle{FillColor: th.Color(theme.ColorNameForeground, v)}
+	track := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameInputBackground, s))
+	active := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameForeground, s))
+	thumb := &canvas.Circle{FillColor: theme.ColorForWidget(theme.ColorNameForeground, s)}
 	focusIndicator := &canvas.Circle{FillColor: color.Transparent}
 
 	objects := []fyne.CanvasObject{track, active, thumb, focusIndicator}
@@ -428,21 +426,18 @@ type sliderRenderer struct {
 
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
-	th := s.slider.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	s.track.FillColor = th.Color(theme.ColorNameInputBackground, v)
+	s.track.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, s.slider)
 	if s.slider.disabled {
-		s.thumb.FillColor = th.Color(theme.ColorNameDisabled, v)
+		s.thumb.FillColor = theme.ColorForWidget(theme.ColorNameDisabled, s.slider)
 	} else {
-		s.thumb.FillColor = th.Color(theme.ColorNameForeground, v)
+		s.thumb.FillColor = theme.ColorForWidget(theme.ColorNameForeground, s.slider)
 	}
 	s.active.FillColor = s.thumb.FillColor
 
 	if s.slider.focused && !s.slider.disabled {
-		s.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
+		s.focusIndicator.FillColor = theme.ColorForWidget(theme.ColorNameFocus, s.slider)
 	} else if s.slider.hovered && !s.slider.disabled {
-		s.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
+		s.focusIndicator.FillColor = theme.ColorForWidget(theme.ColorNameHover, s.slider)
 	} else {
 		s.focusIndicator.FillColor = color.Transparent
 	}

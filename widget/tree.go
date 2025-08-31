@@ -854,11 +854,8 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
-	th := n.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	background := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
-	background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHover, n))
+	background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, n)
 	background.Hide()
 	return &treeNodeRenderer{
 		BaseRenderer: widget.BaseRenderer{},
@@ -972,18 +969,15 @@ func (r *treeNodeRenderer) Refresh() {
 }
 
 func (r *treeNodeRenderer) partialRefresh() {
-	th := r.treeNode.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()
 	}
-	r.background.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
+	r.background.CornerRadius = theme.SizeForWidget(theme.SizeNameSelectionRadius, r.treeNode)
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
-		r.background.FillColor = th.Color(theme.ColorNameSelection, v)
+		r.background.FillColor = theme.ColorForWidget(theme.ColorNameSelection, r.treeNode)
 		r.background.Show()
 	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentFocus == r.treeNode.uid) {
-		r.background.FillColor = th.Color(theme.ColorNameHover, v)
+		r.background.FillColor = theme.ColorForWidget(theme.ColorNameHover, r.treeNode)
 		r.background.Show()
 	} else {
 		r.background.Hide()

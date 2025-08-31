@@ -47,14 +47,12 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 // Implements: fyne.Widget
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
-	th := t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	r := &appTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(th.Color(theme.ColorNameShadow, v)),
-			indicator: canvas.NewRectangle(th.Color(theme.ColorNamePrimary, v)),
+			divider:   canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameShadow, t)),
+			indicator: canvas.NewRectangle(theme.ColorForWidget(theme.ColorNamePrimary, t)),
 		},
 		appTabs: t,
 	}
@@ -427,8 +425,7 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
-	th := r.appTabs.Theme()
-	pad := th.Size(theme.SizeNamePadding)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, r.appTabs)
 
 	switch r.appTabs.location {
 	case TabLocationTop:
@@ -445,7 +442,7 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 		indicatorSize = fyne.NewSize(pad, selectedSize.Height)
 	}
 
-	r.moveIndicator(indicatorPos, indicatorSize, th, animate)
+	r.moveIndicator(indicatorPos, indicatorSize, r.appTabs.Theme(), animate)
 }
 
 func (r *appTabsRenderer) updateTabs(max int) {

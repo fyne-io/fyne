@@ -181,20 +181,17 @@ func (r *radioItemRenderer) Refresh() {
 }
 
 func (r *radioItemRenderer) update() {
-	th := r.item.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	r.label.Text = r.item.Label
-	r.label.TextSize = th.Size(theme.SizeNameText)
+	r.label.TextSize = theme.SizeForWidget(theme.SizeNameText, r.item)
 	if r.item.Disabled() {
-		r.label.Color = th.Color(theme.ColorNameDisabled, v)
+		r.label.Color = theme.ColorForWidget(theme.ColorNameDisabled, r.item)
 	} else {
-		r.label.Color = th.Color(theme.ColorNameForeground, v)
+		r.label.Color = theme.ColorForWidget(theme.ColorNameForeground, r.item)
 	}
 
-	out := theme.NewThemedResource(th.Icon(theme.IconNameRadioButton))
+	out := theme.NewThemedResource(theme.IconForWidget(theme.IconNameRadioButton, r.item))
 	out.ColorName = theme.ColorNameInputBorder
-	in := theme.NewThemedResource(th.Icon(theme.IconNameRadioButtonFill))
+	in := theme.NewThemedResource(theme.IconForWidget(theme.IconNameRadioButtonFill, r.item))
 	in.ColorName = theme.ColorNameInputBackground
 	if r.item.Selected {
 		in.ColorName = theme.ColorNamePrimary
@@ -216,9 +213,9 @@ func (r *radioItemRenderer) update() {
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = color.Transparent
 	} else if r.item.focused {
-		r.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
+		r.focusIndicator.FillColor = theme.ColorForWidget(theme.ColorNameFocus, r.item)
 	} else if r.item.hovered {
-		r.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
+		r.focusIndicator.FillColor = theme.ColorForWidget(theme.ColorNameHover, r.item)
 	} else {
 		r.focusIndicator.FillColor = color.Transparent
 	}

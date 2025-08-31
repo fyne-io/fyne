@@ -135,9 +135,8 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
-	th := r.container.Theme()
-	pad := th.Size(theme.SizeNamePadding)
-	separator := th.Size(theme.SizeNameSeparatorThickness)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, r.container)
+	separator := theme.SizeForWidget(theme.SizeNameSeparatorThickness, r.container)
 	dividerOff := (pad + separator) / 2
 	x := float32(0)
 	y := float32(0)
@@ -193,8 +192,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 }
 
 func (r *accordionRenderer) MinSize() fyne.Size {
-	th := r.container.Theme()
-	pad := th.Size(theme.SizeNamePadding)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, r.container)
 	size := fyne.Size{}
 
 	for i, ai := range r.container.Items {
@@ -222,7 +220,6 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
-	th := r.container.Theme()
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)
@@ -252,10 +249,10 @@ func (r *accordionRenderer) updateObjects() {
 			}
 		}
 		if ai.Open {
-			h.Icon = th.Icon(theme.IconNameArrowDropUp)
+			h.Icon = theme.IconForWidget(theme.IconNameArrowDropUp, r.container)
 			ai.Detail.Show()
 		} else {
-			h.Icon = th.Icon(theme.IconNameArrowDropDown)
+			h.Icon = theme.IconForWidget(theme.IconNameArrowDropDown, r.container)
 			ai.Detail.Hide()
 		}
 		h.Refresh()

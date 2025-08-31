@@ -69,13 +69,11 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.provider.ExtendBaseWidget(&hl.provider)
 	hl.syncSegments()
 
-	th := hl.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	focus := canvas.NewRectangle(color.Transparent)
-	focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
+	focus.StrokeColor = theme.ColorForWidget(theme.ColorNameFocus, hl)
 	focus.StrokeWidth = 2
 	focus.Hide()
-	under := canvas.NewRectangle(th.Color(theme.ColorNameHyperlink, v))
+	under := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameHyperlink, hl))
 	under.Hide()
 	return &hyperlinkRenderer{hl: hl, objects: []fyne.CanvasObject{&hl.provider, focus, under}, focus: focus, under: under}
 }
@@ -124,10 +122,8 @@ func (hl *Hyperlink) MouseOut() {
 }
 
 func (hl *Hyperlink) focusWidth() float32 {
-	th := hl.Theme()
-
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, hl)
+	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+theme.SizeForWidget(theme.SizeNamePadding, hl)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
@@ -146,9 +142,8 @@ func (hl *Hyperlink) focusXPos() float32 {
 }
 
 func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
-	th := hl.Theme()
-	innerPad := th.Size(theme.SizeNameInnerPadding)
-	pad := th.Size(theme.SizeNamePadding)
+	innerPad := theme.SizeForWidget(theme.SizeNameInnerPadding, hl)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, hl)
 	lineCount := fyne.Max(1, float32(len(hl.provider.rowBounds)))
 
 	xpos := hl.focusXPos()
@@ -253,8 +248,6 @@ func (hl *Hyperlink) openURL() {
 }
 
 func (hl *Hyperlink) syncSegments() {
-	th := hl.Theme()
-
 	hl.provider.Wrapping = hl.Wrapping
 	hl.provider.Truncation = hl.Truncation
 
@@ -283,7 +276,7 @@ func (hl *Hyperlink) syncSegments() {
 		sizeName = theme.SizeNameText
 	}
 	hl.provider.Segments[0].(*TextSegment).Style.SizeName = sizeName
-	hl.textSize = fyne.MeasureText(hl.Text, th.Size(sizeName), hl.TextStyle)
+	hl.textSize = fyne.MeasureText(hl.Text, theme.SizeForWidget(sizeName, hl), hl.TextStyle)
 }
 
 var _ fyne.WidgetRenderer = (*hyperlinkRenderer)(nil)
@@ -326,13 +319,11 @@ func (r *hyperlinkRenderer) Objects() []fyne.CanvasObject {
 
 func (r *hyperlinkRenderer) Refresh() {
 	r.hl.provider.Refresh()
-	th := r.hl.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.focus.StrokeColor = th.Color(theme.ColorNameFocus, v)
+	r.focus.StrokeColor = theme.ColorForWidget(theme.ColorNameFocus, r.hl)
 	r.focus.Hidden = !r.hl.focused
 	r.focus.Refresh()
-	r.under.FillColor = th.Color(theme.ColorNameHyperlink, v)
+	r.under.FillColor = theme.ColorForWidget(theme.ColorNameHyperlink, r.hl)
 	r.under.Hidden = !r.hl.hovered
 	r.under.Refresh()
 }

@@ -55,14 +55,12 @@ func (t *DocTabs) Append(item *TabItem) {
 // Implements: fyne.Widget
 func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	th := t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	r := &docTabsRenderer{
 		baseTabsRenderer: baseTabsRenderer{
 			bar:       &fyne.Container{},
-			divider:   canvas.NewRectangle(th.Color(theme.ColorNameShadow, v)),
-			indicator: canvas.NewRectangle(th.Color(theme.ColorNamePrimary, v)),
+			divider:   canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameShadow, t)),
+			indicator: canvas.NewRectangle(theme.ColorForWidget(theme.ColorNamePrimary, t)),
 		},
 		docTabs:  t,
 		scroller: NewScroll(&fyne.Container{}),
@@ -392,10 +390,9 @@ func (r *docTabsRenderer) scrollToSelected() {
 }
 
 func (r *docTabsRenderer) updateIndicator(animate bool) {
-	th := r.docTabs.Theme()
 	if r.docTabs.current < 0 {
 		r.indicator.FillColor = color.Transparent
-		r.moveIndicator(fyne.NewPos(0, 0), fyne.NewSize(0, 0), th, animate)
+		r.moveIndicator(fyne.NewPos(0, 0), fyne.NewSize(0, 0), r.docTabs.Theme(), animate)
 		return
 	}
 
@@ -428,7 +425,7 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
-	pad := th.Size(theme.SizeNamePadding)
+	pad := theme.SizeForWidget(theme.SizeNamePadding, r.docTabs)
 
 	switch r.docTabs.location {
 	case TabLocationTop:
@@ -459,7 +456,7 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 		return
 	}
 
-	r.moveIndicator(indicatorPos, indicatorSize, th, animate)
+	r.moveIndicator(indicatorPos, indicatorSize, r.docTabs.Theme(), animate)
 }
 
 func (r *docTabsRenderer) updateAllTabs() {

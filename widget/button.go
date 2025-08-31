@@ -91,18 +91,16 @@ func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
-	th := b.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
-	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
+	text.inset = fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInnerPadding, b))
 
-	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	background.CornerRadius = th.Size(theme.SizeNameInputRadius)
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameButton, b))
+	background.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, b)
 	tapBG := canvas.NewRectangle(color.Transparent)
-	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
+	b.tapAnim = newButtonTapAnimation(tapBG, b)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
 	objects := []fyne.CanvasObject{
 		background,
@@ -226,15 +224,14 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	r.background.Resize(size)
 	r.tapBG.Resize(size)
 
-	th := r.button.Theme()
-	padding := r.padding(th)
+	padding := r.padding()
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
 	if !hasIcon && !hasLabel {
 		// Nothing to layout
 		return
 	}
-	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
+	iconSize := fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInlineIcon, r.button))
 	labelSize := r.label.MinSize()
 
 	if hasLabel {
@@ -269,28 +266,26 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (r *buttonRenderer) MinSize() (size fyne.Size) {
-	th := r.button.Theme()
 	hasIcon := r.icon != nil
 	hasLabel := r.label.Segments[0].(*TextSegment).Text != ""
-	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
+	iconSize := fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInlineIcon, r.button))
 	labelSize := r.label.MinSize()
 	if hasLabel {
 		size.Width = labelSize.Width
 	}
 	if hasIcon {
 		if hasLabel {
-			size.Width += th.Size(theme.SizeNamePadding)
+			size.Width += theme.SizeForWidget(theme.SizeNamePadding, r.button)
 		}
 		size.Width += iconSize.Width
 	}
 	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
-	size = size.Add(r.padding(th))
+	size = size.Add(r.padding())
 	return
 }
 
 func (r *buttonRenderer) Refresh() {
-	th := r.button.Theme()
-	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
+	r.label.inset = fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInnerPadding, r.button))
 
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
@@ -304,19 +299,17 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
-	th := r.button.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {
 		bgColor := color.Color(color.Transparent)
 		if bgColorName != "" {
-			bgColor = th.Color(bgColorName, v)
+			bgColor = theme.ColorForWidget(bgColorName, r.button)
 		}
 		if bgBlendName != "" {
-			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
+			bgColor = blendColor(bgColor, theme.ColorForWidget(bgBlendName, r.button))
 		}
 		bg.FillColor = bgColor
-		bg.CornerRadius = th.Size(theme.SizeNameInputRadius)
+		bg.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, r.button)
 		bg.Refresh()
 	}
 
@@ -374,8 +367,8 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 	return
 }
 
-func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
-	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
+func (r *buttonRenderer) padding() fyne.Size {
+	return fyne.NewSquareSize(theme.SizeForWidget(theme.SizeNameInnerPadding, r.button) * 2)
 }
 
 // must be called with r.button.propertyLock RLocked
@@ -434,15 +427,14 @@ func blendColor(under, over color.Color) color.Color {
 	return color.RGBA64{R: uint16(outR), G: uint16(outG), B: uint16(outB), A: uint16(outAlpha * 0xFFFF)}
 }
 
-func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *fyne.Animation {
-	v := fyne.CurrentApp().Settings().ThemeVariant()
+func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget) *fyne.Animation {
 	return fyne.NewAnimation(canvas.DurationStandard, func(done float32) {
 		mid := w.Size().Width / 2
 		size := mid * done
 		bg.Resize(fyne.NewSize(size*2, w.Size().Height))
 		bg.Move(fyne.NewPos(mid-size, 0))
 
-		r, g, bb, a := col.ToNRGBA(th.Color(theme.ColorNamePressed, v))
+		r, g, bb, a := col.ToNRGBA(theme.ColorForWidget(theme.ColorNamePressed, w))
 		aa := uint8(a)
 		fade := aa - uint8(float32(aa)*done)
 		if fade > 0 {

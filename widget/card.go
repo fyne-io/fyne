@@ -34,10 +34,8 @@ func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
-	th := c.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	header := canvas.NewText(c.Title, th.Color(theme.ColorNameForeground, v))
+	header := canvas.NewText(c.Title, theme.ColorForWidget(theme.ColorNameForeground, c))
 	header.TextStyle.Bold = true
 	subHeader := canvas.NewText(c.Subtitle, header.Color)
 
@@ -104,7 +102,7 @@ const (
 
 // Layout the components of the card container.
 func (c *cardRenderer) Layout(size fyne.Size) {
-	padding := c.card.Theme().Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, c.card)
 	pos := fyne.NewSquareOffsetPos(padding / 2)
 	size = size.Subtract(fyne.NewSquareSize(padding))
 	c.LayoutShadow(size, pos)
@@ -161,7 +159,7 @@ func (c *cardRenderer) MinSize() fyne.Size {
 	hasImage := c.card.Image != nil
 	hasContent := c.card.Content != nil
 
-	padding := c.card.Theme().Size(theme.SizeNamePadding)
+	padding := theme.SizeForWidget(theme.SizeNamePadding, c.card)
 	if !hasHeader && !hasSubHeader && !hasContent { // just image, or nothing
 		if c.card.Image == nil {
 			return fyne.NewSize(padding, padding) // empty, just space for border
@@ -224,16 +222,13 @@ func (c *cardRenderer) Refresh() {
 
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
-	th := c.card.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	if c.header != nil {
-		c.header.TextSize = th.Size(theme.SizeNameHeadingText)
-		c.header.Color = th.Color(theme.ColorNameForeground, v)
+		c.header.TextSize = theme.SizeForWidget(theme.SizeNameHeadingText, c.card)
+		c.header.Color = theme.ColorForWidget(theme.ColorNameForeground, c.card)
 	}
 	if c.subHeader != nil {
-		c.subHeader.TextSize = th.Size(theme.SizeNameText)
-		c.subHeader.Color = th.Color(theme.ColorNameForeground, v)
+		c.subHeader.TextSize = theme.SizeForWidget(theme.SizeNameText, c.card)
+		c.subHeader.Color = theme.ColorForWidget(theme.ColorNameForeground, c.card)
 	}
 	if c.card.Content != nil {
 		c.card.Content.Refresh()

@@ -359,10 +359,8 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 
-	th := t.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ColorForWidget(theme.ColorNameDisabled, t)}
 
 	var scroll *widget.Scroll
 	content := newTextGridContent(t)
@@ -663,10 +661,7 @@ func (t *textGridRow) setRow(row int) {
 }
 
 func (t *textGridRow) appendTextCell(str rune) {
-	th := t.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	text := canvas.NewText(string(str), th.Color(theme.ColorNameForeground, v))
+	text := canvas.NewText(string(str), theme.ColorForWidget(theme.ColorNameForeground, t.text.text))
 	text.TextStyle.Monospace = true
 
 	bg := canvas.NewRectangle(color.Transparent)
@@ -698,10 +693,8 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	text := t.objects[pos*3+1].(*canvas.Text)
 	underline := t.objects[pos*3+2].(*canvas.Line)
 
-	th := t.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	fg := th.Color(theme.ColorNameForeground, v)
-	text.TextSize = th.Size(theme.SizeNameText)
+	fg := theme.ColorForWidget(theme.ColorNameForeground, t.text.text)
+	text.TextSize = theme.SizeForWidget(theme.SizeNameText, t.text.text)
 
 	var underlineStrokeWidth float32 = 1
 	var underlineStrokeColor color.Color = color.Transparent
@@ -897,9 +890,7 @@ func (t *textGridRowRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRowRenderer) Refresh() {
-	th := t.obj.text.text.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ColorForWidget(theme.ColorNameDisabled, t.obj.text.text)}
 	t.obj.updateGridSize(t.obj.text.text.Size())
 	t.obj.refreshCells()
 }

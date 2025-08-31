@@ -53,11 +53,8 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Refresh() {
-	th := theme.CurrentForWidget(r.scrollBar)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	r.background.FillColor = th.Color(theme.ColorNameScrollBar, v)
-	r.background.CornerRadius = th.Size(theme.SizeNameScrollBarRadius)
+	r.background.FillColor = theme.ColorForWidget(theme.ColorNameScrollBar, r.scrollBar)
+	r.background.CornerRadius = theme.SizeForWidget(theme.SizeNameScrollBarRadius, r.scrollBar)
 	r.background.Refresh()
 }
 
@@ -75,11 +72,8 @@ type scrollBar struct {
 }
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	th := theme.CurrentForWidget(b)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
-	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBar, v))
-	background.CornerRadius = th.Size(theme.SizeNameScrollBarRadius)
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameScrollBar, b))
+	background.CornerRadius = theme.SizeForWidget(theme.SizeNameScrollBarRadius, b)
 	r := &scrollBarRenderer{
 		scrollBar:  b,
 		background: background,
@@ -197,7 +191,7 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 func (r *scrollBarAreaRenderer) Refresh() {
 	th := theme.CurrentForWidget(r.area)
 	r.bar.Refresh()
-	r.background.FillColor = th.Color(theme.ColorNameScrollBarBackground, fyne.CurrentApp().Settings().ThemeVariant())
+	r.background.FillColor = theme.ColorForWidget(theme.ColorNameScrollBarBackground, r.area)
 	r.background.Hidden = !r.area.isLarge()
 	r.layoutWithTheme(th, r.area.Size())
 	canvas.Refresh(r.bar)
@@ -246,10 +240,8 @@ type scrollBarArea struct {
 }
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
-	th := theme.CurrentForWidget(a)
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	a.bar = newScrollBar(a)
-	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBarBackground, v))
+	background := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameScrollBarBackground, a))
 	background.Hidden = !a.isLarge()
 	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{background, a.bar}), area: a, bar: a.bar, background: background}
 }
