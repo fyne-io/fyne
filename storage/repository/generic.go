@@ -32,8 +32,8 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 	newURI := uri{
 		scheme:    u.Scheme(),
 		authority: u.Authority(),
-		query:     u.Query(),
 		path:      path.Dir(p),
+		query:     u.Query(),
 		fragment:  u.Fragment(),
 	}
 
