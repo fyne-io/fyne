@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/storage/repository"
 
 	"github.com/stretchr/testify/assert"
@@ -55,33 +56,101 @@ func TestFromTOML_Resource(t *testing.T) {
 }
 
 func TestHexColor(t *testing.T) {
-	c := hexColor{str: "#abc"}
-	err := c.parseColor()
+	c := hexColor{}
+	err := c.parseColor("#abc")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c.color)
-	c = hexColor{str: "abc"}
-	err = c.parseColor()
+	err = c.parseColor("abc")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c.color)
-	c = hexColor{str: "#abcd"}
-	err = c.parseColor()
+	err = c.parseColor("#abcd")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xdd}, c.color)
 
-	c = hexColor{str: "#a1b2c3"}
-	err = c.parseColor()
+	err = c.parseColor("#a1b2c3")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c.color)
-	c = hexColor{str: "a1b2c3"}
-	err = c.parseColor()
+	err = c.parseColor("a1b2c3")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c.color)
-	c = hexColor{str: "#a1b2c3f4"}
-	err = c.parseColor()
+	err = c.parseColor("#a1b2c3f4")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c.color)
-	c = hexColor{str: "a1b2c3f4"}
-	err = c.parseColor()
+	err = c.parseColor("a1b2c3f4")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c.color)
+}
+
+func BenchmarkJsonTheme_Color(b *testing.B) {
+	th, err := FromJSON(`
+{
+    "Colors-light": {
+        "pageBackground": "#EFF1F5FF",
+        "listHeader": "#DCE0E8FF",
+        "pageHeader": "#E6E9EFFF",
+        "background": "#DCE0E8FF",
+        "button": "#E6E9EFFF",
+        "disabledButton": "#CCD0DAFF",
+        "disabled": "#4C4F69FF",
+        "error": "#D20F39FF",
+        "focus": "#EDCFD5FF",
+        "foregroundOnError": "#EFF1F5FF",
+        "foregroundOnPrimary": "#EFF1F5FF",
+        "foregroundOnSuccess": "#EFF1F5FF",
+        "foregroundOnWarning": "#EFF1F5FF",
+        "headerBackground": "#CCD0DAFF",
+        "hover": "#EFE0E5FF",
+        "hyperlink": "#E64553FF",
+        "inputBackground": "#E6E9EFFF",
+        "inputBorder": "#CCD0DAFF",
+        "menuBackground": "#E6E9EFFF",
+        "overlayBackground": "#E6E9EFFF",
+        "placeholder": "#7C7F93FF",
+        "pressed": "#CCD0DA66",
+        "primary": "#E64553FF",
+        "scrollBar": "#E6E9EF99",
+        "selection": "#EDC6CDFF",
+        "separator": "#DCE0E8FF",
+        "success": "#40A02BFF",
+        "warning": "#DF8E1DFF"
+    },
+	    "Colors-dark": {
+        "pageBackground": "#1E1E2EFF",
+        "listHeader": "#11111BFF",
+        "pageHeader": "#181825FF",
+        "background": "#11111BFF",
+        "button": "#181825FF",
+        "disabledButton": "#313244FF",
+        "disabled": "#CDD6F4FF",
+        "error": "#F38BA8FF",
+        "focus": "#473847FF",
+        "foreground": "#CDD6F4FF",
+        "foregroundOnError": "#1E1E2EFF",
+        "foregroundOnPrimary": "#1E1E2EFF",
+        "foregroundOnSuccess": "#1E1E2EFF",
+        "foregroundOnWarning": "#1E1E2EFF",
+        "headerBackground": "#313244FF",
+        "hover": "#322B3AFF",
+        "hyperlink": "#EBA0ACFF",
+        "inputBackground": "#181825FF",
+        "inputBorder": "#313244FF",
+        "menuBackground": "#181825FF",
+        "overlayBackground": "#181825FF",
+        "placeholder": "#9399B2FF",
+        "pressed": "#31324466",
+        "primary": "#EBA0ACFF",
+        "scrollBar": "#18182599",
+        "selection": "#513E4DFF",
+        "separator": "#11111BFF",
+        "success": "#A6E3A1FF",
+        "warning": "#F9E2AFFF"
+    }
+}`)
+
+	assert.NoError(b, err)
+
+	for i := 0; i < b.N; i++ {
+		_ = th.Color("primary", theme.VariantDark)
+		_ = th.Color("disabledButton", theme.VariantDark)
+	}
 }

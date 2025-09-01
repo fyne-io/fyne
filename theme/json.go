@@ -57,29 +57,26 @@ func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) 
 	return &jsonTheme{data: th, fallback: fallback}, nil
 }
 
-var _ json.Unmarshaler = (*hexColor)(nil)
-
 type hexColor struct {
 	color color.Color
-	str   string
 }
 
-// UnmarshalJSON implements json.Unmarshaler.
 func (h *hexColor) UnmarshalJSON(b []byte) error {
-	if err := json.Unmarshal(b, &h.str); err != nil {
+	var str string
+	if err := json.Unmarshal(b, &str); err != nil {
 		return err
 	}
-	return h.parseColor()
+	return h.parseColor(str)
 }
 
-func (h *hexColor) parseColor() error {
-	data := h.str
-	switch len([]rune(h.str)) {
+func (h *hexColor) parseColor(str string) error {
+	data := str
+	switch len([]rune(str)) {
 	case 8, 6:
 	case 9, 7: // remove # prefix
-		data = h.str[1:]
+		data = str[1:]
 	case 5: // remove # prefix, then double up
-		data = h.str[1:]
+		data = str[1:]
 		fallthrough
 	case 4: // could be rgba or #rgb
 		if data[0] == '#' {
@@ -91,11 +88,11 @@ func (h *hexColor) parseColor() error {
 		v := []rune(data)
 		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2], v[3], v[3]})
 	case 3:
-		v := []rune(h.str)
+		v := []rune(str)
 		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2]})
 	default:
 		h.color = color.Transparent
-		return errors.New("invalid color format: " + h.str)
+		return errors.New("invalid color format: " + str)
 	}
 
 	digits, err := hex.DecodeString(string(data))
