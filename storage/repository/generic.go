@@ -3,6 +3,7 @@ package repository
 import (
 	"io"
 	"path"
+	"strings"
 
 	"fyne.io/fyne/v2"
 )
@@ -23,8 +24,8 @@ import (
 //
 // Since: 2.0
 func GenericParent(u fyne.URI) (fyne.URI, error) {
-	p := u.Path()
-	if p == "" || p == "/" {
+	p := strings.TrimSuffix(u.Path(), "/")
+	if p == "" {
 		return nil, ErrURIRoot
 	}
 
