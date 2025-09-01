@@ -55,26 +55,33 @@ func TestFromTOML_Resource(t *testing.T) {
 }
 
 func TestHexColor(t *testing.T) {
-	c, err := hexColor("#abc").color(nil)
+	c := hexColor{str: "#abc"}
+	err := c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c)
-	c, err = hexColor("abc").color(nil)
+	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c.color)
+	c = hexColor{str: "abc"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c)
-	c, err = hexColor("#abcd").color(nil)
+	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c.color)
+	c = hexColor{str: "#abcd"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xdd}, c)
+	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xdd}, c.color)
 
-	c, err = hexColor("#a1b2c3").color(nil)
+	c = hexColor{str: "#a1b2c3"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c)
-	c, err = hexColor("a1b2c3").color(nil)
+	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c.color)
+	c = hexColor{str: "a1b2c3"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c)
-	c, err = hexColor("#a1b2c3f4").color(nil)
+	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xff}, c.color)
+	c = hexColor{str: "#a1b2c3f4"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c)
-	c, err = hexColor("a1b2c3f4").color(nil)
+	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c.color)
+	c = hexColor{str: "a1b2c3f4"}
+	err = c.parseColor()
 	assert.NoError(t, err)
-	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c)
+	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c.color)
 }
