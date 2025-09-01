@@ -2,22 +2,10 @@ package repository
 
 import (
 	"io"
-	"strings"
+	"path"
 
 	"fyne.io/fyne/v2"
 )
-
-// splitNonEmpty works exactly like strings.Split(), but only returns non-empty
-// components.
-func splitNonEmpty(str, sep string) []string {
-	components := []string{}
-	for _, v := range strings.Split(str, sep) {
-		if len(v) > 0 {
-			components = append(components, v)
-		}
-	}
-	return components
-}
 
 // GenericParent can be used as a common-case implementation of
 // HierarchicalRepository.Parent(). It will create a parent URI based on
@@ -44,19 +32,9 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		scheme:    u.Scheme(),
 		authority: u.Authority(),
 		query:     u.Query(),
+		path:      path.Dir(p),
 		fragment:  u.Fragment(),
 	}
-
-	newPath := strings.Builder{}
-	newPath.Grow(len(p))
-
-	// there will be at least one component, since we know we don't have '/' or ''.
-	newPath.WriteByte('/')
-	components := splitNonEmpty(p, "/")
-	if len(components) > 1 {
-		newPath.WriteString(strings.Join(components[:len(components)-1], "/"))
-	}
-	newURI.path = newPath.String()
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
@@ -79,23 +57,10 @@ func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
 	newURI := uri{
 		scheme:    u.Scheme(),
 		authority: u.Authority(),
+		path:      path.Join(u.Path(), component),
 		query:     u.Query(),
 		fragment:  u.Fragment(),
 	}
-
-	newPath := strings.Builder{}
-	p := u.Path()
-	newPath.Grow(len(p) + len(component) + 1)
-
-	newPath.WriteByte('/')
-	for _, v := range strings.Split(p, "/") {
-		if len(v) > 0 {
-			newPath.WriteString(v)
-			newPath.WriteByte('/')
-		}
-	}
-	newPath.WriteString(component)
-	newURI.path = newPath.String()
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
