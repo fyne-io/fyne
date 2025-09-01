@@ -199,10 +199,9 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 		return nil, err
 	}
 
-	urilist := make([]fyne.URI, 0, len(files))
-	for _, f := range files {
-		uri := storage.NewFileURI(path.Join(p, f.Name()))
-		urilist = append(urilist, uri)
+	urilist := make([]fyne.URI, len(files))
+	for i, f := range files {
+		urilist[i] = storage.NewFileURI(path.Join(p, f.Name()))
 	}
 
 	return urilist, nil
