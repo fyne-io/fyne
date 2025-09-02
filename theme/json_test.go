@@ -15,11 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	globalJsonColor1 color.Color
-	globalJsonColor2 color.Color
-)
-
 func TestFromJSON(t *testing.T) {
 	// Discarding log output for tests
 	// The following method logs an error:
@@ -85,6 +80,8 @@ func TestHexColor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xa1, G: 0xb2, B: 0xc3, A: 0xf4}, c.color)
 }
+
+var result color.Color
 
 func BenchmarkJsonTheme_Color(b *testing.B) {
 	th, err := FromJSON(`
@@ -153,13 +150,10 @@ func BenchmarkJsonTheme_Color(b *testing.B) {
 }`)
 
 	assert.NoError(b, err)
-	var localColor1 color.Color
-	var localColor2 color.Color
+	var localResult color.Color
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		localColor1 = th.Color("primary", theme.VariantDark)
-		localColor2 = th.Color("disabledButton", theme.VariantDark)
+		localResult = th.Color("primary", theme.VariantDark)
 	}
-	globalJsonColor1 = localColor1
-	globalJsonColor2 = localColor2
+	result = localResult
 }
