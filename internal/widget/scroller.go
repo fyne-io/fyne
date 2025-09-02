@@ -222,7 +222,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
 		width = widthOffset
 	}
-	return
+	return length, width, lengthOffset, widthOffset
 }
 
 var (

@@ -1898,17 +1898,17 @@ func (h *hoverable) MouseOut() {
 
 func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
-	return
+	return e
 }
 
 type draggableObject struct {
@@ -1933,12 +1933,12 @@ func (d *draggable) DragEnd() {
 
 func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
-	return
+	return e
 }
 
 func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
-	return
+	return e
 }
 
 type draggableHoverableObject struct {
@@ -1968,7 +1968,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 
 func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
-	return
+	return e
 }
 
 type draggableMouseableObject struct {
@@ -1999,12 +1999,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 
 func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
-	return
+	return e
 }
 
 func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
-	return
+	return e
 }
 
 type draggableTappableObject struct {
@@ -2084,7 +2084,7 @@ func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 
 func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
-	return
+	return e
 }
 
 //

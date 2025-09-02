@@ -105,7 +105,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	anim.Curve = curve
 	anim.AutoReverse = true
 	anim.RepeatCount = 1
-	return
+	return text, box, anim
 }
 
 // themedBox is a simple box that change its background color according

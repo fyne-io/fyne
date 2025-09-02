@@ -1208,7 +1208,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 			break
 		}
 	}
-	return
+	return row, col
 }
 
 // selectAll selects all text in entry
@@ -2112,7 +2112,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 					onlyWordSeparators = false
 				}
 			}
-			return
+			return num, onlyWordSeparators
 		}
 		selfNumWS, _ := wordSeparators(i.Text)
 		otherNumWS, otherOnlyWS := wordSeparators(other.Text)

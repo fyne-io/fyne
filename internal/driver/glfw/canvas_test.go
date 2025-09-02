@@ -614,7 +614,7 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
-	return
+	return e
 }
 
 type safeCanvas struct {

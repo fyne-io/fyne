@@ -270,7 +270,7 @@ func rtou(a []TableRef) (b []uint32) {
 	for _, x := range a {
 		b = append(b, uint32(x))
 	}
-	return
+	return b
 }
 
 func compareUint32s(t *testing.T, a, b []uint32) error {

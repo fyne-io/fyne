@@ -344,7 +344,7 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 		return ok
 	}
 	o, p, _ = intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	return
+	return o, p
 }
 
 func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
