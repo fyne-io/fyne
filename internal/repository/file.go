@@ -7,7 +7,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -39,7 +38,7 @@ func (f *file) URI() fyne.URI {
 	return f.uri
 }
 
-// FileRepository implements a simple wrapper around golang's filesystem
+// FileRepository implements a simple wrapper around Go's filesystem
 // interface libraries. It should be registered by the driver on platforms
 // where it is appropriate to do so.
 //
@@ -169,24 +168,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
-	child := strings.Builder{}
-
-	child.WriteString(u.Scheme())
-	child.WriteString("://")
-	child.WriteString(u.Authority())
-	child.WriteString(path.Join(u.Path(), component))
-
-	// stick the query and fragment back on the end
-	if query := u.Query(); len(query) > 0 {
-		child.WriteByte('?')
-		child.WriteString(query)
-	}
-	if fragment := u.Fragment(); len(fragment) > 0 {
-		child.WriteByte('#')
-		child.WriteString(fragment)
-	}
-
-	return storage.ParseURI(child.String())
+	return storage.NewFileURI(path.Join(u.Path(), component)), nil
 }
 
 // List implements repository.ListableRepository.List()
