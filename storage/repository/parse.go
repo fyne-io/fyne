@@ -81,22 +81,32 @@ func ParseURI(s string) (fyne.URI, error) {
 		return nil, err
 	}
 
-	authority := ""
+	authority := l.Authority()
+	authBuilder := strings.Builder{}
 
-	if userInfo := l.Authority().UserInfo(); len(userInfo) > 0 {
-		authority += userInfo + "@"
+	if userInfo := authority.UserInfo(); userInfo != "" {
+		authBuilder.WriteString(userInfo)
+		authBuilder.WriteByte('@')
 	}
 
-	authority += l.Authority().Host()
+	// Per RFC 3986, section 3.2.2, IPv6 addresses must be enclosed in square brackets.
+	if host := authority.Host(); strings.Contains(host, ":") {
+		authBuilder.WriteByte('[')
+		authBuilder.WriteString(host)
+		authBuilder.WriteByte(']')
+	} else {
+		authBuilder.WriteString(host)
+	}
 
-	if port := l.Authority().Port(); len(port) > 0 {
-		authority += ":" + port
+	if port := authority.Port(); port != "" {
+		authBuilder.WriteByte(':')
+		authBuilder.WriteString(port)
 	}
 
 	return &uri{
 		scheme:    scheme,
-		authority: authority,
-		path:      l.Authority().Path(),
+		authority: authBuilder.String(),
+		path:      authority.Path(),
 		query:     l.Query().Encode(),
 		fragment:  l.Fragment(),
 	}, nil
