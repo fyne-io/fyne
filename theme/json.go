@@ -57,11 +57,11 @@ func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) 
 	return &jsonTheme{data: th, fallback: fallback}, nil
 }
 
-type hexColor struct {
+type jsonColor struct {
 	color color.Color
 }
 
-func (h *hexColor) UnmarshalJSON(b []byte) error {
+func (h *jsonColor) UnmarshalJSON(b []byte) error {
 	var str string
 	if err := json.Unmarshal(b, &str); err != nil {
 		return err
@@ -69,7 +69,7 @@ func (h *hexColor) UnmarshalJSON(b []byte) error {
 	return h.parseColor(str)
 }
 
-func (h *hexColor) parseColor(str string) error {
+func (h *jsonColor) parseColor(str string) error {
 	data := str
 	switch len([]rune(str)) {
 	case 8, 6:
@@ -95,7 +95,7 @@ func (h *hexColor) parseColor(str string) error {
 		return errors.New("invalid color format: " + str)
 	}
 
-	digits, err := hex.DecodeString(string(data))
+	digits, err := hex.DecodeString(data)
 	if err != nil {
 		return err
 	}
@@ -127,10 +127,10 @@ func (u uriString) resource() fyne.Resource {
 }
 
 type schema struct {
-	Colors      map[string]hexColor `json:"Colors,omitempty"`
-	DarkColors  map[string]hexColor `json:"Colors-dark,omitempty"`
-	LightColors map[string]hexColor `json:"Colors-light,omitempty"`
-	Sizes       map[string]float32  `json:"Sizes,omitempty"`
+	Colors      map[string]jsonColor `json:"Colors,omitempty"`
+	DarkColors  map[string]jsonColor `json:"Colors-dark,omitempty"`
+	LightColors map[string]jsonColor `json:"Colors-light,omitempty"`
+	Sizes       map[string]float32   `json:"Sizes,omitempty"`
 
 	Fonts map[string]uriString `json:"Fonts,omitempty"`
 	Icons map[string]uriString `json:"Icons,omitempty"`

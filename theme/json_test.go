@@ -56,7 +56,7 @@ func TestFromTOML_Resource(t *testing.T) {
 }
 
 func TestHexColor(t *testing.T) {
-	c := hexColor{}
+	c := jsonColor{}
 	err := c.parseColor("#abc")
 	assert.NoError(t, err)
 	assert.Equal(t, &color.NRGBA{R: 0xaa, G: 0xbb, B: 0xcc, A: 0xff}, c.color)
