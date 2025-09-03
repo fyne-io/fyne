@@ -31,7 +31,7 @@ type Canvas struct {
 
 	contentFocusMgr *app.FocusManager
 	menuFocusMgr    *app.FocusManager
-	overlays        OverlayStack
+	overlays        overlayStack
 
 	shortcut fyne.ShortcutHandler
 

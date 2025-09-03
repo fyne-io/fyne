@@ -1,4 +1,4 @@
-package common_test
+package common
 
 import (
 	"testing"
@@ -7,13 +7,12 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
 
 func TestOverlayStack(t *testing.T) {
-	s := &common.OverlayStack{Canvas: test.Canvas()}
+	s := &overlayStack{Canvas: test.Canvas()}
 	o1 := widget.NewLabel("A")
 	o2 := widget.NewLabel("B")
 	o3 := widget.NewLabel("C")
@@ -92,7 +91,7 @@ func TestOverlayStack(t *testing.T) {
 }
 
 func TestOverlayStack_empty(t *testing.T) {
-	s := &common.OverlayStack{Canvas: test.Canvas()}
+	s := &overlayStack{Canvas: test.Canvas()}
 	s.Add(nil)
 	assert.Zero(t, len(s.List()))
 
@@ -102,7 +101,7 @@ func TestOverlayStack_empty(t *testing.T) {
 }
 
 func TestOverlayStack_focusManager(t *testing.T) {
-	s := &common.OverlayStack{Canvas: test.Canvas()}
+	s := &overlayStack{Canvas: test.Canvas()}
 	o1 := widget.NewLabel("A")
 	o2 := widget.NewLabel("B")
 	o3 := widget.NewLabel("C")

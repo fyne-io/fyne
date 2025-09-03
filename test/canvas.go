@@ -327,8 +327,6 @@ type overlayStack struct {
 var _ fyne.OverlayStack = (*overlayStack)(nil)
 
 // Add puts an overlay on the stack.
-//
-// Implements: fyne.OverlayStack
 func (s *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
@@ -348,15 +346,11 @@ func (s *overlayStack) Add(overlay fyne.CanvasObject) {
 }
 
 // List returns all overlays on the stack from bottom to top.
-//
-// Implements: fyne.OverlayStack
 func (s *overlayStack) List() []fyne.CanvasObject {
 	return s.overlays
 }
 
 // Remove deletes an overlay and all overlays above it from the stack.
-//
-// Implements: fyne.OverlayStack
 func (s *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(s.overlays) == 0 {
 		return
@@ -384,8 +378,6 @@ func (s *overlayStack) Remove(overlay fyne.CanvasObject) {
 }
 
 // Top returns the top-most overlay of the stack.
-//
-// Implements: fyne.OverlayStack
 func (s *overlayStack) Top() fyne.CanvasObject {
 	if len(s.overlays) == 0 {
 		return nil

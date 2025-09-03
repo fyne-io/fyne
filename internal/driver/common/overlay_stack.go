@@ -6,8 +6,7 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 )
 
-// OverlayStack implements fyne.OverlayStack
-type OverlayStack struct {
+type overlayStack struct {
 	OnChange      func()
 	Canvas        fyne.Canvas
 	focusManagers []*app.FocusManager
@@ -15,12 +14,10 @@ type OverlayStack struct {
 	renderCaches  []*renderCacheTree
 }
 
-var _ fyne.OverlayStack = (*OverlayStack)(nil)
+var _ fyne.OverlayStack = (*overlayStack)(nil)
 
 // Add puts an overlay on the stack.
-//
-// Implements: fyne.OverlayStack
-func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
+func (s *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
@@ -44,21 +41,17 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 }
 
 // List returns all overlays on the stack from bottom to top.
-//
-// Implements: fyne.OverlayStack
-func (s *OverlayStack) List() []fyne.CanvasObject {
+func (s *overlayStack) List() []fyne.CanvasObject {
 	return s.overlays
 }
 
 // ListFocusManagers returns all focus managers on the stack from bottom to top.
-func (s *OverlayStack) ListFocusManagers() []*app.FocusManager {
+func (s *overlayStack) ListFocusManagers() []*app.FocusManager {
 	return s.focusManagers
 }
 
 // Remove deletes an overlay and all overlays above it from the stack.
-//
-// Implements: fyne.OverlayStack
-func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
+func (s *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(s.overlays) == 0 {
 		return
 	}
@@ -91,9 +84,7 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 }
 
 // Top returns the top-most overlay of the stack.
-//
-// Implements: fyne.OverlayStack
-func (s *OverlayStack) Top() fyne.CanvasObject {
+func (s *overlayStack) Top() fyne.CanvasObject {
 	if len(s.overlays) == 0 {
 		return nil
 	}
@@ -101,7 +92,7 @@ func (s *OverlayStack) Top() fyne.CanvasObject {
 }
 
 // TopFocusManager returns the app.FocusManager assigned to the top-most overlay of the stack.
-func (s *OverlayStack) TopFocusManager() *app.FocusManager {
+func (s *overlayStack) TopFocusManager() *app.FocusManager {
 	if len(s.focusManagers) == 0 {
 		return nil
 	}

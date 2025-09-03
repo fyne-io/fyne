@@ -360,7 +360,7 @@ func TestCanvas_walkTree(t *testing.T) {
 }
 
 func TestCanvas_OverlayStack(t *testing.T) {
-	o := OverlayStack{}
+	o := overlayStack{}
 	a := canvas.NewRectangle(color.Black)
 	b := canvas.NewCircle(color.Black)
 	c := canvas.NewRectangle(color.White)
