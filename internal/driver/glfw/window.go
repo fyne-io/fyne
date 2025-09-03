@@ -959,7 +959,7 @@ func (w *window) doShowAgain() {
 	view.Show()
 	w.visible = true
 
-	if w.fullscreen {
+	if w.fullScreen {
 		w.doSetFullScreen(true)
 	}
 
