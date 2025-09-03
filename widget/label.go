@@ -197,8 +197,24 @@ func (r *labelRenderer) Destroy() {
 }
 
 func (r *labelRenderer) Layout(s fyne.Size) {
-	r.l.selection.Resize(s)
 	r.l.provider.Resize(s)
+
+	if !r.l.Selectable || r.l.selection == nil {
+		return
+	}
+
+	textSize := r.l.provider.MinSize()
+
+	offsetX := float32(0)
+	switch r.l.Alignment {
+	case fyne.TextAlignCenter:
+		offsetX = (s.Width - textSize.Width) / 2
+	case fyne.TextAlignTrailing:
+		offsetX = s.Width - textSize.Width
+	}
+
+	r.l.selection.Move(fyne.NewPos(offsetX, 0))
+	r.l.selection.Resize(fyne.NewSize(textSize.Width, s.Height))
 }
 
 func (r *labelRenderer) MinSize() fyne.Size {
