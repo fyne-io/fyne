@@ -403,6 +403,7 @@ func nrgbaColor(c color.Color) color.NRGBA {
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+//gocyclo:ignore
 func knownColor(c color.Color) string {
 	switch nrgbaColor(c) {
 	case nrgbaColor(theme.Color(theme.ColorNameBackground)):
@@ -466,6 +467,7 @@ func knownColor(c color.Color) string {
 	}
 }
 
+//gocyclo:ignore
 func knownResource(rsc fyne.Resource) string {
 	switch rsc {
 	case theme.CancelIcon():
