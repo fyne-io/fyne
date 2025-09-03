@@ -1,4 +1,4 @@
-package internal_test
+package common_test
 
 import (
 	"testing"
@@ -6,14 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 )
 
 func TestOverlayStack(t *testing.T) {
-	s := &internal.OverlayStack{Canvas: test.NewCanvas()}
+	s := &common.OverlayStack{Canvas: test.NewCanvas()}
 	o1 := widget.NewLabel("A")
 	o2 := widget.NewLabel("B")
 	o3 := widget.NewLabel("C")

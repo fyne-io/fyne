@@ -2,7 +2,6 @@ package common
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 )
@@ -65,7 +64,7 @@ func (r *RenderCacheNode) Obj() fyne.CanvasObject {
 }
 
 type overlayStack struct {
-	internal.OverlayStack
+	OverlayStack
 
 	renderCaches []*renderCacheTree
 }

@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
@@ -241,7 +240,7 @@ func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
 	c.refreshQueue.queue = async.NewCanvasObjectQueue()
 	c.overlays = &overlayStack{
-		OverlayStack: internal.OverlayStack{
+		OverlayStack: OverlayStack{
 			OnChange: onOverlayChanged,
 			Canvas:   impl,
 		},

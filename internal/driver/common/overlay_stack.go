@@ -1,4 +1,4 @@
-package internal
+package common
 
 import (
 	"fyne.io/fyne/v2"
