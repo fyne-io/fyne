@@ -7,10 +7,10 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/internal"
 	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -32,7 +32,7 @@ type canvas struct {
 	scale   float32
 
 	content     fyne.CanvasObject
-	overlays    *internal.OverlayStack
+	overlays    overlayStack
 	focusMgr    *intapp.FocusManager
 	hovered     desktop.Hoverable
 	padded      bool
@@ -64,7 +64,7 @@ func NewCanvas() WindowlessCanvas {
 		scale:    1.0,
 		size:     fyne.NewSize(100, 100),
 	}
-	c.overlays = &internal.OverlayStack{Canvas: c}
+	c.overlays.Canvas = c
 	return c
 }
 
@@ -73,7 +73,6 @@ func NewCanvas() WindowlessCanvas {
 func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 	c := NewCanvas().(*canvas)
 	c.painter = painter
-
 	return c
 }
 
@@ -84,7 +83,6 @@ func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 	c := NewCanvasWithPainter(painter).(*canvas)
 	c.transparent = true
-
 	return c
 }
 
@@ -149,7 +147,7 @@ func (c *canvas) Overlays() fyne.OverlayStack {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
-	return c.overlays
+	return &c.overlays
 }
 
 func (c *canvas) Padded() bool {
@@ -318,4 +316,88 @@ func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyn
 		}
 	}
 	return objects
+}
+
+type overlayStack struct {
+	Canvas        fyne.Canvas
+	focusManagers []*intapp.FocusManager
+	overlays      []fyne.CanvasObject
+}
+
+var _ fyne.OverlayStack = (*overlayStack)(nil)
+
+// Add puts an overlay on the stack.
+//
+// Implements: fyne.OverlayStack
+func (s *overlayStack) Add(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
+
+	s.overlays = append(s.overlays, overlay)
+
+	// TODO this should probably apply to all once #707 is addressed
+	if _, ok := overlay.(*widget.OverlayContainer); ok {
+		safePos, safeSize := s.Canvas.InteractiveArea()
+
+		overlay.Resize(safeSize)
+		overlay.Move(safePos)
+	}
+
+	s.focusManagers = append(s.focusManagers, intapp.NewFocusManager(overlay))
+}
+
+// List returns all overlays on the stack from bottom to top.
+//
+// Implements: fyne.OverlayStack
+func (s *overlayStack) List() []fyne.CanvasObject {
+	return s.overlays
+}
+
+// Remove deletes an overlay and all overlays above it from the stack.
+//
+// Implements: fyne.OverlayStack
+func (s *overlayStack) Remove(overlay fyne.CanvasObject) {
+	if overlay == nil || len(s.overlays) == 0 {
+		return
+	}
+
+	overlayIdx := -1
+	for i, o := range s.overlays {
+		if o == overlay {
+			overlayIdx = i
+			break
+		}
+	}
+	if overlayIdx == -1 {
+		return
+	}
+
+	// Set removed elements in backing array to nil to release memory references:
+	for i := overlayIdx; i < len(s.overlays); i++ {
+		s.overlays[i] = nil
+		s.focusManagers[i] = nil
+	}
+
+	s.overlays = s.overlays[:overlayIdx]
+	s.focusManagers = s.focusManagers[:overlayIdx]
+}
+
+// Top returns the top-most overlay of the stack.
+//
+// Implements: fyne.OverlayStack
+func (s *overlayStack) Top() fyne.CanvasObject {
+	if len(s.overlays) == 0 {
+		return nil
+	}
+	return s.overlays[len(s.overlays)-1]
+}
+
+// TopFocusManager returns the app.FocusManager assigned to the top-most overlay of the stack.
+func (s *overlayStack) TopFocusManager() *intapp.FocusManager {
+	if len(s.focusManagers) == 0 {
+		return nil
+	}
+
+	return s.focusManagers[len(s.focusManagers)-1]
 }
