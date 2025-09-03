@@ -76,7 +76,7 @@ func ToNRGBA(c color.Color) (r, g, b, a int) {
 	default: // RGBA, RGBA64, and unknown implementations of Color
 		r, g, b, a = unmultiplyAlpha(c)
 	}
-	return
+	return r, g, b, a
 }
 
 // unmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
@@ -93,5 +93,5 @@ func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
 	g = int(green >> 8)
 	b = int(blue >> 8)
 	a = int(alpha >> 8)
-	return
+	return r, g, b, a
 }

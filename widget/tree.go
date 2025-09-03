@@ -105,11 +105,11 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	t = &Tree{
 		ChildUIDs: func(uid string) (c []string) {
 			c = data[uid]
-			return
+			return c
 		},
 		IsBranch: func(uid string) (b bool) {
 			_, b = data[uid]
-			return
+			return b
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
 			return NewLabel("Template Object")
@@ -119,7 +119,7 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 		},
 	}
 	t.ExtendBaseWidget(t)
-	return
+	return t
 }
 
 // CloseAllBranches closes all branches in the tree.
@@ -463,7 +463,7 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 			y += m.Height
 		}
 	})
-	return
+	return y, size, found
 }
 
 func (t *Tree) offsetUpdated(pos fyne.Position) {
@@ -509,7 +509,7 @@ func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
 	min = min.Max(r.tree.branchMinSize)
 	min = min.Max(r.tree.leafMinSize)
-	return
+	return min
 }
 
 func (r *treeRenderer) Layout(size fyne.Size) {
@@ -556,7 +556,7 @@ func newTreeContent(tree *Tree) (c *treeContent) {
 		tree: tree,
 	}
 	c.ExtendBaseWidget(c)
-	return
+	return c
 }
 
 func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
@@ -756,7 +756,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
-	return
+	return min
 }
 
 func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
@@ -815,7 +815,7 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 		}
 		b = newBranch(r.treeContent.tree, content)
 	}
-	return
+	return b
 }
 
 func (r *treeContentRenderer) getLeaf() (l *leaf) {
@@ -829,7 +829,7 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 		}
 		l = newLeaf(r.treeContent.tree, content)
 	}
-	return
+	return l
 }
 
 var (
@@ -948,7 +948,7 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 
 	min.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
 	min.Height = fyne.Max(min.Height, iconSize)
-	return
+	return min
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
@@ -959,7 +959,7 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 	if r.treeNode.icon != nil {
 		objects = append(objects, r.treeNode.icon)
 	}
-	return
+	return objects
 }
 
 func (r *treeNodeRenderer) Refresh() {
@@ -1013,7 +1013,7 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	if cache.OverrideThemeMatchingScope(b, tree) {
 		b.Refresh()
 	}
-	return
+	return b
 }
 
 func (b *branch) update(uid string, depth int) {
@@ -1034,7 +1034,7 @@ func newBranchIcon(tree *Tree) (i *branchIcon) {
 		tree: tree,
 	}
 	i.ExtendBaseWidget(i)
-	return
+	return i
 }
 
 func (i *branchIcon) Refresh() {
@@ -1074,7 +1074,7 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	if cache.OverrideThemeMatchingScope(l, tree) {
 		l.Refresh()
 	}
-	return
+	return l
 }
 
 func contains(slice []string, item string) bool {

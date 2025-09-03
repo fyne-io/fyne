@@ -398,7 +398,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 	l.visibleRowHeights = l.visibleRowHeights[:0]
 
 	if l.list.scroller.Size().Height <= 0 {
-		return
+		return offY, minRow
 	}
 
 	padding := th.Size(theme.SizeNamePadding)
@@ -425,7 +425,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 		for i := 0; i <= maxRow-minRow; i++ {
 			l.visibleRowHeights = append(l.visibleRowHeights, itemHeight)
 		}
-		return
+		return offY, minRow
 	}
 
 	for i := 0; i < length; i++ {
@@ -450,7 +450,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 			l.visibleRowHeights = append(l.visibleRowHeights, height)
 		}
 	}
-	return
+	return offY, minRow
 }
 
 // Declare conformity with WidgetRenderer interface.

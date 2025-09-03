@@ -406,5 +406,5 @@ func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.
 	t := canvas.NewText(s, shortColor)
 	t.TextStyle = style
 	texts = append(texts, t)
-	return
+	return texts
 }

@@ -153,7 +153,7 @@ func renderChildren(source []byte, n ast.Node, blockquote bool) ([]RichTextSegme
 }
 
 func forceIntoText(source []byte, n ast.Node) string {
-	texts := make([]string, 0)
+	texts := []string{}
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {
