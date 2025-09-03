@@ -198,22 +198,22 @@ func TestCheckGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
 
 func TestCheckGroup_ManipulateOptions(t *testing.T) {
 	check := &widget.CheckGroup{Options: []string{}}
-	assert.Equal(t, 0, len(check.Options))
+	assert.Empty(t, check.Options)
 
 	check.Append("test1")
-	assert.Equal(t, 1, len(check.Options))
+	assert.Len(t, check.Options, 1)
 	check.SetSelected([]string{"test1"})
-	assert.Equal(t, 1, len(check.Selected))
+	assert.Len(t, check.Selected, 1)
 
 	check.Append("test2")
-	assert.Equal(t, 2, len(check.Options))
+	assert.Len(t, check.Options, 2)
 
 	removed := check.Remove("nope")
-	assert.Equal(t, false, removed)
-	assert.Equal(t, 2, len(check.Options))
+	assert.False(t, removed)
+	assert.Len(t, check.Options, 2)
 
 	removed = check.Remove("test1")
-	assert.Equal(t, true, removed)
-	assert.Equal(t, 1, len(check.Options))
-	assert.Equal(t, 0, len(check.Selected))
+	assert.True(t, removed)
+	assert.Len(t, check.Options, 1)
+	assert.Empty(t, check.Selected)
 }

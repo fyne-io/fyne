@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
@@ -69,6 +70,42 @@ func TestMobileCanvas_Menu(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, labels[i-1], item.menu.Label)
 	}
+}
+
+func TestMobileCanvas_MenuChild(t *testing.T) {
+	c := &canvas{}
+	c.Initialize(c, nil)
+	c.Resize(fyne.NewSize(100, 200))
+
+	child := fyne.NewMenu("Child", fyne.NewMenuItem("One", func() {}))
+	parent := fyne.NewMenuItem("Parent", func() {})
+	parent.ChildMenu = child
+	menu := fyne.NewMainMenu(
+		fyne.NewMenu("Top", parent))
+
+	c.showMenu(menu)
+	topObj := c.menu.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*menuLabel)
+	assert.Equal(t, "Top", topObj.menu.Label)
+
+	test.Tap(topObj)
+	assert.Equal(t, 1, len(c.Overlays().List()))
+	rootOverlay := c.Overlays().Top()
+	parentItem := rootOverlay.(*internalWidget.OverlayContainer).Content.(*widget.PopUpMenu).Items[0]
+	parentDetails := test.WidgetRenderer(parentItem.(fyne.Widget))
+	text := parentDetails.Objects()[1].(*fynecanvas.Text)
+	assert.Equal(t, "Parent", text.Text)
+
+	test.Tap(parentItem.(fyne.Tappable))
+	assert.NotNil(t, c.menu) // still visible
+
+	childMenu := parentItem.(interface{ Child() *widget.Menu }).Child()
+	assert.NotNil(t, childMenu)
+	assert.True(t, childMenu.Visible())
+	assert.Equal(t, 1, len(childMenu.Items))
+
+	childDetails := test.WidgetRenderer(childMenu.Items[0].(fyne.Widget))
+	text = childDetails.Objects()[1].(*fynecanvas.Text)
+	assert.Equal(t, "One", text.Text)
 }
 
 func dummyWin(d *driver, title string) *window {

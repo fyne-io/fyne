@@ -15,6 +15,13 @@ type ConfirmDialog struct {
 	confirm *widget.Button
 }
 
+// Confirm instructs the dialog to close agreeing with whatever content was displayed.
+//
+// Since: 2.6
+func (d *ConfirmDialog) Confirm() {
+	d.hideWithResponse(true)
+}
+
 // SetConfirmText allows custom text to be set in the confirmation button
 func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.confirm.SetText(label)
@@ -35,10 +42,12 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 	d := newTextDialog(title, message, theme.QuestionIcon(), parent)
 	d.callback = callback
 
-	d.dismiss = &widget.Button{Text: lang.L("No"), Icon: theme.CancelIcon(),
+	d.dismiss = &widget.Button{
+		Text: lang.L("No"), Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	confirm := &widget.Button{Text: lang.L("Yes"), Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+	confirm := &widget.Button{
+		Text: lang.L("Yes"), Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		},

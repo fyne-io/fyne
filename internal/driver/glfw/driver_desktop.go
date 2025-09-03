@@ -8,9 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
-	"sync"
 	"syscall"
-	"time"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
@@ -22,58 +20,55 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
-
 var (
-	systrayIcon fyne.Resource
-	setup       sync.Once
+	systrayIcon    fyne.Resource
+	systrayRunning bool
 )
 
-func goroutineID() (id uint64) {
-	var buf [30]byte
-	runtime.Stack(buf[:], false)
-	for i := 10; buf[i] != ' '; i++ {
-		id = id*10 + uint64(buf[i]&15)
-	}
-	return id
-}
-
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	setup.Do(func() {
-		d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-			if systrayIcon != nil {
-				d.SetSystemTrayIcon(systrayIcon)
-			} else if fyne.CurrentApp().Icon() != nil {
-				d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
-			} else {
-				d.SetSystemTrayIcon(theme.BrokenImageIcon())
-			}
-
-			// Some XDG systray crash without a title (See #3678)
-			if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
-				app := fyne.CurrentApp()
-				title := app.Metadata().Name
-				if title == "" {
-					title = app.UniqueID()
-				}
-
-				systray.SetTitle(title)
-			}
-
-			// it must be refreshed after init, so an earlier call would have been ineffective
-			d.refreshSystray(m)
-		}, func() {
-			// anything required for tear-down
-		})
-
-		// the only way we know the app was asked to quit is if this window is asked to close...
-		w := d.CreateWindow("SystrayMonitor")
-		w.(*window).create()
-		w.SetCloseIntercept(d.Quit)
-		w.SetOnClosed(systray.Quit)
-	})
+	if !systrayRunning {
+		systrayRunning = true
+		d.runSystray(m)
+	}
 
 	d.refreshSystray(m)
+}
+
+func (d *gLDriver) runSystray(m *fyne.Menu) {
+	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
+		if systrayIcon != nil {
+			d.SetSystemTrayIcon(systrayIcon)
+		} else if fyne.CurrentApp().Icon() != nil {
+			d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
+		} else {
+			d.SetSystemTrayIcon(theme.BrokenImageIcon())
+		}
+
+		// Some XDG systray crash without a title (See #3678)
+		if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
+			app := fyne.CurrentApp()
+			title := app.Metadata().Name
+			if title == "" {
+				title = app.UniqueID()
+			}
+
+			systray.SetTitle(title)
+		}
+
+		if m != nil {
+			// it must be refreshed after init, so an earlier call would have been ineffective
+			runOnMain(func() {
+				d.refreshSystray(m)
+			})
+		}
+	}, func() {
+		// anything required for tear-down
+	})
+
+	// the only way we know the app was asked to quit is if this window is asked to close...
+	w := d.CreateWindow("SystrayMonitor")
+	w.(*window).create()
+	w.SetCloseIntercept(d.Quit)
 }
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
@@ -135,17 +130,19 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
-	runOnMain(func() {
-		d.systrayMenu = m
+	d.systrayMenu = m
 
-		systray.ResetMenu()
-		d.refreshSystrayMenu(m, nil)
+	systray.ResetMenu()
+	d.refreshSystrayMenu(m, nil)
 
-		addMissingQuitForMenu(m, d)
-	})
+	addMissingQuitForMenu(m, d)
 }
 
 func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
+	if m == nil {
+		return
+	}
+
 	for _, i := range m.Items {
 		item := itemForMenuItem(i, parent)
 		if item == nil {
@@ -159,7 +156,7 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 		go func() {
 			for range item.ClickedCh {
 				if fn != nil {
-					fn()
+					runOnMain(fn)
 				}
 			}
 		}()
@@ -175,13 +172,26 @@ func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 		return
 	}
 
-	runOnMain(func() {
-		if _, ok := resource.(*theme.ThemedResource); ok {
-			systray.SetTemplateIcon(img, img)
-		} else {
-			systray.SetIcon(img)
-		}
-	})
+	if _, ok := resource.(*theme.ThemedResource); ok {
+		systray.SetTemplateIcon(img, img)
+	} else {
+		systray.SetIcon(img)
+	}
+}
+
+func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
+	if !systrayRunning {
+		systrayRunning = true
+		d.runSystray(nil)
+	}
+
+	w.SetCloseIntercept(w.Hide)
+	glw := w.(*window)
+	if glw.decorate {
+		systray.SetOnTapped(glw.Show)
+	} else {
+		systray.SetOnTapped(glw.toggleVisible)
+	}
 }
 
 func (d *gLDriver) SystemTrayMenu() *fyne.Menu {
@@ -192,12 +202,13 @@ func (d *gLDriver) CurrentKeyModifiers() fyne.KeyModifier {
 	return d.currentKeyModifiers
 }
 
+// this function should be invoked from a goroutine
 func (d *gLDriver) catchTerm() {
 	terminateSignal := make(chan os.Signal, 1)
 	signal.Notify(terminateSignal, syscall.SIGINT, syscall.SIGTERM)
 
 	<-terminateSignal
-	d.Quit()
+	fyne.Do(d.Quit)
 }
 
 func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {

@@ -1,19 +1,10 @@
 package binding
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func syncMapLen(m *sync.Map) (n int) {
-	m.Range(func(_, _ any) bool {
-		n++
-		return true
-	})
-	return
-}
 
 type simpleItem struct {
 	base
@@ -21,16 +12,14 @@ type simpleItem struct {
 
 func TestBase_AddListener(t *testing.T) {
 	data := &simpleItem{}
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, len(data.listeners))
 
 	called := false
 	fn := NewDataListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
-
-	waitForItems()
+	assert.Equal(t, 1, len(data.listeners))
 	assert.True(t, called)
 }
 
@@ -40,13 +29,12 @@ func TestBase_RemoveListener(t *testing.T) {
 		called = true
 	})
 	data := &simpleItem{}
-	data.listeners.Store(fn, true)
+	data.listeners = append(data.listeners, fn)
 
-	assert.Equal(t, 1, syncMapLen(&data.listeners))
+	assert.Equal(t, 1, len(data.listeners))
 	data.RemoveListener(fn)
-	assert.Equal(t, 0, syncMapLen(&data.listeners))
+	assert.Equal(t, 0, len(data.listeners))
 
-	waitForItems()
 	data.trigger()
 	assert.False(t, called)
 }
@@ -57,7 +45,6 @@ func TestNewDataItemListener(t *testing.T) {
 		called = true
 	})
 
-	waitForItems()
 	fn.DataChanged()
 	assert.True(t, called)
 }
@@ -69,4 +56,17 @@ func TestBindAnyWithNil(t *testing.T) {
 	a.Set(b)
 	var tr any = nil
 	a.Set(tr)
+
+	a.Set(0)
+
+	ival, err := a.Get()
+	assert.NoError(t, err)
+	val, ok := ival.(int)
+	assert.Equal(t, 0, val)
+	assert.True(t, ok)
+
+	a.Set(nil)
+	ival, err = a.Get()
+	assert.NoError(t, err)
+	assert.Equal(t, nil, ival)
 }

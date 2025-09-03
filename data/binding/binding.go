@@ -1,6 +1,7 @@
 //go:generate go run gen.go
 
 // Package binding provides support for binding data to widgets.
+// All APIs in the binding package are safe to invoke directly from any goroutine.
 package binding
 
 import (
@@ -21,12 +22,13 @@ var (
 )
 
 // DataItem is the base interface for all bindable data items.
+// All APIs on bindable data items are safe to invoke directly fron any goroutine.
 //
 // Since: 2.0
 type DataItem interface {
 	// AddListener attaches a new change listener to this DataItem.
 	// Listeners are called each time the data inside this DataItem changes.
-	// Additionally the listener will be triggered upon successful connection to get the current value.
+	// Additionally, the listener will be triggered upon successful connection to get the current value.
 	AddListener(DataListener)
 	// RemoveListener will detach the specified change listener from the DataItem.
 	// Disconnected listener will no longer be triggered when changes occur.
@@ -57,84 +59,61 @@ func (l *listener) DataChanged() {
 }
 
 type base struct {
-	listeners sync.Map // map[DataListener]bool
+	listeners []DataListener
 
 	lock sync.RWMutex
 }
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataListener) {
-	b.listeners.Store(l, true)
-	queueItem(l.DataChanged)
+	fyne.Do(func() {
+		b.listeners = append(b.listeners, l)
+		l.DataChanged()
+	})
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataListener) {
-	b.listeners.Delete(l)
-}
-
-func (b *base) trigger() {
-	b.listeners.Range(func(key, _ any) bool {
-		queueItem(key.(DataListener).DataChanged)
-		return true
+	fyne.Do(func() {
+		for i, listener := range b.listeners {
+			if listener == l {
+				// Delete without preserving order:
+				lastIndex := len(b.listeners) - 1
+				b.listeners[i] = b.listeners[lastIndex]
+				b.listeners[lastIndex] = nil
+				b.listeners = b.listeners[:lastIndex]
+				return
+			}
+		}
 	})
 }
 
-// Untyped supports binding a any value.
+func (b *base) trigger() {
+	fyne.Do(b.triggerFromMain)
+}
+
+func (b *base) triggerFromMain() {
+	for _, listen := range b.listeners {
+		listen.DataChanged()
+	}
+}
+
+// Untyped supports binding an any value.
 //
 // Since: 2.1
-type Untyped interface {
-	DataItem
-	Get() (any, error)
-	Set(any) error
-}
+type Untyped = Item[any]
 
 // NewUntyped returns a bindable any value that is managed internally.
 //
 // Since: 2.1
 func NewUntyped() Untyped {
-	var blank any = nil
-	v := &blank
-	return &boundUntyped{val: reflect.ValueOf(v).Elem()}
-}
-
-type boundUntyped struct {
-	base
-
-	val reflect.Value
-}
-
-func (b *boundUntyped) Get() (any, error) {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-
-	return b.val.Interface(), nil
-}
-
-func (b *boundUntyped) Set(val any) error {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	if b.val.Interface() == val {
-		return nil
-	}
-	if val == nil {
-		zeroValue := reflect.Zero(b.val.Type())
-		b.val.Set(zeroValue)
-	} else {
-		b.val.Set(reflect.ValueOf(val))
-	}
-
-	b.trigger()
-	return nil
+	return NewItem(func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // ExternalUntyped supports binding a any value to an external value.
 //
 // Since: 2.1
-type ExternalUntyped interface {
-	Untyped
-	Reload() error
-}
+type ExternalUntyped = ExternalItem[any]
 
 // BindUntyped returns a bindable any value that is bound to an external type.
 // The parameter must be a pointer to the type you wish to bind.
@@ -148,8 +127,7 @@ func BindUntyped(v any) ExternalUntyped {
 	}
 
 	if v == nil {
-		var blank any
-		v = &blank // never allow a nil value pointer
+		v = new(any) // never allow a nil value pointer
 	}
 
 	b := &boundExternalUntyped{}
@@ -159,19 +137,28 @@ func BindUntyped(v any) ExternalUntyped {
 }
 
 type boundExternalUntyped struct {
-	boundUntyped
+	base
 
+	val reflect.Value
 	old any
+}
+
+func (b *boundExternalUntyped) Get() (any, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	return b.val.Interface(), nil
 }
 
 func (b *boundExternalUntyped) Set(val any) error {
 	b.lock.Lock()
-	defer b.lock.Unlock()
 	if b.old == val {
+		b.lock.Unlock()
 		return nil
 	}
 	b.val.Set(reflect.ValueOf(val))
 	b.old = val
+	b.lock.Unlock()
 
 	b.trigger()
 	return nil

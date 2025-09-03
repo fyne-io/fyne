@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/srwiley/oksvg"
+	"github.com/fyne-io/oksvg"
 	"github.com/srwiley/rasterx"
 
 	"fyne.io/fyne/v2"
@@ -21,23 +21,20 @@ import (
 )
 
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
-func Colorize(src []byte, clr color.Color) []byte {
+func Colorize(src []byte, clr color.Color) ([]byte, error) {
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {
-		fyne.LogError("could not load SVG, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not load SVG, falling back to static content: %v", err)
 	}
 	if err := s.replaceFillColor(clr); err != nil {
-		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not replace fill color, falling back to static content: %v", err)
 	}
 	colorized, err := xml.Marshal(s)
 	if err != nil {
-		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return src
+		return src, fmt.Errorf("could not marshal svg, falling back to static content: %v", err)
 	}
-	return colorized
+	return colorized, nil
 }
 
 type Decoder struct {
@@ -80,7 +77,8 @@ func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
 		imgH = int(float32(width) / config.Aspect)
 	}
 
-	d.icon.SetTarget(0, 0, float64(imgW), float64(imgH))
+	x, y := svgOffset(d.icon, imgW, imgH)
+	d.icon.SetTarget(x, y, float64(imgW), float64(imgH))
 
 	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
 	scanner := rasterx.NewScannerGV(config.Width, config.Height, img, img.Bounds())
@@ -115,12 +113,20 @@ func IsResourceSVG(res fyne.Resource) bool {
 	return false
 }
 
+func svgOffset(icon *oksvg.SvgIcon, _, height int) (x, y float64) {
+	if icon.ViewBox.Y < 0 { // adjust so our positive offset calculations work
+		y = icon.ViewBox.Y + (-icon.ViewBox.Y/icon.ViewBox.H)*float64(height)
+	}
+
+	return 0, y
+}
+
 // svg holds the unmarshaled XML from a Scalable Vector Graphic
 type svg struct {
 	XMLName  xml.Name      `xml:"svg"`
 	XMLNS    string        `xml:"xmlns,attr"`
-	Width    string        `xml:"width,attr"`
-	Height   string        `xml:"height,attr"`
+	Width    string        `xml:"width,attr,omitempty"`
+	Height   string        `xml:"height,attr,omitempty"`
 	ViewBox  string        `xml:"viewBox,attr,omitempty"`
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
@@ -140,6 +146,7 @@ type pathObj struct {
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
 	D               string   `xml:"d,attr"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type rectObj struct {
@@ -155,6 +162,7 @@ type rectObj struct {
 	Y               string   `xml:"y,attr,omitempty"`
 	Width           string   `xml:"width,attr,omitempty"`
 	Height          string   `xml:"height,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type circleObj struct {
@@ -169,6 +177,7 @@ type circleObj struct {
 	CX              string   `xml:"cx,attr,omitempty"`
 	CY              string   `xml:"cy,attr,omitempty"`
 	R               string   `xml:"r,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type ellipseObj struct {
@@ -184,6 +193,7 @@ type ellipseObj struct {
 	CY              string   `xml:"cy,attr,omitempty"`
 	RX              string   `xml:"rx,attr,omitempty"`
 	RY              string   `xml:"ry,attr,omitempty"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type polygonObj struct {
@@ -196,6 +206,7 @@ type polygonObj struct {
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
 	Points          string   `xml:"points,attr"`
+	Transform       string   `xml:"transform,attr,omitempty"`
 }
 
 type objGroup struct {
@@ -207,6 +218,7 @@ type objGroup struct {
 	StrokeLineCap   string        `xml:"stroke-linecap,attr,omitempty"`
 	StrokeLineJoin  string        `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string        `xml:"stroke-dasharray,attr,omitempty"`
+	Transform       string        `xml:"transform,attr,omitempty"`
 	Paths           []*pathObj    `xml:"path"`
 	Circles         []*circleObj  `xml:"circle"`
 	Ellipses        []*ellipseObj `xml:"ellipse"`
@@ -302,7 +314,7 @@ func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
 	r, g, b, a := col.ToNRGBA(color)
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
-	return
+	return hexStr, aStr
 }
 
 func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {

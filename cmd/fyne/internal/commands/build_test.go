@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +11,11 @@ import (
 )
 
 func Test_BuildWasmVersion(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// err := b.build()
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -35,6 +42,11 @@ func Test_BuildWasmVersion(t *testing.T) {
 }
 
 func Test_BuildWasmReleaseVersion(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// err := b.build()
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -63,6 +75,11 @@ func Test_BuildWasmReleaseVersion(t *testing.T) {
 }
 
 func Test_BuildLinuxReleaseVersion(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// err := b.build()
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	relativePath := "." + string(os.PathSeparator) + filepath.Join("cmd", "terminal")
 
 	expected := []mockRunner{
@@ -170,4 +187,5 @@ func Test_NormaliseVersion(t *testing.T) {
 	assert.Equal(t, "2.3.0.0", normaliseVersion("v2.3"))
 	assert.Equal(t, "2.4.0.0", normaliseVersion("v2.4.0"))
 	assert.Equal(t, "2.3.6.0-dev", normaliseVersion("v2.3.6-0.20230711180435-d4b95e1cb1eb"))
+	assert.Equal(t, "2.4.1.0-dev", normaliseVersion("v2.4.1-rc7.0.20230711180435-d4b95e1cb1eb"))
 }

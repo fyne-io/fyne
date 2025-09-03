@@ -16,8 +16,8 @@ func TestRectangle_MinSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	min := rect.MinSize()
 
-	assert.True(t, min.Width > 0)
-	assert.True(t, min.Height > 0)
+	assert.Positive(t, min.Width)
+	assert.Positive(t, min.Height)
 }
 
 func TestRectangle_FillColor(t *testing.T) {
@@ -32,7 +32,8 @@ func TestRectangle_Radius(t *testing.T) {
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
-		CornerRadius: 12}
+		CornerRadius: 12,
+	}
 
 	rect.Resize(fyne.NewSize(50, 50))
 	test.AssertObjectRendersToMarkup(t, "rounded_rect.xml", rect)
@@ -44,4 +45,37 @@ func TestRectangle_Radius(t *testing.T) {
 
 	rect.StrokeWidth = 0
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
+
+	rect.Aspect = 2.0
+	test.AssertRendersToImage(t, "rounded_rect_aspect.png", c)
+}
+
+func TestRectangle_PerCornerRadius(t *testing.T) {
+	rect := &canvas.Rectangle{
+		FillColor:               color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor:             color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+		StrokeWidth:             2.0,
+		CornerRadius:            12,
+		TopRightCornerRadius:    2,
+		TopLeftCornerRadius:     8,
+		BottomLeftCornerRadius:  14,
+		BottomRightCornerRadius: 20,
+	}
+
+	rect.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "rounded_per_corner_rect.xml", rect)
+
+	c := software.NewCanvas()
+	c.SetContent(rect)
+	c.Resize(fyne.NewSize(60, 60))
+	test.AssertRendersToImage(t, "rounded_per_corner_rect_stroke.png", c)
+
+	rect.StrokeWidth = 0
+	rect.BottomLeftCornerRadius = 0
+	rect.TopRightCornerRadius = 0
+	test.AssertRendersToImage(t, "rounded_per_corner_rect.png", c)
+
+	rect.Aspect = 2.0
+	rect.CornerRadius = 0
+	test.AssertRendersToImage(t, "rounded_per_corner_rect_aspect.png", c)
 }

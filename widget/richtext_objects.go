@@ -126,7 +126,7 @@ func (h *HyperlinkSegment) Textual() string {
 	return h.Text
 }
 
-// Visual returns the hyperlink widget required to render this segment.
+// Visual returns a new instance of a hyperlink widget required to render this segment.
 func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 	link := NewHyperlink(h.Text, h.URL)
 	link.Alignment = h.Alignment
@@ -182,7 +182,7 @@ func (i *ImageSegment) Textual() string {
 	return "Image " + i.Title
 }
 
-// Visual returns the image widget required to render this segment.
+// Visual returns a new instance of an image widget required to render this segment.
 func (i *ImageSegment) Visual() fyne.CanvasObject {
 	return newRichImage(i.Source, i.Alignment)
 }
@@ -222,6 +222,29 @@ func (i *ImageSegment) Unselect() {
 type ListSegment struct {
 	Items   []RichTextSegment
 	Ordered bool
+
+	// startIndex is the starting number - 1 (If it is ordered). Unordered lists
+	// ignore startIndex.
+	//
+	// startIndex is set to start - 1 to allow the empty value of ListSegment to have a starting
+	// number of 1, while also allowing the caller to override the starting
+	// number to any int, including 0.
+	startIndex int
+}
+
+// SetStartNumber sets the starting number for an ordered list.
+// Unordered lists are not affected.
+//
+// Since: 2.7
+func (l *ListSegment) SetStartNumber(s int) {
+	l.startIndex = s - 1
+}
+
+// StartNumber return the starting number for an ordered list.
+//
+// Since: 2.7
+func (l *ListSegment) StartNumber() int {
+	return l.startIndex + 1
 }
 
 // Inline returns false as a list should be in a block.
@@ -235,7 +258,7 @@ func (l *ListSegment) Segments() []RichTextSegment {
 	for i, in := range l.Items {
 		txt := "• "
 		if l.Ordered {
-			txt = strconv.Itoa(i+1) + "."
+			txt = strconv.Itoa(i+l.startIndex+1) + "."
 		}
 		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
 		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
@@ -256,7 +279,7 @@ func (l *ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a list visual.
+// Update doesn't need to change a list visual.
 func (l *ListSegment) Update(fyne.CanvasObject) {
 }
 
@@ -301,7 +324,7 @@ func (p *ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
-// Update doesnt need to change a paragraph container.
+// Update doesn't need to change a paragraph container.
 func (p *ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
@@ -335,12 +358,12 @@ func (s *SeparatorSegment) Textual() string {
 	return ""
 }
 
-// Visual returns the separator element for this segment.
+// Visual returns a new instance of a separator widget for this segment.
 func (s *SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
-// Update doesnt need to change a separator visual.
+// Update doesn't need to change a separator visual.
 func (s *SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
@@ -364,7 +387,7 @@ type RichTextStyle struct {
 	Alignment fyne.TextAlign
 	ColorName fyne.ThemeColorName
 	Inline    bool
-	SizeName  fyne.ThemeSizeName
+	SizeName  fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
 	TextStyle fyne.TextStyle
 
 	// an internal detail where we obscure password fields
@@ -405,7 +428,7 @@ func (t *TextSegment) Textual() string {
 	return t.Text
 }
 
-// Visual returns the graphical elements required to render this segment.
+// Visual returns a new instance of a graphical element required to render this segment.
 func (t *TextSegment) Visual() fyne.CanvasObject {
 	obj := canvas.NewText(t.Text, t.color())
 

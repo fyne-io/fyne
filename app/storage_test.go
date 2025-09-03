@@ -12,9 +12,9 @@ func TestStore_RootURI(t *testing.T) {
 	d := makeStoreDocs(id, &store{a: a})
 
 	w, err := d.Create("test")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	err = w.Close()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	err = d.Remove("test")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

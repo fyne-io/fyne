@@ -12,10 +12,6 @@ func TestPool(t *testing.T) {
 	item := pool.Get()
 	assert.Equal(t, 0, item)
 
-	item = 5
-	pool.Put(item)
-	assert.Equal(t, item, pool.Get())
-
 	pool.New = func() int {
 		return -1
 	}

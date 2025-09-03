@@ -94,9 +94,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	th := b.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	b.propertyLock.RLock()
-	defer b.propertyLock.RUnlock()
-
 	seg := &TextSegment{Text: b.Text, Style: RichTextStyleStrong}
 	seg.Style.Alignment = fyne.TextAlignCenter
 	text := NewRichText(seg)
@@ -166,18 +163,14 @@ func (b *Button) MouseOut() {
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
-	b.propertyLock.Lock()
 	b.Icon = icon
-	b.propertyLock.Unlock()
 
 	b.Refresh()
 }
 
 // SetText allows the button label to be changed
 func (b *Button) SetText(text string) {
-	b.propertyLock.Lock()
 	b.Text = text
-	b.propertyLock.Unlock()
 
 	b.Refresh()
 }
@@ -189,7 +182,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 
 	b.tapAnimation()
-	b.Refresh()
 
 	if onTapped := b.OnTapped; onTapped != nil {
 		onTapped()
@@ -245,9 +237,6 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 	iconSize := fyne.NewSquareSize(th.Size(theme.SizeNameInlineIcon))
 	labelSize := r.label.MinSize()
 
-	r.button.propertyLock.RLock()
-	defer r.button.propertyLock.RUnlock()
-
 	if hasLabel {
 		if hasIcon {
 			// Both
@@ -296,18 +285,16 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 	}
 	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
 	size = size.Add(r.padding(th))
-	return
+	return size
 }
 
 func (r *buttonRenderer) Refresh() {
 	th := r.button.Theme()
 	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
-	r.button.propertyLock.RLock()
 	r.label.Segments[0].(*TextSegment).Text = r.button.Text
 	r.updateIconAndText()
 	r.applyTheme()
-	r.button.propertyLock.RUnlock()
 
 	r.background.Refresh()
 	r.Layout(r.button.Size())
@@ -317,7 +304,7 @@ func (r *buttonRenderer) Refresh() {
 // applyTheme updates this button to match the current theme
 // must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
-	th := r.button.themeWithLock()
+	th := r.button.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {
@@ -337,7 +324,7 @@ func (r *buttonRenderer) applyTheme() {
 	r.label.Refresh()
 	if r.icon != nil && r.icon.Resource != nil {
 		icon := r.icon.Resource
-		if r.button.Importance != MediumImportance {
+		if r.button.Importance != MediumImportance && r.button.Importance != LowImportance {
 			if thRes, ok := icon.(fyne.ThemedResource); ok {
 				if thRes.ThemeColorName() != fgColorName {
 					icon = theme.NewColoredResource(icon, fgColorName)
@@ -384,7 +371,7 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 			background = theme.ColorNameButton
 		}
 	}
-	return
+	return foreground, background, backgroundBlend
 }
 
 func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
@@ -428,7 +415,7 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 	case ButtonAlignTrailing:
 		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
 	}
-	return
+	return pos
 }
 
 func blendColor(under, over color.Color) color.Color {
@@ -445,7 +432,6 @@ func blendColor(under, over color.Color) color.Color {
 	outB := srcB + uint32(float32(dstB)*(1-srcAlpha))
 	// We create an RGBA64 here because the color components are already alpha-premultiplied 16-bit values (they're just stored in uint32s).
 	return color.RGBA64{R: uint16(outR), G: uint16(outG), B: uint16(outB), A: uint16(outAlpha * 0xFFFF)}
-
 }
 
 func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *fyne.Animation {

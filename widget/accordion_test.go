@@ -17,18 +17,18 @@ func TestAccordion(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	t.Run("Initializer", func(t *testing.T) {
 		ac := &widget.Accordion{Items: []*widget.AccordionItem{ai}}
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Len(t, ac.Items, 1)
 	})
 	t.Run("Constructor", func(t *testing.T) {
 		ac := widget.NewAccordion(ai)
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Len(t, ac.Items, 1)
 	})
 }
 
 func TestAccordion_Append(t *testing.T) {
 	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-	assert.Equal(t, 1, len(ac.Items))
+	assert.Len(t, ac.Items, 1)
 }
 
 func TestAccordion_ChangeTheme(t *testing.T) {
@@ -520,8 +520,8 @@ func TestAccordion_OpenAll(t *testing.T) {
 	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
 
 	ac.OpenAll()
-	// Cannot open all items if !accordion.MultiOpen
-	assert.False(t, ac.Items[0].Open)
+	// Can only open first item if !accordion.MultiOpen
+	assert.True(t, ac.Items[0].Open)
 	assert.False(t, ac.Items[1].Open)
 	assert.False(t, ac.Items[2].Open)
 
@@ -533,11 +533,20 @@ func TestAccordion_OpenAll(t *testing.T) {
 	assert.True(t, ac.Items[2].Open)
 }
 
+func TestAccordion_Prepend(t *testing.T) {
+	ac := widget.NewAccordion(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+	assert.Len(t, ac.Items, 1)
+
+	ac.Prepend(widget.NewAccordionItem("bar", widget.NewLabel("more bar")))
+	assert.Len(t, ac.Items, 2)
+	assert.Equal(t, "bar", ac.Items[0].Title)
+}
+
 func TestAccordion_Remove(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	ac := widget.NewAccordion(ai)
 	ac.Remove(ai)
-	assert.Equal(t, 0, len(ac.Items))
+	assert.Empty(t, ac.Items)
 }
 
 func TestAccordion_RemoveIndex(t *testing.T) {
@@ -553,7 +562,7 @@ func TestAccordion_RemoveIndex(t *testing.T) {
 			ac := widget.NewAccordion()
 			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 			ac.RemoveIndex(tt.index)
-			assert.Equal(t, tt.length, len(ac.Items))
+			assert.Len(t, ac.Items, tt.length)
 		})
 	}
 }

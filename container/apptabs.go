@@ -37,9 +37,8 @@ type AppTabs struct {
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{}
+	tabs := &AppTabs{Items: items}
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
-	tabs.SetItems(items)
 	return tabs
 }
 
@@ -89,7 +88,7 @@ func (t *AppTabs) CurrentTab() *TabItem {
 //
 // Deprecated: Use `AppTabs.SelectedIndex() int` instead.
 func (t *AppTabs) CurrentTabIndex() int {
-	return t.current
+	return t.SelectedIndex()
 }
 
 // DisableIndex disables the TabItem at the specified index.
@@ -161,13 +160,11 @@ func (t *AppTabs) RemoveIndex(index int) {
 // Select sets the specified TabItem to be selected and its content visible.
 func (t *AppTabs) Select(item *TabItem) {
 	selectItem(t, item)
-	t.Refresh()
 }
 
 // SelectIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *AppTabs) SelectIndex(index int) {
 	selectIndex(t, index)
-	t.Refresh()
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
@@ -204,7 +201,7 @@ func (t *AppTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *AppTabs) SelectedIndex() int {
-	return t.current
+	return t.selected()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -247,6 +244,9 @@ func (t *AppTabs) items() []*TabItem {
 }
 
 func (t *AppTabs) selected() int {
+	if len(t.Items) == 0 {
+		return -1
+	}
 	return t.current
 }
 
@@ -383,6 +383,9 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 				onTapped: func() { r.appTabs.Select(item) },
 				tabs:     r.tabs,
 			}
+			if item.disabled {
+				item.button.Disable()
+			}
 		}
 		button := item.button
 		button.icon = item.Icon
@@ -401,7 +404,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 }
 
 func (r *appTabsRenderer) updateIndicator(animate bool) {
-	if r.appTabs.current < 0 {
+	if len(r.appTabs.Items) == 0 || r.appTabs.current < 0 {
 		r.indicator.Hide()
 		return
 	}

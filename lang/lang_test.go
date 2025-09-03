@@ -3,24 +3,28 @@ package lang
 import (
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"fyne.io/fyne/v2"
 )
 
 func TestAddTranslations(t *testing.T) {
-	setupLang("en")
 	err := AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
-  "Test": "Match"
-}`)))
-	assert.Nil(t, err)
-	assert.Equal(t, "Match", L("Test"))
+		"Test": "Match"
+	}`)))
+	if assert.NoError(t, err) {
+		setupLang("en")
+		assert.Equal(t, "Match", L("Test"))
+	}
 
 	err = AddTranslationsForLocale([]byte(`{
-  "Test2": "Match2"
-}`), "fr")
-	setupLang("fr")
-	assert.Nil(t, err)
-	assert.Equal(t, "Match2", L("Test2"))
+		"Test2": "Match2"
+	}`), "fr")
+	if assert.NoError(t, err) {
+		setupLang("fr")
+		assert.Equal(t, "Match2", L("Test2"))
+	}
 }
 
 func TestLocalize_Default(t *testing.T) {
@@ -45,12 +49,12 @@ func TestLocalize_Map(t *testing.T) {
 }
 
 func TestLocalizePlural_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
-  "Apple": {
-    "one": "Apple",
-    "other": "Apples"
-  }
-}`)))
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+		"Apple": {
+			"one": "Apple",
+			"other": "Apples"
+		}
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Missing", N("Missing", 1))
@@ -59,9 +63,9 @@ func TestLocalizePlural_Fallback(t *testing.T) {
 }
 
 func TestLocalizeKey_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
-  "appleID": "Apple Matched"
-}`)))
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+		"appleID": "Apple Matched"
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Apple", X("appleIDMissing", "Apple"))
@@ -69,15 +73,21 @@ func TestLocalizeKey_Fallback(t *testing.T) {
 }
 
 func TestLocalizePluralKey_Fallback(t *testing.T) {
-	_ = AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
-  "appleID": {
-    "one": "Apple",
-    "other": "Apples"
-  }
-}`)))
+	require.NoError(t, AddTranslations(fyne.NewStaticResource("en.json", []byte(`{
+		"appleID": {
+			"one": "Apple",
+			"other": "Apples"
+		}
+	}`))))
 
 	setupLang("en")
 	assert.Equal(t, "Missing", XN("appleIDMissing", "Missing", 1))
 	assert.Equal(t, "Apple", XN("appleID", "Apple", 1))
 	assert.Equal(t, "Apples", XN("appleID", "Apple", 2))
+}
+
+func TestLoadBuiltInTranslations(t *testing.T) {
+	assert.NoError(t, AddTranslationsFS(translations, "translations"))
+	setupLang("en")
+	assert.Equal(t, "OK", X("OK", "FAIL"))
 }

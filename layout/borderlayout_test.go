@@ -22,7 +22,7 @@ func TestNewBorderContainer(t *testing.T) {
 	middle := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	c := container.NewBorder(top, nil, nil, right, middle)
-	assert.Equal(t, 3, len(c.Objects))
+	assert.Len(t, c.Objects, 3)
 
 	c.Resize(fyne.NewSize(100, 100))
 	assert.Equal(t, float32(0), top.Position().X)

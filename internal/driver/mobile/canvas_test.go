@@ -12,6 +12,8 @@ import (
 	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/driver/common"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -19,12 +21,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var d *driver
+
 func TestMain(m *testing.M) {
 	currentApp := fyne.CurrentApp()
-	fyne.SetCurrentApp(newTestMobileApp())
-	ret := m.Run()
-	fyne.SetCurrentApp(currentApp)
-	os.Exit(ret)
+	tester := newTestMobileApp()
+	d = tester.Driver().(*driver)
+	d.queuedFuncs = async.NewUnboundedChan[func()]()
+	fyne.SetCurrentApp(tester)
+
+	waitForStart := make(chan struct{})
+	go func() {
+		// Wait for app loop to be running (plus a moment in case of scheduling switches).
+		<-waitForStart
+
+		// Just like the GLFW tests, wait a short while for the driver to start
+		time.Sleep(time.Millisecond * 100)
+
+		ret := m.Run()
+		fyne.SetCurrentApp(currentApp)
+		os.Exit(ret)
+	}()
+
+	close(waitForStart) // Signal that execution can continue.
+	tester.Run()
 }
 
 func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
@@ -117,38 +137,47 @@ func Test_canvas_Focusable(t *testing.T) {
 	content.Resize(fyne.NewSize(25, 25))
 
 	pos := fyne.NewPos(10, 10)
-	c.tapDown(pos, 0)
-	c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	d.DoFromGoroutine(func() {
+		c.tapDown(pos, 0)
+		c.tapUp(pos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+			wid.Tapped(ev)
+		}, nil, nil, nil)
+	}, true)
 
-	c.tapDown(pos, 1)
-	c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		wid.Tapped(ev)
-	}, nil, nil, nil)
-	time.Sleep(tapDoubleDelay + 150*time.Millisecond)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 0, content.unfocusedTimes)
+	d.DoFromGoroutine(func() {
+		c.tapDown(pos, 1)
+		c.tapUp(pos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+			wid.Tapped(ev)
+		}, nil, nil, nil)
+	}, true)
+	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
+	})
 
-	c.Unfocus()
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+	d.DoFromGoroutine(func() {
+		c.Focus(content)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 0, content.unfocusedTimes)
 
-	content.Disable()
-	c.Focus(content)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+		c.Unfocus()
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
 
-	c.tapDown(fyne.NewPos(10, 10), 2)
-	assert.Equal(t, 1, content.focusedTimes)
-	assert.Equal(t, 1, content.unfocusedTimes)
+		content.Disable()
+		c.Focus(content)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+
+		c.tapDown(fyne.NewPos(10, 10), 2)
+		assert.Equal(t, 1, content.focusedTimes)
+		assert.Equal(t, 1, content.unfocusedTimes)
+	}, true)
 }
 
 func Test_canvas_InteractiveArea(t *testing.T) {
@@ -314,13 +343,15 @@ func Test_canvas_TappedAndDoubleTapped(t *testing.T) {
 	c.Resize(fyne.NewSize(36, 24))
 
 	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 1, tapped)
+	waitAndCheck(700, func() {
+		assert.Equal(t, 1, tapped)
+	})
 
 	simulateTap(c)
 	simulateTap(c)
-	time.Sleep(700 * time.Millisecond)
-	assert.Equal(t, 2, tapped)
+	waitAndCheck(700, func() {
+		assert.Equal(t, 2, tapped)
+	})
 }
 
 func Test_canvas_TappedMulti(t *testing.T) {
@@ -477,9 +508,35 @@ func (a *mobileApp) Driver() fyne.Driver {
 	return a.driver
 }
 
+func (a *mobileApp) Run() {
+	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
+	// TODO replace with a full mobileApp.Run() once that is resolved
+	async.SetMainGoroutine()
+
+	for fn := range d.queuedFuncs.Out() {
+		fn()
+	}
+}
+
 func newTestMobileApp() fyne.App {
 	return &mobileApp{
 		App:    fyne.CurrentApp(),
 		driver: NewGoMobileDriver(),
 	}
+}
+
+func waitAndCheck(msWait time.Duration, fn func()) {
+	waitForCheck := common.DonePool.Get()
+
+	go func() {
+		defer common.DonePool.Put(waitForCheck)
+
+		time.Sleep(msWait * time.Millisecond)
+		d.DoFromGoroutine(func() {
+			fn()
+
+			waitForCheck <- struct{}{}
+		}, true)
+	}()
+	<-waitForCheck
 }

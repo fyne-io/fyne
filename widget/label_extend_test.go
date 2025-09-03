@@ -24,7 +24,7 @@ func TestLabel_Extended_SetText(t *testing.T) {
 	label := newExtendedLabel("Start")
 	rich := cache.Renderer(label).Objects()[0].(*RichText)
 	objs := cache.Renderer(rich).Objects()
-	assert.Equal(t, 1, len(objs))
+	assert.Len(t, objs, 1)
 	assert.Equal(t, "Start", objs[0].(*canvas.Text).Text)
 
 	label.SetText("Replace")

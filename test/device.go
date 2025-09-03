@@ -6,8 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-type device struct {
-}
+type device struct{}
 
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)

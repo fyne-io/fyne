@@ -64,6 +64,8 @@ type App interface {
 	Lifecycle() Lifecycle
 
 	// Metadata returns the application metadata that was set at compile time.
+	// The items of metadata are available after "fyne package" or when running "go run"
+	// Building with "go build" may cause this to be unavailable.
 	//
 	// Since: 2.2
 	Metadata() AppMetadata
@@ -118,11 +120,14 @@ type AppMetadata struct {
 	// Icon contains, if present, a resource of the icon that was bundled at build time.
 	Icon Resource
 	// Release if true this binary was build in release mode
-	// Since 2.3
+	// Since: 2.3
 	Release bool
 	// Custom contain the custom metadata defined either in FyneApp.toml or on the compile command line
-	// Since 2.3
+	// Since: 2.3
 	Custom map[string]string
+	// Migrations allows an app to opt into features before they are standard
+	// Since: 2.6
+	Migrations map[string]bool
 }
 
 // Lifecycle represents the various phases that an app can transition through.

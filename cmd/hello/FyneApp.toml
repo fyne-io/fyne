@@ -2,5 +2,8 @@
   Icon = "../../theme/icons/fyne.png"
   Name = "Fyne Hello"
   ID = "io.fyne.hello"
-  Version = "2.4.0"
-  Build = 2
+  Version = "2.6.0"
+  Build = 16
+
+[Migrations]
+  fyneDo = true

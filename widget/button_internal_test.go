@@ -111,7 +111,6 @@ func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 	button.Disable()
 	searchBaseName := strings.TrimPrefix(theme.SearchIcon().Name(), "foreground_")
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
-
 }
 
 func TestButton_DisabledIconChangedDirectly(t *testing.T) {
@@ -134,7 +133,6 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button.Disable()
 	searchBaseName := strings.TrimPrefix(theme.SearchIcon().Name(), "foreground_")
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
-
 }
 
 func TestButton_Focus(t *testing.T) {
@@ -146,13 +144,13 @@ func TestButton_Focus(t *testing.T) {
 	render.applyTheme()
 	assert.Equal(t, theme.Color(theme.ColorNameButton), render.background.FillColor)
 
-	assert.Equal(t, false, tapped)
+	assert.False(t, tapped)
 	button.FocusGained()
 	render.Refresh() // force update without waiting
 
 	assert.Equal(t, blendColor(theme.Color(theme.ColorNameButton), theme.Color(theme.ColorNameFocus)), render.background.FillColor)
 	button.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
-	assert.Equal(t, true, tapped)
+	assert.True(t, tapped)
 
 	button.FocusLost()
 	render.applyTheme()
@@ -164,7 +162,7 @@ func TestButtonRenderer_Layout(t *testing.T) {
 	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 	render.Layout(render.MinSize())
 
-	assert.True(t, render.icon.Position().X < render.label.Position().X)
+	assert.Less(t, render.icon.Position().X, render.label.Position().X)
 	assert.Equal(t, theme.InnerPadding(), render.icon.Position().X)
 	assert.Equal(t, theme.InnerPadding(), render.MinSize().Width-render.label.Position().X-render.label.Size().Width)
 }

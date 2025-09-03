@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"testing"
 
+	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -12,11 +13,11 @@ import (
 
 func Test_canvas_Capture(t *testing.T) {
 	c := NewCanvas()
-	c.Size()
+	c.Resize(fyne.NewSquareSize(100))
 
 	img := c.Capture()
-	assert.True(t, img.Bounds().Size().X > 0)
-	assert.True(t, img.Bounds().Size().Y > 0)
+	assert.Positive(t, img.Bounds().Size().X)
+	assert.Positive(t, img.Bounds().Size().Y)
 
 	r1, g1, b1, a1 := theme.Color(theme.ColorNameBackground).RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()
@@ -46,11 +47,11 @@ func Test_canvas_PixelCoordinateAtPosition(t *testing.T) {
 
 func Test_canvas_TransparentCapture(t *testing.T) {
 	c := NewTransparentCanvasWithPainter(nil)
-	c.Size()
+	c.Resize(fyne.NewSquareSize(10))
 
 	img := c.Capture()
-	assert.True(t, img.Bounds().Size().X > 0)
-	assert.True(t, img.Bounds().Size().Y > 0)
+	assert.Positive(t, img.Bounds().Size().X)
+	assert.Positive(t, img.Bounds().Size().Y)
 
 	r1, g1, b1, a1 := color.Transparent.RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()
@@ -58,4 +59,22 @@ func Test_canvas_TransparentCapture(t *testing.T) {
 	assert.Equal(t, g1, g2)
 	assert.Equal(t, b1, b2)
 	assert.Equal(t, a1, a2)
+}
+
+func Test_canvas_Resize(t *testing.T) {
+	c := NewCanvas()
+	assert.Equal(t, float32(100), c.Size().Width) // backwards compatible
+
+	smallSize := fyne.NewSize(10, 5)
+	c.Resize(smallSize)
+	c.SetContent(widget.NewLabel("Bigger"))
+	assert.NotEqual(t, float32(100), c.Size().Width) // backwards compatible
+	assert.Greater(t, c.Size().Width, smallSize.Width)
+	assert.Greater(t, c.Size().Height, smallSize.Height)
+
+	c = NewCanvas()
+	largeSize := fyne.NewSize(100, 75)
+	c.Resize(largeSize)
+	c.SetContent(widget.NewLabel("Smaller"))
+	assert.Equal(t, largeSize, c.Size())
 }

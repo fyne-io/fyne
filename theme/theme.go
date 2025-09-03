@@ -2,11 +2,14 @@
 package theme // import "fyne.io/fyne/v2/theme"
 
 import (
+	"bytes"
 	"image/color"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	internalApp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
@@ -24,7 +27,7 @@ const (
 	VariantLight = internaltheme.VariantLight
 )
 
-var defaultTheme fyne.Theme
+var defaultTheme, systemTheme fyne.Theme
 
 // DarkTheme defines the built-in dark theme colors and sizes.
 //
@@ -43,6 +46,11 @@ func DarkTheme() fyne.Theme {
 func DefaultTheme() fyne.Theme {
 	if defaultTheme == nil {
 		defaultTheme = setupDefaultTheme()
+	}
+
+	// check system too
+	if systemTheme != nil {
+		return systemTheme
 	}
 
 	return defaultTheme
@@ -138,43 +146,6 @@ func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.regular
 }
 
-func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
-	switch s {
-	case SizeNameSeparatorThickness:
-		return 1
-	case SizeNameInlineIcon:
-		return 20
-	case SizeNameInnerPadding:
-		return 8
-	case SizeNameLineSpacing:
-		return 4
-	case SizeNamePadding:
-		return 4
-	case SizeNameScrollBar:
-		return 12
-	case SizeNameScrollBarSmall:
-		return 3
-	case SizeNameText:
-		return 14
-	case SizeNameHeadingText:
-		return 24
-	case SizeNameSubHeadingText:
-		return 18
-	case SizeNameCaptionText:
-		return 11
-	case SizeNameInputBorder:
-		return 1
-	case SizeNameInputRadius:
-		return 5
-	case SizeNameSelectionRadius:
-		return 3
-	case SizeNameScrollBarRadius:
-		return 3
-	default:
-		return 0
-	}
-}
-
 // Current returns the theme that is currently used for the running application.
 // It looks up based on user preferences and application configuration.
 //
@@ -189,7 +160,7 @@ func Current() fyne.Theme {
 		return DarkTheme()
 	}
 
-	return currentTheme
+	return internaltheme.CurrentlyRenderingWithFallback(currentTheme)
 }
 
 // CurrentForWidget returns the theme that is currently used for the specified widget.
@@ -252,6 +223,8 @@ func darkPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorDarkPressed
 	case ColorNameScrollBar:
 		return colorDarkScrollBar
+	case ColorNameScrollBarBackground:
+		return colorDarkScrollBarBackground
 	case ColorNameSeparator:
 		return colorDarkSeparator
 	case ColorNameShadow:
@@ -326,6 +299,8 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 		return colorLightPressed
 	case ColorNameScrollBar:
 		return colorLightScrollBar
+	case ColorNameScrollBarBackground:
+		return colorLightScrollBarBackground
 	case ColorNameSeparator:
 		return colorLightSeparator
 	case ColorNameShadow:
@@ -376,7 +351,30 @@ func selectionColorNamed(name string) color.NRGBA {
 
 func setupDefaultTheme() fyne.Theme {
 	theme := &builtinTheme{variant: internaltheme.VariantNameUserPreference}
-
 	theme.initFonts()
+
+	systemTheme = setupSystemTheme(theme)
+
 	return theme
+}
+
+func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
+	root := internalApp.RootConfigDir()
+
+	path := filepath.Join(root, "theme.json")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to load user theme file: "+path, err)
+		}
+		return nil
+	}
+	if data != nil && data.Content() != nil {
+		th, err := fromJSONWithFallback(bytes.NewReader(data.Content()), fallback)
+		if err == nil {
+			return th
+		}
+		fyne.LogError("Failed to parse user theme file: "+path, err)
+	}
+	return nil
 }

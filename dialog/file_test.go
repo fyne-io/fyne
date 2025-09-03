@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	intWidget "fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
@@ -17,33 +18,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
-
-// comparePaths compares if two file paths point to the same thing, and calls
-// t.Fatalf() if there is an error in performing the comparison.
-//
-// Returns true of both paths point to the same thing.
-//
-// You should use this if you need to compare file paths, since it explicitly
-// normalizes the paths to a stable canonical form. It also nicely
-// abstracts out the requisite error handling.
-//
-// You should only call this function on paths that you expect to be valid.
-func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
-	p1 := u1.String()[len(u1.Scheme())+3:]
-	p2 := u2.String()[len(u2.Scheme())+3:]
-
-	a1, err := filepath.Abs(p1)
-	if err != nil {
-		t.Fatalf("Failed to normalize path '%s'", p1)
-	}
-
-	a2, err := filepath.Abs(p2)
-	if err != nil {
-		t.Fatalf("Failed to normalize path '%s'", p2)
-	}
-
-	return a1 == a2
-}
 
 func TestEffectiveStartingDir(t *testing.T) {
 	homeString, err := os.UserHomeDir()
@@ -70,7 +44,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// test that we get wd when running with the default struct values
 	res := dialog.effectiveStartingDir()
 	expect := home
-	if !comparePaths(t, res, expect) {
+	if !storage.EqualURI(res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
@@ -79,7 +53,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	dialog.startingLocation = nil
 	res = dialog.effectiveStartingDir()
 	expect = home
-	if !comparePaths(t, res, expect) {
+	if !storage.EqualURI(res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
@@ -96,7 +70,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// make sure we fail over if the specified directory does not exist
 	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
-		t.Errorf("Should have failed to create lister for nonexistant file")
+		t.Errorf("Should have failed to create lister for nonexistent file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = home
@@ -134,7 +108,7 @@ func TestFileDialogResize(t *testing.T) {
 	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 
-	//Mimic the fileopen dialog
+	// Mimic the fileopen dialog
 	d := &fileDialog{file: file}
 	open := widget.NewButton("open", func() {})
 	ui := container.NewBorder(nil, nil, nil, open)
@@ -145,32 +119,32 @@ func TestFileDialogResize(t *testing.T) {
 	d.win.Resize(originalSize)
 	file.dialog = d
 
-	//Test resize - normal size scenario
-	size := fyne.NewSize(200, 180) //normal size to fit (600,400)
+	// Test resize - normal size scenario
+	size := fyne.NewSize(200, 180) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth := float32(200)
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
-	//Test resize - normal size scenario again
-	size = fyne.NewSize(300, 280) //normal size to fit (600,400)
+	// Test resize - normal size scenario again
+	size = fyne.NewSize(300, 280) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth = 300
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight = 280
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test resize - greater than max size scenario
+	// Test resize - greater than max size scenario
 	size = fyne.NewSize(800, 600)
 	file.Resize(size)
-	expectedWidth = 600                                          //since win width only 600
-	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) //max, also work
+	expectedWidth = 600                                          // since win width only 600
+	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) // max, also work
 	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                           //since win heigh only 400
-	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) //max, also work
+	expectedHeight = 400                                           // since win height only 400
+	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) // max, also work
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test again - extreme small size
+	// Test again - extreme small size
 	size = fyne.NewSize(1, 1)
 	file.Resize(size)
 	expectedWidth = file.dialog.win.Content.MinSize().Width
@@ -201,10 +175,10 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	//header
+	// header
 	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
-	assert.Equal(t, "Open File", title.Text)
-	//optionsbuttons
+	assert.Equal(t, lang.L("Open")+" "+lang.L("File"), title.Text)
+	// optionsbuttons
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
 	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
@@ -214,15 +188,15 @@ func TestShowFileOpen(t *testing.T) {
 	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
-	//footer
+	// footer
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
-	//body
+	// body
 	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
-	assert.Greater(t, len(breadcrumb.Objects), 0)
+	assert.NotEmpty(t, breadcrumb.Objects)
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	components := strings.Split(testData.String()[7:], "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
@@ -236,10 +210,10 @@ func TestShowFileOpen(t *testing.T) {
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
-	assert.Greater(t, len(objects), 0)
+	assert.NotEmpty(t, objects)
 
 	fileName := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem).name
-	assert.Equal(t, "(Parent)", fileName)
+	assert.Equal(t, lang.L("(Parent)"), fileName)
 	assert.True(t, open.Disabled())
 
 	var target *fileDialogItem
@@ -259,12 +233,12 @@ func TestShowFileOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.Nil(t, openErr)
+	assert.NoError(t, openErr)
 
 	assert.Equal(t, target.location.String(), chosen.URI().String())
 
 	err = chosen.Close()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestHiddenFiles(t *testing.T) {
@@ -275,7 +249,7 @@ func TestHiddenFiles(t *testing.T) {
 		t.Error("Failed to open testdata dir", err)
 	}
 
-	// git does not preserve windows hidden flag so we have to set it.
+	// git does not preserve windows hidden flag, so we have to set it.
 	// just an empty function for non windows builds
 	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
 		t.Error("Failed to hide .hidden", err)
@@ -305,7 +279,7 @@ func TestHiddenFiles(t *testing.T) {
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
-	assert.Greater(t, len(objects), 0)
+	assert.NotEmpty(t, objects)
 
 	var target *fileDialogItem
 	for _, icon := range objects {
@@ -325,7 +299,7 @@ func TestHiddenFiles(t *testing.T) {
 			target = item
 		}
 	}
-	assert.NotNil(t, target, "Failed,.hidden not found in testdata")
+	assert.NotNil(t, target, "Failed, .hidden not found in testdata")
 }
 
 func TestShowFileSave(t *testing.T) {
@@ -352,10 +326,10 @@ func TestShowFileSave(t *testing.T) {
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
-	assert.Greater(t, len(objects), 0)
+	assert.NotEmpty(t, objects)
 
 	item := test.TempWidgetRenderer(t, objects[0].(fyne.Widget)).Objects()[1].(*fileDialogItem)
-	assert.Equal(t, "(Parent)", item.name)
+	assert.Equal(t, lang.L("(Parent)"), item.name)
 	assert.True(t, save.Disabled())
 
 	abs, _ := filepath.Abs("./testdata/")
@@ -392,7 +366,7 @@ func TestShowFileSave(t *testing.T) {
 	test.Type(nameEntry, "v2_")
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.Nil(t, saveErr)
+	assert.NoError(t, saveErr)
 	targetParent, err := storage.Parent(target.location)
 	if err != nil {
 		t.Error(err)
@@ -401,10 +375,10 @@ func TestShowFileSave(t *testing.T) {
 	assert.Equal(t, expectedPath.String(), chosen.URI().String())
 
 	err = chosen.Close()
-	assert.Nil(t, err)
-	pathString := expectedPath.String()[len(expectedPath.Scheme())+3:]
+	assert.NoError(t, err)
+	pathString := expectedPath.Path()
 	err = os.Remove(pathString)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestFileFilters(t *testing.T) {
@@ -432,13 +406,13 @@ func TestFileFilters(t *testing.T) {
 	for _, uri := range f.dialog.data {
 		ok, _ := storage.CanList(uri)
 		if !ok {
-			assert.Equal(t, uri.Extension(), ".png")
+			assert.Equal(t, ".png", uri.Extension())
 			count++
 		}
 	}
 
 	// NOTE: This count needs to be updated when more test images are added.
-	assert.Equal(t, 8, count)
+	assert.Equal(t, 10, count)
 
 	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/jpeg"}))
 
@@ -446,7 +420,7 @@ func TestFileFilters(t *testing.T) {
 	for _, uri := range f.dialog.data {
 		ok, _ := storage.CanList(uri)
 		if !ok {
-			assert.Equal(t, uri.MimeType(), "image/jpeg")
+			assert.Equal(t, "image/jpeg", uri.MimeType())
 			count++
 		}
 	}
@@ -461,23 +435,65 @@ func TestFileFilters(t *testing.T) {
 		ok, _ := storage.CanList(uri)
 		if !ok {
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
-			assert.Equal(t, mimeType, "image")
+			assert.Equal(t, "image", mimeType)
 			count++
 		}
 	}
 
 	// NOTE: This count needs to be updated when more test images are added.
-	assert.Equal(t, 9, count)
+	assert.Equal(t, 11, count)
+}
+
+func TestFileSort(t *testing.T) {
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	d.SetLocation(dir)
+	d.Show()
+
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
+	defer win.Canvas().Overlays().Remove(popup)
+	assert.NotNil(t, popup)
+
+	ui := popup.Content.(*fyne.Container)
+
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
+	assert.NotEmpty(t, objects)
+
+	binPos := -1
+	capitalPos := -1
+	for i, icon := range objects {
+		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
+		switch item.name {
+		case "bin":
+			binPos = i
+		case "Capitalised":
+			capitalPos = i
+		}
+	}
+
+	assert.NotEqual(t, -1, binPos, "bin file not found")
+	assert.NotEqual(t, -1, capitalPos, "Capitalised.txt file not found")
+	assert.Less(t, binPos, capitalPos)
 }
 
 func TestView(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
+	dlg.SetTitleText("File Selection")
 	dlg.SetConfirmText("Yes")
 	dlg.SetDismissText("Dismiss")
 	dlg.Show()
@@ -521,6 +537,8 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	assert.Equal(t, "File Selection", title.Text)
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
@@ -533,10 +551,11 @@ func TestSetView(t *testing.T) {
 	fyne.CurrentApp().Preferences().SetInt(viewLayoutKey, int(defaultView))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
+	dlg.SetTitleText("File Selection")
 	dlg.SetConfirmText("Yes")
 	dlg.SetDismissText("Dismiss")
 
@@ -560,6 +579,8 @@ func TestSetView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
 
+	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	assert.Equal(t, "File Selection", title.Text)
 	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
 	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
@@ -586,7 +607,7 @@ func TestSetViewPreferences(t *testing.T) {
 	prefs.SetInt(viewLayoutKey, int(GridView))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -620,7 +641,7 @@ func TestViewPreferences(t *testing.T) {
 	prefs.SetInt(viewLayoutKey, -1)
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -653,10 +674,11 @@ func TestViewPreferences(t *testing.T) {
 }
 
 func TestFileFavorites(t *testing.T) {
+	_ = test.NewApp()
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Nil(t, reader)
 	}, win)
 
@@ -674,7 +696,7 @@ func TestFileFavorites(t *testing.T) {
 	assert.Len(t, dlg.dialog.favorites, len(favoriteLocations)+len(places))
 
 	favoritesList := ui.Objects[0].(*container.Split).Leading.(*widget.List)
-	assert.Equal(t, favoritesList.Length(), len(dlg.dialog.favorites))
+	assert.Len(t, dlg.dialog.favorites, favoritesList.Length())
 
 	for i := 0; i < favoritesList.Length(); i++ {
 		favoritesList.Select(i)
@@ -690,11 +712,11 @@ func TestFileFavorites(t *testing.T) {
 		}
 
 		ok, err := storage.Exists(dlg.dialog.dir)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.True(t, ok)
 	}
 
-	test.Tap(dlg.dialog.dismiss)
+	dlg.Dismiss()
 }
 
 func TestSetFileNameBeforeShow(t *testing.T) {
@@ -752,7 +774,7 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
 	folderDialog := NewFolderOpen(func(lu fyne.ListableURI, err error) {
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 	}, win)
 	folderDialog.SetConfirmText("Choose")
 	folderDialog.SetDismissText("Cancel")

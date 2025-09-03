@@ -34,16 +34,12 @@ func (c clipboard) Content() string {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	//can't log retry as it would alos log errors for an empty clipboard
+	// can't log retry as it would also log errors for an empty clipboard
 	return ""
 }
 
 func (c clipboard) content() string {
-	content := ""
-	runOnMain(func() {
-		content = glfw.GetClipboardString()
-	})
-	return content
+	return glfw.GetClipboardString()
 }
 
 // SetContent sets the clipboard content
@@ -64,7 +60,5 @@ func (c clipboard) SetContent(content string) {
 }
 
 func (c clipboard) setContent(content string) {
-	runOnMain(func() {
-		glfw.SetClipboardString(content)
-	})
+	glfw.SetClipboardString(content)
 }

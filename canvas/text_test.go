@@ -3,6 +3,9 @@ package canvas_test
 import (
 	"image"
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +17,11 @@ import (
 )
 
 func TestText_FontSource(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// test.NewWindow(text).Canvas().Capture()
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	text := canvas.NewText("Test", color.NRGBA{0, 0, 0, 0xff})
 	c := test.NewWindow(text).Canvas()
 
@@ -33,12 +41,12 @@ func TestText_MinSize(t *testing.T) {
 	text := canvas.NewText("Test", color.NRGBA{0, 0, 0, 0xff})
 	min := text.MinSize()
 
-	assert.True(t, min.Width > 0)
-	assert.True(t, min.Height > 0)
+	assert.Positive(t, min.Width)
+	assert.Positive(t, min.Height)
 
 	text = canvas.NewText("Test2", color.NRGBA{0, 0, 0, 0xff})
 	min2 := text.MinSize()
-	assert.True(t, min2.Width > min.Width)
+	assert.Greater(t, min2.Width, min.Width)
 }
 
 func TestText_MinSize_NoMultiLine(t *testing.T) {
@@ -47,7 +55,7 @@ func TestText_MinSize_NoMultiLine(t *testing.T) {
 
 	text = canvas.NewText("Bre\nak", color.NRGBA{0, 0, 0, 0xff})
 	min2 := text.MinSize()
-	assert.True(t, min2.Width > min.Width)
+	assert.Greater(t, min2.Width, min.Width)
 	assert.True(t, min2.Height == min.Height)
 }
 

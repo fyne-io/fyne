@@ -35,7 +35,7 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar(done float32) {
-	size := p.progress.size.Load()
+	size := p.progress.Size()
 	progressWidth := size.Width
 	spanWidth := progressWidth + (progressWidth * (maxProgressBarInfiniteWidthRatio / 2))
 	maxBarWidth := progressWidth * maxProgressBarInfiniteWidthRatio
@@ -90,13 +90,11 @@ func (p *infProgressRenderer) Refresh() {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	p.progress.propertyLock.Lock()
-	defer p.progress.propertyLock.Unlock()
-
 	p.animation.Duration = time.Second * 3
 	p.animation.Tick = p.updateBar
 	p.animation.Curve = fyne.AnimationLinear
 	p.animation.RepeatCount = fyne.AnimationRepeatForever
+	p.animation.AutoReverse = true
 
 	p.wasRunning = true
 	p.animation.Start()
@@ -104,17 +102,12 @@ func (p *infProgressRenderer) start() {
 
 // Stop the background thread from updating the infinite progress bar
 func (p *infProgressRenderer) stop() {
-	p.progress.propertyLock.Lock()
-	defer p.progress.propertyLock.Unlock()
-
 	p.wasRunning = false
 	p.animation.Stop()
 }
 
 func (p *infProgressRenderer) Destroy() {
-	p.progress.propertyLock.Lock()
 	p.progress.running = false
-	p.progress.propertyLock.Unlock()
 
 	p.stop()
 }
@@ -128,54 +121,40 @@ type ProgressBarInfinite struct {
 
 // Show this widget, if it was previously hidden
 func (p *ProgressBarInfinite) Show() {
-	p.propertyLock.Lock()
 	p.running = true
-	p.propertyLock.Unlock()
 
 	p.BaseWidget.Show()
 }
 
 // Hide this widget, if it was previously visible
 func (p *ProgressBarInfinite) Hide() {
-	p.propertyLock.Lock()
 	p.running = false
-	p.propertyLock.Unlock()
 
 	p.BaseWidget.Hide()
 }
 
 // Start the infinite progress bar animation
 func (p *ProgressBarInfinite) Start() {
-	p.propertyLock.Lock()
 	if p.running {
-		p.propertyLock.Unlock()
 		return
 	}
 
 	p.running = true
-	p.propertyLock.Unlock()
-
 	p.BaseWidget.Refresh()
 }
 
 // Stop the infinite progress bar animation
 func (p *ProgressBarInfinite) Stop() {
-	p.propertyLock.Lock()
 	if !p.running {
-		p.propertyLock.Unlock()
 		return
 	}
 
 	p.running = false
-	p.propertyLock.Unlock()
-
 	p.BaseWidget.Refresh()
 }
 
 // Running returns the current state of the infinite progress animation
 func (p *ProgressBarInfinite) Running() bool {
-	p.propertyLock.RLock()
-	defer p.propertyLock.RUnlock()
 	return p.running
 }
 
@@ -208,10 +187,7 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 
 	render.SetObjects([]fyne.CanvasObject{&render.background, &render.bar})
 
-	p.propertyLock.Lock()
 	p.running = true
-	p.propertyLock.Unlock()
-
 	return render
 }
 

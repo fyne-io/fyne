@@ -752,7 +752,7 @@ function makeLostContextSimulatingCanvas(canvas) {
 
   canvas.loseContextInNCalls = function(numCalls) {
     if (contextLost_) {
-      throw "You can not ask a lost contet to be lost";
+      throw "You can not ask a lost content to be lost";
     }
     numCallsToLoseContext_ = numCalls_ + numCalls;
   };

@@ -23,19 +23,18 @@ type progressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
-	th := p.progress.Theme()
-
 	text := "100%"
 	if format := p.progress.TextFormatter; format != nil {
 		text = format()
 	}
 
+	th := p.progress.Theme()
 	padding := th.Size(theme.SizeNameInnerPadding) * 2
 	size := fyne.MeasureText(text, p.label.TextSize, p.label.TextStyle)
 	return size.AddWidthHeight(padding, padding)
 }
 
-func (p *progressRenderer) layoutBar(size fyne.Size) {
+func (p *progressRenderer) calculateRatio() {
 	if p.progress.Value < p.progress.Min {
 		p.progress.Value = p.progress.Min
 	}
@@ -45,11 +44,10 @@ func (p *progressRenderer) layoutBar(size fyne.Size) {
 
 	delta := p.progress.Max - p.progress.Min
 	p.ratio = float32((p.progress.Value - p.progress.Min) / delta)
-	p.bar.Resize(fyne.NewSize(size.Width*p.ratio, size.Height))
 }
 
 func (p *progressRenderer) updateBar() {
-	p.layoutBar(p.progress.Size())
+	p.Layout(p.progress.Size()) // Make sure that bar length updates.
 
 	// Don't draw rectangles when they can't be seen.
 	p.background.Hidden = p.ratio == 1.0
@@ -57,16 +55,19 @@ func (p *progressRenderer) updateBar() {
 
 	if text := p.progress.TextFormatter; text != nil {
 		p.label.Text = text()
-	} else {
-		p.label.Text = strconv.Itoa(int(p.ratio*100)) + "%"
+		return
 	}
+
+	p.label.Text = strconv.Itoa(int(p.ratio*100)) + "%"
 }
 
 // Layout the components of the check widget
 func (p *progressRenderer) Layout(size fyne.Size) {
+	p.calculateRatio()
+
+	p.bar.Resize(fyne.NewSize(size.Width*p.ratio, size.Height))
 	p.background.Resize(size)
 	p.label.Resize(size)
-	p.layoutBar(size)
 }
 
 // applyTheme updates the progress bar to match the current theme
@@ -138,27 +139,10 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 		p.Max = 1.0
 	}
 
-	th := p.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	cornerRadius := th.Size(theme.SizeNameInputRadius)
-	primaryColor := th.Color(theme.ColorNamePrimary, v)
-
-	renderer := &progressRenderer{
-		background: canvas.Rectangle{
-			FillColor:    progressBlendColor(primaryColor),
-			CornerRadius: cornerRadius,
-		},
-		bar: canvas.Rectangle{
-			FillColor:    primaryColor,
-			CornerRadius: cornerRadius,
-		},
-		label: canvas.Text{
-			Text:      "0%",
-			Color:     th.Color(theme.ColorNameForegroundOnPrimary, v),
-			Alignment: fyne.TextAlignCenter,
-		},
-		progress: p,
-	}
+	renderer := &progressRenderer{progress: p}
+	renderer.label.Alignment = fyne.TextAlignCenter
+	renderer.applyTheme()
+	renderer.updateBar()
 
 	renderer.SetObjects([]fyne.CanvasObject{&renderer.background, &renderer.bar, &renderer.label})
 	return renderer

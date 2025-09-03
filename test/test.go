@@ -344,7 +344,7 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 		return ok
 	}
 	o, p, _ = intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	return
+	return o, p
 }
 
 func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
@@ -385,8 +385,8 @@ func typeChars(chars []rune, keyDown func(rune)) {
 }
 
 func writeMarkup(path string, markup string) error {
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(markup), 0644)
+	return os.WriteFile(path, []byte(markup), 0o644)
 }

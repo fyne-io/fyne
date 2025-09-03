@@ -12,11 +12,12 @@ bool deleteURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 bool existsURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 char* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total);
-void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
+void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr, bool truncate);
 void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* data, int len);
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream);
 */
 import "C"
+
 import (
 	"errors"
 	"io"
@@ -99,13 +100,13 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	return stream, nil
 }
 
-func saveStream(uri string) unsafe.Pointer {
+func saveStream(uri string, truncate bool) unsafe.Pointer {
 	uriStr := C.CString(uri)
 	defer C.free(unsafe.Pointer(uriStr))
 
 	var stream unsafe.Pointer
 	app.RunOnJVM(func(_, env, ctx uintptr) error {
-		streamPtr := C.saveStream(C.uintptr_t(env), C.uintptr_t(ctx), uriStr)
+		streamPtr := C.saveStream(C.uintptr_t(env), C.uintptr_t(ctx), uriStr, C.bool(truncate))
 		if streamPtr == C.NULL {
 			return os.ErrNotExist
 		}
@@ -116,12 +117,12 @@ func saveStream(uri string) unsafe.Pointer {
 	return stream
 }
 
-func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
+func nativeFileSave(f *fileSave, truncate bool) (io.WriteCloser, error) {
 	if f.uri == nil || f.uri.String() == "" {
 		return nil, nil
 	}
 
-	ret := saveStream(f.uri.String())
+	ret := saveStream(f.uri.String(), truncate)
 	if ret == nil {
 		return nil, storage.ErrNotExists
 	}

@@ -15,26 +15,26 @@ import (
 func TestCheck_Binding(t *testing.T) {
 	c := widget.NewCheck("", nil)
 	c.SetChecked(true)
-	assert.Equal(t, true, c.Checked)
+	assert.True(t, c.Checked)
 
 	val := binding.NewBool()
 	c.Bind(val)
 	waitForBinding()
-	assert.Equal(t, false, c.Checked)
+	assert.False(t, c.Checked)
 
 	err := val.Set(true)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
-	assert.Equal(t, true, c.Checked)
+	assert.True(t, c.Checked)
 
 	c.SetChecked(false)
 	v, err := val.Get()
-	assert.Nil(t, err)
-	assert.Equal(t, false, v)
+	assert.NoError(t, err)
+	assert.False(t, v)
 
 	c.Unbind()
 	waitForBinding()
-	assert.Equal(t, false, c.Checked)
+	assert.False(t, c.Checked)
 }
 
 func TestCheck_Layout(t *testing.T) {
@@ -82,16 +82,16 @@ func TestCheck_Layout(t *testing.T) {
 func TestNewCheckWithData(t *testing.T) {
 	val := binding.NewBool()
 	err := val.Set(true)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	c := widget.NewCheckWithData("", val)
 	waitForBinding()
-	assert.Equal(t, true, c.Checked)
+	assert.True(t, c.Checked)
 
 	c.SetChecked(false)
 	v, err := val.Get()
-	assert.Nil(t, err)
-	assert.Equal(t, false, v)
+	assert.NoError(t, err)
+	assert.False(t, v)
 }
 
 func TestCheck_SetText(t *testing.T) {
@@ -118,5 +118,19 @@ func TestCheck_Tapped(t *testing.T) {
 	test.Tap(check)
 	assert.False(t, check.Checked)
 	assert.False(t, check.Partial)
+}
 
+func TestCheck_Resize(t *testing.T) {
+	check := &widget.Check{Text: "test"}
+	check.Resize(fyne.NewSize(300, 200))
+	min := check.MinSize() // set up min cache
+	assert.Less(t, min.Height, check.Size().Height)
+
+	test.TapAt(check, fyne.NewPos(10, 100))
+	assert.True(t, check.Checked)
+	test.TapAt(check, fyne.NewPos(10, 100))
+	assert.False(t, check.Checked)
+
+	test.TapAt(check, fyne.NewPos(10, 10))
+	assert.False(t, check.Checked)
 }

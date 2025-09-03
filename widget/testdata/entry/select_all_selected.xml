@@ -5,9 +5,11 @@
 			<rectangle pos="1,1" radius="4" size="117x97" strokeColor="primary" strokeWidth="2"/>
 			<widget pos="0,2" size="120x96" type="*widget.Scroll">
 				<widget size="120x96" type="*widget.entryContent">
-					<rectangle fillColor="selection" pos="7,6" size="60x19"/>
-					<rectangle fillColor="selection" pos="7,25" size="80x19"/>
-					<rectangle fillColor="selection" pos="7,44" size="66x19"/>
+					<widget size="0x0" type="*widget.selectable">
+						<rectangle fillColor="selection" pos="7,6" size="60x19"/>
+						<rectangle fillColor="selection" pos="7,25" size="80x19"/>
+						<rectangle fillColor="selection" pos="7,44" size="66x19"/>
+					</widget>
 					<widget size="120x96" type="*widget.RichText">
 						<text pos="8,6" size="59x19">First Row</text>
 						<text pos="8,25" size="79x19">Second Row</text>

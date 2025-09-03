@@ -48,7 +48,7 @@ type MenuItem struct {
 	IsQuit      bool
 	IsSeparator bool
 	Label       string
-	Action      func()
+	Action      func() `json:"-"`
 	// Since: 2.1
 	Disabled bool
 	// Since: 2.1
@@ -62,6 +62,13 @@ type MenuItem struct {
 // NewMenuItem creates a new menu item from the passed label and action parameters.
 func NewMenuItem(label string, action func()) *MenuItem {
 	return &MenuItem{Label: label, Action: action}
+}
+
+// NewMenuItemWithIcon creates a new menu item from the passed label, icon, and action parameters.
+//
+// Since: 2.7
+func NewMenuItemWithIcon(label string, icon Resource, action func()) *MenuItem {
+	return &MenuItem{Label: label, Icon: icon, Action: action}
 }
 
 // NewMenuItemSeparator creates a menu item that is to be used as a separator.

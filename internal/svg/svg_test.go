@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/srwiley/oksvg"
+	"github.com/fyne-io/oksvg"
 	"github.com/srwiley/rasterx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,6 +41,11 @@ func TestColorize(t *testing.T) {
 		},
 		"rects": {
 			svgFile:   "rects.svg",
+			color:     color.NRGBA{R: 100, G: 100, B: 100, A: 200},
+			wantImage: "colorized/rects.png",
+		},
+		"negative rects": {
+			svgFile:   "rects-negative.svg",
 			color:     color.NRGBA{R: 100, G: 100, B: 100, A: 200},
 			wantImage: "colorized/rects.png",
 		},
@@ -139,7 +144,8 @@ func TestColorize(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			bytes, err := os.ReadFile(filepath.Join("testdata", tt.svgFile))
 			require.NoError(t, err)
-			got := helperDrawSVG(t, Colorize(bytes, tt.color))
+			content, _ := Colorize(bytes, tt.color)
+			got := helperDrawSVG(t, content)
 			test.AssertImageMatches(t, tt.wantImage, got)
 		})
 	}
@@ -195,7 +201,8 @@ func helperDrawSVG(t *testing.T, data []byte) image.Image {
 
 	width := int(icon.ViewBox.W) * 2
 	height := int(icon.ViewBox.H) * 2
-	icon.SetTarget(0, 0, float64(width), float64(height))
+	x, y := svgOffset(icon, width, height)
+	icon.SetTarget(x, y, float64(width), float64(height))
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(width, height, img, img.Bounds())
 	raster := rasterx.NewDasher(width, height, scanner)

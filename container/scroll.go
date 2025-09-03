@@ -14,20 +14,20 @@ type Scroll = widget.Scroll
 // ScrollDirection represents the directions in which a Scroll container can scroll its child content.
 //
 // Since: 1.4
-type ScrollDirection = widget.ScrollDirection
+type ScrollDirection = fyne.ScrollDirection
 
 // Constants for valid values of ScrollDirection.
 const (
 	// ScrollBoth supports horizontal and vertical scrolling.
-	ScrollBoth ScrollDirection = widget.ScrollBoth
+	ScrollBoth ScrollDirection = fyne.ScrollBoth
 	// ScrollHorizontalOnly specifies the scrolling should only happen left to right.
-	ScrollHorizontalOnly = widget.ScrollHorizontalOnly
+	ScrollHorizontalOnly = fyne.ScrollHorizontalOnly
 	// ScrollVerticalOnly specifies the scrolling should only happen top to bottom.
-	ScrollVerticalOnly = widget.ScrollVerticalOnly
+	ScrollVerticalOnly = fyne.ScrollVerticalOnly
 	// ScrollNone turns off scrolling for this container.
 	//
 	// Since: 2.1
-	ScrollNone = widget.ScrollNone
+	ScrollNone = fyne.ScrollNone
 )
 
 // NewScroll creates a scrollable parent wrapping the specified content.

@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,7 +18,7 @@ var _ fyne.Widget = (*Activity)(nil)
 type Activity struct {
 	BaseWidget
 
-	started atomic.Bool
+	started bool
 }
 
 // NewActivity returns a widget for indicating activity
@@ -38,18 +37,22 @@ func (a *Activity) MinSize() fyne.Size {
 
 // Start the activity indicator animation
 func (a *Activity) Start() {
-	if !a.started.CompareAndSwap(false, true) {
+	if a.started {
 		return // already started
 	}
+
+	a.started = true
 
 	a.Refresh()
 }
 
 // Stop the activity indicator animation
 func (a *Activity) Stop() {
-	if !a.started.CompareAndSwap(true, false) {
+	if !a.started {
 		return // already stopped
 	}
+
+	a.started = false
 
 	a.Refresh()
 }
@@ -64,10 +67,11 @@ func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	r.anim = &fyne.Animation{
 		Duration:    time.Second * 2,
 		RepeatCount: fyne.AnimationRepeatForever,
-		Tick:        r.animate}
+		Tick:        r.animate,
+	}
 	r.updateColor()
 
-	if a.started.Load() {
+	if a.started {
 		r.start()
 	}
 
@@ -88,7 +92,7 @@ type activityRenderer struct {
 }
 
 func (a *activityRenderer) Destroy() {
-	a.parent.started.Store(false)
+	a.parent.started = false
 	a.stop()
 }
 
@@ -106,15 +110,12 @@ func (a *activityRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (a *activityRenderer) Refresh() {
-	started := a.parent.started.Load()
-	if started {
+	if a.parent.started {
 		if !a.wasStarted {
 			a.start()
 		}
-		return
 	} else if a.wasStarted {
 		a.stop()
-		return
 	}
 
 	a.updateColor()

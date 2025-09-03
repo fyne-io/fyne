@@ -31,13 +31,6 @@ Mauris erat urna, fermentum et quam rhoncus, fringilla consequat ante. Vivamus c
 Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat tempus purus.`
 )
 
-var (
-	progress    *widget.ProgressBar
-	fprogress   *widget.ProgressBar
-	infProgress *widget.ProgressBarInfinite
-	endProgress chan any
-)
-
 func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
@@ -68,17 +61,16 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 		a2.Start()
 		a2.Show()
 
-		defer func() {
-			go func() {
-				time.Sleep(time.Second * 10)
+		time.AfterFunc(10*time.Second, func() {
+			fyne.Do(func() {
 				a1.Stop()
 				a1.Hide()
 				a2.Stop()
 				a2.Hide()
 
 				button.Enable()
-			}()
-		}()
+			})
+		})
 	}
 
 	button = widget.NewButton("Animate", start)
@@ -97,11 +89,12 @@ func makeActivityTab(win fyne.Window) fyne.CanvasObject {
 			a3.Start()
 			d.Show()
 
-			go func() {
-				time.Sleep(time.Second * 5)
-				a3.Stop()
-				d.Hide()
-			}()
+			time.AfterFunc(5*time.Second, func() {
+				fyne.Do(func() {
+					a3.Stop()
+					d.Hide()
+				})
+			})
 		}))))
 }
 
@@ -404,18 +397,28 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
-	stopProgress()
+	progress := widget.NewProgressBar()
 
-	progress = widget.NewProgressBar()
-
-	fprogress = widget.NewProgressBar()
+	fprogress := widget.NewProgressBar()
 	fprogress.TextFormatter = func() string {
 		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
 	}
 
-	infProgress = widget.NewProgressBarInfinite()
-	endProgress = make(chan any, 1)
-	startProgress()
+	infProgress := widget.NewProgressBarInfinite()
+
+	progressAnimation := fyne.Animation{
+		Curve:    fyne.AnimationLinear,
+		Duration: 10 * time.Second,
+		Tick: func(percentage float32) {
+			value := float64(percentage)
+			progress.SetValue(value)
+			fprogress.SetValue(value)
+		},
+	}
+
+	progressAnimation.Start()
+
+	OnChangeFuncs = append(OnChangeFuncs, progressAnimation.Stop, infProgress.Stop)
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -471,52 +474,6 @@ func makeToolbarTab(_ fyne.Window) fyne.CanvasObject {
 	)
 
 	return container.NewBorder(t, nil, nil, nil)
-}
-
-func startProgress() {
-	progress.SetValue(0)
-	fprogress.SetValue(0)
-	select { // ignore stale end message
-	case <-endProgress:
-	default:
-	}
-
-	go func() {
-		end := endProgress
-		num := 0.0
-		for num < 1.0 {
-			time.Sleep(16 * time.Millisecond)
-			select {
-			case <-end:
-				return
-			default:
-			}
-
-			progress.SetValue(num)
-			fprogress.SetValue(num)
-			num += 0.002
-		}
-
-		progress.SetValue(1)
-		fprogress.SetValue(1)
-
-		// TODO make sure this resets when we hide etc...
-		stopProgress()
-	}()
-	infProgress.Start()
-}
-
-func stopProgress() {
-	if infProgress == nil {
-		return
-	}
-
-	if !infProgress.Running() {
-		return
-	}
-
-	infProgress.Stop()
-	endProgress <- struct{}{}
 }
 
 // widgetScreen shows a panel containing widget demos

@@ -78,6 +78,20 @@ func TestPainter_paintImage(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
+func TestPainter_paintImageAlpha(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.Translucency = 0.5
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_alpha.png", target)
+}
+
 func TestPainter_paintImage_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	img := canvas.NewImageFromImage(makeTestImage(5, 5))
@@ -208,6 +222,26 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
+func TestPainter_paintImage_cover(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(50, 50))
+	img.FillMode = canvas.ImageFillCover
+	img.ScaleMode = canvas.ImageScalePixels
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(250, 375))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_cover_vertical.png", target)
+
+	c.Resize(fyne.NewSize(375, 250))
+
+	target = p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_cover_horizontal.png", target)
+}
+
 func TestPainter_paintLine(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewLine(color.Black)
@@ -332,6 +366,46 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
+
+	obj.Aspect = 2
+	test.AssertImageMatches(t, "draw_rectangle_stroke_wide.png", p.Paint(c))
+	obj.Aspect = 0.5
+	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
+}
+
+func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewRectangle(color.Black)
+	obj.StrokeWidth = 5
+	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+
+	obj.CornerRadius = 35
+	obj.TopRightCornerRadius = 2
+	obj.TopLeftCornerRadius = 8
+	obj.BottomLeftCornerRadius = 14
+	obj.BottomRightCornerRadius = 20
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius.png", p.Paint(c))
+
+	obj.Aspect = 2
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_wide.png", p.Paint(c))
+	obj.Aspect = 0.5
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_narrow.png", p.Paint(c))
+
+	obj.TopLeftCornerRadius = 0
+	obj.Aspect = 0
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_base.png", p.Paint(c))
+
+	// additional test for zero stroke width and base corner radius to check all per-corner values are effective
+	obj.CornerRadius = 0
+	obj.StrokeWidth = 0
+	test.AssertImageMatches(t, "draw_rectangle_per_corner_radius_zero_base.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {

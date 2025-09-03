@@ -46,7 +46,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 // must be called with i.propertyLock RLocked
 func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
-		i.resource = i.themeWithLock().Icon(theme.IconNameFile)
+		i.resource = i.Theme().Icon(theme.IconNameFile)
 		return
 	}
 
@@ -67,12 +67,7 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	i.ExtendBaseWidget(i)
-	i.propertyLock.Lock()
 	i.setURI(i.URI)
-	i.propertyLock.Unlock()
-
-	i.propertyLock.RLock()
-	defer i.propertyLock.RUnlock()
 
 	// TODO remove background when `SetSelected` is gone.
 	background := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
@@ -106,7 +101,7 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 		return theme.FolderIcon()
 	}
 
-	th := i.themeWithLock()
+	th := i.Theme()
 	mainMimeType, _ := mime.Split(uri.MimeType())
 	switch mainMimeType {
 	case "application":
@@ -180,14 +175,7 @@ func (s *fileIconRenderer) Refresh() {
 	th := s.file.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	s.file.propertyLock.Lock()
 	s.file.setURI(s.file.URI)
-	s.file.propertyLock.Unlock()
-
-	s.file.propertyLock.RLock()
-	s.img.Resource = s.file.resource
-	s.ext.Text = s.file.extension
-	s.file.propertyLock.RUnlock()
 
 	if s.file.Selected {
 		s.background.Show()
@@ -203,9 +191,16 @@ func (s *fileIconRenderer) Refresh() {
 		}
 	}
 
-	s.img.Refresh()
+	if s.img.Resource != s.file.resource {
+		s.img.Resource = s.file.resource
+		s.img.Refresh()
+	}
+	if s.ext.Text != s.file.extension {
+		s.ext.Text = s.file.extension
+		s.ext.Refresh()
+	}
+
 	canvas.Refresh(s.file.super())
-	canvas.Refresh(s.ext)
 }
 
 func trimmedExtension(uri fyne.URI) string {

@@ -22,11 +22,10 @@ func TestDarwinMenu(t *testing.T) {
 		resetMainMenu()
 	})
 
-	w := createWindow("Test").(*window)
+	w := createWindow("Test")
 
 	var lastAction string
 	assertLastAction := func(wantAction string) {
-		w.WaitForEvents()
 		assert.Equal(t, wantAction, lastAction)
 	}
 
@@ -64,7 +63,7 @@ func TestDarwinMenu(t *testing.T) {
 
 	mainMenu := fyne.NewMainMenu(menuFile, menuHelp, menuMore, menuSettings)
 	runOnMain(func() {
-		setupNativeMenu(w, mainMenu)
+		setupNativeMenu(w.window, mainMenu)
 	})
 
 	mm := testDarwinMainMenu()
@@ -258,13 +257,13 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 			runOnMain(func() {
 				resetMainMenu()
 			})
-			w := createWindow("Test").(*window)
+			w := createWindow("Test")
 			item := fyne.NewMenuItem("Special", func() {})
 			item.Shortcut = &desktop.CustomShortcut{KeyName: tt.key, Modifier: fyne.KeyModifierShortcutDefault}
 			menu := fyne.NewMenu("Special", item)
 			mainMenu := fyne.NewMainMenu(menu)
 			runOnMain(func() {
-				setupNativeMenu(w, mainMenu)
+				setupNativeMenu(w.window, mainMenu)
 			})
 
 			mm := testDarwinMainMenu()
@@ -274,8 +273,10 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 	}
 }
 
-var initialAppMenuItems []string
-var initialMenus []string
+var (
+	initialAppMenuItems []string
+	initialMenus        []string
+)
 
 func assertNSMenuItem(t *testing.T, wantTitle, wantKey string, wantModifier uint64, m unsafe.Pointer, i int) {
 	item := testNSMenuItemAtIndex(m, i)

@@ -83,7 +83,7 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 	formatted := false
 
 	bar.SetValue(0.2)
-	assert.Equal(t, false, formatted)
+	assert.False(t, formatted)
 
 	formatter := func() string {
 		formatted = true
@@ -93,7 +93,7 @@ func TestProgressBar_TextFormatter(t *testing.T) {
 
 	bar.SetValue(0.4)
 
-	assert.Equal(t, true, formatted)
+	assert.True(t, formatted)
 }
 
 func TestProgressRenderer_Layout(t *testing.T) {
@@ -122,6 +122,14 @@ func TestProgressRenderer_ApplyTheme(t *testing.T) {
 		bar.SetValue(.2)
 		test.AssertRendersToMarkup(t, "progressbar/themed.xml", c)
 	})
+}
+
+func TestProgressBar_FromStruct(t *testing.T) {
+	bar := &widget.ProgressBar{Max: 10, Value: 5}
+	w := test.NewTempWindow(t, bar)
+	w.Resize(bar.MinSize().AddWidthHeight(100, 0))
+
+	test.AssertRendersToImage(t, "progressbar/initial.png", w.Canvas())
 }
 
 func barOnCanvas() (*widget.ProgressBar, fyne.Canvas) {

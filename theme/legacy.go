@@ -42,6 +42,8 @@ func (l *legacyWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.
 		return l.old.PrimaryColor()
 	case ColorNameScrollBar:
 		return l.old.ScrollBarColor()
+	case ColorNameScrollBarBackground:
+		return l.old.BackgroundColor()
 	case ColorNameShadow:
 		return l.old.ShadowColor()
 	default:

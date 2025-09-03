@@ -9,7 +9,7 @@ import (
 )
 
 // ScrollDirection represents the directions in which a Scroll can scroll its child content.
-type ScrollDirection int
+type ScrollDirection = fyne.ScrollDirection
 
 // Constants for valid values of ScrollDirection.
 const (
@@ -32,6 +32,9 @@ const (
 	scrollBarOrientationVertical   scrollBarOrientation = 0
 	scrollBarOrientationHorizontal scrollBarOrientation = 1
 	scrollContainerMinSize                              = float32(32) // TODO consider the smallest useful scroll view?
+
+	// what fraction of the page to scroll when tapping on the scroll bar area
+	pageScrollFraction = float32(0.95)
 )
 
 type scrollBarRenderer struct {
@@ -58,8 +61,10 @@ func (r *scrollBarRenderer) Refresh() {
 	r.background.Refresh()
 }
 
-var _ desktop.Hoverable = (*scrollBar)(nil)
-var _ fyne.Draggable = (*scrollBar)(nil)
+var (
+	_ desktop.Hoverable = (*scrollBar)(nil)
+	_ fyne.Draggable    = (*scrollBar)(nil)
+)
 
 type scrollBar struct {
 	Base
@@ -143,20 +148,34 @@ func (a *scrollBarArea) isLarge() bool {
 
 type scrollBarAreaRenderer struct {
 	BaseRenderer
-	area *scrollBarArea
-	bar  *scrollBar
+	area       *scrollBarArea
+	bar        *scrollBar
+	background *canvas.Rectangle
 }
 
-func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
+func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
+	r.layoutWithTheme(theme.CurrentForWidget(r.area), size)
+}
+
+func (r *scrollBarAreaRenderer) layoutWithTheme(th fyne.Theme, size fyne.Size) {
 	var barHeight, barWidth, barX, barY float32
+	var bkgHeight, bkgWidth, bkgX, bkgY float32
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
-		barWidth, barHeight, barX, barY = r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
+		barWidth, barHeight, barX, barY = r.barSizeAndOffset(th, r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
+		r.area.barLeadingEdge = barX
+		r.area.barTrailingEdge = barX + barWidth
+		bkgWidth, bkgHeight, bkgX, bkgY = size.Width, barHeight, 0, barY
 	default:
-		barHeight, barWidth, barY, barX = r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
+		barHeight, barWidth, barY, barX = r.barSizeAndOffset(th, r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
+		r.area.barLeadingEdge = barY
+		r.area.barTrailingEdge = barY + barHeight
+		bkgWidth, bkgHeight, bkgX, bkgY = barWidth, size.Height, barX, 0
 	}
 	r.bar.Move(fyne.NewPos(barX, barY))
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	r.background.Move(fyne.NewPos(bkgX, bkgY))
+	r.background.Resize(fyne.NewSize(bkgWidth, bkgHeight))
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
@@ -176,14 +195,16 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
+	th := theme.CurrentForWidget(r.area)
 	r.bar.Refresh()
-	r.Layout(r.area.Size())
+	r.background.FillColor = th.Color(theme.ColorNameScrollBarBackground, fyne.CurrentApp().Settings().ThemeVariant())
+	r.background.Hidden = !r.area.isLarge()
+	r.layoutWithTheme(th, r.area.Size())
 	canvas.Refresh(r.bar)
+	canvas.Refresh(r.background)
 }
 
-func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
-	th := theme.CurrentForWidget(r.area)
-
+func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, contentLength, scrollLength float32) (length, width, lengthOffset, widthOffset float32) {
 	scrollBarSize := th.Size(theme.SizeNameScrollBar)
 	if scrollLength < contentLength {
 		portion := scrollLength / contentLength
@@ -201,10 +222,13 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
 		width = widthOffset
 	}
-	return
+	return length, width, lengthOffset, widthOffset
 }
 
-var _ desktop.Hoverable = (*scrollBarArea)(nil)
+var (
+	_ desktop.Hoverable = (*scrollBarArea)(nil)
+	_ fyne.Tappable     = (*scrollBarArea)(nil)
+)
 
 type scrollBarArea struct {
 	Base
@@ -212,17 +236,78 @@ type scrollBarArea struct {
 	isDragging  bool
 	isMouseIn   bool
 	scroll      *Scroll
+	bar         *scrollBar
 	orientation scrollBarOrientation
+
+	// updated from renderer Layout
+	// coordinates Y in vertical orientation, X in horizontal
+	barLeadingEdge  float32
+	barTrailingEdge float32
 }
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
-	bar := newScrollBar(a)
-	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{bar}), area: a, bar: bar}
+	th := theme.CurrentForWidget(a)
+	v := fyne.CurrentApp().Settings().ThemeVariant()
+	a.bar = newScrollBar(a)
+	background := canvas.NewRectangle(th.Color(theme.ColorNameScrollBarBackground, v))
+	background.Hidden = !a.isLarge()
+	return &scrollBarAreaRenderer{BaseRenderer: NewBaseRenderer([]fyne.CanvasObject{background, a.bar}), area: a, bar: a.bar, background: background}
+}
+
+func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
+	if isScrollerPageOnTap() {
+		a.scrollFullPageOnTap(e)
+		return
+	}
+
+	// scroll to tapped position
+	barSize := a.bar.Size()
+	switch a.orientation {
+	case scrollBarOrientationHorizontal:
+		if e.Position.X < a.barLeadingEdge || e.Position.X > a.barTrailingEdge {
+			a.moveBar(fyne.Max(0, e.Position.X-barSize.Width/2), barSize)
+		}
+	case scrollBarOrientationVertical:
+		if e.Position.Y < a.barLeadingEdge || e.Position.Y > a.barTrailingEdge {
+			a.moveBar(fyne.Max(0, e.Position.Y-barSize.Height/2), a.bar.Size())
+		}
+	}
+}
+
+func (a *scrollBarArea) scrollFullPageOnTap(e *fyne.PointEvent) {
+	// when tapping above/below or left/right of the bar, scroll the content
+	// nearly a full page (pageScrollFraction) up/down or left/right, respectively
+	newOffset := a.scroll.Offset
+	switch a.orientation {
+	case scrollBarOrientationHorizontal:
+		if e.Position.X < a.barLeadingEdge {
+			newOffset.X = fyne.Max(0, newOffset.X-a.scroll.Size().Width*pageScrollFraction)
+		} else if e.Position.X > a.barTrailingEdge {
+			viewWid := a.scroll.Size().Width
+			newOffset.X = fyne.Min(a.scroll.Content.Size().Width-viewWid, newOffset.X+viewWid*pageScrollFraction)
+		}
+	default:
+		if e.Position.Y < a.barLeadingEdge {
+			newOffset.Y = fyne.Max(0, newOffset.Y-a.scroll.Size().Height*pageScrollFraction)
+		} else if e.Position.Y > a.barTrailingEdge {
+			viewHt := a.scroll.Size().Height
+			newOffset.Y = fyne.Min(a.scroll.Content.Size().Height-viewHt, newOffset.Y+viewHt*pageScrollFraction)
+		}
+	}
+	if newOffset == a.scroll.Offset {
+		return
+	}
+
+	a.scroll.Offset = newOffset
+	if f := a.scroll.OnScrolled; f != nil {
+		f(a.scroll.Offset)
+	}
+	a.scroll.refreshWithoutOffsetUpdate()
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 	a.isMouseIn = true
-	a.scroll.Refresh()
+	a.scroll.refreshBars()
 }
 
 func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
@@ -234,7 +319,7 @@ func (a *scrollBarArea) MouseOut() {
 		return
 	}
 
-	a.scroll.Refresh()
+	a.scroll.refreshBars()
 }
 
 func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
@@ -281,7 +366,7 @@ type scrollContainerRenderer struct {
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
-	scrollerSize := r.scroll.size.Load()
+	scrollerSize := r.scroll.Size()
 	if r.scroll.Direction == ScrollVerticalOnly || r.scroll.Direction == ScrollBoth {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(scrollerSize.Width-r.vertArea.Size().Width, 0))
@@ -364,7 +449,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Content == nil {
 		return
 	}
-	scrollSize := r.scroll.size.Load()
+	scrollSize := r.scroll.Size()
 	contentSize := r.scroll.Content.Size()
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
@@ -432,12 +517,13 @@ func (s *Scroll) CreateRenderer() fyne.WidgetRenderer {
 // ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
 func (s *Scroll) ScrollToBottom() {
 	s.scrollBy(0, -1*(s.Content.MinSize().Height-s.Size().Height-s.Offset.Y))
-	s.Refresh()
+	s.refreshBars()
 }
 
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
-	s.scrollBy(0, -s.Offset.Y)
+	s.ScrollToOffset(fyne.Position{})
+	s.refreshBars()
 }
 
 // DragEnd will stop scrolling on mobile has stopped
@@ -478,8 +564,11 @@ func (s *Scroll) SetMinSize(size fyne.Size) {
 
 // Refresh causes this widget to be redrawn in it's current state
 func (s *Scroll) Refresh() {
-	s.updateOffset(0, 0)
-	s.refreshWithoutOffsetUpdate()
+	s.refreshBars()
+
+	if s.Content != nil {
+		s.Content.Refresh()
+	}
 }
 
 // Resize is called when this scroller should change size. We refresh to ensure the scroll bars are updated.
@@ -489,7 +578,19 @@ func (s *Scroll) Resize(sz fyne.Size) {
 	}
 
 	s.Base.Resize(sz)
-	s.Refresh()
+	s.refreshBars()
+}
+
+// ScrollToOffset will update the location of the content of this scroll container.
+//
+// Since: 2.6
+func (s *Scroll) ScrollToOffset(p fyne.Position) {
+	if s.Offset == p {
+		return
+	}
+
+	s.Offset = p
+	s.refreshBars()
 }
 
 func (s *Scroll) refreshWithoutOffsetUpdate() {
@@ -501,6 +602,11 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	if s.Direction != ScrollNone {
 		s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
 	}
+}
+
+func (s *Scroll) refreshBars() {
+	s.updateOffset(0, 0)
+	s.refreshWithoutOffsetUpdate()
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
@@ -530,10 +636,12 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	min := s.Content.MinSize()
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
-	if f := s.OnScrolled; f != nil && (s.Offset.X != oldX || s.Offset.Y != oldY) {
+
+	moved := s.Offset.X != oldX || s.Offset.Y != oldY
+	if f := s.OnScrolled; f != nil && moved {
 		f(s.Offset)
 	}
-	return true
+	return moved
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {

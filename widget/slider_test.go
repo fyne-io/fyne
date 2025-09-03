@@ -14,7 +14,7 @@ import (
 func TestNewSliderWithData(t *testing.T) {
 	val := binding.NewFloat()
 	err := val.Set(4)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	s := NewSliderWithData(0, 10, val)
 	waitForBinding()
@@ -22,7 +22,7 @@ func TestNewSliderWithData(t *testing.T) {
 
 	s.SetValue(2.0)
 	f, err := val.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 2.0, f)
 }
 
@@ -37,13 +37,13 @@ func TestSlider_Binding(t *testing.T) {
 	assert.Equal(t, 0.0, s.Value)
 
 	err := val.Set(3)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, 3.0, s.Value)
 
 	s.SetValue(5)
 	f, err := val.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 5.0, f)
 
 	s.Unbind()
@@ -100,6 +100,7 @@ func TestSlider_MinSize(t *testing.T) {
 
 	assert.Equal(t, min.Height, buttonMin.Height)
 }
+
 func TestSlider_OutOfRange(t *testing.T) {
 	slider := NewSlider(2, 5)
 	slider.Resize(fyne.NewSize(100, 10))

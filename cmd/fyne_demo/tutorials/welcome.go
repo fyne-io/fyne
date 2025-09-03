@@ -59,19 +59,15 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 	slideBG := container.New(underlayer, underlay)
 	footerBG := canvas.NewRectangle(shadowColor)
 
-	listen := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listen)
-	go func() {
-		for range listen {
-			bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
-			bg.FillColor = bgColor
-			bg.Refresh()
+	fyne.CurrentApp().Settings().AddListener(func(fyne.Settings) {
+		bgColor = withAlpha(theme.Color(theme.ColorNameBackground), 0xe0)
+		bg.FillColor = bgColor
+		bg.Refresh()
 
-			shadowColor = withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
-			footerBG.FillColor = bgColor
-			footer.Refresh()
-		}
-	}()
+		shadowColor = withAlpha(theme.Color(theme.ColorNameBackground), 0x33)
+		footerBG.FillColor = bgColor
+		footer.Refresh()
+	})
 
 	underlay.Resize(fyne.NewSize(1024, 1024))
 	scroll.OnScrolled = func(p fyne.Position) {

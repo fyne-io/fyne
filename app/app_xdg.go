@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sync/atomic"
 
 	"github.com/godbus/dbus/v5"
@@ -20,6 +19,8 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/theme"
 )
+
+const systemTheme = fyne.ThemeVariant(99)
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	if build.IsFlatpak {
@@ -39,7 +40,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 func findFreedesktopColorScheme() fyne.ThemeVariant {
 	colorScheme, err := appearance.GetColorScheme()
 	if err != nil {
-		return theme.VariantDark
+		return systemTheme
 	}
 
 	return colorSchemeToThemeVariant(colorScheme)
@@ -114,24 +115,30 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	}
 }
 
-func rootConfigDir() string {
-	desktopConfig, _ := os.UserConfigDir()
-	return filepath.Join(desktopConfig, "fyne")
-}
-
 func watchTheme(s *settings) {
 	go func() {
 		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
 		themeVariant := findFreedesktopColorScheme()
-		internalapp.CurrentVariant.Store(uint64(themeVariant))
-		s.applyVariant(themeVariant)
+		if themeVariant != systemTheme {
+			internalapp.CurrentVariant.Store(uint64(themeVariant))
+			fyne.Do(func() { s.applyVariant(themeVariant) })
+		}
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
 				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
-				s.applyVariant(themeVariant)
+				fyne.Do(func() { s.applyVariant(themeVariant) })
 			}
 		})
 	}()
+}
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
+}
+
+func (s *settings) applyVariant(variant fyne.ThemeVariant) {
+	s.variant = variant
+	s.apply()
 }

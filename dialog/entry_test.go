@@ -16,7 +16,7 @@ func TestEntryDialog_Confirm(t *testing.T) {
 	test.Type(ed.entry, "123")
 	test.Tap(ed.confirm)
 
-	assert.Equal(t, value, "123", "Control form should be confirmed with no validation")
+	assert.Equal(t, "123", value, "Control form should be confirmed with no validation")
 }
 
 func TestEntryDialog_Dismiss(t *testing.T) {
@@ -28,5 +28,5 @@ func TestEntryDialog_Dismiss(t *testing.T) {
 	test.Type(ed.entry, "XYZ")
 	test.Tap(ed.cancel)
 
-	assert.Equal(t, value, "123", "Control form should not change value on dismiss")
+	assert.Equal(t, "123", value, "Control form should not change value on dismiss")
 }

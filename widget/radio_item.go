@@ -10,10 +10,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*radioItem)(nil)
-var _ desktop.Hoverable = (*radioItem)(nil)
-var _ fyne.Tappable = (*radioItem)(nil)
-var _ fyne.Focusable = (*radioItem)(nil)
+var (
+	_ fyne.Widget       = (*radioItem)(nil)
+	_ desktop.Hoverable = (*radioItem)(nil)
+	_ fyne.Tappable     = (*radioItem)(nil)
+	_ fyne.Focusable    = (*radioItem)(nil)
+)
 
 func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
 	i := &radioItem{Label: label, onTap: onTap}
@@ -207,7 +209,9 @@ func (r *radioItemRenderer) update() {
 		out.ColorName = theme.ColorNameDisabled
 	}
 	r.icon.Resource = in
+	r.icon.Refresh()
 	r.over.Resource = out
+	r.over.Refresh()
 
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = color.Transparent

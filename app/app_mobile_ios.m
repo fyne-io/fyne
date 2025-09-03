@@ -8,8 +8,3 @@ void openURL(char *urlStr) {
     [app openURL:url options:@{} completionHandler:nil];
 }
 
-char *documentsPath() {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *path = paths.firstObject;
-    return [path UTF8String];
-}

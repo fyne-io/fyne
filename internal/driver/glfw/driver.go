@@ -7,8 +7,8 @@ import (
 	"image"
 	"os"
 	"runtime"
-	"sync"
 
+	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
 
 	"fyne.io/fyne/v2"
@@ -21,26 +21,15 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized in main.init because
-// a main goroutine may not equal to 1 due to the
-// influence of a garbage collector.
-var mainGoroutineID uint64
-
 var curWindow *window
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
 
-// A workaround on Apple M1/M2, just use 1 thread until fixed upstream.
-const drawOnMainThread bool = runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"
-
 type gLDriver struct {
-	windowLock   sync.RWMutex
-	windows      []fyne.Window
-	done         chan struct{}
-	drawDone     chan struct{}
-	waitForStart chan struct{}
+	windows     []fyne.Window
+	initialized bool
+	done        chan struct{}
 
 	animation animation.Runner
 
@@ -48,6 +37,13 @@ type gLDriver struct {
 
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
+}
+
+func (d *gLDriver) init() {
+	if !d.initialized {
+		d.initialized = true
+		d.initGLFW()
+	}
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
@@ -66,6 +62,16 @@ func toOSIcon(icon []byte) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
+	if wait {
+		async.EnsureNotMain(func() {
+			runOnMainWithWait(f, true)
+		})
+	} else {
+		runOnMainWithWait(f, false)
+	}
 }
 
 func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
@@ -93,7 +99,7 @@ func (d *gLDriver) Device() fyne.Device {
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			curWindow.QueueEvent(f)
+			f()
 		}
 		curWindow = nil
 		if d.trayStop != nil {
@@ -108,8 +114,6 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) addWindow(w *window) {
-	d.windowLock.Lock()
-	defer d.windowLock.Unlock()
 	d.windows = append(d.windows, w)
 }
 
@@ -117,12 +121,8 @@ func (d *gLDriver) addWindow(w *window) {
 // This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
 // of an issue, and the added complexity to track focus was not needed at this time.
 func (d *gLDriver) focusPreviousWindow() {
-	d.windowLock.RLock()
-	wins := d.windows
-	d.windowLock.RUnlock()
-
 	var chosen *window
-	for _, w := range wins {
+	for _, w := range d.windows {
 		win := w.(*window)
 		if !win.visible {
 			continue
@@ -140,13 +140,11 @@ func (d *gLDriver) focusPreviousWindow() {
 }
 
 func (d *gLDriver) windowList() []fyne.Window {
-	d.windowLock.RLock()
-	defer d.windowLock.RUnlock()
 	return d.windows
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
-	logError(msg, err)
+	fyne.LogError(msg, err)
 
 	if !running.Load() {
 		d.Quit()
@@ -156,7 +154,7 @@ func (d *gLDriver) initFailed(msg string, err error) {
 }
 
 func (d *gLDriver) Run() {
-	if goroutineID() != mainGoroutineID {
+	if !async.IsMainGoroutine() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 
@@ -178,8 +176,6 @@ func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done:         make(chan struct{}),
-		drawDone:     make(chan struct{}),
-		waitForStart: make(chan struct{}),
+		done: make(chan struct{}),
 	}
 }

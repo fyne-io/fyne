@@ -2,8 +2,11 @@
   Icon = "../../theme/icons/fyne.png"
   Name = "Fyne Demo"
   ID = "io.fyne.demo"
-  Version = "2.4.0"
-  Build = 11
+  Version = "2.6.0"
+  Build = 13
+
+[Migrations]
+  fyneDo = true
 
 [Source]
   Repo = "https://github.com/fyne-io/fyne"

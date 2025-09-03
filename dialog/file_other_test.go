@@ -18,6 +18,6 @@ func TestFileDialog_LoadPlaces(t *testing.T) {
 	f := &fileDialog{}
 	places := f.getPlaces()
 
-	assert.Equal(t, 1, len(places))
+	assert.Len(t, places, 1)
 	assert.Equal(t, "Computer", places[0].locName)
 }

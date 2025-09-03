@@ -40,14 +40,14 @@ func TestTable_Cache(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
 	assert.Equal(t, float32(0), table.content.Offset.Y) // we didn't scroll as data shorter
 	assert.Equal(t, float32(150), table.content.Offset.X)
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
 }
@@ -143,6 +143,10 @@ func TestTable_Focus(t *testing.T) {
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
+
+	table.Select(TableCellID{Row: 1, Col: 1})
+	assert.Equal(t, &TableCellID{1, 1}, table.selectedCell)
+	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
 }
 
 func TestTable_Headers(t *testing.T) {
@@ -165,7 +169,6 @@ func TestTable_Headers(t *testing.T) {
 }
 
 func TestTable_JustHeaders(t *testing.T) {
-
 	test.NewTempApp(t)
 
 	table := NewTableWithHeaders(
@@ -536,6 +539,33 @@ func TestTable_ScrollToLeading(t *testing.T) {
 	assert.Equal(t, want, table.content.Offset)
 }
 
+func TestTable_ScrollToOffset(t *testing.T) {
+	test.NewTempApp(t)
+
+	const (
+		maxRows int     = 6
+		maxCols int     = 10
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.Size{Width: width, Height: height})
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	want := fyne.NewPos(48, 25)
+	table.ScrollToOffset(want)
+	assert.Equal(t, want, table.offset)
+	assert.Equal(t, want, table.content.Offset)
+}
+
 func TestTable_ScrollToTop(t *testing.T) {
 	test.NewTempApp(t)
 
@@ -702,6 +732,18 @@ func TestTable_Select(t *testing.T) {
 	assert.Equal(t, 3, selectedCol)
 	assert.Equal(t, 4, selectedRow)
 	test.AssertRendersToMarkup(t, "table/selected_scrolled.xml", w.Canvas())
+
+	table.Select(TableCellID{1, -1})
+	assert.Equal(t, 3, table.selectedCell.Col)
+	assert.Equal(t, 4, table.selectedCell.Row)
+	assert.Equal(t, 3, selectedCol)
+	assert.Equal(t, 4, selectedRow)
+
+	table.Select(TableCellID{-1, -1})
+	assert.Equal(t, 3, table.selectedCell.Col)
+	assert.Equal(t, 4, table.selectedCell.Row)
+	assert.Equal(t, 3, selectedCol)
+	assert.Equal(t, 4, selectedRow)
 }
 
 func TestTable_SetColumnWidth(t *testing.T) {
@@ -727,7 +769,7 @@ func TestTable_SetColumnWidth(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
 	assert.Equal(t, float32(32), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
 	cell1Offset := theme.Padding()
 	assert.Equal(t, float32(32)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[1].Position().X)
@@ -773,7 +815,8 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.Dragged(&fyne.DragEvent{ // reduce less than min width
 		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(25, 0)},
-		Dragged:    fyne.Delta{DX: -25, DY: 0}})
+		Dragged:    fyne.Delta{DX: -25, DY: 0},
+	})
 
 	assert.Equal(t, table.cellSize.Width, table.columnWidths[1])
 
@@ -806,7 +849,7 @@ func TestTable_SetRowHeight(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 6, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 6)
 	assert.Equal(t, float32(48), cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Height)
 	cell1Offset := theme.Padding()
 	assert.Equal(t, float32(48)+cell1Offset, cellRenderer.(*tableCellsRenderer).Objects()[3].Position().Y)
@@ -852,7 +895,8 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.Dragged(&fyne.DragEvent{ // reduce less than min height
 		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(0, 25)},
-		Dragged:    fyne.Delta{DX: 0, DY: -25}})
+		Dragged:    fyne.Delta{DX: 0, DY: -25},
+	})
 
 	assert.Equal(t, table.cellSize.Height, table.rowHeights[2])
 
@@ -873,7 +917,7 @@ func TestTable_ShowVisible(t *testing.T) {
 
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 8, len(cellRenderer.(*tableCellsRenderer).visible))
+	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {

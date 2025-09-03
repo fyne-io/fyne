@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/v2/cmd/fyne_settings/settings"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -24,9 +25,9 @@ var topWindow fyne.Window
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(data.FyneLogo)
-	makeTray(a)
-	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
+	makeTray(a, w)
+	logLifecycle(a)
 	topWindow = w
 
 	w.SetMainMenu(makeMenu(a, w))
@@ -73,6 +74,12 @@ func main() {
 		w.SetContent(split)
 	}
 	w.Resize(fyne.NewSize(640, 460))
+
+	notice := widget.NewRichTextFromMarkdown(
+		"This demo has been moved to a new repository.\n\n[Fyne demo on GitHub](https://github.com/fyne-io/demo)")
+	notice.Segments[2].(*widget.HyperlinkSegment).Alignment = fyne.TextAlignCenter
+	dialog.ShowCustom("Fyne Demo Moved", "OK", notice, w)
+
 	w.ShowAndRun()
 }
 
@@ -189,7 +196,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	return main
 }
 
-func makeTray(a fyne.App) {
+func makeTray(a fyne.App, w fyne.Window) {
 	if desk, ok := a.(desktop.App); ok {
 		h := fyne.NewMenuItem("Hello", func() {})
 		h.Icon = theme.HomeIcon()
@@ -200,6 +207,7 @@ func makeTray(a fyne.App) {
 			menu.Refresh()
 		}
 		desk.SetSystemTrayMenu(menu)
+		desk.SetSystemTrayWindow(w)
 	}
 }
 
@@ -228,6 +236,11 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		},
 		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
+				for _, f := range tutorials.OnChangeFuncs {
+					f()
+				}
+				tutorials.OnChangeFuncs = nil // Loading a page registers a new cleanup.
+
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
 			}

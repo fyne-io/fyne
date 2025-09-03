@@ -27,8 +27,9 @@ type WindowlessCanvas interface {
 }
 
 type canvas struct {
-	size  fyne.Size
-	scale float32
+	size    fyne.Size
+	resized bool
+	scale   float32
 
 	content     fyne.CanvasObject
 	overlays    *internal.OverlayStack
@@ -167,6 +168,14 @@ func (c *canvas) Refresh(fyne.CanvasObject) {
 
 func (c *canvas) Resize(size fyne.Size) {
 	c.propertyLock.Lock()
+	c.resized = true
+	c.propertyLock.Unlock()
+
+	c.doResize(size)
+}
+
+func (c *canvas) doResize(size fyne.Size) {
+	c.propertyLock.Lock()
 	content := c.content
 	overlays := c.overlays
 	padded := c.padded
@@ -213,6 +222,7 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.propertyLock.Lock()
 	c.content = content
 	c.focusMgr = intapp.NewFocusManager(c.content)
+	resized := c.resized
 	c.propertyLock.Unlock()
 
 	if content == nil {
@@ -223,7 +233,12 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	if c.padded {
 		minSize = minSize.Add(fyne.NewSquareSize(theme.Padding() * 2))
 	}
-	c.Resize(minSize)
+
+	if resized {
+		c.doResize(c.Size().Max(minSize))
+	} else {
+		c.doResize(minSize)
+	}
 }
 
 func (c *canvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
@@ -245,7 +260,7 @@ func (c *canvas) SetPadded(padded bool) {
 	c.padded = padded
 	c.propertyLock.Unlock()
 
-	c.Resize(c.Size())
+	c.doResize(c.Size())
 }
 
 func (c *canvas) SetScale(scale float32) {

@@ -42,7 +42,7 @@ func TestEntryCursorAnim(t *testing.T) {
 	a.anim.Tick(1.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 
-	a.timeNow = func() time.Time {
+	timeNow = func() time.Time {
 		return time.Now().Add(cursorInterruptTime)
 	}
 	// animation should be restarted inverting the colors
@@ -54,12 +54,12 @@ func TestEntryCursorAnim(t *testing.T) {
 	a.anim.Tick(1.0)
 	assert.True(t, alphaEquals(cursorDim, a.cursor.FillColor))
 
-	a.timeNow = time.Now
+	timeNow = time.Now
 	a.interrupt()
 	a.anim.Tick(0.0)
 	assert.True(t, alphaEquals(cursorOpaque, a.cursor.FillColor))
 
-	a.timeNow = func() time.Time {
+	timeNow = func() time.Time {
 		return time.Now().Add(cursorInterruptTime)
 	}
 	a.anim.Tick(0.0)

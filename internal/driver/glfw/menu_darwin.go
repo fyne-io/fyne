@@ -1,4 +1,4 @@
-//go:build !no_native_menus && !wasm && !test_web_driver
+//go:build darwin && !no_native_menus
 
 package glfw
 
@@ -54,38 +54,40 @@ type menuCallbacks struct {
 	checked func() bool
 }
 
-var callbacks []*menuCallbacks
-var ecb func(string)
-var specialKeys = map[fyne.KeyName]string{
-	fyne.KeyBackspace: "\x08",
-	fyne.KeyDelete:    "\x7f",
-	fyne.KeyDown:      "\uf701",
-	fyne.KeyEnd:       "\uf72b",
-	fyne.KeyEnter:     "\x03",
-	fyne.KeyEscape:    "\x1b",
-	fyne.KeyF10:       "\uf70d",
-	fyne.KeyF11:       "\uf70e",
-	fyne.KeyF12:       "\uf70f",
-	fyne.KeyF1:        "\uf704",
-	fyne.KeyF2:        "\uf705",
-	fyne.KeyF3:        "\uf706",
-	fyne.KeyF4:        "\uf707",
-	fyne.KeyF5:        "\uf708",
-	fyne.KeyF6:        "\uf709",
-	fyne.KeyF7:        "\uf70a",
-	fyne.KeyF8:        "\uf70b",
-	fyne.KeyF9:        "\uf70c",
-	fyne.KeyHome:      "\uf729",
-	fyne.KeyInsert:    "\uf727",
-	fyne.KeyLeft:      "\uf702",
-	fyne.KeyPageDown:  "\uf72d",
-	fyne.KeyPageUp:    "\uf72c",
-	fyne.KeyReturn:    "\n",
-	fyne.KeyRight:     "\uf703",
-	fyne.KeySpace:     " ",
-	fyne.KeyTab:       "\t",
-	fyne.KeyUp:        "\uf700",
-}
+var (
+	callbacks   []*menuCallbacks
+	ecb         func(string)
+	specialKeys = map[fyne.KeyName]string{
+		fyne.KeyBackspace: "\x08",
+		fyne.KeyDelete:    "\x7f",
+		fyne.KeyDown:      "\uf701",
+		fyne.KeyEnd:       "\uf72b",
+		fyne.KeyEnter:     "\x03",
+		fyne.KeyEscape:    "\x1b",
+		fyne.KeyF10:       "\uf70d",
+		fyne.KeyF11:       "\uf70e",
+		fyne.KeyF12:       "\uf70f",
+		fyne.KeyF1:        "\uf704",
+		fyne.KeyF2:        "\uf705",
+		fyne.KeyF3:        "\uf706",
+		fyne.KeyF4:        "\uf707",
+		fyne.KeyF5:        "\uf708",
+		fyne.KeyF6:        "\uf709",
+		fyne.KeyF7:        "\uf70a",
+		fyne.KeyF8:        "\uf70b",
+		fyne.KeyF9:        "\uf70c",
+		fyne.KeyHome:      "\uf729",
+		fyne.KeyInsert:    "\uf727",
+		fyne.KeyLeft:      "\uf702",
+		fyne.KeyPageDown:  "\uf72d",
+		fyne.KeyPageUp:    "\uf72c",
+		fyne.KeyReturn:    "\n",
+		fyne.KeyRight:     "\uf703",
+		fyne.KeySpace:     " ",
+		fyne.KeyTab:       "\t",
+		fyne.KeyUp:        "\uf700",
+	}
+)
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	menu, nextItemID = handleSpecialItems(w, menu, nextItemID, true)
@@ -179,9 +181,13 @@ func insertNativeMenuItem(nsMenu unsafe.Pointer, item *fyne.MenuItem, nextItemID
 			if _, isThemed := rsc.(*theme.ThemedResource); isThemed {
 				var r, g, b, a C.int
 				C.getTextColorRGBA(&r, &g, &b, &a)
+				content, err := svg.Colorize(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)})
+				if err != nil {
+					fyne.LogError("", err)
+				}
 				rsc = &fyne.StaticResource{
 					StaticName:    rsc.Name(),
-					StaticContent: svg.Colorize(rsc.Content(), color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}),
+					StaticContent: content,
 				}
 			}
 			size := int(C.menuFontSize())
@@ -220,7 +226,7 @@ func keyEquivalent(item *fyne.MenuItem) (key string) {
 			key = strings.ToLower(string(s.Key()))
 		}
 	}
-	return
+	return key
 }
 
 func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
@@ -238,7 +244,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 			mask |= 1 << 20 // NSEventModifierFlagCommand
 		}
 	}
-	return
+	return mask
 }
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
@@ -246,7 +252,7 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 		callbacks = append(callbacks, &menuCallbacks{
 			action: func() {
 				if item.Action != nil {
-					w.QueueEvent(item.Action)
+					item.Action()
 				}
 			},
 			enabled: func() bool {
@@ -263,10 +269,6 @@ func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 
 func setExceptionCallback(cb func(string)) {
 	ecb = cb
-}
-
-func hasNativeMenu() bool {
-	return true
 }
 
 //export menuCallback

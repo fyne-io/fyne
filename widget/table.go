@@ -9,23 +9,29 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
-	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
 const noCellMatch = math.MaxInt
 
-// allTableCellsID represents all table cells when refreshing requested cells
-var allTableCellsID = TableCellID{-1, -1}
+var (
+	// allTableCellsID represents all table cells when refreshing requested cells
+	allTableCellsID = TableCellID{-1, -1}
+
+	// onlyNewTableCellsID represents newly visible table cells when refreshing requested cells
+	onlyNewTableCellsID = TableCellID{-2, -2}
+)
 
 // Declare conformity with interfaces
-var _ desktop.Cursorable = (*Table)(nil)
-var _ fyne.Draggable = (*Table)(nil)
-var _ fyne.Focusable = (*Table)(nil)
-var _ desktop.Hoverable = (*Table)(nil)
-var _ fyne.Tappable = (*Table)(nil)
-var _ fyne.Widget = (*Table)(nil)
+var (
+	_ desktop.Cursorable = (*Table)(nil)
+	_ fyne.Draggable     = (*Table)(nil)
+	_ fyne.Focusable     = (*Table)(nil)
+	_ desktop.Hoverable  = (*Table)(nil)
+	_ fyne.Tappable      = (*Table)(nil)
+	_ fyne.Widget        = (*Table)(nil)
+)
 
 // TableCellID is a type that represents a cell's position in a table based on its row and column location.
 type TableCellID struct {
@@ -137,7 +143,6 @@ func NewTableWithHeaders(length func() (rows int, cols int), create func() fyne.
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 
-	t.propertyLock.Lock()
 	t.headerSize = t.createHeader().MinSize()
 	if t.columnWidths != nil {
 		if v, ok := t.columnWidths[-1]; ok {
@@ -156,7 +161,6 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.left = newClip(t, &fyne.Container{})
 	t.corner = newClip(t, &fyne.Container{})
 	t.dividerLayer = newClip(t, &fyne.Container{})
-	t.propertyLock.Unlock()
 	t.dragCol = noCellMatch
 	t.dragRow = noCellMatch
 
@@ -164,7 +168,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	r.SetObjects([]fyne.CanvasObject{t.top, t.left, t.corner, t.dividerLayer, t.content})
 	t.content.OnScrolled = func(pos fyne.Position) {
 		t.offset = pos
-		t.cells.Refresh()
+		t.cells.refreshForID(onlyNewTableCellsID)
 	}
 
 	r.Layout(t.Size())
@@ -182,13 +186,11 @@ func (t *Table) Cursor() desktop.Cursor {
 }
 
 func (t *Table) Dragged(e *fyne.DragEvent) {
-	t.propertyLock.Lock()
 	min := t.cellSize
 	col := t.dragCol
 	row := t.dragRow
 	startPos := t.dragStartPos
 	startSize := t.dragStartSize
-	t.propertyLock.Unlock()
 
 	if col != noCellMatch {
 		newSize := startSize + (e.Position.X - startPos.X)
@@ -216,7 +218,6 @@ func (t *Table) DragEnd() {
 // Implements: fyne.Focusable
 func (t *Table) FocusGained() {
 	t.focused = true
-	t.ScrollTo(t.currentFocus)
 	t.RefreshItem(t.currentFocus)
 }
 
@@ -256,12 +257,7 @@ func (t *Table) RefreshItem(id TableCellID) {
 	if t.cells == nil {
 		return
 	}
-	r := cache.Renderer(t.cells)
-	if r == nil {
-		return
-	}
-
-	r.(*tableCellsRenderer).refreshForID(id)
+	t.cells.refreshForID(id)
 }
 
 // Select will mark the specified cell as selected.
@@ -271,7 +267,7 @@ func (t *Table) Select(id TableCellID) {
 	}
 
 	rows, cols := t.Length()
-	if id.Row >= rows || id.Col >= cols {
+	if id.Row < 0 || id.Row >= rows || id.Col < 0 || id.Col >= cols {
 		return
 	}
 
@@ -282,6 +278,7 @@ func (t *Table) Select(id TableCellID) {
 		f(*t.selectedCell)
 	}
 	t.selectedCell = &id
+	t.currentFocus = id
 
 	t.ScrollTo(id)
 
@@ -296,10 +293,8 @@ func (t *Table) Select(id TableCellID) {
 //
 // Since: 1.4.1
 func (t *Table) SetColumnWidth(id int, width float32) {
-	t.propertyLock.Lock()
 	if id < 0 {
 		if t.headerSize.Width == width {
-			t.propertyLock.Unlock()
 			return
 		}
 		t.headerSize.Width = width
@@ -310,12 +305,9 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 	}
 
 	if set, ok := t.columnWidths[id]; ok && set == width {
-		t.propertyLock.Unlock()
 		return
 	}
 	t.columnWidths[id] = width
-	t.propertyLock.Unlock()
-
 	t.Refresh()
 }
 
@@ -325,10 +317,8 @@ func (t *Table) SetColumnWidth(id int, width float32) {
 //
 // Since: 2.3
 func (t *Table) SetRowHeight(id int, height float32) {
-	t.propertyLock.Lock()
 	if id < 0 {
 		if t.headerSize.Height == height {
-			t.propertyLock.Unlock()
 			return
 		}
 		t.headerSize.Height = height
@@ -339,12 +329,9 @@ func (t *Table) SetRowHeight(id int, height float32) {
 	}
 
 	if set, ok := t.rowHeights[id]; ok && set == height {
-		t.propertyLock.Unlock()
 		return
 	}
 	t.rowHeights[id] = height
-	t.propertyLock.Unlock()
-
 	t.Refresh()
 }
 
@@ -550,6 +537,19 @@ func (t *Table) ScrollToLeading() {
 	t.finishScroll()
 }
 
+// ScrollToOffset scrolls the table to a specific position
+//
+// Since: 2.6
+func (t *Table) ScrollToOffset(off fyne.Position) {
+	if t.content == nil {
+		return
+	}
+
+	t.content.ScrollToOffset(off)
+	t.offset = t.content.Offset
+	t.finishScroll()
+}
+
 // ScrollToTop scrolls to the first row in the table
 //
 // Since: 2.1
@@ -591,11 +591,11 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	}
 
 	col := t.columnAt(e.Position)
-	if col == noCellMatch {
+	if col == noCellMatch || col < 0 {
 		return // out of col range
 	}
 	row := t.rowAt(e.Position)
-	if row == noCellMatch {
+	if row == noCellMatch || row < 0 {
 		return // out of row range
 	}
 	t.Select(TableCellID{row, col})
@@ -604,9 +604,8 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 		t.RefreshItem(t.currentFocus)
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
 		if canvas != nil {
-			canvas.Focus(t)
+			canvas.Focus(t.impl.(fyne.Focusable))
 		}
-		t.currentFocus = TableCellID{row, col}
 		t.RefreshItem(t.currentFocus)
 	}
 }
@@ -668,7 +667,7 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 		}
 		cellWidth = width
 	}
-	return
+	return cellX, cellWidth
 }
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
@@ -685,7 +684,7 @@ func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 		}
 		cellHeight = height
 	}
-	return
+	return cellY, cellHeight
 }
 
 func (t *Table) finishScroll() {
@@ -848,7 +847,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 		for i := 0; i < max; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -860,7 +859,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
@@ -870,12 +869,12 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
 	stick := t.StickyColumnCount
-	size := t.size.Load()
+	size := t.Size()
 
 	if len(t.columnWidths) == 0 {
 		paddedWidth := colWidth + padding
@@ -902,7 +901,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		for i := 0; i < stick; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	for i := 0; i < cols; i++ {
@@ -929,7 +928,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			visible[i] = width
 		}
 	}
-	return
+	return visible, offX, minCol, maxCol
 }
 
 func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32) {
@@ -948,7 +947,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 		for i := 0; i < max; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -960,7 +959,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]float32, offY float32, minRow, maxRow int) {
@@ -970,12 +969,12 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
 	stick := t.StickyRowCount
-	size := t.size.Load()
+	size := t.Size()
 
 	if len(t.rowHeights) == 0 {
 		paddedHeight := rowHeight + padding
@@ -1002,7 +1001,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		for i := 0; i < stick; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	for i := 0; i < rows; i++ {
@@ -1029,7 +1028,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			visible[i] = height
 		}
 	}
-	return
+	return visible, offY, minRow, maxRow
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -1042,7 +1041,6 @@ type tableRenderer struct {
 
 func (t *tableRenderer) Layout(s fyne.Size) {
 	th := t.t.Theme()
-	t.t.propertyLock.RLock()
 
 	t.calculateHeaderSizes(th)
 	off := fyne.NewPos(t.t.stuckWidth, t.t.stuckHeight)
@@ -1052,7 +1050,6 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 	if t.t.ShowHeaderColumn {
 		off.X += t.t.headerSize.Width
 	}
-	t.t.propertyLock.RUnlock()
 
 	t.t.content.Move(off)
 	t.t.content.Resize(s.SubtractWidthHeight(off.X, off.Y))
@@ -1073,9 +1070,6 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 
 func (t *tableRenderer) MinSize() fyne.Size {
 	sep := t.t.Theme().Size(theme.SizeNamePadding)
-	t.t.propertyLock.RLock()
-	defer t.t.propertyLock.RUnlock()
-
 	min := t.t.content.MinSize().Max(t.t.cellSize)
 	if t.t.ShowHeaderRow {
 		min.Height += t.t.headerSize.Height + sep
@@ -1108,7 +1102,6 @@ func (t *tableRenderer) MinSize() fyne.Size {
 
 func (t *tableRenderer) Refresh() {
 	th := t.t.Theme()
-	t.t.propertyLock.Lock()
 	t.t.headerSize = t.t.createHeader().MinSize()
 	if t.t.columnWidths != nil {
 		if v, ok := t.t.columnWidths[-1]; ok {
@@ -1122,7 +1115,6 @@ func (t *tableRenderer) Refresh() {
 	}
 	t.t.cellSize = t.t.templateSize()
 	t.calculateHeaderSizes(th)
-	t.t.propertyLock.Unlock()
 
 	t.Layout(t.t.Size())
 	t.t.cells.Refresh()
@@ -1161,10 +1153,12 @@ var _ fyne.Widget = (*tableCells)(nil)
 type tableCells struct {
 	BaseWidget
 	t *Table
+
+	nextRefreshCellsID TableCellID
 }
 
 func newTableCells(t *Table) *tableCells {
-	c := &tableCells{t: t}
+	c := &tableCells{t: t, nextRefreshCellsID: allTableCellsID}
 	c.ExtendBaseWidget(c)
 	return c
 }
@@ -1177,11 +1171,13 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 
-	r := &tableCellsRenderer{cells: c,
+	r := &tableCellsRenderer{
+		cells:   c,
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		headRowStickyBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
-		marker: marker, hover: hover}
+		marker: marker, hover: hover,
+	}
 
 	c.t.moveCallback = r.moveIndicators
 	return r
@@ -1189,7 +1185,17 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 
 func (c *tableCells) Resize(s fyne.Size) {
 	c.BaseWidget.Resize(s)
-	c.Refresh() // trigger a redraw
+	c.refreshForID(onlyNewTableCellsID) // trigger a redraw
+}
+
+func (c *tableCells) refreshForID(id TableCellID) {
+	c.nextRefreshCellsID = id
+	c.BaseWidget.Refresh()
+}
+
+func (c *tableCells) Refresh() {
+	c.nextRefreshCellsID = allTableCellsID
+	c.BaseWidget.Refresh()
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -1208,14 +1214,10 @@ type tableCellsRenderer struct {
 }
 
 func (r *tableCellsRenderer) Layout(fyne.Size) {
-	r.cells.propertyLock.Lock()
 	r.moveIndicators()
-	r.cells.propertyLock.Unlock()
 }
 
 func (r *tableCellsRenderer) MinSize() fyne.Size {
-	r.cells.propertyLock.RLock()
-	defer r.cells.propertyLock.RUnlock()
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
@@ -1261,14 +1263,13 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	r.refreshForID(allTableCellsID)
+	r.refreshForID(r.cells.nextRefreshCellsID)
 }
 
 func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	th := r.cells.t.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.cells.propertyLock.Lock()
 	separatorThickness := th.Size(theme.SizeNamePadding)
 	dataRows, dataCols := 0, 0
 	if f := r.cells.t.Length; f != nil {
@@ -1276,18 +1277,11 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	}
 	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.t.cellSize.Width, dataCols)
 	if len(visibleColWidths) == 0 && dataCols > 0 { // we can't show anything until we have some dimensions
-		r.cells.propertyLock.Unlock()
 		return
 	}
 	visibleRowHeights, offY, minRow, maxRow := r.cells.t.visibleRowHeights(r.cells.t.cellSize.Height, dataRows)
 	if len(visibleRowHeights) == 0 && dataRows > 0 { // we can't show anything until we have some dimensions
-		r.cells.propertyLock.Unlock()
 		return
-	}
-
-	updateCell := r.cells.t.UpdateCell
-	if updateCell == nil {
-		fyne.LogError("Missing UpdateCell callback required for Table", nil)
 	}
 
 	var cellXOffset, cellYOffset float32
@@ -1341,10 +1335,8 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			displayCol(row, col, rowHeight, cells)
 		}
 		cellXOffset = r.cells.t.content.Offset.X
-		stick := r.cells.t.StickyColumnCount
 		if r.cells.t.ShowHeaderColumn {
 			cellXOffset += r.cells.t.headerSize.Width
-			stick--
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
@@ -1389,22 +1381,11 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			r.pool.Put(old)
 		}
 	}
-	visible := r.visible
-	headers := r.headers
 
-	r.cells.propertyLock.Unlock()
 	r.SetObjects(cells)
 
-	if updateCell != nil {
-		for id, cell := range visible {
-			if toDraw != allTableCellsID && toDraw != id {
-				continue
-			}
-
-			updateCell(id, cell)
-		}
-	}
-	for id, head := range headers {
+	r.updateCells(toDraw, r.visible, wasVisible)
+	for id, head := range r.headers {
 		r.cells.t.updateHeader(id, head)
 	}
 
@@ -1415,6 +1396,30 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	r.hover.FillColor = th.Color(theme.ColorNameHover, v)
 	r.hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 	r.hover.Refresh()
+}
+
+func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible map[TableCellID]fyne.CanvasObject) {
+	updateCell := r.cells.t.UpdateCell
+	if updateCell == nil {
+		fyne.LogError("Missing UpdateCell callback required for Table", nil)
+		return
+	}
+
+	if toDraw == onlyNewTableCellsID {
+		for id, cell := range visible {
+			if _, ok := wasVisible[id]; !ok {
+				updateCell(id, cell)
+			}
+		}
+		return
+	}
+
+	for id, cell := range visible {
+		if toDraw != allTableCellsID && toDraw != id {
+			continue
+		}
+		updateCell(id, cell)
+	}
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
@@ -1477,7 +1482,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.cells.t.dividerLayer.Content.Refresh()
 	}
 
-	size := r.cells.t.size.Load()
+	size := r.cells.t.Size()
 
 	divs := 0
 	i := 0
@@ -1581,7 +1586,7 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	}
 	y2 := y1 + heights[row]
 
-	size := r.cells.t.size.Load()
+	size := r.cells.t.Size()
 	if x2 < 0 || x1 > size.Width || y2 < 0 || y1 > size.Height {
 		marker.Hide()
 	} else {
@@ -1602,7 +1607,8 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 }
 
 func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32,
-	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant) []fyne.CanvasObject {
+	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant,
+) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
 	headerMin := r.cells.t.headerSize

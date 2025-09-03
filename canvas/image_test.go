@@ -9,9 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/storage"
 	_ "fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,6 +30,22 @@ func TestImage_TranslucencyDefault(t *testing.T) {
 	assert.Equal(t, 0.0, img.Translucency)
 }
 
+func TestImage_RefreshBlank(t *testing.T) {
+	img := &canvas.Image{}
+	img.Resize(fyne.NewSize(64, 64))
+	img.Refresh()
+	assert.Nil(t, img.Image)
+
+	img.Resource = theme.HomeIcon()
+	img.Refresh()
+	assert.NotNil(t, img.Image)
+
+	img.Image = nil
+	img.Resource = nil
+	img.Refresh()
+	assert.Nil(t, img.Image)
+}
+
 func TestNewImageFromFile(t *testing.T) {
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
@@ -41,7 +59,7 @@ func TestNewImageFromReader(t *testing.T) {
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
 	read, err := os.Open(path)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	defer read.Close()
 
 	img := canvas.NewImageFromReader(read, "fyne.png")

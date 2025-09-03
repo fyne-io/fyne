@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -20,8 +19,10 @@ import (
 type ListItemID = int
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*List)(nil)
-var _ fyne.Focusable = (*List)(nil)
+var (
+	_ fyne.Widget    = (*List)(nil)
+	_ fyne.Focusable = (*List)(nil)
+)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
@@ -32,11 +33,26 @@ var _ fyne.Focusable = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length       func() int                                  `json:"-"`
-	CreateItem   func() fyne.CanvasObject                    `json:"-"`
-	UpdateItem   func(id ListItemID, item fyne.CanvasObject) `json:"-"`
-	OnSelected   func(id ListItemID)                         `json:"-"`
-	OnUnselected func(id ListItemID)                         `json:"-"`
+	// Length is a callback for returning the number of items in the list.
+	Length func() int `json:"-"`
+
+	// CreateItem is a callback invoked to create a new widget to render
+	// a row in the list.
+	CreateItem func() fyne.CanvasObject `json:"-"`
+
+	// UpdateItem is a callback invoked to update a list row widget
+	// to display a new row in the list. The UpdateItem callback should
+	// only update the given item, it should not invoke APIs that would
+	// change other properties of the list itself.
+	UpdateItem func(id ListItemID, item fyne.CanvasObject) `json:"-"`
+
+	// OnSelected is a callback to be notified when a given item
+	// in the list has been selected.
+	OnSelected func(id ListItemID) `json:"-"`
+
+	// OnSelected is a callback to be notified when a given item
+	// in the list has been unselected.
+	OnUnselected func(id ListItemID) `json:"-"`
 
 	// HideSeparators hides the separators between list rows
 	//
@@ -105,7 +121,6 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Focusable
 func (l *List) FocusGained() {
 	l.focused = true
-	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
 }
 
@@ -132,9 +147,7 @@ func (l *List) RefreshItem(id ListItemID) {
 	}
 	l.BaseWidget.Refresh()
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
-	lo.renderLock.RLock() // ensures we are not changing visible info in render code during the search
 	item, ok := lo.searchVisible(lo.visible, id)
-	lo.renderLock.RUnlock()
 	if ok {
 		lo.setupListItem(item, id, l.focused && l.currentFocus == id)
 	}
@@ -146,15 +159,12 @@ func (l *List) RefreshItem(id ListItemID) {
 //
 // Since: 2.3
 func (l *List) SetItemHeight(id ListItemID, height float32) {
-	l.propertyLock.Lock()
-
 	if l.itemHeights == nil {
 		l.itemHeights = make(map[ListItemID]float32)
 	}
 
 	refresh := l.itemHeights[id] != height
 	l.itemHeights[id] = height
-	l.propertyLock.Unlock()
 
 	if refresh {
 		l.RefreshItem(id)
@@ -169,20 +179,24 @@ func (l *List) scrollTo(id ListItemID) {
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
 	y := float32(0)
 	lastItemHeight := l.itemMin.Height
+
 	if len(l.itemHeights) == 0 {
 		y = (float32(id) * l.itemMin.Height) + (float32(id) * separatorThickness)
 	} else {
-		for i := 0; i < id; i++ {
+		i := 0
+		for ; i < id; i++ {
 			height := l.itemMin.Height
 			if h, ok := l.itemHeights[i]; ok {
 				height = h
 			}
 
 			y += height + separatorThickness
-			lastItemHeight = height
+		}
+		lastItemHeight = l.itemMin.Height
+		if h, ok := l.itemHeights[i]; ok {
+			lastItemHeight = h
 		}
 	}
-
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
 	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
@@ -247,23 +261,16 @@ func (l *List) ScrollTo(id ListItemID) {
 //
 // Since: 2.1
 func (l *List) ScrollToBottom() {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
-	if length > 0 {
-		length--
-	}
-	l.scrollTo(length)
-	l.Refresh()
+	l.scroller.ScrollToBottom()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToTop scrolls to the start of the list
 //
 // Since: 2.1
 func (l *List) ScrollToTop() {
-	l.scrollTo(0)
-	l.Refresh()
+	l.scroller.ScrollToTop()
+	l.offsetUpdated(l.scroller.Offset)
 }
 
 // ScrollToOffset scrolls the list to the given offset position.
@@ -283,9 +290,8 @@ func (l *List) ScrollToOffset(offset float32) {
 	if offset > contentHeight {
 		offset = contentHeight
 	}
-	l.scroller.Offset.Y = offset
+	l.scroller.ScrollToOffset(fyne.NewPos(0, offset))
 	l.offsetUpdated(l.scroller.Offset)
-	l.Refresh()
 }
 
 // GetScrollOffset returns the current scroll offset position
@@ -361,8 +367,6 @@ func (l *List) UnselectAll() {
 
 func (l *List) contentMinSize() fyne.Size {
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
-	l.propertyLock.Lock()
-	defer l.propertyLock.Unlock()
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
@@ -394,7 +398,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 	l.visibleRowHeights = l.visibleRowHeights[:0]
 
 	if l.list.scroller.Size().Height <= 0 {
-		return
+		return offY, minRow
 	}
 
 	padding := th.Size(theme.SizeNamePadding)
@@ -421,7 +425,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 		for i := 0; i <= maxRow-minRow; i++ {
 			l.visibleRowHeights = append(l.visibleRowHeights, itemHeight)
 		}
-		return
+		return offY, minRow
 	}
 
 	for i := 0; i < length; i++ {
@@ -446,7 +450,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 			l.visibleRowHeights = append(l.visibleRowHeights, height)
 		}
 	}
-	return
+	return offY, minRow
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -491,9 +495,11 @@ func (l *listRenderer) Refresh() {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*listItem)(nil)
-var _ fyne.Tappable = (*listItem)(nil)
-var _ desktop.Hoverable = (*listItem)(nil)
+var (
+	_ fyne.Widget       = (*listItem)(nil)
+	_ fyne.Tappable     = (*listItem)(nil)
+	_ desktop.Hoverable = (*listItem)(nil)
+)
 
 type listItem struct {
 	BaseWidget
@@ -614,17 +620,12 @@ type listLayout struct {
 
 	itemPool          async.Pool[fyne.CanvasObject]
 	visible           []listItemAndID
-	slicePool         async.Pool[*[]listItemAndID]
+	wasVisible        []listItemAndID
 	visibleRowHeights []float32
-	renderLock        sync.RWMutex
 }
 
 func newListLayout(list *List) fyne.Layout {
 	l := &listLayout{list: list}
-	l.slicePool.New = func() *[]listItemAndID {
-		s := make([]listItemAndID, 0)
-		return &s
-	}
 	list.offsetUpdated = l.offsetUpdated
 	return l
 }
@@ -680,7 +681,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		if !fyne.CurrentDevice().IsMobile() {
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.list)
 			if canvas != nil {
-				canvas.Focus(l.list)
+				canvas.Focus(l.list.impl.(fyne.Focusable))
 			}
 
 			l.list.currentFocus = id
@@ -693,7 +694,6 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 func (l *listLayout) updateList(newOnly bool) {
 	th := l.list.Theme()
 	separatorThickness := th.Size(theme.SizeNamePadding)
-	l.renderLock.Lock()
 	width := l.list.Size().Width
 	length := 0
 	if f := l.list.Length; f != nil {
@@ -703,22 +703,16 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
-	// Keep pointer reference for copying slice header when returning to the pool
-	// https://blog.mike.norgate.xyz/unlocking-go-slice-performance-navigating-sync-pool-for-enhanced-efficiency-7cb63b0b453e
-	wasVisiblePtr := l.slicePool.Get()
-	wasVisible := (*wasVisiblePtr)[:0]
-	wasVisible = append(wasVisible, l.visible...)
+	// l.wasVisible now represents the currently visible items, while
+	// l.visible will be updated to represent what is visible *after* the update
+	l.wasVisible = append(l.wasVisible, l.visible...)
+	l.visible = l.visible[:0]
 
-	l.list.propertyLock.Lock()
 	offY, minRow := l.calculateVisibleRowHeights(l.list.itemMin.Height, length, th)
-	l.list.propertyLock.Unlock()
 	if len(l.visibleRowHeights) == 0 && length > 0 { // we can't show anything until we have some dimensions
-		l.renderLock.Unlock() // user code should not be locked
 		return
 	}
 
-	oldVisibleLen := len(l.visible)
-	l.visible = l.visible[:0]
 	oldChildrenLen := len(l.children)
 	l.children = l.children[:0]
 
@@ -727,7 +721,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		row := index + minRow
 		size := fyne.NewSize(width, itemHeight)
 
-		c, ok := l.searchVisible(wasVisible, row)
+		c, ok := l.searchVisible(l.wasVisible, row)
 		if !ok {
 			c = l.getItem()
 			if c == nil {
@@ -744,9 +738,8 @@ func (l *listLayout) updateList(newOnly bool) {
 		l.children = append(l.children, c)
 	}
 	l.nilOldSliceData(l.children, len(l.children), oldChildrenLen)
-	l.nilOldVisibleSliceData(l.visible, len(l.visible), oldVisibleLen)
 
-	for _, wasVis := range wasVisible {
+	for _, wasVis := range l.wasVisible {
 		if _, ok := l.searchVisible(l.visible, wasVis.id); !ok {
 			l.itemPool.Put(wasVis.item)
 		}
@@ -761,36 +754,28 @@ func (l *listLayout) updateList(newOnly bool) {
 	c.Objects = append(c.Objects, l.separators...)
 	l.nilOldSliceData(c.Objects, len(c.Objects), oldObjLen)
 
-	// make a local deep copy of l.visible since rest of this function is unlocked
-	// and cannot safely access l.visible
-	visiblePtr := l.slicePool.Get()
-	visible := (*visiblePtr)[:0]
-	visible = append(visible, l.visible...)
-	l.renderLock.Unlock() // user code should not be locked
-
 	if newOnly {
-		for _, vis := range visible {
-			if _, ok := l.searchVisible(wasVisible, vis.id); !ok {
+		for _, vis := range l.visible {
+			if _, ok := l.searchVisible(l.wasVisible, vis.id); !ok {
 				l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
 			}
 		}
 	} else {
-		for _, vis := range visible {
+		for _, vis := range l.visible {
 			l.setupListItem(vis.item, vis.id, l.list.focused && l.list.currentFocus == vis.id)
+		}
+
+		// a full refresh may change theme, we should drain the pool of unused items instead of refreshing them.
+		for l.itemPool.Get() != nil {
 		}
 	}
 
-	// nil out all references before returning slices to pool
-	for i := 0; i < len(wasVisible); i++ {
-		wasVisible[i].item = nil
+	// we don't need wasVisible now until next call to update
+	// nil out all references before truncating slice
+	for i := 0; i < len(l.wasVisible); i++ {
+		l.wasVisible[i].item = nil
 	}
-	for i := 0; i < len(visible); i++ {
-		visible[i].item = nil
-	}
-	*wasVisiblePtr = wasVisible // Copy the stack header over to the heap
-	*visiblePtr = visible
-	l.slicePool.Put(wasVisiblePtr)
-	l.slicePool.Put(visiblePtr)
+	l.wasVisible = l.wasVisible[:0]
 }
 
 func (l *listLayout) updateSeparators() {
@@ -844,15 +829,6 @@ func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) 
 		objs = objs[:oldLen] // gain view into old data
 		for i := len; i < oldLen; i++ {
 			objs[i] = nil
-		}
-	}
-}
-
-func (l *listLayout) nilOldVisibleSliceData(objs []listItemAndID, len, oldLen int) {
-	if oldLen > len {
-		objs = objs[:oldLen] // gain view into old data
-		for i := len; i < oldLen; i++ {
-			objs[i].item = nil
 		}
 	}
 }

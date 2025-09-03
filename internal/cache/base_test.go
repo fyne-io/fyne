@@ -3,7 +3,6 @@ package cache
 import (
 	"fmt"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -36,17 +35,17 @@ func TestCacheClean(t *testing.T) {
 	t.Run("no_expired_objects", func(t *testing.T) {
 		lastClean = tm.createTime(10, 20)
 		Clean(false)
-		assert.Equal(t, syncMapLen(svgs), 40)
-		assert.Len(t, renderers, 40)
-		assert.Len(t, canvases, 40)
+		assert.Equal(t, svgs.Len(), 40)
+		assert.Equal(t, 40, renderers.Len())
+		assert.Equal(t, 40, canvases.Len())
 		assert.Zero(t, destroyedRenderersCnt)
 		assert.Equal(t, tm.now, lastClean)
 
 		tm.setTime(10, 30)
 		Clean(true)
-		assert.Equal(t, syncMapLen(svgs), 40)
-		assert.Len(t, renderers, 40)
-		assert.Len(t, canvases, 40)
+		assert.Equal(t, svgs.Len(), 40)
+		assert.Equal(t, 40, renderers.Len())
+		assert.Equal(t, 40, canvases.Len())
 		assert.Zero(t, destroyedRenderersCnt)
 		assert.Equal(t, tm.now, lastClean)
 	})
@@ -72,9 +71,9 @@ func TestCacheClean(t *testing.T) {
 		Clean(true)
 		assert.Equal(t, tm.now, lastClean)
 
-		assert.Equal(t, syncMapLen(svgs), 40)
-		assert.Len(t, renderers, 40)
-		assert.Len(t, canvases, 40)
+		assert.Equal(t, svgs.Len(), 40)
+		assert.Equal(t, 40, renderers.Len())
+		assert.Equal(t, 40, canvases.Len())
 		assert.Zero(t, destroyedRenderersCnt)
 	})
 
@@ -82,16 +81,16 @@ func TestCacheClean(t *testing.T) {
 		lastClean = tm.createTime(10, 11)
 		tm.setTime(11, 12)
 		Clean(false)
-		assert.Equal(t, syncMapLen(svgs), 20)
-		assert.Len(t, renderers, 40)
-		assert.Len(t, canvases, 40)
+		assert.Equal(t, svgs.Len(), 20)
+		assert.Equal(t, renderers.Len(), 40)
+		assert.Equal(t, canvases.Len(), 40)
 		assert.Zero(t, destroyedRenderersCnt)
 
 		tm.setTime(11, 42)
 		Clean(false)
-		assert.Equal(t, syncMapLen(svgs), 0)
-		assert.Len(t, renderers, 40)
-		assert.Len(t, canvases, 40)
+		assert.Equal(t, svgs.Len(), 0)
+		assert.Equal(t, renderers.Len(), 40)
+		assert.Equal(t, canvases.Len(), 40)
 		assert.Zero(t, destroyedRenderersCnt)
 	})
 
@@ -99,16 +98,16 @@ func TestCacheClean(t *testing.T) {
 		lastClean = tm.createTime(10, 11)
 		tm.setTime(11, 11)
 		Clean(true)
-		assert.Equal(t, syncMapLen(svgs), 0)
-		assert.Len(t, renderers, 20)
-		assert.Len(t, canvases, 20)
+		assert.Equal(t, svgs.Len(), 0)
+		assert.Equal(t, 20, renderers.Len())
+		assert.Equal(t, 20, canvases.Len())
 		assert.Equal(t, 20, destroyedRenderersCnt)
 
 		tm.setTime(11, 22)
 		Clean(true)
-		assert.Equal(t, syncMapLen(svgs), 0)
-		assert.Len(t, renderers, 0)
-		assert.Len(t, canvases, 0)
+		assert.Equal(t, svgs.Len(), 0)
+		assert.Equal(t, 0, renderers.Len())
+		assert.Equal(t, 0, canvases.Len())
 		assert.Equal(t, 40, destroyedRenderersCnt)
 	})
 
@@ -126,13 +125,13 @@ func TestCacheClean(t *testing.T) {
 		Clean(true)
 		assert.True(t, skippedCleanWithCanvasRefresh)
 		assert.Less(t, lastClean.UnixNano(), tm.now.UnixNano())
-		assert.Len(t, renderers, 1)
+		assert.Equal(t, 1, renderers.Len())
 
 		tm.setTime(14, 21)
 		Clean(false)
 		assert.False(t, skippedCleanWithCanvasRefresh)
 		assert.Equal(t, tm.now, lastClean)
-		assert.Len(t, renderers, 0)
+		assert.Equal(t, 0, renderers.Len())
 	})
 }
 
@@ -159,20 +158,21 @@ func TestCleanCanvas(t *testing.T) {
 		SetCanvasForObject(dwidget, dcanvas2, nil)
 	}
 
-	assert.Len(t, renderers, 42)
-	assert.Len(t, canvases, 42)
+	assert.Equal(t, 42, renderers.Len())
+	assert.Equal(t, 42, canvases.Len())
 
 	CleanCanvas(dcanvas1)
-	assert.Len(t, renderers, 22)
-	assert.Len(t, canvases, 22)
+	assert.Equal(t, 22, renderers.Len())
+	assert.Equal(t, 22, canvases.Len())
 	assert.Equal(t, 20, destroyedRenderersCnt)
-	for _, cinfo := range canvases {
+	canvases.Range(func(_ fyne.CanvasObject, cinfo *canvasInfo) bool {
 		assert.Equal(t, dcanvas2, cinfo.canvas)
-	}
+		return true
+	})
 
 	CleanCanvas(dcanvas2)
-	assert.Len(t, renderers, 0)
-	assert.Len(t, canvases, 0)
+	assert.Equal(t, 0, renderers.Len())
+	assert.Equal(t, 0, canvases.Len())
 	assert.Equal(t, 42, destroyedRenderersCnt)
 }
 
@@ -189,24 +189,7 @@ func Test_expiringCache(t *testing.T) {
 	assert.False(t, c.isExpired(tm.now))
 
 	tm.setTime(10, 11)
-	tm.now = tm.now.Add(cacheDuration)
-	assert.True(t, c.isExpired(tm.now))
-}
-
-func Test_expiringCacheNoLock(t *testing.T) {
-	tm := &timeMock{}
-	tm.setTime(10, 10)
-
-	c := &expiringCacheNoLock{}
-	assert.True(t, c.isExpired(tm.now))
-
-	c.setAlive()
-
-	tm.setTime(10, 20)
-	assert.False(t, c.isExpired(tm.now))
-
-	tm.setTime(10, 11)
-	tm.now = tm.now.Add(cacheDuration)
+	tm.now = tm.now.Add(ValidDuration)
 	assert.True(t, c.isExpired(tm.now))
 }
 
@@ -265,12 +248,10 @@ func (t *timeMock) setTime(min, sec int) {
 
 func testClearAll() {
 	skippedCleanWithCanvasRefresh = false
-	canvases = make(map[fyne.CanvasObject]*canvasInfo, 1024)
-	svgs.Range(func(key, _ any) bool {
-		svgs.Delete(key)
-		return true
-	})
-	textures = sync.Map{}
-	renderers = map[fyne.Widget]*rendererInfo{}
+	canvases.Clear()
+	svgs.Clear()
+	textTextures.Clear()
+	objectTextures.Clear()
+	renderers.Clear()
 	timeNow = time.Now
 }

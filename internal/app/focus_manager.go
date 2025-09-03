@@ -1,16 +1,12 @@
 package app
 
 import (
-	"sync"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/driver"
 )
 
 // FocusManager represents a standard manager of input focus for a canvas
 type FocusManager struct {
-	sync.RWMutex
-
 	content fyne.CanvasObject
 	focused fyne.Focusable
 }
@@ -22,8 +18,6 @@ func NewFocusManager(c fyne.CanvasObject) *FocusManager {
 
 // Focus focuses the given obj.
 func (f *FocusManager) Focus(obj fyne.Focusable) bool {
-	f.Lock()
-	defer f.Unlock()
 	if obj != nil {
 		var hiddenAncestor fyne.CanvasObject
 		hidden := false
@@ -66,8 +60,6 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 
 // Focused returns the currently focused object or nil if none.
 func (f *FocusManager) Focused() fyne.Focusable {
-	f.RLock()
-	defer f.RUnlock()
 	return f.focused
 }
 
@@ -88,16 +80,12 @@ func (f *FocusManager) FocusLost() {
 // FocusNext will find the item after the current that can be focused and focus it.
 // If current is nil then the first focusable item in the canvas will be focused.
 func (f *FocusManager) FocusNext() {
-	f.Lock()
-	defer f.Unlock()
 	f.focus(f.nextInChain(f.focused))
 }
 
 // FocusPrevious will find the item before the current that can be focused and focus it.
 // If current is nil then the last focusable item in the canvas will be focused.
 func (f *FocusManager) FocusPrevious() {
-	f.Lock()
-	defer f.Unlock()
 	f.focus(f.previousInChain(f.focused))
 }
 

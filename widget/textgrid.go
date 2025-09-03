@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"fyne.io/fyne/v2/internal/cache"
-	"fyne.io/fyne/v2/internal/painter"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -76,9 +76,80 @@ type TextGrid struct {
 	BaseWidget
 	Rows []TextGridRow
 
+	scroll  *widget.Scroll
+	content *textGridContent
+
 	ShowLineNumbers bool
 	ShowWhitespace  bool
 	TabWidth        int // If set to 0 the fyne.DefaultTabWidth is used
+
+	// Scroll can be used to turn off the scrolling of our TextGrid.
+	//
+	// Since: 2.6
+	Scroll fyne.ScrollDirection
+}
+
+// Append will add new lines to the end of this TextGrid.
+// The first character will be at the beginning of a new line and any newline characters will split the text further.
+//
+// Since: 2.6
+func (t *TextGrid) Append(text string) {
+	rows := t.parseRows(text)
+
+	t.Rows = append(t.Rows, rows...)
+	t.Refresh()
+}
+
+// CursorLocationForPosition returns the location where a cursor would be if it was located in the cell under the
+// requested position. If the grid is scrolled the position will refer to the visible offset and not the distance
+// from the top left of the overall document.
+//
+// Since: 2.6
+func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
+	y := p.Y
+	x := p.X
+
+	if t.scroll != nil && t.scroll.Visible() {
+		y += t.scroll.Offset.Y
+		x += t.scroll.Offset.X
+	}
+
+	row = int(y / t.content.cellSize.Height)
+	col = int(x / t.content.cellSize.Width)
+	return row, col
+}
+
+// ScrollToTop will scroll content to container top
+//
+// Since: 2.7
+func (t *TextGrid) ScrollToTop() {
+	t.scroll.ScrollToTop()
+	t.Refresh()
+}
+
+// ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+//
+// Since: 2.7
+func (t *TextGrid) ScrollToBottom() {
+	t.scroll.ScrollToBottom()
+	t.Refresh()
+}
+
+// PositionForCursorLocation returns the relative position in this TextGrid for the cell at position row, col.
+// If the grid has been scrolled this will be taken into account so that the position compared to top left will
+// refer to the requested location.
+//
+// Since: 2.6
+func (t *TextGrid) PositionForCursorLocation(row, col int) fyne.Position {
+	y := float32(row) * t.content.cellSize.Height
+	x := float32(col) * t.content.cellSize.Width
+
+	if t.scroll != nil && t.scroll.Visible() {
+		y -= t.scroll.Offset.Y
+		x -= t.scroll.Offset.X
+	}
+
+	return fyne.NewPos(x, y)
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -98,24 +169,19 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // The grid will use default text style and any previous content and style will be removed.
 // Tab characters are padded with spaces to the next tab stop.
 func (t *TextGrid) SetText(text string) {
-	lines := strings.Split(text, "\n")
-	rows := make([]TextGridRow, len(lines))
-	for i, line := range lines {
-		cells := make([]TextGridCell, 0, len(line))
-		for _, r := range line {
-			cells = append(cells, TextGridCell{Rune: r})
-			if r == '\t' {
-				col := len(cells)
-				next := nextTab(col-1, t.tabWidth())
-				for i := col; i < next; i++ {
-					cells = append(cells, TextGridCell{Rune: ' '})
-				}
-			}
-		}
-		rows[i] = TextGridRow{Cells: cells}
+	rows := t.parseRows(text)
+
+	oldRowsLen := len(t.Rows)
+	t.Rows = rows
+
+	// If we don't update the scroll offset when the text is shorter,
+	// we may end up with no text displayed or text appearing partially cut off
+	if t.scroll != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroll.Content != nil {
+		offset := t.PositionForCursorLocation(len(rows), 0)
+		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
+		t.scroll.Refresh()
 	}
 
-	t.Rows = rows
 	t.Refresh()
 }
 
@@ -292,15 +358,28 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	render := &textGridRenderer{text: t}
-	render.updateCellSize()
 
 	th := t.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	TextGridStyleDefault = &CustomTextGridStyle{}
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
 
-	return render
+	var scroll *widget.Scroll
+	content := newTextGridContent(t)
+	objs := make([]fyne.CanvasObject, 1)
+	if t.Scroll == widget.ScrollNone {
+		scroll = widget.NewScroll(nil)
+		objs[0] = content
+	} else {
+		scroll = widget.NewScroll(content)
+		scroll.Direction = t.Scroll
+		objs[0] = scroll
+	}
+	t.scroll = scroll
+	t.content = content
+	r := &textGridRenderer{text: content, scroll: scroll}
+	r.SetObjects(objs)
+	return r
 }
 
 func (t *TextGrid) ensureCells(row, col int) {
@@ -315,14 +394,36 @@ func (t *TextGrid) ensureCells(row, col int) {
 	}
 }
 
+func (t *TextGrid) parseRows(text string) []TextGridRow {
+	lines := strings.Split(text, "\n")
+	rows := make([]TextGridRow, len(lines))
+	for i, line := range lines {
+		cells := make([]TextGridCell, 0, len(line))
+		for _, r := range line {
+			cells = append(cells, TextGridCell{Rune: r})
+			if r == '\t' {
+				col := len(cells)
+				next := nextTab(col-1, t.tabWidth())
+				for i := col; i < next; i++ {
+					cells = append(cells, TextGridCell{Rune: ' '})
+				}
+			}
+		}
+		rows[i] = TextGridRow{Cells: cells}
+	}
+
+	return rows
+}
+
 func (t *TextGrid) refreshCell(row, col int) {
-	r := cache.Renderer(t).(*textGridRenderer)
+	r := t.content
 	r.refreshCell(row, col)
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
 func NewTextGrid() *TextGrid {
 	grid := &TextGrid{}
+	grid.Scroll = widget.ScrollNone
 	grid.ExtendBaseWidget(grid)
 	return grid
 }
@@ -341,17 +442,228 @@ func nextTab(column int, tabWidth int) int {
 }
 
 type textGridRenderer struct {
-	text *TextGrid
+	widget.BaseRenderer
 
-	cols, rows int
-
-	cellSize fyne.Size
-	objects  []fyne.CanvasObject
-	current  fyne.Canvas
+	text   *textGridContent
+	scroll *widget.Scroll
 }
 
-func (t *textGridRenderer) appendTextCell(str rune) {
+func (t *textGridRenderer) Layout(s fyne.Size) {
+	t.Objects()[0].Resize(s)
+}
+
+func (t *textGridRenderer) MinSize() fyne.Size {
+	if t.text.text.Scroll == widget.ScrollNone {
+		return t.text.MinSize()
+	}
+
+	return t.scroll.MinSize()
+}
+
+func (t *textGridRenderer) Refresh() {
+	content := t.text
+	if t.text.text.Scroll != widget.ScrollNone {
+		t.scroll.Direction = t.text.text.Scroll
+	}
+	if t.text.text.Scroll == widget.ScrollNone && t.scroll.Content != nil {
+		t.scroll.Hide()
+		t.scroll.Content = nil
+		content.Resize(t.text.Size())
+		t.SetObjects([]fyne.CanvasObject{t.text})
+	} else if (t.text.text.Scroll != widget.ScrollNone) && t.scroll.Content == nil {
+		t.scroll.Content = content
+		t.scroll.Show()
+
+		t.scroll.Resize(t.text.Size())
+		content.Resize(content.MinSize())
+		t.SetObjects([]fyne.CanvasObject{t.scroll})
+	}
+
+	canvas.Refresh(t.text.text.super())
+	t.text.Refresh()
+}
+
+type textGridContent struct {
+	BaseWidget
+	text *TextGrid
+
+	rows     int
+	cellSize fyne.Size
+
+	visible []fyne.CanvasObject
+}
+
+func newTextGridContent(t *TextGrid) *textGridContent {
+	grid := &textGridContent{text: t}
+	grid.ExtendBaseWidget(grid)
+	return grid
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
+	r := &textGridContentRenderer{text: t}
+
+	r.updateCellSize()
+	t.text.scroll.OnScrolled = func(_ fyne.Position) {
+		r.addRowsIfRequired()
+		r.Layout(t.Size())
+	}
+	return r
+}
+
+func (t *textGridContent) refreshCell(row, col int) {
+	if row >= len(t.visible)-1 {
+		return
+	}
+	wid := t.visible[row].(*textGridRow)
+	wid.refreshCell(col)
+}
+
+type textGridContentRenderer struct {
+	text     *textGridContent
+	itemPool async.Pool[*textGridRow]
+}
+
+func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
+	bufRows := len(t.text.text.Rows)
+	sizeRows := int(size.Height / t.text.cellSize.Height)
+
+	if sizeRows > bufRows {
+		t.text.rows = sizeRows
+	} else {
+		t.text.rows = bufRows
+	}
+	t.addRowsIfRequired()
+}
+
+func (t *textGridContentRenderer) Destroy() {
+}
+
+func (t *textGridContentRenderer) Layout(s fyne.Size) {
+	size := fyne.NewSize(s.Width, t.text.cellSize.Height)
+	t.updateGridSize(s)
+
+	for _, o := range t.text.visible {
+		o.Move(fyne.NewPos(0, float32(o.(*textGridRow).row)*t.text.cellSize.Height))
+		o.Resize(size)
+	}
+}
+
+func (t *textGridContentRenderer) MinSize() fyne.Size {
+	longestRow := float32(0)
+	for _, row := range t.text.text.Rows {
+		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
+	}
+	return fyne.NewSize(t.text.cellSize.Width*longestRow,
+		t.text.cellSize.Height*float32(len(t.text.text.Rows)))
+}
+
+func (t *textGridContentRenderer) Objects() []fyne.CanvasObject {
+	return t.text.visible
+}
+
+func (t *textGridContentRenderer) Refresh() {
+	// theme could change text size
+	t.updateCellSize()
+	t.updateGridSize(t.text.text.Size())
+
+	for _, o := range t.text.visible {
+		o.Refresh()
+	}
+}
+
+func (t *textGridContentRenderer) addRowsIfRequired() {
+	start := 0
+	end := t.text.rows
+	if t.text.text.Scroll == widget.ScrollBoth || t.text.text.Scroll == widget.ScrollVerticalOnly {
+		off := t.text.text.scroll.Offset.Y
+		start = int(math.Floor(float64(off / t.text.cellSize.Height)))
+
+		off += t.text.text.Size().Height
+		end = int(math.Ceil(float64(off / t.text.cellSize.Height)))
+	}
+
+	remain := t.text.visible[:0]
+	for _, row := range t.text.visible {
+		if row.(*textGridRow).row < start || row.(*textGridRow).row > end {
+			t.itemPool.Put(row.(*textGridRow))
+			continue
+		}
+
+		remain = append(remain, row.(*textGridRow))
+	}
+	t.text.visible = remain
+
+	var newItems []fyne.CanvasObject
+	for i := start; i <= end; i++ {
+		found := false
+		for _, row := range t.text.visible {
+			if i == row.(*textGridRow).row {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			continue
+		}
+
+		newRow := t.itemPool.Get()
+		if newRow == nil {
+			newRow = newTextGridRow(t.text, i)
+		} else {
+			newRow.setRow(i)
+		}
+		newItems = append(newItems, newRow)
+	}
+
+	if len(newItems) > 0 {
+		t.text.visible = append(t.text.visible, newItems...)
+	}
+}
+
+func (t *textGridContentRenderer) updateCellSize() {
 	th := t.text.Theme()
+	size := fyne.MeasureText("M", th.Size(theme.SizeNameText), fyne.TextStyle{Monospace: true})
+
+	// round it for seamless background
+	size.Width = float32(math.Round(float64(size.Width)))
+	size.Height = float32(math.Round(float64(size.Height)))
+
+	t.text.cellSize = size
+}
+
+type textGridRow struct {
+	BaseWidget
+	text *textGridContent
+
+	objects []fyne.CanvasObject
+	row     int
+	cols    int
+}
+
+func newTextGridRow(t *textGridContent, row int) *textGridRow {
+	newRow := &textGridRow{text: t, row: row}
+	newRow.ExtendBaseWidget(newRow)
+
+	return newRow
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (t *textGridRow) CreateRenderer() fyne.WidgetRenderer {
+	render := &textGridRowRenderer{obj: t}
+
+	render.Refresh() // populate
+	return render
+}
+
+func (t *textGridRow) setRow(row int) {
+	t.row = row
+	t.Refresh()
+}
+
+func (t *textGridRow) appendTextCell(str rune) {
+	th := t.text.text.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	text := canvas.NewText(string(str), th.Color(theme.ColorNameForeground, v))
@@ -364,17 +676,21 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 	t.objects = append(t.objects, bg, text, ul)
 }
 
-func (t *textGridRenderer) refreshCell(row, col int) {
-	pos := row*t.cols + col
+func (t *textGridRow) refreshCell(col int) {
+	pos := t.cols + col
 	if pos*3+1 >= len(t.objects) {
 		return
 	}
 
-	cell := t.text.Rows[row].Cells[col]
-	t.setCellRune(cell.Rune, pos, cell.Style, t.text.Rows[row].Style)
+	row := t.text.text.Rows[t.row]
+
+	if len(row.Cells) > col {
+		cell := row.Cells[col]
+		t.setCellRune(cell.Rune, pos, cell.Style, row.Style)
+	}
 }
 
-func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
+func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
 	if str == 0 {
 		str = ' '
 	}
@@ -382,7 +698,7 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	text := t.objects[pos*3+1].(*canvas.Text)
 	underline := t.objects[pos*3+2].(*canvas.Line)
 
-	th := t.text.Theme()
+	th := t.text.text.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fg := th.Color(theme.ColorNameForeground, v)
 	text.TextSize = th.Size(theme.SizeNameText)
@@ -414,12 +730,12 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 		text.Text = newStr
 		text.Color = fg
 		text.TextStyle = textStyle
-		t.refresh(text)
+		text.Refresh()
 	}
 
 	if underlineStrokeWidth != underline.StrokeWidth || underlineStrokeColor != underline.StrokeColor {
 		underline.StrokeWidth, underline.StrokeColor = underlineStrokeWidth, underlineStrokeColor
-		t.refresh(underline)
+		underline.Refresh()
 	}
 
 	bg := color.Color(color.Transparent)
@@ -430,12 +746,12 @@ func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGr
 	}
 	if rect.FillColor != bg {
 		rect.FillColor = bg
-		t.refresh(rect)
+		rect.Refresh()
 	}
 }
 
-func (t *textGridRenderer) addCellsIfRequired() {
-	cellCount := t.cols * t.rows
+func (t *textGridRow) addCellsIfRequired() {
+	cellCount := t.cols
 	if len(t.objects) == cellCount*3 {
 		return
 	}
@@ -444,65 +760,71 @@ func (t *textGridRenderer) addCellsIfRequired() {
 	}
 }
 
-func (t *textGridRenderer) refreshGrid() {
-	line := 1
+func (t *textGridRow) refreshCells() {
 	x := 0
-
-	for rowIndex, row := range t.text.Rows {
-		rowStyle := row.Style
-		i := 0
-		if t.text.ShowLineNumbers {
-			lineStr := []rune(strconv.Itoa(line))
-			pad := t.lineNumberWidth() - len(lineStr)
-			for ; i < pad; i++ {
-				t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
-				x++
-			}
-			for c := 0; c < len(lineStr); c++ {
-				t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
-				i++
-				x++
-			}
-
-			t.setCellRune('|', x, TextGridStyleWhitespace, rowStyle) // last space
-			i++
-			x++
-		}
-		for _, r := range row.Cells {
-			if i >= t.cols { // would be an overflow - bad
-				continue
-			}
-			if t.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
-				sym := textAreaSpaceSymbol
-				if r.Rune == '\t' {
-					sym = textAreaTabSymbol
-				}
-
-				if r.Style != nil && r.Style.BackgroundColor() != nil {
-					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
-						BGColor: r.Style.BackgroundColor()}
-					t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
-				} else {
-					t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char
-				}
-			} else {
-				t.setCellRune(r.Rune, x, r.Style, rowStyle) // regular char
-			}
-			i++
-			x++
-		}
-		if t.text.ShowWhitespace && i < t.cols && rowIndex < len(t.text.Rows)-1 {
-			t.setCellRune(textAreaNewLineSymbol, x, TextGridStyleWhitespace, rowStyle) // newline
-			i++
-			x++
-		}
-		for ; i < t.cols; i++ {
-			t.setCellRune(' ', x, TextGridStyleDefault, rowStyle) // blanks
-			x++
+	if t.row >= len(t.text.text.Rows) {
+		for ; x < len(t.objects)/3; x++ {
+			t.setCellRune(' ', x, TextGridStyleDefault, nil) // blank rows no longer needed
 		}
 
-		line++
+		return // we can have more rows than content rows (filling space)
 	}
+
+	row := t.text.text.Rows[t.row]
+	rowStyle := row.Style
+	i := 0
+	if t.text.text.ShowLineNumbers {
+		lineStr := []rune(strconv.Itoa(t.row + 1))
+		pad := t.lineNumberWidth() - len(lineStr)
+		for ; i < pad; i++ {
+			t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
+			x++
+		}
+		for c := 0; c < len(lineStr); c++ {
+			t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
+			i++
+			x++
+		}
+
+		t.setCellRune('|', x, TextGridStyleWhitespace, rowStyle) // last space
+		i++
+		x++
+	}
+	for _, r := range row.Cells {
+		if i >= t.cols { // would be an overflow - bad
+			continue
+		}
+		if t.text.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
+			sym := textAreaSpaceSymbol
+			if r.Rune == '\t' {
+				sym = textAreaTabSymbol
+			}
+
+			if r.Style != nil && r.Style.BackgroundColor() != nil {
+				whitespaceBG := &CustomTextGridStyle{
+					FGColor: TextGridStyleWhitespace.TextColor(),
+					BGColor: r.Style.BackgroundColor(),
+				}
+				t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
+			} else {
+				t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char
+			}
+		} else {
+			t.setCellRune(r.Rune, x, r.Style, rowStyle) // regular char
+		}
+		i++
+		x++
+	}
+	if t.text.text.ShowWhitespace && i < t.cols && t.row < len(t.text.text.Rows)-1 {
+		t.setCellRune(textAreaNewLineSymbol, x, TextGridStyleWhitespace, rowStyle) // newline
+		i++
+		x++
+	}
+	for ; i < t.cols; i++ {
+		t.setCellRune(' ', x, TextGridStyleDefault, rowStyle) // blanks
+		x++
+	}
+
 	for ; x < len(t.objects)/3; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
@@ -516,115 +838,78 @@ func (t *TextGrid) tabWidth() int {
 	return t.TabWidth
 }
 
-func (t *textGridRenderer) lineNumberWidth() int {
-	return len(strconv.Itoa(t.rows + 1))
+func (t *textGridRow) lineNumberWidth() int {
+	return len(strconv.Itoa(t.text.rows + 1))
 }
 
-func (t *textGridRenderer) updateGridSize(size fyne.Size) {
-	bufRows := len(t.text.Rows)
-	bufCols := 0
-	for _, row := range t.text.Rows {
-		bufCols = int(math.Max(float64(bufCols), float64(len(row.Cells))))
+func (t *textGridRow) updateGridSize(size fyne.Size) {
+	bufCols := int(size.Width / t.text.cellSize.Width)
+	for _, row := range t.text.text.Rows {
+		lenCells := len(row.Cells)
+		if lenCells > bufCols {
+			bufCols = lenCells
+		}
 	}
-	sizeCols := math.Floor(float64(size.Width) / float64(t.cellSize.Width))
-	sizeRows := math.Floor(float64(size.Height) / float64(t.cellSize.Height))
 
-	if t.text.ShowWhitespace {
+	if t.text.text.ShowWhitespace {
 		bufCols++
 	}
-	if t.text.ShowLineNumbers {
+	if t.text.text.ShowLineNumbers {
 		bufCols += t.lineNumberWidth()
 	}
 
-	t.cols = int(math.Max(sizeCols, float64(bufCols)))
-	t.rows = int(math.Max(sizeRows, float64(bufRows)))
+	t.cols = bufCols
 	t.addCellsIfRequired()
 }
 
-func (t *textGridRenderer) Layout(size fyne.Size) {
-	t.updateGridSize(size)
+type textGridRowRenderer struct {
+	obj *textGridRow
+}
 
-	i := 0
+func (t *textGridRowRenderer) Layout(size fyne.Size) {
+	t.obj.updateGridSize(size)
+
 	cellPos := fyne.NewPos(0, 0)
-	for y := 0; y < t.rows; y++ {
-		for x := 0; x < t.cols; x++ {
-			// rect
-			t.objects[i*3].Resize(t.cellSize)
-			t.objects[i*3].Move(cellPos)
+	off := 0
+	for x := 0; x < t.obj.cols; x++ {
+		// rect
+		t.obj.objects[off].Resize(t.obj.text.cellSize)
+		t.obj.objects[off].Move(cellPos)
 
-			// text
-			t.objects[i*3+1].Move(cellPos)
+		// text
+		t.obj.objects[off+1].Move(cellPos)
 
-			// underline
-			t.objects[i*3+2].Move(cellPos.Add(fyne.Position{X: 0, Y: t.cellSize.Height}))
-			t.objects[i*3+2].Resize(fyne.Size{Width: t.cellSize.Width})
+		// underline
+		t.obj.objects[off+2].Move(cellPos.Add(fyne.Position{X: 0, Y: t.obj.text.cellSize.Height}))
+		t.obj.objects[off+2].Resize(fyne.Size{Width: t.obj.text.cellSize.Width})
 
-			cellPos.X += t.cellSize.Width
-			i++
-		}
-
-		cellPos.X = 0
-		cellPos.Y += t.cellSize.Height
+		cellPos.X += t.obj.text.cellSize.Width
+		off += 3
 	}
 }
 
-func (t *textGridRenderer) MinSize() fyne.Size {
+func (t *textGridRowRenderer) MinSize() fyne.Size {
 	longestRow := float32(0)
-	for _, row := range t.text.Rows {
+	for _, row := range t.obj.text.text.Rows {
 		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
 	}
-	return fyne.NewSize(t.cellSize.Width*longestRow,
-		t.cellSize.Height*float32(len(t.text.Rows)))
+	return fyne.NewSize(t.obj.text.cellSize.Width*longestRow, t.obj.text.cellSize.Height)
 }
 
-func (t *textGridRenderer) Refresh() {
-	// we may be on a new canvas, so just update it to be sure
-	if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
-		t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text)
-	}
-
-	// theme could change text size
-	t.updateCellSize()
-
-	th := t.text.Theme()
+func (t *textGridRowRenderer) Refresh() {
+	th := t.obj.text.text.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: th.Color(theme.ColorNameDisabled, v)}
-	t.updateGridSize(t.text.Size())
-	t.refreshGrid()
+	t.obj.updateGridSize(t.obj.text.text.Size())
+	t.obj.refreshCells()
 }
 
-func (t *textGridRenderer) ApplyTheme() {
+func (t *textGridRowRenderer) ApplyTheme() {
 }
 
-func (t *textGridRenderer) Objects() []fyne.CanvasObject {
-	return t.objects
+func (t *textGridRowRenderer) Objects() []fyne.CanvasObject {
+	return t.obj.objects
 }
 
-func (t *textGridRenderer) Destroy() {
-}
-
-func (t *textGridRenderer) refresh(obj fyne.CanvasObject) {
-	if t.current == nil {
-		if fyne.CurrentApp() != nil && fyne.CurrentApp().Driver() != nil {
-			// cache canvas for this widget, so we don't look it up many times for every cell/row refresh!
-			t.current = fyne.CurrentApp().Driver().CanvasForObject(t.text)
-		}
-
-		if t.current == nil {
-			return // not yet set up perhaps?
-		}
-	}
-
-	t.current.Refresh(obj)
-}
-
-func (t *textGridRenderer) updateCellSize() {
-	th := t.text.Theme()
-	size := fyne.MeasureText("M", th.Size(theme.SizeNameText), fyne.TextStyle{Monospace: true})
-
-	// round it for seamless background
-	size.Width = float32(math.Round(float64(size.Width)))
-	size.Height = float32(math.Round(float64(size.Height)))
-
-	t.cellSize = size
+func (t *textGridRowRenderer) Destroy() {
 }

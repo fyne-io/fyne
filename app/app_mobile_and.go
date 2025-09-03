@@ -11,11 +11,9 @@ void openURL(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *url);
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
 */
 import "C"
+
 import (
-	"log"
 	"net/url"
-	"os"
-	"path/filepath"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
@@ -43,14 +41,4 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
 		return nil
 	})
-}
-
-func rootConfigDir() string {
-	filesDir := os.Getenv("FILESDIR")
-	if filesDir == "" {
-		log.Println("FILESDIR env was not set by android native code")
-		return "/data/data" // probably won't work, but we can't make a better guess
-	}
-
-	return filepath.Join(filesDir, "fyne")
 }

@@ -28,33 +28,26 @@ func NewAccordion(items ...*AccordionItem) *Accordion {
 
 // Append adds the given item to this Accordion.
 func (a *Accordion) Append(item *AccordionItem) {
-	a.propertyLock.Lock()
 	a.Items = append(a.Items, item)
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // Close collapses the item at the given index.
 func (a *Accordion) Close(index int) {
-	a.propertyLock.Lock()
 	if index < 0 || index >= len(a.Items) {
-		a.propertyLock.Unlock()
 		return
 	}
 	a.Items[index].Open = false
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
 // CloseAll collapses all items.
 func (a *Accordion) CloseAll() {
-	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = false
 	}
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
@@ -75,10 +68,7 @@ func (a *Accordion) MinSize() fyne.Size {
 
 // Open expands the item at the given index.
 func (a *Accordion) Open(index int) {
-	a.propertyLock.Lock()
-
 	if index < 0 || index >= len(a.Items) {
-		a.propertyLock.Unlock()
 		return
 	}
 
@@ -89,35 +79,36 @@ func (a *Accordion) Open(index int) {
 			ai.Open = false
 		}
 	}
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
 
-// OpenAll expands all items.
+// OpenAll expands all items, note that your Accordion should have [MultiOpen] set to `true` for this to operate as
+// expected. For single-open accordions it will open only the first item.
 func (a *Accordion) OpenAll() {
-	a.propertyLock.RLock()
-	multiOpen := a.MultiOpen
-	a.propertyLock.RUnlock()
-
-	if !multiOpen {
+	if !a.MultiOpen {
+		a.Open(0)
 		return
 	}
 
-	a.propertyLock.Lock()
 	for _, i := range a.Items {
 		i.Open = true
 	}
-	a.propertyLock.Unlock()
+
+	a.Refresh()
+}
+
+// Prepend adds the given item to the beginning of this Accordion.
+//
+// Since: 2.6
+func (a *Accordion) Prepend(item *AccordionItem) {
+	a.Items = append([]*AccordionItem{item}, a.Items...)
 
 	a.Refresh()
 }
 
 // Remove deletes the given item from this Accordion.
 func (a *Accordion) Remove(item *AccordionItem) {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
 	for i, ai := range a.Items {
 		if ai == item {
 			a.Items = append(a.Items[:i], a.Items[i+1:]...)
@@ -128,13 +119,10 @@ func (a *Accordion) Remove(item *AccordionItem) {
 
 // RemoveIndex deletes the item at the given index from this Accordion.
 func (a *Accordion) RemoveIndex(index int) {
-	a.propertyLock.Lock()
 	if index < 0 || index >= len(a.Items) {
-		a.propertyLock.Unlock()
 		return
 	}
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
-	a.propertyLock.Unlock()
 
 	a.Refresh()
 }
@@ -155,16 +143,13 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	y := float32(0)
 	hasOpen := 0
 
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
-
 	for i, ai := range r.container.Items {
 		h := r.headers[i]
 		min := h.MinSize().Height
 		y += min
 
 		if ai.Open {
-			y += pad
+			y += pad + ai.Detail.MinSize().Height
 			hasOpen++
 		}
 		if i < len(r.container.Items)-1 {
@@ -172,7 +157,10 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		}
 	}
 
-	openSize := (size.Height - y) / float32(hasOpen)
+	extra := (size.Height - y) / float32(hasOpen)
+	if extra < 0 {
+		extra = 0
+	}
 	y = 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
@@ -190,8 +178,11 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		y += min
 
 		if ai.Open {
+			y += pad
 			d := ai.Detail
 			d.Move(fyne.NewPos(x, y))
+
+			openSize := ai.Detail.MinSize().Height + extra
 			d.Resize(fyne.NewSize(size.Width, openSize))
 			y += openSize
 		}
@@ -205,9 +196,6 @@ func (r *accordionRenderer) MinSize() fyne.Size {
 	th := r.container.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	size := fyne.Size{}
-
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
 
 	for i, ai := range r.container.Items {
 		if i != 0 {
@@ -234,10 +222,7 @@ func (r *accordionRenderer) Refresh() {
 }
 
 func (r *accordionRenderer) updateObjects() {
-	r.container.propertyLock.RLock()
-	defer r.container.propertyLock.RUnlock()
-
-	th := r.container.themeWithLock()
+	th := r.container.Theme()
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	ds := len(r.dividers)

@@ -1,7 +1,6 @@
 package animation
 
 import (
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -14,7 +13,7 @@ type anim struct {
 	reverse     bool
 	start       time.Time
 	total       int64
-	stopped     atomic.Bool
+	stopped     bool
 }
 
 func newAnim(a *fyne.Animation) *anim {
@@ -25,9 +24,9 @@ func newAnim(a *fyne.Animation) *anim {
 }
 
 func (a *anim) setStopped() {
-	a.stopped.Store(true)
+	a.stopped = true
 }
 
 func (a *anim) isStopped() bool {
-	return a.stopped.Load()
+	return a.stopped
 }

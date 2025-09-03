@@ -50,27 +50,27 @@ func TestRadioGroup_Extended_Unselected(t *testing.T) {
 func TestRadioGroup_Extended_Append(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Hi"}, nil)
 
-	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(cache.Renderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 1)
+	assert.Len(t, cache.Renderer(radio).(*radioGroupRenderer).items, 1)
 
 	radio.Options = append(radio.Options, "Another")
 	radio.Refresh()
 
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(cache.Renderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 2)
+	assert.Len(t, cache.Renderer(radio).(*radioGroupRenderer).items, 2)
 }
 
 func TestRadioGroup_Extended_Remove(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Hi", "Another"}, nil)
 
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(cache.Renderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 2)
+	assert.Len(t, cache.Renderer(radio).(*radioGroupRenderer).items, 2)
 
 	radio.Options = radio.Options[:1]
 	radio.Refresh()
 
-	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(cache.Renderer(radio).(*radioGroupRenderer).items))
+	assert.Len(t, radio.Options, 1)
+	assert.Len(t, cache.Renderer(radio).(*radioGroupRenderer).items, 1)
 }
 
 func TestRadioGroup_Extended_SetSelected(t *testing.T) {

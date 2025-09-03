@@ -194,6 +194,14 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	barWriter.Close()
 	bazWriter.Close()
 
+	bazAppender, err := storage.Appender(baz)
+	assert.Nil(t, err)
+	n, err = bazAppender.Write([]byte{1, 2, 3, 4, 5})
+	assert.Nil(t, err)
+	assert.Equal(t, 5, n)
+
+	bazAppender.Close()
+
 	// now make sure we can read the data back correctly
 	fooReader, err := storage.Reader(foo)
 	assert.Nil(t, err)
@@ -210,7 +218,7 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	bazReader, err := storage.Reader(baz)
 	assert.Nil(t, err)
 	bazData, err := io.ReadAll(bazReader)
-	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0}, bazData)
+	assert.Equal(t, []byte{5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5}, bazData)
 	assert.Nil(t, err)
 
 	// now let's test deletion
@@ -234,7 +242,6 @@ func TestInMemoryRepositoryWriter(t *testing.T) {
 	bazExists, err := storage.Exists(baz)
 	assert.False(t, bazExists)
 	assert.Nil(t, err)
-
 }
 
 func TestInMemoryRepositoryCanWrite(t *testing.T) {
@@ -333,14 +340,19 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	m := NewInMemoryRepository("mem")
 	repository.Register("mem", m)
 	m.Data[""] = []byte{1, 2, 3}
+	m.Data["/empty/"] = []byte{1, 2, 3}
 	m.Data["/foo"] = []byte{1, 2, 3}
 	m.Data["/foo/bar"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/"] = []byte{1, 2, 3}
 	m.Data["/foo/baz/quux"] = []byte{1, 2, 3}
 
-	foo, _ := storage.ParseURI("mem:///foo")
+	empty, _ := storage.ParseURI("mem:///empty/")
+	canList, err := storage.CanList(empty)
+	assert.Nil(t, err)
+	assert.True(t, canList)
 
-	canList, err := storage.CanList(foo)
+	foo, _ := storage.ParseURI("mem:///foo")
+	canList, err = storage.CanList(foo)
 	assert.Nil(t, err)
 	assert.True(t, canList)
 
@@ -352,7 +364,7 @@ func TestInMemoryRepositoryListing(t *testing.T) {
 	}
 	assert.ElementsMatch(t, []string{"mem:///foo/bar", "mem:///foo/baz/"}, stringListing)
 
-	empty, _ := storage.ParseURI("mem:") // invalid path
+	empty, _ = storage.ParseURI("mem:") // invalid path
 	canList, err = storage.CanList(empty)
 	assert.NotNil(t, err)
 	assert.False(t, canList)

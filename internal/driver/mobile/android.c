@@ -144,7 +144,7 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return (*env)->NewGlobalRef(env, stream);
 }
 
-void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr, bool truncate) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
 
@@ -152,7 +152,12 @@ void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jmethodID saveOutputStream = find_method(env, resolverClass, "openOutputStream", "(Landroid/net/Uri;Ljava/lang/String;)Ljava/io/OutputStream;");
 
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
-	jstring modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
+	jstring modes = NULL;
+	if (truncate) {
+		modes = (*env)->NewStringUTF(env, "wt"); // truncate before write
+	} else {
+		modes = (*env)->NewStringUTF(env, "wa");
+	}
 	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, saveOutputStream, uri, modes);
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 

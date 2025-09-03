@@ -31,13 +31,13 @@ func TestEntry_Binding(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 
 	err := str.Set("Updated")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	waitForBinding()
 	assert.Equal(t, "Updated", entry.Text)
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 
 	entry.Unbind()
@@ -172,6 +172,33 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	entry.TypedKey(up)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
+}
+
+func TestEntry_CursorPosition(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TextStyle.Monospace = true
+	entry.SetText("mmmmmm")
+
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.TypedKey(right)
+	firstX, firstY := entry.CursorPosition().Components()
+
+	entry.TypedKey(right)
+	secondX := entry.CursorPosition().X
+	assert.Greater(t, secondX, firstX)
+
+	entry.TypedKey(right)
+	entry.TypedKey(right)
+	fourthX := entry.CursorPosition().X
+	assert.Equal(t, (secondX-firstX)*3, fourthX-firstX)
+
+	entry.SetText("mmmmmm\nmm\nmm")
+	entry.CursorRow = 1
+	secondY := entry.CursorPosition().Y
+
+	entry.CursorRow = 2
+	thirdY := entry.CursorPosition().Y
+	assert.Equal(t, secondY-firstY, thirdY-secondY)
 }
 
 func TestEntry_Control_Word(t *testing.T) {
@@ -410,6 +437,7 @@ func TestEntry_EmptySelection(t *testing.T) {
 	// manually setting to empty selection
 	typeKeys(entry, keyShiftLeftDown, fyne.KeyRight)
 	entry.CursorColumn = 1
+	entry.Refresh()
 	assert.Equal(t, "", entry.SelectedText())
 }
 
@@ -471,8 +499,8 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
@@ -492,8 +520,8 @@ func TestEntryMultiline_MinSize(t *testing.T) {
 	assert.Equal(t, entry.MinSize().Width, min.Width)
 	assert.Equal(t, entry.MinSize().Height, min.Height)
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
@@ -1390,14 +1418,14 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
 
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 
 	entry.SetPlaceHolder("Test")
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
 
 	entry.SetText("Hi")
-	assert.Equal(t, 2, len(entry.Text))
+	assert.Len(t, entry.Text, 2)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
@@ -1405,15 +1433,15 @@ func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
 
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 
 	entry.PlaceHolder = "Test"
 	entry.Refresh()
-	assert.Equal(t, 0, len(entry.Text))
+	assert.Empty(t, entry.Text)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
 
 	entry.SetText("Hi")
-	assert.Equal(t, 2, len(entry.Text))
+	assert.Len(t, entry.Text, 2)
 	test.AssertRendersToMarkup(t, "entry/set_placeholder_replaced.xml", c)
 }
 
@@ -1553,16 +1581,16 @@ func TestEntry_Append(t *testing.T) {
 	entry := widget.NewEntry()
 
 	entry.Append("abc")
-	assert.Equal(t, entry.Text, "abc")
+	assert.Equal(t, "abc", entry.Text)
 	entry.Append(" def")
-	assert.Equal(t, entry.Text, "abc def")
+	assert.Equal(t, "abc def", entry.Text)
 
 	entry.SetText("")
 	entry.MultiLine = true
 
 	entry.Append("first line")
 	entry.Append("\nsecond line")
-	assert.Equal(t, entry.Text, "first line\nsecond line")
+	assert.Equal(t, "first line\nsecond line", entry.Text)
 }
 
 func TestEntry_Submit(t *testing.T) {
@@ -1677,13 +1705,13 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	tapPos := fyne.NewPos(20, 10)
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_full_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Disable()
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_read_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Password = true
@@ -1695,7 +1723,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
 	test.AssertRendersToMarkup(t, "entry/tapped_secondary_password_menu.xml", c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Len(t, c.Overlays().List(), 1)
 }
 
 func TestEntry_TextWrap(t *testing.T) {
@@ -1786,6 +1814,69 @@ func TestEntry_TextWrap_Changed(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/wrap_single_line_off.xml", c)
 }
 
+func TestEntry_IconSizeAndPlacement(t *testing.T) {
+	entry := widget.NewEntry()
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	entry.SetText("SomeText")
+	r := test.TempWidgetRenderer(t, entry)
+	r.Layout(entry.MinSize())
+
+	iconObj := r.Objects()[3].(*canvas.Image)
+	// Icon should be at the left, with correct size
+	assert.NotNil(t, iconObj)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Width)
+	assert.Equal(t, theme.IconInlineSize(), iconObj.Size().Height)
+	assert.Equal(t, fyne.NewPos(theme.InnerPadding(), theme.InnerPadding()), iconObj.Position())
+	assert.Equal(t, icon, iconObj.Resource)
+}
+
+func TestEntry_SetIcon(t *testing.T) {
+	entry := widget.NewEntry()
+	assert.Nil(t, entry.Icon)
+	icon := theme.MailComposeIcon()
+	entry.SetIcon(icon)
+	assert.Equal(t, icon, entry.Icon)
+}
+
+func TestEntry_Icon_MinSize(t *testing.T) {
+	entryWithIcon := widget.NewEntry()
+	entryWithIcon.SetIcon(theme.MailComposeIcon())
+	entryWithIcon.SetText("Test")
+	minSizeWithIcon := entryWithIcon.MinSize()
+
+	entryWithoutIcon := widget.NewEntry()
+	entryWithoutIcon.SetText("Test")
+	minSizeWithoutIcon := entryWithoutIcon.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_MinSize_IncreasesWidth(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Test")
+	minSizeWithoutIcon := entry.MinSize()
+
+	entry.SetIcon(theme.MailComposeIcon())
+	minSizeWithIcon := entry.MinSize()
+
+	assert.Greater(t, minSizeWithIcon.Width, minSizeWithoutIcon.Width)
+	assert.Equal(t, minSizeWithIcon.Height, minSizeWithoutIcon.Height)
+}
+
+func TestEntry_Icon_ReplaceAndRemove(t *testing.T) {
+	entry := widget.NewEntry()
+	icon1 := theme.MailComposeIcon()
+	icon2 := theme.InfoIcon()
+	entry.SetIcon(icon1)
+	assert.Equal(t, icon1, entry.Icon)
+	entry.Icon = icon2
+	assert.Equal(t, icon2, entry.Icon)
+	entry.SetIcon(nil)
+	assert.Nil(t, entry.Icon)
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
 	singleMin := entry.MinSize()
@@ -1794,7 +1885,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	multiMin := multi.MinSize()
 
 	assert.Equal(t, singleMin.Width, multiMin.Width)
-	assert.True(t, multiMin.Height > singleMin.Height)
+	assert.Greater(t, multiMin.Height, singleMin.Height)
 
 	multi.MultiLine = false
 	multi.Refresh()
@@ -1805,7 +1896,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 func TestNewEntryWithData(t *testing.T) {
 	str := binding.NewString()
 	err := str.Set("Init")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	entry := widget.NewEntryWithData(str)
 	waitForBinding()
@@ -1813,7 +1904,7 @@ func TestNewEntryWithData(t *testing.T) {
 
 	entry.SetText("Typed")
 	v, err := str.Get()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "Typed", v)
 }
 
@@ -1960,7 +2051,7 @@ func TestSingleLineEntry_SelectionSubmitted(t *testing.T) {
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 	assert.Equal(t, "abc", entry.SelectedText())
 	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-	assert.Equal(t, entry.Text, "abc")
+	assert.Equal(t, "abc", entry.Text)
 }
 
 func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
@@ -1970,7 +2061,7 @@ func TestMultiLineEntry_EnterWithSelection(t *testing.T) {
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 	assert.Equal(t, "abc", entry.SelectedText())
 	entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
-	assert.Equal(t, entry.Text, "\n")
+	assert.Equal(t, "\n", entry.Text)
 }
 
 func TestEntry_CarriageReturn(t *testing.T) {
@@ -2062,6 +2153,26 @@ func TestEntry_UndoRedo_Delete(t *testing.T) {
 	assert.Equal(t, "àbf", entry.Text)
 }
 
+func TestEntry_UndoRedo_DeleteWord(t *testing.T) {
+	entry := widget.NewMultiLineEntry()
+
+	for _, r := range "Line 1\nline 2" {
+		entry.TypedRune(r)
+	}
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+
+	moveWordModifier := fyne.KeyModifierShortcutDefault
+	if runtime.GOOS == "darwin" {
+		moveWordModifier = fyne.KeyModifierAlt
+	}
+
+	entry.TypedShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: moveWordModifier})
+	assert.Equal(t, "Line 1\n", entry.Text)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "Line 1\nline 2", entry.Text)
+}
+
 func TestEntry_UndoRedo_Replace(t *testing.T) {
 	entry := widget.NewEntry()
 
@@ -2121,6 +2232,45 @@ func TestEntry_UndoRedoImage(t *testing.T) {
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
 }
 
+func TestEntry_UndoRedo_Callback(t *testing.T) {
+	entry := widget.NewEntry()
+	changed := ""
+	entry.OnChanged = func(s string) {
+		changed = s
+	}
+
+	for _, r := range "abc éàè 123" {
+		entry.TypedRune(r)
+	}
+
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, "", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc", entry.Text)
+	assert.Equal(t, "abc", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè", entry.Text)
+	assert.Equal(t, "abc éàè", changed)
+
+	entry.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "abc éàè 123", entry.Text)
+	assert.Equal(t, "abc éàè 123", changed)
+}
+
 const (
 	entryOffset = 10
 
@@ -2131,7 +2281,7 @@ const (
 )
 
 var typeKeys = func(e *widget.Entry, keys ...fyne.KeyName) {
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}
@@ -2261,7 +2411,7 @@ func findMouseable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyn
 		return ok
 	}
 	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	return
+	return o, p
 }
 
 func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {

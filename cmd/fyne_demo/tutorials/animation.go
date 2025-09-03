@@ -46,6 +46,8 @@ func makeAnimationCanvas() fyne.CanvasObject {
 	a2.Curve = fyne.AnimationLinear
 	a2.Start()
 
+	OnChangeFuncs = append(OnChangeFuncs, a.Stop, a2.Stop)
+
 	running := true
 	var toggle *widget.Button
 	toggle = widget.NewButton("Stop", func() {
@@ -71,6 +73,8 @@ func makeAnimationCurves() fyne.CanvasObject {
 	label3, box3, a3 := makeAnimationCurveItem("EaseOut", fyne.AnimationEaseOut, 60+theme.Padding()*2)
 	label4, box4, a4 := makeAnimationCurveItem("Linear", fyne.AnimationLinear, 90+theme.Padding()*3)
 
+	OnChangeFuncs = append(OnChangeFuncs, a1.Stop, a2.Stop, a3.Stop, a4.Stop)
+
 	start := widget.NewButton("Compare", func() {
 		a1.Start()
 		a2.Start()
@@ -83,7 +87,8 @@ func makeAnimationCurves() fyne.CanvasObject {
 }
 
 func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float32) (
-	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation) {
+	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation,
+) {
 	text = widget.NewLabel(label)
 	text.Alignment = fyne.TextAlignCenter
 	text.Resize(fyne.NewSize(380, 30))
@@ -100,7 +105,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	anim.Curve = curve
 	anim.AutoReverse = true
 	anim.RepeatCount = 1
-	return
+	return text, box, anim
 }
 
 // themedBox is a simple box that change its background color according

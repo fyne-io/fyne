@@ -76,7 +76,27 @@ const (
 	// SizeNameScrollBarRadius is the name of theme lookup for the scroll bar corner radius.
 	//
 	// Since: 2.5
-	SizeNameScrollBarRadius = "scrollBarRadius"
+	SizeNameScrollBarRadius fyne.ThemeSizeName = "scrollBarRadius"
+
+	// SizeNameWindowButtonHeight is the name of the height for an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonHeight fyne.ThemeSizeName = "windowButtonHeight"
+
+	// SizeNameWindowButtonRadius is the name of the radius for an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonRadius fyne.ThemeSizeName = "windowButtonRadius"
+
+	// SizeNameWindowButtonIcon is the name of the width of an inner window titleBar button.
+	//
+	// Since: 2.6
+	SizeNameWindowButtonIcon fyne.ThemeSizeName = "windowButtonIcon"
+
+	// SizeNameWindowTitleBarHeight is the height for inner window titleBars.
+	//
+	// Since: 2.6
+	SizeNameWindowTitleBarHeight fyne.ThemeSizeName = "windowTitleBarHeight"
 )
 
 // CaptionTextSize returns the size for caption text.
@@ -178,4 +198,50 @@ func TextSize() float32 {
 // Since: 2.1
 func TextSubHeadingSize() float32 {
 	return Current().Size(SizeNameSubHeadingText)
+}
+
+func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+	switch s {
+	case SizeNameSeparatorThickness:
+		return 1
+	case SizeNameInlineIcon:
+		return 20
+	case SizeNameInnerPadding:
+		return 8
+	case SizeNameLineSpacing:
+		return 4
+	case SizeNamePadding:
+		return 4
+	case SizeNameScrollBar:
+		return 12
+	case SizeNameScrollBarSmall:
+		return 3
+	case SizeNameText:
+		return 14
+	case SizeNameHeadingText:
+		return 24
+	case SizeNameSubHeadingText:
+		return 18
+	case SizeNameCaptionText:
+		return 11
+	case SizeNameInputBorder:
+		return 1
+	case SizeNameInputRadius:
+		return 5
+	case SizeNameSelectionRadius:
+		return 3
+	case SizeNameScrollBarRadius:
+		return 3
+	case SizeNameWindowButtonHeight:
+		return 16
+	case SizeNameWindowButtonRadius:
+		return 8
+	case SizeNameWindowButtonIcon:
+		return 14
+	case SizeNameWindowTitleBarHeight:
+		return 26
+
+	default:
+		return 0
+	}
 }

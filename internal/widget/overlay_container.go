@@ -5,8 +5,10 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 )
 
-var _ fyne.Widget = (*OverlayContainer)(nil)
-var _ fyne.Tappable = (*OverlayContainer)(nil)
+var (
+	_ fyne.Widget   = (*OverlayContainer)(nil)
+	_ fyne.Tappable = (*OverlayContainer)(nil)
+)
 
 // OverlayContainer is a transparent widget containing one fyne.CanvasObject and meant to be used as overlay.
 type OverlayContainer struct {

@@ -43,7 +43,6 @@ func (r *Runner) Start(a *fyne.Animation) {
 			r.animations = make([]*anim, 0, 16)
 		}
 		r.animations = append(r.animations, newAnim(a))
-		r.runAnimations()
 	} else {
 		if r.pendingAnimations == nil {
 			// initialize with excess capacity to avoid re-allocations
@@ -85,18 +84,20 @@ func (r *Runner) Stop(a *fyne.Animation) {
 	r.pendingAnimations = newList
 }
 
-func (r *Runner) runAnimations() {
-	draw := time.NewTicker(time.Second / 60)
-	go func() {
-		for done := false; !done; {
-			<-draw.C
-			done = r.runOneFrame()
-		}
+// TickAnimations progresses all running animations by one tick.
+// This will be called from the driver to update objects immediately before next paint.
+func (r *Runner) TickAnimations() {
+	if !r.runnerStarted {
+		return
+	}
+
+	done := r.runOneFrame()
+
+	if done {
 		r.animationMutex.Lock()
 		r.runnerStarted = false
 		r.animationMutex.Unlock()
-		draw.Stop()
-	}()
+	}
 }
 
 func (r *Runner) runOneFrame() (done bool) {

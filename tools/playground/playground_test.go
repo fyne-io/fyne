@@ -22,10 +22,10 @@ func TestRender(t *testing.T) {
 	assert.NotNil(t, img)
 
 	enc, err := encodeImage(img)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII=", enc)
 
 	bytes, err := base64.StdEncoding.DecodeString(enc)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "PNG", string(bytes)[1:4])
 }

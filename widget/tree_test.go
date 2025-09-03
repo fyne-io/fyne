@@ -43,8 +43,8 @@ func TestNewTreeWithData(t *testing.T) {
 
 	template := widget.NewLabel("Template Object")
 
-	assert.Equal(t, 1000, len(tree.ChildUIDs("")))
-	assert.Equal(t, 10, len(tree.ChildUIDs("1")))
+	assert.Len(t, tree.ChildUIDs(""), 1000)
+	assert.Len(t, tree.ChildUIDs("1"), 10)
 	assert.GreaterOrEqual(t, tree.MinSize().Width, template.MinSize().Width)
 }
 
@@ -324,9 +324,10 @@ func TestTree_OverrideTheme(t *testing.T) {
 
 	normal := test.Theme()
 	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
-	window.SetContent(&fyne.Container{Layout: layout.NewStackLayout(),
-		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)}})
-	window.Resize(fyne.NewSize(220, 220))
+	window.SetContent(&fyne.Container{
+		Layout:  layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)},
+	})
 	test.AssertImageMatches(t, "tree/theme_initial.png", window.Canvas().Capture())
 }
 
@@ -375,4 +376,25 @@ func TestTree_Refresh(t *testing.T) {
 	tree.Refresh()
 
 	test.AssertImageMatches(t, "tree/refresh_replaced.png", window.Canvas().Capture())
+}
+
+func TestTree_FocusItem(t *testing.T) {
+	test.NewTempApp(t)
+
+	data := map[string][]string{
+		"": {"foo0", "foo1", "foo2"},
+	}
+
+	tree := widget.NewTreeWithStrings(data)
+	tree.OpenBranch("foo")
+
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+	window.Canvas().Focus(tree)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+
+	test.AssertImageMatches(t, "tree/tree_focus_item.png", window.Canvas().Capture())
 }

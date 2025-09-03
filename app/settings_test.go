@@ -106,7 +106,7 @@ func TestCustomTheme(t *testing.T) {
 	set.SetTheme(ctheme)
 
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, internalapp.DefaultVariant(), set.ThemeVariant())
 
 	err := set.loadFromFile(filepath.Join("testdata", "light-theme.json"))
@@ -114,7 +114,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
@@ -122,7 +122,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "light")
@@ -130,7 +130,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantLight, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "dark")
@@ -138,7 +138,7 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 
 	err = os.Setenv("FYNE_THEME", "")
@@ -146,6 +146,6 @@ func TestCustomTheme(t *testing.T) {
 		t.Error(err)
 	}
 	set.setupTheme()
-	assert.True(t, set.Theme() == ctheme)
+	assert.Equal(t, set.Theme(), ctheme)
 	assert.Equal(t, theme.VariantDark, set.ThemeVariant())
 }

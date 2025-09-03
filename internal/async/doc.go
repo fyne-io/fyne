@@ -1,5 +1,3 @@
-//go:generate go run gen.go
-
 // Package async provides unbounded channel and queue structures that are
 // designed for caching unlimited number of a concrete type. For better
 // performance, a given type should be less or euqal than 16 bytes.
@@ -17,6 +15,4 @@
 // speed constantly. However, such a channel may be fairly used for event
 // delivering if the consumer of the channel consumes the incoming
 // forever, such as even processing.
-//
-// This package involves code generators, see gen.go for more details.
 package async

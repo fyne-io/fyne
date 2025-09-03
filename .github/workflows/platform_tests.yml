@@ -9,41 +9,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.19.x', '1.23.x']
+        go-version: ['', 'stable']
         os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             runner: xvfb-run
+            tags: ci,migrated_fynedo
           - os: macos-latest
-            tags: no_glfw
+            tags: no_glfw,ci,migrated_fynedo
 
     steps:
     - uses: actions/checkout@v4
       with:
         persist-credentials: false
-    - uses: WillAbides/setup-go-faster@v1
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        go-version-file: 'go.mod'
 
     - name: Get dependencies
-      run: >-
-        sudo apt-get update &&
-        sudo apt-get install
-        bc
-        gcc
-        libgl1-mesa-dev
-        libwayland-dev
-        libx11-dev
-        libxkbcommon-dev
-        xorg-dev
-        xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install bc clang libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
+        echo "CC=clang" >> "$GITHUB_ENV"
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Set environment variable LANG
+      run: export LANG=en_EN.UTF-8
       if: ${{ runner.os == 'Linux' }}
 
     - name: Tests
-      run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags "${{ matrix.tags }}" ./...
+      run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ./...
 
     - name: Wayland Tests
-      run: go test -tags no_glfw,ci,wayland ./...
+      run: go test -race -tags no_glfw,ci,wayland ./...
       if: ${{ runner.os == 'Linux' }}
 
   windows_tests:
@@ -51,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.20.x', '1.22.x']
+        go-version: ['1.20.x', 'stable']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,4 +60,4 @@ jobs:
           go-version: ${{ matrix.go-version }}
     
       - name: Tests
-        run: ${{ matrix.runner }} go test "-test.benchtime" 10ms -tags no_glfw ./...
+        run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...

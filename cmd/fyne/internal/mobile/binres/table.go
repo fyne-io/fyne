@@ -74,10 +74,10 @@ func NewMipmapTable(pkgname string) (*Table, string) {
 
 	pkg.specs = append(pkg.specs,
 		&TypeSpec{
-			id: uint8(attr) + 1, //1,
+			id: uint8(attr) + 1, // 1,
 		},
 		&TypeSpec{
-			id:         uint8(mipmap) + 1, //2,
+			id:         uint8(mipmap) + 1, // 2,
 			entryCount: 1,
 			entries:    []uint32{uint32(icon)}, // {0}
 			types:      []*Type{typ},
@@ -254,7 +254,7 @@ type Package struct {
 	specs []*TypeSpec
 }
 
-// UnmarshalBinary creates a pakage from binary data
+// UnmarshalBinary creates a package from binary data
 func (pkg *Package) UnmarshalBinary(bin []byte) error {
 	if err := (&pkg.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err

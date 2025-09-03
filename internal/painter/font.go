@@ -17,6 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -30,12 +31,14 @@ const (
 )
 
 var (
-	fm      *fontscan.FontMap
-	mapLock = sync.Mutex{}
-	load    sync.Once
+	fm           *fontscan.FontMap
+	fontScanLock sync.Mutex
+	loaded       bool
 )
 
 func loadMap() {
+	loaded = true
+
 	fm = fontscan.NewFontMap(noopLogger{})
 	err := loadSystemFonts(fm)
 	if err != nil {
@@ -44,9 +47,12 @@ func loadMap() {
 }
 
 func lookupLangFont(family string, aspect font.Aspect) *font.Face {
-	mapLock.Lock()
-	defer mapLock.Unlock()
-	load.Do(loadMap)
+	fontScanLock.Lock()
+	defer fontScanLock.Unlock()
+
+	if !loaded {
+		loadMap()
+	}
 	if fm == nil {
 		return nil
 	}
@@ -57,9 +63,12 @@ func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 }
 
 func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
-	mapLock.Lock()
-	defer mapLock.Unlock()
-	load.Do(loadMap)
+	fontScanLock.Lock()
+	defer fontScanLock.Unlock()
+
+	if !loaded {
+		loadMap()
+	}
 	if fm == nil {
 		return nil
 	}
@@ -111,7 +120,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 			val = &FontCacheItem{Fonts: faces}
 			fontCustomCache.Store(source, val)
 		}
-		return val.(*FontCacheItem)
+		return val
 	}
 
 	scope := ""
@@ -157,13 +166,13 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		fontCache.Store(cacheID{style: style, scope: scope}, val)
 	}
 
-	return val.(*FontCacheItem)
+	return val
 }
 
 // ClearFontCache is used to remove cached fonts in the case that we wish to re-load Font faces
 func ClearFontCache() {
-	fontCache = &sync.Map{}
-	fontCustomCache = &sync.Map{}
+	fontCache.Clear()
+	fontCustomCache.Clear()
 }
 
 // DrawString draws a string into an image.
@@ -244,7 +253,8 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 }
 
 func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
-	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
+	cb func(run shaping.Output, x float32),
+) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
 	runes := []rune(s)
@@ -344,12 +354,14 @@ type cacheID struct {
 	scope string
 }
 
-var fontCache = &sync.Map{}       // map[cacheID]*FontCacheItem
-var fontCustomCache = &sync.Map{} // map[string]*FontCacheItem for custom resources
+var (
+	fontCache       async.Map[cacheID, *FontCacheItem]
+	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+)
 
 type noopLogger struct{}
 
-func (n noopLogger) Printf(string, ...interface{}) {}
+func (n noopLogger) Printf(string, ...any) {}
 
 type dynamicFontMap struct {
 	faces  []*font.Face
@@ -357,7 +369,6 @@ type dynamicFontMap struct {
 }
 
 func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
-
 	for _, f := range d.faces {
 		if _, ok := f.NominalGlyph(r); ok {
 			return f

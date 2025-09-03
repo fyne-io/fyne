@@ -75,7 +75,7 @@ type PublishResult struct {
 }
 
 var theApp = &app{
-	events:         async.NewUnboundedInterfaceChan(),
+	events:         async.NewUnboundedChan[any](),
 	lifecycleStage: lifecycle.StageDead,
 	publish:        make(chan struct{}),
 	publishResult:  make(chan PublishResult),
@@ -100,7 +100,7 @@ func (a *app) sendLifecycle(to lifecycle.Stage) {
 type app struct {
 	filters []func(any) any
 
-	events         *async.UnboundedInterfaceChan
+	events         *async.UnboundedChan[any]
 	lifecycleStage lifecycle.Stage
 	publish        chan struct{}
 	publishResult  chan PublishResult
@@ -152,22 +152,9 @@ func (a *app) HideVirtualKeyboard() {
 func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	driverShowFileOpenPicker(callback, filter)
 }
+
 func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	driverShowFileSavePicker(callback, filter, filename)
-}
-
-// TODO: do this for all build targets, not just linux (x11 and Android)? If
-// so, should package gl instead of this package call RegisterFilter??
-//
-// TODO: does Android need this?? It seems to work without it (Nexus 7,
-// KitKat). If only x11 needs this, should we move this to x11.go??
-func (a *app) registerGLViewportFilter() {
-	a.RegisterFilter(func(e any) any {
-		if e, ok := e.(size.Event); ok {
-			a.glctx.Viewport(0, 0, e.WidthPx, e.HeightPx)
-		}
-		return e
-	})
 }
 
 func screenOrientation(width, height int) size.Orientation {

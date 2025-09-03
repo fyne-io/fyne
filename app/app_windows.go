@@ -29,13 +29,6 @@ $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("%s").Show($toast);`
 
-func rootConfigDir() string {
-	homeDir, _ := os.UserHomeDir()
-
-	desktopConfig := filepath.Join(filepath.Join(homeDir, "AppData"), "Roaming")
-	return filepath.Join(desktopConfig, "fyne")
-}
-
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -80,7 +73,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := os.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := os.WriteFile(tmpFilePath, []byte(script), 0o600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return
@@ -97,5 +90,11 @@ func runScript(name, script string) {
 }
 
 func watchTheme(s *settings) {
-	go internalapp.WatchTheme(s.setupTheme)
+	go internalapp.WatchTheme(func() {
+		fyne.Do(s.setupTheme)
+	})
+}
+
+func (a *fyneApp) registerRepositories() {
+	// no-op
 }

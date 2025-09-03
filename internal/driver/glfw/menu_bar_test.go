@@ -1,14 +1,14 @@
-//go:build !mobile && (!no_glfw || !windows)
+//go:build !mobile && !no_glfw && !windows
 
-package glfw_test
+package glfw
 
 import (
+	"image"
 	"strconv"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/internal/driver/glfw"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -51,7 +51,7 @@ func TestMenuBar(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		themeCounter := 0
 		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
@@ -63,11 +63,14 @@ func TestMenuBar(t *testing.T) {
 			themeCounter++
 		})
 		container := container.NewWithoutLayout(button, menuBar)
-		w.SetContent(container)
-		w.Resize(fyne.NewSize(300, 300))
-		button.Resize(button.MinSize())
-		button.Move(fyne.NewPos(100, 50))
-		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+		runOnMain(func() {
+			w.SetContent(container)
+			w.Resize(fyne.NewSize(300, 300))
+
+			button.Resize(button.MinSize())
+			button.Move(fyne.NewPos(100, 50))
+			menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
+		})
 
 		buttonPos := fyne.NewPos(110, 60)
 		fileMenuPos := fyne.NewPos(20, 10)
@@ -293,9 +296,14 @@ func TestMenuBar(t *testing.T) {
 			},
 		} {
 			t.Run(name, func(t *testing.T) {
-				test.MoveMouse(c, fyne.NewPos(0, 0))
-				test.TapCanvas(c, fyne.NewPos(0, 0))
-				if test.AssertImageMatches(t, "menu_bar_initial.png", c.Capture()) {
+				var capture image.Image
+				runOnMain(func() {
+					test.MoveMouse(c, fyne.NewPos(0, 0))
+					test.TapCanvas(c, fyne.NewPos(0, 0))
+
+					capture = c.Capture()
+				})
+				if test.AssertImageMatches(t, "menu_bar_initial.png", capture) {
 					for i, s := range tt.steps {
 						t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
 							lastAction = ""
@@ -308,7 +316,11 @@ func TestMenuBar(t *testing.T) {
 									test.TapCanvas(c, a.pos)
 								}
 							}
-							test.AssertImageMatches(t, s.wantImage, c.Capture())
+							var capture2 image.Image
+							runOnMain(func() {
+								capture2 = c.Capture()
+							})
+							test.AssertImageMatches(t, s.wantImage, capture2)
 							assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
 						})
 					}
@@ -324,7 +336,7 @@ func TestMenuBar(t *testing.T) {
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
 
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		themeCounter := 0
 		button := newNotFocusableButton("Button", func() {
 			switch themeCounter % 2 {
@@ -418,13 +430,20 @@ func TestMenuBar(t *testing.T) {
 				test.TapCanvas(c, fyne.NewPos(0, 0))
 				test.TapCanvas(c, fileMenuPos) // activate menu
 				require.Equal(t, menuBar.Items[0], c.Focused())
-				if test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture()) {
+
+				var captured image.Image
+				runOnMain(func() {
+					captured = c.Capture()
+				})
+				if test.AssertImageMatches(t, "menu_bar_active_file.png", captured) {
 					lastAction = ""
-					for _, key := range tt.keys {
-						c.Focused().TypedKey(&fyne.KeyEvent{
-							Name: key,
-						})
-					}
+					runOnMain(func() {
+						for _, key := range tt.keys {
+							c.Focused().TypedKey(&fyne.KeyEvent{
+								Name: key,
+							})
+						}
+					})
 					test.AssertRendersToMarkup(t, "menu_bar_kbdctrl_"+name+".xml", c)
 					assert.Equal(t, tt.wantAction, lastAction, "last action should match expected")
 				}
@@ -443,7 +462,10 @@ func TestMenuBar(t *testing.T) {
 
 			test.MoveMouse(c, fileMenuPos.Add(fyne.NewPos(1, 0)))
 			assert.Equal(t, menuBar.Items[0], c.Focused())
-			test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture())
+
+			runOnMain(func() {
+				test.AssertImageMatches(t, "menu_bar_active_file.png", c.Capture())
+			})
 		})
 	})
 }
@@ -467,7 +489,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -487,7 +509,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
@@ -508,7 +530,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		w.SetPadded(false)
 		w.Resize(fyne.NewSize(300, 300))
 		c := w.Canvas()
-		menuBar := glfw.NewMenuBar(menu, c)
+		menuBar := NewMenuBar(menu, c)
 		w.SetContent(container.NewWithoutLayout(menuBar))
 		w.Resize(fyne.NewSize(300, 300))
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))

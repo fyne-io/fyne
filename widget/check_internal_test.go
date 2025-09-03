@@ -17,8 +17,8 @@ func TestCheckSize(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	min := check.MinSize()
 
-	assert.True(t, min.Width > theme.InnerPadding())
-	assert.True(t, min.Height > theme.InnerPadding())
+	assert.Greater(t, min.Width, theme.InnerPadding())
+	assert.Greater(t, min.Height, theme.InnerPadding())
 }
 
 func TestCheckChecked(t *testing.T) {
@@ -91,7 +91,7 @@ func TestCheckStateIsCorrectAfterMultipleUpdates(t *testing.T) {
 	expectedCheckedState := false
 	for i := 0; i < 5; i++ {
 		check.SetChecked(expectedCheckedState)
-		assert.True(t, checkedStateFromCallback == expectedCheckedState)
+		assert.Equal(t, expectedCheckedState, checkedStateFromCallback)
 
 		expectedCheckedState = !expectedCheckedState
 	}

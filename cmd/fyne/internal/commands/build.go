@@ -230,6 +230,9 @@ func (b *Builder) build() error {
 	if b.release {
 		tags = append(tags, "release")
 	}
+	if ok, set := b.appData.Migrations["fyneDo"]; ok && set {
+		tags = append(tags, "migrated_fynedo")
+	}
 	if len(tags) > 0 {
 		args = append(args, "-tags", strings.Join(tags, ","))
 	}
@@ -340,9 +343,11 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 	if app.icon != "" {
 		res, err := fyne.LoadResourceFromPath(app.icon)
 		if err != nil {
-			fyne.LogError("Unable to load medadata icon file "+app.icon, err)
+			fyne.LogError("Unable to load metadata icon file "+app.icon, err)
 			return func() { os.Remove(metadataInitFilePath) }, err
 		}
+
+		res = metadata.ScaleIcon(res, 512)
 
 		// The return type of fyne.LoadResourceFromPath is always a *fyne.StaticResource.
 		app.ResGoString = res.(*fyne.StaticResource).GoString()
@@ -357,7 +362,8 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 }
 
 func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
-	createMetadataInitFile func(srcdir string, app *appData) (func(), error)) (func(), error) {
+	createMetadataInitFile func(srcdir string, app *appData) (func(), error),
+) (func(), error) {
 	fyneGoModVersion, err := getFyneGoModVersion(runner)
 	if err != nil {
 		return nil, err
@@ -441,6 +447,8 @@ func normaliseVersion(str string) string {
 	}
 
 	if pos := strings.Index(str, "-0.20"); pos != -1 {
+		str = str[:pos] + "-dev"
+	} else if pos = strings.Index(str, "-rc"); pos != -1 {
 		str = str[:pos] + "-dev"
 	}
 	return version.Normalize(str)

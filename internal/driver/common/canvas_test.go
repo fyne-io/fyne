@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"image/color"
 	"testing"
@@ -11,6 +10,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -42,22 +43,24 @@ func TestCanvas_walkTree(t *testing.T) {
 		obj                                     fyne.CanvasObject
 		lastBeforeCallIndex, lastAfterCallIndex int
 	}
+
+	painterData := make(map[*RenderCacheNode]nodeInfo)
 	updateInfoBefore := func(node *RenderCacheNode, index int) {
-		pd, _ := node.painterData.(nodeInfo)
-		if (pd != nodeInfo{}) && pd.obj != node.obj {
+		pd, ok := painterData[node]
+		if ok && pd.obj != node.obj {
 			panic("node cache does not match node obj - nodes should not be reused for different objects")
 		}
 		pd.obj = node.obj
 		pd.lastBeforeCallIndex = index
-		node.painterData = pd
+		painterData[node] = pd
 	}
 	updateInfoAfter := func(node *RenderCacheNode, index int) {
-		pd := node.painterData.(nodeInfo)
+		pd := painterData[node]
 		if pd.obj != node.obj {
 			panic("node cache does not match node obj - nodes should not be reused for different objects")
 		}
 		pd.lastAfterCallIndex = index
-		node.painterData = pd
+		painterData[node] = pd
 	}
 
 	//
@@ -122,10 +125,10 @@ func TestCanvas_walkTree(t *testing.T) {
 	nodes := []*RenderCacheNode{}
 
 	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
-		secondRunBeforePainterData = append(secondRunBeforePainterData, node.painterData.(nodeInfo))
+		secondRunBeforePainterData = append(secondRunBeforePainterData, painterData[node])
 		nodes = append(nodes, node)
 	}, func(node *RenderCacheNode, _ fyne.Position) {
-		secondRunAfterPainterData = append(secondRunAfterPainterData, node.painterData.(nodeInfo))
+		secondRunAfterPainterData = append(secondRunAfterPainterData, painterData[node])
 	})
 
 	assert.Equal(t, []nodeInfo{
@@ -172,11 +175,11 @@ func TestCanvas_walkTree(t *testing.T) {
 	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
-		thirdRunBeforePainterData = append(thirdRunBeforePainterData, node.painterData.(nodeInfo))
+		thirdRunBeforePainterData = append(thirdRunBeforePainterData, painterData[node])
 	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
-		thirdRunAfterPainterData = append(thirdRunAfterPainterData, node.painterData.(nodeInfo))
+		thirdRunAfterPainterData = append(thirdRunAfterPainterData, painterData[node])
 	})
 
 	assert.Equal(t, []nodeInfo{
@@ -202,7 +205,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	assert.NotNil(t, rightColNode.nextSibling, "new node for new object")
 
 	//
-	// test that insertion at the beginnning or in the middle of a children list
+	// test that insertion at the beginning or in the middle of a children list
 	// removes all following siblings and their subtrees
 	//
 	leftNewObj2a := canvas.NewRectangle(color.Gray16{Y: 4})
@@ -217,12 +220,12 @@ func TestCanvas_walkTree(t *testing.T) {
 	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
-		fourthRunBeforePainterData = append(fourthRunBeforePainterData, node.painterData.(nodeInfo))
+		fourthRunBeforePainterData = append(fourthRunBeforePainterData, painterData[node])
 		nodes = append(nodes, node)
 	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
-		fourthRunAfterPainterData = append(fourthRunAfterPainterData, node.painterData.(nodeInfo))
+		fourthRunAfterPainterData = append(fourthRunAfterPainterData, painterData[node])
 	})
 
 	assert.Equal(t, []nodeInfo{
@@ -299,12 +302,12 @@ func TestCanvas_walkTree(t *testing.T) {
 	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
-		fifthRunBeforePainterData = append(fifthRunBeforePainterData, node.painterData.(nodeInfo))
+		fifthRunBeforePainterData = append(fifthRunBeforePainterData, painterData[node])
 		nodes = append(nodes, node)
 	}, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoAfter(node, i)
-		fifthRunAfterPainterData = append(fifthRunAfterPainterData, node.painterData.(nodeInfo))
+		fifthRunAfterPainterData = append(fifthRunAfterPainterData, painterData[node])
 	})
 
 	assert.Equal(t, []nodeInfo{
@@ -391,38 +394,36 @@ func Prepend(c *fyne.Container, object fyne.CanvasObject) {
 	c.Refresh()
 }
 
+type dummyCanvas struct {
+	fyne.Canvas
+}
+
+func (dummyCanvas) Scale() float32 {
+	return 1.0
+}
+
 func TestRefreshCount(t *testing.T) { // Issue 2548.
-	var (
-		c              = &Canvas{}
-		errCh          = make(chan error)
-		freed   uint64 = 0
-		refresh uint64 = 1000
-	)
+	c := &Canvas{}
 	c.Initialize(nil, func() {})
+
+	freed := c.FreeDirtyTextures()
+	assert.Zero(t, freed)
+
+	c.SetPainter(gl.NewPainter(&dummyCanvas{}, struct{ driver.WithContext }{}))
+
+	const refresh = uint64(1000)
 	for i := uint64(0); i < refresh; i++ {
 		c.Refresh(canvas.NewRectangle(color.Gray16{Y: 1}))
 	}
 
-	go func() {
-		freed = c.FreeDirtyTextures()
-		if freed == 0 {
-			errCh <- errors.New("expected to free dirty textures but actually not freed")
-			return
-		}
-		errCh <- nil
-	}()
-	err := <-errCh
-	if err != nil {
-		t.Fatal(err)
-	}
-	if freed != refresh {
-		t.Fatalf("FreeDirtyTextures left refresh tasks behind in a frame, got %v, want %v", freed, refresh)
-	}
+	freed = c.FreeDirtyTextures()
+	assert.Equal(t, refresh, freed)
 }
 
 func BenchmarkRefresh(b *testing.B) {
 	c := &Canvas{}
 	c.Initialize(nil, func() {})
+	c.SetPainter(gl.NewPainter(&dummyCanvas{}, struct{ driver.WithContext }{}))
 
 	for i := uint64(1); i < 1<<15; i *= 2 {
 		b.Run(fmt.Sprintf("#%d", i), func(b *testing.B) {

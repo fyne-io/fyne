@@ -15,12 +15,13 @@ type scaleItems struct {
 	button  *widget.Button
 }
 
-var scales = []*scaleItems{
+var scales = [...]*scaleItems{
 	{scale: 0.5, name: "Tiny"},
 	{scale: 0.8, name: "Small"},
 	{scale: 1, name: "Normal"},
 	{scale: 1.3, name: "Large"},
-	{scale: 1.8, name: "Huge"}}
+	{scale: 1.8, name: "Huge"},
+}
 
 func (s *Settings) appliedScale(value float32) {
 	for _, scale := range scales {
@@ -43,7 +44,7 @@ func (s *Settings) chooseScale(value float32) {
 }
 
 func (s *Settings) makeScaleButtons() []fyne.CanvasObject {
-	var buttons = make([]fyne.CanvasObject, len(scales))
+	buttons := make([]fyne.CanvasObject, len(scales))
 	for i, scale := range scales {
 		value := scale.scale
 		button := widget.NewButton(scale.name, func() {
@@ -68,7 +69,7 @@ func (s *Settings) makeScaleGroup(scale float32) *widget.Card {
 }
 
 func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
-	var previews = make([]fyne.CanvasObject, len(scales))
+	previews := make([]fyne.CanvasObject, len(scales))
 	for i, scale := range scales {
 		text := canvas.NewText("A", theme.Color(theme.ColorNameForeground))
 		text.Alignment = fyne.TextAlignCenter

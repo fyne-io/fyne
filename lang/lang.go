@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/jeandeaual/go-locale"
@@ -37,6 +38,7 @@ var (
 
 	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
+	setupOnce sync.Once
 
 	//go:embed translations
 	translations embed.FS
@@ -67,7 +69,6 @@ func LocalizeKey(key, fallback string, data ...any) string {
 		},
 		TemplateData: d0,
 	})
-
 	if err != nil {
 		fyne.LogError("Translation failure", err)
 		return fallbackWithData(key, fallback, d0)
@@ -102,7 +103,6 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 		PluralCount:  count,
 		TemplateData: d0,
 	})
-
 	if err != nil {
 		fyne.LogError("Translation failure", err)
 		return fallbackWithData(key, fallback, d0)
@@ -198,12 +198,12 @@ func setupLang(lang string) {
 
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
+	setupOnce.Do(initRuntime)
+
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
 		all = []string{"en"}
 	}
-	str := closestSupportedLocale(all).LanguageString()
-	setupLang(str)
-	localizer = i18n.NewLocalizer(bundle, str)
+	setupLang(closestSupportedLocale(all).LanguageString())
 }

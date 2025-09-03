@@ -12,7 +12,7 @@ import (
 
 func TestToolbarSize(t *testing.T) {
 	toolbar := NewToolbar(NewToolbarSpacer(), NewToolbarAction(theme.HomeIcon(), func() {}))
-	assert.Equal(t, 2, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 2)
 	size := toolbar.MinSize()
 
 	toolbar.Items = append(toolbar.Items, &toolbarLabel{NewLabel("Hi")})
@@ -23,28 +23,28 @@ func TestToolbarSize(t *testing.T) {
 
 func TestToolbar_Apppend(t *testing.T) {
 	toolbar := NewToolbar(NewToolbarSpacer())
-	assert.Equal(t, 1, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 1)
 
 	added := NewToolbarAction(theme.ContentCutIcon(), func() {})
 	toolbar.Append(added)
-	assert.Equal(t, 2, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 2)
 	assert.Equal(t, added, toolbar.Items[1])
 }
 
 func TestToolbar_Prepend(t *testing.T) {
 	toolbar := NewToolbar(NewToolbarSpacer())
-	assert.Equal(t, 1, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 1)
 
 	prepend := NewToolbarAction(theme.ContentCutIcon(), func() {})
 	toolbar.Prepend(prepend)
-	assert.Equal(t, 2, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 2)
 	assert.Equal(t, prepend, toolbar.Items[0])
 }
 
 func TestToolbar_Replace(t *testing.T) {
 	icon := theme.ContentCutIcon()
 	toolbar := NewToolbar(NewToolbarAction(icon, func() {}))
-	assert.Equal(t, 1, len(toolbar.Items))
+	assert.Len(t, toolbar.Items, 1)
 	render := test.TempWidgetRenderer(t, toolbar)
 	assert.Equal(t, icon.Name(), render.Objects()[0].(*Button).Icon.Name())
 
@@ -68,7 +68,7 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 			items = append(items, b)
 		}
 	}
-	if assert.Equal(t, 2, len(items)) {
+	if assert.Len(t, items, 2) {
 		assert.Equal(t, fyne.NewPos(0, 0), items[0].Position())
 		assert.Equal(t, fyne.NewPos(40, 0), items[1].Position())
 	}
@@ -95,8 +95,8 @@ func TestToolbarAction_Disable(t *testing.T) {
 	testIcon := theme.InfoIcon()
 	toolbarAction := NewToolbarAction(testIcon, nil)
 	toolbarAction.Disable()
-	assert.NotEqual(t, false, toolbarAction.Disabled())
-	assert.Equal(t, true, toolbarAction.Disabled())
+	assert.True(t, toolbarAction.Disabled())
+	assert.True(t, toolbarAction.Disabled())
 }
 
 func TestToolbarAction_Enable(t *testing.T) {
@@ -104,8 +104,8 @@ func TestToolbarAction_Enable(t *testing.T) {
 	toolbarAction := NewToolbarAction(testIcon, nil)
 	toolbarAction.Disable()
 	toolbarAction.Enable()
-	assert.NotEqual(t, true, toolbarAction.Disabled())
-	assert.Equal(t, false, toolbarAction.Disabled())
+	assert.False(t, toolbarAction.Disabled())
+	assert.False(t, toolbarAction.Disabled())
 }
 
 func TestToolbarAction_UpdateOnActivated(t *testing.T) {

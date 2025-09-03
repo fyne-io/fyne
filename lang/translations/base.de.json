@@ -1,14 +1,20 @@
 {
-    "Create Folder": "Erstelle Ordner",
     "Advanced": "Erweitert",
+    "Cancel": "Abbrechen",
     "Confirm": "Bestätigen",
     "Copy": "Kopieren",
+    "Create Folder": "Erstelle Ordner",
+    "Cut": "Ausschneiden",
     "Enter filename": "Dateinamen eingeben",
     "Error": "Fehler",
+    "Favourites": "Favoriten",
     "File": "Datei",
     "Folder": "Ordner",
     "New Folder": "Neuer Ordner",
     "No": "Nein",
+    "OK": "OK",
+    "Open": "Öffnen",
+    "Paste": "Einfügen",
     "Quit": "Beenden",
     "Redo": "Wiederholen",
     "Save": "Speichern",
@@ -20,12 +26,20 @@
         "other": "Name"
     },
     "file.parent": {
-        "other": "Übergeordneter Ordner"
+        "other": "../"
     },
-    "Cancel": "Abbrechen",
-    "Favourites": "Favoriten",
-    "Open": "Öffnen",
-    "Paste": "Einfügen",
-    "Cut": "Ausschneiden",
-    "OK": "OK"
+    "friday": "Freitag",
+    "friday.short": "Fr",
+    "monday": "Montag",
+    "monday.short": "Mo",
+    "saturday": "Samstag",
+    "saturday.short": "Sa",
+    "sunday": "Sonntag",
+    "sunday.short": "So",
+    "thursday": "Donnerstag",
+    "thursday.short": "Do",
+    "tuesday": "Dienstag",
+    "tuesday.short": "Di",
+    "wednesday": "Mittwoch",
+    "wednesday.short": "Mi"
 }

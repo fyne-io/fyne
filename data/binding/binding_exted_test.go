@@ -18,20 +18,17 @@ func TestBindUserType(t *testing.T) {
 		called = true
 	})
 	u.AddListener(fn)
-	waitForItems()
 	assert.True(t, called)
 
 	called = false
 	err = u.Set(user{name: "Replace"})
 	assert.Nil(t, err)
-	waitForItems()
 	assert.Equal(t, "User: Replace", val.String())
 	assert.True(t, called)
 
 	called = false
 	val = user{name: "Direct"}
 	_ = u.Reload()
-	waitForItems()
 	assert.True(t, called)
 	v, err = u.Get()
 	assert.Nil(t, err)
@@ -40,7 +37,6 @@ func TestBindUserType(t *testing.T) {
 	called = false
 	val.name = "FieldSet"
 	_ = u.Reload()
-	waitForItems()
 	assert.True(t, called)
 	v, err = u.Get()
 	assert.Nil(t, err)

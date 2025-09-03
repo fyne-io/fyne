@@ -24,8 +24,10 @@ type Line struct {
 
 // Size returns the current size of bounding box for this line object
 func (l *Line) Size() fyne.Size {
-	return fyne.NewSize(float32(math.Abs(float64(l.Position2.X)-float64(l.Position1.X))),
-		float32(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
+	return fyne.NewSize(
+		float32(math.Abs(float64(l.Position2.X)-float64(l.Position1.X))),
+		float32(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))),
+	)
 }
 
 // Resize sets a new bottom-right position for the line object, then it will then be refreshed.
@@ -55,6 +57,10 @@ func (l *Line) Position() fyne.Position {
 // Move the line object to a new position, relative to its parent / canvas
 func (l *Line) Move(pos fyne.Position) {
 	oldPos := l.Position()
+	if oldPos == pos {
+		return
+	}
+
 	deltaX := pos.X - oldPos.X
 	deltaY := pos.Y - oldPos.Y
 
