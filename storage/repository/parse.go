@@ -83,6 +83,7 @@ func ParseURI(s string) (fyne.URI, error) {
 
 	authority := l.Authority()
 	authBuilder := strings.Builder{}
+	authBuilder.Grow(len(authority.UserInfo()) + len(authority.Host()) + len(authority.Port()) + len("@[]:"))
 
 	if userInfo := authority.UserInfo(); userInfo != "" {
 		authBuilder.WriteString(userInfo)
