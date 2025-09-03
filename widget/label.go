@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
+	"strings"
 )
 
 // Label widget is a label component with appropriate padding and layout.
@@ -161,10 +162,12 @@ func (l *Label) syncSegments() {
 	if sizeName == "" {
 		sizeName = theme.SizeNameText
 	}
+
 	l.provider.Wrapping = l.Wrapping
 	l.provider.Truncation = l.Truncation
+
 	l.provider.Segments[0].(*TextSegment).Style = RichTextStyle{
-		Alignment: l.Alignment,
+		Alignment: fyne.TextAlignLeading,
 		ColorName: color,
 		Inline:    true,
 		TextStyle: l.TextStyle,
@@ -197,8 +200,32 @@ func (r *labelRenderer) Destroy() {
 }
 
 func (r *labelRenderer) Layout(s fyne.Size) {
-	r.l.selection.Resize(s)
 	r.l.provider.Resize(s)
+
+	if r.l.Selectable {
+		r.l.selection.Resize(s)
+	}
+
+	contentW := measureWrappedWidth(r.l.Text, s.Width, r.l.Wrapping, r.l.TextStyle)
+
+	var offsetX float32
+	switch r.l.Alignment {
+	case fyne.TextAlignCenter:
+		if contentW < s.Width {
+			offsetX = (s.Width - contentW) / 2
+		}
+	case fyne.TextAlignTrailing:
+		if contentW < s.Width {
+			offsetX = s.Width - contentW
+		}
+	default:
+		offsetX = 0
+	}
+
+	r.l.provider.Move(fyne.NewPos(offsetX, 0))
+	if r.l.Selectable {
+		r.l.selection.Move(fyne.NewPos(offsetX, 0))
+	}
 }
 
 func (r *labelRenderer) MinSize() fyne.Size {
@@ -225,6 +252,60 @@ func (r *labelRenderer) Refresh() {
 	sel.style = r.l.TextStyle
 	sel.theme = r.l.Theme()
 	sel.Refresh()
+}
+
+// measureWrappedWidth estimates the maximum line width of `text` when rendered
+// into a box of width `availW` using the given wrapping mode and style.
+func measureWrappedWidth(text string, availW float32, wrap fyne.TextWrap, style fyne.TextStyle) float32 {
+	size := theme.TextSize()
+
+	if wrap == fyne.TextWrapOff || availW <= 0 {
+		w := fyne.MeasureText(text, size, style).Width
+		return w
+	}
+
+	maxW := float32(0)
+	spaceW := fyne.MeasureText(" ", size, style).Width
+
+	for _, para := range strings.Split(text, "\n") {
+		if para == "" {
+			if maxW < 0 {
+				maxW = 0
+			}
+			continue
+		}
+
+		words := strings.Fields(para)
+		lineW := float32(0)
+
+		for i, w := range words {
+			ww := fyne.MeasureText(w, size, style).Width
+			add := ww
+			if i > 0 {
+				add += spaceW
+			}
+
+			if lineW == 0 {
+				lineW = add
+			} else if lineW+add <= availW {
+				lineW += add
+			} else {
+				if lineW > maxW {
+					maxW = lineW
+				}
+				lineW = ww
+			}
+		}
+
+		if lineW > maxW {
+			maxW = lineW
+		}
+	}
+
+	if maxW > availW {
+		maxW = availW
+	}
+	return maxW
 }
 
 type focusSelectable struct {
