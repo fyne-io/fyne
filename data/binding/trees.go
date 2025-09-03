@@ -537,7 +537,7 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return fire, retErr
 }
 
 func (t *boundTree[T]) SetValue(id string, v T) error {

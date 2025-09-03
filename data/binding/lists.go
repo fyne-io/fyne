@@ -475,7 +475,7 @@ func (l *boundList[T]) doReload() (trigger bool, retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return trigger, retErr
 }
 
 func (l *boundList[T]) SetValue(i int, v T) error {

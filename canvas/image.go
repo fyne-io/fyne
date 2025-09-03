@@ -365,7 +365,7 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, widt
 		width, height = config.Width, config.Height
 		aspect = float32(width) / float32(height)
 	}
-	return
+	return reader, width, height, aspect, err
 }
 
 func (i *Image) renderSVG(width, height float32) (image.Image, error) {
