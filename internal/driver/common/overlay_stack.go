@@ -12,6 +12,7 @@ type OverlayStack struct {
 	Canvas        fyne.Canvas
 	focusManagers []*app.FocusManager
 	overlays      []fyne.CanvasObject
+	renderCaches  []*renderCacheTree
 }
 
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
@@ -29,6 +30,7 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	}
 
 	s.overlays = append(s.overlays, overlay)
+	s.renderCaches = append(s.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
 
 	// TODO this should probably apply to all once #707 is addressed
 	if _, ok := overlay.(*widget.OverlayContainer); ok {
@@ -57,6 +59,10 @@ func (s *OverlayStack) ListFocusManagers() []*app.FocusManager {
 //
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
+	if overlay == nil || len(s.overlays) == 0 {
+		return
+	}
+
 	if s.OnChange != nil {
 		defer s.OnChange()
 	}
@@ -71,13 +77,17 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlayIdx == -1 {
 		return
 	}
-	// set removed elements in backing array to nil to release memory references
+
+	// Set removed elements in backing array to nil to release memory references:
 	for i := overlayIdx; i < len(s.overlays); i++ {
 		s.overlays[i] = nil
 		s.focusManagers[i] = nil
+		s.renderCaches[i] = nil
 	}
+
 	s.overlays = s.overlays[:overlayIdx]
 	s.focusManagers = s.focusManagers[:overlayIdx]
+	s.renderCaches = s.renderCaches[:overlayIdx]
 }
 
 // Top returns the top-most overlay of the stack.
@@ -92,10 +102,6 @@ func (s *OverlayStack) Top() fyne.CanvasObject {
 
 // TopFocusManager returns the app.FocusManager assigned to the top-most overlay of the stack.
 func (s *OverlayStack) TopFocusManager() *app.FocusManager {
-	return s.topFocusManager()
-}
-
-func (s *OverlayStack) topFocusManager() *app.FocusManager {
 	if len(s.focusManagers) == 0 {
 		return nil
 	}
