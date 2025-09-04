@@ -97,11 +97,9 @@ func (d *directory) List() ([]fyne.URI, error) {
 		return nil, err
 	}
 
-	urilist := []fyne.URI{}
-
-	for _, f := range files {
-		uri := storage.NewFileURI(filepath.Join(path, f.Name()))
-		urilist = append(urilist, uri)
+	urilist := make([]fyne.URI, len(files))
+	for i, f := range files {
+		urilist[i] = storage.NewFileURI(filepath.Join(path, f.Name()))
 	}
 
 	return urilist, nil

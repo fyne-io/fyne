@@ -40,7 +40,7 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	scheme, _, ok := strings.Cut(s, ":")
+	scheme, path, ok := strings.Cut(s, ":")
 	if !ok {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
@@ -53,11 +53,11 @@ func ParseURI(s string) (fyne.URI, error) {
 		// we should punt this to whoever generated the URI in the
 		// first place?
 
-		if len(s) <= 7 {
+		if len(path) <= 2 { // I.e. file: and // given we know scheme.
 			return nil, errors.New("not a valid URI")
 		}
-		path := s[5:] // everything after file:
-		if len(path) > 2 && path[:2] == "//" {
+
+		if path[:2] == "//" {
 			path = path[2:]
 		}
 
