@@ -25,13 +25,32 @@ func (o *otherURI) String() string {
 	return "file://" + o.path
 }
 
+func (u *otherURI) Scheme() string {
+	return "file"
+}
+func (u *otherURI) Authority() string {
+	return ""
+}
+
+func (u *otherURI) Path() string {
+	return u.path
+}
+
+func (u *otherURI) Query() string {
+	return ""
+}
+
+func (u *otherURI) Fragment() string {
+	return ""
+}
+
 func TestURIEqual(t *testing.T) {
-	first := storage.NewFileURI("first")
-	second := storage.NewFileURI("second")
+	first := storage.NewFileURI("/first")
+	second := storage.NewFileURI("/second")
 	assert.False(t, storage.EqualURI(first, second))
 	assert.True(t, storage.EqualURI(first, first))
 
-	assert.True(t, storage.EqualURI(first, storage.NewFileURI("first")))
+	assert.True(t, storage.EqualURI(first, storage.NewFileURI("/first")))
 
 	assert.True(t, storage.EqualURI(nil, nil))
 	assert.False(t, storage.EqualURI(first, nil))
