@@ -23,7 +23,7 @@ const (
 
 var minCellContent = NewLabel("22")
 
-// Calendar creates a new date time picker which returns a time object
+// Calendar creates a new date time picker which returns a time object.
 //
 // Since: 2.6
 type Calendar struct {
@@ -41,7 +41,7 @@ type Calendar struct {
 	OnChanged func(time.Time) `json:"-"`
 }
 
-// NewCalendar creates a calendar instance
+// NewCalendar creates a calendar instance.
 //
 // Since: 2.6
 func NewCalendar(cT time.Time, changed func(time.Time)) *Calendar {
@@ -54,7 +54,9 @@ func NewCalendar(cT time.Time, changed func(time.Time)) *Calendar {
 	return c
 }
 
-// SetDisplayedMonth sets the currently displayed year and month
+// SetDisplayedMonth sets the currently displayed year and month.
+//
+// Since: 2.7
 func (c *Calendar) SetDisplayedMonth(date time.Time) {
 	if date.IsZero() {
 		date = time.Now()
@@ -78,6 +80,8 @@ func (c *Calendar) SetSelectedDate(date time.Time) {
 }
 
 // GetSelectedDate returns the currently selected date, or ZeroTime (time.Time{}) if no date is selected.
+//
+// Since: 2.7
 func (c *Calendar) GetSelectedDate() time.Time {
 	return c.selectedDate
 }
