@@ -509,7 +509,7 @@ func Test_snapshot(t *testing.T) {
 var benchmarkStringSink string
 
 func Benchmark_knownColor(b *testing.B) {
-	lookup := nrgbaColor(theme.Color(theme.ColorNameWarning))
+	lookup := theme.Color(theme.ColorNameWarning)
 	out := ""
 
 	b.ReportAllocs()
