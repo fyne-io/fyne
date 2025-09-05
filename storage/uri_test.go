@@ -28,6 +28,7 @@ func (o *otherURI) String() string {
 func (u *otherURI) Scheme() string {
 	return "file"
 }
+
 func (u *otherURI) Authority() string {
 	return ""
 }
