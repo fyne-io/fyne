@@ -19,5 +19,5 @@ func NewWithID(id string) fyne.App {
 // Since: 2.7
 func SetDriverDetails(a fyne.App, d embedded.Driver) {
 	a.(*fyneApp).Settings().SetTheme(theme.DefaultTheme())
-	a.(*fyneApp).driver = intNoos.NewNoOSDriver(d.Render, d.Queue())
+	a.(*fyneApp).driver = intNoos.NewNoOSDriver(d.Render, d.Run, d.Queue())
 }

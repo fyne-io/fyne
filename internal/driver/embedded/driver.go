@@ -16,6 +16,7 @@ type noosDriver struct {
 	events chan noos2.Event
 	queue  chan funcData
 	render func(image.Image)
+	run    func(func())
 	done   bool
 
 	wins    []fyne.Window
@@ -59,6 +60,10 @@ func (n *noosDriver) Device() fyne.Device {
 }
 
 func (n *noosDriver) Run() {
+	n.run(n.doRun)
+}
+
+func (n *noosDriver) doRun() {
 	for _, w := range n.wins {
 		n.renderWindow(w)
 	}
@@ -166,11 +171,10 @@ func (n *noosDriver) renderWindow(w fyne.Window) {
 	n.render(img)
 }
 
-func NewNoOSDriver(render func(img image.Image), events chan noos2.Event) fyne.Driver {
+func NewNoOSDriver(render func(img image.Image), run func(func()), events chan noos2.Event) fyne.Driver {
 	return &noosDriver{
 		events: events, queue: make(chan funcData),
-		render: render, wins: make([]fyne.Window, 0),
-	}
+		render: render, run: run, wins: make([]fyne.Window, 0)}
 }
 
 type funcData struct {

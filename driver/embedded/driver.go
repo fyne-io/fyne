@@ -8,7 +8,7 @@ import (
 
 type Driver interface {
 	Render(image.Image)
-	Run()
+	Run(func())
 
 	ScreenSize() fyne.Size
 	Queue() chan Event
