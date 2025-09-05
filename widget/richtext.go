@@ -53,7 +53,6 @@ type RichText struct {
 func NewRichText(segments ...RichTextSegment) *RichText {
 	t := &RichText{Segments: segments}
 	t.Scroll = widget.ScrollNone
-	t.updateRowBounds()
 	return t
 }
 
@@ -73,7 +72,8 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 	t.prop = canvas.NewRectangle(color.Transparent)
 	if t.scr == nil && t.Scroll != widget.ScrollNone {
 		t.scr = widget.NewScroll(&fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			t.prop, &fyne.Container{}}})
+			t.prop, &fyne.Container{},
+		}})
 	}
 
 	t.ExtendBaseWidget(t)
@@ -375,6 +375,9 @@ func (t *RichText) rowLength(row int) int {
 // rows returns the number of text rows in this text entry.
 // The entry may be longer than required to show this amount of content.
 func (t *RichText) rows() int {
+	if t.rowBounds == nil { // if the widget API is used before it is shown
+		t.updateRowBounds()
+	}
 	return len(t.rowBounds)
 }
 
@@ -616,7 +619,8 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, objs []fyne.CanvasObject,
-	charMinSize fyne.Size, th fyne.Theme) fyne.Size {
+	charMinSize fyne.Size, th fyne.Theme,
+) fyne.Size {
 	height := float32(0)
 	width := float32(0)
 	rowHeight := float32(0)
@@ -638,8 +642,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 			min := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
-				if !img.MinSize().Subtract(img.oldMin).IsZero() {
-					img.oldMin = img.MinSize()
+				if newMin := img.MinSize(); newMin != img.oldMin {
+					img.oldMin = newMin
 
 					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
@@ -719,7 +723,8 @@ func (r *textRenderer) Refresh() {
 
 	if r.obj.scr != nil {
 		r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			r.obj.prop, &fyne.Container{Objects: objs}}}
+			r.obj.prop, &fyne.Container{Objects: objs},
+		}}
 		r.obj.scr.Direction = scroll
 		r.SetObjects([]fyne.CanvasObject{r.obj.scr})
 		r.obj.scr.Refresh()

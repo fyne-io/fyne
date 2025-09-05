@@ -37,6 +37,7 @@ func Test_Menu_LeaveQuit(t *testing.T) {
 	assert.Equal(t, 1, len(mainMenu.Items[0].Items)) // no separator added
 	assert.Equal(t, reflect.ValueOf(quitFunc).Pointer(), reflect.ValueOf(mainMenu.Items[0].Items[0].Action).Pointer())
 }
+
 func Test_Menu_LeaveQuit_AddAction(t *testing.T) {
 	w := createWindow("Menu Test")
 	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem(lang.L("Quit"), nil)))

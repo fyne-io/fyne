@@ -40,9 +40,12 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(color.RGBA{R: scaleChannel(rStart, rDelta, done), G: scaleChannel(gStart, gDelta, done),
-				B: scaleChannel(bStart, bDelta, done), A: scaleChannel(aStart, aDelta, done)})
-		}}
+			fn(color.RGBA{
+				R: scaleChannel(rStart, rDelta, done), G: scaleChannel(gStart, gDelta, done),
+				B: scaleChannel(bStart, bDelta, done), A: scaleChannel(aStart, aDelta, done),
+			})
+		},
+	}
 }
 
 // NewPositionAnimation sets up a new animation that will transition from the start to stop Position over
@@ -51,14 +54,15 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 //
 // Since: 2.0
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
-	xDelta := float32(stop.X - start.X)
-	yDelta := float32(stop.Y - start.Y)
+	xDelta := stop.X - start.X
+	yDelta := stop.Y - start.Y
 
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
 			fn(fyne.NewPos(scaleVal(start.X, xDelta, done), scaleVal(start.Y, yDelta, done)))
-		}}
+		},
+	}
 }
 
 // NewSizeAnimation sets up a new animation that will transition from the start to stop Size over
@@ -67,14 +71,15 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 //
 // Since: 2.0
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
-	widthDelta := float32(stop.Width - start.Width)
-	heightDelta := float32(stop.Height - start.Height)
+	widthDelta := stop.Width - start.Width
+	heightDelta := stop.Height - start.Height
 
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
 			fn(fyne.NewSize(scaleVal(start.Width, widthDelta, done), scaleVal(start.Height, heightDelta, done)))
-		}}
+		},
+	}
 }
 
 func scaleChannel(start int, diff, done float32) uint8 {

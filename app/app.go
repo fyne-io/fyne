@@ -4,7 +4,6 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
-	"os"
 	"strconv"
 	"time"
 
@@ -12,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
@@ -69,6 +69,11 @@ func (a *fyneApp) NewWindow(title string) fyne.Window {
 
 func (a *fyneApp) Run() {
 	go a.lifecycle.RunEventQueue(a.driver.DoFromGoroutine)
+
+	if !a.driver.Device().IsMobile() {
+		a.settings.watchSettings()
+	}
+
 	a.driver.Run()
 }
 
@@ -133,9 +138,17 @@ func makeStoreDocs(id string, s *store) *internal.Docs {
 		return &internal.Docs{} // an empty impl to avoid crashes
 	}
 	if root := s.a.storageRoot(); root != "" {
-		err := os.MkdirAll(root, 0755) // make the space before anyone can use it
+		uri, err := storage.ParseURI(root)
 		if err != nil {
-			fyne.LogError("Failed to create app storage space", err)
+			uri = storage.NewFileURI(root)
+		}
+
+		exists, err := storage.Exists(uri)
+		if !exists || err != nil {
+			err = storage.CreateListable(uri)
+			if err != nil {
+				fyne.LogError("Failed to create app storage space", err)
+			}
 		}
 
 		root, _ := s.docRootURI()
@@ -156,24 +169,22 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 			prefs.forceImmediateSave()
 		}
 	})
+
+	newApp.registerRepositories() // for web this may provide docs / settings
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)
 	newApp.storage = store
 
-	if !d.Device().IsMobile() {
-		newApp.settings.watchSettings()
-	}
-
 	httpHandler := intRepo.NewHTTPRepository()
 	repository.Register("http", httpHandler)
 	repository.Register("https", httpHandler)
-
 	return newApp
 }
 
 // marker interface to pass system tray to supporting drivers
 type systrayDriver interface {
 	SetSystemTrayMenu(*fyne.Menu)
-	SetSystemTrayIcon(resource fyne.Resource)
+	SetSystemTrayIcon(fyne.Resource)
+	SetSystemTrayWindow(fyne.Window)
 }

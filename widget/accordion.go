@@ -83,11 +83,11 @@ func (a *Accordion) Open(index int) {
 	a.Refresh()
 }
 
-// OpenAll expands all items.
+// OpenAll expands all items, note that your Accordion should have [MultiOpen] set to `true` for this to operate as
+// expected. For single-open accordions it will open only the first item.
 func (a *Accordion) OpenAll() {
-	multiOpen := a.MultiOpen
-
-	if !multiOpen {
+	if !a.MultiOpen {
+		a.Open(0)
 		return
 	}
 
@@ -149,7 +149,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		y += min
 
 		if ai.Open {
-			y += pad
+			y += pad + ai.Detail.MinSize().Height
 			hasOpen++
 		}
 		if i < len(r.container.Items)-1 {
@@ -157,7 +157,10 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		}
 	}
 
-	openSize := (size.Height - y) / float32(hasOpen)
+	extra := (size.Height - y) / float32(hasOpen)
+	if extra < 0 {
+		extra = 0
+	}
 	y = 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
@@ -175,8 +178,11 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 		y += min
 
 		if ai.Open {
+			y += pad
 			d := ai.Detail
 			d.Move(fyne.NewPos(x, y))
+
+			openSize := ai.Detail.MinSize().Height + extra
 			d.Resize(fyne.NewSize(size.Width, openSize))
 			y += openSize
 		}

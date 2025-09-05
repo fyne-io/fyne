@@ -282,30 +282,38 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 9, 9)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5),
-			AbsolutePosition: fyne.NewPos(9, 9)}}, h1.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(5, 5),
+			AbsolutePosition: fyne.NewPos(9, 9),
+		}}, h1.popMouseInEvent())
 		assert.Nil(t, h1.popMouseMovedEvent())
 		assert.Nil(t, h1.popMouseOutEvent())
 
 		w.mouseMoved(w.viewport, 9, 8)
 		assert.Nil(t, h1.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4),
-			AbsolutePosition: fyne.NewPos(9, 8)}}, h1.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(5, 4),
+			AbsolutePosition: fyne.NewPos(9, 8),
+		}}, h1.popMouseMovedEvent())
 		assert.Nil(t, h1.popMouseOutEvent())
 
 		w.mouseMoved(w.viewport, 23, 11)
 		assert.Nil(t, h1.popMouseInEvent())
 		assert.Nil(t, h1.popMouseMovedEvent())
 		assert.NotNil(t, h1.popMouseOutEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 7),
-			AbsolutePosition: fyne.NewPos(23, 11)}}, h2.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(5, 7),
+			AbsolutePosition: fyne.NewPos(23, 11),
+		}}, h2.popMouseInEvent())
 		assert.Nil(t, h2.popMouseMovedEvent())
 		assert.Nil(t, h2.popMouseOutEvent())
 
 		w.mouseMoved(w.viewport, 23, 10)
 		assert.Nil(t, h2.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 6),
-			AbsolutePosition: fyne.NewPos(23, 10)}}, h2.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(5, 6),
+			AbsolutePosition: fyne.NewPos(23, 10),
+		}}, h2.popMouseMovedEvent())
 		assert.Nil(t, h2.popMouseOutEvent())
 	})
 }
@@ -416,8 +424,10 @@ func TestWindow_HandleDragging(t *testing.T) {
 		w.mouseMoved(w.viewport, 8, 8)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-					AbsolutePosition: fyne.NewPos(8, 8)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(4, 4),
+					AbsolutePosition: fyne.NewPos(8, 8),
+				},
 				Dragged: fyne.NewDelta(-2, -2),
 			},
 			d1.popDragEvent(),
@@ -429,8 +439,10 @@ func TestWindow_HandleDragging(t *testing.T) {
 		w.mouseMoved(w.viewport, 16, 8)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4),
-					AbsolutePosition: fyne.NewPos(16, 8)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(12, 4),
+					AbsolutePosition: fyne.NewPos(16, 8),
+				},
 				Dragged: fyne.NewDelta(8, 0),
 			},
 			d1.popDragEvent(),
@@ -442,8 +454,10 @@ func TestWindow_HandleDragging(t *testing.T) {
 		w.mouseMoved(w.viewport, 22, 6)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(18, 2),
-					AbsolutePosition: fyne.NewPos(22, 6)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(18, 2),
+					AbsolutePosition: fyne.NewPos(22, 6),
+				},
 				Dragged: fyne.NewDelta(6, -2),
 			},
 			d1.popDragEvent(),
@@ -471,8 +485,10 @@ func TestWindow_HandleDragging(t *testing.T) {
 		assert.Nil(t, d1.popDragEvent())
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(8, 5),
-					AbsolutePosition: fyne.NewPos(26, 9)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(8, 5),
+					AbsolutePosition: fyne.NewPos(26, 9),
+				},
 				Dragged: fyne.NewDelta(4, 3),
 			},
 			d2.popDragEvent(),
@@ -496,8 +512,10 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		w.mouseMoved(w.viewport, 10, 10)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(6, 6),
-					AbsolutePosition: fyne.NewPos(10, 10)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(6, 6),
+					AbsolutePosition: fyne.NewPos(10, 10),
+				},
 				Dragged: fyne.NewDelta(-2, -2),
 			},
 			d1.popDragEvent(),
@@ -511,8 +529,10 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 		w.mouseMoved(w.viewport, 12, 12)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 9),
-					AbsolutePosition: fyne.NewPos(12, 12)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(9, 9),
+					AbsolutePosition: fyne.NewPos(12, 12),
+				},
 				Dragged: fyne.NewDelta(2, 2),
 			},
 			d1.popDragEvent(),
@@ -594,16 +614,20 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 10, 10)
 		assert.Equal(t,
-			&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(6, 6),
-				AbsolutePosition: fyne.NewPos(10, 10)}},
+			&desktop.MouseEvent{PointEvent: fyne.PointEvent{
+				Position:         fyne.NewPos(6, 6),
+				AbsolutePosition: fyne.NewPos(10, 10),
+			}},
 			dh.popMouseInEvent(),
 		)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseMoved(w.viewport, 12, 12)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(8, 8),
-					AbsolutePosition: fyne.NewPos(12, 12)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(8, 8),
+					AbsolutePosition: fyne.NewPos(12, 12),
+				},
 				Dragged: fyne.NewDelta(2, 2),
 			},
 			dh.popDragEvent(),
@@ -613,8 +637,10 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		w.mouseMoved(w.viewport, 20, 12)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(16, 8),
-					AbsolutePosition: fyne.NewPos(20, 12)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(16, 8),
+					AbsolutePosition: fyne.NewPos(20, 12),
+				},
 				Dragged: fyne.NewDelta(8, 0),
 			},
 			dh.popDragEvent(),
@@ -626,8 +652,10 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 		w.mouseMoved(w.viewport, 12, 12)
 		assert.Equal(t,
 			&fyne.DragEvent{
-				PointEvent: fyne.PointEvent{Position: fyne.NewPos(8, 8),
-					AbsolutePosition: fyne.NewPos(12, 12)},
+				PointEvent: fyne.PointEvent{
+					Position:         fyne.NewPos(8, 8),
+					AbsolutePosition: fyne.NewPos(12, 12),
+				},
 				Dragged: fyne.NewDelta(-8, 0),
 			},
 			dh.popDragEvent(),
@@ -674,8 +702,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	//  - no events by draggableHoverableObject
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 7, 7)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(3, 3),
-			AbsolutePosition: fyne.NewPos(7, 7)}}, h.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(3, 3),
+			AbsolutePosition: fyne.NewPos(7, 7),
+		}}, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
@@ -695,8 +725,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseMoved(w.viewport, 8, 8)
 		assert.Nil(t, h.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-			AbsolutePosition: fyne.NewPos(8, 8)}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(4, 4),
+			AbsolutePosition: fyne.NewPos(8, 8),
+		}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
@@ -715,8 +747,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 16, 16)
 		assert.Nil(t, h.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 12),
-			AbsolutePosition: fyne.NewPos(16, 16)}}, h.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(12, 12),
+			AbsolutePosition: fyne.NewPos(16, 16),
+		}}, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
@@ -735,11 +769,15 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseMoved(w.viewport, 18, 18)
 		assert.Nil(t, h.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(14, 14),
-			AbsolutePosition: fyne.NewPos(18, 18)}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(14, 14),
+			AbsolutePosition: fyne.NewPos(18, 18),
+		}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-			AbsolutePosition: fyne.NewPos(18, 18)}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(4, 4),
+			AbsolutePosition: fyne.NewPos(18, 18),
+		}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
 		assert.Nil(t, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
@@ -777,8 +815,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 		assert.NotNil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(3, 3),
-			AbsolutePosition: fyne.NewPos(27, 27)}}, dh.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(3, 3),
+			AbsolutePosition: fyne.NewPos(27, 27),
+		}}, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
 		assert.Nil(t, dh.popMouseOutEvent())
 		assert.Nil(t, dh.popDragEvent())
@@ -791,8 +831,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	// - mouseOut by draggableHoverableObject
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 37, 37)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(33, 33),
-			AbsolutePosition: fyne.NewPos(37, 37)}}, h.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(33, 33),
+			AbsolutePosition: fyne.NewPos(37, 37),
+		}}, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
@@ -811,8 +853,10 @@ func TestWindow_HoverableUnderDraggable(t *testing.T) {
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 47, 47)
 		assert.Nil(t, h.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(43, 43),
-			AbsolutePosition: fyne.NewPos(47, 47)}}, h.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(43, 43),
+			AbsolutePosition: fyne.NewPos(47, 47),
+		}}, h.popMouseMovedEvent())
 		assert.Nil(t, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
 		assert.Nil(t, dh.popMouseInEvent())
@@ -864,8 +908,10 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 	//  - no events by draggableHoverableObject
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 16, 16)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 12),
-			AbsolutePosition: fyne.NewPos(16, 16)}}, h.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(12, 12),
+			AbsolutePosition: fyne.NewPos(16, 16),
+		}}, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
@@ -885,11 +931,15 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseMoved(w.viewport, 18, 18)
 		assert.Nil(t, h.popMouseInEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(14, 14),
-			AbsolutePosition: fyne.NewPos(18, 18)}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(14, 14),
+			AbsolutePosition: fyne.NewPos(18, 18),
+		}, Button: 1, Modifier: 0}, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-			AbsolutePosition: fyne.NewPos(18, 18)}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(4, 4),
+			AbsolutePosition: fyne.NewPos(18, 18),
+		}, Dragged: fyne.NewDelta(2, 2)}, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
 		assert.Nil(t, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
@@ -907,11 +957,15 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 		assert.Nil(t, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.NotNil(t, h.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(13, 13),
-			AbsolutePosition: fyne.NewPos(27, 27)}, Dragged: fyne.NewDelta(9, 9)}, d.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(13, 13),
+			AbsolutePosition: fyne.NewPos(27, 27),
+		}, Dragged: fyne.NewDelta(9, 9)}, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(3, 3),
-			AbsolutePosition: fyne.NewPos(27, 27)}, Button: 1, Modifier: 0}, dh.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(3, 3),
+			AbsolutePosition: fyne.NewPos(27, 27),
+		}, Button: 1, Modifier: 0}, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
 		assert.Nil(t, dh.popMouseOutEvent())
 		assert.Nil(t, dh.popDragEvent())
@@ -924,12 +978,16 @@ func TestWindow_HoverableUnderDraggable_DragAcross(t *testing.T) {
 	// - mouseOut by draggableHoverableObject
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 37, 37)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(33, 33),
-			AbsolutePosition: fyne.NewPos(37, 37)}, Button: 1, Modifier: 0}, h.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(33, 33),
+			AbsolutePosition: fyne.NewPos(37, 37),
+		}, Button: 1, Modifier: 0}, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(23, 23),
-			AbsolutePosition: fyne.NewPos(37, 37)}, Dragged: fyne.NewDelta(10, 10)}, d.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(23, 23),
+			AbsolutePosition: fyne.NewPos(37, 37),
+		}, Dragged: fyne.NewDelta(10, 10)}, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
 		assert.Nil(t, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
@@ -985,8 +1043,10 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
 		assert.Nil(t, d.popDragEndEvent())
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4),
-			AbsolutePosition: fyne.NewPos(28, 28)}}, dh.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(4, 4),
+			AbsolutePosition: fyne.NewPos(28, 28),
+		}}, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
 		assert.Nil(t, dh.popMouseOutEvent())
 		assert.Nil(t, dh.popDragEvent())
@@ -1008,8 +1068,10 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 		assert.Nil(t, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
 		assert.Nil(t, dh.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(6, 6),
-			AbsolutePosition: fyne.NewPos(30, 30)}, Dragged: fyne.NewDelta(2, 2)}, dh.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(6, 6),
+			AbsolutePosition: fyne.NewPos(30, 30),
+		}, Dragged: fyne.NewDelta(2, 2)}, dh.popDragEvent())
 		assert.Nil(t, dh.popDragEndEvent())
 	})
 
@@ -1019,8 +1081,10 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 	//  - drag and moveOut by draggableHoverableObject
 	runOnMain(func() {
 		w.mouseMoved(w.viewport, 47, 47)
-		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(43, 43),
-			AbsolutePosition: fyne.NewPos(47, 47)}, Button: 1, Modifier: 0}, h.popMouseInEvent())
+		assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(43, 43),
+			AbsolutePosition: fyne.NewPos(47, 47),
+		}, Button: 1, Modifier: 0}, h.popMouseInEvent())
 		assert.Nil(t, h.popMouseMovedEvent())
 		assert.Nil(t, h.popMouseOutEvent())
 		assert.Nil(t, d.popDragEvent())
@@ -1028,8 +1092,10 @@ func TestWindow_HoverableUnderDraggable_Drag_draggableHoverable(t *testing.T) {
 		assert.Nil(t, dh.popMouseInEvent())
 		assert.Nil(t, dh.popMouseMovedEvent())
 		assert.NotNil(t, dh.popMouseOutEvent())
-		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(23, 23),
-			AbsolutePosition: fyne.NewPos(47, 47)}, Dragged: fyne.NewDelta(17, 17)}, dh.popDragEvent())
+		assert.Equal(t, &fyne.DragEvent{PointEvent: fyne.PointEvent{
+			Position:         fyne.NewPos(23, 23),
+			AbsolutePosition: fyne.NewPos(47, 47),
+		}, Dragged: fyne.NewDelta(17, 17)}, dh.popDragEvent())
 		assert.Nil(t, dh.popDragEndEvent())
 	})
 
@@ -1097,30 +1163,30 @@ func TestWindow_Scrolled(t *testing.T) {
 
 func TestWindow_Tapped(t *testing.T) {
 	w := createWindow("Test")
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(container.NewVBox(rect, o))
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
-		w.mousePos = fyne.NewPos(50, 160)
+		w.mousePos = fyne.NewPos(50, 60)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
 		if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
-			assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
-			assert.Equal(t, fyne.NewPos(46, 52), e.Position)
+			assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+			assert.Equal(t, fyne.NewPos(46, 56), e.Position)
 		}
 	})
 }
 
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(o)
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
 		w.mousePos = fyne.NewPos(50, 60)
@@ -1175,7 +1241,10 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 
 	base := container.New(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
-	refreshWindow(w.window) // ensure any async resize is done
+	runOnMain(func() {
+		refreshWindow(w.window) // ensure any async resize is done
+	})
+
 	ensureCanvasSize(t, w, fyne.NewSize(108, 212))
 
 	runOnMain(func() {
@@ -1190,34 +1259,6 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		assert.True(t, tapped, "Tapped button that was clipped")
-	})
-}
-
-func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
-	w := createWindow("Test")
-	tapped := 0
-	b1 := widget.NewButton("Tap", func() { tapped = 1 })
-	b2 := widget.NewButton("Tap", func() { tapped = 2 })
-	w.SetContent(container.NewVBox(b1, b2))
-
-	runOnMain(func() {
-		w.mouseMoved(w.viewport, 17, 27)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 1, tapped, "Button 1 should be tapped")
-		tapped = 0
-
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseMoved(w.viewport, 17, 59)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
-
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 	})
 }
 
@@ -1790,18 +1831,20 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.Equal(t, 0, len(content.capturedShortcuts))
 	assert.Equal(t, "canvas", called)
 
-	if runtime.GOOS != "darwin" { // macOS does this builtin
-		item := fyne.NewMenuItem("Test", func() {
-			called = "menu"
-		})
-		item.Shortcut = testShortcut
-		file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
-
-		w.SetMainMenu(fyne.NewMainMenu(file))
-		trigger()
-		assert.Equal(t, 0, len(content.capturedShortcuts))
-		assert.Equal(t, "menu", called)
+	if runtime.GOOS == "darwin" { // macOS menus are special
+		return
 	}
+
+	item := fyne.NewMenuItem("Test", func() {
+		called = "menu"
+	})
+	item.Shortcut = testShortcut
+	file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
+
+	w.SetMainMenu(fyne.NewMainMenu(file))
+	trigger()
+	assert.Equal(t, 0, len(content.capturedShortcuts))
+	assert.Equal(t, "menu", called)
 
 	called = "obj"
 	w.Canvas().Focus(content)
@@ -1855,17 +1898,17 @@ func (h *hoverable) MouseOut() {
 
 func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
-	return
+	return e
 }
 
 type draggableObject struct {
@@ -1890,12 +1933,12 @@ func (d *draggable) DragEnd() {
 
 func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
-	return
+	return e
 }
 
 func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
-	return
+	return e
 }
 
 type draggableHoverableObject struct {
@@ -1925,7 +1968,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 
 func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
-	return
+	return e
 }
 
 type draggableMouseableObject struct {
@@ -1956,12 +1999,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 
 func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
-	return
+	return e
 }
 
 func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
-	return
+	return e
 }
 
 type draggableTappableObject struct {
@@ -1970,8 +2013,10 @@ type draggableTappableObject struct {
 	tappable
 }
 
-var _ fyne.Focusable = (*focusable)(nil)
-var _ fyne.Disableable = (*focusable)(nil)
+var (
+	_ fyne.Focusable   = (*focusable)(nil)
+	_ fyne.Disableable = (*focusable)(nil)
+)
 
 type focusable struct {
 	canvas.Rectangle
@@ -2039,7 +2084,7 @@ func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 
 func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
-	return
+	return e
 }
 
 //

@@ -36,7 +36,7 @@ type Label struct {
 
 	provider  *RichText
 	binder    basicBinder
-	selection *selectable
+	selection *focusSelectable
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -81,8 +81,9 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.syncSegments()
 
-	l.selection = &selectable{}
+	l.selection = &focusSelectable{}
 	l.selection.ExtendBaseWidget(l.selection)
+	l.selection.focus = l.selection
 	l.selection.style = l.TextStyle
 	l.selection.theme = l.Theme()
 	l.selection.provider = l.provider
@@ -224,4 +225,24 @@ func (r *labelRenderer) Refresh() {
 	sel.style = r.l.TextStyle
 	sel.theme = r.l.Theme()
 	sel.Refresh()
+}
+
+type focusSelectable struct {
+	selectable
+}
+
+func (f *focusSelectable) FocusGained() {
+	f.focussed = true
+	f.Refresh()
+}
+
+func (f *focusSelectable) FocusLost() {
+	f.focussed = false
+	f.Refresh()
+}
+
+func (f *focusSelectable) TypedKey(*fyne.KeyEvent) {
+}
+
+func (f *focusSelectable) TypedRune(rune) {
 }

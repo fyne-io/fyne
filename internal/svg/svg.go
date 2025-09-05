@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/srwiley/oksvg"
+	"github.com/fyne-io/oksvg"
 	"github.com/srwiley/rasterx"
 
 	"fyne.io/fyne/v2"
@@ -314,7 +314,7 @@ func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
 	r, g, b, a := col.ToNRGBA(color)
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
-	return
+	return hexStr, aStr
 }
 
 func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {

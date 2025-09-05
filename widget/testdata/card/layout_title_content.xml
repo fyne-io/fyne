@@ -2,14 +2,14 @@
 	<content>
 		<widget pos="4,4" size="82x70" type="*widget.Card">
 			<widget pos="2,2" size="78x66" type="*widget.Shadow">
-				<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
-				<linearGradient endColor="shadow" pos="0,-1" size="78x1"/>
-				<radialGradient centerOffset="-0.5,0.5" pos="78,-1" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" pos="78,0" size="1x66" startColor="shadow"/>
-				<radialGradient centerOffset="-0.5,-0.5" pos="78,66" size="1x1" startColor="shadow"/>
-				<linearGradient pos="0,66" size="78x1" startColor="shadow"/>
-				<radialGradient centerOffset="0.5,-0.5" pos="-1,66" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x66"/>
+				<radialGradient centerOffset="0.5,0.5" size="1x1" startColor="shadow"/>
+				<linearGradient endColor="shadow" size="77x1"/>
+				<radialGradient centerOffset="-0.5,0.5" pos="77,0" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" pos="77,0" size="1x66" startColor="shadow"/>
+				<radialGradient centerOffset="-0.5,-0.5" pos="77,66" size="1x1" startColor="shadow"/>
+				<linearGradient pos="0,66" size="77x1" startColor="shadow"/>
+				<radialGradient centerOffset="0.5,-0.5" pos="0,66" size="1x1" startColor="shadow"/>
+				<linearGradient angle="270" endColor="shadow" size="1x66"/>
 			</widget>
 			<text bold pos="10,10" size="62x32" textSize="23">Hello</text>
 			<text size="0x0"></text>

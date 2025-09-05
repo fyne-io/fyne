@@ -5,8 +5,6 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
-	"runtime"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -20,6 +18,7 @@ import (
 )
 
 type Cursor struct {
+	JSName string
 }
 
 const defaultTitle = "Fyne Application"
@@ -40,8 +39,6 @@ const (
 	CursorDisabled int = glfw.CursorDisabled
 )
 
-var cursorMap map[desktop.Cursor]*Cursor
-
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
 
@@ -59,14 +56,11 @@ type window struct {
 	icon     fyne.Resource
 	mainmenu *fyne.MainMenu
 
-	clipboard fyne.Clipboard
-
 	master     bool
 	fullScreen bool
 	centered   bool
 	visible    bool
 
-	mouseLock            sync.RWMutex
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
 	mouseDraggedObjStart fyne.Position
@@ -156,64 +150,100 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
-	w.processMoved(x, y)
+	runOnMain(func() {
+		w.processMoved(x, y)
+	})
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
-	w.canvas.scale = w.calculatedScale()
-	w.processResized(width, height)
+	runOnMain(func() {
+		w.canvas.scale = w.calculatedScale()
+		w.processResized(width, height)
+	})
 }
 
 func (w *window) frameSized(_ *glfw.Window, width, height int) {
-	w.processFrameSized(width, height)
+	runOnMain(func() {
+		w.processFrameSized(width, height)
+	})
 }
 
 func (w *window) refresh(_ *glfw.Window) {
-	w.processRefresh()
+	runOnMain(w.processRefresh)
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
+	runOnMain(func() {
+		viewport.SetShouldClose(false) // reset the closed flag until we check the veto in processClosed
 
-	w.processClosed()
+		w.processClosed()
+	})
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
-	return nil, false
+	if _, ok := cursor.(desktop.StandardCursor); !ok {
+		return nil, false // Custom cursors not implemented yet.
+	}
+
+	name := "default"
+	switch cursor {
+	case desktop.TextCursor:
+		name = "text"
+	case desktop.CrosshairCursor:
+		name = "crosshair"
+	case desktop.DefaultCursor:
+		name = "default"
+	case desktop.PointerCursor:
+		name = "pointer"
+	case desktop.HResizeCursor:
+		name = "ew-resize"
+	case desktop.VResizeCursor:
+		name = "ns-resize"
+	case desktop.HiddenCursor:
+		name = "none"
+	}
+
+	return &Cursor{JSName: name}, false
 }
 
-func (w *window) SetCursor(_ *Cursor) {
+func (w *window) SetCursor(cursor *Cursor) {
+	setCursor(cursor.JSName)
 }
 
 func (w *window) setCustomCursor(rawCursor *Cursor, isCustomCursor bool) {
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
-	w.processMouseMoved(w.scaleInput(xpos), w.scaleInput(ypos))
+	runOnMain(func() {
+		w.processMouseMoved(w.scaleInput(xpos), w.scaleInput(ypos))
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	button, modifiers := convertMouseButton(btn, mods)
-	mouseAction := convertAction(action)
+	runOnMain(func() {
+		button, modifiers := convertMouseButton(btn, mods)
+		mouseAction := convertAction(action)
 
-	w.processMouseClicked(button, mouseAction, modifiers)
+		w.processMouseClicked(button, mouseAction, modifiers)
+	})
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
-	if runtime.GOOS != "darwin" && xoff == 0 &&
-		(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
-			viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
-		xoff, yoff = yoff, xoff
-	}
+	runOnMain(func() {
+		if xoff == 0 &&
+			(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
+				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
+			xoff, yoff = yoff, xoff
+		}
 
-	w.processMouseScrolled(xoff, yoff)
+		w.processMouseScrolled(xoff, yoff)
+	})
 }
 
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
-	var button desktop.MouseButton
 	rightClick := false
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		if modifier&fyne.KeyModifierControl != 0 {
 			rightClick = true
 			modifier &^= fyne.KeyModifierControl
@@ -223,17 +253,20 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 			modifier &^= fyne.KeyModifierSuper
 		}
 	}
+
 	switch btn {
 	case glfw.MouseButton1:
 		if rightClick {
-			button = desktop.RightMouseButton
-		} else {
-			button = desktop.LeftMouseButton
+			return desktop.MouseButtonSecondary, modifier
 		}
+		return desktop.MouseButtonPrimary, modifier
 	case glfw.MouseButton2:
-		button = desktop.RightMouseButton
+		return desktop.MouseButtonSecondary, modifier
+	case glfw.MouseButton3:
+		return desktop.MouseButtonTertiary, modifier
+	default:
+		return 0, modifier
 	}
-	return button, modifier
 }
 
 //gocyclo:ignore
@@ -534,9 +567,7 @@ func (w *window) create() {
 	// update window size now we have scaled detected
 	w.fitContent()
 
-	for _, fn := range w.pending {
-		fn()
-	}
+	w.drainPendingEvents()
 
 	w.requestedWidth, w.requestedHeight = w.width, w.height
 

@@ -2,6 +2,9 @@ package theme_test
 
 import (
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -64,6 +67,10 @@ func Test_DefaultTheme_ShadowColor(t *testing.T) {
 }
 
 func TestEmptyTheme(t *testing.T) {
+	// Discarding log output for tests
+	// The following functions tested all log an error when returning nil
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	fyne.CurrentApp().Settings().SetTheme(&emptyTheme{})
 	assert.NotNil(t, theme.ForegroundColor())
 	assert.NotNil(t, theme.TextFont())
@@ -89,8 +96,7 @@ func TestTheme_Bootstrapping(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(current)
 }
 
-type emptyTheme struct {
-}
+type emptyTheme struct{}
 
 func (e *emptyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	return nil

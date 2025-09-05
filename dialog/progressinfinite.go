@@ -29,7 +29,7 @@ func NewProgressInfinite(title, message string, parent fyne.Window) *ProgressInf
 	rect := canvas.NewRectangle(color.Transparent)
 	rect.SetMinSize(fyne.NewSize(200, 0))
 
-	d.create(container.NewMax(rect, bar))
+	d.create(container.NewStack(rect, bar))
 	return &ProgressInfiniteDialog{d, bar}
 }
 

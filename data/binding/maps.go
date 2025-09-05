@@ -248,7 +248,7 @@ func (b *mapBase) doReload() (retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return retErr
 }
 
 func (b *mapBase) setItem(key string, d reflectUntyped) {
@@ -302,7 +302,7 @@ func (b *boundStruct) Reload() (retErr error) {
 		}
 		(*b.val)[key] = f.Interface()
 	}
-	return
+	return retErr
 }
 
 func bindUntypedMapValue(m *map[string]any, k string, external bool) reflectUntyped {
@@ -387,7 +387,7 @@ func (r *reflectBool) Get() (val bool, err error) {
 	}()
 
 	val = r.val.Bool()
-	return
+	return val, err
 }
 
 func (r *reflectBool) Set(b bool) (err error) {
@@ -399,7 +399,7 @@ func (r *reflectBool) Set(b bool) (err error) {
 
 	r.val.SetBool(b)
 	r.trigger()
-	return
+	return err
 }
 
 func bindReflectBool(f reflect.Value) reflectUntyped {
@@ -420,7 +420,7 @@ func (r *reflectFloat) Get() (val float64, err error) {
 	}()
 
 	val = r.val.Float()
-	return
+	return val, err
 }
 
 func (r *reflectFloat) Set(f float64) (err error) {
@@ -432,7 +432,7 @@ func (r *reflectFloat) Set(f float64) (err error) {
 
 	r.val.SetFloat(f)
 	r.trigger()
-	return
+	return err
 }
 
 func bindReflectFloat(f reflect.Value) reflectUntyped {
@@ -453,7 +453,7 @@ func (r *reflectInt) Get() (val int, err error) {
 	}()
 
 	val = int(r.val.Int())
-	return
+	return val, err
 }
 
 func (r *reflectInt) Set(i int) (err error) {
@@ -465,7 +465,7 @@ func (r *reflectInt) Set(i int) (err error) {
 
 	r.val.SetInt(int64(i))
 	r.trigger()
-	return
+	return err
 }
 
 func bindReflectInt(f reflect.Value) reflectUntyped {
@@ -486,7 +486,7 @@ func (r *reflectString) Get() (val string, err error) {
 	}()
 
 	val = r.val.String()
-	return
+	return val, err
 }
 
 func (r *reflectString) Set(s string) (err error) {
@@ -498,7 +498,7 @@ func (r *reflectString) Set(s string) (err error) {
 
 	r.val.SetString(s)
 	r.trigger()
-	return
+	return err
 }
 
 func bindReflectString(f reflect.Value) reflectUntyped {

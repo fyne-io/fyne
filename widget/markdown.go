@@ -10,7 +10,6 @@ import (
 	"github.com/yuin/goldmark/renderer"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/storage"
 )
 
 // NewRichTextFromMarkdown configures a RichText widget by parsing the provided markdown content.
@@ -63,7 +62,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 	case *ast.List:
 		items, err := renderChildren(source, n, blockquote)
 		return []RichTextSegment{
-			&ListSegment{Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
+			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
 		}, err
 	case *ast.ListItem:
 		texts, err := renderChildren(source, n, blockquote)
@@ -106,7 +105,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
 	case *ast.Emphasis:
-		text := string(forceIntoText(source, n))
+		text := forceIntoText(source, n)
 		switch t.Level {
 		case 2:
 			return []RichTextSegment{&TextSegment{Style: RichTextStyleStrong, Text: text}}, nil
@@ -127,12 +126,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 	case *ast.Blockquote:
 		return renderChildren(source, n, true)
 	case *ast.Image:
-		dest := string(t.Destination)
-		u, err := storage.ParseURI(dest)
-		if err != nil {
-			u = storage.NewFileURI(dest)
-		}
-		return []RichTextSegment{&ImageSegment{Source: u, Title: string(t.Title), Alignment: fyne.TextAlignCenter}}, nil
+		return parseMarkdownImage(t), nil
 	}
 	return nil, nil
 }
@@ -159,7 +153,7 @@ func renderChildren(source []byte, n ast.Node, blockquote bool) ([]RichTextSegme
 }
 
 func forceIntoText(source []byte, n ast.Node) string {
-	texts := make([]string, 0)
+	texts := []string{}
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {

@@ -15,8 +15,10 @@ import (
 )
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*GridWrap)(nil)
-var _ fyne.Focusable = (*GridWrap)(nil)
+var (
+	_ fyne.Widget    = (*GridWrap)(nil)
+	_ fyne.Focusable = (*GridWrap)(nil)
+)
 
 // GridWrapItemID is the ID of an individual item in the GridWrap widget.
 //
@@ -80,7 +82,7 @@ func NewGridWrapWithData(data binding.DataList, createItem func() fyne.CanvasObj
 		data.Length,
 		createItem,
 		func(i GridWrapItemID, o fyne.CanvasObject) {
-			item, err := data.GetItem(int(i))
+			item, err := data.GetItem(i)
 			if err != nil {
 				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
 				return
@@ -114,7 +116,6 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.Focusable
 func (l *GridWrap) FocusGained() {
 	l.focused = true
-	l.scrollTo(l.currentFocus)
 	l.RefreshItem(l.currentFocus)
 }
 
@@ -214,7 +215,7 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	if f := l.Length; f != nil {
 		length = f()
 	}
-	if id < 0 || int(id) >= length {
+	if id < 0 || id >= length {
 		return
 	}
 	l.scrollTo(id)
@@ -406,9 +407,11 @@ func (l *gridWrapRenderer) Objects() []fyne.CanvasObject {
 }
 
 // Declare conformity with interfaces.
-var _ fyne.Widget = (*gridWrapItem)(nil)
-var _ fyne.Tappable = (*gridWrapItem)(nil)
-var _ desktop.Hoverable = (*gridWrapItem)(nil)
+var (
+	_ fyne.Widget       = (*gridWrapItem)(nil)
+	_ fyne.Tappable     = (*gridWrapItem)(nil)
+	_ desktop.Hoverable = (*gridWrapItem)(nil)
+)
 
 type gridWrapItem struct {
 	BaseWidget
@@ -588,7 +591,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 			l.gw.RefreshItem(l.gw.currentFocus)
 			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.gw)
 			if canvas != nil {
-				canvas.Focus(l.gw)
+				canvas.Focus(l.gw.impl.(fyne.Focusable))
 			}
 
 			l.gw.currentFocus = id
@@ -628,7 +631,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 
 	offY := l.gw.offsetY - float32(math.Mod(float64(l.gw.offsetY), float64(l.gw.itemMin.Height+padding)))
 	minRow := int(offY / (l.gw.itemMin.Height + padding))
-	minItem := GridWrapItemID(minRow * colCount)
+	minItem := minRow * colCount
 	maxRow := int(math.Min(float64(minRow+visibleRowsCount), math.Ceil(float64(length)/float64(colCount))))
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 
