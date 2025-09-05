@@ -397,64 +397,70 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.indentation++
 }
 
+func nrgbaColor(c color.Color) color.NRGBA {
+	// using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
+	r, g, b, a := col.ToNRGBA(c)
+	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+}
+
 //gocyclo:ignore
 func knownColor(c color.Color) string {
-	switch c {
-	case theme.Color(theme.ColorNameBackground):
+	switch nrgbaColor(c) {
+	case nrgbaColor(theme.Color(theme.ColorNameBackground)):
 		return "background"
-	case theme.Color(theme.ColorNameButton):
+	case nrgbaColor(theme.Color(theme.ColorNameButton)):
 		return "button"
-	case theme.Color(theme.ColorNameDisabledButton):
+	case nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):
 		return "disabled button"
-	case theme.Color(theme.ColorNameDisabled):
+	case nrgbaColor(theme.Color(theme.ColorNameDisabled)):
 		return "disabled"
-	case theme.Color(theme.ColorNameError):
+	case nrgbaColor(theme.Color(theme.ColorNameError)):
 		return "error"
-	case theme.Color(theme.ColorNameFocus):
+	case nrgbaColor(theme.Color(theme.ColorNameFocus)):
 		return "focus"
-	case theme.Color(theme.ColorNameForeground):
+	case nrgbaColor(theme.Color(theme.ColorNameForeground)):
 		return "foreground"
-	case theme.Color(theme.ColorNameForegroundOnError):
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):
 		return "foregroundOnError"
-	case theme.Color(theme.ColorNameForegroundOnPrimary):
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)):
 		return "foregroundOnPrimary"
-	case theme.Color(theme.ColorNameForegroundOnSuccess):
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)):
 		return "foregroundOnSuccess"
-	case theme.Color(theme.ColorNameForegroundOnWarning):
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)):
 		return "foregroundOnWarning"
-	case theme.Color(theme.ColorNameHeaderBackground):
+	case nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):
 		return "headerBackground"
-	case theme.Color(theme.ColorNameHover):
+	case nrgbaColor(theme.Color(theme.ColorNameHover)):
 		return "hover"
-	case theme.Color(theme.ColorNameHyperlink):
+	case nrgbaColor(theme.Color(theme.ColorNameHyperlink)):
 		return "hyperlink"
-	case theme.Color(theme.ColorNameInputBackground):
+	case nrgbaColor(theme.Color(theme.ColorNameInputBackground)):
 		return "inputBackground"
-	case theme.Color(theme.ColorNameInputBorder):
+	case nrgbaColor(theme.Color(theme.ColorNameInputBorder)):
 		return "inputBorder"
-	case theme.Color(theme.ColorNameMenuBackground):
+	case nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):
 		return "menuBackground"
-	case theme.Color(theme.ColorNameOverlayBackground):
+	case nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):
 		return "overlayBackground"
-	case theme.Color(theme.ColorNamePlaceHolder):
+	case nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):
 		return "placeholder"
-	case theme.Color(theme.ColorNamePressed):
+	case nrgbaColor(theme.Color(theme.ColorNamePressed)):
 		return "pressed"
-	case theme.Color(theme.ColorNamePrimary):
+	case nrgbaColor(theme.Color(theme.ColorNamePrimary)):
 		return "primary"
-	case theme.Color(theme.ColorNameScrollBar):
+	case nrgbaColor(theme.Color(theme.ColorNameScrollBar)):
 		return "scrollbar"
-	case theme.Color(theme.ColorNameScrollBarBackground):
+	case nrgbaColor(theme.Color(theme.ColorNameScrollBarBackground)):
 		return "scrollbarBackground"
-	case theme.Color(theme.ColorNameSelection):
+	case nrgbaColor(theme.Color(theme.ColorNameSelection)):
 		return "selection"
-	case theme.Color(theme.ColorNameSeparator):
+	case nrgbaColor(theme.Color(theme.ColorNameSeparator)):
 		return "separator"
-	case theme.Color(theme.ColorNameSuccess):
+	case nrgbaColor(theme.Color(theme.ColorNameSuccess)):
 		return "success"
-	case theme.Color(theme.ColorNameShadow):
+	case nrgbaColor(theme.Color(theme.ColorNameShadow)):
 		return "shadow"
-	case theme.Color(theme.ColorNameWarning):
+	case nrgbaColor(theme.Color(theme.ColorNameWarning)):
 		return "warning"
 	default:
 		return ""
