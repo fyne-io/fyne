@@ -10,7 +10,7 @@ import (
 // Navigation container is used to provide your application with a control bar and an area for content objects.
 // Objects can be any CanvasObject, and only the most recent one will be visible.
 //
-// Since: 2.6
+// Since: 2.7
 type Navigation struct {
 	widget.BaseWidget
 	level  int
@@ -25,14 +25,14 @@ type Navigation struct {
 
 // NewNavigation creates a new navigation container with a given root object.
 //
-// Since: 2.6
+// Since: 2.7
 func NewNavigation(root fyne.CanvasObject) *Navigation {
 	return NewNavigationWithTitle(root, "")
 }
 
 // NewNavigationWithTitle creates a new navigation container with a given root object and a default title.
 //
-// Since: 2.6
+// Since: 2.7
 func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 	var nav *Navigation
 	nav = &Navigation{
@@ -46,7 +46,7 @@ func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 
 // Push puts the given object on top of the navigation stack and hides the object below.
 //
-// Since: 2.6
+// Since: 2.7
 func (nav *Navigation) Push(obj fyne.CanvasObject) {
 	s := nav.Title
 	if nav.level > 0 {
@@ -57,7 +57,7 @@ func (nav *Navigation) Push(obj fyne.CanvasObject) {
 
 // PushWithTitle puts the given CanvasObject on top, hides the object below, and uses the given title as label text.
 //
-// Since: 2.6
+// Since: 2.7
 func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
 	obj.Show()
 	objs := nav.stack.Objects[:nav.level]
@@ -73,7 +73,7 @@ func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
 // Pop return the top level CanvasObject, adjusts the title accordingly, and disabled the back button
 // when no more objects are left to go back to.
 //
-// Since: 2.6
+// Since: 2.7
 func (nav *Navigation) Pop() fyne.CanvasObject {
 	if nav.level == 0 || nav.level == 1 && nav.Root != nil {
 		return nil
@@ -93,7 +93,7 @@ func (nav *Navigation) Pop() fyne.CanvasObject {
 
 // Forward shows the next object in the stack again.
 //
-// Since: 2.6
+// Since: 2.7
 func (nav *Navigation) Forward() fyne.CanvasObject {
 	nav.stack.Objects[nav.level-1].Hide()
 	nav.stack.Objects[nav.level].Show()
@@ -104,7 +104,7 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 
 // SetTitle changes the navigation title and the title for the current object.
 //
-// Since: 2.6
+// Since: 2.7
 func (nav *Navigation) SetTitle(s string) {
 	nav.titles[nav.level] = s
 }
