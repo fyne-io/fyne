@@ -200,9 +200,6 @@ func (b *prefBoundList[T]) checkForChange() {
 		b.Set(updated)
 		return
 	}
-	if val == nil {
-		return
-	}
 
 	// incoming changes to a preference list are not at the child level
 	for i, v := range val {
