@@ -289,13 +289,13 @@ func (b *boundStruct) Reload() (retErr error) {
 		var err error
 		switch kind {
 		case reflect.Bool:
-			err = b.items[key].set(f.Bool())
+			err = b.items[key].(*boundReflect[bool]).Set(f.Bool())
 		case reflect.Float32, reflect.Float64:
-			err = b.items[key].set(f.Float())
+			err = b.items[key].(*boundReflect[float64]).Set(f.Float())
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			err = b.items[key].set(int(f.Int()))
+			err = b.items[key].(*boundReflect[int]).Set(int(f.Int()))
 		case reflect.String:
-			err = b.items[key].set(f.String())
+			err = b.items[key].(*boundReflect[string]).Set(f.String())
 		}
 		if err != nil {
 			retErr = err
@@ -403,7 +403,7 @@ func bindReflect(field reflect.Value) reflectUntyped {
 	case reflect.Float32, reflect.Float64:
 		return &boundReflect[float64]{val: field}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return &boundReflect[int64]{val: field}
+		return &boundReflect[int]{val: field}
 	case reflect.String:
 		return &boundReflect[string]{val: field}
 	}
