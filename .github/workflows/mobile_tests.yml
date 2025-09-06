@@ -11,26 +11,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['', 'stable']
+        go-version: ["", "stable"]
         include:
           - os: ubuntu-latest
             runner: xvfb-run
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go-version }}
-        go-version-file: 'go.mod'
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          go-version-file: "go.mod"
 
-    - name: Get dependencies
-      run: sudo apt-get update && sudo apt-get install clang libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+      - name: Get dependencies
+        run: sudo apt-get update && sudo apt-get install clang libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
-    - name: Tests
-      run: go test -race -tags mobile,ci,migrated_fynedo ./...
+      - name: Tests
+        run: go test -race -tags mobile,ci,migrated_fynedo ./...
 
-    - name: Compile
-      working-directory: cmd/fyne_demo
-      run: go build -tags mobile
+      - name: Compile
+        working-directory: cmd/fyne_demo
+        run: go build -tags mobile
