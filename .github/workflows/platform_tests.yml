@@ -30,7 +30,7 @@ jobs:
       - name: Get dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install bc clang mold libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
+          sudo apt-get install --no-install-recommends bc clang mold libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
           echo "CC=clang" >> "$GITHUB_ENV"
           echo "CGO_LDFLAGS=-fuse-ld=mold" >> "$GITHUB_ENV"
         if: ${{ runner.os == 'Linux' }}

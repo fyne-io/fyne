@@ -24,7 +24,9 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Get dependencies
-        run: sudo apt-get update && sudo apt-get install clang mold libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends clang mold libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
 
       - name: Tests
         run: xvfb-run go test -race -tags mobile,ci,migrated_fynedo ./...
