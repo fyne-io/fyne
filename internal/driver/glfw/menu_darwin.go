@@ -226,7 +226,7 @@ func keyEquivalent(item *fyne.MenuItem) (key string) {
 			key = strings.ToLower(string(s.Key()))
 		}
 	}
-	return
+	return key
 }
 
 func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
@@ -244,7 +244,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 			mask |= 1 << 20 // NSEventModifierFlagCommand
 		}
 	}
-	return
+	return mask
 }
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {

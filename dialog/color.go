@@ -87,7 +87,7 @@ func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject)
 		// Add divider and recents if there are any,
 		contents = append(contents, canvas.NewLine(theme.Color(theme.ColorNameShadow)), recent)
 	}
-	return
+	return contents
 }
 
 func (p *ColorPickerDialog) selectColor(c color.Color) {
@@ -209,7 +209,7 @@ func readRecentColors() (recents []string) {
 			recents = append(recents, r)
 		}
 	}
-	return
+	return recents
 }
 
 func writeRecentColor(color string) {
@@ -258,7 +258,7 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 			colors = append(colors, c)
 		}
 	}
-	return
+	return colors
 }
 
 func colorToHSLA(c color.Color) (int, int, int, int) {

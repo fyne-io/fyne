@@ -2411,7 +2411,7 @@ func findMouseable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyn
 		return ok
 	}
 	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	return
+	return o, p
 }
 
 func clickPrimary(c fyne.Canvas, obj desktop.Mouseable, ev *fyne.PointEvent) {

@@ -139,7 +139,7 @@ func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
 	if can != nil {
 		x, y = can.PixelCoordinateForPosition(pos)
 	}
-	return
+	return x, y
 }
 
 func (a *colorWheel) selection(width, height float32) (float32, float32) {

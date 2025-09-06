@@ -356,7 +356,7 @@ func newTreeComparable[T comparable]() *boundTree[T] {
 
 func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) *boundTree[T] {
 	if v == nil {
-		return newTree[T](comparator)
+		return newTree(comparator)
 	}
 
 	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
@@ -537,7 +537,7 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return fire, retErr
 }
 
 func (t *boundTree[T]) SetValue(id string, v T) error {

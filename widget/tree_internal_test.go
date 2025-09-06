@@ -67,7 +67,7 @@ func TestTree(t *testing.T) {
 				} else if uid == "c" {
 					children = append(children, "d", "e", "f")
 				}
-				return
+				return children
 			},
 			IsBranch: func(uid string) bool {
 				return uid == "" || uid == "c"
@@ -107,7 +107,7 @@ func TestTree(t *testing.T) {
 				} else if uid == "c" {
 					children = append(children, "d", "e", "f")
 				}
-				return
+				return children
 			},
 			func(uid string) bool {
 				return uid == "" || uid == "c"
