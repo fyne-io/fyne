@@ -3,13 +3,10 @@
 package app
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/app"
-	"fyne.io/fyne/v2/theme"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -60,26 +57,6 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 
 	watchFileAddTarget(watcher, path)
 	return watcher
-}
-
-func (s *settings) loadSystemTheme() fyne.Theme {
-	path := filepath.Join(app.RootConfigDir(), "theme.json")
-	f, err := os.Open(path)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			fyne.LogError("Failed to load user theme file: "+path, err)
-		}
-		return theme.DefaultTheme()
-	}
-	defer f.Close()
-
-	th, err := theme.FromJSONReader(bufio.NewReader(f))
-	if err != nil {
-		fyne.LogError("Failed to parse user theme file: "+path, err)
-		return theme.DefaultTheme()
-	}
-
-	return th
 }
 
 func (s *settings) watchSettings() {

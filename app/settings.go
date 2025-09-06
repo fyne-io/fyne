@@ -131,7 +131,7 @@ func (s *settings) setupTheme() {
 	variant := app.DefaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
-		effectiveTheme = s.loadSystemTheme()
+		effectiveTheme = theme.DefaultTheme()
 	}
 	switch name {
 	case "light":
