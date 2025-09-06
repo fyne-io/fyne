@@ -174,7 +174,8 @@ func (n *noosDriver) renderWindow(w fyne.Window) {
 func NewNoOSDriver(render func(img image.Image), run func(func()), events chan noos2.Event) fyne.Driver {
 	return &noosDriver{
 		events: events, queue: make(chan funcData),
-		render: render, run: run, wins: make([]fyne.Window, 0)}
+		render: render, run: run, wins: make([]fyne.Window, 0),
+	}
 }
 
 type funcData struct {
