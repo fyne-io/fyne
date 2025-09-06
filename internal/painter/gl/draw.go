@@ -271,6 +271,8 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	}
 
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
+	inner, _ := rectInnerCoords(size, pos, fill, aspect)
+
 	p.ctx.UseProgram(p.program.ref)
 	p.updateBuffer(p.program.buff, points)
 	p.UpdateVertexArray(p.program, "vert", 3, 5, 0)
@@ -278,7 +280,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 	// Set corner radius and texture size in pixels
 	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
-	p.SetUniform2f(p.program, "size", size.Width*p.pixScale, size.Height*p.pixScale)
+	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
 
 	p.SetUniform1f(p.program, "alpha", alpha)
 
