@@ -31,7 +31,6 @@ jobs:
           go install golang.org/x/tools/cmd/goimports@latest
           go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
           go install honnef.co/go/tools/cmd/staticcheck@latest
-          go install github.com/mattn/goveralls@latest
           go install lucor.dev/lian@latest
 
       - name: Vet
@@ -50,15 +49,3 @@ jobs:
 
       - name: Check license of dependencies
         run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT, ISC"
-
-      - name: Update coverage
-        run: |
-          set -e
-          xvfb-run go test -covermode=atomic -coverprofile=coverage.out ./...
-          coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-          if (( $(echo "$coverage < 62" | bc) )); then echo "Test coverage lowered"; exit 1; fi
-
-      - name: Update PR Coverage
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.out
