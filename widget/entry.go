@@ -214,7 +214,19 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	e.syncSegments()
-	return newEntryRenderer(box, border, e.scroll, icon, objects, e)
+
+	actionWrapper := &fyne.Container{Layout: layout.NewStackLayout()}
+	objects = append(objects, actionWrapper)
+
+	return &entryRenderer{
+		box:           box,
+		border:        border,
+		scroll:        e.scroll,
+		icon:          icon,
+		actionWrapper: actionWrapper,
+		objects:       objects,
+		entry:         e,
+	}
 }
 
 // CursorPosition returns the relative position of this Entry widget's cursor.
@@ -1527,21 +1539,6 @@ type entryRenderer struct {
 
 	objects []fyne.CanvasObject
 	entry   *Entry
-}
-
-func newEntryRenderer(box, border *canvas.Rectangle, scroll *widget.Scroll, icon *canvas.Image, objects []fyne.CanvasObject, e *Entry) *entryRenderer {
-	actionWrapper := &fyne.Container{Layout: layout.NewStackLayout()}
-	objects = append(objects, actionWrapper)
-
-	return &entryRenderer{
-		box:           box,
-		border:        border,
-		scroll:        scroll,
-		icon:          icon,
-		actionWrapper: actionWrapper,
-		objects:       objects,
-		entry:         e,
-	}
 }
 
 func (r *entryRenderer) Destroy() {
