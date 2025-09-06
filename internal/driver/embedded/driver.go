@@ -17,6 +17,7 @@ type noosDriver struct {
 	queue  chan funcData
 	render func(image.Image)
 	run    func(func())
+	size   func() fyne.Size
 	done   bool
 
 	wins    []fyne.Window
@@ -29,6 +30,9 @@ func (n *noosDriver) CreateWindow(_ string) fyne.Window {
 	n.wins = append(n.wins, w)
 	n.current = len(n.wins) - 1
 
+	if f := n.size; f != nil {
+		w.Resize(f())
+	}
 	return w
 }
 
@@ -171,9 +175,9 @@ func (n *noosDriver) renderWindow(w fyne.Window) {
 	n.render(img)
 }
 
-func NewNoOSDriver(render func(img image.Image), run func(func()), events chan noos2.Event) fyne.Driver {
+func NewNoOSDriver(render func(img image.Image), run func(func()), events chan noos2.Event, size func() fyne.Size) fyne.Driver {
 	return &noosDriver{
-		events: events, queue: make(chan funcData),
+		events: events, queue: make(chan funcData), size: size,
 		render: render, run: run, wins: make([]fyne.Window, 0),
 	}
 }
