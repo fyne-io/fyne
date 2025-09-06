@@ -4,7 +4,7 @@ permissions:
   contents: read
 env:
   CC: "clang"
-  CGO_LDFLAGS: "-fuse-ld=mold"
+  CGO_LDFLAGS: "-fuse-ld=lld"
 
 jobs:
   static_analysis:
@@ -21,7 +21,7 @@ jobs:
       - name: Get dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends clang mold libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
+          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
 
       - name: Set environment variable LANG
         run: export LANG=en_EN.UTF-8
