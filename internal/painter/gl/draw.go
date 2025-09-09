@@ -160,25 +160,6 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
-	// the maximum possible corner radius for a circular shape
-	maxCornerRadius := paint.GetMaximumRadius(obj.Size())
-
-	if topRightRadius == canvas.RadiusMaximum {
-		topRightRadius = maxCornerRadius
-	}
-
-	if topLeftRadius == canvas.RadiusMaximum {
-		topLeftRadius = maxCornerRadius
-	}
-
-	if bottomRightRadius == canvas.RadiusMaximum {
-		bottomRightRadius = maxCornerRadius
-	}
-
-	if bottomLeftRadius == canvas.RadiusMaximum {
-		bottomLeftRadius = maxCornerRadius
-	}
-
 	var program ProgramState
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -211,6 +192,27 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+
+		// the maximum possible corner radius for a circular shape, calculated taking into account the rect coords with aspect ratio
+		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
+			bounds[2]-bounds[0], bounds[3]-bounds[1],
+		))
+
+		if topRightRadius == canvas.RadiusMaximum {
+			topRightRadius = maxCornerRadius
+		}
+
+		if topLeftRadius == canvas.RadiusMaximum {
+			topLeftRadius = maxCornerRadius
+		}
+
+		if bottomRightRadius == canvas.RadiusMaximum {
+			bottomRightRadius = maxCornerRadius
+		}
+
+		if bottomLeftRadius == canvas.RadiusMaximum {
+			bottomLeftRadius = maxCornerRadius
+		}
 
 		p.SetUniform4f(program, "radius",
 			roundToPixel(topRightRadius*p.pixScale, 1.0),

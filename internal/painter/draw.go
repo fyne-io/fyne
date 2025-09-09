@@ -231,7 +231,7 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 
 // GetMaximumRadius returns the maximum possible radius that fits within the given size.
 // It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
-// This is typically used for drawing circular corners in rectangles or squares.
+// This is typically used for drawing circular corners in rectangles, circles or squares.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
 }
