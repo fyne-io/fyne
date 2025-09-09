@@ -163,19 +163,19 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	// the maximum possible corner radius for a circular shape
 	maxCornerRadius := paint.GetMaximumRadius(obj.Size())
 
-	if topRightRadius == fyne.RadiusMaximum {
+	if topRightRadius == canvas.RadiusMaximum {
 		topRightRadius = maxCornerRadius
 	}
 
-	if topLeftRadius == fyne.RadiusMaximum {
+	if topLeftRadius == canvas.RadiusMaximum {
 		topLeftRadius = maxCornerRadius
 	}
 
-	if bottomRightRadius == fyne.RadiusMaximum {
+	if bottomRightRadius == canvas.RadiusMaximum {
 		bottomRightRadius = maxCornerRadius
 	}
 
-	if bottomLeftRadius == fyne.RadiusMaximum {
+	if bottomLeftRadius == canvas.RadiusMaximum {
 		bottomLeftRadius = maxCornerRadius
 	}
 

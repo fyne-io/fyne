@@ -85,7 +85,7 @@ func TestRectangle_RadiusMaximum(t *testing.T) {
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
-		CornerRadius: fyne.RadiusMaximum,
+		CornerRadius: canvas.RadiusMaximum,
 	}
 
 	rect.Resize(fyne.NewSize(80, 50))
