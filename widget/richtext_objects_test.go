@@ -70,3 +70,28 @@ func TestRichText_OrderedList(t *testing.T) {
 	assert.Equal(t, "2.", strings.TrimSpace(texts[2].(*canvas.Text).Text))
 	assert.Equal(t, "Two", texts[3].(*canvas.Text).Text)
 }
+
+func TestRichText_OrderedListDifferentIndex(t *testing.T) {
+	for name, tt := range map[string]struct {
+		index        int
+		text1, text2 string
+	}{
+		"Start at -1": {index: -1, text1: "-1.", text2: "0."},
+		"Start at 0":  {index: 0, text1: "0.", text2: "1."},
+		"Start at 1":  {index: 1, text1: "1.", text2: "2."},
+		"Start at 2":  {index: 2, text1: "2.", text2: "3."},
+	} {
+		t.Run(name, func(t *testing.T) {
+			listSegment := &ListSegment{Ordered: true, Items: []RichTextSegment{
+				&TextSegment{Text: "One"},
+				&TextSegment{Text: "Two"},
+			}}
+			listSegment.SetStartNumber(tt.index)
+			text := NewRichText(listSegment)
+			texts := test.TempWidgetRenderer(t, text).Objects()
+
+			assert.Equal(t, tt.text1, strings.TrimSpace(texts[0].(*canvas.Text).Text))
+			assert.Equal(t, tt.text2, strings.TrimSpace(texts[2].(*canvas.Text).Text))
+		})
+	}
+}

@@ -3,6 +3,9 @@ package canvas_test
 import (
 	"image"
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +17,11 @@ import (
 )
 
 func TestText_FontSource(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// test.NewWindow(text).Canvas().Capture()
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	text := canvas.NewText("Test", color.NRGBA{0, 0, 0, 0xff})
 	c := test.NewWindow(text).Canvas()
 

@@ -11,11 +11,10 @@ import (
 const webDefaultDoubleTapDelay = 300 * time.Millisecond
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	// no-op for mobile apps using this driver
+	// no-op for wasm apps using this driver
 }
 
-func (d *gLDriver) catchTerm() {
-}
+func (d *gLDriver) catchTerm() {}
 
 func setDisableScreenBlank(disable bool) {
 	// awaiting complete support for WakeLock

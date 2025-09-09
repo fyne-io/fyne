@@ -33,6 +33,12 @@ const (
 	// as with ImageFillContain there may be transparent areas around the image.
 	// Note that the minSize may be smaller than the image dimensions if scale > 1.
 	ImageFillOriginal
+
+	// ImageFillCover maintains the image aspect ratio whilst filling the space.
+	// The image content will be centered on the available space meaning that an equal amount of top and bottom
+	// or left and right will be clipped if the output aspect ratio does not match the source image.
+	// Since: 2.7
+	ImageFillCover
 )
 
 // ImageScale defines the different scaling filters used to scaling images
@@ -359,7 +365,7 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, widt
 		width, height = config.Width, config.Height
 		aspect = float32(width) / float32(height)
 	}
-	return
+	return reader, width, height, aspect, err
 }
 
 func (i *Image) renderSVG(width, height float32) (image.Image, error) {

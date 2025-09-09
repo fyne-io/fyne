@@ -104,38 +104,28 @@ func (n *nodeReaderWriter) Close() error {
 // This implementation automatically creates the path n.path if it does not
 // exist. If it does exist, it is overwritten.
 func (n *nodeReaderWriter) Write(p []byte) (int, error) {
-	// guarantee that the path exists
-	_, ok := n.repo.Data[n.path]
-	if !ok {
-		n.repo.Data[n.path] = []byte{}
-	}
-
 	// overwrite the file if we haven't already started writing to it
 	if !n.writing {
-		n.repo.Data[n.path] = make([]byte, 0)
+		n.repo.Data[n.path] = make([]byte, 0, len(p))
 		n.writing = true
 	}
 
 	// copy the data into the node buffer
-	count := 0
-	start := n.writeCursor
-	for ; n.writeCursor < start+len(p); n.writeCursor++ {
+	for start := n.writeCursor; n.writeCursor < start+len(p); n.writeCursor++ {
 		// extend the file if needed
 		if len(n.repo.Data) < n.writeCursor+len(p) {
 			n.repo.Data[n.path] = append(n.repo.Data[n.path], 0)
 		}
 		n.repo.Data[n.path][n.writeCursor] = p[n.writeCursor-start]
-		count++
 	}
 
-	return count, nil
+	return len(p), nil
 }
 
 // Name implements fyne.URIReadCloser.URI and fyne.URIWriteCloser.URI
 func (n *nodeReaderWriter) URI() fyne.URI {
 	// discarding the error because this should never fail
 	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
-
 	return u
 }
 

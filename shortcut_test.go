@@ -12,7 +12,7 @@ func syncMapLen(m *sync.Map) (n int) {
 		n++
 		return true
 	})
-	return
+	return n
 }
 
 func TestShortcutHandler_AddShortcut(t *testing.T) {

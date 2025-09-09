@@ -11,12 +11,36 @@ import (
 )
 
 var (
-	isMobile = regexp.MustCompile("Android|iPhone|iPad|iPod").
-			MatchString(js.Global().Get("navigator").Get("userAgent").String())
-	isMacOS = strings.Contains(js.Global().Get("window").Get("navigator").Get("platform").String(), "Mac")
+	isMobile bool
+	isMacOS  bool
+
+	setCursor func(name string)
+
+	blurDummyEntry  func(...any) js.Value
+	focusDummyEntry func(...any) js.Value
 )
 
-var dummyEntry = js.Global().Get("document").Call("getElementById", "dummyEntry")
+func init() {
+	navigator := js.Global().Get("navigator")
+	isMobile = regexp.MustCompile("Android|iPhone|iPad|iPod").
+		MatchString(navigator.Get("userAgent").String())
+	isMacOS = strings.Contains(navigator.Get("platform").String(), "Mac")
+
+	document := js.Global().Get("document")
+	style := document.Get("body").Get("style")
+	setStyleProperty := style.Get("setProperty").Call("bind", style)
+	setCursor = func(name string) {
+		setStyleProperty.Invoke("cursor", name)
+	}
+
+	dummyEntry := document.Call("getElementById", "dummyEntry")
+	if dummyEntry.IsNull() {
+		return
+	}
+
+	blurDummyEntry = dummyEntry.Get("blur").Call("bind", dummyEntry).Invoke
+	focusDummyEntry = dummyEntry.Get("focus").Call("bind", dummyEntry).Invoke
+}
 
 func (*glDevice) IsMobile() bool {
 	return isMobile
@@ -28,17 +52,17 @@ func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
 }
 
 func (*glDevice) hideVirtualKeyboard() {
-	if dummyEntry.IsNull() {
+	if blurDummyEntry == nil {
 		return
 	}
-	dummyEntry.Call("blur")
+	blurDummyEntry()
 }
 
 func (*glDevice) showVirtualKeyboard() {
-	if dummyEntry.IsNull() {
+	if focusDummyEntry == nil {
 		return
 	}
-	dummyEntry.Call("focus")
+	focusDummyEntry()
 }
 
 func connectKeyboard(c *glCanvas) {
