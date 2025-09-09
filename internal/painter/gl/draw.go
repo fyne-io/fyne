@@ -29,7 +29,7 @@ func (p *painter) updateBuffer(vbo Buffer, points []float32) {
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	radius := getMaximumRadius(circle.Size())
+	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -160,8 +160,8 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
-	// The maximum possible corner radius for a circular shape
-	maxCornerRadius := getMaximumRadius(obj.Size())
+	// the maximum possible corner radius for a circular shape
+	maxCornerRadius := paint.GetMaximumRadius(obj.Size())
 
 	if topRightRadius == fyne.RadiusMaximum {
 		topRightRadius = maxCornerRadius
@@ -494,10 +494,6 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 	size.Height = end.Y - pos.Y
 
 	return size, pos
-}
-
-func getMaximumRadius(size fyne.Size) float32 {
-	return fyne.Min(size.Height, size.Width) / 2
 }
 
 // Returns FragmentColor(red,green,blue,alpha) from fyne.Color
