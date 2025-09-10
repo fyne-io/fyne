@@ -31,7 +31,7 @@ mat2 rotate(float angle) {
     return mat2(c, -s, s, c);
 }
 
-// The signed distance (float) from the point to the regular polygon's edge.
+// The signed distance (float) from the point to the regular polygon's edge
 float regular_distance(vec2 p, float r, int s)
 {
     float angle = PI / float(s);
@@ -50,16 +50,20 @@ void main()
 
     vec_centered_pos = rotate(radians(rotation)) * vec_centered_pos;
     float dist = regular_distance(vec_centered_pos, shape_radius - corner_radius, int(sides)) - corner_radius;
+    vec4 final_color = fill_color;
 
-    // create a mask for the fill area (inside, shrunk by stroke width)
-    float fillMask = smoothstep(-stroke_width + edge_softness, -stroke_width - edge_softness, dist);
+    if (stroke_width > 0.0)
+    {
+        // create a mask for the fill area (inside, shrunk by stroke width)
+        float fill_mask = smoothstep(-stroke_width + edge_softness, -stroke_width - edge_softness, dist);
 
-    // combine fill mask and colors (fill + stroke)
-    vec4 color = mix(stroke_color, fill_color, fillMask);
+        // combine fill mask and colors (fill + stroke)
+        final_color = mix(stroke_color, fill_color, fill_mask);
+    }
 
     // smooth edges
-    float fullMask = smoothstep(edge_softness, -edge_softness, dist);
+    float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
 
-    // apply the final alpha to the combined color.
-    gl_FragColor = vec4(color.rgb, color.a * fullMask);
+    // apply the final alpha to the combined color
+    gl_FragColor = vec4(final_color.rgb, final_color.a * final_alpha);
 }
