@@ -14,7 +14,7 @@ import (
 
 func TestPolygon_FillColorSides(t *testing.T) {
 	c := color.White
-	polygon := canvas.NewPolygon(c)
+	polygon := canvas.NewPolygon(3, c)
 
 	assert.Equal(t, c, polygon.FillColor)
 	assert.Equal(t, uint(3), polygon.Sides)
@@ -35,7 +35,7 @@ func TestPolygon_SidesRotation(t *testing.T) {
 
 	c := software.NewCanvas()
 	c.SetContent(polygon)
-	c.Resize(fyne.NewSize(60, 60))
+	c.Resize(fyne.NewSize(150, 150))
 	polygon.Rotation = 0
 	polygon.CornerRadius = 0
 	test.AssertRendersToImage(t, "polygon_stroke.png", c)

@@ -63,9 +63,9 @@ func (r *Polygon) Resize(s fyne.Size) {
 }
 
 // NewPolygon returns a new Polygon instance
-func NewPolygon(color color.Color) *Polygon {
+func NewPolygon(sides uint, color color.Color) *Polygon {
 	return &Polygon{
-		Sides:     3,
+		Sides:     sides,
 		FillColor: color,
 	}
 }

@@ -276,12 +276,12 @@ func TestPainter_paintLine_thin(t *testing.T) {
 
 func TestPainter_paintPolygon(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	obj := canvas.NewPolygon(color.Black)
+	obj := canvas.NewPolygon(3, color.Black)
 
 	c := test.NewCanvas()
 	c.SetPadded(true)
 	c.SetContent(obj)
-	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	c.Resize(fyne.NewSize(150+2*theme.Padding(), 150+2*theme.Padding()))
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_polygon_3.png", p.Paint(c))
