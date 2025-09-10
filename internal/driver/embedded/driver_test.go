@@ -17,7 +17,10 @@ func TestNoOSDriver(t *testing.T) {
 		count++
 	}
 	queue := make(chan embedded.Event, 1)
-	d := intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue)
+	size := func() fyne.Size {
+		return fyne.NewSquareSize(100)
+	}
+	d := intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue, size)
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -27,7 +30,7 @@ func TestNoOSDriver(t *testing.T) {
 	assert.Equal(t, 0, count)
 
 	queue = make(chan embedded.Event, 1)
-	d = intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue)
+	d = intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue, size)
 	_ = d.CreateWindow("Test")
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -38,7 +41,7 @@ func TestNoOSDriver(t *testing.T) {
 
 	count = 0
 	queue = make(chan embedded.Event, 1)
-	d = intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue)
+	d = intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue, size)
 	w := d.CreateWindow("Test")
 	keyed := make(chan bool)
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
