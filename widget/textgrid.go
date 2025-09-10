@@ -116,7 +116,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 
 	row = int(y / t.content.cellSize.Height)
 	col = int(x / t.content.cellSize.Width)
-	return
+	return row, col
 }
 
 // ScrollToTop will scroll content to container top

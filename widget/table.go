@@ -667,7 +667,7 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 		}
 		cellWidth = width
 	}
-	return
+	return cellX, cellWidth
 }
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
@@ -684,7 +684,7 @@ func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 		}
 		cellHeight = height
 	}
-	return
+	return cellY, cellHeight
 }
 
 func (t *Table) finishScroll() {
@@ -847,7 +847,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 		for i := 0; i < max; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -859,7 +859,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
@@ -869,7 +869,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -901,7 +901,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		for i := 0; i < stick; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	for i := 0; i < cols; i++ {
@@ -928,7 +928,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			visible[i] = width
 		}
 	}
-	return
+	return visible, offX, minCol, maxCol
 }
 
 func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32) {
@@ -947,7 +947,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 		for i := 0; i < max; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -959,7 +959,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]float32, offY float32, minRow, maxRow int) {
@@ -969,7 +969,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1001,7 +1001,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		for i := 0; i < stick; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	for i := 0; i < rows; i++ {
@@ -1028,7 +1028,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			visible[i] = height
 		}
 	}
-	return
+	return visible, offY, minRow, maxRow
 }
 
 // Declare conformity with WidgetRenderer interface.
