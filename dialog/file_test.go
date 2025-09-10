@@ -19,33 +19,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// comparePaths compares if two file paths point to the same thing, and calls
-// t.Fatalf() if there is an error in performing the comparison.
-//
-// Returns true of both paths point to the same thing.
-//
-// You should use this if you need to compare file paths, since it explicitly
-// normalizes the paths to a stable canonical form. It also nicely
-// abstracts out the requisite error handling.
-//
-// You should only call this function on paths that you expect to be valid.
-func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
-	p1 := u1.String()[len(u1.Scheme())+3:]
-	p2 := u2.String()[len(u2.Scheme())+3:]
-
-	a1, err := filepath.Abs(p1)
-	if err != nil {
-		t.Fatalf("Failed to normalize path '%s'", p1)
-	}
-
-	a2, err := filepath.Abs(p2)
-	if err != nil {
-		t.Fatalf("Failed to normalize path '%s'", p2)
-	}
-
-	return a1 == a2
-}
-
 func TestEffectiveStartingDir(t *testing.T) {
 	homeString, err := os.UserHomeDir()
 	if err != nil {
@@ -71,7 +44,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// test that we get wd when running with the default struct values
 	res := dialog.effectiveStartingDir()
 	expect := home
-	if !comparePaths(t, res, expect) {
+	if !storage.EqualURI(res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
@@ -80,7 +53,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	dialog.startingLocation = nil
 	res = dialog.effectiveStartingDir()
 	expect = home
-	if !comparePaths(t, res, expect) {
+	if !storage.EqualURI(res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
@@ -403,7 +376,7 @@ func TestShowFileSave(t *testing.T) {
 
 	err = chosen.Close()
 	assert.NoError(t, err)
-	pathString := expectedPath.String()[len(expectedPath.Scheme())+3:]
+	pathString := expectedPath.Path()
 	err = os.Remove(pathString)
 	assert.NoError(t, err)
 }

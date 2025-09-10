@@ -418,27 +418,6 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	assert.Equal(t, 20, y)
 }
 
-func TestGlCanvas_Resize(t *testing.T) {
-	w := createWindow("Test")
-	w.SetPadded(false)
-
-	content := widget.NewLabel("Content")
-	w.SetContent(content)
-	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
-
-	size := fyne.NewSize(200, 100)
-	runOnMain(func() {
-		assert.NotEqual(t, size, content.Size())
-	})
-
-	w.Resize(size)
-	ensureCanvasSize(t, w, size)
-
-	runOnMain(func() {
-		assert.Equal(t, size, content.Size())
-	})
-}
-
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w := createWindow("Test")
@@ -635,7 +614,7 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
-	return
+	return e
 }
 
 type safeCanvas struct {

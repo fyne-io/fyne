@@ -54,8 +54,8 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 //
 // Since: 2.0
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
-	xDelta := float32(stop.X - start.X)
-	yDelta := float32(stop.Y - start.Y)
+	xDelta := stop.X - start.X
+	yDelta := stop.Y - start.Y
 
 	return &fyne.Animation{
 		Duration: d,
@@ -71,8 +71,8 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 //
 // Since: 2.0
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
-	widthDelta := float32(stop.Width - start.Width)
-	heightDelta := float32(stop.Height - start.Height)
+	widthDelta := stop.Width - start.Width
+	heightDelta := stop.Height - start.Height
 
 	return &fyne.Animation{
 		Duration: d,

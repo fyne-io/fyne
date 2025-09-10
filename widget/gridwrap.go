@@ -82,7 +82,7 @@ func NewGridWrapWithData(data binding.DataList, createItem func() fyne.CanvasObj
 		data.Length,
 		createItem,
 		func(i GridWrapItemID, o fyne.CanvasObject) {
-			item, err := data.GetItem(int(i))
+			item, err := data.GetItem(i)
 			if err != nil {
 				fyne.LogError(fmt.Sprintf("Error getting data item %d", i), err)
 				return
@@ -215,7 +215,7 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	if f := l.Length; f != nil {
 		length = f()
 	}
-	if id < 0 || int(id) >= length {
+	if id < 0 || id >= length {
 		return
 	}
 	l.scrollTo(id)
@@ -631,7 +631,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 
 	offY := l.gw.offsetY - float32(math.Mod(float64(l.gw.offsetY), float64(l.gw.itemMin.Height+padding)))
 	minRow := int(offY / (l.gw.itemMin.Height + padding))
-	minItem := GridWrapItemID(minRow * colCount)
+	minItem := minRow * colCount
 	maxRow := int(math.Min(float64(minRow+visibleRowsCount), math.Ceil(float64(length)/float64(colCount))))
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 

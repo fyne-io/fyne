@@ -6,7 +6,7 @@ require (
 	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58
 	github.com/BurntSushi/toml v1.5.0
 	github.com/fogleman/gg v1.3.0
-	github.com/fredbi/uri v1.1.0
+	github.com/fredbi/uri v1.1.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/fyne-io/gl-js v0.2.0
 	github.com/fyne-io/glfw-js v0.3.0
@@ -27,16 +27,16 @@ require (
 	github.com/natefinch/atomic v1.0.1
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
-	github.com/rymdport/portal v0.4.1
+	github.com/rymdport/portal v0.4.2
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/image v0.24.0
-	golang.org/x/mod v0.17.0
+	golang.org/x/mod v0.20.0
 	golang.org/x/sys v0.30.0
 	golang.org/x/text v0.22.0
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
+	golang.org/x/tools v0.24.1
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
