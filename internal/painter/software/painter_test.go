@@ -302,9 +302,8 @@ func TestPainter_paintPolygon(t *testing.T) {
 	test.AssertImageMatches(t, "draw_polygon_6_rounded.png", p.Paint(c))
 
 	obj.StrokeColor = color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
-	obj.StrokeWidth = 2
+	obj.StrokeWidth = 5
 	obj.Rotation = 360
-	c.Resize(fyne.NewSize(220+2*theme.Padding(), 220+2*theme.Padding())) // make a larger image to pass on macOS arm
 	test.AssertImageMatches(t, "draw_polygon_6_rounded_stroke.png", p.Paint(c))
 }
 
