@@ -236,65 +236,53 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
 	program := p.polygonProgram
-	p.ctx.UseProgram(program)
-	vbo := p.createBuffer(points)
-	p.defineVertexArray(program, "vert", 2, 4, 0)
-	p.defineVertexArray(program, "normal", 2, 4, 2)
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
 
 	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
 	p.logError()
 	// Vertex: END
 
 	// Fragment: BEG
-	frameSizeUniform := p.ctx.GetUniformLocation(program, "frame_size")
 	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
-	p.ctx.Uniform2f(frameSizeUniform, frameWidthScaled, frameHeightScaled)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
 
-	rectCoordsUniform := p.ctx.GetUniformLocation(program, "rect_coords")
 	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
-	p.ctx.Uniform4f(rectCoordsUniform, x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
-	edgeSoftnessUniform := p.ctx.GetUniformLocation(program, "edge_softness")
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	p.ctx.Uniform1f(edgeSoftnessUniform, edgeSoftnessScaled)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	outerRadiusUniform := p.ctx.GetUniformLocation(program, "shape_radius")
 	outerRadius := fyne.Min(polygon.Size().Width, polygon.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
-	p.ctx.Uniform1f(outerRadiusUniform, outerRadiusScaled)
+	p.SetUniform1f(program, "shape_radius", outerRadiusScaled)
 
-	startAngleUniform := p.ctx.GetUniformLocation(program, "rotation")
-	p.ctx.Uniform1f(startAngleUniform, polygon.Rotation)
+	p.SetUniform1f(program, "rotation", polygon.Rotation)
+	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
-	endAngleUniform := p.ctx.GetUniformLocation(program, "sides")
-	p.ctx.Uniform1f(endAngleUniform, float32(polygon.Sides))
-
-	cornerRadiusUniform := p.ctx.GetUniformLocation(program, "corner_radius")
 	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)
-	p.ctx.Uniform1f(cornerRadiusUniform, cornerRadiusScaled)
+	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
-	strokeUniform := p.ctx.GetUniformLocation(program, "stroke_width")
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
-	p.ctx.Uniform1f(strokeUniform, strokeWidthScaled)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+
+	r, g, b, a := getFragmentColor(polygon.FillColor)
+	p.SetUniform4f(program, "fill_color", r, g, b, a)
 
 	strokeColor := polygon.StrokeColor
-	strokeColorUniform := p.ctx.GetUniformLocation(program, "stroke_color")
 	if strokeColor == nil {
 		strokeColor = color.Transparent
 	}
-	r, g, b, a := getFragmentColor(strokeColor)
-	p.ctx.Uniform4f(strokeColorUniform, r, g, b, a)
-
-	fillColorUniform := p.ctx.GetUniformLocation(program, "fill_color")
-	r, g, b, a = getFragmentColor(polygon.FillColor)
-	p.ctx.Uniform4f(fillColorUniform, r, g, b, a)
+	r, g, b, a = getFragmentColor(strokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	p.logError()
 	// Fragment: END
 
 	p.ctx.DrawArrays(triangleStrip, 0, 4)
 	p.logError()
-	p.freeBuffer(vbo)
 }
 
 func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {

@@ -36,12 +36,12 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderLineVert, shaderLineFrag
 	case "simple":
 		return shaderSimpleVert, shaderSimpleFrag
-	case "polygon":
-		return shaderRectangleVert, shaderPolygonFrag
 	case "rectangle":
 		return shaderRectangleVert, shaderRectangleFrag
 	case "round_rectangle":
 		return shaderRectangleVert, shaderRoundrectangleFrag
+	case "polygon":
+		return shaderRectangleVert, shaderPolygonFrag
 	}
 	return nil, nil
 }
