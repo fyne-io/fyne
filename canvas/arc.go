@@ -22,8 +22,8 @@ type Arc struct {
 
 	FillColor    color.Color // The arc fill colour
 	InnerRadius  float32     // Distance from center to inner edge
-	StartAngle   float32     // Start angle in degrees (-360, 360)
-	EndAngle     float32     // End angle in degrees (-360, 360)
+	StartAngle   float32     // Start angle in degrees
+	EndAngle     float32     // End angle in degrees
 	CornerRadius float32     // Radius used to round the corners
 	StrokeColor  color.Color // The arc stroke color
 	StrokeWidth  float32     // The stroke width of the arc
@@ -64,10 +64,11 @@ func (a *Arc) Resize(s fyne.Size) {
 	repaint(a)
 }
 
-// NewArc returns a new Arc instance with EndAngle set to 360 degrees.
-func NewArc(fill color.Color) *Arc {
+// NewArc returns a new Arc instance with the specified start and end angles (in degrees) and fill color.
+func NewArc(startAngle, endAngle float32, color color.Color) *Arc {
 	return &Arc{
-		EndAngle:  360.0,
-		FillColor: fill,
+		StartAngle: startAngle,
+		EndAngle:   endAngle,
+		FillColor:  color,
 	}
 }

@@ -14,7 +14,7 @@ import (
 
 func TestArc_FillColorEndAngle(t *testing.T) {
 	c := color.White
-	arc := canvas.NewArc(c)
+	arc := canvas.NewArc(0.0, 360.0, c)
 
 	assert.Equal(t, c, arc.FillColor)
 	assert.Equal(t, float32(0.0), arc.InnerRadius)

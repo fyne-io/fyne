@@ -21,7 +21,7 @@ func makeTestImage(w, h int) image.Image {
 
 func TestPainter_paintArc(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	obj := canvas.NewArc(color.Black)
+	obj := canvas.NewArc(0, 360, color.Black)
 
 	c := test.NewCanvas()
 	c.SetPadded(true)
