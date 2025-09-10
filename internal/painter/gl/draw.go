@@ -29,11 +29,7 @@ func (p *painter) updateBuffer(vbo Buffer, points []float32) {
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	size := circle.Size()
-	radius := size.Width / 2
-	if size.Height < size.Width {
-		radius = size.Height / 2
-	}
+	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -196,6 +192,27 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+
+		// the maximum possible corner radius for a circular shape, calculated taking into account the rect coords with aspect ratio
+		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
+			bounds[2]-bounds[0], bounds[3]-bounds[1],
+		))
+
+		if topRightRadius == canvas.RadiusMaximum {
+			topRightRadius = maxCornerRadius
+		}
+
+		if topLeftRadius == canvas.RadiusMaximum {
+			topLeftRadius = maxCornerRadius
+		}
+
+		if bottomRightRadius == canvas.RadiusMaximum {
+			bottomRightRadius = maxCornerRadius
+		}
+
+		if bottomLeftRadius == canvas.RadiusMaximum {
+			bottomLeftRadius = maxCornerRadius
+		}
 
 		p.SetUniform4f(program, "radius",
 			roundToPixel(topRightRadius*p.pixScale, 1.0),

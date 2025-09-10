@@ -371,6 +371,8 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_wide.png", p.Paint(c))
 	obj.Aspect = 0.5
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
+	obj.CornerRadius = canvas.RadiusMaximum
+	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_radius_maximum.png", p.Paint(c))
 }
 
 func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
