@@ -100,7 +100,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawCircle(circle *canvas.Circle, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := circle.Size()
-	radius := fyne.Min(size.Width, size.Height) / 2
+	radius := GetMaximumRadius(size)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
@@ -185,7 +185,26 @@ func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale fun
 	return drawOblong(sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
 }
 
-func drawOblong(fill, strokeCol color.Color, strokeWidth float32, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius float32, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	// The maximum possible corner radius for a circular shape
+	maxCornerRadius := GetMaximumRadius(fyne.NewSize(rWidth, rHeight))
+
+	if topRightRadius == canvas.RadiusMaximum {
+		topRightRadius = maxCornerRadius
+	}
+
+	if topLeftRadius == canvas.RadiusMaximum {
+		topLeftRadius = maxCornerRadius
+	}
+
+	if bottomRightRadius == canvas.RadiusMaximum {
+		bottomRightRadius = maxCornerRadius
+	}
+
+	if bottomLeftRadius == canvas.RadiusMaximum {
+		bottomLeftRadius = maxCornerRadius
+	}
+
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
 	stroke := scale(strokeWidth)
@@ -490,4 +509,11 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 		return baseCornerRadius
 	}
 	return perCornerRadius
+}
+
+// GetMaximumRadius returns the maximum possible radius that fits within the given size.
+// It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
+// This is typically used for drawing circular corners in rectangles, circles or squares.
+func GetMaximumRadius(size fyne.Size) float32 {
+	return fyne.Min(size.Height, size.Width) / 2
 }
