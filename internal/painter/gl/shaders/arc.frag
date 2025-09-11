@@ -30,7 +30,7 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
 {
     // center the arc for simpler calculations
     float mid_angle = (a0 + a1) / 2.0;
-    float arc_span  = a1 - a0;
+    float arc_span = abs(a1 - a0);
     
     float cs = cos(mid_angle);
     float sn = sin(mid_angle);
@@ -64,24 +64,8 @@ void main()
 {
     vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
-
-    // this logic correctly handles positive Counter-clockwise (CCW) and negative Clockwise (CW) direction
-    // the sd_rounded_arc function requires start_rad < end_rad to draw a CCW arc
-    float start_rad;
-    float end_rad;
-    if (end_angle >= start_angle) // CCW
-    {
-        // the angles are already in the correct order for a CCW arc
-        start_rad = radians(start_angle);
-        end_rad = radians(end_angle);
-    }
-    else // CW
-    {
-        // a CW arc from start to end is the same as a CCW arc from end to start
-        // swap them to satisfy the start_rad < end_rad requirement of the SDF
-        start_rad = radians(end_angle);
-        end_rad = radians(start_angle);
-    }
+    float start_rad = radians(start_angle);
+    float end_rad = radians(end_angle);
     
     // check if the arc is a full circle (360 degrees or more)
     // the sd_rounded_arc function creates segment at the start/end angle, which is undesirable for a complete circle
