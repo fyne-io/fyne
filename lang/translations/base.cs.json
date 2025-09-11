@@ -41,5 +41,18 @@
   "tuesday": "Úterý",
   "tuesday.short": "Út",
   "wednesday": "Středa",
-  "wednesday.short": "St"
+  "wednesday.short": "St",
+  "today": "Dnes",
+  "january": "Leden",
+  "february": "Únor",
+  "march": "Březen",
+  "april": "Duben",
+  "may": "Květen",
+  "june": "Červen",
+  "july": "Červenec",
+  "august": "Srpen",
+  "september": "Září",
+  "october": "Říjen",
+  "november": "Listopad",
+  "december": "Prosinec"
 }

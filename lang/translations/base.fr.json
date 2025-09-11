@@ -27,5 +27,32 @@
     },
     "file.parent": {
         "other": "Parent"
-    }
+    },
+    "monday": "Lundi",
+    "monday.short": "Lun",
+    "tuesday": "Mardi",
+    "tuesday.short": "Mar",
+    "wednesday": "Mercredi",
+    "wednesday.short": "Mer",
+    "thursday": "Jeudi",
+    "thursday.short": "Jeu",
+    "friday": "Vendredi",
+    "friday.short": "Ven",
+    "saturday": "Samedi",
+    "saturday.short": "Sam",
+    "sunday": "Dimanche",
+    "sunday.short": "Dim",
+    "today": "Aujourd'hui",
+    "january": "Janvier",
+    "february": "Février",
+    "march": "Mars",
+    "april": "Avril",
+    "may": "Mai",
+    "june": "Juin",
+    "july": "Juillet",
+    "august": "Août",
+    "september": "Septembre",
+    "october": "Octobre",
+    "november": "Novembre",
+    "december": "Décembre"
 }

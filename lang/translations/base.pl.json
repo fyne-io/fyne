@@ -27,5 +27,32 @@
     "Undo": "Cofnij",
     "file.parent": {
         "other": "Rodzic"
-    }
+    },
+    "monday": "Poniedziałek",
+    "monday.short": "Pon",
+    "tuesday": "Wtorek",
+    "tuesday.short": "Wt",
+    "wednesday": "Środa",
+    "wednesday.short": "Śr",
+    "thursday": "Czwartek",
+    "thursday.short": "Czw",
+    "friday": "Piątek",
+    "friday.short": "Pią",
+    "saturday": "Sobota",
+    "saturday.short": "Sob",
+    "sunday": "Niedziela",
+    "sunday.short": "Nie",
+    "today": "Dzisiaj",
+    "january": "Styczeń",
+    "february": "Luty",
+    "march": "Marzec",
+    "april": "Kwiecień",
+    "may": "Maj",
+    "june": "Czerwiec",
+    "july": "Lipiec",
+    "august": "Sierpień",
+    "september": "Wrzesień",
+    "october": "Październik",
+    "november": "Listopad",
+    "december": "Grudzień"
 }

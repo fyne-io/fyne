@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -112,16 +114,6 @@ func (e *DateEntry) Move(pos fyne.Position) {
 	}
 }
 
-// Resize changes the size of the date entry.
-//
-// Implements: fyne.Widget
-func (e *DateEntry) Resize(size fyne.Size) {
-	e.Entry.Resize(size)
-	if e.popUp != nil {
-		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
-	}
-}
-
 // SetDate will update the widget to a specific date.
 // You can pass nil to unselect a date.
 func (e *DateEntry) SetDate(d *time.Time) {
@@ -141,7 +133,11 @@ func (e *DateEntry) popUpPos() fyne.Position {
 }
 
 func (e *DateEntry) setDate(d time.Time) {
-	e.Date = &d
+	if !d.IsZero() {
+		e.Date = &d
+	} else {
+		e.Date = nil
+	}
 	if e.popUp != nil {
 		e.popUp.Hide()
 	}
@@ -154,11 +150,26 @@ func (e *DateEntry) setupDropDown() *Button {
 		e.dropDown = NewCalendar(time.Now(), e.setDate)
 	}
 	dropDownButton := NewButton("", func() {
+		if e.Date != nil && !e.Date.IsZero() {
+			e.dropDown.SetSelectedDate(*e.Date)
+			e.dropDown.SetDisplayedMonth(*e.Date)
+		} else {
+			e.dropDown.SetSelectedDate(time.Time{})
+			e.dropDown.SetDisplayedMonth(time.Time{})
+		}
+
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
-		e.popUp = NewPopUp(e.dropDown, c)
+		e.popUp = NewPopUp(&fyne.Container{
+			Layout: layout.NewVBoxLayout(),
+			Objects: []fyne.CanvasObject{
+				e.dropDown,
+				&Button{Text: lang.X("today", "Today"), OnTapped: func() {
+					e.setDate(time.Now())
+				}},
+			},
+		}, c)
 		e.popUp.ShowAtPosition(e.popUpPos())
-		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.Importance = LowImportance
 	dropDownButton.SetIcon(e.Theme().Icon(theme.IconNameCalendar))
