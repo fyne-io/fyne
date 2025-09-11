@@ -101,10 +101,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		origImg = subImg
 	}
 
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), img.CornerRadius*c.Scale())
 }
 
-func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64) {
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {
 	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
 		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip, alpha)
@@ -123,6 +123,10 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
 		}
 		draw.CatmullRom.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
+	}
+
+	if radius > 0.5 {
+		applyRoundedCorners(scaledImg, width, height, radius)
 	}
 
 	drawTex(x, y, width, height, base, scaledImg, clip, alpha)
@@ -207,7 +211,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
-		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0)
+		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0, 0.0)
 	} else {
 		drawTex(scaledX, scaledY, width, height, base, pix, clip, 1.0)
 	}
@@ -310,4 +314,58 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
+}
+
+// applyRoundedCorners rounds the corners of the image in-place
+func applyRoundedCorners(img *image.NRGBA, w, h int, radius float32) {
+	rInt := int(radius)
+	r2 := float32(radius * radius)
+
+	// Top-left corner
+	cx, cy := radius, radius
+	for y := 0; y < rInt; y++ {
+		for x := 0; x < rInt; x++ {
+			dx, dy := float32(x)-cx, float32(y)-cy
+			if dx*dx+dy*dy > r2 {
+				i := img.PixOffset(x, y)
+				img.Pix[i+3] = 0
+			}
+		}
+	}
+
+	// Top-right corner
+	cx, cy = float32(w)-radius, radius
+	for y := 0; y < rInt; y++ {
+		for x := w - rInt; x < w; x++ {
+			dx, dy := float32(x)-cx, float32(y)-cy
+			if dx*dx+dy*dy > r2 {
+				i := img.PixOffset(x, y)
+				img.Pix[i+3] = 0
+			}
+		}
+	}
+
+	// Bottom-left coner
+	cx, cy = radius, float32(h)-radius
+	for y := h - rInt; y < h; y++ {
+		for x := 0; x < rInt; x++ {
+			dx, dy := float32(x)-cx, float32(y)-cy
+			if dx*dx+dy*dy > r2 {
+				i := img.PixOffset(x, y)
+				img.Pix[i+3] = 0
+			}
+		}
+	}
+
+	// Bottom-right corner
+	cx, cy = float32(w)-radius, float32(h)-radius
+	for y := h - rInt; y < h; y++ {
+		for x := w - rInt; x < w; x++ {
+			dx, dy := float32(x)-cx, float32(y)-cy
+			if dx*dx+dy*dy > r2 {
+				i := img.PixOffset(x, y)
+				img.Pix[i+3] = 0
+			}
+		}
+	}
 }
