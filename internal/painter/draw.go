@@ -56,22 +56,15 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 	}
 
 	cornerRadius := float64(scale(arc.CornerRadius))
-	if cornerRadius < 0 {
-		cornerRadius = 0
-	}
-
-	// clamp CornerRadius to keep geometry valid
-	if cornerRadius > 0 {
-		// cannot exceed half of the thickness (avoid round overlap)
+	if arc.CornerRadius == canvas.RadiusMaximum {
+		// height (thickness), width (length)
 		thickness := outerRadius - innerRadius
-		if innerRadius > 0 {
-			cornerRadius = math.Min(cornerRadius, thickness/2.0-1e-6)
-		}
-		// for circle-line round on the outer edge we need outer - 2*rc >= 0
-		cornerRadius = math.Min(cornerRadius, outerRadius/2.0-1e-6)
-		if cornerRadius < 0 {
-			cornerRadius = 0
-		}
+		span := math.Sin(0.5 * math.Min(math.Abs(sweep), math.Pi)) // span in (0,1)
+		length := 1.5 * outerRadius * span / (1 + span)            // no division-by-zero risk
+
+		cornerRadius = float64(GetMaximumRadius(fyne.NewSize(
+			float32(thickness), float32(length),
+		)))
 	}
 
 	if arc.FillColor != nil {
@@ -299,9 +292,8 @@ func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLef
 	return raw
 }
 
-// drawRoundArc constructs a rounded pie slice or annular sector.
-// rc = corner radius in pixels (0 for sharp corners).
-func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc float64) {
+// drawRoundArc constructs a rounded pie slice or annular sector
+func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr float64) {
 	if sweep == 0 {
 		return
 	}
@@ -359,7 +351,7 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 		return
 	}
 
-	if rc <= 0 {
+	if cr <= 0 {
 		// sharp-corner fallback
 		if inner <= 0 {
 			// pie slice
@@ -389,14 +381,18 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 	}
 	absSweep := math.Abs(sweep)
 
-	// trim angles due to rounds
-	sOut := math.Sqrt(math.Max(0, outer*(outer-2*rc)))
-	thetaOut := math.Atan2(rc, sOut) // positive
+	// clamp the corner radius if the value is too large
+	cr = math.Min(cr, outer/2)
 
+	// trim angles due to rounds
+	sOut := math.Sqrt(math.Max(0, outer*(outer-2*cr)))
+	thetaOut := math.Atan2(cr, sOut) // positive
+
+	crIn := math.Min(cr, 0.5*math.Min(outer-inner, math.Abs(sweep)*inner))
 	var sIn, thetaIn float64
 	if inner > 0 {
-		sIn = math.Sqrt(math.Max(0, inner*(inner+2*rc)))
-		thetaIn = math.Atan2(rc, sIn)
+		sIn = math.Sqrt(math.Max(0, inner*(inner+2*crIn)))
+		thetaIn = math.Atan2(crIn, sIn)
 	}
 
 	// ensure the trim does not exceed half the sweep
@@ -451,9 +447,9 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 	// round geometry at start/end
 	// outer rounds
 	aOutSx, aOutSy := cx+sOut*vSx, cy+sOut*vSy                      // radial tangent (start)
-	fOutSx, fOutSy := aOutSx+rc*nSx, aOutSy+rc*nSy                  // round center (start)
+	fOutSx, fOutSy := aOutSx+cr*nSx, aOutSy+cr*nSy                  // round center (start)
 	aOutEx, aOutEy := cx+sOut*vEx, cy+sOut*vEy                      // radial tangent (end)
-	fOutEx, fOutEy := aOutEx+rc*nEx, aOutEy+rc*nEy                  // round center (end)
+	fOutEx, fOutEy := aOutEx+cr*nEx, aOutEy+cr*nEy                  // round center (end)
 	phiOutEndB := angleAt(fOutEx, fOutEy, pOutEndX, pOutEndY)       // outer end trimmed point
 	phiOutEndA := angleAt(fOutEx, fOutEy, aOutEx, aOutEy)           // end radial tangent
 	phiOutStartA := angleAt(fOutSx, fOutSy, aOutSx, aOutSy)         // start radial tangent
@@ -464,9 +460,9 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 	var phiInEndA, phiInEndB, phiInStartA, phiInStartB float64
 	if inner > 0 {
 		aInSx, aInSy = cx+sIn*vSx, cy+sIn*vSy
-		fInSx, fInSy = aInSx+rc*nSx, aInSy+rc*nSy
+		fInSx, fInSy = aInSx+crIn*nSx, aInSy+crIn*nSy
 		aInEx, aInEy = cx+sIn*vEx, cy+sIn*vEy
-		fInEx, fInEy = aInEx+rc*nEx, aInEy+rc*nEy
+		fInEx, fInEy = aInEx+crIn*nEx, aInEy+crIn*nEy
 
 		phiInEndA = angleAt(fInEx, fInEy, aInEx, aInEy)           // end radial tangent
 		phiInEndB = angleAt(fInEx, fInEy, pInEndX, pInEndY)       // inner end trimmed point
@@ -480,14 +476,14 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 
 	adder.Start(rasterx.ToFixedP(pOutStartX, pOutStartY))                                   // start at trimmed outer start
 	addCircularArc(adder, cx, cy, outer, startOuter, endOuter-startOuter)                   // outer arc (trimmed)
-	addCircularArc(adder, fOutEx, fOutEy, rc, phiOutEndB, angleDiff(phiOutEndA-phiOutEndB)) // end side: outer round to radial
+	addCircularArc(adder, fOutEx, fOutEy, cr, phiOutEndB, angleDiff(phiOutEndA-phiOutEndB)) // end side: outer round to radial
 
 	if inner > 0 {
-		adder.Line(rasterx.ToFixedP(aInEx, aInEy))                                               // end side: radial line to inner
-		addCircularArc(adder, fInEx, fInEy, rc, phiInEndA, angleDiff(phiInEndB-phiInEndA))       // end side: inner round to inner arc
-		addCircularArc(adder, cx, cy, inner, endInner, startInner-endInner)                      // inner arc (reverse, trimmed)
-		addCircularArc(adder, fInSx, fInSy, rc, phiInStartB, angleDiff(phiInStartA-phiInStartB)) // start side: inner round to radial
-		adder.Line(rasterx.ToFixedP(aOutSx, aOutSy))                                             // start side: radial line to outer
+		adder.Line(rasterx.ToFixedP(aInEx, aInEy))                                                 // end side: radial line to inner
+		addCircularArc(adder, fInEx, fInEy, crIn, phiInEndA, angleDiff(phiInEndB-phiInEndA))       // end side: inner round to inner arc
+		addCircularArc(adder, cx, cy, inner, endInner, startInner-endInner)                        // inner arc (reverse, trimmed)
+		addCircularArc(adder, fInSx, fInSy, crIn, phiInStartB, angleDiff(phiInStartA-phiInStartB)) // start side: inner round to radial
+		adder.Line(rasterx.ToFixedP(aOutSx, aOutSy))                                               // start side: radial line to outer
 	} else {
 		// pie slice: close via center with radial lines
 		adder.Line(rasterx.ToFixedP(cx, cy))         // to center from end side
@@ -495,7 +491,7 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, rc fl
 	}
 
 	// start side: outer round from radial to outer start
-	addCircularArc(adder, fOutSx, fOutSy, rc, phiOutStartA, angleDiff(phiOutStartB-phiOutStartA))
+	addCircularArc(adder, fOutSx, fOutSy, cr, phiOutStartA, angleDiff(phiOutStartB-phiOutStartA))
 	adder.Stop(true)
 }
 

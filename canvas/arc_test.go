@@ -80,3 +80,45 @@ func TestArc_InnerRadiusStartEndAngles(t *testing.T) {
 	arc.StrokeWidth = 3
 	test.AssertRendersToImage(t, "arc_negative_30_50_stroke.png", c)
 }
+
+func TestArc_RadiusMaximum(t *testing.T) {
+	arc := &canvas.Arc{
+		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		InnerRadius:  15,
+		StartAngle:   80,
+		EndAngle:     220,
+		CornerRadius: canvas.RadiusMaximum,
+		StrokeWidth:  2,
+		StrokeColor:  color.Black,
+	}
+
+	arc.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "maximum_rounded_arc.xml", arc)
+
+	c := software.NewCanvas()
+	c.SetContent(arc)
+	c.Resize(fyne.NewSize(60, 60))
+
+	test.AssertRendersToImage(t, "maximum_rounded_arc_80_220_stroke.png", c)
+
+	arc.StrokeWidth = 0
+	test.AssertRendersToImage(t, "maximum_rounded_arc_80_220.png", c)
+
+	arc.InnerRadius = 0
+	test.AssertRendersToImage(t, "maximum_rounded_arc_80_220_no_inner_radius.png", c)
+
+	arc.EndAngle = 110
+	arc.InnerRadius = 10
+	test.AssertRendersToImage(t, "maximum_rounded_arc_80_110.png", c)
+
+	arc.InnerRadius = 0
+	test.AssertRendersToImage(t, "maximum_rounded_arc_80_110_no_inner_radius.png", c)
+
+	arc.StartAngle = 0
+	arc.EndAngle = 350
+	arc.InnerRadius = 20
+	test.AssertRendersToImage(t, "maximum_rounded_arc_0_350.png", c)
+
+	arc.InnerRadius = 0
+	test.AssertRendersToImage(t, "maximum_rounded_arc_0_350_no_inner_radius.png", c)
+}
