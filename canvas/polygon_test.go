@@ -75,7 +75,7 @@ func TestPolygon_RadiusMaximum(t *testing.T) {
 
 	c := software.NewCanvas()
 	c.SetContent(polygon)
-	c.Resize(fyne.NewSize(250, 150))
+	c.Resize(fyne.NewSize(150, 150))
 
 	polygon.Sides = 4
 	polygon.StrokeWidth = 3
