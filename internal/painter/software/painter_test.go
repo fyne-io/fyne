@@ -58,7 +58,6 @@ func TestPainter_paintGradient_clipped(t *testing.T) {
 	cont := container.NewWithoutLayout(scroll)
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetPadded(false)
 	c.SetContent(cont)
 	c.Resize(fyne.NewSize(70, 70))
 	p := software.NewPainter()
