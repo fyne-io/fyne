@@ -12,9 +12,9 @@ var _ fyne.CanvasObject = (*Arc)(nil)
 // Arc represents a filled arc or annular sector primitive that can be drawn on a Fyne canvas.
 // It allows for the creation of circular, ring-shaped or pie-shaped segment, with configurable cutout ratio
 // as well as customizable start and end angles to define the arc's length as the absolute difference between the two angles. The arc is always centered on its position.
-// The arc is drawn from StartAngle to EndAngle (in degrees, positive is counter-clockwise, negative is clockwise).
-// 0°/360 is right, 90° is top, 180° is left, 270° is bottom
-// 0°/-360 is right, -90° is bottom, -180° is left, -270° is top
+// The arc is drawn from StartAngle to EndAngle (in degrees, positive is clockwise, negative is counter-clockwise).
+// 0°/360 is right, 90° is bottom, 180° is left, 270° is top
+// 0°/-360 is right, -90° is top, -180° is left, -270° is bottom
 //
 // Since: 2.7
 type Arc struct {

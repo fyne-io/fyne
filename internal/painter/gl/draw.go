@@ -339,8 +339,9 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
 
-	p.SetUniform1f(program, "start_angle", arc.StartAngle)
-	p.SetUniform1f(program, "end_angle", arc.EndAngle)
+	// reverse the sign of the angles to modify the direction: positive is clockwise, negative is counter-clockwise
+	p.SetUniform1f(program, "start_angle", -arc.StartAngle)
+	p.SetUniform1f(program, "end_angle", -arc.EndAngle)
 
 	cornerRadius := arc.CornerRadius
 	if arc.CornerRadius == canvas.RadiusMaximum {

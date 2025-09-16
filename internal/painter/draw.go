@@ -17,8 +17,8 @@ const quarterCircleControl = 1 - 0.55228
 // DrawArc rasterizes the given arc object into an image.
 // The scale function is used to understand how many pixels are required per unit of size.
 // The arc is drawn from StartAngle to EndAngle (in degrees).
-// 0°/360 is right, 90° is top, 180° is left, 270° is bottom
-// 0°/-360 is right, -90° is bottom, -180° is left, -270° is top
+// 0°/360 is right, 90° is bottom, 180° is left, 270° is top
+// 0°/-360 is right, -90° is top, -180° is left, -270° is bottom
 func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := arc.Size()
 
@@ -41,8 +41,9 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 	}
 
 	// convert to radians
-	startRad := float64(arc.StartAngle * math.Pi / 180.0)
-	endRad := float64(arc.EndAngle * math.Pi / 180.0)
+	// reverse the sign of the angles to modify the direction: positive is clockwise, negative is counter-clockwise
+	startRad := float64(-arc.StartAngle * math.Pi / 180.0)
+	endRad := float64(-arc.EndAngle * math.Pi / 180.0)
 	sweep := endRad - startRad
 	if sweep == 0 {
 		// nothing to draw
