@@ -276,7 +276,7 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "shape_radius", outerRadiusScaled)
 
-	p.SetUniform1f(program, "rotation", polygon.Rotation)
+	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
 	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)

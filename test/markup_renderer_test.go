@@ -472,7 +472,7 @@ func Test_snapshot(t *testing.T) {
 				r := fynecanvas.NewPolygon(4, color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				r.StrokeWidth = 6.375
 				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
-				r.Rotation = 18.25
+				r.Angle = 18.25
 				r.CornerRadius = 12.5
 				return r
 			}(),
@@ -480,7 +480,7 @@ func Test_snapshot(t *testing.T) {
 			pos:  fyne.NewPos(17, 17),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<polygon fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" radius=\"12.5\" rotation=\"18.25\" sides=\"4\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t\t<polygon angle=\"18.25\" fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" radius=\"12.5\" sides=\"4\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},

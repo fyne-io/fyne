@@ -289,21 +289,21 @@ func TestPainter_paintPolygon(t *testing.T) {
 	obj.Sides = 4
 	test.AssertImageMatches(t, "draw_polygon_4.png", p.Paint(c))
 
-	obj.Rotation = 35
+	obj.Angle = 35
 	test.AssertImageMatches(t, "draw_polygon_4_rotate_35.png", p.Paint(c))
 
-	obj.Rotation = -120
+	obj.Angle = -120
 	obj.Sides = 5
 	test.AssertImageMatches(t, "draw_polygon_5_rotate_-120.png", p.Paint(c))
 
 	obj.CornerRadius = 10
-	obj.Rotation = 0
+	obj.Angle = 0
 	obj.Sides = 6
 	test.AssertImageMatches(t, "draw_polygon_6_rounded.png", p.Paint(c))
 
 	obj.StrokeColor = color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.StrokeWidth = 5
-	obj.Rotation = 360
+	obj.Angle = 360
 	test.AssertImageMatches(t, "draw_polygon_6_rounded_stroke.png", p.Paint(c))
 }
 
