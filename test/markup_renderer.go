@@ -231,6 +231,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeRadialGradient(o, attrs)
 	case *fynecanvas.Raster:
 		r.writeRaster(o, attrs)
+	case *fynecanvas.Polygon:
+		r.writePolygon(o, attrs)
 	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
 	case *fynecanvas.Square:
@@ -339,6 +341,16 @@ func (r *markupRenderer) writeRadialGradient(g *fynecanvas.RadialGradient, attrs
 func (r *markupRenderer) writeRaster(rst *fynecanvas.Raster, attrs map[string]*string) {
 	r.setFloatAttr(attrs, "translucency", rst.Translucency)
 	r.writeTag("raster", true, attrs)
+}
+
+func (r *markupRenderer) writePolygon(rct *fynecanvas.Polygon, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", rct.FillColor)
+	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "rotation", float64(rct.Rotation))
+	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
+	r.writeTag("polygon", true, attrs)
 }
 
 func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[string]*string) {

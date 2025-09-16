@@ -26,6 +26,9 @@ var (
 	//go:embed shaders/simple.vert
 	shaderSimpleVert []byte
 
+	//go:embed shaders/polygon.frag
+	shaderPolygonFrag []byte
+
 	//go:embed shaders/arc.frag
 	shaderArcFrag []byte
 )
@@ -40,6 +43,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleVert, shaderRectangleFrag
 	case "round_rectangle":
 		return shaderRectangleVert, shaderRoundrectangleFrag
+	case "polygon":
+		return shaderRectangleVert, shaderPolygonFrag
 	case "arc":
 		return shaderRectangleVert, shaderArcFrag
 	}

@@ -44,6 +44,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawCircle(c, o, pos, base, clip)
 		case *canvas.Line:
 			drawLine(c, o, pos, base, clip)
+		case *canvas.Polygon:
+			drawPolygon(c, o, pos, base, clip)
 		case *canvas.Raster:
 			drawRaster(c, o, pos, base, clip)
 		case *canvas.Rectangle:
