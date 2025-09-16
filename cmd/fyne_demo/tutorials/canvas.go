@@ -50,7 +50,7 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 			CornerRadius: 20,
 		},
 		&canvas.Polygon{
-			FillColor: color.NRGBA{B: 0x80, A: 0xff}, Sides: 3, Rotation: -30,
+			FillColor: color.NRGBA{B: 0x80, A: 0xff}, Sides: 3, Angle: -30,
 			StrokeColor: color.NRGBA{R: 0xff, G: 0x80, A: 0xff}, StrokeWidth: 2,
 		},
 		&canvas.Line{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
