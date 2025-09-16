@@ -257,11 +257,11 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 		return
 	}
 	gf := rasterx.RoundGap
+	angleStep := 2 * math.Pi / float64(sides)
+	rotRads := rot*math.Pi/180 - math.Pi/2
 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
-		angleStep := 2 * math.Pi / float64(sides)
-		rotRads := rot*math.Pi/180 - math.Pi/2
 		x0 := cx + radius*math.Cos(rotRads)
 		y0 := cy + radius*math.Sin(rotRads)
 		p.Start(rasterx.ToFixedP(x0, y0))
@@ -282,8 +282,6 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	}
 
 	// regular polygon vertices
-	angleStep := 2 * math.Pi / float64(sides)
-	rotRads := -rot*math.Pi/180 - math.Pi/2
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
 	for i := 0; i < sides; i++ {

@@ -26,8 +26,8 @@ uniform vec4 stroke_color;
 const float PI = 3.141592653589793;
 
 mat2 rotate(float angle) {
-    float s = sin(angle);
-    float c = cos(angle);
+    float s = sin(-angle);
+    float c = cos(-angle);
     return mat2(c, -s, s, c);
 }
 
