@@ -11,7 +11,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -124,4 +126,22 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 	size := img.MinSize()
 	assert.Equal(t, float32(512), size.Width)
 	assert.Equal(t, float32(512), size.Height)
+}
+
+func TestImage_CornerRadius(t *testing.T) {
+	pwd, _ := os.Getwd()
+	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Fatal("source image not found")
+	}
+
+	i := &canvas.Image{
+		File:         path,
+		CornerRadius: 25,
+	}
+	c := software.NewCanvas()
+	c.SetContent(i)
+	c.Resize(fyne.NewSize(120, 120))
+
+	test.AssertRendersToImage(t, "image_rounded_corners.png", c)
 }
