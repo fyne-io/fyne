@@ -105,7 +105,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {
-	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
+	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height && radius < 0.5 {
 		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip, alpha)
 		return
@@ -296,54 +296,44 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 
 // applyRoundedCorners rounds the corners of the image in-place
 func applyRoundedCorners(img *image.NRGBA, w, h int, radius float32) {
-	rInt := int(radius)
-	r2 := float32(radius * radius)
+	rInt := int(math.Ceil(float64(radius)))
 
-	// Top-left corner
-	cx, cy := radius, radius
-	for y := 0; y < rInt; y++ {
-		for x := 0; x < rInt; x++ {
-			dx, dy := float32(x)-cx, float32(y)-cy
-			if dx*dx+dy*dy > r2 {
+	aaWidth := float32(0.5)
+	outerR2 := (radius + aaWidth) * (radius + aaWidth)
+	innerR2 := (radius - aaWidth) * (radius - aaWidth)
+
+	applyCorner := func(startX, endX, startY, endY int, cx, cy float32) {
+		for y := startY; y < endY; y++ {
+			for x := startX; x < endX; x++ {
+				dx := float32(x) - cx
+				dy := float32(y) - cy
+				dist2 := dx*dx + dy*dy
+
 				i := img.PixOffset(x, y)
-				img.Pix[i+3] = 0
+				alpha := img.Pix[i+3]
+
+				switch {
+				case dist2 >= outerR2:
+					img.Pix[i+3] = 0 // Fully transparent
+				case dist2 > innerR2:
+					// Linear falloff based on squared distance
+					t := (outerR2 - dist2) / (outerR2 - innerR2) // t ranges from 0 to 1
+					newAlpha := uint8(float32(alpha) * t)
+					img.Pix[i+3] = newAlpha
+				}
 			}
 		}
 	}
 
-	// Top-right corner
-	cx, cy = float32(w)-radius, radius
-	for y := 0; y < rInt; y++ {
-		for x := w - rInt; x < w; x++ {
-			dx, dy := float32(x)-cx, float32(y)-cy
-			if dx*dx+dy*dy > r2 {
-				i := img.PixOffset(x, y)
-				img.Pix[i+3] = 0
-			}
-		}
-	}
+	// Top-left
+	applyCorner(0, rInt, 0, rInt, radius, radius)
 
-	// Bottom-left coner
-	cx, cy = radius, float32(h)-radius
-	for y := h - rInt; y < h; y++ {
-		for x := 0; x < rInt; x++ {
-			dx, dy := float32(x)-cx, float32(y)-cy
-			if dx*dx+dy*dy > r2 {
-				i := img.PixOffset(x, y)
-				img.Pix[i+3] = 0
-			}
-		}
-	}
+	// Top-right
+	applyCorner(w-rInt, w, 0, rInt, float32(w)-radius, radius)
 
-	// Bottom-right corner
-	cx, cy = float32(w)-radius, float32(h)-radius
-	for y := h - rInt; y < h; y++ {
-		for x := w - rInt; x < w; x++ {
-			dx, dy := float32(x)-cx, float32(y)-cy
-			if dx*dx+dy*dy > r2 {
-				i := img.PixOffset(x, y)
-				img.Pix[i+3] = 0
-			}
-		}
-	}
+	// Bottom-left
+	applyCorner(0, rInt, h-rInt, h, radius, float32(h)-radius)
+
+	// Bottom-right
+	applyCorner(w-rInt, w, h-rInt, h, float32(w)-radius, float32(h)-radius)
 }
