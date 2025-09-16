@@ -26,7 +26,7 @@ func TestPolygon_SidesRotation(t *testing.T) {
 		StrokeColor:  color.Black,
 		StrokeWidth:  2,
 		CornerRadius: 5,
-		Rotation:     30,
+		Angle:        30,
 		Sides:        3,
 	}
 
@@ -36,7 +36,7 @@ func TestPolygon_SidesRotation(t *testing.T) {
 	c := software.NewCanvas()
 	c.SetContent(polygon)
 	c.Resize(fyne.NewSize(150, 150))
-	polygon.Rotation = 0
+	polygon.Angle = 0
 	polygon.CornerRadius = 0
 	test.AssertRendersToImage(t, "polygon_stroke.png", c)
 
@@ -46,16 +46,16 @@ func TestPolygon_SidesRotation(t *testing.T) {
 	polygon.CornerRadius = 5
 	polygon.Sides = 4
 	polygon.StrokeWidth = 3
-	polygon.Rotation = 45
+	polygon.Angle = 45
 	test.AssertRendersToImage(t, "polygon_4_stroke.png", c)
 
 	polygon.CornerRadius = 10
 	polygon.Sides = 5
-	polygon.Rotation = -135
+	polygon.Angle = -135
 	test.AssertRendersToImage(t, "polygon_5_stroke.png", c)
 
 	polygon.StrokeWidth = 0
 	polygon.Sides = 6
-	polygon.Rotation = -50
+	polygon.Angle = -50
 	test.AssertRendersToImage(t, "polygon_6.png", c)
 }

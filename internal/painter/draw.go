@@ -102,7 +102,7 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Rotation), int(polygon.Sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), filler)
 		filler.Draw()
 	}
 
@@ -110,7 +110,7 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Rotation), int(polygon.Sides), dasher)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
 		dasher.Draw()
 	}
 

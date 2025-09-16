@@ -335,7 +335,7 @@ func (r *markupRenderer) writePolygon(rct *fynecanvas.Polygon, attrs map[string]
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
 	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
-	r.setFloatAttr(attrs, "rotation", float64(rct.Rotation))
+	r.setFloatAttr(attrs, "angle", float64(rct.Angle))
 	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
 	r.writeTag("polygon", true, attrs)
 }
