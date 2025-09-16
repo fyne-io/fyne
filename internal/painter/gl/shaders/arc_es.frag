@@ -55,7 +55,9 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
     vec2 box_half_size = vec2(arc_span * 0.5 * r, (r2 - r1) * 0.5);
     vec2 q = vec2(a * r, r - (r1 + r2) * 0.5);
 
-    // the inner corner radius cannot be larger than the inner radius itself and should be smaller than the outer for a smooth transition
+    // the inner corner radius is clamped to half of the smaller dimension:
+    //   thickness (r2 - r1), to prevent inner/outer corners on the same side from overlapping
+    //   inner length (arc_span * r1), to prevent the start/end inner corners from overlapping
     float inner_cr = min(cr, 0.5 * min(r2 - r1, arc_span * r1));
     // the outer corner radius is just cr
     float outer_cr = cr;

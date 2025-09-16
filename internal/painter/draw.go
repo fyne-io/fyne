@@ -32,7 +32,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 	centerY := float64(height) / 2
 
 	outerRadius := float64(scale(fyne.Min(size.Width, size.Height) / 2.0))
-	innerRadius := float64(scale(arc.InnerRadius))
+	innerRadius := outerRadius * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio)))
 	if innerRadius < 0 {
 		innerRadius = 0
 	}

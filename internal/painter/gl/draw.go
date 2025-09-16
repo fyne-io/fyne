@@ -272,12 +272,13 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	innerRadiusScaled := roundToPixel(arc.InnerRadius*p.pixScale, 1.0)
-	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
-
 	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
+
+	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
 
 	p.SetUniform1f(program, "start_angle", arc.StartAngle)
 	p.SetUniform1f(program, "end_angle", arc.EndAngle)
@@ -285,7 +286,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	cornerRadius := arc.CornerRadius
 	if arc.CornerRadius == canvas.RadiusMaximum {
 		// height (thickness), width (length)
-		thickness := outerRadius - arc.InnerRadius
+		thickness := outerRadius - innerRadius
 		span := math.Sin(0.5 * math.Min(math.Abs(float64(arc.EndAngle-arc.StartAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
 		length := 1.5 * float64(outerRadius) * span / (1 + span)                                                // no division-by-zero risk
 

@@ -450,7 +450,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"arc": {
-			content: fynecanvas.NewArc(25, 98, color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
+			content: fynecanvas.NewArc(25, 98, 0, color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
 			size:    fyne.NewSize(17, 42),
 			pos:     fyne.NewPos(42, 17),
 			want: "<canvas size=\"100x100\">\n" +
@@ -460,7 +460,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"arc with theme color": { // we won’t test _all_ valid values … it’s not that important
-			content: fynecanvas.NewArc(0, 150, theme.Color(theme.ColorNameHover)),
+			content: fynecanvas.NewArc(0, 150, 0, theme.Color(theme.ColorNameHover)),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<arc endAngle=\"150\" fillColor=\"hover\" size=\"100x100\"/>\n" +
@@ -469,18 +469,18 @@ func Test_snapshot(t *testing.T) {
 		},
 		"arc with stroke": {
 			content: func() fyne.CanvasObject {
-				r := fynecanvas.NewArc(-80, -110, color.NRGBA{R: 200, G: 100, B: 0, A: 50})
+				r := fynecanvas.NewArc(-80, -110, 0, color.NRGBA{R: 200, G: 100, B: 0, A: 50})
 				r.StrokeWidth = 6.375
 				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
 				r.CornerRadius = 15
-				r.InnerRadius = 17.375
+				r.CutoutRatio = 0.375
 				return r
 			}(),
 			size: fyne.NewSize(42, 42),
 			pos:  fyne.NewPos(17, 17),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<arc cornerRadius=\"15\" endAngle=\"-110\" fillColor=\"rgba(200,100,0,50)\" innerRadius=\"17.375\" pos=\"17,17\" size=\"42x42\" startAngle=\"-80\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t\t<arc cornerRadius=\"15\" cutoutRatio=\"0.375\" endAngle=\"-110\" fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" size=\"42x42\" startAngle=\"-80\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},

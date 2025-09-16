@@ -254,7 +254,7 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 
 func (r *markupRenderer) writeArc(a *fynecanvas.Arc, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", a.FillColor)
-	r.setFloatAttr(attrs, "innerRadius", float64(a.InnerRadius))
+	r.setFloatAttr(attrs, "cutoutRatio", float64(a.CutoutRatio))
 	r.setFloatAttr(attrs, "startAngle", float64(a.StartAngle))
 	r.setFloatAttr(attrs, "endAngle", float64(a.EndAngle))
 	r.setFloatAttr(attrs, "cornerRadius", float64(a.CornerRadius))
