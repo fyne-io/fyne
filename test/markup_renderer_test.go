@@ -449,6 +449,41 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
+		"polygon": {
+			content: fynecanvas.NewPolygon(3, color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
+			size:    fyne.NewSize(17, 42),
+			pos:     fyne.NewPos(42, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<polygon fillColor=\"rgba(100,200,50,0)\" pos=\"42,17\" sides=\"3\" size=\"17x42\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"polygon with theme color": { // we won’t test _all_ valid values … it’s not that important
+			content: fynecanvas.NewPolygon(5, theme.Color(theme.ColorNameHover)),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<polygon fillColor=\"hover\" sides=\"5\" size=\"100x100\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"polygon with stroke": {
+			content: func() fyne.CanvasObject {
+				r := fynecanvas.NewPolygon(4, color.NRGBA{R: 200, G: 100, B: 0, A: 50})
+				r.StrokeWidth = 6.375
+				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
+				r.Rotation = 18.25
+				r.CornerRadius = 12.5
+				return r
+			}(),
+			size: fyne.NewSize(42, 42),
+			pos:  fyne.NewPos(17, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<polygon fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" radius=\"12.5\" rotation=\"18.25\" sides=\"4\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			c := NewCanvas()

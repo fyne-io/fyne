@@ -3,6 +3,7 @@ package painter
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -80,6 +81,38 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
 	dasher.Stop(true)
 	dasher.Draw()
+
+	return raw
+}
+
+// DrawPolygon rasterizes the given regular polygon object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := polygon.Size()
+	cornerRadius := scale(polygon.CornerRadius)
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	shapeRadius := fyne.Min(size.Width, size.Height) / 2
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	if polygon.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(polygon.FillColor)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Rotation), int(polygon.Sides), filler)
+		filler.Draw()
+	}
+
+	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
+		dasher := rasterx.NewDasher(width, height, scanner)
+		dasher.SetColor(polygon.StrokeColor)
+		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Rotation), int(polygon.Sides), dasher)
+		dasher.Draw()
+	}
 
 	return raw
 }
@@ -215,6 +248,111 @@ func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLef
 	}
 
 	return raw
+}
+
+// drawRegularPolygon draws a regular n-sides centered at (cx,cy) with
+// radius, rounded corners of cornerRadius, rotated by rot degrees.
+func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
+	if sides < 3 || radius <= 0 {
+		return
+	}
+	gf := rasterx.RoundGap
+
+	// sharp polygon fast path
+	if cornerRadius <= 0 {
+		angleStep := 2 * math.Pi / float64(sides)
+		rotRads := -rot*math.Pi/180 - math.Pi/2
+		x0 := cx + radius*math.Cos(rotRads)
+		y0 := cy + radius*math.Sin(rotRads)
+		p.Start(rasterx.ToFixedP(x0, y0))
+		for i := 1; i < sides; i++ {
+			t := rotRads + angleStep*float64(i)
+			p.Line(rasterx.ToFixedP(cx+radius*math.Cos(t), cy+radius*math.Sin(t)))
+		}
+		p.Stop(true)
+		return
+	}
+
+	norm := func(x, y float64) (nx, ny float64) {
+		l := math.Hypot(x, y)
+		if l == 0 {
+			return 0, 0
+		}
+		return x / l, y / l
+	}
+
+	// regular polygon vertices
+	angleStep := 2 * math.Pi / float64(sides)
+	rotRads := -rot*math.Pi/180 - math.Pi/2
+	xs := make([]float64, sides)
+	ys := make([]float64, sides)
+	for i := 0; i < sides; i++ {
+		t := rotRads + angleStep*float64(i)
+		xs[i] = cx + radius*math.Cos(t)
+		ys[i] = cy + radius*math.Sin(t)
+	}
+
+	// interior angle and side length
+	alpha := math.Pi * (float64(sides) - 2) / float64(sides)
+	r := cornerRadius
+
+	// distances for tangency and center placement
+	tTrim := r / math.Tan(alpha/2) // along each edge from vertex to tangency
+	d := r / math.Sin(alpha/2)     // from vertex to arc center along interior bisector
+
+	// precompute fillet geometry per vertex
+	type pt struct{ x, y float64 }
+	sPts := make([]pt, sides) // start tangency (on incoming edge)
+	vS := make([]pt, sides)   // center->start vector
+	vE := make([]pt, sides)   // center->end vector
+	cPts := make([]pt, sides) // arc centers
+
+	for i := 0; i < sides; i++ {
+		prv := (i - 1 + sides) % sides
+		nxt := (i + 1) % sides
+
+		// unit directions
+		uInX, uInY := xs[i]-xs[prv], ys[i]-ys[prv]   // prev -> i
+		uOutX, uOutY := xs[nxt]-xs[i], ys[nxt]-ys[i] // i -> next
+		uInX, uInY = norm(uInX, uInY)
+		uOutX, uOutY = norm(uOutX, uOutY)
+
+		// tangency points along edges from the vertex
+		sx, sy := xs[i]-uInX*tTrim, ys[i]-uInY*tTrim   // incoming (toward prev)
+		ex, ey := xs[i]+uOutX*tTrim, ys[i]+uOutY*tTrim // outgoing (toward next)
+
+		// interior bisector direction and arc center
+		bx, by := -uInX+uOutX, -uInY+uOutY
+		bx, by = norm(bx, by)
+		cxI, cyI := xs[i]+bx*d, ys[i]+by*d
+
+		// center->tangent vectors
+		vsx, vsy := sx-cxI, sy-cyI
+		velx, vely := ex-cxI, ey-cyI
+
+		sPts[i] = pt{sx, sy}
+		vS[i] = pt{vsx, vsy}
+		vE[i] = pt{velx, vely}
+		cPts[i] = pt{cxI, cyI}
+	}
+
+	// start at s0, arc corner 0, then line+arc around, close last edge
+	p.Start(rasterx.ToFixedP(sPts[0].x, sPts[0].y))
+	gf(p,
+		rasterx.ToFixedP(cPts[0].x, cPts[0].y),
+		rasterx.ToFixedP(vS[0].x, vS[0].y),
+		rasterx.ToFixedP(vE[0].x, vE[0].y),
+	)
+	for i := 1; i < sides; i++ {
+		p.Line(rasterx.ToFixedP(sPts[i].x, sPts[i].y))
+		gf(p,
+			rasterx.ToFixedP(cPts[i].x, cPts[i].y),
+			rasterx.ToFixedP(vS[i].x, vS[i].y),
+			rasterx.ToFixedP(vE[i].x, vE[i].y),
+		)
+	}
+	p.Line(rasterx.ToFixedP(sPts[0].x, sPts[0].y))
+	p.Stop(true)
 }
 
 // GetCornerRadius returns the effective corner radius for a rectangle or square corner.
