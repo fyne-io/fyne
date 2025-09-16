@@ -261,7 +261,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
 		angleStep := 2 * math.Pi / float64(sides)
-		rotRads := -rot*math.Pi/180 - math.Pi/2
+		rotRads := rot*math.Pi/180 - math.Pi/2
 		x0 := cx + radius*math.Cos(rotRads)
 		y0 := cy + radius*math.Sin(rotRads)
 		p.Start(rasterx.ToFixedP(x0, y0))

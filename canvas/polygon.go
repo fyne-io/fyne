@@ -20,7 +20,7 @@ type Polygon struct {
 	StrokeColor  color.Color // The polygon stroke color
 	StrokeWidth  float32     // The stroke width of the polygon
 	CornerRadius float32     // The radius of the polygon corners
-	Rotation     float32     // Rotation of polygon, in degrees (positive means counter-clockwise, negative means clockwise direction).
+	Rotation     float32     // Rotation of polygon, in degrees (positive means clockwise, negative means counter-clockwise direction).
 	Sides        uint        //	Amount of sides of polygon.
 }
 
