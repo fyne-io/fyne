@@ -515,7 +515,7 @@ func Test_snapshot(t *testing.T) {
 			pos:  fyne.NewPos(17, 17),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
-				"\t\t<arc cornerRadius=\"15\" cutoutRatio=\"0.375\" endAngle=\"-110\" fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" size=\"42x42\" startAngle=\"-80\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t\t<arc cutoutRatio=\"0.375\" endAngle=\"-110\" fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" radius=\"15\" size=\"42x42\" startAngle=\"-80\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
