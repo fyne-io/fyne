@@ -90,7 +90,6 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := polygon.Size()
-	cornerRadius := scale(polygon.CornerRadius)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
@@ -98,6 +97,11 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	cornerRadius := scale(polygon.CornerRadius)
+	if polygon.CornerRadius == canvas.RadiusMaximum {
+		cornerRadius = float32(float64(shapeRadius/2) * math.Cos(math.Pi/float64(polygon.Sides)))
+	}
 
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)

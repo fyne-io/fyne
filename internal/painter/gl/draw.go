@@ -279,7 +279,11 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
-	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)
+	cornerRadius := polygon.CornerRadius
+	if polygon.CornerRadius == canvas.RadiusMaximum {
+		cornerRadius = float32(float64(outerRadius/2) * math.Cos(math.Pi/float64(polygon.Sides)))
+	}
+	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
