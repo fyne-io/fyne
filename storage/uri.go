@@ -211,7 +211,7 @@ func Delete(u fyne.URI) error {
 }
 
 // DeleteAll destroys, deletes, or otherwise removes the resource referenced
-// by the URI even if the resource is a non-empty directory.
+// by the URI and any child resources for listable URIs.
 //
 // Since: 2.7
 func DeleteAll(u fyne.URI) error {
