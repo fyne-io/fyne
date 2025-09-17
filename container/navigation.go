@@ -131,11 +131,11 @@ func (nav *Navigation) setup() {
 var _ fyne.WidgetRenderer = (*navigatorRenderer)(nil)
 
 type navigatorRenderer struct {
-	nav    *Navigation
-	back   widget.Button
-	next   widget.Button
-	title  widget.Label
-	object fyne.CanvasObject
+	nav     *Navigation
+	back    widget.Button
+	forward widget.Button
+	title   widget.Label
+	object  fyne.CanvasObject
 }
 
 func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
@@ -149,18 +149,18 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 			Icon:     theme.NavigateBackIcon(),
 			OnTapped: nav.OnBack,
 		},
-		next: widget.Button{
+		forward: widget.Button{
 			Icon:     theme.NavigateNextIcon(),
 			OnTapped: nav.OnForward,
 		},
 	}
 	r.back.Disable()
-	r.next.Disable()
+	r.forward.Disable()
 
 	nav.setup()
 
 	r.object = NewBorder(
-		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.next), &r.title),
+		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward), &r.title),
 		nil,
 		nil,
 		nil,
@@ -193,9 +193,9 @@ func (r *navigatorRenderer) Refresh() {
 	}
 
 	if r.nav.level == len(r.nav.stack.Objects) {
-		r.next.Disable()
+		r.forward.Disable()
 	} else {
-		r.next.Enable()
+		r.forward.Enable()
 	}
 
 	if r.nav.level-1 >= 0 && r.nav.level-1 < len(r.nav.titles) {
