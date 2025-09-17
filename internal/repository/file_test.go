@@ -550,3 +550,28 @@ func TestFileRepositoryCreateListable(t *testing.T) {
 	assert.True(t, checkExistance(fooPath))
 	assert.True(t, checkExistance(fooBarPath))
 }
+
+func TestFileRepositoryDeleteAll(t *testing.T) {
+	dir := t.TempDir()
+
+	f := NewFileRepository()
+	repository.Register("file", f)
+
+	fooPath := path.Join(dir, "foo")
+	fooBarPath := path.Join(dir, "foo", "bar")
+	foo := storage.NewFileURI(fooPath)
+	fooBarAPath := path.Join(dir, "foo", "bar", "a")
+
+	err := os.MkdirAll(fooBarPath, 0o755)
+	assert.Nil(t, err)
+	file, err := os.Create(fooBarAPath)
+	assert.Nil(t, err)
+	file.Close()
+
+	err = storage.DeleteAll(foo)
+	assert.Nil(t, err)
+
+	assert.False(t, checkExistance(fooPath))
+	assert.False(t, checkExistance(fooBarPath))
+	assert.False(t, checkExistance(fooBarAPath))
+}
