@@ -213,62 +213,22 @@ func Delete(u fyne.URI) error {
 // DeleteAll destroys, deletes, or otherwise removes the resource referenced
 // by the URI and any child resources for listable URIs.
 //
+// DeleteAll is backed by the repository system - this function calls
+// into a scheme-specific implementation from a registered repository.
+//
 // Since: 2.7
 func DeleteAll(u fyne.URI) error {
-	listable, err := CanList(u)
+	repo, err := repository.ForURI(u)
 	if err != nil {
 		return err
 	}
 
-	if !listable {
-		return Delete(u)
+	wrepo, ok := repo.(repository.DeleteAllRepository)
+	if !ok {
+		return repository.GenericDeleteAll(u)
 	}
 
-	children, err := List(u)
-	if err != nil {
-		return err
-	}
-
-	if len(children) == 0 {
-		return Delete(u)
-	}
-
-	var folders []fyne.URI
-	var files []fyne.URI
-	for i := 0; i < len(children); i++ {
-		listable, err = CanList(children[i])
-
-		if err != nil {
-			return err
-		}
-
-		if listable {
-			grandChildren, err := List(children[i])
-			if err != nil {
-				return err
-			}
-			folders = append(folders, children[i])
-			children = append(children, grandChildren...)
-		} else {
-			files = append(files, children[i])
-		}
-	}
-
-	for i := len(files) - 1; i >= 0; i-- {
-		err = Delete(files[i])
-		if err != nil {
-			return err
-		}
-	}
-
-	for i := len(folders) - 1; i >= 0; i-- {
-		err = Delete(folders[i])
-		if err != nil {
-			return err
-		}
-	}
-
-	return Delete(u)
+	return wrepo.DeleteAll(u)
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the

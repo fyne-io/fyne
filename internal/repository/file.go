@@ -171,6 +171,13 @@ func (r *FileRepository) Delete(u fyne.URI) error {
 	return os.Remove(u.Path())
 }
 
+// DeleteAll implements repository.DeleteAllRepository.DeleteAll
+//
+// Since: 2.7
+func (r *FileRepository) DeleteAll(u fyne.URI) error {
+	return os.RemoveAll(u.Path())
+}
+
 // Parent implements repository.HierarchicalRepository.Parent
 //
 // Since: 2.0

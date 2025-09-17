@@ -189,6 +189,22 @@ type HierarchicalRepository interface {
 	Child(fyne.URI, string) (fyne.URI, error)
 }
 
+// DeleteAllRepository is an extension of the WritableRepository interface which
+// also supports deleting a URI and all its children.
+//
+// Since: 2.7
+type DeleteAllRepository interface {
+	WritableRepository
+
+	// DeleteAll will be used to implement calls to storage.DeleteAll() for the
+	// registered scheme of this repository.
+	//
+	// A generic implementation is provided by GenericDeleteAll().
+	//
+	// Since: 2.7
+	DeleteAll(fyne.URI) error
+}
+
 // CopyableRepository is an extension of the Repository interface which also
 // supports copying referenced resources from one URI to another.
 //
