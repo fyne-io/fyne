@@ -48,7 +48,7 @@ func TestWatchFile(t *testing.T) {
 	watchFile(path, func() {
 		called <- true
 	})
-	file, _ := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	file, _ := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
 	file.WriteString(" ")
 	file.Close()
 

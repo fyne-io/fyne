@@ -33,6 +33,7 @@ void showFileSavePicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
 */
 import "C"
+
 import (
 	"log"
 	"runtime"
@@ -73,8 +74,10 @@ func main(f func(App)) {
 	panic("unexpected return from app.runApp")
 }
 
-var pixelsPerPt float32
-var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
+var (
+	pixelsPerPt float32
+	screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
+)
 
 var DisplayMetrics struct {
 	WidthPx  int

@@ -171,9 +171,11 @@ type menuBarUnderlay struct {
 	action func()
 }
 
-var _ fyne.Widget = (*menuBarUnderlay)(nil)
-var _ fyne.Tappable = (*menuBarUnderlay)(nil)     // deactivate menu on click outside
-var _ desktop.Hoverable = (*menuBarUnderlay)(nil) // block hover events on main content
+var (
+	_ fyne.Widget       = (*menuBarUnderlay)(nil)
+	_ fyne.Tappable     = (*menuBarUnderlay)(nil) // deactivate menu on click outside
+	_ desktop.Hoverable = (*menuBarUnderlay)(nil) // block hover events on main content
+)
 
 func (u *menuBarUnderlay) CreateRenderer() fyne.WidgetRenderer {
 	return &menuUnderlayRenderer{}

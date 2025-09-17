@@ -3,10 +3,13 @@
 package app
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/theme"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -25,7 +28,7 @@ func ensureDirExists(dir string) {
 		return
 	}
 
-	err := os.MkdirAll(dir, 0700)
+	err := os.MkdirAll(dir, 0o700)
 	if err != nil {
 		fyne.LogError("Unable to create settings storage:", err)
 	}
@@ -59,7 +62,29 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 	return watcher
 }
 
+func (s *settings) loadSystemTheme() fyne.Theme {
+	path := filepath.Join(app.RootConfigDir(), "theme.json")
+	data, err := fyne.LoadResourceFromPath(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			fyne.LogError("Failed to load user theme file: "+path, err)
+		}
+		return theme.DefaultTheme()
+	}
+	if data != nil && data.Content() != nil {
+		th, err := theme.FromJSONReader(bytes.NewReader(data.Content()))
+		if err == nil {
+			return th
+		}
+		fyne.LogError("Failed to parse user theme file: "+path, err)
+	}
+	return theme.DefaultTheme()
+}
+
 func (s *settings) watchSettings() {
+	if s.themeSpecified {
+		return // we only watch for theme changes at this time so don't bother
+	}
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
 
 	a := fyne.CurrentApp()

@@ -24,12 +24,14 @@ var (
 )
 
 // Declare conformity with interfaces
-var _ desktop.Cursorable = (*Table)(nil)
-var _ fyne.Draggable = (*Table)(nil)
-var _ fyne.Focusable = (*Table)(nil)
-var _ desktop.Hoverable = (*Table)(nil)
-var _ fyne.Tappable = (*Table)(nil)
-var _ fyne.Widget = (*Table)(nil)
+var (
+	_ desktop.Cursorable = (*Table)(nil)
+	_ fyne.Draggable     = (*Table)(nil)
+	_ fyne.Focusable     = (*Table)(nil)
+	_ desktop.Hoverable  = (*Table)(nil)
+	_ fyne.Tappable      = (*Table)(nil)
+	_ fyne.Widget        = (*Table)(nil)
+)
 
 // TableCellID is a type that represents a cell's position in a table based on its row and column location.
 type TableCellID struct {
@@ -665,7 +667,7 @@ func (t *Table) findX(col int) (cellX float32, cellWidth float32) {
 		}
 		cellWidth = width
 	}
-	return
+	return cellX, cellWidth
 }
 
 func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
@@ -682,7 +684,7 @@ func (t *Table) findY(row int) (cellY float32, cellHeight float32) {
 		}
 		cellHeight = height
 	}
-	return
+	return cellY, cellHeight
 }
 
 func (t *Table) finishScroll() {
@@ -845,7 +847,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 		for i := 0; i < max; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -857,7 +859,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int]float32, offX float32, minCol, maxCol int) {
@@ -867,7 +869,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -899,7 +901,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		for i := 0; i < stick; i++ {
 			visible[i] = colWidth
 		}
-		return
+		return visible, offX, minCol, maxCol
 	}
 
 	for i := 0; i < cols; i++ {
@@ -926,7 +928,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			visible[i] = width
 		}
 	}
-	return
+	return visible, offX, minCol, maxCol
 }
 
 func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32) {
@@ -945,7 +947,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 		for i := 0; i < max; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible
 	}
 
 	for i := 0; i < max; i++ {
@@ -957,7 +959,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 
 		visible[i] = height
 	}
-	return
+	return visible
 }
 
 func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]float32, offY float32, minRow, maxRow int) {
@@ -967,7 +969,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -999,7 +1001,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		for i := 0; i < stick; i++ {
 			visible[i] = rowHeight
 		}
-		return
+		return visible, offY, minRow, maxRow
 	}
 
 	for i := 0; i < rows; i++ {
@@ -1026,7 +1028,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			visible[i] = height
 		}
 	}
-	return
+	return visible, offY, minRow, maxRow
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -1169,11 +1171,13 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	hover := canvas.NewRectangle(th.Color(theme.ColorNameHover, v))
 	hover.CornerRadius = th.Size(theme.SizeNameSelectionRadius)
 
-	r := &tableCellsRenderer{cells: c,
+	r := &tableCellsRenderer{
+		cells:   c,
 		visible: make(map[TableCellID]fyne.CanvasObject), headers: make(map[TableCellID]fyne.CanvasObject),
 		headRowBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
 		headRowStickyBG: canvas.NewRectangle(th.Color(theme.ColorNameHeaderBackground, v)), headColStickyBG: canvas.NewRectangle(theme.Color(theme.ColorNameHeaderBackground)),
-		marker: marker, hover: hover}
+		marker: marker, hover: hover,
+	}
 
 	c.t.moveCallback = r.moveIndicators
 	return r
@@ -1331,10 +1335,8 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 			displayCol(row, col, rowHeight, cells)
 		}
 		cellXOffset = r.cells.t.content.Offset.X
-		stick := r.cells.t.StickyColumnCount
 		if r.cells.t.ShowHeaderColumn {
 			cellXOffset += r.cells.t.headerSize.Width
-			stick--
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
@@ -1418,7 +1420,6 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 		}
 		updateCell(id, cell)
 	}
-
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
@@ -1606,7 +1607,8 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 }
 
 func (r *tableCellsRenderer) refreshHeaders(visibleRowHeights, visibleColWidths map[int]float32, offX, offY float32,
-	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant) []fyne.CanvasObject {
+	startRow, maxRow, startCol, maxCol int, separatorThickness float32, th fyne.Theme, v fyne.ThemeVariant,
+) []fyne.CanvasObject {
 	wasVisible := r.headers
 	r.headers = make(map[TableCellID]fyne.CanvasObject)
 	headerMin := r.cells.t.headerSize

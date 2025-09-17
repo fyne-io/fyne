@@ -73,10 +73,10 @@ func (s *selectable) DragEnd() {
 }
 
 func (s *selectable) Dragged(d *fyne.DragEvent) {
-	s.dragged(d, true)
+	s.dragged(d)
 }
 
-func (s *selectable) dragged(d *fyne.DragEvent, focus bool) {
+func (s *selectable) dragged(d *fyne.DragEvent) {
 	if !s.selecting || s.selectEnded {
 		s.selectEnded = false
 		s.updateMousePointer(d.Position)

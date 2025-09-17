@@ -129,7 +129,6 @@ func (w *window) SetCloseIntercept(callback func()) {
 }
 
 func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
-
 }
 
 func (w *window) SetPadded(padded bool) {

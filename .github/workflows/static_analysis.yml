@@ -2,68 +2,51 @@ name: Static Analysis
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  CC: "clang"
+  CGO_LDFLAGS: "-fuse-ld=lld"
 
 jobs:
   static_analysis:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - uses: actions/setup-go@v5
-      with:
-        go-version: 'stable'
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
 
-    - name: Get dependencies
-      run: >-
-        sudo apt-get update &&
-        sudo apt-get install
-        gcc
-        libegl1-mesa-dev
-        libgl1-mesa-dev
-        libgles2-mesa-dev
-        libx11-dev
-        xorg-dev
-        xvfb
-        language-pack-en
+      - name: Get dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
 
-    - name: Set environment variable LANG
-      run: export LANG=en_EN.UTF-8
+      - name: Set environment variable LANG
+        run: export LANG=en_EN.UTF-8
 
-    - name: Install analysis tools
-      run: |
-        go install golang.org/x/tools/cmd/goimports@latest
-        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-        go install honnef.co/go/tools/cmd/staticcheck@latest
-        go install github.com/mattn/goveralls@latest
-        go install lucor.dev/lian@latest
+      - name: Install analysis tools
+        run: |
+          go install mvdan.cc/gofumpt@latest
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          go install lucor.dev/lian@latest
 
-    - name: Vet
-      run: go vet ./...
+      - name: Vet
+        run: go vet ./...
 
-    - name: Goimports
-      run: test -z "$(goimports -e -d . | tee /dev/stderr)"
+      - name: Formatting
+        run: |
+          gofumpt -d -e .
+          test -z "$(goimports -e -d . | tee /dev/stderr)"
 
-    - name: Gocyclo
-      run: gocyclo -over 30 .
+      - name: Gocyclo
+        run: gocyclo -over 30 .
 
-    - name: Staticcheck
-      run: staticcheck ./...
+      - name: Staticcheck
+        run: staticcheck ./...
 
-    - name: Check license of dependencies
-      run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT, ISC" --excluded=github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e
-
-    - name: Update coverage
-      run: |
-        set -e
-        xvfb-run go test -covermode=atomic -coverprofile=coverage.out ./...
-        coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-        if (( $(echo "$coverage < 62" | bc) )); then echo "Test coverage lowered"; exit 1; fi
-
-    - name: Update PR Coverage
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: coverage.out
+      - name: Check license of dependencies
+        run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT, ISC"

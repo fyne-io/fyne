@@ -71,5 +71,4 @@ func TestNewMainMenu(t *testing.T) {
 	if !reflect.DeepEqual(mm.Items, menus) {
 		t.Errorf("Expected main menu to contain all submenus but got %v", mm.Items)
 	}
-
 }

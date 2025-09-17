@@ -134,7 +134,7 @@ func TestFileIcon_DirURIUpdated(t *testing.T) {
 	// The directory has not been created. It can not be listed yet.
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 
-	err = os.Mkdir(testDir, 0755)
+	err = os.Mkdir(testDir, 0o755)
 	if err != nil {
 		t.Fatal(err)
 	}

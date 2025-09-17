@@ -231,8 +231,12 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeRadialGradient(o, attrs)
 	case *fynecanvas.Raster:
 		r.writeRaster(o, attrs)
+	case *fynecanvas.Polygon:
+		r.writePolygon(o, attrs)
 	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
+	case *fynecanvas.Square:
+		r.writeSquare(o, attrs)
 	case *fynecanvas.Text:
 		r.writeText(o, attrs)
 	case *fyne.Container:
@@ -326,12 +330,39 @@ func (r *markupRenderer) writeRaster(rst *fynecanvas.Raster, attrs map[string]*s
 	r.writeTag("raster", true, attrs)
 }
 
+func (r *markupRenderer) writePolygon(rct *fynecanvas.Polygon, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", rct.FillColor)
+	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "angle", float64(rct.Angle))
+	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
+	r.writeTag("polygon", true, attrs)
+}
+
 func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
 	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "aspect", float64(rct.Aspect))
+	r.setFloatAttr(attrs, "topRightRadius", float64(rct.TopRightCornerRadius))
+	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
+	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
+	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
 	r.writeTag("rectangle", true, attrs)
+}
+
+func (r *markupRenderer) writeSquare(sq *fynecanvas.Square, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", sq.FillColor)
+	r.setColorAttr(attrs, "strokeColor", sq.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(sq.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(sq.CornerRadius))
+	r.setFloatAttr(attrs, "topRightRadius", float64(sq.TopRightCornerRadius))
+	r.setFloatAttr(attrs, "topLeftRadius", float64(sq.TopLeftCornerRadius))
+	r.setFloatAttr(attrs, "bottomRightRadius", float64(sq.BottomRightCornerRadius))
+	r.setFloatAttr(attrs, "bottomLeftRadius", float64(sq.BottomLeftCornerRadius))
+	r.writeTag("square", true, attrs)
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {

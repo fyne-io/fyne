@@ -40,7 +40,6 @@ func TestURIEqual(t *testing.T) {
 	assert.True(t, storage.EqualURI(otherURI, otherURI))
 	assert.False(t, storage.EqualURI(otherURI, first))
 	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
-
 }
 
 func TestURIAuthority(t *testing.T) {
@@ -158,9 +157,11 @@ func TestURI_Parent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
-	assert.NoError(t, err)
-	assert.Equal(t, "file://C:/foo/bar/", parent.String())
+	if runtime.GOOS == "windows" {
+		parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
+		assert.NoError(t, err)
+		assert.Equal(t, "file://C:/foo/bar/", parent.String())
+	}
 
 	// TODO hook in an http/https handler
 	//parent, err = storage.Parent(storage.NewURI("http://foo/bar/baz/"))

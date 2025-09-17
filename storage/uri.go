@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"path"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage/repository"
@@ -16,24 +18,15 @@ func EqualURI(t1, t2 fyne.URI) bool {
 
 // NewFileURI creates a new URI from the given file path.
 // Relative paths will be converted to absolute using filepath.Abs if required.
-func NewFileURI(path string) fyne.URI {
-	assumeAbs := false // avoid filepath.IsAbs as it follows platform rules
-	if len(path) >= 1 {
-		if path[0] == '/' {
-			assumeAbs = true
-		} else if len(path) >= 2 {
-			assumeAbs = path[1] == ':'
-		}
-	}
-
-	if !assumeAbs {
-		absolute, err := filepath.Abs(path)
+func NewFileURI(fpath string) fyne.URI {
+	if !(path.IsAbs(fpath) || runtime.GOOS == "windows" && filepath.IsAbs(fpath)) {
+		absolute, err := filepath.Abs(fpath)
 		if err == nil {
-			path = absolute
+			fpath = absolute
 		}
 	}
 
-	return repository.NewFileURI(path)
+	return repository.NewFileURI(fpath)
 }
 
 // NewURI creates a new URI from the given string representation. This could be
@@ -94,7 +87,6 @@ func ParseURI(s string) (fyne.URI, error) {
 //
 // Since: 1.4
 func Parent(u fyne.URI) (fyne.URI, error) {
-
 	repo, err := repository.ForURI(u)
 	if err != nil {
 		return nil, err
@@ -223,12 +215,12 @@ func DeleteAll(u fyne.URI) error {
 		return err
 	}
 
-	wrepo, ok := repo.(repository.DeleteAllRepository)
+	drepo, ok := repo.(repository.DeleteAllRepository)
 	if !ok {
 		return repository.GenericDeleteAll(u)
 	}
 
-	return wrepo.DeleteAll(u)
+	return drepo.DeleteAll(u)
 }
 
 // Reader returns URIReadCloser set up to read from the resource that the
