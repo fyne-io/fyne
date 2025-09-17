@@ -33,12 +33,6 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 	outerRadius := float64(scale(fyne.Min(size.Width, size.Height) / 2.0))
 	innerRadius := outerRadius * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio)))
-	if innerRadius < 0 {
-		innerRadius = 0
-	}
-	if innerRadius > outerRadius {
-		innerRadius = outerRadius
-	}
 
 	// convert to radians
 	// reverse the sign of the angles to modify the direction: positive is clockwise, negative is counter-clockwise

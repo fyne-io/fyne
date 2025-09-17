@@ -354,7 +354,6 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 			thickness, float32(length),
 		))
 	}
-
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
