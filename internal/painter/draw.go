@@ -98,10 +98,11 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
-	cornerRadius := scale(polygon.CornerRadius)
-	if polygon.CornerRadius == canvas.RadiusMaximum && polygon.Sides > 0 {
-		cornerRadius = float32(float64(outerRadius/2) * math.Cos(math.Pi/float64(polygon.Sides)))
+	cornerRadius := polygon.CornerRadius
+	if polygon.CornerRadius == canvas.RadiusMaximum {
+		cornerRadius = GetMaximumRadiusPolygon(size, polygon.Sides)
 	}
+	cornerRadius = scale(cornerRadius)
 
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
@@ -369,9 +370,19 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 	return perCornerRadius
 }
 
-// GetMaximumRadius returns the maximum possible radius that fits within the given size.
+// GetMaximumRadius returns the maximum possible corner radius that fits within the given size.
 // It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
 // This is typically used for drawing circular corners in rectangles, circles or squares.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
+}
+
+// GetMaximumRadiusPolygon returns the maximum possible corner radius for a polygon
+// with the specified number of sides that fits within the given size.
+// The function returns 0 if the number of sides is less than 3.
+func GetMaximumRadiusPolygon(size fyne.Size, sides uint) float32 {
+	if sides < 3 {
+		return 0
+	}
+	return float32(float64(GetMaximumRadius(size)/1.7) * math.Cos(math.Pi/float64(sides)))
 }
