@@ -93,13 +93,13 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
-	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
 	cornerRadius := scale(polygon.CornerRadius)
-	if polygon.CornerRadius == canvas.RadiusMaximum {
+	if polygon.CornerRadius == canvas.RadiusMaximum && polygon.Sides > 0 {
 		cornerRadius = float32(float64(outerRadius/2) * math.Cos(math.Pi/float64(polygon.Sides)))
 	}
 
@@ -113,7 +113,7 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
-		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
+		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
 		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
 		dasher.Draw()
 	}
