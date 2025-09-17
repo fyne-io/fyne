@@ -17,8 +17,8 @@ const quarterCircleControl = 1 - 0.55228
 // DrawArc rasterizes the given arc object into an image.
 // The scale function is used to understand how many pixels are required per unit of size.
 // The arc is drawn from StartAngle to EndAngle (in degrees).
-// 0°/360 is right, 90° is bottom, 180° is left, 270° is top
-// 0°/-360 is right, -90° is top, -180° is left, -270° is bottom
+// 0°/360 is top, 90° is right, 180° is bottom, 270° is left
+// 0°/-360 is top, -90° is left, -180° is bottom, -270° is right
 func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := arc.Size()
 
@@ -33,11 +33,11 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 
 	// convert to radians
-	// reverse the sign of the angles to modify the direction: positive is clockwise, negative is counter-clockwise
-	startRad := float64(-arc.StartAngle * math.Pi / 180.0)
-	endRad := float64(-arc.EndAngle * math.Pi / 180.0)
+	startRad := float64(startAngle * math.Pi / 180.0)
+	endRad := float64(endAngle * math.Pi / 180.0)
 	sweep := endRad - startRad
 	if sweep == 0 {
 		// nothing to draw
@@ -422,6 +422,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 }
 
 // drawRoundArc constructs a rounded pie slice or annular sector
+// it uses the Unit circle coordinate system
 func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr float64) {
 	if sweep == 0 {
 		return
@@ -655,4 +656,12 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 	return GetMaximumRadius(fyne.NewSize(
 		thickness, float32(length),
 	))
+}
+
+// NormalizeArcAngles adjusts the given start and end angles for arc drawing.
+// It converts the angles from the Unit circle coordinate system (where 0 degrees is along the positive X-axis)
+// to the coordinate system used by the painter, where 0 degrees is at the top (12 o'clock position).
+// The function also reverses the direction: positive is clockwise, negative is counter-clockwise
+func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
+	return -(startAngle - 90), -(endAngle - 90)
 }

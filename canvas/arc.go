@@ -13,8 +13,8 @@ var _ fyne.CanvasObject = (*Arc)(nil)
 // It allows for the creation of circular, ring-shaped or pie-shaped segment, with configurable cutout ratio
 // as well as customizable start and end angles to define the arc's length as the absolute difference between the two angles. The arc is always centered on its position.
 // The arc is drawn from StartAngle to EndAngle (in degrees, positive is clockwise, negative is counter-clockwise).
-// 0°/360 is right, 90° is bottom, 180° is left, 270° is top
-// 0°/-360 is right, -90° is top, -180° is left, -270° is bottom
+// 0°/360 is top, 90° is right, 180° is bottom, 270° is left
+// 0°/-360 is top, -90° is left, -180° is bottom, -270° is right
 //
 // Since: 2.7
 type Arc struct {

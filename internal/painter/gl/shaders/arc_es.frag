@@ -1,5 +1,8 @@
 #version 100
 
+// Note: This shader operates in the unit circle coordinate system, where angles are measured from the positive X axis.
+// To adapt the arc orientation or coordinate system, adjust the start_angle and end_angle uniforms accordingly.
+
 #ifdef GL_ES
 # ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
