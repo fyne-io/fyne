@@ -49,6 +49,7 @@ type painter struct {
 	rectangleProgram      ProgramState
 	roundRectangleProgram ProgramState
 	polygonProgram        ProgramState
+	arcProgram            ProgramState
 	texScale              float32
 	pixScale              float32 // pre-calculate scale*texScale for each draw
 }
