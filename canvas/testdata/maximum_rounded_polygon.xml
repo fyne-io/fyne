@@ -1,5 +1,5 @@
 <canvas size="50x50">
 	<content>
-		<polygon angle="30" fillColor="rgba(255,200,0,180)" radius="3.4028234663852886e+38" sides="3" size="50x50" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+		<polygon angle="30" fillColor="rgba(255,200,0,180)" radius="3.4028234663852886e+38" sides="3" size="50x50" strokeColor="rgba(0,0,0,255)"/>
 	</content>
 </canvas>

@@ -64,7 +64,6 @@ func TestPolygon_RadiusMaximum(t *testing.T) {
 	polygon := &canvas.Polygon{
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.Black,
-		StrokeWidth:  2,
 		CornerRadius: canvas.RadiusMaximum,
 		Angle:        30,
 		Sides:        3,
@@ -77,8 +76,6 @@ func TestPolygon_RadiusMaximum(t *testing.T) {
 	c.SetContent(polygon)
 	c.Resize(fyne.NewSize(150, 150))
 
-	polygon.StrokeWidth = 0
-	polygon.Angle = 120
 	test.AssertRendersToImage(t, "maximum_rounded_polygon_3.png", c)
 
 	polygon.Sides = 4
