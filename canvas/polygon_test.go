@@ -77,6 +77,7 @@ func TestPolygon_RadiusMaximum(t *testing.T) {
 	c.SetContent(polygon)
 	c.Resize(fyne.NewSize(150, 150))
 
+	polygon.StrokeWidth = 0
 	polygon.Angle = 120
 	test.AssertRendersToImage(t, "maximum_rounded_polygon_3.png", c)
 
