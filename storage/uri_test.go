@@ -21,8 +21,8 @@ type otherURI struct {
 	fyne.URI
 }
 
-func (o *otherURI) String() string {
-	return "file://" + o.path
+func (u *otherURI) String() string {
+	return "file://" + u.path
 }
 
 func (u *otherURI) Scheme() string {
