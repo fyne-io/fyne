@@ -20,6 +20,28 @@ type gradient interface {
 	Size() fyne.Size
 }
 
+func drawArc(c fyne.Canvas, arc *canvas.Arc, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(arc)
+	scaledWidth := scale.ToScreenCoordinate(c, arc.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, arc.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawArc(arc, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+}
+
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(circle)
 	scaledWidth := scale.ToScreenCoordinate(c, circle.Size().Width+pad*2)
@@ -101,11 +123,11 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		origImg = subImg
 	}
 
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha())
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), img.CornerRadius*c.Scale())
 }
 
-func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64) {
-	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height {
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {
+	if origImg.Bounds().Dx() == width && origImg.Bounds().Dy() == height && radius < 0.5 {
 		// do not scale or duplicate image since not needed, draw directly
 		drawTex(x, y, width, height, base, origImg, clip, alpha)
 		return
@@ -123,6 +145,10 @@ func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRG
 			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
 		}
 		draw.CatmullRom.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
+	}
+
+	if radius > 0.5 {
+		applyRoundedCorners(scaledImg, width, height, radius)
 	}
 
 	drawTex(x, y, width, height, base, scaledImg, clip, alpha)
@@ -207,7 +233,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 
 	pix := rast.Generator(width, height)
 	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
-		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0)
+		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip, 1.0, 0.0)
 	} else {
 		drawTex(scaledX, scaledY, width, height, base, pix, clip, 1.0)
 	}
@@ -310,4 +336,48 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
+}
+
+// applyRoundedCorners rounds the corners of the image in-place
+func applyRoundedCorners(img *image.NRGBA, w, h int, radius float32) {
+	rInt := int(math.Ceil(float64(radius)))
+
+	aaWidth := float32(0.5)
+	outerR2 := (radius + aaWidth) * (radius + aaWidth)
+	innerR2 := (radius - aaWidth) * (radius - aaWidth)
+
+	applyCorner := func(startX, endX, startY, endY int, cx, cy float32) {
+		for y := startY; y < endY; y++ {
+			for x := startX; x < endX; x++ {
+				dx := float32(x) - cx
+				dy := float32(y) - cy
+				dist2 := dx*dx + dy*dy
+
+				i := img.PixOffset(x, y)
+				alpha := img.Pix[i+3]
+
+				switch {
+				case dist2 >= outerR2:
+					img.Pix[i+3] = 0 // Fully transparent
+				case dist2 > innerR2:
+					// Linear falloff based on squared distance
+					t := (outerR2 - dist2) / (outerR2 - innerR2) // t ranges from 0 to 1
+					newAlpha := uint8(float32(alpha) * t)
+					img.Pix[i+3] = newAlpha
+				}
+			}
+		}
+	}
+
+	// Top-left
+	applyCorner(0, rInt, 0, rInt, radius, radius)
+
+	// Top-right
+	applyCorner(w-rInt, w, 0, rInt, float32(w)-radius, radius)
+
+	// Bottom-left
+	applyCorner(0, rInt, h-rInt, h, radius, float32(h)-radius)
+
+	// Bottom-right
+	applyCorner(w-rInt, w, h-rInt, h, float32(w)-radius, float32(h)-radius)
 }

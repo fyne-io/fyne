@@ -14,6 +14,72 @@ import (
 
 const quarterCircleControl = 1 - 0.55228
 
+// DrawArc rasterizes the given arc object into an image.
+// The scale function is used to understand how many pixels are required per unit of size.
+// The arc is drawn from StartAngle to EndAngle (in degrees).
+// 0°/360 is top, 90° is right, 180° is bottom, 270° is left
+// 0°/-360 is top, -90° is left, -180° is bottom, -270° is right
+func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := arc.Size()
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	centerX := float64(width) / 2
+	centerY := float64(height) / 2
+
+	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
+
+	// convert to radians
+	startRad := float64(startAngle * math.Pi / 180.0)
+	endRad := float64(endAngle * math.Pi / 180.0)
+	sweep := endRad - startRad
+	if sweep == 0 {
+		// nothing to draw
+		return raw
+	}
+
+	if sweep > 2*math.Pi {
+		sweep = 2 * math.Pi
+	} else if sweep < -2*math.Pi {
+		sweep = -2 * math.Pi
+	}
+
+	cornerRadius := arc.CornerRadius
+	if arc.CornerRadius == canvas.RadiusMaximum {
+		cornerRadius = GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
+	}
+
+	cornerRadius = scale(cornerRadius)
+	outerRadius = scale(outerRadius)
+	innerRadius = scale(innerRadius)
+
+	if arc.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(arc.FillColor)
+		// rasterx.AddArc is not used because it does not support rounded corners
+		drawRoundArc(filler, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
+		filler.Draw()
+	}
+
+	stroke := float64(scale(arc.StrokeWidth))
+	if arc.StrokeColor != nil && stroke > 0 {
+		dasher := rasterx.NewDasher(width, height, scanner)
+		dasher.SetColor(arc.StrokeColor)
+		dasher.SetStroke(fixed.Int26_6(stroke*64), 0, nil, nil, nil, 0, nil, 0)
+		// rasterx.AddArc is not used because it does not support rounded corners
+		drawRoundArc(dasher, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
+		dasher.Draw()
+	}
+
+	return raw
+}
+
 // DrawCircle rasterizes the given circle object into an image.
 // The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -358,6 +424,210 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	p.Stop(true)
 }
 
+// drawRoundArc constructs a rounded pie slice or annular sector
+// it uses the Unit circle coordinate system
+func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr float64) {
+	if sweep == 0 {
+		return
+	}
+
+	cosSinPoint := func(cx, cy, r, ang float64) (x, y float64) {
+		return cx + r*math.Cos(ang), cy - r*math.Sin(ang)
+	}
+
+	// addCircularArc appends a circular arc to the current path using cubic Bezier approximation.
+	// 'adder' must already be positioned at the arc start point.
+	// sweep is signed (positive = CCW, negative = CW).
+	addCircularArc := func(adder rasterx.Adder, cx, cy, r, start, sweep float64) {
+		if sweep == 0 || r == 0 {
+			return
+		}
+		segCount := int(math.Ceil(math.Abs(sweep) / (math.Pi / 2.0)))
+		da := sweep / float64(segCount)
+
+		for i := 0; i < segCount; i++ {
+			a1 := start + float64(i)*da
+			a2 := a1 + da
+
+			x1, y1 := cosSinPoint(cx, cy, r, a1)
+			x2, y2 := cosSinPoint(cx, cy, r, a2)
+
+			k := 4.0 / 3.0 * math.Tan((a2-a1)/4.0)
+			// tangent unit vectors on our param (x = cx+rcos, y = cy-rsin)
+			c1x := x1 + k*r*(-math.Sin(a1))
+			c1y := y1 + k*r*(-math.Cos(a1))
+			c2x := x2 - k*r*(-math.Sin(a2))
+			c2y := y2 - k*r*(-math.Cos(a2))
+
+			adder.CubeBezier(
+				rasterx.ToFixedP(c1x, c1y),
+				rasterx.ToFixedP(c2x, c2y),
+				rasterx.ToFixedP(x2, y2),
+			)
+		}
+	}
+
+	// full-circle/donut paths (two closed subpaths: outer CCW, inner CW if inner > 0)
+	if math.Abs(sweep) >= 2*math.Pi {
+		// outer loop (CCW)
+		ox, oy := cosSinPoint(cx, cy, outer, 0)
+		adder.Start(rasterx.ToFixedP(ox, oy))
+		addCircularArc(adder, cx, cy, outer, 0, 2*math.Pi)
+		adder.Stop(true)
+		// inner loop reversed (CW) to create a hole
+		if inner > 0 {
+			ix, iy := cosSinPoint(cx, cy, inner, 0)
+			adder.Start(rasterx.ToFixedP(ix, iy))
+			addCircularArc(adder, cx, cy, inner, 0, -2*math.Pi)
+			adder.Stop(true)
+		}
+		return
+	}
+
+	if cr <= 0 {
+		// sharp-corner fallback
+		if inner <= 0 {
+			// pie slice
+			ox, oy := cosSinPoint(cx, cy, outer, start)
+			adder.Start(rasterx.ToFixedP(cx, cy))
+			adder.Line(rasterx.ToFixedP(ox, oy))
+			addCircularArc(adder, cx, cy, outer, start, sweep)
+			adder.Line(rasterx.ToFixedP(cx, cy))
+			adder.Stop(true)
+			return
+		}
+		// annular sector
+		outerStartX, outerStartY := cosSinPoint(cx, cy, outer, start)
+		adder.Start(rasterx.ToFixedP(outerStartX, outerStartY))
+		addCircularArc(adder, cx, cy, outer, start, sweep)
+		innerEndX, innerEndY := cosSinPoint(cx, cy, inner, start+sweep)
+		adder.Line(rasterx.ToFixedP(innerEndX, innerEndY))
+		addCircularArc(adder, cx, cy, inner, start+sweep, -sweep)
+		adder.Stop(true)
+		return
+	}
+
+	// rounded corners
+	sgn := 1.0
+	if sweep < 0 {
+		sgn = -1.0
+	}
+	absSweep := math.Abs(sweep)
+
+	// clamp the corner radius if the value is too large
+	cr = math.Min(cr, outer/2)
+
+	// trim angles due to rounds
+	sOut := math.Sqrt(math.Max(0, outer*(outer-2*cr)))
+	thetaOut := math.Atan2(cr, sOut) // positive
+
+	crIn := math.Min(cr, 0.5*math.Min(outer-inner, math.Abs(sweep)*inner))
+	var sIn, thetaIn float64
+	if inner > 0 {
+		sIn = math.Sqrt(math.Max(0, inner*(inner+2*crIn)))
+		thetaIn = math.Atan2(crIn, sIn)
+	}
+
+	// ensure the trim does not exceed half the sweep
+	thetaOut = math.Min(thetaOut, absSweep/2.0-1e-6)
+	if thetaOut < 0 {
+		thetaOut = 0
+	}
+	if inner > 0 {
+		thetaIn = math.Min(thetaIn, absSweep/2.0-1e-6)
+		if thetaIn < 0 {
+			thetaIn = 0
+		}
+	}
+
+	// trimmed arc angles
+	startOuter := start + sgn*thetaOut
+	endOuter := start + sweep - sgn*thetaOut
+
+	startInner := 0.0
+	endInner := 0.0
+	if inner > 0 {
+		startInner = start + sgn*thetaIn
+		endInner = start + sweep - sgn*thetaIn
+	}
+
+	// direction frames at start/end radial lines
+	// start side
+	vSx, vSy := math.Cos(start), -math.Sin(start)
+	tSx, tSy := -math.Sin(start), -math.Cos(start)
+	nSx, nSy := sgn*tSx, sgn*tSy // interior side normal at start
+
+	// end side
+	endRad := start + sweep
+	vEx, vEy := math.Cos(endRad), -math.Sin(endRad)
+	tEx, tEy := -math.Sin(endRad), -math.Cos(endRad)
+	nEx, nEy := -sgn*tEx, -sgn*tEy // interior side normal at end
+
+	// key points on arcs
+	pOutStartX, pOutStartY := cosSinPoint(cx, cy, outer, startOuter)
+	pOutEndX, pOutEndY := cosSinPoint(cx, cy, outer, endOuter)
+
+	var pInStartX, pInStartY, pInEndX, pInEndY float64
+	if inner > 0 {
+		pInStartX, pInStartY = cosSinPoint(cx, cy, inner, startInner)
+		pInEndX, pInEndY = cosSinPoint(cx, cy, inner, endInner)
+	}
+
+	angleAt := func(cx, cy, x, y float64) float64 {
+		return math.Atan2(cy-y, x-cx)
+	}
+
+	// round geometry at start/end
+	// outer rounds
+	aOutSx, aOutSy := cx+sOut*vSx, cy+sOut*vSy                      // radial tangent (start)
+	fOutSx, fOutSy := aOutSx+cr*nSx, aOutSy+cr*nSy                  // round center (start)
+	aOutEx, aOutEy := cx+sOut*vEx, cy+sOut*vEy                      // radial tangent (end)
+	fOutEx, fOutEy := aOutEx+cr*nEx, aOutEy+cr*nEy                  // round center (end)
+	phiOutEndB := angleAt(fOutEx, fOutEy, pOutEndX, pOutEndY)       // outer end trimmed point
+	phiOutEndA := angleAt(fOutEx, fOutEy, aOutEx, aOutEy)           // end radial tangent
+	phiOutStartA := angleAt(fOutSx, fOutSy, aOutSx, aOutSy)         // start radial tangent
+	phiOutStartB := angleAt(fOutSx, fOutSy, pOutStartX, pOutStartY) // outer start trimmed point
+
+	// inner rounds
+	var aInSx, aInSy, fInSx, fInSy, aInEx, aInEy, fInEx, fInEy float64
+	var phiInEndA, phiInEndB, phiInStartA, phiInStartB float64
+	if inner > 0 {
+		aInSx, aInSy = cx+sIn*vSx, cy+sIn*vSy
+		fInSx, fInSy = aInSx+crIn*nSx, aInSy+crIn*nSy
+		aInEx, aInEy = cx+sIn*vEx, cy+sIn*vEy
+		fInEx, fInEy = aInEx+crIn*nEx, aInEy+crIn*nEy
+
+		phiInEndA = angleAt(fInEx, fInEy, aInEx, aInEy)           // end radial tangent
+		phiInEndB = angleAt(fInEx, fInEy, pInEndX, pInEndY)       // inner end trimmed point
+		phiInStartB = angleAt(fInSx, fInSy, pInStartX, pInStartY) // inner start trimmed point
+		phiInStartA = angleAt(fInSx, fInSy, aInSx, aInSy)         // start radial tangent
+	}
+
+	angleDiff := func(delta float64) float64 {
+		return math.Atan2(math.Sin(delta), math.Cos(delta))
+	}
+
+	adder.Start(rasterx.ToFixedP(pOutStartX, pOutStartY))                                   // start at trimmed outer start
+	addCircularArc(adder, cx, cy, outer, startOuter, endOuter-startOuter)                   // outer arc (trimmed)
+	addCircularArc(adder, fOutEx, fOutEy, cr, phiOutEndB, angleDiff(phiOutEndA-phiOutEndB)) // end side: outer round to radial
+
+	if inner > 0 {
+		adder.Line(rasterx.ToFixedP(aInEx, aInEy))                                                 // end side: radial line to inner
+		addCircularArc(adder, fInEx, fInEy, crIn, phiInEndA, angleDiff(phiInEndB-phiInEndA))       // end side: inner round to inner arc
+		addCircularArc(adder, cx, cy, inner, endInner, startInner-endInner)                        // inner arc (reverse, trimmed)
+		addCircularArc(adder, fInSx, fInSy, crIn, phiInStartB, angleDiff(phiInStartA-phiInStartB)) // start side: inner round to radial
+		adder.Line(rasterx.ToFixedP(aOutSx, aOutSy))                                               // start side: radial line to outer
+	} else {
+		// pie slice: close via center with radial lines
+		adder.Line(rasterx.ToFixedP(cx, cy))         // to center from end side
+		adder.Line(rasterx.ToFixedP(aOutSx, aOutSy)) // to start-side radial tangent
+	}
+
+	// start side: outer round from radial to outer start
+	addCircularArc(adder, fOutSx, fOutSy, cr, phiOutStartA, angleDiff(phiOutStartB-phiOutStartA))
+	adder.Stop(true)
+}
+
 // GetCornerRadius returns the effective corner radius for a rectangle or square corner.
 // If the specific corner radius (perCornerRadius) is zero, it falls back to the baseCornerRadius.
 // Otherwise, it uses the specific corner radius provided.
@@ -385,4 +655,26 @@ func GetMaximumRadiusPolygon(size fyne.Size, sides uint) float32 {
 		return 0
 	}
 	return float32(float64(GetMaximumRadius(size)/1.7) * math.Cos(math.Pi/float64(sides)))
+}
+
+// GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,
+// inner radius, and sweep angle in degrees.
+// It calculates half of the smaller dimension (thickness or effective length) of the provided arc parameters
+func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
+	// height (thickness), width (length)
+	thickness := outerRadius - innerRadius
+	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
+	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
+
+	return GetMaximumRadius(fyne.NewSize(
+		thickness, float32(length),
+	))
+}
+
+// NormalizeArcAngles adjusts the given start and end angles for arc drawing.
+// It converts the angles from the Unit circle coordinate system (where 0 degrees is along the positive X-axis)
+// to the coordinate system used by the painter, where 0 degrees is at the top (12 o'clock position).
+// The function also reverses the direction: positive is clockwise, negative is counter-clockwise
+func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
+	return -(startAngle - 90), -(endAngle - 90)
 }

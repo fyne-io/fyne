@@ -312,7 +312,7 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
-	variantPath := strings.Replace(env, "Regular", variant, -1)
+	variantPath := strings.ReplaceAll(env, "Regular", variant)
 
 	res, err := fyne.LoadResourceFromPath(variantPath)
 	if err != nil {
