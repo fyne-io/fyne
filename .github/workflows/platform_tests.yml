@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['', 'stable']
+        go-version: ["", "stable"]
         os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
@@ -19,45 +19,59 @@ jobs:
             tags: no_glfw,ci,migrated_fynedo
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - uses: actions/setup-go@v5
-      with:
-        go-version: ${{ matrix.go-version }}
-        go-version-file: 'go.mod'
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          go-version-file: "go.mod"
 
-    - name: Get dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install bc clang libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
-        echo "CC=clang" >> "$GITHUB_ENV"
-      if: ${{ runner.os == 'Linux' }}
+      - name: Get dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends bc clang lld libgl1-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CGO_LDFLAGS=-fuse-ld=lld" >> "$GITHUB_ENV"
+        if: ${{ runner.os == 'Linux' }}
 
-    - name: Set environment variable LANG
-      run: export LANG=en_EN.UTF-8
-      if: ${{ runner.os == 'Linux' }}
+      - name: Set environment variable LANG
+        run: export LANG=en_EN.UTF-8
+        if: ${{ runner.os == 'Linux' }}
 
-    - name: Tests
-      run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ./...
+      - name: Tests
+        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" -covermode=atomic -coverprofile=coverage.out ./...
 
-    - name: Wayland Tests
-      run: go test -race -tags no_glfw,ci,wayland ./...
-      if: ${{ runner.os == 'Linux' }}
+      - name: Wayland Tests
+        run: go test -race -tags no_glfw,ci,wayland ./...
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: Update coverage
+        run: |
+          set -e
+          coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
+          if (( $(echo "$coverage < 62" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
+
+      - name: Update PR Coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverage.out
+        if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
 
   windows_tests:
     runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.20.x', 'stable']
+        go-version: ["1.20.x", "stable"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: WillAbides/setup-go-faster@v1
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-    
+
       - name: Tests
         run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...

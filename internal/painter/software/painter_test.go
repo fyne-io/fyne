@@ -274,6 +274,39 @@ func TestPainter_paintLine_thin(t *testing.T) {
 	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
 }
 
+func TestPainter_paintPolygon(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewPolygon(3, color.Black)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(150+2*theme.Padding(), 150+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_polygon_3.png", p.Paint(c))
+
+	obj.Sides = 4
+	test.AssertImageMatches(t, "draw_polygon_4.png", p.Paint(c))
+
+	obj.Angle = 35
+	test.AssertImageMatches(t, "draw_polygon_4_rotate_35.png", p.Paint(c))
+
+	obj.Angle = -120
+	obj.Sides = 5
+	test.AssertImageMatches(t, "draw_polygon_5_rotate_-120.png", p.Paint(c))
+
+	obj.CornerRadius = 10
+	obj.Angle = 0
+	obj.Sides = 6
+	test.AssertImageMatches(t, "draw_polygon_6_rounded.png", p.Paint(c))
+
+	obj.StrokeColor = color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.StrokeWidth = 5
+	obj.Angle = 360
+	test.AssertImageMatches(t, "draw_polygon_6_rounded_stroke.png", p.Paint(c))
+}
+
 func TestPainter_paintRaster(t *testing.T) {
 	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
 		x = x / 5
@@ -371,6 +404,8 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rectangle_stroke_wide.png", p.Paint(c))
 	obj.Aspect = 0.5
 	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow.png", p.Paint(c))
+	obj.CornerRadius = canvas.RadiusMaximum
+	test.AssertImageMatches(t, "draw_rectangle_stroke_narrow_radius_maximum.png", p.Paint(c))
 }
 
 func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {

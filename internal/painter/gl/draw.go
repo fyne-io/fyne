@@ -29,11 +29,7 @@ func (p *painter) updateBuffer(vbo Buffer, points []float32) {
 }
 
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	size := circle.Size()
-	radius := size.Width / 2
-	if size.Height < size.Width {
-		radius = size.Height / 2
-	}
+	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
@@ -135,6 +131,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawGradient(obj, p.newGlLinearGradientTexture, pos, frame)
 	case *canvas.RadialGradient:
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
+	case *canvas.Polygon:
+		p.drawPolygon(obj, pos, frame)
 	}
 }
 
@@ -197,6 +195,27 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
+		// the maximum possible corner radius for a circular shape, calculated taking into account the rect coords with aspect ratio
+		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
+			bounds[2]-bounds[0], bounds[3]-bounds[1],
+		))
+
+		if topRightRadius == canvas.RadiusMaximum {
+			topRightRadius = maxCornerRadius
+		}
+
+		if topLeftRadius == canvas.RadiusMaximum {
+			topLeftRadius = maxCornerRadius
+		}
+
+		if bottomRightRadius == canvas.RadiusMaximum {
+			bottomRightRadius = maxCornerRadius
+		}
+
+		if bottomLeftRadius == canvas.RadiusMaximum {
+			bottomLeftRadius = maxCornerRadius
+		}
+
 		p.SetUniform4f(program, "radius",
 			roundToPixel(topRightRadius*p.pixScale, 1.0),
 			roundToPixel(bottomRightRadius*p.pixScale, 1.0),
@@ -219,6 +238,63 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
+func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame fyne.Size) {
+	if ((polygon.FillColor == color.Transparent || polygon.FillColor == nil) && (polygon.StrokeColor == color.Transparent || polygon.StrokeColor == nil || polygon.StrokeWidth == 0)) || polygon.Sides < 3 {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
+	program := p.polygonProgram
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	outerRadius := fyne.Min(polygon.Size().Width, polygon.Size().Height) / 2
+	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "shape_radius", outerRadiusScaled)
+
+	p.SetUniform1f(program, "angle", polygon.Angle)
+	p.SetUniform1f(program, "sides", float32(polygon.Sides))
+
+	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
+
+	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+
+	r, g, b, a := getFragmentColor(polygon.FillColor)
+	p.SetUniform4f(program, "fill_color", r, g, b, a)
+
+	strokeColor := polygon.StrokeColor
+	if strokeColor == nil {
+		strokeColor = color.Transparent
+	}
+	r, g, b, a = getFragmentColor(strokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+
 	p.logError()
 	// Fragment: END
 
@@ -258,18 +334,28 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 		return
 	}
 
+	cornerRadius := float32(0)
 	aspect := float32(0)
 	if img, ok := o.(*canvas.Image); ok {
 		aspect = img.Aspect()
 		if aspect == 0 {
 			aspect = 1 // fallback, should not occur - normally an image load error
 		}
+		if img.CornerRadius > 0 {
+			cornerRadius = img.CornerRadius
+		}
 	}
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
+	inner, _ := rectInnerCoords(size, pos, fill, aspect)
+
 	p.ctx.UseProgram(p.program.ref)
 	p.updateBuffer(p.program.buff, points)
 	p.UpdateVertexArray(p.program, "vert", 3, 5, 0)
 	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
+
+	// Set corner radius and texture size in pixels
+	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
+	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
 
 	p.SetUniform1f(p.program, "alpha", alpha)
 

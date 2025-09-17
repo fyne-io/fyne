@@ -106,6 +106,20 @@ func (p *painter) Init() {
 		"fill_color", "stroke_color",
 	)
 	p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
+
+	p.polygonProgram = ProgramState{
+		ref:        p.createProgram("polygon_es"),
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
+	p.getUniformLocations(p.polygonProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"shape_radius", "angle", "sides",
+		"fill_color", "corner_radius",
+		"stroke_width", "stroke_color",
+	)
+	p.enableAttribArrays(p.polygonProgram, "vert", "normal")
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
