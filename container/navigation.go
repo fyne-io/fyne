@@ -13,14 +13,15 @@ import (
 // Since: 2.7
 type Navigation struct {
 	widget.BaseWidget
-	level  int
-	stack  fyne.Container
-	titles []string
 
 	Root      fyne.CanvasObject
 	Title     string
 	OnBack    func()
 	OnForward func()
+
+	level  int
+	stack  fyne.Container
+	titles []string
 }
 
 // NewNavigation creates a new navigation container with a given root object.
