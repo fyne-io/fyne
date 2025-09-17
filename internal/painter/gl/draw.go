@@ -345,14 +345,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	cornerRadius := arc.CornerRadius
 	if arc.CornerRadius == canvas.RadiusMaximum {
-		// height (thickness), width (length)
-		thickness := outerRadius - innerRadius
-		span := math.Sin(0.5 * math.Min(math.Abs(float64(arc.EndAngle-arc.StartAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
-		length := 1.5 * float64(outerRadius) * span / (1 + span)                                                // no division-by-zero risk
-
-		cornerRadius = paint.GetMaximumRadius(fyne.NewSize(
-			thickness, float32(length),
-		))
+		cornerRadius = paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
 	}
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)

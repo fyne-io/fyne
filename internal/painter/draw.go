@@ -31,8 +31,8 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 	centerX := float64(width) / 2
 	centerY := float64(height) / 2
 
-	outerRadius := float64(scale(fyne.Min(size.Width, size.Height) / 2.0))
-	innerRadius := outerRadius * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio)))
+	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
 
 	// convert to radians
 	// reverse the sign of the angles to modify the direction: positive is clockwise, negative is counter-clockwise
@@ -50,23 +50,20 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		sweep = -2 * math.Pi
 	}
 
-	cornerRadius := float64(scale(arc.CornerRadius))
+	cornerRadius := arc.CornerRadius
 	if arc.CornerRadius == canvas.RadiusMaximum {
-		// height (thickness), width (length)
-		thickness := outerRadius - innerRadius
-		span := math.Sin(0.5 * math.Min(math.Abs(sweep), math.Pi)) // span in (0,1)
-		length := 1.5 * outerRadius * span / (1 + span)            // no division-by-zero risk
-
-		cornerRadius = float64(GetMaximumRadius(fyne.NewSize(
-			float32(thickness), float32(length),
-		)))
+		cornerRadius = GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
 	}
+
+	cornerRadius = scale(cornerRadius)
+	outerRadius = scale(outerRadius)
+	innerRadius = scale(innerRadius)
 
 	if arc.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(arc.FillColor)
 		// rasterx.AddArc is not used because it does not support rounded corners
-		drawRoundArc(filler, centerX, centerY, outerRadius, innerRadius, startRad, sweep, cornerRadius)
+		drawRoundArc(filler, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
 		filler.Draw()
 	}
 
@@ -76,7 +73,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		dasher.SetColor(arc.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(stroke*64), 0, nil, nil, nil, 0, nil, 0)
 		// rasterx.AddArc is not used because it does not support rounded corners
-		drawRoundArc(dasher, centerX, centerY, outerRadius, innerRadius, startRad, sweep, cornerRadius)
+		drawRoundArc(dasher, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
 		dasher.Draw()
 	}
 
@@ -644,4 +641,18 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 // This is typically used for drawing circular corners in rectangles, circles or squares.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
+}
+
+// GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,
+// inner radius, and sweep angle in degrees.
+// It calculates half of the smaller dimension (thickness or effective length) of the provided arc parameters
+func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
+	// height (thickness), width (length)
+	thickness := outerRadius - innerRadius
+	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
+	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
+
+	return GetMaximumRadius(fyne.NewSize(
+		thickness, float32(length),
+	))
 }
