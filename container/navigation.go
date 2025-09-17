@@ -95,6 +95,10 @@ func (nav *Navigation) Pop() fyne.CanvasObject {
 //
 // Since: 2.7
 func (nav *Navigation) Forward() fyne.CanvasObject {
+	if nav.level >= len(nav.stack.Objects) {
+		return nil
+	}
+
 	nav.stack.Objects[nav.level-1].Hide()
 	nav.stack.Objects[nav.level].Show()
 	nav.level++

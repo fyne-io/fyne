@@ -20,8 +20,10 @@ func TestNavigation_RootWithTitle(t *testing.T) {
 	assert.Equal(t, 1, len(nav.titles))
 
 	assert.Nil(t, nav.Pop())
+	assert.Nil(t, nav.Forward())
 
 	assert.Equal(t, "Title", r.title.Text)
+
 }
 
 func TestNavigation_EmptyPushWithTitle(t *testing.T) {
@@ -48,6 +50,11 @@ func TestNavigation_EmptyPushWithTitle(t *testing.T) {
 	assert.Equal(t, 2, nav.level)
 	assert.Equal(t, "B", r.title.Text)
 	assert.Equal(t, false, r.back.Disabled())
+
+	assert.Equal(t, b, nav.Pop())
+	assert.Equal(t, 1, nav.level)
+	assert.Equal(t, b, nav.Forward())
+	assert.Equal(t, 2, nav.level)
 
 	nav.PushWithTitle(c, "C")
 	assert.Equal(t, 3, len(nav.stack.Objects))
