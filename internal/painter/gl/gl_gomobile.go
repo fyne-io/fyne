@@ -111,11 +111,43 @@ func (p *painter) Init() {
 			"fill_color", "stroke_color",
 		)
 		p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
+
+		p.polygonProgram = ProgramState{
+			ref:        p.createProgram("polygon_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.polygonProgram,
+			"frame_size", "rect_coords", "edge_softness",
+			"shape_radius", "angle", "sides",
+			"fill_color", "corner_radius",
+			"stroke_width", "stroke_color",
+		)
+		p.enableAttribArrays(p.polygonProgram, "vert", "normal")
+
+		p.arcProgram = ProgramState{
+			ref:        p.createProgram("arc_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.arcProgram,
+			"frame_size", "rect_coords",
+			"inner_radius", "outer_radius",
+			"start_angle", "end_angle",
+			"edge_softness", "corner_radius",
+			"stroke_width", "stroke_color",
+			"fill_color",
+		)
+		p.enableAttribArrays(p.arcProgram, "vert", "normal")
 		compiled = []ProgramState{
 			p.program,
 			p.lineProgram,
 			p.rectangleProgram,
 			p.roundRectangleProgram,
+			p.polygonProgram,
+			p.arcProgram,
 		}
 	}
 
@@ -123,6 +155,8 @@ func (p *painter) Init() {
 	p.lineProgram = compiled[1]
 	p.rectangleProgram = compiled[2]
 	p.roundRectangleProgram = compiled[3]
+	p.polygonProgram = compiled[4]
+	p.arcProgram = compiled[5]
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {

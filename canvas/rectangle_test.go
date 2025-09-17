@@ -79,3 +79,26 @@ func TestRectangle_PerCornerRadius(t *testing.T) {
 	rect.CornerRadius = 0
 	test.AssertRendersToImage(t, "rounded_per_corner_rect_aspect.png", c)
 }
+
+func TestRectangle_RadiusMaximum(t *testing.T) {
+	rect := &canvas.Rectangle{
+		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+		StrokeWidth:  2.0,
+		CornerRadius: canvas.RadiusMaximum,
+	}
+
+	rect.Resize(fyne.NewSize(80, 50))
+	test.AssertObjectRendersToMarkup(t, "maximum_rounded_rect.xml", rect)
+
+	c := software.NewCanvas()
+	c.SetContent(rect)
+	c.Resize(fyne.NewSize(90, 60))
+	test.AssertRendersToImage(t, "maximum_rounded_rect_stroke.png", c)
+
+	rect.StrokeWidth = 0
+	test.AssertRendersToImage(t, "maximum_rounded_rect.png", c)
+
+	rect.Aspect = 2.0
+	test.AssertRendersToImage(t, "maximum_rounded_rect_aspect.png", c)
+}
