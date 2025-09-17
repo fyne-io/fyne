@@ -17,10 +17,10 @@ type Navigation struct {
 	stack  fyne.Container
 	titles []string
 
-	Root   fyne.CanvasObject
-	Title  string
-	OnBack func()
-	OnNext func()
+	Root      fyne.CanvasObject
+	Title     string
+	OnBack    func()
+	OnForward func()
 }
 
 // NewNavigation creates a new navigation container with a given root object.
@@ -36,10 +36,10 @@ func NewNavigation(root fyne.CanvasObject) *Navigation {
 func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 	var nav *Navigation
 	nav = &Navigation{
-		Root:   root,
-		Title:  s,
-		OnBack: func() { _ = nav.Back() },
-		OnNext: func() { _ = nav.Forward() },
+		Root:      root,
+		Title:     s,
+		OnBack:    func() { _ = nav.Back() },
+		OnForward: func() { _ = nav.Forward() },
 	}
 	return nav
 }
@@ -150,7 +150,7 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 		},
 		next: widget.Button{
 			Icon:     theme.NavigateNextIcon(),
-			OnTapped: nav.OnNext,
+			OnTapped: nav.OnForward,
 		},
 	}
 	r.back.Disable()
