@@ -23,7 +23,6 @@ func TestNavigation_RootWithTitle(t *testing.T) {
 	assert.Nil(t, nav.Forward())
 
 	assert.Equal(t, "Title", r.title.Text)
-
 }
 
 func TestNavigation_EmptyPushWithTitle(t *testing.T) {
