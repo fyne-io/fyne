@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
-	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
