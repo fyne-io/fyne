@@ -17,6 +17,7 @@ import (
 var (
 	_ repository.Repository             = (*FileRepository)(nil)
 	_ repository.WritableRepository     = (*FileRepository)(nil)
+	_ repository.DeleteAllRepository    = (*FileRepository)(nil)
 	_ repository.AppendableRepository   = (*FileRepository)(nil)
 	_ repository.HierarchicalRepository = (*FileRepository)(nil)
 	_ repository.ListableRepository     = (*FileRepository)(nil)
