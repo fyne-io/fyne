@@ -575,48 +575,47 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 
 	e.requestFocus()
-	clipboard := fyne.CurrentApp().Clipboard()
-	super := e.super()
 
-	undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)
-	redoItem := fyne.NewMenuItem(lang.L("Redo"), e.Redo)
+	super := e.super()
+	app := fyne.CurrentApp()
+	clipboard := app.Clipboard()
+	typedShortcut := super.(fyne.Shortcutable).TypedShortcut
 	cutItem := fyne.NewMenuItem(lang.L("Cut"), func() {
-		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
+		typedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
 	copyItem := fyne.NewMenuItem(lang.L("Copy"), func() {
-		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
+		typedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	})
 	pasteItem := fyne.NewMenuItem(lang.L("Paste"), func() {
-		super.(fyne.Shortcutable).TypedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
+		typedShortcut(&fyne.ShortcutPaste{Clipboard: clipboard})
 	})
 	selectAllItem := fyne.NewMenuItem(lang.L("Select all"), e.selectAll)
 
-	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(super)
-	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
-	c := fyne.CurrentApp().Driver().CanvasForObject(super)
-
-	var menu *fyne.Menu
+	menuItems := make([]*fyne.MenuItem, 0, 6)
 	if e.Disabled() {
-		menu = fyne.NewMenu("", copyItem, selectAllItem)
+		menuItems = append(menuItems, copyItem, selectAllItem)
 	} else if e.Password {
-		menu = fyne.NewMenu("", pasteItem, selectAllItem)
+		menuItems = append(menuItems, pasteItem, selectAllItem)
 	} else {
-		var menuItems []*fyne.MenuItem
 		canUndo, canRedo := e.undoStack.CanUndo(), e.undoStack.CanRedo()
 		if canUndo {
+			undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)
 			menuItems = append(menuItems, undoItem)
 		}
 		if canRedo {
+			redoItem := fyne.NewMenuItem(lang.L("Redo"), e.Redo)
 			menuItems = append(menuItems, redoItem)
 		}
 		if canUndo || canRedo {
 			menuItems = append(menuItems, fyne.NewMenuItemSeparator())
 		}
 		menuItems = append(menuItems, cutItem, copyItem, pasteItem, selectAllItem)
-		menu = fyne.NewMenu("", menuItems...)
 	}
 
-	e.popUp = NewPopUpMenu(menu, c)
+	driver := app.Driver()
+	entryPos := driver.AbsolutePositionForObject(super)
+	popUpPos := entryPos.Add(pe.Position)
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", menuItems...), driver.CanvasForObject(super))
 	e.popUp.ShowAtPosition(popUpPos)
 }
 
@@ -1697,7 +1696,6 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 
 	th := r.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 
 	// correct our scroll wrappers if the wrap mode changed
@@ -1730,6 +1728,7 @@ func (r *entryRenderer) Refresh() {
 	}
 	r.entry.updateCursorAndSelection()
 
+	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.box.FillColor = th.Color(theme.ColorNameInputBackground, v)
 	r.box.CornerRadius = th.Size(theme.SizeNameInputRadius)
 	r.border.CornerRadius = r.box.CornerRadius
@@ -1879,12 +1878,12 @@ func (r *entryContentRenderer) Refresh() {
 	}
 
 	th := r.content.entry.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	if focusedAppearance {
-		if fyne.CurrentApp().Settings().ShowAnimations() {
+		settings := fyne.CurrentApp().Settings()
+		if settings.ShowAnimations() {
 			r.content.entry.cursorAnim.start()
 		} else {
-			r.cursor.FillColor = th.Color(theme.ColorNamePrimary, v)
+			r.cursor.FillColor = th.Color(theme.ColorNamePrimary, settings.ThemeVariant())
 		}
 		r.cursor.Show()
 	} else {
