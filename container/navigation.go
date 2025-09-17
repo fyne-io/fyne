@@ -38,7 +38,7 @@ func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 	nav = &Navigation{
 		Root:   root,
 		Title:  s,
-		OnBack: func() { _ = nav.Pop() },
+		OnBack: func() { _ = nav.Back() },
 		OnNext: func() { _ = nav.Forward() },
 	}
 	return nav
@@ -70,11 +70,11 @@ func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
 	nav.Refresh()
 }
 
-// Pop return the top level CanvasObject, adjusts the title accordingly, and disabled the back button
+// Back returns the top level CanvasObject, adjusts the title accordingly, and disabled the back button
 // when no more objects are left to go back to.
 //
 // Since: 2.7
-func (nav *Navigation) Pop() fyne.CanvasObject {
+func (nav *Navigation) Back() fyne.CanvasObject {
 	if nav.level == 0 || nav.level == 1 && nav.Root != nil {
 		return nil
 	}
