@@ -49,11 +49,7 @@ func NewNavigationWithTitle(root fyne.CanvasObject, s string) *Navigation {
 //
 // Since: 2.7
 func (nav *Navigation) Push(obj fyne.CanvasObject) {
-	s := nav.Title
-	if nav.level > 0 {
-		s = nav.titles[nav.level-1]
-	}
-	nav.PushWithTitle(obj, s)
+	nav.PushWithTitle(obj, nav.Title)
 }
 
 // PushWithTitle puts the given CanvasObject on top, hides the object below, and uses the given title as label text.
@@ -107,11 +103,22 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 	return nav.stack.Objects[nav.level-1]
 }
 
-// SetTitle changes the navigation title and the title for the current object.
+// SetTitle changes the root navigation title shown by default.
 //
 // Since: 2.7
 func (nav *Navigation) SetTitle(s string) {
-	nav.titles[nav.level] = s
+	nav.Title = s
+	nav.Refresh()
+}
+
+// SetCurrentTitle changes the navigation title for the current level.
+//
+// Since: 2.7
+func (nav *Navigation) SetCurrentTitle(s string) {
+	if nav.level > 1 && nav.level-1 < len(nav.titles) {
+		nav.titles[nav.level-1] = s
+		nav.Refresh()
+	}
 }
 
 func (nav *Navigation) setup() {

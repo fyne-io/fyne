@@ -23,6 +23,25 @@ func TestNavigation_RootWithTitle(t *testing.T) {
 	assert.Nil(t, nav.Forward())
 
 	assert.Equal(t, "Title", r.title.Text)
+
+	nav.SetCurrentTitle("Testing")
+	assert.Equal(t, "Title", r.title.Text)
+	assert.Len(t, nav.titles, 1)
+
+	a := widget.NewLabel("a")
+	nav.PushWithTitle(a, "A")
+	assert.Equal(t, "A", r.title.Text)
+	assert.Len(t, nav.titles, 2)
+
+	nav.SetCurrentTitle("Testing")
+	assert.Equal(t, "Testing", r.title.Text)
+
+	nav.SetTitle("Meep")
+	assert.Equal(t, "Meep", nav.Title)
+	b := widget.NewLabel("b")
+	nav.Push(b)
+	assert.Equal(t, "Meep", r.title.Text)
+	assert.Len(t, nav.titles, 3)
 }
 
 func TestNavigation_EmptyPushWithTitle(t *testing.T) {
