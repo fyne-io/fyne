@@ -133,6 +133,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawGradient(obj, p.newGlRadialGradientTexture, pos, frame)
 	case *canvas.Polygon:
 		p.drawPolygon(obj, pos, frame)
+	case *canvas.Arc:
+		p.drawArc(obj, pos, frame)
 	}
 }
 
@@ -289,6 +291,72 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	p.SetUniform4f(program, "fill_color", r, g, b, a)
 
 	strokeColor := polygon.StrokeColor
+	if strokeColor == nil {
+		strokeColor = color.Transparent
+	}
+	r, g, b, a = getFragmentColor(strokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
+func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
+	if ((arc.FillColor == color.Transparent || arc.FillColor == nil) && (arc.StrokeColor == color.Transparent || arc.StrokeColor == nil || arc.StrokeWidth == 0)) || arc.StartAngle == arc.EndAngle {
+		return
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, arc, frame, 0.0)
+	program := p.arcProgram
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
+
+	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
+	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
+
+	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
+
+	startAngle, endAngle := paint.NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
+	p.SetUniform1f(program, "start_angle", startAngle)
+	p.SetUniform1f(program, "end_angle", endAngle)
+
+	cornerRadius := arc.CornerRadius
+	if arc.CornerRadius == canvas.RadiusMaximum {
+		cornerRadius = paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
+	}
+	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
+	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
+
+	strokeWidthScaled := roundToPixel(arc.StrokeWidth*p.pixScale, 1.0)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+
+	r, g, b, a := getFragmentColor(arc.FillColor)
+	p.SetUniform4f(program, "fill_color", r, g, b, a)
+
+	strokeColor := arc.StrokeColor
 	if strokeColor == nil {
 		strokeColor = color.Transparent
 	}
