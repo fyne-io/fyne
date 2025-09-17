@@ -160,20 +160,22 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
 	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
+	sides := int(polygon.Sides)
+	angle := polygon.Angle
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
 	cornerRadius := polygon.CornerRadius
 	if polygon.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = GetMaximumRadiusPolygon(size, polygon.Sides)
+		cornerRadius = GetMaximumRadius(size)
 	}
 	cornerRadius = scale(cornerRadius)
 
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), filler)
 		filler.Draw()
 	}
 
@@ -181,7 +183,7 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), dasher)
 		dasher.Draw()
 	}
 
@@ -330,6 +332,12 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	gf := rasterx.RoundGap
 	angleStep := 2 * math.Pi / float64(sides)
 	rotRads := rot*math.Pi/180 - math.Pi/2
+
+	// fully rounded, draw circle
+	if math.Min(cornerRadius, radius) == radius {
+		rasterx.AddCircle(cx, cy, radius, p)
+		return
+	}
 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
@@ -645,16 +653,6 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 // This is typically used for drawing circular corners in rectangles, circles or squares.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
-}
-
-// GetMaximumRadiusPolygon returns the maximum possible corner radius for a polygon
-// with the specified number of sides that fits within the given size.
-// The function returns 0 if the number of sides is less than 3.
-func GetMaximumRadiusPolygon(size fyne.Size, sides uint) float32 {
-	if sides < 3 {
-		return 0
-	}
-	return float32(float64(GetMaximumRadius(size)/1.7) * math.Cos(math.Pi/float64(sides)))
 }
 
 // GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,

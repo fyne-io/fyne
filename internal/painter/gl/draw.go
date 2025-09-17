@@ -283,7 +283,7 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 
 	cornerRadius := polygon.CornerRadius
 	if polygon.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = paint.GetMaximumRadiusPolygon(polygon.Size(), polygon.Sides)
+		cornerRadius = paint.GetMaximumRadius(polygon.Size())
 	}
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
