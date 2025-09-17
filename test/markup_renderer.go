@@ -245,11 +245,24 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeWidget(o, attrs)
 	case *layout.Spacer:
 		r.writeSpacer(o, attrs)
+	case *fynecanvas.Arc:
+		r.writeArc(o, attrs)
 	default:
 		panic(fmt.Sprint("please add support for", reflect.TypeOf(o)))
 	}
 
 	return false
+}
+
+func (r *markupRenderer) writeArc(a *fynecanvas.Arc, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", a.FillColor)
+	r.setFloatAttr(attrs, "cutoutRatio", float64(a.CutoutRatio))
+	r.setFloatAttr(attrs, "startAngle", float64(a.StartAngle))
+	r.setFloatAttr(attrs, "endAngle", float64(a.EndAngle))
+	r.setFloatAttr(attrs, "radius", float64(a.CornerRadius))
+	r.setColorAttr(attrs, "strokeColor", a.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(a.StrokeWidth))
+	r.writeTag("arc", true, attrs)
 }
 
 func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*string) {
