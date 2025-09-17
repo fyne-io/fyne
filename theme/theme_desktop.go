@@ -3,7 +3,7 @@
 package theme
 
 import (
-	"bytes"
+	"bufio"
 	"os"
 	"path/filepath"
 
@@ -12,22 +12,21 @@ import (
 )
 
 func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
-	root := internalApp.RootConfigDir()
-
-	path := filepath.Join(root, "theme.json")
-	data, err := fyne.LoadResourceFromPath(path)
+	path := filepath.Join(internalApp.RootConfigDir(), "theme.json")
+	f, err := os.Open(path)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			fyne.LogError("Failed to load user theme file: "+path, err)
 		}
 		return nil
 	}
-	if data != nil && data.Content() != nil {
-		th, err := fromJSONWithFallback(bytes.NewReader(data.Content()), fallback)
-		if err == nil {
-			return th
-		}
+	defer f.Close()
+
+	th, err := fromJSONWithFallback(bufio.NewReader(f), fallback)
+	if err != nil {
 		fyne.LogError("Failed to parse user theme file: "+path, err)
+		return nil
 	}
-	return nil
+
+	return th
 }
