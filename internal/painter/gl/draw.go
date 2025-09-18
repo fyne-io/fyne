@@ -191,29 +191,11 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
 			bounds[2]-bounds[0], bounds[3]-bounds[1],
 		))
-
-		if topRightRadius == canvas.RadiusMaximum {
-			topRightRadius = maxCornerRadius
-		}
-
-		if topLeftRadius == canvas.RadiusMaximum {
-			topLeftRadius = maxCornerRadius
-		}
-
-		if bottomRightRadius == canvas.RadiusMaximum {
-			bottomRightRadius = maxCornerRadius
-		}
-
-		if bottomLeftRadius == canvas.RadiusMaximum {
-			bottomLeftRadius = maxCornerRadius
-		}
-
-		p.SetUniform4f(program, "radius",
-			roundToPixel(topRightRadius*p.pixScale, 1.0),
-			roundToPixel(bottomRightRadius*p.pixScale, 1.0),
-			roundToPixel(topLeftRadius*p.pixScale, 1.0),
-			roundToPixel(bottomLeftRadius*p.pixScale, 1.0),
-		)
+		topRightRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, topRightRadius)*p.pixScale, 1.0)
+		topLeftRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, topLeftRadius)*p.pixScale, 1.0)
+		bottomRightRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, bottomRightRadius)*p.pixScale, 1.0)
+		bottomLeftRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, bottomLeftRadius)*p.pixScale, 1.0)
+		p.SetUniform4f(program, "radius", topRightRadiusScaled, bottomRightRadiusScaled, topLeftRadiusScaled, bottomLeftRadiusScaled)
 
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 		p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
@@ -241,6 +223,7 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	if ((polygon.FillColor == color.Transparent || polygon.FillColor == nil) && (polygon.StrokeColor == color.Transparent || polygon.StrokeColor == nil || polygon.StrokeWidth == 0)) || polygon.Sides < 3 {
 		return
 	}
+	size := polygon.Size()
 
 	// Vertex: BEG
 	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
@@ -264,14 +247,15 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(polygon.Size().Width, polygon.Size().Height) / 2
+	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "shape_radius", outerRadiusScaled)
 
 	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
-	cornerRadiusScaled := roundToPixel(polygon.CornerRadius*p.pixScale, 1.0)
+	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
+	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
 	strokeWidthScaled := roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
@@ -333,10 +317,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, "start_angle", startAngle)
 	p.SetUniform1f(program, "end_angle", endAngle)
 
-	cornerRadius := arc.CornerRadius
-	if arc.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
-	}
+	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 

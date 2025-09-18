@@ -33,6 +33,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	cornerRadius := fyne.Min(GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 
 	// convert to radians
@@ -48,11 +49,6 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		sweep = 2 * math.Pi
 	} else if sweep < -2*math.Pi {
 		sweep = -2 * math.Pi
-	}
-
-	cornerRadius := arc.CornerRadius
-	if arc.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
 	}
 
 	cornerRadius = scale(cornerRadius)
@@ -156,11 +152,11 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := polygon.Size()
-	cornerRadius := scale(polygon.CornerRadius)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
 	shapeRadius := fyne.Min(size.Width, size.Height) / 2
+	cornerRadius := scale(fyne.Min(GetMaximumRadius(size), polygon.CornerRadius))
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
@@ -197,22 +193,10 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	// The maximum possible corner radius for a circular shape
 	maxCornerRadius := GetMaximumRadius(fyne.NewSize(rWidth, rHeight))
-
-	if topRightRadius == canvas.RadiusMaximum {
-		topRightRadius = maxCornerRadius
-	}
-
-	if topLeftRadius == canvas.RadiusMaximum {
-		topLeftRadius = maxCornerRadius
-	}
-
-	if bottomRightRadius == canvas.RadiusMaximum {
-		bottomRightRadius = maxCornerRadius
-	}
-
-	if bottomLeftRadius == canvas.RadiusMaximum {
-		bottomLeftRadius = maxCornerRadius
-	}
+	topRightRadius = fyne.Min(maxCornerRadius, topRightRadius)
+	topLeftRadius = fyne.Min(maxCornerRadius, topLeftRadius)
+	bottomRightRadius = fyne.Min(maxCornerRadius, bottomRightRadius)
+	bottomLeftRadius = fyne.Min(maxCornerRadius, bottomLeftRadius)
 
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
