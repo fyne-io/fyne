@@ -123,7 +123,8 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		origImg = subImg
 	}
 
-	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), img.CornerRadius*c.Scale())
+	cornerRadius := fyne.Min(painter.GetMaximumRadius(bounds), img.CornerRadius)
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), cornerRadius*c.Scale())
 }
 
 func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle, alpha float64, radius float32) {
@@ -370,14 +371,22 @@ func applyRoundedCorners(img *image.NRGBA, w, h int, radius float32) {
 	}
 
 	// Top-left
-	applyCorner(0, rInt, 0, rInt, radius, radius)
+	r := minInt(rInt, minInt(w, h))
+	applyCorner(0, r, 0, r, radius, radius)
 
 	// Top-right
-	applyCorner(w-rInt, w, 0, rInt, float32(w)-radius, radius)
+	applyCorner(w-r, w, 0, r, float32(w)-radius, radius)
 
 	// Bottom-left
-	applyCorner(0, rInt, h-rInt, h, radius, float32(h)-radius)
+	applyCorner(0, r, h-r, h, radius, float32(h)-radius)
 
 	// Bottom-right
-	applyCorner(w-rInt, w, h-rInt, h, float32(w)-radius, float32(h)-radius)
+	applyCorner(w-r, w, h-r, h, float32(w)-radius, float32(h)-radius)
+}
+
+func minInt(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
 }

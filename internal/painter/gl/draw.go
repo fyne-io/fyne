@@ -422,6 +422,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
 
 	// Set corner radius and texture size in pixels
+	cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius)
 	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
 	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
 
