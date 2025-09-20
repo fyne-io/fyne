@@ -20,7 +20,8 @@ func TestSquare_FillColor(t *testing.T) {
 }
 
 func TestSquare_Radius(t *testing.T) {
-	rect := &canvas.Square{
+	rect := &canvas.Rectangle{
+		Aspect:       1,
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
