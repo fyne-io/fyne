@@ -1,5 +1,5 @@
 <canvas size="50x50">
 	<content>
-		<square fillColor="rgba(255,200,0,180)" radius="12" size="50x50" strokeColor="rgba(255,120,0,255)" strokeWidth="2"/>
+		<rectangle aspect="1" fillColor="rgba(255,200,0,180)" radius="12" size="50x50" strokeColor="rgba(255,120,0,255)" strokeWidth="2"/>
 	</content>
 </canvas>

@@ -235,8 +235,6 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writePolygon(o, attrs)
 	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
-	case *fynecanvas.Square:
-		r.writeSquare(o, attrs)
 	case *fynecanvas.Text:
 		r.writeText(o, attrs)
 	case *fyne.Container:
@@ -364,18 +362,6 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
 	r.writeTag("rectangle", true, attrs)
-}
-
-func (r *markupRenderer) writeSquare(sq *fynecanvas.Square, attrs map[string]*string) {
-	r.setColorAttr(attrs, "fillColor", sq.FillColor)
-	r.setColorAttr(attrs, "strokeColor", sq.StrokeColor)
-	r.setFloatAttr(attrs, "strokeWidth", float64(sq.StrokeWidth))
-	r.setFloatAttr(attrs, "radius", float64(sq.CornerRadius))
-	r.setFloatAttr(attrs, "topRightRadius", float64(sq.TopRightCornerRadius))
-	r.setFloatAttr(attrs, "topLeftRadius", float64(sq.TopLeftCornerRadius))
-	r.setFloatAttr(attrs, "bottomRightRadius", float64(sq.BottomRightCornerRadius))
-	r.setFloatAttr(attrs, "bottomLeftRadius", float64(sq.BottomLeftCornerRadius))
-	r.writeTag("square", true, attrs)
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {

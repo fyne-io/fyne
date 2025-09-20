@@ -247,17 +247,9 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	var raw *image.RGBA
-	switch o := obj.(type) {
-	case *canvas.Square:
-		raw = painter.DrawSquare(o, width, height, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
-	default:
-		raw = painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
-	}
+	raw := painter.DrawRectangle(obj.(*canvas.Rectangle), width, height, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
 
 	// the clip intersect above cannot be negative, so we may need to compensate
 	offX, offY := 0, 0
@@ -298,14 +290,6 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := painter.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
 	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, pos, base, clip)
-}
-
-func drawSquare(c fyne.Canvas, sq *canvas.Square, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	topRightRadius := painter.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
-	topLeftRadius := painter.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
-	bottomRightRadius := painter.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
-	bottomLeftRadius := painter.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
-	drawOblong(c, sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, base, clip)
 }
 
 func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
