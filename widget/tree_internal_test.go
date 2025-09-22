@@ -569,6 +569,7 @@ func TestTree_ScrollTo(t *testing.T) {
 	addTreePath(data, "A")
 	addTreePath(data, "B", "C")
 	addTreePath(data, "D", "E", "F")
+	addTreePath(data, "G - A really long entry that scrolls horizontally")
 	tree := NewTreeWithStrings(data)
 	tree.OpenBranch("D")
 	tree.OpenBranch("E")
@@ -584,7 +585,7 @@ func TestTree_ScrollTo(t *testing.T) {
 	// Resize tall enough to display two nodes and the separator between them
 	treeHeight := 2*(min.Height) + sep
 	w.Resize(fyne.Size{
-		Width:  400,
+		Width:  100,
 		Height: treeHeight + 2*theme.Padding(),
 	})
 
@@ -593,6 +594,13 @@ func TestTree_ScrollTo(t *testing.T) {
 	want := 3*min.Height + 2*sep
 	assert.Equal(t, want, tree.offset.Y)
 	assert.Equal(t, want, tree.scroller.Offset.Y)
+
+	tree.scroller.ScrollToOffset(fyne.NewPos(35, want))
+	assert.Equal(t, float32(35), tree.scroller.Offset.X)
+	assert.Equal(t, want, tree.scroller.Offset.Y)
+	tree.ScrollTo("A")
+	assert.Equal(t, float32(35), tree.scroller.Offset.X)
+	assert.Equal(t, float32(0), tree.scroller.Offset.Y)
 }
 
 func TestTree_ScrollToBottom(t *testing.T) {

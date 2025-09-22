@@ -271,7 +271,7 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		newY = y + size.Height - t.scroller.Size().Height
 	}
 
-	t.scroller.ScrollToOffset(fyne.NewPos(0, newY))
+	t.scroller.ScrollToOffset(fyne.NewPos(t.scroller.Offset.X, newY))
 	t.offsetUpdated(t.scroller.Offset)
 }
 
@@ -286,7 +286,7 @@ func (t *Tree) ScrollToOffset(offset float32) {
 		offset = 0
 	}
 
-	t.scroller.ScrollToOffset(fyne.NewPos(0, offset))
+	t.scroller.ScrollToOffset(fyne.NewPos(t.scroller.Offset.X, offset))
 	t.offsetUpdated(t.scroller.Offset)
 }
 
