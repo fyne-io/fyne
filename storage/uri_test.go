@@ -25,26 +25,6 @@ func (u *otherURI) String() string {
 	return "file://" + u.path
 }
 
-func (u *otherURI) Scheme() string {
-	return "file"
-}
-
-func (u *otherURI) Authority() string {
-	return ""
-}
-
-func (u *otherURI) Path() string {
-	return u.path
-}
-
-func (u *otherURI) Query() string {
-	return ""
-}
-
-func (u *otherURI) Fragment() string {
-	return ""
-}
-
 func TestURIEqual(t *testing.T) {
 	first := storage.NewFileURI("/first")
 	second := storage.NewFileURI("/second")
