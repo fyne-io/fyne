@@ -25,11 +25,7 @@ func EqualURI(t1, t2 fyne.URI) bool {
 		return u1 == u2 || *u1 == *u2
 	}
 
-	return t1 == t2 || t1.Scheme() == t2.Scheme() &&
-		t1.Authority() == t2.Authority() &&
-		t1.Path() == t2.Path() &&
-		t1.Query() == t2.Query() &&
-		t1.Fragment() == t2.Fragment()
+	return t1 == t2 || t1.String() == t2.String()
 }
 
 // Declare conformance with fyne.URI interface.
