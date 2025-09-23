@@ -20,13 +20,12 @@ func EqualURI(t1, t2 fyne.URI) bool {
 
 	u1, ok1 := t1.(*uri)
 	u2, ok2 := t2.(*uri)
-	if !ok1 || !ok2 {
-		return t1.String() == t2.String()
+	if ok1 && ok2 {
+		// Knowing the type, pointers are either the same or fields are the same.
+		return u1 == u2 || *u1 == *u2
 	}
 
-	// Knowing the type, pointers are either the same or fields are the same.
-	// This avoids allocating a new string to represent the URIs.
-	return u1 == u2 || *u1 == *u2
+	return t1 == t2 || t1.String() == t2.String()
 }
 
 // Declare conformance with fyne.URI interface.
