@@ -613,7 +613,7 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 	return perCornerRadius
 }
 
-// GetMaximumRadius returns the maximum possible radius that fits within the given size.
+// GetMaximumRadius returns the maximum possible corner radius that fits within the given size.
 // It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
 // This is typically used for drawing circular corners in rectangles, circles or squares.
 func GetMaximumRadius(size fyne.Size) float32 {
@@ -626,6 +626,7 @@ func GetMaximumRadius(size fyne.Size) float32 {
 func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 	// height (thickness), width (length)
 	thickness := outerRadius - innerRadius
+	// TODO: length formula can be improved to get a fully rounded (pill shape) outer edge for thin (small sweep) arc segments
 	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
 	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
 
