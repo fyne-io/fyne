@@ -32,7 +32,7 @@ type Canvas struct {
 
 	contentFocusMgr *app.FocusManager
 	menuFocusMgr    *app.FocusManager
-	overlays        *overlayStack
+	overlays        overlayStack
 
 	shortcut fyne.ShortcutHandler
 
@@ -240,11 +240,9 @@ func (c *Canvas) FreeDirtyTextures() uint64 {
 func (c *Canvas) Initialize(impl SizeableCanvas, onOverlayChanged func()) {
 	c.impl = impl
 	c.refreshQueue.queue = async.NewCanvasObjectQueue()
-	c.overlays = &overlayStack{
-		OverlayStack: internal.OverlayStack{
-			OnChange: onOverlayChanged,
-			Canvas:   impl,
-		},
+	c.overlays.OverlayStack = internal.OverlayStack{
+		OnChange: onOverlayChanged,
+		Canvas:   impl,
 	}
 }
 
@@ -270,8 +268,7 @@ func (c *Canvas) ObjectTrees() []fyne.CanvasObject {
 
 // Overlays returns the overlay stack.
 func (c *Canvas) Overlays() fyne.OverlayStack {
-	// we don't need to lock here, because overlays never changes
-	return c.overlays
+	return &c.overlays
 }
 
 // Painter returns the canvas painter.

@@ -34,3 +34,33 @@ func TestDeduplicatedObjectQueue(t *testing.T) {
 	queue.In(obj1)
 	assert.Equal(t, uint64(1), queue.Len())
 }
+
+func TestOverlayStack(t *testing.T) {
+	stack := overlayStack{}
+
+	obj1 := &fyne.Container{Layout: layout.NewCenterLayout()}
+	stack.Add(obj1)
+	assert.Equal(t, 1, len(stack.List()))
+	assert.Equal(t, 1, len(stack.renderCaches))
+
+	obj2 := &fyne.Container{Layout: layout.NewFormLayout()}
+	stack.Add(obj2)
+	assert.Equal(t, 2, len(stack.List()))
+	assert.Equal(t, 2, len(stack.renderCaches))
+
+	stack.Remove(obj1)
+	assert.Zero(t, len(stack.List()))
+	assert.Zero(t, len(stack.renderCaches))
+
+	stack.Remove(obj2)
+	assert.Zero(t, len(stack.List()))
+	assert.Zero(t, len(stack.renderCaches))
+
+	stack.Add(nil)
+	assert.Zero(t, len(stack.List()))
+	assert.Zero(t, len(stack.renderCaches))
+
+	stack.Remove(nil)
+	assert.Zero(t, len(stack.List()))
+	assert.Zero(t, len(stack.renderCaches))
+}
