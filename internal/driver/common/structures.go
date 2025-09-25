@@ -2,6 +2,7 @@ package common
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 )
@@ -61,4 +62,42 @@ type RenderCacheNode struct {
 // Obj returns the node object.
 func (r *RenderCacheNode) Obj() fyne.CanvasObject {
 	return r.obj
+}
+
+type overlayStack struct {
+	internal.OverlayStack
+
+	renderCaches []*renderCacheTree
+}
+
+func (o *overlayStack) Add(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
+	o.add(overlay)
+}
+
+func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
+	if overlay == nil || len(o.List()) == 0 {
+		return
+	}
+	o.remove(overlay)
+}
+
+func (o *overlayStack) add(overlay fyne.CanvasObject) {
+	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
+	o.OverlayStack.Add(overlay)
+}
+
+func (o *overlayStack) remove(overlay fyne.CanvasObject) {
+	o.OverlayStack.Remove(overlay)
+	overlayCount := len(o.List())
+
+	// it is possible that overlays are removed implicitly and render caches already cleared out
+	if overlayCount >= len(o.renderCaches) {
+		return
+	}
+
+	o.renderCaches[overlayCount] = nil // release memory reference to removed element
+	o.renderCaches = o.renderCaches[:overlayCount]
 }
