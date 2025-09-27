@@ -2,6 +2,7 @@ package embedded
 
 import (
 	"image"
+	"math"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -128,9 +129,61 @@ func (n *noosDriver) doRun() {
 				}
 
 				n.renderWindow(n.wins[n.current])
+			case *noos2.TouchDownEvent:
+				n.handleTouchDown(t, n.wins[n.current].(*noosWindow))
+			case *noos2.TouchMoveEvent:
+				n.handleTouchMove(t, n.wins[n.current].(*noosWindow))
+			case *noos2.TouchUpEvent:
+				n.handleTouchUp(t, n.wins[n.current].(*noosWindow))
 			}
 		}
 	}
+}
+
+func (n *noosDriver) handleTouchDown(ev *noos2.TouchDownEvent, w *noosWindow) {
+	w.c.tapDown(ev.Position, ev.ID)
+	n.renderWindow(w)
+}
+
+func (n *noosDriver) handleTouchMove(ev *noos2.TouchMoveEvent, w *noosWindow) {
+	w.c.tapMove(ev.Position, ev.ID, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+	})
+	n.renderWindow(w)
+}
+
+func (n *noosDriver) handleTouchUp(ev *noos2.TouchUpEvent, w *noosWindow) {
+	w.c.tapUp(ev.Position, ev.ID, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		wid.Tapped(ev)
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+		wid.TappedSecondary(ev)
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+		wid.DoubleTapped(ev)
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		if math.Abs(float64(ev.Dragged.DX)) <= tapMoveEndThreshold && math.Abs(float64(ev.Dragged.DY)) <= tapMoveEndThreshold {
+			wid.DragEnd()
+			return
+		}
+
+		go func() {
+			for math.Abs(float64(ev.Dragged.DX)) > tapMoveEndThreshold || math.Abs(float64(ev.Dragged.DY)) > tapMoveEndThreshold {
+				if math.Abs(float64(ev.Dragged.DX)) > 0 {
+					ev.Dragged.DX *= tapMoveDecay
+				}
+				if math.Abs(float64(ev.Dragged.DY)) > 0 {
+					ev.Dragged.DY *= tapMoveDecay
+				}
+
+				n.DoFromGoroutine(func() {
+					wid.Dragged(ev)
+				}, false)
+				time.Sleep(time.Millisecond * 16)
+			}
+
+			n.DoFromGoroutine(wid.DragEnd, false)
+		}()
+	})
+	n.renderWindow(w)
 }
 
 func (n *noosDriver) Quit() {
@@ -150,7 +203,7 @@ func (n *noosDriver) StopAnimation(*fyne.Animation) {
 }
 
 func (n *noosDriver) DoubleTapDelay() time.Duration {
-	return time.Duration(150)
+	return tapDoubleDelay
 }
 
 func (n *noosDriver) SetDisableScreenBlanking(bool) {}

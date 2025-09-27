@@ -2,12 +2,10 @@ package embedded
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/driver/software"
-	"fyne.io/fyne/v2/test"
 )
 
 type noosWindow struct {
-	c test.WindowlessCanvas
+	c *touchCanvas
 	d *noosDriver
 
 	title string
@@ -135,5 +133,5 @@ func (w *noosWindow) Clipboard() fyne.Clipboard {
 }
 
 func newWindow(d *noosDriver) fyne.Window {
-	return &noosWindow{c: software.NewCanvas(), d: d}
+	return &noosWindow{c: newTouchCanvas(), d: d}
 }
