@@ -74,30 +74,22 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	o.add(overlay)
+
+	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
+	o.OverlayStack.Add(overlay)
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	if overlay == nil || len(o.List()) == 0 {
 		return
 	}
-	o.remove(overlay)
-}
 
-func (o *overlayStack) add(overlay fyne.CanvasObject) {
-	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &RenderCacheNode{obj: overlay}})
-	o.OverlayStack.Add(overlay)
-}
-
-func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 
-	// it is possible that overlays are removed implicitly and render caches already cleared out
-	if overlayCount >= len(o.renderCaches) {
-		return
+	for i := overlayCount; i < len(o.renderCaches); i++ {
+		o.renderCaches[i] = nil // release memory reference to removed element
 	}
 
-	o.renderCaches[overlayCount] = nil // release memory reference to removed element
 	o.renderCaches = o.renderCaches[:overlayCount]
 }
