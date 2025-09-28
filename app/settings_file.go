@@ -1,4 +1,4 @@
-//go:build !wasm && !test_web_driver
+//go:build !wasm && !test_web_driver && !tamago && !noos && !tinygo
 
 package app
 

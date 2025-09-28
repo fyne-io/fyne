@@ -1,4 +1,4 @@
-//go:build (linux || openbsd || freebsd || netbsd) && !android && !wasm && !js
+//go:build (linux || openbsd || freebsd || netbsd) && !android && !wasm && !js && !tamago && !noos
 
 package dialog
 
