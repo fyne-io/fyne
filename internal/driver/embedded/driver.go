@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	noos2 "fyne.io/fyne/v2/driver/embedded"
+	"fyne.io/fyne/v2/driver/embedded"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
@@ -14,7 +14,7 @@ import (
 )
 
 type noosDriver struct {
-	events chan noos2.Event
+	events chan embedded.Event
 	queue  chan funcData
 	render func(image.Image)
 	run    func(func())
@@ -90,7 +90,7 @@ func (n *noosDriver) doRun() {
 			w := n.wins[n.current].(*noosWindow)
 
 			switch t := e.(type) {
-			case *noos2.CharacterEvent:
+			case *embedded.CharacterEvent:
 				if focused := w.c.Focused(); focused != nil {
 					focused.TypedRune(t.Rune)
 				} else if tr := w.c.OnTypedRune(); tr != nil {
@@ -98,10 +98,10 @@ func (n *noosDriver) doRun() {
 				}
 
 				n.renderWindow(n.wins[n.current])
-			case *noos2.KeyEvent:
+			case *embedded.KeyEvent:
 				keyEvent := &fyne.KeyEvent{Name: t.Name}
 
-				if t.Direction == noos2.KeyReleased {
+				if t.Direction == embedded.KeyReleased {
 					// No desktop events so key/up down not reported
 					continue // ignore key up in other core events
 				}
@@ -129,30 +129,30 @@ func (n *noosDriver) doRun() {
 				}
 
 				n.renderWindow(n.wins[n.current])
-			case *noos2.TouchDownEvent:
+			case *embedded.TouchDownEvent:
 				n.handleTouchDown(t, n.wins[n.current].(*noosWindow))
-			case *noos2.TouchMoveEvent:
+			case *embedded.TouchMoveEvent:
 				n.handleTouchMove(t, n.wins[n.current].(*noosWindow))
-			case *noos2.TouchUpEvent:
+			case *embedded.TouchUpEvent:
 				n.handleTouchUp(t, n.wins[n.current].(*noosWindow))
 			}
 		}
 	}
 }
 
-func (n *noosDriver) handleTouchDown(ev *noos2.TouchDownEvent, w *noosWindow) {
+func (n *noosDriver) handleTouchDown(ev *embedded.TouchDownEvent, w *noosWindow) {
 	w.c.tapDown(ev.Position, ev.ID)
 	n.renderWindow(w)
 }
 
-func (n *noosDriver) handleTouchMove(ev *noos2.TouchMoveEvent, w *noosWindow) {
+func (n *noosDriver) handleTouchMove(ev *embedded.TouchMoveEvent, w *noosWindow) {
 	w.c.tapMove(ev.Position, ev.ID, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 	})
 	n.renderWindow(w)
 }
 
-func (n *noosDriver) handleTouchUp(ev *noos2.TouchUpEvent, w *noosWindow) {
+func (n *noosDriver) handleTouchUp(ev *embedded.TouchUpEvent, w *noosWindow) {
 	w.c.tapUp(ev.Position, ev.ID, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
@@ -228,7 +228,7 @@ func (n *noosDriver) renderWindow(w fyne.Window) {
 	n.render(img)
 }
 
-func NewNoOSDriver(render func(img image.Image), run func(func()), events chan noos2.Event, size func() fyne.Size) fyne.Driver {
+func NewNoOSDriver(render func(img image.Image), run func(func()), events chan embedded.Event, size func() fyne.Size) fyne.Driver {
 	return &noosDriver{
 		events: events, queue: make(chan funcData), size: size,
 		render: render, run: run, wins: make([]fyne.Window, 0),
