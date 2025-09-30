@@ -6,9 +6,8 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 )
 
-var _ fyne.OverlayStack = (*OverlayStack)(nil)
-
-// OverlayStack manages a stack of overlays on a canvas.
+// OverlayStack allows stacking overlays on top of each other.
+// Removing an overlay will also remove all overlays above it.
 type OverlayStack struct {
 	OnChange      func()
 	Canvas        fyne.Canvas
@@ -84,10 +83,6 @@ func (s *OverlayStack) Top() fyne.CanvasObject {
 
 // TopFocusManager returns the app.FocusManager assigned to the top-most overlay of the stack.
 func (s *OverlayStack) TopFocusManager() *app.FocusManager {
-	return s.topFocusManager()
-}
-
-func (s *OverlayStack) topFocusManager() *app.FocusManager {
 	if len(s.focusManagers) == 0 {
 		return nil
 	}

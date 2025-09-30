@@ -194,14 +194,6 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 	return drawOblong(rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
 }
 
-func DrawSquare(sq *canvas.Square, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	topRightRadius := GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
-	topLeftRadius := GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
-	bottomRightRadius := GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
-	bottomLeftRadius := GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
-	return drawOblong(sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad, scale)
-}
-
 func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	// The maximum possible corner radius for a circular shape
 	maxCornerRadius := GetMaximumRadius(fyne.NewSize(rWidth, rHeight))

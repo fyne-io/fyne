@@ -202,6 +202,27 @@ func Delete(u fyne.URI) error {
 	return wrepo.Delete(u)
 }
 
+// DeleteAll destroys, deletes, or otherwise removes the resource referenced
+// by the URI and any child resources for listable URIs.
+//
+// DeleteAll is backed by the repository system - this function calls
+// into a scheme-specific implementation from a registered repository.
+//
+// Since: 2.7
+func DeleteAll(u fyne.URI) error {
+	repo, err := repository.ForURI(u)
+	if err != nil {
+		return err
+	}
+
+	drepo, ok := repo.(repository.DeleteAllRepository)
+	if !ok {
+		return repository.GenericDeleteAll(u)
+	}
+
+	return drepo.DeleteAll(u)
+}
+
 // Reader returns URIReadCloser set up to read from the resource that the
 // URI references.
 //

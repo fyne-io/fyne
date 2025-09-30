@@ -123,8 +123,6 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawRaster(obj, pos, frame)
 	case *canvas.Rectangle:
 		p.drawRectangle(obj, pos, frame)
-	case *canvas.Square:
-		p.drawSquare(obj, pos, frame)
 	case *canvas.Text:
 		p.drawText(obj, pos, frame)
 	case *canvas.LinearGradient:
@@ -140,14 +138,6 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 
 func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
 	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0)
-}
-
-func (p *painter) drawSquare(sq *canvas.Square, pos fyne.Position, frame fyne.Size) {
-	topRightRadius := paint.GetCornerRadius(sq.TopRightCornerRadius, sq.CornerRadius)
-	topLeftRadius := paint.GetCornerRadius(sq.TopLeftCornerRadius, sq.CornerRadius)
-	bottomRightRadius := paint.GetCornerRadius(sq.BottomRightCornerRadius, sq.CornerRadius)
-	bottomLeftRadius := paint.GetCornerRadius(sq.BottomLeftCornerRadius, sq.CornerRadius)
-	p.drawOblong(sq, sq.FillColor, sq.StrokeColor, sq.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, 1.0, pos, frame)
 }
 
 func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
@@ -422,6 +412,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
 
 	// Set corner radius and texture size in pixels
+	cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius)
 	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
 	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
 
