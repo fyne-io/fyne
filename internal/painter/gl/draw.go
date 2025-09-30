@@ -187,14 +187,25 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
-		// the maximum possible corner radius for a circular shape, calculated taking into account the rect coords with aspect ratio
-		maxCornerRadius := paint.GetMaximumRadius(fyne.NewSize(
-			bounds[2]-bounds[0], bounds[3]-bounds[1],
-		))
-		topRightRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, topRightRadius)*p.pixScale, 1.0)
-		topLeftRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, topLeftRadius)*p.pixScale, 1.0)
-		bottomRightRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, bottomRightRadius)*p.pixScale, 1.0)
-		bottomLeftRadiusScaled := roundToPixel(fyne.Min(maxCornerRadius, bottomLeftRadius)*p.pixScale, 1.0)
+		// the maximum possible corner radii for a circular shape, calculated taking into account the rect coords with aspect ratio
+		maxWidthRadius := paint.GetMaximumRadius(fyne.NewSquareSize(bounds[2] - bounds[0]))
+		maxHeightRadius := paint.GetMaximumRadius(fyne.NewSquareSize(bounds[3] - bounds[1]))
+		topRightRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			1.0,
+		)
+		topLeftRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			1.0,
+		)
+		bottomRightRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			1.0,
+		)
+		bottomLeftRadiusScaled := roundToPixel(
+			paint.GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			1.0,
+		)
 		p.SetUniform4f(program, "radius", topRightRadiusScaled, bottomRightRadiusScaled, topLeftRadiusScaled, bottomLeftRadiusScaled)
 
 		edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
