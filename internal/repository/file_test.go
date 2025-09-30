@@ -335,6 +335,10 @@ func TestFileRepositoryParent(t *testing.T) {
 		parent, err = storage.Parent(storage.NewFileURI("/C:/"))
 		assert.Nil(t, err)
 		assert.Equal(t, "file:///", parent.String())
+	} else {
+		parent, err = storage.Parent(storage.NewFileURI("/:"))
+		assert.Nil(t, err)
+		assert.Equal(t, "file:///", parent.String())
 	}
 }
 
