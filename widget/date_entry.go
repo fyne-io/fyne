@@ -7,6 +7,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var (
+	_ fyne.Widget      = (*DateEntry)(nil)
+	_ fyne.Tappable    = (*DateEntry)(nil)
+	_ fyne.Disableable = (*DateEntry)(nil)
+)
+
 // DateEntry is an input field which supports selecting from a fixed set of options.
 //
 // Since: 2.6
@@ -30,8 +36,6 @@ func NewDateEntry() *DateEntry {
 }
 
 // CreateRenderer returns a new renderer for this select entry.
-//
-// Implements: fyne.Widget
 func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
@@ -71,8 +75,6 @@ func (e *DateEntry) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Enable this widget, updating any style or features appropriately.
-//
-// Implements: fyne.DisableableWidget
 func (e *DateEntry) Enable() {
 	if e.ActionItem != nil {
 		if d, ok := e.ActionItem.(fyne.Disableable); ok {
@@ -83,8 +85,6 @@ func (e *DateEntry) Enable() {
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
-//
-// Implements: fyne.DisableableWidget
 func (e *DateEntry) Disable() {
 	if e.ActionItem != nil {
 		if d, ok := e.ActionItem.(fyne.Disableable); ok {
@@ -95,16 +95,12 @@ func (e *DateEntry) Disable() {
 }
 
 // MinSize returns the minimal size of the select entry.
-//
-// Implements: fyne.Widget
 func (e *DateEntry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 	return e.Entry.MinSize()
 }
 
 // Move changes the relative position of the date entry.
-//
-// Implements: fyne.Widget
 func (e *DateEntry) Move(pos fyne.Position) {
 	e.Entry.Move(pos)
 	if e.popUp != nil {
@@ -113,8 +109,6 @@ func (e *DateEntry) Move(pos fyne.Position) {
 }
 
 // Resize changes the size of the date entry.
-//
-// Implements: fyne.Widget
 func (e *DateEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)
 	if e.popUp != nil {

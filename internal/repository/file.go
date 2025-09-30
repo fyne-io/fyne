@@ -56,7 +56,7 @@ func NewFileRepository() *FileRepository {
 	return &FileRepository{}
 }
 
-// Exists implements repository.Repository.Exists
+// Exists checks if the given URI exists.
 //
 // Since: 2.0
 func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
@@ -71,14 +71,14 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 	return false, err
 }
 
-// Reader implements repository.Repository.Reader
+// Reader returns a reader for the given URI.
 //
 // Since: 2.0
 func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(u, false, false)
 }
 
-// CanRead implements repository.Repository.CanRead
+// CanRead checks if the given URI can be read.
 //
 // Since: 2.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
@@ -94,26 +94,26 @@ func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 	return true, f.Close()
 }
 
-// Destroy implements repository.Repository.Destroy
+// Destroy tears down the repository for the specified scheme.
 func (r *FileRepository) Destroy(scheme string) {
 	// do nothing
 }
 
-// Writer implements repository.WritableRepository.Writer
+// Writer returns a truncating writer for the given URI.
 //
 // Since: 2.0
 func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true, true)
 }
 
-// Appender implements repository.AppendableRepository.Appender
+// Appender returns a writer that appends to the given URI.
 //
 // Since: 2.6
 func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true, false)
 }
 
-// CanWrite implements repository.WritableRepository.CanWrite
+// CanWrite checks if the given URI can be written.
 //
 // Since: 2.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
@@ -136,21 +136,21 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 	return true, f.Close()
 }
 
-// Delete implements repository.WritableRepository.Delete
+// Delete deletes the given URI.
 //
 // Since: 2.0
 func (r *FileRepository) Delete(u fyne.URI) error {
 	return os.Remove(u.Path())
 }
 
-// DeleteAll implements repository.DeleteAllRepository.DeleteAll
+// DeleteAll deletes the given URI and all its children.
 //
 // Since: 2.7
 func (r *FileRepository) DeleteAll(u fyne.URI) error {
 	return os.RemoveAll(u.Path())
 }
 
-// Parent implements repository.HierarchicalRepository.Parent
+// Parent returns the parent URI of the given URI.
 //
 // Since: 2.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
@@ -172,14 +172,14 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	return storage.NewFileURI(parent), nil
 }
 
-// Child implements repository.HierarchicalRepository.Child
+// Child creates a child URI from the given URI and component.
 //
 // Since: 2.0
 func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return storage.NewFileURI(path.Join(u.Path(), component)), nil
 }
 
-// List implements repository.ListableRepository.List()
+// List returns a list of all child URIs of the given URI.
 //
 // Since: 2.0
 func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
@@ -197,13 +197,13 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	return urilist, nil
 }
 
-// CreateListable implements repository.ListableRepository.CreateListable.
+// CreateListable creates a new directory at the given URI.
 func (r *FileRepository) CreateListable(u fyne.URI) error {
 	path := u.Path()
 	return os.Mkdir(path, 0o755)
 }
 
-// CanList implements repository.ListableRepository.CanList()
+// CanList checks if the given URI can be listed.
 //
 // Since: 2.0
 func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
@@ -244,7 +244,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 	return true, nil
 }
 
-// Copy implements repository.CopyableRepository.Copy()
+// Copy copies the contents of the source URI to the destination URI.
 //
 // Since: 2.0
 func (r *FileRepository) Copy(source, destination fyne.URI) error {
@@ -256,7 +256,7 @@ func (r *FileRepository) Copy(source, destination fyne.URI) error {
 	return repository.GenericCopy(source, destination)
 }
 
-// Move implements repository.MovableRepository.Move()
+// Move moves the contents of the source URI to the destination URI.
 //
 // Since: 2.0
 func (r *FileRepository) Move(source, destination fyne.URI) error {

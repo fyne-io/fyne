@@ -97,8 +97,6 @@ func (m *Menu) ActivatePrevious() {
 }
 
 // CreateRenderer returns a new renderer for the menu.
-//
-// Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
 	box := newMenuBox(m.Items)
@@ -142,16 +140,12 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 }
 
 // MinSize returns the minimal size of the menu.
-//
-// Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
 	m.ExtendBaseWidget(m)
 	return m.BaseWidget.MinSize()
 }
 
 // Refresh updates the menu to reflect changes in the data.
-//
-// Implements: fyne.Widget
 func (m *Menu) Refresh() {
 	for _, item := range m.Items {
 		item.Refresh()
@@ -169,8 +163,6 @@ func (m *Menu) getContainsCheck() bool {
 }
 
 // Tapped catches taps on separators and the menu background. It doesn't perform any action.
-//
-// Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }

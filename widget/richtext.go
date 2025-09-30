@@ -19,9 +19,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const (
-	passwordChar = "•"
-)
+const passwordChar = "•"
+
+var _ fyne.Widget = (*RichText)(nil)
 
 // RichText represents the base element for a rich text-based widget.
 //
@@ -96,8 +96,6 @@ func (t *RichText) MinSize() fyne.Size {
 }
 
 // Refresh triggers a redraw of the rich text.
-//
-// Implements: fyne.Widget
 func (t *RichText) Refresh() {
 	t.minCache = fyne.Size{}
 	t.updateRowBounds()
@@ -113,8 +111,6 @@ func (t *RichText) Refresh() {
 
 // Resize sets a new size for the rich text.
 // This should only be called if it is not in a container with a layout manager.
-//
-// Implements: fyne.Widget
 func (t *RichText) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return

@@ -1,8 +1,6 @@
 package fyne
 
-import (
-	"sync"
-)
+import "sync"
 
 // ShortcutHandler is a default implementation of the shortcut handler
 // for [CanvasObject].
@@ -43,23 +41,19 @@ type KeyboardShortcut interface {
 	Mod() KeyModifier
 }
 
+var _ KeyboardShortcut = (*ShortcutPaste)(nil)
+
 // ShortcutPaste describes a shortcut paste action.
 type ShortcutPaste struct {
 	Clipboard Clipboard
 }
 
-var _ KeyboardShortcut = (*ShortcutPaste)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutPaste) Key() KeyName {
 	return KeyV
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutPaste) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
@@ -69,23 +63,19 @@ func (se *ShortcutPaste) ShortcutName() string {
 	return "Paste"
 }
 
+var _ KeyboardShortcut = (*ShortcutCopy)(nil)
+
 // ShortcutCopy describes a shortcut copy action.
 type ShortcutCopy struct {
 	Clipboard Clipboard
 }
 
-var _ KeyboardShortcut = (*ShortcutCopy)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutCopy) Key() KeyName {
 	return KeyC
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutCopy) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
@@ -95,23 +85,19 @@ func (se *ShortcutCopy) ShortcutName() string {
 	return "Copy"
 }
 
+var _ KeyboardShortcut = (*ShortcutCut)(nil)
+
 // ShortcutCut describes a shortcut cut action.
 type ShortcutCut struct {
 	Clipboard Clipboard
 }
 
-var _ KeyboardShortcut = (*ShortcutCut)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutCut) Key() KeyName {
 	return KeyX
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutCut) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
@@ -121,21 +107,17 @@ func (se *ShortcutCut) ShortcutName() string {
 	return "Cut"
 }
 
+var _ KeyboardShortcut = (*ShortcutSelectAll)(nil)
+
 // ShortcutSelectAll describes a shortcut selectAll action.
 type ShortcutSelectAll struct{}
 
-var _ KeyboardShortcut = (*ShortcutSelectAll)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutSelectAll) Key() KeyName {
 	return KeyA
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutSelectAll) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
@@ -145,23 +127,19 @@ func (se *ShortcutSelectAll) ShortcutName() string {
 	return "SelectAll"
 }
 
+var _ KeyboardShortcut = (*ShortcutUndo)(nil)
+
 // ShortcutUndo describes a shortcut undo action.
 //
 // Since: 2.5
 type ShortcutUndo struct{}
 
-var _ KeyboardShortcut = (*ShortcutUndo)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutUndo) Key() KeyName {
 	return KeyZ
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutUndo) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
@@ -171,23 +149,19 @@ func (se *ShortcutUndo) ShortcutName() string {
 	return "Undo"
 }
 
+var _ KeyboardShortcut = (*ShortcutRedo)(nil)
+
 // ShortcutRedo describes a shortcut redo action.
 //
 // Since: 2.5
 type ShortcutRedo struct{}
 
-var _ KeyboardShortcut = (*ShortcutRedo)(nil)
-
 // Key returns the [KeyName] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutRedo) Key() KeyName {
 	return KeyY
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-//
-// Implements: [KeyboardShortcut]
 func (se *ShortcutRedo) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }

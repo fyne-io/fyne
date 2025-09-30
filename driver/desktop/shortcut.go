@@ -20,13 +20,11 @@ type CustomShortcut struct {
 }
 
 // Key returns the key name of this shortcut.
-// @implements KeyboardShortcut
 func (cs *CustomShortcut) Key() fyne.KeyName {
 	return cs.KeyName
 }
 
 // Mod returns the modifier of this shortcut.
-// @implements KeyboardShortcut
 func (cs *CustomShortcut) Mod() fyne.KeyModifier {
 	return cs.Modifier
 }
