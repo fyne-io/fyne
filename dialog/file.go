@@ -471,24 +471,30 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 }
 
 func (f *fileDialog) setLocation(dir fyne.URI) error {
-	if f.selectedID > -1 {
-		f.files.Unselect(f.selectedID)
-	}
 	if dir == nil {
 		return errors.New("failed to open nil directory")
 	}
+
+	if f.selectedID > -1 {
+		f.files.Unselect(f.selectedID)
+	}
+
 	list, err := storage.ListerForURI(dir)
 	if err != nil {
 		return err
 	}
 
+	isDir, err := storage.CanList(dir)
+	if err != nil {
+		return err
+	} else if !isDir {
+		return errors.New("location was not a listable URI")
+	}
+
 	fyne.CurrentApp().Preferences().SetString(lastFolderKey, dir.String())
 	isFav := false
 	for i, fav := range f.favorites {
-		if fav.loc == nil {
-			continue
-		}
-		if fav.loc.Path() == dir.Path() {
+		if storage.EqualURI(fav.loc, dir) {
 			f.favoritesList.Select(i)
 			isFav = true
 			break
@@ -502,40 +508,22 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 	f.dir = list
 
 	f.breadcrumb.Objects = nil
-
-	localdir := dir.Path()
-	buildDir := filepath.VolumeName(localdir)
-	for i, d := range strings.Split(localdir, "/") {
-		if d == "" {
-			if i > 0 { // what we get if we split "/"
-				break
-			}
-			buildDir = "/"
-			d = "/"
-		} else if i > 0 {
-			buildDir = filepath.Join(buildDir, d)
-		} else {
-			d = buildDir
-			buildDir = d + string(os.PathSeparator)
-		}
-
-		newDir := storage.NewFileURI(buildDir)
-		isDir, err := storage.CanList(newDir)
-		if err != nil {
-			return err
-		}
-
-		if !isDir {
-			return errors.New("location was not a listable URI")
-		}
+	for parent := dir; parent != nil && err == nil; parent, err = storage.Parent(parent) {
+		currentParent := parent
 		f.breadcrumb.Add(
-			widget.NewButton(d, func() {
-				err := f.setLocation(newDir)
+			widget.NewButton(currentParent.Name(), func() {
+				err := f.setLocation(currentParent)
 				if err != nil {
 					fyne.LogError("Failed to set directory", err)
 				}
 			}),
 		)
+	}
+
+	// Use slices.Reverse with Go 1.21:
+	objects := f.breadcrumb.Objects
+	for i, j := 0, len(objects)-1; i < j; i, j = i+1, j-1 {
+		objects[i], objects[j] = objects[j], objects[i]
 	}
 
 	f.breadcrumbScroll.Refresh()
