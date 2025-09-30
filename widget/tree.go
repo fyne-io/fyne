@@ -166,8 +166,6 @@ func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 }
 
 // FocusGained is called after this Tree has gained focus.
-//
-// Implements: fyne.Focusable
 func (t *Tree) FocusGained() {
 	if t.currentFocus == "" {
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
@@ -182,8 +180,6 @@ func (t *Tree) FocusGained() {
 }
 
 // FocusLost is called after this Tree has lost focus.
-//
-// Implements: fyne.Focusable
 func (t *Tree) FocusLost() {
 	t.focused = false
 	t.Refresh() // Item(t.currentFocus)
@@ -343,8 +339,6 @@ func (t *Tree) ToggleBranch(uid string) {
 }
 
 // TypedKey is called if a key event happens while this Tree is focused.
-//
-// Implements: fyne.Focusable
 func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace:
@@ -395,8 +389,6 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Tree is focused.
-//
-// Implements: fyne.Focusable
 func (t *Tree) TypedRune(_ rune) {
 	// intentionally left blank
 }

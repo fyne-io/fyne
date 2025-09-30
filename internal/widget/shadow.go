@@ -52,8 +52,6 @@ func NewShadow(typ ShadowType, level ElevationLevel) *Shadow {
 }
 
 // CreateRenderer returns a new renderer for the shadow.
-//
-// Implements: fyne.Widget
 func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 	r := &shadowRenderer{s: s}
 	r.createShadows()

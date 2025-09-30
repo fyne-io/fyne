@@ -138,8 +138,6 @@ func NewTableWithHeaders(length func() (rows int, cols int), create func() fyne.
 }
 
 // CreateRenderer returns a new renderer for the table.
-//
-// Implements: fyne.Widget
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 
@@ -214,16 +212,12 @@ func (t *Table) DragEnd() {
 }
 
 // FocusGained is called after this table has gained focus.
-//
-// Implements: fyne.Focusable
 func (t *Table) FocusGained() {
 	t.focused = true
 	t.RefreshItem(t.currentFocus)
 }
 
 // FocusLost is called after this Table has lost focus.
-//
-// Implements: fyne.Focusable
 func (t *Table) FocusLost() {
 	t.focused = false
 	t.Refresh() // Item(t.currentFocus)
@@ -349,8 +343,6 @@ func (t *Table) TouchCancel(*mobile.TouchEvent) {
 }
 
 // TypedKey is called if a key event happens while this Table is focused.
-//
-// Implements: fyne.Focusable
 func (t *Table) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace:
@@ -397,8 +389,6 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Table is focused.
-//
-// Implements: fyne.Focusable
 func (t *Table) TypedRune(_ rune) {
 	// intentionally left blank
 }
