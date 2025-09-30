@@ -33,6 +33,13 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 			},
 			want: "CustomDesktop:Control+Alt+Escape",
 		},
+		{
+			name: "Ctrl+Alt+Shift+Esc",
+			fields: fields{
+				KeyName: fyne.KeyEscape,
+			},
+			want: "CustomDesktop:Escape",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
