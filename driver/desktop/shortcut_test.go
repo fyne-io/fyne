@@ -61,24 +61,19 @@ func Test_modifierToString(t *testing.T) {
 		{
 			name: "Ctrl",
 			mods: fyne.KeyModifierControl,
-			want: "Control",
+			want: "Control+",
 		},
 		{
 			name: "Shift+Ctrl",
 			mods: fyne.KeyModifierShift + fyne.KeyModifierControl,
-			want: "Shift+Control",
+			want: "Shift+Control+",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := &strings.Builder{}
 			writeModifiers(w, tt.mods)
-			str := w.String()
-			if str != "" {
-				str = str[:len(str)-1] // Slice off extra plus symbol.
-			}
-
-			if got := str; got != tt.want {
+			if got := w.String(); got != tt.want {
 				t.Errorf("modifierToString() = %v, want %v", got, tt.want)
 			}
 		})
