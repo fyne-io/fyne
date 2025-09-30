@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -154,22 +155,19 @@ func (r *FileRepository) DeleteAll(u fyne.URI) error {
 //
 // Since: 2.0
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
-	p := path.Clean(u.Path())
-	if p == "" || p == "/" || (len(p) == 2 && p[1] == ':') {
+	child := path.Clean(u.Path())
+	if child == "." || // Clean ending up empty returns ".".
+		strings.HasSuffix(child, "/") || // Only root has trailing slash.
+		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' {
 		return nil, repository.ErrURIRoot
 	}
 
-	parent := path.Dir(p)
-	if parent != "/" {
-		parent += "/"
+	parent := path.Dir(child)
+	if parent == "/" {
+		return storage.NewFileURI("/"), nil
 	}
 
-	// only root is its own parent
-	if parent == p {
-		return nil, repository.ErrURIRoot
-	}
-
-	return storage.NewFileURI(parent), nil
+	return storage.NewFileURI(parent + "/"), nil
 }
 
 // Child creates a child URI from the given URI and component.
