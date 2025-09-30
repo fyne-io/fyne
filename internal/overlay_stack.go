@@ -8,7 +8,7 @@ import (
 
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
 
-// OverlayStack implements fyne.OverlayStack
+// OverlayStack manages a stack of overlays on a canvas.
 type OverlayStack struct {
 	OnChange      func()
 	Canvas        fyne.Canvas
