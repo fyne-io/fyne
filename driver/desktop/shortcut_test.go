@@ -34,7 +34,7 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 			want: "CustomDesktop:Control+Alt+Escape",
 		},
 		{
-			name: "Ctrl+Alt+Shift+Esc",
+			name: "Esc",
 			fields: fields{
 				KeyName: fyne.KeyEscape,
 			},
