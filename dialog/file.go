@@ -274,10 +274,6 @@ func (f *fileDialog) makeOpenButton(label string) *widget.Button {
 			location, _ := storage.Child(f.dir, name)
 
 			exists, _ := storage.Exists(location)
-
-			// check if a directory is selected
-			listable, err := storage.CanList(location)
-
 			if !exists {
 				f.win.Hide()
 				if f.file.onClosedCallback != nil {
@@ -285,8 +281,10 @@ func (f *fileDialog) makeOpenButton(label string) *widget.Button {
 				}
 				callback(storage.Writer(location))
 				return
-			} else if err == nil && listable {
-				// a directory has been selected
+			}
+
+			listable, err := storage.CanList(location)
+			if err == nil && listable {
 				ShowInformation("Cannot overwrite",
 					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
 				return
