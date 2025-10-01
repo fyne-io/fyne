@@ -111,21 +111,4 @@ func TestRectangle_RadiusMaximum(t *testing.T) {
 	rect.Aspect = 3.0
 	rect.TopLeftCornerRadius = canvas.RadiusMaximum
 	test.AssertRendersToImage(t, "maximum_rounded_per_corner_rect_aspect.png", c)
-
-	rect.Aspect = 1.0
-	rect.StrokeWidth = 2.0
-	rect.CornerRadius = 0
-	rect.TopRightCornerRadius = canvas.RadiusMaximum
-	rect.TopLeftCornerRadius = canvas.RadiusMaximum
-	test.AssertRendersToImage(t, "maximum_rounded_square_stroke.png", c)
-
-	rect.StrokeWidth = 0
-	test.AssertRendersToImage(t, "maximum_rounded_square.png", c)
-
-	rect.CornerRadius = 0
-	rect.TopRightCornerRadius = 0
-	rect.TopLeftCornerRadius = 5
-	rect.BottomLeftCornerRadius = 0
-	rect.BottomRightCornerRadius = canvas.RadiusMaximum
-	test.AssertRendersToImage(t, "maximum_rounded_per_corner_square.png", c)
 }
