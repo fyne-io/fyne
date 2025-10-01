@@ -34,7 +34,7 @@ float calc_distance(vec2 p, vec2 b, vec4 r)
 
 // distance is calculated for all necessary quadrants
 // corner radius may exceed half of the shorter edge
-float calc_distance_per_corner(vec2 p, vec2 size, vec4 radius) {
+float calc_distance_all_quadrants(vec2 p, vec2 size, vec4 radius) {
     vec2 d = abs(p) - size;
     float dist = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 
@@ -69,7 +69,7 @@ void main() {
     if (max_radius > min(rect_size_half.x, rect_size_half.y) + stroke_width_half)
     {
         // at least one corner radius is larger than half of the shorter edge
-        distance = calc_distance_per_corner(vec_centered_pos, rect_size_half + stroke_width_half, radius);
+        distance = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
         final_alpha = 1.0 - smoothstep(-edge_softness, edge_softness, distance);
 
         if (stroke_width_half > 0.0)
