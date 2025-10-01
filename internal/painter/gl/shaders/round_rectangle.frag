@@ -56,7 +56,8 @@ void main() {
     vec4 final_color = fill_color;
     float final_alpha;
 
-    if (max_radius > min(rect_size_half.x, rect_size_half.y) + stroke_width_half)
+    // subtract a small threshold value to avoid calling calc_distance_all_quadrants when the largest corner radius is very close to half the length of the rectangle's shortest edge
+    if (max_radius - 0.9 > min(rect_size_half.x, rect_size_half.y) + stroke_width_half)
     {
         // at least one corner radius is larger than half of the shorter edge
         distance = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
