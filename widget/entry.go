@@ -143,8 +143,6 @@ func NewPasswordEntry() *Entry {
 
 // AcceptsTab returns if Entry accepts the Tab key or not.
 //
-// Implements: fyne.Tabbable
-//
 // Since: 2.1
 func (e *Entry) AcceptsTab() bool {
 	return e.MultiLine
@@ -165,8 +163,6 @@ func (e *Entry) Bind(data binding.String) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-//
-// Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	th := e.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -245,15 +241,11 @@ func (e *Entry) CursorTextOffset() (pos int) {
 }
 
 // Cursor returns the cursor type of this widget
-//
-// Implements: desktop.Cursorable
 func (e *Entry) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
-//
-// Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	e.focused = true
 	e.syncSelectable()
@@ -282,8 +274,6 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 }
 
 // DragEnd is called at end of a drag event.
-//
-// Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
 	e.syncSelectable()
 
@@ -294,8 +284,6 @@ func (e *Entry) DragEnd() {
 
 // Dragged is called when the pointer moves while a button is held down.
 // It updates the selection accordingly.
-//
-// Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
 	e.sel.dragged(d)
@@ -309,8 +297,6 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 }
 
 // FocusGained is called when the Entry has been given focus.
-//
-// Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
 		e.dirty = true
@@ -322,8 +308,6 @@ func (e *Entry) FocusGained() {
 }
 
 // FocusLost is called when the Entry has had focus removed.
-//
-// Implements: fyne.Focusable
 func (e *Entry) FocusLost() {
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
@@ -335,8 +319,6 @@ func (e *Entry) FocusLost() {
 }
 
 // Hide hides the entry.
-//
-// Implements: fyne.Widget
 func (e *Entry) Hide() {
 	if e.popUp != nil {
 		e.popUp.Hide()
@@ -346,8 +328,6 @@ func (e *Entry) Hide() {
 }
 
 // Keyboard implements the Keyboardable interface
-//
-// Implements: mobile.Keyboardable
 func (e *Entry) Keyboard() mobile.KeyboardType {
 	if e.MultiLine {
 		return mobile.DefaultKeyboard
@@ -359,8 +339,6 @@ func (e *Entry) Keyboard() mobile.KeyboardType {
 }
 
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
-//
-// Implements: desktop.Keyable
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	if e.Disabled() {
 		return
@@ -378,8 +356,6 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 }
 
 // KeyUp handler for key release events - used to reset shift modifier state for text selection
-//
-// Implements: desktop.Keyable
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	if e.Disabled() {
 		return
@@ -392,8 +368,6 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 }
 
 // MinSize returns the size that this widget should not shrink below.
-//
-// Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
 	cached := e.minCache
 	if !cached.IsZero() {
@@ -409,8 +383,6 @@ func (e *Entry) MinSize() fyne.Size {
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
-//
-// Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.requestFocus()
 	e.syncSelectable()
@@ -438,8 +410,6 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // MouseUp called on mouse release
 // If a mouse drag event has completed then check to see if it has resulted in an empty selection,
 // if so, and if a text select key isn't held, then disable selecting
-//
-// Implements: desktop.Mouseable
 func (e *Entry) MouseUp(m *desktop.MouseEvent) {
 	e.syncSelectable()
 	start, _ := e.sel.selection()
@@ -556,8 +526,6 @@ func (e *Entry) Append(text string) {
 
 // Tapped is called when this entry has been tapped. We update the cursor position in
 // device-specific callbacks (MouseDown() and TouchDown()).
-//
-// Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	if fyne.CurrentDevice().IsMobile() && e.sel.selecting {
 		e.sel.selecting = false
@@ -567,8 +535,6 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 // TappedSecondary is called when right or alternative tap is invoked.
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
-//
-// Implements: fyne.SecondaryTappable
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	if e.Disabled() && e.Password {
 		return // no popup options for a disabled concealed field
@@ -622,8 +588,6 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // TouchDown is called when this entry gets a touch down event on mobile device, we ensure we have focus.
 //
 // Since: 2.1
-//
-// Implements: mobile.Touchable
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 	now := time.Now().UnixMilli()
 	e.syncSegments()
@@ -643,22 +607,16 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 // TouchUp is called when this entry gets a touch up event on mobile device.
 //
 // Since: 2.1
-//
-// Implements: mobile.Touchable
 func (e *Entry) TouchUp(*mobile.TouchEvent) {
 }
 
 // TouchCancel is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
 //
 // Since: 2.1
-//
-// Implements: mobile.Touchable
 func (e *Entry) TouchCancel(*mobile.TouchEvent) {
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
-//
-// Implements: fyne.Focusable
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.Disabled() {
 		return
@@ -889,8 +847,6 @@ func (e *Entry) typedKeyTab() {
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
-//
-// Implements: fyne.Focusable
 func (e *Entry) TypedRune(r rune) {
 	if e.Disabled() {
 		return
@@ -931,8 +887,6 @@ func (e *Entry) TypedRune(r rune) {
 }
 
 // TypedShortcut implements the Shortcutable interface
-//
-// Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
 }
@@ -1809,8 +1763,6 @@ func (e *entryContent) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // DragEnd is called at end of a drag event.
-//
-// Implements: fyne.Draggable
 func (e *entryContent) DragEnd() {
 	// we need to propagate the focus, top level widget handles focus APIs
 	e.entry.requestFocus()
@@ -1820,8 +1772,6 @@ func (e *entryContent) DragEnd() {
 
 // Dragged is called when the pointer moves while a button is held down.
 // It updates the selection accordingly.
-//
-// Implements: fyne.Draggable
 func (e *entryContent) Dragged(d *fyne.DragEvent) {
 	e.entry.Dragged(d)
 }

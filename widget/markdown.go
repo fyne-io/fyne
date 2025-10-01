@@ -153,21 +153,22 @@ func renderChildren(source []byte, n ast.Node, blockquote bool) ([]RichTextSegme
 }
 
 func forceIntoText(source []byte, n ast.Node) string {
-	texts := []string{}
+	text := strings.Builder{}
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {
 			case *ast.Text:
-				texts = append(texts, string(t.Value(source)))
+				text.Write(t.Value(source))
+				text.WriteByte(' ')
 			}
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.Join(texts, " ")
+	return strings.TrimSuffix(text.String(), " ")
 }
 
 func forceIntoHeadingText(source []byte, n ast.Node) string {
-	var text strings.Builder
+	text := strings.Builder{}
 	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {

@@ -317,6 +317,10 @@ func TestFileRepositoryParent(t *testing.T) {
 	_, err = storage.Parent(storage.NewFileURI("/"))
 	assert.Equal(t, repository.ErrURIRoot, err)
 
+	// Test with URI returning empty path (as storage.NewFileURI("") returns PWD):
+	_, err = storage.Parent(repository.NewFileURI(""))
+	assert.Equal(t, repository.ErrURIRoot, err)
+
 	if runtime.GOOS == "windows" {
 		// This is only an error under Windows, on *NIX this is a
 		// relative path to a directory named "C:", which is completely
@@ -329,6 +333,10 @@ func TestFileRepositoryParent(t *testing.T) {
 
 		// Windows supports UNIX-style paths. /C:/ is also a valid path.
 		parent, err = storage.Parent(storage.NewFileURI("/C:/"))
+		assert.Nil(t, err)
+		assert.Equal(t, "file:///", parent.String())
+	} else {
+		parent, err = storage.Parent(storage.NewFileURI("/:"))
 		assert.Nil(t, err)
 		assert.Equal(t, "file:///", parent.String())
 	}

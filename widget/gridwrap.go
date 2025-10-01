@@ -112,16 +112,12 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // FocusGained is called after this GridWrap has gained focus.
-//
-// Implements: fyne.Focusable
 func (l *GridWrap) FocusGained() {
 	l.focused = true
 	l.RefreshItem(l.currentFocus)
 }
 
 // FocusLost is called after this GridWrap has lost focus.
-//
-// Implements: fyne.Focusable
 func (l *GridWrap) FocusLost() {
 	l.focused = false
 	l.RefreshItem(l.currentFocus)
@@ -254,8 +250,6 @@ func (l *GridWrap) ScrollToOffset(offset float32) {
 }
 
 // TypedKey is called if a key event happens while this GridWrap is focused.
-//
-// Implements: fyne.Focusable
 func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace:
@@ -311,8 +305,6 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this GridWrap is focused.
-//
-// Implements: fyne.Focusable
 func (l *GridWrap) TypedRune(_ rune) {
 	// intentionally left blank
 }

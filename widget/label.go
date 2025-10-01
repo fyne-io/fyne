@@ -6,6 +6,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var _ fyne.Widget = (*Label)(nil)
+
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
 	BaseWidget
@@ -92,16 +94,12 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this label should not shrink below.
-//
-// Implements: fyne.Widget
 func (l *Label) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 	return l.BaseWidget.MinSize()
 }
 
 // Refresh triggers a redraw of the label.
-//
-// Implements: fyne.Widget
 func (l *Label) Refresh() {
 	if l.provider == nil { // not created until visible
 		return

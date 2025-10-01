@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// declare conformance with repository types
 var _ repository.Repository = (*HTTPRepository)(nil)
 
 type remoteFile struct {
@@ -53,8 +52,6 @@ func NewHTTPRepository() *HTTPRepository {
 // Exists checks whether the resource at u returns a
 // non "404 NOT FOUND" response header.
 //
-// Implements: repository.Repository
-//
 // Since: 2.1
 func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
 	resp, err := http.Head(u.String())
@@ -71,8 +68,6 @@ func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
 // Reader provides a interface for reading the body of the response received
 // from the request to u.
 //
-// Implements: repository.Repository
-//
 // Since: 2.1
 func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	resp, err := http.Get(u.String())
@@ -82,8 +77,6 @@ func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // CanRead makes a HEAD HTTP request to analyse the headers received
 // from the remote server.
 // Any response status code apart from 2xx is considered to be invalid.
-//
-// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
@@ -99,8 +92,6 @@ func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
 }
 
 // Destroy satisfies the repository.Repository interface.
-//
-// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) Destroy(string) {

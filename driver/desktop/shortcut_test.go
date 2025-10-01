@@ -1,6 +1,7 @@
 package desktop
 
 import (
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -32,6 +33,13 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 			},
 			want: "CustomDesktop:Control+Alt+Escape",
 		},
+		{
+			name: "Esc",
+			fields: fields{
+				KeyName: fyne.KeyEscape,
+			},
+			want: "CustomDesktop:Escape",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -60,17 +68,19 @@ func Test_modifierToString(t *testing.T) {
 		{
 			name: "Ctrl",
 			mods: fyne.KeyModifierControl,
-			want: "Control",
+			want: "Control+",
 		},
 		{
 			name: "Shift+Ctrl",
 			mods: fyne.KeyModifierShift + fyne.KeyModifierControl,
-			want: "Shift+Control",
+			want: "Shift+Control+",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := modifierToString(tt.mods); got != tt.want {
+			w := &strings.Builder{}
+			writeModifiers(w, tt.mods)
+			if got := w.String(); got != tt.want {
 				t.Errorf("modifierToString() = %v, want %v", got, tt.want)
 			}
 		})

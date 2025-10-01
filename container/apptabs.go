@@ -43,8 +43,6 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-//
-// Implements: fyne.Widget
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
 	th := t.Theme()
@@ -127,8 +125,6 @@ func (t *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
 }
 
 // Hide hides the widget.
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) Hide() {
 	if t.popUpMenu != nil {
 		t.popUpMenu.Hide()
@@ -138,8 +134,6 @@ func (t *AppTabs) Hide() {
 }
 
 // MinSize returns the size that this widget should not shrink below
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) MinSize() fyne.Size {
 	t.BaseWidget.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
@@ -217,8 +211,6 @@ func (t *AppTabs) SetTabLocation(l TabLocation) {
 }
 
 // Show this widget, if it was previously hidden
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)

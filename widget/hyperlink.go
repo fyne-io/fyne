@@ -157,8 +157,6 @@ func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 }
 
 // Refresh triggers a redraw of the hyperlink.
-//
-// Implements: fyne.Widget
 func (hl *Hyperlink) Refresh() {
 	if len(hl.provider.Segments) == 0 {
 		return // Not initialized yet.

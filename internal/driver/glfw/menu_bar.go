@@ -35,8 +35,6 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 }
 
 // CreateRenderer returns a new renderer for the menu bar.
-//
-// Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := container.NewHBox(b.Items...)
 	background := canvas.NewRectangle(theme.Color(theme.ColorNameBackground))

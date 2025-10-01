@@ -1,4 +1,4 @@
-//go:build !ci && !android && !ios && !mobile
+//go:build !ci && !android && !ios && !mobile && !tamago && !noos && !tinygo
 
 package app
 
