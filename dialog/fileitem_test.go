@@ -103,7 +103,7 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	item.ExtendBaseWidget(item)
 
 	assert.Equal(t, "(Parent)", item.name)
-	assert.Equal(t, parentDir.String()+"/", f.data[0].String())
+	assert.Equal(t, parentDir.String(), f.data[0].String())
 }
 
 func TestFileItem_Wrap(t *testing.T) {
