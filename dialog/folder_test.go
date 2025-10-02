@@ -1,7 +1,6 @@
 package dialog
 
 import (
-	"path/filepath"
 	"testing"
 
 	"fyne.io/fyne/v2/lang"
@@ -22,8 +21,7 @@ func TestShowFolderOpen(t *testing.T) {
 		chosen = file
 		openErr = err
 	}, win)
-	testData, _ := filepath.Abs("testdata")
-	dir, err := storage.ListerForURI(storage.NewFileURI(testData))
+	dir, err := storage.ListerForURI(storage.NewFileURI("testdata"))
 	if err != nil {
 		t.Error("Failed to open testdata dir", err)
 	}
