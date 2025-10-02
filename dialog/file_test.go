@@ -197,14 +197,14 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotEmpty(t, breadcrumb.Objects)
 
 	assert.NoError(t, err)
-	components := strings.Split(testData.String()[7:], "/")
+	components := strings.Split(testData.Path(), "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
 	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
 		for i := range components {
-			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text)
+			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text, i, testData.Path())
 		}
 	}
 
