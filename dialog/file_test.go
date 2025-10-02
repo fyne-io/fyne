@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -203,8 +204,8 @@ func TestShowFileOpen(t *testing.T) {
 		components[0] = "/"
 	}
 	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
-		for i := range components {
-			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text, i, testData.Path())
+		for i, object := range breadcrumb.Objects {
+			assert.Equal(t, components[i], object.(*widget.Button).Text, strconv.Itoa(i), testData.Path())
 		}
 	}
 
