@@ -484,13 +484,6 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		return err
 	}
 
-	isDir, err := storage.CanList(dir)
-	if err != nil {
-		return err
-	} else if !isDir {
-		return errors.New("location was not a listable URI")
-	}
-
 	fyne.CurrentApp().Preferences().SetString(lastFolderKey, dir.String())
 	isFav := false
 	for i, fav := range f.favorites {
