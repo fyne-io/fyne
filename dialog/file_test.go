@@ -198,9 +198,12 @@ func TestShowFileOpen(t *testing.T) {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
+	for _, object := range breadcrumb.Objects {
+		fmt.Println(object.(*widget.Button).Text)
+	}
 	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
 		for i, object := range breadcrumb.Objects {
-			assert.Equal(t, components[i], object.(*widget.Button).Text, fmt.Sprintf("Failure for %s at index: %d", testData.Path(), i))
+			assert.Equal(t, components[i], object.(*widget.Button).Text, fmt.Sprintf("Failure for %s at component %d", testData.Path(), i))
 		}
 	}
 
