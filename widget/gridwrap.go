@@ -54,6 +54,10 @@ type GridWrap struct {
 	// in the GridWrap has been unselected.
 	OnUnselected func(id GridWrapItemID) `json:"-"`
 
+	// OnHighlited is a callback to be notified when a given item
+	// in the GridWrap has been highlighted.
+	OnHighlighted func(id GridWrapItemID) `json:"-"`
+
 	currentFocus  ListItemID
 	focused       bool
 	scroller      *widget.Scroll
@@ -251,6 +255,8 @@ func (l *GridWrap) ScrollToOffset(offset float32) {
 
 // TypedKey is called if a key event happens while this GridWrap is focused.
 func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
+	oldFocus := l.currentFocus
+
 	switch event.Name {
 	case fyne.KeySpace:
 		l.Select(l.currentFocus)
@@ -301,6 +307,12 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.scrollTo(l.currentFocus)
 		l.RefreshItem(l.currentFocus)
+	}
+
+	if oldFocus != l.currentFocus {
+		if f := l.OnHighlighted; f != nil {
+			f(l.currentFocus)
+		}
 	}
 }
 
