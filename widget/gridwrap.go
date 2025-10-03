@@ -56,6 +56,8 @@ type GridWrap struct {
 
 	// OnHighlited is a callback to be notified when a given item
 	// in the GridWrap has been highlighted.
+	//
+	// Since: 2.8
 	OnHighlighted func(id GridWrapItemID) `json:"-"`
 
 	currentFocus  ListItemID
