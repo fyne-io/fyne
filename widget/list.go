@@ -60,10 +60,16 @@ type List struct {
 	HideSeparators bool
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted.
+	// in the List has been highlighted by keyboard navigation.
 	//
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
+
+	// OnHovered is a callback to be notified when a given item
+	// in the List has been hovered over by a mouse.
+	//
+	// Since: 2.8
+	OnHovered func(id ListItemID) `json:"-"`
 
 	currentHighlight ListItemID
 	focused          bool
@@ -511,6 +517,7 @@ type listItem struct {
 	BaseWidget
 
 	onTapped          func()
+	onHovered         func()
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
@@ -549,6 +556,9 @@ func (li *listItem) MinSize() fyne.Size {
 
 // MouseIn is called when a desktop pointer enters the widget.
 func (li *listItem) MouseIn(*desktop.MouseEvent) {
+	if li.onHovered != nil {
+		li.onHovered()
+	}
 	li.hovered = true
 	li.Refresh()
 }
@@ -682,6 +692,11 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	}
 	if f := l.list.UpdateItem; f != nil {
 		f(id, li.child)
+	}
+	li.onHovered = func() {
+		if f := l.list.OnHovered; f != nil {
+			f(id)
+		}
 	}
 	li.onTapped = func() {
 		if !fyne.CurrentDevice().IsMobile() {
