@@ -50,14 +50,20 @@ type Tree struct {
 	OnUnselected   func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is unselected.
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
-	branchMinSize fyne.Size
-	currentFocus  TreeNodeID
-	focused       bool
-	leafMinSize   fyne.Size
-	offset        fyne.Position
-	open          map[TreeNodeID]bool
-	scroller      *widget.Scroll
-	selected      []TreeNodeID
+	// OnHighlighted is a callback to be notified when a given item
+	// in the GridWrap has been highlighted.
+	//
+	// Since: 2.8
+	OnHighlighted func(id TreeNodeID) `json:"-"`
+
+	branchMinSize    fyne.Size
+	currentHighlight TreeNodeID
+	focused          bool
+	leafMinSize      fyne.Size
+	offset           fyne.Position
+	open             map[TreeNodeID]bool
+	scroller         *widget.Scroll
+	selected         []TreeNodeID
 }
 
 // NewTree returns a new performant tree widget defined by the passed functions.
@@ -167,7 +173,7 @@ func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 
 // FocusGained is called after this Tree has gained focus.
 func (t *Tree) FocusGained() {
-	if t.currentFocus == "" {
+	if t.currentHighlight == "" {
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
 			if ids := childUIDs(""); len(ids) > 0 {
 				t.setItemFocus(ids[0])
@@ -176,13 +182,13 @@ func (t *Tree) FocusGained() {
 	}
 
 	t.focused = true
-	t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentHighlight)
 }
 
 // FocusLost is called after this Tree has lost focus.
 func (t *Tree) FocusLost() {
 	t.focused = false
-	t.Refresh() // Item(t.currentFocus)
+	t.Refresh() // Item(t.currentHighlight)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -318,15 +324,15 @@ func (t *Tree) Select(uid TreeNodeID) {
 }
 
 func (t *Tree) setItemFocus(uid TreeNodeID) {
-	if t.currentFocus == uid {
+	if t.currentHighlight == uid {
 		return
 	}
 
-	previous := t.currentFocus
-	t.currentFocus = uid
+	previous := t.currentHighlight
+	t.currentHighlight = uid
 	t.RefreshItem(previous)
-	t.ScrollTo(t.currentFocus)
-	t.RefreshItem(t.currentFocus)
+	t.ScrollTo(t.currentHighlight)
+	t.RefreshItem(t.currentHighlight)
 }
 
 // ToggleBranch flips the state of the branch with the given TreeNodeID.
@@ -340,38 +346,40 @@ func (t *Tree) ToggleBranch(uid string) {
 
 // TypedKey is called if a key event happens while this Tree is focused.
 func (t *Tree) TypedKey(event *fyne.KeyEvent) {
+	oldHighlight := t.currentHighlight
+
 	switch event.Name {
 	case fyne.KeySpace:
-		t.Select(t.currentFocus)
+		t.Select(t.currentHighlight)
 	case fyne.KeyDown:
 		next := false
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
 			if next {
 				t.setItemFocus(id)
 				next = false
-			} else if id == t.currentFocus {
+			} else if id == t.currentHighlight {
 				next = true
 			}
 		})
 	case fyne.KeyLeft:
 		// If the current focus is on a branch which is open, just close it
-		if t.IsBranch(t.currentFocus) && t.IsBranchOpen(t.currentFocus) {
-			t.CloseBranch(t.currentFocus)
+		if t.IsBranch(t.currentHighlight) && t.IsBranchOpen(t.currentHighlight) {
+			t.CloseBranch(t.currentHighlight)
 		} else {
 			// Every other case should move the focus to the current parent node
 			t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
-				if id == t.currentFocus && p != "" {
+				if id == t.currentHighlight && p != "" {
 					t.setItemFocus(p)
 				}
 			})
 		}
 	case fyne.KeyRight:
-		if t.IsBranch(t.currentFocus) {
-			t.OpenBranch(t.currentFocus)
+		if t.IsBranch(t.currentHighlight) {
+			t.OpenBranch(t.currentHighlight)
 		}
 		children := []TreeNodeID{}
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
-			children = childUIDs(t.currentFocus)
+			children = childUIDs(t.currentHighlight)
 		}
 
 		if len(children) > 0 {
@@ -380,11 +388,17 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 	case fyne.KeyUp:
 		previous := ""
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
-			if id == t.currentFocus && previous != "" {
+			if id == t.currentHighlight && previous != "" {
 				t.setItemFocus(previous)
 			}
 			previous = id
 		})
+	}
+
+	if oldHighlight != t.currentHighlight {
+		if f := t.OnHighlighted; f != nil {
+			f(t.currentHighlight)
+		}
 	}
 }
 
@@ -974,7 +988,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
 		r.background.FillColor = th.Color(theme.ColorNameSelection, v)
 		r.background.Show()
-	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentFocus == r.treeNode.uid) {
+	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentHighlight == r.treeNode.uid) {
 		r.background.FillColor = th.Color(theme.ColorNameHover, v)
 		r.background.Show()
 	} else {
