@@ -95,10 +95,16 @@ type Table struct {
 	HideSeparators bool
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted.
+	// in the Table has been highlighted.
 	//
 	// Since: 2.8
 	OnHighlighted func(id TableCellID) `json:"-"`
+
+	// OnHovered is a callback to be notified when a given item
+	// in the Table has been hovered over by a mouse.
+	//
+	// Since: 2.8
+	OnHovered func(id TableCellID) `json:"-"`
 
 	currentHighlight          TableCellID
 	focused                   bool
@@ -700,7 +706,17 @@ func (t *Table) finishScroll() {
 func (t *Table) hoverAt(pos fyne.Position) {
 	col := t.columnAt(pos)
 	row := t.rowAt(pos)
-	t.hoveredCell = &TableCellID{row, col}
+
+	oldHover := t.hoveredCell
+	var newHover *TableCellID
+	if row >= 0 && col >= 0 {
+		newHover = &TableCellID{row, col}
+	}
+
+	if oldHover != nil && newHover != nil && *oldHover == *newHover {
+		return
+	}
+	t.hoveredCell = newHover
 	overHeaderRow := t.ShowHeaderRow && pos.Y < t.headerSize.Height
 	overHeaderCol := t.ShowHeaderColumn && pos.X < t.headerSize.Width
 	if overHeaderRow && !overHeaderCol {
@@ -722,6 +738,11 @@ func (t *Table) hoverAt(pos fyne.Position) {
 		t.hoverHeaderRow = noCellMatch
 	}
 
+	if t.hoveredCell == nil {
+		t.hoverOut()
+		return
+	}
+
 	rows, cols := 0, 0
 	if f := t.Length; f != nil {
 		rows, cols = t.Length()
@@ -729,6 +750,10 @@ func (t *Table) hoverAt(pos fyne.Position) {
 	if t.hoveredCell.Col >= cols || t.hoveredCell.Row >= rows || t.hoveredCell.Col < 0 || t.hoveredCell.Row < 0 {
 		t.hoverOut()
 		return
+	}
+
+	if f := t.OnHovered; f != nil {
+		f(*t.hoveredCell)
 	}
 
 	if t.moveCallback != nil {
