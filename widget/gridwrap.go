@@ -55,10 +55,16 @@ type GridWrap struct {
 	OnUnselected func(id GridWrapItemID) `json:"-"`
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted.
+	// in the GridWrap has been highlighted by keyboard navigation.
 	//
 	// Since: 2.8
 	OnHighlighted func(id GridWrapItemID) `json:"-"`
+
+	// OnHovered is a callback to be notified when a given item
+	// in the GridWrap has been hovered over by a mouse.
+	//
+	// Since: 2.8
+	OnHovered func(id GridWrapItemID) `json:"-"`
 
 	currentHighlight ListItemID
 	focused          bool
@@ -423,6 +429,7 @@ type gridWrapItem struct {
 	BaseWidget
 
 	onTapped          func()
+	onHovered         func()
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
 	hovered, selected bool
@@ -461,6 +468,9 @@ func (gw *gridWrapItem) MinSize() fyne.Size {
 
 // MouseIn is called when a desktop pointer enters the widget.
 func (gw *gridWrapItem) MouseIn(*desktop.MouseEvent) {
+	if gw.onHovered != nil {
+		gw.onHovered()
+	}
 	gw.hovered = true
 	gw.Refresh()
 }
@@ -591,6 +601,11 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 	}
 	if f := l.gw.UpdateItem; f != nil {
 		f(id, li.child)
+	}
+	li.onHovered = func() {
+		if f := l.gw.OnHovered; f != nil {
+			f(id)
+		}
 	}
 	li.onTapped = func() {
 		if !fyne.CurrentDevice().IsMobile() {
