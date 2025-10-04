@@ -51,10 +51,16 @@ type Tree struct {
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted.
+	// in the Tree has been highlighted by keyboard navigation.
 	//
 	// Since: 2.8
 	OnHighlighted func(id TreeNodeID) `json:"-"`
+
+	// OnHovered is a callback to be notified when a given item
+	// in the Tree has been hovered over by a mouse.
+	//
+	// Since: 2.8
+	OnHovered func(id TreeNodeID) `json:"-"`
 
 	branchMinSize    fyne.Size
 	currentHighlight TreeNodeID
@@ -880,6 +886,9 @@ func (n *treeNode) Indent() float32 {
 
 // MouseIn is called when a desktop pointer enters the widget
 func (n *treeNode) MouseIn(*desktop.MouseEvent) {
+	if f := n.tree.OnHovered; f != nil {
+		f(n.uid)
+	}
 	n.hovered = true
 	n.partialRefresh()
 }
