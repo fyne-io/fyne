@@ -65,12 +65,6 @@ type List struct {
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
 
-	// OnHovered is a callback to be notified when a given item
-	// in the List has been hovered over by a mouse.
-	//
-	// Since: 2.8
-	OnHovered func(id ListItemID) `json:"-"`
-
 	currentHighlight ListItemID
 	focused          bool
 	scroller         *widget.Scroll
@@ -694,7 +688,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 		f(id, li.child)
 	}
 	li.onHovered = func() {
-		if f := l.list.OnHovered; f != nil {
+		if f := l.list.OnHighlighted; f != nil {
 			f(id)
 		}
 	}
