@@ -56,12 +56,6 @@ type Tree struct {
 	// Since: 2.8
 	OnHighlighted func(id TreeNodeID) `json:"-"`
 
-	// OnHovered is a callback to be notified when a given item
-	// in the Tree has been hovered over by a mouse.
-	//
-	// Since: 2.8
-	OnHovered func(id TreeNodeID) `json:"-"`
-
 	branchMinSize    fyne.Size
 	currentHighlight TreeNodeID
 	focused          bool
@@ -886,7 +880,7 @@ func (n *treeNode) Indent() float32 {
 
 // MouseIn is called when a desktop pointer enters the widget
 func (n *treeNode) MouseIn(*desktop.MouseEvent) {
-	if f := n.tree.OnHovered; f != nil {
+	if f := n.tree.OnHighlighted; f != nil {
 		f(n.uid)
 	}
 	n.hovered = true
