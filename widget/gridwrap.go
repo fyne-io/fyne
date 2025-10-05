@@ -60,12 +60,6 @@ type GridWrap struct {
 	// Since: 2.8
 	OnHighlighted func(id GridWrapItemID) `json:"-"`
 
-	// OnHovered is a callback to be notified when a given item
-	// in the GridWrap has been hovered over by a mouse.
-	//
-	// Since: 2.8
-	OnHovered func(id GridWrapItemID) `json:"-"`
-
 	currentHighlight ListItemID
 	focused          bool
 	scroller         *widget.Scroll
@@ -603,7 +597,7 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 		f(id, li.child)
 	}
 	li.onHovered = func() {
-		if f := l.gw.OnHovered; f != nil {
+		if f := l.gw.OnHighlighted; f != nil {
 			f(id)
 		}
 	}
