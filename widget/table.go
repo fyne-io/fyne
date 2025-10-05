@@ -100,12 +100,6 @@ type Table struct {
 	// Since: 2.8
 	OnHighlighted func(id TableCellID) `json:"-"`
 
-	// OnHovered is a callback to be notified when a given item
-	// in the Table has been hovered over by a mouse.
-	//
-	// Since: 2.8
-	OnHovered func(id TableCellID) `json:"-"`
-
 	currentHighlight          TableCellID
 	focused                   bool
 	selectedCell, hoveredCell *TableCellID
@@ -752,7 +746,7 @@ func (t *Table) hoverAt(pos fyne.Position) {
 		return
 	}
 
-	if f := t.OnHovered; f != nil {
+	if f := t.OnHighlighted; f != nil {
 		f(*t.hoveredCell)
 	}
 
