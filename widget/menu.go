@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
@@ -16,12 +18,15 @@ var (
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
 	BaseWidget
-	alignment     fyne.TextAlign
-	Items         []fyne.CanvasObject
-	OnDismiss     func() `json:"-"`
-	activeItem    *menuItem
-	customSized   bool
-	containsCheck bool
+	alignment        fyne.TextAlign
+	Items            []fyne.CanvasObject
+	OnDismiss        func() `json:"-"`
+	activeItem       *menuItem
+	customSized      bool
+	containsCheck    bool
+	searchEnabled    bool
+	searchEntry      *Entry
+	searchFirstMatch *menuItem
 }
 
 // NewMenu creates a new Menu.
@@ -29,6 +34,15 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	m := &Menu{}
 	m.ExtendBaseWidget(m)
 	m.setMenu(menu)
+	return m
+}
+
+// NewMenuWithSearch creates a new Menu and enables a search field at the top.
+func NewMenuWithSearch(menu *fyne.Menu) *Menu {
+	m := &Menu{searchEnabled: true}
+	m.ExtendBaseWidget(m)
+	m.setMenu(menu)
+	m.initSearchUI()
 	return m
 }
 
@@ -215,6 +229,150 @@ func (m *Menu) setMenu(menu *fyne.Menu) {
 		}
 	}
 	m.containsCheck = m.getContainsCheck()
+}
+
+func (m *Menu) initSearchUI() {
+	if m.searchEntry != nil {
+		return
+	}
+
+	e := NewEntry()
+	e.PlaceHolder = "Search…"
+	e.OnChanged = func(s string) {
+		m.onSearchChanged(s)
+	}
+	e.OnSubmitted = func(_ string) {
+		m.onSearchSubmitted()
+	}
+	m.searchEntry = e
+
+	sep := NewSeparator()
+	newItems := make([]fyne.CanvasObject, 0, len(m.Items)+2)
+	newItems = append(newItems, e, sep)
+	newItems = append(newItems, m.Items...)
+	m.Items = newItems
+}
+
+func (m *Menu) onSearchChanged(s string) {
+	if !m.searchEnabled {
+		return
+	}
+
+	q := strings.TrimSpace(strings.ToLower(s))
+	if q == "" {
+		m.resetSearchFilter()
+		return
+	}
+
+	m.applySearchFilter(q)
+}
+
+func (m *Menu) onSearchSubmitted() {
+	if !m.searchEnabled {
+		return
+	}
+
+	if m.searchFirstMatch != nil {
+		mi := m.searchFirstMatch
+		if mi.Item.Action != nil && mi.Item.ChildMenu == nil {
+			mi.Tapped(nil)
+			return
+		}
+		if mi.Item.ChildMenu != nil {
+			if m2 := mi.Child(); m2 != nil {
+				if leaf := findFirstActionable(m2); leaf != nil {
+					leaf.Tapped(nil)
+					return
+				}
+			}
+		}
+		if mi.Item.Action != nil {
+			mi.Tapped(nil)
+			return
+		}
+	}
+}
+
+func (m *Menu) resetSearchFilter() {
+	m.searchFirstMatch = nil
+
+	for _, co := range m.Items {
+		if mi, ok := co.(*menuItem); ok {
+			mi.Show()
+			if mi.child != nil {
+				mi.child.Hide()
+			}
+		}
+	}
+
+	m.Refresh()
+}
+
+func (m *Menu) applySearchFilter(q string) {
+	m.searchFirstMatch = nil
+	for _, co := range m.Items {
+		mi, ok := co.(*menuItem)
+		if !ok {
+			continue
+		}
+		matched := m.filterMenuItem(mi, q)
+		if matched {
+			mi.Show()
+		} else {
+			mi.Hide()
+		}
+	}
+	m.Refresh()
+}
+
+func (m *Menu) filterMenuItem(mi *menuItem, q string) bool {
+	label := strings.ToLower(mi.Item.Label)
+	selfMatch := strings.Contains(label, q)
+
+	if selfMatch && m.searchFirstMatch == nil && (mi.Item.Action != nil || mi.Item.ChildMenu != nil) {
+		m.searchFirstMatch = mi
+	}
+
+	if mi.Item.ChildMenu != nil {
+		child := mi.Child()
+		descendantMatch := false
+
+		for _, cco := range child.Items {
+			if cmi, ok := cco.(*menuItem); ok {
+				matchChild := m.filterMenuItem(cmi, q)
+				if matchChild {
+					cmi.Show()
+					descendantMatch = true
+				} else {
+					cmi.Hide()
+				}
+			}
+		}
+
+		child.Refresh()
+
+		return selfMatch || descendantMatch
+	}
+
+	return selfMatch
+}
+
+func findFirstActionable(m *Menu) *menuItem {
+	for _, co := range m.Items {
+		if mi, ok := co.(*menuItem); ok {
+			if mi.Item.Action != nil && mi.Item.ChildMenu == nil {
+				return mi
+			}
+			if mi.Item.ChildMenu != nil {
+				if child := mi.Child(); child != nil {
+					if leaf := findFirstActionable(child); leaf != nil {
+						return leaf
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 type menuRenderer struct {

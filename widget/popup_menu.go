@@ -36,6 +36,22 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	return p
 }
 
+// NewPopUpMenuWithSearch creates a new, reusable popup menu with a search field.
+func NewPopUpMenuWithSearch(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
+	m := NewMenuWithSearch(menu)
+	p := &PopUpMenu{Menu: m, canvas: c}
+	p.ExtendBaseWidget(p)
+	p.Menu.Resize(p.Menu.MinSize())
+	p.Menu.customSized = true
+	o := widget.NewOverlayContainer(p, c, p.Dismiss)
+	o.Resize(o.MinSize())
+	p.overlay = o
+	p.OnDismiss = func() {
+		p.Hide()
+	}
+	return p
+}
+
 // ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
@@ -84,8 +100,15 @@ func (p *PopUpMenu) Show() {
 
 	p.overlay.Show()
 	p.Menu.Show()
+
 	if !fyne.CurrentDevice().IsMobile() {
-		p.canvas.Focus(p)
+		var focusTarget fyne.Focusable = p
+		if p.Menu.searchEntry != nil {
+			focusTarget = p.Menu.searchEntry
+		}
+		fyne.Do(func() {
+			p.canvas.Focus(focusTarget)
+		})
 	}
 }
 
