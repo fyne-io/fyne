@@ -188,22 +188,21 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
 
 		// the maximum possible corner radii for a circular shape, calculated taking into account the rect coords with aspect ratio
-		maxWidthRadius := paint.GetMaximumRadius(fyne.NewSquareSize(bounds[2] - bounds[0]))
-		maxHeightRadius := paint.GetMaximumRadius(fyne.NewSquareSize(bounds[3] - bounds[1]))
+		size := fyne.NewSize(bounds[2]-bounds[0], bounds[3]-bounds[1])
 		topRightRadiusScaled := roundToPixel(
-			paint.GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			paint.GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)*p.pixScale,
 			1.0,
 		)
 		topLeftRadiusScaled := roundToPixel(
-			paint.GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			paint.GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)*p.pixScale,
 			1.0,
 		)
 		bottomRightRadiusScaled := roundToPixel(
-			paint.GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			paint.GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)*p.pixScale,
 			1.0,
 		)
 		bottomLeftRadiusScaled := roundToPixel(
-			paint.GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, maxWidthRadius, maxHeightRadius)*p.pixScale,
+			paint.GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)*p.pixScale,
 			1.0,
 		)
 		p.SetUniform4f(program, "radius", topRightRadiusScaled, bottomRightRadiusScaled, topLeftRadiusScaled, bottomLeftRadiusScaled)

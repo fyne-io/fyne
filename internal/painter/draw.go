@@ -192,12 +192,11 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 
 func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	// The maximum possible corner radii for a circular shape
-	maxWidthRadius := GetMaximumRadius(fyne.NewSquareSize(rWidth))
-	maxHeightRadius := GetMaximumRadius(fyne.NewSquareSize(rHeight))
-	topRightRadius = GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, maxWidthRadius, maxHeightRadius)
-	topLeftRadius = GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, maxWidthRadius, maxHeightRadius)
-	bottomRightRadius = GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, maxWidthRadius, maxHeightRadius)
-	bottomLeftRadius = GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, maxWidthRadius, maxHeightRadius)
+	size := fyne.NewSize(rWidth, rHeight)
+	topRightRadius = GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)
+	topLeftRadius = GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)
+	bottomRightRadius = GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)
+	bottomLeftRadius = GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)
 
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
@@ -628,7 +627,9 @@ func GetMaximumRadius(size fyne.Size) float32 {
 // so this corner can grow up to double the maximum radius of the smaller dimension (width or height) without causing overlaps.
 //
 // This is typically used for drawing circular corners in rectangles or squares with different corner radii.
-func GetMaximumCornerRadius(radius, adjacentWidthRadius, adjacentHeightRadius, maxWidthRadius, maxHeightRadius float32) float32 {
+func GetMaximumCornerRadius(radius, adjacentWidthRadius, adjacentHeightRadius float32, size fyne.Size) float32 {
+	maxWidthRadius := size.Width / 2
+	maxHeightRadius := size.Height / 2
 	// fast path: corner radius fits within both per-axis maxima
 	if radius <= fyne.Min(maxWidthRadius, maxHeightRadius) {
 		return radius
