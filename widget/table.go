@@ -700,17 +700,8 @@ func (t *Table) finishScroll() {
 func (t *Table) hoverAt(pos fyne.Position) {
 	col := t.columnAt(pos)
 	row := t.rowAt(pos)
-
 	oldHover := t.hoveredCell
-	var newHover *TableCellID
-	if row >= 0 && col >= 0 {
-		newHover = &TableCellID{row, col}
-	}
-
-	if oldHover != nil && newHover != nil && *oldHover == *newHover {
-		return
-	}
-	t.hoveredCell = newHover
+	t.hoveredCell = &TableCellID{row, col}
 	overHeaderRow := t.ShowHeaderRow && pos.Y < t.headerSize.Height
 	overHeaderCol := t.ShowHeaderColumn && pos.X < t.headerSize.Width
 	if overHeaderRow && !overHeaderCol {
@@ -746,12 +737,15 @@ func (t *Table) hoverAt(pos fyne.Position) {
 		return
 	}
 
-	if f := t.OnHighlighted; f != nil {
-		f(*t.hoveredCell)
-	}
-
 	if t.moveCallback != nil {
 		t.moveCallback()
+	}
+
+	if f := t.OnHighlighted; f != nil {
+		if oldHover != nil && t.hoveredCell != nil && *oldHover == *t.hoveredCell {
+			return
+		}
+		f(*t.hoveredCell)
 	}
 }
 
