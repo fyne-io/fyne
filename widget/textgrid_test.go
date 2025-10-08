@@ -375,6 +375,22 @@ func TestTextGridRender_TextColor(t *testing.T) {
 	})
 }
 
+func BenchmarkTextGrid_Refresh(b *testing.B) {
+	builder := strings.Builder{}
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < 1000; j++ {
+			builder.WriteByte('A')
+		}
+		builder.WriteString("\n")
+	}
+	grid := NewTextGridFromString(builder.String())
+	grid.Scroll = fyne.ScrollBoth
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		grid.Refresh()
+	}
+}
+
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	lines := strings.Split(expected, "\n")
 	wrap := test.TempWidgetRenderer(t, g).(*textGridRenderer).text
