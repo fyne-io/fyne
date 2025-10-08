@@ -368,8 +368,20 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	radiusY := size.Height / 2
 	program := p.ellipseProgram
 
+	// when rotated, the ellipse needs more space
+	// add half the difference between width and height as padding
+	// with padding the final size is a square
+	width, height := size.Components()
+	rotPad := float32(math.Abs(float64(width)-float64(height)) / 2)
+	xPad, yPad := float32(0), float32(0)
+	if width > height {
+		yPad = rotPad
+	} else {
+		xPad = rotPad
+	}
+
 	// Vertex: BEG
-	bounds, points := p.vecSquareCoords(pos, ellipse, frame) // TODO check
+	bounds, points := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad)
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
 	p.UpdateVertexArray(program, "vert", 2, 4, 0)
@@ -387,15 +399,13 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
 
 	strokeWidthScaled := roundToPixel(ellipse.StrokeWidth*p.pixScale, 1.0)
-	p.SetUniform1f(program, "stroke_width_half", strokeWidthScaled*0.5)
-
-	rectSizeWidthScaled := x2Scaled - x1Scaled - strokeWidthScaled
-	rectSizeHeightScaled := y2Scaled - y1Scaled - strokeWidthScaled
-	p.SetUniform2f(program, "rect_size_half", rectSizeWidthScaled*0.5, rectSizeHeightScaled*0.5)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
 
 	radiusXScaled := roundToPixel(radiusX*p.pixScale, 1.0)
 	radiusYScaled := roundToPixel(radiusY*p.pixScale, 1.0)
 	p.SetUniform2f(program, "radius", radiusXScaled, radiusYScaled)
+
+	p.SetUniform1f(program, "angle", ellipse.Angle)
 
 	r, g, b, a := getFragmentColor(ellipse.FillColor)
 	p.SetUniform4f(program, "fill_color", r, g, b, a)

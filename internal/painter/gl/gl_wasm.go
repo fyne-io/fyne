@@ -145,7 +145,7 @@ func (p *painter) Init() {
 	}
 	p.getUniformLocations(p.ellipseProgram,
 		"frame_size", "rect_coords",
-		"stroke_width_half", "rect_size_half",
+		"stroke_width", "angle",
 		"radius", "edge_softness",
 		"fill_color", "stroke_color",
 	)
