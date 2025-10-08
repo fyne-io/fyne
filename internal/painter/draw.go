@@ -308,6 +308,37 @@ func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLef
 	return raw
 }
 
+// DrawEllipse rasterizes the given ellipse object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawEllipse(ellipse *canvas.Ellipse, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	size := ellipse.Size()
+	radiusX := size.Width / 2
+	radiusY := size.Height / 2
+
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	stroke := scale(ellipse.StrokeWidth)
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+
+	if ellipse.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(ellipse.FillColor)
+		rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), float64(ellipse.Angle), filler)
+		filler.Draw()
+	}
+
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(ellipse.StrokeColor)
+	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+	rasterx.AddEllipse(float64(width/2), float64(height/2), float64(scale(radiusX)), float64(scale(radiusY)), float64(ellipse.Angle), dasher)
+	dasher.Draw()
+
+	return raw
+}
+
 // drawRegularPolygon draws a regular n-sides centered at (cx,cy) with
 // radius, rounded corners of cornerRadius, rotated by rot degrees.
 func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
