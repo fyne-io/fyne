@@ -136,6 +136,20 @@ func (p *painter) Init() {
 		"fill_color",
 	)
 	p.enableAttribArrays(p.arcProgram, "vert", "normal")
+
+	p.ellipseProgram = ProgramState{
+		ref:        p.createProgram("ellipse_es"),
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
+	p.getUniformLocations(p.ellipseProgram,
+		"frame_size", "rect_coords",
+		"stroke_width_half", "rect_size_half",
+		"radius", "edge_softness",
+		"fill_color", "stroke_color",
+	)
+	p.enableAttribArrays(p.ellipseProgram, "vert", "normal")
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
