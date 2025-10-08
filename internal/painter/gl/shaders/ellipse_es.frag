@@ -46,7 +46,7 @@ void main()
 
     if (stroke_width > 0.0)
     {
-        vec2 inner_radius = radius - stroke_width / 2.0;
+        vec2 inner_radius = radius - stroke_width;
         float fill_mask = 0.0;
         if (inner_radius.x > 1.0 && inner_radius.y > 1.0)
         {
