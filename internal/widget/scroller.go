@@ -2,6 +2,9 @@ package widget
 
 import (
 	"math"
+	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -40,6 +43,17 @@ const (
 	pageScrollFraction = float32(0.95)
 
 	smoothScrollingFactor = 0.5
+
+	disableSmoothScrollingEnvKey = "FYNE_DISABLE_SMOOTH_SCROLLING"
+)
+
+var (
+	isSmoothScrollingDisabled bool
+
+	checkEnvDisableSmoothScrolling = sync.OnceFunc(func() {
+		env := os.Getenv(disableSmoothScrollingEnvKey)
+		isSmoothScrollingDisabled = strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1"
+	})
 )
 
 type scrollBarRenderer struct {
@@ -611,9 +625,10 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 		return
 	}
 
+	checkEnvDisableSmoothScrolling()
 	if s.scrollAnimation != nil {
 		s.targetOffset = s.targetOffset.Subtract(ev.Scrolled)
-	} else if fyne.CurrentApp().Settings().ShowAnimations() {
+	} else if !isSmoothScrollingDisabled && fyne.CurrentApp().Settings().ShowAnimations() {
 		s.targetOffset = s.Offset.Subtract(ev.Scrolled)
 		s.scrollAnimation = fyne.NewAnimation(time.Duration(math.MaxInt64), s.animateScroll)
 		s.scrollAnimation.Start()

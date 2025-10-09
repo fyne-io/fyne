@@ -3,6 +3,7 @@ package test // import "fyne.io/fyne/v2/test"
 
 import (
 	"net/url"
+	"os"
 	"sync"
 	"testing"
 
@@ -18,6 +19,7 @@ import (
 // ensure we have a dummy app loaded and ready to test
 func init() {
 	NewApp()
+	os.Setenv("FYNE_DISABLE_SMOOTH_SCROLLING", "true")
 }
 
 type app struct {
