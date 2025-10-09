@@ -50,10 +50,13 @@ const (
 var (
 	isSmoothScrollingDisabled bool
 
-	checkEnvDisableSmoothScrolling = sync.OnceFunc(func() {
-		env := os.Getenv(disableSmoothScrollingEnvKey)
-		isSmoothScrollingDisabled = strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1"
-	})
+	checkSmoothScrollOnce          = sync.Once{}
+	checkEnvDisableSmoothScrolling = func() {
+		checkSmoothScrollOnce.Do(func() {
+			env := os.Getenv(disableSmoothScrollingEnvKey)
+			isSmoothScrollingDisabled = strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1"
+		})
+	}
 )
 
 type scrollBarRenderer struct {
