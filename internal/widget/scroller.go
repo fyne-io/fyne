@@ -58,7 +58,7 @@ func isSmoothScrollDisabled() bool {
 		isSmoothScrollingDisabled = strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1"
 	}
 	return isSmoothScrollingDisabled
-)
+}
 
 type scrollBarRenderer struct {
 	BaseRenderer
