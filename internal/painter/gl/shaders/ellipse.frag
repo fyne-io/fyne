@@ -11,7 +11,8 @@ uniform float angle;
 uniform vec4 fill_color;
 uniform vec4 stroke_color;
 
-mat2 rotate(float a) {
+mat2 rotate(float a)
+{
     float s = sin(-a);
     float c = cos(-a);
     return mat2(c, -s, s, c);
@@ -19,9 +20,10 @@ mat2 rotate(float a) {
 
 float calc_distance(vec2 p, vec2 r)
 {
-    r = max(r, 1e-6);
+    const float eps = 1e-3;
+    r = max(r, eps);
     vec2 f = p / r;
-    return (dot(f, f) - 1.0) / max(length(2.0 * f / r), 1e-6);
+    return (dot(f, f) - 1.0) / max(length(2.0 * f / r), eps);
 }
 
 void main()
