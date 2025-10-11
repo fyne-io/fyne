@@ -176,24 +176,24 @@ func TestShowFileOpen(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 	// header
-	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, lang.L("Open")+" "+lang.L("File"), title.Text)
 	// optionsbuttons
-	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
 	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
-	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 	// footer
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*widget.Label)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
 	// body
-	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
+	breadcrumb := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	assert.NotEmpty(t, breadcrumb.Objects)
 
 	assert.NoError(t, err)
@@ -208,7 +208,7 @@ func TestShowFileOpen(t *testing.T) {
 		}
 	}
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.NotEmpty(t, objects)
 
@@ -267,17 +267,17 @@ func TestHiddenFiles(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 
-	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
 	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
-	optionsButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[2].(*widget.Button)
+	optionsButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[2].(*widget.Button)
 	assert.Equal(t, "", optionsButton.Text)
 	assert.Equal(t, theme.SettingsIcon().Name(), optionsButton.Icon.Name())
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.NotEmpty(t, objects)
 
@@ -317,14 +317,14 @@ func TestShowFileSave(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
-	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Entry)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	nameEntry := ui.Objects[2].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*widget.Entry)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container)
 	save := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.NotEmpty(t, objects)
 
@@ -464,7 +464,7 @@ func TestFileSort(t *testing.T) {
 
 	ui := popup.Content.(*fyne.Container)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
 	assert.NotEmpty(t, objects)
 
@@ -503,8 +503,8 @@ func TestView(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
-	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a grid
 	_, isGrid := panel.(*widget.GridWrap)
@@ -516,7 +516,7 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a list
 	_, isList := panel.(*widget.List)
@@ -528,7 +528,7 @@ func TestView(t *testing.T) {
 	// toggle view
 	test.Tap(toggleViewButton)
 	// reload files container
-	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a grid again
 	_, isGrid = panel.(*widget.GridWrap)
@@ -537,11 +537,11 @@ func TestView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.ListIcon().Name(), toggleViewButton.Icon.Name())
 
-	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, "File Selection", title.Text)
-	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	confirm := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
-	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	dismiss := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "Dismiss", dismiss.Text)
 }
 
@@ -569,8 +569,8 @@ func TestSetView(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
-	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// view should be a list
 	_, isList := panel.(*widget.List)
@@ -579,18 +579,18 @@ func TestSetView(t *testing.T) {
 	assert.Equal(t, "", toggleViewButton.Text)
 	assert.Equal(t, theme.GridIcon(), toggleViewButton.Icon)
 
-	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, "File Selection", title.Text)
-	confirm := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	confirm := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	assert.Equal(t, "Yes", confirm.Text)
-	dismiss := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	dismiss := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "Dismiss", dismiss.Text)
 
 	// set view to grid on already opened dialog - should be updated automatically
 	dlg.SetView(GridView)
 
 	// view should be a grid again
-	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	panel = ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 	_, isGrid := panel.(*widget.GridWrap)
 	assert.True(t, isGrid)
 	// toggleViewButton should reflect to what it will do (change to a list view).
@@ -621,8 +621,8 @@ func TestSetViewPreferences(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
-	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0]
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
+	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
 	// check that preference setting overrules configured default view
 	_, isGrid := panel.(*widget.GridWrap)
@@ -652,7 +652,7 @@ func TestViewPreferences(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[1].(*widget.Button)
+	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 
 	// default viewLayout preference should be 'grid'
 	view := ViewLayout(prefs.Int(viewLayoutKey))
@@ -786,7 +786,7 @@ func TestCreateNewFolderInDir(t *testing.T) {
 
 	folderDialogUI := folderDialogPopup.Content.(*fyne.Container)
 
-	createNewFolderButton := folderDialogUI.Objects[1].(*fyne.Container).Objects[0].(*fyne.Container).Objects[0].(*widget.Button)
+	createNewFolderButton := folderDialogUI.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
 	assert.Equal(t, theme.FolderNewIcon().Name(), createNewFolderButton.Icon.Name())
 
