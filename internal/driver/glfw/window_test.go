@@ -1683,8 +1683,8 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	runOnMain(func() {
 		e.SetText("Testing")
 		e.Disable()
-		w.SetContent(e)
 	})
+	w.SetContent(e)
 	repaintWindow(w)
 
 	w.Canvas().Focus(e)
