@@ -155,8 +155,10 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
-	shapeRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
 	cornerRadius := scale(fyne.Min(GetMaximumRadius(size), polygon.CornerRadius))
+	sides := int(polygon.Sides)
+	angle := polygon.Angle
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
@@ -164,15 +166,15 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), filler)
 		filler.Draw()
 	}
 
 	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
-		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
+		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), dasher)
 		dasher.Draw()
 	}
 
@@ -299,11 +301,17 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 		return
 	}
 	gf := rasterx.RoundGap
+	angleStep := 2 * math.Pi / float64(sides)
+	rotRads := rot*math.Pi/180 - math.Pi/2
+
+	// fully rounded, draw circle
+	if math.Min(cornerRadius, radius) == radius {
+		rasterx.AddCircle(cx, cy, radius, p)
+		return
+	}
 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
-		angleStep := 2 * math.Pi / float64(sides)
-		rotRads := rot*math.Pi/180 - math.Pi/2
 		x0 := cx + radius*math.Cos(rotRads)
 		y0 := cy + radius*math.Sin(rotRads)
 		p.Start(rasterx.ToFixedP(x0, y0))
@@ -324,8 +332,6 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	}
 
 	// regular polygon vertices
-	angleStep := 2 * math.Pi / float64(sides)
-	rotRads := -rot*math.Pi/180 - math.Pi/2
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
 	for i := 0; i < sides; i++ {
