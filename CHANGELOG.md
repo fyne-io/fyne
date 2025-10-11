@@ -16,6 +16,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * RowWrap layout
 
 * Add Generics to List and Tree for data binding
+* Support for IPv6 addresses in URIs
+* Add storage.RemoveAll to recursively delete from a repository
 * Added Portuguese, Russian & Chinese (Simplified)
 * Support left-tap systray show window
 * Support JSON theme with fallback
@@ -27,6 +29,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Massive performance increases on rendering
 * optimisations galore in data handling, custom themes and TextGrid
 * Smooth infinite progress by reversing animation not just looping
+* Numerous memory leaks and potential race conditions addressed
 
 ### Fixed
 
