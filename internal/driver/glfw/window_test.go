@@ -1680,9 +1680,11 @@ func TestWindow_ManualFocus(t *testing.T) {
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w := createWindow("Test")
 	e := widget.NewEntry()
-	e.SetText("Testing")
-	e.Disable()
-	w.SetContent(e)
+	runOnMain(func() {
+		e.SetText("Testing")
+		e.Disable()
+		w.SetContent(e)
+	})
 	repaintWindow(w)
 
 	w.Canvas().Focus(e)
