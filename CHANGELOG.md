@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.7.0 - 15 Oct 2025
+## 2.7.0 - 16 Oct 2025
 
 ### Added
 
@@ -14,12 +14,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 * New containers: Navigation & Clip
 * New Embedded driver (for running on non-standard drvices)
 * RowWrap layout
-
 * Add Generics to List and Tree for data binding
 * Support for IPv6 addresses in URIs
 * Add storage.RemoveAll to recursively delete from a repository
 * Added Portuguese, Russian & Chinese (Simplified)
-* Support left-tap systray show window
+* Support left-tap systray to show window (SetSystemTrayWindow)
 * Support JSON theme with fallback
 * Add RichText bullet start number
 * Option to always show Entry validation
