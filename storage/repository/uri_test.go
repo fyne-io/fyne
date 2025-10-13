@@ -34,6 +34,9 @@ func TestURIExtension(t *testing.T) {
 
 	uri = NewFileURI("file.tar.gz")
 	assert.Equal(t, ".gz", uri.Extension())
+
+	uri = NewFileURI("/path/.txt")
+	assert.Equal(t, ".txt", uri.Extension())
 }
 
 func TestURIName(t *testing.T) {
@@ -45,6 +48,9 @@ func TestURIName(t *testing.T) {
 
 	uri = NewFileURI("/somewhere/file.txt")
 	assert.Equal(t, "file.txt", uri.Name())
+
+	uri = NewFileURI("/path/.txt")
+	assert.Equal(t, ".txt", uri.Name())
 
 	if runtime.GOOS == "windows" {
 		uri = NewFileURI("C://somewhere/file.txt")
