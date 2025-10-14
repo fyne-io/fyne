@@ -1680,8 +1680,10 @@ func TestWindow_ManualFocus(t *testing.T) {
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w := createWindow("Test")
 	e := widget.NewEntry()
-	e.SetText("Testing")
-	e.Disable()
+	runOnMain(func() {
+		e.SetText("Testing")
+		e.Disable()
+	})
 	w.SetContent(e)
 	repaintWindow(w)
 
@@ -1841,7 +1843,9 @@ func TestWindow_Shortcut(t *testing.T) {
 	item.Shortcut = testShortcut
 	file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
 
-	w.SetMainMenu(fyne.NewMainMenu(file))
+	runOnMain(func() {
+		w.SetMainMenu(fyne.NewMainMenu(file))
+	})
 	trigger()
 	assert.Equal(t, 0, len(content.capturedShortcuts))
 	assert.Equal(t, "menu", called)
