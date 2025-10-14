@@ -53,13 +53,13 @@ func TestURIName(t *testing.T) {
 	assert.Equal(t, ".txt", uri.Name())
 
 	if runtime.GOOS == "windows" {
-		uri = NewFileURI("C://somewhere/file.txt")
+		uri = NewFileURI("C:/somewhere/file.txt")
 		assert.Equal(t, "file.txt", uri.Name())
 
-		uri = NewFileURI("C://somewhere")
+		uri = NewFileURI("C:/somewhere")
 		assert.Equal(t, "somewhere", uri.Name())
 
-		uri = NewFileURI("C://")
+		uri = NewFileURI("C:/")
 		assert.Equal(t, "C:", uri.Name())
 	}
 }
