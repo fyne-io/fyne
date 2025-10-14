@@ -221,6 +221,9 @@ func (t *Table) DragEnd() {
 func (t *Table) FocusGained() {
 	t.focused = true
 	t.RefreshItem(t.currentHighlight)
+	if f := t.OnHighlighted; f != nil {
+		f(t.currentHighlight)
+	}
 }
 
 // FocusLost is called after this Table has lost focus.

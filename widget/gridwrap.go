@@ -121,6 +121,9 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 func (l *GridWrap) FocusGained() {
 	l.focused = true
 	l.RefreshItem(l.currentHighlight)
+	if f := l.OnHighlighted; f != nil {
+		f(l.currentHighlight)
+	}
 }
 
 // FocusLost is called after this GridWrap has lost focus.

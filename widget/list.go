@@ -126,6 +126,9 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 func (l *List) FocusGained() {
 	l.focused = true
 	l.RefreshItem(l.currentHighlight)
+	if f := l.OnHighlighted; f != nil {
+		f(l.currentHighlight)
+	}
 }
 
 // FocusLost is called after this List has lost focus.

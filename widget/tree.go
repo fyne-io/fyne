@@ -183,6 +183,9 @@ func (t *Tree) FocusGained() {
 
 	t.focused = true
 	t.RefreshItem(t.currentHighlight)
+	if f := t.OnHighlighted; f != nil {
+		f(t.currentHighlight)
+	}
 }
 
 // FocusLost is called after this Tree has lost focus.
