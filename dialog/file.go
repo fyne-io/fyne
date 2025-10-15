@@ -240,17 +240,17 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	)
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
-		optionsbuttons, f.title,
+		f.title,
 	)
 
 	footer := container.NewBorder(nil, nil, nil, buttons,
-		buttons, container.NewHScroll(f.fileName),
+		container.NewHScroll(f.fileName),
 	)
 
 	body := container.NewHSplit(
 		f.favoritesList,
 		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
-			f.breadcrumbScroll, f.filesScroll,
+			f.filesScroll,
 		),
 	)
 	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only its minimal width

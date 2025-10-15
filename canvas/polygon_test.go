@@ -59,3 +59,35 @@ func TestPolygon_SidesRotation(t *testing.T) {
 	polygon.Angle = -50
 	test.AssertRendersToImage(t, "polygon_6.png", c)
 }
+
+func TestPolygon_RadiusMaximum(t *testing.T) {
+	polygon := &canvas.Polygon{
+		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor:  color.Black,
+		CornerRadius: canvas.RadiusMaximum,
+		Angle:        30,
+		Sides:        3,
+	}
+
+	polygon.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "maximum_rounded_polygon.xml", polygon)
+
+	c := software.NewCanvas()
+	c.SetContent(polygon)
+	c.Resize(fyne.NewSize(150, 150))
+
+	test.AssertRendersToImage(t, "maximum_rounded_polygon.png", c)
+
+	polygon.Sides = 9
+	polygon.Angle = -90
+	test.AssertRendersToImage(t, "maximum_rounded_polygon.png", c)
+
+	polygon.Sides = 4
+	polygon.StrokeWidth = 3
+	polygon.Angle = 55
+	test.AssertRendersToImage(t, "maximum_rounded_polygon_stroke.png", c)
+
+	polygon.Sides = 7
+	polygon.Angle = -115
+	test.AssertRendersToImage(t, "maximum_rounded_polygon_stroke.png", c)
+}
