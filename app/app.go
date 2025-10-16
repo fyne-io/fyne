@@ -185,5 +185,6 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 // marker interface to pass system tray to supporting drivers
 type systrayDriver interface {
 	SetSystemTrayMenu(*fyne.Menu)
-	SetSystemTrayIcon(resource fyne.Resource)
+	SetSystemTrayIcon(fyne.Resource)
+	SetSystemTrayWindow(fyne.Window)
 }

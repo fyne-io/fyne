@@ -19,9 +19,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const (
-	passwordChar = "•"
-)
+const passwordChar = "•"
+
+var _ fyne.Widget = (*RichText)(nil)
 
 // RichText represents the base element for a rich text-based widget.
 //
@@ -72,7 +72,8 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 	t.prop = canvas.NewRectangle(color.Transparent)
 	if t.scr == nil && t.Scroll != widget.ScrollNone {
 		t.scr = widget.NewScroll(&fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			t.prop, &fyne.Container{}}})
+			t.prop, &fyne.Container{},
+		}})
 	}
 
 	t.ExtendBaseWidget(t)
@@ -95,8 +96,6 @@ func (t *RichText) MinSize() fyne.Size {
 }
 
 // Refresh triggers a redraw of the rich text.
-//
-// Implements: fyne.Widget
 func (t *RichText) Refresh() {
 	t.minCache = fyne.Size{}
 	t.updateRowBounds()
@@ -112,8 +111,6 @@ func (t *RichText) Refresh() {
 
 // Resize sets a new size for the rich text.
 // This should only be called if it is not in a container with a layout manager.
-//
-// Implements: fyne.Widget
 func (t *RichText) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return
@@ -618,7 +615,8 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, objs []fyne.CanvasObject,
-	charMinSize fyne.Size, th fyne.Theme) fyne.Size {
+	charMinSize fyne.Size, th fyne.Theme,
+) fyne.Size {
 	height := float32(0)
 	width := float32(0)
 	rowHeight := float32(0)
@@ -640,8 +638,8 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 			min := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
-				if !img.MinSize().Subtract(img.oldMin).IsZero() {
-					img.oldMin = img.MinSize()
+				if newMin := img.MinSize(); newMin != img.oldMin {
+					img.oldMin = newMin
 
 					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
@@ -721,7 +719,8 @@ func (r *textRenderer) Refresh() {
 
 	if r.obj.scr != nil {
 		r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			r.obj.prop, &fyne.Container{Objects: objs}}}
+			r.obj.prop, &fyne.Container{Objects: objs},
+		}}
 		r.obj.scr.Direction = scroll
 		r.SetObjects([]fyne.CanvasObject{r.obj.scr})
 		r.obj.scr.Refresh()
@@ -764,10 +763,11 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	// Access to theme is slow, so we cache the text size
 	textSize := theme.SizeForWidget(theme.SizeNameText, r.obj)
 
+	driver := fyne.CurrentApp().Driver()
 	for i, text := range texts {
 		var size fyne.Size
 		if txt, ok := text.(*canvas.Text); ok {
-			s, base := fyne.CurrentApp().Driver().RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
+			s, base := driver.RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
 			if base > tallestBaseline {
 				if tallestBaseline > 0 {
 					realign = true
@@ -779,7 +779,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		} else if c, ok := text.(*fyne.Container); ok {
 			wid := c.Objects[0]
 			if link, ok := wid.(*Hyperlink); ok {
-				s, base := fyne.CurrentApp().Driver().RenderedTextSize(link.Text, textSize, link.TextStyle, nil)
+				s, base := driver.RenderedTextSize(link.Text, textSize, link.TextStyle, nil)
 				if base > tallestBaseline {
 					if tallestBaseline > 0 {
 						realign = true

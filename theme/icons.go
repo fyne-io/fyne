@@ -504,127 +504,125 @@ const (
 	IconNameWindowMinimize fyne.ThemeIconName = "windowMinimize"
 )
 
-var (
-	icons = map[fyne.ThemeIconName]fyne.Resource{
-		IconNameCancel:        NewThemedResource(cancelIconRes),
-		IconNameConfirm:       NewThemedResource(checkIconRes),
-		IconNameDelete:        NewThemedResource(deleteIconRes),
-		IconNameSearch:        NewThemedResource(searchIconRes),
-		IconNameSearchReplace: NewThemedResource(searchreplaceIconRes),
-		IconNameMenu:          NewThemedResource(menuIconRes),
-		IconNameMenuExpand:    NewThemedResource(menuexpandIconRes),
+var icons = map[fyne.ThemeIconName]fyne.Resource{
+	IconNameCancel:        NewThemedResource(cancelIconRes),
+	IconNameConfirm:       NewThemedResource(checkIconRes),
+	IconNameDelete:        NewThemedResource(deleteIconRes),
+	IconNameSearch:        NewThemedResource(searchIconRes),
+	IconNameSearchReplace: NewThemedResource(searchreplaceIconRes),
+	IconNameMenu:          NewThemedResource(menuIconRes),
+	IconNameMenuExpand:    NewThemedResource(menuexpandIconRes),
 
-		IconNameCheckButton:        NewThemedResource(checkboxIconRes),
-		IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
-		IconNameCheckButtonFill:    NewThemedResource(checkboxfillIconRes),
-		IconNameCheckButtonPartial: NewThemedResource(checkboxpartialIconRes),
-		IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
-		IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
-		IconNameRadioButtonFill:    NewThemedResource(radiobuttonfillIconRes),
+	IconNameCheckButton:        NewThemedResource(checkboxIconRes),
+	IconNameCheckButtonChecked: NewThemedResource(checkboxcheckedIconRes),
+	IconNameCheckButtonFill:    NewThemedResource(checkboxfillIconRes),
+	IconNameCheckButtonPartial: NewThemedResource(checkboxpartialIconRes),
+	IconNameRadioButton:        NewThemedResource(radiobuttonIconRes),
+	IconNameRadioButtonChecked: NewThemedResource(radiobuttoncheckedIconRes),
+	IconNameRadioButtonFill:    NewThemedResource(radiobuttonfillIconRes),
 
-		IconNameContentAdd:    NewThemedResource(contentaddIconRes),
-		IconNameContentClear:  NewThemedResource(cancelIconRes),
-		IconNameContentRemove: NewThemedResource(contentremoveIconRes),
-		IconNameContentCut:    NewThemedResource(contentcutIconRes),
-		IconNameContentCopy:   NewThemedResource(contentcopyIconRes),
-		IconNameContentPaste:  NewThemedResource(contentpasteIconRes),
-		IconNameContentRedo:   NewThemedResource(contentredoIconRes),
-		IconNameContentUndo:   NewThemedResource(contentundoIconRes),
+	IconNameContentAdd:    NewThemedResource(contentaddIconRes),
+	IconNameContentClear:  NewThemedResource(cancelIconRes),
+	IconNameContentRemove: NewThemedResource(contentremoveIconRes),
+	IconNameContentCut:    NewThemedResource(contentcutIconRes),
+	IconNameContentCopy:   NewThemedResource(contentcopyIconRes),
+	IconNameContentPaste:  NewThemedResource(contentpasteIconRes),
+	IconNameContentRedo:   NewThemedResource(contentredoIconRes),
+	IconNameContentUndo:   NewThemedResource(contentundoIconRes),
 
-		IconNameColorAchromatic: NewThemedResource(colorachromaticIconRes),
-		IconNameColorChromatic:  NewThemedResource(colorchromaticIconRes),
-		IconNameColorPalette:    NewThemedResource(colorpaletteIconRes),
+	IconNameColorAchromatic: NewThemedResource(colorachromaticIconRes),
+	IconNameColorChromatic:  NewThemedResource(colorchromaticIconRes),
+	IconNameColorPalette:    NewThemedResource(colorpaletteIconRes),
 
-		IconNameDocument:       NewThemedResource(documentIconRes),
-		IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
-		IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
-		IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
+	IconNameDocument:       NewThemedResource(documentIconRes),
+	IconNameDocumentCreate: NewThemedResource(documentcreateIconRes),
+	IconNameDocumentPrint:  NewThemedResource(documentprintIconRes),
+	IconNameDocumentSave:   NewThemedResource(documentsaveIconRes),
 
-		IconNameDragCornerIndicator: NewThemedResource(dragcornerindicatorIconRes),
+	IconNameDragCornerIndicator: NewThemedResource(dragcornerindicatorIconRes),
 
-		IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
-		IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
+	IconNameMoreHorizontal: NewThemedResource(morehorizontalIconRes),
+	IconNameMoreVertical:   NewThemedResource(moreverticalIconRes),
 
-		IconNameInfo:        NewThemedResource(infoIconRes),
-		IconNameQuestion:    NewThemedResource(questionIconRes),
-		IconNameWarning:     NewThemedResource(warningIconRes),
-		IconNameError:       NewThemedResource(errorIconRes),
-		IconNameBrokenImage: NewThemedResource(brokenimageIconRes),
+	IconNameInfo:        NewThemedResource(infoIconRes),
+	IconNameQuestion:    NewThemedResource(questionIconRes),
+	IconNameWarning:     NewThemedResource(warningIconRes),
+	IconNameError:       NewThemedResource(errorIconRes),
+	IconNameBrokenImage: NewThemedResource(brokenimageIconRes),
 
-		IconNameMailAttachment: NewThemedResource(mailattachmentIconRes),
-		IconNameMailCompose:    NewThemedResource(mailcomposeIconRes),
-		IconNameMailForward:    NewThemedResource(mailforwardIconRes),
-		IconNameMailReply:      NewThemedResource(mailreplyIconRes),
-		IconNameMailReplyAll:   NewThemedResource(mailreplyallIconRes),
-		IconNameMailSend:       NewThemedResource(mailsendIconRes),
+	IconNameMailAttachment: NewThemedResource(mailattachmentIconRes),
+	IconNameMailCompose:    NewThemedResource(mailcomposeIconRes),
+	IconNameMailForward:    NewThemedResource(mailforwardIconRes),
+	IconNameMailReply:      NewThemedResource(mailreplyIconRes),
+	IconNameMailReplyAll:   NewThemedResource(mailreplyallIconRes),
+	IconNameMailSend:       NewThemedResource(mailsendIconRes),
 
-		IconNameMediaMusic:        NewThemedResource(mediamusicIconRes),
-		IconNameMediaPhoto:        NewThemedResource(mediaphotoIconRes),
-		IconNameMediaVideo:        NewThemedResource(mediavideoIconRes),
-		IconNameMediaFastForward:  NewThemedResource(mediafastforwardIconRes),
-		IconNameMediaFastRewind:   NewThemedResource(mediafastrewindIconRes),
-		IconNameMediaPause:        NewThemedResource(mediapauseIconRes),
-		IconNameMediaPlay:         NewThemedResource(mediaplayIconRes),
-		IconNameMediaRecord:       NewThemedResource(mediarecordIconRes),
-		IconNameMediaReplay:       NewThemedResource(mediareplayIconRes),
-		IconNameMediaSkipNext:     NewThemedResource(mediaskipnextIconRes),
-		IconNameMediaSkipPrevious: NewThemedResource(mediaskippreviousIconRes),
-		IconNameMediaStop:         NewThemedResource(mediastopIconRes),
+	IconNameMediaMusic:        NewThemedResource(mediamusicIconRes),
+	IconNameMediaPhoto:        NewThemedResource(mediaphotoIconRes),
+	IconNameMediaVideo:        NewThemedResource(mediavideoIconRes),
+	IconNameMediaFastForward:  NewThemedResource(mediafastforwardIconRes),
+	IconNameMediaFastRewind:   NewThemedResource(mediafastrewindIconRes),
+	IconNameMediaPause:        NewThemedResource(mediapauseIconRes),
+	IconNameMediaPlay:         NewThemedResource(mediaplayIconRes),
+	IconNameMediaRecord:       NewThemedResource(mediarecordIconRes),
+	IconNameMediaReplay:       NewThemedResource(mediareplayIconRes),
+	IconNameMediaSkipNext:     NewThemedResource(mediaskipnextIconRes),
+	IconNameMediaSkipPrevious: NewThemedResource(mediaskippreviousIconRes),
+	IconNameMediaStop:         NewThemedResource(mediastopIconRes),
 
-		IconNameNavigateBack:  NewThemedResource(arrowbackIconRes),
-		IconNameMoveDown:      NewThemedResource(arrowdownIconRes),
-		IconNameNavigateNext:  NewThemedResource(arrowforwardIconRes),
-		IconNameMoveUp:        NewThemedResource(arrowupIconRes),
-		IconNameArrowDropDown: NewThemedResource(arrowdropdownIconRes),
-		IconNameArrowDropUp:   NewThemedResource(arrowdropupIconRes),
+	IconNameNavigateBack:  NewThemedResource(arrowbackIconRes),
+	IconNameMoveDown:      NewThemedResource(arrowdownIconRes),
+	IconNameNavigateNext:  NewThemedResource(arrowforwardIconRes),
+	IconNameMoveUp:        NewThemedResource(arrowupIconRes),
+	IconNameArrowDropDown: NewThemedResource(arrowdropdownIconRes),
+	IconNameArrowDropUp:   NewThemedResource(arrowdropupIconRes),
 
-		IconNameFile:            NewThemedResource(fileIconRes),
-		IconNameFileApplication: NewThemedResource(fileapplicationIconRes),
-		IconNameFileAudio:       NewThemedResource(fileaudioIconRes),
-		IconNameFileImage:       NewThemedResource(fileimageIconRes),
-		IconNameFileText:        NewThemedResource(filetextIconRes),
-		IconNameFileVideo:       NewThemedResource(filevideoIconRes),
-		IconNameFolder:          NewThemedResource(folderIconRes),
-		IconNameFolderNew:       NewThemedResource(foldernewIconRes),
-		IconNameFolderOpen:      NewThemedResource(folderopenIconRes),
-		IconNameHelp:            NewThemedResource(helpIconRes),
-		IconNameHistory:         NewThemedResource(historyIconRes),
-		IconNameHome:            NewThemedResource(homeIconRes),
-		IconNameSettings:        NewThemedResource(settingsIconRes),
+	IconNameFile:            NewThemedResource(fileIconRes),
+	IconNameFileApplication: NewThemedResource(fileapplicationIconRes),
+	IconNameFileAudio:       NewThemedResource(fileaudioIconRes),
+	IconNameFileImage:       NewThemedResource(fileimageIconRes),
+	IconNameFileText:        NewThemedResource(filetextIconRes),
+	IconNameFileVideo:       NewThemedResource(filevideoIconRes),
+	IconNameFolder:          NewThemedResource(folderIconRes),
+	IconNameFolderNew:       NewThemedResource(foldernewIconRes),
+	IconNameFolderOpen:      NewThemedResource(folderopenIconRes),
+	IconNameHelp:            NewThemedResource(helpIconRes),
+	IconNameHistory:         NewThemedResource(historyIconRes),
+	IconNameHome:            NewThemedResource(homeIconRes),
+	IconNameSettings:        NewThemedResource(settingsIconRes),
 
-		IconNameViewFullScreen: NewThemedResource(viewfullscreenIconRes),
-		IconNameViewRefresh:    NewThemedResource(viewrefreshIconRes),
-		IconNameViewRestore:    NewThemedResource(viewzoomfitIconRes),
-		IconNameViewZoomFit:    NewThemedResource(viewzoomfitIconRes),
-		IconNameViewZoomIn:     NewThemedResource(viewzoominIconRes),
-		IconNameViewZoomOut:    NewThemedResource(viewzoomoutIconRes),
+	IconNameViewFullScreen: NewThemedResource(viewfullscreenIconRes),
+	IconNameViewRefresh:    NewThemedResource(viewrefreshIconRes),
+	IconNameViewRestore:    NewThemedResource(viewzoomfitIconRes),
+	IconNameViewZoomFit:    NewThemedResource(viewzoomfitIconRes),
+	IconNameViewZoomIn:     NewThemedResource(viewzoominIconRes),
+	IconNameViewZoomOut:    NewThemedResource(viewzoomoutIconRes),
 
-		IconNameVisibility:    NewThemedResource(visibilityIconRes),
-		IconNameVisibilityOff: NewThemedResource(visibilityoffIconRes),
+	IconNameVisibility:    NewThemedResource(visibilityIconRes),
+	IconNameVisibilityOff: NewThemedResource(visibilityoffIconRes),
 
-		IconNameVolumeDown: NewThemedResource(volumedownIconRes),
-		IconNameVolumeMute: NewThemedResource(volumemuteIconRes),
-		IconNameVolumeUp:   NewThemedResource(volumeupIconRes),
+	IconNameVolumeDown: NewThemedResource(volumedownIconRes),
+	IconNameVolumeMute: NewThemedResource(volumemuteIconRes),
+	IconNameVolumeUp:   NewThemedResource(volumeupIconRes),
 
-		IconNameDownload: NewThemedResource(downloadIconRes),
-		IconNameComputer: NewThemedResource(computerIconRes),
-		IconNameDesktop:  NewThemedResource(desktopIconRes),
-		IconNameStorage:  NewThemedResource(storageIconRes),
-		IconNameUpload:   NewThemedResource(uploadIconRes),
+	IconNameDownload: NewThemedResource(downloadIconRes),
+	IconNameComputer: NewThemedResource(computerIconRes),
+	IconNameDesktop:  NewThemedResource(desktopIconRes),
+	IconNameStorage:  NewThemedResource(storageIconRes),
+	IconNameUpload:   NewThemedResource(uploadIconRes),
 
-		IconNameAccount:  NewThemedResource(accountIconRes),
-		IconNameCalendar: NewThemedResource(calendarIconRes),
-		IconNameLogin:    NewThemedResource(loginIconRes),
-		IconNameLogout:   NewThemedResource(logoutIconRes),
+	IconNameAccount:  NewThemedResource(accountIconRes),
+	IconNameCalendar: NewThemedResource(calendarIconRes),
+	IconNameLogin:    NewThemedResource(loginIconRes),
+	IconNameLogout:   NewThemedResource(logoutIconRes),
 
-		IconNameList: NewThemedResource(listIconRes),
-		IconNameGrid: NewThemedResource(gridIconRes),
+	IconNameList: NewThemedResource(listIconRes),
+	IconNameGrid: NewThemedResource(gridIconRes),
 
-		IconNameWindowClose:    NewThemedResource(cancelIconRes),
-		IconNameWindowMaximize: NewThemedResource(maximizeIconRes),
-		IconNameWindowMinimize: NewThemedResource(minimizeIconRes),
-	}
-)
+	IconNameWindowClose:    NewThemedResource(cancelIconRes),
+	IconNameWindowMaximize: NewThemedResource(maximizeIconRes),
+	IconNameWindowMinimize: NewThemedResource(minimizeIconRes),
+}
 
 // Icon looks up the specified icon for current theme.
 //
@@ -645,6 +643,8 @@ func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
 
+var _ fyne.ThemedResource = (*ThemedResource)(nil)
+
 // ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
 type ThemedResource struct {
@@ -655,8 +655,6 @@ type ThemedResource struct {
 	// Since: 2.3
 	ColorName fyne.ThemeColorName
 }
-
-var _ fyne.ThemedResource = (*ThemedResource)(nil)
 
 // NewColoredResource creates a resource that adapts to the current theme setting using
 // the color named in the constructor.
@@ -703,7 +701,6 @@ func (res *ThemedResource) Name() string {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-// @implements fyne.ThemedResource
 func (res *ThemedResource) ThemeColorName() fyne.ThemeColorName {
 	if res.ColorName != "" {
 		return res.ColorName
@@ -722,13 +719,13 @@ func (res *ThemedResource) Error() *ErrorThemedResource {
 	return NewErrorThemedResource(res)
 }
 
+var _ fyne.ThemedResource = (*InvertedThemedResource)(nil)
+
 // InvertedThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for use over highlighted elements.
 type InvertedThemedResource struct {
 	source fyne.Resource
 }
-
-var _ fyne.ThemedResource = (*InvertedThemedResource)(nil)
 
 // NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
 func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
@@ -748,7 +745,6 @@ func (res *InvertedThemedResource) Content() []byte {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-// @implements fyne.ThemedResource
 func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameBackground
 }
@@ -757,6 +753,8 @@ func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 func (res *InvertedThemedResource) Original() fyne.Resource {
 	return res.source
 }
+
+var _ fyne.ThemedResource = (*ErrorThemedResource)(nil)
 
 // ErrorThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // to indicate an error.
@@ -786,12 +784,13 @@ func (res *ErrorThemedResource) Original() fyne.Resource {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-// @implements fyne.ThemedResource
 //
 // Since: 2.6
 func (res *ErrorThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameError
 }
+
+var _ fyne.ThemedResource = (*PrimaryThemedResource)(nil)
 
 // PrimaryThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // to the theme primary color.
@@ -801,8 +800,7 @@ type PrimaryThemedResource struct {
 
 // NewPrimaryThemedResource creates a resource that adapts to the primary color for the current theme.
 func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
-	res := &PrimaryThemedResource{source: orig}
-	return res
+	return &PrimaryThemedResource{source: orig}
 }
 
 // Name returns the underlying resource name (used for caching).
@@ -821,12 +819,13 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-// @implements fyne.ThemedResource
 //
 // Since: 2.6
 func (res *PrimaryThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNamePrimary
 }
+
+var _ fyne.ThemedResource = (*DisabledResource)(nil)
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
 // the current theme's `DisabledColor` color.
@@ -845,7 +844,6 @@ func (res *DisabledResource) Content() []byte {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-// @implements fyne.ThemedResource
 //
 // Since: 2.6
 func (res *DisabledResource) ThemeColorName() fyne.ThemeColorName {

@@ -2,14 +2,11 @@
 package theme // import "fyne.io/fyne/v2/theme"
 
 import (
-	"bytes"
 	"image/color"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/v2"
-	internalApp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 )
@@ -315,7 +312,7 @@ func lightPaletteColorNamed(name fyne.ThemeColorName) color.Color {
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
-	variantPath := strings.Replace(env, "Regular", variant, -1)
+	variantPath := strings.ReplaceAll(env, "Regular", variant)
 
 	res, err := fyne.LoadResourceFromPath(variantPath)
 	if err != nil {
@@ -356,25 +353,4 @@ func setupDefaultTheme() fyne.Theme {
 	systemTheme = setupSystemTheme(theme)
 
 	return theme
-}
-
-func setupSystemTheme(fallback fyne.Theme) fyne.Theme {
-	root := internalApp.RootConfigDir()
-
-	path := filepath.Join(root, "theme.json")
-	data, err := fyne.LoadResourceFromPath(path)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			fyne.LogError("Failed to load user theme file: "+path, err)
-		}
-		return nil
-	}
-	if data != nil && data.Content() != nil {
-		th, err := fromJSONWithFallback(bytes.NewReader(data.Content()), fallback)
-		if err == nil {
-			return th
-		}
-		fyne.LogError("Failed to parse user theme file: "+path, err)
-	}
-	return nil
 }

@@ -1,4 +1,4 @@
-//go:build !ci && !wasm && !test_web_driver && !mobile
+//go:build !ci && !wasm && !test_web_driver && !mobile && !tinygo
 
 package app
 
@@ -13,6 +13,7 @@ bool isBundled();
 void sendNotification(char *title, char *content);
 */
 import "C"
+
 import (
 	"fmt"
 	"os/exec"

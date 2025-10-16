@@ -3,6 +3,9 @@
 package glfw
 
 import (
+	"io"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 
@@ -13,6 +16,11 @@ import (
 )
 
 func Test_Menu_Empty(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// bar := buildMenuOverlay(fyne.NewMainMenu(), w.window)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Menu Test")
 	bar := buildMenuOverlay(fyne.NewMainMenu(), w.window)
 	assert.Nil(t, bar) // no bar but does not crash
@@ -37,6 +45,7 @@ func Test_Menu_LeaveQuit(t *testing.T) {
 	assert.Equal(t, 1, len(mainMenu.Items[0].Items)) // no separator added
 	assert.Equal(t, reflect.ValueOf(quitFunc).Pointer(), reflect.ValueOf(mainMenu.Items[0].Items[0].Action).Pointer())
 }
+
 func Test_Menu_LeaveQuit_AddAction(t *testing.T) {
 	w := createWindow("Menu Test")
 	mainMenu := fyne.NewMainMenu(fyne.NewMenu("File", fyne.NewMenuItem(lang.L("Quit"), nil)))

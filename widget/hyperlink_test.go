@@ -170,8 +170,10 @@ func TestHyperlink_ThemeOverride(t *testing.T) {
 
 	hyperlink := &Hyperlink{Text: "Test"}
 	bg := canvas.NewRectangle(color.Gray{Y: 0xc0})
-	w := test.NewWindow(&fyne.Container{Layout: layout.NewStackLayout(),
-		Objects: []fyne.CanvasObject{bg, hyperlink}})
+	w := test.NewWindow(&fyne.Container{
+		Layout:  layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, hyperlink},
+	})
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(hyperlink.MinSize())

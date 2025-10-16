@@ -3,6 +3,59 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.7.0 - 16 Oct 2025
+
+### Added
+
+* Canvas types: Arc, Polygon, Square (and Rectangle.Aspect)
+* "Cover" image fill
+* Fully rounded corner radius ("pill" rectangle) & per-corner
+* Image corner radius
+* New containers: Navigation & Clip
+* New Embedded driver (for running on non-standard drvices)
+* RowWrap layout
+* Add Generics to List and Tree for data binding
+* Support for IPv6 addresses in URIs
+* Add storage.RemoveAll to recursively delete from a repository
+* Added Portuguese, Russian & Chinese (Simplified)
+* Support left-tap systray to show window (SetSystemTrayWindow)
+* Support JSON theme with fallback
+* Add RichText bullet start number
+* Option to always show Entry validation
+
+### Changed
+
+* Massive performance increases on rendering
+* optimisations galore in data handling, custom themes and TextGrid
+* Smooth infinite progress by reversing animation not just looping
+* Numerous memory leaks and potential race conditions addressed
+
+### Fixed
+
+* Theme Override container cannot be used to override layout paddings (#5019)
+* Tree widget: First selected node stays highlighted after switching selection (#5796)
+* Brave browser: Web app via fyne serve blinks and closes , works correctly in Chrome (and Edge) (#5705)
+* layout.formLayout render canvas.Text as labels and values outside/off minSize area (#5163)
+* Android: EGL_BAD_SURFACE fails to redraw app after OpenFile dialog closes (#3541)
+* Tab and Shift +Tab not behaving as expected on folder dialog (#5974)
+
+### New Contributors
+
+Code in v2.7.0 contains work from the following first time contributors:
+
+* @kruitbosdotdev
+* @cognusion
+* @r3quie
+* @redawl
+* @generikvault
+* @cwarden
+* @Vinci10
+* @cpustejovsky
+* @xfaris
+* @rad756
+* @ystepanoff
+
+
 ## 2.6.3 - 21 August 2025
 
 ### Fixed

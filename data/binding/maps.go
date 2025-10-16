@@ -248,7 +248,7 @@ func (b *mapBase) doReload() (retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return retErr
 }
 
 func (b *mapBase) setItem(key string, d reflectUntyped) {
@@ -289,20 +289,20 @@ func (b *boundStruct) Reload() (retErr error) {
 		var err error
 		switch kind {
 		case reflect.Bool:
-			err = b.items[key].(*reflectBool).Set(f.Bool())
+			err = b.items[key].(*boundReflect[bool]).Set(f.Bool())
 		case reflect.Float32, reflect.Float64:
-			err = b.items[key].(*reflectFloat).Set(f.Float())
+			err = b.items[key].(*boundReflect[float64]).Set(f.Float())
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			err = b.items[key].(*reflectInt).Set(int(f.Int()))
+			err = b.items[key].(*boundReflect[int]).Set(int(f.Int()))
 		case reflect.String:
-			err = b.items[key].(*reflectString).Set(f.String())
+			err = b.items[key].(*boundReflect[string]).Set(f.String())
 		}
 		if err != nil {
 			retErr = err
 		}
 		(*b.val)[key] = f.Interface()
 	}
-	return
+	return retErr
 }
 
 func bindUntypedMapValue(m *map[string]any, k string, external bool) reflectUntyped {
@@ -353,170 +353,59 @@ func (b *boundExternalMapValue) setIfChanged(val any) error {
 	return b.set(val)
 }
 
-type boundReflect struct {
+type boundReflect[T any] struct {
 	base
 
 	val reflect.Value
 }
 
-func (b *boundReflect) get() (any, error) {
+func (b *boundReflect[T]) Get() (T, error) {
+	var zero T
+	val, err := b.get()
+	if err != nil {
+		return zero, err
+	}
+
+	casted, ok := val.(T)
+	if !ok {
+		return zero, errors.New("unable to convert value to type")
+	}
+
+	return casted, nil
+}
+
+func (b *boundReflect[T]) Set(val T) error {
+	return b.set(val)
+}
+
+func (b *boundReflect[T]) get() (any, error) {
+	if !b.val.CanInterface() {
+		return nil, errors.New("unable to get value from data binding")
+	}
+
 	return b.val.Interface(), nil
 }
 
-func (b *boundReflect) set(val any) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("unable to set bool in data binding")
-		}
-	}()
-	b.val.Set(reflect.ValueOf(val))
+func (b *boundReflect[T]) set(val any) error {
+	if !b.val.CanSet() {
+		return errors.New("unable to set value in data binding")
+	}
 
+	b.val.Set(reflect.ValueOf(val))
 	b.trigger()
 	return nil
-}
-
-type reflectBool struct {
-	boundReflect
-}
-
-func (r *reflectBool) Get() (val bool, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("invalid bool value in data binding")
-		}
-	}()
-
-	val = r.val.Bool()
-	return
-}
-
-func (r *reflectBool) Set(b bool) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("unable to set bool in data binding")
-		}
-	}()
-
-	r.val.SetBool(b)
-	r.trigger()
-	return
-}
-
-func bindReflectBool(f reflect.Value) reflectUntyped {
-	r := &reflectBool{}
-	r.val = f
-	return r
-}
-
-type reflectFloat struct {
-	boundReflect
-}
-
-func (r *reflectFloat) Get() (val float64, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("invalid float64 value in data binding")
-		}
-	}()
-
-	val = r.val.Float()
-	return
-}
-
-func (r *reflectFloat) Set(f float64) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("unable to set float64 in data binding")
-		}
-	}()
-
-	r.val.SetFloat(f)
-	r.trigger()
-	return
-}
-
-func bindReflectFloat(f reflect.Value) reflectUntyped {
-	r := &reflectFloat{}
-	r.val = f
-	return r
-}
-
-type reflectInt struct {
-	boundReflect
-}
-
-func (r *reflectInt) Get() (val int, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("invalid int value in data binding")
-		}
-	}()
-
-	val = int(r.val.Int())
-	return
-}
-
-func (r *reflectInt) Set(i int) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("unable to set int in data binding")
-		}
-	}()
-
-	r.val.SetInt(int64(i))
-	r.trigger()
-	return
-}
-
-func bindReflectInt(f reflect.Value) reflectUntyped {
-	r := &reflectInt{}
-	r.val = f
-	return r
-}
-
-type reflectString struct {
-	boundReflect
-}
-
-func (r *reflectString) Get() (val string, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("invalid string value in data binding")
-		}
-	}()
-
-	val = r.val.String()
-	return
-}
-
-func (r *reflectString) Set(s string) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("unable to set string in data binding")
-		}
-	}()
-
-	r.val.SetString(s)
-	r.trigger()
-	return
-}
-
-func bindReflectString(f reflect.Value) reflectUntyped {
-	r := &reflectString{}
-	r.val = f
-	return r
 }
 
 func bindReflect(field reflect.Value) reflectUntyped {
 	switch field.Kind() {
 	case reflect.Bool:
-		return bindReflectBool(field)
+		return &boundReflect[bool]{val: field}
 	case reflect.Float32, reflect.Float64:
-		return bindReflectFloat(field)
+		return &boundReflect[float64]{val: field}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return bindReflectInt(field)
+		return &boundReflect[int]{val: field}
 	case reflect.String:
-		return bindReflectString(field)
+		return &boundReflect[string]{val: field}
 	}
-	return &boundReflect{val: field}
+	return &boundReflect[any]{val: field}
 }

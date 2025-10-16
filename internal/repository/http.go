@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-// declare conformance with repository types
 var _ repository.Repository = (*HTTPRepository)(nil)
 
 type remoteFile struct {
@@ -50,32 +49,12 @@ func NewHTTPRepository() *HTTPRepository {
 	return &HTTPRepository{}
 }
 
-func constructURI(u fyne.URI) string {
-	uri := ""
-	uri += u.Scheme() + "://"
-	uri += u.Authority()
-	if u.Path() != "" {
-		uri += u.Path()
-	}
-	if u.Query() != "" {
-		uri += "?" + u.Query()
-	}
-	if u.Fragment() != "" {
-		uri += "#" + u.Fragment()
-	}
-
-	return uri
-}
-
 // Exists checks whether the resource at u returns a
 // non "404 NOT FOUND" response header.
 //
-// Implements: repository.Repository
-//
 // Since: 2.1
 func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
-	uri := constructURI(u)
-	resp, err := http.Head(uri)
+	resp, err := http.Head(u.String())
 	if err != nil {
 		return false, err
 	}
@@ -89,13 +68,9 @@ func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
 // Reader provides a interface for reading the body of the response received
 // from the request to u.
 //
-// Implements: repository.Repository
-//
 // Since: 2.1
 func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	uri := constructURI(u)
-	resp, err := http.Get(uri)
-
+	resp, err := http.Get(u.String())
 	return &remoteFile{Response: resp, uri: u}, err
 }
 
@@ -103,12 +78,9 @@ func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // from the remote server.
 // Any response status code apart from 2xx is considered to be invalid.
 //
-// Implements: repository.Repository
-//
 // Since: 2.1
 func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
-	uri := constructURI(u)
-	resp, err := http.Head(uri)
+	resp, err := http.Head(u.String())
 	if err != nil {
 		return false, err
 	}
@@ -120,8 +92,6 @@ func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
 }
 
 // Destroy satisfies the repository.Repository interface.
-//
-// Implements: repository.Repository
 //
 // Since: 2.1
 func (r *HTTPRepository) Destroy(string) {

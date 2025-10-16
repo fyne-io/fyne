@@ -96,16 +96,56 @@ func TestTextGrid_Scroll(t *testing.T) {
 	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
 }
 
+func TestTextGrid_ScrollToTop(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.Refresh()
+	scrolling.scroll.ScrollToBottom()
+	scrolling.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.SetText("Something\nElse")
+	scrolling.scroll.ScrollToBottom()
+	scrolling.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+}
+
+func TestTextGrid_ScrollToBottom(t *testing.T) {
+	grid := NewTextGridFromString("Something\nElse")
+	grid.Resize(fyne.NewSize(50, 20))
+	test.AssertObjectRendersToMarkup(t, "textgrid/basic.xml", grid)
+
+	scrolling := NewTextGridFromString("Something\nElse")
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.Refresh()
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+
+	scrolling = NewTextGrid()
+	scrolling.Scroll = widget.ScrollBoth
+	scrolling.Resize(fyne.NewSize(50, 20))
+	scrolling.SetText("Something\nElse")
+	scrolling.ScrollToBottom()
+	scrolling.scroll.ScrollToTop()
+	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
+}
+
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(52, 22))
 	wrap := test.TempWidgetRenderer(t, grid).(*textGridRenderer).text
-	rend := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
-	rend.Refresh()
-
-	row := rend.visible[0].(fyne.Widget)
-	rr := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
-	assert.Len(t, rr.objects, 18)
+	row := wrap.visible[0].(*textGridRow)
+	assert.Len(t, row.objects, 18)
 }
 
 func TestTextGrid_Row(t *testing.T) {
@@ -150,11 +190,11 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 
 	assert.Len(t, grid.Rows, 2)
 	assert.Len(t, grid.Rows[1].Cells, 5)
-	render := test.WidgetRenderer(test.WidgetRenderer(grid).(*textGridRenderer).text).(*textGridContentRenderer)
-	assert.Equal(t, 3, len(render.visible))
-	row0 := test.WidgetRenderer(render.visible[0].(*textGridRow)).(*textGridRowRenderer)
-	row1 := test.WidgetRenderer(render.visible[1].(*textGridRow)).(*textGridRowRenderer)
-	row2 := test.WidgetRenderer(render.visible[2].(*textGridRow)).(*textGridRowRenderer)
+	content := test.WidgetRenderer(grid).(*textGridRenderer).text
+	assert.Equal(t, 3, len(content.visible))
+	row0 := content.visible[0].(*textGridRow)
+	row1 := content.visible[1].(*textGridRow)
+	row2 := content.visible[2].(*textGridRow)
 	assert.Equal(t, "H", row0.objects[1].(*canvas.Text).Text)
 	assert.Equal(t, "g", row0.objects[28].(*canvas.Text).Text)
 	assert.Equal(t, "t", row1.objects[1].(*canvas.Text).Text)
@@ -163,7 +203,7 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	grid.SetText("Replace")
 
 	assert.Len(t, grid.Rows, 1)
-	assert.Equal(t, 2, len(render.visible))
+	assert.Equal(t, 2, len(content.visible))
 	assert.Len(t, grid.Rows[0].Cells, 7)
 
 	assert.Equal(t, "R", row0.objects[1].(*canvas.Text).Text)
@@ -271,9 +311,8 @@ func TestTextGridRender_Size(t *testing.T) {
 
 	assert.Equal(t, 2, rend.text.rows)
 
-	row := rend.visible[0].(fyne.Widget)
-	rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
-	assert.Equal(t, 3, rend2.cols)
+	row := wrap.visible[0].(*textGridRow)
+	assert.Equal(t, 3, row.cols)
 }
 
 func TestTextGridRender_Whitespace(t *testing.T) {
@@ -336,15 +375,30 @@ func TestTextGridRender_TextColor(t *testing.T) {
 	})
 }
 
+func BenchmarkTextGrid_Refresh(b *testing.B) {
+	builder := strings.Builder{}
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < 1000; j++ {
+			builder.WriteByte('A')
+		}
+		builder.WriteString("\n")
+	}
+	grid := NewTextGridFromString(builder.String())
+	grid.Scroll = fyne.ScrollBoth
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		grid.Refresh()
+	}
+}
+
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	lines := strings.Split(expected, "\n")
 	wrap := test.TempWidgetRenderer(t, g).(*textGridRenderer).text
-	renderer := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 		for _, r := range line {
-			row := renderer.visible[y].(fyne.Widget)
+			row := wrap.visible[y].(fyne.Widget)
 			rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 
 			_, fg := rendererCell(rend2, x)
@@ -357,12 +411,11 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles map[string]TextGridStyle) {
 	lines := strings.Split(content, "\n")
 	wrap := test.TempWidgetRenderer(t, g).(*textGridRenderer).text
-	renderer := test.TempWidgetRenderer(t, wrap).(*textGridContentRenderer)
 
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 
-		row := renderer.visible[y].(fyne.Widget)
+		row := wrap.visible[y].(fyne.Widget)
 		rend2 := test.TempWidgetRenderer(t, row).(*textGridRowRenderer)
 
 		for _, r := range line {
@@ -399,5 +452,5 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 
 func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := col * 3
-	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
+	return r.obj.objects[i].(*canvas.Rectangle), r.obj.objects[i+1].(*canvas.Text)
 }

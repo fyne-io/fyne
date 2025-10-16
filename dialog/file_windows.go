@@ -21,7 +21,7 @@ func driveMask() uint32 {
 		return 0
 	}
 
-	ret, _, err := syscall.Syscall(uintptr(handle), 0, 0, 0, 0)
+	ret, _, err := syscall.SyscallN(uintptr(handle))
 	if err != syscall.Errno(0) { // for some reason Syscall returns something not nil on success
 		fyne.LogError("Error calling GetLogicalDrives", err)
 		return 0
@@ -50,7 +50,7 @@ func (f *fileDialog) getPlaces() []favoriteItem {
 	places := make([]favoriteItem, len(drives))
 	for i, drive := range drives {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
-		driveRootURI, _ := storage.ListerForURI(storage.NewURI("file://" + driveRoot))
+		driveRootURI, _ := storage.ListerForURI(storage.NewFileURI(driveRoot))
 		places[i] = favoriteItem{
 			drive,
 			theme.StorageIcon(),
@@ -66,9 +66,7 @@ func isHidden(file fyne.URI) bool {
 		return false
 	}
 
-	path := file.String()[len(file.Scheme())+3:]
-
-	point, err := syscall.UTF16PtrFromString(path)
+	point, err := syscall.UTF16PtrFromString(file.Path())
 	if err != nil {
 		fyne.LogError("Error making string pointer", err)
 		return false
@@ -99,32 +97,6 @@ func fileSaveOSOverride(*FileDialog) bool {
 	return false
 }
 
-func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	homeURI := storage.NewFileURI(homeDir)
-
-	favoriteNames := getFavoriteOrder()
-	home, _ := storage.ListerForURI(homeURI)
-	favoriteLocations := map[string]fyne.ListableURI{
-		"Home": home,
-	}
-	for _, favName := range favoriteNames {
-		uri, err1 := storage.Child(homeURI, favName)
-		if err1 != nil {
-			err = err1
-			continue
-		}
-
-		listURI, err1 := storage.ListerForURI(uri)
-		if err1 != nil {
-			err = err1
-			continue
-		}
-		favoriteLocations[favName] = listURI
-	}
-
-	return favoriteLocations, err
+func getFavoriteLocation(homeURI fyne.URI, name string) (fyne.URI, error) {
+	return storage.Child(homeURI, name)
 }

@@ -11,19 +11,23 @@ import (
 )
 
 // declare conformance to interfaces
-var _ io.ReadCloser = (*nodeReaderWriter)(nil)
-var _ io.WriteCloser = (*nodeReaderWriter)(nil)
-var _ fyne.URIReadCloser = (*nodeReaderWriter)(nil)
-var _ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
+var (
+	_ io.ReadCloser       = (*nodeReaderWriter)(nil)
+	_ io.WriteCloser      = (*nodeReaderWriter)(nil)
+	_ fyne.URIReadCloser  = (*nodeReaderWriter)(nil)
+	_ fyne.URIWriteCloser = (*nodeReaderWriter)(nil)
+)
 
 // declare conformance with repository types
-var _ repository.Repository = (*InMemoryRepository)(nil)
-var _ repository.WritableRepository = (*InMemoryRepository)(nil)
-var _ repository.AppendableRepository = (*InMemoryRepository)(nil)
-var _ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
-var _ repository.CopyableRepository = (*InMemoryRepository)(nil)
-var _ repository.MovableRepository = (*InMemoryRepository)(nil)
-var _ repository.ListableRepository = (*InMemoryRepository)(nil)
+var (
+	_ repository.Repository             = (*InMemoryRepository)(nil)
+	_ repository.WritableRepository     = (*InMemoryRepository)(nil)
+	_ repository.AppendableRepository   = (*InMemoryRepository)(nil)
+	_ repository.HierarchicalRepository = (*InMemoryRepository)(nil)
+	_ repository.CopyableRepository     = (*InMemoryRepository)(nil)
+	_ repository.MovableRepository      = (*InMemoryRepository)(nil)
+	_ repository.ListableRepository     = (*InMemoryRepository)(nil)
+)
 
 // nodeReaderWriter allows reading or writing to elements in a InMemoryRepository
 type nodeReaderWriter struct {
@@ -60,9 +64,8 @@ type InMemoryRepository struct {
 	scheme string
 }
 
-// Read implements io.Reader.Read
+// Read reads data from the repository into the provided buffer.
 func (n *nodeReaderWriter) Read(p []byte) (int, error) {
-
 	// first make sure the requested path actually exists
 	data, ok := n.repo.Data[n.path]
 	if !ok {
@@ -88,7 +91,7 @@ func (n *nodeReaderWriter) Read(p []byte) (int, error) {
 	return count, err
 }
 
-// Close implements io.Closer.Close
+// Close closes the reader and writer.
 func (n *nodeReaderWriter) Close() error {
 	n.readCursor = 0
 	n.writeCursor = 0
@@ -96,45 +99,33 @@ func (n *nodeReaderWriter) Close() error {
 	return nil
 }
 
-// Write implements io.Writer.Write
+// Write writes data to the repository.
 //
 // This implementation automatically creates the path n.path if it does not
 // exist. If it does exist, it is overwritten.
 func (n *nodeReaderWriter) Write(p []byte) (int, error) {
-
-	// guarantee that the path exists
-	_, ok := n.repo.Data[n.path]
-	if !ok {
-		n.repo.Data[n.path] = []byte{}
-	}
-
 	// overwrite the file if we haven't already started writing to it
 	if !n.writing {
-		n.repo.Data[n.path] = make([]byte, 0)
+		n.repo.Data[n.path] = make([]byte, 0, len(p))
 		n.writing = true
 	}
 
 	// copy the data into the node buffer
-	count := 0
-	start := n.writeCursor
-	for ; n.writeCursor < start+len(p); n.writeCursor++ {
+	for start := n.writeCursor; n.writeCursor < start+len(p); n.writeCursor++ {
 		// extend the file if needed
 		if len(n.repo.Data) < n.writeCursor+len(p) {
 			n.repo.Data[n.path] = append(n.repo.Data[n.path], 0)
 		}
 		n.repo.Data[n.path][n.writeCursor] = p[n.writeCursor-start]
-		count++
 	}
 
-	return count, nil
+	return len(p), nil
 }
 
-// Name implements fyne.URIReadCloser.URI and fyne.URIWriteCloser.URI
+// URI returns the URI of the node.
 func (n *nodeReaderWriter) URI() fyne.URI {
-
 	// discarding the error because this should never fail
 	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
-
 	return u
 }
 
@@ -150,7 +141,7 @@ func NewInMemoryRepository(scheme string) *InMemoryRepository {
 	}
 }
 
-// Exists implements repository.Repository.Exists
+// Exists checks if the given URI exists.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
@@ -163,7 +154,7 @@ func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
 	return ok, nil
 }
 
-// Reader implements repository.Repository.Reader
+// Reader reads the contents of the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
@@ -181,7 +172,7 @@ func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
-// CanRead implements repository.Repository.CanRead
+// CanRead checks if the given URI can be read.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
@@ -194,12 +185,12 @@ func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
 	return ok, nil
 }
 
-// Destroy implements repository.Repository.Destroy
+// Destroy tears down the InMemoryRepository.
 func (m *InMemoryRepository) Destroy(scheme string) {
 	// do nothing
 }
 
-// Writer implements repository.WritableRepository.Writer
+// Writer writes to the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
@@ -211,7 +202,7 @@ func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m}, nil
 }
 
-// Appender implements repository.AppendableRepository.Appender
+// Appender returns a writer that appends to the given URI.
 //
 // Since: 2.6
 func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
@@ -223,7 +214,7 @@ func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return &nodeReaderWriter{path: path, repo: m, writing: true, writeCursor: len(m.Data[path])}, nil
 }
 
-// CanWrite implements repository.WritableRepository.CanWrite
+// CanWrite checks if the given URI can be written to.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
@@ -234,7 +225,7 @@ func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
 	return true, nil
 }
 
-// Delete implements repository.WritableRepository.Delete
+// Delete deletes the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Delete(u fyne.URI) error {
@@ -247,35 +238,35 @@ func (m *InMemoryRepository) Delete(u fyne.URI) error {
 	return nil
 }
 
-// Parent implements repository.HierarchicalRepository.Parent
+// Parent returns the parent URI of the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	return repository.GenericParent(u)
 }
 
-// Child implements repository.HierarchicalRepository.Child
+// Child returns the child URI created from the given URI and component.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return repository.GenericChild(u, component)
 }
 
-// Copy implements repository.CopyableRepository.Copy()
+// Copy copies the source URI to the destination URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
 	return repository.GenericCopy(source, destination)
 }
 
-// Move implements repository.MovableRepository.Move()
+// Move moves the contents of the source URI to the destination.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
 	return repository.GenericMove(source, destination)
 }
 
-// CanList implements repository.ListableRepository.CanList()
+// CanList checks if the given URI can be listed.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanList(u fyne.URI) (bool, error) {
@@ -293,7 +284,7 @@ func (m *InMemoryRepository) CanList(u fyne.URI) (bool, error) {
 	return len(children) > 0, err
 }
 
-// List implements repository.ListableRepository.List()
+// List returns a list of URIs that are children of the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
@@ -338,7 +329,7 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	return listing, nil
 }
 
-// CreateListable implements repository.ListableRepository.CreateListable.
+// CreateListable makes the given URI a listable URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CreateListable(u fyne.URI) error {

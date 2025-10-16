@@ -12,5 +12,4 @@ func NewClipboard() fyne.Clipboard {
 }
 
 // mobileClipboard represents the system mobileClipboard
-type mobileClipboard struct {
-}
+type mobileClipboard struct{}

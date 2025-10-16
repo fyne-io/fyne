@@ -12,7 +12,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*menuItem)(nil)
+var (
+	_ fyne.Widget       = (*menuItem)(nil)
+	_ desktop.Hoverable = (*menuItem)(nil)
+	_ fyne.Tappable     = (*menuItem)(nil)
+)
 
 // menuItem is a widget for displaying a fyne.menuItem.
 type menuItem struct {
@@ -42,8 +46,6 @@ func (i *menuItem) Child() *Menu {
 }
 
 // CreateRenderer returns a new renderer for the menu item.
-//
-// Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	th := i.parent.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -93,21 +95,15 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 
 // MouseIn activates the item which shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
-//
-// Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.activate()
 }
 
 // MouseMoved does nothing.
-//
-// Implements: desktop.Hoverable
 func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut deactivates the item unless it has an open submenu.
-//
-// Implements: desktop.Hoverable
 func (i *menuItem) MouseOut() {
 	if !i.isSubmenuOpen() {
 		i.deactivate()
@@ -116,8 +112,6 @@ func (i *menuItem) MouseOut() {
 
 // Tapped performs the action of the item and dismisses the menu.
 // It does nothing if the item doesn’t have an action.
-//
-// Implements: fyne.Tappable
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Disabled {
 		return
@@ -406,5 +400,5 @@ func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.
 	t := canvas.NewText(s, shortColor)
 	t.TextStyle = style
 	texts = append(texts, t)
-	return
+	return texts
 }

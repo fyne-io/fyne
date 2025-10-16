@@ -35,11 +35,16 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 		labelSize := labelCell.MinSize()
 		if _, ok := labelCell.(*canvas.Text); ok {
 			labelSize.Width += innerPadding * 2
+			labelSize.Height += innerPadding * 2
 		}
 		labelWidth = fyne.Max(labelWidth, labelSize.Width)
 
 		// Content column width is the maximum of all content items.
 		contentSize := contentCell.MinSize()
+		if _, ok := contentCell.(*canvas.Text); ok {
+			contentSize.Width += innerPadding * 2
+			contentSize.Height += innerPadding * 2
+		}
 		contentWidth = fyne.Max(contentWidth, contentSize.Width)
 
 		rowHeight := fyne.Max(labelSize.Height, contentSize.Height)
@@ -82,7 +87,15 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 		labelMin := labelCell.MinSize()
 		contentMin := contentCell.MinSize()
-		rowHeight := fyne.Max(labelMin.Height, contentMin.Height)
+		labelHeight := labelMin.Height
+		contentHeight := contentMin.Height
+		if _, ok := labelCell.(*canvas.Text); ok {
+			labelHeight += innerPadding * 2
+		}
+		if _, ok := contentCell.(*canvas.Text); ok {
+			contentHeight += innerPadding * 2
+		}
+		rowHeight := fyne.Max(labelHeight, contentHeight)
 
 		pos, size := objectLayout(labelCell, 0, labelWidth, rowHeight, labelMin.Height)
 		labelCell.Move(pos)

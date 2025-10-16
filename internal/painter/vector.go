@@ -19,6 +19,10 @@ func VectorPad(obj fyne.CanvasObject) float32 {
 		if co.StrokeWidth > 0 {
 			return co.StrokeWidth + 2
 		}
+	case *canvas.Polygon:
+		if co.StrokeWidth > 0 && co.StrokeColor != nil {
+			return co.StrokeWidth + 2
+		}
 	case *canvas.Rectangle:
 		if co.StrokeWidth > 0 && co.StrokeColor != nil {
 			return co.StrokeWidth + 2
@@ -26,6 +30,10 @@ func VectorPad(obj fyne.CanvasObject) float32 {
 	case *canvas.Text:
 		if co.TextStyle.Italic {
 			return co.TextSize / 5 // make sure that even a 20% lean does not overflow
+		}
+	case *canvas.Arc:
+		if co.StrokeWidth > 0 && co.StrokeColor != nil {
+			return co.StrokeWidth + 2
 		}
 	}
 
