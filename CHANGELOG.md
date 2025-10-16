@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.7.0 - 15 Oct 2025
+## 2.7.0 - 16 Oct 2025
 
 ### Added
 
@@ -14,10 +14,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 * New containers: Navigation & Clip
 * New Embedded driver (for running on non-standard drvices)
 * RowWrap layout
-
 * Add Generics to List and Tree for data binding
+* Support for IPv6 addresses in URIs
+* Add storage.RemoveAll to recursively delete from a repository
 * Added Portuguese, Russian & Chinese (Simplified)
-* Support left-tap systray show window
+* Support left-tap systray to show window (SetSystemTrayWindow)
 * Support JSON theme with fallback
 * Add RichText bullet start number
 * Option to always show Entry validation
@@ -27,6 +28,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Massive performance increases on rendering
 * optimisations galore in data handling, custom themes and TextGrid
 * Smooth infinite progress by reversing animation not just looping
+* Numerous memory leaks and potential race conditions addressed
 
 ### Fixed
 
@@ -54,12 +56,18 @@ Code in v2.7.0 contains work from the following first time contributors:
 * @ystepanoff
 
 
-## 2.6.3 - 21 Aug 2025
+## 2.6.3 - 21 August 2025
 
-This hot fix release resolves the compile issue with Go v1.25.0 and golang.org/x/tools conflict.
+### Fixed
+
+* Resolve compile issue with Go 1.25.0 caused by golang.org/x/tools conflict
 
 
-## 2.6.2 - 28 Jul 2025
+## 2.6.2 - 28 July 2025
+
+### Changed
+
+* Added Czechoslovakia translations
 
 ### Fixed
 
