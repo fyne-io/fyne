@@ -102,6 +102,23 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	// This can easily be seen with fyne/cmd/hello and a scale == 1 as the text will happear blurry without the following line.
 	nearestSize := fyne.NewSize(float32(math.Ceil(float64(size.Width))), float32(math.Ceil(float64(size.Height))))
 
+	// Use actual window size when available and different from expected (important for tiling window managers)
+	if ctx, ok := c.context.(*window); ok && ctx.viewport != nil && ctx.visible && !ctx.fullScreen {
+		actualWidth, actualHeight := ctx.viewport.GetSize()
+		if actualWidth > 0 && actualHeight > 0 {
+			// Check if actual size differs from what we expect
+			expectedWidth, expectedHeight := ctx.screenSize(nearestSize)
+			if actualWidth != expectedWidth || actualHeight != expectedHeight {
+				// Size mismatch detected - recalculate canvas size based on actual window size
+				actualCanvasSize := ctx.computeCanvasSize(actualWidth, actualHeight)
+				nearestSize = fyne.NewSize(float32(math.Ceil(float64(actualCanvasSize.Width))), float32(math.Ceil(float64(actualCanvasSize.Height))))
+
+				ctx.width = actualWidth
+				ctx.height = actualHeight
+			}
+		}
+	}
+
 	c.size = nearestSize
 
 	if c.webExtraWindows != nil {
