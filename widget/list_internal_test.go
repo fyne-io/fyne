@@ -685,6 +685,35 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 	assert.Equal(t, list.scroller.Content.MinSize().Height-list.Size().Height, list.scroller.Offset.Y)
 }
 
+func TestList_SelectionReset(t *testing.T) {
+	data := []string{
+		"Test1",
+		"Test2",
+		"Test3",
+	}
+	list := NewList(
+		func() int { return len(data) },
+		func() fyne.CanvasObject { return NewLabel("Templ") },
+		func(id ListItemID, item fyne.CanvasObject) { item.(*Label).SetText(data[id]) },
+	)
+
+	list.Select(2)
+	list.Refresh()
+
+	assert.Equal(t, len(list.selected), 1)
+
+	data = make([]string, 0)
+	list.Refresh()
+	assert.Equal(t, len(list.selected), 0)
+
+	data = []string{
+		"Test1",
+		"Test2",
+	}
+	list.Refresh()
+	assert.Equal(t, len(list.selected), 0)
+}
+
 var minSize fyne.Size
 
 func BenchmarkContentMinSize(b *testing.B) {
