@@ -64,16 +64,24 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	objectLayout := func(obj fyne.CanvasObject, offset, width, rowHeight, itemHeight float32) (fyne.Position, fyne.Size) {
 		pos := fyne.NewPos(offset, y)
 		size := fyne.NewSize(width, rowHeight)
-		if _, ok := obj.(*canvas.Text); ok {
-			pos = pos.AddXY(innerPadding, innerPadding)
+
+		if text, ok := obj.(*canvas.Text); ok {
+		// Apply padding on all the sides to avoid clipping
+			pos = pos.AddXY(innerPadding, 0)
 			size.Width -= innerPadding * 2
 			size.Height = itemHeight
-		}
 
-		return pos, size
+		// Ensures minimum height respects the text's MinSize height + padding
+			minSize := text.MinSize()
+			if size.Height < minSize.Height+innerPadding*2 {
+			size.Height = minSize.Height + innerPadding*2
+		}
 	}
 
-	remainder := len(objects) % formLayoutCols
+	return pos, size
+}
+
+remainder := len(objects) % formLayoutCols
 	for i := 0; i < len(objects)-remainder; i += formLayoutCols {
 		labelCell, contentCell := objects[i], objects[i+1]
 		if !labelCell.Visible() && !contentCell.Visible() {
@@ -99,20 +107,39 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	if remainder == 1 {
 		lastCell := objects[len(objects)-1]
 		lastMin := lastCell.MinSize()
-		objectLayout(lastCell, 0, labelWidth, lastMin.Height, lastMin.Height)
+		pos, size := objectLayout(lastCell, 0, labelWidth, lastMin.Height, lastMin.Height)
+		lastCell.Move(pos)
+		lastCell.Resize(size)
 	}
 }
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a FormLayout this is the width of the widest label and content items and the height is
 // the sum of all column children combined with padding between each.
+
+
 func (f *formLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	labelWidth, contentWidth, height := f.calculateTableSizes(objects, 0)
-	return fyne.Size{
-		Width:  labelWidth + contentWidth + theme.Padding(),
-		Height: height,
+
+	innerPadding := theme.InnerPadding()
+	for i := 0; i < len(objects); i++ {
+		if text, ok := objects[i].(*canvas.Text); ok {
+			size := text.MinSize()
+			if i%formLayoutCols == 0 {
+				labelWidth = fyne.Max(labelWidth, size.Width+innerPadding*2) // label column
+			} else {
+				contentWidth = fyne.Max(contentWidth, size.Width+innerPadding*2) // content column
+			}
+			if i%formLayoutCols == 0 {
+				height = fyne.Max(height, size.Width+innerPadding*2) // 
+			}
+			//height += innerPadding
+		}
 	}
+
+	return fyne.NewSize(labelWidth+contentWidth+theme.Padding(), height)
 }
+
 
 // NewFormLayout returns a new FormLayout instance
 func NewFormLayout() fyne.Layout {
