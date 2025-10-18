@@ -65,8 +65,10 @@ type driver struct {
 }
 
 // Declare conformity with Driver
-var _ fyne.Driver = (*driver)(nil)
-var _ ConfiguredDriver = (*driver)(nil)
+var (
+	_ fyne.Driver      = (*driver)(nil)
+	_ ConfiguredDriver = (*driver)(nil)
+)
 
 func init() {
 	runtime.LockOSThread()
@@ -101,7 +103,6 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 	} else {
 		caller()
 	}
-
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
@@ -286,17 +287,20 @@ func (*driver) SetDisableScreenBlanking(disable bool) {
 
 func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	c := w.Canvas().(*canvas)
+	switch e.Crosses(lifecycle.StageAlive) {
+	case lifecycle.CrossOn:
+		d.onStart()
+	case lifecycle.CrossOff:
+		d.onStop()
+	}
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
 		d.glctx, _ = e.DrawContext.(gl.Context)
-		d.onStart()
-
 		// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
 		c.Content().Refresh()
 
 		d.sendPaintEvent()
 	case lifecycle.CrossOff:
-		d.onStop()
 		d.glctx = nil
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
@@ -375,7 +379,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 
 	draw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		obj := node.Obj()
-		if _, ok := obj.(fyne.Scrollable); ok {
+		if intdriver.IsClip(obj) {
 			inner := clips.Push(pos, obj.Size())
 			c.Painter().StartClipping(inner.Rect())
 		}
@@ -386,7 +390,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		c.Painter().Paint(obj, pos, size)
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
-		if _, ok := node.Obj().(fyne.Scrollable); ok {
+		if intdriver.IsClip(node.Obj()) {
 			c.Painter().StopClipping()
 			clips.Pop()
 			if top := clips.Top(); top != nil {
@@ -470,11 +474,11 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 
 				d.DoFromGoroutine(func() {
 					wid.Dragged(ev)
-				}, true)
+				}, false)
 				time.Sleep(time.Millisecond * 16)
 			}
 
-			d.DoFromGoroutine(wid.DragEnd, true)
+			d.DoFromGoroutine(wid.DragEnd, false)
 		}()
 	})
 }

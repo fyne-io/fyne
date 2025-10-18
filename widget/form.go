@@ -196,11 +196,13 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 func (f *Form) createLabel(text string) fyne.CanvasObject {
 	th := f.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	label := &canvas.Text{Text: text,
+	label := &canvas.Text{
+		Text:      text,
 		Alignment: fyne.TextAlignTrailing,
 		Color:     th.Color(theme.ColorNameForeground, v),
 		TextSize:  th.Size(theme.SizeNameText),
-		TextStyle: fyne.TextStyle{Bold: true}}
+		TextStyle: fyne.TextStyle{Bold: true},
+	}
 	if f.isVertical() {
 		label.Alignment = fyne.TextAlignLeading
 	}

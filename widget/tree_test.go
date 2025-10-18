@@ -324,8 +324,10 @@ func TestTree_OverrideTheme(t *testing.T) {
 
 	normal := test.Theme()
 	bg := canvas.NewRectangle(normal.Color(theme.ColorNameBackground, theme.VariantDark))
-	window.SetContent(&fyne.Container{Layout: layout.NewStackLayout(),
-		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)}})
+	window.SetContent(&fyne.Container{
+		Layout:  layout.NewStackLayout(),
+		Objects: []fyne.CanvasObject{bg, container.NewThemeOverride(tree, normal)},
+	})
 	test.AssertImageMatches(t, "tree/theme_initial.png", window.Canvas().Capture())
 }
 
@@ -374,4 +376,25 @@ func TestTree_Refresh(t *testing.T) {
 	tree.Refresh()
 
 	test.AssertImageMatches(t, "tree/refresh_replaced.png", window.Canvas().Capture())
+}
+
+func TestTree_FocusItem(t *testing.T) {
+	test.NewTempApp(t)
+
+	data := map[string][]string{
+		"": {"foo0", "foo1", "foo2"},
+	}
+
+	tree := widget.NewTreeWithStrings(data)
+	tree.OpenBranch("foo")
+
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+	window.Canvas().Focus(tree)
+
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	tree.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+
+	test.AssertImageMatches(t, "tree/tree_focus_item.png", window.Canvas().Capture())
 }

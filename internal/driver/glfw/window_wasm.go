@@ -5,8 +5,6 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
-	"runtime"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -58,14 +56,11 @@ type window struct {
 	icon     fyne.Resource
 	mainmenu *fyne.MainMenu
 
-	clipboard fyne.Clipboard
-
 	master     bool
 	fullScreen bool
 	centered   bool
 	visible    bool
 
-	mouseLock            sync.RWMutex
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
 	mouseDraggedObjStart fyne.Position
@@ -174,9 +169,7 @@ func (w *window) frameSized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(_ *glfw.Window) {
-	runOnMain(func() {
-		w.processRefresh()
-	})
+	runOnMain(w.processRefresh)
 }
 
 func (w *window) closed(viewport *glfw.Window) {
@@ -237,7 +230,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 	runOnMain(func() {
-		if runtime.GOOS != "darwin" && xoff == 0 &&
+		if xoff == 0 &&
 			(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
 				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
 			xoff, yoff = yoff, xoff
@@ -249,9 +242,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff, yoff float64) {
 
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
-	var button desktop.MouseButton
 	rightClick := false
-	if runtime.GOOS == "darwin" {
+	if isMacOSRuntime() {
 		if modifier&fyne.KeyModifierControl != 0 {
 			rightClick = true
 			modifier &^= fyne.KeyModifierControl
@@ -261,17 +253,20 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 			modifier &^= fyne.KeyModifierSuper
 		}
 	}
+
 	switch btn {
 	case glfw.MouseButton1:
 		if rightClick {
-			button = desktop.RightMouseButton
-		} else {
-			button = desktop.LeftMouseButton
+			return desktop.MouseButtonSecondary, modifier
 		}
+		return desktop.MouseButtonPrimary, modifier
 	case glfw.MouseButton2:
-		button = desktop.RightMouseButton
+		return desktop.MouseButtonSecondary, modifier
+	case glfw.MouseButton3:
+		return desktop.MouseButtonTertiary, modifier
+	default:
+		return 0, modifier
 	}
-	return button, modifier
 }
 
 //gocyclo:ignore
@@ -572,9 +567,7 @@ func (w *window) create() {
 	// update window size now we have scaled detected
 	w.fitContent()
 
-	for _, fn := range w.pending {
-		fn()
-	}
+	w.drainPendingEvents()
 
 	w.requestedWidth, w.requestedHeight = w.width, w.height
 

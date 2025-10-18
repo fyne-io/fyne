@@ -221,7 +221,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 
 			newFolderPath := filepath.Join(f.dir.Path(), newFolderEntry.Text)
-			createFolderErr := os.MkdirAll(newFolderPath, 0750)
+			createFolderErr := os.MkdirAll(newFolderPath, 0o750)
 			if createFolderErr != nil {
 				fyne.LogError(
 					fmt.Sprintf("Failed to create folder with path %s", newFolderPath),
@@ -240,17 +240,17 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	)
 
 	header := container.NewBorder(nil, nil, nil, optionsbuttons,
-		optionsbuttons, f.title,
+		f.title,
 	)
 
 	footer := container.NewBorder(nil, nil, nil, buttons,
-		buttons, container.NewHScroll(f.fileName),
+		container.NewHScroll(f.fileName),
 	)
 
 	body := container.NewHSplit(
 		f.favoritesList,
 		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
-			f.breadcrumbScroll, f.filesScroll,
+			f.filesScroll,
 		),
 	)
 	body.SetOffset(0) // Set the minimum offset so that the favoritesList takes only its minimal width
@@ -361,16 +361,46 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 	widget.ShowPopUpAtPosition(content, f.win.Canvas, pos)
 }
 
+func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
+	if runtime.GOOS == "js" {
+		return make(map[string]fyne.ListableURI), nil
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	homeURI := storage.NewFileURI(homeDir)
+	home, _ := storage.ListerForURI(homeURI)
+
+	favoriteLocations := map[string]fyne.ListableURI{"Home": home}
+	for _, favName := range getFavoritesOrder() {
+		uri, err1 := getFavoriteLocation(homeURI, favName)
+		if err != nil {
+			err = err1
+			continue
+		}
+
+		listURI, err1 := storage.ListerForURI(uri)
+		if err1 != nil {
+			err = err1
+			continue
+		}
+		favoriteLocations[favName] = listURI
+	}
+
+	return favoriteLocations, err
+}
+
 func (f *fileDialog) loadFavorites() {
 	favoriteLocations, err := getFavoriteLocations()
 	if err != nil {
 		fyne.LogError("Getting favorite locations", err)
 	}
-	favoriteIcons := getFavoriteIcons()
-	favoriteOrder := getFavoriteOrder()
 
 	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]}}
+		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]},
+	}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
 		f.favorites = append(f.favorites,
@@ -378,12 +408,12 @@ func (f *fileDialog) loadFavorites() {
 	}
 	f.favorites = append(f.favorites, f.getPlaces()...)
 
-	for _, locName := range favoriteOrder {
+	for _, locName := range getFavoritesOrder() {
 		loc, ok := favoriteLocations[locName]
 		if !ok {
 			continue
 		}
-		locIcon := favoriteIcons[locName]
+		locIcon := getFavoritesIcon(locName)
 		f.favorites = append(f.favorites,
 			favoriteItem{locName: locName, locIcon: locIcon, loc: loc})
 	}
@@ -475,8 +505,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 
 	f.breadcrumb.Objects = nil
 
-	localdir := dir.String()[len(dir.Scheme())+3:]
-
+	localdir := dir.Path()
 	buildDir := filepath.VolumeName(localdir)
 	for i, d := range strings.Split(localdir, "/") {
 		if d == "" {
@@ -534,7 +563,7 @@ func (f *fileDialog) setSelected(file fyne.URI, id int) {
 	f.selected = file
 	f.selectedID = id
 
-	if file == nil || file.String()[len(file.Scheme())+3:] == "" {
+	if file == nil || file.Path() == "" {
 		// keep user input while navigating
 		// in a FileSave dialog
 		if !f.file.save {
@@ -837,7 +866,7 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 func (f *FileDialog) SetFileName(fileName string) {
 	if f.save {
 		f.initialFileName = fileName
-		//Update entry if fileDialog has already been created
+		// Update entry if fileDialog has already been created
 		if f.dialog != nil {
 			f.dialog.fileName.SetText(fileName)
 		}
@@ -914,30 +943,32 @@ func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent f
 	dialog.Show()
 }
 
-func getFavoriteIcons() map[string]fyne.Resource {
-	if runtime.GOOS == "darwin" {
-		return map[string]fyne.Resource{
-			"Documents": theme.DocumentIcon(),
-			"Desktop":   theme.DesktopIcon(),
-			"Downloads": theme.DownloadIcon(),
-			"Music":     theme.MediaMusicIcon(),
-			"Pictures":  theme.MediaPhotoIcon(),
-			"Movies":    theme.MediaVideoIcon(),
-		}
+func getFavoritesIcon(location string) fyne.Resource {
+	switch location {
+	case "Documents":
+		return theme.DocumentIcon()
+	case "Desktop":
+		return theme.DesktopIcon()
+	case "Downloads":
+		return theme.DownloadIcon()
+	case "Music":
+		return theme.MediaMusicIcon()
+	case "Pictures":
+		return theme.MediaPhotoIcon()
+	case "Videos":
+		return theme.MediaVideoIcon()
 	}
 
-	return map[string]fyne.Resource{
-		"Documents": theme.DocumentIcon(),
-		"Desktop":   theme.DesktopIcon(),
-		"Downloads": theme.DownloadIcon(),
-		"Music":     theme.MediaMusicIcon(),
-		"Pictures":  theme.MediaPhotoIcon(),
-		"Videos":    theme.MediaVideoIcon(),
+	if (runtime.GOOS == "darwin" && location == "Movies") ||
+		(runtime.GOOS != "darwin" && location == "Videos") {
+		return theme.MediaVideoIcon()
 	}
+
+	return nil
 }
 
-func getFavoriteOrder() []string {
-	order := []string{
+func getFavoritesOrder() [6]string {
+	order := [6]string{
 		"Desktop",
 		"Documents",
 		"Downloads",
@@ -968,8 +999,7 @@ func storageURI(a fyne.App) fyne.URI {
 
 // iconPaddingLayout adds padding to the left of a widget.Icon().
 // NOTE: It assumes that the slice only contains one item.
-type iconPaddingLayout struct {
-}
+type iconPaddingLayout struct{}
 
 func (i *iconPaddingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	padding := theme.Padding() * 2

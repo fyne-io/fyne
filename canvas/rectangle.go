@@ -20,6 +20,32 @@ type Rectangle struct {
 	//
 	// Since: 2.4
 	CornerRadius float32
+
+	// Enforce an aspect ratio for the rectangle, the content will be made shorter or narrower
+	// to meet the requested aspect, if set.
+	//
+	// Since: 2.7
+	Aspect float32
+
+	// The radius of the rectangle top-right corner only.
+	//
+	// Since: 2.7
+	TopRightCornerRadius float32
+
+	// The radius of the rectangle top-left corner only.
+	//
+	// Since: 2.7
+	TopLeftCornerRadius float32
+
+	// The radius of the rectangle bottom-right corner only.
+	//
+	// Since: 2.7
+	BottomRightCornerRadius float32
+
+	// The radius of the rectangle bottom-left corner only.
+	//
+	// Since: 2.7
+	BottomLeftCornerRadius float32
 }
 
 // Hide will set this rectangle to not be visible
@@ -47,6 +73,7 @@ func (r *Rectangle) Refresh() {
 
 // Resize on a rectangle updates the new size of this object.
 // If it has a stroke width this will cause it to Refresh.
+// If Aspect is non-zero it may cause the rectangle to be smaller than the requested size.
 func (r *Rectangle) Resize(s fyne.Size) {
 	if s == r.Size() {
 		return

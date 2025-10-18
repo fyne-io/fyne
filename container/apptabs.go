@@ -37,15 +37,12 @@ type AppTabs struct {
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{}
+	tabs := &AppTabs{Items: items}
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
-	tabs.SetItems(items)
 	return tabs
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-//
-// Implements: fyne.Widget
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
 	th := t.Theme()
@@ -89,7 +86,7 @@ func (t *AppTabs) CurrentTab() *TabItem {
 //
 // Deprecated: Use `AppTabs.SelectedIndex() int` instead.
 func (t *AppTabs) CurrentTabIndex() int {
-	return t.current
+	return t.SelectedIndex()
 }
 
 // DisableIndex disables the TabItem at the specified index.
@@ -128,8 +125,6 @@ func (t *AppTabs) ExtendBaseWidget(wid fyne.Widget) {
 }
 
 // Hide hides the widget.
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) Hide() {
 	if t.popUpMenu != nil {
 		t.popUpMenu.Hide()
@@ -139,8 +134,6 @@ func (t *AppTabs) Hide() {
 }
 
 // MinSize returns the size that this widget should not shrink below
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) MinSize() fyne.Size {
 	t.BaseWidget.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
@@ -202,7 +195,7 @@ func (t *AppTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *AppTabs) SelectedIndex() int {
-	return t.current
+	return t.selected()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -218,8 +211,6 @@ func (t *AppTabs) SetTabLocation(l TabLocation) {
 }
 
 // Show this widget, if it was previously hidden
-//
-// Implements: fyne.CanvasObject
 func (t *AppTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
@@ -245,6 +236,9 @@ func (t *AppTabs) items() []*TabItem {
 }
 
 func (t *AppTabs) selected() int {
+	if len(t.Items) == 0 {
+		return -1
+	}
 	return t.current
 }
 
@@ -381,6 +375,9 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 				onTapped: func() { r.appTabs.Select(item) },
 				tabs:     r.tabs,
 			}
+			if item.disabled {
+				item.button.Disable()
+			}
 		}
 		button := item.button
 		button.icon = item.Icon
@@ -399,7 +396,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 }
 
 func (r *appTabsRenderer) updateIndicator(animate bool) {
-	if r.appTabs.current < 0 {
+	if len(r.appTabs.Items) == 0 || r.appTabs.current < 0 {
 		r.indicator.Hide()
 		return
 	}

@@ -52,6 +52,7 @@ void finish(JNIEnv* env, jobject ctx);
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
+
 import (
 	"fmt"
 	"log"
@@ -166,6 +167,7 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
+	windowCreated <- window
 }
 
 //export onNativeWindowRedrawNeeded
@@ -282,6 +284,7 @@ func onLowMemory(activity *C.ANativeActivity) {
 var (
 	inputQueue         = make(chan *C.AInputQueue)
 	inputQueueDone     = make(chan struct{})
+	windowCreated      = make(chan *C.ANativeWindow)
 	windowDestroyed    = make(chan *C.ANativeWindow)
 	windowRedrawNeeded = make(chan *C.ANativeWindow)
 	windowRedrawDone   = make(chan struct{})
@@ -441,6 +444,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var pixelsPerPt float32
+	var surfaceInitialized, wasDestroyed bool
 
 	for {
 		select {
@@ -448,11 +452,21 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			return nil
 		case cfg := <-windowConfigChange:
 			pixelsPerPt = cfg.pixelsPerPt
+		case w := <-windowCreated:
+			if surfaceInitialized && !wasDestroyed {
+				if errStr := C.destroyEGLSurface(); errStr != nil {
+					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+				}
+				if errStr := C.createEGLSurface(w); errStr != nil {
+					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+				}
+			}
 		case w := <-windowRedrawNeeded:
 			if C.surface == nil {
 				if errStr := C.createEGLSurface(w); errStr != nil {
 					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
 				}
+				surfaceInitialized = true
 				DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
 				DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
 			}
@@ -481,6 +495,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				}
 			}
 			C.surface = nil
+			wasDestroyed = true
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
 			theApp.sendLifecycle(lifecycle.StageDead)

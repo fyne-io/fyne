@@ -20,8 +20,10 @@ type funcData struct {
 }
 
 // channel for queuing functions on the main thread
-var funcQueue = async.NewUnboundedChan[funcData]()
-var running, drained atomic.Bool
+var (
+	funcQueue        = async.NewUnboundedChan[funcData]()
+	running, drained atomic.Bool
+)
 
 // Arrange that main.main runs on main thread.
 func init() {

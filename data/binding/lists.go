@@ -7,6 +7,45 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
+// List supports binding a list of values with type T.
+//
+// Since: 2.7
+type List[T any] interface {
+	DataList
+
+	Append(value T) error
+	Get() ([]T, error)
+	GetValue(index int) (T, error)
+	Prepend(value T) error
+	Remove(value T) error
+	Set(list []T) error
+	SetValue(index int, value T) error
+}
+
+// ExternalList supports binding a list of values, with type T, from an external variable.
+//
+// Since: 2.7
+type ExternalList[T any] interface {
+	List[T]
+
+	Reload() error
+}
+
+// NewList returns a bindable list of values with type T.
+//
+// Since: 2.7
+func NewList[T any](comparator func(T, T) bool) List[T] {
+	return newList[T](comparator)
+}
+
+// BindList returns a bound list of values with type T, based on the contents of the passed slice.
+// If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
+//
+// Since: 2.7
+func BindList[T any](v *[]T, comparator func(T, T) bool) ExternalList[T] {
+	return bindList(v, comparator)
+}
+
 // DataList is the base interface for all bindable data lists.
 //
 // Since: 2.0
@@ -19,31 +58,17 @@ type DataList interface {
 // BoolList supports binding a list of bool values.
 //
 // Since: 2.0
-type BoolList interface {
-	DataList
-
-	Append(value bool) error
-	Get() ([]bool, error)
-	GetValue(index int) (bool, error)
-	Prepend(value bool) error
-	Remove(value bool) error
-	Set(list []bool) error
-	SetValue(index int, value bool) error
-}
+type BoolList = List[bool]
 
 // ExternalBoolList supports binding a list of bool values from an external variable.
 //
 // Since: 2.0
-type ExternalBoolList interface {
-	BoolList
-
-	Reload() error
-}
+type ExternalBoolList = ExternalList[bool]
 
 // NewBoolList returns a bindable list of bool values.
 //
 // Since: 2.0
-func NewBoolList() BoolList {
+func NewBoolList() List[bool] {
 	return newListComparable[bool]()
 }
 
@@ -51,38 +76,24 @@ func NewBoolList() BoolList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindBoolList(v *[]bool) ExternalBoolList {
+func BindBoolList(v *[]bool) ExternalList[bool] {
 	return bindListComparable(v)
 }
 
 // BytesList supports binding a list of []byte values.
 //
 // Since: 2.2
-type BytesList interface {
-	DataList
-
-	Append(value []byte) error
-	Get() ([][]byte, error)
-	GetValue(index int) ([]byte, error)
-	Prepend(value []byte) error
-	Remove(value []byte) error
-	Set(list [][]byte) error
-	SetValue(index int, value []byte) error
-}
+type BytesList = List[[]byte]
 
 // ExternalBytesList supports binding a list of []byte values from an external variable.
 //
 // Since: 2.2
-type ExternalBytesList interface {
-	BytesList
-
-	Reload() error
-}
+type ExternalBytesList = ExternalList[[]byte]
 
 // NewBytesList returns a bindable list of []byte values.
 //
 // Since: 2.2
-func NewBytesList() BytesList {
+func NewBytesList() List[[]byte] {
 	return newList(bytes.Equal)
 }
 
@@ -90,38 +101,24 @@ func NewBytesList() BytesList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.2
-func BindBytesList(v *[][]byte) ExternalBytesList {
+func BindBytesList(v *[][]byte) ExternalList[[]byte] {
 	return bindList(v, bytes.Equal)
 }
 
 // FloatList supports binding a list of float64 values.
 //
 // Since: 2.0
-type FloatList interface {
-	DataList
-
-	Append(value float64) error
-	Get() ([]float64, error)
-	GetValue(index int) (float64, error)
-	Prepend(value float64) error
-	Remove(value float64) error
-	Set(list []float64) error
-	SetValue(index int, value float64) error
-}
+type FloatList = List[float64]
 
 // ExternalFloatList supports binding a list of float64 values from an external variable.
 //
 // Since: 2.0
-type ExternalFloatList interface {
-	FloatList
-
-	Reload() error
-}
+type ExternalFloatList = ExternalList[float64]
 
 // NewFloatList returns a bindable list of float64 values.
 //
 // Since: 2.0
-func NewFloatList() FloatList {
+func NewFloatList() List[float64] {
 	return newListComparable[float64]()
 }
 
@@ -129,38 +126,24 @@ func NewFloatList() FloatList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindFloatList(v *[]float64) ExternalFloatList {
+func BindFloatList(v *[]float64) ExternalList[float64] {
 	return bindListComparable(v)
 }
 
 // IntList supports binding a list of int values.
 //
 // Since: 2.0
-type IntList interface {
-	DataList
-
-	Append(value int) error
-	Get() ([]int, error)
-	GetValue(index int) (int, error)
-	Prepend(value int) error
-	Remove(value int) error
-	Set(list []int) error
-	SetValue(index int, value int) error
-}
+type IntList = List[int]
 
 // ExternalIntList supports binding a list of int values from an external variable.
 //
 // Since: 2.0
-type ExternalIntList interface {
-	IntList
-
-	Reload() error
-}
+type ExternalIntList = ExternalList[int]
 
 // NewIntList returns a bindable list of int values.
 //
 // Since: 2.0
-func NewIntList() IntList {
+func NewIntList() List[int] {
 	return newListComparable[int]()
 }
 
@@ -168,38 +151,24 @@ func NewIntList() IntList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindIntList(v *[]int) ExternalIntList {
+func BindIntList(v *[]int) ExternalList[int] {
 	return bindListComparable(v)
 }
 
 // RuneList supports binding a list of rune values.
 //
 // Since: 2.0
-type RuneList interface {
-	DataList
-
-	Append(value rune) error
-	Get() ([]rune, error)
-	GetValue(index int) (rune, error)
-	Prepend(value rune) error
-	Remove(value rune) error
-	Set(list []rune) error
-	SetValue(index int, value rune) error
-}
+type RuneList = List[rune]
 
 // ExternalRuneList supports binding a list of rune values from an external variable.
 //
 // Since: 2.0
-type ExternalRuneList interface {
-	RuneList
-
-	Reload() error
-}
+type ExternalRuneList = ExternalList[rune]
 
 // NewRuneList returns a bindable list of rune values.
 //
 // Since: 2.0
-func NewRuneList() RuneList {
+func NewRuneList() List[rune] {
 	return newListComparable[rune]()
 }
 
@@ -207,50 +176,24 @@ func NewRuneList() RuneList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindRuneList(v *[]rune) ExternalRuneList {
-	if v == nil {
-		return NewRuneList().(ExternalRuneList)
-	}
-
-	b := newListComparable[rune]()
-	b.val = v
-	b.updateExternal = true
-
-	for i := range *v {
-		b.appendItem(bindListItemComparable(v, i, b.updateExternal))
-	}
-
-	return b
+func BindRuneList(v *[]rune) ExternalList[rune] {
+	return bindListComparable(v)
 }
 
 // StringList supports binding a list of string values.
 //
 // Since: 2.0
-type StringList interface {
-	DataList
-
-	Append(value string) error
-	Get() ([]string, error)
-	GetValue(index int) (string, error)
-	Prepend(value string) error
-	Remove(value string) error
-	Set(list []string) error
-	SetValue(index int, value string) error
-}
+type StringList = List[string]
 
 // ExternalStringList supports binding a list of string values from an external variable.
 //
 // Since: 2.0
-type ExternalStringList interface {
-	StringList
-
-	Reload() error
-}
+type ExternalStringList = ExternalList[string]
 
 // NewStringList returns a bindable list of string values.
 //
 // Since: 2.0
-func NewStringList() StringList {
+func NewStringList() List[string] {
 	return newListComparable[string]()
 }
 
@@ -258,38 +201,24 @@ func NewStringList() StringList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.0
-func BindStringList(v *[]string) ExternalStringList {
+func BindStringList(v *[]string) ExternalList[string] {
 	return bindListComparable(v)
 }
 
 // UntypedList supports binding a list of any values.
 //
 // Since: 2.1
-type UntypedList interface {
-	DataList
-
-	Append(value any) error
-	Get() ([]any, error)
-	GetValue(index int) (any, error)
-	Prepend(value any) error
-	Remove(value any) error
-	Set(list []any) error
-	SetValue(index int, value any) error
-}
+type UntypedList = List[any]
 
 // ExternalUntypedList supports binding a list of any values from an external variable.
 //
 // Since: 2.1
-type ExternalUntypedList interface {
-	UntypedList
-
-	Reload() error
-}
+type ExternalUntypedList = ExternalList[any]
 
 // NewUntypedList returns a bindable list of any values.
 //
 // Since: 2.1
-func NewUntypedList() UntypedList {
+func NewUntypedList() List[any] {
 	return newList(func(t1, t2 any) bool { return t1 == t2 })
 }
 
@@ -297,48 +226,24 @@ func NewUntypedList() UntypedList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.1
-func BindUntypedList(v *[]any) ExternalUntypedList {
-	if v == nil {
-		return NewUntypedList().(ExternalUntypedList)
-	}
-
-	comparator := func(t1, t2 any) bool { return t1 == t2 }
-	b := newExternalList(v, comparator)
-	for i := range *v {
-		b.appendItem(bindListItem(v, i, b.updateExternal, comparator))
-	}
-
-	return b
+func BindUntypedList(v *[]any) ExternalList[any] {
+	return bindList(v, func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // URIList supports binding a list of fyne.URI values.
 //
 // Since: 2.1
-type URIList interface {
-	DataList
-
-	Append(value fyne.URI) error
-	Get() ([]fyne.URI, error)
-	GetValue(index int) (fyne.URI, error)
-	Prepend(value fyne.URI) error
-	Remove(value fyne.URI) error
-	Set(list []fyne.URI) error
-	SetValue(index int, value fyne.URI) error
-}
+type URIList = List[fyne.URI]
 
 // ExternalURIList supports binding a list of fyne.URI values from an external variable.
 //
 // Since: 2.1
-type ExternalURIList interface {
-	URIList
-
-	Reload() error
-}
+type ExternalURIList = ExternalList[fyne.URI]
 
 // NewURIList returns a bindable list of fyne.URI values.
 //
 // Since: 2.1
-func NewURIList() URIList {
+func NewURIList() List[fyne.URI] {
 	return newList(storage.EqualURI)
 }
 
@@ -346,7 +251,7 @@ func NewURIList() URIList {
 // If your code changes the content of the slice this refers to you should call Reload() to inform the bindings.
 //
 // Since: 2.1
-func BindURIList(v *[]fyne.URI) ExternalURIList {
+func BindURIList(v *[]fyne.URI) ExternalList[fyne.URI] {
 	return bindList(v, storage.EqualURI)
 }
 
@@ -387,7 +292,7 @@ func newList[T any](comparator func(T, T) bool) *boundList[T] {
 	return &boundList[T]{val: new([]T), comparator: comparator}
 }
 
-func newListComparable[T bool | float64 | int | rune | string]() *boundList[T] {
+func newListComparable[T comparable]() *boundList[T] {
 	return newList(func(t1, t2 T) bool { return t1 == t2 })
 }
 
@@ -408,7 +313,7 @@ func bindList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 	return l
 }
 
-func bindListComparable[T bool | float64 | int | rune | string](v *[]T) *boundList[T] {
+func bindListComparable[T comparable](v *[]T) *boundList[T] {
 	return bindList(v, func(t1, t2 T) bool { return t1 == t2 })
 }
 
@@ -570,7 +475,7 @@ func (l *boundList[T]) doReload() (trigger bool, retErr error) {
 			retErr = err
 		}
 	}
-	return
+	return trigger, retErr
 }
 
 func (l *boundList[T]) SetValue(i int, v T) error {
@@ -603,10 +508,6 @@ func bindListItem[T any](v *[]T, i int, external bool, comparator func(T, T) boo
 	}
 
 	return &boundListItem[T]{val: v, index: i, comparator: comparator}
-}
-
-func bindListItemComparable[T bool | float64 | int | rune | string](v *[]T, i int, external bool) Item[T] {
-	return bindListItem(v, i, external, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type boundListItem[T any] struct {
