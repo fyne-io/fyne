@@ -61,6 +61,15 @@ func (m *Menu) ActivateLastSubmenu() bool {
 	return true
 }
 
+// FocusSearch focuses the search entry if the menu has search enabled
+func (m *Menu) FocusSearch() {
+	if m.searchEnabled && m.searchEntry != nil {
+		if c := fyne.CurrentApp().Driver().CanvasForObject(m.searchEntry); c != nil {
+			c.Focus(m.searchEntry)
+		}
+	}
+}
+
 // ActivateNext activates the menu item following the currently active menu item.
 // If there is no menu item active, it activates the first menu item.
 // If there is no menu item after the current active one, it does nothing.
@@ -416,6 +425,13 @@ func (r *menuRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuRenderer) Refresh() {
+	if r.box != nil {
+		r.box.items = r.m.Items
+		r.box.Refresh()
+		r.scroll.Content = r.box
+		r.scroll.Refresh()
+	}
+
 	r.layoutActiveChild()
 	r.ShadowingRenderer.RefreshShadow()
 
@@ -515,5 +531,8 @@ func (r *menuBoxRenderer) Refresh() {
 
 	r.background.FillColor = th.Color(theme.ColorNameMenuBackground, v)
 	r.background.Refresh()
+	r.cont.Objects = r.b.items
+	r.cont.Refresh()
+
 	canvas.Refresh(r.b)
 }
