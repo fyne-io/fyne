@@ -157,12 +157,18 @@ type MenuWithGlobalSearch struct {
 
 // NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu
 func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWithGlobalSearch {
+	var searchLabel string
 	filteredItems := make([]*fyne.MenuItem, 0, len(menu.Items))
 	for _, item := range menu.Items {
 		if fyne.IsSearchMenuItem(item) {
+			searchLabel = item.Label
 			continue
 		}
 		filteredItems = append(filteredItems, item)
+	}
+
+	if searchLabel == "" {
+		searchLabel = fyne.DefaultSearchMenuLabel
 	}
 
 	filteredMenu := fyne.NewMenu(menu.Label, filteredItems...)
@@ -173,10 +179,10 @@ func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWith
 	}
 
 	if m.Menu.searchEntry != nil {
-		m.Menu.searchEntry.PlaceHolder = "Search all menus…"
+		m.Menu.searchEntry.PlaceHolder = searchLabel
 		m.searchEntry = m.Menu.searchEntry
 
-		placeholderText := NewRichTextWithText("Search all menus…")
+		placeholderText := NewRichTextWithText(searchLabel)
 		textSize := placeholderText.MinSize()
 
 		th := m.Theme()

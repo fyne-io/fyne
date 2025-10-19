@@ -1,5 +1,8 @@
 package fyne
 
+// DefaultSearchMenuLabel is the default label for search menu items
+const DefaultSearchMenuLabel = "Search Menu..."
+
 // searchMenuItemMarker is used as a sentinel value for search menu items
 var searchMenuItemMarker = struct{}{}
 
@@ -8,21 +11,27 @@ var searchMenuItems = make(map[*MenuItem]bool)
 
 // IsSearchMenuItem checks if a menu item is a search placeholder
 func IsSearchMenuItem(item *MenuItem) bool {
-	// Check if this item has been marked as a search item
 	return searchMenuItems[item]
 }
 
 // AddSearchToMainMenu adds search functionality to a MainMenu
-// By default, it adds the search to the File menu
+// By default, it adds the search to the File menu with the default label
 // This allows users to search and trigger any menu item across all menus
 func AddSearchToMainMenu(mainMenu *MainMenu) *MainMenu {
-	return AddSearchToMenu(mainMenu, "File")
+	return AddSearchToMenuWithLabel(mainMenu, "File", DefaultSearchMenuLabel)
 }
 
 // AddSearchToMenu adds search functionality to a specific menu in the MainMenu
 // menuLabel specifies which menu should contain the search (e.g., "File", "Edit", "Help")
-// The search item will be added at the beginning of the menu
+// The search item will be added at the beginning of the menu with the default label
 func AddSearchToMenu(mainMenu *MainMenu, menuLabel string) *MainMenu {
+	return AddSearchToMenuWithLabel(mainMenu, menuLabel, DefaultSearchMenuLabel)
+}
+
+// AddSearchToMenuWithLabel adds search functionality with a custom label
+// menuLabel specifies which menu should contain the search (e.g., "File", "Edit", "Help")
+// searchLabel specifies the text to display for the search item (e.g., "Search All Menus...", "Find...", etc.)
+func AddSearchToMenuWithLabel(mainMenu *MainMenu, menuLabel string, searchLabel string) *MainMenu {
 	var targetMenu *Menu
 	for _, menu := range mainMenu.Items {
 		if menu.Label == menuLabel {
@@ -45,7 +54,7 @@ func AddSearchToMenu(mainMenu *MainMenu, menuLabel string) *MainMenu {
 	}
 
 	searchItem := &MenuItem{
-		Label:  "Search All Menus...",
+		Label:  searchLabel,
 		Action: func() {},
 	}
 
@@ -66,7 +75,16 @@ func AddSearchToMenu(mainMenu *MainMenu, menuLabel string) *MainMenu {
 
 // AddSearchToMenuAtPosition adds search functionality at a specific position in the menu
 // position specifies where to insert the search item (0 = beginning, -1 = end)
+// Uses the default search label
 func AddSearchToMenuAtPosition(mainMenu *MainMenu, menuLabel string, position int) *MainMenu {
+	return AddSearchToMenuAtPositionWithLabel(mainMenu, menuLabel, position, DefaultSearchMenuLabel)
+}
+
+// AddSearchToMenuAtPositionWithLabel adds search functionality with custom label at a specific position
+// menuLabel specifies which menu should contain the search
+// position specifies where to insert the search item (0 = beginning, -1 = end)
+// searchLabel specifies the text to display for the search item
+func AddSearchToMenuAtPositionWithLabel(mainMenu *MainMenu, menuLabel string, position int, searchLabel string) *MainMenu {
 	var targetMenu *Menu
 	for _, menu := range mainMenu.Items {
 		if menu.Label == menuLabel {
@@ -89,7 +107,7 @@ func AddSearchToMenuAtPosition(mainMenu *MainMenu, menuLabel string, position in
 	}
 
 	searchItem := &MenuItem{
-		Label:  "Search All Menus...",
+		Label:  searchLabel,
 		Action: func() {},
 	}
 
@@ -108,8 +126,15 @@ func AddSearchToMenuAtPosition(mainMenu *MainMenu, menuLabel string, position in
 }
 
 // NewMainMenuWithSearch creates a new MainMenu with search functionality
-// It automatically adds search to the File menu
+// It automatically adds search to the File menu with the default label
 func NewMainMenuWithSearch(items ...*Menu) *MainMenu {
 	mainMenu := NewMainMenu(items...)
 	return AddSearchToMainMenu(mainMenu)
+}
+
+// NewMainMenuWithSearchLabel creates a new MainMenu with search functionality and custom label
+// It automatically adds search to the File menu with the specified label
+func NewMainMenuWithSearchLabel(searchLabel string, items ...*Menu) *MainMenu {
+	mainMenu := NewMainMenu(items...)
+	return AddSearchToMenuWithLabel(mainMenu, "File", searchLabel)
 }

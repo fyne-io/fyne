@@ -75,7 +75,6 @@ func menuSearchCallback(searchTerm *C.char) {
 		onMenuSearch(term)
 	}
 
-	// Also trigger the native search
 	SearchNativeMenus(term)
 }
 
@@ -87,32 +86,4 @@ func menuItemFoundCallback(menuItemId C.int) {
 			onMenuItemFound(item)
 		}
 	}
-}
-
-// AddNativeSearchToFileMenu adds a native search field to the File menu
-func AddNativeSearchToFileMenu(w *window, menu *fyne.Menu) {
-	// This function would be called when setting up the File menu
-	// to add the search field at the appropriate position
-
-	// For now, we can use the Help menu search as it's more native to macOS
-	EnableHelpMenuSearch()
-}
-
-// Alternative approach: Add search to Help menu (more macOS-like)
-func SetupNativeHelpMenuSearch(w *window, mainMenu *fyne.MainMenu) {
-	// Enable the native Help menu search
-	EnableHelpMenuSearch()
-
-	// Set up callbacks to handle search results
-	SetMenuSearchCallback(func(term string) {
-		fyne.LogError("Searching for: "+term, nil)
-	})
-
-	SetMenuItemFoundCallback(func(item *fyne.MenuItem) {
-		fyne.LogError("Found menu item: "+item.Label, nil)
-		// Could trigger the item's action or highlight it
-		if item.Action != nil {
-			item.Action()
-		}
-	})
 }
