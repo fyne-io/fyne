@@ -104,6 +104,7 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 	}
 
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
+
 	C.completeDarwinMenu(nsMenu, C.bool(prepend))
 	return nextItemID
 }
@@ -291,6 +292,7 @@ func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
 	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu
+
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
 		if menu.Label == "Help" {
@@ -299,6 +301,7 @@ func setupNativeMenu(w *window, main *fyne.MainMenu) {
 		}
 		nextItemID = addNativeMenu(w, menu, nextItemID, true)
 	}
+
 	if helpMenu != nil {
 		addNativeMenu(w, helpMenu, nextItemID, false)
 	}

@@ -26,12 +26,39 @@ type menuBarItem struct {
 	hovered bool
 }
 
+func (i *menuBarItem) hasSearchItem() bool {
+	for _, item := range i.Menu.Items {
+		if fyne.IsSearchMenuItem(item) {
+			return true
+		}
+	}
+	return false
+}
+
 func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
-		child := publicWidget.NewMenu(i.Menu)
-		child.Hide()
-		child.OnDismiss = i.Parent.deactivate
-		i.child = child
+		if i.hasSearchItem() {
+			mainMenu := i.Parent.getMainMenu()
+			if mainMenu != nil {
+				globalSearchMenu := publicWidget.NewMenuWithGlobalSearch(i.Menu, mainMenu)
+				globalSearchMenu.Menu.Hide()
+				globalSearchMenu.Menu.OnDismiss = i.Parent.deactivate
+				i.child = globalSearchMenu.Menu
+				if i.child != nil {
+					i.child.FocusSearch()
+				}
+			} else {
+				child := publicWidget.NewMenu(i.Menu)
+				child.Hide()
+				child.OnDismiss = i.Parent.deactivate
+				i.child = child
+			}
+		} else {
+			child := publicWidget.NewMenu(i.Menu)
+			child.Hide()
+			child.OnDismiss = i.Parent.deactivate
+			i.child = child
+		}
 	}
 	return i.child
 }
