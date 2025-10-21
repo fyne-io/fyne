@@ -65,19 +65,6 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	padding := theme.Padding()
 	innerPadding := theme.InnerPadding()
 
-	// Calculate size and position of object. Position and size is returned (instead of calling Move() and Resize()) to make inlineable.
-	objectLayout := func(obj fyne.CanvasObject, offset, width, rowHeight, itemHeight float32) (fyne.Position, fyne.Size) {
-		pos := fyne.NewPos(offset, y)
-		size := fyne.NewSize(width, rowHeight)
-		if _, ok := obj.(*canvas.Text); ok {
-			pos = pos.AddXY(innerPadding, innerPadding)
-			size.Width -= innerPadding * 2
-			size.Height = itemHeight
-		}
-
-		return pos, size
-	}
-
 	remainder := len(objects) % formLayoutCols
 	for i := 0; i < len(objects)-remainder; i += formLayoutCols {
 		labelCell, contentCell := objects[i], objects[i+1]
@@ -97,13 +84,16 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 		rowHeight := fyne.Max(labelHeight, contentHeight)
 
-		pos, size := objectLayout(labelCell, 0, labelWidth, rowHeight, labelMin.Height)
-		labelCell.Move(pos)
-		labelCell.Resize(size)
+		if textObj, isText := labelCell.(*canvas.Text); isText {
+			labelCell.Move(fyne.NewPos(innerPadding, y+innerPadding))
+			labelCell.Resize(fyne.NewSize(labelWidth-innerPadding*2, textObj.MinSize().Height))
+		} else {
+			labelCell.Move(fyne.NewPos(0, y))
+			labelCell.Resize(fyne.NewSize(labelWidth, rowHeight))
+		}
 
-		pos, size = objectLayout(contentCell, labelWidth+padding, contentWidth, rowHeight, contentMin.Height)
-		contentCell.Move(pos)
-		contentCell.Resize(size)
+		contentCell.Move(fyne.NewPos(labelWidth+padding, y))
+		contentCell.Resize(fyne.NewSize(contentWidth, rowHeight))
 
 		y += rowHeight + padding
 	}
@@ -111,8 +101,11 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	// Handle remaining item in the case of uneven number of objects:
 	if remainder == 1 {
 		lastCell := objects[len(objects)-1]
-		lastMin := lastCell.MinSize()
-		objectLayout(lastCell, 0, labelWidth, lastMin.Height, lastMin.Height)
+		if lastCell.Visible() {
+			lastMin := lastCell.MinSize()
+			lastCell.Move(fyne.NewPos(0, y))
+			lastCell.Resize(fyne.NewSize(labelWidth, lastMin.Height))
+		}
 	}
 }
 
