@@ -15,6 +15,8 @@ import (
 
 func TestCard_SetImage(t *testing.T) {
 	c := widget.NewCard("Title", "sub", widget.NewLabel("Content"))
+	test.NewTempWindow(t, c)
+
 	r := test.TempWidgetRenderer(t, c)
 	assert.Len(t, r.Objects(), 4) // the 3 above plus shadow
 
