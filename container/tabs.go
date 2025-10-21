@@ -159,9 +159,16 @@ func removeIndex(t baseTabs, index int) {
 	if index < 0 || index >= len(items) {
 		return
 	}
+	existingItem := items[index]
 	setItems(t, append(items[:index], items[index+1:]...))
 	if s := t.selected(); index < s {
 		t.setSelected(s - 1)
+	}
+	if f := t.onUnselected(); f != nil {
+		f(existingItem)
+	}
+	if f := t.onSelected(); f != nil {
+		f(selected(t))
 	}
 }
 

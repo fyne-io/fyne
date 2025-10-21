@@ -46,3 +46,25 @@ func TestTab_ThemeChange(t *testing.T) {
 	tabs.SelectIndex(0)
 	assert.Equal(t, initial, w.Canvas().Capture())
 }
+
+func TestTab_RemoveCallsHandlers(t *testing.T) {
+	tabs := NewDocTabs(
+		NewTabItem("a", widget.NewLabel("a")),
+		NewTabItem("b", widget.NewLabel("b")),
+	)
+
+	selectedText := ""
+	unSelectedText := ""
+	tabs.OnSelected = func(ti *TabItem) {
+		selectedText = ti.Text
+	}
+	tabs.OnUnselected = func(ti *TabItem) {
+		unSelectedText = ti.Text
+	}
+
+	tabs.RemoveIndex(0)
+
+	assert.Equal(t, "b", selectedText)
+	assert.Equal(t, "a", unSelectedText)
+
+}
