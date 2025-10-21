@@ -1,6 +1,7 @@
 package dialog
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -81,12 +82,8 @@ func TestEffectiveStartingDir(t *testing.T) {
 }
 
 func TestFileDialogStartRemember(t *testing.T) {
-	testPath, err := filepath.Abs("./testdata")
-	assert.Nil(t, err)
-	start, err := storage.ListerForURI(storage.NewFileURI(testPath))
-	if err != nil {
-		t.Skipf("could not get lister for working directory: %s", err)
-	}
+	start, err := storage.ListerForURI(storage.NewFileURI("testdata"))
+	assert.NoError(t, err)
 
 	w := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileOpen(nil, w)
@@ -161,8 +158,7 @@ func TestShowFileOpen(t *testing.T) {
 		chosen = file
 		openErr = err
 	}, win)
-	testDataPath, _ := filepath.Abs("testdata")
-	testData := storage.NewFileURI(testDataPath)
+	testData := storage.NewFileURI("testdata")
 	dir, err := storage.ListerForURI(testData)
 	if err != nil {
 		t.Error("Failed to open testdata dir", err)
@@ -197,14 +193,17 @@ func TestShowFileOpen(t *testing.T) {
 	assert.NotEmpty(t, breadcrumb.Objects)
 
 	assert.NoError(t, err)
-	components := strings.Split(testData.String()[7:], "/")
+	components := strings.Split(testData.Path(), "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
+	for _, object := range breadcrumb.Objects {
+		fmt.Println(object.(*widget.Button).Text)
+	}
 	if assert.Equal(t, len(components), len(breadcrumb.Objects)) {
-		for i := range components {
-			assert.Equal(t, components[i], breadcrumb.Objects[i].(*widget.Button).Text)
+		for i, object := range breadcrumb.Objects {
+			assert.Equal(t, components[i], object.(*widget.Button).Text, fmt.Sprintf("Failure for %s at component %d", testData.Path(), i))
 		}
 	}
 
@@ -242,18 +241,14 @@ func TestShowFileOpen(t *testing.T) {
 }
 
 func TestHiddenFiles(t *testing.T) {
-	testDataPath, _ := filepath.Abs("testdata")
-	testData := storage.NewFileURI(testDataPath)
-	dir, err := storage.ListerForURI(testData)
-	if err != nil {
-		t.Error("Failed to open testdata dir", err)
-	}
+	dir, err := storage.ListerForURI(storage.NewFileURI("testdata"))
+	assert.NoError(t, err)
 
 	// git does not preserve windows hidden flag, so we have to set it.
 	// just an empty function for non windows builds
-	if err := hideFile(filepath.Join(testDataPath, ".hidden")); err != nil {
-		t.Error("Failed to hide .hidden", err)
-	}
+	hidden, _ := storage.Child(dir, ".hidden")
+	err = hideFile(hidden.Path())
+	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
@@ -332,8 +327,8 @@ func TestShowFileSave(t *testing.T) {
 	assert.Equal(t, lang.L("(Parent)"), item.name)
 	assert.True(t, save.Disabled())
 
-	abs, _ := filepath.Abs("./testdata/")
-	dir, _ := storage.ListerForURI(storage.NewFileURI(abs))
+	dir, err := storage.ListerForURI(storage.NewFileURI("testdata"))
+	assert.NoError(t, err)
 	saver.SetLocation(dir)
 
 	var target *fileDialogItem
@@ -445,12 +440,8 @@ func TestFileFilters(t *testing.T) {
 }
 
 func TestFileSort(t *testing.T) {
-	testDataPath, _ := filepath.Abs("testdata")
-	testData := storage.NewFileURI(testDataPath)
-	dir, err := storage.ListerForURI(testData)
-	if err != nil {
-		t.Error("Failed to open testdata dir", err)
-	}
+	dir, err := storage.ListerForURI(storage.NewFileURI("testdata"))
+	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
