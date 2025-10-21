@@ -66,5 +66,4 @@ func TestTab_RemoveCallsHandlers(t *testing.T) {
 
 	assert.Equal(t, "b", selectedText)
 	assert.Equal(t, "a", unSelectedText)
-
 }
