@@ -135,8 +135,8 @@ func TestMenuWithGlobalSearch_Creation(t *testing.T) {
 	assert.NotNil(t, globalSearchMenu.searchEntry)
 
 	assert.Greater(t, len(globalSearchMenu.Items), 2)
-	_, isEntry := globalSearchMenu.Items[0].(*Entry)
-	assert.True(t, isEntry)
+	_, isMinWidthContainer := globalSearchMenu.Items[0].(*minWidthContainer)
+	assert.True(t, isMinWidthContainer)
 }
 
 func TestMenuWithGlobalSearch_SearchAndDisplay(t *testing.T) {
@@ -213,33 +213,48 @@ func TestAddSearchToMainMenu(t *testing.T) {
 		fyne.NewMenu("File", fyne.NewMenuItem("New", nil)),
 	)
 
-	result := fyne.AddSearchToMainMenu(mainMenu)
+	result := fyne.AddSearchToMainMenu(mainMenu, "")
 
-	assert.Equal(t, 1, len(result.Items))
+	assert.Equal(t, 2, len(result.Items))
 	assert.Equal(t, "File", result.Items[0].Label)
-	assert.Greater(t, len(result.Items[0].Items), 0)
-	assert.Equal(t, "Search Menu...", result.Items[0].Items[0].Label)
+	assert.Equal(t, "Help", result.Items[1].Label)
+	assert.Greater(t, len(result.Items[1].Items), 0)
+	assert.Equal(t, "Search...", result.Items[1].Items[0].Label)
 
 	mainMenu2 := fyne.NewMainMenu(
 		fyne.NewMenu("File", fyne.NewMenuItem("New", nil)),
 		fyne.NewMenu("Help", fyne.NewMenuItem("About", nil)),
 	)
 
-	result2 := fyne.AddSearchToMainMenu(mainMenu2)
+	result2 := fyne.AddSearchToMainMenu(mainMenu2, "")
 
 	assert.Equal(t, 2, len(result2.Items))
-	assert.Equal(t, "File", result2.Items[0].Label)
-	assert.GreaterOrEqual(t, len(result2.Items[0].Items), 3)
-	assert.Equal(t, "Search Menu...", result2.Items[0].Items[0].Label)
+	assert.Equal(t, "Help", result2.Items[1].Label)
+	assert.GreaterOrEqual(t, len(result2.Items[1].Items), 3)
+	assert.Equal(t, "Search...", result2.Items[1].Items[0].Label)
+
+	mainMenu3 := fyne.NewMainMenu(
+		fyne.NewMenu("File", fyne.NewMenuItem("New", nil)),
+	)
+
+	result3 := fyne.AddSearchToMainMenu(mainMenu3, "Find...")
+
+	assert.Equal(t, 2, len(result3.Items))
+	assert.Equal(t, "Help", result3.Items[1].Label)
+	assert.Equal(t, "Find...", result3.Items[1].Items[0].Label)
 }
 
 func TestNewMainMenuWithSearch(t *testing.T) {
 	fileMenu := fyne.NewMenu("File", fyne.NewMenuItem("New", nil))
-	mainMenu := fyne.NewMainMenuWithSearch(fileMenu)
+	mainMenu := fyne.NewMainMenuWithSearch("", fileMenu)
 
 	assert.NotNil(t, mainMenu)
-	assert.Equal(t, 1, len(mainMenu.Items)) // File and Help
+	assert.Equal(t, 2, len(mainMenu.Items))
 	assert.Equal(t, "File", mainMenu.Items[0].Label)
-	assert.Greater(t, len(mainMenu.Items[0].Items), 0)
-	assert.Equal(t, "Search Menu...", mainMenu.Items[0].Items[0].Label)
+	assert.Equal(t, "Help", mainMenu.Items[1].Label)
+	assert.Greater(t, len(mainMenu.Items[1].Items), 0)
+	assert.Equal(t, "Search...", mainMenu.Items[1].Items[0].Label)
+
+	mainMenu2 := fyne.NewMainMenuWithSearch("Find...", fileMenu)
+	assert.Equal(t, "Find...", mainMenu2.Items[1].Items[0].Label)
 }
