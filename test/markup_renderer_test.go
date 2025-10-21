@@ -519,6 +519,72 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
+		"quadraticBezierCurve": {
+			content: fynecanvas.NewQuadraticBezierCurve(fyne.NewPos(10, 10), fyne.NewPos(50, 50), fyne.NewPos(90, 10), color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
+			size:    fyne.NewSize(17, 42),
+			pos:     fyne.NewPos(42, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"50,50\" endPoint=\"90,10\" pos=\"42,17\" size=\"17x42\" startPoint=\"10,10\" strokeColor=\"rgba(100,200,50,0)\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"quadraticBezierCurve with theme color": { // we won’t test _all_ valid values … it’s not that important
+			content: fynecanvas.NewQuadraticBezierCurve(fyne.NewPos(5, 8.5), fyne.NewPos(15, 50), fyne.NewPos(90, 2), theme.Color(theme.ColorNameHover)),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"15,50\" endPoint=\"90,2\" size=\"100x100\" startPoint=\"5,8.5\" strokeColor=\"hover\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"quadraticBezierCurve with stroke": {
+			content: func() fyne.CanvasObject {
+				r := fynecanvas.NewQuadraticBezierCurve(fyne.NewPos(10, 10), fyne.NewPos(50, 50), fyne.NewPos(90, 10), color.NRGBA{R: 100, G: 200, B: 50, A: 0})
+				r.StrokeWidth = 6.375
+				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
+				return r
+			}(),
+			size: fyne.NewSize(42, 42),
+			pos:  fyne.NewPos(17, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"50,50\" endPoint=\"90,10\" pos=\"17,17\" size=\"42x42\" startPoint=\"10,10\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"cubicBezierCurve": {
+			content: fynecanvas.NewCubicBezierCurve(fyne.NewPos(10, 10), fyne.NewPos(50, 50), fyne.NewPos(0, 5), fyne.NewPos(90, 10), color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
+			size:    fyne.NewSize(17, 42),
+			pos:     fyne.NewPos(42, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"50,50\" controlPoint2=\"0,5\" endPoint=\"90,10\" pos=\"42,17\" size=\"17x42\" startPoint=\"10,10\" strokeColor=\"rgba(100,200,50,0)\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"cubicBezierCurve with theme color": { // we won’t test _all_ valid values … it’s not that important
+			content: fynecanvas.NewCubicBezierCurve(fyne.NewPos(5, 8.5), fyne.NewPos(15, 50), fyne.NewPos(70, 5), fyne.NewPos(90, 2), theme.Color(theme.ColorNameHover)),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"15,50\" controlPoint2=\"70,5\" endPoint=\"90,2\" size=\"100x100\" startPoint=\"5,8.5\" strokeColor=\"hover\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"cubicBezierCurve with stroke": {
+			content: func() fyne.CanvasObject {
+				r := fynecanvas.NewCubicBezierCurve(fyne.NewPos(10, 10), fyne.NewPos(50, 50), fyne.NewPos(0, 5), fyne.NewPos(90, 10), color.NRGBA{R: 100, G: 200, B: 50, A: 0})
+				r.StrokeWidth = 6.375
+				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
+				return r
+			}(),
+			size: fyne.NewSize(42, 42),
+			pos:  fyne.NewPos(17, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<bezierCurve controlPoint1=\"50,50\" controlPoint2=\"0,5\" endPoint=\"90,10\" pos=\"17,17\" size=\"42x42\" startPoint=\"10,10\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			c := NewCanvas()
