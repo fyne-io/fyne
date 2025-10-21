@@ -4,8 +4,60 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
 )
+
+// minWidthContainer is a container that enforces a minimum width for its content
+type minWidthContainer struct {
+	BaseWidget
+	content  fyne.CanvasObject
+	minWidth float32
+}
+
+func newMinWidthContainer(content fyne.CanvasObject, minWidth float32) *minWidthContainer {
+	c := &minWidthContainer{
+		content:  content,
+		minWidth: minWidth,
+	}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+func (c *minWidthContainer) CreateRenderer() fyne.WidgetRenderer {
+	return &minWidthRenderer{
+		container: c,
+		objects:   []fyne.CanvasObject{c.content},
+	}
+}
+
+type minWidthRenderer struct {
+	container *minWidthContainer
+	objects   []fyne.CanvasObject
+}
+
+func (r *minWidthRenderer) Destroy() {}
+
+func (r *minWidthRenderer) Layout(size fyne.Size) {
+	r.container.content.Resize(size)
+	r.container.content.Move(fyne.NewPos(0, 0))
+}
+
+func (r *minWidthRenderer) MinSize() fyne.Size {
+	minSize := r.container.content.MinSize()
+	if minSize.Width < r.container.minWidth {
+		minSize.Width = r.container.minWidth
+	}
+	return minSize
+}
+
+func (r *minWidthRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *minWidthRenderer) Refresh() {
+	canvas.Refresh(r.container.content)
+}
 
 // MenuSearchItem represents a searchable menu item with its path through the menu hierarchy
 type MenuSearchItem struct {
@@ -156,6 +208,8 @@ type MenuWithGlobalSearch struct {
 }
 
 // NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu
+// This is automatically used when a menu contains a search menu item (created by AddSearchToMainMenu)
+// The search functionality is automatically added to the Help menu, or creates a Help menu if it doesn't exist
 func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWithGlobalSearch {
 	var searchLabel string
 	filteredItems := make([]*fyne.MenuItem, 0, len(menu.Items))
@@ -188,10 +242,14 @@ func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWith
 		th := m.Theme()
 		innerPadding := th.Size(theme.SizeNameInnerPadding)
 		inputBorder := th.Size(theme.SizeNameInputBorder)
-		calculatedWidth := textSize.Width + (innerPadding * 2) + (inputBorder * 2) + 80
-		idealWidth := fyne.Min(fyne.Max(calculatedWidth, 240), 280)
-		m.minSearchWidth = idealWidth
-		m.searchEntry.Resize(fyne.NewSize(idealWidth, m.searchEntry.MinSize().Height))
+
+		minWidth := textSize.Width + (innerPadding * 4) + (inputBorder * 2) + 40
+		m.minSearchWidth = minWidth
+
+		if len(m.Menu.Items) > 0 {
+			wrappedEntry := newMinWidthContainer(m.Menu.searchEntry, minWidth)
+			m.Menu.Items[0] = wrappedEntry
+		}
 	}
 
 	m.initGlobalSearchHandlers()

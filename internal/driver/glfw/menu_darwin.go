@@ -30,7 +30,6 @@ const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
 void        getTextColorRGBA(int* r, int* g, int* b, int* a);
 const void* insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, unsigned int keyEquivalentModifierMask, int id, int index, bool isSeparator, const void *imageData, unsigned int imageDataLength);
-void        insertDarwinSearchMenuItem(const void* menu, int index);
 int         menuFontSize();
 void        resetDarwinMenu();
 
@@ -105,16 +104,6 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 	}
 
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
-	if menu.Label == "File" && hasSearchItem(menu) {
-		insertSearchPosition := 2
-		for i, item := range menu.Items {
-			if fyne.IsSearchMenuItem(item) {
-				insertSearchPosition = i
-				break
-			}
-		}
-		C.insertDarwinSearchMenuItem(nsMenu, C.int(insertSearchPosition))
-	}
 
 	C.completeDarwinMenu(nsMenu, C.bool(prepend))
 	return nextItemID
@@ -133,10 +122,6 @@ func clearNativeMenu() {
 func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
 	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
 	for _, item := range menu.Items {
-		if fyne.IsSearchMenuItem(item) {
-			continue
-		}
-
 		nsMenuItem := insertNativeMenuItem(nsMenu, item, nextItemID, -1)
 		nextItemID = registerCallback(w, item, nextItemID)
 		if item.ChildMenu != nil {
@@ -320,15 +305,6 @@ func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	if helpMenu != nil {
 		addNativeMenu(w, helpMenu, nextItemID, false)
 	}
-}
-
-func hasSearchItem(menu *fyne.Menu) bool {
-	for _, item := range menu.Items {
-		if fyne.IsSearchMenuItem(item) {
-			return true
-		}
-	}
-	return false
 }
 
 //

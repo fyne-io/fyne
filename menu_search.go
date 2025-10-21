@@ -1,7 +1,7 @@
 package fyne
 
 // DefaultSearchMenuLabel is the default label for search menu items
-const DefaultSearchMenuLabel = "Search Menu..."
+const DefaultSearchMenuLabel = "Search..."
 
 // searchMenuItemMarker is used as a sentinel value for search menu items
 var searchMenuItemMarker = struct{}{}
@@ -15,39 +15,28 @@ func IsSearchMenuItem(item *MenuItem) bool {
 }
 
 // AddSearchToMainMenu adds search functionality to a MainMenu
-// By default, it adds the search to the File menu with the default label
-// This allows users to search and trigger any menu item across all menus
-func AddSearchToMainMenu(mainMenu *MainMenu) *MainMenu {
-	return AddSearchToMenuWithLabel(mainMenu, "File", DefaultSearchMenuLabel)
-}
+// It automatically adds the search to the Help menu (creating it if it doesn't exist)
+// The search item will be added at the top of the Help menu
+// If searchLabel is empty, DefaultSearchMenuLabel ("Search...") will be used
+func AddSearchToMainMenu(mainMenu *MainMenu, searchLabel string) *MainMenu {
+	if searchLabel == "" {
+		searchLabel = DefaultSearchMenuLabel
+	}
 
-// AddSearchToMenu adds search functionality to a specific menu in the MainMenu
-// menuLabel specifies which menu should contain the search (e.g., "File", "Edit", "Help")
-// The search item will be added at the beginning of the menu with the default label
-func AddSearchToMenu(mainMenu *MainMenu, menuLabel string) *MainMenu {
-	return AddSearchToMenuWithLabel(mainMenu, menuLabel, DefaultSearchMenuLabel)
-}
-
-// AddSearchToMenuWithLabel adds search functionality with a custom label
-// menuLabel specifies which menu should contain the search (e.g., "File", "Edit", "Help")
-// searchLabel specifies the text to display for the search item (e.g., "Search All Menus...", "Find...", etc.)
-func AddSearchToMenuWithLabel(mainMenu *MainMenu, menuLabel string, searchLabel string) *MainMenu {
-	var targetMenu *Menu
+	var helpMenu *Menu
 	for _, menu := range mainMenu.Items {
-		if menu.Label == menuLabel {
-			targetMenu = menu
+		if menu.Label == "Help" {
+			helpMenu = menu
 			break
 		}
 	}
 
-	if targetMenu == nil && menuLabel == "Help" {
-		targetMenu = NewMenu("Help")
-		mainMenu.Items = append(mainMenu.Items, targetMenu)
-	} else if targetMenu == nil {
-		return mainMenu
+	if helpMenu == nil {
+		helpMenu = NewMenu("Help")
+		mainMenu.Items = append(mainMenu.Items, helpMenu)
 	}
 
-	for _, item := range targetMenu.Items {
+	for _, item := range helpMenu.Items {
 		if IsSearchMenuItem(item) {
 			return mainMenu
 		}
@@ -60,81 +49,24 @@ func AddSearchToMenuWithLabel(mainMenu *MainMenu, menuLabel string, searchLabel 
 
 	searchMenuItems[searchItem] = true
 
-	newItems := make([]*MenuItem, 0, len(targetMenu.Items)+2)
+	newItems := make([]*MenuItem, 0, len(helpMenu.Items)+2)
 	newItems = append(newItems, searchItem)
 
-	if len(targetMenu.Items) > 0 && !targetMenu.Items[0].IsSeparator {
+	if len(helpMenu.Items) > 0 && !helpMenu.Items[0].IsSeparator {
 		newItems = append(newItems, NewMenuItemSeparator())
 	}
 
-	newItems = append(newItems, targetMenu.Items...)
-	targetMenu.Items = newItems
-
-	return mainMenu
-}
-
-// AddSearchToMenuAtPosition adds search functionality at a specific position in the menu
-// position specifies where to insert the search item (0 = beginning, -1 = end)
-// Uses the default search label
-func AddSearchToMenuAtPosition(mainMenu *MainMenu, menuLabel string, position int) *MainMenu {
-	return AddSearchToMenuAtPositionWithLabel(mainMenu, menuLabel, position, DefaultSearchMenuLabel)
-}
-
-// AddSearchToMenuAtPositionWithLabel adds search functionality with custom label at a specific position
-// menuLabel specifies which menu should contain the search
-// position specifies where to insert the search item (0 = beginning, -1 = end)
-// searchLabel specifies the text to display for the search item
-func AddSearchToMenuAtPositionWithLabel(mainMenu *MainMenu, menuLabel string, position int, searchLabel string) *MainMenu {
-	var targetMenu *Menu
-	for _, menu := range mainMenu.Items {
-		if menu.Label == menuLabel {
-			targetMenu = menu
-			break
-		}
-	}
-
-	if targetMenu == nil && menuLabel == "Help" {
-		targetMenu = NewMenu("Help")
-		mainMenu.Items = append(mainMenu.Items, targetMenu)
-	} else if targetMenu == nil {
-		return mainMenu
-	}
-
-	for _, item := range targetMenu.Items {
-		if IsSearchMenuItem(item) {
-			return mainMenu
-		}
-	}
-
-	searchItem := &MenuItem{
-		Label:  searchLabel,
-		Action: func() {},
-	}
-
-	searchMenuItems[searchItem] = true
-	if position < 0 || position >= len(targetMenu.Items) {
-		targetMenu.Items = append(targetMenu.Items, searchItem)
-	} else {
-		newItems := make([]*MenuItem, 0, len(targetMenu.Items)+1)
-		newItems = append(newItems, targetMenu.Items[:position]...)
-		newItems = append(newItems, searchItem)
-		newItems = append(newItems, targetMenu.Items[position:]...)
-		targetMenu.Items = newItems
-	}
+	newItems = append(newItems, helpMenu.Items...)
+	helpMenu.Items = newItems
 
 	return mainMenu
 }
 
 // NewMainMenuWithSearch creates a new MainMenu with search functionality
-// It automatically adds search to the File menu with the default label
-func NewMainMenuWithSearch(items ...*Menu) *MainMenu {
+// It automatically adds search to the Help menu (creating it if it doesn't exist)
+// Pass an empty string for searchLabel to use the default "Search..." label
+// Example: NewMainMenuWithSearch("", fileMenu, editMenu) or NewMainMenuWithSearch("Find...", fileMenu, editMenu)
+func NewMainMenuWithSearch(searchLabel string, items ...*Menu) *MainMenu {
 	mainMenu := NewMainMenu(items...)
-	return AddSearchToMainMenu(mainMenu)
-}
-
-// NewMainMenuWithSearchLabel creates a new MainMenu with search functionality and custom label
-// It automatically adds search to the File menu with the specified label
-func NewMainMenuWithSearchLabel(searchLabel string, items ...*Menu) *MainMenu {
-	mainMenu := NewMainMenu(items...)
-	return AddSearchToMenuWithLabel(mainMenu, "File", searchLabel)
+	return AddSearchToMainMenu(mainMenu, searchLabel)
 }
