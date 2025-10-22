@@ -541,3 +541,33 @@ func TestPainter_paintText_scale2(t *testing.T) {
 
 	test.AssertImageMatches(t, "draw_text_scale2.png", p.Paint(c))
 }
+
+func TestPainter_paintEllipse(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewEllipse(color.Black)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
+
+	obj.Resize(fyne.NewSize(70, 35))
+	test.AssertImageMatches(t, "draw_ellipse_wide.png", p.Paint(c))
+
+	obj.StrokeColor = color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+	obj.StrokeWidth = 4
+	obj.Angle = 360
+	test.AssertImageMatches(t, "draw_ellipse_wide_stroke.png", p.Paint(c))
+
+	obj.Resize(fyne.NewSize(35, 70))
+	obj.StrokeWidth = 0
+	obj.Angle = 0
+	test.AssertImageMatches(t, "draw_ellipse_narrow.png", p.Paint(c))
+
+	obj.StrokeWidth = 4
+	obj.Angle = 180
+	test.AssertImageMatches(t, "draw_ellipse_narrow_stroke.png", p.Paint(c))
+}
