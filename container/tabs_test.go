@@ -67,3 +67,38 @@ func TestTab_RemoveCallsHandlers(t *testing.T) {
 	assert.Equal(t, "b", selectedText)
 	assert.Equal(t, "a", unSelectedText)
 }
+
+func TestTab_RemoveNonSelectedTab(t *testing.T) {
+	tabs := NewDocTabs(
+		NewTabItem("a", widget.NewLabel("a")),
+		NewTabItem("b", widget.NewLabel("b")),
+	)
+
+	selectedText := ""
+	unSelectedText := ""
+	tabs.OnSelected = func(ti *TabItem) {
+		selectedText = ti.Text
+	}
+	tabs.OnUnselected = func(ti *TabItem) {
+		unSelectedText = ti.Text
+	}
+
+	tabs.RemoveIndex(1)
+
+	assert.Equal(t, "a", selectedText)
+	assert.Equal(t, "", unSelectedText)
+}
+
+func TestTab_RemoveLastTab(t *testing.T) {
+	tabs := NewDocTabs(
+		NewTabItem("a", widget.NewLabel("a")),
+	)
+	selectedText := ""
+	tabs.OnUnselected = func(ti *TabItem) {
+		selectedText = ti.Text
+	}
+
+	tabs.RemoveIndex(0)
+
+	assert.Equal(t, "a", selectedText)
+}
