@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -201,10 +202,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
-	if e.ActionItem != nil {
-		objects = append(objects, e.ActionItem)
-	}
-
 	icon := canvas.NewImageFromResource(e.Icon)
 	icon.FillMode = canvas.ImageFillContain
 	objects = append(objects, icon)
@@ -213,7 +210,19 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	e.syncSegments()
-	return &entryRenderer{box, border, e.scroll, icon, objects, e}
+
+	actionWrapper := &fyne.Container{Layout: layout.NewStackLayout()}
+	objects = append(objects, actionWrapper)
+
+	return &entryRenderer{
+		box:           box,
+		border:        border,
+		scroll:        e.scroll,
+		icon:          icon,
+		actionWrapper: actionWrapper,
+		objects:       objects,
+		entry:         e,
+	}
 }
 
 // CursorPosition returns the relative position of this Entry widget's cursor.
@@ -1476,9 +1485,10 @@ func (e *Entry) setFieldsAndRefresh(f func()) {
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 
 type entryRenderer struct {
-	box, border *canvas.Rectangle
-	scroll      *widget.Scroll
-	icon        *canvas.Image
+	box, border   *canvas.Rectangle
+	scroll        *widget.Scroll
+	icon          *canvas.Image
+	actionWrapper *fyne.Container
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1535,9 +1545,9 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	pad := theme.InputBorderSize()
 	actionIconSize := fyne.NewSize(0, size.Height-pad*2)
 	if r.entry.ActionItem != nil {
-		actionIconSize.Width = r.entry.ActionItem.MinSize().Width
-		r.entry.ActionItem.Resize(actionIconSize)
-		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-pad, pad))
+		actionIconSize.Width = r.actionWrapper.MinSize().Width
+		r.actionWrapper.Resize(actionIconSize)
+		r.actionWrapper.Move(fyne.NewPos(size.Width-actionIconSize.Width-pad, pad))
 	}
 
 	validatorIconSize := fyne.NewSize(0, 0)
@@ -1638,6 +1648,14 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *entryRenderer) Refresh() {
+	if r.entry.ActionItem != nil {
+		r.actionWrapper.Objects = []fyne.CanvasObject{r.entry.ActionItem}
+		r.actionWrapper.Show()
+	} else {
+		r.actionWrapper.Objects = []fyne.CanvasObject{}
+		r.actionWrapper.Hide()
+	}
+
 	content := r.entry.content
 	focusedAppearance := r.entry.focused && !r.entry.Disabled()
 	scroll := r.entry.Scroll
