@@ -165,12 +165,14 @@ func removeIndex(t baseTabs, index int) {
 	if s := t.selected(); index < s {
 		t.setSelected(s - 1)
 	}
-	if f := t.onUnselected(); selectedItem == existingItem && f != nil {
-		f(existingItem)
-	}
-	if f := t.onSelected(); f != nil {
-		if s := selected(t); s != nil {
-			f(s)
+	if selectedItem == existingItem {
+		if f := t.onUnselected(); f != nil {
+			f(existingItem)
+		}
+		if f := t.onSelected(); f != nil {
+			if s := selected(t); s != nil {
+				f(s)
+			}
 		}
 	}
 }
@@ -248,8 +250,14 @@ func setItems(t baseTabs, items []*TabItem) {
 		// Current is first tab item
 		selectIndex(t, 0)
 	case selected >= count:
-		// Current doesn't exist, select last tab
-		selectIndex(t, count-1)
+		if selected == count {
+			// If selected is exactly equal to count, it still exists,
+			// it's just shifted to the left. We don't want to call onSelected in this case,
+			// so we call setSelected directly
+			t.setSelected(count - 1)
+		} else {
+			selectIndex(t, count-1)
+		}
 	}
 }
 

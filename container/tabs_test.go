@@ -85,7 +85,7 @@ func TestTab_RemoveNonSelectedTab(t *testing.T) {
 
 	tabs.RemoveIndex(1)
 
-	assert.Equal(t, "a", selectedText)
+	assert.Equal(t, "", selectedText)
 	assert.Equal(t, "", unSelectedText)
 }
 
@@ -101,4 +101,19 @@ func TestTab_RemoveLastTab(t *testing.T) {
 	tabs.RemoveIndex(0)
 
 	assert.Equal(t, "a", selectedText)
+}
+
+func TestTab_RemoveTabWhenLastIsSelected(t *testing.T) {
+	tabs := NewDocTabs(
+		NewTabItem("a", widget.NewLabel("a")),
+		NewTabItem("b", widget.NewLabel("b")),
+	)
+	tabs.SelectIndex(1)
+	selectedText := ""
+	tabs.OnSelected = func(ti *TabItem) {
+		selectedText = ti.Text
+	}
+	tabs.RemoveIndex(0)
+
+	assert.Equal(t, "", selectedText)
 }
