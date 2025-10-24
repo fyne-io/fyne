@@ -55,7 +55,7 @@ type GridWrap struct {
 	OnUnselected func(id GridWrapItemID) `json:"-"`
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted by keyboard navigation.
+	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
 	//
 	// Since: 2.8
 	OnHighlighted func(id GridWrapItemID) `json:"-"`
