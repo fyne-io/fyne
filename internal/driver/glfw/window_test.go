@@ -2192,6 +2192,8 @@ func (s *safeWindow) keyPressed(w *glfw.Window, key glfw.Key, scancode int, acti
 }
 
 func (s *safeWindow) moveMouse(xpos, ypos float64) {
-	s.mouseMoved(s.viewport, xpos, ypos)
-	s.processMouseMoved(s.newMousePosX, s.newMousePosY)
+	runOnMain(func() {
+		s.mouseMoved(s.viewport, xpos, ypos)
+		s.processMouseMoved(s.newMousePosX, s.newMousePosY)
+	})
 }
