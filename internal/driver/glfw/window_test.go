@@ -247,9 +247,11 @@ func TestWindow_Cursor(t *testing.T) {
 	w.SetContent(container.NewVBox(e, h, b))
 	repaintWindow(w)
 	ensureCanvasSize(t, w, fyne.NewSize(72, 123))
-	w.moveMouse(10, float64(e.Position().Y+10))
-	textCursor := desktop.TextCursor
-	assert.Equal(t, textCursor, w.cursor)
+	runOnMain(func() {
+		w.moveMouse(10, float64(e.Position().Y+10))
+		textCursor := desktop.TextCursor
+		assert.Equal(t, textCursor, w.cursor)
+	})
 
 	/*
 		// See fyne-io/fyne/issues/4513 - Hyperlink doesn't update its cursor type until
@@ -258,10 +260,11 @@ func TestWindow_Cursor(t *testing.T) {
 			pointerCursor := desktop.PointerCursor
 			assert.Equal(t, pointerCursor, w.cursor)
 	*/
-
-	w.moveMouse(10, float64(b.Position().Y+10))
-	defaultCursor := desktop.DefaultCursor
-	assert.Equal(t, defaultCursor, w.cursor)
+	runOnMain(func() {
+		w.moveMouse(10, float64(b.Position().Y+10))
+		defaultCursor := desktop.DefaultCursor
+		assert.Equal(t, defaultCursor, w.cursor)
+	})
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {
@@ -336,24 +339,24 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 
 	runOnMain(func() {
 		w.moveMouse(15, 48)
+		repaintWindow(w)
+		assert.NotNil(t, w.mouseOver)
+		test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 	})
-	repaintWindow(w)
-	assert.NotNil(t, w.mouseOver)
-	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	runOnMain(func() {
 		w.moveMouse(42, 48)
+		repaintWindow(w)
+		assert.NotNil(t, w.mouseOver)
+		test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 	})
-	repaintWindow(w)
-	assert.NotNil(t, w.mouseOver)
-	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	runOnMain(func() {
 		w.moveMouse(42, 100)
+		repaintWindow(w)
+		assert.Nil(t, w.mouseOver)
+		test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 	})
-	repaintWindow(w)
-	assert.Nil(t, w.mouseOver)
-	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 }
 
 func TestWindow_HandleDragging(t *testing.T) {
@@ -1310,7 +1313,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	repaintWindow(w)
 	ensureCanvasSize(t, w, minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2))
 
-	w.moveMouse(7, 7)
+	runOnMain(func() { w.moveMouse(7, 7) })
 
 	// On OS X a Ctrl+Click is normally translated into a Right-Click.
 	// The well-known Ctrl+Click for extending a selection is a Cmd+Click there.
@@ -2192,8 +2195,6 @@ func (s *safeWindow) keyPressed(w *glfw.Window, key glfw.Key, scancode int, acti
 }
 
 func (s *safeWindow) moveMouse(xpos, ypos float64) {
-	runOnMain(func() {
-		s.mouseMoved(s.viewport, xpos, ypos)
-		s.processMouseMoved(s.newMousePosX, s.newMousePosY)
-	})
+	s.mouseMoved(s.viewport, xpos, ypos)
+	s.processMouseMoved(s.newMousePosX, s.newMousePosY)
 }
