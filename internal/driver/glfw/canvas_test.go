@@ -551,7 +551,9 @@ func TestGlCanvas_SetContent(t *testing.T) {
 	if build.HasNativeMenu {
 		menuHeight = 0
 	} else {
-		menuHeight = NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
+		runOnMain(func() {
+			menuHeight = NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
+		})
 	}
 	tests := []struct {
 		name               string
