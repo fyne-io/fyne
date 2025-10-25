@@ -855,10 +855,7 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 		return []float32{}
 	}
 
-	max := t.StickyColumnCount
-	if max > cols {
-		max = cols
-	}
+	max := min(t.StickyColumnCount, cols)
 
 	visible = make([]float32, max)
 
@@ -917,13 +914,13 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 		for i := minCol; i < maxCol; i++ {
 			visible[i] = colWidth
 		}
-		for i := 0; i < stick; i++ {
+		for i := range stick {
 			visible[i] = colWidth
 		}
 		return visible, offX, minCol, maxCol
 	}
 
-	for i := 0; i < cols; i++ {
+	for i := range cols {
 		width := colWidth
 		if w, ok := t.columnWidths[i]; ok {
 			width = w
@@ -955,10 +952,7 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 		return []float32{}
 	}
 
-	max := t.StickyRowCount
-	if max > rows {
-		max = rows
-	}
+	max := min(t.StickyRowCount, rows)
 
 	visible = make([]float32, max)
 
@@ -1017,13 +1011,13 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 		for i := minRow; i < maxRow; i++ {
 			visible[i] = rowHeight
 		}
-		for i := 0; i < stick; i++ {
+		for i := range stick {
 			visible[i] = rowHeight
 		}
 		return visible, offY, minRow, maxRow
 	}
 
-	for i := 0; i < rows; i++ {
+	for i := range rows {
 		height := rowHeight
 		if h, ok := t.rowHeights[i]; ok {
 			height = h
@@ -1312,14 +1306,8 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	if r.cells.t.ShowHeaderColumn {
 		cellXOffset += r.cells.t.headerSize.Width
 	}
-	startRow := minRow + stickRows
-	if startRow < stickRows {
-		startRow = stickRows
-	}
-	startCol := minCol + stickCols
-	if startCol < stickCols {
-		startCol = stickCols
-	}
+	startRow := max(minRow+stickRows, stickRows)
+	startCol := max(minCol+stickCols, stickCols)
 
 	wasVisible := r.visible
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
@@ -1371,7 +1359,7 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 
 	offX -= r.cells.t.content.Offset.X
 	cellYOffset = r.cells.t.stuckYOff
-	for row := 0; row < stickRows; row++ {
+	for row := range stickRows {
 		displayRow(row, &r.cells.t.top.Content.(*fyne.Container).Objects)
 	}
 
@@ -1379,17 +1367,17 @@ func (r *tableCellsRenderer) refreshForID(toDraw TableCellID) {
 	for row := startRow; row < maxRow; row++ {
 		cellXOffset = r.cells.t.stuckXOff
 		rowHeight := visibleRowHeights[row]
-		for col := 0; col < stickCols; col++ {
+		for col := range stickCols {
 			displayCol(row, col, rowHeight, &r.cells.t.left.Content.(*fyne.Container).Objects)
 		}
 		cellYOffset += rowHeight + separatorThickness
 	}
 
 	cellYOffset = r.cells.t.stuckYOff
-	for row := 0; row < stickRows; row++ {
+	for row := range stickRows {
 		cellXOffset = r.cells.t.stuckXOff
 		rowHeight := visibleRowHeights[row]
-		for col := 0; col < stickCols; col++ {
+		for col := range stickCols {
 			displayCol(row, col, rowHeight, &r.cells.t.corner.Content.(*fyne.Container).Objects)
 		}
 		cellYOffset += rowHeight + separatorThickness
@@ -1475,14 +1463,8 @@ func (r *tableCellsRenderer) moveIndicators() {
 		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}
 
-	colDivs := stickCols + maxCol - minCol - 1
-	if colDivs < 0 {
-		colDivs = 0
-	}
-	rowDivs := stickRows + maxRow - minRow - 1
-	if rowDivs < 0 {
-		rowDivs = 0
-	}
+	colDivs := max(stickCols+maxCol-minCol-1, 0)
+	rowDivs := max(stickRows+maxRow-minRow-1, 0)
 
 	if colDivs < 0 {
 		colDivs = 0

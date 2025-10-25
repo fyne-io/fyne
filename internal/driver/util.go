@@ -2,6 +2,7 @@ package driver
 
 import (
 	"math"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
@@ -188,10 +189,8 @@ func walkObjectTree(
 			}
 		}
 	} else {
-		for _, child := range children {
-			if followChild(child) {
-				break
-			}
+		if slices.ContainsFunc(children, followChild) {
+
 		}
 	}
 

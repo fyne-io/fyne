@@ -45,7 +45,7 @@ func TestQueue(t *testing.T) {
 			canvas.NewRectangle(color.Black),
 		}
 
-		for i := 0; i < len(want); i++ {
+		for i := range want {
 			q.In(want[i])
 		}
 
@@ -58,7 +58,7 @@ func TestQueue(t *testing.T) {
 			x = append(x, e)
 		}
 
-		for i := 0; i < len(want); i++ {
+		for i := range want {
 			if x[i] != want[i] {
 				t.Fatalf("input does not match output, want %+v, got %+v", want[i], x[i])
 			}

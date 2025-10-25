@@ -200,8 +200,8 @@ func computeGradient(generator func(x, y float64) float64, w, h int, startColor,
 		endColor = color.Transparent
 	}
 
-	for x := 0; x < w; x++ {
-		for y := 0; y < h; y++ {
+	for x := range w {
+		for y := range h {
 			distance := generator(float64(x)+0.5, float64(y)+0.5)
 			img.Set(x, y, calculatePixel(distance, startColor, endColor))
 		}

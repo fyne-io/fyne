@@ -206,7 +206,7 @@ func TestPrefs_SetSameValue(t *testing.T) {
 	})
 
 	// We should not fire change when it hasn't changed.
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		p.SetBool("enabled", true)
 		time.Sleep(time.Millisecond * 100)
 
@@ -227,7 +227,7 @@ func TestPrefs_SetSameSliceValue(t *testing.T) {
 	})
 
 	// We should not fire change when it hasn't changed.
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		p.SetStringList("items", []string{"1", "2"})
 		time.Sleep(time.Millisecond * 100)
 

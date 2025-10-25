@@ -583,8 +583,8 @@ func Benchmark_knownColor(b *testing.B) {
 	out := ""
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		out = knownColor(lookup)
 	}
 
@@ -596,8 +596,8 @@ func Benchmark_knownResource(b *testing.B) {
 	out := ""
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		out = knownResource(lookup)
 	}
 

@@ -428,8 +428,8 @@ func extractLdFlags(goFlags string) (string, string) {
 	newGoFlags := ""
 
 	for _, flag := range flags {
-		if strings.HasPrefix(flag, "-ldflags=") {
-			ldflags += strings.TrimPrefix(flag, "-ldflags=") + " "
+		if after, ok := strings.CutPrefix(flag, "-ldflags="); ok {
+			ldflags += after + " "
 		} else {
 			newGoFlags += flag + " "
 		}

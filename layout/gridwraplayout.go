@@ -61,10 +61,7 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // layout has no padding. The returned size does not take into account the number
 // of columns as this layout re-flows dynamically.
 func (g *gridWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	rows := g.rowCount
-	if rows < 1 {
-		rows = 1
-	}
+	rows := max(g.rowCount, 1)
 	return fyne.NewSize(g.CellSize.Width,
 		(g.CellSize.Height*float32(rows))+(float32(rows-1)*theme.Padding()))
 }

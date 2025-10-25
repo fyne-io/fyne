@@ -1,5 +1,7 @@
 package fyne
 
+import "slices"
+
 type systemTrayDriver interface {
 	Driver
 	SetSystemTrayMenu(*Menu)
@@ -25,11 +27,8 @@ func (m *Menu) Refresh() {
 	for _, w := range CurrentApp().Driver().AllWindows() {
 		main := w.MainMenu()
 		if main != nil {
-			for _, menu := range main.Items {
-				if menu == m {
-					w.SetMainMenu(main)
-					break
-				}
+			if slices.Contains(main.Items, m) {
+				w.SetMainMenu(main)
 			}
 		}
 	}

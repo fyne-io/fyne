@@ -20,7 +20,7 @@ func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 	widget := &widget.ProgressBar{}
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		renderer = widget.CreateRenderer()
 	}
 
@@ -34,7 +34,7 @@ func BenchmarkProgressBarLayout(b *testing.B) {
 	bar := &widget.ProgressBar{}
 	renderer := bar.CreateRenderer()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		renderer.Layout(fyne.NewSize(100, 100))
 	}
 }

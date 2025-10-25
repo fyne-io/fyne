@@ -14,8 +14,8 @@ func BenchmarkURIString(b *testing.B) {
 	input, _ := ParseURI("foo://example.com:8042/over/there?name=ferret#nose")
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		str = input.String()
 	}
 

@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -152,13 +153,7 @@ func (r *CheckGroup) update() {
 		r.items = r.items[:len(r.Options)]
 	}
 	for i, item := range r.items {
-		contains := false
-		for _, s := range r.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
+		contains := slices.Contains(r.Selected, item.Text)
 
 		item.Text = r.Options[i]
 		item.Checked = contains
@@ -246,13 +241,7 @@ func (r *checkGroupRenderer) updateItems() {
 		r.SetObjects(r.Objects()[:total])
 	}
 	for i, item := range r.items {
-		contains := false
-		for _, s := range r.checks.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
+		contains := slices.Contains(r.checks.Selected, item.Text)
 		item.Text = r.checks.Options[i]
 		item.Checked = contains
 		item.disabled = r.checks.Disabled()

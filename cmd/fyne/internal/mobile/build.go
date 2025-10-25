@@ -14,6 +14,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
@@ -408,12 +409,7 @@ func parseBuildTarget(buildTarget string) (os string, archs []string, _ error) {
 
 	// verify all archs are supported one while deduping.
 	isSupported := func(os, arch string) bool {
-		for _, a := range allArchs[os] {
-			if a == arch {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(allArchs[os], arch)
 	}
 
 	seen := map[string]bool{}

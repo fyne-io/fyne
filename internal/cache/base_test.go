@@ -21,9 +21,9 @@ func TestCacheClean(t *testing.T) {
 	testClearAll()
 	tm := &timeMock{}
 
-	for k := 0; k < 2; k++ {
+	for k := range 2 {
 		tm.setTime(10, 10+k*10)
-		for i := 0; i < 20; i++ {
+		for i := range 20 {
 			SetSvg(fmt.Sprintf("%d%d", k, i), nil, nil, i, i+1)
 			Renderer(&dummyWidget{onDestroy: func() {
 				destroyedRenderersCnt++
@@ -142,7 +142,7 @@ func TestCleanCanvas(t *testing.T) {
 	dcanvas1 := &dummyCanvas{}
 	dcanvas2 := &dummyCanvas{}
 
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		dwidget := &dummyWidget{onDestroy: func() {
 			destroyedRenderersCnt++
 		}}
@@ -150,7 +150,7 @@ func TestCleanCanvas(t *testing.T) {
 		SetCanvasForObject(dwidget, dcanvas1, nil)
 	}
 
-	for i := 0; i < 22; i++ {
+	for range 22 {
 		dwidget := &dummyWidget{onDestroy: func() {
 			destroyedRenderersCnt++
 		}}

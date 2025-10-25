@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -550,12 +551,6 @@ func findWindowsSDKBin() (string, error) {
 }
 
 func isValidMacOSCategory(in string) bool {
-	found := false
-	for _, cat := range macAppStoreCategories {
-		if cat == strings.ToLower(in) {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(macAppStoreCategories, strings.ToLower(in))
 	return found
 }

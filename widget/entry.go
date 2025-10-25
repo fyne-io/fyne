@@ -1143,7 +1143,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	canWrap := e.Wrapping == fyne.TextWrapBreak || e.Wrapping == fyne.TextWrapWord
 	totalRows := provider.rows()
-	for i := 0; i < totalRows; i++ {
+	for i := range totalRows {
 		b := provider.rowBoundary(i)
 		if b == nil {
 			continue

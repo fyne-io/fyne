@@ -580,7 +580,7 @@ func TestEntry_MultilineWrapping_DeleteWithBackspace(t *testing.T) {
 	assert.Equal(t, 5, entry.CursorColumn)
 	assert.Equal(t, 2, entry.CursorRow)
 
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
 		assert.Equal(t, 4-i, entry.CursorColumn)
 		assert.Equal(t, 2, entry.CursorRow)
@@ -2221,12 +2221,12 @@ func TestEntry_UndoRedoImage(t *testing.T) {
 	}
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		e.TypedShortcut(&fyne.ShortcutUndo{})
 	}
 	test.AssertImageMatches(t, "entry/undo_redo_5undo.png", window.Canvas().Capture())
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		e.TypedShortcut(&fyne.ShortcutRedo{})
 	}
 	test.AssertImageMatches(t, "entry/undo_redo_mistake_corrected.png", window.Canvas().Capture())

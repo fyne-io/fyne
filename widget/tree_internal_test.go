@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"slices"
 	"testing"
 	"time"
 
@@ -962,11 +963,8 @@ func addTreePath(data map[string][]string, path ...string) {
 	for _, p := range path {
 		children := data[parent]
 		add := true
-		for _, c := range children {
-			if c == p {
-				add = false
-				break
-			}
+		if slices.Contains(children, p) {
+			add = false
 		}
 		if add {
 			data[parent] = append(children, p)

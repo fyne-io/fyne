@@ -183,7 +183,7 @@ func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
 	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
-	for i := 0; i < len(text); i++ {
+	for i := range text {
 		str := string(text[0:i])
 		wid := fyne.MeasureText(str, textSize, s.style).Width
 		charWid := fyne.MeasureText(string(text[i]), textSize, s.style).Width
@@ -378,7 +378,7 @@ func (r *selectableRenderer) buildSelection() {
 	}
 
 	// build a rectangle for each row and add it to r.selection
-	for i := 0; i < rowCount; i++ {
+	for i := range rowCount {
 		if len(r.selections) <= i {
 			box := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
 			r.selections = append(r.selections, box)

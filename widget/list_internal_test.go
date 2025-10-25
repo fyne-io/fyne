@@ -36,7 +36,7 @@ func TestNewList(t *testing.T) {
 
 func TestNewListWithData(t *testing.T) {
 	data := binding.NewStringList()
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		data.Append(fmt.Sprintf("Test Item %d", i))
 	}
 
@@ -178,7 +178,7 @@ func TestList_Hover(t *testing.T) {
 	list := createList(1000)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		assert.False(t, children[i].(*listItem).background.Visible())
 		children[i].(*listItem).MouseIn(&desktop.MouseEvent{})
 		assert.Equal(t, children[i].(*listItem).background.FillColor, theme.Color(theme.ColorNameHover))
@@ -468,7 +468,7 @@ func TestList_ScrollThenShrink(t *testing.T) {
 	test.NewTempApp(t)
 
 	data := make([]string, 0, 20)
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		data = append(data, fmt.Sprintf("Data %d", i))
 	}
 
@@ -507,7 +507,7 @@ func TestList_ScrollThenResizeWindow(t *testing.T) {
 	test.NewTempApp(t)
 
 	data := make([]string, 0, 20)
-	for i := 0; i < 20; i++ {
+	for i := range 20 {
 		data = append(data, fmt.Sprintf("Data %d", i))
 	}
 
@@ -578,7 +578,7 @@ func TestList_Focus(t *testing.T) {
 
 func createList(items int) *List {
 	var data []string
-	for i := 0; i < items; i++ {
+	for i := range items {
 		data = append(data, fmt.Sprintf("Test Item %d", i))
 	}
 
@@ -688,7 +688,6 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 var minSize fyne.Size
 
 func BenchmarkContentMinSize(b *testing.B) {
-	b.StopTimer()
 
 	l := NewList(
 		func() int { return 1000000 },
@@ -703,8 +702,8 @@ func BenchmarkContentMinSize(b *testing.B) {
 	l.SetItemHeight(12345, 2)
 
 	min := fyne.Size{}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		min = l.contentMinSize()
 	}
 

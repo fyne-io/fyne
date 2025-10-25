@@ -60,7 +60,7 @@ func TestWriteResource(t *testing.T) {
 }
 
 func BenchmarkWriteResource(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		b.StopTimer()
 		f, _ := os.CreateTemp("", "*.go")
 		b.StartTimer()

@@ -2,6 +2,7 @@ package binding
 
 import (
 	"bytes"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
@@ -302,10 +303,8 @@ func (t *treeBase) appendItem(i DataItem, id, parent string) {
 	t.items[id] = i
 
 	ids := t.ids[parent]
-	for _, in := range ids {
-		if in == id {
-			return
-		}
+	if slices.Contains(ids, id) {
+		return
 	}
 	t.ids[parent] = append(ids, id)
 }
@@ -333,10 +332,8 @@ func (t *treeBase) deleteItem(id, parent string) {
 
 func parentIDFor(id string, ids map[string][]string) string {
 	for parent, list := range ids {
-		for _, child := range list {
-			if child == id {
-				return parent
-			}
+		if slices.Contains(list, id) {
+			return parent
 		}
 	}
 
@@ -513,11 +510,8 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 
 	for id := range t.items {
 		remove := true
-		for _, done := range updated {
-			if done == id {
-				remove = false
-				break
-			}
+		if slices.Contains(updated, id) {
+			remove = false
 		}
 
 		if remove { // remove item no longer present

@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 
 	"fyne.io/fyne/v2"
@@ -437,7 +438,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 		return offY, minRow
 	}
 
-	for i := 0; i < length; i++ {
+	for i := range length {
 		height := itemHeight
 		if h, ok := l.list.itemHeights[i]; ok {
 			height = h
@@ -673,13 +674,7 @@ func (l *listLayout) offsetUpdated(pos fyne.Position) {
 
 func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	previousIndicator := li.selected
-	li.selected = false
-	for _, s := range l.list.selected {
-		if id == s {
-			li.selected = true
-			break
-		}
-	}
+	li.selected = slices.Contains(l.list.selected, id)
 	if focus {
 		li.hovered = true
 		li.Refresh()

@@ -334,7 +334,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	// regular polygon vertices
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
-	for i := 0; i < sides; i++ {
+	for i := range sides {
 		t := rotRads + angleStep*float64(i)
 		xs[i] = cx + radius*math.Cos(t)
 		ys[i] = cy + radius*math.Sin(t)
@@ -355,7 +355,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	vE := make([]pt, sides)   // center->end vector
 	cPts := make([]pt, sides) // arc centers
 
-	for i := 0; i < sides; i++ {
+	for i := range sides {
 		prv := (i - 1 + sides) % sides
 		nxt := (i + 1) % sides
 
@@ -424,7 +424,7 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr fl
 		segCount := int(math.Ceil(math.Abs(sweep) / (math.Pi / 2.0)))
 		da := sweep / float64(segCount)
 
-		for i := 0; i < segCount; i++ {
+		for i := range segCount {
 			a1 := start + float64(i)*da
 			a2 := a1 + da
 

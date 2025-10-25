@@ -51,7 +51,7 @@ func BenchmarkEqualURI(b *testing.B) {
 		b.ReportAllocs()
 
 		equal := false
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			equal = storage.EqualURI(first, first)
 		}
 		equalSink = equal
@@ -61,7 +61,7 @@ func BenchmarkEqualURI(b *testing.B) {
 		b.ReportAllocs()
 
 		equal := false
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			equal = storage.EqualURI(first, first2)
 		}
 		equalSink = equal
@@ -71,7 +71,7 @@ func BenchmarkEqualURI(b *testing.B) {
 		b.ReportAllocs()
 
 		equal := false
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			equal = storage.EqualURI(first, second)
 		}
 		equalSink = equal
@@ -82,7 +82,7 @@ func BenchmarkEqualURI(b *testing.B) {
 		b.ReportAllocs()
 
 		equal := false
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			equal = storage.EqualURI(otherFirst, otherFirst)
 		}
 		equalSink = equal
@@ -91,7 +91,7 @@ func BenchmarkEqualURI(b *testing.B) {
 		b.ReportAllocs()
 
 		equal := false
-		for i := 0; i < b.N; i++ {
+		for b.Loop() {
 			equal = storage.EqualURI(first, otherFirst)
 		}
 		equalSink = equal

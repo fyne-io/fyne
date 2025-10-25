@@ -471,7 +471,6 @@ func TestTable_ScrollTo(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			table.ScrollTo(tc.in)
 			assert.Equal(t, tc.want, table.offset)

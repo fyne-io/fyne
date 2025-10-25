@@ -17,7 +17,7 @@ func BenchmarkProgressbarInf(b *testing.B) {
 	widget := &ProgressBarInfinite{}
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		renderer = widget.CreateRenderer()
 	}
 

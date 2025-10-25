@@ -266,7 +266,7 @@ func (pkg *Package) UnmarshalBinary(bin []byte) error {
 	pkg.id = btou32(bin[8:])
 
 	var name []uint16
-	for i := 0; i < 128; i++ {
+	for i := range 128 {
 		x := btou16(bin[12+i*2:])
 		if x == 0 {
 			break

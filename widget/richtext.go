@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"math"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -222,13 +223,7 @@ func (t *RichText) cleanVisualCache() {
 	}
 	var deletingSegs []RichTextSegment
 	for seg1 := range t.visualCache {
-		found := false
-		for _, seg2 := range t.Segments {
-			if seg1 == seg2 {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(t.Segments, seg1)
 		if !found {
 			// cached segment is not currently in t.Segments, clear it
 			deletingSegs = append(deletingSegs, seg1)
@@ -460,10 +455,7 @@ func (t *RichText) updateRowBounds() {
 				if begin > len(runes) {
 					begin = len(runes)
 				}
-				end := last.end
-				if end > len(runes) {
-					end = len(runes)
-				}
+				end := min(last.end, len(runes))
 				text := string(runes[begin:end])
 				measured := fyne.MeasureText(text, textSeg.size(), textSeg.Style.TextStyle)
 				lastWidth := measured.Width
@@ -1079,7 +1071,7 @@ func splitLines(seg *TextSegment) []rowBoundary {
 	var lines []rowBoundary
 	text := []rune(seg.Text)
 	length := len(text)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		if text[i] == '\n' {
 			high = i
 			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false})

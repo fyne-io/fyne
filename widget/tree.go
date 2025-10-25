@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -1090,10 +1091,5 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 }
 
 func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(slice, item)
 }

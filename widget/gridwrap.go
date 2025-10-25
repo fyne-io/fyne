@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 
 	"fyne.io/fyne/v2"
@@ -582,13 +583,7 @@ func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
 
 func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focus bool) {
 	previousIndicator := li.selected
-	li.selected = false
-	for _, s := range l.gw.selected {
-		if id == s {
-			li.selected = true
-			break
-		}
-	}
+	li.selected = slices.Contains(l.gw.selected, id)
 	if focus {
 		li.hovered = true
 		li.Refresh()

@@ -101,7 +101,7 @@ func (c *Calendar) calendarObjects() []fyne.CanvasObject {
 	}
 
 	var columnHeadings []fyne.CanvasObject
-	for i := 0; i < daysPerWeek; i++ {
+	for i := range daysPerWeek {
 		t := NewLabel(shortDayName(time.Weekday((i + offset) % daysPerWeek).String()))
 		t.Alignment = fyne.TextAlignCenter
 		columnHeadings = append(columnHeadings, t)

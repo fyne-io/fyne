@@ -16,7 +16,6 @@ import (
 var minSize fyne.Size
 
 func BenchmarkFormLayout(b *testing.B) {
-	b.StopTimer()
 
 	min := fyne.Size{}
 	form := layout.NewFormLayout()
@@ -27,10 +26,8 @@ func BenchmarkFormLayout(b *testing.B) {
 
 	objects := []fyne.CanvasObject{label1, content1, label2, content2}
 
-	b.StartTimer()
-
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		min = form.MinSize(objects)
 	}
 

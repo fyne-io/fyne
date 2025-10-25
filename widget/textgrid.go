@@ -528,11 +528,7 @@ func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.text.Rows)
 	sizeRows := int(size.Height / t.text.cellSize.Height)
 
-	if sizeRows > bufRows {
-		t.text.rows = sizeRows
-	} else {
-		t.text.rows = bufRows
-	}
+	t.text.rows = max(sizeRows, bufRows)
 	t.addRowsIfRequired()
 }
 
@@ -781,7 +777,7 @@ func (t *textGridRow) refreshCells() {
 			t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
 			x++
 		}
-		for c := 0; c < len(lineStr); c++ {
+		for c := range lineStr {
 			t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
 			i++
 			x++

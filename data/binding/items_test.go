@@ -95,7 +95,7 @@ func TestBindFloat_TriggerOnlyWhenChange(t *testing.T) {
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		err := f.Set(9.0)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, triggered)
@@ -133,7 +133,7 @@ func TestNewFloat_TriggerOnlyWhenChange(t *testing.T) {
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		err := f.Set(9.0)
 		assert.Nil(t, err)
 		assert.Equal(t, 1, triggered)
@@ -189,7 +189,7 @@ func TestBindURI_TriggerOnlyWhenChange(t *testing.T) {
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		err := b.Set(storage.NewFileURI("second"))
 		assert.Nil(t, err)
 		assert.Equal(t, 1, triggered)
@@ -240,7 +240,7 @@ func TestNewURI_TriggerOnlyWhenChange(t *testing.T) {
 	assert.Equal(t, 1, triggered)
 
 	triggered = 0
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		err := b.Set(storage.NewFileURI("first"))
 		assert.Nil(t, err)
 		assert.Equal(t, 1, triggered)

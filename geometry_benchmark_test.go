@@ -33,7 +33,7 @@ var (
 
 func benchmarkPositionAdd(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		pos = pos.Add(fyne.NewPos(float32(n), float32(n)))
 	}
 	benchmarkPos = pos
@@ -41,7 +41,7 @@ func benchmarkPositionAdd(b *testing.B) {
 
 func benchmarkPositionAddXY(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		pos = pos.AddXY(float32(n), float32(n))
 	}
 	benchmarkPos = pos
@@ -49,7 +49,7 @@ func benchmarkPositionAddXY(b *testing.B) {
 
 func benchmarkPositionSubtract(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		pos = pos.Subtract(fyne.NewPos(float32(n), float32(n)))
 	}
 	benchmarkPos = pos
@@ -57,7 +57,7 @@ func benchmarkPositionSubtract(b *testing.B) {
 
 func benchmarkPositionSubtractXY(b *testing.B) {
 	pos := fyne.NewPos(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		pos = pos.SubtractXY(float32(n), float32(n))
 	}
 	benchmarkPos = pos
@@ -65,7 +65,7 @@ func benchmarkPositionSubtractXY(b *testing.B) {
 
 func benchmarkSizeAdd(b *testing.B) {
 	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		size = size.Add(fyne.NewPos(float32(n), float32(n)))
 	}
 	benchmarkSize = size
@@ -73,7 +73,7 @@ func benchmarkSizeAdd(b *testing.B) {
 
 func benchmarkSizeAddWidthHeight(b *testing.B) {
 	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		size = size.AddWidthHeight(float32(n), float32(n))
 	}
 	benchmarkSize = size
@@ -81,7 +81,7 @@ func benchmarkSizeAddWidthHeight(b *testing.B) {
 
 func benchmarkSizeSubtract(b *testing.B) {
 	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		size = size.Subtract(fyne.NewSize(float32(n), float32(n)))
 	}
 	benchmarkSize = size
@@ -89,7 +89,7 @@ func benchmarkSizeSubtract(b *testing.B) {
 
 func benchmarkSizeSubtractWidthHeight(b *testing.B) {
 	size := fyne.NewSize(10, 10)
-	for n := 0; n < b.N; n++ {
+	for n := 0; b.Loop(); n++ {
 		size = size.SubtractWidthHeight(float32(n), float32(n))
 	}
 	benchmarkSize = size

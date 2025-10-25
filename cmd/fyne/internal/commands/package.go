@@ -469,8 +469,8 @@ func validateAppID(appID, os, name string, release bool) (string, error) {
 			}
 
 			// appID package names can not start with '_' or a number
-			packageNames := strings.Split(appID, ".")
-			for _, name := range packageNames {
+			packageNames := strings.SplitSeq(appID, ".")
+			for name := range packageNames {
 				if len(name) == 0 {
 					continue
 				}

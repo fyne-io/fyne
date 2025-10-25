@@ -19,7 +19,7 @@ func TestBindPreference_DataRace(t *testing.T) {
 	var wg sync.WaitGroup
 
 	binds := make([]Int, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		wg.Add(1)
 		index := i
 		fyne.Do(func() {
@@ -31,7 +31,7 @@ func TestBindPreference_DataRace(t *testing.T) {
 
 	wg.Wait()
 	expectedBind := binds[0]
-	for i := 0; i < n; i++ {
+	for i := range n {
 		assert.Equal(t, expectedBind, binds[i])
 	}
 }

@@ -128,7 +128,7 @@ func TestGridWrap_ScrollToTop(t *testing.T) {
 
 func createGridWrap(items int) *GridWrap {
 	data := make([]fyne.Resource, items)
-	for i := 0; i < items; i++ {
+	for i := range items {
 		switch i % 10 {
 		case 0:
 			data[i] = theme.AccountIcon()
@@ -180,7 +180,7 @@ func TestGridWrap_IndexIsInt(t *testing.T) {
 
 func TestGridWrap_RefreshItem(t *testing.T) {
 	data := make([]string, 5)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		data[i] = "Text"
 	}
 
