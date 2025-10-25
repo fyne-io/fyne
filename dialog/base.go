@@ -252,7 +252,7 @@ func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()
 
-	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), labelMin.Width) + padWidth
+	width := max(max(contentMin.Width, btnMin.Width), labelMin.Width) + padWidth
 	height := contentMin.Height + btnMin.Height + labelMin.Height + theme.Padding() + padHeight*2
 
 	return fyne.NewSize(width, height)

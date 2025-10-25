@@ -26,7 +26,7 @@ var result string
 func BenchmarkToGo(b *testing.B) {
 	var temp string
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		res := NewStaticResource(imgName, imgBytes)
 		temp = res.GoString()
 	}

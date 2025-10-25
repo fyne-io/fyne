@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -279,10 +280,7 @@ func compareUint32s(t *testing.T, a, b []uint32) error {
 		err = fmt.Errorf("lengths do not match")
 	}
 
-	n := len(a)
-	if n < len(b) {
-		n = len(b)
-	}
+	n := max(len(a), len(b))
 
 	var buf bytes.Buffer
 	buf.WriteString("a.Map.rs    b.Map.rs\n")
@@ -342,26 +340,17 @@ func compareStrings(t *testing.T, a, b []string) error {
 		fmt.Fprintf(buf, "Pool(%2v, %s) %q\n", i, v, x)
 	}
 
-	contains := func(xs []string, a string) bool {
-		for _, x := range xs {
-			if x == a {
-				return true
-			}
-		}
-		return false
-	}
-
 	if err != nil {
 		buf.WriteString("\n## only in var a\n")
 		for i, x := range a {
-			if !contains(b, x) {
+			if !slices.Contains(b, x) {
 				fmt.Fprintf(buf, "Pool(%2v) %q\n", i, x)
 			}
 		}
 
 		buf.WriteString("\n## only in var b\n")
 		for i, x := range b {
-			if !contains(a, x) {
+			if !slices.Contains(a, x) {
 				fmt.Fprintf(buf, "Pool(%2v) %q\n", i, x)
 			}
 		}
@@ -480,8 +469,8 @@ func BenchmarkTableRefByName(b *testing.B) {
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
+
+	for b.Loop() {
 		tbl, err := OpenTable()
 		if err != nil {
 			b.Fatal(err)

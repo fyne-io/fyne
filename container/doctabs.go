@@ -281,17 +281,16 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 		// Show pop up containing all tabs
 
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
-		for i := 0; i < len(r.docTabs.Items); i++ {
-			index := i // capture
+		for i, item := range r.docTabs.Items {
 			// FIXME MenuItem doesn't support icons (#1752)
-			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
-				r.docTabs.SelectIndex(index)
+			items[i] = fyne.NewMenuItem(item.Text, func() {
+				r.docTabs.SelectIndex(i)
 				if r.docTabs.popUpMenu != nil {
 					r.docTabs.popUpMenu.Hide()
 					r.docTabs.popUpMenu = nil
 				}
 			})
-			items[i].Checked = index == r.docTabs.current
+			items[i].Checked = i == r.docTabs.current
 		}
 
 		r.docTabs.popUpMenu = buildPopUpMenu(r.docTabs, all, items)
@@ -325,7 +324,7 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 		iconPos = buttonIconInline
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		item := r.docTabs.Items[i]
 		if item.button == nil {
 			item.button = &tabButton{
@@ -425,16 +424,16 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	switch r.docTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
+		indicatorSize = fyne.NewSize(min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
 	case TabLocationLeading:
 		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(pad, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(pad, min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	case TabLocationBottom:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.Position().Y-pad)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
+		indicatorSize = fyne.NewSize(min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
 	case TabLocationTrailing:
 		indicatorPos = fyne.NewPos(r.bar.Position().X-pad, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(pad, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(pad, min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	}
 
 	if indicatorPos.X < 0 {

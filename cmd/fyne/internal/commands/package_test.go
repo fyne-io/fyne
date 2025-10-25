@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/josephspurrier/goversioninfo"
@@ -250,10 +249,12 @@ func Test_PackageWasm(t *testing.T) {
 		return expectedEnsureSubDirRuns.verifyExpectation(t, parent, name)
 	}
 
+	goroot, err := GOROOT()
+	assert.NoError(t, err)
+
 	// Handle lookup for wasm_exec.js from lib folder in Go 1.24 and newer:
-	goroot := runtime.GOROOT()
 	wasmExecJSPath := filepath.Join(goroot, "lib", "wasm", "wasm_exec.js")
-	_, err := os.Stat(wasmExecJSPath)
+	_, err = os.Stat(wasmExecJSPath)
 	execJSLibExists := err == nil || !os.IsNotExist(err)
 
 	expectedExistRuns := mockExistRuns{

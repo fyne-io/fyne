@@ -31,9 +31,9 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 	centerX := float64(width) / 2
 	centerY := float64(height) / 2
 
-	outerRadius := fyne.Min(size.Width, size.Height) / 2
-	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
-	cornerRadius := fyne.Min(GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
+	outerRadius := min(size.Width, size.Height) / 2
+	innerRadius := outerRadius * min(1.0, max(0.0, arc.CutoutRatio))
+	cornerRadius := min(GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 
 	// convert to radians
@@ -155,8 +155,8 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
-	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
-	cornerRadius := scale(fyne.Min(GetMaximumRadius(size), polygon.CornerRadius))
+	outerRadius := scale(min(size.Width, size.Height) / 2)
+	cornerRadius := scale(min(GetMaximumRadius(size), polygon.CornerRadius))
 	sides := int(polygon.Sides)
 	angle := polygon.Angle
 
@@ -334,7 +334,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	// regular polygon vertices
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
-	for i := 0; i < sides; i++ {
+	for i := range sides {
 		t := rotRads + angleStep*float64(i)
 		xs[i] = cx + radius*math.Cos(t)
 		ys[i] = cy + radius*math.Sin(t)
@@ -355,7 +355,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	vE := make([]pt, sides)   // center->end vector
 	cPts := make([]pt, sides) // arc centers
 
-	for i := 0; i < sides; i++ {
+	for i := range sides {
 		prv := (i - 1 + sides) % sides
 		nxt := (i + 1) % sides
 
@@ -424,7 +424,7 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr fl
 		segCount := int(math.Ceil(math.Abs(sweep) / (math.Pi / 2.0)))
 		da := sweep / float64(segCount)
 
-		for i := 0; i < segCount; i++ {
+		for i := range segCount {
 			a1 := start + float64(i)*da
 			a2 := a1 + da
 
@@ -624,7 +624,7 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 //
 // This is typically used for drawing circular corners in rectangles, circles or squares with the same radius for all corners.
 func GetMaximumRadius(size fyne.Size) float32 {
-	return fyne.Min(size.Height, size.Width) / 2
+	return min(size.Height, size.Width) / 2
 }
 
 // GetMaximumCornerRadius returns the maximum possible corner radius for an individual corner,
@@ -637,16 +637,16 @@ func GetMaximumCornerRadius(radius, adjacentWidthRadius, adjacentHeightRadius fl
 	maxWidthRadius := size.Width / 2
 	maxHeightRadius := size.Height / 2
 	// fast path: corner radius fits within both per-axis maxima
-	if radius <= fyne.Min(maxWidthRadius, maxHeightRadius) {
+	if radius <= min(maxWidthRadius, maxHeightRadius) {
 		return radius
 	}
 	// expand per-axis limits by borrowing any unused capacity from adjacent corners
-	expandedMaxWidthRadius := 2*maxWidthRadius - fyne.Min(maxWidthRadius, adjacentWidthRadius)
-	expandedMaxHeightRadius := 2*maxHeightRadius - fyne.Min(maxHeightRadius, adjacentHeightRadius)
+	expandedMaxWidthRadius := 2*maxWidthRadius - min(maxWidthRadius, adjacentWidthRadius)
+	expandedMaxHeightRadius := 2*maxHeightRadius - min(maxHeightRadius, adjacentHeightRadius)
 
 	// respect the smaller axis and never exceed the requested radius
-	expandedMaxRadius := fyne.Min(expandedMaxWidthRadius, expandedMaxHeightRadius)
-	return fyne.Min(expandedMaxRadius, radius)
+	expandedMaxRadius := min(expandedMaxWidthRadius, expandedMaxHeightRadius)
+	return min(expandedMaxRadius, radius)
 }
 
 // GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,

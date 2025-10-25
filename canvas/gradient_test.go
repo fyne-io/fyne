@@ -32,7 +32,7 @@ func TestNewHorizontalGradient(t *testing.T) {
 
 	img := horizontal.Generate(51, 5)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 0))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(25, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 0))
@@ -58,7 +58,7 @@ func TestNewHorizontalGradient_Flipped(t *testing.T) {
 
 	img := horizontal.Generate(51, 5)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 0))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(25, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 0))
@@ -83,7 +83,7 @@ func TestNewVerticalGradient(t *testing.T) {
 
 	imgVert := vertical.Generate(5, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, imgVert.At(0, 0))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, imgVert.At(0, 50))
@@ -109,7 +109,7 @@ func TestNewVerticalGradient_Flipped(t *testing.T) {
 
 	imgVert := vertical.Generate(5, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, imgVert.At(0, 0))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, imgVert.At(0, 50))
@@ -143,7 +143,7 @@ func TestNewLinearGradient_45(t *testing.T) {
 	img := negative.Generate(51, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 0))
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 50))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(i, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 0))
@@ -170,7 +170,7 @@ func TestNewLinearGradient_225(t *testing.T) {
 	img := negative.Generate(51, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 0))
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 50))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(i, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 0))
@@ -197,7 +197,7 @@ func TestNewLinearGradient_135(t *testing.T) {
 	img := positive.Generate(51, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 0))
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 50))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 0))
@@ -224,7 +224,7 @@ func TestNewLinearGradient_315(t *testing.T) {
 	img := positive.Generate(51, 51)
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 0))
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 50))
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
 	}
 	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 0))

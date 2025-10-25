@@ -412,7 +412,7 @@ func TestRefreshCount(t *testing.T) { // Issue 2548.
 	c.SetPainter(gl.NewPainter(&dummyCanvas{}, struct{ driver.WithContext }{}))
 
 	const refresh = uint64(1000)
-	for i := uint64(0); i < refresh; i++ {
+	for range refresh {
 		c.Refresh(canvas.NewRectangle(color.Gray16{Y: 1}))
 	}
 
@@ -429,7 +429,7 @@ func BenchmarkRefresh(b *testing.B) {
 		b.Run(fmt.Sprintf("#%d", i), func(b *testing.B) {
 			b.ReportAllocs()
 
-			for j := 0; j < b.N; j++ {
+			for b.Loop() {
 				for n := uint64(0); n < i; n++ {
 					c.Refresh(canvas.NewRectangle(color.Black))
 				}

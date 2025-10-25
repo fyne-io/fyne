@@ -97,7 +97,7 @@ func (a *activityRenderer) Destroy() {
 }
 
 func (a *activityRenderer) Layout(size fyne.Size) {
-	a.maxRad = fyne.Min(size.Width, size.Height) / 2
+	a.maxRad = min(size.Width, size.Height) / 2
 	a.bound = size
 }
 

@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -111,25 +112,17 @@ func (r *CheckGroup) itemTapped(item *Check) {
 		return
 	}
 
-	contains := false
-	for i, s := range r.Selected {
-		if s == item.Text {
-			contains = true
-			if len(r.Selected) <= 1 {
-				if r.Required {
-					item.SetChecked(true)
-					return
-				}
-				r.Selected = nil
-			} else {
-				r.Selected = append(r.Selected[:i], r.Selected[i+1:]...)
-			}
-			break
-		}
-	}
-
-	if !contains {
+	index := slices.Index(r.Selected, item.Text)
+	if index == -1 {
 		r.Selected = append(r.Selected, item.Text)
+	} else if len(r.Selected) <= 1 {
+		if r.Required {
+			item.SetChecked(true)
+			return
+		}
+		r.Selected = nil
+	} else {
+		r.Selected = append(r.Selected[:index], r.Selected[index+1:]...)
 	}
 
 	if r.OnChanged != nil {
@@ -152,13 +145,7 @@ func (r *CheckGroup) update() {
 		r.items = r.items[:len(r.Options)]
 	}
 	for i, item := range r.items {
-		contains := false
-		for _, s := range r.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
+		contains := slices.Contains(r.Selected, item.Text)
 
 		item.Text = r.Options[i]
 		item.Checked = contains
@@ -211,8 +198,8 @@ func (r *checkGroupRenderer) MinSize() fyne.Size {
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 
-		width = fyne.Max(width, itemMin.Width)
-		height = fyne.Max(height, itemMin.Height)
+		width = max(width, itemMin.Width)
+		height = max(height, itemMin.Height)
 	}
 
 	if r.checks.Horizontal {
@@ -246,13 +233,7 @@ func (r *checkGroupRenderer) updateItems() {
 		r.SetObjects(r.Objects()[:total])
 	}
 	for i, item := range r.items {
-		contains := false
-		for _, s := range r.checks.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
+		contains := slices.Contains(r.checks.Selected, item.Text)
 		item.Text = r.checks.Options[i]
 		item.Checked = contains
 		item.disabled = r.checks.Disabled()

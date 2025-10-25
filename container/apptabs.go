@@ -368,7 +368,7 @@ func (r *appTabsRenderer) buildTabButtons(count int) *fyne.Container {
 		iconPos = buttonIconInline
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		item := r.appTabs.Items[i]
 		if item.button == nil {
 			item.button = &tabButton{

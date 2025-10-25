@@ -257,14 +257,14 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
 
 	p.SetUniform1f(program, "angle", polygon.Angle)
 	p.SetUniform1f(program, "sides", float32(polygon.Sides))
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadius(size), polygon.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
@@ -315,11 +315,11 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
+	outerRadius := min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "outer_radius", outerRadiusScaled)
 
-	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	innerRadius := outerRadius * min(1.0, max(0.0, arc.CutoutRatio))
 	innerRadiusScaled := roundToPixel(innerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "inner_radius", innerRadiusScaled)
 
@@ -327,7 +327,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, "start_angle", startAngle)
 	p.SetUniform1f(program, "end_angle", endAngle)
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, "corner_radius", cornerRadiusScaled)
 
@@ -403,7 +403,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
 
 	// Set corner radius and texture size in pixels
-	cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius)
+	cornerRadius = min(paint.GetMaximumRadius(size), cornerRadius)
 	p.SetUniform1f(p.program, "cornerRadius", cornerRadius*p.pixScale)
 	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
 
@@ -422,8 +422,8 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([]float32, float32, float32) {
 	// Shift line coordinates so that they match the target position.
-	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
-	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
+	xPosDiff := pos.X - min(pos1.X, pos2.X)
+	yPosDiff := pos.Y - min(pos1.Y, pos2.Y)
 	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
 	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
 	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)

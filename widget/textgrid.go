@@ -528,11 +528,7 @@ func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.text.Rows)
 	sizeRows := int(size.Height / t.text.cellSize.Height)
 
-	if sizeRows > bufRows {
-		t.text.rows = sizeRows
-	} else {
-		t.text.rows = bufRows
-	}
+	t.text.rows = max(sizeRows, bufRows)
 	t.addRowsIfRequired()
 }
 
@@ -552,7 +548,7 @@ func (t *textGridContentRenderer) Layout(s fyne.Size) {
 func (t *textGridContentRenderer) MinSize() fyne.Size {
 	longestRow := float32(0)
 	for _, row := range t.text.text.Rows {
-		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
+		longestRow = max(longestRow, float32(len(row.Cells)))
 	}
 	return fyne.NewSize(t.text.cellSize.Width*longestRow,
 		t.text.cellSize.Height*float32(len(t.text.text.Rows)))
@@ -781,7 +777,7 @@ func (t *textGridRow) refreshCells() {
 			t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
 			x++
 		}
-		for c := 0; c < len(lineStr); c++ {
+		for c := range lineStr {
 			t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
 			i++
 			x++
@@ -892,7 +888,7 @@ func (t *textGridRowRenderer) Layout(size fyne.Size) {
 func (t *textGridRowRenderer) MinSize() fyne.Size {
 	longestRow := float32(0)
 	for _, row := range t.obj.text.text.Rows {
-		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
+		longestRow = max(longestRow, float32(len(row.Cells)))
 	}
 	return fyne.NewSize(t.obj.text.cellSize.Width*longestRow, t.obj.text.cellSize.Height)
 }

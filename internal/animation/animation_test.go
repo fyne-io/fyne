@@ -79,7 +79,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	wg = sync.WaitGroup{}
 
 	// stopping animation inside tick function
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		wg.Add(1)
 		var b *fyne.Animation
 		b = &fyne.Animation{

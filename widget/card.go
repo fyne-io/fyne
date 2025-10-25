@@ -179,7 +179,7 @@ func (c *cardRenderer) MinSize() fyne.Size {
 		min = min.Add(fyne.NewSize(0, titlePad*2))
 		if hasHeader {
 			headerMin := c.header.MinSize()
-			min = fyne.NewSize(fyne.Max(min.Width, headerMin.Width+titlePad*2+padding),
+			min = fyne.NewSize(max(min.Width, headerMin.Width+titlePad*2+padding),
 				min.Height+headerMin.Height)
 			if hasSubHeader {
 				min.Height += padding
@@ -187,14 +187,14 @@ func (c *cardRenderer) MinSize() fyne.Size {
 		}
 		if hasSubHeader {
 			subHeaderMin := c.subHeader.MinSize()
-			min = fyne.NewSize(fyne.Max(min.Width, subHeaderMin.Width+titlePad*2+padding),
+			min = fyne.NewSize(max(min.Width, subHeaderMin.Width+titlePad*2+padding),
 				min.Height+subHeaderMin.Height)
 		}
 	}
 
 	if hasContent {
 		contentMin := c.card.Content.MinSize()
-		min = fyne.NewSize(fyne.Max(min.Width, contentMin.Width+padding*3),
+		min = fyne.NewSize(max(min.Width, contentMin.Width+padding*3),
 			min.Height+contentMin.Height+padding*2)
 	}
 

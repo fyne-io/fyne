@@ -17,7 +17,7 @@ func BenchmarkRadioCreateRenderer(b *testing.B) {
 	widget := &radioItem{}
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		renderer = widget.CreateRenderer()
 	}
 

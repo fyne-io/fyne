@@ -576,32 +576,24 @@ func Test_snapshot(t *testing.T) {
 	})
 }
 
-var benchmarkStringSink string
-
 func Benchmark_knownColor(b *testing.B) {
 	lookup := nrgbaColor(theme.Color(theme.ColorNameWarning))
-	out := ""
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		out = knownColor(lookup)
-	}
 
-	benchmarkStringSink = out
+	for b.Loop() {
+		knownColor(lookup)
+	}
 }
 
 func Benchmark_knownResource(b *testing.B) {
 	lookup := theme.ZoomOutIcon()
-	out := ""
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		out = knownResource(lookup)
-	}
 
-	benchmarkStringSink = out
+	for b.Loop() {
+		knownResource(lookup)
+	}
 }
 
 type markupRendererTestWidget struct {

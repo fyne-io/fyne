@@ -84,23 +84,23 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 	if b.left != nil && b.left.Visible() {
 		leftMin := b.left.MinSize()
-		minHeight := fyne.Max(minSize.Height, leftMin.Height)
+		minHeight := max(minSize.Height, leftMin.Height)
 		minSize = fyne.NewSize(minSize.Width+leftMin.Width+padding, minHeight)
 	}
 	if b.right != nil && b.right.Visible() {
 		rightMin := b.right.MinSize()
-		minHeight := fyne.Max(minSize.Height, rightMin.Height)
+		minHeight := max(minSize.Height, rightMin.Height)
 		minSize = fyne.NewSize(minSize.Width+rightMin.Width+padding, minHeight)
 	}
 
 	if b.top != nil && b.top.Visible() {
 		topMin := b.top.MinSize()
-		minWidth := fyne.Max(minSize.Width, topMin.Width)
+		minWidth := max(minSize.Width, topMin.Width)
 		minSize = fyne.NewSize(minWidth, minSize.Height+topMin.Height+padding)
 	}
 	if b.bottom != nil && b.bottom.Visible() {
 		bottomMin := b.bottom.MinSize()
-		minWidth := fyne.Max(minSize.Width, bottomMin.Width)
+		minWidth := max(minSize.Width, bottomMin.Width)
 		minSize = fyne.NewSize(minWidth, minSize.Height+bottomMin.Height+padding)
 	}
 
