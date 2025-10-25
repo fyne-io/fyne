@@ -584,7 +584,6 @@ func Benchmark_knownColor(b *testing.B) {
 	for b.Loop() {
 		knownColor(lookup)
 	}
-
 }
 
 func Benchmark_knownResource(b *testing.B) {

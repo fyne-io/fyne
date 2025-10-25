@@ -190,7 +190,6 @@ func walkObjectTree(
 		}
 	} else {
 		if slices.ContainsFunc(children, followChild) {
-
 		}
 	}
 

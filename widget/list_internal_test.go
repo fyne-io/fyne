@@ -688,7 +688,6 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 var minSize fyne.Size
 
 func BenchmarkContentMinSize(b *testing.B) {
-
 	l := NewList(
 		func() int { return 1000000 },
 		func() fyne.CanvasObject {

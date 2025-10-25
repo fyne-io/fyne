@@ -509,12 +509,7 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 	}
 
 	for id := range t.items {
-		remove := true
-		if slices.Contains(updated, id) {
-			remove = false
-		}
-
-		if remove { // remove item no longer present
+		if !slices.Contains(updated, id) { // remove item no longer present
 			fire = true
 			t.deleteItem(id, parentIDFor(id, t.ids))
 		}

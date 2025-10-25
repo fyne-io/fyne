@@ -16,7 +16,6 @@ import (
 var minSize fyne.Size
 
 func BenchmarkFormLayout(b *testing.B) {
-
 	min := fyne.Size{}
 	form := layout.NewFormLayout()
 	label1 := canvas.NewRectangle(color.Black)
