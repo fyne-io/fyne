@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"sort"
 	"strings"
 
@@ -513,11 +514,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		)
 	}
 
-	// Use slices.Reverse with Go 1.21:
-	objects := f.breadcrumb.Objects
-	for i, j := 0, len(objects)-1; i < j; i, j = i+1, j-1 {
-		objects[i], objects[j] = objects[j], objects[i]
-	}
+	slices.Reverse(f.breadcrumb.Objects)
 
 	f.breadcrumbScroll.Refresh()
 	f.breadcrumbScroll.Offset.X = f.breadcrumbScroll.Content.Size().Width - f.breadcrumbScroll.Size().Width

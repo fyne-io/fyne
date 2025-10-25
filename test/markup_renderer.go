@@ -3,8 +3,9 @@ package test
 import (
 	"fmt"
 	"image/color"
+	"maps"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 	"unsafe"
 
@@ -649,10 +650,5 @@ func knownResource(rsc fyne.Resource) string {
 }
 
 func sortedKeys(m map[string]*string) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
+	return slices.Sorted(maps.Keys(m))
 }

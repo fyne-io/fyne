@@ -56,7 +56,8 @@ func (ch *UnboundedChan[T]) processing() {
 		for len(ch.q) > 0 {
 			select {
 			case ch.out <- ch.q[0]:
-				ch.q[0] = *new(T) // de-reference earlier to help GC (use clear() when Go 1.21 is base)
+				var zero T
+				ch.q[0] = zero
 				ch.q = ch.q[1:]
 			case e, ok := <-ch.in:
 				if !ok {
@@ -87,7 +88,8 @@ func (ch *UnboundedChan[T]) closed() {
 	for len(ch.q) > 0 {
 		select {
 		case ch.out <- ch.q[0]:
-			ch.q[0] = *new(T) // de-reference earlier to help GC (use clear() when Go 1.21 is base)
+			var zero T
+			ch.q[0] = zero
 			ch.q = ch.q[1:]
 		default:
 		}
