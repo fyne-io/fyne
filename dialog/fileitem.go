@@ -162,11 +162,7 @@ func (s *fileItemRenderer) Refresh() {
 		loc, _ = storage.ParseURI(loc.String()[:len(loc.String())-1])
 	}
 
-	var ff *fancyfs.FancyFolder
-	if loc != nil {
-		ff, _ = fancyfs.DetailsForFolder(loc)
-	}
-	if ff != nil {
+	if ff, _ := fancyfs.DetailsForFolder(loc); ff != nil {
 		if ff.BackgroundURI != nil {
 			s.over.File = ff.BackgroundURI.Path()
 		} else {
