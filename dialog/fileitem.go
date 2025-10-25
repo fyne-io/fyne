@@ -5,9 +5,13 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/lang"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/FyshOS/fancyfs"
 )
 
 const (
@@ -35,12 +39,14 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	text.Truncation = fyne.TextTruncateEllipsis
 	text.Wrapping = fyne.TextWrapBreak
 	icon := widget.NewFileIcon(i.location)
+	over := &canvas.Image{}
 
 	return &fileItemRenderer{
 		item:         i,
 		icon:         icon,
 		text:         text,
-		objects:      []fyne.CanvasObject{icon, text},
+		over:         over,
+		objects:      []fyne.CanvasObject{icon, text, over},
 		fileTextSize: widget.NewLabel("M\nM").MinSize().Height, // cache two-line label height,
 	}
 }
@@ -101,20 +107,33 @@ type fileItemRenderer struct {
 
 	icon    *widget.FileIcon
 	text    *widget.Label
+	over    *canvas.Image
 	objects []fyne.CanvasObject
 }
 
 func (s *fileItemRenderer) Layout(size fyne.Size) {
 	if s.item.picker.view == GridView {
-		s.icon.Resize(fyne.NewSize(fileIconSize, fileIconSize))
+		s.icon.Resize(fyne.NewSquareSize(fileIconSize))
 		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
+
+		folderInsetX := float32(10)
+		folderInsetBottom := float32(25)
+		folderInsetTop := float32(20)
+		s.over.Resize(fyne.NewSize(fileIconSize-folderInsetX*2, fileIconSize-folderInsetX-folderInsetBottom))
+		s.over.Move(s.icon.Position().AddXY(folderInsetX, folderInsetTop))
 
 		s.text.Alignment = fyne.TextAlignCenter
 		s.text.Resize(fyne.NewSize(size.Width, s.fileTextSize))
 		s.text.Move(fyne.NewPos(0, size.Height-s.fileTextSize))
 	} else {
-		s.icon.Resize(fyne.NewSize(fileInlineIconSize, fileInlineIconSize))
+		s.icon.Resize(fyne.NewSquareSize(fileInlineIconSize))
 		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-fileInlineIconSize)/2))
+
+		folderInsetX := float32(4)
+		folderInsetBottom := float32(6)
+		folderInsetTop := float32(6)
+		s.over.Resize(fyne.NewSize(fileInlineIconSize-folderInsetX*2, fileInlineIconSize-folderInsetX-folderInsetBottom))
+		s.over.Move(s.icon.Position().AddXY(folderInsetX, folderInsetTop))
 
 		s.text.Alignment = fyne.TextAlignLeading
 		textMin := s.text.MinSize()
@@ -137,6 +156,35 @@ func (s *fileItemRenderer) Refresh() {
 
 	s.text.SetText(s.item.name)
 	s.icon.SetURI(s.item.location)
+
+	loc := s.item.location
+	if loc.Path()[len(loc.Path())-1] == '/' {
+		loc, _ = storage.ParseURI(loc.String()[:len(loc.String())-1])
+	}
+
+	var ff *fancyfs.FancyFolder
+	if loc != nil {
+		ff, _ = fancyfs.DetailsForFolder(loc)
+	}
+	if ff != nil {
+		if ff.BackgroundURI != nil {
+			s.over.File = ff.BackgroundURI.Path()
+		} else {
+			s.over.File = ""
+		}
+		if ff.BackgroundResource != nil {
+			s.over.Resource = theme.NewColoredResource(ff.BackgroundResource, theme.ColorNameBackground)
+		} else {
+			s.over.Resource = nil
+		}
+		s.over.FillMode = ff.BackgroundFill
+	} else {
+		s.over.File = ""
+		s.over.Resource = nil
+		s.over.Image = nil
+	}
+
+	s.over.Refresh()
 }
 
 func (s *fileItemRenderer) Objects() []fyne.CanvasObject {
