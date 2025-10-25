@@ -31,7 +31,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v2 v2.4.0
-	github.com/yuin/goldmark v1.7.8
+	github.com/yuin/goldmark v1.7.13
 	golang.org/x/image v0.32.0
 	golang.org/x/mod v0.29.0
 	golang.org/x/sys v0.37.0
