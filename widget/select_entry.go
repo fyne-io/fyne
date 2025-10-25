@@ -76,7 +76,6 @@ func (e *SelectEntry) SetOptions(options []string) {
 	e.options = options
 	items := make([]*fyne.MenuItem, len(options))
 	for i, option := range options {
-		// capture
 		items[i] = fyne.NewMenuItem(option, func() { e.SetText(option) })
 	}
 	e.dropDown = fyne.NewMenu("", items...)

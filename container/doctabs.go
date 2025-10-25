@@ -281,17 +281,16 @@ func (r *docTabsRenderer) buildAllTabsButton() (all *widget.Button) {
 		// Show pop up containing all tabs
 
 		items := make([]*fyne.MenuItem, len(r.docTabs.Items))
-		for i := 0; i < len(r.docTabs.Items); i++ {
-			index := i // capture
+		for i, item := range r.docTabs.Items {
 			// FIXME MenuItem doesn't support icons (#1752)
-			items[i] = fyne.NewMenuItem(r.docTabs.Items[i].Text, func() {
-				r.docTabs.SelectIndex(index)
+			items[i] = fyne.NewMenuItem(item.Text, func() {
+				r.docTabs.SelectIndex(i)
 				if r.docTabs.popUpMenu != nil {
 					r.docTabs.popUpMenu.Hide()
 					r.docTabs.popUpMenu = nil
 				}
 			})
-			items[i].Checked = index == r.docTabs.current
+			items[i].Checked = i == r.docTabs.current
 		}
 
 		r.docTabs.popUpMenu = buildPopUpMenu(r.docTabs, all, items)
