@@ -27,7 +27,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/rymdport/portal v0.4.2
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/image v0.24.0
 	golang.org/x/mod v0.20.0
