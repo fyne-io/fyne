@@ -173,7 +173,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 
 	textHeight := render.label.MinSize().Height
-	minIconHeight := fyne.Max(theme.IconInlineSize(), textHeight)
+	minIconHeight := max(theme.IconInlineSize(), textHeight)
 	assert.Equal(t, 50+theme.InnerPadding(), render.icon.Position().X, "icon x")
 	assert.Equal(t, 50+theme.InnerPadding(), render.icon.Position().Y, "icon y")
 	assert.Equal(t, theme.IconInlineSize(), render.icon.Size().Width, "icon width")

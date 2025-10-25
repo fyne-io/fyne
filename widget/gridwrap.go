@@ -645,8 +645,8 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	offY := l.gw.offsetY - float32(math.Mod(float64(l.gw.offsetY), float64(l.gw.itemMin.Height+padding)))
 	minRow := int(offY / (l.gw.itemMin.Height + padding))
 	minItem := minRow * colCount
-	maxRow := int(math.Min(float64(minRow+visibleRowsCount), math.Ceil(float64(length)/float64(colCount))))
-	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
+	maxRow := min(minRow+visibleRowsCount, int(math.Ceil(float64(length)/float64(colCount))))
+	maxItem := min(maxRow*colCount, length-1)
 
 	if l.gw.UpdateItem == nil {
 		fyne.LogError("Missing UpdateCell callback required for GridWrap", nil)

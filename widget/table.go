@@ -1593,11 +1593,11 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	} else {
 		left := x1
 		if col >= stickCols { // clip X
-			left = fyne.Max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
+			left = max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
 		}
 		top := y1
 		if row >= stickRows { // clip Y
-			top = fyne.Max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
+			top = max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
 		}
 		marker.Move(fyne.NewPos(left, top))
 		marker.Resize(fyne.NewSize(x2-left, y2-top))

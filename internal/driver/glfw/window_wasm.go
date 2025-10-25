@@ -520,11 +520,11 @@ func (w *window) create() {
 	initWindowHints()
 
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
-	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	pixWidth = int(max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
 		pixWidth = 10
 	}
-	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	pixHeight = int(max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
 		pixHeight = 10
 	}

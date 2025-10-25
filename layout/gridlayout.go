@@ -149,8 +149,8 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 	width := minSize.Width * float32(primaryObjects)
 	height := minSize.Height * float32(secondaryObjects)
-	xpad := padding * fyne.Max(float32(primaryObjects-1), 0)
-	ypad := padding * fyne.Max(float32(secondaryObjects-1), 0)
+	xpad := padding * max(float32(primaryObjects-1), 0)
+	ypad := padding * max(float32(secondaryObjects-1), 0)
 
 	return fyne.NewSize(width+xpad, height+ypad)
 }

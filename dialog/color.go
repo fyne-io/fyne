@@ -188,7 +188,7 @@ func newCheckeredBackground(radial bool) *canvas.Raster {
 		rect := f
 		f = func(x, y, w, h int) color.Color {
 			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
-			limit := math.Min(float64(w), float64(h)) / 2.0
+			limit := float64(min(w, h)) / 2.0
 			if r > limit {
 				// Out of bounds
 				return &color.NRGBA{A: 0}

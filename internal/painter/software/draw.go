@@ -123,7 +123,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		origImg = subImg
 	}
 
-	cornerRadius := fyne.Min(painter.GetMaximumRadius(bounds), img.CornerRadius)
+	cornerRadius := min(painter.GetMaximumRadius(bounds), img.CornerRadius)
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip, img.Alpha(), cornerRadius*c.Scale())
 }
 

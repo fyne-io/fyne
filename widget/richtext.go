@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"math"
 	"slices"
 	"strings"
 	"unicode"
@@ -175,8 +174,8 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
 			continue
 		}
 
-		startOff := int(math.Max(float64(lowBound-start), 0))
-		endOff := int(math.Min(float64(end), float64(highBound))) - start
+		startOff := max(lowBound-start, 0)
+		endOff := min(end, highBound) - start
 		r := ([]rune)(seg.(*TextSegment).Text)
 		ret = append(ret, r[startOff:endOff]...)
 		r2 := append(r[:startOff], r[endOff:]...)
@@ -316,7 +315,7 @@ func (t *RichText) lineSizeToColumn(col, row int, textSize, innerPad float32) fy
 		}
 
 		total.Width += size.Width
-		total.Height = fyne.Max(total.Height, size.Height)
+		total.Height = max(total.Height, size.Height)
 		if last {
 			break
 		}
@@ -640,12 +639,12 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 					r.Refresh() // TODO resolve this in a similar way to #2991
 				}
 			}
-			rowHeight = fyne.Max(rowHeight, min.Height)
+			rowHeight = max(rowHeight, min.Height)
 			rowWidth += min.Width
 		}
 
 		if wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
-			width = fyne.Max(width, rowWidth)
+			width = max(width, rowWidth)
 		}
 		height += rowHeight
 		rowHeight = 0
@@ -792,7 +791,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		if height == 0 {
 			height = size.Height
 		} else if height != size.Height {
-			height = fyne.Max(height, size.Height)
+			height = max(height, size.Height)
 			realign = true
 		}
 	}
@@ -925,7 +924,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 		return lines, 0 // don't bother returning a calculated height, our MinSize is going to cover it
 	}
 
-	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
+	measureWidth := float32(min(firstWidth, max.Width))
 	text := []rune(seg.Text)
 	widthChecker := func(low int, high int) bool {
 		return measurer(text[low:high]).Width <= measureWidth

@@ -333,10 +333,10 @@ func TestAccordion_Layout_Expanded(t *testing.T) {
 func TestAccordion_MinSize(t *testing.T) {
 	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
 	minSizeA.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
-	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.InnerPadding()
+	minSizeA.Height = max(minSizeA.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
 	minSizeB.Width += theme.IconInlineSize() + theme.InnerPadding()*3 + theme.Padding()
-	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.InnerPadding()
+	minSizeB.Height = max(minSizeB.Height, theme.IconInlineSize()) + theme.InnerPadding()
 	minSize1 := fyne.MeasureText("111111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 4
 	minSize1.Height += theme.Padding() * 4
@@ -344,9 +344,9 @@ func TestAccordion_MinSize(t *testing.T) {
 	minSize2.Width += theme.Padding() * 4
 	minSize2.Height += theme.Padding() * 4
 
-	minWidthA1 := fyne.Max(minSizeA.Width, minSize1.Width)
-	minWidthB2 := fyne.Max(minSizeB.Width, minSize2.Width)
-	minWidthA1B2 := fyne.Max(minWidthA1, minWidthB2)
+	minWidthA1 := max(minSizeA.Width, minSize1.Width)
+	minWidthB2 := max(minSizeB.Width, minSize2.Width)
+	minWidthA1B2 := max(minWidthA1, minWidthB2)
 
 	minHeightA1 := minSizeA.Height + minSize1.Height + theme.Padding()
 

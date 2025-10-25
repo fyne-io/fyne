@@ -206,8 +206,8 @@ func (r *checkGroupRenderer) MinSize() fyne.Size {
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 
-		width = fyne.Max(width, itemMin.Width)
-		height = fyne.Max(height, itemMin.Height)
+		width = max(width, itemMin.Width)
+		height = max(height, itemMin.Height)
 	}
 
 	if r.checks.Horizontal {
