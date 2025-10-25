@@ -127,26 +127,26 @@ func TestTable_Focus(t *testing.T) {
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
 	assert.Equal(t, table, canvas.Focused())
-	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
+	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
+	assert.Equal(t, TableCellID{1, 0}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
+	assert.Equal(t, TableCellID{1, 1}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
-	assert.Equal(t, TableCellID{1, 0}, table.currentFocus)
+	assert.Equal(t, TableCellID{1, 0}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-	assert.Equal(t, TableCellID{0, 0}, table.currentFocus)
+	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
 
 	table.Select(TableCellID{Row: 1, Col: 1})
 	assert.Equal(t, &TableCellID{1, 1}, table.selectedCell)
-	assert.Equal(t, TableCellID{1, 1}, table.currentFocus)
+	assert.Equal(t, TableCellID{1, 1}, table.currentHighlight)
 }
 
 func TestTable_Headers(t *testing.T) {

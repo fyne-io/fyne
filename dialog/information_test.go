@@ -74,7 +74,7 @@ func TestDialog_TextWrapping(t *testing.T) {
 	d.Show() // we cannot check window size if not shown
 
 	// limits width to 90% of window size
-	assert.Equal(t, float32(600.0*maxTextDialogWinPcntWidth), theDialog.desiredSize.Width)
+	assert.Equal(t, 600.0*maxTextDialogWinPcntWidth, theDialog.desiredSize.Width)
 
 	theDialog.desiredSize = fyne.NewSquareSize(0)
 	window.Resize(fyne.NewSize(900, 400))

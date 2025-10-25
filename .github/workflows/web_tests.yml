@@ -6,20 +6,18 @@ permissions:
 jobs:
   web_tests:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - uses: actions/setup-go@v5
-      with:
-        go-version-file: 'go.mod'
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
 
-    - name: Build WebAssembly binary
-      env:
-        GOOS: js
-        GOARCH: wasm
-      working-directory: cmd/fyne_demo
-      run: go build
+      - name: Build WebAssembly binary
+        env:
+          GOOS: js
+          GOARCH: wasm
+        working-directory: cmd/fyne_demo
+        run: go build

@@ -21,25 +21,26 @@ type TabItem struct {
 	Content fyne.CanvasObject
 
 	button *tabButton
+
+	disabled bool
 }
 
 // Disabled returns whether or not the TabItem is disabled.
 //
 // Since: 2.3
 func (ti *TabItem) Disabled() bool {
-	if ti.button != nil {
-		return ti.button.Disabled()
-	}
-	return false
+	return ti.disabled
 }
 
 func (ti *TabItem) disable() {
+	ti.disabled = true
 	if ti.button != nil {
 		ti.button.Disable()
 	}
 }
 
 func (ti *TabItem) enable() {
+	ti.disabled = false
 	if ti.button != nil {
 		ti.button.Enable()
 	}
@@ -424,7 +425,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 }
 
 func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fyne.Theme, animate bool) {
-	isSameState := r.lastIndicatorPos.Subtract(pos).IsZero() && r.lastIndicatorSize.Subtract(siz).IsZero() &&
+	isSameState := r.lastIndicatorPos == pos && r.lastIndicatorSize == siz &&
 		r.lastIndicatorHidden == r.indicator.Hidden
 	if isSameState {
 		return
@@ -550,7 +551,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	close.Hide()
 
 	objects := []fyne.CanvasObject{background, label, close, icon}
-	r := &tabButtonRenderer{
+	return &tabButtonRenderer{
 		button:     b,
 		background: background,
 		icon:       icon,
@@ -558,8 +559,6 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		close:      close,
 		objects:    objects,
 	}
-	r.Refresh()
-	return r
 }
 
 func (b *tabButton) MinSize() fyne.Size {
@@ -778,14 +777,12 @@ func (b *tabCloseButton) CreateRenderer() fyne.WidgetRenderer {
 	background.Hide()
 	icon := canvas.NewImageFromResource(theme.CancelIcon())
 
-	r := &tabCloseButtonRenderer{
+	return &tabCloseButtonRenderer{
 		button:     b,
 		background: background,
 		icon:       icon,
 		objects:    []fyne.CanvasObject{background, icon},
 	}
-	r.Refresh()
-	return r
 }
 
 func (b *tabCloseButton) MinSize() fyne.Size {

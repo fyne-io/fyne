@@ -195,5 +195,5 @@ func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visib
 	require.Nil(t, m.Focused())
 	require.False(t, hidden.Visible())
 	require.True(t, visibleInsideHidden.Visible())
-	return
+	return m, entry1, hidden, visibleInsideHidden, entry2, disabled, entry3
 }

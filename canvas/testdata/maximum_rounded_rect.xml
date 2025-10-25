@@ -1,0 +1,5 @@
+<canvas size="80x50">
+	<content>
+		<rectangle fillColor="rgba(255,200,0,180)" radius="3.4028234663852886e+38" size="80x50" strokeColor="rgba(255,120,0,255)" strokeWidth="2"/>
+	</content>
+</canvas>

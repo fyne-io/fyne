@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+var _ fyne.Widget = (*PopUp)(nil)
+
 // PopUp is a widget that can float above the user interface.
 // It wraps any standard elements with padding and a shadow.
 // If it is modal then the shadow will cover the entire canvas it hovers over and block interactions.
@@ -44,8 +46,6 @@ func (p *PopUp) Move(pos fyne.Position) {
 // Resize changes the size of the PopUp's content.
 // PopUps always have the size of their canvas, but this call updates the
 // size of the content portion.
-//
-// Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
 	p.innerSize = size
 	// The canvas size might not have changed and therefore the Resize won't trigger a layout.

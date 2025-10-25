@@ -1,4 +1,4 @@
-//go:build !android && !ios && !mobile && !wasm && !test_web_driver
+//go:build !android && !ios && !mobile && !wasm && !test_web_driver && !tamago && !noos && !tinygo
 
 package app
 
@@ -60,6 +60,9 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 }
 
 func (s *settings) watchSettings() {
+	if s.themeSpecified {
+		return // we only watch for theme changes at this time so don't bother
+	}
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
 
 	a := fyne.CurrentApp()

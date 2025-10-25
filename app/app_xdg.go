@@ -1,4 +1,4 @@
-//go:build !ci && !wasm && !test_web_driver && !android && !ios && !mobile && (linux || openbsd || freebsd || netbsd)
+//go:build !ci && !wasm && !test_web_driver && !android && !ios && !mobile && (linux || openbsd || freebsd || netbsd) && !tinygo && !noos && !tamago
 
 package app
 
@@ -20,6 +20,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const systemTheme = fyne.ThemeVariant(99)
+
 func (a *fyneApp) OpenURL(url *url.URL) error {
 	if build.IsFlatpak {
 		err := openuri.OpenURI("", url.String(), nil)
@@ -38,7 +40,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 func findFreedesktopColorScheme() fyne.ThemeVariant {
 	colorScheme, err := appearance.GetColorScheme()
 	if err != nil {
-		return theme.VariantDark
+		return systemTheme
 	}
 
 	return colorSchemeToThemeVariant(colorScheme)
@@ -98,7 +100,7 @@ func (a *fyneApp) sendNotificationThroughPortal(n *fyne.Notification) error {
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
-// By default this will use the application icon.
+// By default, this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	if desk, ok := a.Driver().(systrayDriver); ok { // don't use this on mobile tag
 		desk.SetSystemTrayMenu(menu)
@@ -113,12 +115,20 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	}
 }
 
+// SetSystemTrayWindow assigns a window to be shown with the system tray menu is tapped.
+// You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
+func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
+	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
+}
+
 func watchTheme(s *settings) {
 	go func() {
 		// Theme lookup hangs on some desktops. Update theme variant cache from within goroutine.
 		themeVariant := findFreedesktopColorScheme()
-		internalapp.CurrentVariant.Store(uint64(themeVariant))
-		fyne.Do(func() { s.applyVariant(themeVariant) })
+		if themeVariant != systemTheme {
+			internalapp.CurrentVariant.Store(uint64(themeVariant))
+			fyne.Do(func() { s.applyVariant(themeVariant) })
+		}
 
 		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
@@ -132,4 +142,9 @@ func watchTheme(s *settings) {
 
 func (a *fyneApp) registerRepositories() {
 	// no-op
+}
+
+func (s *settings) applyVariant(variant fyne.ThemeVariant) {
+	s.variant = variant
+	s.apply()
 }

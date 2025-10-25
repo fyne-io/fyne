@@ -20,7 +20,8 @@ func TestSquare_FillColor(t *testing.T) {
 }
 
 func TestSquare_Radius(t *testing.T) {
-	rect := &canvas.Square{
+	rect := &canvas.Rectangle{
+		Aspect:       1,
 		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
 		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
 		StrokeWidth:  2.0,
@@ -37,4 +38,29 @@ func TestSquare_Radius(t *testing.T) {
 
 	rect.StrokeWidth = 0
 	test.AssertRendersToImage(t, "rounded_rect.png", c)
+}
+
+func TestSquare_RadiusMaximum(t *testing.T) {
+	rect := &canvas.Rectangle{
+		Aspect:       1,
+		FillColor:    color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor:  color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+		StrokeWidth:  2.0,
+		CornerRadius: canvas.RadiusMaximum,
+	}
+
+	c := software.NewCanvas()
+	c.SetContent(rect)
+	c.Resize(fyne.NewSize(90, 60))
+	test.AssertRendersToImage(t, "maximum_rounded_square_stroke.png", c)
+
+	rect.StrokeWidth = 0
+	test.AssertRendersToImage(t, "maximum_rounded_square.png", c)
+
+	rect.CornerRadius = 0
+	rect.TopRightCornerRadius = 0
+	rect.TopLeftCornerRadius = 5
+	rect.BottomLeftCornerRadius = 0
+	rect.BottomRightCornerRadius = canvas.RadiusMaximum
+	test.AssertRendersToImage(t, "maximum_rounded_per_corner_square.png", c)
 }

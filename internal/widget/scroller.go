@@ -222,7 +222,7 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(th fyne.Theme, contentOffset, c
 		widthOffset = th.Size(theme.SizeNameScrollBarSmall)
 		width = widthOffset
 	}
-	return
+	return length, width, lengthOffset, widthOffset
 }
 
 var (
@@ -255,7 +255,7 @@ func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (a *scrollBarArea) Tapped(e *fyne.PointEvent) {
-	if false /*todo - read MacOS system setting for scroll by page*/ {
+	if isScrollerPageOnTap() {
 		a.scrollFullPageOnTap(e)
 		return
 	}
@@ -585,7 +585,7 @@ func (s *Scroll) Resize(sz fyne.Size) {
 //
 // Since: 2.6
 func (s *Scroll) ScrollToOffset(p fyne.Position) {
-	if s.Offset.Subtract(p).IsZero() {
+	if s.Offset == p {
 		return
 	}
 

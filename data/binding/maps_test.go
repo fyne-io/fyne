@@ -9,29 +9,29 @@ import (
 
 func TestBindReflectInt(t *testing.T) {
 	i := 5
-	b := bindReflectInt(reflect.ValueOf(&i).Elem())
-	v, err := b.(Int).Get()
+	b := &boundReflect[int]{val: reflect.ValueOf(&i).Elem()}
+	v, err := b.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5, v)
 
-	err = b.(Int).Set(4)
+	err = b.Set(4)
 	assert.Nil(t, err)
 	assert.Equal(t, 4, i)
 
 	s := "hi"
-	b = bindReflectInt(reflect.ValueOf(&s).Elem())
-	_, err = b.(Int).Get()
+	b.val = reflect.ValueOf(&s).Elem()
+	_, err = b.Get()
 	assert.NotNil(t, err) // don't crash
 }
 
 func TestBindReflectString(t *testing.T) {
 	s := "Hi"
-	b := bindReflectString(reflect.ValueOf(&s).Elem())
-	v, err := b.(String).Get()
+	b := &boundReflect[string]{val: reflect.ValueOf(&s).Elem()}
+	v, err := b.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "Hi", v)
 
-	err = b.(String).Set("New")
+	err = b.Set("New")
 	assert.Nil(t, err)
 	assert.Equal(t, "New", s)
 }

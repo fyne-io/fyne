@@ -29,7 +29,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 
 func paintImage(img *canvas.Image, width, height int) (dst image.Image, err error) {
 	if width <= 0 || height <= 0 {
-		return
+		return dst, err
 	}
 
 	dst = img.Image
@@ -41,7 +41,7 @@ func paintImage(img *canvas.Image, width, height int) (dst image.Image, err erro
 	if width != size.X || height != size.Y {
 		dst = scaleImage(dst, width, height, img.ScaleMode)
 	}
-	return
+	return dst, err
 }
 
 func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {

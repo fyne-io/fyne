@@ -17,29 +17,85 @@ import (
 )
 
 type otherURI struct {
+	path string
 	fyne.URI
 }
 
-func (*otherURI) String() string {
-	return "file:///other"
+func (u *otherURI) String() string {
+	return "file://" + u.path
 }
 
 func TestURIEqual(t *testing.T) {
-	first := storage.NewFileURI("first")
-	second := storage.NewFileURI("second")
+	first := storage.NewFileURI("/first")
+	second := storage.NewFileURI("/second")
 	assert.False(t, storage.EqualURI(first, second))
 	assert.True(t, storage.EqualURI(first, first))
 
-	assert.True(t, storage.EqualURI(first, storage.NewFileURI("first")))
+	assert.True(t, storage.EqualURI(first, storage.NewFileURI("/first")))
 
 	assert.True(t, storage.EqualURI(nil, nil))
 	assert.False(t, storage.EqualURI(first, nil))
 	assert.False(t, storage.EqualURI(nil, second))
 
-	otherURI := &otherURI{}
+	otherURI := &otherURI{path: "/other"}
 	assert.True(t, storage.EqualURI(otherURI, otherURI))
 	assert.False(t, storage.EqualURI(otherURI, first))
 	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
+}
+
+var equalSink bool
+
+func BenchmarkEqualURI(b *testing.B) {
+	first := storage.NewFileURI("/first")
+	b.Run("same path and same object", func(b *testing.B) {
+		b.ReportAllocs()
+
+		equal := false
+		for i := 0; i < b.N; i++ {
+			equal = storage.EqualURI(first, first)
+		}
+		equalSink = equal
+	})
+	first2 := storage.NewFileURI("/first")
+	b.Run("same path but different object", func(b *testing.B) {
+		b.ReportAllocs()
+
+		equal := false
+		for i := 0; i < b.N; i++ {
+			equal = storage.EqualURI(first, first2)
+		}
+		equalSink = equal
+	})
+	second := storage.NewFileURI("/second")
+	b.Run("different path and different object", func(b *testing.B) {
+		b.ReportAllocs()
+
+		equal := false
+		for i := 0; i < b.N; i++ {
+			equal = storage.EqualURI(first, second)
+		}
+		equalSink = equal
+	})
+
+	otherFirst := &otherURI{path: "/first"}
+	b.Run("custom uri types but same object", func(b *testing.B) {
+		b.ReportAllocs()
+
+		equal := false
+		for i := 0; i < b.N; i++ {
+			equal = storage.EqualURI(otherFirst, otherFirst)
+		}
+		equalSink = equal
+	})
+	b.Run("different uri types", func(b *testing.B) {
+		b.ReportAllocs()
+
+		equal := false
+		for i := 0; i < b.N; i++ {
+			equal = storage.EqualURI(first, otherFirst)
+		}
+		equalSink = equal
+	})
 }
 
 func TestURIAuthority(t *testing.T) {
@@ -157,9 +213,11 @@ func TestURI_Parent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
-	assert.NoError(t, err)
-	assert.Equal(t, "file://C:/foo/bar/", parent.String())
+	if runtime.GOOS == "windows" {
+		parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
+		assert.NoError(t, err)
+		assert.Equal(t, "file://C:/foo/bar/", parent.String())
+	}
 
 	// TODO hook in an http/https handler
 	//parent, err = storage.Parent(storage.NewURI("http://foo/bar/baz/"))
