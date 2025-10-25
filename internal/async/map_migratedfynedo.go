@@ -3,10 +3,8 @@
 package async
 
 // Map is a generic wrapper around [sync.Map].
-type Map[K any, V any] struct {
-	// Use "comparable" as type constraint and map[K]V as the inner type
-	// once Go 1.20 is our minimum version so interfaces can be used as keys.
-	m map[any]V
+type Map[K comparable, V any] struct {
+	m map[K]V
 }
 
 // Delete deletes the value for a key.
@@ -39,7 +37,7 @@ func (m *Map[K, V]) LoadAndDelete(key K) (value V, loaded bool) {
 // The loaded result is true if the value was loaded, false if stored.
 func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 	if m.m == nil {
-		m.m = make(map[any]V)
+		m.m = make(map[K]V)
 	}
 
 	if val, ok := m.m[key]; ok {
@@ -52,7 +50,7 @@ func (m *Map[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 // Range calls f sequentially for each key and value present in the map. If f returns false, range stops the iteration.
 func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 	for k, v := range m.m {
-		if !f(k.(K), v) {
+		if !f(k, v) {
 			return
 		}
 	}
@@ -61,12 +59,12 @@ func (m *Map[K, V]) Range(f func(key K, value V) bool) {
 // Store sets the value for a key.
 func (m *Map[K, V]) Store(key K, value V) {
 	if m.m == nil {
-		m.m = make(map[any]V)
+		m.m = make(map[K]V)
 	}
 	m.m[key] = value
 }
 
 // Clear removes all entries from the map.
 func (m *Map[K, V]) Clear() {
-	m.m = make(map[any]V) // Use range-and-delete loop once Go 1.20 is the minimum version.
+	clear(m.m)
 }
