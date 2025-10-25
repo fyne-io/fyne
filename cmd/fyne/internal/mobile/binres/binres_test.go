@@ -340,21 +340,17 @@ func compareStrings(t *testing.T, a, b []string) error {
 		fmt.Fprintf(buf, "Pool(%2v, %s) %q\n", i, v, x)
 	}
 
-	contains := func(xs []string, a string) bool {
-		return slices.Contains(xs, a)
-	}
-
 	if err != nil {
 		buf.WriteString("\n## only in var a\n")
 		for i, x := range a {
-			if !contains(b, x) {
+			if !slices.Contains(b, x) {
 				fmt.Fprintf(buf, "Pool(%2v) %q\n", i, x)
 			}
 		}
 
 		buf.WriteString("\n## only in var b\n")
 		for i, x := range b {
-			if !contains(a, x) {
+			if !slices.Contains(a, x) {
 				fmt.Fprintf(buf, "Pool(%2v) %q\n", i, x)
 			}
 		}

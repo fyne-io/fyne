@@ -112,24 +112,18 @@ func (r *CheckGroup) itemTapped(item *Check) {
 		return
 	}
 
-	contains := false
-	for i, s := range r.Selected {
-		if s == item.Text {
-			contains = true
-			if len(r.Selected) <= 1 {
-				if r.Required {
-					item.SetChecked(true)
-					return
-				}
-				r.Selected = nil
-			} else {
-				r.Selected = append(r.Selected[:i], r.Selected[i+1:]...)
+	index := slices.Index(r.Selected, item.Text)
+	if index != -1 {
+		if len(r.Selected) <= 1 {
+			if r.Required {
+				item.SetChecked(true)
+				return
 			}
-			break
+			r.Selected = nil
+		} else {
+			r.Selected = append(r.Selected[:index], r.Selected[index+1:]...)
 		}
-	}
 
-	if !contains {
 		r.Selected = append(r.Selected, item.Text)
 	}
 
