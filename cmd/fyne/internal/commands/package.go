@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	_ "github.com/fyne-io/image/ico" // import image encodings
-	"github.com/urfave/cli/v2"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
 
@@ -28,104 +27,6 @@ const (
 	defaultAppVersion = "0.0.1"
 )
 
-// Package returns the cli command for packaging fyne applications
-func Package() *cli.Command {
-	p := NewPackager()
-
-	return &cli.Command{
-		Name:        "package",
-		Usage:       "Packages an application for distribution.",
-		Description: "You may specify the -executable to package, otherwise -sourceDir will be built.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "target",
-				Aliases:     []string{"os"},
-				Usage:       "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios, iossimulator, wasm, js, web).",
-				Destination: &p.os,
-			},
-			&cli.StringFlag{
-				Name:        "executable",
-				Aliases:     []string{"exe"},
-				Usage:       "The path to the executable, default is the current dir main binary",
-				Destination: &p.exe,
-			},
-			&cli.StringFlag{
-				Name:        "name",
-				Usage:       "The name of the application, default is the executable file name",
-				Destination: &p.Name,
-			},
-			&cli.StringFlag{
-				Name:        "tags",
-				Usage:       "A comma-separated list of build tags.",
-				Destination: &p.tags,
-			},
-			&cli.StringFlag{
-				Name:        "appVersion",
-				Usage:       "Version number in the form x, x.y or x.y.z semantic version",
-				Destination: &p.AppVersion,
-			},
-			&cli.IntFlag{
-				Name:        "appBuild",
-				Usage:       "Build number, should be greater than 0 and incremented for each build",
-				Destination: &p.AppBuild,
-			},
-			&cli.StringFlag{
-				Name:        "sourceDir",
-				Aliases:     []string{"src"},
-				Usage:       "The directory to package, if executable is not set.",
-				Destination: &p.srcDir,
-			},
-			&cli.StringFlag{
-				Name:        "icon",
-				Usage:       "The name of the application icon file.",
-				Value:       "",
-				Destination: &p.icon,
-			},
-			&cli.BoolFlag{
-				Name:        "use-raw-icon",
-				Usage:       "Skip any OS-specific icon pre-processing",
-				Value:       false,
-				Destination: &p.rawIcon,
-			},
-			&cli.StringFlag{
-				Name:        "appID",
-				Aliases:     []string{"id"},
-				Usage:       "For Android, darwin, iOS and Windows targets an appID in the form of a reversed domain name is required, for ios this must match a valid provisioning profile",
-				Destination: &p.AppID,
-			},
-			&cli.StringFlag{
-				Name:        "certificate",
-				Aliases:     []string{"cert"},
-				Usage:       "iOS/macOS/Windows: name of the certificate to sign the build",
-				Destination: &p.certificate,
-			},
-			&cli.StringFlag{
-				Name:        "profile",
-				Usage:       "iOS/macOS: name of the provisioning profile for this build",
-				Destination: &p.profile,
-				Value:       "XCWildcard",
-			},
-			&cli.BoolFlag{
-				Name:        "release",
-				Usage:       "Enable installation in release mode (disable debug etc).",
-				Destination: &p.release,
-			},
-			&cli.GenericFlag{
-				Name:  "metadata",
-				Usage: "Specify custom metadata key value pair that you do not want to store in your FyneApp.toml (key=value)",
-				Value: &p.customMetadata,
-			},
-		},
-		Action: func(_ *cli.Context) error {
-			if p.customMetadata.m == nil {
-				p.customMetadata.m = map[string]string{}
-			}
-
-			return p.Package()
-		},
-	}
-}
-
 // Packager wraps executables into full GUI app packages.
 type Packager struct {
 	*appData
@@ -136,7 +37,6 @@ type Packager struct {
 	tempDir                        string
 	langs                          []string
 
-	customMetadata      keyValueFlag
 	linuxAndBSDMetadata *metadata.LinuxAndBSD
 	sourceMetadata      *metadata.AppSource
 }
@@ -333,7 +233,6 @@ func (p *Packager) validate() (err error) {
 	}
 	os.Chdir(p.srcDir)
 
-	p.appData.CustomMetadata = p.customMetadata.m
 	p.appData.Release = p.release
 
 	data, err := metadata.LoadStandard(p.srcDir)
