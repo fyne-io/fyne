@@ -178,7 +178,6 @@ func BenchmarkUnboundedChann(b *testing.B) {
 	b.Run("any", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
 			c := async.NewUnboundedChan[any]()
-			b.ResetTimer()
 			b.ReportAllocs()
 			for b.Loop() {
 				c.In() <- struct{}{}
@@ -187,7 +186,6 @@ func BenchmarkUnboundedChann(b *testing.B) {
 		})
 		b.Run("async", func(b *testing.B) {
 			c := async.NewUnboundedChan[any]()
-			b.ResetTimer()
 			b.ReportAllocs()
 			for b.Loop() {
 				go func() { c.In() <- struct{}{} }()
@@ -198,7 +196,6 @@ func BenchmarkUnboundedChann(b *testing.B) {
 	b.Run("struct{}", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
 			c := async.NewUnboundedStructChan()
-			b.ResetTimer()
 			b.ReportAllocs()
 			for b.Loop() {
 				c.In() <- struct{}{}
@@ -207,7 +204,6 @@ func BenchmarkUnboundedChann(b *testing.B) {
 		})
 		b.Run("async", func(b *testing.B) {
 			c := async.NewUnboundedStructChan()
-			b.ResetTimer()
 			b.ReportAllocs()
 			for b.Loop() {
 				go func() { c.In() <- struct{}{} }()

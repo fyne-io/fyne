@@ -576,32 +576,25 @@ func Test_snapshot(t *testing.T) {
 	})
 }
 
-var benchmarkStringSink string
-
 func Benchmark_knownColor(b *testing.B) {
 	lookup := nrgbaColor(theme.Color(theme.ColorNameWarning))
-	out := ""
 
 	b.ReportAllocs()
 
 	for b.Loop() {
-		out = knownColor(lookup)
+		knownColor(lookup)
 	}
 
-	benchmarkStringSink = out
 }
 
 func Benchmark_knownResource(b *testing.B) {
 	lookup := theme.ZoomOutIcon()
-	out := ""
 
 	b.ReportAllocs()
 
 	for b.Loop() {
-		out = knownResource(lookup)
+		knownResource(lookup)
 	}
-
-	benchmarkStringSink = out
 }
 
 type markupRendererTestWidget struct {
