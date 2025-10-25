@@ -10,12 +10,14 @@ jobs:
       fail-fast: false
       matrix:
         go-version: ["", "stable"]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             runner: xvfb-run
             tags: ci,migrated_fynedo
           - os: macos-latest
+            tags: no_glfw,ci,migrated_fynedo
+          - os: windows-latest
             tags: no_glfw,ci,migrated_fynedo
 
     steps:
@@ -58,20 +60,3 @@ jobs:
         with:
           path-to-profile: coverage.out
         if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
-
-  windows_tests:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        go-version: ["1.20.x", "stable"]
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go-version }}
-
-      - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...
