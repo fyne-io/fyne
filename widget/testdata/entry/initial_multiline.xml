@@ -13,6 +13,8 @@
 					</widget>
 				</widget>
 			</widget>
+			<container size="0x0">
+			</container>
 		</widget>
 	</content>
 </canvas>
