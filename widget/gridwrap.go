@@ -270,9 +270,6 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentFocus <= 0 {
 			return
 		}
-		if l.currentFocus%l.ColumnCount() == 0 {
-			return
-		}
 
 		l.RefreshItem(l.currentFocus)
 		l.currentFocus--
@@ -280,9 +277,6 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		l.RefreshItem(l.currentFocus)
 	case fyne.KeyRight:
 		if f := l.Length; f != nil && l.currentFocus >= f()-1 {
-			return
-		}
-		if (l.currentFocus+1)%l.ColumnCount() == 0 {
 			return
 		}
 
