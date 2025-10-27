@@ -21,7 +21,7 @@ func TestGridWrap_Focus(t *testing.T) {
 
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, 0, canvas.Focused().(*GridWrap).currentFocus)
+	assert.Equal(t, 0, canvas.Focused().(*GridWrap).currentHighlight)
 
 	children := list.scroller.Content.(*fyne.Container).Objects
 	assert.True(t, children[0].(*gridWrapItem).hovered)

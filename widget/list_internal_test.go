@@ -555,7 +555,7 @@ func TestList_Focus(t *testing.T) {
 
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, 0, canvas.Focused().(*List).currentFocus)
+	assert.Equal(t, 0, canvas.Focused().(*List).currentHighlight)
 
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.True(t, children[0].(*listItem).hovered)

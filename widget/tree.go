@@ -50,14 +50,20 @@ type Tree struct {
 	OnUnselected   func(uid TreeNodeID)                                      `json:"-"` // Called when the Node with the given TreeNodeID is unselected.
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
-	branchMinSize fyne.Size
-	currentFocus  TreeNodeID
-	focused       bool
-	leafMinSize   fyne.Size
-	offset        fyne.Position
-	open          map[TreeNodeID]bool
-	scroller      *widget.Scroll
-	selected      []TreeNodeID
+	// OnHighlighted is a callback to be notified when a given item
+	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
+	//
+	// Since: 2.8
+	OnHighlighted func(id TreeNodeID) `json:"-"`
+
+	branchMinSize    fyne.Size
+	currentHighlight TreeNodeID
+	focused          bool
+	leafMinSize      fyne.Size
+	offset           fyne.Position
+	open             map[TreeNodeID]bool
+	scroller         *widget.Scroll
+	selected         []TreeNodeID
 }
 
 // NewTree returns a new performant tree widget defined by the passed functions.
@@ -105,11 +111,11 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	t = &Tree{
 		ChildUIDs: func(uid string) (c []string) {
 			c = data[uid]
-			return
+			return c
 		},
 		IsBranch: func(uid string) (b bool) {
 			_, b = data[uid]
-			return
+			return b
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
 			return NewLabel("Template Object")
@@ -119,7 +125,7 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 		},
 	}
 	t.ExtendBaseWidget(t)
-	return
+	return t
 }
 
 // CloseAllBranches closes all branches in the tree.
@@ -166,27 +172,26 @@ func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 }
 
 // FocusGained is called after this Tree has gained focus.
-//
-// Implements: fyne.Focusable
 func (t *Tree) FocusGained() {
-	if t.currentFocus == "" {
+	if t.currentHighlight == "" {
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
 			if ids := childUIDs(""); len(ids) > 0 {
-				t.currentFocus = ids[0]
+				t.setItemFocus(ids[0])
 			}
 		}
 	}
 
 	t.focused = true
-	t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentHighlight)
+	if f := t.OnHighlighted; f != nil {
+		f(t.currentHighlight)
+	}
 }
 
 // FocusLost is called after this Tree has lost focus.
-//
-// Implements: fyne.Focusable
 func (t *Tree) FocusLost() {
 	t.focused = false
-	t.Refresh() // Item(t.currentFocus)
+	t.Refresh() // Item(t.currentHighlight)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -271,7 +276,7 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		newY = y + size.Height - t.scroller.Size().Height
 	}
 
-	t.scroller.ScrollToOffset(fyne.NewPos(0, newY))
+	t.scroller.ScrollToOffset(fyne.NewPos(t.scroller.Offset.X, newY))
 	t.offsetUpdated(t.scroller.Offset)
 }
 
@@ -286,7 +291,7 @@ func (t *Tree) ScrollToOffset(offset float32) {
 		offset = 0
 	}
 
-	t.scroller.ScrollToOffset(fyne.NewPos(0, offset))
+	t.scroller.ScrollToOffset(fyne.NewPos(t.scroller.Offset.X, offset))
 	t.offsetUpdated(t.scroller.Offset)
 }
 
@@ -304,6 +309,7 @@ func (t *Tree) ScrollToTop() {
 
 // Select marks the specified node to be selected.
 func (t *Tree) Select(uid TreeNodeID) {
+	t.setItemFocus(uid)
 	if len(t.selected) > 0 {
 		if uid == t.selected[0] {
 			return // no change
@@ -320,6 +326,18 @@ func (t *Tree) Select(uid TreeNodeID) {
 	}
 }
 
+func (t *Tree) setItemFocus(uid TreeNodeID) {
+	if t.currentHighlight == uid {
+		return
+	}
+
+	previous := t.currentHighlight
+	t.currentHighlight = uid
+	t.RefreshItem(previous)
+	t.ScrollTo(t.currentHighlight)
+	t.RefreshItem(t.currentHighlight)
+}
+
 // ToggleBranch flips the state of the branch with the given TreeNodeID.
 func (t *Tree) ToggleBranch(uid string) {
 	if t.IsBranchOpen(uid) {
@@ -330,76 +348,64 @@ func (t *Tree) ToggleBranch(uid string) {
 }
 
 // TypedKey is called if a key event happens while this Tree is focused.
-//
-// Implements: fyne.Focusable
 func (t *Tree) TypedKey(event *fyne.KeyEvent) {
+	oldHighlight := t.currentHighlight
+
 	switch event.Name {
 	case fyne.KeySpace:
-		t.Select(t.currentFocus)
+		t.Select(t.currentHighlight)
 	case fyne.KeyDown:
-		t.RefreshItem(t.currentFocus)
 		next := false
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
 			if next {
-				t.currentFocus = id
+				t.setItemFocus(id)
 				next = false
-			} else if id == t.currentFocus {
+			} else if id == t.currentHighlight {
 				next = true
 			}
 		})
-
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyLeft:
 		// If the current focus is on a branch which is open, just close it
-		if t.IsBranch(t.currentFocus) && t.IsBranchOpen(t.currentFocus) {
-			t.CloseBranch(t.currentFocus)
+		if t.IsBranch(t.currentHighlight) && t.IsBranchOpen(t.currentHighlight) {
+			t.CloseBranch(t.currentHighlight)
 		} else {
 			// Every other case should move the focus to the current parent node
 			t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
-				if id == t.currentFocus && p != "" {
-					t.currentFocus = p
+				if id == t.currentHighlight && p != "" {
+					t.setItemFocus(p)
 				}
 			})
 		}
-
-		t.RefreshItem(t.currentFocus)
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyRight:
-		if t.IsBranch(t.currentFocus) {
-			t.OpenBranch(t.currentFocus)
+		if t.IsBranch(t.currentHighlight) {
+			t.OpenBranch(t.currentHighlight)
 		}
 		children := []TreeNodeID{}
 		if childUIDs := t.ChildUIDs; childUIDs != nil {
-			children = childUIDs(t.currentFocus)
+			children = childUIDs(t.currentHighlight)
 		}
 
 		if len(children) > 0 {
-			t.currentFocus = children[0]
+			t.setItemFocus(children[0])
 		}
-
-		t.RefreshItem(t.currentFocus)
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
 	case fyne.KeyUp:
-		t.RefreshItem(t.currentFocus)
 		previous := ""
 		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
-			if id == t.currentFocus && previous != "" {
-				t.currentFocus = previous
+			if id == t.currentHighlight && previous != "" {
+				t.setItemFocus(previous)
 			}
 			previous = id
 		})
+	}
 
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
+	if oldHighlight != t.currentHighlight {
+		if f := t.OnHighlighted; f != nil {
+			f(t.currentHighlight)
+		}
 	}
 }
 
 // TypedRune is called if a text event happens while this Tree is focused.
-//
-// Implements: fyne.Focusable
 func (t *Tree) TypedRune(_ rune) {
 	// intentionally left blank
 }
@@ -466,7 +472,7 @@ func (t *Tree) offsetAndSize(uid TreeNodeID) (y float32, size fyne.Size, found b
 			y += m.Height
 		}
 	})
-	return
+	return y, size, found
 }
 
 func (t *Tree) offsetUpdated(pos fyne.Position) {
@@ -512,7 +518,7 @@ func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
 	min = min.Max(r.tree.branchMinSize)
 	min = min.Max(r.tree.leafMinSize)
-	return
+	return min
 }
 
 func (r *treeRenderer) Layout(size fyne.Size) {
@@ -559,7 +565,7 @@ func newTreeContent(tree *Tree) (c *treeContent) {
 		tree: tree,
 	}
 	c.ExtendBaseWidget(c)
-	return
+	return c
 }
 
 func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
@@ -759,7 +765,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
-	return
+	return min
 }
 
 func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
@@ -818,7 +824,7 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 		}
 		b = newBranch(r.treeContent.tree, content)
 	}
-	return
+	return b
 }
 
 func (r *treeContentRenderer) getLeaf() (l *leaf) {
@@ -832,7 +838,7 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 		}
 		l = newLeaf(r.treeContent.tree, content)
 	}
-	return
+	return l
 }
 
 var (
@@ -877,6 +883,9 @@ func (n *treeNode) Indent() float32 {
 
 // MouseIn is called when a desktop pointer enters the widget
 func (n *treeNode) MouseIn(*desktop.MouseEvent) {
+	if f := n.tree.OnHighlighted; f != nil {
+		f(n.uid)
+	}
 	n.hovered = true
 	n.partialRefresh()
 }
@@ -892,14 +901,9 @@ func (n *treeNode) MouseOut() {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
-	if n.tree.currentFocus != "" {
-		n.tree.RefreshItem(n.tree.currentFocus)
-	}
-
 	n.tree.Select(n.uid)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree)
 	if canvas != nil && canvas.Focused() != n.tree {
-		n.tree.currentFocus = n.uid
 		if !fyne.CurrentDevice().IsMobile() {
 			canvas.Focus(n.tree.impl.(fyne.Focusable))
 		}
@@ -956,7 +960,7 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 
 	min.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
 	min.Height = fyne.Max(min.Height, iconSize)
-	return
+	return min
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
@@ -967,7 +971,7 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 	if r.treeNode.icon != nil {
 		objects = append(objects, r.treeNode.icon)
 	}
-	return
+	return objects
 }
 
 func (r *treeNodeRenderer) Refresh() {
@@ -990,7 +994,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	if len(r.treeNode.tree.selected) > 0 && r.treeNode.uid == r.treeNode.tree.selected[0] {
 		r.background.FillColor = th.Color(theme.ColorNameSelection, v)
 		r.background.Show()
-	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentFocus == r.treeNode.uid) {
+	} else if r.treeNode.hovered || (r.treeNode.tree.focused && r.treeNode.tree.currentHighlight == r.treeNode.uid) {
 		r.background.FillColor = th.Color(theme.ColorNameHover, v)
 		r.background.Show()
 	} else {
@@ -1021,7 +1025,7 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	if cache.OverrideThemeMatchingScope(b, tree) {
 		b.Refresh()
 	}
-	return
+	return b
 }
 
 func (b *branch) update(uid string, depth int) {
@@ -1042,7 +1046,7 @@ func newBranchIcon(tree *Tree) (i *branchIcon) {
 		tree: tree,
 	}
 	i.ExtendBaseWidget(i)
-	return
+	return i
 }
 
 func (i *branchIcon) Refresh() {
@@ -1082,7 +1086,7 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	if cache.OverrideThemeMatchingScope(l, tree) {
 		l.Refresh()
 	}
-	return
+	return l
 }
 
 func contains(slice []string, item string) bool {

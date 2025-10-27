@@ -959,6 +959,10 @@ func (w *window) doShowAgain() {
 	view.Show()
 	w.visible = true
 
+	if w.fullScreen {
+		w.doSetFullScreen(true)
+	}
+
 	w.RunWithContext(func() {
 		w.driver.repaintWindow(w)
 	})

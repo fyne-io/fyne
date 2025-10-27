@@ -18,7 +18,7 @@ func (c *centerLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	for _, child := range objects {
 		childMin := child.MinSize()
 		child.Resize(childMin)
-		child.Move(fyne.NewPos(float32(size.Width-childMin.Width)/2, float32(size.Height-childMin.Height)/2))
+		child.Move(fyne.NewPos((size.Width-childMin.Width)/2, (size.Height-childMin.Height)/2))
 	}
 }
 

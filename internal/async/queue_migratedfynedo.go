@@ -48,6 +48,7 @@ func (q *CanvasObjectQueue) Out() fyne.CanvasObject {
 
 	if q.size == 0 && len(q.buffer) > 4*defaultQueueCapacity {
 		q.buffer = make([]fyne.CanvasObject, defaultQueueCapacity)
+		q.head = 0
 	}
 
 	return first

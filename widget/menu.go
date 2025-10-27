@@ -97,8 +97,6 @@ func (m *Menu) ActivatePrevious() {
 }
 
 // CreateRenderer returns a new renderer for the menu.
-//
-// Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	m.ExtendBaseWidget(m)
 	th := m.Theme()
@@ -151,16 +149,12 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 }
 
 // MinSize returns the minimal size of the menu.
-//
-// Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
 	m.ExtendBaseWidget(m)
 	return m.BaseWidget.MinSize()
 }
 
 // Refresh updates the menu to reflect changes in the data.
-//
-// Implements: fyne.Widget
 func (m *Menu) Refresh() {
 	for _, item := range m.Items {
 		item.Refresh()
@@ -178,8 +172,6 @@ func (m *Menu) getContainsCheck() bool {
 }
 
 // Tapped catches taps on separators and the menu background. It doesn't perform any action.
-//
-// Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
@@ -251,8 +243,10 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 		boxSize = minSize
 	}
 	scrollSize := boxSize
-	if c := fyne.CurrentApp().Driver().CanvasForObject(r.m.super()); c != nil {
-		ap := fyne.CurrentApp().Driver().AbsolutePositionForObject(r.m.super())
+
+	driver := fyne.CurrentApp().Driver()
+	if c := driver.CanvasForObject(r.m.super()); c != nil {
+		ap := driver.AbsolutePositionForObject(r.m.super())
 		_, areaSize := c.InteractiveArea()
 		if ah := areaSize.Height - ap.Y; ah < boxSize.Height {
 			scrollSize = fyne.NewSize(boxSize.Width, ah)

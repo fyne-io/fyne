@@ -1,7 +1,6 @@
 package dialog
 
 import (
-	"path/filepath"
 	"testing"
 
 	"fyne.io/fyne/v2/lang"
@@ -22,8 +21,7 @@ func TestShowFolderOpen(t *testing.T) {
 		chosen = file
 		openErr = err
 	}, win)
-	testData, _ := filepath.Abs("testdata")
-	dir, err := storage.ListerForURI(storage.NewFileURI(testData))
+	dir, err := storage.ListerForURI(storage.NewFileURI("testdata"))
 	if err != nil {
 		t.Error("Failed to open testdata dir", err)
 	}
@@ -35,14 +33,14 @@ func TestShowFolderOpen(t *testing.T) {
 	assert.NotNil(t, popup)
 
 	ui := popup.Content.(*fyne.Container)
-	title := ui.Objects[1].(*fyne.Container).Objects[1].(*widget.Label)
+	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, lang.L("Open")+" "+lang.L("Folder"), title.Text)
 
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*container.Scroll).Content.(*widget.Label)
-	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*fyne.Container)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[0].(*container.Scroll).Content.(*widget.Label)
+	buttons := ui.Objects[2].(*fyne.Container).Objects[1].(*fyne.Container)
 	open := buttons.Objects[1].(*widget.Button)
 
-	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[1].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
+	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	assert.NotEmpty(t, d.dialog.data)
 
 	item := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]

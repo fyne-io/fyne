@@ -23,6 +23,16 @@ func TestParseURI(t *testing.T) {
 	uri, err = ParseURI("file://C:/tmp/foo.txt")
 	assert.NoError(t, err)
 	assert.Equal(t, "file://C:/tmp/foo.txt", uri.String())
+
+	IPv6url := "http://[2001:db8:4006:812::200e]:8080/path/page.html"
+	uri, err = ParseURI(IPv6url)
+	assert.NoError(t, err)
+	assert.Equal(t, IPv6url, uri.String())
+
+	IPv6url = "http://[2001:db8:4006:812::200e]/path/page.html"
+	uri, err = ParseURI(IPv6url)
+	assert.NoError(t, err)
+	assert.Equal(t, IPv6url, uri.String())
 }
 
 func TestParseInvalidURI(t *testing.T) {

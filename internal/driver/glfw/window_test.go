@@ -1163,30 +1163,30 @@ func TestWindow_Scrolled(t *testing.T) {
 
 func TestWindow_Tapped(t *testing.T) {
 	w := createWindow("Test")
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(container.NewVBox(rect, o))
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
-		w.mousePos = fyne.NewPos(50, 160)
+		w.mousePos = fyne.NewPos(50, 60)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
 		if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
-			assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
-			assert.Equal(t, fyne.NewPos(46, 52), e.Position)
+			assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+			assert.Equal(t, fyne.NewPos(46, 56), e.Position)
 		}
 	})
 }
 
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
+	prop := canvas.NewRectangle(color.White)
+	prop.SetMinSize(fyne.NewSize(100, 100))
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
-	o.SetMinSize(fyne.NewSize(100, 100))
-	w.SetContent(o)
+	w.SetContent(container.NewStack(prop, o))
 
 	runOnMain(func() {
 		w.mousePos = fyne.NewPos(50, 60)
@@ -1259,34 +1259,6 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 		assert.True(t, tapped, "Tapped button that was clipped")
-	})
-}
-
-func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
-	w := createWindow("Test")
-	tapped := 0
-	b1 := widget.NewButton("Tap", func() { tapped = 1 })
-	b2 := widget.NewButton("Tap", func() { tapped = 2 })
-	w.SetContent(container.NewVBox(b1, b2))
-
-	runOnMain(func() {
-		w.mouseMoved(w.viewport, 17, 27)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 1, tapped, "Button 1 should be tapped")
-		tapped = 0
-
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseMoved(w.viewport, 17, 59)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
-
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
-
-		assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 	})
 }
 
@@ -1708,8 +1680,10 @@ func TestWindow_ManualFocus(t *testing.T) {
 func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	w := createWindow("Test")
 	e := widget.NewEntry()
-	e.SetText("Testing")
-	e.Disable()
+	runOnMain(func() {
+		e.SetText("Testing")
+		e.Disable()
+	})
 	w.SetContent(e)
 	repaintWindow(w)
 
@@ -1869,7 +1843,9 @@ func TestWindow_Shortcut(t *testing.T) {
 	item.Shortcut = testShortcut
 	file := fyne.NewMenu("File", []*fyne.MenuItem{item}...)
 
-	w.SetMainMenu(fyne.NewMainMenu(file))
+	runOnMain(func() {
+		w.SetMainMenu(fyne.NewMainMenu(file))
+	})
 	trigger()
 	assert.Equal(t, 0, len(content.capturedShortcuts))
 	assert.Equal(t, "menu", called)
@@ -1926,17 +1902,17 @@ func (h *hoverable) MouseOut() {
 
 func (h *hoverable) popMouseInEvent() (e any) {
 	e, h.mouseInEvents = pop(h.mouseInEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseMovedEvent() (e any) {
 	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
-	return
+	return e
 }
 
 func (h *hoverable) popMouseOutEvent() (e any) {
 	e, h.mouseOutEvents = pop(h.mouseOutEvents)
-	return
+	return e
 }
 
 type draggableObject struct {
@@ -1961,12 +1937,12 @@ func (d *draggable) DragEnd() {
 
 func (d *draggable) popDragEvent() (e any) {
 	e, d.events = pop(d.events)
-	return
+	return e
 }
 
 func (d *draggable) popDragEndEvent() (e any) {
 	e, d.endEvents = pop(d.endEvents)
-	return
+	return e
 }
 
 type draggableHoverableObject struct {
@@ -1996,7 +1972,7 @@ func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
 
 func (m *mouseable) popMouseEvent() (e any) {
 	e, m.mouseEvents = pop(m.mouseEvents)
-	return
+	return e
 }
 
 type draggableMouseableObject struct {
@@ -2027,12 +2003,12 @@ func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 
 func (t *tappable) popTapEvent() (e any) {
 	e, t.tapEvents = pop(t.tapEvents)
-	return
+	return e
 }
 
 func (t *tappable) popSecondaryTapEvent() (e any) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
-	return
+	return e
 }
 
 type draggableTappableObject struct {
@@ -2112,7 +2088,7 @@ func (s *scrollable) Scrolled(e *fyne.ScrollEvent) {
 
 func (s *scrollable) popScrollEvent() (e any) {
 	e, s.events = pop(s.events)
-	return
+	return e
 }
 
 //

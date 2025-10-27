@@ -285,7 +285,7 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 	}
 	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
 	size = size.Add(r.padding(th))
-	return
+	return size
 }
 
 func (r *buttonRenderer) Refresh() {
@@ -305,9 +305,9 @@ func (r *buttonRenderer) Refresh() {
 // must be called with the button propertyLock RLocked
 func (r *buttonRenderer) applyTheme() {
 	th := r.button.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
 	fgColorName, bgColorName, bgBlendName := r.buttonColorNames()
 	if bg := r.background; bg != nil {
+		v := fyne.CurrentApp().Settings().ThemeVariant()
 		bgColor := color.Color(color.Transparent)
 		if bgColorName != "" {
 			bgColor = th.Color(bgColorName, v)
@@ -371,7 +371,7 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 			background = theme.ColorNameButton
 		}
 	}
-	return
+	return foreground, background, backgroundBlend
 }
 
 func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
@@ -415,7 +415,7 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 	case ButtonAlignTrailing:
 		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
 	}
-	return
+	return pos
 }
 
 func blendColor(under, over color.Color) color.Color {

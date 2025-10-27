@@ -5,6 +5,9 @@ package glfw
 import (
 	"image"
 	"image/color"
+	"io"
+	"log"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -177,10 +180,15 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 }
 
 func TestGlCanvas_Focus(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// foreign := &focusable{id: "o2e1"}
+	// c.Focus(foreign)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Test")
 	w.SetPadded(false)
 	c := w.Canvas()
-
 	ce := &focusable{id: "ce1"}
 	content := container.NewVBox(ce)
 	me := &focusable{id: "o2e1"}
@@ -219,6 +227,11 @@ func TestGlCanvas_Focus(t *testing.T) {
 }
 
 func TestGlCanvas_Focus_BeforeVisible(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// c.Focus(e)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Test")
 	w.SetPadded(false)
 	e := widget.NewEntry()
@@ -403,27 +416,6 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	x, y = c.PixelCoordinateForPosition(pos)
 	assert.Equal(t, 20, x)
 	assert.Equal(t, 20, y)
-}
-
-func TestGlCanvas_Resize(t *testing.T) {
-	w := createWindow("Test")
-	w.SetPadded(false)
-
-	content := widget.NewLabel("Content")
-	w.SetContent(content)
-	ensureCanvasSize(t, w, fyne.NewSize(69, 36))
-
-	size := fyne.NewSize(200, 100)
-	runOnMain(func() {
-		assert.NotEqual(t, size, content.Size())
-	})
-
-	w.Resize(size)
-	ensureCanvasSize(t, w, size)
-
-	runOnMain(func() {
-		assert.Equal(t, size, content.Size())
-	})
 }
 
 // TODO: this can be removed when #707 is addressed
@@ -622,7 +614,7 @@ func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 
 func (l *recordingLayout) popLayoutEvent() (e any) {
 	e, l.layoutEvents = pop(l.layoutEvents)
-	return
+	return e
 }
 
 type safeCanvas struct {

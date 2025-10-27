@@ -27,9 +27,29 @@ type Rectangle struct {
 	// Since: 2.7
 	Aspect float32
 
-	// Support shadow configuration
+	// The radius of the rectangle top-right corner only.
 	//
 	// Since: 2.7
+	TopRightCornerRadius float32
+
+	// The radius of the rectangle top-left corner only.
+	//
+	// Since: 2.7
+	TopLeftCornerRadius float32
+
+	// The radius of the rectangle bottom-right corner only.
+	//
+	// Since: 2.7
+	BottomRightCornerRadius float32
+
+	// The radius of the rectangle bottom-left corner only.
+	//
+	// Since: 2.7
+	BottomLeftCornerRadius float32
+
+	// Support shadow configuration
+	//
+	// Since: 2.8
 	Shadow
 }
 

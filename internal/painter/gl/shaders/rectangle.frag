@@ -24,6 +24,11 @@ vec4 blendShadow(vec4 color, vec4 shadow) {
 
 void main() {
 
+    // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
+    if (gl_FragCoord.x < rect_coords[0] || gl_FragCoord.x > rect_coords[1] || gl_FragCoord.y < frame_size.y - rect_coords[3] || gl_FragCoord.y > frame_size.y - rect_coords[2]) {
+        discard;
+    }
+
     vec4 color = fill_color;
     
     if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){
