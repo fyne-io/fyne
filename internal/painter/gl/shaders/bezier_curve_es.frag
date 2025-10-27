@@ -1,4 +1,14 @@
-#version 110
+#version 100
+
+#ifdef GL_ES
+# ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+# else
+precision mediump float;
+#endif
+precision mediump int;
+precision lowp sampler2D;
+#endif
 
 uniform vec2 frame_size;
 uniform vec4 rect_coords;

@@ -10,12 +10,19 @@ import (
 var _ fyne.CanvasObject = (*BezierCurve)(nil)
 
 // BezierCurve describes a colored bezier curve primitive in a Fyne canvas.
+// It supports linear (0 control point), quadratic (1 control point) and cubic (2 control points) bezier curves.
+// The curve is drawn within the object's position and size, with the start, end, and control points specified relative to the object.
+// Top-left position is (0,0) and bottom-right is (height,width).
+// Increasing the X coordinate moves to the right, increasing the Y coordinate moves downwards.
+// Negative coordinates are not supported.
+//
+// Since: 2.8
 type BezierCurve struct {
 	baseObject
 
 	StartPoint    fyne.Position   // Starting point of the bezier curve
 	EndPoint      fyne.Position   // Ending point of the bezier curve
-	ControlPoints []fyne.Position // Max 2 control points (1 for quadratic, 2 for cubic)
+	ControlPoints []fyne.Position // Max 2 control points (0 for linear, 1 for quadratic, 2 for cubic)
 	StrokeColor   color.Color     // The bezier curve stroke color
 	StrokeWidth   float32         // The stroke width of the bezier curve
 }
@@ -56,6 +63,17 @@ func (r *BezierCurve) Resize(s fyne.Size) {
 	}
 
 	Refresh(r)
+}
+
+// NewLinearBezierCurve creates a linear bezier curve with 0 control points
+func NewLinearBezierCurve(startPoint, endPoint fyne.Position, color color.Color) *BezierCurve {
+	return &BezierCurve{
+		StartPoint:    startPoint,
+		EndPoint:      endPoint,
+		ControlPoints: []fyne.Position{},
+		StrokeColor:   color,
+		StrokeWidth:   1,
+	}
 }
 
 // NewQuadraticBezierCurve creates a quadratic bezier curve with 1 control points

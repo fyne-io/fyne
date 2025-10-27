@@ -22,6 +22,21 @@ func TestBezierCurve_MinSizeAndStrokeColor(t *testing.T) {
 	assert.Equal(t, color.Black, curve.StrokeColor)
 }
 
+func TestBezierCurve_Linear(t *testing.T) {
+	curve := canvas.NewLinearBezierCurve(fyne.NewPos(10, 0), fyne.NewPos(50, 10), color.Black)
+	curve.StrokeWidth = 1
+	curve.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "bezier_curve_linear.xml", curve)
+
+	c := software.NewCanvas()
+	c.SetContent(curve)
+	c.Resize(fyne.NewSize(70, 60))
+	test.AssertRendersToImage(t, "bezier_curve_linear.png", c)
+
+	curve.StartPoint = fyne.NewPos(10, -5)
+	test.AssertRendersToImage(t, "bezier_curve_linear.png", c)
+}
+
 func TestBezierCurve_Quadratic(t *testing.T) {
 	curve := canvas.NewQuadraticBezierCurve(fyne.NewPos(0, 0), fyne.NewPos(30, 40), fyne.NewPos(50, 10), color.Black)
 	curve.StrokeWidth = 2

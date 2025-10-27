@@ -138,8 +138,8 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	// ensure stroke width is not larger than the size of the object - edge softness margin due to rendering artefacts
-	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height)-2*edgeSoftness)
+	// ensure stroke width is not larger than the size of the object
+	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height))
 	if strokeWidth < 1 {
 		strokeWidth = 1
 	}
