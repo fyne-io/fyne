@@ -714,22 +714,22 @@ func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
 // that are not coincident with the start or end points. If two control points are provided
 // and they are identical, only one is added if it is not coincident with the start or end.
 func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoints []fyne.Position, size fyne.Size, offset float32) (fyne.Position, fyne.Position, []fyne.Position) {
-	clampPoint := func(p fyne.Position, size fyne.Size) (float32, float32) {
+	clampPoint := func(p fyne.Position) (float32, float32) {
 		return fyne.Min(fyne.Max(p.X, offset), fyne.Max(size.Width-offset, 0)), fyne.Min(fyne.Max(p.Y, offset), fyne.Max(size.Height-offset, 0))
 	}
-	p1x, p1y := clampPoint(startPoint, size)
-	p2x, p2y := clampPoint(endPoint, size)
+	p1x, p1y := clampPoint(startPoint)
+	p2x, p2y := clampPoint(endPoint)
 	cp := make([]fyne.Position, 0, 2)
 
 	if len(controlPoints) == 1 {
-		cpX, cpY := clampPoint(controlPoints[0], size)
+		cpX, cpY := clampPoint(controlPoints[0])
 		if (cpX != p1x || cpY != p1y) && (cpX != p2x || cpY != p2y) {
 			// only add the control point if it is not the same as start and end point
 			cp = append(cp, fyne.NewPos(cpX, cpY))
 		}
 	} else if len(controlPoints) >= 2 {
-		cp1x, cp1y := clampPoint(controlPoints[0], size)
-		cp2x, cp2y := clampPoint(controlPoints[1], size)
+		cp1x, cp1y := clampPoint(controlPoints[0])
+		cp2x, cp2y := clampPoint(controlPoints[1])
 
 		if cp1x == cp2x && cp1y == cp2y {
 			// if both control points are the same, only add one if it is not the same as start and end point
