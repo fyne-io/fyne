@@ -56,7 +56,7 @@ func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *i
 	})
 
 	if circle.ShadowColor != color.Transparent && circle.ShadowColor != nil && (!circle.ShadowOffset.IsZero() || circle.ShadowSoftness > 0.0) {
-		bounds = drawShadow(c, circle, circle.Size(), circle.ShadowSoftness, circle.ShadowOffset, circle.ShadowColor, circle.ShadowType, pad, bounds, base, clip)
+		bounds = drawShadow(c, circle, circle.Size(), circle.Shadow, pad, bounds, base, clip)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -246,7 +246,7 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	}
 }
 
-func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float32, shadow canvas.Shadow, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(obj)
 	scaledWidth := scale.ToScreenCoordinate(c, width+pad*2)
 	scaledHeight := scale.ToScreenCoordinate(c, height+pad*2)
@@ -257,8 +257,8 @@ func drawOblongStroke(c fyne.Canvas, obj fyne.CanvasObject, width, height float3
 		return float32(math.Round(float64(in) * float64(c.Scale())))
 	})
 
-	if shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0) {
-		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, shadowType, pad, bounds, base, clip)
+	if shadow.ShadowColor != color.Transparent && shadow.ShadowColor != nil && (!shadow.ShadowOffset.IsZero() || shadow.ShadowSoftness > 0.0) {
+		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadow, pad, bounds, base, clip)
 	}
 
 	// the clip intersect above cannot be negative, so we may need to compensate
@@ -299,10 +299,10 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, bas
 	topLeftRadius := painter.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := painter.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := painter.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
-	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.ShadowSoftness, rect.ShadowOffset, rect.ShadowColor, rect.ShadowType, pos, base, clip)
+	drawOblong(c, rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.Shadow, pos, base, clip)
 }
 
-func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, shadow canvas.Shadow, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	width, height := obj.Size().Components()
 	if aspect != 0 {
 		frameAspect := width / height
@@ -322,7 +322,7 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	}
 
 	if (stroke != nil && strokeWidth > 0) || topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0 { // use a rasterizer if there is a stroke or radius
-		drawOblongStroke(c, obj, width, height, shadowSoftness, shadowOffset, shadowColor, shadowType, pos, base, clip)
+		drawOblongStroke(c, obj, width, height, shadow, pos, base, clip)
 		return
 	}
 
@@ -331,8 +331,8 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X), scale.ToScreenCoordinate(c, pos.Y)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	if shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0) {
-		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadowSoftness, shadowOffset, shadowColor, shadowType, 0, bounds, base, clip)
+	if shadow.ShadowColor != color.Transparent && shadow.ShadowColor != nil && (!shadow.ShadowOffset.IsZero() || shadow.ShadowSoftness > 0.0) {
+		bounds = drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, bounds, base, clip)
 		// due to shadow draw rectangle with a certain width and height
 		raw := painter.DrawRectangle(canvas.NewRectangle(fill), width, height, 0, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
@@ -343,22 +343,23 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	}
 }
 
-func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pad float32, bounds image.Rectangle, base *image.NRGBA, clip image.Rectangle) image.Rectangle {
-	var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom int
-	if s, ok := obj.(canvas.Shadowable); ok {
-		pads := s.ShadowPaddings()
-		shadowPadLeft = scale.ToScreenCoordinate(c, pads[0])
-		shadowPadRight = scale.ToScreenCoordinate(c, pads[2])
-		shadowPadTop = scale.ToScreenCoordinate(c, pads[1])
-		shadowPadBottom = scale.ToScreenCoordinate(c, pads[3])
-	} else {
-		return bounds
-	}
+func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow canvas.Shadow, pad float32, bounds image.Rectangle, base *image.NRGBA, clip image.Rectangle) image.Rectangle {
+	pads := painter.GetShadowPaddings(shadow)
+	shadowPadLeft := scale.ToScreenCoordinate(c, pads[0])
+	shadowPadRight := scale.ToScreenCoordinate(c, pads[2])
+	shadowPadTop := scale.ToScreenCoordinate(c, pads[1])
+	shadowPadBottom := scale.ToScreenCoordinate(c, pads[3])
 
-	var shadow *image.RGBA
+	shadowColor := shadow.ShadowColor
+	shadowSoftness := shadow.ShadowSoftness
+	shadowOffset := shadow.ShadowOffset
+	shadowType := shadow.ShadowType
+
+	var shadowRaw *image.RGBA
+
 	switch o := obj.(type) {
 	case *canvas.Rectangle:
-		shadow = painter.DrawRectangle(&canvas.Rectangle{
+		shadowRaw = painter.DrawRectangle(&canvas.Rectangle{
 			FillColor:               shadowColor,
 			CornerRadius:            o.CornerRadius,
 			TopRightCornerRadius:    o.TopRightCornerRadius,
@@ -371,7 +372,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowS
 	case *canvas.Circle:
 		shadowCircle := &canvas.Circle{FillColor: shadowColor}
 		shadowCircle.Resize(objSize)
-		shadow = painter.DrawCircle(shadowCircle, pad+shadowSoftness, func(in float32) float32 {
+		shadowRaw = painter.DrawCircle(shadowCircle, pad+shadowSoftness, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	}
@@ -397,15 +398,15 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowS
 		),
 	)
 
-	blurred := blur.Gaussian(shadow, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
+	blurred := blur.Gaussian(shadowRaw, float64(scale.ToScreenCoordinate(c, shadowSoftness)))
 
 	// If DropShadow, subtract object from shadow
 	if shadowType == canvas.DropShadow {
-		for y := 0; y < shadow.Bounds().Dy(); y++ {
-			for x := 0; x < shadow.Bounds().Dx(); x++ {
+		for y := 0; y < shadowRaw.Bounds().Dy(); y++ {
+			for x := 0; x < shadowRaw.Bounds().Dx(); x++ {
 				mx := x - offset.X + int(shadowSoftness)
 				my := y - offset.Y + int(shadowSoftness)
-				if _, _, _, a := shadow.At(mx, my).RGBA(); a > 0 {
+				if _, _, _, a := shadowRaw.At(mx, my).RGBA(); a > 0 {
 					blurred.SetRGBA(x, y, color.RGBA{A: 0})
 				}
 			}

@@ -7,6 +7,8 @@ import (
 )
 
 // ShadowType defines the type of shadow to render.
+//
+// Since: 2.8
 type ShadowType int
 
 const (
@@ -14,20 +16,10 @@ const (
 	BoxShadow
 )
 
-// Shadowable defines an interface for objects that can render a shadow.
-// It provides methods to retrieve the shadow paddings.
-//
-// Since: 2.7
-type Shadowable interface {
-	// ShadowPaddings returns the paddings (left, top, right, bottom) of the shadow.
-	ShadowPaddings() [4]float32
-}
-
-// Ensure shadow implements Shadowable.
-var _ Shadowable = (*Shadow)(nil)
-
 // Shadow provides base functionality for objects that can have a Shadow.
 // Intended to be embedded in other structs to add Shadow support.
+//
+// Since: 2.8
 type Shadow struct {
 	ShadowColor    color.Color   // Color of the shadow.
 	ShadowSoftness float32       // Softness (blur radius) of the shadow.
@@ -35,32 +27,14 @@ type Shadow struct {
 	ShadowType     ShadowType    // Type of shadow (DropShadow or BoxShadow).
 }
 
-// ShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset and softness.
-func (r *Shadow) ShadowPaddings() [4]float32 {
-	offsetX := r.ShadowOffset.X
-	offsetY := r.ShadowOffset.Y
-	softness := r.ShadowSoftness
-
-	rightReach := -offsetX + softness
-	leftReach := offsetX + softness
-	topReach := -offsetY + softness
-	bottomReach := offsetY + softness
-
-	var padLeft, padRight, padTop, padBottom float32
-
-	if leftReach > 0 {
-		padLeft = leftReach
+// NewShadow creates a new Shadow with the specified properties.
+//
+// Since: 2.8
+func NewShadow(color color.Color, softness float32, offet fyne.Position, shadowType ShadowType) Shadow {
+	return Shadow{
+		ShadowColor:    color,
+		ShadowSoftness: softness,
+		ShadowOffset:   offet,
+		ShadowType:     shadowType,
 	}
-	if rightReach > 0 {
-		padRight = rightReach
-	}
-	if topReach > 0 {
-		padTop = topReach
-	}
-	if bottomReach > 0 {
-		padBottom = bottomReach
-	}
-
-	// Returns paddings in order: left, top, right, bottom.
-	return [4]float32{padLeft, padTop, padRight, padBottom}
 }

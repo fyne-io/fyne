@@ -34,7 +34,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	program := p.roundRectangleProgram
 
 	// Vertex: BEG
-	bounds, points := p.vecSquareCoords(pos, circle, frame)
+	bounds, points := p.vecSquareCoords(pos, circle, frame, circle.Shadow)
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
 	p.UpdateVertexArray(program, "vert", 2, 4, 0)
@@ -160,16 +160,15 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	topLeftRadius := paint.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := paint.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := paint.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
-	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.ShadowSoftness, rect.ShadowOffset, rect.ShadowColor, rect.ShadowType, pos, frame)
+	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.Shadow, pos, frame)
 }
 
-func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect, shadowSoftness float32, shadowOffset fyne.Position, shadowColor color.Color, shadowType canvas.ShadowType, pos fyne.Position, frame fyne.Size) {
-	if (shadowColor == color.Transparent || shadowColor == nil || (shadowOffset.IsZero() && shadowSoftness == 0.0)) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
+func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32, shadow canvas.Shadow, pos fyne.Position, frame fyne.Size) {
+	if (shadow.ShadowColor == color.Transparent || shadow.ShadowColor == nil || (shadow.ShadowOffset.IsZero() && shadow.ShadowSoftness == 0.0)) && (fill == color.Transparent || fill == nil) && (stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
 	}
 
 	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
-	shadow := shadowColor != color.Transparent && shadowColor != nil && (!shadowOffset.IsZero() || shadowSoftness > 0.0)
 	var program ProgramState
 	if roundedCorners {
 		program = p.roundRectangleProgram
@@ -178,7 +177,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, obj, frame, aspect)
+	bounds, points := p.vecRectCoords(pos, obj, frame, aspect, shadow)
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
 	p.UpdateVertexArray(program, "vert", 2, 4, 0)
@@ -240,13 +239,13 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
 	var addShadow float32
-	if shadow {
-		r, g, b, a = getFragmentColor(shadowColor)
+	if shadow.ShadowColor != color.Transparent && shadow.ShadowColor != nil && (!shadow.ShadowOffset.IsZero() || shadow.ShadowSoftness > 0.0) {
+		r, g, b, a = getFragmentColor(shadow.ShadowColor)
 		p.SetUniform4f(program, "shadow_color", r, g, b, a)
 
-		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadowOffset.X*p.pixScale, 1.0), roundToPixel(shadowOffset.Y*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_softness", roundToPixel(shadowSoftness*p.pixScale, 1.0))
-		p.SetUniform1f(program, "shadow_type", float32(shadowType))
+		p.SetUniform2f(program, "shadow_offset", roundToPixel(shadow.ShadowOffset.X*p.pixScale, 1.0), roundToPixel(shadow.ShadowOffset.Y*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_softness", roundToPixel(shadow.ShadowSoftness*p.pixScale, 1.0))
+		p.SetUniform1f(program, "shadow_type", float32(shadow.ShadowType))
 
 		addShadow = 1.0
 	}
@@ -266,7 +265,7 @@ func (p *painter) drawPolygon(polygon *canvas.Polygon, pos fyne.Position, frame 
 	size := polygon.Size()
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0)
+	bounds, points := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.polygonProgram
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
@@ -324,7 +323,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	}
 
 	// Vertex: BEG
-	bounds, points := p.vecRectCoords(pos, arc, frame, 0.0)
+	bounds, points := p.vecRectCoords(pos, arc, frame, 0.0, canvas.Shadow{})
 	program := p.arcProgram
 	p.ctx.UseProgram(program.ref)
 	p.updateBuffer(program.buff, points)
@@ -571,7 +570,7 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return size, pos
 }
 
-func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, aspect float32) ([4]float32, []float32) {
+func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, aspect float32, shadow canvas.Shadow) ([4]float32, []float32) {
 	xPad, yPad := float32(0), float32(0)
 
 	if aspect != 0 {
@@ -587,10 +586,10 @@ func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame
 		}
 	}
 
-	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad)
+	return p.vecRectCoordsWithPad(pos, rect, frame, xPad, yPad, shadow)
 }
 
-func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32) ([4]float32, []float32) {
+func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32, shadow canvas.Shadow) ([4]float32, []float32) {
 	size := rect.Size()
 	pos1 := rect.Position()
 
@@ -601,14 +600,11 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
 	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
 
-	var shadowPadLeft, shadowPadRight, shadowPadTop, shadowPadBottom float32
-	if s, ok := rect.(canvas.Shadowable); ok {
-		pads := s.ShadowPaddings()
-		shadowPadLeft = roundToPixel(pads[0], p.pixScale)
-		shadowPadRight = roundToPixel(pads[2], p.pixScale)
-		shadowPadTop = roundToPixel(pads[1], p.pixScale)
-		shadowPadBottom = roundToPixel(pads[3], p.pixScale)
-	}
+	shadowPads := paint.GetShadowPaddings(shadow)
+	shadowPadLeft := roundToPixel(shadowPads[0], p.pixScale)
+	shadowPadRight := roundToPixel(shadowPads[2], p.pixScale)
+	shadowPadTop := roundToPixel(shadowPads[1], p.pixScale)
+	shadowPadBottom := roundToPixel(shadowPads[3], p.pixScale)
 
 	// without edge softness adjustment the rectangle has cropped edges
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
@@ -632,8 +628,8 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 	return [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}, coords
 }
 
-func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size) ([4]float32, []float32) {
-	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0)
+func (p *painter) vecSquareCoords(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, shadow canvas.Shadow) ([4]float32, []float32) {
+	return p.vecRectCoordsWithPad(pos, rect, frame, 0, 0, shadow)
 }
 
 func roundToPixel(v float32, pixScale float32) float32 {

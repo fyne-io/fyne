@@ -22,7 +22,7 @@ type Circle struct {
 
 	// Support shadow configuration
 	//
-	// Since: 2.7
+	// Since: 2.8
 	Shadow
 }
 

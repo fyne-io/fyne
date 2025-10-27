@@ -671,3 +671,33 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
 	return -(startAngle - 90), -(endAngle - 90)
 }
+
+// GetShadowPaddings calculates the shadow paddings (left, top, right, bottom) based on offset and softness.
+func GetShadowPaddings(shadow canvas.Shadow) [4]float32 {
+	offsetX := shadow.ShadowOffset.X
+	offsetY := shadow.ShadowOffset.Y
+	softness := shadow.ShadowSoftness
+
+	rightReach := -offsetX + softness
+	leftReach := offsetX + softness
+	topReach := -offsetY + softness
+	bottomReach := offsetY + softness
+
+	var padLeft, padRight, padTop, padBottom float32
+
+	if leftReach > 0 {
+		padLeft = leftReach
+	}
+	if rightReach > 0 {
+		padRight = rightReach
+	}
+	if topReach > 0 {
+		padTop = topReach
+	}
+	if bottomReach > 0 {
+		padBottom = bottomReach
+	}
+
+	// Returns paddings in order: left, top, right, bottom.
+	return [4]float32{padLeft, padTop, padRight, padBottom}
+}
