@@ -115,7 +115,7 @@ func (p *painter) Init() {
 	}
 	p.getUniformLocations(p.polygonProgram,
 		"frame_size", "rect_coords", "edge_softness",
-		"shape_radius", "angle", "sides",
+		"outer_radius", "angle", "sides",
 		"fill_color", "corner_radius",
 		"stroke_width", "stroke_color",
 	)

@@ -51,7 +51,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
-// By default this will use the application icon.
+// By default, this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
 }
@@ -60,6 +60,12 @@ func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	a.Driver().(systrayDriver).SetSystemTrayIcon(icon)
+}
+
+// SetSystemTrayWindow assigns a window to be shown with the system tray menu is tapped.
+// You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
+func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
+	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
 }
 
 func escapeNotificationString(in string) string {

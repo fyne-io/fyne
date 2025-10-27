@@ -287,17 +287,20 @@ func (*driver) SetDisableScreenBlanking(disable bool) {
 
 func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 	c := w.Canvas().(*canvas)
+	switch e.Crosses(lifecycle.StageAlive) {
+	case lifecycle.CrossOn:
+		d.onStart()
+	case lifecycle.CrossOff:
+		d.onStop()
+	}
 	switch e.Crosses(lifecycle.StageVisible) {
 	case lifecycle.CrossOn:
 		d.glctx, _ = e.DrawContext.(gl.Context)
-		d.onStart()
-
 		// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
 		c.Content().Refresh()
 
 		d.sendPaintEvent()
 	case lifecycle.CrossOff:
-		d.onStop()
 		d.glctx = nil
 	}
 	switch e.Crosses(lifecycle.StageFocused) {
