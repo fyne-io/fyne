@@ -23,24 +23,9 @@ vec4 blend_shadow(vec4 color, vec4 shadow)
     );
 }
 
-void main() {
-
-    // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
-    if (gl_FragCoord.x < rect_coords[0] || gl_FragCoord.x > rect_coords[1] || gl_FragCoord.y < frame_size.y - rect_coords[3] || gl_FragCoord.y > frame_size.y - rect_coords[2]) {
-        discard;
-    }
-
+void main()
+{
     vec4 color = fill_color;
-    
-    if (gl_FragCoord.x >= rect_coords[1] - stroke_width ){
-        color = stroke_color;
-    } else if (gl_FragCoord.x <= rect_coords[0] + stroke_width){
-        color = stroke_color;
-    } else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width ){
-        color = stroke_color;
-    } else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width ){
-        color = stroke_color;
-    }
 
     if (add_shadow == 1.0)
     {
@@ -74,6 +59,34 @@ void main() {
         }
 
         color = blend_shadow(color, vec4(shadow_color.rgb, shadow_alpha));
+    }
+
+    // discard if outside rectangle coords, necessary to draw thin stroke and mitigate inconsistent borders issue
+    if (gl_FragCoord.x < rect_coords[0] || gl_FragCoord.x > rect_coords[1] || gl_FragCoord.y < frame_size.y - rect_coords[3] || gl_FragCoord.y > frame_size.y - rect_coords[2])
+    {
+        if (add_shadow == 0.0)
+        {
+            discard;
+        }
+    }
+    else
+    {
+        if (gl_FragCoord.x >= rect_coords[1] - stroke_width)
+        {
+            color = stroke_color;
+        }
+        else if (gl_FragCoord.x <= rect_coords[0] + stroke_width)
+        {
+            color = stroke_color;
+        }
+        else if (gl_FragCoord.y <= frame_size.y - rect_coords[3] + stroke_width)
+        {
+            color = stroke_color;
+        }
+        else if (gl_FragCoord.y >= frame_size.y - rect_coords[2] - stroke_width)
+        {
+            color = stroke_color;
+        }
     }
 
     gl_FragColor = color;
