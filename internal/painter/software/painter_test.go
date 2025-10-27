@@ -327,6 +327,39 @@ func TestPainter_paintLine_thin(t *testing.T) {
 	test.AssertImageMatches(t, "draw_line_thin.png", p.Paint(c))
 }
 
+func TestPainter_paintLinearBezierCurve(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	obj := canvas.NewLinearBezierCurve(fyne.NewPos(20, 40), fyne.NewPos(40, 60), color.Black)
+	obj.StrokeWidth = 6
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_bezier_curve_linear.png", p.Paint(c))
+}
+
+func TestPainter_paintLinearBezierCurve_thin(t *testing.T) {
+	c := test.NewCanvas()
+	lines := [5]*canvas.BezierCurve{}
+	sws := []float32{4, 2, 1, 0.5, 0.3}
+	for i, sw := range sws {
+		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{255, 0, 0, 255}}
+		lines[i].StrokeWidth = sw
+		x := float32(i * 20)
+		lines[i].StartPoint = fyne.NewPos(x, 10)
+		lines[i].EndPoint = fyne.NewPos(x+15, 10)
+		lines[i].Resize(fyne.NewSize(109, 28))
+	}
+	c.SetContent(container.NewWithoutLayout(lines[0], lines[1], lines[2], lines[3], lines[4]))
+	c.Resize(fyne.NewSize(109, 28))
+
+	p := software.NewPainter()
+	test.AssertImageMatches(t, "draw_bezier_curve_linear_thin.png", p.Paint(c))
+}
+
 func TestPainter_paintQuadraticBezierCurve(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewQuadraticBezierCurve(fyne.NewPos(0, 0), fyne.NewPos(10, 50), fyne.NewPos(70, 30), color.Black)
@@ -338,7 +371,7 @@ func TestPainter_paintQuadraticBezierCurve(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_quadratic_bezier_curve.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_bezier_curve_quadratic.png", p.Paint(c))
 }
 
 func TestPainter_paintQuadraticBezierCurve_thin(t *testing.T) {
@@ -358,7 +391,7 @@ func TestPainter_paintQuadraticBezierCurve_thin(t *testing.T) {
 	c.Resize(fyne.NewSize(109, 28))
 
 	p := software.NewPainter()
-	test.AssertImageMatches(t, "draw_quadratic_bezier_curve_thin.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_bezier_curve_quadratic_thin.png", p.Paint(c))
 }
 
 func TestPainter_paintCubicBezierCurve(t *testing.T) {
@@ -372,7 +405,7 @@ func TestPainter_paintCubicBezierCurve(t *testing.T) {
 	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
 	p := software.NewPainter()
 
-	test.AssertImageMatches(t, "draw_cubic_bezier_curve.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_bezier_curve_cubic.png", p.Paint(c))
 }
 
 func TestPainter_paintCubicBezierCurve_thin(t *testing.T) {
@@ -392,7 +425,7 @@ func TestPainter_paintCubicBezierCurve_thin(t *testing.T) {
 	c.Resize(fyne.NewSize(109, 28))
 
 	p := software.NewPainter()
-	test.AssertImageMatches(t, "draw_cubic_bezier_curve_thin.png", p.Paint(c))
+	test.AssertImageMatches(t, "draw_bezier_curve_cubic_thin.png", p.Paint(c))
 }
 
 func TestPainter_paintPolygon(t *testing.T) {
