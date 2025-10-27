@@ -357,12 +357,15 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadowS
 
 	var shadow *image.RGBA
 	switch o := obj.(type) {
-	case *canvas.Square:
-		shadow = painter.DrawSquare(&canvas.Square{FillColor: shadowColor, CornerRadius: o.CornerRadius}, objSize.Width, objSize.Height, pad+shadowSoftness, func(in float32) float32 {
-			return float32(math.Round(float64(in) * float64(c.Scale())))
-		})
 	case *canvas.Rectangle:
-		shadow = painter.DrawRectangle(&canvas.Rectangle{FillColor: shadowColor, CornerRadius: obj.(*canvas.Rectangle).CornerRadius}, objSize.Width, objSize.Height, pad+shadowSoftness, func(in float32) float32 {
+		shadow = painter.DrawRectangle(&canvas.Rectangle{
+			FillColor:               shadowColor,
+			CornerRadius:            o.CornerRadius,
+			TopRightCornerRadius:    o.TopRightCornerRadius,
+			TopLeftCornerRadius:     o.TopLeftCornerRadius,
+			BottomRightCornerRadius: o.BottomRightCornerRadius,
+			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
+		}, objSize.Width, objSize.Height, pad+shadowSoftness, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 	case *canvas.Circle:

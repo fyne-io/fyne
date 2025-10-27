@@ -24,7 +24,8 @@ uniform vec2 shadow_offset;
 uniform vec4 shadow_color;
 uniform float shadow_type;
 
-vec4 blendShadow(vec4 color, vec4 shadow) {
+vec4 blend_shadow(vec4 color, vec4 shadow)
+{
     float alpha = color.a + shadow.a * (1.0 - color.a);
     return vec4(
         (color.rgb * color.a + shadow.rgb * shadow.a * (1.0 - color.a)) / alpha,
@@ -82,7 +83,7 @@ void main() {
             color[3] = 0.0;
         }
 
-        color = blendShadow(color, vec4(shadow_color.rgb, shadow_alpha));
+        color = blend_shadow(color, vec4(shadow_color.rgb, shadow_alpha));
     }
 
     gl_FragColor = color;

@@ -54,7 +54,7 @@ float calc_distance_all_quadrants(vec2 p, vec2 size, vec4 radius)
     return dist;
 }
 
-vec4 blendShadow(vec4 color, vec4 shadow)
+vec4 blend_shadow(vec4 color, vec4 shadow)
 {
     float alpha = color.a + shadow.a * (1.0 - color.a);
     return vec4(
@@ -73,7 +73,8 @@ void main() {
     float final_alpha;
 
     // subtract a small threshold value to avoid calling calc_distance_all_quadrants when the largest corner radius is very close to half the length of the rectangle's shortest edge
-    if (max_radius - 0.9 > min(rect_size_half.x, rect_size_half.y) + stroke_width_half)
+    bool calc_all_quadrants = max_radius - 0.9 > min(rect_size_half.x, rect_size_half.y) + stroke_width_half;
+    if (calc_all_quadrants)
     {
         // at least one corner radius is larger than half of the shorter edge
         distance = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
@@ -103,18 +104,34 @@ void main() {
     if (add_shadow == 1.0)
     {
         // Apply shadow effect
-        float distance_shadow = smoothstep(0.0, shadow_softness, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+        float distance_shadow;
+        if (calc_all_quadrants)
+        {
+            distance_shadow = smoothstep(0.0, shadow_softness, calc_distance_all_quadrants(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+        }
+        else
+        {
+            distance_shadow = smoothstep(0.0, shadow_softness, calc_distance(vec_centered_pos + shadow_offset, rect_size_half + stroke_width_half, radius));
+        }
         float shadow_alpha = shadow_color.a * (1.0 - distance_shadow);
 
         if (shadow_type == 0.0)
         {
             // remove shadow inside rectangle
-            float d_shape = calc_distance(vec_centered_pos, rect_size_half + stroke_width_half, radius);
-            float mask = smoothstep(-2.0, 0.0, d_shape);
+            float d_shape;
+            if (calc_all_quadrants)
+            {
+                d_shape = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
+            }
+            else
+            {
+                d_shape = calc_distance(vec_centered_pos, rect_size_half + stroke_width_half, radius);
+            }
+            float mask = smoothstep(-2.0 * edge_softness, 0.0, d_shape);
             shadow_alpha *= mask;
         }
 
-        final_color = blendShadow(final_color, vec4(shadow_color.rgb, shadow_alpha));
+        final_color = blend_shadow(final_color, vec4(shadow_color.rgb, shadow_alpha));
     }
 
     gl_FragColor = final_color;
