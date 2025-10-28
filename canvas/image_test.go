@@ -147,4 +147,9 @@ func TestImage_CornerRadius(t *testing.T) {
 	i.CornerRadius = canvas.RadiusMaximum
 	c.Resize(fyne.NewSize(60, 60))
 	test.AssertRendersToImage(t, "image_fully_rounded_corners.png", c)
+
+	i.FillMode = canvas.ImageFillCover
+	i.CornerRadius = 20
+	c.Resize(fyne.NewSize(60, 100))
+	test.AssertRendersToImage(t, "image_cover_rounded_corners.png", c)
 }
