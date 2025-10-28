@@ -73,7 +73,8 @@ vec4 blend_shadow(vec4 color, vec4 shadow)
     );
 }
 
-void main() {
+void main()
+{
     vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
 
@@ -131,7 +132,8 @@ void main() {
             float d_shape;
             if (calc_all_quadrants)
             {
-                d_shape = calc_distance_all_quadrants(vec_centered_pos, rect_size_half + stroke_width_half, radius);
+                // reuse the previously computed outer distance
+                d_shape = distance;
             }
             else
             {

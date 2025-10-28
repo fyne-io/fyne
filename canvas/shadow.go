@@ -12,7 +12,15 @@ import (
 type ShadowType int
 
 const (
+	// DropShadow represents a shadow effect that is rendered exclusively outside the boundaries of the object,
+	// following the object's shape and not appearing beneath its filled area.
+	//
+	// Since: 2.8
 	DropShadow ShadowType = iota
+	// BoxShadow represents a shadow effect that is rendered both behind and outside the object,
+	// appearing as a blurred rectangle that extends beneath the object's filled area as well as beyond its edges.
+	//
+	// Since: 2.8
 	BoxShadow
 )
 
