@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -83,12 +82,7 @@ func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
 	img := image.NewNRGBA(image.Rect(0, 0, imgW, imgH))
 	scanner := rasterx.NewScannerGV(config.Width, config.Height, img, img.Bounds())
 	raster := rasterx.NewDasher(width, height, scanner)
-
-	err := drawSVGSafely(d.icon, raster)
-	if err != nil {
-		err = fmt.Errorf("SVG render error: %w", err)
-		return nil, err
-	}
+	d.icon.Draw(raster, 1)
 	return img, nil
 }
 
@@ -315,16 +309,4 @@ func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
 	cBytes := []byte{byte(r), byte(g), byte(b)}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return hexStr, aStr
-}
-
-func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
-	var err error
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("crash when rendering svg")
-		}
-	}()
-	icon.Draw(raster, 1)
-
-	return err
 }
