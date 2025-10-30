@@ -782,9 +782,14 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
 			}
-		case fyne.KeyC, fyne.KeyInsert: // detect copy shortcut
+		case fyne.KeyC: // detect copy shortcut
 			shortcut = &fyne.ShortcutCopy{
 				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyInsert: // detect copy shortcut (alternative
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
 		case fyne.KeyX: // detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
@@ -797,13 +802,15 @@ func (w *window) triggersShortcut(localizedKeyName fyne.KeyName, key fyne.KeyNam
 
 	if modifier == fyne.KeyModifierShift {
 		switch keyName {
-		case fyne.KeyInsert: // detect paste shortcut
+		case fyne.KeyInsert: // detect paste shortcut (alternative)
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
-		case fyne.KeyDelete: // detect cut shortcut
+		case fyne.KeyDelete: // detect cut shortcut (alternative)
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: NewClipboard(),
+				Secondary: true,
 			}
 		}
 	}
