@@ -31,6 +31,9 @@ var (
 
 	//go:embed shaders/arc_es.frag
 	shaderArcesFrag []byte
+
+	//go:embed shaders/bezier_curve_es.frag
+	shaderBezierCurveesFrag []byte
 )
 
 func shaderSourceNamed(name string) ([]byte, []byte) {
@@ -47,6 +50,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleesVert, shaderPolygonesFrag
 	case "arc_es":
 		return shaderRectangleesVert, shaderArcesFrag
+	case "bezier_curve_es":
+		return shaderRectangleesVert, shaderBezierCurveesFrag
 	}
 	return nil, nil
 }
