@@ -69,7 +69,7 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size")
+	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 	p.lineProgram = ProgramState{
