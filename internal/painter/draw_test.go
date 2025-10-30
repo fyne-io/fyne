@@ -1,11 +1,13 @@
 package painter_test
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/painter"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPaint_GetCornerRadius(t *testing.T) {
@@ -117,4 +119,178 @@ func TestPaint_NormalizeArcAngles(t *testing.T) {
 			t.Errorf("NormalizeArcAngles(%v, %v) = (%v, %v), want (%v, %v)", c.start, c.end, gotStart, gotEnd, c.wantStart, c.wantEnd)
 		}
 	}
+}
+
+func TestShadow_ShadowPaddings_Empty(t *testing.T) {
+	b := canvas.Shadow{}
+	expected := [4]float32{0, 0, 0, 0}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetOnlyLeft(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 3,
+		ShadowOffset:   fyne.NewPos(5, 0),
+		ShadowType:     canvas.BoxShadow,
+	}
+	expected := [4]float32{8, 3, 0, 3}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetOnlyRight(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 2,
+		ShadowOffset:   fyne.NewPos(-6, 0),
+		ShadowType:     canvas.DropShadow,
+	}
+	expected := [4]float32{0, 2, 8, 2}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetOnlyTop(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 5,
+		ShadowOffset:   fyne.NewPos(0, -4),
+		ShadowType:     canvas.BoxShadow,
+	}
+	expected := [4]float32{5, 9, 5, 1}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetOnlyBottom(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 1,
+		ShadowOffset:   fyne.NewPos(0, 7),
+		ShadowType:     canvas.DropShadow,
+	}
+	expected := [4]float32{1, 0, 1, 8}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetLeftTop(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 4,
+		ShadowOffset:   fyne.NewPos(3, -2),
+		ShadowType:     canvas.DropShadow,
+	}
+	expected := [4]float32{7, 6, 1, 2}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetLeftBottom(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 2,
+		ShadowOffset:   fyne.NewPos(4, 5),
+		ShadowType:     canvas.BoxShadow,
+	}
+	expected := [4]float32{6, 0, 0, 7}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetRightTop(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 3,
+		ShadowOffset:   fyne.NewPos(-3, -2),
+	}
+	expected := [4]float32{0, 5, 6, 1}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetRightBottom(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 4,
+		ShadowOffset:   fyne.NewPos(2, 3),
+		ShadowType:     canvas.DropShadow,
+	}
+	expected := [4]float32{6, 1, 2, 7}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_OffsetRightBottom2(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 2,
+		ShadowOffset:   fyne.NewPos(-4, 5),
+		ShadowType:     canvas.DropShadow,
+	}
+	expected := [4]float32{0, 0, 6, 7}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_NoOffsetOnlySoftness(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 5,
+		ShadowOffset:   fyne.NewPos(0, 0),
+		ShadowType:     canvas.BoxShadow,
+	}
+	expected := [4]float32{5, 5, 5, 5}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
+}
+
+func TestShadow_ShadowPaddings_NoOffsetOnlySoftness2(t *testing.T) {
+	b := canvas.Shadow{
+		ShadowColor:    color.NRGBA{0, 0, 0, 128},
+		ShadowSoftness: 9,
+		ShadowOffset:   fyne.NewPos(0, 0),
+		ShadowType:     canvas.BoxShadow,
+	}
+	expected := [4]float32{9, 9, 9, 9}
+	pads := painter.GetShadowPaddings(b)
+	assert.Equal(t, expected[0], pads[0], "left")
+	assert.Equal(t, expected[1], pads[1], "top")
+	assert.Equal(t, expected[2], pads[2], "right")
+	assert.Equal(t, expected[3], pads[3], "bottom")
 }

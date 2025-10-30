@@ -95,6 +95,7 @@ func (p *painter) Init() {
 		p.getUniformLocations(
 			p.rectangleProgram,
 			"frame_size", "rect_coords", "stroke_width", "fill_color", "stroke_color",
+			"add_shadow", "shadow_softness", "shadow_offset", "shadow_color", "shadow_type",
 		)
 		p.enableAttribArrays(p.rectangleProgram, "vert", "normal")
 
@@ -109,6 +110,7 @@ func (p *painter) Init() {
 			"stroke_width_half", "rect_size_half",
 			"radius", "edge_softness",
 			"fill_color", "stroke_color",
+			"add_shadow", "shadow_softness", "shadow_offset", "shadow_color", "shadow_type",
 		)
 		p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
 

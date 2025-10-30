@@ -73,7 +73,7 @@ func TestInnerWindow_MinSize(t *testing.T) {
 func TestInnerWindow_SetContent(t *testing.T) {
 	w := NewInnerWindow("Title", widget.NewLabel("Content"))
 	r := cache.Renderer(w).(*innerWindowRenderer)
-	title := r.Objects()[4].(*fyne.Container)
+	title := r.Objects()[3].(*fyne.Container)
 	assert.Equal(t, "Content", title.Objects[0].(*widget.Label).Text)
 
 	w.SetContent(widget.NewLabel("Content2"))

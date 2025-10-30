@@ -4,18 +4,8 @@
 	</content>
 	<overlay>
 		<widget size="200x300" type="*widget.PopUp">
-			<widget pos="19,92" size="161x114" type="*widget.Shadow">
-				<radialGradient centerOffset="0.5,0.5" pos="-19,-14" size="24x24" startColor="shadow"/>
-				<linearGradient endColor="shadow" pos="4,-14" size="152x24"/>
-				<radialGradient centerOffset="-0.5,0.5" pos="156,-14" size="24x24" startColor="shadow"/>
-				<linearGradient angle="270" pos="156,9" size="24x104" startColor="shadow"/>
-				<radialGradient centerOffset="-0.5,-0.5" pos="156,114" size="24x24" startColor="shadow"/>
-				<linearGradient pos="4,114" size="152x24" startColor="shadow"/>
-				<radialGradient centerOffset="0.5,-0.5" pos="-19,114" size="24x24" startColor="shadow"/>
-				<linearGradient angle="270" endColor="shadow" pos="-19,9" size="24x104"/>
-			</widget>
 			<rectangle fillColor="shadow" size="200x300"/>
-			<rectangle fillColor="overlayBackground" pos="19,92" size="161x114"/>
+			<rectangle fillColor="overlayBackground" pos="19,92" shadowColor="shadow" shadowOffset="-9,4" shadowSoftness="6" size="161x114"/>
 			<container pos="23,96" size="153x106">
 				<spacer pos="59,-4" size="98x98"/>
 				<widget size="153x106" type="*dialog.themedBackground">
