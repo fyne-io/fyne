@@ -189,8 +189,7 @@ func walkObjectTree(
 			}
 		}
 	} else {
-		if slices.ContainsFunc(children, followChild) {
-		}
+		_ = slices.ContainsFunc(children, followChild)
 	}
 
 	if afterChildren != nil {

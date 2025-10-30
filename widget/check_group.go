@@ -144,11 +144,10 @@ func (r *CheckGroup) update() {
 	} else if len(r.items) > len(r.Options) {
 		r.items = r.items[:len(r.Options)]
 	}
-	for i, item := range r.items {
-		contains := slices.Contains(r.Selected, item.Text)
 
+	for i, item := range r.items {
 		item.Text = r.Options[i]
-		item.Checked = contains
+		item.Checked = slices.Contains(r.Selected, item.Text)
 		item.DisableableWidget.disabled = r.Disabled()
 		item.Refresh()
 	}
@@ -232,10 +231,10 @@ func (r *checkGroupRenderer) updateItems() {
 		r.items = r.items[:total]
 		r.SetObjects(r.Objects()[:total])
 	}
+
 	for i, item := range r.items {
-		contains := slices.Contains(r.checks.Selected, item.Text)
 		item.Text = r.checks.Options[i]
-		item.Checked = contains
+		item.Checked = slices.Contains(r.checks.Selected, item.Text)
 		item.disabled = r.checks.Disabled()
 		item.Refresh()
 	}

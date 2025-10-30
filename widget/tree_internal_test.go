@@ -961,13 +961,8 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 func addTreePath(data map[string][]string, path ...string) {
 	parent := ""
 	for _, p := range path {
-		children := data[parent]
-		add := true
-		if slices.Contains(children, p) {
-			add = false
-		}
-		if add {
-			data[parent] = append(children, p)
+		if !slices.Contains(data[parent], p) {
+			data[parent] = append(data[parent], p)
 		}
 		parent = p
 	}

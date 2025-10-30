@@ -790,7 +790,7 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 
 	if toDraw == onlyNewTreeNodesID {
 		for id, b := range r.branches {
-			if contains(r.visible, id) && !contains(r.wasVisible, id) {
+			if slices.Contains(r.visible, id) && !slices.Contains(r.wasVisible, id) {
 				b.Refresh()
 			}
 		}
@@ -1088,8 +1088,4 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		l.Refresh()
 	}
 	return l
-}
-
-func contains(slice []string, item string) bool {
-	return slices.Contains(slice, item)
 }
