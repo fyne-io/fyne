@@ -323,6 +323,43 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }
 
+func drawEllipse(c fyne.Canvas, ellipse *canvas.Ellipse, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	// when rotated, the ellipse needs more space
+	// add half the difference between width and height as padding
+	// with padding the final size is a square
+	width, height := ellipse.Size().Components()
+	rotPad := float32(math.Abs(float64(width)-float64(height)) / 2)
+	xPad, yPad := float32(0), float32(0)
+
+	if width > height {
+		yPad = rotPad
+	} else {
+		xPad = rotPad
+	}
+
+	pos = pos.AddXY(xPad, yPad)
+	pad := painter.VectorPad(ellipse) + rotPad
+
+	scaledWidth := scale.ToScreenCoordinate(c, ellipse.Size().Width+pad*2)
+	scaledHeight := scale.ToScreenCoordinate(c, ellipse.Size().Height+pad*2)
+	scaledX, scaledY := scale.ToScreenCoordinate(c, pos.X-pad), scale.ToScreenCoordinate(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawEllipse(ellipse, pad, func(in float32) float32 {
+		return float32(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
+}
+
 // applyRoundedCorners rounds the corners of the image in-place
 func applyRoundedCorners(img *image.NRGBA, w, h int, radius float32) {
 	rInt := int(math.Ceil(float64(radius)))

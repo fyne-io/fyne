@@ -245,6 +245,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeSpacer(o, attrs)
 	case *fynecanvas.Arc:
 		r.writeArc(o, attrs)
+	case *fynecanvas.Ellipse:
+		r.writeEllipse(o, attrs)
 	default:
 		panic(fmt.Sprint("please add support for", reflect.TypeOf(o)))
 	}
@@ -362,6 +364,14 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
 	r.writeTag("rectangle", true, attrs)
+}
+
+func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", e.FillColor)
+	r.setColorAttr(attrs, "strokeColor", e.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(e.StrokeWidth))
+	r.setFloatAttr(attrs, "angle", float64(e.Angle))
+	r.writeTag("ellipse", true, attrs)
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {
