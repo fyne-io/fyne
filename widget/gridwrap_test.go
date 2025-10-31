@@ -99,6 +99,44 @@ func TestGridWrap_ScrollTo(t *testing.T) {
 	assert.Equal(t, greatest, GridWrapItemID(999))
 }
 
+func TestGridWrap_ScrollToItem(t *testing.T) {
+	g := createGridWrap(1000)
+
+	// override update item to keep track of greatest item rendered
+	oldUpdateFunc := g.UpdateItem
+	var greatest GridWrapItemID = -1
+	g.UpdateItem = func(id GridWrapItemID, item fyne.CanvasObject) {
+		if id > greatest {
+			greatest = id
+		}
+		oldUpdateFunc(id, item)
+	}
+
+	g.ScrollToItem(650)
+	assert.GreaterOrEqual(t, greatest, 650)
+	assert.Equal(t, 650, g.currentHighlight)
+
+	g.ScrollToItem(800)
+	assert.GreaterOrEqual(t, greatest, 800)
+	assert.Equal(t, 800, g.currentHighlight)
+
+	g.ScrollToItem(999)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, g.currentHighlight)
+
+	g.ScrollToItem(1001)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, g.currentHighlight)
+
+	g.ScrollToItem(0)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, g.currentHighlight)
+
+	g.ScrollToItem(-1)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, g.currentHighlight)
+}
+
 func TestGridWrap_ScrollToOffset(t *testing.T) {
 	g := createGridWrap(10)
 	g.Resize(fyne.NewSize(10, 10))
