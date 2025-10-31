@@ -86,18 +86,19 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePos             fyne.Position
-	mouseDragged         fyne.Draggable
-	mouseDraggedObjStart fyne.Position
-	mouseDraggedOffset   fyne.Position
-	mouseDragPos         fyne.Position
-	mouseDragStarted     bool
-	mouseButton          desktop.MouseButton
-	mouseOver            desktop.Hoverable
-	mouseLastClick       fyne.CanvasObject
-	mousePressed         fyne.CanvasObject
-	mouseClickCount      int
-	mouseCancelFunc      context.CancelFunc
+	newMousePosX, newMousePosY float64
+	mousePos                   fyne.Position
+	mouseDragged               fyne.Draggable
+	mouseDraggedObjStart       fyne.Position
+	mouseDraggedOffset         fyne.Position
+	mouseDragPos               fyne.Position
+	mouseDragStarted           bool
+	mouseButton                desktop.MouseButton
+	mouseOver                  desktop.Hoverable
+	mouseLastClick             fyne.CanvasObject
+	mousePressed               fyne.CanvasObject
+	mouseClickCount            int
+	mouseCancelFunc            context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -337,7 +338,10 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
-	w.processResized(width, height)
+	if !w.fullScreen {
+		w.width = width
+		w.height = height
+	}
 }
 
 func (w *window) scaled(_ *glfw.Window, x float32, y float32) {
@@ -399,7 +403,8 @@ func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
-	w.processMouseMoved(xpos, ypos)
+	w.newMousePosX = xpos
+	w.newMousePosY = ypos
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
