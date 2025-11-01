@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"slices"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -622,7 +623,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	pad := th.Size(theme.SizeNamePadding)
 	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
-	width := fyne.Max(size.Width, viewport.Width)
+	width := max(size.Width, viewport.Width)
 	separatorCount := 0
 	separatorThickness := th.Size(theme.SizeNameSeparatorThickness)
 	separatorSize := fyne.NewSize(width, separatorThickness)
@@ -762,7 +763,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 			m = r.treeContent.tree.branchMinSize
 		}
 		m.Width += float32(depth) * (iconSize + pad)
-		min.Width = fyne.Max(min.Width, m.Width)
+		min.Width = max(min.Width, m.Width)
 		min.Height += m.Height
 	})
 	return min
@@ -789,7 +790,7 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 
 	if toDraw == onlyNewTreeNodesID {
 		for id, b := range r.branches {
-			if contains(r.visible, id) && !contains(r.wasVisible, id) {
+			if slices.Contains(r.visible, id) && !slices.Contains(r.wasVisible, id) {
 				b.Refresh()
 			}
 		}
@@ -959,7 +960,7 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 
 	min.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
-	min.Height = fyne.Max(min.Height, iconSize)
+	min.Height = max(min.Height, iconSize)
 	return min
 }
 
@@ -1087,13 +1088,4 @@ func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 		l.Refresh()
 	}
 	return l
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }

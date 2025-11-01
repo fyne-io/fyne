@@ -735,7 +735,7 @@ func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Po
 			}
 		case DataIntHex:
 			nattr.TypedValue.Type = t
-			for _, x := range strings.Split(attr.Value, "|") {
+			for x := range strings.SplitSeq(attr.Value, "|") {
 				for _, val := range nt.values {
 					if val.name == 0x01000000 {
 						continue

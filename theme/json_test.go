@@ -151,8 +151,8 @@ func BenchmarkJsonTheme_Color(b *testing.B) {
 
 	assert.NoError(b, err)
 	var localResult color.Color
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		localResult = th.Color("primary", theme.VariantDark)
 	}
 	result = localResult

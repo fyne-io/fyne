@@ -39,7 +39,7 @@ func createBeforeShowHook(d *dialog, message string) func() {
 	return func() {
 		if d.desiredSize.IsZero() {
 			maxWinWitth := d.parent.Canvas().Size().Width * maxTextDialogWinPcntWidth
-			w := fyne.Min(fyne.Min(noWrapWidth, maxTextDialogAbsoluteWidth), maxWinWitth)
+			w := min(min(noWrapWidth, maxTextDialogAbsoluteWidth), maxWinWitth)
 			d.desiredSize = fyne.NewSize(w, d.MinSize().Height)
 		}
 	}

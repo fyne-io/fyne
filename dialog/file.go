@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"sort"
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -455,14 +455,11 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 	if parent != nil {
 		toSort = icons[1:]
 	}
-	sort.Slice(toSort, func(i, j int) bool {
-		if parent != nil { // avoiding the parent in [0]
-			i++
-			j++
-		}
 
-		return strings.ToLower(icons[i].Name()) < strings.ToLower(icons[j].Name())
+	slices.SortFunc(toSort, func(a, b fyne.URI) int {
+		return strings.Compare(strings.ToLower(a.Name()), strings.ToLower(b.Name()))
 	})
+
 	f.data = icons
 
 	f.files.Refresh()
@@ -513,11 +510,7 @@ func (f *fileDialog) setLocation(dir fyne.URI) error {
 		)
 	}
 
-	// Use slices.Reverse with Go 1.21:
-	objects := f.breadcrumb.Objects
-	for i, j := 0, len(objects)-1; i < j; i, j = i+1, j-1 {
-		objects[i], objects[j] = objects[j], objects[i]
-	}
+	slices.Reverse(f.breadcrumb.Objects)
 
 	f.breadcrumbScroll.Refresh()
 	f.breadcrumbScroll.Offset.X = f.breadcrumbScroll.Content.Size().Width - f.breadcrumbScroll.Size().Width

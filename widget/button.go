@@ -283,7 +283,7 @@ func (r *buttonRenderer) MinSize() (size fyne.Size) {
 		}
 		size.Width += iconSize.Width
 	}
-	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
+	size.Height = max(labelSize.Height, iconSize.Height)
 	size = size.Add(r.padding(th))
 	return size
 }

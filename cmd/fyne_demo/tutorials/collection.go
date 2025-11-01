@@ -147,7 +147,7 @@ func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 
 	childlen := 10000
 	z := make([]string, childlen)
-	for i := 0; i < childlen; i++ {
+	for i := range childlen {
 		z[i] = strconv.Itoa(i)
 	}
 	data["Z"] = z

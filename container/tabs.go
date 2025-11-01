@@ -417,9 +417,9 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 	switch t.tabLocation() {
 	case TabLocationLeading, TabLocationTrailing:
 		return fyne.NewSize(barMin.Width+contentMin.Width+pad,
-			fyne.Max(contentMin.Height, accessoryMin.Height+buttonPad+tabsMin.Height))
+			max(contentMin.Height, accessoryMin.Height+buttonPad+tabsMin.Height))
 	default:
-		return fyne.NewSize(fyne.Max(contentMin.Width, accessoryMin.Width+buttonPad+tabsMin.Width),
+		return fyne.NewSize(max(contentMin.Width, accessoryMin.Width+buttonPad+tabsMin.Width),
 			barMin.Height+contentMin.Height+pad)
 	}
 }
@@ -644,7 +644,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	iconSize := r.iconSize()
 	padding := th.Size(theme.SizeNamePadding)
 	if r.button.iconPosition == buttonIconTop {
-		contentWidth = fyne.Max(textSize.Width, iconSize)
+		contentWidth = max(textSize.Width, iconSize)
 		if r.icon.Visible() {
 			contentHeight += iconSize
 		}
@@ -655,7 +655,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 			contentHeight += textSize.Height
 		}
 	} else {
-		contentHeight = fyne.Max(textSize.Height, iconSize)
+		contentHeight = max(textSize.Height, iconSize)
 		if r.icon.Visible() {
 			contentWidth += iconSize
 		}
@@ -669,7 +669,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	if r.button.onClosed != nil {
 		inlineIconSize := th.Size(theme.SizeNameInlineIcon)
 		contentWidth += inlineIconSize + padding
-		contentHeight = fyne.Max(contentHeight, inlineIconSize)
+		contentHeight = max(contentHeight, inlineIconSize)
 	}
 	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
 }

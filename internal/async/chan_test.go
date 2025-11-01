@@ -54,10 +54,10 @@ func TestUnboundedChann(t *testing.T) {
 			t.Run("order", func(t *testing.T) {
 				// Ensure that the unbounded channel processes everything FIFO.
 				c := async.NewUnboundedChan[any]()
-				for i := 0; i < 1<<11; i++ {
+				for i := range 1 << 11 {
 					c.In() <- i
 				}
-				for i := 0; i < 1<<11; i++ {
+				for i := range 1 << 11 {
 					if val := <-c.Out(); val != i {
 						t.Fatalf("unbounded channel passes messages in a non-FIFO order, got %v want %v", val, i)
 					}
@@ -71,7 +71,7 @@ func TestUnboundedChann(t *testing.T) {
 				n := 0
 				done := make(chan struct{})
 				ch := async.NewUnboundedChan[any]()
-				for i := 0; i < N; i++ {
+				for range N {
 					ch.In() <- true
 				}
 				go func() {
@@ -130,11 +130,11 @@ func TestUnboundedChann(t *testing.T) {
 			t.Run("order", func(t *testing.T) {
 				// Ensure that the unbounded channel processes everything FIFO.
 				c := async.NewUnboundedStructChan()
-				for i := 0; i < 1<<11; i++ {
+				for range 1 << 11 {
 					c.In() <- struct{}{}
 				}
 				n := 0
-				for i := 0; i < 1<<11; i++ {
+				for range 1 << 11 {
 					if _, ok := <-c.Out(); ok {
 						n++
 					}
@@ -151,7 +151,7 @@ func TestUnboundedChann(t *testing.T) {
 				n := 0
 				done := make(chan struct{})
 				ch := async.NewUnboundedStructChan()
-				for i := 0; i < N; i++ {
+				for range N {
 					ch.In() <- struct{}{}
 				}
 				go func() {
@@ -178,18 +178,16 @@ func BenchmarkUnboundedChann(b *testing.B) {
 	b.Run("any", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
 			c := async.NewUnboundedChan[any]()
-			b.ResetTimer()
 			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				c.In() <- struct{}{}
 				<-c.Out()
 			}
 		})
 		b.Run("async", func(b *testing.B) {
 			c := async.NewUnboundedChan[any]()
-			b.ResetTimer()
 			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				go func() { c.In() <- struct{}{} }()
 				<-c.Out()
 			}
@@ -198,18 +196,16 @@ func BenchmarkUnboundedChann(b *testing.B) {
 	b.Run("struct{}", func(b *testing.B) {
 		b.Run("sync", func(b *testing.B) {
 			c := async.NewUnboundedStructChan()
-			b.ResetTimer()
 			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				c.In() <- struct{}{}
 				<-c.Out()
 			}
 		})
 		b.Run("async", func(b *testing.B) {
 			c := async.NewUnboundedStructChan()
-			b.ResetTimer()
 			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				go func() { c.In() <- struct{}{} }()
 				<-c.Out()
 			}

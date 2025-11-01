@@ -301,7 +301,7 @@ Moreover, we've got a list:
 - baz
 `
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		NewRichTextFromMarkdown(md)
 	}
 }

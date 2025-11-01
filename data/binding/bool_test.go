@@ -45,7 +45,7 @@ func TestAnd(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < 32; i++ {
+	for i := range 32 {
 		for idx := range bb {
 			setAtOffset(idx, i)
 		}
@@ -86,7 +86,7 @@ func TestOr(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < 32; i++ {
+	for i := range 32 {
 		for idx := range bb {
 			setAtOffset(idx, i)
 		}

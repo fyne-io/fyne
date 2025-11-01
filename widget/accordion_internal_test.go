@@ -3,7 +3,6 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -158,7 +157,7 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			min := ar.MinSize()
 			aih := ar.headers[0].MinSize()
 			aid := ai.Detail.MinSize()
-			assert.Equal(t, fyne.Max(aih.Width, aid.Width), min.Width)
+			assert.Equal(t, max(aih.Width, aid.Width), min.Width)
 			assert.Equal(t, aih.Height+aid.Height+theme.Padding(), min.Height)
 		})
 		t.Run("Closed", func(t *testing.T) {
@@ -190,9 +189,9 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aih1 := ar.headers[1].MinSize()
 			aih2 := ar.headers[2].MinSize()
 			aid0 := ai0.Detail.MinSize()
-			width := fyne.Max(aih0.Width, aid0.Width)
-			width = fyne.Max(width, aih1.Width)
-			width = fyne.Max(width, aih2.Width)
+			width := max(aih0.Width, aid0.Width)
+			width = max(width, aih1.Width)
+			width = max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
 			height += aid0.Height + theme.Padding()
@@ -217,9 +216,9 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aid0 := ai0.Detail.MinSize()
 			aid1 := ai1.Detail.MinSize()
 			aid2 := ai2.Detail.MinSize()
-			width := fyne.Max(aih0.Width, aid0.Width)
-			width = fyne.Max(width, fyne.Max(aih1.Width, aid1.Width))
-			width = fyne.Max(width, fyne.Max(aih2.Width, aid2.Width))
+			width := max(aih0.Width, aid0.Width)
+			width = max(width, max(aih1.Width, aid1.Width))
+			width = max(width, max(aih2.Width, aid2.Width))
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
 			height += aid0.Height + theme.Padding()
@@ -249,9 +248,9 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aih2 := ar.headers[2].MinSize()
 			aid0 := ai0.Detail.MinSize()
 			aid1 := ai1.Detail.MinSize()
-			width := fyne.Max(aih0.Width, aid0.Width)
-			width = fyne.Max(width, fyne.Max(aih1.Width, aid1.Width))
-			width = fyne.Max(width, aih2.Width)
+			width := max(aih0.Width, aid0.Width)
+			width = max(width, max(aih1.Width, aid1.Width))
+			width = max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height
 			height += aid0.Height + theme.Padding()
@@ -274,8 +273,8 @@ func TestAccordionRenderer_MinSize(t *testing.T) {
 			aih1 := ar.headers[1].MinSize()
 			aih2 := ar.headers[2].MinSize()
 			width := aih0.Width
-			width = fyne.Max(width, aih1.Width)
-			width = fyne.Max(width, aih2.Width)
+			width = max(width, aih1.Width)
+			width = max(width, aih2.Width)
 			assert.Equal(t, width, min.Width)
 			height := aih0.Height + theme.Padding()
 			height += aih1.Height + theme.Padding()

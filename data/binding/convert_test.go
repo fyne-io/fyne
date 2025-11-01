@@ -9,7 +9,7 @@ import (
 )
 
 func BenchmarkBoolToString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		bo := NewBool()
 		s := BoolToString(bo)
 		s.Get()
@@ -26,7 +26,7 @@ func BenchmarkBoolToString(b *testing.B) {
 }
 
 func BenchmarkFloatToString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		f := NewFloat()
 		s := FloatToString(f)
 		s.Get()
@@ -43,7 +43,7 @@ func BenchmarkFloatToString(b *testing.B) {
 }
 
 func BenchmarkIntToString(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		i := NewInt()
 		s := IntToString(i)
 		s.Get()
@@ -60,7 +60,7 @@ func BenchmarkIntToString(b *testing.B) {
 }
 
 func BenchmarkStringToBool(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		s := NewString()
 		b := StringToBool(s)
 		b.Get()
@@ -77,7 +77,7 @@ func BenchmarkStringToBool(b *testing.B) {
 }
 
 func BenchmarkStringToFloat(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		s := NewString()
 		f := StringToFloat(s)
 		f.Get()
@@ -94,7 +94,7 @@ func BenchmarkStringToFloat(b *testing.B) {
 }
 
 func BenchmarkStringToInt(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		s := NewString()
 		i := StringToInt(s)
 		i.Get()

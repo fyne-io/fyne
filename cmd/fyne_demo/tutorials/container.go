@@ -62,10 +62,9 @@ func makeBoxLayout(_ fyne.Window) fyne.CanvasObject {
 
 func makeButtonList(count int) []fyne.CanvasObject {
 	var items []fyne.CanvasObject
-	for i := 1; i <= count; i++ {
-		index := i // capture
-		items = append(items, widget.NewButton("Button "+strconv.Itoa(index), func() {
-			fmt.Println("Tapped", index)
+	for i := range count {
+		items = append(items, widget.NewButton("Button "+strconv.Itoa(i), func() {
+			fmt.Println("Tapped", i)
 		}))
 	}
 

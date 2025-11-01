@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -111,25 +112,17 @@ func (r *CheckGroup) itemTapped(item *Check) {
 		return
 	}
 
-	contains := false
-	for i, s := range r.Selected {
-		if s == item.Text {
-			contains = true
-			if len(r.Selected) <= 1 {
-				if r.Required {
-					item.SetChecked(true)
-					return
-				}
-				r.Selected = nil
-			} else {
-				r.Selected = append(r.Selected[:i], r.Selected[i+1:]...)
-			}
-			break
-		}
-	}
-
-	if !contains {
+	index := slices.Index(r.Selected, item.Text)
+	if index == -1 {
 		r.Selected = append(r.Selected, item.Text)
+	} else if len(r.Selected) <= 1 {
+		if r.Required {
+			item.SetChecked(true)
+			return
+		}
+		r.Selected = nil
+	} else {
+		r.Selected = append(r.Selected[:index], r.Selected[index+1:]...)
 	}
 
 	if r.OnChanged != nil {
@@ -151,17 +144,10 @@ func (r *CheckGroup) update() {
 	} else if len(r.items) > len(r.Options) {
 		r.items = r.items[:len(r.Options)]
 	}
-	for i, item := range r.items {
-		contains := false
-		for _, s := range r.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
 
+	for i, item := range r.items {
 		item.Text = r.Options[i]
-		item.Checked = contains
+		item.Checked = slices.Contains(r.Selected, item.Text)
 		item.DisableableWidget.disabled = r.Disabled()
 		item.Refresh()
 	}
@@ -211,8 +197,8 @@ func (r *checkGroupRenderer) MinSize() fyne.Size {
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 
-		width = fyne.Max(width, itemMin.Width)
-		height = fyne.Max(height, itemMin.Height)
+		width = max(width, itemMin.Width)
+		height = max(height, itemMin.Height)
 	}
 
 	if r.checks.Horizontal {
@@ -245,16 +231,10 @@ func (r *checkGroupRenderer) updateItems() {
 		r.items = r.items[:total]
 		r.SetObjects(r.Objects()[:total])
 	}
+
 	for i, item := range r.items {
-		contains := false
-		for _, s := range r.checks.Selected {
-			if s == item.Text {
-				contains = true
-				break
-			}
-		}
 		item.Text = r.checks.Options[i]
-		item.Checked = contains
+		item.Checked = slices.Contains(r.checks.Selected, item.Text)
 		item.disabled = r.checks.Disabled()
 		item.Refresh()
 	}

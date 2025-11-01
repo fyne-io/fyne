@@ -43,8 +43,8 @@ func newColorWheel(onChange func(int, int, int, int)) *colorWheel {
 			rect := image.Rect(0, 0, w, h)
 			a.cache = image.NewRGBA(rect)
 		}
-		for x := 0; x < w; x++ {
-			for y := 0; y < h; y++ {
+		for x := range w {
+			for y := range h {
 				if c := a.colorAt(x, y, w, h); c != nil {
 					a.cache.Set(x, y, c)
 				}
