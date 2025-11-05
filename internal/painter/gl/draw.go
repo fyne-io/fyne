@@ -21,13 +21,6 @@ func (p *painter) createBuffer(size int) Buffer {
 	return vbo
 }
 
-func (p *painter) updateBuffer(vbo Buffer, points []float32) {
-	p.ctx.BindBuffer(arrayBuffer, vbo)
-	p.logError()
-	p.ctx.BufferSubData(arrayBuffer, points)
-	p.logError()
-}
-
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
