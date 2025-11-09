@@ -259,27 +259,36 @@ func (f *Form) checkValidation(err error) {
 }
 
 func (f *Form) ensureRenderItems() {
-	done := len(f.itemGrid.Objects) / 2
-	if done >= len(f.Items) {
-		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
-		return
+	// Calculate the required capacity based on the number of items in the form
+	requiredCapacity := len(f.Items) * 2
+
+	// Pre-allocate capacity if necessary
+	if cap(f.itemGrid.Objects) < requiredCapacity {
+		newObjects := make([]fyne.CanvasObject, len(f.itemGrid.Objects), requiredCapacity)
+		copy(newObjects, f.itemGrid.Objects)
+		f.itemGrid.Objects = newObjects
 	}
 
-	adding := len(f.Items) - done
-	objects := make([]fyne.CanvasObject, adding*2)
-	off := 0
+	// Adjust the length to match the number of items (each with label and widget)
+	f.itemGrid.Objects = f.itemGrid.Objects[:requiredCapacity]
+
 	for i, item := range f.Items {
-		if i < done {
-			continue
+		labelIndex := i * 2
+		widgetIndex := labelIndex + 1
+
+		// Update or create label for the item
+		if labelIndex < len(f.itemGrid.Objects) && f.itemGrid.Objects[labelIndex] != nil {
+			f.itemGrid.Objects[labelIndex] = f.createLabel(item.Text)
+		} else {
+			f.itemGrid.Objects[labelIndex] = f.createLabel(item.Text)
 		}
 
-		objects[off] = f.createLabel(item.Text)
-		off++
 		f.setUpValidation(item.Widget, i)
-		objects[off] = f.createInput(item)
-		off++
+		f.itemGrid.Objects[widgetIndex] = f.createInput(item)
 	}
-	f.itemGrid.Objects = append(f.itemGrid.Objects, objects...)
+
+	// Refresh the grid to apply changes
+	f.itemGrid.Refresh()
 }
 
 func (f *Form) isVertical() bool {
