@@ -266,30 +266,30 @@ func TestGridWrap_TypedKey(t *testing.T) {
 	canvas := window.Canvas().(test.WindowlessCanvas)
 	canvas.FocusNext()
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
-	assert.Equal(t, 3, gridWrap.currentHighlight)
+	assert.Equal(t, 3, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
-	assert.Equal(t, 0, gridWrap.currentHighlight)
+	assert.Equal(t, 0, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
-	assert.Equal(t, 0, gridWrap.currentHighlight)
+	assert.Equal(t, 0, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, 1, gridWrap.currentHighlight)
+	assert.Equal(t, 1, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, 2, gridWrap.currentHighlight)
+	assert.Equal(t, 2, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, 3, gridWrap.currentHighlight)
+	assert.Equal(t, 3, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
-	assert.Equal(t, 2, gridWrap.currentHighlight)
+	assert.Equal(t, 2, gridWrap.currentFocus)
 
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, []int{2}, gridWrap.selected)
 
-	gridWrap.currentHighlight = 20
+	gridWrap.currentFocus = 20
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-	assert.Equal(t, 20, gridWrap.currentHighlight)
+	assert.Equal(t, 20, gridWrap.currentFocus)
 }
