@@ -445,6 +445,35 @@ func (t *Table) UnselectAll() {
 	}
 }
 
+// Highlight scrolls to the item represented by id and highlights it
+//
+// Since: 2.8
+func (t *Table) Highlight(id TableCellID) {
+	if t.Length == nil {
+		return
+	}
+
+	if t.content == nil {
+		return
+	}
+
+	rows, cols := t.Length()
+	if id.Row >= rows {
+		id.Row = rows - 1
+	}
+
+	if id.Col >= cols {
+		id.Col = cols - 1
+	}
+
+	t.ScrollTo(id)
+	t.currentHighlight = id
+	if t.OnHighlighted != nil {
+		t.OnHighlighted(id)
+	}
+	t.Refresh()
+}
+
 // ScrollTo will scroll to the given cell without changing the selection.
 // Attempting to scroll beyond the limits of the table will scroll to
 // the edge of the table instead.
