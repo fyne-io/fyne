@@ -244,6 +244,44 @@ func TestGridWrap_RefreshItem(t *testing.T) {
 	assert.Equal(t, "Replace", children[2].(*gridWrapItem).child.(*Label).Text)
 }
 
+func TestGridWrap_Highlight(t *testing.T) {
+	g := createGridWrap(1000)
+
+	// override update item to keep track of greatest item rendered
+	oldUpdateFunc := g.UpdateItem
+	var greatest GridWrapItemID = -1
+	g.UpdateItem = func(id GridWrapItemID, item fyne.CanvasObject) {
+		if id > greatest {
+			greatest = id
+		}
+		oldUpdateFunc(id, item)
+	}
+
+	g.Highlight(650)
+	assert.GreaterOrEqual(t, greatest, 650)
+	assert.Equal(t, 650, g.currentHighlight)
+
+	g.Highlight(800)
+	assert.GreaterOrEqual(t, greatest, 800)
+	assert.Equal(t, 800, g.currentHighlight)
+
+	g.Highlight(999)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, g.currentHighlight)
+
+	g.Highlight(1001)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, g.currentHighlight)
+
+	g.Highlight(0)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, g.currentHighlight)
+
+	g.Highlight(-1)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, g.currentHighlight)
+}
+
 func TestGridWrap_Selection(t *testing.T) {
 	g := createGridWrap(10)
 	assert.Empty(t, g.selected)
