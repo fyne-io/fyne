@@ -51,8 +51,8 @@ func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScal
 	}
 
 	bounds := pixels.Bounds()
-	pixW := int(fyne.Min(float32(scaledW), float32(bounds.Dx()))) // don't push more pixels than we have to
-	pixH := int(fyne.Min(float32(scaledH), float32(bounds.Dy()))) // the GL calls will scale this up on GPU.
+	pixW := int(min(float32(scaledW), float32(bounds.Dx()))) // don't push more pixels than we have to
+	pixH := int(min(float32(scaledH), float32(bounds.Dy()))) // the GL calls will scale this up on GPU.
 	scaledBounds := image.Rect(0, 0, pixW, pixH)
 	tex := image.NewNRGBA(scaledBounds)
 	switch scale {

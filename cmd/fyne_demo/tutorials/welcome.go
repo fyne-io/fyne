@@ -133,7 +133,7 @@ func formatAuthors(lines string) string {
 	markdown := &strings.Builder{}
 	markdown.WriteString("### Authors\n\n")
 
-	for _, line := range strings.Split(lines, "\n") {
+	for line := range strings.SplitSeq(lines, "\n") {
 		if len(line) == 0 {
 			continue
 		}

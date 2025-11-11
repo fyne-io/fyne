@@ -116,8 +116,8 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 				pix.img = dst
 			}
 
-			for y := 0; y < h; y++ {
-				for x := 0; x < w; x++ {
+			for y := range h {
+				for x := range w {
 					pix.img.Set(x, y, pixelColor(x, y, w, h))
 				}
 			}

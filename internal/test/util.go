@@ -40,9 +40,9 @@ func NewCheckedImage(w, h, hTiles, vTiles int) image.Image {
 	colors := []color.Color{color.White, color.Black}
 	tileWidth := float64(w) / float64(hTiles)
 	tileHeight := float64(h) / float64(vTiles)
-	for y := 0; y < h; y++ {
+	for y := range h {
 		yTile := int(math.Floor(float64(y) / tileHeight))
-		for x := 0; x < w; x++ {
+		for x := range w {
 			xTile := int(math.Floor(float64(x) / tileWidth))
 			img.Set(x, y, colors[(xTile+yTile)%2])
 		}

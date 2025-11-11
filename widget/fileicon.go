@@ -149,7 +149,7 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
-	isize := fyne.Min(size.Width, size.Height)
+	isize := min(size.Width, size.Height)
 
 	xoff := float32(0)
 	yoff := (size.Height - isize) / 2

@@ -89,7 +89,7 @@ func TestCheckStateIsCorrectAfterMultipleUpdates(t *testing.T) {
 	})
 
 	expectedCheckedState := false
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		check.SetChecked(expectedCheckedState)
 		assert.Equal(t, expectedCheckedState, checkedStateFromCallback)
 

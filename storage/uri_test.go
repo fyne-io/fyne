@@ -43,58 +43,46 @@ func TestURIEqual(t *testing.T) {
 	assert.True(t, storage.EqualURI(otherURI, storage.NewFileURI("/other")))
 }
 
-var equalSink bool
-
 func BenchmarkEqualURI(b *testing.B) {
 	first := storage.NewFileURI("/first")
 	b.Run("same path and same object", func(b *testing.B) {
 		b.ReportAllocs()
 
-		equal := false
-		for i := 0; i < b.N; i++ {
-			equal = storage.EqualURI(first, first)
+		for b.Loop() {
+			storage.EqualURI(first, first)
 		}
-		equalSink = equal
 	})
 	first2 := storage.NewFileURI("/first")
 	b.Run("same path but different object", func(b *testing.B) {
 		b.ReportAllocs()
 
-		equal := false
-		for i := 0; i < b.N; i++ {
-			equal = storage.EqualURI(first, first2)
+		for b.Loop() {
+			storage.EqualURI(first, first2)
 		}
-		equalSink = equal
 	})
 	second := storage.NewFileURI("/second")
 	b.Run("different path and different object", func(b *testing.B) {
 		b.ReportAllocs()
 
-		equal := false
-		for i := 0; i < b.N; i++ {
-			equal = storage.EqualURI(first, second)
+		for b.Loop() {
+			storage.EqualURI(first, second)
 		}
-		equalSink = equal
 	})
 
 	otherFirst := &otherURI{path: "/first"}
 	b.Run("custom uri types but same object", func(b *testing.B) {
 		b.ReportAllocs()
 
-		equal := false
-		for i := 0; i < b.N; i++ {
-			equal = storage.EqualURI(otherFirst, otherFirst)
+		for b.Loop() {
+			storage.EqualURI(otherFirst, otherFirst)
 		}
-		equalSink = equal
 	})
 	b.Run("different uri types", func(b *testing.B) {
 		b.ReportAllocs()
 
-		equal := false
-		for i := 0; i < b.N; i++ {
-			equal = storage.EqualURI(first, otherFirst)
+		for b.Loop() {
+			storage.EqualURI(first, otherFirst)
 		}
-		equalSink = equal
 	})
 }
 

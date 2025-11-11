@@ -10,8 +10,8 @@ func BenchmarkRunOnMain(b *testing.B) {
 	f := func() {}
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		runOnMain(f)
 	}
 }
@@ -24,8 +24,8 @@ func BenchmarkRunOnDraw(b *testing.B) {
 	w.create()
 
 	b.ReportAllocs()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		w.RunWithContext(f)
 	}
 }

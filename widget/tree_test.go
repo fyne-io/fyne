@@ -24,11 +24,11 @@ var treeData = map[string][]string{
 
 func TestNewTreeWithData(t *testing.T) {
 	data := binding.NewStringTree()
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		data.Append("", fmt.Sprintf("%d", i), fmt.Sprintf("Test Item %d", i))
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		data.Append("1", fmt.Sprintf("%d", 1000+i), fmt.Sprintf("Child Item %d", i))
 	}
 

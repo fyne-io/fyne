@@ -137,8 +137,8 @@ func (s Size) Max(v Vector2) Size {
 func (s Size) Min(v Vector2) Size {
 	x, y := v.Components()
 
-	minW := Min(s.Width, x)
-	minH := Min(s.Height, y)
+	minW := min(s.Width, x)
+	minH := min(s.Height, y)
 
 	return NewSize(minW, minH)
 }

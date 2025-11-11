@@ -13,19 +13,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var globalProgressRenderer fyne.WidgetRenderer
-
 func BenchmarkProgressbarCreateRenderer(b *testing.B) {
-	var renderer fyne.WidgetRenderer
 	widget := &widget.ProgressBar{}
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
-		renderer = widget.CreateRenderer()
+	for b.Loop() {
+		widget.CreateRenderer()
 	}
-
-	// Avoid having the value optimized out by the compiler.
-	globalProgressRenderer = renderer
 }
 
 func BenchmarkProgressBarLayout(b *testing.B) {
@@ -34,7 +28,7 @@ func BenchmarkProgressBarLayout(b *testing.B) {
 	bar := &widget.ProgressBar{}
 	renderer := bar.CreateRenderer()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		renderer.Layout(fyne.NewSize(100, 100))
 	}
 }
