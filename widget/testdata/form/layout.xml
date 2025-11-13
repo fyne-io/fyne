@@ -19,6 +19,8 @@
 								</widget>
 							</widget>
 						</widget>
+						<container size="0x0">
+						</container>
 					</widget>
 					<container pos="0,39" size="51x35">
 						<text alignment="trailing" bold pos="8,8" size="35x19">test2</text>
@@ -36,6 +38,8 @@
 								</widget>
 							</widget>
 						</widget>
+						<container size="0x0">
+						</container>
 					</widget>
 				</container>
 				<container pos="0,78" size="187x36">
