@@ -418,7 +418,6 @@ func TestTable_Highlight(t *testing.T) {
 
 	table.Highlight(TableCellID{Row: 10, Col: 3})
 	assert.Equal(t, TableCellID{Row: 10, Col: 3}, table.currentHighlight)
-
 }
 
 func TestTable_ScrollTo(t *testing.T) {
