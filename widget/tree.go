@@ -231,7 +231,41 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 	t.Refresh()
 }
 
-// Resize sets a new size for a widget.
+// Opens the branches leading to a node
+//
+// Since: 2.8
+func (t *Tree) openBranches(uid TreeNodeID) {
+	found, parents := t.findPath(t.Root, uid)
+	if !found {
+		return
+	}
+
+	if len(parents) == 0 {
+		return
+	}
+
+	t.ensureOpenMap()
+	var opened []TreeNodeID
+	for _, parent := range parents {
+		if parent == t.Root {
+			continue
+		}
+		if !t.IsBranchOpen(parent) {
+			t.open[parent] = true
+			opened = append(opened, parent)
+		}
+	}
+
+	if len(opened) > 0 {
+		if f := t.OnBranchOpened; f != nil {
+			for i := len(opened) - 1; i >= 0; i-- {
+				f(opened[i])
+			}
+		}
+		t.Refresh()
+	}
+}
+
 func (t *Tree) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return
@@ -263,37 +297,7 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		return
 	}
 
-	parentMap := make(map[TreeNodeID]TreeNodeID)
-	found := false
-	t.walk(t.Root, "", 0, true, func(id, parent TreeNodeID, branch bool, depth int) {
-		parentMap[id] = parent
-		if id == uid {
-			found = true
-		}
-	})
-
-	if !found {
-		return
-	}
-
-	t.ensureOpenMap()
-	var opened []TreeNodeID
-	for currentID := parentMap[uid]; currentID != ""; currentID = parentMap[currentID] {
-		if t.IsBranch(currentID) && !t.IsBranchOpen(currentID) {
-			t.open[currentID] = true
-			opened = append(opened, currentID)
-		}
-	}
-
-	if f := t.OnBranchOpened; f != nil {
-		for _, b := range opened {
-			f(b)
-		}
-	}
-
-	if len(opened) > 0 {
-		t.Refresh()
-	}
+	t.openBranches(uid)
 
 	y, size, ok := t.offsetAndSize(uid)
 	if !ok {
@@ -470,6 +474,30 @@ func (t *Tree) UnselectAll() {
 			f(uid)
 		}
 	}
+}
+
+// finPath finds the path to a target node
+//
+// Since: 2.8
+func (t *Tree) findPath(current, target TreeNodeID) (bool, []TreeNodeID) {
+	if current == target {
+		return true, nil
+	}
+
+	if !t.IsBranch(current) {
+		return false, nil
+	}
+
+	if childUIDs := t.ChildUIDs; childUIDs != nil {
+		for _, child := range childUIDs(current) {
+			found, path := t.findPath(child, target)
+			if found {
+				return true, append(path, current)
+			}
+		}
+	}
+
+	return false, nil
 }
 
 func (t *Tree) ensureOpenMap() {
