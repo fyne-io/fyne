@@ -42,8 +42,16 @@ type InnerWindow struct {
 	// Since: 2.6
 	Alignment widget.ButtonAlign
 
-	title     string
-	content   *fyne.Container
+	// Title returns the string that is currently shown in the top of the window border.
+	//
+	// Since: 2.8
+	Title string
+
+	// Content returns the current `CanvasObject` that makes the content of this inner window.
+	//
+	// Since: 2.8
+	Content *fyne.Container
+
 	maximized bool
 }
 
@@ -52,7 +60,7 @@ type InnerWindow struct {
 //
 // Since: 2.5
 func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
-	w := &InnerWindow{title: title, content: NewPadded(content)}
+	w := &InnerWindow{Title: title, Content: NewPadded(content)}
 	w.ExtendBaseWidget(w)
 	return w
 }
@@ -103,7 +111,7 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	if w.Icon == nil {
 		borderIcon.Hide()
 	}
-	title := newDraggableLabel(w.title, w)
+	title := newDraggableLabel(w.Title, w)
 	title.Truncation = fyne.TextTruncateEllipsis
 
 	height := w.Theme().Size(theme.SizeNameWindowTitleBarHeight)
@@ -119,10 +127,10 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},
 		buttons, borderIcon, barMid)
 
-	if w.content == nil {
-		w.content = NewPadded(canvas.NewRectangle(color.Transparent))
+	if w.Content == nil {
+		w.Content = NewPadded(canvas.NewRectangle(color.Transparent))
 	}
-	objects := []fyne.CanvasObject{bg, contentBG, bar, w.content, corner}
+	objects := []fyne.CanvasObject{bg, contentBG, bar, w.Content, corner}
 	r := &innerWindowRenderer{
 		ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
 		win:               w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
@@ -133,9 +141,9 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
-	w.content.Objects[0] = obj
+	w.Content.Objects[0] = obj
 
-	w.content.Refresh()
+	w.Content.Refresh()
 }
 
 // SetMaximized tells the window if the maximized state should be set or not.
@@ -148,15 +156,15 @@ func (w *InnerWindow) SetMaximized(max bool) {
 
 func (w *InnerWindow) SetPadded(pad bool) {
 	if pad {
-		w.content.Layout = layout.NewPaddedLayout()
+		w.Content.Layout = layout.NewPaddedLayout()
 	} else {
-		w.content.Layout = layout.NewStackLayout()
+		w.Content.Layout = layout.NewStackLayout()
 	}
-	w.content.Refresh()
+	w.Content.Refresh()
 }
 
 func (w *InnerWindow) SetTitle(title string) {
-	w.title = title
+	w.Title = title
 	w.Refresh()
 }
 
@@ -200,8 +208,8 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	innerSize := fyne.NewSize(size.Width-pad*2, size.Height-pad-barHeight)
 	i.contentBG.Move(innerPos)
 	i.contentBG.Resize(innerSize)
-	i.win.content.Move(innerPos)
-	i.win.content.Resize(innerSize)
+	i.win.Content.Move(innerPos)
+	i.win.Content.Resize(innerSize)
 
 	cornerSize := i.corner.MinSize()
 	i.corner.Move(fyne.NewPos(size.Components()).Subtract(cornerSize).AddXY(1, 1))
@@ -211,7 +219,7 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 func (i *innerWindowRenderer) MinSize() fyne.Size {
 	th := i.win.Theme()
 	pad := th.Size(theme.SizeNamePadding)
-	contentMin := i.win.content.MinSize()
+	contentMin := i.win.Content.MinSize()
 	barHeight := th.Size(theme.SizeNameWindowTitleBarHeight)
 
 	innerWidth := fyne.Max(i.bar.MinSize().Width, contentMin.Width)
@@ -257,7 +265,7 @@ func (i *innerWindowRenderer) Refresh() {
 	}
 
 	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
-	title.SetText(i.win.title)
+	title.SetText(i.win.Title)
 	i.ShadowingRenderer.RefreshShadow()
 	if i.win.OnTappedIcon == nil {
 		i.icon.Disable()
