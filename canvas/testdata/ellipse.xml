@@ -1,0 +1,5 @@
+<canvas size="50x90">
+	<content>
+		<ellipse angle="30" fillColor="rgba(255,200,0,180)" size="50x90" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+	</content>
+</canvas>

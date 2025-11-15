@@ -126,6 +126,8 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawPolygon(obj, pos, frame)
 	case *canvas.Arc:
 		p.drawArc(obj, pos, frame)
+	case *canvas.Ellipse:
+		p.drawEllipse(obj, pos, frame)
 	}
 }
 
@@ -337,6 +339,70 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	r, g, b, a = getFragmentColor(strokeColor)
 	p.SetUniform4f(program, "stroke_color", r, g, b, a)
 
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
+func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame fyne.Size) {
+	size := ellipse.Size()
+	radiusX := size.Width / 2
+	radiusY := size.Height / 2
+	program := p.ellipseProgram
+
+	// when rotated, the ellipse needs more space
+	// add half the difference between width and height as padding
+	// with padding the final size is a square
+	width, height := size.Components()
+	rotPad := float32(math.Abs(float64(width)-float64(height)) / 2)
+	xPad, yPad := float32(0), float32(0)
+	if width > height {
+		yPad = rotPad
+	} else {
+		xPad = rotPad
+	}
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad)
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	strokeWidthScaled := roundToPixel(ellipse.StrokeWidth*p.pixScale, 1.0)
+	p.SetUniform1f(program, "stroke_width", strokeWidthScaled)
+
+	radiusXScaled := roundToPixel(radiusX*p.pixScale, 1.0)
+	radiusYScaled := roundToPixel(radiusY*p.pixScale, 1.0)
+	p.SetUniform2f(program, "radius", radiusXScaled, radiusYScaled)
+
+	p.SetUniform1f(program, "angle", ellipse.Angle)
+
+	r, g, b, a := getFragmentColor(ellipse.FillColor)
+	p.SetUniform4f(program, "fill_color", r, g, b, a)
+
+	strokeColor := ellipse.StrokeColor
+	if strokeColor == nil {
+		strokeColor = color.Transparent
+	}
+	r, g, b, a = getFragmentColor(strokeColor)
+	p.SetUniform4f(program, "stroke_color", r, g, b, a)
+
+	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
+	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 	p.logError()
 	// Fragment: END
 
