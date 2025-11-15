@@ -141,6 +141,20 @@ func (p *painter) Init() {
 			"fill_color",
 		)
 		p.enableAttribArrays(p.arcProgram, "vert", "normal")
+
+		p.bezierCurveProgram = ProgramState{
+			ref:        p.createProgram("bezier_curve_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.bezierCurveProgram,
+			"frame_size", "rect_coords", "edge_softness",
+			"start_point", "end_point", "num_control_points",
+			"control_point1", "control_point2",
+			"stroke_width_half", "stroke_color",
+		)
+		p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
 		compiled = []ProgramState{
 			p.program,
 			p.lineProgram,
@@ -148,6 +162,7 @@ func (p *painter) Init() {
 			p.roundRectangleProgram,
 			p.polygonProgram,
 			p.arcProgram,
+			p.bezierCurveProgram,
 		}
 	}
 
@@ -157,6 +172,7 @@ func (p *painter) Init() {
 	p.roundRectangleProgram = compiled[3]
 	p.polygonProgram = compiled[4]
 	p.arcProgram = compiled[5]
+	p.bezierCurveProgram = compiled[6]
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {

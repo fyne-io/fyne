@@ -245,6 +245,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeSpacer(o, attrs)
 	case *fynecanvas.Arc:
 		r.writeArc(o, attrs)
+	case *fynecanvas.BezierCurve:
+		r.writeBezierCurve(o, attrs)
 	default:
 		panic(fmt.Sprint("please add support for", reflect.TypeOf(o)))
 	}
@@ -320,6 +322,17 @@ func (r *markupRenderer) writeLine(l *fynecanvas.Line, attrs map[string]*string)
 	r.setColorAttr(attrs, "strokeColor", l.StrokeColor)
 	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(l.StrokeWidth), 1)
 	r.writeTag("line", true, attrs)
+}
+
+func (r *markupRenderer) writeBezierCurve(bc *fynecanvas.BezierCurve, attrs map[string]*string) {
+	r.setColorAttr(attrs, "strokeColor", bc.StrokeColor)
+	r.setFloatAttrWithDefault(attrs, "strokeWidth", float64(bc.StrokeWidth), 1)
+	r.setFloatPosAttr(attrs, "startPoint", float64(bc.StartPoint.X), float64(bc.StartPoint.Y))
+	r.setFloatPosAttr(attrs, "endPoint", float64(bc.EndPoint.X), float64(bc.EndPoint.Y))
+	for i, cp := range bc.ControlPoints {
+		r.setFloatPosAttr(attrs, fmt.Sprintf("controlPoint%d", i+1), float64(cp.X), float64(cp.Y))
+	}
+	r.writeTag("bezierCurve", true, attrs)
 }
 
 func (r *markupRenderer) writeLinearGradient(g *fynecanvas.LinearGradient, attrs map[string]*string) {

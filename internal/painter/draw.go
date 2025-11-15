@@ -294,6 +294,42 @@ func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLef
 	return raw
 }
 
+// DrawBezierCurve rasterizes the given bezier curve object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawBezierCurve(bezierCurve *canvas.BezierCurve, vectorPad float32, scale func(float32) float32) *image.RGBA {
+	col := bezierCurve.StrokeColor
+	size := bezierCurve.Size()
+	width := int(scale(size.Width + vectorPad*2))
+	height := int(scale(size.Height + vectorPad*2))
+	stroke := scale(bezierCurve.StrokeWidth)
+	if stroke < 1 { // software painter doesn't fade bezier curve to compensate
+		stroke = 1
+	}
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(col)
+	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+
+	p1, p2, cp := NormalizeBezierCurvePoints(bezierCurve.StartPoint, bezierCurve.EndPoint, bezierCurve.ControlPoints, size, 0)
+	dasher.Start(rasterx.ToFixedP(float64(scale(p1.X+vectorPad)), float64(scale(p1.Y+vectorPad))))
+	if len(cp) == 1 {
+		dasher.QuadBezier(rasterx.ToFixedP(float64(scale(cp[0].X+vectorPad)), float64(scale(cp[0].Y+vectorPad))), rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	} else if len(cp) == 2 {
+		dasher.CubeBezier(rasterx.ToFixedP(float64(scale(cp[0].X+vectorPad)), float64(scale(cp[0].Y+vectorPad))), rasterx.ToFixedP(float64(scale(cp[1].X+vectorPad)), float64(scale(cp[1].Y+vectorPad))), rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	} else {
+		// no control points, draw a line
+		dasher.Line(rasterx.ToFixedP(float64(scale(p2.X+vectorPad)), float64(scale(p2.Y+vectorPad))))
+	}
+
+	dasher.Stop(false)
+	dasher.Draw()
+
+	return raw
+}
+
 // drawRegularPolygon draws a regular n-sides centered at (cx,cy) with
 // radius, rounded corners of cornerRadius, rotated by rot degrees.
 func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
@@ -670,4 +706,48 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 // The function also reverses the direction: positive is clockwise, negative is counter-clockwise
 func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
 	return -(startAngle - 90), -(endAngle - 90)
+}
+
+// NormalizeBezierCurvePoints clamps the start, end, and control points of a Bezier curve
+// to ensure they remain within the bounds of the given size, considering the offset e.g. stroke width.
+// It returns the normalized start and end positions, and a filtered slice of control points
+// that are not coincident with the start or end points. If two control points are provided
+// and they are identical, only one is added if it is not coincident with the start or end.
+func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoints []fyne.Position, size fyne.Size, offset float32) (fyne.Position, fyne.Position, []fyne.Position) {
+	clampPoint := func(p fyne.Position) (float32, float32) {
+		return fyne.Min(fyne.Max(p.X, offset), fyne.Max(size.Width-offset, 0)), fyne.Min(fyne.Max(p.Y, offset), fyne.Max(size.Height-offset, 0))
+	}
+	p1x, p1y := clampPoint(startPoint)
+	p2x, p2y := clampPoint(endPoint)
+	cp := make([]fyne.Position, 0, 2)
+
+	if len(controlPoints) == 1 {
+		cpX, cpY := clampPoint(controlPoints[0])
+		if (cpX != p1x || cpY != p1y) && (cpX != p2x || cpY != p2y) {
+			// only add the control point if it is not the same as start and end point
+			cp = append(cp, fyne.NewPos(cpX, cpY))
+		}
+	} else if len(controlPoints) >= 2 {
+		cp1x, cp1y := clampPoint(controlPoints[0])
+		cp2x, cp2y := clampPoint(controlPoints[1])
+
+		if cp1x == cp2x && cp1y == cp2y {
+			// if both control points are the same, only add one if it is not the same as start and end point
+			if (cp1x != p1x || cp1y != p1y) && (cp1x != p2x || cp1y != p2y) {
+				// only add the control point if it is not the same as start and end point
+				cp = append(cp, fyne.NewPos(cp1x, cp1y))
+			}
+		} else {
+			if cp1x != p1x || cp1y != p1y {
+				// only add the control point if it is not the same as start point
+				cp = append(cp, fyne.NewPos(cp1x, cp1y))
+			}
+			if cp2x != p2x || cp2y != p2y {
+				// only add the control point if it is not the same as end point
+				cp = append(cp, fyne.NewPos(cp2x, cp2y))
+			}
+		}
+	}
+
+	return fyne.NewPos(p1x, p1y), fyne.NewPos(p2x, p2y), cp
 }

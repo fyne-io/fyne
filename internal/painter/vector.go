@@ -35,6 +35,10 @@ func VectorPad(obj fyne.CanvasObject) float32 {
 		if co.StrokeWidth > 0 && co.StrokeColor != nil {
 			return co.StrokeWidth + 2
 		}
+	case *canvas.BezierCurve:
+		if co.StrokeWidth > 0 {
+			return co.StrokeWidth + 2
+		}
 	}
 
 	return 0
