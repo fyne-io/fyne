@@ -70,7 +70,14 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	if w.OnMinimized == nil {
 		min.Disable()
 	}
-	max := newBorderButton(theme.WindowMaximizeIcon(), modeMaximize, th, w.OnMaximized)
+	max := newBorderButton(theme.WindowMaximizeIcon(), modeMaximize, th, func() {
+		w.maximized = !w.maximized
+		w.Refresh()
+
+		if fn := w.OnMaximized; fn != nil {
+			fn()
+		}
+	})
 	if w.OnMaximized == nil {
 		max.Disable()
 	}
@@ -241,7 +248,6 @@ func (i *innerWindowRenderer) Refresh() {
 	if i.win.OnMaximized == nil {
 		i.buttons[2].Disable()
 	} else {
-		max.SetOnTapped(i.win.OnMaximized)
 		max.Enable()
 	}
 	if i.win.maximized {
