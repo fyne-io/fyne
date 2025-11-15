@@ -77,6 +77,14 @@ func (p *PopUpMenu) Resize(size fyne.Size) {
 	p.Menu.Resize(size)
 }
 
+// SetCanvas allows a popup menu to be re-used on a different canvas.
+//
+// Since: 2.8
+func (p *PopUpMenu) SetCanvas(c fyne.Canvas) {
+	p.canvas = c
+	p.overlay.SetCanvas(c)
+}
+
 // Show makes the pop-up menu visible.
 func (p *PopUpMenu) Show() {
 	p.Menu.alignment = p.alignment
