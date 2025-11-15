@@ -28,3 +28,25 @@ func TestMultipleWindows_Drag(t *testing.T) {
 	assert.Equal(t, float32(10), w.Position().X)
 	assert.Equal(t, float32(5), w.Position().Y)
 }
+
+func TestMultipleWindows_RaiseToTop(t *testing.T) {
+	w1 := NewInnerWindow("1", widget.NewLabel("Content"))
+	m := NewMultipleWindows(w1)
+	assert.Equal(t, w1, m.Top())
+
+	w2 := NewInnerWindow("2", widget.NewLabel("Content"))
+	m.Add(w2)
+	assert.Equal(t, w2, m.Top())
+
+	m.RaiseToTop(w1)
+	assert.Equal(t, w1, m.Top())
+}
+
+func TestMultipleWindows_Top(t *testing.T) {
+	m := NewMultipleWindows()
+	assert.Nil(t, m.Top())
+
+	w1 := NewInnerWindow("1", widget.NewLabel("Content"))
+	m.Add(w1)
+	assert.Equal(t, w1, m.Top())
+}

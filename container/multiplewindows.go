@@ -46,7 +46,10 @@ func (m *MultipleWindows) Refresh() {
 	//	m.BaseWidget.Refresh()
 }
 
-func (m *MultipleWindows) raise(w *InnerWindow) {
+// RaiseToTop asks this multiple window container to raise a specific inner window above others.
+//
+// Since: 2.8
+func (m *MultipleWindows) RaiseToTop(w *InnerWindow) {
 	id := -1
 	for i, ww := range m.Windows {
 		if ww == w {
@@ -61,6 +64,18 @@ func (m *MultipleWindows) raise(w *InnerWindow) {
 	windows := append(m.Windows[:id], m.Windows[id+1:]...)
 	m.Windows = append(windows, w)
 	m.refreshChildren()
+}
+
+// Top returns the topmost window in this multiple stack (the one visible above all others).
+// If there are no windows it will return nil.
+//
+// Since: 2.8
+func (m *MultipleWindows) Top() *InnerWindow {
+	if len(m.Windows) == 0 {
+		return nil
+	}
+
+	return m.Windows[len(m.Windows)-1]
 }
 
 func (m *MultipleWindows) refreshChildren() {
@@ -87,7 +102,7 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 		w.Resize(size.Max(w.MinSize()))
 	}
 	w.OnTappedBar = func() {
-		m.raise(w)
+		m.RaiseToTop(w)
 	}
 }
 
