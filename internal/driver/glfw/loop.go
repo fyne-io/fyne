@@ -154,6 +154,9 @@ func (d *gLDriver) runGL() {
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
 				w := d.windows[i].(*window)
+				w.processMouseMoved(w.newMousePosX, w.newMousePosY)
+				w.processResized(w.width, w.height)
+
 				if w.viewport == nil {
 					continue
 				}
