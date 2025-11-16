@@ -55,7 +55,7 @@ type (
 var (
 	noBuffer          = Buffer(gl.NoBuffer)
 	noShader          = Shader(gl.NoShader)
-	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST}
+	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
 
 func (p *painter) Init() {
