@@ -1,0 +1,5 @@
+<canvas size="50x50">
+	<content>
+		<bezierCurve controlPoint1="30,40" endPoint="50,10" size="50x50" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+	</content>
+</canvas>

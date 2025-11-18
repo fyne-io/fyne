@@ -1578,6 +1578,36 @@ func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	assert.Equal(t, "CustomDesktop:Control+F", content.capturedShortcuts[0].ShortcutName())
 }
 
+func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
+	w := createWindow("Test")
+	content := &typedShortcutable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.Canvas().Focus(content)
+
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Press, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Release, glfw.ModControl)
+
+	assert.Equal(t, 1, len(content.capturedShortcuts))
+	paste, ok := content.capturedShortcuts[0].(*fyne.ShortcutPaste)
+	assert.True(t, ok)
+	assert.False(t, paste.Secondary)
+
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyInsert, 0, glfw.Press, glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModShift)
+	w.keyPressed(nil, glfw.KeyInsert, 0, glfw.Release, glfw.ModShift)
+
+	assert.Equal(t, 2, len(content.capturedShortcuts))
+	paste, ok = content.capturedShortcuts[1].(*fyne.ShortcutPaste)
+	assert.True(t, ok)
+	assert.True(t, paste.Secondary)
+}
+
 func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
 	w := createWindow("Test")
 	content := &tabbable{}

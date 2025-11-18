@@ -512,11 +512,12 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *textGridContent) refreshCell(row, col int) {
-	if row >= len(t.visible)-1 {
-		return
+	for _, v := range t.visible {
+		if tr := v.(*textGridRow); tr.row == row {
+			tr.refreshCell(col)
+			return
+		}
 	}
-	wid := t.visible[row].(*textGridRow)
-	wid.refreshCell(col)
 }
 
 type textGridContentRenderer struct {

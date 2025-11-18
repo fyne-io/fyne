@@ -55,7 +55,7 @@ type (
 var (
 	noBuffer          = Buffer(gl.NoBuffer)
 	noShader          = Shader(gl.NoShader)
-	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST}
+	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
 
 func (p *painter) Init() {
@@ -69,7 +69,7 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size")
+	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 	p.lineProgram = ProgramState{
@@ -136,6 +136,20 @@ func (p *painter) Init() {
 		"fill_color",
 	)
 	p.enableAttribArrays(p.arcProgram, "vert", "normal")
+
+	p.bezierCurveProgram = ProgramState{
+		ref:        p.createProgram("bezier_curve_es"),
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
+	p.getUniformLocations(p.bezierCurveProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"start_point", "end_point", "num_control_points",
+		"control_point1", "control_point2",
+		"stroke_width_half", "stroke_color",
+	)
+	p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {

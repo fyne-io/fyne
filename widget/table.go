@@ -94,7 +94,13 @@ type Table struct {
 	// Since: 2.5
 	HideSeparators bool
 
-	currentFocus              TableCellID
+	// OnHighlighted is a callback to be notified when a given item
+	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
+	//
+	// Since: 2.8
+	OnHighlighted func(id TableCellID) `json:"-"`
+
+	currentHighlight          TableCellID
 	focused                   bool
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
@@ -214,13 +220,16 @@ func (t *Table) DragEnd() {
 // FocusGained is called after this table has gained focus.
 func (t *Table) FocusGained() {
 	t.focused = true
-	t.RefreshItem(t.currentFocus)
+	t.RefreshItem(t.currentHighlight)
+	if f := t.OnHighlighted; f != nil {
+		f(t.currentHighlight)
+	}
 }
 
 // FocusLost is called after this Table has lost focus.
 func (t *Table) FocusLost() {
 	t.focused = false
-	t.Refresh() // Item(t.currentFocus)
+	t.Refresh() // Item(t.currentHighlight)
 }
 
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
@@ -272,7 +281,7 @@ func (t *Table) Select(id TableCellID) {
 		f(*t.selectedCell)
 	}
 	t.selectedCell = &id
-	t.currentFocus = id
+	t.currentHighlight = id
 
 	t.ScrollTo(id)
 
@@ -344,47 +353,54 @@ func (t *Table) TouchCancel(*mobile.TouchEvent) {
 
 // TypedKey is called if a key event happens while this Table is focused.
 func (t *Table) TypedKey(event *fyne.KeyEvent) {
+	oldHighlight := t.currentHighlight
+
 	switch event.Name {
 	case fyne.KeySpace:
-		t.Select(t.currentFocus)
+		t.Select(t.currentHighlight)
 	case fyne.KeyDown:
 		if f := t.Length; f != nil {
 			rows, _ := f()
-			if t.currentFocus.Row >= rows-1 {
+			if t.currentHighlight.Row >= rows-1 {
 				return
 			}
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Row++
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentHighlight)
+		t.currentHighlight.Row++
+		t.ScrollTo(t.currentHighlight)
+		t.RefreshItem(t.currentHighlight)
 	case fyne.KeyLeft:
-		if t.currentFocus.Col <= 0 {
+		if t.currentHighlight.Col <= 0 {
 			return
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Col--
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentHighlight)
+		t.currentHighlight.Col--
+		t.ScrollTo(t.currentHighlight)
+		t.RefreshItem(t.currentHighlight)
 	case fyne.KeyRight:
 		if f := t.Length; f != nil {
 			_, cols := f()
-			if t.currentFocus.Col >= cols-1 {
+			if t.currentHighlight.Col >= cols-1 {
 				return
 			}
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Col++
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentHighlight)
+		t.currentHighlight.Col++
+		t.ScrollTo(t.currentHighlight)
+		t.RefreshItem(t.currentHighlight)
 	case fyne.KeyUp:
-		if t.currentFocus.Row <= 0 {
+		if t.currentHighlight.Row <= 0 {
 			return
 		}
-		t.RefreshItem(t.currentFocus)
-		t.currentFocus.Row--
-		t.ScrollTo(t.currentFocus)
-		t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentHighlight)
+		t.currentHighlight.Row--
+		t.ScrollTo(t.currentHighlight)
+		t.RefreshItem(t.currentHighlight)
+	}
+	if oldHighlight != t.currentHighlight {
+		if f := t.OnHighlighted; f != nil {
+			f(t.currentHighlight)
+		}
 	}
 }
 
@@ -591,12 +607,12 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 	t.Select(TableCellID{row, col})
 
 	if !fyne.CurrentDevice().IsMobile() {
-		t.RefreshItem(t.currentFocus)
-		canvas := fyne.CurrentApp().Driver().CanvasForObject(t)
+		t.RefreshItem(t.currentHighlight)
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(t.super())
 		if canvas != nil {
-			canvas.Focus(t.impl.(fyne.Focusable))
+			canvas.Focus(t.super().(fyne.Focusable))
 		}
-		t.RefreshItem(t.currentFocus)
+		t.RefreshItem(t.currentHighlight)
 	}
 }
 
@@ -687,6 +703,7 @@ func (t *Table) finishScroll() {
 func (t *Table) hoverAt(pos fyne.Position) {
 	col := t.columnAt(pos)
 	row := t.rowAt(pos)
+	oldHover := t.hoveredCell
 	t.hoveredCell = &TableCellID{row, col}
 	overHeaderRow := t.ShowHeaderRow && pos.Y < t.headerSize.Height
 	overHeaderCol := t.ShowHeaderColumn && pos.X < t.headerSize.Width
@@ -709,6 +726,11 @@ func (t *Table) hoverAt(pos fyne.Position) {
 		t.hoverHeaderRow = noCellMatch
 	}
 
+	if t.hoveredCell == nil {
+		t.hoverOut()
+		return
+	}
+
 	rows, cols := 0, 0
 	if f := t.Length; f != nil {
 		rows, cols = t.Length()
@@ -720,6 +742,13 @@ func (t *Table) hoverAt(pos fyne.Position) {
 
 	if t.moveCallback != nil {
 		t.moveCallback()
+	}
+
+	if f := t.OnHighlighted; f != nil {
+		if oldHover != nil && t.hoveredCell != nil && *oldHover == *t.hoveredCell {
+			return
+		}
+		f(*t.hoveredCell)
 	}
 }
 
@@ -1441,7 +1470,7 @@ func (r *tableCellsRenderer) moveIndicators() {
 	if r.cells.t.hoveredCell == nil && !r.cells.t.focused {
 		r.moveMarker(r.hover, -1, -1, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	} else if r.cells.t.focused {
-		r.moveMarker(r.hover, r.cells.t.currentFocus.Row, r.cells.t.currentFocus.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
+		r.moveMarker(r.hover, r.cells.t.currentHighlight.Row, r.cells.t.currentHighlight.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	} else {
 		r.moveMarker(r.hover, r.cells.t.hoveredCell.Row, r.cells.t.hoveredCell.Col, offX, offY, minCol, minRow, visibleColWidths, visibleRowHeights)
 	}

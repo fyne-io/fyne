@@ -21,7 +21,7 @@ func TestGridWrap_Focus(t *testing.T) {
 
 	canvas.FocusNext()
 	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, 0, canvas.Focused().(*GridWrap).currentFocus)
+	assert.Equal(t, 0, canvas.Focused().(*GridWrap).currentHighlight)
 
 	children := list.scroller.Content.(*fyne.Container).Objects
 	assert.True(t, children[0].(*gridWrapItem).hovered)
@@ -252,4 +252,44 @@ func TestGridWrap_ResizeToSameSizeBeforeRender(t *testing.T) {
 	// will not create renderer.
 	// will crash if GridWrap scroller (not yet created) is accessed
 	g.Resize(fyne.NewSize(0, 0))
+}
+
+func TestGridWrap_TypedKey(t *testing.T) {
+	gridWrap := createGridWrap(20)
+	window := test.NewWindow(gridWrap)
+	defer window.Close()
+	window.Resize(fyne.NewSize(80, 100))
+
+	// want 3 columns to make assert navigaiton behavior
+	assert.Equal(t, 3, gridWrap.ColumnCount())
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas.FocusNext()
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	assert.Equal(t, 3, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+	assert.Equal(t, 0, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 0, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 1, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 2, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 3, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	assert.Equal(t, 2, gridWrap.currentHighlight)
+
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	assert.Equal(t, []int{2}, gridWrap.selected)
+
+	gridWrap.currentHighlight = 20
+	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+	assert.Equal(t, 20, gridWrap.currentHighlight)
 }
