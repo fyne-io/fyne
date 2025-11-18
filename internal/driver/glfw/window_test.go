@@ -339,24 +339,24 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 
 	runOnMain(func() {
 		w.moveMouse(15, 48)
-		repaintWindow(w)
-		assert.NotNil(t, w.mouseOver)
-		test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 	})
+	repaintWindow(w)
+	assert.NotNil(t, w.mouseOver)
+	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	runOnMain(func() {
 		w.moveMouse(42, 48)
-		repaintWindow(w)
-		assert.NotNil(t, w.mouseOver)
-		test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 	})
+	repaintWindow(w)
+	assert.NotNil(t, w.mouseOver)
+	test.AssertRendersToMarkup(t, "windows_hover_object.xml", w.Canvas())
 
 	runOnMain(func() {
 		w.moveMouse(42, 100)
-		repaintWindow(w)
-		assert.Nil(t, w.mouseOver)
-		test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 	})
+	repaintWindow(w)
+	assert.Nil(t, w.mouseOver)
+	test.AssertRendersToMarkup(t, "windows_no_hover_outside_object.xml", w.Canvas())
 }
 
 func TestWindow_HandleDragging(t *testing.T) {
