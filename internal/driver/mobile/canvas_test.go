@@ -273,7 +273,7 @@ func Test_canvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 }
 
 func Test_canvas_Tappable(t *testing.T) {
-	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
+	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi"), ids: make(map[int]bool)}
 	content.ExtendBaseWidget(content)
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	c.SetContent(content)
@@ -295,6 +295,31 @@ func Test_canvas_Tappable(t *testing.T) {
 		wid.Dragged(ev)
 	})
 	assert.True(t, content.cancel)
+}
+
+func Test_canvas_TouchID(t *testing.T) {
+	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi"), ids: make(map[int]bool)}
+	content.ExtendBaseWidget(content)
+	c := newCanvas(fyne.CurrentDevice()).(*canvas)
+	c.SetContent(content)
+	c.Resize(fyne.NewSize(36, 24))
+	content.Resize(fyne.NewSize(24, 24))
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+	assert.True(t, content.ids[0])
+
+	c.tapDown(fyne.NewPos(15, 15), 1)
+	c.tapUp(fyne.NewPos(15, 15), 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+	assert.True(t, content.ids[1])
 }
 
 func Test_canvas_Tapped(t *testing.T) {
@@ -423,18 +448,22 @@ func Test_canvas_TappedSecondary(t *testing.T) {
 type touchableLabel struct {
 	*widget.Label
 	down, up, cancel bool
+	ids              map[int]bool
 }
 
-func (t *touchableLabel) TouchDown(event *mobile.TouchEvent) {
+func (t *touchableLabel) TouchDown(ev *mobile.TouchEvent) {
 	t.down = true
+	t.ids[ev.ID] = true
 }
 
-func (t *touchableLabel) TouchUp(event *mobile.TouchEvent) {
+func (t *touchableLabel) TouchUp(ev *mobile.TouchEvent) {
 	t.up = true
+	t.ids[ev.ID] = true
 }
 
-func (t *touchableLabel) TouchCancel(event *mobile.TouchEvent) {
+func (t *touchableLabel) TouchCancel(ev *mobile.TouchEvent) {
 	t.cancel = true
+	t.ids[ev.ID] = true
 }
 
 type tappableLabel struct {
