@@ -281,9 +281,6 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentHighlight <= 0 {
 			return
 		}
-		if l.currentHighlight%l.ColumnCount() == 0 {
-			return
-		}
 
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight--
@@ -291,9 +288,6 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyRight:
 		if f := l.Length; f != nil && l.currentHighlight >= f()-1 {
-			return
-		}
-		if (l.currentHighlight+1)%l.ColumnCount() == 0 {
 			return
 		}
 
@@ -607,9 +601,9 @@ func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focu
 	li.onTapped = func() {
 		if !fyne.CurrentDevice().IsMobile() {
 			l.gw.RefreshItem(l.gw.currentHighlight)
-			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.gw)
+			canvas := fyne.CurrentApp().Driver().CanvasForObject(l.gw.super())
 			if canvas != nil {
-				canvas.Focus(l.gw.impl.(fyne.Focusable))
+				canvas.Focus(l.gw.super().(fyne.Focusable))
 			}
 
 			l.gw.currentHighlight = id

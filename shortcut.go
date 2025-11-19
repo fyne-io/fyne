@@ -46,6 +46,10 @@ var _ KeyboardShortcut = (*ShortcutPaste)(nil)
 // ShortcutPaste describes a shortcut paste action.
 type ShortcutPaste struct {
 	Clipboard Clipboard
+	// Secondary indicates an alternative buffer such as selection, when true
+	//
+	// Since: 2.8
+	Secondary bool
 }
 
 // Key returns the [KeyName] for this shortcut.
@@ -68,6 +72,10 @@ var _ KeyboardShortcut = (*ShortcutCopy)(nil)
 // ShortcutCopy describes a shortcut copy action.
 type ShortcutCopy struct {
 	Clipboard Clipboard
+	// Secondary indicates an alternative buffer such as selection, when true
+	//
+	// Since: 2.8
+	Secondary bool
 }
 
 // Key returns the [KeyName] for this shortcut.
@@ -90,6 +98,10 @@ var _ KeyboardShortcut = (*ShortcutCut)(nil)
 // ShortcutCut describes a shortcut cut action.
 type ShortcutCut struct {
 	Clipboard Clipboard
+	// Secondary indicates an alternative buffer such as selection, when true
+	//
+	// Since: 2.8
+	Secondary bool
 }
 
 // Key returns the [KeyName] for this shortcut.

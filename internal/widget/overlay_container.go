@@ -54,6 +54,15 @@ func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 func (o *OverlayContainer) MouseOut() {
 }
 
+// SetCanvas allows an overlay container to be re-used on a different canvas.
+//
+// Since: 2.8
+func (o *OverlayContainer) SetCanvas(c fyne.Canvas) {
+	o.canvas.Overlays().Remove(o)
+	o.canvas = c
+	o.canvas.Overlays().Add(o)
+}
+
 // Show makes the overlay container visible.
 func (o *OverlayContainer) Show() {
 	if !o.shown {

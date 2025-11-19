@@ -6,6 +6,7 @@ require (
 	fyne.io/systray v1.11.1-0.20250603113521-ca66a66d8b58
 	github.com/BurntSushi/toml v1.5.0
 	github.com/anthonynsimon/bild v0.13.0
+	github.com/FyshOS/fancyfs v0.0.0-20251025194026-1f03098ff624
 	github.com/fogleman/gg v1.3.0
 	github.com/fredbi/uri v1.1.1
 	github.com/fsnotify/fsnotify v1.9.0
