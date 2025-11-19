@@ -85,9 +85,10 @@ float quadratic_distance(vec2 pos, vec2 v0, vec2 v1, vec2 v2)
 float cubic_distance(vec2 p, vec2 v0, vec2 v1, vec2 v2, vec2 v3)
 {
     const int NEWTON_ITERS = 4;
+    const int MAX_STEPS = 64;
 
     float approx_length = length(v1 - v0) + length(v2 - v1) + length(v3 - v2); // control polygon length
-    int steps = int(clamp(approx_length * 10.0, 16.0, 64.0)); // scale steps by length
+    int steps = int(clamp(approx_length * 10.0, 16.0, float(MAX_STEPS))); // scale steps by length
 
     vec2 a = -v0 + 3.0*v1 - 3.0*v2 + v3;
     vec2 b =  3.0*v0 - 6.0*v1 + 3.0*v2;
@@ -99,8 +100,10 @@ float cubic_distance(vec2 p, vec2 v0, vec2 v1, vec2 v2, vec2 v3)
     float best_seg_dist = 1e3;
     float t0 = 0.0;
 
-    for (int i = 1; i <= steps; i++)
+    for (int i = 1; i <= MAX_STEPS; i++)
     {
+        if (i > steps) break;
+
         float t = float(i) * dt;
         vec2 cur = ((a*t + b)*t + c)*t + d;
 
