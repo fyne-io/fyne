@@ -317,3 +317,132 @@ func TestButtonSuccess(t *testing.T) {
 
 	test.AssertImageMatches(t, "button/success_importance.png", w.Canvas().Capture())
 }
+
+func TestButton_OnMouseIn(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		t.Skip("Skipping on mobile devices")
+	}
+
+	test.NewTempApp(t)
+
+	mouseInCalled := make(chan bool, 1)
+	var receivedEvent *desktop.MouseEvent
+
+	button := widget.NewButton("Test", nil)
+	button.OnMouseIn = func(ev *desktop.MouseEvent) {
+		receivedEvent = ev
+		mouseInCalled <- true
+	}
+
+	w := test.NewWindow(button)
+	defer w.Close()
+
+	// Move mouse over the button to trigger MouseIn
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+
+	select {
+	case <-mouseInCalled:
+		// Success - OnMouseIn was called
+		assert.NotNil(t, receivedEvent, "MouseEvent should be passed to OnMouseIn")
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Timed out waiting for OnMouseIn callback")
+	}
+}
+
+func TestButton_OnMouseOut(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		t.Skip("Skipping on mobile devices")
+	}
+
+	test.NewTempApp(t)
+
+	mouseOutCalled := make(chan bool, 1)
+
+	button := widget.NewButton("Test", nil)
+	button.OnMouseOut = func() {
+		mouseOutCalled <- true
+	}
+
+	w := test.NewWindow(button)
+	defer w.Close()
+
+	// Move mouse over the button first
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+	time.Sleep(10 * time.Millisecond) // Brief pause to ensure MouseIn is processed
+
+	// Move mouse away from the button to trigger MouseOut
+	test.MoveMouse(w.Canvas(), fyne.NewPos(1000, 1000))
+
+	select {
+	case <-mouseOutCalled:
+		// Success - OnMouseOut was called
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Timed out waiting for OnMouseOut callback")
+	}
+}
+
+func TestButton_OnMouseInOut_Sequence(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		t.Skip("Skipping on mobile devices")
+	}
+
+	test.NewTempApp(t)
+
+	events := make(chan string, 2)
+
+	button := widget.NewButton("Test", nil)
+	button.OnMouseIn = func(ev *desktop.MouseEvent) {
+		events <- "in"
+	}
+	button.OnMouseOut = func() {
+		events <- "out"
+	}
+
+	w := test.NewWindow(button)
+	defer w.Close()
+
+	// Move mouse over the button
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+
+	// Wait for MouseIn event
+	select {
+	case event := <-events:
+		assert.Equal(t, "in", event, "First event should be MouseIn")
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Timed out waiting for OnMouseIn callback")
+	}
+
+	// Move mouse away
+	test.MoveMouse(w.Canvas(), fyne.NewPos(1000, 1000))
+
+	// Wait for MouseOut event
+	select {
+	case event := <-events:
+		assert.Equal(t, "out", event, "Second event should be MouseOut")
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Timed out waiting for OnMouseOut callback")
+	}
+}
+
+func TestButton_OnMouseIn_Nil(t *testing.T) {
+	if fyne.CurrentDevice().IsMobile() {
+		t.Skip("Skipping on mobile devices")
+	}
+
+	test.NewTempApp(t)
+
+	// Test that nil callbacks don't cause issues
+	button := widget.NewButton("Test", nil)
+	button.OnMouseIn = nil
+	button.OnMouseOut = nil
+
+	w := test.NewWindow(button)
+	defer w.Close()
+
+	// Move mouse over and out - should not panic
+	test.MoveMouse(w.Canvas(), fyne.NewPos(5, 5))
+	test.MoveMouse(w.Canvas(), fyne.NewPos(1000, 1000))
+
+	// If we get here without panicking, test passes
+	assert.True(t, true)
+}

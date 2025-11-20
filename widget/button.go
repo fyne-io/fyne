@@ -60,6 +60,16 @@ type Button struct {
 	IconPlacement ButtonIconPlacement
 
 	OnTapped func() `json:"-"`
+	// OnMouseIn is called when the mouse pointer enters the button.
+	// This can be used for accessibility features like screen reader announcements.
+	//
+	// Since: 2.8
+	OnMouseIn func(*desktop.MouseEvent) `json:"-"`
+	// OnMouseOut is called when the mouse pointer exits the button.
+	// This can be used for accessibility features like screen reader announcements.
+	//
+	// Since: 2.8
+	OnMouseOut func() `json:"-"`
 
 	hovered, focused bool
 	tapAnim          *fyne.Animation
@@ -146,9 +156,13 @@ func (b *Button) MinSize() fyne.Size {
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (b *Button) MouseIn(*desktop.MouseEvent) {
+func (b *Button) MouseIn(ev *desktop.MouseEvent) {
 	b.hovered = true
 	b.Refresh()
+
+	if onMouseIn := b.OnMouseIn; onMouseIn != nil {
+		onMouseIn(ev)
+	}
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -159,6 +173,10 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 func (b *Button) MouseOut() {
 	b.hovered = false
 	b.Refresh()
+
+	if onMouseOut := b.OnMouseOut; onMouseOut != nil {
+		onMouseOut()
+	}
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
