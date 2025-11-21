@@ -4,6 +4,7 @@ package widget // import "fyne.io/fyne/v2/widget"
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
 	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -158,6 +159,9 @@ func (w *BaseWidget) super() fyne.Widget {
 type DisableableWidget struct {
 	BaseWidget
 
+	disableListener binding.DataListener
+	disableBinding  binding.Bool
+
 	disabled bool
 }
 
@@ -194,6 +198,67 @@ func (w *DisableableWidget) Disable() {
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
 	return w.disabled
+}
+
+// UnbindDisable remove the previously bound binding.Bool that manage the disable state of the widget
+//
+// Since 2.4
+func (w *DisableableWidget) UnbindDisable() {
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	if w.disableListener == nil {
+		return
+	}
+	w.disableBinding.RemoveListener(w.disableListener)
+	w.disableListener = nil
+	w.disableBinding = nil
+}
+
+// BindDisable will use the passed binding.Bool to manage the disable state of the widget
+//
+// Since 2.4
+func (w *DisableableWidget) BindDisable(data binding.Bool) {
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	getBool := func(data binding.Bool) bool {
+		v, err := data.Get()
+		if err != nil {
+			return false
+		}
+		return v
+	}
+
+	applyDisable := func(disable bool) {
+		if disable {
+			w.Disable()
+		} else {
+			w.Enable()
+		}
+	}
+
+	if w.disableBinding == data {
+		goto refreshDisable
+	}
+	if w.disableListener != nil {
+		w.UnbindDisable()
+	}
+
+	w.disableListener = binding.NewDataListener(func() {
+		isDisable := w.Disabled()
+		disable := getBool(data)
+		if isDisable == disable {
+			return
+		}
+		applyDisable(disable)
+	})
+	w.disableBinding = data
+	w.disableBinding.AddListener(w.disableListener)
+
+refreshDisable:
+	disable := getBool(data)
+	applyDisable(disable)
 }
 
 // NewSimpleRenderer creates a new SimpleRenderer to render a widget using a
