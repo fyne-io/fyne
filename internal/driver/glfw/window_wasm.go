@@ -56,24 +56,24 @@ type window struct {
 	icon     fyne.Resource
 	mainmenu *fyne.MainMenu
 
-	master                              bool
-	fullScreen                          bool
-	centered                            bool
-	visible                             bool
-	mousePosUpdated, widthHeightUpdated bool
-	newMousePosX, newMousePosY          float64
-	mousePos                            fyne.Position
-	mouseDragged                        fyne.Draggable
-	mouseDraggedObjStart                fyne.Position
-	mouseDraggedOffset                  fyne.Position
-	mouseDragPos                        fyne.Position
-	mouseDragStarted                    bool
-	mouseButton                         desktop.MouseButton
-	mouseOver                           desktop.Hoverable
-	mouseLastClick                      fyne.CanvasObject
-	mousePressed                        fyne.CanvasObject
-	mouseClickCount                     int
-	mouseCancelFunc                     context.CancelFunc
+	master                                         bool
+	fullScreen                                     bool
+	centered                                       bool
+	visible                                        bool
+	mousePosUpdateProcessed, resizeUpdateProcessed bool
+	newMousePosX, newMousePosY                     float64
+	mousePos                                       fyne.Position
+	mouseDragged                                   fyne.Draggable
+	mouseDraggedObjStart                           fyne.Position
+	mouseDraggedOffset                             fyne.Position
+	mouseDragPos                                   fyne.Position
+	mouseDragStarted                               bool
+	mouseButton                                    desktop.MouseButton
+	mouseOver                                      desktop.Hoverable
+	mouseLastClick                                 fyne.CanvasObject
+	mousePressed                                   fyne.CanvasObject
+	mouseClickCount                                int
+	mouseCancelFunc                                context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -158,10 +158,11 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
-	w.width = width
-	w.height = height
 	runOnMain(func() {
+		w.newWidth = width
+		w.newHeight = height
 		w.canvas.scale = w.calculatedScale()
+		w.resizeUpdateProcessed = false
 	})
 }
 
@@ -219,6 +220,7 @@ func (w *window) setCustomCursor(rawCursor *Cursor, isCustomCursor bool) {
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
 	w.newMousePosX = w.scaleInput(xpos)
 	w.newMousePosY = w.scaleInput(ypos)
+	w.mousePosUpdateProcessed = false
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
