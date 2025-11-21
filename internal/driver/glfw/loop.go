@@ -158,7 +158,7 @@ func (d *gLDriver) runGL() {
 					w.processMouseMoved(w.newMousePosX, w.newMousePosY)
 					w.mousePosUpdateProcessed = true
 				}
-				if !w.resizeUpdateProcessed && true {
+				if !w.resizeUpdateProcessed {
 					w.processResized(w.newWidth, w.newHeight)
 					w.resizeUpdateProcessed = true
 				}
