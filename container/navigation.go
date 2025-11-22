@@ -88,7 +88,8 @@ func (nav *Navigation) Back() fyne.CanvasObject {
 	return objs[nav.level]
 }
 
-// Forward shows the next object in the stack again.
+// Forward shows the next object in the stack again
+// and returns the object that was visible before.
 //
 // Since: 2.7
 func (nav *Navigation) Forward() fyne.CanvasObject {
@@ -99,6 +100,7 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 	nav.stack.Objects[nav.level-1].Hide()
 	nav.stack.Objects[nav.level].Show()
 	nav.level++
+	nav.Refresh()
 
 	return nav.stack.Objects[nav.level-1]
 }
