@@ -86,20 +86,20 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePosUpdateProcessed, resizeUpdateProcessed bool
-	newMousePosX, newMousePosY                     float64
-	mousePos                                       fyne.Position
-	mouseDragged                                   fyne.Draggable
-	mouseDraggedObjStart                           fyne.Position
-	mouseDraggedOffset                             fyne.Position
-	mouseDragPos                                   fyne.Position
-	mouseDragStarted                               bool
-	mouseButton                                    desktop.MouseButton
-	mouseOver                                      desktop.Hoverable
-	mouseLastClick                                 fyne.CanvasObject
-	mousePressed                                   fyne.CanvasObject
-	mouseClickCount                                int
-	mouseCancelFunc                                context.CancelFunc
+	mousePosUpdateProcessed    bool
+	newMousePosX, newMousePosY float64
+	mousePos                   fyne.Position
+	mouseDragged               fyne.Draggable
+	mouseDraggedObjStart       fyne.Position
+	mouseDraggedOffset         fyne.Position
+	mouseDragPos               fyne.Position
+	mouseDragStarted           bool
+	mouseButton                desktop.MouseButton
+	mouseOver                  desktop.Hoverable
+	mouseLastClick             fyne.CanvasObject
+	mousePressed               fyne.CanvasObject
+	mouseClickCount            int
+	mouseCancelFunc            context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -108,7 +108,6 @@ type window struct {
 	menuDeactivationPending fyne.KeyName
 
 	xpos, ypos                      int
-	newWidth, newHeight             int
 	width, height                   int
 	requestedWidth, requestedHeight int
 	shouldWidth, shouldHeight       int
@@ -340,9 +339,7 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 }
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
-	w.newWidth = width
-	w.newHeight = height
-	w.resizeUpdateProcessed = false
+	w.processResized(width, height)
 }
 
 func (w *window) scaled(_ *glfw.Window, x float32, y float32) {

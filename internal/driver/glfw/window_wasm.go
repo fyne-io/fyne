@@ -159,10 +159,8 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 
 func (w *window) resized(_ *glfw.Window, width, height int) {
 	runOnMain(func() {
-		w.newWidth = width
-		w.newHeight = height
 		w.canvas.scale = w.calculatedScale()
-		w.resizeUpdateProcessed = false
+		w.processResized(width, height)
 	})
 }
 
