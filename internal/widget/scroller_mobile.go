@@ -1,4 +1,4 @@
-//go:build ci || android || ios || mobile
+//go:build ci || no_glfw || android || ios || mobile
 
 package widget
 
