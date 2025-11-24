@@ -72,7 +72,8 @@ func TestButton_Tapped_Unfocus(t *testing.T) {
 
 	w := test.NewWindow(&fyne.Container{
 		Layout:  layout.NewGridLayoutWithColumns(1),
-		Objects: []fyne.CanvasObject{e, button}})
+		Objects: []fyne.CanvasObject{e, button},
+	})
 	c := w.Canvas()
 
 	c.Focus(e)
