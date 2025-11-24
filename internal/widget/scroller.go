@@ -526,21 +526,6 @@ func (s *Scroll) ScrollToTop() {
 	s.refreshBars()
 }
 
-// DragEnd will stop scrolling on mobile has stopped
-func (s *Scroll) DragEnd() {
-}
-
-// Dragged will scroll on any drag - bar or otherwise - for mobile
-func (s *Scroll) Dragged(e *fyne.DragEvent) {
-	if !fyne.CurrentDevice().IsMobile() {
-		return
-	}
-
-	if s.updateOffset(e.Dragged.DX, e.Dragged.DY) {
-		s.refreshWithoutOffsetUpdate()
-	}
-}
-
 // MinSize returns the smallest size this widget can shrink to
 func (s *Scroll) MinSize() fyne.Size {
 	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
