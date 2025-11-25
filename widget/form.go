@@ -300,6 +300,9 @@ func (f *Form) isVertical() bool {
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	updateValidation := func(err error) {
+		if i >= len(f.Items) {
+			return // called after form has been truncated
+		}
 		if err == errFormItemInitialState {
 			return
 		}
