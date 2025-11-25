@@ -18,7 +18,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6
 	github.com/go-text/render v0.2.0
 	github.com/go-text/typesetting v0.2.1
-	github.com/godbus/dbus/v5 v5.1.0
+	github.com/godbus/dbus/v5 v5.2.0
 	github.com/hack-pad/go-indexeddb v0.3.2
 	github.com/jackmordaunt/icns/v2 v2.2.6
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
