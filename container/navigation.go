@@ -16,8 +16,8 @@ type Navigation struct {
 
 	Root      fyne.CanvasObject
 	Title     string
-	OnBack    func()
-	OnForward func()
+	OnBack    func() `json:"-"`
+	OnForward func() `json:"-"`
 
 	level  int
 	stack  fyne.Container
@@ -110,6 +110,11 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 // Since: 2.7
 func (nav *Navigation) SetTitle(s string) {
 	nav.Title = s
+
+	if len(nav.titles) > 0 {
+		nav.titles[0] = s
+	}
+
 	nav.Refresh()
 }
 
