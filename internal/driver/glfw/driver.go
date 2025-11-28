@@ -7,6 +7,7 @@ import (
 	"image"
 	"os"
 	"runtime"
+	"time"
 
 	"fyne.io/fyne/v2/internal/async"
 	"github.com/fyne-io/image/ico"
@@ -26,12 +27,17 @@ var curWindow *window
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
 
+const defaultFrameRate = 60
+
 type gLDriver struct {
 	windows     []fyne.Window
 	initialized bool
 	done        chan struct{}
 
 	animation animation.Runner
+	eventTick *time.Ticker
+	frameRate int
+	frameTime time.Duration
 
 	currentKeyModifiers fyne.KeyModifier // desktop driver only
 
@@ -44,6 +50,18 @@ func (d *gLDriver) init() {
 		d.initialized = true
 		d.initGLFW()
 	}
+}
+
+func (d *gLDriver) SetFrameRate(rate int) {
+	d.frameRate = rate
+	d.frameTime = time.Second / time.Duration(d.frameRate)
+	if d.eventTick != nil {
+		d.eventTick.Reset(d.frameTime)
+	}
+}
+
+func (d *gLDriver) GetFrameRate() int {
+	return d.frameRate
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
@@ -176,6 +194,8 @@ func NewGLDriver() *gLDriver {
 	repository.Register("file", intRepo.NewFileRepository())
 
 	return &gLDriver{
-		done: make(chan struct{}),
+		done:      make(chan struct{}),
+		frameRate: defaultFrameRate,
+		frameTime: time.Second / defaultFrameRate,
 	}
 }

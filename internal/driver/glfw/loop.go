@@ -124,11 +124,11 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	eventTick := time.NewTicker(time.Second / 60)
+	d.eventTick = time.NewTicker(d.frameTime)
 	for {
 		select {
 		case <-d.done:
-			eventTick.Stop()
+			d.eventTick.Stop()
 			d.Terminate()
 			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
@@ -150,7 +150,7 @@ func (d *gLDriver) runGL() {
 			if f.done != nil {
 				f.done <- struct{}{}
 			}
-		case <-eventTick.C:
+		case <-d.eventTick.C:
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
 				w := d.windows[i].(*window)

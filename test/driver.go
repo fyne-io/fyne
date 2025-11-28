@@ -151,3 +151,12 @@ func (d *driver) DoubleTapDelay() time.Duration {
 func (d *driver) SetDisableScreenBlanking(_ bool) {
 	// no-op for test
 }
+
+func (d *driver) SetFrameRate(rate int) {
+	// Nothing
+}
+
+func (d *driver) GetFrameRate() int {
+	// Nothing
+	return 0
+}

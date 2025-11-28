@@ -24,6 +24,19 @@ type noosDriver struct {
 	wins    []fyne.Window
 	current int
 	device  noosDevice
+
+	frameRate int
+	frameTime time.Duration
+}
+
+func (d *noosDriver) SetFrameRate(rate int) {
+	d.frameRate = rate
+	d.frameTime = time.Second / time.Duration(d.frameRate)
+	// Doesn't appear to actually support frame timing in this driver
+}
+
+func (d *noosDriver) GetFrameRate() int {
+	return d.frameRate
 }
 
 func (n *noosDriver) CreateWindow(_ string) fyne.Window {
@@ -232,6 +245,8 @@ func NewNoOSDriver(render func(img image.Image), run func(func()), events chan e
 	return &noosDriver{
 		events: events, queue: make(chan funcData), size: size,
 		render: render, run: run, wins: make([]fyne.Window, 0),
+		frameRate: 60,
+		frameTime: time.Second / 60,
 	}
 }
 

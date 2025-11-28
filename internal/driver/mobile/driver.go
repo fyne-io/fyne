@@ -36,6 +36,7 @@ const (
 	tapMoveThreshold    = 4.0                    // how far can we move before it is a drag
 	tapSecondaryDelay   = 300 * time.Millisecond // how long before secondary tap
 	tapDoubleDelay      = 500 * time.Millisecond // max duration between taps for a DoubleTap event
+	defaultFrameRate    = 60
 )
 
 // Configuration is the system information about the current device
@@ -55,6 +56,7 @@ type driver struct {
 	windows     []fyne.Window
 	device      device
 	animation   animation.Runner
+	draw        *time.Ticker
 	currentSize size.Event
 
 	theme           fyne.ThemeVariant
@@ -62,6 +64,9 @@ type driver struct {
 	painting        bool
 	running         bool
 	queuedFuncs     *async.UnboundedChan[func()]
+
+	frameRate int
+	frameTime time.Duration
 }
 
 // Declare conformity with Driver
@@ -72,6 +77,18 @@ var (
 
 func init() {
 	runtime.LockOSThread()
+}
+
+func (d *driver) SetFrameRate(rate int) {
+	d.frameRate = rate
+	d.frameTime = time.Second / time.Duration(d.frameRate)
+	if d.draw != nil {
+		d.draw.Reset(d.frameTime)
+	}
+}
+
+func (d *driver) GetFrameRate() int {
+	return d.frameRate
 }
 
 func (d *driver) DoFromGoroutine(fn func(), wait bool) {
@@ -178,6 +195,15 @@ func (d *driver) Run() {
 	}
 	d.running = true
 
+	// Check what frame rate to run at
+	var frameTime time.Duration
+	if d.frameRate > 0 {
+		frameTime = time.Second / time.Duration(d.frameRate)
+	} else {
+		d.frameRate = defaultFrameRate
+		frameTime = time.Second / time.Duration(defaultFrameRate)
+	}
+
 	app.Main(func(a app.App) {
 		async.SetMainGoroutine()
 		d.app = a
@@ -195,7 +221,7 @@ func (d *driver) Run() {
 			})
 		})
 
-		draw := time.NewTicker(time.Second / 60)
+		d.draw = time.NewTicker(frameTime)
 		defer func() {
 			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 
@@ -213,7 +239,7 @@ func (d *driver) Run() {
 
 		for {
 			select {
-			case <-draw.C:
+			case <-d.draw.C:
 				d.sendPaintEvent()
 			case fn := <-d.queuedFuncs.Out():
 				fn()
@@ -662,7 +688,9 @@ func (d *driver) DoubleTapDelay() time.Duration {
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
 	d := &driver{
-		theme: fyne.ThemeVariant(2), // unspecified
+		theme:     fyne.ThemeVariant(2), // unspecified
+		frameRate: defaultFrameRate,
+		frameTime: time.Second / defaultFrameRate,
 	}
 
 	registerRepository(d)

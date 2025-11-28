@@ -3,6 +3,12 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## Next
+
+### Added
+
+* Add the ability to change the internal framerate of the driver at runtime
+
 ## 2.7.1 - 14 Nov 2025
 
 ### Fixed

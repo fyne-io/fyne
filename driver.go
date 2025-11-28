@@ -54,4 +54,14 @@ type Driver interface {
 	//
 	// Since: 2.6
 	DoFromGoroutine(fn func(), wait bool)
+
+	// SetFrameRate sets the target frame rate for the application.
+	//
+	// Since: 2.8
+	SetFrameRate(int)
+
+	// GetFrameRate returns the target frame rate for the application.
+	//
+	// Since: 2.8
+	GetFrameRate() int
 }
