@@ -56,24 +56,24 @@ type window struct {
 	icon     fyne.Resource
 	mainmenu *fyne.MainMenu
 
-	master                                         bool
-	fullScreen                                     bool
-	centered                                       bool
-	visible                                        bool
-	mousePosUpdateProcessed, resizeUpdateProcessed bool
-	newMousePosX, newMousePosY                     float64
-	mousePos                                       fyne.Position
-	mouseDragged                                   fyne.Draggable
-	mouseDraggedObjStart                           fyne.Position
-	mouseDraggedOffset                             fyne.Position
-	mouseDragPos                                   fyne.Position
-	mouseDragStarted                               bool
-	mouseButton                                    desktop.MouseButton
-	mouseOver                                      desktop.Hoverable
-	mouseLastClick                                 fyne.CanvasObject
-	mousePressed                                   fyne.CanvasObject
-	mouseClickCount                                int
-	mouseCancelFunc                                context.CancelFunc
+	master                     bool
+	fullScreen                 bool
+	centered                   bool
+	visible                    bool
+	mousePosUpdateProcessed    bool
+	newMousePosX, newMousePosY float64
+	mousePos                   fyne.Position
+	mouseDragged               fyne.Draggable
+	mouseDraggedObjStart       fyne.Position
+	mouseDraggedOffset         fyne.Position
+	mouseDragPos               fyne.Position
+	mouseDragStarted           bool
+	mouseButton                desktop.MouseButton
+	mouseOver                  desktop.Hoverable
+	mouseLastClick             fyne.CanvasObject
+	mousePressed               fyne.CanvasObject
+	mouseClickCount            int
+	mouseCancelFunc            context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -82,7 +82,6 @@ type window struct {
 	menuDeactivationPending fyne.KeyName
 
 	xpos, ypos                      int
-	newWidth, newHeight             int
 	width, height                   int
 	requestedWidth, requestedHeight int
 	shouldWidth, shouldHeight       int
