@@ -132,7 +132,7 @@ func (w *window) Show() {
 }
 
 func (w *window) ShowAtPos(xPos int, yPos int) {
-	w.RequestFocus()
+	w.Show()
 }
 
 func (w *window) ShowAndRun() {
