@@ -86,18 +86,20 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePos             fyne.Position
-	mouseDragged         fyne.Draggable
-	mouseDraggedObjStart fyne.Position
-	mouseDraggedOffset   fyne.Position
-	mouseDragPos         fyne.Position
-	mouseDragStarted     bool
-	mouseButton          desktop.MouseButton
-	mouseOver            desktop.Hoverable
-	mouseLastClick       fyne.CanvasObject
-	mousePressed         fyne.CanvasObject
-	mouseClickCount      int
-	mouseCancelFunc      context.CancelFunc
+	mousePosUpdateProcessed    bool
+	newMousePosX, newMousePosY float64
+	mousePos                   fyne.Position
+	mouseDragged               fyne.Draggable
+	mouseDraggedObjStart       fyne.Position
+	mouseDraggedOffset         fyne.Position
+	mouseDragPos               fyne.Position
+	mouseDragStarted           bool
+	mouseButton                desktop.MouseButton
+	mouseOver                  desktop.Hoverable
+	mouseLastClick             fyne.CanvasObject
+	mousePressed               fyne.CanvasObject
+	mouseClickCount            int
+	mouseCancelFunc            context.CancelFunc
 
 	onClosed           func()
 	onCloseIntercepted func()
@@ -399,7 +401,9 @@ func (w *window) setCustomCursor(rawCursor *glfw.Cursor, isCustomCursor bool) {
 }
 
 func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
-	w.processMouseMoved(xpos, ypos)
+	w.newMousePosX = xpos
+	w.newMousePosY = ypos
+	w.mousePosUpdateProcessed = false
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
