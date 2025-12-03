@@ -193,7 +193,6 @@ func (w *window) Show() {
 }
 
 func (w *window) ShowAtPos(xPos int, yPos int) {
-	println("calling ShowAtPos")
 	w.show(xPos, yPos)
 }
 
