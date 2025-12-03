@@ -158,15 +158,15 @@ func (w *window) show(xPos int, yPos int) {
 			view.SetPos(xPos, yPos)
 		}
 
-		if !build.IsWayland && w.centered {
-			w.doCenterOnScreen() // lastly center if that was requested
-		}
-		view.Show()
-
 		// save coordinates
 		if !build.IsWayland || xPos != 0 || yPos != 0 {
 			w.xpos, w.ypos = xPos, yPos
 		}
+
+		if !build.IsWayland && w.centered {
+			w.doCenterOnScreen() // lastly center if that was requested
+		}
+		view.Show()
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			w.doSetFullScreen(true)
