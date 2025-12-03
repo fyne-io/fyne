@@ -79,6 +79,8 @@ type Window interface {
 
 	// Show the window on screen.
 	Show()
+	// Show the window on screen at a position.
+	ShowAtPos(int, int)
 	// Hide the window from the user.
 	// This will not destroy the window or cause the app to exit.
 	Hide()

@@ -87,6 +87,10 @@ func (w *noosWindow) Show() {
 	w.d.renderWindow(w)
 }
 
+func (w *noosWindow) ShowAtPos(xPos int, yPos int) {
+	w.Show()
+}
+
 func (w *noosWindow) Hide() {}
 
 func (w *noosWindow) Close() {
