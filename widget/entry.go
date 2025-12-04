@@ -70,6 +70,7 @@ type Entry struct {
 	AlwaysShowValidationError bool
 
 	CursorRow, CursorColumn int
+	cursorMoved             bool
 	OnCursorChanged         func() `json:"-"`
 
 	// Icon is displayed at the outer left of the entry.
@@ -270,6 +271,7 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 
 		e.syncSelectable()
 		e.sel.selecting = true
+		e.cursorMoved = true
 	})
 }
 
@@ -433,6 +435,7 @@ func (e *Entry) Redo() {
 	}
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.cursorMoved = true
 	e.syncSelectable()
 	if e.OnChanged != nil {
 		e.OnChanged(newText)
@@ -644,6 +647,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		pos := e.CursorTextOffset()
 		deletedText := provider.deleteFromTo(pos-1, pos)
 		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		e.cursorMoved = true
 		e.syncSelectable()
 		e.undoStack.MergeOrAdd(&entryModifyAction{
 			Delete:   true,
@@ -683,6 +687,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			e.CursorRow = 0
 		}
 		e.CursorColumn = 0
+		e.cursorMoved = true
 		e.syncSelectable()
 	case fyne.KeyPageDown:
 		if e.MultiLine {
@@ -691,6 +696,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		} else {
 			e.CursorColumn = provider.len()
 		}
+		e.cursorMoved = true
 		e.syncSelectable()
 	default:
 		return
@@ -726,6 +732,7 @@ func (e *Entry) Undo() {
 	}
 	e.updateText(newText, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+	e.cursorMoved = true
 	e.syncSelectable()
 	if e.OnChanged != nil {
 		e.OnChanged(newText)
@@ -744,6 +751,7 @@ func (e *Entry) typedKeyUp(provider *RichText) {
 	if e.CursorColumn > rowLength {
 		e.CursorColumn = rowLength
 	}
+	e.cursorMoved = true
 	e.syncSelectable()
 }
 
@@ -760,6 +768,7 @@ func (e *Entry) typedKeyDown(provider *RichText) {
 	if e.CursorColumn > rowLength {
 		e.CursorColumn = rowLength
 	}
+	e.cursorMoved = true
 	e.syncSelectable()
 }
 
@@ -770,6 +779,7 @@ func (e *Entry) typedKeyLeft(provider *RichText) {
 		e.CursorRow--
 		e.CursorColumn = provider.rowLength(e.CursorRow)
 	}
+	e.cursorMoved = true
 	e.syncSelectable()
 }
 
@@ -785,11 +795,13 @@ func (e *Entry) typedKeyRight(provider *RichText) {
 	} else if e.CursorColumn < provider.len() {
 		e.CursorColumn++
 	}
+	e.cursorMoved = true
 	e.syncSelectable()
 }
 
 func (e *Entry) typedKeyHome() {
 	e.CursorColumn = 0
+	e.cursorMoved = true
 }
 
 func (e *Entry) typedKeyEnd(provider *RichText) {
@@ -798,6 +810,7 @@ func (e *Entry) typedKeyEnd(provider *RichText) {
 	} else {
 		e.CursorColumn = provider.len()
 	}
+	e.cursorMoved = true
 }
 
 // handler for Ctrl+[backspace/delete] - delete the word
@@ -834,6 +847,7 @@ func (e *Entry) deleteWord(right bool) {
 	if !right {
 		e.CursorColumn = cursorCol - (end - start)
 	}
+	e.cursorMoved = true
 	e.updateTextAndRefresh(provider.String(), false)
 }
 
@@ -872,6 +886,7 @@ func (e *Entry) TypedRune(r rune) {
 	content := provider.String()
 	e.updateText(content, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	e.cursorMoved = true
 	e.syncSelectable()
 
 	e.undoStack.MergeOrAdd(&entryModifyAction{
@@ -944,6 +959,7 @@ func (e *Entry) eraseSelection() bool {
 
 	erasedText := provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
+	e.cursorMoved = true
 	e.syncSelectable()
 	e.sel.selectRow, e.sel.selectColumn = e.CursorRow, e.CursorColumn
 	e.sel.selecting = false
@@ -1001,6 +1017,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	content := provider.String()
 	e.updateText(content, false)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	e.cursorMoved = true
 	e.syncSelectable()
 	cb := e.OnChanged
 
@@ -1085,6 +1102,7 @@ func (e *Entry) registerShortcut() {
 					e.CursorColumn = end
 				}
 			}
+			e.cursorMoved = true
 			e.syncSelectable()
 		})
 	}
@@ -1176,6 +1194,7 @@ func (e *Entry) selectAll() {
 		lastRow := e.textProvider().rows() - 1
 		e.CursorColumn = e.textProvider().rowLength(lastRow)
 		e.CursorRow = lastRow
+		e.cursorMoved = true
 		e.syncSelectable()
 		e.sel.selecting = true
 	})
@@ -1226,6 +1245,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 			// seek to the start of the selection -- return handled
 			selectStart, _ := e.sel.selection()
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
+			e.cursorMoved = true
 			e.syncSelectable()
 			e.sel.selecting = false
 			return true
@@ -1233,6 +1253,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 			// seek to the end of the selection -- return handled
 			_, selectEnd := e.sel.selection()
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
+			e.cursorMoved = true
 			e.syncSelectable()
 			e.sel.selecting = false
 			return true
@@ -1364,6 +1385,7 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 		e.CursorRow = row
 		e.CursorColumn = col
 
+		e.cursorMoved = true
 		e.syncSelectable()
 	}
 
@@ -1460,6 +1482,7 @@ func (e *Entry) typedKeyReturn(provider *RichText, multiLine bool) {
 	})
 	e.CursorColumn = 0
 	e.CursorRow++
+	e.cursorMoved = true
 	e.syncSelectable()
 }
 
@@ -1579,6 +1602,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	if textPos != resizedTextPos {
 		r.entry.setFieldsAndRefresh(func() {
 			r.entry.CursorRow, r.entry.CursorColumn = r.entry.rowColFromTextPos(textPos)
+			r.entry.cursorMoved = true
 			r.entry.sel.cursorRow, r.entry.sel.cursorRow = r.entry.CursorRow, r.entry.CursorColumn
 
 			if r.entry.sel.selecting {
@@ -1895,7 +1919,10 @@ func (r *entryContentRenderer) moveCursor() {
 	r.cursor.Move(r.content.entry.CursorPosition())
 
 	callback := r.content.entry.OnCursorChanged
-	r.ensureCursorVisible()
+	if r.content.entry.cursorMoved {
+		r.ensureCursorVisible()
+		r.content.entry.cursorMoved = false
+	}
 
 	if callback != nil {
 		callback()
