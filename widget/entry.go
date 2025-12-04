@@ -1439,6 +1439,7 @@ func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 	if callback != nil {
 		callback(text)
 	}
+	e.requestScrollingToCursor = true
 	e.Refresh()
 }
 
