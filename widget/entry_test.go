@@ -1790,6 +1790,7 @@ func TestEntry_TextWrap(t *testing.T) {
 			} else {
 				e.SetText("Testing Wrapping")
 			}
+			e.Refresh()
 			test.AssertRendersToMarkup(t, tt.want, c)
 		})
 	}
