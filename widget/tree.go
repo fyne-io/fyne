@@ -492,7 +492,7 @@ func (t *Tree) findPath(current, target TreeNodeID) (bool, []TreeNodeID) {
 		for _, child := range childUIDs(current) {
 			found, path := t.findPath(child, target)
 			if found {
-				return true, append(path, current)
+				return true, append([]TreeNodeID{current}, path...)
 			}
 		}
 	}

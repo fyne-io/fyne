@@ -1003,9 +1003,13 @@ func TestTree_FindPath(t *testing.T) {
 	})
 
 	t.Run("deeply nested node", func(t *testing.T) {
+		want := []string{"", "item_1", "item_1_2"}
 		found, parents := tree.findPath("", "item_1_2_2")
 		assert.True(t, found)
-		assert.ElementsMatch(t, []string{"", "item_1", "item_1_2"}, parents)
+		// Also make sure slice is ordered
+		for i, n := range parents {
+			assert.Equal(t, want[i], n)
+		}
 	})
 
 	t.Run("from node instead of root", func(t *testing.T) {
