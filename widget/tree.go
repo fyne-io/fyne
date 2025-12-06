@@ -234,32 +234,27 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 // Opens the branches leading to a node
 func (t *Tree) openBranches(uid TreeNodeID) {
 	found, parents := t.findPath(t.Root, uid)
-	if !found {
-		return
-	}
-
-	if len(parents) == 0 {
+	if !found || len(parents) == 0 {
 		return
 	}
 
 	t.ensureOpenMap()
-	var opened []TreeNodeID
+	var opened bool
+	f := t.OnBranchOpened
 	for _, parent := range parents {
 		if parent == t.Root {
 			continue
 		}
 		if !t.IsBranchOpen(parent) {
 			t.open[parent] = true
-			opened = append(opened, parent)
+			if f != nil {
+				f(parent)
+			}
+			opened = true
 		}
 	}
 
-	if len(opened) > 0 {
-		if f := t.OnBranchOpened; f != nil {
-			for i := len(opened) - 1; i >= 0; i-- {
-				f(opened[i])
-			}
-		}
+	if opened {
 		t.Refresh()
 	}
 }
