@@ -231,7 +231,7 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 	t.Refresh()
 }
 
-// Opens the branches leading to a node
+// openBranches opens the branches leading to a node.
 func (t *Tree) openBranches(uid TreeNodeID) {
 	found, parents := t.findPath(t.Root, uid)
 	if !found || len(parents) == 0 {
@@ -469,7 +469,7 @@ func (t *Tree) UnselectAll() {
 	}
 }
 
-// finPath finds the path to a target node
+// findPath finds the path to a target node.
 func (t *Tree) findPath(current, target TreeNodeID) (bool, []TreeNodeID) {
 	if current == target {
 		return true, nil

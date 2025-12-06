@@ -1019,7 +1019,7 @@ func TestTree_FindPath(t *testing.T) {
 	})
 }
 
-func TestTree_ExpandBranches(t *testing.T) {
+func TestTree_OpenBranches(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.NewTheme())
 
@@ -1056,10 +1056,10 @@ func TestTree_ExpandBranches(t *testing.T) {
 	t.Run("expand when parents already open", func(t *testing.T) {
 		tree.CloseAllBranches()
 		tree.OpenBranch("item_1")
-		tree.OpenBranch("item1_1")
+		tree.OpenBranch("item_1_1")
 
-		tree.openBranches("item1_1_1")
+		tree.openBranches("item_1_1_1")
 		assert.True(t, tree.IsBranchOpen("item_1"))
-		assert.True(t, tree.IsBranchOpen("item1_1"))
+		assert.True(t, tree.IsBranchOpen("item_1_1"))
 	})
 }
