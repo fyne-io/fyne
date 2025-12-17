@@ -367,6 +367,14 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	}
 }
 
+func (e *Entry) StartSelectRow() int {
+	return e.selectRow
+}
+
+func (e *Entry) StartSelectColumn() int {
+	return e.selectColumn
+}
+
 // MinSize returns the size that this widget should not shrink below.
 func (e *Entry) MinSize() fyne.Size {
 	cached := e.minCache
