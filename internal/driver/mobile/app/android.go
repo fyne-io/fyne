@@ -761,6 +761,12 @@ var androidKeycoe = map[int32]key.Code{
 	C.AKEYCODE_NUMPAD_ENTER:    key.CodeKeypadEnter,
 	C.AKEYCODE_NUMPAD_EQUALS:   key.CodeKeypadEqualSign,
 	C.AKEYCODE_VOLUME_MUTE:     key.CodeMute,
+
+	C.AKEYCODE_DPAD_UP:     key.CodeDPadUp,
+	C.AKEYCODE_DPAD_DOWN:   key.CodeDPadDown,
+	C.AKEYCODE_DPAD_LEFT:   key.CodeDPadLeft,
+	C.AKEYCODE_DPAD_RIGHT:  key.CodeDPadRight,
+	C.AKEYCODE_DPAD_CENTER: key.CodeDPadCenter,
 }
 
 func convAndroidKeyCode(aKeyCode int32) key.Code {
@@ -783,11 +789,6 @@ func convAndroidKeyCode(aKeyCode int32) key.Code {
 	C.AKEYCODE_ENDCALL
 	C.AKEYCODE_STAR
 	C.AKEYCODE_POUND
-	C.AKEYCODE_DPAD_UP
-	C.AKEYCODE_DPAD_DOWN
-	C.AKEYCODE_DPAD_LEFT
-	C.AKEYCODE_DPAD_RIGHT
-	C.AKEYCODE_DPAD_CENTER
 	C.AKEYCODE_POWER
 	C.AKEYCODE_CAMERA
 	C.AKEYCODE_CLEAR

@@ -580,6 +580,11 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeGraveAccent:        fyne.KeyBackTick,
 
 	key.CodeBackButton: mobile.KeyBack,
+	key.CodeDPadUp:     mobile.KeyDPadUp,
+	key.CodeDPadDown:   mobile.KeyDPadDown,
+	key.CodeDPadLeft:   mobile.KeyDPadLeft,
+	key.CodeDPadRight:  mobile.KeyDPadRight,
+	key.CodeDPadCenter: mobile.KeyDPadCenter,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
