@@ -259,6 +259,7 @@ func (t *Tree) openBranches(uid TreeNodeID) {
 	}
 }
 
+// Resize sets a new size for a widget.
 func (t *Tree) Resize(size fyne.Size) {
 	if size == t.Size() {
 		return
