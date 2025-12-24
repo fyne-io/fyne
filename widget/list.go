@@ -151,6 +151,7 @@ func (l *List) RefreshItem(id ListItemID) {
 		return
 	}
 	l.BaseWidget.Refresh()
+	l.Unselect(id)
 	lo := l.scroller.Content.(*fyne.Container).Layout.(*listLayout)
 	item, ok := lo.searchVisible(lo.visible, id)
 	if ok {
@@ -398,6 +399,17 @@ func (l *List) contentMinSize() fyne.Size {
 	height += float32(items-totalCustom) * templateHeight
 
 	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
+}
+
+func (l *List) Tapped(event *fyne.PointEvent) {
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(l)
+	if canvas != nil {
+		// First, unfocus the currently focused widget if any
+		if l.focused {
+			l.FocusLost()
+		}
+		canvas.Focus(l)
+	}
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
