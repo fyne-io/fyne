@@ -156,8 +156,9 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	r := &navigatorRenderer{
 		nav: nav,
 		title: widget.Label{
-			Text:      nav.Title,
-			Alignment: fyne.TextAlignCenter,
+			Text:       nav.Title,
+			Alignment:  fyne.TextAlignCenter,
+			Truncation: fyne.TextTruncateEllipsis,
 		},
 		back: widget.Button{
 			Icon:     theme.NavigateBackIcon(),
@@ -173,8 +174,10 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 
 	nav.setup()
 
+	pad := r.back.MinSize().Width
 	r.object = NewBorder(
-		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward), &r.title),
+		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward),
+			&fyne.Container{Layout: layout.NewCustomPaddedLayout(0, 0, pad, pad), Objects: []fyne.CanvasObject{&r.title}}),
 		nil,
 		nil,
 		nil,
