@@ -3,6 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.7.2 - 6 Jan 2026
+
+### Changed
+
+* Added Japanese translation
+
+### Fixed
+
+* Crash in accordion (#3966)
+* Extended list does not focus correctly when tapped (#5997)
+* TextGrid: Ensure we are refreshing the correct row (#6023)
+* Entry doesn't lose focus when clicking on button elsewhere (#5107)
+* Mouse clicks missed (#4672)
+* Possible crash when form is truncated when an Entry is focused
+* Alt-Tab'ing should not open MainMenu (#2998)
+* Wayland: ALT key steals focus to the menubar if it exists (#5960)
+* Extending the build-In theme only works fully when theme is set after app has started (#6056)
+* Multi-segment RichText not right aligning correctly (#6060)
+
+
 ## 2.7.1 - 14 Nov 2025
 
 ### Fixed
