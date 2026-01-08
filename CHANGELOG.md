@@ -3,6 +3,14 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.7.3 - Ongoing
+
+### Fixed
+
+* systray not functional within snap sandbox (systray#64)
+* A dialog with a table. Selecting a cell and closing the dialog produces a Fyne error (#5166)
+
+
 ## 2.7.2 - 6 Jan 2026
 
 ### Changed
