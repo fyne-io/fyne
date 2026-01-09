@@ -22,6 +22,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"sync"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
@@ -32,21 +33,34 @@ import (
 
 type javaStream struct {
 	stream unsafe.Pointer // java.io.InputStream
+	mu     sync.Mutex
+	closed bool
 }
 
 // Declare conformity to ReadCloser interface
 var _ io.ReadCloser = (*javaStream)(nil)
 
+// errStreamClosed is returned when attempting to use a closed stream
+var errStreamClosed = errors.New("stream is closed")
+
 func (s *javaStream) Read(p []byte) (int, error) {
+	s.mu.Lock()
+	if s.closed || s.stream == nil {
+		s.mu.Unlock()
+		return 0, errStreamClosed
+	}
+	stream := s.stream
+	s.mu.Unlock()
+
 	count := 0
 	err := app.RunOnJVM(func(_, env, ctx uintptr) error {
 		cCount := C.int(0)
-		cBytes := unsafe.Pointer(C.readStream(C.uintptr_t(env), C.uintptr_t(ctx), s.stream, C.int(len(p)), &cCount))
-		if cCount == -1 {
+		cBytes := unsafe.Pointer(C.readStream(C.uintptr_t(env), C.uintptr_t(ctx), stream, C.int(len(p)), &cCount))
+		if cCount == -1 || cBytes == nil {
 			return io.EOF
 		}
 		defer C.free(cBytes)
-		count = int(cCount) // avoid sending -1 instead of 0 on completion
+		count = int(cCount)
 
 		bytes := C.GoBytes(cBytes, cCount)
 		for i := 0; i < int(count); i++ {
@@ -59,9 +73,18 @@ func (s *javaStream) Read(p []byte) (int, error) {
 }
 
 func (s *javaStream) Close() error {
-	app.RunOnJVM(func(_, env, ctx uintptr) error {
-		C.closeStream(C.uintptr_t(env), C.uintptr_t(ctx), s.stream)
+	s.mu.Lock()
+	if s.closed || s.stream == nil {
+		s.mu.Unlock()
+		return nil
+	}
+	s.closed = true
+	stream := s.stream
+	s.stream = nil
+	s.mu.Unlock()
 
+	app.RunOnJVM(func(_, env, ctx uintptr) error {
+		C.closeStream(C.uintptr_t(env), C.uintptr_t(ctx), stream)
 		return nil
 	})
 
@@ -136,8 +159,16 @@ func nativeFileSave(f *fileSave, truncate bool) (io.WriteCloser, error) {
 var _ io.WriteCloser = (*javaStream)(nil)
 
 func (s *javaStream) Write(p []byte) (int, error) {
+	s.mu.Lock()
+	if s.closed || s.stream == nil {
+		s.mu.Unlock()
+		return 0, errStreamClosed
+	}
+	stream := s.stream
+	s.mu.Unlock()
+
 	err := app.RunOnJVM(func(_, env, ctx uintptr) error {
-		C.writeStream(C.uintptr_t(env), C.uintptr_t(ctx), s.stream, (*C.char)(C.CBytes(p)), C.int(len(p)))
+		C.writeStream(C.uintptr_t(env), C.uintptr_t(ctx), stream, (*C.char)(C.CBytes(p)), C.int(len(p)))
 		return nil
 	})
 

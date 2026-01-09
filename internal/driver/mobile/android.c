@@ -170,6 +170,10 @@ void* saveStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr, bool truncate)
 }
 
 jbyte* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* total) {
+	if (stream == NULL) {
+		*total = -1;
+		return NULL;
+	}
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
 	jmethodID read = find_method(env, streamClass, "read", "([BII)I");
@@ -188,6 +192,12 @@ jbyte* readStream(uintptr_t jni_env, uintptr_t ctx, void* stream, int len, int* 
 }
 
 void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, jbyte* buf, int len) {
+	if (stream == NULL) {
+		if (buf != NULL) {
+			free(buf);
+		}
+		return;
+	}
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
 	jmethodID write = find_method(env, streamClass, "write", "([BII)V");
@@ -201,6 +211,9 @@ void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, jbyte* buf, int
 }
 
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
+	if (stream == NULL) {
+		return;
+	}
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass streamClass = (*env)->GetObjectClass(env, stream);
 	jmethodID close = find_method(env, streamClass, "close", "()V");
