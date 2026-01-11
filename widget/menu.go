@@ -71,6 +71,14 @@ func (m *Menu) FocusSearch() {
 	}
 }
 
+// FocusSearchOn focuses the search entry using the provided canvas.
+// This is useful when the menu hasn't been fully added to the widget tree yet.
+func (m *Menu) FocusSearchOn(c fyne.Canvas) {
+	if m.searchEnabled && m.searchEntry != nil && c != nil {
+		c.Focus(m.searchEntry)
+	}
+}
+
 // ActivateNext activates the menu item following the currently active menu item.
 // If there is no menu item active, it activates the first menu item.
 // If there is no menu item after the current active one, it does nothing.

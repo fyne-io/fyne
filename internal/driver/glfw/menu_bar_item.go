@@ -35,9 +35,6 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 				globalSearchMenu.Menu.Hide()
 				globalSearchMenu.Menu.OnDismiss = i.Parent.deactivate
 				i.child = globalSearchMenu.Menu
-				if i.child != nil {
-					i.child.FocusSearch()
-				}
 			} else {
 				child := publicWidget.NewMenu(i.Menu)
 				child.Hide()

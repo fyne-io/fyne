@@ -90,7 +90,7 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 	child := item.Child()
 	child.Show()
 	if child != nil {
-		child.FocusSearch()
+		child.FocusSearchOn(b.canvas)
 	}
 	b.Refresh()
 }
@@ -119,6 +119,9 @@ func (b *MenuBar) toggle(item *menuBarItem) {
 	} else {
 		b.activateChild(item)
 		b.canvas.Focus(item)
+		if child := item.Child(); child != nil {
+			child.FocusSearchOn(b.canvas)
+		}
 	}
 }
 
