@@ -222,6 +222,26 @@ func TestForm_Validation(t *testing.T) {
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }
 
+func TestForm_Validation_Reset(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
+
+	slide := NewSlider(0, 5)
+	entry := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	items := []*FormItem{
+		{Text: "Slide", Widget: slide},
+		{Text: "Input", Widget: entry},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	w.Canvas().Focus(entry)
+	form.Items = []*FormItem{}
+	w.Canvas().Focus(slide)
+}
+
 func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.Theme())

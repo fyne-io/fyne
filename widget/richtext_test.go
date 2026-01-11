@@ -52,6 +52,83 @@ func TestText_Alignment(t *testing.T) {
 	assert.Equal(t, fyne.TextAlignTrailing, test.TempWidgetRenderer(t, text).Objects()[0].(*canvas.Text).Alignment)
 }
 
+func TestText_AlignmentInline(t *testing.T) {
+	seg1 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignTrailing,
+		},
+		Text: "Thing 1",
+	}
+	seg2 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignTrailing,
+			Inline:    true,
+		},
+		Text: "Thing 2",
+	}
+	seg3 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignTrailing,
+			Inline:    true,
+		},
+		Text: "Thing 3",
+	}
+	text := NewRichText(seg1, seg2, seg3)
+	text.Resize(fyne.NewSize(150, 50))
+
+	r := test.TempWidgetRenderer(t, text)
+	obj1 := r.Objects()[0].(*canvas.Text)
+	right1 := obj1.Position().X + obj1.Size().Width
+	assert.Equal(t, fyne.TextAlignTrailing, obj1.Alignment)
+	obj3 := r.Objects()[2].(*canvas.Text)
+	right3 := obj3.Position().X + obj3.Size().Width
+	assert.Equal(t, fyne.TextAlignTrailing, obj3.Alignment)
+
+	assert.Equal(t, right1, right3)
+}
+
+func TestText_AlignmentInlineCenter(t *testing.T) {
+	seg1 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignCenter,
+		},
+		Text: "MMM",
+	}
+	seg2 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignCenter,
+			Inline:    true,
+		},
+		Text: "MMM",
+	}
+	seg3 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignCenter,
+			Inline:    true,
+		},
+		Text: "MMM",
+	}
+	seg4 := &TextSegment{
+		Style: RichTextStyle{
+			Alignment: fyne.TextAlignCenter,
+			Inline:    true,
+		},
+		Text: "MMM",
+	}
+	text := NewRichText(seg1, seg2, seg3, seg4)
+	text.Resize(fyne.NewSize(150, 50))
+
+	r := test.TempWidgetRenderer(t, text)
+	obj1 := r.Objects()[0].(*canvas.Text)
+	left1 := obj1.Position().X
+	assert.Equal(t, fyne.TextAlignCenter, obj1.Alignment)
+	obj3 := r.Objects()[2].(*canvas.Text)
+	left3 := obj3.Position().X
+	assert.Equal(t, fyne.TextAlignCenter, obj3.Alignment)
+
+	assert.Equal(t, left1, left3)
+}
+
 func TestText_Row(t *testing.T) {
 	text := NewRichTextWithText("")
 	text.Segments[0].(*TextSegment).Text = "test"

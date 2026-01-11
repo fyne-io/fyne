@@ -55,7 +55,7 @@ type (
 var (
 	noBuffer          = Buffer(gl.NoBuffer)
 	noShader          = Shader(gl.NoShader)
-	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST}
+	textureFilterToGL = [...]int32{gl.LINEAR, gl.NEAREST, gl.LINEAR}
 )
 
 func (p *painter) Init() {
@@ -69,7 +69,7 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size")
+	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 	p.lineProgram = ProgramState{
@@ -115,7 +115,7 @@ func (p *painter) Init() {
 	}
 	p.getUniformLocations(p.polygonProgram,
 		"frame_size", "rect_coords", "edge_softness",
-		"shape_radius", "angle", "sides",
+		"outer_radius", "angle", "sides",
 		"fill_color", "corner_radius",
 		"stroke_width", "stroke_color",
 	)

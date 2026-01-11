@@ -177,6 +177,11 @@ func (b *Button) SetText(text string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
+	impl := b.super()
+	if c := fyne.CurrentApp().Driver().CanvasForObject(impl); c != nil {
+		c.Focus(nil) // the focus manager won't get this Tap and we are not focusable
+	}
+
 	if b.Disabled() {
 		return
 	}

@@ -16,8 +16,8 @@ type Navigation struct {
 
 	Root      fyne.CanvasObject
 	Title     string
-	OnBack    func()
-	OnForward func()
+	OnBack    func() `json:"-"`
+	OnForward func() `json:"-"`
 
 	level  int
 	stack  fyne.Container
@@ -88,7 +88,8 @@ func (nav *Navigation) Back() fyne.CanvasObject {
 	return objs[nav.level]
 }
 
-// Forward shows the next object in the stack again.
+// Forward shows the next object in the stack again
+// and returns the object that was visible before.
 //
 // Since: 2.7
 func (nav *Navigation) Forward() fyne.CanvasObject {
@@ -99,6 +100,7 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 	nav.stack.Objects[nav.level-1].Hide()
 	nav.stack.Objects[nav.level].Show()
 	nav.level++
+	nav.Refresh()
 
 	return nav.stack.Objects[nav.level-1]
 }
@@ -108,6 +110,11 @@ func (nav *Navigation) Forward() fyne.CanvasObject {
 // Since: 2.7
 func (nav *Navigation) SetTitle(s string) {
 	nav.Title = s
+
+	if len(nav.titles) > 0 {
+		nav.titles[0] = s
+	}
+
 	nav.Refresh()
 }
 
@@ -149,8 +156,9 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	r := &navigatorRenderer{
 		nav: nav,
 		title: widget.Label{
-			Text:      nav.Title,
-			Alignment: fyne.TextAlignCenter,
+			Text:       nav.Title,
+			Alignment:  fyne.TextAlignCenter,
+			Truncation: fyne.TextTruncateEllipsis,
 		},
 		back: widget.Button{
 			Icon:     theme.NavigateBackIcon(),
@@ -166,8 +174,10 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 
 	nav.setup()
 
+	pad := r.back.MinSize().Width
 	r.object = NewBorder(
-		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward), &r.title),
+		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward),
+			&fyne.Container{Layout: layout.NewCustomPaddedLayout(0, 0, pad, pad), Objects: []fyne.CanvasObject{&r.title}}),
 		nil,
 		nil,
 		nil,

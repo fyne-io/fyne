@@ -812,9 +812,11 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		}
 	}
 
+	innerPadding := r.obj.Theme().Size(theme.SizeNameInnerPadding)
 	spare := lineWidth - xPos
 	switch align {
 	case fyne.TextAlignTrailing:
+		spare += innerPadding
 		first := texts[0]
 		first.Resize(fyne.NewSize(first.Size().Width+spare, height))
 		setAlign(first, fyne.TextAlignTrailing)
@@ -823,6 +825,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 			text.Move(text.Position().Add(fyne.NewPos(spare, 0)))
 		}
 	case fyne.TextAlignCenter:
+		spare += innerPadding
 		pad := spare / 2
 		first := texts[0]
 		first.Resize(fyne.NewSize(first.Size().Width+pad, height))

@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -62,6 +63,24 @@ func TestButton_Tapped(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for button tap")
 		}
 	}()
+}
+
+func TestButton_Tapped_Unfocus(t *testing.T) {
+	e := widget.NewEntry()
+	button := widget.NewButton("Hi", func() {
+	})
+
+	w := test.NewWindow(&fyne.Container{
+		Layout:  layout.NewGridLayoutWithColumns(1),
+		Objects: []fyne.CanvasObject{e, button},
+	})
+	c := w.Canvas()
+
+	c.Focus(e)
+	assert.Equal(t, e, c.Focused())
+
+	test.Tap(button)
+	assert.Nil(t, c.Focused())
 }
 
 func TestButton_Disable(t *testing.T) {

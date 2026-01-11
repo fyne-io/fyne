@@ -28,17 +28,18 @@ type unixData struct {
 func (p *Packager) packageUNIX() error {
 	var prefixDir string
 	local := "local/"
-	tempDir := "tmp-pkg"
+	dirName := filepath.Base(p.exe)
 
-	if p.install {
-		tempDir = ""
+	outDir := p.dir
+	if !p.install {
+		outDir = util.EnsureSubDir(util.EnsureSubDir(p.dir, "tmp-pkg"), dirName)
 	}
 
 	if _, err := os.Stat(filepath.Join("/", "usr", "local")); os.IsNotExist(err) {
-		prefixDir = util.EnsureSubDir(util.EnsureSubDir(p.dir, tempDir), "usr")
+		prefixDir = util.EnsureSubDir(outDir, "usr")
 		local = ""
 	} else {
-		prefixDir = util.EnsureSubDir(util.EnsureSubDir(util.EnsureSubDir(p.dir, tempDir), "usr"), "local")
+		prefixDir = util.EnsureSubDir(util.EnsureSubDir(outDir, "usr"), "local")
 	}
 
 	shareDir := util.EnsureSubDir(prefixDir, "share")
@@ -88,9 +89,10 @@ func (p *Packager) packageUNIX() error {
 	}
 
 	if !p.install {
-		defer os.RemoveAll(filepath.Join(p.dir, tempDir))
+		parent := filepath.Dir(outDir)
+		defer os.RemoveAll(parent)
 
-		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
+		makefile, _ := os.Create(filepath.Join(outDir, "Makefile"))
 		err := templates.MakefileUNIX.Execute(makefile, tplData)
 		if err != nil {
 			return fmt.Errorf("failed to write Makefile string: %w", err)
@@ -100,7 +102,7 @@ func (p *Packager) packageUNIX() error {
 		if p.os == "openbsd" {
 			tarCmdArgs = []string{"-zcf", filepath.Join(p.dir, p.Name+".tar.gz")}
 		}
-		tarCmdArgs = append(tarCmdArgs, "-C", filepath.Join(p.dir, tempDir), "usr", "Makefile")
+		tarCmdArgs = append(tarCmdArgs, "-C", parent, dirName)
 
 		var buf bytes.Buffer
 		tarCmd := execabs.Command("tar", tarCmdArgs...)
