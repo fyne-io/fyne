@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
@@ -246,7 +247,7 @@ func (m *Menu) initSearchUI() {
 	}
 
 	e := NewEntry()
-	e.PlaceHolder = "Search…"
+	e.PlaceHolder = lang.L("Search...")
 	e.OnChanged = func(s string) {
 		m.onSearchChanged(s)
 	}

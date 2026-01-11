@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -207,28 +208,13 @@ type MenuWithGlobalSearch struct {
 	minSearchWidth     float32
 }
 
-// NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu
-// This is automatically used when a menu contains a search menu item (created by AddSearchToMainMenu)
-// The search functionality is automatically added to the Help menu, or creates a Help menu if it doesn't exist
+// NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu.
+// This is automatically used for the Help menu to provide search functionality.
 func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWithGlobalSearch {
-	var searchLabel string
-	filteredItems := make([]*fyne.MenuItem, 0, len(menu.Items))
-	for _, item := range menu.Items {
-		if fyne.IsSearchMenuItem(item) {
-			searchLabel = item.Label
-			continue
-		}
-		filteredItems = append(filteredItems, item)
-	}
-
-	if searchLabel == "" {
-		searchLabel = fyne.DefaultSearchMenuLabel
-	}
-
-	filteredMenu := fyne.NewMenu(menu.Label, filteredItems...)
+	searchLabel := lang.L("Search...")
 
 	m := &MenuWithGlobalSearch{
-		Menu:               NewMenuWithSearch(filteredMenu),
+		Menu:               NewMenuWithSearch(menu),
 		searchableMainMenu: NewSearchableMainMenu(mainMenu),
 	}
 
@@ -307,7 +293,7 @@ func (m *MenuWithGlobalSearch) displaySearchResults() {
 
 	if len(m.searchResults) == 0 {
 		noResultsItem := newMenuItem(&fyne.MenuItem{
-			Label:    "No results found",
+			Label:    lang.L("No results found"),
 			Disabled: true,
 		}, m.Menu)
 		resultItems = append(resultItems, noResultsItem)

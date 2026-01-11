@@ -26,18 +26,9 @@ type menuBarItem struct {
 	hovered bool
 }
 
-func (i *menuBarItem) hasSearchItem() bool {
-	for _, item := range i.Menu.Items {
-		if fyne.IsSearchMenuItem(item) {
-			return true
-		}
-	}
-	return false
-}
-
 func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
-		if i.hasSearchItem() {
+		if fyne.IsHelpMenu(i.Menu) {
 			mainMenu := i.Parent.getMainMenu()
 			if mainMenu != nil {
 				globalSearchMenu := publicWidget.NewMenuWithGlobalSearch(i.Menu, mainMenu)
