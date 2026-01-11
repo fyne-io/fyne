@@ -3,6 +3,7 @@ package container
 import (
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -155,4 +156,45 @@ func TestNavigation_StructWithRootAndTitle(t *testing.T) {
 
 	assert.Equal(t, "Nav Test", nav.Title)
 	assert.Equal(t, "Nav Test", r.title.Text)
+}
+
+func TestNavigation_ForwardRefresh(t *testing.T) {
+	vbox := NewVBox()
+	nav := NewNavigationWithTitle(vbox, "Root")
+
+	secVb := NewVBox()
+	secVb.Add(widget.NewLabel("Second"))
+	secVb.Add(widget.NewProgressBarInfinite())
+
+	secTit := "Progressbar"
+	secBtn := widget.NewButton("NextPage", func() {
+		nav.PushWithTitle(secVb, secTit)
+	})
+
+	vbox.Add(secBtn)
+
+	thrVb := NewVBox()
+	thrVb.Add(widget.NewLabel("Third"))
+	thrVb.Add(widget.NewSlider(1, 100))
+
+	thrTit := "Third layout"
+	thrBtn := widget.NewButton("toThird", func() {
+		nav.PushWithTitle(thrVb, thrTit)
+	})
+
+	secVb.Add(thrBtn)
+
+	tr := test.TempWidgetRenderer(t, nav)
+	r := tr.(*navigatorRenderer)
+
+	secBtn.Tapped(&fyne.PointEvent{})
+	thrBtn.Tapped(&fyne.PointEvent{})
+
+	nav.Back()
+	nav.Back()
+
+	nav.Forward()
+	assert.Equal(t, secTit, r.title.Text)
+	nav.Forward()
+	assert.Equal(t, thrTit, r.title.Text)
 }

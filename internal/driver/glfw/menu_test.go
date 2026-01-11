@@ -3,6 +3,9 @@
 package glfw
 
 import (
+	"io"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 
@@ -13,6 +16,11 @@ import (
 )
 
 func Test_Menu_Empty(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// bar := buildMenuOverlay(fyne.NewMainMenu(), w.window)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	w := createWindow("Menu Test")
 	bar := buildMenuOverlay(fyne.NewMainMenu(), w.window)
 	assert.Nil(t, bar) // no bar but does not crash

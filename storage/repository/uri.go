@@ -3,7 +3,7 @@ package repository
 import (
 	"bufio"
 	"mime"
-	"path/filepath"
+	"path"
 	"strings"
 	"unicode/utf8"
 
@@ -40,11 +40,11 @@ type uri struct {
 }
 
 func (u *uri) Extension() string {
-	return filepath.Ext(u.path)
+	return path.Ext(u.path)
 }
 
 func (u *uri) Name() string {
-	return filepath.Base(u.path)
+	return path.Base(u.path)
 }
 
 func (u *uri) MimeType() string {

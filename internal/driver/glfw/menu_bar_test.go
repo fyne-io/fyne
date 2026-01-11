@@ -310,10 +310,14 @@ func TestMenuBar(t *testing.T) {
 							for _, a := range s.actions {
 								switch a.typ {
 								case "move":
-									test.MoveMouse(c, a.pos)
+									runOnMain(func() {
+										test.MoveMouse(c, a.pos)
+									})
 								case "tap":
-									test.MoveMouse(c, a.pos)
-									test.TapCanvas(c, a.pos)
+									runOnMain(func() {
+										test.MoveMouse(c, a.pos)
+										test.TapCanvas(c, a.pos)
+									})
 								}
 							}
 							var capture2 image.Image

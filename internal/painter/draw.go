@@ -33,6 +33,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 
 	outerRadius := fyne.Min(size.Width, size.Height) / 2
 	innerRadius := float32(float64(outerRadius) * math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
+	cornerRadius := fyne.Min(GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	startAngle, endAngle := NormalizeArcAngles(arc.StartAngle, arc.EndAngle)
 
 	// convert to radians
@@ -48,11 +49,6 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		sweep = 2 * math.Pi
 	} else if sweep < -2*math.Pi {
 		sweep = -2 * math.Pi
-	}
-
-	cornerRadius := arc.CornerRadius
-	if arc.CornerRadius == canvas.RadiusMaximum {
-		cornerRadius = GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle)
 	}
 
 	cornerRadius = scale(cornerRadius)
@@ -156,11 +152,13 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 // The scale function is used to understand how many pixels are required per unit of size.
 func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32) float32) *image.RGBA {
 	size := polygon.Size()
-	cornerRadius := scale(polygon.CornerRadius)
 
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
-	shapeRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := scale(fyne.Min(size.Width, size.Height) / 2)
+	cornerRadius := scale(fyne.Min(GetMaximumRadius(size), polygon.CornerRadius))
+	sides := int(polygon.Sides)
+	angle := polygon.Angle
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
@@ -168,15 +166,15 @@ func DrawPolygon(polygon *canvas.Polygon, vectorPad float32, scale func(float32)
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), filler)
 		filler.Draw()
 	}
 
 	if polygon.StrokeColor != nil && polygon.StrokeWidth > 0 {
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
-		dasher.SetStroke(fixed.Int26_6(float64(polygon.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(shapeRadius), float64(cornerRadius), float64(polygon.Angle), int(polygon.Sides), dasher)
+		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), dasher)
 		dasher.Draw()
 	}
 
@@ -195,24 +193,12 @@ func DrawRectangle(rect *canvas.Rectangle, rWidth, rHeight, vectorPad float32, s
 }
 
 func drawOblong(fill, strokeCol color.Color, strokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rWidth, rHeight, vectorPad float32, scale func(float32) float32) *image.RGBA {
-	// The maximum possible corner radius for a circular shape
-	maxCornerRadius := GetMaximumRadius(fyne.NewSize(rWidth, rHeight))
-
-	if topRightRadius == canvas.RadiusMaximum {
-		topRightRadius = maxCornerRadius
-	}
-
-	if topLeftRadius == canvas.RadiusMaximum {
-		topLeftRadius = maxCornerRadius
-	}
-
-	if bottomRightRadius == canvas.RadiusMaximum {
-		bottomRightRadius = maxCornerRadius
-	}
-
-	if bottomLeftRadius == canvas.RadiusMaximum {
-		bottomLeftRadius = maxCornerRadius
-	}
+	// The maximum possible corner radii for a circular shape
+	size := fyne.NewSize(rWidth, rHeight)
+	topRightRadius = GetMaximumCornerRadius(topRightRadius, topLeftRadius, bottomRightRadius, size)
+	topLeftRadius = GetMaximumCornerRadius(topLeftRadius, topRightRadius, bottomLeftRadius, size)
+	bottomRightRadius = GetMaximumCornerRadius(bottomRightRadius, bottomLeftRadius, topRightRadius, size)
+	bottomLeftRadius = GetMaximumCornerRadius(bottomLeftRadius, bottomRightRadius, topLeftRadius, size)
 
 	width := int(scale(rWidth + vectorPad*2))
 	height := int(scale(rHeight + vectorPad*2))
@@ -315,11 +301,17 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 		return
 	}
 	gf := rasterx.RoundGap
+	angleStep := 2 * math.Pi / float64(sides)
+	rotRads := rot*math.Pi/180 - math.Pi/2
+
+	// fully rounded, draw circle
+	if math.Min(cornerRadius, radius) == radius {
+		rasterx.AddCircle(cx, cy, radius, p)
+		return
+	}
 
 	// sharp polygon fast path
 	if cornerRadius <= 0 {
-		angleStep := 2 * math.Pi / float64(sides)
-		rotRads := rot*math.Pi/180 - math.Pi/2
 		x0 := cx + radius*math.Cos(rotRads)
 		y0 := cy + radius*math.Sin(rotRads)
 		p.Start(rasterx.ToFixedP(x0, y0))
@@ -340,8 +332,6 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	}
 
 	// regular polygon vertices
-	angleStep := 2 * math.Pi / float64(sides)
-	rotRads := -rot*math.Pi/180 - math.Pi/2
 	xs := make([]float64, sides)
 	ys := make([]float64, sides)
 	for i := 0; i < sides; i++ {
@@ -629,11 +619,34 @@ func GetCornerRadius(perCornerRadius, baseCornerRadius float32) float32 {
 	return perCornerRadius
 }
 
-// GetMaximumRadius returns the maximum possible radius that fits within the given size.
+// GetMaximumRadius returns the maximum possible corner radius that fits within the given size.
 // It calculates half of the smaller dimension (width or height) of the provided fyne.Size.
-// This is typically used for drawing circular corners in rectangles, circles or squares.
+//
+// This is typically used for drawing circular corners in rectangles, circles or squares with the same radius for all corners.
 func GetMaximumRadius(size fyne.Size) float32 {
 	return fyne.Min(size.Height, size.Width) / 2
+}
+
+// GetMaximumCornerRadius returns the maximum possible corner radius for an individual corner,
+// considering the specified corner radius, the radii of adjacent corners, and the maximum radii
+// allowed for the width and height of the shape. Corner radius may utilize unused capacity from adjacent corners with radius smaller than maximum value
+// so this corner can grow up to double the maximum radius of the smaller dimension (width or height) without causing overlaps.
+//
+// This is typically used for drawing circular corners in rectangles or squares with different corner radii.
+func GetMaximumCornerRadius(radius, adjacentWidthRadius, adjacentHeightRadius float32, size fyne.Size) float32 {
+	maxWidthRadius := size.Width / 2
+	maxHeightRadius := size.Height / 2
+	// fast path: corner radius fits within both per-axis maxima
+	if radius <= fyne.Min(maxWidthRadius, maxHeightRadius) {
+		return radius
+	}
+	// expand per-axis limits by borrowing any unused capacity from adjacent corners
+	expandedMaxWidthRadius := 2*maxWidthRadius - fyne.Min(maxWidthRadius, adjacentWidthRadius)
+	expandedMaxHeightRadius := 2*maxHeightRadius - fyne.Min(maxHeightRadius, adjacentHeightRadius)
+
+	// respect the smaller axis and never exceed the requested radius
+	expandedMaxRadius := fyne.Min(expandedMaxWidthRadius, expandedMaxHeightRadius)
+	return fyne.Min(expandedMaxRadius, radius)
 }
 
 // GetMaximumRadiusArc returns the maximum possible corner radius for an arc segment based on the outer radius,
@@ -642,6 +655,7 @@ func GetMaximumRadius(size fyne.Size) float32 {
 func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 	// height (thickness), width (length)
 	thickness := outerRadius - innerRadius
+	// TODO: length formula can be improved to get a fully rounded (pill shape) outer edge for thin (small sweep) arc segments
 	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
 	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
 

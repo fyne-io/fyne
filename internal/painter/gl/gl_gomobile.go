@@ -56,7 +56,7 @@ var (
 	compiled          []ProgramState // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
 	noShader          = Shader{}
-	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest}
+	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
 
 func (p *painter) glctx() gl.Context {
@@ -74,7 +74,7 @@ func (p *painter) Init() {
 			uniforms:   make(map[string]*UniformState),
 			attributes: make(map[string]Attribute),
 		}
-		p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size")
+		p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 		p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 		p.lineProgram = ProgramState{
@@ -120,7 +120,7 @@ func (p *painter) Init() {
 		}
 		p.getUniformLocations(p.polygonProgram,
 			"frame_size", "rect_coords", "edge_softness",
-			"shape_radius", "angle", "sides",
+			"outer_radius", "angle", "sides",
 			"fill_color", "corner_radius",
 			"stroke_width", "stroke_color",
 		)

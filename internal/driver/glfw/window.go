@@ -743,6 +743,10 @@ func (w *window) processFocused(focus bool) {
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
+		// Avoid triggering menu on Alt+Tab: glfw sends a fake "alt key released" event immediately after
+		// unfocusing the window, and it should be ignored.
+		w.menuTogglePending = desktop.KeyNone
+		w.menuDeactivationPending = desktop.KeyNone
 
 		// check whether another window was focused or not
 		if curWindow != w {

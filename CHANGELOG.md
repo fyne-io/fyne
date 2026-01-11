@@ -3,6 +3,129 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.7.2 - 6 Jan 2026
+
+### Changed
+
+* Added Japanese translation
+
+### Fixed
+
+* Crash in accordion (#3966)
+* Extended list does not focus correctly when tapped (#5997)
+* TextGrid: Ensure we are refreshing the correct row (#6023)
+* Entry doesn't lose focus when clicking on button elsewhere (#5107)
+* Mouse clicks missed (#4672)
+* Possible crash when form is truncated when an Entry is focused
+* Alt-Tab'ing should not open MainMenu (#2998)
+* Wayland: ALT key steals focus to the menubar if it exists (#5960)
+* Extending the build-In theme only works fully when theme is set after app has started (#6056)
+* Multi-segment RichText not right aligning correctly (#6060)
+
+
+## 2.7.1 - 14 Nov 2025
+
+### Fixed
+
+* Ensure tar files created in cli tool contain a root directory
+* 2.7 regression in GL performance on Mac (#6010)
+* GridWrap keyboard navigation does not change to next row at the end of previous row (#5994)
+* Image border radius not always shown on image fill cover (#5980)
+* Speed up file dialog rendering
+
+
+## 2.7.0 - 16 Oct 2025
+
+### Added
+
+* Canvas types: Arc, Polygon, Square (and Rectangle.Aspect)
+* "Cover" image fill
+* Fully rounded corner radius ("pill" rectangle) & per-corner
+* Image corner radius
+* New containers: Navigation & Clip
+* New Embedded driver (for running on non-standard drvices)
+* RowWrap layout
+* Add Generics to List and Tree for data binding
+* Support for IPv6 addresses in URIs
+* Add storage.RemoveAll to recursively delete from a repository
+* Added Portuguese, Russian & Chinese (Simplified)
+* Support left-tap systray to show window (SetSystemTrayWindow)
+* Support JSON theme with fallback
+* Add RichText bullet start number
+* Option to always show Entry validation
+
+### Changed
+
+* Massive performance increases on rendering
+* optimisations galore in data handling, custom themes and TextGrid
+* Smooth infinite progress by reversing animation not just looping
+* Numerous memory leaks and potential race conditions addressed
+
+### Fixed
+
+* Theme Override container cannot be used to override layout paddings (#5019)
+* Tree widget: First selected node stays highlighted after switching selection (#5796)
+* Brave browser: Web app via fyne serve blinks and closes , works correctly in Chrome (and Edge) (#5705)
+* layout.formLayout render canvas.Text as labels and values outside/off minSize area (#5163)
+* Android: EGL_BAD_SURFACE fails to redraw app after OpenFile dialog closes (#3541)
+* Tab and Shift +Tab not behaving as expected on folder dialog (#5974)
+
+### New Contributors
+
+Code in v2.7.0 contains work from the following first time contributors:
+
+* @kruitbosdotdev
+* @cognusion
+* @r3quie
+* @redawl
+* @generikvault
+* @cwarden
+* @Vinci10
+* @cpustejovsky
+* @xfaris
+* @rad756
+* @ystepanoff
+
+
+## 2.6.3 - 21 August 2025
+
+### Fixed
+
+* Resolve compile issue with Go 1.25.0 caused by golang.org/x/tools conflict
+
+
+## 2.6.2 - 28 July 2025
+
+### Changed
+
+* Added Czechoslovakia translations
+
+### Fixed
+
+* bounds check panic on undo after ctrl-deleting text on last line from MultiLineEntry (#5714)
+* Entry OnChanged does not get triggered on undo and redo (#5710)
+* SetText in TextGrid leaves trailing content (#5722)
+* Desktop app with system tray hangs on app.Quit (#5724)
+* CenterOnScreen Regression (#5733)
+* TextGrid CursorLocationForPosition reports wrong location when scrolled (#5745)
+* Language is always "en" on macOS (#5760)
+* TextGrid is glitchy when calling SetText on a scrolled container. (#5762)
+* When running for the second time in window.CenterOnScreen(), it will get stuck when running on the main thread (#5766)
+* Text entry widget backspace deletes two characters on Android (#2774)
+* Secondary windows is not refreshed correctly (#5782)
+* Clicking a button rapidly causes the click animation to extend outside of the button (#5785)
+* WASM cursor was ignored
+* Corrected date format for Germany
+* Hide() doesn't work at startup for widgets/containers (#5597)
+* Android GBoard: first character typed into Entry is prefixed with "0" after focus (#5666)
+* Use Scaled Monitor Size For Monitor Detection (#5802)
+* Don't override user choice if a) xdg lookup fails or b) system updates (#5851)
+* Entry with mobile.NumberKeyboard does not Type comma and separators (#5101)
+* Padding value is ignored in ThemeOverride container
+* Performance improvements in TextGrid and object positioning
+* Improvements in WASM rendering performance
+
+
 ## 2.6.1 - 8 May 2025
 
 ### Changed
