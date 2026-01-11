@@ -87,9 +87,8 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 	}
 
 	item.Refresh()
-	child := item.Child()
-	child.Show()
-	if child != nil {
+	if child := item.Child(); child != nil {
+		child.Show()
 		child.FocusSearchOn(b.canvas)
 	}
 	b.Refresh()
