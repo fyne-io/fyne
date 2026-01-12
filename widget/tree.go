@@ -51,7 +51,7 @@ type Tree struct {
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) `json:"-"` // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
+	// in the tree has been highlighted by keyboard navigation and mouse hover
 	//
 	// Since: 2.8
 	OnHighlighted func(id TreeNodeID) `json:"-"`
