@@ -95,7 +95,7 @@ type Table struct {
 	HideSeparators bool
 
 	// OnHighlighted is a callback to be notified when a given item
-	// in the GridWrap has been highlighted by keyboard navigation and mouse hover
+	// in the table has been highlighted by keyboard navigation and mouse hover
 	//
 	// Since: 2.8
 	OnHighlighted func(id TableCellID) `json:"-"`

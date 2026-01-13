@@ -50,7 +50,7 @@ type GridWrap struct {
 	// in the GridWrap has been selected.
 	OnSelected func(id GridWrapItemID) `json:"-"`
 
-	// OnSelected is a callback to be notified when a given item
+	// OnUnselected is a callback to be notified when a given item
 	// in the GridWrap has been unselected.
 	OnUnselected func(id GridWrapItemID) `json:"-"`
 
