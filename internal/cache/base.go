@@ -73,9 +73,17 @@ func CleanCanvas(canvas fyne.Canvas) {
 			return true
 		}
 		rinfo.renderer.Destroy()
-		overrides.Delete(wid)
+		deleteOverrideFor(wid)
 		return true
 	})
+}
+
+func deleteOverrideFor(o fyne.CanvasObject) {
+	overrides.Delete(o)
+	if currentOverrideObj == o {
+		currentOverrideObj = nil
+		currentOverrideScope = nil
+	}
 }
 
 // ResetThemeCaches clears all the svg and text size cache maps
@@ -100,7 +108,7 @@ func destroyExpiredRenderers(now time.Time) {
 	renderers.Range(func(wid fyne.Widget, rinfo *rendererInfo) bool {
 		if rinfo.isExpired(now) {
 			rinfo.renderer.Destroy()
-			overrides.Delete(wid)
+			deleteOverrideFor(wid)
 			renderers.Delete(wid)
 		}
 		return true
