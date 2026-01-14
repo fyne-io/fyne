@@ -91,7 +91,7 @@ func URIToString(v URI) String {
 // ItemToString creates a binding that connects a generic data item to a String.
 //
 // Since: 2.8
-func ItemToString[T any](v Item[T], formatter func(T) (string, error), comparator func(T, T) bool, parser func(string) (T, error)) String {
+func ItemToString[T any](v Item[T], formatter func(T) (string, error), parser func(string) (T, error), comparator func(T, T) bool) String {
 	return toString(v, formatter, comparator, parser)
 }
 

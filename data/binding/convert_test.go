@@ -92,7 +92,7 @@ func BenchmarkIntToString(b *testing.B) {
 func BenchmarkItemtToString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		i := NewItem(testItemComparator)
-		s := ItemToString(i, testItemFormatter, testItemComparator, testItemParser)
+		s := ItemToString(i, testItemFormatter, testItemParser, testItemComparator)
 		s.Get()
 
 		i.Set(testItem{"test", 2})
@@ -515,7 +515,7 @@ func TestURIToString(t *testing.T) {
 
 func TestItemToString(t *testing.T) {
 	i := NewItem(testItemComparator)
-	s := ItemToString(i, testItemFormatter, testItemComparator, testItemParser)
+	s := ItemToString(i, testItemFormatter, testItemParser, testItemComparator)
 	v, err := s.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "-0", v)
