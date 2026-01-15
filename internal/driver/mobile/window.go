@@ -130,6 +130,10 @@ func (w *window) Show() {
 	}
 }
 
+func (w *window) ShowAtPos(xPos int, yPos int) {
+	w.Show()
+}
+
 func (w *window) Hide() {
 	w.visible = false
 
