@@ -19,6 +19,11 @@ type Circle struct {
 	FillColor   color.Color // The circle fill color
 	StrokeColor color.Color // The circle stroke color
 	StrokeWidth float32     // The stroke width of the circle
+
+	// Support shadow configuration
+	//
+	// Since: 2.8
+	Shadow
 }
 
 // NewCircle returns a new Circle instance

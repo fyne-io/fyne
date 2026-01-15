@@ -122,6 +122,10 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
+	bg.ShadowColor = th.Color(theme.ColorNameShadow, v)
+	// TODO update initial shadow offset and softness to match ShadowingRenderer
+	bg.ShadowSoftness = 8
+	bg.ShadowOffset = fyne.NewPos(-float32(intWidget.DialogLevel)*0.1, float32(intWidget.DialogLevel)*0.05)
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
 	bar := New(&titleBarLayout{buttons: buttons, icon: borderIcon, title: barMid, win: w},
@@ -132,8 +136,8 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	}
 	objects := []fyne.CanvasObject{bg, contentBG, bar, w.Content, corner}
 	r := &innerWindowRenderer{
-		ShadowingRenderer: intWidget.NewShadowingRenderer(objects, intWidget.DialogLevel),
-		win:               w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
+		BaseRenderer: intWidget.NewBaseRenderer(objects),
+		win:          w, bar: bar, buttonBox: buttons, buttons: []*borderButton{close, min, max}, bg: bg,
 		corner: corner, contentBG: contentBG, icon: borderIcon,
 	}
 	r.Layout(w.Size())
@@ -183,7 +187,7 @@ func (w *InnerWindow) buttonPosition() widget.ButtonAlign {
 var _ fyne.WidgetRenderer = (*innerWindowRenderer)(nil)
 
 type innerWindowRenderer struct {
-	*intWidget.ShadowingRenderer
+	intWidget.BaseRenderer
 
 	win            *InnerWindow
 	bar, buttonBox *fyne.Container
@@ -197,8 +201,8 @@ func (i *innerWindowRenderer) Layout(size fyne.Size) {
 	th := i.win.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 
-	i.LayoutShadow(size, fyne.Position{})
 	i.bg.Resize(size)
+	i.bg.Move(fyne.Position{})
 
 	barHeight := i.win.Theme().Size(theme.SizeNameWindowTitleBarHeight)
 	i.bar.Move(fyne.NewPos(pad, 0))
@@ -231,6 +235,7 @@ func (i *innerWindowRenderer) Refresh() {
 	th := i.win.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	i.bg.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	i.bg.ShadowColor = th.Color(theme.ColorNameShadow, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
@@ -266,7 +271,6 @@ func (i *innerWindowRenderer) Refresh() {
 
 	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.Title)
-	i.ShadowingRenderer.RefreshShadow()
 	if i.win.OnTappedIcon == nil {
 		i.icon.Disable()
 	} else {

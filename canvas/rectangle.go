@@ -46,6 +46,11 @@ type Rectangle struct {
 	//
 	// Since: 2.7
 	BottomLeftCornerRadius float32
+
+	// Support shadow configuration
+	//
+	// Since: 2.8
+	Shadow
 }
 
 // Hide will set this rectangle to not be visible

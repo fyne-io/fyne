@@ -1,16 +1,7 @@
 <canvas padded size="168x229">
 	<content>
 		<widget pos="4,4" size="160x221" type="*widget.Card">
-			<widget pos="2,2" size="156x217" type="*widget.Shadow">
-				<radialGradient centerOffset="0.5,0.5" size="1x1" startColor="shadow"/>
-				<linearGradient endColor="shadow" size="155x1"/>
-				<radialGradient centerOffset="-0.5,0.5" pos="156,0" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" pos="156,0" size="1x217" startColor="shadow"/>
-				<radialGradient centerOffset="-0.5,-0.5" pos="156,217" size="1x1" startColor="shadow"/>
-				<linearGradient pos="0,217" size="155x1" startColor="shadow"/>
-				<radialGradient centerOffset="0.5,-0.5" pos="0,217" size="1x1" startColor="shadow"/>
-				<linearGradient angle="270" endColor="shadow" size="1x217"/>
-			</widget>
+			<rectangle fillColor="background" pos="2,2" shadowColor="shadow" shadowSoftness="2" size="156x217"/>
 			<text bold pos="10,138" size="140x32" textSize="23">Longer title</text>
 			<text pos="10,174" size="140x19">subtitle with length</text>
 			<image pos="2,2" rsc="computerIcon" size="156x128" themed="foreground"/>

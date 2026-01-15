@@ -269,6 +269,7 @@ func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*str
 	r.setColorAttr(attrs, "fillColor", c.FillColor)
 	r.setColorAttr(attrs, "strokeColor", c.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(c.StrokeWidth))
+	r.setShadowAttrs(c.Shadow, attrs)
 	r.writeTag("circle", true, attrs)
 }
 
@@ -374,7 +375,15 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
 	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
+	r.setShadowAttrs(rct.Shadow, attrs)
 	r.writeTag("rectangle", true, attrs)
+}
+
+func (r *markupRenderer) setShadowAttrs(s fynecanvas.Shadow, attrs map[string]*string) {
+	r.setColorAttr(attrs, "shadowColor", s.ShadowColor)
+	r.setFloatAttr(attrs, "shadowSoftness", float64(s.ShadowSoftness))
+	r.setPosAttr(attrs, "shadowOffset", s.ShadowOffset)
+	r.setFloatAttr(attrs, "shadowType", float64(s.ShadowType))
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {
