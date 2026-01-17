@@ -974,3 +974,92 @@ func addTreePath(data map[string][]string, path ...string) {
 		parent = p
 	}
 }
+
+func TestTree_FindPath(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.NewTheme())
+
+	treeData := map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	t.Run("non existing node", func(t *testing.T) {
+		found, parents := tree.findPath("", "item_4")
+		assert.False(t, found)
+		assert.Nil(t, parents)
+	})
+
+	t.Run("no parents", func(t *testing.T) {
+		found, parents := tree.findPath("", "item_2")
+		assert.True(t, found)
+		assert.Equal(t, parents, []string{""})
+	})
+
+	t.Run("deeply nested node", func(t *testing.T) {
+		want := []string{"", "item_1", "item_1_2"}
+		found, parents := tree.findPath("", "item_1_2_2")
+		assert.True(t, found)
+		// Also make sure slice is ordered
+		for i, n := range parents {
+			assert.Equal(t, want[i], n)
+		}
+	})
+
+	t.Run("from node instead of root", func(t *testing.T) {
+		found, parents := tree.findPath("item_2", "item_1_2_2")
+		assert.False(t, found)
+		assert.Nil(t, parents)
+	})
+}
+
+func TestTree_OpenBranches(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.NewTheme())
+
+	treeData := map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	w := test.NewWindow(tree)
+	defer w.Close()
+
+	t.Run("expand to nested node", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.openBranches("item_1_1_1")
+
+		assert.True(t, tree.IsBranchOpen("item_1"))
+		assert.True(t, tree.IsBranchOpen("item_1_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_2"))
+		assert.False(t, tree.IsBranchOpen("item_2"))
+	})
+
+	t.Run("expand to non-existent node", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.openBranches("non_existent")
+
+		assert.False(t, tree.IsBranchOpen("item_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_1"))
+		assert.False(t, tree.IsBranchOpen("item_1_2"))
+	})
+
+	t.Run("expand when parents already open", func(t *testing.T) {
+		tree.CloseAllBranches()
+		tree.OpenBranch("item_1")
+		tree.OpenBranch("item_1_1")
+
+		tree.openBranches("item_1_1_1")
+		assert.True(t, tree.IsBranchOpen("item_1"))
+		assert.True(t, tree.IsBranchOpen("item_1_1"))
+	})
+}

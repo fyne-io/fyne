@@ -231,6 +231,34 @@ func (t *Tree) OpenBranch(uid TreeNodeID) {
 	t.Refresh()
 }
 
+// openBranches opens the branches leading to a node.
+func (t *Tree) openBranches(uid TreeNodeID) {
+	found, parents := t.findPath(t.Root, uid)
+	if !found || len(parents) == 0 {
+		return
+	}
+
+	t.ensureOpenMap()
+	var opened bool
+	f := t.OnBranchOpened
+	for _, parent := range parents {
+		if parent == t.Root {
+			continue
+		}
+		if !t.IsBranchOpen(parent) {
+			t.open[parent] = true
+			if f != nil {
+				f(parent)
+			}
+			opened = true
+		}
+	}
+
+	if opened {
+		t.Refresh()
+	}
+}
+
 // Resize sets a new size for a widget.
 func (t *Tree) Resize(size fyne.Size) {
 	if size == t.Size() {
@@ -263,12 +291,13 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		return
 	}
 
+	t.openBranches(uid)
+
 	y, size, ok := t.offsetAndSize(uid)
 	if !ok {
 		return
 	}
 
-	// TODO scrolling to a node should open all parents if they aren't already
 	newY := t.scroller.Offset.Y
 	if y < t.scroller.Offset.Y {
 		newY = y
@@ -356,7 +385,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		t.Select(t.currentHighlight)
 	case fyne.KeyDown:
 		next := false
-		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
+		t.walk(t.Root, "", 0, false, func(id, p TreeNodeID, _ bool, _ int) {
 			if next {
 				t.setItemFocus(id)
 				next = false
@@ -370,7 +399,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 			t.CloseBranch(t.currentHighlight)
 		} else {
 			// Every other case should move the focus to the current parent node
-			t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
+			t.walk(t.Root, "", 0, false, func(id, p TreeNodeID, _ bool, _ int) {
 				if id == t.currentHighlight && p != "" {
 					t.setItemFocus(p)
 				}
@@ -390,7 +419,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		}
 	case fyne.KeyUp:
 		previous := ""
-		t.walk(t.Root, "", 0, func(id, p TreeNodeID, _ bool, _ int) {
+		t.walk(t.Root, "", 0, false, func(id, p TreeNodeID, _ bool, _ int) {
 			if id == t.currentHighlight && previous != "" {
 				t.setItemFocus(previous)
 			}
@@ -441,6 +470,28 @@ func (t *Tree) UnselectAll() {
 	}
 }
 
+// findPath finds the path to a target node.
+func (t *Tree) findPath(current, target TreeNodeID) (bool, []TreeNodeID) {
+	if current == target {
+		return true, nil
+	}
+
+	if !t.IsBranch(current) {
+		return false, nil
+	}
+
+	if childUIDs := t.ChildUIDs; childUIDs != nil {
+		for _, child := range childUIDs(current) {
+			found, path := t.findPath(child, target)
+			if found {
+				return true, append([]TreeNodeID{current}, path...)
+			}
+		}
+	}
+
+	return false, nil
+}
+
 func (t *Tree) ensureOpenMap() {
 	if t.open == nil {
 		t.open = make(map[string]bool)
@@ -483,14 +534,14 @@ func (t *Tree) offsetUpdated(pos fyne.Position) {
 	t.scroller.Content.(*treeContent).refreshForID(onlyNewTreeNodesID)
 }
 
-func (t *Tree) walk(uid, parent TreeNodeID, depth int, onNode func(TreeNodeID, TreeNodeID, bool, int)) {
+func (t *Tree) walk(uid, parent TreeNodeID, depth int, walkClosedBranch bool, onNode func(TreeNodeID, TreeNodeID, bool, int)) {
 	if isBranch := t.IsBranch; isBranch != nil {
 		if isBranch(uid) {
 			onNode(uid, parent, true, depth)
-			if t.IsBranchOpen(uid) {
+			if t.IsBranchOpen(uid) || walkClosedBranch {
 				if childUIDs := t.ChildUIDs; childUIDs != nil {
 					for _, c := range childUIDs(uid) {
-						t.walk(c, uid, depth+1, onNode)
+						t.walk(c, uid, depth+1, walkClosedBranch, onNode)
 					}
 				}
 			}
@@ -502,7 +553,7 @@ func (t *Tree) walk(uid, parent TreeNodeID, depth int, onNode func(TreeNodeID, T
 
 // walkAll visits every open node of the tree and calls the given callback with TreeNodeID, whether node is branch, and the depth of node.
 func (t *Tree) walkAll(onNode func(TreeNodeID, TreeNodeID, bool, int)) {
-	t.walk(t.Root, "", 0, onNode)
+	t.walk(t.Root, "", 0, false, onNode)
 }
 
 var _ fyne.WidgetRenderer = (*treeRenderer)(nil)
