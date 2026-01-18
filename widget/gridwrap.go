@@ -252,28 +252,6 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	l.Refresh()
 }
 
-// ScrollToItem scrolls to the item represented by id and highlights it
-//
-// Since: 2.8
-func (l *GridWrap) ScrollToItem(id GridWrapItemID) {
-	if l.Length() == 0 {
-		return
-	}
-
-	newID := id
-	if id < 0 {
-		newID = 0
-	}
-
-	if id > l.Length() {
-		newID = l.Length() - 1
-	}
-
-	l.currentHighlight = newID
-	l.scrollTo(newID)
-	l.Refresh()
-}
-
 // ScrollToBottom scrolls to the end of the list
 func (l *GridWrap) ScrollToBottom() {
 	l.scroller.ScrollToBottom()
