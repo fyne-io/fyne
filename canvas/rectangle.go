@@ -80,7 +80,8 @@ func (r *Rectangle) Resize(s fyne.Size) {
 	}
 
 	r.baseObject.Resize(s)
-	Refresh(r)
+
+	repaint(r)
 }
 
 // NewRectangle returns a new Rectangle instance
