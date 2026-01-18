@@ -1,12 +1,42 @@
 package binding
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/storage"
 )
+
+type testItem struct {
+	word   string
+	number int
+}
+
+func testItemFormatter(a testItem) (string, error) {
+	return fmt.Sprintf("%s-%d", a.word, a.number), nil
+}
+
+func testItemComparator(a, b testItem) bool {
+	return a.word == b.word && a.number == b.number
+}
+
+func testItemParser(s string) (testItem, error) {
+	split := strings.Split(s, "-")
+	if len(split) != 2 {
+		return testItem{}, fmt.Errorf("invalid split count %d", len(split))
+	}
+
+	num, err := strconv.Atoi(split[1])
+	if err != nil {
+		return testItem{}, fmt.Errorf("error parsing number: %w", err)
+	}
+
+	return testItem{split[0], num}, nil
+}
 
 func BenchmarkBoolToString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
@@ -55,6 +85,23 @@ func BenchmarkIntToString(b *testing.B) {
 		i.Get()
 
 		s.Set("5")
+		i.Get()
+	}
+}
+
+func BenchmarkItemtToString(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		i := NewItem(testItemComparator)
+		s := ItemToString(i, testItemFormatter, testItemParser, testItemComparator)
+		s.Get()
+
+		i.Set(testItem{"test", 2})
+		s.Get()
+
+		s.Set("invalid-number")
+		i.Get()
+
+		s.Set("a-5")
 		i.Get()
 	}
 }
@@ -464,6 +511,32 @@ func TestURIToString(t *testing.T) {
 	v2, err := u.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///tmp/test.txt", v2.String())
+}
+
+func TestItemToString(t *testing.T) {
+	i := NewItem(testItemComparator)
+	s := ItemToString(i, testItemFormatter, testItemParser, testItemComparator)
+	v, err := s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "-0", v)
+
+	err = i.Set(testItem{"test", 2})
+	assert.Nil(t, err)
+	v, err = s.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "test-2", v)
+
+	err = s.Set("invalid=-number")
+	assert.NotNil(t, err)
+	_, err = i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, "test-2", v) // Value should not have changed
+
+	err = s.Set("a-5")
+	assert.Nil(t, err)
+	v2, err := i.Get()
+	assert.Nil(t, err)
+	assert.Equal(t, testItem{"a", 5}, v2)
 }
 
 func TestFloatToInt(t *testing.T) {

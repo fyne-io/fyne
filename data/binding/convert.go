@@ -88,6 +88,13 @@ func URIToString(v URI) String {
 	return toString(v, uriToString, storage.EqualURI, uriFromString)
 }
 
+// ItemToString creates a binding that connects a generic data item to a String.
+//
+// Since: 2.8
+func ItemToString[T any](v Item[T], formatter func(T) (string, error), parser func(string) (T, error), comparator func(T, T) bool) String {
+	return toString(v, formatter, comparator, parser)
+}
+
 // StringToBool creates a binding that connects a String data item to a Bool.
 // Changes to the String will be parsed and pushed to the Bool if the parse was successful, and setting
 // the Bool update the String binding.
