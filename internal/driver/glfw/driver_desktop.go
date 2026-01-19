@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/lang"
@@ -167,6 +168,23 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 
 func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	systrayIcon = resource // in case we need it later
+
+	// only macOS supports SVG system tray
+	if runtime.GOOS != "darwin" && svg.IsResourceSVG(resource) {
+		img := canvas.NewImageFromResource(resource)
+		c := software.NewTransparentCanvas()
+		c.SetContent(img)
+		c.SetPadded(false)
+		c.Resize(fyne.NewSquareSize(systrayIconSize))
+
+		buf := &bytes.Buffer{}
+		err := png.Encode(buf, c.Capture())
+		if err != nil {
+			fyne.LogError("Failed to encode SVG icon for system tray icon", err)
+			return
+		}
+		resource = fyne.NewStaticResource(resource.Name()+".png", buf.Bytes())
+	}
 
 	img, err := toOSIcon(resource.Content())
 	if err != nil {
