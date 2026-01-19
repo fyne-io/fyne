@@ -20,6 +20,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const systrayIconSize = 64
+
 var (
 	systrayIcon    fyne.Resource
 	systrayRunning bool
@@ -106,7 +108,7 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 			if runtime.GOOS == "windows" && isDark() { // windows menus don't match dark mode so invert icons
 				res = theme.NewInvertedThemedResource(i.Icon)
 			}
-			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, 64, 64)
+			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
 			err := png.Encode(b, img)
 			if err != nil {
 				fyne.LogError("Failed to encode SVG icon for menu", err)
