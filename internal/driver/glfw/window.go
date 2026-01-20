@@ -347,11 +347,13 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
 		w.cursor = cursor
 
-		if rawCursor == nil {
-			w.view().SetInputMode(CursorMode, CursorHidden)
-		} else {
-			w.view().SetInputMode(CursorMode, CursorNormal)
-			w.SetCursor(rawCursor)
+		if view := w.view(); view != nil { // not yet visible? linux weirdness
+			if rawCursor == nil {
+				view.SetInputMode(CursorMode, CursorHidden)
+			} else {
+				view.SetInputMode(CursorMode, CursorNormal)
+				w.SetCursor(rawCursor)
+			}
 		}
 		w.setCustomCursor(rawCursor, isCustomCursor)
 	}
