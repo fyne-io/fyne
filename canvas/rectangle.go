@@ -80,9 +80,6 @@ func (r *Rectangle) Resize(s fyne.Size) {
 	}
 
 	r.baseObject.Resize(s)
-	if r.StrokeWidth == 0 {
-		return
-	}
 
 	Refresh(r)
 }
