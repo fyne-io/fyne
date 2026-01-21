@@ -1,6 +1,11 @@
 package widget
 
 import (
+	"math"
+	"os"
+	"strings"
+	"time"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -35,7 +40,25 @@ const (
 
 	// what fraction of the page to scroll when tapping on the scroll bar area
 	pageScrollFraction = float32(0.95)
+
+	smoothScrollingFactor = 0.5
+
+	disableSmoothScrollingEnvKey = "FYNE_DISABLE_SMOOTH_SCROLLING"
 )
+
+var (
+	isSmoothScrollingDisabled  bool
+	haveCheckedSmoothScrollEnv bool
+)
+
+func isSmoothScrollDisabled() bool {
+	if !haveCheckedSmoothScrollEnv {
+		haveCheckedSmoothScrollEnv = true
+		env := os.Getenv(disableSmoothScrollingEnvKey)
+		isSmoothScrollingDisabled = strings.EqualFold(env, "true") || strings.EqualFold(env, "t") || env == "1"
+	}
+	return isSmoothScrollingDisabled
+}
 
 type scrollBarRenderer struct {
 	BaseRenderer
@@ -493,6 +516,9 @@ type Scroll struct {
 	//
 	// Since: 2.0
 	OnScrolled func(fyne.Position) `json:"-"`
+
+	targetOffset    fyne.Position
+	scrollAnimation *fyne.Animation
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -584,7 +610,17 @@ func (s *Scroll) refreshWithoutOffsetUpdate() {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
-	if s.Direction != ScrollNone {
+	if s.Direction == ScrollNone {
+		return
+	}
+
+	if s.scrollAnimation != nil {
+		s.targetOffset = s.targetOffset.Subtract(ev.Scrolled)
+	} else if !isSmoothScrollDisabled() && fyne.CurrentApp().Settings().ShowAnimations() {
+		s.targetOffset = s.Offset.Subtract(ev.Scrolled)
+		s.scrollAnimation = fyne.NewAnimation(time.Duration(math.MaxInt64), s.animateScroll)
+		s.scrollAnimation.Start()
+	} else {
 		s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
 	}
 }
@@ -627,6 +663,23 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 		f(s.Offset)
 	}
 	return moved
+}
+
+func (s *Scroll) animateScroll(_ float32) {
+	diff := s.Offset.Subtract(s.targetOffset)
+	if math.Abs(float64(diff.X)) < 0.5 && math.Abs(float64(diff.Y)) < 0.5 {
+		s.scrollAnimation.Stop()
+		s.scrollAnimation = nil
+		s.scrollBy(diff.X, diff.Y)
+		return
+	}
+
+	oldOffset := s.Offset
+	s.scrollBy(diff.X*smoothScrollingFactor, diff.Y*smoothScrollingFactor)
+	if s.Offset == oldOffset {
+		s.scrollAnimation.Stop()
+		s.scrollAnimation = nil
+	}
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
