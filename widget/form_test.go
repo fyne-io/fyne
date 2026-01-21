@@ -465,3 +465,28 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 		form.Refresh()
 	})
 }
+
+func TestEnsureRenderItemsCapacity(t *testing.T) {
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "Label1", Widget: NewEntry()},
+			{Text: "Label2", Widget: NewCheck("Check", nil)},
+		},
+		itemGrid: &fyne.Container{
+			Objects: []fyne.CanvasObject{},
+		},
+	}
+
+	// Call ensureRenderItems
+	form.ensureRenderItems()
+
+	// Check that the capacity is sufficient
+	if cap(form.itemGrid.Objects) < len(form.Items)*2 {
+		t.Errorf("Expected capacity >= %d, got %d", len(form.Items)*2, cap(form.itemGrid.Objects))
+	}
+
+	// Check that objects are updated correctly
+	if len(form.itemGrid.Objects) != len(form.Items)*2 {
+		t.Errorf("Expected %d objects, got %d", len(form.Items)*2, len(form.itemGrid.Objects))
+	}
+}
