@@ -188,6 +188,31 @@ func (l *GridWrap) Resize(s fyne.Size) {
 	}
 }
 
+// Highlight scrolls to the item represented by id and highlights it
+//
+// Since: 2.8
+func (l *GridWrap) Highlight(id GridWrapItemID) {
+	if l.Length() == 0 {
+		return
+	}
+
+	newID := id
+	if id < 0 {
+		newID = 0
+	}
+
+	if id > l.Length() {
+		newID = l.Length() - 1
+	}
+
+	l.scrollTo(newID)
+	l.currentHighlight = newID
+	if l.OnHighlighted != nil {
+		l.OnHighlighted(id)
+	}
+	l.Refresh()
+}
+
 // Select adds the item identified by the given ID to the selection.
 func (l *GridWrap) Select(id GridWrapItemID) {
 	if len(l.selected) > 0 && id == l.selected[0] {

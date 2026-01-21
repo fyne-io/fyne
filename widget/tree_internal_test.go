@@ -1063,3 +1063,31 @@ func TestTree_OpenBranches(t *testing.T) {
 		assert.True(t, tree.IsBranchOpen("item_1_1"))
 	})
 }
+
+func TestTree_Highlight(t *testing.T) {
+	treeData := map[string][]string{
+		"":         {"item_1", "item_2"},
+		"item_1":   {"item_1_1", "item_1_2"},
+		"item_2":   {"item_2_1", "item_2_2"},
+		"item_1_1": {"item_1_1_1", "item_1_1_2"},
+		"item_1_2": {"item_1_2_1", "item_1_2_2"},
+	}
+	tree := NewTreeWithStrings(treeData)
+	window := test.NewWindow(tree)
+	defer window.Close()
+
+	t.Run("non existing item", func(t *testing.T) {
+		tree.Highlight("non_existing")
+		assert.Equal(t, "", tree.currentHighlight)
+	})
+
+	t.Run("parent branch", func(t *testing.T) {
+		tree.Highlight("item_1")
+		assert.Equal(t, "item_1", tree.currentHighlight)
+	})
+
+	t.Run("child branch", func(t *testing.T) {
+		tree.Highlight("item_1_1_2")
+		assert.Equal(t, "item_1_1_2", tree.currentHighlight)
+	})
+}
