@@ -8,6 +8,8 @@
 					<text pos="8,6" size="26x19">Text</text>
 				</widget>
 			</widget>
+			<container size="0x0">
+			</container>
 		</widget>
 	</content>
 </canvas>
