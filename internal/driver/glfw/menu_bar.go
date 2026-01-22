@@ -19,12 +19,13 @@ type MenuBar struct {
 	active     bool
 	activeItem *menuBarItem
 	canvas     fyne.Canvas
+	mainMenu   *fyne.MainMenu
 }
 
 // NewMenuBar creates a menu bar populated with items from the passed main menu structure.
 func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 	items := make([]fyne.CanvasObject, len(mainMenu.Items))
-	b := &MenuBar{Items: items, canvas: canvas}
+	b := &MenuBar{Items: items, canvas: canvas, mainMenu: mainMenu}
 	b.ExtendBaseWidget(b)
 	for i, menu := range mainMenu.Items {
 		barItem := &menuBarItem{Menu: menu, Parent: b}
@@ -86,7 +87,10 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 	}
 
 	item.Refresh()
-	item.Child().Show()
+	if child := item.Child(); child != nil {
+		child.Show()
+		child.FocusSearchOn(b.canvas)
+	}
 	b.Refresh()
 }
 
@@ -114,6 +118,9 @@ func (b *MenuBar) toggle(item *menuBarItem) {
 	} else {
 		b.activateChild(item)
 		b.canvas.Focus(item)
+		if child := item.Child(); child != nil {
+			child.FocusSearchOn(b.canvas)
+		}
 	}
 }
 
@@ -206,4 +213,8 @@ func (r *menuUnderlayRenderer) MinSize() fyne.Size {
 }
 
 func (r *menuUnderlayRenderer) Refresh() {
+}
+
+func (b *MenuBar) getMainMenu() *fyne.MainMenu {
+	return b.mainMenu
 }

@@ -28,10 +28,25 @@ type menuBarItem struct {
 
 func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
-		child := publicWidget.NewMenu(i.Menu)
-		child.Hide()
-		child.OnDismiss = i.Parent.deactivate
-		i.child = child
+		if fyne.IsHelpMenu(i.Menu) {
+			mainMenu := i.Parent.getMainMenu()
+			if mainMenu != nil {
+				globalSearchMenu := publicWidget.NewMenuWithGlobalSearch(i.Menu, mainMenu)
+				globalSearchMenu.Menu.Hide()
+				globalSearchMenu.Menu.OnDismiss = i.Parent.deactivate
+				i.child = globalSearchMenu.Menu
+			} else {
+				child := publicWidget.NewMenu(i.Menu)
+				child.Hide()
+				child.OnDismiss = i.Parent.deactivate
+				i.child = child
+			}
+		} else {
+			child := publicWidget.NewMenu(i.Menu)
+			child.Hide()
+			child.OnDismiss = i.Parent.deactivate
+			i.child = child
+		}
 	}
 	return i.child
 }

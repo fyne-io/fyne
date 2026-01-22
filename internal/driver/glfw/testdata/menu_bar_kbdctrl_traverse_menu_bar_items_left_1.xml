@@ -28,27 +28,46 @@
 						<text pos="8,4" size="25x19">Edit</text>
 					</widget>
 					<widget pos="87,0" size="46x27" type="*glfw.menuBarItem">
-						<rectangle fillColor="focus" radius="4" size="46x27"/>
 						<text pos="8,4" size="30x19">Help</text>
 					</widget>
 				</container>
-				<widget pos="95,27" size="50x35" type="*widget.Menu">
-					<widget size="50x35" type="*widget.Shadow">
+				<widget pos="95,27" size="147x79" type="*widget.Menu">
+					<widget size="147x79" type="*widget.Shadow">
 						<radialGradient centerOffset="0.5,0.5" pos="-3,-2" size="4x4" startColor="shadow"/>
-						<linearGradient endColor="shadow" pos="0,-2" size="48x4"/>
-						<radialGradient centerOffset="-0.5,0.5" pos="49,-2" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" pos="49,1" size="4x33" startColor="shadow"/>
-						<radialGradient centerOffset="-0.5,-0.5" pos="49,35" size="4x4" startColor="shadow"/>
-						<linearGradient pos="0,35" size="48x4" startColor="shadow"/>
-						<radialGradient centerOffset="0.5,-0.5" pos="-3,35" size="4x4" startColor="shadow"/>
-						<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x33"/>
+						<linearGradient endColor="shadow" pos="0,-2" size="145x4"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="146,-2" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" pos="146,1" size="4x77" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="146,79" size="4x4" startColor="shadow"/>
+						<linearGradient pos="0,79" size="145x4" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-3,79" size="4x4" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-3,1" size="4x77"/>
 					</widget>
-					<widget size="50x35" type="*widget.Scroll">
-						<widget size="50x35" type="*widget.menuBox">
-							<rectangle fillColor="menuBackground" size="50x35"/>
-							<container size="50x35">
-								<widget size="50x35" type="*widget.menuItem">
-									<text pos="8,8" size="34x19">Help!</text>
+					<widget size="147x79" type="*widget.Scroll">
+						<widget size="147x79" type="*widget.menuBox">
+							<rectangle fillColor="menuBackground" size="147x79"/>
+							<container size="147x79">
+								<widget size="147x35" type="*widget.minWidthContainer">
+									<widget size="147x35" type="*widget.Entry">
+										<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="143x31"/>
+										<rectangle pos="1,1" radius="4" size="145x32" strokeColor="primary" strokeWidth="2"/>
+										<widget pos="0,2" size="147x31" type="*widget.Scroll">
+											<widget size="147x31" type="*widget.entryContent">
+												<widget size="147x31" type="*widget.RichText">
+													<text color="placeholder" pos="8,6" size="55x19">Search...</text>
+												</widget>
+												<widget size="147x31" type="*widget.RichText">
+													<text pos="8,6" size="0x19"></text>
+												</widget>
+												<rectangle fillColor="primary" pos="7,6" size="2x19"/>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+								<widget pos="0,39" size="147x1" type="*widget.Separator">
+									<rectangle fillColor="separator" size="147x1"/>
+								</widget>
+								<widget pos="0,44" size="147x35" type="*widget.menuItem">
+									<text pos="8,8" size="131x19">Help!</text>
 								</widget>
 							</container>
 						</widget>
