@@ -660,8 +660,9 @@ type treeContentRenderer struct {
 	branchPool  async.Pool[fyne.CanvasObject]
 	leafPool    async.Pool[fyne.CanvasObject]
 
-	wasVisible []TreeNodeID
-	visible    []TreeNodeID
+	wasVisible   []TreeNodeID
+	visible      []TreeNodeID
+	minSizeCache fyne.Size
 }
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
@@ -789,6 +790,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
+	if !r.minSizeCache.IsZero() {
+		return r.minSizeCache
+	}
 	th := r.treeContent.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	iconSize := th.Size(theme.SizeNameInlineIcon)
@@ -816,6 +820,8 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
+
+	r.minSizeCache = min
 	return min
 }
 
@@ -824,6 +830,7 @@ func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *treeContentRenderer) Refresh() {
+	r.minSizeCache = fyne.Size{}
 	r.refreshForID(r.treeContent.nextRefreshID)
 	for _, s := range r.separators {
 		s.Refresh()
