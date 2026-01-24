@@ -40,6 +40,10 @@ func Clean(canvasRefreshed bool) {
 		canvasRefreshed = true
 	}
 	if !canvasRefreshed && now.Sub(lastClean) < cleanTaskInterval {
+		// Even though we're not doing full cleanup, update lastClean to prevent
+		// this check from running every frame (which would cause log spam if logging
+		// were enabled and unnecessary CPU usage from the time comparisons).
+		lastClean = now
 		return
 	}
 	destroyExpiredSvgs(now)
