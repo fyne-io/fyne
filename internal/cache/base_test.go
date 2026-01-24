@@ -77,6 +77,21 @@ func TestCacheClean(t *testing.T) {
 		assert.Zero(t, destroyedRenderersCnt)
 	})
 
+	t.Run("early_return_updates_lastClean", func(t *testing.T) {
+		// Regression test: when canvasRefreshed=false and we're between
+		// 10s and 30s since lastClean, we hit an early return. This early
+		// return must still update lastClean, otherwise Clean() will be
+		// called every frame (causing unnecessary CPU usage).
+		testClearAll()
+		tm.setTime(10, 25)
+		lastClean = tm.createTime(10, 10) // 15 seconds ago (past 10s, before 30s)
+
+		Clean(false)
+
+		// lastClean should be updated to now, not stuck at the old value
+		assert.Equal(t, tm.now, lastClean)
+	})
+
 	t.Run("clean_no_canvas_refresh", func(t *testing.T) {
 		lastClean = tm.createTime(10, 11)
 		tm.setTime(11, 12)
