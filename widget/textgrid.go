@@ -505,8 +505,8 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 
 	r.updateCellSize()
 	t.text.scroll.OnScrolled = func(_ fyne.Position) {
-		r.addRowsIfRequired()
 		r.Layout(t.Size())
+		r.Refresh()
 	}
 	return r
 }
@@ -543,9 +543,12 @@ func (t *textGridContentRenderer) Destroy() {
 func (t *textGridContentRenderer) Layout(s fyne.Size) {
 	size := fyne.NewSize(s.Width, t.text.cellSize.Height)
 	t.updateGridSize(s)
-
+	xOffset := float32(0)
+	if t.text.text.Scroll != fyne.ScrollNone {
+		xOffset = float32(math.Floor(float64(t.text.text.scroll.Offset.X)))
+	}
 	for _, o := range t.text.visible {
-		o.Move(fyne.NewPos(0, float32(o.(*textGridRow).row)*t.text.cellSize.Height))
+		o.Move(fyne.NewPos(xOffset, float32(o.(*textGridRow).row)*t.text.cellSize.Height))
 		o.Resize(size)
 	}
 }
@@ -681,15 +684,17 @@ func (t *textGridRow) appendTextCell(str rune) {
 }
 
 func (t *textGridRow) refreshCell(col int) {
-	pos := t.cols + col
+	pos := col
 	if pos*3+1 >= len(t.objects) {
 		return
 	}
 
 	row := t.text.text.Rows[t.row]
 
-	if len(row.Cells) > col {
-		cell := row.Cells[col]
+	xOffset := int(t.text.text.scroll.Offset.X / t.text.cellSize.Width)
+
+	if len(row.Cells) > col+xOffset {
+		cell := row.Cells[col+xOffset]
 		t.setCellRune(cell.Rune, pos, cell.Style, row.Style)
 	}
 }
@@ -757,15 +762,19 @@ func (t *textGridRow) addCellsIfRequired() {
 	if len(t.objects) == cellCount*3 {
 		return
 	}
+	if len(t.objects) > cellCount*3 {
+		newObjects := make([]fyne.CanvasObject, cellCount*3)
+		copy(newObjects, t.objects)
+		t.objects = newObjects
+	}
 	for i := len(t.objects); i < cellCount*3; i += 3 {
 		t.appendTextCell(' ')
 	}
 }
 
 func (t *textGridRow) refreshCells() {
-	x := 0
 	if t.row >= len(t.text.text.Rows) {
-		for ; x < len(t.objects)/3; x++ {
+		for x := 0; x < len(t.objects)/3; x++ {
 			t.setCellRune(' ', x, TextGridStyleDefault, nil) // blank rows no longer needed
 		}
 
@@ -774,28 +783,27 @@ func (t *textGridRow) refreshCells() {
 
 	row := t.text.text.Rows[t.row]
 	rowStyle := row.Style
+	xOffset := int(t.text.text.scroll.Offset.X / t.text.cellSize.Width)
 	i := 0
 	if t.text.text.ShowLineNumbers {
 		lineStr := []rune(strconv.Itoa(t.row + 1))
 		pad := t.lineNumberWidth() - len(lineStr)
 		for ; i < pad; i++ {
-			t.setCellRune(' ', x, TextGridStyleWhitespace, rowStyle) // padding space
-			x++
+			t.setCellRune(' ', i, TextGridStyleWhitespace, rowStyle) // padding space
 		}
 		for c := 0; c < len(lineStr); c++ {
-			t.setCellRune(lineStr[c], x, TextGridStyleDefault, rowStyle) // line numbers
+			t.setCellRune(lineStr[c], i, TextGridStyleDefault, rowStyle) // line numbers
 			i++
-			x++
 		}
 
-		t.setCellRune('|', x, TextGridStyleWhitespace, rowStyle) // last space
+		t.setCellRune('|', i, TextGridStyleWhitespace, rowStyle) // last space
 		i++
-		x++
 	}
-	for _, r := range row.Cells {
-		if i >= t.cols { // would be an overflow - bad
-			continue
+	for ; i < t.cols; i++ {
+		if i+xOffset >= len(row.Cells) { // would be an overflow - bad
+			break
 		}
+		r := row.Cells[i+xOffset]
 		if t.text.text.ShowWhitespace && (r.Rune == ' ' || r.Rune == '\t') {
 			sym := textAreaSpaceSymbol
 			if r.Rune == '\t' {
@@ -807,28 +815,24 @@ func (t *textGridRow) refreshCells() {
 					FGColor: TextGridStyleWhitespace.TextColor(),
 					BGColor: r.Style.BackgroundColor(),
 				}
-				t.setCellRune(sym, x, whitespaceBG, rowStyle) // whitespace char
+				t.setCellRune(sym, i, whitespaceBG, rowStyle) // whitespace char
 			} else {
-				t.setCellRune(sym, x, TextGridStyleWhitespace, rowStyle) // whitespace char
+				t.setCellRune(sym, i, TextGridStyleWhitespace, rowStyle) // whitespace char
 			}
 		} else {
-			t.setCellRune(r.Rune, x, r.Style, rowStyle) // regular char
+			t.setCellRune(r.Rune, i, r.Style, rowStyle) // regular char
 		}
-		i++
-		x++
 	}
 	if t.text.text.ShowWhitespace && i < t.cols && t.row < len(t.text.text.Rows)-1 {
-		t.setCellRune(textAreaNewLineSymbol, x, TextGridStyleWhitespace, rowStyle) // newline
+		t.setCellRune(textAreaNewLineSymbol, i, TextGridStyleWhitespace, rowStyle) // newline
 		i++
-		x++
 	}
 	for ; i < t.cols; i++ {
-		t.setCellRune(' ', x, TextGridStyleDefault, rowStyle) // blanks
-		x++
+		t.setCellRune(' ', i, TextGridStyleDefault, rowStyle) // blanks
 	}
 
-	for ; x < len(t.objects)/3; x++ {
-		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
+	for ; i < len(t.objects)/3; i++ {
+		t.setCellRune(' ', i, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
 }
 
@@ -845,22 +849,7 @@ func (t *textGridRow) lineNumberWidth() int {
 }
 
 func (t *textGridRow) updateGridSize(size fyne.Size) {
-	bufCols := int(size.Width / t.text.cellSize.Width)
-	for _, row := range t.text.text.Rows {
-		lenCells := len(row.Cells)
-		if lenCells > bufCols {
-			bufCols = lenCells
-		}
-	}
-
-	if t.text.text.ShowWhitespace {
-		bufCols++
-	}
-	if t.text.text.ShowLineNumbers {
-		bufCols += t.lineNumberWidth()
-	}
-
-	t.cols = bufCols
+	t.cols = int(size.Width / t.text.cellSize.Width)
 	t.addCellsIfRequired()
 }
 
