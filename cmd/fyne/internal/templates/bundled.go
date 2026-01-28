@@ -23,7 +23,7 @@ var resourceMakefile = &fyne.StaticResource{
 var resourceAppDesktop = &fyne.StaticResource{
 	StaticName: "app.desktop",
 	StaticContent: []byte(
-		"[Desktop Entry]\nType=Application\nName={{.Name}}\n{{- if ne .GenericName \"\"}}\nGenericName={{.GenericName}}{{end}}\nExec={{.Exec}} {{- .ExecParams}}\nIcon={{.Name}}\n{{- if ne .Comment \"\"}}\nComment={{.Comment}}{{end}}\n{{- if ne .Categories \"\"}}\nCategories={{.Categories}}{{end}}\nKeywords={{if ne .Keywords \"\"}}{{.Keywords}}{{else}}fyne;{{end}}\n\n{{if or (ne .SourceRepo \"\") (ne .SourceDir \"\") -}}\n[X-Fyne Source]\nRepo={{.SourceRepo}}\nDir={{.SourceDir}}\n\n{{end -}}\n"),
+		"[Desktop Entry]\nType=Application\nName={{.Name}}\n{{- if ne .GenericName \"\"}}\nGenericName={{.GenericName}}{{end}}\nExec={{.Exec}} {{- .ExecParams}}\nIcon={{.Name}}\n{{- if ne .Comment \"\"}}\nComment={{.Comment}}{{end}}\n{{- if ne .Categories \"\"}}\nCategories={{.Categories}}{{end}}\nKeywords={{if ne .Keywords \"\"}}{{.Keywords}}{{else}}fyne;{{end}}\n\n{{if or (ne .SourceRepo \"\") (ne .SourceDir \"\") -}}\n[X-Fyne Source]\nRepo={{.SourceRepo}}\nDir={{.SourceDir}}\n\n{{end -}}\n{{- if ne .StartupWMClass \"\"}}\nStartupWMClass={{.StartupWMClass}}{{end}}\n"),
 }
 var resourceAppManifest = &fyne.StaticResource{
 	StaticName: "app.manifest",

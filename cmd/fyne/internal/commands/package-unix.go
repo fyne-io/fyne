@@ -23,6 +23,7 @@ type unixData struct {
 	ExecParams       string
 
 	SourceRepo, SourceDir string
+	StartupWMClass        string
 }
 
 func (p *Packager) packageUNIX() error {
@@ -67,15 +68,16 @@ func (p *Packager) packageUNIX() error {
 		linuxBSD = *p.linuxAndBSDMetadata
 	}
 	tplData := unixData{
-		Name:        p.Name,
-		Exec:        filepath.Base(p.exe),
-		Icon:        p.Name + filepath.Ext(p.icon),
-		Local:       local,
-		GenericName: linuxBSD.GenericName,
-		Keywords:    formatDesktopFileList(linuxBSD.Keywords),
-		Comment:     linuxBSD.Comment,
-		Categories:  formatDesktopFileList(linuxBSD.Categories),
-		ExecParams:  linuxBSD.ExecParams,
+		Name:           p.Name,
+		Exec:           filepath.Base(p.exe),
+		Icon:           p.Name + filepath.Ext(p.icon),
+		Local:          local,
+		GenericName:    linuxBSD.GenericName,
+		Keywords:       formatDesktopFileList(linuxBSD.Keywords),
+		Comment:        linuxBSD.Comment,
+		Categories:     formatDesktopFileList(linuxBSD.Categories),
+		ExecParams:     linuxBSD.ExecParams,
+		StartupWMClass: p.Name,
 	}
 
 	if p.sourceMetadata != nil {

@@ -33,4 +33,9 @@ func TestDesktopFileSource(t *testing.T) {
 	assert.True(t, strings.Contains(buf.String(), "[X-Fyne"))
 	assert.True(t, strings.Contains(buf.String(), "Repo=https://example.com"))
 	assert.True(t, strings.Contains(buf.String(), "Dir=cmd/name"))
+
+	tplData.StartupWMClass = "Testing"
+	err = templates.DesktopFileUNIX.Execute(buf, tplData)
+	assert.Nil(t, err)
+	assert.True(t, strings.Contains(buf.String(), "StartupWMClass=Testing"))
 }
