@@ -722,9 +722,24 @@ func (w *window) RescaleContext() {
 		return
 	}
 
-	size := w.canvas.size.Max(w.canvas.MinSize())
-	newWidth, newHeight := w.screenSize(size)
-	w.viewport.SetSize(newWidth, newHeight)
+	// When scale changes (e.g., moving between monitors), we need to recalculate
+	// the canvas size based on the current window size, not the other way around
+	if w.visible {
+		currentWidth, currentHeight := w.viewport.GetSize()
+		if currentWidth > 0 && currentHeight > 0 {
+			canvasSize := fyne.NewSize(
+				scale.ToFyneCoordinate(w.canvas, currentWidth),
+				scale.ToFyneCoordinate(w.canvas, currentHeight))
+			w.canvas.Resize(canvasSize)
+
+			w.width = currentWidth
+			w.height = currentHeight
+		}
+	} else {
+		size := w.canvas.size.Max(w.canvas.MinSize())
+		newWidth, newHeight := w.screenSize(size)
+		w.viewport.SetSize(newWidth, newHeight)
+	}
 
 	// Ensure textures re-rasterize at the new scale
 	cache.DeleteTextTexturesFor(w.canvas)
