@@ -721,6 +721,21 @@ func (l *listLayout) updateList(newOnly bool) {
 		fyne.LogError("Missing UpdateCell callback required for List", nil)
 	}
 
+	if l.list.currentFocus >= length {
+		l.list.focused = false
+	}
+
+	if l.list.selected != nil {
+		index := 0
+		for _, selected := range l.list.selected {
+			if selected < length {
+				l.list.selected[index] = selected
+				index++
+			}
+		}
+		l.list.selected = l.list.selected[:index]
+	}
+
 	// l.wasVisible now represents the currently visible items, while
 	// l.visible will be updated to represent what is visible *after* the update
 	l.wasVisible = append(l.wasVisible, l.visible...)
