@@ -463,7 +463,9 @@ func newButtonTapAnimation(bg *canvas.Rectangle, w fyne.Widget, th fyne.Theme) *
 		}
 		canvas.Refresh(bg)
 		if done == 1.0 {
-			w.(*Button).isAnimating = false
+			if btn, ok := w.(*Button); ok {
+				btn.isAnimating = false
+			}
 		}
 	})
 }
