@@ -48,7 +48,7 @@ type Config struct {
 }
 
 func NewDecoder(stream io.Reader) (*Decoder, error) {
-	icon, err := oksvg.ReadIconStream(stream)
+	icon, err := oksvg.ReadReplacingCurrentColor(stream, "#000000")
 	if err != nil {
 		return nil, err
 	}
