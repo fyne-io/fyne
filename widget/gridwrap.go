@@ -68,6 +68,7 @@ type GridWrap struct {
 	offsetY          float32
 	offsetUpdated    func(fyne.Position)
 	colCountCache    int
+	minSizeCache     fyne.Size
 }
 
 // NewGridWrap creates and returns a GridWrap widget for displaying items in
@@ -158,6 +159,7 @@ func (l *GridWrap) scrollTo(id GridWrapItemID) {
 //
 // Since: 2.4
 func (l *GridWrap) RefreshItem(id GridWrapItemID) {
+	l.minSizeCache = fyne.Size{}
 	if l.scroller == nil {
 		return
 	}
@@ -354,7 +356,17 @@ func (l *GridWrap) UnselectAll() {
 	}
 }
 
+// Refresh causes this GridWrap to be redrawn in its current state.
+func (l *GridWrap) Refresh() {
+	l.minSizeCache = fyne.Size{}
+	l.BaseWidget.Refresh()
+}
+
 func (l *GridWrap) contentMinSize() fyne.Size {
+	if !l.minSizeCache.IsZero() {
+		return l.minSizeCache
+	}
+
 	padding := l.Theme().Size(theme.SizeNamePadding)
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
@@ -362,7 +374,9 @@ func (l *GridWrap) contentMinSize() fyne.Size {
 
 	cols := l.ColumnCount()
 	rows := float32(math.Ceil(float64(l.Length()) / float64(cols)))
-	return fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
+	size := fyne.NewSize(l.itemMin.Width, (l.itemMin.Height+padding)*rows-padding)
+	l.minSizeCache = size
+	return size
 }
 
 // Declare conformity with WidgetRenderer interface.

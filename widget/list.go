@@ -73,6 +73,7 @@ type List struct {
 	itemHeights      map[ListItemID]float32
 	offsetY          float32
 	offsetUpdated    func(fyne.Position)
+	minSizeCache     fyne.Size
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -147,6 +148,7 @@ func (l *List) MinSize() fyne.Size {
 //
 // Since: 2.4
 func (l *List) RefreshItem(id ListItemID) {
+	l.minSizeCache = fyne.Size{}
 	if l.scroller == nil {
 		return
 	}
@@ -374,7 +376,17 @@ func (l *List) UnselectAll() {
 	}
 }
 
+// Refresh causes this List to be redrawn in its current state
+func (l *List) Refresh() {
+	l.minSizeCache = fyne.Size{}
+	l.BaseWidget.Refresh()
+}
+
 func (l *List) contentMinSize() fyne.Size {
+	if !l.minSizeCache.IsZero() {
+		return l.minSizeCache
+	}
+
 	separatorThickness := l.Theme().Size(theme.SizeNamePadding)
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
@@ -397,7 +409,9 @@ func (l *List) contentMinSize() fyne.Size {
 	}
 	height += float32(items-totalCustom) * templateHeight
 
-	return fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
+	size := fyne.NewSize(l.itemMin.Width, height+separatorThickness*float32(items-1))
+	l.minSizeCache = size
+	return size
 }
 
 // fills l.visibleRowHeights and also returns offY and minRow
@@ -488,6 +502,7 @@ func (l *listRenderer) MinSize() fyne.Size {
 }
 
 func (l *listRenderer) Refresh() {
+	l.list.minSizeCache = fyne.Size{}
 	if f := l.list.CreateItem; f != nil {
 		item := createItemAndApplyThemeScope(f, l.list)
 		l.list.itemMin = item.MinSize()
