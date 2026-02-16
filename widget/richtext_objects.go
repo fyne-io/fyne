@@ -257,13 +257,15 @@ func (l *ListSegment) Inline() bool {
 // Segments returns the segments required to draw bullets before each item
 func (l *ListSegment) Segments() []RichTextSegment {
 	out := make([]RichTextSegment, len(l.Items))
+	j := l.StartNumber()
 	for i, in := range l.Items {
-		txt := "• "
-		if l.Ordered {
-			txt = strconv.Itoa(i+l.startIndex+1) + "."
-		}
 		var texts []RichTextSegment
 		if _, ok := in.(*ListSegment); !ok {
+			txt := "• "
+			if l.Ordered {
+				txt = strconv.Itoa(j) + "."
+				j++
+			}
 			indentation := strings.Repeat(" ", l.indentationLevel*4)
 			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
 			texts = append(texts, bullet)
