@@ -44,32 +44,46 @@ type markdownRenderer []RichTextSegment
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
-	segs, err := renderNode(source, n, false)
+	segs, err := renderNode(source, n, false, 0)
 	*m = segs
 	return err
 }
 
-func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, error) {
+func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
 	switch t := n.(type) {
 	case *ast.Document:
-		return renderChildren(source, n, blockquote)
+		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Paragraph:
-		children, err := renderChildren(source, n, blockquote)
+		children, err := renderChildren(source, n, blockquote, listDepth)
 		if !blockquote {
 			linebreak := &TextSegment{Style: RichTextStyleParagraph}
 			children = append(children, linebreak)
 		}
 		return children, err
 	case *ast.List:
-		items, err := renderChildren(source, n, blockquote)
+		items, err := renderChildren(source, n, blockquote, listDepth+1)
 		return []RichTextSegment{
-			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+'},
+			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+', indentationLevel: listDepth},
 		}, err
 	case *ast.ListItem:
-		texts, err := renderChildren(source, n, blockquote)
-		return []RichTextSegment{&ParagraphSegment{Texts: texts}}, err
+		children, err := renderChildren(source, n, blockquote, listDepth)
+		var texts []RichTextSegment
+		var sublist RichTextSegment
+		for _, child := range children {
+			// check if child is a sub-list
+			if _, ok := child.(*ListSegment); ok {
+				sublist = child
+			} else {
+				texts = append(texts, child)
+			}
+		}
+		result := []RichTextSegment{&ParagraphSegment{Texts: texts}}
+		if sublist != nil {
+			result = append(result, sublist)
+		}
+		return result, err
 	case *ast.TextBlock:
-		return renderChildren(source, n, blockquote)
+		return renderChildren(source, n, blockquote, listDepth)
 	case *ast.Heading:
 		text := forceIntoHeadingText(source, n)
 		switch t.Level {
@@ -125,7 +139,7 @@ func renderNode(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, 
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: decodeText(text)}}, nil
 	case *ast.Blockquote:
-		return renderChildren(source, n, true)
+		return renderChildren(source, n, true, listDepth)
 	case *ast.Image:
 		return parseMarkdownImage(t), nil
 	}
@@ -140,10 +154,10 @@ func suffixSpaceIfAppropriate(text string, n ast.Node) string {
 	return text
 }
 
-func renderChildren(source []byte, n ast.Node, blockquote bool) ([]RichTextSegment, error) {
+func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
 	children := make([]RichTextSegment, 0, n.ChildCount())
 	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
-		segs, err := renderNode(source, child, blockquote)
+		segs, err := renderNode(source, child, blockquote, listDepth)
 		if err != nil {
 			return children, err
 		}

@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -229,7 +230,8 @@ type ListSegment struct {
 	// startIndex is set to start - 1 to allow the empty value of ListSegment to have a starting
 	// number of 1, while also allowing the caller to override the starting
 	// number to any int, including 0.
-	startIndex int
+	startIndex       int
+	indentationLevel int
 }
 
 // SetStartNumber sets the starting number for an ordered list.
@@ -260,11 +262,14 @@ func (l *ListSegment) Segments() []RichTextSegment {
 		if l.Ordered {
 			txt = strconv.Itoa(i+l.startIndex+1) + "."
 		}
-		bullet := &TextSegment{Text: txt + " ", Style: RichTextStyleStrong}
-		out[i] = &ParagraphSegment{Texts: []RichTextSegment{
-			bullet,
-			in,
-		}}
+		var texts []RichTextSegment
+		if _, ok := in.(*ListSegment); !ok {
+			indentation := strings.Repeat(" ", l.indentationLevel*4)
+			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
+			texts = append(texts, bullet)
+		}
+		texts = append(texts, in)
+		out[i] = &ParagraphSegment{Texts: texts}
 	}
 	return out
 }

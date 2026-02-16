@@ -241,6 +241,46 @@ func TestRichTextMarkdown_ListWithDifferentStartingIndex(t *testing.T) {
 	}
 }
 
+func TestRichTextMarkdown_NestedList(t *testing.T) {
+	r := NewRichTextFromMarkdown("* item 1\n  * item 1.1\n* item 2")
+
+	assert.Len(t, r.Segments, 1)
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.Len(t, list.Items, 3)
+		assert.Len(t, list.Items[0].(*ParagraphSegment).Texts, 1)
+		assert.Equal(t, "item 1", list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		if sublist, ok := list.Items[1].(*ListSegment); ok {
+			assert.Len(t, sublist.Items, 1)
+			assert.False(t, sublist.Ordered)
+			assert.Equal(t, "item 1.1", sublist.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		} else {
+			t.Error("Segment should be a List")
+		}
+		assert.Len(t, list.Items[1].(*ListSegment).Items, 1)
+	} else {
+		t.Error("Segment should be a List")
+	}
+
+	r.ParseMarkdown("1. item 1\n   - item 1.1\n2. item 2")
+
+	assert.Len(t, r.Segments, 1)
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.True(t, list.Ordered)
+		assert.Len(t, list.Items, 3)
+		assert.Len(t, list.Items[0].(*ParagraphSegment).Texts, 1)
+		if sublist, ok := list.Items[1].(*ListSegment); ok {
+			assert.Len(t, sublist.Items, 1)
+			assert.False(t, sublist.Ordered)
+			assert.Equal(t, "item 1.1", sublist.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		} else {
+			t.Error("Segment should be a List")
+		}
+		assert.Equal(t, "item 2", list.Items[2].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+	} else {
+		t.Error("Segment should be a List")
+	}
+}
+
 func TestRichTextMarkdown_Separator(t *testing.T) {
 	r := NewRichTextFromMarkdown("---\n")
 
