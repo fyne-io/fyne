@@ -215,6 +215,3 @@ func (r *menuUnderlayRenderer) MinSize() fyne.Size {
 func (r *menuUnderlayRenderer) Refresh() {
 }
 
-func (b *MenuBar) getMainMenu() *fyne.MainMenu {
-	return b.mainMenu
-}

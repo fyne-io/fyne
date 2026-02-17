@@ -5,8 +5,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/lang"
-	"fyne.io/fyne/v2/theme"
 )
 
 // minWidthContainer is a container that enforces a minimum width for its content
@@ -60,23 +58,23 @@ func (r *minWidthRenderer) Refresh() {
 	canvas.Refresh(r.container.content)
 }
 
-// MenuSearchItem represents a searchable menu item with its path through the menu hierarchy
-type MenuSearchItem struct {
+// menuSearchItem represents a searchable menu item with its path through the menu hierarchy
+type menuSearchItem struct {
 	Item       *fyne.MenuItem
 	Path       []string
 	Parent     *fyne.Menu
 	ParentItem *fyne.MenuItem
 }
 
-// SearchableMainMenu wraps a MainMenu to provide search functionality across all menus
-type SearchableMainMenu struct {
+// searchableMainMenu wraps a MainMenu to provide search functionality across all menus
+type searchableMainMenu struct {
 	MainMenu    *fyne.MainMenu
-	searchItems []MenuSearchItem
+	searchItems []menuSearchItem
 }
 
-// NewSearchableMainMenu creates a searchable wrapper around a MainMenu
-func NewSearchableMainMenu(mainMenu *fyne.MainMenu) *SearchableMainMenu {
-	s := &SearchableMainMenu{
+// newSearchableMainMenu creates a searchable wrapper around a MainMenu
+func newSearchableMainMenu(mainMenu *fyne.MainMenu) *searchableMainMenu {
+	s := &searchableMainMenu{
 		MainMenu: mainMenu,
 	}
 	s.indexMenuItems()
@@ -84,8 +82,8 @@ func NewSearchableMainMenu(mainMenu *fyne.MainMenu) *SearchableMainMenu {
 }
 
 // indexMenuItems builds an index of all menu items for searching
-func (s *SearchableMainMenu) indexMenuItems() {
-	s.searchItems = []MenuSearchItem{}
+func (s *searchableMainMenu) indexMenuItems() {
+	s.searchItems = []menuSearchItem{}
 
 	for _, menu := range s.MainMenu.Items {
 		s.indexMenu(menu, []string{}, nil, nil)
@@ -93,7 +91,7 @@ func (s *SearchableMainMenu) indexMenuItems() {
 }
 
 // indexMenu recursively indexes menu items
-func (s *SearchableMainMenu) indexMenu(menu *fyne.Menu, path []string, parentItem *fyne.MenuItem, parentMenu *fyne.Menu) {
+func (s *searchableMainMenu) indexMenu(menu *fyne.Menu, path []string, parentItem *fyne.MenuItem, parentMenu *fyne.Menu) {
 	newPath := append(path, menu.Label)
 
 	for _, item := range menu.Items {
@@ -101,7 +99,7 @@ func (s *SearchableMainMenu) indexMenu(menu *fyne.Menu, path []string, parentIte
 			continue
 		}
 
-		searchItem := MenuSearchItem{
+		searchItem := menuSearchItem{
 			Item:       item,
 			Path:       newPath,
 			Parent:     menu,
@@ -116,13 +114,13 @@ func (s *SearchableMainMenu) indexMenu(menu *fyne.Menu, path []string, parentIte
 }
 
 // Search finds menu items matching the query
-func (s *SearchableMainMenu) Search(query string) []MenuSearchItem {
+func (s *searchableMainMenu) Search(query string) []menuSearchItem {
 	if query == "" {
-		return []MenuSearchItem{}
+		return []menuSearchItem{}
 	}
 
 	query = strings.ToLower(strings.TrimSpace(query))
-	var results []MenuSearchItem
+	var results []menuSearchItem
 
 	for _, searchItem := range s.searchItems {
 		if s.matchesQuery(searchItem, query) {
@@ -134,7 +132,7 @@ func (s *SearchableMainMenu) Search(query string) []MenuSearchItem {
 }
 
 // matchesQuery checks if a menu item matches the search query
-func (s *SearchableMainMenu) matchesQuery(item MenuSearchItem, query string) bool {
+func (s *searchableMainMenu) matchesQuery(item menuSearchItem, query string) bool {
 	if strings.Contains(strings.ToLower(item.Item.Label), query) {
 		return true
 	}
@@ -155,8 +153,8 @@ func (s *SearchableMainMenu) matchesQuery(item MenuSearchItem, query string) boo
 	return false
 }
 
-// CreateSearchResultMenuItem creates a menu item that represents a search result
-func CreateSearchResultMenuItem(searchItem MenuSearchItem) *fyne.MenuItem {
+// createSearchResultMenuItem creates a menu item that represents a search result
+func createSearchResultMenuItem(searchItem menuSearchItem) *fyne.MenuItem {
 	pathStr := strings.Join(searchItem.Path, " → ")
 	if searchItem.Item.Label != "" {
 		pathStr += " → " + searchItem.Item.Label
@@ -197,149 +195,4 @@ func findFirstActionableInMenu(menu *fyne.Menu) *fyne.MenuItem {
 		}
 	}
 	return nil
-}
-
-// MenuWithGlobalSearch extends Menu to search across all menus in a MainMenu
-type MenuWithGlobalSearch struct {
-	*Menu
-	searchableMainMenu *SearchableMainMenu
-	searchResults      []MenuSearchItem
-	originalItems      []fyne.CanvasObject
-	minSearchWidth     float32
-}
-
-// NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu.
-// This is automatically used for the Help menu to provide search functionality.
-func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *MenuWithGlobalSearch {
-	searchLabel := lang.L("Search...")
-
-	m := &MenuWithGlobalSearch{
-		Menu:               NewMenuWithSearch(menu),
-		searchableMainMenu: NewSearchableMainMenu(mainMenu),
-	}
-
-	if m.Menu.searchEntry != nil {
-		m.Menu.searchEntry.PlaceHolder = searchLabel
-		m.searchEntry = m.Menu.searchEntry
-
-		placeholderText := NewRichTextWithText(searchLabel)
-		textSize := placeholderText.MinSize()
-
-		th := m.Theme()
-		innerPadding := th.Size(theme.SizeNameInnerPadding)
-		inputBorder := th.Size(theme.SizeNameInputBorder)
-
-		minWidth := textSize.Width + (innerPadding * 4) + (inputBorder * 2) + 40
-		m.minSearchWidth = minWidth
-
-		if len(m.Menu.Items) > 0 {
-			wrappedEntry := newMinWidthContainer(m.Menu.searchEntry, minWidth)
-			m.Menu.Items[0] = wrappedEntry
-		}
-	}
-
-	m.initGlobalSearchHandlers()
-	return m
-}
-
-// MinSize returns the minimum size for the menu, ensuring it's wide enough for the search field
-func (m *MenuWithGlobalSearch) MinSize() fyne.Size {
-	baseSize := m.Menu.MinSize()
-
-	if m.minSearchWidth > 0 && baseSize.Width < m.minSearchWidth {
-		baseSize.Width = m.minSearchWidth
-	}
-
-	return baseSize
-}
-
-// initGlobalSearchHandlers sets up the search handlers for global search
-func (m *MenuWithGlobalSearch) initGlobalSearchHandlers() {
-	if m.searchEntry == nil {
-		return
-	}
-
-	if len(m.Menu.Items) > 2 {
-		m.originalItems = make([]fyne.CanvasObject, len(m.Menu.Items)-2)
-		copy(m.originalItems, m.Menu.Items[2:])
-	}
-
-	m.searchEntry.OnChanged = func(s string) {
-		m.onGlobalSearchChanged(s)
-	}
-	m.searchEntry.OnSubmitted = func(_ string) {
-		m.onGlobalSearchSubmitted()
-	}
-}
-
-// onGlobalSearchChanged handles search query changes
-func (m *MenuWithGlobalSearch) onGlobalSearchChanged(query string) {
-	if query == "" {
-		m.resetGlobalSearchResults()
-		return
-	}
-
-	m.searchResults = m.searchableMainMenu.Search(query)
-	m.displaySearchResults()
-}
-
-// displaySearchResults updates the menu to show search results
-func (m *MenuWithGlobalSearch) displaySearchResults() {
-	searchEntry := m.Menu.Items[0]
-	separator := m.Menu.Items[1]
-
-	resultItems := make([]fyne.CanvasObject, 0, len(m.searchResults)+2)
-	resultItems = append(resultItems, searchEntry, separator)
-
-	if len(m.searchResults) == 0 {
-		noResultsItem := newMenuItem(&fyne.MenuItem{
-			Label:    lang.L("No results found"),
-			Disabled: true,
-		}, m.Menu)
-		resultItems = append(resultItems, noResultsItem)
-	} else {
-		for _, result := range m.searchResults {
-			resultMenuItem := CreateSearchResultMenuItem(result)
-			menuItem := newMenuItem(resultMenuItem, m.Menu)
-			resultItems = append(resultItems, menuItem)
-		}
-	}
-
-	m.Menu.Items = resultItems
-	m.Menu.Refresh()
-
-	if m.Menu.Size().Height > 0 {
-		newSize := m.Menu.MinSize()
-		if newSize.Height > m.Menu.Size().Height {
-			m.Menu.Resize(newSize)
-		}
-	}
-}
-
-// resetGlobalSearchResults resets the menu to show original items
-func (m *MenuWithGlobalSearch) resetGlobalSearchResults() {
-	m.searchResults = nil
-
-	searchEntry := m.Menu.Items[0]
-	separator := m.Menu.Items[1]
-
-	newItems := make([]fyne.CanvasObject, 0, len(m.originalItems)+2)
-	newItems = append(newItems, searchEntry, separator)
-	newItems = append(newItems, m.originalItems...)
-	m.Menu.Items = newItems
-
-	m.Menu.Refresh()
-}
-
-// onGlobalSearchSubmitted handles Enter key press in search
-func (m *MenuWithGlobalSearch) onGlobalSearchSubmitted() {
-	if len(m.searchResults) > 0 {
-		firstResult := m.searchResults[0]
-		if firstResult.Item.Action != nil {
-			firstResult.Item.Action()
-			if m.OnDismiss != nil {
-				m.OnDismiss()
-			}
-		}
-	}
 }

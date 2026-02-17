@@ -28,6 +28,11 @@ type Menu struct {
 	searchEnabled    bool
 	searchEntry      *Entry
 	searchFirstMatch *menuItem
+
+	globalSearch   *searchableMainMenu
+	searchResults  []menuSearchItem
+	originalItems  []fyne.CanvasObject
+	minSearchWidth float32
 }
 
 // NewMenu creates a new Menu.
@@ -38,8 +43,8 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	return m
 }
 
-// NewMenuWithSearch creates a new Menu and enables a search field at the top.
-func NewMenuWithSearch(menu *fyne.Menu) *Menu {
+// newMenuWithSearch creates a new Menu and enables a search field at the top.
+func newMenuWithSearch(menu *fyne.Menu) *Menu {
 	m := &Menu{searchEnabled: true}
 	m.ExtendBaseWidget(m)
 	m.setMenu(menu)
@@ -62,17 +67,10 @@ func (m *Menu) ActivateLastSubmenu() bool {
 	return true
 }
 
-// FocusSearch focuses the search entry if the menu has search enabled
-func (m *Menu) FocusSearch() {
-	if m.searchEnabled && m.searchEntry != nil {
-		if c := fyne.CurrentApp().Driver().CanvasForObject(m.searchEntry); c != nil {
-			c.Focus(m.searchEntry)
-		}
-	}
-}
-
 // FocusSearchOn focuses the search entry using the provided canvas.
 // This is useful when the menu hasn't been fully added to the widget tree yet.
+//
+// Since: 2.8
 func (m *Menu) FocusSearchOn(c fyne.Canvas) {
 	if m.searchEnabled && m.searchEntry != nil && c != nil {
 		c.Focus(m.searchEntry)
@@ -174,7 +172,13 @@ func (m *Menu) DeactivateLastSubmenu() bool {
 // MinSize returns the minimal size of the menu.
 func (m *Menu) MinSize() fyne.Size {
 	m.ExtendBaseWidget(m)
-	return m.BaseWidget.MinSize()
+	s := m.BaseWidget.MinSize()
+
+	if m.minSearchWidth > 0 && s.Width < m.minSearchWidth {
+		s.Width = m.minSearchWidth
+	}
+
+	return s
 }
 
 // Refresh updates the menu to reflect changes in the data.
@@ -391,6 +395,130 @@ func findFirstActionable(m *Menu) *menuItem {
 		}
 	}
 	return nil
+}
+
+// NewMenuWithGlobalSearch creates a menu that can search across all menus in a MainMenu.
+// This is automatically used for the Help menu to provide search functionality.
+//
+// Since: 2.8
+func NewMenuWithGlobalSearch(menu *fyne.Menu, mainMenu *fyne.MainMenu) *Menu {
+	searchLabel := lang.L("Search...")
+
+	m := newMenuWithSearch(menu)
+	m.globalSearch = newSearchableMainMenu(mainMenu)
+
+	if m.searchEntry != nil {
+		m.searchEntry.PlaceHolder = searchLabel
+
+		placeholderText := NewRichTextWithText(searchLabel)
+		textSize := placeholderText.MinSize()
+
+		th := m.Theme()
+		innerPadding := th.Size(theme.SizeNameInnerPadding)
+		inputBorder := th.Size(theme.SizeNameInputBorder)
+
+		minWidth := textSize.Width + (innerPadding * 4) + (inputBorder * 2) + 40
+		m.minSearchWidth = minWidth
+
+		if len(m.Items) > 0 {
+			wrappedEntry := newMinWidthContainer(m.searchEntry, minWidth)
+			m.Items[0] = wrappedEntry
+		}
+	}
+
+	m.initGlobalSearchHandlers()
+	return m
+}
+
+// initGlobalSearchHandlers sets up the search handlers for global search
+func (m *Menu) initGlobalSearchHandlers() {
+	if m.searchEntry == nil {
+		return
+	}
+
+	if len(m.Items) > 2 {
+		m.originalItems = make([]fyne.CanvasObject, len(m.Items)-2)
+		copy(m.originalItems, m.Items[2:])
+	}
+
+	m.searchEntry.OnChanged = func(s string) {
+		m.onGlobalSearchChanged(s)
+	}
+	m.searchEntry.OnSubmitted = func(_ string) {
+		m.onGlobalSearchSubmitted()
+	}
+}
+
+// onGlobalSearchChanged handles search query changes
+func (m *Menu) onGlobalSearchChanged(query string) {
+	if query == "" {
+		m.resetGlobalSearchResults()
+		return
+	}
+
+	m.searchResults = m.globalSearch.Search(query)
+	m.displaySearchResults()
+}
+
+// displaySearchResults updates the menu to show search results
+func (m *Menu) displaySearchResults() {
+	searchEntry := m.Items[0]
+	separator := m.Items[1]
+
+	resultItems := make([]fyne.CanvasObject, 0, len(m.searchResults)+2)
+	resultItems = append(resultItems, searchEntry, separator)
+
+	if len(m.searchResults) == 0 {
+		noResultsItem := newMenuItem(&fyne.MenuItem{
+			Label:    lang.L("No results found"),
+			Disabled: true,
+		}, m)
+		resultItems = append(resultItems, noResultsItem)
+	} else {
+		for _, result := range m.searchResults {
+			resultMenuItem := createSearchResultMenuItem(result)
+			menuItem := newMenuItem(resultMenuItem, m)
+			resultItems = append(resultItems, menuItem)
+		}
+	}
+
+	m.Items = resultItems
+	m.Refresh()
+
+	if m.Size().Height > 0 {
+		newSize := m.MinSize()
+		if newSize.Height > m.Size().Height {
+			m.Resize(newSize)
+		}
+	}
+}
+
+// resetGlobalSearchResults resets the menu to show original items
+func (m *Menu) resetGlobalSearchResults() {
+	m.searchResults = nil
+
+	searchEntry := m.Items[0]
+	separator := m.Items[1]
+
+	newItems := make([]fyne.CanvasObject, 0, len(m.originalItems)+2)
+	newItems = append(newItems, searchEntry, separator)
+	newItems = append(newItems, m.originalItems...)
+	m.Items = newItems
+
+	m.Refresh()
+}
+
+// onGlobalSearchSubmitted handles Enter key press in search
+func (m *Menu) onGlobalSearchSubmitted() {
+	if len(m.searchResults) > 0 {
+		firstResult := m.searchResults[0]
+		if firstResult.Item.Action != nil {
+			firstResult.Item.Action()
+			if m.OnDismiss != nil {
+				m.OnDismiss()
+			}
+		}
+	}
 }
 
 type menuRenderer struct {

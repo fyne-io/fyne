@@ -33,7 +33,7 @@ func TestSearchableMainMenu_IndexMenuItems(t *testing.T) {
 	)
 
 	mainMenu := fyne.NewMainMenu(fileMenu, editMenu, formatMenu)
-	searchable := NewSearchableMainMenu(mainMenu)
+	searchable := newSearchableMainMenu(mainMenu)
 
 	assert.Equal(t, 10, len(searchable.searchItems)) // 3 + 3 + 2 + 2
 
@@ -62,7 +62,7 @@ func TestSearchableMainMenu_Search(t *testing.T) {
 	)
 
 	mainMenu := fyne.NewMainMenu(fileMenu, editMenu)
-	searchable := NewSearchableMainMenu(mainMenu)
+	searchable := newSearchableMainMenu(mainMenu)
 
 	results := searchable.Search("save")
 	assert.Equal(t, 2, len(results))
@@ -93,7 +93,7 @@ func TestSearchableMainMenu_SearchWithShortcuts(t *testing.T) {
 	)
 
 	mainMenu := fyne.NewMainMenu(fileMenu)
-	searchable := NewSearchableMainMenu(mainMenu)
+	searchable := newSearchableMainMenu(mainMenu)
 
 	results := searchable.Search("Paste")
 	assert.Equal(t, 1, len(results))
@@ -102,12 +102,12 @@ func TestSearchableMainMenu_SearchWithShortcuts(t *testing.T) {
 
 func TestCreateSearchResultMenuItem(t *testing.T) {
 	originalItem := fyne.NewMenuItem("Save", func() {})
-	searchItem := MenuSearchItem{
+	searchItem := menuSearchItem{
 		Item: originalItem,
 		Path: []string{"File"},
 	}
 
-	resultItem := CreateSearchResultMenuItem(searchItem)
+	resultItem := createSearchResultMenuItem(searchItem)
 
 	assert.Equal(t, "File → Save", resultItem.Label)
 	assert.NotNil(t, resultItem.Action)
@@ -127,16 +127,16 @@ func TestMenuWithGlobalSearch_Creation(t *testing.T) {
 		helpMenu,
 	)
 
-	globalSearchMenu := NewMenuWithGlobalSearch(helpMenu, mainMenu)
+	m := NewMenuWithGlobalSearch(helpMenu, mainMenu)
 
-	assert.NotNil(t, globalSearchMenu)
-	assert.NotNil(t, globalSearchMenu.searchableMainMenu)
-	assert.True(t, globalSearchMenu.searchEnabled)
-	assert.NotNil(t, globalSearchMenu.searchEntry)
+	assert.NotNil(t, m)
+	assert.NotNil(t, m.globalSearch)
+	assert.True(t, m.searchEnabled)
+	assert.NotNil(t, m.searchEntry)
 
 	// Should have search entry, separator, and original items
-	assert.Greater(t, len(globalSearchMenu.Items), 2)
-	_, isMinWidthContainer := globalSearchMenu.Items[0].(*minWidthContainer)
+	assert.Greater(t, len(m.Items), 2)
+	_, isMinWidthContainer := m.Items[0].(*minWidthContainer)
 	assert.True(t, isMinWidthContainer)
 }
 
@@ -151,14 +151,14 @@ func TestMenuWithGlobalSearch_SearchAndDisplay(t *testing.T) {
 	)
 
 	mainMenu := fyne.NewMainMenu(fileMenu, helpMenu)
-	globalSearchMenu := NewMenuWithGlobalSearch(helpMenu, mainMenu)
+	m := NewMenuWithGlobalSearch(helpMenu, mainMenu)
 
-	globalSearchMenu.onGlobalSearchChanged("save")
+	m.onGlobalSearchChanged("save")
 
-	assert.NotNil(t, globalSearchMenu.searchResults)
-	assert.Equal(t, 1, len(globalSearchMenu.searchResults))
+	assert.NotNil(t, m.searchResults)
+	assert.Equal(t, 1, len(m.searchResults))
 
-	assert.GreaterOrEqual(t, len(globalSearchMenu.Items), 3)
+	assert.GreaterOrEqual(t, len(m.Items), 3)
 }
 
 func TestMenuWithGlobalSearch_ResetSearch(t *testing.T) {
@@ -174,14 +174,14 @@ func TestMenuWithGlobalSearch_ResetSearch(t *testing.T) {
 		helpMenu,
 	)
 
-	globalSearchMenu := NewMenuWithGlobalSearch(helpMenu, mainMenu)
-	originalItemCount := len(globalSearchMenu.Items)
+	m := NewMenuWithGlobalSearch(helpMenu, mainMenu)
+	originalItemCount := len(m.Items)
 
-	globalSearchMenu.onGlobalSearchChanged("save")
-	globalSearchMenu.onGlobalSearchChanged("")
+	m.onGlobalSearchChanged("save")
+	m.onGlobalSearchChanged("")
 
-	assert.Nil(t, globalSearchMenu.searchResults)
-	assert.Equal(t, originalItemCount, len(globalSearchMenu.Items))
+	assert.Nil(t, m.searchResults)
+	assert.Equal(t, originalItemCount, len(m.Items))
 }
 
 func TestMenuWithGlobalSearch_NoResults(t *testing.T) {
@@ -194,11 +194,11 @@ func TestMenuWithGlobalSearch_NoResults(t *testing.T) {
 		helpMenu,
 	)
 
-	globalSearchMenu := NewMenuWithGlobalSearch(helpMenu, mainMenu)
-	globalSearchMenu.onGlobalSearchChanged("xyz")
+	m := NewMenuWithGlobalSearch(helpMenu, mainMenu)
+	m.onGlobalSearchChanged("xyz")
 
 	hasNoResults := false
-	for _, item := range globalSearchMenu.Items {
+	for _, item := range m.Items {
 		if mi, ok := item.(*menuItem); ok {
 			if mi.Item.Disabled {
 				hasNoResults = true
@@ -207,12 +207,4 @@ func TestMenuWithGlobalSearch_NoResults(t *testing.T) {
 		}
 	}
 	assert.True(t, hasNoResults, "Should show 'No results found' message")
-}
-
-func TestIsHelpMenu(t *testing.T) {
-	helpMenu := fyne.NewMenu("Help")
-	fileMenu := fyne.NewMenu("File")
-
-	assert.True(t, fyne.IsHelpMenu(helpMenu))
-	assert.False(t, fyne.IsHelpMenu(fileMenu))
 }

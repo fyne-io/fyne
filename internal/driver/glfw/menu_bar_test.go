@@ -553,6 +553,14 @@ func TestMenuBar_Toggle(t *testing.T) {
 	})
 }
 
+func TestIsHelpMenu(t *testing.T) {
+	helpMenu := fyne.NewMenu("Help")
+	fileMenu := fyne.NewMenu("File")
+
+	assert.True(t, isHelpMenu(helpMenu))
+	assert.False(t, isHelpMenu(fileMenu))
+}
+
 type notFocusableButton struct {
 	widget.Label
 	f func()
