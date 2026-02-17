@@ -214,4 +214,3 @@ func (r *menuUnderlayRenderer) MinSize() fyne.Size {
 
 func (r *menuUnderlayRenderer) Refresh() {
 }
-
