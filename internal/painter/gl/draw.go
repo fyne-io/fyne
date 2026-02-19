@@ -429,6 +429,10 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
+	if pos.Y > frame.Height || pos.Y+size.Height < 0 || pos.X > frame.Width || pos.X+size.Width < 0 {
+		return
+	}
+
 	// text size is sensitive to position on screen
 	size.Width = roundToPixel(size.Width, p.pixScale)
 	size.Height = roundToPixel(size.Height, p.pixScale)
