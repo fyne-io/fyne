@@ -231,6 +231,18 @@ bool hasPrefix(char* string, char* prefix) {
 	return memcmp(prefix, string, lp) == 0;
 }
 
+bool isTreeURI(JNIEnv *env, jclass contractClass, jobject uri) {
+	jmethodID isTree = find_static_method(env, contractClass, "isTreeUri", "(Landroid/net/Uri;)Z");
+	jboolean tree = (*env)->CallStaticBooleanMethod(env, contractClass, isTree, uri);
+	return tree == JNI_TRUE;
+}
+
+bool isDocumentURI(JNIEnv *env, uintptr_t ctx, jclass contractClass, jobject uri) {
+	jmethodID isDocument = find_static_method(env, contractClass, "isDocumentUri", "(Landroid/content/Context;Landroid/net/Uri;)Z");
+	jboolean result = (*env)->CallStaticBooleanMethod(env, contractClass, isDocument, ctx, uri);
+	return result == JNI_TRUE;
+}
+
 bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
@@ -246,18 +258,23 @@ bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	if (contractClass == NULL) { // API 19
 		return false;
 	}
-	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
-	if (getDoc == NULL) { // API 21
-		return false;
-	}
-	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
 
-	jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-	jobject treeUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+	bool tree = isTreeURI(env, contractClass, uri);
+	bool document = isDocumentURI(env, ctx, contractClass, uri);
+	if (tree && !document) {
+		jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+		if (getDoc == NULL) { // API 21
+			return false;
+		}
+		jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+
+		jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+		uri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+	}
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
-	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, treeUri);
+	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, uri);
 
 	if (type == NULL) {
 		return false;
