@@ -417,6 +417,11 @@ func (t *RichText) updateRowBounds() {
 				itemMin := t.cachedSegmentVisual(seg, 0).MinSize()
 				if seg.Inline() {
 					wrapWidth -= itemMin.Width
+					if wrapWidth < 0 {
+						wrapWidth = maxWidth
+						currentBound = nil
+						fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
+					}
 				} else {
 					wrapWidth = maxWidth
 					currentBound = nil
