@@ -1,4 +1,4 @@
-//go:build mobile
+//go:build mobile || android || ios
 
 package async
 
