@@ -13,6 +13,8 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
+
+	"github.com/mattn/go-runewidth"
 )
 
 const (
@@ -848,7 +850,8 @@ func (t *textGridRowRenderer) Layout(size fyne.Size) {
 		t.objects[off+2].Move(cellPos.Add(fyne.Position{X: 0, Y: t.obj.text.cellSize.Height}))
 		t.objects[off+2].Resize(fyne.Size{Width: t.obj.text.cellSize.Width})
 
-		cellPos.X += t.obj.text.cellSize.Width
+		cellSpan := float32(runewidth.StringWidth(t.objects[off+1].(*canvas.Text).Text))
+		cellPos.X += t.obj.text.cellSize.Width * cellSpan
 		off += 3
 	}
 }
