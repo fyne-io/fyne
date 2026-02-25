@@ -45,6 +45,7 @@ typedef enum {
 	glfnBlendColor,
 	glfnBlendFunc,
 	glfnBufferData,
+    glfnBufferSubData,
 	glfnClear,
 	glfnClearColor,
 	glfnCompileShader,

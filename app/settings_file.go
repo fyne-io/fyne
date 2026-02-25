@@ -1,8 +1,9 @@
-//go:build !wasm && !test_web_driver
+//go:build !wasm && !test_web_driver && !tamago && !noos && !tinygo
 
 package app
 
 import (
+	"bufio"
 	"encoding/json"
 	"io"
 	"os"
@@ -28,7 +29,5 @@ func (s *settings) loadFromFile(path string) error {
 		return err
 	}
 	defer file.Close()
-	decode := json.NewDecoder(file)
-
-	return decode.Decode(&s.schema)
+	return json.NewDecoder(bufio.NewReader(file)).Decode(&s.schema)
 }

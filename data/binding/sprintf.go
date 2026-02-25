@@ -24,7 +24,7 @@ func NewSprintf(format string, b ...DataItem) String {
 	ret := &sprintfString{
 		String: NewString(),
 		format: format,
-		source: append(make([]DataItem, 0, len(b)), b...),
+		source: b,
 	}
 
 	for _, value := range b {

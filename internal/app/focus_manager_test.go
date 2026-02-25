@@ -146,9 +146,11 @@ func TestFocusManager_FocusPrevious(t *testing.T) {
 	assert.False(t, entry1.focused)
 }
 
-var _ fyne.Widget = (*focusable)(nil)
-var _ fyne.Focusable = (*focusable)(nil)
-var _ fyne.Disableable = (*focusable)(nil)
+var (
+	_ fyne.Widget      = (*focusable)(nil)
+	_ fyne.Focusable   = (*focusable)(nil)
+	_ fyne.Disableable = (*focusable)(nil)
+)
 
 type focusable struct {
 	widget.DisableableWidget
@@ -193,5 +195,5 @@ func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visib
 	require.Nil(t, m.Focused())
 	require.False(t, hidden.Visible())
 	require.True(t, visibleInsideHidden.Visible())
-	return
+	return m, entry1, hidden, visibleInsideHidden, entry2, disabled, entry3
 }

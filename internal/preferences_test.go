@@ -81,7 +81,6 @@ func TestPrefs_FloatWithFallback(t *testing.T) {
 	assert.Equal(t, "bad", p.StringWithFallback("testFloat", "bad"))
 
 	assert.Equal(t, 1.2, p.FloatWithFallback("testFloat", 1.3))
-
 }
 
 func TestPrefs_Float_Zero(t *testing.T) {

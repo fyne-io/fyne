@@ -28,8 +28,8 @@ func isHidden(file fyne.URI) bool {
 		fyne.LogError("Cannot check if non file is hidden", nil)
 		return false
 	}
-	path := file.String()[len(file.Scheme())+3:]
-	name := filepath.Base(path)
+
+	name := filepath.Base(file.Path())
 	return name == "" || name[0] == '.'
 }
 

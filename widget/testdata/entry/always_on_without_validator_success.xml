@@ -1,0 +1,20 @@
+<canvas padded size="44x43">
+	<content>
+		<widget pos="4,4" size="36x35" type="*widget.Entry">
+			<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="32x31"/>
+			<rectangle pos="1,1" radius="4" size="34x32" strokeColor="inputBorder" strokeWidth="2"/>
+			<widget pos="0,2" size="36x31" type="*widget.Scroll">
+				<widget size="36x31" type="*widget.entryContent">
+					<widget size="36x31" type="*widget.RichText">
+						<text color="placeholder" pos="8,6" size="0x19"></text>
+					</widget>
+					<widget size="36x31" type="*widget.RichText">
+						<text pos="8,6" size="0x19"></text>
+					</widget>
+				</widget>
+			</widget>
+			<widget pos="8,8" size="20x20" type="*widget.validationStatus">
+			</widget>
+		</widget>
+	</content>
+</canvas>

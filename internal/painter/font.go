@@ -253,7 +253,8 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 }
 
 func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
-	cb func(run shaping.Output, x float32)) (size fyne.Size, base float32) {
+	cb func(run shaping.Output, x float32),
+) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
 	runes := []rune(s)
@@ -353,8 +354,10 @@ type cacheID struct {
 	scope string
 }
 
-var fontCache async.Map[cacheID, *FontCacheItem]
-var fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+var (
+	fontCache       async.Map[cacheID, *FontCacheItem]
+	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+)
 
 type noopLogger struct{}
 
@@ -366,7 +369,6 @@ type dynamicFontMap struct {
 }
 
 func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
-
 	for _, f := range d.faces {
 		if _, ok := f.NominalGlyph(r); ok {
 			return f

@@ -59,6 +59,10 @@ func (w *BaseWidget) Position() fyne.Position {
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
+	if w.Position() == pos {
+		return
+	}
+
 	w.position = pos
 	internalWidget.Repaint(w.super())
 }

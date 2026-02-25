@@ -47,5 +47,5 @@ func TestScrollContainer_ThemeOverride(t *testing.T) {
 	w.SetContent(container.NewStack(bg, container.NewThemeOverride(scroll, normal)))
 	w.Resize(fyne.NewSize(100, 100))
 	// TODO why is this off by a 1bit RGB difference?
-	//test.AssertImageMatches(t, "scroll/theme_initial.png", w.Canvas().Capture())
+	// test.AssertImageMatches(t, "scroll/theme_initial.png", w.Canvas().Capture())
 }

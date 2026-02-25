@@ -2,8 +2,6 @@
 
 package app
 
-// TODO: #2734
-
 func (s *settings) load() {
 	s.setupTheme()
 	s.schema.Scale = 1

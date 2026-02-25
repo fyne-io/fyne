@@ -87,7 +87,8 @@ func makeAnimationCurves() fyne.CanvasObject {
 }
 
 func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float32) (
-	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation) {
+	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation,
+) {
 	text = widget.NewLabel(label)
 	text.Alignment = fyne.TextAlignCenter
 	text.Resize(fyne.NewSize(380, 30))
@@ -104,7 +105,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff float3
 	anim.Curve = curve
 	anim.AutoReverse = true
 	anim.RepeatCount = 1
-	return
+	return text, box, anim
 }
 
 // themedBox is a simple box that change its background color according

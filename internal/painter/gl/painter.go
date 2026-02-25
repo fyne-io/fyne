@@ -10,28 +10,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func shaderSourceNamed(name string) ([]byte, []byte) {
-	switch name {
-	case "line":
-		return shaderLineVert.StaticContent, shaderLineFrag.StaticContent
-	case "line_es":
-		return shaderLineesVert.StaticContent, shaderLineesFrag.StaticContent
-	case "simple":
-		return shaderSimpleVert.StaticContent, shaderSimpleFrag.StaticContent
-	case "simple_es":
-		return shaderSimpleesVert.StaticContent, shaderSimpleesFrag.StaticContent
-	case "rectangle":
-		return shaderRectangleVert.StaticContent, shaderRectangleFrag.StaticContent
-	case "round_rectangle":
-		return shaderRectangleVert.StaticContent, shaderRoundrectangleFrag.StaticContent
-	case "rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRectangleesFrag.StaticContent
-	case "round_rectangle_es":
-		return shaderRectangleesVert.StaticContent, shaderRoundrectangleesFrag.StaticContent
-	}
-	return nil, nil
-}
-
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
 	// Init tell a new painter to initialise, usually called after a context is available
@@ -66,12 +44,64 @@ type painter struct {
 	canvas                fyne.Canvas
 	ctx                   context
 	contextProvider       driver.WithContext
-	program               Program
-	lineProgram           Program
-	rectangleProgram      Program
-	roundRectangleProgram Program
+	program               ProgramState
+	lineProgram           ProgramState
+	rectangleProgram      ProgramState
+	roundRectangleProgram ProgramState
+	polygonProgram        ProgramState
+	arcProgram            ProgramState
 	texScale              float32
 	pixScale              float32 // pre-calculate scale*texScale for each draw
+}
+
+type ProgramState struct {
+	ref        Program
+	buff       Buffer
+	uniforms   map[string]*UniformState
+	attributes map[string]Attribute
+}
+
+type UniformState struct {
+	ref  Uniform
+	prev [4]float32
+}
+
+func (p *painter) SetUniform1f(pState ProgramState, name string, v float32) {
+	u := pState.uniforms[name]
+	if u.prev[0] == v {
+		return
+	}
+	u.prev[0] = v
+	p.ctx.Uniform1f(u.ref, v)
+}
+
+func (p *painter) SetUniform2f(pState ProgramState, name string, v0, v1 float32) {
+	u := pState.uniforms[name]
+	if u.prev[0] == v0 && u.prev[1] == v1 {
+		return
+	}
+	u.prev[0] = v0
+	u.prev[1] = v1
+	p.ctx.Uniform2f(u.ref, v0, v1)
+}
+
+func (p *painter) SetUniform4f(pState ProgramState, name string, v0, v1, v2, v3 float32) {
+	u := pState.uniforms[name]
+	if u.prev[0] == v0 && u.prev[1] == v1 && u.prev[2] == v2 && u.prev[3] == v3 {
+		return
+	}
+	u.prev[0] = v0
+	u.prev[1] = v1
+	u.prev[2] = v2
+	u.prev[3] = v3
+	p.ctx.Uniform4f(u.ref, v0, v1, v2, v3)
+}
+
+func (p *painter) UpdateVertexArray(pState ProgramState, name string, size, stride, offset int) {
+	a := pState.attributes[name]
+
+	p.ctx.VertexAttribPointerWithOffset(a, size, float, false, stride*floatSize, offset*floatSize)
+	p.logError()
 }
 
 // Declare conformity to Painter interface
@@ -178,6 +208,8 @@ func (p *painter) createProgram(shaderFilename string) Program {
 	if glErr := p.ctx.GetError(); glErr != 0 {
 		panic(fmt.Sprintf("failed to link OpenGL program; error code: %x", glErr))
 	}
+
+	p.ctx.UseProgram(prog)
 
 	return prog
 }

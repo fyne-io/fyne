@@ -48,8 +48,10 @@ func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	if c.Content != nil {
 		objects = append(objects, c.Content)
 	}
-	r := &cardRenderer{widget.NewShadowingRenderer(objects, widget.CardLevel),
-		header, subHeader, c}
+	r := &cardRenderer{
+		widget.NewShadowingRenderer(objects, widget.CardLevel),
+		header, subHeader, c,
+	}
 	r.applyTheme()
 	return r
 }

@@ -91,8 +91,7 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 	}
 }
 
-type multiWinLayout struct {
-}
+type multiWinLayout struct{}
 
 func (m *multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
 	for _, w := range objects { // update the windows so they have real size

@@ -91,192 +91,196 @@ func (ctx *context) cStringPtr(str string) (uintptr, func()) {
 	return uintptr(ret), func() { sfree(); delete(ctx.cStrings, id) }
 }
 
-var glfnMap = map[glfn]func(c call) (ret uintptr){
+var glfnFuncs = [...]func(c call) (ret uintptr){
 	glfnActiveTexture: func(c call) (ret uintptr) {
-		syscall.Syscall(glActiveTexture.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glActiveTexture.Addr(), c.args.a0)
+		return ret
 	},
 	glfnAttachShader: func(c call) (ret uintptr) {
-		syscall.Syscall(glAttachShader.Addr(), 2, c.args.a0, c.args.a1, 0)
-		return
+		syscall.SyscallN(glAttachShader.Addr(), c.args.a0, c.args.a1)
+		return ret
 	},
 	glfnBindBuffer: func(c call) (ret uintptr) {
-		syscall.Syscall(glBindBuffer.Addr(), 2, c.args.a0, c.args.a1, 0)
-		return
+		syscall.SyscallN(glBindBuffer.Addr(), c.args.a0, c.args.a1)
+		return ret
 	},
 	glfnBindTexture: func(c call) (ret uintptr) {
-		syscall.Syscall(glBindTexture.Addr(), 2, c.args.a0, c.args.a1, 0)
-		return
+		syscall.SyscallN(glBindTexture.Addr(), c.args.a0, c.args.a1)
+		return ret
 	},
 	glfnBindVertexArray: func(c call) (ret uintptr) {
-		syscall.Syscall(glBindVertexArray.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glBindVertexArray.Addr(), c.args.a0)
+		return ret
 	},
 	glfnBlendColor: func(c call) (ret uintptr) {
-		syscall.Syscall6(glBlendColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-		return
+		syscall.SyscallN(glBlendColor.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
+		return ret
 	},
 	glfnBlendFunc: func(c call) (ret uintptr) {
-		syscall.Syscall(glBlendFunc.Addr(), 2, c.args.a0, c.args.a1, 0)
-		return
+		syscall.SyscallN(glBlendFunc.Addr(), c.args.a0, c.args.a1)
+		return ret
 	},
 	glfnBufferData: func(c call) (ret uintptr) {
-		syscall.Syscall6(glBufferData.Addr(), 4, c.args.a0, c.args.a1, uintptr(c.parg), c.args.a2, 0, 0)
-		return
+		syscall.SyscallN(glBufferData.Addr(), c.args.a0, c.args.a1, uintptr(c.parg), c.args.a2)
+		return ret
+	},
+	glfnBufferSubData: func(c call) (ret uintptr) {
+		syscall.SyscallN(glBufferSubData.Addr(), c.args.a0, c.args.a1, c.args.a2, uintptr(c.parg))
+		return ret
 	},
 	glfnClear: func(c call) (ret uintptr) {
-		syscall.Syscall(glClear.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glClear.Addr(), c.args.a0)
+		return ret
 	},
 	glfnClearColor: func(c call) (ret uintptr) {
-		syscall.Syscall6(glClearColor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-		return
+		syscall.SyscallN(glClearColor.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
+		return ret
 	},
 	glfnCompileShader: func(c call) (ret uintptr) {
-		syscall.Syscall(glCompileShader.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glCompileShader.Addr(), c.args.a0)
+		return ret
 	},
 	glfnCreateProgram: func(c call) (ret uintptr) {
-		ret, _, _ = syscall.Syscall(glCreateProgram.Addr(), 0, 0, 0, 0)
+		ret, _, _ = syscall.SyscallN(glCreateProgram.Addr())
 		return ret
 	},
 	glfnCreateShader: func(c call) (ret uintptr) {
-		ret, _, _ = syscall.Syscall(glCreateShader.Addr(), 1, c.args.a0, 0, 0)
+		ret, _, _ = syscall.SyscallN(glCreateShader.Addr(), c.args.a0)
 		return ret
 	},
 	glfnDeleteBuffer: func(c call) (ret uintptr) {
-		syscall.Syscall(glDeleteBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-		return
+		syscall.SyscallN(glDeleteBuffers.Addr(), 1, uintptr(unsafe.Pointer(&c.args.a0)))
+		return ret
 	},
 	glfnDeleteTexture: func(c call) (ret uintptr) {
-		syscall.Syscall(glDeleteTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&c.args.a0)), 0)
-		return
+		syscall.SyscallN(glDeleteTextures.Addr(), 1, uintptr(unsafe.Pointer(&c.args.a0)))
+		return ret
 	},
 	glfnDisable: func(c call) (ret uintptr) {
-		syscall.Syscall(glDisable.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glDisable.Addr(), c.args.a0)
+		return ret
 	},
 	glfnDrawArrays: func(c call) (ret uintptr) {
-		syscall.Syscall(glDrawArrays.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-		return
+		syscall.SyscallN(glDrawArrays.Addr(), c.args.a0, c.args.a1, c.args.a2)
+		return ret
 	},
 	glfnEnable: func(c call) (ret uintptr) {
-		syscall.Syscall(glEnable.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glEnable.Addr(), c.args.a0)
+		return ret
 	},
 	glfnEnableVertexAttribArray: func(c call) (ret uintptr) {
-		syscall.Syscall(glEnableVertexAttribArray.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glEnableVertexAttribArray.Addr(), c.args.a0)
+		return ret
 	},
 	glfnFlush: func(c call) (ret uintptr) {
-		syscall.Syscall(glFlush.Addr(), 0, 0, 0, 0)
-		return
+		syscall.SyscallN(glFlush.Addr())
+		return ret
 	},
 	glfnGenBuffer: func(c call) (ret uintptr) {
-		syscall.Syscall(glGenBuffers.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-		return
+		syscall.SyscallN(glGenBuffers.Addr(), 1, uintptr(unsafe.Pointer(&ret)))
+		return ret
 	},
 	glfnGenVertexArray: func(c call) (ret uintptr) {
-		syscall.Syscall(glGenVertexArrays.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-		return
+		syscall.SyscallN(glGenVertexArrays.Addr(), 1, uintptr(unsafe.Pointer(&ret)))
+		return ret
 	},
 	glfnGenTexture: func(c call) (ret uintptr) {
-		syscall.Syscall(glGenTextures.Addr(), 2, 1, uintptr(unsafe.Pointer(&ret)), 0)
-		return
+		syscall.SyscallN(glGenTextures.Addr(), 1, uintptr(unsafe.Pointer(&ret)))
+		return ret
 	},
 	glfnGetAttribLocation: func(c call) (ret uintptr) {
-		ret, _, _ = syscall.Syscall(glGetAttribLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
+		ret, _, _ = syscall.SyscallN(glGetAttribLocation.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
 	glfnGetError: func(c call) (ret uintptr) {
-		ret, _, _ = syscall.Syscall(glGetError.Addr(), 0, 0, 0, 0)
+		ret, _, _ = syscall.SyscallN(glGetError.Addr())
 		return ret
 	},
 	glfnGetProgramInfoLog: func(c call) (ret uintptr) {
-		syscall.Syscall6(glGetProgramInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-		return
+		syscall.SyscallN(glGetProgramInfoLog.Addr(), c.args.a0, c.args.a1, 0, uintptr(c.parg))
+		return ret
 	},
 	glfnGetProgramiv: func(c call) (ret uintptr) {
-		syscall.Syscall(glGetProgramiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-		return
+		syscall.SyscallN(glGetProgramiv.Addr(), c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return ret
 	},
 	glfnGetShaderInfoLog: func(c call) (ret uintptr) {
-		syscall.Syscall6(glGetShaderInfoLog.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-		return
+		syscall.SyscallN(glGetShaderInfoLog.Addr(), c.args.a0, c.args.a1, 0, uintptr(c.parg))
+		return ret
 	},
 	glfnGetShaderSource: func(c call) (ret uintptr) {
-		syscall.Syscall6(glGetShaderSource.Addr(), 4, c.args.a0, c.args.a1, 0, uintptr(c.parg), 0, 0)
-		return
+		syscall.SyscallN(glGetShaderSource.Addr(), c.args.a0, c.args.a1, 0, uintptr(c.parg))
+		return ret
 	},
 	glfnGetShaderiv: func(c call) (ret uintptr) {
-		syscall.Syscall(glGetShaderiv.Addr(), 3, c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
-		return
+		syscall.SyscallN(glGetShaderiv.Addr(), c.args.a0, c.args.a1, uintptr(unsafe.Pointer(&ret)))
+		return ret
 	},
 	glfnGetTexParameteriv: func(c call) (ret uintptr) {
-		syscall.Syscall(glGetTexParameteriv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-		return
+		syscall.SyscallN(glGetTexParameteriv.Addr(), c.args.a0, c.args.a1, uintptr(c.parg))
+		return ret
 	},
 	glfnGetUniformLocation: func(c call) (ret uintptr) {
-		ret, _, _ = syscall.Syscall(glGetUniformLocation.Addr(), 2, c.args.a0, c.args.a1, 0)
+		ret, _, _ = syscall.SyscallN(glGetUniformLocation.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
 	glfnLinkProgram: func(c call) (ret uintptr) {
-		syscall.Syscall(glLinkProgram.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glLinkProgram.Addr(), c.args.a0)
+		return ret
 	},
 	glfnReadPixels: func(c call) (ret uintptr) {
-		syscall.Syscall9(glReadPixels.Addr(), 7, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, uintptr(c.parg), 0, 0)
-		return
+		syscall.SyscallN(glReadPixels.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, uintptr(c.parg))
+		return ret
 	},
 	glfnScissor: func(c call) (ret uintptr) {
-		syscall.Syscall6(glScissor.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-		return
+		syscall.SyscallN(glScissor.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
+		return ret
 	},
 	glfnShaderSource: func(c call) (ret uintptr) {
-		syscall.Syscall6(glShaderSource.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, 0, 0, 0)
-		return
+		syscall.SyscallN(glShaderSource.Addr(), c.args.a0, c.args.a1, c.args.a2, 0)
+		return ret
 	},
 	glfnTexImage2D: func(c call) (ret uintptr) {
-		syscall.Syscall9(glTexImage2D.Addr(), 9, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0, c.args.a5, c.args.a6, uintptr(c.parg))
-		return
+		syscall.SyscallN(glTexImage2D.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, 0, c.args.a5, c.args.a6, uintptr(c.parg))
+		return ret
 	},
 	glfnTexParameteri: func(c call) (ret uintptr) {
-		syscall.Syscall(glTexParameteri.Addr(), 3, c.args.a0, c.args.a1, c.args.a2)
-		return
+		syscall.SyscallN(glTexParameteri.Addr(), c.args.a0, c.args.a1, c.args.a2)
+		return ret
 	},
 	glfnUniform1f: func(c call) (ret uintptr) {
-		syscall.Syscall6(glUniform1f.Addr(), 2, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-		return
+		syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
+		return ret
 	},
 	glfnUniform2f: func(c call) (ret uintptr) {
-		syscall.Syscall6(glUniform2f.Addr(), 3, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-		return
+		syscall.SyscallN(glUniform2f.Addr(), c.args.a0, c.args.a1, c.args.a2)
+		return ret
 	},
 	glfnUniform4f: func(c call) (ret uintptr) {
-		syscall.Syscall6(glUniform4f.Addr(), 5, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-		return
+		syscall.SyscallN(glUniform4f.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4)
+		return ret
 	},
 	glfnUniform4fv: func(c call) (ret uintptr) {
-		syscall.Syscall(glUniform4fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
-		return
+		syscall.SyscallN(glUniform4fv.Addr(), c.args.a0, c.args.a1, uintptr(c.parg))
+		return ret
 	},
 	glfnUseProgram: func(c call) (ret uintptr) {
-		syscall.Syscall(glUseProgram.Addr(), 1, c.args.a0, 0, 0)
-		return
+		syscall.SyscallN(glUseProgram.Addr(), c.args.a0)
+		return ret
 	},
 	glfnVertexAttribPointer: func(c call) (ret uintptr) {
-		syscall.Syscall6(glVertexAttribPointer.Addr(), 6, c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
-		return
+		syscall.SyscallN(glVertexAttribPointer.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5)
+		return ret
 	},
 	glfnViewport: func(c call) (ret uintptr) {
-		syscall.Syscall6(glViewport.Addr(), 4, c.args.a0, c.args.a1, c.args.a2, c.args.a3, 0, 0)
-		return
+		syscall.SyscallN(glViewport.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
+		return ret
 	},
 }
 
 func (ctx *context) doWork(c call) (ret uintptr) {
-	if f, ok := glfnMap[c.args.fn]; ok {
-		return f(c)
+	if int(c.args.fn) < len(glfnFuncs) {
+		return glfnFuncs[c.args.fn](c)
 	}
 	panic("unknown GL function")
 }
@@ -303,6 +307,7 @@ var (
 	glBlendColor              = libGLESv2.NewProc("glBlendColor")
 	glBlendFunc               = libGLESv2.NewProc("glBlendFunc")
 	glBufferData              = libGLESv2.NewProc("glBufferData")
+	glBufferSubData           = libGLESv2.NewProc("glBufferSubData")
 	glClear                   = libGLESv2.NewProc("glClear")
 	glClearColor              = libGLESv2.NewProc("glClearColor")
 	glCompileShader           = libGLESv2.NewProc("glCompileShader")

@@ -100,6 +100,7 @@ func TestSlider_MinSize(t *testing.T) {
 
 	assert.Equal(t, min.Height, buttonMin.Height)
 }
+
 func TestSlider_OutOfRange(t *testing.T) {
 	slider := NewSlider(2, 5)
 	slider.Resize(fyne.NewSize(100, 10))

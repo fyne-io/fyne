@@ -31,32 +31,32 @@ func TestDialog_Resize(t *testing.T) {
 	theDialog := d.(*dialog)
 	d.Show() // we cannot check window size if not shown
 
-	//Test resize - normal size scenario
-	size := fyne.NewSize(300, 180) //normal size to fit (600,400)
+	// Test resize - normal size scenario
+	size := fyne.NewSize(300, 180) // normal size to fit (600,400)
 	theDialog.Resize(size)
 	expectedWidth := float32(300)
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight := float32(180)
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
-	//Test resize - normal size scenario again
-	size = fyne.NewSize(310, 280) //normal size to fit (600,400)
+	// Test resize - normal size scenario again
+	size = fyne.NewSize(310, 280) // normal size to fit (600,400)
 	theDialog.Resize(size)
 	expectedWidth = 310
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
 	expectedHeight = 280
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test resize - greater than max size scenario
+	// Test resize - greater than max size scenario
 	size = fyne.NewSize(800, 600)
 	theDialog.Resize(size)
-	expectedWidth = 600                                        //since win width only 600
-	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) //max, also work
+	expectedWidth = 600                                        // since win width only 600
+	assert.Equal(t, expectedWidth, theDialog.win.Size().Width) // max, also work
 	assert.Equal(t, expectedWidth, theDialog.win.Content.Size().Width+theme.Padding()*2)
-	expectedHeight = 400                                         //since win height only 400
-	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) //max, also work
+	expectedHeight = 400                                         // since win height only 400
+	assert.Equal(t, expectedHeight, theDialog.win.Size().Height) // max, also work
 	assert.Equal(t, expectedHeight, theDialog.win.Content.Size().Height+theme.Padding()*2)
 
-	//Test again - extreme small size
+	// Test again - extreme small size
 	size = fyne.NewSize(1, 1)
 	theDialog.Resize(size)
 	expectedWidth = theDialog.win.Content.MinSize().Width
@@ -74,7 +74,7 @@ func TestDialog_TextWrapping(t *testing.T) {
 	d.Show() // we cannot check window size if not shown
 
 	// limits width to 90% of window size
-	assert.Equal(t, float32(600.0*maxTextDialogWinPcntWidth), theDialog.desiredSize.Width)
+	assert.Equal(t, 600.0*maxTextDialogWinPcntWidth, theDialog.desiredSize.Width)
 
 	theDialog.desiredSize = fyne.NewSquareSize(0)
 	window.Resize(fyne.NewSize(900, 400))

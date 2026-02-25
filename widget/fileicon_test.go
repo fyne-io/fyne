@@ -61,8 +61,7 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 }
 
 func TestFileIcon_Icon(t *testing.T) {
-	data, _ := filepath.Abs("testdata")
-	dir := storage.NewFileURI(data)
+	dir := storage.NewFileURI("testdata")
 
 	icon1 := widget.NewFileIcon(dir)
 	trash := &customURI{URI: dir, icon: theme.DeleteIcon()}

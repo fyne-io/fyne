@@ -34,6 +34,6 @@ func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
 	rect := canvas.NewRectangle(color.Transparent)
 	rect.SetMinSize(fyne.NewSize(200, 0))
 
-	d.create(container.NewMax(rect, bar))
+	d.create(container.NewStack(rect, bar))
 	return &ProgressDialog{d, bar}
 }

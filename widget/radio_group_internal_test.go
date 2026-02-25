@@ -213,7 +213,6 @@ func TestRadioGroup_Disabled(t *testing.T) {
 }
 
 func TestRadioGroup_Hovered(t *testing.T) {
-
 	tests := []struct {
 		name         string
 		options      []string

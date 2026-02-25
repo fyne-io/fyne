@@ -43,7 +43,7 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
 	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
 
-	return widget.NewSimpleRenderer(t.holder)
+	return &overrideRenderer{parent: t, objs: []fyne.CanvasObject{t.holder}}
 }
 
 func (t *ThemeOverride) Refresh() {
@@ -53,6 +53,7 @@ func (t *ThemeOverride) Refresh() {
 	}
 
 	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
+	t.Content.Refresh()
 	t.BaseWidget.Refresh()
 }
 
@@ -82,4 +83,34 @@ func (f *featureTheme) Feature(n intTheme.FeatureName) any {
 	}
 
 	return nil
+}
+
+type overrideRenderer struct {
+	parent *ThemeOverride
+
+	objs []fyne.CanvasObject
+}
+
+func (r *overrideRenderer) Destroy() {
+}
+
+func (r *overrideRenderer) Layout(s fyne.Size) {
+	intTheme.PushRenderingTheme(r.parent.Theme)
+	defer intTheme.PopRenderingTheme()
+
+	r.parent.holder.Resize(s)
+}
+
+func (r *overrideRenderer) MinSize() fyne.Size {
+	intTheme.PushRenderingTheme(r.parent.Theme)
+	defer intTheme.PopRenderingTheme()
+
+	return r.parent.Content.MinSize()
+}
+
+func (r *overrideRenderer) Objects() []fyne.CanvasObject {
+	return r.objs
+}
+
+func (r *overrideRenderer) Refresh() {
 }

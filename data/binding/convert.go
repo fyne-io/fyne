@@ -13,7 +13,7 @@ import (
 //
 // Since: 2.0
 func BoolToString(v Bool) String {
-	return toStringComparable[bool](v, formatBool, parseBool)
+	return toStringComparable(v, formatBool, parseBool)
 }
 
 // BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
@@ -31,7 +31,7 @@ func BoolToStringWithFormat(v Bool, format string) String {
 //
 // Since: 2.0
 func FloatToString(v Float) String {
-	return toStringComparable[float64](v, formatFloat, parseFloat)
+	return toStringComparable(v, formatFloat, parseFloat)
 }
 
 // FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
@@ -40,7 +40,7 @@ func FloatToString(v Float) String {
 //
 // Since: 2.0
 func FloatToStringWithFormat(v Float, format string) String {
-	return toStringWithFormatComparable[float64](v, format, "%f", formatFloat, parseFloat)
+	return toStringWithFormatComparable(v, format, "%f", formatFloat, parseFloat)
 }
 
 // IntToFloat creates a binding that connects an Int data item to a Float.
@@ -67,7 +67,7 @@ func FloatToInt(v Float) Int {
 //
 // Since: 2.0
 func IntToString(v Int) String {
-	return toStringComparable[int](v, formatInt, parseInt)
+	return toStringComparable(v, formatInt, parseInt)
 }
 
 // IntToStringWithFormat creates a binding that connects a Int data item to a String and is
@@ -76,7 +76,7 @@ func IntToString(v Int) String {
 //
 // Since: 2.0
 func IntToStringWithFormat(v Int, format string) String {
-	return toStringWithFormatComparable[int](v, format, "%d", formatInt, parseInt)
+	return toStringWithFormatComparable(v, format, "%d", formatInt, parseInt)
 }
 
 // URIToString creates a binding that connects a URI data item to a String.
@@ -85,7 +85,7 @@ func IntToStringWithFormat(v Int, format string) String {
 //
 // Since: 2.1
 func URIToString(v URI) String {
-	return toString[fyne.URI](v, uriToString, storage.EqualURI, uriFromString)
+	return toString(v, uriToString, storage.EqualURI, uriFromString)
 }
 
 // StringToBool creates a binding that connects a String data item to a Bool.

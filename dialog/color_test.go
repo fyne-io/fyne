@@ -75,7 +75,6 @@ func TestColorDialog_Recents(t *testing.T) {
 }
 
 func TestColorDialog_SetColor(t *testing.T) {
-
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 

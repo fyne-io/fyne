@@ -362,7 +362,8 @@ func createMetadataInitFile(srcdir string, app *appData) (func(), error) {
 }
 
 func injectMetadataIfPossible(runner runner, srcdir string, app *appData,
-	createMetadataInitFile func(srcdir string, app *appData) (func(), error)) (func(), error) {
+	createMetadataInitFile func(srcdir string, app *appData) (func(), error),
+) (func(), error) {
 	fyneGoModVersion, err := getFyneGoModVersion(runner)
 	if err != nil {
 		return nil, err

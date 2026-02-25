@@ -27,7 +27,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 //
 // Since: 2.6
 func BindPreferenceBoolList(key string, p fyne.Preferences) BoolList {
-	return bindPreferenceListComparable[bool](key, p,
+	return bindPreferenceListComparable(key, p,
 		func(p fyne.Preferences) (func(string) []bool, func(string, []bool)) {
 			return p.BoolList, p.SetBoolList
 		},
@@ -50,7 +50,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 //
 // Since: 2.6
 func BindPreferenceFloatList(key string, p fyne.Preferences) FloatList {
-	return bindPreferenceListComparable[float64](key, p,
+	return bindPreferenceListComparable(key, p,
 		func(p fyne.Preferences) (func(string) []float64, func(string, []float64)) {
 			return p.FloatList, p.SetFloatList
 		},
@@ -73,7 +73,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 //
 // Since: 2.6
 func BindPreferenceIntList(key string, p fyne.Preferences) IntList {
-	return bindPreferenceListComparable[int](key, p,
+	return bindPreferenceListComparable(key, p,
 		func(p fyne.Preferences) (func(string) []int, func(string, []int)) {
 			return p.IntList, p.SetIntList
 		},
@@ -96,7 +96,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 //
 // Since: 2.6
 func BindPreferenceStringList(key string, p fyne.Preferences) StringList {
-	return bindPreferenceListComparable[string](key, p,
+	return bindPreferenceListComparable(key, p,
 		func(p fyne.Preferences) (func(string) []string, func(string, []string)) {
 			return p.StringList, p.SetStringList
 		},
@@ -200,9 +200,6 @@ func (b *prefBoundList[T]) checkForChange() {
 		b.Set(updated)
 		return
 	}
-	if val == nil {
-		return
-	}
 
 	// incoming changes to a preference list are not at the child level
 	for i, v := range val {
@@ -223,7 +220,8 @@ func (b *prefBoundList[T]) replaceProvider(p fyne.Preferences) {
 type internalPrefs = interface{ WriteValues(func(map[string]any)) }
 
 func bindPreferenceListComparable[T bool | float64 | int | string](key string, p fyne.Preferences,
-	setLookup preferenceLookupSetter[[]T]) *prefBoundList[T] {
+	setLookup preferenceLookupSetter[[]T],
+) *prefBoundList[T] {
 	if found, ok := lookupExistingListBinding[T](key, p); ok {
 		return found
 	}

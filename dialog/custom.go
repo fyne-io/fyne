@@ -77,13 +77,16 @@ func ShowCustomWithoutButtons(title string, content fyne.CanvasObject, parent fy
 // use the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) *ConfirmDialog {
+	callback func(bool), parent fyne.Window,
+) *ConfirmDialog {
 	d := &dialog{content: content, title: title, parent: parent, callback: callback}
 
-	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
+	d.dismiss = &widget.Button{
+		Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+	ok := &widget.Button{
+		Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		},
@@ -98,6 +101,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 // the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) {
+	callback func(bool), parent fyne.Window,
+) {
 	NewCustomConfirm(title, confirm, dismiss, content, callback, parent).Show()
 }

@@ -13,11 +13,13 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Draggable = (*Slider)(nil)
-var _ fyne.Focusable = (*Slider)(nil)
-var _ desktop.Hoverable = (*Slider)(nil)
-var _ fyne.Tappable = (*Slider)(nil)
-var _ fyne.Disableable = (*Slider)(nil)
+var (
+	_ fyne.Draggable    = (*Slider)(nil)
+	_ fyne.Focusable    = (*Slider)(nil)
+	_ desktop.Hoverable = (*Slider)(nil)
+	_ fyne.Tappable     = (*Slider)(nil)
+	_ fyne.Disableable  = (*Slider)(nil)
+)
 
 // Slider is a widget that can slide between two fixed values.
 type Slider struct {

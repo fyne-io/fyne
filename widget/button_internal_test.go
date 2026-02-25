@@ -111,7 +111,6 @@ func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 	button.Disable()
 	searchBaseName := strings.TrimPrefix(theme.SearchIcon().Name(), "foreground_")
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
-
 }
 
 func TestButton_DisabledIconChangedDirectly(t *testing.T) {
@@ -134,7 +133,6 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button.Disable()
 	searchBaseName := strings.TrimPrefix(theme.SearchIcon().Name(), "foreground_")
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
-
 }
 
 func TestButton_Focus(t *testing.T) {

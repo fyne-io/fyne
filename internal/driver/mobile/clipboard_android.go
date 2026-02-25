@@ -11,6 +11,7 @@ char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx);
 void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *content);
 */
 import "C"
+
 import (
 	"unsafe"
 

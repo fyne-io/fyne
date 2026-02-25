@@ -10,10 +10,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*radioItem)(nil)
-var _ desktop.Hoverable = (*radioItem)(nil)
-var _ fyne.Tappable = (*radioItem)(nil)
-var _ fyne.Focusable = (*radioItem)(nil)
+var (
+	_ fyne.Widget       = (*radioItem)(nil)
+	_ desktop.Hoverable = (*radioItem)(nil)
+	_ fyne.Tappable     = (*radioItem)(nil)
+	_ fyne.Focusable    = (*radioItem)(nil)
+)
 
 func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
 	i := &radioItem{Label: label, onTap: onTap}
@@ -34,8 +36,6 @@ type radioItem struct {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
-//
-// Implements: fyne.Widget
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	txt := canvas.Text{Alignment: fyne.TextAlignLeading}
 	txt.TextSize = i.Theme().Size(theme.SizeNameText)
@@ -46,24 +46,18 @@ func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // FocusGained is called when this item gained the focus.
-//
-// Implements: fyne.Focusable
 func (i *radioItem) FocusGained() {
 	i.focused = true
 	i.Refresh()
 }
 
 // FocusLost is called when this item lost the focus.
-//
-// Implements: fyne.Focusable
 func (i *radioItem) FocusLost() {
 	i.focused = false
 	i.Refresh()
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
-//
-// Implements: desktop.Hoverable
 func (i *radioItem) MouseIn(_ *desktop.MouseEvent) {
 	if i.Disabled() {
 		return
@@ -74,14 +68,10 @@ func (i *radioItem) MouseIn(_ *desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
-//
-// Implements: desktop.Hoverable
 func (i *radioItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
-//
-// Implements: desktop.Hoverable
 func (i *radioItem) MouseOut() {
 	if i.Disabled() {
 		return
@@ -102,8 +92,6 @@ func (i *radioItem) SetSelected(selected bool) {
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-//
-// Implements: fyne.Tappable
 func (i *radioItem) Tapped(_ *fyne.PointEvent) {
 	if !i.focused {
 		focusIfNotMobile(i.super())
@@ -112,14 +100,10 @@ func (i *radioItem) Tapped(_ *fyne.PointEvent) {
 }
 
 // TypedKey is called when this item receives a key event.
-//
-// Implements: fyne.Focusable
 func (i *radioItem) TypedKey(_ *fyne.KeyEvent) {
 }
 
 // TypedRune is called when this item receives a char event.
-//
-// Implements: fyne.Focusable
 func (i *radioItem) TypedRune(r rune) {
 	if r == ' ' {
 		i.toggle()

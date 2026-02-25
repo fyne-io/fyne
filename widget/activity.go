@@ -67,7 +67,8 @@ func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	r.anim = &fyne.Animation{
 		Duration:    time.Second * 2,
 		RepeatCount: fyne.AnimationRepeatForever,
-		Tick:        r.animate}
+		Tick:        r.animate,
+	}
 	r.updateColor()
 
 	if a.started {
@@ -113,10 +114,8 @@ func (a *activityRenderer) Refresh() {
 		if !a.wasStarted {
 			a.start()
 		}
-		return
 	} else if a.wasStarted {
 		a.stop()
-		return
 	}
 
 	a.updateColor()

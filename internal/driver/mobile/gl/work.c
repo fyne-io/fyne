@@ -49,6 +49,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnBufferData:
 		glBufferData((GLenum)args->a0, (GLsizeiptr)args->a1, (GLvoid*)parg, (GLenum)args->a2);
 		break;
+	case glfnBufferSubData:
+		glBufferSubData((GLenum)args->a0, (GLsizeiptr)args->a1, (GLenum)args->a2, (GLvoid*)parg);
+		break;
 	case glfnClear:
 		glClear((GLenum)args->a0);
 		break;

@@ -40,7 +40,7 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	scheme, _, ok := strings.Cut(s, ":")
+	scheme, path, ok := strings.Cut(s, ":")
 	if !ok {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
@@ -53,11 +53,11 @@ func ParseURI(s string) (fyne.URI, error) {
 		// we should punt this to whoever generated the URI in the
 		// first place?
 
-		if len(s) <= 7 {
+		if len(path) <= 2 { // I.e. file: and // given we know scheme.
 			return nil, errors.New("not a valid URI")
 		}
-		path := s[5:] // everything after file:
-		if len(path) > 2 && path[:2] == "//" {
+
+		if path[:2] == "//" {
 			path = path[2:]
 		}
 
@@ -81,22 +81,33 @@ func ParseURI(s string) (fyne.URI, error) {
 		return nil, err
 	}
 
-	authority := ""
+	authority := l.Authority()
+	authBuilder := strings.Builder{}
+	authBuilder.Grow(len(authority.UserInfo()) + len(authority.Host()) + len(authority.Port()) + len("@[]:"))
 
-	if userInfo := l.Authority().UserInfo(); len(userInfo) > 0 {
-		authority += userInfo + "@"
+	if userInfo := authority.UserInfo(); userInfo != "" {
+		authBuilder.WriteString(userInfo)
+		authBuilder.WriteByte('@')
 	}
 
-	authority += l.Authority().Host()
+	// Per RFC 3986, section 3.2.2, IPv6 addresses must be enclosed in square brackets.
+	if host := authority.Host(); strings.Contains(host, ":") {
+		authBuilder.WriteByte('[')
+		authBuilder.WriteString(host)
+		authBuilder.WriteByte(']')
+	} else {
+		authBuilder.WriteString(host)
+	}
 
-	if port := l.Authority().Port(); len(port) > 0 {
-		authority += ":" + port
+	if port := authority.Port(); port != "" {
+		authBuilder.WriteByte(':')
+		authBuilder.WriteString(port)
 	}
 
 	return &uri{
 		scheme:    scheme,
-		authority: authority,
-		path:      l.Authority().Path(),
+		authority: authBuilder.String(),
+		path:      authority.Path(),
 		query:     l.Query().Encode(),
 		fragment:  l.Fragment(),
 	}, nil

@@ -4,6 +4,8 @@ package mobile
 
 import (
 	"image/color"
+	"io"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -131,6 +133,13 @@ func Test_canvas_DraggingOutOfWidget(t *testing.T) {
 }
 
 func Test_canvas_Focusable(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// wid.Tapped(ev) on lines 148 and 159
+	// c.Focus(content) on line 168
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
+
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	content := newFocusableEntry(c)
 	c.SetContent(content)
@@ -143,7 +152,6 @@ func Test_canvas_Focusable(t *testing.T) {
 			wid.Tapped(ev)
 		}, nil, nil, nil)
 	}, true)
-
 	waitAndCheck(tapDoubleDelay/time.Millisecond+150, func() {
 		assert.Equal(t, 1, content.focusedTimes)
 		assert.Equal(t, 0, content.unfocusedTimes)

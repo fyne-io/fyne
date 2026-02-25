@@ -135,6 +135,7 @@ type accordionRenderer struct {
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
+	r.updateObjects()
 	th := r.container.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	separator := th.Size(theme.SizeNameSeparatorThickness)
@@ -193,6 +194,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 }
 
 func (r *accordionRenderer) MinSize() fyne.Size {
+	r.updateObjects()
 	th := r.container.Theme()
 	pad := th.Size(theme.SizeNamePadding)
 	size := fyne.Size{}

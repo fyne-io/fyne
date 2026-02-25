@@ -2,8 +2,7 @@ package widget
 
 import "fyne.io/fyne/v2"
 
-// BaseRenderer is a renderer base providing the most common implementations of a part of the
-// widget.Renderer interface.
+// BaseRenderer is a renderer base that provides part of the widget.Renderer interface.
 type BaseRenderer struct {
 	objects []fyne.CanvasObject
 }
@@ -14,14 +13,10 @@ func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
 }
 
 // Destroy does nothing in the base implementation.
-//
-// Implements: fyne.WidgetRenderer
 func (r *BaseRenderer) Destroy() {
 }
 
 // Objects returns the objects that should be rendered.
-//
-// Implements: fyne.WidgetRenderer
 func (r *BaseRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }

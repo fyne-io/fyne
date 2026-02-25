@@ -12,6 +12,7 @@ void openURL(char *urlStr);
 void sendNotification(char *title, char *content);
 */
 import "C"
+
 import (
 	"net/url"
 	"unsafe"

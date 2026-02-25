@@ -259,11 +259,11 @@ func TestEntry_EraseSelection(t *testing.T) {
 	e.CursorRow = 1
 	e.CursorColumn = 2
 	e.sel.cursorRow, e.sel.cursorRow = e.CursorRow, e.CursorColumn
-	var keyDown = func(key *fyne.KeyEvent) {
+	keyDown := func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
 	}
-	var keyPress = func(key *fyne.KeyEvent) {
+	keyPress := func(key *fyne.KeyEvent) {
 		keyDown(key)
 		e.KeyUp(key)
 	}
@@ -293,6 +293,24 @@ func TestEntry_CallbackLocking(t *testing.T) {
 	e.selectAll()
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
 	assert.Equal(t, 7, called)
+}
+
+func TestEntry_ContentSizeAndPlacementWithIcon(t *testing.T) {
+	entry := NewEntry()
+	entry.SetIcon(theme.MailComposeIcon())
+	entry.SetText("SomeText")
+	renderer := entry.CreateRenderer()
+	contentPos := fyne.NewPos(theme.LineSpacing()+theme.IconInlineSize(), theme.InputBorderSize())
+
+	renderer.Layout(entry.MinSize())
+	// Scrollable content should be positioned after the icon, with correct padding
+	assert.Equal(t, contentPos, entry.scroll.Position())
+
+	entry.Wrapping = fyne.TextWrapOff
+	entry.Scroll = fyne.ScrollNone
+	renderer.Layout(entry.MinSize())
+	// Content should be positioned after the icon, with correct padding
+	assert.Equal(t, contentPos, entry.content.Position())
 }
 
 func TestEntry_MouseClickAndDragOutsideText(t *testing.T) {

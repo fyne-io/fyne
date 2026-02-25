@@ -28,8 +28,6 @@ func (f *fileDialog) getPlaces() []favoriteItem {
 	return []favoriteItem{}
 }
 
-func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
-	favoriteLocations := make(map[string]fyne.ListableURI)
-
-	return favoriteLocations, nil
+func getFavoriteLocation(homeURI fyne.URI, name string) (fyne.URI, error) {
+	return nil, nil
 }

@@ -95,7 +95,7 @@ func TestSprintfConversionReadWrite(t *testing.T) {
 }
 
 func TestNewStringWithFormat(t *testing.T) {
-	var s = "this is a string"
+	s := "this is a string"
 	bs := BindString(&s)
 
 	format := "String %s"

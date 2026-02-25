@@ -2,9 +2,17 @@ package canvas
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/svg"
+)
+
+const (
+	// RadiusMaximum can be applied to a canvas corner radius to achieve fully rounded corners.
+	// This constant represents the maximum possible corner radius, resulting in a circular appearance.
+	// Since: 2.7
+	RadiusMaximum float32 = math.MaxFloat32
 )
 
 // Refresh instructs the containing canvas to refresh the specified obj.

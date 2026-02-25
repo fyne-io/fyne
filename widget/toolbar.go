@@ -67,8 +67,7 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
 // This is typically used to assist layout if you wish some left and some right aligned items.
 // Space will be split evebly amongst all the spacers on a toolbar.
-type ToolbarSpacer struct {
-}
+type ToolbarSpacer struct{}
 
 // ToolbarObject gets the actual spacer object for this ToolbarSpacer
 func (t *ToolbarSpacer) ToolbarObject() fyne.CanvasObject {
@@ -82,8 +81,7 @@ func NewToolbarSpacer() *ToolbarSpacer {
 
 // ToolbarSeparator is a thin, visible divide that can be added to a Toolbar.
 // This is typically used to assist visual grouping of ToolbarItems.
-type ToolbarSeparator struct {
-}
+type ToolbarSeparator struct{}
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
 func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {

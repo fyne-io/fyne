@@ -64,7 +64,8 @@ func TestSimpleRenderer(t *testing.T) {
 
 	c := &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
 		newTestWidget(canvas.NewRectangle(color.Gray{Y: 0x79})),
-		newTestWidget(canvas.NewText("Hi", color.Black))}}
+		newTestWidget(canvas.NewText("Hi", color.Black)),
+	}}
 
 	window := test.NewWindow(c)
 	defer window.Close()

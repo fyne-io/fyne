@@ -105,7 +105,8 @@ func TestForm_Renderer(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -133,7 +134,8 @@ func TestForm_ChangeTheme(t *testing.T) {
 			{Text: "test1", Widget: NewEntry()},
 			{Text: "test2", Widget: NewLabel("static")},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -220,6 +222,26 @@ func TestForm_Validation(t *testing.T) {
 	test.AssertImageMatches(t, "form/validation_valid.png", w.Canvas().Capture())
 }
 
+func TestForm_Validation_Reset(t *testing.T) {
+	test.NewTempApp(t)
+	test.ApplyTheme(t, test.Theme())
+
+	slide := NewSlider(0, 5)
+	entry := &Entry{Validator: validation.NewRegexp(`^\w{3}-\w{5}$`, "Input is not valid"), Text: "wrong"}
+	items := []*FormItem{
+		{Text: "Slide", Widget: slide},
+		{Text: "Input", Widget: entry},
+	}
+
+	form := &Form{Items: items, OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	defer w.Close()
+
+	w.Canvas().Focus(entry)
+	form.Items = []*FormItem{}
+	w.Canvas().Focus(slide)
+}
+
 func TestForm_EntryValidation_FirstTypeValid(t *testing.T) {
 	test.NewTempApp(t)
 	test.ApplyTheme(t, test.Theme())
@@ -267,7 +289,8 @@ func TestForm_DisableEnable(t *testing.T) {
 		Items: []*FormItem{
 			{Text: "test1", Widget: NewEntry()},
 		},
-		OnSubmit: func() {}, OnCancel: func() {}}
+		OnSubmit: func() {}, OnCancel: func() {},
+	}
 	w := test.NewWindow(form)
 	defer w.Close()
 
@@ -387,7 +410,6 @@ func TestForm_Validate(t *testing.T) {
 	entry2.SetText("not-wrong")
 	err = form.Validate()
 	assert.NoError(t, err)
-
 }
 
 func TestForm_SetOnValidationChanged(t *testing.T) {
@@ -414,7 +436,6 @@ func TestForm_SetOnValidationChanged(t *testing.T) {
 	entry1.SetText("15-true")
 	assert.NoError(t, form.Validate())
 	assert.False(t, validationError)
-
 }
 
 func TestForm_ExtendedEntry(t *testing.T) {
@@ -443,5 +464,4 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 	assert.NotPanics(t, func() {
 		form.Refresh()
 	})
-
 }

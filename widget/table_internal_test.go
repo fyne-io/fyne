@@ -169,7 +169,6 @@ func TestTable_Headers(t *testing.T) {
 }
 
 func TestTable_JustHeaders(t *testing.T) {
-
 	test.NewTempApp(t)
 
 	table := NewTableWithHeaders(
@@ -816,7 +815,8 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.Dragged(&fyne.DragEvent{ // reduce less than min width
 		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(25, 0)},
-		Dragged:    fyne.Delta{DX: -25, DY: 0}})
+		Dragged:    fyne.Delta{DX: -25, DY: 0},
+	})
 
 	assert.Equal(t, table.cellSize.Width, table.columnWidths[1])
 
@@ -895,7 +895,8 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 	table.MouseDown(&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: dragPos}})
 	table.Dragged(&fyne.DragEvent{ // reduce less than min height
 		PointEvent: fyne.PointEvent{Position: dragPos.SubtractXY(0, 25)},
-		Dragged:    fyne.Delta{DX: 0, DY: -25}})
+		Dragged:    fyne.Delta{DX: 0, DY: -25},
+	})
 
 	assert.Equal(t, table.cellSize.Height, table.rowHeights[2])
 

@@ -1,0 +1,5 @@
+<canvas size="50x50">
+	<content>
+		<arc cutoutRatio="0.5" endAngle="220" fillColor="rgba(255,200,0,180)" radius="3.4028234663852886e+38" size="50x50" startAngle="80" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
+	</content>
+</canvas>

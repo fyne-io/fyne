@@ -11,6 +11,7 @@ package app
 bool isDarkMode();
 */
 import "C"
+
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/theme"

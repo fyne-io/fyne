@@ -19,6 +19,7 @@ void iosCloseFileWriter(void* handle);
 const int iosWriteToFile(void* handle, const void* bytes, int len);
 */
 import "C"
+
 import (
 	"errors"
 	"io"

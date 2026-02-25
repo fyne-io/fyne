@@ -469,6 +469,20 @@ func TestAccordion_MinSize(t *testing.T) {
 	}
 }
 
+func TestAccordion_MinSize_ChangeItems(t *testing.T) {
+	ac := widget.NewAccordion()
+	m1 := ac.MinSize()
+
+	ac.Items = []*widget.AccordionItem{widget.NewAccordionItem("foo1", widget.NewLabel("foobar1"))}
+	m2 := ac.MinSize() // has crashed before as internal state changed
+	assert.NotEqual(t, m1, m2)
+
+	ac.Items = nil
+	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
+	m3 := ac.MinSize() // completely replace
+	assert.Equal(t, m2, m3)
+}
+
 func TestAccordion_Open(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		ac := widget.NewAccordion()

@@ -2,6 +2,8 @@ package commands
 
 import (
 	"image"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -157,6 +159,11 @@ func Test_validateAppID(t *testing.T) {
 }
 
 func Test_buildPackageWasm(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// p.buildPackage(wasmBuildTest, []string{})
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},
@@ -191,6 +198,11 @@ func Test_buildPackageWasm(t *testing.T) {
 }
 
 func Test_PackageWasm(t *testing.T) {
+	// Discarding log output for tests
+	// The following method logs an error:
+	// p.doPackage(wasmBuildTest)
+	log.SetOutput(io.Discard)
+	t.Cleanup(func() { log.SetOutput(os.Stderr) })
 	expected := []mockRunner{
 		{
 			expectedValue: expectedValue{args: []string{"mod", "edit", "-json"}},

@@ -9,6 +9,8 @@ import (
 
 type device struct {
 	safeTop, safeLeft, safeBottom, safeRight int
+
+	keyboardShown bool
 }
 
 //lint:file-ignore U1000 Var currentDPI is used in other files, but not here
@@ -45,14 +47,14 @@ func (*device) HasKeyboard() bool {
 	return false
 }
 
-func (*device) ShowVirtualKeyboard() {
-	showVirtualKeyboard(mobile.DefaultKeyboard)
+func (d *device) ShowVirtualKeyboard() {
+	d.showVirtualKeyboard(mobile.DefaultKeyboard)
 }
 
-func (*device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
-	showVirtualKeyboard(keyboard)
+func (d *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
+	d.showVirtualKeyboard(keyboard)
 }
 
-func (*device) HideVirtualKeyboard() {
-	hideVirtualKeyboard()
+func (d *device) HideVirtualKeyboard() {
+	d.hideVirtualKeyboard()
 }

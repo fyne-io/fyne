@@ -2,22 +2,11 @@ package repository
 
 import (
 	"io"
+	"path"
 	"strings"
 
 	"fyne.io/fyne/v2"
 )
-
-// splitNonEmpty works exactly like strings.Split(), but only returns non-empty
-// components.
-func splitNonEmpty(str, sep string) []string {
-	components := []string{}
-	for _, v := range strings.Split(str, sep) {
-		if len(v) > 0 {
-			components = append(components, v)
-		}
-	}
-	return components
-}
 
 // GenericParent can be used as a common-case implementation of
 // HierarchicalRepository.Parent(). It will create a parent URI based on
@@ -35,36 +24,24 @@ func splitNonEmpty(str, sep string) []string {
 //
 // Since: 2.0
 func GenericParent(u fyne.URI) (fyne.URI, error) {
-	p := u.Path()
-
-	if p == "" || p == "/" {
+	p := strings.TrimSuffix(u.Path(), "/")
+	if p == "" {
 		return nil, ErrURIRoot
 	}
 
-	components := splitNonEmpty(p, "/")
-
-	newURI := u.Scheme() + "://" + u.Authority()
-
-	// there will be at least one component, since we know we don't have
-	// '/' or ''.
-	newURI += "/"
-	if len(components) > 1 {
-		newURI += strings.Join(components[:len(components)-1], "/")
-	}
-
-	// stick the query and fragment back on the end
-	if q := u.Query(); len(q) > 0 {
-		newURI += "?" + q
-	}
-
-	if f := u.Fragment(); len(f) > 0 {
-		newURI += "#" + f
+	newURI := uri{
+		scheme:    u.Scheme(),
+		authority: u.Authority(),
+		path:      path.Dir(p),
+		query:     u.Query(),
+		fragment:  u.Fragment(),
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
-	return ParseURI(newURI)
+	// However, we can reuse &uri.String() to not duplicate string creation.
+	return ParseURI(newURI.String())
 }
 
 // GenericChild can be used as a common-case implementation of
@@ -78,27 +55,19 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-
-	// split into components and add the new one
-	components := splitNonEmpty(u.Path(), "/")
-	components = append(components, component)
-
-	// generate the scheme, authority, and path
-	newURI := u.Scheme() + "://" + u.Authority()
-	newURI += "/" + strings.Join(components, "/")
-
-	// stick the query and fragment back on the end
-	if q := u.Query(); len(q) > 0 {
-		newURI += "?" + q
-	}
-	if f := u.Fragment(); len(f) > 0 {
-		newURI += "#" + f
+	newURI := uri{
+		scheme:    u.Scheme(),
+		authority: u.Authority(),
+		path:      path.Join(u.Path(), component),
+		query:     u.Query(),
+		fragment:  u.Fragment(),
 	}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
 	// CustomURIRepository that implements its own ParseURI.
-	return ParseURI(newURI)
+	// However, we can reuse &uri.String() to not duplicate string creation.
+	return ParseURI(newURI.String())
 }
 
 // GenericCopy can be used a common-case implementation of
@@ -158,6 +127,35 @@ func GenericCopy(source fyne.URI, destination fyne.URI) error {
 	// Perform the copy.
 	_, err = io.Copy(dstWriter, srcReader)
 	return err
+}
+
+// GenericDeleteAll can be used a common-case implementation of
+// DeletableRepository.DeleteAll(). It will perform the deletion by obtaining
+// a list of all items in the URI, then deleting each one.
+//
+// For obvious reasons, the URI must be writable.
+//
+// NOTE: this function should not be called except by an implementation of
+// the Repository interface - using this for unknown URIs may break.
+//
+// Since: 2.7
+func GenericDeleteAll(u fyne.URI) error {
+	repo, err := ForURI(u)
+	if err != nil {
+		return err
+	}
+
+	wrepo, ok := repo.(WritableRepository)
+	if !ok {
+		return ErrOperationNotSupported
+	}
+
+	lrepo, ok := repo.(ListableRepository)
+	if !ok {
+		return wrepo.Delete(u)
+	}
+
+	return genericDeleteAll(u, wrepo, lrepo)
 }
 
 // GenericMove can be used a common-case implementation of
@@ -269,4 +267,56 @@ func genericCopyMoveListable(source, destination fyne.URI, repo Repository, dele
 	// we know the repo is writable as well from earlier checks
 	writer, _ := repo.(WritableRepository)
 	return writer.Delete(source)
+}
+
+func genericDeleteAll(u fyne.URI, wrepo WritableRepository, lrepo ListableRepository) error {
+	listable, err := lrepo.CanList(u)
+	if err != nil {
+		return err
+	} else if !listable {
+		return wrepo.Delete(u)
+	}
+
+	children, err := lrepo.List(u)
+	if err != nil {
+		return err
+	} else if len(children) == 0 {
+		return wrepo.Delete(u)
+	}
+
+	var folders []fyne.URI
+	var files []fyne.URI
+	for i := 0; i < len(children); i++ {
+		listable, err = lrepo.CanList(children[i])
+		if err != nil {
+			return err
+		}
+
+		if listable {
+			grandChildren, err := lrepo.List(children[i])
+			if err != nil {
+				return err
+			}
+			folders = append(folders, children[i])
+			children = append(children, grandChildren...)
+		} else {
+			files = append(files, children[i])
+		}
+	}
+
+	for i := len(files) - 1; i >= 0; i-- {
+		err = wrepo.Delete(files[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	for i := len(folders) - 1; i >= 0; i-- {
+		err = wrepo.Delete(folders[i])
+		if err != nil {
+			return err
+		}
+	}
+
+	return wrepo.Delete(u)
 }

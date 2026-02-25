@@ -55,7 +55,7 @@ func gendex() error {
 	if androidHome == "" {
 		return errors.New("ANDROID_HOME not set")
 	}
-	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
+	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0o775); err != nil {
 		return err
 	}
 	javaFiles, err := filepath.Glob("../../../../internal/driver/mobile/app/*.java")

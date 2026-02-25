@@ -231,6 +231,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeRadialGradient(o, attrs)
 	case *fynecanvas.Raster:
 		r.writeRaster(o, attrs)
+	case *fynecanvas.Polygon:
+		r.writePolygon(o, attrs)
 	case *fynecanvas.Rectangle:
 		r.writeRectangle(o, attrs)
 	case *fynecanvas.Text:
@@ -241,11 +243,24 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeWidget(o, attrs)
 	case *layout.Spacer:
 		r.writeSpacer(o, attrs)
+	case *fynecanvas.Arc:
+		r.writeArc(o, attrs)
 	default:
 		panic(fmt.Sprint("please add support for", reflect.TypeOf(o)))
 	}
 
 	return false
+}
+
+func (r *markupRenderer) writeArc(a *fynecanvas.Arc, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", a.FillColor)
+	r.setFloatAttr(attrs, "cutoutRatio", float64(a.CutoutRatio))
+	r.setFloatAttr(attrs, "startAngle", float64(a.StartAngle))
+	r.setFloatAttr(attrs, "endAngle", float64(a.EndAngle))
+	r.setFloatAttr(attrs, "radius", float64(a.CornerRadius))
+	r.setColorAttr(attrs, "strokeColor", a.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(a.StrokeWidth))
+	r.writeTag("arc", true, attrs)
 }
 
 func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*string) {
@@ -326,11 +341,26 @@ func (r *markupRenderer) writeRaster(rst *fynecanvas.Raster, attrs map[string]*s
 	r.writeTag("raster", true, attrs)
 }
 
+func (r *markupRenderer) writePolygon(rct *fynecanvas.Polygon, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", rct.FillColor)
+	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
+	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "angle", float64(rct.Angle))
+	r.setFloatAttr(attrs, "sides", float64(rct.Sides))
+	r.writeTag("polygon", true, attrs)
+}
+
 func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[string]*string) {
 	r.setColorAttr(attrs, "fillColor", rct.FillColor)
 	r.setColorAttr(attrs, "strokeColor", rct.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(rct.StrokeWidth))
 	r.setFloatAttr(attrs, "radius", float64(rct.CornerRadius))
+	r.setFloatAttr(attrs, "aspect", float64(rct.Aspect))
+	r.setFloatAttr(attrs, "topRightRadius", float64(rct.TopRightCornerRadius))
+	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
+	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
+	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
 	r.writeTag("rectangle", true, attrs)
 }
 
@@ -384,123 +414,238 @@ func nrgbaColor(c color.Color) color.NRGBA {
 	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
 }
 
+//gocyclo:ignore
 func knownColor(c color.Color) string {
-	return map[color.Color]string{
-		nrgbaColor(theme.Color(theme.ColorNameBackground)):          "background",
-		nrgbaColor(theme.Color(theme.ColorNameButton)):              "button",
-		nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):      "disabled button",
-		nrgbaColor(theme.Color(theme.ColorNameDisabled)):            "disabled",
-		nrgbaColor(theme.Color(theme.ColorNameError)):               "error",
-		nrgbaColor(theme.Color(theme.ColorNameFocus)):               "focus",
-		nrgbaColor(theme.Color(theme.ColorNameForeground)):          "foreground",
-		nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):   "foregroundOnError",
-		nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)): "foregroundOnPrimary",
-		nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)): "foregroundOnSuccess",
-		nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)): "foregroundOnWarning",
-		nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):    "headerBackground",
-		nrgbaColor(theme.Color(theme.ColorNameHover)):               "hover",
-		nrgbaColor(theme.Color(theme.ColorNameHyperlink)):           "hyperlink",
-		nrgbaColor(theme.Color(theme.ColorNameInputBackground)):     "inputBackground",
-		nrgbaColor(theme.Color(theme.ColorNameInputBorder)):         "inputBorder",
-		nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):      "menuBackground",
-		nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):   "overlayBackground",
-		nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):         "placeholder",
-		nrgbaColor(theme.Color(theme.ColorNamePressed)):             "pressed",
-		nrgbaColor(theme.Color(theme.ColorNamePrimary)):             "primary",
-		nrgbaColor(theme.Color(theme.ColorNameScrollBar)):           "scrollbar",
-		nrgbaColor(theme.Color(theme.ColorNameScrollBarBackground)): "scrollbarBackground",
-		nrgbaColor(theme.Color(theme.ColorNameSelection)):           "selection",
-		nrgbaColor(theme.Color(theme.ColorNameSeparator)):           "separator",
-		nrgbaColor(theme.Color(theme.ColorNameSuccess)):             "success",
-		nrgbaColor(theme.Color(theme.ColorNameShadow)):              "shadow",
-		nrgbaColor(theme.Color(theme.ColorNameWarning)):             "warning",
-	}[nrgbaColor(c)]
+	switch nrgbaColor(c) {
+	case nrgbaColor(theme.Color(theme.ColorNameBackground)):
+		return "background"
+	case nrgbaColor(theme.Color(theme.ColorNameButton)):
+		return "button"
+	case nrgbaColor(theme.Color(theme.ColorNameDisabledButton)):
+		return "disabled button"
+	case nrgbaColor(theme.Color(theme.ColorNameDisabled)):
+		return "disabled"
+	case nrgbaColor(theme.Color(theme.ColorNameError)):
+		return "error"
+	case nrgbaColor(theme.Color(theme.ColorNameFocus)):
+		return "focus"
+	case nrgbaColor(theme.Color(theme.ColorNameForeground)):
+		return "foreground"
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnError)):
+		return "foregroundOnError"
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnPrimary)):
+		return "foregroundOnPrimary"
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnSuccess)):
+		return "foregroundOnSuccess"
+	case nrgbaColor(theme.Color(theme.ColorNameForegroundOnWarning)):
+		return "foregroundOnWarning"
+	case nrgbaColor(theme.Color(theme.ColorNameHeaderBackground)):
+		return "headerBackground"
+	case nrgbaColor(theme.Color(theme.ColorNameHover)):
+		return "hover"
+	case nrgbaColor(theme.Color(theme.ColorNameHyperlink)):
+		return "hyperlink"
+	case nrgbaColor(theme.Color(theme.ColorNameInputBackground)):
+		return "inputBackground"
+	case nrgbaColor(theme.Color(theme.ColorNameInputBorder)):
+		return "inputBorder"
+	case nrgbaColor(theme.Color(theme.ColorNameMenuBackground)):
+		return "menuBackground"
+	case nrgbaColor(theme.Color(theme.ColorNameOverlayBackground)):
+		return "overlayBackground"
+	case nrgbaColor(theme.Color(theme.ColorNamePlaceHolder)):
+		return "placeholder"
+	case nrgbaColor(theme.Color(theme.ColorNamePressed)):
+		return "pressed"
+	case nrgbaColor(theme.Color(theme.ColorNamePrimary)):
+		return "primary"
+	case nrgbaColor(theme.Color(theme.ColorNameScrollBar)):
+		return "scrollbar"
+	case nrgbaColor(theme.Color(theme.ColorNameScrollBarBackground)):
+		return "scrollbarBackground"
+	case nrgbaColor(theme.Color(theme.ColorNameSelection)):
+		return "selection"
+	case nrgbaColor(theme.Color(theme.ColorNameSeparator)):
+		return "separator"
+	case nrgbaColor(theme.Color(theme.ColorNameSuccess)):
+		return "success"
+	case nrgbaColor(theme.Color(theme.ColorNameShadow)):
+		return "shadow"
+	case nrgbaColor(theme.Color(theme.ColorNameWarning)):
+		return "warning"
+	default:
+		return ""
+	}
 }
 
+//gocyclo:ignore
 func knownResource(rsc fyne.Resource) string {
-	return map[fyne.Resource]string{
-		theme.CancelIcon():             "cancelIcon",
-		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
-		theme.CheckButtonFillIcon():    "checkButtonFillIcon",
-		theme.CheckButtonIcon():        "checkButtonIcon",
-		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
-		theme.ColorChromaticIcon():     "colorChromaticIcon",
-		theme.ColorPaletteIcon():       "colorPaletteIcon",
-		theme.ComputerIcon():           "computerIcon",
-		theme.ConfirmIcon():            "confirmIcon",
-		theme.ContentAddIcon():         "contentAddIcon",
-		theme.ContentClearIcon():       "contentClearIcon",
-		theme.ContentCopyIcon():        "contentCopyIcon",
-		theme.ContentCutIcon():         "contentCutIcon",
-		theme.ContentPasteIcon():       "contentPasteIcon",
-		theme.ContentRedoIcon():        "contentRedoIcon",
-		theme.ContentRemoveIcon():      "contentRemoveIcon",
-		theme.ContentUndoIcon():        "contentUndoIcon",
-		theme.DeleteIcon():             "deleteIcon",
-		theme.DesktopIcon():            "desktopIcon",
-		theme.DocumentCreateIcon():     "documentCreateIcon",
-		theme.DocumentIcon():           "documentIcon",
-		theme.DocumentPrintIcon():      "documentPrintIcon",
-		theme.DocumentSaveIcon():       "documentSaveIcon",
-		theme.DownloadIcon():           "downloadIcon",
-		theme.ErrorIcon():              "errorIcon",
-		theme.FileApplicationIcon():    "fileApplicationIcon",
-		theme.FileAudioIcon():          "fileAudioIcon",
-		theme.FileIcon():               "fileIcon",
-		theme.FileImageIcon():          "fileImageIcon",
-		theme.FileTextIcon():           "fileTextIcon",
-		theme.FileVideoIcon():          "fileVideoIcon",
-		theme.FolderIcon():             "folderIcon",
-		theme.FolderNewIcon():          "folderNewIcon",
-		theme.FolderOpenIcon():         "folderOpenIcon",
-		theme.FyneLogo():               "fyneLogo", //lint:ignore SA1019 This needs to stay until the API is removed.
-		theme.HelpIcon():               "helpIcon",
-		theme.HistoryIcon():            "historyIcon",
-		theme.HomeIcon():               "homeIcon",
-		theme.InfoIcon():               "infoIcon",
-		theme.MailAttachmentIcon():     "mailAttachementIcon",
-		theme.MailComposeIcon():        "mailComposeIcon",
-		theme.MailForwardIcon():        "mailForwardIcon",
-		theme.MailReplyAllIcon():       "mailReplyAllIcon",
-		theme.MailReplyIcon():          "mailReplyIcon",
-		theme.MailSendIcon():           "mailSendIcon",
-		theme.MediaFastForwardIcon():   "mediaFastForwardIcon",
-		theme.MediaFastRewindIcon():    "mediaFastRewindIcon",
-		theme.MediaPauseIcon():         "mediaPauseIcon",
-		theme.MediaPlayIcon():          "mediaPlayIcon",
-		theme.MediaRecordIcon():        "mediaRecordIcon",
-		theme.MediaReplayIcon():        "mediaReplayIcon",
-		theme.MediaSkipNextIcon():      "mediaSkipNextIcon",
-		theme.MediaSkipPreviousIcon():  "mediaSkipPreviousIcon",
-		theme.MenuDropDownIcon():       "menuDropDownIcon",
-		theme.MenuDropUpIcon():         "menuDropUpIcon",
-		theme.MenuExpandIcon():         "menuExpandIcon",
-		theme.MenuIcon():               "menuIcon",
-		theme.MoveDownIcon():           "moveDownIcon",
-		theme.MoveUpIcon():             "moveUpIcon",
-		theme.NavigateBackIcon():       "navigateBackIcon",
-		theme.NavigateNextIcon():       "navigateNextIcon",
-		theme.QuestionIcon():           "questionIcon",
-		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
-		theme.RadioButtonFillIcon():    "radioButtonFillIcon",
-		theme.RadioButtonIcon():        "radioButtonIcon",
-		theme.SearchIcon():             "searchIcon",
-		theme.SearchReplaceIcon():      "searchReplaceIcon",
-		theme.SettingsIcon():           "settingsIcon",
-		theme.StorageIcon():            "storageIcon",
-		theme.ViewFullScreenIcon():     "viewFullScreenIcon",
-		theme.ViewRefreshIcon():        "viewRefreshIcon",
-		theme.ViewRestoreIcon():        "viewRestoreIcon",
-		theme.VisibilityIcon():         "visibilityIcon",
-		theme.VisibilityOffIcon():      "visibilityOffIcon",
-		theme.VolumeDownIcon():         "volumeDownIcon",
-		theme.VolumeMuteIcon():         "volumeMuteIcon",
-		theme.VolumeUpIcon():           "volumeUpIcon",
-		theme.WarningIcon():            "warningIcon",
-		theme.ZoomFitIcon():            "zoomFitIcon",
-		theme.ZoomInIcon():             "zoomInIcon",
-		theme.ZoomOutIcon():            "zoomOutIcon",
-	}[rsc]
+	switch rsc {
+	case theme.CancelIcon():
+		return "cancelIcon"
+	case theme.CheckButtonCheckedIcon():
+		return "checkButtonCheckedIcon"
+	case theme.CheckButtonFillIcon():
+		return "checkButtonFillIcon"
+	case theme.CheckButtonIcon():
+		return "checkButtonIcon"
+	case theme.ColorAchromaticIcon():
+		return "colorAchromaticIcon"
+	case theme.ColorChromaticIcon():
+		return "colorChromaticIcon"
+	case theme.ColorPaletteIcon():
+		return "colorPaletteIcon"
+	case theme.ComputerIcon():
+		return "computerIcon"
+	case theme.ConfirmIcon():
+		return "confirmIcon"
+	case theme.ContentAddIcon():
+		return "contentAddIcon"
+	case theme.ContentClearIcon():
+		return "contentClearIcon"
+	case theme.ContentCopyIcon():
+		return "contentCopyIcon"
+	case theme.ContentCutIcon():
+		return "contentCutIcon"
+	case theme.ContentPasteIcon():
+		return "contentPasteIcon"
+	case theme.ContentRedoIcon():
+		return "contentRedoIcon"
+	case theme.ContentRemoveIcon():
+		return "contentRemoveIcon"
+	case theme.ContentUndoIcon():
+		return "contentUndoIcon"
+	case theme.DeleteIcon():
+		return "deleteIcon"
+	case theme.DesktopIcon():
+		return "desktopIcon"
+	case theme.DocumentCreateIcon():
+		return "documentCreateIcon"
+	case theme.DocumentIcon():
+		return "documentIcon"
+	case theme.DocumentPrintIcon():
+		return "documentPrintIcon"
+	case theme.DocumentSaveIcon():
+		return "documentSaveIcon"
+	case theme.DownloadIcon():
+		return "downloadIcon"
+	case theme.ErrorIcon():
+		return "errorIcon"
+	case theme.FileApplicationIcon():
+		return "fileApplicationIcon"
+	case theme.FileAudioIcon():
+		return "fileAudioIcon"
+	case theme.FileIcon():
+		return "fileIcon"
+	case theme.FileImageIcon():
+		return "fileImageIcon"
+	case theme.FileTextIcon():
+		return "fileTextIcon"
+	case theme.FileVideoIcon():
+		return "fileVideoIcon"
+	case theme.FolderIcon():
+		return "folderIcon"
+	case theme.FolderNewIcon():
+		return "folderNewIcon"
+	case theme.FolderOpenIcon():
+		return "folderOpenIcon"
+	case theme.FyneLogo():
+		return "fyneLogo" //lint:ignore SA1019 This needs to stay until the API is removed.
+	case theme.HelpIcon():
+		return "helpIcon"
+	case theme.HistoryIcon():
+		return "historyIcon"
+	case theme.HomeIcon():
+		return "homeIcon"
+	case theme.InfoIcon():
+		return "infoIcon"
+	case theme.MailAttachmentIcon():
+		return "mailAttachementIcon"
+	case theme.MailComposeIcon():
+		return "mailComposeIcon"
+	case theme.MailForwardIcon():
+		return "mailForwardIcon"
+	case theme.MailReplyAllIcon():
+		return "mailReplyAllIcon"
+	case theme.MailReplyIcon():
+		return "mailReplyIcon"
+	case theme.MailSendIcon():
+		return "mailSendIcon"
+	case theme.MediaFastForwardIcon():
+		return "mediaFastForwardIcon"
+	case theme.MediaFastRewindIcon():
+		return "mediaFastRewindIcon"
+	case theme.MediaPauseIcon():
+		return "mediaPauseIcon"
+	case theme.MediaPlayIcon():
+		return "mediaPlayIcon"
+	case theme.MediaRecordIcon():
+		return "mediaRecordIcon"
+	case theme.MediaReplayIcon():
+		return "mediaReplayIcon"
+	case theme.MediaSkipNextIcon():
+		return "mediaSkipNextIcon"
+	case theme.MediaSkipPreviousIcon():
+		return "mediaSkipPreviousIcon"
+	case theme.MenuDropDownIcon():
+		return "menuDropDownIcon"
+	case theme.MenuDropUpIcon():
+		return "menuDropUpIcon"
+	case theme.MenuExpandIcon():
+		return "menuExpandIcon"
+	case theme.MenuIcon():
+		return "menuIcon"
+	case theme.MoveDownIcon():
+		return "moveDownIcon"
+	case theme.MoveUpIcon():
+		return "moveUpIcon"
+	case theme.NavigateBackIcon():
+		return "navigateBackIcon"
+	case theme.NavigateNextIcon():
+		return "navigateNextIcon"
+	case theme.QuestionIcon():
+		return "questionIcon"
+	case theme.RadioButtonCheckedIcon():
+		return "radioButtonCheckedIcon"
+	case theme.RadioButtonFillIcon():
+		return "radioButtonFillIcon"
+	case theme.RadioButtonIcon():
+		return "radioButtonIcon"
+	case theme.SearchIcon():
+		return "searchIcon"
+	case theme.SearchReplaceIcon():
+		return "searchReplaceIcon"
+	case theme.SettingsIcon():
+		return "settingsIcon"
+	case theme.StorageIcon():
+		return "storageIcon"
+	case theme.ViewFullScreenIcon():
+		return "viewFullScreenIcon"
+	case theme.ViewRefreshIcon():
+		return "viewRefreshIcon"
+	case theme.ViewRestoreIcon():
+		return "viewRestoreIcon"
+	case theme.VisibilityIcon():
+		return "visibilityIcon"
+	case theme.VisibilityOffIcon():
+		return "visibilityOffIcon"
+	case theme.VolumeDownIcon():
+		return "volumeDownIcon"
+	case theme.VolumeMuteIcon():
+		return "volumeMuteIcon"
+	case theme.VolumeUpIcon():
+		return "volumeUpIcon"
+	case theme.WarningIcon():
+		return "warningIcon"
+	case theme.ZoomFitIcon():
+		return "zoomFitIcon"
+	case theme.ZoomInIcon():
+		return "zoomInIcon"
+	case theme.ZoomOutIcon():
+		return "zoomOutIcon"
+	default:
+		return ""
+	}
 }
 
 func sortedKeys(m map[string]*string) []string {

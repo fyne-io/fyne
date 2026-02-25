@@ -13,6 +13,14 @@ import (
 
 const defaultPlaceHolder string = "(Select one)"
 
+var (
+	_ fyne.Widget       = (*Select)(nil)
+	_ desktop.Hoverable = (*Select)(nil)
+	_ fyne.Tappable     = (*Select)(nil)
+	_ fyne.Focusable    = (*Select)(nil)
+	_ fyne.Disableable  = (*Select)(nil)
+)
+
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
 	DisableableWidget
@@ -33,12 +41,6 @@ type Select struct {
 	popUp   *PopUpMenu
 	tapAnim *fyne.Animation
 }
-
-var _ fyne.Widget = (*Select)(nil)
-var _ desktop.Hoverable = (*Select)(nil)
-var _ fyne.Tappable = (*Select)(nil)
-var _ fyne.Focusable = (*Select)(nil)
-var _ fyne.Disableable = (*Select)(nil)
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
@@ -114,24 +116,18 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // FocusGained is called after this Select has gained focus.
-//
-// Implements: fyne.Focusable
 func (s *Select) FocusGained() {
 	s.focused = true
 	s.Refresh()
 }
 
 // FocusLost is called after this Select has lost focus.
-//
-// Implements: fyne.Focusable
 func (s *Select) FocusLost() {
 	s.focused = false
 	s.Refresh()
 }
 
 // Hide hides the select.
-//
-// Implements: fyne.Widget
 func (s *Select) Hide() {
 	if s.popUp != nil {
 		s.popUp.Hide()
@@ -163,8 +159,6 @@ func (s *Select) MouseOut() {
 }
 
 // Move changes the relative position of the select.
-//
-// Implements: fyne.Widget
 func (s *Select) Move(pos fyne.Position) {
 	s.BaseWidget.Move(pos)
 
@@ -237,8 +231,6 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 }
 
 // TypedKey is called if a key event happens while this Select is focused.
-//
-// Implements: fyne.Focusable
 func (s *Select) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace, fyne.KeyUp, fyne.KeyDown:
@@ -259,8 +251,6 @@ func (s *Select) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Select is focused.
-//
-// Implements: fyne.Focusable
 func (s *Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
@@ -328,7 +318,6 @@ func (s *Select) updateFromData(data binding.DataItem) {
 		return
 	}
 	s.SetSelected(val)
-
 }
 
 func (s *Select) updateSelected(text string) {

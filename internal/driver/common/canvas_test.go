@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"image/color"
 	"testing"
@@ -11,6 +10,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver"
+	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -393,38 +394,36 @@ func Prepend(c *fyne.Container, object fyne.CanvasObject) {
 	c.Refresh()
 }
 
+type dummyCanvas struct {
+	fyne.Canvas
+}
+
+func (dummyCanvas) Scale() float32 {
+	return 1.0
+}
+
 func TestRefreshCount(t *testing.T) { // Issue 2548.
-	var (
-		c              = &Canvas{}
-		errCh          = make(chan error)
-		freed   uint64 = 0
-		refresh uint64 = 1000
-	)
+	c := &Canvas{}
 	c.Initialize(nil, func() {})
+
+	freed := c.FreeDirtyTextures()
+	assert.Zero(t, freed)
+
+	c.SetPainter(gl.NewPainter(&dummyCanvas{}, struct{ driver.WithContext }{}))
+
+	const refresh = uint64(1000)
 	for i := uint64(0); i < refresh; i++ {
 		c.Refresh(canvas.NewRectangle(color.Gray16{Y: 1}))
 	}
 
-	go func() {
-		freed = c.FreeDirtyTextures()
-		if freed == 0 {
-			errCh <- errors.New("expected to free dirty textures but actually not freed")
-			return
-		}
-		errCh <- nil
-	}()
-	err := <-errCh
-	if err != nil {
-		t.Fatal(err)
-	}
-	if freed != refresh {
-		t.Fatalf("FreeDirtyTextures left refresh tasks behind in a frame, got %v, want %v", freed, refresh)
-	}
+	freed = c.FreeDirtyTextures()
+	assert.Equal(t, refresh, freed)
 }
 
 func BenchmarkRefresh(b *testing.B) {
 	c := &Canvas{}
 	c.Initialize(nil, func() {})
+	c.SetPainter(gl.NewPainter(&dummyCanvas{}, struct{ driver.WithContext }{}))
 
 	for i := uint64(1); i < 1<<15; i *= 2 {
 		b.Run(fmt.Sprintf("#%d", i), func(b *testing.B) {

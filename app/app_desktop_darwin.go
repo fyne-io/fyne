@@ -12,6 +12,7 @@ bool isBundled();
 void watchTheme();
 */
 import "C"
+
 import (
 	"net/url"
 	"os"
@@ -33,11 +34,17 @@ func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
-// By default this will use the application icon.
+// By default, this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	if desk, ok := a.Driver().(systrayDriver); ok {
 		desk.SetSystemTrayMenu(menu)
 	}
+}
+
+// SetSystemTrayWindow assigns a window to be shown with the system tray menu is tapped.
+// You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
+func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
+	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
 }
 
 //export themeChanged

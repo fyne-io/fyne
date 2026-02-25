@@ -72,14 +72,20 @@ func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 
 	c.monthLabel = NewLabel(c.monthYear())
 
-	nav := &fyne.Container{Layout: layout.NewBorderLayout(nil, nil, c.monthPrevious, c.monthNext),
-		Objects: []fyne.CanvasObject{c.monthPrevious, c.monthNext,
-			&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{c.monthLabel}}}}
+	nav := &fyne.Container{
+		Layout: layout.NewBorderLayout(nil, nil, c.monthPrevious, c.monthNext),
+		Objects: []fyne.CanvasObject{
+			c.monthPrevious, c.monthNext,
+			&fyne.Container{Layout: layout.NewCenterLayout(), Objects: []fyne.CanvasObject{c.monthLabel}},
+		},
+	}
 
 	c.dates = &fyne.Container{Layout: newCalendarLayout(), Objects: c.calendarObjects()}
 
-	dateContainer := &fyne.Container{Layout: layout.NewBorderLayout(nav, nil, nil, nil),
-		Objects: []fyne.CanvasObject{nav, c.dates}}
+	dateContainer := &fyne.Container{
+		Layout:  layout.NewBorderLayout(nav, nil, nil, nil),
+		Objects: []fyne.CanvasObject{nav, c.dates},
+	}
 
 	return NewSimpleRenderer(dateContainer)
 }
@@ -113,7 +119,7 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 	var buttons []fyne.CanvasObject
 
 	dayIndex := int(start.Weekday())
-	//account for Go time pkg starting on sunday at index 0
+	// account for Go time pkg starting on sunday at index 0
 	switch getLocaleWeekStart() {
 	case "Saturday":
 		if dayIndex == daysPerWeek-1 {
@@ -130,7 +136,7 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 		}
 	}
 
-	//add spacers if week doesn't start on Monday
+	// add spacers if week doesn't start on Monday
 	for i := 0; i < dayIndex; i++ {
 		buttons = append(buttons, layout.NewSpacer())
 	}

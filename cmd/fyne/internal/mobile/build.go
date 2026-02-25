@@ -75,7 +75,7 @@ const (
 
 func runBuild(cmd *command) (err error) {
 	_, err = runBuildImpl(cmd)
-	return
+	return err
 }
 
 // AppOutputName provides the name of a build resource for a given os - "ios" or "android".

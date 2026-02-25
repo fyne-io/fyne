@@ -1,4 +1,4 @@
-//go:build !ci && !android && !ios && !wasm && !test_web_driver
+//go:build !ci && !android && !ios && !wasm && !test_web_driver && !tinygo
 
 package app
 
@@ -51,7 +51,7 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 }
 
 // SetSystemTrayMenu creates a system tray item and attaches the specified menu.
-// By default this will use the application icon.
+// By default, this will use the application icon.
 func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	a.Driver().(systrayDriver).SetSystemTrayMenu(menu)
 }
@@ -60,6 +60,12 @@ func (a *fyneApp) SetSystemTrayMenu(menu *fyne.Menu) {
 // You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
 func (a *fyneApp) SetSystemTrayIcon(icon fyne.Resource) {
 	a.Driver().(systrayDriver).SetSystemTrayIcon(icon)
+}
+
+// SetSystemTrayWindow assigns a window to be shown with the system tray menu is tapped.
+// You should have previously called `SetSystemTrayMenu` to initialise the menu icon.
+func (a *fyneApp) SetSystemTrayWindow(w fyne.Window) {
+	a.Driver().(systrayDriver).SetSystemTrayWindow(w)
 }
 
 func escapeNotificationString(in string) string {
@@ -73,7 +79,7 @@ func runScript(name, script string) {
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
-	err := os.WriteFile(tmpFilePath, []byte(script), 0600)
+	err := os.WriteFile(tmpFilePath, []byte(script), 0o600)
 	if err != nil {
 		fyne.LogError("Could not write script to show notification", err)
 		return

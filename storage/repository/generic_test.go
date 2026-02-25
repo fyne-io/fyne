@@ -3,6 +3,7 @@ package repository
 import (
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,4 +59,32 @@ func TestGenericChild(t *testing.T) {
 
 		assert.Equal(t, c.expect, res.String())
 	}
+}
+
+var benchURI fyne.URI
+
+func BenchmarkGenericParent(b *testing.B) {
+	var uri fyne.URI
+	input, _ := ParseURI("foo://example.com:8042/over/there?name=ferret#nose")
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		uri, _ = GenericParent(input)
+	}
+
+	benchURI = uri
+}
+
+func BenchmarkGenericChild(b *testing.B) {
+	var uri fyne.URI
+	input, _ := ParseURI("foo://example.com:8042/over/there?name=ferret#nose")
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		uri, _ = GenericChild(input, "bar")
+	}
+
+	benchURI = uri
 }

@@ -395,5 +395,4 @@ func focusIfNotMobile(w fyne.Widget) {
 			c.Focus(w.(fyne.Focusable))
 		}
 	}
-
 }

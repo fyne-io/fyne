@@ -1,4 +1,4 @@
-//go:build !android && !ios && !mobile && !wasm && !test_web_driver
+//go:build !android && !ios && !mobile && !wasm && !test_web_driver && !tamago && !noos && !tinygo
 
 package app
 
@@ -25,7 +25,7 @@ func ensureDirExists(dir string) {
 		return
 	}
 
-	err := os.MkdirAll(dir, 0700)
+	err := os.MkdirAll(dir, 0o700)
 	if err != nil {
 		fyne.LogError("Unable to create settings storage:", err)
 	}

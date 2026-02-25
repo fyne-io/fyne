@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 )
 
+var _ fyne.Widget = (*CheckGroup)(nil)
+
 // CheckGroup widget has a list of text labels and checkbox icons next to each.
 // Changing the selection (any number can be selected) will trigger the changed func.
 //
@@ -22,8 +24,6 @@ type CheckGroup struct {
 
 	items []*Check
 }
-
-var _ fyne.Widget = (*CheckGroup)(nil)
 
 // NewCheckGroup creates a new check group widget with the set options and change handler
 //
@@ -65,8 +65,6 @@ func (r *CheckGroup) MinSize() fyne.Size {
 }
 
 // Refresh causes this widget to be redrawn in it's current state.
-//
-// Implements: fyne.CanvasObject
 func (r *CheckGroup) Refresh() {
 	r.update()
 	r.BaseWidget.Refresh()

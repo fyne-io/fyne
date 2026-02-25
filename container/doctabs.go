@@ -40,9 +40,8 @@ type DocTabs struct {
 //
 // Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
-	tabs := &DocTabs{}
+	tabs := &DocTabs{Items: items}
 	tabs.ExtendBaseWidget(tabs)
-	tabs.SetItems(items)
 	return tabs
 }
 
@@ -52,8 +51,6 @@ func (t *DocTabs) Append(item *TabItem) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-//
-// Implements: fyne.Widget
 func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	th := t.Theme()
@@ -113,8 +110,6 @@ func (t *DocTabs) EnableItem(item *TabItem) {
 }
 
 // Hide hides the widget.
-//
-// Implements: fyne.CanvasObject
 func (t *DocTabs) Hide() {
 	if t.popUpMenu != nil {
 		t.popUpMenu.Hide()
@@ -124,8 +119,6 @@ func (t *DocTabs) Hide() {
 }
 
 // MinSize returns the size that this widget should not shrink below
-//
-// Implements: fyne.CanvasObject
 func (t *DocTabs) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
@@ -161,7 +154,7 @@ func (t *DocTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *DocTabs) SelectedIndex() int {
-	return t.current
+	return t.selected()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -177,8 +170,6 @@ func (t *DocTabs) SetTabLocation(l TabLocation) {
 }
 
 // Show this widget, if it was previously hidden
-//
-// Implements: fyne.CanvasObject
 func (t *DocTabs) Show() {
 	t.BaseWidget.Show()
 	t.SelectIndex(t.current)
@@ -208,6 +199,9 @@ func (t *DocTabs) items() []*TabItem {
 }
 
 func (t *DocTabs) selected() int {
+	if len(t.Items) == 0 {
+		return -1
+	}
 	return t.current
 }
 
@@ -338,6 +332,9 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 				onTapped: func() { r.docTabs.Select(item) },
 				onClosed: func() { r.docTabs.close(item) },
 				tabs:     r.tabs,
+			}
+			if item.disabled {
+				item.button.Disable()
 			}
 		}
 		button := item.button

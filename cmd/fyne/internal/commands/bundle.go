@@ -110,7 +110,7 @@ func (b *Bundler) Run(args []string) {
 			fileModes = os.O_RDWR | os.O_APPEND
 		}
 
-		f, err := os.OpenFile(b.out, fileModes, 0666)
+		f, err := os.OpenFile(b.out, fileModes, 0o666)
 		if err == nil {
 			outFile = f
 		} else {
@@ -224,7 +224,7 @@ func openOutputFile(filePath string, noheader bool) (file *os.File, close func()
 		fileModes = os.O_RDWR | os.O_APPEND
 	}
 
-	f, err := os.OpenFile(filePath, fileModes, 0666)
+	f, err := os.OpenFile(filePath, fileModes, 0o666)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			fyne.LogError("Unable to open output file", err)

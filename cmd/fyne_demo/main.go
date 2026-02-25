@@ -25,9 +25,9 @@ var topWindow fyne.Window
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(data.FyneLogo)
-	makeTray(a)
-	logLifecycle(a)
 	w := a.NewWindow("Fyne Demo")
+	makeTray(a, w)
+	logLifecycle(a)
 	topWindow = w
 
 	w.SetMainMenu(makeMenu(a, w))
@@ -196,7 +196,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	return main
 }
 
-func makeTray(a fyne.App) {
+func makeTray(a fyne.App, w fyne.Window) {
 	if desk, ok := a.(desktop.App); ok {
 		h := fyne.NewMenuItem("Hello", func() {})
 		h.Icon = theme.HomeIcon()
@@ -207,6 +207,7 @@ func makeTray(a fyne.App) {
 			menu.Refresh()
 		}
 		desk.SetSystemTrayMenu(menu)
+		desk.SetSystemTrayWindow(w)
 	}
 }
 

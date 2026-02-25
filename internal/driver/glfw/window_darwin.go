@@ -11,6 +11,7 @@ package glfw
 void setFullScreen(bool full, void *window);
 */
 import "C"
+
 import (
 	"runtime"
 

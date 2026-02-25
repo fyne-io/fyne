@@ -1,3 +1,5 @@
+//go:build !migrated_fynedo
+
 package async
 
 import (

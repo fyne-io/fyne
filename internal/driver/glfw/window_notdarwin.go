@@ -2,6 +2,10 @@
 
 package glfw
 
+import "time"
+
+const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
+
 func (w *window) doSetFullScreen(full bool) {
 	monitor := w.getMonitorForWindow()
 	mode := monitor.GetVideoMode()

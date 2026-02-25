@@ -17,6 +17,7 @@ void writeStream(uintptr_t jni_env, uintptr_t ctx, void* stream, char* data, int
 void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream);
 */
 import "C"
+
 import (
 	"errors"
 	"io"

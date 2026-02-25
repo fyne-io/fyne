@@ -69,7 +69,6 @@ func LocalizeKey(key, fallback string, data ...any) string {
 		},
 		TemplateData: d0,
 	})
-
 	if err != nil {
 		fyne.LogError("Translation failure", err)
 		return fallbackWithData(key, fallback, d0)
@@ -104,7 +103,6 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 		PluralCount:  count,
 		TemplateData: d0,
 	})
-
 	if err != nil {
 		fyne.LogError("Translation failure", err)
 		return fallbackWithData(key, fallback, d0)

@@ -20,9 +20,11 @@ import (
 func TestNewList(t *testing.T) {
 	list := createList(1000)
 
-	content := &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
-		NewIcon(theme.DocumentIcon()),
-		NewLabel("Template Object")},
+	content := &fyne.Container{
+		Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+			NewIcon(theme.DocumentIcon()),
+			NewLabel("Template Object"),
+		},
 	}
 	template := newListItem(content, nil)
 
@@ -385,9 +387,11 @@ func TestList_SmallList(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
-				NewIcon(theme.DocumentIcon()),
-				NewLabel("Template Object")},
+			return &fyne.Container{
+				Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+					NewIcon(theme.DocumentIcon()),
+					NewLabel("Template Object"),
+				},
 			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {
@@ -435,9 +439,11 @@ func TestList_RemoveItem(t *testing.T) {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return &fyne.Container{Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
-				NewIcon(theme.DocumentIcon()),
-				NewLabel("Template Object")},
+			return &fyne.Container{
+				Layout: layout.NewHBoxLayout(), Objects: []fyne.CanvasObject{
+					NewIcon(theme.DocumentIcon()),
+					NewLabel("Template Object"),
+				},
 			}
 		},
 		func(id ListItemID, item fyne.CanvasObject) {

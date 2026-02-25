@@ -41,6 +41,10 @@ func (c *Circle) MinSize() fyne.Size {
 
 // Move the circle object to a new position, relative to its parent / canvas
 func (c *Circle) Move(pos fyne.Position) {
+	if c.Position1 == pos {
+		return
+	}
+
 	size := c.Size()
 	c.Position1 = pos
 	c.Position2 = c.Position1.Add(size)

@@ -9,9 +9,11 @@ import (
 	publicWidget "fyne.io/fyne/v2/widget"
 )
 
-var _ desktop.Hoverable = (*menuBarItem)(nil)
-var _ fyne.Focusable = (*menuBarItem)(nil)
-var _ fyne.Widget = (*menuBarItem)(nil)
+var (
+	_ fyne.Widget       = (*menuBarItem)(nil)
+	_ desktop.Hoverable = (*menuBarItem)(nil)
+	_ fyne.Focusable    = (*menuBarItem)(nil)
+)
 
 // menuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
 type menuBarItem struct {
@@ -35,8 +37,6 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 }
 
 // CreateRenderer returns a new renderer for the menu bar item.
-//
-// Implements: fyne.Widget
 func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	background := canvas.NewRectangle(theme.Color(theme.ColorNameHover))
 	background.CornerRadius = theme.SelectionRadiusSize()
@@ -73,8 +73,6 @@ func (i *menuBarItem) Focused() bool {
 // The menu that was displayed before will be hidden.
 //
 // If the bar is not active, the item will be hovered.
-//
-// Implements: desktop.Hoverable
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
 	i.hovered = true
 	if i.Parent.active {
@@ -90,8 +88,6 @@ func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
 // On the next mouse move the hovered item is activated again.
 //
 // If the bar is not active, this will do nothing.
-//
-// Implements: desktop.Hoverable
 func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 	if i.Parent.active {
 		i.Parent.canvas.Focus(i)
@@ -101,8 +97,6 @@ func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 // MouseOut does nothing if the bar is active.
 //
 // IF the bar is not active, it changes the item to not be hovered.
-//
-// Implements: desktop.Hoverable
 func (i *menuBarItem) MouseOut() {
 	i.hovered = false
 	i.Refresh()
@@ -110,8 +104,6 @@ func (i *menuBarItem) MouseOut() {
 
 // Tapped toggles the activation state of the menu bar.
 // It shows the item’s menu if the bar is activated and hides it if the bar is deactivated.
-//
-// Implements: fyne.Tappable
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
 	i.Parent.toggle(i)
 }

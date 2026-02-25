@@ -91,6 +91,7 @@ func TextMonospaceFont() fyne.Resource {
 func SymbolFont() fyne.Resource {
 	return safeFontLookup(fyne.TextStyle{Symbol: true})
 }
+
 func safeFontLookup(s fyne.TextStyle) fyne.Resource {
 	font := Current().Font(s)
 	if font != nil {

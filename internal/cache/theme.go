@@ -64,6 +64,10 @@ func overrideContainer(c *fyne.Container, s *overrideScope) {
 }
 
 func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
+	if _, ok := o.(interface{ SetDeviceIsMobile(bool) }); ok { // ThemeOverride without the import loop
+		return // do not apply this theme over a new scope
+	}
+
 	switch c := o.(type) {
 	case fyne.Widget:
 		overrideWidget(c, s)

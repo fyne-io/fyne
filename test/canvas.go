@@ -32,7 +32,7 @@ type canvas struct {
 	scale   float32
 
 	content     fyne.CanvasObject
-	overlays    *internal.OverlayStack
+	overlays    internal.OverlayStack
 	focusMgr    *intapp.FocusManager
 	hovered     desktop.Hoverable
 	padded      bool
@@ -64,7 +64,7 @@ func NewCanvas() WindowlessCanvas {
 		scale:    1.0,
 		size:     fyne.NewSize(100, 100),
 	}
-	c.overlays = &internal.OverlayStack{Canvas: c}
+	c.overlays.Canvas = c
 	return c
 }
 
@@ -149,7 +149,7 @@ func (c *canvas) Overlays() fyne.OverlayStack {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
-	return c.overlays
+	return &c.overlays
 }
 
 func (c *canvas) Padded() bool {

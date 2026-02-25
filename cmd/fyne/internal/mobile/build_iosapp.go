@@ -21,7 +21,8 @@ import (
 )
 
 func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
-	appName, version string, build int, release bool, cert, profile string) (map[string]bool, error) {
+	appName, version string, build int, release bool, cert, profile string,
+) (map[string]bool, error) {
 	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
 	// Detect the team ID
@@ -76,7 +77,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 			printcmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
-			if err := os.WriteFile(file.name, file.contents, 0600); err != nil {
+			if err := os.WriteFile(file.name, file.contents, 0o600); err != nil {
 				return nil, err
 			}
 		}
