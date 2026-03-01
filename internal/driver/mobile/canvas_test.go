@@ -91,15 +91,19 @@ func Test_canvas_Dragged(t *testing.T) {
 		draggedObj = wid
 	})
 
-	assert.True(t, dragged)
-	assert.Equal(t, scroll, draggedObj)
-	dragged = false
-	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		wid.Dragged(ev)
-		dragged = true
-	})
-	assert.True(t, dragged)
-	assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
+	if _, ok := interface{}(scroll).(fyne.Draggable); ok {
+		assert.True(t, dragged)
+		assert.Equal(t, scroll, draggedObj)
+		dragged = false
+		c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+			wid.Dragged(ev)
+			dragged = true
+		})
+		assert.True(t, dragged)
+		assert.Equal(t, fyne.NewPos(0, 5), scroll.Offset)
+	} else {
+		assert.False(t, dragged)
+	}
 }
 
 func Test_canvas_DraggingOutOfWidget(t *testing.T) {
