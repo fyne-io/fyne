@@ -6,6 +6,7 @@ import (
 	"image"
 	"strconv"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -322,6 +323,7 @@ func TestMenuBar(t *testing.T) {
 							}
 							var capture2 image.Image
 							runOnMain(func() {
+								time.Sleep(time.Millisecond * 20)
 								capture2 = c.Capture()
 							})
 							test.AssertImageMatches(t, s.wantImage, capture2)
