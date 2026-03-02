@@ -74,6 +74,7 @@ func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {
 	}
 
 	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
+	fm.SetScript(language.LookupScript(r))
 	return fm.ResolveFace(r)
 }
 
