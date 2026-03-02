@@ -1,4 +1,4 @@
-//go:build !windows || !ci
+//go:build mobile && (!windows || !ci)
 
 package mobile
 
@@ -14,7 +14,6 @@ import (
 	fynecanvas "fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/mobile"
-	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver/common"
 	_ "fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -22,32 +21,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
-
-var d *driver
-
-func TestMain(m *testing.M) {
-	currentApp := fyne.CurrentApp()
-	tester := newTestMobileApp()
-	d = tester.Driver().(*driver)
-	d.queuedFuncs = async.NewUnboundedChan[func()]()
-	fyne.SetCurrentApp(tester)
-
-	waitForStart := make(chan struct{})
-	go func() {
-		// Wait for app loop to be running (plus a moment in case of scheduling switches).
-		<-waitForStart
-
-		// Just like the GLFW tests, wait a short while for the driver to start
-		time.Sleep(time.Millisecond * 100)
-
-		ret := m.Run()
-		fyne.SetCurrentApp(currentApp)
-		os.Exit(ret)
-	}()
-
-	close(waitForStart) // Signal that execution can continue.
-	tester.Run()
-}
 
 func Test_canvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
@@ -534,32 +507,6 @@ func simulateTap(c *canvas) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
-}
-
-type mobileApp struct {
-	fyne.App
-	driver fyne.Driver
-}
-
-func (a *mobileApp) Driver() fyne.Driver {
-	return a.driver
-}
-
-func (a *mobileApp) Run() {
-	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
-	// TODO replace with a full mobileApp.Run() once that is resolved
-	async.SetMainGoroutine()
-
-	for fn := range d.queuedFuncs.Out() {
-		fn()
-	}
-}
-
-func newTestMobileApp() fyne.App {
-	return &mobileApp{
-		App:    fyne.CurrentApp(),
-		driver: NewGoMobileDriver(),
-	}
 }
 
 func waitAndCheck(msWait time.Duration, fn func()) {
