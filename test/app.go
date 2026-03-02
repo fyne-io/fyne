@@ -254,17 +254,15 @@ func (s *testSettings) apply() {
 		listener <- s
 	}
 
-	s.app.driver.DoFromGoroutine(func() {
-		s.app.propertyLock.Lock()
-		painter.ClearFontCache()
-		cache.ResetThemeCaches()
-		intapp.ApplySettings(s, s.app)
-		s.app.propertyLock.Unlock()
+	s.app.propertyLock.Lock()
+	painter.ClearFontCache()
+	cache.ResetThemeCaches()
+	intapp.ApplySettings(s, s.app)
+	s.app.propertyLock.Unlock()
 
-		for _, l := range listenersFns {
-			l(s)
-		}
-	}, false)
+	for _, l := range listenersFns {
+		l(s)
+	}
 
 	s.app.propertyLock.Lock()
 	s.app.appliedTheme = s.Theme()
