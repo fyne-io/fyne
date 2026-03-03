@@ -62,8 +62,9 @@ type TextStyle struct {
 	// Since: 2.1
 	TabWidth int // Width of tabs in spaces
 	// Since: 2.5
-	// Currently only supported by [fyne.io/fyne/v2/widget.TextGrid].
 	Underline bool // Should text be underlined.
+	// Since: 2.8
+	Strikethrough bool // Should text be struck through.
 }
 
 // MeasureText uses the current driver to calculate the size of text when rendered.

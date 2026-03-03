@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
@@ -243,6 +244,20 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	clippedBounds := clip.Intersect(imgBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - imgBounds.Min.X, Y: clippedBounds.Min.Y - imgBounds.Min.Y}
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
+
+	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
+		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+		line := canvas.NewLine(color)
+		line.Resize(fyne.NewSize(bounds.Width, 0))
+		if text.TextStyle.Underline {
+			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+painter.UnderlineOffsetFromBaseline)
+			drawLine(c, line, underlinePos, base, clip)
+		}
+		if text.TextStyle.Strikethrough {
+			strikePos := fyne.NewPos(pos.X, pos.Y+baseline*painter.StrikethroughToBaselineFactor)
+			drawLine(c, line, strikePos, base, clip)
+		}
+	}
 }
 
 func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {

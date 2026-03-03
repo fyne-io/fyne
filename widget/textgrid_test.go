@@ -145,7 +145,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid.Resize(fyne.NewSize(52, 22))
 	wrap := test.TempWidgetRenderer(t, grid).(*textGridRenderer).text
 	row := wrap.visible[0].(*textGridRow)
-	assert.Len(t, row.objects, 18)
+	assert.Len(t, row.objects, 12)
 }
 
 func TestTextGrid_Row(t *testing.T) {
@@ -196,7 +196,7 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	row1 := content.visible[1].(*textGridRow)
 	row2 := content.visible[2].(*textGridRow)
 	assert.Equal(t, "H", row0.objects[1].(*canvas.Text).Text)
-	assert.Equal(t, "g", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, "g", row0.objects[19].(*canvas.Text).Text)
 	assert.Equal(t, "t", row1.objects[1].(*canvas.Text).Text)
 	assert.Equal(t, " ", row2.objects[1].(*canvas.Text).Text)
 
@@ -207,7 +207,7 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	assert.Len(t, grid.Rows[0].Cells, 7)
 
 	assert.Equal(t, "R", row0.objects[1].(*canvas.Text).Text)
-	assert.Equal(t, " ", row0.objects[28].(*canvas.Text).Text)
+	assert.Equal(t, " ", row0.objects[19].(*canvas.Text).Text)
 	assert.Equal(t, " ", row1.objects[1].(*canvas.Text).Text)
 }
 
@@ -451,6 +451,6 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 }
 
 func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
-	i := col * 3
+	i := col * 2
 	return r.obj.objects[i].(*canvas.Rectangle), r.obj.objects[i+1].(*canvas.Text)
 }

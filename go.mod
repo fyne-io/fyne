@@ -16,8 +16,8 @@ require (
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/go-ole/go-ole v1.2.6
-	github.com/go-text/render v0.2.0
-	github.com/go-text/typesetting v0.3.3
+	github.com/go-text/render v0.2.1
+	github.com/go-text/typesetting v0.3.4
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/hack-pad/go-indexeddb v0.3.2
 	github.com/jackmordaunt/icns/v2 v2.2.6

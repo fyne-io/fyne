@@ -677,14 +677,12 @@ func (t *textGridRow) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 
-	ul := canvas.NewLine(color.Transparent)
-
-	t.objects = append(t.objects, bg, text, ul)
+	t.objects = append(t.objects, bg, text)
 }
 
 func (t *textGridRow) refreshCell(col int) {
 	pos := t.cols + col
-	if pos*3+1 >= len(t.objects) {
+	if pos*2+1 >= len(t.objects) {
 		return
 	}
 
@@ -700,26 +698,17 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	if str == 0 {
 		str = ' '
 	}
-	rect := t.objects[pos*3].(*canvas.Rectangle)
-	text := t.objects[pos*3+1].(*canvas.Text)
-	underline := t.objects[pos*3+2].(*canvas.Line)
+	rect := t.objects[pos*2].(*canvas.Rectangle)
+	text := t.objects[pos*2+1].(*canvas.Text)
 
 	fg := t.cachedFGColor
 	text.TextSize = t.cachedTextSize
 
-	var underlineStrokeWidth float32 = 1
-	var underlineStrokeColor color.Color = color.Transparent
 	textStyle := fyne.TextStyle{}
 	if style != nil {
 		textStyle = style.Style()
 	} else if rowStyle != nil {
 		textStyle = rowStyle.Style()
-	}
-	if textStyle.Bold {
-		underlineStrokeWidth = 2
-	}
-	if textStyle.Underline {
-		underlineStrokeColor = fg
 	}
 	textStyle.Monospace = true
 
@@ -737,11 +726,6 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 		text.Refresh()
 	}
 
-	if underlineStrokeWidth != underline.StrokeWidth || underlineStrokeColor != underline.StrokeColor {
-		underline.StrokeWidth, underline.StrokeColor = underlineStrokeWidth, underlineStrokeColor
-		underline.Refresh()
-	}
-
 	bg := color.Color(color.Transparent)
 	if style != nil && style.BackgroundColor() != nil {
 		bg = style.BackgroundColor()
@@ -756,10 +740,10 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 
 func (t *textGridRow) addCellsIfRequired() {
 	cellCount := t.cols
-	if len(t.objects) == cellCount*3 {
+	if len(t.objects) == cellCount*2 {
 		return
 	}
-	for i := len(t.objects); i < cellCount*3; i += 3 {
+	for i := len(t.objects); i < cellCount*2; i += 2 {
 		t.appendTextCell(' ')
 	}
 }
@@ -767,7 +751,7 @@ func (t *textGridRow) addCellsIfRequired() {
 func (t *textGridRow) refreshCells() {
 	x := 0
 	if t.row >= len(t.text.text.Rows) {
-		for ; x < len(t.objects)/3; x++ {
+		for ; x < len(t.objects)/2; x++ {
 			t.setCellRune(' ', x, TextGridStyleDefault, nil) // blank rows no longer needed
 		}
 
@@ -829,7 +813,7 @@ func (t *textGridRow) refreshCells() {
 		x++
 	}
 
-	for ; x < len(t.objects)/3; x++ {
+	for ; x < len(t.objects)/2; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
 }
@@ -883,13 +867,9 @@ func (t *textGridRowRenderer) Layout(size fyne.Size) {
 		// text
 		t.obj.objects[off+1].Move(cellPos)
 
-		// underline
-		t.obj.objects[off+2].Move(cellPos.Add(fyne.Position{X: 0, Y: t.obj.text.cellSize.Height}))
-		t.obj.objects[off+2].Resize(fyne.Size{Width: t.obj.text.cellSize.Width})
-
 		cellSpan := float32(runewidth.StringWidth(t.obj.objects[off+1].(*canvas.Text).Text))
 		cellPos.X += t.obj.text.cellSize.Width * cellSpan
-		off += 3
+		off += 2
 	}
 }
 

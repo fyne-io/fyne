@@ -25,7 +25,9 @@ import (
 
 const (
 	// DefaultTabWidth is the default width in spaces
-	DefaultTabWidth = 4
+	DefaultTabWidth               = 4
+	UnderlineOffsetFromBaseline   = 2
+	StrikethroughToBaselineFactor = 0.75
 
 	fontTabSpaceSize = 10
 )
