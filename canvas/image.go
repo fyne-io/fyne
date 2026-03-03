@@ -147,7 +147,9 @@ func (i *Image) Refresh() {
 			fyne.LogError("Failed to load image", err)
 			return
 		}
-		rc = io.NopCloser(r)
+		if r != nil {
+			rc = io.NopCloser(r)
+		}
 	} else if i.previousRender {
 		i.previousRender = false
 

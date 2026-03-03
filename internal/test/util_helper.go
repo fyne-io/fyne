@@ -3,6 +3,7 @@
 package test
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"os"
@@ -47,15 +48,17 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 		return true
 	}
 
+	if bytes.Equal(masterPix, capturePix) {
+		return true
+	}
+
 	var msg string
 	if len(msgAndArgs) > 0 {
 		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
 	}
-	if !assert.Equal(t, masterPix, capturePix, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
-		require.NoError(t, writeImage(failedPath, img))
-		return false
-	}
-	return true
+
+	require.NoError(t, writeImage(failedPath, img))
+	return assert.Fail(t, "Images not equal.", "%sImage did not match master. Actual image written to file://%s.", msg, failedPath)
 }
 
 func pixelsForImage(t *testing.T, img image.Image) []uint8 {
