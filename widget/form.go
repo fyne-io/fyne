@@ -477,11 +477,14 @@ type formItemLayout struct {
 
 func (f formItemLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
 	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
-	itemHeight := objs[0].MinSize().Height
+	min0 := objs[0].MinSize()
+	min1 := objs[1].MinSize()
+
+	itemHeight := fyne.Max(min0.Height, size.Height-min1.Height-innerPad)
 	objs[0].Resize(fyne.NewSize(size.Width, itemHeight))
 
 	objs[1].Move(fyne.NewPos(innerPad, itemHeight+innerPad/2))
-	objs[1].Resize(fyne.NewSize(size.Width, objs[1].MinSize().Width))
+	objs[1].Resize(fyne.NewSize(size.Width, min1.Height))
 }
 
 func (f formItemLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {

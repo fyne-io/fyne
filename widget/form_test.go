@@ -465,3 +465,30 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 		form.Refresh()
 	})
 }
+
+func TestFormItem_Layout_Expansion(t *testing.T) {
+	rect := canvas.NewRectangle(theme.Color(theme.ColorNameForeground))
+	rect.SetMinSize(fyne.NewSize(50, 50))
+	item := NewFormItem("Test", rect)
+	item.HintText = "Hint" // Ensure it is wrapped in formItemLayout
+	form := NewForm(item)
+
+	test.TempWidgetRenderer(t, form)
+
+	inputContainer := form.itemGrid.Objects[1].(*fyne.Container)
+	textContainer := inputContainer.Objects[1].(*fyne.Container)
+
+	// Min height of rect is 50. textContainer min height is usually theme dependent.
+	// Let's give the whole inputContainer 100.
+	availableHeight := float32(100)
+	inputContainer.Resize(fyne.NewSize(200, availableHeight))
+	inputContainer.Layout.Layout(inputContainer.Objects, inputContainer.Size())
+
+	innerPad := form.Theme().Size(theme.SizeNameInnerPadding)
+	min1Height := textContainer.MinSize().Height
+	expectedHeight := availableHeight - min1Height - innerPad
+
+	assert.Equal(t, textContainer.Size().Height, min1Height)
+	assert.Equal(t, expectedHeight, rect.Size().Height)
+	assert.Greater(t, rect.Size().Height, float32(50))
+}
