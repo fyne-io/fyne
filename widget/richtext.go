@@ -846,25 +846,35 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-// binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
-// binarySearch returns the index of rune located as close to the maximum line width as possible
-func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
+// ratioSearch accepts a function that checks if the text width less the maximum width and the start and end rune index
+// ratioSearch returns the index of rune located as close to the maximum line width as possible
+func ratioSearch(lessMaxWidth func(int, int) float32, low int, maxHigh int) int {
 	if low >= maxHigh {
 		return low
 	}
-	if lessMaxWidth(low, maxHigh) {
+	ratio := lessMaxWidth(low, maxHigh)
+	if ratio <= 1.0 {
 		return maxHigh
 	}
 	high := low
-	delta := maxHigh - low
-	for delta > 0 {
-		delta /= 2
-		if lessMaxWidth(low, high+delta) {
-			high += delta
-		}
+	nextHigh := low + int(float32(maxHigh-low)/ratio)
+	if nextHigh <= high {
+		nextHigh = high + 1
 	}
-	for (high < maxHigh) && lessMaxWidth(low, high+1) {
-		high++
+	for nextHigh < maxHigh {
+		ratio = lessMaxWidth(low, nextHigh)
+		if ratio <= 1.0 {
+			high = nextHigh
+		} else {
+			maxHigh = nextHigh
+		}
+		nextHigh = low + int(float32(nextHigh-low)/ratio)
+		if nextHigh >= maxHigh {
+			nextHigh = maxHigh - 1
+		}
+		if nextHigh <= high {
+			nextHigh = high + 1
+		}
 	}
 	return high
 }
@@ -887,11 +897,11 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	seg := prior.segments[0].(*TextSegment)
 	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
 
-	widthChecker := func(low int, high int) bool {
-		return measurer([]rune(seg.Text)[low:high]).Width <= width-ellipsisSize.Width
+	widthChecker := func(low int, high int) float32 {
+		return measurer([]rune(seg.Text)[low:high]).Width / (width - ellipsisSize.Width)
 	}
 
-	limit := binarySearch(widthChecker, prior.begin, prior.end)
+	limit := ratioSearch(widthChecker, prior.begin, prior.end)
 	prior.end = limit
 
 	prior.ellipsis = true
@@ -938,8 +948,8 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 
 	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
 	text := []rune(seg.Text)
-	widthChecker := func(low int, high int) bool {
-		return measurer(text[low:high]).Width <= measureWidth
+	widthChecker := func(low int, high int) float32 {
+		return measurer(text[low:high]).Width / measureWidth
 	}
 
 	reuse := 0
@@ -972,7 +982,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 
 					yPos += measured.Height
 				} else {
-					newHigh := binarySearch(widthChecker, low, high)
+					newHigh := ratioSearch(widthChecker, low, high)
 					if newHigh <= low {
 						bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false})
 						reuse++
@@ -1007,7 +1017,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				} else {
 					oldHigh := high
 					last := low + len(sub) - 1
-					fallback := binarySearch(widthChecker, low, last) - low
+					fallback := ratioSearch(widthChecker, low, last) - low
 
 					if fallback < 1 { // even a character won't fit
 						include := 1
@@ -1052,7 +1062,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
 				reuse++
 			} else if trunc == fyne.TextTruncateClip {
-				high = binarySearch(widthChecker, low, high)
+				high = ratioSearch(widthChecker, low, high)
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 				reuse++
 			}
