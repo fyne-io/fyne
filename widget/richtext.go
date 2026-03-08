@@ -846,9 +846,10 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-// ratioSearch accepts a function that returns the ratio between the text width
-// and the maximum width and the start and end rune index
-// ratioSearch returns the index of rune located as close to the maximum line width as possible
+// ratioSearch accepts a function that, given a start and end rune index, returns
+// the ratio of the text width to the maximum allowed width. The low and maxHigh
+// parameters are the start and end rune indices to search between. ratioSearch
+// returns the index of the rune located as close as possible to the maximum line width.
 func ratioSearch(widthToMaxWidthRatio func(int, int) float32, low int, maxHigh int) int {
 	if low >= maxHigh {
 		return low
