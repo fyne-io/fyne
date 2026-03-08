@@ -59,3 +59,19 @@ func BenchmarkText_lineBounds_WrapBreak(b *testing.B) {
 func BenchmarkText_lineBounds_WrapWord(b *testing.B) {
 	benchmarkTextLineBounds(fyne.TextWrapWord, b)
 }
+
+func BenchmarkText_ratioSearch(b *testing.B) {
+	text := loremIpsum
+	maxWidth := float32(200)
+	textSize := float32(10)
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) float32 {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	}
+	checker := func(low int, high int) float32 {
+		return measurer([]rune(text[low:high])) / maxWidth
+	}
+	for n := 0; n < b.N; n++ {
+		ratioSearch(checker, 0, len(text))
+	}
+}
