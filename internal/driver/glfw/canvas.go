@@ -137,9 +137,6 @@ func (c *glCanvas) Scale() float32 {
 }
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
-	content.Resize(content.MinSize()) // give it the space it wants then calculate the real min
-
-	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
 	newSize := c.size.Max(c.canvasSize(content.MinSize()))
 
 	c.setContent(content)
