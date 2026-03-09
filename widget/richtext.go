@@ -126,7 +126,6 @@ func (t *RichText) Resize(size fyne.Size) {
 			return
 		}
 	}
-	t.updateRowBounds()
 
 	t.Refresh()
 }
