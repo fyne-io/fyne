@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/internal/async"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -53,7 +52,7 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 // DoFromGoroutine on a test driver ignores the wait flag as our threading is simple
 func (d *driver) DoFromGoroutine(f func(), _ bool) {
 	// Tests all run on a single (but potentially different per-test) thread
-	async.EnsureNotMain(f)
+	f()
 }
 
 func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
