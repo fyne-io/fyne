@@ -1158,6 +1158,17 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 	}
 }
 
+func TestText_lineBounds_small_firstWidth(t *testing.T) {
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
+	}
+	got, _ := lineBounds(&TextSegment{Text: "foobar"}, fyne.TextWrapWord, fyne.TextTruncateOff, 0.1, fyne.NewSize(64, 20), measurer)
+	assert.Equal(t, 0, got[0].begin)
+	assert.Equal(t, 0, got[0].end)
+	assert.Equal(t, 0, got[1].begin)
+	assert.Equal(t, 6, got[1].end)
+}
+
 func TestText_ratioSearch(t *testing.T) {
 	maxWidth := float32(46)
 	textSize := float32(10)
