@@ -211,6 +211,8 @@ func (t *TextGrid) Text() string {
 			runes = append(runes, cell.Rune)
 			if cell.Rune == '\t' {
 				next = nextTab(col, t.tabWidth())
+			} else {
+				next = col + runewidth.StringWidth(string(cell.Rune))
 			}
 		}
 		if i < len(t.Rows)-1 {
@@ -251,6 +253,8 @@ func (t *TextGrid) RowText(row int) string {
 		runes = append(runes, cell.Rune)
 		if cell.Rune == '\t' {
 			next = nextTab(col, t.tabWidth())
+		} else {
+			next = col + runewidth.StringWidth(string(cell.Rune))
 		}
 	}
 	return string(runes)
@@ -401,18 +405,16 @@ func (t *TextGrid) parseRows(text string) []TextGridRow {
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
 		cells := make([]TextGridCell, 0, len(line))
+		next := 0
 		for _, r := range line {
 			cells = append(cells, TextGridCell{Rune: r})
+			col := len(cells)
 			if r == '\t' {
-				col := len(cells)
-				next := nextTab(col-1, t.tabWidth())
-				for i := col; i < next; i++ {
-					cells = append(cells, TextGridCell{Rune: ' '})
-				}
+				next = nextTab(col-1, t.tabWidth())
+			} else {
+				next = col - 1 + runewidth.StringWidth(string(r))
 			}
-			// append trailing empty cells for wide rune
-			cellSpan := runewidth.StringWidth(string(r))
-			for j := 0; j < cellSpan-1; j++ {
+			for i := col; i < next; i++ {
 				cells = append(cells, TextGridCell{Rune: ' '})
 			}
 		}
