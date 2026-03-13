@@ -406,10 +406,11 @@ func (t *TextGrid) parseRows(text string) []TextGridRow {
 	for i, line := range lines {
 		cells := make([]TextGridCell, 0, len(line))
 		next := 0
+		col := 0
 		for _, r := range line {
 			cells = append(cells, TextGridCell{Rune: r})
-			col := len(cells)
 			if r == '\t' {
+				col = len(cells)
 				next = nextTab(col-1, t.tabWidth())
 			} else {
 				next = col - 1 + runewidth.StringWidth(string(r))
