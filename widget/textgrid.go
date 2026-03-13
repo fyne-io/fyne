@@ -410,6 +410,11 @@ func (t *TextGrid) parseRows(text string) []TextGridRow {
 					cells = append(cells, TextGridCell{Rune: ' '})
 				}
 			}
+			// append trailing empty cells for wide rune
+			cellSpan := runewidth.StringWidth(string(r))
+			for j := 0; j < cellSpan-1; j++ {
+				cells = append(cells, TextGridCell{Rune: ' '})
+			}
 		}
 		rows[i] = TextGridRow{Cells: cells}
 	}
@@ -867,8 +872,7 @@ func (t *textGridRowRenderer) Layout(size fyne.Size) {
 		// text
 		t.obj.objects[off+1].Move(cellPos)
 
-		cellSpan := float32(runewidth.StringWidth(t.obj.objects[off+1].(*canvas.Text).Text))
-		cellPos.X += t.obj.text.cellSize.Width * cellSpan
+		cellPos.X += t.obj.text.cellSize.Width
 		off += 2
 	}
 }
