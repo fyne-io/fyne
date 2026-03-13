@@ -274,6 +274,17 @@ func TestTextGrid_Text(t *testing.T) {
 	assert.Equal(t, input, grid.Text())
 }
 
+func TestTextGrid_Size(t *testing.T) {
+	grid := NewTextGrid()
+	singleWidthRunes := []rune{'a', 'b', 'c'}
+	doubleWidthRunes := []rune{'一', '二', '三'}
+	grid.SetText(string(append(singleWidthRunes, doubleWidthRunes...)))
+	grid.Resize(grid.MinSize())
+	size := grid.content.cellSize
+	size.Width *= float32(len(singleWidthRunes) + 2*len(doubleWidthRunes))
+	assert.Equal(t, size, grid.Size())
+}
+
 func TestTextGridRenderer_Resize(t *testing.T) {
 	grid := NewTextGridFromString("1\n2")
 	grid.ShowLineNumbers = true
