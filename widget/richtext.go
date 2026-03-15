@@ -852,7 +852,7 @@ func ratioSearch(widthToMaxWidthRatio func(int, int) float32, low int, maxHigh i
 	if low >= maxHigh {
 		return low
 	}
-	if ratio == 0.0 {
+	if ratio == -1.0 {
 		ratio = widthToMaxWidthRatio(low, maxHigh)
 		if ratio <= 1.0 {
 			return maxHigh
@@ -904,7 +904,7 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 		return measurer([]rune(seg.Text)[low:high]).Width / (width - ellipsisSize.Width)
 	}
 
-	limit := ratioSearch(widthChecker, prior.begin, prior.end, 0.0)
+	limit := ratioSearch(widthChecker, prior.begin, prior.end, -1.0)
 	prior.end = limit
 
 	prior.ellipsis = true
@@ -1074,7 +1074,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full})
 				reuse++
 			} else if trunc == fyne.TextTruncateClip {
-				high = ratioSearch(widthChecker, low, high, 0.0)
+				high = ratioSearch(widthChecker, low, high, -1.0)
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false})
 				reuse++
 			}

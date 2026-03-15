@@ -1217,7 +1217,7 @@ func TestText_ratioSearch(t *testing.T) {
 			return measurer([]rune(tt.text[low:high])) / maxWidth
 		}
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, ratioSearch(checker, 0, len(tt.text), 0.0))
+			assert.Equal(t, tt.want, ratioSearch(checker, 0, len(tt.text), -1.0))
 		})
 	}
 }

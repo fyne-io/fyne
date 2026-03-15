@@ -72,6 +72,6 @@ func BenchmarkText_ratioSearch(b *testing.B) {
 		return measurer([]rune(text[low:high])) / maxWidth
 	}
 	for n := 0; n < b.N; n++ {
-		ratioSearch(checker, 0, len(text), 0.0)
+		ratioSearch(checker, 0, len(text), -1.0)
 	}
 }
