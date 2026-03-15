@@ -945,7 +945,7 @@ func lineBounds(seg *TextSegment, wrap fyne.TextWrap, trunc fyne.TextTruncation,
 		wrap = fyne.TextWrapOff
 	}
 
-	if max.Width < 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
+	if max.Width <= 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
 		return lines, 0 // don't bother returning a calculated height, our MinSize is going to cover it
 	}
 
