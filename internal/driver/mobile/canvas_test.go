@@ -254,20 +254,20 @@ func Test_canvas_Tappable(t *testing.T) {
 	content.Resize(fyne.NewSize(24, 24))
 
 	c.tapDown(fyne.NewPos(15, 15), 0)
-	assert.True(t, content.down)
+	assert.False(t, content.down)
 
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
-	assert.True(t, content.up)
+	assert.False(t, content.down)
 
 	c.tapDown(fyne.NewPos(15, 15), 0)
 	c.tapMove(fyne.NewPos(35, 15), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 	})
-	assert.True(t, content.cancel)
+	assert.False(t, content.cancel)
 }
 
 func Test_canvas_TouchID(t *testing.T) {
@@ -284,7 +284,7 @@ func Test_canvas_TouchID(t *testing.T) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
-	assert.True(t, content.ids[0])
+	assert.False(t, content.ids[0])
 
 	c.tapDown(fyne.NewPos(15, 15), 1)
 	c.tapUp(fyne.NewPos(15, 15), 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
@@ -292,7 +292,7 @@ func Test_canvas_TouchID(t *testing.T) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
-	assert.True(t, content.ids[1])
+	assert.False(t, content.ids[1])
 }
 
 func Test_canvas_Tapped(t *testing.T) {

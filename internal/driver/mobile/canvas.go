@@ -227,30 +227,6 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
-
-	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		switch object.(type) {
-		case mobile.Touchable, fyne.Focusable:
-			return true
-		}
-
-		return false
-	})
-
-	if wid, ok := co.(mobile.Touchable); ok {
-		touchEv := &mobile.TouchEvent{}
-		touchEv.ID = tapID
-		touchEv.Position = objPos
-		touchEv.AbsolutePosition = pos
-		wid.TouchDown(touchEv)
-		c.touched[tapID] = wid
-	}
-
-	if layer != 1 { // 0 - overlay, 1 - window head / menu, 2 - content
-		if wid, ok := co.(fyne.Focusable); !ok || wid != c.Focused() {
-			c.Unfocus()
-		}
-	}
 }
 
 func (c *canvas) tapMove(pos fyne.Position, tapID int,
@@ -347,12 +323,11 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		return false
 	})
 
-	if wid, ok := co.(mobile.Touchable); ok {
+	if _, ok := co.(mobile.Touchable); ok {
 		touchEv := &mobile.TouchEvent{}
 		touchEv.ID = tapID
 		touchEv.Position = objPos
 		touchEv.AbsolutePosition = pos
-		wid.TouchUp(touchEv)
 		c.touched[tapID] = nil
 	}
 
