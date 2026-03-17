@@ -26,7 +26,7 @@ jobs:
       - name: Get dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev fonts-noto-cjk
 
       - name: Tests
         run: xvfb-run go test -race -tags mobile,ci,migrated_fynedo ./...
