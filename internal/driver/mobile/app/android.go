@@ -582,15 +582,13 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 		}
 
 		for i, n := C.size_t(0), C.AMotionEvent_getPointerCount(e); i < n; i++ {
-			t := touch.TypeMove
 			if i == upDownIndex {
-				t = upDownType
-			}
-			theApp.events.In() <- touch.Event{
-				X:        float32(C.AMotionEvent_getX(e, i)),
-				Y:        float32(C.AMotionEvent_getY(e, i)),
-				Sequence: touch.Sequence(C.AMotionEvent_getPointerId(e, i)),
-				Type:     t,
+				theApp.events.In() <- touch.Event{
+					X:        float32(C.AMotionEvent_getX(e, i)),
+					Y:        float32(C.AMotionEvent_getY(e, i)),
+					Sequence: touch.Sequence(C.AMotionEvent_getPointerId(e, i)),
+					Type:     upDownType,
+				}
 			}
 		}
 	default:
