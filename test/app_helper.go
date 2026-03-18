@@ -13,6 +13,8 @@ import (
 // Since: 2.5
 func NewTempApp(t testing.TB) fyne.App {
 	app := NewApp()
-	t.Cleanup(func() { NewApp() })
+	fyne.Do(func() {
+		t.Cleanup(func() { NewApp() })
+	})
 	return app
 }
