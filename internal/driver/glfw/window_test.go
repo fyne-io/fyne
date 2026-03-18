@@ -89,7 +89,7 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 }
 
 func TestWindow_MinSize_Fixed(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindowWithResizeCallback("Test")
 	r := canvas.NewRectangle(color.White)
 	minSize := fyne.NewSize(100, 100)
 	minSizePlusPadding := minSize.AddWidthHeight(theme.Padding()*2, theme.Padding()*2)
@@ -1909,6 +1909,18 @@ func TestWindow_RescaleContext(t *testing.T) {
 }
 
 func createWindow(title string) *safeWindow {
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.CreateWindow(title).(*window)
+		w.create()
+		// disable the GLFW window size callback because it causes a delayed canvas
+		// resize that breaks some tests sometimes
+		w.view().SetSizeCallback(func(_ *glfw.Window, width, height int) {})
+	})
+	return &safeWindow{window: w}
+}
+
+func createWindowWithResizeCallback(title string) *safeWindow {
 	var w *window
 	runOnMain(func() { // tests launch in a different context
 		w = d.CreateWindow(title).(*window)

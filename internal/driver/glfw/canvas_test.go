@@ -20,6 +20,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
@@ -332,7 +333,7 @@ func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *
 	c := w.Canvas()
 	canvasSize := fyne.NewSize(200, 100)
 	w.Resize(canvasSize)
-	ensureCanvasSize(t, w, canvasSize)
+	require.Equal(t, canvasSize, w.Canvas().Size())
 	popUpContent := canvas.NewRectangle(color.Black)
 	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
 	popUp := widget.NewPopUp(popUpContent, c)
@@ -443,7 +444,7 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	})
 
 	w.Resize(size)
-	ensureCanvasSize(t, w, size)
+	require.Equal(t, size, w.Canvas().Size())
 	runOnMain(func() {
 		assert.Equal(t, size, content.Size(), "canvas content is resized")
 		assert.Equal(t, size, over.Size(), "canvas overlay is resized")
@@ -475,7 +476,7 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	assert.NotEqual(t, size, o3.Size())
 
 	w.Resize(size)
-	ensureCanvasSize(t, w, size)
+	require.Equal(t, size, w.Canvas().Size())
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, o1.Size(), "canvas overlay 1 is resized")
 	assert.Equal(t, size, o2.Size(), "canvas overlay 2 is resized")
@@ -503,7 +504,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	assert.NotEqual(t, size, overContentSize)
 
 	w.Resize(size)
-	ensureCanvasSize(t, w, size)
+	require.Equal(t, size, w.Canvas().Size())
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
@@ -526,7 +527,7 @@ func TestGlCanvas_ResizeWithModalPopUpOverlay(t *testing.T) {
 
 	winSize := fyne.NewSize(1000, 600)
 	w.Resize(winSize)
-	ensureCanvasSize(t, w, winSize)
+	require.Equal(t, winSize, w.Canvas().Size())
 
 	// get popup content padding dynamically
 	popupContentPadding := popup.MinSize().Subtract(popup.Content.MinSize())
@@ -581,7 +582,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 			canvasSize := float32(200)
 			w.SetContent(content)
 			w.Resize(fyne.NewSize(canvasSize, canvasSize))
-			ensureCanvasSize(t, w, fyne.NewSize(canvasSize, canvasSize))
+			require.Equal(t, fyne.NewSize(canvasSize, canvasSize), w.Canvas().Size())
 
 			newContent := canvas.NewCircle(color.White)
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
