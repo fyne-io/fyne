@@ -466,29 +466,60 @@ func TestForm_RefreshFromStructInit(t *testing.T) {
 	})
 }
 
-func TestFormItem_Layout_Expansion(t *testing.T) {
+func TestFormItem_Layout_HeightExpansion_Horizontal(t *testing.T) {
 	rect := canvas.NewRectangle(theme.Color(theme.ColorNameForeground))
 	rect.SetMinSize(fyne.NewSize(50, 50))
 	item := NewFormItem("Test", rect)
-	item.HintText = "Hint" // Ensure it is wrapped in formItemLayout
+	item.HintText = "Hint" // ensure it is wrapped in formItemLayout
 	form := NewForm(item)
+	form.Orientation = Horizontal
 
 	test.TempWidgetRenderer(t, form)
 
+	labelContainer := form.itemGrid.Objects[0].(*fyne.Container)
 	inputContainer := form.itemGrid.Objects[1].(*fyne.Container)
-	textContainer := inputContainer.Objects[1].(*fyne.Container)
+	hintTextContainer := inputContainer.Objects[1].(*fyne.Container)
 
-	// Min height of rect is 50. textContainer min height is usually theme dependent.
-	// Let's give the whole inputContainer 100.
-	availableHeight := float32(100)
-	inputContainer.Resize(fyne.NewSize(200, availableHeight))
-	inputContainer.Layout.Layout(inputContainer.Objects, inputContainer.Size())
+	hintTextMinHeight := hintTextContainer.MinSize().Height
+	inputHeight := float32(100)
+	form.itemGrid.Resize(fyne.NewSize(200, inputHeight*2))
+	inputContainer.Resize(fyne.NewSize(200, inputHeight))
 
 	innerPad := form.Theme().Size(theme.SizeNameInnerPadding)
-	min1Height := textContainer.MinSize().Height
-	expectedHeight := availableHeight - min1Height - innerPad
+	expectedRectHeight := inputHeight - hintTextMinHeight - innerPad
 
-	assert.Equal(t, textContainer.Size().Height, min1Height)
-	assert.Equal(t, expectedHeight, rect.Size().Height)
-	assert.Greater(t, rect.Size().Height, float32(50))
+	// label container height equals input container min size height based on the formLayout logic
+	assert.Equal(t, inputContainer.MinSize().Height, labelContainer.Size().Height)
+	assert.Equal(t, rect.MinSize().Height+hintTextMinHeight+innerPad, inputContainer.MinSize().Height)
+	assert.Less(t, inputContainer.MinSize().Height, inputHeight)
+	assert.Equal(t, hintTextMinHeight, hintTextContainer.Size().Height)
+	assert.Equal(t, expectedRectHeight, rect.Size().Height)
+	assert.Greater(t, expectedRectHeight, rect.MinSize().Height)
+}
+
+func TestFormItem_Layout_HeightExpansion_Vertical(t *testing.T) {
+	rect := canvas.NewRectangle(theme.Color(theme.ColorNameForeground))
+	rect.SetMinSize(fyne.NewSize(50, 50))
+	item := NewFormItem("Test", rect)
+	item.HintText = "Hint" // ensure it is wrapped in formItemLayout
+	form := NewForm(item)
+	form.Orientation = Vertical
+
+	test.TempWidgetRenderer(t, form)
+
+	labelContainer := form.itemGrid.Objects[0].(*fyne.Container)
+	inputContainer := form.itemGrid.Objects[1].(*fyne.Container)
+	hintTextContainer := inputContainer.Objects[1].(*fyne.Container)
+
+	labelMinHeight := labelContainer.MinSize().Height
+	hintTextMinHeight := hintTextContainer.MinSize().Height
+
+	inputHeight := float32(100)
+	form.itemGrid.Resize(fyne.NewSize(200, inputHeight*2))
+	innerPad := form.Theme().Size(theme.SizeNameInnerPadding)
+	inputContainer.Resize(fyne.NewSize(200, inputHeight+hintTextMinHeight+innerPad))
+
+	assert.Equal(t, labelMinHeight, labelContainer.Size().Height)
+	assert.Equal(t, hintTextMinHeight, hintTextContainer.Size().Height)
+	assert.Equal(t, inputHeight, rect.Size().Height)
 }
