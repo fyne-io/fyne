@@ -163,3 +163,23 @@ func TestCustom_SetIcon(t *testing.T) {
 
 	test.AssertRendersToImage(t, "dialog-custom-seticon-nil.png", w.Canvas())
 }
+
+func TestCustom_ContentLayout(t *testing.T) {
+	test.NewTempApp(t)
+	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 300))
+
+	label := widget.NewLabel("iiiiiiiiiimmmmmmmmmm")
+	label.Wrapping = fyne.TextWrapWord
+	d := NewCustom("Title", "OK", label, w)
+	d.Show()
+
+	p := d.win
+	r := p.CreateRenderer()
+	r.Layout(p.Size())
+	initialSize := d.content.Size()
+
+	c := d.win.Content.(*fyne.Container)
+	c.Layout.Layout(c.Objects, c.Size())
+	assert.Equal(t, d.content.Size(), initialSize)
+}
