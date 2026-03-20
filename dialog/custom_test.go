@@ -174,12 +174,10 @@ func TestCustom_ContentLayout(t *testing.T) {
 	d := NewCustom("Title", "OK", label, w)
 	d.Show()
 
-	p := d.win
-	r := p.CreateRenderer()
-	r.Layout(p.Size())
+	c := d.win.Content.(*fyne.Container)
+	c.Layout.Layout(c.Objects, c.MinSize())
 	initialSize := d.content.Size()
 
-	c := d.win.Content.(*fyne.Container)
-	c.Layout.Layout(c.Objects, c.Size())
+	c.Layout.Layout(c.Objects, c.MinSize())
 	assert.Equal(t, d.content.Size(), initialSize)
 }
