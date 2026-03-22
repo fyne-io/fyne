@@ -188,6 +188,7 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	render.SetObjects([]fyne.CanvasObject{&render.background, &render.bar})
 
 	p.running = true
+	render.start()
 	return render
 }
 
