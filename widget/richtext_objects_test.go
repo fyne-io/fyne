@@ -93,9 +93,9 @@ func TestRichText_HyperLink_WrappedHoverSynced(t *testing.T) {
 	}
 	assert.GreaterOrEqual(t, len(links), 2, "expected hyperlink to wrap into multiple segments")
 
-	// MouseIn on the first segment — position must be inside the text area.
-	// The test theme uses InnerPadding=20, so the text area starts at pos (10,10).
-	inside := &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 15)}}
+	// MouseIn on the first segment — choose a position inside the hyperlink's bounds.
+	center := fyne.NewPos(links[0].Size().Width/2, links[0].Size().Height/2)
+	inside := &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: center}}
 	links[0].MouseIn(inside)
 	for i, hl := range links {
 		assert.True(t, hl.hovered, "expected link[%d] to be hovered after MouseIn on link[0]", i)
