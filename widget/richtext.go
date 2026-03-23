@@ -697,7 +697,7 @@ func (r *textRenderer) Refresh() {
 	for _, bound := range bounds {
 		for i, seg := range bound.segments {
 			_, isText := seg.(*TextSegment)
-			_, isHyperlink := seg.(*HyperlinkSegment)
+			hlSeg, isHyperlink := seg.(*HyperlinkSegment)
 			if !isText && !isHyperlink {
 				obj := r.obj.cachedSegmentVisual(seg, 0)
 				seg.Update(obj)
@@ -736,8 +736,20 @@ func (r *textRenderer) Refresh() {
 			if isText {
 				obj.(*canvas.Text).Text = txt
 			} else if isHyperlink {
-				obj.(*fyne.Container).Objects[0].(*Hyperlink).Text = txt
-				obj.(*fyne.Container).Objects[0].(*Hyperlink).Refresh()
+				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
+				hl.Text = txt
+				// A wrapping hyperlink produces one Hyperlink widget per row, each
+				// cached at successive offsets for the same segment. reuse is both
+				// this visual's cache offset and the count of prior row visuals, so
+				// the earlier ones sit at offsets 0..reuse-1 and can be fetched
+				// directly from the cache to build the all-to-all sibling list.
+				hl.siblings = hl.siblings[:0]
+				for prev := 0; prev < reuse; prev++ {
+					prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+					prevHL.siblings = append(prevHL.siblings, hl)
+					hl.siblings = append(hl.siblings, prevHL)
+				}
+				hl.Refresh()
 			}
 			objs = append(objs, obj)
 		}
