@@ -523,7 +523,6 @@ func (s *Scroll) ScrollToBottom() {
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
 	s.ScrollToOffset(fyne.Position{})
-	s.refreshBars()
 }
 
 // MinSize returns the smallest size this widget can shrink to
