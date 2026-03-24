@@ -94,12 +94,15 @@ func (t *RichText) CreateRenderer() fyne.WidgetRenderer {
 // MinSize calculates the minimum size of a rich text widget.
 // This is based on the contained text with a standard amount of padding added.
 func (t *RichText) MinSize() fyne.Size {
-	// we don't return the minCache here, as any internal segments could have caused it to change...
+	// We return the minCache here which might be outdated if internal segments were changed.
+	// Users must call Refresh() to force an update after any changes to t.
 	t.ExtendBaseWidget(t)
 
-	min := t.BaseWidget.MinSize()
-	t.minCache = min
-	return min
+	if t.minCache.IsZero() {
+		min := t.BaseWidget.MinSize()
+		t.minCache = min
+	}
+	return t.minCache
 }
 
 // Refresh triggers a redraw of the rich text.
