@@ -738,11 +738,8 @@ func (r *textRenderer) Refresh() {
 			} else if isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
-				// A wrapping hyperlink produces one Hyperlink widget per row, each
-				// cached at successive offsets for the same segment. reuse is both
-				// this visual's cache offset and the count of prior row visuals, so
-				// the earlier ones sit at offsets 0..reuse-1 and can be fetched
-				// directly from the cache to build the all-to-all sibling list.
+				// create the all-to-all sibling list linking the *Hyperlinks
+				// rendering each wrapped row of the same HyperlinkSegment
 				hl.siblings = hl.siblings[:0]
 				for prev := 0; prev < reuse; prev++ {
 					prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
