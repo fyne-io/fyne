@@ -208,7 +208,7 @@ func (l *GridWrap) Highlight(id GridWrapItemID) {
 	l.scrollTo(newID)
 	l.currentHighlight = newID
 	if l.OnHighlighted != nil {
-		l.OnHighlighted(id)
+		l.OnHighlighted(newID)
 	}
 	l.Refresh()
 }
