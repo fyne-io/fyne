@@ -598,8 +598,15 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	} else {
 		clipSize = frame
 	}
-	if pos.Y > clipPos.Y+clipSize.Height || pos.Y+size.Height < clipPos.Y ||
-		pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X {
+	if pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X || pos.Y+size.Height < clipPos.Y {
+		return
+	}
+	if pos.Y > clipPos.Y+clipSize.Height {
+		// if text is slightly below the clip area, pre-render it in the background
+		// to make scrolling smoother
+		if pos.Y <= clipPos.Y+clipSize.Height*1.3 {
+			p.createTextTexture(text, p.newGlTextTexture)
+		}
 		return
 	}
 
