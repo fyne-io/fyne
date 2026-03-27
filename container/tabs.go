@@ -708,6 +708,7 @@ func (r *tabButtonRenderer) Refresh() {
 	} else {
 		r.label.Show()
 	}
+	r.label.Refresh()
 
 	r.icon.Resource = r.button.icon
 	if r.icon.Resource != nil {
