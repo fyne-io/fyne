@@ -28,6 +28,8 @@ type Text struct {
 	//
 	// Since: 2.5
 	FontSource fyne.Resource
+
+	minCache fyne.Size
 }
 
 // Hide will set this text to not be visible
@@ -40,8 +42,10 @@ func (t *Text) Hide() {
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
-	return s
+	if t.minCache.IsZero() {
+		t.minCache, _ = fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	}
+	return t.minCache
 }
 
 // Move the text to a new position, relative to its parent / canvas
@@ -72,6 +76,7 @@ func (t *Text) SetMinSize(fyne.Size) {
 
 // Refresh causes this text to be redrawn with its configured state.
 func (t *Text) Refresh() {
+	t.minCache = fyne.Size{}
 	Refresh(t)
 }
 
