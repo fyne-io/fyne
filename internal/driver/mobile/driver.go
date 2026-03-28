@@ -57,11 +57,13 @@ type driver struct {
 	animation   animation.Runner
 	currentSize size.Event
 
-	theme           fyne.ThemeVariant
-	onConfigChanged func(*Configuration)
-	painting        bool
-	running         bool
-	queuedFuncs     *async.UnboundedChan[func()]
+	theme                  fyne.ThemeVariant
+	onConfigChanged        func(*Configuration)
+	painting               bool
+	running                bool
+	queuedFuncs            *async.UnboundedChan[func()]
+	queuedFuncsLowPriority *async.UnboundedChan[func()]
+	prerenderChecked       bool
 }
 
 // Declare conformity with Driver
@@ -182,6 +184,7 @@ func (d *driver) Run() {
 		async.SetMainGoroutine()
 		d.app = a
 		d.queuedFuncs = async.NewUnboundedChan[func()]()
+		d.queuedFuncsLowPriority = async.NewUnboundedChan[func()]()
 
 		fyne.CurrentApp().Settings().AddListener(func(s fyne.Settings) {
 			painter.ClearFontCache()
@@ -276,6 +279,8 @@ func (d *driver) Run() {
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}
+			case fn := <-d.queuedFuncsLowPriority.Out():
+				fn()
 			}
 		}
 	})
@@ -402,6 +407,65 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 	}
 
 	c.WalkTrees(draw, afterDraw)
+
+	if !d.prerenderChecked {
+		d.findTextsForPrerender(size, c)
+	}
+}
+
+func (d *driver) findTextsForPrerender(size fyne.Size, c *canvas) {
+	if size.Width <= 0 || size.Height <= 0 {
+		return
+	}
+	clips := &internal.ClipStack{}
+	frame := size
+	p := c.Painter()
+	check := func(node *common.RenderCacheNode, pos fyne.Position) {
+		obj := node.Obj()
+		if !obj.Visible() {
+			return
+		}
+		if intdriver.IsClip(obj) {
+			clips.Push(pos, obj.Size())
+		}
+		if text, ok := obj.(*fynecanvas.Text); ok {
+			if text.Text == "" {
+				return
+			}
+			decorated := text.TextStyle.Underline || text.TextStyle.Strikethrough
+			if text.Text == " " && !decorated {
+				return
+			}
+
+			size := text.MinSize()
+			containerSize := text.Size()
+			switch text.Alignment {
+			case fyne.TextAlignTrailing:
+				pos = fyne.NewPos(pos.X+containerSize.Width-size.Width, pos.Y)
+			case fyne.TextAlignCenter:
+				pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
+			}
+
+			if containerSize.Height > size.Height {
+				pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
+			}
+
+			var clipPos fyne.Position
+			var clipSize fyne.Size
+			clip := clips.Top()
+			if clip != nil {
+				clipPos, clipSize = clip.Rect()
+			} else {
+				clipSize = frame
+			}
+			if pos.Y > clipPos.Y+clipSize.Height || pos.Y+size.Height < clipPos.Y ||
+				pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X {
+				p.CreateTextTexture(text, d.queuedFuncsLowPriority.In())
+			}
+		}
+	}
+	c.WalkTrees(check, nil)
+	d.prerenderChecked = true
 }
 
 func (d *driver) sendPaintEvent() {
