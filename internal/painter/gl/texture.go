@@ -45,10 +45,10 @@ func (p *painter) CreateTextTexture(t *canvas.Text, queue chan<- func()) {
 
 	if _, ok := cache.GetTextTexture(ent); !ok {
 		queue <- func() {
-			texture, ok := cache.GetTextTexture(ent)
+			_, ok := cache.GetTextTexture(ent)
 			if !ok {
 				tex := p.newGlTextTexture(t)
-				texture = cache.TextureType(tex)
+				texture := cache.TextureType(tex)
 				cache.SetTextTexture(ent, texture, p.canvas, func() {
 					p.ctx.DeleteTexture(tex)
 					p.logError()
