@@ -43,6 +43,11 @@ const (
 	// Since: 2.0
 	SizeNameSeparatorThickness fyne.ThemeSizeName = "separator"
 
+	// SizeNameSplitThickness is the name of theme lookup for the thickness of a split divider.
+	//
+	// Since: 2.8
+	SizeNameSplitThickness fyne.ThemeSizeName = "split"
+
 	// SizeNameText is the name of theme lookup for text size.
 	//
 	// Since: 2.0
@@ -67,6 +72,11 @@ const (
 	//
 	// Since: 2.4
 	SizeNameInputRadius fyne.ThemeSizeName = "inputRadius"
+
+	// SizeNameModalBlurRadius is the name of theme lookup for blurring modal popup backgrounds.
+	//
+	// Since: 2.7
+	SizeNameModalBlurRadius fyne.ThemeSizeName = "modalBlurRadius"
 
 	// SizeNameSelectionRadius is the name of theme lookup for selection corner radius.
 	//
@@ -228,6 +238,8 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 1
 	case SizeNameInputRadius:
 		return 5
+	case SizeNameModalBlurRadius:
+		return 1.5
 	case SizeNameSelectionRadius:
 		return 3
 	case SizeNameScrollBarRadius:

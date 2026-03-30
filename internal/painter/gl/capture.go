@@ -10,6 +10,21 @@ import (
 type captureImage struct {
 	pix           []uint8
 	width, height int
+
+	leftPad, rightPad, topPad, bottomPad int
+}
+
+func (c *captureImage) SubImage(inner image.Rectangle) *captureImage {
+	return &captureImage{
+		pix:    c.pix,
+		width:  c.width,
+		height: c.height,
+
+		leftPad:   inner.Min.X,
+		topPad:    inner.Min.Y,
+		rightPad:  c.width - inner.Max.X,
+		bottomPad: c.height - inner.Max.Y,
+	}
 }
 
 func (c *captureImage) ColorModel() color.Model {
@@ -17,7 +32,7 @@ func (c *captureImage) ColorModel() color.Model {
 }
 
 func (c *captureImage) Bounds() image.Rectangle {
-	return image.Rect(0, 0, c.width, c.height)
+	return image.Rect(c.leftPad, c.topPad, c.width-c.rightPad, c.height-c.bottomPad)
 }
 
 func (c *captureImage) At(x, y int) color.Color {

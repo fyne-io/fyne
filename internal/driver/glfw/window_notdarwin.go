@@ -8,8 +8,18 @@ const desktopDefaultDoubleTapDelay = 300 * time.Millisecond
 
 func (w *window) doSetFullScreen(full bool) {
 	monitor := w.getMonitorForWindow()
-	mode := monitor.GetVideoMode()
 
+	w.doApplyFullScreen(monitor, full)
+}
+
+func (w *window) doSetFullScreen2(full bool) {
+	monitor := w.getSecondaryMonitor()
+
+	w.doApplyFullScreen(monitor, full)
+}
+
+func (w *window) doApplyFullScreen(monitor *monitor, full bool) {
+	mode := monitor.GetVideoMode()
 	if full {
 		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 	} else {

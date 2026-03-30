@@ -3,6 +3,7 @@ package software_test
 import (
 	"image"
 	"image/color"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -70,6 +71,25 @@ func TestPainter_paintArc(t *testing.T) {
 	obj.CutoutRatio = 1.0
 	obj.StrokeWidth = 0
 	test.AssertImageMatches(t, "draw_arc_empty.png", p.Paint(c))
+}
+
+func TestPainter_paintBlur(t *testing.T) {
+	test.ApplyTheme(t, test.Theme())
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.ScaleMode = canvas.ImageScalePixels
+	obj := canvas.NewBlur(5)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(container.NewStack(img, container.NewPadded(obj)))
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	if runtime.GOOS == "darwin" {
+		test.AssertImageMatches(t, "draw_blur_darwin.png", p.Paint(c))
+	} else {
+		test.AssertImageMatches(t, "draw_blur.png", p.Paint(c))
+	}
 }
 
 func TestPainter_paintCircle(t *testing.T) {

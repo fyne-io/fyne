@@ -32,8 +32,8 @@ After importing a new module, run the following command before compiling the cod
 
 To run a showcase of the features of Fyne execute the following:
 
-    go install fyne.io/fyne/v2/cmd/fyne_demo@latest
-    fyne_demo
+    go install fyne.io/demo@latest
+    demo
 
 And you should see something like this (after you click a few buttons):
 

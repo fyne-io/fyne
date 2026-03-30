@@ -5,6 +5,12 @@ package gl
 import _ "embed"
 
 var (
+	//go:embed shaders/blur.frag
+	shaderBlurFrag []byte
+
+	//go:embed shaders/blur.vert
+	shaderBlurVert []byte
+
 	//go:embed shaders/line.frag
 	shaderLineFrag []byte
 
@@ -46,6 +52,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleVert, shaderRectangleFrag
 	case "round_rectangle":
 		return shaderRectangleVert, shaderRoundrectangleFrag
+	case "blur":
+		return shaderBlurVert, shaderBlurFrag
 	case "polygon":
 		return shaderRectangleVert, shaderPolygonFrag
 	case "arc":

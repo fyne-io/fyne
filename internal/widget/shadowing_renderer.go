@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 )
 
 // ShadowingRenderer is a renderer that adds a shadow around the rendered content.
@@ -34,8 +35,14 @@ func (r *ShadowingRenderer) LayoutShadow(size fyne.Size, pos fyne.Position) {
 
 // SetObjects updates the renderer's objects including the shadow if necessary.
 func (r *ShadowingRenderer) SetObjects(objects []fyne.CanvasObject) {
-	if r.shadow != nil && len(objects) > 0 && r.shadow != objects[0] {
-		objects = append([]fyne.CanvasObject{r.shadow}, objects...)
+	if r.shadow != nil && len(objects) > 0 {
+		if b, hasBlur := objects[0].(*canvas.Blur); hasBlur {
+			if r.shadow != objects[1] {
+				objects = append([]fyne.CanvasObject{b, r.shadow}, objects[1:]...)
+			}
+		} else if r.shadow != objects[0] {
+			objects = append([]fyne.CanvasObject{r.shadow}, objects...)
+		}
 	}
 	r.BaseRenderer.SetObjects(objects)
 }

@@ -72,6 +72,15 @@ func (p *painter) Init() {
 	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
+	p.blurProgram = ProgramState{
+		ref:        p.createProgram("blur_es"),
+		buff:       p.createBuffer(20),
+		uniforms:   make(map[string]*UniformState),
+		attributes: make(map[string]Attribute),
+	}
+	p.getUniformLocations(p.blurProgram, "radius", "size", "kernel")
+	p.enableAttribArrays(p.blurProgram, "vert", "vertTexCoord")
+
 	p.lineProgram = ProgramState{
 		ref:        p.createProgram("line_es"),
 		buff:       p.createBuffer(24),
@@ -288,6 +297,10 @@ func (c *xjsContext) LinkProgram(program Program) {
 	gl.LinkProgram(gl.Program(program))
 }
 
+func (c *xjsContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	gl.CopyTexSubImage2D(gl.Enum(target), level, xoffset, yoffset, x, y, width, height)
+}
+
 func (c *xjsContext) ReadBuffer(_ uint32) {
 }
 
@@ -304,6 +317,10 @@ func (c *xjsContext) Scissor(x, y, w, h int32) {
 }
 
 func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+	var jsData interface{}
+	if len(data) > 0 {
+		jsData = data
+	}
 	gl.TexImage2D(
 		gl.Enum(target),
 		level,
@@ -311,7 +328,7 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 		height,
 		gl.Enum(colorFormat),
 		gl.Enum(typ),
-		data,
+		jsData,
 	)
 }
 
@@ -321,6 +338,10 @@ func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
+	gl.Uniform1fv(gl.Uniform(uniform), v)
 }
 
 func (c *xjsContext) Uniform2f(uniform Uniform, v0, v1 float32) {

@@ -11,6 +11,8 @@ import (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Split)(nil)
 
+var splitDefaultThickness = float32(5) // a sane constant if the theme does not know the new value nor delegate
+
 // Split defines a container whose size is split between two children.
 //
 // Since: 1.4
@@ -401,7 +403,11 @@ func dividerTheme(d *divider) fyne.Theme {
 
 func dividerThickness(d *divider) float32 {
 	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 2
+	pad := th.Size(theme.SizeNameSplitThickness)
+	if pad == 0 {
+		pad = splitDefaultThickness
+	}
+	return pad
 }
 
 func dividerLength(d *divider) float32 {
@@ -411,7 +417,7 @@ func dividerLength(d *divider) float32 {
 
 func handleThickness(d *divider) float32 {
 	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) / 2
+	return th.Size(theme.SizeNameSeparatorThickness)
 }
 
 func handleLength(d *divider) float32 {

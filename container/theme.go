@@ -64,7 +64,7 @@ func (t *ThemeOverride) Refresh() {
 // Since: 2.6
 func (t *ThemeOverride) SetDeviceIsMobile(on bool) {
 	t.mobile = on
-	t.BaseWidget.Refresh()
+	t.Refresh()
 }
 
 type featureTheme struct {

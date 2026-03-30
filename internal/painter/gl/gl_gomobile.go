@@ -65,6 +65,7 @@ func (p *painter) glctx() gl.Context {
 
 func (p *painter) Init() {
 	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
+	p.blurSnapTexValid = false // reset on context recreation; old texture IDs are no longer valid
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {
@@ -76,6 +77,15 @@ func (p *painter) Init() {
 		}
 		p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
 		p.enableAttribArrays(p.program, "vert", "vertTexCoord")
+
+		p.blurProgram = ProgramState{
+			ref:        p.createProgram("blur_es"),
+			buff:       p.createBuffer(20),
+			uniforms:   make(map[string]*UniformState),
+			attributes: make(map[string]Attribute),
+		}
+		p.getUniformLocations(p.blurProgram, "radius", "size", "kernel")
+		p.enableAttribArrays(p.blurProgram, "vert", "vertTexCoord")
 
 		p.lineProgram = ProgramState{
 			ref:        p.createProgram("line_es"),
@@ -157,6 +167,7 @@ func (p *painter) Init() {
 		p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
 		compiled = []ProgramState{
 			p.program,
+			p.blurProgram,
 			p.lineProgram,
 			p.rectangleProgram,
 			p.roundRectangleProgram,
@@ -167,12 +178,13 @@ func (p *painter) Init() {
 	}
 
 	p.program = compiled[0]
-	p.lineProgram = compiled[1]
-	p.rectangleProgram = compiled[2]
-	p.roundRectangleProgram = compiled[3]
-	p.polygonProgram = compiled[4]
-	p.arcProgram = compiled[5]
-	p.bezierCurveProgram = compiled[6]
+	p.blurProgram = compiled[1]
+	p.lineProgram = compiled[2]
+	p.rectangleProgram = compiled[3]
+	p.roundRectangleProgram = compiled[4]
+	p.polygonProgram = compiled[5]
+	p.arcProgram = compiled[6]
+	p.bezierCurveProgram = compiled[7]
 }
 
 func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
@@ -314,6 +326,10 @@ func (c *mobileContext) LinkProgram(program Program) {
 	c.glContext.LinkProgram(gl.Program(program))
 }
 
+func (c *mobileContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+	c.glContext.CopyTexSubImage2D(gl.Enum(target), level, xoffset, yoffset, x, y, width, height)
+}
+
 func (c *mobileContext) ReadBuffer(_ uint32) {
 }
 
@@ -348,6 +364,10 @@ func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {
+	c.glContext.Uniform1fv(gl.Uniform(uniform), v)
 }
 
 func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {

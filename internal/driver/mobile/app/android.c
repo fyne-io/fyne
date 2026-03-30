@@ -154,12 +154,13 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 }
 
 // TODO(crawshaw): Test configuration on more devices.
-static const EGLint RGB_888[] = {
+static const EGLint RGBA_8888[] = {
 	EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 	EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 	EGL_BLUE_SIZE, 8,
 	EGL_GREEN_SIZE, 8,
 	EGL_RED_SIZE, 8,
+	EGL_ALPHA_SIZE, 8,
 	EGL_DEPTH_SIZE, 16,
 	EGL_CONFIG_CAVEAT, EGL_NONE,
 	EGL_NONE
@@ -188,8 +189,8 @@ char* createEGLSurface(ANativeWindow* window) {
 		}
 	}
 
-	if (!eglChooseConfig(display, RGB_888, &config, 1, &numConfigs)) {
-		return "EGL choose RGB_888 config failed";
+	if (!eglChooseConfig(display, RGBA_8888, &config, 1, &numConfigs)) {
+		return "EGL choose RGBA_8888 config failed";
 	}
 	if (numConfigs <= 0) {
 		return "EGL no config found";

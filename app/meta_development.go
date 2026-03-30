@@ -39,6 +39,11 @@ func checkLocalMetadata() {
 		if err == nil {
 			meta.Icon = metadata.ScaleIcon(res, 512)
 		}
+	} else { // Icon.png fallback
+		res, err := fyne.LoadResourceFromPath("Icon.png")
+		if err == nil {
+			meta.Icon = metadata.ScaleIcon(res, 512)
+		}
 	}
 
 	meta.Release = false

@@ -253,5 +253,6 @@ func testClearAll() {
 	textTextures.Clear()
 	objectTextures.Clear()
 	renderers.Clear()
+	blurKernels.Clear()
 	timeNow = time.Now
 }

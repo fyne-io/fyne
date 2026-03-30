@@ -106,12 +106,13 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
 	if p.modal {
+		blur := canvas.NewBlur(th.Size(theme.SizeNameModalBlurRadius))
 		underlay := canvas.NewRectangle(th.Color(theme.ColorNameShadow, v))
-		objects := []fyne.CanvasObject{underlay, background, p.Content}
+		objects := []fyne.CanvasObject{blur, underlay, background, p.Content}
 		return &modalPopUpRenderer{
 			widget.NewShadowingRenderer(objects, widget.DialogLevel),
 			popUpBaseRenderer{popUp: p, background: background},
-			underlay,
+			underlay, blur,
 		}
 	}
 	objects := []fyne.CanvasObject{background, p.Content}
@@ -248,10 +249,12 @@ type modalPopUpRenderer struct {
 	*widget.ShadowingRenderer
 	popUpBaseRenderer
 	underlay *canvas.Rectangle
+	blur     *canvas.Blur
 }
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	r.underlay.Resize(canvasSize)
+	r.blur.Resize(canvasSize)
 
 	padding := r.padding()
 	innerSize := r.popUp.innerSize.Max(r.popUp.Content.MinSize().Add(padding))
@@ -277,6 +280,10 @@ func (r *modalPopUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.underlay.FillColor = th.Color(theme.ColorNameShadow, v)
+	r.underlay.Refresh()
+	r.blur.Radius = th.Size(theme.SizeNameModalBlurRadius)
+	r.blur.Refresh()
+
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	expectedContentSize := r.popUp.innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldLayout := r.popUp.Content.Size() != expectedContentSize

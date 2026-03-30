@@ -23,6 +23,77 @@ func (p *painter) createBuffer(size int) Buffer {
 	return vbo
 }
 
+func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
+	vertAttrib := p.ctx.GetAttribLocation(prog, name)
+	p.ctx.EnableVertexAttribArray(vertAttrib)
+	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
+	p.logError()
+}
+
+func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
+	if b.Radius == 0 {
+		return
+	}
+	radius := b.Radius * p.pixScale
+
+	x := roundToPixel(pos.X*p.pixScale, 1.0)
+	y := roundToPixel(pos.Y*p.pixScale, 1.0)
+	bw := int(roundToPixel(b.Size().Width*p.pixScale, 1.0))
+	bh := int(roundToPixel(b.Size().Height*p.pixScale, 1.0))
+	if bw <= 0 || bh <= 0 {
+		return
+	}
+
+	// Ensure blurSnapTex exists at the correct size; reallocate only when dimensions change.
+	if !p.blurSnapTexValid || p.blurSnapW != bw || p.blurSnapH != bh {
+		if p.blurSnapTexValid {
+			p.ctx.DeleteTexture(p.blurSnapTex)
+		}
+		p.blurSnapTex = p.newTexture(canvas.ImageScaleFastest)
+		p.ctx.TexImage2D(texture2D, 0, bw, bh, colorFormatRGBA, unsignedByte, nil)
+		p.blurSnapTexValid = true
+		p.blurSnapW = bw
+		p.blurSnapH = bh
+	}
+
+	// Copy the blur region from the framebuffer directly to the texture on the GPU.
+	// glCopyTexSubImage2D uses GL coordinates (y=0 at bottom), so convert the canvas-top y.
+	fbY := p.fbHeight - int(y) - bh
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, p.blurSnapTex)
+	p.ctx.CopyTexSubImage2D(texture2D, 0, 0, 0, int(x), fbY, bw, bh)
+	p.logError()
+
+	// Build quad vertices. CopyTexSubImage2D places the framebuffer bottom at texture v=0,
+	// but rectCoords maps v=0 to the canvas top. Swap the v coordinates to correct orientation.
+	points, _ := p.rectCoords(b.Size(), pos, frame, canvas.ImageFillStretch, 1.0, 0)
+	points[4], points[9] = points[9], points[4]
+	points[14], points[19] = points[19], points[14]
+
+	p.ctx.UseProgram(p.blurProgram.ref)
+	p.updateBuffer(p.blurProgram.buff, points)
+	p.defineVertexArray(p.blurProgram.ref, "vert", 3, 5, 0)
+	p.defineVertexArray(p.blurProgram.ref, "vertTexCoord", 2, 5, 3)
+
+	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
+	p.logError()
+
+	p.SetUniform1f(p.blurProgram, "radius", radius)
+	p.SetUniform2f(p.blurProgram, "size", float32(bw), float32(bh))
+
+	values, ok := cache.GetBlurKernel(radius)
+	if !ok {
+		values = createKernel(radius)
+		cache.SetBlurKernel(radius, values)
+	}
+
+	kernel := p.ctx.GetUniformLocation(p.blurProgram.ref, "kernel")
+	p.ctx.Uniform1fv(kernel, values)
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
 func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
 	radius := paint.GetMaximumRadius(circle.Size())
 	program := p.roundRectangleProgram
@@ -173,6 +244,8 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 
 func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	switch obj := o.(type) {
+	case *canvas.Blur:
+		p.drawBlur(obj, pos, frame)
 	case *canvas.Circle:
 		p.drawCircle(obj, pos, frame)
 	case *canvas.Line:
@@ -739,4 +812,20 @@ func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, flo
 	y1Scaled := roundToPixel(y1*p.pixScale, 1.0)
 	y2Scaled := roundToPixel(y2*p.pixScale, 1.0)
 	return x1Scaled, x2Scaled, y1Scaled, y2Scaled
+}
+
+func createKernel(radius float32) []float32 {
+	sum := float32(0.0)
+	length := int(radius)*2 + 1
+	values := make([]float32, length)
+	for i, x := 0, float64(-radius); i < length; i, x = i+1, x+1 {
+		value := float32(math.Exp(-(x * x / 4 / float64(radius))))
+		values[i] = value
+		sum += value
+	}
+	for i := 0; i < length; i++ {
+		values[i] /= sum
+	}
+
+	return values
 }

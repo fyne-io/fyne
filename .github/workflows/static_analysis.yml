@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
 
       - name: Set environment variable LANG
-        run: export LANG=en_EN.UTF-8
+        run: echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
 
       - name: Install analysis tools
         run: |

@@ -252,6 +252,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
+	glfnUniform1fv: func(c call) (ret uintptr) {
+		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
+		return
+	},
 	glfnUniform2f: func(c call) (ret uintptr) {
 		syscall.SyscallN(glUniform2f.Addr(), c.args.a0, c.args.a1, c.args.a2)
 		return ret
@@ -274,6 +278,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 	},
 	glfnViewport: func(c call) (ret uintptr) {
 		syscall.SyscallN(glViewport.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3)
+		return ret
+	},
+	glfnCopyTexSubImage2D: func(c call) (ret uintptr) {
+		syscall.SyscallN(glCopyTexSubImage2D.Addr(), c.args.a0, c.args.a1, c.args.a2, c.args.a3, c.args.a4, c.args.a5, c.args.a6, c.args.a7)
 		return ret
 	},
 }
@@ -340,10 +348,12 @@ var (
 	glTexImage2D              = libGLESv2.NewProc("glTexImage2D")
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
+	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
 	glUniform2f               = libGLESv2.NewProc("glUniform2f")
 	glUniform4f               = libGLESv2.NewProc("glUniform4f")
 	glUniform4fv              = libGLESv2.NewProc("glUniform4fv")
 	glUseProgram              = libGLESv2.NewProc("glUseProgram")
 	glVertexAttribPointer     = libGLESv2.NewProc("glVertexAttribPointer")
 	glViewport                = libGLESv2.NewProc("glViewport")
+	glCopyTexSubImage2D       = libGLESv2.NewProc("glCopyTexSubImage2D")
 )

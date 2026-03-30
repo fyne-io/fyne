@@ -271,6 +271,21 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.scroller.Content.(*treeContent).refreshForID(onlyNewTreeNodesID)
 }
 
+// Highlight scrolls to the item represented by id and highlights it
+//
+// Since: 2.8
+func (t *Tree) Highlight(uid TreeNodeID) {
+	if found, _ := t.findPath(t.Root, uid); !found {
+		return
+	}
+	t.ScrollTo(uid)
+	t.currentHighlight = uid
+	if t.OnHighlighted != nil {
+		t.OnHighlighted(uid)
+	}
+	t.Refresh()
+}
+
 // ScrollToBottom scrolls to the bottom of the tree.
 //
 // Since 2.1

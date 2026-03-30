@@ -421,20 +421,24 @@ func (r *docTabsRenderer) updateIndicator(animate bool) {
 	var indicatorPos fyne.Position
 	var indicatorSize fyne.Size
 	pad := th.Size(theme.SizeNamePadding)
+	dividerWidth := th.Size(theme.SizeNameSeparatorThickness)
+	if !isMobile(r.tabs) {
+		dividerWidth = pad
+	}
 
 	switch r.docTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
+		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
 	case TabLocationLeading:
 		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(pad, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(dividerWidth, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	case TabLocationBottom:
 		indicatorPos = fyne.NewPos(selectedPos.X-scrollOffset.X, r.bar.Position().Y-pad)
-		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), pad)
+		indicatorSize = fyne.NewSize(fyne.Min(selectedSize.Width, scrollSize.Width-indicatorPos.X), dividerWidth)
 	case TabLocationTrailing:
 		indicatorPos = fyne.NewPos(r.bar.Position().X-pad, selectedPos.Y-scrollOffset.Y)
-		indicatorSize = fyne.NewSize(pad, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
+		indicatorSize = fyne.NewSize(dividerWidth, fyne.Min(selectedSize.Height, scrollSize.Height-indicatorPos.Y))
 	}
 
 	if indicatorPos.X < 0 {

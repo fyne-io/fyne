@@ -1,15 +1,15 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.DocTabs">
-			<container size="72x150">
-				<widget size="72x110" type="*widget.Scroll">
-					<container size="72x110">
-						<widget size="72x56" type="*container.tabButton">
-							<image pos="16,8" rsc="infoIcon" size="40x40" themed="primary"/>
+			<container size="62x150">
+				<widget size="62x110" type="*widget.Scroll">
+					<container size="62x110">
+						<widget size="62x30" type="*container.tabButton">
+							<image pos="16,4" rsc="infoIcon" size="30x30" themed="primary"/>
 						</widget>
 					</container>
 				</widget>
-				<container pos="0,114" size="72x36">
+				<container pos="0,114" size="62x36">
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
@@ -17,9 +17,9 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="72,0" size="4x150"/>
-			<rectangle fillColor="primary" pos="72,0" radius="4" size="4x56"/>
-			<circle fillColor="background" pos="76,0" size="74x150"/>
+			<rectangle fillColor="shadow" pos="62,0" size="1x150"/>
+			<rectangle fillColor="primary" pos="62,0" radius="4" size="4x30"/>
+			<circle fillColor="background" pos="66,0" size="84x150"/>
 		</widget>
 	</content>
 </canvas>

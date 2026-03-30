@@ -3,6 +3,7 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/storage"
@@ -79,37 +80,101 @@ func TestRichTextMarkdown_Emphasis(t *testing.T) {
 	} else {
 		t.Error("Segment should be text")
 	}
+
+	r.ParseMarkdown("~c~.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "c", text.Text)
+		assert.False(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
+
+	r.ParseMarkdown("~~d~~.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "d", text.Text)
+		assert.False(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
+
+	r.ParseMarkdown("~~**e**~~.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "e", text.Text)
+		assert.True(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
+
+	r.ParseMarkdown("**~~f~~**.")
+
+	assert.Len(t, r.Segments, 3)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "f", text.Text)
+		assert.True(t, text.Style.TextStyle.Bold)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be text")
+	}
 }
 
 func TestRichTextMarkdown_Heading(t *testing.T) {
-	r := NewRichTextFromMarkdown("# Head1\n\n## Head2!\n### Head3\n")
+	r := NewRichTextFromMarkdown("# Head1\n\n## Head2!\n\n### Head3\n\n## *Head4*\n\n## ~Head5~")
 
-	assert.Len(t, r.Segments, 3)
+	assert.Len(t, r.Segments, 11)
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "Head1", text.Text)
 		assert.Equal(t, RichTextStyleHeading, text.Style)
 	} else {
 		t.Error("Segment should be Heading")
 	}
-	if text, ok := r.Segments[1].(*TextSegment); ok {
-		assert.Equal(t, "Head2!", text.Text)
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "Head2", text.Text)
+		assert.Equal(t, theme.SizeNameSubHeadingText, text.Style.SizeName)
+	} else {
+		t.Error("Segment should be SubHeading")
+	}
+	if text, ok := r.Segments[3].(*TextSegment); ok {
+		assert.Equal(t, "!", text.Text)
 		assert.Equal(t, RichTextStyleSubHeading, text.Style)
 	} else {
 		t.Error("Segment should be SubHeading")
 	}
 
-	if text, ok := r.Segments[2].(*TextSegment); ok {
+	if text, ok := r.Segments[5].(*TextSegment); ok {
 		assert.Equal(t, "Head3", text.Text)
 		assert.True(t, text.Style.TextStyle.Bold) // we don't have 6 levels of heading so just bold others
 	} else {
 		t.Error("Segment should be Strong")
+	}
+
+	if text, ok := r.Segments[7].(*TextSegment); ok {
+		assert.Equal(t, "Head4", text.Text)
+		assert.True(t, text.Style.TextStyle.Italic)
+	} else {
+		t.Error("Segment should be Italic")
+	}
+
+	if text, ok := r.Segments[9].(*TextSegment); ok {
+		assert.Equal(t, "Head5", text.Text)
+		assert.True(t, text.Style.TextStyle.Strikethrough)
+	} else {
+		t.Error("Segment should be Struck through")
 	}
 }
 
 func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
 	r := NewRichTextFromMarkdown("#")
 
-	assert.Len(t, r.Segments, 1)
+	assert.Len(t, r.Segments, 2)
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "", text.Text)
 		assert.Equal(t, RichTextStyleHeading, text.Style)
@@ -119,12 +184,48 @@ func TestRichTextMarkdown_Heading_Blank(t *testing.T) {
 
 	r = NewRichTextFromMarkdown("# ")
 
-	assert.Len(t, r.Segments, 1)
+	assert.Len(t, r.Segments, 2)
 	if text, ok := r.Segments[0].(*TextSegment); ok {
 		assert.Equal(t, "", text.Text)
 		assert.Equal(t, RichTextStyleHeading, text.Style)
 	} else {
 		t.Error("Segment should be Text")
+	}
+}
+
+func TestRichTextMarkdown_HeadingWithHyperlink(t *testing.T) {
+	r := NewRichTextFromMarkdown("# Head1 [link](https://fyne.io/)\n\n## Head2 <https://fyne.io>\n### [Head3](https://fyne.io/)\n")
+
+	assert.Len(t, r.Segments, 8)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "Head1 ", text.Text)
+		assert.Equal(t, RichTextStyleHeading, text.Style)
+	} else {
+		t.Error("Segment should be Heading text")
+	}
+	if link, ok := r.Segments[1].(*HyperlinkSegment); ok {
+		assert.Equal(t, "link", link.Text)
+		assert.Equal(t, RichTextStyleHeading.TextStyle, link.TextStyle)
+	} else {
+		t.Error("Segment should be Heading hyperlink")
+	}
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "", text.Text)
+		assert.Equal(t, RichTextStyleParagraph, text.Style)
+	} else {
+		t.Error("Segment should be Paragraph (linebreak)")
+	}
+	if link, ok := r.Segments[4].(*HyperlinkSegment); ok {
+		assert.Equal(t, "https://fyne.io", link.Text)
+		assert.Equal(t, RichTextStyleSubHeading.TextStyle, link.TextStyle)
+	} else {
+		t.Error("Segment should be SubHeading hyperlink")
+	}
+	if link, ok := r.Segments[6].(*HyperlinkSegment); ok {
+		assert.Equal(t, "Head3", link.Text)
+		assert.Equal(t, RichTextStyleStrong.TextStyle, link.TextStyle) // we don't have 6 levels of heading so just bold others
+	} else {
+		t.Error("Segment should be Strong hyperlink")
 	}
 }
 

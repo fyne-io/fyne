@@ -1,20 +1,20 @@
 <canvas size="150x150">
 	<content>
 		<widget size="150x150" type="*container.AppTabs">
-			<container size="150x36">
-				<container size="150x36">
-					<widget size="28x36" type="*container.tabButton">
-						<image pos="4,8" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
+			<container size="150x28">
+				<container size="150x28">
+					<widget size="28x28" type="*container.tabButton">
+						<image pos="4,4" rsc="infoIcon" size="iconInlineSize" themed="primary"/>
 					</widget>
-					<widget pos="32,0" size="28x36" type="*container.tabButton">
-						<image pos="4,8" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
+					<widget pos="32,0" size="28x28" type="*container.tabButton">
+						<image pos="4,4" rsc="confirmIcon" size="iconInlineSize" themed="foreground"/>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,36" size="150x4"/>
-			<rectangle fillColor="primary" pos="0,36" radius="4" size="28x4"/>
-			<widget pos="0,40" size="150x110" type="*widget.Label">
-				<widget size="150x110" type="*widget.RichText">
+			<rectangle fillColor="shadow" pos="0,28" size="150x1"/>
+			<rectangle fillColor="primary" pos="0,28" radius="4" size="28x4"/>
+			<widget pos="0,32" size="150x118" type="*widget.Label">
+				<widget size="150x118" type="*widget.RichText">
 					<text pos="8,8" size="34x19">Text1</text>
 				</widget>
 			</widget>

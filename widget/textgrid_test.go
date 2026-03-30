@@ -296,6 +296,31 @@ func TestTextGridRenderer_Resize(t *testing.T) {
 	assert.Equal(t, min, renderer.MinSize())
 }
 
+func TestTextGridRenderer_MinSize(t *testing.T) {
+	grid := NewTextGridFromString("ABC")
+	grid.ShowLineNumbers = false
+	renderer := test.TempWidgetRenderer(t, grid)
+
+	grid.Refresh()
+	assert.Equal(t, fyne.NewSize(24, 16), renderer.MinSize())
+
+	grid.ShowLineNumbers = true
+	grid.Refresh()
+	assert.Equal(t, fyne.NewSize(40, 16), renderer.MinSize())
+
+	grid.SetCell(8, 0, TextGridCell{Rune: 'A'})
+	grid.Refresh()
+	assert.Equal(t, fyne.NewSize(40, 144), renderer.MinSize())
+
+	grid.SetCell(10, 0, TextGridCell{Rune: 'B'})
+	grid.Refresh()
+	assert.Equal(t, fyne.NewSize(48, 176), renderer.MinSize())
+
+	grid.SetCell(5, 20, TextGridCell{Rune: 'C'})
+	grid.Refresh()
+	assert.Equal(t, fyne.NewSize(192, 176), renderer.MinSize())
+}
+
 func TestTextGridRenderer_ShowLineNumbers(t *testing.T) {
 	grid := NewTextGridFromString("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")
 	grid.ShowLineNumbers = true

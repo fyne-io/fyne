@@ -36,7 +36,7 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,36" size="300x4"/>
+			<rectangle fillColor="shadow" pos="0,36" size="300x1"/>
 			<rectangle fillColor="primary" pos="0,36" radius="4" size="76x4"/>
 			<widget pos="0,40" size="300x60" type="*widget.Label">
 				<widget size="300x60" type="*widget.RichText">

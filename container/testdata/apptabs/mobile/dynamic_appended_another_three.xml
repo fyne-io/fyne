@@ -1,26 +1,26 @@
 <canvas size="300x150">
 	<content>
 		<widget size="300x150" type="*container.AppTabs">
-			<container size="300x35">
-				<container size="300x35">
-					<widget size="72x35" type="*container.tabButton">
-						<text alignment="center" bold color="primary" pos="4,8" size="64x19">Test2</text>
+			<container size="300x27">
+				<container size="300x27">
+					<widget size="72x27" type="*container.tabButton">
+						<text alignment="center" bold color="primary" pos="4,4" size="64x14" textSize="11">Test2</text>
 					</widget>
-					<widget pos="76,0" size="72x35" type="*container.tabButton">
-						<text alignment="center" bold pos="4,8" size="64x19">Test3</text>
+					<widget pos="76,0" size="72x27" type="*container.tabButton">
+						<text alignment="center" bold pos="4,4" size="64x14" textSize="11">Test3</text>
 					</widget>
-					<widget pos="152,0" size="72x35" type="*container.tabButton">
-						<text alignment="center" bold pos="4,8" size="64x19">Test4</text>
+					<widget pos="152,0" size="72x27" type="*container.tabButton">
+						<text alignment="center" bold pos="4,4" size="64x14" textSize="11">Test4</text>
 					</widget>
-					<widget pos="228,0" size="72x35" type="*container.tabButton">
-						<text alignment="center" bold size="0x0">Test5</text>
+					<widget pos="228,0" size="72x27" type="*container.tabButton">
+						<text alignment="center" bold size="0x0" textSize="11">Test5</text>
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="0,35" size="300x4"/>
-			<rectangle fillColor="primary" pos="0,35" radius="4" size="72x4"/>
-			<widget pos="0,39" size="300x110" type="*widget.Label">
-				<widget size="300x110" type="*widget.RichText">
+			<rectangle fillColor="shadow" pos="0,27" size="300x1"/>
+			<rectangle fillColor="primary" pos="0,27" radius="4" size="72x1"/>
+			<widget pos="0,31" size="300x118" type="*widget.Label">
+				<widget size="300x118" type="*widget.RichText">
 					<text pos="8,8" size="38x19">Text 2</text>
 				</widget>
 			</widget>

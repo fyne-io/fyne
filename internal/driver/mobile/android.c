@@ -419,16 +419,16 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	if (loadErr != NULL) {
 		(*env)->ExceptionClear(env);
-		return "";
+		return "ERROR: Cannot parse URI";
 	}
 
 	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
 	if (contractClass == NULL) { // API 19
-		return "";
+		return "ERROR: Cannot list content for URI";
 	}
 	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
 	if (getDoc == NULL) { // API 21
-		return "";
+		return "ERROR: Cannot list content for URI";
 	}
 	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
 
@@ -441,10 +441,19 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
 	if (getDoc == NULL) { // API 26
-		return "";
+		return "ERROR: Cannot list content for URI";
 	}
 
 	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
+	if ((*env)->ExceptionCheck(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+		LOG_FATAL("cannot list content of uri: %s", uriCstr);
+		return "ERROR: Cannot list content for URI";
+	}
+	if (cursor == NULL) {
+		return "ERROR: Cannot list content for URI (NULL cursor)";
+	}
 	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
 	jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
 	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
@@ -537,7 +546,7 @@ char* listURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 		return listContentURI(jni_env, ctx, uriCstr);
 	}
 	LOG_FATAL("Unrecognized scheme: %s", uriCstr);
-	return "";
+	return "ERROR: Unrecognized scheme";
 }
 
 void keepScreenOn(uintptr_t jni_env, uintptr_t ctx, bool disabled) {

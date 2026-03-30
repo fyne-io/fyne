@@ -384,6 +384,42 @@ func TestTable_Refresh(t *testing.T) {
 	assert.Equal(t, "replaced", cellRenderer.(*tableCellsRenderer).Objects()[6].(*Label).Text)
 }
 
+func TestTable_Highlight(t *testing.T) {
+	test.NewTempApp(t)
+
+	// for this test the separator thickness is 0
+	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
+
+	// we will test a 20 row x 5 column table where each cell is 50x50
+	const (
+		maxRows int     = 20
+		maxCols int     = 5
+		width   float32 = 50
+		height  float32 = 50
+	)
+
+	templ := canvas.NewRectangle(color.Gray16{})
+	templ.SetMinSize(fyne.Size{Width: width, Height: height})
+
+	table := NewTable(
+		func() (int, int) { return maxRows, maxCols },
+		func() fyne.CanvasObject { return templ },
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+
+	rows, cols := table.Length()
+	table.Highlight(TableCellID{Row: 200, Col: 200})
+	assert.Equal(t, TableCellID{Row: rows - 1, Col: cols - 1}, table.currentHighlight)
+
+	table.Highlight(TableCellID{Row: 0, Col: 0})
+	assert.Equal(t, TableCellID{Row: 0, Col: 0}, table.currentHighlight)
+
+	table.Highlight(TableCellID{Row: 10, Col: 3})
+	assert.Equal(t, TableCellID{Row: 10, Col: 3}, table.currentHighlight)
+}
+
 func TestTable_ScrollTo(t *testing.T) {
 	test.NewTempApp(t)
 

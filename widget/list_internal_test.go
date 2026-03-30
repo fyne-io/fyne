@@ -266,6 +266,44 @@ func TestList_ScrollOffset(t *testing.T) {
 	assert.Equal(t, float32(0), list.GetScrollOffset()) // doesn't scroll
 }
 
+func TestList_Highlight(t *testing.T) {
+	list := createList(1000)
+
+	// override update item to keep track of greatest item rendered
+	oldUpdateFunc := list.UpdateItem
+	var greatest ListItemID = -1
+	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
+		if id > greatest {
+			greatest = id
+		}
+		oldUpdateFunc(id, item)
+	}
+
+	list.Highlight(650)
+	assert.GreaterOrEqual(t, greatest, 650)
+	assert.Equal(t, 650, list.currentHighlight)
+
+	list.Highlight(800)
+	assert.GreaterOrEqual(t, greatest, 800)
+	assert.Equal(t, 800, list.currentHighlight)
+
+	list.Highlight(999)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, list.currentHighlight)
+
+	list.Highlight(1001)
+	assert.Equal(t, greatest, 999)
+	assert.Equal(t, 999, list.currentHighlight)
+
+	list.Highlight(0)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, list.currentHighlight)
+
+	list.Highlight(-1)
+	assert.GreaterOrEqual(t, greatest, 0)
+	assert.Equal(t, 0, list.currentHighlight)
+}
+
 func TestList_Selection(t *testing.T) {
 	list := createList(1000)
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children

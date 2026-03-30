@@ -54,7 +54,7 @@ var (
 	// Since: 2.1
 	RichTextStyleHeading = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		Inline:    false,
+		Inline:    true,
 		SizeName:  theme.SizeNameHeadingText,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
@@ -97,7 +97,7 @@ var (
 	// Since: 2.1
 	RichTextStyleSubHeading = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		Inline:    false,
+		Inline:    true,
 		SizeName:  theme.SizeNameSubHeadingText,
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
@@ -118,6 +118,8 @@ type HyperlinkSegment struct {
 
 	// Since 2.8
 	TextStyle fyne.TextStyle
+	// Since 2.8
+	SizeName fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -141,9 +143,9 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 // Update applies the current state of this hyperlink segment to an existing visual.
 func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 	link := o.(*fyne.Container).Objects[0].(*Hyperlink)
-	link.Text = h.Text
 	link.URL = h.URL
 	link.Alignment = h.Alignment
+	link.SizeName = h.SizeName
 	link.TextStyle = h.TextStyle
 	link.OnTapped = h.OnTapped
 	link.Refresh()

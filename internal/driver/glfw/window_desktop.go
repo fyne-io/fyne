@@ -28,6 +28,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+type monitor = glfw.Monitor
+
 const (
 	defaultTitle              = "Fyne Application"
 	disableDPIDetectionEnvKey = "FYNE_DISABLE_DPI_DETECTION"
@@ -81,10 +83,9 @@ type window struct {
 	icon         fyne.Resource
 	mainmenu     *fyne.MainMenu
 
-	master     bool
-	fullScreen bool
-	centered   bool
-	visible    bool
+	master                          bool
+	fullScreen, fullScreenSecondary bool
+	centered, visible, onTop        bool
 
 	mousePosUpdateProcessed    bool
 	newMousePosX, newMousePosY float64
@@ -120,11 +121,36 @@ type window struct {
 
 func (w *window) SetFullScreen(full bool) {
 	w.fullScreen = full
+	w.fullScreenSecondary = false
 
 	if w.view() != nil {
 		async.EnsureMain(func() {
 			w.doSetFullScreen(full)
 		})
+	}
+}
+
+func (w *window) RequestAlwaysOnTop() {
+	w.onTop = true
+}
+
+func (w *window) RequestFullScreenSecondary() {
+	w.fullScreenSecondary = true
+	w.fullScreen = true
+
+	if w.view() != nil {
+		async.EnsureMain(func() {
+			w.doSetFullScreen2(true)
+		})
+	}
+}
+
+func (w *window) RequestPosition(x, y int) {
+	w.xpos = x
+	w.ypos = y
+
+	if w.view() != nil {
+		w.view().SetPos(x, y)
 	}
 }
 
@@ -313,6 +339,17 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 		monitor = glfw.GetPrimaryMonitor()
 	}
 	return monitor
+}
+
+func (w *window) getSecondaryMonitor() *monitor {
+	primary := glfw.GetPrimaryMonitor()
+	for _, m := range glfw.GetMonitors() {
+		if m.GetName() != primary.GetName() {
+			return m
+		}
+	}
+
+	return primary
 }
 
 func (w *window) detectScale() float32 {
@@ -727,7 +764,9 @@ func (w *window) RescaleContext() {
 	w.viewport.SetSize(newWidth, newHeight)
 
 	// Ensure textures re-rasterize at the new scale
-	cache.DeleteTextTexturesFor(w.canvas)
+	w.RunWithContext(func() {
+		cache.DeleteTextTexturesFor(w.canvas)
+	})
 	w.canvas.content.Refresh()
 }
 
@@ -745,6 +784,11 @@ func (w *window) create() {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 	} else {
 		glfw.WindowHint(glfw.Resizable, glfw.True)
+	}
+	if w.onTop {
+		glfw.WindowHint(glfw.Floating, glfw.True)
+	} else {
+		glfw.WindowHint(glfw.Floating, glfw.False)
 	}
 	glfw.WindowHint(glfw.AutoIconify, glfw.False)
 	initWindowHints()
@@ -768,6 +812,10 @@ func (w *window) create() {
 	w.viewport = win
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
+	}
+
+	if (w.xpos != 0 || w.ypos != 0) && !build.IsWayland {
+		win.SetPos(w.xpos, w.ypos)
 	}
 
 	// run the GL init on the draw thread

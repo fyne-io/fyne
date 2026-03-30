@@ -51,6 +51,7 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 			texture = cache.TextureType(tex)
 			cache.SetTextTexture(ent, texture, p.canvas, func() {
 				p.ctx.DeleteTexture(tex)
+				p.logError()
 			})
 		}
 
@@ -106,7 +107,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.Point{}, draw.Over)
+		draw.Draw(rgba, rgba.Rect, img, img.Bounds().Min, draw.Over)
 		return p.imgToTexture(rgba, textureFilter)
 	}
 }

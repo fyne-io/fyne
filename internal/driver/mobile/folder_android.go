@@ -63,7 +63,12 @@ func listURI(uri fyne.URI) ([]fyne.URI, error) {
 		return nil
 	})
 
-	parts := strings.Split(C.GoString(str), "|")
+	result := C.GoString(str)
+	if strings.HasPrefix(result, "ERROR: ") {
+		return nil, errors.New(result[7:])
+	}
+
+	parts := strings.Split(result, "|")
 	var list []fyne.URI
 	for _, part := range parts {
 		if len(part) == 0 {

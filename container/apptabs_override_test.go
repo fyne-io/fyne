@@ -21,15 +21,13 @@ func TestAppTabs_OverrideMobile(t *testing.T) {
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
-
-	min := tabs.MinSize()
-	w.Resize(min)
+	w.Resize(tabs.MinSize())
 
 	test.AssertRendersToMarkup(t, "apptabs/desktop/tab_location_top.xml", c)
 
 	override := container.NewThemeOverride(tabs, test.Theme())
 	override.SetDeviceIsMobile(true)
-	w.Resize(min.AddWidthHeight(-4, -0))
+	w.Resize(tabs.MinSize())
 
 	test.AssertRendersToMarkup(t, "apptabs/mobile/tab_location_top.xml", c)
 }

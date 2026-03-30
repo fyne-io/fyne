@@ -30,6 +30,7 @@ func TestDocTabs_ApplyTheme(t *testing.T) {
 	test.AssertRendersToImage(t, "doctabs/mobile/theme_default.png", c)
 
 	test.ApplyTheme(t, test.NewTheme())
+	w.Content().Refresh()
 	test.AssertRendersToImage(t, "doctabs/mobile/theme_ugly.png", c)
 }
 
@@ -169,21 +170,6 @@ func TestDocTabs_HoverButtons(t *testing.T) {
 	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c)
 
 	test.MoveMouse(c, fyne.NewPos(10, 10))
-	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
-
-	test.MoveMouse(c, fyne.NewPos(75, 10))
-	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
-
-	test.MoveMouse(c, fyne.NewPos(90, 10))
-	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
-
-	test.MoveMouse(c, fyne.NewPos(10, 10))
-	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
-
-	test.MoveMouse(c, fyne.NewPos(136, 10))
-	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
-
-	test.MoveMouse(c, fyne.NewPos(104, 10))
 	test.AssertRendersToMarkup(t, "doctabs/mobile/hover_none.xml", c, "no hovering on mobile")
 }
 

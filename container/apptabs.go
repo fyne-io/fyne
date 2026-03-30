@@ -421,20 +421,24 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 	var indicatorSize fyne.Size
 	th := r.appTabs.Theme()
 	pad := th.Size(theme.SizeNamePadding)
+	dividerWidth := th.Size(theme.SizeNameSeparatorThickness)
+	if !isMobile(r.tabs) {
+		dividerWidth = pad
+	}
 
 	switch r.appTabs.location {
 	case TabLocationTop:
 		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.MinSize().Height)
-		indicatorSize = fyne.NewSize(selectedSize.Width, pad)
+		indicatorSize = fyne.NewSize(selectedSize.Width, dividerWidth)
 	case TabLocationLeading:
 		indicatorPos = fyne.NewPos(r.bar.MinSize().Width, selectedPos.Y)
-		indicatorSize = fyne.NewSize(pad, selectedSize.Height)
+		indicatorSize = fyne.NewSize(dividerWidth, selectedSize.Height)
 	case TabLocationBottom:
 		indicatorPos = fyne.NewPos(selectedPos.X, r.bar.Position().Y-pad)
-		indicatorSize = fyne.NewSize(selectedSize.Width, pad)
+		indicatorSize = fyne.NewSize(selectedSize.Width, dividerWidth)
 	case TabLocationTrailing:
 		indicatorPos = fyne.NewPos(r.bar.Position().X-pad, selectedPos.Y)
-		indicatorSize = fyne.NewSize(pad, selectedSize.Height)
+		indicatorSize = fyne.NewSize(dividerWidth, selectedSize.Height)
 	}
 
 	r.moveIndicator(indicatorPos, indicatorSize, th, animate)

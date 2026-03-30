@@ -343,11 +343,7 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 	if canvasNeedRefresh {
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
-		if c.EnsureMinSize() {
-			c.sizeContent(newSize) // force resize of content
-		} else { // if screen changed
-			w.Resize(newSize)
-		}
+		w.Resize(newSize)
 
 		d.paintWindow(w, newSize)
 		d.app.Publish()
@@ -371,6 +367,8 @@ func (d *driver) onStop() {
 func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 	clips := &internal.ClipStack{}
 	c := window.Canvas().(*canvas)
+
+	c.Painter().SetOutputSize(d.currentSize.WidthPx, d.currentSize.HeightPx)
 
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	max16bit := float32(255 * 255)
@@ -441,9 +439,11 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
-	w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
-		wid.Dragged(ev)
-	})
+	if tapID == 0 {
+		w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+			wid.Dragged(ev)
+		})
+	}
 }
 
 func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {

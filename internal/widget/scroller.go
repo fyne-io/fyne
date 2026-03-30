@@ -523,7 +523,6 @@ func (s *Scroll) ScrollToBottom() {
 // ScrollToTop will scroll content to container top
 func (s *Scroll) ScrollToTop() {
 	s.ScrollToOffset(fyne.Position{})
-	s.refreshBars()
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -641,25 +640,19 @@ func computeOffset(start, delta, outerWidth, innerWidth float32) float32 {
 // NewScroll creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed object.
 func NewScroll(content fyne.CanvasObject) *Scroll {
-	s := newScrollContainerWithDirection(ScrollBoth, content)
-	s.ExtendBaseWidget(s)
-	return s
+	return newScrollContainerWithDirection(ScrollBoth, content)
 }
 
 // NewHScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
 func NewHScroll(content fyne.CanvasObject) *Scroll {
-	s := newScrollContainerWithDirection(ScrollHorizontalOnly, content)
-	s.ExtendBaseWidget(s)
-	return s
+	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
 }
 
 // NewVScroll create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
 func NewVScroll(content fyne.CanvasObject) *Scroll {
-	s := newScrollContainerWithDirection(ScrollVerticalOnly, content)
-	s.ExtendBaseWidget(s)
-	return s
+	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
 }
 
 func newScrollContainerWithDirection(direction ScrollDirection, content fyne.CanvasObject) *Scroll {

@@ -132,3 +132,11 @@ func TestRenderedTextSize(t *testing.T) {
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)
 }
+
+func TestHangul(t *testing.T) {
+	got := painter.CachedFontFace(fyne.TextStyle{}, nil, nil)
+	f := got.Fonts.ResolveFace('안')
+	gid, ok := f.Cmap.Lookup('안')
+	assert.True(t, ok)
+	assert.NotZero(t, gid)
+}

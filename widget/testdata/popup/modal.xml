@@ -4,6 +4,7 @@
 	</content>
 	<overlay>
 		<widget size="200x199" type="*widget.PopUp">
+			<blur radius="1.5" size="200x199"/>
 			<widget pos="81,77" size="37x43" type="*widget.Shadow">
 				<radialGradient centerOffset="0.5,0.5" pos="-19,-14" size="24x24" startColor="shadow"/>
 				<linearGradient endColor="shadow" pos="4,-14" size="28x24"/>

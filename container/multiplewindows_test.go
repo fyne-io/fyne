@@ -20,6 +20,7 @@ func TestMultipleWindows_Add(t *testing.T) {
 func TestMultipleWindows_Drag(t *testing.T) {
 	w := NewInnerWindow("1", widget.NewLabel("Inside"))
 	m := NewMultipleWindows(w)
+	m.Resize(fyne.NewSize(30, 30))
 	_ = test.TempWidgetRenderer(t, m) // initialise display
 	assert.Equal(t, 1, len(m.Windows))
 
@@ -27,6 +28,13 @@ func TestMultipleWindows_Drag(t *testing.T) {
 	w.OnDragged(&fyne.DragEvent{Dragged: fyne.Delta{DX: 10, DY: 5}})
 	assert.Equal(t, float32(10), w.Position().X)
 	assert.Equal(t, float32(5), w.Position().Y)
+
+	drag := &fyne.DragEvent{Dragged: fyne.Delta{DX: -10, DY: -5}}
+	drag.Position = fyne.NewPos(5, 5)
+	drag.AbsolutePosition = fyne.NewPos(5, 5)
+	w.OnDragged(drag)
+	assert.Equal(t, float32(0), w.Position().X)
+	assert.Equal(t, float32(0), w.Position().Y)
 }
 
 func TestMultipleWindows_RaiseToTop(t *testing.T) {

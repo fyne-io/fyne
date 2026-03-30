@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"image/color"
+	"os"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -128,4 +129,20 @@ func TestConfirm_Importance(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
 	d.Show()
 	test.AssertRendersToImage(t, "dialog-confirm-importance.png", w.Canvas())
+}
+
+func TestConfirm_Importance_Blur(t *testing.T) {
+	test.NewTempApp(t)
+	code := widget.NewEntry()
+	data, _ := os.ReadFile("./testdata/Capitalised.txt")
+	code.SetText(string(data))
+	w := test.NewTempWindow(t, code)
+	size := fyne.NewSize(480, 320)
+	w.Resize(size)
+
+	d := NewConfirm("Delete me?", "This is dangerous!", nil, w)
+	d.SetConfirmImportance(widget.DangerImportance)
+
+	d.Show()
+	test.AssertRendersToImage(t, "dialog-confirm-blur.png", w.Canvas())
 }

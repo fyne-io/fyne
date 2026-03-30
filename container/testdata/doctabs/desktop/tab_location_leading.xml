@@ -1,29 +1,29 @@
-<canvas size="130x72">
+<canvas size="127x72">
 	<content>
-		<widget size="130x72" type="*container.DocTabs">
-			<container size="72x72">
-				<widget size="72x32" type="*widget.Scroll">
-					<container size="72x116">
-						<widget size="72x36" type="*container.tabButton">
-							<text bold color="primary" pos="4,8" size="64x19">Test1</text>
+		<widget size="127x72" type="*container.DocTabs">
+			<container size="68x72">
+				<widget size="68x32" type="*widget.Scroll">
+					<container size="68x92">
+						<widget size="68x28" type="*container.tabButton">
+							<text bold color="primary" pos="4,4" size="60x19">Test1</text>
 						</widget>
-						<widget pos="0,40" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x19">Test2</text>
+						<widget pos="0,32" size="68x28" type="*container.tabButton">
+							<text bold pos="4,4" size="60x19">Test2</text>
 						</widget>
-						<widget pos="0,80" size="72x36" type="*container.tabButton">
-							<text bold pos="4,8" size="64x19">Test3</text>
+						<widget pos="0,64" size="68x28" type="*container.tabButton">
+							<text bold pos="4,4" size="60x19">Test3</text>
 						</widget>
 					</container>
-					<widget pos="0,32" size="72x0" type="*widget.Shadow">
-						<linearGradient endColor="shadow" pos="0,-8" size="72x8"/>
+					<widget pos="0,32" size="68x0" type="*widget.Shadow">
+						<linearGradient endColor="shadow" pos="0,-8" size="68x8"/>
 					</widget>
-					<widget pos="66,0" size="6x32" type="*widget.scrollBarArea">
+					<widget pos="62,0" size="6x32" type="*widget.scrollBarArea">
 						<widget pos="3,0" size="3x16" type="*widget.scrollBar">
 							<rectangle fillColor="scrollbar" radius="3" size="3x16"/>
 						</widget>
 					</widget>
 				</widget>
-				<container pos="0,36" size="72x36">
+				<container pos="0,36" size="68x36">
 					<widget size="36x36" type="*widget.Button">
 						<rectangle radius="4" size="36x36"/>
 						<rectangle size="36x36"/>
@@ -31,9 +31,9 @@
 					</widget>
 				</container>
 			</container>
-			<rectangle fillColor="shadow" pos="72,0" size="4x72"/>
-			<rectangle fillColor="primary" pos="72,0" radius="4" size="4x32"/>
-			<widget pos="76,0" size="54x72" type="*widget.Label">
+			<rectangle fillColor="shadow" pos="68,0" size="1x72"/>
+			<rectangle fillColor="primary" pos="68,0" radius="4" size="4x28"/>
+			<widget pos="72,0" size="54x72" type="*widget.Label">
 				<widget size="54x72" type="*widget.RichText">
 					<text pos="8,8" size="38x19">Text 1</text>
 				</widget>
