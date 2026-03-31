@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 )
 
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis consectetur nisi. Suspendisse id interdum felis. Sed egestas eget tellus eu pharetra. Praesent pulvinar sed massa id placerat. Etiam sem libero, semper vitae consequat ut, volutpat id mi. Mauris volutpat pellentesque convallis. Curabitur rutrum venenatis orci nec ornare. Maecenas quis pellentesque neque. Aliquam consectetur dapibus nulla, id maximus odio ultrices ac. Sed luctus at felis sed faucibus. Cras leo augue, congue in velit ut, mattis rhoncus lectus.
@@ -71,10 +72,13 @@ func BenchmarkText_howManyRunesFit_latin(b *testing.B) {
 	maxWidth := float32(200)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
+	fontFace := painter.CachedFontFace(textStyle, nil, nil)
 	measurer := func(text []rune) fyne.Size {
-		return fyne.MeasureText(string(text), textSize, textStyle)
+		size, _ := painter.MeasureString(fontFace.Fonts, string(text), textSize, textStyle)
+		return size
 	}
 	charWidth := measurer([]rune("z")).Width
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		howManyRunesFit([]rune(text), maxWidth, charWidth, measurer)
 	}
@@ -85,10 +89,15 @@ func BenchmarkText_howManyRunesFit_chinese(b *testing.B) {
 	maxWidth := float32(200)
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
+	fontFace := painter.CachedFontFace(textStyle, nil, nil)
 	measurer := func(text []rune) fyne.Size {
-		return fyne.MeasureText(string(text), textSize, textStyle)
+		size, _ := painter.MeasureString(fontFace.Fonts, string(text), textSize, textStyle)
+		return size
 	}
 	charWidth := measurer([]rune("z")).Width
+	// make sure the right font for chinese text is loaded
+	measurer([]rune("昔"))
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		howManyRunesFit([]rune(text), maxWidth, charWidth, measurer)
 	}
