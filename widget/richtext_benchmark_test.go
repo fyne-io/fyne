@@ -45,7 +45,7 @@ func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 	richText.Wrapping = wrap
 	richText.Truncation = fyne.TextTruncateOff
 	for n := 0; n < b.N; n++ {
-		cache.ResetFontMetrics()
+		cache.ClearFontMetrics()
 		lineBounds(richText, richText.Segments[0], 10, fyne.NewSize(10, 14), measurer)
 	}
 }
