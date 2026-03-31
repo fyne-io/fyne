@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 )
 
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quis consectetur nisi. Suspendisse id interdum felis. Sed egestas eget tellus eu pharetra. Praesent pulvinar sed massa id placerat. Etiam sem libero, semper vitae consequat ut, volutpat id mi. Mauris volutpat pellentesque convallis. Curabitur rutrum venenatis orci nec ornare. Maecenas quis pellentesque neque. Aliquam consectetur dapibus nulla, id maximus odio ultrices ac. Sed luctus at felis sed faucibus. Cras leo augue, congue in velit ut, mattis rhoncus lectus.
@@ -44,6 +45,7 @@ func benchmarkTextLineBounds(wrap fyne.TextWrap, b *testing.B) {
 	richText.Wrapping = wrap
 	richText.Truncation = fyne.TextTruncateOff
 	for n := 0; n < b.N; n++ {
+		cache.ResetFontMetrics()
 		lineBounds(richText, richText.Segments[0], 10, fyne.NewSize(10, 14), measurer)
 	}
 }
