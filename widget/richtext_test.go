@@ -1320,7 +1320,7 @@ func TestText_findSpaceIndex(t *testing.T) {
 	}{
 		"no_space_fallback": {
 			text: "iiiiiiiiiimmmmmmmmmm",
-			want: 19,
+			want: -1,
 		},
 		"single_space": {
 			text: "foobar foobar",

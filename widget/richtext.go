@@ -932,17 +932,13 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	return bounds
 }
 
-// findSpaceIndex accepts a slice of runes and a fallback index
-// findSpaceIndex returns the index of the last space in the text, or fallback if there are no spaces
-func findSpaceIndex(text []rune, fallback int) int {
-	curIndex := fallback
+// findSpaceIndex accepts a slice of runes and a start position index
+// findSpaceIndex returns the index of the last space in the text, or -1 if there are no spaces
+func findSpaceIndex(text []rune, curIndex int) int {
 	for ; curIndex >= 0; curIndex-- {
 		if unicode.IsSpace(text[curIndex]) {
 			break
 		}
-	}
-	if curIndex < 0 {
-		return fallback
 	}
 	return curIndex
 }
@@ -1065,9 +1061,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				yPos += lineHeight
 				continue
 			}
-
-			oldHigh := high
-			if fitCount < 1 { // even a character won't fit
+			if fitCount == 0 { // even a character won't fit
 				if measureWidth < max.Width {
 					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
 					reuse++
@@ -1090,15 +1084,19 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				if high > l.end {
 					return bounds, yPos
 				}
-			} else {
-				spaceIndex := findSpaceIndex(sub, fitCount)
+				continue
+			}
+			spaceIndex := findSpaceIndex(sub, fitCount)
+			if spaceIndex >= 0 {
 				if spaceIndex == 0 {
 					spaceIndex = 1
 				}
-
 				high = low + spaceIndex
+				continue
 			}
-			if high == fitCount && measureWidth < max.Width { // add a newline as there is more space on next
+			oldHigh := high
+			high = low + fitCount
+			if low == 0 && measureWidth < max.Width { // add a newline as there is more space on next
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false})
 				reuse++
 				high = oldHigh
