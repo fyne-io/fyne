@@ -90,13 +90,13 @@ func BenchmarkText_howManyRunesFit_chinese(b *testing.B) {
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
 	fontFace := painter.CachedFontFace(textStyle, nil, nil)
+	// make sure the right font for chinese text is loaded
+	fontFace.Fonts.ResolveFace('昔')
 	measurer := func(text []rune) fyne.Size {
 		size, _ := painter.MeasureString(fontFace.Fonts, string(text), textSize, textStyle)
 		return size
 	}
 	charWidth := measurer([]rune("z")).Width
-	// make sure the right font for chinese text is loaded
-	measurer([]rune("昔"))
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		howManyRunesFit([]rune(text), maxWidth, charWidth, measurer)
