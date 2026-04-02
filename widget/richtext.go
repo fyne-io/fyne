@@ -738,7 +738,7 @@ func (r *textRenderer) Refresh() {
 			} else if isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
-				r.associateSiblings(hl)
+				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
 			}
 			objs = append(objs, obj)
@@ -762,7 +762,7 @@ func (r *textRenderer) Refresh() {
 	r.obj.cleanVisualCache()
 }
 
-func (r *textRenderer) associateSiblings(hl *widget.Hyperlink) {
+func (r *textRenderer) associateSiblings(hl *Hyperlink, hlSeg *HyperlinkSegment, reuse int) {
 	hl.siblings = hl.siblings[:0]
 	for prev := 0; prev < reuse; prev++ {
 		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
