@@ -738,14 +738,7 @@ func (r *textRenderer) Refresh() {
 			} else if isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
-				// create the all-to-all sibling list linking the *Hyperlinks
-				// rendering each wrapped row of the same HyperlinkSegment
-				hl.siblings = hl.siblings[:0]
-				for prev := 0; prev < reuse; prev++ {
-					prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
-					prevHL.siblings = append(prevHL.siblings, hl)
-					hl.siblings = append(hl.siblings, prevHL)
-				}
+				r.associateSiblings(hl)
 				hl.Refresh()
 			}
 			objs = append(objs, obj)
@@ -767,6 +760,15 @@ func (r *textRenderer) Refresh() {
 	canvas.Refresh(r.obj.super())
 
 	r.obj.cleanVisualCache()
+}
+
+func (r *textRenderer) associateSiblings(hl *widget.Hyperlink) {
+	hl.siblings = hl.siblings[:0]
+	for prev := 0; prev < reuse; prev++ {
+		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+		prevHL.siblings = append(prevHL.siblings, hl)
+		hl.siblings = append(hl.siblings, prevHL)
+	}
 }
 
 func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
