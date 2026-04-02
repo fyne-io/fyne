@@ -426,7 +426,14 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	if (contractClass == NULL) { // API 19
 		return "ERROR: Cannot list content for URI";
 	}
-	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+
+	bool tree = isTreeURI(env, contractClass, uri);
+	bool document = isDocumentURI(env, ctx, contractClass, uri);
+	char *methodName = "getDocumentId";
+	if (tree && !document) {
+		methodName = "getTreeDocumentId";
+	}
+	jmethodID getDoc = find_static_method(env, contractClass, methodName, "(Landroid/net/Uri;)Ljava/lang/String;");
 	if (getDoc == NULL) { // API 21
 		return "ERROR: Cannot list content for URI";
 	}
@@ -440,9 +447,6 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
-	if (getDoc == NULL) { // API 26
-		return "ERROR: Cannot list content for URI";
-	}
 
 	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
 	if ((*env)->ExceptionCheck(env)) {
