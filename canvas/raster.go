@@ -128,10 +128,6 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 	return pix.r
 }
 
-type subImg interface {
-	SubImage(r image.Rectangle) image.Image
-}
-
 // NewRasterFromImage returns a new Raster instance that is rendered from the Go
 // image.Image passed in.
 // Rasters returned from this method will map pixel for pixel to the screen
@@ -146,19 +142,8 @@ func NewRasterFromImage(img image.Image) *Raster {
 			rect := image.Rect(0, 0, w, h)
 
 			switch {
-			case w == bounds.Max.X && h == bounds.Max.Y:
+			case w == bounds.Dx() && h == bounds.Dy():
 				return img
-			case w >= bounds.Max.X && h >= bounds.Max.Y:
-				// try quickly truncating
-				if sub, ok := img.(subImg); ok {
-					return sub.SubImage(image.Rectangle{
-						Min: bounds.Min,
-						Max: image.Point{
-							X: bounds.Min.X + w,
-							Y: bounds.Min.Y + h,
-						},
-					})
-				}
 			default:
 				if !rect.Overlaps(bounds) {
 					return image.NewUniform(color.RGBA{})
