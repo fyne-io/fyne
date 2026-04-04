@@ -81,6 +81,10 @@ func (d *Decoder) Draw(width, height int) (*image.NRGBA, error) {
 	x, y := svgOffset(d.icon, imgW, imgH)
 	d.icon.SetTarget(x, y, float64(imgW), float64(imgH))
 
+	// Rasterize to RGBA, then copy to NRGBA.
+	// We do this because golang.org/x/image has a fast path for RGBA dst image,
+	// and the fast path is ~69% faster, even with the overhead of copying the RGBA to
+	// NRGBA for returning.
 	img := image.NewRGBA(image.Rect(0, 0, imgW, imgH))
 	scanner := rasterx.NewScannerGV(config.Width, config.Height, img, img.Bounds())
 	raster := rasterx.NewDasher(width, height, scanner)
