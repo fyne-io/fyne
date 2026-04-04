@@ -213,9 +213,22 @@ func loadMeasureFont(data fyne.Resource) *font.Face {
 	return loaded
 }
 
+func isSimple(s string) bool {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 0x80 || c == '\t' {
+			return false
+		}
+	}
+	return true
+}
+
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+	if isSimple(s) {
+		return walkStringFast(f, s, textSize)
+	}
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32) {})
 }
 
@@ -253,6 +266,34 @@ func tabStop(spacew, x float32, tabWidth int) float32 {
 	tabw := spacew * float32(tabWidth)
 	tabs, _ := math.Modf(float64((x + tabw) / tabw))
 	return tabw * float32(tabs)
+}
+
+func lineMetrics(face *font.Face, size float32) (ascent, thickness float32) {
+	ext, ok := face.FontHExtents()
+	if !ok {
+		return 0, 0
+	}
+	scale := size / float32(face.Upem())
+	thickness = (ext.Ascender - ext.Descender + ext.LineGap) * scale
+	return ext.Ascender * scale, thickness
+}
+
+func walkStringFast(faces shaping.Fontmap, s string, textSize float32) (size fyne.Size, base float32) {
+	face := faces.ResolveFace('a')
+	var adv float32
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c == '\r' {
+			continue
+		}
+		gid, ok := face.Font.NominalGlyph(rune(c))
+		if ok {
+			adv += face.HorizontalAdvance(gid)
+		}
+	}
+	scaled := adv * textSize / float32(face.Upem())
+	ascent, thickness := lineMetrics(face, textSize)
+	return fyne.NewSize(scaled, thickness), ascent
 }
 
 func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style fyne.TextStyle, advance *float32, scale float32,
