@@ -206,8 +206,16 @@ func (i *Image) Resize(s fyne.Size) {
 	}
 
 	i.baseObject.Resize(s)
-	if i.isSVG || i.Image == nil {
-		i.Refresh() // we need to rasterise at the new size
+	if i.isSVG {
+		// we need to rasterize at the new size
+		tex, err := i.renderSVG(s.Width, s.Height)
+		if err != nil {
+			fyne.LogError("Failed to render SVG", err)
+			return
+		}
+		i.Image = tex
+	} else if i.Image == nil {
+		i.Refresh()
 	} else {
 		Refresh(i) // just re-size using GPU scaling
 	}
