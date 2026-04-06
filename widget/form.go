@@ -194,20 +194,16 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 }
 
 func (f *Form) createLabel(text string) fyne.CanvasObject {
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-	label := &canvas.Text{
+	label := &Label{
 		Text:      text,
 		Alignment: fyne.TextAlignTrailing,
-		Color:     th.Color(theme.ColorNameForeground, v),
-		TextSize:  th.Size(theme.SizeNameText),
 		TextStyle: fyne.TextStyle{Bold: true},
 	}
 	if f.isVertical() {
 		label.Alignment = fyne.TextAlignLeading
 	}
 
-	return &fyne.Container{Layout: &formLabelLayout{form: f}, Objects: []fyne.CanvasObject{label}}
+	return label
 }
 
 func (f *Form) updateButtons() {
@@ -383,20 +379,16 @@ func (f *Form) updateHelperText(item *FormItem) {
 }
 
 func (f *Form) updateLabels() {
-	th := f.Theme()
-	v := fyne.CurrentApp().Settings().ThemeVariant()
-
 	for i, item := range f.Items {
-		l := f.itemGrid.Objects[i*2].(*fyne.Container).Objects[0].(*canvas.Text)
-		l.TextSize = th.Size(theme.SizeNameText)
+		l := f.itemGrid.Objects[i*2].(*Label)
 		if dis, ok := item.Widget.(fyne.Disableable); ok {
 			if dis.Disabled() {
-				l.Color = th.Color(theme.ColorNameDisabled, v)
+				l.Importance = LowImportance
 			} else {
-				l.Color = th.Color(theme.ColorNameForeground, v)
+				l.Importance = MediumImportance
 			}
 		} else {
-			l.Color = th.Color(theme.ColorNameForeground, v)
+			l.Importance = MediumImportance
 		}
 
 		l.Text = item.Text
@@ -442,33 +434,6 @@ func NewForm(items ...*FormItem) *Form {
 	form.ExtendBaseWidget(form)
 
 	return form
-}
-
-type formLabelLayout struct {
-	form *Form
-}
-
-func (f formLabelLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
-	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
-	xPad := innerPad
-	yPos := float32(0)
-	if !f.form.isVertical() {
-		xPad += innerPad
-		yPos = innerPad
-	}
-	objs[0].Move(fyne.NewPos(innerPad, yPos))
-	objs[0].Resize(fyne.NewSize(size.Width-xPad, objs[0].MinSize().Height))
-}
-
-func (f formLabelLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
-	innerPad := f.form.Theme().Size(theme.SizeNameInnerPadding)
-	min0 := objs[0].MinSize()
-
-	if !f.form.isVertical() {
-		min0 = min0.AddWidthHeight(innerPad, 0)
-	}
-
-	return min0.AddWidthHeight(innerPad, 0)
 }
 
 type formItemLayout struct {

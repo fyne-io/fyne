@@ -3,9 +3,11 @@
 		<widget pos="4,4" size="187x35" type="*widget.Form">
 			<container size="187x35">
 				<container size="187x35">
-					<container size="123x35">
-						<text alignment="trailing" bold pos="8,8" size="107x19">Extended entry</text>
-					</container>
+					<widget size="123x35" type="*widget.Label">
+						<widget size="123x35" type="*widget.RichText">
+							<text alignment="trailing" bold pos="8,8" size="107x19">Extended entry</text>
+						</widget>
+					</widget>
 					<widget pos="127,0" size="60x35" type="*widget.SelectEntry">
 						<rectangle fillColor="inputBackground" pos="2,2" radius="4" size="56x31"/>
 						<rectangle pos="1,1" radius="4" size="58x32" strokeColor="inputBorder" strokeWidth="2"/>
