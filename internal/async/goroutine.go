@@ -31,6 +31,8 @@ func EnsureNotMain(fn func()) {
 	}
 
 	log.Println("*** Error in Fyne call thread, fyne.Do[AndWait] called from main goroutine ***")
+	log.Println("*** This error needs to be addressed as it will become a deadlock soon ***")
+	log.Println("*** The next major Fyne release will remove this safety! ***")
 
 	logStackTop(2)
 	go fn()
@@ -48,6 +50,8 @@ func EnsureMain(fn func()) {
 	}
 
 	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***")
+	log.Println("*** This error needs to be addressed as it could cause concurrent errors soon ***")
+	log.Println("*** The next major Fyne release will remove this safety! ***")
 
 	logStackTop(1)
 	fyne.DoAndWait(fn)
