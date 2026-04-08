@@ -176,7 +176,11 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.arbitraryPolygonProgram, arbitraryPolygonUniforms()...)
+	p.getUniformLocations(p.arbitraryPolygonProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"vertex_count", "vertices", "corner_radii",
+		"fill_color", "stroke_width", "stroke_color",
+	)
 	p.enableAttribArrays(p.arbitraryPolygonProgram, "vert", "normal")
 }
 

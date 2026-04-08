@@ -10,14 +10,14 @@ precision mediump int;
 precision lowp sampler2D;
 #endif
 
-#define MAX_VERTICES 16
+#define MAX_VERTICES 32
 
 uniform vec2 frame_size;
 uniform vec4 rect_coords;
 uniform float edge_softness;
 
 uniform vec2 vertices[MAX_VERTICES];
-uniform float radii[MAX_VERTICES];
+uniform float corner_radii[MAX_VERTICES];
 uniform float vertex_count;
 
 uniform vec4 fill_color;
@@ -51,7 +51,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         if (m == num - 2) p_prev2 = vertices[m];
         if (m == num - 1) {
             p_prev1 = vertices[m];
-            r_prev = radii[m];
+            r_prev = corner_radii[m];
             break;
         }
     }
@@ -121,7 +121,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         // Shift values for the next iteration
         p_prev2 = point2;
         p_prev1 = point3;
-        r_prev = radii[k];
+        r_prev = corner_radii[k];
     }
 
     // Phase 2: Distance to straight edge segments between tangent points

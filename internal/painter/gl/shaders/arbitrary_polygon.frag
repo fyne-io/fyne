@@ -1,13 +1,13 @@
 #version 110
 
-#define MAX_VERTICES 16
+#define MAX_VERTICES 32
 
 uniform vec2 frame_size;
 uniform vec4 rect_coords;
 uniform float edge_softness;
 
 uniform vec2 vertices[MAX_VERTICES];
-uniform float radii[MAX_VERTICES];
+uniform float corner_radii[MAX_VERTICES];
 uniform float vertex_count;
 
 uniform vec4 fill_color;
@@ -43,7 +43,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         vec2 point1 = vertices[i];
         vec2 point2 = vertices[j];
         vec2 point3 = vertices[k];
-        float radius = radii[j];
+        float radius = corner_radii[j];
 
         vec2 pos = p - point2;
         vec2 a = normalize(point1 - point2);

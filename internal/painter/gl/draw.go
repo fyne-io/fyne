@@ -270,7 +270,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, "edge_softness", edgeSoftnessScaled)
 
-	numPoints := int(fyne.Min(canvas.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
+	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
 	p.SetUniform1f(program, "vertex_count", float32(numPoints))
 
 	size := polygon.Size()
@@ -279,7 +279,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 
 	fixedPoints := make([]fyne.Position, numPoints)
-	radii := make([]float32, numPoints)
+	cornerRadii := make([]float32, numPoints)
 
 	for i := 0; i < numPoints; i++ {
 		px, py := polygon.Points[i].X, polygon.Points[i].Y
@@ -293,17 +293,16 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 		if i < len(polygon.CornerRadii) {
 			radius = polygon.CornerRadii[i]
 		}
-		radii[i] = radius
+		cornerRadii[i] = radius
 	}
 
-	scaledRadii := paint.GetMaximumCornerRadiusPolygon(fixedPoints, radii)
-
+	cornerRadii = paint.GetMaximumCornerRadii(fixedPoints, cornerRadii)
 	for i := 0; i < numPoints; i++ {
 		pXScaled, pYScaled := roundToPixel(fixedPoints[i].X*p.pixScale, 1.0), roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
-		p.SetUniform2f(program, fmt.Sprintf("vertices[%d]", i), pXScaled, pYScaled)
+		p.ctx.Uniform2f(p.ctx.GetUniformLocation(p.arbitraryPolygonProgram.ref, fmt.Sprintf("vertices[%d]", i)), pXScaled, pYScaled)
 
-		radiusScaled := roundToPixel(scaledRadii[i]*p.pixScale, 1.0)
-		p.SetUniform1f(program, fmt.Sprintf("radii[%d]", i), radiusScaled)
+		radiusScaled := roundToPixel(cornerRadii[i]*p.pixScale, 1.0)
+		p.ctx.Uniform1f(p.ctx.GetUniformLocation(p.arbitraryPolygonProgram.ref, fmt.Sprintf("corner_radii[%d]", i)), radiusScaled)
 	}
 
 	// Colors and Stroke

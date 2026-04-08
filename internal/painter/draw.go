@@ -12,7 +12,10 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-const quarterCircleControl = 1 - 0.55228
+const (
+	quarterCircleControl            = 1 - 0.55228
+	ArbitraryPolygonVerticesMaximum = 32
+)
 
 // DrawArc rasterizes the given arc object into an image.
 // The scale function is used to understand how many pixels are required per unit of size.
@@ -190,13 +193,12 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 	width := int(scale(size.Width + vectorPad*2))
 	height := int(scale(size.Height + vectorPad*2))
 	vertices := polygon.Points
-	radii := polygon.CornerRadii
-	num := int(fyne.Min(canvas.ArbitraryPolygonVerticesMaximum, float32(len(vertices))))
+	numPoints := int(fyne.Min(ArbitraryPolygonVerticesMaximum, float32(len(vertices))))
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(int(size.Width), int(size.Height), raw, raw.Bounds())
 
-	if num < 3 {
+	if numPoints < 3 {
 		return raw
 	}
 
@@ -204,12 +206,12 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 		return fyne.Min(fyne.Max(p.X, 0), fyne.Max(size.Width, 0)), fyne.Min(fyne.Max(p.Y, 0), fyne.Max(size.Height, 0))
 	}
 
-	xScaled := make([]float64, num)
-	yScaled := make([]float64, num)
-	radius := make([]float32, num)
+	xScaled := make([]float64, numPoints)
+	yScaled := make([]float64, numPoints)
+	cornerRadii := make([]float32, numPoints)
 
-	fixedPoints := make([]fyne.Position, num)
-	for i := 0; i < num; i++ {
+	fixedPoints := make([]fyne.Position, numPoints)
+	for i := 0; i < numPoints; i++ {
 		px, py := vertices[i].X, vertices[i].Y
 		if polygon.NormalizedPoints {
 			px, py = px*size.Width, py*size.Height
@@ -219,24 +221,23 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 		xScaled[i] = float64(scale(px + vectorPad))
 		yScaled[i] = float64(scale(py + vectorPad))
 
-		var r float32
-		if i < len(radii) {
-			r = radii[i]
+		var radius float32
+		if i < len(polygon.CornerRadii) {
+			radius = polygon.CornerRadii[i]
 		}
-		radius[i] = r
+		cornerRadii[i] = radius
 	}
 
-	radius = GetMaximumCornerRadiusPolygon(fixedPoints, radius)
-
-	radiiScaled := make([]float64, num)
-	for i := 0; i < num; i++ {
-		radiiScaled[i] = float64(scale(radius[i]))
+	cornerRadii = GetMaximumCornerRadii(fixedPoints, cornerRadii)
+	cornerRadiiScaled := make([]float64, numPoints)
+	for i := 0; i < numPoints; i++ {
+		cornerRadiiScaled[i] = float64(scale(cornerRadii[i]))
 	}
 
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawArbitraryPolygon(xScaled, yScaled, radiiScaled, filler)
+		drawArbitraryPolygon(xScaled, yScaled, cornerRadiiScaled, filler)
 		filler.Draw()
 	}
 
@@ -244,7 +245,7 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
-		drawArbitraryPolygon(xScaled, yScaled, radiiScaled, dasher)
+		drawArbitraryPolygon(xScaled, yScaled, cornerRadiiScaled, dasher)
 		dasher.Draw()
 	}
 
@@ -913,12 +914,12 @@ func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoint
 	return fyne.NewPos(p1x, p1y), fyne.NewPos(p2x, p2y), cp
 }
 
-// GetMaximumCornerRadiusPolygon computes the maximum possible corner radius for an individual corner,
-// considering the specified corner radius, the radii of adjacent corners, and the maximum radii
-// allowed for the width and height of the shape. Corner radius may utilize unused capacity from adjacent corners with radius smaller than maximum value.
+// GetMaximumCornerRadii calculates the maximum possible corner radii for an arbitrary polygon with given vertices and desired corner radii.
+// It ensures that the specified corner radius do not cause overlaps between adjacent corners by calculating the interior angles at each vertex
+// and adjusting the radius proportionally if necessary. The function returns a slice of adjusted corner radii that fit within the geometry of the polygon.
 //
-// This is typically used for drawing circular corners in arbitrary polygons with different corner radii.
-func GetMaximumCornerRadiusPolygon(points []fyne.Position, radii []float32) []float32 {
+// This is typically used for drawing arbitrary polygons with rounded corners, ensuring that the corners do not overlap and the shape remains visually consistent.
+func GetMaximumCornerRadii(points []fyne.Position, radii []float32) []float32 {
 	n := len(points)
 	if n < 3 || len(radii) != n {
 		return radii

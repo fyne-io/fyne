@@ -13,10 +13,6 @@ const (
 	// This constant represents the maximum possible corner radius, resulting in a circular appearance.
 	// Since: 2.7
 	RadiusMaximum float32 = math.MaxFloat32
-
-	// ArbitraryPolygonVerticesMaximum defines the maximum number of vertices supported by the arbitrary polygon
-	// Since: 2.8
-	ArbitraryPolygonVerticesMaximum = 16
 )
 
 // Refresh instructs the containing canvas to refresh the specified obj.

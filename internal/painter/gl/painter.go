@@ -6,7 +6,6 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -111,23 +110,6 @@ func (p *painter) UpdateVertexArray(pState ProgramState, name string, size, stri
 
 	p.ctx.VertexAttribPointerWithOffset(a, size, float, false, stride*floatSize, offset*floatSize)
 	p.logError()
-}
-
-// arbitraryPolygonUniforms returns all uniform names needed for the arbitrary polygon shader,
-// including the array element names for vertices[0..15] and radii[0..15].
-func arbitraryPolygonUniforms() []string {
-	names := []string{
-		"frame_size", "rect_coords", "edge_softness",
-		"vertex_count",
-		"fill_color", "stroke_width", "stroke_color",
-	}
-	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
-		names = append(names, fmt.Sprintf("vertices[%d]", i))
-	}
-	for i := 0; i < canvas.ArbitraryPolygonVerticesMaximum; i++ {
-		names = append(names, fmt.Sprintf("radii[%d]", i))
-	}
-	return names
 }
 
 // Declare conformity to Painter interface
