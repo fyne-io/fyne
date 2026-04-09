@@ -189,11 +189,8 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	}
 
 	advance := float32(0)
-	y := math.MinInt
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
-		if y == math.MinInt {
-			y = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
-		}
+		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))
