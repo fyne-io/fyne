@@ -816,7 +816,11 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		} else if c, ok := text.(*fyne.Container); ok {
 			wid := c.Objects[0]
 			if link, ok := wid.(*Hyperlink); ok {
-				textSize := theme.SizeForWidget(link.SizeName, r.obj)
+				sizeName := link.SizeName
+				if sizeName == "" {
+					sizeName = theme.SizeNameText
+				}
+				textSize := theme.SizeForWidget(sizeName, r.obj)
 				s, base := driver.RenderedTextSize(link.Text, textSize, link.TextStyle, nil)
 				if base > tallestBaseline {
 					if tallestBaseline > 0 {
