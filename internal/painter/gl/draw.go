@@ -11,7 +11,7 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
-const edgeSoftness = 1.0
+const edgeSoftness = 0.5
 
 func (p *painter) createBuffer(size int) Buffer {
 	vbo := p.ctx.CreateBuffer()
