@@ -23,13 +23,6 @@ func (p *painter) createBuffer(size int) Buffer {
 	return vbo
 }
 
-func (p *painter) defineVertexArray(prog Program, name string, size, stride, offset int) {
-	vertAttrib := p.ctx.GetAttribLocation(prog, name)
-	p.ctx.EnableVertexAttribArray(vertAttrib)
-	p.ctx.VertexAttribPointerWithOffset(vertAttrib, size, float, false, stride*floatSize, offset*floatSize)
-	p.logError()
-}
-
 func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	if b.Radius == 0 {
 		return
@@ -72,8 +65,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 
 	p.ctx.UseProgram(p.blurProgram.ref)
 	p.updateBuffer(p.blurProgram.buff, points)
-	p.defineVertexArray(p.blurProgram.ref, "vert", 3, 5, 0)
-	p.defineVertexArray(p.blurProgram.ref, "vertTexCoord", 2, 5, 3)
+	p.UpdateVertexArray(p.blurProgram, "vert", 3, 5, 0)
+	p.UpdateVertexArray(p.blurProgram, "vertTexCoord", 2, 5, 3)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
