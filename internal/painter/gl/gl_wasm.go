@@ -69,8 +69,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.program, "text", "alpha", "cornerRadius", "size", "inset")
-	p.enableAttribArrays(p.program, "vert", "vertTexCoord")
 
 	p.blurProgram = ProgramState{
 		ref:        p.createProgram("blur_es"),
@@ -78,8 +76,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.blurProgram, "radius", "size", "kernel")
-	p.enableAttribArrays(p.blurProgram, "vert", "vertTexCoord")
 
 	p.lineProgram = ProgramState{
 		ref:        p.createProgram("line_es"),
@@ -87,8 +83,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.lineProgram, "color", "feather", "lineWidth")
-	p.enableAttribArrays(p.lineProgram, "vert", "normal")
 
 	p.rectangleProgram = ProgramState{
 		ref:        p.createProgram("rectangle_es"),
@@ -96,11 +90,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(
-		p.rectangleProgram,
-		"frame_size", "rect_coords", "stroke_width", "fill_color", "stroke_color",
-	)
-	p.enableAttribArrays(p.rectangleProgram, "vert", "normal")
 
 	p.roundRectangleProgram = ProgramState{
 		ref:        p.createProgram("round_rectangle_es"),
@@ -108,13 +97,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.roundRectangleProgram,
-		"frame_size", "rect_coords",
-		"stroke_width_half", "rect_size_half",
-		"radius", "edge_softness",
-		"fill_color", "stroke_color",
-	)
-	p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
 
 	p.polygonProgram = ProgramState{
 		ref:        p.createProgram("polygon_es"),
@@ -122,13 +104,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.polygonProgram,
-		"frame_size", "rect_coords", "edge_softness",
-		"outer_radius", "angle", "sides",
-		"fill_color", "corner_radius",
-		"stroke_width", "stroke_color",
-	)
-	p.enableAttribArrays(p.polygonProgram, "vert", "normal")
 
 	p.arcProgram = ProgramState{
 		ref:        p.createProgram("arc_es"),
@@ -136,15 +111,6 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.arcProgram,
-		"frame_size", "rect_coords",
-		"inner_radius", "outer_radius",
-		"start_angle", "end_angle",
-		"edge_softness", "corner_radius",
-		"stroke_width", "stroke_color",
-		"fill_color",
-	)
-	p.enableAttribArrays(p.arcProgram, "vert", "normal")
 
 	p.bezierCurveProgram = ProgramState{
 		ref:        p.createProgram("bezier_curve_es"),
@@ -152,40 +118,12 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
-	p.getUniformLocations(p.bezierCurveProgram,
-		"frame_size", "rect_coords", "edge_softness",
-		"start_point", "end_point", "num_control_points",
-		"control_point1", "control_point2",
-		"stroke_width_half", "stroke_color",
-	)
-	p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
 
 	p.arbitraryPolygonProgram = ProgramState{
 		ref:        p.createProgram("arbitrary_polygon_es"),
 		buff:       p.createBuffer(16),
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
-	}
-	p.getUniformLocations(p.arbitraryPolygonProgram,
-		"frame_size", "rect_coords", "edge_softness",
-		"vertex_count", "vertices", "corner_radii",
-		"fill_color", "stroke_width", "stroke_color",
-	)
-	p.enableAttribArrays(p.arbitraryPolygonProgram, "vert", "normal")
-}
-
-func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
-	for _, name := range names {
-		u := p.ctx.GetUniformLocation(pState.ref, name)
-		pState.uniforms[name] = &UniformState{ref: u}
-	}
-}
-
-func (p *painter) enableAttribArrays(pState ProgramState, names ...string) {
-	for _, name := range names {
-		a := p.ctx.GetAttribLocation(pState.ref, name)
-		p.ctx.EnableVertexAttribArray(a)
-		pState.attributes[name] = a
 	}
 }
 
@@ -359,6 +297,10 @@ func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
 
 func (c *xjsContext) Uniform2f(uniform Uniform, v0, v1 float32) {
 	gl.Uniform2f(gl.Uniform(uniform), v0, v1)
+}
+
+func (c *xjsContext) Uniform2fv(uniform Uniform, v []float32) {
+	gl.Uniform2fv(gl.Uniform(uniform), v)
 }
 
 func (c *xjsContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {

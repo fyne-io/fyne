@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -297,13 +296,17 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 
 	cornerRadii = paint.GetMaximumCornerRadii(fixedPoints, cornerRadii)
-	for i := 0; i < numPoints; i++ {
-		pXScaled, pYScaled := roundToPixel(fixedPoints[i].X*p.pixScale, 1.0), roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
-		p.ctx.Uniform2f(p.ctx.GetUniformLocation(p.arbitraryPolygonProgram.ref, fmt.Sprintf("vertices[%d]", i)), pXScaled, pYScaled)
 
-		radiusScaled := roundToPixel(cornerRadii[i]*p.pixScale, 1.0)
-		p.ctx.Uniform1f(p.ctx.GetUniformLocation(p.arbitraryPolygonProgram.ref, fmt.Sprintf("corner_radii[%d]", i)), radiusScaled)
+	verticesScaled := make([]float32, numPoints*2)
+	cornerRadiiScaled := make([]float32, numPoints)
+	for i := 0; i < numPoints; i++ {
+		verticesScaled[i*2] = roundToPixel(fixedPoints[i].X*p.pixScale, 1.0)
+		verticesScaled[i*2+1] = roundToPixel(fixedPoints[i].Y*p.pixScale, 1.0)
+		cornerRadiiScaled[i] = roundToPixel(cornerRadii[i]*p.pixScale, 1.0)
 	}
+
+	p.SetUniform2fv(program, "vertices", verticesScaled)
+	p.SetUniform1fv(program, "corner_radii", cornerRadiiScaled)
 
 	// Colors and Stroke
 	r, g, b, a := getFragmentColor(polygon.FillColor)

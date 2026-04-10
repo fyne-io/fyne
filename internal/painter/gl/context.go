@@ -40,6 +40,7 @@ type context interface {
 	Uniform1f(uniform Uniform, v float32)
 	Uniform1fv(uniform Uniform, v []float32)
 	Uniform2f(uniform Uniform, v0, v1 float32)
+	Uniform2fv(uniform Uniform, v []float32)
 	Uniform4f(uniform Uniform, v0, v1, v2, v3 float32)
 	UseProgram(program Program)
 	VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int)

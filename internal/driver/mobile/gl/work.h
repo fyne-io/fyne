@@ -79,6 +79,7 @@ typedef enum {
 	glfnUniform1f,
 	glfnUniform1fv,
 	glfnUniform2f,
+	glfnUniform2fv,
 	glfnUniform4f,
 	glfnUniform4fv,
 	glfnUseProgram,
