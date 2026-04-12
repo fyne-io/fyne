@@ -99,7 +99,7 @@ const void* insertDarwinMenuItem(const void* m, const char* label, const char* k
     }
 
     if (isSeparator) {
-        item = [NSMenuItem separatorItem];
+        item = [[NSMenuItem separatorItem] retain];
     } else {
         item = [[NSMenuItem alloc]
             initWithTitle:[NSString stringWithUTF8String:label]
