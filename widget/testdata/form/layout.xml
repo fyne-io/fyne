@@ -21,6 +21,8 @@
 								</widget>
 							</widget>
 						</widget>
+						<container size="0x0">
+						</container>
 					</widget>
 					<widget pos="0,39" size="51x35" type="*widget.Label">
 						<widget size="51x35" type="*widget.RichText">
@@ -40,6 +42,8 @@
 								</widget>
 							</widget>
 						</widget>
+						<container size="0x0">
+						</container>
 					</widget>
 				</container>
 				<container pos="0,78" size="187x36">

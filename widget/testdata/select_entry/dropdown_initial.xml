@@ -13,11 +13,8 @@
 					</widget>
 				</widget>
 			</widget>
-			<widget pos="92,2" size="36x31" type="*widget.Button">
-				<rectangle radius="4" size="36x31"/>
-				<rectangle size="36x31"/>
-				<image fillMode="contain" pos="8,5" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
-			</widget>
+			<container pos="128,2" size="0x31">
+			</container>
 		</widget>
 	</content>
 </canvas>

@@ -11,6 +11,8 @@
 					<text pos="8,6" size="0x19"></text>
 				</widget>
 			</widget>
+			<container size="0x0">
+			</container>
 		</widget>
 	</content>
 </canvas>

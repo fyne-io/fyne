@@ -371,7 +371,7 @@ func TestEntry_Disableable(t *testing.T) {
 
 	entry.Enable()
 	assert.False(t, entry.Disabled())
-	test.AssertRendersToMarkup(t, "entry/disableable_enabled_empty.xml", c)
+	test.AssertRendersToMarkup(t, "entry/disableable_enabled_empty_without_container.xml", c)
 
 	entry.SetPlaceHolder("Type!")
 	assert.False(t, entry.Disabled())
@@ -1438,7 +1438,7 @@ func TestEntry_SetPlaceHolder_ByField(t *testing.T) {
 	entry.PlaceHolder = "Test"
 	entry.Refresh()
 	assert.Empty(t, entry.Text)
-	test.AssertRendersToMarkup(t, "entry/set_placeholder_set.xml", c)
+	test.AssertRendersToMarkup(t, "entry/set_placeholder_set_without_container.xml", c)
 
 	entry.SetText("Hi")
 	assert.Len(t, entry.Text, 2)

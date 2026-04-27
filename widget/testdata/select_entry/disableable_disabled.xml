@@ -13,11 +13,13 @@
 					</widget>
 				</widget>
 			</widget>
-			<widget pos="92,2" size="36x31" type="*widget.Button">
-				<rectangle radius="4" size="36x31"/>
-				<rectangle size="36x31"/>
-				<image fillMode="contain" pos="8,5" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
-			</widget>
+			<container pos="92,2" size="36x31">
+				<widget size="36x31" type="*widget.Button">
+					<rectangle radius="4" size="36x31"/>
+					<rectangle size="36x31"/>
+					<image fillMode="contain" pos="8,5" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
+				</widget>
+			</container>
 		</widget>
 	</content>
 </canvas>

@@ -27,7 +27,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
+	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened_without_button.xml", c)
 
 	areaPos, _ := c.InteractiveArea()
 	test.TapCanvas(c, areaPos)
@@ -45,7 +45,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_tapped.xml", c)
 
 	test.TapCanvas(c, switchPos)
-	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened.xml", c)
+	test.AssertRendersToMarkup(t, "select_entry/disableable_enabled_opened_with_overlay.xml", c)
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
