@@ -260,6 +260,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 	s = strings.ReplaceAll(s, "\r", "")
 
 	runes := []rune(s)
+	langID := language.Language(lang.SystemLocale().LanguageString())
 	in := shaping.Input{
 		Text:      []rune{' '},
 		RunStart:  0,
@@ -267,6 +268,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		Direction: di.DirectionLTR,
 		Face:      faces.ResolveFace(' '),
 		Size:      textSize,
+		Language:  langID,
 	}
 	shaper := &shaping.HarfbuzzShaper{}
 	segmenter := &shaping.Segmenter{}
