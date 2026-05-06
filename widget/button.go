@@ -99,8 +99,10 @@ func (b *Button) AccessibilityLabel() string {
 	if b.Text != "" {
 		return b.Text
 	}
-
-	return b.Icon.Name()
+	if b.Icon != nil {
+		return b.Icon.Name()
+	}
+	return ""
 }
 
 // AccessibilityRole for a button is fyne.AccessibleRoleButton.
