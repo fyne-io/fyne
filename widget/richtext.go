@@ -149,6 +149,22 @@ func (t *RichText) String() string {
 	return ret.String()
 }
 
+// AccessibilityRole returns the role used to describe this rich text to
+// assistive technologies.
+//
+// Since: 2.8
+func (t *RichText) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleText
+}
+
+// AccessibilityLabel returns the plain-text representation of the rich
+// text content.
+//
+// Since: 2.8
+func (t *RichText) AccessibilityLabel() string {
+	return t.String()
+}
+
 // charMinSize returns the average char size to use for internal computation
 func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
 	defaultChar := "M"

@@ -145,6 +145,32 @@ func (m *Menu) MinSize() fyne.Size {
 	return m.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this menu to assistive
+// technologies.
+//
+// Since: 2.8
+func (m *Menu) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this menu.
+//
+// Since: 2.8
+func (m *Menu) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the menu items so they can be navigated by
+// assistive technologies.
+//
+// Since: 2.8
+func (m *Menu) AccessibilityChildren() []fyne.CanvasObject {
+	out := make([]fyne.CanvasObject, len(m.Items))
+	copy(out, m.Items)
+	return out
+}
+
 // Refresh updates the menu to reflect changes in the data.
 func (m *Menu) Refresh() {
 	for _, item := range m.Items {

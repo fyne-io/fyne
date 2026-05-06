@@ -100,6 +100,33 @@ func (p *PopUp) MinSize() fyne.Size {
 	return p.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this popup to
+// assistive technologies.
+//
+// Since: 2.8
+func (p *PopUp) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this popup.
+//
+// Since: 2.8
+func (p *PopUp) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the popup content so it can be navigated by
+// assistive technologies.
+//
+// Since: 2.8
+func (p *PopUp) AccessibilityChildren() []fyne.CanvasObject {
+	if p.Content == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{p.Content}
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	th := p.Theme()

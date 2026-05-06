@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -64,6 +65,48 @@ func (a *Accordion) CreateRenderer() fyne.WidgetRenderer {
 func (a *Accordion) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
+}
+
+// AccessibilityRole returns the role used to describe this accordion to
+// assistive technologies.
+//
+// Since: 2.8
+func (a *Accordion) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this accordion.
+//
+// Since: 2.8
+func (a *Accordion) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the section header buttons (and, where the
+// section is open, its details) so they can be navigated by assistive
+// technologies.
+//
+// Since: 2.8
+func (a *Accordion) AccessibilityChildren() []fyne.CanvasObject {
+	r, ok := cache.CachedRenderer(a)
+	if !ok {
+		return nil
+	}
+	ar, ok := r.(*accordionRenderer)
+	if !ok {
+		return nil
+	}
+	out := make([]fyne.CanvasObject, 0, len(a.Items)*2)
+	for i, item := range a.Items {
+		if i < len(ar.headers) {
+			out = append(out, ar.headers[i])
+		}
+		if item.Open && item.Detail != nil {
+			out = append(out, item.Detail)
+		}
+	}
+	return out
 }
 
 // Open expands the item at the given index.

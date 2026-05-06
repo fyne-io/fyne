@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -308,4 +309,79 @@ func TestTable_Accessibility(t *testing.T) {
 
 	children := tbl.AccessibilityChildren()
 	assert.NotEmpty(t, children)
+}
+
+func TestCard_Accessibility(t *testing.T) {
+	content := widget.NewLabel("body")
+	card := widget.NewCard("Title", "Subtitle", content)
+
+	assert.Equal(t, fyne.AccessibleRoleContainer, card.AccessibilityRole())
+	assert.Equal(t, "Title", card.AccessibilityLabel())
+
+	card.SetTitle("")
+	assert.Equal(t, "Subtitle", card.AccessibilityLabel())
+
+	assert.Equal(t, []fyne.CanvasObject{content}, card.AccessibilityChildren())
+}
+
+func TestToolbar_Accessibility(t *testing.T) {
+	action := widget.NewToolbarAction(theme.HomeIcon(), nil)
+	tb := widget.NewToolbar(action, widget.NewToolbarSpacer(), widget.NewToolbarSeparator())
+
+	assert.Equal(t, fyne.AccessibleRoleContainer, tb.AccessibilityRole())
+
+	children := tb.AccessibilityChildren()
+	assert.Len(t, children, 2) // spacer is filtered out
+}
+
+func TestAccordion_Accessibility(t *testing.T) {
+	body := widget.NewLabel("body")
+	item := widget.NewAccordionItem("Header", body)
+	a := widget.NewAccordion(item)
+
+	assert.Equal(t, fyne.AccessibleRoleList, a.AccessibilityRole())
+
+	test.NewTempWindow(t, a)
+	a.Open(0)
+
+	children := a.AccessibilityChildren()
+	assert.Len(t, children, 2) // header + body when open
+}
+
+func TestIcon_Accessibility(t *testing.T) {
+	icon := widget.NewIcon(theme.HomeIcon())
+
+	assert.Equal(t, fyne.AccessibleRoleImage, icon.AccessibilityRole())
+	assert.NotEmpty(t, icon.AccessibilityLabel())
+
+	icon.SetResource(nil)
+	assert.Equal(t, "", icon.AccessibilityLabel())
+}
+
+func TestSeparator_Accessibility(t *testing.T) {
+	s := widget.NewSeparator()
+	assert.Equal(t, fyne.AccessibleRoleSeparator, s.AccessibilityRole())
+	assert.Equal(t, "", s.AccessibilityLabel())
+}
+
+func TestActivity_Accessibility(t *testing.T) {
+	a := widget.NewActivity()
+	assert.Equal(t, fyne.AccessibleRoleProgressBar, a.AccessibilityRole())
+	assert.Equal(t, "idle", a.AccessibilityValue())
+
+	a.Start()
+	assert.Equal(t, "active", a.AccessibilityValue())
+}
+
+func TestRichText_Accessibility(t *testing.T) {
+	r := widget.NewRichTextFromMarkdown("hello **world**")
+	assert.Equal(t, fyne.AccessibleRoleText, r.AccessibilityRole())
+	assert.Contains(t, r.AccessibilityLabel(), "hello")
+	assert.Contains(t, r.AccessibilityLabel(), "world")
+}
+
+func TestTextGrid_Accessibility(t *testing.T) {
+	g := widget.NewTextGridFromString("hello\nworld")
+	assert.Equal(t, fyne.AccessibleRoleText, g.AccessibilityRole())
+	assert.Equal(t, "hello\nworld", g.AccessibilityLabel())
 }
