@@ -346,6 +346,83 @@ func (s *Slider) Disabled() bool {
 	return s.disabled
 }
 
+// AccessibilityLabel returns an empty label so the slider is announced by role only.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleSlider.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleSlider
+}
+
+// AccessibilityValue returns the current slider value as a string.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityValue() string {
+	return fmt.Sprintf("%g", s.Value)
+}
+
+// AccessibilitySetValue parses value and updates the slider, returning true on success.
+//
+// Since: 2.8
+func (s *Slider) AccessibilitySetValue(value string) bool {
+	if s.Disabled() {
+		return false
+	}
+	var v float64
+	if _, err := fmt.Sscanf(value, "%g", &v); err != nil {
+		return false
+	}
+	s.SetValue(v)
+	return true
+}
+
+// AccessibilityStates reports whether the slider is disabled or focused.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if s.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if s.focused {
+		states = append(states, fyne.AccessibleStateFocused)
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions supported by this slider.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{
+		fyne.AccessibleActionIncrement,
+		fyne.AccessibleActionDecrement,
+		fyne.AccessibleActionSetValue,
+	}
+}
+
+// AccessibilityPerformAction adjusts the slider in response to the supplied action.
+//
+// Since: 2.8
+func (s *Slider) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if s.Disabled() {
+		return false
+	}
+	switch action {
+	case fyne.AccessibleActionIncrement:
+		s.SetValue(s.Value + s.Step)
+		return true
+	case fyne.AccessibleActionDecrement:
+		s.SetValue(s.Value - s.Step)
+		return true
+	}
+	return false
+}
+
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)

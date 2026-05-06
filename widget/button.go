@@ -110,6 +110,34 @@ func (b *Button) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleButton
 }
 
+// AccessibilityStates reports whether the button is disabled.
+//
+// Since: 2.8
+func (b *Button) AccessibilityStates() []fyne.AccessibleState {
+	if b.Disabled() {
+		return []fyne.AccessibleState{fyne.AccessibleStateDisabled}
+	}
+	return nil
+}
+
+// AccessibilityActions reports the actions this button supports.
+//
+// Since: 2.8
+func (b *Button) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress}
+}
+
+// AccessibilityPerformAction invokes the button's tap handler when pressed.
+//
+// Since: 2.8
+func (b *Button) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if action != fyne.AccessibleActionPress || b.Disabled() || b.OnTapped == nil {
+		return false
+	}
+	b.OnTapped()
+	return true
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)

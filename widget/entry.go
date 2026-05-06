@@ -300,6 +300,58 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 	e.registerShortcut()
 }
 
+// AccessibilityLabel returns the entry's place-holder text as a hint, when present.
+//
+// Since: 2.8
+func (e *Entry) AccessibilityLabel() string {
+	return e.PlaceHolder
+}
+
+// AccessibilityRole returns AccessibleRoleTextField.
+//
+// Since: 2.8
+func (e *Entry) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTextField
+}
+
+// AccessibilityValue returns the entry's text content.
+//
+// Since: 2.8
+func (e *Entry) AccessibilityValue() string {
+	return e.Text
+}
+
+// AccessibilitySetValue replaces the entry's text content unless the entry is disabled.
+//
+// Since: 2.8
+func (e *Entry) AccessibilitySetValue(value string) bool {
+	if e.Disabled() {
+		return false
+	}
+	e.SetText(value)
+	return true
+}
+
+// AccessibilityStates reports whether the entry is disabled, focused, required or invalid.
+//
+// Since: 2.8
+func (e *Entry) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if e.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if e.focused {
+		states = append(states, fyne.AccessibleStateFocused)
+	}
+	if e.Validator != nil {
+		states = append(states, fyne.AccessibleStateRequired)
+	}
+	if e.validationError != nil {
+		states = append(states, fyne.AccessibleStateInvalid)
+	}
+	return states
+}
+
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {

@@ -80,6 +80,24 @@ func (hl *Hyperlink) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleLink
 }
 
+// AccessibilityActions reports the actions this hyperlink supports.
+//
+// Since: 2.8
+func (hl *Hyperlink) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress}
+}
+
+// AccessibilityPerformAction follows the hyperlink when pressed.
+//
+// Since: 2.8
+func (hl *Hyperlink) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if action != fyne.AccessibleActionPress {
+		return false
+	}
+	hl.invokeAction()
+	return true
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.ExtendBaseWidget(hl)
