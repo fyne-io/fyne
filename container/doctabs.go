@@ -225,6 +225,26 @@ func (t *DocTabs) transitioning() bool {
 	return t.isTransitioning
 }
 
+// AccessibilityLabel returns an empty label so the tab list is announced by role only.
+//
+// Since: 2.8
+func (t *DocTabs) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleTabList.
+//
+// Since: 2.8
+func (t *DocTabs) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTabList
+}
+
+// AccessibilityChildren returns the rendered tab bar and the active tab's content
+// so assistive technologies can navigate the tabs and selected page.
+//
+// Since: 2.8
+func (t *DocTabs) AccessibilityChildren() []fyne.CanvasObject {
+	return tabsAccessibilityChildren(t)
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*docTabsRenderer)(nil)
 

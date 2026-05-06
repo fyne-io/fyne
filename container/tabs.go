@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/cache"
 	intTheme "fyne.io/fyne/v2/internal/theme"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -594,6 +595,75 @@ func (b *tabButton) Tapped(*fyne.PointEvent) {
 	}
 
 	b.onTapped()
+}
+
+// AccessibilityLabel returns the tab's text, or its icon name when no text is set.
+//
+// Since: 2.8
+func (b *tabButton) AccessibilityLabel() string {
+	if b.text != "" {
+		return b.text
+	}
+	if b.icon != nil {
+		return b.icon.Name()
+	}
+	return ""
+}
+
+// AccessibilityRole returns AccessibleRoleTab.
+//
+// Since: 2.8
+func (b *tabButton) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTab
+}
+
+// AccessibilityStates reports the disabled and selected states for this tab.
+//
+// Since: 2.8
+func (b *tabButton) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if b.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if b.tabs != nil {
+		items := b.tabs.items()
+		if i := b.tabs.selected(); i >= 0 && i < len(items) && items[i].button == b {
+			states = append(states, fyne.AccessibleStateSelected)
+		}
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions supported by this tab.
+//
+// Since: 2.8
+func (b *tabButton) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect}
+}
+
+// AccessibilityPerformAction selects this tab when invoked via Press or Select.
+//
+// Since: 2.8
+func (b *tabButton) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	switch action {
+	case fyne.AccessibleActionPress, fyne.AccessibleActionSelect:
+		if b.Disabled() || b.onTapped == nil {
+			return false
+		}
+		b.onTapped()
+		return true
+	}
+	return false
+}
+
+// tabsAccessibilityChildren returns the accessibility-relevant descendants of a
+// tab container: the bar holding tab buttons (when laid out), interior decoration
+// such as the divider and indicator, and the content of the active tab.
+func tabsAccessibilityChildren(t fyne.Widget) []fyne.CanvasObject {
+	if r, ok := cache.CachedRenderer(t); ok && r != nil {
+		return r.Objects()
+	}
+	return nil
 }
 
 type tabButtonRenderer struct {

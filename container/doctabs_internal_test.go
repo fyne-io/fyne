@@ -48,3 +48,44 @@ func TestDocTabs_tabButtonRenderer_Remove(t *testing.T) {
 
 	assert.Less(t, tabRenderer.indicator.Position().X, pos.X)
 }
+
+func TestDocTabs_AccessibilityRoleAndLabel(t *testing.T) {
+	tabs := NewDocTabs(&TabItem{Text: "One", Content: widget.NewLabel("One")})
+
+	assert.Equal(t, fyne.AccessibleRoleTabList, tabs.AccessibilityRole())
+	assert.Equal(t, "", tabs.AccessibilityLabel())
+}
+
+func TestDocTabs_AccessibilityChildren(t *testing.T) {
+	tabs := NewDocTabs(
+		&TabItem{Text: "One", Content: widget.NewLabel("One")},
+		&TabItem{Text: "Two", Content: widget.NewLabel("Two")},
+	)
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	r := cache.Renderer(tabs).(*docTabsRenderer)
+	assert.Equal(t, r.Objects(), tabs.AccessibilityChildren())
+}
+
+func TestDocTabs_AccessibilityChildren_NoRendererYet(t *testing.T) {
+	tabs := NewDocTabs(&TabItem{Text: "One", Content: widget.NewLabel("One")})
+
+	assert.Nil(t, tabs.AccessibilityChildren())
+}
+
+func TestDocTabs_TabButton_AccessibilitySelectsTab(t *testing.T) {
+	tabs := NewDocTabs(
+		&TabItem{Text: "One", Content: widget.NewLabel("One")},
+		&TabItem{Text: "Two", Content: widget.NewLabel("Two")},
+	)
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	r := cache.Renderer(tabs).(*docTabsRenderer)
+	buttons := r.bar.Objects[0].(*Scroll).Content.(*fyne.Container).Objects
+	second := buttons[1].(*tabButton)
+
+	assert.Equal(t, fyne.AccessibleRoleTab, second.AccessibilityRole())
+	assert.True(t, second.AccessibilityPerformAction(fyne.AccessibleActionPress))
+	assert.Equal(t, 1, tabs.SelectedIndex())
+	assert.Equal(t, []fyne.AccessibleState{fyne.AccessibleStateSelected}, second.AccessibilityStates())
+}

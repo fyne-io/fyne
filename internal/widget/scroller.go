@@ -607,6 +607,28 @@ func (s *Scroll) ScrollToOffset(p fyne.Position) {
 	s.refreshBars()
 }
 
+// AccessibilityLabel returns an empty label so the scroll is announced by role only.
+//
+// Since: 2.8
+func (s *Scroll) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleContainer.
+//
+// Since: 2.8
+func (s *Scroll) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityChildren returns the wrapped content.
+//
+// Since: 2.8
+func (s *Scroll) AccessibilityChildren() []fyne.CanvasObject {
+	if s.Content == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{s.Content}
+}
+
 func (s *Scroll) refreshWithoutOffsetUpdate() {
 	s.Base.Refresh()
 }

@@ -578,3 +578,29 @@ func (r *refreshCountingWidget) Refresh() {
 	r.refreshCount += 1
 	r.BaseWidget.Refresh()
 }
+
+func TestSplitContainer_AccessibilityRoleAndLabel(t *testing.T) {
+	split := NewHSplit(widget.NewLabel("L"), widget.NewLabel("R"))
+
+	assert.Equal(t, fyne.AccessibleRoleContainer, split.AccessibilityRole())
+	assert.Equal(t, "", split.AccessibilityLabel())
+}
+
+func TestSplitContainer_AccessibilityChildren(t *testing.T) {
+	leading := widget.NewLabel("L")
+	trailing := widget.NewLabel("R")
+	split := NewHSplit(leading, trailing)
+
+	children := split.AccessibilityChildren()
+
+	assert.Equal(t, []fyne.CanvasObject{leading, trailing}, children)
+}
+
+func TestSplitContainer_AccessibilityChildren_SkipsNil(t *testing.T) {
+	leading := widget.NewLabel("L")
+	split := &Split{Leading: leading}
+
+	children := split.AccessibilityChildren()
+
+	assert.Equal(t, []fyne.CanvasObject{leading}, children)
+}
