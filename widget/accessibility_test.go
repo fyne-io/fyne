@@ -191,3 +191,121 @@ func TestForm_Accessibility(t *testing.T) {
 	children := form.AccessibilityChildren()
 	assert.NotEmpty(t, children)
 }
+
+func TestList_Accessibility(t *testing.T) {
+	data := []string{"A", "B", "C"}
+	selected := -1
+	l := widget.NewList(
+		func() int { return len(data) },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(i widget.ListItemID, o fyne.CanvasObject) { o.(*widget.Label).SetText(data[i]) },
+	)
+	l.OnSelected = func(id widget.ListItemID) { selected = id }
+
+	assert.Equal(t, fyne.AccessibleRoleList, l.AccessibilityRole())
+	assert.Empty(t, l.AccessibilityChildren()) // not yet rendered
+
+	test.NewTempWindow(t, l)
+	l.Resize(fyne.NewSize(200, 200))
+
+	children := l.AccessibilityChildren()
+	assert.NotEmpty(t, children)
+
+	first, ok := children[0].(fyne.Accessible)
+	assert.True(t, ok)
+	assert.Equal(t, fyne.AccessibleRoleListItem, first.AccessibilityRole())
+	assert.Equal(t, "A", first.AccessibilityLabel())
+
+	actions, ok := children[0].(fyne.AccessibleActions)
+	assert.True(t, ok)
+	assert.True(t, actions.AccessibilityPerformAction(fyne.AccessibleActionSelect))
+	assert.Equal(t, 0, selected)
+
+	states, ok := children[0].(fyne.AccessibleStates)
+	assert.True(t, ok)
+	assert.Contains(t, states.AccessibilityStates(), fyne.AccessibleStateSelected)
+}
+
+func TestGridWrap_Accessibility(t *testing.T) {
+	data := []string{"A", "B", "C", "D"}
+	selected := -1
+	g := widget.NewGridWrap(
+		func() int { return len(data) },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(i widget.GridWrapItemID, o fyne.CanvasObject) { o.(*widget.Label).SetText(data[i]) },
+	)
+	g.OnSelected = func(id widget.GridWrapItemID) { selected = id }
+
+	assert.Equal(t, fyne.AccessibleRoleList, g.AccessibilityRole())
+
+	test.NewTempWindow(t, g)
+	g.Resize(fyne.NewSize(400, 400))
+
+	children := g.AccessibilityChildren()
+	assert.NotEmpty(t, children)
+
+	first, ok := children[0].(fyne.Accessible)
+	assert.True(t, ok)
+	assert.Equal(t, fyne.AccessibleRoleListItem, first.AccessibilityRole())
+
+	actions, ok := children[0].(fyne.AccessibleActions)
+	assert.True(t, ok)
+	assert.True(t, actions.AccessibilityPerformAction(fyne.AccessibleActionPress))
+	assert.Equal(t, 0, selected)
+}
+
+func TestTree_Accessibility(t *testing.T) {
+	data := map[string][]string{
+		"":    {"A"},
+		"A":   {"A.1", "A.2"},
+		"A.1": {},
+		"A.2": {},
+	}
+	tree := widget.NewTree(
+		func(uid widget.TreeNodeID) []widget.TreeNodeID { return data[uid] },
+		func(uid widget.TreeNodeID) bool {
+			_, hasChildren := data[uid]
+			return hasChildren && len(data[uid]) > 0
+		},
+		func(branch bool) fyne.CanvasObject { return widget.NewLabel("") },
+		func(uid widget.TreeNodeID, branch bool, o fyne.CanvasObject) { o.(*widget.Label).SetText(uid) },
+	)
+
+	assert.Equal(t, fyne.AccessibleRoleTree, tree.AccessibilityRole())
+	assert.Empty(t, tree.AccessibilityChildren())
+
+	test.NewTempWindow(t, tree)
+	tree.Resize(fyne.NewSize(200, 200))
+	tree.OpenAllBranches()
+	tree.Refresh()
+
+	children := tree.AccessibilityChildren()
+	assert.NotEmpty(t, children)
+
+	first, ok := children[0].(fyne.Accessible)
+	assert.True(t, ok)
+	assert.Equal(t, fyne.AccessibleRoleTreeItem, first.AccessibilityRole())
+
+	states, ok := children[0].(fyne.AccessibleStates)
+	assert.True(t, ok)
+	assert.Contains(t, states.AccessibilityStates(), fyne.AccessibleStateExpanded)
+}
+
+func TestTable_Accessibility(t *testing.T) {
+	data := [][]string{{"a", "b"}, {"c", "d"}}
+	tbl := widget.NewTable(
+		func() (int, int) { return len(data), len(data[0]) },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(id widget.TableCellID, o fyne.CanvasObject) {
+			o.(*widget.Label).SetText(data[id.Row][id.Col])
+		},
+	)
+
+	assert.Equal(t, fyne.AccessibleRoleTable, tbl.AccessibilityRole())
+
+	test.NewTempWindow(t, tbl)
+	tbl.Resize(fyne.NewSize(200, 200))
+
+	children := tbl.AccessibilityChildren()
+	assert.NotEmpty(t, children)
+}

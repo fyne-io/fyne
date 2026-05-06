@@ -162,6 +162,55 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// AccessibilityRole returns the role used to describe this tree to assistive
+// technologies.
+//
+// Since: 2.8
+func (t *Tree) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTree
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this tree.
+//
+// Since: 2.8
+func (t *Tree) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the currently visible tree nodes so they
+// appear in the accessibility tree.
+//
+// Since: 2.8
+func (t *Tree) AccessibilityChildren() []fyne.CanvasObject {
+	if t.scroller == nil {
+		return nil
+	}
+	tc, ok := t.scroller.Content.(*treeContent)
+	if !ok {
+		return nil
+	}
+	r, ok := cache.CachedRenderer(tc)
+	if !ok {
+		return nil
+	}
+	tcr, ok := r.(*treeContentRenderer)
+	if !ok {
+		return nil
+	}
+	out := make([]fyne.CanvasObject, 0, len(tcr.visible))
+	for _, uid := range tcr.visible {
+		if b, ok := tcr.branches[uid]; ok {
+			out = append(out, b)
+			continue
+		}
+		if l, ok := tcr.leaves[uid]; ok {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
 // IsBranchOpen returns true if the branch with the given TreeNodeID is expanded.
 func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 	if uid == t.Root {
@@ -995,6 +1044,68 @@ func (n *treeNode) update(uid string, depth int) {
 	n.depth = depth
 	n.Hidden = false
 	n.partialRefresh()
+}
+
+// AccessibilityRole returns the role used to describe this tree node to
+// assistive technologies.
+//
+// Since: 2.8
+func (n *treeNode) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTreeItem
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this tree node, deferring to the wrapped child if it implements
+// [fyne.Accessible].
+//
+// Since: 2.8
+func (n *treeNode) AccessibilityLabel() string {
+	if a, ok := n.content.(fyne.Accessible); ok {
+		return a.AccessibilityLabel()
+	}
+	return n.uid
+}
+
+// AccessibilityStates returns the current state flags that assistive
+// technologies should report alongside this tree node.
+//
+// Since: 2.8
+func (n *treeNode) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if n.isBranch && n.tree.IsBranchOpen(n.uid) {
+		states = append(states, fyne.AccessibleStateExpanded)
+	}
+	if len(n.tree.selected) > 0 && n.tree.selected[0] == n.uid {
+		states = append(states, fyne.AccessibleStateSelected)
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions an assistive technology may
+// trigger on this tree node.
+//
+// Since: 2.8
+func (n *treeNode) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect}
+}
+
+// AccessibilityPerformAction performs the named accessibility action.
+//
+// Since: 2.8
+func (n *treeNode) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	switch action {
+	case fyne.AccessibleActionSelect:
+		n.tree.Select(n.uid)
+		return true
+	case fyne.AccessibleActionPress:
+		if n.isBranch {
+			n.tree.ToggleBranch(n.uid)
+		} else {
+			n.tree.Select(n.uid)
+		}
+		return true
+	}
+	return false
 }
 
 var _ fyne.WidgetRenderer = (*treeNodeRenderer)(nil)

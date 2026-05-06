@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 )
@@ -177,6 +178,48 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	r.Layout(t.Size())
 	return r
+}
+
+// AccessibilityRole returns the role used to describe this table to assistive
+// technologies.
+//
+// Since: 2.8
+func (t *Table) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleTable
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this table.
+//
+// Since: 2.8
+func (t *Table) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the currently visible cells (including
+// headers) so they appear in the accessibility tree.
+//
+// Since: 2.8
+func (t *Table) AccessibilityChildren() []fyne.CanvasObject {
+	if t.cells == nil {
+		return nil
+	}
+	r, ok := cache.CachedRenderer(t.cells)
+	if !ok {
+		return nil
+	}
+	cr, ok := r.(*tableCellsRenderer)
+	if !ok {
+		return nil
+	}
+	out := make([]fyne.CanvasObject, 0, len(cr.headers)+len(cr.visible))
+	for _, c := range cr.headers {
+		out = append(out, c)
+	}
+	for _, c := range cr.visible {
+		out = append(out, c)
+	}
+	return out
 }
 
 func (t *Table) Cursor() desktop.Cursor {

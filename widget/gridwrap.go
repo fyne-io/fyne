@@ -118,6 +118,39 @@ func (l *GridWrap) CreateRenderer() fyne.WidgetRenderer {
 	return newGridWrapRenderer([]fyne.CanvasObject{l.scroller}, l, l.scroller, layout)
 }
 
+// AccessibilityRole returns the role used to describe this grid to assistive
+// technologies.
+//
+// Since: 2.8
+func (l *GridWrap) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this grid.
+//
+// Since: 2.8
+func (l *GridWrap) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the currently visible grid items so they
+// appear in the accessibility tree.
+//
+// Since: 2.8
+func (l *GridWrap) AccessibilityChildren() []fyne.CanvasObject {
+	if l.scroller == nil {
+		return nil
+	}
+	c, ok := l.scroller.Content.(*fyne.Container)
+	if !ok {
+		return nil
+	}
+	out := make([]fyne.CanvasObject, len(c.Objects))
+	copy(out, c.Objects)
+	return out
+}
+
 // FocusGained is called after this GridWrap has gained focus.
 func (l *GridWrap) FocusGained() {
 	l.focused = true
@@ -522,6 +555,57 @@ func (gw *gridWrapItem) Tapped(*fyne.PointEvent) {
 		gw.Refresh()
 		gw.onTapped()
 	}
+}
+
+// AccessibilityRole returns the role used to describe this grid item to
+// assistive technologies.
+//
+// Since: 2.8
+func (gw *gridWrapItem) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleListItem
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this grid item, deferring to the wrapped child if it implements
+// [fyne.Accessible].
+//
+// Since: 2.8
+func (gw *gridWrapItem) AccessibilityLabel() string {
+	if a, ok := gw.child.(fyne.Accessible); ok {
+		return a.AccessibilityLabel()
+	}
+	return ""
+}
+
+// AccessibilityStates returns the current state flags that assistive
+// technologies should report alongside this grid item.
+//
+// Since: 2.8
+func (gw *gridWrapItem) AccessibilityStates() []fyne.AccessibleState {
+	if gw.selected {
+		return []fyne.AccessibleState{fyne.AccessibleStateSelected}
+	}
+	return nil
+}
+
+// AccessibilityActions reports the actions an assistive technology may
+// trigger on this grid item.
+//
+// Since: 2.8
+func (gw *gridWrapItem) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect}
+}
+
+// AccessibilityPerformAction performs the named accessibility action.
+//
+// Since: 2.8
+func (gw *gridWrapItem) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	switch action {
+	case fyne.AccessibleActionPress, fyne.AccessibleActionSelect:
+		gw.Tapped(nil)
+		return true
+	}
+	return false
 }
 
 // Declare conformity with the WidgetRenderer interface.
