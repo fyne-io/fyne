@@ -77,10 +77,40 @@ func roleToCWin(role fyne.AccessibleRole) C.WinAccessibilityRole {
 	switch role {
 	case fyne.AccessibleRoleButton:
 		return C.WinAccessibilityRoleButton
-	case fyne.AccessibleRoleText:
-		return C.WinAccessibilityRoleText
+	case fyne.AccessibleRoleCheckbox:
+		return C.WinAccessibilityRoleCheckbox
+	case fyne.AccessibleRoleHeading:
+		return C.WinAccessibilityRoleHeading
+	case fyne.AccessibleRoleImage:
+		return C.WinAccessibilityRoleImage
 	case fyne.AccessibleRoleLink:
 		return C.WinAccessibilityRoleLink
+	case fyne.AccessibleRoleList:
+		return C.WinAccessibilityRoleList
+	case fyne.AccessibleRoleListItem:
+		return C.WinAccessibilityRoleListItem
+	case fyne.AccessibleRoleProgressBar:
+		return C.WinAccessibilityRoleProgressBar
+	case fyne.AccessibleRoleRadio:
+		return C.WinAccessibilityRoleRadio
+	case fyne.AccessibleRoleSeparator:
+		return C.WinAccessibilityRoleSeparator
+	case fyne.AccessibleRoleSlider:
+		return C.WinAccessibilityRoleSlider
+	case fyne.AccessibleRoleTab:
+		return C.WinAccessibilityRoleTab
+	case fyne.AccessibleRoleTabList:
+		return C.WinAccessibilityRoleTabList
+	case fyne.AccessibleRoleTable:
+		return C.WinAccessibilityRoleTable
+	case fyne.AccessibleRoleText:
+		return C.WinAccessibilityRoleText
+	case fyne.AccessibleRoleTextField:
+		return C.WinAccessibilityRoleTextField
+	case fyne.AccessibleRoleTree:
+		return C.WinAccessibilityRoleTree
+	case fyne.AccessibleRoleTreeItem:
+		return C.WinAccessibilityRoleTreeItem
 	default:
 		return C.WinAccessibilityRoleGroup
 	}
