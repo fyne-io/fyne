@@ -20,6 +20,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -109,10 +110,8 @@ func (w *window) collectIOSNodes(
 		}
 	}
 
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			w.collectIOSNodes(child, objPos, nodes)
-		}
+	for _, child := range common.AccessibilityChildren(obj) {
+		w.collectIOSNodes(child, objPos, nodes)
 	}
 }
 

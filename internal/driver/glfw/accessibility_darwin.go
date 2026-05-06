@@ -16,6 +16,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -87,56 +88,45 @@ func (w *window) collectAccessibilityElements(
 
 	objPos := pos.Add(obj.Position())
 	var result []C.AccessibilityElementRef
+	currentElement := parent
 
-	// Check if this object is accessible
-	accessible, ok := obj.(fyne.Accessible)
-	if !ok {
-		return nil
+	if accessible, ok := obj.(fyne.Accessible); ok {
+		label := accessible.AccessibilityLabel()
+		role := string(accessible.AccessibilityRole())
+
+		pixelX := scale.ToScreenCoordinate(w.canvas, objPos.X)
+		pixelY := scale.ToScreenCoordinate(w.canvas, objPos.Y)
+		pixelWidth := scale.ToScreenCoordinate(w.canvas, obj.Size().Width)
+		pixelHeight := scale.ToScreenCoordinate(w.canvas, obj.Size().Height)
+
+		cLabel := C.CString(label)
+		cTitle := C.CString(label)
+		defer C.free(unsafe.Pointer(cLabel))
+		defer C.free(unsafe.Pointer(cTitle))
+
+		currentElement = C.AccessibilityElementCreate(
+			roleToC(role),
+			cTitle, cLabel,
+			C.double(pixelX), C.double(pixelY),
+			C.double(pixelWidth), C.double(pixelHeight),
+			nil, nil, nil,
+		)
+
+		if parent != nil {
+			C.AccessibilityElementAddChild(parent, currentElement)
+		} else {
+			result = append(result, currentElement)
+		}
 	}
 
-	label := accessible.AccessibilityLabel()
-	role := string(accessible.AccessibilityRole())
-
-	pixelX := scale.ToScreenCoordinate(w.canvas, objPos.X)
-	pixelY := scale.ToScreenCoordinate(w.canvas, objPos.Y)
-	pixelWidth := scale.ToScreenCoordinate(w.canvas, obj.Size().Width)
-	pixelHeight := scale.ToScreenCoordinate(w.canvas, obj.Size().Height)
-
-	cLabel := C.CString(label)
-	cTitle := C.CString(label)
-	defer C.free(unsafe.Pointer(cLabel))
-	defer C.free(unsafe.Pointer(cTitle))
-
-	currentElement := C.AccessibilityElementCreate(
-		roleToC(role),
-		cTitle, cLabel,
-		C.double(pixelX), C.double(pixelY),
-		C.double(pixelWidth), C.double(pixelHeight),
-		nil, nil, nil,
-	)
-
-	// Establish parent-child relationship
-	if parent != nil {
-		C.AccessibilityElementAddChild(parent, currentElement)
-	} else {
-		// This is a root element
-		result = append(result, currentElement)
-	}
-
-	// Recurse into children
-	// Use currentElement as parent if we created one, otherwise pass through existing parent
-	childParent := parent
-	if currentElement != nil {
-		childParent = currentElement
-	}
-
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			childResults := w.collectAccessibilityElements(child, objPos, childParent, depth+1)
-			if parent == nil && currentElement == nil {
-				// We're at root level and didn't create an element, return children as roots
-				result = append(result, childResults...)
-			}
+	// Recurse via AccessibleChildren if available, otherwise the standard
+	// Container.Objects path. Non-Accessible objects still recurse so we
+	// don't lose subtrees rooted under decorative wrappers.
+	for _, child := range common.AccessibilityChildren(obj) {
+		childResults := w.collectAccessibilityElements(child, objPos, currentElement, depth+1)
+		if parent == nil && currentElement == parent {
+			// We didn't create an element here; child roots bubble up.
+			result = append(result, childResults...)
 		}
 	}
 

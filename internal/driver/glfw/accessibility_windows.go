@@ -14,6 +14,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -48,8 +49,7 @@ func (w *window) collectAccessibleElements(obj fyne.CanvasObject, pos fyne.Posit
 
 	objPos := pos.Add(obj.Position())
 
-	accessible, isAccessible := obj.(fyne.Accessible)
-	if isAccessible {
+	if accessible, isAccessible := obj.(fyne.Accessible); isAccessible {
 		role := accessible.AccessibilityRole()
 		// Use flat model: skip containers, only add leaf elements
 		if role != fyne.AccessibleRoleContainer {
@@ -68,11 +68,8 @@ func (w *window) collectAccessibleElements(obj fyne.CanvasObject, pos fyne.Posit
 		}
 	}
 
-	// Recurse into container children
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			w.collectAccessibleElements(child, objPos)
-		}
+	for _, child := range common.AccessibilityChildren(obj) {
+		w.collectAccessibleElements(child, objPos)
 	}
 }
 
