@@ -3,6 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.8.0 - Unreleased
+
+### Added
+
+* Initial accessibility support behind the `accessibility` build tag (#1285).
+  Widgets opt in via the new `Accessible`, `AccessibleChildren`,
+  `AccessibleValue`, `AccessibleValueSetter`, `AccessibleActions`, and
+  `AccessibleStates` interfaces. Roles, actions and states are surfaced
+  through native AT bridges:
+  - macOS: full NSAccessibility coverage including roles, subroles,
+    actions (press/increment/decrement/showMenu/select/setValue), states
+    (checked/disabled/expanded/focused/selected/required/invalid), and
+    live notifications for value/selection/layout/focus changes.
+  - Windows: UIA control type mapping for all 19 Fyne roles.
+  - iOS: UIAccessibilityTraits mapping for Button, Checkbox, Heading,
+    Image, Link, ProgressBar, Radio, Slider, Tab, and StaticText.
+  - Android: virtual view roles forwarded to the Java accessibility
+    delegate.
+
+
 ## 2.7.3 - 21 Feb 2026
 
 ### Fixed
