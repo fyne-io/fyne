@@ -24,10 +24,25 @@ import (
 )
 
 const (
-	androidRoleButton    = 1
-	androidRoleText      = 2
-	androidRoleLink      = 3
-	androidRoleContainer = 4
+	androidRoleContainer = iota
+	androidRoleButton
+	androidRoleCheckbox
+	androidRoleHeading
+	androidRoleImage
+	androidRoleLink
+	androidRoleList
+	androidRoleListItem
+	androidRoleProgressBar
+	androidRoleRadio
+	androidRoleSeparator
+	androidRoleSlider
+	androidRoleTab
+	androidRoleTabList
+	androidRoleTable
+	androidRoleText
+	androidRoleTextField
+	androidRoleTree
+	androidRoleTreeItem
 )
 
 type androidAccessNode struct {
@@ -39,14 +54,44 @@ type androidAccessNode struct {
 	height int
 }
 
-func roleNameToAndroid(role string) int {
+func roleNameToAndroid(role fyne.AccessibleRole) int {
 	switch role {
-	case "button":
+	case fyne.AccessibleRoleButton:
 		return androidRoleButton
-	case "text":
-		return androidRoleText
-	case "link":
+	case fyne.AccessibleRoleCheckbox:
+		return androidRoleCheckbox
+	case fyne.AccessibleRoleHeading:
+		return androidRoleHeading
+	case fyne.AccessibleRoleImage:
+		return androidRoleImage
+	case fyne.AccessibleRoleLink:
 		return androidRoleLink
+	case fyne.AccessibleRoleList:
+		return androidRoleList
+	case fyne.AccessibleRoleListItem:
+		return androidRoleListItem
+	case fyne.AccessibleRoleProgressBar:
+		return androidRoleProgressBar
+	case fyne.AccessibleRoleRadio:
+		return androidRoleRadio
+	case fyne.AccessibleRoleSeparator:
+		return androidRoleSeparator
+	case fyne.AccessibleRoleSlider:
+		return androidRoleSlider
+	case fyne.AccessibleRoleTab:
+		return androidRoleTab
+	case fyne.AccessibleRoleTabList:
+		return androidRoleTabList
+	case fyne.AccessibleRoleTable:
+		return androidRoleTable
+	case fyne.AccessibleRoleText:
+		return androidRoleText
+	case fyne.AccessibleRoleTextField:
+		return androidRoleTextField
+	case fyne.AccessibleRoleTree:
+		return androidRoleTree
+	case fyne.AccessibleRoleTreeItem:
+		return androidRoleTreeItem
 	default:
 		return androidRoleContainer
 	}
@@ -110,7 +155,7 @@ func (w *window) collectAndroidNodes(
 	// must be direct children of the host view. Container nodes are skipped so
 	// their children surface at the top level where TalkBack can reach them.
 	if accessible, ok := obj.(fyne.Accessible); ok {
-		role := roleNameToAndroid(string(accessible.AccessibilityRole()))
+		role := roleNameToAndroid(accessible.AccessibilityRole())
 		if role != androidRoleContainer {
 			*nodes = append(*nodes, androidAccessNode{
 				id:     *nextID,

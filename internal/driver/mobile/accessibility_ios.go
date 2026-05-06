@@ -25,20 +25,65 @@ import (
 )
 
 const (
-	iosRoleButton    = 1
-	iosRoleText      = 2
-	iosRoleLink      = 3
-	iosRoleContainer = 4
+	iosRoleContainer = iota
+	iosRoleButton
+	iosRoleCheckbox
+	iosRoleHeading
+	iosRoleImage
+	iosRoleLink
+	iosRoleList
+	iosRoleListItem
+	iosRoleProgressBar
+	iosRoleRadio
+	iosRoleSeparator
+	iosRoleSlider
+	iosRoleTab
+	iosRoleTabList
+	iosRoleTable
+	iosRoleText
+	iosRoleTextField
+	iosRoleTree
+	iosRoleTreeItem
 )
 
-func roleNameToIOS(role string) int {
+func roleNameToIOS(role fyne.AccessibleRole) int {
 	switch role {
-	case "button":
+	case fyne.AccessibleRoleButton:
 		return iosRoleButton
-	case "text":
-		return iosRoleText
-	case "link":
+	case fyne.AccessibleRoleCheckbox:
+		return iosRoleCheckbox
+	case fyne.AccessibleRoleHeading:
+		return iosRoleHeading
+	case fyne.AccessibleRoleImage:
+		return iosRoleImage
+	case fyne.AccessibleRoleLink:
 		return iosRoleLink
+	case fyne.AccessibleRoleList:
+		return iosRoleList
+	case fyne.AccessibleRoleListItem:
+		return iosRoleListItem
+	case fyne.AccessibleRoleProgressBar:
+		return iosRoleProgressBar
+	case fyne.AccessibleRoleRadio:
+		return iosRoleRadio
+	case fyne.AccessibleRoleSeparator:
+		return iosRoleSeparator
+	case fyne.AccessibleRoleSlider:
+		return iosRoleSlider
+	case fyne.AccessibleRoleTab:
+		return iosRoleTab
+	case fyne.AccessibleRoleTabList:
+		return iosRoleTabList
+	case fyne.AccessibleRoleTable:
+		return iosRoleTable
+	case fyne.AccessibleRoleText:
+		return iosRoleText
+	case fyne.AccessibleRoleTextField:
+		return iosRoleTextField
+	case fyne.AccessibleRoleTree:
+		return iosRoleTree
+	case fyne.AccessibleRoleTreeItem:
+		return iosRoleTreeItem
 	default:
 		return iosRoleContainer
 	}
@@ -97,7 +142,7 @@ func (w *window) collectIOSNodes(
 	// Only add leaf roles (text, button, link) as accessibility elements.
 	// Containers are skipped so VoiceOver can navigate their children directly.
 	if accessible, ok := obj.(fyne.Accessible); ok {
-		role := roleNameToIOS(string(accessible.AccessibilityRole()))
+		role := roleNameToIOS(accessible.AccessibilityRole())
 		if role != iosRoleContainer {
 			*nodes = append(*nodes, iosAccessNode{
 				role:   role,
