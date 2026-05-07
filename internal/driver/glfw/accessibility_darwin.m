@@ -8,6 +8,8 @@ static NSMutableArray<NSAccessibilityElement*>* globalAccessibilityElements = ni
 static NSView* targetContentView = nil;
 static NSWindow* targetWindow = nil;
 static IMP originalAccessibilityChildrenIMP = NULL;
+static BOOL contentViewSwizzled = NO;
+static BOOL appAccessibilitySwizzled = NO;
 
 @interface AccessibleElement : NSAccessibilityElement
 
@@ -163,6 +165,14 @@ static IMP originalAccessibilityChildrenIMP = NULL;
     return [window contentView];
 }
 
+- (id)accessibilityWindow {
+    return targetWindow;
+}
+
+- (id)accessibilityTopLevelUIElement {
+    return targetWindow;
+}
+
 - (NSArray*)accessibilityChildren {
     return [[self.children copy] autorelease];
 }
@@ -238,6 +248,80 @@ static IMP originalAccessibilityChildrenIMP = NULL;
     return YES;
 }
 
+// Legacy API: ensure elements are not ignored.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+- (BOOL)accessibilityIsIgnored {
+    return ![self isAccessibilityElement];
+}
+
+- (NSArray*)accessibilityAttributeNames {
+    NSMutableArray* attrs = [NSMutableArray arrayWithArray:@[
+        NSAccessibilityRoleAttribute,
+        NSAccessibilityRoleDescriptionAttribute,
+        NSAccessibilityTitleAttribute,
+        NSAccessibilityDescriptionAttribute,
+        NSAccessibilityParentAttribute,
+        NSAccessibilityChildrenAttribute,
+        NSAccessibilityWindowAttribute,
+        NSAccessibilityTopLevelUIElementAttribute,
+        NSAccessibilityPositionAttribute,
+        NSAccessibilitySizeAttribute,
+        NSAccessibilityFocusedAttribute,
+        NSAccessibilityEnabledAttribute,
+    ]];
+    if (self.value) {
+        [attrs addObject:NSAccessibilityValueAttribute];
+    }
+    return attrs;
+}
+
+- (id)accessibilityAttributeValue:(NSString*)attr {
+    if ([attr isEqualToString:NSAccessibilityRoleAttribute]) {
+        return [self accessibilityRole];
+    }
+    if ([attr isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
+        return [self accessibilityRoleDescription];
+    }
+    if ([attr isEqualToString:NSAccessibilityTitleAttribute]) {
+        return self.title;
+    }
+    if ([attr isEqualToString:NSAccessibilityDescriptionAttribute]) {
+        return self.label;
+    }
+    if ([attr isEqualToString:NSAccessibilityValueAttribute]) {
+        return [self accessibilityValue];
+    }
+    if ([attr isEqualToString:NSAccessibilityChildrenAttribute]) {
+        return NSAccessibilityUnignoredChildren([self accessibilityChildren]);
+    }
+    if ([attr isEqualToString:NSAccessibilityParentAttribute]) {
+        return NSAccessibilityUnignoredAncestor([self accessibilityParent]);
+    }
+    if ([attr isEqualToString:NSAccessibilityWindowAttribute]) {
+        return targetWindow;
+    }
+    if ([attr isEqualToString:NSAccessibilityTopLevelUIElementAttribute]) {
+        return targetWindow;
+    }
+    if ([attr isEqualToString:NSAccessibilityPositionAttribute]) {
+        NSRect frame = [self accessibilityFrame];
+        return [NSValue valueWithPoint:frame.origin];
+    }
+    if ([attr isEqualToString:NSAccessibilitySizeAttribute]) {
+        NSRect frame = [self accessibilityFrame];
+        return [NSValue valueWithSize:frame.size];
+    }
+    if ([attr isEqualToString:NSAccessibilityFocusedAttribute]) {
+        return @(self.focused);
+    }
+    if ([attr isEqualToString:NSAccessibilityEnabledAttribute]) {
+        return @(self.enabled);
+    }
+    return [super accessibilityAttributeValue:attr];
+}
+#pragma clang diagnostic pop
+
 @end
 
 static NSArray* customAccessibilityChildren(id self, SEL _cmd) {
@@ -248,6 +332,65 @@ static NSArray* customAccessibilityChildren(id self, SEL _cmd) {
         return ((NSArray*(*)(id, SEL))originalAccessibilityChildrenIMP)(self, _cmd);
     }
     return @[];
+}
+
+// Swizzled methods for GLFWContentView to fix accessibility hierarchy.
+// GLFWContentView reports AXUnknown role and isAccessibilityElement=NO by
+// default, which breaks the AX chain from window → content → elements.
+static NSAccessibilityRole customAccessibilityRole(id self, SEL _cmd) {
+    return NSAccessibilityGroupRole;
+}
+
+static BOOL customIsAccessibilityElement(id self, SEL _cmd) {
+    return YES;
+}
+
+static BOOL customAccessibilityIsNotIgnored(id self, SEL _cmd) {
+    return NO;
+}
+
+// GLFWWindow needs to return its content view as a child.
+// Without this, the window appears empty in the AX hierarchy.
+static NSArray* customWindowAccessibilityChildren(id self, SEL _cmd) {
+    NSWindow* window = (NSWindow*)self;
+    NSView* cv = [window contentView];
+    if (cv) {
+        return @[cv];
+    }
+    return @[];
+}
+
+static void swizzleContentViewAccessibility(NSView* contentView) {
+    if (contentViewSwizzled) {
+        return;
+    }
+    contentViewSwizzled = YES;
+
+    Class viewClass = [contentView class];
+
+    class_addMethod(viewClass, @selector(accessibilityRole),
+                    (IMP)customAccessibilityRole, "@@:");
+    class_addMethod(viewClass, @selector(isAccessibilityElement),
+                    (IMP)customIsAccessibilityElement, "B@:");
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    class_addMethod(viewClass, @selector(accessibilityIsIgnored),
+                    (IMP)customAccessibilityIsNotIgnored, "B@:");
+#pragma clang diagnostic pop
+}
+
+static void swizzleAppAccessibility(void) {
+    if (appAccessibilitySwizzled) {
+        return;
+    }
+    appAccessibilitySwizzled = YES;
+
+    if (targetWindow) {
+        Class winClass = [targetWindow class];
+        class_addMethod(winClass, @selector(accessibilityChildren),
+                        (IMP)customWindowAccessibilityChildren, "@@:");
+    }
 }
 
 AccessibilityElementRef AccessibilityElementCreate(
@@ -405,6 +548,11 @@ void AccessibilitySetTargetWindow(void* nsWindow) {
         targetWindow = (NSWindow*)nsWindow;
         if (targetWindow) {
             targetContentView = [targetWindow contentView];
+
+            if (targetContentView) {
+                swizzleContentViewAccessibility(targetContentView);
+            }
+            swizzleAppAccessibility();
         }
     }
 }
@@ -435,7 +583,12 @@ void AccessibilityAttachToWindow(AccessibilityElementRef elem) {
             Method originalMethod = class_getInstanceMethod(viewClass, selector);
             if (originalMethod) {
                 originalAccessibilityChildrenIMP = method_getImplementation(originalMethod);
-                method_setImplementation(originalMethod, (IMP)customAccessibilityChildren);
+                // Use class_addMethod to add ONLY to GLFWContentView.
+                // The original code used method_setImplementation which modified
+                // the parent class (NSView/NSResponder), breaking ALL views
+                // including NSWindow's accessibility hierarchy.
+                class_addMethod(viewClass, selector,
+                                (IMP)customAccessibilityChildren, "@@:");
             }
         }
 
