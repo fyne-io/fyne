@@ -164,7 +164,7 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 }
 
 - (NSArray*)accessibilityChildren {
-    return [self.children copy];
+    return [[self.children copy] autorelease];
 }
 
 - (BOOL)isAccessibilityEnabled {
@@ -242,7 +242,7 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 
 static NSArray* customAccessibilityChildren(id self, SEL _cmd) {
     if (globalAccessibilityElements && [globalAccessibilityElements count] > 0) {
-        return [globalAccessibilityElements copy];
+        return [[globalAccessibilityElements copy] autorelease];
     }
     if (originalAccessibilityChildrenIMP) {
         return ((NSArray*(*)(id, SEL))originalAccessibilityChildrenIMP)(self, _cmd);
@@ -262,7 +262,7 @@ AccessibilityElementRef AccessibilityElementCreate(
 ) {
     @autoreleasepool {
         if (!globalAccessibilityElements) {
-            globalAccessibilityElements = [NSMutableArray array];
+            globalAccessibilityElements = [[NSMutableArray alloc] init];
         }
 
         AccessibleElement* elem = [[AccessibleElement alloc] initWithParent:parent];
@@ -278,8 +278,7 @@ AccessibilityElementRef AccessibilityElementCreate(
         elem.callbackContext = callbackContext;
         elem.contextDestroy = contextDestroy;
 
-        // Manually retain since we're not using ARC
-        return (void*)[elem retain];
+        return (void*)elem;
     }
 }
 
@@ -375,6 +374,7 @@ void AccessibilityElementAddChild(AccessibilityElementRef parent, AccessibilityE
         if (![parentElem.children containsObject:childElem]) {
             [parentElem.children addObject:childElem];
             childElem.parentElement = parentElem;
+            [childElem release]; // Transfer create ownership to the parent.
             NSAccessibilityPostNotification(parentElem, NSAccessibilityLayoutChangedNotification);
         }
     }
@@ -384,8 +384,8 @@ void AccessibilityElementRemoveChild(AccessibilityElementRef parent, Accessibili
     @autoreleasepool {
         AccessibleElement* parentElem = (__bridge AccessibleElement*)parent;
         AccessibleElement* childElem = (__bridge AccessibleElement*)child;
-        [parentElem.children removeObject:childElem];
         childElem.parentElement = nil;
+        [parentElem.children removeObject:childElem];
         if (parentElem) {
             NSAccessibilityPostNotification(parentElem, NSAccessibilityLayoutChangedNotification);
         }
@@ -465,7 +465,16 @@ void AccessibilityElementDestroy(AccessibilityElementRef elem) {
         if (!elem) return;
 
         AccessibleElement* element = (AccessibleElement*)elem;
-        // Manually release since we're not using ARC
+        if (globalAccessibilityElements) {
+            [globalAccessibilityElements removeObject:element];
+        }
+        if ([element.parentElement isKindOfClass:[AccessibleElement class]]) {
+            AccessibleElement* parent = (AccessibleElement*)element.parentElement;
+            element.parentElement = nil;
+            [parent.children removeObject:element];
+            return;
+        }
+        element.parentElement = nil;
         [element release];
     }
 }

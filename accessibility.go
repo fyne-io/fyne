@@ -74,8 +74,8 @@ type Accessible interface {
 //
 // Implementations should return only the descendants that should appear in
 // the accessibility tree at this point. Returning nil is equivalent to
-// having no accessible children and the walker will fall back to recursing
-// through any [Container.Objects].
+// having no accessible children. Objects that do not implement
+// AccessibleChildren may still be traversed through any [Container.Objects].
 //
 // Since: 2.8
 type AccessibleChildren interface {

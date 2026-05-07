@@ -399,10 +399,25 @@ public class GoNativeActivity extends NativeActivity {
     // Android accessibility bridge  (real-view overlay approach)
     // -------------------------------------------------------------------------
 
-    static final int ROLE_BUTTON    = 1;
-    static final int ROLE_TEXT      = 2;
-    static final int ROLE_LINK      = 3;
-    static final int ROLE_CONTAINER = 4;
+    static final int ROLE_CONTAINER    = 0;
+    static final int ROLE_BUTTON       = 1;
+    static final int ROLE_CHECKBOX     = 2;
+    static final int ROLE_HEADING      = 3;
+    static final int ROLE_IMAGE        = 4;
+    static final int ROLE_LINK         = 5;
+    static final int ROLE_LIST         = 6;
+    static final int ROLE_LIST_ITEM    = 7;
+    static final int ROLE_PROGRESS_BAR = 8;
+    static final int ROLE_RADIO        = 9;
+    static final int ROLE_SEPARATOR    = 10;
+    static final int ROLE_SLIDER       = 11;
+    static final int ROLE_TAB          = 12;
+    static final int ROLE_TAB_LIST     = 13;
+    static final int ROLE_TABLE        = 14;
+    static final int ROLE_TEXT         = 15;
+    static final int ROLE_TEXT_FIELD   = 16;
+    static final int ROLE_TREE         = 17;
+    static final int ROLE_TREE_ITEM    = 18;
 
     // Called once from Go (via JNI).
     static void setupAccessibility() {
@@ -533,11 +548,71 @@ public class GoNativeActivity extends NativeActivity {
                     info.setContentDescription(labelCopy);
                     switch (roleCopy) {
                         case ROLE_BUTTON:
-                        case ROLE_LINK:
                             info.setClassName("android.widget.Button");
                             info.setClickable(true);
                             info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
                             break;
+                        case ROLE_CHECKBOX:
+                            info.setClassName("android.widget.CheckBox");
+                            info.setCheckable(true);
+                            info.setClickable(true);
+                            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            break;
+                        case ROLE_HEADING:
+                            info.setClassName("android.widget.TextView");
+                            info.setText(labelCopy);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                                info.setHeading(true);
+                            }
+                            break;
+                        case ROLE_IMAGE:
+                            info.setClassName("android.widget.ImageView");
+                            break;
+                        case ROLE_LINK:
+                            info.setClassName("android.widget.TextView");
+                            info.setClickable(true);
+                            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            break;
+                        case ROLE_LIST:
+                            info.setClassName("android.widget.ListView");
+                            break;
+                        case ROLE_PROGRESS_BAR:
+                            info.setClassName("android.widget.ProgressBar");
+                            break;
+                        case ROLE_RADIO:
+                            info.setClassName("android.widget.RadioButton");
+                            info.setCheckable(true);
+                            info.setClickable(true);
+                            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            break;
+                        case ROLE_SEPARATOR:
+                            info.setClassName("android.view.View");
+                            break;
+                        case ROLE_SLIDER:
+                            info.setClassName("android.widget.SeekBar");
+                            break;
+                        case ROLE_TAB:
+                            info.setClassName("android.widget.TabWidget");
+                            info.setClickable(true);
+                            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            break;
+                        case ROLE_TAB_LIST:
+                            info.setClassName("android.widget.TabWidget");
+                            break;
+                        case ROLE_TABLE:
+                            info.setClassName("android.widget.GridView");
+                            break;
+                        case ROLE_TEXT_FIELD:
+                            info.setClassName("android.widget.EditText");
+                            info.setText(labelCopy);
+                            break;
+                        case ROLE_TREE:
+                            info.setClassName("android.widget.ExpandableListView");
+                            break;
+                        case ROLE_CONTAINER:
+                        case ROLE_LIST_ITEM:
+                        case ROLE_TEXT:
+                        case ROLE_TREE_ITEM:
                         default: // ROLE_TEXT
                             info.setClassName("android.widget.TextView");
                             info.setText(labelCopy);
