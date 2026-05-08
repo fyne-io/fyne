@@ -25,6 +25,7 @@ func (s *stateBag) AccessibilityStates() []fyne.AccessibleState {
 func (s *stateBag) AccessibilityActions() []fyne.AccessibleAction {
 	return s.actions
 }
+
 func (s *stateBag) AccessibilityPerformAction(_ fyne.AccessibleAction) bool { return true }
 
 // TestRoleToC_Distinct verifies that semantically distinct Fyne roles map

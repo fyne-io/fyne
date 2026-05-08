@@ -14,7 +14,6 @@ type accessibleChildrenStub struct {
 	canvas.Rectangle
 	children []fyne.CanvasObject
 }
-
 func (s *accessibleChildrenStub) AccessibilityLabel() string { return "stub" }
 func (s *accessibleChildrenStub) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleContainer
