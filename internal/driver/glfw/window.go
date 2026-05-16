@@ -134,7 +134,7 @@ func (w *window) detectTextureScale() float32 {
 	return float32(texWidth) / float32(winWidth)
 }
 
-func (w *window) Show() {
+func (w *window) show(xPos int, yPos int) {
 	async.EnsureMain(func() {
 		if w.view() != nil {
 			w.doShowAgain()
@@ -154,15 +154,19 @@ func (w *window) Show() {
 		view := w.view()
 		view.SetTitle(w.title)
 
+		if xPos != 0 || yPos != 0 {
+			view.SetPos(xPos, yPos)
+		}
+
+		// save coordinates
+		if !build.IsWayland || xPos != 0 || yPos != 0 {
+			w.xpos, w.ypos = xPos, yPos
+		}
+
 		if !build.IsWayland && w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
 		}
 		view.Show()
-
-		// save coordinates
-		if !build.IsWayland {
-			w.xpos, w.ypos = view.GetPos()
-		}
 
 		if w.fullScreen { // this does not work if called before viewport.Show()
 			w.doSetFullScreen(true)
@@ -175,6 +179,21 @@ func (w *window) Show() {
 			})
 		}
 	})
+}
+
+func (w *window) Show() {
+	xPos, yPos := 0, 0
+
+	view := w.view()
+	if view != nil && !build.IsWayland {
+		xPos, yPos = view.GetPos()
+	}
+
+	w.show(xPos, yPos)
+}
+
+func (w *window) ShowAtPos(xPos int, yPos int) {
+	w.show(xPos, yPos)
 }
 
 func (w *window) Hide() {
