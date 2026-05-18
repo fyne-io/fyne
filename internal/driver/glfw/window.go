@@ -209,7 +209,9 @@ func (w *window) Close() {
 		// Clean up accessibility resources
 		w.cleanupAccessibilityForWindow()
 
+		w.closeLock.Lock()
 		w.closing = true
+		w.closeLock.Unlock()
 		w.viewport.SetShouldClose(true)
 
 		cache.RangeTexturesFor(w.canvas, w.canvas.Painter().Free)
@@ -896,10 +898,11 @@ func (w *window) triggerMainMenuShortcut(sh fyne.Shortcut) bool {
 }
 
 func (w *window) RunWithContext(f func()) {
-	if w.isClosing() {
+	v := w.view()
+	if v == nil {
 		return
 	}
-	w.view().MakeContextCurrent()
+	v.MakeContextCurrent()
 
 	f()
 
@@ -997,6 +1000,8 @@ func (w *window) doShowAgain() {
 }
 
 func (w *window) isClosing() bool {
+	w.closeLock.RLock()
+	defer w.closeLock.RUnlock()
 	return w.closing || w.viewport == nil
 }
 

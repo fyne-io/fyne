@@ -193,7 +193,7 @@ func (d *gLDriver) runGL() {
 
 func (d *gLDriver) destroyWindow(w *window, index int) {
 	w.visible = false
-	w.viewport.Destroy()
+	w.destroyViewport()
 	w.destroy(d)
 
 	if index < len(d.windows)-1 {

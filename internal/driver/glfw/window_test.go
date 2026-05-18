@@ -1825,9 +1825,7 @@ func TestWindow_ClosedBeforeShow(t *testing.T) {
 // Two failure modes: data race on w.closing, and MakeContextCurrent on a
 // destroyed viewport. Run with `-race`.
 func TestWindow_RunWithContext_DataRace(t *testing.T) {
-	w := createWindow("Race3874-DataRace")
-	defer w.Close()
-
+	w := createWindow("Race-DataRace")
 	win := w.window
 
 	var (
@@ -1845,14 +1843,10 @@ func TestWindow_RunWithContext_DataRace(t *testing.T) {
 		}
 	}()
 
-	for i := 0; i < 200; i++ {
-		runOnMain(func() {
-			win.closing = !win.closing
-		})
-	}
-	runOnMain(func() {
-		win.closing = false
-	})
+	// Production write path: Close() flips w.closing on the main thread.
+	// Without synchronization the race detector flags the read above.
+	w.Close()
+	time.Sleep(50 * time.Millisecond)
 
 	atomic.StoreInt32(&stop, 1)
 	wg.Wait()
@@ -1863,13 +1857,13 @@ func TestWindow_RunWithContext_DataRace(t *testing.T) {
 // return nil — otherwise RunWithContext drives MakeContextCurrent on a
 // destroyed GLFW window (SIGSEGV on macOS, BadWindow on X11).
 func TestWindow_RunWithContext_AfterViewportDestroyed(t *testing.T) {
-	w := createWindow("Race3874-Destroyed")
+	w := createWindow("Race-Destroyed")
 
 	runOnMain(func() {
-		w.window.viewport.Destroy()
+		w.window.destroyViewport()
 	})
 
-	require.Nil(t, w.window.view(), "view() must be nil after viewport.Destroy()")
+	require.Nil(t, w.window.view(), "view() must be nil after destroyViewport()")
 }
 
 func TestWindow_SetContent_Twice(t *testing.T) {

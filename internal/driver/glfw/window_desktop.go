@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -74,6 +75,8 @@ type window struct {
 	decorate  bool
 	closing   bool
 	fixedSize bool
+
+	closeLock sync.RWMutex // guards closing and viewport
 
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
@@ -886,10 +889,25 @@ func (w *window) create() {
 }
 
 func (w *window) view() *glfw.Window {
+	w.closeLock.RLock()
+	defer w.closeLock.RUnlock()
 	if w.closing {
 		return nil
 	}
 	return w.viewport
+}
+
+// destroyViewport destroys the underlying GLFW window and clears the pointer
+// under closeLock so subsequent view() / isClosing() calls observe the
+// destruction atomically. Safe to call once; later calls are no-ops.
+func (w *window) destroyViewport() {
+	w.closeLock.Lock()
+	vp := w.viewport
+	w.viewport = nil
+	w.closeLock.Unlock()
+	if vp != nil {
+		vp.Destroy()
+	}
 }
 
 // wrapInnerWindow is a no-op to match what the web driver provides
