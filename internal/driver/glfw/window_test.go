@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1816,6 +1818,58 @@ func TestWindow_ClosedBeforeShow(t *testing.T) {
 	w := createWindow("Test")
 	// viewport will be nil if window is closed before show
 	assert.NotPanics(t, func() { w.closed(nil) })
+}
+
+// fyne-io/fyne#3874: w.closing / w.viewport in RunWithContext are read
+// without synchronization, and viewport.Destroy() does not nil the pointer.
+// Two failure modes: data race on w.closing, and MakeContextCurrent on a
+// destroyed viewport. Run with `-race`.
+func TestWindow_RunWithContext_DataRace(t *testing.T) {
+	w := createWindow("Race3874-DataRace")
+	defer w.Close()
+
+	win := w.window
+
+	var (
+		stop int32
+		wg   sync.WaitGroup
+	)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for atomic.LoadInt32(&stop) == 0 {
+			_ = win.isClosing()
+			_ = win.view()
+			runtime.Gosched()
+		}
+	}()
+
+	for i := 0; i < 200; i++ {
+		runOnMain(func() {
+			win.closing = !win.closing
+		})
+	}
+	runOnMain(func() {
+		win.closing = false
+	})
+
+	atomic.StoreInt32(&stop, 1)
+	wg.Wait()
+}
+
+// fyne#3874: viewport.Destroy() does not nil w.viewport, so view() keeps
+// handing a dead handle to the draw thread. After Destroy(), view() must
+// return nil — otherwise RunWithContext drives MakeContextCurrent on a
+// destroyed GLFW window (SIGSEGV on macOS, BadWindow on X11).
+func TestWindow_RunWithContext_AfterViewportDestroyed(t *testing.T) {
+	w := createWindow("Race3874-Destroyed")
+
+	runOnMain(func() {
+		w.window.viewport.Destroy()
+	})
+
+	require.Nil(t, w.window.view(), "view() must be nil after viewport.Destroy()")
 }
 
 func TestWindow_SetContent_Twice(t *testing.T) {
