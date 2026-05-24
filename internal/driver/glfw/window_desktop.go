@@ -74,6 +74,7 @@ type window struct {
 	decorate  bool
 	closing   bool
 	fixedSize bool
+	transparent bool
 
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
@@ -802,6 +803,11 @@ func (w *window) create() {
 		glfw.WindowHint(glfw.Floating, glfw.True)
 	} else {
 		glfw.WindowHint(glfw.Floating, glfw.False)
+	}
+	if w.transparent {
+		glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
+	} else {
+		glfw.WindowHint(glfw.TransparentFramebuffer, glfw.False)
 	}
 	glfw.WindowHint(glfw.AutoIconify, glfw.False)
 	initWindowHints()

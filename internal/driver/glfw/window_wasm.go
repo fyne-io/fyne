@@ -50,6 +50,7 @@ type window struct {
 	decorate  bool
 	closing   bool
 	fixedSize bool
+	transparent bool
 
 	cursor   desktop.Cursor
 	canvas   *glCanvas

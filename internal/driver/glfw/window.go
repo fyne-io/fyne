@@ -1019,6 +1019,14 @@ func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
 }
 
+func (w *window) Transparent() bool {
+	return w.transparent
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	w.transparent = transparent
+}
+
 func isKeyModifier(keyName fyne.KeyName) bool {
 	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
 		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||

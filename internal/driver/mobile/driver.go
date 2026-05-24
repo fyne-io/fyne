@@ -371,7 +371,12 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 
 	c.Painter().SetOutputSize(d.currentSize.WidthPx, d.currentSize.HeightPx)
 
-	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
+	var r, g, b, a uint32
+	if window.Transparent() {
+		r, g, b, a = 0, 0, 0, 0
+	} else {
+		r, g, b, a = theme.Color(theme.ColorNameBackground).RGBA()
+	}
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.ColorBufferBit)

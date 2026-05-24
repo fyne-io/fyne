@@ -13,6 +13,7 @@ import (
 type window struct {
 	title              string
 	visible            bool
+	transparent        bool
 	onClosed           func()
 	onCloseIntercepted func()
 	isChild            bool
@@ -208,4 +209,12 @@ func (w *window) RescaleContext() {
 
 func (w *window) Context() any {
 	return fyne.CurrentApp().Driver().(*driver).glctx
+}
+
+func (w *window) Transparent() bool {
+	return w.transparent
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	w.transparent = transparent
 }
