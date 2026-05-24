@@ -1,9 +1,11 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
@@ -330,4 +332,98 @@ func TestGridWrap_TypedKey(t *testing.T) {
 	gridWrap.currentHighlight = 20
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 	assert.Equal(t, 20, gridWrap.currentHighlight)
+}
+
+func TestGridWrap_StretchItems_DisabledKeepsMinWidth(t *testing.T) {
+	test.NewTempApp(t)
+
+	g := createGridWrapWithMin(4, fyne.NewSize(20, 10))
+	w := test.NewTempWindow(t, g)
+	w.Resize(fyne.NewSize(103, 40))
+
+	children := g.scroller.Content.(*fyne.Container).Objects
+	assert.Len(t, children, 4)
+	assert.Equal(t, float32(20), children[0].Size().Width)
+	assert.Equal(t, float32(20), children[3].Size().Width)
+}
+
+func TestGridWrap_StretchItems_EnabledStretchesToFillRow(t *testing.T) {
+	test.NewTempApp(t)
+
+	g := createGridWrapWithMin(4, fyne.NewSize(20, 10))
+	g.StretchItems = GridWrapStretchHorizontal
+	w := test.NewTempWindow(t, g)
+	w.Resize(fyne.NewSize(103, 40))
+
+	padding := g.Theme().Size(theme.SizeNamePadding)
+	colCount := g.ColumnCount()
+	assert.Equal(t, 4, colCount)
+
+	viewportWidth := g.scroller.Size().Width
+	expectedWidth := (viewportWidth - float32(colCount-1)*padding) / float32(colCount)
+	assert.Greater(t, expectedWidth, g.itemMin.Width)
+
+	children := g.scroller.Content.(*fyne.Container).Objects
+	assert.Len(t, children, 4)
+	assert.InDelta(t, float64(expectedWidth), float64(children[0].Size().Width), 0.001)
+	assert.InDelta(t, float64(expectedWidth), float64(children[3].Size().Width), 0.001)
+
+	lastRight := children[colCount-1].Position().X + children[colCount-1].Size().Width
+	assert.InDelta(t, float64(viewportWidth), float64(lastRight), 0.001)
+}
+
+func TestGridWrap_StretchItems_DoesNotShrinkItems(t *testing.T) {
+	test.NewTempApp(t)
+
+	g := createGridWrapWithMin(1, fyne.NewSize(20, 10))
+	g.StretchItems = GridWrapStretchHorizontal
+	w := test.NewTempWindow(t, g)
+	w.Resize(fyne.NewSize(15, 40))
+
+	children := g.scroller.Content.(*fyne.Container).Objects
+	assert.Len(t, children, 1)
+	assert.Equal(t, float32(20), children[0].Size().Width)
+}
+
+func TestGridWrap_StretchItems_Both(t *testing.T) {
+	test.NewTempApp(t)
+
+	g := createGridWrapWithMin(4, fyne.NewSize(20, 10))
+	g.StretchItems = GridWrapStretchBoth
+	w := test.NewTempWindow(t, g)
+	w.Resize(fyne.NewSize(103, 40))
+
+	padding := g.Theme().Size(theme.SizeNamePadding)
+	colCount := g.ColumnCount()
+	// 4 items, min width 20, padding 4.
+	// 103 width -> (103 + 4) / (20 + 4) = 107 / 24 = 4.45 -> 4 columns.
+	assert.Equal(t, 4, colCount)
+
+	viewportWidth := g.scroller.Size().Width
+	// Expected width: (103 - 3*4) / 4 = (103 - 12) / 4 = 91 / 4 = 22.75
+	expectedWidth := (viewportWidth - float32(colCount-1)*padding) / float32(colCount)
+	assert.Greater(t, expectedWidth, g.itemMin.Width)
+
+	// Aspect ratio is 20/10 = 2.
+	// Expected height: 22.75 / 2 = 11.375
+	expectedHeight := expectedWidth / (g.itemMin.Width / g.itemMin.Height)
+
+	children := g.scroller.Content.(*fyne.Container).Objects
+	assert.Len(t, children, 4)
+	assert.InDelta(t, float64(expectedWidth), float64(children[0].Size().Width), 0.001)
+	assert.InDelta(t, float64(expectedHeight), float64(children[0].Size().Height), 0.001)
+}
+
+func createGridWrapWithMin(items int, min fyne.Size) *GridWrap {
+	list := NewGridWrap(
+		func() int { return items },
+		func() fyne.CanvasObject {
+			rect := canvas.NewRectangle(color.Transparent)
+			rect.SetMinSize(min)
+			return rect
+		},
+		func(id GridWrapItemID, item fyne.CanvasObject) {},
+	)
+	list.Resize(fyne.NewSize(200, 200))
+	return list
 }
