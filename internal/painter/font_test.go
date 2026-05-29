@@ -3,6 +3,7 @@ package painter_test
 import (
 	"image"
 	"image/color"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -121,6 +122,46 @@ func TestMeasureString(t *testing.T) {
 			fontMap := &intTest.FontMap{faces.Fonts.ResolveFace(' ')} // first (ascii) font
 			got, _ := painter.MeasureString(fontMap, tt.string, tt.size, fyne.TextStyle{TabWidth: tt.tabWidth})
 			assert.Equal(t, tt.want, got.Width)
+		})
+	}
+}
+
+// TestDrawString_UnderscoreVisibleAtAllScales is a regression test for the
+// descender-clipping bug where the underscore glyph could vanish at certain
+// DPI scales. It mirrors the texture-sizing math used by newGlTextTexture and
+// asserts the bottom rows of the rasterised image contain non-trivial alpha.
+func TestDrawString_UnderscoreVisibleAtAllScales(t *testing.T) {
+	const fontSize = 14
+	style := fyne.TextStyle{Monospace: true}
+
+	for _, pixScale := range []float32{1.0, 1.25, 1.5, 1.75, 2.0} {
+		t.Run("", func(t *testing.T) {
+			bounds, baseline := painter.RenderedTextSize("_", fontSize, style, nil)
+
+			ascentPx := int(math.Ceil(float64(baseline * pixScale)))
+			descentPx := int(math.Ceil(float64((bounds.Height - baseline) * pixScale)))
+			height := ascentPx + descentPx
+			width := int(math.Ceil(float64(bounds.Width * pixScale)))
+			if width < 1 {
+				width = 1
+			}
+
+			img := image.NewNRGBA(image.Rect(0, 0, width, height))
+			face := painter.CachedFontFace(style, nil, nil)
+			painter.DrawString(img, "_", color.Black, face.Fonts, fontSize, pixScale, style)
+
+			// The underscore lives below the baseline; sum alpha in the
+			// descender area and require it to be visibly painted.
+			var totalAlpha int
+			for y := ascentPx; y < height; y++ {
+				for x := 0; x < width; x++ {
+					_, _, _, a := img.At(x, y).RGBA()
+					totalAlpha += int(a >> 8)
+				}
+			}
+			assert.Greater(t, totalAlpha, 50,
+				"underscore should produce visible pixels in the descent area at pixScale=%v (got total alpha %d in %d rows × %d cols)",
+				pixScale, totalAlpha, height-ascentPx, width)
 		})
 	}
 }
