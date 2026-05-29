@@ -587,6 +587,13 @@ func (t *textGridContentRenderer) Refresh() {
 	t.updateCellSize()
 	t.updateGridSize(t.text.text.Size())
 
+	// Re-run Layout so row positions reflect the (possibly updated) cellSize.
+	// Without this, callers that update cellSize via Refresh (e.g. theme/font
+	// size changes) end up with rows positioned using the OLD cellSize while
+	// cells inside those rows are sized using the NEW cellSize, producing
+	// 1-pixel hairlines between rows at certain font/cell sizes.
+	t.Layout(t.text.Size())
+
 	for _, o := range t.text.visible {
 		o.Refresh()
 	}
