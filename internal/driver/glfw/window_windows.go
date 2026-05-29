@@ -15,7 +15,16 @@ import (
 func (w *window) setDarkMode() {
 	if runtime.GOOS == "windows" {
 		hwnd := w.view().GetWin32Window()
-		dark := isDark()
+
+		var dark bool
+		if themeVariant == 0 {
+			dark = isDark()
+		} else if themeVariant == 1 {
+			dark = true
+		} else {
+			dark = false
+		}
+
 		// cannot use a go bool.
 		var winBool int32
 		if dark {
@@ -23,11 +32,12 @@ func (w *window) setDarkMode() {
 		}
 		dwm := syscall.NewLazyDLL("dwmapi.dll")
 		setAtt := dwm.NewProc("DwmSetWindowAttribute")
-		ret, _, err := setAtt.Call(uintptr(unsafe.Pointer(hwnd)), // window handle
+		ret, _, err := setAtt.Call(
+			uintptr(unsafe.Pointer(hwnd)),     // window handle
 			20,                                // DWMWA_USE_IMMERSIVE_DARK_MODE
 			uintptr(unsafe.Pointer(&winBool)), // on or off
-			4)                                 // sizeof(bool for windows)
-
+			4,                                 // sizeof(bool for windows)
+		)
 		if ret != 0 && ret != 0x80070057 { // err is always non-nil, we check return value (except erroneous code)
 			fyne.LogError("Failed to set dark mode", err)
 		}

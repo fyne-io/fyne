@@ -22,6 +22,11 @@ const (
 	//
 	// Since: 2.0
 	VariantLight = internaltheme.VariantLight
+
+	// VariantSystem is the version of a theme that satisfies a user preference based on the system look.
+	//
+	// Since: 2.8
+	VariantSystem = internaltheme.VariantSystem
 )
 
 var defaultTheme, systemTheme fyne.Theme

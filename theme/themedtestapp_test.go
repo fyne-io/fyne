@@ -102,6 +102,10 @@ func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
 	return t.variant // The null value is theme.VariantDark
 }
 
+func (t *themedApp) SetThemeVariant(variant fyne.ThemeVariant) {
+	t.variant = variant
+}
+
 func (t *themedApp) SetCloudProvider(fyne.CloudProvider) {
 }
 

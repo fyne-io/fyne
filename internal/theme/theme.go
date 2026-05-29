@@ -22,6 +22,7 @@ const (
 const (
 	VariantDark fyne.ThemeVariant = iota
 	VariantLight
+	VariantSystem
 	VariantNameUserPreference // locally used in builtinTheme for backward compatibility
 )
 
