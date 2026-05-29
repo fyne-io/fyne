@@ -37,6 +37,10 @@ func paintImage(img *canvas.Image, width, height int) (dst image.Image, err erro
 		dst = image.NewNRGBA(image.Rect(0, 0, width, height))
 	}
 
+	if img.FillMode == canvas.ImageFillCover {
+		return dst, nil
+	}
+
 	size := dst.Bounds().Size()
 	if width != size.X || height != size.Y {
 		dst = scaleImage(dst, width, height, img.ScaleMode)
