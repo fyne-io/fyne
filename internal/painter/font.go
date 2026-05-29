@@ -196,9 +196,29 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 		Color:    color,
 	}
 
+	dstHeight := dst.Bounds().Dy()
+
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
+		// Default baseline: ceil(ascent * pixScale). At certain DPI scales the
+		// combination ceil(ascent*pixScale) + ceil(-descent*pixScale) exceeds
+		// the dst image height (which is round(lineThickness*pixScale)). When
+		// that happens, descender glyphs — most visibly the underscore — get
+		// rasterised at or past the bottom edge and either clip entirely or
+		// reduce to a near-invisible anti-aliased sliver. Shift the baseline
+		// up just enough that ceil(-descent*pixScale) pixels remain below it.
+		// Without this clamp the original code would clip; with my earlier
+		// attempt (expanding the texture instead) the texture ended up larger
+		// than the drawn quad and GL resampling produced blurry text.
 		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
+		descentPx := int(math.Ceil(float64(-fixed266ToFloat32(run.LineBounds.Descent) * r.PixScale)))
+		if maxBaseline := dstHeight - descentPx; maxBaseline < y {
+			if maxBaseline < 0 {
+				maxBaseline = 0
+			}
+			y = maxBaseline
+		}
+
 		if len(run.Glyphs) == 1 {
 			if run.Glyphs[0].GlyphID == 0 {
 				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))

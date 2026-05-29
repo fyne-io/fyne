@@ -168,19 +168,9 @@ func (p *painter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 		color = theme.Color(theme.ColorNameForeground)
 	}
 
-	bounds, baseline := paint.RenderedTextSize(text.Text, text.TextSize, text.TextStyle, text.FontSource)
+	bounds := text.MinSize()
 	width := int(math.Ceil(float64(p.textureScale(bounds.Width) + paint.VectorPad(text)))) // potentially italic overspill
-
-	// Size the texture so the ascent and descent areas are each rounded up
-	// independently. This matches DrawString's baseline placement (ceil of
-	// ascent*pixScale) and guarantees enough descender pixels for glyphs that
-	// sit at or near the descender line (g, j, p, q, y, _). Previously this
-	// used round(bounds.Height*pixScale), so at some DPI scales the descent
-	// budget collapsed by one pixel and underscores were clipped or rendered
-	// as a near-invisible anti-aliased sliver.
-	ascentPx := int(math.Ceil(float64(baseline * p.pixScale)))
-	descentPx := int(math.Ceil(float64((bounds.Height - baseline) * p.pixScale)))
-	height := ascentPx + descentPx
+	height := int(math.Ceil(float64(p.textureScale(bounds.Height))))
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
