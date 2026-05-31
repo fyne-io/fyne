@@ -396,6 +396,53 @@ func (s *SeparatorSegment) SelectedText() string {
 func (s *SeparatorSegment) Unselect() {
 }
 
+// CheckBoxSegment represents checkbox (with text) in a rich text widget.
+//
+// Since: 2.8
+type CheckBoxSegment struct {
+	Checked bool
+	Text    string
+}
+
+// Inline returns true as a CheckBoxSegment is usually part of a list item.
+func (c *CheckBoxSegment) Inline() bool {
+	return true
+}
+
+// Textual returns the content of this segment rendered to plain text.
+func (c *CheckBoxSegment) Textual() string {
+	if c.Checked {
+		return "[x] "
+	}
+	return "[ ] "
+}
+
+// Visual returns a new instance of a check widget for this segment.
+func (c *CheckBoxSegment) Visual() fyne.CanvasObject {
+	check := NewCheck(c.Text, nil)
+	if c.Checked {
+		check.SetChecked(true)
+	}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: check}, Objects: []fyne.CanvasObject{check}}
+}
+
+// Update doesn't need to change a checkbox
+func (c *CheckBoxSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a checkbox.
+func (c *CheckBoxSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the empty string for a checkbox.
+func (c *CheckBoxSegment) SelectedText() string {
+	return ""
+}
+
+// Unselect does nothing for a checkbox.
+func (c *CheckBoxSegment) Unselect() {
+}
+
 // RichTextStyle describes the details of a text object inside a RichText widget.
 //
 // Since: 2.1

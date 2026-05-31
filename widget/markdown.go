@@ -83,6 +83,14 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		}
 		return result, err
 	case *ast.TextBlock:
+		if c, ok := t.FirstChild().(*ast2.TaskCheckBox); ok {
+			child := c.NextSibling()
+			text := ""
+			if child != nil {
+				text = string(child.(*ast.Text).Value(source))
+			}
+			return []RichTextSegment{&CheckBoxSegment{Text: decodeText(text), Checked: c.IsChecked}}, nil
+		}
 		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Heading:
 		return renderHeading(source, n, quotingDepth, listDepth)
@@ -260,7 +268,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 
 func parseMarkdown(content string) []RichTextSegment {
 	r := markdownRenderer{}
-	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough))
+	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough, extension.TaskList))
 	err := md.Convert([]byte(content), nil)
 	if err != nil {
 		fyne.LogError("Failed to parse markdown", err)
