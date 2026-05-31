@@ -41,9 +41,4 @@ type Settings interface {
 	BuildType() BuildType
 
 	ShowAnimations() bool
-
-	// SetThemeVariant sets the preferred variant of a theme to be used.
-	//
-	// Since: 2.8
-	SetThemeVariant(ThemeVariant)
 }

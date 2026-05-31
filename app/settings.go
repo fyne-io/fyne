@@ -31,10 +31,9 @@ func (sc *SettingsSchema) StoragePath() string {
 var _ fyne.Settings = (*settings)(nil)
 
 type settings struct {
-	theme            fyne.Theme
-	themeSpecified   bool
-	variant          fyne.ThemeVariant
-	variantSpecified bool
+	theme          fyne.Theme
+	themeSpecified bool
+	variant        fyne.ThemeVariant
 
 	listeners       []func(fyne.Settings)
 	changeListeners async.Map[chan fyne.Settings, bool]
@@ -79,16 +78,6 @@ func (s *settings) ShowAnimations() bool {
 
 func (s *settings) ThemeVariant() fyne.ThemeVariant {
 	return s.variant
-}
-
-func (s *settings) SetThemeVariant(variant fyne.ThemeVariant) {
-	if variant == theme.VariantSystem {
-		s.variantSpecified = false
-		s.setupTheme() // get and apply system variant
-		return
-	}
-	s.variantSpecified = true
-	s.applyTheme(s.theme, variant)
 }
 
 func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
@@ -139,7 +128,7 @@ func (s *settings) setupTheme() {
 		name = env
 	}
 
-	variant := app.DefaultVariant() // system variant
+	variant := app.DefaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
 		effectiveTheme = theme.DefaultTheme()
@@ -149,10 +138,6 @@ func (s *settings) setupTheme() {
 		variant = theme.VariantLight
 	case "dark":
 		variant = theme.VariantDark
-	}
-
-	if s.variantSpecified {
-		variant = s.variant
 	}
 
 	s.applyTheme(effectiveTheme, variant)

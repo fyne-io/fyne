@@ -24,10 +24,7 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-var (
-	curWindow    *window
-	themeVariant uint // mode 0 = system, 1 = dark, 2 = light
-)
+var curWindow *window
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)

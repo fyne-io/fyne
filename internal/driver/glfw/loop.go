@@ -12,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
-	"fyne.io/fyne/v2/internal/theme"
 )
 
 type funcData struct {
@@ -118,12 +117,6 @@ func (d *gLDriver) runGL() {
 	fyne.CurrentApp().Settings().AddListener(func(set fyne.Settings) {
 		painter.ClearFontCache()
 		cache.ResetThemeCaches()
-		if set.ThemeVariant() == theme.VariantDark {
-			themeVariant = 1
-		} else {
-			// use light mode as default
-			themeVariant = 2
-		}
 		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
 			d.applyThemeToWindow(w)
 			c, ok := w.Canvas().(*glCanvas)

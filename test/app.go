@@ -268,8 +268,6 @@ func (s *testSettings) ThemeVariant() fyne.ThemeVariant {
 	return 2 // not a preference
 }
 
-func (s *testSettings) SetThemeVariant(v fyne.ThemeVariant) {}
-
 func (s *testSettings) Scale() float32 {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
