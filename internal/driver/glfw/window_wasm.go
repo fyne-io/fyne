@@ -45,11 +45,11 @@ const (
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	viewport  *glfw.Window
-	created   bool
-	decorate  bool
-	closing   bool
-	fixedSize bool
+	viewport    *glfw.Window
+	created     bool
+	decorate    bool
+	closing     bool
+	fixedSize   bool
 	transparent bool
 
 	cursor   desktop.Cursor
@@ -122,6 +122,14 @@ func (w *window) SetIcon(icon fyne.Resource) {
 
 func (w *window) SetMaster() {
 	// FIXME: there could really only be one window
+}
+
+func (w *window) Opacity() float32 {
+	return 1.0
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	// FIXME: no support for SetOpacity yet
 }
 
 func (w *window) fitContent() {
@@ -526,6 +534,7 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) create() {
+	// transparency doesn't seem to work in WebGL, so we'll ignore it for now
 	// we can't hide the window in webgl, so there might be some artifact
 	initWindowHints()
 

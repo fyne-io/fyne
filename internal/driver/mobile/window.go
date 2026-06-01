@@ -13,7 +13,6 @@ import (
 type window struct {
 	title              string
 	visible            bool
-	transparent        bool
 	onClosed           func()
 	onCloseIntercepted func()
 	isChild            bool
@@ -212,9 +211,17 @@ func (w *window) Context() any {
 }
 
 func (w *window) Transparent() bool {
-	return w.transparent
+	return false
 }
 
 func (w *window) SetTransparent(transparent bool) {
-	w.transparent = transparent
+	// no-op on mobile
+}
+
+func (w *window) Opacity() float32 {
+	return 1.0
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	// no-op on mobile
 }

@@ -110,8 +110,18 @@ type Window interface {
 	// Since: 2.8
 	Transparent() bool
 	// SetTransparent sets whether the window background should be transparent.
-	// This must be set before Show() is called.
+	// This must be set before Show() or ShowAndRun() is called.
 	//
 	// Since: 2.8
 	SetTransparent(bool)
+
+	// Opacity returns the opacity of this window.
+	//
+	// Since: 2.8
+	Opacity() float32
+	// SetOpacity sets the opacity of this window.
+	// 0.0 - fully transparent, 1.0 - fully opaque
+	//
+	// Since: 2.8
+	SetOpacity(float32)
 }

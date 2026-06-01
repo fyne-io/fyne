@@ -88,6 +88,19 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func TestGLDriver_TransparentWindow(t *testing.T) {
+	var w *window
+	runOnMain(func() { // tests launch in a different context
+		w = d.createWindow("", true).(*window)
+		w.SetTransparent(true)
+		w.create()
+	})
+	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.TransparentFramebuffer))
+
+	w1 := createWindow("")
+	assert.Equal(t, 0, w1.window.viewport.GetAttrib(glfw.TransparentFramebuffer))
+}
+
 func TestWindow_MinSize_Fixed(t *testing.T) {
 	w := createWindowWithResizeCallback("Test")
 	r := canvas.NewRectangle(color.White)
@@ -1917,6 +1930,16 @@ func TestWindow_RescaleContext(t *testing.T) {
 
 		w.RescaleContext()
 		assert.Equal(t, initialWidth, w.width)
+	})
+}
+
+func TestWindow_Opacity(t *testing.T) {
+	w := createWindow("Test")
+	assert.Equal(t, float32(1), w.Opacity())
+
+	runOnMain(func() {
+		w.SetOpacity(0.5)
+		assert.Equal(t, float32(0.5), w.Opacity())
 	})
 }
 

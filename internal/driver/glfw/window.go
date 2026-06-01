@@ -249,6 +249,14 @@ func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
+func (w *window) Transparent() bool {
+	return w.transparent
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	w.transparent = transparent
+}
+
 func (w *window) processClosed() {
 	if w.onCloseIntercepted != nil {
 		w.onCloseIntercepted()
@@ -1017,14 +1025,6 @@ func (d *gLDriver) CreateSplashWindow() fyne.Window {
 
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
-}
-
-func (w *window) Transparent() bool {
-	return w.transparent
-}
-
-func (w *window) SetTransparent(transparent bool) {
-	w.transparent = transparent
 }
 
 func isKeyModifier(keyName fyne.KeyName) bool {

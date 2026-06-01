@@ -10,6 +10,7 @@ type window struct {
 	fixedSize          bool
 	focused            bool
 	transparent        bool
+	opacity            float32
 	onClosed           func()
 	onCloseIntercepted func()
 
@@ -146,4 +147,12 @@ func (w *window) Transparent() bool {
 
 func (w *window) SetTransparent(transparent bool) {
 	w.transparent = transparent
+}
+
+func (w *window) Opacity() float32 {
+	return w.opacity
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	w.opacity = opacity
 }
