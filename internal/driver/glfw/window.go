@@ -142,7 +142,6 @@ func (w *window) Show() {
 		}
 
 		if !w.created {
-			w.created = true
 			w.create()
 		}
 
@@ -254,6 +253,9 @@ func (w *window) Transparent() bool {
 }
 
 func (w *window) SetTransparent(transparent bool) {
+	if w.created {
+		return // cannot change after creation
+	}
 	w.transparent = transparent
 }
 

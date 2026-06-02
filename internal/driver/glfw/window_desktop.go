@@ -902,6 +902,7 @@ func (w *window) create() {
 
 	// Initialize accessibility support
 	w.initAccessibilityForWindow()
+	w.created = true
 }
 
 func (w *window) view() *glfw.Window {

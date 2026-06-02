@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -1921,15 +1922,38 @@ func TestWindow_RescaleContext(t *testing.T) {
 }
 
 func TestWindow_Transparent(t *testing.T) {
-	runOnMain(func() { // tests launch in a different context
-		w := d.CreateWindow("Transparent").(*window)
+	var w *window
+	var transparent bool
+	var frameBufferAttrib int
+
+	runOnMain(func() {
+		w = d.CreateWindow("Transparent").(*window)
 		w.SetTransparent(true)
 		w.create()
-		assert.Equal(t, 1, w.viewport.GetAttrib(glfw.TransparentFramebuffer))
+		transparent = w.Transparent()
+		frameBufferAttrib = w.viewport.GetAttrib(glfw.TransparentFramebuffer)
 	})
 
-	w1 := createWindow("")
-	assert.Equal(t, 0, w1.window.viewport.GetAttrib(glfw.TransparentFramebuffer))
+	assert.True(t, transparent)
+
+	// xvfb-run creates a cookie file usually matching /tmp/xvfb-run.XXXXXX/Xauthority
+	if runtime.GOOS == "linux" && strings.Contains(os.Getenv("XAUTHORITY"), "xvfb") {
+		t.Skip("Linux (xvfb) does not support transparent framebuffers")
+	}
+
+	assert.Equal(t, glfw.True, frameBufferAttrib)
+}
+
+func TestWindow_TransparentAfterCreate(t *testing.T) {
+	w := createWindow("Transparent")
+	assert.False(t, w.Transparent())
+	assert.Equal(t, glfw.False, w.window.viewport.GetAttrib(glfw.TransparentFramebuffer))
+
+	runOnMain(func() {
+		w.SetTransparent(true) // should not have an effect after creation
+		assert.False(t, w.Transparent())
+		assert.Equal(t, glfw.False, w.window.viewport.GetAttrib(glfw.TransparentFramebuffer))
+	})
 }
 
 func TestWindow_Opacity(t *testing.T) {
