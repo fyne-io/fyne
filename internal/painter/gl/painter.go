@@ -136,7 +136,7 @@ var _ Painter = (*painter)(nil)
 
 func (p *painter) Clear() {
 	var r, g, b, a uint32
-	if win, ok := p.contextProvider.(interface{ Transparent() bool }); ok && win.Transparent() {
+	if win, ok := p.contextProvider.(fyne.Window); ok && win.Transparent() {
 		r, g, b, a = 0, 0, 0, 0
 	} else {
 		r, g, b, a = theme.Color(theme.ColorNameBackground).RGBA()
