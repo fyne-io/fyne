@@ -612,6 +612,27 @@ func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
 	}
 	l.gw.offsetY = pos.Y
 	l.updateGrid(true)
+	l.keepHighlightVisible()
+}
+
+func (l *gridWrapLayout) keepHighlightVisible() {
+	if len(l.visible) == 0 {
+		return
+	}
+
+	current := l.gw.currentHighlight
+	first := l.visible[0].id
+	last := l.visible[len(l.visible)-1].id
+	if current < first {
+		l.gw.currentHighlight = first
+	} else if current > last {
+		l.gw.currentHighlight = last
+	}
+
+	if current != l.gw.currentHighlight {
+		l.gw.RefreshItem(current)
+		l.gw.RefreshItem(l.gw.currentHighlight)
+	}
 }
 
 func (l *gridWrapLayout) setupGridItem(li *gridWrapItem, id GridWrapItemID, focus bool) {

@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGridWrap_Focus(t *testing.T) {
@@ -97,6 +98,25 @@ func TestGridWrap_ScrollTo(t *testing.T) {
 
 	g.ScrollToBottom()
 	assert.Equal(t, greatest, GridWrapItemID(999))
+}
+
+func TestGridWrap_ScrollKeepsHighlightVisible(t *testing.T) {
+	g := createGridWrap(1000)
+	window := test.NewWindow(g)
+	defer window.Close()
+	window.Resize(fyne.NewSize(80, 100))
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas.FocusNext()
+	assert.Equal(t, GridWrapItemID(0), g.currentHighlight)
+
+	g.ScrollToBottom()
+
+	visible := g.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout).visible
+	require.NotEmpty(t, visible)
+
+	assert.GreaterOrEqual(t, g.currentHighlight, visible[0].id)
+	assert.LessOrEqual(t, g.currentHighlight, visible[len(visible)-1].id)
 }
 
 func TestGridWrap_ScrollToOffset(t *testing.T) {
