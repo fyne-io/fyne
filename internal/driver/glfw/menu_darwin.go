@@ -342,7 +342,7 @@ func testNSMenuItemKeyEquivalent(i unsafe.Pointer) string {
 }
 
 func testNSMenuItemKeyEquivalentModifierMask(i unsafe.Pointer) uint64 {
-	return uint64(C.ulong(C.test_NSMenuItem_keyEquivalentModifierMask(i)))
+	return uint64(C.test_NSMenuItem_keyEquivalentModifierMask(i))
 }
 
 func testNSMenuItemSubmenu(i unsafe.Pointer) unsafe.Pointer {

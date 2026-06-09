@@ -129,7 +129,7 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 		R: red,
 		G: green,
 		B: blue,
-		A: uint8(a.Alpha),
+		A: a.Alpha,
 	}
 }
 

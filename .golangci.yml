@@ -8,6 +8,7 @@ linters:
     - govet
     - nolintlint
     - staticcheck
+    - unconvert
     - unused
   exclusions:
     presets:
