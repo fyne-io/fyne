@@ -70,7 +70,8 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 				visibilityWindow.Show()
 			}
 			visibilityState = !visibilityState
-		}))
+		}),
+	)
 
 	drv := fyne.CurrentApp().Driver()
 	if drv, ok := drv.(desktop.Driver); ok {

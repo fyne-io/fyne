@@ -15,23 +15,27 @@ import (
 
 func TestMenu_ItemHovered(t *testing.T) {
 	sub1 := fyne.NewMenuItem("sub1", nil)
-	sub1.ChildMenu = fyne.NewMenu("",
+	sub1.ChildMenu = fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("sub1 A", nil),
 		fyne.NewMenuItem("sub1 B", nil),
 	)
 	sub2sub := fyne.NewMenuItem("sub2sub", nil)
-	sub2sub.ChildMenu = fyne.NewMenu("",
+	sub2sub.ChildMenu = fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("sub2sub A", nil),
 		fyne.NewMenuItem("sub2sub B", nil),
 	)
 	sub2 := fyne.NewMenuItem("sub2", nil)
-	sub2.ChildMenu = fyne.NewMenu("",
+	sub2.ChildMenu = fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("sub2 A", nil),
 		fyne.NewMenuItem("sub2 B", nil),
 		sub2sub,
 	)
 	m := NewMenu(
-		fyne.NewMenu("",
+		fyne.NewMenu(
+			"",
 			fyne.NewMenuItem("Foo", nil),
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Bar", nil),

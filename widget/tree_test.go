@@ -32,7 +32,8 @@ func TestNewTreeWithData(t *testing.T) {
 		data.Append("1", fmt.Sprintf("%d", 1000+i), fmt.Sprintf("Child Item %d", i))
 	}
 
-	tree := widget.NewTreeWithData(data,
+	tree := widget.NewTreeWithData(
+		data,
 		func(bool) fyne.CanvasObject {
 			return widget.NewLabel("Template Object")
 		},

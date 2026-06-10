@@ -36,7 +36,8 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 		}
 	}()
 
-	return container.NewGridWrap(fyne.NewSize(90, 90),
+	return container.NewGridWrap(
+		fyne.NewSize(90, 90),
 		canvas.NewImageFromResource(data.FyneLogo),
 		&canvas.Rectangle{
 			FillColor:   color.NRGBA{0x80, 0, 0, 0xff},

@@ -493,14 +493,16 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 
 	// start at s0, arc corner 0, then line+arc around, close last edge
 	p.Start(rasterx.ToFixedP(sPts[0].x, sPts[0].y))
-	gf(p,
+	gf(
+		p,
 		rasterx.ToFixedP(cPts[0].x, cPts[0].y),
 		rasterx.ToFixedP(vS[0].x, vS[0].y),
 		rasterx.ToFixedP(vE[0].x, vE[0].y),
 	)
 	for i := 1; i < sides; i++ {
 		p.Line(rasterx.ToFixedP(sPts[i].x, sPts[i].y))
-		gf(p,
+		gf(
+			p,
 			rasterx.ToFixedP(cPts[i].x, cPts[i].y),
 			rasterx.ToFixedP(vS[i].x, vS[i].y),
 			rasterx.ToFixedP(vE[i].x, vE[i].y),
@@ -588,7 +590,8 @@ func drawArbitraryPolygon(xs, ys, radii []float64, p rasterx.Adder) {
 		nxtIdx := (i + 1) % num
 
 		// draw the arc at the current vertex
-		rasterx.RoundGap(p,
+		rasterx.RoundGap(
+			p,
 			rasterx.ToFixedP(centers[i].x, centers[i].y),
 			rasterx.ToFixedP(startPoints[i].x-centers[i].x, startPoints[i].y-centers[i].y),
 			rasterx.ToFixedP(endPoints[i].x-centers[i].x, endPoints[i].y-centers[i].y),

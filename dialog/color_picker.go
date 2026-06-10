@@ -187,7 +187,8 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 			container.NewPadded(wheel),
 			hslBox,
 			rgbBox),
-		container.NewGridWithColumns(3,
+		container.NewGridWithColumns(
+			3,
 			container.NewPadded(preview),
 
 			hex,

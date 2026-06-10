@@ -243,7 +243,8 @@ func (i *Installer) installToIOSSimulator(target string) error {
 	cmd := execabs.Command(
 		"xcrun", "simctl", "install",
 		"booted", // Install to the booted simulator.
-		target)
+		target,
+	)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("Install to a simulator error: %s%s", out, err)
 	}

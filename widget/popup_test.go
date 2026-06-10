@@ -69,7 +69,8 @@ func TestShowPopUpAtRelativePosition(t *testing.T) {
 	parent1 := NewLabel("Parent1")
 	parent2 := NewLabel("Parent2")
 	w := test.NewTempWindow(
-		t, &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}})
+		t, &fyne.Container{Layout: layout.NewVBoxLayout(), Objects: []fyne.CanvasObject{parent1, parent2}},
+	)
 	w.Resize(fyne.NewSize(100, 200))
 
 	ShowPopUpAtRelativePosition(label, w.Canvas(), pos, parent2)

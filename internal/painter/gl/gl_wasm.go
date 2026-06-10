@@ -97,6 +97,14 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
+	p.getUniformLocations(
+		p.roundRectangleProgram,
+		"frame_size", "rect_coords",
+		"stroke_width_half", "rect_size_half",
+		"radius", "edge_softness",
+		"fill_color", "stroke_color",
+	)
+	p.enableAttribArrays(p.roundRectangleProgram, "vert", "normal")
 
 	p.polygonProgram = ProgramState{
 		ref:        p.createProgram("polygon_es"),
@@ -104,6 +112,14 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
+	p.getUniformLocations(
+		p.polygonProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"outer_radius", "angle", "sides",
+		"fill_color", "corner_radius",
+		"stroke_width", "stroke_color",
+	)
+	p.enableAttribArrays(p.polygonProgram, "vert", "normal")
 
 	p.arcProgram = ProgramState{
 		ref:        p.createProgram("arc_es"),
@@ -111,6 +127,16 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
+	p.getUniformLocations(
+		p.arcProgram,
+		"frame_size", "rect_coords",
+		"inner_radius", "outer_radius",
+		"start_angle", "end_angle",
+		"edge_softness", "corner_radius",
+		"stroke_width", "stroke_color",
+		"fill_color",
+	)
+	p.enableAttribArrays(p.arcProgram, "vert", "normal")
 
 	p.bezierCurveProgram = ProgramState{
 		ref:        p.createProgram("bezier_curve_es"),
@@ -118,6 +144,14 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
+	p.getUniformLocations(
+		p.bezierCurveProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"stroke_width_half", "stroke_color",
+		"start_point", "end_point",
+		"control_point1", "control_point2", "num_control_points",
+	)
+	p.enableAttribArrays(p.bezierCurveProgram, "vert", "normal")
 
 	p.arbitraryPolygonProgram = ProgramState{
 		ref:        p.createProgram("arbitrary_polygon_es"),
@@ -125,6 +159,13 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*UniformState),
 		attributes: make(map[string]Attribute),
 	}
+	p.getUniformLocations(
+		p.arbitraryPolygonProgram,
+		"frame_size", "rect_coords", "edge_softness",
+		"vertices", "corner_radii", "vertex_count",
+		"fill_color", "stroke_width", "stroke_color",
+	)
+	p.enableAttribArrays(p.arbitraryPolygonProgram, "vert", "normal")
 }
 
 type xjsContext struct{}

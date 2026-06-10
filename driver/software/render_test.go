@@ -44,7 +44,8 @@ func TestRenderCanvas(t *testing.T) {
 		container.NewTabItem("Tab 1", container.NewVBox(
 			widget.NewLabel("Label"),
 			widget.NewButton("Button", func() {}),
-		)))
+		)),
+	)
 
 	c := NewCanvas()
 	c.SetContent(obj)

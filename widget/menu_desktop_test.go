@@ -207,7 +207,8 @@ func TestMenu_Scrolling(t *testing.T) {
 	w.SetPadded(false)
 	c := w.Canvas()
 
-	menu := fyne.NewMenu("",
+	menu := fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("A", nil),
 		fyne.NewMenuItem("B", nil),
 		fyne.NewMenuItem("C", nil),
@@ -249,11 +250,13 @@ func TestMenu_TraverseMenu(t *testing.T) {
 	c := w.Canvas()
 
 	itemWithChild := fyne.NewMenuItem("Bar", nil)
-	itemWithChild.ChildMenu = fyne.NewMenu("",
+	itemWithChild.ChildMenu = fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("SubA", nil),
 		fyne.NewMenuItem("SubB", nil),
 	)
-	m := widget.NewMenu(fyne.NewMenu("",
+	m := widget.NewMenu(fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("Foo", nil),
 		fyne.NewMenuItemSeparator(),
 		itemWithChild,
@@ -326,12 +329,14 @@ func TestMenu_TriggerTraversedMenu(t *testing.T) {
 		triggered = ""
 		dismissed = false
 		itemWithChild := fyne.NewMenuItem("Bar", func() { triggered = "2nd" })
-		itemWithChild.ChildMenu = fyne.NewMenu("",
+		itemWithChild.ChildMenu = fyne.NewMenu(
+			"",
 			fyne.NewMenuItem("SubA", func() { triggered = "1st sub" }),
 			fyne.NewMenuItem("SubB", nil),
 			fyne.NewMenuItem("SubC", func() { triggered = "3rd sub" }),
 		)
-		m := widget.NewMenu(fyne.NewMenu("",
+		m := widget.NewMenu(fyne.NewMenu(
+			"",
 			fyne.NewMenuItem("Foo", func() { triggered = "1st" }),
 			fyne.NewMenuItemSeparator(),
 			itemWithChild,

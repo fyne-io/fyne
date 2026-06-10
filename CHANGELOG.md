@@ -3,24 +3,26 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.8.0 - Unreleased
+## 2.7.4 - 12 May 2026
 
-### Added
+### Fixed
 
-* Initial accessibility support behind the `accessibility` build tag (#1285).
-  Widgets opt in via the new `Accessible`, `AccessibleChildren`,
-  `AccessibleValue`, `AccessibleValueSetter`, `AccessibleActions`, and
-  `AccessibleStates` interfaces. Roles, actions and states are surfaced
-  through native AT bridges:
-  - macOS: full NSAccessibility coverage including roles, subroles,
-    actions (press/increment/decrement/showMenu/select/setValue), states
-    (checked/disabled/expanded/focused/selected/required/invalid), and
-    live notifications for value/selection/layout/focus changes.
-  - Windows: UIA control type mapping for all 19 Fyne roles.
-  - iOS: UIAccessibilityTraits mapping for Button, Checkbox, Heading,
-    Image, Link, ProgressBar, Radio, Slider, Tab, and StaticText.
-  - Android: virtual view roles forwarded to the Java accessibility
-    delegate.
+* SIGSEGV in glfwPollEvents after SetMainMenu rebuild with separator items (macOS) (#6264)
+* Rasters created from NewRasterFromImage unexpectedly stretches the image (#6242)
+* Infinite Progress Bar widget will not automatically start until a Refresh() or Start() is called (#6221)
+* TextGrid: MinSize do not work when line number is visible (#6218)
+* InnerWindow drags past MultiWindows border (#6210)
+* Layout issue with fyne.TextWordWrap (#6181)
+* Hangul (Korean) text renders as U+FFFD (�) on Windows in v2.7 (#6146)
+* Android: storage.List(uri) call results in crash when permission has expired (#6117)
+* Fix strange wrapping which results in one char per line
+* Unexpected fyne.Do errors on android (#5664)
+* Local function is not call on the main Fyne runtime on mobile (#5868)
+* Fix Wide Character's width calculation in TextGrid
+* Various system tray fixes
+* Speed improvement in rendering scrolled text
+* Support OpenURL in mobile simulator
+* When using local metadata for go run also check Icon.png
 
 
 ## 2.7.3 - 21 Feb 2026

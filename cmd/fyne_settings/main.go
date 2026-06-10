@@ -15,7 +15,8 @@ func main() {
 
 	appearance := s.LoadAppearanceScreen(w)
 	tabs := container.NewAppTabs(
-		&container.TabItem{Text: "Appearance", Icon: s.AppearanceIcon(), Content: appearance})
+		&container.TabItem{Text: "Appearance", Icon: s.AppearanceIcon(), Content: appearance},
+	)
 	tabs.SetTabLocation(container.TabLocationLeading)
 	w.SetContent(tabs)
 

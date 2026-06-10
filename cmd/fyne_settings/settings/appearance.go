@@ -86,7 +86,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	appearance := widget.NewForm(
 		widget.NewFormItem("Animations", animations),
 		widget.NewFormItem("Main Color", swatch),
-		widget.NewFormItem("Theme", themes))
+		widget.NewFormItem("Theme", themes),
+	)
 
 	box.Add(widget.NewCard("Appearance", "", appearance))
 	bottom := container.NewHBox(layout.NewSpacer(),
@@ -283,7 +284,8 @@ func createPreviewWidget() fyne.CanvasObject {
 	form.OnCancel = func() {}
 	form.OnSubmit = func() {}
 	content := container.NewVBox(
-		widget.NewLabelWithStyle("Theme Preview", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
+		widget.NewLabelWithStyle("Theme Preview", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form,
+	)
 
 	over := container.NewStack(intWidget.NewShadow(intWidget.ShadowAround, intWidget.DialogLevel),
 		container.NewPadded(content))

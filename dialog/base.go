@@ -135,7 +135,8 @@ func (d *dialog) create(buttons fyne.CanvasObject) {
 		image = &layout.Spacer{}
 	}
 
-	content := container.New(&dialogLayout{d: d},
+	content := container.New(
+		&dialogLayout{d: d},
 		image,
 		newThemedBackground(),
 		d.content,

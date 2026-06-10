@@ -212,7 +212,8 @@ func envInit() (err error) {
 		if before116 {
 			os = "darwin"
 		}
-		env = append(env,
+		env = append(
+			env,
 			"GOOS="+os,
 			"GOARCH="+arch,
 			"CC="+clang,

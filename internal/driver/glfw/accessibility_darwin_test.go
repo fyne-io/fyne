@@ -22,6 +22,7 @@ func (s *stateBag) AccessibilityRole() fyne.AccessibleRole { return fyne.Accessi
 func (s *stateBag) AccessibilityStates() []fyne.AccessibleState {
 	return s.states
 }
+
 func (s *stateBag) AccessibilityActions() []fyne.AccessibleAction {
 	return s.actions
 }

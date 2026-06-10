@@ -96,7 +96,8 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	// first movement
 	e.Move(fyne.NewPos(10, 10))
 	assert.Equal(t, fyne.NewPos(10, 10), e.Entry.Position())
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		fyne.NewPos(10, 10+entrySize.Height-theme.InputBorderSize()).Subtract(inset),
 		e.popUp.Position(),
 	)
@@ -104,7 +105,8 @@ func TestSelectEntry_DropDownMove(t *testing.T) {
 	// second movement
 	e.Move(fyne.NewPos(30, 27))
 	assert.Equal(t, fyne.NewPos(30, 27), e.Entry.Position())
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		fyne.NewPos(30, 27+entrySize.Height-theme.InputBorderSize()).Subtract(inset),
 		e.popUp.Position(),
 	)

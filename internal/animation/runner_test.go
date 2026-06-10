@@ -15,7 +15,8 @@ func BenchmarkRunnerAllocs(b *testing.B) {
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(
 			fyne.NewAnimation(1000*time.Second, func(f float32) {
 				fl = f
-			})))
+			}),
+		))
 	}
 	for n := 0; n < b.N; n++ {
 		r.runOneFrame()

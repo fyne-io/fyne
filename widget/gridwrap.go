@@ -95,7 +95,8 @@ func NewGridWrapWithData(data binding.DataList, createItem func() fyne.CanvasObj
 				return
 			}
 			updateItem(item, o)
-		})
+		},
+	)
 
 	data.AddListener(binding.NewDataListener(gwList.Refresh))
 	return gwList

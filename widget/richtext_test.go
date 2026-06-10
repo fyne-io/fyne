@@ -423,7 +423,8 @@ func TestText_DeleteFromTo_Segments(t *testing.T) {
 func TestText_Multiline(t *testing.T) {
 	text := NewRichText(
 		&TextSegment{Text: "line1\nli", Style: RichTextStyleStrong},
-		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline})
+		&TextSegment{Text: "ne2\nline3", Style: RichTextStyleInline},
+	)
 
 	w := test.NewTempWindow(t, text)
 	w.Resize(fyne.NewSize(64, 90))

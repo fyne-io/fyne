@@ -27,7 +27,8 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 //
 // Since: 2.6
 func BindPreferenceBoolList(key string, p fyne.Preferences) BoolList {
-	return bindPreferenceListComparable(key, p,
+	return bindPreferenceListComparable(
+		key, p,
 		func(p fyne.Preferences) (func(string) []bool, func(string, []bool)) {
 			return p.BoolList, p.SetBoolList
 		},
@@ -50,7 +51,8 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 //
 // Since: 2.6
 func BindPreferenceFloatList(key string, p fyne.Preferences) FloatList {
-	return bindPreferenceListComparable(key, p,
+	return bindPreferenceListComparable(
+		key, p,
 		func(p fyne.Preferences) (func(string) []float64, func(string, []float64)) {
 			return p.FloatList, p.SetFloatList
 		},
@@ -73,7 +75,8 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 //
 // Since: 2.6
 func BindPreferenceIntList(key string, p fyne.Preferences) IntList {
-	return bindPreferenceListComparable(key, p,
+	return bindPreferenceListComparable(
+		key, p,
 		func(p fyne.Preferences) (func(string) []int, func(string, []int)) {
 			return p.IntList, p.SetIntList
 		},
@@ -96,7 +99,8 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 //
 // Since: 2.6
 func BindPreferenceStringList(key string, p fyne.Preferences) StringList {
-	return bindPreferenceListComparable(key, p,
+	return bindPreferenceListComparable(
+		key, p,
 		func(p fyne.Preferences) (func(string) []string, func(string, []string)) {
 			return p.StringList, p.SetStringList
 		},

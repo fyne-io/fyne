@@ -907,7 +907,8 @@ func (t *textGridRowRenderer) MinSize() fyne.Size {
 
 	return fyne.NewSize(
 		t.obj.text.cellSize.Width*float32(len(t.obj.text.text.Rows[t.obj.row].Cells)),
-		t.obj.text.cellSize.Height)
+		t.obj.text.cellSize.Height,
+	)
 }
 
 func (t *textGridRowRenderer) Refresh() {

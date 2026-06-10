@@ -86,7 +86,7 @@ var currentCtx C.jobject
 func SetCurrentContext(vm unsafe.Pointer, ctx uintptr) {
 	currentVM = (*C.JavaVM)(vm)
 	currentCtxPrev := currentCtx
-	currentCtx = (C.jobject)(ctx)
+	currentCtx = C.jobject(ctx)
 	RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
 		C.deletePrevCtx(env, C.jobject(currentCtxPrev))

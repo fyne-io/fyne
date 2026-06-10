@@ -141,7 +141,8 @@ func TestMenu_Dragging(t *testing.T) {
 	w.SetPadded(false)
 	c := w.Canvas()
 
-	menu := fyne.NewMenu("",
+	menu := fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("A", nil),
 		fyne.NewMenuItem("B", nil),
 		fyne.NewMenuItem("C", nil),

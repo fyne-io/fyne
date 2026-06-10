@@ -54,7 +54,8 @@ func Translate() *cli.Command {
 			}
 
 			usage := func() {
-				fmt.Fprintf(os.Stderr, "usage: %s %s [command options] %s\n",
+				fmt.Fprintf(
+					os.Stderr, "usage: %s %s [command options] %s\n",
 					ctx.App.Name,
 					ctx.Command.Name,
 					ctx.Command.ArgsUsage,

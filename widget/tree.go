@@ -97,7 +97,8 @@ func NewTreeWithData(data binding.DataTree, createItem func(bool) fyne.CanvasObj
 				return
 			}
 			updateItem(item, branch, o)
-		})
+		},
+	)
 
 	data.AddListener(binding.NewDataListener(t.Refresh))
 	return t

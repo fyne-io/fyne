@@ -31,7 +31,8 @@ func TestTab_ThemeChange(t *testing.T) {
 
 	tabs := NewAppTabs(
 		NewTabItem("a", widget.NewLabel("a")),
-		NewTabItem("b", widget.NewLabel("b")))
+		NewTabItem("b", widget.NewLabel("b")),
+	)
 	w := test.NewTempWindow(t, tabs)
 	w.Resize(fyne.NewSize(180, 120))
 

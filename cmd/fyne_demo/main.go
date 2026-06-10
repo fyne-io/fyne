@@ -65,7 +65,8 @@ func main() {
 	}
 
 	tutorial := container.NewBorder(
-		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
+		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content,
+	)
 	if fyne.CurrentDevice().IsMobile() {
 		w.SetContent(makeNav(setTutorial, false))
 	} else {
@@ -76,7 +77,8 @@ func main() {
 	w.Resize(fyne.NewSize(640, 460))
 
 	notice := widget.NewRichTextFromMarkdown(
-		"This demo has been moved to a new repository.\n\n[Fyne demo on GitHub](https://github.com/fyne-io/demo)")
+		"This demo has been moved to a new repository.\n\n[Fyne demo on GitHub](https://github.com/fyne-io/demo)",
+	)
 	notice.Segments[2].(*widget.HyperlinkSegment).Alignment = fyne.TextAlignCenter
 	dialog.ShowCustom("Fyne Demo Moved", "OK", notice, w)
 
@@ -107,7 +109,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	otherItem := fyne.NewMenuItem("Other", nil)
 	mailItem := fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") })
 	mailItem.Icon = theme.MailComposeIcon()
-	otherItem.ChildMenu = fyne.NewMenu("",
+	otherItem.ChildMenu = fyne.NewMenu(
+		"",
 		fyne.NewMenuItem("Project", func() { fmt.Println("Menu New->Other->Project") }),
 		mailItem,
 	)
@@ -115,7 +118,8 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	fileItem.Icon = theme.FileIcon()
 	dirItem := fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") })
 	dirItem.Icon = theme.FolderIcon()
-	newItem.ChildMenu = fyne.NewMenu("",
+	newItem.ChildMenu = fyne.NewMenu(
+		"",
 		fileItem,
 		dirItem,
 		otherItem,
@@ -252,7 +256,8 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) f
 		tree.Select(currentPref)
 	}
 
-	themes := container.NewGridWithColumns(2,
+	themes := container.NewGridWithColumns(
+		2,
 		widget.NewButton("Dark", func() {
 			a.Settings().SetTheme(&forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantDark})
 		}),

@@ -293,10 +293,12 @@ func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	base := container.NewGridWithColumns(1,
+	base := container.NewGridWithColumns(
+		1,
 		rect,
 		internal_widget.NewScroll(child),
-		container.NewGridWithColumns(2,
+		container.NewGridWithColumns(
+			2,
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
@@ -364,10 +366,12 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	child := canvas.NewRectangle(color.Black)
-	base := container.NewGridWithColumns(1,
+	base := container.NewGridWithColumns(
+		1,
 		rect,
 		internal_widget.NewScroll(child),
-		container.NewGridWithColumns(2,
+		container.NewGridWithColumns(
+			2,
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),
 			canvas.NewCircle(color.White),

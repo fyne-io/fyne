@@ -239,17 +239,20 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		optionsButton,
 	)
 
-	header := container.NewBorder(nil, nil, nil, optionsbuttons,
+	header := container.NewBorder(
+		nil, nil, nil, optionsbuttons,
 		f.title,
 	)
 
-	footer := container.NewBorder(nil, nil, nil, buttons,
+	footer := container.NewBorder(
+		nil, nil, nil, buttons,
 		container.NewHScroll(f.fileName),
 	)
 
 	body := container.NewHSplit(
 		f.favoritesList,
-		container.NewBorder(f.breadcrumbScroll, nil, nil, nil,
+		container.NewBorder(
+			f.breadcrumbScroll, nil, nil, nil,
 			f.filesScroll,
 		),
 	)

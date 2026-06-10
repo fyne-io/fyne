@@ -3,7 +3,7 @@ module fyne.io/fyne/v2
 go 1.19
 
 require (
-	fyne.io/systray v1.12.0
+	fyne.io/systray v1.12.1
 	github.com/BurntSushi/toml v1.5.0
 	github.com/FyshOS/fancyfs v0.0.0-20251025194026-1f03098ff624
 	github.com/anthonynsimon/bild v0.13.0

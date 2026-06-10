@@ -40,7 +40,8 @@ func TestNewListWithData(t *testing.T) {
 		data.Append(fmt.Sprintf("Test Item %d", i))
 	}
 
-	list := NewListWithData(data,
+	list := NewListWithData(
+		data,
 		func() fyne.CanvasObject {
 			return NewLabel("Template Object")
 		},
@@ -80,7 +81,8 @@ func TestList_MinSize(t *testing.T) {
 					r.Resize(tt.cellSize)
 					return r
 				},
-				func(ListItemID, fyne.CanvasObject) {}).MinSize())
+				func(ListItemID, fyne.CanvasObject) {},
+			).MinSize())
 		})
 	}
 }
@@ -105,7 +107,8 @@ func TestList_Resize(t *testing.T) {
 			return NewButton("", func() {})
 		},
 		func(ListItemID, fyne.CanvasObject) {
-		})
+		},
+	)
 	list.Resize(list.Size())
 }
 
@@ -118,7 +121,8 @@ func TestList_SetItemHeight(t *testing.T) {
 			return r
 		},
 		func(ListItemID, fyne.CanvasObject) {
-		})
+		},
+	)
 
 	lay := test.TempWidgetRenderer(t, list).(*listRenderer).layout
 	assert.Equal(t, fyne.NewSize(32, 32), list.MinSize())
@@ -144,7 +148,8 @@ func TestList_SetItemHeight_InUpdate(t *testing.T) {
 		},
 		func(id ListItemID, o fyne.CanvasObject) {
 			list.SetItemHeight(id, 32)
-		})
+		},
+	)
 
 	done := make(chan struct{})
 	go func() {

@@ -131,6 +131,21 @@ func (p *painter) UpdateVertexArray(pState ProgramState, name string, size, stri
 	p.logError()
 }
 
+func (p *painter) getUniformLocations(pState ProgramState, names ...string) {
+	for _, name := range names {
+		u := p.ctx.GetUniformLocation(pState.ref, name)
+		pState.uniforms[name] = &UniformState{ref: u}
+	}
+}
+
+func (p *painter) enableAttribArrays(pState ProgramState, names ...string) {
+	for _, name := range names {
+		a := p.ctx.GetAttribLocation(pState.ref, name)
+		p.ctx.EnableVertexAttribArray(a)
+		pState.attributes[name] = a
+	}
+}
+
 // Declare conformity to Painter interface
 var _ Painter = (*painter)(nil)
 

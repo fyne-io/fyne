@@ -19,7 +19,8 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 	c := newCanvas(fyne.CurrentDevice()).(*canvas)
 	c.SetContent(fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground)))
 	menu := fyne.NewMainMenu(
-		fyne.NewMenu("Test"))
+		fyne.NewMenu("Test"),
+	)
 	c.showMenu(menu)
 	c.Resize(fyne.NewSize(100, 100))
 
@@ -35,7 +36,8 @@ func TestMobileCanvas_DismissMenu(t *testing.T) {
 	c.padded = false
 	c.SetContent(fynecanvas.NewRectangle(theme.Color(theme.ColorNameBackground)))
 	menu := fyne.NewMainMenu(
-		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
+		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})),
+	)
 	c.showMenu(menu)
 	c.Resize(fyne.NewSize(100, 100))
 
@@ -54,7 +56,8 @@ func TestMobileCanvas_Menu(t *testing.T) {
 	labels := []string{"File", "Edit"}
 	menu := fyne.NewMainMenu(
 		fyne.NewMenu(labels[0]),
-		fyne.NewMenu(labels[1]))
+		fyne.NewMenu(labels[1]),
+	)
 
 	c.showMenu(menu)
 	menuObjects := c.menu.(*fyne.Container).Objects[1].(*fyne.Container)
@@ -81,7 +84,8 @@ func TestMobileCanvas_MenuChild(t *testing.T) {
 	parent := fyne.NewMenuItem("Parent", func() {})
 	parent.ChildMenu = child
 	menu := fyne.NewMainMenu(
-		fyne.NewMenu("Top", parent))
+		fyne.NewMenu("Top", parent),
+	)
 
 	c.showMenu(menu)
 	topObj := c.menu.(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*menuLabel)

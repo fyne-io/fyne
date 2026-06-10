@@ -160,12 +160,13 @@ func (ctx *context) CreateBuffer() Buffer {
 func (ctx *context) CreateProgram() Program {
 	return Program{
 		Init: true,
-		Value: uint32(ctx.enqueue(call{
-			args: fnargs{
-				fn: glfnCreateProgram,
+		Value: uint32(ctx.enqueue(
+			call{
+				args: fnargs{
+					fn: glfnCreateProgram,
+				},
+				blocking: true,
 			},
-			blocking: true,
-		},
 		)),
 	}
 }
