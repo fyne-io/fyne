@@ -226,9 +226,9 @@ func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
 	w.SetCloseIntercept(w.Hide)
 	glw := w.(*window)
 	if glw.decorate {
-		systray.SetOnTapped(glw.Show)
+		systray.SetOnTapped(func() { fyne.Do(glw.Show) })
 	} else {
-		systray.SetOnTapped(glw.toggleVisible)
+		systray.SetOnTapped(func() { fyne.Do(glw.toggleVisible) })
 	}
 }
 

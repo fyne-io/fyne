@@ -1,21 +1,89 @@
 package widget
 
 import (
+	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne/v2/storage"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
 	r := NewRichTextFromMarkdown("p1\n\n> quote\n\np2")
 
-	assert.Len(t, r.Segments, 5)
+	assert.Len(t, r.Segments, 6)
 	if text, ok := r.Segments[2].(*TextSegment); ok {
 		assert.Equal(t, "quote", text.Text)
-		assert.Equal(t, RichTextStyleBlockquote, text.Style)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be Text")
+	}
+
+	r = NewRichTextFromMarkdown("> # Head1\n> > # Head2")
+
+	assert.Len(t, r.Segments, 4)
+	if text, ok := r.Segments[0].(*TextSegment); ok {
+		assert.Equal(t, "Head1", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 1, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be blockquoted Heading")
+	}
+	if text, ok := r.Segments[2].(*TextSegment); ok {
+		assert.Equal(t, "Head2", text.Text)
+		assert.Equal(t, RichTextStyleHeading.SizeName, text.Style.SizeName)
+		assert.Equal(t, true, text.Style.TextStyle.Bold)
+		assert.Equal(t, true, text.Style.TextStyle.Italic)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
+	} else {
+		t.Error("Segment should be a blockquoted Heading")
+	}
+
+	r = NewRichTextFromMarkdown("> - quoted list item")
+
+	assert.Len(t, r.Segments, 1)
+	if list, ok := r.Segments[0].(*ListSegment); ok {
+		assert.Len(t, list.Items[0].(*ParagraphSegment).Texts, 1)
+		assert.Equal(t, "quoted list item", list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Text)
+		assert.Equal(t, 1, list.Items[0].(*ParagraphSegment).Texts[0].(*TextSegment).Style.QuotingDepth)
+		assert.Equal(t, 1, list.quotingLevel)
+	} else {
+		t.Error("Segment should be a List")
+	}
+
+	r = NewRichTextFromMarkdown("> [fyne.io](https://fyne.io/)")
+
+	assert.Len(t, r.Segments, 2)
+	if link, ok := r.Segments[0].(*HyperlinkSegment); ok {
+		assert.Equal(t, "fyne.io", link.Text)
+		assert.Equal(t, 1, link.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted hyperlink")
+	}
+
+	r = NewRichTextFromMarkdown("> ```go\n> package main\n> ```")
+
+	assert.Len(t, r.Segments, 1)
+	if block, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "package main", block.Text)
+		assert.Equal(t, 1, block.quotingLevel)
+	} else {
+		t.Error("Segment should be a blockquoted code block")
+	}
+}
+
+func TestRichTextMarkdown_NestedBlockquote(t *testing.T) {
+	r := NewRichTextFromMarkdown("p1\n\n> quote\n> > nested quote\n\np2")
+
+	assert.Len(t, r.Segments, 8)
+	if text, ok := r.Segments[4].(*TextSegment); ok {
+		assert.Equal(t, "nested quote", text.Text)
+		assert.Equal(t, 2, text.Style.QuotingDepth)
 	} else {
 		t.Error("Segment should be Text")
 	}
@@ -34,12 +102,117 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 
 	r.ParseMarkdown("``` go\ncode\nblock\n```")
 	assert.Len(t, r.Segments, 1)
-	if text, ok := r.Segments[0].(*TextSegment); ok {
-		assert.Equal(t, "code\nblock", text.Text)
-		assert.Equal(t, RichTextStyleCodeBlock, text.Style)
+	if code, ok := r.Segments[0].(*CodeBlockSegment); ok {
+		assert.Equal(t, "code\nblock", code.Text)
 	} else {
-		t.Error("Segment should be Text")
+		t.Error("Segment should be CodeBlock")
 	}
+}
+
+func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	cb := newRichCodeBlock(long)
+	test.TempWidgetRenderer(t, cb)
+	min := cb.MinSize()
+
+	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
+	assert.Greater(t, min.Height, float32(10))
+}
+
+func TestRichTextMarkdown_Table(t *testing.T) {
+	r := NewRichTextFromMarkdown("| Feature | Value |\n| :--- | ---: |\n| **bold** | `code` |")
+
+	assert.Len(t, r.Segments, 1)
+	table, ok := r.Segments[0].(*TableSegment)
+	if !ok {
+		t.Fatal("Segment should be a Table")
+	}
+
+	assert.Len(t, table.Headers, 2)
+	assert.Len(t, table.Rows, 1)
+	assert.Len(t, table.Rows[0], 2)
+
+	// Per-column alignment from the delimiter row.
+	assert.Equal(t, fyne.TextAlignLeading, table.Alignments[0])
+	assert.Equal(t, fyne.TextAlignTrailing, table.Alignments[1])
+
+	// Header text.
+	if text, ok := table.Headers[0][0].(*TextSegment); ok {
+		assert.Equal(t, "Feature", text.Text)
+	} else {
+		t.Error("header cell should be Text")
+	}
+
+	// Inline formatting inside body cells is preserved.
+	if text, ok := table.Rows[0][0][0].(*TextSegment); ok {
+		assert.True(t, text.Style.TextStyle.Bold, "bold cell should be bold")
+	} else {
+		t.Error("bold cell should be Text")
+	}
+	if text, ok := table.Rows[0][1][0].(*TextSegment); ok {
+		assert.True(t, text.Style.TextStyle.Monospace, "code cell should be monospace")
+	} else {
+		t.Error("code cell should be Text")
+	}
+}
+
+func TestRichTextMarkdown_TableAlignment(t *testing.T) {
+	// The four GFM delimiter forms: left, center, right and none (no marker).
+	r := NewRichTextFromMarkdown("| L | C | R | D |\n| :--- | :---: | ---: | --- |\n| a | b | c | d |")
+
+	table, ok := r.Segments[0].(*TableSegment)
+	if !ok {
+		t.Fatal("Segment should be a Table")
+	}
+
+	want := []fyne.TextAlign{
+		fyne.TextAlignLeading,  // :---
+		fyne.TextAlignCenter,   // :---:
+		fyne.TextAlignTrailing, // ---:
+		fyne.TextAlignLeading,  // --- (no marker defaults to leading)
+	}
+	assert.Equal(t, want, table.Alignments)
+
+	// alignFor reports each column's alignment and defaults to leading for
+	// columns beyond the delimiter row.
+	for col, a := range want {
+		assert.Equal(t, a, table.alignFor(col))
+	}
+	assert.Equal(t, fyne.TextAlignLeading, table.alignFor(len(want)))
+}
+
+func TestTableCellAppliesAlignment(t *testing.T) {
+	test.NewTempApp(t)
+
+	// A body cell applies the column alignment to its text without bolding it.
+	body := &TextSegment{Style: RichTextStyleInline, Text: "x"}
+	newTableCell([]RichTextSegment{body}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, body.Style.Alignment)
+	assert.False(t, body.Style.TextStyle.Bold)
+
+	// A header cell applies the alignment and makes the text bold.
+	header := &TextSegment{Style: RichTextStyleInline, Text: "h"}
+	newTableCell([]RichTextSegment{header}, fyne.TextAlignCenter, true)
+	assert.Equal(t, fyne.TextAlignCenter, header.Style.Alignment)
+	assert.True(t, header.Style.TextStyle.Bold)
+
+	// Hyperlink cells are aligned via their own Alignment field.
+	link := &HyperlinkSegment{Text: "l"}
+	newTableCell([]RichTextSegment{link}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, link.Alignment)
+}
+
+func TestRichTextMarkdown_TableAlignmentAppliedThroughVisual(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("| L | R |\n| :--- | ---: |\n| a | b |")
+	table := r.Segments[0].(*TableSegment)
+
+	// Visual builds the cells, feeding alignFor(col) into each via newTableCell.
+	table.Visual()
+
+	assert.Equal(t, fyne.TextAlignLeading, table.Rows[0][0][0].(*TextSegment).Style.Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, table.Rows[0][1][0].(*TextSegment).Style.Alignment)
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

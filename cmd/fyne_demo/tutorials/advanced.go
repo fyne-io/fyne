@@ -84,7 +84,7 @@ func advancedScreen(win fyne.Window) fyne.CanvasObject {
 			deskWin.RequestFullScreenSecondary()
 		}
 	})
-	if !ok {
+	if !ok || !fyne.CurrentApp().Driver().(desktop.Driver).HasSecondaryDisplay() {
 		secondary.Disable()
 	}
 

@@ -21,12 +21,17 @@ type PopUpMenu struct {
 //
 // Since: 2.0
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
+	if c == nil {
+		return nil
+	}
 	m := &Menu{}
 	m.setMenu(menu)
 	p := &PopUpMenu{Menu: m, canvas: c}
 	p.ExtendBaseWidget(p)
 	p.Menu.Resize(p.Menu.MinSize())
 	p.Menu.customSized = true
+
+	p.Move(fyne.NewPos(10, 10)) // non-zero pos to get manual overlay, fixed on show
 	o := widget.NewOverlayContainer(p, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
@@ -40,6 +45,9 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
 	m := NewPopUpMenu(menu, c)
+	if m == nil {
+		return
+	}
 	m.ShowAtPosition(pos)
 }
 

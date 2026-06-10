@@ -18,6 +18,10 @@ const (
 	DurationShort = time.Millisecond * 150
 )
 
+// shaderMaxFrameDelta caps the time advanced per animation frame. A gap longer than this
+// means animation was paused (or stalled) and should resume without time progression for smoothness.
+const shaderMaxFrameDelta = 100 * time.Millisecond
+
 // NewColorRGBAAnimation sets up a new animation that will transition from the start to stop Color over
 // the specified Duration. The colour transition will move linearly through the RGB colour space.
 // The content of fn should apply the color values to an object and refresh it.
@@ -80,6 +84,44 @@ func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)
 			fn(fyne.NewSize(scaleVal(start.Width, widthDelta, done), scaleVal(start.Height, heightDelta, done)))
 		},
 	}
+}
+
+// NewShaderAnimation sets up a new animation that continuously redraws the given
+// shader, advancing its "time" uniform each frame so the fragment shader can
+// produce motion. You should call Start() on the returned animation to begin and
+// Stop() to freeze the shader at its current frame. Stopping and starting the same
+// animation again resumes from where it left off, without counting the paused time.
+//
+// Since: 2.8
+func NewShaderAnimation(s *Shader) *fyne.Animation {
+	var elapsed time.Duration
+	var lastTick time.Time
+
+	return &fyne.Animation{
+		Duration:    time.Second,
+		Curve:       fyne.AnimationLinear,
+		RepeatCount: fyne.AnimationRepeatForever,
+		Tick: func(float32) {
+			elapsed, lastTick = advanceShaderTime(elapsed, lastTick, time.Now())
+			if s.Uniforms == nil {
+				s.Uniforms = make(map[string]float32, 1)
+			}
+			s.Uniforms["time"] = float32(elapsed.Seconds())
+			s.Refresh()
+		},
+	}
+}
+
+// advanceShaderTime accumulates animation time for a single frame ending at now.
+// A gap larger than shaderMaxFrameDelta is treated as a pause/resume and adds no
+// time. It returns the updated elapsed time and the tick to measure from next.
+func advanceShaderTime(elapsed time.Duration, lastTick, now time.Time) (time.Duration, time.Time) {
+	if !lastTick.IsZero() {
+		if delta := now.Sub(lastTick); delta <= shaderMaxFrameDelta {
+			elapsed += delta
+		}
+	}
+	return elapsed, now
 }
 
 func scaleChannel(start int, diff, done float32) uint8 {

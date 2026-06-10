@@ -98,6 +98,12 @@ func (d *gLDriver) drawSingleFrame() {
 	cache.Clean(refreshed)
 }
 
+func (d *gLDriver) applyThemeToWindow(w fyne.Window) {
+	if win, ok := w.(*window); ok {
+		win.setDarkMode()
+	}
+}
+
 func (d *gLDriver) runGL() {
 	if !running.CompareAndSwap(false, true) {
 		return // Run was called twice.
@@ -112,6 +118,7 @@ func (d *gLDriver) runGL() {
 		painter.ClearFontCache()
 		cache.ResetThemeCaches()
 		app.ApplySettingsWithCallback(set, fyne.CurrentApp(), func(w fyne.Window) {
+			d.applyThemeToWindow(w)
 			c, ok := w.Canvas().(*glCanvas)
 			if !ok {
 				return

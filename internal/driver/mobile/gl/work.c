@@ -73,6 +73,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnDeleteTexture:
 		glDeleteTextures(1, (const GLuint*)(&args->a0));
 		break;
+	case glfnDeleteProgram:
+		glDeleteProgram((GLuint)args->a0);
+		break;
 	case glfnDisable:
 		glDisable((GLenum)args->a0);
 		break;
@@ -157,6 +160,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 		break;
 	case glfnUniform1f:
 		glUniform1f((GLint)args->a0, *(GLfloat*)&args->a1);
+		break;
+	case glfnUniform1i:
+		glUniform1i((GLint)args->a0, (GLint)args->a1);
 		break;
 	case glfnUniform1fv:
 		glUniform1fv((GLint)args->a0, (GLsizeiptr)args->a1, (GLvoid*)parg);

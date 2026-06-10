@@ -81,8 +81,7 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 		fyne.NewMenuItem("Bar", func() { item2Hit = true }),
 	))
 	size := m.MinSize()
-	w.Resize(size.Add(fyne.NewSize(10, 10)))
-	m.Resize(size)
+	w.Resize(size.Add(fyne.NewSize(4, 4)))
 	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
 	w.SetContent(o)
 
@@ -103,6 +102,6 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	test.TapCanvas(c, fyne.NewPos(5, 3*size.Height/4))
 	assert.True(t, item2Hit, "hit item 2")
 	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	test.TapCanvas(c, fyne.NewPos(size.Width+1, size.Height+1))
+	test.TapCanvas(c, fyne.NewPos(size.Width+2, size.Height+2))
 	assert.True(t, overlayContainerHit, "hit the overlay container")
 }

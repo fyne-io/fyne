@@ -1,14 +1,30 @@
 package widget
 
 import (
-	"errors"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Validatable = (*Entry)(nil)
+var (
+	_ fyne.Requireable = (*Entry)(nil)
+	_ fyne.Validatable = (*Entry)(nil)
+)
+
+// HasValue is used for required validation and returns true if the text is not empty.
+//
+// Since: 2.8
+func (e *Entry) HasValue() bool {
+	return e.Text != ""
+}
+
+// SetOnRequiredChanged is intended for parent widgets or containers to hook into the required state.
+// The function might be overwritten by a parent that cares about child state (e.g. widget.Form).
+//
+// Since: 2.8
+func (e *Entry) SetOnRequiredChanged(callback func(bool)) {
+	e.onRequiredChanged = callback
+}
 
 // Validate validates the current text in the widget.
 func (e *Entry) Validate() error {
@@ -35,6 +51,12 @@ func (e *Entry) validate() {
 // The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
 func (e *Entry) SetOnValidationChanged(callback func(error)) {
 	e.onValidationChanged = callback
+
+	if e.Validator != nil && callback != nil && e.Text != "" {
+		if err := e.Validator(e.Text); err != nil {
+			callback(err)
+		}
+	}
 }
 
 // SetValidationError manually updates the validation status until the next input change.
@@ -53,18 +75,25 @@ func (e *Entry) SetValidationError(err error) {
 // setValidationError sets the validation error and returns a bool to indicate if it changes.
 // It assumes that the widget has a validator.
 func (e *Entry) setValidationError(err error) bool {
-	if err == nil && e.validationError == nil {
-		return false
+	if e.AlwaysShowValidationError {
+		e.validationError = err
+		if e.onValidationChanged != nil {
+			e.onValidationChanged(err)
+		}
+		return true
 	}
-	if errors.Is(err, e.validationError) {
+
+	gone := err == nil
+	if !gone && (e.focused || (!e.hasFocused && e.Text == "")) {
 		return false
 	}
 
 	changed := e.validationError != err
 	e.validationError = err
-
-	if e.onValidationChanged != nil && changed {
-		e.onValidationChanged(err)
+	if e.onValidationChanged != nil {
+		if changed || gone {
+			e.onValidationChanged(err)
+		}
 	}
 
 	return true

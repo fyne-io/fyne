@@ -3,6 +3,7 @@ package fyne
 import (
 	"net/url"
 	"sync/atomic"
+	"time"
 )
 
 // An App is the definition of a graphical application.
@@ -48,6 +49,25 @@ type App interface {
 
 	// SendNotification sends a system notification that will be displayed in the operating system's notification area.
 	SendNotification(*Notification)
+
+	// ScheduleNotification queues a notification for delivery at the given time.
+	// On platforms with a system scheduler (iOS, Android, macOS, Windows) the request is
+	// passed to the OS. On other platforms the app schedules delivery in-process and
+	// persists the request so that an outstanding schedule survives app restarts.
+	//
+	// Returns the scheduled notification, whose [ScheduledNotification.ID] can be used to
+	// cancel the delivery via [App.CancelScheduledNotification]. An error is returned if
+	// the request could not be queued (for example a delivery time in the past on a
+	// platform that does not allow it).
+	//
+	// Since: 2.8
+	ScheduleNotification(n *Notification, deliverAt time.Time) (*ScheduledNotification, error)
+
+	// CancelScheduledNotification removes a previously scheduled notification by its ID.
+	// It is safe to call with an unknown ID or after the notification has already fired.
+	//
+	// Since: 2.8
+	CancelScheduledNotification(id string) error
 
 	// Settings return the globally set settings, determining theme and so on.
 	Settings() Settings

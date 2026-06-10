@@ -3,11 +3,13 @@ package widget_test
 import (
 	"fmt"
 	"image"
+	"runtime/debug"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
@@ -610,6 +612,74 @@ func TestSelect_Layout(t *testing.T) {
 			assertRendersToPlatformMarkup(t, "select/%s/layout_"+name+".xml", window.Canvas())
 		})
 	}
+}
+
+// nilCanvasDriver wraps a fyne.Driver and returns nil from CanvasForObject
+// for one specific target, simulating the state observed on the real GLFW
+// driver after a widget is detached from its window between event delivery
+// and popup creation (fyne-io/fyne#5965). The stock test driver always
+// returns the last window's canvas regardless of the queried object, so the
+// detach scenario cannot otherwise be reproduced under the unit test driver.
+type nilCanvasDriver struct {
+	fyne.Driver
+	target fyne.CanvasObject
+}
+
+func (d *nilCanvasDriver) CanvasForObject(o fyne.CanvasObject) fyne.Canvas {
+	if o == d.target {
+		return nil
+	}
+	return d.Driver.CanvasForObject(o)
+}
+
+func (d *nilCanvasDriver) AbsolutePositionForObject(o fyne.CanvasObject) fyne.Position {
+	if o == d.target {
+		return fyne.NewPos(0, 0)
+	}
+	return d.Driver.AbsolutePositionForObject(o)
+}
+
+type wrappedApp struct {
+	fyne.App
+	drv fyne.Driver
+}
+
+func (a *wrappedApp) Driver() fyne.Driver { return a.drv }
+
+// Repro for fyne-io/fyne#5965: Select.Tapped must not panic when the widget
+// was already detached from its canvas (a frequent outcome of SetContent /
+// container rebuilds while a tap is in flight on the real driver).
+//
+// Failure mode on main: Select.Tapped -> showPopUp -> NewPopUpMenu(menu, nil)
+// -> OverlayContainer.Resize -> overlayRenderer.MinSize() -> nil deref on
+// OverlayContainer.canvas.
+func TestSelect_Tapped_AfterCanvasDetach_DoesNotPanic(t *testing.T) {
+	baseApp := test.NewTempApp(t)
+
+	sel := widget.NewSelect([]string{"a", "b", "c"}, nil)
+	w := test.NewWindow(container.NewVBox(sel))
+	defer w.Close()
+	w.Resize(fyne.NewSize(200, 200))
+
+	require.NotNil(t, fyne.CurrentApp().Driver().CanvasForObject(sel),
+		"precondition: Select is attached to a canvas before detach")
+
+	shim := &wrappedApp{App: baseApp, drv: &nilCanvasDriver{
+		Driver: baseApp.Driver(),
+		target: fyne.CanvasObject(sel),
+	}}
+	fyne.SetCurrentApp(shim)
+	t.Cleanup(func() { fyne.SetCurrentApp(baseApp) })
+
+	require.Nil(t, fyne.CurrentApp().Driver().CanvasForObject(fyne.CanvasObject(sel)),
+		"precondition: Select sees nil canvas after detach")
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("Select.Tapped panicked after canvas detach: %v\n%s", r, debug.Stack())
+		}
+	}()
+	sel.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 0)})
 }
 
 func assertRendersToPlatformMarkup(t *testing.T, file string, c fyne.Canvas) {

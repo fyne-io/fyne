@@ -352,6 +352,18 @@ func (w *window) getSecondaryMonitor() *monitor {
 	return primary
 }
 
+// findSiblingMonitor returns the monitor of an already-visible window in this app, or nil.
+func (w *window) findSiblingMonitor() *glfw.Monitor {
+	for _, other := range w.driver.windowList() {
+		ow, ok := other.(*window)
+		if !ok || ow == w || !ow.visible || ow.viewport == nil {
+			continue
+		}
+		return ow.getMonitorForWindow()
+	}
+	return nil
+}
+
 func (w *window) detectScale() float32 {
 	if build.IsWayland { // Wayland controls scale through content scaling
 		return 1
@@ -813,6 +825,17 @@ func (w *window) create() {
 	w.viewport = win
 	if w.view() == nil { // something went wrong above, it will have been logged
 		return
+	}
+
+	// macOS 26 places new windows on a different screen than existing app windows;
+	// default new windows onto the same monitor as a visible sibling when no position was set.
+	if runtime.GOOS == "darwin" && !build.IsWayland && w.xpos == 0 && w.ypos == 0 {
+		if monitor := w.findSiblingMonitor(); monitor != nil {
+			monX, monY := monitor.GetPos()
+			monMode := monitor.GetVideoMode()
+			w.xpos = monX + (monMode.Width-pixWidth)/2
+			w.ypos = monY + (monMode.Height-pixHeight)/2
+		}
 	}
 
 	if (w.xpos != 0 || w.ypos != 0) && !build.IsWayland {

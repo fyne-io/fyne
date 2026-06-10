@@ -126,6 +126,11 @@ func tabsAdjustedLocation(l TabLocation, b baseTabs) TabLocation {
 func buildPopUpMenu(t baseTabs, button *widget.Button, items []*fyne.MenuItem) *widget.PopUpMenu {
 	d := fyne.CurrentApp().Driver()
 	c := d.CanvasForObject(button)
+	if c == nil {
+		// Overflow button detached from its canvas; nothing to host the
+		// pop-up on (see fyne-io/fyne#5965).
+		return nil
+	}
 	popUpMenu := widget.NewPopUpMenu(fyne.NewMenu("", items...), c)
 	buttonPos := d.AbsolutePositionForObject(button)
 	buttonSize := button.Size()

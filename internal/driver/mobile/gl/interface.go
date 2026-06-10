@@ -106,6 +106,11 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteBuffers.xhtml
 	DeleteBuffer(v Buffer)
 
+	// DeleteProgram deletes the given program object.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteProgram.xhtml
+	DeleteProgram(p Program)
+
 	// DeleteTexture deletes the given texture object.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDeleteTextures.xhtml
@@ -214,6 +219,11 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
+
+	// Uniform1i writes an int uniform variable, used to bind a sampler to a texture unit.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1i(dst Uniform, v int)
 
 	// Uniform1fv writes a float array uniform variable.
 	//

@@ -128,3 +128,42 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	(*env)->CallVoidMethod(env, mgr, notify, nextId, notif);
 	nextId++;
 }
+
+// JNI's FindClass uses the system class loader on a Go-spawned thread, which
+// cannot see APK-bundled classes like GoNativeActivity. The ctx parameter
+// is the running activity instance, so its runtime class is GoNativeActivity
+// itself - GetObjectClass returns the right jclass without going through
+// FindClass / the activity's ClassLoader.
+bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
+		char *id, char *title, char *body, long long deliveryMillis) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass cls = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID mid = find_static_method(env, cls, "scheduleNotification",
+		"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Z");
+	if (cls == NULL || mid == 0) {
+		return false;
+	}
+
+	jstring idStr = (*env)->NewStringUTF(env, id);
+	jstring titleStr = (*env)->NewStringUTF(env, title);
+	jstring bodyStr = (*env)->NewStringUTF(env, body);
+
+	jboolean ok = (*env)->CallStaticBooleanMethod(env, cls, mid,
+		idStr, titleStr, bodyStr, (jlong)deliveryMillis);
+	return (bool)ok;
+}
+
+void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass cls = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID mid = find_static_method(env, cls, "cancelScheduledNotification",
+		"(Ljava/lang/String;)V");
+	if (cls == NULL || mid == 0) {
+		return;
+	}
+
+	jstring idStr = (*env)->NewStringUTF(env, id);
+	(*env)->CallStaticVoidMethod(env, cls, mid, idStr);
+}

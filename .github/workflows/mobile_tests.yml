@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
-          go-version-file: "go.mod"
+          go-version-file: ${{ matrix.go-version == '' && 'go.mod' || '' }}
 
       - name: Get dependencies
         run: |

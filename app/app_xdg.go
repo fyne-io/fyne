@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"sync/atomic"
+	"time"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/rymdport/portal/notification"
@@ -82,6 +83,16 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	if call.Err != nil {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}
+}
+
+// The freedesktop notification spec has no scheduling primitive, so scheduled
+// notifications use the in-process scheduler with cache-backed persistence.
+func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	return a.scheduleViaScheduler(n, when)
+}
+
+func (a *fyneApp) CancelScheduledNotification(id string) error {
+	return a.cancelViaScheduler(id)
 }
 
 // Sending with same ID replaces the old notification.

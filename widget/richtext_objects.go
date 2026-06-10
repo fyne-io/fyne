@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/scale"
+	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -18,7 +20,7 @@ var (
 	// Since: 2.1
 	RichTextStyleBlockquote = RichTextStyle{
 		ColorName: theme.ColorNameForeground,
-		Inline:    false,
+		Inline:    true,
 		SizeName:  theme.SizeNameText,
 		TextStyle: fyne.TextStyle{Italic: true},
 	}
@@ -35,10 +37,11 @@ var (
 	//
 	// Since: 2.1
 	RichTextStyleCodeInline = RichTextStyle{
-		ColorName: theme.ColorNameForeground,
-		Inline:    true,
-		SizeName:  theme.SizeNameText,
-		TextStyle: fyne.TextStyle{Monospace: true},
+		ColorName:  theme.ColorNameForeground,
+		Inline:     true,
+		SizeName:   theme.SizeNameText,
+		TextStyle:  fyne.TextStyle{Monospace: true},
+		codeInline: true,
 	}
 	// RichTextStyleEmphasis represents regular text with emphasis.
 	//
@@ -119,7 +122,8 @@ type HyperlinkSegment struct {
 	// Since 2.8
 	TextStyle fyne.TextStyle
 	// Since 2.8
-	SizeName fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
+	SizeName     fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
+	quotingLevel int
 }
 
 // Inline returns true as hyperlinks are inside other elements.
@@ -238,6 +242,7 @@ type ListSegment struct {
 	// number to any int, including 0.
 	startIndex       int
 	indentationLevel int
+	quotingLevel     int
 }
 
 // SetStartNumber sets the starting number for an ordered list.
@@ -273,8 +278,13 @@ func (l *ListSegment) Segments() []RichTextSegment {
 				j++
 			}
 			indentation := strings.Repeat(" ", l.indentationLevel*4)
-			bullet := &TextSegment{Text: indentation + txt + " ", Style: RichTextStyleStrong}
+			style := RichTextStyleStrong
+			style.QuotingDepth = l.quotingLevel
+			bullet := &TextSegment{Text: indentation + txt + " ", Style: style}
 			texts = append(texts, bullet)
+			if _, ok := in.(*ParagraphSegment); !ok {
+				in = &ParagraphSegment{Texts: []RichTextSegment{in}}
+			}
 		}
 		texts = append(texts, in)
 		out[i] = &ParagraphSegment{Texts: texts}
@@ -393,6 +403,350 @@ func (s *SeparatorSegment) SelectedText() string {
 func (s *SeparatorSegment) Unselect() {
 }
 
+// CodeBlockSegment represents a fenced or indented code block. It renders its
+// content as monospace text on a panel, so the block stands apart from the
+// surrounding prose.
+//
+// Since: 2.8
+type CodeBlockSegment struct {
+	Text         string
+	quotingLevel int
+}
+
+// Inline returns false as a code block is a full-width block element.
+func (c *CodeBlockSegment) Inline() bool {
+	return false
+}
+
+// Textual returns the raw content of this code block.
+func (c *CodeBlockSegment) Textual() string {
+	return c.Text
+}
+
+// Visual returns a new panel widget rendering this code block.
+func (c *CodeBlockSegment) Visual() fyne.CanvasObject {
+	return newRichCodeBlock(c.Text)
+}
+
+// Update applies the current content of this segment to an existing visual.
+func (c *CodeBlockSegment) Update(o fyne.CanvasObject) {
+	o.(*richCodeBlock).setText(c.Text)
+}
+
+// Select does nothing for a code block.
+func (c *CodeBlockSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the code block content.
+func (c *CodeBlockSegment) SelectedText() string {
+	return c.Text
+}
+
+// Unselect does nothing for a code block.
+func (c *CodeBlockSegment) Unselect() {
+}
+
+// richCodeBlock is the internal widget that draws a code block: monospace text
+// on a rounded, bordered panel.
+type richCodeBlock struct {
+	BaseWidget
+	text  string
+	bg    *canvas.Rectangle
+	label *Label
+}
+
+func newRichCodeBlock(text string) *richCodeBlock {
+	c := &richCodeBlock{text: text}
+	c.ExtendBaseWidget(c)
+	return c
+}
+
+func (c *richCodeBlock) setText(text string) {
+	c.text = text
+	if c.label != nil {
+		c.label.SetText(text)
+	}
+}
+
+func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
+	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
+	c.bg.StrokeColor = theme.Color(theme.ColorNameInputBorder)
+	c.bg.StrokeWidth = 1
+	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
+	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+	scroll := widget.NewHScroll(c.label)
+	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
+	return NewSimpleRenderer(cont)
+}
+
+type richCodeBlockLayout struct{}
+
+func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return objects[1].MinSize()
+}
+
+func (l *richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
+	for _, o := range objects {
+		o.Move(fyne.NewPos(0, 0))
+		o.Resize(s)
+	}
+}
+
+// CheckBoxSegment represents checkbox (with text) in a rich text widget.
+//
+// Since: 2.8
+type CheckBoxSegment struct {
+	Checked bool
+	Text    string
+}
+
+// Inline returns true as a CheckBoxSegment is usually part of a list item.
+func (c *CheckBoxSegment) Inline() bool {
+	return true
+}
+
+// Textual returns the content of this segment rendered to plain text.
+func (c *CheckBoxSegment) Textual() string {
+	if c.Checked {
+		return "[x] "
+	}
+	return "[ ] "
+}
+
+// Visual returns a new instance of a check widget for this segment.
+func (c *CheckBoxSegment) Visual() fyne.CanvasObject {
+	check := NewCheck(c.Text, nil)
+	if c.Checked {
+		check.SetChecked(true)
+	}
+	return &fyne.Container{Layout: &unpadTextWidgetLayout{parent: check}, Objects: []fyne.CanvasObject{check}}
+}
+
+// Update doesn't need to change a checkbox
+func (c *CheckBoxSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a checkbox.
+func (c *CheckBoxSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the empty string for a checkbox.
+func (c *CheckBoxSegment) SelectedText() string {
+	return ""
+}
+
+// Unselect does nothing for a checkbox.
+func (c *CheckBoxSegment) Unselect() {
+}
+
+// TableSegment represents a table within a rich text widget.
+//
+// Since: 2.8
+type TableSegment struct {
+	// Headers holds the cells of the header row, or nil for a header-less table.
+	Headers [][]RichTextSegment
+	// Rows holds the body rows; each row is a slice of cells, each cell a slice of segments.
+	Rows       [][][]RichTextSegment
+	Alignments []fyne.TextAlign
+}
+
+// Inline returns false as a table is a full-width block element.
+func (t *TableSegment) Inline() bool {
+	return false
+}
+
+// Textual returns the table content as tab-separated, newline-delimited text.
+func (t *TableSegment) Textual() string {
+	var b strings.Builder
+	writeRow := func(cells [][]RichTextSegment) {
+		for i, cell := range cells {
+			if i > 0 {
+				b.WriteByte('\t')
+			}
+			for _, s := range cell {
+				b.WriteString(s.Textual())
+			}
+		}
+		b.WriteByte('\n')
+	}
+	if t.Headers != nil {
+		writeRow(t.Headers)
+	}
+	for _, r := range t.Rows {
+		writeRow(r)
+	}
+	return b.String()
+}
+
+func (t *TableSegment) columns() int {
+	cols := len(t.Alignments)
+	if len(t.Headers) > cols {
+		cols = len(t.Headers)
+	}
+	for _, r := range t.Rows {
+		if len(r) > cols {
+			cols = len(r)
+		}
+	}
+	return cols
+}
+
+func (t *TableSegment) alignFor(col int) fyne.TextAlign {
+	if col < len(t.Alignments) {
+		return t.Alignments[col]
+	}
+	return fyne.TextAlignLeading
+}
+
+// Visual returns a new grid laying out the table cells.
+func (t *TableSegment) Visual() fyne.CanvasObject {
+	cols := t.columns()
+	if cols == 0 {
+		return NewRichText()
+	}
+
+	objects := make([]fyne.CanvasObject, 0, cols*(len(t.Rows)+1))
+	appendRow := func(cells [][]RichTextSegment, header bool) {
+		for c := 0; c < cols; c++ {
+			var segs []RichTextSegment
+			if c < len(cells) {
+				segs = cells[c]
+			}
+			objects = append(objects, newTableCell(segs, t.alignFor(c), header))
+		}
+	}
+	if t.Headers != nil {
+		appendRow(t.Headers, true)
+	}
+	for _, r := range t.Rows {
+		appendRow(r, false)
+	}
+
+	grid := &fyne.Container{Layout: &tableSegmentLayout{cols: cols}, Objects: objects}
+	border := canvas.NewRectangle(theme.Color(theme.ColorNameInputBorder))
+	return &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{border, grid}}
+}
+
+// Update does nothing; a table visual is rebuilt rather than updated.
+func (t *TableSegment) Update(fyne.CanvasObject) {
+}
+
+// Select does nothing for a table.
+func (t *TableSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the table content as text.
+func (t *TableSegment) SelectedText() string {
+	return t.Textual()
+}
+
+// Unselect does nothing for a table.
+func (t *TableSegment) Unselect() {
+}
+
+// newTableCell builds a single table cell: padded rich-text content over a fill,
+// so the grid-line colour drawn behind the grid shows through the gaps left by
+// tableSegmentLayout.
+func newTableCell(segs []RichTextSegment, align fyne.TextAlign, header bool) fyne.CanvasObject {
+	fill := theme.Color(theme.ColorNameBackground)
+	if header {
+		fill = theme.Color(theme.ColorNameHeaderBackground)
+	}
+	bg := canvas.NewRectangle(fill)
+
+	cell := make([]RichTextSegment, 0, len(segs))
+	for _, s := range segs {
+		switch seg := s.(type) {
+		case *TextSegment:
+			seg.Style.Alignment = align
+			if header {
+				seg.Style.TextStyle.Bold = true
+			}
+		case *HyperlinkSegment:
+			seg.Alignment = align
+		}
+		cell = append(cell, s)
+	}
+	if len(cell) == 0 {
+		cell = append(cell, &TextSegment{Style: RichTextStyleInline, Text: " "})
+	}
+
+	text := NewRichText(cell...)
+	text.Wrapping = fyne.TextWrapOff
+	padded := &fyne.Container{Layout: layout.NewPaddedLayout(), Objects: []fyne.CanvasObject{text}}
+	return &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{bg, padded}}
+}
+
+// tableSegmentLayout arranges cells row-major. Columns are sized to their widest
+// cell, any slack width is shared evenly so the table fills the available width,
+// and a one-pixel gap is left around each cell so a background drawn behind the
+// grid shows through as grid lines.
+type tableSegmentLayout struct {
+	cols int
+}
+
+func (l *tableSegmentLayout) measure(objects []fyne.CanvasObject) (colWidths, rowHeights []float32) {
+	rows := (len(objects) + l.cols - 1) / l.cols
+	colWidths = make([]float32, l.cols)
+	rowHeights = make([]float32, rows)
+	for i, o := range objects {
+		r, c := i/l.cols, i%l.cols
+		m := o.MinSize()
+		if m.Width > colWidths[c] {
+			colWidths[c] = m.Width
+		}
+		if m.Height > rowHeights[r] {
+			rowHeights[r] = m.Height
+		}
+	}
+	return colWidths, rowHeights
+}
+
+func (l *tableSegmentLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	colWidths, rowHeights := l.measure(objects)
+	gap := theme.Size(theme.SizeNameSeparatorThickness)
+	w := gap
+	for _, cw := range colWidths {
+		w += cw + gap
+	}
+	h := gap
+	for _, rh := range rowHeights {
+		h += rh + gap
+	}
+	return fyne.NewSize(w, h)
+}
+
+func (l *tableSegmentLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	colWidths, rowHeights := l.measure(objects)
+	gap := theme.Size(theme.SizeNameSeparatorThickness)
+
+	minWidth := gap
+	for _, cw := range colWidths {
+		minWidth += cw + gap
+	}
+	if extra := size.Width - minWidth; extra > 0 && l.cols > 0 {
+		share := extra / float32(l.cols)
+		for c := range colWidths {
+			colWidths[c] += share
+		}
+	}
+
+	y := gap
+	for r, rh := range rowHeights {
+		x := gap
+		for c := 0; c < l.cols; c++ {
+			idx := r*l.cols + c
+			if idx >= len(objects) {
+				break
+			}
+			objects[idx].Move(fyne.NewPos(x, y))
+			objects[idx].Resize(fyne.NewSize(colWidths[c], rh))
+			x += colWidths[c] + gap
+		}
+		y += rh + gap
+	}
+}
+
 // RichTextStyle describes the details of a text object inside a RichText widget.
 //
 // Since: 2.1
@@ -402,9 +756,14 @@ type RichTextStyle struct {
 	Inline    bool
 	SizeName  fyne.ThemeSizeName // The theme name of the text size to use, if blank will be the standard text size
 	TextStyle fyne.TextStyle
+	// Since: 2.8
+	QuotingDepth int
 
 	// an internal detail where we obscure password fields
 	concealed bool
+
+	// an internal detail marking inline code, which renders on a background fill
+	codeInline bool
 }
 
 // RichTextSegment describes any element that can be rendered in a RichText widget.
@@ -443,21 +802,51 @@ func (t *TextSegment) Textual() string {
 
 // Visual returns a new instance of a graphical element required to render this segment.
 func (t *TextSegment) Visual() fyne.CanvasObject {
-	obj := canvas.NewText(t.Text, t.color())
+	text := canvas.NewText(t.Text, t.color())
+	if t.Style.codeInline {
+		bg := canvas.NewRectangle(theme.ColorForWidget(theme.ColorNameInputBackground, t.parent))
+		c := &fyne.Container{Layout: &codeInlineLayout{}, Objects: []fyne.CanvasObject{bg, text}}
+		t.Update(c)
+		return c
+	}
 
-	t.Update(obj)
-	return obj
+	t.Update(text)
+	return text
 }
 
 // Update applies the current state of this text segment to an existing visual.
 func (t *TextSegment) Update(o fyne.CanvasObject) {
-	obj := o.(*canvas.Text)
+	obj, ok := o.(*canvas.Text)
+	if !ok { // inline code container: [background, text]
+		c := o.(*fyne.Container)
+		bg := c.Objects[0].(*canvas.Rectangle)
+		bg.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, t.parent)
+		bg.Refresh()
+		obj = c.Objects[1].(*canvas.Text)
+	}
 	obj.Text = t.Text
 	obj.Color = t.color()
 	obj.Alignment = t.Style.Alignment
 	obj.TextStyle = t.Style.TextStyle
 	obj.TextSize = t.size()
 	obj.Refresh()
+}
+
+// codeInlineLayout keeps the inline-code background tight to the text, so when
+// the row layout stretches the container to fill trailing space the fill does
+// not stretch with it.
+type codeInlineLayout struct{}
+
+func (codeInlineLayout) MinSize(o []fyne.CanvasObject) fyne.Size {
+	return o[1].MinSize()
+}
+
+func (codeInlineLayout) Layout(o []fyne.CanvasObject, _ fyne.Size) {
+	size := o[1].MinSize()
+	for _, obj := range o {
+		obj.Resize(size)
+		obj.Move(fyne.NewPos(0, 0))
+	}
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.

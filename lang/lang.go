@@ -71,7 +71,11 @@ func LocalizeKey(key, fallback string, data ...any) string {
 	})
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return fallbackWithData(key, fallback, d0)
+
+		// ret can still have a fallback string even if err is set
+		if ret == "" {
+			return fallbackWithData(key, fallback, d0)
+		}
 	}
 	return ret
 }
@@ -105,7 +109,11 @@ func LocalizePluralKey(key, fallback string, count int, data ...any) string {
 	})
 	if err != nil {
 		fyne.LogError("Translation failure", err)
-		return fallbackWithData(key, fallback, d0)
+
+		// ret can still have a fallback string even if err is set
+		if ret == "" {
+			return fallbackWithData(key, fallback, d0)
+		}
 	}
 	return ret
 }

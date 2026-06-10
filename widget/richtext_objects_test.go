@@ -132,3 +132,23 @@ func TestRichText_OrderedListDifferentIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestRichText_List_WrappedIndent(t *testing.T) {
+	text := NewRichText(&ListSegment{Items: []RichTextSegment{
+		&TextSegment{Text: "A very long line that will wrap around and test the indentation of the second line"},
+	}})
+	text.Wrapping = fyne.TextWrapWord
+	text.Resize(fyne.NewSize(100, 200))
+
+	objs := test.TempWidgetRenderer(t, text).Objects()
+	assert.GreaterOrEqual(t, len(objs), 3, "expected text to wrap into multiple segments")
+
+	bullet := objs[0].(*canvas.Text)
+	assert.Equal(t, "•", strings.TrimSpace(bullet.Text))
+
+	line1 := objs[1].(*canvas.Text)
+	line2 := objs[2].(*canvas.Text)
+
+	assert.Equal(t, line1.Position().X, line2.Position().X, "wrapped line should align with start of first line")
+	assert.Greater(t, line1.Position().X, bullet.Position().X, "text should be indented from bullet")
+}

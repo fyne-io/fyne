@@ -440,6 +440,22 @@ func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
 
+	co, posMovable, _ := w.canvas.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(mobile.Movable); ok {
+			return true
+		}
+		return false
+	})
+
+	if co != nil {
+		co.(mobile.Movable).TouchMoved(&mobile.TouchEvent{
+			PointEvent: fyne.PointEvent{
+				Position: posMovable,
+			},
+			ID: int(tapID),
+		})
+	}
+
 	if tapID == 0 {
 		w.canvas.tapMove(pos, int(tapID), func(wid fyne.Draggable, ev *fyne.DragEvent) {
 			wid.Dragged(ev)

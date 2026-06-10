@@ -168,6 +168,9 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
 	windowCreated <- window
+	// Force a redraw because Android might not call onNativeWindowRedrawNeeded
+	// after unlocking the screen.
+	onNativeWindowRedrawNeeded(activity, window)
 }
 
 //export onNativeWindowRedrawNeeded

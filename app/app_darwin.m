@@ -53,8 +53,61 @@ void sendNotification(char *cTitle, char *cBody) {
             }
         }];
 }
+
+bool scheduleNotification(char *cID, char *cTitle, char *cBody, double seconds) {
+    if (seconds <= 0) {
+        return false;
+    }
+
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    NSString *identifier = [NSString stringWithUTF8String:cID];
+    NSString *title = [NSString stringWithUTF8String:cTitle];
+    NSString *body = [NSString stringWithUTF8String:cBody];
+
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    [content autorelease];
+    content.title = title;
+    content.body = body;
+
+    UNTimeIntervalNotificationTrigger *trigger =
+        [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:seconds repeats:NO];
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+        content:content trigger:trigger];
+
+    UNAuthorizationOptions options = UNAuthorizationOptionAlert;
+    [center requestAuthorizationWithOptions:options
+        completionHandler:^(BOOL granted, NSError *_Nullable error) {
+            if (!granted) {
+                if (error != NULL) {
+                    NSLog(@"Error asking for permission to schedule notifications %@", error);
+                } else {
+                    NSLog(@"Unable to get permission to schedule notifications");
+                }
+                return;
+            }
+            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable err) {
+                if (err != nil) {
+                    NSLog(@"Could not schedule notification: %@", err);
+                }
+            }];
+        }];
+    return true;
+}
+
+void cancelScheduledNotification(char *cID) {
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    NSString *identifier = [NSString stringWithUTF8String:cID];
+    [center removePendingNotificationRequestsWithIdentifiers:@[identifier]];
+}
 #else
 void sendNotification(char *cTitle, char *cBody) {
 	fallbackSend(cTitle, cBody);
+}
+
+bool scheduleNotification(char *cID, char *cTitle, char *cBody, double seconds) {
+    return false;
+}
+
+void cancelScheduledNotification(char *cID) {
 }
 #endif

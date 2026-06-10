@@ -5,6 +5,9 @@ package glfw
 import (
 	"bytes"
 	"image"
+	"image/draw"
+	_ "image/jpeg"
+	"image/png"
 	"os"
 	"runtime"
 
@@ -47,21 +50,51 @@ func (d *gLDriver) init() {
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
-	if runtime.GOOS != "windows" {
+	return toOSIconForRuntime(icon, runtime.GOOS)
+}
+
+// toOSIconForRuntime takes the input image bytes and converts it to an image type
+// that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
+func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
+	if goos != "windows" && !usesUnixSystrayIcon(goos) {
 		return icon, nil
 	}
 
-	img, _, err := image.Decode(bytes.NewReader(icon))
+	img, format, err := image.Decode(bytes.NewReader(icon))
 	if err != nil {
 		return nil, err
 	}
 
+	// keep windows behavior: convert to ico
+	if goos == "windows" {
+		buf := &bytes.Buffer{}
+		if err = ico.Encode(buf, img); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	}
+	if format == "png" {
+		return icon, nil
+	}
+
+	// Unix systray expects a PNG bitmap.
+	return convertToPNG(img)
+}
+
+func convertToPNG(img image.Image) ([]byte, error) {
+	bounds := img.Bounds()
+	nrgba := image.NewNRGBA(bounds)
+	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
+
 	buf := &bytes.Buffer{}
-	err = ico.Encode(buf, img)
-	if err != nil {
+	if err := png.Encode(buf, nrgba); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func usesUnixSystrayIcon(goos string) bool {
+	return goos == "linux" || goos == "freebsd" || goos == "openbsd" || goos == "netbsd"
 }
 
 func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {

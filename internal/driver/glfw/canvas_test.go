@@ -340,7 +340,7 @@ func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *
 	popUp.Show()
 
 	assert.Equal(t, fyne.NewSize(200, 10), popUpContent.Size())
-	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
+	assert.Equal(t, fyne.NewSize(1000, 10), popUp.MinSize())
 	assert.Equal(t, canvasSize, c.Overlays().Top().Size())
 
 	repaintWindow(w)

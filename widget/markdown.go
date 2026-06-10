@@ -46,29 +46,27 @@ type markdownRenderer []RichTextSegment
 func (m *markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
-	segs, err := renderNode(source, n, false, 0)
+	segs, err := renderNode(source, n, 0, 0)
 	*m = segs
 	return err
 }
 
-func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
 	switch t := n.(type) {
 	case *ast.Document:
-		return renderChildren(source, n, blockquote, listDepth)
+		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Paragraph:
-		children, err := renderChildren(source, n, blockquote, listDepth)
-		if !blockquote {
-			linebreak := &TextSegment{Style: RichTextStyleParagraph}
-			children = append(children, linebreak)
-		}
+		children, err := renderChildren(source, n, quotingDepth, listDepth)
+		linebreak := &TextSegment{Style: RichTextStyleParagraph}
+		children = append(children, linebreak)
 		return children, err
 	case *ast.List:
-		items, err := renderChildren(source, n, blockquote, listDepth+1)
+		items, err := renderChildren(source, n, quotingDepth, listDepth+1)
 		return []RichTextSegment{
-			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+', indentationLevel: listDepth},
+			&ListSegment{startIndex: t.Start - 1, Items: items, Ordered: t.Marker != '*' && t.Marker != '-' && t.Marker != '+', indentationLevel: listDepth, quotingLevel: quotingDepth},
 		}, err
 	case *ast.ListItem:
-		children, err := renderChildren(source, n, blockquote, listDepth)
+		children, err := renderChildren(source, n, quotingDepth, listDepth)
 		var texts []RichTextSegment
 		var sublist RichTextSegment
 		for _, child := range children {
@@ -85,40 +83,36 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		}
 		return result, err
 	case *ast.TextBlock:
-		return renderChildren(source, n, blockquote, listDepth)
+		if c, ok := t.FirstChild().(*ast2.TaskCheckBox); ok {
+			child := c.NextSibling()
+			text := ""
+			if child != nil {
+				text = string(child.(*ast.Text).Value(source))
+			}
+			return []RichTextSegment{&CheckBoxSegment{Text: decodeText(text), Checked: c.IsChecked}}, nil
+		}
+		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Heading:
-		return renderHeading(source, n, blockquote, listDepth)
+		return renderHeading(source, n, quotingDepth, listDepth)
 	case *ast.ThematicBreak:
 		return []RichTextSegment{&SeparatorSegment{}}, nil
 	case *ast.Link:
 		link, _ := url.Parse(string(t.Destination))
 		text := forceIntoText(source, n)
-		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link}}, nil
+		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link, quotingLevel: quotingDepth}}, nil
 	case *ast.AutoLink:
 		link, _ := url.Parse(string(t.URL(source)))
 		text := string(t.Label(source))
-		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link}}, nil
+		return []RichTextSegment{&HyperlinkSegment{Alignment: fyne.TextAlignLeading, Text: decodeText(text), URL: link, quotingLevel: quotingDepth}}, nil
 	case *ast.CodeSpan:
 		text := forceIntoText(source, n)
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeInline, Text: text}}, nil
 	case *ast.CodeBlock, *ast.FencedCodeBlock:
-		var data []byte
-		lines := n.Lines()
-		for i := 0; i < lines.Len(); i++ {
-			line := lines.At(i)
-			data = append(data, line.Value(source)...)
-		}
-		if len(data) == 0 {
-			return nil, nil
-		}
-		if data[len(data)-1] == '\n' {
-			data = data[:len(data)-1]
-		}
-		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeBlock, Text: string(data)}}, nil
+		return renderCodeBlock(source, n, quotingDepth), nil
 	case *ast.Emphasis:
-		return renderEmphasis(source, n, blockquote, n.(*ast.Emphasis).Level, listDepth)
+		return renderEmphasis(source, n, quotingDepth, n.(*ast.Emphasis).Level, listDepth)
 	case *ast2.Strikethrough:
-		return renderEmphasis(source, n, blockquote, 3, listDepth)
+		return renderEmphasis(source, n, quotingDepth, 3, listDepth)
 	case *ast.Text:
 		text := string(t.Value(source))
 		if text == "" {
@@ -128,22 +122,76 @@ func renderNode(source []byte, n ast.Node, blockquote bool, listDepth int) ([]Ri
 		if n.(*ast.Text).SoftLineBreak() {
 			text = text + " "
 		}
-		if blockquote {
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleBlockquote, Text: text}}, nil
+		if quotingDepth > 0 {
+			style := RichTextStyleBlockquote
+			style.QuotingDepth = quotingDepth
+			return []RichTextSegment{&TextSegment{Style: style, Text: text}}, nil
 		}
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: decodeText(text)}}, nil
 	case *ast.Blockquote:
-		return renderChildren(source, n, true, listDepth)
+		quotingDepth++
+		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Image:
 		return parseMarkdownImage(t), nil
+	case *ast2.Table:
+		return []RichTextSegment{renderTable(source, t)}, nil
 	}
 	return nil, nil
 }
 
-func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+// renderTable builds a TableSegment from a goldmark table node, rendering each
+// cell's inline content with the standard inline renderer.
+func renderTable(source []byte, n *ast2.Table) *TableSegment {
+	seg := &TableSegment{}
+	for _, a := range n.Alignments {
+		seg.Alignments = append(seg.Alignments, tableAlignment(a))
+	}
+	for row := n.FirstChild(); row != nil; row = row.NextSibling() {
+		var cells [][]RichTextSegment
+		for cell := row.FirstChild(); cell != nil; cell = cell.NextSibling() {
+			segs, _ := renderChildren(source, cell, 0, 0)
+			cells = append(cells, segs)
+		}
+		if _, ok := row.(*ast2.TableHeader); ok {
+			seg.Headers = cells
+		} else {
+			seg.Rows = append(seg.Rows, cells)
+		}
+	}
+	return seg
+}
+
+func renderCodeBlock(source []byte, n ast.Node, quotingDepth int) []RichTextSegment {
+	var data []byte
+	lines := n.Lines()
+	for i := 0; i < lines.Len(); i++ {
+		line := lines.At(i)
+		data = append(data, line.Value(source)...)
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+	return []RichTextSegment{&CodeBlockSegment{Text: string(data), quotingLevel: quotingDepth}}
+}
+
+func tableAlignment(a ast2.Alignment) fyne.TextAlign {
+	switch a {
+	case ast2.AlignCenter:
+		return fyne.TextAlignCenter
+	case ast2.AlignRight:
+		return fyne.TextAlignTrailing
+	default:
+		return fyne.TextAlignLeading
+	}
+}
+
+func renderChildren(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
 	children := make([]RichTextSegment, 0, n.ChildCount())
-	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
-		segs, err := renderNode(source, child, blockquote, listDepth)
+	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0 && child != nil; childCount-- {
+		segs, err := renderNode(source, child, quotingDepth, listDepth)
 		if err != nil {
 			return children, err
 		}
@@ -153,7 +201,7 @@ func renderChildren(source []byte, n ast.Node, blockquote bool, listDepth int) (
 	return children, nil
 }
 
-func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDepth int) ([]RichTextSegment, error) {
+func renderEmphasis(source []byte, n ast.Node, quotingDepth int, strength, listDepth int) ([]RichTextSegment, error) {
 	style := RichTextStyleInline
 	switch strength {
 	case 1:
@@ -178,7 +226,7 @@ func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDe
 		}
 	}
 
-	children, err := renderChildren(source, n, blockquote, listDepth)
+	children, err := renderChildren(source, n, quotingDepth, listDepth)
 	for _, child := range children {
 		switch t := child.(type) {
 		case *TextSegment:
@@ -194,7 +242,7 @@ func renderEmphasis(source []byte, n ast.Node, blockquote bool, strength, listDe
 	return children, err
 }
 
-func renderHeading(source []byte, n ast.Node, blockquote bool, listDepth int) ([]RichTextSegment, error) {
+func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
 	var style RichTextStyle
 	switch n.(*ast.Heading).Level {
 	case 1:
@@ -204,6 +252,10 @@ func renderHeading(source []byte, n ast.Node, blockquote bool, listDepth int) ([
 	default:
 		style = RichTextStyleStrong
 	}
+	if quotingDepth > 0 {
+		style.QuotingDepth = quotingDepth
+		style.TextStyle.Italic = true
+	}
 
 	children := make([]RichTextSegment, 0, n.ChildCount())
 	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
@@ -212,7 +264,7 @@ func renderHeading(source []byte, n ast.Node, blockquote bool, listDepth int) ([
 			text := string(t.Value(source))
 			children = append(children, &TextSegment{Style: style, Text: decodeText(text)})
 		default:
-			segs, err := renderNode(source, child, blockquote, listDepth)
+			segs, err := renderNode(source, child, quotingDepth, listDepth)
 			if err != nil {
 				return children, err
 			}
@@ -259,7 +311,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 
 func parseMarkdown(content string) []RichTextSegment {
 	r := markdownRenderer{}
-	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough))
+	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough, extension.TaskList, extension.Table))
 	err := md.Convert([]byte(content), nil)
 	if err != nil {
 		fyne.LogError("Failed to parse markdown", err)

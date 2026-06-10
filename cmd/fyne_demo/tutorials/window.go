@@ -89,12 +89,20 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 	}
 
 	otherGroup := widget.NewCard("Other", "",
-		widget.NewButton("Notification", func() {
-			fyne.CurrentApp().SendNotification(&fyne.Notification{
-				Title:   "Fyne Demo",
-				Content: "Testing notifications...",
-			})
-		}))
+		container.NewVBox(
+			widget.NewButton("Notification", func() {
+				fyne.CurrentApp().SendNotification(&fyne.Notification{
+					Title:   "Fyne Demo",
+					Content: "This is a notification",
+				})
+			}),
+			widget.NewButton("Notification in 30 sec", func() {
+				_, _ = fyne.CurrentApp().ScheduleNotification(&fyne.Notification{
+					Title:   "Fyne Demo",
+					Content: "A scheduled notification",
+				}, time.Now().Add(time.Second*30))
+			}),
+		))
 
 	return container.NewVBox(widget.NewCard("Windows", "", windowGroup), otherGroup)
 }

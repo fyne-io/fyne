@@ -140,8 +140,15 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		th := theme.CurrentForWidget(o)
 		font1 := th.Font(style)
 
-		emoji := theme.DefaultEmojiFont() // TODO only one emoji - maybe others too
-		fallbacks := []fyne.Resource{emoji, theme.DefaultSymbolFont()}
+		// Skip any nil fallback fonts — they can be nil when built with
+		// -tags no_emoji, and the lookupFaces loop expects non-nil entries.
+		var fallbacks []fyne.Resource
+		if emoji := theme.DefaultEmojiFont(); emoji != nil { // TODO only one emoji - maybe others too
+			fallbacks = append(fallbacks, emoji)
+		}
+		if sym := theme.DefaultSymbolFont(); sym != nil {
+			fallbacks = append(fallbacks, sym)
+		}
 		switch {
 		case style.Monospace:
 			faces = lookupFaces(font1, theme.DefaultTextMonospaceFont(), fallbacks, fontscan.Monospace, style)

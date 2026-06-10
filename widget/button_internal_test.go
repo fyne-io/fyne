@@ -233,3 +233,10 @@ func TestButtonRenderer_TapAnimation(t *testing.T) {
 	button.tapAnim.Tick(0.5)
 	test.AssertImageMatches(t, "button/tap_animation.png", w.Canvas().Capture())
 }
+
+func TestButtonRenderer_CornerRadius(t *testing.T) {
+	button := &Button{}
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
+
+	assert.Equal(t, button.Theme().Size(theme.SizeNameButtonRadius), render.background.CornerRadius)
+}

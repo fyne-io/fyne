@@ -11,13 +11,19 @@ package app
 
 bool isBundled();
 void sendNotification(char *title, char *content);
+bool scheduleNotification(char *id, char *title, char *content, double seconds);
+void cancelScheduledNotification(char *id);
 */
 import "C"
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 	"unsafe"
 
 	"fyne.io/fyne/v2"
@@ -35,6 +41,55 @@ func (a *fyneApp) SendNotification(n *fyne.Notification) {
 	}
 
 	fallbackNotification(n.Title, n.Content)
+}
+
+func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	if !C.isBundled() {
+		// osascript path has no native scheduler - use the in-process fallback.
+		return a.scheduleViaScheduler(n, when)
+	}
+
+	delay := time.Until(when).Seconds()
+	if delay <= 0 {
+		return nil, errors.New("scheduled delivery time must be in the future")
+	}
+
+	id, err := newDarwinNotificationID()
+	if err != nil {
+		return nil, err
+	}
+	idStr := C.CString(id)
+	defer C.free(unsafe.Pointer(idStr))
+	titleStr := C.CString(n.Title)
+	defer C.free(unsafe.Pointer(titleStr))
+	contentStr := C.CString(n.Content)
+	defer C.free(unsafe.Pointer(contentStr))
+
+	if !bool(C.scheduleNotification(idStr, titleStr, contentStr, C.double(delay))) {
+		// older SDK or runtime refusal - use the in-process scheduler instead
+		return a.scheduleViaScheduler(n, when)
+	}
+	return fyne.NewScheduledNotification(id, n, when), nil
+}
+
+func (a *fyneApp) CancelScheduledNotification(id string) error {
+	if !C.isBundled() {
+		a.cancelViaScheduler(id)
+		return nil
+	}
+
+	idStr := C.CString(id)
+	defer C.free(unsafe.Pointer(idStr))
+	C.cancelScheduledNotification(idStr)
+	return nil
+}
+
+func newDarwinNotificationID() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return "fyne-sched-" + hex.EncodeToString(b[:]), nil
 }
 
 func escapeNotificationString(in string) string {

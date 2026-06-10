@@ -1,7 +1,11 @@
 package org.golang.app;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.NativeActivity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -55,6 +59,56 @@ public class GoNativeActivity extends NativeActivity {
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 	private boolean keyboardUp = false;
+
+	// Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
+	// classes (Runnable -> Listener). javac stores a `MethodParameters`
+	// attribute with an empty name on the synthetic `this$1` parameter of a
+	// nested anonymous class's constructor; older D8 / R8 versions
+	// (e.g. AOSP build-tools 3.3) NPE while reading that attribute.
+	private final OnEditorActionListener mEditorActionListener = new OnEditorActionListener() {
+		@Override
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			if (actionId == EditorInfo.IME_ACTION_DONE) {
+				keyboardTyped("\n");
+			}
+			return false;
+		}
+	};
+
+	private final TextWatcher mTextWatcher = new TextWatcher() {
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			if (ignoreKey) {
+				return;
+			}
+			if (count > 0) {
+				keyboardTyped(s.subSequence(start, start + count).toString());
+			}
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			if (ignoreKey) {
+				return;
+			}
+			if (count > 0) {
+				for (int i = 0; i < count; i++) {
+					keyboardDelete();
+				}
+			}
+		}
+
+		@Override
+		public void afterTextChanged(Editable s) {
+			// always place one character so all keyboards can send backspace
+			if (s.length() < 1) {
+				ignoreKey = true;
+				mTextEdit.setText(" ");
+				mTextEdit.setSelection(mTextEdit.getText().length());
+				ignoreKey = false;
+			}
+		}
+	};
 
 	// Accessibility – real-view overlay approach.
 	private static FrameLayout mA11yContainer;
@@ -129,15 +183,7 @@ public class GoNativeActivity extends NativeActivity {
                     mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
                 }
 
-                mTextEdit.setOnEditorActionListener(new OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            keyboardTyped("\n");
-                        }
-                        return false;
-                    }
-                });
+                mTextEdit.setOnEditorActionListener(mEditorActionListener);
 
                 // always place one character so all keyboards can send backspace
                 ignoreKey = true;
@@ -209,6 +255,102 @@ public class GoNativeActivity extends NativeActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
     }
+
+    // -------------------------------------------------------------------------
+    // Scheduled notifications via AlarmManager.
+    //
+    // For delivery to survive the app process being killed, the FyneNotificationReceiver
+    // inner class must be declared in AndroidManifest.xml:
+    //
+    //   <receiver android:name="org.golang.app.FyneNotificationReceiver"
+    //             android:exported="false" />
+    //
+    // The packaging tool is responsible for emitting that line. If the receiver is not
+    // registered the schedule call returns false and the Go layer falls back to an
+    // in-process scheduler. Cancellation always uses the same identifier so the same
+    // PendingIntent can be reproduced and removed from AlarmManager.
+    // -------------------------------------------------------------------------
+
+    static boolean scheduleNotification(String id, String title, String body, long deliveryTimeMillis) {
+        if (goNativeActivity == null) {
+            return false;
+        }
+        return goNativeActivity.doScheduleNotification(id, title, body, deliveryTimeMillis);
+    }
+
+    boolean doScheduleNotification(String id, String title, String body, long deliveryTimeMillis) {
+        // If the receiver is not registered in the manifest the scheduled alarm
+        // will fire into the void once the app is killed; report failure so the
+        // Go layer can fall back to in-process scheduling instead.
+        ComponentName receiver = new ComponentName(this, FyneNotificationReceiver.class);
+        try {
+            getPackageManager().getReceiverInfo(receiver, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmMgr == null) {
+            return false;
+        }
+
+        Intent intent = new Intent(this, FyneNotificationReceiver.class);
+        intent.putExtra("title", title);
+        intent.putExtra("body", body);
+        intent.putExtra("notif_id", id.hashCode());
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pi = PendingIntent.getBroadcast(this, id.hashCode(), intent, flags);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, deliveryTimeMillis, pi);
+            } else {
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, deliveryTimeMillis, pi);
+            }
+        } catch (SecurityException e) {
+            Log.e("Fyne", "AlarmManager rejected scheduled notification", e);
+            return false;
+        }
+        return true;
+    }
+
+    static void cancelScheduledNotification(String id) {
+        if (goNativeActivity == null) {
+            return;
+        }
+        goNativeActivity.doCancelScheduledNotification(id);
+    }
+
+    void doCancelScheduledNotification(String id) {
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmMgr == null) {
+            return;
+        }
+
+        Intent intent = new Intent(this, FyneNotificationReceiver.class);
+        int flags = PendingIntent.FLAG_NO_CREATE;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pi = PendingIntent.getBroadcast(this, id.hashCode(), intent, flags);
+        if (pi != null) {
+            alarmMgr.cancel(pi);
+            pi.cancel();
+        }
+
+        // Also drop any already-posted notification with the same id so cancelling
+        // after delivery clears it from the shade.
+        NotificationManager mgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (mgr != null) {
+            mgr.cancel(id.hashCode());
+        }
+    }
+
 	static int getRune(int deviceId, int keyCode, int metaState) {
 		try {
 			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
@@ -280,42 +422,7 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setText(" ");
                 mTextEdit.setSelection(mTextEdit.getText().length());
 
-                mTextEdit.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (ignoreKey) {
-                            return;
-                        }
-                        if (count > 0) {
-                            keyboardTyped(s.subSequence(start,start+count).toString());
-                        }
-                    }
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                        if (ignoreKey) {
-                            return;
-                        }
-                        if (count > 0) {
-                            for (int i = 0; i < count; i++) {
-                                // send a backspace
-                                keyboardDelete();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        // always place one character so all keyboards can send backspace
-                        if (s.length() < 1) {
-                            ignoreKey = true;
-                            mTextEdit.setText(" ");
-                            mTextEdit.setSelection(mTextEdit.getText().length());
-                            ignoreKey = false;
-                            return;
-                        }
-                    }
-                });
+                mTextEdit.addTextChangedListener(mTextWatcher);
             }
         });
 	}

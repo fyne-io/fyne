@@ -2,6 +2,7 @@ package test
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 
@@ -31,4 +32,28 @@ func TestAssertNotificationSent_NotSent(t *testing.T) {
 		// don't send anything
 	})
 	assert.True(t, tt.Failed(), "notification assert should fail if no notification was sent")
+}
+
+func TestAssertNotificationScheduled(t *testing.T) {
+	n := fyne.NewNotification("Reminder", "Take a break")
+	myApp := fyne.CurrentApp()
+
+	var scheduled *fyne.ScheduledNotification
+	AssertNotificationScheduled(t, n, func() {
+		s, err := fyne.CurrentApp().ScheduleNotification(n, time.Now().Add(time.Minute))
+		assert.NoError(t, err)
+		scheduled = s
+	})
+	assert.NotNil(t, scheduled)
+	assert.NotEmpty(t, scheduled.ID())
+	assert.Equal(t, myApp, fyne.CurrentApp())
+}
+
+func TestAssertNotificationScheduled_CancelClearsState(t *testing.T) {
+	n := fyne.NewNotification("Reminder", "Take a break")
+	s, err := fyne.CurrentApp().ScheduleNotification(n, time.Now().Add(time.Minute))
+	assert.NoError(t, err)
+
+	err = fyne.CurrentApp().CancelScheduledNotification(s.ID())
+	assert.NoError(t, err)
 }

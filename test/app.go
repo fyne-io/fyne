@@ -4,12 +4,14 @@ package test // import "fyne.io/fyne/v2/test"
 import (
 	"net/url"
 	"sync"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	intapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/scheduler"
 	"fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 )
@@ -31,8 +33,11 @@ type app struct {
 	cloud        fyne.CloudProvider
 
 	// user action variables
-	appliedTheme     fyne.Theme
-	lastNotification *fyne.Notification
+	appliedTheme              fyne.Theme
+	lastNotification          *fyne.Notification
+	scheduledNotifications    map[string]*fyne.ScheduledNotification
+	lastScheduledNotification *fyne.ScheduledNotification
+	lastCancelledScheduleID   string
 }
 
 func (a *app) CloudProvider() fyne.CloudProvider {
@@ -85,6 +90,31 @@ func (a *app) SendNotification(notify *fyne.Notification) {
 	defer a.propertyLock.Unlock()
 
 	a.lastNotification = notify
+}
+
+func (a *app) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	id, _ := scheduler.NewID()
+	scheduled := fyne.NewScheduledNotification(id, n, when)
+
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	if a.scheduledNotifications == nil {
+		a.scheduledNotifications = map[string]*fyne.ScheduledNotification{}
+	}
+	a.scheduledNotifications[id] = scheduled
+	a.lastScheduledNotification = scheduled
+	return scheduled, nil
+}
+
+func (a *app) CancelScheduledNotification(id string) error {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	delete(a.scheduledNotifications, id)
+	a.lastCancelledScheduleID = id
+
+	return nil
 }
 
 func (a *app) SetCloudProvider(p fyne.CloudProvider) {

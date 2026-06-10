@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/build"
 	intRepo "fyne.io/fyne/v2/internal/repository"
+	"fyne.io/fyne/v2/internal/scheduler"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -32,6 +33,7 @@ type fyneApp struct {
 	settings  *settings
 	storage   fyne.Storage
 	prefs     fyne.Preferences
+	scheduler *scheduler.Scheduler
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -184,6 +186,8 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 
 	newApp.registerRepositories() // for web this may provide docs / settings
 	newApp.cache = makeCache(newApp)
+	newApp.scheduler = scheduler.New(newApp.cache, newApp.SendNotification)
+	newApp.scheduler.Start()
 	newApp.settings = loadSettings()
 	store := &store{a: newApp}
 	store.Docs = makeStoreDocs(id, store)

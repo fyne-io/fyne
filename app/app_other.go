@@ -5,6 +5,7 @@ package app
 import (
 	"errors"
 	"net/url"
+	"time"
 
 	"fyne.io/fyne/v2"
 )
@@ -15,6 +16,14 @@ func (a *fyneApp) OpenURL(_ *url.URL) error {
 
 func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Refusing to show notification for unknown operating system", nil)
+}
+
+func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	return a.scheduleViaScheduler(n, when)
+}
+
+func (a *fyneApp) CancelScheduledNotification(id string) error {
+	return a.cancelViaScheduler(id)
 }
 
 func watchTheme(_ *settings) {

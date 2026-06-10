@@ -149,6 +149,11 @@ func (e *DateEntry) setupDropDown() *Button {
 	}
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
+		if c == nil {
+			// DateEntry detached from its canvas; cannot host calendar
+			// dropdown (see fyne-io/fyne#5965).
+			return
+		}
 
 		e.popUp = NewPopUp(e.dropDown, c)
 		e.popUp.ShowAtPosition(e.popUpPos())

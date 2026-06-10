@@ -1,4 +1,4 @@
-//go:build !ci && mobile && !android && !ios
+//go:build !ci && mobile && !android && !ios && !windows
 
 package app
 
@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 
 	"fyne.io/fyne/v2"
 )
@@ -25,6 +26,14 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 
 func (a *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Notifications are not supported in the mobile simulator yet", nil)
+}
+
+func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*fyne.ScheduledNotification, error) {
+	return a.scheduleViaScheduler(n, when)
+}
+
+func (a *fyneApp) CancelScheduledNotification(id string) error {
+	return a.cancelViaScheduler(id)
 }
 
 func watchTheme(_ *settings) {

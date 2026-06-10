@@ -468,6 +468,10 @@ func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	form.Append("Password", password)
 	form.Append("Disabled", disabled)
 	form.Append("Message", largeText)
+
+	form.Items[2].Required = true
+	form.Items[3].Required = true
+	form.Refresh()
 	return form
 }
 

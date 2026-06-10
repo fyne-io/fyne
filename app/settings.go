@@ -30,6 +30,11 @@ func (sc *SettingsSchema) StoragePath() string {
 // Declare conformity with Settings interface
 var _ fyne.Settings = (*settings)(nil)
 
+const (
+	themeVariantNameDark  = "dark"
+	themeVariantNameLight = "light"
+)
+
 type settings struct {
 	theme          fyne.Theme
 	themeSpecified bool
@@ -123,24 +128,28 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
-	name := s.schema.ThemeName
-	if env := os.Getenv("FYNE_THEME"); env != "" {
-		name = env
-	}
-
+	name := s.explicitThemeVariantName()
 	variant := app.DefaultVariant()
 	effectiveTheme := s.theme
 	if !s.themeSpecified {
 		effectiveTheme = theme.DefaultTheme()
 	}
 	switch name {
-	case "light":
+	case themeVariantNameLight:
 		variant = theme.VariantLight
-	case "dark":
+	case themeVariantNameDark:
 		variant = theme.VariantDark
 	}
 
 	s.applyTheme(effectiveTheme, variant)
+}
+
+func (s *settings) explicitThemeVariantName() string {
+	if name := os.Getenv("FYNE_THEME"); name != "" {
+		return name
+	}
+
+	return s.schema.ThemeName
 }
 
 func loadSettings() *settings {

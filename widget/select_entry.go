@@ -97,6 +97,11 @@ func (e *SelectEntry) popUpPos() fyne.Position {
 func (e *SelectEntry) setupDropDown() *Button {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
+		if c == nil {
+			// SelectEntry detached from its canvas; nothing to host the
+			// dropdown on (see fyne-io/fyne#5965).
+			return
+		}
 
 		e.popUp = NewPopUpMenu(e.dropDown, c)
 		e.popUp.ShowAtPosition(e.popUpPos())

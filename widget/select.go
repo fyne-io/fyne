@@ -337,6 +337,13 @@ func (s *Select) showPopUp() {
 	}
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
+	if c == nil {
+		// The Select was detached from its canvas (e.g. its parent
+		// container was rebuilt) between the tap event being delivered
+		// and this call. There is no canvas to host the pop-up, so do
+		// nothing rather than crash inside the overlay machinery.
+		return
+	}
 	pop := NewPopUpMenu(fyne.NewMenu("", items...), c)
 	pop.alignment = s.Alignment
 	pop.ShowAtPosition(s.popUpPos())

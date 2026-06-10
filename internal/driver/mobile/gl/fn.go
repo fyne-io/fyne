@@ -80,6 +80,8 @@ const (
 	glfnVertexAttribPointer
 	glfnViewport
 	glfnCopyTexSubImage2D
+	glfnDeleteProgram
+	glfnUniform1i
 )
 
 func goString(buf []byte) string {

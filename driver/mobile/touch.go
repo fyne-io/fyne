@@ -19,3 +19,12 @@ type Touchable interface {
 	TouchUp(*TouchEvent)
 	TouchCancel(*TouchEvent)
 }
+
+// Movable represents a mobile touch event dragging across the screen.
+// Where multiple fingers are moving then will be reported as different events.
+// The ID of the TouchEvent indicates which finger moved.
+//
+// Since: 2.8
+type Movable interface {
+	TouchMoved(*TouchEvent)
+}

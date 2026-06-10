@@ -2,17 +2,48 @@ package widget_test
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestList_Bind(t *testing.T) {
+	c := widget.NewList(
+		func() int { return 5 },
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Item")
+		}, func(i widget.ListItemID, o fyne.CanvasObject) {
+			o.(*widget.Label).SetText(strconv.Itoa(i))
+		},
+	)
+	assert.Equal(t, 5, c.Length()) // TODO check rendered count
+
+	val := binding.NewStringList()
+	c.Bind(val, func(di binding.DataItem, o fyne.CanvasObject) {
+		str, _ := di.(binding.String).Get()
+		o.(*widget.Label).SetText(str)
+	})
+	waitForBinding()
+	assert.Equal(t, 0, c.Length())
+
+	err := val.Set([]string{"test", "item 2"})
+	assert.NoError(t, err)
+	waitForBinding()
+	assert.Equal(t, 2, c.Length()) // TODO check rendered count
+
+	c.Unbind()
+	waitForBinding()
+	assert.Equal(t, 5, c.Length())
+}
 
 func TestList_ThemeChange(t *testing.T) {
 	list, w, _ := setupList(t)

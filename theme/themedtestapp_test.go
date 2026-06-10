@@ -2,6 +2,7 @@ package theme_test
 
 import (
 	"net/url"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
@@ -51,6 +52,14 @@ func (t *themedApp) UniqueID() string {
 }
 
 func (t *themedApp) SendNotification(_ *fyne.Notification) {
+}
+
+func (t *themedApp) ScheduleNotification(_ *fyne.Notification, _ time.Time) (*fyne.ScheduledNotification, error) {
+	return nil, nil
+}
+
+func (t *themedApp) CancelScheduledNotification(_ string) error {
+	return nil
 }
 
 func (t *themedApp) Settings() fyne.Settings {

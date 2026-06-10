@@ -68,6 +68,9 @@ func (d *dialog) Hide() {
 //
 // Since: 2.1
 func (d *dialog) MinSize() fyne.Size {
+	if d.win == nil {
+		return fyne.NewSquareSize(1)
+	}
 	return d.win.MinSize()
 }
 
@@ -87,9 +90,9 @@ func (d *dialog) Refresh() {
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
-	d.desiredSize = size
+	d.desiredSize = size.Max(d.MinSize())
 	if d.win != nil { // could be called before popup is created!
-		d.win.Resize(size)
+		d.win.Resize(size.Max(d.MinSize()))
 	}
 }
 
