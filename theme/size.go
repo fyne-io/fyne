@@ -245,6 +245,7 @@ func TextSubHeadingSize() float32 {
 }
 
 func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+	//revive:disable:add-constant
 	switch s {
 	case SizeNameSeparatorThickness:
 		return 1
@@ -302,4 +303,5 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	default:
 		return 0
 	}
+	//revive:enable:add-constant
 }

@@ -12,6 +12,13 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
+const (
+	lenColorStringRGB       = lenColorStringRGBShort * 2
+	lenColorStringRGBShort  = 3
+	lenColorStringRGBA      = lenColorStringRGBAShort * 2
+	lenColorStringRGBAShort = 4
+)
+
 // FromJSON returns a Theme created from the given JSON metadata.
 // Any values not present in the data will fall back to the default theme.
 // If a parse error occurs it will be returned along with a default theme.
@@ -70,32 +77,19 @@ func (h *jsonColor) UnmarshalJSON(b []byte) error {
 }
 
 func (h *jsonColor) parseColor(str string) error {
-	data := str
-	switch len([]rune(str)) {
-	case 8, 6:
-	case 9, 7: // remove # prefix
-		data = str[1:]
-	case 5: // remove # prefix, then double up
-		data = str[1:]
-		fallthrough
-	case 4: // could be rgba or #rgb
-		if data[0] == '#' {
-			v := []rune(data[1:])
-			data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2]})
-			break
-		}
-
-		v := []rune(data)
-		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2], v[3], v[3]})
-	case 3:
-		v := []rune(str)
-		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2]})
+	data := []byte(strings.TrimPrefix(str, "#"))
+	switch len(data) {
+	case lenColorStringRGB, lenColorStringRGBA:
+	case lenColorStringRGBAShort:
+		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2], data[3], data[3]}
+	case lenColorStringRGBShort:
+		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2]}
 	default:
 		h.color = color.Transparent
 		return errors.New("invalid color format: " + str)
 	}
 
-	digits, err := hex.DecodeString(data)
+	digits, err := hex.DecodeString(string(data))
 	if err != nil {
 		return err
 	}
