@@ -8,6 +8,7 @@ import (
 // URL component constants
 const (
 	URLPathSeparator   = "/"
+	URLSchemeFile      = "file"
 	URLSchemeSeparator = "://"
 )
 
