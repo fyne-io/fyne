@@ -307,12 +307,12 @@ func (d *divider) Dragged(e *fyne.DragEvent) {
 	if d.split.Horizontal {
 		widthFree := float64(d.split.Size().Width - dividerThickness(d))
 		leadingRatio = float64(d.split.Leading.MinSize().Width) / widthFree
-		trailingRatio = 1. - (float64(d.split.Trailing.MinSize().Width) / widthFree)
+		trailingRatio = 1.0 - (float64(d.split.Trailing.MinSize().Width) / widthFree)
 		offset = float64(x-d.startDragOff.X) / widthFree
 	} else {
 		heightFree := float64(d.split.Size().Height - dividerThickness(d))
 		leadingRatio = float64(d.split.Leading.MinSize().Height) / heightFree
-		trailingRatio = 1. - (float64(d.split.Trailing.MinSize().Height) / heightFree)
+		trailingRatio = 1.0 - (float64(d.split.Trailing.MinSize().Height) / heightFree)
 		offset = float64(y-d.startDragOff.Y) / heightFree
 	}
 
@@ -412,7 +412,7 @@ func dividerThickness(d *divider) float32 {
 
 func dividerLength(d *divider) float32 {
 	th := dividerTheme(d)
-	return th.Size(theme.SizeNamePadding) * 6
+	return th.Size(theme.SizeNamePadding) * 6 //revive:disable-line:add-constant
 }
 
 func handleThickness(d *divider) float32 {

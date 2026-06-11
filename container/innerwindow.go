@@ -20,6 +20,8 @@ const (
 	modeMinimize
 	modeMaximize
 	modeIcon
+
+	sizeDraggableCorner = 16
 )
 
 var _ fyne.Widget = (*InnerWindow)(nil)
@@ -349,7 +351,7 @@ func newDraggableCorner(w *InnerWindow) *draggableCorner {
 
 func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
 	prop := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon(theme.IconNameDragCornerIndicator))
-	prop.SetMinSize(fyne.NewSquareSize(16))
+	prop.SetMinSize(fyne.NewSquareSize(sizeDraggableCorner))
 	return widget.NewSimpleRenderer(prop)
 }
 
