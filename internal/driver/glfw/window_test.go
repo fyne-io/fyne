@@ -1215,6 +1215,31 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	})
 }
 
+func TestWindow_TappedSecondary_RedispatchAfterOverlayDismiss(t *testing.T) {
+	w := createWindow("Test")
+	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(o)
+	ensureCanvasSize(t, w, fyne.NewSize(108, 108))
+
+	menu := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
+	pop := widget.NewPopUpMenu(menu, w.canvas)
+
+	runOnMain(func() {
+		pop.ShowAtPosition(fyne.NewPos(0, 0))
+		assert.NotNil(t, w.canvas.Overlays().Top(), "overlay should be present")
+
+		// right-click outside the popup menu but inside the tappable object
+		w.mousePos = fyne.NewPos(80, 80)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+
+		assert.Nil(t, w.canvas.Overlays().Top(), "overlay should be dismissed")
+		assert.Nil(t, o.popTapEvent(), "no primary tap")
+		assert.NotNil(t, o.popSecondaryTapEvent(), "secondary tap should reach widget underneath")
+	})
+}
+
 func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w := createWindow("Test")
 	tapped := false
@@ -1599,15 +1624,16 @@ func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
 
 	w.Canvas().Focus(content)
 
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Press, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, glfw.ModControl)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Release, glfw.ModControl)
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Press, ctrlMod())
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Press, ctrlMod())
+	w.keyPressed(nil, glfw.KeyLeftControl, 0, glfw.Release, ctrlMod())
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Release, ctrlMod())
 
 	assert.Equal(t, 1, len(content.capturedShortcuts))
 	paste, ok := content.capturedShortcuts[0].(*fyne.ShortcutPaste)
-	assert.True(t, ok)
-	assert.False(t, paste.Secondary)
+	if assert.True(t, ok) {
+		assert.False(t, paste.Secondary)
+	}
 
 	w.keyPressed(nil, glfw.KeyLeftShift, 0, glfw.Press, glfw.ModShift)
 	w.keyPressed(nil, glfw.KeyInsert, 0, glfw.Press, glfw.ModShift)
@@ -1616,8 +1642,9 @@ func TestWindow_CaptureTypedShortcutClipboard(t *testing.T) {
 
 	assert.Equal(t, 2, len(content.capturedShortcuts))
 	paste, ok = content.capturedShortcuts[1].(*fyne.ShortcutPaste)
-	assert.True(t, ok)
-	assert.True(t, paste.Secondary)
+	if assert.True(t, ok) {
+		assert.True(t, paste.Secondary)
+	}
 }
 
 func TestWindow_OnlyTabAndShiftTabToCapturesTab(t *testing.T) {
@@ -1735,11 +1762,7 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	e.DoubleTapped(nil)
 	assert.Equal(t, "Testing", e.SelectedText())
 
-	ctrlMod := glfw.ModControl
-	if isMacOSRuntime() {
-		ctrlMod = glfw.ModSuper
-	}
-	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyC, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing", NewClipboard().Content())
 
@@ -1748,13 +1771,13 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing2", e.SelectedText())
 
 	// any other shortcut should be forbidden (Cut)
-	w.keyPressed(nil, glfw.KeyX, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyX, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing2", e.Text)
 	assert.Equal(t, "Testing", NewClipboard().Content())
 
 	// any other shortcut should be forbidden (Paste)
-	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod)
+	w.keyPressed(nil, glfw.KeyV, 0, glfw.Repeat, ctrlMod())
 
 	assert.Equal(t, "Testing2", e.Text)
 	assert.Equal(t, "Testing", NewClipboard().Content())
@@ -1939,6 +1962,14 @@ func createWindowWithResizeCallback(title string) *safeWindow {
 		w.create()
 	})
 	return &safeWindow{window: w}
+}
+
+func ctrlMod() glfw.ModifierKey {
+	if isMacOSRuntime() {
+		return glfw.ModSuper
+	}
+
+	return glfw.ModControl
 }
 
 //

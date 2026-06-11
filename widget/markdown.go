@@ -108,19 +108,7 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		text := forceIntoText(source, n)
 		return []RichTextSegment{&TextSegment{Style: RichTextStyleCodeInline, Text: text}}, nil
 	case *ast.CodeBlock, *ast.FencedCodeBlock:
-		var data []byte
-		lines := n.Lines()
-		for i := 0; i < lines.Len(); i++ {
-			line := lines.At(i)
-			data = append(data, line.Value(source)...)
-		}
-		if len(data) == 0 {
-			return nil, nil
-		}
-		if data[len(data)-1] == '\n' {
-			data = data[:len(data)-1]
-		}
-		return []RichTextSegment{&CodeBlockSegment{Text: string(data), quotingLevel: quotingDepth}}, nil
+		return renderCodeBlock(source, n, quotingDepth), nil
 	case *ast.Emphasis:
 		return renderEmphasis(source, n, quotingDepth, n.(*ast.Emphasis).Level, listDepth)
 	case *ast2.Strikethrough:
@@ -145,13 +133,64 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		return renderChildren(source, n, quotingDepth, listDepth)
 	case *ast.Image:
 		return parseMarkdownImage(t), nil
+	case *ast2.Table:
+		return []RichTextSegment{renderTable(source, t)}, nil
 	}
 	return nil, nil
 }
 
+// renderTable builds a TableSegment from a goldmark table node, rendering each
+// cell's inline content with the standard inline renderer.
+func renderTable(source []byte, n *ast2.Table) *TableSegment {
+	seg := &TableSegment{}
+	for _, a := range n.Alignments {
+		seg.Alignments = append(seg.Alignments, tableAlignment(a))
+	}
+	for row := n.FirstChild(); row != nil; row = row.NextSibling() {
+		var cells [][]RichTextSegment
+		for cell := row.FirstChild(); cell != nil; cell = cell.NextSibling() {
+			segs, _ := renderChildren(source, cell, 0, 0)
+			cells = append(cells, segs)
+		}
+		if _, ok := row.(*ast2.TableHeader); ok {
+			seg.Headers = cells
+		} else {
+			seg.Rows = append(seg.Rows, cells)
+		}
+	}
+	return seg
+}
+
+func renderCodeBlock(source []byte, n ast.Node, quotingDepth int) []RichTextSegment {
+	var data []byte
+	lines := n.Lines()
+	for i := 0; i < lines.Len(); i++ {
+		line := lines.At(i)
+		data = append(data, line.Value(source)...)
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	if data[len(data)-1] == '\n' {
+		data = data[:len(data)-1]
+	}
+	return []RichTextSegment{&CodeBlockSegment{Text: string(data), quotingLevel: quotingDepth}}
+}
+
+func tableAlignment(a ast2.Alignment) fyne.TextAlign {
+	switch a {
+	case ast2.AlignCenter:
+		return fyne.TextAlignCenter
+	case ast2.AlignRight:
+		return fyne.TextAlignTrailing
+	default:
+		return fyne.TextAlignLeading
+	}
+}
+
 func renderChildren(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]RichTextSegment, error) {
 	children := make([]RichTextSegment, 0, n.ChildCount())
-	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0; childCount-- {
+	for childCount, child := n.ChildCount(), n.FirstChild(); childCount > 0 && child != nil; childCount-- {
 		segs, err := renderNode(source, child, quotingDepth, listDepth)
 		if err != nil {
 			return children, err
@@ -272,7 +311,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 
 func parseMarkdown(content string) []RichTextSegment {
 	r := markdownRenderer{}
-	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough, extension.TaskList))
+	md := goldmark.New(goldmark.WithRenderer(&r), goldmark.WithExtensions(extension.Strikethrough, extension.TaskList, extension.Table))
 	err := md.Convert([]byte(content), nil)
 	if err != nil {
 		fyne.LogError("Failed to parse markdown", err)

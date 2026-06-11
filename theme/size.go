@@ -1,6 +1,10 @@
 package theme
 
-import "fyne.io/fyne/v2"
+import (
+	"math"
+
+	"fyne.io/fyne/v2"
+)
 
 const (
 	// SizeNameCaptionText is the name of theme lookup for helper text size, normally smaller than regular text size.
@@ -261,7 +265,7 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 	case SizeNameWindowButtonHeight:
 		return 16
 	case SizeNameWindowButtonRadius:
-		return 8
+		return math.MaxFloat32 // MaxRadius without the import loop
 	case SizeNameWindowButtonIcon:
 		return 14
 	case SizeNameWindowTitleBarHeight:

@@ -8,19 +8,19 @@
 				<blur radius="1.5" size="200x300"/>
 				<rectangle fillColor="shadow" size="200x300"/>
 			</container>
-			<widget size="161x150" type="*widget.PopUp">
-				<widget pos="19,74" size="161x150" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-19,-14" size="24x24" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="4,-14" size="152x24"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="156,-14" size="24x24" startColor="shadow"/>
-					<linearGradient angle="270" pos="156,9" size="24x140" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="156,150" size="24x24" startColor="shadow"/>
-					<linearGradient pos="4,150" size="152x24" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-19,150" size="24x24" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-19,9" size="24x140"/>
+			<widget pos="23,78" size="153x142" type="*widget.PopUp">
+				<widget size="153x142" type="*widget.Shadow">
+					<radialGradient centerOffset="0.5,0.5" pos="-6,-4" size="8x8" startColor="shadow"/>
+					<linearGradient endColor="shadow" pos="1,-4" size="150x8"/>
+					<radialGradient centerOffset="-0.5,0.5" pos="152,-4" size="8x8" startColor="shadow"/>
+					<linearGradient angle="270" pos="152,3" size="8x138" startColor="shadow"/>
+					<radialGradient centerOffset="-0.5,-0.5" pos="152,142" size="8x8" startColor="shadow"/>
+					<linearGradient pos="1,142" size="150x8" startColor="shadow"/>
+					<radialGradient centerOffset="0.5,-0.5" pos="-6,142" size="8x8" startColor="shadow"/>
+					<linearGradient angle="270" endColor="shadow" pos="-6,3" size="8x138"/>
 				</widget>
-				<rectangle fillColor="overlayBackground" pos="19,74" size="161x150"/>
-				<container pos="23,78" size="153x142">
+				<rectangle fillColor="overlayBackground" size="153x142"/>
+				<container size="153x142">
 					<spacer pos="59,-4" size="98x98"/>
 					<widget size="153x142" type="*dialog.themedBackground">
 						<rectangle fillColor="rgba(40,40,40,230)" size="153x142"/>

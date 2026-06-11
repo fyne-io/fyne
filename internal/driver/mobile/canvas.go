@@ -374,7 +374,20 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		}
 	} else {
 		if wid, ok := co.(fyne.SecondaryTappable); ok {
+			prevOverlay := c.Overlays().Top()
 			tapAltCallback(wid, ev)
+
+			// if the secondary tap dismissed an overlay, forward the event to the widget underneath
+			if prevOverlay != nil && c.Overlays().Top() != prevOverlay {
+				co2, objPos2, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+					_, ok := object.(fyne.SecondaryTappable)
+					return ok
+				})
+				if sec2, ok := co2.(fyne.SecondaryTappable); ok {
+					ev2 := &fyne.PointEvent{Position: objPos2, AbsolutePosition: pos}
+					tapAltCallback(sec2, ev2)
+				}
+			}
 		}
 	}
 }

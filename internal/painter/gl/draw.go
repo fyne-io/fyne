@@ -3,6 +3,7 @@ package gl
 import (
 	"image/color"
 	"math"
+	"sort"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -346,7 +347,113 @@ func (p *painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 		p.drawArc(obj, pos, frame)
 	case *canvas.BezierCurve:
 		p.drawBezierCurve(obj, pos, frame)
+	case *canvas.Shader:
+		p.drawShader(obj, pos, frame)
 	}
+}
+
+// shaderProgram returns the cached state for the given shader, building and
+// caching the program on first use. Programs are keyed by Shader.Name and kept
+// for the lifetime of the GL context, like the built in shader programs, so a
+// per-frame Refresh does not recompile them (see Free). The second return is
+// false if the shader source could not be compiled - the failure is cached so
+// we do not retry, and log, every frame.
+func (p *painter) shaderProgram(shader *canvas.Shader) (*shaderState, bool) {
+	if p.shaderPrograms == nil {
+		p.shaderPrograms = make(map[string]*shaderState)
+	}
+	if state, ok := p.shaderPrograms[shader.Name]; ok {
+		return state, state.valid
+	}
+
+	ref, err := p.createProgramFromSource(rectangleVertexSource(), userShaderFragment(shader))
+	if err != nil {
+		fyne.LogError("Failed to compile shader "+shader.Name, err)
+		p.shaderPrograms[shader.Name] = &shaderState{} // cache the failure so we do not retry
+		return p.shaderPrograms[shader.Name], false
+	}
+
+	state := &shaderState{
+		program: programState{
+			ref:        ref,
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		valid: true,
+	}
+	p.shaderPrograms[shader.Name] = state
+	return state, true
+}
+
+func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyne.Size) {
+	state, ok := p.shaderProgram(shader)
+	if !ok {
+		return
+	}
+	program := state.program
+
+	// Vertex: BEG
+	bounds, points := p.vecRectCoords(pos, shader, frame, 0.0)
+	p.ctx.UseProgram(program.ref)
+	p.updateBuffer(program.buff, points)
+	p.UpdateVertexArray(program, "vert", 2, 4, 0)
+	p.UpdateVertexArray(program, "normal", 2, 4, 2)
+
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.logError()
+	// Vertex: END
+
+	// Fragment: BEG - the standard uniform contract shared with the built in vector shaders
+	frameWidthScaled, frameHeightScaled := p.scaleFrameSize(frame)
+	p.SetUniform2f(program, "frame_size", frameWidthScaled, frameHeightScaled)
+
+	x1Scaled, x2Scaled, y1Scaled, y2Scaled := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
+	p.SetUniform4f(program, "rect_coords", x1Scaled, x2Scaled, y1Scaled, y2Scaled)
+
+	for name, v := range shader.Uniforms {
+		p.SetUniform1f(program, name, v)
+	}
+
+	p.bindShaderTextures(state, shader)
+	p.logError()
+	// Fragment: END
+
+	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.logError()
+}
+
+// bindShaderTextures uploads (once) and binds the shader's textures to
+// successive texture units, pointing each "sampler2D <name>" uniform at its
+// unit. Units are assigned by sorted name so the mapping is stable across frames.
+func (p *painter) bindShaderTextures(state *shaderState, shader *canvas.Shader) {
+	if len(shader.Textures) == 0 {
+		return
+	}
+	if state.textures == nil {
+		state.textures = make(map[string]*shaderTexture, len(shader.Textures))
+	}
+
+	// Upload any new or replaced images first; uploading binds to texture unit 0,
+	// so it must happen before we assign the per-unit bindings below.
+	names := make([]string, 0, len(shader.Textures))
+	for name, img := range shader.Textures {
+		names = append(names, name)
+		if cached := state.textures[name]; cached == nil || cached.src != img {
+			if cached != nil {
+				p.ctx.DeleteTexture(cached.tex)
+			}
+			state.textures[name] = &shaderTexture{tex: p.imgToTexture(img, canvas.ImageScaleSmooth), src: img}
+		}
+	}
+	sort.Strings(names)
+
+	for i, name := range names {
+		p.ctx.ActiveTexture(texture0 + uint32(i))
+		p.ctx.BindTexture(texture2D, state.textures[name].tex)
+		p.SetUniform1i(state.program, name, int32(i))
+	}
+	p.ctx.ActiveTexture(texture0) // restore the default unit for later draws
 }
 
 func (p *painter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
@@ -367,7 +474,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 	}
 
 	roundedCorners := topRightRadius != 0 || topLeftRadius != 0 || bottomRightRadius != 0 || bottomLeftRadius != 0
-	var program ProgramState
+	var program programState
 	if roundedCorners {
 		program = p.roundRectangleProgram
 	} else {
@@ -601,7 +708,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	// text size is sensitive to position on screen
 	size.Width = roundToPixel(size.Width, p.pixScale)
 	size.Height = roundToPixel(size.Height, p.pixScale)
-	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
+	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
+	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
 	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 
 	if decorated {

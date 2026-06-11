@@ -424,7 +424,7 @@ func (b *buttonTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Co
 
 func (b *buttonTheme) Size(n fyne.ThemeSizeName) float32 {
 	switch n {
-	case theme.SizeNameInputRadius:
+	case theme.SizeNameButtonRadius:
 		if b.mode == modeIcon {
 			return 0
 		}

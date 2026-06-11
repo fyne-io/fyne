@@ -43,8 +43,9 @@ const (
 )
 
 const (
-	noBuffer = Buffer(0)
-	noShader = Shader(0)
+	noBuffer  = Buffer(0)
+	noProgram = Program(0)
+	noShader  = Shader(0)
 )
 
 type (
@@ -73,66 +74,66 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = ProgramState{
+	p.program = programState{
 		ref:        p.createProgram("simple_es"),
 		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.blurProgram = ProgramState{
+	p.blurProgram = programState{
 		ref:        p.createProgram("blur_es"),
 		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.lineProgram = ProgramState{
+	p.lineProgram = programState{
 		ref:        p.createProgram("line_es"),
 		buff:       p.createBuffer(24),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.rectangleProgram = ProgramState{
+	p.rectangleProgram = programState{
 		ref:        p.createProgram("rectangle_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.roundRectangleProgram = ProgramState{
+	p.roundRectangleProgram = programState{
 		ref:        p.createProgram("round_rectangle_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.polygonProgram = ProgramState{
+	p.polygonProgram = programState{
 		ref:        p.createProgram("polygon_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.arcProgram = ProgramState{
+	p.arcProgram = programState{
 		ref:        p.createProgram("arc_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.bezierCurveProgram = ProgramState{
+	p.bezierCurveProgram = programState{
 		ref:        p.createProgram("bezier_curve_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 
-	p.arbitraryPolygonProgram = ProgramState{
+	p.arbitraryPolygonProgram = programState{
 		ref:        p.createProgram("arbitrary_polygon_es"),
 		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*UniformState),
+		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
 }
@@ -207,6 +208,10 @@ func (c *esContext) CreateTexture() (texture Texture) {
 
 func (c *esContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffers(1, (*uint32)(&buffer))
+}
+
+func (c *esContext) DeleteProgram(program Program) {
+	gl.DeleteProgram(uint32(program))
 }
 
 func (c *esContext) DeleteTexture(texture Texture) {
@@ -320,6 +325,10 @@ func (c *esContext) TexParameteri(target, param uint32, value int32) {
 
 func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
+}
+
+func (c *esContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(int32(uniform), v)
 }
 
 func (c *esContext) Uniform1fv(uniform Uniform, v []float32) {

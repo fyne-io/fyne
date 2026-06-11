@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -116,6 +117,102 @@ func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
 
 	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
 	assert.Greater(t, min.Height, float32(10))
+}
+
+func TestRichTextMarkdown_Table(t *testing.T) {
+	r := NewRichTextFromMarkdown("| Feature | Value |\n| :--- | ---: |\n| **bold** | `code` |")
+
+	assert.Len(t, r.Segments, 1)
+	table, ok := r.Segments[0].(*TableSegment)
+	if !ok {
+		t.Fatal("Segment should be a Table")
+	}
+
+	assert.Len(t, table.Headers, 2)
+	assert.Len(t, table.Rows, 1)
+	assert.Len(t, table.Rows[0], 2)
+
+	// Per-column alignment from the delimiter row.
+	assert.Equal(t, fyne.TextAlignLeading, table.Alignments[0])
+	assert.Equal(t, fyne.TextAlignTrailing, table.Alignments[1])
+
+	// Header text.
+	if text, ok := table.Headers[0][0].(*TextSegment); ok {
+		assert.Equal(t, "Feature", text.Text)
+	} else {
+		t.Error("header cell should be Text")
+	}
+
+	// Inline formatting inside body cells is preserved.
+	if text, ok := table.Rows[0][0][0].(*TextSegment); ok {
+		assert.True(t, text.Style.TextStyle.Bold, "bold cell should be bold")
+	} else {
+		t.Error("bold cell should be Text")
+	}
+	if text, ok := table.Rows[0][1][0].(*TextSegment); ok {
+		assert.True(t, text.Style.TextStyle.Monospace, "code cell should be monospace")
+	} else {
+		t.Error("code cell should be Text")
+	}
+}
+
+func TestRichTextMarkdown_TableAlignment(t *testing.T) {
+	// The four GFM delimiter forms: left, center, right and none (no marker).
+	r := NewRichTextFromMarkdown("| L | C | R | D |\n| :--- | :---: | ---: | --- |\n| a | b | c | d |")
+
+	table, ok := r.Segments[0].(*TableSegment)
+	if !ok {
+		t.Fatal("Segment should be a Table")
+	}
+
+	want := []fyne.TextAlign{
+		fyne.TextAlignLeading,  // :---
+		fyne.TextAlignCenter,   // :---:
+		fyne.TextAlignTrailing, // ---:
+		fyne.TextAlignLeading,  // --- (no marker defaults to leading)
+	}
+	assert.Equal(t, want, table.Alignments)
+
+	// alignFor reports each column's alignment and defaults to leading for
+	// columns beyond the delimiter row.
+	for col, a := range want {
+		assert.Equal(t, a, table.alignFor(col))
+	}
+	assert.Equal(t, fyne.TextAlignLeading, table.alignFor(len(want)))
+}
+
+func TestTableCellAppliesAlignment(t *testing.T) {
+	test.NewTempApp(t)
+
+	// A body cell applies the column alignment to its text without bolding it.
+	body := &TextSegment{Style: RichTextStyleInline, Text: "x"}
+	newTableCell([]RichTextSegment{body}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, body.Style.Alignment)
+	assert.False(t, body.Style.TextStyle.Bold)
+
+	// A header cell applies the alignment and makes the text bold.
+	header := &TextSegment{Style: RichTextStyleInline, Text: "h"}
+	newTableCell([]RichTextSegment{header}, fyne.TextAlignCenter, true)
+	assert.Equal(t, fyne.TextAlignCenter, header.Style.Alignment)
+	assert.True(t, header.Style.TextStyle.Bold)
+
+	// Hyperlink cells are aligned via their own Alignment field.
+	link := &HyperlinkSegment{Text: "l"}
+	newTableCell([]RichTextSegment{link}, fyne.TextAlignTrailing, false)
+	assert.Equal(t, fyne.TextAlignTrailing, link.Alignment)
+}
+
+func TestRichTextMarkdown_TableAlignmentAppliedThroughVisual(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("| L | R |\n| :--- | ---: |\n| a | b |")
+	table := r.Segments[0].(*TableSegment)
+
+	// Visual builds the cells, feeding alignFor(col) into each via newTableCell.
+	table.Visual()
+
+	assert.Equal(t, fyne.TextAlignLeading, table.Rows[0][0][0].(*TextSegment).Style.Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, table.Rows[0][1][0].(*TextSegment).Style.Alignment)
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

@@ -117,7 +117,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 			wantY:  43,
 		},
 		"the overlay": {
-			object: ovl,
+			object: w.window.Canvas().Overlays().Top(),
 			wantX:  0,
 			wantY:  0,
 		},

@@ -38,6 +38,7 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	test.AssertRendersToMarkup(t, "entry/validate_invalid.xml", c)
 
 	test.Type(entry, "-12")
+	entry.FocusLost()
 	assert.NoError(t, r(entry.Text))
 	test.AssertRendersToMarkup(t, "entry/validate_valid.xml", c)
 }
@@ -88,11 +89,15 @@ func TestEntry_SetValidationError(t *testing.T) {
 
 	entry.Validator = validator
 
+	entry.FocusGained()
 	entry.SetText("2020-30-30")
+	entry.FocusLost()
 	entry.SetValidationError(errors.New("set invalid"))
 	test.AssertImageMatches(t, "entry/validation_set_invalid.png", c.Capture())
 
+	entry.FocusGained()
 	entry.SetText("set valid")
+	entry.FocusLost()
 	entry.SetValidationError(nil)
 	test.AssertImageMatches(t, "entry/validation_set_valid.png", c.Capture())
 }
@@ -107,16 +112,22 @@ func TestEntry_SetOnValidationChanged(t *testing.T) {
 		modified = true
 	})
 
+	entry.FocusGained()
 	test.Type(entry, "2020")
+	entry.FocusLost()
 	assert.True(t, modified)
 
 	modified = false
+	entry.FocusGained()
 	test.Type(entry, "-01-01")
+	entry.FocusLost()
 	assert.True(t, modified)
 
 	modified = false
 	entry.SetOnValidationChanged(nil)
+	entry.FocusGained()
 	test.Type(entry, "invalid")
+	entry.FocusLost()
 	assert.False(t, modified)
 }
 
@@ -161,10 +172,10 @@ func TestEntry_AlwaysShowValidationError_WithoutValidator_Error(t *testing.T) {
 
 	entry := widget.NewEntry()
 	entry.AlwaysShowValidationError = true
+	w := test.NewTempWindow(t, entry)
 
 	entry.SetValidationError(errors.New("error"))
 
-	w := test.NewTempWindow(t, entry)
 	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_error.xml", w.Canvas())
 }
 
@@ -175,7 +186,6 @@ func TestEntry_AlwaysShowValidationError_WithoutValidator_Success(t *testing.T) 
 	entry.AlwaysShowValidationError = true
 
 	entry.SetValidationError(errors.New("error"))
-	entry.SetValidationError(nil)
 
 	w := test.NewTempWindow(t, entry)
 	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_success.xml", w.Canvas())

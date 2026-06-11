@@ -156,6 +156,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glDeleteTextures.Addr(), 1, uintptr(unsafe.Pointer(&c.args.a0)))
 		return ret
 	},
+	glfnDeleteProgram: func(c call) (ret uintptr) {
+		syscall.SyscallN(glDeleteProgram.Addr(), c.args.a0)
+		return ret
+	},
 	glfnDisable: func(c call) (ret uintptr) {
 		syscall.SyscallN(glDisable.Addr(), c.args.a0)
 		return ret
@@ -252,6 +256,10 @@ var glfnFuncs = [...]func(c call) (ret uintptr){
 		syscall.SyscallN(glUniform1f.Addr(), c.args.a0, c.args.a1)
 		return ret
 	},
+	glfnUniform1i: func(c call) (ret uintptr) {
+		syscall.SyscallN(glUniform1i.Addr(), c.args.a0, c.args.a1)
+		return ret
+	},
 	glfnUniform1fv: func(c call) (ret uintptr) {
 		syscall.Syscall(glUniform1fv.Addr(), 3, c.args.a0, c.args.a1, uintptr(c.parg))
 		return ret
@@ -326,6 +334,7 @@ var (
 	glCreateProgram           = libGLESv2.NewProc("glCreateProgram")
 	glCreateShader            = libGLESv2.NewProc("glCreateShader")
 	glDeleteBuffers           = libGLESv2.NewProc("glDeleteBuffers")
+	glDeleteProgram           = libGLESv2.NewProc("glDeleteProgram")
 	glDeleteTextures          = libGLESv2.NewProc("glDeleteTextures")
 	glDisable                 = libGLESv2.NewProc("glDisable")
 	glDrawArrays              = libGLESv2.NewProc("glDrawArrays")
@@ -352,6 +361,7 @@ var (
 	glTexImage2D              = libGLESv2.NewProc("glTexImage2D")
 	glTexParameteri           = libGLESv2.NewProc("glTexParameteri")
 	glUniform1f               = libGLESv2.NewProc("glUniform1f")
+	glUniform1i               = libGLESv2.NewProc("glUniform1i")
 	glUniform1fv              = libGLESv2.NewProc("glUniform1fv")
 	glUniform2f               = libGLESv2.NewProc("glUniform2f")
 	glUniform2fv              = libGLESv2.NewProc("glUniform2fv")

@@ -548,6 +548,21 @@ type textRenderer struct {
 	obj *RichText
 }
 
+// codeInlineText returns the text inside an inline-code container, identified by
+// its codeInlineLayout, or a bare *canvas.Text as-is. It returns false for any
+// other object.
+func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
+	switch o := obj.(type) {
+	case *canvas.Text:
+		return o, true
+	case *fyne.Container:
+		if _, ok := o.Layout.(*codeInlineLayout); ok {
+			return o.Objects[1].(*canvas.Text), true
+		}
+	}
+	return nil, false
+}
+
 func (r *textRenderer) Layout(size fyne.Size) {
 	th := r.obj.Theme()
 	bounds := r.obj.rowBounds
@@ -579,7 +594,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
-			_, isText := obj.(*canvas.Text)
+			_, isText := codeInlineText(obj) // code-inline containers are text-like, not blocks
 			if !isText && !inline {
 				if len(rowItems) != 0 {
 					width, _ := r.layoutRow(rowItems, rowAlign, left+leftPad, yPos, lineWidth-leftPad)
@@ -763,7 +778,8 @@ func (r *textRenderer) Refresh() {
 			}
 
 			if isText {
-				obj.(*canvas.Text).Text = txt
+				to, _ := codeInlineText(obj)
+				to.Text = txt
 			} else if isHyperlink {
 				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
@@ -775,11 +791,13 @@ func (r *textRenderer) Refresh() {
 	}
 
 	if r.obj.scr != nil {
-		r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-			r.obj.prop, &fyne.Container{Objects: objs},
-		}}
-		r.obj.scr.Direction = scroll
-		r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if isEmptyScroll(r.obj.scr) {
+			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+				r.obj.prop, &fyne.Container{Objects: objs},
+			}}
+			r.obj.scr.Direction = scroll
+			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		}
 		r.obj.scr.Refresh()
 	} else {
 		r.SetObjects(objs)
@@ -804,7 +822,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	initialX := xPos
 	if len(texts) == 1 {
 		min := texts[0].MinSize()
-		if text, ok := texts[0].(*canvas.Text); ok {
+		if text, ok := codeInlineText(texts[0]); ok {
 			texts[0].Resize(min)
 			xPad := float32(0)
 			switch text.Alignment {
@@ -829,7 +847,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	driver := fyne.CurrentApp().Driver()
 	for i, text := range texts {
 		var size fyne.Size
-		if txt, ok := text.(*canvas.Text); ok {
+		if txt, ok := codeInlineText(text); ok { // bare text or an inline-code container
 			s, base := driver.RenderedTextSize(txt.Text, txt.TextSize, txt.TextStyle, txt.FontSource)
 			if base > tallestBaseline {
 				if tallestBaseline > 0 {
@@ -912,6 +930,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	}
 
 	return xPos - initialX, height
+}
+
+func isEmptyScroll(o *widget.Scroll) bool {
+	if c, ok := o.Content.(*fyne.Container); ok {
+		if len(c.Objects) == 2 {
+			if inner, ok := c.Objects[1].(*fyne.Container); ok {
+				return inner.Objects == nil
+			}
+		}
+	}
+	return false
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average
@@ -1171,7 +1200,7 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			var textObj *canvas.Text
 			switch s := seg.(type) {
 			case *TextSegment:
-				textObj = seg.Visual().(*canvas.Text)
+				textObj, _ = codeInlineText(seg.Visual())
 			case *HyperlinkSegment:
 				textObj = canvas.NewText(string(txt), color.Black)
 				textObj.TextStyle = s.TextStyle

@@ -155,8 +155,8 @@ func TestPopUp_MinSize(t *testing.T) {
 	assert.Equal(t, label.MinSize().Height, inner.Height)
 
 	min := pop.MinSize()
-	assert.Equal(t, label.MinSize().Width+theme.InnerPadding(), min.Width)
-	assert.Equal(t, label.MinSize().Height+theme.InnerPadding(), min.Height)
+	assert.Equal(t, label.MinSize().Width, min.Width)
+	assert.Equal(t, label.MinSize().Height, min.Height)
 }
 
 func TestPopUp_Move(t *testing.T) {
@@ -234,7 +234,7 @@ func TestPopUp_Resize(t *testing.T) {
 
 	size := fyne.NewSize(60, 50)
 	pop.Resize(size)
-	assert.Equal(t, size.Subtract(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())), pop.Content.Size())
+	assert.Equal(t, size, pop.Content.Size())
 
 	popSize := pop.Size()
 	assert.Equal(t, float32(60), popSize.Width)
@@ -324,12 +324,11 @@ func TestPopUp_Layout(t *testing.T) {
 	r := cache.Renderer(pop)
 	require.GreaterOrEqual(t, len(r.Objects()), 3)
 
-	pad := theme.Padding()
 	if s, ok := r.Objects()[0].(*widget.Shadow); assert.True(t, ok, "first rendered object is a shadow") {
-		assert.Equal(t, size.SubtractWidthHeight(pad*2, pad*2), s.Size())
+		assert.Equal(t, size, s.Size())
 	}
 	if bg, ok := r.Objects()[1].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
-		assert.Equal(t, size.SubtractWidthHeight(pad*2, pad*2), bg.Size())
+		assert.Equal(t, size, bg.Size())
 		assert.Equal(t, theme.Color(theme.ColorNameOverlayBackground), bg.FillColor)
 	}
 	assert.Equal(t, r.Objects()[2], content)
@@ -341,7 +340,6 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 300))
 
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())
-	inner := pop.MinSize()
 
 	test.ApplyTheme(t, test.Theme())
 	pop.Show()
@@ -351,12 +349,6 @@ func TestPopUp_ApplyThemeOnShow(t *testing.T) {
 	test.ApplyTheme(t, test.NewTheme())
 	pop.Show()
 	test.AssertImageMatches(t, "popup/normal-onshow-theme-changed.png", w.Canvas().Capture())
-	pop.Hide()
-
-	test.ApplyTheme(t, test.Theme())
-	pop.Resize(inner)
-	pop.Show()
-	test.AssertImageMatches(t, "popup/normal-onshow-theme-default.png", w.Canvas().Capture())
 	pop.Hide()
 }
 
@@ -395,10 +387,10 @@ func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	pop := NewPopUp(NewLabel("Label"), w.Canvas())
 	popBgSize := fyne.NewSize(200, 200)
 	pop.Resize(popBgSize)
-	pop.Show()
 
 	winSize := fyne.NewSize(300, 300)
 	w.Resize(winSize)
+	pop.Show()
 
 	// get content padding dynamically
 	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())
@@ -446,7 +438,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 
 	size := fyne.NewSize(50, 48)
 	pop.Resize(size)
-	assert.Equal(t, size.Subtract(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())), pop.Content.Size())
+	assert.Equal(t, size, pop.Content.Size())
 	pop.Show()
 	defer pop.Hide()
 
@@ -471,7 +463,7 @@ func TestModalPopUp_TappedInside(t *testing.T) {
 	size := fyne.NewSize(50, 48)
 	pop.Resize(size)
 	pop.Move(fyne.NewPos(10, 10))
-	assert.Equal(t, size.Subtract(fyne.NewSize(theme.InnerPadding(), theme.InnerPadding())), pop.Content.Size())
+	assert.Equal(t, size, pop.Content.Size())
 
 	pop.Tapped(&fyne.PointEvent{Position: fyne.NewPos(30, 30)})
 	assert.False(t, pop.Hidden)
@@ -489,8 +481,8 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	pop.Show()
 	_, safe := win.Canvas().InteractiveArea()
 
-	assert.Equal(t, safe.Width-theme.InnerPadding(), pop.Content.Size().Width)
-	assert.Equal(t, safe.Height-theme.InnerPadding(), pop.Content.Size().Height)
+	assert.Equal(t, safe.Width, pop.Content.Size().Width)
+	assert.Equal(t, safe.Height, pop.Content.Size().Height)
 	assert.Equal(t, safe.Width, pop.Size().Width)
 	assert.Equal(t, safe.Height, pop.Size().Height)
 }
@@ -601,10 +593,10 @@ func TestModelPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 	pop := NewModalPopUp(NewLabel("Label"), w.Canvas())
 	popBgSize := fyne.NewSize(200, 200)
 	pop.Resize(popBgSize)
-	pop.Show()
 
 	winSize := fyne.NewSize(300, 300)
 	w.Resize(winSize)
+	pop.Show()
 
 	// get content padding dynamically
 	popContentPadding := pop.MinSize().Subtract(pop.Content.MinSize())

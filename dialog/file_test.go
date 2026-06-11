@@ -120,16 +120,16 @@ func TestFileDialogResize(t *testing.T) {
 	size := fyne.NewSize(200, 180) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth := float32(200)
-	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
 	expectedHeight := float32(180)
-	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 	// Test resize - normal size scenario again
 	size = fyne.NewSize(300, 280) // normal size to fit (600,400)
 	file.Resize(size)
 	expectedWidth = 300
-	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
 	expectedHeight = 280
-	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 	file.Hide()
 
 	// Test resize - greater than max size scenario
@@ -138,10 +138,10 @@ func TestFileDialogResize(t *testing.T) {
 	file.Show()
 	expectedWidth = 600                                          // since win width only 600
 	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) // max, also work
-	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
 	expectedHeight = 400                                           // since win height only 400
 	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) // max, also work
-	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 	file.Hide()
 
 	// Test again - tiny size

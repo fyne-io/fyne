@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	_ fyne.Widget       = (*OverlayContainer)(nil)
-	_ fyne.Tappable     = (*OverlayContainer)(nil)
-	_ desktop.Hoverable = (*OverlayContainer)(nil)
+	_ fyne.Widget            = (*OverlayContainer)(nil)
+	_ fyne.Tappable          = (*OverlayContainer)(nil)
+	_ fyne.SecondaryTappable = (*OverlayContainer)(nil)
+	_ desktop.Hoverable      = (*OverlayContainer)(nil)
 )
 
 // OverlayContainer is a transparent widget containing one fyne.CanvasObject and meant to be used as overlay.
@@ -16,14 +17,15 @@ type OverlayContainer struct {
 	Base
 	Content, Background fyne.CanvasObject
 
-	canvas    fyne.Canvas
-	onDismiss func()
-	shown     bool
+	canvas        fyne.Canvas
+	onDismiss     func()
+	shown, manual bool
 }
 
 // NewOverlayContainer creates an OverlayContainer.
 func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, onDismiss func()) *OverlayContainer {
 	o := &OverlayContainer{canvas: canvas, Content: c, onDismiss: onDismiss}
+	o.manual = c != nil && !c.Position().IsZero()
 	o.ExtendBaseWidget(o)
 	return o
 }
@@ -34,7 +36,14 @@ func (o *OverlayContainer) CreateRenderer() fyne.WidgetRenderer {
 	if o.Background != nil {
 		objs = []fyne.CanvasObject{o.Background, o.Content}
 	}
+
+	o.manual = !o.Content.Position().IsZero()
 	return &overlayRenderer{BaseRenderer{objs}, o}
+}
+
+func (o *OverlayContainer) Refresh() {
+	o.Content.Refresh()
+	o.Base.Refresh()
 }
 
 // Hide hides the overlay container.
@@ -84,6 +93,14 @@ func (o *OverlayContainer) Tapped(*fyne.PointEvent) {
 	}
 }
 
+// TappedSecondary catches secondary tap events not handled by the container’s content.
+// It performs the overlay container’s dismiss action.
+func (o *OverlayContainer) TappedSecondary(*fyne.PointEvent) {
+	if o.onDismiss != nil {
+		o.onDismiss()
+	}
+}
+
 type overlayRenderer struct {
 	BaseRenderer
 	o *OverlayContainer
@@ -96,21 +113,28 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	size := r.o.Content.Size()
-	if size.IsZero() {
-		size = r.o.Content.MinSize()
-	}
-	size = size.Min(s)
+	size := r.o.Content.Size().Max(r.o.Content.MinSize()).Min(s)
 	r.o.Content.Resize(size)
 
 	if r.o.Background != nil {
 		r.o.Background.Resize(s)
 	}
+
+	if r.o.manual { // position is overridden
+		return
+	}
+
+	midX := s.Width / 2
+	midX -= size.Width / 2
+	midY := s.Height / 2
+	midY -= size.Height / 2
+	r.o.Content.Move(fyne.NewPos(midX, midY))
 }
 
 func (r *overlayRenderer) MinSize() fyne.Size {
-	return r.o.canvas.Size()
+	return r.o.Content.MinSize()
 }
 
 func (r *overlayRenderer) Refresh() {
+	r.Layout(r.o.Size()) // in case theme changed we might need to move
 }

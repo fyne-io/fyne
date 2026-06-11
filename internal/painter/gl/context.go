@@ -17,6 +17,7 @@ type context interface {
 	CreateShader(typ uint32) Shader
 	CreateTexture() Texture
 	DeleteBuffer(buffer Buffer)
+	DeleteProgram(program Program)
 	DeleteTexture(texture Texture)
 	Disable(capability uint32)
 	DrawArrays(mode uint32, first, count int)
@@ -39,6 +40,7 @@ type context interface {
 	TexParameteri(target, param uint32, value int32)
 	Uniform1f(uniform Uniform, v float32)
 	Uniform1fv(uniform Uniform, v []float32)
+	Uniform1i(uniform Uniform, v int32)
 	Uniform2f(uniform Uniform, v0, v1 float32)
 	Uniform2fv(uniform Uniform, v []float32)
 	Uniform4f(uniform Uniform, v0, v1, v2, v3 float32)

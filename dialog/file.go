@@ -752,11 +752,11 @@ func (f *FileDialog) Refresh() {
 // Resize dialog to the requested size, if there is sufficient space.
 // If the parent window is not large enough then the size will be reduced to fit.
 func (f *FileDialog) Resize(size fyne.Size) {
-	f.desiredSize = size
+	f.desiredSize = size.Max(f.MinSize())
 	if f.dialog == nil {
 		return
 	}
-	f.dialog.win.Resize(size)
+	f.dialog.win.Resize(size.Max(f.MinSize()))
 }
 
 // Hide hides the file dialog.

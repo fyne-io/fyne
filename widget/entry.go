@@ -67,6 +67,7 @@ type Entry struct {
 	validationStatus    *validationStatus
 	onValidationChanged func(error)
 	validationError     error
+	onRequiredChanged   func(bool)
 
 	// If true, the Validator runs automatically on render without user interaction.
 	// It will reflect any validation errors found or those explicitly set via SetValidationError().
@@ -83,12 +84,12 @@ type Entry struct {
 
 	cursorAnim *entryCursorAnimation
 
-	dirty       bool
-	focused     bool
-	text        RichText
-	placeholder RichText
-	content     *entryContent
-	scroll      *widget.Scroll
+	dirty               bool
+	focused, hasFocused bool
+	text                RichText
+	placeholder         RichText
+	content             *entryContent
+	scroll              *widget.Scroll
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
@@ -303,6 +304,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
 	e.setFieldsAndRefresh(func() {
+		e.hasFocused = true
 		e.dirty = true
 		e.focused = true
 	})
@@ -317,6 +319,10 @@ func (e *Entry) FocusLost() {
 		e.focused = false
 		e.selectKeyDown = false
 	})
+	if e.Validator != nil {
+		e.validate()
+		e.Refresh()
+	}
 	if e.onFocusChanged != nil {
 		e.onFocusChanged(false)
 	}
@@ -1392,7 +1398,14 @@ func (e *Entry) updateMousePointer(p fyne.Position, rightClick bool) {
 // It assumes that a lock exists on the widget.
 func (e *Entry) updateText(text string, fromBinding bool) bool {
 	changed := e.Text != text
+	wasEmpty := e.Text == ""
 	e.Text = text
+	if e.onRequiredChanged != nil {
+		empty := text == ""
+		if wasEmpty != empty {
+			e.onRequiredChanged(!empty)
+		}
+	}
 	e.syncSegments()
 	e.text.updateRowBounds()
 
