@@ -58,7 +58,7 @@ func EnsureMain(fn func()) {
 }
 
 func logStackTop(skip int) {
-	pc := make([]uintptr, 16)
+	pc := make([]uintptr, 16) //revive:disable-line:add-constant -- TODO: What is this 16 about?
 	_ = runtime.Callers(skip, pc)
 	frames := runtime.CallersFrames(pc)
 	frame, more := frames.Next()
@@ -79,11 +79,13 @@ func logStackTop(skip int) {
 }
 
 func goroutineID() (id uint64) {
+	//revive:disable:add-constant
 	var buf [30]byte
 	runtime.Stack(buf[:], false)
 	for i := 10; buf[i] != ' '; i++ {
 		id = id*10 + uint64(buf[i]&15)
 	}
+	//revive:enable:add-constant
 
 	return id
 }
