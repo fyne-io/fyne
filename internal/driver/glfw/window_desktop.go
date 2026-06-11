@@ -288,10 +288,12 @@ func (w *window) fitContent() {
 
 // getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
 func getMonitorScale(monitor *glfw.Monitor) float32 {
+	const steamDeckIncorrectlyReportedDisplaySize = 60
 	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == goos.Linux && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
+	if runtime.GOOS == goos.Linux && widthMm == steamDeckIncorrectlyReportedDisplaySize && heightMm == steamDeckIncorrectlyReportedDisplaySize { // Steam Deck incorrectly reports 6cm square!
 		return 1.0
 	}
+
 	widthPx := monitor.GetVideoMode().Width
 	return calculateDetectedScale(widthMm, widthPx)
 }
@@ -772,6 +774,8 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) create() {
+	const fallbackScreenSize = 10
+
 	if !build.IsWayland {
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, glfw.False)
@@ -797,11 +801,11 @@ func (w *window) create() {
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
 	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
-		pixWidth = 10
+		pixWidth = fallbackScreenSize
 	}
 	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
-		pixHeight = 10
+		pixHeight = fallbackScreenSize
 	}
 
 	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
