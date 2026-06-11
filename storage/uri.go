@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/storage/repository"
 )
 
@@ -19,7 +20,7 @@ func EqualURI(t1, t2 fyne.URI) bool {
 // NewFileURI creates a new URI from the given file path.
 // Relative paths will be converted to absolute using filepath.Abs if required.
 func NewFileURI(fpath string) fyne.URI {
-	if isAbsolutePath := path.IsAbs(fpath) || runtime.GOOS == "windows" && filepath.IsAbs(fpath); !isAbsolutePath {
+	if isAbsolutePath := path.IsAbs(fpath) || runtime.GOOS == goos.Windows && filepath.IsAbs(fpath); !isAbsolutePath {
 		absolute, err := filepath.Abs(fpath)
 		if err == nil {
 			fpath = absolute

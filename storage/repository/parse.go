@@ -9,6 +9,7 @@ import (
 	uriParser "github.com/fredbi/uri"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
@@ -21,7 +22,7 @@ func NewFileURI(path string) fyne.URI {
 	// should be OK to use the platform native filepath with UNIX
 	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Windows {
 		// seems that sometimes we end up with
 		// double-backslashes
 		path = filepath.ToSlash(path)

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
 )
@@ -174,7 +175,7 @@ func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	child := path.Clean(u.Path())
 	if child == "." || // Clean ending up empty returns ".".
 		strings.HasSuffix(child, filePathSeparator) || // Only root has trailing slash.
-		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' {
+		runtime.GOOS == goos.Windows && len(child) == 2 && child[1] == ':' {
 		return nil, repository.ErrURIRoot
 	}
 
@@ -233,7 +234,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, nil
 	}
 
-	if runtime.GOOS == "windows" && len(p) <= 3 {
+	if runtime.GOOS == goos.Windows && len(p) <= 3 {
 		return true, nil // assume drives can be read, avoids hang if the drive is temporarily unresponsive
 	}
 

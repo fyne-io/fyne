@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
@@ -363,7 +364,7 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 }
 
 func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == goos.JavaScript {
 		return make(map[string]fyne.ListableURI), nil
 	}
 
@@ -938,8 +939,8 @@ func getFavoritesIcon(location string) fyne.Resource {
 		return theme.MediaVideoIcon()
 	}
 
-	if (runtime.GOOS == "darwin" && location == "Movies") ||
-		(runtime.GOOS != "darwin" && location == "Videos") {
+	if (runtime.GOOS == goos.Darwin && location == "Movies") ||
+		(runtime.GOOS != goos.Darwin && location == "Videos") {
 		return theme.MediaVideoIcon()
 	}
 
@@ -956,7 +957,7 @@ func getFavoritesOrder() [6]string {
 		"Videos",
 	}
 
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		order[5] = "Movies"
 	}
 

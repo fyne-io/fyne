@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	internalapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/goos"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -62,7 +63,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	def := s.fyneSettings.ThemeName
 	themeNames := []string{themeNameDark, themeNameLight}
-	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Darwin || runtime.GOOS == goos.Windows {
 		themeNames = append(themeNames, themeNameSystemLabel)
 		if s.fyneSettings.ThemeName == themeNameSystem {
 			def = themeNameSystemLabel

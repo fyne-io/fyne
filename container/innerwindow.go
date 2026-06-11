@@ -3,10 +3,10 @@ package container
 import (
 	"image/color"
 	"runtime"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/goos"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -184,7 +184,7 @@ func (w *InnerWindow) buttonPosition() widget.ButtonAlign {
 		return w.Alignment
 	}
 
-	if runtime.GOOS == "windows" || runtime.GOOS == "linux" || strings.Contains(runtime.GOOS, "bsd") {
+	if runtime.GOOS == goos.Windows || runtime.GOOS == goos.Linux || goos.IsBSD(runtime.GOOS) {
 		return widget.ButtonAlignTrailing
 	}
 	// macOS

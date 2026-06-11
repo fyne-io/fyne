@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -288,7 +289,7 @@ func (w *window) fitContent() {
 // getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
 func getMonitorScale(monitor *glfw.Monitor) float32 {
 	widthMm, heightMm := monitor.GetPhysicalSize()
-	if runtime.GOOS == "linux" && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
+	if runtime.GOOS == goos.Linux && widthMm == 60 && heightMm == 60 { // Steam Deck incorrectly reports 6cm square!
 		return 1.0
 	}
 	widthPx := monitor.GetVideoMode().Width
@@ -450,7 +451,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	if runtime.GOOS != "darwin" && xoff == 0 &&
+	if runtime.GOOS != goos.Darwin && xoff == 0 &&
 		(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
 			viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
 		xoff, yoff = yoff, xoff
@@ -462,7 +463,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, fyne.KeyModifier) {
 	modifier := desktopModifier(mods)
 	rightClick := false
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		if modifier&fyne.KeyModifierControl != 0 {
 			rightClick = true
 			modifier &^= fyne.KeyModifierControl
@@ -816,7 +817,7 @@ func (w *window) create() {
 
 	// macOS 26 places new windows on a different screen than existing app windows;
 	// default new windows onto the same monitor as a visible sibling when no position was set.
-	if runtime.GOOS == "darwin" && !build.IsWayland && w.xpos == 0 && w.ypos == 0 {
+	if runtime.GOOS == goos.Darwin && !build.IsWayland && w.xpos == 0 && w.ypos == 0 {
 		if monitor := w.findSiblingMonitor(); monitor != nil {
 			monX, monY := monitor.GetPos()
 			monMode := monitor.GetVideoMode()

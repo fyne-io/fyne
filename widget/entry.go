@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -1118,7 +1119,7 @@ func (e *Entry) registerShortcut() {
 	}
 
 	moveWordModifier := fyne.KeyModifierShortcutDefault
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		moveWordModifier = fyne.KeyModifierAlt
 
 		// Cmd+left, Cmd+right shortcuts behave like Home and End keys on Mac OS
