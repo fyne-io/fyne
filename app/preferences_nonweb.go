@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"fyne.io/fyne/v2/internal/repository"
 )
 
 func (p *preferences) storageWriter() (writeSyncCloser, error) {
@@ -17,7 +19,7 @@ func (p *preferences) storageReader() (io.ReadCloser, error) {
 }
 
 func (p *preferences) storageWriterForPath(path string) (writeSyncCloser, error) {
-	err := os.MkdirAll(filepath.Dir(path), 0o700)
+	err := os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec)
 	if err != nil { // this is not an exists error according to docs
 		return nil, err
 	}
@@ -38,7 +40,7 @@ func (p *preferences) storageReaderForPath(path string) (io.ReadCloser, error) {
 	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+			if err := os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec); err != nil {
 				return nil, err
 			}
 			return nil, errEmptyPreferencesStore
