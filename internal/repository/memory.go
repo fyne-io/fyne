@@ -145,44 +145,32 @@ func NewInMemoryRepository(scheme string) *InMemoryRepository {
 //
 // Since: 2.0
 func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
-	path := u.Path()
-	if path == "" {
-		return false, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	_, ok := m.Data[path]
-	return ok, nil
+	return withValidPath(u.Path(), func(path string) bool {
+		_, ok := m.Data[path]
+		return ok
+	})
 }
 
 // Reader reads the contents of the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	path := u.Path()
-
-	if path == "" {
-		return nil, fmt.Errorf("invalid path '%s'", path)
+	readable, err := m.CanRead(u)
+	if err != nil {
+		return nil, err
+	}
+	if !readable {
+		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
 
-	_, ok := m.Data[path]
-	if !ok {
-		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", path)
-	}
-
-	return &nodeReaderWriter{path: path, repo: m}, nil
+	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
 }
 
 // CanRead checks if the given URI can be read.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
-	path := u.Path()
-	if path == "" {
-		return false, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	_, ok := m.Data[path]
-	return ok, nil
+	return m.Exists(u)
 }
 
 // Destroy tears down the InMemoryRepository.
@@ -194,12 +182,9 @@ func (m *InMemoryRepository) Destroy(scheme string) {
 //
 // Since: 2.0
 func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	path := u.Path()
-	if path == "" {
-		return nil, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	return &nodeReaderWriter{path: path, repo: m}, nil
+	return withValidPath(u.Path(), func(path string) fyne.URIWriteCloser {
+		return &nodeReaderWriter{path: path, repo: m}
+	})
 }
 
 // Appender returns a writer that appends to the given URI.
@@ -218,11 +203,9 @@ func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
-	if p := u.Path(); p == "" {
-		return false, fmt.Errorf("invalid path '%s'", p)
-	}
-
-	return true, nil
+	return withValidPath(u.Path(), func(path string) bool {
+		return true
+	})
 }
 
 // Delete deletes the given URI.
@@ -343,4 +326,13 @@ func (m *InMemoryRepository) CreateListable(u fyne.URI) error {
 	}
 	m.Data[path] = []byte{}
 	return nil
+}
+
+func withValidPath[R any](path string, fn func(string) R) (R, error) {
+	var noneResult R
+	if path == "" {
+		return noneResult, fmt.Errorf("invalid path '%s'", path)
+	}
+
+	return fn(path), nil
 }
