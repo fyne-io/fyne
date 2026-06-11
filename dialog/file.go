@@ -32,8 +32,15 @@ const (
 )
 
 const (
-	viewLayoutKey = "fyne:fileDialogViewLayout"
+	folderDesktop   = "Desktop"
+	folderDocuments = "Documents"
+	folderDownloads = "Downloads"
+	folderHome      = "Home"
+	folderMusic     = "Music"
+	folderPictures  = "Pictures"
+
 	lastFolderKey = "fyne:fileDialogLastFolder"
+	viewLayoutKey = "fyne:fileDialogViewLayout"
 )
 
 type textWidget interface {
@@ -145,7 +152,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	buttons := container.NewGridWithRows(1, f.dismiss, f.open)
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
-	verticalExtra := float32(float64(fileIconSize) * 0.25)
+	verticalExtra := float32(float64(iconSize) * 0.25)
 	itemMin := f.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
 	f.filesScroll.SetMinSize(itemMin.AddWidthHeight(itemMin.Width+theme.Padding()*3, verticalExtra))
 
@@ -401,7 +408,7 @@ func (f *fileDialog) loadFavorites() {
 	}
 
 	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]},
+		{locName: folderHome, locIcon: theme.HomeIcon(), loc: favoriteLocations[folderHome]},
 	}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
@@ -925,43 +932,31 @@ func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent f
 
 func getFavoritesIcon(location string) fyne.Resource {
 	switch location {
-	case "Documents":
+	case folderDocuments:
 		return theme.DocumentIcon()
-	case "Desktop":
+	case folderDesktop:
 		return theme.DesktopIcon()
-	case "Downloads":
+	case folderDownloads:
 		return theme.DownloadIcon()
-	case "Music":
+	case folderMusic:
 		return theme.MediaMusicIcon()
-	case "Pictures":
+	case folderPictures:
 		return theme.MediaPhotoIcon()
-	case "Videos":
+	case folderVideos:
 		return theme.MediaVideoIcon()
 	}
-
-	if (runtime.GOOS == goos.Darwin && location == "Movies") ||
-		(runtime.GOOS != goos.Darwin && location == "Videos") {
-		return theme.MediaVideoIcon()
-	}
-
 	return nil
 }
 
-func getFavoritesOrder() [6]string {
-	order := [6]string{
-		"Desktop",
-		"Documents",
-		"Downloads",
-		"Music",
-		"Pictures",
-		"Videos",
+func getFavoritesOrder() []string {
+	return []string{
+		folderDesktop,
+		folderDocuments,
+		folderDownloads,
+		folderMusic,
+		folderPictures,
+		folderVideos,
 	}
-
-	if runtime.GOOS == goos.Darwin {
-		order[5] = "Movies"
-	}
-
-	return order
 }
 
 func hasAppFiles(a fyne.App) bool {
@@ -973,7 +968,7 @@ func hasAppFiles(a fyne.App) bool {
 }
 
 func storageURI(a fyne.App) fyne.URI {
-	dir, _ := storage.Child(a.Storage().RootURI(), "Documents")
+	dir, _ := storage.Child(a.Storage().RootURI(), folderDocuments)
 	return dir
 }
 

@@ -4,6 +4,7 @@ package geom
 const (
 	AngleEighth       = 45
 	AngleFiveEighth   = 225
+	AngleFull         = 360
 	AngleHalf         = 180
 	AngleNone         = 0
 	AngleQuarter      = 90

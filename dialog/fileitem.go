@@ -15,9 +15,17 @@ import (
 )
 
 const (
-	fileIconSize       = 64
-	fileInlineIconSize = 24
-	fileIconCellWidth  = fileIconSize * 1.25
+	cellWidthIcon = iconSize * 1.25
+
+	folderInsetBottom       = 25
+	folderInsetBottomInline = 6
+	folderInsetTop          = 20
+	folderInsetTopInline    = 6
+	folderInsetX            = 10
+	folderInsetXInline      = 4
+
+	iconSize       = 64
+	iconSizeInline = 24
 )
 
 type fileDialogItem struct {
@@ -113,42 +121,36 @@ type fileItemRenderer struct {
 
 func (s *fileItemRenderer) Layout(size fyne.Size) {
 	if s.item.picker.view == GridView {
-		s.icon.Resize(fyne.NewSquareSize(fileIconSize))
-		s.icon.Move(fyne.NewPos((size.Width-fileIconSize)/2, 0))
+		s.icon.Resize(fyne.NewSquareSize(iconSize))
+		s.icon.Move(fyne.NewPos((size.Width-iconSize)/2, 0))
 
-		folderInsetX := float32(10)
-		folderInsetBottom := float32(25)
-		folderInsetTop := float32(20)
-		s.over.Resize(fyne.NewSize(fileIconSize-folderInsetX*2, fileIconSize-folderInsetX-folderInsetBottom))
+		s.over.Resize(fyne.NewSize(iconSize-folderInsetX*2, iconSize-folderInsetX-folderInsetBottom))
 		s.over.Move(s.icon.Position().AddXY(folderInsetX, folderInsetTop))
 
 		s.text.Alignment = fyne.TextAlignCenter
 		s.text.Resize(fyne.NewSize(size.Width, s.fileTextSize))
 		s.text.Move(fyne.NewPos(0, size.Height-s.fileTextSize))
 	} else {
-		s.icon.Resize(fyne.NewSquareSize(fileInlineIconSize))
-		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-fileInlineIconSize)/2))
+		s.icon.Resize(fyne.NewSquareSize(iconSizeInline))
+		s.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-iconSizeInline)/2))
 
-		folderInsetX := float32(4)
-		folderInsetBottom := float32(6)
-		folderInsetTop := float32(6)
-		s.over.Resize(fyne.NewSize(fileInlineIconSize-folderInsetX*2, fileInlineIconSize-folderInsetX-folderInsetBottom))
-		s.over.Move(s.icon.Position().AddXY(folderInsetX, folderInsetTop))
+		s.over.Resize(fyne.NewSize(iconSizeInline-folderInsetXInline*2, iconSizeInline-folderInsetXInline-folderInsetBottomInline))
+		s.over.Move(s.icon.Position().AddXY(folderInsetXInline, folderInsetTopInline))
 
 		s.text.Alignment = fyne.TextAlignLeading
 		textMin := s.text.MinSize()
 		s.text.Resize(fyne.NewSize(size.Width, textMin.Height))
-		s.text.Move(fyne.NewPos(fileInlineIconSize, (size.Height-textMin.Height)/2))
+		s.text.Move(fyne.NewPos(iconSizeInline, (size.Height-textMin.Height)/2))
 	}
 }
 
 func (s *fileItemRenderer) MinSize() fyne.Size {
 	if s.item.picker.view == GridView {
-		return fyne.NewSize(fileIconCellWidth, fileIconSize+s.fileTextSize)
+		return fyne.NewSize(cellWidthIcon, iconSize+s.fileTextSize)
 	}
 
 	textMin := s.text.MinSize()
-	return fyne.NewSize(fileInlineIconSize+textMin.Width+theme.Padding(), textMin.Height)
+	return fyne.NewSize(iconSizeInline+textMin.Width+theme.Padding(), textMin.Height)
 }
 
 func (s *fileItemRenderer) Refresh() {
