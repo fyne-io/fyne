@@ -125,7 +125,7 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 // URI returns the URI of the node.
 func (n *nodeReaderWriter) URI() fyne.URI {
 	// discarding the error because this should never fail
-	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
+	u, _ := storage.ParseURI(n.repo.scheme + fyne.URLSchemeSeparator + n.path)
 	return u
 }
 
@@ -277,11 +277,11 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	// '/foo/barbaz'.
 	prefix := u.Path()
 
-	if len(prefix) > 0 && prefix[len(prefix)-1] != '/' {
-		prefix = prefix + "/"
+	if !strings.HasSuffix(prefix, fyne.URLPathSeparator) {
+		prefix = prefix + fyne.URLPathSeparator
 	}
 
-	prefixSplit := strings.Split(prefix, "/")
+	prefixSplit := strings.Split(prefix, fyne.URLPathSeparator)
 	prefixSplitLen := len(prefixSplit)
 
 	// Now we can simply loop over all the paths and find the ones with an
@@ -293,14 +293,15 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 		// prefixSplit, which is guaranteed to have a trailing slash,
 		// so we want to also make pSplit be counted in ncomp like it
 		// does not have one.
-		pSplit := strings.Split(p, "/")
+		pSplit := strings.Split(p, fyne.URLPathSeparator)
 		ncomp := len(pSplit)
-		if len(p) > 0 && p[len(p)-1] == '/' {
+
+		if strings.HasSuffix(p, fyne.URLPathSeparator) {
 			ncomp--
 		}
 
 		if strings.HasPrefix(p, prefix) && ncomp == prefixSplitLen {
-			uri, err := storage.ParseURI(m.scheme + "://" + p)
+			uri, err := storage.ParseURI(m.scheme + fyne.URLSchemeSeparator + p)
 			if err != nil {
 				return nil, err
 			}

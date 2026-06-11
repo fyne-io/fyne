@@ -82,7 +82,7 @@ func (u *uri) String() string {
 	s.Grow(len(u.scheme) + len(u.authority) + len(u.path) + len(u.query) + len(u.fragment) + len("://?#"))
 
 	s.WriteString(u.scheme)
-	s.WriteString("://")
+	s.WriteString(fyne.URLSchemeSeparator)
 	s.WriteString(u.authority)
 	s.WriteString(u.path)
 

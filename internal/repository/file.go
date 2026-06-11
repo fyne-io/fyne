@@ -14,6 +14,22 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
+const (
+	dirPermDefault    = permGroupExec | permGroupRead | permOtherExec | permOtherRead | permUserExec | permUserRead | permUserWrite
+	filePathSeparator = "/"
+	filePermDefault   = permGroupRead | permGroupWrite | permOtherRead | permOtherWrite | permUserRead | permUserWrite
+
+	permGroupExec  = 0o10
+	permGroupRead  = 0o40
+	permGroupWrite = 0o20
+	permOtherExec  = 0o1
+	permOtherRead  = 0o4
+	permOtherWrite = 0o2
+	permUserExec   = 0o100
+	permUserRead   = 0o400
+	permUserWrite  = 0o200
+)
+
 // declare conformance with repository types
 var (
 	_ repository.Repository             = (*FileRepository)(nil)
@@ -83,7 +99,7 @@ func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 //
 // Since: 2.0
 func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0o666)
+	f, err := os.OpenFile(u.Path(), os.O_RDONLY, filePermDefault)
 	if err != nil {
 		if os.IsPermission(err) || os.IsNotExist(err) {
 			return false, nil
@@ -118,7 +134,7 @@ func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 //
 // Since: 2.0
 func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0o666)
+	f, err := os.OpenFile(u.Path(), os.O_WRONLY, filePermDefault)
 	if err != nil {
 		if os.IsPermission(err) {
 			return false, nil
@@ -157,17 +173,17 @@ func (r *FileRepository) DeleteAll(u fyne.URI) error {
 func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	child := path.Clean(u.Path())
 	if child == "." || // Clean ending up empty returns ".".
-		strings.HasSuffix(child, "/") || // Only root has trailing slash.
+		strings.HasSuffix(child, filePathSeparator) || // Only root has trailing slash.
 		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' {
 		return nil, repository.ErrURIRoot
 	}
 
 	parent := path.Dir(child)
-	if parent == "/" {
-		return storage.NewFileURI("/"), nil
+	if parent == filePathSeparator {
+		return storage.NewFileURI(filePathSeparator), nil
 	}
 
-	return storage.NewFileURI(parent + "/"), nil
+	return storage.NewFileURI(parent + filePathSeparator), nil
 }
 
 // Child creates a child URI from the given URI and component.
@@ -197,8 +213,7 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 
 // CreateListable creates a new directory at the given URI.
 func (r *FileRepository) CreateListable(u fyne.URI) error {
-	path := u.Path()
-	return os.Mkdir(path, 0o755)
+	return os.Mkdir(u.Path(), dirPermDefault)
 }
 
 // CanList checks if the given URI can be listed.
@@ -329,7 +344,7 @@ func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
 		if truncate {
 			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
 		} else {
-			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
+			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermDefault)
 		}
 	} else {
 		f, err = os.Open(path)
