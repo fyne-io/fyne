@@ -19,11 +19,13 @@ linters:
         linters:
           - errcheck
           - gosec
+          - revive
           - staticcheck
       - path: cmd/fyne_demo/ # The whole tool is deprecated
         linters:
           - errcheck
           - gosec
+          - revive
       - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
         linters:
           - staticcheck
@@ -45,7 +47,14 @@ linters:
       enable-all-rules: true
       rules:
         - name: add-constant
-          disabled: true # TODO
+          arguments:
+          - allowFloats: "0.0,0.25,0.5,0.75,1.0"
+            allowInts: "0,1,2,3,4,5,100,0xff,0xffff"
+            allowStrs: '""'
+            ignoreFuncs: "strconv\\.Format.*,strconv\\.Parse.*"
+          exclude:
+            - "**/*_test.go"
+            - "**/test/**"
         - name: argument-limit
           disabled: true # TODO
         - name: blank-imports
@@ -90,8 +99,6 @@ linters:
           disabled: true # TODO
         - name: identical-switch-branches
           disabled: true # TODO
-        - name: if-return
-          disabled: true # TODO
         - name: import-alias-naming
           disabled: true # TODO
         - name: import-shadowing
@@ -103,8 +110,6 @@ linters:
         - name: inefficient-map-lookup
           disabled: true # TODO
         - name: line-length-limit
-          disabled: true # TODO
-        - name: max-control-nesting
           disabled: true # TODO
         - name: max-public-structs
           disabled: true # TODO
@@ -132,13 +137,9 @@ linters:
           disabled: true # TODO
         - name: unnecessary-stmt
           disabled: true # TODO
-        - name: unsecure-url-scheme
-          disabled: true # TODO
         - name: unused-parameter
           disabled: true # TODO
         - name: unused-receiver
-          disabled: true # TODO
-        - name: use-errors-new
           disabled: true # TODO
         - name: var-declaration
           disabled: true # TODO
