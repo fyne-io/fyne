@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	internalapp "fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/goos"
+	"fyne.io/fyne/v2/internal/repository"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -138,12 +139,9 @@ func (s *Settings) loadFromFile(path string) error {
 	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(filepath.Dir(path), 0o700)
-			if err != nil {
-				return err
-			}
-			return nil
+			return os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec)
 		}
+
 		return err
 	}
 	decode := json.NewDecoder(file)
@@ -161,8 +159,7 @@ func (s *Settings) save() error {
 }
 
 func (s *Settings) saveToFile(path string) error {
-	err := os.MkdirAll(filepath.Dir(path), 0o700)
-	if err != nil { // this is not an exists error according to docs
+	if err := os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec); err != nil { // this is not an exists error according to docs
 		return err
 	}
 
@@ -171,7 +168,7 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	return os.WriteFile(path, data, 0o644)
+	return os.WriteFile(path, data, repository.PermGroupRead|repository.PermOtherRead|repository.PermUserRead|repository.PermUserWrite)
 }
 
 type primaryColorButton struct {
@@ -219,7 +216,7 @@ func (c *primaryColorButtonRenderer) Layout(s fyne.Size) {
 }
 
 func (c *primaryColorButtonRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(20, 32)
+	return fyne.NewSize(20, 32) //revive:disable-line:add-constant
 }
 
 func (c *primaryColorButtonRenderer) Refresh() {

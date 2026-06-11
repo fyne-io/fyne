@@ -15,20 +15,24 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
+// Constants for file permissions to be combined using `|`.
 const (
-	dirPermDefault    = permGroupExec | permGroupRead | permOtherExec | permOtherRead | permUserExec | permUserRead | permUserWrite
-	filePathSeparator = "/"
-	filePermDefault   = permGroupRead | permGroupWrite | permOtherRead | permOtherWrite | permUserRead | permUserWrite
+	PermGroupExec         = 0o10
+	PermGroupRead         = 0o40
+	PermGroupWrite        = 0o20
+	PermOtherExec         = 0o1
+	PermOtherRead         = 0o4
+	PermOtherWrite        = 0o2
+	PermUserExec          = 0o100
+	PermUserRead          = 0o400
+	PermUserReadWriteExec = PermUserExec | PermUserRead | PermUserWrite
+	PermUserWrite         = 0o200
+)
 
-	permGroupExec  = 0o10
-	permGroupRead  = 0o40
-	permGroupWrite = 0o20
-	permOtherExec  = 0o1
-	permOtherRead  = 0o4
-	permOtherWrite = 0o2
-	permUserExec   = 0o100
-	permUserRead   = 0o400
-	permUserWrite  = 0o200
+const (
+	dirPermDefault    = PermGroupExec | PermGroupRead | PermOtherExec | PermOtherRead | PermUserReadWriteExec
+	filePathSeparator = "/"
+	filePermDefault   = PermGroupRead | PermGroupWrite | PermOtherRead | PermOtherWrite | PermUserRead | PermUserWrite
 )
 
 // declare conformance with repository types
