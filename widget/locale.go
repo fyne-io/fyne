@@ -15,17 +15,6 @@ const (
 	saturday
 )
 
-func (w weekday) String() string {
-	switch w {
-	case sunday:
-		return "Sunday"
-	case saturday:
-		return "Saturday"
-	default:
-		return "Monday"
-	}
-}
-
 type localeSetting struct {
 	dateFormat   string
 	weekStartDay weekday
@@ -100,9 +89,8 @@ func getLocaleDateFormat() string {
 	return defaultDateFormat
 }
 
-func getLocaleWeekStart() string {
-	s := lookupLocaleSetting(lang.SystemLocale())
-	return s.weekStartDay.String()
+func getLocaleWeekStart() weekday {
+	return lookupLocaleSetting(lang.SystemLocale()).weekStartDay
 }
 
 func lookupLocaleSetting(l fyne.Locale) localeSetting {

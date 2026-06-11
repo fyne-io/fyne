@@ -154,7 +154,7 @@ func (a *activityRenderer) animate(done float32) {
 }
 
 func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
-	rad := a.maxRad - a.maxRad*off/1.2
+	rad := a.maxRad - a.maxRad*off/1.2 //revive:disable-line:add-constant
 	mid := fyne.NewPos(a.bound.Width/2, a.bound.Height/2)
 
 	dot.Move(mid.Subtract(fyne.NewSquareOffsetPos(rad)))
@@ -203,7 +203,7 @@ func (a *activityRenderer) drawStaticEllipsis() {
 	fill := color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: a.maxCol.A}
 	for i, obj := range a.dots {
 		dot := obj.(*canvas.Circle)
-		cx := startX + radius + float32(i)*1.5*d
+		cx := startX + radius + float32(i)*3*radius
 		dot.Move(fyne.NewPos(cx-radius, cy-radius))
 		dot.Resize(fyne.NewSquareSize(d))
 		dot.FillColor = fill

@@ -31,7 +31,7 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p.Resize(p.MinSize())
 	p.customSized = true
 
-	p.Move(fyne.NewPos(10, 10)) // non-zero pos to get manual overlay, fixed on show
+	p.Move(fyne.NewPos(10, 10)) //revive:disable-line:add-constant // non-zero pos to get manual overlay, fixed on show
 	o := widget.NewOverlayContainer(p, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o

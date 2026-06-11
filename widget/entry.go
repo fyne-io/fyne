@@ -568,7 +568,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	})
 	selectAllItem := fyne.NewMenuItem(lang.L("Select all"), e.selectAll)
 
-	menuItems := make([]*fyne.MenuItem, 0, 6)
+	const maxMenuItems = 6
+	menuItems := make([]*fyne.MenuItem, 0, maxMenuItems)
 	if e.Disabled() {
 		menuItems = append(menuItems, copyItem, selectAllItem)
 	} else if e.Password {
