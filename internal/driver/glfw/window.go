@@ -175,7 +175,7 @@ func (w *window) Show() {
 		// show top canvas element
 		if content := w.canvas.Content(); content != nil {
 			w.RunWithContext(func() {
-				w.driver.repaintWindow(w)
+				w.driver.repaintWindow(w, false)
 			})
 			// Update accessibility tree
 			w.updateAccessibility()
@@ -1005,7 +1005,7 @@ func (w *window) doShowAgain() {
 	}
 
 	w.RunWithContext(func() {
-		w.driver.repaintWindow(w)
+		w.driver.repaintWindow(w, false)
 	})
 }
 

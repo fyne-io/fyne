@@ -338,18 +338,47 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
+	shouldClean := cache.ShouldClean()
+	shouldCleanCanvases := cache.ShouldCleanCanvases()
+
 	d.animation.TickAnimations()
 	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
 	if canvasNeedRefresh {
+		if shouldCleanCanvases {
+			// EnsureMinSize and paintWindow only walk visible trees.
+			// Walk the entire tree and mark alive so we do not clean
+			// CanvasForObject entries of hidden objects.
+			c.MarkAlive(false /*visibleOnly*/)
+		}
+
 		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
 
 		w.Resize(newSize)
 
 		d.paintWindow(w, newSize)
 		d.app.Publish()
-		w.updateAccessibility()
+
+		if shouldClean {
+			var texFree func(fyne.CanvasObject)
+			if c.Painter() != nil {
+				texFree = c.Painter().Free
+			}
+			cache.CleanTextures(c, texFree)
+		}
+	} else if shouldClean {
+		c.MarkAlive(!shouldCleanCanvases /*visibleOnly*/)
+		var texFree func(fyne.CanvasObject)
+		if c.Painter() != nil {
+			texFree = c.Painter().Free
+		}
+		cache.CleanTextures(c, texFree)
 	}
-	cache.Clean(canvasNeedRefresh)
+
+	if shouldClean {
+		cache.Clean()
+	}
+	w.updateAccessibility()
+	cache.IncrementFrameCounter()
 }
 
 func (d *driver) onStart() {

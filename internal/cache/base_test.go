@@ -17,121 +17,92 @@ func TestMain(m *testing.M) {
 }
 
 func TestCacheClean(t *testing.T) {
-	destroyedRenderersCnt := 0
-	testClearAll()
 	tm := &timeMock{}
 
-	for k := 0; k < 2; k++ {
-		tm.setTime(10, 10+k*10)
+	t.Run("frame_counter_keeps_objects_alive", func(t *testing.T) {
+		testClearAll()
+		destroyedRenderersCnt := 0
+		tm.setTime(10, 10)
 		for i := 0; i < 20; i++ {
-			SetSvg(fmt.Sprintf("%d%d", k, i), nil, nil, i, i+1)
-			Renderer(&dummyWidget{onDestroy: func() {
-				destroyedRenderersCnt++
-			}})
+			Renderer(&dummyWidget{onDestroy: func() { destroyedRenderersCnt++ }})
 			SetCanvasForObject(&dummyWidget{}, &dummyCanvas{}, nil)
 		}
-	}
 
-	t.Run("no_expired_objects", func(t *testing.T) {
-		lastClean = tm.createTime(10, 20)
-		Clean(false)
-		assert.Equal(t, svgs.Len(), 40)
-		assert.Equal(t, 40, renderers.Len())
-		assert.Equal(t, 40, canvases.Len())
-		assert.Zero(t, destroyedRenderersCnt)
-		assert.Equal(t, tm.now, lastClean)
+		// Force full clean without advancing the frame counter
+		lastClean = tm.createTime(10, 10)
+		tm.setTime(12, 11) // ValidDuration (2 min) elapsed
+		Clean()
 
-		tm.setTime(10, 30)
-		Clean(true)
-		assert.Equal(t, svgs.Len(), 40)
-		assert.Equal(t, 40, renderers.Len())
-		assert.Equal(t, 40, canvases.Len())
-		assert.Zero(t, destroyedRenderersCnt)
-		assert.Equal(t, tm.now, lastClean)
-	})
-
-	t.Run("do_not_clean_too_fast", func(t *testing.T) {
-		lastClean = tm.createTime(10, 30)
-		// when no canvas refresh and has been transcurred less than
-		// cleanTaskInterval duration, no clean task should occur.
-		tm.setTime(10, 42)
-		Clean(false)
-		assert.Less(t, lastClean.UnixNano(), tm.now.UnixNano())
-
-		Clean(true)
-		assert.Equal(t, tm.now, lastClean)
-
-		// when canvas refresh the clean task is only executed if it has been
-		// transcurred more than 10 seconds since the lastClean.
-		tm.setTime(10, 45)
-		Clean(true)
-		assert.Less(t, lastClean.UnixNano(), tm.now.UnixNano())
-
-		tm.setTime(10, 53)
-		Clean(true)
-		assert.Equal(t, tm.now, lastClean)
-
-		assert.Equal(t, svgs.Len(), 40)
-		assert.Equal(t, 40, renderers.Len())
-		assert.Equal(t, 40, canvases.Len())
-		assert.Zero(t, destroyedRenderersCnt)
-	})
-
-	t.Run("clean_no_canvas_refresh", func(t *testing.T) {
-		lastClean = tm.createTime(10, 11)
-		tm.setTime(11, 12)
-		Clean(false)
-		assert.Equal(t, svgs.Len(), 20)
-		assert.Equal(t, renderers.Len(), 40)
-		assert.Equal(t, canvases.Len(), 40)
-		assert.Zero(t, destroyedRenderersCnt)
-
-		tm.setTime(11, 42)
-		Clean(false)
-		assert.Equal(t, svgs.Len(), 0)
-		assert.Equal(t, renderers.Len(), 40)
-		assert.Equal(t, canvases.Len(), 40)
-		assert.Zero(t, destroyedRenderersCnt)
-	})
-
-	t.Run("clean_canvas_refresh", func(t *testing.T) {
-		lastClean = tm.createTime(10, 11)
-		tm.setTime(11, 11)
-		Clean(true)
-		assert.Equal(t, svgs.Len(), 0)
+		// Frame-based caches kept alive because framecounter hasn't advanced
 		assert.Equal(t, 20, renderers.Len())
 		assert.Equal(t, 20, canvases.Len())
-		assert.Equal(t, 20, destroyedRenderersCnt)
-
-		tm.setTime(11, 22)
-		Clean(true)
-		assert.Equal(t, svgs.Len(), 0)
-		assert.Equal(t, 0, renderers.Len())
-		assert.Equal(t, 0, canvases.Len())
-		assert.Equal(t, 40, destroyedRenderersCnt)
+		assert.Zero(t, destroyedRenderersCnt)
 	})
 
-	t.Run("skipped_clean_with_canvas_refresh", func(t *testing.T) {
+	t.Run("advancing_frame_counter_expires_objects", func(t *testing.T) {
 		testClearAll()
-		lastClean = tm.createTime(13, 10)
-		tm.setTime(13, 10)
-		assert.False(t, skippedCleanWithCanvasRefresh)
-		Clean(true)
-		assert.Equal(t, tm.now, lastClean)
+		destroyedRenderersCnt := 0
+		tm.setTime(10, 10)
+		for i := 0; i < 20; i++ {
+			Renderer(&dummyWidget{onDestroy: func() { destroyedRenderersCnt++ }})
+			SetCanvasForObject(&dummyWidget{}, &dummyCanvas{}, nil)
+		}
 
-		Renderer(&dummyWidget{})
+		// Advance frame counter — previous objects are now expired
+		IncrementFrameCounter()
 
-		tm.setTime(13, 15)
-		Clean(true)
-		assert.True(t, skippedCleanWithCanvasRefresh)
-		assert.Less(t, lastClean.UnixNano(), tm.now.UnixNano())
-		assert.Equal(t, 1, renderers.Len())
+		// Force full clean
+		lastClean = tm.createTime(10, 10)
+		tm.setTime(12, 11) // ValidDuration (2 min) elapsed
+		Clean()
 
-		tm.setTime(14, 21)
-		Clean(false)
-		assert.False(t, skippedCleanWithCanvasRefresh)
-		assert.Equal(t, tm.now, lastClean)
 		assert.Equal(t, 0, renderers.Len())
+		assert.Equal(t, 0, canvases.Len())
+		assert.Equal(t, 20, destroyedRenderersCnt)
+	})
+
+	t.Run("full_clean_expires_svgs_after_valid_duration", func(t *testing.T) {
+		testClearAll()
+		tm.setTime(10, 10)
+		for i := 0; i < 20; i++ {
+			SetSvg(fmt.Sprintf("%d", i), nil, nil, i, i+1)
+		}
+
+		// No full clean yet — ValidDuration hasn't elapsed
+		lastClean = tm.createTime(10, 10)
+		tm.setTime(10, 20)
+		Clean()
+		assert.Equal(t, 20, svgs.Len())
+
+		// After ValidDuration, full clean removes expired SVGs
+		tm.setTime(12, 11)
+		Clean()
+		assert.Equal(t, 0, svgs.Len())
+	})
+
+	t.Run("dynamic_flags_trigger_targeted_clean", func(t *testing.T) {
+		testClearAll()
+		destroyedRenderersCnt := 0
+		tm.setTime(10, 10)
+
+		// Set a non-zero baseline clean size
+		rendererCacheLastCleanSize = 5
+		for i := 0; i < 11; i++ {
+			Renderer(&dummyWidget{onDestroy: func() { destroyedRenderersCnt++ }})
+		}
+		assert.True(t, shouldCleanRenderers) // 11 > 2*5
+
+		// Targeted clean without full clean (ValidDuration not elapsed)
+		lastClean = tm.createTime(10, 10)
+		tm.setTime(10, 20)
+		Clean()
+
+		// Flag cleared and last-clean size updated
+		assert.False(t, shouldCleanRenderers)
+		assert.Equal(t, 11, rendererCacheLastCleanSize)
+		// Objects not expired (frame counter not advanced)
+		assert.Equal(t, 11, renderers.Len())
+		assert.Zero(t, destroyedRenderersCnt)
 	})
 }
 
@@ -247,7 +218,6 @@ func (t *timeMock) setTime(min, sec int) {
 }
 
 func testClearAll() {
-	skippedCleanWithCanvasRefresh = false
 	canvases.Clear()
 	svgs.Clear()
 	textTextures.Clear()
@@ -255,4 +225,16 @@ func testClearAll() {
 	renderers.Clear()
 	blurKernels.Clear()
 	timeNow = time.Now
+	lastClean = time.Time{}
+	framecounter = 1
+	rendererCacheLastCleanSize = 0
+	canvasCacheLastCleanSize = 0
+	fontSizeCacheLastCleanSize = 0
+	textTextureLastCleanSize = 0
+	objectTexturesLastCleanSize = 0
+	shouldCleanRenderers = false
+	shouldCleanCanvases = false
+	shouldCleanFontSizeCache = false
+	shouldCleanTextTextures = false
+	shouldCleanObjectTextures = false
 }

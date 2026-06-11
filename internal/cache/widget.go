@@ -5,7 +5,11 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var renderers async.Map[fyne.Widget, *rendererInfo]
+var (
+	renderers                  async.Map[fyne.Widget, *rendererInfo]
+	rendererCacheLastCleanSize int
+	shouldCleanRenderers       bool
+)
 
 type isBaseWidget interface {
 	ExtendBaseWidget(fyne.Widget)
@@ -21,6 +25,9 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 		rinfo := &rendererInfo{renderer: renderer}
 		rinfo.setAlive()
 		renderers.Store(wid, rinfo)
+		if renderers.Len() > 2*rendererCacheLastCleanSize {
+			shouldCleanRenderers = true
+		}
 	}
 
 	return renderer
@@ -69,6 +76,6 @@ func IsRendered(wid fyne.Widget) bool {
 }
 
 type rendererInfo struct {
-	expiringCache
+	frameCounterCache
 	renderer fyne.WidgetRenderer
 }

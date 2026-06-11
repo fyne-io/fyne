@@ -5,7 +5,6 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -89,8 +88,6 @@ type window struct {
 	shouldExpand                    bool
 
 	pending []func()
-
-	lastWalkedTime time.Time
 }
 
 func (w *window) SetFullScreen(full bool) {

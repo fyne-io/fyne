@@ -89,7 +89,7 @@ func NewTransparentCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
 }
 
 func (c *canvas) Capture() image.Image {
-	cache.Clean(true)
+	cache.Clean()
 	size := c.Size()
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
 	img := image.NewNRGBA(bounds)

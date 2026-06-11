@@ -33,7 +33,7 @@ func ensureCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
 func repaintWindow(w *safeWindow) {
 	runOnMain(func() {
 		w.RunWithContext(func() {
-			d.repaintWindow(w.window)
+			d.repaintWindow(w.window, false)
 		})
 	})
 

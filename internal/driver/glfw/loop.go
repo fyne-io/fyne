@@ -57,7 +57,9 @@ func runOnMainWithWait(f func(), wait bool) {
 }
 
 func (d *gLDriver) drawSingleFrame() {
-	refreshed := false
+	shouldClean := cache.ShouldClean()
+	shouldCleanCanvases := cache.ShouldCleanCanvases()
+
 	for _, win := range d.windowList() {
 		w := win.(*window)
 		if w.closing {
@@ -69,33 +71,26 @@ func (d *gLDriver) drawSingleFrame() {
 		// showing old content without a dirty flag set to true.
 		// Do the clear if and only if the window is visible.
 		if !w.visible || !w.canvas.CheckDirtyAndClear() {
-			// Window hidden or not being redrawn, mark canvasForObject
-			// cache alive if it hasn't been done recently
-			// n.b. we need to make sure threshold is a bit *after*
-			// time.Now() - CacheDuration()
-			threshold := time.Now().Add(10*time.Second - cache.ValidDuration)
-			if w.lastWalkedTime.Before(threshold) {
-				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
-					// marks canvas for object cache entry alive
-					_ = cache.GetCanvasForObject(node.Obj())
-					// marks renderer cache entry alive
-					if wid, ok := node.Obj().(fyne.Widget); ok {
-						_, _ = cache.CachedRenderer(wid)
-					}
-				})
-				w.lastWalkedTime = time.Now()
+			if shouldClean {
+				d.cleanInactiveWindowTextures(w, !shouldCleanCanvases /*walkVisibleOnly*/)
 			}
 			continue
+		} else if shouldCleanCanvases {
+			// EnsureMinSize and paint only walk visible trees.
+			// Walk entire trees of window and mark alive,
+			// so that we do not clean CanvasForObject entries of hidden objects.
+			w.canvas.MarkAlive(false /*visibleOnly*/)
 		}
 
 		w.RunWithContext(func() {
-			if w.driver.repaintWindow(w) {
-				refreshed = true
-			}
+			w.driver.repaintWindow(w, shouldClean)
 		})
 		w.updateAccessibility()
 	}
-	cache.Clean(refreshed)
+
+	if shouldClean {
+		cache.Clean()
+	}
 }
 
 func (d *gLDriver) applyThemeToWindow(w fyne.Window) {
@@ -194,6 +189,7 @@ func (d *gLDriver) runGL() {
 
 			d.animation.TickAnimations()
 			d.drawSingleFrame()
+			cache.IncrementFrameCounter()
 		}
 	}
 }
@@ -214,7 +210,20 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) bool {
+func (d *gLDriver) cleanInactiveWindowTextures(w *window, walkVisibleOnly bool) {
+	w.RunWithContext(func() {
+		// Walk trees of inactive window and mark its visible contents
+		// as alive in all caches, so they are not cleaned.
+		w.canvas.MarkAlive(walkVisibleOnly)
+		var texFree func(fyne.CanvasObject)
+		if w.canvas.Painter() != nil {
+			texFree = w.canvas.Painter().Free
+		}
+		cache.CleanTextures(w.canvas, texFree)
+	})
+}
+
+func (d *gLDriver) repaintWindow(w *window, cleanTextures bool) bool {
 	canvas := w.canvas
 	freed := false
 	if canvas.EnsureMinSize() {
@@ -232,9 +241,17 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 		view.SwapBuffers()
 	}
 
-	// mark that we have walked the window and don't
-	// need to walk it again to mark caches alive
-	w.lastWalkedTime = time.Now()
+	if cleanTextures {
+		// the object tree walks in EnsureMinSize and canvas.paint
+		// will have ensured all alive objects are marked in the caches
+		// No need to call canvas.markAlive
+		var texFree func(fyne.CanvasObject)
+		if canvas.Painter() != nil {
+			texFree = canvas.Painter().Free
+		}
+		cache.CleanTextures(canvas, texFree)
+	}
+
 	return freed
 }
 
