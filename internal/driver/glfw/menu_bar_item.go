@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/widget"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	publicWidget "fyne.io/fyne/v2/widget"
 )
@@ -26,12 +27,19 @@ type menuBarItem struct {
 	hovered bool
 }
 
+func isHelpMenu(menu *fyne.Menu) bool {
+	return menu.Label == lang.L("Help")
+}
+
 func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
-		child := publicWidget.NewMenu(i.Menu)
-		child.Hide()
-		child.OnDismiss = i.Parent.deactivate
-		i.child = child
+		if isHelpMenu(i.Menu) && i.Parent.mainMenu != nil {
+			i.child = publicWidget.NewMenuWithGlobalSearch(i.Menu, i.Parent.mainMenu)
+		} else {
+			i.child = publicWidget.NewMenu(i.Menu)
+		}
+		i.child.Hide()
+		i.child.OnDismiss = i.Parent.deactivate
 	}
 	return i.child
 }

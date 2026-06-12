@@ -464,7 +464,9 @@ func TestMenuBar(t *testing.T) {
 			require.Equal(t, menuBar.Items[0], c.Focused())
 			c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
 			c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
-			require.Equal(t, menuBar.Items[2], c.Focused())
+			// When Help menu is opened, the search entry gets focus, so we check
+			// that the Help menu is the active item in the menu bar
+			require.Equal(t, menuBar.Items[2], menuBar.activeItem, "Help menu should be the active item")
 
 			test.MoveMouse(c, fileMenuPos.Add(fyne.NewPos(1, 0)))
 			assert.Equal(t, menuBar.Items[0], c.Focused())
@@ -553,6 +555,14 @@ func TestMenuBar_Toggle(t *testing.T) {
 		assert.Nil(t, c.Focused())
 		test.AssertRendersToMarkup(t, "menu_bar_toggle_deactivated.xml", c)
 	})
+}
+
+func TestIsHelpMenu(t *testing.T) {
+	helpMenu := fyne.NewMenu("Help")
+	fileMenu := fyne.NewMenu("File")
+
+	assert.True(t, isHelpMenu(helpMenu))
+	assert.False(t, isHelpMenu(fileMenu))
 }
 
 type notFocusableButton struct {
