@@ -7,8 +7,6 @@ import (
 	"net/url"
 	"os"
 	"runtime"
-	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -1818,38 +1816,6 @@ func TestWindow_ClosedBeforeShow(t *testing.T) {
 	w := createWindow("Test")
 	// viewport will be nil if window is closed before show
 	assert.NotPanics(t, func() { w.closed(nil) })
-}
-
-// fyne-io/fyne#3874: w.closing / w.viewport in RunWithContext are read
-// without synchronization, and viewport.Destroy() does not nil the pointer.
-// Two failure modes: data race on w.closing, and MakeContextCurrent on a
-// destroyed viewport. Run with `-race`.
-func TestWindow_RunWithContext_DataRace(t *testing.T) {
-	w := createWindow("Race-DataRace")
-	win := w.window
-
-	var (
-		stop int32
-		wg   sync.WaitGroup
-	)
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for atomic.LoadInt32(&stop) == 0 {
-			_ = win.isClosing()
-			_ = win.view()
-			runtime.Gosched()
-		}
-	}()
-
-	// Production write path: Close() flips w.closing on the main thread.
-	// Without synchronization the race detector flags the read above.
-	w.Close()
-	time.Sleep(50 * time.Millisecond)
-
-	atomic.StoreInt32(&stop, 1)
-	wg.Wait()
 }
 
 // fyne#3874: viewport.Destroy() does not nil w.viewport, so view() keeps

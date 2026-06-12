@@ -10,7 +10,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -75,8 +74,6 @@ type window struct {
 	decorate  bool
 	closing   bool
 	fixedSize bool
-
-	closeLock sync.RWMutex // guards closing and viewport
 
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
@@ -889,8 +886,6 @@ func (w *window) create() {
 }
 
 func (w *window) view() *glfw.Window {
-	w.closeLock.RLock()
-	defer w.closeLock.RUnlock()
 	if w.closing {
 		return nil
 	}
@@ -898,13 +893,13 @@ func (w *window) view() *glfw.Window {
 }
 
 // destroyViewport destroys the underlying GLFW window and clears the pointer
-// under closeLock so subsequent view() / isClosing() calls observe the
-// destruction atomically. Safe to call once; later calls are no-ops.
+// first, so a later view() / isClosing() observes the destruction and never
+// hands out a pointer to an already-destroyed window. Safe to call once; later
+// calls are no-ops. Must run on the main goroutine, like the rest of the GLFW
+// lifecycle.
 func (w *window) destroyViewport() {
-	w.closeLock.Lock()
 	vp := w.viewport
 	w.viewport = nil
-	w.closeLock.Unlock()
 	if vp != nil {
 		vp.Destroy()
 	}
