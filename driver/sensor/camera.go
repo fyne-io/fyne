@@ -4,7 +4,7 @@ import (
 	"image"
 )
 
-// A camera device is a device that has hardware support for taking photos.
+// A CameraDevice is a device that has hardware support for taking photos.
 //
 // Since: 2.9
 type CameraDevice interface {
