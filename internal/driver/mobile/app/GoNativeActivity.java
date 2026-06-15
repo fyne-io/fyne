@@ -94,6 +94,7 @@ public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
     private boolean keyboardUp = false;
 
     private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+    private int pendingPermissionAction = 0;
     private Preview preview = null;
     private boolean isCameraRunning = false;
     private ProcessCameraProvider globalCameraProvider = null;
@@ -280,6 +281,29 @@ public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    
+                // 4. Read the explicit action intent token
+                int actionToExecute = pendingPermissionAction;
+                pendingPermissionAction = 0; // Clear immediately to reset the gate
+    
+                if (actionToExecute == 1) {
+                    doStartCameraPreview();
+                } else if (actionToExecute == 2) {
+                    doCaptureCameraPhoto();
+                }
+    
+            } else {
+                pendingPermissionAction = 0; // Clear token if user denied
+            }
+        }
+    }
+
     private boolean ensureCameraInitialized(Context context, androidx.lifecycle.LifecycleOwner lifecycleOwner, Runnable onReadyTask) {
         if (isCameraRunning && globalCameraProvider != null && globalImageCapture != null && (!isPreviewRequested || preview != null)) {
             if (onReadyTask != null) onReadyTask.run();
@@ -399,15 +423,16 @@ public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
     }
 
     void doStartCameraPreview() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) this, new String[] { Manifest.permission.CAMERA }, 100);
-            return;
-        }
-    
         // If the preview is already up and running, we can safely skip
         if (isPreviewRequested && isCameraRunning) {
             return;
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            pendingPermissionAction = 1; 
+            ActivityCompat.requestPermissions((Activity) this, new String[] { Manifest.permission.CAMERA }, 100);
+            return;
+        }    
     
         isPreviewRequested = true;
         Context context = this;
@@ -458,7 +483,9 @@ public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
     }
 
     void doCaptureCameraPhoto() {
+        isPreviewRequested = false;
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            pendingPermissionAction = 2; 
             ActivityCompat.requestPermissions((Activity) this, new String[] { Manifest.permission.CAMERA }, 100);
             return;
         }
