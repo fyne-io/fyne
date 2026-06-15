@@ -234,24 +234,12 @@ func colorToString(c color.Color) string {
 	return fmt.Sprintf("#%02x%02x%02x%02x", red, green, blue, alpha)
 }
 
-func stringToColor(s string) (color.Color, error) {
-	var c color.NRGBA
-	var err error
-	if len(s) == 7 {
-		c.A = 0xFF
-		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
-	} else {
-		_, err = fmt.Sscanf(s, "#%02x%02x%02x%02x", &c.R, &c.G, &c.B, &c.A)
-	}
-	return c, err
-}
-
 func stringsToColors(ss ...string) (colors []color.Color) {
 	for _, s := range ss {
 		if s == "" {
 			continue
 		}
-		c, err := stringToColor(s)
+		c, err := col.Parse(s)
 		if err != nil {
 			fyne.LogError("Couldn't parse color:", err)
 		} else {

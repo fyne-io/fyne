@@ -5,8 +5,9 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/v2/canvas"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/canvas"
 
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
@@ -65,5 +66,5 @@ func TestThemeOverride_CurrentTheme(t *testing.T) {
 	o.Refresh()
 
 	text = test.WidgetRenderer(l).Objects()[0].(*widget.RichText).Segments[0].Visual()
-	assert.Equal(t, &color.NRGBA{R: 0, G: 0, B: 0, A: 0xff}, text.(*canvas.Text).Color)
+	assert.Equal(t, color.NRGBA{R: 0, G: 0, B: 0, A: 0xff}, text.(*canvas.Text).Color)
 }

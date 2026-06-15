@@ -153,7 +153,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	// Hex
 	hex := newUserChangeEntry("")
 	hex.setOnChanged(func(text string) {
-		c, err := stringToColor(text)
+		c, err := col.Parse(text)
 		if err != nil {
 			fyne.LogError("Error parsing color: "+text, err)
 			// TODO trigger entry invalid state

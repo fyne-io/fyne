@@ -1,22 +1,14 @@
 package theme
 
 import (
-	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"image/color"
 	"io"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/storage"
-)
-
-const (
-	lenColorStringRGB       = lenColorStringRGBShort * 2
-	lenColorStringRGBShort  = 3
-	lenColorStringRGBA      = lenColorStringRGBAShort * 2
-	lenColorStringRGBAShort = 4
 )
 
 // FromJSON returns a Theme created from the given JSON metadata.
@@ -77,30 +69,12 @@ func (h *jsonColor) UnmarshalJSON(b []byte) error {
 }
 
 func (h *jsonColor) parseColor(str string) error {
-	data := []byte(strings.TrimPrefix(str, "#"))
-	switch len(data) {
-	case lenColorStringRGB, lenColorStringRGBA:
-	case lenColorStringRGBAShort:
-		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2], data[3], data[3]}
-	case lenColorStringRGBShort:
-		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2]}
-	default:
-		h.color = color.Transparent
-		return errors.New("invalid color format: " + str)
-	}
-
-	digits, err := hex.DecodeString(string(data))
+	c, err := fynecolor.Parse(str)
 	if err != nil {
 		return err
 	}
-	ret := &color.NRGBA{R: digits[0], G: digits[1], B: digits[2]}
-	if len(digits) == 4 {
-		ret.A = digits[3]
-	} else {
-		ret.A = 0xff
-	}
 
-	h.color = ret
+	h.color = c
 	return nil
 }
 
