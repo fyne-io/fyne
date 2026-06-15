@@ -769,7 +769,30 @@ public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
                 GoNativeActivity.this.updateLayout();
             }
         });
-        ProcessCameraProvider.configureInstance(Camera2Config.defaultConfig());
+
+	// Check if camerax needs to be configured.  It might not need to be configured during the
+	// Activity's onCreate if this Activity was destoyed but the app was not restarted.  Configuring
+	// the camera from the Application class may be more appropriate, as checking the state from
+	// the Activity required reflection.
+        boolean isAlreadyConfigured = false;
+        try {
+            Class<?> cameraXClass = Class.forName("androidx.camera.core.CameraX");
+            java.lang.reflect.Method isInitializedMethod = cameraXClass.getDeclaredMethod("isInitialized");
+            isInitializedMethod.setAccessible(true);
+            isAlreadyConfigured = (Boolean) isInitializedMethod.invoke(null);
+        } catch (Exception e) {
+            isAlreadyConfigured = false; 
+        }
+        if (!isAlreadyConfigured) {
+            try {
+                androidx.camera.lifecycle.ProcessCameraProvider.configureInstance(
+                    androidx.camera.camera2.Camera2Config.defaultConfig()
+                );
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
+
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     }
 
