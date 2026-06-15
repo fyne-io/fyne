@@ -1,5 +1,9 @@
 package org.golang.app;
 
+import java.util.Base64;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.NativeActivity;
@@ -12,9 +16,15 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Matrix;
+import android.Manifest;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -36,100 +46,131 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.impl.utils.executor.CameraXExecutors;
+import java.util.concurrent.Executors;
+import androidx.annotation.NonNull;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleService;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import com.google.common.util.concurrent.ListenableFuture;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.camera2.Camera2Config;
+import androidx.camera.view.PreviewView;
+import androidx.camera.core.Preview;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
-public class GoNativeActivity extends NativeActivity {
-	private static GoNativeActivity goNativeActivity;
-	private static final int FILE_OPEN_CODE = 1;
-	private static final int FILE_SAVE_CODE = 2;
+public class GoNativeActivity extends NativeActivity implements LifecycleOwner {
+    private static GoNativeActivity goNativeActivity;
+    private static final int FILE_OPEN_CODE = 1;
+    private static final int FILE_SAVE_CODE = 2;
+    private static final int CAMERA_OPEN_CODE = 3;
 
-	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+    private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
-	private static final int DEFAULT_KEYBOARD_CODE = 0;
-	private static final int SINGLELINE_KEYBOARD_CODE = 1;
-	private static final int NUMBER_KEYBOARD_CODE = 2;
-	private static final int PASSWORD_KEYBOARD_CODE = 3;
+    private static final int DEFAULT_KEYBOARD_CODE = 0;
+    private static final int SINGLELINE_KEYBOARD_CODE = 1;
+    private static final int NUMBER_KEYBOARD_CODE = 2;
+    private static final int PASSWORD_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
+    private native void capturePhotoReturned(byte[] jpegBytes, int length);
+    private native void cameraPreviewFrame(byte[] jpegBytes, int length);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
     private native void backPressed();
     private native void setDarkMode(boolean dark);
 
-	private EditText mTextEdit;
-	private boolean ignoreKey = false;
-	private boolean keyboardUp = false;
+    private EditText mTextEdit;
+    private boolean ignoreKey = false;
+    private boolean keyboardUp = false;
 
-	// Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
-	// classes (Runnable -> Listener). javac stores a `MethodParameters`
-	// attribute with an empty name on the synthetic `this$1` parameter of a
-	// nested anonymous class's constructor; older D8 / R8 versions
-	// (e.g. AOSP build-tools 3.3) NPE while reading that attribute.
-	private final OnEditorActionListener mEditorActionListener = new OnEditorActionListener() {
-		@Override
-		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-			if (actionId == EditorInfo.IME_ACTION_DONE) {
-				keyboardTyped("\n");
-			}
-			return false;
-		}
-	};
+    private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+    private Preview preview = null;
+    private boolean isCameraRunning = false;
+    private ProcessCameraProvider globalCameraProvider = null;
+    private ImageCapture globalImageCapture = null;
+    private BitmapSurfaceProvider globalBitmapSurfaceProvider = null;
+    private boolean isPreviewRequested = false;
 
-	private final TextWatcher mTextWatcher = new TextWatcher() {
-		@Override
-		public void onTextChanged(CharSequence s, int start, int before, int count) {
-			if (ignoreKey) {
-				return;
-			}
-			if (count > 0) {
-				keyboardTyped(s.subSequence(start, start + count).toString());
-			}
-		}
+    // Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
+    // classes (Runnable -> Listener). javac stores a `MethodParameters`
+    // attribute with an empty name on the synthetic `this$1` parameter of a
+    // nested anonymous class's constructor; older D8 / R8 versions
+    // (e.g. AOSP build-tools 3.3) NPE while reading that attribute.
+    private final OnEditorActionListener mEditorActionListener = new OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                keyboardTyped("\n");
+            }
+            return false;
+        }
+    };
 
-		@Override
-		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			if (ignoreKey) {
-				return;
-			}
-			if (count > 0) {
-				for (int i = 0; i < count; i++) {
-					keyboardDelete();
-				}
-			}
-		}
+    private final TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (ignoreKey) {
+                return;
+            }
+            if (count > 0) {
+                keyboardTyped(s.subSequence(start, start + count).toString());
+            }
+        }
 
-		@Override
-		public void afterTextChanged(Editable s) {
-			// always place one character so all keyboards can send backspace
-			if (s.length() < 1) {
-				ignoreKey = true;
-				mTextEdit.setText(" ");
-				mTextEdit.setSelection(mTextEdit.getText().length());
-				ignoreKey = false;
-			}
-		}
-	};
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            if (ignoreKey) {
+                return;
+            }
+            if (count > 0) {
+                for (int i = 0; i < count; i++) {
+                    keyboardDelete();
+                }
+            }
+        }
 
-	// Accessibility – real-view overlay approach.
-	private static FrameLayout mA11yContainer;
+        @Override
+        public void afterTextChanged(Editable s) {
+            // always place one character so all keyboards can send backspace
+            if (s.length() < 1) {
+                ignoreKey = true;
+                mTextEdit.setText(" ");
+                mTextEdit.setSelection(mTextEdit.getText().length());
+                ignoreKey = false;
+            }
+        }
+    };
 
-	// Staging buffer – written by Go threads, consumed on the UI thread.
-	private static final List<int[]>  sStagingData   = new ArrayList<>();
-	private static final List<String> sStagingLabels = new ArrayList<>();
-	// Signature of the last committed layout; skip UI work when nothing changed.
-	private static String sLastCommittedSignature = null;
+    // Accessibility – real-view overlay approach.
+    private static FrameLayout mA11yContainer;
 
-	public GoNativeActivity() {
-		super();
-		goNativeActivity = this;
-	}
+    // Staging buffer – written by Go threads, consumed on the UI thread.
+    private static final List<int[]>  sStagingData   = new ArrayList<>();
+    private static final List<String> sStagingLabels = new ArrayList<>();
+    // Signature of the last committed layout; skip UI work when nothing changed.
+    private static String sLastCommittedSignature = null;
 
-	String getTmpdir() {
-		return getCacheDir().getAbsolutePath();
-	}
+    public GoNativeActivity() {
+        super();
+        goNativeActivity = this;
+    }
 
-	void updateLayout() {
-	    try {
+    String getTmpdir() {
+        return getCacheDir().getAbsolutePath();
+    }
+
+    void updateLayout() {
+        try {
             WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
             if (insets == null) {
                 return;
@@ -138,7 +179,7 @@ public class GoNativeActivity extends NativeActivity {
             insetsChanged(insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetBottom(),
                 insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetRight());
         } catch (java.lang.NoSuchMethodError e) {
-    	    Rect insets = new Rect();
+            Rect insets = new Rect();
             getWindow().getDecorView().getWindowVisibleDisplayFrame(insets);
 
             View view = findViewById(android.R.id.content).getRootView();
@@ -237,6 +278,303 @@ public class GoNativeActivity extends NativeActivity {
             intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
+    }
+
+    private boolean ensureCameraInitialized(Context context, androidx.lifecycle.LifecycleOwner lifecycleOwner, Runnable onReadyTask) {
+        if (isCameraRunning && globalCameraProvider != null && globalImageCapture != null && (!isPreviewRequested || preview != null)) {
+            if (onReadyTask != null) onReadyTask.run();
+            return true;
+        }
+    
+        isCameraRunning = true;
+    
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ListenableFuture<ProcessCameraProvider> providerListenableFuture = ProcessCameraProvider.getInstance(context);
+                providerListenableFuture.addListener(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            globalCameraProvider = providerListenableFuture.get();
+                            globalCameraProvider.unbindAll(); // Fresh slate
+    
+                            CameraSelector cameraSelector = new CameraSelector.Builder()
+                                    .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                                    .build();
+    
+                            // 1. Always build the ImageCapture use case
+                            globalImageCapture = new ImageCapture.Builder()
+                                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                                    .setTargetRotation(getWindow().getDecorView().getRootView().getDisplay().getRotation())
+                                    .build();
+    
+                            // 2. Build the Preview use case ONLY if requested
+                            if (isPreviewRequested) {
+                                preview = new Preview.Builder().build();
+                                globalBitmapSurfaceProvider = new BitmapSurfaceProvider(context);
+                                globalBitmapSurfaceProvider.setFrameCallback(new BitmapSurfaceProvider.FrameProcessor() {
+                                    @Override
+                                    public void onNewFrame(Bitmap photo) {
+                                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                        photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                                        byte[] rawBytes = out.toByteArray();
+                                        cameraPreviewFrame(rawBytes, rawBytes.length);
+                                    }
+                                });
+                                preview.setSurfaceProvider(globalBitmapSurfaceProvider);
+    
+                                // Bind both together
+                                globalCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, globalImageCapture);
+                            } else {
+                                // Bind just the photo use case to initialize hardware instantly without starting the video thread
+                                globalCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, globalImageCapture);
+                            }
+    
+                            // 3. Execute any deferred task (like taking the photo) once bound
+                            if (onReadyTask != null) {
+                                onReadyTask.run();
+                            }
+    
+                        } catch (Exception e) {
+                            isCameraRunning = false;
+                            globalImageCapture = null;
+                            e.printStackTrace();
+                        }
+                    }
+                }, ContextCompat.getMainExecutor(context));
+            }
+        });
+    
+        return false;
+    }
+
+    private void forceRestartPreviewStream() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Only attempt to restore if the preview was actually requested and active
+                if (isPreviewRequested && isCameraRunning && globalCameraProvider != null) {
+                    try {
+                        // 1. Force unbind everything to completely reset the frozen hardware pipeline
+                        globalCameraProvider.unbindAll();
+    
+                        CameraSelector cameraSelector = new CameraSelector.Builder()
+                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                                .build();
+    
+                        // 2. Clear out any locked up buffers from the old surface provider
+                        if (globalBitmapSurfaceProvider != null) {
+                            globalBitmapSurfaceProvider.cleanUp();
+                        }
+    
+                        // 3. Instantiate a fresh provider with clean ImageReader slots
+                        globalBitmapSurfaceProvider = new BitmapSurfaceProvider(GoNativeActivity.this);
+                        globalBitmapSurfaceProvider.setFrameCallback(new BitmapSurfaceProvider.FrameProcessor() {
+                            @Override
+                            public void onNewFrame(Bitmap photo) {
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                                byte[] rawBytes = out.toByteArray();
+                                cameraPreviewFrame(rawBytes, rawBytes.length);
+                            }
+                        });
+    
+                        preview = new Preview.Builder().build();
+                        preview.setSurfaceProvider(globalBitmapSurfaceProvider);
+    
+                        // 4. Rebind both use cases cleanly to the lens
+                        globalCameraProvider.bindToLifecycle(GoNativeActivity.this, cameraSelector, preview, globalImageCapture);
+    
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    static void startCameraPreview() {
+        goNativeActivity.doStartCameraPreview();
+    }
+
+    void doStartCameraPreview() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) this, new String[] { Manifest.permission.CAMERA }, 100);
+            return;
+        }
+    
+        // If the preview is already up and running, we can safely skip
+        if (isPreviewRequested && isCameraRunning) {
+            return;
+        }
+    
+        isPreviewRequested = true;
+        Context context = this;
+        androidx.lifecycle.LifecycleOwner lifecycleOwner = this;
+    
+        // 1. FIXED SCENARIO: Camera is already running (from a prior photo), but preview isn't bound yet
+        if (isCameraRunning && globalCameraProvider != null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Unbind everything to cleanly reconfigure the lens options
+                        globalCameraProvider.unbindAll();
+    
+                        CameraSelector cameraSelector = new CameraSelector.Builder()
+                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                                .build();
+    
+                        // Rebuild the surface preview use case
+                        preview = new Preview.Builder().build();
+                        globalBitmapSurfaceProvider = new BitmapSurfaceProvider(context);
+                        globalBitmapSurfaceProvider.setFrameCallback(new BitmapSurfaceProvider.FrameProcessor() {
+                            @Override
+                            public void onNewFrame(Bitmap photo) {
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                                byte[] rawBytes = out.toByteArray();
+                                cameraPreviewFrame(rawBytes, rawBytes.length);
+                            }
+                        });
+                        preview.setSurfaceProvider(globalBitmapSurfaceProvider);
+    
+                        // Rebind BOTH use cases together cleanly
+                        globalCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, globalImageCapture);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } else {
+            // 2. Standard cold start sequence if nothing was running yet
+            ensureCameraInitialized(this, this, null);
+        }
+    }
+
+    static void captureCameraPhoto() {
+        goNativeActivity.doCaptureCameraPhoto();
+    }
+
+    void doCaptureCameraPhoto() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) this, new String[] { Manifest.permission.CAMERA }, 100);
+            return;
+        }
+    
+        Context context = this;
+        androidx.lifecycle.LifecycleOwner lifecycleOwner = this;
+    
+        // Define the photo-taking logic
+        Runnable takePhotoRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (globalImageCapture == null) return;
+    
+                globalImageCapture.takePicture(
+                    ContextCompat.getMainExecutor(context),
+                    new ImageCapture.OnImageCapturedCallback() {
+                        @Override
+                        public void onCaptureSuccess(@NonNull androidx.camera.core.ImageProxy image) {
+                            try {
+                                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                                byte[] bytes = new byte[buffer.remaining()];
+                                buffer.get(bytes);
+                                
+                                Bitmap photo = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                Matrix matrix = new Matrix();
+                                matrix.postRotate(image.getImageInfo().getRotationDegrees());
+                                Bitmap rotated = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), matrix, true);
+                                
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                rotated.compress(Bitmap.CompressFormat.JPEG, 95, out);
+                                byte[] rawBytes = out.toByteArray();
+                                
+                                capturePhotoReturned(rawBytes, rawBytes.length);
+                                
+                                photo.recycle();
+                                rotated.recycle();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                image.close();
+                            }
+    
+                            // Restore preview stream if it was active
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isPreviewRequested && preview != null && globalBitmapSurfaceProvider != null) {
+                    forceRestartPreviewStream();
+                                    }
+                                }
+                            });
+                        }
+    
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            exception.printStackTrace();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isPreviewRequested && preview != null && globalBitmapSurfaceProvider != null) {
+                    forceRestartPreviewStream();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                );
+            }
+        };
+    
+        // Ensure the system is ready. If it's already open, it runs instantly. 
+        // If it's closed, it initializes everything first, then fires the runnable.
+        boolean initialized = ensureCameraInitialized(context, lifecycleOwner, takePhotoRunnable);
+        if (initialized) {
+            // Camera was already fully initialized; fire immediately on the main thread
+            runOnUiThread(takePhotoRunnable);
+        }
+    }
+
+    static void stopCameraPreview() {
+        goNativeActivity.doStopCameraPreview();
+    }
+
+    public void doStopCameraPreview() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // 1. Reset state tracking variables immediately
+                isCameraRunning = false;
+                isPreviewRequested = false;
+                
+                // 2. Unbind all active use cases from the Android system lens
+                if (globalCameraProvider != null) {
+                    try {
+                        globalCameraProvider.unbindAll();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    globalCameraProvider = null;
+                }
+                
+                // 3. Terminate background threads and clear the custom ImageReader
+                if (globalBitmapSurfaceProvider != null) {
+                    try {
+                        globalBitmapSurfaceProvider.cleanUp(); // Quits the HandlerThread and drops old frames
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    globalBitmapSurfaceProvider = null;
+                }
+                
+                // 4. Nullify remaining references
+                globalImageCapture = null;
+                preview = null;
+            }
+        });
     }
 
     static void showFileSave(String mimes, String filename) {
@@ -351,58 +689,61 @@ public class GoNativeActivity extends NativeActivity {
         }
     }
 
-	static int getRune(int deviceId, int keyCode, int metaState) {
-		try {
-			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
-			if (rune == 0) {
-				return -1;
-			}
-			return rune;
-		} catch (KeyCharacterMap.UnavailableException e) {
-			return -1;
-		} catch (Exception e) {
-			Log.e("Fyne", "exception reading KeyCharacterMap", e);
-			return -1;
-		}
-	}
+    static int getRune(int deviceId, int keyCode, int metaState) {
+        try {
+            int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
+            if (rune == 0) {
+                return -1;
+            }
+            return rune;
+        } catch (KeyCharacterMap.UnavailableException e) {
+            return -1;
+        } catch (Exception e) {
+            Log.e("Fyne", "exception reading KeyCharacterMap", e);
+            return -1;
+        }
+    }
 
-	private void load() {
-		// Interestingly, NativeActivity uses a different method
-		// to find native code to execute, avoiding
-		// System.loadLibrary. The result is Java methods
-		// implemented in C with JNIEXPORT (and JNI_OnLoad) are not
-		// available unless an explicit call to System.loadLibrary
-		// is done. So we do it here, borrowing the name of the
-		// library from the same AndroidManifest.xml metadata used
-		// by NativeActivity.
-		try {
-			ActivityInfo ai = getPackageManager().getActivityInfo(
-					getIntent().getComponent(), PackageManager.GET_META_DATA);
-			if (ai.metaData == null) {
-				Log.e("Fyne", "loadLibrary: no manifest metadata found");
-				return;
-			}
-			String libName = ai.metaData.getString("android.app.lib_name");
-			System.loadLibrary(libName);
-		} catch (Exception e) {
-			Log.e("Fyne", "loadLibrary failed", e);
-		}
-	}
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		load();
-		super.onCreate(savedInstanceState);
-		setupEntry();
-		updateTheme(getResources().getConfiguration());
+    private void load() {
+        // Interestingly, NativeActivity uses a different method
+        // to find native code to execute, avoiding
+        // System.loadLibrary. The result is Java methods
+        // implemented in C with JNIEXPORT (and JNI_OnLoad) are not
+        // available unless an explicit call to System.loadLibrary
+        // is done. So we do it here, borrowing the name of the
+        // library from the same AndroidManifest.xml metadata used
+        // by NativeActivity.
+        try {
+            ActivityInfo ai = getPackageManager().getActivityInfo(
+                    getIntent().getComponent(), PackageManager.GET_META_DATA);
+            if (ai.metaData == null) {
+                Log.e("Fyne", "loadLibrary: no manifest metadata found");
+                return;
+            }
+            String libName = ai.metaData.getString("android.app.lib_name");
+            System.loadLibrary(libName);
+        } catch (Exception e) {
+            Log.e("Fyne", "loadLibrary failed", e);
+        }
+    }
 
-		View view = findViewById(android.R.id.content).getRootView();
-		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-			public void onLayoutChange (View v, int left, int top, int right, int bottom,
-			                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-				GoNativeActivity.this.updateLayout();
-			}
-		});
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        load();
+        super.onCreate(savedInstanceState);
+        setupEntry();
+        updateTheme(getResources().getConfiguration());
+
+        View view = findViewById(android.R.id.content).getRootView();
+        view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            public void onLayoutChange (View v, int left, int top, int right, int bottom,
+                                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                GoNativeActivity.this.updateLayout();
+            }
+        });
+        ProcessCameraProvider.configureInstance(Camera2Config.defaultConfig());
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
     }
 
     private void setupEntry() {
@@ -425,17 +766,17 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.addTextChangedListener(mTextWatcher);
             }
         });
-	}
+    }
 
-	@Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // unhandled request
-        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
+        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE && requestCode != CAMERA_OPEN_CODE) {
             return;
         }
 
-        // dialog was cancelled
         if (resultCode != Activity.RESULT_OK) {
+            // dialog was cancelled
             filePickerReturned("");
             return;
         }
@@ -659,5 +1000,43 @@ public class GoNativeActivity extends NativeActivity {
             lp.topMargin  = y;
             mA11yContainer.addView(v, lp);
         }
+    }
+
+    @Override
+    public Lifecycle getLifecycle() {
+        return lifecycleRegistry;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);
+    }
+
+    @Override
+    protected void onPause() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);
+        super.onPause();
+        doStopCameraPreview();
+    }
+
+    @Override
+    protected void onStop() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
+        super.onStop();
+        doStopCameraPreview();
+    }
+
+    @Override
+    protected void onDestroy() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
+        super.onDestroy();
+        doStopCameraPreview();
     }
 }
