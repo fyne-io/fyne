@@ -5,10 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/embedded"
 	intNoos "fyne.io/fyne/v2/internal/driver/embedded"
-	"github.com/stretchr/testify/assert"
+	_ "fyne.io/fyne/v2/test" // for test app initialization
 )
 
 func TestNoOSDriver(t *testing.T) {

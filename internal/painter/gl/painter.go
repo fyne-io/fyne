@@ -83,9 +83,24 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 }
 
 func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
-	if obj.Visible() {
-		p.drawObject(obj, pos, frame, clip)
+	if !obj.Visible() {
+		return
 	}
+
+	size := obj.Size()
+	var clipPos fyne.Position
+	var clipSize fyne.Size
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
+	} else {
+		clipSize = frame
+	}
+	if pos.Y > clipPos.Y+clipSize.Height || pos.Y+size.Height < clipPos.Y ||
+		pos.X > clipPos.X+clipSize.Width || pos.X+size.Width < clipPos.X {
+		return
+	}
+
+	p.drawObject(obj, pos, frame)
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {

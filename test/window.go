@@ -2,6 +2,7 @@ package test
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 )
 
 type window struct {
@@ -12,7 +13,7 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	canvas *canvas
+	canvas software.WindowlessCanvas
 	driver *driver
 	menu   *fyne.MainMenu
 }

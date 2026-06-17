@@ -3,10 +3,12 @@ package widget
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGridWrap_Focus(t *testing.T) {
@@ -16,7 +18,7 @@ func TestGridWrap_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(list.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -301,7 +303,7 @@ func TestGridWrap_TypedKey(t *testing.T) {
 	// want 3 columns to make assert navigaiton behavior
 	assert.Equal(t, 3, gridWrap.ColumnCount())
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	canvas.FocusNext()
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 	assert.Equal(t, 3, gridWrap.currentHighlight)

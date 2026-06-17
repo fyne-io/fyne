@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -238,7 +239,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 		defer w.Close()
 		w.Resize(fyne.NewSize(200, 150))
 
-		c := w.Canvas().(test.WindowlessCanvas)
+		c := w.Canvas().(software.WindowlessCanvas)
 		c.FocusNext()
 		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		sel.Disable()

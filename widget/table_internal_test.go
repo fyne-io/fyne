@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -125,7 +126,7 @@ func TestTable_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(table.MinSize().Max(fyne.NewSize(300, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()

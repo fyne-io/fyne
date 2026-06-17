@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -171,7 +172,7 @@ func TestTree_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -222,7 +223,7 @@ func TestTree_Keyboard(t *testing.T) {
 	defer window.Close()
 	window.Resize(tree.MinSize().Max(fyne.NewSize(250, 400)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	// Start with a fully collapsed tree

@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/driver"
-	"fyne.io/fyne/v2/test"
 )
 
 const (
@@ -22,7 +21,7 @@ const (
 )
 
 type touchCanvas struct {
-	test.WindowlessCanvas
+	software.WindowlessCanvas
 
 	lastTapDown    map[int]time.Time
 	lastTapDownPos map[int]fyne.Position

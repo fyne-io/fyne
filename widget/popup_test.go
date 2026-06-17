@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -402,7 +403,7 @@ func TestPopUp_ResizeBeforeShow_CanvasSizeZero(t *testing.T) {
 
 func TestModalPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
-	c := test.Canvas().(test.WindowlessCanvas)
+	c := test.Canvas().(software.WindowlessCanvas)
 	c.Resize(fyne.NewSquareSize(200))
 	pop := NewModalPopUp(label, c)
 	pop.Show()

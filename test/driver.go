@@ -1,11 +1,11 @@
 package test
 
 import (
-	"image"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
+	fynedriver "fyne.io/fyne/v2/driver"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -14,13 +14,13 @@ import (
 )
 
 // SoftwarePainter describes a simple type that can render canvases
-type SoftwarePainter interface {
-	Paint(fyne.Canvas) image.Image
-}
+//
+// Deprecated: Use driver.Painter instead.
+type SoftwarePainter = fynedriver.Painter
 
 type driver struct {
 	device       device
-	painter      SoftwarePainter
+	painter      fynedriver.Painter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 }
@@ -45,7 +45,7 @@ func NewDriver() fyne.Driver {
 
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
-func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
+func NewDriverWithPainter(painter fynedriver.Painter) fyne.Driver {
 	return &driver{painter: painter}
 }
 
@@ -61,8 +61,13 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*canvas)
-	pos := intdriver.AbsolutePositionForObject(co, tc.objectTrees())
+	overlays := c.Overlays().List()
+	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
+	if content := c.Content(); content != nil {
+		trees = append(trees, content)
+	}
+	trees = append(trees, overlays...)
+	pos := intdriver.AbsolutePositionForObject(co, trees)
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
 }
@@ -81,13 +86,11 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*canvas)
-	if d.painter != nil {
-		c.painter = d.painter
-	} else {
-		c.painter = software.NewPainter()
+	p := d.painter
+	if p == nil {
+		p = software.NewPainter()
 	}
-
+	c := NewCanvasWithPainter(p)
 	w := &window{canvas: c, driver: d, title: title}
 
 	d.windowsMutex.Lock()

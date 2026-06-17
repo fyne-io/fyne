@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -544,7 +545,7 @@ func TestMenuBar_Toggle(t *testing.T) {
 		menuBar.Resize(fyne.NewSize(300, 0).Max(menuBar.MinSize()))
 
 		menuBar.Toggle()
-		c.(test.WindowlessCanvas).FocusNext()
+		c.(software.WindowlessCanvas).FocusNext()
 		require.True(t, menuBar.IsActive())
 		test.AssertRendersToMarkup(t, "menu_bar_toggle_second_item_active.xml", c)
 

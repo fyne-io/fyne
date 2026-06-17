@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -17,7 +18,7 @@ func TestCheckGroup_FocusRendering(t *testing.T) {
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		test.AssertRendersToMarkup(t, "check_group/focus_none_focused_none_selected.xml", canvas)
 		canvas.FocusNext()
 		test.AssertRendersToMarkup(t, "check_group/focus_a_focused_none_selected.xml", canvas)
@@ -42,7 +43,7 @@ func TestCheckGroup_FocusRendering(t *testing.T) {
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		canvas.FocusNext()
 		check.Disable()
 		test.AssertRendersToMarkup(t, "check_group/focus_disabled_none_selected.xml", canvas)
@@ -56,7 +57,7 @@ func TestCheckGroup_FocusRendering(t *testing.T) {
 		defer window.Close()
 		window.Resize(check.MinSize().Max(fyne.NewSize(150, 200)))
 
-		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas := window.Canvas().(software.WindowlessCanvas)
 		check.Disable()
 		test.AssertRendersToMarkup(t, "check_group/disabled_none_selected.xml", canvas)
 		check.Append("Option C")
@@ -170,7 +171,7 @@ func TestCheckGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
 	var empty []string
 	assert.Equal(t, empty, check.Selected)
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	canvas.FocusNext()
 	canvas.FocusNext()
 	test.Type(canvas.Focused(), " ")

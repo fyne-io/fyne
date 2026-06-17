@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -672,7 +673,7 @@ func TestList_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(list.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
