@@ -476,7 +476,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
 
-	pop := newModalPopUp(label, win.Canvas())
+	pop := NewModalPopUp(label, win.Canvas())
 
 	size := fyne.NewSize(50, 48)
 	pop.Resize(size)
