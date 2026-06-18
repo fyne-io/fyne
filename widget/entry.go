@@ -88,7 +88,7 @@ type Entry struct {
 	dirty               bool
 	focused, hasFocused bool
 	text                RichText
-	placeholder         RichText
+	placeholderWidget   RichText
 	content             *entryContent
 	scroller            *widget.Scroll
 
@@ -510,7 +510,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
 
 	e.placeholderProvider().Segments[0].(*TextSegment).Text = text
-	e.placeholder.updateRowBounds()
+	e.placeholderWidget.updateRowBounds()
 	e.placeholderProvider().Refresh()
 }
 
@@ -1046,25 +1046,25 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *RichText {
-	if len(e.placeholder.Segments) > 0 {
-		return &e.placeholder
+	if len(e.placeholderWidget.Segments) > 0 {
+		return &e.placeholderWidget
 	}
 
-	e.placeholder.Scroll = widget.ScrollNone
-	e.placeholder.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
+	e.placeholderWidget.Scroll = widget.ScrollNone
+	e.placeholderWidget.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
 	style.TextStyle = e.TextStyle
 
-	e.placeholder.Segments = []RichTextSegment{
+	e.placeholderWidget.Segments = []RichTextSegment{
 		&TextSegment{
 			Style: style,
 			Text:  e.PlaceHolder,
 		},
 	}
 
-	return &e.placeholder
+	return &e.placeholderWidget
 }
 
 func (e *Entry) registerShortcut() {
@@ -1684,9 +1684,9 @@ func (r *entryRenderer) Refresh() {
 
 	r.entry.syncSegments()
 	r.entry.text.updateRowBounds()
-	r.entry.placeholder.updateRowBounds()
+	r.entry.placeholderWidget.updateRowBounds()
 	r.entry.text.Refresh()
-	r.entry.placeholder.Refresh()
+	r.entry.placeholderWidget.Refresh()
 
 	th := r.entry.Theme()
 	inputBorder := th.Size(theme.SizeNameInputBorder)

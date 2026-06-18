@@ -419,10 +419,10 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
 
 	w := test.NewTempWindow(t, e)
-	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
 
 	w.Canvas().Focus(e)
-	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
 }
 
 func TestEntry_Tab(t *testing.T) {
