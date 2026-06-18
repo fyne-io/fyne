@@ -292,7 +292,7 @@ func (e *Entry) DragEnd() {
 // It updates the selection accordingly.
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.dragged(d)
+	e.sel.Dragged(d)
 	e.updateMousePointer(d.Position, false)
 }
 
