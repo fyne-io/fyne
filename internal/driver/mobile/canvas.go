@@ -127,7 +127,7 @@ func (c *canvas) Scale() float32 {
 }
 
 func (c *canvas) SetContent(content fyne.CanvasObject) {
-	c.setContent(content)
+	c.applyContent(content)
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 	c.SetDirty()
 }
@@ -142,6 +142,11 @@ func (c *canvas) SetOnTypedRune(typed func(rune)) {
 
 func (c *canvas) Size() fyne.Size {
 	return c.size
+}
+
+func (c *canvas) applyContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
 }
 
 func (c *canvas) applyThemeOutOfTreeObjects() {
@@ -168,11 +173,6 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 func (c *canvas) overlayChanged() {
 	c.device.handleKeyboard(c.Focused())
 	c.SetDirty()
-}
-
-func (c *canvas) setContent(content fyne.CanvasObject) {
-	c.content = content
-	c.SetContentTreeAndFocusMgr(content)
 }
 
 func (c *canvas) setMenu(menu fyne.CanvasObject) {
