@@ -517,10 +517,10 @@ func (e *Entry) SetPlaceHolder(text string) {
 // SetText manually sets the text of the Entry to the given text value.
 // Calling SetText resets all undo history.
 func (e *Entry) SetText(text string) {
-	e.setText(text, false)
+	e.applyText(text, false)
 }
 
-func (e *Entry) setText(text string, fromBinding bool) {
+func (e *Entry) applyText(text string, fromBinding bool) {
 	e.Theme() // setup theme cache before locking
 	e.updateTextAndRefresh(text, fromBinding)
 	e.updateCursorAndSelection()
@@ -1370,7 +1370,7 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 	if err != nil {
 		return
 	}
-	e.setText(val, true)
+	e.applyText(val, true)
 }
 
 func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
