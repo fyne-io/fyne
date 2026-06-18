@@ -54,7 +54,7 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 	ret := &canvas{
 		Canvas: common.Canvas{
 			OnFocus:   d.handleKeyboard,
-			OnUnfocus: d.hideVirtualKeyboard,
+			OnUnfocus: d.HideVirtualKeyboard,
 		},
 		device:         d,
 		lastTapDown:    make(map[int]time.Time),

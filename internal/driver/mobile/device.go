@@ -21,7 +21,10 @@ var (
 )
 
 // Declare conformity with Device
-var _ fyne.Device = (*device)(nil)
+var (
+	_ fyne.Device   = (*device)(nil)
+	_ mobile.Device = (*device)(nil)
+)
 
 func (*device) Locale() fyne.Locale {
 	return lang.SystemLocale()
@@ -57,7 +60,14 @@ func (d *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
 }
 
 func (d *device) HideVirtualKeyboard() {
-	d.hideVirtualKeyboard()
+	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
+		if drv.app == nil { // not yet running
+			return
+		}
+
+		drv.app.HideVirtualKeyboard()
+		d.keyboardShown = false
+	}
 }
 
 func (d *device) handleKeyboard(obj fyne.Focusable) {
@@ -72,18 +82,7 @@ func (d *device) handleKeyboard(obj fyne.Focusable) {
 			d.showVirtualKeyboard(mobile.DefaultKeyboard)
 		}
 	} else {
-		d.hideVirtualKeyboard()
-	}
-}
-
-func (d *device) hideVirtualKeyboard() {
-	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
-		if drv.app == nil { // not yet running
-			return
-		}
-
-		drv.app.HideVirtualKeyboard()
-		d.keyboardShown = false
+		d.HideVirtualKeyboard()
 	}
 }
 
