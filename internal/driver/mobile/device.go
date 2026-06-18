@@ -52,11 +52,19 @@ func (*device) HasKeyboard() bool {
 }
 
 func (d *device) ShowVirtualKeyboard() {
-	d.showVirtualKeyboard(mobile.DefaultKeyboard)
+	d.ShowVirtualKeyboardType(mobile.DefaultKeyboard)
 }
 
 func (d *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
-	d.showVirtualKeyboard(keyboard)
+	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
+		if drv.app == nil { // not yet running
+			fyne.LogError("Cannot show keyboard before app is running", nil)
+			return
+		}
+
+		d.keyboardShown = true
+		drv.app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
+	}
 }
 
 func (d *device) HideVirtualKeyboard() {
@@ -77,23 +85,11 @@ func (d *device) handleKeyboard(obj fyne.Focusable) {
 	}
 	if obj != nil && !isDisabled {
 		if keyb, ok := obj.(mobile.Keyboardable); ok {
-			d.showVirtualKeyboard(keyb.Keyboard())
+			d.ShowVirtualKeyboardType(keyb.Keyboard())
 		} else {
-			d.showVirtualKeyboard(mobile.DefaultKeyboard)
+			d.ShowVirtualKeyboardType(mobile.DefaultKeyboard)
 		}
 	} else {
 		d.HideVirtualKeyboard()
-	}
-}
-
-func (d *device) showVirtualKeyboard(keyboard mobile.KeyboardType) {
-	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
-		if drv.app == nil { // not yet running
-			fyne.LogError("Cannot show keyboard before app is running", nil)
-			return
-		}
-
-		d.keyboardShown = true
-		drv.app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
 	}
 }
