@@ -36,8 +36,7 @@ func (e *Entry) Validate() (err error) {
 	return err
 }
 
-// validate works like Validate but only updates the internal state and does not refresh.
-func (e *Entry) validate() {
+func (e *Entry) validateWithoutRefresh() {
 	var err error
 
 	if e.Validator != nil {

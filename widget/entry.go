@@ -321,7 +321,7 @@ func (e *Entry) FocusLost() {
 		e.selectKeyDown = false
 	})
 	if e.Validator != nil {
-		e.validate()
+		e.validateWithoutRefresh()
 		e.Refresh()
 	}
 	if e.onFocusChanged != nil {
@@ -540,7 +540,7 @@ func (e *Entry) Append(text string) {
 	e.undoStack.Clear()
 
 	if changed {
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -735,7 +735,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 	cb := e.OnChanged
 	if changed {
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -911,7 +911,7 @@ func (e *Entry) TypedRune(r rune) {
 		Text:     runes,
 	})
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content)
 	}
@@ -954,7 +954,7 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	content := e.Text
 	cb := e.OnChanged
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content)
 	}
@@ -1036,7 +1036,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	e.syncSelectable()
 	cb := e.OnChanged
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content) // We know that the text has changed.
 	}
@@ -1238,7 +1238,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		content := e.Text
 		cb := e.OnChanged
 
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -1366,7 +1366,7 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 
 	val, err := textSource.Get()
 	e.conversionError = err
-	e.validate()
+	e.validateWithoutRefresh()
 	if err != nil {
 		return
 	}
@@ -1450,7 +1450,7 @@ func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 		callback = e.OnChanged
 	}
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if callback != nil {
 		callback(text)
 	}
@@ -1768,7 +1768,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.Size())
 
-		r.entry.validate()
+		r.entry.validateWithoutRefresh()
 		r.Refresh()
 	}
 }
