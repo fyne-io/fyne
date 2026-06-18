@@ -49,7 +49,7 @@ func TestTextGrid_CursorLocationForPosition(t *testing.T) {
 	assert.Equal(t, 1, row)
 	assert.Equal(t, 2, col)
 
-	grid.scroll.ScrollToOffset(fyne.NewPos(20, 0))
+	grid.scroller.ScrollToOffset(fyne.NewPos(20, 0))
 	row, col = grid.CursorLocationForPosition(fyne.NewPos(0, 20))
 	assert.Equal(t, 1, row)
 	assert.Equal(t, 2, col)
@@ -80,14 +80,14 @@ func TestTextGrid_Scroll(t *testing.T) {
 	scrolling.Scroll = widget.ScrollBoth
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
-	scrolling.scroll.ScrollToTop()
+	scrolling.scroller.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
 	scrolling = NewTextGrid()
 	scrolling.Scroll = widget.ScrollBoth
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.SetText("Something\nElse")
-	scrolling.scroll.ScrollToTop()
+	scrolling.scroller.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
 	scrolling.Scroll = widget.ScrollNone
@@ -105,7 +105,7 @@ func TestTextGrid_ScrollToTop(t *testing.T) {
 	scrolling.Scroll = widget.ScrollBoth
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
-	scrolling.scroll.ScrollToBottom()
+	scrolling.scroller.ScrollToBottom()
 	scrolling.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
@@ -113,7 +113,7 @@ func TestTextGrid_ScrollToTop(t *testing.T) {
 	scrolling.Scroll = widget.ScrollBoth
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.SetText("Something\nElse")
-	scrolling.scroll.ScrollToBottom()
+	scrolling.scroller.ScrollToBottom()
 	scrolling.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
@@ -128,7 +128,7 @@ func TestTextGrid_ScrollToBottom(t *testing.T) {
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.Refresh()
 	scrolling.ScrollToBottom()
-	scrolling.scroll.ScrollToTop()
+	scrolling.scroller.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 
 	scrolling = NewTextGrid()
@@ -136,7 +136,7 @@ func TestTextGrid_ScrollToBottom(t *testing.T) {
 	scrolling.Resize(fyne.NewSize(50, 20))
 	scrolling.SetText("Something\nElse")
 	scrolling.ScrollToBottom()
-	scrolling.scroll.ScrollToTop()
+	scrolling.scroller.ScrollToTop()
 	test.AssertObjectRendersToMarkup(t, "textgrid/scroll.xml", scrolling)
 }
 
