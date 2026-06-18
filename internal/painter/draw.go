@@ -63,7 +63,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(arc.FillColor)
 		// rasterx.AddArc is not used because it does not support rounded corners
-		drawRoundArc(filler, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
+		drawRoundArcUsingAdder(centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius), filler)
 		filler.Draw()
 	}
 
@@ -73,7 +73,7 @@ func DrawArc(arc *canvas.Arc, vectorPad float32, scale func(float32) float32) *i
 		dasher.SetColor(arc.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(stroke*64), 0, nil, nil, nil, 0, nil, 0)
 		// rasterx.AddArc is not used because it does not support rounded corners
-		drawRoundArc(dasher, centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius))
+		drawRoundArcUsingAdder(centerX, centerY, float64(outerRadius), float64(innerRadius), startRad, sweep, float64(cornerRadius), dasher)
 		dasher.Draw()
 	}
 
@@ -170,7 +170,7 @@ func DrawPolygon(polygon *canvas.RegularPolygon, vectorPad float32, scale func(f
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, filler)
+		drawRegularPolygonUsingAdder(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, filler)
 		filler.Draw()
 	}
 
@@ -178,7 +178,7 @@ func DrawPolygon(polygon *canvas.RegularPolygon, vectorPad float32, scale func(f
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, dasher)
+		drawRegularPolygonUsingAdder(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, dasher)
 		dasher.Draw()
 	}
 
@@ -238,7 +238,7 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawArbitraryPolygon(xScaled, yScaled, cornerRadiiScaled, filler)
+		drawArbitraryPolygonUsingAdder(xScaled, yScaled, cornerRadiiScaled, filler)
 		filler.Draw()
 	}
 
@@ -246,7 +246,7 @@ func DrawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, vectorPad float32, s
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
-		drawArbitraryPolygon(xScaled, yScaled, cornerRadiiScaled, dasher)
+		drawArbitraryPolygonUsingAdder(xScaled, yScaled, cornerRadiiScaled, dasher)
 		dasher.Draw()
 	}
 
@@ -433,9 +433,9 @@ func DrawEllipse(ellipse *canvas.Ellipse, vectorPad float32, scale func(float32)
 	return raw
 }
 
-// drawRegularPolygon draws a regular n-sides centered at (cx,cy) with
+// drawRegularPolygonUsingAdder draws a regular n-sides centered at (cx,cy) with
 // radius, rounded corners of cornerRadius, rotated by rot degrees.
-func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
+func drawRegularPolygonUsingAdder(cx, cy, radius, cornerRadius, rot float64, sides int, p rasterx.Adder) {
 	if sides < 3 || radius <= 0 {
 		return
 	}
@@ -544,7 +544,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	p.Stop(true)
 }
 
-func drawArbitraryPolygon(xs, ys, radii []float64, p rasterx.Adder) {
+func drawArbitraryPolygonUsingAdder(xs, ys, radii []float64, p rasterx.Adder) {
 	num := len(xs)
 	if num < 3 {
 		return
@@ -636,9 +636,9 @@ func drawArbitraryPolygon(xs, ys, radii []float64, p rasterx.Adder) {
 	p.Stop(true)
 }
 
-// drawRoundArc constructs a rounded pie slice or annular sector
+// drawRoundArcUsingAdder constructs a rounded pie slice or annular sector
 // it uses the Unit circle coordinate system
-func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr float64) {
+func drawRoundArcUsingAdder(cx, cy, outer, inner, start, sweep, cr float64, adder rasterx.Adder) {
 	if sweep == 0 {
 		return
 	}
