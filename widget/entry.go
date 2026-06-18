@@ -87,7 +87,7 @@ type Entry struct {
 
 	dirty               bool
 	focused, hasFocused bool
-	text                RichText
+	textWidget          RichText
 	placeholderWidget   RichText
 	content             *entryContent
 	scroller            *widget.Scroll
@@ -1320,18 +1320,18 @@ func (e *Entry) syncSelectable() {
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
-	if len(e.text.Segments) > 0 {
-		return &e.text
+	if len(e.textWidget.Segments) > 0 {
+		return &e.textWidget
 	}
 
 	if e.Text != "" {
 		e.dirty = true
 	}
 
-	e.text.Scroll = widget.ScrollNone
-	e.text.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
-	e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
-	return &e.text
+	e.textWidget.Scroll = widget.ScrollNone
+	e.textWidget.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
+	e.textWidget.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
+	return &e.textWidget
 }
 
 // textWrap calculates the wrapping that we should apply.
@@ -1423,7 +1423,7 @@ func (e *Entry) updateText(text string, fromBinding bool) bool {
 		}
 	}
 	e.syncSegments()
-	e.text.updateRowBounds()
+	e.textWidget.updateRowBounds()
 
 	if e.Text != "" {
 		e.dirty = true
@@ -1683,9 +1683,9 @@ func (r *entryRenderer) Refresh() {
 	wrapping := r.entry.Wrapping
 
 	r.entry.syncSegments()
-	r.entry.text.updateRowBounds()
+	r.entry.textWidget.updateRowBounds()
 	r.entry.placeholderWidget.updateRowBounds()
-	r.entry.text.Refresh()
+	r.entry.textWidget.Refresh()
 	r.entry.placeholderWidget.Refresh()
 
 	th := r.entry.Theme()
@@ -1839,7 +1839,7 @@ func (r *entryContentRenderer) MinSize() fyne.Size {
 	minSize := r.content.entry.placeholderProvider().MinSize()
 
 	if r.content.entry.textProvider().len() > 0 {
-		minSize = r.content.entry.text.MinSize()
+		minSize = r.content.entry.textWidget.MinSize()
 	}
 
 	return minSize
@@ -1929,7 +1929,7 @@ func (r *entryContentRenderer) moveCursor() {
 	textSize := th.Size(theme.SizeNameText)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
+	lineHeight := r.content.entry.textWidget.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
 	r.cursor.Move(r.content.entry.CursorPosition())
 
