@@ -19,6 +19,7 @@ const (
 	float                 = gl.Float
 	fragmentShader        = gl.FragmentShader
 	front                 = gl.Front
+	back                  = gl.Back
 	glFalse               = gl.False
 	linkStatus            = gl.LinkStatus
 	one                   = gl.One

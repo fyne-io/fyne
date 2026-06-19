@@ -41,6 +41,7 @@ const (
 	SrcAlpha         = 0x0302
 	OneMinusSrcAlpha = 0x0303
 	Front            = 0x0404
+	Back             = 0x0405
 	DepthTest        = 0x0B71
 	Blend            = 0x0BE2
 	ScissorTest      = 0x0C11

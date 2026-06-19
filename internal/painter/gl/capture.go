@@ -50,6 +50,9 @@ func (p *painter) Capture(c fyne.Canvas) image.Image {
 		p.logError()
 		p.ctx.ReadPixels(0, 0, width, height, colorFormatRGBA, unsignedByte, pixels)
 		p.logError()
+		// Restore the default read buffer for future reads.
+		p.ctx.ReadBuffer(back)
+		p.logError()
 	})
 
 	return &captureImage{
