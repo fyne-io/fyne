@@ -17,7 +17,10 @@ type RadioGroup struct {
 	OnChanged  func(string) `json:"-"`
 	Options    []string
 	Selected   string
-	Wrapping   fyne.TextWrap
+	// The wrapping of the Options Text
+	//
+	// Since: 2.8
+	Wrapping fyne.TextWrap
 
 	// this index is ONE-BASED so the default zero-value is unselected
 	// use r.selectedIndex(), r.setSelectedIndex(int) to maniupulate this field
