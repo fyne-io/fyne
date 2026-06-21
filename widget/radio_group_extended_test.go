@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"testing"
 
@@ -167,13 +168,13 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Test"}, func(string) {})
 	render := cache.Renderer(test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)).(*radioItemRenderer)
 
-	textSize := render.label.Size()
+	textSize := render.label.Theme()
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
 		render.Refresh()
-		customTextSize = render.label.Size()
+		customTextSize = render.label.Theme()
 	})
-
+	fmt.Println(textSize, customTextSize)
 	assert.NotEqual(t, textSize, customTextSize)
 }
 

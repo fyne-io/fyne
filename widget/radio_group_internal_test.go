@@ -298,11 +298,11 @@ func TestRadioGroupRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadioGroup([]string{"Test"}, func(string) {})
 	render := radioGroupTestItemRenderer(t, radio, 0)
 
-	textSize := render.label.Size()
+	textSize := render.label.Theme()
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
 		render.Refresh()
-		customTextSize = render.label.Size()
+		customTextSize = render.label.Theme()
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
