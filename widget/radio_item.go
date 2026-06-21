@@ -17,8 +17,8 @@ var (
 	_ fyne.Focusable    = (*radioItem)(nil)
 )
 
-func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
-	i := &radioItem{Label: label, onTap: onTap}
+func newRadioItem(label string, Wrapping fyne.TextWrap, onTap func(*radioItem)) *radioItem {
+	i := &radioItem{Label: label, onTap: onTap, Wrapping: Wrapping}
 	i.ExtendBaseWidget(i)
 	return i
 }
@@ -29,6 +29,7 @@ type radioItem struct {
 
 	Label    string
 	Selected bool
+	Wrapping fyne.TextWrap
 
 	focused bool
 	hovered bool
@@ -37,10 +38,10 @@ type radioItem struct {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	txt := canvas.Text{Alignment: fyne.TextAlignLeading}
-	txt.TextSize = i.Theme().Size(theme.SizeNameText)
-	r := &radioItemRenderer{item: i, label: &txt}
-	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, &txt})
+	txt := NewRichTextWithText(i.Label)
+	txt.Wrapping = i.Wrapping
+	r := &radioItemRenderer{item: i, label: txt}
+	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, txt})
 	r.update()
 	return r
 }
@@ -124,7 +125,7 @@ type radioItemRenderer struct {
 
 	focusIndicator canvas.Circle
 	icon, over     canvas.Image
-	label          *canvas.Text
+	label          *RichText
 }
 
 func (r *radioItemRenderer) Layout(size fyne.Size) {
@@ -137,7 +138,7 @@ func (r *radioItemRenderer) Layout(size fyne.Size) {
 	r.focusIndicator.Resize(focusIndicatorSize)
 	r.focusIndicator.Move(fyne.NewPos(borderSize, (size.Height-focusIndicatorSize.Height)/2))
 
-	labelSize := fyne.NewSize(size.Width, size.Height)
+	labelSize := fyne.NewSize(size.Width-iconInlineSize, size.Height-iconInlineSize)
 	r.label.Resize(labelSize)
 	r.label.Move(fyne.NewPos(focusIndicatorSize.Width+th.Size(theme.SizeNamePadding), 0))
 
@@ -166,12 +167,13 @@ func (r *radioItemRenderer) update() {
 	th := r.item.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	r.label.Text = r.item.Label
-	r.label.TextSize = th.Size(theme.SizeNameText)
+	r.label.Segments[0].(*TextSegment).Text = r.item.Label
+	r.label.Segments[0].(*TextSegment).Style.SizeName = theme.SizeNameText
+	r.label.Wrapping = r.item.Wrapping
 	if r.item.Disabled() {
-		r.label.Color = th.Color(theme.ColorNameDisabled, v)
+		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	} else {
-		r.label.Color = th.Color(theme.ColorNameForeground, v)
+		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	}
 
 	out := theme.NewThemedResource(th.Icon(theme.IconNameRadioButton))
