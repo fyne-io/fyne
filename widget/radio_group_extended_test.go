@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"testing"
 
@@ -174,7 +173,6 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 		render.Refresh()
 		customTextSize = render.label.Theme()
 	})
-	fmt.Println(textSize, customTextSize)
 	assert.NotEqual(t, textSize, customTextSize)
 }
 
