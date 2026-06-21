@@ -54,6 +54,7 @@ type painter struct {
 	arcProgram              programState
 	bezierCurveProgram      programState
 	arbitraryPolygonProgram programState
+	ellipseProgram          programState
 	shaderPrograms          map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale                float32
 	pixScale                float32 // pre-calculate scale*texScale for each draw

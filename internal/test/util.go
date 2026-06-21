@@ -23,14 +23,20 @@ func pixCloseEnough(a, b []uint8) bool {
 		}
 		// Allow a small delta for rendering variation.
 		delta := int(v) - int(w) // use int to avoid overflow
-		if delta > 4 || delta < -4 {
+		if delta < 0 {
+			delta = -delta
+		}
+
+		if delta > 30 {
 			return false
 		}
-		mismatches++
+
+		mismatches += delta
 	}
 
-	// Allow up to 1% of pixels to mismatch.
-	return mismatches == 0 || mismatches < len(a)/100
+	// Allow an average of 1/2 bit difference per byte.
+	// This is should be more reliable for images than a percentage of mismatched bytes.
+	return float64(mismatches)/float64(len(a)) < 0.5
 }
 
 // NewCheckedImage returns a new black/white checked image with the specified size

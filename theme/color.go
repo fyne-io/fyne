@@ -217,7 +217,7 @@ var (
 	colorDarkScrollBar                 = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0x99}
 	colorDarkScrollBarBackground       = color.NRGBA{R: 0x20, G: 0x20, B: 0x23, A: 0xff}
 	colorDarkSeparator                 = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff}
-	colorDarkShadow                    = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x66}
+	colorDarkShadow                    = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x77}
 	colorDarkSuccess                   = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
 	colorDarkWarning                   = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 
@@ -259,7 +259,7 @@ var (
 	colorLightSelectionRed              = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0x3f}
 	colorLightSelectionYellow           = color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0x3f}
 	colorLightSeparator                 = color.NRGBA{R: 0xe3, G: 0xe3, B: 0xe3, A: 0xff}
-	colorLightShadow                    = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x33}
+	colorLightShadow                    = color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x44}
 	colorLightSuccess                   = color.NRGBA{R: 0x43, G: 0xf4, B: 0x36, A: 0xff}
 	colorLightWarning                   = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
 )

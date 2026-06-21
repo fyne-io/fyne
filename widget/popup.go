@@ -110,9 +110,11 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 	p.ExtendBaseWidget(p)
 	background := canvas.NewRectangle(th.Color(theme.ColorNameOverlayBackground, v))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
+	background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
 	objects := []fyne.CanvasObject{background, p.Content}
 	return &popUpRenderer{
-		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
+		widget.NewBaseRenderer(objects),
 		popUpBaseRenderer{popUp: p, background: background},
 	}
 }
@@ -179,7 +181,7 @@ func (r *popUpBaseRenderer) padding() fyne.Size {
 }
 
 type popUpRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 	popUpBaseRenderer
 }
 
@@ -194,7 +196,6 @@ func (r *popUpRenderer) Layout(s fyne.Size) {
 	r.popUp.Content.Resize(size)
 
 	r.background.Resize(size)
-	r.LayoutShadow(size, fyne.Position{})
 }
 
 func (r *popUpRenderer) MinSize() fyne.Size {
@@ -208,6 +209,8 @@ func (r *popUpRenderer) Refresh() {
 	th := r.popUp.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
+	r.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	r.background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
 	expectedContentSize := innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
@@ -216,7 +219,6 @@ func (r *popUpRenderer) Refresh() {
 	}
 	r.popUp.Content.Refresh()
 	r.background.Refresh()
-	r.ShadowingRenderer.RefreshShadow()
 }
 
 func withRelativePosition(rel fyne.Position, to fyne.CanvasObject, f func(position fyne.Position)) {

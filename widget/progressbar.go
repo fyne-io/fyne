@@ -61,7 +61,7 @@ func (p *progressRenderer) updateBar() {
 	p.label.Text = strconv.Itoa(int(p.ratio*100)) + "%"
 }
 
-// Layout the components of the check widget
+// Layout the components of the progress bar widget
 func (p *progressRenderer) Layout(size fyne.Size) {
 	p.calculateRatio()
 

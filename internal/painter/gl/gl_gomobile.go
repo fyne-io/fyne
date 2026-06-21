@@ -132,6 +132,14 @@ func (p *painter) Init() {
 			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		}
+
+		p.ellipseProgram = programState{
+			ref:        p.createProgram("ellipse_es"),
+			buff:       p.createBuffer(16),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		}
+
 		compiled = []programState{
 			p.program,
 			p.blurProgram,
@@ -142,6 +150,7 @@ func (p *painter) Init() {
 			p.arcProgram,
 			p.bezierCurveProgram,
 			p.arbitraryPolygonProgram,
+			p.ellipseProgram,
 		}
 	}
 
@@ -154,6 +163,7 @@ func (p *painter) Init() {
 	p.arcProgram = compiled[6]
 	p.bezierCurveProgram = compiled[7]
 	p.arbitraryPolygonProgram = compiled[8]
+	p.ellipseProgram = compiled[9]
 }
 
 type mobileContext struct {

@@ -33,9 +33,11 @@ type canvas struct {
 	touched        map[int]mobile.Touchable
 	windowHead     fyne.CanvasObject
 
-	dragOffset fyne.Position
-	dragStart  fyne.Position
-	dragging   fyne.Draggable
+	dragOffset     fyne.Position
+	dragStart      fyne.Position
+	dragging       fyne.Draggable
+	draggingOuter  fyne.Draggable
+	otherDirection container.ScrollDirection
 
 	onTypedKey  func(event *fyne.KeyEvent)
 	onTypedRune func(rune)
@@ -220,6 +222,7 @@ func (c *canvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDown[tapID] = time.Now()
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
+	c.draggingOuter = nil
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
@@ -269,6 +272,23 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 
 		return false
 	})
+	var scrollOtherDirection fyne.CanvasObject
+	if scr, ok := co.(*container.Scroll); ok {
+		if scr.Direction == container.ScrollHorizontalOnly {
+			c.otherDirection = container.ScrollVerticalOnly
+		} else if scr.Direction == container.ScrollVerticalOnly {
+			c.otherDirection = container.ScrollHorizontalOnly
+		}
+		if c.otherDirection != container.ScrollBoth {
+			scrollOtherDirection, _, _ = c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+				if scr, ok := object.(*container.Scroll); ok {
+					return scr.Direction == c.otherDirection || scr.Direction == container.ScrollBoth
+				}
+
+				return false
+			})
+		}
+	}
 
 	if c.touched[tapID] != nil {
 		if touch, ok := co.(mobile.Touchable); !ok || c.touched[tapID] != touch {
@@ -286,6 +306,9 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 			c.dragging = drag
 			c.dragOffset = previousPos.Subtract(objPos)
 			c.dragStart = co.Position()
+			if scrollOtherDirection != nil {
+				c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
+			}
 		} else {
 			return
 		}
@@ -297,6 +320,14 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	ev.Dragged = offset
 
 	dragCallback(c.dragging, ev)
+	if c.draggingOuter != nil {
+		if c.otherDirection == container.ScrollVerticalOnly {
+			ev.Dragged.DX = 0
+		} else {
+			ev.Dragged.DY = 0
+		}
+		dragCallback(c.draggingOuter, ev)
+	}
 }
 
 func (c *canvas) tapUp(pos fyne.Position, tapID int,
@@ -312,8 +343,18 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 		ev.Position = pos.Subtract(c.dragOffset).Add(draggedObjDelta)
 		ev.AbsolutePosition = pos
 		dragCallback(c.dragging, ev)
+		if c.draggingOuter != nil {
+			if c.otherDirection == container.ScrollVerticalOnly {
+				ev.Dragged.DX = 0
+			} else {
+				ev.Dragged.DY = 0
+			}
+			dragCallback(c.draggingOuter, ev)
+		}
 
 		c.dragging = nil
+		c.draggingOuter = nil
+		c.otherDirection = container.ScrollBoth
 		return
 	}
 

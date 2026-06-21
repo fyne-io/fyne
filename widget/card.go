@@ -41,7 +41,10 @@ func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	header.TextStyle.Bold = true
 	subHeader := canvas.NewText(c.Subtitle, header.Color)
 
-	objects := []fyne.CanvasObject{header, subHeader}
+	background := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
+	background.CornerRadius = th.Size(theme.SizeNameCardRadius)
+	widget.ApplyShadowForLevel(&background.Shadow, widget.CardLevel, th.Color(theme.ColorNameShadow, v))
+	objects := []fyne.CanvasObject{background, header, subHeader}
 	if c.Image != nil {
 		objects = append(objects, c.Image)
 	}
@@ -49,8 +52,8 @@ func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, c.Content)
 	}
 	r := &cardRenderer{
-		widget.NewShadowingRenderer(objects, widget.CardLevel),
-		header, subHeader, c,
+		widget.NewBaseRenderer(objects),
+		header, subHeader, c, background,
 	}
 	r.applyTheme()
 	return r
@@ -91,11 +94,13 @@ func (c *Card) SetTitle(text string) {
 }
 
 type cardRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 
 	header, subHeader *canvas.Text
 
 	card *Card
+
+	background *canvas.Rectangle
 }
 
 const (
@@ -107,7 +112,8 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 	padding := c.card.Theme().Size(theme.SizeNamePadding)
 	pos := fyne.NewSquareOffsetPos(padding / 2)
 	size = size.Subtract(fyne.NewSquareSize(padding))
-	c.LayoutShadow(size, pos)
+	c.background.Resize(size)
+	c.background.Move(pos)
 
 	if c.card.Image != nil {
 		c.card.Image.Move(pos)
@@ -207,18 +213,18 @@ func (c *cardRenderer) Refresh() {
 	c.subHeader.Text = c.card.Subtitle
 	c.subHeader.Refresh()
 
-	objects := []fyne.CanvasObject{c.header, c.subHeader}
+	objects := []fyne.CanvasObject{c.background, c.header, c.subHeader}
 	if c.card.Image != nil {
 		objects = append(objects, c.card.Image)
 	}
 	if c.card.Content != nil {
 		objects = append(objects, c.card.Content)
 	}
-	c.ShadowingRenderer.SetObjects(objects)
+	c.BaseRenderer.SetObjects(objects)
 
 	c.applyTheme()
 	c.Layout(c.card.Size())
-	c.ShadowingRenderer.RefreshShadow()
+	c.background.Refresh()
 	canvas.Refresh(c.card.super())
 }
 
@@ -238,4 +244,7 @@ func (c *cardRenderer) applyTheme() {
 	if c.card.Content != nil {
 		c.card.Content.Refresh()
 	}
+	c.background.FillColor = th.Color(theme.ColorNameBackground, v)
+	c.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	c.background.CornerRadius = th.Size(theme.SizeNameCardRadius)
 }

@@ -9,17 +9,7 @@
 				<rectangle fillColor="shadow" size="200x300"/>
 			</container>
 			<widget pos="23,78" size="153x142" type="*widget.PopUp">
-				<widget size="153x142" type="*widget.Shadow">
-					<radialGradient centerOffset="0.5,0.5" pos="-6,-4" size="8x8" startColor="shadow"/>
-					<linearGradient endColor="shadow" pos="1,-4" size="150x8"/>
-					<radialGradient centerOffset="-0.5,0.5" pos="152,-4" size="8x8" startColor="shadow"/>
-					<linearGradient angle="270" pos="152,3" size="8x138" startColor="shadow"/>
-					<radialGradient centerOffset="-0.5,-0.5" pos="152,142" size="8x8" startColor="shadow"/>
-					<linearGradient pos="1,142" size="150x8" startColor="shadow"/>
-					<radialGradient centerOffset="0.5,-0.5" pos="-6,142" size="8x8" startColor="shadow"/>
-					<linearGradient angle="270" endColor="shadow" pos="-6,3" size="8x138"/>
-				</widget>
-				<rectangle fillColor="overlayBackground" size="153x142"/>
+				<rectangle fillColor="overlayBackground" radius="5" shadowBlurRadius="14" shadowColor="shadow" shadowOffset="0,4" size="153x142"/>
 				<container size="153x142">
 					<spacer pos="59,-4" size="98x98"/>
 					<widget size="153x142" type="*dialog.themedBackground">

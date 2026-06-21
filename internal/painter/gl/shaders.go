@@ -47,6 +47,9 @@ var (
 
 	//go:embed shaders/arbitrary_polygon.frag
 	shaderArbitraryPolygonFrag []byte
+
+	//go:embed shaders/ellipse.frag
+	shaderEllipseFrag []byte
 )
 
 func shaderSourceNamed(name string) ([]byte, []byte) {
@@ -69,6 +72,8 @@ func shaderSourceNamed(name string) ([]byte, []byte) {
 		return shaderRectangleVert, shaderBezierCurveFrag
 	case "arbitrary_polygon":
 		return shaderRectangleVert, shaderArbitraryPolygonFrag
+	case "ellipse":
+		return shaderRectangleVert, shaderEllipseFrag
 	}
 	return nil, nil
 }

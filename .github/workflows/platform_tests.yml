@@ -42,6 +42,16 @@ jobs:
       - name: Tests
         run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" -covermode=atomic -coverprofile=coverage.out ./...
 
+      - name: Upload failed testdata
+        uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: failed-testdata-${{ matrix.os }}-${{ matrix.go-version }}
+          path: |
+            **/testdata/failed
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Wayland Tests
         run: go test -race -tags no_glfw,ci,wayland ./...
         if: ${{ runner.os == 'Linux' }}
@@ -75,3 +85,13 @@ jobs:
 
       - name: Tests
         run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...
+
+      - name: Upload failed testdata
+        uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: failed-testdata-windows-${{ matrix.go-version }}
+          path: |
+            **/testdata/failed
+          retention-days: 1
+          if-no-files-found: ignore

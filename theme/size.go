@@ -84,7 +84,7 @@ const (
 
 	// SizeNameModalBlurRadius is the name of theme lookup for blurring modal popup backgrounds.
 	//
-	// Since: 2.7
+	// Since: 2.8
 	SizeNameModalBlurRadius fyne.ThemeSizeName = "modalBlurRadius"
 
 	// SizeNameSelectionRadius is the name of theme lookup for selection corner radius.
@@ -121,6 +121,26 @@ const (
 	//
 	// Since: 2.8
 	SizeNameButtonRadius fyne.ThemeSizeName = "buttonRadius"
+
+	// SizeNameCardRadius is the name of theme lookup for card widget corner radius.
+	//
+	// Since: 2.8
+	SizeNameCardRadius fyne.ThemeSizeName = "cardRadius"
+
+	// SizeNameDialogRadius is the name of theme lookup for dialog and modal popup corner radius.
+	//
+	// Since: 2.8
+	SizeNameDialogRadius fyne.ThemeSizeName = "dialogRadius"
+
+	// SizeNamePopupRadius is the name of theme lookup for popup corner radius.
+	//
+	// Since: 2.8
+	SizeNamePopupRadius fyne.ThemeSizeName = "popupRadius"
+
+	// SizeNameMenuRadius is the name of theme lookup for menu corner radius.
+	//
+	// Since: 2.8
+	SizeNameMenuRadius fyne.ThemeSizeName = "menuRadius"
 )
 
 // CaptionTextSize returns the size for caption text.
@@ -270,6 +290,14 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return 14
 	case SizeNameWindowTitleBarHeight:
 		return 26
+	case SizeNameCardRadius:
+		return 5
+	case SizeNameDialogRadius:
+		return 10
+	case SizeNamePopupRadius:
+		return 5
+	case SizeNameMenuRadius:
+		return 3
 
 	default:
 		return 0

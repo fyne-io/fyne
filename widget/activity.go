@@ -99,6 +99,10 @@ func (a *activityRenderer) Destroy() {
 func (a *activityRenderer) Layout(size fyne.Size) {
 	a.maxRad = fyne.Min(size.Width, size.Height) / 2
 	a.bound = size
+
+	if a.parent.started && !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.drawStaticEllipsis()
+	}
 }
 
 func (a *activityRenderer) MinSize() fyne.Size {
@@ -162,12 +166,56 @@ func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
 
 func (a *activityRenderer) start() {
 	a.wasStarted = true
+	if !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.drawStaticEllipsis()
+		return
+	}
 	a.anim.Start()
 }
 
 func (a *activityRenderer) stop() {
 	a.wasStarted = false
 	a.anim.Stop()
+	if !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.hideDots()
+	}
+}
+
+// drawStaticEllipsis places the three dots in a horizontal row, like an
+// ellipsis. Used when animations are disabled so the widget still indicates
+// something is happening without any motion.
+func (a *activityRenderer) drawStaticEllipsis() {
+	th := a.parent.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	d := fyne.Min(a.bound.Width/4, a.bound.Height)
+	if d > th.Size(theme.SizeNameInlineIcon)/2 {
+		d -= innerPad
+	}
+	if d <= 0 {
+		a.hideDots()
+		return
+	}
+	radius := d / 2
+	totalW := 4 * d
+	startX := (a.bound.Width - totalW) / 2
+	cy := a.bound.Height / 2
+	fill := color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: a.maxCol.A}
+	for i, obj := range a.dots {
+		dot := obj.(*canvas.Circle)
+		cx := startX + radius + float32(i)*1.5*d
+		dot.Move(fyne.NewPos(cx-radius, cy-radius))
+		dot.Resize(fyne.NewSquareSize(d))
+		dot.FillColor = fill
+		dot.Refresh()
+	}
+}
+
+func (a *activityRenderer) hideDots() {
+	for _, obj := range a.dots {
+		dot := obj.(*canvas.Circle)
+		dot.Resize(fyne.NewSquareSize(0))
+		dot.Refresh()
+	}
 }
 
 func (a *activityRenderer) updateColor() {

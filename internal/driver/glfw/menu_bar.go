@@ -38,6 +38,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	cont := container.NewHBox(b.Items...)
 	background := canvas.NewRectangle(theme.Color(theme.ColorNameBackground))
+	widget.ApplyShadowForLevel(&background.Shadow, widget.MenuBarLevel, theme.Color(theme.ColorNameShadow))
 	underlay := &menuBarUnderlay{action: b.deactivate}
 	underlay.ExtendBaseWidget(underlay)
 	objects := []fyne.CanvasObject{underlay, background, cont}
@@ -45,7 +46,7 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, item.(*menuBarItem).Child())
 	}
 	return &menuBarRenderer{
-		widget.NewShadowingRenderer(objects, widget.MenuLevel),
+		widget.NewBaseRenderer(objects),
 		b,
 		background,
 		underlay,
@@ -118,7 +119,7 @@ func (b *MenuBar) toggle(item *menuBarItem) {
 }
 
 type menuBarRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 	b          *MenuBar
 	background *canvas.Rectangle
 	underlay   *menuBarUnderlay
@@ -126,7 +127,6 @@ type menuBarRenderer struct {
 }
 
 func (r *menuBarRenderer) Layout(size fyne.Size) {
-	r.LayoutShadow(size, fyne.NewPos(0, 0))
 	minSize := r.MinSize()
 	if size.Height != minSize.Height || size.Width < minSize.Width {
 		r.b.Resize(fyne.NewSize(fyne.Max(size.Width, minSize.Width), minSize.Height))
@@ -147,6 +147,8 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 		}
 		item.Child().Move(fyne.NewPos(item.Position().X+innerPadding, item.Size().Height))
 	}
+
+	r.background.Move(fyne.NewPos(0, 0))
 	r.background.Resize(size)
 }
 
@@ -157,8 +159,8 @@ func (r *menuBarRenderer) MinSize() fyne.Size {
 func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
 	r.background.FillColor = theme.Color(theme.ColorNameBackground)
+	r.background.Shadow.Color = theme.Color(theme.ColorNameShadow)
 	r.background.Refresh()
-	r.ShadowingRenderer.RefreshShadow()
 	canvas.Refresh(r.b)
 }
 

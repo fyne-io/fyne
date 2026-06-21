@@ -126,6 +126,13 @@ func (p *painter) Init() {
 		uniforms:   make(map[string]*uniformState),
 		attributes: make(map[string]Attribute),
 	}
+
+	p.ellipseProgram = programState{
+		ref:        p.createProgram("ellipse_es"),
+		buff:       p.createBuffer(16),
+		uniforms:   make(map[string]*uniformState),
+		attributes: make(map[string]Attribute),
+	}
 }
 
 type xjsContext struct{}
