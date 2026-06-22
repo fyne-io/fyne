@@ -36,7 +36,13 @@ func closestSupportedLocale(locs []string) fyne.Locale {
 		}
 		tags[i] = tag
 	}
-	best, _, _ := matcher.Match(tags...)
+	best, _, conf := matcher.Match(tags...)
+	// When confidence is No the matcher may pick a language that shares only a script
+	// (for example Serbian Cyrillic resolving to Russian). Prefer the default fallback
+	// in that case rather than presenting an unrelated language.
+	if conf == language.No && len(translated) > 0 {
+		best = translated[0]
+	}
 	return localeFromTag(best)
 }
 
