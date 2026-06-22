@@ -19,7 +19,7 @@ type RadioGroup struct {
 	Selected   string
 	// The wrapping of the Options Text
 	//
-	// Since: 2.8
+	// Since: 2.9
 	Wrapping fyne.TextWrap
 
 	// this index is ONE-BASED so the default zero-value is unselected
