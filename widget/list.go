@@ -334,6 +334,31 @@ func (l *List) GetScrollOffset() float32 {
 	return l.offsetY
 }
 
+// IsScrolledToTop reports whether the list is currently scrolled to the top.
+//
+// Since: 2.7
+func (l *List) IsScrolledToTop() bool {
+	if l.scroller == nil {
+		return true
+	}
+	return l.scroller.Offset.Y <= 0
+}
+
+// IsScrolledToBottom reports whether the list is currently scrolled to the bottom.
+//
+// Since: 2.7
+func (l *List) IsScrolledToBottom() bool {
+	if l.scroller == nil {
+		return true
+	}
+	viewHeight := l.scroller.Size().Height
+	contentHeight := l.contentMinSize().Height
+	if viewHeight >= contentHeight {
+		return true
+	}
+	return l.scroller.Offset.Y+viewHeight >= contentHeight
+}
+
 // TypedKey is called if a key event happens while this List is focused.
 func (l *List) TypedKey(event *fyne.KeyEvent) {
 	oldFocus := l.currentHighlight

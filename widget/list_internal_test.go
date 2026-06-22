@@ -251,6 +251,26 @@ func TestList_ScrollToTop(t *testing.T) {
 	assert.Equal(t, offset, list.scroller.Offset.Y)
 }
 
+func TestList_IsScrolledToTopAndBottom(t *testing.T) {
+	list := createList(1000)
+
+	assert.True(t, list.IsScrolledToTop())
+	assert.False(t, list.IsScrolledToBottom())
+
+	list.ScrollToBottom()
+	assert.False(t, list.IsScrolledToTop())
+	assert.True(t, list.IsScrolledToBottom())
+
+	list.ScrollToTop()
+	assert.True(t, list.IsScrolledToTop())
+	assert.False(t, list.IsScrolledToBottom())
+
+	small := createList(1)
+	small.Resize(fyne.NewSize(200, 500))
+	assert.True(t, small.IsScrolledToTop())
+	assert.True(t, small.IsScrolledToBottom())
+}
+
 func TestList_ScrollOffset(t *testing.T) {
 	list := createList(10)
 	list.Resize(fyne.NewSize(20, 15))
