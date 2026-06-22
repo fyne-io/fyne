@@ -56,7 +56,7 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	items := make([]fyne.CanvasObject, len(r.Options))
 	for i, option := range r.Options {
 		idx := i
-		items[idx] = newRadioItem(option, r.Wrapping, func(item *radioItem) {
+		items[idx] = newRadioItem(option, &r.Wrapping, func(item *radioItem) {
 			r.itemTapped(item, idx)
 		})
 	}
@@ -158,19 +158,18 @@ type radioGroupRenderer struct {
 }
 
 // Layout the components of the radio widget
-func (r *radioGroupRenderer) Layout(s fyne.Size) {
+func (r *radioGroupRenderer) Layout(size fyne.Size) {
 	count := 1
 	if len(r.items) > 0 {
 		count = len(r.items)
 	}
 	var itemHeight, itemWidth float32
-	minSize := s
 	if r.radio.Horizontal {
-		itemHeight = minSize.Height
-		itemWidth = minSize.Width / float32(count)
+		itemHeight = size.Height
+		itemWidth = size.Width / float32(count)
 	} else {
-		itemHeight = minSize.Height / float32(count)
-		itemWidth = minSize.Width
+		itemHeight = size.Height / float32(count)
+		itemWidth = size.Width
 	}
 
 	itemSize := fyne.NewSize(itemWidth, itemHeight)
@@ -217,7 +216,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			idx := i
-			item := newRadioItem(r.radio.Options[idx], r.radio.Wrapping, func(item *radioItem) {
+			item := newRadioItem(r.radio.Options[idx], &r.radio.Wrapping, func(item *radioItem) {
 				r.radio.itemTapped(item, idx)
 			})
 			r.items = append(r.items, item)

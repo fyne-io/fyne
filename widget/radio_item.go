@@ -17,7 +17,7 @@ var (
 	_ fyne.Focusable    = (*radioItem)(nil)
 )
 
-func newRadioItem(label string, Wrapping fyne.TextWrap, onTap func(*radioItem)) *radioItem {
+func newRadioItem(label string, Wrapping *fyne.TextWrap, onTap func(*radioItem)) *radioItem {
 	i := &radioItem{Label: label, onTap: onTap, Wrapping: Wrapping}
 	i.ExtendBaseWidget(i)
 	return i
@@ -29,7 +29,7 @@ type radioItem struct {
 
 	Label    string
 	Selected bool
-	Wrapping fyne.TextWrap
+	Wrapping *fyne.TextWrap
 
 	focused bool
 	hovered bool
@@ -39,7 +39,7 @@ type radioItem struct {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	txt := NewRichTextWithText(i.Label)
-	txt.Wrapping = i.Wrapping
+	txt.Wrapping = *i.Wrapping
 	r := &radioItemRenderer{item: i, label: txt}
 	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, txt})
 	r.update()
@@ -169,12 +169,13 @@ func (r *radioItemRenderer) update() {
 
 	r.label.Segments[0].(*TextSegment).Text = r.item.Label
 	r.label.Segments[0].(*TextSegment).Style.SizeName = theme.SizeNameText
-	r.label.Wrapping = r.item.Wrapping
+	r.label.Wrapping = *r.item.Wrapping
 	if r.item.Disabled() {
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameDisabled
 	} else {
 		r.label.Segments[0].(*TextSegment).Style.ColorName = theme.ColorNameForeground
 	}
+	r.label.Refresh()
 
 	out := theme.NewThemedResource(th.Icon(theme.IconNameRadioButton))
 	out.ColorName = theme.ColorNameInputBorder
