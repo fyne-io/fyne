@@ -39,7 +39,7 @@ type radioItem struct {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	txt := NewRichTextWithText(i.Label)
-	txt.Wrapping = *&i.radio.Wrapping
+	txt.Wrapping = i.radio.Wrapping
 	r := &radioItemRenderer{item: i, label: txt}
 	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, txt})
 	r.update()
