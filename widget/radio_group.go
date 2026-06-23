@@ -56,7 +56,7 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	items := make([]fyne.CanvasObject, len(r.Options))
 	for i, option := range r.Options {
 		idx := i
-		items[idx] = newRadioItem(option, &r.Wrapping, func(item *radioItem) {
+		items[idx] = newRadioItem(option, r, func(item *radioItem) {
 			r.itemTapped(item, idx)
 		})
 	}
@@ -216,7 +216,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			idx := i
-			item := newRadioItem(r.radio.Options[idx], &r.radio.Wrapping, func(item *radioItem) {
+			item := newRadioItem(r.radio.Options[idx], r.radio, func(item *radioItem) {
 				r.radio.itemTapped(item, idx)
 			})
 			r.items = append(r.items, item)
