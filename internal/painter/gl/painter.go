@@ -68,7 +68,12 @@ type painter struct {
 var _ Painter = (*painter)(nil)
 
 func (p *painter) Clear() {
-	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
+	var r, g, b, a uint32
+	if win, ok := p.contextProvider.(fyne.Window); ok && win.Transparent() {
+		r, g, b, a = 0, 0, 0, 0
+	} else {
+		r, g, b, a = theme.Color(theme.ColorNameBackground).RGBA()
+	}
 	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
 	p.logError()

@@ -71,6 +71,23 @@ func windowScreen(_ fyne.Window) fyne.CanvasObject {
 			}
 			visibilityState = !visibilityState
 		}),
+		widget.NewButton("Transparent window", func() {
+			w := fyne.CurrentApp().NewWindow("Transparent")
+			w.SetContent(container.NewCenter(widget.NewLabel("Hello World!")))
+			w.SetTransparent(true)
+			w.Show()
+		}),
+		widget.NewButton("Fixed opacity window", func() {
+			w := fyne.CurrentApp().NewWindow("Fixed Opacity")
+			slider := widget.NewSlider(0, 1)
+			slider.Step = 0.1
+			slider.Value = 1.0
+			slider.OnChanged = func(value float64) {
+				w.SetOpacity(float32(value))
+			}
+			w.SetContent(slider)
+			w.Show()
+		}),
 	)
 
 	drv := fyne.CurrentApp().Driver()

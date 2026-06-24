@@ -67,11 +67,13 @@ func initCursors() {
 var _ fyne.Window = (*window)(nil)
 
 type window struct {
-	viewport  *glfw.Window
-	created   bool
-	decorate  bool
-	closing   bool
-	fixedSize bool
+	viewport    *glfw.Window
+	created     bool
+	decorate    bool
+	closing     bool
+	fixedSize   bool
+	transparent bool
+	opacity     float32
 
 	cursor       desktop.Cursor
 	customCursor *glfw.Cursor
@@ -249,6 +251,17 @@ func (w *window) SetIcon(icon fyne.Resource) {
 
 func (w *window) SetMaster() {
 	w.master = true
+}
+
+func (w *window) Opacity() float32 {
+	return w.opacity
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	w.opacity = opacity
+	w.runOnMainWhenCreated(func() {
+		w.view().SetOpacity(opacity)
+	})
 }
 
 func (w *window) fitContent() {
@@ -790,6 +803,11 @@ func (w *window) create() {
 	} else {
 		glfw.WindowHint(glfw.Floating, glfw.False)
 	}
+	if w.transparent {
+		glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)
+	} else {
+		glfw.WindowHint(glfw.TransparentFramebuffer, glfw.False)
+	}
 	glfw.WindowHint(glfw.AutoIconify, glfw.False)
 	initWindowHints()
 
@@ -802,6 +820,7 @@ func (w *window) create() {
 	if pixHeight == 0 {
 		pixHeight = 10
 	}
+	w.opacity = 1.0
 
 	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 	if err != nil {
@@ -870,6 +889,7 @@ func (w *window) create() {
 
 	// Initialize accessibility support
 	w.initAccessibilityForWindow()
+	w.created = true
 }
 
 func (w *window) view() *glfw.Window {

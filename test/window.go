@@ -10,6 +10,8 @@ type window struct {
 	fullScreen         bool
 	fixedSize          bool
 	focused            bool
+	transparent        bool
+	opacity            float32
 	onClosed           func()
 	onCloseIntercepted func()
 
@@ -138,4 +140,20 @@ func (w *window) ShowAndRun() {
 
 func (w *window) Title() string {
 	return w.title
+}
+
+func (w *window) Transparent() bool {
+	return w.transparent
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	w.transparent = transparent
+}
+
+func (w *window) Opacity() float32 {
+	return w.opacity
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	w.opacity = opacity
 }

@@ -132,6 +132,24 @@ func (w *noosWindow) Clipboard() fyne.Clipboard {
 	return nil
 }
 
+func (w *noosWindow) Transparent() bool {
+	// TODO implement me
+	return false
+}
+
+func (w *noosWindow) SetTransparent(transparent bool) {
+	// TODO implement me
+}
+
+func (w *noosWindow) Opacity() float32 {
+	// TODO implement me
+	return 1.0
+}
+
+func (w *noosWindow) SetOpacity(opacity float32) {
+	// TODO implement me
+}
+
 func newWindow(d *noosDriver) fyne.Window {
 	return &noosWindow{c: newTouchCanvas(), d: d}
 }

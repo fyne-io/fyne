@@ -104,4 +104,24 @@ type Window interface {
 	//
 	// Deprecated: use App.Clipboard() instead.
 	Clipboard() Clipboard
+
+	// Transparent returns whether the window background is transparent.
+	//
+	// Since: 2.8
+	Transparent() bool
+	// SetTransparent sets whether the window background should be transparent.
+	// This must be set before Show() or ShowAndRun() is called.
+	//
+	// Since: 2.8
+	SetTransparent(bool)
+
+	// Opacity returns the opacity of this window.
+	//
+	// Since: 2.8
+	Opacity() float32
+	// SetOpacity sets the opacity of this window.
+	// 0.0 - fully transparent, 1.0 - fully opaque
+	//
+	// Since: 2.8
+	SetOpacity(float32)
 }

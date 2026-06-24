@@ -209,3 +209,19 @@ func (w *window) RescaleContext() {
 func (w *window) Context() any {
 	return fyne.CurrentApp().Driver().(*driver).glctx
 }
+
+func (w *window) Transparent() bool {
+	return false
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	// no-op on mobile
+}
+
+func (w *window) Opacity() float32 {
+	return 1.0
+}
+
+func (w *window) SetOpacity(opacity float32) {
+	// no-op on mobile
+}

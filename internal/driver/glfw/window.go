@@ -142,7 +142,6 @@ func (w *window) Show() {
 		}
 
 		if !w.created {
-			w.created = true
 			w.create()
 		}
 
@@ -247,6 +246,17 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 
 func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
+}
+
+func (w *window) Transparent() bool {
+	return w.transparent
+}
+
+func (w *window) SetTransparent(transparent bool) {
+	if w.created {
+		return // cannot change after creation
+	}
+	w.transparent = transparent
 }
 
 func (w *window) processClosed() {
