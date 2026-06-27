@@ -8,18 +8,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*Shadow)(nil)
-
-// Shadow is a widget that renders a shadow.
-type Shadow struct {
-	Base
-	level ElevationLevel
-	typ   ShadowType
-}
-
-// ElevationLevel is the level of elevation of the shadow casting object.
-type ElevationLevel int
-
+// All known values for ElevationLevel.
 const (
 	BaseLevel             ElevationLevel = 0
 	MenuBarLevel          ElevationLevel = 1
@@ -31,9 +20,6 @@ const (
 	DialogLevel           ElevationLevel = 24
 )
 
-// ShadowType specifies the type of the shadow.
-type ShadowType int
-
 // ShadowType constants
 const (
 	ShadowAround ShadowType = iota
@@ -42,6 +28,21 @@ const (
 	ShadowBottom
 	ShadowTop
 )
+
+// ElevationLevel is the level of elevation of the shadow casting object.
+type ElevationLevel int
+
+// Shadow is a widget that renders a shadow.
+type Shadow struct {
+	Base
+	level ElevationLevel
+	typ   ShadowType
+}
+
+var _ fyne.Widget = (*Shadow)(nil)
+
+// ShadowType specifies the type of the shadow.
+type ShadowType int
 
 // ApplyShadowForLevel applies Material Design inspired shadow parameters (only downward Y-axis offset + blur) to the given shadow.
 // The Variant is always [canvas.DropShadow].
