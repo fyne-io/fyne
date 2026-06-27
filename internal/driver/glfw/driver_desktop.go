@@ -33,7 +33,7 @@ var (
 
 func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
 	async.EnsureMain(func() {
-		win = d.createWindow(title, true)
+		win = d.newWindow(title, true)
 	})
 	return win
 }

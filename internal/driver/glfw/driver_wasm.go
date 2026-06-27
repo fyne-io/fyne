@@ -26,7 +26,7 @@ func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
 	}
 
 	if !hasVisible {
-		return d.createWindow(title, true)
+		return d.newWindow(title, true)
 	}
 
 	c := root.Canvas().(*glCanvas)

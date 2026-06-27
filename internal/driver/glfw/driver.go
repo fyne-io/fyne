@@ -71,7 +71,7 @@ func (*gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *gLDriver) CreateSplashWindow() fyne.Window {
-	win := d.createWindow("", false)
+	win := d.newWindow("", false)
 	win.SetPadded(false)
 	win.CenterOnScreen()
 	return win
@@ -130,7 +130,7 @@ func (*gLDriver) SetDisableScreenBlanking(disable bool) {
 	setDisableScreenBlank(disable)
 }
 
-func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
+func (d *gLDriver) newWindow(title string, decorate bool) fyne.Window {
 	var ret *window
 	if title == "" {
 		title = defaultTitle
