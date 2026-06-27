@@ -98,6 +98,17 @@ func usesUnixSystrayIcon(osName string) bool {
 	return osName == goos.Linux || goos.IsBSD(osName)
 }
 
+func (d *gLDriver) AllWindows() []fyne.Window {
+	return d.windows
+}
+
+func (d *gLDriver) CreateSplashWindow() fyne.Window {
+	win := d.createWindow("", false)
+	win.SetPadded(false)
+	win.CenterOnScreen()
+	return win
+}
+
 func (*gLDriver) DoFromGoroutine(f func(), wait bool) {
 	if wait {
 		async.EnsureNotMain(func() {
@@ -204,4 +215,23 @@ func NewGLDriver() fyne.Driver {
 	return &gLDriver{
 		done: make(chan struct{}),
 	}
+}
+
+func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
+	var ret *window
+	if title == "" {
+		title = defaultTitle
+	}
+
+	d.init()
+
+	// A window starts with no mouse move outstanding: the zero value would read
+	// as one pending at (0,0), which the first click would then apply.
+	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
+	ret.frame = newPresentGate(ret)
+	ret.canvas = newCanvas()
+	ret.canvas.context = ret
+	ret.SetIcon(ret.icon)
+	d.windows = append(d.windows, ret)
+	return ret
 }

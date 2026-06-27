@@ -955,25 +955,6 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 	w.pending = append(w.pending, fn)
 }
 
-func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
-	var ret *window
-	if title == "" {
-		title = defaultTitle
-	}
-
-	d.init()
-
-	// A window starts with no mouse move outstanding: the zero value would read
-	// as one pending at (0,0), which the first click would then apply.
-	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
-	ret.frame = newPresentGate(ret)
-	ret.canvas = newCanvas()
-	ret.canvas.context = ret
-	ret.SetIcon(ret.icon)
-	d.windows = append(d.windows, ret)
-	return ret
-}
-
 func (w *window) doShowAgain() {
 	if w.isClosing() {
 		return
@@ -1009,17 +990,6 @@ func (w *window) toggleVisible() {
 	} else {
 		w.Show()
 	}
-}
-
-func (d *gLDriver) CreateSplashWindow() fyne.Window {
-	win := d.createWindow("", false)
-	win.SetPadded(false)
-	win.CenterOnScreen()
-	return win
-}
-
-func (d *gLDriver) AllWindows() []fyne.Window {
-	return d.windows
 }
 
 func isKeyModifier(keyName fyne.KeyName) bool {
