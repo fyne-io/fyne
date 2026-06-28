@@ -294,18 +294,48 @@ func TestRadioGroup_Required(t *testing.T) {
 	assert.Equal(t, "There", radio.Selected)
 }
 
+func TestRadioGroup_Wrapping_PropagatesToItems(t *testing.T) {
+	radio := NewRadioGroup([]string{"A", "B"}, nil)
+	radio.Wrapping = fyne.TextWrapBreak
+	render := test.TempWidgetRenderer(t, radio).(*radioGroupRenderer)
+
+	for _, obj := range render.items {
+		assert.Equal(t, fyne.TextWrapBreak, obj.(*radioItem).wrapping)
+	}
+
+	radio.Wrapping = fyne.TextWrapOff
+	radio.Refresh()
+	for _, obj := range render.items {
+		assert.Equal(t, fyne.TextWrapOff, obj.(*radioItem).wrapping)
+	}
+}
+
+func TestRadioGroup_Wrapping_WrapsLongOption(t *testing.T) {
+	const longText = "this is a deliberately long radio option label that should wrap"
+	radio := NewRadioGroup([]string{longText}, nil)
+	noWrapHeight := radio.MinSize().Height
+
+	radio.Wrapping = fyne.TextWrapBreak
+	radio.Refresh()
+	radio.Resize(fyne.NewSize(80, radio.MinSize().Height))
+
+	itemRender := radioGroupTestItemRenderer(t, radio, 0)
+	wrappedHeight := itemRender.MinSize().Height
+	assert.Greater(t, wrappedHeight, noWrapHeight, "wrapped item should be taller than a single-line option")
+}
+
 func TestRadioGroupRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadioGroup([]string{"Test"}, func(string) {})
 	render := radioGroupTestItemRenderer(t, radio, 0)
 
-	textSize := render.label.TextSize
-	customTextSize := textSize
+	textMin := render.label.MinSize()
+	customMin := textMin
 	test.WithTestTheme(t, func() {
 		render.Refresh()
-		customTextSize = render.label.TextSize
+		customMin = render.label.MinSize()
 	})
 
-	assert.NotEqual(t, textSize, customTextSize)
+	assert.NotEqual(t, textMin, customMin)
 }
 
 func radioGroupTestTapItem(t *testing.T, radio *RadioGroup, item int) {
