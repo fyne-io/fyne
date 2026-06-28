@@ -45,6 +45,14 @@ const (
 	ButtonIconTrailingText
 )
 
+// disabledIconTranslucency is the alpha-fade applied to bitmap icons (PNG, JPEG, ...)
+// when the button is disabled. Themed SVGs are recolored to ColorNameDisabled
+// instead, but raster resources cannot be recolored without per-pixel work, so we
+// fall back to a fixed translucency. 0.5 is a compromise: more transparent would
+// hide colorful icons against the disabled background, less transparent gives no
+// visible disabled cue.
+const disabledIconTranslucency = 0.5
+
 var (
 	_ fyne.Focusable  = (*Button)(nil)
 	_ fyne.Accessible = (*Button)(nil)
@@ -419,9 +427,15 @@ func (r *buttonRenderer) updateIconAndText() {
 			r.icon.FillMode = canvas.ImageFillContain
 			r.SetObjects([]fyne.CanvasObject{r.background, r.tapBG, r.label, r.icon})
 		}
-		// TODO support disabling bitmap resource not just SVG
-		if r.button.Disabled() && svg.IsResourceSVG(icon) {
-			icon = theme.NewDisabledResource(icon)
+		r.icon.Translucency = 0
+		if r.button.Disabled() {
+			if svg.IsResourceSVG(icon) {
+				icon = theme.NewDisabledResource(icon)
+			} else {
+				// Bitmap resources cannot be recolored, so fade them instead
+				// to provide a visual disabled cue.
+				r.icon.Translucency = disabledIconTranslucency
+			}
 		}
 		r.icon.Resource = icon
 		r.icon.Refresh()

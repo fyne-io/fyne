@@ -135,6 +135,27 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
 }
 
+func TestButton_DisabledBitmapIcon(t *testing.T) {
+	pngIcon := fyne.NewStaticResource("fyne.png", iconData)
+	button := NewButtonWithIcon("Test", pngIcon, nil)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
+
+	// Bitmap resource is kept as-is (no DisabledResource wrapping) and not faded while enabled.
+	assert.Equal(t, pngIcon, render.icon.Resource)
+	assert.Equal(t, 0.0, render.icon.Translucency)
+
+	// When disabled, the bitmap resource is unchanged but the image is faded
+	// to give a visual disabled cue (cannot recolor a bitmap).
+	button.Disable()
+	assert.Equal(t, pngIcon, render.icon.Resource)
+	assert.Equal(t, disabledIconTranslucency, render.icon.Translucency)
+
+	// Re-enabling resets the fade.
+	button.Enable()
+	assert.Equal(t, pngIcon, render.icon.Resource)
+	assert.Equal(t, 0.0, render.icon.Translucency)
+}
+
 func TestButton_Focus(t *testing.T) {
 	tapped := false
 	button := NewButton("Test", func() {
