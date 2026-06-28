@@ -310,6 +310,25 @@ func TestRadioGroup_Wrapping_PropagatesToItems(t *testing.T) {
 	}
 }
 
+func TestRadioGroup_Wrapping_Horizontal(t *testing.T) {
+	const longText = "this is a deliberately long radio option label that should wrap"
+	radio := NewRadioGroup([]string{longText, longText}, nil)
+	radio.Horizontal = true
+	radio.Wrapping = fyne.TextWrapBreak
+	render := test.TempWidgetRenderer(t, radio).(*radioGroupRenderer)
+
+	radio.Resize(fyne.NewSize(200, 200))
+
+	item0 := render.items[0].(*radioItem)
+	item1 := render.items[1].(*radioItem)
+
+	assert.Equal(t, float32(100), item0.Size().Width)
+	assert.Equal(t, item0.Size().Width, item1.Size().Width)
+	assert.Equal(t, item0.Size().Height, item1.Size().Height, "horizontal wrap should align item heights")
+	assert.Equal(t, fyne.NewPos(0, 0), item0.Position())
+	assert.Equal(t, fyne.NewPos(100, 0), item1.Position())
+}
+
 func TestRadioGroup_Wrapping_WrapsLongOption(t *testing.T) {
 	const longText = "this is a deliberately long radio option label that should wrap"
 	radio := NewRadioGroup([]string{longText}, nil)

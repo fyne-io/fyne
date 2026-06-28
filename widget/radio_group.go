@@ -22,6 +22,10 @@ type RadioGroup struct {
 	// The default value, fyne.TextWrapOff, preserves the previous behaviour: text that
 	// is wider than the radio group will not be wrapped and may be clipped.
 	//
+	// When wrapping is enabled the group's height grows with the content; if the parent
+	// container does not give it enough room, items may extend beyond its bounds. Wrap
+	// the RadioGroup in a container.Scroll if scrolling is needed.
+	//
 	// Since: 2.9
 	Wrapping fyne.TextWrap
 
@@ -225,7 +229,8 @@ func (r *radioGroupRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a radio item.
 // This is based on the contained text, the radio icon and a standard amount of padding
-// between each item.
+// between each item. When Wrapping is enabled the per-item MinSize shrinks to roughly a
+// single character, matching widget.Label's behaviour with wrapping.
 func (r *radioGroupRenderer) MinSize() fyne.Size {
 	width := float32(0)
 	height := float32(0)

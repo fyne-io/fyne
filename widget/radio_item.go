@@ -39,10 +39,8 @@ type radioItem struct {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
-	th := i.Theme()
 	label := NewRichTextWithText(i.Label)
 	label.Wrapping = i.wrapping
-	label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 	r := &radioItemRenderer{item: i, label: label}
 	r.SetObjects([]fyne.CanvasObject{&r.focusIndicator, &r.icon, &r.over, label})
 	r.update()
@@ -194,6 +192,8 @@ func (r *radioItemRenderer) update() {
 		seg.Style.ColorName = theme.ColorNameForeground
 	}
 	r.label.Wrapping = r.item.wrapping
+	// Negate RichText's built-in inner padding so the label keeps the same
+	// position and MinSize that the previous canvas.Text-based renderer had.
 	r.label.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 	r.label.Refresh()
 
