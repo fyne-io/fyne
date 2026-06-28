@@ -18,6 +18,13 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
+	// Wrapping controls how option text that does not fit the available width is wrapped.
+	// The default value, fyne.TextWrapOff, preserves the previous behaviour: text that
+	// is wider than the radio group will not be wrapped and may be clipped.
+	//
+	// Since: 2.9
+	Wrapping fyne.TextWrap
+
 	// this index is ONE-BASED so the default zero-value is unselected
 	// use r.selectedIndex(), r.setSelectedIndex(int) to maniupulate this field
 	// as if it were a zero-based index (with -1 == nothing selected)
@@ -52,7 +59,7 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	items := make([]fyne.CanvasObject, len(r.Options))
 	for i, option := range r.Options {
 		idx := i
-		items[idx] = newRadioItem(option, func(item *radioItem) {
+		items[idx] = newRadioItem(option, r.Wrapping, func(item *radioItem) {
 			r.itemTapped(item, idx)
 		})
 	}
@@ -154,31 +161,65 @@ type radioGroupRenderer struct {
 }
 
 // Layout the components of the radio widget
-func (r *radioGroupRenderer) Layout(_ fyne.Size) {
+func (r *radioGroupRenderer) Layout(size fyne.Size) {
 	count := 1
 	if len(r.items) > 0 {
 		count = len(r.items)
 	}
-	var itemHeight, itemWidth float32
-	minSize := r.radio.MinSize()
-	if r.radio.Horizontal {
-		itemHeight = minSize.Height
-		itemWidth = minSize.Width / float32(count)
-	} else {
-		itemHeight = minSize.Height / float32(count)
-		itemWidth = minSize.Width
+
+	if r.radio.Wrapping == fyne.TextWrapOff {
+		var itemHeight, itemWidth float32
+		minSize := r.radio.MinSize()
+		if r.radio.Horizontal {
+			itemHeight = minSize.Height
+			itemWidth = minSize.Width / float32(count)
+		} else {
+			itemHeight = minSize.Height / float32(count)
+			itemWidth = minSize.Width
+		}
+
+		itemSize := fyne.NewSize(itemWidth, itemHeight)
+		x, y := float32(0), float32(0)
+		for _, item := range r.items {
+			item.Resize(itemSize)
+			item.Move(fyne.NewPos(x, y))
+			if r.radio.Horizontal {
+				x += itemWidth
+			} else {
+				y += itemHeight
+			}
+		}
+		return
 	}
 
-	itemSize := fyne.NewSize(itemWidth, itemHeight)
-	x, y := float32(0), float32(0)
-	for _, item := range r.items {
-		item.Resize(itemSize)
-		item.Move(fyne.NewPos(x, y))
-		if r.radio.Horizontal {
-			x += itemWidth
-		} else {
-			y += itemHeight
+	// When wrapping is enabled each item's height depends on its width, so we
+	// resize the item to the available width first and then read its content
+	// height before placing it.
+	if r.radio.Horizontal {
+		itemWidth := size.Width / float32(count)
+		var maxHeight float32
+		for _, item := range r.items {
+			item.Resize(fyne.NewSize(itemWidth, 0))
+			if h := item.MinSize().Height; h > maxHeight {
+				maxHeight = h
+			}
 		}
+		x := float32(0)
+		for _, item := range r.items {
+			item.Resize(fyne.NewSize(itemWidth, maxHeight))
+			item.Move(fyne.NewPos(x, 0))
+			x += itemWidth
+		}
+		return
+	}
+
+	y := float32(0)
+	for _, item := range r.items {
+		item.Resize(fyne.NewSize(size.Width, 0))
+		h := item.MinSize().Height
+		item.Resize(fyne.NewSize(size.Width, h))
+		item.Move(fyne.NewPos(0, y))
+		y += h
 	}
 }
 
@@ -213,7 +254,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			idx := i
-			item := newRadioItem(r.radio.Options[idx], func(item *radioItem) {
+			item := newRadioItem(r.radio.Options[idx], r.radio.Wrapping, func(item *radioItem) {
 				r.radio.itemTapped(item, idx)
 			})
 			r.items = append(r.items, item)
@@ -238,6 +279,10 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 		}
 		if d := r.radio.Disabled(); d != item.Disabled() {
 			item.disabled = d
+			changed = true
+		}
+		if w := r.radio.Wrapping; w != item.wrapping {
+			item.wrapping = w
 			changed = true
 		}
 
