@@ -1,7 +1,11 @@
 package theme
 
 import (
+	"bytes"
+	"image"
 	"image/color"
+	_ "image/jpeg" // register JPEG decoder so DisabledResource can desaturate JPEG icons
+	"image/png"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/svg"
@@ -838,9 +842,44 @@ func (res *DisabledResource) Name() string {
 	return "disabled_" + unwrapResource(res.source).Name()
 }
 
-// Content returns the disabled style content of the correct resource for the current theme
+// Content returns the disabled style content of the correct resource for the current theme.
+// SVG resources are recolored with the theme's disabled color; bitmap resources (PNG, JPEG, ...)
+// are desaturated to greyscale since they cannot be recolored.
 func (res *DisabledResource) Content() []byte {
-	return colorizeLogError(unwrapResource(res.source).Content(), Color(ColorNameDisabled))
+	src := unwrapResource(res.source)
+	content := src.Content()
+	if svg.IsResourceSVG(src) {
+		return colorizeLogError(content, Color(ColorNameDisabled))
+	}
+	return desaturateLogError(content)
+}
+
+// desaturateLogError returns a PNG-encoded greyscale copy of the given image bytes,
+// preserving the alpha channel. If decoding or encoding fails, the original bytes are
+// returned so the caller can still render something.
+func desaturateLogError(src []byte) []byte {
+	img, _, err := image.Decode(bytes.NewReader(src))
+	if err != nil {
+		fyne.LogError("Failed to decode bitmap for disabled state", err)
+		return src
+	}
+	bounds := img.Bounds()
+	gray := image.NewNRGBA(bounds)
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			// Convert via NRGBA so the luminance is computed on unpremultiplied
+			// channels — otherwise partially-transparent pixels go too dark.
+			n := color.NRGBAModel.Convert(img.At(x, y)).(color.NRGBA)
+			lum := uint8((299*uint32(n.R) + 587*uint32(n.G) + 114*uint32(n.B)) / 1000)
+			gray.SetNRGBA(x, y, color.NRGBA{R: lum, G: lum, B: lum, A: n.A})
+		}
+	}
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, gray); err != nil {
+		fyne.LogError("Failed to encode desaturated bitmap", err)
+		return src
+	}
+	return buf.Bytes()
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.

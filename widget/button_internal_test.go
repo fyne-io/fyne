@@ -140,20 +140,18 @@ func TestButton_DisabledBitmapIcon(t *testing.T) {
 	button := NewButtonWithIcon("Test", pngIcon, nil)
 	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
 
-	// Bitmap resource is kept as-is (no DisabledResource wrapping) and not faded while enabled.
+	// While enabled the original bitmap resource is rendered untouched.
 	assert.Equal(t, pngIcon, render.icon.Resource)
-	assert.Equal(t, 0.0, render.icon.Translucency)
 
-	// When disabled, the bitmap resource is unchanged but the image is faded
-	// to give a visual disabled cue (cannot recolor a bitmap).
+	// When disabled the resource is wrapped so DisabledResource.Content()
+	// returns a desaturated PNG copy — the icon is recolored, not faded.
 	button.Disable()
-	assert.Equal(t, pngIcon, render.icon.Resource)
-	assert.Equal(t, disabledIconTranslucency, render.icon.Translucency)
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"),
+		"disabled icon should be wrapped: %s", render.icon.Resource.Name())
 
-	// Re-enabling resets the fade.
+	// Re-enabling restores the original resource reference.
 	button.Enable()
 	assert.Equal(t, pngIcon, render.icon.Resource)
-	assert.Equal(t, 0.0, render.icon.Translucency)
 }
 
 func TestButton_Focus(t *testing.T) {
