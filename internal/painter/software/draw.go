@@ -553,11 +553,11 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		var objAlpha float32
 		if fill != nil {
 			_, _, _, a := fill.RGBA()
-			objAlpha = float32(a) / 65535.0
+			objAlpha = float32(a) / math.MaxUint16
 		}
 		if strokeCol != nil && strokeWidth > 0 {
 			_, _, _, a := strokeCol.RGBA()
-			sa := float32(a) / 65535.0
+			sa := float32(a) / math.MaxUint16
 			if sa > objAlpha {
 				objAlpha = sa
 			}
@@ -571,7 +571,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 				_, _, _, maskA := maskRaw.At(mx, my).RGBA()
 				if maskA > 0 {
 					pixel := blurred.RGBAAt(x, y)
-					cVal := float32(maskA) / 65535.0
+					cVal := float32(maskA) / math.MaxUint16
 					den := 1.0 - cVal*objAlpha
 					var invMA float32
 					if den <= 0 {

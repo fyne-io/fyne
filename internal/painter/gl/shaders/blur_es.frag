@@ -17,7 +17,7 @@ varying vec2 fragTexCoord;
 uniform float radius;
 uniform vec2 direction;
 uniform float sampleScale;
-uniform float cornerRadius;
+uniform float corner_radius;
 uniform vec2 size;
 
 float getKernel(int i, int kernelLen) {
@@ -27,11 +27,11 @@ float getKernel(int i, int kernelLen) {
 
 void main() {
     float alpha = 1.0;
-    if (cornerRadius > 0.5) {
+    if (corner_radius > 0.5) {
         vec2 pos = fragTexCoord * size;
         vec2 halfSize = size * 0.5;
-        vec2 q = abs(pos - halfSize) - halfSize + cornerRadius;
-        float dist = min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - cornerRadius;
+        vec2 q = abs(pos - halfSize) - halfSize + corner_radius;
+        float dist = min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - corner_radius;
         alpha = 1.0 - smoothstep(-0.5, 0.5, dist);
     }
 
