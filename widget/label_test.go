@@ -199,6 +199,31 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	test.AssertRendersToMarkup(t, "label/truncate.xml", c)
 }
 
+func TestLabel_TruncateMiddle(t *testing.T) {
+	test.NewTempApp(t)
+
+	c := test.NewCanvasWithPainter(software.NewPainter())
+	c.SetPadded(false)
+	original := "/home/user/projects/fyne/widget/label.go"
+	label := NewLabel(original)
+	c.SetContent(label)
+	natural := label.MinSize()
+	c.Resize(natural)
+
+	truncSize := fyne.NewSize(natural.Width/2, natural.Height)
+	label.Resize(truncSize)
+	label.Truncation = fyne.TextTruncateMiddle
+	label.Refresh()
+
+	rendered := richTextRenderTexts(label.provider)
+	assert.Equal(t, 1, len(rendered))
+	display := rendered[0].Text
+	assert.Contains(t, display, "…", "expected ellipsis in truncated text")
+	assert.NotEqual(t, original, display)
+	assert.Equal(t, byte('/'), display[0], "should keep original prefix")
+	assert.Equal(t, byte('o'), display[len(display)-1], "should keep original suffix")
+}
+
 func TestLabel_Select(t *testing.T) {
 	l := NewLabel("Hello")
 	l.Selectable = true

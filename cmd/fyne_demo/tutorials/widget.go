@@ -306,7 +306,7 @@ This styled row should also wrap as expected, but only *when required*.
 	radioWrap.Horizontal = true
 	radioWrap.SetSelected("Word")
 
-	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis"}, func(s string) {
+	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis", "Middle"}, func(s string) {
 		var trunc fyne.TextTruncation
 		switch s {
 		case "Off":
@@ -315,6 +315,8 @@ This styled row should also wrap as expected, but only *when required*.
 			trunc = fyne.TextTruncateClip
 		case "Ellipsis":
 			trunc = fyne.TextTruncateEllipsis
+		case "Middle":
+			trunc = fyne.TextTruncateMiddle
 		}
 
 		label.Truncation = trunc
