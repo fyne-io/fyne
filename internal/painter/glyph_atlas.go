@@ -55,10 +55,10 @@ func (a *glyphAtlas) cacheKey(face *font.Face, gid font.GID, fontSize, scale flo
 		face:    face,
 		gid:     gid,
 		pixSize: pixSize,
-		r:       uint8(r32 >> 8),
-		g:       uint8(g32 >> 8),
-		b:       uint8(b32 >> 8),
-		a:       uint8(a32 >> 8),
+		r:       uint8((r32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
+		g:       uint8((g32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
+		b:       uint8((b32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
+		a:       uint8((a32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
 	}
 }
 
