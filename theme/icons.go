@@ -842,26 +842,37 @@ func (res *DisabledResource) Name() string {
 	return "disabled_" + unwrapResource(res.source).Name()
 }
 
+// ITU-R BT.601 luma coefficients, scaled by 1000 for integer math.
+const (
+	lumaWeightR = 299
+	lumaWeightG = 587
+	lumaWeightB = 114
+	lumaScale   = 1000
+)
+
 // Content returns the disabled style content of the correct resource for the current theme.
 // SVG resources are recolored with the theme's disabled color; bitmap resources (PNG, JPEG, ...)
-// are desaturated to greyscale since they cannot be recolored.
+// are desaturated to greyscale.
 func (res *DisabledResource) Content() []byte {
 	src := unwrapResource(res.source)
 	content := src.Content()
 	if svg.IsResourceSVG(src) {
 		return colorizeLogError(content, Color(ColorNameDisabled))
 	}
-	return desaturateLogError(content)
+	out, err := desaturate(content)
+	if err != nil {
+		fyne.LogError("Failed to desaturate bitmap for disabled state", err)
+		return content
+	}
+	return out
 }
 
-// desaturateLogError returns a PNG-encoded greyscale copy of the given image bytes,
-// preserving the alpha channel. If decoding or encoding fails, the original bytes are
-// returned so the caller can still render something.
-func desaturateLogError(src []byte) []byte {
+// desaturate returns a PNG-encoded greyscale copy of the given image bytes,
+// preserving the alpha channel.
+func desaturate(src []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(src))
 	if err != nil {
-		fyne.LogError("Failed to decode bitmap for disabled state", err)
-		return src
+		return nil, err
 	}
 	bounds := img.Bounds()
 	gray := image.NewNRGBA(bounds)
@@ -870,16 +881,18 @@ func desaturateLogError(src []byte) []byte {
 			// Convert via NRGBA so the luminance is computed on unpremultiplied
 			// channels — otherwise partially-transparent pixels go too dark.
 			n := color.NRGBAModel.Convert(img.At(x, y)).(color.NRGBA)
-			lum := uint8((299*uint32(n.R) + 587*uint32(n.G) + 114*uint32(n.B)) / 1000)
-			gray.SetNRGBA(x, y, color.NRGBA{R: lum, G: lum, B: lum, A: n.A})
+			lum := (lumaWeightR*uint32(n.R) + lumaWeightG*uint32(n.G) + lumaWeightB*uint32(n.B)) / lumaScale
+			if lum > 255 {
+				lum = 255
+			}
+			gray.SetNRGBA(x, y, color.NRGBA{R: uint8(lum), G: uint8(lum), B: uint8(lum), A: n.A})
 		}
 	}
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, gray); err != nil {
-		fyne.LogError("Failed to encode desaturated bitmap", err)
-		return src
+		return nil, err
 	}
-	return buf.Bytes()
+	return buf.Bytes(), nil
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
