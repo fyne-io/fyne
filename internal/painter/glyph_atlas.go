@@ -29,9 +29,9 @@ type glyphAtlas struct {
 
 // glyphCacheKey uniquely identifies one pre-rendered glyph.
 type glyphCacheKey struct {
-	face    *font.Face // pointer identity — stable as long as fontCache is alive
-	gid     font.GID
-	pixSize int32 // int32(round(fontSize * pixScale * 64)), avoids float key issues
+	face       *font.Face // pointer identity; stable as long as fontCache is alive
+	gid        font.GID
+	pixSize    int32 // int32(round(fontSize * pixScale * 64)), avoids float key issues
 	r, g, b, a uint8
 }
 
