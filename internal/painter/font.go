@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -187,6 +188,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
+	ResetGlyphAtlas()
 }
 
 // DrawString draws a string into an image.
@@ -211,6 +213,54 @@ func DrawStringOffset(dst draw.Image, s string, color color.Color, f shaping.Fon
 		}
 
 		r.DrawShapedRunAt(run, dst, int(x)-offset, y)
+	})
+}
+
+// DrawStringAtlas renders s into dst using cached per-glyph bitmaps from the
+// shared glyph atlas, avoiding redundant rasterisation of glyphs that have
+// already been seen.  It is otherwise equivalent to DrawString.
+func DrawStringAtlas(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle) {
+	DrawStringOffsetAtlas(dst, s, color, f, fontSize, scale, style, 0)
+}
+
+// DrawStringOffsetAtlas is like DrawStringAtlas but shifts the rendered text
+// left by offset pixels.  It is otherwise equivalent to DrawStringOffset.
+func DrawStringOffsetAtlas(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
+	ren := &render.Renderer{
+		FontSize: fontSize,
+		PixScale: scale,
+		Color:    color,
+	}
+	a := sharedGlyphAtlas
+
+	advance := float32(0)
+	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
+		// Replacement characters are uncommon; fall back to direct rendering.
+		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
+			y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * ren.PixScale)))
+			ren.DrawStringAt(string([]rune{replacementChar}), dst, int(x)-offset, y, f.ResolveFace(replacementChar))
+			return
+		}
+
+		penX := int(x) - offset
+		for i, g := range run.Glyphs {
+			glyphImg := a.glyphImage(ren, run, i, color, scale)
+
+			// Apply the real HarfBuzz kerning/positioning offsets at blit time.
+			xOff := int(math.Round(float64(fixed266ToFloat32(g.XOffset) * scale)))
+			yOff := int(math.Round(float64(fixed266ToFloat32(g.YOffset) * scale)))
+
+			// glyphImg baseline is at y=ascent from its top, matching dst layout.
+			// YOffset is upward-positive in font coords; image Y grows downward.
+			sr := glyphImg.Bounds()
+			dp := image.Pt(penX+xOff, -yOff)
+			dr := sr.Add(dp).Intersect(dst.Bounds())
+			if !dr.Empty() {
+				draw.Draw(dst, dr, glyphImg, sr.Min.Add(dr.Min).Sub(dp), draw.Over)
+			}
+
+			penX += int(math.Round(float64(fixed266ToFloat32(g.Advance) * scale)))
+		}
 	})
 }
 
