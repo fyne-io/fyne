@@ -1,6 +1,6 @@
 module fyne.io/fyne/v2
 
-go 1.19
+go 1.25.0
 
 require (
 	fyne.io/systray v1.12.2
@@ -36,10 +36,10 @@ require (
 	github.com/urfave/cli/v2 v2.4.0
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/image v0.24.0
-	golang.org/x/mod v0.20.0
-	golang.org/x/sys v0.30.0
-	golang.org/x/text v0.22.0
-	golang.org/x/tools v0.24.1
+	golang.org/x/mod v0.35.0
+	golang.org/x/sys v0.45.0
+	golang.org/x/text v0.37.0
+	golang.org/x/tools v0.44.0
 	golang.org/x/tools/go/vcs v0.1.0-deprecated
 )
 
@@ -55,8 +55,8 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
