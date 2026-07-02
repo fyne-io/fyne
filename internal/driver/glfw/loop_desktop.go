@@ -10,6 +10,12 @@ import (
 )
 
 func (d *gLDriver) initGLFW() {
+	if shouldForceX11() {
+		// A Wayland compositor that forces client-side decorations would push
+		// GLFW onto libdecor, which is unstable. Prefer X11 through XWayland.
+		glfw.InitHint(glfw.PlatformHint, int(glfw.PlatformX11))
+	}
+
 	err := glfw.Init()
 	if err != nil {
 		fyne.LogError("failed to initialise GLFW", err)
