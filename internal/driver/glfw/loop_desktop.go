@@ -9,11 +9,19 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
+// platform values returned by forcePlatform to override GLFW's auto-detection.
+const (
+	platformAuto    = ""
+	platformX11     = "x11"
+	platformWayland = "wayland"
+)
+
 func (d *gLDriver) initGLFW() {
-	if shouldForceX11() {
-		// A Wayland compositor that forces client-side decorations would push
-		// GLFW onto libdecor, which is unstable. Prefer X11 through XWayland.
+	switch forcePlatform() {
+	case platformX11:
 		glfw.InitHint(glfw.PlatformHint, int(glfw.PlatformX11))
+	case platformWayland:
+		glfw.InitHint(glfw.PlatformHint, int(glfw.PlatformWayland))
 	}
 
 	err := glfw.Init()

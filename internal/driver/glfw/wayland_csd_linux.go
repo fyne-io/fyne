@@ -48,17 +48,29 @@ import "C"
 
 import "os"
 
-// shouldForceX11 reports whether GLFW's auto-detected backend is built with X11
-// and Wayland, and is running a Wayland session with Client Side Decorations (CSD).
-// If so we should force X11 (XWayland) platform before glfw.Init() is called.
-func shouldForceX11() bool {
+// forcePlatform reports which GLFW platform should be forced before glfw.Init()
+// is called, or platformAuto to leave the choice to GLFW's own detection.
+//
+// A FYNE_PLATFORM value of "x11" or "wayland" overrides both the auto-detection and our CSD
+// workaround; any other value is ignored.
+func forcePlatform() string {
+	switch os.Getenv("FYNE_PLATFORM") {
+	case platformX11:
+		return platformX11
+	case platformWayland:
+		return platformWayland
+	}
+
 	if os.Getenv("WAYLAND_DISPLAY") == "" {
-		return false // not a Wayland session, leave the choice to GLFW
+		return platformAuto // not a Wayland session, leave the choice to GLFW
 	}
 	if os.Getenv("DISPLAY") == "" {
-		return false // no XWayland available to fall back to, stay on Wayland
+		return platformAuto // no XWayland available to fall back to, stay on Wayland
 	}
 
 	// Zero means the detected compositor forces client-side decorations (libdecor).
-	return C.fyne_wayland_has_ssd() == 0
+	if C.fyne_wayland_has_ssd() == 0 {
+		return platformX11
+	}
+	return platformAuto
 }

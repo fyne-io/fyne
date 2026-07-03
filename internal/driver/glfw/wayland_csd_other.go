@@ -2,8 +2,8 @@
 
 package glfw
 
-// shouldForceX11 returns false when either x11 or wayland was specified
+// forcePlatform returns platformAuto when either x11 or wayland was specified
 // or if we're not on a suitable OS.
-func shouldForceX11() bool {
-	return false
+func forcePlatform() string {
+	return platformAuto
 }
