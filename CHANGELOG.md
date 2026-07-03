@@ -25,6 +25,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
+* Fyne now requires Go 1.22 as a minimum version, as a result we no longer support windows 7 or 8 and macOS 10.14 or earlier.
 * Wayland is now supported by default and will automatically be picked at runtime
 * Circle canvas object is now always a circle filling centrally in the space
 * Popups (modal and regular) no longer include padding by default
