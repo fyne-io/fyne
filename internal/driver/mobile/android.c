@@ -261,27 +261,59 @@ bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	bool tree = isTreeURI(env, contractClass, uri);
 	bool document = isDocumentURI(env, ctx, contractClass, uri);
-	if (tree && !document) {
+
+	jstring docID = NULL;
+	if (tree) {
 		jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
 		if (getDoc == NULL) { // API 21
 			return false;
 		}
-		jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
-
-		jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-		uri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+		docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+		if (!document) {
+			jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+			uri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+		}
 	}
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
 	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, uri);
 
-	if (type == NULL) {
-		return false;
+	if (type != NULL) {
+		const char *str = getString(jni_env, ctx, type);
+		return strcmp(str, "vnd.android.document/directory") == 0;
 	}
 
-	const char *str = getString(jni_env, ctx, type);
-	return strcmp(str, "vnd.android.document/directory") == 0;
+	// Fallback for Android 10 bug: getType() returns null for tree URIs
+	if (type == NULL && tree && docID != NULL) {
+		jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+		if (getChild == NULL) {
+			return false;
+		}
+		jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
+
+		jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
+		if (query == NULL) {
+			return false;
+		}
+
+		jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, NULL, NULL, NULL);
+		if ((*env)->ExceptionCheck(env)) {
+			(*env)->ExceptionClear(env);
+			return false;
+		}
+		
+		if (cursor != NULL) {
+			jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+			jmethodID close = find_method(env, cursorClass, "close", "()V");
+			if (close != NULL) {
+				(*env)->CallVoidMethod(env, cursor, close);
+			}
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool canListFileURI(char* uriCstr) {
@@ -447,7 +479,7 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
-	if (getDoc == NULL) { // API 26
+	if (query == NULL) { // API 26
 		return "ERROR: Cannot list content for URI";
 	}
 
