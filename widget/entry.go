@@ -534,6 +534,13 @@ func (e *Entry) Append(text string) {
 	e.Refresh()
 }
 
+// ScrollToBottom scrolls the entry's content to the bottom.
+//
+// Since: 2.7
+func (e *Entry) ScrollToBottom() {
+	e.scroll.ScrollToBottom()
+}
+
 // Tapped is called when this entry has been tapped. We update the cursor position in
 // device-specific callbacks (MouseDown() and TouchDown()).
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
