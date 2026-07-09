@@ -169,6 +169,7 @@ static const EGLint RGBA_8888[] = {
 EGLDisplay display = NULL;
 EGLSurface surface = NULL;
 EGLContext context = NULL;
+ANativeWindow* boundWindow = NULL;
 
 static char* initEGLDisplay() {
 	display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -205,6 +206,7 @@ char* createEGLSurface(ANativeWindow* window) {
 	if (surface == EGL_NO_SURFACE) {
 		return "EGL create surface failed";
 	}
+	boundWindow = window;
 
     if (context == NULL) {
         const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -221,7 +223,15 @@ char* destroyEGLSurface() {
 	if (!eglDestroySurface(display, surface)) {
 		return "EGL destroy surface failed";
 	}
+	surface = NULL;
+	boundWindow = NULL;
 	return NULL;
+}
+
+// Returns 1 if the EGL surface must be (re)created for `window`
+// (no surface yet, or bound to a different window).
+int surfaceNeedsRecreate(ANativeWindow* window) {
+	return surface == NULL || boundWindow != window;
 }
 
 void finish(JNIEnv* env, jobject ctx) {

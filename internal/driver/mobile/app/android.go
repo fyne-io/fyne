@@ -41,6 +41,7 @@ extern EGLSurface surface;
 
 char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
+int surfaceNeedsRecreate(ANativeWindow* window);
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env, int keyboardType);
@@ -437,6 +438,29 @@ var DisplayMetrics struct {
 	HeightPx int
 }
 
+// ensureSurface guarantees an EGLSurface exists and is bound to w, recreating it
+// when it is missing or still bound to a different (e.g. already-torn-down)
+// window. Some Android versions/devices do not deliver onNativeWindowDestroyed
+// on background, leaving a stale surface bound to a dead window; this makes
+// recovery robust regardless of which callbacks fire.
+func ensureSurface(w *C.ANativeWindow) error {
+	if C.surfaceNeedsRecreate(w) == 0 {
+		return nil
+	}
+	if C.surface != nil {
+		if errStr := C.destroyEGLSurface(); errStr != nil {
+			return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+		}
+		C.surface = nil
+	}
+	if errStr := C.createEGLSurface(w); errStr != nil {
+		return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+	}
+	DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
+	DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+	return nil
+}
+
 func mainUI(vm, jniEnv, ctx uintptr) error {
 	workAvailable := theApp.worker.WorkAvailable()
 
@@ -447,7 +471,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var pixelsPerPt float32
-	var surfaceInitialized, wasDestroyed bool
 
 	for {
 		select {
@@ -456,22 +479,12 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 		case cfg := <-windowConfigChange:
 			pixelsPerPt = cfg.pixelsPerPt
 		case w := <-windowCreated:
-			if surfaceInitialized && !wasDestroyed {
-				if errStr := C.destroyEGLSurface(); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 		case w := <-windowRedrawNeeded:
-			if C.surface == nil {
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				surfaceInitialized = true
-				DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
-				DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 			theApp.sendLifecycle(lifecycle.StageFocused)
 			widthPx := int(C.ANativeWindow_getWidth(w))
@@ -498,7 +511,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				}
 			}
 			C.surface = nil
-			wasDestroyed = true
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
 			theApp.sendLifecycle(lifecycle.StageDead)
