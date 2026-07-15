@@ -244,76 +244,121 @@ bool isDocumentURI(JNIEnv *env, uintptr_t ctx, jclass contractClass, jobject uri
 }
 
 bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
-	JNIEnv *env = (JNIEnv*)jni_env;
-	jobject resolver = getContentResolver(jni_env, ctx);
-	jobject uri = parseURI(jni_env, ctx, uriCstr);
-	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+    JNIEnv *env = (JNIEnv*)jni_env;
+    jobject resolver = getContentResolver(jni_env, ctx);
+    jobject originalUri = parseURI(jni_env, ctx, uriCstr); // Store the original Tree URI!
 
-	if (loadErr != NULL) {
-		(*env)->ExceptionClear(env);
-		return false;
-	}
+    // Check for exceptions after initial setup
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        return false;
+    }
+    if (resolver == NULL || originalUri == NULL) return false;
 
-	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
-	if (contractClass == NULL) { // API 19
-		return false;
-	}
+    jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+    if (contractClass == NULL || (*env)->ExceptionCheck(env)) {
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+        return false;
+    }
 
-	bool tree = isTreeURI(env, contractClass, uri);
-	bool document = isDocumentURI(env, ctx, contractClass, uri);
+    bool tree = isTreeURI(env, contractClass, originalUri);
+    bool document = isDocumentURI(env, ctx, contractClass, originalUri);
+    if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
 
-	jstring docID = NULL;
-	if (tree) {
-		jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
-		if (getDoc == NULL) { // API 21
-			return false;
-		}
-		docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
-		if (!document) {
-			jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-			uri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
-		}
-	}
+    jobject docUri = originalUri; // By default, check the URI that was passed in
+    jstring docID = NULL;
 
-	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
-	jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
-	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, uri);
+    if (tree) {
+        jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+        if (getDoc != NULL) {
+            docID = (jstring)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, originalUri);
+            if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+        }
 
-	if (type != NULL) {
-		const char *str = getString(jni_env, ctx, type);
-		return strcmp(str, "vnd.android.document/directory") == 0;
-	}
+        // If it's a pure Tree URI, convert it to a Document URI for getType()
+        if (docID != NULL && !document) {
+            jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+            if (getTree != NULL) {
+                jobject newUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, originalUri, docID);
+                if ((*env)->ExceptionCheck(env)) {
+                    (*env)->ExceptionClear(env);
+                } else {
+                    docUri = newUri; // getType() will be called on this Document URI
+                }
+            }
+        }
+    }
 
-	// Fallback for Android 10 bug: getType() returns null for tree URIs
-	if (type == NULL && tree && docID != NULL) {
-		jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-		if (getChild == NULL) {
-			return false;
-		}
-		jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
+    bool result = false;
+    jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 
-		jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
-		if (query == NULL) {
-			return false;
-		}
+    // --- STEP 1: Fast getType() check ---
+    jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
+    if (getType != NULL) {
+        jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, docUri);
+        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
 
-		jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, NULL, NULL, NULL);
-		if ((*env)->ExceptionCheck(env)) {
-			(*env)->ExceptionClear(env);
-			return false;
-		}
-		
-		if (cursor != NULL) {
-			jclass cursorClass = (*env)->GetObjectClass(env, cursor);
-			jmethodID close = find_method(env, cursorClass, "close", "()V");
-			if (close != NULL) {
-				(*env)->CallVoidMethod(env, cursor, close);
-			}
-			return true;
-		}
-	}
+        if (type != NULL) {
+            const char *str = getString(jni_env, ctx, type);
+            if (str != NULL) {
+                result = (strcmp(str, "vnd.android.document/directory") == 0);
+            }
+            (*env)->DeleteLocalRef(env, type);
+        }
+    }
 
-	return false;
+    // --- STEP 2: Slow query() fallback (only if getType failed) ---
+    if (!result && tree && docID != NULL) {
+        // IMPORTANT: Pass originalUri (Tree URI), not docUri!
+        jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+        if (getChild != NULL) {
+            jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, originalUri, docID);
+            if ((*env)->ExceptionCheck(env)) {
+                (*env)->ExceptionClear(env);
+            } else if (childrenUri != NULL) {
+                // Try API 16+ signature (with CancellationSignal)
+                jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
+                
+                jobject cursor = NULL;
+                if (query != NULL) {
+                    // Call with 6 arguments: uri, projection, selection, selectionArgs, sortOrder, cancellationSignal
+                    cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, NULL, NULL, NULL, NULL, NULL);
+                } else {
+                    // Fallback to API 1+ signature
+                    query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;");
+                    if (query != NULL) {
+                        // Call with 5 arguments: uri, projection, selection, selectionArgs, sortOrder
+                        cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, NULL, NULL, NULL, NULL);
+                    }
+                }
+
+                if ((*env)->ExceptionCheck(env)) {
+                    (*env)->ExceptionClear(env);
+                } else if (cursor != NULL) {
+                    result = true; // Yay, it's a listable directory!
+                    jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+                    jmethodID close = find_method(env, cursorClass, "close", "()V");
+                    if (close != NULL) {
+                        (*env)->CallVoidMethod(env, cursor, close);
+                        if ((*env)->ExceptionCheck(env)) (*env)->ExceptionClear(env);
+                    }
+                    (*env)->DeleteLocalRef(env, cursorClass);
+                    (*env)->DeleteLocalRef(env, cursor);
+                }
+                (*env)->DeleteLocalRef(env, childrenUri);
+            }
+        }
+    }
+
+    // --- Cleanup local references ---
+    (*env)->DeleteLocalRef(env, resolverClass);
+    if (docUri != originalUri) (*env)->DeleteLocalRef(env, docUri); // Only delete if it was newly created
+    if (docID != NULL) (*env)->DeleteLocalRef(env, docID);
+    (*env)->DeleteLocalRef(env, contractClass);
+    (*env)->DeleteLocalRef(env, resolver);
+    (*env)->DeleteLocalRef(env, originalUri);
+
+    return result;
 }
 
 bool canListFileURI(char* uriCstr) {
