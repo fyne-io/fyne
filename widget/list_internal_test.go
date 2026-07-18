@@ -753,7 +753,6 @@ func BenchmarkContentMinSize(b *testing.B) {
 	assert.Equal(b, minSize, minSize)
 }
 
-/***************************************/
 func TestList_AutoScrollBottom(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -777,7 +776,7 @@ func TestList_AutoScrollBottom(t *testing.T) {
 	list.Refresh()
 
 	if r.scroller.Offset.Y <= initialOffset {
-		t.Errorf("auto-scroll down, offset remained %f", r.scroller.Offset.Y)
+		t.Errorf("Expected list to auto-scroll down, offset remained %f", r.scroller.Offset.Y)
 	}
 
 	list.ScrollToTop()
@@ -787,6 +786,6 @@ func TestList_AutoScrollBottom(t *testing.T) {
 	list.Refresh()
 
 	if r.scroller.Offset.Y != topOffset {
-		t.Errorf("no auto-scroll, offset changed to %f", r.scroller.Offset.Y)
+		t.Errorf("Expected list to not auto-scroll, offset changed to %f", r.scroller.Offset.Y)
 	}
 }
