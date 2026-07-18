@@ -752,3 +752,41 @@ func BenchmarkContentMinSize(b *testing.B) {
 
 	assert.Equal(b, minSize, minSize)
 }
+
+/***************************************/
+func TestList_AutoScrollBottom(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	data := []string{"1", "2", "3", "4", "5"}
+	list := NewList(
+		func() int { return len(data) },
+		func() fyne.CanvasObject { return NewLabel("Template") },
+		func(i ListItemID, o fyne.CanvasObject) { o.(*Label).SetText(data[i]) },
+	)
+
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(100, 100))
+
+	list.ScrollToBottom()
+
+	r := test.WidgetRenderer(list).(*listRenderer)
+	initialOffset := r.scroller.Offset.Y
+
+	data = append(data, "6", "7", "8")
+	list.Refresh()
+
+	if r.scroller.Offset.Y <= initialOffset {
+		t.Errorf("auto-scroll down, offset remained %f", r.scroller.Offset.Y)
+	}
+
+	list.ScrollToTop()
+	topOffset := r.scroller.Offset.Y
+
+	data = append(data, "9", "10")
+	list.Refresh()
+
+	if r.scroller.Offset.Y != topOffset {
+		t.Errorf("no auto-scroll, offset changed to %f", r.scroller.Offset.Y)
+	}
+}
