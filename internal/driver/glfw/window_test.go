@@ -1240,6 +1240,35 @@ func TestWindow_TappedSecondary_RedispatchAfterOverlayDismiss(t *testing.T) {
 	})
 }
 
+func TestWindow_TappedSecondary_OpenMenuInsideExistingOverlay(t *testing.T) {
+	w := createWindow("Test")
+	inner := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	inner.SetMinSize(fyne.NewSize(100, 100))
+
+	pop := widget.NewModalPopUp(inner, w.canvas)
+	ensureCanvasSize(t, w, fyne.NewSize(200, 200))
+
+	runOnMain(func() {
+		pop.Show()
+
+		menu := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
+		inner.secondaryTapAction = func(e *fyne.PointEvent) {
+			widget.ShowPopUpMenuAtPosition(menu, w.canvas, e.AbsolutePosition)
+		}
+
+		before := len(w.canvas.Overlays().List())
+
+		// right-click inside the widget under the modal popup, which opens a
+		// new pop-up menu overlay on top of the existing modal overlay
+		w.mousePos = fyne.NewPos(50, 50)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+
+		after := len(w.canvas.Overlays().List())
+		assert.Equal(t, before+1, after, "the newly opened menu overlay should not be immediately dismissed")
+	})
+}
+
 func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w := createWindow("Test")
 	tapped := false
@@ -2092,6 +2121,7 @@ var _ fyne.Tappable = (*tappable)(nil)
 type tappable struct {
 	tapEvents          []any
 	secondaryTapEvents []any
+	secondaryTapAction func(*fyne.PointEvent)
 }
 
 func (t *tappable) Tapped(e *fyne.PointEvent) {
@@ -2100,6 +2130,9 @@ func (t *tappable) Tapped(e *fyne.PointEvent) {
 
 func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
+	if t.secondaryTapAction != nil {
+		t.secondaryTapAction(e)
+	}
 }
 
 func (t *tappable) popTapEvent() (e any) {

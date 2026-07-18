@@ -549,8 +549,9 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 				prevOverlay := w.canvas.Overlays().Top()
 				secondary.TappedSecondary(ev)
 
-				// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-				if prevOverlay != nil && w.canvas.Overlays().Top() != prevOverlay {
+				// if the secondary tap dismissed an overlay (rather than opening a new
+				// one on top), forward the event to the widget underneath
+				if prevOverlay != nil && !overlayStillPresent(w.canvas.Overlays().List(), prevOverlay) {
 					co2, pos2, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 						_, ok := object.(fyne.SecondaryTappable)
 						return ok
@@ -568,6 +569,15 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	if action == release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
 	}
+}
+
+func overlayStillPresent(overlays []fyne.CanvasObject, overlay fyne.CanvasObject) bool {
+	for _, o := range overlays {
+		if o == overlay {
+			return true
+		}
+	}
+	return false
 }
 
 func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action action, wid desktop.Mouseable) {
