@@ -580,6 +580,11 @@ func (l *listRenderer) MinSize() fyne.Size {
 }
 
 func (l *listRenderer) Refresh() {
+	wasAtBottom := false
+	if l.scroller.Content != nil {
+		wasAtBottom = l.scroller.Offset.Y+l.scroller.Size().Height >= l.scroller.Content.Size().Height-1.0
+	}
+
 	l.list.minSizeCache = fyne.Size{}
 	if f := l.list.CreateItem; f != nil {
 		item := createItemAndApplyThemeScope(f, l.list)
@@ -594,6 +599,10 @@ func (l *listRenderer) Refresh() {
 		s.Refresh()
 	}
 	canvas.Refresh(l.list.super())
+
+	if wasAtBottom {
+		l.scroller.ScrollToBottom()
+	}
 }
 
 // Declare conformity with interfaces.
