@@ -73,6 +73,12 @@ type List struct {
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
 
+	// AutoScroll sets whether the list should automatically scroll to the bottom
+	// when new items are added, if the list is already scrolled to the bottom.
+	//
+	// Since: 2.9
+	AutoScroll bool
+
 	currentHighlight ListItemID
 	focused          bool
 	scroller         *widget.Scroll
@@ -600,7 +606,7 @@ func (l *listRenderer) Refresh() {
 	}
 	canvas.Refresh(l.list.super())
 
-	if wasAtBottom {
+	if l.list.AutoScroll && wasAtBottom {
 		l.scroller.ScrollToBottom()
 	}
 }

@@ -764,6 +764,8 @@ func TestList_AutoScrollBottom(t *testing.T) {
 		func(i ListItemID, o fyne.CanvasObject) { o.(*Label).SetText(data[i]) },
 	)
 
+	list.AutoScroll = true
+
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(100, 100))
 
