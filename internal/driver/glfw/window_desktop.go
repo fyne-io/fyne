@@ -774,10 +774,8 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) create() {
-	if !build.IsWayland {
-		// make the window hidden, we will set it up and then show it later
-		glfw.WindowHint(glfw.Visible, glfw.False)
-	}
+	// make the window hidden, we will set it up and then show it later
+	glfw.WindowHint(glfw.Visible, glfw.False)
 	if w.decorate {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	} else {
