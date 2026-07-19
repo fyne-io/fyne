@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
@@ -29,6 +30,13 @@ var (
 	systrayIcon    fyne.Resource
 	systrayRunning bool
 )
+
+func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
+	async.EnsureMain(func() {
+		win = d.createWindow(title, true)
+	})
+	return win
+}
 
 func (*gLDriver) HasSecondaryDisplay() bool {
 	monitors := glfw.GetMonitors()
