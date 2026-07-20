@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/painter/geom"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -164,9 +165,9 @@ func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	w := gradient.Size().Width
 	h := gradient.Size().Height
 	switch a := gradient.Angle; {
-	case almostEqual(a, 90), almostEqual(a, 270):
+	case almostEqual(a, geom.AngleQuarter), almostEqual(a, geom.AngleThreeQuarter):
 		h = 1
-	case almostEqual(a, 0), almostEqual(a, 180):
+	case almostEqual(a, geom.AngleNone), almostEqual(a, geom.AngleHalf):
 		w = 1
 	}
 	width := p.textureScale(w)

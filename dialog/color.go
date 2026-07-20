@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
+	"fyne.io/fyne/v2/internal/painter/geom"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -156,10 +157,10 @@ func clamp(value, min, max int) int {
 
 func wrapHue(hue int) int {
 	for hue < 0 {
-		hue += 360
+		hue += geom.AngleFull
 	}
-	for hue > 360 {
-		hue -= 360
+	for hue > geom.AngleFull {
+		hue -= geom.AngleFull
 	}
 	return hue
 }
@@ -172,23 +173,23 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	for _, c := range colors {
 		objects = append(objects, newColorButton(c, callback))
 	}
-	return container.NewGridWithColumns(8, objects...)
+	return container.NewGridWithColumns(8, objects...) //revive:disable-line:add-constant
 }
 
 func newCheckeredBackground(radial bool) *canvas.Raster {
 	f := func(x, y, _, _ int) color.Color {
 		if (x/checkeredBoxSize)%2 == (y/checkeredBoxSize)%2 {
-			return color.Gray{Y: 58}
+			return color.Gray{Y: 58} //revive:disable-line:add-constant
 		}
 
-		return color.Gray{Y: 84}
+		return color.Gray{Y: 84} //revive:disable-line:add-constant
 	}
 
 	if radial {
 		rect := f
 		f = func(x, y, w, h int) color.Color {
 			r, t := cmplx.Polar(complex(float64(x)-float64(w)/2, float64(y)-float64(h)/2))
-			limit := math.Min(float64(w), float64(h)) / 2.0
+			limit := math.Min(float64(w), float64(h)) / 2
 			if r > limit {
 				// Out of bounds
 				return &color.NRGBA{A: 0}
@@ -234,24 +235,12 @@ func colorToString(c color.Color) string {
 	return fmt.Sprintf("#%02x%02x%02x%02x", red, green, blue, alpha)
 }
 
-func stringToColor(s string) (color.Color, error) {
-	var c color.NRGBA
-	var err error
-	if len(s) == 7 {
-		c.A = 0xFF
-		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
-	} else {
-		_, err = fmt.Sscanf(s, "#%02x%02x%02x%02x", &c.R, &c.G, &c.B, &c.A)
-	}
-	return c, err
-}
-
 func stringsToColors(ss ...string) (colors []color.Color) {
 	for _, s := range ss {
 		if s == "" {
 			continue
 		}
-		c, err := stringToColor(s)
+		c, err := col.Parse(s)
 		if err != nil {
 			fyne.LogError("Couldn't parse color:", err)
 		} else {
@@ -264,20 +253,20 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
 func rgbToHsl(r, g, b uint8) (int, int, int) {
-	red := float64(r) / 255.0
-	green := float64(g) / 255.0
-	blue := float64(b) / 255.0
+	red := float64(r) / math.MaxUint8
+	green := float64(g) / math.MaxUint8
+	blue := float64(b) / math.MaxUint8
 
 	min := math.Min(red, math.Min(green, blue))
 	max := math.Max(red, math.Max(green, blue))
 
-	lightness := (max + min) / 2.0
+	lightness := (max + min) / 2
 
 	delta := max - min
 
 	if delta == 0.0 {
 		// Achromatic
-		return 0, 0, int(lightness * 100.0)
+		return 0, 0, int(lightness * 100)
 	}
 
 	// Chromatic
@@ -287,7 +276,7 @@ func rgbToHsl(r, g, b uint8) (int, int, int) {
 	if lightness < 0.5 {
 		saturation = (max - min) / (max + min)
 	} else {
-		saturation = (max - min) / (2.0 - max - min)
+		saturation = (max - min) / (2 - max - min)
 	}
 
 	var hue float64
@@ -295,49 +284,50 @@ func rgbToHsl(r, g, b uint8) (int, int, int) {
 	if red == max {
 		hue = (green - blue) / delta
 	} else if green == max {
-		hue = 2.0 + (blue-red)/delta
+		hue = 2 + (blue-red)/delta
 	} else if blue == max {
-		hue = 4.0 + (red-green)/delta
+		hue = 4 + (red-green)/delta
 	}
 
-	h := wrapHue(int(hue * 60.0))
+	h := wrapHue(int(hue * 60.0)) //revive:disable-line:add-constant
 	s := int(saturation * 100.0)
 	l := int(lightness * 100.0)
 	return h, s, l
 }
 
 func hslToRgb(h, s, l int) (uint8, uint8, uint8) {
-	hue := float64(h) / 360.0
-	saturation := float64(s) / 100.0
-	lightness := float64(l) / 100.0
+	hue := float64(h) / geom.AngleFull
+	saturation := float64(s) / 100
+	lightness := float64(l) / 100
 
 	if saturation == 0.0 {
 		// Greyscale
-		g := uint8(lightness * 255.0)
+		g := uint8(lightness * math.MaxUint8)
 		return g, g, g
 	}
 
 	var v1 float64
 	if lightness < 0.5 {
-		v1 = lightness * (1.0 + saturation)
+		v1 = lightness * (1 + saturation)
 	} else {
 		v1 = (lightness + saturation) - (lightness * saturation)
 	}
 
-	v2 := 2.0*lightness - v1
+	v2 := 2*lightness - v1
 
-	red := hueToChannel(hue+(1.0/3.0), v1, v2)
+	red := hueToChannel(hue+(1.0/3), v1, v2)
 	green := hueToChannel(hue, v1, v2)
-	blue := hueToChannel(hue-(1.0/3.0), v1, v2)
+	blue := hueToChannel(hue-(1.0/3), v1, v2)
 
-	r := uint8(math.Round(255.0 * red))
-	g := uint8(math.Round(255.0 * green))
-	b := uint8(math.Round(255.0 * blue))
+	r := uint8(math.Round(math.MaxUint8 * red))
+	g := uint8(math.Round(math.MaxUint8 * green))
+	b := uint8(math.Round(math.MaxUint8 * blue))
 
 	return r, g, b
 }
 
 func hueToChannel(h, v1, v2 float64) float64 {
+	//revive:disable:add-constant
 	for h < 0.0 {
 		h += 1.0
 	}
@@ -354,4 +344,5 @@ func hueToChannel(h, v1, v2 float64) float64 {
 		return v2 + (v1-v2)*6*((2.0/3.0)-h)
 	}
 	return v2
+	//revive:enable-line:add-constant
 }

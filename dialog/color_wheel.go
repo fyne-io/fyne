@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/painter/geom"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -113,23 +114,23 @@ func (a *colorWheel) DragEnd() {
 
 func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 	width, height := float64(w), float64(h)
-	dx := float64(x) - (width / 2.0)
-	dy := float64(y) - (height / 2.0)
+	dx := float64(x) - (width / 2)
+	dy := float64(y) - (height / 2)
 	radius, radians := cmplx.Polar(complex(dx, dy))
-	limit := math.Min(width, height) / 2.0
+	limit := math.Min(width, height) / 2
 	if radius > limit {
 		// Out of bounds
 		return color.Transparent
 	}
-	degrees := radians * (180.0 / math.Pi)
+	degrees := radians * (geom.AngleHalf / math.Pi)
 	hue := wrapHue(int(degrees))
-	saturation := int(radius / limit * 100.0)
+	saturation := int(radius / limit * 100)
 	red, green, blue := hslToRgb(hue, saturation, a.Lightness)
 	return &color.NRGBA{
 		R: red,
 		G: green,
 		B: blue,
-		A: uint8(a.Alpha),
+		A: a.Alpha,
 	}
 }
 
@@ -144,11 +145,11 @@ func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
 
 func (a *colorWheel) selection(width, height float32) (float32, float32) {
 	w, h := float64(width), float64(height)
-	radius := float64(a.Saturation) / 100.0 * math.Min(w, h) / 2.0
+	radius := float64(a.Saturation) / 100 * math.Min(w, h) / 2
 	degrees := float64(a.Hue)
-	radians := degrees * math.Pi / 180.0
+	radians := degrees * math.Pi / geom.AngleHalf
 	c := cmplx.Rect(radius, radians)
-	return float32(real(c) + w/2.0), float32(imag(c) + h/2.0)
+	return float32(real(c) + w/2), float32(imag(c) + h/2)
 }
 
 func (a *colorWheel) trigger(pos fyne.Position) {
@@ -159,14 +160,14 @@ func (a *colorWheel) trigger(pos fyne.Position) {
 		dx := float64(x) - (width / 2)
 		dy := float64(y) - (height / 2)
 		radius, radians := cmplx.Polar(complex(dx, dy))
-		limit := math.Min(width, height) / 2.0
+		limit := math.Min(width, height) / 2
 		if radius > limit {
 			// Out of bounds
 			return
 		}
-		degrees := radians * (180.0 / math.Pi)
+		degrees := radians * (geom.AngleHalf / math.Pi)
 		a.Hue = wrapHue(int(degrees))
-		a.Saturation = int(radius / limit * 100.0)
+		a.Saturation = int(radius / limit * 100)
 		f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
 	}
 	a.Refresh()
@@ -192,7 +193,7 @@ func (r *colorWheelRenderer) Layout(size fyne.Size) {
 }
 
 func (r *colorWheelRenderer) MinSize() fyne.Size {
-	return r.raster.MinSize().Max(fyne.NewSize(128, 128))
+	return r.raster.MinSize().Max(fyne.NewSize(128, 128)) //revive:disable-line:add-constant
 }
 
 func (r *colorWheelRenderer) Refresh() {

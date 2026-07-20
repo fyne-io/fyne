@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -65,7 +66,7 @@ func (w *window) Resize(size fyne.Size) {
 		}
 
 		w.requestedWidth, w.requestedHeight = width, height
-		if runtime.GOOS != "js" {
+		if runtime.GOOS != goos.JavaScript {
 			w.view().SetSize(width, height)
 			w.processResized(width, height)
 		}
@@ -265,7 +266,7 @@ func (w *window) destroy(d *gLDriver) {
 
 	if w.master {
 		d.Quit()
-	} else if runtime.GOOS == "darwin" {
+	} else if runtime.GOOS == goos.Darwin {
 		d.focusPreviousWindow()
 	}
 }
@@ -315,7 +316,7 @@ func (w *window) processResized(width, height int) {
 }
 
 func (w *window) processFrameSized(width, height int) {
-	if width == 0 || height == 0 || runtime.GOOS != "darwin" {
+	if width == 0 || height == 0 || runtime.GOOS != goos.Darwin {
 		return
 	}
 
@@ -712,7 +713,7 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
-			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == fyne.KeyModifierAlt) {
+			if (runtime.GOOS == goos.Linux && keyDesktopModifier == 0) || (runtime.GOOS != goos.Linux && keyDesktopModifier == fyne.KeyModifierAlt) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:
@@ -939,7 +940,7 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
-	if runtime.GOOS != "js" {
+	if runtime.GOOS != goos.JavaScript {
 		async.EnsureMain(func() {
 			win = d.createWindow(title, true)
 		})

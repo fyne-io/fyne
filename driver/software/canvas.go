@@ -15,6 +15,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const canvasDefaultSize = 100
+
 // WindowlessCanvas provides functionality for a canvas to operate without a window
 //
 // Since: 2.9
@@ -61,7 +63,7 @@ func newCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
 		padded:      true,
 		painter:     painter,
 		scale:       1.0,
-		size:        fyne.NewSize(100, 100),
+		size:        fyne.NewSize(canvasDefaultSize, canvasDefaultSize),
 		transparent: transparent,
 	}
 	c.overlays.Canvas = c

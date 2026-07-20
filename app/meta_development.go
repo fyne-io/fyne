@@ -34,15 +34,16 @@ func checkLocalMetadata() {
 	meta.Version = data.Details.Version
 	meta.Build = data.Details.Build
 
+	const iconBaseSize = 512
 	if data.Details.Icon != "" {
 		res, err := fyne.LoadResourceFromPath(data.Details.Icon)
 		if err == nil {
-			meta.Icon = metadata.ScaleIcon(res, 512)
+			meta.Icon = metadata.ScaleIcon(res, iconBaseSize)
 		}
 	} else { // Icon.png fallback
 		res, err := fyne.LoadResourceFromPath("Icon.png")
 		if err == nil {
-			meta.Icon = metadata.ScaleIcon(res, 512)
+			meta.Icon = metadata.ScaleIcon(res, iconBaseSize)
 		}
 	}
 

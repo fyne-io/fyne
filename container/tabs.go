@@ -761,7 +761,7 @@ func (r *tabButtonRenderer) Refresh() {
 func (r *tabButtonRenderer) iconSize() float32 {
 	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 1.5 * iconSize
+		return 1.5 * iconSize //revive:disable-line:add-constant
 	}
 
 	return iconSize
