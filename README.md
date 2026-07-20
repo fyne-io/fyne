@@ -24,17 +24,8 @@ Using the standard go command you can add Fyne to your project by running two co
 
     go get fyne.io/fyne/v2@latest
 
-If you are new to Go, it is important to know that (as of Go 1.18) `go get` only downloads the specified module (to an internal folder), and adds a mention to it in the current folder's `go.mod` file. It does not add that module's dependencies to the `go.mod` file. To do this requires running a second command.
-
-Before running this second command, there must be a reference to fyne in one of your project's source files. The following, works:
-
-	import "fyne.io/fyne/v2/app"
-
-Note that:
-* `import "fyne.io/fyne/v2"` does not work.
-* some tools (such as [the official Visual Studio Go extension](https://marketplace.visualstudio.com/items?itemName=golang.go)), automatically remove unused imports. In which case you'll have to also write some code that uses an imported fyne module.
-
-Now run the following command, which both adds missing dependencies and removes unused ones.
+If you are new to Go, it is important to know that (as of Go 1.18) `go get` only downloads the specified module and register it in the `go.mod` file. It does not add any dependencies into the `go.mod` file.
+The command for automatically adding missing dependencies will remove unused modules as well. Therefore, you must first add a reference to fyne in a `.go` source file. After you have done that, you can run the second command:
 
 	go mod tidy
 
