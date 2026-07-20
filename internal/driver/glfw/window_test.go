@@ -1595,6 +1595,56 @@ func TestWindow_Focus(t *testing.T) {
 	assert.Equal(t, "ef", e2.Text)
 }
 
+func TestWindow_CollectionEmptyAreaUnfocus(t *testing.T) {
+	// List, GridWrap, Table and Tree are all Focusable themselves (for keyboard
+	// navigation), but that should not stop a tap on an empty area (with no
+	// row/cell/node under the cursor) from unfocusing another currently
+	// focused widget - see https://github.com/fyne-io/fyne/issues/4770.
+	newWidgets := map[string]func() fyne.CanvasObject{
+		"List": func() fyne.CanvasObject {
+			return widget.NewList(func() int { return 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.ListItemID, fyne.CanvasObject) {})
+		},
+		"GridWrap": func() fyne.CanvasObject {
+			return widget.NewGridWrap(func() int { return 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.GridWrapItemID, fyne.CanvasObject) {})
+		},
+		"Table": func() fyne.CanvasObject {
+			return widget.NewTable(func() (int, int) { return 1, 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.TableCellID, fyne.CanvasObject) {})
+		},
+		"Tree": func() fyne.CanvasObject {
+			return widget.NewTreeWithStrings(map[string][]string{"": {"leaf1"}})
+		},
+	}
+
+	for name, newWidget := range newWidgets {
+		t.Run(name, func(t *testing.T) {
+			w := createWindow("Test")
+			entry := widget.NewEntry()
+			coll := newWidget()
+
+			w.SetContent(container.NewBorder(entry, nil, nil, nil, coll))
+			w.Resize(fyne.NewSize(200, 200))
+			repaintWindow(w)
+
+			w.Canvas().Focus(entry)
+			require.Equal(t, entry, w.Canvas().Focused())
+
+			runOnMain(func() {
+				w.moveMouse(20, 150) // well below the single row/cell/node, but still within the widget
+				w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+				w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+			})
+
+			assert.Nil(t, w.Canvas().Focused())
+		})
+	}
+}
+
 func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w := createWindow("Test")
 	content := &typedShortcutable{}

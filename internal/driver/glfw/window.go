@@ -497,19 +497,17 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
-	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
+	focused := w.canvas.Focused()
+	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
 		ignore := false
-		_, _, _ = w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-			switch object.(type) {
-			case fyne.Focusable:
-				ignore = true
-				return true
-			}
+		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
+			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+				return object == focusedObj
+			})
+			ignore = found != nil
+		}
 
-			return false
-		})
-
-		if !ignore { // if a parent item under the mouse has focus then ignore this tap unfocus
+		if !ignore { // if the currently focused widget is under the mouse then ignore this tap unfocus
 			w.canvas.Unfocus()
 		}
 	}
