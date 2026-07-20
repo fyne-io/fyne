@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const initialAnimationsCapacity = 16
+
 // Runner is the main driver for animations package
 type Runner struct {
 	// animationMutex synchronizes access to `animations` and `pendingAnimations`
@@ -40,14 +42,14 @@ func (r *Runner) Start(a *fyne.Animation) {
 		if r.animations == nil {
 			// initialize with excess capacity to avoid re-allocations
 			// on subsequent Starts
-			r.animations = make([]*anim, 0, 16)
+			r.animations = make([]*anim, 0, initialAnimationsCapacity)
 		}
 		r.animations = append(r.animations, newAnim(a))
 	} else {
 		if r.pendingAnimations == nil {
 			// initialize with excess capacity to avoid re-allocations
 			// on subsequent Starts
-			r.pendingAnimations = make([]*anim, 0, 16)
+			r.pendingAnimations = make([]*anim, 0, initialAnimationsCapacity)
 		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}

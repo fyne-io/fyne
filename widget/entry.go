@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -579,7 +580,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	})
 	selectAllItem := fyne.NewMenuItem(lang.L("Select all"), e.selectAll)
 
-	menuItems := make([]*fyne.MenuItem, 0, 6)
+	const maxMenuItems = 6
+	menuItems := make([]*fyne.MenuItem, 0, maxMenuItems)
 	if e.Disabled() {
 		menuItems = append(menuItems, copyItem, selectAllItem)
 	} else if e.Password {
@@ -1130,7 +1132,7 @@ func (e *Entry) registerShortcut() {
 	}
 
 	moveWordModifier := fyne.KeyModifierShortcutDefault
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		moveWordModifier = fyne.KeyModifierAlt
 
 		// Cmd+left, Cmd+right shortcuts behave like Home and End keys on Mac OS

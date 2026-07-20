@@ -24,6 +24,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	pgl "fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -266,7 +267,7 @@ func (d *driver) Run() {
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
 				case key.Event:
-					if runtime.GOOS == "android" && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
+					if runtime.GOOS == goos.Android && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
 						break // we are getting release/press on backspace during soft backspace
 					}
 
@@ -310,7 +311,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			f()
 		}
 	case lifecycle.CrossOff: // will enter background
-		if runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
+		if runtime.GOOS == goos.Darwin || runtime.GOOS == goos.IOS {
 			if d.glctx == nil {
 				return
 			}

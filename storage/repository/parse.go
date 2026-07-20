@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 const domainLabelPattern = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
@@ -26,14 +27,14 @@ func NewFileURI(path string) fyne.URI {
 	// should be OK to use the platform native filepath with UNIX
 	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Windows {
 		// seems that sometimes we end up with
 		// double-backslashes
 		path = filepath.ToSlash(path)
 	}
 
 	return &uri{url.URL{
-		Scheme: "file",
+		Scheme: fyne.URISchemeFile,
 		Path:   path,
 	}}
 }
@@ -45,7 +46,7 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	scheme, path, ok := strings.Cut(s, ":")
+	scheme, path, ok := strings.Cut(s, fyne.URISchemeSeparator)
 	if !ok {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
@@ -61,13 +62,13 @@ func ParseURI(s string) (fyne.URI, error) {
 		}}, nil
 	}
 
-	if runtime.GOOS == "windows" && len(scheme) == 1 {
+	if runtime.GOOS == goos.Windows && len(scheme) == 1 {
 		path = scheme + ":" + filepath.ToSlash(path)
-		scheme = "file"
+		scheme = fyne.URISchemeFile
 	}
 
-	if strings.EqualFold(scheme, "file") {
-		path = strings.TrimPrefix(path, "//")
+	if strings.EqualFold(scheme, fyne.URISchemeFile) {
+		path = strings.TrimPrefix(path, fyne.URIAuthorityPrefix)
 		if path == "" {
 			return nil, errors.New("invalid file URI, path cannot be empty")
 		}

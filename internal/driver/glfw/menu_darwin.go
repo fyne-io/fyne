@@ -48,6 +48,13 @@ const char*   test_NSMenuItem_title(const void*);
 */
 import "C"
 
+const (
+	NSEventModifierFlagCommand = 20
+	NSEventModifierFlagControl = 18
+	NSEventModifierFlagOption  = 19
+	NSEventModifierFlagShift   = 17
+)
+
 type menuCallbacks struct {
 	action  func()
 	enabled func() bool
@@ -232,16 +239,16 @@ func keyEquivalent(item *fyne.MenuItem) (key string) {
 func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 	if s, ok := item.Shortcut.(fyne.KeyboardShortcut); ok {
 		if (s.Mod() & fyne.KeyModifierShift) != 0 {
-			mask |= 1 << 17 // NSEventModifierFlagShift
+			mask |= 1 << NSEventModifierFlagShift
 		}
 		if (s.Mod() & fyne.KeyModifierAlt) != 0 {
-			mask |= 1 << 19 // NSEventModifierFlagOption
+			mask |= 1 << NSEventModifierFlagOption
 		}
 		if (s.Mod() & fyne.KeyModifierControl) != 0 {
-			mask |= 1 << 18 // NSEventModifierFlagControl
+			mask |= 1 << NSEventModifierFlagControl
 		}
 		if (s.Mod() & fyne.KeyModifierSuper) != 0 {
-			mask |= 1 << 20 // NSEventModifierFlagCommand
+			mask |= 1 << NSEventModifierFlagCommand
 		}
 	}
 	return mask
@@ -342,7 +349,7 @@ func testNSMenuItemKeyEquivalent(i unsafe.Pointer) string {
 }
 
 func testNSMenuItemKeyEquivalentModifierMask(i unsafe.Pointer) uint64 {
-	return uint64(C.ulong(C.test_NSMenuItem_keyEquivalentModifierMask(i)))
+	return uint64(C.test_NSMenuItem_keyEquivalentModifierMask(i))
 }
 
 func testNSMenuItemSubmenu(i unsafe.Pointer) unsafe.Pointer {

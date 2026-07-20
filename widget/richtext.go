@@ -664,13 +664,14 @@ func (r *textRenderer) MinSize() fyne.Size {
 		}
 	}
 
+	const minScrolledSize = 32
 	switch scroll {
 	case widget.ScrollBoth:
-		return fyne.NewSize(32, 32)
+		return fyne.NewSize(minScrolledSize, minScrolledSize)
 	case widget.ScrollHorizontalOnly:
-		return fyne.NewSize(32, min.Height)
+		return fyne.NewSize(minScrolledSize, min.Height)
 	case widget.ScrollVerticalOnly:
-		return fyne.NewSize(min.Width, 32)
+		return fyne.NewSize(min.Width, minScrolledSize)
 	default:
 		return min
 	}
@@ -993,7 +994,7 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 
 	prior := bounds[len(bounds)-1]
 	seg := prior.segments[0].(*TextSegment)
-	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)
 	prior.end = prior.begin + fitCount
@@ -1183,7 +1184,7 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 	text := []rune(seg.Textual())
 	yPos := float32(0)
 	var bounds []rowBoundary
-	charSize := measurer([]rune("z"))
+	charSize := measurer([]rune("z")) //revive:disable-line:add-constant -- TODO: clarify whether we want to define a common letter constant for approximate character sizes
 	charWidth := charSize.Width
 	reuse := 0
 	for _, l := range lines {

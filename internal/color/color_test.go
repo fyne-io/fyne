@@ -9,6 +9,80 @@ import (
 	"fyne.io/fyne/v2/internal/color"
 )
 
+func Test_Parse(t *testing.T) {
+	for name, tt := range map[string]struct {
+		input   string
+		want    imagecolor.NRGBA
+		wantErr string
+	}{
+		"ok: #rrggbbaa": {
+			input: "#1a2b3c4d",
+			want:  imagecolor.NRGBA{R: 0x1a, G: 0x2b, B: 0x3c, A: 0x4d},
+		},
+		"ok: rrggbbaa": {
+			input: "1a2b3c4d",
+			want:  imagecolor.NRGBA{R: 0x1a, G: 0x2b, B: 0x3c, A: 0x4d},
+		},
+		"ok: #rrggbb": {
+			input: "#1a2b3c",
+			want:  imagecolor.NRGBA{R: 0x1a, G: 0x2b, B: 0x3c, A: 0xff},
+		},
+		"ok: rrggbb": {
+			input: "1a2b3c",
+			want:  imagecolor.NRGBA{R: 0x1a, G: 0x2b, B: 0x3c, A: 0xff},
+		},
+		"ok: #rgba": {
+			input: "#1a2b",
+			want:  imagecolor.NRGBA{R: 0x11, G: 0xaa, B: 0x22, A: 0xbb},
+		},
+		"ok: rgba": {
+			input: "1a2b",
+			want:  imagecolor.NRGBA{R: 0x11, G: 0xaa, B: 0x22, A: 0xbb},
+		},
+		"ok: #rgb": {
+			input: "#1a2",
+			want:  imagecolor.NRGBA{R: 0x11, G: 0xaa, B: 0x22, A: 0xff},
+		},
+		"ok: rgb": {
+			input: "1a2",
+			want:  imagecolor.NRGBA{R: 0x11, G: 0xaa, B: 0x22, A: 0xff},
+		},
+		"err: #rg": {
+			input:   "#12",
+			wantErr: "invalid color format: #12",
+		},
+		"err: #rrggb": {
+			input:   "#12345",
+			wantErr: "invalid color format: #12345",
+		},
+		"err: #rrggbba": {
+			input:   "#1234567",
+			wantErr: "invalid color format: #1234567",
+		},
+		"err: #rrggbbaax": {
+			input:   "#123456789",
+			wantErr: "invalid color format: #123456789",
+		},
+		"err: xrrggbbaa": {
+			input:   "x1a2b3c4d",
+			wantErr: "invalid color format: x1a2b3c4d",
+		},
+		"err: #rrggbbax": {
+			input:   "#1a2b3c4x",
+			wantErr: "encoding/hex: invalid byte: U+0078 'x'",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got, err := color.Parse(tt.input)
+			if tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+			} else if assert.NoError(t, err) {
+				assert.Equal(t, tt.want, got)
+			}
+		})
+	}
+}
+
 func Test_ToNRGBA_unmultiplyAlpha(t *testing.T) {
 	for name, tt := range map[string]struct {
 		color imagecolor.Color

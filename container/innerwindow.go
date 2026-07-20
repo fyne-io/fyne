@@ -3,11 +3,11 @@ package container
 import (
 	"image/color"
 	"runtime"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal/goos"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -21,6 +21,8 @@ const (
 	modeMinimize
 	modeMaximize
 	modeIcon
+
+	sizeDraggableCorner = 16
 )
 
 var _ fyne.Widget = (*InnerWindow)(nil)
@@ -185,7 +187,7 @@ func (w *InnerWindow) buttonPosition() widget.ButtonAlign {
 		return w.Alignment
 	}
 
-	if runtime.GOOS == "windows" || runtime.GOOS == "linux" || strings.Contains(runtime.GOOS, "bsd") {
+	if runtime.GOOS == goos.Windows || runtime.GOOS == goos.Linux || goos.IsBSD(runtime.GOOS) {
 		return widget.ButtonAlignTrailing
 	}
 	// macOS
@@ -350,7 +352,7 @@ func newDraggableCorner(w *InnerWindow) *draggableCorner {
 
 func (c *draggableCorner) CreateRenderer() fyne.WidgetRenderer {
 	prop := canvas.NewImageFromResource(fyne.CurrentApp().Settings().Theme().Icon(theme.IconNameDragCornerIndicator))
-	prop.SetMinSize(fyne.NewSquareSize(16))
+	prop.SetMinSize(fyne.NewSquareSize(sizeDraggableCorner))
 	return widget.NewSimpleRenderer(prop)
 }
 

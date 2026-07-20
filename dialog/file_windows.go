@@ -61,7 +61,7 @@ func (f *fileDialog) getPlaces() []favoriteItem {
 }
 
 func isHidden(file fyne.URI) bool {
-	if file.Scheme() != "file" {
+	if file.Scheme() != fyne.URISchemeFile {
 		fyne.LogError("Cannot check if non file is hidden", nil)
 		return false
 	}

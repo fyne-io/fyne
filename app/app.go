@@ -4,8 +4,8 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
+	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -64,7 +64,7 @@ func (a *fyneApp) UniqueID() string {
 		return a.Metadata().ID
 	}
 
-	a.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
+	a.uniqueID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
 	a.missingID = true
 	return a.uniqueID
 }

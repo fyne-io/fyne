@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
@@ -55,8 +56,8 @@ func toOSIcon(icon []byte) ([]byte, error) {
 
 // toOSIconForRuntime takes the input image bytes and converts it to an image type
 // that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
-func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
-	if goos != "windows" && !usesUnixSystrayIcon(goos) {
+func toOSIconForRuntime(icon []byte, os string) ([]byte, error) {
+	if os != goos.Windows && !usesUnixSystrayIcon(os) {
 		return icon, nil
 	}
 
@@ -66,7 +67,7 @@ func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
 	}
 
 	// keep windows behavior: convert to ico
-	if goos == "windows" {
+	if os == goos.Windows {
 		buf := &bytes.Buffer{}
 		if err = ico.Encode(buf, img); err != nil {
 			return nil, err
@@ -93,8 +94,8 @@ func convertToPNG(img image.Image) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func usesUnixSystrayIcon(goos string) bool {
-	return goos == "linux" || goos == "freebsd" || goos == "openbsd" || goos == "netbsd"
+func usesUnixSystrayIcon(os string) bool {
+	return os == goos.Linux || goos.IsBSD(os)
 }
 
 func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
@@ -206,7 +207,7 @@ func (d *gLDriver) SetDisableScreenBlanking(disable bool) {
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
 func NewGLDriver() *gLDriver {
-	repository.Register("file", intRepo.NewFileRepository())
+	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
 
 	return &gLDriver{
 		done: make(chan struct{}),

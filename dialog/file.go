@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
@@ -31,8 +32,15 @@ const (
 )
 
 const (
-	viewLayoutKey = "fyne:fileDialogViewLayout"
+	folderDesktop   = "Desktop"
+	folderDocuments = "Documents"
+	folderDownloads = "Downloads"
+	folderHome      = "Home"
+	folderMusic     = "Music"
+	folderPictures  = "Pictures"
+
 	lastFolderKey = "fyne:fileDialogLastFolder"
+	viewLayoutKey = "fyne:fileDialogViewLayout"
 )
 
 type textWidget interface {
@@ -144,7 +152,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	buttons := container.NewGridWithRows(1, f.dismiss, f.open)
 
 	f.filesScroll = container.NewScroll(nil) // filesScroll's content will be set by setView function.
-	verticalExtra := float32(float64(fileIconSize) * 0.25)
+	verticalExtra := float32(float64(iconSize) * 0.25)
 	itemMin := f.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
 	f.filesScroll.SetMinSize(itemMin.AddWidthHeight(itemMin.Width+theme.Padding()*3, verticalExtra))
 
@@ -363,7 +371,7 @@ func (f *fileDialog) optionsMenu(position fyne.Position, buttonSize fyne.Size) {
 }
 
 func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
-	if runtime.GOOS == "js" {
+	if runtime.GOOS == goos.JavaScript {
 		return make(map[string]fyne.ListableURI), nil
 	}
 
@@ -400,7 +408,7 @@ func (f *fileDialog) loadFavorites() {
 	}
 
 	f.favorites = []favoriteItem{
-		{locName: "Home", locIcon: theme.HomeIcon(), loc: favoriteLocations["Home"]},
+		{locName: folderHome, locIcon: theme.HomeIcon(), loc: favoriteLocations[folderHome]},
 	}
 	app := fyne.CurrentApp()
 	if hasAppFiles(app) {
@@ -627,7 +635,7 @@ func (f *fileDialog) getDataItem(id int) (fyne.URI, bool) {
 //   - "/" (should be filesystem root on all supported platforms)
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	if f.startingLocation != nil {
-		if f.startingLocation.Scheme() == "file" {
+		if f.startingLocation.Scheme() == fyne.URISchemeFile {
 			path := f.startingLocation.Path()
 
 			// the starting directory is set explicitly
@@ -924,43 +932,31 @@ func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent f
 
 func getFavoritesIcon(location string) fyne.Resource {
 	switch location {
-	case "Documents":
+	case folderDocuments:
 		return theme.DocumentIcon()
-	case "Desktop":
+	case folderDesktop:
 		return theme.DesktopIcon()
-	case "Downloads":
+	case folderDownloads:
 		return theme.DownloadIcon()
-	case "Music":
+	case folderMusic:
 		return theme.MediaMusicIcon()
-	case "Pictures":
+	case folderPictures:
 		return theme.MediaPhotoIcon()
-	case "Videos":
+	case folderVideos:
 		return theme.MediaVideoIcon()
 	}
-
-	if (runtime.GOOS == "darwin" && location == "Movies") ||
-		(runtime.GOOS != "darwin" && location == "Videos") {
-		return theme.MediaVideoIcon()
-	}
-
 	return nil
 }
 
-func getFavoritesOrder() [6]string {
-	order := [6]string{
-		"Desktop",
-		"Documents",
-		"Downloads",
-		"Music",
-		"Pictures",
-		"Videos",
+func getFavoritesOrder() []string {
+	return []string{
+		folderDesktop,
+		folderDocuments,
+		folderDownloads,
+		folderMusic,
+		folderPictures,
+		folderVideos,
 	}
-
-	if runtime.GOOS == "darwin" {
-		order[5] = "Movies"
-	}
-
-	return order
 }
 
 func hasAppFiles(a fyne.App) bool {
@@ -972,7 +968,7 @@ func hasAppFiles(a fyne.App) bool {
 }
 
 func storageURI(a fyne.App) fyne.URI {
-	dir, _ := storage.Child(a.Storage().RootURI(), "Documents")
+	dir, _ := storage.Child(a.Storage().RootURI(), folderDocuments)
 	return dir
 }
 

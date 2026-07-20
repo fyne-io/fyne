@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/painter/geom"
 )
 
 // LinearGradient defines a Gradient travelling straight at a given angle.
@@ -23,31 +24,31 @@ func (g *LinearGradient) Generate(iw, ih int) image.Image {
 	w, h := float64(iw), float64(ih)
 	var generator func(x, y float64) float64
 	switch g.Angle {
-	case 90, -270: // horizontal flipped
+	case geom.AngleQuarter, -geom.AngleThreeQuarter: // horizontal flipped
 		generator = func(x, _ float64) float64 {
 			return (w - x) / w
 		}
-	case 270, -90: // horizontal
+	case geom.AngleThreeQuarter, -geom.AngleQuarter: // horizontal
 		generator = func(x, _ float64) float64 {
 			return x / w
 		}
-	case 45, -315: // diagonal negative flipped
+	case geom.AngleEighth, -geom.AngleSevenEighth: // diagonal negative flipped
 		generator = func(x, y float64) float64 {
 			return math.Abs((w - x + y) / (w + h)) // ((w+h)-(x+h-y)) / (w+h)
 		}
-	case 225, -135: // diagonal negative
+	case geom.AngleFiveEighth, -geom.AngleThreeEighth: // diagonal negative
 		generator = func(x, y float64) float64 {
 			return math.Abs((x + h - y) / (w + h))
 		}
-	case 135, -225: // diagonal positive flipped
+	case geom.AngleThreeEighth, -geom.AngleFiveEighth: // diagonal positive flipped
 		generator = func(x, y float64) float64 {
 			return math.Abs((w + h - (x + y)) / (w + h))
 		}
-	case 315, -45: // diagonal positive
+	case geom.AngleSevenEighth, -geom.AngleEighth: // diagonal positive
 		generator = func(x, y float64) float64 {
 			return math.Abs((x + y) / (w + h))
 		}
-	case 180, -180: // vertical flipped
+	case geom.AngleHalf, -geom.AngleHalf: // vertical flipped
 		generator = func(_, y float64) float64 {
 			return (h - y) / h
 		}
@@ -213,7 +214,7 @@ func computeGradient(generator func(x, y float64) float64, w, h int, startColor,
 // The start color will be at the left of the gradient and the end color will be at the right.
 func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	g := &LinearGradient{StartColor: start, EndColor: end}
-	g.Angle = 270
+	g.Angle = geom.AngleThreeQuarter
 	return g
 }
 

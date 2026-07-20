@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/painter/geom"
 
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/math/fixed"
@@ -131,7 +132,7 @@ func DrawLine(line *canvas.Line, vectorPad float32, scale func(float32) float32)
 	p1x, p1y := scale(line.Position1.X-position.X+vectorPad), scale(line.Position1.Y-position.Y+vectorPad)
 	p2x, p2y := scale(line.Position2.X-position.X+vectorPad), scale(line.Position2.Y-position.Y+vectorPad)
 
-	if stroke <= 1.5 { // adjust to support 1px
+	if stroke <= 1.5 { //revive:disable-line:add-constant -- adjust to support 1px
 		if p1x == p2x {
 			p1x -= 0.5
 			p2x -= 0.5
@@ -169,7 +170,7 @@ func DrawPolygon(polygon *canvas.RegularPolygon, vectorPad float32, scale func(f
 	if polygon.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(polygon.FillColor)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), filler)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, filler)
 		filler.Draw()
 	}
 
@@ -177,7 +178,7 @@ func DrawPolygon(polygon *canvas.RegularPolygon, vectorPad float32, scale func(f
 		dasher := rasterx.NewDasher(width, height, scanner)
 		dasher.SetColor(polygon.StrokeColor)
 		dasher.SetStroke(fixed.Int26_6(float64(scale(polygon.StrokeWidth))*64), 0, nil, nil, nil, 0, nil, 0)
-		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), int(sides), dasher)
+		drawRegularPolygon(float64(width/2), float64(height/2), float64(outerRadius), float64(cornerRadius), float64(angle), sides, dasher)
 		dasher.Draw()
 	}
 
@@ -440,7 +441,7 @@ func drawRegularPolygon(cx, cy, radius, cornerRadius, rot float64, sides int, p 
 	}
 	gf := rasterx.RoundGap
 	angleStep := 2 * math.Pi / float64(sides)
-	rotRads := rot*math.Pi/180 - math.Pi/2
+	rotRads := rot*math.Pi/geom.AngleHalf - math.Pi/2
 
 	// fully rounded, draw circle
 	if math.Min(cornerRadius, radius) == radius {
@@ -663,7 +664,7 @@ func drawRoundArc(adder rasterx.Adder, cx, cy, outer, inner, start, sweep, cr fl
 			x1, y1 := cosSinPoint(cx, cy, r, a1)
 			x2, y2 := cosSinPoint(cx, cy, r, a2)
 
-			k := 4.0 / 3.0 * math.Tan((a2-a1)/4.0)
+			k := 4.0 / 3.0 * math.Tan((a2-a1)/4.0) //revive:disable-line:add-constant
 			// tangent unit vectors on our param (x = cx+rcos, y = cy-rsin)
 			c1x := x1 + k*r*(-math.Sin(a1))
 			c1y := y1 + k*r*(-math.Cos(a1))
@@ -888,8 +889,9 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 	// height (thickness), width (length)
 	thickness := outerRadius - innerRadius
 	// TODO: length formula can be improved to get a fully rounded (pill shape) outer edge for thin (small sweep) arc segments
-	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/180.0, math.Pi)) // span in (0,1)
-	length := 1.5 * float64(outerRadius) * span / (1 + span)                               // no division-by-zero risk
+	span := math.Sin(0.5 * math.Min(math.Abs(float64(sweepAngle))*math.Pi/geom.AngleHalf, math.Pi)) // span in (0,1)
+	//revive:disable-next-line:add-constant
+	length := 1.5 * float64(outerRadius) * span / (1 + span) // no division-by-zero risk
 
 	return GetMaximumRadius(fyne.NewSize(
 		thickness, float32(length),
@@ -901,7 +903,7 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 // to the coordinate system used by the painter, where 0 degrees is at the top (12 o'clock position).
 // The function also reverses the direction: positive is clockwise, negative is counter-clockwise
 func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
-	return -(startAngle - 90), -(endAngle - 90)
+	return -(startAngle - geom.AngleQuarter), -(endAngle - geom.AngleQuarter)
 }
 
 // NormalizeBezierCurvePoints clamps the start, end, and control points of a Bezier curve

@@ -58,6 +58,7 @@ func (c *Canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.
 }
 
 func (c *Canvas) DrawDebugOverlay(obj fyne.CanvasObject, pos fyne.Position, size fyne.Size, clip *internal.ClipItem) {
+	//revive:disable:add-constant
 	switch obj.(type) {
 	case fyne.Widget:
 		r := canvas.NewRectangle(color.Transparent)
@@ -76,6 +77,7 @@ func (c *Canvas) DrawDebugOverlay(obj fyne.CanvasObject, pos fyne.Position, size
 		r.Resize(obj.Size())
 		c.Painter().Paint(r, pos, size, clip)
 	}
+	//revive:enable:add-constant
 }
 
 // EnsureMinSize ensure canvas min size.

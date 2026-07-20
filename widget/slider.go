@@ -223,6 +223,7 @@ func (s *Slider) buttonDiameter(inlineIconSize float32) float32 {
 }
 
 func (s *Slider) endOffset(inlineIconSize, innerPadding float32) float32 {
+	//revive:disable-next-line:add-constant -- TODO: clarify what this 1.5 is about
 	return s.buttonDiameter(inlineIconSize)/2 + innerPadding - 1.5 // align with radio icons
 }
 
