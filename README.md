@@ -24,7 +24,7 @@ Using the standard go command you can add Fyne to your project by running two co
 
     go get fyne.io/fyne/v2@latest
 
-If you are new to Go, it is important to know that (as of Go 1.18) `go get` only downloads the specified module and register it in the `go.mod` file. It does not add any dependencies into the `go.mod` file.
+If you are new to Go, it is important to know that (as of Go 1.18) `go get` only downloads the specified module and registers it in the `go.mod` file. It does not add any dependencies into the `go.mod` file.
 The command for automatically adding missing dependencies will remove unused modules as well. Therefore, you must first add a reference to fyne in a `.go` source file. After you have done that, you can run the second command:
 
 	go mod tidy
