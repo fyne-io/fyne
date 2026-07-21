@@ -6,6 +6,7 @@ import (
 	"image/color"
 	_ "image/jpeg" // register JPEG decoder so DisabledResource can desaturate JPEG icons
 	"image/png"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/svg"
@@ -882,8 +883,8 @@ func desaturate(src []byte) ([]byte, error) {
 			// channels — otherwise partially-transparent pixels go too dark.
 			n := color.NRGBAModel.Convert(img.At(x, y)).(color.NRGBA)
 			lum := (lumaWeightR*uint32(n.R) + lumaWeightG*uint32(n.G) + lumaWeightB*uint32(n.B)) / lumaScale
-			if lum > 255 {
-				lum = 255
+			if lum > math.MaxUint8 {
+				lum = math.MaxUint8
 			}
 			gray.SetNRGBA(x, y, color.NRGBA{R: uint8(lum), G: uint8(lum), B: uint8(lum), A: n.A})
 		}
