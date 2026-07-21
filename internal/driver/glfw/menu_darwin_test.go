@@ -303,13 +303,13 @@ func TestDarwinMenu_focusChangeUpdatesNativeMenu(t *testing.T) {
 
 	// Switching focus back to w1 should switch the native menu back to menu1.
 	runOnMain(func() {
-		w1.window.processFocused(true)
+		w1.processFocused(true)
 	})
 	assert.Equal(t, "Menu1", titleOfSecondMenu())
 
 	// Switching focus to w2 should switch the native menu back to menu2.
 	runOnMain(func() {
-		w2.window.processFocused(true)
+		w2.processFocused(true)
 	})
 	assert.Equal(t, "Menu2", titleOfSecondMenu())
 }
