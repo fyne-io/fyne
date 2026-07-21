@@ -107,13 +107,15 @@ func tabsAdjustedLocation(l TabLocation, b baseTabs) TabLocation {
 		if o := fyne.CurrentDevice().Orientation(); fyne.IsVertical(o) {
 			if l == TabLocationLeading {
 				return TabLocationTop
-			} else if l == TabLocationTrailing {
+			}
+			if l == TabLocationTrailing {
 				return TabLocationBottom
 			}
 		} else {
 			if l == TabLocationTop {
 				return TabLocationLeading
-			} else if l == TabLocationBottom {
+			}
+			if l == TabLocationBottom {
 				return TabLocationTrailing
 			}
 		}
@@ -759,7 +761,7 @@ func (r *tabButtonRenderer) Refresh() {
 func (r *tabButtonRenderer) iconSize() float32 {
 	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 1.5 * iconSize
+		return 1.5 * iconSize //revive:disable-line:add-constant
 	}
 
 	return iconSize

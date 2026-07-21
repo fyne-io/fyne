@@ -101,7 +101,8 @@ func (s *sprintfString) DataChanged() {
 	}
 
 	r := fmt.Sprintf(s.format, data...)
-	s.String.Set(r)
+	// NewString() delivers an *item and *item#Set() never returns an error.
+	_ = s.String.Set(r)
 }
 
 func (s *sprintfString) Get() (string, error) {

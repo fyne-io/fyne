@@ -22,16 +22,21 @@ const (
 	float                 = gl.FLOAT
 	fragmentShader        = gl.FRAGMENT_SHADER
 	front                 = gl.FRONT
+	back                  = gl.BACK
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
+	maxTextureSizeParam   = gl.MAX_TEXTURE_SIZE
 	one                   = gl.ONE
+	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
 	scissorTest           = gl.SCISSOR_TEST
 	srcAlpha              = gl.SRC_ALPHA
 	staticDraw            = gl.STATIC_DRAW
 	texture0              = gl.TEXTURE0
+	texture1              = gl.TEXTURE1
 	texture2D             = gl.TEXTURE_2D
+	textureNearest        = gl.NEAREST
 	textureMinFilter      = gl.TEXTURE_MIN_FILTER
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
@@ -70,79 +75,12 @@ func (p *painter) Init() {
 		fyne.LogError("failed to initialise OpenGL", err)
 		return
 	}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = programState{
-		ref:        p.createProgram("simple_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.blurProgram = programState{
-		ref:        p.createProgram("blur_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.lineProgram = programState{
-		ref:        p.createProgram("line_es"),
-		buff:       p.createBuffer(24),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.rectangleProgram = programState{
-		ref:        p.createProgram("rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.roundRectangleProgram = programState{
-		ref:        p.createProgram("round_rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.polygonProgram = programState{
-		ref:        p.createProgram("polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arcProgram = programState{
-		ref:        p.createProgram("arc_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.bezierCurveProgram = programState{
-		ref:        p.createProgram("bezier_curve_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arbitraryPolygonProgram = programState{
-		ref:        p.createProgram("arbitrary_polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.ellipseProgram = programState{
-		ref:        p.createProgram("ellipse_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
+	p.programs = p.compilePrograms()
 }
 
 type esContext struct{}
@@ -250,6 +188,12 @@ func (c *esContext) GetError() uint32 {
 	return gl.GetError()
 }
 
+func (c *esContext) GetInteger(pname uint32) int {
+	var value int32
+	gl.GetIntegerv(pname, &value)
+	return int(value)
+}
+
 func (c *esContext) GetProgrami(program Program, param uint32) int {
 	var value int32
 	gl.GetProgramiv(uint32(program), param, &value)
@@ -334,12 +278,12 @@ func (c *esContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
 }
 
-func (c *esContext) Uniform1i(uniform Uniform, v int32) {
-	gl.Uniform1i(int32(uniform), v)
-}
-
 func (c *esContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(int32(uniform), int32(len(v)), &v[0])
+}
+
+func (c *esContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(int32(uniform), v)
 }
 
 func (c *esContext) Uniform2f(uniform Uniform, v0, v1 float32) {

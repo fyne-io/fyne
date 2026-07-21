@@ -218,9 +218,10 @@ func renderEmphasis(source []byte, n ast.Node, quotingDepth int, strength, listD
 		style = RichTextStyleInline
 		style.TextStyle.Strikethrough = true
 		if emp, ok := n.Parent().(*ast.Emphasis); ok {
-			if emp.Level == 1 {
+			switch emp.Level {
+			case 1:
 				style.TextStyle.Italic = true
-			} else if emp.Level == 2 {
+			case 2:
 				style.TextStyle.Bold = true
 			}
 		}
@@ -296,7 +297,8 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 
 func forceIntoText(source []byte, n ast.Node) string {
 	text := strings.Builder{}
-	ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
+	// ast.Walk() only ever returns an error if the walker does and our walker does not.
+	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch t := n2.(type) {
 			case *ast.Text:
@@ -306,7 +308,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), " ")
+	return strings.TrimSuffix(text.String(), " ") //revive:disable-line:add-constant
 }
 
 func parseMarkdown(content string) []RichTextSegment {

@@ -17,6 +17,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2/driver"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 // assert we are implementing driver.NativeWindow
@@ -32,7 +33,7 @@ func (w *window) RunNative(f func(any)) {
 }
 
 func (w *window) doSetFullScreen(full bool) {
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != goos.Darwin {
 		return
 	}
 
@@ -41,7 +42,7 @@ func (w *window) doSetFullScreen(full bool) {
 }
 
 func (w *window) doSetFullScreen2(full bool) {
-	if runtime.GOOS != "darwin" {
+	if runtime.GOOS != goos.Darwin {
 		return
 	}
 

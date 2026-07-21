@@ -19,16 +19,21 @@ const (
 	float                 = gl.FLOAT
 	fragmentShader        = gl.FRAGMENT_SHADER
 	front                 = gl.FRONT
+	back                  = gl.BACK
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
+	maxTextureSizeParam   = gl.MAX_TEXTURE_SIZE
 	one                   = gl.ONE
+	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
 	scissorTest           = gl.SCISSOR_TEST
 	srcAlpha              = gl.SRC_ALPHA
 	staticDraw            = gl.STATIC_DRAW
 	texture0              = gl.TEXTURE0
+	texture1              = gl.TEXTURE1
 	texture2D             = gl.TEXTURE_2D
+	textureNearest        = gl.NEAREST
 	textureMinFilter      = gl.TEXTURE_MIN_FILTER
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
 	textureWrapS          = gl.TEXTURE_WRAP_S
@@ -61,78 +66,11 @@ var (
 
 func (p *painter) Init() {
 	p.ctx = &xjsContext{}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = programState{
-		ref:        p.createProgram("simple_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.blurProgram = programState{
-		ref:        p.createProgram("blur_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.lineProgram = programState{
-		ref:        p.createProgram("line_es"),
-		buff:       p.createBuffer(24),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.rectangleProgram = programState{
-		ref:        p.createProgram("rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.roundRectangleProgram = programState{
-		ref:        p.createProgram("round_rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.polygonProgram = programState{
-		ref:        p.createProgram("polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arcProgram = programState{
-		ref:        p.createProgram("arc_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.bezierCurveProgram = programState{
-		ref:        p.createProgram("bezier_curve_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arbitraryPolygonProgram = programState{
-		ref:        p.createProgram("arbitrary_polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.ellipseProgram = programState{
-		ref:        p.createProgram("ellipse_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
+	p.programs = p.compilePrograms()
 }
 
 type xjsContext struct{}
@@ -236,6 +174,10 @@ func (c *xjsContext) GetError() uint32 {
 	return uint32(gl.GetError())
 }
 
+func (c *xjsContext) GetInteger(pname uint32) int {
+	return gl.GetInteger(gl.Enum(pname))
+}
+
 func (c *xjsContext) GetProgrami(program Program, param uint32) int {
 	return gl.GetProgrami(gl.Program(program), gl.Enum(param))
 }
@@ -303,12 +245,12 @@ func (c *xjsContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(gl.Uniform(uniform), v)
 }
 
-func (c *xjsContext) Uniform1i(uniform Uniform, v int32) {
-	gl.Uniform1i(gl.Uniform(uniform), int(v))
-}
-
 func (c *xjsContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(gl.Uniform(uniform), v)
+}
+
+func (c *xjsContext) Uniform1i(uniform Uniform, v int32) {
+	gl.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *xjsContext) Uniform2f(uniform Uniform, v0, v1 float32) {

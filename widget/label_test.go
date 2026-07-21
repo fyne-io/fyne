@@ -225,10 +225,41 @@ func TestLabel_Select(t *testing.T) {
 	sel.TypedShortcut(&fyne.ShortcutCopy{})
 	assert.Equal(t, "el", fyne.CurrentApp().Clipboard().Content())
 
+	l.SetText("World")
+	assert.Equal(t, "", l.SelectedText())
+
 	l.Selectable = false
 	l.Refresh()
 	assert.Equal(t, 1, len(test.WidgetRenderer(l).Objects()))
 	assert.Empty(t, l.SelectedText())
+}
+
+func TestLabel_ClearSelection(t *testing.T) {
+	l := NewLabel("Hello")
+	l.Selectable = true
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
+	sel.MouseDown(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)},
+	})
+	sel.Dragged(&fyne.DragEvent{
+		Dragged:    fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
+	sel.DragEnd()
+	sel.MouseUp(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
+	assert.Equal(t, "el", l.SelectedText())
+
+	l.ClearSelection()
+	assert.Equal(t, "", l.SelectedText())
+
+	// calling again with nothing selected is a no-op
+	l.ClearSelection()
+	assert.Equal(t, "", l.SelectedText())
 }
 
 func TestLabel_SelectWord(t *testing.T) {

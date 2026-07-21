@@ -39,6 +39,6 @@ func TestPixCloseEnough(t *testing.T) {
 }
 
 func uint8color(c color.Color) (r, g, b, a uint8) {
-	rr, gg, bb, aa := c.RGBA()
-	return uint8(rr >> 8), uint8(gg >> 8), uint8(bb >> 8), uint8(aa >> 8)
+	rgba, _ := color.RGBAModel.Convert(c).(color.RGBA)
+	return rgba.R, rgba.G, rgba.B, rgba.A
 }

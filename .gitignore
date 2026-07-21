@@ -9,6 +9,7 @@ fyne-cross
 *.app
 *.tar.xz
 *.zip
+wasm
 
 ### Tests
 **/testdata/failed

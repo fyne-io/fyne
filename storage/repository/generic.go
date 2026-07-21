@@ -2,11 +2,26 @@ package repository
 
 import (
 	"io"
+	"net/url"
 	"path"
 	"strings"
 
 	"fyne.io/fyne/v2"
 )
+
+func getUserHost(authority string) (*url.Userinfo, string) {
+	info := strings.SplitN(authority, "@", 2)
+	if len(info) != 2 {
+		return nil, authority
+	}
+
+	u := strings.SplitN(info[0], ":", 2)
+	if len(u) == 2 {
+		return url.UserPassword(u[0], u[1]), info[1]
+	}
+
+	return url.User(u[0]), info[1]
+}
 
 // GenericParent can be used as a common-case implementation of
 // HierarchicalRepository.Parent(). It will create a parent URI based on
@@ -29,13 +44,15 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 		return nil, ErrURIRoot
 	}
 
-	newURI := uri{
-		scheme:    u.Scheme(),
-		authority: u.Authority(),
-		path:      path.Dir(p),
-		query:     u.Query(),
-		fragment:  u.Fragment(),
-	}
+	user, host := getUserHost(u.Authority())
+	newURI := uri{url.URL{
+		Scheme:   u.Scheme(),
+		User:     user,
+		Host:     host,
+		Path:     path.Dir(p),
+		RawQuery: u.Query(),
+		Fragment: u.Fragment(),
+	}}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a
@@ -55,13 +72,15 @@ func GenericParent(u fyne.URI) (fyne.URI, error) {
 //
 // Since: 2.0
 func GenericChild(u fyne.URI, component string) (fyne.URI, error) {
-	newURI := uri{
-		scheme:    u.Scheme(),
-		authority: u.Authority(),
-		path:      path.Join(u.Path(), component),
-		query:     u.Query(),
-		fragment:  u.Fragment(),
-	}
+	user, host := getUserHost(u.Authority())
+	newURI := uri{url.URL{
+		Scheme:   u.Scheme(),
+		User:     user,
+		Host:     host,
+		Path:     path.Join(u.Path(), component),
+		RawQuery: u.Query(),
+		Fragment: u.Fragment(),
+	}}
 
 	// NOTE: we specifically want to use ParseURI, rather than &uri{},
 	// since the repository for the URI we just created might be a

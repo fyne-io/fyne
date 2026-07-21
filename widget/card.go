@@ -220,7 +220,7 @@ func (c *cardRenderer) Refresh() {
 	if c.card.Content != nil {
 		objects = append(objects, c.card.Content)
 	}
-	c.BaseRenderer.SetObjects(objects)
+	c.SetObjects(objects)
 
 	c.applyTheme()
 	c.Layout(c.card.Size())

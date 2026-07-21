@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -213,6 +214,17 @@ func TestRichTextMarkdown_TableAlignmentAppliedThroughVisual(t *testing.T) {
 
 	assert.Equal(t, fyne.TextAlignLeading, table.Rows[0][0][0].(*TextSegment).Style.Alignment)
 	assert.Equal(t, fyne.TextAlignTrailing, table.Rows[0][1][0].(*TextSegment).Style.Alignment)
+}
+
+func TestRichTextMarkdown_TableScrollsHorizontally(t *testing.T) {
+	r := NewRichTextFromMarkdown("| Feature | Value |\n| :--- | ---: |\n| " + strings.Repeat("wide", 50) + " | value |")
+	table := r.Segments[0].(*TableSegment)
+
+	visual, ok := table.Visual().(*internalWidget.Scroll)
+	if !ok {
+		t.Fatalf("table visual = %T, want *widget.Scroll", table.Visual())
+	}
+	assert.Equal(t, internalWidget.ScrollHorizontalOnly, visual.Direction)
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

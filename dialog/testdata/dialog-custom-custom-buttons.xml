@@ -13,7 +13,7 @@
 				<container size="153x142">
 					<spacer pos="59,-4" size="98x98"/>
 					<widget size="153x142" type="*dialog.themedBackground">
-						<rectangle fillColor="rgba(40,40,40,230)" size="153x142"/>
+						<rectangle fillColor="rgba(40,40,40,230)" radius="12" size="153x142"/>
 					</widget>
 					<widget pos="16,51" size="121x35" type="*widget.Label">
 						<widget size="121x35" type="*widget.RichText">

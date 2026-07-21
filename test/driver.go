@@ -114,7 +114,11 @@ func (d *driver) Run() {
 
 func (d *driver) StartAnimation(a *fyne.Animation) {
 	// currently no animations in test app, we just initialise it and leave
-	a.Tick(1.0)
+	if a.AutoReverse {
+		a.Tick(0.0)
+	} else {
+		a.Tick(1.0)
+	}
 }
 
 func (d *driver) StopAnimation(a *fyne.Animation) {

@@ -28,10 +28,10 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	m.setMenu(menu)
 	p := &PopUpMenu{Menu: m, canvas: c}
 	p.ExtendBaseWidget(p)
-	p.Menu.Resize(p.Menu.MinSize())
-	p.Menu.customSized = true
+	p.Resize(p.MinSize())
+	p.customSized = true
 
-	p.Move(fyne.NewPos(10, 10)) // non-zero pos to get manual overlay, fixed on show
+	p.Move(fyne.NewPos(10, 10)) //revive:disable-line:add-constant // non-zero pos to get manual overlay, fixed on show
 	o := widget.NewOverlayContainer(p, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
@@ -95,9 +95,7 @@ func (p *PopUpMenu) SetCanvas(c fyne.Canvas) {
 
 // Show makes the pop-up menu visible.
 func (p *PopUpMenu) Show() {
-	p.Menu.alignment = p.alignment
-	p.Menu.Refresh()
-
+	p.Refresh()
 	p.overlay.Show()
 	p.Menu.Show()
 	if !fyne.CurrentDevice().IsMobile() {

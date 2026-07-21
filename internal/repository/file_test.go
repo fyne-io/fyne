@@ -332,16 +332,17 @@ func TestFileRepositoryParent(t *testing.T) {
 		assert.Equal(t, repository.ErrURIRoot, err)
 
 		parent, err = storage.Parent(storage.NewFileURI("C:/foo"))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "file://C:/", parent.String())
 
 		// Windows supports UNIX-style paths. /C:/ is also a valid path.
 		parent, err = storage.Parent(storage.NewFileURI("/C:/"))
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "file:///", parent.String())
 	} else {
-		parent, err = storage.Parent(storage.NewFileURI("/:"))
-		assert.Nil(t, err)
+		u := storage.NewFileURI("/:")
+		parent, err = storage.Parent(u)
+		assert.NoError(t, err)
 		assert.Equal(t, "file:///", parent.String())
 	}
 }

@@ -122,8 +122,7 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 
 func TestPainter_paintCircle_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewCircle(color.NRGBA{R: 0, G: 0, B: 0, A: 150})
 	obj.Shadow.Color = color.White
 	obj.Shadow.Offset = fyne.NewPos(-10, -5)
 	obj.Shadow.BlurRadius = 3
@@ -146,7 +145,7 @@ func TestPainter_paintCircle_shadow(t *testing.T) {
 
 func TestPainter_paintGradient_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})
+	g := canvas.NewRadialGradient(color.NRGBA{R: 200, G: 0, B: 0, A: 255}, color.NRGBA{R: 0, G: 0, B: 200, A: 255})
 	g.SetMinSize(fyne.NewSize(100, 100))
 	scroll := container.NewScroll(g)
 	scroll.Move(fyne.NewPos(10, 10))
@@ -358,7 +357,7 @@ func TestPainter_paintLine_thin(t *testing.T) {
 	lines := [5]*canvas.Line{}
 	sws := []float32{4, 2, 1, 0.5, 0.3}
 	for i, sw := range sws {
-		lines[i] = canvas.NewLine(color.RGBA{255, 0, 0, 255})
+		lines[i] = canvas.NewLine(color.RGBA{R: 255, G: 0, B: 0, A: 255})
 		lines[i].StrokeWidth = sw
 		x := float32(i * 20)
 		lines[i].Position1 = fyne.NewPos(x, 10)
@@ -390,7 +389,7 @@ func TestPainter_paintLinearBezierCurve_thin(t *testing.T) {
 	lines := [5]*canvas.BezierCurve{}
 	sws := []float32{4, 2, 1, 0.5, 0.3}
 	for i, sw := range sws {
-		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{255, 0, 0, 255}}
+		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{R: 255, G: 0, B: 0, A: 255}}
 		lines[i].StrokeWidth = sw
 		x := float32(i * 20)
 		lines[i].StartPoint = fyne.NewPos(x, 10)
@@ -423,7 +422,7 @@ func TestPainter_paintQuadraticBezierCurve_thin(t *testing.T) {
 	lines := [5]*canvas.BezierCurve{}
 	sws := []float32{4, 2, 1, 0.5, 0.3}
 	for i, sw := range sws {
-		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{255, 0, 0, 255}}
+		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{R: 255, G: 0, B: 0, A: 255}}
 		lines[i].StrokeWidth = sw
 		x := float32(i * 20)
 		lines[i].StartPoint = fyne.NewPos(x, 10)
@@ -457,7 +456,7 @@ func TestPainter_paintCubicBezierCurve_thin(t *testing.T) {
 	lines := [5]*canvas.BezierCurve{}
 	sws := []float32{4, 2, 1, 0.5, 0.3}
 	for i, sw := range sws {
-		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{255, 0, 0, 255}}
+		lines[i] = &canvas.BezierCurve{StrokeColor: color.RGBA{R: 255, G: 0, B: 0, A: 255}}
 		lines[i].StrokeWidth = sw
 		x := float32(i * 20)
 		lines[i].StartPoint = fyne.NewPos(x, 10)
@@ -548,25 +547,25 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 
 func TestPainter_paintRectangle_clipped(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	red1 := canvas.NewRectangle(color.NRGBA{R: 200, A: 255})
+	red1 := canvas.NewRectangle(color.NRGBA{R: 200, G: 0, B: 0, A: 255})
 	red1.SetMinSize(fyne.NewSize(20, 20))
-	red2 := canvas.NewRectangle(color.NRGBA{R: 150, A: 255})
+	red2 := canvas.NewRectangle(color.NRGBA{R: 150, G: 0, B: 0, A: 255})
 	red2.SetMinSize(fyne.NewSize(20, 20))
-	red3 := canvas.NewRectangle(color.NRGBA{R: 100, A: 255})
+	red3 := canvas.NewRectangle(color.NRGBA{R: 100, G: 0, B: 0, A: 255})
 	red3.SetMinSize(fyne.NewSize(20, 20))
 	reds := container.NewHBox(red1, red2, red3)
-	green1 := canvas.NewRectangle(color.NRGBA{G: 200, A: 255})
+	green1 := canvas.NewRectangle(color.NRGBA{R: 0, G: 200, B: 0, A: 255})
 	green1.SetMinSize(fyne.NewSize(20, 20))
-	green2 := canvas.NewRectangle(color.NRGBA{G: 150, A: 255})
+	green2 := canvas.NewRectangle(color.NRGBA{R: 0, G: 150, B: 0, A: 255})
 	green2.SetMinSize(fyne.NewSize(20, 20))
-	green3 := canvas.NewRectangle(color.NRGBA{G: 100, A: 255})
+	green3 := canvas.NewRectangle(color.NRGBA{R: 0, G: 100, B: 0, A: 255})
 	green3.SetMinSize(fyne.NewSize(20, 20))
 	greens := container.NewHBox(green1, green2, green3)
-	blue1 := canvas.NewRectangle(color.NRGBA{B: 200, A: 255})
+	blue1 := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 200, A: 255})
 	blue1.SetMinSize(fyne.NewSize(20, 20))
-	blue2 := canvas.NewRectangle(color.NRGBA{B: 150, A: 255})
+	blue2 := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 150, A: 255})
 	blue2.SetMinSize(fyne.NewSize(20, 20))
-	blue3 := canvas.NewRectangle(color.NRGBA{B: 100, A: 255})
+	blue3 := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 100, A: 255})
 	blue3.SetMinSize(fyne.NewSize(20, 20))
 	blues := container.NewHBox(blue1, blue2, blue3)
 	box := container.NewVBox(reds, greens, blues)
@@ -643,8 +642,7 @@ func TestPainter_paintRectangle_perCornerRadius(t *testing.T) {
 
 func TestPainter_paintRectangle_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(3, -4)
 	obj.Shadow.BlurRadius = 8
@@ -675,8 +673,7 @@ func TestPainter_paintRectangle_shadow(t *testing.T) {
 
 func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 150})
 	obj.StrokeWidth = 2
 	obj.StrokeColor = color.White
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
@@ -709,8 +706,7 @@ func TestPainter_paintRectangle_stroke_shadow(t *testing.T) {
 
 func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewRectangle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewRectangle(color.NRGBA{R: 0, G: 0, B: 0, A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(-5, 5)
 	obj.Shadow.BlurRadius = 5
@@ -739,8 +735,7 @@ func TestPainter_paintRectangle_shadow_spread(t *testing.T) {
 
 func TestPainter_paintCircle_shadow_spread(t *testing.T) {
 	test.ApplyTheme(t, test.Theme())
-	r, g, b, _ := color.Black.RGBA()
-	obj := canvas.NewCircle(color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 150})
+	obj := canvas.NewCircle(color.NRGBA{R: 0, G: 0, B: 0, A: 150})
 	obj.Shadow.Color = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
 	obj.Shadow.Offset = fyne.NewPos(5, -5)
 	obj.Shadow.BlurRadius = 7
@@ -845,7 +840,7 @@ func TestPainter_paintArbitraryPolygon(t *testing.T) {
 		fyne.NewPos(10, 90),
 	}
 	poly.Points = concavePoints
-	poly.FillColor = color.NRGBA{B: 255, A: 255}
+	poly.FillColor = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
 	test.AssertImageMatches(t, "draw_arbitrary_polygon_concave.png", p.Paint(c))
 
 	// Heart with Mixed Corner Radii

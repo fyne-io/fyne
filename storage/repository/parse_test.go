@@ -59,4 +59,12 @@ func TestParseInvalidURI(t *testing.T) {
 	uri, err = ParseURI("scheme://0[]/invalid")
 	assert.Error(t, err)
 	assert.Nil(t, uri)
+
+	uri, err = ParseURI("scheme://aaaaaaaaaa22222222223333333333444444444455555555556666666666bbbb/too/long")
+	assert.Error(t, err)
+	assert.Nil(t, uri)
+
+	uri, err = ParseURI("scheme://1..2/wrong")
+	assert.Error(t, err)
+	assert.Nil(t, uri)
 }

@@ -30,6 +30,7 @@ const (
 	StrikethroughToBaselineFactor = 0.75
 
 	fontTabSpaceSize = 10
+	replacementChar  = 0xfffd // that’s '�'
 )
 
 var (
@@ -190,6 +191,11 @@ func ClearFontCache() {
 
 // DrawString draws a string into an image.
 func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle) {
+	DrawStringOffset(dst, s, color, f, fontSize, scale, style, 0)
+}
+
+// DrawStringOffset draws a string shifted left by the specified pixel offset.
+func DrawStringOffset(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
 	r := render.Renderer{
 		FontSize: fontSize,
 		PixScale: scale,
@@ -199,14 +205,12 @@ func DrawString(dst draw.Image, s string, color color.Color, f shaping.Fontmap, 
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
 		y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * r.PixScale)))
-		if len(run.Glyphs) == 1 {
-			if run.Glyphs[0].GlyphID == 0 {
-				r.DrawStringAt(string([]rune{0xfffd}), dst, int(x), y, f.ResolveFace(0xfffd))
-				return
-			}
+		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
+			r.DrawStringAt(string([]rune{replacementChar}), dst, int(x)-offset, y, f.ResolveFace(replacementChar))
+			return
 		}
 
-		r.DrawShapedRunAt(run, dst, int(x), y)
+		r.DrawShapedRunAt(run, dst, int(x)-offset, y)
 	})
 }
 
@@ -321,31 +325,26 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 	out := shaper.Shape(in)
 	glyphs := out.Glyphs
 	start := 0
-	pending := false
 	adv := fixed.I(0)
 	for i, g := range out.Glyphs {
 		if g.GlyphID == 0 {
-			if pending {
+			if start < i {
 				out.Glyphs = glyphs[start:i]
 				cb(out, x)
 				x += fixed266ToFloat32(adv) * scale
-				adv = 0
 			}
 
 			out.Glyphs = glyphs[i : i+1]
 			cb(out, x)
 			x += fixed266ToFloat32(glyphs[i].Advance) * scale
-			adv = 0
 
+			adv = 0
 			start = i + 1
-			pending = false
-		} else {
-			pending = true
 		}
 		adv += g.Advance
 	}
 
-	if pending {
+	if start < len(glyphs) {
 		out.Glyphs = glyphs[start:]
 		cb(out, x)
 		x += fixed266ToFloat32(adv) * scale

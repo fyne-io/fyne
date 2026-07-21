@@ -80,7 +80,7 @@ func BindStruct(i any) Struct {
 		return NewUntypedMap().(Struct)
 	}
 	t := reflect.TypeOf(i)
-	if t.Kind() != reflect.Ptr ||
+	if t.Kind() != reflect.Pointer ||
 		(reflect.TypeOf(reflect.ValueOf(i).Elem()).Kind() != reflect.Struct) {
 		fyne.LogError("Invalid type passed to BindStruct, must be pointer to struct", nil)
 		return NewUntypedMap().(Struct)

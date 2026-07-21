@@ -1,14 +1,13 @@
 package theme
 
 import (
-	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"image/color"
 	"io"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/storage"
 )
 
@@ -70,43 +69,12 @@ func (h *jsonColor) UnmarshalJSON(b []byte) error {
 }
 
 func (h *jsonColor) parseColor(str string) error {
-	data := str
-	switch len([]rune(str)) {
-	case 8, 6:
-	case 9, 7: // remove # prefix
-		data = str[1:]
-	case 5: // remove # prefix, then double up
-		data = str[1:]
-		fallthrough
-	case 4: // could be rgba or #rgb
-		if data[0] == '#' {
-			v := []rune(data[1:])
-			data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2]})
-			break
-		}
-
-		v := []rune(data)
-		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2], v[3], v[3]})
-	case 3:
-		v := []rune(str)
-		data = string([]rune{v[0], v[0], v[1], v[1], v[2], v[2]})
-	default:
-		h.color = color.Transparent
-		return errors.New("invalid color format: " + str)
-	}
-
-	digits, err := hex.DecodeString(data)
+	c, err := fynecolor.Parse(str)
 	if err != nil {
 		return err
 	}
-	ret := &color.NRGBA{R: digits[0], G: digits[1], B: digits[2]}
-	if len(digits) == 4 {
-		ret.A = digits[3]
-	} else {
-		ret.A = 0xff
-	}
 
-	h.color = ret
+	h.color = c
 	return nil
 }
 

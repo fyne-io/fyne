@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -364,9 +365,9 @@ func (r *menuItemRenderer) refreshText(text *canvas.Text, shortcut bool) {
 
 func shortcutColor(th fyne.Theme) color.Color {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	r, g, b, a := th.Color(theme.ColorNameForeground, v).RGBA()
-	a = uint32(float32(a) * 0.95)
-	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+	r, g, b, a := fynecolor.ToNRGBA(th.Color(theme.ColorNameForeground, v))
+	a = uint8(float32(a) * 0.198)
+	return color.NRGBA{R: r, G: g, B: b, A: a}
 }
 
 func textsForShortcut(sc fyne.KeyboardShortcut, th fyne.Theme) (texts []*canvas.Text) {

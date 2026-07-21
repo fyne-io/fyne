@@ -63,9 +63,10 @@ func TestTree(t *testing.T) {
 	t.Run("Initializer_Populated", func(t *testing.T) {
 		tree := &Tree{
 			ChildUIDs: func(uid string) (children []string) {
-				if uid == "" {
+				switch uid {
+				case "":
 					children = append(children, "a", "b", "c")
-				} else if uid == "c" {
+				case "c":
 					children = append(children, "d", "e", "f")
 				}
 				return children
@@ -103,9 +104,10 @@ func TestTree(t *testing.T) {
 	t.Run("NewTree", func(t *testing.T) {
 		tree := NewTree(
 			func(uid string) (children []string) {
-				if uid == "" {
+				switch uid {
+				case "":
 					children = append(children, "a", "b", "c")
-				} else if uid == "c" {
+				case "c":
 					children = append(children, "d", "e", "f")
 				}
 				return children

@@ -66,7 +66,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 	}
 
 	rd, g, b, a := col.ToNRGBA(c)
-	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
+	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", rd, g, b, a))
 }
 
 func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m fynecanvas.ImageFill) {
@@ -154,7 +154,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if !named {
 		// That’s some magic to access the private `source` field of the themed resource.
 		v := reflect.ValueOf(rsc).Elem().Field(0)
-		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
+		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
 		r.setResourceAttr(attrs, name, src)
 	}
 	r.setStringAttr(attrs, "themed", variant)
@@ -467,7 +467,7 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 func nrgbaColor(c color.Color) color.NRGBA {
 	// using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
 	r, g, b, a := col.ToNRGBA(c)
-	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+	return color.NRGBA{R: r, G: g, B: b, A: a}
 }
 
 //gocyclo:ignore

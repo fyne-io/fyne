@@ -188,8 +188,8 @@ func (r *Releaser) PrintHelp(indent string) {
 //
 // Deprecated: A better version will be exposed in the future.
 func (r *Releaser) Run(params []string) {
-	r.Packager.distribution = true
-	r.Packager.release = true
+	r.distribution = true
+	r.release = true
 
 	if err := r.validate(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -207,8 +207,8 @@ func (r *Releaser) Run(params []string) {
 }
 
 func (r *Releaser) releaseAction(_ *cli.Context) error {
-	r.Packager.distribution = true
-	r.Packager.release = true
+	r.distribution = true
+	r.release = true
 
 	if err := r.validate(); err != nil {
 		return err
@@ -218,7 +218,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 		return err
 	}
 
-	if err := r.Packager.packageWithoutValidate(); err != nil {
+	if err := r.packageWithoutValidate(); err != nil {
 		return err
 	}
 
@@ -231,7 +231,7 @@ func (r *Releaser) releaseAction(_ *cli.Context) error {
 
 func (r *Releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
-		target := mobile.AppOutputName(r.os, r.Packager.Name, r.release)
+		target := mobile.AppOutputName(r.os, r.Name, r.release)
 		apk := filepath.Join(r.dir, target)
 		if err := r.zipAlign(apk); err != nil {
 			return err

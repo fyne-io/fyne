@@ -643,7 +643,7 @@ func (s *safeCanvas) FocusPrevious() {
 	runOnMain(s.glCanvas.FocusPrevious)
 }
 
-func (s *safeCanvas) Focussed() (ret fyne.Focusable) {
+func (s *safeCanvas) Focused() (ret fyne.Focusable) {
 	runOnMain(func() {
 		ret = s.glCanvas.Focused()
 	})
@@ -679,13 +679,13 @@ func (s *safeCanvas) SetPadded(pad bool) {
 
 func (s *safeCanvas) SetScale(scale float32) {
 	runOnMain(func() {
-		s.glCanvas.scale = scale
+		s.scale = scale
 	})
 }
 
 func (s *safeCanvas) SetTexScale(scale float32) {
 	runOnMain(func() {
-		s.glCanvas.texScale = scale
+		s.texScale = scale
 	})
 }
 
@@ -703,7 +703,7 @@ func (s *safeCanvas) Size() (ret fyne.Size) {
 
 func (s *safeCanvas) TexScale() (ret float32) {
 	runOnMain(func() {
-		ret = s.glCanvas.texScale
+		ret = s.texScale
 	})
 
 	return ret

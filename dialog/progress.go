@@ -32,7 +32,7 @@ func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
 	d := newTextDialog(title, message, theme.InfoIcon(), parent)
 	bar := widget.NewProgressBar()
 	rect := canvas.NewRectangle(color.Transparent)
-	rect.SetMinSize(fyne.NewSize(200, 0))
+	rect.SetMinSize(fyne.NewSize(200, 0)) //revive:disable-line:add-constant
 
 	d.create(container.NewStack(rect, bar))
 	return &ProgressDialog{d, bar}

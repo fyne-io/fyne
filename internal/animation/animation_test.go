@@ -61,6 +61,127 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 	run.animationMutex.RUnlock()
 }
 
+func TestRunner_DurationIncreasedMidAnimation(t *testing.T) {
+	progress := make(chan float32, 8)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+	run.Start(a)
+
+	time.Sleep(200 * time.Millisecond)
+	run.TickAnimations()
+	var before float32
+	select {
+	case before = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	// Extend the duration; progress should not snap backwards.
+	a.Duration = 4 * time.Second
+	run.TickAnimations()
+	var after float32
+	select {
+	case after = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked after duration change")
+	}
+	assert.InDelta(t, before, after, 0.1,
+		"progress should be preserved when Duration grows: before=%v after=%v", before, after)
+
+	time.Sleep(100 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Greater(t, d, after,
+			"progress should continue forward after pin: after=%v d=%v", after, d)
+		assert.Less(t, d, float32(0.6),
+			"progress should pace against the new longer duration: d=%v", d)
+	case <-time.After(time.Second):
+		t.Fatal("animation did not continue ticking")
+	}
+}
+
+func TestRunner_DurationDecreasedMidAnimation(t *testing.T) {
+	progress := make(chan float32, 8)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+	run.Start(a)
+
+	time.Sleep(200 * time.Millisecond)
+	run.TickAnimations()
+	var before float32
+	select {
+	case before = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	// Shorten Duration but keep it longer than elapsed time.
+	a.Duration = 400 * time.Millisecond
+	run.TickAnimations()
+	var after float32
+	select {
+	case after = <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked after duration change")
+	}
+	assert.InDelta(t, before, after, 0.1,
+		"progress should be preserved when Duration shrinks: before=%v after=%v", before, after)
+
+	time.Sleep(300 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Equal(t, float32(1.0), d, "animation should complete on the new shorter duration")
+	case <-time.After(time.Second):
+		t.Fatal("animation did not complete after duration change")
+	}
+}
+
+func TestRunner_DurationShortenedBelowElapsed(t *testing.T) {
+	progress := make(chan float32, 4)
+	run := &Runner{}
+	a := &fyne.Animation{
+		Duration: time.Second,
+		Curve:    fyne.AnimationLinear,
+		Tick: func(d float32) {
+			progress <- d
+		},
+	}
+	run.Start(a)
+
+	time.Sleep(200 * time.Millisecond)
+	run.TickAnimations()
+	select {
+	case <-progress:
+	case <-time.After(time.Second):
+		t.Fatal("animation was not ticked")
+	}
+
+	// Shorten Duration below the elapsed time.
+	a.Duration = 50 * time.Millisecond
+	run.TickAnimations()
+	select {
+	case d := <-progress:
+		assert.Equal(t, float32(1.0), d,
+			"animation should complete when new duration is shorter than elapsed time")
+	case <-time.After(time.Second):
+		t.Fatal("animation did not complete")
+	}
+}
+
 func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	var wg sync.WaitGroup
 	run := &Runner{}

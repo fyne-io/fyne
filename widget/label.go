@@ -139,9 +139,27 @@ func (l *Label) SelectedText() string {
 	return l.selection.SelectedText()
 }
 
+// ClearSelection removes any active text selection in this Label.
+// It has no effect if the Label is not Selectable or nothing is currently selected.
+//
+// Since: 2.9
+func (l *Label) ClearSelection() {
+	if !l.Selectable || l.selection == nil || !l.selection.selecting {
+		return
+	}
+	l.selection.selecting = false
+	l.Refresh()
+}
+
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
+	if l.Selectable && l.selection != nil {
+		l.selection.cursorRow = 0
+		l.selection.cursorColumn = 0
+		l.selection.selectRow = 0
+		l.selection.selectColumn = 0
+	}
 	l.Refresh()
 }
 

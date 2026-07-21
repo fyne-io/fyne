@@ -16,11 +16,11 @@ var _ fyne.CanvasObject = (*Shader)(nil)
 // The supplied fragment shader must follow the same conventions as Fyne's
 // internal vector shaders. It is provided with the following uniforms:
 //
-//	uniform vec2 frame_size;   // the size of the output frame, in pixels
-//	uniform vec4 rect_coords;  // this object's bounds (x1, y1, x2, y2), in pixels
-//	uniform float time;        // elapsed animation time in seconds (see NewShaderAnimation)
+//	uniform vec2 frame;   // the size of the output frame, in pixels
+//	uniform vec4 bounds;  // this object's bounds (x1, y1, x2, y2), in pixels
+//	uniform float time;   // elapsed animation time in seconds (see NewShaderAnimation)
 //
-// and should compute its colour from gl_FragCoord, as the built in shapes do.
+// and should compute its color from gl_FragCoord, as the built-in shapes do.
 // Any images set in Textures are additionally exposed as "uniform sampler2D"
 // values, and any values in Uniforms as "uniform float", named by their map key.
 //

@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
@@ -468,6 +469,18 @@ func (e *Entry) SelectedText() string {
 	return e.sel.SelectedText()
 }
 
+// ClearSelection removes any active text selection in this Entry.
+// It has no effect if nothing is currently selected.
+//
+// Since: 2.9
+func (e *Entry) ClearSelection() {
+	if e.sel == nil || !e.sel.selecting {
+		return
+	}
+	e.sel.selecting = false
+	e.Refresh()
+}
+
 // SetIcon sets the leading icon resource for the entry.
 // The icon will be displayed at the outer left of the entry, but is not clickable.
 // This can be used to indicate the purpose of the entry, such as an email or password field.
@@ -534,12 +547,9 @@ func (e *Entry) Append(text string) {
 	e.Refresh()
 }
 
-// Tapped is called when this entry has been tapped. We update the cursor position in
-// device-specific callbacks (MouseDown() and TouchDown()).
-func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if fyne.CurrentDevice().IsMobile() && e.sel.selecting {
-		e.sel.selecting = false
-	}
+// Tapped is called when this entry has been tapped.
+// Cursor position and selection state are updated in the device-specific down callbacks.
+func (e *Entry) Tapped(*fyne.PointEvent) {
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -567,7 +577,8 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	})
 	selectAllItem := fyne.NewMenuItem(lang.L("Select all"), e.selectAll)
 
-	menuItems := make([]*fyne.MenuItem, 0, 6)
+	const maxMenuItems = 6
+	menuItems := make([]*fyne.MenuItem, 0, maxMenuItems)
 	if e.Disabled() {
 		menuItems = append(menuItems, copyItem, selectAllItem)
 	} else if e.Password {
@@ -617,7 +628,11 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 		return
 	}
 
-	e.updateMousePointer(ev.Position, false)
+	if e.sel.selecting {
+		e.sel.selecting = false
+	}
+
+	e.updateMousePointer(ev.Position.Add(e.scroll.Offset), false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
@@ -998,7 +1013,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
-		text = strings.Replace(text, "\n", " ", -1)
+		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
 	if e.sel.selecting {
@@ -1118,7 +1133,7 @@ func (e *Entry) registerShortcut() {
 	}
 
 	moveWordModifier := fyne.KeyModifierShortcutDefault
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		moveWordModifier = fyne.KeyModifierAlt
 
 		// Cmd+left, Cmd+right shortcuts behave like Home and End keys on Mac OS
@@ -2076,20 +2091,7 @@ func (i *entryModifyAction) TryMerge(other entryMergeableUndoAction) bool {
 		}
 
 		// Don't merge two separate words
-		wordSeparators := func(s []rune) (num int, onlyWordSeparators bool) {
-			onlyWordSeparators = true
-			for _, r := range s {
-				if isWordSeparator(r) {
-					num++
-					onlyWordSeparators = false
-				}
-			}
-			return num, onlyWordSeparators
-		}
-		selfNumWS, _ := wordSeparators(i.Text)
-		otherNumWS, otherOnlyWS := wordSeparators(other.Text)
-		if !((selfNumWS == 0 && otherNumWS == 0) ||
-			(selfNumWS > 0 && otherOnlyWS)) {
+		if strings.IndexFunc(string(other.Text), isWordSeparator) >= 0 {
 			return false
 		}
 

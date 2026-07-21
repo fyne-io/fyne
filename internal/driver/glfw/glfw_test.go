@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"fyne.io/fyne/v2"
 )
 
 func assertCanvasSize(t *testing.T, w *safeWindow, size fyne.Size) {
@@ -42,14 +43,10 @@ func repaintWindow(w *safeWindow) {
 
 func waitForCanvasSize(t *testing.T, w *safeWindow, size fyne.Size, resizeIfNecessary bool) {
 	attempts := 0
-	for {
-		if w.Canvas().Size() == size {
-			break
-		}
+	for w.Canvas().Size() != size {
 		attempts++
-		if !assert.Less(t, attempts, 100, "canvas did not get correct size in time") {
-			break
-		}
+		require.Less(t, attempts, 100, "canvas did not get correct size in time")
+
 		if resizeIfNecessary && attempts%20 == 0 {
 			// sometimes the resize does not seem to reach the actual window at all
 			w.Resize(size)

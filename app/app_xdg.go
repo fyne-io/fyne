@@ -32,7 +32,7 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 		return err
 	}
 
-	cmd := exec.Command("xdg-open", url.String())
+	cmd := exec.Command("xdg-open", url.String()) //gosec:disable G204 -- It’s the callers responsibility to validate the input.
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
@@ -141,13 +141,16 @@ func watchTheme(s *settings) {
 			fyne.Do(func() { s.applyVariant(themeVariant) })
 		}
 
-		portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
+		err := portalSettings.OnSignalSettingChanged(func(changed portalSettings.Changed) {
 			if changed.Namespace == appearance.Namespace && changed.Key == "color-scheme" {
-				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32)))
+				themeVariant := colorSchemeToThemeVariant(appearance.ColorScheme(changed.Value.(uint32))) //gosec:disable G115 -- Probably okay to cast uint32 to uint8 here.
 				internalapp.CurrentVariant.Store(uint64(themeVariant))
 				fyne.Do(func() { s.applyVariant(themeVariant) })
 			}
 		})
+		if err != nil {
+			fyne.LogError("failed to watch theme settings", err)
+		}
 	}()
 }
 

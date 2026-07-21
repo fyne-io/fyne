@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"testing"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/storage"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/storage"
 )
 
 func TestSprintfConversionRead(t *testing.T) {
-	var b bool = true
+	b := true
 	var f float64 = 42
-	var i int = 7
-	var r rune = 'B'
-	var s string = "this is a string"
-	var u fyne.URI = storage.NewFileURI("/")
+	i := 7
+	r := 'B'
+	s := "this is a string"
+	u := storage.NewFileURI("/")
 
 	bb := BindBool(&b)
 	bf := BindFloat(&f)
@@ -50,12 +50,12 @@ func TestSprintfConversionRead(t *testing.T) {
 }
 
 func TestSprintfConversionReadWrite(t *testing.T) {
-	var b bool = true
+	b := true
 	var f float64 = 42
-	var i int = 7
-	var r rune = 'B'
-	var s string = "this is a string"
-	var u fyne.URI = storage.NewFileURI("/")
+	i := 7
+	r := 'B'
+	s := "this is a string"
+	u := storage.NewFileURI("/")
 
 	bb := BindBool(&b)
 	bf := BindFloat(&f)

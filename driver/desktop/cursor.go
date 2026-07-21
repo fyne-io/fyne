@@ -37,6 +37,14 @@ const (
 	HResizeCursor
 	// VResizeCursor is the cursor often used to indicate vertical resize
 	VResizeCursor
+	// NESWResizeCursor is the cursor often used to indicate diagonal resize (top-right to bottom-left)
+	//
+	// Since: 2.8
+	NESWResizeCursor
+	// NWSEResizeCursor is the cursor often used to indicate diagonal resize (top-left to bottom-right)
+	//
+	// Since: 2.8
+	NWSEResizeCursor
 	// HiddenCursor will cause the cursor to not be shown
 	HiddenCursor
 )

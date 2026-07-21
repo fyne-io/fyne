@@ -624,7 +624,7 @@ func (t *TableSegment) Visual() fyne.CanvasObject {
 
 	grid := &fyne.Container{Layout: &tableSegmentLayout{cols: cols}, Objects: objects}
 	border := canvas.NewRectangle(theme.Color(theme.ColorNameInputBorder))
-	return &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{border, grid}}
+	return widget.NewHScroll(&fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{border, grid}})
 }
 
 // Update does nothing; a table visual is rebuilt rather than updated.

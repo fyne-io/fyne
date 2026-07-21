@@ -201,7 +201,9 @@ func (b *prefBoundList[T]) checkForChange() {
 	val := *b.val
 	updated := b.get(b.key)
 	if val == nil || len(updated) != len(val) {
-		b.Set(updated)
+		// #Set’s error comes via #doReload from *boundExternalListItem#setIfChanged or *boundListItem#doSet
+		// which both never return an error.
+		_ = b.Set(updated)
 		return
 	}
 
@@ -236,7 +238,7 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 	items := listen.get(listen.key)
 	listen.boundList = *bindList(nil, func(t1, t2 T) bool { return t1 == t2 })
 
-	listen.boundList.AddListener(NewDataListener(func() {
+	listen.AddListener(NewDataListener(func() {
 		cached := *listen.val
 		replaced := listen.get(listen.key)
 		if len(cached) == len(replaced) {
@@ -247,7 +249,7 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 		listen.trigger()
 	}))
 
-	listen.boundList.parentListener = func(index int) {
+	listen.parentListener = func(index int) {
 		listen.set(listen.key, *listen.val)
 
 		// the child changes are not seen on the write end so force it
@@ -255,7 +257,9 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 			prefs.WriteValues(func(map[string]any) {})
 		}
 	}
-	listen.boundList.Set(items)
+	// #Set’s error comes via #doReload from *boundExternalListItem#setIfChanged or *boundListItem#doSet
+	// which both never return an error.
+	_ = listen.Set(items)
 
 	binds := prefBinds.ensurePreferencesAttached(p)
 	binds.Store(key, listen)

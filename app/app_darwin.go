@@ -74,8 +74,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 
 func (a *fyneApp) CancelScheduledNotification(id string) error {
 	if !C.isBundled() {
-		a.cancelViaScheduler(id)
-		return nil
+		return a.cancelViaScheduler(id)
 	}
 
 	idStr := C.CString(id)

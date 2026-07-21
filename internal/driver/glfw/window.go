@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -65,7 +66,7 @@ func (w *window) Resize(size fyne.Size) {
 		}
 
 		w.requestedWidth, w.requestedHeight = width, height
-		if runtime.GOOS != "js" {
+		if runtime.GOOS != goos.JavaScript {
 			w.view().SetSize(width, height)
 			w.processResized(width, height)
 		}
@@ -261,10 +262,11 @@ func (w *window) processClosed() {
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
 	cache.CleanCanvas(w.canvas)
+	w.frame.free()
 
 	if w.master {
 		d.Quit()
-	} else if runtime.GOOS == "darwin" {
+	} else if runtime.GOOS == goos.Darwin {
 		d.focusPreviousWindow()
 	}
 }
@@ -314,7 +316,7 @@ func (w *window) processResized(width, height int) {
 }
 
 func (w *window) processFrameSized(width, height int) {
-	if width == 0 || height == 0 || runtime.GOOS != "darwin" {
+	if width == 0 || height == 0 || runtime.GOOS != goos.Darwin {
 		return
 	}
 
@@ -548,8 +550,9 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 				prevOverlay := w.canvas.Overlays().Top()
 				secondary.TappedSecondary(ev)
 
-				// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-				if prevOverlay != nil && w.canvas.Overlays().Top() != prevOverlay {
+				// if the secondary tap dismissed an overlay (rather than opening a new
+				// one on top), forward the event to the widget underneath
+				if prevOverlay != nil && !overlayStillPresent(w.canvas.Overlays().List(), prevOverlay) {
 					co2, pos2, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 						_, ok := object.(fyne.SecondaryTappable)
 						return ok
@@ -567,6 +570,15 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	if action == release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
 	}
+}
+
+func overlayStillPresent(overlays []fyne.CanvasObject, overlay fyne.CanvasObject) bool {
+	for _, o := range overlays {
+		if o == overlay {
+			return true
+		}
+	}
+	return false
 }
 
 func (w *window) mouseClickedHandleMouseable(mev *desktop.MouseEvent, action action, wid desktop.Mouseable) {
@@ -711,7 +723,7 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
-			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == fyne.KeyModifierAlt) {
+			if (runtime.GOOS == goos.Linux && keyDesktopModifier == 0) || (runtime.GOOS != goos.Linux && keyDesktopModifier == fyne.KeyModifierAlt) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:
@@ -766,6 +778,11 @@ func (w *window) processFocused(focus bool) {
 		}
 		curWindow = w
 		w.canvas.FocusGained()
+
+		if build.IsWayland {
+			w.frame.markReady()
+			w.canvas.SetDirty()
+		}
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
@@ -933,7 +950,7 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
-	if runtime.GOOS != "js" {
+	if runtime.GOOS != goos.JavaScript {
 		async.EnsureMain(func() {
 			win = d.createWindow(title, true)
 		})
@@ -977,6 +994,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.frame = newPresentGate(ret)
 	ret.canvas = newCanvas()
 	ret.canvas.context = ret
 	ret.SetIcon(ret.icon)

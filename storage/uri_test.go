@@ -134,7 +134,8 @@ func TestURIPath(t *testing.T) {
 	s = "urn:example:animal:ferret:nose"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
-	assert.Equal(t, "example:animal:ferret:nose", u.Path())
+	assert.Equal(t, "urn:example:animal:ferret:nose", u.String())
+	assert.Equal(t, "", u.Path())
 }
 
 func TestURIQuery(t *testing.T) {
@@ -145,10 +146,10 @@ func TestURIQuery(t *testing.T) {
 	assert.Equal(t, "name=ferret", u.Query())
 
 	// from IETF RFC 3986
-	s = "urn:example:animal:ferret:nose"
+	s = "urn:example:animal:ferret:nose?quux#foo"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
-	assert.Equal(t, "", u.Query())
+	assert.Equal(t, "quux", u.Query())
 }
 
 func TestURIFragment(t *testing.T) {
@@ -159,10 +160,46 @@ func TestURIFragment(t *testing.T) {
 	assert.Equal(t, "nose", u.Fragment())
 
 	// from IETF RFC 3986
-	s = "urn:example:animal:ferret:nose"
+	s = "urn:example:animal:ferret:nose?quux#foo"
 	u, err = storage.ParseURI(s)
 	assert.NoError(t, err)
+	assert.Equal(t, "foo", u.Fragment())
+}
+
+func TestURN(t *testing.T) {
+	// examples from RFC 8141
+	s := "urn:example:foo-bar-baz-qux?+CCResolve:cc=uk"
+	u, err := storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
 	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "+CCResolve:cc=uk", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:weather?=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "=op=map&lat=39.56&lon=-104.85&datetime=1969-07-21T02:56:15Z", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:foo-bar-baz-qux#somepart"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "somepart", u.Fragment())
+	assert.Equal(t, "", u.Query())
+	assert.Equal(t, s, u.String())
+
+	s = "urn:example:a123%2Cz456"
+	u, err = storage.ParseURI(s)
+	assert.NoError(t, err)
+	assert.Equal(t, "", u.Path())
+	assert.Equal(t, "", u.Fragment())
+	assert.Equal(t, "", u.Query())
+	assert.Equal(t, s, u.String())
+	assert.Equal(t, "", u.Authority())
 }
 
 func TestNewURI(t *testing.T) {
@@ -201,6 +238,15 @@ func TestURI_Name(t *testing.T) {
 	assert.Equal(t, "image.JPEG", storage.NewFileURI("C:/image.JPEG").Name())
 }
 
+func TestURI_NewFileURI(t *testing.T) {
+	path := "/home/user/file#1.txt"
+	uri := "file:///home/user/file%231.txt"
+	assert.Equal(t, uri, storage.NewFileURI(path).String())
+	u, err := storage.ParseURI(uri)
+	assert.NoError(t, err)
+	assert.Equal(t, path, u.Path())
+}
+
 func TestURI_Parent(t *testing.T) {
 	// note the trailing slashes are significant, as they tend to belie a
 	// directory
@@ -214,7 +260,9 @@ func TestURI_Parent(t *testing.T) {
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	if runtime.GOOS == "windows" {
-		parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
+		u := storage.NewURI("file://C:/foo/bar/baz/")
+		assert.Equal(t, "file://C:/foo/bar/baz/", u.String())
+		parent, err = storage.Parent(u)
 		assert.NoError(t, err)
 		assert.Equal(t, "file://C:/foo/bar/", parent.String())
 	}
@@ -241,9 +289,11 @@ func TestURI_Parent(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		uri := storage.NewURI("file://C:\\foo\\bar\\baz\\")
-		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
-		uri = storage.NewFileURI("C:\\foo\\bar\\baz\\")
+		uri, err := storage.ParseURI(`file://C:\foo\bar\baz\`)
+		if assert.NoError(t, err) {
+			assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
+		}
+		uri = storage.NewFileURI(`C:\foo\bar\baz\`)
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 
 		parent, err = storage.Parent(uri)

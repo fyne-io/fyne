@@ -156,13 +156,13 @@ type userChangeEntry struct {
 
 func newUserChangeEntry(text string) *userChangeEntry {
 	e := &userChangeEntry{}
-	e.Entry.Text = text
+	e.Text = text
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 func (e *userChangeEntry) setOnChanged(onChanged func(s string)) {
-	e.Entry.OnChanged = func(text string) {
+	e.OnChanged = func(text string) {
 		if !e.userTyped {
 			return
 		}

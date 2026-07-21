@@ -68,12 +68,11 @@ func TestButton_Hover_Math(t *testing.T) {
 	srcAlpha := float32(srcA) / 0xFF
 	dstAlpha := float32(dstA) / 0xFF
 
-	outAlpha := (srcAlpha + dstAlpha*(1-srcAlpha))
-	outR := uint32((float32(srcR)*srcAlpha + float32(dstR)*dstAlpha*(1-srcAlpha)) / outAlpha)
-	outG := uint32((float32(srcG)*srcAlpha + float32(dstG)*dstAlpha*(1-srcAlpha)) / outAlpha)
-	outB := uint32((float32(srcB)*srcAlpha + float32(dstB)*dstAlpha*(1-srcAlpha)) / outAlpha)
-
-	nrgba := color.NRGBA{R: uint8(outR), G: uint8(outG), B: uint8(outB), A: uint8(outAlpha * 0xFF)}
+	outAlpha := srcAlpha + dstAlpha*(1-srcAlpha)
+	outR := uint8((float32(srcR)*srcAlpha + float32(dstR)*dstAlpha*(1-srcAlpha)) / outAlpha)
+	outG := uint8((float32(srcG)*srcAlpha + float32(dstG)*dstAlpha*(1-srcAlpha)) / outAlpha)
+	outB := uint8((float32(srcB)*srcAlpha + float32(dstB)*dstAlpha*(1-srcAlpha)) / outAlpha)
+	nrgba := color.NRGBA{R: outR, G: outG, B: outB, A: uint8(outAlpha * 0xFF)}
 	render.applyTheme()
 	bcn := color.NRGBAModel.Convert(render.background.FillColor)
 

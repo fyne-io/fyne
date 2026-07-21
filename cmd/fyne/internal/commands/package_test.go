@@ -110,7 +110,7 @@ func Test_MergeMetata(t *testing.T) {
 		},
 	}
 
-	p.appData.mergeMetadata(data)
+	p.mergeMetadata(data)
 	assert.Equal(t, "v0.1", p.AppVersion)
 	assert.Equal(t, 3, p.AppBuild)
 	assert.Equal(t, "test.png", p.icon)

@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const cacheCleanCooldown = 10 * time.Second
+
 var (
 	ValidDuration     = 1 * time.Minute
 	cleanTaskInterval = ValidDuration / 2
@@ -29,7 +31,7 @@ func init() {
 func Clean(canvasRefreshed bool) {
 	now := timeNow()
 	// do not run clean task too fast
-	if now.Sub(lastClean) < 10*time.Second {
+	if now.Sub(lastClean) < cacheCleanCooldown {
 		if canvasRefreshed {
 			skippedCleanWithCanvasRefresh = true
 		}

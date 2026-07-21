@@ -119,8 +119,8 @@ func (b *Builder) Build() error {
 	if b.tagsToParse != "" {
 		b.tags = strings.Split(b.tagsToParse, ",")
 	}
-	b.appData.Release = b.release
-	b.appData.CustomMetadata = b.customMetadata.m
+	b.Release = b.release
+	b.CustomMetadata = b.customMetadata.m
 
 	return b.build()
 }
@@ -230,7 +230,7 @@ func (b *Builder) build() error {
 	if b.release {
 		tags = append(tags, "release")
 	}
-	if ok, set := b.appData.Migrations["fyneDo"]; ok && set {
+	if ok, set := b.Migrations["fyneDo"]; ok && set {
 		tags = append(tags, "migrated_fynedo")
 	}
 	if len(tags) > 0 {

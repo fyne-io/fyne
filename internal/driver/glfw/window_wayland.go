@@ -1,4 +1,4 @@
-//go:build wayland && (linux || freebsd || openbsd || netbsd)
+//go:build wayland && !x11 && (linux || freebsd || openbsd || netbsd)
 
 package glfw
 

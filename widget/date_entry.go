@@ -121,7 +121,7 @@ func (e *DateEntry) Resize(size fyne.Size) {
 func (e *DateEntry) SetDate(d *time.Time) {
 	if d == nil {
 		e.Date = nil
-		e.Entry.SetText("")
+		e.SetText("")
 
 		return
 	}
@@ -140,7 +140,7 @@ func (e *DateEntry) setDate(d time.Time) {
 		e.popUp.Hide()
 	}
 
-	e.Entry.SetText(d.Format(getLocaleDateFormat()))
+	e.SetText(d.Format(getLocaleDateFormat()))
 }
 
 func (e *DateEntry) setupDropDown() *Button {

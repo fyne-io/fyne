@@ -30,7 +30,7 @@ func (m *mobileFileRepo) CanWrite(u fyne.URI) (bool, error) {
 }
 
 func (m *mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
-	if u == nil || u.Scheme() != "file" {
+	if u == nil || u.Scheme() != fyne.URISchemeFile {
 		return nil, repository.ErrOperationNotSupported
 	}
 
@@ -57,7 +57,7 @@ func (m *mobileFileRepo) List(u fyne.URI) ([]fyne.URI, error) {
 }
 
 func (m *mobileFileRepo) Parent(u fyne.URI) (fyne.URI, error) {
-	if u == nil || u.Scheme() != "file" {
+	if u == nil || u.Scheme() != fyne.URISchemeFile {
 		return nil, repository.ErrOperationNotSupported
 	}
 

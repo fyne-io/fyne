@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -42,26 +43,18 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	canvas                  fyne.Canvas
-	ctx                     context
-	contextProvider         driver.WithContext
-	program                 programState
-	blurProgram             programState
-	lineProgram             programState
-	rectangleProgram        programState
-	roundRectangleProgram   programState
-	polygonProgram          programState
-	arcProgram              programState
-	bezierCurveProgram      programState
-	arbitraryPolygonProgram programState
-	ellipseProgram          programState
-	shaderPrograms          map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
-	texScale                float32
-	pixScale                float32 // pre-calculate scale*texScale for each draw
-	blurSnapTex             Texture // cached texture for GPU-side blur snapshot
-	blurSnapTexValid        bool    // whether blurSnapTex has been allocated
-	blurSnapW, blurSnapH    int     // size of blurSnapTex in pixels
-	fbHeight                int     // current framebuffer height in pixels
+	blurKernel          blurKernel // cached 1D kernel texture on GPU
+	blurSnap            blurSnap   // cached texture for GPU-side blur snapshot
+	canvas              fyne.Canvas
+	clippedTextTextures map[*canvas.Text]clippedTextTexture
+	contextProvider     driver.WithContext
+	ctx                 context
+	fbHeight            int // current framebuffer height in pixels
+	maxTextureSize      int
+	pixScale            float32 // pre-calculate scale*texScale for each draw
+	programs            *programs
+	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
+	texScale            float32
 }
 
 // Declare conformity to Painter interface
@@ -80,6 +73,9 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	// deliberately not freed here: Free is also called for every object on each
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
+	if text, ok := obj.(*canvas.Text); ok {
+		p.freeClippedTextTexture(text)
+	}
 	p.freeTexture(obj)
 }
 
@@ -101,7 +97,7 @@ func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Siz
 		return
 	}
 
-	p.drawObject(obj, pos, frame)
+	p.drawObject(obj, pos, frame, clip)
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {
@@ -203,6 +199,71 @@ func (p *painter) UpdateVertexArray(pState programState, name string, size, stri
 	p.logError()
 }
 
+func (p *painter) compilePrograms() *programs {
+	return &programs{
+		arbitraryPolygon: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragArbitraryPolygon),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		arc: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragArc),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		bezierCurve: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragBezierCurve),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		blur: programState{
+			ref:        p.mustCreateProgram(shaderVertTexturedPassthrough2D, shaderFragBlur),
+			buff:       p.createBuffer(coordinatesSizeRectangleWithTexture),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		ellipse: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragEllipse),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		line: programState{
+			ref:        p.mustCreateProgram(shaderVertLine, shaderFragLine),
+			buff:       p.createBuffer(coordinatesSizeLine),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		polygon: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragPolygon),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		rectangle: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragRectangle),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		roundRectangle: programState{
+			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragRoundRectangle),
+			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		simple: programState{
+			ref:        p.mustCreateProgram(shaderVertTexturedPassthrough2D, shaderFragSimple),
+			buff:       p.createBuffer(coordinatesSizeRectangleWithTexture),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+	}
+}
+
 func (p *painter) compileShader(source string, shaderType uint32) (Shader, error) {
 	shader := p.ctx.CreateShader(shaderType)
 
@@ -225,27 +286,8 @@ func (p *painter) compileShader(source string, shaderType uint32) (Shader, error
 	return shader, nil
 }
 
-func (p *painter) createProgram(shaderFilename string) Program {
-	// Why a switch over a filename?
-	// Because this allows for a minimal change, once we reach Go 1.16 and use go:embed instead of
-	// fyne bundle.
-	vertexSrc, fragmentSrc := shaderSourceNamed(shaderFilename)
-	if vertexSrc == nil {
-		panic("shader not found: " + shaderFilename)
-	}
-
-	prog, err := p.createProgramFromSource(vertexSrc, fragmentSrc)
-	if err != nil {
-		panic(err)
-	}
-
-	return prog
-}
-
-// createProgramFromSource compiles and links the given vertex and fragment shader sources
-// into a program. Unlike createProgram it returns an error rather than panicking, so it is
-// safe to use with application supplied shader source that may fail to compile.
-func (p *painter) createProgramFromSource(vertexSrc, fragmentSrc []byte) (Program, error) {
+// createProgram compiles and links the given vertex and fragment shader sources into a program.
+func (p *painter) createProgram(vertexSrc, fragmentSrc []byte) (Program, error) {
 	vertShader, err := p.compileShader(string(vertexSrc), vertexShader)
 	if err != nil {
 		return noProgram, err
@@ -305,11 +347,46 @@ func (p *painter) logError() {
 	logGLError(p.ctx.GetError)
 }
 
+func (p *painter) mustCreateProgram(vertexSrc, fragmentSrc []byte) Program {
+	prog, err := p.createProgram(vertexSrc, fragmentSrc)
+	if err != nil {
+		panic(err)
+	}
+
+	return prog
+}
+
+type blurKernel struct {
+	radius   float32
+	tex      Texture
+	texValid bool // whether tex has been allocated
+}
+
+type blurSnap struct {
+	height   int
+	tex      Texture
+	texValid bool // whether tex has been allocated
+	width    int
+}
+
 type programState struct {
 	ref        Program
 	buff       Buffer
 	uniforms   map[string]*uniformState
 	attributes map[string]Attribute
+}
+
+type programs struct {
+	arbitraryPolygon programState
+	arc              programState
+	bezierCurve      programState
+	blur             programState
+	ellipse          programState
+	line             programState
+	polygon          programState
+	rectangle        programState
+	roundRectangle   programState
+	simple           programState
 }
 
 // shaderState caches a user shader's compiled program and uploaded textures.

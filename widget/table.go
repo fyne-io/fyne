@@ -13,7 +13,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const noCellMatch = math.MaxInt
+const (
+	columnLetterCount = 26
+	noCellMatch       = math.MaxInt
+)
 
 var (
 	// allTableCellsID represents all table cells when refreshing requested cells
@@ -865,11 +868,11 @@ func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
 
 	l := o.(*Label)
 	if id.Row < 0 {
-		ids := []rune{'A' + rune(id.Col%26)}
-		pre := (id.Col - id.Col%26) / 26
+		ids := []rune{'A' + rune(id.Col%columnLetterCount)}
+		pre := (id.Col - id.Col%columnLetterCount) / columnLetterCount
 		for pre > 0 {
-			ids = append([]rune{'A' - 1 + rune(pre%26)}, ids...)
-			pre = (pre - pre%26) / 26
+			ids = append([]rune{'A' - 1 + rune(pre%columnLetterCount)}, ids...)
+			pre = (pre - pre%columnLetterCount) / columnLetterCount
 		}
 		l.SetText(string(ids))
 	} else if id.Col < 0 {

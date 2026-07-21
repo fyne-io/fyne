@@ -12,6 +12,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	fynecolor "fyne.io/fyne/v2/internal/color"
 )
 
 func TestToOSIconEncodesJPGAsPNG(t *testing.T) {
@@ -49,11 +51,11 @@ func TestToOSIconJPGPixelsMatchSystrayPixelConversion(t *testing.T) {
 	decoded, _, err := image.Decode(bytes.NewReader(converted))
 	require.NoError(t, err)
 
-	r, g, b, a := decoded.At(0, 0).RGBA()
-	assert.InDelta(t, source.A, byte(a), 0)
-	assert.InDelta(t, source.R, byte(r), 3)
-	assert.InDelta(t, source.G, byte(g), 3)
-	assert.InDelta(t, source.B, byte(b), 3)
+	r, g, b, a := fynecolor.ToNRGBA(decoded.At(0, 0))
+	assert.InDelta(t, source.A, a, 0)
+	assert.InDelta(t, source.R, r, 3)
+	assert.InDelta(t, source.G, g, 3)
+	assert.InDelta(t, source.B, b, 3)
 }
 
 func TestToOSIconLeavesPNGUnchanged(t *testing.T) {

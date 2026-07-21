@@ -19,16 +19,21 @@ const (
 	float                 = gl.Float
 	fragmentShader        = gl.FragmentShader
 	front                 = gl.Front
+	back                  = gl.Back
 	glFalse               = gl.False
 	linkStatus            = gl.LinkStatus
+	maxTextureSizeParam   = gl.MaxTextureSize
 	one                   = gl.One
+	zero                  = gl.Zero
 	oneMinusConstantAlpha = gl.OneMinusConstantAlpha
 	oneMinusSrcAlpha      = gl.OneMinusSrcAlpha
 	scissorTest           = gl.ScissorTest
 	srcAlpha              = gl.SrcAlpha
 	staticDraw            = gl.StaticDraw
 	texture0              = gl.Texture0
+	texture1              = gl.Texture1
 	texture2D             = gl.Texture2D
+	textureNearest        = gl.Nearest
 	textureMinFilter      = gl.TextureMinFilter
 	textureMagFilter      = gl.TextureMagFilter
 	textureWrapS          = gl.TextureWrapS
@@ -53,117 +58,26 @@ type (
 )
 
 var (
-	compiled          []programState // avoid multiple compilations with the re-used mobile GUI context
+	compiled          *programs // avoid multiple compilations with the re-used mobile GUI context
 	noBuffer          = Buffer{}
 	noProgram         = Program{}
 	noShader          = Shader{}
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
 
-func (p *painter) glctx() gl.Context {
-	return p.contextProvider.Context().(gl.Context)
-}
-
 func (p *painter) Init() {
-	p.ctx = &mobileContext{glContext: p.contextProvider.Context().(gl.Context)}
-	p.blurSnapTexValid = false // reset on context recreation; old texture IDs are no longer valid
-	p.glctx().Disable(gl.DepthTest)
-	p.glctx().Enable(gl.Blend)
+	glctx := p.contextProvider.Context().(gl.Context)
+	glctx.Disable(gl.DepthTest)
+	glctx.Enable(gl.Blend)
+	p.ctx = &mobileContext{glContext: glctx}
+	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
+	p.blurSnap.texValid = false   // reset on context recreation; old texture IDs are no longer valid
+	p.blurKernel.texValid = false // kernel texture must also be re-created
 	if compiled == nil {
-		p.program = programState{
-			ref:        p.createProgram("simple_es"),
-			buff:       p.createBuffer(20),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.blurProgram = programState{
-			ref:        p.createProgram("blur_es"),
-			buff:       p.createBuffer(20),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.lineProgram = programState{
-			ref:        p.createProgram("line_es"),
-			buff:       p.createBuffer(24),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.rectangleProgram = programState{
-			ref:        p.createProgram("rectangle_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.roundRectangleProgram = programState{
-			ref:        p.createProgram("round_rectangle_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.polygonProgram = programState{
-			ref:        p.createProgram("polygon_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.arcProgram = programState{
-			ref:        p.createProgram("arc_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.bezierCurveProgram = programState{
-			ref:        p.createProgram("bezier_curve_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.arbitraryPolygonProgram = programState{
-			ref:        p.createProgram("arbitrary_polygon_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		p.ellipseProgram = programState{
-			ref:        p.createProgram("ellipse_es"),
-			buff:       p.createBuffer(16),
-			uniforms:   make(map[string]*uniformState),
-			attributes: make(map[string]Attribute),
-		}
-
-		compiled = []programState{
-			p.program,
-			p.blurProgram,
-			p.lineProgram,
-			p.rectangleProgram,
-			p.roundRectangleProgram,
-			p.polygonProgram,
-			p.arcProgram,
-			p.bezierCurveProgram,
-			p.arbitraryPolygonProgram,
-			p.ellipseProgram,
-		}
+		compiled = p.compilePrograms()
 	}
 
-	p.program = compiled[0]
-	p.blurProgram = compiled[1]
-	p.lineProgram = compiled[2]
-	p.rectangleProgram = compiled[3]
-	p.roundRectangleProgram = compiled[4]
-	p.polygonProgram = compiled[5]
-	p.arcProgram = compiled[6]
-	p.bezierCurveProgram = compiled[7]
-	p.arbitraryPolygonProgram = compiled[8]
-	p.ellipseProgram = compiled[9]
+	p.programs = compiled
 }
 
 type mobileContext struct {
@@ -270,6 +184,10 @@ func (c *mobileContext) GetError() uint32 {
 	return uint32(c.glContext.GetError())
 }
 
+func (c *mobileContext) GetInteger(pname uint32) int {
+	return c.glContext.GetInteger(gl.Enum(pname))
+}
+
 func (c *mobileContext) GetProgrami(program Program, param uint32) int {
 	return c.glContext.GetProgrami(gl.Program(program), gl.Enum(param))
 }
@@ -334,12 +252,12 @@ func (c *mobileContext) Uniform1f(uniform Uniform, v float32) {
 	c.glContext.Uniform1f(gl.Uniform(uniform), v)
 }
 
-func (c *mobileContext) Uniform1i(uniform Uniform, v int32) {
-	c.glContext.Uniform1i(gl.Uniform(uniform), int(v))
-}
-
 func (c *mobileContext) Uniform1fv(uniform Uniform, v []float32) {
 	c.glContext.Uniform1fv(gl.Uniform(uniform), v)
+}
+
+func (c *mobileContext) Uniform1i(uniform Uniform, v int32) {
+	c.glContext.Uniform1i(gl.Uniform(uniform), int(v))
 }
 
 func (c *mobileContext) Uniform2f(uniform Uniform, v0, v1 float32) {

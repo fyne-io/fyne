@@ -274,9 +274,10 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	})
 	var scrollOtherDirection fyne.CanvasObject
 	if scr, ok := co.(*container.Scroll); ok {
-		if scr.Direction == container.ScrollHorizontalOnly {
+		switch scr.Direction {
+		case container.ScrollHorizontalOnly:
 			c.otherDirection = container.ScrollVerticalOnly
-		} else if scr.Direction == container.ScrollVerticalOnly {
+		case container.ScrollVerticalOnly:
 			c.otherDirection = container.ScrollHorizontalOnly
 		}
 		if c.otherDirection != container.ScrollBoth {
@@ -418,8 +419,9 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 			prevOverlay := c.Overlays().Top()
 			tapAltCallback(wid, ev)
 
-			// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-			if prevOverlay != nil && c.Overlays().Top() != prevOverlay {
+			// if the secondary tap dismissed an overlay (rather than opening a new
+			// one on top), forward the event to the widget underneath
+			if prevOverlay != nil && !overlayStillPresent(c.Overlays().List(), prevOverlay) {
 				co2, objPos2, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 					_, ok := object.(fyne.SecondaryTappable)
 					return ok
@@ -463,6 +465,15 @@ func (c *canvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tap
 		c.touchLastTapped = nil
 		c.touchCancelLock.Unlock()
 	}, true)
+}
+
+func overlayStillPresent(overlays []fyne.CanvasObject, overlay fyne.CanvasObject) bool {
+	for _, o := range overlays {
+		if o == overlay {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *canvas) windowHeadIsDisplacing() bool {

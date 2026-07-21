@@ -351,7 +351,8 @@ func (f *Form) ensureRenderItems() {
 func (f *Form) isVertical() bool {
 	if f.Orientation == Vertical {
 		return true
-	} else if f.Orientation == Horizontal {
+	}
+	if f.Orientation == Horizontal {
 		return false
 	}
 

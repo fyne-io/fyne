@@ -19,14 +19,14 @@ func (f *remoteFile) Close() error {
 	if f.Response == nil {
 		return nil
 	}
-	return f.Response.Body.Close()
+	return f.Body.Close()
 }
 
 func (f *remoteFile) Read(p []byte) (int, error) {
 	if f.Response == nil {
 		return 0, nil
 	}
-	return f.Response.Body.Read(p)
+	return f.Body.Read(p)
 }
 
 func (f *remoteFile) URI() fyne.URI {

@@ -1,9 +1,9 @@
 [Details]
-  Icon = "../../theme/icons/fyne.png"
-  Name = "Fyne Settings"
-  ID = "io.fyne.settings"
-  Version = "2.6.0"
-  Build = 2
+Icon = "../../theme/icons/fyne.png"
+Name = "Fyne Settings"
+ID = "io.fyne.settings"
+Version = "2.8.0"
+Build = 2
 
 [Migrations]
-  fyneDo = true
+fyneDo = true

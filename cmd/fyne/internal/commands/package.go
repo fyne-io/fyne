@@ -333,8 +333,8 @@ func (p *Packager) validate() (err error) {
 	}
 	os.Chdir(p.srcDir)
 
-	p.appData.CustomMetadata = p.customMetadata.m
-	p.appData.Release = p.release
+	p.CustomMetadata = p.customMetadata.m
+	p.Release = p.release
 
 	data, err := metadata.LoadStandard(p.srcDir)
 	if err == nil {
@@ -343,7 +343,7 @@ func (p *Packager) validate() (err error) {
 			data.Details.Icon = util.MakePathRelativeTo(p.srcDir, data.Details.Icon)
 		}
 
-		p.appData.mergeMetadata(data)
+		p.mergeMetadata(data)
 		p.sourceMetadata = data.Source
 		p.langs = data.Languages
 

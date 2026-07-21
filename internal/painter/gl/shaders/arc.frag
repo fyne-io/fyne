@@ -1,20 +1,20 @@
 #version 110
 
 // Note: This shader operates in the unit circle coordinate system, where angles are measured from the positive X axis.
-// To adapt the arc orientation or coordinate system, adjust the start_angle and end_angle uniforms accordingly.
+// To adapt the arc orientation or coordinate system, adjust the startAngle and endAngle uniforms accordingly.
 
-uniform vec2 frame_size;
-uniform vec4 rect_coords;
-uniform float edge_softness;
+uniform vec2 frame;
+uniform vec4 bounds;
+uniform float edgeSoftness;
 
-uniform float inner_radius;
-uniform float outer_radius;
-uniform float start_angle;
-uniform float end_angle;
-uniform vec4 fill_color;
-uniform float corner_radius;
-uniform float stroke_width;
-uniform vec4 stroke_color;
+uniform float innerRadius;
+uniform float outerRadius;
+uniform float startAngle;
+uniform float endAngle;
+uniform vec4 fillColor;
+uniform float cornerRadius;
+uniform float strokeWidth;
+uniform vec4 strokeColor;
 
 const float PI = 3.141592653589793;
 
@@ -67,10 +67,10 @@ float sd_rounded_arc(vec2 p, float r1, float r2, float a0, float a1, float cr)
 
 void main()
 {
-    vec4 frag_rect_coords = vec4(rect_coords[0], rect_coords[1], frame_size.y - rect_coords[3], frame_size.y - rect_coords[2]);
+    vec4 frag_rect_coords = vec4(bounds[0], bounds[2], frame.y - bounds[3], frame.y - bounds[1]);
     vec2 vec_centered_pos = (gl_FragCoord.xy - vec2(frag_rect_coords[0] + frag_rect_coords[1], frag_rect_coords[2] + frag_rect_coords[3]) * 0.5);
-    float start_rad = radians(start_angle);
-    float end_rad = radians(end_angle);
+    float start_rad = radians(startAngle);
+    float end_rad = radians(endAngle);
     
     // check if the arc is a full circle (360 degrees or more)
     // the sd_rounded_arc function creates segment at the start/end angle, which is undesirable for a complete circle
@@ -80,36 +80,36 @@ void main()
         // full circle
         float r = length(vec_centered_pos);
         
-        if (inner_radius < 0.5)
+        if (innerRadius < 0.5)
         {
             // no inner radius
-            dist = r - outer_radius;
+            dist = r - outerRadius;
         }
         else
         {
-            float ring_center_radius = (inner_radius + outer_radius) * 0.5;
-            float ring_thickness = (outer_radius - inner_radius) * 0.5;
+            float ring_center_radius = (innerRadius + outerRadius) * 0.5;
+            float ring_thickness = (outerRadius - innerRadius) * 0.5;
             dist = abs(r - ring_center_radius) - ring_thickness;
         }
     }
     else
     {
-        dist = sd_rounded_arc(vec_centered_pos, inner_radius, outer_radius, start_rad, end_rad, corner_radius);
+        dist = sd_rounded_arc(vec_centered_pos, innerRadius, outerRadius, start_rad, end_rad, cornerRadius);
     }
 
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
-    if (stroke_width > 0.0)
+    if (strokeWidth > 0.0)
     {
         // create a mask for the fill area (inside, shrunk by stroke width)
-        float fill_mask = smoothstep(edge_softness, -edge_softness, dist + stroke_width);
+        float fill_mask = smoothstep(edgeSoftness, -edgeSoftness, dist + strokeWidth);
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(strokeColor, fillColor, fill_mask);
     }
 
     // smooth edges
-    float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
+    float final_alpha = smoothstep(edgeSoftness, -edgeSoftness, dist);
     
     // apply the final alpha to the combined color
     gl_FragColor = vec4(final_color.rgb, final_color.a * final_alpha);

@@ -1,97 +1,116 @@
 package color
 
 import (
+	"encoding/hex"
+	"errors"
 	"image/color"
+	"strings"
 )
 
+const (
+	lenColorStringRGB       = lenColorStringRGBShort * 2
+	lenColorStringRGBShort  = 3
+	lenColorStringRGBA      = lenColorStringRGBAShort * 2
+	lenColorStringRGBAShort = 4
+)
+
+// Parse parses a color string representation into a color.Color.
+// It supports (#)rgb(a) and (#)rrggbb(aa)
+func Parse(str string) (color.Color, error) {
+	data := []byte(strings.TrimPrefix(str, "#"))
+	switch len(data) {
+	case lenColorStringRGB, lenColorStringRGBA:
+	case lenColorStringRGBAShort:
+		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2], data[3], data[3]}
+	case lenColorStringRGBShort:
+		data = []byte{data[0], data[0], data[1], data[1], data[2], data[2]}
+	default:
+		return nil, errors.New("invalid color format: " + str)
+	}
+
+	digits, err := hex.DecodeString(string(data))
+	if err != nil {
+		return nil, err
+	}
+	a := uint8(0xff)
+	if len(digits) == 4 {
+		a = digits[3]
+	}
+	return color.NRGBA{R: digits[0], G: digits[1], B: digits[2], A: a}, nil
+}
+
 // ToNRGBA converts a color to RGBA values which are not premultiplied, unlike color.RGBA().
-func ToNRGBA(c color.Color) (r, g, b, a int) {
+func ToNRGBA(c color.Color) (r, g, b, a uint8) {
 	// We use UnmultiplyAlpha with RGBA, RGBA64, and unrecognized implementations of Color.
 	// It works for all Colors whose RGBA() method is implemented according to spec, but is only necessary for those.
 	// Only RGBA and RGBA64 have components which are already premultiplied.
 	switch col := c.(type) {
 	// NRGBA and NRGBA64 are not premultiplied
 	case color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
+		r = col.R
+		g = col.G
+		b = col.B
+		a = col.A
 	case *color.NRGBA:
-		r = int(col.R)
-		g = int(col.G)
-		b = int(col.B)
-		a = int(col.A)
+		r = col.R
+		g = col.G
+		b = col.B
+		a = col.A
 	case color.NRGBA64:
-		r = int(col.R) >> 8
-		g = int(col.G) >> 8
-		b = int(col.B) >> 8
-		a = int(col.A) >> 8
+		r = uint8(col.R >> 8)
+		g = uint8(col.G >> 8)
+		b = uint8(col.B >> 8)
+		a = uint8(col.A >> 8)
 	case *color.NRGBA64:
-		r = int(col.R) >> 8
-		g = int(col.G) >> 8
-		b = int(col.B) >> 8
-		a = int(col.A) >> 8
+		r = uint8(col.R >> 8)
+		g = uint8(col.G >> 8)
+		b = uint8(col.B >> 8)
+		a = uint8(col.A >> 8)
 	// Gray and Gray16 have no alpha component
 	case *color.Gray:
-		r = int(col.Y)
-		g = int(col.Y)
-		b = int(col.Y)
+		r = col.Y
+		g = col.Y
+		b = col.Y
 		a = 0xff
 	case color.Gray:
-		r = int(col.Y)
-		g = int(col.Y)
-		b = int(col.Y)
+		r = col.Y
+		g = col.Y
+		b = col.Y
 		a = 0xff
 	case *color.Gray16:
-		r = int(col.Y) >> 8
-		g = int(col.Y) >> 8
-		b = int(col.Y) >> 8
+		r = uint8(col.Y >> 8)
+		g = uint8(col.Y >> 8)
+		b = uint8(col.Y >> 8)
 		a = 0xff
 	case color.Gray16:
-		r = int(col.Y) >> 8
-		g = int(col.Y) >> 8
-		b = int(col.Y) >> 8
+		r = uint8(col.Y >> 8)
+		g = uint8(col.Y >> 8)
+		b = uint8(col.Y >> 8)
 		a = 0xff
 	// Alpha and Alpha16 contain only an alpha component.
 	case color.Alpha:
 		r = 0xff
 		g = 0xff
 		b = 0xff
-		a = int(col.A)
+		a = col.A
 	case *color.Alpha:
 		r = 0xff
 		g = 0xff
 		b = 0xff
-		a = int(col.A)
+		a = col.A
 	case color.Alpha16:
 		r = 0xff
 		g = 0xff
 		b = 0xff
-		a = int(col.A) >> 8
+		a = uint8(col.A >> 8)
 	case *color.Alpha16:
 		r = 0xff
 		g = 0xff
 		b = 0xff
-		a = int(col.A) >> 8
-	default: // RGBA, RGBA64, and unknown implementations of Color
-		r, g, b, a = unmultiplyAlpha(c)
+		a = uint8(col.A >> 8)
+	default:
+		n, _ := color.NRGBAModel.Convert(c).(color.NRGBA)
+		r, g, b, a = n.R, n.G, n.B, n.A
 	}
-	return r, g, b, a
-}
-
-// unmultiplyAlpha returns a color's RGBA components as 8-bit integers by calling c.RGBA() and then removing the alpha premultiplication.
-// It is only used by ToRGBA.
-func unmultiplyAlpha(c color.Color) (r, g, b, a int) {
-	red, green, blue, alpha := c.RGBA()
-	if alpha != 0 && alpha != 0xffff {
-		red = (red * 0xffff) / alpha
-		green = (green * 0xffff) / alpha
-		blue = (blue * 0xffff) / alpha
-	}
-	// Convert from range 0-65535 to range 0-255
-	r = int(red >> 8)
-	g = int(green >> 8)
-	b = int(blue >> 8)
-	a = int(alpha >> 8)
 	return r, g, b, a
 }

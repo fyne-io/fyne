@@ -23,15 +23,26 @@ func TestActivity_Animation(t *testing.T) {
 	render := test.TempWidgetRenderer(t, a).(*activityRenderer)
 	render.anim.Tick(0)
 	test.AssertImageMatches(t, "activity/animate_0.0.png", w.Canvas().Capture())
-
-	render.anim.Tick(0.25)
-	test.AssertImageMatches(t, "activity/animate_0.25.png", w.Canvas().Capture())
-
+	render.anim.Tick(0.1)
+	test.AssertImageMatches(t, "activity/animate_0.1.png", w.Canvas().Capture())
+	render.anim.Tick(0.2)
+	test.AssertImageMatches(t, "activity/animate_0.2.png", w.Canvas().Capture())
+	render.anim.Tick(0.3)
+	test.AssertImageMatches(t, "activity/animate_0.3.png", w.Canvas().Capture())
+	render.anim.Tick(0.4)
+	test.AssertImageMatches(t, "activity/animate_0.4.png", w.Canvas().Capture())
 	render.anim.Tick(0.5)
 	test.AssertImageMatches(t, "activity/animate_0.5.png", w.Canvas().Capture())
-
-	// check reset to loop
+	render.anim.Tick(0.6)
+	test.AssertImageMatches(t, "activity/animate_0.6.png", w.Canvas().Capture())
+	render.anim.Tick(0.7)
+	test.AssertImageMatches(t, "activity/animate_0.7.png", w.Canvas().Capture())
+	render.anim.Tick(0.8)
+	test.AssertImageMatches(t, "activity/animate_0.8.png", w.Canvas().Capture())
+	render.anim.Tick(0.9)
+	test.AssertImageMatches(t, "activity/animate_0.9.png", w.Canvas().Capture())
 	render.anim.Tick(1.0)
+	// reset to loop
 	test.AssertImageMatches(t, "activity/animate_0.0.png", w.Canvas().Capture())
 }
 

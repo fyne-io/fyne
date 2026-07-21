@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	col "fyne.io/fyne/v2/internal/color"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
@@ -22,10 +22,10 @@ func TestColorDialog_Resize(t *testing.T) {
 	d.Resize(fyne.NewSize(800, 600))
 	d.Show()
 
-	size := d.dialog.content.Size()
+	size := d.content.Size()
 
 	d.Resize(fyne.NewSize(900, 600))
-	newSize := d.dialog.content.Size()
+	newSize := d.content.Size()
 
 	assert.Equal(t, float32(100), newSize.Width-size.Width)
 }
@@ -81,11 +81,10 @@ func TestColorDialog_SetColor(t *testing.T) {
 	w := test.NewTempWindow(t, canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(800, 600))
 
-	col := color.RGBA{70, 210, 200, 255}
+	col := color.RGBA{R: 70, G: 210, B: 200, A: 255}
 
 	d := NewColorPicker("pick colour", "select colour", func(c color.Color) {
-		r, g, b, a := c.RGBA()
-		col = color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+		col = color.RGBAModel.Convert(c).(color.RGBA)
 	}, w)
 	d.Advanced = true
 
@@ -93,22 +92,22 @@ func TestColorDialog_SetColor(t *testing.T) {
 	d.SetColor(col)
 	assert.NotNil(t, d.picker)
 
-	assert.Equal(t, 70, d.picker.Red)
-	assert.Equal(t, 210, d.picker.Green)
-	assert.Equal(t, 200, d.picker.Blue)
-	assert.Equal(t, 255, d.picker.Alpha)
+	assert.Equal(t, uint8(70), d.picker.Red)
+	assert.Equal(t, uint8(210), d.picker.Green)
+	assert.Equal(t, uint8(200), d.picker.Blue)
+	assert.Equal(t, uint8(255), d.picker.Alpha)
 
-	col = color.RGBA{255, 40, 70, 244}
-	assert.NotEqual(t, int(col.R), d.picker.Red)
-	assert.NotEqual(t, int(col.G), d.picker.Green)
-	assert.NotEqual(t, int(col.B), d.picker.Blue)
-	assert.NotEqual(t, int(col.A), d.picker.Alpha)
+	col = color.RGBA{R: 244, G: 40, B: 70, A: 244}
+	assert.NotEqual(t, col.R, d.picker.Red)
+	assert.NotEqual(t, col.G, d.picker.Green)
+	assert.NotEqual(t, col.B, d.picker.Blue)
+	assert.NotEqual(t, col.A, d.picker.Alpha)
 
 	d.SetColor(col)
-	assert.Equal(t, 255, d.picker.Red)
-	assert.Equal(t, 41, d.picker.Green)
-	assert.Equal(t, 73, d.picker.Blue)
-	assert.Equal(t, 244, d.picker.Alpha)
+	assert.Equal(t, uint8(255), d.picker.Red)
+	assert.Equal(t, uint8(41), d.picker.Green)
+	assert.Equal(t, uint8(73), d.picker.Blue)
+	assert.Equal(t, uint8(244), d.picker.Alpha)
 
 	d.Show()
 }
@@ -233,7 +232,7 @@ func Test_wrapHue(t *testing.T) {
 
 type rgbhsl struct {
 	hex     string
-	r, g, b int
+	r, g, b uint8
 	h, s, l int
 }
 
@@ -298,9 +297,9 @@ func Test_colorToString(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			hex := colorToString(&color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
 			})
 			assert.Equal(t, tt.hex, hex)
@@ -308,33 +307,21 @@ func Test_colorToString(t *testing.T) {
 	}
 }
 
-func Test_stringToColor(t *testing.T) {
-	for name, tt := range rgbhslMap {
-		t.Run(name, func(t *testing.T) {
-			c, err := stringToColor(tt.hex)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.hex, colorToString(c))
-		})
-	}
-	t.Run("Invalid", func(t *testing.T) {
-		_, err := stringToColor("potato")
-		assert.Error(t, err)
-	})
-}
-
 func Test_colorToHSLA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			h, s, l, a := colorToHSLA(&color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+			var c color.Color = &color.NRGBA{
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
-			})
+			}
+			r, g, b, a := fynecolor.ToNRGBA(c)
+			h, s, l := rgbToHsl(r, g, b)
 			assert.Equal(t, tt.h, h)
 			assert.Equal(t, tt.s, s)
 			assert.Equal(t, tt.l, l)
-			assert.Equal(t, 255, a)
+			assert.Equal(t, uint8(255), a)
 		})
 	}
 }
@@ -343,16 +330,16 @@ func Test_toRGBA(t *testing.T) {
 	// Test_toRGBA is only still here instead of with ToNRGBA because it uses rgbhslMap
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			r, g, b, a := col.ToNRGBA(&color.NRGBA{
-				R: uint8(tt.r),
-				G: uint8(tt.g),
-				B: uint8(tt.b),
+			r, g, b, a := fynecolor.ToNRGBA(&color.NRGBA{
+				R: tt.r,
+				G: tt.g,
+				B: tt.b,
 				A: 0xff,
 			})
 			assert.Equal(t, tt.r, r)
 			assert.Equal(t, tt.g, g)
 			assert.Equal(t, tt.b, b)
-			assert.Equal(t, 255, a)
+			assert.Equal(t, uint8(0xff), a)
 		})
 	}
 }

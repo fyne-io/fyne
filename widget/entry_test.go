@@ -441,6 +441,21 @@ func TestEntry_EmptySelection(t *testing.T) {
 	assert.Equal(t, "", entry.SelectedText())
 }
 
+func TestEntry_ClearSelection(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Testing")
+
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "st", entry.SelectedText())
+
+	entry.ClearSelection()
+	assert.Equal(t, "", entry.SelectedText())
+
+	// calling again with nothing selected is a no-op
+	entry.ClearSelection()
+	assert.Equal(t, "", entry.SelectedText())
+}
+
 func TestEntry_Focus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()

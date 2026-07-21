@@ -657,19 +657,21 @@ func (r *textRenderer) MinSize() fyne.Size {
 		}
 		if trunc == fyne.TextTruncateClip {
 			return minBounds
-		} else if trunc == fyne.TextTruncateEllipsis {
+		}
+		if trunc == fyne.TextTruncateEllipsis {
 			ellipsisSize := fyne.MeasureText("…", th.Size(theme.SizeNameText), fyne.TextStyle{})
 			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
 	}
 
+	const minScrolledSize = 32
 	switch scroll {
 	case widget.ScrollBoth:
-		return fyne.NewSize(32, 32)
+		return fyne.NewSize(minScrolledSize, minScrolledSize)
 	case widget.ScrollHorizontalOnly:
-		return fyne.NewSize(32, min.Height)
+		return fyne.NewSize(minScrolledSize, min.Height)
 	case widget.ScrollVerticalOnly:
-		return fyne.NewSize(min.Width, 32)
+		return fyne.NewSize(min.Width, minScrolledSize)
 	default:
 		return min
 	}
@@ -992,7 +994,7 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 
 	prior := bounds[len(bounds)-1]
 	seg := prior.segments[0].(*TextSegment)
-	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)
 	prior.end = prior.begin + fitCount
@@ -1072,21 +1074,20 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 			}
 
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
-			if fitCount == high-low { // all characters fit on this line
+			switch fitCount {
+			case high - low: // all characters fit on this line
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 				reuse++
 				low = high
 				high = l.end
 				measureWidth = max.Width
-
 				yPos += lineHeight
-			} else if fitCount == 0 { // even a character won't fit
+			case 0: // even a character won't fit
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0})
 				reuse++
 				low++
-
 				yPos += lineHeight
-			} else {
+			default:
 				high = low + fitCount
 			}
 		}
@@ -1183,7 +1184,7 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 	text := []rune(seg.Textual())
 	yPos := float32(0)
 	var bounds []rowBoundary
-	charSize := measurer([]rune("z"))
+	charSize := measurer([]rune("z")) //revive:disable-line:add-constant -- TODO: clarify whether we want to define a common letter constant for approximate character sizes
 	charWidth := charSize.Width
 	reuse := 0
 	for _, l := range lines {
@@ -1195,7 +1196,8 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			bounds = append(bounds, l)
 			continue
 		}
-		if trunc == fyne.TextTruncateEllipsis {
+		switch trunc {
+		case fyne.TextTruncateEllipsis:
 			txt := []rune(seg.Textual())[low:high]
 			var textObj *canvas.Text
 			switch s := seg.(type) {
@@ -1214,11 +1216,13 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			high = low + end
 			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0})
 			reuse++
-		} else if trunc == fyne.TextTruncateClip {
+		case fyne.TextTruncateClip:
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			high = low + fitCount
 			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 			reuse++
+		case fyne.TextTruncateOff:
+			// don’t do anything
 		}
 	}
 	return bounds, yPos

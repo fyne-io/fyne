@@ -93,9 +93,9 @@ func (r *CheckGroup) Remove(option string) bool {
 
 // SetSelected sets the checked options, it can be used to set a default option.
 func (r *CheckGroup) SetSelected(options []string) {
-	//if r.Selected == options {
+	// if r.Selected == options {
 	//	return
-	//}
+	// }
 
 	r.Selected = options
 
@@ -162,7 +162,7 @@ func (r *CheckGroup) update() {
 
 		item.Text = r.Options[i]
 		item.Checked = contains
-		item.DisableableWidget.disabled = r.Disabled()
+		item.disabled = r.Disabled()
 		item.Refresh()
 	}
 }

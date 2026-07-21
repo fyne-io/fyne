@@ -153,6 +153,9 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetError.xhtml
 	GetError() Enum
 
+	// GetInteger returns an integer OpenGL state value.
+	GetInteger(pname Enum) int
+
 	// GetProgrami returns a parameter value for a shader.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetProgramiv.xhtml
@@ -215,15 +218,15 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glTexParameter.xhtml
 	TexParameteri(target, pname Enum, param int)
 
+	// Uniform1i writes an int uniform variable.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1i(dst Uniform, v int)
+
 	// Uniform1f writes a float uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
-
-	// Uniform1i writes an int uniform variable, used to bind a sampler to a texture unit.
-	//
-	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
-	Uniform1i(dst Uniform, v int)
 
 	// Uniform1fv writes a float array uniform variable.
 	//
