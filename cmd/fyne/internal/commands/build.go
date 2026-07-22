@@ -230,8 +230,8 @@ func (b *Builder) build() error {
 	if b.release {
 		tags = append(tags, "release")
 	}
-	if ok, set := b.Migrations["fyneDo"]; ok && set {
-		tags = append(tags, "migrated_fynedo")
+	if ok, set := b.Migrations["fyneDo"]; ok && !set {
+		tags = append(tags, "legacy_threading")
 	}
 	if len(tags) > 0 {
 		args = append(args, "-tags", strings.Join(tags, ","))

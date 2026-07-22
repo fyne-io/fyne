@@ -10,7 +10,7 @@ import (
 var (
 	migrateCheck sync.Once
 
-	migratedFyneDo bool
+	migratedFyneDo bool = true
 )
 
 func MigratedToFyneDo() bool {

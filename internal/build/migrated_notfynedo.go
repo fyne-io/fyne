@@ -1,4 +1,4 @@
-//go:build !migrated_fynedo
+//go:build legacy_threading
 
 package build
 
