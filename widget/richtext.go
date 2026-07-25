@@ -1224,7 +1224,7 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			reuse++
 		case fyne.TextTruncateMiddle:
 			txt := text[low:high]
-			prefix, suffix, full := middleTruncate(txt, measureWidth, measurer)
+			prefix, suffix, full := truncateMiddle(txt, measureWidth, measurer)
 			display := ""
 			if !full {
 				display = string(txt[:prefix]) + "…" + string(txt[len(txt)-suffix:])
@@ -1294,12 +1294,11 @@ func splitLines(seg RichTextSegment) []rowBoundary {
 	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false, 0, ""})
 }
 
-// middleTruncate finds the largest prefix and suffix rune counts such that
+// truncateMiddle finds the largest prefix and suffix rune counts such that
 // runes[:prefix] + "…" + runes[len(runes)-suffix:] fits within maxWidth when
 // measured. The third return value is true when the entire input fits without
-// truncation. The prefix is the larger half when the total is odd, so a single
-// character input is always kept as-is.
-func middleTruncate(runes []rune, maxWidth float32, measurer func([]rune) fyne.Size) (int, int, bool) {
+// truncation.
+func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.Size) (int, int, bool) {
 	n := len(runes)
 	if n == 0 || measurer(runes).Width <= maxWidth {
 		return n, 0, true
@@ -1385,8 +1384,6 @@ type rowBoundary struct {
 	begin, end        int
 	ellipsis          bool
 	indent            float32
-	// displayText overrides the [begin:end] slice when rendering. It is used
-	// to substitute a pre-computed truncated string such as the prefix+…+suffix
-	// produced by [fyne.TextTruncateMiddle].
+	// displayText overrides the [begin:end] slice when rendering.
 	displayText string
 }

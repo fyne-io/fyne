@@ -1340,7 +1340,7 @@ func TestText_lineBounds_truncateMiddle(t *testing.T) {
 	})
 }
 
-func TestText_middleTruncate(t *testing.T) {
+func TestText_truncateMiddle(t *testing.T) {
 	textSize := float32(10)
 	textStyle := fyne.TextStyle{}
 	measurer := func(text []rune) fyne.Size {
@@ -1349,7 +1349,7 @@ func TestText_middleTruncate(t *testing.T) {
 	ellipsisWidth := measurer([]rune("…")).Width
 
 	t.Run("empty", func(t *testing.T) {
-		prefix, suffix, full := middleTruncate(nil, 100, measurer)
+		prefix, suffix, full := truncateMiddle(nil, 100, measurer)
 		assert.Equal(t, 0, prefix)
 		assert.Equal(t, 0, suffix)
 		assert.True(t, full)
@@ -1358,7 +1358,7 @@ func TestText_middleTruncate(t *testing.T) {
 	t.Run("fits_whole", func(t *testing.T) {
 		runes := []rune("hello")
 		full := measurer(runes).Width
-		prefix, suffix, fullOK := middleTruncate(runes, full+10, measurer)
+		prefix, suffix, fullOK := truncateMiddle(runes, full+10, measurer)
 		assert.True(t, fullOK)
 		assert.Equal(t, len(runes), prefix)
 		assert.Equal(t, 0, suffix)
@@ -1366,7 +1366,7 @@ func TestText_middleTruncate(t *testing.T) {
 
 	t.Run("does_not_fit_ellipsis", func(t *testing.T) {
 		runes := []rune("hello world")
-		prefix, suffix, fullOK := middleTruncate(runes, ellipsisWidth-1, measurer)
+		prefix, suffix, fullOK := truncateMiddle(runes, ellipsisWidth-1, measurer)
 		assert.False(t, fullOK)
 		assert.Equal(t, 0, prefix)
 		assert.Equal(t, 0, suffix)
@@ -1376,7 +1376,7 @@ func TestText_middleTruncate(t *testing.T) {
 		runes := []rune("aaaaaaaaaa") // 10 a's
 		full := measurer(runes).Width
 		// allow enough room for roughly half the characters plus ellipsis
-		prefix, suffix, fullOK := middleTruncate(runes, full/2+ellipsisWidth, measurer)
+		prefix, suffix, fullOK := truncateMiddle(runes, full/2+ellipsisWidth, measurer)
 		assert.False(t, fullOK)
 		// prefix should be the larger or equal half
 		assert.GreaterOrEqual(t, prefix, suffix)
