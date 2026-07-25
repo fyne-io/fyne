@@ -304,7 +304,7 @@ func TestEntry_ContentSizeAndPlacementWithIcon(t *testing.T) {
 
 	renderer.Layout(entry.MinSize())
 	// Scrollable content should be positioned after the icon, with correct padding
-	assert.Equal(t, contentPos, entry.scroll.Position())
+	assert.Equal(t, contentPos, entry.scroller.Position())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = fyne.ScrollNone

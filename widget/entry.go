@@ -90,7 +90,7 @@ type Entry struct {
 	text                RichText
 	placeholder         RichText
 	content             *entryContent
-	scroll              *widget.Scroll
+	scroller            *widget.Scroll
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
@@ -190,16 +190,16 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
-	e.scroll = widget.NewScroll(nil)
+	e.scroller = widget.NewScroll(nil)
 	objects := []fyne.CanvasObject{box, border}
 	if e.Wrapping != fyne.TextWrapOff || e.Scroll != widget.ScrollNone {
-		e.scroll.Content = e.content
-		objects = append(objects, e.scroll)
+		e.scroller.Content = e.content
+		objects = append(objects, e.scroller)
 	} else {
-		e.scroll.Hide()
+		e.scroller.Hide()
 		objects = append(objects, e.content)
 	}
-	e.content.scroll = e.scroll
+	e.content.scroll = e.scroller
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -219,7 +219,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	e.syncSegments()
-	return &entryRenderer{box, border, e.scroll, icon, objects, e}
+	return &entryRenderer{box, border, e.scroller, icon, objects, e}
 }
 
 // CursorPosition returns the relative position of this Entry widget's cursor.
@@ -411,7 +411,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 		e.sel.selecting = false
 	}
 
-	e.updateMousePointer(m.Position.Add(e.scroll.Offset), m.Button == desktop.MouseButtonSecondary)
+	e.updateMousePointer(m.Position.Add(e.scroller.Offset), m.Button == desktop.MouseButtonSecondary)
 
 	if !e.Disabled() {
 		e.requestFocus()
@@ -633,7 +633,7 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 		e.sel.selecting = false
 	}
 
-	e.updateMousePointer(ev.Position.Add(e.scroll.Offset), false)
+	e.updateMousePointer(ev.Position.Add(e.scroller.Offset), false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
