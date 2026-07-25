@@ -658,7 +658,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 		if trunc == fyne.TextTruncateClip {
 			return minBounds
 		}
-		if trunc == fyne.TextTruncateEllipsis {
+		if trunc == fyne.TextTruncateEllipsis || trunc == fyne.TextTruncateMiddle {
 			ellipsisSize := fyne.MeasureText("…", th.Size(theme.SizeNameText), fyne.TextStyle{})
 			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
@@ -760,7 +760,9 @@ func (r *textRenderer) Refresh() {
 			var txt string
 			runes := []rune(seg.Textual())
 
-			if i == 0 {
+			if i == 0 && len(bound.segments) == 1 && bound.displayText != "" {
+				txt = bound.displayText
+			} else if i == 0 {
 				if len(bound.segments) == 1 {
 					txt = string(runes[bound.begin:bound.end])
 				} else {
@@ -988,7 +990,7 @@ func concealed(seg RichTextSegment) bool {
 }
 
 func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width float32, charWidth float32, measurer func([]rune) fyne.Size) []rowBoundary {
-	if trunc != fyne.TextTruncateEllipsis || len(bounds) == 0 {
+	if trunc != fyne.TextTruncateEllipsis && trunc != fyne.TextTruncateMiddle || len(bounds) == 0 {
 		return bounds
 	}
 
@@ -1076,14 +1078,14 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			switch fitCount {
 			case high - low: // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
 				reuse++
 				low = high
 				high = l.end
 				measureWidth = max.Width
 				yPos += lineHeight
 			case 0: // even a character won't fit
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0, ""})
 				reuse++
 				low++
 				yPos += lineHeight
@@ -1120,7 +1122,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			sub := text[low:high]
 			fitCount := howManyRunesFit(sub, measureWidth, charWidth, measurer)
 			if fitCount == high-low { // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
 				reuse++
 				low = high
 				high = l.end
@@ -1134,7 +1136,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			}
 			if fitCount == 0 { // even a character won't fit
 				if measureWidth < max.Width {
-					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
+					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0, ""})
 					reuse++
 					measureWidth = max.Width
 					yPos += lineHeight
@@ -1142,11 +1144,11 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				}
 				include := 1
 				ellipsis := false
-				if trunc == fyne.TextTruncateEllipsis {
+				if trunc == fyne.TextTruncateEllipsis || trunc == fyne.TextTruncateMiddle {
 					include = 0
 					ellipsis = true
 				}
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis, 0})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis, 0, ""})
 				low++
 				high = low + 1
 				reuse++
@@ -1168,7 +1170,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			oldHigh := high
 			high = low + fitCount
 			if low == 0 && measureWidth < max.Width { // add a newline as there is more space on next
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
+				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0, ""})
 				reuse++
 				high = oldHigh
 				measureWidth = max.Width
@@ -1214,12 +1216,21 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			}
 			end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 			high = low + end
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0})
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0, ""})
 			reuse++
 		case fyne.TextTruncateClip:
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			high = low + fitCount
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
+			reuse++
+		case fyne.TextTruncateMiddle:
+			txt := text[low:high]
+			prefix, suffix, full := truncateMiddle(txt, measureWidth, measurer)
+			display := ""
+			if !full {
+				display = string(txt[:prefix]) + "…" + string(txt[len(txt)-suffix:])
+			}
+			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, display})
 			reuse++
 		case fyne.TextTruncateOff:
 			// don’t do anything
@@ -1277,11 +1288,50 @@ func splitLines(seg RichTextSegment) []rowBoundary {
 	for i := 0; i < length; i++ {
 		if text[i] == '\n' {
 			high = i
-			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false, 0})
+			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false, 0, ""})
 			low = i + 1
 		}
 	}
-	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false, 0})
+	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false, 0, ""})
+}
+
+// truncateMiddle finds the largest prefix and suffix rune counts such that
+// runes[:prefix] + "…" + runes[len(runes)-suffix:] fits within maxWidth when
+// measured. The third return value is true when the entire input fits without
+// truncation.
+func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.Size) (int, int, bool) {
+	n := len(runes)
+	if n == 0 || measurer(runes).Width <= maxWidth {
+		return n, 0, true
+	}
+
+	ellipsis := []rune{'…'}
+	if measurer(ellipsis).Width > maxWidth {
+		return 0, 0, false
+	}
+
+	fits := func(k int) bool {
+		prefix := (k + 1) / 2
+		suffix := k / 2
+		candidate := make([]rune, 0, prefix+1+suffix)
+		candidate = append(candidate, runes[:prefix]...)
+		candidate = append(candidate, ellipsis...)
+		candidate = append(candidate, runes[n-suffix:]...)
+		return measurer(candidate).Width <= maxWidth
+	}
+
+	low, high := 0, n-1
+	best := 0
+	for low <= high {
+		mid := (low + high) / 2
+		if fits(mid) {
+			best = mid
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return (best + 1) / 2, best / 2, false
 }
 
 func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int, bool) {
@@ -1335,4 +1385,6 @@ type rowBoundary struct {
 	begin, end        int
 	ellipsis          bool
 	indent            float32
+	// displayText overrides the [begin:end] slice when rendering.
+	displayText string
 }

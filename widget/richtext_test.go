@@ -1314,6 +1314,80 @@ func TestText_howManyRunesFit(t *testing.T) {
 	})
 }
 
+func TestText_lineBounds_truncateMiddle(t *testing.T) {
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), 14, fyne.TextStyle{})
+	}
+
+	t.Run("short_no_truncation", func(t *testing.T) {
+		richText := NewRichTextWithText("foobar")
+		richText.Truncation = fyne.TextTruncateMiddle
+		got, _ := lineBounds(richText, richText.Segments[0], 200, fyne.NewSize(200, 64), measurer)
+		assert.Equal(t, 1, len(got))
+		assert.Empty(t, got[0].displayText)
+		assert.False(t, got[0].ellipsis)
+	})
+
+	t.Run("long_truncates_in_middle", func(t *testing.T) {
+		richText := NewRichTextWithText("/home/user/projects/fyne/file.txt")
+		richText.Truncation = fyne.TextTruncateMiddle
+		got, _ := lineBounds(richText, richText.Segments[0], 76, fyne.NewSize(76, 64), measurer)
+		assert.Equal(t, 1, len(got))
+		assert.Contains(t, got[0].displayText, "…")
+		// displayText starts with original prefix and ends with original suffix
+		assert.Equal(t, byte('/'), got[0].displayText[0])
+		assert.Equal(t, byte('t'), got[0].displayText[len(got[0].displayText)-1])
+	})
+}
+
+func TestText_truncateMiddle(t *testing.T) {
+	textSize := float32(10)
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), textSize, textStyle)
+	}
+	ellipsisWidth := measurer([]rune("…")).Width
+
+	t.Run("empty", func(t *testing.T) {
+		prefix, suffix, full := truncateMiddle(nil, 100, measurer)
+		assert.Equal(t, 0, prefix)
+		assert.Equal(t, 0, suffix)
+		assert.True(t, full)
+	})
+
+	t.Run("fits_whole", func(t *testing.T) {
+		runes := []rune("hello")
+		full := measurer(runes).Width
+		prefix, suffix, fullOK := truncateMiddle(runes, full+10, measurer)
+		assert.True(t, fullOK)
+		assert.Equal(t, len(runes), prefix)
+		assert.Equal(t, 0, suffix)
+	})
+
+	t.Run("does_not_fit_ellipsis", func(t *testing.T) {
+		runes := []rune("hello world")
+		prefix, suffix, fullOK := truncateMiddle(runes, ellipsisWidth-1, measurer)
+		assert.False(t, fullOK)
+		assert.Equal(t, 0, prefix)
+		assert.Equal(t, 0, suffix)
+	})
+
+	t.Run("balanced_split", func(t *testing.T) {
+		runes := []rune("aaaaaaaaaa") // 10 a's
+		full := measurer(runes).Width
+		// allow enough room for roughly half the characters plus ellipsis
+		prefix, suffix, fullOK := truncateMiddle(runes, full/2+ellipsisWidth, measurer)
+		assert.False(t, fullOK)
+		// prefix should be the larger or equal half
+		assert.GreaterOrEqual(t, prefix, suffix)
+		// resulting candidate must actually fit
+		out := append([]rune{}, runes[:prefix]...)
+		out = append(out, '…')
+		out = append(out, runes[len(runes)-suffix:]...)
+		assert.LessOrEqual(t, measurer(out).Width, full/2+ellipsisWidth)
+	})
+}
+
 func TestText_findSpaceIndex(t *testing.T) {
 	for name, tt := range map[string]struct {
 		text string
