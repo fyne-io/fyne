@@ -134,6 +134,12 @@ func (w *window) SetFullScreen(full bool) {
 
 func (w *window) RequestAlwaysOnTop() {
 	w.onTop = true
+
+	if w.view() != nil {
+		async.EnsureMain(func() {
+			w.view().SetAttrib(glfw.Floating, glfw.True)
+		})
+	}
 }
 
 func (w *window) RequestFullScreenSecondary() {
