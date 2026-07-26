@@ -47,19 +47,15 @@ func (clipboard) content() string {
 func (c clipboard) SetContent(content string) {
 	// This retry logic is to work around the "Access Denied" error often thrown in windows PR#1679
 	if runtime.GOOS != goos.Windows {
-		c.setContent(content)
+		glfw.SetClipboardString(content)
 		return
 	}
 	for i := 3; i > 0; i-- {
-		c.setContent(content)
+		glfw.SetClipboardString(content)
 		if c.content() == content {
 			return
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
 	fyne.LogError("GLFW clipboard set failed", nil)
-}
-
-func (clipboard) setContent(content string) {
-	glfw.SetClipboardString(content)
 }
