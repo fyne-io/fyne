@@ -236,7 +236,7 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 	listen.replaceProvider(p)
 
 	items := listen.get(listen.key)
-	listen.boundList = *bindList(nil, func(t1, t2 T) bool { return t1 == t2 })
+	listen.boundList = *bindListWithComparator(nil, func(t1, t2 T) bool { return t1 == t2 })
 
 	listen.AddListener(NewDataListener(func() {
 		cached := *listen.val
