@@ -63,7 +63,7 @@ func (b *MenuBar) IsActive() bool {
 // Toggle changes the activation state of the menu bar.
 // On activation, the first item will become active.
 func (b *MenuBar) Toggle() {
-	b.toggle(b.Items[0].(*menuBarItem))
+	b.toggleItem(b.Items[0].(*menuBarItem))
 }
 
 func (b *MenuBar) activateChild(item *menuBarItem) {
@@ -108,7 +108,7 @@ func (b *MenuBar) deactivate() {
 	b.Refresh()
 }
 
-func (b *MenuBar) toggle(item *menuBarItem) {
+func (b *MenuBar) toggleItem(item *menuBarItem) {
 	if b.active {
 		b.canvas.Unfocus()
 		b.deactivate()
