@@ -47,7 +47,21 @@ func NewTree[T any](comparator func(T, T) bool) Tree[T] {
 //
 // Since: 2.7
 func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) ExternalTree[T] {
-	return bindTree(ids, v, comparator)
+	if v == nil {
+		return newTree(comparator)
+	}
+
+	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
+	t.ids = make(map[string][]string)
+	t.items = make(map[string]DataItem)
+
+	for parent, children := range *ids {
+		for _, leaf := range children {
+			t.appendItem(bindTreeItem(v, leaf, t.updateExternal, t.comparator), leaf, parent)
+		}
+	}
+
+	return t
 }
 
 // DataTree is the base interface for all bindable data trees.
@@ -108,7 +122,7 @@ func NewBytesTree() Tree[[]byte] {
 //
 // Since: 2.4
 func BindBytesTree(ids *map[string][]string, v *map[string][]byte) ExternalTree[[]byte] {
-	return bindTree(ids, v, bytes.Equal)
+	return BindTree(ids, v, bytes.Equal)
 }
 
 // FloatTree supports binding a tree of float64 values.
@@ -238,7 +252,7 @@ func NewUntypedTree() Tree[any] {
 //
 // Since: 2.4
 func BindUntypedTree(ids *map[string][]string, v *map[string]any) ExternalTree[any] {
-	return bindTree(ids, v, func(a1, a2 any) bool { return a1 == a2 })
+	return BindTree(ids, v, func(a1, a2 any) bool { return a1 == a2 })
 }
 
 // URITree supports binding a tree of fyne.URI values.
@@ -264,7 +278,7 @@ func NewURITree() Tree[fyne.URI] {
 //
 // Since: 2.4
 func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalTree[fyne.URI] {
-	return bindTree(ids, v, storage.EqualURI)
+	return BindTree(ids, v, storage.EqualURI)
 }
 
 type treeBase struct {
@@ -354,26 +368,8 @@ func newTreeComparable[T comparable]() *boundTree[T] {
 	return newTree(func(t1, t2 T) bool { return t1 == t2 })
 }
 
-func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) *boundTree[T] {
-	if v == nil {
-		return newTree(comparator)
-	}
-
-	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
-	t.ids = make(map[string][]string)
-	t.items = make(map[string]DataItem)
-
-	for parent, children := range *ids {
-		for _, leaf := range children {
-			t.appendItem(bindTreeItem(v, leaf, t.updateExternal, t.comparator), leaf, parent)
-		}
-	}
-
-	return t
-}
-
-func bindTreeComparable[T comparable](ids *map[string][]string, v *map[string]T) *boundTree[T] {
-	return bindTree(ids, v, func(t1, t2 T) bool { return t1 == t2 })
+func bindTreeComparable[T comparable](ids *map[string][]string, v *map[string]T) ExternalTree[T] {
+	return BindTree(ids, v, func(t1, t2 T) bool { return t1 == t2 })
 }
 
 type boundTree[T any] struct {
