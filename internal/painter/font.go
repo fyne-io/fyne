@@ -196,6 +196,14 @@ func DrawString(dst draw.Image, s string, c color.Color, f shaping.Fontmap, font
 
 // DrawStringOffset draws a string shifted left by the specified pixel offset.
 func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
+	reqColor := color.NRGBAModel.Convert(c).(color.NRGBA)
+	isGrayscale := reqColor.R == reqColor.G && reqColor.G == reqColor.B
+
+	target := dst
+	if isGrayscale && reqColor.A > 0 {
+		target = &desaturatingImage{Image: dst}
+	}
+
 	r := render.Renderer{
 		FontSize: fontSize,
 		PixScale: scale,
@@ -206,13 +214,14 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
 		yPix := int(math.Ceil(float64(y)))
 		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
-			r.DrawStringAt(string([]rune{replacementChar}), dst, int(x)-offset, yPix, f.ResolveFace(replacementChar))
+			r.DrawStringAt(string([]rune{replacementChar}), target, int(x)-offset, yPix, f.ResolveFace(replacementChar))
 			return
 		}
 
-		r.DrawShapedRunAt(run, dst, int(x)-offset, yPix)
+		r.DrawShapedRunAt(run, target, int(x)-offset, yPix)
 	})
 }
+	
 
 func loadMeasureFont(data fyne.Resource) *font.Face {
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
@@ -426,4 +435,17 @@ func (d *dynamicFontMap) ResolveFace(r rune) *font.Face {
 
 func (d *dynamicFontMap) addFace(f *font.Face) {
 	d.faces = append(d.faces, f)
+}
+
+type desaturatingImage struct {
+	draw.Image
+}
+
+func (d *desaturatingImage) Set(x, y int, c color.Color) {
+	n := color.NRGBAModel.Convert(c).(color.NRGBA)
+	lum := (299*uint32(n.R) + 587*uint32(n.G) + 114*uint32(n.B)) / 1000
+	if lum > math.MaxUint8 {
+		lum = math.MaxUint8
+	}
+	d.Image.Set(x, y, color.NRGBA{R: uint8(lum), G: uint8(lum), B: uint8(lum), A: n.A})
 }
