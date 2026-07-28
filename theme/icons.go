@@ -873,7 +873,7 @@ func (res *DisabledResource) Content() []byte {
 func desaturate(src []byte) ([]byte, error) {
 	img, _, err := image.Decode(bytes.NewReader(src))
 	if err != nil {
-		return nil, err
+		return src, err
 	}
 	bounds := img.Bounds()
 	gray := image.NewNRGBA(bounds)
@@ -891,7 +891,7 @@ func desaturate(src []byte) ([]byte, error) {
 	}
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, gray); err != nil {
-		return nil, err
+		return src, err
 	}
 	return buf.Bytes(), nil
 }
