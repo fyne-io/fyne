@@ -803,7 +803,6 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(inputPopup)
 	assert.NotNil(t, inputPopup)
 
-	// padded container -> content container
 	folderNameInputUI := inputPopup.Content.(*fyne.Container)
 
 	folderNameInputTitle := folderNameInputUI.Objects[4].(*widget.Label)
