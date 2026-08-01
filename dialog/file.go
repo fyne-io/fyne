@@ -701,7 +701,7 @@ func showFile(file *FileDialog) *fileDialog {
 	itemMin := d.newFileItem(storage.NewFileURI("filename.txt"), false, false).MinSize()
 	size := ui.MinSize().Add(itemMin.AddWidthHeight(itemMin.Width+pad*4, pad*2))
 
-	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
+	d.win = widget.NewModalPopUp(container.NewPadded(ui), file.parent.Canvas())
 	d.win.Resize(size)
 
 	d.setLocation(file.effectiveStartingDir())
