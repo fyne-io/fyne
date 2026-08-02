@@ -107,7 +107,7 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.selection.theme = l.Theme()
 	l.selection.provider = l.provider
 
-	return &labelRenderer{l}
+	return &labelRenderer{l: l, objects: []fyne.CanvasObject{l.selection, l.provider}}
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -221,7 +221,8 @@ func (l *Label) updateFromData(data binding.DataItem) {
 }
 
 type labelRenderer struct {
-	l *Label
+	l       *Label
+	objects []fyne.CanvasObject
 }
 
 func (*labelRenderer) Destroy() {
@@ -238,10 +239,10 @@ func (r *labelRenderer) MinSize() fyne.Size {
 
 func (r *labelRenderer) Objects() []fyne.CanvasObject {
 	if !r.l.Selectable {
-		return []fyne.CanvasObject{r.l.provider}
+		return r.objects[1:] // only the RichText provider; exclude selection
 	}
 
-	return []fyne.CanvasObject{r.l.selection, r.l.provider}
+	return r.objects
 }
 
 func (r *labelRenderer) Refresh() {
