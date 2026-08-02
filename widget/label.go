@@ -239,7 +239,7 @@ func (r *labelRenderer) MinSize() fyne.Size {
 
 func (r *labelRenderer) Objects() []fyne.CanvasObject {
 	if !r.l.Selectable {
-		return r.objects[1:]
+		return r.objects[1:] // only the RichText provider; exclude selection
 	}
 
 	return r.objects
