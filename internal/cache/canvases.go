@@ -23,16 +23,16 @@ func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
 	// this runs for every visible object on every repaint, so avoid allocating
 	// a canvasInfo we would only throw away - and keep the entry alive so a
 	// constantly repainting window does not expire its own cache.
-	if old, found := canvases.Load(obj); found {
+	if old, found := canvases.Load(obj); found && old.canvas == c {
 		old.setAlive()
-		if old.canvas == c {
-			return
-		}
-	} else {
-		cinfo := &canvasInfo{canvas: c}
-		cinfo.setAlive()
-		canvases.Store(obj, cinfo)
+		return
 	}
+
+	// not cached, or moved to a different canvas - an object may only be on one
+	// canvas at a time, so replace the entry and re-run setup for the new canvas.
+	cinfo := &canvasInfo{canvas: c}
+	cinfo.setAlive()
+	canvases.Store(obj, cinfo)
 
 	if setup != nil {
 		setup()

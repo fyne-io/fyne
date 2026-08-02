@@ -23,8 +23,13 @@ func TestSetCanvasForObject(t *testing.T) {
 	SetCanvasForObject(obj, c, setup)
 	assert.Equal(t, 1, called)
 
-	// a different canvas (object moved window)
+	// a different canvas (object moved window) - the stored canvas must follow,
+	// an object can only be on one canvas at a time
 	c = &dummyCanvas{}
+	SetCanvasForObject(obj, c, setup)
+	assert.Equal(t, 2, called)
+	assert.Equal(t, c, GetCanvasForObject(obj))
+
 	SetCanvasForObject(obj, c, setup)
 	assert.Equal(t, 2, called)
 }
