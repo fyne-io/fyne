@@ -566,7 +566,8 @@ func (p *Painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 // selects straight or premultiplied alpha, which differs between shapes and
 // textures the same way it does in the GL Painter.
 func (p *Painter) upload(verts []vertex, c *constants, vs *vertexShader, ps *pixelShader,
-	topology uint32, blend *blendState) {
+	topology uint32, blend *blendState,
+) {
 	vb := box{Right: uint32(len(verts)) * vertexStride, Bottom: 1, Back: 1}
 	p.g.ctx.UpdateSubresource(unsafe.Pointer(p.vbuf), unsafe.Pointer(&verts[0]), &vb)
 	// Constant buffers must be updated whole (nil box) on the immediate context.
@@ -596,7 +597,8 @@ func (p *Painter) upload(verts []vertex, c *constants, vs *vertexShader, ps *pix
 
 // baseConstants fills the fields every shape shader reads.
 func (p *Painter) baseConstants(frame fyne.Size, bounds [4]float32, fill, stroke color.Color,
-	shadow canvas.Shadow) constants {
+	shadow canvas.Shadow,
+) constants {
 	fw, fh := p.scaleFrameSize(frame)
 	x1, x2, y1, y2 := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 
@@ -644,7 +646,8 @@ func (p *Painter) drawRectangle(d3dRect *canvas.Rectangle, pos fyne.Position, fr
 
 func (p *Painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth,
 	topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, aspect float32,
-	shadow canvas.Shadow, pos fyne.Position, frame fyne.Size) {
+	shadow canvas.Shadow, pos fyne.Position, frame fyne.Size,
+) {
 	if !paint.IsShadowVisible(shadow) && (fill == color.Transparent || fill == nil) &&
 		(stroke == color.Transparent || stroke == nil || strokeWidth == 0) {
 		return
@@ -737,7 +740,8 @@ func (p *Painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	innerRadius := outerRadius * float32(math.Min(1.0, math.Max(0.0, float64(arc.CutoutRatio))))
 	cornerRadius := fyne.Min(
 		paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle),
-		arc.CornerRadius)
+		arc.CornerRadius,
+	)
 
 	c.Radius = [4]float32{
 		roundToPixel(innerRadius*p.pixScale, 1.0),
@@ -934,7 +938,8 @@ func (p *Painter) freeClippedTextTexture(text *canvas.Text) {
 
 // drawTexture is the shared path for every texture-backed object.
 func (p *Painter) drawTexture(obj fyne.CanvasObject, creator func(fyne.CanvasObject) *gpuTexture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32) {
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32,
+) {
 	tex := p.getTexture(obj, creator)
 	if tex == nil {
 		return
@@ -944,7 +949,8 @@ func (p *Painter) drawTexture(obj fyne.CanvasObject, creator func(fyne.CanvasObj
 
 // drawGPUTexture draws an already-uploaded texture as a quad.
 func (p *Painter) drawGPUTexture(obj fyne.CanvasObject, tex *gpuTexture,
-	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32) {
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32,
+) {
 	points, insets, inner := p.rectCoords(size, pos, frame, fill, aspect, 0)
 
 	c := constants{}
@@ -1006,7 +1012,8 @@ func (p *Painter) quadVertices(points [8]float32) []vertex {
 // ---------------------------------------------------------------------------
 
 func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame fyne.Size,
-	aspect float32, shadow canvas.Shadow) ([8]float32, [4]float32) {
+	aspect float32, shadow canvas.Shadow,
+) ([8]float32, [4]float32) {
 	xPad, yPad := float32(0), float32(0)
 	if aspect != 0 {
 		inner := obj.Size()
@@ -1056,7 +1063,8 @@ func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame 
 // rectCoords returns interleaved position/texture-coordinate vertices for a
 // textured quad, plus the texture insets used by the rounded-corner path.
 func (p *Painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect, pad float32) ([16]float32, [4]float32, fyne.Size) {
+	fill canvas.ImageFill, aspect, pad float32,
+) ([16]float32, [4]float32, fyne.Size) {
 	innerSize, innerPos := rectInnerCoords(size, pos, fill, aspect)
 	pixelSize, pixelPos := roundToPixelCoords(innerSize, innerPos, p.pixScale)
 
@@ -1109,7 +1117,8 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 // lineVertices builds the six vertices of a quad covering the line, each
 // carrying the outward normal that VertexLine scales by the half width.
 func (p *Painter) lineVertices(pos, pos1, pos2 fyne.Position, lineWidth, feather float32,
-	frame fyne.Size) (verts [6]vertex, halfWidth, featherWidth float32) {
+	frame fyne.Size,
+) (verts [6]vertex, halfWidth, featherWidth float32) {
 	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
 	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
 	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
@@ -1587,7 +1596,8 @@ func (p *Painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	clamp := func(v fyne.Position) fyne.Position {
 		return fyne.NewPos(
 			fyne.Min(fyne.Max(v.X, 0), fyne.Max(size.Width, 0)),
-			fyne.Min(fyne.Max(v.Y, 0), fyne.Max(size.Height, 0)))
+			fyne.Min(fyne.Max(v.Y, 0), fyne.Max(size.Height, 0)),
+		)
 	}
 
 	fixed := make([]fyne.Position, num)

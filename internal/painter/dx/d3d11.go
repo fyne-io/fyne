@@ -317,16 +317,18 @@ const (
 	slotGetDeviceRemovedReason   = 39
 )
 
-type buffer struct{ unknown }
-type texture2D struct{ unknown }
-type shaderResourceView struct{ unknown }
-type renderTargetView struct{ unknown }
-type inputLayout struct{ unknown }
-type vertexShader struct{ unknown }
-type pixelShader struct{ unknown }
-type blendState struct{ unknown }
-type rasterizerState struct{ unknown }
-type samplerState struct{ unknown }
+type (
+	buffer             struct{ unknown }
+	texture2D          struct{ unknown }
+	shaderResourceView struct{ unknown }
+	renderTargetView   struct{ unknown }
+	inputLayout        struct{ unknown }
+	vertexShader       struct{ unknown }
+	pixelShader        struct{ unknown }
+	blendState         struct{ unknown }
+	rasterizerState    struct{ unknown }
+	samplerState       struct{ unknown }
+)
 
 func (d *device) CreateBuffer(desc *bufferDesc, data *subresourceData) (*buffer, error) {
 	var out *buffer
@@ -671,7 +673,8 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 }
 
 func callD3D11Create(driverType, flags uint32, levels *uint32, levelCount uint32,
-	desc *dxgiSwapChainDesc, sc **swapChain, dev **device, gotLevel *uint32, ctx **deviceContext) int32 {
+	desc *dxgiSwapChainDesc, sc **swapChain, dev **device, gotLevel *uint32, ctx **deviceContext,
+) int32 {
 	r, _, _ := procD3D11Create.Call(
 		0, // pAdapter - null means "pick for the driver type"
 		uintptr(driverType),
