@@ -41,6 +41,18 @@ type Shader struct {
 	// SourceES is the GLSL fragment shader used on OpenGL ES, mobile and web.
 	SourceES []byte
 
+	// SourceHLSL is the HLSL pixel shader used by the Direct3D 11 driver (the
+	// `directx` build tag). It is ignored by every OpenGL target, so a shader
+	// can carry it unconditionally alongside the GLSL sources. A shader without
+	// it simply is not drawn under Direct3D.
+	//
+	// The entry point must be "main" and it is compiled as ps_4_0. The driver
+	// prepends its shared prelude, so `frame`, `bounds` and the PSIn struct are
+	// already declared; the shader's own Uniforms must be declared as a flat
+	// "cbuffer <anything> : register(b1)", and its Textures bind to t0 upwards
+	// with a matching sampler at s0 upwards, ordered by sorted texture name.
+	SourceHLSL []byte
+
 	// Textures supplies named images to the shader. Each entry is uploaded to
 	// the GPU and exposed to the fragment shader as a "uniform sampler2D <name>".
 	// Images are uploaded once and reused; replacing an entry with a different
