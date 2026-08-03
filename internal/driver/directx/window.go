@@ -199,7 +199,8 @@ func (w *window) syncSurface() bool {
 	w.width, w.height = int(width), int(height)
 	w.canvas.Resize(fyne.NewSize(
 		scale.ToFyneCoordinate(w.canvas, int(width)),
-		scale.ToFyneCoordinate(w.canvas, int(height))))
+		scale.ToFyneCoordinate(w.canvas, int(height)),
+	))
 	w.canvas.SetDirty()
 	return true
 }
@@ -446,7 +447,8 @@ func (w *window) processDropped(drop uintptr) {
 	procDragQueryPoint.Call(drop, uintptr(unsafe.Pointer(&pt)))
 	w.onDropped(fyne.NewPos(
 		scale.ToFyneCoordinate(w.canvas, int(pt.X)),
-		scale.ToFyneCoordinate(w.canvas, int(pt.Y))), uris)
+		scale.ToFyneCoordinate(w.canvas, int(pt.Y)),
+	), uris)
 }
 
 func (w *window) Show() {

@@ -100,7 +100,8 @@ func registerClassEx(wc *wndClassExW) (uint16, error) {
 }
 
 func createWindowEx(exStyle uint32, class, title *uint16, style uint32, x, y, w, h int32,
-	parent, menu, inst windows.Handle, param unsafe.Pointer) (windows.Handle, error) {
+	parent, menu, inst windows.Handle, param unsafe.Pointer,
+) (windows.Handle, error) {
 	r, _, err := procCreateWindowExW.Call(uintptr(exStyle), uintptr(unsafe.Pointer(class)),
 		uintptr(unsafe.Pointer(title)), uintptr(style), uintptr(x), uintptr(y), uintptr(w), uintptr(h),
 		uintptr(parent), uintptr(menu), uintptr(inst), uintptr(param))

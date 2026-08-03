@@ -18,7 +18,8 @@ import (
 )
 
 func (w *window) findObjectAtPositionMatching(mouse fyne.Position,
-	matches func(fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	matches func(fyne.CanvasObject) bool,
+) (fyne.CanvasObject, fyne.Position, int) {
 	return driver.FindObjectAtPositionMatching(mouse, matches, w.canvas.Overlays().Top(), nil, w.canvas.Content())
 }
 

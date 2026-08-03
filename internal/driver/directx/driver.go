@@ -143,7 +143,8 @@ func (d *dxDriver) addWindow(w *window) {
 }
 
 func (*dxDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle,
-	source fyne.Resource) (fyne.Size, float32) {
+	source fyne.Resource,
+) (fyne.Size, float32) {
 	return paint.RenderedTextSize(text, textSize, style, source)
 }
 

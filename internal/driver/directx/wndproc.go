@@ -102,7 +102,8 @@ func (w *window) handleMessage(message uint32, wParam, lParam uintptr) uintptr {
 			minSize := w.canvas.MinSize()
 			cw, ch := w.frameSizeFor(
 				scale.ToScreenCoordinate(w.canvas, minSize.Width),
-				scale.ToScreenCoordinate(w.canvas, minSize.Height))
+				scale.ToScreenCoordinate(w.canvas, minSize.Height),
+			)
 			info.ptMinTrackSize = point{X: cw, Y: ch}
 			return 0
 		}
