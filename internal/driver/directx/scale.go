@@ -38,10 +38,6 @@ func userScale() float32 {
 	return 1.0
 }
 
-// CurrentKeyModifiers reports the modifier keys held right now. Windows keeps
-// modifier state in the keyboard rather than in each message, so this samples it
-// on demand.
-
 // calculatedScale combines the monitor DPI with the user's scale preference.
 func (w *window) calculatedScale() float32 {
 	dpi := float32(getDpiForWindow(w.hwnd))
@@ -49,5 +45,3 @@ func (w *window) calculatedScale() float32 {
 	raw := system * userScale()
 	return float32(math.Round(float64(raw*10.0))) / 10.0
 }
-
-// frameSizeFor grows a client size into the full window size for the current style.
