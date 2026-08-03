@@ -36,8 +36,6 @@ const (
 )
 
 // Declare conformity with the Window interfaces.
-
-// Declare conformity with the Window interfaces.
 var (
 	_ fyne.Window          = (*window)(nil)
 	_ desktop.Window       = (*window)(nil)
@@ -578,8 +576,6 @@ func (w *window) fitContent() {
 	fw, fh := w.frameSizeFor(width, height)
 	setWindowPos(w.hwnd, 0, 0, fw, fh, swpNoMove|swpNoZOrder)
 }
-
-// RunNative exposes the native handle, satisfying driver.NativeWindow.
 
 // RunNative exposes the native handle, satisfying driver.NativeWindow.
 func (w *window) RunNative(f func(context any)) {
