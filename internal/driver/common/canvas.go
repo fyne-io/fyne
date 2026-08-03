@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
-	"fyne.io/fyne/v2/internal/painter/gl"
+	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/theme"
 )
 
@@ -36,7 +36,7 @@ type Canvas struct {
 
 	shortcut fyne.ShortcutHandler
 
-	painter gl.Painter
+	painter paint.Painter
 
 	// Any object that requests to enter to the refresh queue should
 	// not be omitted as it is always a rendering task's decision
@@ -274,7 +274,7 @@ func (c *Canvas) Overlays() fyne.OverlayStack {
 }
 
 // Painter returns the canvas painter.
-func (c *Canvas) Painter() gl.Painter {
+func (c *Canvas) Painter() paint.Painter {
 	return c.painter
 }
 
@@ -338,7 +338,7 @@ func (c *Canvas) SetMobileWindowHeadTree(head fyne.CanvasObject) {
 }
 
 // SetPainter sets the canvas painter.
-func (c *Canvas) SetPainter(p gl.Painter) {
+func (c *Canvas) SetPainter(p paint.Painter) {
 	c.painter = p
 }
 
