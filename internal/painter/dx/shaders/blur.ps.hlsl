@@ -5,8 +5,9 @@
 // in between. The kernel arrives as a 1-pixel-tall texture at t1 rather than as a
 // uniform array, exactly as in the GL painter.
 //
-// texParams holds {radius, cornerRadius, size.x, size.y} and inset
-// {direction.x, direction.y, sampleScale, unused}.
+// texParams holds {radius, cornerRadius, size.x, size.y} and rectHalf
+// {direction.x, direction.y, sampleScale, unused} - not inset, which the
+// vertex stage owns as the texture-coordinate source.
 //
 // Every sample is a SampleLevel rather than a Sample: the loop bound is dynamic,
 // and HLSL forbids gradient-derived sampling under varying flow control. The
@@ -28,8 +29,8 @@ float4 main(PSIn input) : SV_TARGET
     float radius = texParams.x;
     float cornerRadius = texParams.y;
     float2 size = texParams.zw;
-    float2 direction = inset.xy;
-    float sampleScale = inset.z;
+    float2 direction = rectHalf.xy;
+    float sampleScale = rectHalf.z;
 
     float alpha = 1.0;
     if (cornerRadius > 0.5) {

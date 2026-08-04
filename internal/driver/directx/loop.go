@@ -224,7 +224,7 @@ func (d *dxDriver) repaintWindow(w *window) bool {
 	canvas.Painter().SetOutputSize(int(fbWidth), int(fbHeight))
 
 	canvas.paint(canvas.Size())
-	if w.gpu.Present(!w.resizing) {
+	if w.gpu.Present() {
 		w.recoverDevice()
 	}
 

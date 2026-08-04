@@ -108,6 +108,18 @@ func (w *window) handleMessage(message uint32, wParam, lParam uintptr) uintptr {
 			return 0
 		}
 
+	// Menu icons are owner-drawn, see menuState.setIcon. Both messages must report
+	// back that they handled it, or Windows falls back to leaving a blank column.
+	case wmMeasureItem:
+		if w.menu != nil && w.menu.measureMenuIcon(lParam) {
+			return 1
+		}
+
+	case wmDrawItem:
+		if w.menu != nil && w.menu.drawMenuIcon(lParam) {
+			return 1
+		}
+
 	case wmEnterSizeMove:
 		w.resizing = true
 		return 0

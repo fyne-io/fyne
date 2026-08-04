@@ -21,6 +21,8 @@ const (
 	wmSetIcon       = 0x0080
 	wmSetCursor     = 0x0020
 	wmGetMinMaxInfo = 0x0024
+	wmDrawItem      = 0x002B
+	wmMeasureItem   = 0x002C
 	wmEnterSizeMove = 0x0231
 	wmExitSizeMove  = 0x0232
 	wmDropFiles     = 0x0233
@@ -101,8 +103,23 @@ const (
 	// size Windows draws hbmpItem at.
 	smCxMenuCheck = 71
 
+	// colorMenuText is COLOR_MENUTEXT, the ink Windows paints menu item labels in.
+	colorMenuText = 7
+
 	// miimBitmap selects MENUITEMINFOW.hbmpItem.
 	miimBitmap = 0x00000080
+	// miimData selects MENUITEMINFOW.dwItemData, where the icon handle is parked
+	// for the WM_DRAWITEM that comes back.
+	miimData = 0x00000020
+
+	// hbmMenuCallback is HBMMENU_CALLBACK, the hbmpItem value that asks Windows to
+	// send WM_MEASUREITEM and WM_DRAWITEM instead of blitting a bitmap itself.
+	hbmMenuCallback = ^uintptr(0) // (HBITMAP)-1
+
+	// odtMenu is ODT_MENU, the CtlType for menu owner-draw messages.
+	odtMenu = 1
+	// diNormal is DI_NORMAL, DrawIconEx drawing both the image and its mask.
+	diNormal = 3
 
 	// dibRGBColors: the DIB has no colour table, the pixels are literal BGRA.
 	dibRGBColors = 0
@@ -226,4 +243,27 @@ type bitmapInfoHeader struct {
 	biYPelsPerMeter int32
 	biClrUsed       uint32
 	biClrImportant  uint32
+}
+
+// measureItemStruct is MEASUREITEMSTRUCT, the reply buffer for WM_MEASUREITEM.
+type measureItemStruct struct {
+	ctlType    uint32
+	ctlID      uint32
+	itemID     uint32
+	itemWidth  uint32
+	itemHeight uint32
+	itemData   uintptr
+}
+
+// drawItemStruct is DRAWITEMSTRUCT, the request for WM_DRAWITEM.
+type drawItemStruct struct {
+	ctlType    uint32
+	ctlID      uint32
+	itemID     uint32
+	itemAction uint32
+	itemState  uint32
+	hwndItem   windows.Handle
+	hDC        windows.Handle
+	rcItem     rect
+	itemData   uintptr
 }

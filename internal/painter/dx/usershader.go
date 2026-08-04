@@ -84,7 +84,7 @@ func (p *Painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 	x1, x2, y1, y2 := p.scaleRectCoords(bounds[0], bounds[2], bounds[1], bounds[3])
 	c.Bounds = [4]float32{x1, y1, x2, y2}
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, state.ps, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, state.ps, topologyTriangleStrip, p.blend, 4)
 }
 
 // userShader returns the cached state for a shader, compiling it on first use.
