@@ -3,6 +3,7 @@
 package dx
 
 import (
+	"fmt"
 	"image/color"
 	"reflect"
 	"regexp"
@@ -58,19 +59,6 @@ func TestConstantBufferSizeIsAligned(t *testing.T) {
 	}
 }
 
-func TestVertexLayoutMatchesInputElements(t *testing.T) {
-	if vertexStride != 16 {
-		t.Errorf("vertex stride is %d, expected 16 (two float2)", vertexStride)
-	}
-	v := vertex{}
-	if off := unsafe.Offsetof(v.U); off != 8 {
-		t.Errorf("uv offset is %d, but the input layout declares 8", off)
-	}
-	if unsafe.Offsetof(v.X) != 0 {
-		t.Error("position must be at offset 0 to match the input layout")
-	}
-}
-
 func TestRoundToPixel(t *testing.T) {
 	cases := []struct {
 		v, scale, want float32
@@ -105,13 +93,13 @@ func TestVecRectCoords(t *testing.T) {
 	//   x1 = -1 + (10-1)*2/200 = -0.91,  y1 = 1 - (20-1)*2/100 = 0.62
 	const wantX1, wantY1 = -0.91, 0.62
 	if !closeTo(coords[0], wantX1) || !closeTo(coords[1], wantY1) {
-		t.Errorf("first vertex = (%v, %v), want (%v, %v)", coords[0], coords[1], wantX1, wantY1)
+		t.Errorf("first corner = (%v, %v), want (%v, %v)", coords[0], coords[1], wantX1, wantY1)
 	}
-	// Strip order is (x1,y1) (x2,y1) (x1,y2) (x2,y2).
-	if coords[2] != coords[6] || coords[1] != coords[3] {
-		t.Error("triangle strip corners are inconsistent")
+	// coords is the clip-space rect {x1, y1, x2, y2} the vertex shader expands.
+	if coords[2] <= coords[0] {
+		t.Error("x2 should be right of x1 in NDC")
 	}
-	if coords[1] <= coords[5] {
+	if coords[1] <= coords[3] {
 		t.Error("y1 should be above y2 in NDC (larger value)")
 	}
 }
@@ -289,5 +277,102 @@ func TestTextTextureWindow(t *testing.T) {
 	}
 	if cached.covers(7200, 400, 40, 1) {
 		t.Error("cached window should not cover a range beyond it")
+	}
+}
+
+// TestFrameLatencySlotDerivation pins the SetMaximumFrameLatency vtable index to
+// the interface chain it is counted from. An off-by-one here does not fail - it
+// calls a neighbouring method with the wrong argument, on a COM object, in a
+// process that then keeps running.
+func TestFrameLatencySlotDerivation(t *testing.T) {
+	const (
+		iUnknown    = 3 // QueryInterface, AddRef, Release
+		iDXGIObject = 4 // SetPrivateData, SetPrivateDataInterface, GetPrivateData, GetParent
+		iDXGIDevice = 5 // GetAdapter, CreateSurface, QueryResourceResidency,
+		// SetGPUThreadPriority, GetGPUThreadPriority
+	)
+
+	// SetMaximumFrameLatency is the first method IDXGIDevice1 adds of its own.
+	if want := iUnknown + iDXGIObject + iDXGIDevice; slotSetMaximumFrameLatency != want {
+		t.Errorf("slotSetMaximumFrameLatency = %d, want %d", slotSetMaximumFrameLatency, want)
+	}
+}
+
+// TestDXGIDevice1IID checks the GUID byte layout against the canonical form. A
+// typo here is silent in a different way: QueryInterface just reports
+// E_NOINTERFACE, setMaximumFrameLatency logs and carries on, and the frame queue
+// quietly stays at its laggy default.
+func TestDXGIDevice1IID(t *testing.T) {
+	// {77db970f-6276-48ba-ba28-070143b4392c}
+	if got := fmt.Sprintf("%08x-%04x-%04x-%02x-%02x", iidDXGIDevice1.Data1, iidDXGIDevice1.Data2,
+		iidDXGIDevice1.Data3, iidDXGIDevice1.Data4[:2], iidDXGIDevice1.Data4[2:]); got != "77db970f-6276-48ba-ba28-070143b4392c" {
+		t.Errorf("iidDXGIDevice1 = %s, want 77db970f-6276-48ba-ba28-070143b4392c", got)
+	}
+}
+
+// poolPainter is a Painter with just enough state for the texture pool; the
+// parked textures carry nil COM pointers, which release() ignores.
+func poolPainter() *Painter {
+	return &Painter{texPool: map[[2]uint32][]pooledTexture{}}
+}
+
+func TestTexturePool_ParkAndReuse(t *testing.T) {
+	p := poolPainter()
+	tex := &gpuTexture{width: 8, height: 4}
+
+	p.releaseTexture(tex)
+	if p.texPoolSize != 1 {
+		t.Fatalf("texPoolSize = %d, want 1", p.texPoolSize)
+	}
+	if got := p.pooledTextureFor(8, 8); got != nil {
+		t.Errorf("pooledTextureFor(8, 8) = %v, want nil for a size miss", got)
+	}
+	if got := p.pooledTextureFor(8, 4); got != tex {
+		t.Errorf("pooledTextureFor(8, 4) = %v, want the parked texture", got)
+	}
+	if p.texPoolSize != 0 || len(p.texPool) != 0 {
+		t.Errorf("after reuse: texPoolSize = %d, entries = %d, want an empty pool", p.texPoolSize, len(p.texPool))
+	}
+}
+
+func TestTexturePool_LIFOAndUnpoolable(t *testing.T) {
+	p := poolPainter()
+	older := &gpuTexture{width: 8, height: 4}
+	newer := &gpuTexture{width: 8, height: 4}
+	p.releaseTexture(older)
+	p.releaseTexture(newer)
+	p.releaseTexture(&gpuTexture{}) // width 0: not from imgToTexture, never pooled
+
+	if p.texPoolSize != 2 {
+		t.Fatalf("texPoolSize = %d, want 2 (unpoolable texture parked?)", p.texPoolSize)
+	}
+	if got := p.pooledTextureFor(8, 4); got != newer {
+		t.Errorf("first pop = %v, want the most recently parked", got)
+	}
+	if got := p.pooledTextureFor(8, 4); got != older {
+		t.Errorf("second pop = %v, want the older texture", got)
+	}
+}
+
+func TestTexturePool_CapAndSweep(t *testing.T) {
+	p := poolPainter()
+	for i := 0; i < texPoolMax+5; i++ {
+		p.releaseTexture(&gpuTexture{width: uint32(i + 1), height: 1})
+	}
+	if p.texPoolSize != texPoolMax {
+		t.Fatalf("texPoolSize = %d, want the cap %d", p.texPoolSize, texPoolMax)
+	}
+
+	p.frameTick += texPoolTTL + 1
+	p.sweepTexPool()
+	if p.texPoolSize != 0 || len(p.texPool) != 0 {
+		t.Errorf("after sweep: texPoolSize = %d, entries = %d, want an empty pool", p.texPoolSize, len(p.texPool))
+	}
+
+	// A freshly parked texture must survive a sweep.
+	p.releaseTexture(&gpuTexture{width: 8, height: 4})
+	p.sweepTexPool()
+	if p.texPoolSize != 1 {
+		t.Errorf("fresh texture swept: texPoolSize = %d, want 1", p.texPoolSize)
 	}
 }

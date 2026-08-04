@@ -4,6 +4,8 @@ package dx
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"syscall"
 	"unsafe"
 
@@ -15,6 +17,10 @@ var (
 	d3dCompiler     = windows.NewLazySystemDLL("d3dcompiler_47.dll")
 	procD3D11Create = d3d11DLL.NewProc("D3D11CreateDeviceAndSwapChain")
 	procD3DCompile  = d3dCompiler.NewProc("D3DCompile")
+
+	// dxDebug enables one-shot device diagnostics and periodic draw statistics,
+	// for chasing performance differences against the GL driver.
+	dxDebug = os.Getenv("FYNE_DX_DEBUG") != ""
 )
 
 // COM plumbing.
@@ -109,17 +115,13 @@ const (
 	createDeviceBGRASupport = 0x20
 	createDeviceDebug       = 0x2
 
-	formatR8G8B8A8Unorm     = 28
-	formatB8G8R8A8Unorm     = 87
-	formatR32G32Float       = 16
-	formatR32G32B32A32Float = 2
+	formatR8G8B8A8Unorm = 28
+	formatB8G8R8A8Unorm = 87
 
 	usageDefault   = 0
 	usageImmutable = 1
 	usageDynamic   = 2
 
-	bindVertexBuffer   = 0x1
-	bindIndexBuffer    = 0x2
 	bindConstantBuffer = 0x4
 	bindShaderResource = 0x8
 	bindRenderTarget   = 0x20
@@ -142,8 +144,6 @@ const (
 
 	topologyTriangleList  = 4
 	topologyTriangleStrip = 5
-
-	inputPerVertexData = 0
 
 	fillSolid = 3
 	cullNone  = 1
@@ -231,16 +231,6 @@ type texture2DDesc struct {
 	MiscFlags      uint32
 }
 
-type inputElementDesc struct {
-	SemanticName         *byte
-	SemanticIndex        uint32
-	Format               uint32
-	InputSlot            uint32
-	AlignedByteOffset    uint32
-	InputSlotClass       uint32
-	InstanceDataStepRate uint32
-}
-
 type samplerDesc struct {
 	Filter         uint32
 	AddressU       uint32
@@ -308,7 +298,6 @@ const (
 	slotCreateTexture2D          = 5
 	slotCreateShaderResourceView = 7
 	slotCreateRenderTargetView   = 9
-	slotCreateInputLayout        = 11
 	slotCreateVertexShader       = 12
 	slotCreatePixelShader        = 15
 	slotCreateBlendState         = 20
@@ -322,7 +311,6 @@ type (
 	texture2D          struct{ unknown }
 	shaderResourceView struct{ unknown }
 	renderTargetView   struct{ unknown }
-	inputLayout        struct{ unknown }
 	vertexShader       struct{ unknown }
 	pixelShader        struct{ unknown }
 	blendState         struct{ unknown }
@@ -358,14 +346,6 @@ func (d *device) CreateRenderTargetView(res *texture2D) (*renderTargetView, erro
 	hr := hresult(d.call(slotCreateRenderTargetView, uintptr(unsafe.Pointer(res)), 0,
 		uintptr(unsafe.Pointer(&out))))
 	return out, hr.error("CreateRenderTargetView")
-}
-
-func (d *device) CreateInputLayout(elems []inputElementDesc, shaderByteCode []byte) (*inputLayout, error) {
-	var out *inputLayout
-	hr := hresult(d.call(slotCreateInputLayout, uintptr(unsafe.Pointer(&elems[0])), uintptr(len(elems)),
-		uintptr(unsafe.Pointer(&shaderByteCode[0])), uintptr(len(shaderByteCode)),
-		uintptr(unsafe.Pointer(&out))))
-	return out, hr.error("CreateInputLayout")
 }
 
 func (d *device) CreateVertexShader(code []byte) (*vertexShader, error) {
@@ -420,8 +400,6 @@ const (
 	slotMap                    = 14
 	slotUnmap                  = 15
 	slotPSSetConstantBuffers   = 16
-	slotIASetInputLayout       = 17
-	slotIASetVertexBuffers     = 18
 	slotIASetPrimitiveTopology = 24
 	slotOMSetRenderTargets     = 33
 	slotOMSetBlendState        = 35
@@ -463,17 +441,8 @@ func (c *deviceContext) OMSetBlendState(s *blendState) {
 	c.call(slotOMSetBlendState, uintptr(unsafe.Pointer(s)), 0, 0xffffffff)
 }
 
-func (c *deviceContext) IASetInputLayout(l *inputLayout) {
-	c.call(slotIASetInputLayout, uintptr(unsafe.Pointer(l)))
-}
-
 func (c *deviceContext) IASetPrimitiveTopology(t uint32) {
 	c.call(slotIASetPrimitiveTopology, uintptr(t))
-}
-
-func (c *deviceContext) IASetVertexBuffer(b *buffer, stride, offset uint32) {
-	c.call(slotIASetVertexBuffers, 0, 1, uintptr(unsafe.Pointer(&b)),
-		uintptr(unsafe.Pointer(&stride)), uintptr(unsafe.Pointer(&offset)))
 }
 
 func (c *deviceContext) VSSetShader(s *vertexShader) {
@@ -541,6 +510,12 @@ func (c *deviceContext) UpdateSubresource(res, data unsafe.Pointer, dstBox *box)
 	c.call(slotUpdateSubresource, uintptr(res), 0, uintptr(unsafe.Pointer(dstBox)), uintptr(data), 0, 0)
 }
 
+// UpdateTexture2D replaces the whole first subresource of a texture; unlike the
+// buffer path above, textures need the source row pitch.
+func (c *deviceContext) UpdateTexture2D(res, data unsafe.Pointer, rowPitch uint32) {
+	c.call(slotUpdateSubresource, uintptr(res), 0, 0, uintptr(data), uintptr(rowPitch), 0)
+}
+
 // CopySubresourceRegion copies a rectangle of src into dst at the origin.
 func (c *deviceContext) CopySubresourceRegion(dst *texture2D, src *texture2D, region *box) {
 	c.call(slotCopySubresourceRegion, uintptr(unsafe.Pointer(dst)), 0, 0, 0, 0,
@@ -600,6 +575,93 @@ var iidTexture2D = windows.GUID{
 	Data4: [8]byte{0x9a, 0xb4, 0x48, 0x95, 0x35, 0xd3, 0x4f, 0x9c},
 }
 
+// dxgiDevice1 wraps IDXGIDevice1, reachable from the D3D11 device by QueryInterface
+// and needed only to bound how many frames DXGI queues ahead.
+type dxgiDevice1 struct{ unknown }
+
+// IDXGIDevice1 inherits IUnknown (0-2), IDXGIObject (3-6) and IDXGIDevice (7-11),
+// so its own two methods start at 12.
+const slotSetMaximumFrameLatency = 12
+
+// iidDXGIDevice1 is IID_IDXGIDevice1 {77db970f-6276-48ba-ba28-070143b4392c}.
+var iidDXGIDevice1 = windows.GUID{
+	Data1: 0x77db970f, Data2: 0x6276, Data3: 0x48ba,
+	Data4: [8]byte{0xba, 0x28, 0x07, 0x01, 0x43, 0xb4, 0x39, 0x2c},
+}
+
+// dxgiAdapterDesc mirrors DXGI_ADAPTER_DESC.
+type dxgiAdapterDesc struct {
+	Description           [128]uint16
+	VendorID              uint32
+	DeviceID              uint32
+	SubSysID              uint32
+	Revision              uint32
+	DedicatedVideoMemory  uintptr
+	DedicatedSystemMemory uintptr
+	SharedSystemMemory    uintptr
+	AdapterLuid           [2]uint32
+}
+
+const (
+	// IDXGIDevice: IUnknown (3) + IDXGIObject (4) inherited, GetAdapter first own method.
+	slotGetAdapter = 7
+	// IDXGIAdapter: same 7 inherited slots, then EnumOutputs, GetDesc.
+	slotAdapterGetDesc = 8
+)
+
+// logDeviceDiagnostics prints which device, swap effect and adapter the driver
+// ended up with, for FYNE_DX_DEBUG runs. A blt fallback or a present chain on a
+// different adapter than the compositor (hybrid-GPU laptops) both turn Present
+// into a copy, which is invisible without this.
+func logDeviceDiagnostics(dev *device, driverType, effect, level uint32) {
+	driverName := "hardware"
+	if driverType == driverTypeWARP {
+		driverName = "warp"
+	}
+	effectName := "blt-discard"
+	if effect == swapEffectFlipDiscard {
+		effectName = "flip-discard"
+	}
+
+	adapterName := "unknown"
+	var dxgi *dxgiDevice1
+	if hr := hresult(dev.call(slotQueryInterface, uintptr(unsafe.Pointer(&iidDXGIDevice1)),
+		uintptr(unsafe.Pointer(&dxgi)))); !hr.failed() {
+		var adapter *unknown
+		if hr := hresult(dxgi.call(slotGetAdapter, uintptr(unsafe.Pointer(&adapter)))); !hr.failed() {
+			var desc dxgiAdapterDesc
+			if hr := hresult(adapter.call(slotAdapterGetDesc, uintptr(unsafe.Pointer(&desc)))); !hr.failed() {
+				adapterName = windows.UTF16ToString(desc.Description[:])
+			}
+			adapter.Release()
+		}
+		dxgi.Release()
+	}
+
+	log.Printf("directx: %s device, %s swap chain, feature level %#x, adapter %q",
+		driverName, effectName, level, adapterName)
+}
+
+// setMaximumFrameLatency caps how many frames DXGI will queue before Present
+// blocks. DXGI defaults this to 3, which on a flip model swap chain means what is
+// drawn now can reach the screen up to three refreshes later - directly visible as
+// lag when dragging, where the pointer is the reference the eye compares against.
+//
+// Failure is not fatal: the frame queue is a latency tuning knob, and a driver that
+// will not hand back IDXGIDevice1 still renders correctly, just with the default
+// queue depth.
+func setMaximumFrameLatency(dev *device, frames uint32) error {
+	var dxgi *dxgiDevice1
+	hr := hresult(dev.call(slotQueryInterface, uintptr(unsafe.Pointer(&iidDXGIDevice1)),
+		uintptr(unsafe.Pointer(&dxgi))))
+	if hr.failed() {
+		return hr.error("QueryInterface(IDXGIDevice1)")
+	}
+	defer dxgi.Release()
+
+	return hresult(dxgi.call(slotSetMaximumFrameLatency, uintptr(frames))).error("SetMaximumFrameLatency")
+}
+
 // blob wraps ID3DBlob, the buffer type returned by the shader compiler.
 type blob struct{ unknown }
 
@@ -645,12 +707,26 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 			Height: height,
 			Format: formatB8G8R8A8Unorm,
 		},
-		SampleDesc:   dxgiSampleDesc{Count: 1},
-		BufferUsage:  swapUsageRTOutput,
-		BufferCount:  2,
+		SampleDesc:  dxgiSampleDesc{Count: 1},
+		BufferUsage: swapUsageRTOutput,
+		// Flip model wants headroom over the frame latency (count >= latency+1);
+		// with too few buffers the compositor still holds the presented frame
+		// when the driver wants it back and the wait lands inside Present.
+		//
+		// Swap-effect choice is measured, not aesthetic - windowed on Intel
+		// Iris Plus, 582 draws/frame playback: flip-discard with 2 buffers
+		// ~7ms per Present, flip-discard with 3 buffers 1.2-4.5ms on battery
+		// and ~100us on AC, blt-discard 8-11ms (the DXGI blt path is NOT the
+		// cheap WGL-style copy the GL driver gets - do not "simplify" back to
+		// it). If Present time ever needs to go lower still, the route is
+		// CreateSwapChainForHwnd with
+		// DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT, waiting on the
+		// latency handle at frame start.
+		BufferCount:  4,
 		OutputWindow: hwnd,
 		Windowed:     1,
-		// SwapEffect is set per attempt below: flip model first, blt fallback.
+		// SwapEffect is set per attempt below: flip model first, blt fallback
+		// for pre-Windows-10 systems.
 	}
 
 	lastErr := fmt.Errorf("no Direct3D 11 device available")
@@ -664,6 +740,9 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 			hr := hresult(callD3D11Create(driverType, createDeviceBGRASupport, &levels[0], uint32(len(levels)),
 				&desc, &sc, &dev, &gotLevel, &ctx))
 			if !hr.failed() {
+				if dxDebug {
+					logDeviceDiagnostics(dev, driverType, effect, gotLevel)
+				}
 				return dev, ctx, sc, gotLevel, nil
 			}
 			lastErr = hr.error("D3D11CreateDeviceAndSwapChain")

@@ -6,6 +6,7 @@ package directx
 
 import (
 	"image"
+	"image/color"
 	imgdraw "image/draw"
 	"runtime"
 	"unsafe"
@@ -15,6 +16,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/svg"
 )
 
 // rasterise draws a resource into a square image of the given pixel size.
@@ -41,46 +43,31 @@ func iconFromResource(res fyne.Resource, size int) windows.Handle {
 	return hIconFor(rasterise(res, size))
 }
 
-// menuBitmapFromResource rasterises a resource into the 32 bit per pixel bitmap a
-// menu item wants for its icon column. The caller owns the handle and must
-// DeleteObject it.
+// menuIconResource recolours a themed icon to the colour Windows paints menu text
+// in. Fyne themed resources come out in the app theme's foreground, which is the
+// wrong reference here: the menu is drawn by Windows, not by the Fyne canvas, so a
+// dark app theme yields a white icon that is invisible on a light menu. Matching
+// COLOR_MENUTEXT puts the icon in the same ink as the label beside it.
 //
-// Unlike an icon this has to be a DIB section: menus composite hbmpItem with
-// AlphaBlend, which reads the alpha channel only from a device independent
-// bitmap. A device dependent bitmap from CreateBitmap draws as a black box.
-func menuBitmapFromResource(res fyne.Resource, size int) windows.Handle {
-	src := rasterise(res, size)
-	b := src.Bounds()
-	width, height := b.Dx(), b.Dy()
-	if width <= 0 || height <= 0 {
-		return 0
+// Resources that are not themed are the caller's own artwork - possibly multi
+// coloured - and are passed through untouched.
+func menuIconResource(res fyne.Resource) fyne.Resource {
+	if _, ok := res.(fyne.ThemedResource); !ok {
+		return res
 	}
 
-	header := bitmapInfoHeader{
-		biSize:     uint32(unsafe.Sizeof(bitmapInfoHeader{})),
-		biWidth:    int32(width),
-		biHeight:   int32(-height), // negative for a top-down row order
-		biPlanes:   1,
-		biBitCount: 32,
+	recoloured, err := svg.Colorize(res.Content(), sysColour(colorMenuText))
+	if err != nil {
+		return res // not an SVG, or unparseable - the original still draws
 	}
-	var bitsAddr uintptr
-	h, _, _ := procCreateDIBSection.Call(0, uintptr(unsafe.Pointer(&header)), dibRGBColors,
-		uintptr(unsafe.Pointer(&bitsAddr)), 0, 0)
-	if h == 0 || bitsAddr == 0 {
-		return 0
-	}
+	return fyne.NewStaticResource(res.Name(), recoloured)
+}
 
-	// color.Color.RGBA is already alpha premultiplied, which is exactly what
-	// AlphaBlend expects, so the channels only need reordering to BGRA.
-	bits := unsafe.Slice((*byte)(pointerFromAddr(bitsAddr)), width*height*4)
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			r, g, bl, a := src.At(b.Min.X+x, b.Min.Y+y).RGBA()
-			i := (y*width + x) * 4
-			bits[i], bits[i+1], bits[i+2], bits[i+3] = byte(bl>>8), byte(g>>8), byte(r>>8), byte(a>>8)
-		}
-	}
-	return windows.Handle(h)
+// sysColour reads a Win32 system colour. GetSysColor returns a COLORREF, which
+// packs the channels as 0x00BBGGRR - the reverse of the usual order.
+func sysColour(index uintptr) color.Color {
+	c, _, _ := procGetSysColor.Call(index)
+	return color.NRGBA{R: byte(c), G: byte(c >> 8), B: byte(c >> 16), A: 0xff}
 }
 
 // menuIconSize reports the icon column size for a window's DPI.

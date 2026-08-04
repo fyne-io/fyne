@@ -47,18 +47,18 @@ type menuState struct {
 	nextID  uint16
 
 	// iconSize is the pixel size of the icon column at this window's DPI, and
-	// bitmaps are the item icons built for it. DestroyMenu does not own them, so
-	// they are deleted by hand when the menu is replaced or the window closes.
+	// icons are the item icons built for it. DestroyMenu does not own them, so
+	// they are destroyed by hand when the menu is replaced or the window closes.
 	iconSize int
-	bitmaps  []windows.Handle
+	icons    []windows.Handle
 }
 
-// release frees the menu and the icon bitmaps hanging off it.
+// release frees the menu and the icons hanging off it.
 func (s *menuState) release() {
-	for _, b := range s.bitmaps {
-		deleteObject(b)
+	for _, icon := range s.icons {
+		procDestroyIcon.Call(uintptr(icon))
 	}
-	s.bitmaps = nil
+	s.icons = nil
 	if s.handle != 0 {
 		procDestroyMenu.Call(uintptr(s.handle))
 		s.handle = 0
@@ -151,22 +151,71 @@ func (s *menuState) buildMenu(items []*fyne.MenuItem) uintptr {
 // setIcon puts an item's icon in the menu's icon column, the same column the
 // check mark uses. Addressing by position rather than by command id is what lets
 // submenu headers, which have no id, carry an icon too.
+//
+// The icon is drawn by drawMenuIcon rather than handed over as a bitmap. Windows
+// would alpha blend an hbmpItem correctly, but Wine blits it, turning every
+// transparent pixel into black and the icon into a black box. Drawing it ourselves
+// with DrawIconEx honours the alpha on both.
 func (s *menuState) setIcon(menu, pos uintptr, item *fyne.MenuItem) {
 	if item.Icon == nil {
 		return
 	}
-	bmp := menuBitmapFromResource(item.Icon, s.iconSize)
-	if bmp == 0 {
+	icon := iconFromResource(menuIconResource(item.Icon), s.iconSize)
+	if icon == 0 {
 		return
 	}
-	s.bitmaps = append(s.bitmaps, bmp)
+	s.icons = append(s.icons, icon)
 
 	info := menuItemInfoW{
-		cbSize:   uint32(unsafe.Sizeof(menuItemInfoW{})),
-		fMask:    miimBitmap,
-		hbmpItem: bmp,
+		cbSize:     uint32(unsafe.Sizeof(menuItemInfoW{})),
+		fMask:      miimBitmap | miimData,
+		hbmpItem:   windows.Handle(hbmMenuCallback),
+		dwItemData: uintptr(icon),
 	}
-	procSetMenuItemInfoW.Call(menu, pos, 1 /* by position */, uintptr(unsafe.Pointer(&info)))
+	if ok, _, err := procSetMenuItemInfoW.Call(menu, pos, 1, /* by position */
+		uintptr(unsafe.Pointer(&info))); ok == 0 {
+		fyne.LogError("directx: could not set the icon for menu item "+item.Label, err)
+	}
+}
+
+// measureMenuIcon answers WM_MEASUREITEM for an owner-drawn menu icon, claiming a
+// square of the icon column's size. Reporting nothing leaves no room and the icon
+// is never asked for.
+func (s *menuState) measureMenuIcon(lParam uintptr) bool {
+	info := (*measureItemStruct)(pointerFromAddr(lParam))
+	if info.ctlType != odtMenu || info.itemData == 0 {
+		return false
+	}
+
+	info.itemWidth = uint32(s.iconSize)
+	info.itemHeight = uint32(s.iconSize)
+	return true
+}
+
+// drawMenuIcon answers WM_DRAWITEM by painting the icon parked in the item's data
+// over whatever Windows has already drawn, so the highlight shows through.
+func (s *menuState) drawMenuIcon(lParam uintptr) bool {
+	info := (*drawItemStruct)(pointerFromAddr(lParam))
+	if info.ctlType != odtMenu || info.itemData == 0 {
+		return false
+	}
+
+	// Centre the icon in the rect Windows allotted, which is at least the size
+	// asked for in measureMenuIcon but can be taller on a roomy menu.
+	w := int32(s.iconSize)
+	if avail := info.rcItem.Right - info.rcItem.Left; avail < w {
+		w = avail
+	}
+	h := int32(s.iconSize)
+	if avail := info.rcItem.Bottom - info.rcItem.Top; avail < h {
+		h = avail
+	}
+	x := info.rcItem.Left + (info.rcItem.Right-info.rcItem.Left-w)/2
+	y := info.rcItem.Top + (info.rcItem.Bottom-info.rcItem.Top-h)/2
+
+	procDrawIconEx.Call(uintptr(info.hDC), uintptr(x), uintptr(y), info.itemData,
+		uintptr(w), uintptr(h), 0, 0, diNormal)
+	return true
 }
 
 // menuLabel renders an item's label with its accelerator after a tab, which is how

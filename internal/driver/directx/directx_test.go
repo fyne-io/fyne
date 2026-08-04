@@ -133,18 +133,11 @@ func TestTriggerMenuShortcut(t *testing.T) {
 	}
 }
 
-// TestMenuIcon drives a real menu through the icon path. Both halves fail
-// silently in production - a wrong MENUITEMINFOW layout makes SetMenuItemInfoW
-// reject cbSize, and a device dependent bitmap draws as a black box instead of
-// erroring - so calling the API is the only way to catch either.
+// TestMenuIcon drives a real menu through the icon path. It fails silently in
+// production - a wrong MENUITEMINFOW layout makes SetMenuItemInfoW reject cbSize,
+// and nothing else reports it - so calling the API is the only way to catch it.
 func TestMenuIcon(t *testing.T) {
 	test.NewTempApp(t)
-
-	bmp := menuBitmapFromResource(theme.HomeIcon(), 16)
-	if bmp == 0 {
-		t.Fatal("menuBitmapFromResource returned no bitmap")
-	}
-	defer deleteObject(bmp)
 
 	menu, _, _ := procCreatePopupMenu.Call()
 	if menu == 0 {
@@ -153,14 +146,62 @@ func TestMenuIcon(t *testing.T) {
 	defer procDestroyMenu.Call(menu)
 	appendMenu(menu, mfString, firstMenuID, "Home")
 
-	info := menuItemInfoW{
-		cbSize:   uint32(unsafe.Sizeof(menuItemInfoW{})),
-		fMask:    miimBitmap,
-		hbmpItem: bmp,
+	s := &menuState{iconSize: 16}
+	defer s.release()
+	s.setIcon(menu, 0, &fyne.MenuItem{Label: "Home", Icon: theme.HomeIcon()})
+
+	if len(s.icons) != 1 || s.icons[0] == 0 {
+		t.Fatal("setIcon did not build an icon")
 	}
-	r, _, err := procSetMenuItemInfoW.Call(menu, 0, 1, uintptr(unsafe.Pointer(&info)))
+
+	// Read the item back: hbmpItem must be the callback marker and the icon must
+	// have survived in the item data, which is where WM_DRAWITEM looks for it.
+	info := menuItemInfoW{
+		cbSize: uint32(unsafe.Sizeof(menuItemInfoW{})),
+		fMask:  miimBitmap | miimData,
+	}
+	r, _, err := procGetMenuItemInfoW.Call(menu, 0, 1, uintptr(unsafe.Pointer(&info)))
 	if r == 0 {
-		t.Errorf("SetMenuItemInfoW rejected the item: %v", err)
+		t.Fatalf("GetMenuItemInfoW failed: %v", err)
+	}
+	if uintptr(info.hbmpItem) != hbmMenuCallback {
+		t.Errorf("hbmpItem is %#x, want HBMMENU_CALLBACK %#x", info.hbmpItem, hbmMenuCallback)
+	}
+	if info.dwItemData != uintptr(s.icons[0]) {
+		t.Errorf("item data is %#x, want the icon handle %#x", info.dwItemData, s.icons[0])
+	}
+}
+
+// TestMenuIconOwnerDraw runs the two owner-draw replies against real Win32
+// structures. A layout drift here reads garbage out of the message and the icon
+// silently never appears.
+func TestMenuIconOwnerDraw(t *testing.T) {
+	test.NewTempApp(t)
+
+	s := &menuState{iconSize: 16}
+	defer s.release()
+
+	measure := measureItemStruct{ctlType: odtMenu, itemData: 1}
+	if !s.measureMenuIcon(uintptr(unsafe.Pointer(&measure))) {
+		t.Fatal("measureMenuIcon did not claim the menu item")
+	}
+	if measure.itemWidth != 16 || measure.itemHeight != 16 {
+		t.Errorf("measured %dx%d, want 16x16", measure.itemWidth, measure.itemHeight)
+	}
+
+	// A non-menu owner-draw message belongs to someone else and must be declined.
+	other := measureItemStruct{ctlType: odtMenu + 1, itemData: 1}
+	if s.measureMenuIcon(uintptr(unsafe.Pointer(&other))) {
+		t.Error("measureMenuIcon claimed a message that was not for a menu")
+	}
+	noIcon := measureItemStruct{ctlType: odtMenu}
+	if s.measureMenuIcon(uintptr(unsafe.Pointer(&noIcon))) {
+		t.Error("measureMenuIcon claimed an item that carries no icon")
+	}
+
+	draw := drawItemStruct{ctlType: odtMenu}
+	if s.drawMenuIcon(uintptr(unsafe.Pointer(&draw))) {
+		t.Error("drawMenuIcon claimed an item that carries no icon")
 	}
 }
 
