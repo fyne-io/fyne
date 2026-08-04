@@ -450,7 +450,9 @@ func (p *Painter) initPipeline() error {
 	}
 
 	// Default usage, written with UpdateSubresource: one syscall per write
-	// instead of a Map/Unmap pair, and the driver handles versioning.
+	// instead of a Map/Unmap pair, and the driver handles versioning. Only the
+	// polygon and curve shaders touch this one, so the extra syscall the shared
+	// cbuf avoids below is not worth paying for here.
 	if p.auxbuf, err = p.g.dev.CreateBuffer(&bufferDesc{
 		ByteWidth: uint32(unsafe.Sizeof(auxConstants{})),
 		Usage:     usageDefault,
@@ -459,9 +461,10 @@ func (p *Painter) initPipeline() error {
 		return fmt.Errorf("aux constant buffer: %w", err)
 	}
 	if p.cbuf, err = p.g.dev.CreateBuffer(&bufferDesc{
-		ByteWidth: uint32(unsafe.Sizeof(constants{})),
-		Usage:     usageDefault,
-		BindFlags: bindConstantBuffer,
+		ByteWidth:      uint32(unsafe.Sizeof(constants{})),
+		Usage:          usageDynamic,
+		BindFlags:      bindConstantBuffer,
+		CPUAccessFlags: cpuAccessWrite,
 	}, nil); err != nil {
 		return fmt.Errorf("constant buffer: %w", err)
 	}
@@ -470,6 +473,39 @@ func (p *Painter) initPipeline() error {
 }
 
 func (p *Painter) ready() bool { return p.vsQuad != nil }
+
+// textureStats totals the live textures and the video memory they occupy, so
+// FYNE_DX_DEBUG can show whether a workload is accumulating textures. This is
+// the one thing a Go heap profile cannot see: a texture costs a pointer on the
+// Go side and megabytes on the GPU.
+//
+// ponytail: walked on demand rather than kept as a running counter. It only
+// runs once per debug report, and a counter maintained across every create,
+// pool, evict and device-loss path is exactly the kind of bookkeeping that
+// drifts and then lies to you.
+func (p *Painter) textureStats() (count int, bytes uint64) {
+	add := func(t *gpuTexture) {
+		if t == nil { // negative cache entries store nil
+			return
+		}
+		count++
+		bytes += uint64(t.width) * uint64(t.height) * 4 // every format here is 32bpp
+	}
+	for _, t := range p.textures {
+		add(t)
+	}
+	for _, entries := range p.texPool {
+		for _, e := range entries {
+			add(e.tex)
+		}
+	}
+	for _, s := range p.userShaders {
+		for _, t := range s.textures {
+			add(t.GPU)
+		}
+	}
+	return count, bytes
+}
 
 const debugReportFrames = 120
 
@@ -482,8 +518,11 @@ func (p *Painter) Clear() {
 		if p.g.presentN > 0 {
 			avgPresent = p.g.presentDur / time.Duration(p.g.presentN)
 		}
-		log.Printf("directx: %d draw calls/frame, avg present %v (over %d frames)",
-			p.drawCount/debugReportFrames, avgPresent.Round(10*time.Microsecond), debugReportFrames)
+		texCount, texBytes := p.textureStats()
+		log.Printf("directx: %d draw calls/frame, avg present %v, "+
+			"%d textures live using %dMB (over %d frames)",
+			p.drawCount/debugReportFrames, avgPresent.Round(10*time.Microsecond),
+			texCount, texBytes/(1024*1024), debugReportFrames)
 		p.drawCount = 0
 		p.g.presentDur, p.g.presentN = 0, 0
 	}
@@ -612,8 +651,18 @@ func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps 
 	topology uint32, blend *blendState, vertexCount uint32,
 ) {
 	c.NdcRect = ndcRect
-	// Constant buffers must be updated whole (nil box) on the immediate context.
-	p.g.ctx.UpdateSubresource(unsafe.Pointer(p.cbuf), unsafe.Pointer(c), nil)
+	// Map(WRITE_DISCARD) rather than UpdateSubresource: this buffer is rewritten
+	// once per draw, and discard is the rename path the driver is tuned for -
+	// it hands back fresh storage instead of versioning a default-usage copy.
+	m, err := p.g.ctx.Map(unsafe.Pointer(p.cbuf), mapWriteDiscard)
+	if err != nil {
+		// Realistically only device removal, which Present catches next; drawing
+		// with whatever the buffer held last would draw the wrong thing.
+		fyne.LogError("directx: mapping the constant buffer", err)
+		return
+	}
+	*(*constants)(m.Data) = *c
+	p.g.ctx.Unmap(unsafe.Pointer(p.cbuf))
 
 	// The constant buffer bindings never change after Init; everything else is
 	// set only when it differs from what is already bound.
