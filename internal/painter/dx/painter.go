@@ -7,7 +7,9 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"math"
+	"time"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -45,19 +47,11 @@ type constants struct {
 	ShadowOffset [4]float32
 	TexParams    [4]float32
 	Inset        [4]float32
+	// NdcRect carries the quad corners in clip space (x1, y1, x2, y2); the
+	// vertex shader expands them via SV_VertexID, so draws need no vertex
+	// buffer. The line shader reuses it as the two endpoints.
+	NdcRect [4]float32
 }
-
-// vertex is the single vertex format used by every draw. uv carries texture
-// coordinates for textured quads and the edge normal for lines.
-type vertex struct {
-	X, Y float32
-	U, V float32
-}
-
-const (
-	maxVertices  = 6
-	vertexStride = uint32(unsafe.Sizeof(vertex{}))
-)
 
 // GPU owns the Direct3D 11 device and swap chain backing one window.
 type GPU struct {
@@ -69,6 +63,12 @@ type GPU struct {
 
 	width, height uint32
 	featureLevel  uint32
+
+	// presentDur and presentN accumulate Present wall time between
+	// FYNE_DX_DEBUG reports; blocking in Present means the compositor or GPU
+	// is gating the frame, which a CPU profile cannot separate from spin.
+	presentDur time.Duration
+	presentN   int
 }
 
 func NewGPU(hwnd windows.Handle, width, height uint32) (*GPU, error) {
@@ -82,6 +82,17 @@ func NewGPU(hwnd windows.Handle, width, height uint32) (*GPU, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Frame latency bounds how many presents may be in flight before Present
+	// blocks - and Intel's driver spins that block on the CPU. On battery the
+	// GPU is down-clocked to near the frame budget, so tight budgets (1 or 2,
+	// both profiled) turn into milliseconds of spinning per frame; 3 gives the
+	// queue depth the GL driver effectively enjoys. Latency only binds when
+	// presents outpace retirement, so this costs no drag lag while the GPU
+	// keeps up.
+	if err := setMaximumFrameLatency(dev, 3); err != nil {
+		fyne.LogError("directx: could not set the frame latency", err)
+	}
+
 	g := &GPU{dev: dev, ctx: ctx, swap: swap, width: width, height: height, featureLevel: level}
 	if err := g.createTarget(); err != nil {
 		g.Release()
@@ -140,21 +151,26 @@ func (g *GPU) Resize(width, height uint32) error {
 	return g.createTarget()
 }
 
-// Present publishes the back buffer. vsync should be true for ordinary frames,
-// and false while the user is dragging a window border: each vsynced Present
-// blocks until the next refresh, and an interactive resize generates WM_SIZE far
-// faster than that, so the swap chain falls behind the window the OS is already
-// compositing - which shows up as undrawn strips along the edge being dragged.
+// Present publishes the back buffer with sync interval 0, matching the GL
+// driver's SwapInterval(0): frame pacing comes from the run loop's ticker, and
+// a vsynced Present would instead block (often spin-waiting) inside the driver
+// for the rest of the refresh interval, burning a core during any continuous
+// redraw. Windowed flip-model presents are still composed tear-free by DWM.
 //
 // It reports whether the device was lost (removed or reset - a GPU driver
 // upgrade or timeout kills every resource); the caller must then rebuild the
 // GPU and its painter.
-func (g *GPU) Present(vsync bool) (deviceLost bool) {
-	interval := uint32(0)
-	if vsync {
-		interval = 1
+func (g *GPU) Present() (deviceLost bool) {
+	var start time.Time
+	if dxDebug {
+		start = time.Now()
 	}
-	if hr := g.swap.Present(interval); hr.deviceLost() {
+	hr := g.swap.Present(0)
+	if dxDebug {
+		g.presentDur += time.Since(start)
+		g.presentN++
+	}
+	if hr.deviceLost() {
 		fyne.LogError("directx: device lost", g.dev.RemovedReason().error("GetDeviceRemovedReason"))
 		return true
 	}
@@ -207,10 +223,13 @@ func premultipliedAlphaBlend() blendDesc {
 	return d
 }
 
-// gpuTexture is one uploaded image plus the view the shader samples.
+// gpuTexture is one uploaded image plus the view the shader samples. width and
+// height are set only for textures created by imgToTexture, marking them safe
+// for the same-size reuse pool.
 type gpuTexture struct {
-	tex *texture2D
-	srv *shaderResourceView
+	tex           *texture2D
+	srv           *shaderResourceView
+	width, height uint32
 }
 
 func (t *gpuTexture) release() {
@@ -226,7 +245,6 @@ type Painter struct {
 	canvas fyne.Canvas
 	g      *GPU
 
-	layout *inputLayout
 	vsQuad *vertexShader
 	vsLine *vertexShader
 
@@ -249,7 +267,6 @@ type Painter struct {
 	sampLinear   *samplerState
 	sampNearest  *samplerState
 
-	vbuf *buffer
 	cbuf *buffer
 	// auxbuf is the register(b1) buffer carrying the variable-length data the
 	// polygon and curve shaders need, which does not fit the shared cbuffer.
@@ -263,6 +280,17 @@ type Painter struct {
 	// D3D resources are indirected through an id rather than stored directly.
 	textures  map[uint32]*gpuTexture
 	nextTexID uint32
+
+	// texPool parks released textures for same-size reuse. Playback-style
+	// workloads (gauges, plots, changing labels) free and recreate equal-sized
+	// textures every frame, and a D3D11 create/destroy pair is a kernel round
+	// trip - far dearer than refilling existing storage with UpdateSubresource.
+	texPool     map[[2]uint32][]pooledTexture
+	texPoolSize int
+	frameTick   uint32
+
+	// drawCount tallies draw calls between FYNE_DX_DEBUG reports.
+	drawCount int
 
 	// clippedTextTextures holds the windowed textures for text runs wider than
 	// the device texture limit, keyed by the text object as the GL painter does.
@@ -284,10 +312,6 @@ type Painter struct {
 	lastPS       *pixelShader
 	lastSRV      *shaderResourceView
 	lastSampler  *samplerState
-
-	// quad is scratch space for quadVertices; a returned slice literal would
-	// heap-allocate on every draw. The painter is single-threaded per window.
-	quad [4]vertex
 }
 
 // Repainter is a canvas that can redraw itself into the back buffer on demand.
@@ -301,8 +325,27 @@ type Repainter interface {
 // Declare conformity with the Painter interface.
 var _ paint.Painter = (*Painter)(nil)
 
+// pooledTexture is one parked texture plus the frame it was parked on, so the
+// sweep in Clear can drop sizes that stopped recurring.
+type pooledTexture struct {
+	tex  *gpuTexture
+	tick uint32
+}
+
+const (
+	// texPoolMax bounds how many textures sit parked at once; beyond it a
+	// released texture is destroyed rather than pooled.
+	texPoolMax = 32
+	// texPoolTTL is how many frames a parked texture survives unused (~2s at
+	// 60fps): long enough to ride out a pause, short enough to return VRAM.
+	texPoolTTL = 120
+)
+
 func NewPainter(c fyne.Canvas, g *GPU) *Painter {
-	p := &Painter{canvas: c, g: g, textures: map[uint32]*gpuTexture{}}
+	p := &Painter{canvas: c, g: g,
+		textures: map[uint32]*gpuTexture{},
+		texPool:  map[[2]uint32][]pooledTexture{},
+	}
 	p.SetFrameBufferScale(1.0)
 	return p
 }
@@ -312,15 +355,15 @@ func NewPainter(c fyne.Canvas, g *GPU) *Painter {
 // the binary), so it panics the way the GL painter does on a shader compile
 // error, rather than leaving a painter that silently draws nothing.
 func (p *Painter) Init() {
-	if p.layout != nil {
+	if p.vsQuad != nil {
 		return
 	}
 	if err := p.initPipeline(); err != nil {
 		panic("directx: painter init failed: " + err.Error())
 	}
 	// Bind everything that never changes once; upload only touches the rest.
-	p.g.ctx.IASetInputLayout(p.layout)
-	p.g.ctx.IASetVertexBuffer(p.vbuf, vertexStride, 0)
+	// There is no input layout or vertex buffer at all: the vertex shaders
+	// generate geometry from SV_VertexID and the constant buffer.
 	p.g.ctx.VSSetConstantBuffer(p.cbuf)
 	p.g.ctx.PSSetConstantBuffer(p.cbuf)
 	p.g.ctx.OMSetBlendState(p.blend)
@@ -368,16 +411,6 @@ func (p *Painter) initPipeline() error {
 		}
 	}
 
-	posName, _ := windows.BytePtrFromString("POSITION")
-	uvName, _ := windows.BytePtrFromString("TEXCOORD")
-	elems := []inputElementDesc{
-		{SemanticName: posName, Format: formatR32G32Float, AlignedByteOffset: 0, InputSlotClass: inputPerVertexData},
-		{SemanticName: uvName, Format: formatR32G32Float, AlignedByteOffset: 8, InputSlotClass: inputPerVertexData},
-	}
-	if p.layout, err = p.g.dev.CreateInputLayout(elems, vsCode); err != nil {
-		return fmt.Errorf("input layout: %w", err)
-	}
-
 	straight := straightAlphaBlend()
 	if p.blend, err = p.g.dev.CreateBlendState(&straight); err != nil {
 		return fmt.Errorf("blend state: %w", err)
@@ -418,13 +451,6 @@ func (p *Painter) initPipeline() error {
 
 	// Default usage, written with UpdateSubresource: one syscall per write
 	// instead of a Map/Unmap pair, and the driver handles versioning.
-	if p.vbuf, err = p.g.dev.CreateBuffer(&bufferDesc{
-		ByteWidth: maxVertices * vertexStride,
-		Usage:     usageDefault,
-		BindFlags: bindVertexBuffer,
-	}, nil); err != nil {
-		return fmt.Errorf("vertex buffer: %w", err)
-	}
 	if p.auxbuf, err = p.g.dev.CreateBuffer(&bufferDesc{
 		ByteWidth: uint32(unsafe.Sizeof(auxConstants{})),
 		Usage:     usageDefault,
@@ -443,9 +469,25 @@ func (p *Painter) initPipeline() error {
 	return nil
 }
 
-func (p *Painter) ready() bool { return p.layout != nil }
+func (p *Painter) ready() bool { return p.vsQuad != nil }
+
+const debugReportFrames = 120
 
 func (p *Painter) Clear() {
+	p.frameTick++
+	p.sweepTexPool()
+
+	if dxDebug && p.frameTick%debugReportFrames == 0 {
+		avgPresent := time.Duration(0)
+		if p.g.presentN > 0 {
+			avgPresent = p.g.presentDur / time.Duration(p.g.presentN)
+		}
+		log.Printf("directx: %d draw calls/frame, avg present %v (over %d frames)",
+			p.drawCount/debugReportFrames, avgPresent.Round(10*time.Microsecond), debugReportFrames)
+		p.drawCount = 0
+		p.g.presentDur, p.g.presentN = 0, 0
+	}
+
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	rgba := [4]float32{
 		float32(r) / max16bit, float32(g) / max16bit,
@@ -562,20 +604,19 @@ func (p *Painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 // Pipeline helpers
 // ---------------------------------------------------------------------------
 
-// upload writes the vertex list and constants, then issues the draw. blend
+// upload writes the constants and issues the draw; the vertex shader generates
+// the geometry from c.NdcRect, so no vertex data is uploaded at all. blend
 // selects straight or premultiplied alpha, which differs between shapes and
 // textures the same way it does in the GL Painter.
-func (p *Painter) upload(verts []vertex, c *constants, vs *vertexShader, ps *pixelShader,
-	topology uint32, blend *blendState,
+func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps *pixelShader,
+	topology uint32, blend *blendState, vertexCount uint32,
 ) {
-	vb := box{Right: uint32(len(verts)) * vertexStride, Bottom: 1, Back: 1}
-	p.g.ctx.UpdateSubresource(unsafe.Pointer(p.vbuf), unsafe.Pointer(&verts[0]), &vb)
+	c.NdcRect = ndcRect
 	// Constant buffers must be updated whole (nil box) on the immediate context.
 	p.g.ctx.UpdateSubresource(unsafe.Pointer(p.cbuf), unsafe.Pointer(c), nil)
 
-	// The input layout, vertex buffer and constant buffer bindings never change
-	// after Init; everything else is set only when it differs from what is
-	// already bound.
+	// The constant buffer bindings never change after Init; everything else is
+	// set only when it differs from what is already bound.
 	if blend != p.lastBlend {
 		p.g.ctx.OMSetBlendState(blend)
 		p.lastBlend = blend
@@ -592,7 +633,8 @@ func (p *Painter) upload(verts []vertex, c *constants, vs *vertexShader, ps *pix
 		p.g.ctx.PSSetShader(ps)
 		p.lastPS = ps
 	}
-	p.g.ctx.Draw(uint32(len(verts)), 0)
+	p.g.ctx.Draw(vertexCount, 0)
+	p.drawCount++
 }
 
 // baseConstants fills the fields every shape shader reads.
@@ -679,7 +721,7 @@ func (p *Painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 		c.Misc[0] = strokeScaled
 	}
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, ps, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, ps, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
@@ -702,7 +744,7 @@ func (p *Painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 	softness := c.RectHalf[3]
 	c.Radius = [4]float32{halfW - softness, halfH - softness, 0, 0}
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psEllipse, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psEllipse, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame fyne.Size) {
@@ -722,7 +764,7 @@ func (p *Painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 		0, 0,
 	}
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psEllipse, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psEllipse, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
@@ -756,22 +798,28 @@ func (p *Painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 
 	c.Misc[0] = roundToPixel(arc.StrokeWidth*p.pixScale, 1.0)
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psArc, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psArc, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
 	if line.StrokeColor == color.Transparent || line.StrokeColor == nil || line.StrokeWidth == 0 {
 		return
 	}
-	verts, halfWidth, feather := p.lineVertices(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
+	ndc, normal, halfWidth, feather := p.lineGeometry(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
+	if halfWidth == 0 {
+		return // degenerate: both endpoints on the same pixel
+	}
 
 	c := constants{}
 	r, g, b, a := fragmentColor(line.StrokeColor)
 	c.FillColor = [4]float32{r, g, b, a}
 	c.Misc[0] = halfWidth
 	c.ShadowOffset[3] = feather
+	// The line vertex shader reads the edge normal from inset, which lines
+	// never use for texturing.
+	c.Inset[0], c.Inset[1] = normal[0], normal[1]
 
-	p.upload(verts[:], &c, p.vsLine, p.psLine, topologyTriangleList, p.blend)
+	p.upload(&c, ndc, p.vsLine, p.psLine, topologyTriangleList, p.blend, 6)
 }
 
 func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
@@ -985,25 +1033,7 @@ func (p *Painter) drawGPUTexture(obj fyne.CanvasObject, tex *gpuTexture,
 		p.lastSampler = sampler
 	}
 
-	p.quad = [4]vertex{
-		{points[0], points[1], points[2], points[3]},
-		{points[4], points[5], points[6], points[7]},
-		{points[8], points[9], points[10], points[11]},
-		{points[12], points[13], points[14], points[15]},
-	}
-	p.upload(p.quad[:], &c, p.vsQuad, p.psTextured, topologyTriangleStrip, p.blendPremul)
-}
-
-// quadVertices expands the four NDC corner pairs into the vertex format, using
-// the painter's scratch quad so the hot path does not allocate.
-func (p *Painter) quadVertices(points [8]float32) []vertex {
-	p.quad = [4]vertex{
-		{points[0], points[1], 0, 0},
-		{points[2], points[3], 0, 0},
-		{points[4], points[5], 0, 0},
-		{points[6], points[7], 0, 0},
-	}
-	return p.quad[:]
+	p.upload(&c, points, p.vsQuad, p.psTextured, topologyTriangleStrip, p.blendPremul, 4)
 }
 
 // ---------------------------------------------------------------------------
@@ -1013,7 +1043,7 @@ func (p *Painter) quadVertices(points [8]float32) []vertex {
 
 func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame fyne.Size,
 	aspect float32, shadow canvas.Shadow,
-) ([8]float32, [4]float32) {
+) ([4]float32, [4]float32) {
 	xPad, yPad := float32(0), float32(0)
 	if aspect != 0 {
 		inner := obj.Size()
@@ -1051,20 +1081,14 @@ func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame 
 	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - (y2Pos+softness+padBottom)*2/frame.Height
 
-	coords := [8]float32{
-		x1Norm, y1Norm,
-		x2Norm, y1Norm,
-		x1Norm, y2Norm,
-		x2Norm, y2Norm,
-	}
-	return coords, [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}
+	return [4]float32{x1Norm, y1Norm, x2Norm, y2Norm}, [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}
 }
 
-// rectCoords returns interleaved position/texture-coordinate vertices for a
-// textured quad, plus the texture insets used by the rounded-corner path.
+// rectCoords returns the clip-space rectangle of a textured quad, plus the
+// texture insets used by the sampling and rounded-corner paths.
 func (p *Painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	fill canvas.ImageFill, aspect, pad float32,
-) ([16]float32, [4]float32, fyne.Size) {
+) ([4]float32, [4]float32, fyne.Size) {
 	innerSize, innerPos := rectInnerCoords(size, pos, fill, aspect)
 	pixelSize, pixelPos := roundToPixelCoords(innerSize, innerPos, p.pixScale)
 
@@ -1086,12 +1110,7 @@ func (p *Painter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
 	}
 	insets := [4]float32{xInset, yInset, 1 - xInset, 1 - yInset}
 
-	return [16]float32{
-		x1, y2, insets[0], insets[3], // top left
-		x1, y1, insets[0], insets[1], // bottom left
-		x2, y2, insets[2], insets[3], // top right
-		x2, y1, insets[2], insets[1], // bottom right
-	}, insets, innerSize
+	return [4]float32{x1, y1, x2, y2}, insets, innerSize
 }
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
@@ -1114,11 +1133,11 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 	return fyne.NewSize(newWidth, newHeight), fyne.NewPos(newX, newY)
 }
 
-// lineVertices builds the six vertices of a quad covering the line, each
-// carrying the outward normal that VertexLine scales by the half width.
-func (p *Painter) lineVertices(pos, pos1, pos2 fyne.Position, lineWidth, feather float32,
+// lineGeometry converts a line to the clip-space endpoints and outward edge
+// normal that VertexLine expands into a quad, scaled by the half width.
+func (p *Painter) lineGeometry(pos, pos1, pos2 fyne.Position, lineWidth, feather float32,
 	frame fyne.Size,
-) (verts [6]vertex, halfWidth, featherWidth float32) {
+) (ndc [4]float32, normal [2]float32, halfWidth, featherWidth float32) {
 	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
 	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
 	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
@@ -1150,7 +1169,7 @@ func (p *Painter) lineVertices(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	normalY := (pos2.X - pos1.X) / frame.Height
 	dirLength := float32(math.Sqrt(float64(normalX*normalX + normalY*normalY)))
 	if dirLength == 0 {
-		return verts, 0, 0
+		return ndc, normal, 0, 0
 	}
 	normalX /= dirLength
 	normalY /= dirLength
@@ -1161,14 +1180,7 @@ func (p *Painter) lineVertices(pos, pos1, pos2 fyne.Position, lineWidth, feather
 	halfWidth = (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
 	featherWidth = feather / widthMultiplier
 
-	return [6]vertex{
-		{x1, y1, normalX, normalY},
-		{x2, y2, normalX, normalY},
-		{x2, y2, -normalX, -normalY},
-		{x2, y2, -normalX, -normalY},
-		{x1, y1, normalX, normalY},
-		{x1, y1, -normalX, -normalY},
-	}, halfWidth, featherWidth
+	return [4]float32{x1, y1, x2, y2}, [2]float32{normalX, normalY}, halfWidth, featherWidth
 }
 
 func roundToPixel(v, pixScale float32) float32 {
@@ -1277,17 +1289,69 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 // Textures
 // ---------------------------------------------------------------------------
 
-// releaseTexture frees a texture's COM objects and drops it from the bound-SRV
-// cache: a later allocation could reuse the same address, and a stale cache hit
-// would skip a bind the context actually needs.
+// releaseTexture retires a texture: poolable ones (created by imgToTexture)
+// are parked for same-size reuse, the rest are destroyed outright.
 func (p *Painter) releaseTexture(t *gpuTexture) {
 	if t == nil {
 		return
 	}
+	if t.width > 0 && p.texPoolSize < texPoolMax {
+		key := [2]uint32{t.width, t.height}
+		p.texPool[key] = append(p.texPool[key], pooledTexture{tex: t, tick: p.frameTick})
+		p.texPoolSize++
+		return
+	}
+	p.destroyTexture(t)
+}
+
+// destroyTexture frees a texture's COM objects and drops it from the bound-SRV
+// cache: a later allocation could reuse the same address, and a stale cache hit
+// would skip a bind the context actually needs.
+func (p *Painter) destroyTexture(t *gpuTexture) {
 	if t.srv == p.lastSRV {
 		p.lastSRV = nil
 	}
 	t.release()
+}
+
+// pooledTextureFor pops a parked texture of exactly the given size, most
+// recently parked first.
+func (p *Painter) pooledTextureFor(width, height uint32) *gpuTexture {
+	key := [2]uint32{width, height}
+	entries := p.texPool[key]
+	if len(entries) == 0 {
+		return nil
+	}
+	t := entries[len(entries)-1].tex
+	if len(entries) == 1 {
+		delete(p.texPool, key)
+	} else {
+		p.texPool[key] = entries[:len(entries)-1]
+	}
+	p.texPoolSize--
+	return t
+}
+
+// sweepTexPool destroys parked textures whose size has not recurred within
+// texPoolTTL frames, so a burst of odd sizes (say, mid-resize plots) does not
+// pin VRAM forever.
+func (p *Painter) sweepTexPool() {
+	for key, entries := range p.texPool {
+		kept := entries[:0]
+		for _, e := range entries {
+			if p.frameTick-e.tick > texPoolTTL {
+				p.destroyTexture(e.tex)
+				p.texPoolSize--
+			} else {
+				kept = append(kept, e)
+			}
+		}
+		if len(kept) == 0 {
+			delete(p.texPool, key)
+		} else {
+			p.texPool[key] = kept
+		}
+	}
 }
 
 func (p *Painter) Free(obj fyne.CanvasObject) {
@@ -1308,13 +1372,22 @@ func (p *Painter) Free(obj fyne.CanvasObject) {
 // freeAll releases every uploaded texture, used when the device goes away.
 func (p *Painter) freeAll() {
 	for id, tex := range p.textures {
-		p.releaseTexture(tex)
+		if tex != nil {
+			p.destroyTexture(tex)
+		}
 		delete(p.textures, id)
 	}
 	for text, cached := range p.clippedTextTextures {
-		p.releaseTexture(cached.tex)
+		p.destroyTexture(cached.tex)
 		delete(p.clippedTextTextures, text)
 	}
+	for key, entries := range p.texPool {
+		for _, e := range entries {
+			p.destroyTexture(e.tex)
+		}
+		delete(p.texPool, key)
+	}
+	p.texPoolSize = 0
 }
 
 // getTexture returns the cached upload for obj, creating it on first use. Text
@@ -1372,7 +1445,8 @@ func (p *Painter) storeTexture(tex *gpuTexture) uint32 {
 	return id
 }
 
-// imgToTexture uploads a Go image as an immutable RGBA texture.
+// imgToTexture uploads a Go image as an RGBA texture, refilling a pooled
+// same-size texture when one is available instead of creating a new resource.
 func (p *Painter) imgToTexture(img image.Image) *gpuTexture {
 	if uni, ok := img.(*image.Uniform); ok {
 		// A Uniform's bounds can be effectively infinite (canvas.Raster returns
@@ -1400,14 +1474,20 @@ func (p *Painter) imgToTexture(img image.Image) *gpuTexture {
 		return nil
 	}
 
+	if t := p.pooledTextureFor(w, h); t != nil {
+		p.g.ctx.UpdateTexture2D(unsafe.Pointer(t.tex), unsafe.Pointer(&rgba.Pix[0]), uint32(rgba.Stride))
+		return t
+	}
+
 	data := subresourceData{
 		SysMem:      unsafe.Pointer(&rgba.Pix[0]),
 		SysMemPitch: uint32(rgba.Stride),
 	}
+	// Default usage rather than immutable, so a pooled texture can be refilled.
 	tex, err := p.g.dev.CreateTexture2D(&texture2DDesc{
 		Width: w, Height: h, MipLevels: 1, ArraySize: 1,
 		Format: formatR8G8B8A8Unorm, SampleDesc: dxgiSampleDesc{Count: 1},
-		Usage: usageImmutable, BindFlags: bindShaderResource,
+		Usage: usageDefault, BindFlags: bindShaderResource,
 	}, &data)
 	if err != nil {
 		fyne.LogError("directx: texture upload", err)
@@ -1419,7 +1499,7 @@ func (p *Painter) imgToTexture(img image.Image) *gpuTexture {
 		fyne.LogError("directx: shader resource view", err)
 		return nil
 	}
-	return &gpuTexture{tex: tex, srv: srv}
+	return &gpuTexture{tex: tex, srv: srv, width: w, height: h}
 }
 
 func (p *Painter) imageTexture(obj fyne.CanvasObject) *gpuTexture {
@@ -1494,7 +1574,6 @@ func (p *Painter) Release() {
 	p.blurSnap.release()
 	p.blurKernel.release()
 	releaseCOM(&p.auxbuf)
-	releaseCOM(&p.vbuf)
 	releaseCOM(&p.cbuf)
 	releaseCOM(&p.sampNearest)
 	releaseCOM(&p.sampLinear)
@@ -1515,7 +1594,6 @@ func (p *Painter) Release() {
 	releaseCOM(&p.psTextured)
 	releaseCOM(&p.vsLine)
 	releaseCOM(&p.vsQuad)
-	releaseCOM(&p.layout)
 }
 
 // ---------------------------------------------------------------------------
@@ -1577,7 +1655,7 @@ func (p *Painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	c.ShadowOffset[3] = polygon.Angle // rotation in degrees
 	c.Misc[0] = roundToPixel(polygon.StrokeWidth*p.pixScale, 1.0)
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psPolygon, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psPolygon, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyne.Position, frame fyne.Size) {
@@ -1626,7 +1704,7 @@ func (p *Painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	}
 	p.uploadAux(&aux)
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psArbPoly, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psArbPoly, topologyTriangleStrip, p.blend, 4)
 }
 
 func (p *Painter) drawBezierCurve(curve *canvas.BezierCurve, pos fyne.Position, frame fyne.Size) {
@@ -1665,7 +1743,7 @@ func (p *Painter) drawBezierCurve(curve *canvas.BezierCurve, pos fyne.Position, 
 	c.TexParams[0] = fyne.Min(float32(len(cp)), 2)
 	c.RectHalf[2] = roundToPixel(strokeWidth*p.pixScale, 1.0) * 0.5
 
-	p.upload(p.quadVertices(points), &c, p.vsQuad, p.psBezier, topologyTriangleStrip, p.blend)
+	p.upload(&c, points, p.vsQuad, p.psBezier, topologyTriangleStrip, p.blend, 4)
 }
 
 // blurSnapshot is the copy of the back buffer that the blur passes sample. D3D11
@@ -1838,12 +1916,6 @@ func (p *Painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	}
 
 	points, _, _ := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1.0, 0)
-	verts := [4]vertex{
-		{points[0], points[1], points[2], points[3]},
-		{points[4], points[5], points[6], points[7]},
-		{points[8], points[9], points[10], points[11]},
-		{points[12], points[13], points[14], points[15]},
-	}
 
 	cornerRadius := fyne.Min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
 
@@ -1864,14 +1936,18 @@ func (p *Painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.g.ctx.PSSetSamplersAt(0, []*samplerState{p.sampLinear, p.sampNearest})
 	views := []*shaderResourceView{p.blurSnap.srv, p.blurKernel.srv}
 
+	// The vertex shader owns inset as the texture-coordinate source, so the
+	// blur direction rides in rectHalf instead, which blur never uses.
+	c.Inset = [4]float32{0, 0, 1, 1}
+
 	// Horizontal then vertical. Each pass reads a fresh snapshot of the region and
 	// replaces it, so the second pass sees the first pass's output.
 	for _, direction := range [2][2]float32{{1 / float32(bw), 0}, {0, 1 / float32(bh)}} {
 		p.g.ctx.CopySubresourceRegion(p.blurSnap.tex, p.g.back, &region)
 		p.g.ctx.PSSetShaderResourcesAt(0, views)
 
-		c.Inset = [4]float32{direction[0], direction[1], sampleScale, 0}
-		p.upload(verts[:], &c, p.vsQuad, p.psBlur, topologyTriangleStrip, p.blendReplace)
+		c.RectHalf = [4]float32{direction[0], direction[1], sampleScale, 0}
+		p.upload(&c, points, p.vsQuad, p.psBlur, topologyTriangleStrip, p.blendReplace, 4)
 	}
 
 	// Leave only the default texture bound so a later draw cannot sample the
