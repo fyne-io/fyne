@@ -220,6 +220,16 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
+// itemRendersWidget reports whether rendered already shows widget, accounting for
+// createInput sometimes wrapping it in a hint/validation container.
+func (*Form) itemRendersWidget(rendered, widget fyne.CanvasObject) bool {
+	if rendered == widget {
+		return true
+	}
+	c, ok := rendered.(*fyne.Container)
+	return ok && len(c.Objects) > 0 && c.Objects[0] == widget
+}
+
 func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	value := reflect.ValueOf(w).Elem()
 	validatorField := value.FieldByName("Validator")
@@ -327,6 +337,16 @@ func (f *Form) checkValidation(err error) {
 
 func (f *Form) ensureRenderItems() {
 	done := len(f.itemGrid.Objects) / 2
+	for i := 0; i < done && i < len(f.Items); i++ {
+		item := f.Items[i]
+		if f.itemRendersWidget(f.itemGrid.Objects[i*2+1], item.Widget) {
+			continue
+		}
+
+		f.setUpValidation(item.Widget, i)
+		f.itemGrid.Objects[i*2+1] = f.createInput(item)
+	}
+
 	if done >= len(f.Items) {
 		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
 		return

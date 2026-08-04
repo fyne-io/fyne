@@ -142,6 +142,21 @@ func TestForm_ChangeText(t *testing.T) {
 	assert.Equal(t, "Changed", c.Objects[0].(*RichText).String())
 }
 
+func TestForm_ChangeItemWidget(t *testing.T) {
+	oldEntry := NewEntry()
+	item := NewFormItem("Test", oldEntry)
+	form := NewForm(item)
+	test.TempWidgetRenderer(t, form)
+
+	assert.Equal(t, oldEntry, form.itemGrid.Objects[1])
+
+	newEntry := NewEntry()
+	item.Widget = newEntry
+	form.Refresh()
+
+	assert.Equal(t, newEntry, form.itemGrid.Objects[1])
+}
+
 func TestForm_ChangeTheme(t *testing.T) {
 	test.NewTempApp(t)
 
