@@ -20,14 +20,12 @@ cbuffer Constants : register(b0) {
     float4 texParams;    // x: alpha, y: cornerRadius, zw: quad size in pixels
                          // psArc reuses xy as start/end angle - it samples no texture
     float4 inset;        // texture coordinate insets (minX, minY, maxX, maxY)
+                         // the line shaders reuse xy as the edge normal
+    float4 ndcRect;      // quad corners in clip space (x1, y1, x2, y2)
+                         // the line shaders reuse it as the two endpoints
 };
 
 static const float PI = 3.141592653589793;
-
-struct VSIn {
-    float2 pos : POSITION;
-    float2 uv  : TEXCOORD0;
-};
 
 struct PSIn {
     float4 pos : SV_POSITION;
