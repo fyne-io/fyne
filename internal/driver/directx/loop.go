@@ -153,6 +153,61 @@ func (d *dxDriver) runLoop() {
 	}
 }
 
+// modalTimerID tags the WM_TIMER that keeps frames flowing while DefWindowProc
+// holds the thread in a modal message loop - menu tracking or a border drag.
+// The run loop's ticker cannot fire then, but the modal loop still dispatches
+// WM_TIMER to the window procedure, which forwards it to modalTick.
+const modalTimerID = 1
+
+// modalLoop is true while DefWindowProc holds the thread in a modal loop. Only
+// the main thread touches it. WM_TIMER alone is not enough to stay live: it is
+// the lowest-priority message and is never synthesized while input keeps the
+// queue busy, so a steady drag starves it - the wndproc therefore also ticks
+// from WM_SIZE, WM_MOVE and wmFyneDo while this is set.
+var modalLoop bool
+
+func (w *window) beginModalTick() {
+	modalLoop = true
+	procSetTimer.Call(uintptr(w.hwnd), modalTimerID, 10, 0)
+}
+
+func (w *window) endModalTick() {
+	modalLoop = false
+	procKillTimer.Call(uintptr(w.hwnd), modalTimerID)
+}
+
+// lastModalTick throttles the paint half of modalTick. Main thread only.
+var lastModalTick time.Time
+
+// modalTick is one run-loop iteration driven from the wndproc instead of the
+// ticker: queued functions, animations, then a frame.
+//
+// The func queue is always drained, so goroutines blocked in fyne.Do never
+// stall for longer than one message step. The paint side is throttled: the
+// messages that drive this arrive at mouse input rate (up to 1000Hz), and with
+// live data keeping the canvas permanently dirty an unthrottled tick would walk
+// and Present the canvas per mouse step, turning the drag into sludge.
+func (d *dxDriver) modalTick() {
+	// Before the run loop starts (window construction resizes land here too)
+	// there is nothing to tick and the func queue is not ours to drain yet.
+	if !running.Load() {
+		return
+	}
+	for len(funcQueue.Out()) > 0 {
+		f := <-funcQueue.Out()
+		f.f()
+		if f.done != nil {
+			f.done <- struct{}{}
+		}
+	}
+	if time.Since(lastModalTick) < 10*time.Millisecond {
+		return
+	}
+	lastModalTick = time.Now()
+	d.animation.TickAnimations()
+	d.drawSingleFrame()
+}
+
 // pollEvents drains the Win32 message queue without blocking, so the ticker
 // keeps driving repaints and the func queue stays responsive.
 func (*dxDriver) pollEvents() {
