@@ -41,6 +41,11 @@ type glyphGPUAtlas struct {
 	texSize int
 	entries map[glyphAtlasKey]glyphAtlasEntry
 
+	// generation counts resets. Callers that collect several entries before
+	// drawing compare it either side to notice that the entries they gathered
+	// were invalidated part way through.
+	generation int
+
 	// shelf packer cursor
 	shelfX, shelfY, shelfH int
 }
@@ -91,6 +96,7 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx int, fontSize, scale fl
 		a.cpuImg = image.NewRGBA(image.Rect(0, 0, a.texSize, a.texSize))
 		a.entries = make(map[glyphAtlasKey]glyphAtlasEntry)
 		a.shelfX, a.shelfY, a.shelfH = 0, 0, 0
+		a.generation++
 	}
 
 	atlasX, atlasY := a.shelfX, a.shelfY
@@ -119,6 +125,13 @@ func (p *painter) ensureGlyphAtlas() {
 	p.glyphAtlas.texture = p.newTexture(canvas.ImageScaleSmooth)
 	p.ctx.TexImage2D(texture2D, 0, glyphAtlasTexSize, glyphAtlasTexSize, colorFormatRGBA, unsignedByte, p.glyphAtlas.cpuImg.Pix)
 	p.logError()
+
+	if !p.textBufferValid {
+		// Sized for a typical line; drawGlyphBatch reallocates when a string
+		// needs more, so this is a starting point rather than a limit.
+		p.textBuffer = p.createBuffer(floatsPerGlyph * 128)
+		p.textBufferValid = true
+	}
 }
 
 // uploadAtlasRegion copies dirty pixels from the CPU atlas image to the GPU
@@ -136,41 +149,72 @@ func (p *painter) uploadAtlasRegion(dirty image.Rectangle) {
 	p.logError()
 }
 
-// drawGlyphQuad renders one glyph quad by sampling the sub-region [entry.x,
-// entry.y, entry.x+entry.w, entry.y+entry.h] of the shared GPU atlas texture.
-// pos and size are in logical (fyne) coordinate space; frame is the canvas size.
-func (p *painter) drawGlyphQuad(entry glyphAtlasEntry, pos fyne.Position, size fyne.Size, frame fyne.Size) {
-	points, insets, inner := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1, 0)
+// A glyph quad is emitted as two triangles rather than a strip, because a strip
+// cannot describe several disjoint quads in one draw without degenerate
+// vertices joining them.
+const (
+	verticesPerGlyph = 6
+	floatsPerGlyph   = verticesPerGlyph * coordinateSize2DWithTexture
+)
 
-	// Replace the full-texture UVs that rectCoords produced with the glyph's
-	// sub-region of the atlas. rectCoords lays out vertices in the order
-	// top-left, bottom-left, top-right, bottom-right, and v runs opposite to
-	// screen y, so the two "top" vertices take vMax.
+// appendGlyphQuad adds one glyph's two triangles to points and returns the
+// extended slice. The quad samples the sub-region [entry.x, entry.y,
+// entry.x+entry.w, entry.y+entry.h] of the shared atlas texture. pos and size
+// are in logical (fyne) coordinate space; frame is the canvas size.
+//
+// The geometry deliberately matches what rectCoords produces for a stretched
+// fill with no padding, so batching changes only the number of draw calls and
+// not a single pixel of output.
+func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, pos fyne.Position, size, frame fyne.Size) []float32 {
+	pixelSize, pixelPos := roundToPixelCoords(size, pos, p.pixScale)
+
+	x1 := -1 + pixelPos.X/frame.Width*2
+	x2 := -1 + (pixelPos.X+pixelSize.Width)/frame.Width*2
+	y1 := 1 - pixelPos.Y/frame.Height*2
+	y2 := 1 - (pixelPos.Y+pixelSize.Height)/frame.Height*2
+
 	af := float32(p.glyphAtlas.texSize)
 	uMin := float32(entry.x) / af
 	vMin := float32(entry.y) / af
 	uMax := float32(entry.x+entry.w) / af
 	vMax := float32(entry.y+entry.h) / af
 
-	uv := [vertexCountRectangle][2]float32{
-		{uMin, vMax}, // top left
-		{uMin, vMin}, // bottom left
-		{uMax, vMax}, // top right
-		{uMax, vMin}, // bottom right
-	}
-	for i, c := range uv {
-		texCoord := i*coordinateSize2DWithTexture + coordinateSize2D
-		points[texCoord], points[texCoord+1] = c[0], c[1]
+	// Corners are named as rectCoords names them; v runs opposite to screen y,
+	// so the two "top" vertices take vMax. The winding matches the triangle
+	// strip this replaced: (top left, bottom left, top right) then
+	// (top right, bottom left, bottom right).
+	return append(points,
+		x1, y2, uMin, vMax, // top left
+		x1, y1, uMin, vMin, // bottom left
+		x2, y2, uMax, vMax, // top right
+
+		x2, y2, uMax, vMax, // top right
+		x1, y1, uMin, vMin, // bottom left
+		x2, y1, uMax, vMin, // bottom right
+	)
+}
+
+// drawGlyphBatch issues every glyph quad collected for one string as a single
+// draw call. The simple shader ignores size and inset while cornerRadius is 0,
+// so one uniform set covers the whole batch however many glyphs it holds.
+func (p *painter) drawGlyphBatch(points []float32) {
+	if len(points) == 0 {
+		return
 	}
 
 	p.ctx.UseProgram(p.programs.simple.ref)
-	p.updateBuffer(p.programs.simple.buff, points[:])
+
+	// The batch size varies per string, so this goes through BufferData rather
+	// than p.updateBuffer: BufferSubData cannot grow the allocation it writes
+	// into, and the mobile path of updateBuffer uses exactly that.
+	p.ctx.BindBuffer(arrayBuffer, p.textBuffer)
+	p.ctx.BufferData(arrayBuffer, points, staticDraw)
+	p.logError()
+
 	p.UpdateVertexArray(p.programs.simple, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.simple, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
 
 	p.SetUniform1f(p.programs.simple, attrRadiusCorner, 0)
-	p.SetUniform2f(p.programs.simple, attrSize, inner.Width*p.pixScale, inner.Height*p.pixScale)
-	p.SetUniform4f(p.programs.simple, attrInset, insets[0], insets[1], insets[2], insets[3])
 	p.SetUniform1f(p.programs.simple, attrAlpha, 1.0)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
@@ -180,6 +224,6 @@ func (p *painter) drawGlyphQuad(entry glyphAtlasEntry, pos fyne.Position, size f
 	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
 	p.logError()
 
-	p.ctx.DrawArrays(triangleStrip, 0, vertexCountRectangle)
+	p.ctx.DrawArrays(triangles, 0, len(points)/coordinateSize2DWithTexture)
 	p.logError()
 }

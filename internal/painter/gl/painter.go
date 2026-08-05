@@ -54,6 +54,9 @@ type painter struct {
 	programs        *programs
 	shaderPrograms  map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale        float32
+	textBatch       []float32 // reused vertex scratch for one string's glyph quads
+	textBuffer      Buffer    // VBO the batch is uploaded through
+	textBufferValid bool      // whether textBuffer has been created on the current context
 }
 
 // Declare conformity to Painter interface
