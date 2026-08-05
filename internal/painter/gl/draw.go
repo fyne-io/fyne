@@ -959,24 +959,6 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 }
 
-func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.ClipItem, scale float32) (offset, width int) {
-	clipPos := fyne.Position{}
-	clipSize := frame
-	if clip != nil {
-		clipPos, clipSize = clip.Rect()
-	}
-
-	left := fyne.Max(pos.X, clipPos.X)
-	right := fyne.Min(pos.X+size.Width, clipPos.X+clipSize.Width)
-	if right <= left {
-		return 0, 0
-	}
-
-	offset = int(math.Floor(float64((left - pos.X) * scale)))
-	width = int(math.Ceil(float64((right-pos.X)*scale))) - offset
-	return offset, width
-}
-
 func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect, cornerRadius, pad float32) {
 	points, insets, inner := p.rectCoords(size, pos, frame, fill, aspect, pad)
 

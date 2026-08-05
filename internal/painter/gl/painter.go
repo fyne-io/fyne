@@ -6,7 +6,6 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -43,19 +42,18 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	blurKernel          blurKernel // cached 1D kernel texture on GPU
-	blurSnap            blurSnap   // cached texture for GPU-side blur snapshot
-	canvas              fyne.Canvas
-	clippedTextTextures map[*canvas.Text]clippedTextTexture
-	contextProvider     driver.WithContext
-	ctx                 context
-	fbHeight            int            // current framebuffer height in pixels
-	glyphAtlas          *glyphGPUAtlas // shared GPU texture holding rasterised glyphs
-	maxTextureSize      int
-	pixScale            float32 // pre-calculate scale*texScale for each draw
-	programs            *programs
-	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
-	texScale            float32
+	blurKernel      blurKernel // cached 1D kernel texture on GPU
+	blurSnap        blurSnap   // cached texture for GPU-side blur snapshot
+	canvas          fyne.Canvas
+	contextProvider driver.WithContext
+	ctx             context
+	fbHeight        int            // current framebuffer height in pixels
+	glyphAtlas      *glyphGPUAtlas // shared GPU texture holding rasterised glyphs
+	maxTextureSize  int
+	pixScale        float32 // pre-calculate scale*texScale for each draw
+	programs        *programs
+	shaderPrograms  map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
+	texScale        float32
 }
 
 // Declare conformity to Painter interface
@@ -74,9 +72,6 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	// deliberately not freed here: Free is also called for every object on each
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
-	if text, ok := obj.(*canvas.Text); ok {
-		p.freeClippedTextTexture(text)
-	}
 	p.freeTexture(obj)
 }
 
