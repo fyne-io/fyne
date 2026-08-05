@@ -65,7 +65,7 @@ var (
 )
 
 func (p *painter) Init() {
-	p.ctx = &xjsContext{}
+	p.ctx = wrapContext(&xjsContext{})
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
