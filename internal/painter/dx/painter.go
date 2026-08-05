@@ -23,6 +23,10 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+func init() {
+	log.SetFlags(log.Lshortfile | log.Lmicroseconds)
+}
+
 const (
 	edgeSoftness = 0.5
 	max16bit     = float32(255 * 256)
@@ -69,6 +73,12 @@ type GPU struct {
 	// is gating the frame, which a CPU profile cannot separate from spin.
 	presentDur time.Duration
 	presentN   int
+
+	// frameStart and frameDur time Clear-to-Present: the CPU cost of walking
+	// the tree and issuing every draw. A frame time far above avg present means
+	// the app is CPU-bound in the painter, not waiting on the GPU.
+	frameStart time.Time
+	frameDur   time.Duration
 }
 
 func NewGPU(hwnd windows.Handle, width, height uint32) (*GPU, error) {
@@ -164,6 +174,9 @@ func (g *GPU) Present() (deviceLost bool) {
 	var start time.Time
 	if dxDebug {
 		start = time.Now()
+		if !g.frameStart.IsZero() {
+			g.frameDur += start.Sub(g.frameStart)
+		}
 	}
 	hr := g.swap.Present(0)
 	if dxDebug {
@@ -245,10 +258,12 @@ type Painter struct {
 	canvas fyne.Canvas
 	g      *GPU
 
-	vsQuad *vertexShader
-	vsLine *vertexShader
+	vsQuad  *vertexShader
+	vsLine  *vertexShader
+	vsGlyph *vertexShader
 
 	psTextured *pixelShader
+	psGlyph    *pixelShader
 	psRect     *pixelShader
 	psRound    *pixelShader
 	psEllipse  *pixelShader
@@ -271,6 +286,24 @@ type Painter struct {
 	// auxbuf is the register(b1) buffer carrying the variable-length data the
 	// polygon and curve shaders need, which does not fit the shared cbuffer.
 	auxbuf *buffer
+	// glyphbuf is the register(b2) buffer holding one batch of glyph quads. It
+	// is dynamic rather than default because a batch writes fewer entries than
+	// the buffer holds and UpdateSubresource cannot partially update a constant
+	// buffer without D3D11.1; Map(WRITE_DISCARD) writes only what is used.
+	glyphbuf *buffer
+	// glyphPending accumulates glyph quads until something forces a flush.
+	glyphPending []glyphInst
+	// glyphScratch and entryScratch are reused by drawText to collect one
+	// string's shaped glyphs and their atlas slots.
+	glyphScratch []paint.PlacedGlyph
+	entryScratch []glyphEntry
+	// shaped caches the result of shaping one string, keyed by everything the
+	// shaper reads. Shaping (segmenting plus HarfBuzz) is the dominant cost of
+	// text once rasterisation and draws are cached and batched, and a UI's
+	// strings mostly repeat frame over frame.
+	shaped map[shapedKey]shapedEntry
+
+	atlas glyphAtlas
 
 	blurSnap   blurSnapshot
 	blurKernel blurKernelTexture
@@ -289,8 +322,16 @@ type Painter struct {
 	texPoolSize int
 	frameTick   uint32
 
-	// drawCount tallies draw calls between FYNE_DX_DEBUG reports.
-	drawCount int
+	// drawCount tallies draw calls between FYNE_DX_DEBUG reports. glyphCount and
+	// batchCount tally the batched quads and the DrawInstanced calls that
+	// carried them; their ratio is the only direct evidence that batching is
+	// collapsing anything, since drawCount already counts a batch as one call.
+	// rectCount is the subset of those quads that were solid rectangles riding
+	// the batch rather than glyphs.
+	drawCount  int
+	glyphCount int
+	batchCount int
+	rectCount  int
 
 	// clippedTextTextures holds the windowed textures for text runs wider than
 	// the device texture limit, keyed by the text object as the GL painter does.
@@ -345,6 +386,7 @@ func NewPainter(c fyne.Canvas, g *GPU) *Painter {
 	p := &Painter{canvas: c, g: g,
 		textures: map[uint32]*gpuTexture{},
 		texPool:  map[[2]uint32][]pooledTexture{},
+		shaped:   map[shapedKey]shapedEntry{},
 	}
 	p.SetFrameBufferScale(1.0)
 	return p
@@ -366,6 +408,9 @@ func (p *Painter) Init() {
 	// generate geometry from SV_VertexID and the constant buffer.
 	p.g.ctx.VSSetConstantBuffer(p.cbuf)
 	p.g.ctx.PSSetConstantBuffer(p.cbuf)
+	// Only the vertex stage reads the glyph batch; the pixel stage gets each
+	// glyph's colour down the interpolator instead of indexing the array again.
+	p.g.ctx.VSSetConstantBufferAt(2, p.glyphbuf)
 	p.g.ctx.OMSetBlendState(p.blend)
 	p.g.ctx.RSSetState(p.rsPlain)
 	p.lastBlend = p.blend
@@ -386,6 +431,13 @@ func (p *Painter) initPipeline() error {
 	if p.vsLine, err = p.g.dev.CreateVertexShader(lineCode); err != nil {
 		return fmt.Errorf("line vertex shader: %w", err)
 	}
+	glyphCode, err := compileShader(VertexGlyph, "main", "vs_4_0")
+	if err != nil {
+		return fmt.Errorf("glyph vertex shader: %w", err)
+	}
+	if p.vsGlyph, err = p.g.dev.CreateVertexShader(glyphCode); err != nil {
+		return fmt.Errorf("glyph vertex shader: %w", err)
+	}
 
 	for _, s := range []struct {
 		src string
@@ -401,6 +453,7 @@ func (p *Painter) initPipeline() error {
 		{PixelBezierCurve, &p.psBezier},
 		{PixelBlur, &p.psBlur},
 		{PixelLine, &p.psLine},
+		{PixelGlyph, &p.psGlyph},
 	} {
 		code, err := compileShader(s.src, "main", "ps_4_0")
 		if err != nil {
@@ -468,6 +521,17 @@ func (p *Painter) initPipeline() error {
 	}, nil); err != nil {
 		return fmt.Errorf("constant buffer: %w", err)
 	}
+	if p.glyphbuf, err = p.g.dev.CreateBuffer(&bufferDesc{
+		ByteWidth:      uint32(unsafe.Sizeof(glyphInst{})) * glyphBatchMax,
+		Usage:          usageDynamic,
+		BindFlags:      bindConstantBuffer,
+		CPUAccessFlags: cpuAccessWrite,
+	}, nil); err != nil {
+		return fmt.Errorf("glyph instance buffer: %w", err)
+	}
+	if err = p.initAtlas(); err != nil {
+		return fmt.Errorf("glyph atlas: %w", err)
+	}
 
 	return nil
 }
@@ -512,19 +576,36 @@ const debugReportFrames = 120
 func (p *Painter) Clear() {
 	p.frameTick++
 	p.sweepTexPool()
+	// Anything still queued belongs to a frame that is about to be wiped, so
+	// drop it rather than drawing it into the cleared target.
+	p.glyphPending = p.glyphPending[:0]
 
-	if dxDebug && p.frameTick%debugReportFrames == 0 {
-		avgPresent := time.Duration(0)
-		if p.g.presentN > 0 {
-			avgPresent = p.g.presentDur / time.Duration(p.g.presentN)
+	if dxDebug {
+		if p.frameTick%debugReportFrames == 0 {
+			avgPresent := time.Duration(0)
+			avgFrame := time.Duration(0)
+			if p.g.presentN > 0 {
+				avgPresent = p.g.presentDur / time.Duration(p.g.presentN)
+				avgFrame = p.g.frameDur / time.Duration(p.g.presentN)
+			}
+			perBatch := float64(0)
+			if p.batchCount > 0 {
+				perBatch = float64(p.glyphCount) / float64(p.batchCount)
+			}
+			texCount, texBytes := p.textureStats()
+			log.Printf("directx: %d draw calls/frame (%d glyphs + %d rects in %d batches, %.1f per batch), "+
+				"avg frame cpu %v, avg present %v, %d textures live using %dMB (over %d frames)",
+				p.drawCount/debugReportFrames,
+				(p.glyphCount-p.rectCount)/debugReportFrames,
+				p.rectCount/debugReportFrames,
+				p.batchCount/debugReportFrames, perBatch,
+				avgFrame.Round(10*time.Microsecond),
+				avgPresent.Round(10*time.Microsecond),
+				texCount, texBytes/(1024*1024), debugReportFrames)
+			p.drawCount, p.glyphCount, p.batchCount, p.rectCount = 0, 0, 0, 0
+			p.g.presentDur, p.g.presentN, p.g.frameDur = 0, 0, 0
 		}
-		texCount, texBytes := p.textureStats()
-		log.Printf("directx: %d draw calls/frame, avg present %v, "+
-			"%d textures live using %dMB (over %d frames)",
-			p.drawCount/debugReportFrames, avgPresent.Round(10*time.Microsecond),
-			texCount, texBytes/(1024*1024), debugReportFrames)
-		p.drawCount = 0
-		p.g.presentDur, p.g.presentN = 0, 0
+		p.g.frameStart = time.Now()
 	}
 
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
@@ -553,6 +634,7 @@ func (p *Painter) SetOutputSize(width, height int) {
 // top-origin canvas coordinates and D3D scissor rects are also top-origin, so
 // unlike the GL Painter no vertical flip is needed.
 func (p *Painter) StartClipping(pos fyne.Position, size fyne.Size) {
+	p.flushGlyphs() // queued glyphs belong to the outgoing scissor rectangle
 	x := p.textureScale(pos.X)
 	y := p.textureScale(pos.Y)
 	w := p.textureScale(size.Width)
@@ -575,6 +657,7 @@ func (p *Painter) StopClipping() {
 	if !p.clipping {
 		return
 	}
+	p.flushGlyphs() // as in StartClipping: emit under the rectangle still in force
 	p.g.ctx.RSSetState(p.rsPlain)
 	p.clipping = false
 }
@@ -650,6 +733,10 @@ func (p *Painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps *pixelShader,
 	topology uint32, blend *blendState, vertexCount uint32,
 ) {
+	// Glyphs queued before this object have to reach the back buffer before it
+	// does, or alpha blending sees the wrong order.
+	p.flushGlyphs()
+
 	c.NdcRect = ndcRect
 	// Map(WRITE_DISCARD) rather than UpdateSubresource: this buffer is rewritten
 	// once per draw, and discard is the rename path the driver is tuned for -
@@ -664,8 +751,15 @@ func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps 
 	*(*constants)(m.Data) = *c
 	p.g.ctx.Unmap(unsafe.Pointer(p.cbuf))
 
-	// The constant buffer bindings never change after Init; everything else is
-	// set only when it differs from what is already bound.
+	p.setState(vs, ps, topology, blend)
+	p.g.ctx.Draw(vertexCount, 0)
+	p.drawCount++
+}
+
+// setState binds the pipeline objects a draw needs. The constant buffer
+// bindings never change after Init; everything else is set only when it differs
+// from what is already bound.
+func (p *Painter) setState(vs *vertexShader, ps *pixelShader, topology uint32, blend *blendState) {
 	if blend != p.lastBlend {
 		p.g.ctx.OMSetBlendState(blend)
 		p.lastBlend = blend
@@ -682,8 +776,60 @@ func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps 
 		p.g.ctx.PSSetShader(ps)
 		p.lastPS = ps
 	}
-	p.g.ctx.Draw(vertexCount, 0)
+}
+
+// pushGlyph queues one glyph quad for the current batch, emitting the batch
+// first if it is full.
+func (p *Painter) pushGlyph(inst glyphInst) {
+	if len(p.glyphPending) == glyphBatchMax {
+		p.flushGlyphs()
+	}
+	p.glyphPending = append(p.glyphPending, inst)
+}
+
+// flushGlyphs draws every queued glyph quad as one instanced draw. Callers must
+// invoke it before any other draw, before the scissor rectangle moves, before
+// the atlas contents are overwritten, and at the end of the frame; every one of
+// those would otherwise reorder, mis-clip or mis-sample the queue.
+func (p *Painter) flushGlyphs() {
+	n := len(p.glyphPending)
+	if n == 0 {
+		return
+	}
+
+	m, err := p.g.ctx.Map(unsafe.Pointer(p.glyphbuf), mapWriteDiscard)
+	if err != nil {
+		fyne.LogError("directx: mapping the glyph batch", err)
+		p.glyphPending = p.glyphPending[:0]
+		return
+	}
+	copy(unsafe.Slice((*glyphInst)(m.Data), n), p.glyphPending)
+	p.g.ctx.Unmap(unsafe.Pointer(p.glyphbuf))
+	p.glyphPending = p.glyphPending[:0]
+
+	if p.atlas.tex.srv != p.lastSRV {
+		p.g.ctx.PSSetShaderResource(p.atlas.tex.srv)
+		p.lastSRV = p.atlas.tex.srv
+	}
+	if p.sampLinear != p.lastSampler {
+		p.g.ctx.PSSetSampler(p.sampLinear)
+		p.lastSampler = p.sampLinear
+	}
+
+	p.setState(p.vsGlyph, p.psGlyph, topologyTriangleList, p.blend)
+	p.g.ctx.DrawInstanced(6, uint32(n))
 	p.drawCount++
+	p.glyphCount += n
+	p.batchCount++
+}
+
+// Flush emits anything still queued. The canvas calls it once the render tree
+// has been walked, because the last object drawn is often text.
+func (p *Painter) Flush() {
+	if !p.ready() {
+		return
+	}
+	p.flushGlyphs()
 }
 
 // baseConstants fills the fields every shape shader reads.
@@ -731,8 +877,56 @@ func (p *Painter) drawRectangle(d3dRect *canvas.Rectangle, pos fyne.Position, fr
 	topLeft := paint.GetCornerRadius(d3dRect.TopLeftCornerRadius, d3dRect.CornerRadius)
 	bottomRight := paint.GetCornerRadius(d3dRect.BottomRightCornerRadius, d3dRect.CornerRadius)
 	bottomLeft := paint.GetCornerRadius(d3dRect.BottomLeftCornerRadius, d3dRect.CornerRadius)
+	if topRight == 0 && topLeft == 0 && bottomRight == 0 && bottomLeft == 0 &&
+		p.pushSolidRect(d3dRect, pos, frame) {
+		return
+	}
 	p.drawOblong(d3dRect, d3dRect.FillColor, d3dRect.StrokeColor, d3dRect.StrokeWidth,
 		topRight, topLeft, bottomRight, bottomLeft, d3dRect.Aspect, d3dRect.Shadow, pos, frame)
+}
+
+// pushSolidRect queues a plain filled rectangle on the glyph batch instead of
+// issuing a draw of its own: a run of table cells and their labels then costs
+// one DrawInstanced rather than a constant-buffer Map and Draw per cell. Only
+// the square-cornered, unstroked, unshadowed case qualifies - for it, the
+// generic path's pixel shader draws a hard-edged fill (no antialiasing), so a
+// quad snapped to the same device pixels is identical output. Reports false
+// when the rectangle needs the generic path.
+func (p *Painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fyne.Size) bool {
+	// A nonzero stroke width always goes to the generic path: its shader draws
+	// the rim in the stroke colour even when that colour is transparent, which
+	// visually insets the fill - not something a plain quad can reproduce.
+	if r.Aspect != 0 || r.StrokeWidth != 0 || paint.IsShadowVisible(r.Shadow) {
+		return false
+	}
+	if r.FillColor == nil || r.FillColor == color.Transparent {
+		return true // nothing to draw, and no stroke or shadow either
+	}
+	if !p.ensureAtlasWhite() {
+		return false
+	}
+
+	// The same snapping vecRectCoords applies, without the antialiasing skirt
+	// it adds for the generic quad (whose shader clips it back to bounds).
+	size := r.Size()
+	x := roundToPixel(pos.X, p.pixScale)
+	y := roundToPixel(pos.Y, p.pixScale)
+	w := roundToPixel(size.Width, p.pixScale)
+	h := roundToPixel(size.Height, p.pixScale)
+	x1, x2, y1, y2 := p.scaleRectCoords(x, x+w, y, y+h)
+	fw, fh := p.scaleFrameSize(frame)
+
+	cr, cg, cb, ca := fragmentColor(r.FillColor)
+	p.pushGlyph(glyphInst{
+		NDC: [4]float32{
+			x1/fw*2 - 1, 1 - y1/fh*2,
+			x2/fw*2 - 1, 1 - y2/fh*2,
+		},
+		UV:    [4]float32{p.atlas.whiteU, p.atlas.whiteV, p.atlas.whiteU, p.atlas.whiteV},
+		Color: [4]float32{cr, cg, cb, ca},
+	})
+	p.rectCount++
+	return true
 }
 
 func (p *Painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, strokeWidth,
@@ -901,6 +1095,19 @@ func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)
 
+	// The atlas draws a quad per glyph out of one shared texture, so it needs no
+	// texture of its own and no width limit - both of the paths below exist only
+	// for strings it cannot represent.
+	if p.drawTextFromAtlas(text, pos, frame) {
+		// An object that used to be too wide for one texture may have a windowed
+		// texture parked from before; the atlas has no width limit, so it is dead.
+		p.freeClippedTextTexture(text)
+		if decorated {
+			p.drawTextDecoration(text, pos, size, frame)
+		}
+		return
+	}
+
 	// A run wider than the device's texture limit cannot upload whole; render
 	// only a window around the visible part, the way the GL painter does.
 	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
@@ -921,6 +1128,10 @@ func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	if !decorated {
 		return
 	}
+	p.drawTextDecoration(text, pos, size, frame)
+}
+
+func (p *Painter) drawTextDecoration(text *canvas.Text, pos fyne.Position, size, frame fyne.Size) {
 	_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
 	line := canvas.NewLine(text.Color)
 	line.Resize(fyne.NewSize(size.Width, 0))
@@ -930,6 +1141,119 @@ func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	if text.TextStyle.Strikethrough {
 		p.drawLine(line, fyne.NewPos(pos.X, pos.Y+baseline*paint.StrikethroughToBaselineFactor), frame)
 	}
+}
+
+// shapedKey identifies one shaped string: the text and everything else the
+// shaper reads. The face is the cached *FontCacheItem pointer, whose identity
+// is stable until the font caches are cleared - a theme or font change hands
+// out new pointers, orphaning (not corrupting) old entries.
+type shapedKey struct {
+	text  string
+	face  *paint.FontCacheItem
+	size  float32
+	scale float32
+	style fyne.TextStyle
+}
+
+// shapedEntry is one cached shaping result. ok is false when the string has to
+// take the whole-run texture path (an emoji, in practice), cached so the
+// losing shape is not re-run every frame just to fail again.
+type shapedEntry struct {
+	glyphs []paint.PlacedGlyph
+	ok     bool
+}
+
+// shapedCacheMax caps the shaped-run cache. A UI whose labels churn (counters,
+// live values) grows entries without bound; past the cap the whole cache is
+// dropped and rebuilt from live strings, the same reset-and-repack answer the
+// atlas uses. 4096 entries of a dozen glyphs is roughly 2MB.
+const shapedCacheMax = 4096
+
+// drawTextFromAtlas queues one quad per glyph of the run, reporting false when
+// the string has to go down the whole-run texture path instead.
+func (p *Painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size) bool {
+	col := text.Color
+	if col == nil {
+		col = theme.Color(theme.ColorNameForeground)
+	}
+
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
+	key := shapedKey{text: text.Text, face: face, size: text.TextSize,
+		scale: p.pixScale, style: text.TextStyle}
+	entry, ok := p.shaped[key]
+	if !ok {
+		p.glyphScratch = p.glyphScratch[:0]
+		paint.WalkGlyphs(face.Fonts, text.Text, text.TextSize, p.pixScale, text.TextStyle,
+			func(g paint.PlacedGlyph) { p.glyphScratch = append(p.glyphScratch, g) })
+		entry.ok = len(p.glyphScratch) > 0 && shapeable(p.glyphScratch)
+		if entry.ok {
+			entry.glyphs = append([]paint.PlacedGlyph(nil), p.glyphScratch...)
+		}
+		if len(p.shaped) >= shapedCacheMax {
+			clear(p.shaped)
+		}
+		p.shaped[key] = entry
+	}
+	if !entry.ok {
+		return false
+	}
+
+	// The run's own pixel origin. WalkGlyphs positions are relative to it, and
+	// the same rounding the texture path applies to the quad is applied here so
+	// glyphs land on whole pixels either way.
+	originX := roundToPixel(pos.X*p.pixScale, 1.0)
+	originY := roundToPixel(pos.Y*p.pixScale, 1.0)
+
+	// Every glyph is resolved before any quad is queued. Resolving can reset a
+	// full atlas, and failing part way through after queueing would leave half a
+	// string on screen with no way to take it back.
+	p.entryScratch = p.entryScratch[:0]
+	for _, pg := range entry.glyphs {
+		e, ok := p.glyphEntry(pg, text.TextSize)
+		if !ok {
+			return false
+		}
+		p.entryScratch = append(p.entryScratch, e)
+	}
+
+	r, g, b, a := fragmentColor(col)
+	fw, fh := p.scaleFrameSize(frame)
+
+	for i, pg := range entry.glyphs {
+		e := p.entryScratch[i]
+		if e.empty() {
+			continue
+		}
+
+		// Snapped to whole device pixels. The bitmap was rasterised at a whole
+		// pixel origin, so a quad at a fractional position would resample it and
+		// the glyph would come out soft and fringed - the pen position drifts
+		// fractional as the shaped advances accumulate, so this is every glyph
+		// but the first, not an edge case.
+		//
+		// ponytail: whole-pixel placement, so within-run subpixel positioning is
+		// lost and spacing can differ from the whole-run path by under a pixel.
+		// The upgrade, if that is ever visible, is to cache each glyph at a few
+		// horizontal subpixel phases and pick by the fractional pen position.
+		x1 := roundToPixel(originX+pg.X, 1.0) + float32(e.bearX)
+		y1 := roundToPixel(originY+pg.Y, 1.0) + float32(e.bearY)
+		x2, y2 := x1+float32(e.width), y1+float32(e.height)
+
+		p.pushGlyph(glyphInst{
+			// Pixels to clip space: x doubles and shifts, y additionally flips,
+			// which is why y1 becomes the larger clip-space value.
+			NDC: [4]float32{
+				x1/fw*2 - 1, 1 - y1/fh*2,
+				x2/fw*2 - 1, 1 - y2/fh*2,
+			},
+			UV: [4]float32{
+				float32(e.x) / atlasSize, float32(e.y) / atlasSize,
+				float32(e.x+e.width) / atlasSize, float32(e.y+e.height) / atlasSize,
+			},
+			Color: [4]float32{r, g, b, a},
+		})
+	}
+	return true
 }
 
 // clippedTextEntry is one windowed texture for a text run wider than the device
@@ -1061,6 +1385,10 @@ func (p *Painter) drawGPUTexture(obj fyne.CanvasObject, tex *gpuTexture,
 	if img, ok := obj.(*canvas.Image); ok && img.CornerRadius > 0 {
 		c.TexParams[1] = fyne.Min(paint.GetMaximumRadius(size), img.CornerRadius) * p.pixScale
 	}
+
+	// Before binding, not after: flushing draws the glyph batch, which leaves the
+	// atlas in shader slot 0. Binding first would have this draw sample the atlas.
+	p.flushGlyphs()
 
 	sampler := p.sampLinear
 	switch o := obj.(type) {
@@ -1624,6 +1952,8 @@ func (p *Painter) Release() {
 	p.blurKernel.release()
 	releaseCOM(&p.auxbuf)
 	releaseCOM(&p.cbuf)
+	releaseCOM(&p.glyphbuf)
+	p.atlas.release()
 	releaseCOM(&p.sampNearest)
 	releaseCOM(&p.sampLinear)
 	releaseCOM(&p.rsScissor)
@@ -1631,6 +1961,7 @@ func (p *Painter) Release() {
 	releaseCOM(&p.blendPremul)
 	releaseCOM(&p.blendReplace)
 	releaseCOM(&p.blend)
+	releaseCOM(&p.psGlyph)
 	releaseCOM(&p.psLine)
 	releaseCOM(&p.psBlur)
 	releaseCOM(&p.psBezier)
@@ -1641,6 +1972,7 @@ func (p *Painter) Release() {
 	releaseCOM(&p.psRound)
 	releaseCOM(&p.psRect)
 	releaseCOM(&p.psTextured)
+	releaseCOM(&p.vsGlyph)
 	releaseCOM(&p.vsLine)
 	releaseCOM(&p.vsQuad)
 }
@@ -1981,6 +2313,11 @@ func (p *Painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 		Left: uint32(x), Top: uint32(y), Front: 0,
 		Right: uint32(x + bw), Bottom: uint32(y + bh), Back: 1,
 	}
+
+	// Ahead of both the binding and the snapshot below: queued glyphs have to be
+	// in the back buffer before it is copied, or the blur samples a frame that
+	// is missing its text.
+	p.flushGlyphs()
 
 	p.g.ctx.PSSetSamplersAt(0, []*samplerState{p.sampLinear, p.sampNearest})
 	views := []*shaderResourceView{p.blurSnap.srv, p.blurKernel.srv}

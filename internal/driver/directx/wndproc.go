@@ -122,12 +122,41 @@ func (w *window) handleMessage(message uint32, wParam, lParam uintptr) uintptr {
 
 	case wmEnterSizeMove:
 		w.resizing = true
+		w.beginModalTick()
 		return 0
 
 	case wmExitSizeMove:
 		w.resizing = false
+		w.endModalTick()
 		w.fitContent()
 		return 0
+
+	// Opening the menu bar parks the thread in DefWindowProc's modal menu loop,
+	// which starves the run loop; a timer keeps animations and repaints going.
+	case wmEnterMenuLoop:
+		w.beginModalTick()
+
+	case wmExitMenuLoop:
+		w.endModalTick()
+
+	case wmTimer:
+		if wParam == modalTimerID {
+			w.driver.modalTick()
+			return 0
+		}
+
+	// A steady drag starves WM_TIMER, so the drag itself has to drive frames.
+	// WM_SIZE/WM_MOVE only arrive when the geometry actually changes; the
+	// -ING pair is sent for every mouse step even when Windows clamps the size
+	// or the motion is parallel to the border, so together they cover every
+	// drag pattern. The modalLoop gate matters: real Windows always brackets
+	// drags with WM_ENTERSIZEMOVE, but Wine never enters the modal loop (the
+	// X11 window manager owns the drag) and instead streams WM_MOVE per
+	// configure event - ungated, that turned into a permanent paint storm.
+	case wmMove, wmSizing, wmMoving:
+		if modalLoop {
+			w.driver.modalTick()
+		}
 
 	case wmSetFocus:
 		w.processFocused(true)
@@ -248,7 +277,13 @@ func (w *window) handleMessage(message uint32, wParam, lParam uintptr) uintptr {
 		}
 
 	case wmFyneDo:
-		// The queue is drained by the run loop; this message only wakes it.
+		// Normally this message only wakes the run loop, which drains the queue.
+		// In a modal loop the run loop is blocked, so drain here - posted
+		// messages outrank input in the queue, so unlike WM_TIMER this gets
+		// through even mid-drag and goroutines in fyne.Do are never starved.
+		if modalLoop {
+			w.driver.modalTick()
+		}
 		return 0
 	}
 

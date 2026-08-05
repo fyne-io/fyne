@@ -203,16 +203,37 @@ func (w *window) syncSurface() bool {
 	return true
 }
 
+// lastResizeSync coalesces WM_SIZE storms outside a modal loop. Main thread only.
+var lastResizeSync time.Time
+
 func (w *window) resized(width, height int32) {
 	if width <= 0 || height <= 0 { // minimised
 		return
 	}
-	w.syncSurface()
 
-	// Draw the new size now rather than waiting for the next loop tick. Dragging a
-	// border puts Windows into a modal message loop inside DefWindowProc, which
-	// blocks the run loop entirely - without this the swap chain is resized but
-	// never redrawn, so the window shows a stale frame for the whole drag.
+	// Inside a real modal drag (Windows sends WM_ENTERSIZEMOVE) the run loop is
+	// blocked in DefWindowProc and this is the only place animations, the func
+	// queue and repaints can advance, so take a full throttled tick.
+	if modalLoop {
+		w.syncSurface()
+		w.driver.modalTick()
+		return
+	}
+
+	// Outside a modal loop the run loop is alive, but Wine posts one WM_SIZE per
+	// X11 configure event - hundreds per second during a WM-managed drag - and
+	// handling each one costs more than the gap between them, so pollEvents
+	// would never drain the queue and the app appears frozen. Coalesce instead:
+	// skip intermediates entirely (SetDirty makes the ticker paint the trailing
+	// size, and repaintWindow re-syncs the surface from the live client rect),
+	// and when one is handled pair syncSurface with an immediate repaint - a
+	// resized-but-unpainted swap chain is what wined3d displays as flicker.
+	if time.Since(lastResizeSync) < 10*time.Millisecond {
+		w.canvas.SetDirty()
+		return
+	}
+	lastResizeSync = time.Now()
+	w.syncSurface()
 	if w.visible && !w.closing && w.gpu != nil && w.paint != nil {
 		w.driver.repaintWindow(w)
 	}

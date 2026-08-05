@@ -205,6 +205,11 @@ func (c *dxCanvas) paint(size fyne.Size) {
 		}
 	}
 	c.WalkTrees(paint, afterPaint)
+	// The painter batches glyph quads, so the tail of the tree can still be
+	// sitting in a queue when the walk ends.
+	if p, ok := c.Painter().(*dx.Painter); ok {
+		p.Flush()
+	}
 }
 
 // applyTheme re-applies the current theme to objects that live outside the
