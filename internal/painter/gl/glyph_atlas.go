@@ -17,13 +17,32 @@ import (
 const (
 	glyphAtlasTexSize = 1024
 	glyphAtlasPad     = 1
+
+	// Horizontal sub-pixel positions each glyph is rasterised at. Kerning puts
+	// glyphs on fractional positions, and a bitmap can only be drawn on whole
+	// pixels, so the fraction is baked into the bitmap rather than rounded away
+	// (uneven spacing) or resampled at draw time (blurred edges). Four costs
+	// four entries per glyph and leaves the error under an eighth of a pixel.
+	subpixelPhases = 4
 )
 
 type glyphAtlasKey struct {
 	face       *font.Face // pointer identity; stable while fontCache is alive
 	gid        font.GID
 	pixSize    int32 // round(fontSize * pixScale * 64), avoids float key issues
+	phase      uint8 // horizontal sub-pixel position, 0 to subpixelPhases-1
 	r, g, b, a uint8
+}
+
+// subpixelPhaseAt returns which sub-pixel position x falls into, and the whole
+// pixel the glyph should then be drawn at.
+func subpixelPhaseAt(x float32) (phase int, whole float32) {
+	whole = float32(math.Floor(float64(x)))
+	phase = int((x - whole) * subpixelPhases)
+	if phase >= subpixelPhases { // guard against rounding at the top of the range
+		phase = subpixelPhases - 1
+	}
+	return phase, whole
 }
 
 type glyphAtlasEntry struct {
@@ -59,7 +78,7 @@ func newGlyphGPUAtlas(texSize int) *glyphGPUAtlas {
 	}
 }
 
-func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx int, fontSize, scale float32, col color.Color) glyphAtlasKey {
+func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32, col color.Color) glyphAtlasKey {
 	g := run.Glyphs[idx]
 	r32, g32, b32, a32 := col.RGBA()
 	pixSize := int32(math.Round(float64(fontSize * scale * 64)))
@@ -67,6 +86,7 @@ func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx int, fontSize, scale fl
 		face:    run.Face,
 		gid:     g.GlyphID,
 		pixSize: pixSize,
+		phase:   uint8(phase),             //gosec:disable G115 -- phase is always 0 to subpixelPhases-1
 		r:       uint8((r32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
 		g:       uint8((g32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
 		b:       uint8((b32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
@@ -77,13 +97,14 @@ func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx int, fontSize, scale fl
 // getOrAdd returns the atlas entry for a glyph, adding it on a miss.
 // The second return value is the dirty rectangle written into cpuImg; it is
 // empty when the entry was already cached so no GPU upload is needed.
-func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx int, fontSize, scale float32, col color.Color) (glyphAtlasEntry, image.Rectangle) {
-	key := a.cacheKey(run, idx, fontSize, scale, col)
+func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, scale float32, col color.Color) (glyphAtlasEntry, image.Rectangle) {
+	key := a.cacheKey(run, idx, phase, fontSize, scale, col)
 	if entry, ok := a.entries[key]; ok {
 		return entry, image.Rectangle{}
 	}
 
-	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, col)
+	subpixel := float32(phase) / subpixelPhases
+	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel, col)
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
 	// Advance to a new shelf if the glyph does not fit in the current row.
@@ -170,13 +191,13 @@ type textVertices struct {
 // entry.x+entry.w, entry.y+entry.h] of the shared atlas texture.
 //
 // offX and offY are the glyph's device-pixel offset from the string origin.
-// They are rounded to whole pixels so that the glyph bitmap, which was
-// rasterised at integer alignment, maps one texel to one pixel. Rounding
-// relative to the origin rather than to the screen also keeps letter spacing
-// stable as the string moves, where rounding absolute positions made it shift
-// from frame to frame.
+// offX is already a whole pixel, its fractional part having been rasterised
+// into the bitmap as a sub-pixel offset, so the quad maps one texel to one
+// pixel and stays crisp while still sitting where kerning asked for it. offY
+// is rounded here, since vertical sub-pixel positioning buys nothing on a
+// shared baseline.
 func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, offY float32) []float32 {
-	x1 := float32(math.Round(float64(offX)))
+	x1 := offX
 	y1 := float32(math.Round(float64(offY)))
 	x2 := x1 + float32(entry.w)
 	y2 := y1 + float32(entry.h)
@@ -223,7 +244,11 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 
 		paint.WalkStringGlyphs(face.Fonts, text.Text, text.TextSize, text.TextStyle, p.pixScale,
 			func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32) {
-				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, text.TextSize, p.pixScale, col)
+				// Split the exact position into the pixel the glyph is drawn on
+				// and the sub-pixel remainder that is rasterised into it.
+				phase, wholeX := subpixelPhaseAt(penX + xOff)
+
+				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, phase, text.TextSize, p.pixScale, col)
 				if !dirty.Empty() {
 					p.uploadAtlasRegion(dirty)
 				}
@@ -231,7 +256,7 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 				// rather than the line's. Offsetting by the difference keeps runs
 				// from differently sized faces on the one baseline (see #6448).
 				p.textBatch = p.appendGlyphQuad(p.textBatch, entry,
-					penX+xOff, baseY-float32(entry.baseline)-yOff)
+					wholeX, baseY-float32(entry.baseline)-yOff)
 			},
 		)
 

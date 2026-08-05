@@ -225,6 +225,11 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 // ascent across the runs, so glyphs from differently sized faces sit on one
 // baseline rather than each on their own.
 //
+// All four positions are exact rather than rounded to whole pixels. Kerning
+// routinely moves a glyph by a fraction of a pixel, and rounding it away is
+// visible as uneven letter spacing, so it is left to the caller to decide how
+// to land on the pixel grid.
+//
 // Runs that consist solely of a replacement-char glyph (GlyphID==0) are skipped
 // so callers do not need to handle them.
 func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
@@ -237,8 +242,8 @@ func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.
 		}
 		penX := x
 		for i, g := range run.Glyphs {
-			xOff := float32(math.Round(float64(fixed266ToFloat32(g.XOffset) * scale)))
-			yOff := float32(math.Round(float64(fixed266ToFloat32(g.YOffset) * scale)))
+			xOff := fixed266ToFloat32(g.XOffset) * scale
+			yOff := fixed266ToFloat32(g.YOffset) * scale
 			cb(run, i, penX, y, xOff, yOff)
 			penX += fixed266ToFloat32(g.Advance) * scale
 		}
@@ -246,16 +251,22 @@ func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.
 }
 
 // RenderGlyphToImage rasterises a single glyph from run (at index idx) into a
-// freshly allocated RGBA image. XOffset and YOffset of the glyph are zeroed so
-// the result is independent of kerning context; callers apply the real offsets
-// when positioning the glyph on screen.
+// freshly allocated RGBA image. The glyph's own XOffset and YOffset are dropped
+// so the result does not depend on the kerning context it happened to appear
+// in, which is what lets one bitmap serve every occurrence of the glyph.
+//
+// subpixel shifts the glyph right by that fraction of a pixel while rasterising,
+// and must be in [0,1). Text is laid out on fractional positions but a bitmap
+// can only be drawn on whole pixels, so the fraction is rasterised into the
+// bitmap instead of being rounded away or resampled at draw time. Callers hold
+// one bitmap per subpixel position they use and pick between them.
 //
 // Image height equals the full line height (ascent + |descent|). The returned
 // baseline is the glyph's baseline measured in pixels down from the top of the
 // image, which callers need in order to sit the bitmap on the line's shared
 // baseline: a run's own ascent is not necessarily the line's ascent when faces
 // of different sizes are mixed.
-func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale float32, col color.Color) (img *image.RGBA, baseline int) {
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32, col color.Color) (img *image.RGBA, baseline int) {
 	g := run.Glyphs[idx]
 	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: col}
 
@@ -266,17 +277,19 @@ func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale float32, co
 		h = 1
 	}
 	italicPad := int(math.Ceil(float64(fontSize * scale / 5)))
-	w := int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 2
+	// One extra column beyond the advance for ink pushed right by subpixel.
+	w := int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 3
 	if w <= 0 {
 		w = 1
 	}
 
 	img = image.NewRGBA(image.Rect(0, 0, w, h))
-	noOffset := g
-	noOffset.XOffset = 0
-	noOffset.YOffset = 0
+	shifted := g
+	// XOffset is in font units, so undo the pixel scale to express the shift.
+	shifted.XOffset = float32ToFixed266(subpixel / scale)
+	shifted.YOffset = 0
 	singleRun := run
-	singleRun.Glyphs = []shaping.Glyph{noOffset}
+	singleRun.Glyphs = []shaping.Glyph{shifted}
 	ren.DrawShapedRunAt(singleRun, img, 0, baseline)
 	return img, baseline
 }
