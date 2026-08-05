@@ -18,9 +18,12 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/png"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -28,6 +31,29 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
+
+// writePNG saves img to path. The path comes from the environment, so it is
+// cleaned and required to be a plain .png name rather than something that can
+// climb out of the directory the harness was pointed at.
+func writePNG(path string, img image.Image) error {
+	clean := filepath.Clean(path)
+	if strings.Contains(clean, "..") {
+		return fmt.Errorf("refusing to write outside the target directory: %s", path)
+	}
+	if filepath.Ext(clean) != ".png" {
+		return fmt.Errorf("capture path must end in .png: %s", path)
+	}
+
+	f, err := os.Create(clean)
+	if err != nil {
+		return err
+	}
+	if err := png.Encode(f, img); err != nil {
+		f.Close()
+		return err
+	}
+	return f.Close()
+}
 
 func envInt(name string, fallback int) int {
 	if v := os.Getenv(name); v != "" {
@@ -51,12 +77,23 @@ func rowText(i int) string {
 		i*3%997, float32(i)/97.0)
 }
 
+// Defaults for the scroll workload. The window is roughly phone shaped, and the
+// scroll step is deliberately not a whole row height so that rows are drawn at
+// many different sub-pixel offsets rather than repeating a short cycle.
+const (
+	defaultRows   = 5000
+	defaultWidth  = 400
+	defaultHeight = 800
+	defaultStepPx = 7
+	defaultTickMs = 8
+)
+
 func main() {
-	rows := envInt("TEXTBENCH_ROWS", 5000)
-	width := envInt("TEXTBENCH_WIDTH", 400)
-	height := envInt("TEXTBENCH_HEIGHT", 800)
-	stepPx := envInt("TEXTBENCH_STEP", 7)
-	tickMs := envInt("TEXTBENCH_TICK_MS", 8)
+	rows := envInt("TEXTBENCH_ROWS", defaultRows)
+	width := envInt("TEXTBENCH_WIDTH", defaultWidth)
+	height := envInt("TEXTBENCH_HEIGHT", defaultHeight)
+	stepPx := envInt("TEXTBENCH_STEP", defaultStepPx)
+	tickMs := envInt("TEXTBENCH_TICK_MS", defaultTickMs)
 
 	a := app.New()
 	w := a.NewWindow("textbench")
@@ -83,16 +120,10 @@ func main() {
 			time.Sleep(time.Second)
 			fyne.Do(func() {
 				img := w.Canvas().Capture()
-				f, err := os.Create(out)
-				if err != nil {
+				if err := writePNG(out, img); err != nil {
 					fmt.Fprintln(os.Stderr, "capture:", err)
 					os.Exit(1)
 				}
-				if err := png.Encode(f, img); err != nil {
-					fmt.Fprintln(os.Stderr, "capture:", err)
-					os.Exit(1)
-				}
-				f.Close()
 				fmt.Fprintln(os.Stderr, "captured to", out)
 				os.Exit(0)
 			})
