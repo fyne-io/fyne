@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
@@ -54,9 +55,8 @@ type painter struct {
 	programs        *programs
 	shaderPrograms  map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale        float32
-	textBatch       []float32 // reused vertex scratch for one string's glyph quads
-	textBuffer      Buffer    // VBO the batch is uploaded through
-	textBufferValid bool      // whether textBuffer has been created on the current context
+	textBatch       []float32                      // scratch used while building a batch
+	textCache       map[*canvas.Text]*textVertices // cached glyph geometry, keyed by object
 }
 
 // Declare conformity to Painter interface
@@ -75,6 +75,18 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	// deliberately not freed here: Free is also called for every object on each
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
+	//
+	// Cached glyph geometry is dropped here though, which is exactly what we
+	// want: a text object reaches Free either because it was refreshed, in
+	// which case its glyphs may have changed, or because it expired from the
+	// texture cache having not been drawn for a while.
+	if text, ok := obj.(*canvas.Text); ok {
+		if cached, ok := p.textCache[text]; ok {
+			p.ctx.DeleteBuffer(cached.buffer)
+			p.logError()
+			delete(p.textCache, text)
+		}
+	}
 	p.freeTexture(obj)
 }
 
@@ -260,6 +272,14 @@ func (p *painter) compilePrograms() *programs {
 			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		},
+		text: programState{
+			ref: p.mustCreateProgram(shaderVertText, shaderFragText),
+			// Sized for a typical line. Batches that need more grow the
+			// allocation; see drawGlyphBatch.
+			buff:       p.createBuffer(floatsPerGlyph * 128),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
 	}
 }
 
@@ -386,6 +406,7 @@ type programs struct {
 	rectangle        programState
 	roundRectangle   programState
 	simple           programState
+	text             programState
 }
 
 // shaderState caches a user shader's compiled program and uploaded textures.

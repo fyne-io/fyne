@@ -5,8 +5,6 @@ import (
 	"math"
 	"sort"
 
-	"github.com/go-text/typesetting/shaping"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
@@ -31,6 +29,8 @@ const (
 	attrInset                    = "inset"
 	attrLineWidth                = "lineWidth"
 	attrNormal                   = "normal"
+	attrOrigin                   = "origin"
+	attrPixelScale               = "pixelScale"
 	attrPointControlCount        = "numControlPoints"
 	attrPointControl1            = "controlPoint1"
 	attrPointControl2            = "controlPoint2"
@@ -923,42 +923,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
 	p.ensureGlyphAtlas()
 
-	// Collect every glyph of the string into one vertex buffer and issue a
-	// single draw for it. Adding a glyph can fill the atlas and reset it, which
-	// invalidates the quads gathered so far, so the pass is repeated if the
-	// generation moved. A second pass cannot reset again unless one string
-	// alone exceeds the atlas, in which case the last batch is the best
-	// available and is drawn as is.
-	for attempt := 0; attempt < 2; attempt++ {
-		generation := p.glyphAtlas.generation
-		p.textBatch = p.textBatch[:0]
-
-		paint.WalkStringGlyphs(face.Fonts, text.Text, text.TextSize, text.TextStyle, p.pixScale,
-			func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32) {
-				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, text.TextSize, p.pixScale, col)
-				if !dirty.Empty() {
-					p.uploadAtlasRegion(dirty)
-				}
-				// The bitmap carries its own baseline, which is the run's ascent
-				// rather than the line's. Offsetting by the difference keeps runs
-				// from differently sized faces on the one baseline (see #6448).
-				glyphPos := fyne.NewPos(
-					pos.X+(penX+xOff)/p.pixScale,
-					pos.Y+(baseY-float32(entry.baseline)-yOff)/p.pixScale,
-				)
-				glyphSize := fyne.NewSize(
-					float32(entry.w)/p.pixScale,
-					float32(entry.h)/p.pixScale,
-				)
-				p.textBatch = p.appendGlyphQuad(p.textBatch, entry, glyphPos, glyphSize, frame)
-			},
-		)
-
-		if p.glyphAtlas.generation == generation {
-			break
-		}
-	}
-	p.drawGlyphBatch(p.textBatch)
+	cached := p.glyphGeometry(text, face, col)
+	p.drawGlyphBatch(cached, pos, frame)
 
 	if decorated {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
