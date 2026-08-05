@@ -67,6 +67,7 @@ type painter struct {
 	blurKernelRadius        float32 // radius the current kernel texture was built for
 	fbHeight                int     // current framebuffer height in pixels
 	maxTextureSize          int
+	glyphAtlas              *glyphGPUAtlas
 	clippedTextTextures     map[*canvas.Text]clippedTextTexture
 }
 

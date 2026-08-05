@@ -305,6 +305,14 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 	)
 }
 
+func (c *xjsContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	var jsData interface{}
+	if len(data) > 0 {
+		jsData = data
+	}
+	gl.TexSubImage2D(gl.Enum(target), level, xoffset, yoffset, width, height, gl.Enum(colorFormat), gl.Enum(typ), jsData)
+}
+
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
 }

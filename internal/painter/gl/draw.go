@@ -5,11 +5,14 @@ import (
 	"math"
 	"sort"
 
+	"github.com/go-text/typesetting/shaping"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 )
 
 const edgeSoftness = 0.5
@@ -852,30 +855,39 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	case fyne.TextAlignCenter:
 		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
-
 	if containerSize.Height > size.Height {
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
-	// text size is sensitive to position on screen
 	size.Width = roundToPixel(size.Width, p.pixScale)
 	size.Height = roundToPixel(size.Height, p.pixScale)
-	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
-	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
-	if fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
-		p.freeClippedTextTexture(text)
-		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
-	} else {
-		visibleOffset, visibleWidth := visibleTextPixels(pos, size, frame, clip, p.pixScale)
-		height := int(math.Ceil(float64(size.Height * p.pixScale)))
-		cached := p.clippedTextTexture(text, visibleOffset, visibleWidth, fullWidth, height)
-		if cache.IsValid(cache.TextureType(cached.texture)) {
-			clipPos := fyne.NewPos(pos.X+float32(cached.offset)/p.pixScale, pos.Y)
-			clipSize := fyne.NewSize(float32(cached.width)/p.pixScale, size.Height)
-			p.drawTextureRegion(cached.texture, clipPos, clipSize, frame)
-		}
+	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale)
+	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)
+
+	col := text.Color
+	if col == nil {
+		col = theme.Color(theme.ColorNameForeground)
 	}
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
+	p.ensureGlyphAtlas()
+
+	paint.WalkStringGlyphs(face.Fonts, text.Text, text.TextSize, text.TextStyle, p.pixScale,
+		func(run shaping.Output, idx int, penX, xOff, yOff float32) {
+			entry, dirty := p.glyphAtlas.getOrAdd(run, idx, text.TextSize, p.pixScale, col)
+			if !dirty.Empty() {
+				p.uploadAtlasRegion(dirty)
+			}
+			glyphPos := fyne.NewPos(
+				pos.X+(penX+xOff)/p.pixScale,
+				pos.Y-yOff/p.pixScale,
+			)
+			glyphSize := fyne.NewSize(
+				float32(entry.w)/p.pixScale,
+				float32(entry.h)/p.pixScale,
+			)
+			p.drawGlyphQuad(entry, glyphPos, glyphSize, frame)
+		},
+	)
 
 	if decorated {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)

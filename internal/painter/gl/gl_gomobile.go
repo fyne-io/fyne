@@ -74,6 +74,7 @@ func (p *painter) Init() {
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	p.blurSnapTexValid = false   // reset on context recreation; old texture IDs are no longer valid
 	p.blurKernelTexValid = false // kernel texture must also be re-created
+	p.glyphAtlas = nil           // GPU atlas texture is invalidated on context recreation
 	p.glctx().Disable(gl.DepthTest)
 	p.glctx().Enable(gl.Blend)
 	if compiled == nil {
@@ -335,6 +336,10 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 		gl.Enum(typ),
 		data,
 	)
+}
+
+func (c *mobileContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	c.glContext.TexSubImage2D(gl.Enum(target), level, xoffset, yoffset, width, height, gl.Enum(colorFormat), gl.Enum(typ), data)
 }
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {

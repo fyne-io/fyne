@@ -188,7 +188,6 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
-	ResetGlyphAtlas()
 }
 
 // DrawString draws a string into an image.
@@ -216,52 +215,61 @@ func DrawStringOffset(dst draw.Image, s string, color color.Color, f shaping.Fon
 	})
 }
 
-// DrawStringAtlas renders s into dst using cached per-glyph bitmaps from the
-// shared glyph atlas, avoiding redundant rasterisation of glyphs that have
-// already been seen.  It is otherwise equivalent to DrawString.
-func DrawStringAtlas(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle) {
-	DrawStringOffsetAtlas(dst, s, color, f, fontSize, scale, style, 0)
-}
-
-// DrawStringOffsetAtlas is like DrawStringAtlas but shifts the rendered text
-// left by offset pixels.  It is otherwise equivalent to DrawStringOffset.
-func DrawStringOffsetAtlas(dst draw.Image, s string, color color.Color, f shaping.Fontmap, fontSize, scale float32, style fyne.TextStyle, offset int) {
-	ren := &render.Renderer{
-		FontSize: fontSize,
-		PixScale: scale,
-		Color:    color,
-	}
-	a := sharedGlyphAtlas
-
+// WalkStringGlyphs calls cb once for each glyph in s. The callback receives
+// the shaped run containing the glyph, the glyph's index within run.Glyphs,
+// and the accumulated pen X position in device pixels at the start of that
+// glyph together with the HarfBuzz X/Y positioning offsets (also in device
+// pixels). Runs that consist solely of a replacement-char glyph (GlyphID==0)
+// are skipped so callers do not need to handle them.
+func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
+	cb func(run shaping.Output, idx int, penX, xOff, yOff float32),
+) {
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x float32) {
-		// Replacement characters are uncommon; fall back to direct rendering.
 		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
-			y := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * ren.PixScale)))
-			ren.DrawStringAt(string([]rune{replacementChar}), dst, int(x)-offset, y, f.ResolveFace(replacementChar))
 			return
 		}
-
-		penX := int(x) - offset
+		penX := x
 		for i, g := range run.Glyphs {
-			glyphImg := a.glyphImage(ren, run, i, color, scale)
-
-			// Apply the real HarfBuzz kerning/positioning offsets at blit time.
-			xOff := int(math.Round(float64(fixed266ToFloat32(g.XOffset) * scale)))
-			yOff := int(math.Round(float64(fixed266ToFloat32(g.YOffset) * scale)))
-
-			// glyphImg baseline is at y=ascent from its top, matching dst layout.
-			// YOffset is upward-positive in font coords; image Y grows downward.
-			sr := glyphImg.Bounds()
-			dp := image.Pt(penX+xOff, -yOff)
-			dr := sr.Add(dp).Intersect(dst.Bounds())
-			if !dr.Empty() {
-				draw.Draw(dst, dr, glyphImg, sr.Min.Add(dr.Min).Sub(dp), draw.Over)
-			}
-
-			penX += int(math.Round(float64(fixed266ToFloat32(g.Advance) * scale)))
+			xOff := float32(math.Round(float64(fixed266ToFloat32(g.XOffset) * scale)))
+			yOff := float32(math.Round(float64(fixed266ToFloat32(g.YOffset) * scale)))
+			cb(run, i, penX, xOff, yOff)
+			penX += fixed266ToFloat32(g.Advance) * scale
 		}
 	})
+}
+
+// RenderGlyphToImage rasterises a single glyph from run (at index idx) into a
+// freshly allocated RGBA image. XOffset and YOffset of the glyph are zeroed so
+// the result is independent of kerning context; callers apply the real offsets
+// when positioning the glyph on screen.
+//
+// Image height equals the full line height (ascent + |descent|); the baseline
+// sits at y=ascent pixels from the top, matching the DrawShapedRunAt convention.
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale float32, col color.Color) *image.RGBA {
+	g := run.Glyphs[idx]
+	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: col}
+
+	ascent := int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * scale)))
+	descent := int(math.Ceil(float64(-fixed266ToFloat32(run.LineBounds.Descent) * scale)))
+	h := ascent + descent
+	if h <= 0 {
+		h = 1
+	}
+	italicPad := int(math.Ceil(float64(fontSize * scale / 5)))
+	w := int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 2
+	if w <= 0 {
+		w = 1
+	}
+
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	noOffset := g
+	noOffset.XOffset = 0
+	noOffset.YOffset = 0
+	singleRun := run
+	singleRun.Glyphs = []shaping.Glyph{noOffset}
+	ren.DrawShapedRunAt(singleRun, img, 0, ascent)
+	return img
 }
 
 func loadMeasureFont(data fyne.Resource) *font.Face {

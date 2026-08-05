@@ -359,6 +359,20 @@ func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorF
 	)
 }
 
+func (c *coreContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexSubImage2D(
+		target,
+		int32(level),   //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(xoffset), //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(yoffset), //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(width),   //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(height),  //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		colorFormat,
+		typ,
+		gl.Ptr(data),
+	)
+}
+
 func (c *coreContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(target, param, value)
 }
