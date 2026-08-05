@@ -32,6 +32,34 @@ struct PSIn {
     float2 uv  : TEXCOORD0;
 };
 
+// Text is drawn a glyph at a time out of one shared coverage atlas, so a run of
+// text objects is a single DrawInstanced rather than an UpdateSubresource and a
+// Draw for each. Everything a glyph quad needs is here instead of in the shared
+// b0 buffer, which is what makes the batch possible. A constant buffer holds the
+// batch rather than a StructuredBuffer because these compile as vs_4_0/ps_4_0
+// and structured buffers need shader model 5.
+//
+// Mirrored by `glyphInst` in painter.go, and the array length by
+// `glyphBatchMax`; TestGlyphInstMatchesShader pins both.
+struct GlyphInst {
+    float4 ndc;   // x1, top, x2, bottom in clip space
+    float4 uv;    // u1, v1, u2, v2 in the atlas
+    float4 color; // rgba, straight alpha
+};
+
+cbuffer GlyphInstances : register(b2) {
+    GlyphInst gGlyphs[256];
+};
+
+// GlyphPSIn carries the per-instance colour to the pixel stage. It cannot ride
+// in PSIn because every other vertex shader would then have to write a field it
+// has no use for.
+struct GlyphPSIn {
+    float4 pos                   : SV_POSITION;
+    float2 uv                    : TEXCOORD0;
+    nointerpolation float4 color : COLOR0;
+};
+
 float4 blend_shadow(float4 col, float4 shadow)
 {
     float alpha = col.a + shadow.a * (1.0 - col.a);

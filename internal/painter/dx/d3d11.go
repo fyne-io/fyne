@@ -117,6 +117,10 @@ const (
 
 	formatR8G8B8A8Unorm = 28
 	formatB8G8R8A8Unorm = 87
+	// formatR8Unorm backs the glyph atlas. Glyphs are coverage, not colour - the
+	// text colour comes from the instance data - so one channel does the job at a
+	// quarter of the memory.
+	formatR8Unorm = 61
 
 	usageDefault   = 0
 	usageImmutable = 1
@@ -400,6 +404,7 @@ const (
 	slotMap                    = 14
 	slotUnmap                  = 15
 	slotPSSetConstantBuffers   = 16
+	slotDrawInstanced          = 21
 	slotIASetPrimitiveTopology = 24
 	slotOMSetRenderTargets     = 33
 	slotOMSetBlendState        = 35
@@ -473,6 +478,10 @@ func (c *deviceContext) PSSetSampler(s *samplerState) {
 // second constant buffer and several textures at once. The built in shaders
 // only ever use slot 0, so they keep the simpler forms above.
 
+func (c *deviceContext) VSSetConstantBufferAt(slot uint32, b *buffer) {
+	c.call(slotVSSetConstantBuffers, uintptr(slot), 1, uintptr(unsafe.Pointer(&b)))
+}
+
 func (c *deviceContext) PSSetConstantBufferAt(slot uint32, b *buffer) {
 	c.call(slotPSSetConstantBuffers, uintptr(slot), 1, uintptr(unsafe.Pointer(&b)))
 }
@@ -493,6 +502,20 @@ func (c *deviceContext) PSSetSamplersAt(slot uint32, samplers []*samplerState) {
 
 func (c *deviceContext) Draw(vertexCount, startVertex uint32) {
 	c.call(slotDraw, uintptr(vertexCount), uintptr(startVertex))
+}
+
+// DrawInstanced repeats the vertex shader instanceCount times, handing it
+// SV_InstanceID; there are no vertex buffers here, so no per-instance input
+// slot has to be set up first.
+func (c *deviceContext) DrawInstanced(vertexCountPerInstance, instanceCount uint32) {
+	c.call(slotDrawInstanced, uintptr(vertexCountPerInstance), uintptr(instanceCount), 0, 0)
+}
+
+// UpdateTextureRegion replaces a rectangle of a texture rather than the whole
+// of it, which is how a glyph reaches its slot in the atlas.
+func (c *deviceContext) UpdateTextureRegion(res, data unsafe.Pointer, rowPitch uint32, dstBox *box) {
+	c.call(slotUpdateSubresource, uintptr(res), 0, uintptr(unsafe.Pointer(dstBox)),
+		uintptr(data), uintptr(rowPitch), 0)
 }
 
 // box is D3D11_BOX, the source region for CopySubresourceRegion. Coordinates are
@@ -534,7 +557,17 @@ func (c *deviceContext) Flush() {
 func (c *deviceContext) Map(res unsafe.Pointer, mapType uint32) (mappedSubresource, error) {
 	var m mappedSubresource
 	hr := hresult(c.call(slotMap, uintptr(res), 0, uintptr(mapType), 0, uintptr(unsafe.Pointer(&m))))
-	return m, hr.error("Map")
+	if err := hr.error("Map"); err != nil {
+		return m, err
+	}
+	// Write-only maps do not report DXGI_ERROR_DEVICE_REMOVED (only maps with
+	// CPU read access do); after a TDR they can "succeed" with a null pointer.
+	// Surface that as an error so callers skip the draw instead of crashing;
+	// Present notices the removal and rebuilds the device right after.
+	if m.Data == nil {
+		return m, fmt.Errorf("Map succeeded with nil data (device removed?)")
+	}
+	return m, nil
 }
 
 func (c *deviceContext) Unmap(res unsafe.Pointer) {

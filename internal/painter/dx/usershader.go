@@ -170,6 +170,10 @@ func (s *userShader) bindTextures(p *Painter, shader *canvas.Shader) bool {
 		// uploads user textures with canvas.ImageScaleSmooth.
 		s.samplers = append(s.samplers, p.sampLinear)
 	}
+	// Before binding: flushing draws the glyph batch, which would otherwise
+	// leave the atlas bound over slot 0 for this shader's draw.
+	p.flushGlyphs()
+
 	p.g.ctx.PSSetShaderResourcesAt(0, s.srvs)
 	p.g.ctx.PSSetSamplersAt(0, s.samplers)
 	// Slot 0 changed behind the hot path's back; keep its cache truthful.

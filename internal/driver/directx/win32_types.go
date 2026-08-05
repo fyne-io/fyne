@@ -12,6 +12,7 @@ import (
 // Window messages we care about.
 const (
 	wmDestroy       = 0x0002
+	wmMove          = 0x0003
 	wmSize          = 0x0005
 	wmSetFocus      = 0x0007
 	wmKillFocus     = 0x0008
@@ -23,6 +24,11 @@ const (
 	wmGetMinMaxInfo = 0x0024
 	wmDrawItem      = 0x002B
 	wmMeasureItem   = 0x002C
+	wmTimer         = 0x0113
+	wmEnterMenuLoop = 0x0211
+	wmExitMenuLoop  = 0x0212
+	wmSizing        = 0x0214
+	wmMoving        = 0x0216
 	wmEnterSizeMove = 0x0231
 	wmExitSizeMove  = 0x0232
 	wmDropFiles     = 0x0233

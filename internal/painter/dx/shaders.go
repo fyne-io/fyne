@@ -40,6 +40,8 @@ var (
 	vertPassthrough2D string
 	//go:embed shaders/line.vs.hlsl
 	vertLine string
+	//go:embed shaders/glyph.vs.hlsl
+	vertGlyph string
 
 	//go:embed shaders/simple.ps.hlsl
 	pixelSimple string
@@ -61,12 +63,15 @@ var (
 	pixelBlur string
 	//go:embed shaders/line.ps.hlsl
 	pixelLine string
+	//go:embed shaders/glyph.ps.hlsl
+	pixelGlyph string
 )
 
 // Compilable sources, each already carrying the shared prelude.
 var (
 	VertexPassthrough2D = Common + vertPassthrough2D
 	VertexLine          = Common + vertLine
+	VertexGlyph         = Common + vertGlyph
 
 	PixelSimple         = Common + pixelSimple
 	PixelRectangle      = Common + pixelRectangle
@@ -79,4 +84,5 @@ var (
 	PixelBezierCurve      = Common + pixelBezierCurve
 	PixelBlur             = Common + pixelBlur
 	PixelLine             = Common + pixelLine
+	PixelGlyph            = Common + pixelGlyph
 )
