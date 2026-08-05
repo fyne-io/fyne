@@ -42,6 +42,8 @@ var (
 	procSetCursor                    = user32.NewProc("SetCursor")
 	procDestroyCursor                = user32.NewProc("DestroyCursor")
 	procEnumDisplayMonitors          = user32.NewProc("EnumDisplayMonitors")
+	procSetTimer                     = user32.NewProc("SetTimer")
+	procKillTimer                    = user32.NewProc("KillTimer")
 	procSetCapture                   = user32.NewProc("SetCapture")
 	procReleaseCapture               = user32.NewProc("ReleaseCapture")
 	procSetFocus                     = user32.NewProc("SetFocus")

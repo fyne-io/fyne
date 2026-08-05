@@ -69,18 +69,21 @@ func (w *window) setNativeMenu(main *fyne.MainMenu) {
 	if w.hwnd == 0 {
 		return
 	}
-	if w.menu != nil {
-		procSetMenu.Call(uintptr(w.hwnd), 0)
-		w.menu.release()
-		w.menu = nil
-	}
+	old := w.menu
+	w.menu = nil
+
 	if main == nil || len(main.Items) == 0 {
-		procDrawMenuBar.Call(uintptr(w.hwnd))
+		if old != nil {
+			procSetMenu.Call(uintptr(w.hwnd), 0)
+			old.release()
+			procDrawMenuBar.Call(uintptr(w.hwnd))
+		}
 		return
 	}
 
 	bar, _, _ := procCreateMenu.Call()
 	if bar == 0 {
+		w.menu = old // keep what is there rather than leaking a dead handle
 		return
 	}
 	state := &menuState{
@@ -98,12 +101,21 @@ func (w *window) setNativeMenu(main *fyne.MainMenu) {
 		appendMenu(bar, mfPopup, sub, m.Label)
 	}
 
+	// One SetMenu call replaces any bar already attached in place. Detaching
+	// first (SetMenu 0, then the new bar) resizes the client area twice, and a
+	// menu Refresh - which lands here - made every window's content visibly
+	// jump down and back up. The old menu is released only once replaced;
+	// SetMenu detaches but never destroys.
 	w.menu = state
 	procSetMenu.Call(uintptr(w.hwnd), bar)
+	if old != nil {
+		old.release()
+	}
 	procDrawMenuBar.Call(uintptr(w.hwnd))
 
 	// A menu bar takes its height out of the client area without any WM_SIZE, so
 	// the window has to grow by that much or the content loses its bottom rows.
+	// On a same-height rebuild setWindowPos is a no-op and Windows sends nothing.
 	w.applyClientSize()
 }
 
