@@ -447,7 +447,28 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var pixelsPerPt float32
-	var surfaceInitialized, wasDestroyed bool
+
+	var currentWindow *C.ANativeWindow
+	ensureSurface := func(w *C.ANativeWindow) error {
+		if C.surface != nil {
+			if currentWindow == w {
+				return nil
+			}
+			if errStr := C.destroyEGLSurface(); errStr != nil {
+				return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+			}
+			C.surface = nil
+			currentWindow = nil
+		}
+
+		if errStr := C.createEGLSurface(w); errStr != nil {
+			return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+		}
+		currentWindow = w
+		DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
+		DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+		return nil
+	}
 
 	for {
 		select {
@@ -456,22 +477,12 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 		case cfg := <-windowConfigChange:
 			pixelsPerPt = cfg.pixelsPerPt
 		case w := <-windowCreated:
-			if surfaceInitialized && !wasDestroyed {
-				if errStr := C.destroyEGLSurface(); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 		case w := <-windowRedrawNeeded:
-			if C.surface == nil {
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				surfaceInitialized = true
-				DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
-				DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 			theApp.sendLifecycle(lifecycle.StageFocused)
 			widthPx := int(C.ANativeWindow_getWidth(w))
@@ -498,7 +509,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				}
 			}
 			C.surface = nil
-			wasDestroyed = true
+			currentWindow = nil
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
 			theApp.sendLifecycle(lifecycle.StageDead)

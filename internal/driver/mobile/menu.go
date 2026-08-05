@@ -101,11 +101,11 @@ type menuLabelRenderer struct {
 	content *fyne.Container
 }
 
-func (m *menuLabelRenderer) BackgroundColor() color.Color {
+func (*menuLabelRenderer) BackgroundColor() color.Color {
 	return theme.Color(theme.ColorNameBackground)
 }
 
-func (m *menuLabelRenderer) Destroy() {
+func (*menuLabelRenderer) Destroy() {
 }
 
 func (m *menuLabelRenderer) Layout(size fyne.Size) {

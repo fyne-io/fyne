@@ -2,6 +2,85 @@
 
 package painter
 
+import (
+	"testing"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
+	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/shaping"
+	"github.com/stretchr/testify/assert"
+)
+
+// splitFaceMap resolves ASCII runes to one face and everything else to another,
+// modeling a string whose glyphs get shaped across two different fallback fonts
+// (as happens with mixed-script text, or text mixed with symbols/emoji).
+type splitFaceMap struct {
+	ascii, other *font.Face
+}
+
+func (m splitFaceMap) ResolveFace(r rune) *font.Face {
+	if r < 128 {
+		return m.ascii
+	}
+	return m.other
+}
+
+// TestWalkStringSharedLineAscent ensures that when a string is shaped across more
+// than one font (e.g. mixed CJK fallback fonts, or text mixed with symbols/emoji),
+// every run is positioned against the same, shared line ascent rather than each
+// run's own font ascent - which is what previously caused visibly inconsistent
+// vertical positioning within a single line (fyne-io/fyne#6446).
+func TestWalkStringSharedLineAscent(t *testing.T) {
+	ascii := loadMeasureFont(theme.DefaultTextFont())
+	other := loadMeasureFont(theme.DefaultSymbolFont())
+	if ascii == nil || other == nil {
+		t.Fatal("failed to load bundled fonts for test")
+	}
+	faces := splitFaceMap{ascii: ascii, other: other}
+
+	// soloAscent shapes a single-face string in isolation, so its one (and only)
+	// run necessarily gets its own font's true ascent - this gives us a reference
+	// value to compare against, without hard-coding font metrics in the test.
+	soloAscent := func(s string) float32 {
+		var y float32
+		found := false
+		adv := float32(0)
+		walkString(faces, s, float32ToFixed266(24), fyne.TextStyle{}, &adv, 1, func(_ shaping.Output, _, ry float32) {
+			y = ry
+			found = true
+		})
+		if !found {
+			t.Fatalf("no run produced for %q", s)
+		}
+		return y
+	}
+
+	asciiAscent := soloAscent("A")
+	otherAscent := soloAscent("⌘") // '⌘', present in the symbol font but not the text font
+	if asciiAscent == otherAscent {
+		t.Fatal("test fonts have identical ascent, can't verify sharing between distinct ascents")
+	}
+	expected := asciiAscent
+	if otherAscent > expected {
+		expected = otherAscent
+	}
+
+	for _, s := range []string{"A⌘", "⌘A", "A⌘A⌘"} {
+		var ys []float32
+		adv := float32(0)
+		walkString(faces, s, float32ToFixed266(24), fyne.TextStyle{}, &adv, 1, func(_ shaping.Output, _, y float32) {
+			ys = append(ys, y)
+		})
+
+		if assert.NotEmpty(t, ys, "expected at least one shaped run for %q", s) {
+			for i, y := range ys {
+				assert.Equal(t, expected, y, "run %d of %q should share the line's max ascent", i, s)
+			}
+		}
+	}
+}
+
 //
 //func Test_compositeFace_Close(t *testing.T) {
 //	chosenFont := &truetype.Font{}

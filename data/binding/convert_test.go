@@ -474,10 +474,10 @@ func TestStringToURI(t *testing.T) {
 	assert.Equal(t, "file:///tmp/test.txt", v.String())
 
 	// TODO fix issue in URI parser whereby "wrong" is a valid URI
-	//err = s.Set("wrong")
-	//assert.Nil(t, err)
-	//_, err = u.Get()
-	//assert.NotNil(t, err)
+	// err = s.Set("wrong")
+	// assert.Nil(t, err)
+	// _, err = u.Get()
+	// assert.NotNil(t, err)
 
 	uri := storage.NewFileURI("/mydir/")
 	err = u.Set(uri)
@@ -501,10 +501,10 @@ func TestURIToString(t *testing.T) {
 	assert.Equal(t, "file:///tmp/test.txt", v)
 
 	// TODO fix issue in URI parser whereby "wrong" is a valid URI
-	//err = s.Set("wrong")
-	//assert.NotNil(t, err)
-	//_, err = u.Get()
-	//assert.Nil(t, err)
+	// err = s.Set("wrong")
+	// assert.NotNil(t, err)
+	// _, err = u.Get()
+	// assert.Nil(t, err)
 
 	err = s.Set("file:///tmp/test.txt")
 	assert.Nil(t, err)

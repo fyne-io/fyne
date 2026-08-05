@@ -316,7 +316,7 @@ type baseTabsRenderer struct {
 	tabs baseTabs
 }
 
-func (r *baseTabsRenderer) Destroy() {
+func (*baseTabsRenderer) Destroy() {
 }
 
 func (r *baseTabsRenderer) applyTheme(t baseTabs) {
@@ -547,7 +547,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label := canvas.NewText(b.text, th.Color(theme.ColorNameForeground, v))
 	label.TextStyle.Bold = true
 
-	close := &tabCloseButton{
+	buttonClose := &tabCloseButton{
 		parent: b,
 		onTapped: func() {
 			if f := b.onClosed; f != nil {
@@ -555,16 +555,16 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 			}
 		},
 	}
-	close.ExtendBaseWidget(close)
-	close.Hide()
+	buttonClose.ExtendBaseWidget(buttonClose)
+	buttonClose.Hide()
 
-	objects := []fyne.CanvasObject{background, label, close, icon}
+	objects := []fyne.CanvasObject{background, label, buttonClose, icon}
 	return &tabButtonRenderer{
 		button:     b,
 		background: background,
 		icon:       icon,
 		label:      label,
-		close:      close,
+		close:      buttonClose,
 		objects:    objects,
 	}
 }
@@ -583,7 +583,7 @@ func (b *tabButton) MouseIn(*desktop.MouseEvent) {
 	b.Refresh()
 }
 
-func (b *tabButton) MouseMoved(*desktop.MouseEvent) {
+func (*tabButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabButton) MouseOut() {
@@ -612,7 +612,7 @@ type tabButtonRenderer struct {
 	objects    []fyne.CanvasObject
 }
 
-func (r *tabButtonRenderer) Destroy() {
+func (*tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
@@ -761,7 +761,7 @@ func (r *tabButtonRenderer) Refresh() {
 func (r *tabButtonRenderer) iconSize() float32 {
 	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 1.5 * iconSize
+		return 1.5 * iconSize //revive:disable-line:add-constant
 	}
 
 	return iconSize
@@ -816,7 +816,7 @@ func (b *tabCloseButton) MouseIn(*desktop.MouseEvent) {
 	b.parent.Refresh()
 }
 
-func (b *tabCloseButton) MouseMoved(*desktop.MouseEvent) {
+func (*tabCloseButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabCloseButton) MouseOut() {
@@ -835,7 +835,7 @@ type tabCloseButtonRenderer struct {
 	objects    []fyne.CanvasObject
 }
 
-func (r *tabCloseButtonRenderer) Destroy() {
+func (*tabCloseButtonRenderer) Destroy() {
 }
 
 func (r *tabCloseButtonRenderer) Layout(size fyne.Size) {

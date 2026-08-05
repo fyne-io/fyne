@@ -44,7 +44,7 @@ func newClipRenderer(c *Clip) *clipRenderer {
 	return &clipRenderer{c: c, objects: []fyne.CanvasObject{c.Content}}
 }
 
-func (r *clipRenderer) Destroy() {
+func (*clipRenderer) Destroy() {
 }
 
 func (r *clipRenderer) Layout(s fyne.Size) {
@@ -67,4 +67,4 @@ func (r *clipRenderer) Refresh() {
 }
 
 // IsClip marks this widget as clipping. It is on the renderer to avoid a public API addition.
-func (r *clipRenderer) IsClip() {}
+func (*clipRenderer) IsClip() {}

@@ -7,7 +7,9 @@ linters:
     - gosec
     - govet
     - nolintlint
+    - revive
     - staticcheck
+    - unconvert
     - unused
   exclusions:
     presets:
@@ -17,11 +19,13 @@ linters:
         linters:
           - errcheck
           - gosec
+          - revive
           - staticcheck
       - path: cmd/fyne_demo/ # The whole tool is deprecated
         linters:
           - errcheck
           - gosec
+          - revive
       - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
         linters:
           - staticcheck
@@ -38,6 +42,54 @@ linters:
         - G302
         - G304
         - G306
+    revive:
+      severity: error
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          arguments:
+          - allowFloats: "0.0,0.25,0.5,0.75,1.0"
+            allowInts: "0,1,2,3,4,5,100,0xff,0xffff"
+            allowStrs: '""'
+            ignoreFuncs: "strconv\\.Format.*,strconv\\.Parse.*"
+          exclude:
+            - "**/*_test.go"
+            - "**/test/**"
+        - name: argument-limit
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: confusing-naming
+          disabled: true # TODO
+        - name: cyclomatic
+          disabled: true
+        - name: enforce-switch-style
+          arguments:
+            - allowNoDefault
+        - name: exported
+          disabled: true # TODO
+        - name: flag-parameter
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: function-result-limit
+          disabled: true
+        - name: import-alias-naming
+          disabled: true # TODO
+        - name: line-length-limit
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: package-comments
+          disabled: true # TODO
+        - name: package-naming
+          disabled: true # TODO
+        - name: unchecked-type-assertion
+          disabled: true # TODO
+        - name: unhandled-error
+          disabled: true # we rely on errcheck
+        - name: use-slices-sort
+          disabled: true # TODO
     staticcheck:
       checks:
         - all

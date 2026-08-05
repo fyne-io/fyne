@@ -92,7 +92,7 @@ func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-func (b *scrollBar) Cursor() desktop.Cursor {
+func (*scrollBar) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
@@ -133,7 +133,7 @@ func (b *scrollBar) MouseIn(e *desktop.MouseEvent) {
 	b.area.MouseIn(e)
 }
 
-func (b *scrollBar) MouseMoved(*desktop.MouseEvent) {
+func (*scrollBar) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *scrollBar) MouseOut() {
@@ -204,15 +204,15 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	th := theme.CurrentForWidget(r.area)
 
 	barSize := th.Size(theme.SizeNameScrollBar)
-	min := barSize
+	minBarWidth := barSize
 	if !r.area.isLarge() {
-		min = th.Size(theme.SizeNameScrollBarSmall) * 2
+		minBarWidth = th.Size(theme.SizeNameScrollBarSmall) * 2
 	}
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
-		return fyne.NewSize(barSize, min)
+		return fyne.NewSize(barSize, minBarWidth)
 	default:
-		return fyne.NewSize(min, barSize)
+		return fyne.NewSize(minBarWidth, barSize)
 	}
 }
 
@@ -337,7 +337,7 @@ func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 	a.scroll.refreshBars()
 }
 
-func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
+func (*scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (a *scrollBarArea) MouseOut() {
@@ -364,7 +364,7 @@ func (a *scrollBarArea) moveBar(offset float32, barSize fyne.Size) {
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
-func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength float32) float32 {
+func (*scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength float32) float32 {
 	maxOffset := scrollLength - length
 	if offset < 0 {
 		offset = 0
@@ -557,16 +557,16 @@ func (s *Scroll) ScrollToTop() {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *Scroll) MinSize() fyne.Size {
-	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
+	minSize := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
-		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height)
+		minSize.Height = fyne.Max(minSize.Height, s.Content.MinSize().Height)
 	case ScrollVerticalOnly:
-		min.Width = fyne.Max(min.Width, s.Content.MinSize().Width)
+		minSize.Width = fyne.Max(minSize.Width, s.Content.MinSize().Width)
 	case ScrollNone:
 		return s.Content.MinSize()
 	}
-	return min
+	return minSize
 }
 
 // SetMinSize specifies a minimum size for this scroll container.
@@ -638,9 +638,9 @@ func (s *Scroll) refreshBars() {
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
-	min := s.Content.MinSize()
+	minSize := s.Content.MinSize()
 	size := s.Size()
-	if size.Width < min.Width && size.Height >= min.Height && dx == 0 {
+	if size.Width < minSize.Width && size.Height >= minSize.Height && dx == 0 {
 		dx, dy = dy, dx
 	}
 	if s.updateOffset(dx, dy) {
@@ -661,9 +661,9 @@ func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
 	}
 	oldX := s.Offset.X
 	oldY := s.Offset.Y
-	min := s.Content.MinSize()
-	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, min.Width)
-	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, min.Height)
+	minSize := s.Content.MinSize()
+	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, minSize.Width)
+	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, minSize.Height)
 
 	moved := s.Offset.X != oldX || s.Offset.Y != oldY
 	if f := s.OnScrolled; f != nil && moved {

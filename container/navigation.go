@@ -187,7 +187,7 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-func (r *navigatorRenderer) Destroy() {
+func (*navigatorRenderer) Destroy() {
 }
 
 func (r *navigatorRenderer) Layout(s fyne.Size) {

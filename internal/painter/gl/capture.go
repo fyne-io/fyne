@@ -27,7 +27,7 @@ func (c *captureImage) SubImage(inner image.Rectangle) *captureImage {
 	}
 }
 
-func (c *captureImage) ColorModel() color.Model {
+func (*captureImage) ColorModel() color.Model {
 	return color.RGBAModel
 }
 

@@ -21,6 +21,11 @@ import (
 	col "fyne.io/fyne/v2/internal/color"
 )
 
+const (
+	fillNone             = "none"
+	lengthValidSVGPrefix = 5
+)
+
 // Colorize creates a new SVG from a given one by replacing all fill colors by the given color.
 func Colorize(src []byte, clr color.Color) ([]byte, error) {
 	rdr := bytes.NewReader(src)
@@ -110,11 +115,11 @@ func IsResourceSVG(res fyne.Resource) bool {
 		return true
 	}
 
-	if len(res.Content()) < 5 {
+	if len(res.Content()) < lengthValidSVGPrefix {
 		return false
 	}
 
-	switch strings.ToLower(string(res.Content()[:5])) {
+	switch strings.ToLower(string(res.Content()[:lengthValidSVGPrefix])) {
 	case "<!doc", "<?xml", "<svg ":
 		return true
 	}
@@ -232,12 +237,12 @@ type objGroup struct {
 	Ellipses        []*ellipseObj `xml:"ellipse"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
-	Groups          []*objGroup   `xml:"g"`
+	Groups          []*objGroup   `xml:"g"` //revive:disable-line:struct-tag -- this is not a duplicate of the name tag but refers to children names
 }
 
 func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
 	for _, path := range paths {
-		if path.Fill != "none" {
+		if path.Fill != fillNone {
 			path.Fill = hexColor
 			path.FillOpacity = opacity
 		}
@@ -246,7 +251,7 @@ func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
 
 func replaceRectsFill(rects []*rectObj, hexColor string, opacity string) {
 	for _, rect := range rects {
-		if rect.Fill != "none" {
+		if rect.Fill != fillNone {
 			rect.Fill = hexColor
 			rect.FillOpacity = opacity
 		}
@@ -255,7 +260,7 @@ func replaceRectsFill(rects []*rectObj, hexColor string, opacity string) {
 
 func replaceCirclesFill(circles []*circleObj, hexColor string, opacity string) {
 	for _, circle := range circles {
-		if circle.Fill != "none" {
+		if circle.Fill != fillNone {
 			circle.Fill = hexColor
 			circle.FillOpacity = opacity
 		}
@@ -264,7 +269,7 @@ func replaceCirclesFill(circles []*circleObj, hexColor string, opacity string) {
 
 func replaceEllipsesFill(ellipses []*ellipseObj, hexColor string, opacity string) {
 	for _, ellipse := range ellipses {
-		if ellipse.Fill != "none" {
+		if ellipse.Fill != fillNone {
 			ellipse.Fill = hexColor
 			ellipse.FillOpacity = opacity
 		}
@@ -273,7 +278,7 @@ func replaceEllipsesFill(ellipses []*ellipseObj, hexColor string, opacity string
 
 func replacePolygonsFill(polys []*polygonObj, hexColor string, opacity string) {
 	for _, poly := range polys {
-		if poly.Fill != "none" {
+		if poly.Fill != fillNone {
 			poly.Fill = hexColor
 			poly.FillOpacity = opacity
 		}
@@ -294,8 +299,8 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string)
 // replaceFillColor alters an svg objects fill color.  Note that if an svg with multiple fill
 // colors is being operated upon, all fills will be converted to a single color.  Mostly used
 // to recolor Icons to match the theme's IconColor.
-func (s *svg) replaceFillColor(color color.Color) error {
-	hexColor, opacity := colorToHexAndOpacity(color)
+func (s *svg) replaceFillColor(c color.Color) error {
+	hexColor, opacity := colorToHexAndOpacity(c)
 	replacePathsFill(s.Paths, hexColor, opacity)
 	replaceRectsFill(s.Rects, hexColor, opacity)
 	replaceCirclesFill(s.Circles, hexColor, opacity)
@@ -318,8 +323,8 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 	return &s, nil
 }
 
-func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
-	r, g, b, a := col.ToNRGBA(color)
+func colorToHexAndOpacity(c color.Color) (hexStr, aStr string) {
+	r, g, b, a := col.ToNRGBA(c)
 	cBytes := []byte{r, g, b}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return hexStr, aStr

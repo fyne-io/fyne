@@ -249,7 +249,7 @@ func bindPreferenceListComparable[T bool | float64 | int | string](key string, p
 		listen.trigger()
 	}))
 
-	listen.parentListener = func(index int) {
+	listen.parentListener = func(int) {
 		listen.set(listen.key, *listen.val)
 
 		// the child changes are not seen on the write end so force it

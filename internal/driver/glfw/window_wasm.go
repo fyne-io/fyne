@@ -46,6 +46,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport  *glfw.Window
+	frame     presentGate
 	created   bool
 	decorate  bool
 	closing   bool
@@ -205,6 +206,10 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
 		name = "ew-resize"
 	case desktop.VResizeCursor:
 		name = "ns-resize"
+	case desktop.NESWResizeCursor:
+		name = "nesw-resize"
+	case desktop.NWSEResizeCursor:
+		name = "nwse-resize"
 	case desktop.HiddenCursor:
 		name = "none"
 	}

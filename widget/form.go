@@ -166,11 +166,11 @@ func (f *Form) RemoveItem(item *FormItem) {
 			}
 		}
 
-		if pos != -1 {
-			f.Items = append(f.Items[:pos], f.Items[pos+1:]...)
-		} else {
+		if pos == -1 {
 			return
 		}
+
+		f.Items = append(f.Items[:pos], f.Items[pos+1:]...)
 	}
 
 	f.Refresh()
@@ -220,7 +220,7 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
-func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
+func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	value := reflect.ValueOf(w).Elem()
 	validatorField := value.FieldByName("Validator")
 	if validatorField == (reflect.Value{}) {
@@ -297,6 +297,7 @@ func (f *Form) checkValidation(err error) {
 			f.submitButton.Disable()
 			return
 		}
+
 		if item.Required {
 			if has, ok := item.Widget.(fyne.Requireable); ok && !has.HasValue() {
 				f.submitButton.Disable()
@@ -313,10 +314,10 @@ func (f *Form) checkValidation(err error) {
 			f.validateText.Show()
 			f.submitButton.Disable()
 			return
-		} else {
-			f.validationError = nil
-			f.validateText.Hide()
 		}
+
+		f.validationError = nil
+		f.validateText.Hide()
 	}
 
 	if !f.disabled {

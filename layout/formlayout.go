@@ -18,7 +18,7 @@ type formLayout struct{}
 // This includes the width of the label column (maximum width of all labels),
 // the width of the content column (maximum width of all content cells and remaining space in container)
 // and the total minimum height of the form.
-func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (labelWidth float32, contentWidth float32, height float32) {
+func (*formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (labelWidth float32, contentWidth float32, height float32) {
 	if len(objects)%formLayoutCols != 0 {
 		return 0, 0, 0
 	}

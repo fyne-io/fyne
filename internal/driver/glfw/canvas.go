@@ -86,7 +86,7 @@ func (c *glCanvas) Padded() bool {
 	return c.padded
 }
 
-func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 	multiple := c.scale * c.texScale
 	scaleInt := func(x float32) int {
 		return int(math.Round(float64(x * multiple)))

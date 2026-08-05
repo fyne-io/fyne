@@ -126,13 +126,13 @@ func TestLabel_Alignment_Later(t *testing.T) {
 
 func TestText_MinSize_MultiLine(t *testing.T) {
 	textOneLine := NewLabel("Break")
-	min := textOneLine.MinSize()
+	minSize := textOneLine.MinSize()
 	textMultiLine := NewLabel("Bre\nak")
 	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*RichText)
 	min2 := textMultiLine.MinSize()
 
-	assert.Less(t, min2.Width, min.Width)
-	assert.Greater(t, min2.Height, min.Height)
+	assert.Less(t, min2.Width, minSize.Width)
+	assert.Greater(t, min2.Height, minSize.Height)
 
 	yPos := float32(-1)
 	for _, text := range test.TempWidgetRenderer(t, rich).(*textRenderer).Objects() {
@@ -232,6 +232,34 @@ func TestLabel_Select(t *testing.T) {
 	l.Refresh()
 	assert.Equal(t, 1, len(test.WidgetRenderer(l).Objects()))
 	assert.Empty(t, l.SelectedText())
+}
+
+func TestLabel_ClearSelection(t *testing.T) {
+	l := NewLabel("Hello")
+	l.Selectable = true
+
+	sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
+	sel.MouseDown(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 10)},
+	})
+	sel.Dragged(&fyne.DragEvent{
+		Dragged:    fyne.Delta{DX: 15, DY: 0},
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
+	sel.DragEnd()
+	sel.MouseUp(&desktop.MouseEvent{
+		Button:     desktop.MouseButtonPrimary,
+		PointEvent: fyne.PointEvent{Position: fyne.NewPos(30, 10)},
+	})
+	assert.Equal(t, "el", l.SelectedText())
+
+	l.ClearSelection()
+	assert.Equal(t, "", l.SelectedText())
+
+	// calling again with nothing selected is a no-op
+	l.ClearSelection()
+	assert.Equal(t, "", l.SelectedText())
 }
 
 func TestLabel_SelectWord(t *testing.T) {

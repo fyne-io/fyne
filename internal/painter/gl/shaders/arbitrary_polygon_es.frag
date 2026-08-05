@@ -10,7 +10,7 @@ precision mediump int;
 precision lowp sampler2D;
 #endif
 
-#define MAX_VERTICES 32
+#define MAX_VERTICES 16
 
 uniform vec2 frame;
 uniform vec4 bounds;

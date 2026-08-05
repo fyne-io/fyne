@@ -6,26 +6,26 @@ import (
 
 type noosDevice struct{}
 
-func (n *noosDevice) Orientation() fyne.DeviceOrientation {
+func (*noosDevice) Orientation() fyne.DeviceOrientation {
 	return fyne.OrientationVertical
 }
 
-func (n *noosDevice) IsMobile() bool {
+func (*noosDevice) IsMobile() bool {
 	return false
 }
 
-func (n *noosDevice) IsBrowser() bool {
+func (*noosDevice) IsBrowser() bool {
 	return false
 }
 
-func (n *noosDevice) HasKeyboard() bool {
+func (*noosDevice) HasKeyboard() bool {
 	return true
 }
 
-func (n *noosDevice) SystemScaleForWindow(fyne.Window) float32 {
+func (*noosDevice) SystemScaleForWindow(fyne.Window) float32 {
 	return 1.0
 }
 
-func (n *noosDevice) Locale() fyne.Locale {
+func (*noosDevice) Locale() fyne.Locale {
 	return "en"
 }

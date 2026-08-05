@@ -14,7 +14,7 @@ func NewCenterLayout() fyne.Layout {
 
 // Layout is called to pack all child objects into a specified size.
 // For CenterLayout this sets all children to their minimum size, centered within the space.
-func (c *centerLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+func (*centerLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	for _, child := range objects {
 		childMin := child.MinSize()
 		child.Resize(childMin)
@@ -24,7 +24,7 @@ func (c *centerLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For CenterLayout this is determined simply as the MinSize of the largest child.
-func (c *centerLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+func (*centerLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	for _, child := range objects {
 		if !child.Visible() {

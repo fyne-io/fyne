@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/repository"
 )
 
 var once sync.Once
@@ -28,7 +29,7 @@ func (a *fyneApp) cachedIconPath() string {
 }
 
 func (a *fyneApp) saveIconToCache(dirPath, filePath string) error {
-	err := os.MkdirAll(dirPath, 0o700)
+	err := os.MkdirAll(dirPath, repository.PermUserReadWriteExec)
 	if err != nil {
 		fyne.LogError("Unable to create application cache directory", err)
 		return err

@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
-	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -71,7 +72,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// make sure we fail over if the specified directory does not exist
 	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
-		t.Errorf("Should have failed to create lister for nonexistent file")
+		t.Error("Should have failed to create lister for nonexistent file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = home
@@ -102,7 +103,7 @@ func TestFileDialogStartRemember(t *testing.T) {
 func TestFileDialogResize(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	win.Resize(fyne.NewSize(600, 400))
-	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
+	file := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 
 	// Mimic the fileopen dialog
@@ -223,7 +224,7 @@ func TestShowFileOpen(t *testing.T) {
 	id := 0
 	for i, icon := range objects {
 		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
-		if item.dir == false {
+		if !item.dir {
 			target = item
 			id = i
 			break
@@ -255,7 +256,7 @@ func TestHiddenFiles(t *testing.T) {
 	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	d := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 	d.SetLocation(dir)
 	d.Show()
@@ -339,7 +340,7 @@ func TestShowFileSave(t *testing.T) {
 	id := -1
 	for i, icon := range objects {
 		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
-		if item.dir == false {
+		if !item.dir {
 			target = item
 			id = i
 			break
@@ -382,7 +383,7 @@ func TestShowFileSave(t *testing.T) {
 
 func TestFileFilters(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	f := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 
 	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
@@ -448,7 +449,7 @@ func TestFileSort(t *testing.T) {
 	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	d := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 	d.SetLocation(dir)
 	d.Show()
@@ -723,7 +724,7 @@ func TestSetFileNameBeforeShow(t *testing.T) {
 	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
 
 	// Should have no effect on FileOpen dialog
-	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	dOpen.SetFileName("testfile.zip")
 	dOpen.Show()
 
@@ -739,7 +740,7 @@ func TestSetFileNameAfterShow(t *testing.T) {
 	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
 
 	// Should have no effect on FileOpen dialog
-	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	dOpen.Show()
 	dOpen.SetFileName("testfile.zip")
 
@@ -768,7 +769,7 @@ func TestTapParent_GoesUpOne(t *testing.T) {
 func TestCreateNewFolderInDir(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
-	folderDialog := NewFolderOpen(func(lu fyne.ListableURI, err error) {
+	folderDialog := NewFolderOpen(func(_ fyne.ListableURI, err error) {
 		assert.NoError(t, err)
 	}, win)
 	folderDialog.SetConfirmText("Choose")

@@ -190,7 +190,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	// from the internal animation list (first one is added directly to animation list)
 	a := &fyne.Animation{
 		Duration: time.Second,
-		Tick:     func(f float32) {},
+		Tick:     func(float32) {},
 	}
 	run.Start(a)
 	go tick(run) // simulate a graphics draw loop
@@ -205,7 +205,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 		var b *fyne.Animation
 		b = &fyne.Animation{
 			Duration: time.Second,
-			Tick: func(d float32) {
+			Tick: func(float32) {
 				run.Stop(b)
 				wg.Done()
 			},
@@ -220,7 +220,7 @@ func TestGLDriver_StopAnimationImmediatelyAndInsideTick(t *testing.T) {
 	// from pendingAnimation slice.
 	c := &fyne.Animation{
 		Duration: time.Second,
-		Tick:     func(f float32) {},
+		Tick:     func(float32) {},
 	}
 	run.Start(c)
 	tick(run) // simulate a graphics draw loop

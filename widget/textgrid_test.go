@@ -290,10 +290,10 @@ func TestTextGridRenderer_Resize(t *testing.T) {
 	grid.ShowLineNumbers = true
 
 	renderer := test.TempWidgetRenderer(t, grid)
-	min := renderer.MinSize()
+	minSize := renderer.MinSize()
 
 	grid.Resize(fyne.NewSize(100, 250))
-	assert.Equal(t, min, renderer.MinSize())
+	assert.Equal(t, minSize, renderer.MinSize())
 }
 
 func TestTextGridRenderer_MinSize(t *testing.T) {

@@ -61,6 +61,6 @@ func (e *Ellipse) Resize(s fyne.Size) {
 }
 
 // NewEllipse returns a new Ellipse instance
-func NewEllipse(color color.Color) *Ellipse {
-	return &Ellipse{FillColor: color}
+func NewEllipse(c color.Color) *Ellipse {
+	return &Ellipse{FillColor: c}
 }

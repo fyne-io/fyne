@@ -26,8 +26,9 @@ type glyphAtlasKey struct {
 }
 
 type glyphAtlasEntry struct {
-	x, y int // top-left position in the atlas texture
-	w, h int // dimensions in pixels
+	x, y     int // top-left position in the atlas texture
+	w, h     int // dimensions in pixels
+	baseline int // baseline position in pixels down from the top of the glyph bitmap
 }
 
 // glyphGPUAtlas packs pre-rasterised glyph bitmaps into a single GPU texture
@@ -76,7 +77,7 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx int, fontSize, scale fl
 		return entry, image.Rectangle{}
 	}
 
-	glyphImg := paint.RenderGlyphToImage(run, idx, fontSize, scale, col)
+	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, col)
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
 	// Advance to a new shelf if the glyph does not fit in the current row.
@@ -99,7 +100,7 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx int, fontSize, scale fl
 		copy(a.cpuImg.Pix[dst:dst+w*4], glyphImg.Pix[src:src+w*4])
 	}
 
-	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h}
+	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline}
 	a.entries[key] = entry
 	if h > a.shelfH {
 		a.shelfH = h
@@ -139,35 +140,38 @@ func (p *painter) uploadAtlasRegion(dirty image.Rectangle) {
 // entry.y, entry.x+entry.w, entry.y+entry.h] of the shared GPU atlas texture.
 // pos and size are in logical (fyne) coordinate space; frame is the canvas size.
 func (p *painter) drawGlyphQuad(entry glyphAtlasEntry, pos fyne.Position, size fyne.Size, frame fyne.Size) {
-	points, insets := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1, 0)
-	inner, _ := rectInnerCoords(size, pos, canvas.ImageFillStretch, 1)
+	points, insets, inner := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 1, 0)
 
-	// Override UV coordinates to sample only the glyph's region in the atlas.
-	// rectCoords vertex layout (each 5 floats: x,y,z,u,v):
-	//   vertex 0 [0..4]  – screen bottom-left: points[3]=u, points[4]=v
-	//   vertex 1 [5..9]  – screen top-left:    points[8]=u, points[9]=v
-	//   vertex 2 [10..14]– screen bottom-right: points[13]=u, points[14]=v
-	//   vertex 3 [15..19]– screen top-right:    points[18]=u, points[19]=v
+	// Replace the full-texture UVs that rectCoords produced with the glyph's
+	// sub-region of the atlas. rectCoords lays out vertices in the order
+	// top-left, bottom-left, top-right, bottom-right, and v runs opposite to
+	// screen y, so the two "top" vertices take vMax.
 	af := float32(p.glyphAtlas.texSize)
 	uMin := float32(entry.x) / af
 	vMin := float32(entry.y) / af
 	uMax := float32(entry.x+entry.w) / af
 	vMax := float32(entry.y+entry.h) / af
 
-	points[3], points[4] = uMin, vMax
-	points[8], points[9] = uMin, vMin
-	points[13], points[14] = uMax, vMax
-	points[18], points[19] = uMax, vMin
+	uv := [vertexCountRectangle][2]float32{
+		{uMin, vMax}, // top left
+		{uMin, vMin}, // bottom left
+		{uMax, vMax}, // top right
+		{uMax, vMin}, // bottom right
+	}
+	for i, c := range uv {
+		texCoord := i*coordinateSize2DWithTexture + coordinateSize2D
+		points[texCoord], points[texCoord+1] = c[0], c[1]
+	}
 
-	p.ctx.UseProgram(p.program.ref)
-	p.updateBuffer(p.program.buff, points)
-	p.UpdateVertexArray(p.program, "vert", 3, 5, 0)
-	p.UpdateVertexArray(p.program, "vertTexCoord", 2, 5, 3)
+	p.ctx.UseProgram(p.programs.simple.ref)
+	p.updateBuffer(p.programs.simple.buff, points[:])
+	p.UpdateVertexArray(p.programs.simple, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
+	p.UpdateVertexArray(p.programs.simple, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
 
-	p.SetUniform1f(p.program, "cornerRadius", 0)
-	p.SetUniform2f(p.program, "size", inner.Width*p.pixScale, inner.Height*p.pixScale)
-	p.SetUniform4f(p.program, "inset", insets[0], insets[1], insets[2], insets[3])
-	p.SetUniform1f(p.program, "alpha", 1.0)
+	p.SetUniform1f(p.programs.simple, attrRadiusCorner, 0)
+	p.SetUniform2f(p.programs.simple, attrSize, inner.Width*p.pixScale, inner.Height*p.pixScale)
+	p.SetUniform4f(p.programs.simple, attrInset, insets[0], insets[1], insets[2], insets[3])
+	p.SetUniform1f(p.programs.simple, attrAlpha, 1.0)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
@@ -176,6 +180,6 @@ func (p *painter) drawGlyphQuad(entry glyphAtlasEntry, pos fyne.Position, size f
 	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
 	p.logError()
 
-	p.ctx.DrawArrays(triangleStrip, 0, 4)
+	p.ctx.DrawArrays(triangleStrip, 0, vertexCountRectangle)
 	p.logError()
 }

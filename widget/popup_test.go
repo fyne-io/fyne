@@ -155,9 +155,9 @@ func TestPopUp_MinSize(t *testing.T) {
 	assert.Equal(t, label.MinSize().Width, inner.Width)
 	assert.Equal(t, label.MinSize().Height, inner.Height)
 
-	min := pop.MinSize()
-	assert.Equal(t, label.MinSize().Width, min.Width)
-	assert.Equal(t, label.MinSize().Height, min.Height)
+	minSize := pop.MinSize()
+	assert.Equal(t, label.MinSize().Width, minSize.Width)
+	assert.Equal(t, label.MinSize().Height, minSize.Height)
 }
 
 func TestPopUp_Move(t *testing.T) {
@@ -205,7 +205,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	//	"content Y position is adjusted to keep the content inside the window")
 }
 
-func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
+func TestPopUp_Move_ConstrainedWindowToSmall(*testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()

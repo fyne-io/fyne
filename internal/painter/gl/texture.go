@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/internal/painter/geom"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -30,15 +31,15 @@ func (t clippedTextTexture) covers(offset, width, height int, scale float32) boo
 		t.offset <= offset && t.offset+t.width >= offset+width
 }
 
-func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (int, int) {
-	width := maxWidth
+func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (offset, width int) {
+	width = maxWidth
 	if fullWidth < width {
 		width = fullWidth
 	}
 	if visibleWidth > width {
 		visibleWidth = width
 	}
-	offset := visibleOffset - (width-visibleWidth)/2
+	offset = visibleOffset - (width-visibleWidth)/2
 	if offset < 0 {
 		offset = 0
 	}
@@ -164,9 +165,9 @@ func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	w := gradient.Size().Width
 	h := gradient.Size().Height
 	switch a := gradient.Angle; {
-	case almostEqual(a, 90), almostEqual(a, 270):
+	case almostEqual(a, geom.AngleQuarter), almostEqual(a, geom.AngleThreeQuarter):
 		h = 1
-	case almostEqual(a, 0), almostEqual(a, 180):
+	case almostEqual(a, geom.AngleNone), almostEqual(a, geom.AngleHalf):
 		w = 1
 	}
 	width := p.textureScale(w)

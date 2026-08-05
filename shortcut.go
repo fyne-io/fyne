@@ -53,17 +53,17 @@ type ShortcutPaste struct {
 }
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutPaste) Key() KeyName {
+func (*ShortcutPaste) Key() KeyName {
 	return KeyV
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutPaste) Mod() KeyModifier {
+func (*ShortcutPaste) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutPaste) ShortcutName() string {
+func (*ShortcutPaste) ShortcutName() string {
 	return "Paste"
 }
 
@@ -79,17 +79,17 @@ type ShortcutCopy struct {
 }
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutCopy) Key() KeyName {
+func (*ShortcutCopy) Key() KeyName {
 	return KeyC
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutCopy) Mod() KeyModifier {
+func (*ShortcutCopy) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutCopy) ShortcutName() string {
+func (*ShortcutCopy) ShortcutName() string {
 	return "Copy"
 }
 
@@ -105,17 +105,17 @@ type ShortcutCut struct {
 }
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutCut) Key() KeyName {
+func (*ShortcutCut) Key() KeyName {
 	return KeyX
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutCut) Mod() KeyModifier {
+func (*ShortcutCut) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutCut) ShortcutName() string {
+func (*ShortcutCut) ShortcutName() string {
 	return "Cut"
 }
 
@@ -125,17 +125,17 @@ var _ KeyboardShortcut = (*ShortcutSelectAll)(nil)
 type ShortcutSelectAll struct{}
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutSelectAll) Key() KeyName {
+func (*ShortcutSelectAll) Key() KeyName {
 	return KeyA
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutSelectAll) Mod() KeyModifier {
+func (*ShortcutSelectAll) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutSelectAll) ShortcutName() string {
+func (*ShortcutSelectAll) ShortcutName() string {
 	return "SelectAll"
 }
 
@@ -147,17 +147,17 @@ var _ KeyboardShortcut = (*ShortcutUndo)(nil)
 type ShortcutUndo struct{}
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutUndo) Key() KeyName {
+func (*ShortcutUndo) Key() KeyName {
 	return KeyZ
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutUndo) Mod() KeyModifier {
+func (*ShortcutUndo) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutUndo) ShortcutName() string {
+func (*ShortcutUndo) ShortcutName() string {
 	return "Undo"
 }
 
@@ -169,16 +169,16 @@ var _ KeyboardShortcut = (*ShortcutRedo)(nil)
 type ShortcutRedo struct{}
 
 // Key returns the [KeyName] for this shortcut.
-func (se *ShortcutRedo) Key() KeyName {
+func (*ShortcutRedo) Key() KeyName {
 	return KeyY
 }
 
 // Mod returns the [KeyModifier] for this shortcut.
-func (se *ShortcutRedo) Mod() KeyModifier {
+func (*ShortcutRedo) Mod() KeyModifier {
 	return KeyModifierShortcutDefault
 }
 
 // ShortcutName returns the shortcut name
-func (se *ShortcutRedo) ShortcutName() string {
+func (*ShortcutRedo) ShortcutName() string {
 	return "Redo"
 }

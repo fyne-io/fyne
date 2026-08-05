@@ -116,12 +116,12 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 
 type multiWinLayout struct{}
 
-func (m *multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
+func (*multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
 	for _, w := range objects { // update the windows so they have real size
 		w.Resize(w.MinSize().Max(w.Size()))
 	}
 }
 
-func (m *multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+func (*multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	return fyne.Size{}
 }

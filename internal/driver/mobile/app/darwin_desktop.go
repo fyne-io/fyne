@@ -184,7 +184,7 @@ func eventKey(runeVal int32, direction uint8, code uint16, flags uint32) {
 	}
 
 	theApp.events.In() <- key.Event{
-		Rune:      convRune(rune(runeVal)),
+		Rune:      convRune(runeVal),
 		Code:      convVirtualKeyCode(code),
 		Modifiers: modifiers,
 		Direction: key.Direction(direction),

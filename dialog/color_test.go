@@ -307,20 +307,6 @@ func Test_colorToString(t *testing.T) {
 	}
 }
 
-func Test_stringToColor(t *testing.T) {
-	for name, tt := range rgbhslMap {
-		t.Run(name, func(t *testing.T) {
-			c, err := stringToColor(tt.hex)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.hex, colorToString(c))
-		})
-	}
-	t.Run("Invalid", func(t *testing.T) {
-		_, err := stringToColor("potato")
-		assert.Error(t, err)
-	})
-}
-
 func Test_colorToHSLA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {

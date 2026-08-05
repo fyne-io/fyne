@@ -4,6 +4,7 @@ import (
 	"context"
 	"image"
 	"math"
+	"slices"
 	"sync"
 	"time"
 
@@ -109,7 +110,7 @@ func (c *canvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
@@ -303,15 +304,16 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	}
 
 	if c.dragging == nil {
-		if drag, ok := co.(fyne.Draggable); ok {
-			c.dragging = drag
-			c.dragOffset = previousPos.Subtract(objPos)
-			c.dragStart = co.Position()
-			if scrollOtherDirection != nil {
-				c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
-			}
-		} else {
+		drag, ok := co.(fyne.Draggable)
+		if !ok {
 			return
+		}
+
+		c.dragging = drag
+		c.dragOffset = previousPos.Subtract(objPos)
+		c.dragStart = co.Position()
+		if scrollOtherDirection != nil {
+			c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
 		}
 	}
 
@@ -419,8 +421,9 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 			prevOverlay := c.Overlays().Top()
 			tapAltCallback(wid, ev)
 
-			// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-			if prevOverlay != nil && c.Overlays().Top() != prevOverlay {
+			// if the secondary tap dismissed an overlay (rather than opening a new
+			// one on top), forward the event to the widget underneath
+			if prevOverlay != nil && !slices.Contains(c.Overlays().List(), prevOverlay) {
 				co2, objPos2, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 					_, ok := object.(fyne.SecondaryTappable)
 					return ok

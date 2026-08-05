@@ -170,7 +170,7 @@ func (m *Menu) getContainsCheck() bool {
 }
 
 // Tapped catches taps on separators and the menu background. It doesn't perform any action.
-func (m *Menu) Tapped(*fyne.PointEvent) {
+func (*Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
 

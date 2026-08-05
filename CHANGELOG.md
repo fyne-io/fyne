@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 2.8.0 - 5 Jul 2026
+## 2.8.0 - 11 Jul 2026
 
 ### Added
 
@@ -22,14 +22,18 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add HighlightItem API to collection widgets
 * Secondary cut/copy/paste shortcuts for Unix systems
 * New sizes and colors in theme to support features
+* Added new diagonal resize cursors for desktop
 
 ### Changed
 
+* Fyne now requires Go 1.22 as a minimum version, as a result we no longer support windows 7 or 8 and macOS 10.14 or earlier.
 * Wayland is now supported by default and will automatically be picked at runtime
 * Circle canvas object is now always a circle filling centrally in the space
+* Popups (modal and regular) no longer include padding by default
 * Canvas Polygon renamed to RegularPolygon
 * Follow macOS system setting for scroll bar visibility
 * Handle nested lists and quotes in Markdown renderer
+* AppTabs on mobile render with smaller icons and text, in-keeping with the platform
 * Upgrades to RichText rendering and performance including clearer code blocks
 * Apps that have not migrated to the fyne.Do thread handling will warn on app launch
 

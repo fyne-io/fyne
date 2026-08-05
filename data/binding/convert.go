@@ -255,11 +255,11 @@ func (s *toStringFrom[T]) Set(str string) error {
 			return errParseFailed
 		}
 	} else {
-		new, err := s.parser(str)
+		var err error
+		val, err = s.parser(str)
 		if err != nil {
 			return err
 		}
-		val = new
 	}
 
 	old, err := s.from.Get()

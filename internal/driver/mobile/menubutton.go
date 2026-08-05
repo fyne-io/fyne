@@ -30,7 +30,7 @@ type menuButtonRenderer struct {
 	bg  *fynecanvas.Rectangle
 }
 
-func (m *menuButtonRenderer) Destroy() {
+func (*menuButtonRenderer) Destroy() {
 }
 
 func (m *menuButtonRenderer) Layout(size fyne.Size) {

@@ -241,7 +241,7 @@ func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return t.fonts[lookup]
 }
 
-func (t *configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+func (*configurableTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 

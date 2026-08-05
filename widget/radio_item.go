@@ -68,7 +68,7 @@ func (i *radioItem) MouseIn(_ *desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
-func (i *radioItem) MouseMoved(_ *desktop.MouseEvent) {
+func (*radioItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
@@ -100,7 +100,7 @@ func (i *radioItem) Tapped(_ *fyne.PointEvent) {
 }
 
 // TypedKey is called when this item receives a key event.
-func (i *radioItem) TypedKey(_ *fyne.KeyEvent) {
+func (*radioItem) TypedKey(_ *fyne.KeyEvent) {
 }
 
 // TypedRune is called when this item receives a char event.
@@ -195,13 +195,12 @@ func (r *radioItemRenderer) update() {
 	r.over.Resource = out
 	r.over.Refresh()
 
-	if r.item.Disabled() {
-		r.focusIndicator.FillColor = color.Transparent
-	} else if r.item.focused {
-		r.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
-	} else if r.item.hovered {
-		r.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
-	} else {
-		r.focusIndicator.FillColor = color.Transparent
+	r.focusIndicator.FillColor = color.Transparent
+	if !r.item.Disabled() {
+		if r.item.focused {
+			r.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
+		} else if r.item.hovered {
+			r.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
+		}
 	}
 }

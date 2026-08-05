@@ -4,6 +4,8 @@ import (
 	"image/color"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -11,7 +13,6 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSplitContainer_MinSize(t *testing.T) {
@@ -20,14 +21,14 @@ func TestSplitContainer_MinSize(t *testing.T) {
 	rectB := canvas.NewRectangle(color.Black)
 	rectB.SetMinSize(fyne.NewSize(10, 10))
 	t.Run("Horizontal", func(t *testing.T) {
-		min := NewHSplit(rectA, rectB).MinSize()
-		assert.Equal(t, rectA.MinSize().Width+rectB.MinSize().Width+dividerThickness(nil), min.Width)
-		assert.Equal(t, fyne.Max(rectA.MinSize().Height, fyne.Max(rectB.MinSize().Height, dividerLength(nil))), min.Height)
+		minSize := NewHSplit(rectA, rectB).MinSize()
+		assert.Equal(t, rectA.MinSize().Width+rectB.MinSize().Width+dividerThickness(nil), minSize.Width)
+		assert.Equal(t, fyne.Max(rectA.MinSize().Height, fyne.Max(rectB.MinSize().Height, dividerLength(nil))), minSize.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		min := NewVSplit(rectA, rectB).MinSize()
-		assert.Equal(t, fyne.Max(rectA.MinSize().Width, fyne.Max(rectB.MinSize().Width, dividerLength(nil))), min.Width)
-		assert.Equal(t, rectA.MinSize().Height+rectB.MinSize().Height+dividerThickness(nil), min.Height)
+		minSize := NewVSplit(rectA, rectB).MinSize()
+		assert.Equal(t, fyne.Max(rectA.MinSize().Width, fyne.Max(rectB.MinSize().Width, dividerLength(nil))), minSize.Width)
+		assert.Equal(t, rectA.MinSize().Height+rectB.MinSize().Height+dividerThickness(nil), minSize.Height)
 	})
 }
 
@@ -274,25 +275,25 @@ func TestSplitContainer_swap_contents(t *testing.T) {
 	objC.SetMinSize(fyne.NewSize(100, 100))
 	t.Run("Leading", func(t *testing.T) {
 		sc := NewHSplit(objA, objB)
-		min := sc.MinSize()
-		assert.Equal(t, initialWidth, min.Width)
-		assert.Equal(t, initialHeight, min.Height)
+		minSize := sc.MinSize()
+		assert.Equal(t, initialWidth, minSize.Width)
+		assert.Equal(t, initialHeight, minSize.Height)
 		sc.Leading = objC
 		sc.Refresh()
-		min = sc.MinSize()
-		assert.Equal(t, expectedWidth, min.Width)
-		assert.Equal(t, expectedHeight, min.Height)
+		minSize = sc.MinSize()
+		assert.Equal(t, expectedWidth, minSize.Width)
+		assert.Equal(t, expectedHeight, minSize.Height)
 	})
 	t.Run("Trailing", func(t *testing.T) {
 		sc := NewHSplit(objA, objB)
-		min := sc.MinSize()
-		assert.Equal(t, initialWidth, min.Width)
-		assert.Equal(t, initialHeight, min.Height)
+		minSize := sc.MinSize()
+		assert.Equal(t, initialWidth, minSize.Width)
+		assert.Equal(t, initialHeight, minSize.Height)
 		sc.Trailing = objC
 		sc.Refresh()
-		min = sc.MinSize()
-		assert.Equal(t, expectedWidth, min.Width)
-		assert.Equal(t, expectedHeight, min.Height)
+		minSize = sc.MinSize()
+		assert.Equal(t, expectedWidth, minSize.Width)
+		assert.Equal(t, expectedHeight, minSize.Height)
 	})
 }
 
@@ -467,15 +468,15 @@ func TestSplitContainer_divider_hover(t *testing.T) {
 func TestSplitContainer_divider_MinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		divider := newDivider(&Split{Horizontal: true})
-		min := divider.MinSize()
-		assert.Equal(t, dividerThickness(nil), min.Width)
-		assert.Equal(t, dividerLength(nil), min.Height)
+		minSize := divider.MinSize()
+		assert.Equal(t, dividerThickness(nil), minSize.Width)
+		assert.Equal(t, dividerLength(nil), minSize.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		divider := newDivider(&Split{Horizontal: false})
-		min := divider.MinSize()
-		assert.Equal(t, dividerLength(nil), min.Width)
-		assert.Equal(t, dividerThickness(nil), min.Height)
+		minSize := divider.MinSize()
+		assert.Equal(t, dividerLength(nil), minSize.Width)
+		assert.Equal(t, dividerThickness(nil), minSize.Height)
 	})
 }
 
@@ -570,11 +571,11 @@ type refreshCountingWidget struct {
 	refreshCount int
 }
 
-func (r *refreshCountingWidget) CreateRenderer() fyne.WidgetRenderer {
+func (*refreshCountingWidget) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(canvas.NewRectangle(color.Transparent))
 }
 
 func (r *refreshCountingWidget) Refresh() {
-	r.refreshCount += 1
+	r.refreshCount++
 	r.BaseWidget.Refresh()
 }

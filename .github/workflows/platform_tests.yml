@@ -10,13 +10,16 @@ jobs:
       fail-fast: false
       matrix:
         go-version: ["", "stable"]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             runner: xvfb-run
             tags: ci,migrated_fynedo
+            cover: -covermode=atomic -coverprofile=coverage.out
           - os: macos-latest
             tags: no_glfw,ci,migrated_fynedo
+          - os: windows-latest
+            tags: no_glfw,migrated_fynedo
 
     steps:
       - uses: actions/checkout@v5
@@ -39,8 +42,16 @@ jobs:
         run: echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
         if: ${{ runner.os == 'Linux' }}
 
+      # Recent macOS (Tahoe/26) requires an LC_UUID load command, which Go's
+      # internal linker does not emit on older Go versions. Force external
+      # linking so the test binaries get an LC_UUID and don't abort trap with
+      # "missing LC_UUID load command". See golang/go#69987 and #78012.
+      - name: Set macOS linker flag (LC_UUID workaround)
+        run: echo "TESTLDFLAGS=-ldflags=-linkmode=external" >> $GITHUB_ENV
+        if: ${{ runner.os == 'macOS' && matrix.go-version == '' }}
+
       - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" -covermode=atomic -coverprofile=coverage.out ./...
+        run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ${{ env.TESTLDFLAGS }} ./...
 
       - name: Upload failed testdata
         uses: actions/upload-artifact@v5
@@ -68,30 +79,3 @@ jobs:
         with:
           path-to-profile: coverage.out
         if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
-
-  windows_tests:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        go-version: ["1.20.x", "stable"]
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: actions/setup-go@v6
-        with:
-          go-version: ${{ matrix.go-version }}
-
-      - name: Tests
-        run: ${{ matrix.runner }} go test -race -tags no_glfw,migrated_fynedo ./...
-
-      - name: Upload failed testdata
-        uses: actions/upload-artifact@v5
-        if: failure()
-        with:
-          name: failed-testdata-windows-${{ matrix.go-version }}
-          path: |
-            **/testdata/failed
-          retention-days: 1
-          if-no-files-found: ignore

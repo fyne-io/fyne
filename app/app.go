@@ -4,8 +4,8 @@
 package app // import "fyne.io/fyne/v2/app"
 
 import (
+	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -26,6 +26,7 @@ type fyneApp struct {
 	clipboard fyne.Clipboard
 	icon      fyne.Resource
 	uniqueID  string
+	missingID bool // true if the developer did not supply their own ID
 
 	cache     fyne.Cache
 	cloud     fyne.CloudProvider
@@ -63,8 +64,8 @@ func (a *fyneApp) UniqueID() string {
 		return a.Metadata().ID
 	}
 
-	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
-	a.uniqueID = "missing-id-" + strconv.FormatInt(time.Now().Unix(), 10) // This is a fake unique - it just has to not be reused...
+	a.uniqueID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
+	a.missingID = true
 	return a.uniqueID
 }
 
@@ -110,7 +111,7 @@ func (a *fyneApp) Storage() fyne.Storage {
 }
 
 func (a *fyneApp) Preferences() fyne.Preferences {
-	if a.UniqueID() == "" {
+	if a.missingID {
 		fyne.LogError("Preferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
 	}
 	return a.prefs
@@ -148,28 +149,26 @@ func New() fyne.App {
 }
 
 func makeStoreDocs(id string, s *store) *internal.Docs {
-	if id == "" {
+	storageRoot := s.a.storageRoot()
+	if id == "" || storageRoot == "" {
 		return &internal.Docs{} // an empty impl to avoid crashes
 	}
-	if root := s.a.storageRoot(); root != "" {
-		uri, err := storage.ParseURI(root)
+
+	uri, err := storage.ParseURI(storageRoot)
+	if err != nil {
+		uri = storage.NewFileURI(storageRoot)
+	}
+
+	exists, err := storage.Exists(uri)
+	if !exists || err != nil {
+		err = storage.CreateListable(uri)
 		if err != nil {
-			uri = storage.NewFileURI(root)
+			fyne.LogError("Failed to create app storage space", err)
 		}
-
-		exists, err := storage.Exists(uri)
-		if !exists || err != nil {
-			err = storage.CreateListable(uri)
-			if err != nil {
-				fyne.LogError("Failed to create app storage space", err)
-			}
-		}
-
-		root, _ := s.docRootURI()
-		return &internal.Docs{RootDocURI: root}
-	} else {
-		return &internal.Docs{} // an empty impl to avoid crashes
 	}
+
+	docRoot, _ := s.docRootURI()
+	return &internal.Docs{RootDocURI: docRoot}
 }
 
 func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.App {

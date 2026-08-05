@@ -65,7 +65,7 @@ func (r *colorPreviewRenderer) Layout(size fyne.Size) {
 func (r *colorPreviewRenderer) MinSize() fyne.Size {
 	s := r.old.MinSize()
 	s.Width *= 2
-	return s.Max(fyne.NewSize(16, 8))
+	return s.Max(fyne.NewSize(16, 8)) //revive:disable-line:add-constant
 }
 
 func (r *colorPreviewRenderer) Refresh() {

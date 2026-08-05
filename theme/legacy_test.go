@@ -43,86 +43,86 @@ var _ fyne.LegacyTheme = (*legacyTheme)(nil)
 
 type legacyTheme struct{}
 
-func (t *legacyTheme) BackgroundColor() color.Color {
+func (*legacyTheme) BackgroundColor() color.Color {
 	return BackgroundColor()
 }
 
-func (t *legacyTheme) ButtonColor() color.Color {
+func (*legacyTheme) ButtonColor() color.Color {
 	return ButtonColor()
 }
 
-func (t *legacyTheme) DisabledButtonColor() color.Color {
+func (*legacyTheme) DisabledButtonColor() color.Color {
 	return DisabledButtonColor()
 }
 
-func (t *legacyTheme) DisabledTextColor() color.Color {
+func (*legacyTheme) DisabledTextColor() color.Color {
 	return DisabledColor()
 }
 
-func (t *legacyTheme) FocusColor() color.Color {
+func (*legacyTheme) FocusColor() color.Color {
 	return FocusColor()
 }
 
-func (t *legacyTheme) HoverColor() color.Color {
+func (*legacyTheme) HoverColor() color.Color {
 	return HoverColor()
 }
 
-func (t *legacyTheme) PlaceHolderColor() color.Color {
+func (*legacyTheme) PlaceHolderColor() color.Color {
 	return PlaceHolderColor()
 }
 
-func (t *legacyTheme) PrimaryColor() color.Color {
+func (*legacyTheme) PrimaryColor() color.Color {
 	return PrimaryColor()
 }
 
-func (t *legacyTheme) ScrollBarColor() color.Color {
+func (*legacyTheme) ScrollBarColor() color.Color {
 	return ScrollBarColor()
 }
 
-func (t *legacyTheme) ShadowColor() color.Color {
+func (*legacyTheme) ShadowColor() color.Color {
 	return ShadowColor()
 }
 
-func (t *legacyTheme) TextColor() color.Color {
+func (*legacyTheme) TextColor() color.Color {
 	return ForegroundColor()
 }
 
-func (t *legacyTheme) TextSize() int {
+func (*legacyTheme) TextSize() int {
 	return int(TextSize())
 }
 
-func (t *legacyTheme) TextFont() fyne.Resource {
+func (*legacyTheme) TextFont() fyne.Resource {
 	return TextFont()
 }
 
-func (t *legacyTheme) TextBoldFont() fyne.Resource {
+func (*legacyTheme) TextBoldFont() fyne.Resource {
 	return TextBoldFont()
 }
 
-func (t *legacyTheme) TextItalicFont() fyne.Resource {
+func (*legacyTheme) TextItalicFont() fyne.Resource {
 	return TextItalicFont()
 }
 
-func (t *legacyTheme) TextBoldItalicFont() fyne.Resource {
+func (*legacyTheme) TextBoldItalicFont() fyne.Resource {
 	return TextBoldItalicFont()
 }
 
-func (t *legacyTheme) TextMonospaceFont() fyne.Resource {
+func (*legacyTheme) TextMonospaceFont() fyne.Resource {
 	return TextMonospaceFont()
 }
 
-func (t *legacyTheme) Padding() int {
+func (*legacyTheme) Padding() int {
 	return int(Padding())
 }
 
-func (t *legacyTheme) IconInlineSize() int {
+func (*legacyTheme) IconInlineSize() int {
 	return int(IconInlineSize())
 }
 
-func (t *legacyTheme) ScrollBarSize() int {
+func (*legacyTheme) ScrollBarSize() int {
 	return int(ScrollBarSize())
 }
 
-func (t *legacyTheme) ScrollBarSmallSize() int {
+func (*legacyTheme) ScrollBarSmallSize() int {
 	return int(ScrollBarSmallSize())
 }

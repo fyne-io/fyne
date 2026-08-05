@@ -190,6 +190,7 @@ func newThemedBackground() *themedBackground {
 func (t *themedBackground) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	rect := canvas.NewRectangle(theme.Color(theme.ColorNameOverlayBackground))
+	rect.CornerRadius = theme.Size(theme.SizeNameDialogRadius)
 	return &themedBackgroundRenderer{rect, []fyne.CanvasObject{rect}}
 }
 
@@ -198,7 +199,7 @@ type themedBackgroundRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (renderer *themedBackgroundRenderer) Destroy() {
+func (*themedBackgroundRenderer) Destroy() {
 }
 
 func (renderer *themedBackgroundRenderer) Layout(size fyne.Size) {
@@ -215,7 +216,7 @@ func (renderer *themedBackgroundRenderer) Objects() []fyne.CanvasObject {
 
 func (renderer *themedBackgroundRenderer) Refresh() {
 	r, g, b, _ := col.ToNRGBA(theme.Color(theme.ColorNameOverlayBackground))
-	bg := &color.NRGBA{R: r, G: g, B: b, A: 230}
+	bg := &color.NRGBA{R: r, G: g, B: b, A: 230} //revive:disable-line:add-constant
 	renderer.rect.FillColor = bg
 }
 
@@ -227,7 +228,7 @@ type dialogLayout struct {
 	d *dialog
 }
 
-func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
+func (*dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()
 
@@ -251,7 +252,7 @@ func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
-func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
+func (*dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()

@@ -56,15 +56,15 @@ func (o *OverlayContainer) Hide() {
 }
 
 // MouseIn catches mouse-in events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseIn(*desktop.MouseEvent) {
+func (*OverlayContainer) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved catches mouse-moved events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
+func (*OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut catches mouse-out events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseOut() {
+func (*OverlayContainer) MouseOut() {
 }
 
 // SetCanvas allows an overlay container to be re-used on a different canvas.

@@ -15,6 +15,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const canvasDefaultSize = 100
+
 // WindowlessCanvas provides functionality for a canvas to operate without a window
 //
 // Since: 2.9
@@ -61,7 +63,7 @@ func newCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
 		padded:      true,
 		painter:     painter,
 		scale:       1.0,
-		size:        fyne.NewSize(100, 100),
+		size:        fyne.NewSize(canvasDefaultSize, canvasDefaultSize),
 		transparent: transparent,
 	}
 	c.overlays.Canvas = c
@@ -158,11 +160,11 @@ func (c *canvas) Padded() bool {
 	return c.padded
 }
 
-func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
-func (c *canvas) Refresh(fyne.CanvasObject) {
+func (*canvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *canvas) Resize(size fyne.Size) {
@@ -225,11 +227,11 @@ func (c *canvas) SetPadded(padded bool) {
 	c.doResize(c.Size())
 }
 
-func (c *canvas) SetScale(scale float32) {
+func (c *canvas) SetScale(s float32) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
-	c.scale = scale
+	c.scale = s
 }
 
 func (c *canvas) Size() fyne.Size {

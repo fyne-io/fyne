@@ -6,6 +6,7 @@ import (
 	_ "image/png" // for the icon
 	"math"
 	"runtime"
+	"slices"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -18,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -43,13 +45,13 @@ func (w *window) FullScreen() bool {
 }
 
 // minSizeOnScreen gets the padded minimum size of a window content in screen pixels
-func (w *window) minSizeOnScreen() (int, int) {
+func (w *window) minSizeOnScreen() (width, height int) {
 	// get minimum size of content inside the window
 	return w.screenSize(w.canvas.MinSize())
 }
 
 // screenSize computes the actual output size of the given content size in screen pixels
-func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
+func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
 	return scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
 }
 
@@ -65,7 +67,7 @@ func (w *window) Resize(size fyne.Size) {
 		}
 
 		w.requestedWidth, w.requestedHeight = width, height
-		if runtime.GOOS != "js" {
+		if runtime.GOOS != goos.JavaScript {
 			w.view().SetSize(width, height)
 			w.processResized(width, height)
 		}
@@ -227,7 +229,7 @@ func (w *window) ShowAndRun() {
 }
 
 // Clipboard returns the system clipboard
-func (w *window) Clipboard() fyne.Clipboard {
+func (*window) Clipboard() fyne.Clipboard {
 	return NewClipboard()
 }
 
@@ -261,10 +263,11 @@ func (w *window) processClosed() {
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
 	cache.CleanCanvas(w.canvas)
+	w.frame.free()
 
 	if w.master {
 		d.Quit()
-	} else if runtime.GOOS == "darwin" {
+	} else if runtime.GOOS == goos.Darwin {
 		d.focusPreviousWindow()
 	}
 }
@@ -314,7 +317,7 @@ func (w *window) processResized(width, height int) {
 }
 
 func (w *window) processFrameSized(width, height int) {
-	if width == 0 || height == 0 || runtime.GOOS != "darwin" {
+	if width == 0 || height == 0 || runtime.GOOS != goos.Darwin {
 		return
 	}
 
@@ -330,8 +333,8 @@ func (w *window) processRefresh() {
 	refreshWindow(w)
 }
 
-func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
+func (*window) findObjectAtPositionMatching(c *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	return driver.FindObjectAtPositionMatching(mouse, matches, c.Overlays().Top(), c.menu, c.Content())
 }
 
 func (w *window) processMouseMoved(xpos float64, ypos float64) {
@@ -402,7 +405,7 @@ func (w *window) processMouseMoved(xpos float64, ypos float64) {
 		} else if mouseOver != nil {
 			isChild := false
 			driver.WalkCompleteObjectTree(mouseOver.(fyne.CanvasObject),
-				func(co fyne.CanvasObject, p1, p2 fyne.Position, s fyne.Size) bool {
+				func(co fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
 					if co == obj {
 						isChild = true
 						return true
@@ -496,19 +499,17 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 		w.mouseClickedHandleMouseable(mev, action, wid)
 	}
 
-	if wid, ok := co.(fyne.Focusable); !ok || wid != w.canvas.Focused() {
+	focused := w.canvas.Focused()
+	if wid, ok := co.(fyne.Focusable); !ok || wid != focused {
 		ignore := false
-		_, _, _ = w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
-			switch object.(type) {
-			case fyne.Focusable:
-				ignore = true
-				return true
-			}
+		if focusedObj, ok := focused.(fyne.CanvasObject); ok {
+			found, _, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
+				return object == focusedObj
+			})
+			ignore = found != nil
+		}
 
-			return false
-		})
-
-		if !ignore { // if a parent item under the mouse has focus then ignore this tap unfocus
+		if !ignore { // if the currently focused widget is under the mouse then ignore this tap unfocus
 			w.canvas.Unfocus()
 		}
 	}
@@ -548,8 +549,9 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 				prevOverlay := w.canvas.Overlays().Top()
 				secondary.TappedSecondary(ev)
 
-				// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-				if prevOverlay != nil && w.canvas.Overlays().Top() != prevOverlay {
+				// if the secondary tap dismissed an overlay (rather than opening a new
+				// one on top), forward the event to the widget underneath
+				if prevOverlay != nil && !slices.Contains(w.canvas.Overlays().List(), prevOverlay) {
 					co2, pos2, _ := w.findObjectAtPositionMatching(w.canvas, mousePos, func(object fyne.CanvasObject) bool {
 						_, ok := object.(fyne.SecondaryTappable)
 						return ok
@@ -647,8 +649,7 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
-	switch wid := co.(type) {
-	case fyne.Scrollable:
+	if wid, ok := co.(fyne.Scrollable); ok {
 		if math.Abs(xoff) >= scrollAccelerateCutoff {
 			xoff *= scrollAccelerateRate
 		}
@@ -680,7 +681,7 @@ func (w *window) capturesTab(modifier fyne.KeyModifier) bool {
 }
 
 func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, scancode int, action action, keyDesktopModifier fyne.KeyModifier) {
-	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}}
+	keyEvent := &fyne.KeyEvent{Name: keyName, Physical: fyne.HardwareKey{ScanCode: scancode}, Repeat: action == repeat}
 
 	pendingMenuToggle := w.menuTogglePending
 	w.menuTogglePending = desktop.KeyNone
@@ -699,9 +700,9 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 			}
 		}
 
-		if w.canvas.Focused() != nil {
-			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				focused.KeyUp(keyEvent)
+		if focused := w.canvas.Focused(); focused != nil {
+			if keyable, ok := focused.(desktop.Keyable); ok {
+				keyable.KeyUp(keyEvent)
 			}
 		} else if w.canvas.onKeyUp != nil {
 			w.canvas.onKeyUp(keyEvent)
@@ -711,21 +712,28 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 		switch keyName {
 		case desktop.KeyAltLeft, desktop.KeyAltRight:
 			// compensate for GLFW modifiers bug https://github.com/glfw/glfw/issues/1630
-			if (runtime.GOOS == "linux" && keyDesktopModifier == 0) || (runtime.GOOS != "linux" && keyDesktopModifier == fyne.KeyModifierAlt) {
+			if (runtime.GOOS == goos.Linux && keyDesktopModifier == 0) || (runtime.GOOS != goos.Linux && keyDesktopModifier == fyne.KeyModifierAlt) {
 				w.menuTogglePending = keyName
 			}
 		case fyne.KeyEscape:
 			w.menuDeactivationPending = keyName
 		}
-		if w.canvas.Focused() != nil {
-			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				focused.KeyDown(keyEvent)
+		if focused := w.canvas.Focused(); focused != nil {
+			if keyable, ok := focused.(desktop.Keyable); ok {
+				keyable.KeyDown(keyEvent)
 			}
 		} else if w.canvas.onKeyDown != nil {
 			w.canvas.onKeyDown(keyEvent)
 		}
 	default:
-		// key repeat will fall through to TypedKey and TypedShortcut
+		// key repeat triggers KeyDown and falls through to TypedKey and TypedShortcut
+		if focused := w.canvas.Focused(); focused != nil {
+			if keyable, ok := focused.(desktop.Keyable); ok {
+				keyable.KeyDown(keyEvent)
+			}
+		} else if w.canvas.onKeyDown != nil {
+			w.canvas.onKeyDown(keyEvent)
+		}
 	}
 
 	modifierOtherThanShift := (keyDesktopModifier & fyne.KeyModifierControl) |
@@ -737,8 +745,7 @@ func (w *window) processKeyPressed(keyName fyne.KeyName, keyASCII fyne.KeyName, 
 	}
 
 	// No shortcut detected, pass down to TypedKey
-	focused := w.canvas.Focused()
-	if focused != nil {
+	if focused := w.canvas.Focused(); focused != nil {
 		focused.TypedKey(keyEvent)
 	} else if w.canvas.onTypedKey != nil {
 		w.canvas.onTypedKey(keyEvent)
@@ -766,6 +773,11 @@ func (w *window) processFocused(focus bool) {
 		}
 		curWindow = w
 		w.canvas.FocusGained()
+
+		if build.IsWayland {
+			w.frame.markReady()
+			w.canvas.SetDirty()
+		}
 	} else {
 		w.canvas.FocusLost()
 		w.mousePos = fyne.Position{}
@@ -919,7 +931,7 @@ func (w *window) RunWithContext(f func()) {
 	w.DetachCurrentContext()
 }
 
-func (w *window) Context() any {
+func (*window) Context() any {
 	return nil
 }
 
@@ -933,7 +945,7 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (d *gLDriver) CreateWindow(title string) (win fyne.Window) {
-	if runtime.GOOS != "js" {
+	if runtime.GOOS != goos.JavaScript {
 		async.EnsureMain(func() {
 			win = d.createWindow(title, true)
 		})
@@ -977,6 +989,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	d.init()
 
 	ret = &window{title: title, decorate: decorate, driver: d}
+	ret.frame = newPresentGate(ret)
 	ret.canvas = newCanvas()
 	ret.canvas.context = ret
 	ret.SetIcon(ret.icon)
