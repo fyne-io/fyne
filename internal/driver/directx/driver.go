@@ -1,12 +1,11 @@
-//go:build windows
+//go:build windows && directx
 
 // Package directx implements a Fyne desktop driver for Windows on native Win32,
 // rendering through the Direct3D 11 painter in internal/painter/dx. It needs
-// neither cgo nor GLFW - every Win32 call here goes through syscall.
+// no cgo - every Win32 call here goes through syscall.
 //
-// The split mirrors the OpenGL driver: this package owns windows, input, menus,
-// the clipboard and the run loop, the way internal/driver/glfw does, while all
-// drawing lives in the painter package.
+// This package owns windows, input, menus, the clipboard and the run loop;
+// all drawing lives in the painter package.
 //
 // Select it with the `directx` build tag:
 //

@@ -1,5 +1,3 @@
-// Port of gl/shaders/arc.frag.
-//
 // A signed-distance rounded arc with an optional cutout, in the unit-circle
 // convention where angles are measured from the positive X axis. radius carries
 // {innerRadius, outerRadius, cornerRadius} and texParams.xy the start and end
@@ -13,8 +11,8 @@ float sd_rounded_arc(float2 p, float r1, float r2, float a0, float a1, float cr)
 
     float cs = cos(midAngle);
     float sn = sin(midAngle);
-    // GLSL's mat2(cs, -sn, sn, cs) is column-major, so the rows are
-    // (cs, sn) and (-sn, cs). Written out to keep the orientation unambiguous.
+    // Rotate p by -midAngle. The rows are (cs, sn) and (-sn, cs), written out
+    // to keep the orientation unambiguous.
     p = float2(cs * p.x + sn * p.y, -sn * p.x + cs * p.y);
 
     // Distance to a rounded box in pseudo-polar space.
@@ -39,7 +37,7 @@ float sd_rounded_arc(float2 p, float r1, float r2, float a0, float a1, float cr)
 
 float4 main(PSIn input) : SV_TARGET
 {
-    float2 p = centredGL(input.pos.xy);
+    float2 p = centredUp(input.pos.xy);
 
     float innerRadius = radius.x;
     float outerRadius = radius.y;

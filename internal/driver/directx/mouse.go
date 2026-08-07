@@ -1,7 +1,6 @@
-//go:build windows
+//go:build windows && directx
 
-// Mouse event processing - hover, drag, tap and double tap. Ported from the
-// GLFW driver so pointer behaviour matches across the two desktop backends.
+// Mouse event processing - hover, drag, tap and double tap.
 
 package directx
 
@@ -312,7 +311,7 @@ func (w *window) processMouseScrolled(xoff, yoff float64) {
 	}
 
 	// A high-resolution wheel or trackpad reports large offsets; accelerate those
-	// so a flick travels as far as it does under the GLFW driver.
+	// so a hard flick covers real distance instead of creeping.
 	if math.Abs(xoff) >= scrollAccelerateCutoff {
 		xoff *= scrollAccelerateRate
 	}

@@ -1,5 +1,3 @@
-// Port of gl/shaders/bezier_curve.frag.
-//
 // Distance-field stroke of a linear, quadratic or cubic Bezier. The curve points
 // ride in their own register(b1) buffer; rectHalf.z is the half stroke width and
 // texParams.x selects the degree (0 linear, 1 quadratic, 2 cubic).
@@ -131,8 +129,8 @@ float cubic_distance(float2 p, float2 v0, float2 v1, float2 v2, float2 v3)
 
 float4 main(PSIn input) : SV_TARGET
 {
-    // (0,0) at the rect top-left, +X right, +Y down. SV_Position and bounds are
-    // both top-origin, so unlike the GLSL original no vertical flip is needed.
+    // (0,0) at the rect top-left, +X right, +Y down: SV_Position and bounds
+    // are both top-origin, so subtracting maps into the rect directly.
     float2 p = input.pos.xy - bounds.xy;
 
     float strokeWidthHalf = rectHalf.z;

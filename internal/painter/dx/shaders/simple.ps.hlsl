@@ -1,5 +1,3 @@
-// Port of gl/shaders/simple.frag.
-//
 // An alpha-modulated texture with optional rounded corners. Covers images,
 // rasters, gradients and text.
 Texture2D tex : register(t0);
