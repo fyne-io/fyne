@@ -853,7 +853,7 @@ func (t *Table) templateSize() fyne.Size {
 		if !t.ShowHeaderRow && !t.ShowHeaderColumn {
 			return template.MinSize()
 		}
-		return template.MinSize().Max(t.createHeader().MinSize())
+		return template.MinSize().MaxSize(t.createHeader().MinSize())
 	}
 
 	fyne.LogError("Missing CreateCell callback required for Table", nil)
@@ -1115,7 +1115,7 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 
 func (t *tableRenderer) MinSize() fyne.Size {
 	sep := t.t.Theme().Size(theme.SizeNamePadding)
-	minSize := t.t.content.MinSize().Max(t.t.cellSize)
+	minSize := t.t.content.MinSize().MaxSize(t.t.cellSize)
 	if t.t.ShowHeaderRow {
 		minSize.Height += t.t.headerSize.Height + sep
 	}

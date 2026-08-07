@@ -100,7 +100,7 @@ func (r *colorButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *colorButtonRenderer) MinSize() fyne.Size {
-	return r.rectangle.MinSize().Max(fyne.NewSize(32, 32)) //revive:disable-line:add-constant
+	return r.rectangle.MinSize().MaxSize(fyne.NewSize(32, 32)) //revive:disable-line:add-constant
 }
 
 func (r *colorButtonRenderer) Refresh() {

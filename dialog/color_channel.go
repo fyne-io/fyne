@@ -146,7 +146,7 @@ func (e *colorChannelEntry) MinSize() fyne.Size {
 	// Ensure space for 3 digits
 	minSize := fyne.MeasureText("000", theme.TextSize(), fyne.TextStyle{})
 	minSize = minSize.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
-	return minSize.Max(e.Entry.MinSize())
+	return minSize.MaxSize(e.Entry.MinSize())
 }
 
 type userChangeEntry struct {

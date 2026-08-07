@@ -133,6 +133,15 @@ func (s Size) Max(v Vector2) Size {
 	return NewSize(maxW, maxH)
 }
 
+// MaxSize returns a new [Size] that is the maximum of the current Size and v.
+// It is the allocation-free equivalent of [Size.Max] for a [Size] argument,
+// which [Size.Max] would box into its [Vector2] parameter.
+//
+// Since: 2.9
+func (s Size) MaxSize(v Size) Size {
+	return NewSize(Max(s.Width, v.Width), Max(s.Height, v.Height))
+}
+
 // Min returns a new [Size] that is the minimum of s and v.
 func (s Size) Min(v Vector2) Size {
 	x, y := v.Components()
@@ -141,6 +150,15 @@ func (s Size) Min(v Vector2) Size {
 	minH := Min(s.Height, y)
 
 	return NewSize(minW, minH)
+}
+
+// MinSize returns a new [Size] that is the minimum of the current Size and v.
+// It is the allocation-free equivalent of [Size.Min] for a [Size] argument,
+// which [Size.Min] would box into its [Vector2] parameter.
+//
+// Since: 2.9
+func (s Size) MinSize(v Size) Size {
+	return NewSize(Min(s.Width, v.Width), Min(s.Height, v.Height))
 }
 
 // Components returns the Width and Height elements of this Size

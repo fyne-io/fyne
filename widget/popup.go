@@ -186,11 +186,11 @@ type popUpRenderer struct {
 }
 
 func (r *popUpRenderer) Layout(s fyne.Size) {
-	size := s.Max(r.popUp.Content.MinSize())
+	size := s.MaxSize(r.popUp.Content.MinSize())
 	if r.popUp.Canvas != nil {
 		canvasSize := r.popUp.Canvas.Size()
 		if !canvasSize.IsZero() {
-			size = size.Min(r.popUp.Canvas.Size())
+			size = size.MinSize(r.popUp.Canvas.Size())
 		}
 	}
 	r.popUp.Content.Resize(size)
@@ -211,7 +211,7 @@ func (r *popUpRenderer) Refresh() {
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	r.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	r.background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
-	expectedContentSize := innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
+	expectedContentSize := innerSize.MaxSize(r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
 	if r.background.Size() != innerSize || r.background.Position() != innerPos || shouldRelayout {

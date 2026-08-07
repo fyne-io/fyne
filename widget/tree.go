@@ -585,8 +585,8 @@ type treeRenderer struct {
 
 func (r *treeRenderer) MinSize() fyne.Size {
 	minSize := r.scroller.MinSize()
-	minSize = minSize.Max(r.tree.branchMinSize)
-	minSize = minSize.Max(r.tree.leafMinSize)
+	minSize = minSize.MaxSize(r.tree.branchMinSize)
+	minSize = minSize.MaxSize(r.tree.leafMinSize)
 	return minSize
 }
 
@@ -855,7 +855,7 @@ func (r *treeContentRenderer) Refresh() {
 func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	s := r.treeContent.Size()
 	if s.IsZero() {
-		r.treeContent.Resize(r.treeContent.MinSize().Max(r.treeContent.tree.Size()))
+		r.treeContent.Resize(r.treeContent.MinSize().MaxSize(r.treeContent.tree.Size()))
 	} else {
 		r.Layout(s)
 	}

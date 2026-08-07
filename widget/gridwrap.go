@@ -427,7 +427,7 @@ func (l *gridWrapRenderer) Layout(size fyne.Size) {
 }
 
 func (l *gridWrapRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.itemMin)
+	return l.scroller.MinSize().MaxSize(l.list.itemMin)
 }
 
 func (l *gridWrapRenderer) Refresh() {

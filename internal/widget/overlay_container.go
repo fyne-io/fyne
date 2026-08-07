@@ -113,7 +113,7 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	size := r.o.Content.Size().Max(r.o.Content.MinSize()).Min(s)
+	size := r.o.Content.Size().MaxSize(r.o.Content.MinSize()).MinSize(s)
 	r.o.Content.Resize(size)
 
 	if r.o.Background != nil {

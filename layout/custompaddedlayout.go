@@ -53,7 +53,7 @@ func (c CustomPaddedLayout) MinSize(objects []fyne.CanvasObject) (minSize fyne.S
 			continue
 		}
 
-		minSize = minSize.Max(child.MinSize())
+		minSize = minSize.MaxSize(child.MinSize())
 	}
 	minSize.Width += c.LeftPadding + c.RightPadding
 	minSize.Height += c.TopPadding + c.BottomPadding

@@ -16,6 +16,11 @@ var (
 	lastClean                     time.Time
 	skippedCleanWithCanvasRefresh = false
 
+	// cachedNow is the clock sample setAlive uses. Reading the real clock there
+	// is an expensive operation and setAlive is called per-object per paint.
+	// cachedNow is updated on Clean, which should be called once per frame.
+	cachedNow int64
+
 	// testing purpose only
 	timeNow = time.Now
 )
@@ -25,11 +30,19 @@ func init() {
 		ValidDuration = t
 		cleanTaskInterval = ValidDuration / 2
 	}
+	refreshNow()
+}
+
+// refreshNow samples the clock for setAlive and returns the sample.
+func refreshNow() time.Time {
+	now := timeNow()
+	cachedNow = now.UnixNano()
+	return now
 }
 
 // Clean run cache clean task, it should be called on paint events.
 func Clean(canvasRefreshed bool) {
-	now := timeNow()
+	now := refreshNow()
 	// do not run clean task too fast
 	if now.Sub(lastClean) < cacheCleanCooldown {
 		if canvasRefreshed {
@@ -54,7 +67,7 @@ func Clean(canvasRefreshed bool) {
 		// be a way to recover them later
 		destroyExpiredCanvases(now)
 	}
-	lastClean = timeNow()
+	lastClean = refreshNow()
 }
 
 // CleanCanvas performs a complete remove of all the objects that belong to the specified
@@ -111,15 +124,15 @@ func destroyExpiredRenderers(now time.Time) {
 }
 
 type expiringCache struct {
-	expires time.Time
+	expires int64 // unix nanos, so setAlive is a load and an add
 }
 
 // isExpired check if the cache data is expired.
 func (c *expiringCache) isExpired(now time.Time) bool {
-	return c.expires.Before(now)
+	return c.expires < now.UnixNano()
 }
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = timeNow().Add(ValidDuration)
+	c.expires = cachedNow + ValidDuration.Nanoseconds()
 }

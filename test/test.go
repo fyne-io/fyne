@@ -53,7 +53,7 @@ func FocusPrevious(c fyne.Canvas) {
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+		objects = layoutAndCollect(objects, o, o.MinSize().MaxSize(o.Size()))
 	}
 	return objects
 }
@@ -104,7 +104,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 func RenderObjectToMarkup(o fyne.CanvasObject) string {
 	c := NewCanvas()
 	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
+	size := o.MinSize().MaxSize(o.Size())
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 

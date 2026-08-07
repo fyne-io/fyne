@@ -236,7 +236,7 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	minSize := r.MinSize()
 	var boxSize fyne.Size
 	if r.m.customSized {
-		boxSize = minSize.Max(s)
+		boxSize = minSize.MaxSize(s)
 	} else {
 		boxSize = minSize
 	}

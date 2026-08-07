@@ -136,7 +136,7 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Max(child.MinSize())
+		minSize = minSize.MaxSize(child.MinSize())
 	}
 
 	padding := theme.Padding()

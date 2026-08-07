@@ -40,7 +40,7 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
 	c := NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
+	size := o.MinSize().MaxSize(o.Size())
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 
@@ -62,7 +62,7 @@ func AssertObjectRendersToImage(t *testing.T, masterFilename string, o fyne.Canv
 func AssertObjectRendersToMarkup(t *testing.T, masterFilename string, o fyne.CanvasObject, msgAndArgs ...any) bool {
 	c := NewCanvas()
 	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
+	size := o.MinSize().MaxSize(o.Size())
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 

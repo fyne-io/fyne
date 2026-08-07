@@ -663,7 +663,7 @@ func (w *wrapInner) doCenter() {
 	multi := c.webExtraWindows
 
 	min := w.inner.MinSize()
-	min = min.Max(w.inner.Size())
+	min = min.MaxSize(w.inner.Size())
 
 	x := (multi.Size().Width - min.Width) / 2
 	y := (multi.Size().Height - min.Height) / 2

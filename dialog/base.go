@@ -90,9 +90,9 @@ func (d *dialog) Refresh() {
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
-	d.desiredSize = size.Max(d.MinSize())
+	d.desiredSize = size.MaxSize(d.MinSize())
 	if d.win != nil { // could be called before popup is created!
-		d.win.Resize(size.Max(d.MinSize()))
+		d.win.Resize(size.MaxSize(d.MinSize()))
 	}
 }
 

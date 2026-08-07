@@ -193,7 +193,7 @@ func (r *colorWheelRenderer) Layout(size fyne.Size) {
 }
 
 func (r *colorWheelRenderer) MinSize() fyne.Size {
-	return r.raster.MinSize().Max(fyne.NewSize(128, 128)) //revive:disable-line:add-constant
+	return r.raster.MinSize().MaxSize(fyne.NewSize(128, 128)) //revive:disable-line:add-constant
 }
 
 func (r *colorWheelRenderer) Refresh() {

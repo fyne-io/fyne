@@ -30,7 +30,7 @@ func (paddedLayout) MinSize(objects []fyne.CanvasObject) (minSize fyne.Size) {
 			continue
 		}
 
-		minSize = minSize.Max(child.MinSize())
+		minSize = minSize.MaxSize(child.MinSize())
 	}
 	minSize = minSize.Add(fyne.NewSquareSize(2 * theme.Padding()))
 	return minSize
