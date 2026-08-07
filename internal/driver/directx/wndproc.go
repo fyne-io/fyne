@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Win32 window class registration and the window procedure: every message the
 // driver cares about is dispatched from here to the handlers in window.go,
@@ -201,8 +201,8 @@ func (w *window) handleMessage(message uint32, wParam, lParam uintptr) uintptr {
 	case wmMouseWheel:
 		delta := float64(hiWord(wParam)) / wheelDelta
 		if keyDown(vkShift) {
-			// Shift turns vertical wheel motion into horizontal scrolling, the way
-			// the GLFW driver and the rest of the desktop do.
+			// Shift turns vertical wheel motion into horizontal scrolling, the
+			// desktop convention.
 			w.processMouseScrolled(delta, 0)
 		} else {
 			w.processMouseScrolled(0, delta)

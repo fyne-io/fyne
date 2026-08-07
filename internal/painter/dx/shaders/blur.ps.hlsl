@@ -1,9 +1,6 @@
-// Port of gl/shaders/blur.frag.
-//
 // One pass of a separable Gaussian blur over a snapshot of what is already on
 // screen. The painter runs it twice, horizontally then vertically, re-snapshotting
-// in between. The kernel arrives as a 1-pixel-tall texture at t1 rather than as a
-// uniform array, exactly as in the GL painter.
+// in between. The kernel arrives as a 1-pixel-tall texture at t1.
 //
 // texParams holds {radius, cornerRadius, size.x, size.y} and rectHalf
 // {direction.x, direction.y, sampleScale, unused} - not inset, which the

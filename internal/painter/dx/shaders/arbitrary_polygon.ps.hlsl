@@ -1,13 +1,10 @@
-// Port of gl/shaders/arbitrary_polygon.frag.
-//
 // Signed distance to an arbitrary polygon with per-corner rounding, based on
 // Inigo Quilez's sdPolygon (MIT licensed) plus the per-radius rounding technique.
 //
-// The GLSL original takes two parallel uniform arrays, vertices[] and
-// cornerRadii[]. HLSL gives every array element in a constant buffer its own
-// 16-byte register, so two arrays would burn 512 bytes to carry 12 useful ones.
-// They are packed into a single float4 array instead: xy is the vertex, z is its
-// corner radius.
+// Every array element in a constant buffer occupies its own 16-byte register,
+// so parallel vertices[] and cornerRadii[] arrays would burn 512 bytes to carry
+// 12 useful ones. Both are packed into a single float4 array instead: xy is the
+// vertex, z is its corner radius.
 
 #define MAX_VERTICES 16
 
@@ -126,8 +123,8 @@ float arbitrary_polygon_distance(float2 p, int num)
 
 float4 main(PSIn input) : SV_TARGET
 {
-    // (0,0) at the rect top-left, +X right, +Y down. SV_Position and bounds are
-    // both top-origin, so unlike the GLSL original no vertical flip is needed.
+    // (0,0) at the rect top-left, +X right, +Y down: SV_Position and bounds
+    // are both top-origin, so subtracting maps into the rect directly.
     float2 p = input.pos.xy - bounds.xy;
 
     float edgeSoftness = rectHalf.w;

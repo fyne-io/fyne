@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package dx
 
@@ -250,9 +250,8 @@ func TestBlurKernelIsNormalised(t *testing.T) {
 	}
 }
 
-// TestTextTextureWindow pins the windowing maths for over-wide text runs to the
-// same values the GL painter's test uses, so both painters place the window
-// identically.
+// TestTextTextureWindow pins the windowing maths for over-wide text runs:
+// the window must cover the visible span and stay inside the full run.
 func TestTextTextureWindow(t *testing.T) {
 	cases := []struct {
 		visibleOffset, visibleWidth, fullWidth, maxWidth int

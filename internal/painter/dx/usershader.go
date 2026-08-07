@@ -1,26 +1,23 @@
-//go:build windows
+//go:build windows && directx
 
 package dx
 
-// User canvas.Shader support, mirroring drawShader in internal/Painter/gl/draw.go:
-// the program is compiled once per Shader.Name and cached for the lifetime of
-// the device, textures are uploaded once and reused until the image is replaced,
-// and the uniforms are pushed every frame.
+// User canvas.Shader support: the program is compiled once per Shader.Name and
+// cached for the lifetime of the device, textures are uploaded once and reused
+// until the image is replaced, and the uniforms are pushed every frame.
 //
 // The contract a user shader has to meet is documented on canvas.Shader.SourceHLSL:
 //
-//   - the shared prelude (internal/Painter/dx, shaders/common.hlsl) is prepended,
-//     so `frame`, `bounds` and PSIn arrive exactly as
-//     the built in shaders see them. `bounds` is already top-origin and so is
-//     SV_Position, so a GLSL original's `frame.y - gl_FragCoord.y` flip is simply
-//     dropped when porting - the same deviation shaders.go documents.
+//   - the shared prelude (shaders/common.hlsl) is prepended, so `frame`,
+//     `bounds` and PSIn arrive exactly as the built in shaders see them.
+//     `bounds` is top-origin, as is SV_Position: pixel y counts down from the
+//     top of the frame.
 //   - the shader declares its own Uniforms as a flat `cbuffer X : register(b1)`.
 //     Offsets are read out of the source text rather than by reflection, so the
 //     names in Shader.Uniforms can be matched to buffer offsets without pulling
 //     in ID3D11ShaderReflection.
-//   - Textures bind to t0 upwards with a sampler each at s0 upwards, ordered by
-//     sorted name. That is the same assignment the GL Painter makes to texture
-//     units, so one shader can serve both backends.
+//   - Textures bind to t0 upwards with a sampler each at s0 upwards, ordered
+//     by sorted name, so the binding order is deterministic.
 
 import (
 	"encoding/binary"
@@ -89,7 +86,7 @@ func (p *Painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 
 // userShader returns the cached state for a shader, compiling it on first use.
 // A compile failure is cached as an invalid entry so it is logged once rather
-// than every frame, like the GL Painter's shaderPrograms cache.
+// than every frame.
 func (p *Painter) userShader(shader *canvas.Shader) (*userShader, bool) {
 	if p.userShaders == nil {
 		p.userShaders = make(map[string]*userShader)
@@ -166,8 +163,7 @@ func (s *userShader) bindTextures(p *Painter, shader *canvas.Shader) bool {
 	s.srvs, s.samplers = s.srvs[:0], s.samplers[:0]
 	for _, name := range names {
 		s.srvs = append(s.srvs, s.textures[name].GPU.srv)
-		// Smooth sampling for every texture, matching the GL Painter, which
-		// uploads user textures with canvas.ImageScaleSmooth.
+		// Smooth (linear) sampling for every user texture.
 		s.samplers = append(s.samplers, p.sampLinear)
 	}
 	// Before binding: flushing draws the glyph batch, which would otherwise

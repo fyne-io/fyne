@@ -1,5 +1,3 @@
-// Port of gl/shaders/rectangle.frag.
-//
 // Square corners, optional inset stroke, optional drop or inner shadow.
 float4 main(PSIn input) : SV_TARGET
 {

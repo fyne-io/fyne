@@ -1,30 +1,26 @@
-// Package dx provides a full Fyne render implementation using Direct3D 11,
-// mirroring the OpenGL renderer in internal/painter/gl. It has no cgo: the COM
-// calls go through syscall, and the HLSL below is compiled at startup by
-// d3dcompiler_47.dll, which ships with Windows 8.1 and later.
+//go:build windows && directx
+
+// Package dx provides a full Fyne render implementation using Direct3D 11.
+// It has no cgo: the COM calls go through syscall, and the HLSL below is
+// compiled at startup by d3dcompiler_47.dll, which ships with Windows 8.1 and
+// later.
 //
-// Every canvas primitive the OpenGL painter draws is drawn here too: rectangles
-// (with per-corner radii, strokes and shadows), circles, ellipses, arcs, regular
-// and arbitrary polygons, Bezier curves, blur, lines, text, images, rasters and
-// both gradient types. User canvas.Shader objects are supported through
-// Shader.SourceHLSL; a shader supplying only GLSL is skipped, since translating
-// it has no cheap answer.
+// Every canvas primitive is drawn on the GPU: rectangles (with per-corner
+// radii, strokes and shadows), circles, ellipses, arcs, regular and arbitrary
+// polygons, Bezier curves, blur, lines, text, images, rasters and both
+// gradient types. User canvas.Shader objects are supported through
+// Shader.SourceHLSL; a shader that carries no HLSL source is not drawn.
 //
-// The shader sources live in shaders/, laid out like internal/painter/gl/shaders.
-// Each is the port of the equivalently named GLSL shader. Two coordinate
-// conventions differ between the two APIs and account for every deliberate
-// deviation from the originals:
+// The shader sources live in shaders/, one file per primitive plus a shared
+// prelude (common.hlsl) that declares the frame constants and the vertex
+// output struct. All pixel positions in the shaders are top-origin: both
+// SV_Position and the `bounds` uniform put y=0 at the top of the frame, and
+// where a signed-distance computation needs a centred vector with y pointing
+// up (the rounded-rectangle, ellipse and arc shaders, whose corner and radius
+// selection is sign-sensitive), y is negated when forming that vector.
 //
-//   - gl_FragCoord has its origin at the bottom-left, SV_Position at the top-left.
-//     Fyne's `bounds` uniform is already top-origin, so the GLSL `frame.y - bounds[n]`
-//     flips simply disappear - SV_Position and bounds are in the same space.
-//   - Where a shader needs a centred vector with y pointing up (the rounded-rect,
-//     ellipse and arc SDFs, whose corner and radius selection is sign-sensitive),
-//     y is negated when forming that vector so the ported SDF body stays
-//     equivalent to the original.
-//
-// Only the shader sources build on every platform; the renderer itself is
-// Windows only, so a non-Windows build of this package yields just the HLSL.
+// The package builds only for Windows targets that opt in with the `directx`
+// build tag.
 package dx
 
 import _ "embed"

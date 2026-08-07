@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Scale handling: the user preference and the per-monitor DPI that combine into
 // a canvas scale.
@@ -19,8 +19,8 @@ const (
 	scaleEnvKey    = "FYNE_SCALE"
 )
 
-// userScale reads the user's scale preference, matching the GLFW driver so both
-// honour FYNE_SCALE and the app setting identically.
+// userScale reads the user's scale preference: the FYNE_SCALE environment
+// variable when set to anything but "auto", otherwise the app's scale setting.
 func userScale() float32 {
 	env := os.Getenv(scaleEnvKey)
 	if env != "" && env != "auto" {

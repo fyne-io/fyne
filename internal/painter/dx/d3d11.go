@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package dx
 
@@ -19,7 +19,7 @@ var (
 	procD3DCompile  = d3dCompiler.NewProc("D3DCompile")
 
 	// dxDebug enables one-shot device diagnostics and periodic draw statistics,
-	// for chasing performance differences against the GL driver.
+	// for chasing rendering performance.
 	dxDebug = os.Getenv("FYNE_DX_DEBUG") != ""
 )
 
@@ -518,8 +518,8 @@ func (c *deviceContext) UpdateTextureRegion(res, data unsafe.Pointer, rowPitch u
 		uintptr(data), uintptr(rowPitch), 0)
 }
 
-// box is D3D11_BOX, the source region for CopySubresourceRegion. Coordinates are
-// top-origin pixels, unlike OpenGL's bottom-origin glCopyTexSubImage2D.
+// box is D3D11_BOX, the source region for CopySubresourceRegion. Coordinates
+// are top-origin pixels.
 type box struct {
 	Left, Top, Front, Right, Bottom, Back uint32
 }
@@ -749,8 +749,7 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 		// Swap-effect choice is measured, not aesthetic - windowed on Intel
 		// Iris Plus, 582 draws/frame playback: flip-discard with 2 buffers
 		// ~7ms per Present, flip-discard with 3 buffers 1.2-4.5ms on battery
-		// and ~100us on AC, blt-discard 8-11ms (the DXGI blt path is NOT the
-		// cheap WGL-style copy the GL driver gets - do not "simplify" back to
+		// and ~100us on AC, blt-discard 8-11ms (do not "simplify" back to
 		// it). If Present time ever needs to go lower still, the route is
 		// CreateSwapChainForHwnd with
 		// DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT, waiting on the

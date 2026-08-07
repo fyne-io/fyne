@@ -1,4 +1,4 @@
-// Port of gl/shaders/ellipse.frag, also used for circles.
+// Ellipse fill and stroke by signed distance, also used for circles.
 //
 // radius.xy holds the two semi-axes and shadowOffset.w the rotation in degrees.
 float2 rotate(float2 v, float a)
@@ -18,7 +18,7 @@ float calc_distance(float2 p, float2 r)
 
 float4 main(PSIn input) : SV_TARGET
 {
-    float2 p = centredGL(input.pos.xy);
+    float2 p = centredUp(input.pos.xy);
 
     float strokeWidth = misc.x;
     float addShadow = misc.y;
