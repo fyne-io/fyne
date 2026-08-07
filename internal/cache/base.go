@@ -20,8 +20,8 @@ var (
 	// cachedNow is the clock sample setAlive uses. Reading the real clock there
 	// is an expensive operation and setAlive is called per-object per paint.
 	// cachedNow is updated on Clean, which should be called once per frame.
-	// Atomic because tests (and Resize/Refresh from goroutines) reach setAlive
-	// off the main thread while the draw loop is in Clean.
+	// Atomic because tests (and Resize/Refresh from goroutines in non-migrated apps)
+	// reach setAlive off the main thread while the draw loop is in Clean.
 	cachedNow atomic.Int64
 
 	// testing purpose only
