@@ -1,8 +1,8 @@
-//go:build windows
+//go:build windows && directx
 
 package directx
 
-// System tray support, ported from the GLFW driver's driver_desktop.go.
+// System tray support.
 //
 // fyne.io/systray only needs cgo on darwin; its Windows implementation is pure
 // Go over the same Win32 calls this package already uses, so pulling it in keeps

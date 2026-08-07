@@ -1,5 +1,3 @@
-// Port of gl/shaders/line.frag.
-//
 // A solid colour with an edge feathered from the delta emitted by line.vs.hlsl.
 float4 main(PSIn input) : SV_TARGET
 {

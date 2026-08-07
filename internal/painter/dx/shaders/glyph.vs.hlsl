@@ -1,6 +1,5 @@
-// Vertex stage for atlas text. It has no counterpart in gl/shaders: the OpenGL
-// painter draws each string as one textured quad from a texture of its own,
-// where this draws one quad per glyph out of the shared atlas.
+// Vertex stage for atlas text: one quad per glyph, textured out of the shared
+// glyph atlas.
 //
 // Six vertices per instance as a triangle list, generated from the instance
 // rectangle. A strip would need four, but instanced strips leave the question

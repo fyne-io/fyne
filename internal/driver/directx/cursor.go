@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Mapping from Fyne cursors to Win32 cursors: stock cursors by id, custom
 // desktop.Cursor images through CreateIconIndirect.

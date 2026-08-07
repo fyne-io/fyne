@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Turning a fyne.Resource into the HICON that WM_SETICON wants.
 

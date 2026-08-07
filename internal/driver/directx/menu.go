@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package directx
 
@@ -13,9 +13,8 @@ import (
 	"fyne.io/fyne/v2/lang"
 )
 
-// Native Win32 menus. Fyne's own MenuBar widget lives inside the GLFW driver, so
-// rather than porting it this driver uses the real menu bar - which is also what
-// Windows users expect, and gets keyboard access and theming for free.
+// Native Win32 menus. The main menu is the real Windows menu bar - which is
+// what Windows users expect, and gets keyboard access and theming for free.
 
 var (
 	procCreateMenu      = user32.NewProc("CreateMenu")
@@ -288,8 +287,8 @@ func triggerMenuShortcut(sh fyne.Shortcut, m *fyne.Menu) bool {
 	return false
 }
 
-// addMissingQuitForMainMenu guarantees the first menu can quit the app, matching
-// the GLFW driver so the same menu definition behaves the same on both backends.
+// addMissingQuitForMainMenu guarantees the first menu can quit the app: when it
+// does not already end in a quit item, a separator and a Quit item are appended.
 func addMissingQuitForMainMenu(menus *fyne.MainMenu, w *window) {
 	if len(menus.Items) == 0 {
 		return

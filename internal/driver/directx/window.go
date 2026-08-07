@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package directx
 
@@ -25,7 +25,8 @@ const (
 	dragMoveThreshold = 2
 	wheelDelta        = 120
 
-	// Scroll feel, matching the GLFW driver's non-darwin values.
+	// Scroll feel: points per wheel notch, and the multiplier plus cutoff for
+	// accelerating large trackpad/free-wheel offsets.
 	scrollSpeed            = 25
 	scrollAccelerateRate   = 125
 	scrollAccelerateCutoff = 10
@@ -103,7 +104,7 @@ type window struct {
 	onCloseInter func()
 	onDropped    func(fyne.Position, []fyne.URI)
 
-	// mouse state, mirroring the GLFW driver's tap/drag/hover machine
+	// mouse state for the tap/drag/hover machine
 	mousePos             fyne.Position
 	mouseButton          desktop.MouseButton
 	mouseDragged         fyne.Draggable
@@ -389,8 +390,8 @@ func (w *window) applyIcon() {
 	}
 }
 
-// setDarkMode matches the title bar to the system theme, the way the GLFW driver
-// does. The attribute is Windows 10 1809 and later; older builds keep a light
+// setDarkMode matches the title bar to the system theme.
+// The attribute is Windows 10 1809 and later; older builds keep a light
 // frame, and pre-20H1 builds reject the ordinal with E_INVALIDARG.
 func (w *window) setDarkMode() {
 	if w.hwnd == 0 || procDwmSetWindowAttribute.Find() != nil {
@@ -556,7 +557,7 @@ func (w *window) applyClientSize() {
 
 // rescale resizes the window around a canvas whose scale has just changed. The
 // canvas keeps its size in Fyne coordinates and the frame grows or shrinks to
-// match, which is how the GLFW driver's RescaleContext behaves.
+// match.
 func (w *window) rescale() {
 	if w.hwnd == 0 || w.closing || w.fullScreen {
 		return
