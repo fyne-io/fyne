@@ -130,8 +130,10 @@ func (p *Painter) uploadGlyph(img *image.RGBA, x, y int) bool {
 		}
 	}
 
-	region := box{Left: uint32(x), Top: uint32(y), Front: 0,
-		Right: uint32(x + w), Bottom: uint32(y + h), Back: 1}
+	region := box{
+		Left: uint32(x), Top: uint32(y), Front: 0,
+		Right: uint32(x + w), Bottom: uint32(y + h), Back: 1,
+	}
 	p.g.ctx.UpdateTextureRegion(unsafe.Pointer(p.atlas.tex.tex),
 		unsafe.Pointer(&cov[0]), uint32(w), &region)
 	return true
@@ -155,8 +157,10 @@ func (p *Painter) ensureAtlasWhite() bool {
 		}
 	}
 	cov := [9]byte{255, 255, 255, 255, 255, 255, 255, 255, 255}
-	region := box{Left: uint32(x), Top: uint32(y), Front: 0,
-		Right: uint32(x + 3), Bottom: uint32(y + 3), Back: 1}
+	region := box{
+		Left: uint32(x), Top: uint32(y), Front: 0,
+		Right: uint32(x + 3), Bottom: uint32(y + 3), Back: 1,
+	}
 	p.g.ctx.UpdateTextureRegion(unsafe.Pointer(p.atlas.tex.tex),
 		unsafe.Pointer(&cov[0]), 3, &region)
 
