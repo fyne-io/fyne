@@ -2,6 +2,7 @@ package cache
 
 import (
 	"os"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,7 +20,9 @@ var (
 	// cachedNow is the clock sample setAlive uses. Reading the real clock there
 	// is an expensive operation and setAlive is called per-object per paint.
 	// cachedNow is updated on Clean, which should be called once per frame.
-	cachedNow int64
+	// Atomic because tests (and Resize/Refresh from goroutines) reach setAlive
+	// off the main thread while the draw loop is in Clean.
+	cachedNow atomic.Int64
 
 	// testing purpose only
 	timeNow = time.Now
@@ -36,7 +39,7 @@ func init() {
 // refreshNow samples the clock for setAlive and returns the sample.
 func refreshNow() time.Time {
 	now := timeNow()
-	cachedNow = now.UnixNano()
+	cachedNow.Store(now.UnixNano())
 	return now
 }
 
@@ -134,5 +137,5 @@ func (c *expiringCache) isExpired(now time.Time) bool {
 
 // setAlive updates expiration time.
 func (c *expiringCache) setAlive() {
-	c.expires = cachedNow + ValidDuration.Nanoseconds()
+	c.expires = cachedNow.Load() + ValidDuration.Nanoseconds()
 }

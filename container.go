@@ -105,7 +105,9 @@ func (c *Container) MinSize() Size {
 
 	minSize := NewSize(1, 1)
 	for _, child := range c.Objects {
-		minSize = minSize.MaxSize(child.MinSize())
+		// inlined internal.MaxSizes, which this package cannot import
+		childMin := child.MinSize()
+		minSize = NewSize(Max(minSize.Width, childMin.Width), Max(minSize.Height, childMin.Height))
 	}
 
 	return minSize
