@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // The Win32 syscall layer: lazily bound procedures and thin Go wrappers.
 // Constants and structures live in win32_types.go.

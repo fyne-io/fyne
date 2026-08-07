@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // The run loop and the main-thread work queue.
 //

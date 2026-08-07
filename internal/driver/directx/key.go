@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Virtual key code to fyne.KeyName mapping, plus modifier state and the
 // standard editing shortcuts.

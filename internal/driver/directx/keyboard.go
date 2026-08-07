@@ -1,7 +1,7 @@
-//go:build windows
+//go:build windows && directx
 
 // Keyboard event processing: key down/up, typed runes, shortcuts and tab focus
-// traversal. Ported from the GLFW driver so behaviour matches.
+// traversal.
 
 package directx
 

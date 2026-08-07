@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package dx
 
@@ -95,8 +95,8 @@ func NewGPU(hwnd windows.Handle, width, height uint32) (*GPU, error) {
 	// Frame latency bounds how many presents may be in flight before Present
 	// blocks - and Intel's driver spins that block on the CPU. On battery the
 	// GPU is down-clocked to near the frame budget, so tight budgets (1 or 2,
-	// both profiled) turn into milliseconds of spinning per frame; 3 gives the
-	// queue depth the GL driver effectively enjoys. Latency only binds when
+	// both profiled) turn into milliseconds of spinning per frame; 3 is deep
+	// enough that Present rarely blocks. Latency only binds when
 	// presents outpace retirement, so this costs no drag lag while the GPU
 	// keeps up.
 	if err := setMaximumFrameLatency(dev, 3); err != nil {
@@ -203,9 +203,10 @@ func (g *GPU) Release() {
 	releaseCOM(&g.dev)
 }
 
-// The Painter needs two blend modes, mirroring the two glBlendFunc calls in the
-// GL Painter. Getting this wrong is silent - nothing errors, output just looks
-// subtly wrong - so both are built by named functions the tests can check.
+// The Painter needs two blend modes: straight alpha for shapes and
+// premultiplied alpha for textures. Getting this wrong is silent - nothing
+// errors, output just looks subtly wrong - so both are built by named
+// functions the tests can check.
 
 // straightAlphaBlend is for shapes, whose fragment shaders emit un-premultiplied
 // colour (see fragmentColor).
@@ -309,8 +310,8 @@ type Painter struct {
 	blurKernel blurKernelTexture
 
 	// textures maps the uint32 handle stored in Fyne's texture cache to the COM
-	// objects behind it. The shared cache is typed to uint32 for the GL driver, so
-	// D3D resources are indirected through an id rather than stored directly.
+	// objects behind it: the shared cache stores uint32 handles, so D3D
+	// resources are indirected through an id rather than stored directly.
 	textures  map[uint32]*gpuTexture
 	nextTexID uint32
 
@@ -334,11 +335,11 @@ type Painter struct {
 	rectCount  int
 
 	// clippedTextTextures holds the windowed textures for text runs wider than
-	// the device texture limit, keyed by the text object as the GL painter does.
+	// the device texture limit, keyed by the text object.
 	clippedTextTextures map[*canvas.Text]clippedTextEntry
 
 	// userShaders caches the compiled program, uniform buffer and textures of
-	// each canvas.Shader, keyed by Shader.Name as the GL Painter does.
+	// each canvas.Shader, keyed by Shader.Name.
 	userShaders map[string]*userShader
 
 	pixScale, texScale float32
@@ -394,8 +395,8 @@ func NewPainter(c fyne.Canvas, g *GPU) *Painter {
 
 // Init compiles the shader set and builds the fixed pipeline state. It is called
 // once, after the device exists. A failure here is a bug (the shaders ship with
-// the binary), so it panics the way the GL painter does on a shader compile
-// error, rather than leaving a painter that silently draws nothing.
+// the binary), so it panics rather than leaving a painter that silently draws
+// nothing.
 func (p *Painter) Init() {
 	if p.vsQuad != nil {
 		return
@@ -632,7 +633,7 @@ func (p *Painter) SetOutputSize(width, height int) {
 
 // StartClipping restricts drawing to the given canvas rectangle. Fyne passes
 // top-origin canvas coordinates and D3D scissor rects are also top-origin, so
-// unlike the GL Painter no vertical flip is needed.
+// the coordinates map directly.
 func (p *Painter) StartClipping(pos fyne.Position, size fyne.Size) {
 	p.flushGlyphs() // queued glyphs belong to the outgoing scissor rectangle
 	x := p.textureScale(pos.X)
@@ -728,8 +729,7 @@ func (p *Painter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.
 
 // upload writes the constants and issues the draw; the vertex shader generates
 // the geometry from c.NdcRect, so no vertex data is uploaded at all. blend
-// selects straight or premultiplied alpha, which differs between shapes and
-// textures the same way it does in the GL Painter.
+// selects straight alpha (shapes) or premultiplied alpha (textures).
 func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps *pixelShader,
 	topology uint32, blend *blendState, vertexCount uint32,
 ) {
@@ -973,9 +973,8 @@ func (p *Painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 		!paint.IsShadowVisible(circle.Shadow) {
 		return
 	}
-	// Aspect 1 squares the drawn bounds inside the object's rectangle, matching
-	// the GL painter's vecSquareCoords: a circle stays circular even when its
-	// bounding box is not square.
+	// Aspect 1 squares the drawn bounds inside the object's rectangle: a circle
+	// stays circular even when its bounding box is not square.
 	points, bounds := p.vecRectCoords(pos, circle, frame, 1, circle.Shadow)
 	c := p.baseConstants(frame, bounds, circle.FillColor, circle.StrokeColor, circle.Shadow)
 
@@ -1109,7 +1108,7 @@ func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 
 	// A run wider than the device's texture limit cannot upload whole; render
-	// only a window around the visible part, the way the GL painter does.
+	// only a window around the visible part.
 	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
 	if maxSize := p.g.MaxTextureSize(); fullWidth <= maxSize || maxSize <= 0 {
 		p.freeClippedTextTexture(text)
@@ -1414,8 +1413,8 @@ func (p *Painter) drawGPUTexture(obj fyne.CanvasObject, tex *gpuTexture,
 }
 
 // ---------------------------------------------------------------------------
-// Coordinate maths - ported from internal/Painter/gl/draw.go so both painters
-// place geometry identically.
+// Coordinate maths - converting canvas positions and sizes into pixel-aligned
+// texture and NDC coordinates.
 // ---------------------------------------------------------------------------
 
 func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame fyne.Size,
@@ -1592,8 +1591,8 @@ func (p *Painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, flo
 		roundToPixel(y1*p.pixScale, 1.0), roundToPixel(y2*p.pixScale, 1.0)
 }
 
-// fragmentColor splits a colour into un-premultiplied RGB plus alpha, matching
-// getFragmentColor in the GL Painter.
+// fragmentColor splits a colour into un-premultiplied RGB plus alpha, the form
+// the shape shaders expect.
 func fragmentColor(col color.Color) (r, g, b, a float32) {
 	if col == nil {
 		return 0, 0, 0, 0
@@ -1622,8 +1621,7 @@ func (p *Painter) Capture(c fyne.Canvas) image.Image {
 	// The swap chain uses DXGI_SWAP_EFFECT_DISCARD, which leaves the back buffer
 	// contents undefined once Present has run - so whatever is sitting there now is
 	// not the last frame, and reading it straight out yields garbage or black.
-	// Redraw into it first. (The GL painter avoids this by reading the front
-	// buffer, which D3D11 gives no access to.)
+	// Redraw into it first.
 	if r, ok := c.(Repainter); ok {
 		r.Repaint(c.Size())
 	}
@@ -2096,7 +2094,8 @@ func (p *Painter) drawBezierCurve(curve *canvas.BezierCurve, pos fyne.Position, 
 	points, bounds := p.vecRectCoords(pos, curve, frame, 0, canvas.Shadow{})
 	c := p.baseConstants(frame, bounds, color.Transparent, curve.StrokeColor, canvas.Shadow{})
 
-	// Keep the stroke inside the object, matching the GL Painter.
+	// Cap the stroke at the object's smaller dimension so it stays inside the
+	// bounds, with a floor of one unit.
 	size := curve.Size()
 	strokeWidth := fyne.Min(curve.StrokeWidth, fyne.Min(size.Width, size.Height))
 	if strokeWidth < 1 {
@@ -2215,8 +2214,7 @@ func (k *blurKernelTexture) ensure(dev *device, radius float32) bool {
 	return true
 }
 
-// createBlurKernel builds normalised Gaussian weights, matching createKernel in
-// the GL Painter so both backends blur identically.
+// createBlurKernel builds normalised Gaussian weights for the given radius.
 func createBlurKernel(radius float32) []float32 {
 	sum := float32(0)
 	length := int(radius)*2 + 1

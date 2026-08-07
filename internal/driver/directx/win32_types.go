@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 // Win32 constants and structure layouts. These must match the C headers
 // exactly; the wrappers that use them are in win32.go.

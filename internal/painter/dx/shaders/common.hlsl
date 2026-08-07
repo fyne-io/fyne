@@ -67,9 +67,9 @@ float4 blend_shadow(float4 col, float4 shadow)
     return float4((col.rgb * col.a + shadow.rgb * shadow.a * (1.0 - col.a)) / alpha, alpha);
 }
 
-// centredGL returns the fragment position relative to the shape centre with y
-// pointing up, matching what the GLSL shaders derive from gl_FragCoord.
-float2 centredGL(float2 fragPos)
+// centredUp returns the fragment position relative to the shape centre with y
+// pointing up, the convention the signed-distance shaders compute in.
+float2 centredUp(float2 fragPos)
 {
     float2 centre = float2((bounds.x + bounds.z) * 0.5, (bounds.y + bounds.w) * 0.5);
     return float2(fragPos.x - centre.x, centre.y - fragPos.y);

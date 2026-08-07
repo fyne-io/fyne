@@ -1,10 +1,11 @@
+//go:build windows && directx
+
 package dx
 
 import "github.com/go-text/typesetting/font"
 
-// This file holds the parts of the glyph atlas that need no Direct3D, so they
-// compile and test on any platform - the renderer itself is Windows only. The
-// GPU half lives in atlas_gpu.go.
+// This file holds the parts of the glyph atlas that need no Direct3D; the GPU
+// half lives in atlas_gpu.go.
 //
 // Caching whole rasterised strings costs one texture per distinct string, which
 // for a UI whose labels change - a dashboard, a log player, anything counting -
@@ -30,9 +31,8 @@ const (
 
 // glyphInst mirrors the `GlyphInst` struct in common.hlsl, one per glyph quad.
 // The two declarations must stay in the same order; TestGlyphInstMatchesShader
-// pins them. It lives in this untagged file so that test can run on any
-// platform - the shader sources build everywhere, and a mirror that has drifted
-// is exactly the mistake no compiler will catch.
+// pins them, because a mirror that has drifted is exactly the mistake no
+// compiler will catch.
 type glyphInst struct {
 	NDC   [4]float32
 	UV    [4]float32
