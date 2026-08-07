@@ -384,7 +384,8 @@ const (
 )
 
 func NewPainter(c fyne.Canvas, g *GPU) *Painter {
-	p := &Painter{canvas: c, g: g,
+	p := &Painter{
+		canvas: c, g: g,
 		textures: map[uint32]*gpuTexture{},
 		texPool:  map[[2]uint32][]pooledTexture{},
 		shaped:   map[shapedKey]shapedEntry{},
@@ -1177,8 +1178,10 @@ func (p *Painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame 
 	}
 
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
-	key := shapedKey{text: text.Text, face: face, size: text.TextSize,
-		scale: p.pixScale, style: text.TextStyle}
+	key := shapedKey{
+		text: text.Text, face: face, size: text.TextSize,
+		scale: p.pixScale, style: text.TextStyle,
+	}
 	entry, ok := p.shaped[key]
 	if !ok {
 		p.glyphScratch = p.glyphScratch[:0]
