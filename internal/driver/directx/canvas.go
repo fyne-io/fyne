@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows && directx
 
 package directx
 
@@ -92,8 +92,8 @@ func (c *dxCanvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 }
 
 func (c *dxCanvas) Resize(size fyne.Size) {
-	// Rounding up at scale 1 keeps the first frame sharp; see the equivalent note
-	// in the GLFW canvas.
+	// At scale 1 the requested size may be fractional; round up so the canvas
+	// covers the window fully and the first frame stays sharp.
 	nearestSize := size
 	if c.scale == 1 {
 		nearestSize = fyne.NewSize(float32(math.Ceil(float64(size.Width))),

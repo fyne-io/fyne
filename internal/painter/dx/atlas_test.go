@@ -1,3 +1,5 @@
+//go:build windows && directx
+
 package dx
 
 import (

@@ -1,5 +1,3 @@
-// Port of gl/shaders/round_rectangle.frag.
-//
 // Signed-distance rounded rectangle with per-corner radii, stroke and shadow.
 float calc_distance(float2 p, float2 b, float4 r)
 {
@@ -33,7 +31,7 @@ float calc_distance_all_quadrants(float2 p, float2 size, float4 rad)
 
 float4 main(PSIn input) : SV_TARGET
 {
-    float2 p = centredGL(input.pos.xy);
+    float2 p = centredUp(input.pos.xy);
 
     float strokeWidthHalf = rectHalf.z;
     float edgeSoftness = rectHalf.w;
