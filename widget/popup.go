@@ -20,6 +20,12 @@ type PopUp struct {
 	Content fyne.CanvasObject
 	Canvas  fyne.Canvas
 
+	// OnDismiss is a callback invoked when the PopUp is dismissed,
+	// either by tapping outside of it if non-modal, or by calling Hide().
+	//
+	// Since: 2.9
+	OnDismiss func() `json:"-"`
+
 	overlay       *widget.OverlayContainer
 	modal, manual bool
 }
@@ -33,6 +39,10 @@ func (p *PopUp) Hide() {
 
 	p.BaseWidget.Hide()
 	p.Move(fyne.Position{}) // reset so that Show or ShowAtPosition next time is respected
+
+	if p.OnDismiss != nil {
+		p.OnDismiss()
+	}
 }
 
 // Refresh the background for a modal popup and the content of this popup.
