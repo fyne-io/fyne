@@ -23,8 +23,11 @@ func (w *window) doSetFullScreen2(full bool) {
 }
 
 func (w *window) doApplyFullScreen(monitor *monitor, full bool) {
-	mode := monitor.GetVideoMode()
 	if full {
+		mode := monitor.GetVideoMode()
+		if mode == nil { // monitor was disconnected
+			return
+		}
 		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 	} else {
 		if w.width == 0 && w.height == 0 { // if we were fullscreen on creation...
