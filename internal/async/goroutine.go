@@ -10,10 +10,14 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 )
 
-// mainGoroutineID stores the main goroutine ID.
-// This ID must be initialized during setup by calling `SetMainGoroutine` because
-// a main goroutine may not equal to 1 due to the influence of a garbage collector.
-var mainGoroutineID atomic.Uint64
+var (
+	// mainGoroutineID stores the main goroutine ID.
+	// This ID must be initialized during setup by calling `SetMainGoroutine` because
+	// a main goroutine may not equal to 1 due to the influence of a garbage collector.
+	mainGoroutineID atomic.Uint64
+
+	warnedNotMigrated bool
+)
 
 func SetMainGoroutine() {
 	mainGoroutineID.Store(goroutineID())
@@ -29,6 +33,7 @@ func EnsureNotMain(fn func()) {
 		fn()
 		return
 	}
+	PrintFyneDoWarning()
 
 	log.Println("*** Error in Fyne call thread, fyne.Do[AndWait] called from main goroutine ***")
 	log.Println("*** This error needs to be addressed as it will become a deadlock soon ***")
@@ -48,6 +53,7 @@ func EnsureMain(fn func()) {
 		fn()
 		return
 	}
+	PrintFyneDoWarning()
 
 	log.Println("*** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***")
 	log.Println("*** This error needs to be addressed as it could cause concurrent errors soon ***")
@@ -88,4 +94,15 @@ func goroutineID() (id uint64) {
 	//revive:enable:add-constant
 
 	return id
+}
+
+func PrintFyneDoWarning() {
+	if warnedNotMigrated { // shown before
+		return
+	}
+
+	warnedNotMigrated = true
+	log.Println("*** This application has not been migrated to the fyne.Do threading model ***")
+	log.Println("*** The next major Fyne release will remove this safety! ***")
+	log.Println("*** Read more at https://docs.fyne.io/started/goroutines ***")
 }

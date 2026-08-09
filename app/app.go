@@ -5,12 +5,12 @@ package app // import "fyne.io/fyne/v2/app"
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/internal/scheduler"
@@ -80,10 +80,8 @@ func (a *fyneApp) Run() {
 		a.settings.watchSettings()
 	}
 
-	if !build.MigratedToFyneDo() {
-		log.Println("*** This application has not been migrated to the fyne.Do threading model ***")
-		log.Println("*** The next major Fyne release will remove this safety! ***")
-		log.Println("*** Read more at https://docs.fyne.io/started/goroutines ***")
+	if !build.MigratedToFyneDo() && build.HasHints {
+		async.PrintFyneDoWarning()
 	}
 	a.driver.Run()
 }
