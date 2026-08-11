@@ -32,7 +32,7 @@ func TestStripPrecision(t *testing.T) {
 
 func TestURIFromStringHelper(t *testing.T) {
 	str := "file:///tmp/test.txt"
-	u, err := uriFromString(str)
+	u, err := parseURI(str)
 
 	assert.Nil(t, err)
 	assert.Equal(t, str, u.String())

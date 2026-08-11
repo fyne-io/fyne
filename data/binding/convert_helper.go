@@ -56,7 +56,7 @@ func stripFormatPrecision(in string) string {
 	return string(runes[:start+1]) + strconv.Itoa(int(width)) + string(runes[end:])
 }
 
-func uriFromString(in string) (fyne.URI, error) {
+func parseURI(in string) (fyne.URI, error) {
 	return storage.ParseURI(in)
 }
 
