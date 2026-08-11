@@ -157,6 +157,80 @@ func TestForm_ChangeItemWidget(t *testing.T) {
 	assert.Equal(t, newEntry, form.itemGrid.Objects[1])
 }
 
+func TestForm_ChangeItemWidget_ResetsValidation(t *testing.T) {
+	test.NewTempApp(t)
+
+	invalidEntry := &Entry{Validator: validation.NewRegexp(`^\d+$`, "must be numeric"), Text: "not-a-number"}
+	item := NewFormItem("Test", invalidEntry)
+	form := &Form{Items: []*FormItem{item}, OnSubmit: func() {}}
+	test.NewTempWindow(t, form)
+
+	assert.True(t, item.invalid)
+	assert.Error(t, item.validationError)
+	assert.True(t, form.submitButton.Disabled())
+
+	item.Widget = NewLabel("static") // not fyne.Validatable
+	form.Refresh()
+
+	assert.False(t, item.invalid)
+	assert.NoError(t, item.validationError)
+	assert.False(t, form.submitButton.Disabled())
+}
+
+func TestForm_ChangeItemWidget_ResetsWasFocused(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := &Entry{}
+	item := &FormItem{Text: "Test", Widget: entry, HintText: "a hint"}
+	form := &Form{Items: []*FormItem{item}}
+	test.NewTempWindow(t, form)
+
+	entry.FocusGained()
+	entry.FocusLost()
+	form.Refresh()
+	assert.True(t, item.wasFocused)
+
+	item.Widget = &Entry{}
+	form.Refresh()
+
+	assert.False(t, item.wasFocused)
+}
+
+func TestForm_ChangeItemWidget_DetachesOldWidget(t *testing.T) {
+	test.NewTempApp(t)
+
+	oldEntry := &Entry{Validator: validation.NewRegexp(`^\d+$`, "must be numeric")}
+	item := NewFormItem("Test", oldEntry)
+	form := &Form{Items: []*FormItem{item}, OnSubmit: func() {}}
+	test.NewTempWindow(t, form)
+
+	item.Widget = &Entry{}
+	form.Refresh()
+
+	// oldEntry is no longer part of the form; validating it must not write into item.
+	oldEntry.Text = "not-a-number"
+	oldEntry.Validate()
+
+	assert.False(t, item.invalid)
+	assert.NoError(t, item.validationError)
+}
+
+func TestForm_ChangeItemWidget_ClearsHelperOutput(t *testing.T) {
+	test.NewTempApp(t)
+
+	entry := &Entry{Validator: validation.NewRegexp(`^\d+$`, "must be numeric"), Text: "not-a-number"}
+	item := NewFormItem("Test", entry)
+	form := &Form{Items: []*FormItem{item}, OnSubmit: func() {}}
+	test.NewTempWindow(t, form)
+
+	assert.NotNil(t, item.helperOutput)
+
+	item.Widget = NewLabel("static")
+	form.Refresh()
+
+	assert.Nil(t, item.helperOutput)
+}
+
 func TestForm_ChangeTheme(t *testing.T) {
 	test.NewTempApp(t)
 

@@ -220,14 +220,29 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
-// itemRendersWidget reports whether rendered already shows widget, accounting for
-// createInput sometimes wrapping it in a hint/validation container.
-func (*Form) itemRendersWidget(rendered, widget fyne.CanvasObject) bool {
-	if rendered == widget {
-		return true
+// unwrapItemWidget returns the widget actually shown by rendered, stripping the
+// hint/validation container createInput sometimes wraps it in.
+func (*Form) unwrapItemWidget(rendered fyne.CanvasObject) fyne.CanvasObject {
+	if c, ok := rendered.(*fyne.Container); ok && len(c.Objects) > 0 {
+		return c.Objects[0]
 	}
-	c, ok := rendered.(*fyne.Container)
-	return ok && len(c.Objects) > 0 && c.Objects[0] == widget
+	return rendered
+}
+
+func (f *Form) itemRendersWidget(rendered, widget fyne.CanvasObject) bool {
+	return f.unwrapItemWidget(rendered) == widget
+}
+
+// detachValidation unhooks the callbacks setUpValidation registered on widget, so a
+// caller that keeps interacting with a widget no longer shown by the form can't have
+// it write stale state into the FormItem slot it used to occupy.
+func (*Form) detachValidation(widget fyne.CanvasObject) {
+	if v, ok := widget.(fyne.Validatable); ok {
+		v.SetOnValidationChanged(nil)
+	}
+	if r, ok := widget.(fyne.Requireable); ok {
+		r.SetOnRequiredChanged(nil)
+	}
 }
 
 func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
@@ -339,9 +354,16 @@ func (f *Form) ensureRenderItems() {
 	done := len(f.itemGrid.Objects) / 2
 	for i := 0; i < done && i < len(f.Items); i++ {
 		item := f.Items[i]
-		if f.itemRendersWidget(f.itemGrid.Objects[i*2+1], item.Widget) {
+		old := f.itemGrid.Objects[i*2+1]
+		if f.itemRendersWidget(old, item.Widget) {
 			continue
 		}
+
+		f.detachValidation(f.unwrapItemWidget(old))
+		item.validationError = nil
+		item.invalid = false
+		item.wasFocused = false
+		item.helperOutput = nil
 
 		f.setUpValidation(item.Widget, i)
 		f.itemGrid.Objects[i*2+1] = f.createInput(item)
