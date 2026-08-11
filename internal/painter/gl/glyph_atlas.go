@@ -295,10 +295,14 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 	cached.generation = generation
 	cached.pixScale = p.pixScale
 
-	// The only upload this string needs until its text changes.
-	p.ctx.BindBuffer(arrayBuffer, cached.buffer)
-	p.ctx.BufferData(arrayBuffer, p.textBatch, staticDraw)
-	p.logError()
+	// The only upload this string needs until its text changes. Skipped when
+	// every glyph was too large to pack, both because there is nothing to send
+	// and because the desktop path takes the address of the first element.
+	if len(p.textBatch) > 0 {
+		p.ctx.BindBuffer(arrayBuffer, cached.buffer)
+		p.ctx.BufferData(arrayBuffer, p.textBatch, staticDraw)
+		p.logError()
+	}
 
 	// Register with the texture cache purely for liveness: it holds no texture,
 	// but this is what drives expiry, and so eventually painter.Free, for text
