@@ -107,6 +107,14 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, s
 	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel, col)
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
+	// A glyph bigger than the atlas cannot be packed at any offset, and writing
+	// it anyway would run past the end of the texture. Report it as empty so it
+	// is skipped rather than drawn wrongly; only text far larger than the atlas
+	// is affected.
+	if w > a.texSize || h > a.texSize {
+		return glyphAtlasEntry{}, image.Rectangle{}
+	}
+
 	// Advance to a new shelf if the glyph does not fit in the current row.
 	if a.shelfX+w+glyphAtlasPad > a.texSize {
 		a.shelfY += a.shelfH + glyphAtlasPad
@@ -186,6 +194,14 @@ type textVertices struct {
 	pixScale   float32 // scale the glyphs were laid out and rasterised at
 }
 
+// usable reports whether cached geometry can be drawn as it stands. It cannot
+// once the atlas has reset, since every texture coordinate in it then points at
+// the wrong place, nor once the scale has changed, since the glyphs were both
+// laid out and rasterised for the old one.
+func (v *textVertices) usable(generation int, pixScale float32) bool {
+	return v != nil && v.generation == generation && v.pixScale == pixScale
+}
+
 // appendGlyphQuad adds one glyph's two triangles to points and returns the
 // extended slice. The quad samples the sub-region [entry.x, entry.y,
 // entry.x+entry.w, entry.y+entry.h] of the shared atlas texture.
@@ -227,8 +243,7 @@ func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX,
 // (see painter.Free), when the scale changes, or when the atlas has reset and
 // every texture coordinate in it has become stale.
 func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, col color.Color) *textVertices {
-	if cached, ok := p.textCache[text]; ok &&
-		cached.generation == p.glyphAtlas.generation && cached.pixScale == p.pixScale {
+	if cached := p.textCache[text]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
 		cache.GetTexture(text) // keep the expiry marker alive while still drawn
 		return cached
 	}
@@ -251,6 +266,9 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, phase, text.TextSize, p.pixScale, col)
 				if !dirty.Empty() {
 					p.uploadAtlasRegion(dirty)
+				}
+				if entry.w == 0 { // too large for the atlas to hold
+					return
 				}
 				// The bitmap carries its own baseline, which is the run's ascent
 				// rather than the line's. Offsetting by the difference keeps runs
