@@ -38,14 +38,14 @@ func TestURIFromStringHelper(t *testing.T) {
 	assert.Equal(t, str, u.String())
 }
 
-func TestURIToStringHelper(t *testing.T) {
+func Test_formatURI(t *testing.T) {
 	u := storage.NewFileURI("/tmp/test.txt")
-	str, err := uriToString(u)
+	str, err := formatURI(u)
 
 	assert.Nil(t, err)
 	assert.Equal(t, u.String(), str)
 
-	str, err = uriToString(nil)
+	str, err = formatURI(nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "", str)
 }

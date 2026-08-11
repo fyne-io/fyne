@@ -60,7 +60,7 @@ func uriFromString(in string) (fyne.URI, error) {
 	return storage.ParseURI(in)
 }
 
-func uriToString(in fyne.URI) (string, error) {
+func formatURI(in fyne.URI) (string, error) {
 	if in == nil {
 		return "", nil
 	}

@@ -85,7 +85,7 @@ func IntToStringWithFormat(v Int, format string) String {
 //
 // Since: 2.1
 func URIToString(v URI) String {
-	return toString(v, uriToString, storage.EqualURI, uriFromString)
+	return toString(v, formatURI, storage.EqualURI, uriFromString)
 }
 
 // ItemToString creates a binding that connects a generic data item to a String.
@@ -182,7 +182,7 @@ func StringToIntWithFormat(str String, format string) Int {
 //
 // Since: 2.1
 func StringToURI(str String) URI {
-	v := &fromStringTo[fyne.URI]{from: str, parser: uriToString, formatter: uriFromString}
+	v := &fromStringTo[fyne.URI]{from: str, parser: formatURI, formatter: uriFromString}
 	str.AddListener(v)
 	return v
 }
