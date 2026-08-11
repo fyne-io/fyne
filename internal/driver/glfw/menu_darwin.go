@@ -288,6 +288,10 @@ func menuChecked(id int) bool {
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	clearNativeMenu()
+	if main == nil {
+		return
+	}
+
 	nextItemID := 0
 	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu
