@@ -35,7 +35,7 @@ type ExternalList[T any] interface {
 //
 // Since: 2.7
 func NewList[T any](comparator func(T, T) bool) List[T] {
-	return newList[T](comparator)
+	return newBoundList(nil, comparator)
 }
 
 // BindList returns a bound list of values with type T, based on the contents of the passed slice.
@@ -94,7 +94,7 @@ type ExternalBytesList = ExternalList[[]byte]
 //
 // Since: 2.2
 func NewBytesList() List[[]byte] {
-	return newList(bytes.Equal)
+	return NewList(bytes.Equal)
 }
 
 // BindBytesList returns a bound list of []byte values, based on the contents of the passed slice.
@@ -219,7 +219,7 @@ type ExternalUntypedList = ExternalList[any]
 //
 // Since: 2.1
 func NewUntypedList() List[any] {
-	return newList(func(t1, t2 any) bool { return t1 == t2 })
+	return NewList(func(t1, t2 any) bool { return t1 == t2 })
 }
 
 // BindUntypedList returns a bound list of any values, based on the contents of the passed slice.
@@ -244,7 +244,7 @@ type ExternalURIList = ExternalList[fyne.URI]
 //
 // Since: 2.1
 func NewURIList() List[fyne.URI] {
-	return newList(storage.EqualURI)
+	return NewList(storage.EqualURI)
 }
 
 // BindURIList returns a bound list of fyne.URI values, based on the contents of the passed slice.
@@ -288,24 +288,24 @@ func (b *listBase) deleteItem(i int) {
 	b.items = append(b.items[:i], b.items[i+1:]...)
 }
 
-func newList[T any](comparator func(T, T) bool) *boundList[T] {
-	return &boundList[T]{val: new([]T), comparator: comparator}
+func newBoundList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
+	val := v
+	if val == nil {
+		val = new([]T)
+	}
+	return &boundList[T]{val: val, comparator: comparator, updateExternal: v != nil}
 }
 
-func newListComparable[T comparable]() *boundList[T] {
-	return newList(func(t1, t2 T) bool { return t1 == t2 })
-}
-
-func newExternalList[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
-	return &boundList[T]{val: v, comparator: comparator, updateExternal: true}
+func newListComparable[T comparable]() List[T] {
+	return NewList(func(t1, t2 T) bool { return t1 == t2 })
 }
 
 func bindListWithComparator[T any](v *[]T, comparator func(T, T) bool) *boundList[T] {
 	if v == nil {
-		return newList(comparator)
+		return newBoundList(nil, comparator)
 	}
 
-	l := newExternalList(v, comparator)
+	l := newBoundList(v, comparator)
 	for i := range *v {
 		l.appendItem(bindListItem(v, i, l.updateExternal, comparator))
 	}
