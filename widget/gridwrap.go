@@ -688,7 +688,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 
 	if l.gw.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for GridWrap", nil)
+		fyne.LogError("Missing UpdateItem callback required for GridWrap", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while

@@ -812,7 +812,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		length = f()
 	}
 	if l.list.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for List", nil)
+		fyne.LogError("Missing UpdateItem callback required for List", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while
