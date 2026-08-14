@@ -231,7 +231,7 @@ func (d *dxDriver) destroyWindow(w *window, index int) {
 	d.windows = d.windows[:len(d.windows)-1]
 
 	// An app with a system tray menu outlives its windows - quitting is then the
-	// tray's Quit item, which addMissingQuitForMenu guarantees exists.
+	// tray's Quit item, which the shared tray code guarantees exists.
 	if w.master || (len(d.windows) == 0 && d.systrayMenu == nil) {
 		d.Quit()
 	}
