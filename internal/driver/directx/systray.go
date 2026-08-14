@@ -2,7 +2,9 @@
 
 package directx
 
-// System tray support.
+// System tray support. The menu handling and icon conversion shared with the
+// other desktop drivers lives in internal/driver/systray; what stays here is the
+// Win32 specifics - the classic ICO encoder and the dark mode lookup.
 //
 // fyne.io/systray only needs cgo on darwin; its Windows implementation is pure
 // Go over the same Win32 calls this package already uses, so pulling it in keeps
@@ -14,19 +16,13 @@ import (
 	"image"
 	"image/draw"
 	_ "image/jpeg" // allow JPEG icon sources
-	"image/png"
 
 	"fyne.io/systray"
 	xdraw "golang.org/x/image/draw"
 	"golang.org/x/sys/windows/registry"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/driver/software"
-	paint "fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/internal/svg"
-	"fyne.io/fyne/v2/lang"
-	"fyne.io/fyne/v2/theme"
+	intsystray "fyne.io/fyne/v2/internal/driver/systray"
 )
 
 // systrayIconSize matches what fyne.io/systray's LoadImage call produces: it
@@ -37,171 +33,42 @@ import (
 // larger. Fix by reading GetSystemMetrics(SM_CXICON) if that ever matters.
 const systrayIconSize = 32
 
-var (
-	systrayIcon    fyne.Resource
-	systrayRunning bool
-)
+var systrayTray *intsystray.Tray
+
+func (d *dxDriver) systray() *intsystray.Tray {
+	if systrayTray == nil {
+		systrayTray = &intsystray.Tray{
+			IconSize:        systrayIconSize,
+			RunOnMain:       runOnMain,
+			Quit:            d.Quit,
+			ToOSIcon:        toOSIcon,
+			InvertMenuIcons: isDark, // Windows menus do not follow dark mode
+		}
+	}
+	return systrayTray
+}
 
 func (d *dxDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	if !systrayRunning {
-		systrayRunning = true
-		d.runSystray(m)
+	d.systrayMenu = m
+	t := d.systray()
+	if !t.Running() {
+		d.trayStart, d.trayStop = t.Start(m, nil)
 	}
-	d.refreshSystray(m)
+	t.Refresh(m)
 }
 
 func (d *dxDriver) SystemTrayMenu() *fyne.Menu {
 	return d.systrayMenu
 }
 
-func (d *dxDriver) runSystray(m *fyne.Menu) {
-	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-		switch {
-		case systrayIcon != nil:
-			d.SetSystemTrayIcon(systrayIcon)
-		case fyne.CurrentApp().Icon() != nil:
-			d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
-		default:
-			d.SetSystemTrayIcon(theme.BrokenImageIcon())
-		}
-
-		if m != nil {
-			// The menu has to be rebuilt after init; doing it earlier has no effect.
-			runOnMain(func() {
-				d.refreshSystray(m)
-			})
-		}
-	}, func() {
-		// nothing to tear down
-	})
-}
-
-func (d *dxDriver) refreshSystray(m *fyne.Menu) {
-	d.systrayMenu = m
-
-	systray.ResetMenu()
-	d.refreshSystrayMenu(m, nil)
-
-	addMissingQuitForMenu(m, d)
-}
-
-func (d *dxDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
-	if m == nil {
-		return
-	}
-	for _, i := range m.Items {
-		item := itemForMenuItem(i, parent)
-		if item == nil {
-			continue // separator
-		}
-		if i.ChildMenu != nil {
-			d.refreshSystrayMenu(i.ChildMenu, item)
-		}
-
-		fn := i.Action
-		go func() {
-			for range item.ClickedCh {
-				if fn != nil {
-					runOnMain(fn)
-				}
-			}
-		}()
-	}
-}
-
-func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
-	if i.IsSeparator {
-		if parent != nil {
-			parent.AddSeparator()
-		} else {
-			systray.AddSeparator()
-		}
-		return nil
-	}
-
-	var item *systray.MenuItem
-	switch {
-	case i.Checked && parent != nil:
-		item = parent.AddSubMenuItemCheckbox(i.Label, "", true)
-	case i.Checked:
-		item = systray.AddMenuItemCheckbox(i.Label, "", true)
-	case parent != nil:
-		item = parent.AddSubMenuItem(i.Label, "")
-	default:
-		item = systray.AddMenuItem(i.Label, "")
-	}
-
-	if i.Disabled {
-		item.Disable()
-	}
-	if i.Icon == nil {
-		return item
-	}
-
-	data := i.Icon.Content()
-	if svg.IsResourceSVG(i.Icon) {
-		res := i.Icon
-		if isDark() { // Windows menus do not follow dark mode, so invert the icon
-			res = theme.NewInvertedThemedResource(i.Icon)
-		}
-		b := &bytes.Buffer{}
-		img := paint.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
-		if err := png.Encode(b, img); err != nil {
-			fyne.LogError("directx: encode SVG icon for menu", err)
-		} else {
-			data = b.Bytes()
-		}
-	}
-
-	img, err := toOSIcon(data)
-	if err != nil {
-		fyne.LogError("directx: convert systray menu icon", err)
-		return item
-	}
-	if _, ok := i.Icon.(*theme.ThemedResource); ok {
-		item.SetTemplateIcon(img, img)
-	} else {
-		item.SetIcon(img)
-	}
-	return item
-}
-
-func (*dxDriver) SetSystemTrayIcon(resource fyne.Resource) {
-	systrayIcon = resource // kept in case the tray is (re)started later
-
-	// Windows has no SVG tray icon support, so rasterise first.
-	if svg.IsResourceSVG(resource) {
-		img := canvas.NewImageFromResource(resource)
-		c := software.NewTransparentCanvas()
-		c.SetContent(img)
-		c.SetPadded(false)
-		c.Resize(fyne.NewSquareSize(systrayIconSize))
-
-		buf := &bytes.Buffer{}
-		if err := png.Encode(buf, c.Capture()); err != nil {
-			fyne.LogError("directx: encode SVG system tray icon", err)
-			return
-		}
-		resource = fyne.NewStaticResource(resource.Name()+".png", buf.Bytes())
-	}
-
-	img, err := toOSIcon(resource.Content())
-	if err != nil {
-		fyne.LogError("directx: convert system tray icon", err)
-		return
-	}
-
-	if _, ok := resource.(*theme.ThemedResource); ok {
-		systray.SetTemplateIcon(img, img)
-	} else {
-		systray.SetIcon(img)
-	}
+func (d *dxDriver) SetSystemTrayIcon(resource fyne.Resource) {
+	d.systray().SetIcon(resource)
 }
 
 func (d *dxDriver) SetSystemTrayWindow(w fyne.Window) {
-	if !systrayRunning {
-		systrayRunning = true
-		d.runSystray(nil)
+	t := d.systray()
+	if !t.Running() {
+		d.trayStart, d.trayStop = t.Start(nil, nil)
 	}
 
 	w.SetCloseIntercept(w.Hide)
@@ -274,31 +141,6 @@ func toOSIcon(icon []byte) ([]byte, error) {
 	buf.Write(mask)
 
 	return buf.Bytes(), nil
-}
-
-// addMissingQuitForMenu guarantees the tray menu can always quit the app, which
-// matters here because a driver with a tray menu deliberately keeps running after
-// its last window closes.
-func addMissingQuitForMenu(menu *fyne.Menu, d *dxDriver) {
-	localQuit := lang.L("Quit")
-
-	var lastItem *fyne.MenuItem
-	if len(menu.Items) > 0 {
-		lastItem = menu.Items[len(menu.Items)-1]
-		if lastItem.Label == localQuit {
-			lastItem.IsQuit = true
-		}
-	}
-	if lastItem == nil || !lastItem.IsQuit {
-		quitItem := fyne.NewMenuItem(localQuit, nil)
-		quitItem.IsQuit = true
-		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
-	}
-	for _, item := range menu.Items {
-		if item.IsQuit && item.Action == nil {
-			item.Action = d.Quit
-		}
-	}
 }
 
 // isDark reports whether Windows is in dark mode, so tray icons can be inverted.
