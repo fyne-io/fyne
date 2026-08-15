@@ -174,6 +174,7 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 		render.Refresh()
 		customTextSize = test.TempWidgetRenderer(t, render.label).Objects()[0].(*canvas.Text).TextSize
 	})
+
 	assert.NotEqual(t, textSize, customTextSize)
 }
 
