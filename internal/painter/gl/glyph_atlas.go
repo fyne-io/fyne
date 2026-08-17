@@ -290,14 +290,37 @@ func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX,
 	)
 }
 
+// glyphCacheKey identifies cached geometry by what the glyphs are, not by which
+// object is showing them, mirroring how the per-string textures were keyed
+// before this. Colour is left unset because the atlas holds coverage and the
+// tint is a uniform, so one set of quads serves the same words in every colour.
+//
+// Keying on the object instead would look right and behave badly: a widget that
+// refreshes rebuilds every string it draws, so typing into an Entry rebuilt the
+// whole visible text on each keystroke rather than the line that changed.
+func glyphCacheKey(text *canvas.Text, c fyne.Canvas) cache.FontCacheEntry {
+	source := ""
+	if text.FontSource != nil {
+		source = text.FontSource.Name()
+	}
+
+	ent := cache.FontCacheEntry{Canvas: c}
+	ent.Text = text.Text
+	ent.Size = text.TextSize
+	ent.Style = text.TextStyle
+	ent.Source = source
+	return ent
+}
+
 // glyphGeometry returns the glyph quads for text, building them only when there
-// is no usable cached copy. A cached entry survives the object moving, which is
-// the common case while scrolling, and is discarded when the text is refreshed
-// (see painter.Free), when the scale changes, or when the atlas has reset and
-// every texture coordinate in it has become stale.
+// is no usable cached copy. A cached entry survives both the object moving and
+// the object being refreshed, and is discarded when the scale changes, when the
+// atlas has reset and every texture coordinate in it has gone stale, or when
+// the text it belongs to has not been drawn for long enough to expire.
 func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *textVertices {
-	if cached := p.textCache[text]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
-		cache.GetTexture(text) // keep the expiry marker alive while still drawn
+	key := glyphCacheKey(text, p.canvas)
+	if cached := p.textCache[key]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
+		cache.GetTextTexture(key) // keep the expiry marker alive while still drawn
 		return cached
 	}
 
@@ -342,19 +365,28 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 	}
 	generation := p.glyphAtlas.generation
 
-	cached, ok := p.textCache[text]
+	cached, ok := p.textCache[key]
 	if !ok {
 		cached = &textVertices{buffer: p.ctx.CreateBuffer()}
 		if p.textCache == nil {
-			p.textCache = make(map[*canvas.Text]*textVertices)
+			p.textCache = make(map[cache.FontCacheEntry]*textVertices)
 		}
-		p.textCache[text] = cached
+		p.textCache[key] = cached
+
+		// Registered with the text cache purely for its lifetime: it holds no
+		// texture, but this is what expires entries whose words have not been
+		// on screen for a while, and calls back so the buffer can go with them.
+		cache.SetTextTexture(key, cache.NoTexture, p.canvas, func() {
+			p.ctx.DeleteBuffer(cached.buffer)
+			p.logError()
+			delete(p.textCache, key)
+		})
 	}
 	cached.vertices = len(p.textBatch) / coordinateSize2DWithTexture
 	cached.generation = generation
 	cached.pixScale = p.pixScale
 
-	// The only upload this string needs until its text changes. Skipped when
+	// The only upload these words need until they leave the screen. Skipped when
 	// every glyph was too large to pack, both because there is nothing to send
 	// and because the desktop path takes the address of the first element.
 	if len(p.textBatch) > 0 {
@@ -362,11 +394,6 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 		p.ctx.BufferData(arrayBuffer, p.textBatch, staticDraw)
 		p.logError()
 	}
-
-	// Register with the texture cache purely for liveness: it holds no texture,
-	// but this is what drives expiry, and so eventually painter.Free, for text
-	// objects that are discarded without ever being refreshed.
-	cache.SetTexture(text, cache.NoTexture, p.canvas)
 	return cached
 }
 
@@ -412,5 +439,15 @@ func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne
 	p.logError()
 
 	p.ctx.DrawArrays(triangles, 0, cached.vertices)
+	p.logError()
+
+	// Leave no vertex attribute array pointing into this object's buffer. Every
+	// other program draws from a buffer that lives as long as the context, but
+	// these are freed when their text is refreshed, and without VAOs the
+	// pointers are global state: a later draw would read from a deleted buffer.
+	// Typing does exactly that, freeing a buffer on every keystroke.
+	p.ctx.BindBuffer(arrayBuffer, p.programs.text.buff)
+	p.UpdateVertexArray(p.programs.text, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
+	p.UpdateVertexArray(p.programs.text, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
 	p.logError()
 }

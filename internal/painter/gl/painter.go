@@ -6,8 +6,8 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
 )
@@ -55,8 +55,8 @@ type painter struct {
 	programs        *programs
 	shaderPrograms  map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale        float32
-	textBatch       []float32                      // scratch used while building a batch
-	textCache       map[*canvas.Text]*textVertices // cached glyph geometry, keyed by object
+	textBatch       []float32                              // scratch used while building a batch
+	textCache       map[cache.FontCacheEntry]*textVertices // cached glyph geometry, keyed by content
 }
 
 // Declare conformity to Painter interface
@@ -76,17 +76,10 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
 	// program - and reset its animation clock - every single frame.
 	//
-	// Cached glyph geometry is dropped here though, which is exactly what we
-	// want: a text object reaches Free either because it was refreshed, in
-	// which case its glyphs may have changed, or because it expired from the
-	// texture cache having not been drawn for a while.
-	if text, ok := obj.(*canvas.Text); ok {
-		if cached, ok := p.textCache[text]; ok {
-			p.ctx.DeleteBuffer(cached.buffer)
-			p.logError()
-			delete(p.textCache, text)
-		}
-	}
+	// Glyph geometry is deliberately not dropped here either. It is keyed by
+	// the words rather than the object showing them, so a refresh that leaves
+	// the text alone should keep it, and the text cache expires it on its own
+	// once those words stop being drawn.
 	p.freeTexture(obj)
 }
 

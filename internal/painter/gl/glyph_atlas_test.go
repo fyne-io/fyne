@@ -3,6 +3,7 @@
 package gl
 
 import (
+	"image/color"
 	"testing"
 
 	"github.com/go-text/typesetting/shaping"
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
@@ -186,6 +188,33 @@ func TestGlyphAtlasColourIndependence(t *testing.T) {
 
 	assert.Equal(t, resident, len(atlas.entries), "colour must not add atlas entries")
 	assert.False(t, atlas.resetPending, "repeated colours must not fill the atlas")
+}
+
+// TestGlyphCacheKey pins what cached geometry is keyed on. Keying it on the
+// object rather than the words looked equivalent and was not: a widget that
+// refreshes rebuilds every string it draws, so typing into an Entry rebuilt all
+// the visible text on every keystroke instead of the line that changed.
+func TestGlyphCacheKey(t *testing.T) {
+	base := &canvas.Text{Text: "hello", TextSize: 14}
+	key := glyphCacheKey(base, nil)
+
+	same := &canvas.Text{Text: "hello", TextSize: 14}
+	assert.Equal(t, key, glyphCacheKey(same, nil),
+		"the same words should share geometry across objects")
+
+	// Colour is a uniform applied when drawing, so it must not split the cache.
+	coloured := &canvas.Text{Text: "hello", TextSize: 14, Color: color.White}
+	assert.Equal(t, key, glyphCacheKey(coloured, nil), "colour must not affect the key")
+
+	for name, differs := range map[string]*canvas.Text{
+		"text":  {Text: "hallo", TextSize: 14},
+		"size":  {Text: "hello", TextSize: 15},
+		"style": {Text: "hello", TextSize: 14, TextStyle: fyne.TextStyle{Bold: true}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.NotEqual(t, key, glyphCacheKey(differs, nil), "%s must be part of the key", name)
+		})
+	}
 }
 
 // TestTextVerticesUsable covers when cached glyph geometry may be reused. Both

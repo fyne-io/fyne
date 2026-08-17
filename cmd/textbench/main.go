@@ -86,7 +86,51 @@ const (
 	defaultHeight = 800
 	defaultStepPx = 7
 	defaultTickMs = 8
+
+	// Rows of text the entry workload starts with, enough to fill the window.
+	entrySeedRows = 12
 )
+
+// runEntry types into a multi-line Entry that already holds a screenful of
+// text, which is the second half of what issue 1062 reports. Every keystroke
+// refreshes the text object, so unlike the scrolling workload this one cannot
+// reuse cached geometry and shows what the glyph cache alone is worth.
+func runEntry(w fyne.Window, width, height, tickMs int) {
+	entry := widget.NewMultiLineEntry()
+	var seed strings.Builder
+	for i := 0; i < entrySeedRows; i++ {
+		seed.WriteString(rowText(i))
+		seed.WriteByte('\n')
+	}
+	entry.SetText(seed.String())
+
+	w.SetContent(container.NewStack(entry))
+	w.Resize(fyne.NewSize(float32(width), float32(height)))
+
+	go func() {
+		time.Sleep(time.Second)
+
+		typed := 0
+		ticker := time.NewTicker(time.Duration(tickMs) * time.Millisecond)
+		defer ticker.Stop()
+		for range ticker.C {
+			r := rune('a' + typed%26)
+			typed++
+			// Start a fresh line periodically so the entry does not grow without
+			// bound and turn this into a measurement of one enormous line.
+			nl := typed%80 == 0
+			fyne.Do(func() {
+				if nl {
+					entry.SetText(entry.Text + "\n")
+					return
+				}
+				entry.SetText(entry.Text + string(r))
+			})
+		}
+	}()
+
+	w.ShowAndRun()
+}
 
 func main() {
 	rows := envInt("TEXTBENCH_ROWS", defaultRows)
@@ -97,6 +141,15 @@ func main() {
 
 	a := app.New()
 	w := a.NewWindow("textbench")
+
+	// The issue this harness exists for names two symptoms, scrolling and
+	// entering text, and they stress different things. Scrolling reveals rows
+	// of text that already exist, so geometry can be cached and reused, while
+	// typing refreshes one object on every keystroke and cannot reuse it.
+	if os.Getenv("TEXTBENCH_MODE") == "entry" {
+		runEntry(w, width, height, tickMs)
+		return
+	}
 
 	list := widget.NewList(
 		func() int { return rows },
