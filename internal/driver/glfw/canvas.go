@@ -135,7 +135,7 @@ func (c *glCanvas) Scale() float32 {
 }
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
-	newSize := c.size.Max(c.canvasSize(content.MinSize()))
+	newSize := internal.MaxSizes(c.size, c.canvasSize(content.MinSize()))
 
 	c.setContent(content)
 

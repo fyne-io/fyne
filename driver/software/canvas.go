@@ -199,7 +199,7 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	}
 
 	if resized {
-		c.doResize(c.Size().Max(minSize))
+		c.doResize(internal.MaxSizes(c.Size(), minSize))
 	} else {
 		c.doResize(minSize)
 	}

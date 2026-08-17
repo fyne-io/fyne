@@ -255,6 +255,19 @@ func TestFloatToStringWithFormat(t *testing.T) {
 	v2, err := f.Get()
 	assert.Nil(t, err)
 	assert.Equal(t, 5.0, v2)
+
+	f = NewFloat()
+	s = FloatToStringWithFormat(f, "%.f")
+	v, err = s.Get()
+	assert.NoError(t, err)
+	assert.Equal(t, "0", v)
+
+	err = s.Set("1.2")
+	assert.NoError(t, err)
+
+	v, err = s.Get()
+	assert.NoError(t, err)
+	assert.Equal(t, "1", v)
 }
 
 func TestIntToString(t *testing.T) {

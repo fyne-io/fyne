@@ -2,6 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -49,7 +50,7 @@ func (*clipRenderer) Destroy() {
 
 func (r *clipRenderer) Layout(s fyne.Size) {
 	o := r.objects[0]
-	o.Resize(s.Max(o.MinSize()))
+	o.Resize(internal.MaxSizes(s, o.MinSize()))
 }
 
 func (r *clipRenderer) MinSize() fyne.Size {

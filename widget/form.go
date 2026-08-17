@@ -220,6 +220,31 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
+// unwrapItemWidget returns the widget actually shown by rendered, stripping the
+// hint/validation container createInput sometimes wraps it in.
+func (*Form) unwrapItemWidget(rendered fyne.CanvasObject) fyne.CanvasObject {
+	if c, ok := rendered.(*fyne.Container); ok && len(c.Objects) > 0 {
+		return c.Objects[0]
+	}
+	return rendered
+}
+
+func (f *Form) itemRendersWidget(rendered, widget fyne.CanvasObject) bool {
+	return f.unwrapItemWidget(rendered) == widget
+}
+
+// detachValidation unhooks the callbacks setUpValidation registered on widget, so a
+// caller that keeps interacting with a widget no longer shown by the form can't have
+// it write stale state into the FormItem slot it used to occupy.
+func (*Form) detachValidation(widget fyne.CanvasObject) {
+	if v, ok := widget.(fyne.Validatable); ok {
+		v.SetOnValidationChanged(nil)
+	}
+	if r, ok := widget.(fyne.Requireable); ok {
+		r.SetOnRequiredChanged(nil)
+	}
+}
+
 func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	value := reflect.ValueOf(w).Elem()
 	validatorField := value.FieldByName("Validator")
@@ -327,6 +352,23 @@ func (f *Form) checkValidation(err error) {
 
 func (f *Form) ensureRenderItems() {
 	done := len(f.itemGrid.Objects) / 2
+	for i := 0; i < done && i < len(f.Items); i++ {
+		item := f.Items[i]
+		old := f.itemGrid.Objects[i*2+1]
+		if f.itemRendersWidget(old, item.Widget) {
+			continue
+		}
+
+		f.detachValidation(f.unwrapItemWidget(old))
+		item.validationError = nil
+		item.invalid = false
+		item.wasFocused = false
+		item.helperOutput = nil
+
+		f.setUpValidation(item.Widget, i)
+		f.itemGrid.Objects[i*2+1] = f.createInput(item)
+	}
+
 	if done >= len(f.Items) {
 		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
 		return

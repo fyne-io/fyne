@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/theme"
 )
@@ -415,7 +416,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 	c := r.scroll.Content
-	c.Resize(c.MinSize().Max(size))
+	c.Resize(internal.MaxSizes(c.MinSize(), size))
 
 	r.layoutBars(size)
 }
@@ -557,7 +558,7 @@ func (s *Scroll) ScrollToTop() {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *Scroll) MinSize() fyne.Size {
-	minSize := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
+	minSize := internal.MaxSizes(fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize), s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
 		minSize.Height = fyne.Max(minSize.Height, s.Content.MinSize().Height)

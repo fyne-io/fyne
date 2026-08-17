@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
@@ -58,7 +59,7 @@ func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
 	// we cannot perform this until window is prepared as we don't know its scale!
-	bigEnough := size.Max(w.canvas.canvasSize(w.canvas.Content().MinSize()))
+	bigEnough := internal.MaxSizes(size, w.canvas.canvasSize(w.canvas.Content().MinSize()))
 	w.runOnMainWhenCreated(func() {
 		width, height := scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
@@ -773,6 +774,10 @@ func (w *window) processFocused(focus bool) {
 		}
 		curWindow = w
 		w.canvas.FocusGained()
+
+		if build.HasNativeMenu {
+			setupNativeMenu(w, w.mainmenu)
+		}
 
 		if build.IsWayland {
 			w.frame.markReady()

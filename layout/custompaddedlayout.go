@@ -2,6 +2,7 @@ package layout
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 )
 
 // Declare conformity with Layout interface
@@ -53,7 +54,7 @@ func (c CustomPaddedLayout) MinSize(objects []fyne.CanvasObject) (minSize fyne.S
 			continue
 		}
 
-		minSize = minSize.Max(child.MinSize())
+		minSize = internal.MaxSizes(minSize, child.MinSize())
 	}
 	minSize.Width += c.LeftPadding + c.RightPadding
 	minSize.Height += c.TopPadding + c.BottomPadding

@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -427,7 +428,7 @@ func (l *gridWrapRenderer) Layout(size fyne.Size) {
 }
 
 func (l *gridWrapRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.itemMin)
+	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
 func (l *gridWrapRenderer) Refresh() {
@@ -688,7 +689,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 
 	if l.gw.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for GridWrap", nil)
+		fyne.LogError("Missing UpdateItem callback required for GridWrap", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while

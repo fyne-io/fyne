@@ -40,7 +40,8 @@ type DocTabs struct {
 //
 // Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
-	tabs := &DocTabs{Items: items}
+	tabs := &DocTabs{}
+	setItems(tabs, items)
 	tabs.ExtendBaseWidget(tabs)
 	return tabs
 }

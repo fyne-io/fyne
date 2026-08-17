@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 )
@@ -53,7 +54,7 @@ func FocusPrevious(c fyne.Canvas) {
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+		objects = layoutAndCollect(objects, o, internal.MaxSizes(o.MinSize(), o.Size()))
 	}
 	return objects
 }
@@ -104,7 +105,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 func RenderObjectToMarkup(o fyne.CanvasObject) string {
 	c := NewCanvas()
 	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
+	size := internal.MaxSizes(o.MinSize(), o.Size())
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 

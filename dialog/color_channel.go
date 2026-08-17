@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -146,7 +147,7 @@ func (e *colorChannelEntry) MinSize() fyne.Size {
 	// Ensure space for 3 digits
 	minSize := fyne.MeasureText("000", theme.TextSize(), fyne.TextStyle{})
 	minSize = minSize.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
-	return minSize.Max(e.Entry.MinSize())
+	return internal.MaxSizes(minSize, e.Entry.MinSize())
 }
 
 type userChangeEntry struct {

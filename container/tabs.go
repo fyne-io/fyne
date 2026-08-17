@@ -419,7 +419,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 
 	contentMin := fyne.NewSize(0, 0)
 	for _, content := range t.items() {
-		contentMin = contentMin.Max(content.Content.MinSize())
+		contentMin = internal.MaxSizes(contentMin, content.Content.MinSize())
 	}
 
 	switch t.tabLocation() {

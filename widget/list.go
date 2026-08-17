@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
@@ -575,7 +576,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.itemMin)
+	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
 func (l *listRenderer) Refresh() {
@@ -810,7 +811,7 @@ func (l *listLayout) updateList(newOnly bool) {
 		length = f()
 	}
 	if l.list.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for List", nil)
+		fyne.LogError("Missing UpdateItem callback required for List", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while

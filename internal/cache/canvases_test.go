@@ -45,7 +45,7 @@ func TestSetCanvasForObject_keepsAlive(t *testing.T) {
 	SetCanvasForObject(obj, &dummyCanvas{}, nil)
 
 	// a window that keeps repainting must not expire its own cache entry
-	tm.now = tm.now.Add(2 * ValidDuration)
+	tm.advance(2 * ValidDuration)
 	SetCanvasForObject(obj, canvasForObject(obj), nil)
 
 	destroyExpiredCanvases(tm.now)

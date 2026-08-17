@@ -22,6 +22,12 @@ func TestStripPrecision(t *testing.T) {
 
 	format = "%v"
 	assert.Equal(t, "%v", stripFormatPrecision(format))
+
+	format = "%.f"
+	assert.Equal(t, "%f", stripFormatPrecision(format))
+
+	format = "foo=%.f"
+	assert.Equal(t, "foo=%f", stripFormatPrecision(format))
 }
 
 func TestURIFromStringHelper(t *testing.T) {

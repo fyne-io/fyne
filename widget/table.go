@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -853,7 +854,7 @@ func (t *Table) templateSize() fyne.Size {
 		if !t.ShowHeaderRow && !t.ShowHeaderColumn {
 			return template.MinSize()
 		}
-		return template.MinSize().Max(t.createHeader().MinSize())
+		return internal.MaxSizes(template.MinSize(), t.createHeader().MinSize())
 	}
 
 	fyne.LogError("Missing CreateCell callback required for Table", nil)
@@ -1115,7 +1116,7 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 
 func (t *tableRenderer) MinSize() fyne.Size {
 	sep := t.t.Theme().Size(theme.SizeNamePadding)
-	minSize := t.t.content.MinSize().Max(t.t.cellSize)
+	minSize := internal.MaxSizes(t.t.content.MinSize(), t.t.cellSize)
 	if t.t.ShowHeaderRow {
 		minSize.Height += t.t.headerSize.Height + sep
 	}

@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -236,7 +237,7 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	minSize := r.MinSize()
 	var boxSize fyne.Size
 	if r.m.customSized {
-		boxSize = minSize.Max(s)
+		boxSize = internal.MaxSizes(minSize, s)
 	} else {
 		boxSize = minSize
 	}

@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"slices"
 	"strings"
 	"sync"
 
@@ -32,6 +33,11 @@ const (
 
 	fontTabSpaceSize = 10
 	replacementChar  = 0xfffd // that’s '�'
+
+	// emojiVariationSelector (VS16) asks for the preceding rune to be presented as emoji rather than text.
+	emojiVariationSelector = '\uFE0F'
+	// keycapMark encloses the preceding rune in a key, as in "0️⃣".
+	keycapMark = '\u20E3'
 )
 
 var (
@@ -395,7 +401,7 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		runBuffer = append(runBuffer, shapedRun{out: run, x: runX})
 	}
 
-	ins := segmenter.Split(in, faces)
+	ins := splitEmojiSequences(in, faces, segmenter)
 	runBufferMut.Lock()
 	for _, in := range ins {
 		inEnd := in.RunEnd
@@ -463,6 +469,111 @@ func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, f
 		adv = 0
 	}
 	return x + fixed266ToFloat32(adv)*scale
+}
+
+// splitEmojiSequences segments in for the shaper, keeping any emoji sequence
+// whole in a single face.
+func splitEmojiSequences(in shaping.Input, faces shaping.Fontmap, seg *shaping.Segmenter) []shaping.Input {
+	if !slices.Contains(in.Text[in.RunStart:in.RunEnd], emojiVariationSelector) {
+		return seg.Split(in, faces) // by far the common case, split in one pass
+	}
+
+	var out []shaping.Input
+	start := in.RunStart
+	for i := start; i < in.RunEnd; {
+		var face *font.Face
+		length := emojiSequenceLen(in.Text, i, in.RunEnd)
+		if length > 0 {
+			face = resolveSequence(faces, in.Text[i:i+length])
+		}
+		if face == nil { // no sequence here, or none that one face draws better
+			i++
+			continue
+		}
+
+		if i > start {
+			out = appendSplit(out, in, start, i, faces, seg)
+		}
+		out = appendSplit(out, in, i, i+length, fixedFontMap{face: face}, seg)
+
+		i += length
+		start = i
+	}
+	if start < in.RunEnd {
+		out = appendSplit(out, in, start, in.RunEnd, faces, seg)
+	}
+	return out
+}
+
+// appendSplit segments the runes of in between start and end and adds the runs
+// to out. They have to be copied out because seg reuses its buffers between
+// calls.
+func appendSplit(out []shaping.Input, in shaping.Input, start, end int, faces shaping.Fontmap,
+	seg *shaping.Segmenter,
+) []shaping.Input {
+	in.RunStart, in.RunEnd = start, end
+	return append(out, seg.Split(in, faces)...)
+}
+
+// emojiSequenceLen returns the length of the emoji sequence starting at index i,
+// or 0 if none starts there. A sequence is a base rune and the variation
+// selector asking for emoji presentation, plus the enclosing mark of a keycap.
+func emojiSequenceLen(text []rune, i, end int) int {
+	if i+1 >= end || text[i+1] != emojiVariationSelector {
+		return 0
+	}
+	if i+2 < end && text[i+2] == keycapMark {
+		return 3
+	}
+	return 2
+}
+
+// resolveSequence returns the one face to shape a whole emoji sequence in, or
+// nil to leave the choice to the segmenter.
+func resolveSequence(faces shaping.Fontmap, seq []rune) *font.Face {
+	var candidates []*font.Face
+	torn := false
+	for _, r := range seq {
+		if r == emojiVariationSelector {
+			continue // ignorable, so the segmenter never asks for a face for it
+		}
+
+		face := faces.ResolveFace(r)
+		if len(candidates) > 0 && face != candidates[0] {
+			torn = true
+		}
+		candidates = append(candidates, face)
+	}
+	if !torn {
+		return nil
+	}
+
+	for _, face := range candidates {
+		if coversSequence(face, seq) {
+			return face
+		}
+	}
+	return nil
+}
+
+// coversSequence reports whether one face has a glyph for every rune of seq.
+func coversSequence(face *font.Face, seq []rune) bool {
+	for _, r := range seq {
+		if _, ok := face.NominalGlyph(r); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// fixedFontMap is a [shaping.Fontmap] that answers with a single face, used to
+// shape an emoji sequence whose face was already resolved as a whole.
+type fixedFontMap struct {
+	face *font.Face
+}
+
+func (f fixedFontMap) ResolveFace(rune) *font.Face {
+	return f.face
 }
 
 type FontCacheItem struct {

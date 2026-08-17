@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 )
 
 var (
@@ -113,7 +114,7 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	size := r.o.Content.Size().Max(r.o.Content.MinSize()).Min(s)
+	size := internal.MinSizes(internal.MaxSizes(r.o.Content.Size(), r.o.Content.MinSize()), s)
 	r.o.Content.Resize(size)
 
 	if r.o.Background != nil {

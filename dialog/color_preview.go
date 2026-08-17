@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/widget"
 )
@@ -65,7 +66,7 @@ func (r *colorPreviewRenderer) Layout(size fyne.Size) {
 func (r *colorPreviewRenderer) MinSize() fyne.Size {
 	s := r.old.MinSize()
 	s.Width *= 2
-	return s.Max(fyne.NewSize(16, 8)) //revive:disable-line:add-constant
+	return internal.MaxSizes(s, fyne.NewSize(16, 8)) //revive:disable-line:add-constant
 }
 
 func (r *colorPreviewRenderer) Refresh() {

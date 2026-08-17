@@ -105,7 +105,9 @@ func (c *Container) MinSize() Size {
 
 	minSize := NewSize(1, 1)
 	for _, child := range c.Objects {
-		minSize = minSize.Max(child.MinSize())
+		// inlined internal.MaxSizes, which this package cannot import
+		childMin := child.MinSize()
+		minSize = NewSize(Max(minSize.Width, childMin.Width), Max(minSize.Height, childMin.Height))
 	}
 
 	return minSize
@@ -113,6 +115,10 @@ func (c *Container) MinSize() Size {
 
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
+	if pos == c.position {
+		return
+	}
+
 	c.position = pos
 	repaint(c)
 }

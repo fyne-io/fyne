@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -90,9 +91,9 @@ func (d *dialog) Refresh() {
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
-	d.desiredSize = size.Max(d.MinSize())
+	d.desiredSize = internal.MaxSizes(size, d.MinSize())
 	if d.win != nil { // could be called before popup is created!
-		d.win.Resize(size.Max(d.MinSize()))
+		d.win.Resize(internal.MaxSizes(size, d.MinSize()))
 	}
 }
 

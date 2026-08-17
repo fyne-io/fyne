@@ -1,6 +1,9 @@
 package layout
 
-import "fyne.io/fyne/v2"
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
+)
 
 // Declare conformity with Layout interface
 var _ fyne.Layout = (*centerLayout)(nil)
@@ -31,7 +34,7 @@ func (*centerLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 			continue
 		}
 
-		minSize = minSize.Max(child.MinSize())
+		minSize = internal.MaxSizes(minSize, child.MinSize())
 	}
 
 	return minSize

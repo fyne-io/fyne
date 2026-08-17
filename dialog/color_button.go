@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	internalwidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -100,7 +101,7 @@ func (r *colorButtonRenderer) Layout(size fyne.Size) {
 }
 
 func (r *colorButtonRenderer) MinSize() fyne.Size {
-	return r.rectangle.MinSize().Max(fyne.NewSize(32, 32)) //revive:disable-line:add-constant
+	return internal.MaxSizes(r.rectangle.MinSize(), fyne.NewSize(32, 32)) //revive:disable-line:add-constant
 }
 
 func (r *colorButtonRenderer) Refresh() {

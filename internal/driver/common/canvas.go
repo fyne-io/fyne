@@ -127,7 +127,7 @@ func (c *Canvas) EnsureMinSize() bool {
 			} else {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
-				expectedSize := minSize.Max(size)
+				expectedSize := internal.MaxSizes(minSize, size)
 				if expectedSize != size && size != csize {
 					obj.Resize(expectedSize)
 				} else {
@@ -144,7 +144,7 @@ func (c *Canvas) EnsureMinSize() bool {
 
 	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < minSize.Width || csize.Height < minSize.Height)
 	if shouldResize {
-		c.impl.Resize(csize.Max(minSize))
+		c.impl.Resize(internal.MaxSizes(csize, minSize))
 	}
 	return windowNeedsMinSizeUpdate
 }

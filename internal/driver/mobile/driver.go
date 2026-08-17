@@ -512,6 +512,7 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeReturnEnter:     fyne.KeyReturn,
 	key.CodeTab:             fyne.KeyTab,
 	key.CodeDeleteBackspace: fyne.KeyBackspace,
+	key.CodeDeleteForward:   fyne.KeyDelete,
 	key.CodeInsert:          fyne.KeyInsert,
 	key.CodePageUp:          fyne.KeyPageUp,
 	key.CodePageDown:        fyne.KeyPageDown,
