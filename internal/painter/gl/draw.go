@@ -923,8 +923,8 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
 	p.ensureGlyphAtlas()
 
-	cached := p.glyphGeometry(text, face, col)
-	p.drawGlyphBatch(cached, pos, frame)
+	cached := p.glyphGeometry(text, face)
+	p.drawGlyphBatch(cached, col, pos, frame)
 
 	if decorated {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)

@@ -15,8 +15,18 @@ import (
 )
 
 const (
-	glyphAtlasTexSize = 1024
+	// The atlas holds one byte of coverage per pixel rather than four of
+	// colour, so this is 4 MiB on the GPU and the same again on the CPU, the
+	// size a 1024 square RGBA atlas used to cost while holding four times as
+	// many glyphs. Headroom matters most at phone pixel densities, where a
+	// glyph covers nine times the area it does at 1x.
+	glyphAtlasTexSize = 2048
 	glyphAtlasPad     = 1
+
+	// GL's default unpack alignment. Glyph slots are placed and sized to it so
+	// that uploading a single byte texture never needs it changed, which fyne's
+	// mobile GL binding has no call for.
+	glyphAtlasRowAlign = 4
 
 	// Horizontal sub-pixel positions each glyph is rasterised at. Kerning puts
 	// glyphs on fractional positions, and a bitmap can only be drawn on whole
@@ -26,12 +36,15 @@ const (
 	subpixelPhases = 4
 )
 
+// glyphAtlasKey identifies a glyph bitmap. Colour is deliberately absent:
+// bitmaps hold coverage and are tinted when drawn, so one entry serves every
+// colour. Keying on colour instead multiplied the entry count by the number of
+// colours in the theme, which overflowed the atlas at phone pixel densities.
 type glyphAtlasKey struct {
-	face       *font.Face // pointer identity; stable while fontCache is alive
-	gid        font.GID
-	pixSize    int32 // round(fontSize * pixScale * 64), avoids float key issues
-	phase      uint8 // horizontal sub-pixel position, 0 to subpixelPhases-1
-	r, g, b, a uint8
+	face    *font.Face // pointer identity; stable while fontCache is alive
+	gid     font.GID
+	pixSize int32 // round(fontSize * pixScale * 64), avoids float key issues
+	phase   uint8 // horizontal sub-pixel position, 0 to subpixelPhases-1
 }
 
 // subpixelPhaseAt returns which sub-pixel position x falls into, and the whole
@@ -51,60 +64,68 @@ type glyphAtlasEntry struct {
 	baseline int // baseline position in pixels down from the top of the glyph bitmap
 }
 
-// glyphGPUAtlas packs pre-rasterised glyph bitmaps into a single GPU texture
-// (glyphAtlasTexSize × glyphAtlasTexSize RGBA).  New glyphs are appended with
-// a simple shelf packer; the atlas resets (with a brief visual flash) when it
-// fills up.  It is per-painter so it lives and dies with a single GL context.
+// glyphGPUAtlas packs pre-rasterised glyphs into a single GPU texture holding
+// one byte of coverage per pixel. New glyphs are appended with a simple shelf
+// packer. It is per-painter, so it lives and dies with one GL context.
 type glyphGPUAtlas struct {
-	cpuImg  *image.RGBA
-	texture Texture
-	texSize int
-	entries map[glyphAtlasKey]glyphAtlasEntry
+	// coverage is the CPU copy of the texture, one byte per pixel, row major.
+	coverage []uint8
+	texture  Texture
+	texSize  int
+	entries  map[glyphAtlasKey]glyphAtlasEntry
 
 	// generation counts resets. Callers that collect several entries before
 	// drawing compare it either side to notice that the entries they gathered
 	// were invalidated part way through.
 	generation int
 
+	// resetPending records that a glyph could not be packed. The reset itself
+	// waits for the caller to reach a point where no half-built string depends
+	// on the current layout.
+	resetPending bool
+
 	// shelf packer cursor
 	shelfX, shelfY, shelfH int
 }
 
+// reset empties the atlas so packing starts over. Every texture coordinate
+// handed out before now becomes wrong, which the generation bump signals.
+func (a *glyphGPUAtlas) reset() {
+	clear(a.coverage)
+	a.entries = make(map[glyphAtlasKey]glyphAtlasEntry)
+	a.shelfX, a.shelfY, a.shelfH = 0, 0, 0
+	a.resetPending = false
+	a.generation++
+}
+
 func newGlyphGPUAtlas(texSize int) *glyphGPUAtlas {
 	return &glyphGPUAtlas{
-		cpuImg:  image.NewRGBA(image.Rect(0, 0, texSize, texSize)),
-		texSize: texSize,
-		entries: make(map[glyphAtlasKey]glyphAtlasEntry),
+		coverage: make([]uint8, texSize*texSize),
+		texSize:  texSize,
+		entries:  make(map[glyphAtlasKey]glyphAtlasEntry),
 	}
 }
 
-func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32, col color.Color) glyphAtlasKey {
-	g := run.Glyphs[idx]
-	r32, g32, b32, a32 := col.RGBA()
-	pixSize := int32(math.Round(float64(fontSize * scale * 64)))
+func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32) glyphAtlasKey {
 	return glyphAtlasKey{
 		face:    run.Face,
-		gid:     g.GlyphID,
-		pixSize: pixSize,
-		phase:   uint8(phase),             //gosec:disable G115 -- phase is always 0 to subpixelPhases-1
-		r:       uint8((r32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
-		g:       uint8((g32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
-		b:       uint8((b32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
-		a:       uint8((a32 >> 8) & 0xff), //gosec:disable G115 -- value is always 0-255 after the shift and mask
+		gid:     run.Glyphs[idx].GlyphID,
+		pixSize: int32(math.Round(float64(fontSize * scale * 64))),
+		phase:   uint8(phase), //gosec:disable G115 -- phase is always 0 to subpixelPhases-1
 	}
 }
 
 // getOrAdd returns the atlas entry for a glyph, adding it on a miss.
 // The second return value is the dirty rectangle written into cpuImg; it is
 // empty when the entry was already cached so no GPU upload is needed.
-func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, scale float32, col color.Color) (glyphAtlasEntry, image.Rectangle) {
-	key := a.cacheKey(run, idx, phase, fontSize, scale, col)
+func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, scale float32) (glyphAtlasEntry, image.Rectangle) {
+	key := a.cacheKey(run, idx, phase, fontSize, scale)
 	if entry, ok := a.entries[key]; ok {
 		return entry, image.Rectangle{}
 	}
 
 	subpixel := float32(phase) / subpixelPhases
-	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel, col)
+	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel)
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
 	// A glyph bigger than the atlas cannot be packed at any offset, and writing
@@ -115,35 +136,52 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, s
 		return glyphAtlasEntry{}, image.Rectangle{}
 	}
 
+	// Slots are a multiple of glyphAtlasRowAlign wide and start on the same
+	// boundary, so every row of a sub-image upload begins on a boundary GL is
+	// content to read a single byte texture from. Without that its default
+	// unpack alignment misreads each row of a glyph whose width is not a
+	// multiple of four, and the text comes out sheared.
+	slotW := (w + glyphAtlasPad + glyphAtlasRowAlign - 1) / glyphAtlasRowAlign * glyphAtlasRowAlign
+
 	// Advance to a new shelf if the glyph does not fit in the current row.
-	if a.shelfX+w+glyphAtlasPad > a.texSize {
+	if a.shelfX+slotW > a.texSize {
 		a.shelfY += a.shelfH + glyphAtlasPad
 		a.shelfX = 0
 		a.shelfH = 0
 	}
 	if a.shelfY+h > a.texSize {
-		// Atlas is full; wipe it and start over.
-		a.cpuImg = image.NewRGBA(image.Rect(0, 0, a.texSize, a.texSize))
-		a.entries = make(map[glyphAtlasKey]glyphAtlasEntry)
-		a.shelfX, a.shelfY, a.shelfH = 0, 0, 0
-		a.generation++
+		// Full. Resetting here would move entries that the caller has already
+		// collected for the string it is part way through, so the glyph is
+		// dropped for now and the reset left for the caller to trigger between
+		// passes, where it invalidates nothing mid-flight.
+		a.resetPending = true
+		return glyphAtlasEntry{}, image.Rectangle{}
 	}
 
+	// Keep only the alpha channel: the glyph was rasterised in white, so alpha
+	// is its coverage and the colour channels carry nothing the atlas needs.
 	atlasX, atlasY := a.shelfX, a.shelfY
 	for y := 0; y < h; y++ {
 		src := glyphImg.PixOffset(0, y)
-		dst := a.cpuImg.PixOffset(atlasX, atlasY+y)
-		copy(a.cpuImg.Pix[dst:dst+w*4], glyphImg.Pix[src:src+w*4])
+		dst := (atlasY+y)*a.texSize + atlasX
+		for x := 0; x < w; x++ {
+			a.coverage[dst+x] = glyphImg.Pix[src+x*4+3]
+		}
 	}
 
+	// The entry keeps the glyph's true width so quads and texture coordinates
+	// are unaffected by the slot padding.
 	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline}
 	a.entries[key] = entry
 	if h > a.shelfH {
 		a.shelfH = h
 	}
-	a.shelfX += w + glyphAtlasPad
+	a.shelfX += slotW
 
-	return entry, image.Rect(atlasX, atlasY, atlasX+w, atlasY+h)
+	// The upload covers the whole slot, not just the glyph, so both its start
+	// and its width stay on the alignment boundary. The padding columns were
+	// left at zero coverage, so uploading them changes nothing on screen.
+	return entry, image.Rect(atlasX, atlasY, atlasX+slotW, atlasY+h)
 }
 
 // ensureGlyphAtlas lazily allocates the GPU texture for the glyph atlas.
@@ -151,24 +189,39 @@ func (p *painter) ensureGlyphAtlas() {
 	if p.glyphAtlas != nil {
 		return
 	}
-	p.glyphAtlas = newGlyphGPUAtlas(glyphAtlasTexSize)
+	size := glyphAtlasTexSize
+	if p.maxTextureSize > 0 && size > p.maxTextureSize {
+		size = p.maxTextureSize // older GPUs cap below what we would like
+	}
+	p.glyphAtlas = newGlyphGPUAtlas(size)
 	p.glyphAtlas.texture = p.newTexture(canvas.ImageScaleSmooth)
-	p.ctx.TexImage2D(texture2D, 0, glyphAtlasTexSize, glyphAtlasTexSize, colorFormatRGBA, unsignedByte, p.glyphAtlas.cpuImg.Pix)
+	p.uploadAtlas()
+}
+
+// uploadAtlas sends the whole atlas to the GPU. Needed after a reset, where the
+// texture still holds the previous layout's pixels and the incremental uploads
+// only cover glyphs added since.
+func (p *painter) uploadAtlas() {
+	p.ctx.ActiveTexture(texture0)
+	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
+	p.ctx.TexImage2D(texture2D, 0, p.glyphAtlas.texSize, p.glyphAtlas.texSize,
+		colorFormatAlpha, unsignedByte, p.glyphAtlas.coverage)
 	p.logError()
 }
 
-// uploadAtlasRegion copies dirty pixels from the CPU atlas image to the GPU
-// texture via TexSubImage2D, avoiding a full texture re-upload.
+// uploadAtlasRegion copies dirty pixels from the CPU atlas to the GPU texture
+// via TexSubImage2D, avoiding a full texture re-upload.
 func (p *painter) uploadAtlasRegion(dirty image.Rectangle) {
+	atlas := p.glyphAtlas
 	w, h := dirty.Dx(), dirty.Dy()
-	pixels := make([]uint8, w*h*4)
+	pixels := make([]uint8, w*h)
 	for y := 0; y < h; y++ {
-		src := p.glyphAtlas.cpuImg.PixOffset(dirty.Min.X, dirty.Min.Y+y)
-		copy(pixels[y*w*4:], p.glyphAtlas.cpuImg.Pix[src:src+w*4])
+		src := (dirty.Min.Y+y)*atlas.texSize + dirty.Min.X
+		copy(pixels[y*w:(y+1)*w], atlas.coverage[src:src+w])
 	}
 	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
-	p.ctx.TexSubImage2D(texture2D, 0, dirty.Min.X, dirty.Min.Y, w, h, colorFormatRGBA, unsignedByte, pixels)
+	p.ctx.BindTexture(texture2D, atlas.texture)
+	p.ctx.TexSubImage2D(texture2D, 0, dirty.Min.X, dirty.Min.Y, w, h, colorFormatAlpha, unsignedByte, pixels)
 	p.logError()
 }
 
@@ -242,19 +295,20 @@ func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX,
 // the common case while scrolling, and is discarded when the text is refreshed
 // (see painter.Free), when the scale changes, or when the atlas has reset and
 // every texture coordinate in it has become stale.
-func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, col color.Color) *textVertices {
+func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *textVertices {
 	if cached := p.textCache[text]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
 		cache.GetTexture(text) // keep the expiry marker alive while still drawn
 		return cached
 	}
 
-	// Adding a glyph can fill the atlas and reset it, which invalidates the
-	// quads gathered so far, so the pass repeats if the generation moved. A
-	// second pass cannot reset again unless one string alone exceeds the whole
-	// atlas, in which case the last attempt is the best available.
-	var generation int
+	// The atlas can run out of room part way through a string. It does not
+	// reset under us when that happens, it asks for one, so the quads gathered
+	// so far all still address the layout they were built against. The pass is
+	// then repeated against the emptied atlas. Only a string whose own glyphs
+	// exceed the whole atlas can fail twice, and it settles for what fits
+	// rather than looping or drawing against coordinates that have moved.
 	for attempt := 0; attempt < 2; attempt++ {
-		generation = p.glyphAtlas.generation
+		p.glyphAtlas.resetPending = false
 		p.textBatch = p.textBatch[:0]
 
 		paint.WalkStringGlyphs(face.Fonts, text.Text, text.TextSize, text.TextStyle, p.pixScale,
@@ -263,11 +317,11 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 				// and the sub-pixel remainder that is rasterised into it.
 				phase, wholeX := subpixelPhaseAt(penX + xOff)
 
-				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, phase, text.TextSize, p.pixScale, col)
+				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, phase, text.TextSize, p.pixScale)
 				if !dirty.Empty() {
 					p.uploadAtlasRegion(dirty)
 				}
-				if entry.w == 0 { // too large for the atlas to hold
+				if entry.w == 0 { // did not fit the atlas
 					return
 				}
 				// The bitmap carries its own baseline, which is the run's ascent
@@ -278,10 +332,15 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 			},
 		)
 
-		if p.glyphAtlas.generation == generation {
+		if !p.glyphAtlas.resetPending {
 			break
 		}
+		if attempt == 0 {
+			p.glyphAtlas.reset()
+			p.uploadAtlas()
+		}
 	}
+	generation := p.glyphAtlas.generation
 
 	cached, ok := p.textCache[text]
 	if !ok {
@@ -313,8 +372,10 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem, co
 
 // drawGlyphBatch issues every glyph quad of one string as a single draw call.
 // The vertices are relative to the string origin, so pos places them and frame
-// converts device pixels into clip space.
-func (p *painter) drawGlyphBatch(cached *textVertices, pos fyne.Position, frame fyne.Size) {
+// converts device pixels into clip space. The atlas holds coverage rather than
+// colour, so col tints the whole batch, which is why one string's glyphs can
+// share an entry with the same glyphs drawn elsewhere in another colour.
+func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne.Position, frame fyne.Size) {
 	if cached.vertices == 0 {
 		return
 	}
@@ -339,6 +400,9 @@ func (p *painter) drawGlyphBatch(cached *textVertices, pos fyne.Position, frame 
 	p.SetUniform2f(p.programs.text, attrPixelScale,
 		2/(frame.Width*p.pixScale),
 		-2/(frame.Height*p.pixScale))
+
+	r, g, b, a := getFragmentColor(col)
+	p.SetUniform4f(p.programs.text, attrColor, r, g, b, a)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()

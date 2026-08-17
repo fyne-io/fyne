@@ -2,7 +2,6 @@ package painter_test
 
 import (
 	"image"
-	"image/color"
 	"math"
 	"testing"
 
@@ -79,7 +78,7 @@ func TestRenderGlyphToImage(t *testing.T) {
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	img, baseline := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0, color.White)
+	img, baseline := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
 	require.NotNil(t, img)
 
 	assert.Positive(t, img.Bounds().Dx(), "glyph bitmap should have width")
@@ -97,8 +96,8 @@ func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	atZero, baseZero := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0, color.White)
-	atHalf, baseHalf := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0.5, color.White)
+	atZero, baseZero := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0)
+	atHalf, baseHalf := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0.5)
 	require.NotNil(t, atZero)
 	require.NotNil(t, atHalf)
 
@@ -112,27 +111,35 @@ func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 		"a positive sub-pixel offset should not move ink left")
 }
 
-func TestRenderGlyphToImage_Colour(t *testing.T) {
+// TestRenderGlyphToImage_IsCoverageNotColour pins the property that lets one
+// bitmap serve a glyph in every colour it is drawn in. Baking colour in here
+// instead would multiply the number of cached bitmaps by the number of colours
+// a theme uses, which is enough to overflow the atlas at phone pixel densities.
+func TestRenderGlyphToImage_IsCoverageNotColour(t *testing.T) {
 	glyphs := walkGlyphs(t, "X", 24, 1)
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	red, _ := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0, color.NRGBA{R: 0xff, A: 0xff})
-	require.NotNil(t, red)
+	img, _ := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
+	require.NotNil(t, img)
 
-	// Find the most opaque pixel and check it carries the requested colour.
-	var bestR, bestG, bestB, bestA uint32
-	for y := red.Bounds().Min.Y; y < red.Bounds().Max.Y; y++ {
-		for x := red.Bounds().Min.X; x < red.Bounds().Max.X; x++ {
-			r, g, b, a := red.At(x, y).RGBA()
-			if a > bestA {
-				bestR, bestG, bestB, bestA = r, g, b, a
+	var inked bool
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+			r, g, b, a := img.At(x, y).RGBA()
+			if a == 0 {
+				continue
 			}
+			inked = true
+			// White premultiplied by coverage: the channels track alpha, so the
+			// bitmap carries how much of the pixel the glyph covers and nothing
+			// about what colour it will end up.
+			assert.Equal(t, a, r, "red channel should equal coverage at %d,%d", x, y)
+			assert.Equal(t, a, g, "green channel should equal coverage at %d,%d", x, y)
+			assert.Equal(t, a, b, "blue channel should equal coverage at %d,%d", x, y)
 		}
 	}
-	require.NotZero(t, bestA, "glyph should have rendered some ink")
-	assert.Greater(t, bestR, bestG, "ink should carry the red requested")
-	assert.Greater(t, bestR, bestB, "ink should carry the red requested")
+	require.True(t, inked, "glyph should have rendered some ink")
 }
 
 func inkPixels(img *image.RGBA) int {

@@ -3,7 +3,6 @@
 package gl
 
 import (
-	"image/color"
 	"testing"
 
 	"github.com/go-text/typesetting/shaping"
@@ -75,54 +74,68 @@ func TestGlyphAtlasCacheKey(t *testing.T) {
 	run, idx := glyphAt(t, "A", 20, 1)
 	atlas := newGlyphGPUAtlas(256)
 
-	base := atlas.cacheKey(run, idx, 0, 20, 1, color.White)
+	base := atlas.cacheKey(run, idx, 0, 20, 1)
 
-	assert.Equal(t, base, atlas.cacheKey(run, idx, 0, 20, 1, color.White), "same inputs should give the same key")
-	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 1, 20, 1, color.White), "sub-pixel phase must be part of the key")
-	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 0, 21, 1, color.White), "font size must be part of the key")
-	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 0, 20, 2, color.White), "scale must be part of the key")
-	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 0, 20, 1, color.Black), "colour must be part of the key")
+	assert.Equal(t, base, atlas.cacheKey(run, idx, 0, 20, 1), "same inputs should give the same key")
+	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 1, 20, 1), "sub-pixel phase must be part of the key")
+	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 0, 21, 1), "font size must be part of the key")
+	assert.NotEqual(t, base, atlas.cacheKey(run, idx, 0, 20, 2), "scale must be part of the key")
 }
 
 func TestGlyphAtlasGetOrAdd(t *testing.T) {
 	run, idx := glyphAt(t, "A", 20, 1)
 	atlas := newGlyphGPUAtlas(256)
 
-	entry, dirty := atlas.getOrAdd(run, idx, 0, 20, 1, color.White)
+	entry, dirty := atlas.getOrAdd(run, idx, 0, 20, 1)
 	assert.Positive(t, entry.w, "a newly added glyph should have width")
 	assert.Positive(t, entry.h, "a newly added glyph should have height")
 	assert.Positive(t, entry.baseline, "a newly added glyph should carry its baseline")
 	assert.False(t, dirty.Empty(), "adding a glyph should report the region to upload")
-	assert.Equal(t, entry.w, dirty.Dx(), "dirty region should cover the glyph")
+	assert.GreaterOrEqual(t, dirty.Dx(), entry.w, "dirty region should cover the glyph")
 	assert.Equal(t, entry.h, dirty.Dy(), "dirty region should cover the glyph")
 
-	again, dirtyAgain := atlas.getOrAdd(run, idx, 0, 20, 1, color.White)
+	// Single byte rows are only read correctly by GL when each starts on its
+	// unpack alignment, so slots are placed and sized to that boundary.
+	assert.Zero(t, dirty.Min.X%glyphAtlasRowAlign, "upload should start on an aligned column")
+	assert.Zero(t, dirty.Dx()%glyphAtlasRowAlign, "upload width should be a multiple of the alignment")
+
+	again, dirtyAgain := atlas.getOrAdd(run, idx, 0, 20, 1)
 	assert.Equal(t, entry, again, "a cached glyph should return the same entry")
 	assert.True(t, dirtyAgain.Empty(), "a cached glyph needs no upload")
 
 	// A different sub-pixel phase is a different bitmap and must not collide.
-	shifted, dirtyShifted := atlas.getOrAdd(run, idx, 2, 20, 1, color.White)
+	shifted, dirtyShifted := atlas.getOrAdd(run, idx, 2, 20, 1)
 	assert.False(t, dirtyShifted.Empty(), "a new phase should need uploading")
 	assert.NotEqual(t, entry.x, shifted.x, "phases should occupy different atlas slots")
 }
 
-// TestGlyphAtlasResetsWhenFull covers the packer running out of room: entries
-// are dropped and the generation moves, which is how callers know the texture
-// coordinates they are holding have gone stale.
-func TestGlyphAtlasResetsWhenFull(t *testing.T) {
+// TestGlyphAtlasAsksForResetWhenFull covers the packer running out of room. It
+// must not reset itself: a caller part way through a string is holding texture
+// coordinates from the current layout, and moving them under it would draw
+// those glyphs from whatever now occupies those slots.
+func TestGlyphAtlasAsksForResetWhenFull(t *testing.T) {
 	run, idx := glyphAt(t, "A", 20, 1)
 	atlas := newGlyphGPUAtlas(64)
 
 	start := atlas.generation
-	// Vary the colour so every call is a fresh entry, filling the small atlas.
-	for i := 0; i < 200 && atlas.generation == start; i++ {
-		col := color.NRGBA{R: uint8(i), G: uint8(i * 3), B: uint8(i * 7), A: 0xff}
-		atlas.getOrAdd(run, idx, 0, 20, 1, col)
+	// Vary the size so every call is a fresh entry, filling the small atlas.
+	var filled bool
+	for i := 0; i < 200 && !filled; i++ {
+		atlas.getOrAdd(run, idx, 0, float32(8+i), 1)
+		filled = atlas.resetPending
 	}
 
-	require.Greater(t, atlas.generation, start, "atlas should have reset once full")
-	assert.NotEmpty(t, atlas.entries, "the glyph that triggered the reset should be in the fresh atlas")
-	assert.Less(t, len(atlas.entries), 200, "a reset should have dropped earlier entries")
+	require.True(t, filled, "atlas should have run out of room")
+	assert.Equal(t, start, atlas.generation, "a full atlas must not reset itself mid-string")
+	assert.NotEmpty(t, atlas.entries, "entries packed before the atlas filled should still be addressable")
+
+	// The caller resets between strings, once nothing depends on the layout.
+	before := len(atlas.entries)
+	atlas.reset()
+	assert.Greater(t, atlas.generation, start, "reset should move the generation")
+	assert.Empty(t, atlas.entries, "reset should empty the atlas")
+	assert.False(t, atlas.resetPending, "reset should clear the request")
+	assert.Positive(t, before, "sanity: the atlas held entries before the reset")
 }
 
 // TestGlyphAtlasSkipsOversizedGlyph guards a glyph too large for the atlas to
@@ -133,10 +146,46 @@ func TestGlyphAtlasSkipsOversizedGlyph(t *testing.T) {
 	atlas := newGlyphGPUAtlas(8) // far smaller than any glyph at this size
 
 	assert.NotPanics(t, func() {
-		entry, dirty := atlas.getOrAdd(run, idx, 0, 40, 1, color.White)
+		entry, dirty := atlas.getOrAdd(run, idx, 0, 40, 1)
 		assert.Zero(t, entry.w, "an unpackable glyph should report no size")
 		assert.True(t, dirty.Empty(), "an unpackable glyph should need no upload")
 	})
+}
+
+// TestGlyphAtlasColourIndependence is the property that keeps the atlas within
+// capacity on a real themed UI. Before this, colour was part of the key, so the
+// same text in foreground, disabled and placeholder colours stored three copies
+// of every glyph, and a phone at 3x density overflowed on the second colour.
+func TestGlyphAtlasColourIndependence(t *testing.T) {
+	ascii := " !#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	face := paint.CachedFontFace(fyne.TextStyle{}, nil, nil)
+
+	// A phone-like pixel density, where the old colour-keyed atlas overflowed.
+	const scale = 3
+	atlas := newGlyphGPUAtlas(glyphAtlasTexSize)
+	paint.WalkStringGlyphs(face.Fonts, ascii, 14, fyne.TextStyle{}, scale,
+		func(run shaping.Output, idx int, _, _, _, _ float32) {
+			for phase := 0; phase < subpixelPhases; phase++ {
+				atlas.getOrAdd(run, idx, phase, 14, scale)
+			}
+		})
+
+	require.False(t, atlas.resetPending, "one colour of ASCII should fit comfortably")
+	resident := len(atlas.entries)
+
+	// Drawing the same text in any number of further colours must add nothing,
+	// because colour is applied when drawing rather than baked into the bitmap.
+	for round := 0; round < 4; round++ {
+		paint.WalkStringGlyphs(face.Fonts, ascii, 14, fyne.TextStyle{}, scale,
+			func(run shaping.Output, idx int, _, _, _, _ float32) {
+				for phase := 0; phase < subpixelPhases; phase++ {
+					atlas.getOrAdd(run, idx, phase, 14, scale)
+				}
+			})
+	}
+
+	assert.Equal(t, resident, len(atlas.entries), "colour must not add atlas entries")
+	assert.False(t, atlas.resetPending, "repeated colours must not fill the atlas")
 }
 
 // TestTextVerticesUsable covers when cached glyph geometry may be reused. Both

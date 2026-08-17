@@ -14,6 +14,7 @@ const (
 	bitDepthBuffer        = gl.DepthBufferBit
 	clampToEdge           = gl.ClampToEdge
 	colorFormatRGBA       = gl.RGBA
+	colorFormatAlpha      = gl.ALPHA
 	compileStatus         = gl.CompileStatus
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float

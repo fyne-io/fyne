@@ -267,14 +267,20 @@ func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.
 // bitmap instead of being rounded away or resampled at draw time. Callers hold
 // one bitmap per subpixel position they use and pick between them.
 //
+// The glyph is rasterised in white, so the bitmap carries coverage rather than
+// a colour and one copy serves every colour the glyph is ever drawn in. Callers
+// tint it when drawing. Baking the colour in instead would multiply the number
+// of bitmaps by the number of colours in the theme, which is the difference
+// between a cache that fits and one that thrashes.
+//
 // Image height equals the full line height (ascent + |descent|). The returned
 // baseline is the glyph's baseline measured in pixels down from the top of the
 // image, which callers need in order to sit the bitmap on the line's shared
 // baseline: a run's own ascent is not necessarily the line's ascent when faces
 // of different sizes are mixed.
-func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32, col color.Color) (img *image.RGBA, baseline int) {
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline int) {
 	g := run.Glyphs[idx]
-	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: col}
+	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: color.White}
 
 	baseline = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * scale)))
 	descent := int(math.Ceil(float64(-fixed266ToFloat32(run.LineBounds.Descent) * scale)))
