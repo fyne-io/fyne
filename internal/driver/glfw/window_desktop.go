@@ -840,6 +840,26 @@ func (w *window) create() {
 
 	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 	if err != nil {
+		// Some platforms cannot supply the requested client API through their
+		// native context API: Windows on ARM exposes no
+		// WGL_EXT_create_context_es2_profile, and Mesa's software renderer
+		// exposes no GLX_EXT_create_context_es2_profile. Both can still reach
+		// it through EGL, so try once more that way before giving up.
+		//
+		// This only runs once the native attempt has already failed, so it
+		// cannot change the outcome for a driver that works today. If EGL
+		// succeeds the hint is left in place, because any later window would
+		// otherwise fail the same way the first one just did.
+		glfw.WindowHint(glfw.ContextCreationAPI, glfw.EGLContextAPI)
+		if eglWin, eglErr := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil); eglErr == nil {
+			win, err = eglWin, nil
+		} else {
+			// Keep reporting the native failure: it names the extension the
+			// platform is missing, which is the actionable half.
+			glfw.WindowHint(glfw.ContextCreationAPI, glfw.NativeContextAPI)
+		}
+	}
+	if err != nil {
 		w.driver.initFailed("window creation error", err)
 		return
 	}
