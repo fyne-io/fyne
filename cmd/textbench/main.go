@@ -22,6 +22,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -91,6 +93,11 @@ const (
 	entrySeedRows = 12
 )
 
+// devicePhase is how long each workload runs for on a phone. Long enough to
+// leave the warmup behind, short enough that nobody has to hold a handset
+// steady for very long.
+const devicePhase = 12 * time.Second
+
 // runEntry types into a multi-line Entry that already holds a screenful of
 // text, which is the second half of what issue 1062 reports. Every keystroke
 // refreshes the text object, so unlike the scrolling workload this one cannot
@@ -132,6 +139,73 @@ func runEntry(w fyne.Window, width, height, tickMs int) {
 	w.ShowAndRun()
 }
 
+// runDevice measures both workloads in one session and reports them to the log,
+// which is the only channel a phone reliably offers. It scrolls, then types,
+// then exits, so a single launch produces both sets of numbers.
+func runDevice(w fyne.Window, rows, width, height, stepPx, tickMs int) {
+	list := widget.NewList(
+		func() int { return rows },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(id widget.ListItemID, o fyne.CanvasObject) {
+			o.(*widget.Label).SetText(rowText(id))
+		},
+	)
+	entry := widget.NewMultiLineEntry()
+	var seed strings.Builder
+	for i := 0; i < entrySeedRows; i++ {
+		seed.WriteString(rowText(i))
+		seed.WriteByte('\n')
+	}
+
+	w.SetContent(container.NewStack(list))
+	w.Resize(fyne.NewSize(float32(width), float32(height)))
+
+	go func() {
+		time.Sleep(2 * time.Second) // let the window map and the first frames settle
+		gl.MarkPhase("scroll")
+
+		offset := float32(0)
+		maxOffset := float32(rows) * 40
+		deadline := time.Now().Add(devicePhase)
+		for time.Now().Before(deadline) {
+			offset += float32(stepPx)
+			if offset > maxOffset {
+				offset = 0
+			}
+			off := offset
+			fyne.Do(func() { list.ScrollToOffset(off) })
+			time.Sleep(time.Duration(tickMs) * time.Millisecond)
+		}
+
+		fyne.DoAndWait(func() {
+			entry.SetText(seed.String())
+			w.SetContent(container.NewStack(entry))
+		})
+		time.Sleep(time.Second) // settle before measuring the new content
+		gl.MarkPhase("entry")
+
+		typed := 0
+		deadline = time.Now().Add(devicePhase)
+		for time.Now().Before(deadline) {
+			r := rune('a' + typed%26)
+			typed++
+			nl := typed%80 == 0
+			fyne.Do(func() {
+				if nl {
+					entry.SetText(entry.Text + "\n")
+					return
+				}
+				entry.SetText(entry.Text + string(r))
+			})
+			time.Sleep(time.Duration(tickMs) * time.Millisecond)
+		}
+
+		fyne.Do(gl.ReportStats) // prints the summary and exits
+	}()
+
+	w.ShowAndRun()
+}
+
 func main() {
 	rows := envInt("TEXTBENCH_ROWS", defaultRows)
 	width := envInt("TEXTBENCH_WIDTH", defaultWidth)
@@ -148,6 +222,15 @@ func main() {
 	// typing refreshes one object on every keystroke and cannot reuse it.
 	if os.Getenv("TEXTBENCH_MODE") == "entry" {
 		runEntry(w, width, height, tickMs)
+		return
+	}
+
+	// A phone cannot be handed environment variables or a writable path, and
+	// launching it twice to measure two workloads is far more awkward than on a
+	// desktop, so there it scrolls and then types in one session and reports
+	// both to the log before exiting.
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" || os.Getenv("TEXTBENCH_MODE") == "device" {
+		runDevice(w, rows, width, height, stepPx, tickMs)
 		return
 	}
 

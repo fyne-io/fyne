@@ -7,3 +7,11 @@ package gl
 func wrapContext(c context) context {
 	return c
 }
+
+// MarkPhase labels the stretch of a run being measured. It does nothing unless
+// built with -tags glstats.
+func MarkPhase(string) {}
+
+// ReportStats writes the gathered render statistics and ends the process. It
+// does nothing unless built with -tags glstats.
+func ReportStats() {}
