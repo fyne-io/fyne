@@ -106,7 +106,7 @@ func newGlyphGPUAtlas(texSize int) *glyphGPUAtlas {
 	}
 }
 
-func (a *glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32) glyphAtlasKey {
+func (*glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32) glyphAtlasKey {
 	return glyphAtlasKey{
 		face:    run.Face,
 		gid:     run.Glyphs[idx].GlyphID,
