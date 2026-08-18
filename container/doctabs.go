@@ -176,6 +176,10 @@ func (t *DocTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
+func (t *DocTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
 func (t *DocTabs) close(item *TabItem) {
 	if f := t.CloseIntercept; f != nil {
 		f(item)
@@ -187,18 +191,6 @@ func (t *DocTabs) close(item *TabItem) {
 	}
 }
 
-func (t *DocTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
-}
-
-func (t *DocTabs) onSelected() func(*TabItem) {
-	return t.OnSelected
-}
-
-func (t *DocTabs) items() []*TabItem {
-	return t.Items
-}
-
 func (t *DocTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
@@ -206,8 +198,16 @@ func (t *DocTabs) getCurrent() int {
 	return t.current
 }
 
-func (t *DocTabs) applyItems(items []*TabItem) {
-	t.Items = items
+func (t *DocTabs) items() []*TabItem {
+	return t.Items
+}
+
+func (t *DocTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *DocTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
 }
 
 func (t *DocTabs) setCurrent(current int) {

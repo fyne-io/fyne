@@ -43,6 +43,11 @@ func NewAppTabs(items ...*TabItem) *AppTabs {
 	return tabs
 }
 
+// Append adds a new TabItem to the end of the tab bar.
+func (t *AppTabs) Append(item *TabItem) {
+	t.SetItems(append(t.Items, item))
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	t.BaseWidget.ExtendBaseWidget(t)
@@ -66,11 +71,6 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
-}
-
-// Append adds a new TabItem to the end of the tab bar.
-func (t *AppTabs) Append(item *TabItem) {
-	t.SetItems(append(t.Items, item))
 }
 
 // CurrentTab returns the currently selected TabItem.
@@ -217,8 +217,19 @@ func (t *AppTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
-func (t *AppTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
+func (t *AppTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
+func (t *AppTabs) getCurrent() int {
+	if len(t.Items) == 0 {
+		return -1
+	}
+	return t.current
+}
+
+func (t *AppTabs) items() []*TabItem {
+	return t.Items
 }
 
 func (t *AppTabs) onSelected() func(*TabItem) {
@@ -232,19 +243,8 @@ func (t *AppTabs) onSelected() func(*TabItem) {
 	}
 }
 
-func (t *AppTabs) items() []*TabItem {
-	return t.Items
-}
-
-func (t *AppTabs) getCurrent() int {
-	if len(t.Items) == 0 {
-		return -1
-	}
-	return t.current
-}
-
-func (t *AppTabs) applyItems(items []*TabItem) {
-	t.Items = items
+func (t *AppTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
 }
 
 func (t *AppTabs) setCurrent(current int) {
