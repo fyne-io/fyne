@@ -155,7 +155,7 @@ func (t *DocTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *DocTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -199,7 +199,7 @@ func (t *DocTabs) items() []*TabItem {
 	return t.Items
 }
 
-func (t *DocTabs) selected() int {
+func (t *DocTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
 	}

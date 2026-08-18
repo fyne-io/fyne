@@ -196,7 +196,7 @@ func (t *AppTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *AppTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -236,7 +236,7 @@ func (t *AppTabs) items() []*TabItem {
 	return t.Items
 }
 
-func (t *AppTabs) selected() int {
+func (t *AppTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
 	}
