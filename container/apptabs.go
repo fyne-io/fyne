@@ -247,8 +247,8 @@ func (t *AppTabs) setItems(items []*TabItem) {
 	t.Items = items
 }
 
-func (t *AppTabs) setSelected(selected int) {
-	t.current = selected
+func (t *AppTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *AppTabs) setTransitioning(transitioning bool) {

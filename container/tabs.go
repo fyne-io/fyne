@@ -83,7 +83,7 @@ type baseTabs interface {
 	setItems([]*TabItem)
 
 	getCurrent() int
-	setSelected(int)
+	setCurrent(int)
 
 	tabLocation() TabLocation
 
@@ -168,7 +168,7 @@ func removeIndex(t baseTabs, index int) {
 	}
 	setItems(t, append(items[:index], items[index+1:]...))
 	if s := t.getCurrent(); index < s {
-		t.setSelected(s - 1)
+		t.setCurrent(s - 1)
 	}
 }
 
@@ -211,7 +211,7 @@ func selectIndex(t baseTabs, index int) {
 	}
 
 	t.setTransitioning(true)
-	t.setSelected(index)
+	t.setCurrent(index)
 	t.Refresh()
 
 	if f := t.onSelected(); f != nil {
@@ -240,7 +240,7 @@ func setItems(t baseTabs, items []*TabItem) {
 	case count == 0:
 		// No items available to be selected
 		selectIndex(t, -1) // Unsure OnUnselected gets called if applicable
-		t.setSelected(-1)
+		t.setCurrent(-1)
 	case selected < 0:
 		// Current is first tab item
 		selectIndex(t, 0)

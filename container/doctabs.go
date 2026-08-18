@@ -210,8 +210,8 @@ func (t *DocTabs) setItems(items []*TabItem) {
 	t.Items = items
 }
 
-func (t *DocTabs) setSelected(selected int) {
-	t.current = selected
+func (t *DocTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *DocTabs) setTransitioning(transitioning bool) {
