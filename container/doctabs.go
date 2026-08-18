@@ -206,7 +206,7 @@ func (t *DocTabs) getCurrent() int {
 	return t.current
 }
 
-func (t *DocTabs) setItems(items []*TabItem) {
+func (t *DocTabs) applyItems(items []*TabItem) {
 	t.Items = items
 }
 

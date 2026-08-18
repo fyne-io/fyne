@@ -80,7 +80,7 @@ type baseTabs interface {
 	onSelected() func(*TabItem)
 
 	items() []*TabItem
-	setItems([]*TabItem)
+	applyItems([]*TabItem)
 
 	getCurrent() int
 	setCurrent(int)
@@ -233,7 +233,7 @@ func setItems(t baseTabs, items []*TabItem) {
 	if build.HasHints && mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
-	t.setItems(items)
+	t.applyItems(items)
 	selected := t.getCurrent()
 	count := len(items)
 	switch {

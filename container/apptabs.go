@@ -243,7 +243,7 @@ func (t *AppTabs) getCurrent() int {
 	return t.current
 }
 
-func (t *AppTabs) setItems(items []*TabItem) {
+func (t *AppTabs) applyItems(items []*TabItem) {
 	t.Items = items
 }
 
