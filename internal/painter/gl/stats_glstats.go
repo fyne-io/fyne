@@ -19,7 +19,7 @@ package gl
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -114,15 +114,17 @@ func (c *statsContext) phase() *phaseStats {
 	return c.phases[len(c.phases)-1]
 }
 
-// Clear marks a frame boundary: the painter calls it once at the start of every
-// paint pass, so the previous frame's counters are complete by now.
-func (c *statsContext) Clear(mask uint32) {
+// Viewport marks a frame boundary. The painter sets the viewport once at the
+// start of every paint pass on both desktop and mobile, which Clear does not:
+// the mobile driver clears the screen through its own GL context rather than
+// the painter's, so a frame boundary hooked there never fires on a phone.
+func (c *statsContext) Viewport(x, y, width, height int) {
 	c.endFrame()
 	c.cur = frameStats{}
 	c.started = time.Now()
 	c.last = c.started
 	c.inFrame = true
-	c.context.Clear(mask)
+	c.context.Viewport(x, y, width, height)
 }
 
 // endFrame closes off the in-progress frame. Duration runs from the Clear that
@@ -155,11 +157,17 @@ func (p *phaseStats) measured(warmup int) []frameStats {
 func (c *statsContext) write() {
 	c.written = true
 
-	// The summary goes to stderr because that is the one channel available
-	// everywhere: on Android it is piped into logcat under the tag "Fyne".
+	// The summary goes through the log package rather than straight to stderr.
+	// Both reach a terminal on a desktop, but on Android stderr is a pipe drained
+	// by a goroutine, so a line written just before the process exits can be lost,
+	// while the log package hands each line to the system log as it is written.
 	for _, p := range c.phases {
 		frames := p.measured(c.warmup)
 		if len(frames) == 0 {
+			// Saying so beats printing nothing: a phase that never got past the
+			// warmup is a fact about the run, not a reason to stay quiet.
+			log.Printf("glstats phase=%s frames=%d (fewer than the %d warmup frames, not measured)",
+				p.Name, len(p.Frames), c.warmup)
 			continue
 		}
 		var bufCalls, drawCalls, bufFloats, texBytes, subCalls float64
@@ -175,7 +183,7 @@ func (c *statsContext) write() {
 		n := float64(len(frames))
 		vertKiB := bufFloats * 4 / n / 1024
 		texKiB := texBytes / n / 1024
-		fmt.Fprintf(os.Stderr,
+		log.Printf(
 			"glstats phase=%s frames=%d bufCalls=%.1f drawCalls=%.1f subImgCalls=%.2f "+
 				"vertKiB=%.2f texKiB=%.2f totalKiB=%.2f submitMs=%.2f\n",
 			p.Name, len(frames), bufCalls/n, drawCalls/n, subCalls/n,
@@ -188,9 +196,13 @@ func (c *statsContext) write() {
 			Frames []frameStats  `json:"frames"`
 		}{c.phases, c.phases[len(c.phases)-1].measured(c.warmup)}, "", "  "); err == nil {
 			_ = os.WriteFile(c.out, data, 0o644)
-			os.Stderr.WriteString("glstats: wrote " + strconv.Itoa(len(c.phases)) + " phase(s) to " + c.out + "\n")
+			log.Print("glstats: wrote " + strconv.Itoa(len(c.phases)) + " phase(s) to " + c.out)
 		}
 	}
+
+	// Give whatever carries the log a moment to flush before the process
+	// disappears; on Android that is another goroutine draining a pipe.
+	time.Sleep(500 * time.Millisecond)
 	os.Exit(0)
 }
 
