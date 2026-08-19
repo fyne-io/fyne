@@ -166,3 +166,12 @@ func firstInkColumn(img *image.RGBA) int {
 	}
 	return img.Bounds().Dx()
 }
+
+// TestWalkStringGlyphs_UnmappableCodepoint guards a regression: a codepoint no
+// font can draw used to be skipped entirely, so where the software renderer
+// shows a replacement character the GL path showed a gap.
+func TestWalkStringGlyphs_UnmappableCodepoint(t *testing.T) {
+	// A private-use plane codepoint no bundled font maps.
+	glyphs := walkGlyphs(t, "a\U0010FFFDb", 20, 1)
+	assert.Len(t, glyphs, 3, "an unmappable codepoint should still produce a glyph")
+}

@@ -43,20 +43,21 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	blurKernel      blurKernel // cached 1D kernel texture on GPU
-	blurSnap        blurSnap   // cached texture for GPU-side blur snapshot
-	canvas          fyne.Canvas
-	contextProvider driver.WithContext
-	ctx             context
-	fbHeight        int            // current framebuffer height in pixels
-	glyphAtlas      *glyphGPUAtlas // shared GPU texture holding rasterised glyphs
-	maxTextureSize  int
-	pixScale        float32 // pre-calculate scale*texScale for each draw
-	programs        *programs
-	shaderPrograms  map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
-	texScale        float32
-	textBatch       []float32                              // scratch used while building a batch
-	textCache       map[cache.FontCacheEntry]*textVertices // cached glyph geometry, keyed by content
+	blurKernel       blurKernel // cached 1D kernel texture on GPU
+	blurSnap         blurSnap   // cached texture for GPU-side blur snapshot
+	canvas           fyne.Canvas
+	contextProvider  driver.WithContext
+	ctx              context
+	fbHeight         int            // current framebuffer height in pixels
+	glyphAtlas       *glyphGPUAtlas // shared GPU texture holding glyph coverage
+	glyphColourAtlas *glyphGPUAtlas // and a smaller one for glyphs with colour of their own
+	maxTextureSize   int
+	pixScale         float32 // pre-calculate scale*texScale for each draw
+	programs         *programs
+	shaderPrograms   map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
+	texScale         float32
+	textBatch        []float32                              // scratch used while building a batch
+	textCache        map[cache.FontCacheEntry]*textVertices // cached glyph geometry, keyed by content
 }
 
 // Declare conformity to Painter interface

@@ -3,6 +3,7 @@
 package gl
 
 import (
+	"image"
 	"image/color"
 	"testing"
 
@@ -36,6 +37,17 @@ func glyphAt(t *testing.T, s string, size, scale float32) (shaping.Output, int) 
 	return run, idx
 }
 
+// addGlyph rasterises a glyph and files it, which is what the painter does in
+// two steps so that it can pick the atlas based on whether the glyph has colour.
+func addGlyph(a *glyphGPUAtlas, run shaping.Output, idx, phase, phases int, size, scale float32) (glyphAtlasEntry, image.Rectangle) {
+	key := a.cacheKey(run, idx, phase, size, scale)
+	if e, ok := a.entries[key]; ok {
+		return e, image.Rectangle{}
+	}
+	img, baseline := paint.RenderGlyphToImage(run, idx, size, scale, float32(phase)/float32(phases))
+	return a.add(key, img, baseline)
+}
+
 func TestSubpixelPhaseAt(t *testing.T) {
 	for name, tt := range map[string]struct {
 		in        float32
@@ -53,7 +65,7 @@ func TestSubpixelPhaseAt(t *testing.T) {
 		"negative frac":    {-2.5, 2, -3},
 	} {
 		t.Run(name, func(t *testing.T) {
-			phase, whole := subpixelPhaseAt(tt.in)
+			phase, whole := subpixelPhaseAt(tt.in, subpixelPhases)
 			assert.Equal(t, tt.phase, phase)
 			assert.Equal(t, tt.wholePart, whole)
 		})
@@ -64,7 +76,7 @@ func TestSubpixelPhaseAt(t *testing.T) {
 // always a valid index and the whole part never runs ahead of the position.
 func TestSubpixelPhaseAtInRange(t *testing.T) {
 	for x := float32(-5); x < 5; x += 0.013 {
-		phase, whole := subpixelPhaseAt(x)
+		phase, whole := subpixelPhaseAt(x, subpixelPhases)
 		assert.GreaterOrEqual(t, phase, 0, "phase out of range at %v", x)
 		assert.Less(t, phase, subpixelPhases, "phase out of range at %v", x)
 		assert.LessOrEqual(t, whole, x, "whole part should not exceed the position at %v", x)
@@ -88,7 +100,7 @@ func TestGlyphAtlasGetOrAdd(t *testing.T) {
 	run, idx := glyphAt(t, "A", 20, 1)
 	atlas := newGlyphGPUAtlas(256)
 
-	entry, dirty := atlas.getOrAdd(run, idx, 0, 20, 1)
+	entry, dirty := addGlyph(atlas, run, idx, 0, subpixelPhases, 20, 1)
 	assert.Positive(t, entry.w, "a newly added glyph should have width")
 	assert.Positive(t, entry.h, "a newly added glyph should have height")
 	assert.Positive(t, entry.baseline, "a newly added glyph should carry its baseline")
@@ -101,12 +113,12 @@ func TestGlyphAtlasGetOrAdd(t *testing.T) {
 	assert.Zero(t, dirty.Min.X%glyphAtlasRowAlign, "upload should start on an aligned column")
 	assert.Zero(t, dirty.Dx()%glyphAtlasRowAlign, "upload width should be a multiple of the alignment")
 
-	again, dirtyAgain := atlas.getOrAdd(run, idx, 0, 20, 1)
+	again, dirtyAgain := addGlyph(atlas, run, idx, 0, subpixelPhases, 20, 1)
 	assert.Equal(t, entry, again, "a cached glyph should return the same entry")
 	assert.True(t, dirtyAgain.Empty(), "a cached glyph needs no upload")
 
 	// A different sub-pixel phase is a different bitmap and must not collide.
-	shifted, dirtyShifted := atlas.getOrAdd(run, idx, 2, 20, 1)
+	shifted, dirtyShifted := addGlyph(atlas, run, idx, 2, subpixelPhases, 20, 1)
 	assert.False(t, dirtyShifted.Empty(), "a new phase should need uploading")
 	assert.NotEqual(t, entry.x, shifted.x, "phases should occupy different atlas slots")
 }
@@ -123,7 +135,7 @@ func TestGlyphAtlasAsksForResetWhenFull(t *testing.T) {
 	// Vary the size so every call is a fresh entry, filling the small atlas.
 	var filled bool
 	for i := 0; i < 200 && !filled; i++ {
-		atlas.getOrAdd(run, idx, 0, float32(8+i), 1)
+		addGlyph(atlas, run, idx, 0, subpixelPhases, float32(8+i), 1)
 		filled = atlas.resetPending
 	}
 
@@ -148,7 +160,7 @@ func TestGlyphAtlasSkipsOversizedGlyph(t *testing.T) {
 	atlas := newGlyphGPUAtlas(8) // far smaller than any glyph at this size
 
 	assert.NotPanics(t, func() {
-		entry, dirty := atlas.getOrAdd(run, idx, 0, 40, 1)
+		entry, dirty := addGlyph(atlas, run, idx, 0, subpixelPhases, 40, 1)
 		assert.Zero(t, entry.w, "an unpackable glyph should report no size")
 		assert.True(t, dirty.Empty(), "an unpackable glyph should need no upload")
 	})
@@ -168,7 +180,7 @@ func TestGlyphAtlasColourIndependence(t *testing.T) {
 	paint.WalkStringGlyphs(face.Fonts, ascii, 14, fyne.TextStyle{}, scale,
 		func(run shaping.Output, idx int, _, _, _, _ float32) {
 			for phase := 0; phase < subpixelPhases; phase++ {
-				atlas.getOrAdd(run, idx, phase, 14, scale)
+				addGlyph(atlas, run, idx, phase, subpixelPhases, 14, scale)
 			}
 		})
 
@@ -181,7 +193,7 @@ func TestGlyphAtlasColourIndependence(t *testing.T) {
 		paint.WalkStringGlyphs(face.Fonts, ascii, 14, fyne.TextStyle{}, scale,
 			func(run shaping.Output, idx int, _, _, _, _ float32) {
 				for phase := 0; phase < subpixelPhases; phase++ {
-					atlas.getOrAdd(run, idx, phase, 14, scale)
+					addGlyph(atlas, run, idx, phase, subpixelPhases, 14, scale)
 				}
 			})
 	}
@@ -237,7 +249,7 @@ func TestAppendGlyphQuad(t *testing.T) {
 	p.glyphAtlas = newGlyphGPUAtlas(64)
 
 	entry := glyphAtlasEntry{x: 2, y: 4, w: 6, h: 8}
-	points := p.appendGlyphQuad(nil, entry, 10, 20)
+	points := p.appendGlyphQuad(nil, entry, 10, 20, p.glyphAtlas)
 
 	require.Len(t, points, floatsPerGlyph, "a glyph should emit two triangles")
 
@@ -267,7 +279,7 @@ func TestAppendGlyphQuadKeepsOrigin(t *testing.T) {
 	p.glyphAtlas = newGlyphGPUAtlas(64)
 
 	entry := glyphAtlasEntry{x: 0, y: 0, w: 4, h: 4}
-	points := p.appendGlyphQuad(nil, entry, 7, 3)
+	points := p.appendGlyphQuad(nil, entry, 7, 3, p.glyphAtlas)
 
 	for i := 0; i < len(points); i += coordinateSize2DWithTexture {
 		assert.Contains(t, []float32{7, 11}, points[i], "x should span the requested position")
@@ -279,8 +291,30 @@ func TestAppendGlyphQuadAccumulates(t *testing.T) {
 	p.glyphAtlas = newGlyphGPUAtlas(64)
 
 	entry := glyphAtlasEntry{x: 0, y: 0, w: 4, h: 4}
-	points := p.appendGlyphQuad(nil, entry, 0, 0)
-	points = p.appendGlyphQuad(points, entry, 4, 0)
+	points := p.appendGlyphQuad(nil, entry, 0, 0, p.glyphAtlas)
+	points = p.appendGlyphQuad(points, entry, 4, 0, p.glyphAtlas)
 
 	assert.Len(t, points, 2*floatsPerGlyph, "each glyph should add to the batch rather than replace it")
+}
+
+// TestIsColour separates glyphs that reduce to coverage from those carrying
+// their own colours. Getting it wrong drew emoji as flat silhouettes, because
+// only the alpha channel of a colour bitmap was kept.
+func TestIsColour(t *testing.T) {
+	face := paint.CachedFontFace(fyne.TextStyle{}, nil, nil)
+
+	check := func(s string) bool {
+		var colour bool
+		var seen bool
+		paint.WalkStringGlyphs(face.Fonts, s, 32, fyne.TextStyle{}, 1,
+			func(run shaping.Output, idx int, _, _, _, _ float32) {
+				img, _ := paint.RenderGlyphToImage(run, idx, 32, 1, 0)
+				colour, seen = isColour(img), true
+			})
+		require.True(t, seen, "expected a glyph for %q", s)
+		return colour
+	}
+
+	assert.False(t, check("A"), "an outline glyph is coverage only")
+	assert.True(t, check("\U0001F600"), "an emoji carries its own colours")
 }

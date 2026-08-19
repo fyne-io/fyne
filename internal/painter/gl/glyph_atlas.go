@@ -23,18 +23,44 @@ const (
 	glyphAtlasTexSize = 2048
 	glyphAtlasPad     = 1
 
+	// Colour glyphs, meaning emoji and anything else from a bitmap or COLR
+	// face, cannot be reduced to coverage and need their own smaller atlas of
+	// full colour. There are far fewer of them than there are letters.
+	glyphColourAtlasTexSize = 1024
+
+	// Device sizes at which fewer sub-pixel positions are kept. A quarter of a
+	// pixel is a visible slice of a small stroke and nothing on a large one.
+	subpixelFullSizePx = 24
+	subpixelHalfSizePx = 48
+
 	// GL's default unpack alignment. Glyph slots are placed and sized to it so
 	// that uploading a single byte texture never needs it changed, which fyne's
 	// mobile GL binding has no call for.
 	glyphAtlasRowAlign = 4
 
-	// Horizontal sub-pixel positions each glyph is rasterised at. Kerning puts
+	// Most horizontal sub-pixel positions a glyph is rasterised at. Kerning puts
 	// glyphs on fractional positions, and a bitmap can only be drawn on whole
 	// pixels, so the fraction is baked into the bitmap rather than rounded away
-	// (uneven spacing) or resampled at draw time (blurred edges). Four costs
-	// four entries per glyph and leaves the error under an eighth of a pixel.
+	// (uneven spacing) or resampled at draw time (blurred edges).
 	subpixelPhases = 4
 )
+
+// subpixelPhasesFor returns how many sub-pixel positions to keep for glyphs
+// whose em box is emPx device pixels. Each one costs another copy of every
+// glyph, and what it buys shrinks as the glyphs grow: a quarter of a pixel is a
+// visible slice of a small stroke and nothing at all on a large one. Large text
+// therefore settles for halves, which is what makes a screen of CJK at phone
+// density fit in the atlas at all.
+func subpixelPhasesFor(emPx float32) int {
+	switch {
+	case emPx <= subpixelFullSizePx: // small text, where uneven spacing is easiest to see
+		return subpixelPhases
+	case emPx <= subpixelHalfSizePx:
+		return 2
+	default: // a whole pixel here is already a small fraction of a stroke
+		return 1
+	}
+}
 
 // glyphAtlasKey identifies a glyph bitmap. Colour is deliberately absent:
 // bitmaps hold coverage and are tinted when drawn, so one entry serves every
@@ -49,30 +75,33 @@ type glyphAtlasKey struct {
 
 // subpixelPhaseAt returns which sub-pixel position x falls into, and the whole
 // pixel the glyph should then be drawn at.
-func subpixelPhaseAt(x float32) (phase int, whole float32) {
+func subpixelPhaseAt(x float32, phases int) (phase int, whole float32) {
 	whole = float32(math.Floor(float64(x)))
-	phase = int((x - whole) * subpixelPhases)
-	if phase >= subpixelPhases { // guard against rounding at the top of the range
-		phase = subpixelPhases - 1
+	phase = int((x - whole) * float32(phases))
+	if phase >= phases { // guard against rounding at the top of the range
+		phase = phases - 1
 	}
 	return phase, whole
 }
 
 type glyphAtlasEntry struct {
-	x, y     int // top-left position in the atlas texture
-	w, h     int // dimensions in pixels
-	baseline int // baseline position in pixels down from the top of the glyph bitmap
+	x, y     int  // top-left position in the atlas texture
+	w, h     int  // dimensions in pixels
+	baseline int  // baseline position in pixels down from the top of the glyph bitmap
+	colour   bool // lives in the colour atlas and is drawn untinted
 }
 
 // glyphGPUAtlas packs pre-rasterised glyphs into a single GPU texture holding
 // one byte of coverage per pixel. New glyphs are appended with a simple shelf
 // packer. It is per-painter, so it lives and dies with one GL context.
 type glyphGPUAtlas struct {
-	// coverage is the CPU copy of the texture, one byte per pixel, row major.
-	coverage []uint8
-	texture  Texture
-	texSize  int
-	entries  map[glyphAtlasKey]glyphAtlasEntry
+	// pixels is the CPU copy of the texture, row major, bpp bytes per pixel:
+	// one for a coverage atlas, four for a colour one.
+	pixels  []uint8
+	bpp     int
+	texture Texture
+	texSize int
+	entries map[glyphAtlasKey]glyphAtlasEntry
 
 	// generation counts resets. Callers that collect several entries before
 	// drawing compare it either side to notice that the entries they gathered
@@ -91,7 +120,7 @@ type glyphGPUAtlas struct {
 // reset empties the atlas so packing starts over. Every texture coordinate
 // handed out before now becomes wrong, which the generation bump signals.
 func (a *glyphGPUAtlas) reset() {
-	clear(a.coverage)
+	clear(a.pixels)
 	a.entries = make(map[glyphAtlasKey]glyphAtlasEntry)
 	a.shelfX, a.shelfY, a.shelfH = 0, 0, 0
 	a.resetPending = false
@@ -99,11 +128,32 @@ func (a *glyphGPUAtlas) reset() {
 }
 
 func newGlyphGPUAtlas(texSize int) *glyphGPUAtlas {
+	return newGlyphAtlasOfDepth(texSize, 1)
+}
+
+func newGlyphAtlasOfDepth(texSize, bpp int) *glyphGPUAtlas {
 	return &glyphGPUAtlas{
-		coverage: make([]uint8, texSize*texSize),
-		texSize:  texSize,
-		entries:  make(map[glyphAtlasKey]glyphAtlasEntry),
+		pixels:  make([]uint8, texSize*texSize*bpp),
+		bpp:     bpp,
+		texSize: texSize,
+		entries: make(map[glyphAtlasKey]glyphAtlasEntry),
 	}
+}
+
+// isColour reports whether a rasterised glyph carries colour of its own. Glyphs
+// are rendered white, so an ordinary outline comes back with every channel
+// equal to its coverage; an emoji does not.
+func isColour(img *image.RGBA) bool {
+	for i := 0; i+3 < len(img.Pix); i += 4 {
+		a := img.Pix[i+3]
+		if a == 0 {
+			continue
+		}
+		if img.Pix[i] != a || img.Pix[i+1] != a || img.Pix[i+2] != a {
+			return true
+		}
+	}
+	return false
 }
 
 func (*glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, scale float32) glyphAtlasKey {
@@ -118,14 +168,9 @@ func (*glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, sca
 // getOrAdd returns the atlas entry for a glyph, adding it on a miss.
 // The second return value is the dirty rectangle written into cpuImg; it is
 // empty when the entry was already cached so no GPU upload is needed.
-func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, scale float32) (glyphAtlasEntry, image.Rectangle) {
-	key := a.cacheKey(run, idx, phase, fontSize, scale)
-	if entry, ok := a.entries[key]; ok {
-		return entry, image.Rectangle{}
-	}
-
-	subpixel := float32(phase) / subpixelPhases
-	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel)
+// add packs an already rasterised glyph. The caller decides which atlas a glyph
+// belongs in, since that depends on whether it came back with colour.
+func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline int) (glyphAtlasEntry, image.Rectangle) {
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
 	// A glyph bigger than the atlas cannot be packed at any offset, and writing
@@ -158,20 +203,25 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, s
 		return glyphAtlasEntry{}, image.Rectangle{}
 	}
 
-	// Keep only the alpha channel: the glyph was rasterised in white, so alpha
-	// is its coverage and the colour channels carry nothing the atlas needs.
+	// A coverage atlas keeps only the alpha channel, since the glyph was
+	// rasterised in white and the colour channels then carry nothing. A colour
+	// atlas keeps the lot.
 	atlasX, atlasY := a.shelfX, a.shelfY
 	for y := 0; y < h; y++ {
 		src := glyphImg.PixOffset(0, y)
-		dst := (atlasY+y)*a.texSize + atlasX
-		for x := 0; x < w; x++ {
-			a.coverage[dst+x] = glyphImg.Pix[src+x*4+3]
+		dst := ((atlasY+y)*a.texSize + atlasX) * a.bpp
+		if a.bpp == 1 {
+			for x := 0; x < w; x++ {
+				a.pixels[dst+x] = glyphImg.Pix[src+x*4+3]
+			}
+			continue
 		}
+		copy(a.pixels[dst:dst+w*4], glyphImg.Pix[src:src+w*4])
 	}
 
 	// The entry keeps the glyph's true width so quads and texture coordinates
 	// are unaffected by the slot padding.
-	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline}
+	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline, colour: a.bpp == 4}
 	a.entries[key] = entry
 	if h > a.shelfH {
 		a.shelfH = h
@@ -184,6 +234,32 @@ func (a *glyphGPUAtlas) getOrAdd(run shaping.Output, idx, phase int, fontSize, s
 	return entry, image.Rect(atlasX, atlasY, atlasX+slotW, atlasY+h)
 }
 
+// glyphEntry finds a glyph in whichever atlas holds it, rasterising and filing
+// it on a miss. Which atlas that is depends on the glyph: letters reduce to
+// coverage and are tinted when drawn, emoji keep their own colours.
+func (p *painter) glyphEntry(run shaping.Output, idx, phase, phases int, fontSize, scale float32) glyphAtlasEntry {
+	key := p.glyphAtlas.cacheKey(run, idx, phase, fontSize, scale)
+	if entry, ok := p.glyphAtlas.entries[key]; ok {
+		return entry
+	}
+	if entry, ok := p.glyphColourAtlas.entries[key]; ok {
+		return entry
+	}
+
+	subpixel := float32(phase) / float32(phases)
+	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel)
+
+	atlas := p.glyphAtlas
+	if isColour(glyphImg) {
+		atlas = p.glyphColourAtlas
+	}
+	entry, dirty := atlas.add(key, glyphImg, baseline)
+	if !dirty.Empty() {
+		p.uploadAtlasRegion(atlas, dirty)
+	}
+	return entry
+}
+
 // ensureGlyphAtlas lazily allocates the GPU texture for the glyph atlas.
 func (p *painter) ensureGlyphAtlas() {
 	if p.glyphAtlas != nil {
@@ -193,35 +269,50 @@ func (p *painter) ensureGlyphAtlas() {
 	if p.maxTextureSize > 0 && size > p.maxTextureSize {
 		size = p.maxTextureSize // older GPUs cap below what we would like
 	}
-	p.glyphAtlas = newGlyphGPUAtlas(size)
+	p.glyphAtlas = newGlyphAtlasOfDepth(size, 1)
 	p.glyphAtlas.texture = p.newTexture(canvas.ImageScaleSmooth)
-	p.uploadAtlas()
+	p.uploadAtlas(p.glyphAtlas)
+
+	colourSize := glyphColourAtlasTexSize
+	if p.maxTextureSize > 0 && colourSize > p.maxTextureSize {
+		colourSize = p.maxTextureSize
+	}
+	p.glyphColourAtlas = newGlyphAtlasOfDepth(colourSize, 4)
+	p.glyphColourAtlas.texture = p.newTexture(canvas.ImageScaleSmooth)
+	p.uploadAtlas(p.glyphColourAtlas)
 }
 
 // uploadAtlas sends the whole atlas to the GPU. Needed after a reset, where the
 // texture still holds the previous layout's pixels and the incremental uploads
 // only cover glyphs added since.
-func (p *painter) uploadAtlas() {
+func (p *painter) uploadAtlas(a *glyphGPUAtlas) {
+	format := uint32(colorFormatAlpha)
+	if a.bpp == 4 {
+		format = colorFormatRGBA
+	}
 	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
-	p.ctx.TexImage2D(texture2D, 0, p.glyphAtlas.texSize, p.glyphAtlas.texSize,
-		colorFormatAlpha, unsignedByte, p.glyphAtlas.coverage)
+	p.ctx.BindTexture(texture2D, a.texture)
+	p.ctx.TexImage2D(texture2D, 0, a.texSize, a.texSize, format, unsignedByte, a.pixels)
 	p.logError()
 }
 
 // uploadAtlasRegion copies dirty pixels from the CPU atlas to the GPU texture
 // via TexSubImage2D, avoiding a full texture re-upload.
-func (p *painter) uploadAtlasRegion(dirty image.Rectangle) {
-	atlas := p.glyphAtlas
+func (p *painter) uploadAtlasRegion(atlas *glyphGPUAtlas, dirty image.Rectangle) {
+	bpp := atlas.bpp
+	format := uint32(colorFormatAlpha)
+	if bpp == 4 {
+		format = colorFormatRGBA
+	}
 	w, h := dirty.Dx(), dirty.Dy()
-	pixels := make([]uint8, w*h)
+	pixels := make([]uint8, w*h*bpp)
 	for y := 0; y < h; y++ {
-		src := (dirty.Min.Y+y)*atlas.texSize + dirty.Min.X
-		copy(pixels[y*w:(y+1)*w], atlas.coverage[src:src+w])
+		src := ((dirty.Min.Y+y)*atlas.texSize + dirty.Min.X) * bpp
+		copy(pixels[y*w*bpp:(y+1)*w*bpp], atlas.pixels[src:src+w*bpp])
 	}
 	p.ctx.ActiveTexture(texture0)
 	p.ctx.BindTexture(texture2D, atlas.texture)
-	p.ctx.TexSubImage2D(texture2D, 0, dirty.Min.X, dirty.Min.Y, w, h, colorFormatAlpha, unsignedByte, pixels)
+	p.ctx.TexSubImage2D(texture2D, 0, dirty.Min.X, dirty.Min.Y, w, h, format, unsignedByte, pixels)
 	p.logError()
 }
 
@@ -240,8 +331,11 @@ const (
 // visible string on every frame of a scroll. Drawing a cached string uploads
 // nothing at all.
 type textVertices struct {
-	buffer   Buffer
-	vertices int // number of vertices in buffer, for the draw call
+	buffer Buffer
+	// Coverage glyphs come first in the buffer and colour glyphs after, so each
+	// group can be drawn from its own atlas without reordering at draw time.
+	vertices       int // coverage vertices, from the start of the buffer
+	colourVertices int // colour vertices, following them
 
 	generation int     // atlas generation the texture coordinates came from
 	pixScale   float32 // scale the glyphs were laid out and rasterised at
@@ -265,13 +359,13 @@ func (v *textVertices) usable(generation int, pixScale float32) bool {
 // pixel and stays crisp while still sitting where kerning asked for it. offY
 // is rounded here, since vertical sub-pixel positioning buys nothing on a
 // shared baseline.
-func (p *painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, offY float32) []float32 {
+func (*painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, offY float32, atlas *glyphGPUAtlas) []float32 {
 	x1 := offX
 	y1 := float32(math.Round(float64(offY)))
 	x2 := x1 + float32(entry.w)
 	y2 := y1 + float32(entry.h)
 
-	af := float32(p.glyphAtlas.texSize)
+	af := float32(atlas.texSize)
 	uMin := float32(entry.x) / af
 	vMin := float32(entry.y) / af
 	uMax := float32(entry.x+entry.w) / af
@@ -330,39 +424,51 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 	// then repeated against the emptied atlas. Only a string whose own glyphs
 	// exceed the whole atlas can fail twice, and it settles for what fits
 	// rather than looping or drawing against coordinates that have moved.
+	phases := subpixelPhasesFor(text.TextSize * p.pixScale)
+	var colourBatch []float32
 	for attempt := 0; attempt < 2; attempt++ {
 		p.glyphAtlas.resetPending = false
+		p.glyphColourAtlas.resetPending = false
 		p.textBatch = p.textBatch[:0]
+		colourBatch = colourBatch[:0]
 
 		paint.WalkStringGlyphs(face.Fonts, text.Text, text.TextSize, text.TextStyle, p.pixScale,
 			func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32) {
 				// Split the exact position into the pixel the glyph is drawn on
 				// and the sub-pixel remainder that is rasterised into it.
-				phase, wholeX := subpixelPhaseAt(penX + xOff)
+				phase, wholeX := subpixelPhaseAt(penX+xOff, phases)
 
-				entry, dirty := p.glyphAtlas.getOrAdd(run, idx, phase, text.TextSize, p.pixScale)
-				if !dirty.Empty() {
-					p.uploadAtlasRegion(dirty)
-				}
+				entry := p.glyphEntry(run, idx, phase, phases, text.TextSize, p.pixScale)
 				if entry.w == 0 { // did not fit the atlas
 					return
 				}
 				// The bitmap carries its own baseline, which is the run's ascent
 				// rather than the line's. Offsetting by the difference keeps runs
 				// from differently sized faces on the one baseline (see #6448).
-				p.textBatch = p.appendGlyphQuad(p.textBatch, entry,
-					wholeX, baseY-float32(entry.baseline)-yOff)
+				offY := baseY - float32(entry.baseline) - yOff
+				if entry.colour {
+					colourBatch = p.appendGlyphQuad(colourBatch, entry, wholeX, offY, p.glyphColourAtlas)
+					return
+				}
+				p.textBatch = p.appendGlyphQuad(p.textBatch, entry, wholeX, offY, p.glyphAtlas)
 			},
 		)
 
-		if !p.glyphAtlas.resetPending {
+		if !p.glyphAtlas.resetPending && !p.glyphColourAtlas.resetPending {
 			break
 		}
 		if attempt == 0 {
-			p.glyphAtlas.reset()
-			p.uploadAtlas()
+			if p.glyphAtlas.resetPending {
+				p.glyphAtlas.reset()
+				p.uploadAtlas(p.glyphAtlas)
+			}
+			if p.glyphColourAtlas.resetPending {
+				p.glyphColourAtlas.reset()
+				p.uploadAtlas(p.glyphColourAtlas)
+			}
 		}
 	}
+	p.textBatch = append(p.textBatch, colourBatch...)
 	generation := p.glyphAtlas.generation
 
 	cached, ok := p.textCache[key]
@@ -382,7 +488,8 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 			delete(p.textCache, key)
 		})
 	}
-	cached.vertices = len(p.textBatch) / coordinateSize2DWithTexture
+	cached.vertices = (len(p.textBatch) - len(colourBatch)) / coordinateSize2DWithTexture
+	cached.colourVertices = len(colourBatch) / coordinateSize2DWithTexture
 	cached.generation = generation
 	cached.pixScale = p.pixScale
 
@@ -403,7 +510,7 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 // colour, so col tints the whole batch, which is why one string's glyphs can
 // share an entry with the same glyphs drawn elsewhere in another colour.
 func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne.Position, frame fyne.Size) {
-	if cached.vertices == 0 {
+	if cached.vertices == 0 && cached.colourVertices == 0 {
 		return
 	}
 
@@ -428,18 +535,32 @@ func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne
 		2/(frame.Width*p.pixScale),
 		-2/(frame.Height*p.pixScale))
 
+	// getFragmentColor hands back straight colour with alpha alongside, which
+	// suits the shape shaders because they blend with SRC_ALPHA. Text goes
+	// through the premultiplied blend that the texture paths use, so the colour
+	// has to be premultiplied to match, or anything drawn with alpha below one
+	// comes out too bright.
 	r, g, b, a := getFragmentColor(col)
-	p.SetUniform4f(p.programs.text, attrColor, r, g, b, a)
+	p.SetUniform4f(p.programs.text, attrColor, r*a, g*a, b*a, a)
 
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
+	// Coverage glyphs first, tinted, then any that carry their own colour. Most
+	// strings have none of the latter and so still draw in a single call.
 	p.ctx.ActiveTexture(texture0)
-	p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
-	p.logError()
-
-	p.ctx.DrawArrays(triangles, 0, cached.vertices)
-	p.logError()
+	if cached.vertices > 0 {
+		p.SetUniform1f(p.programs.text, attrOwnColor, 0)
+		p.ctx.BindTexture(texture2D, p.glyphAtlas.texture)
+		p.ctx.DrawArrays(triangles, 0, cached.vertices)
+		p.logError()
+	}
+	if cached.colourVertices > 0 {
+		p.SetUniform1f(p.programs.text, attrOwnColor, 1)
+		p.ctx.BindTexture(texture2D, p.glyphColourAtlas.texture)
+		p.ctx.DrawArrays(triangles, cached.vertices, cached.colourVertices)
+		p.logError()
+	}
 
 	// Leave no vertex attribute array pointing into this object's buffer. Every
 	// other program draws from a buffer that lives as long as the context, but

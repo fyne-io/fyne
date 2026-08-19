@@ -30,6 +30,7 @@ const (
 	attrLineWidth                = "lineWidth"
 	attrNormal                   = "normal"
 	attrOrigin                   = "origin"
+	attrOwnColor                 = "ownColor"
 	attrPixelScale               = "pixelScale"
 	attrPointControlCount        = "numControlPoints"
 	attrPointControl1            = "controlPoint1"

@@ -236,15 +236,34 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 // visible as uneven letter spacing, so it is left to the caller to decide how
 // to land on the pixel grid.
 //
-// Runs that consist solely of a replacement-char glyph (GlyphID==0) are skipped
-// so callers do not need to handle them.
+// A run of a single unmapped glyph, meaning a codepoint no available font can
+// draw, is replaced by a shaped replacement character, which is what the
+// software renderer puts there.
 func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
 	cb func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32),
 ) {
 	advance := float32(0)
-	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
+	size := float32ToFixed266(fontSize)
+	walkString(f, s, size, style, &advance, scale, func(run shaping.Output, x, y float32) {
+		// A run of one unmapped glyph is a codepoint no font could provide. The
+		// software renderer draws a replacement character rather than a gap, so
+		// shape one and hand that over in its place.
 		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
-			return
+			face := f.ResolveFace(replacementChar)
+			if face == nil {
+				return
+			}
+			run = shaper.Shape(shaping.Input{
+				Text:      []rune{replacementChar},
+				RunStart:  0,
+				RunEnd:    1,
+				Direction: di.DirectionLTR,
+				Face:      face,
+				Size:      size,
+			})
+			if len(run.Glyphs) == 0 {
+				return
+			}
 		}
 		penX := x
 		for i, g := range run.Glyphs {
