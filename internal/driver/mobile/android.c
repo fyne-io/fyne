@@ -577,3 +577,97 @@ void keepScreenOn(uintptr_t jni_env, uintptr_t ctx, bool disabled) {
 
    	(*env)->CallVoidMethod(env, win, action, screenFlag);
 }
+
+static jclass find_app_class(JNIEnv *env, jobject ctx, const char *class_name) {
+	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
+	jmethodID getClassLoader = find_method(env, ctxClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+	if (getClassLoader == 0) return NULL;
+	jobject loader = (*env)->CallObjectMethod(env, ctx, getClassLoader);
+	if (loader == NULL) {
+		(*env)->ExceptionClear(env);
+		LOG_FATAL("cannot get class loader");
+		return NULL;
+	}
+
+	jclass loaderClass = (*env)->GetObjectClass(env, loader);
+	jmethodID loadClass = find_method(env, loaderClass, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+	if (loadClass == 0) return NULL;
+
+	jstring name = (*env)->NewStringUTF(env, class_name);
+	jclass clazz = (jclass)(*env)->CallObjectMethod(env, loader, loadClass, name);
+	(*env)->DeleteLocalRef(env, name);
+	if ((*env)->ExceptionCheck(env) || clazz == NULL) {
+		(*env)->ExceptionClear(env);
+		LOG_FATAL("cannot load %s", class_name);
+		return NULL;
+	}
+	return clazz;
+}
+
+void startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass serviceClass = find_app_class(env, (jobject)ctx, "org.golang.app.GoForegroundService");
+	if (serviceClass == NULL) return;
+
+	jmethodID start = find_static_method(env, serviceClass, "start",
+        "(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V");
+	if (start == 0) return;
+
+	jstring jTitle   = (*env)->NewStringUTF(env, title);
+	jstring jContent = (*env)->NewStringUTF(env, content);
+
+	(*env)->CallStaticVoidMethod(env, serviceClass, start, (jobject)ctx, jTitle, jContent);
+	if ((*env)->ExceptionCheck(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+
+	(*env)->DeleteLocalRef(env, jTitle);
+	(*env)->DeleteLocalRef(env, jContent);
+}
+
+void stopForegroundService(uintptr_t jni_env, uintptr_t ctx) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass serviceClass = find_app_class(env, (jobject)ctx, "org.golang.app.GoForegroundService");
+	if (serviceClass == NULL) return;
+
+	jmethodID stop = find_static_method(env, serviceClass, "stop",
+		"(Landroid/content/Context;)V");
+	if (stop == 0) return;
+
+	(*env)->CallStaticVoidMethod(env, serviceClass, stop, (jobject)ctx);
+}
+
+void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jclass versionClass = find_class(env, "android/os/Build$VERSION");
+	jfieldID sdkIntFieldID = (*env)->GetStaticFieldID(env, versionClass, "SDK_INT", "I");
+	if ((*env)->GetStaticIntField(env, versionClass, sdkIntFieldID) < 33) {
+		return;
+	}
+
+	jstring perm = (*env)->NewStringUTF(env, "android.permission.POST_NOTIFICATIONS");
+
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID checkSelfPermission = find_method(env, ctxClass, "checkSelfPermission", "(Ljava/lang/String;)I");
+	if (checkSelfPermission == 0) return;
+	if ((*env)->CallIntMethod(env, (jobject)ctx, checkSelfPermission, perm) == 0) {
+		(*env)->DeleteLocalRef(env, perm);
+		return;
+	}
+
+	jmethodID requestPermissions = find_method(env, ctxClass, "requestPermissions", "([Ljava/lang/String;I)V");
+	if (requestPermissions == 0) return;
+
+	jclass stringClass = find_class(env, "java/lang/String");
+	jobjectArray perms = (*env)->NewObjectArray(env, 1, stringClass, NULL);
+	(*env)->SetObjectArrayElement(env, perms, 0, perm);
+
+	(*env)->CallVoidMethod(env, (jobject)ctx, requestPermissions, perms, 1);
+
+	(*env)->DeleteLocalRef(env, perms);
+	(*env)->DeleteLocalRef(env, perm);
+}

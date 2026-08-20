@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	A complete AndroidManifest.xml for an app that uses a foreground service.
+
+	Place a file named AndroidManifest.xml next to the Go files of the main
+	package and "fyne package -os android" will use it instead of generating
+	one. It replaces the generated manifest completely, so everything the app
+	needs has to be listed here, and the values that FyneApp.toml would have
+	supplied - package, versionCode, versionName and label - are written out
+	by hand.
+
+	Two things the generated manifest handles are still added during packaging
+	and must not be declared here: <uses-sdk>, which is derived from the build
+	target, and android:icon on <application>, which comes from the packaged
+	icon.
+-->
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.example.myapp"
+	android:versionCode="1"
+	android:versionName="1.0">
+
+	<application android:label="MyApp" android:debuggable="false">
+	<activity android:name="org.golang.app.GoNativeActivity"
+		android:label="MyApp"
+		android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode"
+		android:exported="true"
+		android:theme="@android:style/Theme"
+		android:windowSoftInputMode="adjustResize">
+		<meta-data android:name="android.app.lib_name" android:value="myapp" />
+		<intent-filter>
+			<action android:name="android.intent.action.MAIN" />
+			<category android:name="android.intent.category.LAUNCHER" />
+		</intent-filter>
+	</activity>
+
+	<receiver
+		android:name="org.golang.app.FyneNotificationReceiver"
+		android:exported="false" />
+
+	<!--
+		The service behind fyne.App.StartForegroundService. Declaring it is
+		what gives the app a foreground service at all; leave the element out
+		unless the app starts one, so that it does not ask for permissions it
+		never uses.
+
+		android:foregroundServiceType tells Android what the service is for.
+		Use "specialUse" for a service whose only purpose is to keep the app's
+		process alive; the types that describe real work, such as "dataSync",
+		are time limited by newer Android versions. Several types may be
+		combined with "|".
+	-->
+	<service
+		android:name="org.golang.app.GoForegroundService"
+		android:enabled="true"
+		android:exported="false"
+		android:foregroundServiceType="specialUse">
+		<!--
+			Only needed for the specialUse type, and rejected for any other.
+			It explains to app store reviewers why this app needs a foreground
+			service, so replace it with a description of what this app does.
+		-->
+		<property
+			android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+			android:value="Keeps recording sensor data while the screen is off" />
+	</service>
+	</application>
+
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<!-- Android 13 and later refuse to show the service's notification without this. -->
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<!--
+		FOREGROUND_SERVICE is required by every foreground service. From
+		Android 14 the permission matching the declared type is required as
+		well, or the service is refused at startup:
+
+			dataSync         FOREGROUND_SERVICE_DATA_SYNC
+			mediaPlayback    FOREGROUND_SERVICE_MEDIA_PLAYBACK
+			phoneCall        FOREGROUND_SERVICE_PHONE_CALL
+			location         FOREGROUND_SERVICE_LOCATION
+			connectedDevice  FOREGROUND_SERVICE_CONNECTED_DEVICE
+			mediaProjection  FOREGROUND_SERVICE_MEDIA_PROJECTION
+			camera           FOREGROUND_SERVICE_CAMERA
+			microphone       FOREGROUND_SERVICE_MICROPHONE
+			health           FOREGROUND_SERVICE_HEALTH
+			remoteMessaging  FOREGROUND_SERVICE_REMOTE_MESSAGING
+			systemExempted   FOREGROUND_SERVICE_SYSTEM_EXEMPTED
+			mediaProcessing  FOREGROUND_SERVICE_MEDIA_PROCESSING
+			specialUse       FOREGROUND_SERVICE_SPECIAL_USE
+
+		shortService needs no permission of its own, as it is time limited.
+	-->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+</manifest>

@@ -14,6 +14,18 @@ type themedApp struct {
 	variant      fyne.ThemeVariant
 }
 
+func (t *themedApp) StopForegroundService() {
+	// no-op in test app
+}
+
+func (t *themedApp) StartForegroundService(_, _ string) {
+	// no-op in test app
+}
+
+func (t *themedApp) RequestNotificationPermission() {
+	// no-op in test app
+}
+
 func (t *themedApp) CloudProvider() fyne.CloudProvider {
 	return nil
 }
