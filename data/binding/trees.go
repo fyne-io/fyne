@@ -493,15 +493,8 @@ func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 	updated := []string{}
 	for id := range *t.val {
-		found := false
-		for child := range t.items {
-			if child == id { // update existing
-				updated = append(updated, id)
-				found = true
-				break
-			}
-		}
-		if found {
+		if _, ok := t.items[id]; ok {
+			updated = append(updated, id)
 			continue
 		}
 

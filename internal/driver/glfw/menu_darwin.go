@@ -254,7 +254,7 @@ func keyEquivalentModifierMask(item *fyne.MenuItem) (mask uint) {
 	return mask
 }
 
-func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
+func registerCallback(_ *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
 		callbacks = append(callbacks, &menuCallbacks{
 			action: func() {
@@ -295,6 +295,10 @@ func menuChecked(id int) bool {
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	clearNativeMenu()
+	if main == nil {
+		return
+	}
+
 	nextItemID := 0
 	callbacks = []*menuCallbacks{}
 	var helpMenu *fyne.Menu

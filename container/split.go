@@ -95,7 +95,7 @@ type splitContainerRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (r *splitContainerRenderer) Destroy() {
+func (*splitContainerRenderer) Destroy() {
 }
 
 func (r *splitContainerRenderer) Layout(size fyne.Size) {
@@ -150,16 +150,16 @@ func (r *splitContainerRenderer) MinSize() fyne.Size {
 	s := fyne.NewSize(0, 0)
 	dividerVisible := r.split.Leading.Visible() && r.split.Trailing.Visible()
 	for i, o := range r.objects {
-		if (i == 1 /*divider*/ && !dividerVisible) || (i != 1 && !o.Visible()) {
+		if (i == 1 /* divider */ && !dividerVisible) || (i != 1 && !o.Visible()) {
 			continue
 		}
-		min := o.MinSize()
+		minSize := o.MinSize()
 		if r.split.Horizontal {
-			s.Width += min.Width
-			s.Height = fyne.Max(s.Height, min.Height)
+			s.Width += minSize.Width
+			s.Height = fyne.Max(s.Height, minSize.Height)
 		} else {
-			s.Width = fyne.Max(s.Width, min.Width)
-			s.Height += min.Height
+			s.Width = fyne.Max(s.Width, minSize.Width)
+			s.Height += minSize.Height
 		}
 	}
 	return s
@@ -187,7 +187,7 @@ func (r *splitContainerRenderer) Refresh() {
 	canvas.Refresh(r.split)
 }
 
-func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) (float32, float32) {
+func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) (leading, trailing float32) {
 	available := float64(total - dividerThickness(r.divider))
 	if available <= 0 {
 		return 0, 0
@@ -196,14 +196,14 @@ func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin float32) 
 	tr := float64(tMin)
 	offset := r.split.Offset
 
-	min := ld / available
-	max := 1 - tr/available
-	if min <= max {
-		if offset < min {
-			offset = min
+	minOffset := ld / available
+	maxOffset := 1 - tr/available
+	if minOffset <= maxOffset {
+		if offset < minOffset {
+			offset = minOffset
 		}
-		if offset > max {
-			offset = max
+		if offset > maxOffset {
+			offset = maxOffset
 		}
 	} else {
 		offset = ld / (ld + tr)
@@ -325,12 +325,12 @@ func (d *divider) Dragged(e *fyne.DragEvent) {
 	d.split.SetOffset(offset)
 }
 
-func (d *divider) MouseIn(event *desktop.MouseEvent) {
+func (d *divider) MouseIn(*desktop.MouseEvent) {
 	d.hovered = true
 	d.Refresh()
 }
 
-func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
+func (*divider) MouseMoved(*desktop.MouseEvent) {}
 
 func (d *divider) MouseOut() {
 	d.hovered = false
@@ -346,7 +346,7 @@ type dividerRenderer struct {
 	objects    []fyne.CanvasObject
 }
 
-func (r *dividerRenderer) Destroy() {
+func (*dividerRenderer) Destroy() {
 }
 
 func (r *dividerRenderer) Layout(size fyne.Size) {

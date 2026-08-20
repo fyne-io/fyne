@@ -96,7 +96,7 @@ func (w *window) markCacheAlive() {
 	}
 }
 
-func (d *gLDriver) applyThemeToWindow(w fyne.Window) {
+func (*gLDriver) applyThemeToWindow(w fyne.Window) {
 	if win, ok := w.(*window); ok {
 		win.setDarkMode()
 	}
@@ -212,7 +212,7 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) bool {
+func (*gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
 	freed := false
 	if canvas.EnsureMinSize() {

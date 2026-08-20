@@ -36,7 +36,7 @@ type Label struct {
 	// If set to true, Selectable indicates that this label should support select interaction
 	// to allow the text to be copied.
 	//
-	//Since: 2.6
+	// Since: 2.6
 	Selectable bool
 
 	provider  *RichText
@@ -81,7 +81,7 @@ func (l *Label) AccessibilityLabel() string {
 // AccessibilityRole for a label is fyne.AccessibleRoleText.
 //
 // Since: 2.8
-func (l *Label) AccessibilityRole() fyne.AccessibleRole {
+func (*Label) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleText
 }
 
@@ -107,7 +107,7 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.selection.theme = l.Theme()
 	l.selection.provider = l.provider
 
-	return &labelRenderer{l}
+	return &labelRenderer{l: l, objects: []fyne.CanvasObject{l.selection, l.provider}}
 }
 
 // MinSize returns the size that this label should not shrink below.
@@ -176,8 +176,6 @@ func (l *Label) syncSegments() {
 	switch l.Importance {
 	case LowImportance:
 		color = theme.ColorNameDisabled
-	case MediumImportance:
-		color = theme.ColorNameForeground
 	case HighImportance:
 		color = theme.ColorNamePrimary
 	case DangerImportance:
@@ -223,10 +221,11 @@ func (l *Label) updateFromData(data binding.DataItem) {
 }
 
 type labelRenderer struct {
-	l *Label
+	l       *Label
+	objects []fyne.CanvasObject
 }
 
-func (r *labelRenderer) Destroy() {
+func (*labelRenderer) Destroy() {
 }
 
 func (r *labelRenderer) Layout(s fyne.Size) {
@@ -240,10 +239,10 @@ func (r *labelRenderer) MinSize() fyne.Size {
 
 func (r *labelRenderer) Objects() []fyne.CanvasObject {
 	if !r.l.Selectable {
-		return []fyne.CanvasObject{r.l.provider}
+		return r.objects[1:] // only the RichText provider; exclude selection
 	}
 
-	return []fyne.CanvasObject{r.l.selection, r.l.provider}
+	return r.objects
 }
 
 func (r *labelRenderer) Refresh() {
@@ -265,17 +264,17 @@ type focusSelectable struct {
 }
 
 func (f *focusSelectable) FocusGained() {
-	f.focussed = true
+	f.focused = true
 	f.Refresh()
 }
 
 func (f *focusSelectable) FocusLost() {
-	f.focussed = false
+	f.focused = false
 	f.Refresh()
 }
 
-func (f *focusSelectable) TypedKey(*fyne.KeyEvent) {
+func (*focusSelectable) TypedKey(*fyne.KeyEvent) {
 }
 
-func (f *focusSelectable) TypedRune(rune) {
+func (*focusSelectable) TypedRune(rune) {
 }

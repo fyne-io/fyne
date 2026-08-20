@@ -13,9 +13,9 @@ type Polygon = RegularPolygon
 // Deprecated: Use [NewRegularPolygon] instead
 //
 // Since: 2.7
-func NewPolygon(sides uint, color color.Color) *Polygon {
+func NewPolygon(sides uint, c color.Color) *Polygon {
 	return &RegularPolygon{
 		Sides:     sides,
-		FillColor: color,
+		FillColor: c,
 	}
 }

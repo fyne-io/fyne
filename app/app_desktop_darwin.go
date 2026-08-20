@@ -21,8 +21,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func (a *fyneApp) OpenURL(url *url.URL) error {
-	cmd := exec.Command("open", url.String())
+func (*fyneApp) OpenURL(u *url.URL) error {
+	cmd := exec.Command("open", u.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
 }
@@ -56,6 +56,6 @@ func watchTheme(_ *settings) {
 	C.watchTheme()
 }
 
-func (a *fyneApp) registerRepositories() {
+func (*fyneApp) registerRepositories() {
 	// no-op
 }

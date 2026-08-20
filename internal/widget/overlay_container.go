@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 )
 
 var (
@@ -56,15 +57,15 @@ func (o *OverlayContainer) Hide() {
 }
 
 // MouseIn catches mouse-in events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseIn(*desktop.MouseEvent) {
+func (*OverlayContainer) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved catches mouse-moved events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
+func (*OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut catches mouse-out events not handled by the container’s content. It does nothing.
-func (o *OverlayContainer) MouseOut() {
+func (*OverlayContainer) MouseOut() {
 }
 
 // SetCanvas allows an overlay container to be re-used on a different canvas.
@@ -113,7 +114,7 @@ func (r *overlayRenderer) Layout(s fyne.Size) {
 		return
 	}
 
-	size := r.o.Content.Size().Max(r.o.Content.MinSize()).Min(s)
+	size := internal.MinSizes(internal.MaxSizes(r.o.Content.Size(), r.o.Content.MinSize()), s)
 	r.o.Content.Resize(size)
 
 	if r.o.Background != nil {

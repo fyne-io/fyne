@@ -237,7 +237,7 @@ type objGroup struct {
 	Ellipses        []*ellipseObj `xml:"ellipse"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
-	Groups          []*objGroup   `xml:"g"`
+	Groups          []*objGroup   `xml:"g"` //revive:disable-line:struct-tag -- this is not a duplicate of the name tag but refers to children names
 }
 
 func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
@@ -299,8 +299,8 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string)
 // replaceFillColor alters an svg objects fill color.  Note that if an svg with multiple fill
 // colors is being operated upon, all fills will be converted to a single color.  Mostly used
 // to recolor Icons to match the theme's IconColor.
-func (s *svg) replaceFillColor(color color.Color) error {
-	hexColor, opacity := colorToHexAndOpacity(color)
+func (s *svg) replaceFillColor(c color.Color) error {
+	hexColor, opacity := colorToHexAndOpacity(c)
 	replacePathsFill(s.Paths, hexColor, opacity)
 	replaceRectsFill(s.Rects, hexColor, opacity)
 	replaceCirclesFill(s.Circles, hexColor, opacity)
@@ -323,8 +323,8 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 	return &s, nil
 }
 
-func colorToHexAndOpacity(color color.Color) (hexStr, aStr string) {
-	r, g, b, a := col.ToNRGBA(color)
+func colorToHexAndOpacity(c color.Color) (hexStr, aStr string) {
+	r, g, b, a := col.ToNRGBA(c)
 	cBytes := []byte{r, g, b}
 	hexStr, aStr = "#"+hex.EncodeToString(cBytes), strconv.FormatFloat(float64(a)/0xff, 'f', 6, 64)
 	return hexStr, aStr

@@ -50,15 +50,15 @@ type Hyperlink struct {
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
-func NewHyperlink(text string, url *url.URL) *Hyperlink {
-	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{})
+func NewHyperlink(text string, u *url.URL) *Hyperlink {
+	return NewHyperlinkWithStyle(text, u, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
 // NewHyperlinkWithStyle creates a new hyperlink widget with the set text content
-func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
+func NewHyperlinkWithStyle(text string, u *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
 		Text:      text,
-		URL:       url,
+		URL:       u,
 		Alignment: alignment,
 		TextStyle: style,
 	}
@@ -76,7 +76,7 @@ func (hl *Hyperlink) AccessibilityLabel() string {
 // AccessibilityRole for a hyperlink is fyne.AccessibleRoleLink.
 //
 // Since: 2.8
-func (hl *Hyperlink) AccessibilityRole() fyne.AccessibleRole {
+func (*Hyperlink) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleLink
 }
 
@@ -228,8 +228,8 @@ func (hl *Hyperlink) SetText(text string) {
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
-func (hl *Hyperlink) SetURL(url *url.URL) {
-	hl.URL = url
+func (hl *Hyperlink) SetURL(u *url.URL) {
+	hl.URL = u
 }
 
 // SetURLFromString sets the URL of the hyperlink, taking in a string type
@@ -261,7 +261,7 @@ func (hl *Hyperlink) invokeAction() {
 }
 
 // TypedRune is a hook called by the input handling logic on text input events if this object is focused.
-func (hl *Hyperlink) TypedRune(rune) {
+func (*Hyperlink) TypedRune(rune) {
 }
 
 // TypedKey is a hook called by the input handling logic on key events if this object is focused.
@@ -272,10 +272,10 @@ func (hl *Hyperlink) TypedKey(ev *fyne.KeyEvent) {
 }
 
 func (hl *Hyperlink) openURL() {
-	url := hl.URL
+	u := hl.URL
 
-	if url != nil {
-		err := fyne.CurrentApp().OpenURL(url)
+	if u != nil {
+		err := fyne.CurrentApp().OpenURL(u)
 		if err != nil {
 			fyne.LogError("Failed to open url", err)
 		}
@@ -326,7 +326,7 @@ type hyperlinkRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (r *hyperlinkRenderer) Destroy() {
+func (*hyperlinkRenderer) Destroy() {
 }
 
 func (r *hyperlinkRenderer) Layout(s fyne.Size) {

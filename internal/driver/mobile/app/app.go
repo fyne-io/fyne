@@ -128,18 +128,18 @@ func (a *app) RegisterFilter(f func(any) any) {
 	a.filters = append(a.filters, f)
 }
 
-func (a *app) ShowVirtualKeyboard(keyboard KeyboardType) {
+func (*app) ShowVirtualKeyboard(keyboard KeyboardType) {
 	driverShowVirtualKeyboard(keyboard)
 }
 
-func (a *app) HideVirtualKeyboard() {
+func (*app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
-func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
+func (*app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	driverShowFileOpenPicker(callback, filter)
 }
 
-func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
+func (*app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	driverShowFileSavePicker(callback, filter, filename)
 }

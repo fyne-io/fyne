@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -19,6 +20,12 @@ type PopUp struct {
 	Content fyne.CanvasObject
 	Canvas  fyne.Canvas
 
+	// OnDismiss is a callback invoked when the PopUp is dismissed,
+	// either by tapping outside of it if non-modal, or by calling Hide().
+	//
+	// Since: 2.9
+	OnDismiss func() `json:"-"`
+
 	overlay       *widget.OverlayContainer
 	modal, manual bool
 }
@@ -32,6 +39,10 @@ func (p *PopUp) Hide() {
 
 	p.BaseWidget.Hide()
 	p.Move(fyne.Position{}) // reset so that Show or ShowAtPosition next time is respected
+
+	if p.OnDismiss != nil {
+		p.OnDismiss()
+	}
 }
 
 // Refresh the background for a modal popup and the content of this popup.
@@ -89,12 +100,12 @@ func (p *PopUp) ShowAtRelativePosition(rel fyne.Position, to fyne.CanvasObject) 
 
 // Tapped is called when the user taps the popUp.
 // This is not called when tapping the background, but non-modal popups will dismiss when tapped outside.
-func (p *PopUp) Tapped(*fyne.PointEvent) {
+func (*PopUp) Tapped(*fyne.PointEvent) {
 }
 
 // TappedSecondary is called when the user right/alt taps the popUp.
 // This is not called when tapping the background, but non-modal popups will dismiss when tapped outside.
-func (p *PopUp) TappedSecondary(*fyne.PointEvent) {
+func (*PopUp) TappedSecondary(*fyne.PointEvent) {
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -121,52 +132,52 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
-func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) {
-	newPopUp(content, canvas).ShowAtPosition(pos)
+func ShowPopUpAtPosition(content fyne.CanvasObject, c fyne.Canvas, pos fyne.Position) {
+	newPopUp(content, c).ShowAtPosition(pos)
 }
 
 // ShowPopUpAtRelativePosition shows a new popUp for the specified content at the given position relative to stated object.
 // It will then display the popup on the passed canvas.
 //
 // Since 2.4
-func ShowPopUpAtRelativePosition(content fyne.CanvasObject, canvas fyne.Canvas, rel fyne.Position, to fyne.CanvasObject) {
+func ShowPopUpAtRelativePosition(content fyne.CanvasObject, c fyne.Canvas, rel fyne.Position, to fyne.CanvasObject) {
 	withRelativePosition(rel, to, func(pos fyne.Position) {
-		ShowPopUpAtPosition(content, canvas, pos)
+		ShowPopUpAtPosition(content, c, pos)
 	})
 }
 
-func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	ret := &PopUp{Content: content, Canvas: canvas, modal: false}
+func newPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
+	ret := &PopUp{Content: content, Canvas: c, modal: false}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	return newPopUp(content, canvas)
+func NewPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
+	return newPopUp(content, c)
 }
 
 // ShowPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-func ShowPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
-	newPopUp(content, canvas).Show()
+func ShowPopUp(content fyne.CanvasObject, c fyne.Canvas) {
+	newPopUp(content, c).Show()
 }
 
-func newModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	p := &PopUp{Content: content, Canvas: canvas, modal: true}
+func newModalPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
+	p := &PopUp{Content: content, Canvas: c, modal: true}
 	p.ExtendBaseWidget(p)
 	return p
 }
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
-func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	return newModalPopUp(content, canvas)
+func NewModalPopUp(content fyne.CanvasObject, c fyne.Canvas) *PopUp {
+	return newModalPopUp(content, c)
 }
 
 // ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
-func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
-	p := newModalPopUp(content, canvas)
+func ShowModalPopUp(content fyne.CanvasObject, c fyne.Canvas) {
+	p := newModalPopUp(content, c)
 	p.Show()
 }
 
@@ -186,11 +197,11 @@ type popUpRenderer struct {
 }
 
 func (r *popUpRenderer) Layout(s fyne.Size) {
-	size := s.Max(r.popUp.Content.MinSize())
+	size := internal.MaxSizes(s, r.popUp.Content.MinSize())
 	if r.popUp.Canvas != nil {
 		canvasSize := r.popUp.Canvas.Size()
 		if !canvasSize.IsZero() {
-			size = size.Min(r.popUp.Canvas.Size())
+			size = internal.MinSizes(size, r.popUp.Canvas.Size())
 		}
 	}
 	r.popUp.Content.Resize(size)
@@ -211,7 +222,7 @@ func (r *popUpRenderer) Refresh() {
 	r.background.FillColor = th.Color(theme.ColorNameOverlayBackground, v)
 	r.background.Shadow.Color = th.Color(theme.ColorNameShadow, v)
 	r.background.CornerRadius = th.Size(theme.SizeNamePopupRadius)
-	expectedContentSize := innerSize.Max(r.popUp.MinSize()).Subtract(r.padding())
+	expectedContentSize := internal.MaxSizes(innerSize, r.popUp.MinSize()).Subtract(r.padding())
 	shouldRelayout := r.popUp.Content.Size() != expectedContentSize
 
 	if r.background.Size() != innerSize || r.background.Position() != innerPos || shouldRelayout {

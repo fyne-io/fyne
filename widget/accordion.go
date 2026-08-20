@@ -147,8 +147,8 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 
 	for i, ai := range r.container.Items {
 		h := r.headers[i]
-		min := h.MinSize().Height
-		y += min
+		minHeight := h.MinSize().Height
+		y += minHeight
 
 		if ai.Open {
 			y += pad + ai.Detail.MinSize().Height
@@ -175,9 +175,9 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
-		min := h.MinSize().Height
-		h.Resize(fyne.NewSize(size.Width, min))
-		y += min
+		minHeight := h.MinSize().Height
+		h.Resize(fyne.NewSize(size.Width, minHeight))
+		y += minHeight
 
 		if ai.Open {
 			y += pad
@@ -208,13 +208,13 @@ func (r *accordionRenderer) MinSize() fyne.Size {
 		if i != 0 {
 			size.Height += pad
 		}
-		min := r.headers[i].MinSize()
-		size.Width = fyne.Max(size.Width, min.Width)
-		size.Height += min.Height
-		min = ai.Detail.MinSize()
-		size.Width = fyne.Max(size.Width, min.Width)
+		minSize := r.headers[i].MinSize()
+		size.Width = fyne.Max(size.Width, minSize.Width)
+		size.Height += minSize.Height
+		minSize = ai.Detail.MinSize()
+		size.Width = fyne.Max(size.Width, minSize.Width)
 		if ai.Open {
-			size.Height += min.Height
+			size.Height += minSize.Height
 			size.Height += pad
 		}
 	}

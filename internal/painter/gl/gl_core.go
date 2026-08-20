@@ -13,6 +13,7 @@ import (
 
 const (
 	arrayBuffer           = gl.ARRAY_BUFFER
+	back                  = gl.BACK
 	bitColorBuffer        = gl.COLOR_BUFFER_BIT
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
@@ -22,12 +23,10 @@ const (
 	float                 = gl.FLOAT
 	fragmentShader        = gl.FRAGMENT_SHADER
 	front                 = gl.FRONT
-	back                  = gl.BACK
 	glFalse               = gl.FALSE
 	linkStatus            = gl.LINK_STATUS
 	maxTextureSizeParam   = gl.MAX_TEXTURE_SIZE
 	one                   = gl.ONE
-	zero                  = gl.ZERO
 	oneMinusConstantAlpha = gl.ONE_MINUS_CONSTANT_ALPHA
 	oneMinusSrcAlpha      = gl.ONE_MINUS_SRC_ALPHA
 	scissorTest           = gl.SCISSOR_TEST
@@ -36,15 +35,16 @@ const (
 	texture0              = gl.TEXTURE0
 	texture1              = gl.TEXTURE1
 	texture2D             = gl.TEXTURE_2D
-	textureNearest        = gl.NEAREST
-	textureMinFilter      = gl.TEXTURE_MIN_FILTER
 	textureMagFilter      = gl.TEXTURE_MAG_FILTER
+	textureMinFilter      = gl.TEXTURE_MIN_FILTER
+	textureNearest        = gl.NEAREST
 	textureWrapS          = gl.TEXTURE_WRAP_S
 	textureWrapT          = gl.TEXTURE_WRAP_T
-	triangles             = gl.TRIANGLES
 	triangleStrip         = gl.TRIANGLE_STRIP
+	triangles             = gl.TRIANGLES
 	unsignedByte          = gl.UNSIGNED_BYTE
 	vertexShader          = gl.VERTEX_SHADER
+	zero                  = gl.ZERO
 )
 
 const (
@@ -87,88 +87,88 @@ type coreContext struct{}
 
 var _ context = (*coreContext)(nil)
 
-func (c *coreContext) ActiveTexture(textureUnit uint32) {
+func (*coreContext) ActiveTexture(textureUnit uint32) {
 	gl.ActiveTexture(textureUnit)
 }
 
-func (c *coreContext) AttachShader(program Program, shader Shader) {
+func (*coreContext) AttachShader(program Program, shader Shader) {
 	gl.AttachShader(uint32(program), uint32(shader))
 }
 
-func (c *coreContext) BindBuffer(target uint32, buf Buffer) {
+func (*coreContext) BindBuffer(target uint32, buf Buffer) {
 	gl.BindBuffer(target, uint32(buf))
 }
 
-func (c *coreContext) BindTexture(target uint32, texture Texture) {
+func (*coreContext) BindTexture(target uint32, texture Texture) {
 	gl.BindTexture(target, uint32(texture))
 }
 
-func (c *coreContext) BlendColor(r, g, b, a float32) {
+func (*coreContext) BlendColor(r, g, b, a float32) {
 	gl.BlendColor(r, g, b, a)
 }
 
-func (c *coreContext) BlendFunc(srcFactor, destFactor uint32) {
+func (*coreContext) BlendFunc(srcFactor, destFactor uint32) {
 	gl.BlendFunc(srcFactor, destFactor)
 }
 
-func (c *coreContext) BufferData(target uint32, points []float32, usage uint32) {
+func (*coreContext) BufferData(target uint32, points []float32, usage uint32) {
 	gl.BufferData(target, 4*len(points), gl.Ptr(points), usage)
 }
 
-func (c *coreContext) BufferSubData(target uint32, points []float32) {
+func (*coreContext) BufferSubData(target uint32, points []float32) {
 	gl.BufferSubData(target, 0, 4*len(points), gl.Ptr(points))
 }
 
-func (c *coreContext) Clear(mask uint32) {
+func (*coreContext) Clear(mask uint32) {
 	gl.Clear(mask)
 }
 
-func (c *coreContext) ClearColor(r, g, b, a float32) {
+func (*coreContext) ClearColor(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
 }
 
-func (c *coreContext) CompileShader(shader Shader) {
+func (*coreContext) CompileShader(shader Shader) {
 	gl.CompileShader(uint32(shader))
 }
 
-func (c *coreContext) CreateBuffer() Buffer {
+func (*coreContext) CreateBuffer() Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	return Buffer(vbo)
 }
 
-func (c *coreContext) CreateProgram() Program {
+func (*coreContext) CreateProgram() Program {
 	return Program(gl.CreateProgram())
 }
 
-func (c *coreContext) CreateShader(typ uint32) Shader {
+func (*coreContext) CreateShader(typ uint32) Shader {
 	return Shader(gl.CreateShader(typ))
 }
 
-func (c *coreContext) CreateTexture() (texture Texture) {
+func (*coreContext) CreateTexture() (texture Texture) {
 	var tex uint32
 	gl.GenTextures(1, &tex)
 	return Texture(tex)
 }
 
-func (c *coreContext) DeleteBuffer(buffer Buffer) {
+func (*coreContext) DeleteBuffer(buffer Buffer) {
 	gl.DeleteBuffers(1, (*uint32)(&buffer))
 }
 
-func (c *coreContext) DeleteProgram(program Program) {
+func (*coreContext) DeleteProgram(program Program) {
 	gl.DeleteProgram(uint32(program))
 }
 
-func (c *coreContext) DeleteTexture(texture Texture) {
+func (*coreContext) DeleteTexture(texture Texture) {
 	tex := uint32(texture)
 	gl.DeleteTextures(1, &tex)
 }
 
-func (c *coreContext) Disable(capability uint32) {
+func (*coreContext) Disable(capability uint32) {
 	gl.Disable(capability)
 }
 
-func (c *coreContext) DrawArrays(mode uint32, first, count int) {
+func (*coreContext) DrawArrays(mode uint32, first, count int) {
 	gl.DrawArrays(
 		mode,
 		int32(first), //gosec:disable G115 -- we are definitely fine with limiting the value range here
@@ -176,35 +176,35 @@ func (c *coreContext) DrawArrays(mode uint32, first, count int) {
 	)
 }
 
-func (c *coreContext) Enable(capability uint32) {
+func (*coreContext) Enable(capability uint32) {
 	gl.Enable(capability)
 }
 
-func (c *coreContext) EnableVertexAttribArray(attribute Attribute) {
+func (*coreContext) EnableVertexAttribArray(attribute Attribute) {
 	gl.EnableVertexAttribArray(uint32(attribute))
 }
 
-func (c *coreContext) GetAttribLocation(program Program, name string) Attribute {
+func (*coreContext) GetAttribLocation(program Program, name string) Attribute {
 	return Attribute(gl.GetAttribLocation(uint32(program), gl.Str(name+"\x00"))) //gosec:disable G115 -- the attribute location is a pointer, so unsigned is fine
 }
 
-func (c *coreContext) GetError() uint32 {
+func (*coreContext) GetError() uint32 {
 	return gl.GetError()
 }
 
-func (c *coreContext) GetInteger(pname uint32) int {
+func (*coreContext) GetInteger(pname uint32) int {
 	var value int32
 	gl.GetIntegerv(pname, &value)
 	return int(value)
 }
 
-func (c *coreContext) GetProgrami(program Program, param uint32) int {
+func (*coreContext) GetProgrami(program Program, param uint32) int {
 	var value int32
 	gl.GetProgramiv(uint32(program), param, &value)
 	return int(value)
 }
 
-func (c *coreContext) GetProgramInfoLog(program Program) string {
+func (*coreContext) GetProgramInfoLog(program Program) string {
 	var logLength int32
 	gl.GetProgramiv(uint32(program), gl.INFO_LOG_LENGTH, &logLength)
 	info := strings.Repeat("\x00", int(logLength+1))
@@ -212,13 +212,13 @@ func (c *coreContext) GetProgramInfoLog(program Program) string {
 	return info
 }
 
-func (c *coreContext) GetShaderi(shader Shader, param uint32) int {
+func (*coreContext) GetShaderi(shader Shader, param uint32) int {
 	var value int32
 	gl.GetShaderiv(uint32(shader), param, &value)
 	return int(value)
 }
 
-func (c *coreContext) GetShaderInfoLog(shader Shader) string {
+func (*coreContext) GetShaderInfoLog(shader Shader) string {
 	var logLength int32
 	gl.GetShaderiv(uint32(shader), gl.INFO_LOG_LENGTH, &logLength)
 	info := strings.Repeat("\x00", int(logLength+1))
@@ -226,15 +226,15 @@ func (c *coreContext) GetShaderInfoLog(shader Shader) string {
 	return info
 }
 
-func (c *coreContext) GetUniformLocation(program Program, name string) Uniform {
+func (*coreContext) GetUniformLocation(program Program, name string) Uniform {
 	return Uniform(gl.GetUniformLocation(uint32(program), gl.Str(name+"\x00")))
 }
 
-func (c *coreContext) LinkProgram(program Program) {
+func (*coreContext) LinkProgram(program Program) {
 	gl.LinkProgram(uint32(program))
 }
 
-func (c *coreContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
+func (*coreContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, x, y, width, height int) {
 	gl.CopyTexSubImage2D(
 		target,
 		int32(level),   //gosec:disable G115 -- we are definitely fine with limiting the value range here
@@ -247,11 +247,11 @@ func (c *coreContext) CopyTexSubImage2D(target uint32, level, xoffset, yoffset, 
 	)
 }
 
-func (c *coreContext) ReadBuffer(src uint32) {
+func (*coreContext) ReadBuffer(src uint32) {
 	gl.ReadBuffer(src)
 }
 
-func (c *coreContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
+func (*coreContext) ReadPixels(x, y, width, height int, colorFormat, typ uint32, pixels []uint8) {
 	gl.ReadPixels(
 		int32(x),      //gosec:disable G115 -- we are definitely fine with limiting the value range here
 		int32(y),      //gosec:disable G115 -- we are definitely fine with limiting the value range here
@@ -263,17 +263,17 @@ func (c *coreContext) ReadPixels(x, y, width, height int, colorFormat, typ uint3
 	)
 }
 
-func (c *coreContext) Scissor(x, y, w, h int32) {
+func (*coreContext) Scissor(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
 }
 
-func (c *coreContext) ShaderSource(shader Shader, source string) {
+func (*coreContext) ShaderSource(shader Shader, source string) {
 	csources, free := gl.Strs(source + "\x00")
 	defer free()
 	gl.ShaderSource(uint32(shader), 1, csources, nil)
 }
 
-func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
+func (*coreContext) TexImage2D(target uint32, level, width, height int, colorFormat, typ uint32, data []uint8) {
 	var ptr unsafe.Pointer
 	if len(data) > 0 {
 		ptr = gl.Ptr(data)
@@ -291,15 +291,15 @@ func (c *coreContext) TexImage2D(target uint32, level, width, height int, colorF
 	)
 }
 
-func (c *coreContext) TexParameteri(target, param uint32, value int32) {
+func (*coreContext) TexParameteri(target, param uint32, value int32) {
 	gl.TexParameteri(target, param, value)
 }
 
-func (c *coreContext) Uniform1f(uniform Uniform, v float32) {
+func (*coreContext) Uniform1f(uniform Uniform, v float32) {
 	gl.Uniform1f(int32(uniform), v)
 }
 
-func (c *coreContext) Uniform1fv(uniform Uniform, v []float32) {
+func (*coreContext) Uniform1fv(uniform Uniform, v []float32) {
 	gl.Uniform1fv(
 		int32(uniform),
 		int32(len(v)), //gosec:disable G115 -- v should definitely not contain more than two billion values
@@ -307,15 +307,15 @@ func (c *coreContext) Uniform1fv(uniform Uniform, v []float32) {
 	)
 }
 
-func (c *coreContext) Uniform1i(uniform Uniform, v int32) {
+func (*coreContext) Uniform1i(uniform Uniform, v int32) {
 	gl.Uniform1i(int32(uniform), v)
 }
 
-func (c *coreContext) Uniform2f(uniform Uniform, v0, v1 float32) {
+func (*coreContext) Uniform2f(uniform Uniform, v0, v1 float32) {
 	gl.Uniform2f(int32(uniform), v0, v1)
 }
 
-func (c *coreContext) Uniform2fv(uniform Uniform, v []float32) {
+func (*coreContext) Uniform2fv(uniform Uniform, v []float32) {
 	gl.Uniform2fv(
 		int32(uniform),
 		int32(len(v)/2), //gosec:disable G115 -- v should definitely not contain more than two billion values
@@ -323,15 +323,15 @@ func (c *coreContext) Uniform2fv(uniform Uniform, v []float32) {
 	)
 }
 
-func (c *coreContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
+func (*coreContext) Uniform4f(uniform Uniform, v0, v1, v2, v3 float32) {
 	gl.Uniform4f(int32(uniform), v0, v1, v2, v3)
 }
 
-func (c *coreContext) UseProgram(program Program) {
+func (*coreContext) UseProgram(program Program) {
 	gl.UseProgram(uint32(program))
 }
 
-func (c *coreContext) VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int) {
+func (*coreContext) VertexAttribPointerWithOffset(attribute Attribute, size int, typ uint32, normalized bool, stride, offset int) {
 	gl.VertexAttribPointerWithOffset(
 		uint32(attribute),
 		int32(size), //gosec:disable G115 -- we are definitely fine with limiting the value range here
@@ -342,7 +342,7 @@ func (c *coreContext) VertexAttribPointerWithOffset(attribute Attribute, size in
 	)
 }
 
-func (c *coreContext) Viewport(x, y, width, height int) {
+func (*coreContext) Viewport(x, y, width, height int) {
 	gl.Viewport(
 		int32(x),      //gosec:disable G115 -- we are definitely fine with limiting the value range here
 		int32(y),      //gosec:disable G115 -- we are definitely fine with limiting the value range here

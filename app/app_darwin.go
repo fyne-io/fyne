@@ -29,7 +29,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func (a *fyneApp) SendNotification(n *fyne.Notification) {
+func (*fyneApp) SendNotification(n *fyne.Notification) {
 	if C.isBundled() {
 		titleStr := C.CString(n.Title)
 		defer C.free(unsafe.Pointer(titleStr))

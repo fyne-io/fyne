@@ -41,11 +41,11 @@ func (n *noosDriver) AllWindows() []fyne.Window {
 	return n.wins
 }
 
-func (n *noosDriver) RenderedTextSize(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+func (*noosDriver) RenderedTextSize(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
 	return painter.RenderedTextSize(text, fontSize, style, source)
 }
 
-func (n *noosDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+func (*noosDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	return cache.GetCanvasForObject(obj)
 }
 
@@ -194,19 +194,19 @@ func (n *noosDriver) Quit() {
 	}()
 }
 
-func (n *noosDriver) StartAnimation(*fyne.Animation) {
+func (*noosDriver) StartAnimation(*fyne.Animation) {
 	// no animations on embedded
 }
 
-func (n *noosDriver) StopAnimation(*fyne.Animation) {
+func (*noosDriver) StopAnimation(*fyne.Animation) {
 	// no animations on embedded
 }
 
-func (n *noosDriver) DoubleTapDelay() time.Duration {
+func (*noosDriver) DoubleTapDelay() time.Duration {
 	return tapDoubleDelay
 }
 
-func (n *noosDriver) SetDisableScreenBlanking(bool) {}
+func (*noosDriver) SetDisableScreenBlanking(bool) {}
 
 func (n *noosDriver) DoFromGoroutine(fn func(), wait bool) {
 	if wait {

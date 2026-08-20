@@ -126,13 +126,13 @@ func TestLabel_Alignment_Later(t *testing.T) {
 
 func TestText_MinSize_MultiLine(t *testing.T) {
 	textOneLine := NewLabel("Break")
-	min := textOneLine.MinSize()
+	minSize := textOneLine.MinSize()
 	textMultiLine := NewLabel("Bre\nak")
 	rich := test.TempWidgetRenderer(t, textMultiLine).Objects()[0].(*RichText)
 	min2 := textMultiLine.MinSize()
 
-	assert.Less(t, min2.Width, min.Width)
-	assert.Greater(t, min2.Height, min.Height)
+	assert.Less(t, min2.Width, minSize.Width)
+	assert.Greater(t, min2.Height, minSize.Height)
 
 	yPos := float32(-1)
 	for _, text := range test.TempWidgetRenderer(t, rich).(*textRenderer).Objects() {

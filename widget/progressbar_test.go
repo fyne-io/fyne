@@ -17,11 +17,11 @@ var globalProgressRenderer fyne.WidgetRenderer
 
 func BenchmarkProgressbarCreateRenderer(b *testing.B) {
 	var renderer fyne.WidgetRenderer
-	widget := &widget.ProgressBar{}
+	bar := &widget.ProgressBar{}
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		renderer = widget.CreateRenderer()
+		renderer = bar.CreateRenderer()
 	}
 
 	// Avoid having the value optimized out by the compiler.

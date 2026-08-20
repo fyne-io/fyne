@@ -21,9 +21,9 @@ type selectable struct {
 	// position may occur before or after the select start position in the text.
 	selectRow, selectColumn int
 
-	focussed, selecting, selectEnded, password bool
-	sizeName                                   fyne.ThemeSizeName
-	style                                      fyne.TextStyle
+	focused, selecting, selectEnded, password bool
+	sizeName                                  fyne.ThemeSizeName
+	style                                     fyne.TextStyle
 
 	provider *RichText
 	theme    fyne.Theme
@@ -38,7 +38,7 @@ func (s *selectable) CreateRenderer() fyne.WidgetRenderer {
 	return &selectableRenderer{sel: s}
 }
 
-func (s *selectable) Cursor() desktop.Cursor {
+func (*selectable) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
@@ -161,19 +161,18 @@ func (s *selectable) TouchCancel(m *mobile.TouchEvent) {
 	s.TouchUp(m)
 }
 
-func (s *selectable) TouchDown(m *mobile.TouchEvent) {
+func (s *selectable) TouchDown(*mobile.TouchEvent) {
 	if isTripleTap(s.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
 		s.selectCurrentRow(true)
 		return
 	}
 }
 
-func (s *selectable) TouchUp(*mobile.TouchEvent) {
+func (*selectable) TouchUp(*mobile.TouchEvent) {
 }
 
 func (s *selectable) TypedShortcut(sh fyne.Shortcut) {
-	switch sh.(type) {
-	case *fyne.ShortcutCopy:
+	if _, ok := sh.(*fyne.ShortcutCopy); ok {
 		fyne.CurrentApp().Clipboard().SetContent(s.SelectedText())
 	}
 }
@@ -194,14 +193,14 @@ func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
 	return len(text)
 }
 
-func (s *selectable) getRowCol(p fyne.Position) (int, int) {
+func (s *selectable) getRowCol(p fyne.Position) (row, col int) {
 	th := s.theme
 	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	rowHeight := s.provider.charMinSize(false, s.style, textSize).Height // TODO handle Password
-	row := int(math.Floor(float64(p.Y-innerPad+th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
-	col := 0
+	row = int(math.Floor(float64(p.Y-innerPad+th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
+	col = 0
 	if row < 0 {
 		row = 0
 	} else if row >= s.provider.rows() {
@@ -215,7 +214,7 @@ func (s *selectable) getRowCol(p fyne.Position) (int, int) {
 }
 
 // Selects the row where the cursorColumn is currently positioned
-func (s *selectable) selectCurrentRow(focus bool) {
+func (s *selectable) selectCurrentRow(bool) {
 	s.grabFocus()
 	provider := s.provider
 	s.selectRow = s.cursorRow
@@ -232,7 +231,7 @@ func (s *selectable) selectCurrentRow(focus bool) {
 //	"T  e  s [t  i]_n  g" == 3, 5
 //	"T  e  s_[t  i] n  g" == 3, 5
 //	"T  e_[s  t  i] n  g" == 2, 5
-func (s *selectable) selection() (int, int) {
+func (s *selectable) selection() (start, end int) {
 	noSelection := !s.selecting || (s.cursorRow == s.selectRow && s.cursorColumn == s.selectColumn)
 
 	if noSelection {
@@ -285,13 +284,13 @@ type selectableRenderer struct {
 	selections []fyne.CanvasObject
 }
 
-func (r *selectableRenderer) Destroy() {
+func (*selectableRenderer) Destroy() {
 }
 
-func (r *selectableRenderer) Layout(fyne.Size) {
+func (*selectableRenderer) Layout(fyne.Size) {
 }
 
-func (r *selectableRenderer) MinSize() fyne.Size {
+func (*selectableRenderer) MinSize() fyne.Size {
 	return fyne.Size{}
 }
 
@@ -308,8 +307,7 @@ func (r *selectableRenderer) Refresh() {
 	for _, selection := range selections {
 		rect := selection.(*canvas.Rectangle)
 		rect.FillColor = selectionColor
-
-		if r.sel.focussed {
+		if r.sel.focused {
 			rect.Show()
 		} else {
 			rect.Hide()

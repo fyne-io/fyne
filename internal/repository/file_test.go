@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func checkExistance(path string) bool {
-	_, err := os.Stat(path)
+func checkExistance(p string) bool {
+	_, err := os.Stat(p)
 	if err == nil {
 		return true
 	}

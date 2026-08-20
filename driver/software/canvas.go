@@ -160,11 +160,11 @@ func (c *canvas) Padded() bool {
 	return c.padded
 }
 
-func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
-func (c *canvas) Refresh(fyne.CanvasObject) {
+func (*canvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *canvas) Resize(size fyne.Size) {
@@ -199,7 +199,7 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	}
 
 	if resized {
-		c.doResize(c.Size().Max(minSize))
+		c.doResize(internal.MaxSizes(c.Size(), minSize))
 	} else {
 		c.doResize(minSize)
 	}
@@ -227,11 +227,11 @@ func (c *canvas) SetPadded(padded bool) {
 	c.doResize(c.Size())
 }
 
-func (c *canvas) SetScale(scale float32) {
+func (c *canvas) SetScale(s float32) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 
-	c.scale = scale
+	c.scale = s
 }
 
 func (c *canvas) Size() fyne.Size {

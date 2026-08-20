@@ -17,19 +17,19 @@ var (
 
 type mobileFileRepo struct{}
 
-func (m *mobileFileRepo) CanList(u fyne.URI) (bool, error) {
+func (*mobileFileRepo) CanList(u fyne.URI) (bool, error) {
 	return canListURI(u), nil
 }
 
-func (m *mobileFileRepo) CanRead(u fyne.URI) (bool, error) {
+func (*mobileFileRepo) CanRead(fyne.URI) (bool, error) {
 	return true, nil // TODO check a file can be read
 }
 
-func (m *mobileFileRepo) CanWrite(u fyne.URI) (bool, error) {
+func (*mobileFileRepo) CanWrite(fyne.URI) (bool, error) {
 	return true, nil // TODO check a file can be written
 }
 
-func (m *mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
+func (*mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
 	if u == nil || u.Scheme() != fyne.URISchemeFile {
 		return nil, repository.ErrOperationNotSupported
 	}
@@ -37,26 +37,26 @@ func (m *mobileFileRepo) Child(u fyne.URI, name string) (fyne.URI, error) {
 	return repository.GenericChild(u, name)
 }
 
-func (m *mobileFileRepo) CreateListable(u fyne.URI) error {
+func (*mobileFileRepo) CreateListable(u fyne.URI) error {
 	return createListableURI(u)
 }
 
-func (m *mobileFileRepo) Delete(u fyne.URI) error {
+func (*mobileFileRepo) Delete(u fyne.URI) error {
 	return deleteURI(u)
 }
 
-func (m *mobileFileRepo) Destroy(string) {
+func (*mobileFileRepo) Destroy(string) {
 }
 
-func (m *mobileFileRepo) Exists(u fyne.URI) (bool, error) {
+func (*mobileFileRepo) Exists(u fyne.URI) (bool, error) {
 	return existsURI(u)
 }
 
-func (m *mobileFileRepo) List(u fyne.URI) ([]fyne.URI, error) {
+func (*mobileFileRepo) List(u fyne.URI) ([]fyne.URI, error) {
 	return listURI(u)
 }
 
-func (m *mobileFileRepo) Parent(u fyne.URI) (fyne.URI, error) {
+func (*mobileFileRepo) Parent(u fyne.URI) (fyne.URI, error) {
 	if u == nil || u.Scheme() != fyne.URISchemeFile {
 		return nil, repository.ErrOperationNotSupported
 	}
@@ -64,14 +64,14 @@ func (m *mobileFileRepo) Parent(u fyne.URI) (fyne.URI, error) {
 	return repository.GenericParent(u)
 }
 
-func (m *mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+func (*mobileFileRepo) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return fileReaderForURI(u)
 }
 
-func (m *mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+func (*mobileFileRepo) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return fileWriterForURI(u, true)
 }
 
-func (m *mobileFileRepo) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+func (*mobileFileRepo) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return fileWriterForURI(u, false)
 }

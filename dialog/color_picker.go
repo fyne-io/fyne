@@ -66,14 +66,14 @@ type colorAdvancedPicker struct {
 }
 
 // newColorAdvancedPicker returns a new color widget set to the given color.
-func newColorAdvancedPicker(color color.Color, onChange func(color.Color)) *colorAdvancedPicker {
-	c := &colorAdvancedPicker{
+func newColorAdvancedPicker(c color.Color, onChange func(color.Color)) *colorAdvancedPicker {
+	p := &colorAdvancedPicker{
 		onChange: onChange,
 	}
-	c.ExtendBaseWidget(c)
-	c.previousColor = color
-	c.updateColor(color)
-	return c
+	p.ExtendBaseWidget(p)
+	p.previousColor = c
+	p.updateColor(c)
+	return p
 }
 
 // Color returns the currently selected color.
@@ -87,12 +87,12 @@ func (p *colorAdvancedPicker) Color() color.Color {
 }
 
 // SetColor updates the color selected in this color widget.
-func (p *colorAdvancedPicker) SetColor(color color.Color) {
-	p.previousColor = color
-	if p.updateColor(color) {
+func (p *colorAdvancedPicker) SetColor(c color.Color) {
+	p.previousColor = c
+	if p.updateColor(c) {
 		p.Refresh()
 		if f := p.onChange; f != nil {
-			f(color)
+			f(c)
 		}
 	}
 }
@@ -217,8 +217,8 @@ func (p *colorAdvancedPicker) setRGBA(r, g, b, a uint8) {
 	}
 }
 
-func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := col.ToNRGBA(color)
+func (p *colorAdvancedPicker) updateColor(c color.Color) bool {
+	r, g, b, a := col.ToNRGBA(c)
 	return p.updateRGBA(r, g, b, a)
 }
 
@@ -287,14 +287,14 @@ func (r *colorPickerRenderer) updateObjects() {
 	// Wheel
 	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
 
-	color := r.picker.Color()
+	c := r.picker.Color()
 
 	// Preview
-	r.preview.SetColor(color)
+	r.preview.SetColor(c)
 
 	// Alpha
 	r.alphaChannel.SetValue(int(r.picker.Alpha))
 
 	// Hex
-	r.hex.SetText(colorToString(color))
+	r.hex.SetText(colorToString(c))
 }

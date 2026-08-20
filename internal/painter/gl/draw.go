@@ -941,7 +941,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	}
 }
 
-func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.ClipItem, scale float32) (int, int) {
+func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.ClipItem, scale float32) (offset, width int) {
 	clipPos := fyne.Position{}
 	clipSize := frame
 	if clip != nil {
@@ -954,9 +954,9 @@ func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.
 		return 0, 0
 	}
 
-	offset := int(math.Floor(float64((left - pos.X) * scale)))
-	end := int(math.Ceil(float64((right - pos.X) * scale)))
-	return offset, end - offset
+	offset = int(math.Floor(float64((left - pos.X) * scale)))
+	width = int(math.Ceil(float64((right-pos.X)*scale))) - offset
+	return offset, width
 }
 
 func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect, cornerRadius, pad float32) {
@@ -1010,7 +1010,7 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 	p.drawTextureRegion(texture, pos, size, frame, fill, alpha, aspect, cornerRadius, pad)
 }
 
-func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) ([coordinatesSizeLine]float32, float32, float32) {
+func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) (points [coordinatesSizeLine]float32, halfWidth, featherWidth float32) {
 	// Shift line coordinates so that they match the target position.
 	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
 	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
@@ -1052,8 +1052,8 @@ func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather f
 	normalObjX := normalX * 0.5 * frame.Width
 	normalObjY := normalY * 0.5 * frame.Height
 	widthMultiplier := float32(math.Sqrt(float64(normalObjX*normalObjX + normalObjY*normalObjY)))
-	halfWidth := (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
-	featherWidth := feather / widthMultiplier
+	halfWidth = (roundToPixel(lineWidth+feather, p.pixScale) * 0.5) / widthMultiplier
+	featherWidth = feather / widthMultiplier
 
 	return [coordinatesSizeLine]float32{
 		// coord x, y normal x, y
@@ -1215,7 +1215,7 @@ func roundToPixelCoords(size fyne.Size, pos fyne.Position, pixScale float32) (fy
 }
 
 // Returns FragmentColor(red,green,blue,alpha) from fyne.Color
-func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
+func getFragmentColor(col color.Color) (fragmentR, fragmentG, fragmentB, fragmentA float32) {
 	if col == nil {
 		return 0, 0, 0, 0
 	}
@@ -1227,18 +1227,18 @@ func getFragmentColor(col color.Color) (float32, float32, float32, float32) {
 	return float32(r) / alpha, float32(g) / alpha, float32(b) / alpha, alpha / 0xffff
 }
 
-func (p *painter) scaleFrameSize(frame fyne.Size) (float32, float32) {
+func (p *painter) scaleFrameSize(frame fyne.Size) (width, height float32) {
 	frameWidthScaled := roundToPixel(frame.Width*p.pixScale, 1.0)
 	frameHeightScaled := roundToPixel(frame.Height*p.pixScale, 1.0)
 	return frameWidthScaled, frameHeightScaled
 }
 
 // Returns scaled RectCoords(x1,x2,y1,y2) in same order
-func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (float32, float32, float32, float32) {
-	x1Scaled := roundToPixel(x1*p.pixScale, 1.0)
-	x2Scaled := roundToPixel(x2*p.pixScale, 1.0)
-	y1Scaled := roundToPixel(y1*p.pixScale, 1.0)
-	y2Scaled := roundToPixel(y2*p.pixScale, 1.0)
+func (p *painter) scaleRectCoords(x1, x2, y1, y2 float32) (x1Scaled, x2Scaled, y1Scaled, y2Scaled float32) {
+	x1Scaled = roundToPixel(x1*p.pixScale, 1.0)
+	x2Scaled = roundToPixel(x2*p.pixScale, 1.0)
+	y1Scaled = roundToPixel(y1*p.pixScale, 1.0)
+	y2Scaled = roundToPixel(y2*p.pixScale, 1.0)
 	return x1Scaled, x2Scaled, y1Scaled, y2Scaled
 }
 

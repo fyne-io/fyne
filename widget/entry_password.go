@@ -38,7 +38,7 @@ func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (r *passwordRevealer) Cursor() desktop.Cursor {
+func (*passwordRevealer) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 

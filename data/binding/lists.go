@@ -480,10 +480,10 @@ func (l *boundList[T]) doReload() (trigger bool, retErr error) {
 
 func (l *boundList[T]) SetValue(i int, v T) error {
 	l.lock.RLock()
-	len := l.Length()
+	length := l.Length()
 	l.lock.RUnlock()
 
-	if i < 0 || i >= len {
+	if i < 0 || i >= length {
 		return errOutOfBounds
 	}
 

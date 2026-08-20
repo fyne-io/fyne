@@ -43,7 +43,7 @@ func (t *RichText) AppendMarkdown(content string) {
 
 type markdownRenderer []RichTextSegment
 
-func (m *markdownRenderer) AddOptions(...renderer.Option) {}
+func (*markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
 	segs, err := renderNode(source, n, 0, 0)
@@ -284,8 +284,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 	}
 
 	for _, child := range children {
-		switch t := child.(type) {
-		case *HyperlinkSegment:
+		if t, ok := child.(*HyperlinkSegment); ok {
 			t.TextStyle = style.TextStyle
 			t.SizeName = style.SizeName
 		}
@@ -300,8 +299,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 	// ast.Walk() only ever returns an error if the walker does and our walker does not.
 	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
-			switch t := n2.(type) {
-			case *ast.Text:
+			if t, ok := n2.(*ast.Text); ok {
 				text.Write(t.Value(source))
 				text.WriteByte(' ')
 			}

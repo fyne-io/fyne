@@ -27,7 +27,7 @@ type KeyEvent struct {
 	Direction KeyDirection
 }
 
-func (d *KeyEvent) isEvent() {}
+func (*KeyEvent) isEvent() {}
 
 // CharacterEvent is an event specifying that a character was created by a hardware or virtual keyboard.
 //
@@ -36,4 +36,4 @@ type CharacterEvent struct {
 	Rune rune
 }
 
-func (c *CharacterEvent) isEvent() {}
+func (*CharacterEvent) isEvent() {}

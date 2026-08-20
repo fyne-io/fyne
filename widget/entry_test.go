@@ -505,65 +505,65 @@ func TestEntry_HidePopUpOnEntry(t *testing.T) {
 
 func TestEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetPlaceHolder("")
-	assert.Equal(t, min, entry.MinSize())
+	assert.Equal(t, minSize, entry.MinSize())
 	entry.SetText("")
-	assert.Equal(t, min, entry.MinSize())
+	assert.Equal(t, minSize, entry.MinSize())
 	entry.SetPlaceHolder("Hello")
-	assert.Equal(t, entry.MinSize().Width, min.Width)
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.Refresh()
-	assert.Greater(t, entry.MinSize().Width, min.Width)
+	assert.Greater(t, entry.MinSize().Width, minSize.Width)
 
-	min = entry.MinSize()
+	minSize = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
 	entry.Refresh()
-	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0)), entry.MinSize())
+	assert.Equal(t, minSize.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0)), entry.MinSize())
 }
 
 func TestEntryMultiline_MinSize(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetText("Hello")
-	assert.Equal(t, entry.MinSize().Width, min.Width)
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.Refresh()
-	assert.Greater(t, entry.MinSize().Width, min.Width)
+	assert.Greater(t, entry.MinSize().Width, minSize.Width)
 
 	entry.Wrapping = fyne.TextWrapBreak
 	entry.Refresh()
-	assert.Equal(t, entry.MinSize().Width, min.Width)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
 
-	min = entry.MinSize()
+	minSize = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
 	entry.Refresh()
-	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
+	assert.Equal(t, minSize.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
 func TestEntryMultiline_SetMinRowsVisible(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetText("Hello")
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
 	entry.SetMinRowsVisible(2)
-	assert.Less(t, entry.MinSize().Height, min.Height)
+	assert.Less(t, entry.MinSize().Height, minSize.Height)
 
 	entry.SetMinRowsVisible(5)
-	assert.Greater(t, entry.MinSize().Height, min.Height)
+	assert.Greater(t, entry.MinSize().Height, minSize.Height)
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {

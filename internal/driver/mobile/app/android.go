@@ -58,6 +58,7 @@ import (
 	"log"
 	"mime"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -575,15 +576,21 @@ func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
 		if C.AInputQueue_preDispatchEvent(q, e) != 0 {
 			continue
 		}
-		processEvent(env, e)
-		C.AInputQueue_finishEvent(q, e, 0)
+		handled := C.int(0)
+		if processEvent(env, e) {
+			handled = 1
+		}
+		C.AInputQueue_finishEvent(q, e, handled)
 	}
 }
 
-func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
+// processEvent passes an Android input event to the Fyne event queue.
+// It reports whether the event was consumed, so that Android will not
+// also dispatch it to the view hierarchy.
+func processEvent(env *C.JNIEnv, e *C.AInputEvent) bool {
 	switch C.AInputEvent_getType(e) {
 	case C.AINPUT_EVENT_TYPE_KEY:
-		processKey(env, e)
+		return processKey(env, e)
 	case C.AINPUT_EVENT_TYPE_MOTION:
 		// At most one of the events in this batch is an up or down event; get its index and change.
 		upDownIndex := C.size_t(C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> C.AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT
@@ -610,13 +617,14 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
 	}
+	return false
 }
 
-func processKey(env *C.JNIEnv, e *C.AInputEvent) {
+func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
 	deviceID := C.AInputEvent_getDeviceId(e)
 	if deviceID == 0 {
 		// Software keyboard input, leaving for scribe/IME.
-		return
+		return false
 	}
 
 	k := key.Event{
@@ -624,7 +632,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		Code: convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e))),
 	}
 	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
-		return
+		return false
 	}
 	switch C.AKeyEvent_getAction(e) {
 	case C.AKEY_STATE_DOWN:
@@ -636,6 +644,23 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	}
 	// TODO(crawshaw): set Modifiers.
 	theApp.events.In() <- k
+
+	return keyEditsText(k)
+}
+
+// keyEditsText reports whether Android would also apply this key to the hidden
+// EditText that backs the soft keyboard. Deletion is the exception - it always
+// travels through the text watcher, as some keyboards delete through the input
+// connection where we cannot intercept it.
+func keyEditsText(k key.Event) bool {
+	switch k.Code {
+	case key.CodeDeleteBackspace, key.CodeDeleteForward:
+		return false
+	case key.CodeReturnEnter, key.CodeTab:
+		return true
+	}
+
+	return strconv.IsPrint(k.Rune)
 }
 
 func eglGetError() string {

@@ -33,7 +33,7 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 				}
 				return false
 			},
-			func(object fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
+			func(object fyne.CanvasObject, _ fyne.Position, _ fyne.CanvasObject) {
 				if hiddenAncestor == object {
 					hiddenAncestor = nil
 				}

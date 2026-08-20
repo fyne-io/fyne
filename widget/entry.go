@@ -247,7 +247,7 @@ func (e *Entry) CursorTextOffset() (pos int) {
 }
 
 // Cursor returns the cursor type of this widget
-func (e *Entry) Cursor() desktop.Cursor {
+func (*Entry) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
@@ -386,10 +386,10 @@ func (e *Entry) MinSize() fyne.Size {
 	}
 
 	e.ExtendBaseWidget(e)
-	min := e.BaseWidget.MinSize()
+	minSize := e.BaseWidget.MinSize()
 
-	e.minCache = min
-	return min
+	e.minCache = minSize
+	return minSize
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -421,7 +421,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // MouseUp called on mouse release
 // If a mouse drag event has completed then check to see if it has resulted in an empty selection,
 // if so, and if a text select key isn't held, then disable selecting
-func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+func (e *Entry) MouseUp(*desktop.MouseEvent) {
 	e.syncSelectable()
 	start, _ := e.sel.selection()
 	if start == -1 && e.sel.selecting && !e.selectKeyDown {
@@ -457,7 +457,7 @@ func (e *Entry) Refresh() {
 	if e.sel != nil {
 		e.sel.style = e.TextStyle
 		e.sel.theme = e.Theme()
-		e.sel.focussed = e.focused
+		e.sel.focused = e.focused
 		e.sel.Refresh()
 	}
 	e.BaseWidget.Refresh()
@@ -549,7 +549,7 @@ func (e *Entry) Append(text string) {
 
 // Tapped is called when this entry has been tapped.
 // Cursor position and selection state are updated in the device-specific down callbacks.
-func (e *Entry) Tapped(*fyne.PointEvent) {
+func (*Entry) Tapped(*fyne.PointEvent) {
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -616,12 +616,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 //
 // Since: 2.1
 func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
-	now := time.Now().UnixMilli()
+	nowUnixMilli := time.Now().UnixMilli()
 	e.syncSegments()
 	if !e.Disabled() {
 		e.requestFocus()
 	}
-	if isTripleTap(e.sel.doubleTappedAtUnixMillis, now) {
+	if isTripleTap(e.sel.doubleTappedAtUnixMillis, nowUnixMilli) {
 		e.sel.selectCurrentRow(false)
 		e.CursorColumn = e.sel.cursorColumn
 		e.Refresh()
@@ -638,13 +638,13 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 // TouchUp is called when this entry gets a touch up event on mobile device.
 //
 // Since: 2.1
-func (e *Entry) TouchUp(*mobile.TouchEvent) {
+func (*Entry) TouchUp(*mobile.TouchEvent) {
 }
 
 // TouchCancel is called when this entry gets a touch cancel event on mobile device (app was removed from focus).
 //
 // Since: 2.1
-func (e *Entry) TouchCancel(*mobile.TouchEvent) {
+func (*Entry) TouchCancel(*mobile.TouchEvent) {
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
@@ -1067,10 +1067,10 @@ func (e *Entry) placeholderProvider() *RichText {
 }
 
 func (e *Entry) registerShortcut() {
-	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(se fyne.Shortcut) {
+	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(fyne.Shortcut) {
 		e.Undo()
 	})
-	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(se fyne.Shortcut) {
+	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(fyne.Shortcut) {
 		e.Redo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
@@ -1085,7 +1085,7 @@ func (e *Entry) registerShortcut() {
 		paste := se.(*fyne.ShortcutPaste)
 		e.pasteFromClipboard(paste.Clipboard)
 	})
-	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
+	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(fyne.Shortcut) {
 		e.selectAll()
 	})
 
@@ -1179,17 +1179,17 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 		if b == nil {
 			continue
 		}
-		if b.begin <= pos {
-			if b.end < pos {
-				row++
-			}
-			col = pos - b.begin
-			// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
-			if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
-				row++
-			}
-		} else {
+		if b.begin > pos {
 			break
+		}
+
+		if b.end < pos {
+			row++
+		}
+		col = pos - b.begin
+		// if this gap is at `pos` and is a line wrap, increment (safe to access boundary i-1)
+		if canWrap && b.begin == pos && pos != 0 && provider.rowBoundary(i-1).end == b.begin && row < (totalRows-1) {
+			row++
 		}
 	}
 	return row, col
@@ -1372,12 +1372,12 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 	e.setText(val, true)
 }
 
-func (e *Entry) truncatePosition(row, col int) (int, int) {
+func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
 	if e.Text == "" {
 		return 0, 0
 	}
-	newRow := row
-	newCol := col
+	newRow = row
+	newCol = col
 	if row >= e.textProvider().rows() {
 		newRow = e.textProvider().rows() - 1
 	}
@@ -1522,7 +1522,7 @@ type entryRenderer struct {
 	entry   *Entry
 }
 
-func (r *entryRenderer) Destroy() {
+func (*entryRenderer) Destroy() {
 }
 
 func (r *entryRenderer) trailingInset() float32 {
@@ -1958,7 +1958,7 @@ func (r *entryContentRenderer) updateScrollDirections() {
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
 // and expanding to the start and end of the whitespace or text underneath the specified position.
 // Pass `true` for `expand` if you want whitespace selection to extend to the neighboring words.
-func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
+func getTextWhitespaceRegion(row []rune, col int, expand bool) (start, end int) {
 	if len(row) == 0 || col < 0 {
 		return -1, -1
 	}
@@ -1998,11 +1998,11 @@ func getTextWhitespaceRegion(row []rune, col int, expand bool) (int, int) {
 
 	// LastIndexByte + 1 ensures that the position of the unwanted character ' ' is excluded
 	// +1 also has the added side effect whereby if ' ' isn't found then -1 is snapped to 0
-	start := strings.LastIndexByte(toks[:startCheck], c) + 1
+	start = strings.LastIndexByte(toks[:startCheck], c) + 1
 
 	// IndexByte will find the position of the next unwanted character, this is to be the end
 	// marker for the selection
-	end := -1
+	end = -1
 	if endCheck != -1 {
 		end = strings.IndexByte(toks[endCheck:], c)
 	}
@@ -2058,17 +2058,17 @@ type entryModifyAction struct {
 func (i *entryModifyAction) Undo(s string) string {
 	if i.Delete {
 		return i.add(s)
-	} else {
-		return i.sub(s)
 	}
+
+	return i.sub(s)
 }
 
 func (i *entryModifyAction) Redo(s string) string {
 	if i.Delete {
 		return i.sub(s)
-	} else {
-		return i.add(s)
 	}
+
+	return i.add(s)
 }
 
 // Inserts Text

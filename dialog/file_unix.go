@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func (f *fileDialog) getPlaces() []favoriteItem {
+func (*fileDialog) getPlaces() []favoriteItem {
 	lister, err := storage.ListerForURI(storage.NewFileURI("/"))
 	if err != nil {
 		fyne.LogError("could not create lister for /", err)

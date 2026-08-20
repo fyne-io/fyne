@@ -31,15 +31,15 @@ func (t clippedTextTexture) covers(offset, width, height int, scale float32) boo
 		t.offset <= offset && t.offset+t.width >= offset+width
 }
 
-func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (int, int) {
-	width := maxWidth
+func textTextureWindow(visibleOffset, visibleWidth, fullWidth, maxWidth int) (offset, width int) {
+	width = maxWidth
 	if fullWidth < width {
 		width = fullWidth
 	}
 	if visibleWidth > width {
 		visibleWidth = width
 	}
-	offset := visibleOffset - (width-visibleWidth)/2
+	offset = visibleOffset - (width-visibleWidth)/2
 	if offset < 0 {
 		offset = 0
 	}

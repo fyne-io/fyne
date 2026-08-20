@@ -56,94 +56,39 @@ linters:
             - "**/*_test.go"
             - "**/test/**"
         - name: argument-limit
-          disabled: true # TODO
-        - name: blank-imports
-          disabled: true # TODO
-        - name: bool-literal-in-expr
-          disabled: true # TODO
+          disabled: true
         - name: cognitive-complexity
           disabled: true
-        - name: comment-spacings
-          disabled: true # TODO
         - name: confusing-naming
-          disabled: true # TODO
-        - name: confusing-results
           disabled: true # TODO
         - name: cyclomatic
           disabled: true
-        - name: deep-exit
-          disabled: true # TODO
-        - name: early-return
-          disabled: true # TODO
-        - name: empty-block
-          disabled: true # TODO
-        - name: empty-lines
-          disabled: true # TODO
         - name: enforce-switch-style
-          disabled: true # TODO
-        - name: epoch-naming
-          disabled: true # TODO
+          arguments:
+            - allowNoDefault
         - name: exported
           disabled: true # TODO
-        - name: filename-format
-          disabled: true # TODO
         - name: flag-parameter
-          disabled: true # TODO
+          disabled: true
         - name: function-length
-          disabled: true # TODO
+          disabled: true
         - name: function-result-limit
-          disabled: true # TODO
-        - name: get-return
-          disabled: true # TODO
-        - name: identical-ifelseif-branches
-          disabled: true # TODO
-        - name: identical-switch-branches
-          disabled: true # TODO
+          disabled: true
         - name: import-alias-naming
           disabled: true # TODO
-        - name: import-shadowing
-          disabled: true # TODO
-        - name: increment-decrement
-          disabled: true # TODO
-        - name: indent-error-flow
-          disabled: true # TODO
-        - name: inefficient-map-lookup
-          disabled: true # TODO
         - name: line-length-limit
-          disabled: true # TODO
+          disabled: true
         - name: max-public-structs
-          disabled: true # TODO
-        - name: nested-structs
-          disabled: true # TODO
+          disabled: true
         - name: package-comments
           disabled: true # TODO
         - name: package-naming
           disabled: true # TODO
-        - name: redefines-builtin-id
-          disabled: true # TODO
-        - name: redundant-test-main-exit
-          disabled: true # TODO
-        - name: struct-tag
-          disabled: true # TODO
         - name: unchecked-type-assertion
-          disabled: true # TODO
-        - name: unexported-naming
-          disabled: true # TODO
-        - name: unexported-return
           disabled: true # TODO
         - name: unhandled-error
           disabled: true # we rely on errcheck
-        - name: unnecessary-format
-          disabled: true # TODO
-        - name: unnecessary-stmt
-          disabled: true # TODO
-        - name: unused-parameter
-          disabled: true # TODO
-        - name: unused-receiver
-          disabled: true # TODO
         - name: use-slices-sort
-          disabled: true # TODO
-        - name: var-declaration
           disabled: true # TODO
     staticcheck:
       checks:

@@ -39,7 +39,7 @@ func (c clipboard) Content() string {
 	return ""
 }
 
-func (c clipboard) content() string {
+func (clipboard) content() string {
 	return glfw.GetClipboardString()
 }
 
@@ -60,6 +60,6 @@ func (c clipboard) SetContent(content string) {
 	fyne.LogError("GLFW clipboard set failed", nil)
 }
 
-func (c clipboard) setContent(content string) {
+func (clipboard) setContent(content string) {
 	glfw.SetClipboardString(content)
 }

@@ -23,10 +23,10 @@ func TestNewShader(t *testing.T) {
 
 func TestShader_MinSize(t *testing.T) {
 	shader := canvas.NewShader("test", nil, nil)
-	min := shader.MinSize()
+	minSize := shader.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestShader_Resize(t *testing.T) {

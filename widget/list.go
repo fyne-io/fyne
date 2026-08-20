@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
@@ -27,8 +28,8 @@ var (
 type listBind struct {
 	listener annotatedListener
 
-	oldLength func() int                                  `json:"-"`
-	oldUpdate func(id ListItemID, item fyne.CanvasObject) `json:"-"`
+	oldLength func() int
+	oldUpdate func(id ListItemID, item fyne.CanvasObject)
 }
 
 // List is a widget that pools list items for performance and
@@ -527,7 +528,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this List is focused.
-func (l *List) TypedRune(_ rune) {
+func (*List) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
@@ -664,9 +665,7 @@ func (l *listLayout) calculateVisibleRowHeights(itemHeight float32, length int, 
 			height = h
 		}
 
-		if rowOffset <= l.list.offsetY-height-padding {
-			// before scroll
-		} else if rowOffset <= l.list.offsetY {
+		if rowOffset > l.list.offsetY-height-padding && rowOffset <= l.list.offsetY {
 			minRow = i
 			offY = rowOffset
 			isVisible = true
@@ -705,7 +704,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.itemMin)
+	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
 func (l *listRenderer) Refresh() {
@@ -784,7 +783,7 @@ func (li *listItem) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
-func (li *listItem) MouseMoved(*desktop.MouseEvent) {
+func (*listItem) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget.
@@ -1003,7 +1002,7 @@ func (l *listLayout) updateList(newOnly bool) {
 	width := l.list.Size().Width
 	length := l.list.length()
 	if l.list.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for List", nil)
+		fyne.LogError("Missing UpdateItem callback required for List", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while
@@ -1069,15 +1068,12 @@ func (l *listLayout) updateList(newOnly bool) {
 		}
 
 		// a full refresh may change theme, we should drain the pool of unused items instead of refreshing them.
-		for l.itemPool.Get() != nil {
+		for l.itemPool.Get() != nil { //revive:disable-line:empty-block
 		}
 	}
 
-	// we don't need wasVisible now until next call to update
-	// nil out all references before truncating slice
-	for i := 0; i < len(l.wasVisible); i++ {
-		l.wasVisible[i].item = nil
-	}
+	// we don't need wasVisible now until next call to update; clear and reset its length
+	clear(l.wasVisible)
 	l.wasVisible = l.wasVisible[:0]
 }
 
@@ -1091,12 +1087,10 @@ func (l *listLayout) updateSeparators() {
 			l.separators = l.separators[:lenChildren]
 		} else {
 			for i := lenSep; i < lenChildren; i++ {
-
 				sep := NewSeparator()
 				if cache.OverrideThemeMatchingScope(sep, l.list) {
 					sep.Refresh()
 				}
-
 				l.separators = append(l.separators, sep)
 			}
 		}
@@ -1118,7 +1112,7 @@ func (l *listLayout) updateSeparators() {
 }
 
 // invariant: visible is in ascending order of IDs
-func (l *listLayout) searchVisible(visible []listItemAndID, id ListItemID) (*listItem, bool) {
+func (*listLayout) searchVisible(visible []listItemAndID, id ListItemID) (*listItem, bool) {
 	ln := len(visible)
 	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
 	if idx < ln && visible[idx].id == id {
@@ -1127,12 +1121,10 @@ func (l *listLayout) searchVisible(visible []listItemAndID, id ListItemID) (*lis
 	return nil, false
 }
 
-func (l *listLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {
-	if oldLen > len {
-		objs = objs[:oldLen] // gain view into old data
-		for i := len; i < oldLen; i++ {
-			objs[i] = nil
-		}
+func (*listLayout) nilOldSliceData(objs []fyne.CanvasObject, length, oldLength int) {
+	if oldLength > length {
+		objs = objs[:oldLength] // gain view into old data
+		clear(objs[length:])
 	}
 }
 

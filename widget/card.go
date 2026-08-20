@@ -175,36 +175,36 @@ func (c *cardRenderer) MinSize() fyne.Size {
 		return fyne.NewSize(c.card.Image.MinSize().Width+padding, cardMediaHeight+padding)
 	}
 
-	min := fyne.NewSize(padding, padding)
+	minSize := fyne.NewSize(padding, padding)
 	if hasImage {
-		min = fyne.NewSize(min.Width, min.Height+cardMediaHeight)
+		minSize = fyne.NewSize(minSize.Width, minSize.Height+cardMediaHeight)
 	}
 
 	if hasHeader || hasSubHeader {
 		titlePad := padding * 2
-		min = min.Add(fyne.NewSize(0, titlePad*2))
+		minSize = minSize.Add(fyne.NewSize(0, titlePad*2))
 		if hasHeader {
 			headerMin := c.header.MinSize()
-			min = fyne.NewSize(fyne.Max(min.Width, headerMin.Width+titlePad*2+padding),
-				min.Height+headerMin.Height)
+			minSize = fyne.NewSize(fyne.Max(minSize.Width, headerMin.Width+titlePad*2+padding),
+				minSize.Height+headerMin.Height)
 			if hasSubHeader {
-				min.Height += padding
+				minSize.Height += padding
 			}
 		}
 		if hasSubHeader {
 			subHeaderMin := c.subHeader.MinSize()
-			min = fyne.NewSize(fyne.Max(min.Width, subHeaderMin.Width+titlePad*2+padding),
-				min.Height+subHeaderMin.Height)
+			minSize = fyne.NewSize(fyne.Max(minSize.Width, subHeaderMin.Width+titlePad*2+padding),
+				minSize.Height+subHeaderMin.Height)
 		}
 	}
 
 	if hasContent {
 		contentMin := c.card.Content.MinSize()
-		min = fyne.NewSize(fyne.Max(min.Width, contentMin.Width+padding*3),
-			min.Height+contentMin.Height+padding*2)
+		minSize = fyne.NewSize(fyne.Max(minSize.Width, contentMin.Width+padding*3),
+			minSize.Height+contentMin.Height+padding*2)
 	}
 
-	return min
+	return minSize
 }
 
 func (c *cardRenderer) Refresh() {

@@ -551,7 +551,7 @@ func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	t.addRowsIfRequired()
 }
 
-func (t *textGridContentRenderer) Destroy() {
+func (*textGridContentRenderer) Destroy() {
 }
 
 func (t *textGridContentRenderer) Layout(s fyne.Size) {
@@ -906,12 +906,12 @@ func (t *textGridRowRenderer) Refresh() {
 	t.obj.refreshCells()
 }
 
-func (t *textGridRowRenderer) ApplyTheme() {
+func (*textGridRowRenderer) ApplyTheme() {
 }
 
 func (t *textGridRowRenderer) Objects() []fyne.CanvasObject {
 	return t.obj.objects
 }
 
-func (t *textGridRowRenderer) Destroy() {
+func (*textGridRowRenderer) Destroy() {
 }

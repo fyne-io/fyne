@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -193,7 +194,7 @@ func (t *Table) Cursor() desktop.Cursor {
 }
 
 func (t *Table) Dragged(e *fyne.DragEvent) {
-	min := t.cellSize
+	minSize := t.cellSize
 	col := t.dragCol
 	row := t.dragRow
 	startPos := t.dragStartPos
@@ -201,15 +202,15 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 
 	if col != noCellMatch {
 		newSize := startSize + (e.Position.X - startPos.X)
-		if newSize < min.Width {
-			newSize = min.Width
+		if newSize < minSize.Width {
+			newSize = minSize.Width
 		}
 		t.SetColumnWidth(t.dragCol, newSize)
 	}
 	if row != noCellMatch {
 		newSize := startSize + (e.Position.Y - startPos.Y)
-		if newSize < min.Height {
-			newSize = min.Height
+		if newSize < minSize.Height {
+			newSize = minSize.Height
 		}
 		t.SetRowHeight(t.dragRow, newSize)
 	}
@@ -253,7 +254,7 @@ func (t *Table) MouseOut() {
 }
 
 // MouseUp response to desktop mouse event
-func (t *Table) MouseUp(*desktop.MouseEvent) {
+func (*Table) MouseUp(*desktop.MouseEvent) {
 }
 
 // RefreshItem refreshes a single item, specified by the item ID passed in.
@@ -347,11 +348,11 @@ func (t *Table) TouchDown(e *mobile.TouchEvent) {
 }
 
 // TouchUp response to mobile touch event
-func (t *Table) TouchUp(*mobile.TouchEvent) {
+func (*Table) TouchUp(*mobile.TouchEvent) {
 }
 
 // TouchCancel response to mobile touch event
-func (t *Table) TouchCancel(*mobile.TouchEvent) {
+func (*Table) TouchCancel(*mobile.TouchEvent) {
 }
 
 // TypedKey is called if a key event happens while this Table is focused.
@@ -408,7 +409,7 @@ func (t *Table) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Table is focused.
-func (t *Table) TypedRune(_ rune) {
+func (*Table) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
@@ -639,9 +640,9 @@ func (t *Table) Tapped(e *fyne.PointEvent) {
 
 	if !fyne.CurrentDevice().IsMobile() {
 		t.RefreshItem(t.currentHighlight)
-		canvas := fyne.CurrentApp().Driver().CanvasForObject(t.super())
-		if canvas != nil {
-			canvas.Focus(t.super().(fyne.Focusable))
+		c := fyne.CurrentApp().Driver().CanvasForObject(t.super())
+		if c != nil {
+			c.Focus(t.super().(fyne.Focusable))
 		}
 		t.RefreshItem(t.currentHighlight)
 	}
@@ -853,7 +854,7 @@ func (t *Table) templateSize() fyne.Size {
 		if !t.ShowHeaderRow && !t.ShowHeaderColumn {
 			return template.MinSize()
 		}
-		return template.MinSize().Max(t.createHeader().MinSize())
+		return internal.MaxSizes(template.MinSize(), t.createHeader().MinSize())
 	}
 
 	fyne.LogError("Missing CreateCell callback required for Table", nil)
@@ -887,21 +888,21 @@ func (t *Table) stickyColumnWidths(colWidth float32, cols int) (visible []float3
 		return []float32{}
 	}
 
-	max := t.StickyColumnCount
-	if max > cols {
-		max = cols
+	maxColCount := t.StickyColumnCount
+	if maxColCount > cols {
+		maxColCount = cols
 	}
 
-	visible = make([]float32, max)
+	visible = make([]float32, maxColCount)
 
 	if len(t.columnWidths) == 0 {
-		for i := 0; i < max; i++ {
+		for i := 0; i < maxColCount; i++ {
 			visible[i] = colWidth
 		}
 		return visible
 	}
 
-	for i := 0; i < max; i++ {
+	for i := 0; i < maxColCount; i++ {
 		height := colWidth
 
 		if h, ok := t.columnWidths[i]; ok {
@@ -961,19 +962,16 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 			width = w
 		}
 
-		if colOffset <= t.offset.X-width-padding {
-			// before visible content
-		} else if colOffset <= headWidth || colOffset <= t.offset.X {
+		if colOffset > t.offset.X-width-padding && (colOffset <= headWidth || colOffset <= t.offset.X) {
 			minCol = i
 			offX = colOffset
 			isVisible = true
 		}
-		if colOffset < t.offset.X+size.Width {
-			maxCol = i + 1
-		} else {
+		if colOffset >= t.offset.X+size.Width {
 			break
 		}
 
+		maxCol = i + 1
 		colOffset += width + padding
 		if isVisible || i < stick {
 			visible[i] = width
@@ -987,21 +985,21 @@ func (t *Table) stickyRowHeights(rowHeight float32, rows int) (visible []float32
 		return []float32{}
 	}
 
-	max := t.StickyRowCount
-	if max > rows {
-		max = rows
+	maxRowCount := t.StickyRowCount
+	if maxRowCount > rows {
+		maxRowCount = rows
 	}
 
-	visible = make([]float32, max)
+	visible = make([]float32, maxRowCount)
 
 	if len(t.rowHeights) == 0 {
-		for i := 0; i < max; i++ {
+		for i := 0; i < maxRowCount; i++ {
 			visible[i] = rowHeight
 		}
 		return visible
 	}
 
-	for i := 0; i < max; i++ {
+	for i := 0; i < maxRowCount; i++ {
 		height := rowHeight
 
 		if h, ok := t.rowHeights[i]; ok {
@@ -1061,19 +1059,16 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 			height = h
 		}
 
-		if rowOffset <= t.offset.Y-height-padding {
-			// before visible content
-		} else if rowOffset <= headHeight || rowOffset <= t.offset.Y {
+		if rowOffset > t.offset.Y-height-padding && (rowOffset <= headHeight || rowOffset <= t.offset.Y) {
 			minRow = i
 			offY = rowOffset
 			isVisible = true
 		}
-		if rowOffset < t.offset.Y+size.Height {
-			maxRow = i + 1
-		} else {
+		if rowOffset >= t.offset.Y+size.Height {
 			break
 		}
 
+		maxRow = i + 1
 		rowOffset += height + padding
 		if isVisible || i < stick {
 			visible[i] = height
@@ -1121,12 +1116,12 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 
 func (t *tableRenderer) MinSize() fyne.Size {
 	sep := t.t.Theme().Size(theme.SizeNamePadding)
-	min := t.t.content.MinSize().Max(t.t.cellSize)
+	minSize := internal.MaxSizes(t.t.content.MinSize(), t.t.cellSize)
 	if t.t.ShowHeaderRow {
-		min.Height += t.t.headerSize.Height + sep
+		minSize.Height += t.t.headerSize.Height + sep
 	}
 	if t.t.ShowHeaderColumn {
-		min.Width += t.t.headerSize.Width + sep
+		minSize.Width += t.t.headerSize.Width + sep
 	}
 	if t.t.StickyRowCount > 0 {
 		for i := 0; i < t.t.StickyRowCount; i++ {
@@ -1135,7 +1130,7 @@ func (t *tableRenderer) MinSize() fyne.Size {
 				height = h
 			}
 
-			min.Height += height + sep
+			minSize.Height += height + sep
 		}
 	}
 	if t.t.StickyColumnCount > 0 {
@@ -1145,10 +1140,10 @@ func (t *tableRenderer) MinSize() fyne.Size {
 				width = w
 			}
 
-			min.Width += width + sep
+			minSize.Width += width + sep
 		}
 	}
-	return min
+	return minSize
 }
 
 func (t *tableRenderer) Refresh() {

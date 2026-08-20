@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/lang"
-	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -71,7 +72,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// make sure we fail over if the specified directory does not exist
 	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
-		t.Errorf("Should have failed to create lister for nonexistent file")
+		t.Error("Should have failed to create lister for nonexistent file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = home
@@ -102,7 +103,7 @@ func TestFileDialogStartRemember(t *testing.T) {
 func TestFileDialogResize(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 	win.Resize(fyne.NewSize(600, 400))
-	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
+	file := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 
 	// Mimic the fileopen dialog
@@ -174,7 +175,8 @@ func TestShowFileOpen(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	// header
 	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, lang.L("Open")+" "+lang.L("File"), title.Text)
@@ -223,7 +225,7 @@ func TestShowFileOpen(t *testing.T) {
 	id := 0
 	for i, icon := range objects {
 		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
-		if item.dir == false {
+		if !item.dir {
 			target = item
 			id = i
 			break
@@ -255,7 +257,7 @@ func TestHiddenFiles(t *testing.T) {
 	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	d := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 	d.SetLocation(dir)
 	d.Show()
@@ -264,7 +266,8 @@ func TestHiddenFiles(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	createNewFolderButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)
@@ -315,7 +318,8 @@ func TestShowFileSave(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	title := ui.Objects[1].(*fyne.Container).Objects[0].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
@@ -339,7 +343,7 @@ func TestShowFileSave(t *testing.T) {
 	id := -1
 	for i, icon := range objects {
 		item := test.TempWidgetRenderer(t, icon.(fyne.Widget)).Objects()[1].(*fileDialogItem)
-		if item.dir == false {
+		if !item.dir {
 			target = item
 			id = i
 			break
@@ -382,7 +386,7 @@ func TestShowFileSave(t *testing.T) {
 
 func TestFileFilters(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	f := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 
 	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
@@ -448,7 +452,7 @@ func TestFileSort(t *testing.T) {
 	assert.NoError(t, err)
 
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
-	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	d := NewFileOpen(func(fyne.URIReadCloser, error) {
 	}, win)
 	d.SetLocation(dir)
 	d.Show()
@@ -457,7 +461,8 @@ func TestFileSort(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	files := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0].(*widget.GridWrap)
 	objects := test.TempWidgetRenderer(t, files).Objects()[0].(*container.Scroll).Content.(*fyne.Container).Objects
@@ -497,7 +502,8 @@ func TestView(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
@@ -563,7 +569,8 @@ func TestSetView(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
@@ -615,7 +622,8 @@ func TestSetViewPreferences(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 	panel := ui.Objects[0].(*container.Split).Trailing.(*fyne.Container).Objects[0].(*container.Scroll).Content.(*fyne.Container).Objects[0]
 
@@ -646,7 +654,8 @@ func TestViewPreferences(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 	toggleViewButton := ui.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[1].(*widget.Button)
 
 	// default viewLayout preference should be 'grid'
@@ -683,7 +692,8 @@ func TestFileFavorites(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.Content.(*fyne.Container)
+	// padded container -> content container
+	ui := popup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	dlg.dialog.loadFavorites()
 	favoriteLocations, _ := getFavoriteLocations()
@@ -723,7 +733,7 @@ func TestSetFileNameBeforeShow(t *testing.T) {
 	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
 
 	// Should have no effect on FileOpen dialog
-	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	dOpen.SetFileName("testfile.zip")
 	dOpen.Show()
 
@@ -739,7 +749,7 @@ func TestSetFileNameAfterShow(t *testing.T) {
 	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
 
 	// Should have no effect on FileOpen dialog
-	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
 	dOpen.Show()
 	dOpen.SetFileName("testfile.zip")
 
@@ -768,7 +778,7 @@ func TestTapParent_GoesUpOne(t *testing.T) {
 func TestCreateNewFolderInDir(t *testing.T) {
 	win := test.NewTempWindow(t, widget.NewLabel("Content"))
 
-	folderDialog := NewFolderOpen(func(lu fyne.ListableURI, err error) {
+	folderDialog := NewFolderOpen(func(_ fyne.ListableURI, err error) {
 		assert.NoError(t, err)
 	}, win)
 	folderDialog.SetConfirmText("Choose")
@@ -779,7 +789,8 @@ func TestCreateNewFolderInDir(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(folderDialogPopup)
 	assert.NotNil(t, folderDialogPopup)
 
-	folderDialogUI := folderDialogPopup.Content.(*fyne.Container)
+	// padded container -> content container
+	folderDialogUI := folderDialogPopup.Content.(*fyne.Container).Objects[0].(*fyne.Container)
 
 	createNewFolderButton := folderDialogUI.Objects[1].(*fyne.Container).Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	assert.Equal(t, "", createNewFolderButton.Text)

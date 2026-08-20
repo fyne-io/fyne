@@ -5,8 +5,9 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/v2/widget"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/widget"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -125,7 +126,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	secondRunAfterPainterData := []nodeInfo{}
 	nodes := []*RenderCacheNode{}
 
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkTree(tree, func(node *RenderCacheNode, _ fyne.Position) {
 		secondRunBeforePainterData = append(secondRunBeforePainterData, painterData[node])
 		nodes = append(nodes, node)
 	}, func(node *RenderCacheNode, _ fyne.Position) {
@@ -173,7 +174,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	thirdRunAfterPainterData := []nodeInfo{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkTree(tree, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		thirdRunBeforePainterData = append(thirdRunBeforePainterData, painterData[node])
@@ -218,7 +219,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	nodes = []*RenderCacheNode{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkTree(tree, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		fourthRunBeforePainterData = append(fourthRunBeforePainterData, painterData[node])
@@ -300,7 +301,7 @@ func TestCanvas_walkTree(t *testing.T) {
 	nodes = []*RenderCacheNode{}
 
 	i = 0
-	c.walkTree(tree, func(node *RenderCacheNode, pos fyne.Position) {
+	c.walkTree(tree, func(node *RenderCacheNode, _ fyne.Position) {
 		i++
 		updateInfoBefore(node, i)
 		fifthRunBeforePainterData = append(fifthRunBeforePainterData, painterData[node])

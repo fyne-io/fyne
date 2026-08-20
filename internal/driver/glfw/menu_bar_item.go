@@ -127,7 +127,7 @@ func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
 	}
 }
 
-func (i *menuBarItem) TypedRune(_ rune) {
+func (*menuBarItem) TypedRune(_ rune) {
 }
 
 type menuBarItemRenderer struct {
@@ -167,6 +167,6 @@ func (r *menuBarItemRenderer) Refresh() {
 	canvas.Refresh(r.i)
 }
 
-func (r *menuBarItemRenderer) padding() fyne.Size {
+func (*menuBarItemRenderer) padding() fyne.Size {
 	return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding())
 }

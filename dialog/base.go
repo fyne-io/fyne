@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal"
 	col "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -90,9 +91,9 @@ func (d *dialog) Refresh() {
 
 // Resize dialog, call this function after dialog show
 func (d *dialog) Resize(size fyne.Size) {
-	d.desiredSize = size.Max(d.MinSize())
+	d.desiredSize = internal.MaxSizes(size, d.MinSize())
 	if d.win != nil { // could be called before popup is created!
-		d.win.Resize(size.Max(d.MinSize()))
+		d.win.Resize(internal.MaxSizes(size, d.MinSize()))
 	}
 }
 
@@ -199,7 +200,7 @@ type themedBackgroundRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (renderer *themedBackgroundRenderer) Destroy() {
+func (*themedBackgroundRenderer) Destroy() {
 }
 
 func (renderer *themedBackgroundRenderer) Layout(size fyne.Size) {
@@ -228,7 +229,7 @@ type dialogLayout struct {
 	d *dialog
 }
 
-func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
+func (*dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()
 
@@ -252,7 +253,7 @@ func (l *dialogLayout) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
-func (l *dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
+func (*dialogLayout) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	contentMin := obj[2].MinSize()
 	btnMin := obj[3].MinSize()
 	labelMin := obj[4].MinSize()

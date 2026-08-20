@@ -18,16 +18,16 @@ func syncMapLen(m *sync.Map) (n int) {
 func TestShortcutHandler_AddShortcut(t *testing.T) {
 	handle := &ShortcutHandler{}
 
-	handle.AddShortcut(&ShortcutCopy{}, func(shortcut Shortcut) {})
-	handle.AddShortcut(&ShortcutPaste{}, func(shortcut Shortcut) {})
+	handle.AddShortcut(&ShortcutCopy{}, func(Shortcut) {})
+	handle.AddShortcut(&ShortcutPaste{}, func(Shortcut) {})
 
 	assert.Equal(t, 2, syncMapLen(&handle.entry))
 }
 
 func TestShortcutHandler_RemoveShortcut(t *testing.T) {
 	handler := &ShortcutHandler{}
-	handler.AddShortcut(&ShortcutCopy{}, func(shortcut Shortcut) {})
-	handler.AddShortcut(&ShortcutPaste{}, func(shortcut Shortcut) {})
+	handler.AddShortcut(&ShortcutCopy{}, func(Shortcut) {})
+	handler.AddShortcut(&ShortcutPaste{}, func(Shortcut) {})
 
 	assert.Equal(t, 2, syncMapLen(&handler.entry))
 
@@ -44,13 +44,13 @@ func TestShortcutHandler_HandleShortcut(t *testing.T) {
 	handle := &ShortcutHandler{}
 	cutCalled, copyCalled, pasteCalled := false, false, false
 
-	handle.AddShortcut(&ShortcutCut{}, func(shortcut Shortcut) {
+	handle.AddShortcut(&ShortcutCut{}, func(Shortcut) {
 		cutCalled = true
 	})
-	handle.AddShortcut(&ShortcutCopy{}, func(shortcut Shortcut) {
+	handle.AddShortcut(&ShortcutCopy{}, func(Shortcut) {
 		copyCalled = true
 	})
-	handle.AddShortcut(&ShortcutPaste{}, func(shortcut Shortcut) {
+	handle.AddShortcut(&ShortcutPaste{}, func(Shortcut) {
 		pasteCalled = true
 	})
 

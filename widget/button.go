@@ -106,7 +106,7 @@ func (b *Button) AccessibilityLabel() string {
 // AccessibilityRole for a button is fyne.AccessibleRoleButton.
 //
 // Since: 2.8
-func (b *Button) AccessibilityRole() fyne.AccessibleRole {
+func (*Button) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleButton
 }
 
@@ -145,7 +145,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Cursor returns the cursor type of this widget
-func (b *Button) Cursor() desktop.Cursor {
+func (*Button) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
@@ -174,7 +174,7 @@ func (b *Button) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (b *Button) MouseMoved(*desktop.MouseEvent) {
+func (*Button) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
@@ -216,7 +216,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 }
 
 // TypedRune is a hook called by the input handling logic on text input events if this object is focused.
-func (b *Button) TypedRune(rune) {
+func (*Button) TypedRune(rune) {
 }
 
 // TypedKey is a hook called by the input handling logic on key events if this object is focused.
@@ -279,10 +279,10 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 				objects = append(objects, r.label, r.icon)
 			}
 			r.icon.SetMinSize(iconSize)
-			min := r.layout.MinSize(objects)
-			r.layout.Layout(objects, min)
-			pos := alignedPosition(r.button.Alignment, padding, min, size)
-			labelOff := (min.Height - labelSize.Height) / 2
+			minSize := r.layout.MinSize(objects)
+			r.layout.Layout(objects, minSize)
+			pos := alignedPosition(r.button.Alignment, padding, minSize, size)
+			labelOff := (minSize.Height - labelSize.Height) / 2
 			r.label.Move(r.label.Position().Add(pos).AddXY(0, labelOff))
 			r.icon.Move(r.icon.Position().Add(pos))
 		} else {
@@ -406,7 +406,7 @@ func (r *buttonRenderer) buttonColorNames() (foreground, background, backgroundB
 	return foreground, background, backgroundBlend
 }
 
-func (r *buttonRenderer) padding(th fyne.Theme) fyne.Size {
+func (*buttonRenderer) padding(th fyne.Theme) fyne.Size {
 	return fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding) * 2)
 }
 

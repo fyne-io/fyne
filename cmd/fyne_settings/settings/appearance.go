@@ -49,7 +49,7 @@ func NewSettings() *Settings {
 }
 
 // AppearanceIcon returns the icon for appearance settings
-func (s *Settings) AppearanceIcon() fyne.Resource {
+func (*Settings) AppearanceIcon() fyne.Resource {
 	return theme.NewThemedResource(resourceAppearanceSvg)
 }
 
@@ -215,7 +215,7 @@ func (c *primaryColorButtonRenderer) Layout(s fyne.Size) {
 	c.rect.Resize(s)
 }
 
-func (c *primaryColorButtonRenderer) MinSize() fyne.Size {
+func (*primaryColorButtonRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(20, 32) //revive:disable-line:add-constant
 }
 
@@ -235,7 +235,7 @@ func (c *primaryColorButtonRenderer) Objects() []fyne.CanvasObject {
 	return c.objs
 }
 
-func (c *primaryColorButtonRenderer) Destroy() {
+func (*primaryColorButtonRenderer) Destroy() {
 }
 
 type previewTheme struct {

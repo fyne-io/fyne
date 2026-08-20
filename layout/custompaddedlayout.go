@@ -2,6 +2,7 @@ package layout
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 )
 
 // Declare conformity with Layout interface
@@ -47,15 +48,15 @@ func (c CustomPaddedLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) 
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For CustomPaddedLayout this is determined simply as the MinSize of the largest child plus the given paddings all around.
-func (c CustomPaddedLayout) MinSize(objects []fyne.CanvasObject) (min fyne.Size) {
+func (c CustomPaddedLayout) MinSize(objects []fyne.CanvasObject) (minSize fyne.Size) {
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
 
-		min = min.Max(child.MinSize())
+		minSize = internal.MaxSizes(minSize, child.MinSize())
 	}
-	min.Width += c.LeftPadding + c.RightPadding
-	min.Height += c.TopPadding + c.BottomPadding
-	return min
+	minSize.Width += c.LeftPadding + c.RightPadding
+	minSize.Height += c.TopPadding + c.BottomPadding
+	return minSize
 }

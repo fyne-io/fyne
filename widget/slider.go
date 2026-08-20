@@ -44,11 +44,11 @@ type Slider struct {
 }
 
 // NewSlider returns a basic slider.
-func NewSlider(min, max float64) *Slider {
+func NewSlider(minValue, maxValue float64) *Slider {
 	slider := &Slider{
 		Value:       0,
-		Min:         min,
-		Max:         max,
+		Min:         minValue,
+		Max:         maxValue,
 		Step:        1,
 		Orientation: Horizontal,
 	}
@@ -59,8 +59,8 @@ func NewSlider(min, max float64) *Slider {
 // NewSliderWithData returns a slider connected with the specified data source.
 //
 // Since: 2.0
-func NewSliderWithData(min, max float64, data binding.Float) *Slider {
-	slider := NewSlider(min, max)
+func NewSliderWithData(minValue, maxValue float64, data binding.Float) *Slider {
+	slider := NewSlider(minValue, maxValue)
 	slider.Bind(data)
 
 	return slider
@@ -175,7 +175,7 @@ func (s *Slider) MouseIn(_ *desktop.MouseEvent) {
 // MouseMoved is called when a desktop pointer hovers over the widget.
 //
 // Since: 2.4
-func (s *Slider) MouseMoved(_ *desktop.MouseEvent) {
+func (*Slider) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
@@ -215,10 +215,10 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 // TypedRune is called when this item receives a char event.
 //
 // Since: 2.4
-func (s *Slider) TypedRune(_ rune) {
+func (*Slider) TypedRune(_ rune) {
 }
 
-func (s *Slider) buttonDiameter(inlineIconSize float32) float32 {
+func (*Slider) buttonDiameter(inlineIconSize float32) float32 {
 	return inlineIconSize - 4 // match radio icons
 }
 
@@ -239,19 +239,19 @@ func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
 	case Vertical:
 		if y > size.Height-pad {
 			return 0.0
-		} else if y < pad {
-			return 1.0
-		} else {
-			return 1 - float64(y-pad)/float64(size.Height-pad*2)
 		}
+		if y < pad {
+			return 1.0
+		}
+		return 1 - float64(y-pad)/float64(size.Height-pad*2)
 	case Horizontal:
 		if x > size.Width-pad {
 			return 1.0
-		} else if x < pad {
-			return 0.0
-		} else {
-			return float64(x-pad) / float64(size.Width-pad*2)
 		}
+		if x < pad {
+			return 0.0
+		}
+		return float64(x-pad) / float64(size.Width-pad*2)
 	}
 	return 0.0
 }
@@ -282,15 +282,16 @@ func (s *Slider) clampValueToRange() {
 	if rem == 0 {
 		return
 	}
-	min := value - rem
+
+	value -= rem
 	if rem > step/2 {
-		min += s.Step
+		value += s.Step
 	}
 
 	if invert {
-		s.Value = -min
+		s.Value = -value
 	} else {
-		s.Value = min
+		s.Value = value
 	}
 }
 

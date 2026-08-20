@@ -31,11 +31,11 @@ func (w *window) SetTitle(title string) {
 	w.title = title
 }
 
-func (w *window) FullScreen() bool {
+func (*window) FullScreen() bool {
 	return true
 }
 
-func (w *window) SetFullScreen(bool) {
+func (*window) SetFullScreen(bool) {
 	// no-op
 }
 
@@ -43,19 +43,19 @@ func (w *window) Resize(size fyne.Size) {
 	w.Canvas().(*canvas).Resize(size)
 }
 
-func (w *window) RequestFocus() {
+func (*window) RequestFocus() {
 	// no-op - we cannot change which window is focused
 }
 
-func (w *window) FixedSize() bool {
+func (*window) FixedSize() bool {
 	return true
 }
 
-func (w *window) SetFixedSize(bool) {
+func (*window) SetFixedSize(bool) {
 	// no-op - all windows are fixed size
 }
 
-func (w *window) CenterOnScreen() {
+func (*window) CenterOnScreen() {
 	// no-op
 }
 
@@ -79,7 +79,7 @@ func (w *window) SetIcon(icon fyne.Resource) {
 	w.icon = icon
 }
 
-func (w *window) SetMaster() {
+func (*window) SetMaster() {
 	// no-op on mobile
 }
 
@@ -99,7 +99,7 @@ func (w *window) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
-func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+func (*window) SetOnDropped(func(fyne.Position, []fyne.URI)) {
 	// not implemented yet
 }
 
@@ -192,20 +192,20 @@ func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
-func (w *window) Clipboard() fyne.Clipboard {
+func (*window) Clipboard() fyne.Clipboard {
 	return NewClipboard()
 }
 
-func (w *window) RunWithContext(f func()) {
+func (*window) RunWithContext(f func()) {
 	//	ctx, _ = e.DrawContext.(gl.Context)
 
 	f()
 }
 
-func (w *window) RescaleContext() {
+func (*window) RescaleContext() {
 	// TODO
 }
 
-func (w *window) Context() any {
+func (*window) Context() any {
 	return fyne.CurrentApp().Driver().(*driver).glctx
 }

@@ -30,7 +30,7 @@ var (
 	systrayRunning bool
 )
 
-func (d *gLDriver) HasSecondaryDisplay() bool {
+func (*gLDriver) HasSecondaryDisplay() bool {
 	monitors := glfw.GetMonitors()
 	if len(monitors) == 1 {
 		return false
@@ -93,6 +93,37 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 	w.SetCloseIntercept(d.Quit)
 }
 
+// systrayShortcutKeys maps the few key names that Fyne spells differently to the
+// platform neutral names that the systray package understands.
+var systrayShortcutKeys = map[fyne.KeyName]string{
+	fyne.KeyEnter:    "Enter",
+	fyne.KeyPageDown: "PageDown",
+	fyne.KeyPageUp:   "PageUp",
+}
+
+func systrayShortcutKey(key fyne.KeyName) string {
+	if name, ok := systrayShortcutKeys[key]; ok {
+		return name
+	}
+	return string(key)
+}
+
+func systrayModifiers(mod fyne.KeyModifier) (mods systray.KeyModifier) {
+	if mod&fyne.KeyModifierShift != 0 {
+		mods |= systray.KeyModifierShift
+	}
+	if mod&fyne.KeyModifierControl != 0 {
+		mods |= systray.KeyModifierControl
+	}
+	if mod&fyne.KeyModifierAlt != 0 {
+		mods |= systray.KeyModifierAlt
+	}
+	if mod&fyne.KeyModifierSuper != 0 {
+		mods |= systray.KeyModifierSuper
+	}
+	return mods
+}
+
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
 	if i.IsSeparator {
 		if parent != nil {
@@ -119,6 +150,9 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	}
 	if i.Disabled {
 		item.Disable()
+	}
+	if s, ok := i.Shortcut.(fyne.KeyboardShortcut); ok {
+		item.SetShortcut(systrayModifiers(s.Mod()), systrayShortcutKey(s.Key()))
 	}
 	if i.Icon != nil {
 		data := i.Icon.Content()
@@ -185,7 +219,7 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 	}
 }
 
-func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
+func (*gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	systrayIcon = resource // in case we need it later
 
 	// only macOS supports SVG system tray

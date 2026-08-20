@@ -95,9 +95,9 @@ func getLocaleWeekStart() weekday {
 
 func lookupLocaleSetting(l fyne.Locale) localeSetting {
 	region := ""
-	lang := l.LanguageString()
-	if pos := strings.Index(lang, "-"); pos != -1 {
-		region = strings.Split(lang, "-")[1]
+	language := l.LanguageString()
+	if pos := strings.Index(language, "-"); pos != -1 {
+		region = strings.Split(language, "-")[1]
 	}
 
 	if setting, ok := localeSettings[region]; ok {

@@ -189,5 +189,5 @@ func (s *fileItemRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *fileItemRenderer) Destroy() {
+func (*fileItemRenderer) Destroy() {
 }

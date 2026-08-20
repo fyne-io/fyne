@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"image"
 	"image/draw"
-	_ "image/jpeg"
+	_ "image/jpeg" // allow to use JPEGs as icon source
 	"image/png"
 	"os"
 	"runtime"
@@ -56,8 +56,8 @@ func toOSIcon(icon []byte) ([]byte, error) {
 
 // toOSIconForRuntime takes the input image bytes and converts it to an image type
 // that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
-func toOSIconForRuntime(icon []byte, os string) ([]byte, error) {
-	if os != goos.Windows && !usesUnixSystrayIcon(os) {
+func toOSIconForRuntime(icon []byte, osName string) ([]byte, error) {
+	if osName != goos.Windows && !usesUnixSystrayIcon(osName) {
 		return icon, nil
 	}
 
@@ -67,7 +67,7 @@ func toOSIconForRuntime(icon []byte, os string) ([]byte, error) {
 	}
 
 	// keep windows behavior: convert to ico
-	if os == goos.Windows {
+	if osName == goos.Windows {
 		buf := &bytes.Buffer{}
 		if err = ico.Encode(buf, img); err != nil {
 			return nil, err
@@ -94,11 +94,11 @@ func convertToPNG(img image.Image) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func usesUnixSystrayIcon(os string) bool {
-	return os == goos.Linux || goos.IsBSD(os)
+func usesUnixSystrayIcon(osName string) bool {
+	return osName == goos.Linux || goos.IsBSD(osName)
 }
 
-func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
+func (*gLDriver) DoFromGoroutine(f func(), wait bool) {
 	if wait {
 		async.EnsureNotMain(func() {
 			runOnMainWithWait(f, true)
@@ -108,11 +108,11 @@ func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
 	}
 }
 
-func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
 	return painter.RenderedTextSize(text, textSize, style, source)
 }
 
-func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+func (*gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	return common.CanvasForObject(obj)
 }
 
@@ -126,7 +126,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
 }
 
-func (d *gLDriver) Device() fyne.Device {
+func (*gLDriver) Device() fyne.Device {
 	return &glDevice{}
 }
 
@@ -180,11 +180,11 @@ func (d *gLDriver) windowList() []fyne.Window {
 func (d *gLDriver) initFailed(msg string, err error) {
 	fyne.LogError(msg, err)
 
-	if !running.Load() {
-		d.Quit()
-	} else {
-		os.Exit(1)
+	if running.Load() {
+		os.Exit(1) //revive:disable-line:deep-exit
 	}
+
+	d.Quit()
 }
 
 func (d *gLDriver) Run() {
@@ -201,12 +201,12 @@ func (d *gLDriver) Run() {
 	l.DestroyEventQueue()
 }
 
-func (d *gLDriver) SetDisableScreenBlanking(disable bool) {
+func (*gLDriver) SetDisableScreenBlanking(disable bool) {
 	setDisableScreenBlank(disable)
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
-func NewGLDriver() *gLDriver {
+func NewGLDriver() fyne.Driver {
 	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
 
 	return &gLDriver{

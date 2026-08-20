@@ -14,10 +14,10 @@ import (
 
 func TestEllipse_MinSize(t *testing.T) {
 	ellipse := canvas.NewEllipse(color.Black)
-	min := ellipse.MinSize()
+	minSize := ellipse.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestEllipse_FillColor(t *testing.T) {

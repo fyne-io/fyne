@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -170,7 +171,7 @@ func (m *Menu) getContainsCheck() bool {
 }
 
 // Tapped catches taps on separators and the menu background. It doesn't perform any action.
-func (m *Menu) Tapped(*fyne.PointEvent) {
+func (*Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
 
@@ -236,7 +237,7 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	minSize := r.MinSize()
 	var boxSize fyne.Size
 	if r.m.customSized {
-		boxSize = minSize.Max(s)
+		boxSize = internal.MaxSizes(minSize, s)
 	} else {
 		boxSize = minSize
 	}

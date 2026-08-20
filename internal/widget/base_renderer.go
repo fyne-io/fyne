@@ -13,7 +13,7 @@ func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
 }
 
 // Destroy does nothing in the base implementation.
-func (r *BaseRenderer) Destroy() {
+func (*BaseRenderer) Destroy() {
 }
 
 // Objects returns the objects that should be rendered.

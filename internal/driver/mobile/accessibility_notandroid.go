@@ -4,11 +4,11 @@ package mobile
 
 // Stub implementations for platforms without accessibility bridges.
 
-func (w *window) updateAccessibility() {
+func (*window) updateAccessibility() {
 }
 
-func (w *window) initAccessibilityForWindow() {
+func (*window) initAccessibilityForWindow() {
 }
 
-func (w *window) cleanupAccessibilityForWindow() {
+func (*window) cleanupAccessibilityForWindow() {
 }

@@ -22,9 +22,9 @@ type MenuBar struct {
 }
 
 // NewMenuBar creates a menu bar populated with items from the passed main menu structure.
-func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
+func NewMenuBar(mainMenu *fyne.MainMenu, c fyne.Canvas) *MenuBar {
 	items := make([]fyne.CanvasObject, len(mainMenu.Items))
-	b := &MenuBar{Items: items, canvas: canvas}
+	b := &MenuBar{Items: items, canvas: c}
 	b.ExtendBaseWidget(b)
 	for i, menu := range mainMenu.Items {
 		barItem := &menuBarItem{Menu: menu, Parent: b}
@@ -177,17 +177,17 @@ var (
 	_ desktop.Hoverable = (*menuBarUnderlay)(nil) // block hover events on main content
 )
 
-func (u *menuBarUnderlay) CreateRenderer() fyne.WidgetRenderer {
+func (*menuBarUnderlay) CreateRenderer() fyne.WidgetRenderer {
 	return &menuUnderlayRenderer{}
 }
 
-func (u *menuBarUnderlay) MouseIn(*desktop.MouseEvent) {
+func (*menuBarUnderlay) MouseIn(*desktop.MouseEvent) {
 }
 
-func (u *menuBarUnderlay) MouseOut() {
+func (*menuBarUnderlay) MouseOut() {
 }
 
-func (u *menuBarUnderlay) MouseMoved(*desktop.MouseEvent) {
+func (*menuBarUnderlay) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (u *menuBarUnderlay) Tapped(*fyne.PointEvent) {
@@ -200,12 +200,12 @@ type menuUnderlayRenderer struct {
 
 var _ fyne.WidgetRenderer = (*menuUnderlayRenderer)(nil)
 
-func (r *menuUnderlayRenderer) Layout(fyne.Size) {
+func (*menuUnderlayRenderer) Layout(fyne.Size) {
 }
 
-func (r *menuUnderlayRenderer) MinSize() fyne.Size {
+func (*menuUnderlayRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
-func (r *menuUnderlayRenderer) Refresh() {
+func (*menuUnderlayRenderer) Refresh() {
 }

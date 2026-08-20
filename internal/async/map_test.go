@@ -3,8 +3,9 @@ package async_test
 import (
 	"testing"
 
-	"fyne.io/fyne/v2/internal/async"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2/internal/async"
 )
 
 func TestMap_LoadAndStore(t *testing.T) {
@@ -54,7 +55,7 @@ func TestMap_ClearAndDelete(t *testing.T) {
 	assert.Equal(t, 2, m.Len())
 
 	sum := 0
-	m.Range(func(key int, value *string) bool {
+	m.Range(func(key int, _ *string) bool {
 		sum += key
 		return true
 	})

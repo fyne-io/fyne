@@ -83,7 +83,7 @@ func (n *nodeReaderWriter) Read(p []byte) (int, error) {
 	}
 
 	// generate EOF if needed
-	var err error = nil
+	var err error
 	if n.readCursor >= len(data) {
 		err = io.EOF
 	}
@@ -174,7 +174,7 @@ func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
 }
 
 // Destroy tears down the InMemoryRepository.
-func (m *InMemoryRepository) Destroy(scheme string) {
+func (*InMemoryRepository) Destroy(string) {
 	// do nothing
 }
 
@@ -202,8 +202,8 @@ func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 // CanWrite checks if the given URI can be written to.
 //
 // Since: 2.0
-func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
-	return withValidPath(u.Path(), func(path string) bool {
+func (*InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
+	return withValidPath(u.Path(), func(string) bool {
 		return true
 	})
 }
@@ -224,28 +224,28 @@ func (m *InMemoryRepository) Delete(u fyne.URI) error {
 // Parent returns the parent URI of the given URI.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
+func (*InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	return repository.GenericParent(u)
 }
 
 // Child returns the child URI created from the given URI and component.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
+func (*InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return repository.GenericChild(u, component)
 }
 
 // Copy copies the source URI to the destination URI.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
+func (*InMemoryRepository) Copy(source, destination fyne.URI) error {
 	return repository.GenericCopy(source, destination)
 }
 
 // Move moves the contents of the source URI to the destination.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
+func (*InMemoryRepository) Move(source, destination fyne.URI) error {
 	return repository.GenericMove(source, destination)
 }
 

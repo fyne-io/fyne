@@ -268,23 +268,23 @@ func TestURI_Parent(t *testing.T) {
 	}
 
 	// TODO hook in an http/https handler
-	//parent, err = storage.Parent(storage.NewURI("http://foo/bar/baz/"))
-	//assert.Nil(t, err)
-	//assert.Equal(t, "http://foo/bar/", parent.String())
+	// parent, err = storage.Parent(storage.NewURI("http://foo/bar/baz/"))
+	// assert.Nil(t, err)
+	// assert.Equal(t, "http://foo/bar/", parent.String())
 	//
-	//parent, err = storage.Parent(storage.NewURI("http:////foo/bar/baz/"))
-	//assert.Nil(t, err)
-	//assert.Equal(t, "http://foo/bar/", parent.String())
+	// parent, err = storage.Parent(storage.NewURI("http:////foo/bar/baz/"))
+	// assert.Nil(t, err)
+	// assert.Equal(t, "http://foo/bar/", parent.String())
 	//
-	//_, err = storage.Parent(storage.NewURI("http://foo"))
-	//assert.Equal(t, repository.ErrURIRoot, err)
+	// _, err = storage.Parent(storage.NewURI("http://foo"))
+	// assert.Equal(t, repository.ErrURIRoot, err)
 	//
-	//_, err = storage.Parent(storage.NewURI("http:///"))
-	//assert.Equal(t, repository.ErrURIRoot, err)
+	// _, err = storage.Parent(storage.NewURI("http:///"))
+	// assert.Equal(t, repository.ErrURIRoot, err)
 	//
-	//parent, err = storage.Parent(storage.NewURI("https://///foo/bar/"))
-	//assert.Nil(t, err)
-	//assert.Equal(t, "https:///foo/", parent.String())
+	// parent, err = storage.Parent(storage.NewURI("https://///foo/bar/"))
+	// assert.Nil(t, err)
+	// assert.Equal(t, "https:///foo/", parent.String())
 
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle

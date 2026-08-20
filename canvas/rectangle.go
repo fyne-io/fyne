@@ -90,8 +90,8 @@ func (r *Rectangle) Resize(s fyne.Size) {
 }
 
 // NewRectangle returns a new Rectangle instance
-func NewRectangle(color color.Color) *Rectangle {
+func NewRectangle(c color.Color) *Rectangle {
 	return &Rectangle{
-		FillColor: color,
+		FillColor: c,
 	}
 }

@@ -44,7 +44,7 @@ type ColorPickerDialog struct {
 // Since: 1.4
 func NewColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
 	return &ColorPickerDialog{
-		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
+		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /* cancel? */, parent),
 		color:    theme.Color(theme.ColorNamePrimary),
 		callback: callback,
 	}
@@ -145,12 +145,12 @@ func (p *ColorPickerDialog) updateUI() {
 	}
 }
 
-func clamp(value, min, max int) int {
-	if value < min {
-		return min
+func clamp(value, minValue, maxValue int) int {
+	if value < minValue {
+		return minValue
 	}
-	if value > max {
-		return max
+	if value > maxValue {
+		return maxValue
 	}
 	return value
 }
@@ -213,10 +213,10 @@ func readRecentColors() (recents []string) {
 	return recents
 }
 
-func writeRecentColor(color string) {
-	recents := []string{color}
+func writeRecentColor(c string) {
+	recents := []string{c}
 	for _, r := range readRecentColors() {
-		if r == color {
+		if r == c {
 			continue // Color already in recents
 		}
 		recents = append(recents, r)
@@ -252,17 +252,17 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 
 // https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
-func rgbToHsl(r, g, b uint8) (int, int, int) {
+func rgbToHsl(r, g, b uint8) (h, s, l int) {
 	red := float64(r) / math.MaxUint8
 	green := float64(g) / math.MaxUint8
 	blue := float64(b) / math.MaxUint8
 
-	min := math.Min(red, math.Min(green, blue))
-	max := math.Max(red, math.Max(green, blue))
+	minComponentValue := math.Min(red, math.Min(green, blue))
+	maxComponentValue := math.Max(red, math.Max(green, blue))
 
-	lightness := (max + min) / 2
+	lightness := (maxComponentValue + minComponentValue) / 2
 
-	delta := max - min
+	delta := maxComponentValue - minComponentValue
 
 	if delta == 0.0 {
 		// Achromatic
@@ -274,28 +274,28 @@ func rgbToHsl(r, g, b uint8) (int, int, int) {
 	var saturation float64
 
 	if lightness < 0.5 {
-		saturation = (max - min) / (max + min)
+		saturation = (maxComponentValue - minComponentValue) / (maxComponentValue + minComponentValue)
 	} else {
-		saturation = (max - min) / (2 - max - min)
+		saturation = (maxComponentValue - minComponentValue) / (2 - maxComponentValue - minComponentValue)
 	}
 
 	var hue float64
 
-	if red == max {
+	if red == maxComponentValue {
 		hue = (green - blue) / delta
-	} else if green == max {
+	} else if green == maxComponentValue {
 		hue = 2 + (blue-red)/delta
-	} else if blue == max {
+	} else if blue == maxComponentValue {
 		hue = 4 + (red-green)/delta
 	}
 
-	h := wrapHue(int(hue * 60.0)) //revive:disable-line:add-constant
-	s := int(saturation * 100.0)
-	l := int(lightness * 100.0)
+	h = wrapHue(int(hue * 60.0)) //revive:disable-line:add-constant
+	s = int(saturation * 100.0)
+	l = int(lightness * 100.0)
 	return h, s, l
 }
 
-func hslToRgb(h, s, l int) (uint8, uint8, uint8) {
+func hslToRgb(h, s, l int) (r, g, b uint8) {
 	hue := float64(h) / geom.AngleFull
 	saturation := float64(s) / 100
 	lightness := float64(l) / 100
@@ -319,10 +319,9 @@ func hslToRgb(h, s, l int) (uint8, uint8, uint8) {
 	green := hueToChannel(hue, v1, v2)
 	blue := hueToChannel(hue-(1.0/3), v1, v2)
 
-	r := uint8(math.Round(math.MaxUint8 * red))
-	g := uint8(math.Round(math.MaxUint8 * green))
-	b := uint8(math.Round(math.MaxUint8 * blue))
-
+	r = uint8(math.Round(math.MaxUint8 * red))
+	g = uint8(math.Round(math.MaxUint8 * green))
+	b = uint8(math.Round(math.MaxUint8 * blue))
 	return r, g, b
 }
 

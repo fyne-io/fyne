@@ -36,7 +36,7 @@ func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
 	label := widget.NewLabel(m.menu.Label)
 	box := container.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
 
-	return &menuLabelRenderer{menu: m, content: box}
+	return &menuLabelRenderer{menu: m, content: box, objects: []fyne.CanvasObject{box}}
 }
 
 func newMenuLabel(item *fyne.Menu, parent *fyne.Container, c *canvas) *menuLabel {
@@ -99,13 +99,14 @@ func (d *driver) findMenu(win *window) *fyne.MainMenu {
 type menuLabelRenderer struct {
 	menu    *menuLabel
 	content *fyne.Container
+	objects []fyne.CanvasObject
 }
 
-func (m *menuLabelRenderer) BackgroundColor() color.Color {
+func (*menuLabelRenderer) BackgroundColor() color.Color {
 	return theme.Color(theme.ColorNameBackground)
 }
 
-func (m *menuLabelRenderer) Destroy() {
+func (*menuLabelRenderer) Destroy() {
 }
 
 func (m *menuLabelRenderer) Layout(size fyne.Size) {
@@ -117,7 +118,7 @@ func (m *menuLabelRenderer) MinSize() fyne.Size {
 }
 
 func (m *menuLabelRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{m.content}
+	return m.objects
 }
 
 func (m *menuLabelRenderer) Refresh() {

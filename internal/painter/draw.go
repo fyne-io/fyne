@@ -902,7 +902,7 @@ func GetMaximumRadiusArc(outerRadius, innerRadius, sweepAngle float32) float32 {
 // It converts the angles from the Unit circle coordinate system (where 0 degrees is along the positive X-axis)
 // to the coordinate system used by the painter, where 0 degrees is at the top (12 o'clock position).
 // The function also reverses the direction: positive is clockwise, negative is counter-clockwise
-func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
+func NormalizeArcAngles(startAngle, endAngle float32) (normalizedStartAngle, normalizedEndAngle float32) {
 	return -(startAngle - geom.AngleQuarter), -(endAngle - geom.AngleQuarter)
 }
 
@@ -911,7 +911,7 @@ func NormalizeArcAngles(startAngle, endAngle float32) (float32, float32) {
 // It returns the normalized start and end positions, and a filtered slice of control points
 // that are not coincident with the start or end points. If two control points are provided
 // and they are identical, only one is added if it is not coincident with the start or end.
-func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoints []fyne.Position, size fyne.Size, offset float32) (fyne.Position, fyne.Position, []fyne.Position) {
+func NormalizeBezierCurvePoints(startPoint, endPoint fyne.Position, controlPoints []fyne.Position, size fyne.Size, offset float32) (normalizedStart, normalizedEnd fyne.Position, control []fyne.Position) {
 	clampPoint := func(p fyne.Position) (float32, float32) {
 		return fyne.Min(fyne.Max(p.X, offset), fyne.Max(size.Width-offset, 0)), fyne.Min(fyne.Max(p.Y, offset), fyne.Max(size.Height-offset, 0))
 	}

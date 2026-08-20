@@ -89,11 +89,11 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	windowNeedsMinSizeUpdate := false
 	csize := c.impl.Size()
-	min := c.impl.MinSize()
+	minSize := c.impl.MinSize()
 
 	var parentNeedingUpdate *RenderCacheNode
 
-	setup := func(node *RenderCacheNode, pos fyne.Position) {
+	setup := func(node *RenderCacheNode, _ fyne.Position) {
 		if !node.obj.Visible() {
 			return
 		}
@@ -101,7 +101,7 @@ func (c *Canvas) EnsureMinSize() bool {
 			theme.PushRenderingTheme(th.Theme)
 		}
 	}
-	ensureMinSize := func(node *RenderCacheNode, pos fyne.Position) {
+	ensureMinSize := func(node *RenderCacheNode, _ fyne.Position) {
 		obj := node.obj
 		cache.SetCanvasForObject(obj, c.impl, func() {
 			if img, ok := obj.(*canvas.Image); ok {
@@ -127,7 +127,7 @@ func (c *Canvas) EnsureMinSize() bool {
 			} else {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
-				expectedSize := minSize.Max(size)
+				expectedSize := internal.MaxSizes(minSize, size)
 				if expectedSize != size && size != csize {
 					obj.Resize(expectedSize)
 				} else {
@@ -142,9 +142,9 @@ func (c *Canvas) EnsureMinSize() bool {
 	}
 	c.WalkTrees(setup, ensureMinSize)
 
-	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < min.Width || csize.Height < min.Height)
+	shouldResize := windowNeedsMinSizeUpdate && (csize.Width < minSize.Width || csize.Height < minSize.Height)
 	if shouldResize {
-		c.impl.Resize(csize.Max(min))
+		c.impl.Resize(internal.MaxSizes(csize, minSize))
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -414,7 +414,7 @@ func (c *Canvas) isMenuActive() bool {
 	return true
 }
 
-func (c *Canvas) walkTree(
+func (*Canvas) walkTree(
 	tree *renderCacheTree,
 	beforeChildren func(*RenderCacheNode, fyne.Position),
 	afterChildren func(*RenderCacheNode, fyne.Position),
@@ -449,7 +449,7 @@ func (c *Canvas) walkTree(
 		node = parent.firstChild
 		return false
 	}
-	ac := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
+	ac := func(_ fyne.CanvasObject, pos fyne.Position, _ fyne.CanvasObject) {
 		node = parent
 		parent = node.parent
 		if prev != nil && prev.parent != parent {
@@ -470,7 +470,7 @@ type activatableMenu interface {
 	IsActive() bool
 }
 
-func (c *Canvas) updateLayout(objToLayout fyne.CanvasObject) {
+func (*Canvas) updateLayout(objToLayout fyne.CanvasObject) {
 	switch cont := objToLayout.(type) {
 	case *fyne.Container:
 		if cont.Layout != nil {

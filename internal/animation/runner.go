@@ -115,15 +115,10 @@ func (r *Runner) runOneFrame() (done bool) {
 	r.animationMutex.Lock()
 	// nil out old r.animations for re-use as next r.nextFrameAnimations
 	tmp := r.animations
-	for i := range tmp {
-		tmp[i] = nil
-	}
+	clear(tmp)
 	r.animations = append(r.nextFrameAnimations, r.pendingAnimations...)
 	r.nextFrameAnimations = tmp[:0]
-	// nil out r.pendingAnimations
-	for i := range r.pendingAnimations {
-		r.pendingAnimations[i] = nil
-	}
+	clear(r.pendingAnimations)
 	r.pendingAnimations = r.pendingAnimations[:0]
 	done = len(r.animations) == 0
 	r.animationMutex.Unlock()
@@ -131,7 +126,7 @@ func (r *Runner) runOneFrame() (done bool) {
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
-func (r *Runner) tickAnimation(a *anim) bool {
+func (*Runner) tickAnimation(a *anim) bool {
 	duration := a.a.Duration
 	now := time.Now()
 

@@ -18,7 +18,7 @@ type App interface {
 	NewWindow(title string) Window
 
 	// Open a URL in the default browser application.
-	OpenURL(url *url.URL) error
+	OpenURL(*url.URL) error
 
 	// Icon returns the application icon, this is used in various ways
 	// depending on operating system.

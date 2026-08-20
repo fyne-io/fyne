@@ -14,10 +14,10 @@ import (
 
 func TestRectangle_MinSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	min := rect.MinSize()
+	minSize := rect.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestRectangle_FillColor(t *testing.T) {
