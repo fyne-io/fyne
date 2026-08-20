@@ -109,7 +109,7 @@ func TestHyperlink_TappedOutsideTextBoundary(t *testing.T) {
 	}
 	link.syncSegments()
 	link.Tapped(&fyne.PointEvent{
-		Position: fyne.NewPos(50 /*past text boundary*/, 2),
+		Position: fyne.NewPos(50 /* past text boundary */, 2),
 	})
 	assert.Equal(t, 0, tapped)
 }

@@ -505,7 +505,7 @@ func TestPainter_paintPolygon(t *testing.T) {
 }
 
 func TestPainter_paintRaster(t *testing.T) {
-	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+	img := canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
 		x = x / 5
 		y = y / 5
 		if x%2 == y%2 {
@@ -525,7 +525,7 @@ func TestPainter_paintRaster(t *testing.T) {
 }
 
 func TestPainter_paintRaster_scaled(t *testing.T) {
-	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+	img := canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
 		x = x / 5
 		y = y / 5
 		if x%2 == y%2 {

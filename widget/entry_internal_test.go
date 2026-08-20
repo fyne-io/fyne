@@ -401,7 +401,7 @@ func TestEntry_PasteFromClipboard_MultilineWrapping(t *testing.T) {
 func TestEntry_PasteFromClipboardValidation(t *testing.T) {
 	entry := NewEntry()
 	var triggered int
-	entry.Validator = func(s string) error {
+	entry.Validator = func(string) error {
 		triggered++
 		return nil
 	}

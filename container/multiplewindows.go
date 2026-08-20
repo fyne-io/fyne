@@ -2,6 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/widget"
 )
@@ -107,7 +108,7 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 	}
 	w.OnResized = func(ev *fyne.DragEvent) {
 		size := w.Size().Add(ev.Dragged)
-		w.Resize(size.Max(w.MinSize()))
+		w.Resize(internal.MaxSizes(size, w.MinSize()))
 	}
 	w.OnTappedBar = func() {
 		m.RaiseToTop(w)
@@ -116,12 +117,12 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 
 type multiWinLayout struct{}
 
-func (m *multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
+func (*multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
 	for _, w := range objects { // update the windows so they have real size
-		w.Resize(w.MinSize().Max(w.Size()))
+		w.Resize(internal.MaxSizes(w.MinSize(), w.Size()))
 	}
 }
 
-func (m *multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+func (*multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	return fyne.Size{}
 }

@@ -14,10 +14,10 @@ import (
 
 func TestBezierCurve_MinSizeAndStrokeColor(t *testing.T) {
 	curve := canvas.NewQuadraticBezierCurve(fyne.NewPos(0, 0), fyne.NewPos(20, -5), fyne.NewPos(30, 0), color.Black)
-	min := curve.MinSize()
+	minSize := curve.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 
 	assert.Equal(t, color.Black, curve.StrokeColor)
 }

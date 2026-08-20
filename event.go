@@ -13,6 +13,10 @@ type KeyEvent struct {
 	Name KeyName
 	// Physical is a platform specific field that reports the hardware information of physical keyboard events.
 	Physical HardwareKey
+	// Repeat indicates that this event is a key repeat, i.e. the key was held down long enough to trigger repeated events.
+	//
+	// Since: 2.9
+	Repeat bool
 }
 
 // PointEvent describes a pointer input event. The position is relative to the

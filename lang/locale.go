@@ -31,7 +31,7 @@ func closestSupportedLocale(locs []string) fyne.Locale {
 	tags := make([]language.Tag, len(locs))
 	for i, loc := range locs {
 		tag, err := language.Parse(loc)
-		if err != nil {
+		if err != nil && loc != "C" {
 			fyne.LogError("Error parsing user locale "+loc, err)
 		}
 		tags[i] = tag

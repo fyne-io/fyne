@@ -127,7 +127,7 @@ type HyperlinkSegment struct {
 }
 
 // Inline returns true as hyperlinks are inside other elements.
-func (h *HyperlinkSegment) Inline() bool {
+func (*HyperlinkSegment) Inline() bool {
 	return true
 }
 
@@ -156,18 +156,18 @@ func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (h *HyperlinkSegment) Select(begin, end fyne.Position) {
+func (*HyperlinkSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (h *HyperlinkSegment) SelectedText() string {
+func (*HyperlinkSegment) SelectedText() string {
 	// no-op: this will be added when we progress to editor
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (h *HyperlinkSegment) Unselect() {
+func (*HyperlinkSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 
@@ -184,7 +184,7 @@ type ImageSegment struct {
 }
 
 // Inline returns false as images in rich text are blocks.
-func (i *ImageSegment) Inline() bool {
+func (*ImageSegment) Inline() bool {
 	return false
 }
 
@@ -212,18 +212,18 @@ func (i *ImageSegment) Update(o fyne.CanvasObject) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (i *ImageSegment) Select(begin, end fyne.Position) {
+func (*ImageSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (i *ImageSegment) SelectedText() string {
+func (*ImageSegment) SelectedText() string {
 	// no-op: images have no text rendering
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (i *ImageSegment) Unselect() {
+func (*ImageSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 
@@ -261,7 +261,7 @@ func (l *ListSegment) StartNumber() int {
 }
 
 // Inline returns false as a list should be in a block.
-func (l *ListSegment) Inline() bool {
+func (*ListSegment) Inline() bool {
 	return false
 }
 
@@ -293,30 +293,30 @@ func (l *ListSegment) Segments() []RichTextSegment {
 }
 
 // Textual returns no content for a list as the content is in sub-segments.
-func (l *ListSegment) Textual() string {
+func (*ListSegment) Textual() string {
 	return ""
 }
 
 // Visual returns no additional elements for this segment.
-func (l *ListSegment) Visual() fyne.CanvasObject {
+func (*ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
 // Update doesn't need to change a list visual.
-func (l *ListSegment) Update(fyne.CanvasObject) {
+func (*ListSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a list container.
-func (l *ListSegment) Select(_, _ fyne.Position) {
+func (*ListSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this list.
-func (l *ListSegment) SelectedText() string {
+func (*ListSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a list container.
-func (l *ListSegment) Unselect() {
+func (*ListSegment) Unselect() {
 }
 
 // ParagraphSegment wraps a number of text elements in a paragraph.
@@ -328,7 +328,7 @@ type ParagraphSegment struct {
 }
 
 // Inline returns false as a paragraph should be in a block.
-func (p *ParagraphSegment) Inline() bool {
+func (*ParagraphSegment) Inline() bool {
 	return false
 }
 
@@ -338,30 +338,30 @@ func (p *ParagraphSegment) Segments() []RichTextSegment {
 }
 
 // Textual returns no content for a paragraph container.
-func (p *ParagraphSegment) Textual() string {
+func (*ParagraphSegment) Textual() string {
 	return ""
 }
 
 // Visual returns the no extra elements.
-func (p *ParagraphSegment) Visual() fyne.CanvasObject {
+func (*ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
 // Update doesn't need to change a paragraph container.
-func (p *ParagraphSegment) Update(fyne.CanvasObject) {
+func (*ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a paragraph container.
-func (p *ParagraphSegment) Select(_, _ fyne.Position) {
+func (*ParagraphSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this paragraph container.
-func (p *ParagraphSegment) SelectedText() string {
+func (*ParagraphSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a paragraph container.
-func (p *ParagraphSegment) Unselect() {
+func (*ParagraphSegment) Unselect() {
 }
 
 // SeparatorSegment includes a horizontal separator in a rich text widget.
@@ -372,35 +372,35 @@ type SeparatorSegment struct {
 }
 
 // Inline returns false as a separator should be full width.
-func (s *SeparatorSegment) Inline() bool {
+func (*SeparatorSegment) Inline() bool {
 	return false
 }
 
 // Textual returns no content for a separator element.
-func (s *SeparatorSegment) Textual() string {
+func (*SeparatorSegment) Textual() string {
 	return ""
 }
 
 // Visual returns a new instance of a separator widget for this segment.
-func (s *SeparatorSegment) Visual() fyne.CanvasObject {
+func (*SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
 // Update doesn't need to change a separator visual.
-func (s *SeparatorSegment) Update(fyne.CanvasObject) {
+func (*SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a separator.
-func (s *SeparatorSegment) Select(_, _ fyne.Position) {
+func (*SeparatorSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this separator.
-func (s *SeparatorSegment) SelectedText() string {
+func (*SeparatorSegment) SelectedText() string {
 	return "" // TODO maybe return "---\n"?
 }
 
 // Unselect does nothing for a separator.
-func (s *SeparatorSegment) Unselect() {
+func (*SeparatorSegment) Unselect() {
 }
 
 // CodeBlockSegment represents a fenced or indented code block. It renders its
@@ -414,7 +414,7 @@ type CodeBlockSegment struct {
 }
 
 // Inline returns false as a code block is a full-width block element.
-func (c *CodeBlockSegment) Inline() bool {
+func (*CodeBlockSegment) Inline() bool {
 	return false
 }
 
@@ -434,7 +434,7 @@ func (c *CodeBlockSegment) Update(o fyne.CanvasObject) {
 }
 
 // Select does nothing for a code block.
-func (c *CodeBlockSegment) Select(_, _ fyne.Position) {
+func (*CodeBlockSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the code block content.
@@ -443,7 +443,7 @@ func (c *CodeBlockSegment) SelectedText() string {
 }
 
 // Unselect does nothing for a code block.
-func (c *CodeBlockSegment) Unselect() {
+func (*CodeBlockSegment) Unselect() {
 }
 
 // richCodeBlock is the internal widget that draws a code block: monospace text
@@ -481,11 +481,11 @@ func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
 
 type richCodeBlockLayout struct{}
 
-func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+func (*richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return objects[1].MinSize()
 }
 
-func (l *richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
+func (*richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
 	for _, o := range objects {
 		o.Move(fyne.NewPos(0, 0))
 		o.Resize(s)
@@ -501,7 +501,7 @@ type CheckBoxSegment struct {
 }
 
 // Inline returns true as a CheckBoxSegment is usually part of a list item.
-func (c *CheckBoxSegment) Inline() bool {
+func (*CheckBoxSegment) Inline() bool {
 	return true
 }
 
@@ -523,20 +523,20 @@ func (c *CheckBoxSegment) Visual() fyne.CanvasObject {
 }
 
 // Update doesn't need to change a checkbox
-func (c *CheckBoxSegment) Update(fyne.CanvasObject) {
+func (*CheckBoxSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a checkbox.
-func (c *CheckBoxSegment) Select(_, _ fyne.Position) {
+func (*CheckBoxSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for a checkbox.
-func (c *CheckBoxSegment) SelectedText() string {
+func (*CheckBoxSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a checkbox.
-func (c *CheckBoxSegment) Unselect() {
+func (*CheckBoxSegment) Unselect() {
 }
 
 // TableSegment represents a table within a rich text widget.
@@ -551,7 +551,7 @@ type TableSegment struct {
 }
 
 // Inline returns false as a table is a full-width block element.
-func (t *TableSegment) Inline() bool {
+func (*TableSegment) Inline() bool {
 	return false
 }
 
@@ -628,11 +628,11 @@ func (t *TableSegment) Visual() fyne.CanvasObject {
 }
 
 // Update does nothing; a table visual is rebuilt rather than updated.
-func (t *TableSegment) Update(fyne.CanvasObject) {
+func (*TableSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a table.
-func (t *TableSegment) Select(_, _ fyne.Position) {
+func (*TableSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the table content as text.
@@ -641,7 +641,7 @@ func (t *TableSegment) SelectedText() string {
 }
 
 // Unselect does nothing for a table.
-func (t *TableSegment) Unselect() {
+func (*TableSegment) Unselect() {
 }
 
 // newTableCell builds a single table cell: padded rich-text content over a fill,
@@ -850,18 +850,18 @@ func (codeInlineLayout) Layout(o []fyne.CanvasObject, _ fyne.Size) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (t *TextSegment) Select(begin, end fyne.Position) {
+func (*TextSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (t *TextSegment) SelectedText() string {
+func (*TextSegment) SelectedText() string {
 	// no-op: this will be added when we progress to editor
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (t *TextSegment) Unselect() {
+func (*TextSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 

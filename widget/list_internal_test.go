@@ -147,7 +147,7 @@ func TestList_SetItemHeight_InUpdate(t *testing.T) {
 			r.SetMinSize(fyne.NewSize(10, 10))
 			return r
 		},
-		func(id ListItemID, o fyne.CanvasObject) {
+		func(id ListItemID, _ fyne.CanvasObject) {
 			list.SetItemHeight(id, 32)
 		},
 	)
@@ -264,7 +264,7 @@ func TestList_ScrollOffset(t *testing.T) {
 	assert.Equal(t, float32(0), list.GetScrollOffset())
 
 	list.ScrollToOffset(1000)
-	assert.LessOrEqual(t, list.GetScrollOffset(), float32(500) /*upper bound on content height*/)
+	assert.LessOrEqual(t, list.GetScrollOffset(), float32(500) /* upper bound on content height */)
 
 	// list viewport is larger than content size
 	list.Resize(fyne.NewSize(100, 500))
@@ -594,12 +594,12 @@ func TestList_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(list.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(software.WindowlessCanvas)
-	assert.Nil(t, canvas.Focused())
+	c := window.Canvas().(software.WindowlessCanvas)
+	assert.Nil(t, c.Focused())
 
-	canvas.FocusNext()
-	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, 0, canvas.Focused().(*List).currentHighlight)
+	c.FocusNext()
+	assert.NotNil(t, c.Focused())
+	assert.Equal(t, 0, c.Focused().(*List).currentHighlight)
 
 	children := list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.True(t, children[0].(*listItem).hovered)
@@ -616,7 +616,7 @@ func TestList_Focus(t *testing.T) {
 	assert.False(t, children[1].(*listItem).hovered)
 	assert.False(t, children[2].(*listItem).hovered)
 
-	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.True(t, children[0].(*listItem).selected)
 }
 
@@ -673,7 +673,7 @@ func TestList_LimitUpdateItem(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("")
 		},
-		func(id ListItemID, item fyne.CanvasObject) {
+		func(id ListItemID, _ fyne.CanvasObject) {
 			printOut += fmt.Sprintf("%d.", id)
 		},
 	)
@@ -698,7 +698,7 @@ func TestList_RefreshUpdatesAllItems(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("Test")
 		},
-		func(id ListItemID, item fyne.CanvasObject) {
+		func(id ListItemID, _ fyne.CanvasObject) {
 			printOut += fmt.Sprintf("%d.", id)
 		},
 	)
@@ -718,7 +718,7 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("Row")
 		},
-		func(id ListItemID, item fyne.CanvasObject) {
+		func(ListItemID, fyne.CanvasObject) {
 		},
 	)
 	list.SetItemHeight(9, 50)
@@ -728,8 +728,6 @@ func TestList_ScrollToLargeItem(t *testing.T) {
 	list.scrollTo(9)
 	assert.Equal(t, list.scroller.Content.MinSize().Height-list.Size().Height, list.scroller.Offset.Y)
 }
-
-var minSize fyne.Size
 
 func BenchmarkContentMinSize(b *testing.B) {
 	b.StopTimer()
@@ -746,11 +744,11 @@ func BenchmarkContentMinSize(b *testing.B) {
 	l.SetItemHeight(10, 55)
 	l.SetItemHeight(12345, 2)
 
-	min := fyne.Size{}
+	minSize := fyne.Size{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		min = l.contentMinSize()
+		minSize = l.contentMinSize()
 	}
 
-	minSize = min
+	assert.Equal(b, minSize, minSize)
 }

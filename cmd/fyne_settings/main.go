@@ -20,6 +20,6 @@ func main() {
 	tabs.SetTabLocation(container.TabLocationLeading)
 	w.SetContent(tabs)
 
-	w.Resize(fyne.NewSize(520, 520))
+	w.Resize(fyne.NewSize(520, 520)) //revive:disable-line:add-constant
 	w.ShowAndRun()
 }

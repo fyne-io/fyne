@@ -157,7 +157,7 @@ const (
 
 // cString creates C string off the Go heap.
 // ret is a *char.
-func (ctx *context) cString(str string) (uintptr, func()) {
+func (*context) cString(str string) (uintptr, func()) {
 	ptr := unsafe.Pointer(C.CString(str))
 	return uintptr(ptr), func() { C.free(ptr) }
 }

@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 )
@@ -95,7 +96,7 @@ func (w *window) markCacheAlive() {
 	}
 }
 
-func (d *gLDriver) applyThemeToWindow(w fyne.Window) {
+func (*gLDriver) applyThemeToWindow(w fyne.Window) {
 	if win, ok := w.(*window); ok {
 		win.setDarkMode()
 	}
@@ -183,7 +184,7 @@ func (d *gLDriver) runGL() {
 					w.shouldExpand = false
 					view := w.viewport
 
-					if shouldExpand && runtime.GOOS != "js" {
+					if shouldExpand && runtime.GOOS != goos.JavaScript {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}
@@ -211,7 +212,7 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) bool {
+func (*gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
 	freed := false
 	if canvas.EnsureMinSize() {

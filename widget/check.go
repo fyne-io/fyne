@@ -216,7 +216,7 @@ func (c *Check) TypedRune(r rune) {
 }
 
 // TypedKey receives key input events when the Check is focused.
-func (c *Check) TypedKey(key *fyne.KeyEvent) {}
+func (*Check) TypedKey(*fyne.KeyEvent) {}
 
 // SetText sets the text of the Check
 //
@@ -285,13 +285,13 @@ func (c *checkRenderer) MinSize() fyne.Size {
 	th := c.check.Theme()
 
 	pad4 := th.Size(theme.SizeNameInnerPadding) * 2
-	min := c.label.MinSize().Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+pad4, pad4))
+	minSize := c.label.MinSize().Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+pad4, pad4))
 
 	if c.check.Text != "" {
-		min.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
+		minSize.Add(fyne.NewSize(th.Size(theme.SizeNamePadding), 0))
 	}
 
-	return min
+	return minSize
 }
 
 // Layout the components of the check widget
@@ -374,14 +374,13 @@ func (c *checkRenderer) updateResource(th fyne.Theme) {
 
 // must be called while holding c.check.propertyLock for reading
 func (c *checkRenderer) updateFocusIndicator(th fyne.Theme, v fyne.ThemeVariant) {
-	if c.check.Disabled() {
-		c.focusIndicator.FillColor = color.Transparent
-	} else if c.check.focused {
-		c.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
-	} else if c.check.hovered {
-		c.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
-	} else {
-		c.focusIndicator.FillColor = color.Transparent
+	c.focusIndicator.FillColor = color.Transparent
+	if !c.check.Disabled() {
+		if c.check.focused {
+			c.focusIndicator.FillColor = th.Color(theme.ColorNameFocus, v)
+		} else if c.check.hovered {
+			c.focusIndicator.FillColor = th.Color(theme.ColorNameHover, v)
+		}
 	}
 }
 

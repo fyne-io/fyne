@@ -2,14 +2,20 @@ package repository
 
 import (
 	"errors"
+	"net"
+	"net/url"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
-	uriParser "github.com/fredbi/uri"
-
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
+
+const domainLabelPattern = "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+
+var rxHostName = regexp.MustCompile("^" + domainLabelPattern + `(?:\.` + domainLabelPattern + ")*$")
 
 // NewFileURI implements the back-end logic to storage.NewFileURI, which you
 // should use instead. This is only here because other functions in repository
@@ -21,16 +27,16 @@ func NewFileURI(path string) fyne.URI {
 	// should be OK to use the platform native filepath with UNIX
 	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Windows {
 		// seems that sometimes we end up with
 		// double-backslashes
 		path = filepath.ToSlash(path)
 	}
 
-	return &uri{
-		scheme: "file",
-		path:   path,
-	}
+	return &uri{url.URL{
+		Scheme: fyne.URISchemeFile,
+		Path:   path,
+	}}
 }
 
 // ParseURI implements the back-end logic for storage.ParseURI, which you
@@ -40,29 +46,37 @@ func NewFileURI(path string) fyne.URI {
 // Since: 2.0
 func ParseURI(s string) (fyne.URI, error) {
 	// Extract the scheme.
-	scheme, path, ok := strings.Cut(s, ":")
+	scheme, path, ok := strings.Cut(s, fyne.URISchemeSeparator)
 	if !ok {
 		return nil, errors.New("invalid URI, scheme must be present")
 	}
 
-	if strings.EqualFold(scheme, "file") {
-		// Does this really deserve to be special? In principle, the
-		// purpose of this check is to pass it to NewFileURI, which
-		// allows platform path seps in the URI (against the RFC, but
-		// easier for people building URIs naively on Windows). Maybe
-		// we should punt this to whoever generated the URI in the
-		// first place?
+	if strings.EqualFold(scheme, "urn") {
+		f := append(strings.SplitN(path, "#", 2), "")
+		q := append(strings.SplitN(f[0], "?", 2), "")
+		return &uri{url.URL{
+			Scheme:   scheme,
+			Opaque:   q[0],
+			RawQuery: q[1],
+			Fragment: f[1],
+		}}, nil
+	}
 
-		if len(path) <= 2 { // I.e. file: and // given we know scheme.
-			return nil, errors.New("not a valid URI")
+	if runtime.GOOS == goos.Windows && len(scheme) == 1 {
+		path = scheme + ":" + filepath.ToSlash(path)
+		scheme = fyne.URISchemeFile
+	}
+
+	if strings.EqualFold(scheme, fyne.URISchemeFile) {
+		path = strings.TrimPrefix(path, fyne.URIAuthorityPrefix)
+		if path == "" {
+			return nil, errors.New("invalid file URI, path cannot be empty")
 		}
-
-		if path[:2] == "//" {
-			path = path[2:]
+		p, err := url.PathUnescape(path)
+		if err != nil {
+			return nil, err
 		}
-
-		// Windows files can break authority checks, so just return the parsed file URI
-		return NewFileURI(path), nil
+		return NewFileURI(p), nil
 	}
 
 	scheme = strings.ToLower(scheme)
@@ -76,39 +90,21 @@ func ParseURI(s string) (fyne.URI, error) {
 
 	// There was no repository registered, or it did not provide a parser
 
-	l, err := uriParser.Parse(s)
+	l, err := url.Parse(s)
 	if err != nil {
 		return nil, err
 	}
 
-	authority := l.Authority()
-	authBuilder := strings.Builder{}
-	authBuilder.Grow(len(authority.UserInfo()) + len(authority.Host()) + len(authority.Port()) + len("@[]:"))
-
-	if userInfo := authority.UserInfo(); userInfo != "" {
-		authBuilder.WriteString(userInfo)
-		authBuilder.WriteByte('@')
+	if l.Host == "" {
+		return &uri{*l}, nil
 	}
 
-	// Per RFC 3986, section 3.2.2, IPv6 addresses must be enclosed in square brackets.
-	if host := authority.Host(); strings.Contains(host, ":") {
-		authBuilder.WriteByte('[')
-		authBuilder.WriteString(host)
-		authBuilder.WriteByte(']')
-	} else {
-		authBuilder.WriteString(host)
+	host := l.Hostname()
+	if net.ParseIP(host) != nil {
+		return &uri{*l}, nil
 	}
-
-	if port := authority.Port(); port != "" {
-		authBuilder.WriteByte(':')
-		authBuilder.WriteString(port)
+	if !rxHostName.MatchString(host) {
+		return nil, errors.New("failed to validate host")
 	}
-
-	return &uri{
-		scheme:    scheme,
-		authority: authBuilder.String(),
-		path:      authority.Path(),
-		query:     l.Query().Encode(),
-		fragment:  l.Fragment(),
-	}, nil
+	return &uri{*l}, nil
 }

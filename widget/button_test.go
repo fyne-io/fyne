@@ -16,10 +16,10 @@ import (
 
 func TestButton_MinSize(t *testing.T) {
 	button := widget.NewButton("Hi", nil)
-	min := button.MinSize()
+	minSize := button.MinSize()
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 }
 
 func TestButton_SetText(t *testing.T) {
@@ -315,7 +315,7 @@ func TestButton_ChangeTheme(t *testing.T) {
 	})
 }
 
-func TestButtonCompatImportance(t *testing.T) {
+func TestButtonCompatImportance(*testing.T) {
 	// Test backward compatibility of widget.Importance
 	var imp any = widget.HighImportance
 	btn := widget.NewButton("test", func() {})

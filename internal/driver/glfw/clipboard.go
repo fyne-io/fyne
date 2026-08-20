@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
@@ -24,7 +25,7 @@ type clipboard struct{}
 // Content returns the clipboard content
 func (c clipboard) Content() string {
 	// This retry logic is to work around the "Access Denied" error often thrown in windows PR#1679
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS != goos.Windows {
 		return c.content()
 	}
 	for i := 3; i > 0; i-- {
@@ -38,14 +39,14 @@ func (c clipboard) Content() string {
 	return ""
 }
 
-func (c clipboard) content() string {
+func (clipboard) content() string {
 	return glfw.GetClipboardString()
 }
 
 // SetContent sets the clipboard content
 func (c clipboard) SetContent(content string) {
 	// This retry logic is to work around the "Access Denied" error often thrown in windows PR#1679
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS != goos.Windows {
 		c.setContent(content)
 		return
 	}
@@ -59,6 +60,6 @@ func (c clipboard) SetContent(content string) {
 	fyne.LogError("GLFW clipboard set failed", nil)
 }
 
-func (c clipboard) setContent(content string) {
+func (clipboard) setContent(content string) {
 	glfw.SetClipboardString(content)
 }

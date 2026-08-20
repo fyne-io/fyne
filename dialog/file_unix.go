@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-func (f *fileDialog) getPlaces() []favoriteItem {
+func (*fileDialog) getPlaces() []favoriteItem {
 	lister, err := storage.ListerForURI(storage.NewFileURI("/"))
 	if err != nil {
 		fyne.LogError("could not create lister for /", err)
@@ -24,7 +24,7 @@ func (f *fileDialog) getPlaces() []favoriteItem {
 }
 
 func isHidden(file fyne.URI) bool {
-	if file.Scheme() != "file" {
+	if file.Scheme() != fyne.URISchemeFile {
 		fyne.LogError("Cannot check if non file is hidden", nil)
 		return false
 	}

@@ -245,13 +245,13 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	height := scale.ToScreenCoordinate(c, bounds.Height+painter.TextVectorPad) // space below for descenders / underline
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
-	color := text.Color
-	if color == nil {
-		color = theme.Color(theme.ColorNameForeground)
+	textColor := text.Color
+	if textColor == nil {
+		textColor = theme.Color(theme.ColorNameForeground)
 	}
 
 	face := painter.CachedFontFace(text.TextStyle, text.FontSource, text)
-	painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
+	painter.DrawString(txtImg, text.Text, textColor, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
 
 	size := text.Size()
 	offsetX := float32(0)
@@ -274,7 +274,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 
 	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
-		line := canvas.NewLine(color)
+		line := canvas.NewLine(textColor)
 		line.Resize(fyne.NewSize(bounds.Width, 0))
 		if text.TextStyle.Underline {
 			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+painter.UnderlineOffsetFromBaseline)
@@ -553,11 +553,11 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		var objAlpha float32
 		if fill != nil {
 			_, _, _, a := fill.RGBA()
-			objAlpha = float32(a) / 65535.0
+			objAlpha = float32(a) / math.MaxUint16
 		}
 		if strokeCol != nil && strokeWidth > 0 {
 			_, _, _, a := strokeCol.RGBA()
-			sa := float32(a) / 65535.0
+			sa := float32(a) / math.MaxUint16
 			if sa > objAlpha {
 				objAlpha = sa
 			}
@@ -571,7 +571,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 				_, _, _, maskA := maskRaw.At(mx, my).RGBA()
 				if maskA > 0 {
 					pixel := blurred.RGBAAt(x, y)
-					cVal := float32(maskA) / 65535.0
+					cVal := float32(maskA) / math.MaxUint16
 					den := 1.0 - cVal*objAlpha
 					var invMA float32
 					if den <= 0 {

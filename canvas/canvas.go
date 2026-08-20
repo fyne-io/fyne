@@ -37,8 +37,8 @@ func Refresh(obj fyne.CanvasObject) {
 // and a non-nil error is returned.
 //
 // Since: 2.6
-func RecolorSVG(svgContent []byte, color color.Color) ([]byte, error) {
-	return svg.Colorize(svgContent, color)
+func RecolorSVG(svgContent []byte, c color.Color) ([]byte, error) {
+	return svg.Colorize(svgContent, c)
 }
 
 // repaint instructs the containing canvas to redraw, even if nothing changed.

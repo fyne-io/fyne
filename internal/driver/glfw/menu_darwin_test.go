@@ -273,6 +273,47 @@ func TestDarwinMenu_specialKeyShortcuts(t *testing.T) {
 	}
 }
 
+func TestDarwinMenu_focusChangeUpdatesNativeMenu(t *testing.T) {
+	setExceptionCallback(func(msg string) { t.Error("Obj-C exception:", msg) })
+	defer setExceptionCallback(nil)
+
+	runOnMain(func() {
+		resetMainMenu()
+	})
+
+	w1 := createWindow("Test1")
+	w2 := createWindow("Test2")
+
+	menu1 := fyne.NewMainMenu(fyne.NewMenu("Menu1", fyne.NewMenuItem("Item1", func() {})))
+	menu2 := fyne.NewMainMenu(fyne.NewMenu("Menu2", fyne.NewMenuItem("Item2", func() {})))
+
+	runOnMain(func() {
+		w1.SetMainMenu(menu1)
+		w2.SetMainMenu(menu2)
+	})
+
+	titleOfSecondMenu := func() string {
+		mm := testDarwinMainMenu()
+		m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
+		return testNSMenuTitle(m)
+	}
+
+	// Focusing w2 last (as SetMainMenu does above) shows its menu.
+	assert.Equal(t, "Menu2", titleOfSecondMenu())
+
+	// Switching focus back to w1 should switch the native menu back to menu1.
+	runOnMain(func() {
+		w1.processFocused(true)
+	})
+	assert.Equal(t, "Menu1", titleOfSecondMenu())
+
+	// Switching focus to w2 should switch the native menu back to menu2.
+	runOnMain(func() {
+		w2.processFocused(true)
+	})
+	assert.Equal(t, "Menu2", titleOfSecondMenu())
+}
+
 var (
 	initialAppMenuItems []string
 	initialMenus        []string

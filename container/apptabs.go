@@ -37,7 +37,8 @@ type AppTabs struct {
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{Items: items}
+	tabs := &AppTabs{}
+	setItems(tabs, items)
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	return tabs
 }
@@ -441,15 +442,15 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 	r.moveIndicator(indicatorPos, indicatorSize, th, animate)
 }
 
-func (r *appTabsRenderer) updateTabs(max int) {
+func (r *appTabsRenderer) updateTabs(maxCount int) {
 	tabCount := len(r.appTabs.Items)
 
 	// Set overflow action
-	if tabCount <= max {
+	if tabCount <= maxCount {
 		r.action.Hide()
 		r.bar.Layout = layout.NewStackLayout()
 	} else {
-		tabCount = max
+		tabCount = maxCount
 		r.action.Show()
 
 		// Set layout of tab bar containing tab buttons and overflow action

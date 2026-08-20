@@ -23,7 +23,7 @@ func TestScheduler_Schedule_FiresAtDeliveryTime(t *testing.T) {
 	cache := newMemCache()
 	var fired atomic.Int32
 	done := make(chan struct{}, 1)
-	s := New(cache, func(n *fyne.Notification) {
+	s := New(cache, func(*fyne.Notification) {
 		fired.Add(1)
 		done <- struct{}{}
 	})
@@ -142,7 +142,7 @@ func (m *memCache) exists(name string) bool {
 	return ok
 }
 
-func (m *memCache) RootURI() fyne.URI       { return nil }
+func (*memCache) RootURI() fyne.URI         { return nil }
 func (m *memCache) Exists(name string) bool { return m.exists(name) }
 
 func (m *memCache) Read(name string) (io.ReadCloser, error) {

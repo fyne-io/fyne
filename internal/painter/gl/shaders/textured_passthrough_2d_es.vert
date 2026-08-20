@@ -11,8 +11,12 @@ precision lowp sampler2D;
 #endif
 
 attribute vec2 vert;
-attribute vec2 normal;
+attribute vec2 vertTexCoord;
+
+varying vec2 fragTexCoord;
 
 void main() {
-    gl_Position = vec4(vert+normal, 0, 1);
+    fragTexCoord = vertTexCoord;
+
+    gl_Position = vec4(vert, 0, 1);
 }

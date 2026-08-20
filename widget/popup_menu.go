@@ -31,7 +31,7 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p.Resize(p.MinSize())
 	p.customSized = true
 
-	p.Move(fyne.NewPos(10, 10)) // non-zero pos to get manual overlay, fixed on show
+	p.Move(fyne.NewPos(10, 10)) //revive:disable-line:add-constant // non-zero pos to get manual overlay, fixed on show
 	o := widget.NewOverlayContainer(p, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
@@ -62,10 +62,10 @@ func ShowPopUpMenuAtRelativePosition(menu *fyne.Menu, c fyne.Canvas, rel fyne.Po
 }
 
 // FocusGained is triggered when the object gained focus. For the pop-up menu it does nothing.
-func (p *PopUpMenu) FocusGained() {}
+func (*PopUpMenu) FocusGained() {}
 
 // FocusLost is triggered when the object lost focus. For the pop-up menu it does nothing.
-func (p *PopUpMenu) FocusLost() {}
+func (*PopUpMenu) FocusLost() {}
 
 // Hide hides the pop-up menu.
 func (p *PopUpMenu) Hide() {
@@ -135,7 +135,7 @@ func (p *PopUpMenu) TypedKey(e *fyne.KeyEvent) {
 }
 
 // TypedRune handles text events. For pop-up menus this does nothing.
-func (p *PopUpMenu) TypedRune(rune) {}
+func (*PopUpMenu) TypedRune(rune) {}
 
 func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Position {
 	x := pos.X

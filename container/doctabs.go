@@ -40,7 +40,8 @@ type DocTabs struct {
 //
 // Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
-	tabs := &DocTabs{Items: items}
+	tabs := &DocTabs{}
+	setItems(tabs, items)
 	tabs.ExtendBaseWidget(tabs)
 	return tabs
 }
@@ -70,7 +71,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.tabs = t
 
 	r.box = NewHBox(r.create, r.action)
-	r.scroller.OnScrolled = func(offset fyne.Position) {
+	r.scroller.OnScrolled = func(fyne.Position) {
 		r.updateIndicator(false)
 	}
 	r.updateAllTabs()

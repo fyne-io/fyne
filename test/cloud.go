@@ -13,15 +13,15 @@ func (c *mockCloud) Cleanup(_ fyne.App) {
 	c.configured = false
 }
 
-func (c *mockCloud) ProviderDescription() string {
+func (*mockCloud) ProviderDescription() string {
 	return "Mock cloud implementation"
 }
 
-func (c *mockCloud) ProviderIcon() fyne.Resource {
+func (*mockCloud) ProviderIcon() fyne.Resource {
 	return theme.ComputerIcon()
 }
 
-func (c *mockCloud) ProviderName() string {
+func (*mockCloud) ProviderName() string {
 	return "mock"
 }
 

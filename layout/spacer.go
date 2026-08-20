@@ -56,7 +56,7 @@ func (s *Spacer) Move(pos fyne.Position) {
 }
 
 // MinSize returns a 0 size as a Spacer can shrink to no actual size
-func (s *Spacer) MinSize() fyne.Size {
+func (*Spacer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
@@ -76,5 +76,5 @@ func (s *Spacer) Hide() {
 }
 
 // Refresh does nothing for a spacer but is part of the CanvasObject definition
-func (s *Spacer) Refresh() {
+func (*Spacer) Refresh() {
 }

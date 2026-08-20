@@ -10,16 +10,17 @@ import (
 	"runtime"
 	"syscall"
 
+	"fyne.io/systray"
+	"github.com/go-gl/glfw/v3.4/glfw"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/systray"
-
-	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
 const systrayIconSize = 64
@@ -29,7 +30,7 @@ var (
 	systrayRunning bool
 )
 
-func (d *gLDriver) HasSecondaryDisplay() bool {
+func (*gLDriver) HasSecondaryDisplay() bool {
 	monitors := glfw.GetMonitors()
 	if len(monitors) == 1 {
 		return false
@@ -66,7 +67,7 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 		}
 
 		// Some XDG systray crash without a title (See #3678)
-		if runtime.GOOS == "linux" || runtime.GOOS == "openbsd" || runtime.GOOS == "freebsd" || runtime.GOOS == "netbsd" {
+		if runtime.GOOS == goos.Linux || goos.IsBSD(runtime.GOOS) {
 			app := fyne.CurrentApp()
 			title := app.Metadata().Name
 			if title == "" {
@@ -90,6 +91,37 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 	w := d.CreateWindow("SystrayMonitor")
 	w.(*window).create()
 	w.SetCloseIntercept(d.Quit)
+}
+
+// systrayShortcutKeys maps the few key names that Fyne spells differently to the
+// platform neutral names that the systray package understands.
+var systrayShortcutKeys = map[fyne.KeyName]string{
+	fyne.KeyEnter:    "Enter",
+	fyne.KeyPageDown: "PageDown",
+	fyne.KeyPageUp:   "PageUp",
+}
+
+func systrayShortcutKey(key fyne.KeyName) string {
+	if name, ok := systrayShortcutKeys[key]; ok {
+		return name
+	}
+	return string(key)
+}
+
+func systrayModifiers(mod fyne.KeyModifier) (mods systray.KeyModifier) {
+	if mod&fyne.KeyModifierShift != 0 {
+		mods |= systray.KeyModifierShift
+	}
+	if mod&fyne.KeyModifierControl != 0 {
+		mods |= systray.KeyModifierControl
+	}
+	if mod&fyne.KeyModifierAlt != 0 {
+		mods |= systray.KeyModifierAlt
+	}
+	if mod&fyne.KeyModifierSuper != 0 {
+		mods |= systray.KeyModifierSuper
+	}
+	return mods
 }
 
 func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
@@ -119,12 +151,15 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	if i.Disabled {
 		item.Disable()
 	}
+	if s, ok := i.Shortcut.(fyne.KeyboardShortcut); ok {
+		item.SetShortcut(systrayModifiers(s.Mod()), systrayShortcutKey(s.Key()))
+	}
 	if i.Icon != nil {
 		data := i.Icon.Content()
 		if svg.IsResourceSVG(i.Icon) {
 			b := &bytes.Buffer{}
 			res := i.Icon
-			if runtime.GOOS == "windows" && isDark() { // windows menus don't match dark mode so invert icons
+			if runtime.GOOS == goos.Windows && isDark() { // windows menus don't match dark mode so invert icons
 				res = theme.NewInvertedThemedResource(i.Icon)
 			}
 			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
@@ -184,11 +219,11 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 	}
 }
 
-func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
+func (*gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
 	systrayIcon = resource // in case we need it later
 
 	// only macOS supports SVG system tray
-	if runtime.GOOS != "darwin" && svg.IsResourceSVG(resource) {
+	if runtime.GOOS != goos.Darwin && svg.IsResourceSVG(resource) {
 		img := canvas.NewImageFromResource(resource)
 		c := software.NewTransparentCanvas()
 		c.SetContent(img)

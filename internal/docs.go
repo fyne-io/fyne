@@ -60,7 +60,7 @@ func (d *Docs) List() []string {
 	ret := make([]string, len(uris))
 	for i, u := range uris {
 		ret[i] = u.Name()
-		if d.RootDocURI.Scheme() != "file" {
+		if d.RootDocURI.Scheme() != fyne.URISchemeFile {
 			ret[i], _ = url.PathUnescape(u.Name())
 		}
 	}
@@ -133,7 +133,7 @@ func (d *Docs) ensureRootExists() error {
 
 func (d *Docs) childURI(name string) (fyne.URI, error) {
 	encoded := name
-	if d.RootDocURI.Scheme() != "file" {
+	if d.RootDocURI.Scheme() != fyne.URISchemeFile {
 		encoded = url.PathEscape(name)
 	}
 

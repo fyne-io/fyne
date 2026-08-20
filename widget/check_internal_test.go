@@ -15,10 +15,10 @@ import (
 
 func TestCheckSize(t *testing.T) {
 	check := NewCheck("Hi", nil)
-	min := check.MinSize()
+	minSize := check.MinSize()
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 }
 
 func TestCheckChecked(t *testing.T) {
@@ -126,7 +126,7 @@ func TestCheck_Enable(t *testing.T) {
 }
 
 func TestCheck_Focused(t *testing.T) {
-	check := NewCheck("Test", func(on bool) {})
+	check := NewCheck("Test", func(bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
 	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
@@ -165,7 +165,7 @@ func TestCheck_Focused(t *testing.T) {
 }
 
 func TestCheck_Hovered(t *testing.T) {
-	check := NewCheck("Test", func(on bool) {})
+	check := NewCheck("Test", func(bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
 	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
@@ -211,7 +211,7 @@ func TestCheck_Hovered(t *testing.T) {
 }
 
 func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
-	check := NewCheck("Test", func(on bool) {})
+	check := NewCheck("Test", func(bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
 	render := test.TempWidgetRenderer(t, check).(*checkRenderer)
@@ -229,7 +229,7 @@ func TestCheck_HoveredOutsideActiveArea(t *testing.T) {
 }
 
 func TestCheck_TappedOutsideActiveArea(t *testing.T) {
-	check := NewCheck("Test", func(on bool) {})
+	check := NewCheck("Test", func(bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
 
@@ -243,7 +243,7 @@ func TestCheck_TappedOutsideActiveArea(t *testing.T) {
 }
 
 func TestCheck_TypedRune(t *testing.T) {
-	check := NewCheck("Test", func(on bool) {})
+	check := NewCheck("Test", func(bool) {})
 	w := test.NewWindow(check)
 	defer w.Close()
 	assert.False(t, check.Checked)

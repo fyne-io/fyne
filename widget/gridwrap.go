@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -344,7 +345,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this GridWrap is focused.
-func (l *GridWrap) TypedRune(_ rune) {
+func (*GridWrap) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
@@ -427,7 +428,7 @@ func (l *gridWrapRenderer) Layout(size fyne.Size) {
 }
 
 func (l *gridWrapRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize().Max(l.list.itemMin)
+	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
 func (l *gridWrapRenderer) Refresh() {
@@ -442,7 +443,7 @@ func (l *gridWrapRenderer) Refresh() {
 	canvas.Refresh(l.list)
 }
 
-func (l *gridWrapRenderer) Destroy() {
+func (*gridWrapRenderer) Destroy() {
 }
 
 func (l *gridWrapRenderer) Objects() []fyne.CanvasObject {
@@ -507,7 +508,7 @@ func (gw *gridWrapItem) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget.
-func (gw *gridWrapItem) MouseMoved(*desktop.MouseEvent) {
+func (*gridWrapItem) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget.
@@ -688,7 +689,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	maxItem := GridWrapItemID(math.Min(float64(maxRow*colCount), float64(length-1)))
 
 	if l.gw.UpdateItem == nil {
-		fyne.LogError("Missing UpdateCell callback required for GridWrap", nil)
+		fyne.LogError("Missing UpdateItem callback required for GridWrap", nil)
 	}
 
 	// l.wasVisible now represents the currently visible items, while
@@ -745,14 +746,12 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 
 	// we don't need wasVisible now until next call to update
 	// nil out all references before truncating slice
-	for i := 0; i < len(l.wasVisible); i++ {
-		l.wasVisible[i].item = nil
-	}
+	clear(l.wasVisible)
 	l.wasVisible = l.wasVisible[:0]
 }
 
 // invariant: visible is in ascending order of IDs
-func (l *gridWrapLayout) searchVisible(visible []gridItemAndID, id GridWrapItemID) (*gridWrapItem, bool) {
+func (*gridWrapLayout) searchVisible(visible []gridItemAndID, id GridWrapItemID) (*gridWrapItem, bool) {
 	ln := len(visible)
 	idx := sort.Search(ln, func(i int) bool { return visible[i].id >= id })
 	if idx < ln && visible[idx].id == id {
@@ -761,11 +760,9 @@ func (l *gridWrapLayout) searchVisible(visible []gridItemAndID, id GridWrapItemI
 	return nil, false
 }
 
-func (l *gridWrapLayout) nilOldSliceData(objs []fyne.CanvasObject, len, oldLen int) {
-	if oldLen > len {
-		objs = objs[:oldLen] // gain view into old data
-		for i := len; i < oldLen; i++ {
-			objs[i] = nil
-		}
+func (*gridWrapLayout) nilOldSliceData(objs []fyne.CanvasObject, length, oldLength int) {
+	if oldLength > length {
+		objs = objs[:oldLength] // gain view into old data
+		clear(objs[length:])
 	}
 }

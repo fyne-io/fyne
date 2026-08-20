@@ -41,6 +41,10 @@ func stripFormatPrecision(in string) string {
 	}
 
 	sizeRunes := runes[start+1 : end]
+	if len(sizeRunes) == 1 && sizeRunes[0] == '.' { // %.f fails to parse as float "."
+		return string(runes[:start+1]) + string(runes[end:])
+	}
+
 	width, err := parseFloat(string(sizeRunes))
 	if err != nil {
 		return string(runes[:start+1]) + string(runes[:end])

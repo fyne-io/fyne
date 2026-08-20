@@ -82,11 +82,10 @@ func (t *timeBinding) Reload() error {
 	return t.Set(*t.src)
 }
 
-func (t *timeBinding) Set(time time.Time) error {
+func (t *timeBinding) Set(value time.Time) error {
 	if t.src != nil {
-		*t.src = time
+		*t.src = value
 	}
 
-	i := time.Unix()
-	return t.Int.Set(int(i))
+	return t.Int.Set(int(value.Unix()))
 }

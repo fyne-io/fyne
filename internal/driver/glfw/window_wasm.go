@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -663,7 +664,7 @@ func (w *wrapInner) doCenter() {
 	multi := c.webExtraWindows
 
 	min := w.inner.MinSize()
-	min = min.Max(w.inner.Size())
+	min = internal.MaxSizes(min, w.inner.Size())
 
 	x := (multi.Size().Width - min.Width) / 2
 	y := (multi.Size().Height - min.Height) / 2
