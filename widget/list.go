@@ -367,7 +367,7 @@ func (l *List) SelectAll() {
 		wasSel[oldID] = struct{}{}
 	}
 	for id := ListItemID(0); id < ListItemID(length); id++ {
-		if _, exists := wasSel[id]; !exists {
+		if _, wasSelected := wasSel[id]; !wasSelected {
 			onSelected(id)
 		}
 	}
@@ -534,26 +534,25 @@ func (*List) TypedRune(_ rune) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	isSel := false
+	isSelected := false
 	for _, selID := range l.selected {
 		if selID == id {
-			isSel = true
+			isSelected = true
 			break
 		}
 	}
-	if !isSel {
+	if !isSelected {
 		return
 	}
 
-	newSel := make([]ListItemID, 0, len(l.selected)-1)
+	newSelected := make([]ListItemID, 0, len(l.selected)-1)
 	for _, selID := range l.selected {
 		if selID != id {
-			newSel = append(newSel, selID)
+			newSelected = append(newSelected, selID)
 		}
 	}
-	l.selected = newSel
+	l.selected = newSelected
 	l.Refresh()
-
 	if f := l.OnUnselected; f != nil {
 		f(id)
 	}
