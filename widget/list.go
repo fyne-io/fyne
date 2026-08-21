@@ -374,7 +374,7 @@ func (l *List) SelectAll() {
 }
 
 // SetSelection sets the currently selected items in the list when in MultiSelect mode,
-// otherwise selects the first item given, or clear the selection when empty.
+// otherwise selects the first item given, or clears the selection when empty.
 //
 // Since: 2.9
 func (l *List) SetSelection(ids []ListItemID) {
@@ -990,12 +990,11 @@ func selectRangeIDs(selected []ListItemID, selID ListItemID) []ListItemID {
 	if selID > high {
 		r := make([]ListItemID, 0, len(selected)+(selID-high))
 		r = append(r, selected...)
-		for id := high+1; id <= selID; id++ {
+		for id := high + 1; id <= selID; id++ {
 			r = append(r, id)
 		}
 		return r
 	}
-
 
 	return append(selected, selID)
 }

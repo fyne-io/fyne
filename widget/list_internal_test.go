@@ -438,19 +438,19 @@ func TestList_selectRangeIDs(t *testing.T) {
 		assert.Equal(t, []ListItemID{2}, selectRangeIDs([]ListItemID{2}, 2))
 	})
 	t.Run("already", func(t *testing.T) {
-		assert.Equal(t, []ListItemID{0,2}, selectRangeIDs([]ListItemID{0,2}, 2))
-		assert.Equal(t, []ListItemID{2,4}, selectRangeIDs([]ListItemID{2,4}, 2))
-		assert.Equal(t, []ListItemID{2,4}, selectRangeIDs([]ListItemID{2,4}, 4))
+		assert.Equal(t, []ListItemID{0, 2}, selectRangeIDs([]ListItemID{0, 2}, 2))
+		assert.Equal(t, []ListItemID{2, 4}, selectRangeIDs([]ListItemID{2, 4}, 2))
+		assert.Equal(t, []ListItemID{2, 4}, selectRangeIDs([]ListItemID{2, 4}, 4))
 	})
 	t.Run("higher", func(t *testing.T) {
-		assert.Equal(t, []ListItemID{0,1,2}, selectRangeIDs([]ListItemID{0}, 2))
-		assert.Equal(t, []ListItemID{2,4,5,6}, selectRangeIDs([]ListItemID{2,4}, 6))
-		assert.Equal(t, []ListItemID{4,5,6}, selectRangeIDs([]ListItemID{4}, 6))
+		assert.Equal(t, []ListItemID{0, 1, 2}, selectRangeIDs([]ListItemID{0}, 2))
+		assert.Equal(t, []ListItemID{2, 4, 5, 6}, selectRangeIDs([]ListItemID{2, 4}, 6))
+		assert.Equal(t, []ListItemID{4, 5, 6}, selectRangeIDs([]ListItemID{4}, 6))
 	})
 	t.Run("lower", func(t *testing.T) {
-		assert.Equal(t, []ListItemID{0,1}, selectRangeIDs([]ListItemID{1}, 0))
-		assert.Equal(t, []ListItemID{2,3,4}, selectRangeIDs([]ListItemID{4}, 2))
-		assert.Equal(t, []ListItemID{0,1,2,4}, selectRangeIDs([]ListItemID{2,4}, 0))
+		assert.Equal(t, []ListItemID{0, 1}, selectRangeIDs([]ListItemID{1}, 0))
+		assert.Equal(t, []ListItemID{2, 3, 4}, selectRangeIDs([]ListItemID{4}, 2))
+		assert.Equal(t, []ListItemID{0, 1, 2, 4}, selectRangeIDs([]ListItemID{2, 4}, 0))
 	})
 	t.Run("gap", func(t *testing.T) {
 		assert.Equal(t, []ListItemID{1, 3, 5, 2}, selectRangeIDs([]ListItemID{1, 3, 5}, 2))
