@@ -491,7 +491,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 
 	scrollOrSelect := func() {
 		if isModifierPressed(fyne.KeyModifierShift) {
-			l.SetSelection(rangeSelectionIds(l.currentHighlight, l.selected))
+			l.SetSelection(selectRangeIDs(l.selected, l.currentHighlight))
 		}
 		l.scrollTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
@@ -500,7 +500,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace:
 		if isModifierPressed(fyne.KeyModifierShift) {
-			l.SetSelection(rangeSelectionIds(l.currentHighlight, l.selected))
+			l.SetSelection(selectRangeIDs(l.selected, l.currentHighlight))
 		} else {
 			l.Select(l.currentHighlight)
 		}
@@ -943,7 +943,7 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 				l.list.Select(id)
 			}
 		} else if isModifierPressed(fyne.KeyModifierShift) {
-			l.list.SetSelection(rangeSelectionIds(id, l.list.selected))
+			l.list.SetSelection(selectRangeIDs(l.list.selected, id))
 		} else {
 			l.list.Select(id)
 		}
@@ -960,9 +960,16 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 	}
 }
 
-func rangeSelectionIds(cur ListItemID, selected []ListItemID) []ListItemID {
+func selectRangeIDs(selected []ListItemID, selID ListItemID) []ListItemID {
+	if len(selected) == 0 {
+		return []ListItemID{selID}
+	}
+
 	var high, low ListItemID = math.MinInt, math.MaxInt
 	for _, id := range selected {
+		if id == selID {
+			return selected
+		}
 		if id > high {
 			high = id
 		}
@@ -971,28 +978,26 @@ func rangeSelectionIds(cur ListItemID, selected []ListItemID) []ListItemID {
 		}
 	}
 
-	if len(selected) == 0 {
-		low = cur
-		high = cur
-	}
-
-	if cur < low {
-		r := make([]ListItemID, 0, (low-cur)+len(selected))
-		for id := cur; id <= low; id++ {
+	if selID < low {
+		r := make([]ListItemID, 0, len(selected)+(low-selID))
+		for id := selID; id < low; id++ {
 			r = append(r, id)
 		}
-		r = append(r, selected[1:]...)
+		r = append(r, selected...)
 		return r
 	}
 
-	r := make([]ListItemID, 0, (cur-high)+len(selected))
-	if len(selected) > 0 {
-		r = append(r, selected[:len(selected)-1]...)
+	if selID > high {
+		r := make([]ListItemID, 0, len(selected)+(selID-high))
+		r = append(r, selected...)
+		for id := high+1; id <= selID; id++ {
+			r = append(r, id)
+		}
+		return r
 	}
-	for id := high; id <= cur; id++ {
-		r = append(r, id)
-	}
-	return r
+
+
+	return append(selected, selID)
 }
 
 func (l *listLayout) updateList(newOnly bool) {

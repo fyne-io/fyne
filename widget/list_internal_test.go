@@ -430,18 +430,36 @@ func TestList_MultiSelect(t *testing.T) {
 	assert.Equal(t, 1000, count)
 }
 
-func TestList_rangeSelectionIds(t *testing.T) {
-	selected := []ListItemID{2}
-	assert.Equal(t, []ListItemID{2}, rangeSelectionIds(2, selected))
-	assert.Equal(t, []ListItemID{0, 1, 2}, rangeSelectionIds(0, selected))
-	assert.Equal(t, []ListItemID{2, 3, 4}, rangeSelectionIds(4, selected))
-	selected = []ListItemID{2, 3, 4}
-	assert.Equal(t, []ListItemID{1, 2, 3, 4}, rangeSelectionIds(1, selected))
-	assert.Equal(t, []ListItemID{2, 3, 4, 5}, rangeSelectionIds(5, selected))
-	assert.Equal(t, []ListItemID{2}, rangeSelectionIds(2, []ListItemID{}))
-	selected = []ListItemID{2, 4, 6}
-	assert.Equal(t, []ListItemID{2, 4, 6, 7, 8}, rangeSelectionIds(8, selected))
-	assert.Equal(t, []ListItemID{1, 2, 4, 6}, rangeSelectionIds(1, selected))
+func TestList_selectRangeIDs(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{2}, selectRangeIDs([]ListItemID{}, 2))
+	})
+	t.Run("same", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{2}, selectRangeIDs([]ListItemID{2}, 2))
+	})
+	t.Run("already", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0,2}, selectRangeIDs([]ListItemID{0,2}, 2))
+		assert.Equal(t, []ListItemID{2,4}, selectRangeIDs([]ListItemID{2,4}, 2))
+		assert.Equal(t, []ListItemID{2,4}, selectRangeIDs([]ListItemID{2,4}, 4))
+	})
+	t.Run("higher", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0,1,2}, selectRangeIDs([]ListItemID{0}, 2))
+		assert.Equal(t, []ListItemID{2,4,5,6}, selectRangeIDs([]ListItemID{2,4}, 6))
+		assert.Equal(t, []ListItemID{4,5,6}, selectRangeIDs([]ListItemID{4}, 6))
+	})
+	t.Run("lower", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0,1}, selectRangeIDs([]ListItemID{1}, 0))
+		assert.Equal(t, []ListItemID{2,3,4}, selectRangeIDs([]ListItemID{4}, 2))
+		assert.Equal(t, []ListItemID{0,1,2,4}, selectRangeIDs([]ListItemID{2,4}, 0))
+	})
+	t.Run("gap", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{1, 3, 5, 2}, selectRangeIDs([]ListItemID{1, 3, 5}, 2))
+		assert.Equal(t, []ListItemID{1, 3, 5, 2}, selectRangeIDs([]ListItemID{1, 3, 5, 2}, 2))
+
+		// support range selection in gaps?
+		// assert.Equal(t, []ListItemID{0, 1, 2, 5}, selectRangeIDs([]ListItemID{0, 5}, 2))
+		// assert.Equal(t, []ListItemID{0, 3, 4, 5}, selectRangeIDs([]ListItemID{0, 5}, 3))
+	})
 }
 
 func TestList_Unselect(t *testing.T) {
