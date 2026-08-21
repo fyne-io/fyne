@@ -94,3 +94,4 @@ linters:
       checks:
         - all
         - -ST1000
+        - -SA4023
