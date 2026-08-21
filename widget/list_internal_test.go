@@ -402,7 +402,7 @@ func TestList_MultiSelect(t *testing.T) {
 	assert.True(t, visible8.background.Visible())
 
 	count := 0
-	list.OnSelected = func(id ListItemID) {
+	list.OnSelected = func(ListItemID) {
 		count++
 	}
 	list.SelectAll()
@@ -418,7 +418,7 @@ func TestList_MultiSelect(t *testing.T) {
 	assert.Equal(t, 1000-3, count)
 
 	count = 0
-	list.OnUnselected = func(id ListItemID) {
+	list.OnUnselected = func(ListItemID) {
 		count++
 	}
 	list.UnselectAll()

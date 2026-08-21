@@ -366,7 +366,7 @@ func (l *List) SelectAll() {
 	for _, oldID := range oldIDs {
 		wasSel[oldID] = struct{}{}
 	}
-	for id := ListItemID(0); id < ListItemID(length); id++ {
+	for id := ListItemID(0); id < length; id++ {
 		if _, wasSelected := wasSel[id]; !wasSelected {
 			onSelected(id)
 		}
@@ -410,7 +410,7 @@ func (l *List) SetSelection(ids []ListItemID) {
 		return
 	}
 
-	for id := ListItemID(0); id < ListItemID(length); id++ {
+	for id := ListItemID(0); id < length; id++ {
 		_, wasSelected := wasSel[id]
 		_, newSelected := newSel[id]
 		if wasSelected && !newSelected && onUnselected != nil {
