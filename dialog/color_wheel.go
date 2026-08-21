@@ -47,9 +47,7 @@ func newColorWheel(onChange func(int, int, int, uint8)) *colorWheel {
 		}
 		for x := 0; x < w; x++ {
 			for y := 0; y < h; y++ {
-				if c := a.colorAt(x, y, w, h); c != nil {
-					a.cache.Set(x, y, c)
-				}
+				a.cache.Set(x, y, a.colorAt(x, y, w, h))
 			}
 		}
 		return a.cache
