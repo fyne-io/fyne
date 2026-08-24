@@ -23,6 +23,7 @@ const canvasDefaultSize = 100
 type WindowlessCanvas interface {
 	fyne.Canvas
 
+	CaptureTo(draw.Image)
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
@@ -89,19 +90,27 @@ type canvas struct {
 	propertyLock sync.RWMutex
 }
 
-func (c *canvas) Capture() image.Image {
+func (c *canvas) CaptureTo(dst draw.Image) {
+	if dst == nil {
+		return
+	}
 	cache.Clean(true)
 	size := c.Size()
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
-	img := image.NewNRGBA(bounds)
 	if !c.transparent {
-		draw.Draw(img, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
+		draw.Draw(dst, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
 	}
 
 	if c.painter != nil {
-		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+		draw.Draw(dst, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
 	}
+}
 
+func (c *canvas) Capture() image.Image {
+	size := c.Size()
+	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
+	img := image.NewNRGBA(bounds)
+	c.CaptureTo(img)
 	return img
 }
 

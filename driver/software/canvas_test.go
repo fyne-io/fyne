@@ -1,6 +1,7 @@
 package software_test
 
 import (
+	"image"
 	"image/color"
 	"testing"
 
@@ -79,4 +80,19 @@ func Test_canvas_Resize(t *testing.T) {
 	c.Resize(largeSize)
 	c.SetContent(widget.NewLabel("Smaller"))
 	assert.Equal(t, largeSize, c.Size())
+}
+
+func Test_canvas_CaptureTo(t *testing.T) {
+	c := software.NewCanvas()
+	c.Resize(fyne.NewSquareSize(100))
+
+	dst := image.NewNRGBA(image.Rect(0, 0, 100, 100))
+	c.CaptureTo(dst)
+
+	r1, g1, b1, a1 := theme.Color(theme.ColorNameBackground).RGBA()
+	r2, g2, b2, a2 := dst.At(1, 1).RGBA()
+	assert.Equal(t, r1, r2)
+	assert.Equal(t, g1, g2)
+	assert.Equal(t, b1, b2)
+	assert.Equal(t, a1, a2)
 }
