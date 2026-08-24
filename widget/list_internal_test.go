@@ -764,7 +764,7 @@ func TestList_AutoScrollBottom(t *testing.T) {
 		func(i ListItemID, o fyne.CanvasObject) { o.(*Label).SetText(data[i]) },
 	)
 
-	list.ScrollGravity = ScrollGravityBottom
+	list.Gravity = ScrollGravityBottom
 
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(100, 100))
