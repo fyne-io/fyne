@@ -91,7 +91,7 @@ type List struct {
 	// when new items are added, if the list is already scrolled to that edge.
 	//
 	// Since: 2.9
-	ScrollGravity ScrollGravity
+	Gravity ScrollGravity
 
 	currentHighlight ListItemID
 	focused          bool
@@ -599,12 +599,14 @@ func (l *listRenderer) MinSize() fyne.Size {
 	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
+const scrollAtEdgeTolerance = 1.0
+
 func (l *listRenderer) Refresh() {
 	wasAtBottom := false
 	wasAtTop := false
 	if l.scroller.Content != nil {
-		wasAtBottom = l.scroller.Offset.Y+l.scroller.Size().Height >= l.scroller.Content.Size().Height-1.0
-		wasAtTop = l.scroller.Offset.Y <= 1.0
+		wasAtBottom = l.scroller.Offset.Y+l.scroller.Size().Height >= l.scroller.Content.Size().Height-scrollAtEdgeTolerance
+		wasAtTop = l.scroller.Offset.Y <= scrollAtEdgeTolerance
 	}
 
 	l.list.minSizeCache = fyne.Size{}
@@ -622,7 +624,7 @@ func (l *listRenderer) Refresh() {
 	}
 	canvas.Refresh(l.list.super())
 
-	switch l.list.ScrollGravity {
+	switch l.list.Gravity {
 	case ScrollGravityBottom:
 		if wasAtBottom {
 			l.scroller.ScrollToBottom()
