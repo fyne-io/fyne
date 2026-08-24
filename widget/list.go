@@ -87,7 +87,7 @@ type List struct {
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
 
-	// ScrollGravity sets whether the list should automatically scroll to the bottom or top
+	// Gravity sets whether the list should automatically scroll to the bottom or top
 	// when new items are added, if the list is already scrolled to that edge.
 	//
 	// Since: 2.9
