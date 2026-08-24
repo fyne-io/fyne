@@ -239,7 +239,7 @@ func assertPixelsMatch(t *testing.T, match bool, img1, img2 image.Image) {
 }
 
 func TestHyperlink_Disableable(t *testing.T) {
-	link := widget.NewHyperlink("Test Link", nil)
+	link := NewHyperlink("Test Link", nil)
 	assert.False(t, link.Disabled())
 
 	link.Disable()
