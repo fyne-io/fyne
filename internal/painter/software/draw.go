@@ -415,6 +415,24 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, base, clip, pos)
 	}
 
+	if fill != nil {
+		r, g, b, a := fill.RGBA()
+		if a == 0xFFFF && bounds.Dx() > 0 && bounds.Dy() > 0 {
+			nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8)
+			for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+				off := base.PixOffset(bounds.Min.X, y)
+				endOff := base.PixOffset(bounds.Max.X, y)
+				for p := off; p < endOff; p += 4 {
+					base.Pix[p] = nr
+					base.Pix[p+1] = ng
+					base.Pix[p+2] = nb
+					base.Pix[p+3] = 0xFF
+				}
+			}
+			return
+		}
+	}
+
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }
 
