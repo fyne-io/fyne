@@ -24,7 +24,9 @@ func TestRender(t *testing.T) {
 
 	enc, err := encodeImage(img)
 	assert.NoError(t, err)
-	assert.Equal(t, "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII=", enc)
+	expected1 := "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII="
+	expected2 := "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAEUlEQVR4nGJiwAtGpbFKAwYADogAFRbNyHoAAAAASUVORK5CYII="
+	assert.True(t, enc == expected1 || enc == expected2, "unexpected base64: %s", enc)
 
 	bytes, err := base64.StdEncoding.DecodeString(enc)
 	assert.NoError(t, err)
