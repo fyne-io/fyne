@@ -237,3 +237,14 @@ func assertPixelsMatch(t *testing.T, match bool, img1, img2 image.Image) {
 		assert.NotEqual(t, pix1, pix2)
 	}
 }
+
+func TestHyperlink_Disableable(t *testing.T) {
+	link := widget.NewHyperlink("Test Link", nil)
+	assert.False(t, link.Disabled())
+
+	link.Disable()
+	assert.True(t, link.Disabled())
+
+	link.Enable()
+	assert.False(t, link.Disabled())
+}
