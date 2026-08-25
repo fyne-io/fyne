@@ -495,10 +495,14 @@ func (t *Table) ScrollTo(id TableCellID) {
 	rows, cols := t.Length()
 	if id.Row >= rows {
 		id.Row = rows - 1
+	} else if id.Row < 0 {
+		id.Row = 0
 	}
 
 	if id.Col >= cols {
 		id.Col = cols - 1
+	} else if id.Col < 0 {
+		id.Col = 0
 	}
 
 	scrollPos := t.offset
