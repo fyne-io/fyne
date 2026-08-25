@@ -41,18 +41,8 @@ func init() {
 	}
 }
 
-// LinearFromSRGB converts an 8-bit non-linear sRGB component to a 16-bit linear photometric intensity.
-func LinearFromSRGB(val uint8) uint16 {
-	return srgbToLinearLUT[val]
-}
-
-// SRGBFromLinear converts a 16-bit linear photometric intensity to an 8-bit non-linear sRGB component.
-func SRGBFromLinear(lin uint16) uint8 {
-	return linearToSrgbLUT[lin]
-}
-
 // BlendPhotometric blends a source color over a destination color in linear photometric sRGB space.
-// This physically eliminates dark fringing artifacts around anti-aliased text and translucent shapes.
+// 50% white over black yields sRGB 188 rather than 128. This primitive is not yet wired into draw.go.
 func BlendPhotometric(dst, src color.NRGBA) color.NRGBA {
 	if src.A == 0 {
 		return dst
