@@ -18,13 +18,7 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
-	// Wrapping controls how option text that does not fit the available width is wrapped.
-	// The default value, fyne.TextWrapOff, preserves the previous behaviour: text that
-	// is wider than the radio group will not be wrapped and may be clipped.
-	//
-	// When wrapping is enabled the group's height grows with the content; if the parent
-	// container does not give it enough room, items may extend beyond its bounds. Wrap
-	// the RadioGroup in a container.Scroll if scrolling is needed.
+	// Wrapping is the wrapping of the option text.
 	//
 	// Since: 2.9
 	Wrapping fyne.TextWrap
