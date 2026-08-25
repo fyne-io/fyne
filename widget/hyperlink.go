@@ -112,21 +112,42 @@ func (hl *Hyperlink) Cursor() desktop.Cursor {
 
 // Disable sets this hyperlink to be unresponsive and renders it in a greyed-out state.
 func (hl *Hyperlink) Disable() {
-	hl.disabled = true
-	hl.hovered = false
-	hl.focused = false
-	hl.Refresh()
+	if hl.disabled {
+		return
+	}
+	hl.setDisabled(true)
+	for _, s := range hl.siblings {
+		s.setDisabled(true)
+	}
 }
 
 // Enable marks this hyperlink as active and clickable.
 func (hl *Hyperlink) Enable() {
-	hl.disabled = false
-	hl.Refresh()
+	if !hl.disabled {
+		return
+	}
+	hl.setDisabled(false)
+	for _, s := range hl.siblings {
+		s.setDisabled(false)
+	}
 }
 
 // Disabled returns true if this hyperlink is currently disabled.
 func (hl *Hyperlink) Disabled() bool {
 	return hl.disabled
+}
+
+// setDisabled updates the disabled state without propagating back to siblings, avoiding recursion.
+func (hl *Hyperlink) setDisabled(disabled bool) {
+	if hl.disabled == disabled {
+		return
+	}
+	hl.disabled = disabled
+	if disabled {
+		hl.hovered = false
+		hl.focused = false
+	}
+	hl.Refresh()
 }
 
 // FocusGained is a hook called by the focus handling logic after this object gained the focus.
