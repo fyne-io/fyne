@@ -98,3 +98,16 @@ func Test_canvas_Capture_BufferReuse(t *testing.T) {
 	assert.Equal(t, b1, b2)
 	assert.Equal(t, a1, a2)
 }
+
+func Test_canvas_Capture_AntiPoisoning_Transparent(t *testing.T) {
+	c := software.NewTransparentCanvas()
+	c.Resize(fyne.NewSquareSize(100))
+
+	// Capture d'un canvas transparent : le buffer doit être vierge (0, 0, 0, 0)
+	img := c.Capture()
+	r, g, b, a := img.At(50, 50).RGBA()
+	assert.Equal(t, uint32(0), r)
+	assert.Equal(t, uint32(0), g)
+	assert.Equal(t, uint32(0), b)
+	assert.Equal(t, uint32(0), a)
+}
