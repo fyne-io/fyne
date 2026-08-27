@@ -23,7 +23,6 @@ const canvasDefaultSize = 100
 type WindowlessCanvas interface {
 	fyne.Canvas
 
-	CaptureTo(draw.Image)
 	Padded() bool
 	Resize(fyne.Size)
 	SetPadded(bool)
@@ -72,11 +71,10 @@ func newCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
 }
 
 type canvas struct {
-	size    fyne.Size
-	resized bool
-	scale   float32
-
 	content     fyne.CanvasObject
+	size        fyne.Size
+	resized     bool
+	scale       float32
 	overlays    internal.OverlayStack
 	focusMgr    *app.FocusManager
 	padded      bool
@@ -87,30 +85,32 @@ type canvas struct {
 
 	fyne.ShortcutHandler
 	painter      driver.Painter
+	captureImg   *image.NRGBA
 	propertyLock sync.RWMutex
 }
 
-func (c *canvas) CaptureTo(dst draw.Image) {
-	if dst == nil {
-		return
-	}
+func (c *canvas) Capture() image.Image {
 	cache.Clean(true)
 	size := c.Size()
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
+
+	c.propertyLock.Lock()
+	if c.captureImg == nil || c.captureImg.Rect != bounds {
+		c.captureImg = image.NewNRGBA(bounds)
+	}
+	img := c.captureImg
+	c.propertyLock.Unlock()
+
 	if !c.transparent {
-		draw.Draw(dst, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
+		draw.Draw(img, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
+	} else {
+		clear(img.Pix)
 	}
 
 	if c.painter != nil {
-		draw.Draw(dst, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
+		draw.Draw(img, bounds, c.painter.Paint(c), image.Point{}, draw.Over)
 	}
-}
 
-func (c *canvas) Capture() image.Image {
-	size := c.Size()
-	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
-	img := image.NewNRGBA(bounds)
-	c.CaptureTo(img)
 	return img
 }
 
