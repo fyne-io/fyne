@@ -417,6 +417,9 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 
 	if fill != nil {
 		r, g, b, a := fill.RGBA()
+		// Opaque axis-aligned fill (no stroke, no radius): write pixels directly.
+		// The draw.Draw(Uniform, Over) path allocates and does per-pixel Porter-Duff
+		// for a source that completely replaces the destination.
 		if a == 0xFFFF && bounds.Dx() > 0 && bounds.Dy() > 0 {
 			nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8)
 			for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
