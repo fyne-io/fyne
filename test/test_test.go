@@ -2,6 +2,7 @@ package test_test
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"os"
 	"strings"
@@ -306,4 +307,35 @@ type scrollable struct {
 
 func (s *scrollable) Scrolled(event *fyne.ScrollEvent) {
 	s.event = event
+}
+
+func TestCaptureTo(t *testing.T) {
+	c := test.NewCanvas()
+	c.Resize(fyne.NewSize(100, 100))
+
+	buf := image.NewNRGBA(image.Rect(0, 0, 100, 100))
+	test.CaptureTo(c, buf)
+
+	assert.Equal(t, image.Rect(0, 0, 100, 100), buf.Bounds())
+}
+
+func BenchmarkCanvas_Capture(b *testing.B) {
+	c := test.NewCanvas()
+	c.Resize(fyne.NewSize(200, 200))
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		_ = c.Capture()
+	}
+}
+
+func BenchmarkCanvas_CaptureTo(b *testing.B) {
+	c := test.NewCanvas()
+	c.Resize(fyne.NewSize(200, 200))
+	buf := image.NewNRGBA(image.Rect(0, 0, 200, 200))
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		test.CaptureTo(c, buf)
+	}
 }

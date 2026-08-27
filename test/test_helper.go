@@ -5,6 +5,7 @@ package test
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
+	softwaredriver "fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -88,6 +90,20 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // Since 2.3
 func AssertRendersToImage(t *testing.T, masterFilename string, c fyne.Canvas, msgAndArgs ...any) bool {
 	return AssertImageMatches(t, masterFilename, c.Capture(), msgAndArgs...)
+}
+
+// CaptureTo captures the canvas contents directly into the provided destination image.
+// If the canvas implements driver/software.WindowlessCanvas, it draws directly to dst without allocating a new image.
+//
+// Since: 2.6
+func CaptureTo(c fyne.Canvas, dst draw.Image) {
+	if wc, ok := c.(softwaredriver.WindowlessCanvas); ok {
+		wc.CaptureTo(dst)
+		return
+	}
+	if img := c.Capture(); img != nil && dst != nil {
+		draw.Draw(dst, dst.Bounds(), img, image.Point{}, draw.Src)
+	}
 }
 
 // AssertRendersToMarkup asserts that the given canvas renders the same markup as the one stored in the master file.
