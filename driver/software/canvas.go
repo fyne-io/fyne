@@ -85,7 +85,6 @@ type canvas struct {
 
 	fyne.ShortcutHandler
 	painter      driver.Painter
-	captureImg   *image.NRGBA
 	propertyLock sync.RWMutex
 }
 
@@ -93,18 +92,10 @@ func (c *canvas) Capture() image.Image {
 	cache.Clean(true)
 	size := c.Size()
 	bounds := image.Rect(0, 0, scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height))
-
-	c.propertyLock.Lock()
-	if c.captureImg == nil || c.captureImg.Rect != bounds {
-		c.captureImg = image.NewNRGBA(bounds)
-	}
-	img := c.captureImg
-	c.propertyLock.Unlock()
+	img := image.NewNRGBA(bounds)
 
 	if !c.transparent {
 		draw.Draw(img, bounds, image.NewUniform(theme.Color(theme.ColorNameBackground)), image.Point{}, draw.Src)
-	} else {
-		clear(img.Pix)
 	}
 
 	if c.painter != nil {

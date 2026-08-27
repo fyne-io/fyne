@@ -81,24 +81,6 @@ func Test_canvas_Resize(t *testing.T) {
 	assert.Equal(t, largeSize, c.Size())
 }
 
-func Test_canvas_Capture_BufferReuse(t *testing.T) {
-	c := software.NewCanvas()
-	c.Resize(fyne.NewSquareSize(100))
-
-	img1 := c.Capture()
-	img2 := c.Capture()
-
-	// Les captures successives à même dimension réutilisent le buffer interne
-	assert.Equal(t, img1, img2)
-
-	r1, g1, b1, a1 := theme.Color(theme.ColorNameBackground).RGBA()
-	r2, g2, b2, a2 := img2.At(1, 1).RGBA()
-	assert.Equal(t, r1, r2)
-	assert.Equal(t, g1, g2)
-	assert.Equal(t, b1, b2)
-	assert.Equal(t, a1, a2)
-}
-
 func Test_canvas_Capture_AntiPoisoning_Transparent(t *testing.T) {
 	c := software.NewTransparentCanvas()
 	c.Resize(fyne.NewSquareSize(100))
