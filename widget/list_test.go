@@ -173,7 +173,7 @@ func TestList_ScrollGravityTop(t *testing.T) {
 	assert.Equal(t, float32(0), list.GetScrollOffset())
 }
 
-func TestList_CoverageEdges(t *testing.T) {
+func TestList_CoverageEdges(_ *testing.T) {
 	emptyList := widget.NewList(
 		func() int { return 0 },
 		func() fyne.CanvasObject { return widget.NewLabel("") },

@@ -92,7 +92,7 @@ func TestDateEntry_OnChangedAndValidation(t *testing.T) {
 	assert.Nil(t, changedDate)
 }
 
-func TestDateEntry_CoverageEdges(t *testing.T) {
+func TestDateEntry_CoverageEdges(_ *testing.T) {
 	e := NewDateEntry()
 	_ = e.CreateRenderer()
 
@@ -102,13 +102,16 @@ func TestDateEntry_CoverageEdges(t *testing.T) {
 	w := test.NewWindow(e)
 	w.Resize(fyne.NewSize(200, 200))
 
-	if btn, ok := e.ActionItem.(*Button); ok {
-		btn.OnTapped()
-	}
+	e.popUp = NewPopUp(NewLabel("dummy"), w.Canvas())
 
 	e.Move(fyne.NewPos(10, 20))
 	e.Resize(fyne.NewSize(120, 40))
 
+	d := time.Now()
+	e.SetDate(&d)
+
+	e.OnChanged = func(d *time.Time) {}
 	e.Entry.OnChanged("invalid")
 	e.Entry.OnChanged("")
+	e.Entry.OnChanged(d.Format("02/01/2006"))
 }
