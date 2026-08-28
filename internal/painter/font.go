@@ -150,10 +150,10 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 		// Skip any nil fallback fonts — they can be nil when built with
 		// -tags no_emoji, and the lookupFaces loop expects non-nil entries.
 		var fallbacks []fyne.Resource
-		if emoji := theme.DefaultEmojiFont(); emoji != nil { // TODO only one emoji - maybe others too //lint:ignore SA4023 can be nil when built without emoji font
+		if emoji := theme.DefaultEmojiFont(); emoji != nil { // TODO only one emoji - maybe others too
 			fallbacks = append(fallbacks, emoji)
 		}
-		if sym := theme.DefaultSymbolFont(); sym != nil { //lint:ignore SA4023 can be nil when built without symbol font
+		if sym := theme.DefaultSymbolFont(); sym != nil {
 			fallbacks = append(fallbacks, sym)
 		}
 		switch {
