@@ -463,6 +463,8 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) processMouseClicked(button desktop.MouseButton, action action, modifiers fyne.KeyModifier) {
+	w.ensurePositionProcessed()
+
 	w.mouseDragPos = w.mousePos
 	mousePos := w.mousePos
 	mouseDragStarted := w.mouseDragStarted
@@ -569,6 +571,13 @@ func (w *window) processMouseClicked(button desktop.MouseButton, action action, 
 	// Check for double click/tap on left mouse button
 	if action == release && button == desktop.MouseButtonPrimary && !mouseDragStarted {
 		w.mouseClickedHandleTapDoubleTap(co, ev)
+	}
+}
+
+func (w *window) ensurePositionProcessed() {
+	if !w.mousePosUpdateProcessed {
+		w.processMouseMoved(w.newMousePosX, w.newMousePosY)
+		w.mousePosUpdateProcessed = true
 	}
 }
 
@@ -993,7 +1002,9 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 	d.init()
 
-	ret = &window{title: title, decorate: decorate, driver: d}
+	// A window starts with no mouse move outstanding: the zero value would read
+	// as one pending at (0,0), which the first click would then apply.
+	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
 	ret.frame = newPresentGate(ret)
 	ret.canvas = newCanvas()
 	ret.canvas.context = ret

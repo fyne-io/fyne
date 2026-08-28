@@ -1195,6 +1195,25 @@ func TestWindow_Tapped(t *testing.T) {
 	})
 }
 
+func TestWindow_TouchScreenTappedWithMouseMovePending(t *testing.T) {
+	w := createWindow("Test")
+	left := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	right := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	w.SetContent(container.NewGridWithColumns(2, left, right))
+	w.Resize(fyne.NewSize(200, 100))
+
+	runOnMain(func() {
+		w.moveMouse(20, 50) // the pointer comes to rest over the left object
+
+		w.mouseMoved(w.viewport, 150, 50)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+		assert.Nil(t, left.popTapEvent(), "the tap did not land where the pointer had been")
+		assert.NotNil(t, right.popTapEvent(), "the object under the tap was tapped")
+	})
+}
+
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
 	prop := canvas.NewRectangle(color.White)
