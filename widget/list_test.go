@@ -157,7 +157,7 @@ func TestList_ScrollGravityTop(t *testing.T) {
 	list := widget.NewList(
 		func() int { return itemCount },
 		func() fyne.CanvasObject { return widget.NewLabel("Item") },
-		func(id widget.ListItemID, o fyne.CanvasObject) {},
+		func(_ widget.ListItemID, _ fyne.CanvasObject) {},
 	)
 	list.Gravity = widget.ScrollGravityTop
 
