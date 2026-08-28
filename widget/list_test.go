@@ -151,3 +151,24 @@ func (r *resizeRefreshCountingLabel) Resize(s fyne.Size) {
 	r.resizeCount++
 	r.Label.Resize(s)
 }
+
+func TestList_ScrollGravityTop(t *testing.T) {
+	itemCount := 10
+	list := widget.NewList(
+		func() int { return itemCount },
+		func() fyne.CanvasObject { return widget.NewLabel("Item") },
+		func(id widget.ListItemID, o fyne.CanvasObject) {},
+	)
+	list.Gravity = widget.ScrollGravityTop
+
+	w := test.NewTempWindow(t, list)
+	w.Resize(fyne.NewSize(100, 100))
+
+	list.ScrollToTop()
+	assert.Equal(t, float32(0), list.GetScrollOffset())
+
+	itemCount = 20
+	list.Refresh()
+
+	assert.Equal(t, float32(0), list.GetScrollOffset())
+}
