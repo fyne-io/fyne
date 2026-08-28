@@ -91,3 +91,24 @@ func TestDateEntry_OnChangedAndValidation(t *testing.T) {
 	assert.Nil(t, e.Date)
 	assert.Nil(t, changedDate)
 }
+
+func TestDateEntry_CoverageEdges(t *testing.T) {
+	e := NewDateEntry()
+	_ = e.CreateRenderer()
+
+	e.Disable()
+	e.Enable()
+
+	w := test.NewWindow(e)
+	w.Resize(fyne.NewSize(200, 200))
+
+	if btn, ok := e.ActionItem.(*Button); ok {
+		btn.OnTapped()
+	}
+
+	e.Move(fyne.NewPos(10, 20))
+	e.Resize(fyne.NewSize(120, 40))
+
+	e.Entry.OnChanged("invalid")
+	e.Entry.OnChanged("")
+}
