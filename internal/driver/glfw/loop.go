@@ -138,7 +138,7 @@ func (d *gLDriver) runGL() {
 			d.Terminate()
 			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
-				l.QueueEvent(f)
+				f()
 			}
 
 			// as we are shutting down make sure we drain the pending funcQueue and close it out.
