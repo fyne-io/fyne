@@ -11,6 +11,18 @@ import (
 var (
 	overrides     async.Map[fyne.CanvasObject, *overrideScope]
 	overrideCount atomic.Uint32
+
+	// Provide an extra fast means of accessing the override
+	// for a given object multiple times in succession.
+	// (e.g. repeated calls to theme.ColorForWidget(colorName, wid))
+	//
+	// This should be set to the last queried entry in the overrides map
+	//
+	// Whenever an entry is deleted from overrides during cache clean,
+	// if that entry is the current one here, both of these fields
+	// should be set to nil as well
+	currentOverrideObj   fyne.CanvasObject
+	currentOverrideScope *overrideScope
 )
 
 type overrideScope struct {
@@ -30,7 +42,7 @@ func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 }
 
 func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
-	scope, ok := overrides.Load(parent)
+	scope, ok := lookupOverride(o)
 	if !ok { // not overridden in parent
 		return false
 	}
@@ -40,7 +52,7 @@ func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
 }
 
 func WidgetScopeID(o fyne.CanvasObject) string {
-	scope, ok := overrides.Load(o)
+	scope, ok := lookupOverride(o)
 	if !ok {
 		return ""
 	}
@@ -49,7 +61,7 @@ func WidgetScopeID(o fyne.CanvasObject) string {
 }
 
 func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
-	scope, ok := overrides.Load(o)
+	scope, ok := lookupOverride(o)
 	if !ok {
 		return nil
 	}
@@ -74,13 +86,13 @@ func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
 	case *fyne.Container:
 		overrideContainer(c, s)
 	default:
-		overrides.Store(c, s)
+		storeOverride(c, s)
 	}
 }
 
 func overrideWidget(w fyne.Widget, s *overrideScope) {
 	ResetThemeCaches()
-	overrides.Store(w, s)
+	storeOverride(w, s)
 
 	r := Renderer(w)
 	if r == nil {
@@ -90,4 +102,21 @@ func overrideWidget(w fyne.Widget, s *overrideScope) {
 	for _, o := range r.Objects() {
 		overrideTheme(o, s)
 	}
+}
+
+func lookupOverride(o fyne.CanvasObject) (*overrideScope, bool) {
+	if currentOverrideObj == o {
+		return currentOverrideScope, currentOverrideScope != nil
+	}
+	s, ok := overrides.Load(o)
+	currentOverrideObj = o
+	currentOverrideScope = s
+	return s, ok
+}
+
+func storeOverride(o fyne.CanvasObject, s *overrideScope) {
+	if currentOverrideObj == o {
+		currentOverrideScope = s
+	}
+	overrides.Store(o, s)
 }
