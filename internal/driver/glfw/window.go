@@ -935,10 +935,11 @@ func (w *window) triggerMainMenuShortcut(sh fyne.Shortcut) bool {
 }
 
 func (w *window) RunWithContext(f func()) {
-	if w.isClosing() {
+	v := w.view()
+	if v == nil {
 		return
 	}
-	w.view().MakeContextCurrent()
+	v.MakeContextCurrent()
 
 	f()
 

@@ -598,6 +598,19 @@ func (w *window) view() *glfw.Window {
 	return w.viewport
 }
 
+// destroyViewport destroys the underlying GLFW window and clears the pointer
+// first, so a later view() / isClosing() observes the destruction and never
+// hands out a pointer to an already-destroyed window. Safe to call once; later
+// calls are no-ops. Must run on the main goroutine, like the rest of the GLFW
+// lifecycle.
+func (w *window) destroyViewport() {
+	vp := w.viewport
+	w.viewport = nil
+	if vp != nil {
+		vp.Destroy()
+	}
+}
+
 // wrapInner represents a window that is provided by an InnerWindow container in the canvas.
 type wrapInner struct {
 	fyne.Window

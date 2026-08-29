@@ -1987,6 +1987,20 @@ func TestWindow_ClosedBeforeShow(t *testing.T) {
 	assert.NotPanics(t, func() { w.closed(nil) })
 }
 
+// fyne#3874: viewport.Destroy() does not nil w.viewport, so view() keeps
+// handing a dead handle to the draw thread. After Destroy(), view() must
+// return nil — otherwise RunWithContext drives MakeContextCurrent on a
+// destroyed GLFW window (SIGSEGV on macOS, BadWindow on X11).
+func TestWindow_RunWithContext_AfterViewportDestroyed(t *testing.T) {
+	w := createWindow("Race-Destroyed")
+
+	runOnMain(func() {
+		w.window.destroyViewport()
+	})
+
+	require.Nil(t, w.window.view(), "view() must be nil after destroyViewport()")
+}
+
 func TestWindow_SetContent_Twice(t *testing.T) {
 	w := createWindow("Test")
 
