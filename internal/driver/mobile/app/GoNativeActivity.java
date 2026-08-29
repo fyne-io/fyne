@@ -37,6 +37,11 @@ import android.widget.TextView.OnEditorActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+// GoNativeActivity is the java implementation that helps Go map to android via the NDK.
+// If you modify this, you need to regenerate the `dex.go` file with the `gendex` util.
+// They should be located
+// - ./cmd/fyne/internal/mobile/dex.go
+// - ./cmd/fyne/internal/mobile/gendex/
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
