@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
@@ -298,11 +299,11 @@ func TestRadioGroupRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadioGroup([]string{"Test"}, func(string) {})
 	render := radioGroupTestItemRenderer(t, radio, 0)
 
-	textSize := render.label.TextSize
+	textSize := test.TempWidgetRenderer(t, render.label).Objects()[0].(*canvas.Text).TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
 		render.Refresh()
-		customTextSize = render.label.TextSize
+		customTextSize = test.TempWidgetRenderer(t, render.label).Objects()[0].(*canvas.Text).TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
