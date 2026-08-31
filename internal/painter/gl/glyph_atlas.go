@@ -15,17 +15,11 @@ import (
 )
 
 const (
-	// The atlas holds one byte of coverage per pixel rather than four of
-	// colour, so this is 4 MiB on the GPU and the same again on the CPU, the
-	// size a 1024 square RGBA atlas used to cost while holding four times as
-	// many glyphs. Headroom matters most at phone pixel densities, where a
-	// glyph covers nine times the area it does at 1x.
+	// Coverage is one byte per pixel, so each atlas costs 4 MiB.
 	glyphAtlasTexSize = 2048
 	glyphAtlasPad     = 1
 
-	// Colour glyphs, meaning emoji and anything else from a bitmap or COLR
-	// face, cannot be reduced to coverage and need their own smaller atlas of
-	// full colour. There are far fewer of them than there are letters.
+	// Colour glyphs such as emoji cannot reduce to coverage and need their own.
 	glyphColourAtlasTexSize = 1024
 
 	// Device sizes at which fewer sub-pixel positions are kept. A quarter of a
@@ -33,24 +27,17 @@ const (
 	subpixelFullSizePx = 24
 	subpixelHalfSizePx = 48
 
-	// GL's default unpack alignment. Glyph slots are placed and sized to it so
-	// that uploading a single byte texture never needs it changed, which fyne's
-	// mobile GL binding has no call for.
+	// GL's default unpack alignment, which slot placement respects so that
+	// single byte uploads never need it changed.
 	glyphAtlasRowAlign = 4
 
-	// Most horizontal sub-pixel positions a glyph is rasterised at. Kerning puts
-	// glyphs on fractional positions, and a bitmap can only be drawn on whole
-	// pixels, so the fraction is baked into the bitmap rather than rounded away
-	// (uneven spacing) or resampled at draw time (blurred edges).
+	// Most sub-pixel positions a glyph is rasterised at, so that kerning is not
+	// rounded to whole pixels.
 	subpixelPhases = 4
 )
 
 // subpixelPhasesFor returns how many sub-pixel positions to keep for glyphs
-// whose em box is emPx device pixels. Each one costs another copy of every
-// glyph, and what it buys shrinks as the glyphs grow: a quarter of a pixel is a
-// visible slice of a small stroke and nothing at all on a large one. Large text
-// therefore settles for halves, which is what makes a screen of CJK at phone
-// density fit in the atlas at all.
+// with an em box of emPx device pixels. Larger glyphs need fewer.
 func subpixelPhasesFor(emPx float32) int {
 	switch {
 	case emPx <= subpixelFullSizePx: // small text, where uneven spacing is easiest to see
@@ -62,10 +49,8 @@ func subpixelPhasesFor(emPx float32) int {
 	}
 }
 
-// glyphAtlasKey identifies a glyph bitmap. Colour is deliberately absent:
-// bitmaps hold coverage and are tinted when drawn, so one entry serves every
-// colour. Keying on colour instead multiplied the entry count by the number of
-// colours in the theme, which overflowed the atlas at phone pixel densities.
+// glyphAtlasKey identifies a glyph bitmap. Colour is absent because bitmaps
+// hold coverage and are tinted when drawn.
 type glyphAtlasKey struct {
 	face    *font.Face // pointer identity; stable while fontCache is alive
 	gid     font.GID
@@ -91,8 +76,7 @@ type glyphAtlasEntry struct {
 	colour   bool // lives in the colour atlas and is drawn untinted
 }
 
-// glyphGPUAtlas packs pre-rasterised glyphs into a single GPU texture holding
-// one byte of coverage per pixel. New glyphs are appended with a simple shelf
+// glyphGPUAtlas packs rasterised glyphs into one GPU texture with a shelf
 // packer. It is per-painter, so it lives and dies with one GL context.
 type glyphGPUAtlas struct {
 	// pixels is the CPU copy of the texture, row major, bpp bytes per pixel:
@@ -103,14 +87,11 @@ type glyphGPUAtlas struct {
 	texSize int
 	entries map[glyphAtlasKey]glyphAtlasEntry
 
-	// generation counts resets. Callers that collect several entries before
-	// drawing compare it either side to notice that the entries they gathered
-	// were invalidated part way through.
+	// generation counts resets, so callers can tell that entries they hold are stale.
 	generation int
 
-	// resetPending records that a glyph could not be packed. The reset itself
-	// waits for the caller to reach a point where no half-built string depends
-	// on the current layout.
+	// resetPending records that a glyph would not fit. The caller resets between
+	// strings, where nothing half built depends on the layout.
 	resetPending bool
 
 	// shelf packer cursor
@@ -140,9 +121,8 @@ func newGlyphAtlasOfDepth(texSize, bpp int) *glyphGPUAtlas {
 	}
 }
 
-// isColour reports whether a rasterised glyph carries colour of its own. Glyphs
-// are rendered white, so an ordinary outline comes back with every channel
-// equal to its coverage; an emoji does not.
+// isColour reports whether a rasterised glyph carries colour of its own.
+// Glyphs render white, so an outline has every channel equal to its coverage.
 func isColour(img *image.RGBA) bool {
 	for i := 0; i+3 < len(img.Pix); i += 4 {
 		a := img.Pix[i+3]
@@ -165,27 +145,18 @@ func (*glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, sca
 	}
 }
 
-// getOrAdd returns the atlas entry for a glyph, adding it on a miss.
-// The second return value is the dirty rectangle written into cpuImg; it is
-// empty when the entry was already cached so no GPU upload is needed.
-// add packs an already rasterised glyph. The caller decides which atlas a glyph
-// belongs in, since that depends on whether it came back with colour.
+// add packs an already rasterised glyph, returning its entry and the region
+// of the atlas to upload.
 func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline int) (glyphAtlasEntry, image.Rectangle) {
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
-	// A glyph bigger than the atlas cannot be packed at any offset, and writing
-	// it anyway would run past the end of the texture. Report it as empty so it
-	// is skipped rather than drawn wrongly; only text far larger than the atlas
-	// is affected.
+	// A glyph larger than the atlas cannot be packed at any offset.
 	if w > a.texSize || h > a.texSize {
 		return glyphAtlasEntry{}, image.Rectangle{}
 	}
 
-	// Slots are a multiple of glyphAtlasRowAlign wide and start on the same
-	// boundary, so every row of a sub-image upload begins on a boundary GL is
-	// content to read a single byte texture from. Without that its default
-	// unpack alignment misreads each row of a glyph whose width is not a
-	// multiple of four, and the text comes out sheared.
+	// Slots start and end on the unpack alignment so that single byte rows
+	// upload correctly; misaligned rows come out sheared.
 	slotW := (w + glyphAtlasPad + glyphAtlasRowAlign - 1) / glyphAtlasRowAlign * glyphAtlasRowAlign
 
 	// Advance to a new shelf if the glyph does not fit in the current row.
@@ -195,17 +166,13 @@ func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline in
 		a.shelfH = 0
 	}
 	if a.shelfY+h > a.texSize {
-		// Full. Resetting here would move entries that the caller has already
-		// collected for the string it is part way through, so the glyph is
-		// dropped for now and the reset left for the caller to trigger between
-		// passes, where it invalidates nothing mid-flight.
+		// Full. Resetting now would move entries the caller already holds, so ask
+		// for a reset between strings instead.
 		a.resetPending = true
 		return glyphAtlasEntry{}, image.Rectangle{}
 	}
 
-	// A coverage atlas keeps only the alpha channel, since the glyph was
-	// rasterised in white and the colour channels then carry nothing. A colour
-	// atlas keeps the lot.
+	// A coverage atlas keeps only alpha, a colour atlas every channel.
 	atlasX, atlasY := a.shelfX, a.shelfY
 	for y := 0; y < h; y++ {
 		src := glyphImg.PixOffset(0, y)
@@ -228,15 +195,12 @@ func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline in
 	}
 	a.shelfX += slotW
 
-	// The upload covers the whole slot, not just the glyph, so both its start
-	// and its width stay on the alignment boundary. The padding columns were
-	// left at zero coverage, so uploading them changes nothing on screen.
+	// Upload the whole slot so that offset and width stay aligned.
 	return entry, image.Rect(atlasX, atlasY, atlasX+slotW, atlasY+h)
 }
 
-// glyphEntry finds a glyph in whichever atlas holds it, rasterising and filing
-// it on a miss. Which atlas that is depends on the glyph: letters reduce to
-// coverage and are tinted when drawn, emoji keep their own colours.
+// glyphEntry returns the atlas entry for a glyph, rasterising and filing it on
+// a miss. Colour glyphs go to the colour atlas, the rest to the coverage one.
 func (p *painter) glyphEntry(run shaping.Output, idx, phase, phases int, fontSize, scale float32) glyphAtlasEntry {
 	key := p.glyphAtlas.cacheKey(run, idx, phase, fontSize, scale)
 	if entry, ok := p.glyphAtlas.entries[key]; ok {
@@ -282,9 +246,7 @@ func (p *painter) ensureGlyphAtlas() {
 	p.uploadAtlas(p.glyphColourAtlas)
 }
 
-// uploadAtlas sends the whole atlas to the GPU. Needed after a reset, where the
-// texture still holds the previous layout's pixels and the incremental uploads
-// only cover glyphs added since.
+// uploadAtlas sends the whole atlas to the GPU, which a reset requires.
 func (p *painter) uploadAtlas(a *glyphGPUAtlas) {
 	format := uint32(colorFormatAlpha)
 	if a.bpp == 4 {
@@ -316,20 +278,15 @@ func (p *painter) uploadAtlasRegion(atlas *glyphGPUAtlas, dirty image.Rectangle)
 	p.logError()
 }
 
-// A glyph quad is emitted as two triangles rather than a strip, because a strip
-// cannot describe several disjoint quads in one draw without degenerate
-// vertices joining them.
+// Two triangles per quad: a strip cannot describe disjoint quads in one draw.
 const (
 	verticesPerGlyph = 6
 	floatsPerGlyph   = verticesPerGlyph * coordinateSize2DWithTexture
 )
 
-// textVertices is the cached glyph geometry for one canvas.Text, held in its
-// own GPU buffer. The vertices are in device pixels relative to the string
-// origin rather than in clip space, so neither the data nor the buffer needs
-// touching while the object merely moves, which is what happens to every
-// visible string on every frame of a scroll. Drawing a cached string uploads
-// nothing at all.
+// textVertices is the cached glyph geometry for one string, in its own GPU
+// buffer. Vertices are device pixels relative to the string origin, so moving
+// the text needs no new upload.
 type textVertices struct {
 	buffer Buffer
 	// Coverage glyphs come first in the buffer and colour glyphs after, so each
@@ -341,24 +298,14 @@ type textVertices struct {
 	pixScale   float32 // scale the glyphs were laid out and rasterised at
 }
 
-// usable reports whether cached geometry can be drawn as it stands. It cannot
-// once the atlas has reset, since every texture coordinate in it then points at
-// the wrong place, nor once the scale has changed, since the glyphs were both
-// laid out and rasterised for the old one.
+// usable reports whether cached geometry can still be drawn: not after an
+// atlas reset, which moves every texture coordinate, nor after a scale change.
 func (v *textVertices) usable(generation int, pixScale float32) bool {
 	return v != nil && v.generation == generation && v.pixScale == pixScale
 }
 
-// appendGlyphQuad adds one glyph's two triangles to points and returns the
-// extended slice. The quad samples the sub-region [entry.x, entry.y,
-// entry.x+entry.w, entry.y+entry.h] of the shared atlas texture.
-//
-// offX and offY are the glyph's device-pixel offset from the string origin.
-// offX is already a whole pixel, its fractional part having been rasterised
-// into the bitmap as a sub-pixel offset, so the quad maps one texel to one
-// pixel and stays crisp while still sitting where kerning asked for it. offY
-// is rounded here, since vertical sub-pixel positioning buys nothing on a
-// shared baseline.
+// appendGlyphQuad adds one glyph's two triangles to points. offX and offY are
+// its whole-pixel offset from the string origin.
 func (*painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, offY float32, atlas *glyphGPUAtlas) []float32 {
 	x1 := offX
 	y1 := float32(math.Round(float64(offY)))
@@ -384,14 +331,8 @@ func (*painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, o
 	)
 }
 
-// glyphCacheKey identifies cached geometry by what the glyphs are, not by which
-// object is showing them, mirroring how the per-string textures were keyed
-// before this. Colour is left unset because the atlas holds coverage and the
-// tint is a uniform, so one set of quads serves the same words in every colour.
-//
-// Keying on the object instead would look right and behave badly: a widget that
-// refreshes rebuilds every string it draws, so typing into an Entry rebuilt the
-// whole visible text on each keystroke rather than the line that changed.
+// glyphCacheKey identifies cached geometry by the text rather than the object
+// drawing it, so a refresh that leaves the words alone keeps the geometry.
 func glyphCacheKey(text *canvas.Text, c fyne.Canvas) cache.FontCacheEntry {
 	source := ""
 	if text.FontSource != nil {
@@ -406,11 +347,7 @@ func glyphCacheKey(text *canvas.Text, c fyne.Canvas) cache.FontCacheEntry {
 	return ent
 }
 
-// glyphGeometry returns the glyph quads for text, building them only when there
-// is no usable cached copy. A cached entry survives both the object moving and
-// the object being refreshed, and is discarded when the scale changes, when the
-// atlas has reset and every texture coordinate in it has gone stale, or when
-// the text it belongs to has not been drawn for long enough to expire.
+// glyphGeometry returns the glyph quads for text, building them on a miss.
 func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *textVertices {
 	key := glyphCacheKey(text, p.canvas)
 	if cached := p.textCache[key]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
@@ -418,12 +355,9 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 		return cached
 	}
 
-	// The atlas can run out of room part way through a string. It does not
-	// reset under us when that happens, it asks for one, so the quads gathered
-	// so far all still address the layout they were built against. The pass is
-	// then repeated against the emptied atlas. Only a string whose own glyphs
-	// exceed the whole atlas can fail twice, and it settles for what fits
-	// rather than looping or drawing against coordinates that have moved.
+	// A full atlas asks to be reset rather than resetting itself, so the quads
+	// gathered so far stay valid. One retry is enough unless a single string
+	// needs more than the whole atlas.
 	phases := subpixelPhasesFor(text.TextSize * p.pixScale)
 	var colourBatch []float32
 	for attempt := 0; attempt < 2; attempt++ {
@@ -442,9 +376,8 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 				if entry.w == 0 { // did not fit the atlas
 					return
 				}
-				// The bitmap carries its own baseline, which is the run's ascent
-				// rather than the line's. Offsetting by the difference keeps runs
-				// from differently sized faces on the one baseline (see #6448).
+				// The bitmap's baseline is its own run's ascent, not the line's; the
+				// difference keeps mixed faces on one baseline (#6448).
 				offY := baseY - float32(entry.baseline) - yOff
 				if entry.colour {
 					colourBatch = p.appendGlyphQuad(colourBatch, entry, wholeX, offY, p.glyphColourAtlas)
@@ -479,9 +412,8 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 		}
 		p.textCache[key] = cached
 
-		// Registered with the text cache purely for its lifetime: it holds no
-		// texture, but this is what expires entries whose words have not been
-		// on screen for a while, and calls back so the buffer can go with them.
+		// Registered with the text cache for lifetime only: it holds no texture,
+		// but expiry calls back so the buffer can be freed.
 		cache.SetTextTexture(key, cache.NoTexture, p.canvas, func() {
 			p.ctx.DeleteBuffer(cached.buffer)
 			p.logError()
@@ -493,9 +425,8 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 	cached.generation = generation
 	cached.pixScale = p.pixScale
 
-	// The only upload these words need until they leave the screen. Skipped when
-	// every glyph was too large to pack, both because there is nothing to send
-	// and because the desktop path takes the address of the first element.
+	// The only upload until these words leave the screen. Skipped when empty,
+	// which BufferData cannot take.
 	if len(p.textBatch) > 0 {
 		p.ctx.BindBuffer(arrayBuffer, cached.buffer)
 		p.ctx.BufferData(arrayBuffer, p.textBatch, staticDraw)
@@ -504,11 +435,9 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 	return cached
 }
 
-// drawGlyphBatch issues every glyph quad of one string as a single draw call.
-// The vertices are relative to the string origin, so pos places them and frame
-// converts device pixels into clip space. The atlas holds coverage rather than
-// colour, so col tints the whole batch, which is why one string's glyphs can
-// share an entry with the same glyphs drawn elsewhere in another colour.
+// drawGlyphBatch draws one string's glyph quads. Vertices are relative to the
+// string origin, which pos and frame place in clip space, and col tints the
+// coverage glyphs.
 func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne.Position, frame fyne.Size) {
 	if cached.vertices == 0 && cached.colourVertices == 0 {
 		return
@@ -535,11 +464,7 @@ func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne
 		2/(frame.Width*p.pixScale),
 		-2/(frame.Height*p.pixScale))
 
-	// getFragmentColor hands back straight colour with alpha alongside, which
-	// suits the shape shaders because they blend with SRC_ALPHA. Text goes
-	// through the premultiplied blend that the texture paths use, so the colour
-	// has to be premultiplied to match, or anything drawn with alpha below one
-	// comes out too bright.
+	// The blend is premultiplied, so the colour must be too.
 	r, g, b, a := getFragmentColor(col)
 	p.SetUniform4f(p.programs.text, attrColor, r*a, g*a, b*a, a)
 
@@ -562,11 +487,8 @@ func (p *painter) drawGlyphBatch(cached *textVertices, col color.Color, pos fyne
 		p.logError()
 	}
 
-	// Leave no vertex attribute array pointing into this object's buffer. Every
-	// other program draws from a buffer that lives as long as the context, but
-	// these are freed when their text is refreshed, and without VAOs the
-	// pointers are global state: a later draw would read from a deleted buffer.
-	// Typing does exactly that, freeing a buffer on every keystroke.
+	// Point the attribute arrays back at a buffer that outlives this one: without
+	// VAOs they are global state, and this buffer is freed when the text changes.
 	p.ctx.BindBuffer(arrayBuffer, p.programs.text.buff)
 	p.UpdateVertexArray(p.programs.text, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.text, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)

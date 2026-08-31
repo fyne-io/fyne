@@ -16,8 +16,7 @@ import (
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
-// glyphAt shapes s and returns the run and index of its first glyph, giving
-// tests a real shaped glyph to rasterise rather than a synthetic one.
+// glyphAt shapes s and returns its first glyph.
 func glyphAt(t *testing.T, s string, size, scale float32) (shaping.Output, int) {
 	t.Helper()
 
@@ -37,8 +36,7 @@ func glyphAt(t *testing.T, s string, size, scale float32) (shaping.Output, int) 
 	return run, idx
 }
 
-// addGlyph rasterises a glyph and files it, which is what the painter does in
-// two steps so that it can pick the atlas based on whether the glyph has colour.
+// addGlyph rasterises a glyph and files it in the atlas.
 func addGlyph(a *glyphGPUAtlas, run shaping.Output, idx, phase, phases int, size, scale float32) (glyphAtlasEntry, image.Rectangle) {
 	key := a.cacheKey(run, idx, phase, size, scale)
 	if e, ok := a.entries[key]; ok {
@@ -72,8 +70,7 @@ func TestSubpixelPhaseAt(t *testing.T) {
 	}
 }
 
-// TestSubpixelPhaseAtInRange is the property the atlas relies on: the phase is
-// always a valid index and the whole part never runs ahead of the position.
+// The phase must always be a valid index and the whole part never ahead of x.
 func TestSubpixelPhaseAtInRange(t *testing.T) {
 	for x := float32(-5); x < 5; x += 0.013 {
 		phase, whole := subpixelPhaseAt(x, subpixelPhases)
@@ -123,10 +120,8 @@ func TestGlyphAtlasGetOrAdd(t *testing.T) {
 	assert.NotEqual(t, entry.x, shifted.x, "phases should occupy different atlas slots")
 }
 
-// TestGlyphAtlasAsksForResetWhenFull covers the packer running out of room. It
-// must not reset itself: a caller part way through a string is holding texture
-// coordinates from the current layout, and moving them under it would draw
-// those glyphs from whatever now occupies those slots.
+// A full atlas must ask for a reset rather than resetting itself, since a
+// caller part way through a string is holding coordinates from the current layout.
 func TestGlyphAtlasAsksForResetWhenFull(t *testing.T) {
 	run, idx := glyphAt(t, "A", 20, 1)
 	atlas := newGlyphGPUAtlas(64)
@@ -152,9 +147,7 @@ func TestGlyphAtlasAsksForResetWhenFull(t *testing.T) {
 	assert.Positive(t, before, "sanity: the atlas held entries before the reset")
 }
 
-// TestGlyphAtlasSkipsOversizedGlyph guards a glyph too large for the atlas to
-// hold. It cannot be packed at any offset, and writing it anyway would run off
-// the end of the texture.
+// A glyph too large for the atlas cannot be packed and must be skipped.
 func TestGlyphAtlasSkipsOversizedGlyph(t *testing.T) {
 	run, idx := glyphAt(t, "W", 40, 1)
 	atlas := newGlyphGPUAtlas(8) // far smaller than any glyph at this size
@@ -166,10 +159,7 @@ func TestGlyphAtlasSkipsOversizedGlyph(t *testing.T) {
 	})
 }
 
-// TestGlyphAtlasColourIndependence is the property that keeps the atlas within
-// capacity on a real themed UI. Before this, colour was part of the key, so the
-// same text in foreground, disabled and placeholder colours stored three copies
-// of every glyph, and a phone at 3x density overflowed on the second colour.
+// Colour must not add atlas entries, or a themed UI overflows the atlas.
 func TestGlyphAtlasColourIndependence(t *testing.T) {
 	ascii := " !#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	face := paint.CachedFontFace(fyne.TextStyle{}, nil, nil)
@@ -202,10 +192,7 @@ func TestGlyphAtlasColourIndependence(t *testing.T) {
 	assert.False(t, atlas.resetPending, "repeated colours must not fill the atlas")
 }
 
-// TestGlyphCacheKey pins what cached geometry is keyed on. Keying it on the
-// object rather than the words looked equivalent and was not: a widget that
-// refreshes rebuilds every string it draws, so typing into an Entry rebuilt all
-// the visible text on every keystroke instead of the line that changed.
+// Cached geometry is keyed on the text, not the object drawing it.
 func TestGlyphCacheKey(t *testing.T) {
 	base := &canvas.Text{Text: "hello", TextSize: 14}
 	key := glyphCacheKey(base, nil)
@@ -229,10 +216,7 @@ func TestGlyphCacheKey(t *testing.T) {
 	}
 }
 
-// TestTextVerticesUsable covers when cached glyph geometry may be reused. Both
-// negative cases would draw the wrong thing rather than fail loudly: stale
-// texture coordinates point at whatever now occupies that part of the atlas,
-// and stale scale draws glyphs rasterised for a different pixel density.
+// Cached geometry must not be reused after an atlas reset or a scale change.
 func TestTextVerticesUsable(t *testing.T) {
 	cached := &textVertices{generation: 3, pixScale: 2}
 
@@ -271,9 +255,7 @@ func TestAppendGlyphQuad(t *testing.T) {
 	assert.Equal(t, map[float32]bool{4.0 / 64: true, 12.0 / 64: true}, vs)
 }
 
-// TestAppendGlyphQuadKeepsOrigin checks that the quad is placed exactly where
-// asked, without re-rounding: the caller has already split the position into the
-// whole pixel drawn on and the fraction rasterised into the bitmap.
+// The quad is placed where asked, without re-rounding.
 func TestAppendGlyphQuadKeepsOrigin(t *testing.T) {
 	p := &painter{pixScale: 1}
 	p.glyphAtlas = newGlyphGPUAtlas(64)
@@ -297,9 +279,7 @@ func TestAppendGlyphQuadAccumulates(t *testing.T) {
 	assert.Len(t, points, 2*floatsPerGlyph, "each glyph should add to the batch rather than replace it")
 }
 
-// TestIsColour separates glyphs that reduce to coverage from those carrying
-// their own colours. Getting it wrong drew emoji as flat silhouettes, because
-// only the alpha channel of a colour bitmap was kept.
+// Colour glyphs must be told apart from outlines, or emoji lose their colour.
 func TestIsColour(t *testing.T) {
 	face := paint.CachedFontFace(fyne.TextStyle{}, nil, nil)
 

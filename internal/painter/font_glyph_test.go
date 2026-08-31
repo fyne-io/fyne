@@ -54,10 +54,7 @@ func TestWalkStringGlyphs_Empty(t *testing.T) {
 	assert.Empty(t, walkGlyphs(t, "", 14, 1), "an empty string has no glyphs")
 }
 
-// TestWalkStringGlyphs_PositionsAreExact guards the regression that made letter
-// spacing uneven: positions used to be rounded to whole pixels inside the walk,
-// which discarded the fractional part of every advance. Landing on the pixel
-// grid is the caller's decision, so the positions handed out here must be exact.
+// Positions must keep their fractional part; rounding them made spacing uneven.
 func TestWalkStringGlyphs_PositionsAreExact(t *testing.T) {
 	// A long mixed string at a scale that will not divide evenly, so at least
 	// one glyph is certain to land off the pixel grid.
@@ -88,9 +85,7 @@ func TestRenderGlyphToImage(t *testing.T) {
 	assert.NotZero(t, inkPixels(img), "a rendered 'M' should put ink in the bitmap")
 }
 
-// TestRenderGlyphToImage_SubpixelShiftsInk checks that the sub-pixel offset is
-// actually rasterised into the bitmap rather than ignored, which is what lets a
-// glyph sit on a fractional position without being resampled at draw time.
+// The sub-pixel offset must be rasterised into the bitmap, not ignored.
 func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 	glyphs := walkGlyphs(t, "l", 32, 1)
 	require.Len(t, glyphs, 1)
@@ -111,10 +106,7 @@ func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 		"a positive sub-pixel offset should not move ink left")
 }
 
-// TestRenderGlyphToImage_IsCoverageNotColour pins the property that lets one
-// bitmap serve a glyph in every colour it is drawn in. Baking colour in here
-// instead would multiply the number of cached bitmaps by the number of colours
-// a theme uses, which is enough to overflow the atlas at phone pixel densities.
+// The bitmap must carry coverage, not colour, so one copy serves every colour.
 func TestRenderGlyphToImage_IsCoverageNotColour(t *testing.T) {
 	glyphs := walkGlyphs(t, "X", 24, 1)
 	require.Len(t, glyphs, 1)
@@ -167,9 +159,7 @@ func firstInkColumn(img *image.RGBA) int {
 	return img.Bounds().Dx()
 }
 
-// TestWalkStringGlyphs_UnmappableCodepoint guards a regression: a codepoint no
-// font can draw used to be skipped entirely, so where the software renderer
-// shows a replacement character the GL path showed a gap.
+// A codepoint no font can draw must still produce a glyph.
 func TestWalkStringGlyphs_UnmappableCodepoint(t *testing.T) {
 	// A private-use plane codepoint no bundled font maps.
 	glyphs := walkGlyphs(t, "a\U0010FFFDb", 20, 1)

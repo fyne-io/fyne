@@ -70,7 +70,7 @@ func (p *painter) Init() {
 	glctx := p.contextProvider.Context().(gl.Context)
 	glctx.Disable(gl.DepthTest)
 	glctx.Enable(gl.Blend)
-	p.ctx = wrapContext(&mobileContext{glContext: glctx})
+	p.ctx = &mobileContext{glContext: glctx}
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	p.blurSnap.texValid = false   // reset on context recreation; old texture IDs are no longer valid
 	p.blurKernel.texValid = false // kernel texture must also be re-created

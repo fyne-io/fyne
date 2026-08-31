@@ -10,9 +10,7 @@ precision mediump int;
 precision lowp sampler2D;
 #endif
 
-// The atlas holds one byte of glyph coverage per pixel rather than colour, so a
-// single bitmap serves every colour a glyph is drawn in and the tint is applied
-// here. color is alpha premultiplied, matching the blend the painter sets up.
+// Coverage glyphs are tinted by color; colour glyphs are drawn as rasterised.
 
 uniform sampler2D tex;
 uniform vec4 color;

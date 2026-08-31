@@ -71,16 +71,8 @@ func (p *painter) Clear() {
 }
 
 func (p *painter) Free(obj fyne.CanvasObject) {
-	// Shader programs are immutable and compiled once per Shader.Name, living for
-	// the lifetime of the GL context like the built-in shader programs. They are
-	// deliberately not freed here: Free is also called for every object on each
-	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
-	// program - and reset its animation clock - every single frame.
-	//
-	// Glyph geometry is deliberately not dropped here either. It is keyed by
-	// the words rather than the object showing them, so a refresh that leaves
-	// the text alone should keep it, and the text cache expires it on its own
-	// once those words stop being drawn.
+	// Glyph geometry is keyed by the text rather than the object, so it is left for
+	// the text cache to expire.
 	p.freeTexture(obj)
 }
 

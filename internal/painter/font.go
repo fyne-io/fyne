@@ -219,33 +219,20 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	})
 }
 
-// WalkStringGlyphs calls cb once for each glyph in s. The callback receives
-// the shaped run containing the glyph, the glyph's index within run.Glyphs,
-// the accumulated pen X position in device pixels at the start of that glyph,
-// the shared baseline Y for the line in device pixels, and the HarfBuzz X/Y
-// positioning offsets (also in device pixels).
+// WalkStringGlyphs calls cb once for each glyph in s, passing the shaped run,
+// the glyph's index within it, the pen X at that glyph, the shared baseline Y
+// for the line, and the glyph's X and Y offsets, all in device pixels.
 //
-// baseY is the same value for every run in the string, taken from the largest
-// ascent across the runs, so glyphs from differently sized faces sit on one
-// baseline rather than each on their own.
-//
-// All four positions are exact rather than rounded to whole pixels. Kerning
-// routinely moves a glyph by a fraction of a pixel, and rounding it away is
-// visible as uneven letter spacing, so it is left to the caller to decide how
-// to land on the pixel grid.
-//
-// A run of a single unmapped glyph, meaning a codepoint no available font can
-// draw, is replaced by a shaped replacement character, which is what the
-// software renderer puts there.
+// Positions are exact rather than rounded, leaving the caller to decide how to
+// land on the pixel grid. Unmappable codepoints yield a replacement character.
 func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
 	cb func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32),
 ) {
 	advance := float32(0)
 	size := float32ToFixed266(fontSize)
 	walkString(f, s, size, style, &advance, scale, func(run shaping.Output, x, y float32) {
-		// A run of one unmapped glyph is a codepoint no font could provide. The
-		// software renderer draws a replacement character rather than a gap, so
-		// shape one and hand that over in its place.
+		// A codepoint no font can provide is drawn as a replacement character, which is
+		// what the software renderer does.
 		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
 			face := f.ResolveFace(replacementChar)
 			if face == nil {
@@ -273,28 +260,10 @@ func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.
 	})
 }
 
-// RenderGlyphToImage rasterises a single glyph from run (at index idx) into a
-// freshly allocated RGBA image. The glyph's own XOffset and YOffset are dropped
-// so the result does not depend on the kerning context it happened to appear
-// in, which is what lets one bitmap serve every occurrence of the glyph.
-//
-// subpixel shifts the glyph right by that fraction of a pixel while rasterising,
-// and must be in [0,1). Text is laid out on fractional positions but a bitmap
-// can only be drawn on whole pixels, so the fraction is rasterised into the
-// bitmap instead of being rounded away or resampled at draw time. Callers hold
-// one bitmap per subpixel position they use and pick between them.
-//
-// The glyph is rasterised in white, so the bitmap carries coverage rather than
-// a colour and one copy serves every colour the glyph is ever drawn in. Callers
-// tint it when drawing. Baking the colour in instead would multiply the number
-// of bitmaps by the number of colours in the theme, which is the difference
-// between a cache that fits and one that thrashes.
-//
-// Image height equals the full line height (ascent + |descent|). The returned
-// baseline is the glyph's baseline measured in pixels down from the top of the
-// image, which callers need in order to sit the bitmap on the line's shared
-// baseline: a run's own ascent is not necessarily the line's ascent when faces
-// of different sizes are mixed.
+// RenderGlyphToImage rasterises one glyph of run into a new image, in white so
+// that the bitmap carries coverage rather than colour and serves every colour it
+// is drawn in. subpixel shifts it right by that fraction of a pixel and must be
+// in [0,1). The returned baseline is measured down from the top of the image.
 func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline int) {
 	g := run.Glyphs[idx]
 	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: color.White}
