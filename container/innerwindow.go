@@ -266,6 +266,7 @@ func (i *innerWindowRenderer) Refresh() {
 	for _, b := range i.buttons {
 		b.setTheme(th)
 	}
+	i.icon.setTheme(th)
 	i.bar.Refresh()
 
 	if i.win.OnMinimized == nil {

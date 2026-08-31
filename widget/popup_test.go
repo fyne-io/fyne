@@ -147,6 +147,48 @@ func TestPopUp_Hide(t *testing.T) {
 	assert.Empty(t, test.Canvas().Overlays().List())
 }
 
+func TestPopUp_OnDismiss(t *testing.T) {
+	label := NewLabel("Hi")
+	pop := NewPopUp(label, test.Canvas())
+
+	dismissed := false
+	pop.OnDismiss = func() {
+		dismissed = true
+	}
+
+	pop.Show()
+	assert.True(t, pop.Visible())
+	assert.False(t, dismissed)
+
+	pop.Hide()
+	assert.False(t, pop.Visible())
+	assert.True(t, dismissed)
+}
+
+func TestPopUp_OnDismiss_TapOutside(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewTempWindow(t, NewLabel(""))
+	c := win.Canvas()
+	win.Resize(fyne.NewSize(120, 30))
+	pop := NewPopUp(label, c)
+
+	dismissed := false
+	pop.OnDismiss = func() {
+		dismissed = true
+	}
+
+	pop.Show()
+	assert.True(t, pop.Visible())
+
+	test.Tap(pop)
+	assert.True(t, pop.Visible())
+	assert.False(t, dismissed)
+
+	test.TapCanvas(c, fyne.NewPos(100, 20))
+	assert.False(t, pop.Visible())
+	assert.True(t, dismissed)
+}
+
 func TestPopUp_MinSize(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewPopUp(label, test.Canvas())

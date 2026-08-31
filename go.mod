@@ -14,7 +14,7 @@ require (
 	github.com/fyne-io/image v0.1.1
 	github.com/fyne-io/oksvg v0.2.0
 	github.com/go-gl/gl v0.0.0-20260331235117-4566fea9a276
-	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260707082822-2a407d02d01a
+	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.2
 	github.com/go-ole/go-ole v1.3.0
 	github.com/go-text/render v0.2.1
 	github.com/go-text/typesetting v0.3.4
