@@ -317,8 +317,10 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			}
 
 			s := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+			app.BeginPaint()
 			d.paintWindow(w, s)
 			d.app.Publish()
+			app.EndPaint()
 		}
 		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
 			f()
@@ -335,6 +337,12 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 	if d.glctx == nil || e.External {
 		return
 	}
+
+	// Painter init and drawing both queue GL calls that only the UI thread can
+	// run, so keep it with us for the whole paint - not just the draw.
+	app.BeginPaint()
+	defer app.EndPaint()
+
 	if !c.initialized {
 		c.initialized = true
 		c.Painter().Init() // we cannot init until the context is set above
@@ -372,10 +380,6 @@ func (*driver) onStop() {
 }
 
 func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
-	// Announce the frame before any of its GL calls are queued.
-	// Currently needed on iOS due to the thread handling there.
-	app.BeginPaint()
-
 	clips := &internal.ClipStack{}
 	c := window.Canvas().(*canvas)
 

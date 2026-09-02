@@ -76,6 +76,8 @@ type context struct {
 
 func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable.Out() }
 
+func (ctx *context) HasWork() bool { return len(ctx.work) > 0 }
+
 type context3 struct {
 	*context
 }

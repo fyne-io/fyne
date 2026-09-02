@@ -218,29 +218,40 @@ func lifecycleMemoryWarning() {
 	cleanCaches()
 }
 
-// painting is true from BeginPaint until drawloop completed.
+// painting is true while the driver is handling a paint, from BeginPaint until
+// EndPaint or the publish that ends it.
 var painting atomic.Bool
 
-// BeginPaint records that a frame's drawing commands are about to be issued,
-// and that a matching Publish will follow.
+// paintDone wakes the UI thread from a paint that ended without publishing a
+// frame, which it cannot see from the atomic alone.
+var paintDone = make(chan struct{}, 1)
+
+// BeginPaint records that the driver has started a paint.
 func BeginPaint() {
+	select {
+	case <-paintDone: // drop a wakeup left over from the last paint
+	default:
+	}
 	painting.Store(true)
+}
+
+// EndPaint records that the driver has finished a paint, published or not.
+func EndPaint() {
+	painting.Store(false)
+	select {
+	case paintDone <- struct{}{}:
+	default:
+	}
 }
 
 // needsDraw reports whether the UI thread has pending changes to draw.
 //
 //export needsDraw
 func needsDraw() C.int {
-	if painting.Load() {
+	if painting.Load() || theApp.worker.HasWork() {
 		return 1
 	}
-
-	select {
-	case <-theApp.worker.WorkAvailable():
-		return 1
-	default:
-		return 0
-	}
+	return 0
 }
 
 //export drawloop
@@ -269,6 +280,8 @@ func drawloop() {
 		case <-theApp.publish:
 			painting.Store(false)
 			theApp.publishResult <- PublishResult{}
+			return
+		case <-paintDone:
 			return
 		}
 	}
