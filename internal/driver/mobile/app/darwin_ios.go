@@ -38,7 +38,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"time"
+	"sync/atomic"
 	"unsafe"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
@@ -218,19 +218,57 @@ func lifecycleMemoryWarning() {
 	cleanCaches()
 }
 
+// painting is true from BeginPaint until drawloop completed.
+var painting atomic.Bool
+
+// BeginPaint records that a frame's drawing commands are about to be issued,
+// and that a matching Publish will follow.
+func BeginPaint() {
+	painting.Store(true)
+}
+
+// needsDraw reports whether the UI thread has pending changes to draw.
+//
+//export needsDraw
+func needsDraw() C.int {
+	if painting.Load() {
+		return 1
+	}
+
+	select {
+	case <-theApp.worker.WorkAvailable():
+		return 1
+	default:
+		return 0
+	}
+}
+
 //export drawloop
 func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for workAvailable := theApp.worker.WorkAvailable(); ; {
+	workAvailable := theApp.worker.WorkAvailable()
+	for {
+		// Run everything that is already queued
+		select {
+		case <-workAvailable:
+			theApp.worker.DoWork()
+			continue
+		default:
+		}
+
+		if !painting.Load() {
+			// Nothing left in the draw queue, relinquish control
+			return
+		}
+
 		select {
 		case <-workAvailable:
 			theApp.worker.DoWork()
 		case <-theApp.publish:
+			painting.Store(false)
 			theApp.publishResult <- PublishResult{}
-			return
-		case <-time.After(100 * time.Millisecond): // in case the method blocked!!
 			return
 		}
 	}

@@ -372,6 +372,10 @@ func (*driver) onStop() {
 }
 
 func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
+	// Announce the frame before any of its GL calls are queued.
+	// Currently needed on iOS due to the thread handling there.
+	app.BeginPaint()
+
 	clips := &internal.ClipStack{}
 	c := window.Canvas().(*canvas)
 
