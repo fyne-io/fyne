@@ -27,7 +27,7 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 				if hiddenAncestor == nil && !object.Visible() {
 					hiddenAncestor = object
 				}
-				if object == obj.(fyne.CanvasObject) {
+				if fo, _ := obj.(fyne.CanvasObject); object == fo {
 					hidden = hiddenAncestor != nil
 					return true
 				}
@@ -129,7 +129,7 @@ func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc)
 			next = focus
 		}
 
-		if obj == current.(fyne.CanvasObject) {
+		if co, _ := current.(fyne.CanvasObject); obj == co {
 			found = true
 		}
 

@@ -115,7 +115,7 @@ func (p *painter) imgToTexture(img image.Image, textureFilter canvas.ImageScale)
 }
 
 func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
-	img := obj.(*canvas.Image)
+	img, _ := obj.(*canvas.Image)
 
 	width := p.textureScale(img.Size().Width)
 	height := p.textureScale(img.Size().Height)
@@ -129,7 +129,7 @@ func (p *painter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 }
 
 func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
-	gradient := obj.(*canvas.LinearGradient)
+	gradient, _ := obj.(*canvas.LinearGradient)
 
 	w := gradient.Size().Width
 	h := gradient.Size().Height
@@ -146,7 +146,7 @@ func (p *painter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 }
 
 func (p *painter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
-	gradient := obj.(*canvas.RadialGradient)
+	gradient, _ := obj.(*canvas.RadialGradient)
 
 	width := p.textureScale(gradient.Size().Width)
 	height := p.textureScale(gradient.Size().Height)
@@ -155,7 +155,7 @@ func (p *painter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 }
 
 func (p *painter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
-	rast := obj.(*canvas.Raster)
+	rast, _ := obj.(*canvas.Raster)
 
 	width := p.textureScale(rast.Size().Width)
 	height := p.textureScale(rast.Size().Height)

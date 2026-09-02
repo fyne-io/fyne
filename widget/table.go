@@ -867,7 +867,7 @@ func (t *Table) updateHeader(id TableCellID, o fyne.CanvasObject) {
 		return
 	}
 
-	l := o.(*Label)
+	l, _ := o.(*Label)
 	if id.Row < 0 {
 		ids := []rune{'A' + rune(id.Col%columnLetterCount)}
 		pre := (id.Col - id.Col%columnLetterCount) / columnLetterCount

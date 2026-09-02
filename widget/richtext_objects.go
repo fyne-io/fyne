@@ -146,7 +146,7 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 
 // Update applies the current state of this hyperlink segment to an existing visual.
 func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
-	link := o.(*fyne.Container).Objects[0].(*Hyperlink)
+	link, _ := o.(*fyne.Container).Objects[0].(*Hyperlink)
 	link.URL = h.URL
 	link.Alignment = h.Alignment
 	link.SizeName = h.SizeName
@@ -201,7 +201,7 @@ func (i *ImageSegment) Visual() fyne.CanvasObject {
 // Update applies the current state of this image segment to an existing visual.
 func (i *ImageSegment) Update(o fyne.CanvasObject) {
 	newer := canvas.NewImageFromURI(i.Source)
-	img := o.(*richImage)
+	img, _ := o.(*richImage)
 
 	// one of the following will be used
 	img.img.File = newer.File
@@ -818,11 +818,11 @@ func (t *TextSegment) Visual() fyne.CanvasObject {
 func (t *TextSegment) Update(o fyne.CanvasObject) {
 	obj, ok := o.(*canvas.Text)
 	if !ok { // inline code container: [background, text]
-		c := o.(*fyne.Container)
-		bg := c.Objects[0].(*canvas.Rectangle)
+		c, _ := o.(*fyne.Container)
+		bg, _ := c.Objects[0].(*canvas.Rectangle)
 		bg.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, t.parent)
 		bg.Refresh()
-		obj = c.Objects[1].(*canvas.Text)
+		obj, _ = c.Objects[1].(*canvas.Text)
 	}
 	obj.Text = t.Text
 	obj.Color = t.color()

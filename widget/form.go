@@ -258,9 +258,9 @@ func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	return validator != nil
 }
 
-func (f *Form) createLabel(item *FormItem) fyne.CanvasObject {
+func (f *Form) createLabel(item *FormItem) *RichText {
 	label := NewRichTextWithText(item.Text)
-	seg1 := label.Segments[0].(*TextSegment)
+	seg1, _ := label.Segments[0].(*TextSegment)
 	seg1.Style.Alignment = fyne.TextAlignTrailing
 	seg1.Style.TextStyle.Bold = true
 	if f.isVertical() {
@@ -501,7 +501,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		r := f.itemGrid.Objects[i*2].(*RichText)
+		r, _ := f.itemGrid.Objects[i*2].(*RichText)
 
 		if len(r.Segments) == 1 {
 			if item.Required {
@@ -517,7 +517,7 @@ func (f *Form) updateLabels() {
 		}
 
 		if item.Required {
-			m := r.Segments[0].(*TextSegment)
+			m, _ := r.Segments[0].(*TextSegment)
 			if dis, ok := item.Widget.(fyne.Disableable); ok && dis.Disabled() {
 				m.Style.ColorName = theme.ColorNameDisabled
 			} else {
@@ -525,7 +525,7 @@ func (f *Form) updateLabels() {
 			}
 		}
 
-		l := r.Segments[len(r.Segments)-1].(*TextSegment)
+		l, _ := r.Segments[len(r.Segments)-1].(*TextSegment)
 		if dis, ok := item.Widget.(fyne.Disableable); ok {
 			if dis.Disabled() {
 				l.Style.ColorName = theme.ColorNameDisabled

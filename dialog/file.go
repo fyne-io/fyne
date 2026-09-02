@@ -281,7 +281,7 @@ func (f *fileDialog) makeOpenButton(label string) *widget.Button {
 		}
 
 		if f.file.save {
-			callback := f.file.callback.(func(fyne.URIWriteCloser, error))
+			callback, _ := f.file.callback.(func(fyne.URIWriteCloser, error))
 			name := f.fileName.(*widget.Entry).Text
 			location, _ := storage.Child(f.dir, name)
 
@@ -315,14 +315,14 @@ func (f *fileDialog) makeOpenButton(label string) *widget.Button {
 					}
 				}, f.file.parent)
 		} else if f.selected != nil {
-			callback := f.file.callback.(func(fyne.URIReadCloser, error))
+			callback, _ := f.file.callback.(func(fyne.URIReadCloser, error))
 			f.win.Hide()
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
 			}
 			callback(storage.Reader(f.selected))
 		} else if f.file.isDirectory() {
-			callback := f.file.callback.(func(fyne.ListableURI, error))
+			callback, _ := f.file.callback.(func(fyne.ListableURI, error))
 			f.win.Hide()
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)

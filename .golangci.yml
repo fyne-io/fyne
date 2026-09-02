@@ -85,7 +85,10 @@ linters:
         - name: package-naming
           disabled: true # TODO
         - name: unchecked-type-assertion
-          disabled: true # TODO
+          arguments:
+            - accept-ignored-assertion-result: true
+          exclude:
+            - "**/*_test.go"
         - name: unhandled-error
           disabled: true # we rely on errcheck
         - name: use-slices-sort

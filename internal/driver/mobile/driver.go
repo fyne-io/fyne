@@ -107,7 +107,7 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
+	c, _ := newCanvas(fyne.CurrentDevice()).(*canvas)
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
 	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
@@ -127,7 +127,7 @@ func (d *driver) currentWindow() *window {
 
 	var last *window
 	for i := len(d.windows) - 1; i >= 0; i-- {
-		last = d.windows[i].(*window)
+		last, _ = d.windows[i].(*window)
 		if last.visible {
 			return last
 		}
@@ -159,7 +159,7 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	mc := c.(*canvas)
+	mc, _ := c.(*canvas)
 	pos := intdriver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
@@ -198,7 +198,7 @@ func (d *driver) Run() {
 
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
-			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+			l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 
 			// exhaust the event queue
 			go func() {
@@ -226,7 +226,7 @@ func (d *driver) Run() {
 				if current == nil {
 					continue
 				}
-				c := current.Canvas().(*canvas)
+				c, _ := current.Canvas().(*canvas)
 
 				switch e := a.Filter(e).(type) {
 				case lifecycle.Event:
@@ -288,7 +288,7 @@ func (*driver) SetDisableScreenBlanking(disable bool) {
 }
 
 func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
-	c := w.Canvas().(*canvas)
+	c, _ := w.Canvas().(*canvas)
 	switch e.Crosses(lifecycle.StageAlive) {
 	case lifecycle.CrossOn:
 		d.onStart()
@@ -327,7 +327,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 }
 
 func (d *driver) handlePaint(e paint.Event, w *window) {
-	c := w.Canvas().(*canvas)
+	c, _ := w.Canvas().(*canvas)
 	if e.Window != 0 { // not all paint events come from hardware
 		w.handle = e.Window
 	}
@@ -365,7 +365,7 @@ func (*driver) onStart() {
 }
 
 func (*driver) onStop() {
-	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	if f := l.OnStopped(); f != nil {
 		l.QueueEvent(f)
 	}
@@ -373,7 +373,7 @@ func (*driver) onStop() {
 
 func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 	clips := &internal.ClipStack{}
-	c := window.Canvas().(*canvas)
+	c, _ := window.Canvas().(*canvas)
 
 	c.Painter().SetOutputSize(d.currentSize.WidthPx, d.currentSize.HeightPx)
 

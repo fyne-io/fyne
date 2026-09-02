@@ -166,7 +166,7 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 		return
 	}
 	l.BaseWidget.Refresh()
-	lo := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
+	lo, _ := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
 	item, ok := lo.searchVisible(lo.visible, id)
 	if ok {
 		lo.setupGridItem(item, id, l.focused && l.currentHighlight == id)
@@ -576,7 +576,7 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	gw *GridWrap
 
-	itemPool   async.Pool[fyne.CanvasObject]
+	itemPool   async.Pool[*gridWrapItem]
 	visible    []gridItemAndID
 	wasVisible []gridItemAndID
 }
@@ -596,15 +596,15 @@ func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 func (l *gridWrapLayout) getItem() *gridWrapItem {
-	item := l.itemPool.Get()
-	if item == nil {
-		if f := l.gw.CreateItem; f != nil {
-			child := createItemAndApplyThemeScope(f, l.gw)
-
-			item = newGridWrapItem(child, nil)
-		}
+	if item := l.itemPool.Get(); item != nil {
+		return item
 	}
-	return item.(*gridWrapItem)
+
+	if f := l.gw.CreateItem; f != nil {
+		return newGridWrapItem(createItemAndApplyThemeScope(f, l.gw), nil)
+	}
+
+	return nil
 }
 
 func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
@@ -697,7 +697,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	l.wasVisible = append(l.wasVisible, l.visible...)
 	l.visible = l.visible[:0]
 
-	c := l.gw.scroller.Content.(*fyne.Container)
+	c, _ := l.gw.scroller.Content.(*fyne.Container)
 	oldObjLen := len(c.Objects)
 	c.Objects = c.Objects[:0]
 	y := offY
