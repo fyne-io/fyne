@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	col "fyne.io/fyne/v2/internal/color"
-	"fyne.io/fyne/v2/internal/svg"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
@@ -419,8 +418,7 @@ func (r *buttonRenderer) updateIconAndText() {
 			r.icon.FillMode = canvas.ImageFillContain
 			r.SetObjects([]fyne.CanvasObject{r.background, r.tapBG, r.label, r.icon})
 		}
-		// TODO support disabling bitmap resource not just SVG
-		if r.button.Disabled() && svg.IsResourceSVG(icon) {
+		if r.button.Disabled() {
 			icon = theme.NewDisabledResource(icon)
 		}
 		r.icon.Resource = icon

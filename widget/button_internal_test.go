@@ -1,8 +1,11 @@
 package widget
 
 import (
+	"bytes"
 	"fmt"
+	"image"
 	"image/color"
+	_ "image/png"
 	"strings"
 	"testing"
 
@@ -132,6 +135,65 @@ func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button.Disable()
 	searchBaseName := strings.TrimPrefix(theme.SearchIcon().Name(), "foreground_")
 	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", searchBaseName))
+}
+
+func TestButton_DisabledBitmapIcon(t *testing.T) {
+	pngIcon := fyne.NewStaticResource("fyne.png", iconData)
+	button := NewButtonWithIcon("Test", pngIcon, nil)
+	render := test.TempWidgetRenderer(t, button).(*buttonRenderer)
+
+	// While enabled the original bitmap resource is rendered untouched.
+	assert.Equal(t, pngIcon, render.icon.Resource)
+
+	button.Disable()
+	assert.True(t, strings.HasPrefix(render.icon.Resource.Name(), "disabled_"),
+		"disabled icon should be wrapped: %s", render.icon.Resource.Name())
+
+	// Sanity-check that the source PNG has coloured pixels; otherwise
+	// the desaturation assertion below would pass trivially.
+	origImg, _, err := image.Decode(bytes.NewReader(iconData))
+	if !assert.NoError(t, err) {
+		return
+	}
+	var origColoured bool
+	origBounds := origImg.Bounds()
+	for y := origBounds.Min.Y; y < origBounds.Max.Y && !origColoured; y++ {
+		for x := origBounds.Min.X; x < origBounds.Max.X; x++ {
+			n := color.NRGBAModel.Convert(origImg.At(x, y)).(color.NRGBA)
+			if n.A > 0 && (n.R != n.G || n.G != n.B) {
+				origColoured = true
+				break
+			}
+		}
+	}
+	assert.True(t, origColoured, "test icon must contain coloured pixels")
+
+	// Every opaque pixel in the disabled resource content must be greyscale.
+	disabledImg, _, err := image.Decode(bytes.NewReader(render.icon.Resource.Content()))
+	if !assert.NoError(t, err) {
+		return
+	}
+	var opaque, greyscale int
+	bounds := disabledImg.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			n := color.NRGBAModel.Convert(disabledImg.At(x, y)).(color.NRGBA)
+			if n.A == 0 {
+				continue
+			}
+			opaque++
+			if n.R == n.G && n.G == n.B {
+				greyscale++
+			}
+		}
+	}
+	assert.Greater(t, opaque, 0, "expected the disabled icon to have opaque pixels")
+	assert.Equal(t, opaque, greyscale,
+		"every opaque pixel should be greyscale: got %d of %d", greyscale, opaque)
+
+	// Re-enabling restores the original resource reference.
+	button.Enable()
+	assert.Equal(t, pngIcon, render.icon.Resource)
 }
 
 func TestButton_Focus(t *testing.T) {
