@@ -66,7 +66,7 @@ func TestFillRectFastPath_DeclinesNonOpaque(t *testing.T) {
 	translucent := color.NRGBA{R: 0x11, G: 0x22, B: 0x33, A: 0x80}
 
 	if fillRectFastPath(base, base.Rect, translucent) {
-		t.Fatalf("fillRectFastPath accepted a non-opaque fill")
+		t.Fatal("fillRectFastPath accepted a non-opaque fill")
 	}
 }
 
@@ -74,7 +74,7 @@ func TestFillRectFastPath_DeclinesNilFill(t *testing.T) {
 	base := image.NewNRGBA(image.Rect(0, 0, 10, 10))
 
 	if fillRectFastPath(base, base.Rect, nil) {
-		t.Fatalf("fillRectFastPath accepted a nil fill")
+		t.Fatal("fillRectFastPath accepted a nil fill")
 	}
 }
 
@@ -102,7 +102,7 @@ func TestFillRectFastPath_DetectsMutation(t *testing.T) {
 		}
 	}
 	if !mismatch {
-		t.Fatalf("expected the deliberately broken fill to be detected as a mismatch")
+		t.Fatal("expected the deliberately broken fill to be detected as a mismatch")
 	}
 }
 
@@ -111,7 +111,7 @@ func TestFillRectFastPath_DetectsMutation(t *testing.T) {
 // comparison loop is sensitive to real regressions.
 func brokenFillRectFastPath(base *image.NRGBA, bounds image.Rectangle, fill color.Color) {
 	r, g, b, _ := fill.RGBA()
-	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8)+1
+	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8)+1 //gosec:disable G115 -- RGBA() components are 16-bit, >>8 always fits uint8
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		off := base.PixOffset(bounds.Min.X, y)
 		end := base.PixOffset(bounds.Max.X, y)

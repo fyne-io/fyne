@@ -438,7 +438,7 @@ func fillRectFastPath(base *image.NRGBA, bounds image.Rectangle, fill color.Colo
 		return false
 	}
 
-	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8)
+	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8) //gosec:disable G115 -- RGBA() components are 16-bit, >>8 always fits uint8
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		off := base.PixOffset(bounds.Min.X, y)
 		end := base.PixOffset(bounds.Max.X, y)
