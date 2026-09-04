@@ -66,7 +66,6 @@ const maxPooledFrameBytes = 3840 * 2160 * 4
 var framePool sync.Pool
 
 func (*Painter) paintInto(c fyne.Canvas, base *image.NRGBA) {
-
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
 		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
