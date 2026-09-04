@@ -98,7 +98,7 @@ func (a *activityRenderer) Destroy() {
 }
 
 func (a *activityRenderer) Layout(size fyne.Size) {
-	a.maxRad = fyne.Min(size.Width, size.Height) / 2
+	a.maxRad = min(size.Width, size.Height) / 2
 	a.bound = size
 
 	if a.parent.started && !fyne.CurrentApp().Settings().ShowAnimations() {
@@ -188,7 +188,7 @@ func (a *activityRenderer) stop() {
 func (a *activityRenderer) drawStaticEllipsis() {
 	th := a.parent.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
-	d := fyne.Min(a.bound.Width/4, a.bound.Height)
+	d := min(a.bound.Width/4, a.bound.Height)
 	if d > th.Size(theme.SizeNameInlineIcon)/2 {
 		d -= innerPad
 	}

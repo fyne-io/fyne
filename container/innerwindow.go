@@ -236,7 +236,7 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	contentMin := i.win.Content.MinSize()
 	barHeight := th.Size(theme.SizeNameWindowTitleBarHeight)
 
-	innerWidth := fyne.Max(i.bar.MinSize().Width, contentMin.Width)
+	innerWidth := max(i.bar.MinSize().Width, contentMin.Width)
 
 	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barHeight)
 }
@@ -478,5 +478,5 @@ func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	titleMin := t.title.MinSize() // can truncate
 
 	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
-		fyne.Max(fyne.Max(buttonMin.Height, iconMin.Height), titleMin.Height))
+		max(max(buttonMin.Height, iconMin.Height), titleMin.Height))
 }

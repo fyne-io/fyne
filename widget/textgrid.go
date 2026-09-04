@@ -567,7 +567,7 @@ func (t *textGridContentRenderer) Layout(s fyne.Size) {
 func (t *textGridContentRenderer) MinSize() fyne.Size {
 	longestRow := float32(0)
 	for _, row := range t.text.text.Rows {
-		longestRow = fyne.Max(longestRow, float32(len(row.Cells)))
+		longestRow = max(longestRow, float32(len(row.Cells)))
 	}
 
 	if t.text.text.ShowLineNumbers {

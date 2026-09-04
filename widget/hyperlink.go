@@ -159,7 +159,7 @@ func (hl *Hyperlink) focusWidth() float32 {
 	th := hl.Theme()
 
 	innerPad := th.Size(theme.SizeNameInnerPadding)
-	return fyne.Min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
+	return min(hl.Size().Width, hl.textSize.Width+innerPad+th.Size(theme.SizeNamePadding)*2) - innerPad
 }
 
 func (hl *Hyperlink) focusXPos() float32 {
@@ -181,7 +181,7 @@ func (hl *Hyperlink) isPosOverText(pos fyne.Position) bool {
 	th := hl.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 	pad := th.Size(theme.SizeNamePadding)
-	lineCount := fyne.Max(1, float32(len(hl.provider.rowBounds)))
+	lineCount := max(1, float32(len(hl.provider.rowBounds)))
 
 	xpos := hl.focusXPos()
 	return pos.X >= xpos && pos.X <= xpos+hl.focusWidth() &&

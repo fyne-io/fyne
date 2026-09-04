@@ -336,7 +336,7 @@ func (t *RichText) lineSizeToColumn(col, row int, textSize, innerPad float32) fy
 		}
 
 		total.Width += size.Width
-		total.Height = fyne.Max(total.Height, size.Height)
+		total.Height = max(total.Height, size.Height)
 		if last {
 			break
 		}
@@ -714,12 +714,12 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 					r.Refresh() // TODO resolve this in a similar way to #2991
 				}
 			}
-			rowHeight = fyne.Max(rowHeight, minSize.Height)
+			rowHeight = max(rowHeight, minSize.Height)
 			rowWidth += minSize.Width
 		}
 
 		if wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
-			width = fyne.Max(width, rowWidth)
+			width = max(width, rowWidth)
 		}
 		height += rowHeight
 		rowHeight = 0
@@ -891,7 +891,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		if height == 0 {
 			height = size.Height
 		} else if height != size.Height {
-			height = fyne.Max(height, size.Height)
+			height = max(height, size.Height)
 			realign = true
 		}
 	}
