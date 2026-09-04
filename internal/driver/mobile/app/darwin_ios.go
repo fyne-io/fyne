@@ -218,30 +218,14 @@ func lifecycleMemoryWarning() {
 	cleanCaches()
 }
 
-// painting is true while the driver is handling a paint, from BeginPaint until
-// EndPaint or the publish that ends it.
+// painting is true from BeginPaint until drawloop takes the publish that ends
+// the frame. The UI thread reads it, so it has to be atomic.
 var painting atomic.Bool
 
-// paintDone wakes the UI thread from a paint that ended without publishing a
-// frame, which it cannot see from the atomic alone.
-var paintDone = make(chan struct{}, 1)
-
-// BeginPaint records that the driver has started a paint.
+// BeginPaint records that the driver is about to queue a frame's GL calls and
+// will follow them with a Publish.
 func BeginPaint() {
-	select {
-	case <-paintDone: // drop a wakeup left over from the last paint
-	default:
-	}
 	painting.Store(true)
-}
-
-// EndPaint records that the driver has finished a paint, published or not.
-func EndPaint() {
-	painting.Store(false)
-	select {
-	case paintDone <- struct{}{}:
-	default:
-	}
 }
 
 // needsDraw reports whether the UI thread has pending changes to draw.
@@ -261,27 +245,17 @@ func drawloop() {
 
 	workAvailable := theApp.worker.WorkAvailable()
 	for {
-		// Run everything that is already queued
-		select {
-		case <-workAvailable:
-			theApp.worker.DoWork()
-			continue
-		default:
-		}
+		theApp.worker.DoWork() // returns straight away when nothing is queued
 
 		if !painting.Load() {
-			// Nothing left in the draw queue, relinquish control
-			return
+			return // no frame is coming, so hand the thread back to UIKit
 		}
 
 		select {
-		case <-workAvailable:
-			theApp.worker.DoWork()
+		case <-workAvailable: // loop round and run it
 		case <-theApp.publish:
 			painting.Store(false)
 			theApp.publishResult <- PublishResult{}
-			return
-		case <-paintDone:
 			return
 		}
 	}
