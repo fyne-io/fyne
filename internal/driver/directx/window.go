@@ -215,8 +215,19 @@ func (w *window) resized(width, height int32) {
 	// Inside a real modal drag (Windows sends WM_ENTERSIZEMOVE) the run loop is
 	// blocked in DefWindowProc and this is the only place animations, the func
 	// queue and repaints can advance, so take a full throttled tick.
+	//
+	// A tick after a real size change must not be throttled away: DWM holds a
+	// live-resize geometry change briefly so it can compose it together with a
+	// present of matching size, and a paint deferred to the next tick misses
+	// that window - the compositor then stretches the previous, old-size frame
+	// over the new client area, which reads as the content shaking against the
+	// menu bar during the drag. Unthrottled WM_SIZE cannot storm the way
+	// WM_SIZING can: it arrives once per applied size step, so the drag
+	// self-paces to however fast frames can actually be drawn.
 	if modalLoop {
-		w.syncSurface()
+		if w.syncSurface() {
+			lastModalTick = time.Time{}
+		}
 		w.driver.modalTick()
 		return
 	}
