@@ -32,7 +32,7 @@ type canvas struct {
 	scale          float32
 	size           fyne.Size
 	touched        map[int]mobile.Touchable
-	windowHead     fyne.CanvasObject
+	windowHead     *fyne.Container
 
 	dragOffset     fyne.Position
 	dragStart      fyne.Position
@@ -158,7 +158,11 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 		return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
 	}
 
-	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
+	var wh fyne.CanvasObject
+	if c.windowHead != nil {
+		wh = c.windowHead
+	}
+	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), wh, c.content)
 }
 
 func (c *canvas) overlayChanged() {
@@ -176,7 +180,7 @@ func (c *canvas) setMenu(menu fyne.CanvasObject) {
 	c.SetMenuTreeAndFocusMgr(menu)
 }
 
-func (c *canvas) setWindowHead(head fyne.CanvasObject) {
+func (c *canvas) setWindowHead(head *fyne.Container) {
 	if c.padded {
 		head = container.NewPadded(head)
 	}
@@ -313,7 +317,7 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 		c.dragOffset = previousPos.Subtract(objPos)
 		c.dragStart = co.Position()
 		if scrollOtherDirection != nil {
-			c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
+			c.draggingOuter, _ = scrollOtherDirection.(fyne.Draggable)
 		}
 	}
 
@@ -474,9 +478,9 @@ func (c *canvas) windowHeadIsDisplacing() bool {
 		return false
 	}
 
-	chromeBox := c.windowHead.(*fyne.Container)
+	chromeBox := c.windowHead
 	if c.padded {
-		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+		chromeBox, _ = chromeBox.Objects[0].(*fyne.Container) // the padded container
 	}
 	return len(chromeBox.Objects) > 1
 }

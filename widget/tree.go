@@ -676,8 +676,8 @@ type treeContentRenderer struct {
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
-	branchPool  async.Pool[fyne.CanvasObject]
-	leafPool    async.Pool[fyne.CanvasObject]
+	branchPool  async.Pool[*branch]
+	leafPool    async.Pool[*leaf]
 
 	wasVisible   []TreeNodeID
 	visible      []TreeNodeID
@@ -887,32 +887,28 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	canvas.Refresh(r.treeContent.super())
 }
 
-func (r *treeContentRenderer) getBranch() (b *branch) {
-	o := r.branchPool.Get()
-	if o != nil {
-		b = o.(*branch)
-	} else {
-		var content fyne.CanvasObject
-		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
-		}
-		b = newBranch(r.treeContent.tree, content)
+func (r *treeContentRenderer) getBranch() *branch {
+	if o := r.branchPool.Get(); o != nil {
+		return o
 	}
-	return b
+
+	var content fyne.CanvasObject
+	if f := r.treeContent.tree.CreateNode; f != nil {
+		content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
+	}
+	return newBranch(r.treeContent.tree, content)
 }
 
-func (r *treeContentRenderer) getLeaf() (l *leaf) {
-	o := r.leafPool.Get()
-	if o != nil {
-		l = o.(*leaf)
-	} else {
-		var content fyne.CanvasObject
-		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
-		}
-		l = newLeaf(r.treeContent.tree, content)
+func (r *treeContentRenderer) getLeaf() *leaf {
+	if o := r.leafPool.Get(); o != nil {
+		return o
 	}
-	return l
+
+	var content fyne.CanvasObject
+	if f := r.treeContent.tree.CreateNode; f != nil {
+		content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
+	}
+	return newLeaf(r.treeContent.tree, content)
 }
 
 var (

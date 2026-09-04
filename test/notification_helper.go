@@ -16,7 +16,7 @@ import (
 func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func()) {
 	require.NotNil(t, f, "function has to be specified")
 	require.IsType(t, &app{}, fyne.CurrentApp())
-	a := fyne.CurrentApp().(*app)
+	a, _ := fyne.CurrentApp().(*app)
 	a.lastNotification = nil
 
 	f()
@@ -40,7 +40,7 @@ func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func()) {
 func AssertNotificationScheduled(t *testing.T, n *fyne.Notification, f func()) {
 	require.NotNil(t, f, "function has to be specified")
 	require.IsType(t, &app{}, fyne.CurrentApp())
-	a := fyne.CurrentApp().(*app)
+	a, _ := fyne.CurrentApp().(*app)
 	a.lastScheduledNotification = nil
 
 	f()

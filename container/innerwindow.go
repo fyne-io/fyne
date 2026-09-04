@@ -288,7 +288,7 @@ func (i *innerWindowRenderer) Refresh() {
 		maximize.b.SetIcon(theme.WindowMaximizeIcon())
 	}
 
-	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
+	title, _ := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.Title)
 	if i.win.OnTappedIcon == nil {
 		i.icon.Disable()

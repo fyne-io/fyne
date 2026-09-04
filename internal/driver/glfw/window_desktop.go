@@ -363,7 +363,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 // findSiblingMonitor returns the monitor of an already-visible window in this app, or nil.
 func (w *window) findSiblingMonitor() *glfw.Monitor {
-	for _, other := range w.driver.windowList() {
+	for _, other := range w.driver.AllWindows() {
 		ow, ok := other.(*window)
 		if !ok || ow == w || !ow.visible || ow.viewport == nil {
 			continue

@@ -5,6 +5,7 @@ package glfw
 import "C"
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/godbus/dbus/v5"
@@ -36,11 +37,16 @@ func setDisableScreenBlank(disable bool) {
 	if inhibitCookie != 0 {
 		return
 	}
+
 	obj := conn.Object("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver")
 	call := obj.Call("org.freedesktop.ScreenSaver.Inhibit", 0, fyne.CurrentApp().Metadata().ID,
 		"App disabled screensaver")
 	if call.Err == nil {
-		inhibitCookie = call.Body[0].(uint32)
+		var ok bool
+		callResult := call.Body[0]
+		if inhibitCookie, ok = callResult.(uint32); !ok {
+			fyne.LogError(fmt.Sprintf("Unexpected D-Bus call result: %#v", callResult), nil)
+		}
 	} else {
 		fyne.LogError("Failed to send message to bus", call.Err)
 	}

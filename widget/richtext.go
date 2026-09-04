@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -259,11 +260,12 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	start := 0
 	var into *TextSegment
 	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
+		var ok bool
+		if into, ok = seg.(*TextSegment); !ok {
 			continue
 		}
-		end := start + len([]rune(seg.(*TextSegment).Text))
-		into = seg.(*TextSegment)
+
+		end := start + len([]rune(into.Text))
 		index = i
 		if end > pos {
 			break
@@ -557,7 +559,8 @@ func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 		return o, true
 	case *fyne.Container:
 		if _, ok := o.Layout.(*codeInlineLayout); ok {
-			return o.Objects[1].(*canvas.Text), true
+			t, _ := o.Objects[1].(*canvas.Text)
+			return t, true
 		}
 	}
 	return nil, false
@@ -783,7 +786,7 @@ func (r *textRenderer) Refresh() {
 				to, _ := codeInlineText(obj)
 				to.Text = txt
 			} else if isHyperlink {
-				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
+				hl, _ := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
 				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
@@ -814,7 +817,7 @@ func (r *textRenderer) Refresh() {
 func (r *textRenderer) associateSiblings(hl *Hyperlink, hlSeg *HyperlinkSegment, reuse int) {
 	hl.siblings = hl.siblings[:0]
 	for prev := 0; prev < reuse; prev++ {
-		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+		prevHL, _ := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
 		prevHL.siblings = append(prevHL.siblings, hl)
 		hl.siblings = append(hl.siblings, prevHL)
 	}
@@ -993,7 +996,12 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	}
 
 	prior := bounds[len(bounds)-1]
-	seg := prior.segments[0].(*TextSegment)
+	seg, ok := prior.segments[0].(*TextSegment)
+	if !ok {
+		fyne.LogError(fmt.Sprintf("unexpected rich text segment: %#v", prior.segments[0]), nil)
+		return bounds
+	}
+
 	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)

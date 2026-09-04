@@ -226,7 +226,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 	r.SetObjects(r.items)
 
 	for i, item := range r.items {
-		item := item.(*radioItem)
+		item, _ := item.(*radioItem)
 		changed := false
 		if l := r.radio.Options[i]; l != item.Label {
 			item.Label = r.radio.Options[i]

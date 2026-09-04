@@ -305,7 +305,7 @@ func (r *selectableRenderer) Refresh() {
 
 	selectionColor := r.sel.theme.Color(theme.ColorNameSelection, v)
 	for _, selection := range selections {
-		rect := selection.(*canvas.Rectangle)
+		rect, _ := selection.(*canvas.Rectangle)
 		rect.FillColor = selectionColor
 		if r.sel.focused {
 			rect.Show()
