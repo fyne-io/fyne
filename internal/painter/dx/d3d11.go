@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	d3d11DLL        = windows.NewLazySystemDLL("d3d11.dll")
-	d3dCompiler     = windows.NewLazySystemDLL("d3dcompiler_47.dll")
-	procD3D11Create = d3d11DLL.NewProc("D3D11CreateDeviceAndSwapChain")
-	procD3DCompile  = d3dCompiler.NewProc("D3DCompile")
+	d3d11DLL              = windows.NewLazySystemDLL("d3d11.dll")
+	d3dCompiler           = windows.NewLazySystemDLL("d3dcompiler_47.dll")
+	procD3D11Create       = d3d11DLL.NewProc("D3D11CreateDeviceAndSwapChain")
+	procD3D11CreateDevice = d3d11DLL.NewProc("D3D11CreateDevice")
+	procD3DCompile        = d3dCompiler.NewProc("D3DCompile")
 
 	// dxDebug enables one-shot device diagnostics and periodic draw statistics,
 	// for chasing rendering performance.
@@ -141,6 +142,11 @@ const (
 	swapEffectFlipDiscard = 4
 	swapUsageRTOutput     = 0x00000020
 
+	// scalingNone (DXGI_SCALING_NONE) makes DWM show a back buffer that differs
+	// from the window size pinned 1:1 at the top-left instead of stretched to
+	// fit. Flip-model only, and only via CreateSwapChainForHwnd.
+	scalingNone = 1
+
 	// DXGI_ERROR_DEVICE_REMOVED / _RESET, reported by Present when the GPU went
 	// away (driver upgrade, TDR). Compared as uint32 because hresult is signed.
 	dxgiErrorDeviceRemoved = 0x887a0005
@@ -199,6 +205,22 @@ type dxgiSwapChainDesc struct {
 	Windowed     int32
 	SwapEffect   uint32
 	Flags        uint32
+}
+
+// dxgiSwapChainDesc1 mirrors DXGI_SWAP_CHAIN_DESC1, the CreateSwapChainForHwnd
+// description - the only one with a Scaling field.
+type dxgiSwapChainDesc1 struct {
+	Width       uint32
+	Height      uint32
+	Format      uint32
+	Stereo      int32
+	SampleDesc  dxgiSampleDesc
+	BufferUsage uint32
+	BufferCount uint32
+	Scaling     uint32
+	SwapEffect  uint32
+	AlphaMode   uint32
+	Flags       uint32
 }
 
 type bufferDesc struct {
@@ -602,6 +624,35 @@ func (s *swapChain) ResizeBuffers(w, h uint32) error {
 	return hr.error("ResizeBuffers")
 }
 
+// slotSetBackgroundColor is on IDXGISwapChain1: IDXGISwapChain ends at
+// GetLastPresentCount (17), then GetDesc1 (18), GetFullscreenDesc (19),
+// GetHwnd (20), GetCoreWindow (21), Present1 (22), IsTemporaryMonoSupported
+// (23), GetRestrictToOutput (24), SetBackgroundColor (25).
+const slotSetBackgroundColor = 25
+
+// iidDXGISwapChain1 is IID_IDXGISwapChain1 {790a45f7-0d42-4876-983a-0a55cfe6f4aa}.
+var iidDXGISwapChain1 = windows.GUID{
+	Data1: 0x790a45f7, Data2: 0x0d42, Data3: 0x4876,
+	Data4: [8]byte{0x98, 0x3a, 0x0a, 0x55, 0xcf, 0xe6, 0xf4, 0xaa},
+}
+
+// setBackgroundColor tells DWM what to paint where the window is larger than
+// the current back buffer - with a scaling-none chain that is the strip a live
+// resize exposes until the next matching present. Best-effort: chains
+// predating IDXGISwapChain1 lack the method, and those are stretch-scaled so
+// the colour could never show anyway.
+func (s *swapChain) setBackgroundColor(r, g, b, a float32) {
+	var sc1 *unknown
+	hr := hresult(s.call(slotQueryInterface, uintptr(unsafe.Pointer(&iidDXGISwapChain1)),
+		uintptr(unsafe.Pointer(&sc1))))
+	if hr.failed() {
+		return
+	}
+	rgba := [4]float32{r, g, b, a} // DXGI_RGBA
+	sc1.call(slotSetBackgroundColor, uintptr(unsafe.Pointer(&rgba)))
+	sc1.Release()
+}
+
 // iidTexture2D is IID_ID3D11Texture2D {6f15aaf2-d208-4e89-9ab4-489535d34f9c}.
 var iidTexture2D = windows.GUID{
 	Data1: 0x6f15aaf2, Data2: 0xd208, Data3: 0x4e89,
@@ -636,11 +687,70 @@ type dxgiAdapterDesc struct {
 }
 
 const (
+	// IDXGIObject: after IUnknown (0-2) come SetPrivateData, SetPrivateDataInterface,
+	// GetPrivateData, then GetParent.
+	slotGetParent = 6
 	// IDXGIDevice: IUnknown (3) + IDXGIObject (4) inherited, GetAdapter first own method.
 	slotGetAdapter = 7
 	// IDXGIAdapter: same 7 inherited slots, then EnumOutputs, GetDesc.
 	slotAdapterGetDesc = 8
 )
+
+// dxgiFactory2 wraps IDXGIFactory2: IUnknown (3) + IDXGIObject (4) +
+// IDXGIFactory (5) + IDXGIFactory1 (2) = 14 inherited slots, then
+// IsWindowedStereoEnabled (14) and CreateSwapChainForHwnd (15). Only this
+// factory revision (DXGI 1.2, Windows 8+) can create DESC1 swap chains.
+type dxgiFactory2 struct{ unknown }
+
+const slotCreateSwapChainForHwnd = 15
+
+// iidDXGIFactory2 is IID_IDXGIFactory2 {50c83a1c-e072-4c48-87b0-3630fa36a6d0}.
+var iidDXGIFactory2 = windows.GUID{
+	Data1: 0x50c83a1c, Data2: 0xe072, Data3: 0x4c48,
+	Data4: [8]byte{0x87, 0xb0, 0x36, 0x30, 0xfa, 0x36, 0xa6, 0xd0},
+}
+
+// CreateSwapChainForHwnd returns the created IDXGISwapChain1 as a *swapChain:
+// its vtable is a superset, and the 1-only method used here goes through
+// setBackgroundColor's QueryInterface.
+func (f *dxgiFactory2) CreateSwapChainForHwnd(dev *device, hwnd windows.Handle, desc *dxgiSwapChainDesc1) (*swapChain, error) {
+	var sc *swapChain
+	hr := hresult(f.call(slotCreateSwapChainForHwnd,
+		uintptr(unsafe.Pointer(dev)),
+		uintptr(hwnd),
+		uintptr(unsafe.Pointer(desc)),
+		0, // pFullscreenDesc - windowed
+		0, // pRestrictToOutput
+		uintptr(unsafe.Pointer(&sc))))
+	return sc, hr.error("CreateSwapChainForHwnd")
+}
+
+// factory2From walks device -> IDXGIDevice1 -> adapter -> parent factory,
+// failing on systems without DXGI 1.2.
+func factory2From(dev *device) (*dxgiFactory2, error) {
+	var dxgi *dxgiDevice1
+	hr := hresult(dev.call(slotQueryInterface, uintptr(unsafe.Pointer(&iidDXGIDevice1)),
+		uintptr(unsafe.Pointer(&dxgi))))
+	if hr.failed() {
+		return nil, hr.error("QueryInterface(IDXGIDevice1)")
+	}
+	defer dxgi.Release()
+
+	var adapter *unknown
+	hr = hresult(dxgi.call(slotGetAdapter, uintptr(unsafe.Pointer(&adapter))))
+	if hr.failed() {
+		return nil, hr.error("GetAdapter")
+	}
+	defer adapter.Release()
+
+	var factory *dxgiFactory2
+	hr = hresult(adapter.call(slotGetParent, uintptr(unsafe.Pointer(&iidDXGIFactory2)),
+		uintptr(unsafe.Pointer(&factory))))
+	if hr.failed() {
+		return nil, hr.error("GetParent(IDXGIFactory2)")
+	}
+	return factory, nil
+}
 
 // logDeviceDiagnostics prints which device, swap effect and adapter the driver
 // ended up with, for FYNE_DX_DEBUG runs. A blt fallback or a present chain on a
@@ -763,6 +873,24 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 
 	lastErr := fmt.Errorf("no Direct3D 11 device available")
 	for _, driverType := range [...]uint32{driverTypeHardware, driverTypeWARP} {
+		// Preferred: the device alone, then a scaling-none flip chain from its
+		// factory. The combined call below can only produce stretch-scaled
+		// chains, and stretch is what makes a live resize shake: any present
+		// that lags the drag even one step is scaled by DWM to the new client
+		// size, wobbling the whole canvas. Scaling-none pins a stale frame 1:1
+		// at the top-left instead, so content holds still and only the exposed
+		// edge fills with the swap chain background colour. Needs flip-discard,
+		// so this fails before Windows 10 and the legacy path covers those.
+		dev, ctx, sc, gotLevel, err := createScalingNoneSwapChain(driverType, hwnd, width, height, levels[:])
+		if err == nil {
+			if dxDebug {
+				logDeviceDiagnostics(dev, driverType, swapEffectFlipDiscard, gotLevel)
+				log.Printf("directx: scaling-none swap chain via CreateSwapChainForHwnd")
+			}
+			return dev, ctx, sc, gotLevel, nil
+		}
+		lastErr = err
+
 		for _, effect := range [...]uint32{swapEffectFlipDiscard, swapEffectDiscard} {
 			desc.SwapEffect = effect
 			var sc *swapChain
@@ -781,6 +909,53 @@ func createDeviceAndSwapChain(hwnd windows.Handle, width, height uint32) (*devic
 		}
 	}
 	return nil, nil, nil, 0, lastErr
+}
+
+// createScalingNoneSwapChain builds the device with D3D11CreateDevice and the
+// swap chain with IDXGIFactory2::CreateSwapChainForHwnd, the only creation
+// route that can ask for DXGI_SCALING_NONE. On failure nothing is leaked and
+// the caller falls back to the legacy combined call.
+func createScalingNoneSwapChain(driverType uint32, hwnd windows.Handle, width, height uint32, levels []uint32) (*device, *deviceContext, *swapChain, uint32, error) {
+	var dev *device
+	var ctx *deviceContext
+	var gotLevel uint32
+	r, _, _ := procD3D11CreateDevice.Call(
+		0, // pAdapter - null means "pick for the driver type"
+		uintptr(driverType),
+		0, // Software
+		uintptr(createDeviceBGRASupport),
+		uintptr(unsafe.Pointer(&levels[0])),
+		uintptr(uint32(len(levels))),
+		d3d11SDKVersion,
+		uintptr(unsafe.Pointer(&dev)),
+		uintptr(unsafe.Pointer(&gotLevel)),
+		uintptr(unsafe.Pointer(&ctx)),
+	)
+	if hr := hresult(int32(r)); hr.failed() {
+		return nil, nil, nil, 0, hr.error("D3D11CreateDevice")
+	}
+
+	factory, err := factory2From(dev)
+	if err == nil {
+		defer factory.Release()
+		desc := dxgiSwapChainDesc1{
+			Width:       width,
+			Height:      height,
+			Format:      formatB8G8R8A8Unorm,
+			SampleDesc:  dxgiSampleDesc{Count: 1},
+			BufferUsage: swapUsageRTOutput,
+			BufferCount: 4, // same headroom rationale as the legacy desc
+			Scaling:     scalingNone,
+			SwapEffect:  swapEffectFlipDiscard,
+		}
+		var sc *swapChain
+		if sc, err = factory.CreateSwapChainForHwnd(dev, hwnd, &desc); err == nil {
+			return dev, ctx, sc, gotLevel, nil
+		}
+	}
+	releaseCOM(&ctx)
+	releaseCOM(&dev)
+	return nil, nil, nil, 0, err
 }
 
 func callD3D11Create(driverType, flags uint32, levels *uint32, levelCount uint32,

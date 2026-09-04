@@ -108,6 +108,13 @@ func NewGPU(hwnd windows.Handle, width, height uint32) (*GPU, error) {
 		g.Release()
 		return nil, err
 	}
+	// On a scaling-none chain DWM paints this colour over the strip a live
+	// resize exposes until the next matching present; theme background beats
+	// the default black. ponytail: sampled once at creation - a theme switch
+	// mid-session leaves the old colour on a strip that shows for under a
+	// frame, re-set it from the settings listener if that ever bothers anyone.
+	r, gr, b, _ := theme.Color(theme.ColorNameBackground).RGBA()
+	g.swap.setBackgroundColor(float32(r)/0xffff, float32(gr)/0xffff, float32(b)/0xffff, 1)
 	return g, nil
 }
 
