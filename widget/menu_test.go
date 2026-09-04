@@ -1,6 +1,7 @@
 package widget_test
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -10,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMenu_RefreshOptions(t *testing.T) {
@@ -104,4 +106,52 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
 	test.TapCanvas(c, fyne.NewPos(size.Width+2, size.Height+2))
 	assert.True(t, overlayContainerHit, "hit the overlay container")
+}
+
+func TestMenu_SubmenuTallerThanCanvasScrolls(t *testing.T) {
+	w := test.NewTempWindow(t, widget.NewLabel(""))
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(200, 300))
+	c := w.Canvas()
+	d := fyne.CurrentApp().Driver()
+
+	items := make([]*fyne.MenuItem, 50)
+	for i := range items {
+		items[i] = fyne.NewMenuItem(fmt.Sprintf("Item %d", i), nil)
+	}
+	parent := fyne.NewMenuItem("Alpha", nil)
+	parent.ChildMenu = fyne.NewMenu("", items...)
+	m := widget.NewPopUpMenu(fyne.NewMenu("", parent), c)
+	m.ShowAtPosition(fyne.NewPos(0, 150))
+	test.MoveMouse(c, fyne.NewPos(20, 160)) // hover "Alpha" to open its submenu on desktop ...
+	test.TapCanvas(c, fyne.NewPos(20, 160)) // ... or tap it on mobile
+
+	var child *widget.Menu
+	for _, o := range test.WidgetRenderer(m.Menu).Objects() {
+		if sub, ok := o.(*widget.Menu); ok {
+			child = sub
+		}
+	}
+	require.NotNil(t, child)
+	_, areaSize := c.InteractiveArea()
+	require.Greater(t, child.MinSize().Height, areaSize.Height, "the submenu must not fit the canvas")
+
+	// the submenu is pinned to the top of the canvas and clamped to its height, like an over-tall menu
+	childPos := d.AbsolutePositionForObject(child)
+	assert.Equal(t, float32(0), childPos.Y)
+	assert.Equal(t, areaSize.Height, child.Size().Height)
+
+	// the items below the canvas can be scrolled into view
+	last := child.Items[len(child.Items)-1]
+	require.Greater(t, d.AbsolutePositionForObject(last).Y, areaSize.Height)
+	test.Scroll(c, fyne.NewPos(childPos.X+10, 10), 0, -child.MinSize().Height)
+	assert.LessOrEqual(t, d.AbsolutePositionForObject(last).Y+last.Size().Height, areaSize.Height)
+}
+
+func TestMenu_ResizeBelowMinSizeGrowsBack(t *testing.T) {
+	test.NewTempApp(t)
+
+	m := widget.NewMenu(fyne.NewMenu("", fyne.NewMenuItem("Foo", nil), fyne.NewMenuItem("Bar", nil)))
+	m.Resize(fyne.NewSize(100, 10)) // e.g. a stale size after a theme change
+	assert.Equal(t, m.MinSize().Height, m.Size().Height)
 }
