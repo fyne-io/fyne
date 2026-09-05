@@ -142,6 +142,63 @@ func (s *Select) MinSize() fyne.Size {
 	return s.BaseWidget.MinSize()
 }
 
+// AccessibilityLabel returns the placeholder text used as a hint when nothing is selected.
+//
+// Since: 2.8
+func (s *Select) AccessibilityLabel() string {
+	return s.PlaceHolder
+}
+
+// AccessibilityRole returns AccessibleRoleButton because Select reveals its options on press.
+//
+// Since: 2.8
+func (s *Select) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleButton
+}
+
+// AccessibilityValue returns the currently selected option, if any.
+//
+// Since: 2.8
+func (s *Select) AccessibilityValue() string {
+	return s.Selected
+}
+
+// AccessibilityStates reports whether this select is disabled or focused.
+//
+// Since: 2.8
+func (s *Select) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if s.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if s.focused {
+		states = append(states, fyne.AccessibleStateFocused)
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions supported by this select.
+//
+// Since: 2.8
+func (s *Select) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionShowMenu}
+}
+
+// AccessibilityPerformAction opens the select's option menu for press or showMenu actions.
+//
+// Since: 2.8
+func (s *Select) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if s.Disabled() {
+		return false
+	}
+	switch action {
+	case fyne.AccessibleActionPress, fyne.AccessibleActionShowMenu:
+		s.showPopUp()
+		return true
+	}
+	return false
+}
+
 // MouseIn is called when a desktop pointer enters the widget
 func (s *Select) MouseIn(*desktop.MouseEvent) {
 	s.hovered = true

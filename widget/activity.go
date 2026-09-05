@@ -36,6 +36,33 @@ func (a *Activity) MinSize() fyne.Size {
 	return a.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this activity
+// indicator to assistive technologies.
+//
+// Since: 2.8
+func (a *Activity) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleProgressBar
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this activity indicator.
+//
+// Since: 2.8
+func (a *Activity) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityValue reports the activity status as either "active" or
+// "idle".
+//
+// Since: 2.8
+func (a *Activity) AccessibilityValue() string {
+	if a.started {
+		return "active"
+	}
+	return "idle"
+}
+
 // Start the activity indicator animation
 func (a *Activity) Start() {
 	if a.started {

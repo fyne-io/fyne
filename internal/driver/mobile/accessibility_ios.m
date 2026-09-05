@@ -47,22 +47,28 @@ void addAccessibilityNodeIOS(int role, const char *label,
 
         elem.accessibilityLabel = label ? [NSString stringWithUTF8String:label] : @"";
 
-        // Map Fyne roles to UIAccessibilityTraits.
-        // role values: 1=button, 2=text, 3=link, 4=container
+        // Map Fyne roles to UIAccessibilityTraits. Role values match the
+        // const block in accessibility_ios.go.
+        // 0=container, 1=button, 2=checkbox, 3=heading, 4=image, 5=link,
+        // 6=list, 7=listItem, 8=progressBar, 9=radio, 10=separator,
+        // 11=slider, 12=tab, 13=tabList, 14=table, 15=text, 16=textField,
+        // 17=tree, 18=treeItem.
+        UIAccessibilityTraits traits = UIAccessibilityTraitNone;
         switch (role) {
-            case 1: // button
-                elem.accessibilityTraits = UIAccessibilityTraitButton;
-                break;
-            case 2: // text
-                elem.accessibilityTraits = UIAccessibilityTraitStaticText;
-                break;
-            case 3: // link
-                elem.accessibilityTraits = UIAccessibilityTraitLink;
-                break;
-            default:
-                elem.accessibilityTraits = UIAccessibilityTraitNone;
-                break;
+            case 1:  traits = UIAccessibilityTraitButton; break;
+            case 2:  traits = UIAccessibilityTraitButton; break; // checkbox
+            case 3:  traits = UIAccessibilityTraitHeader; break;
+            case 4:  traits = UIAccessibilityTraitImage; break;
+            case 5:  traits = UIAccessibilityTraitLink; break;
+            case 8:  traits = UIAccessibilityTraitUpdatesFrequently; break;
+            case 9:  traits = UIAccessibilityTraitButton; break; // radio
+            case 11: traits = UIAccessibilityTraitAdjustable; break;
+            case 12: traits = UIAccessibilityTraitButton; break; // tab
+            case 15: traits = UIAccessibilityTraitStaticText; break;
+            case 16: traits = UIAccessibilityTraitNone; break; // text field
+            default: traits = UIAccessibilityTraitNone; break;
         }
+        elem.accessibilityTraits = traits;
 
         // Convert from native pixel coordinates to point coordinates for the
         // accessibility frame, which UIKit expects in screen coordinates.

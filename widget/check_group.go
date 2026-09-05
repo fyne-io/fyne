@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 )
 
@@ -62,6 +63,28 @@ func (r *CheckGroup) CreateRenderer() fyne.WidgetRenderer {
 func (r *CheckGroup) MinSize() fyne.Size {
 	r.ExtendBaseWidget(r)
 	return r.BaseWidget.MinSize()
+}
+
+// AccessibilityLabel returns an empty label so the group is announced by role only.
+//
+// Since: 2.8
+func (r *CheckGroup) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleList.
+//
+// Since: 2.8
+func (r *CheckGroup) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityChildren returns each check item in the group.
+//
+// Since: 2.8
+func (r *CheckGroup) AccessibilityChildren() []fyne.CanvasObject {
+	if rd, ok := cache.CachedRenderer(r); ok && rd != nil {
+		return rd.Objects()
+	}
+	return nil
 }
 
 // Refresh causes this widget to be redrawn in it's current state.

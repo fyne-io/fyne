@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
 )
 
@@ -112,6 +113,28 @@ func (r *RadioGroup) itemTapped(item *radioItem, idx int) {
 func (r *RadioGroup) Refresh() {
 	r.updateSelectedIndex()
 	r.BaseWidget.Refresh()
+}
+
+// AccessibilityLabel returns an empty label so the group is announced by role only.
+//
+// Since: 2.8
+func (r *RadioGroup) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleList.
+//
+// Since: 2.8
+func (r *RadioGroup) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityChildren returns each radio item in the group.
+//
+// Since: 2.8
+func (r *RadioGroup) AccessibilityChildren() []fyne.CanvasObject {
+	if rd, ok := cache.CachedRenderer(r); ok && rd != nil {
+		return rd.Objects()
+	}
+	return nil
 }
 
 func (r *RadioGroup) selectedIndex() int {

@@ -129,6 +129,57 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	i.trigger()
 }
 
+// AccessibilityRole returns the role used to describe this menu item to
+// assistive technologies.
+//
+// Since: 2.8
+func (i *menuItem) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleButton
+}
+
+// AccessibilityLabel returns the menu item label.
+//
+// Since: 2.8
+func (i *menuItem) AccessibilityLabel() string {
+	return i.Item.Label
+}
+
+// AccessibilityStates reports the disabled and checked state of this menu
+// item.
+//
+// Since: 2.8
+func (i *menuItem) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if i.Item.Disabled {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if i.Item.Checked {
+		states = append(states, fyne.AccessibleStateChecked)
+	}
+	return states
+}
+
+// AccessibilityActions reports that menu items support a press action.
+//
+// Since: 2.8
+func (i *menuItem) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress}
+}
+
+// AccessibilityPerformAction triggers the menu item when asked to press it.
+//
+// Since: 2.8
+func (i *menuItem) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if action != fyne.AccessibleActionPress {
+		return false
+	}
+	if i.Item.Disabled {
+		return false
+	}
+	i.Tapped(nil)
+	return true
+}
+
 func (i *menuItem) activate() {
 	if i.Item.Disabled {
 		return

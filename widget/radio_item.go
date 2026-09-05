@@ -118,6 +118,59 @@ func (i *radioItem) toggle() {
 	i.onTap(i)
 }
 
+// AccessibilityLabel returns the radio item's label.
+//
+// Since: 2.8
+func (i *radioItem) AccessibilityLabel() string {
+	return i.Label
+}
+
+// AccessibilityRole returns AccessibleRoleRadio.
+//
+// Since: 2.8
+func (i *radioItem) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleRadio
+}
+
+// AccessibilityStates reports whether this item is selected, disabled or focused.
+//
+// Since: 2.8
+func (i *radioItem) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if i.Selected {
+		states = append(states, fyne.AccessibleStateSelected)
+	}
+	if i.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if i.focused {
+		states = append(states, fyne.AccessibleStateFocused)
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions supported by this radio item.
+//
+// Since: 2.8
+func (i *radioItem) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect}
+}
+
+// AccessibilityPerformAction selects this radio item when pressed or selected.
+//
+// Since: 2.8
+func (i *radioItem) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	switch action {
+	case fyne.AccessibleActionPress, fyne.AccessibleActionSelect:
+		if i.Disabled() || i.onTap == nil {
+			return false
+		}
+		i.onTap(i)
+		return true
+	}
+	return false
+}
+
 type radioItemRenderer struct {
 	widget.BaseRenderer
 	item *radioItem

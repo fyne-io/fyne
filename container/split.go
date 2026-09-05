@@ -87,6 +87,32 @@ func (s *Split) SetOffset(offset float64) {
 	s.Refresh()
 }
 
+// AccessibilityLabel returns an empty label so the split is announced by role only.
+//
+// Since: 2.8
+func (s *Split) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleContainer.
+//
+// Since: 2.8
+func (s *Split) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityChildren returns the leading and trailing children of the split.
+//
+// Since: 2.8
+func (s *Split) AccessibilityChildren() []fyne.CanvasObject {
+	children := make([]fyne.CanvasObject, 0, 2)
+	if s.Leading != nil {
+		children = append(children, s.Leading)
+	}
+	if s.Trailing != nil {
+		children = append(children, s.Trailing)
+	}
+	return children
+}
+
 var _ fyne.WidgetRenderer = (*splitContainerRenderer)(nil)
 
 type splitContainerRenderer struct {

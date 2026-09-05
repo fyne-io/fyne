@@ -14,6 +14,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/common"
 	"fyne.io/fyne/v2/internal/scale"
 )
 
@@ -48,8 +49,7 @@ func (w *window) collectAccessibleElements(obj fyne.CanvasObject, pos fyne.Posit
 
 	objPos := pos.Add(obj.Position())
 
-	accessible, isAccessible := obj.(fyne.Accessible)
-	if isAccessible {
+	if accessible, isAccessible := obj.(fyne.Accessible); isAccessible {
 		role := accessible.AccessibilityRole()
 		// Use flat model: skip containers, only add leaf elements
 		if role != fyne.AccessibleRoleContainer {
@@ -68,11 +68,8 @@ func (w *window) collectAccessibleElements(obj fyne.CanvasObject, pos fyne.Posit
 		}
 	}
 
-	// Recurse into container children
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			w.collectAccessibleElements(child, objPos)
-		}
+	for _, child := range common.AccessibilityChildren(obj) {
+		w.collectAccessibleElements(child, objPos)
 	}
 }
 
@@ -80,10 +77,40 @@ func roleToCWin(role fyne.AccessibleRole) C.WinAccessibilityRole {
 	switch role {
 	case fyne.AccessibleRoleButton:
 		return C.WinAccessibilityRoleButton
-	case fyne.AccessibleRoleText:
-		return C.WinAccessibilityRoleText
+	case fyne.AccessibleRoleCheckbox:
+		return C.WinAccessibilityRoleCheckbox
+	case fyne.AccessibleRoleHeading:
+		return C.WinAccessibilityRoleHeading
+	case fyne.AccessibleRoleImage:
+		return C.WinAccessibilityRoleImage
 	case fyne.AccessibleRoleLink:
 		return C.WinAccessibilityRoleLink
+	case fyne.AccessibleRoleList:
+		return C.WinAccessibilityRoleList
+	case fyne.AccessibleRoleListItem:
+		return C.WinAccessibilityRoleListItem
+	case fyne.AccessibleRoleProgressBar:
+		return C.WinAccessibilityRoleProgressBar
+	case fyne.AccessibleRoleRadio:
+		return C.WinAccessibilityRoleRadio
+	case fyne.AccessibleRoleSeparator:
+		return C.WinAccessibilityRoleSeparator
+	case fyne.AccessibleRoleSlider:
+		return C.WinAccessibilityRoleSlider
+	case fyne.AccessibleRoleTab:
+		return C.WinAccessibilityRoleTab
+	case fyne.AccessibleRoleTabList:
+		return C.WinAccessibilityRoleTabList
+	case fyne.AccessibleRoleTable:
+		return C.WinAccessibilityRoleTable
+	case fyne.AccessibleRoleText:
+		return C.WinAccessibilityRoleText
+	case fyne.AccessibleRoleTextField:
+		return C.WinAccessibilityRoleTextField
+	case fyne.AccessibleRoleTree:
+		return C.WinAccessibilityRoleTree
+	case fyne.AccessibleRoleTreeItem:
+		return C.WinAccessibilityRoleTreeItem
 	default:
 		return C.WinAccessibilityRoleGroup
 	}
