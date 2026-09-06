@@ -365,6 +365,103 @@ func TestList_Select(t *testing.T) {
 	assert.True(t, visible6.background.Visible())
 }
 
+func TestList_MultiSelect(t *testing.T) {
+	list := createList(1000)
+	list.MultiSelect = true
+
+	assert.Equal(t, float32(0), list.offsetY)
+	list.Select(50)
+	assert.Equal(t, 988, int(list.offsetY))
+	lo := list.scroller.Content.(*fyne.Container).Layout.(*listLayout)
+	visible50, _ := lo.searchVisible(lo.visible, 50)
+	assert.Equal(t, visible50.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.True(t, visible50.background.Visible())
+
+	list.Select(5)
+	assert.Equal(t, 195, int(list.offsetY))
+	visible5, _ := lo.searchVisible(lo.visible, 5)
+	assert.Equal(t, visible5.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.True(t, visible5.background.Visible())
+
+	list.Select(6)
+	assert.Equal(t, 195, int(list.offsetY))
+	visible6, _ := lo.searchVisible(lo.visible, 6)
+	assert.True(t, visible5.background.Visible())
+	assert.Equal(t, visible6.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.True(t, visible6.background.Visible())
+
+	list.SetSelection([]ListItemID{6, 7, 8})
+	assert.Equal(t, 195, int(list.offsetY))
+	visible7, _ := lo.searchVisible(lo.visible, 7)
+	visible8, _ := lo.searchVisible(lo.visible, 8)
+	assert.False(t, visible5.background.Visible())
+	assert.True(t, visible6.background.Visible())
+	assert.Equal(t, visible7.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.Equal(t, visible8.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.True(t, visible7.background.Visible())
+	assert.True(t, visible8.background.Visible())
+
+	count := 0
+	list.OnSelected = func(ListItemID) {
+		count++
+	}
+	list.SelectAll()
+	assert.Equal(t, 195, int(list.offsetY))
+	assert.True(t, visible5.background.Visible())
+	assert.True(t, visible6.background.Visible())
+	assert.True(t, visible7.background.Visible())
+	assert.True(t, visible8.background.Visible())
+	assert.Equal(t, visible5.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.Equal(t, visible6.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.Equal(t, visible7.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.Equal(t, visible8.background.FillColor, theme.Color(theme.ColorNameSelection))
+	assert.Equal(t, 1000-3, count)
+
+	count = 0
+	list.OnUnselected = func(ListItemID) {
+		count++
+	}
+	list.UnselectAll()
+	assert.Equal(t, 195, int(list.offsetY))
+	assert.False(t, visible5.background.Visible())
+	assert.False(t, visible6.background.Visible())
+	assert.False(t, visible7.background.Visible())
+	assert.False(t, visible8.background.Visible())
+	assert.Equal(t, 1000, count)
+}
+
+func TestList_selectRangeIDs(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{2}, selectRangeIDs([]ListItemID{}, 2))
+	})
+	t.Run("same", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{2}, selectRangeIDs([]ListItemID{2}, 2))
+	})
+	t.Run("already", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0, 2}, selectRangeIDs([]ListItemID{0, 2}, 2))
+		assert.Equal(t, []ListItemID{2, 4}, selectRangeIDs([]ListItemID{2, 4}, 2))
+		assert.Equal(t, []ListItemID{2, 4}, selectRangeIDs([]ListItemID{2, 4}, 4))
+	})
+	t.Run("higher", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0, 1, 2}, selectRangeIDs([]ListItemID{0}, 2))
+		assert.Equal(t, []ListItemID{2, 4, 5, 6}, selectRangeIDs([]ListItemID{2, 4}, 6))
+		assert.Equal(t, []ListItemID{4, 5, 6}, selectRangeIDs([]ListItemID{4}, 6))
+	})
+	t.Run("lower", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{0, 1}, selectRangeIDs([]ListItemID{1}, 0))
+		assert.Equal(t, []ListItemID{2, 3, 4}, selectRangeIDs([]ListItemID{4}, 2))
+		assert.Equal(t, []ListItemID{0, 1, 2, 4}, selectRangeIDs([]ListItemID{2, 4}, 0))
+	})
+	t.Run("gap", func(t *testing.T) {
+		assert.Equal(t, []ListItemID{1, 3, 5, 2}, selectRangeIDs([]ListItemID{1, 3, 5}, 2))
+		assert.Equal(t, []ListItemID{1, 3, 5, 2}, selectRangeIDs([]ListItemID{1, 3, 5, 2}, 2))
+
+		// support range selection in gaps?
+		// assert.Equal(t, []ListItemID{0, 1, 2, 5}, selectRangeIDs([]ListItemID{0, 5}, 2))
+		// assert.Equal(t, []ListItemID{0, 3, 4, 5}, selectRangeIDs([]ListItemID{0, 5}, 3))
+	})
+}
+
 func TestList_Unselect(t *testing.T) {
 	list := createList(1000)
 	var unselected ListItemID
@@ -380,7 +477,7 @@ func TestList_Unselect(t *testing.T) {
 	list.Unselect(10)
 	children = list.scroller.Content.(*fyne.Container).Layout.(*listLayout).children
 	assert.False(t, children[10].(*listItem).background.Visible())
-	assert.Nil(t, list.selected)
+	assert.Empty(t, list.selected)
 	assert.Equal(t, 10, unselected)
 
 	unselected = -1

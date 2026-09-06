@@ -73,6 +73,11 @@ type List struct {
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
 
+	// MuliSelect enables selection of multiple items
+	//
+	// Since: 2.9
+	MultiSelect bool
+
 	currentHighlight ListItemID
 	focused          bool
 	scroller         *widget.Scroll
@@ -303,23 +308,29 @@ func (l *List) Highlight(id ListItemID) {
 	l.Refresh()
 }
 
-// Select add the item identified by the given ID to the selection.
+// Select puts the item identified by the given ID into the selection,
+// or adds it to the selection when the list is in MultiSelect mode.
 func (l *List) Select(id ListItemID) {
-	if len(l.selected) > 0 && id == l.selected[0] {
-		return
+	oldIDs := l.selected
+	for _, oldID := range oldIDs {
+		if oldID == id {
+			return
+		}
 	}
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
-	old := l.selected
-	l.selected = []ListItemID{id}
+	if l.MultiSelect {
+		l.selected = append(l.selected, id)
+	} else {
+		l.selected = []ListItemID{id}
+	}
 	defer func() {
-		if f := l.OnUnselected; f != nil && len(old) > 0 {
-			f(old[0])
+		if f := l.OnUnselected; f != nil && len(oldIDs) > 0 && !l.MultiSelect {
+			for _, oldID := range oldIDs {
+				f(oldID)
+			}
 		}
 		if f := l.OnSelected; f != nil {
 			f(id)
@@ -329,14 +340,92 @@ func (l *List) Select(id ListItemID) {
 	l.Refresh()
 }
 
+// SelectAll selects all items in the list.
+//
+// Since: 2.9
+func (l *List) SelectAll() {
+	length := l.length()
+	if length == 0 || length == len(l.selected) {
+		return
+	}
+
+	oldIDs := l.selected
+	l.selected = make([]ListItemID, length)
+	for i := range l.selected {
+		l.selected[i] = i
+	}
+	l.Refresh()
+
+	// Call OnSelected callback for each newly selected item
+	onSelected := l.OnSelected
+	if onSelected == nil {
+		return
+	}
+
+	wasSel := make(map[ListItemID]struct{}, len(oldIDs))
+	for _, oldID := range oldIDs {
+		wasSel[oldID] = struct{}{}
+	}
+	for id := ListItemID(0); id < length; id++ {
+		if _, wasSelected := wasSel[id]; !wasSelected {
+			onSelected(id)
+		}
+	}
+}
+
+// SetSelection sets the currently selected items in the list when in MultiSelect mode,
+// otherwise selects the first item given, or clears the selection when empty.
+//
+// Since: 2.9
+func (l *List) SetSelection(ids []ListItemID) {
+	if !l.MultiSelect && len(ids) > 0 {
+		ids = []ListItemID{ids[0]}
+	}
+
+	length := l.length()
+	if length == 0 {
+		return
+	}
+
+	wasSel := make(map[ListItemID]struct{}, len(l.selected))
+	for _, id := range l.selected {
+		wasSel[id] = struct{}{}
+	}
+
+	newIDs := make([]ListItemID, 0, len(ids))
+	newSel := make(map[ListItemID]struct{}, len(ids))
+	for _, id := range ids {
+		if id >= 0 && id < length {
+			newIDs = append(newIDs, id)
+			newSel[id] = struct{}{}
+		}
+	}
+	l.selected = newIDs
+	l.Refresh()
+
+	// Call OnSelected, OnUnselected callbacks for each newly (un)selected item
+	onSelected := l.OnSelected
+	onUnselected := l.OnUnselected
+	if onSelected == nil && onUnselected == nil {
+		return
+	}
+
+	for id := ListItemID(0); id < length; id++ {
+		_, wasSelected := wasSel[id]
+		_, newSelected := newSel[id]
+		if wasSelected && !newSelected && onUnselected != nil {
+			onUnselected(id)
+		} else if newSelected && !wasSelected && onSelected != nil {
+			onSelected(id)
+		}
+	}
+}
+
 // ScrollTo scrolls to the item represented by id
 //
 // Since: 2.1
 func (l *List) ScrollTo(id ListItemID) {
-	length := 0
-	if f := l.Length; f != nil {
-		length = f()
-	}
+	length := l.length()
 	if id < 0 || id >= length {
 		return
 	}
@@ -388,29 +477,47 @@ func (l *List) GetScrollOffset() float32 {
 	return l.offsetY
 }
 
+func isModifierPressed(mod fyne.KeyModifier) bool {
+	d, ok := fyne.CurrentApp().Driver().(desktop.Driver)
+	if ok && d.CurrentKeyModifiers()&mod > 0 {
+		return true
+	}
+	return false
+}
+
 // TypedKey is called if a key event happens while this List is focused.
 func (l *List) TypedKey(event *fyne.KeyEvent) {
 	oldFocus := l.currentHighlight
 
+	scrollOrSelect := func() {
+		if isModifierPressed(fyne.KeyModifierShift) {
+			l.SetSelection(selectRangeIDs(l.selected, l.currentHighlight))
+		}
+		l.scrollTo(l.currentHighlight)
+		l.RefreshItem(l.currentHighlight)
+	}
+
 	switch event.Name {
 	case fyne.KeySpace:
-		l.Select(l.currentHighlight)
+		if isModifierPressed(fyne.KeyModifierShift) {
+			l.SetSelection(selectRangeIDs(l.selected, l.currentHighlight))
+		} else {
+			l.Select(l.currentHighlight)
+		}
 	case fyne.KeyDown:
 		if f := l.Length; f != nil && l.currentHighlight >= f()-1 {
 			return
 		}
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight++
-		l.scrollTo(l.currentHighlight)
-		l.RefreshItem(l.currentHighlight)
+		scrollOrSelect()
 	case fyne.KeyUp:
 		if l.currentHighlight <= 0 {
 			return
 		}
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight--
-		l.scrollTo(l.currentHighlight)
-		l.RefreshItem(l.currentHighlight)
+		scrollOrSelect()
 	}
 
 	if oldFocus != l.currentHighlight {
@@ -427,11 +534,24 @@ func (*List) TypedRune(_ rune) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	if len(l.selected) == 0 || l.selected[0] != id {
+	isSelected := false
+	for _, selID := range l.selected {
+		if selID == id {
+			isSelected = true
+			break
+		}
+	}
+	if !isSelected {
 		return
 	}
 
-	l.selected = nil
+	newSelected := make([]ListItemID, 0, len(l.selected)-1)
+	for _, selID := range l.selected {
+		if selID != id {
+			newSelected = append(newSelected, selID)
+		}
+	}
+	l.selected = newSelected
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		f(id)
@@ -446,14 +566,21 @@ func (l *List) UnselectAll() {
 		return
 	}
 
-	selected := l.selected
+	oldIDs := l.selected
 	l.selected = nil
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
-		for _, id := range selected {
+		for _, id := range oldIDs {
 			f(id)
 		}
 	}
+}
+
+func (l *List) length() int {
+	if f := l.Length; f != nil {
+		return f()
+	}
+	return 0
 }
 
 // Refresh causes this List to be redrawn in its current state
@@ -471,7 +598,7 @@ func (l *List) contentMinSize() fyne.Size {
 	if l.Length == nil {
 		return fyne.NewSize(0, 0)
 	}
-	items := l.Length()
+	items := l.length()
 
 	if len(l.itemHeights) == 0 {
 		return fyne.NewSize(l.itemMin.Width,
@@ -607,6 +734,7 @@ type listItem struct {
 	BaseWidget
 
 	onTapped          func()
+	onTappedSecondary func() // used instead of tapped+modifier for multi-select
 	onHovered         func()
 	background        *canvas.Rectangle
 	child             fyne.CanvasObject
@@ -669,6 +797,17 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.selected = true
 		li.Refresh()
 		li.onTapped()
+	}
+}
+
+func (li *listItem) TappedSecondary(*fyne.PointEvent) {
+	if !fyne.CurrentDevice().IsMobile() {
+		return
+	}
+	if f := li.onTappedSecondary; f != nil {
+		li.selected = true
+		li.Refresh()
+		f()
 	}
 }
 
@@ -797,19 +936,74 @@ func (l *listLayout) setupListItem(li *listItem, id ListItemID, focus bool) {
 
 			l.list.currentHighlight = id
 		}
-
-		l.list.Select(id)
+		if isModifierPressed(fyne.KeyModifierSuper | fyne.KeyModifierControl) {
+			if li.selected {
+				l.list.Unselect(id)
+			} else {
+				l.list.Select(id)
+			}
+		} else if isModifierPressed(fyne.KeyModifierShift) {
+			l.list.SetSelection(selectRangeIDs(l.list.selected, id))
+		} else {
+			l.list.Select(id)
+		}
 	}
+	if !fyne.CurrentDevice().IsMobile() {
+		return
+	}
+	li.onTappedSecondary = func() {
+		if li.selected {
+			l.list.Unselect(id)
+		} else {
+			l.list.SetSelection(append(l.list.selected, id))
+		}
+	}
+}
+
+func selectRangeIDs(selected []ListItemID, selID ListItemID) []ListItemID {
+	if len(selected) == 0 {
+		return []ListItemID{selID}
+	}
+
+	var high, low ListItemID = math.MinInt, math.MaxInt
+	for _, id := range selected {
+		if id == selID {
+			return selected
+		}
+		if id > high {
+			high = id
+		}
+		if id < low {
+			low = id
+		}
+	}
+
+	if selID < low {
+		r := make([]ListItemID, 0, len(selected)+(low-selID))
+		for id := selID; id < low; id++ {
+			r = append(r, id)
+		}
+		r = append(r, selected...)
+		return r
+	}
+
+	if selID > high {
+		r := make([]ListItemID, 0, len(selected)+(selID-high))
+		r = append(r, selected...)
+		for id := high + 1; id <= selID; id++ {
+			r = append(r, id)
+		}
+		return r
+	}
+
+	return append(selected, selID)
 }
 
 func (l *listLayout) updateList(newOnly bool) {
 	th := l.list.Theme()
 	separatorThickness := th.Size(theme.SizeNamePadding)
 	width := l.list.Size().Width
-	length := 0
-	if f := l.list.Length; f != nil {
-		length = f()
-	}
+	length := l.list.length()
 	if l.list.UpdateItem == nil {
 		fyne.LogError("Missing UpdateItem callback required for List", nil)
 	}
