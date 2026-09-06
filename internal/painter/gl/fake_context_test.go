@@ -3,18 +3,14 @@
 package gl
 
 // fakeContext records the GL calls the painter makes, so the drawing paths can
-// be exercised without a real context.
+// be exercised without a real context. The handle types are numeric on desktop
+// and structs on mobile, so the fake hands back zero values: nothing here reads
+// them back, and the zero value is the one form that compiles everywhere.
 type fakeContext struct {
-	seq                       uint32
 	draws, vertices           int
 	bufferUploads, floats     int
 	buffersFreed              int
 	imageBytes, subImageBytes int
-}
-
-func (c *fakeContext) next() uint32 {
-	c.seq++
-	return c.seq
 }
 
 var _ context = (*fakeContext)(nil)
@@ -44,20 +40,24 @@ func (*fakeContext) ClearColor(float32, float32, float32, float32) {}
 
 func (*fakeContext) CompileShader(Shader) {}
 
-func (c *fakeContext) CreateBuffer() Buffer {
-	return Buffer(c.next())
+func (*fakeContext) CreateBuffer() Buffer {
+	var v Buffer
+	return v
 }
 
-func (c *fakeContext) CreateProgram() Program {
-	return Program(c.next())
+func (*fakeContext) CreateProgram() Program {
+	var v Program
+	return v
 }
 
-func (c *fakeContext) CreateShader(uint32) Shader {
-	return Shader(c.next())
+func (*fakeContext) CreateShader(uint32) Shader {
+	var v Shader
+	return v
 }
 
-func (c *fakeContext) CreateTexture() Texture {
-	return Texture(c.next())
+func (*fakeContext) CreateTexture() Texture {
+	var v Texture
+	return v
 }
 
 func (c *fakeContext) DeleteBuffer(Buffer) {
@@ -79,8 +79,9 @@ func (*fakeContext) Enable(uint32) {}
 
 func (*fakeContext) EnableVertexAttribArray(Attribute) {}
 
-func (c *fakeContext) GetAttribLocation(Program, string) Attribute {
-	return Attribute(c.next())
+func (*fakeContext) GetAttribLocation(Program, string) Attribute {
+	var v Attribute
+	return v
 }
 
 func (*fakeContext) GetError() uint32 {
@@ -107,8 +108,9 @@ func (*fakeContext) GetShaderInfoLog(Shader) string {
 	return ""
 }
 
-func (c *fakeContext) GetUniformLocation(Program, string) Uniform {
-	return Uniform(c.next()) //gosec:disable G115 -- ids in a test never approach the limit
+func (*fakeContext) GetUniformLocation(Program, string) Uniform {
+	var v Uniform
+	return v
 }
 
 func (*fakeContext) LinkProgram(Program) {}

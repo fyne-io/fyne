@@ -12,8 +12,16 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 )
+
+// Text measurement reads the theme through the current app, and the app that
+// gl_test.go starts is not built under the ci tag, so start one here.
+func TestMain(m *testing.M) {
+	test.NewApp()
+	m.Run()
+}
 
 // testPainter builds a painter driving a fake GL context, so the text drawing
 // path can run without a window.
