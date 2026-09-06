@@ -16,6 +16,10 @@ func (*context) enqueue(c call) uintptr {
 	panic("unimplemented; GOOS/CGO combination not supported")
 }
 
+func (*context) HasWork() bool {
+	panic("unimplemented; GOOS/CGO combination not supported")
+}
+
 func (*context) cString(str string) (uintptr, func()) {
 	panic("unimplemented; GOOS/CGO combination not supported")
 }

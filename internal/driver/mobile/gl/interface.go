@@ -316,4 +316,7 @@ type Worker interface {
 
 	// DoWork performs any pending OpenGL calls.
 	DoWork()
+
+	// HasWork reports whether any OpenGL calls are queued.
+	HasWork() bool
 }

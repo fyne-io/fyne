@@ -130,8 +130,8 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 
 // NewRasterFromImage returns a new Raster instance that is rendered from the Go
 // image.Image passed in.
-// Rasters returned from this method will map pixel for pixel to the screen
-// starting img.Bounds().Min pixels from the top left of the canvas object.
+// The top left pixel is at img.Bounds().Min and from there image pixels map to
+// output pixels.
 // Truncates rather than scales the image.
 // If smaller than the target space, the image will be padded with zero-pixels to the target size.
 func NewRasterFromImage(img image.Image) *Raster {
@@ -141,14 +141,8 @@ func NewRasterFromImage(img image.Image) *Raster {
 
 			rect := image.Rect(0, 0, w, h)
 
-			switch {
-			case w == bounds.Dx() && h == bounds.Dy():
+			if bounds == rect {
 				return img
-			default:
-				if !rect.Overlaps(bounds) {
-					return image.NewUniform(color.RGBA{})
-				}
-				bounds = bounds.Intersect(rect)
 			}
 
 			// respect the user's pixel format (if possible)
@@ -178,7 +172,9 @@ func NewRasterFromImage(img image.Image) *Raster {
 				dst = image.NewRGBA(rect)
 			}
 
-			draw.Draw(dst, bounds, img, bounds.Min, draw.Over)
+			// the image is drawn from its top left corner, the bounds origin is not a screen offset.
+			// anything the image does not cover is left as the zero pixels dst was made with
+			draw.Draw(dst, rect.Intersect(bounds.Sub(bounds.Min)), img, bounds.Min, draw.Over)
 			return dst
 		},
 	}
