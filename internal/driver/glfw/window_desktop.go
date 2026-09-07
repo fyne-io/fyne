@@ -467,6 +467,7 @@ func (w *window) mouseMoved(_ *glfw.Window, xpos, ypos float64) {
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	button, modifiers := convertMouseButton(btn, mods)
 	mouseAction := convertAction(action)
+	w.driver.currentKeyModifiers = modifiers
 
 	w.processMouseClicked(button, mouseAction, modifiers)
 }
@@ -736,10 +737,11 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.Action) fyne.KeyModifier {
 	// On X11, pressing/releasing modifier keys does not include newly pressed/released keys in 'mod' mask.
 	// https://github.com/glfw/glfw/issues/1630
-	if action == glfw.Press {
-		mods |= glfwKeyToModifier(key)
-	} else {
+	if action == glfw.Release {
 		mods &= ^glfwKeyToModifier(key)
+	} else {
+		// both Press and Repeat actions mean the key is currently held down
+		mods |= glfwKeyToModifier(key)
 	}
 	return desktopModifier(mods)
 }

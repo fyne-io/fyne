@@ -1908,6 +1908,53 @@ func TestWindow_KeyDownOnRepeat(t *testing.T) {
 	require.Len(t, content.keyDownEvents, 3) // release does not trigger KeyDown
 }
 
+func TestDesktopModifierCorrected_Repeat(t *testing.T) {
+	// A held modifier key auto-repeats; Repeat must be treated the same as Press,
+	// not as a release, or CurrentKeyModifiers() reports the key as released while
+	// it is still physically held (fyne-io/fyne#6486).
+	mods := desktopModifierCorrected(glfw.ModControl, glfw.KeyLeftControl, glfw.Press)
+	assert.Equal(t, fyne.KeyModifierControl, mods)
+
+	mods = desktopModifierCorrected(glfw.ModControl, glfw.KeyLeftControl, glfw.Repeat)
+	assert.Equal(t, fyne.KeyModifierControl, mods, "repeat of a held modifier must still report it as held")
+
+	mods = desktopModifierCorrected(0, glfw.KeyLeftControl, glfw.Release)
+	assert.Equal(t, fyne.KeyModifier(0), mods)
+}
+
+func TestWindow_CurrentKeyModifiers_ResyncOnMouseClick(t *testing.T) {
+	w := createWindow("Test")
+	t.Cleanup(func() { w.driver.currentKeyModifiers = 0 })
+
+	// Simulate a modifier key-up event having been missed, e.g. because it was
+	// released while the window was unfocused, leaving the tracked state stuck "on".
+	w.driver.currentKeyModifiers = fyne.KeyModifierControl
+
+	// GLFW queries the OS for the live modifier state on every mouse click, so a
+	// click should resync our tracked state even without a matching key event.
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+
+	assert.Equal(t, fyne.KeyModifier(0), w.driver.currentKeyModifiers)
+}
+
+func TestWindow_CurrentKeyModifiers_ResetOnFocusLost(t *testing.T) {
+	w := createWindow("Test")
+	t.Cleanup(func() {
+		w.driver.currentKeyModifiers = 0
+		curWindow = nil
+	})
+
+	w.processFocused(true)
+	w.driver.currentKeyModifiers = fyne.KeyModifierControl
+
+	// GLFW only delivers key events to a focused window, so a modifier released while
+	// the app is in the background would otherwise never be observed, leaving it
+	// reported as held forever.
+	w.processFocused(false)
+
+	assert.Equal(t, fyne.KeyModifier(0), w.driver.currentKeyModifiers)
+}
+
 func TestWindow_KeyDownOnRepeat_NoFocused(t *testing.T) {
 	w := createWindow("Test")
 	w.SetContent(canvas.NewRectangle(color.Black))

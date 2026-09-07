@@ -132,9 +132,7 @@ func (*gLDriver) Device() fyne.Device {
 
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
-		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			f()
-		}
+		d.handleExitedForeground()
 		curWindow = nil
 		if d.trayStop != nil {
 			d.trayStop()
@@ -144,6 +142,13 @@ func (d *gLDriver) Quit() {
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
 		close(d.done)
+	}
+}
+
+func (d *gLDriver) handleExitedForeground() {
+	d.currentKeyModifiers = 0
+	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+		f()
 	}
 }
 
