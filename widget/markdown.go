@@ -26,6 +26,9 @@ func NewRichTextFromMarkdown(content string) *RichText {
 // It will replace the content of this widget similarly to SetText, but with the appropriate formatting.
 func (t *RichText) ParseMarkdown(content string) {
 	t.Segments = parseMarkdown(content)
+	if t.scr != nil && !isEmptyScroll(t.scr) {
+		clearScrollContainer(t.scr)
+	}
 	t.Refresh()
 }
 

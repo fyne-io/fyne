@@ -948,6 +948,16 @@ func isEmptyScroll(o *widget.Scroll) bool {
 	return false
 }
 
+func clearScrollContainer(o *widget.Scroll) {
+	if c, ok := o.Content.(*fyne.Container); ok {
+		if len(c.Objects) == 2 {
+			if inner, ok := c.Objects[1].(*fyne.Container); ok {
+				inner.Objects = nil
+			}
+		}
+	}
+}
+
 // howManyRunesFit accepts a rune slice, an available width, an average
 // character width, and a function that calculates the (pixel) size of a given
 // rune slice.
