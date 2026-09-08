@@ -167,14 +167,14 @@ func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Test"}, func(string) {})
 	render := cache.Renderer(test.TempWidgetRenderer(t, radio).Objects()[0].(*radioItem)).(*radioItemRenderer)
 
-	textSize := render.label.TextSize
-	customTextSize := textSize
+	textMin := render.label.MinSize()
+	customMin := textMin
 	test.WithTestTheme(t, func() {
 		render.Refresh()
-		customTextSize = render.label.TextSize
+		customMin = render.label.MinSize()
 	})
 
-	assert.NotEqual(t, textSize, customTextSize)
+	assert.NotEqual(t, textMin, customMin)
 }
 
 func extendedRadioGroupTestTapItem(t *testing.T, radio *extendedRadioGroup, item int) {
