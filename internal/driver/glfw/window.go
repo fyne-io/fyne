@@ -777,8 +777,14 @@ func (w *window) processCharInput(char rune) {
 func (w *window) processFocused(focus bool) {
 	if focus {
 		if curWindow == nil {
-			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnEnteredForeground(); f != nil {
-				f()
+			if running.Load() {
+				if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnEnteredForeground(); f != nil {
+					f()
+				}
+			} else {
+				// Windows reports the first focus during Show(), which is before the run loop
+				// has begun - defer to runGL so the hook cannot precede the started hook
+				foregroundPending = true
 			}
 		}
 		curWindow = w
@@ -806,8 +812,13 @@ func (w *window) processFocused(focus bool) {
 		}
 
 		curWindow = nil
-		if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
-			f()
+		if running.Load() {
+			if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnExitedForeground(); f != nil {
+				f()
+			}
+		} else {
+			// an app that lost the focus again before it started running was never in the foreground
+			foregroundPending = false
 		}
 	}
 }

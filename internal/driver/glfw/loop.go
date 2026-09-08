@@ -130,6 +130,13 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
+	if foregroundPending {
+		foregroundPending = false
+		if f := fyne.CurrentApp().Lifecycle().(*app.Lifecycle).OnEnteredForeground(); f != nil {
+			f()
+		}
+	}
+
 	eventTick := time.NewTicker(time.Second / 60)
 	for {
 		select {

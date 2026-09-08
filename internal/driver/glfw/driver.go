@@ -25,7 +25,13 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 )
 
-var curWindow *window
+var (
+	curWindow *window
+
+	// set when a window gained focus before the run loop started, so that the
+	// entered foreground hook can be called once the app is really running
+	foregroundPending bool
+)
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*gLDriver)(nil)
@@ -132,14 +138,18 @@ func (*gLDriver) Device() fyne.Device {
 
 func (d *gLDriver) Quit() {
 	if curWindow != nil {
-		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			f()
+		// if the foreground event is still pending then it never ran, so there is nothing to exit
+		if !foregroundPending {
+			if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+				f()
+			}
 		}
 		curWindow = nil
 		if d.trayStop != nil {
 			d.trayStop()
 		}
 	}
+	foregroundPending = false
 
 	// Only call close once to avoid panic.
 	if running.CompareAndSwap(true, false) {
