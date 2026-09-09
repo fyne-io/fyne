@@ -649,9 +649,28 @@ void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx) {
 		return;
 	}
 
+	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
+
+	// Apps targeting an SDK below 33 cannot request POST_NOTIFICATIONS
+	// themselves: the permission controller rejects the request without
+	// showing a dialog, and Android instead prompts on its own when the app
+	// first creates a notification channel. Issuing the request anyway can
+	// dismiss that system prompt, so leave legacy targets to the platform.
+	jmethodID getApplicationInfo = find_method(env, ctxClass, "getApplicationInfo",
+		"()Landroid/content/pm/ApplicationInfo;");
+	if (getApplicationInfo == 0) return;
+	jobject appInfo = (*env)->CallObjectMethod(env, (jobject)ctx, getApplicationInfo);
+	if (appInfo == NULL) return;
+	jclass appInfoClass = (*env)->GetObjectClass(env, appInfo);
+	jfieldID targetSdkFieldID = (*env)->GetFieldID(env, appInfoClass, "targetSdkVersion", "I");
+	jint targetSdk = (*env)->GetIntField(env, appInfo, targetSdkFieldID);
+	(*env)->DeleteLocalRef(env, appInfo);
+	if (targetSdk < 33) {
+		return;
+	}
+
 	jstring perm = (*env)->NewStringUTF(env, "android.permission.POST_NOTIFICATIONS");
 
-	jclass ctxClass = (*env)->GetObjectClass(env, (jobject)ctx);
 	jmethodID checkSelfPermission = find_method(env, ctxClass, "checkSelfPermission", "(Ljava/lang/String;)I");
 	if (checkSelfPermission == 0) return;
 	if ((*env)->CallIntMethod(env, (jobject)ctx, checkSelfPermission, perm) == 0) {
@@ -667,6 +686,10 @@ void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx) {
 	(*env)->SetObjectArrayElement(env, perms, 0, perm);
 
 	(*env)->CallVoidMethod(env, (jobject)ctx, requestPermissions, perms, 1);
+	if ((*env)->ExceptionCheck(env)) {
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
 
 	(*env)->DeleteLocalRef(env, perms);
 	(*env)->DeleteLocalRef(env, perm);

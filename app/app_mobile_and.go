@@ -64,6 +64,11 @@ func (a *fyneApp) StopForegroundService() {
 // notifications, which Android 13+ requires before any notification is
 // shown. The system dialog is skipped when the permission is already granted
 // or the device runs an older Android version.
+//
+// The request is only issued when the app targets SDK 33 or later, which
+// for Fyne means a release build. Apps with a lower target SDK cannot request
+// this permission themselves; Android prompts on its own when the app first
+// creates a notification channel, so this call is a no-op for them.
 func (a *fyneApp) RequestNotificationPermission() {
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		C.requestNotificationPermission(C.uintptr_t(env), C.uintptr_t(ctx))
