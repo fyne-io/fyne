@@ -33,7 +33,7 @@ type listBind struct {
 }
 
 // ScrollGravity represents the scroll gravity for auto-scrolling when list items change.
-//
+// It dictates whether the list should remain pinned to the top, stick to the bottom, or not auto-scroll at all.
 // Since: 2.9
 type ScrollGravity int
 

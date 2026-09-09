@@ -777,9 +777,7 @@ func TestList_AutoScrollBottom(t *testing.T) {
 	data = append(data, "6", "7", "8")
 	list.Refresh()
 
-	if r.scroller.Offset.Y <= initialOffset {
-		t.Errorf("Expected list to auto-scroll down, offset remained %f", r.scroller.Offset.Y)
-	}
+	assert.Greater(t, r.scroller.Offset.Y, initialOffset)
 
 	list.ScrollToTop()
 	topOffset := r.scroller.Offset.Y
@@ -787,7 +785,5 @@ func TestList_AutoScrollBottom(t *testing.T) {
 	data = append(data, "9", "10")
 	list.Refresh()
 
-	if r.scroller.Offset.Y != topOffset {
-		t.Errorf("Expected list to not auto-scroll, offset changed to %f", r.scroller.Offset.Y)
-	}
+	assert.Equal(t, topOffset, r.scroller.Offset.Y)
 }
