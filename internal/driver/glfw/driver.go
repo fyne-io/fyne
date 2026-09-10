@@ -184,9 +184,7 @@ func (d *gLDriver) initFailed(msg string, err error) {
 }
 
 func (d *gLDriver) Run() {
-	if !async.IsMainGoroutine() {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
-	}
+	async.SetMainGoroutine()
 
 	go d.catchTerm()
 	d.runGL()
