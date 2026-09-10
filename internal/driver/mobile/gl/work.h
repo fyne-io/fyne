@@ -89,6 +89,7 @@ typedef enum {
 	glfnCopyTexSubImage2D,
 	glfnDeleteProgram,
 	glfnGetIntegerv,
+	glfnTexSubImage2D,
 } glfn;
 
 // TODO: generate this type from fn.go.

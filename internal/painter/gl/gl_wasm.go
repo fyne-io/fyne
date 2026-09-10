@@ -14,6 +14,7 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
+	colorFormatAlpha      = gl.ALPHA
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
@@ -235,6 +236,14 @@ func (c *xjsContext) TexImage2D(target uint32, level, width, height int, colorFo
 		gl.Enum(typ),
 		jsData,
 	)
+}
+
+func (c *xjsContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	var jsData interface{}
+	if len(data) > 0 {
+		jsData = data
+	}
+	gl.TexSubImage2D(gl.Enum(target), level, xoffset, yoffset, width, height, gl.Enum(colorFormat), gl.Enum(typ), jsData)
 }
 
 func (c *xjsContext) TexParameteri(target, param uint32, value int32) {

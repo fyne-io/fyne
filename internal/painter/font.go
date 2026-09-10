@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -216,6 +217,79 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 
 		r.DrawShapedRunAt(run, dst, int(x)-offset, yPix)
 	})
+}
+
+// WalkStringGlyphs calls cb once for each glyph in s, passing the shaped run,
+// the glyph's index within it, the pen X at that glyph, the shared baseline Y
+// for the line, and the glyph's X and Y offsets, all in device pixels.
+//
+// Positions are exact rather than rounded, leaving the caller to decide how to
+// land on the pixel grid. Unmappable codepoints yield a replacement character.
+func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
+	cb func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32),
+) {
+	advance := float32(0)
+	size := float32ToFixed266(fontSize)
+	walkString(f, s, size, style, &advance, scale, func(run shaping.Output, x, y float32) {
+		// A codepoint no font can provide is drawn as a replacement character, which is
+		// what the software renderer does.
+		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
+			face := f.ResolveFace(replacementChar)
+			if face == nil {
+				return
+			}
+			run = shaper.Shape(shaping.Input{
+				Text:      []rune{replacementChar},
+				RunStart:  0,
+				RunEnd:    1,
+				Direction: di.DirectionLTR,
+				Face:      face,
+				Size:      size,
+			})
+			if len(run.Glyphs) == 0 {
+				return
+			}
+		}
+		penX := x
+		for i, g := range run.Glyphs {
+			xOff := fixed266ToFloat32(g.XOffset) * scale
+			yOff := fixed266ToFloat32(g.YOffset) * scale
+			cb(run, i, penX, y, xOff, yOff)
+			penX += fixed266ToFloat32(g.Advance) * scale
+		}
+	})
+}
+
+// RenderGlyphToImage rasterises one glyph of run into a new image, in white so
+// that the bitmap carries coverage rather than colour and serves every colour it
+// is drawn in. subpixel shifts it right by that fraction of a pixel and must be
+// in [0,1). The returned baseline is measured down from the top of the image.
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline int) {
+	g := run.Glyphs[idx]
+	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: color.White}
+
+	baseline = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * scale)))
+	descent := int(math.Ceil(float64(-fixed266ToFloat32(run.LineBounds.Descent) * scale)))
+	h := baseline + descent
+	if h <= 0 {
+		h = 1
+	}
+	italicPad := int(math.Ceil(float64(fontSize * scale / 5)))
+	// One extra column beyond the advance for ink pushed right by subpixel.
+	w := int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 3
+	if w <= 0 {
+		w = 1
+	}
+
+	img = image.NewRGBA(image.Rect(0, 0, w, h))
+	shifted := g
+	// XOffset is in font units, so undo the pixel scale to express the shift.
+	shifted.XOffset = float32ToFixed266(subpixel / scale)
+	shifted.YOffset = 0
+	singleRun := run
+	singleRun.Glyphs = []shaping.Glyph{shifted}
+	ren.DrawShapedRunAt(singleRun, img, 0, baseline)
+	return img, baseline
 }
 
 func loadMeasureFont(data fyne.Resource) *font.Face {
