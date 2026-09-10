@@ -415,7 +415,42 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, base, clip, pos)
 	}
 
+	if fillRectFastPath(base, bounds, fill) {
+		return
+	}
+
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
+}
+
+// fillRectFastPath writes an opaque, axis-aligned fill directly into base.Pix.
+// image/draw's generic uniform-fill fast path (drawFillOver/drawFillSrc in the
+// standard library) only special-cases an *image.RGBA destination; an
+// *image.NRGBA destination always falls through the slow per-pixel
+// color.Color conversion, even though a fully opaque fill simply replaces the
+// destination pixels and needs no Porter-Duff blending at all.
+func fillRectFastPath(base *image.NRGBA, bounds image.Rectangle, fill color.Color) bool {
+	if fill == nil || bounds.Empty() {
+		return false
+	}
+
+	r, g, b, a := fill.RGBA()
+	if a != 0xffff {
+		return false
+	}
+
+	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8) //gosec:disable G115 -- RGBA() components are 16-bit, >>8 always fits uint8
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		off := base.PixOffset(bounds.Min.X, y)
+		end := base.PixOffset(bounds.Max.X, y)
+		row := base.Pix[off:end]
+		for p := 0; p < len(row); p += 4 {
+			row[p] = nr
+			row[p+1] = ng
+			row[p+2] = nb
+			row[p+3] = 0xff
+		}
+	}
+	return true
 }
 
 func drawEllipse(c fyne.Canvas, ellipse *canvas.Ellipse, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
