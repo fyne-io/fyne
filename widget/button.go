@@ -62,6 +62,10 @@ type Button struct {
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
+	// Override the theme corner radius (if >0). Use canvas.RadiusMaximum for circular buttons and
+	// canvas.RadiusNone to remove the radius completely.
+	CornerRadius float32
+
 	OnTapped func() `json:"-"`
 
 	hovered, focused bool
