@@ -351,7 +351,13 @@ func (r *buttonRenderer) applyTheme() {
 			bgColor = blendColor(bgColor, th.Color(bgBlendName, v))
 		}
 		bg.FillColor = bgColor
-		bg.CornerRadius = th.Size(theme.SizeNameButtonRadius)
+		var cornerRadius float32
+		if r.button.CornerRadius <= 0 {
+			cornerRadius = th.Size(theme.SizeNameButtonRadius)
+		} else {
+			cornerRadius = float32(r.button.CornerRadius)
+		}
+		r.background.CornerRadius = cornerRadius
 		bg.Refresh()
 	}
 
