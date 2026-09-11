@@ -122,7 +122,6 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	text.inset = fyne.NewSquareSize(th.Size(theme.SizeNameInnerPadding))
 
 	background := canvas.NewRectangle(th.Color(theme.ColorNameButton, v))
-	background.CornerRadius = th.Size(theme.SizeNameButtonRadius)
 	tapBG := canvas.NewRectangle(color.Transparent)
 	b.tapAnim = newButtonTapAnimation(tapBG, b, th)
 	b.tapAnim.Curve = fyne.AnimationEaseOut
