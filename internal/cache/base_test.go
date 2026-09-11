@@ -2,6 +2,8 @@ package cache
 
 import (
 	"fmt"
+	"image"
+	"image/color"
 	"testing"
 	"time"
 
@@ -134,6 +136,129 @@ func TestCacheClean(t *testing.T) {
 	})
 }
 
+func TestCacheCleanWithStaleClockKeepsRecentlyUsedEntries(t *testing.T) {
+	testClearAll()
+	previousLastClean := lastClean
+	lastClean = time.Time{}
+	t.Cleanup(func() {
+		lastClean = previousLastClean
+		testClearAll()
+	})
+
+	tm := &timeMock{}
+	tm.setTime(10, 10)
+	canvas := &dummyCanvas{}
+	oldObject := &dummyWidget{}
+	recentObject := &dummyWidget{}
+	SetCanvasForObject(oldObject, canvas, nil)
+
+	// Simulate a driver that has not painted for longer than the cache lifetime.
+	// The recent entry is used before the next Clean refreshes the sampled clock.
+	tm.now = tm.now.Add(ValidDuration + time.Second)
+	SetCanvasForObject(recentObject, canvas, nil)
+	Clean(true)
+
+	_, oldFound := canvases.Load(oldObject)
+	_, recentFound := canvases.Load(recentObject)
+	assert.True(t, oldFound)
+	assert.True(t, recentFound)
+
+	// The refreshed sample lets the next pass distinguish an entry used in the
+	// current frame from one that really is expired.
+	SetCanvasForObject(recentObject, canvas, nil)
+	tm.now = tm.now.Add(cacheCleanCooldown + time.Second)
+	Clean(true)
+
+	_, oldFound = canvases.Load(oldObject)
+	_, recentFound = canvases.Load(recentObject)
+	assert.False(t, oldFound)
+	assert.True(t, recentFound)
+}
+
+func TestCacheCleanWithStaleClockWithoutCanvasRefreshLeavesSkippedUnset(t *testing.T) {
+	testClearAll()
+	previousLastClean := lastClean
+	lastClean = time.Time{}
+	t.Cleanup(func() {
+		lastClean = previousLastClean
+		testClearAll()
+	})
+
+	tm := &timeMock{}
+	tm.setTime(10, 10)
+	obj := &dummyWidget{}
+	SetCanvasForObject(obj, &dummyCanvas{}, nil)
+
+	tm.now = tm.now.Add(ValidDuration + time.Second)
+	Clean(false)
+
+	assert.False(t, skippedCleanWithCanvasRefresh)
+	_, found := canvases.Load(obj)
+	assert.True(t, found)
+}
+
+func TestCacheCleanWithStaleClockKeepsSvgFontAndBlurEntries(t *testing.T) {
+	testClearAll()
+	previousLastClean := lastClean
+	lastClean = time.Time{}
+	t.Cleanup(func() {
+		lastClean = previousLastClean
+		testClearAll()
+	})
+
+	tm := &timeMock{}
+	tm.setTime(10, 10)
+	pix := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	SetSvg("old.svg", nil, pix, 1, 1)
+	SetFontMetrics("old", 10, fyne.TextStyle{}, nil, fyne.NewSize(1, 1), 1)
+	SetBlurKernel(1, []float32{1})
+	oldWidget := &dummyWidget{}
+	Renderer(oldWidget)
+
+	tm.now = tm.now.Add(ValidDuration + time.Second)
+	SetSvg("recent.svg", nil, pix, 1, 1)
+	SetFontMetrics("recent", 10, fyne.TextStyle{}, nil, fyne.NewSize(2, 2), 2)
+	SetBlurKernel(2, []float32{2})
+	recentWidget := &dummyWidget{}
+	Renderer(recentWidget)
+	Clean(true)
+
+	_, oldSvg := svgs.Load("old.svg")
+	_, recentSvg := svgs.Load("recent.svg")
+	assert.True(t, oldSvg)
+	assert.True(t, recentSvg)
+	_, oldFont := fontSizeCache.Load(fontSizeEntry{Text: "old", Size: 10})
+	_, recentFont := fontSizeCache.Load(fontSizeEntry{Text: "recent", Size: 10})
+	assert.True(t, oldFont)
+	assert.True(t, recentFont)
+	_, oldBlur := blurKernels.Load(float32(1))
+	_, recentBlur := blurKernels.Load(float32(2))
+	assert.True(t, oldBlur)
+	assert.True(t, recentBlur)
+	assert.True(t, IsRendered(oldWidget))
+	assert.True(t, IsRendered(recentWidget))
+
+	SetSvg("recent.svg", nil, pix, 1, 1)
+	SetFontMetrics("recent", 10, fyne.TextStyle{}, nil, fyne.NewSize(2, 2), 2)
+	SetBlurKernel(2, []float32{2})
+	Renderer(recentWidget)
+	tm.now = tm.now.Add(cacheCleanCooldown + time.Second)
+	Clean(true)
+
+	assert.Nil(t, GetSvg("old.svg", nil, 1, 1))
+	assert.NotNil(t, GetSvg("recent.svg", nil, 1, 1))
+	oldSize, _ := GetFontMetrics("old", 10, fyne.TextStyle{}, nil)
+	recentSize, _ := GetFontMetrics("recent", 10, fyne.TextStyle{}, nil)
+	assert.True(t, oldSize.IsZero())
+	assert.Equal(t, fyne.NewSize(2, 2), recentSize)
+	_, oldBlur = GetBlurKernel(1)
+	_, recentBlur = GetBlurKernel(2)
+	assert.False(t, oldBlur)
+	assert.True(t, recentBlur)
+	assert.False(t, IsRendered(oldWidget))
+	assert.True(t, IsRendered(recentWidget))
+}
+
 func TestCleanCanvas(t *testing.T) {
 	destroyedRenderersCnt := 0
 	testClearAll()
@@ -175,6 +300,21 @@ func TestCleanCanvas(t *testing.T) {
 	assert.Equal(t, 42, destroyedRenderersCnt)
 }
 
+func TestCleanCanvas_NonWidgetAndMissingRenderer(t *testing.T) {
+	testClearAll()
+	t.Cleanup(testClearAll)
+
+	c := &dummyCanvas{}
+	obj := &dummyCanvasObject{}
+	wid := &dummyWidget{}
+	SetCanvasForObject(obj, c, nil)
+	SetCanvasForObject(wid, c, nil)
+
+	CleanCanvas(c)
+	assert.Equal(t, 0, canvases.Len())
+	assert.Equal(t, 0, renderers.Len())
+}
+
 func Test_expiringCache(t *testing.T) {
 	tm := &timeMock{}
 	tm.setTime(10, 10)
@@ -196,9 +336,50 @@ type dummyCanvas struct {
 	fyne.Canvas
 }
 
+type dummyCanvasObject struct {
+	fyne.CanvasObject
+}
+
+type dummyTheme struct{}
+
+func (dummyTheme) Color(fyne.ThemeColorName, fyne.ThemeVariant) color.Color {
+	return color.Black
+}
+
+func (dummyTheme) Font(fyne.TextStyle) fyne.Resource { return nil }
+
+func (dummyTheme) Icon(fyne.ThemeIconName) fyne.Resource { return nil }
+
+func (dummyTheme) Size(fyne.ThemeSizeName) float32 { return 0 }
+
 type dummyWidget struct {
 	fyne.Widget
 	onDestroy func()
+}
+
+type dummyBaseWidget struct {
+	dummyWidget
+	impl fyne.Widget
+}
+
+func (*dummyBaseWidget) ExtendBaseWidget(fyne.Widget) {}
+
+func (w *dummyBaseWidget) super() fyne.Widget {
+	return w.impl
+}
+
+type dummyMobileScope struct {
+	fyne.CanvasObject
+}
+
+func (*dummyMobileScope) SetDeviceIsMobile(bool) {}
+
+type nilRendererWidget struct {
+	dummyWidget
+}
+
+func (*nilRendererWidget) CreateRenderer() fyne.WidgetRenderer {
+	return nil
 }
 
 func (w *dummyWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -261,6 +442,8 @@ func testClearAll() {
 	objectTextures.Clear()
 	renderers.Clear()
 	blurKernels.Clear()
+	fontSizeCache.Clear()
+	overrides.Clear()
 	timeNow = time.Now
 	refreshNow()
 }

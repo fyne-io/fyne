@@ -34,6 +34,17 @@ func TestSetCanvasForObject(t *testing.T) {
 	assert.Equal(t, 2, called)
 }
 
+func TestGetCanvasForObject_Missing(t *testing.T) {
+	testClearAll()
+	t.Cleanup(testClearAll)
+
+	obj := &dummyWidget{}
+	assert.Nil(t, GetCanvasForObject(obj))
+
+	canvases.Store(obj, nil)
+	assert.Nil(t, GetCanvasForObject(obj))
+}
+
 func TestSetCanvasForObject_keepsAlive(t *testing.T) {
 	testClearAll()
 	defer testClearAll()
