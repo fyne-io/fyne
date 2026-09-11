@@ -32,6 +32,20 @@ type listBind struct {
 	oldUpdate func(id ListItemID, item fyne.CanvasObject)
 }
 
+// ScrollGravity represents the scroll gravity for auto-scrolling when list items change.
+// It dictates whether the list should remain pinned to the top, stick to the bottom, or not auto-scroll at all.
+// Since: 2.9
+type ScrollGravity int
+
+const (
+	// ScrollGravityNone disables auto-scrolling.
+	ScrollGravityNone ScrollGravity = iota
+	// ScrollGravityBottom auto-scrolls to the bottom when new items are added and the list is at the bottom.
+	ScrollGravityBottom
+	// ScrollGravityTop auto-scrolls to the top when new items are added and the list is at the top.
+	ScrollGravityTop
+)
+
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
 // By default, List requires that all items are the same size, but specific
@@ -72,6 +86,12 @@ type List struct {
 	//
 	// Since: 2.8
 	OnHighlighted func(id ListItemID) `json:"-"`
+
+	// Gravity sets whether the list should automatically scroll to the bottom or top
+	// when new items are added, if the list is already scrolled to that edge.
+	//
+	// Since: 2.9
+	Gravity ScrollGravity
 
 	currentHighlight ListItemID
 	focused          bool
@@ -579,7 +599,16 @@ func (l *listRenderer) MinSize() fyne.Size {
 	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
 
+const scrollAtEdgeTolerance = 1.0
+
 func (l *listRenderer) Refresh() {
+	wasAtBottom := false
+	wasAtTop := false
+	if l.scroller.Content != nil {
+		wasAtBottom = l.scroller.Offset.Y+l.scroller.Size().Height >= l.scroller.Content.Size().Height-scrollAtEdgeTolerance
+		wasAtTop = l.scroller.Offset.Y <= scrollAtEdgeTolerance
+	}
+
 	l.list.minSizeCache = fyne.Size{}
 	if f := l.list.CreateItem; f != nil {
 		item := createItemAndApplyThemeScope(f, l.list)
@@ -594,6 +623,17 @@ func (l *listRenderer) Refresh() {
 		s.Refresh()
 	}
 	canvas.Refresh(l.list.super())
+
+	switch l.list.Gravity {
+	case ScrollGravityBottom:
+		if wasAtBottom {
+			l.scroller.ScrollToBottom()
+		}
+	case ScrollGravityTop:
+		if wasAtTop {
+			l.scroller.ScrollToTop()
+		}
+	}
 }
 
 // Declare conformity with interfaces.
