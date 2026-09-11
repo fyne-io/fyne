@@ -3,8 +3,6 @@
 package glfw
 
 import (
-	"bytes"
-	"image/png"
 	"os"
 	"os/signal"
 	"runtime"
@@ -14,21 +12,28 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/driver/software"
+	intsystray "fyne.io/fyne/v2/internal/driver/systray"
 	"fyne.io/fyne/v2/internal/goos"
-	"fyne.io/fyne/v2/internal/painter"
-	"fyne.io/fyne/v2/internal/svg"
-	"fyne.io/fyne/v2/lang"
-	"fyne.io/fyne/v2/theme"
 )
 
 const systrayIconSize = 64
 
-var (
-	systrayIcon    fyne.Resource
-	systrayRunning bool
-)
+var systrayTray *intsystray.Tray
+
+func (d *gLDriver) systray() *intsystray.Tray {
+	if systrayTray == nil {
+		systrayTray = &intsystray.Tray{
+			IconSize:    systrayIconSize,
+			RunOnMain:   runOnMain,
+			Quit:        d.Quit,
+			ToOSIcon:    toOSIcon,
+			SupportsSVG: runtime.GOOS == goos.Darwin, // only macOS takes SVG tray icons
+			// Windows menus don't match dark mode so icons are inverted there
+			InvertMenuIcons: func() bool { return runtime.GOOS == goos.Windows && isDark() },
+		}
+	}
+	return systrayTray
+}
 
 func (*gLDriver) HasSecondaryDisplay() bool {
 	monitors := glfw.GetMonitors()
@@ -48,24 +53,16 @@ func (*gLDriver) HasSecondaryDisplay() bool {
 }
 
 func (d *gLDriver) SetSystemTrayMenu(m *fyne.Menu) {
-	if !systrayRunning {
-		systrayRunning = true
+	d.systrayMenu = m
+	if !d.systray().Running() {
 		d.runSystray(m)
 	}
 
-	d.refreshSystray(m)
+	d.systray().Refresh(m)
 }
 
 func (d *gLDriver) runSystray(m *fyne.Menu) {
-	d.trayStart, d.trayStop = systray.RunWithExternalLoop(func() {
-		if systrayIcon != nil {
-			d.SetSystemTrayIcon(systrayIcon)
-		} else if fyne.CurrentApp().Icon() != nil {
-			d.SetSystemTrayIcon(fyne.CurrentApp().Icon())
-		} else {
-			d.SetSystemTrayIcon(theme.BrokenImageIcon())
-		}
-
+	d.trayStart, d.trayStop = d.systray().Start(m, func() {
 		// Some XDG systray crash without a title (See #3678)
 		if runtime.GOOS == goos.Linux || goos.IsBSD(runtime.GOOS) {
 			app := fyne.CurrentApp()
@@ -76,15 +73,6 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 
 			systray.SetTitle(title)
 		}
-
-		if m != nil {
-			// it must be refreshed after init, so an earlier call would have been ineffective
-			runOnMain(func() {
-				d.refreshSystray(m)
-			})
-		}
-	}, func() {
-		// anything required for tear-down
 	})
 
 	// the only way we know the app was asked to quit is if this window is asked to close...
@@ -93,168 +81,12 @@ func (d *gLDriver) runSystray(m *fyne.Menu) {
 	w.SetCloseIntercept(d.Quit)
 }
 
-// systrayShortcutKeys maps the few key names that Fyne spells differently to the
-// platform neutral names that the systray package understands.
-var systrayShortcutKeys = map[fyne.KeyName]string{
-	fyne.KeyEnter:    "Enter",
-	fyne.KeyPageDown: "PageDown",
-	fyne.KeyPageUp:   "PageUp",
-}
-
-func systrayShortcutKey(key fyne.KeyName) string {
-	if name, ok := systrayShortcutKeys[key]; ok {
-		return name
-	}
-	return string(key)
-}
-
-func systrayModifiers(mod fyne.KeyModifier) (mods systray.KeyModifier) {
-	if mod&fyne.KeyModifierShift != 0 {
-		mods |= systray.KeyModifierShift
-	}
-	if mod&fyne.KeyModifierControl != 0 {
-		mods |= systray.KeyModifierControl
-	}
-	if mod&fyne.KeyModifierAlt != 0 {
-		mods |= systray.KeyModifierAlt
-	}
-	if mod&fyne.KeyModifierSuper != 0 {
-		mods |= systray.KeyModifierSuper
-	}
-	return mods
-}
-
-func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuItem {
-	if i.IsSeparator {
-		if parent != nil {
-			parent.AddSeparator()
-		} else {
-			systray.AddSeparator()
-		}
-		return nil
-	}
-
-	var item *systray.MenuItem
-	if i.Checked {
-		if parent != nil {
-			item = parent.AddSubMenuItemCheckbox(i.Label, "", true)
-		} else {
-			item = systray.AddMenuItemCheckbox(i.Label, "", true)
-		}
-	} else {
-		if parent != nil {
-			item = parent.AddSubMenuItem(i.Label, "")
-		} else {
-			item = systray.AddMenuItem(i.Label, "")
-		}
-	}
-	if i.Disabled {
-		item.Disable()
-	}
-	if s, ok := i.Shortcut.(fyne.KeyboardShortcut); ok {
-		item.SetShortcut(systrayModifiers(s.Mod()), systrayShortcutKey(s.Key()))
-	}
-	if i.Icon != nil {
-		data := i.Icon.Content()
-		if svg.IsResourceSVG(i.Icon) {
-			b := &bytes.Buffer{}
-			res := i.Icon
-			if runtime.GOOS == goos.Windows && isDark() { // windows menus don't match dark mode so invert icons
-				res = theme.NewInvertedThemedResource(i.Icon)
-			}
-			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
-			err := png.Encode(b, img)
-			if err != nil {
-				fyne.LogError("Failed to encode SVG icon for menu", err)
-			} else {
-				data = b.Bytes()
-			}
-		}
-
-		img, err := toOSIcon(data)
-		if err != nil {
-			fyne.LogError("Failed to convert systray icon", err)
-		} else {
-			if _, ok := i.Icon.(*theme.ThemedResource); ok {
-				item.SetTemplateIcon(img, img)
-			} else {
-				item.SetIcon(img)
-			}
-		}
-	}
-	return item
-}
-
-func (d *gLDriver) refreshSystray(m *fyne.Menu) {
-	d.systrayMenu = m
-
-	systray.ResetMenu()
-	d.refreshSystrayMenu(m, nil)
-
-	addMissingQuitForMenu(m, d)
-}
-
-func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
-	if m == nil {
-		return
-	}
-
-	for _, i := range m.Items {
-		item := itemForMenuItem(i, parent)
-		if item == nil {
-			continue // separator
-		}
-		if i.ChildMenu != nil {
-			d.refreshSystrayMenu(i.ChildMenu, item)
-		}
-
-		fn := i.Action
-		go func() {
-			for range item.ClickedCh {
-				if fn != nil {
-					runOnMain(fn)
-				}
-			}
-		}()
-	}
-}
-
-func (*gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
-	systrayIcon = resource // in case we need it later
-
-	// only macOS supports SVG system tray
-	if runtime.GOOS != goos.Darwin && svg.IsResourceSVG(resource) {
-		img := canvas.NewImageFromResource(resource)
-		c := software.NewTransparentCanvas()
-		c.SetContent(img)
-		c.SetPadded(false)
-		c.Resize(fyne.NewSquareSize(systrayIconSize))
-
-		buf := &bytes.Buffer{}
-		err := png.Encode(buf, c.Capture())
-		if err != nil {
-			fyne.LogError("Failed to encode SVG icon for system tray icon", err)
-			return
-		}
-		resource = fyne.NewStaticResource(resource.Name()+".png", buf.Bytes())
-	}
-
-	img, err := toOSIcon(resource.Content())
-	if err != nil {
-		fyne.LogError("Failed to convert systray icon", err)
-		return
-	}
-
-	if _, ok := resource.(*theme.ThemedResource); ok {
-		systray.SetTemplateIcon(img, img)
-	} else {
-		systray.SetIcon(img)
-	}
+func (d *gLDriver) SetSystemTrayIcon(resource fyne.Resource) {
+	d.systray().SetIcon(resource)
 }
 
 func (d *gLDriver) SetSystemTrayWindow(w fyne.Window) {
-	if !systrayRunning {
-		systrayRunning = true
+	if !d.systray().Running() {
 		d.runSystray(nil)
 	}
 
@@ -282,25 +114,4 @@ func (d *gLDriver) catchTerm() {
 
 	<-terminateSignal
 	fyne.Do(d.Quit)
-}
-
-func addMissingQuitForMenu(menu *fyne.Menu, d *gLDriver) {
-	localQuit := lang.L("Quit")
-	var lastItem *fyne.MenuItem
-	if len(menu.Items) > 0 {
-		lastItem = menu.Items[len(menu.Items)-1]
-		if lastItem.Label == localQuit {
-			lastItem.IsQuit = true
-		}
-	}
-	if lastItem == nil || !lastItem.IsQuit { // make sure the menu always has a quit option
-		quitItem := fyne.NewMenuItem(localQuit, nil)
-		quitItem.IsQuit = true
-		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
-	}
-	for _, item := range menu.Items {
-		if item.IsQuit && item.Action == nil {
-			item.Action = d.Quit
-		}
-	}
 }
