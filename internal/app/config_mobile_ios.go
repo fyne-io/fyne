@@ -13,7 +13,7 @@ char *documentsPath(void);
 */
 import "C"
 
-func rootConfigDir() string {
+func RootConfigDir() string {
 	root := C.documentsPath()
 	return filepath.Join(C.GoString(root), "fyne")
 }

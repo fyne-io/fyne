@@ -27,8 +27,14 @@ import (
 
 var curWindow *window
 
-// Declare conformity with Driver
-var _ fyne.Driver = (*gLDriver)(nil)
+// NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
+func NewGLDriver() fyne.Driver {
+	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
+
+	return &gLDriver{
+		done: make(chan struct{}),
+	}
+}
 
 type gLDriver struct {
 	windows     []fyne.Window
@@ -43,11 +49,155 @@ type gLDriver struct {
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
 }
 
+// Declare conformity with Driver
+var _ fyne.Driver = (*gLDriver)(nil)
+
+func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+	c := d.CanvasForObject(co)
+	if c == nil {
+		return fyne.NewPos(0, 0)
+	}
+
+	glc, _ := c.(*glCanvas)
+	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
+}
+
+func (d *gLDriver) AllWindows() []fyne.Window {
+	return d.windows
+}
+
+func (*gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	return common.CanvasForObject(obj)
+}
+
+func (d *gLDriver) CreateSplashWindow() fyne.Window {
+	win := d.newWindow("", false)
+	win.SetPadded(false)
+	win.CenterOnScreen()
+	return win
+}
+
+func (*gLDriver) Device() fyne.Device {
+	return &glDevice{}
+}
+
+func (*gLDriver) DoFromGoroutine(f func(), wait bool) {
+	if wait {
+		async.EnsureNotMain(func() {
+			runOnMainWithWait(f, true)
+		})
+	} else {
+		runOnMainWithWait(f, false)
+	}
+}
+
+func (d *gLDriver) Quit() {
+	if curWindow != nil {
+		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
+			f()
+		}
+		curWindow = nil
+		if d.trayStop != nil {
+			d.trayStop()
+		}
+	}
+
+	// Only call close once to avoid panic.
+	if running.CompareAndSwap(true, false) {
+		close(d.done)
+	}
+}
+
+func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style, source)
+}
+
+func (d *gLDriver) Run() {
+	if !async.IsMainGoroutine() {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+
+	go d.catchTerm()
+	d.runGL()
+
+	// Ensure lifecycle events run to completion before the app exits
+	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l.WaitForEvents()
+	l.DestroyEventQueue()
+}
+
+func (*gLDriver) SetDisableScreenBlanking(disable bool) {
+	setDisableScreenBlank(disable)
+}
+
+func (d *gLDriver) newWindow(title string, decorate bool) fyne.Window {
+	var ret *window
+	if title == "" {
+		title = defaultTitle
+	}
+
+	d.init()
+
+	// A window starts with no mouse move outstanding: the zero value would read
+	// as one pending at (0,0), which the first click would then apply.
+	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
+	ret.frame = newPresentGate(ret)
+	ret.canvas = newCanvas()
+	ret.canvas.context = ret
+	ret.SetIcon(ret.icon)
+	d.windows = append(d.windows, ret)
+	return ret
+}
+
+// a trivial implementation of "focus previous" - return to the most recently opened, or master if set.
+// This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
+// of an issue, and the added complexity to track focus was not needed at this time.
+func (d *gLDriver) focusPreviousWindow() {
+	var chosen *window
+	for _, w := range d.windows {
+		win, _ := w.(*window)
+		if !win.visible {
+			continue
+		}
+		chosen = win
+		if win.master {
+			break
+		}
+	}
+
+	if chosen == nil || chosen.view() == nil {
+		return
+	}
+	chosen.RequestFocus()
+}
+
 func (d *gLDriver) init() {
 	if !d.initialized {
 		d.initialized = true
 		d.initGLFW()
 	}
+}
+
+func (d *gLDriver) initFailed(msg string, err error) {
+	fyne.LogError(msg, err)
+
+	if running.Load() {
+		os.Exit(1) //revive:disable-line:deep-exit
+	}
+
+	d.Quit()
+}
+
+func convertToPNG(img image.Image) ([]byte, error) {
+	bounds := img.Bounds()
+	nrgba := image.NewNRGBA(bounds)
+	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
+
+	buf := &bytes.Buffer{}
+	if err := png.Encode(buf, nrgba); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func toOSIcon(icon []byte) ([]byte, error) {
@@ -82,130 +232,6 @@ func toOSIconForRuntime(icon []byte, osName string) ([]byte, error) {
 	return convertToPNG(img)
 }
 
-func convertToPNG(img image.Image) ([]byte, error) {
-	bounds := img.Bounds()
-	nrgba := image.NewNRGBA(bounds)
-	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
-
-	buf := &bytes.Buffer{}
-	if err := png.Encode(buf, nrgba); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
 func usesUnixSystrayIcon(osName string) bool {
 	return osName == goos.Linux || goos.IsBSD(osName)
-}
-
-func (*gLDriver) DoFromGoroutine(f func(), wait bool) {
-	if wait {
-		async.EnsureNotMain(func() {
-			runOnMainWithWait(f, true)
-		})
-	} else {
-		runOnMainWithWait(f, false)
-	}
-}
-
-func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
-	return painter.RenderedTextSize(text, textSize, style, source)
-}
-
-func (*gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	return common.CanvasForObject(obj)
-}
-
-func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
-	c := d.CanvasForObject(co)
-	if c == nil {
-		return fyne.NewPos(0, 0)
-	}
-
-	glc, _ := c.(*glCanvas)
-	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
-}
-
-func (*gLDriver) Device() fyne.Device {
-	return &glDevice{}
-}
-
-func (d *gLDriver) Quit() {
-	if curWindow != nil {
-		if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnExitedForeground(); f != nil {
-			f()
-		}
-		curWindow = nil
-		if d.trayStop != nil {
-			d.trayStop()
-		}
-	}
-
-	// Only call close once to avoid panic.
-	if running.CompareAndSwap(true, false) {
-		close(d.done)
-	}
-}
-
-func (d *gLDriver) addWindow(w *window) {
-	d.windows = append(d.windows, w)
-}
-
-// a trivial implementation of "focus previous" - return to the most recently opened, or master if set.
-// This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
-// of an issue, and the added complexity to track focus was not needed at this time.
-func (d *gLDriver) focusPreviousWindow() {
-	var chosen *window
-	for _, w := range d.windows {
-		win, _ := w.(*window)
-		if !win.visible {
-			continue
-		}
-		chosen = win
-		if win.master {
-			break
-		}
-	}
-
-	if chosen == nil || chosen.view() == nil {
-		return
-	}
-	chosen.RequestFocus()
-}
-
-func (d *gLDriver) initFailed(msg string, err error) {
-	fyne.LogError(msg, err)
-
-	if running.Load() {
-		os.Exit(1) //revive:disable-line:deep-exit
-	}
-
-	d.Quit()
-}
-
-func (d *gLDriver) Run() {
-	if !async.IsMainGoroutine() {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
-	}
-
-	go d.catchTerm()
-	d.runGL()
-
-	// Ensure lifecycle events run to completion before the app exits
-	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
-	l.WaitForEvents()
-	l.DestroyEventQueue()
-}
-
-func (*gLDriver) SetDisableScreenBlanking(disable bool) {
-	setDisableScreenBlank(disable)
-}
-
-// NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
-func NewGLDriver() fyne.Driver {
-	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
-
-	return &gLDriver{
-		done: make(chan struct{}),
-	}
 }

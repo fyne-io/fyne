@@ -63,8 +63,6 @@ linters:
           disabled: true
         - name: cognitive-complexity
           disabled: true
-        - name: confusing-naming
-          disabled: true # TODO
         - name: cyclomatic
           disabled: true
         - name: enforce-switch-style

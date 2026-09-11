@@ -246,7 +246,7 @@ func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 
 // MouseDown response to desktop mouse event
 func (t *Table) MouseDown(e *desktop.MouseEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // MouseMoved implements the [desktop.Hoverable] interface.
@@ -350,7 +350,7 @@ func (t *Table) SetRowHeight(id int, height float32) {
 
 // TouchDown response to mobile touch event
 func (t *Table) TouchDown(e *mobile.TouchEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // TouchUp response to mobile touch event
@@ -832,11 +832,10 @@ func (t *Table) rowAt(pos fyne.Position) int {
 	return noCellMatch
 }
 
-func (t *Table) tapped(pos fyne.Position) {
+func (t *Table) startDrag(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
 		t.dragStartPos = pos
 		if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = noCellMatch
 			t.dragRow = t.hoverHeaderRow
 			size, ok := t.rowHeights[t.hoverHeaderRow]
 			if !ok {
@@ -845,7 +844,6 @@ func (t *Table) tapped(pos fyne.Position) {
 			t.dragStartSize = size
 		} else if t.hoverHeaderCol != noCellMatch {
 			t.dragCol = t.hoverHeaderCol
-			t.dragRow = noCellMatch
 			size, ok := t.columnWidths[t.hoverHeaderCol]
 			if !ok {
 				size = t.cellSize.Width

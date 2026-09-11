@@ -155,7 +155,7 @@ func (t *DocTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *DocTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -176,6 +176,10 @@ func (t *DocTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
+func (t *DocTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
 func (t *DocTabs) close(item *TabItem) {
 	if f := t.CloseIntercept; f != nil {
 		f(item)
@@ -187,31 +191,27 @@ func (t *DocTabs) close(item *TabItem) {
 	}
 }
 
-func (t *DocTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
-}
-
-func (t *DocTabs) onSelected() func(*TabItem) {
-	return t.OnSelected
-}
-
-func (t *DocTabs) items() []*TabItem {
-	return t.Items
-}
-
-func (t *DocTabs) selected() int {
+func (t *DocTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
 	}
 	return t.current
 }
 
-func (t *DocTabs) setItems(items []*TabItem) {
-	t.Items = items
+func (t *DocTabs) items() []*TabItem {
+	return t.Items
 }
 
-func (t *DocTabs) setSelected(selected int) {
-	t.current = selected
+func (t *DocTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *DocTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
+
+func (t *DocTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *DocTabs) setTransitioning(transitioning bool) {

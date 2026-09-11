@@ -87,10 +87,10 @@ type Entry struct {
 
 	dirty               bool
 	focused, hasFocused bool
-	text                RichText
-	placeholder         RichText
+	textWidget          RichText
+	placeholderWidget   RichText
 	content             *entryContent
-	scroll              *widget.Scroll
+	scroller            *widget.Scroll
 
 	// useful for Form validation (as the error text should only be shown when
 	// the entry is unfocused)
@@ -190,16 +190,16 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	e.cursorAnim = newEntryCursorAnimation(cursor)
 	e.content = &entryContent{entry: e}
-	e.scroll = widget.NewScroll(nil)
+	e.scroller = widget.NewScroll(nil)
 	objects := []fyne.CanvasObject{box, border}
 	if e.Wrapping != fyne.TextWrapOff || e.Scroll != widget.ScrollNone {
-		e.scroll.Content = e.content
-		objects = append(objects, e.scroll)
+		e.scroller.Content = e.content
+		objects = append(objects, e.scroller)
 	} else {
-		e.scroll.Hide()
+		e.scroller.Hide()
 		objects = append(objects, e.content)
 	}
-	e.content.scroll = e.scroll
+	e.content.scroll = e.scroller
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -219,7 +219,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	e.syncSegments()
-	return &entryRenderer{box, border, e.scroll, icon, objects, e}
+	return &entryRenderer{box, border, e.scroller, icon, objects, e}
 }
 
 // CursorPosition returns the relative position of this Entry widget's cursor.
@@ -292,7 +292,7 @@ func (e *Entry) DragEnd() {
 // It updates the selection accordingly.
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	d.Position = d.Position.Add(fyne.NewPos(0, e.Theme().Size(theme.SizeNameInputBorder)))
-	e.sel.dragged(d)
+	e.sel.Dragged(d)
 	e.updateMousePointer(d.Position, false)
 }
 
@@ -321,7 +321,7 @@ func (e *Entry) FocusLost() {
 		e.selectKeyDown = false
 	})
 	if e.Validator != nil {
-		e.validate()
+		e.validateWithoutRefresh()
 		e.Refresh()
 	}
 	if e.onFocusChanged != nil {
@@ -411,7 +411,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 		e.sel.selecting = false
 	}
 
-	e.updateMousePointer(m.Position.Add(e.scroll.Offset), m.Button == desktop.MouseButtonSecondary)
+	e.updateMousePointer(m.Position.Add(e.scroller.Offset), m.Button == desktop.MouseButtonSecondary)
 
 	if !e.Disabled() {
 		e.requestFocus()
@@ -510,17 +510,17 @@ func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
 
 	e.placeholderProvider().Segments[0].(*TextSegment).Text = text
-	e.placeholder.updateRowBounds()
+	e.placeholderWidget.updateRowBounds()
 	e.placeholderProvider().Refresh()
 }
 
 // SetText manually sets the text of the Entry to the given text value.
 // Calling SetText resets all undo history.
 func (e *Entry) SetText(text string) {
-	e.setText(text, false)
+	e.applyText(text, false)
 }
 
-func (e *Entry) setText(text string, fromBinding bool) {
+func (e *Entry) applyText(text string, fromBinding bool) {
 	e.Theme() // setup theme cache before locking
 	e.updateTextAndRefresh(text, fromBinding)
 	e.updateCursorAndSelection()
@@ -540,7 +540,7 @@ func (e *Entry) Append(text string) {
 	e.undoStack.Clear()
 
 	if changed {
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -633,7 +633,7 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 		e.sel.selecting = false
 	}
 
-	e.updateMousePointer(ev.Position.Add(e.scroll.Offset), false)
+	e.updateMousePointer(ev.Position.Add(e.scroller.Offset), false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
@@ -735,7 +735,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 	cb := e.OnChanged
 	if changed {
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -911,7 +911,7 @@ func (e *Entry) TypedRune(r rune) {
 		Text:     runes,
 	})
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content)
 	}
@@ -954,7 +954,7 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 	content := e.Text
 	cb := e.OnChanged
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content)
 	}
@@ -1036,7 +1036,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	e.syncSelectable()
 	cb := e.OnChanged
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if cb != nil {
 		cb(content) // We know that the text has changed.
 	}
@@ -1046,25 +1046,25 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *RichText {
-	if len(e.placeholder.Segments) > 0 {
-		return &e.placeholder
+	if len(e.placeholderWidget.Segments) > 0 {
+		return &e.placeholderWidget
 	}
 
-	e.placeholder.Scroll = widget.ScrollNone
-	e.placeholder.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
+	e.placeholderWidget.Scroll = widget.ScrollNone
+	e.placeholderWidget.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
 
 	style := RichTextStyleInline
 	style.ColorName = theme.ColorNamePlaceHolder
 	style.TextStyle = e.TextStyle
 
-	e.placeholder.Segments = []RichTextSegment{
+	e.placeholderWidget.Segments = []RichTextSegment{
 		&TextSegment{
 			Style: style,
 			Text:  e.PlaceHolder,
 		},
 	}
 
-	return &e.placeholder
+	return &e.placeholderWidget
 }
 
 func (e *Entry) registerShortcut() {
@@ -1238,7 +1238,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		content := e.Text
 		cb := e.OnChanged
 
-		e.validate()
+		e.validateWithoutRefresh()
 		if cb != nil {
 			cb(content)
 		}
@@ -1320,18 +1320,18 @@ func (e *Entry) syncSelectable() {
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *RichText {
-	if len(e.text.Segments) > 0 {
-		return &e.text
+	if len(e.textWidget.Segments) > 0 {
+		return &e.textWidget
 	}
 
 	if e.Text != "" {
 		e.dirty = true
 	}
 
-	e.text.Scroll = widget.ScrollNone
-	e.text.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
-	e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
-	return &e.text
+	e.textWidget.Scroll = widget.ScrollNone
+	e.textWidget.inset = fyne.NewSize(0, e.Theme().Size(theme.SizeNameInputBorder))
+	e.textWidget.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
+	return &e.textWidget
 }
 
 // textWrap calculates the wrapping that we should apply.
@@ -1366,11 +1366,11 @@ func (e *Entry) updateFromData(data binding.DataItem) {
 
 	val, err := textSource.Get()
 	e.conversionError = err
-	e.validate()
+	e.validateWithoutRefresh()
 	if err != nil {
 		return
 	}
-	e.setText(val, true)
+	e.applyText(val, true)
 }
 
 func (e *Entry) truncatePosition(row, col int) (newRow, newCol int) {
@@ -1423,7 +1423,7 @@ func (e *Entry) updateText(text string, fromBinding bool) bool {
 		}
 	}
 	e.syncSegments()
-	e.text.updateRowBounds()
+	e.textWidget.updateRowBounds()
 
 	if e.Text != "" {
 		e.dirty = true
@@ -1450,7 +1450,7 @@ func (e *Entry) updateTextAndRefresh(text string, fromBinding bool) {
 		callback = e.OnChanged
 	}
 
-	e.validate()
+	e.validateWithoutRefresh()
 	if callback != nil {
 		callback(text)
 	}
@@ -1683,10 +1683,10 @@ func (r *entryRenderer) Refresh() {
 	wrapping := r.entry.Wrapping
 
 	r.entry.syncSegments()
-	r.entry.text.updateRowBounds()
-	r.entry.placeholder.updateRowBounds()
-	r.entry.text.Refresh()
-	r.entry.placeholder.Refresh()
+	r.entry.textWidget.updateRowBounds()
+	r.entry.placeholderWidget.updateRowBounds()
+	r.entry.textWidget.Refresh()
+	r.entry.placeholderWidget.Refresh()
 
 	th := r.entry.Theme()
 	inputBorder := th.Size(theme.SizeNameInputBorder)
@@ -1768,7 +1768,7 @@ func (r *entryRenderer) ensureValidationSetup() {
 		r.objects = append(r.objects, r.entry.validationStatus)
 		r.Layout(r.entry.Size())
 
-		r.entry.validate()
+		r.entry.validateWithoutRefresh()
 		r.Refresh()
 	}
 }
@@ -1839,7 +1839,7 @@ func (r *entryContentRenderer) MinSize() fyne.Size {
 	minSize := r.content.entry.placeholderProvider().MinSize()
 
 	if r.content.entry.textProvider().len() > 0 {
-		minSize = r.content.entry.text.MinSize()
+		minSize = r.content.entry.textWidget.MinSize()
 	}
 
 	return minSize
@@ -1929,7 +1929,7 @@ func (r *entryContentRenderer) moveCursor() {
 	textSize := th.Size(theme.SizeNameText)
 	inputBorder := th.Size(theme.SizeNameInputBorder)
 
-	lineHeight := r.content.entry.text.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
+	lineHeight := r.content.entry.textWidget.charMinSize(r.content.entry.Password, r.content.entry.TextStyle, textSize).Height
 	r.cursor.Resize(fyne.NewSize(inputBorder, lineHeight))
 	r.cursor.Move(r.content.entry.CursorPosition())
 

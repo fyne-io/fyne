@@ -26,7 +26,7 @@ type overrideScope struct {
 func OverrideTheme(o fyne.CanvasObject, th fyne.Theme) {
 	id := overrideCount.Add(1)
 	s := &overrideScope{th: th, cacheID: strconv.Itoa(int(id))}
-	overrideTheme(o, s)
+	overrideThemeWithScope(o, s)
 }
 
 func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
@@ -35,7 +35,7 @@ func OverrideThemeMatchingScope(o, parent fyne.CanvasObject) bool {
 		return false
 	}
 
-	overrideTheme(o, scope)
+	overrideThemeWithScope(o, scope)
 	return true
 }
 
@@ -59,11 +59,11 @@ func WidgetTheme(o fyne.CanvasObject) fyne.Theme {
 
 func overrideContainer(c *fyne.Container, s *overrideScope) {
 	for _, o := range c.Objects {
-		overrideTheme(o, s)
+		overrideThemeWithScope(o, s)
 	}
 }
 
-func overrideTheme(o fyne.CanvasObject, s *overrideScope) {
+func overrideThemeWithScope(o fyne.CanvasObject, s *overrideScope) {
 	if _, ok := o.(interface{ SetDeviceIsMobile(bool) }); ok { // ThemeOverride without the import loop
 		return // do not apply this theme over a new scope
 	}
@@ -88,6 +88,6 @@ func overrideWidget(w fyne.Widget, s *overrideScope) {
 	}
 
 	for _, o := range r.Objects() {
-		overrideTheme(o, s)
+		overrideThemeWithScope(o, s)
 	}
 }

@@ -44,7 +44,7 @@ func (i *FileIcon) SetURI(uri fyne.URI) {
 }
 
 // must be called with i.propertyLock RLocked
-func (i *FileIcon) setURI(uri fyne.URI) {
+func (i *FileIcon) applyURI(uri fyne.URI) {
 	if uri == nil {
 		i.resource = i.Theme().Icon(theme.IconNameFile)
 		return
@@ -67,7 +67,7 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	i.ExtendBaseWidget(i)
-	i.setURI(i.URI)
+	i.applyURI(i.URI)
 
 	// TODO remove background when `SetSelected` is gone.
 	background := canvas.NewRectangle(th.Color(theme.ColorNameSelection, v))
@@ -175,7 +175,7 @@ func (s *fileIconRenderer) Refresh() {
 	th := s.file.Theme()
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
-	s.file.setURI(s.file.URI)
+	s.file.applyURI(s.file.URI)
 
 	if s.file.Selected {
 		s.background.Show()

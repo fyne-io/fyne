@@ -304,7 +304,7 @@ func TestEntry_ContentSizeAndPlacementWithIcon(t *testing.T) {
 
 	renderer.Layout(entry.MinSize())
 	// Scrollable content should be positioned after the icon, with correct padding
-	assert.Equal(t, contentPos, entry.scroll.Position())
+	assert.Equal(t, contentPos, entry.scroller.Position())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = fyne.ScrollNone
@@ -419,10 +419,10 @@ func TestEntry_PlaceholderTextStyle(t *testing.T) {
 	e.TextStyle = fyne.TextStyle{Bold: true, Italic: true}
 
 	w := test.NewTempWindow(t, e)
-	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
 
 	w.Canvas().Focus(e)
-	assert.Equal(t, e.TextStyle, e.placeholder.Segments[0].(*TextSegment).Style.TextStyle)
+	assert.Equal(t, e.TextStyle, e.placeholderWidget.Segments[0].(*TextSegment).Style.TextStyle)
 }
 
 func TestEntry_Tab(t *testing.T) {

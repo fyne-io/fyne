@@ -59,7 +59,7 @@ func TestScheduler_Cancel_StopsDelivery(t *testing.T) {
 	s.Cancel(id)
 	time.Sleep(250 * time.Millisecond)
 	assert.Equal(t, int32(0), fired.Load())
-	assert.False(t, cache.exists(scheduleFile), "cache file should be removed when no entries remain")
+	assert.False(t, cache.Exists(scheduleFile), "cache file should be removed when no entries remain")
 }
 
 func TestScheduler_Persistence_AcrossInstances(t *testing.T) {
@@ -71,7 +71,7 @@ func TestScheduler_Persistence_AcrossInstances(t *testing.T) {
 	id, err := first.Schedule(fyne.NewNotification("p", "q"), deliverAt)
 	require.NoError(t, err)
 	require.NotEmpty(t, id)
-	assert.True(t, cache.exists(scheduleFile))
+	assert.True(t, cache.Exists(scheduleFile))
 
 	// Second instance: should pick up the persisted entry and re-arm it.
 	var fired atomic.Int32
@@ -121,7 +121,7 @@ func TestScheduler_PastEntries_FireImmediatelyOnStart(t *testing.T) {
 
 	// The delivered entry must not remain in the cache, otherwise a subsequent
 	// launch would re-deliver it.
-	assert.False(t, cache.exists(scheduleFile),
+	assert.False(t, cache.Exists(scheduleFile),
 		"past-due entry must be cleared from cache after delivery on Start")
 }
 
@@ -135,15 +135,14 @@ func newMemCache() *memCache {
 	return &memCache{files: map[string][]byte{}}
 }
 
-func (m *memCache) exists(name string) bool {
+func (*memCache) RootURI() fyne.URI { return nil }
+
+func (m *memCache) Exists(name string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	_, ok := m.files[name]
 	return ok
 }
-
-func (*memCache) RootURI() fyne.URI         { return nil }
-func (m *memCache) Exists(name string) bool { return m.exists(name) }
 
 func (m *memCache) Read(name string) (io.ReadCloser, error) {
 	m.mu.Lock()
