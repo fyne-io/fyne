@@ -31,6 +31,7 @@ func NewActivity() *Activity {
 	return a
 }
 
+// MinSize implements the [fyne.CanvasObject] interface.
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
@@ -58,6 +59,7 @@ func (a *Activity) Stop() {
 	a.Refresh()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
 	v := fyne.CurrentApp().Settings().ThemeVariant()

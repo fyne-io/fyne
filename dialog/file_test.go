@@ -831,3 +831,19 @@ func TestSetOnClosedBeforeShow(t *testing.T) {
 	d.Hide()
 	assert.True(t, onClosedCalled)
 }
+
+func TestFileDialogSizeBeforeShow(t *testing.T) {
+	win := test.NewTempWindow(t, widget.NewLabel("Content"))
+	win.Resize(fyne.NewSize(1000, 800))
+	d := NewFileOpen(func(fyne.URIReadCloser, error) {}, win)
+
+	// the popup does not exist yet, none of these may panic
+	d.MinSize()
+	d.Refresh()
+	d.Dismiss()
+	d.Resize(fyne.NewSize(700, 500))
+
+	d.Show()
+	assert.Equal(t, fyne.NewSize(700, 500), d.dialog.win.Content.Size())
+	d.Hide()
+}

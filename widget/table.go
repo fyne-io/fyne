@@ -183,6 +183,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Cursor implements the [desktop.Cursorable] interface.
 func (t *Table) Cursor() desktop.Cursor {
 	if t.hoverHeaderRow != noCellMatch {
 		return desktop.VResizeCursor
@@ -193,6 +194,7 @@ func (t *Table) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
+// Dragged implements the [fyne.Draggable] interface.
 func (t *Table) Dragged(e *fyne.DragEvent) {
 	minSize := t.cellSize
 	col := t.dragCol
@@ -216,6 +218,7 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 	}
 }
 
+// DragEnd implements the [fyne.Draggable] interface.
 func (t *Table) DragEnd() {
 	t.dragCol = noCellMatch
 	t.dragRow = noCellMatch
@@ -236,6 +239,7 @@ func (t *Table) FocusLost() {
 	t.Refresh() // Item(t.currentHighlight)
 }
 
+// MouseIn implements the [desktop.Hoverable] interface.
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
@@ -245,10 +249,12 @@ func (t *Table) MouseDown(e *desktop.MouseEvent) {
 	t.tapped(e.Position)
 }
 
+// MouseMoved implements the [desktop.Hoverable] interface.
 func (t *Table) MouseMoved(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
+// MouseOut implements the [desktop.Hoverable] interface.
 func (t *Table) MouseOut() {
 	t.hoverOut()
 }
@@ -622,6 +628,7 @@ func (t *Table) ScrollToTrailing() {
 	t.finishScroll()
 }
 
+// Tapped implements the [fyne.Tappable] interface.
 func (t *Table) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= t.Size().Width || e.Position.Y < 0 || e.Position.Y >= t.Size().Height {
 		t.selectedCell = nil

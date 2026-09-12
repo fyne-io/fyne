@@ -317,6 +317,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			}
 
 			s := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+			app.BeginPaint()
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
@@ -335,27 +336,34 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 	if d.glctx == nil || e.External {
 		return
 	}
-	if !c.initialized {
+
+	d.animation.TickAnimations()
+	needsInit := !c.initialized
+	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
+	if !needsInit && !canvasNeedRefresh {
+		cache.Clean(false)
+		return
+	}
+
+	// Everything below queues GL calls that only the UI thread can run, and it blocks on each one.
+	app.BeginPaint()
+
+	if needsInit {
 		c.initialized = true
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
-	d.animation.TickAnimations()
-	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
-	if canvasNeedRefresh {
-		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
-
-		if c.EnsureMinSize() {
-			c.sizeContent(newSize) // force resize of content
-		} else { // if screen changed
-			w.Resize(newSize)
-		}
-
-		d.paintWindow(w, newSize)
-		d.app.Publish()
-		w.updateAccessibility()
+	newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+	if c.EnsureMinSize() {
+		c.sizeContent(newSize) // force resize of content
+	} else { // if screen changed
+		w.Resize(newSize)
 	}
-	cache.Clean(canvasNeedRefresh)
+
+	d.paintWindow(w, newSize)
+	d.app.Publish()
+	w.updateAccessibility()
+	cache.Clean(true)
 }
 
 func (*driver) onStart() {

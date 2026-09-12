@@ -3,6 +3,7 @@ package software_test
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"runtime"
 	"testing"
 
@@ -522,6 +523,21 @@ func TestPainter_paintRaster(t *testing.T) {
 
 	target := p.Paint(c)
 	test.AssertImageMatches(t, "draw_raster.png", target)
+}
+
+func TestPainter_paintRaster_offsetBounds(t *testing.T) {
+	src := image.NewNRGBA(image.Rect(2, 3, 52, 53)) // a tile cut out of a larger sheet
+	draw.Draw(src, src.Bounds(), internalTest.NewCheckedImage(50, 50, 5, 5), image.Point{}, draw.Src)
+	img := canvas.NewRasterFromImage(src)
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_raster_offset_bounds.png", target)
 }
 
 func TestPainter_paintRaster_scaled(t *testing.T) {

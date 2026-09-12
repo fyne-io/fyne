@@ -451,6 +451,7 @@ func (e *Entry) Redo() {
 	e.Refresh()
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (e *Entry) Refresh() {
 	e.minCache = fyne.Size{}
 

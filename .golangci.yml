@@ -1,5 +1,9 @@
 version: "2"
 
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
 linters:
   enable:
     - errcheck
@@ -26,13 +30,13 @@ linters:
           - errcheck
           - gosec
           - revive
-      - path: test/ # In tests, the usage of deprecated stuff is valid to check for compatibility.
+      - path: test/
         linters:
           - staticcheck
-        text: "SA1019"
-      - path: _test\.go # TODO: Clarify whether we should explicitly handle errors in tests (e.g., using require.NoError()).
+        text: "SA1019" # In tests, the usage of deprecated stuff is valid to check for compatibility.
+      - path: _test\.go
         linters:
-          - errcheck
+          - errcheck # TODO: Clarify whether we should explicitly handle errors in tests (e.g., using require.NoError()).
   settings:
     gosec:
       excludes:
@@ -67,7 +71,8 @@ linters:
           arguments:
             - allowNoDefault
         - name: exported
-          disabled: true # TODO
+          exclude:
+            - "**/internal/**" # TODO: enable for internal packages, too?
         - name: flag-parameter
           disabled: true
         - name: function-length
@@ -81,7 +86,9 @@ linters:
         - name: max-public-structs
           disabled: true
         - name: package-comments
-          disabled: true # TODO
+          exclude:
+            - "**/cmd/**"
+            - "**/internal/**"
         - name: package-naming
           disabled: true # TODO
         - name: unchecked-type-assertion

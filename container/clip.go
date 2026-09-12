@@ -24,6 +24,7 @@ func NewClip(content fyne.CanvasObject) *Clip {
 	return &Clip{Content: content}
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (c *Clip) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	return newClipRenderer(c)

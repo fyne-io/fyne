@@ -152,6 +152,7 @@ type navigatorRenderer struct {
 	objects []fyne.CanvasObject
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	r := &navigatorRenderer{
 		nav: nav,

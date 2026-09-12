@@ -1,3 +1,6 @@
+// Package software implements a more generic system for just rendering without a window.
+// Primarily, it was used in tests but found to be useful elsewhere.
+// Between embedded and test utilities this may not be needed any more.
 package software
 
 import (

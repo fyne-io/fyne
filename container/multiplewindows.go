@@ -31,17 +31,20 @@ func NewMultipleWindows(wins ...*InnerWindow) *MultipleWindows {
 	return m
 }
 
+// Add appends an [InnerWindow] to the managed windows.
 func (m *MultipleWindows) Add(w *InnerWindow) {
 	m.Windows = append(m.Windows, w)
 	m.refreshChildren()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (m *MultipleWindows) CreateRenderer() fyne.WidgetRenderer {
 	m.content = New(&multiWinLayout{})
 	m.refreshChildren()
 	return widget.NewSimpleRenderer(intWidget.NewScroll(m.content))
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (m *MultipleWindows) Refresh() {
 	m.refreshChildren()
 	//	m.BaseWidget.Refresh()
