@@ -25,6 +25,15 @@ const (
 	sizeDraggableCorner = 16
 )
 
+var (
+	windowBackgroundShadowOffset = fyne.NewPos(1, 2)
+	windowBackgroundShadowRadius = float32(8)
+	windowBackgroundShadowSpread = float32(3)
+	windowForegroundShadowOffset = fyne.NewPos(2, 5)
+	windowForegroundShadowRadius = float32(20)
+	windowForegroundShadowSpread = float32(10)
+)
+
 var _ fyne.Widget = (*InnerWindow)(nil)
 
 // InnerWindow defines a container that wraps content in a window border - that can then be placed inside
@@ -126,6 +135,11 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameInnerWindowBorder, v))
 	bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
+	bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	bg.Shadow.Offset = windowBackgroundShadowOffset
+	bg.Shadow.Spread = windowBackgroundShadowSpread
+	bg.Shadow.BlurRadius = windowBackgroundShadowRadius
+
 	intWidget.ApplyShadowForLevel(&bg.Shadow, intWidget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
@@ -254,6 +268,15 @@ func (i *innerWindowRenderer) Refresh() {
 	}
 	i.bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
 	i.bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	if i.win.inactive {
+		i.bg.Shadow.Offset = windowBackgroundShadowOffset
+		i.bg.Shadow.Spread = windowBackgroundShadowSpread
+		i.bg.Shadow.BlurRadius = windowBackgroundShadowRadius
+	} else {
+		i.bg.Shadow.Offset = windowForegroundShadowOffset
+		i.bg.Shadow.Spread = windowForegroundShadowSpread
+		i.bg.Shadow.BlurRadius = windowForegroundShadowRadius
+	}
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
