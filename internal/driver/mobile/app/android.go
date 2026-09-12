@@ -47,9 +47,13 @@ void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
+void captureCameraPhoto(JNIEnv* env);
+void startCameraPreview(JNIEnv* env);
+void stopCameraPreview(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
+void Java_org_golang_app_GoNativeActivity_capturePhotoReturned(JNIEnv *env, jclass clazz, jbyteArray jpegBytes, jint length);
 */
 import "C"
 
@@ -356,6 +360,40 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
+var capturePhotoCallback func([]byte)
+
+//export capturePhotoReturned
+func capturePhotoReturned(cBuffer *C.char, cLength C.int) {
+	if capturePhotoCallback == nil {
+		return
+	}
+	length := int(cLength)
+	if length <= 0 || cBuffer == nil {
+		return
+	}
+
+	goByteSlice := C.GoBytes(unsafe.Pointer(cBuffer), cLength)
+	capturePhotoCallback(goByteSlice)
+	capturePhotoCallback = nil
+}
+
+var previewCallback func([]byte)
+
+//export previewFrameCaptured
+func previewFrameCaptured(cBuffer *C.char, cLength C.int) {
+	if previewCallback == nil {
+		return
+	}
+
+	length := int(cLength)
+	if length <= 0 || cBuffer == nil {
+		return
+	}
+
+	goByteSlice := C.GoBytes(unsafe.Pointer(cBuffer), cLength)
+	previewCallback(goByteSlice)
+}
+
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	currentSize.InsetTopPx = top
@@ -423,6 +461,46 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	save := func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showFileSave(env, mimeStr, filenameStr)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(save); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func NativeCapturePhoto(callback func([]byte)) {
+	capturePhotoCallback = callback
+
+	save := func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.captureCameraPhoto(env)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(save); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func NativeStartPreview(callback func([]byte)) {
+	previewCallback = callback
+
+	save := func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.startCameraPreview(env)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(save); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func NativeStopPreview() {
+	save := func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.stopCameraPreview(env)
 		return nil
 	}
 
