@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLabel_Binding(t *testing.T) {
@@ -374,4 +375,43 @@ func TestLabelSizeNameWithSelection(t *testing.T) {
 func labelTextRenderTexts(p fyne.Widget) []*canvas.Text {
 	rich := cache.Renderer(p).Objects()[0].(*RichText)
 	return richTextRenderTexts(rich)
+}
+
+func TestLabel_SelectAligned(t *testing.T) {
+	for name, align := range map[string]fyne.TextAlign{
+		"leading":  fyne.TextAlignLeading,
+		"center":   fyne.TextAlignCenter,
+		"trailing": fyne.TextAlignTrailing,
+	} {
+		t.Run(name, func(t *testing.T) {
+			l := NewLabelWithStyle("Hello World", align, fyne.TextStyle{})
+			l.Selectable = true
+			w := test.NewTempWindow(t, l)
+			w.Resize(fyne.NewSize(300, 50))
+			l.Resize(fyne.NewSize(300, 50))
+
+			texts := richTextRenderTexts(l.provider)
+			require.Len(t, texts, 1)
+			text := texts[0]
+			textWidth := fyne.MeasureText(text.Text, text.TextSize, text.TextStyle).Width
+			textX := text.Position().X
+			switch align {
+			case fyne.TextAlignTrailing:
+				textX += text.Size().Width - textWidth
+			case fyne.TextAlignCenter:
+				textX += (text.Size().Width - textWidth) / 2
+			}
+			helloWidth := fyne.MeasureText("Hello", text.TextSize, text.TextStyle).Width
+
+			sel := test.WidgetRenderer(l).Objects()[0].(*focusSelectable)
+			// double tap in the middle of the "Hello" glyphs as they are drawn
+			sel.DoubleTapped(&fyne.PointEvent{Position: fyne.NewPos(textX+helloWidth/2, 10)})
+			assert.Equal(t, "Hello", l.SelectedText())
+
+			rects := test.WidgetRenderer(sel).Objects()
+			require.Len(t, rects, 1)
+			assert.InDelta(t, textX-1, rects[0].Position().X, 0.5)
+			assert.InDelta(t, helloWidth+1, rects[0].Size().Width, 0.5)
+		})
+	}
 }
