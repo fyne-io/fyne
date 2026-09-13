@@ -12,6 +12,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/lang"
 )
 
 func TestDarwinMenu(t *testing.T) {
@@ -87,7 +88,7 @@ func TestDarwinMenu(t *testing.T) {
 	assertLastAction("more settings")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
-	assert.Equal(t, "File", testNSMenuTitle(m))
+	assert.Equal(t, lang.L("File"), testNSMenuTitle(m))
 	assert.Equal(t, 4, testNSMenuNumberOfItems(m))
 	// NSEventModifierFlagCommand = 1 << 20
 	assertNSMenuItem(t, "New", "n", 0b100000000000000000000, m, 0)
@@ -113,10 +114,10 @@ func TestDarwinMenu(t *testing.T) {
 	assertLastAction("more")
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 3))
-	assert.Equal(t, "Window", testNSMenuTitle(m))
+	assert.Equal(t, lang.L("Window"), testNSMenuTitle(m))
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 4))
-	assert.Equal(t, "Help", testNSMenuTitle(m))
+	assert.Equal(t, lang.L("Help"), testNSMenuTitle(m))
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
 	// NSEventModifierFlagControl = 1 << 18
 	assertNSMenuItem(t, "Help", "h", 0b1000000000000000000, m, 0)
@@ -321,7 +322,7 @@ var (
 
 func assertNSMenuItem(t *testing.T, wantTitle, wantKey string, wantModifier uint64, m unsafe.Pointer, i int) {
 	item := testNSMenuItemAtIndex(m, i)
-	assert.Equal(t, wantTitle, testNSMenuItemTitle(item))
+	assert.Equal(t, lang.L(wantTitle), testNSMenuItemTitle(item))
 	if wantKey != "" {
 		assert.Equal(t, wantKey, testNSMenuItemKeyEquivalent(item))
 		assert.Equal(t, wantModifier, testNSMenuItemKeyEquivalentModifierMask(item))
