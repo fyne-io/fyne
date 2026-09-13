@@ -516,8 +516,8 @@ func TestText_splitLines(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := splitLines(&TextSegment{Text: tt.text})
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 			}
 		})
 	}
@@ -1073,8 +1073,8 @@ func TestText_lineBounds(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 76, fyne.NewSize(76, 64), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 
 				if got[i].ellipsis {
 					ellipses++
@@ -1151,8 +1151,8 @@ func TestText_lineBounds_hyperlinks(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 50, fyne.NewSize(50, 64), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 
 				if got[i].ellipsis {
 					ellipses++
@@ -1236,8 +1236,8 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 			richText.Truncation = tt.trunc
 			got, _ := lineBounds(richText, richText.Segments[0], 46, fyne.NewSize(46, 184), measurer)
 			for i, wantRow := range tt.want {
-				assert.Equal(t, wantRow[0], got[i].begin)
-				assert.Equal(t, wantRow[1], got[i].end)
+				assert.Equal(t, wantRow[0], got[i].segBegin)
+				assert.Equal(t, wantRow[1], got[i].segEnd)
 			}
 		})
 	}
@@ -1251,10 +1251,10 @@ func TestText_lineBounds_small_firstWidth(t *testing.T) {
 	richText.Wrapping = fyne.TextWrapWord
 	richText.Truncation = fyne.TextTruncateOff
 	got, _ := lineBounds(richText, richText.Segments[0], 0.1, fyne.NewSize(64, 20), measurer)
-	assert.Equal(t, 0, got[0].begin)
-	assert.Equal(t, 0, got[0].end)
-	assert.Equal(t, 0, got[1].begin)
-	assert.Equal(t, 6, got[1].end)
+	assert.Equal(t, 0, got[0].segBegin)
+	assert.Equal(t, 0, got[0].segEnd)
+	assert.Equal(t, 0, got[1].segBegin)
+	assert.Equal(t, 6, got[1].segEnd)
 }
 
 func TestText_howManyRunesFit(t *testing.T) {

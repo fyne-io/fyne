@@ -111,14 +111,20 @@ func TestRichTextMarkdown_Code(t *testing.T) {
 	}
 }
 
-func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
-	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
-	cb := newRichCodeBlock(long)
-	test.TempWidgetRenderer(t, cb)
-	minSize := cb.MinSize()
+func TestRichTextMarkdown_CodeBlockWraps(t *testing.T) {
+	test.NewTempApp(t)
 
-	assert.Less(t, minSize.Width, float32(200)) // scrolls rather than demanding full width
-	assert.Greater(t, minSize.Height, float32(10))
+	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
+	r := NewRichTextFromMarkdown("```\n" + long + "\n```")
+	r.Wrapping = fyne.TextWrapBreak
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 300))
+	r.Refresh()
+
+	assert.Greater(t, r.rows(), 2) // the long line wraps into rows on the panel
+	for i := 0; i < r.rows(); i++ {
+		assert.NotNil(t, r.rowBounds[i].panel, "row %d should sit on the code panel", i)
+	}
 }
 
 func TestRichTextMarkdown_Table(t *testing.T) {
@@ -671,4 +677,36 @@ Moreover, we've got a list:
 	for i := 0; i < b.N; i++ {
 		NewRichTextFromMarkdown(md)
 	}
+}
+
+func TestRichTextMarkdown_ListBulletsAreNotContent(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("- one\n- two")
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 100))
+	r.Refresh()
+
+	// the bullets are drawn beside the items rather than being part of them
+	assert.Equal(t, "onetwo", r.String())
+	assert.Equal(t, 2, r.rows())
+	assert.Equal(t, "one", string(r.row(0)))
+	assert.Equal(t, "two", string(r.row(1)))
+}
+
+func TestRichTextMarkdown_CodeBlockRowsOnPanel(t *testing.T) {
+	test.NewTempApp(t)
+
+	r := NewRichTextFromMarkdown("intro\n\n```\none\ntwo\n```\n\nafter")
+	w := test.NewTempWindow(t, r)
+	w.Resize(fyne.NewSize(200, 200))
+	r.Refresh()
+
+	var onPanel []string
+	for i := 0; i < r.rows(); i++ {
+		if r.rowBounds[i].panel != nil {
+			onPanel = append(onPanel, string(r.row(i)))
+		}
+	}
+	assert.Equal(t, []string{"one", "two"}, onPanel)
 }
