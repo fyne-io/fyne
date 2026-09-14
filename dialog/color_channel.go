@@ -108,7 +108,7 @@ func (r *colorChannelRenderer) MinSize() fyne.Size {
 	eMin := r.entry.MinSize()
 	return fyne.NewSize(
 		lMin.Width+sMin.Width+eMin.Width,
-		max(lMin.Height, max(sMin.Height, eMin.Height)),
+		max(lMin.Height, sMin.Height, eMin.Height),
 	)
 }
 
