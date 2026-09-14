@@ -478,5 +478,5 @@ func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	titleMin := t.title.MinSize() // can truncate
 
 	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
-		max(max(buttonMin.Height, iconMin.Height), titleMin.Height))
+		max(buttonMin.Height, iconMin.Height, titleMin.Height)
 }
