@@ -8,12 +8,16 @@ package app
 
 import "log"
 
-func main(f func(a App)) {
-	log.Fatalln("Running mobile simulation mode does not currently work on Windows.")
-}
-
 func GoBack() {
 	// When simulating mobile there are no other activities open (and we can't just force background)
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
+	log.Fatalln("Running mobile simulation mode does not currently work on Windows.") //revive:disable-line:deep-exit
 }
 
 // driverShowVirtualKeyboard does nothing on desktop

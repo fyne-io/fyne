@@ -109,7 +109,7 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 func (d *driver) CreateWindow(title string) fyne.Window {
 	c, _ := newCanvas(fyne.CurrentDevice()).(*canvas)
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
-	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.applyContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret

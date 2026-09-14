@@ -36,14 +36,13 @@ func (e *Entry) Validate() (err error) {
 	return err
 }
 
-// validate works like Validate but only updates the internal state and does not refresh.
-func (e *Entry) validate() {
+func (e *Entry) validateWithoutRefresh() {
 	var err error
 
 	if e.Validator != nil {
 		err = e.Validator(e.Text)
 	}
-	e.setValidationError(err)
+	e.setValidationErrorWithoutRefresh(err)
 }
 
 // SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
@@ -60,16 +59,14 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 
 // SetValidationError manually updates the validation status until the next input change.
 func (e *Entry) SetValidationError(err error) {
-	if !e.setValidationError(err) {
-		return
+	if e.setValidationErrorWithoutRefresh(err) {
+		e.Refresh()
 	}
-
-	e.Refresh()
 }
 
-// setValidationError sets the validation error and returns a bool to indicate if it changes.
+// setValidationErrorWithoutRefresh sets the validation error and returns a bool to indicate if it changes.
 // It assumes that the widget has a validator.
-func (e *Entry) setValidationError(err error) bool {
+func (e *Entry) setValidationErrorWithoutRefresh(err error) bool {
 	if e.AlwaysShowValidationError {
 		e.validationError = err
 		if e.onValidationChanged != nil {

@@ -26,7 +26,7 @@ func FromJSON(data string) (fyne.Theme, error) {
 //
 // Since: 2.7
 func FromJSONWithFallback(data string, fallback fyne.Theme) (fyne.Theme, error) {
-	return fromJSONWithFallback(strings.NewReader(data), fallback)
+	return FromJSONReaderWithFallback(strings.NewReader(data), fallback)
 }
 
 // FromJSONReader returns a Theme created from the given JSON metadata through the reader.
@@ -35,7 +35,7 @@ func FromJSONWithFallback(data string, fallback fyne.Theme) (fyne.Theme, error) 
 //
 // Since: 2.2
 func FromJSONReader(r io.Reader) (fyne.Theme, error) {
-	return fromJSONWithFallback(r, DefaultTheme())
+	return FromJSONReaderWithFallback(r, DefaultTheme())
 }
 
 // FromJSONReaderWithFallback returns a Theme created from the given JSON metadata through the reader.
@@ -44,10 +44,6 @@ func FromJSONReader(r io.Reader) (fyne.Theme, error) {
 //
 // Since: 2.7
 func FromJSONReaderWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) {
-	return fromJSONWithFallback(r, fallback)
-}
-
-func fromJSONWithFallback(r io.Reader, fallback fyne.Theme) (fyne.Theme, error) {
 	var th *schema
 	if err := json.NewDecoder(r).Decode(&th); err != nil {
 		return fallback, err

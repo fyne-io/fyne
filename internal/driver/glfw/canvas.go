@@ -137,7 +137,7 @@ func (c *glCanvas) Scale() float32 {
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	newSize := internal.MaxSizes(c.size, c.canvasSize(content.MinSize()))
 
-	c.setContent(content)
+	c.applyContent(content)
 
 	c.Resize(newSize)
 	c.SetDirty()
@@ -186,6 +186,11 @@ func (c *glCanvas) ToggleMenu() {
 	if c.menu != nil {
 		c.menu.(*MenuBar).Toggle()
 	}
+}
+
+func (c *glCanvas) applyContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
 }
 
 func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
@@ -272,11 +277,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.WalkTrees(paint, afterPaint)
 }
 
-func (c *glCanvas) setContent(content fyne.CanvasObject) {
-	c.content = content
-	c.SetContentTreeAndFocusMgr(content)
-}
-
 func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 	c.menu = b
 	c.SetMenuTreeAndFocusMgr(b)
@@ -302,6 +302,6 @@ func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0, padded: true}
 	connectKeyboard(c)
 	c.Initialize(c, c.overlayChanged)
-	c.setContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.applyContent(&canvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	return c
 }

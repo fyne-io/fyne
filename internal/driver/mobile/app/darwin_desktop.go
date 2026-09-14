@@ -49,9 +49,17 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(App)) {
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
 	if tid := uint64(C.threadID()); tid != initThreadID {
-		log.Fatalf("app.Main called on thread %d, but app.init ran on %d", tid, initThreadID)
+		log.Fatalf("app.Main called on thread %d, but app.init ran on %d", tid, initThreadID) //revive:disable-line:deep-exit
 	}
 
 	go func() {
@@ -61,10 +69,6 @@ func main(f func(App)) {
 	}()
 
 	C.runApp()
-}
-
-func GoBack() {
-	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 // loop is the primary drawing loop.
