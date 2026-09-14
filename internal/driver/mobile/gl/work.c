@@ -158,6 +158,18 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 			(GLenum)args->a6,
 			(const GLvoid*)parg);
 		break;
+	case glfnTexSubImage2D:
+		glTexSubImage2D(
+			(GLenum)args->a0,
+			(GLint)args->a1,
+			(GLint)args->a2,
+			(GLint)args->a3,
+			(GLsizei)args->a4,
+			(GLsizei)args->a5,
+			(GLenum)args->a6,
+			(GLenum)args->a7,
+			(const GLvoid*)parg);
+		break;
 	case glfnTexParameteri:
 		glTexParameteri((GLenum)args->a0, (GLenum)args->a1, (GLint)args->a2);
 		break;

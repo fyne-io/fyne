@@ -29,11 +29,15 @@ var (
 	shaderFragRoundRectangle []byte
 	//go:embed shaders/simple.frag
 	shaderFragSimple []byte
+	//go:embed shaders/text.frag
+	shaderFragText []byte
 
 	//go:embed shaders/line.vert
 	shaderVertLine []byte
 	//go:embed shaders/passthrough_2d.vert
 	shaderVertPassthrough2D []byte
+	//go:embed shaders/text.vert
+	shaderVertText []byte
 	//go:embed shaders/textured_passthrough_2d.vert
 	shaderVertTexturedPassthrough2D []byte
 )
