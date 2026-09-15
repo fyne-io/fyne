@@ -151,3 +151,54 @@ func (r *resizeRefreshCountingLabel) Resize(s fyne.Size) {
 	r.resizeCount++
 	r.Label.Resize(s)
 }
+
+func TestList_ScrollGravityTop(t *testing.T) {
+	itemCount := 10
+	list := widget.NewList(
+		func() int { return itemCount },
+		func() fyne.CanvasObject { return widget.NewLabel("Item") },
+		func(_ widget.ListItemID, _ fyne.CanvasObject) {},
+	)
+	list.Gravity = widget.ScrollGravityTop
+
+	w := test.NewTempWindow(t, list)
+	w.Resize(fyne.NewSize(100, 100))
+
+	list.ScrollToTop()
+	assert.Equal(t, float32(0), list.GetScrollOffset())
+
+	itemCount = 20
+	list.Refresh()
+
+	assert.Equal(t, float32(0), list.GetScrollOffset())
+}
+
+func TestList_CoverageEdges(_ *testing.T) {
+	emptyList := widget.NewList(
+		func() int { return 0 },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(_ widget.ListItemID, _ fyne.CanvasObject) {},
+	)
+	emptyList.Highlight(0)
+
+	list := widget.NewList(
+		func() int { return 2 },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(_ widget.ListItemID, _ fyne.CanvasObject) {},
+	)
+	list.Select(-1)
+	list.Select(2)
+	list.Select(0)
+	list.Select(0)
+
+	list.UnselectAll()
+	list.UnselectAll()
+	list.Unselect(1)
+
+	list.ScrollTo(-1)
+	list.ScrollTo(2)
+	list.ScrollToOffset(10)
+
+	list.Highlight(-1)
+	list.Highlight(5)
+}
