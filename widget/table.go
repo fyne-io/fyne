@@ -501,24 +501,26 @@ func (t *Table) ScrollTo(id TableCellID) {
 	rows, cols := t.Length()
 	if id.Row >= rows {
 		id.Row = rows - 1
+	} else if id.Row < 0 {
+		id.Row = 0
 	}
 
 	if id.Col >= cols {
 		id.Col = cols - 1
+	} else if id.Col < 0 {
+		id.Col = 0
 	}
 
 	scrollPos := t.offset
 
+	// the scroll offset is measured in cell space, where the first cell starts at zero.
+	// Any header is outside the scrolling content, so it must not be added here, but the
+	// sticky cells cover the leading edge of the viewport so they do have to be allowed for.
 	cellX, cellWidth := t.findX(id.Col)
-	stickCols := t.StickyColumnCount
-	if stickCols > 0 {
-		cellX -= t.stuckXOff + t.stuckWidth
+	if t.StickyColumnCount > 0 {
+		cellX -= t.stuckWidth
 	}
-	if t.ShowHeaderColumn {
-		cellX += t.headerSize.Width
-		stickCols--
-	}
-	if stickCols == 0 || id.Col > stickCols {
+	if id.Col >= t.StickyColumnCount {
 		if cellX < scrollPos.X {
 			scrollPos.X = cellX
 		} else if cellX+cellWidth > scrollPos.X+t.content.Size().Width {
@@ -527,15 +529,10 @@ func (t *Table) ScrollTo(id TableCellID) {
 	}
 
 	cellY, cellHeight := t.findY(id.Row)
-	stickRows := t.StickyRowCount
-	if stickRows > 0 {
-		cellY -= t.stuckYOff + t.stuckHeight
+	if t.StickyRowCount > 0 {
+		cellY -= t.stuckHeight
 	}
-	if t.ShowHeaderRow {
-		cellY += t.headerSize.Height
-		stickRows--
-	}
-	if stickRows == 0 || id.Row >= stickRows {
+	if id.Row >= t.StickyRowCount {
 		if cellY < scrollPos.Y {
 			scrollPos.Y = cellY
 		} else if cellY+cellHeight > scrollPos.Y+t.content.Size().Height {
