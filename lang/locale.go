@@ -25,6 +25,22 @@ func SystemLocale() fyne.Locale {
 	return localeFromTag(tag)
 }
 
+// CurrentLocale returns the currently set locale. If no locale has been set previously,
+// it returns an empty string and the package uses the system locale.
+func CurrentLocale() fyne.Locale {
+	return currentLocale
+}
+
+// SetLocale sets the closest supported locale to the given locale as the current locale.
+// If an empty string is given, the package continues to use the system locale.
+func SetLocale(loc fyne.Locale) {
+	currentLocale = ""
+	if loc != "" {
+		currentLocale = closestSupportedLocale([]string{loc.String()})
+	}
+	updateLocalizer()
+}
+
 func closestSupportedLocale(locs []string) fyne.Locale {
 	matcher := language.NewMatcher(translated)
 
