@@ -16,6 +16,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+const scrollAtEdgeTolerance = 1.0
+
 // ListItemID uniquely identifies an item within a list.
 type ListItemID = int
 
@@ -598,8 +600,6 @@ func (l *listRenderer) Layout(size fyne.Size) {
 func (l *listRenderer) MinSize() fyne.Size {
 	return internal.MaxSizes(l.scroller.MinSize(), l.list.itemMin)
 }
-
-const scrollAtEdgeTolerance = 1.0
 
 func (l *listRenderer) Refresh() {
 	wasAtBottom := false
