@@ -1,0 +1,1 @@
+# one java dependencies per line in groupId:artifactId:version format
