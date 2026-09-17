@@ -22,7 +22,7 @@ var (
 )
 
 // DataItem is the base interface for all bindable data items.
-// All APIs on bindable data items are safe to invoke directly fron any goroutine.
+// All APIs on bindable data items are safe to invoke directly from any goroutine.
 //
 // Since: 2.0
 type DataItem interface {

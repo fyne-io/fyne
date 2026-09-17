@@ -122,7 +122,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 		return fyne.NewPos(0, 0)
 	}
 
-	glc := c.(*glCanvas)
+	glc, _ := c.(*glCanvas)
 	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
 }
 
@@ -157,7 +157,7 @@ func (d *gLDriver) addWindow(w *window) {
 func (d *gLDriver) focusPreviousWindow() {
 	var chosen *window
 	for _, w := range d.windows {
-		win := w.(*window)
+		win, _ := w.(*window)
 		if !win.visible {
 			continue
 		}
@@ -171,10 +171,6 @@ func (d *gLDriver) focusPreviousWindow() {
 		return
 	}
 	chosen.RequestFocus()
-}
-
-func (d *gLDriver) windowList() []fyne.Window {
-	return d.windows
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
@@ -196,7 +192,7 @@ func (d *gLDriver) Run() {
 	d.runGL()
 
 	// Ensure lifecycle events run to completion before the app exits
-	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	l.WaitForEvents()
 	l.DestroyEventQueue()
 }

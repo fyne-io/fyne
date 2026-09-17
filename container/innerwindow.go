@@ -68,10 +68,12 @@ func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
 	return w
 }
 
+// Close closes the window by hiding it.
 func (w *InnerWindow) Close() {
 	w.Hide()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
 	th := w.Theme()
@@ -154,6 +156,8 @@ func (w *InnerWindow) SetActive(active bool) {
 	w.Refresh()
 }
 
+// SetContent replaces the first [fyne.CanvasObject] of thw window’s content with the specified one.
+// The window must have a non-empty content.
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
 	w.Content.Objects[0] = obj
 
@@ -168,6 +172,7 @@ func (w *InnerWindow) SetMaximized(maximized bool) {
 	w.Refresh()
 }
 
+// SetPadded allows applications to specify whether the window should have inner padding.
 func (w *InnerWindow) SetPadded(pad bool) {
 	if pad {
 		w.Content.Layout = layout.NewPaddedLayout()
@@ -177,6 +182,7 @@ func (w *InnerWindow) SetPadded(pad bool) {
 	w.Content.Refresh()
 }
 
+// SetTitle updates the current title of the window.
 func (w *InnerWindow) SetTitle(title string) {
 	w.Title = title
 	w.Refresh()
@@ -266,6 +272,7 @@ func (i *innerWindowRenderer) Refresh() {
 	for _, b := range i.buttons {
 		b.setTheme(th)
 	}
+	i.icon.setTheme(th)
 	i.bar.Refresh()
 
 	if i.win.OnMinimized == nil {
@@ -287,7 +294,7 @@ func (i *innerWindowRenderer) Refresh() {
 		maximize.b.SetIcon(theme.WindowMaximizeIcon())
 	}
 
-	title := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
+	title, _ := i.bar.Objects[2].(*fyne.Container).Objects[0].(*draggableLabel)
 	title.SetText(i.win.Title)
 	if i.win.OnTappedIcon == nil {
 		i.icon.Disable()

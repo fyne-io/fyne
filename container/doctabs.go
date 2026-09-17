@@ -245,7 +245,7 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.layout(r.docTabs, size)
 
 	// lay out buttons before updating indicator, which is relative to their position
-	buttons := r.scroller.Content.(*fyne.Container)
+	buttons, _ := r.scroller.Content.(*fyne.Container)
 	buttons.Layout.Layout(buttons.Objects, buttons.Size())
 	r.updateIndicator(r.docTabs.transitioning())
 
@@ -354,7 +354,7 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 }
 
 func (r *docTabsRenderer) scrollToSelected() {
-	buttons := r.scroller.Content.(*fyne.Container)
+	buttons, _ := r.scroller.Content.(*fyne.Container)
 
 	// https://github.com/fyne-io/fyne/issues/3909
 	// very dirty temporary fix to this crash!

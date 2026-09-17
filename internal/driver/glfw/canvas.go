@@ -166,7 +166,7 @@ func (c *glCanvas) SetPadded(padded bool) {
 }
 
 func (c *glCanvas) reloadScale() {
-	w := c.context.(*window)
+	w, _ := c.context.(*window)
 	windowVisible := w.visible
 	if !windowVisible {
 		return

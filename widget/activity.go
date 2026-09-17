@@ -31,6 +31,7 @@ func NewActivity() *Activity {
 	return a
 }
 
+// MinSize implements the [fyne.CanvasObject] interface.
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
@@ -58,6 +59,7 @@ func (a *Activity) Stop() {
 	a.Refresh()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -202,7 +204,7 @@ func (a *activityRenderer) drawStaticEllipsis() {
 	cy := a.bound.Height / 2
 	fill := color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: a.maxCol.A}
 	for i, obj := range a.dots {
-		dot := obj.(*canvas.Circle)
+		dot, _ := obj.(*canvas.Circle)
 		cx := startX + radius + float32(i)*3*radius
 		dot.Move(fyne.NewPos(cx-radius, cy-radius))
 		dot.Resize(fyne.NewSquareSize(d))
@@ -213,7 +215,7 @@ func (a *activityRenderer) drawStaticEllipsis() {
 
 func (a *activityRenderer) hideDots() {
 	for _, obj := range a.dots {
-		dot := obj.(*canvas.Circle)
+		dot, _ := obj.(*canvas.Circle)
 		dot.Resize(fyne.NewSquareSize(0))
 		dot.Refresh()
 	}

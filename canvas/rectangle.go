@@ -28,21 +28,25 @@ type Rectangle struct {
 	Aspect float32
 
 	// The radius of the rectangle top-right corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	TopRightCornerRadius float32
 
 	// The radius of the rectangle top-left corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	TopLeftCornerRadius float32
 
 	// The radius of the rectangle bottom-right corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	BottomRightCornerRadius float32
 
 	// The radius of the rectangle bottom-left corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	BottomLeftCornerRadius float32

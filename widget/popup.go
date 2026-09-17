@@ -51,7 +51,7 @@ func (p *PopUp) Refresh() {
 		th := p.Theme()
 		v := fyne.CurrentApp().Settings().ThemeVariant()
 
-		bg := p.overlay.Background.(*fyne.Container).Objects[1].(*canvas.Rectangle)
+		bg, _ := p.overlay.Background.(*fyne.Container).Objects[1].(*canvas.Rectangle)
 		bg.FillColor = th.Color(theme.ColorNameShadow, v)
 	}
 

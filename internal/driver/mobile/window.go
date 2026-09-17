@@ -149,7 +149,7 @@ func (w *window) tryClose() {
 }
 
 func (w *window) Close() {
-	d := fyne.CurrentApp().Driver().(*driver)
+	d, _ := fyne.CurrentApp().Driver().(*driver)
 	pos := -1
 	for i, win := range d.windows {
 		if win == w {

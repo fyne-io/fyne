@@ -10,13 +10,9 @@ type ShortcutHandler struct {
 
 // TypedShortcut handle the registered shortcut
 func (sh *ShortcutHandler) TypedShortcut(shortcut Shortcut) {
-	val, ok := sh.entry.Load(shortcut.ShortcutName())
-	if !ok {
-		return
+	if val, ok := sh.entry.Load(shortcut.ShortcutName()); ok {
+		val.(func(Shortcut))(shortcut)
 	}
-
-	f := val.(func(Shortcut))
-	f(shortcut)
 }
 
 // AddShortcut register a handler to be executed when the shortcut action is triggered

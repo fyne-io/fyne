@@ -527,7 +527,7 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 
 func (t *textGridContent) refreshCell(row, col int) {
 	for _, v := range t.visible {
-		if tr := v.(*textGridRow); tr.row == row {
+		if tr, _ := v.(*textGridRow); tr.row == row {
 			tr.refreshCell(col)
 			return
 		}
@@ -715,8 +715,8 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	if str == 0 {
 		str = ' '
 	}
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-	text := t.objects[pos*2+1].(*canvas.Text)
+	rect, _ := t.objects[pos*2].(*canvas.Rectangle)
+	text, _ := t.objects[pos*2+1].(*canvas.Text)
 
 	fg := t.cachedFGColor
 	text.TextSize = t.cachedTextSize

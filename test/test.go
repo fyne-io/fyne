@@ -76,7 +76,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	}
 	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
-		hovered = o.(desktop.Hoverable)
+		hovered, _ = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{
 				AbsolutePosition: pos,

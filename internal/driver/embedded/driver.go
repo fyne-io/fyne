@@ -87,7 +87,7 @@ func (n *noosDriver) doRun() {
 				continue
 			}
 
-			w := n.wins[n.current].(*noosWindow)
+			w, _ := n.wins[n.current].(*noosWindow)
 
 			switch t := e.(type) {
 			case *embedded.CharacterEvent:

@@ -3,6 +3,42 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.8.1 - 26 Aug 2026
+
+### Changed
+
+* File dialog content is now padded using container.NewPadded (#6451)
+* The "large FyneDo" warning is now delayed unless hints are enabled
+* Big performance boost in repainting, walking objects and building render lists (#6449, #6453, #6454)
+
+### Fixed
+
+* MenuItem.Shortcut was missing from systray menus
+* Fix file path handling for URIs on Windows, including paths without a file scheme
+* Support query, fragment and URN forms in ParseURI, with stricter host validation
+* Android: re-create the surface if the window has changed underneath us (#6408)
+* Android: fix duplicated characters when using a hardware keyboard, and add missing delete key support (#6271)
+* Android: fix typo when checking for NULL in native code (#6402)
+* Mobile: multiline Entry ignored scroll position on TouchDown (#6307)
+* Mobile: fix row selection and follow-up behaviour after double/triple tap in Entry
+* Form: rebuild the render slot when a FormItem.Widget is replaced (#1966, #6459)
+* Menu: sync menu item label text on Refresh (#6404)
+* macOS: rebuild the native menu when switching windows (#6431)
+* Fix popup menu immediately dismissing when opened over an existing overlay (#6426)
+* Only skip unfocus on mouse click when the click is over the currently focused widget (#6432)
+* RequestAlwaysOnTop had no effect when called after window creation (#6436, #6441)
+* Prevent crashes from unknown GLFW scancodes, such as the Fn key on Wayland (#6445)
+* Always check for a nil return from monitor.GetVideoMode() (#6472)
+* Fix apps with systray showing a hidden "SystrayMonitor" window on KDE Wayland (#6428)
+* Fix noisy Preferences API warnings for apps that don't use Preferences (#6429)
+* Fix inconsistent vertical positioning of mixed-font text lines (#6448)
+* Fix an issue with the emoji parser
+* Report captured images as opaque so blended output is correct in captures
+* Data binding: handle the edge case where parsing a string as a float fails
+* Fix vendoring of apps using the Wayland build by keeping GLFW include headers
+* Resolve issue where some touch screen Linux taps were missed
+
+
 ## 2.8.0 - 11 Jul 2026
 
 ### Added
