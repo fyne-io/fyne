@@ -128,6 +128,8 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameInnerWindowBorder, v))
 	bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
+	configureShadow(bg, false, th, v)
+
 	intWidget.ApplyShadowForLevel(&bg.Shadow, intWidget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
@@ -260,6 +262,7 @@ func (i *innerWindowRenderer) Refresh() {
 	}
 	i.bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
 	i.bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	configureShadow(i.bg, !i.win.inactive, th, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
@@ -485,4 +488,18 @@ func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 
 	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
 		fyne.Max(fyne.Max(buttonMin.Height, iconMin.Height), titleMin.Height))
+}
+
+func configureShadow(bg *canvas.Rectangle, active bool, th fyne.Theme, v fyne.ThemeVariant) {
+	var radius float32
+	if active {
+		radius = th.Size(theme.SizeNameWindowShadowActiveRadius)
+	} else {
+		radius = th.Size(theme.SizeNameWindowShadowRadius)
+	}
+
+	bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	bg.Shadow.Offset = fyne.NewPos(radius/8, radius/4)
+	bg.Shadow.Spread = radius / 2
+	bg.Shadow.BlurRadius = radius
 }
