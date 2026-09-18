@@ -54,7 +54,7 @@ func (f *FocusManager) Focus(obj fyne.Focusable) bool {
 			}
 		}
 	}
-	f.focus(obj)
+	f.switchFocusTo(obj)
 	return true
 }
 
@@ -80,27 +80,13 @@ func (f *FocusManager) FocusLost() {
 // FocusNext will find the item after the current that can be focused and focus it.
 // If current is nil then the first focusable item in the canvas will be focused.
 func (f *FocusManager) FocusNext() {
-	f.focus(f.nextInChain(f.focused))
+	f.switchFocusTo(f.nextInChain(f.focused))
 }
 
 // FocusPrevious will find the item before the current that can be focused and focus it.
 // If current is nil then the last focusable item in the canvas will be focused.
 func (f *FocusManager) FocusPrevious() {
-	f.focus(f.previousInChain(f.focused))
-}
-
-func (f *FocusManager) focus(obj fyne.Focusable) {
-	if f.focused == obj {
-		return
-	}
-
-	if f.focused != nil {
-		f.focused.FocusLost()
-	}
-	f.focused = obj
-	if obj != nil {
-		obj.FocusGained()
-	}
+	f.switchFocusTo(f.previousInChain(f.focused))
 }
 
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
@@ -141,6 +127,20 @@ func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc)
 
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 	return f.nextWithWalker(current, driver.ReverseWalkVisibleObjectTree)
+}
+
+func (f *FocusManager) switchFocusTo(obj fyne.Focusable) {
+	if f.focused == obj {
+		return
+	}
+
+	if f.focused != nil {
+		f.focused.FocusLost()
+	}
+	f.focused = obj
+	if obj != nil {
+		obj.FocusGained()
+	}
 }
 
 type walkerFunc func(
