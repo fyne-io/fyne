@@ -207,7 +207,8 @@ func (s *selectable) getRowCol(p fyne.Position) (row, col int) {
 		row = s.provider.rows() - 1
 		col = s.provider.rowLength(row)
 	} else {
-		col = s.cursorColAt(s.provider.row(row), p)
+		offset := s.provider.rowAlignOffset(row, textSize, innerPad)
+		col = s.cursorColAt(s.provider.row(row), p.SubtractXY(offset, 0))
 	}
 
 	return row, col
@@ -346,7 +347,7 @@ func (r *selectableRenderer) buildSelection() {
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row, textSize, innerPad)
-		return sz.Width, sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
+		return sz.Width + provider.rowAlignOffset(row, textSize, innerPad), sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
 	}
 
 	lineHeight := r.sel.provider.charMinSize(r.sel.password, r.sel.style, textSize).Height
