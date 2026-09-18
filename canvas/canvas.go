@@ -13,6 +13,12 @@ const (
 	// This constant represents the maximum possible corner radius, resulting in a circular appearance.
 	// Since: 2.7
 	RadiusMaximum float32 = math.MaxFloat32
+
+	// RadiusNone can be applied to a canvas corner radius to achieve no rounded corners.
+	// This can be used to override the corner radius in cases where normally a theme value is applied
+	// (like for buttons) and `0` would not work because it is ignored as the zero value.
+	// Since: 2.9
+	RadiusNone float32 = -math.MaxFloat32
 )
 
 // Refresh instructs the containing canvas to refresh the specified obj.
