@@ -61,6 +61,53 @@ func errWrongType(have ResType, want ...ResType) error {
 	return fmt.Errorf("wrong resource type %s, want one of %v", have, want)
 }
 
+// laterAttrRefs maps android attribute names that were added to the platform
+// after the API level of the embedded resource table (see MinSDK) to their
+// public framework resource IDs. Framework resource IDs are stable public
+// ABI, so they may be listed here without a corresponding table entry.
+var laterAttrRefs = map[string]TableRef{
+	"foregroundServiceType": 0x01010599, // added in API 29
+}
+
+// foregroundServiceTypes describes every value accepted by
+// android:foregroundServiceType, which an app declares on its service element
+// when it supplies its own AndroidManifest.xml. The flag is the value the
+// attribute encodes to, as defined by attrs_manifest.xml and
+// android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_*.
+var foregroundServiceTypes = map[string]uint32{
+	"none":            0x00000000,
+	"dataSync":        0x00000001,
+	"mediaPlayback":   0x00000002,
+	"phoneCall":       0x00000004,
+	"location":        0x00000008,
+	"connectedDevice": 0x00000010,
+	"mediaProjection": 0x00000020,
+	"camera":          0x00000040,
+	"microphone":      0x00000080,
+	"health":          0x00000100,
+	"remoteMessaging": 0x00000200,
+	"systemExempted":  0x00000400,
+	"shortService":    0x00000800,
+	"mediaProcessing": 0x00002000,
+	"specialUse":      0x40000000,
+}
+
+// addLaterAttribute encodes attributes listed in laterAttrRefs, which cannot
+// be resolved against the embedded resource table. Only foregroundServiceType
+// is currently supported; it is a flags attribute, encoded as the OR of its
+// |-separated flag names.
+func addLaterAttribute(attr xml.Attr, nattr *Attribute) error {
+	nattr.TypedValue.Type = DataIntHex
+	for _, x := range strings.Split(attr.Value, "|") {
+		flag, ok := foregroundServiceTypes[strings.TrimSpace(x)]
+		if !ok {
+			return fmt.Errorf("unknown %s value %q", attr.Name.Local, strings.TrimSpace(x))
+		}
+		nattr.TypedValue.Value |= flag
+	}
+	return nil
+}
+
 // ResType is the type of a resource
 type ResType uint16
 
@@ -411,7 +458,11 @@ func buildXML(q []ltoken) (*XML, error) {
 	for _, s := range bx.Pool.strings {
 		ref, err := tbl.RefByName("attr/" + s)
 		if err != nil {
-			break // break after first non-ref as all strings after are also non-refs.
+			lref, ok := laterAttrRefs[s]
+			if !ok {
+				break // break after first non-ref as all strings after are also non-refs.
+			}
+			ref = lref
 		}
 		bx.Map.rs = append(bx.Map.rs, ref)
 	}
@@ -649,6 +700,10 @@ func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Elem
 // The encoded value is stored in nattr.
 // If the value was not already present in pool, it is added.
 func addAttributeNamespace(attr xml.Attr, nattr *Attribute, tbl *Table, pool *Pool) error {
+	if _, ok := laterAttrRefs[attr.Name.Local]; ok {
+		return addLaterAttribute(attr, nattr)
+	}
+
 	// get type spec and value data type
 	ref, err := tbl.RefByName("attr/" + attr.Name.Local)
 	if err != nil {
