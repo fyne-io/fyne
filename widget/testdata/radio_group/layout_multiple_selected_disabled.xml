@@ -1,18 +1,22 @@
 <canvas padded size="150x200">
 	<content>
 		<container pos="4,4" size="142x192">
-			<widget pos="38,60" size="64x70" type="*widget.RadioGroup">
-				<widget size="64x35" type="*widget.radioItem">
-					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="disabled"/>
-					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,0" size="64x35">Foo</text>
+			<widget pos="30,44" size="80x102" type="*widget.RadioGroup">
+				<widget size="80x51" type="*widget.radioItem">
+					<circle pos="2,11" size="28x28"/>
+					<image pos="6,15" rsc="radioButtonFillIcon" size="iconInlineSize" themed="disabled"/>
+					<image pos="6,15" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<widget pos="32,0" size="60x31" type="*widget.RichText">
+						<text color="disabled" pos="8,8" size="24x19">Foo</text>
+					</widget>
 				</widget>
-				<widget pos="0,35" size="64x35" type="*widget.radioItem">
-					<circle pos="2,3" size="28x28"/>
-					<image pos="6,7" rsc="radioButtonFillIcon" size="iconInlineSize" themed="background"/>
-					<image pos="6,7" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-					<text color="disabled" pos="32,0" size="64x35">Bar</text>
+				<widget pos="0,51" size="80x51" type="*widget.radioItem">
+					<circle pos="2,11" size="28x28"/>
+					<image pos="6,15" rsc="radioButtonFillIcon" size="iconInlineSize" themed="background"/>
+					<image pos="6,15" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
+					<widget pos="32,0" size="60x31" type="*widget.RichText">
+						<text color="disabled" pos="8,8" size="22x19">Bar</text>
+					</widget>
 				</widget>
 			</widget>
 		</container>
