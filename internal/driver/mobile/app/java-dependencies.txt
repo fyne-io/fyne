@@ -1,1 +1,5 @@
-# one java dependencies per line in groupId:artifactId:version format
+# Simple and extensible format to track java dependencies.
+# Commented and empty lines are ignored, fields are separated by whitespace.
+#
+# Currently supported fields:
+#  - maven style dependencies in groupId:artifactId:version format
