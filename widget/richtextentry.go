@@ -320,7 +320,7 @@ func (e *RichTextEntry) applyUndoAction(action entryUndoAction, undo bool) {
 	if e.OnChanged != nil {
 		e.OnChanged(content)
 	}
-	e.validate()
+	e.validateWithoutRefresh()
 	e.Refresh()
 }
 
@@ -336,9 +336,9 @@ func (e *RichTextEntry) richProvider() *RichText {
 	if !e.rich {
 		e.rich = true
 		e.initTextProvider()
-		e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
+		e.textWidget.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
 	}
-	return &e.text
+	return &e.textWidget
 }
 
 // blockContainer returns the segments held inside a block, so that content can
@@ -1030,7 +1030,7 @@ func (e *RichTextEntry) finishStyling(cursor int) {
 	if e.OnChanged != nil {
 		e.OnChanged(content)
 	}
-	e.validate()
+	e.validateWithoutRefresh()
 }
 
 func lastIndexRunes(haystack, needle []rune) int {

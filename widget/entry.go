@@ -1446,10 +1446,10 @@ func (e *Entry) updateText(text string, fromBinding bool) bool {
 			e.onRequiredChanged(!empty)
 		}
 	}
-	if e.rich && !e.text.contentIs(text) {
+	if e.rich && !e.textWidget.contentIs(text) {
 		// content was set from outside the segment model, using SetText or a data
 		// binding, so there is no styling information to preserve
-		e.text.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: text}}
+		e.textWidget.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: text}}
 	}
 	e.syncSegments()
 	e.textWidget.updateRowBounds()
