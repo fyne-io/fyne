@@ -868,6 +868,9 @@ type RichTextStyle struct {
 
 	// an internal detail marking inline code, which renders on a background fill
 	codeInline bool
+
+	// an internal detail recording the level of a heading that has no size of its own (3 and deeper)
+	headingLevel int
 }
 
 // RichTextSegment describes any element that can be rendered in a RichText widget.

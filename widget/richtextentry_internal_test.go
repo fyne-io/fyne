@@ -326,6 +326,28 @@ func TestRichTextEntry_ReturnLeavesHeadingHeight(t *testing.T) {
 	assert.Equal(t, lineHeight, height)
 }
 
+func TestRichTextEntry_ReturnLeavesMinorHeading(t *testing.T) {
+	// a third level heading is drawn as bold text, but must end at the line break
+	e := NewRichTextEntryFromMarkdown("### Title")
+	e.CursorRow, e.CursorColumn = 0, 5
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+	typeString(e, "body")
+
+	assert.Equal(t, []string{"Title\n|b", "body|"}, segmentDump(e))
+	assert.Equal(t, "### Title\n\nbody", e.Markdown())
+
+	e = NewRichTextEntry()
+	e.MultiLine = true
+	e.TypeMarkdown = true
+	typeString(e, "### Title")
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+	typeString(e, "body")
+
+	assert.Equal(t, []string{"Title\n|b", "body|"}, segmentDump(e))
+	assert.Equal(t, "### Title\n\nbody", e.Markdown())
+}
+
 func TestRichTextEntry_ReturnKeepsInlineStyle(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("**bold**")
 	e.CursorRow, e.CursorColumn = 0, 4

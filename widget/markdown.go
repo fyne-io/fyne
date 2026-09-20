@@ -252,6 +252,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 		style = RichTextStyleSubHeading
 	default:
 		style = RichTextStyleStrong
+		style.headingLevel = n.(*ast.Heading).Level
 	}
 	if quotingDepth > 0 {
 		style.QuotingDepth = quotingDepth
@@ -273,6 +274,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 				if t, ok := seg.(*TextSegment); ok { // apply heading to other text
 					t.Style.SizeName = style.SizeName
 					t.Style.TextStyle.Bold = true
+					t.Style.headingLevel = style.headingLevel
 				}
 			}
 			children = append(children, segs...)

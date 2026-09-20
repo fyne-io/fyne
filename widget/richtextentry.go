@@ -274,7 +274,7 @@ func (e *RichTextEntry) hasSelection() bool {
 // isBlockStyle reports whether a style applies to a whole line, rather than to a
 // run of text within one.
 func isBlockStyle(style RichTextStyle) bool {
-	if style.QuotingDepth > 0 {
+	if style.QuotingDepth > 0 || style.headingLevel > 0 {
 		return true
 	}
 	return style.SizeName != "" && style.SizeName != theme.SizeNameText
@@ -818,11 +818,14 @@ func markdownBlockPrefix(style RichTextStyle) string {
 	case theme.SizeNameSubHeadingText:
 		return prefix + "## "
 	}
+	if style.headingLevel > 0 {
+		return prefix + strings.Repeat("#", style.headingLevel) + " "
+	}
 	return prefix
 }
 
 func markdownInlineMarks(style RichTextStyle) string {
-	if style.SizeName == theme.SizeNameHeadingText || style.SizeName == theme.SizeNameSubHeadingText {
+	if style.SizeName == theme.SizeNameHeadingText || style.SizeName == theme.SizeNameSubHeadingText || style.headingLevel > 0 {
 		return "" // the heading prefix already covers the emphasis
 	}
 
@@ -1004,6 +1007,7 @@ func markdownBlockStyle(prefix string) (RichTextStyle, bool) {
 		style = RichTextStyleSubHeading
 	case "###":
 		style = RichTextStyleStrong
+		style.headingLevel = 3
 	default:
 		return style, false
 	}
