@@ -1354,6 +1354,7 @@ func (e *Entry) textProvider() *RichText {
 		e.dirty = true
 	}
 
+	e.initTextProvider()
 	e.textWidget.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: e.Text}}
 	return &e.textWidget
 }
