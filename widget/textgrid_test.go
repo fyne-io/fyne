@@ -198,7 +198,7 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	assert.Equal(t, "H", row0.objects[1].(*canvas.Text).Text)
 	assert.Equal(t, "g", row0.objects[19].(*canvas.Text).Text)
 	assert.Equal(t, "t", row1.objects[1].(*canvas.Text).Text)
-	assert.Equal(t, " ", row2.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, textSpace, row2.objects[1].(*canvas.Text).Text)
 
 	grid.SetText("Replace")
 
@@ -207,8 +207,8 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	assert.Len(t, grid.Rows[0].Cells, 7)
 
 	assert.Equal(t, "R", row0.objects[1].(*canvas.Text).Text)
-	assert.Equal(t, " ", row0.objects[19].(*canvas.Text).Text)
-	assert.Equal(t, " ", row1.objects[1].(*canvas.Text).Text)
+	assert.Equal(t, textSpace, row0.objects[19].(*canvas.Text).Text)
+	assert.Equal(t, textSpace, row1.objects[1].(*canvas.Text).Text)
 }
 
 func TestTextGrid_SetRowStyle(t *testing.T) {

@@ -21,6 +21,8 @@ const (
 	markdownCodeFence = "```"
 	markdownQuote     = "> "
 	markdownStrike    = "~~"
+
+	textSpace = " "
 )
 
 // RichTextEntry widget allows styled text to be edited when focused.
@@ -757,7 +759,7 @@ func segmentsToMarkdown(segments []RichTextSegment) string {
 				number++
 			}
 			prefix = strings.Repeat(markdownQuote, list.quotingLevel) +
-				strings.Repeat(" ", list.indentationLevel*listIndentSpaces) + bullet
+				strings.Repeat(textSpace, list.indentationLevel*listIndentSpaces) + bullet
 
 			startLine(RichTextStyleInline) // an item with no text still has a bullet
 			writeSegments(blockContent(item))
@@ -819,7 +821,7 @@ func markdownBlockPrefix(style RichTextStyle) string {
 		return prefix + "## "
 	}
 	if style.headingLevel > 0 {
-		return prefix + strings.Repeat("#", style.headingLevel) + " "
+		return prefix + strings.Repeat("#", style.headingLevel) + textSpace
 	}
 	return prefix
 }
@@ -991,7 +993,7 @@ func markdownBlockStyle(prefix string) (RichTextStyle, bool) {
 	quoting := 0
 	for strings.HasPrefix(prefix, ">") {
 		quoting++
-		prefix = strings.TrimPrefix(strings.TrimPrefix(prefix, ">"), " ")
+		prefix = strings.TrimPrefix(strings.TrimPrefix(prefix, ">"), textSpace)
 	}
 
 	var style RichTextStyle

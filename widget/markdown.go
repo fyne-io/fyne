@@ -117,10 +117,10 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		text := string(t.Value(source))
 		if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
+			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: textSpace}}, nil
 		}
 		if n.(*ast.Text).SoftLineBreak() {
-			text = text + " "
+			text = text + textSpace
 		}
 		if quotingDepth > 0 {
 			style := RichTextStyleBlockquote
@@ -308,7 +308,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), " ") //revive:disable-line:add-constant
+	return strings.TrimSuffix(text.String(), textSpace) //revive:disable-line:add-constant
 }
 
 func parseMarkdown(content string) []RichTextSegment {

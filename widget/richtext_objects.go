@@ -362,7 +362,7 @@ func (l *listMarkerSegment) marker() string {
 		bullet = strconv.Itoa(l.number) + "."
 	}
 
-	return strings.Repeat(" ", l.indent*listIndentSpaces) + bullet + " "
+	return strings.Repeat(textSpace, l.indent*listIndentSpaces) + bullet + textSpace
 }
 
 // Visual returns a new text object drawing this marker.
@@ -772,7 +772,7 @@ func newTableCell(segs []RichTextSegment, align fyne.TextAlign, header bool) fyn
 		cell = append(cell, s)
 	}
 	if len(cell) == 0 {
-		cell = append(cell, &TextSegment{Style: RichTextStyleInline, Text: " "})
+		cell = append(cell, &TextSegment{Style: RichTextStyleInline, Text: textSpace})
 	}
 
 	text := NewRichText(cell...)
