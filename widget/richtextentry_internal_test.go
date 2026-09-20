@@ -307,6 +307,25 @@ func TestRichTextEntry_ReturnLeavesHeading(t *testing.T) {
 	assert.Equal(t, []string{"Title\n|bh1", "body|"}, segmentDump(e))
 }
 
+func TestRichTextEntry_ReturnLeavesHeadingHeight(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("# Title")
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(300, 200))
+	e.CursorRow, e.CursorColumn = 0, 5
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+
+	lineHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
+	_, headingHeight := e.textProvider().rowGeometry(0)
+	_, height := e.textProvider().rowGeometry(1)
+	assert.Greater(t, headingHeight, lineHeight)
+	assert.Equal(t, lineHeight, height) // the heading that ended above must not size this row
+
+	typeString(e, "body")
+	_, height = e.textProvider().rowGeometry(1)
+	assert.Equal(t, lineHeight, height)
+}
+
 func TestRichTextEntry_ReturnKeepsInlineStyle(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("**bold**")
 	e.CursorRow, e.CursorColumn = 0, 4

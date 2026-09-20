@@ -652,6 +652,10 @@ func (t *RichText) updateRowGeometry() {
 		bound := &t.rowBounds[i]
 		height := float32(0)
 		for j, seg := range bound.segments {
+			if j == 0 && rowStartsWithSpentText(bound) {
+				continue
+			}
+
 			var segHeight float32
 			switch s := seg.(type) {
 			case *TextSegment:
@@ -701,6 +705,20 @@ func (t *RichText) uniformRowGeometry() bool {
 		yPos += height
 	}
 	return true
+}
+
+// rowStartsWithSpentText reports whether the first segment of this row is text
+// that ended with the line break before it.
+func rowStartsWithSpentText(bound *rowBoundary) bool {
+	if len(bound.segments) < 2 || bound.segBegin == 0 {
+		return false
+	}
+
+	switch bound.segments[0].(type) {
+	case *TextSegment, *HyperlinkSegment:
+		return bound.segBegin >= utf8.RuneCountInString(bound.segments[0].Textual())
+	}
+	return false
 }
 
 // rowFirstVisibleSegment returns the first segment that puts content on this row.
@@ -901,6 +919,11 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
+			if segI == 0 && rowStartsWithSpentText(&bound) {
+				obj.Move(fyne.NewPos(left+leftPad, yPos))
+				obj.Resize(fyne.Size{})
+				continue
+			}
 			_, isText := codeInlineText(obj) // code-inline containers are text-like, not blocks
 			if !isText && !inline {
 				if len(rowItems) != 0 {
@@ -1025,12 +1048,15 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 	i := 0
 	for row, bound := range bounds {
-		for range bound.segments {
+		for segI := range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
 			}
 			obj := objs[i]
 			i++
+			if segI == 0 && rowStartsWithSpentText(&bound) {
+				continue
+			}
 
 			minSize := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
