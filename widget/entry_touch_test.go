@@ -14,7 +14,7 @@ func TestEntry_TouchDown_AccountsForScroll(t *testing.T) {
 	e.SetText("Line 1\nLine 2\nLine 3\nLine 4\nLine 5")
 
 	e.CreateRenderer()
-	e.scroll.Offset.Y = 50
+	e.scroller.Offset.Y = 50
 
 	touch := &mobile.TouchEvent{
 		PointEvent: fyne.PointEvent{

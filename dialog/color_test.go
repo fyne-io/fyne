@@ -46,7 +46,7 @@ func TestColorDialog_Theme(t *testing.T) {
 	d.Resize(d.MinSize())
 	test.AssertRendersToImage(t, "color/dialog_theme_ugly.png", w.Canvas())
 
-	d.advanced.Open(0)
+	d.additionalSettings.Open(0)
 
 	test.ApplyTheme(t, test.Theme())
 	d.Resize(d.MinSize())

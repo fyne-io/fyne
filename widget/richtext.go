@@ -796,12 +796,16 @@ func (r *textRenderer) Refresh() {
 	}
 
 	if r.obj.scr != nil {
-		if isEmptyScroll(r.obj.scr) {
-			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-				r.obj.prop, &fyne.Container{Objects: objs},
-			}}
-			r.obj.scr.Direction = scroll
-			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if inner := scrollInnerContainer(r.obj.scr); inner != nil {
+			if inner.Objects == nil {
+				r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+					r.obj.prop, &fyne.Container{Objects: objs},
+				}}
+				r.obj.scr.Direction = scroll
+				r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+			} else {
+				inner.Objects = objs
+			}
 		}
 		r.obj.scr.Refresh()
 	} else {
@@ -937,15 +941,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-func isEmptyScroll(o *widget.Scroll) bool {
+// scrollInnerContainer returns the container holding the visual objects of a RichText
+// scroll content, or nil if the scroll structure is not the expected one.
+func scrollInnerContainer(o *widget.Scroll) *fyne.Container {
 	if c, ok := o.Content.(*fyne.Container); ok {
 		if len(c.Objects) == 2 {
 			if inner, ok := c.Objects[1].(*fyne.Container); ok {
-				return inner.Objects == nil
+				return inner
 			}
 		}
 	}
-	return false
+	return nil
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average

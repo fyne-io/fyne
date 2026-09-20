@@ -3,6 +3,7 @@ package mobile
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/mobile"
+	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/lang"
 )
@@ -20,7 +21,10 @@ var (
 )
 
 // Declare conformity with Device
-var _ fyne.Device = (*device)(nil)
+var (
+	_ fyne.Device   = (*device)(nil)
+	_ mobile.Device = (*device)(nil)
+)
 
 func (*device) Locale() fyne.Locale {
 	return lang.SystemLocale()
@@ -48,13 +52,44 @@ func (*device) HasKeyboard() bool {
 }
 
 func (d *device) ShowVirtualKeyboard() {
-	d.showVirtualKeyboard(mobile.DefaultKeyboard)
+	d.ShowVirtualKeyboardType(mobile.DefaultKeyboard)
 }
 
 func (d *device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
-	d.showVirtualKeyboard(keyboard)
+	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
+		if drv.app == nil { // not yet running
+			fyne.LogError("Cannot show keyboard before app is running", nil)
+			return
+		}
+
+		d.keyboardShown = true
+		drv.app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
+	}
 }
 
 func (d *device) HideVirtualKeyboard() {
-	d.hideVirtualKeyboard()
+	if drv, ok := fyne.CurrentApp().Driver().(*driver); ok {
+		if drv.app == nil { // not yet running
+			return
+		}
+
+		drv.app.HideVirtualKeyboard()
+		d.keyboardShown = false
+	}
+}
+
+func (d *device) handleKeyboard(obj fyne.Focusable) {
+	isDisabled := false
+	if disWid, ok := obj.(fyne.Disableable); ok {
+		isDisabled = disWid.Disabled()
+	}
+	if obj != nil && !isDisabled {
+		if keyb, ok := obj.(mobile.Keyboardable); ok {
+			d.ShowVirtualKeyboardType(keyb.Keyboard())
+		} else {
+			d.ShowVirtualKeyboardType(mobile.DefaultKeyboard)
+		}
+	} else {
+		d.HideVirtualKeyboard()
+	}
 }

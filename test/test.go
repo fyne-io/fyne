@@ -143,13 +143,13 @@ func Tap(obj fyne.Tappable) {
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
 func TapAt(obj fyne.Tappable, pos fyne.Position) {
 	ev, c := prepareTap(obj, pos)
-	tap(c, obj, ev)
+	performTap(c, obj, ev)
 }
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
 	if o, p := findTappable(c, pos); o != nil {
-		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+		performTap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
 }
 
@@ -241,7 +241,7 @@ func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
 	return ev, c
 }
 
-func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
+func performTap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
 }
