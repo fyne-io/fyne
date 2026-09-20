@@ -5,6 +5,7 @@ package fyne
 // Since: 2.8
 type AccessibleRole string
 
+// Known values for [AccessibleRole].
 const (
 	AccessibleRoleButton    AccessibleRole = "button"
 	AccessibleRoleContainer AccessibleRole = "container"

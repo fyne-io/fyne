@@ -40,12 +40,14 @@ func NewThemeOverride(obj fyne.CanvasObject, th fyne.Theme) *ThemeOverride {
 	return t
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (t *ThemeOverride) CreateRenderer() fyne.WidgetRenderer {
 	cache.OverrideTheme(t.Content, addFeatures(t.Theme, t))
 
 	return &overrideRenderer{parent: t, objs: []fyne.CanvasObject{t.holder}}
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (t *ThemeOverride) Refresh() {
 	if t.holder.Objects[0] != t.Content {
 		t.holder.Objects[0] = t.Content

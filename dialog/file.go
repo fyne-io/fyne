@@ -26,6 +26,7 @@ import (
 // Since: 2.5
 type ViewLayout int
 
+// Known values for [ViewLayout].
 const (
 	defaultView ViewLayout = iota
 	ListView
@@ -717,6 +718,9 @@ func showFile(file *FileDialog) *fileDialog {
 //
 // Since: 2.6
 func (f *FileDialog) Dismiss() {
+	if f.dialog == nil {
+		return
+	}
 	f.dialog.dismiss.OnTapped()
 }
 
@@ -724,6 +728,9 @@ func (f *FileDialog) Dismiss() {
 //
 // Since: 2.1
 func (f *FileDialog) MinSize() fyne.Size {
+	if f.dialog == nil { // the popup is only created on Show
+		return fyne.NewSquareSize(1)
+	}
 	return f.dialog.win.MinSize()
 }
 
@@ -750,6 +757,9 @@ func (f *FileDialog) Show() {
 
 // Refresh causes this dialog to be updated
 func (f *FileDialog) Refresh() {
+	if f.dialog == nil {
+		return
+	}
 	f.dialog.win.Refresh()
 }
 

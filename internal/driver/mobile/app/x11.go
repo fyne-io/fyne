@@ -37,7 +37,15 @@ func init() {
 	theApp.registerGLViewportFilter()
 }
 
-func main(f func(App)) {
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
 	runtime.LockOSThread()
 
 	workAvailable := theApp.worker.WorkAvailable()
@@ -79,10 +87,6 @@ func main(f func(App)) {
 			theApp.publishResult <- PublishResult{}
 		}
 	}
-}
-
-func GoBack() {
-	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 //export onResize

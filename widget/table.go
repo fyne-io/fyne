@@ -183,6 +183,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Cursor implements the [desktop.Cursorable] interface.
 func (t *Table) Cursor() desktop.Cursor {
 	if t.hoverHeaderRow != noCellMatch {
 		return desktop.VResizeCursor
@@ -193,6 +194,7 @@ func (t *Table) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
+// Dragged implements the [fyne.Draggable] interface.
 func (t *Table) Dragged(e *fyne.DragEvent) {
 	minSize := t.cellSize
 	col := t.dragCol
@@ -216,6 +218,7 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 	}
 }
 
+// DragEnd implements the [fyne.Draggable] interface.
 func (t *Table) DragEnd() {
 	t.dragCol = noCellMatch
 	t.dragRow = noCellMatch
@@ -236,19 +239,22 @@ func (t *Table) FocusLost() {
 	t.Refresh() // Item(t.currentHighlight)
 }
 
+// MouseIn implements the [desktop.Hoverable] interface.
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
 // MouseDown response to desktop mouse event
 func (t *Table) MouseDown(e *desktop.MouseEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
+// MouseMoved implements the [desktop.Hoverable] interface.
 func (t *Table) MouseMoved(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
+// MouseOut implements the [desktop.Hoverable] interface.
 func (t *Table) MouseOut() {
 	t.hoverOut()
 }
@@ -344,7 +350,7 @@ func (t *Table) SetRowHeight(id int, height float32) {
 
 // TouchDown response to mobile touch event
 func (t *Table) TouchDown(e *mobile.TouchEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // TouchUp response to mobile touch event
@@ -622,6 +628,7 @@ func (t *Table) ScrollToTrailing() {
 	t.finishScroll()
 }
 
+// Tapped implements the [fyne.Tappable] interface.
 func (t *Table) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= t.Size().Width || e.Position.Y < 0 || e.Position.Y >= t.Size().Height {
 		t.selectedCell = nil
@@ -825,11 +832,10 @@ func (t *Table) rowAt(pos fyne.Position) int {
 	return noCellMatch
 }
 
-func (t *Table) tapped(pos fyne.Position) {
+func (t *Table) startDrag(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
 		t.dragStartPos = pos
 		if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = noCellMatch
 			t.dragRow = t.hoverHeaderRow
 			size, ok := t.rowHeights[t.hoverHeaderRow]
 			if !ok {
@@ -838,7 +844,6 @@ func (t *Table) tapped(pos fyne.Position) {
 			t.dragStartSize = size
 		} else if t.hoverHeaderCol != noCellMatch {
 			t.dragCol = t.hoverHeaderCol
-			t.dragRow = noCellMatch
 			size, ok := t.columnWidths[t.hoverHeaderCol]
 			if !ok {
 				size = t.cellSize.Width

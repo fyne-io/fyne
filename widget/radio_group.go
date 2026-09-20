@@ -109,6 +109,7 @@ func (r *RadioGroup) itemTapped(item *radioItem, idx int) {
 	r.Refresh()
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (r *RadioGroup) Refresh() {
 	r.updateSelectedIndex()
 	r.BaseWidget.Refresh()

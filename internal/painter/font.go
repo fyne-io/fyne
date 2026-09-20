@@ -205,6 +205,8 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 		PixScale: scale,
 		Color:    c,
 	}
+	// we do not support newlines in string primitive yet, but the go-text now cuts the run
+	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
@@ -231,6 +233,8 @@ func loadMeasureFont(data fyne.Resource) *font.Face {
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+	// we do not support newlines in string primitive yet, but the go-text now cuts the run
+	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32, float32) {})
 }
 

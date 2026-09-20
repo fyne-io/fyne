@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
@@ -918,9 +917,4 @@ func (w *window) view() *glfw.Window {
 		return nil
 	}
 	return w.viewport
-}
-
-// wrapInnerWindow is a no-op to match what the web driver provides
-func wrapInnerWindow(*container.InnerWindow, fyne.Window, *gLDriver) fyne.Window {
-	return nil
 }
