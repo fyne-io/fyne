@@ -30,3 +30,24 @@ func TestDRMLostOutput(t *testing.T) {
 		t.Fatal("unchanged outputs are not a loss")
 	}
 }
+
+func TestDRMStillMissing(t *testing.T) {
+	lost := map[string]drmConn{
+		"card1-HDMI-A-1": {Status: "connected", Enabled: "enabled"},
+		"card1-DP-1":     {Status: "connected", Enabled: "enabled"},
+	}
+	away := map[string]drmConn{
+		"card1-HDMI-A-1": {Status: "connected", Enabled: "disabled"},
+		"card1-DP-1":     {Status: "connected", Enabled: "enabled"},
+	}
+	if !drmStillMissing(lost, away) {
+		t.Fatal("enabled→disabled must keep the display down")
+	}
+	back := map[string]drmConn{
+		"card1-HDMI-A-1": {Status: "connected", Enabled: "enabled"},
+		"card1-DP-1":     {Status: "connected", Enabled: "enabled"},
+	}
+	if drmStillMissing(lost, back) {
+		t.Fatal("restored connector should allow the window back")
+	}
+}

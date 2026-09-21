@@ -2,6 +2,6 @@
 
 package glfw
 
-func (*gLDriver) hideIfDRMOutputLost() {}
+func (*gLDriver) guardDRM() {}
 
 func (*gLDriver) shouldSkipPoll() bool { return false }

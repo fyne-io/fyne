@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync/atomic"
 
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
@@ -14,43 +13,31 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
-// hideIfDRMOutputLost runs on the GLFW thread immediately before PollEvents.
-// KVM often leaves status=connected and only flips enabled=disabled, so both
-// are watched. While a previously live connector is down we skip PollEvents
-// so GLFW never dispatches wl_registry.global_remove on a mapped surface.
+// guardDRM runs on the GLFW thread before PollEvents.
 //
-// On resume we must not PollEvents: the socket still holds global_remove
-// from the skip period, which SIGSEGVs even with the window hidden.
-// Terminate drops the connection; Init + create() is a clean compositor.
-func (d *gLDriver) hideIfDRMOutputLost() {
+// KVM often leaves status=connected and only flips enabled=disabled, so both
+// are watched. The crash is glfw.PollEvents dispatching wl_registry.global_remove.
+// On loss we Terminate immediately and do not poll until the output is back;
+// flushing those events later SIGSEGVs even with the window hidden.
+func (d *gLDriver) guardDRM() {
 	cur := drmSnapshot()
-	if drmLostOutput(drmPrev, cur) {
-		d.hideAllNative()
-		drmSkipPoll.Store(true)
-		drmAtSkip = cloneDRM(drmPrev)
+	if !drmDown && drmLostOutput(drmPrev, cur) {
+		drmLost = cloneDRM(drmPrev)
+		d.dropDisplay()
+		drmDown = true
 	}
-	if drmSkipPoll.Load() && !drmStillMissing(drmAtSkip, cur) {
-		drmSkipPoll.Store(false)
-		d.rebindGLFWAfterHotplug()
-	}
-	drmPrev = cur
-}
-
-func (d *gLDriver) hideAllNative() {
-	for _, win := range d.AllWindows() {
-		w, ok := win.(*window)
-		if !ok || w.closing || w.viewport == nil {
-			continue
+	if drmDown && !drmStillMissing(drmLost, cur) {
+		if d.restoreDisplay() {
+			drmDown = false
+			drmPrev = cur
 		}
-		w.visible = false
-		w.viewport.Hide()
+	}
+	if !drmDown {
+		drmPrev = cur
 	}
 }
 
-func (d *gLDriver) rebindGLFWAfterHotplug() {
-	d.rebindActive = true
-	defer func() { d.rebindActive = false }()
-
+func (d *gLDriver) dropDisplay() {
 	for _, win := range d.AllWindows() {
 		w, ok := win.(*window)
 		if !ok {
@@ -67,7 +54,15 @@ func (d *gLDriver) rebindGLFWAfterHotplug() {
 		}
 	}
 	glfw.Terminate()
-	d.initGLFW()
+}
+
+func (d *gLDriver) restoreDisplay() bool {
+	d.rebindActive = true
+	defer func() { d.rebindActive = false }()
+
+	if err := d.initGLFW(); err != nil {
+		return false
+	}
 	for _, win := range d.AllWindows() {
 		w, ok := win.(*window)
 		if !ok || w.closing {
@@ -76,6 +71,7 @@ func (d *gLDriver) rebindGLFWAfterHotplug() {
 		w.remapAfterHotplug()
 	}
 	d.rebindPaint = true
+	return true
 }
 
 func (w *window) remapAfterHotplug() {
@@ -111,7 +107,7 @@ func (w *window) remapAfterHotplug() {
 }
 
 func (*gLDriver) shouldSkipPoll() bool {
-	return drmSkipPoll.Load()
+	return drmDown
 }
 
 type drmConn struct {
@@ -120,9 +116,9 @@ type drmConn struct {
 }
 
 var (
-	drmPrev     map[string]drmConn
-	drmAtSkip   map[string]drmConn
-	drmSkipPoll atomic.Bool
+	drmPrev map[string]drmConn
+	drmLost map[string]drmConn
+	drmDown bool
 )
 
 func drmSnapshot() map[string]drmConn {
@@ -134,9 +130,10 @@ func drmSnapshot() map[string]drmConn {
 	for _, p := range matches {
 		dir := filepath.Dir(p)
 		name := filepath.Base(dir)
-		st := drmRead(p)
-		en := drmRead(filepath.Join(dir, "enabled"))
-		out[name] = drmConn{Status: st, Enabled: en}
+		out[name] = drmConn{
+			Status:  drmRead(p),
+			Enabled: drmRead(filepath.Join(dir, "enabled")),
+		}
 	}
 	return out
 }
@@ -165,8 +162,8 @@ func drmLostOutput(prev, cur map[string]drmConn) bool {
 	return false
 }
 
-func drmStillMissing(atSkip, cur map[string]drmConn) bool {
-	for name, p := range atSkip {
+func drmStillMissing(lost, cur map[string]drmConn) bool {
+	for name, p := range lost {
 		if p.Status != "connected" && p.Enabled != "enabled" {
 			continue
 		}
