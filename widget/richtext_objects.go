@@ -393,9 +393,9 @@ func (l *listMarkerSegment) Update(o fyne.CanvasObject) {
 func (*listMarkerSegment) Select(_, _ fyne.Position) {
 }
 
-// SelectedText returns the empty string as a marker holds no content.
-func (*listMarkerSegment) SelectedText() string {
-	return ""
+// SelectedText returns the marker as it introduces this item in selected text.
+func (l *listMarkerSegment) SelectedText() string {
+	return strings.TrimRight(l.marker(), textSpace) + textSpace
 }
 
 // Unselect does nothing for a list marker.

@@ -114,6 +114,8 @@ func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
+// The styling is left behind, but each list item that the selection starts is
+// introduced by its marker so that the structure of a list is kept.
 func (s *selectable) SelectedText() string {
 	if s == nil || !s.selecting {
 		return ""
@@ -123,8 +125,29 @@ func (s *selectable) SelectedText() string {
 	if start == stop {
 		return ""
 	}
-	r := ([]rune)(s.provider.String())
-	return string(r[start:stop])
+
+	out := strings.Builder{}
+	off := 0
+	for _, seg := range s.provider.contentSegments() {
+		if off >= stop {
+			break
+		}
+
+		if marker, ok := seg.(*listMarkerSegment); ok {
+			if off >= start {
+				out.WriteString(marker.SelectedText())
+			}
+			continue
+		}
+
+		r := ([]rune)(seg.Textual())
+		from, to := max(start-off, 0), min(stop-off, len(r))
+		if from < to {
+			out.WriteString(string(r[from:to]))
+		}
+		off += len(r)
+	}
+	return out.String()
 }
 
 func (s *selectable) Tapped(*fyne.PointEvent) {

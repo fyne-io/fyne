@@ -876,3 +876,28 @@ func TestRichTextEntry_MarkdownOfTypedOrderedList(t *testing.T) {
 
 	assert.Equal(t, "3. third\n4. fourth", e.Markdown())
 }
+
+func TestRichTextEntry_SelectedText_ListMarkers(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("Intro\n\n- one\n- **two**\n\n1. first\n2. second")
+	clipboard := test.NewClipboard()
+	selectRange := func(row1, col1, row2, col2 int) {
+		e.sel.selectRow, e.sel.selectColumn, e.sel.selecting = row1, col1, true
+		e.CursorRow, e.CursorColumn = row2, col2
+		e.syncSelectable()
+	}
+
+	selectRange(0, 0, 4, 6)
+	e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
+	assert.Equal(t, "Intro\n• one\n• two\n1. first\n2. second", clipboard.Content())
+	assert.Equal(t, clipboard.Content(), e.SelectedText())
+
+	// an item that is only partly selected is copied without its marker
+	selectRange(1, 1, 2, 3)
+	e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
+	assert.Equal(t, "ne\n• two", clipboard.Content())
+
+	// stopping at the start of an item does not include its marker
+	selectRange(1, 0, 2, 0)
+	e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
+	assert.Equal(t, "• one\n", clipboard.Content())
+}
