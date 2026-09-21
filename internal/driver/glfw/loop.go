@@ -62,11 +62,19 @@ func decideRepaint(visible, ready bool, checkDirtyAndClear func() bool) bool {
 }
 
 func (d *gLDriver) drawSingleFrame() {
+	if d.shouldSkipPoll() {
+		return
+	}
 	refreshed := false
 	for _, win := range d.AllWindows() {
 		w, _ := win.(*window)
 		if w.closing {
 			continue
+		}
+
+		if d.rebindPaint && w.visible && w.frame != nil && !w.frame.ready() {
+			w.frame.markReady()
+			w.canvas.SetDirty()
 		}
 
 		if decideRepaint(w.visible, w.frame.ready(), w.canvas.CheckDirtyAndClear) {
@@ -226,6 +234,7 @@ func (*gLDriver) repaintWindow(w *window) bool {
 	if view != nil && visible {
 		w.frame.requestFrame()
 		view.SwapBuffers()
+		w.driver.rebindPaint = false
 	}
 
 	// mark that we have walked the window and don't

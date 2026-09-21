@@ -85,6 +85,23 @@ func DeleteTextTexturesFor(canvas fyne.Canvas) {
 	})
 }
 
+// DropTexturesFor removes cached GPU textures for a canvas without calling
+// GL free. Use after the GL context has been destroyed (glfw.Terminate).
+func DropTexturesFor(canvas fyne.Canvas) {
+	objectTextures.Range(func(obj fyne.CanvasObject, tinfo *textureInfo) bool {
+		if tinfo.canvas == canvas {
+			objectTextures.Delete(obj)
+		}
+		return true
+	})
+	textTextures.Range(func(key FontCacheEntry, tinfo *textureInfo) bool {
+		if tinfo.canvas == canvas {
+			textTextures.Delete(key)
+		}
+		return true
+	})
+}
+
 // SetTextTexture sets cached texture for a text run.
 func SetTextTexture(ent FontCacheEntry, texture TextureType, canvas fyne.Canvas, free func()) {
 	tinfo := prepareTexture(texture, canvas, free)

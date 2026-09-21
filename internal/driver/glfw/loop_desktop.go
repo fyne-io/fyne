@@ -3,6 +3,8 @@
 package glfw
 
 import (
+	"os"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/build"
 
@@ -23,6 +25,11 @@ func (*gLDriver) initGLFW() {
 	case platformWayland:
 		glfw.InitHint(glfw.PlatformHint, int(glfw.PlatformWayland))
 	}
+	// glfw.Terminate resets InitHints. Re-apply compositor-side decorations
+	// when the app asked for them (FYNE_DISABLE_LIBDECOR=1).
+	if os.Getenv("FYNE_DISABLE_LIBDECOR") == "1" {
+		glfw.InitHint(glfw.WaylandLibdecor, glfw.WaylandDisableLibdecor)
+	}
 	err := glfw.Init()
 	if err != nil {
 		fyne.LogError("failed to initialise GLFW", err)
@@ -35,7 +42,11 @@ func (*gLDriver) initGLFW() {
 	}
 }
 
-func (*gLDriver) pollEvents() {
+func (d *gLDriver) pollEvents() {
+	d.hideIfDRMOutputLost()
+	if d.shouldSkipPoll() {
+		return
+	}
 	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
