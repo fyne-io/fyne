@@ -154,7 +154,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if !named {
 		// That’s some magic to access the private `source` field of the themed resource.
 		v := reflect.ValueOf(rsc).Elem().Field(0)
-		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
+		src, _ := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
 		r.setResourceAttr(attrs, name, src)
 	}
 	r.setStringAttr(attrs, "themed", variant)

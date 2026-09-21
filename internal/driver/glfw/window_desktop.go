@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
@@ -363,7 +362,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 // findSiblingMonitor returns the monitor of an already-visible window in this app, or nil.
 func (w *window) findSiblingMonitor() *glfw.Monitor {
-	for _, other := range w.driver.windowList() {
+	for _, other := range w.driver.AllWindows() {
 		ow, ok := other.(*window)
 		if !ok || ow == w || !ow.visible || ow.viewport == nil {
 			continue
@@ -918,9 +917,4 @@ func (w *window) view() *glfw.Window {
 		return nil
 	}
 	return w.viewport
-}
-
-// wrapInnerWindow is a no-op to match what the web driver provides
-func wrapInnerWindow(*container.InnerWindow, fyne.Window, *gLDriver) fyne.Window {
-	return nil
 }

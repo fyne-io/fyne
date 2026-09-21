@@ -23,6 +23,7 @@ type Menu struct {
 	activeItem    *menuItem
 	customSized   bool
 	containsCheck bool
+	isSubmenu     bool
 }
 
 // NewMenu creates a new Menu.
@@ -242,13 +243,17 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 		boxSize = minSize
 	}
 	scrollSize := boxSize
+	if r.m.isSubmenu && s.Height < scrollSize.Height {
+		// the parent clamped the submenu to the canvas, scroll instead of growing back to full height
+		scrollSize.Height = s.Height
+	}
 
 	driver := fyne.CurrentApp().Driver()
 	if c := driver.CanvasForObject(r.m.super()); c != nil {
 		ap := driver.AbsolutePositionForObject(r.m.super())
 		_, areaSize := c.InteractiveArea()
-		if ah := areaSize.Height - ap.Y; ah < boxSize.Height {
-			scrollSize = fyne.NewSize(boxSize.Width, ah)
+		if ah := areaSize.Height - ap.Y; ah < scrollSize.Height {
+			scrollSize.Height = ah
 		}
 	}
 	if scrollSize != r.m.Size() {
@@ -290,17 +295,14 @@ func (r *menuRenderer) layoutActiveChild() {
 		return
 	}
 
-	if item.Child().Size().IsZero() {
-		item.Child().Resize(item.Child().MinSize())
-	}
-
+	child := item.Child()
+	childSize := child.MinSize()
 	itemSize := item.Size()
 	cp := fyne.NewPos(itemSize.Width, item.Position().Y)
 	d := fyne.CurrentApp().Driver()
 	c := d.CanvasForObject(item)
 	if c != nil {
 		absPos := d.AbsolutePositionForObject(item)
-		childSize := item.Child().Size()
 		if absPos.X+itemSize.Width+childSize.Width > c.Size().Width {
 			if absPos.X-childSize.Width >= 0 {
 				cp.X = -childSize.Width
@@ -308,14 +310,15 @@ func (r *menuRenderer) layoutActiveChild() {
 				cp.X = c.Size().Width - absPos.X - childSize.Width
 			}
 		}
-		requiredHeight := childSize.Height - r.m.Theme().Size(theme.SizeNamePadding)
-		availableHeight := c.Size().Height - absPos.Y
-		missingHeight := requiredHeight - availableHeight
-		if missingHeight > 0 {
-			cp.Y -= missingHeight
-		}
+		// Move the submenu up if it would extend below the canvas, but never above its top.
+		// Whatever still does not fit is scrolled, just like for the menu itself.
+		_, areaSize := c.InteractiveArea()
+		top := fyne.Max(0, fyne.Min(absPos.Y, areaSize.Height-childSize.Height))
+		cp.Y -= absPos.Y - top
+		childSize.Height = fyne.Min(childSize.Height, areaSize.Height-top)
 	}
-	item.Child().Move(cp)
+	child.Move(cp)
+	child.Resize(childSize)
 }
 
 type menuBox struct {

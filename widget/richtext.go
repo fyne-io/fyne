@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -259,11 +260,12 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	start := 0
 	var into *TextSegment
 	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
+		var ok bool
+		if into, ok = seg.(*TextSegment); !ok {
 			continue
 		}
-		end := start + len([]rune(seg.(*TextSegment).Text))
-		into = seg.(*TextSegment)
+
+		end := start + len([]rune(into.Text))
 		index = i
 		if end > pos {
 			break
@@ -557,7 +559,8 @@ func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 		return o, true
 	case *fyne.Container:
 		if _, ok := o.Layout.(*codeInlineLayout); ok {
-			return o.Objects[1].(*canvas.Text), true
+			t, _ := o.Objects[1].(*canvas.Text)
+			return t, true
 		}
 	}
 	return nil, false
@@ -783,7 +786,7 @@ func (r *textRenderer) Refresh() {
 				to, _ := codeInlineText(obj)
 				to.Text = txt
 			} else if isHyperlink {
-				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
+				hl, _ := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
 				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
@@ -793,12 +796,16 @@ func (r *textRenderer) Refresh() {
 	}
 
 	if r.obj.scr != nil {
-		if isEmptyScroll(r.obj.scr) {
-			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-				r.obj.prop, &fyne.Container{Objects: objs},
-			}}
-			r.obj.scr.Direction = scroll
-			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if inner := scrollInnerContainer(r.obj.scr); inner != nil {
+			if inner.Objects == nil {
+				r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+					r.obj.prop, &fyne.Container{Objects: objs},
+				}}
+				r.obj.scr.Direction = scroll
+				r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+			} else {
+				inner.Objects = objs
+			}
 		}
 		r.obj.scr.Refresh()
 	} else {
@@ -814,7 +821,7 @@ func (r *textRenderer) Refresh() {
 func (r *textRenderer) associateSiblings(hl *Hyperlink, hlSeg *HyperlinkSegment, reuse int) {
 	hl.siblings = hl.siblings[:0]
 	for prev := 0; prev < reuse; prev++ {
-		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+		prevHL, _ := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
 		prevHL.siblings = append(prevHL.siblings, hl)
 		hl.siblings = append(hl.siblings, prevHL)
 	}
@@ -934,15 +941,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-func isEmptyScroll(o *widget.Scroll) bool {
+// scrollInnerContainer returns the container holding the visual objects of a RichText
+// scroll content, or nil if the scroll structure is not the expected one.
+func scrollInnerContainer(o *widget.Scroll) *fyne.Container {
 	if c, ok := o.Content.(*fyne.Container); ok {
 		if len(c.Objects) == 2 {
 			if inner, ok := c.Objects[1].(*fyne.Container); ok {
-				return inner.Objects == nil
+				return inner
 			}
 		}
 	}
-	return false
+	return nil
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average
@@ -993,7 +1002,12 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	}
 
 	prior := bounds[len(bounds)-1]
-	seg := prior.segments[0].(*TextSegment)
+	seg, ok := prior.segments[0].(*TextSegment)
+	if !ok {
+		fyne.LogError(fmt.Sprintf("unexpected rich text segment: %#v", prior.segments[0]), nil)
+		return bounds
+	}
+
 	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)

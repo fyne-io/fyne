@@ -31,10 +31,11 @@ const (
 type ColorPickerDialog struct {
 	*dialog
 	Advanced bool
-	color    color.Color
-	callback func(c color.Color)
-	advanced *widget.Accordion
-	picker   *colorAdvancedPicker
+
+	additionalSettings *widget.Accordion
+	callback           func(c color.Color)
+	color              color.Color
+	picker             *colorAdvancedPicker
 }
 
 // NewColorPicker creates a color dialog and returns the handle.
@@ -76,7 +77,7 @@ func (p *ColorPickerDialog) SetColor(c color.Color) {
 
 // Show causes this dialog to be displayed
 func (p *ColorPickerDialog) Show() {
-	if p.win == nil || p.Advanced != (p.advanced != nil) {
+	if p.win == nil || p.Advanced != (p.additionalSettings != nil) {
 		p.updateUI()
 	}
 	p.dialog.Show()
@@ -117,10 +118,10 @@ func (p *ColorPickerDialog) updateUI() {
 		})
 
 		advancedItem := widget.NewAccordionItem(lang.L("Advanced"), p.picker)
-		if p.advanced != nil {
-			advancedItem.Open = p.advanced.Items[0].Open
+		if p.additionalSettings != nil {
+			advancedItem.Open = p.additionalSettings.Items[0].Open
 		}
-		p.advanced = widget.NewAccordion(advancedItem)
+		p.additionalSettings = widget.NewAccordion(advancedItem)
 
 		p.content = container.NewVBox(
 			container.NewCenter(
@@ -129,7 +130,7 @@ func (p *ColorPickerDialog) updateUI() {
 				),
 			),
 			widget.NewSeparator(),
-			p.advanced,
+			p.additionalSettings,
 		)
 
 		confirm := &widget.Button{

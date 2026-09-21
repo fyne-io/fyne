@@ -63,8 +63,8 @@ func decideRepaint(visible, ready bool, checkDirtyAndClear func() bool) bool {
 
 func (d *gLDriver) drawSingleFrame() {
 	refreshed := false
-	for _, win := range d.windowList() {
-		w := win.(*window)
+	for _, win := range d.AllWindows() {
+		w, _ := win.(*window)
 		if w.closing {
 			continue
 		}
@@ -136,7 +136,7 @@ func (d *gLDriver) runGL() {
 		case <-d.done:
 			eventTick.Stop()
 			d.Terminate()
-			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+			l, _ := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
 				l.QueueEvent(f)
 			}
@@ -159,7 +159,7 @@ func (d *gLDriver) runGL() {
 		case <-eventTick.C:
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
-				w := d.windows[i].(*window)
+				w, _ := d.windows[i].(*window)
 				w.ensurePositionProcessed()
 
 				if w.viewport == nil {

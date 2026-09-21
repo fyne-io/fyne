@@ -141,7 +141,7 @@ func (l *GridWrap) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *GridWrap) scrollTo(id GridWrapItemID) {
+func (l *GridWrap) scrollWithoutItemCheckTo(id GridWrapItemID) {
 	if l.scroller == nil {
 		return
 	}
@@ -166,7 +166,7 @@ func (l *GridWrap) RefreshItem(id GridWrapItemID) {
 		return
 	}
 	l.BaseWidget.Refresh()
-	lo := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
+	lo, _ := l.scroller.Content.(*fyne.Container).Layout.(*gridWrapLayout)
 	item, ok := lo.searchVisible(lo.visible, id)
 	if ok {
 		lo.setupGridItem(item, id, l.focused && l.currentHighlight == id)
@@ -209,7 +209,7 @@ func (l *GridWrap) Highlight(id GridWrapItemID) {
 		newID = l.Length() - 1
 	}
 
-	l.scrollTo(newID)
+	l.scrollWithoutItemCheckTo(newID)
 	l.currentHighlight = newID
 	if l.OnHighlighted != nil {
 		l.OnHighlighted(newID)
@@ -239,7 +239,7 @@ func (l *GridWrap) Select(id GridWrapItemID) {
 			f(id)
 		}
 	}()
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -252,7 +252,7 @@ func (l *GridWrap) ScrollTo(id GridWrapItemID) {
 	if id < 0 || id >= length {
 		return
 	}
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -304,7 +304,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentHighlight >= count-1 {
 			l.currentHighlight = count - 1
 		}
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyLeft:
 		if l.currentHighlight <= 0 {
@@ -313,7 +313,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight--
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyRight:
 		if f := l.Length; f != nil && l.currentHighlight >= f()-1 {
@@ -322,7 +322,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight++
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyUp:
 		if l.currentHighlight <= 0 {
@@ -333,7 +333,7 @@ func (l *GridWrap) TypedKey(event *fyne.KeyEvent) {
 		if l.currentHighlight < 0 {
 			l.currentHighlight = 0
 		}
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	}
 
@@ -576,7 +576,7 @@ type gridItemAndID struct {
 type gridWrapLayout struct {
 	gw *GridWrap
 
-	itemPool   async.Pool[fyne.CanvasObject]
+	itemPool   async.Pool[*gridWrapItem]
 	visible    []gridItemAndID
 	wasVisible []gridItemAndID
 }
@@ -596,15 +596,15 @@ func (l *gridWrapLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 }
 
 func (l *gridWrapLayout) getItem() *gridWrapItem {
-	item := l.itemPool.Get()
-	if item == nil {
-		if f := l.gw.CreateItem; f != nil {
-			child := createItemAndApplyThemeScope(f, l.gw)
-
-			item = newGridWrapItem(child, nil)
-		}
+	if item := l.itemPool.Get(); item != nil {
+		return item
 	}
-	return item.(*gridWrapItem)
+
+	if f := l.gw.CreateItem; f != nil {
+		return newGridWrapItem(createItemAndApplyThemeScope(f, l.gw), nil)
+	}
+
+	return nil
 }
 
 func (l *gridWrapLayout) offsetUpdated(pos fyne.Position) {
@@ -697,7 +697,7 @@ func (l *gridWrapLayout) updateGrid(newOnly bool) {
 	l.wasVisible = append(l.wasVisible, l.visible...)
 	l.visible = l.visible[:0]
 
-	c := l.gw.scroller.Content.(*fyne.Container)
+	c, _ := l.gw.scroller.Content.(*fyne.Container)
 	oldObjLen := len(c.Objects)
 	c.Objects = c.Objects[:0]
 	y := offY

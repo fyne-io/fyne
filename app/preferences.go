@@ -171,20 +171,20 @@ func convertLists(values map[string]any) {
 			case bool:
 				bools := make([]bool, len(items))
 				for i, item := range items {
-					bools[i] = item.(bool)
+					bools[i], _ = item.(bool)
 				}
 				values[k] = bools
 			case float64:
 				floats := make([]float64, len(items))
 				for i, item := range items {
-					floats[i] = item.(float64)
+					floats[i], _ = item.(float64)
 				}
 				values[k] = floats
 			// case int: // json has no int!
 			case string:
 				strings := make([]string, len(items))
 				for i, item := range items {
-					strings[i] = item.(string)
+					strings[i], _ = item.(string)
 				}
 				values[k] = strings
 			}

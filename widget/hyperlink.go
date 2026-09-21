@@ -302,7 +302,7 @@ func (hl *Hyperlink) syncSegments() {
 			},
 		}
 	} else {
-		segment := hl.provider.Segments[0].(*TextSegment)
+		segment, _ := hl.provider.Segments[0].(*TextSegment)
 		segment.Style.Alignment = hl.Alignment
 		segment.Style.TextStyle = hl.TextStyle
 		segment.Text = hl.Text

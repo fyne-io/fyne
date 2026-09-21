@@ -73,10 +73,6 @@ func (s *selectable) DragEnd() {
 }
 
 func (s *selectable) Dragged(d *fyne.DragEvent) {
-	s.dragged(d)
-}
-
-func (s *selectable) dragged(d *fyne.DragEvent) {
 	if !s.selecting || s.selectEnded {
 		s.selectEnded = false
 		s.updateMousePointer(d.Position)
@@ -305,7 +301,7 @@ func (r *selectableRenderer) Refresh() {
 
 	selectionColor := r.sel.theme.Color(theme.ColorNameSelection, v)
 	for _, selection := range selections {
-		rect := selection.(*canvas.Rectangle)
+		rect, _ := selection.(*canvas.Rectangle)
 		rect.FillColor = selectionColor
 		if r.sel.focused {
 			rect.Show()
