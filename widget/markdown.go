@@ -308,7 +308,7 @@ func forceIntoText(source []byte, n ast.Node) string {
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), textSpace) //revive:disable-line:add-constant
+	return strings.TrimSuffix(text.String(), textSpace)
 }
 
 func parseMarkdown(content string) []RichTextSegment {

@@ -548,7 +548,7 @@ func editableSegments(in []RichTextSegment) []RichTextSegment {
 // trimTrailingNewline removes the line break that closes the final block, as
 // there is no following content for it to separate.
 func trimTrailingNewline(segments []RichTextSegment) []RichTextSegment {
-	content := appendContentSegments(segments, nil)
+	content := appendContentSegments(nil, segments)
 	for i := len(content) - 1; i >= 0; i-- {
 		holder, ok := content[i].(textHolder)
 		if !ok {
@@ -567,7 +567,7 @@ func trimTrailingNewline(segments []RichTextSegment) []RichTextSegment {
 // endsWithNewline reports whether the flattened content already ends with a
 // line break, so that nested blocks do not each add one of their own.
 func endsWithNewline(segments []RichTextSegment) bool {
-	content := appendContentSegments(segments, nil)
+	content := appendContentSegments(nil, segments)
 	for i := len(content) - 1; i >= 0; i-- {
 		text := content[i].Textual()
 		if text == "" {
@@ -1125,7 +1125,7 @@ func findInList(list *ListSegment, owner *[]RichTextSegment, pos, off int) (rich
 // that are inside it.
 func contentLength(seg RichTextSegment) int {
 	total := 0
-	for _, leaf := range appendContentSegments([]RichTextSegment{seg}, nil) {
+	for _, leaf := range appendContentSegments(nil, []RichTextSegment{seg}) {
 		total += utf8.RuneCountInString(leaf.Textual())
 	}
 	return total
@@ -1585,7 +1585,7 @@ func (e *RichTextEntry) joinIntoBlockAbove(pos int) bool {
 	}
 
 	line := &strings.Builder{}
-	for _, seg := range appendContentSegments(texts, nil) {
+	for _, seg := range appendContentSegments(nil, texts) {
 		line.WriteString(seg.Textual())
 	}
 	block.Text = strings.TrimSuffix(block.Text, newLineChar) + line.String()

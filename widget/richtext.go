@@ -186,23 +186,24 @@ func (t *RichText) String() string {
 func (t *RichText) contentSegments() []RichTextSegment {
 	for _, seg := range t.Segments {
 		if holdsContent(seg) {
-			return appendContentSegments(t.Segments, make([]RichTextSegment, 0, len(t.Segments)+2))
+			return appendContentSegments(make([]RichTextSegment, 0, len(t.Segments)+2), t.Segments)
 		}
 	}
 
 	return t.Segments // the common case of content that is not nested
 }
 
-func appendContentSegments(in, out []RichTextSegment) []RichTextSegment {
-	for _, seg := range in {
+// appendContentSegments adds the content carrying segments of src to dst and returns the extended slice.
+func appendContentSegments(dst, src []RichTextSegment) []RichTextSegment {
+	for _, seg := range src {
 		if holdsContent(seg) {
-			out = appendContentSegments(seg.(RichTextBlock).Segments(), out)
+			dst = appendContentSegments(dst, seg.(RichTextBlock).Segments())
 			continue
 		}
 
-		out = append(out, seg)
+		dst = append(dst, seg)
 	}
-	return out
+	return dst
 }
 
 // holdsContent reports whether a segment keeps its content in the segments inside

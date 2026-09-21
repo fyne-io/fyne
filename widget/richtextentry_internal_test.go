@@ -455,7 +455,7 @@ func itemTexts(t *testing.T, e *RichTextEntry, index int) []string {
 	var out []string
 	for _, item := range list.Items {
 		text := &strings.Builder{}
-		for _, seg := range appendContentSegments([]RichTextSegment{item}, nil) {
+		for _, seg := range appendContentSegments(nil, []RichTextSegment{item}) {
 			text.WriteString(seg.Textual())
 		}
 		out = append(out, text.String())
