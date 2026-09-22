@@ -32,7 +32,7 @@ func CurrentLocale() fyne.Locale {
 }
 
 // SetLocale sets the closest supported locale to the given locale as the current locale.
-// If an empty string is given, the package continues to use the system locale.
+// If an empty string is given, the package sets the system locale as the current locale.
 func SetLocale(loc fyne.Locale) {
 	currentLocale = ""
 	if loc != "" {
