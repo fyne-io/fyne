@@ -70,7 +70,7 @@ var (
 	translations embed.FS
 	translated   []language.Tag
 
-	currentLocale fyne.Locale
+	overriddenLocale fyne.Locale
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
@@ -238,8 +238,8 @@ func setupLang(lang string) {
 func updateLocalizer() {
 	setupOnce.Do(initRuntime)
 
-	if currentLocale != "" {
-		setupLang(currentLocale.LanguageString())
+	if overriddenLocale != "" {
+		setupLang(overriddenLocale.LanguageString())
 		return
 	}
 
@@ -248,6 +248,5 @@ func updateLocalizer() {
 		fyne.LogError("Failed to load user locales", err)
 		all = []string{"en"}
 	}
-	currentLocale = closestSupportedLocale(all)
-	setupLang(currentLocale.LanguageString())
+	setupLang(closestSupportedLocale(all).LanguageString())
 }

@@ -25,20 +25,16 @@ func SystemLocale() fyne.Locale {
 	return localeFromTag(tag)
 }
 
-// CurrentLocale returns the currently set locale. If no locale has been set previously,
-// it returns an empty string and the package uses the system locale.
-func CurrentLocale() fyne.Locale {
-	return currentLocale
-}
-
-// SetLocale sets the closest supported locale to the given locale as the current locale.
-// If an empty string is given, the package sets the system locale as the current locale.
-func SetLocale(loc fyne.Locale) {
-	currentLocale = ""
+// OverrideLocale overrides the locale with the closest supported locale
+// to the given locale. If an empty string is given, the package uses its default
+// behavior. It returns the overridden locale.
+func OverrideLocale(loc fyne.Locale) fyne.Locale {
+	overriddenLocale = ""
 	if loc != "" {
-		currentLocale = closestSupportedLocale([]string{loc.String()})
+		overriddenLocale = closestSupportedLocale([]string{loc.String()})
 	}
 	updateLocalizer()
+	return overriddenLocale
 }
 
 func closestSupportedLocale(locs []string) fyne.Locale {
