@@ -35,12 +35,6 @@ static void frame_state_free(frame_state *s) {
     if (s->cb) wl_callback_destroy(s->cb);
     free(s);
 }
-static void frame_state_abandon(frame_state *s) {
-    if (!s) return;
-    // glfw.Terminate already disconnected the display; do not destroy cb.
-    s->cb = NULL;
-    s->ready = 1;
-}
 */
 import "C"
 
@@ -80,10 +74,4 @@ func (t *frameTracker) markReady() {
 func (t *frameTracker) free() {
 	C.frame_state_free(t.state)
 	t.state = nil
-}
-
-func (t *frameTracker) resetAfterDisplayLoss() {
-	if t.state != nil {
-		C.frame_state_abandon(t.state)
-	}
 }

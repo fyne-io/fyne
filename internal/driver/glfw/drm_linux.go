@@ -7,19 +7,23 @@ import (
 	"path/filepath"
 	"strings"
 
-	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
-// guardDRM runs on the GLFW thread before PollEvents.
+// skipPollForDRM runs on the GLFW thread before PollEvents.
 //
-// KVM often leaves status=connected and only flips enabled=disabled, so both
-// are watched. The crash is glfw.PollEvents dispatching wl_registry.global_remove.
-// On loss we Terminate immediately and do not poll until the output is back;
-// flushing those events later SIGSEGVs even with the window hidden.
-func (d *gLDriver) guardDRM() {
+// The crash is glfw.PollEvents dispatching wl_registry.global_remove for an
+// output that just went away. KVM often leaves status=connected and only
+// flips enabled=disabled, so both are watched. GLFW's own monitor callback
+// runs inside PollEvents, which is the call that crashes, so this looks at
+// sysfs first.
+//
+// On loss we Terminate without polling. The socket still holds global_remove,
+// and reading it later crashes even if the window is hidden. When the output
+// is back we Init and Show the same windows again.
+func (d *gLDriver) skipPollForDRM() bool {
 	cur := drmSnapshot()
 	if !drmDown && drmLostOutput(drmPrev, cur) {
 		drmLost = cloneDRM(drmPrev)
@@ -35,6 +39,7 @@ func (d *gLDriver) guardDRM() {
 	if !drmDown {
 		drmPrev = cur
 	}
+	return drmDown
 }
 
 func (d *gLDriver) dropDisplay() {
@@ -44,14 +49,17 @@ func (d *gLDriver) dropDisplay() {
 			continue
 		}
 		w.visible = false
-		w.viewport = nil
-		w.created = false
+		// Display is still connected. Free the frame callback now; after
+		// Terminate it would point at a dead wl_display.
 		if w.frame != nil {
-			w.frame.resetAfterDisplayLoss()
+			w.frame.free()
 		}
+		w.frame = newPresentGate(w)
 		if w.canvas != nil {
 			cache.DropTexturesFor(w.canvas)
 		}
+		w.viewport = nil
+		w.created = false
 	}
 	glfw.Terminate()
 }
@@ -68,46 +76,10 @@ func (d *gLDriver) restoreDisplay() bool {
 		if !ok || w.closing {
 			continue
 		}
-		w.remapAfterHotplug()
+		w.Show()
 	}
 	d.rebindPaint = true
 	return true
-}
-
-func (w *window) remapAfterHotplug() {
-	w.create()
-	if w.viewport == nil {
-		return
-	}
-	w.created = true
-	if w.frame != nil {
-		w.frame.resetAfterDisplayLoss()
-	}
-	if w.canvas != nil {
-		w.canvas.SetDirty()
-		if content := w.canvas.Content(); content != nil {
-			content.Refresh()
-		}
-	}
-	view := w.viewport
-	view.SetTitle(w.title)
-	if !build.IsWayland && w.centered {
-		w.doCenterOnScreen()
-	}
-	w.visible = true
-	view.Show()
-	if !build.IsWayland {
-		w.xpos, w.ypos = view.GetPos()
-	}
-	if w.fullScreenSecondary {
-		w.doSetFullScreen2(true)
-	} else if w.fullScreen {
-		w.doSetFullScreen(true)
-	}
-}
-
-func (*gLDriver) shouldSkipPoll() bool {
-	return drmDown
 }
 
 type drmConn struct {
@@ -129,8 +101,7 @@ func drmSnapshot() map[string]drmConn {
 	}
 	for _, p := range matches {
 		dir := filepath.Dir(p)
-		name := filepath.Base(dir)
-		out[name] = drmConn{
+		out[filepath.Base(dir)] = drmConn{
 			Status:  drmRead(p),
 			Enabled: drmRead(filepath.Join(dir, "enabled")),
 		}

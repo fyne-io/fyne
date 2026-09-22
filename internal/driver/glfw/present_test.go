@@ -9,7 +9,6 @@ func TestNoGateAlwaysReady(t *testing.T) {
 	}
 	g.requestFrame()
 	g.markReady()
-	g.resetAfterDisplayLoss()
 	g.free()
 }
 
@@ -47,14 +46,5 @@ func TestNewPresentGateReadyByDefault(t *testing.T) {
 	defer g.free()
 	if !g.ready() {
 		t.Fatal("newPresentGate().ready() = false, want true")
-	}
-}
-
-func TestResetAfterDisplayLossReady(t *testing.T) {
-	g := newPresentGate(nil)
-	defer g.free()
-	g.resetAfterDisplayLoss()
-	if !g.ready() {
-		t.Fatal("resetAfterDisplayLoss().ready() = false, want true")
 	}
 }

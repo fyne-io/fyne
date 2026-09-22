@@ -2,6 +2,4 @@
 
 package glfw
 
-func (*gLDriver) guardDRM() {}
-
-func (*gLDriver) shouldSkipPoll() bool { return false }
+func (*gLDriver) skipPollForDRM() bool { return false }

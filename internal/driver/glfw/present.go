@@ -9,16 +9,11 @@ type presentGate interface {
 	requestFrame()
 	markReady()
 	free()
-	// resetAfterDisplayLoss drops a pending wl_callback without destroying
-	// it (the Wayland display is already gone) and marks the gate ready so
-	// the first frame after glfw.Terminate/Init can present.
-	resetAfterDisplayLoss()
 }
 
 type noGate struct{}
 
-func (noGate) ready() bool            { return true }
-func (noGate) requestFrame()          {}
-func (noGate) markReady()             {}
-func (noGate) free()                  {}
-func (noGate) resetAfterDisplayLoss() {}
+func (noGate) ready() bool   { return true }
+func (noGate) requestFrame() {}
+func (noGate) markReady()    {}
+func (noGate) free()         {}
