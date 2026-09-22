@@ -27,14 +27,10 @@ func SystemLocale() fyne.Locale {
 
 // OverrideLocale overrides the locale with the closest supported locale
 // to the given locale. If an empty string is given, the package uses its default
-// behavior. It returns the overridden locale.
-func OverrideLocale(loc fyne.Locale) fyne.Locale {
-	overriddenLocale = ""
-	if loc != "" {
-		overriddenLocale = closestSupportedLocale([]string{loc.String()})
-	}
+// behavior.
+func OverrideLocale(loc fyne.Locale) {
+	overriddenLocale = loc
 	updateLocalizer()
-	return overriddenLocale
 }
 
 func closestSupportedLocale(locs []string) fyne.Locale {

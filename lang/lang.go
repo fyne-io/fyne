@@ -239,7 +239,7 @@ func updateLocalizer() {
 	setupOnce.Do(initRuntime)
 
 	if overriddenLocale != "" {
-		setupLang(overriddenLocale.LanguageString())
+		setupLang(closestSupportedLocale([]string{overriddenLocale.String()}).LanguageString())
 		return
 	}
 
