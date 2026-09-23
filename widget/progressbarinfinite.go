@@ -164,6 +164,25 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 	return p.BaseWidget.MinSize()
 }
 
+// AccessibilityLabel returns an empty label so the progress bar is announced by role only.
+//
+// Since: 2.8
+func (p *ProgressBarInfinite) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleProgressBar.
+//
+// Since: 2.8
+func (p *ProgressBarInfinite) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleProgressBar
+}
+
+// AccessibilityValue reports that this is an indeterminate progress indicator.
+//
+// Since: 2.8
+func (p *ProgressBarInfinite) AccessibilityValue() string {
+	return "indeterminate"
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)

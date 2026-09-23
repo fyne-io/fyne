@@ -11,6 +11,8 @@ import (
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestScrollContainer_Theme(t *testing.T) {
@@ -48,4 +50,26 @@ func TestScrollContainer_ThemeOverride(t *testing.T) {
 	w.Resize(fyne.NewSize(100, 100))
 	// TODO why is this off by a 1bit RGB difference?
 	// test.AssertImageMatches(t, "scroll/theme_initial.png", w.Canvas().Capture())
+}
+
+func TestScrollContainer_AccessibilityRoleAndLabel(t *testing.T) {
+	scroll := widget.NewScroll(canvas.NewRectangle(color.Transparent))
+
+	assert.Equal(t, fyne.AccessibleRoleContainer, scroll.AccessibilityRole())
+	assert.Equal(t, "", scroll.AccessibilityLabel())
+}
+
+func TestScrollContainer_AccessibilityChildren(t *testing.T) {
+	content := canvas.NewRectangle(color.Transparent)
+	scroll := widget.NewScroll(content)
+
+	children := scroll.AccessibilityChildren()
+
+	assert.Equal(t, []fyne.CanvasObject{content}, children)
+}
+
+func TestScrollContainer_AccessibilityChildren_NilContent(t *testing.T) {
+	scroll := &widget.Scroll{}
+
+	assert.Nil(t, scroll.AccessibilityChildren())
 }

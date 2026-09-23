@@ -160,6 +160,55 @@ func (c *Check) MinSize() fyne.Size {
 	return c.minSize
 }
 
+// AccessibilityLabel returns the check's text.
+//
+// Since: 2.8
+func (c *Check) AccessibilityLabel() string {
+	return c.Text
+}
+
+// AccessibilityRole returns AccessibleRoleCheckbox.
+//
+// Since: 2.8
+func (c *Check) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleCheckbox
+}
+
+// AccessibilityStates reports whether the check is checked, disabled or focused.
+//
+// Since: 2.8
+func (c *Check) AccessibilityStates() []fyne.AccessibleState {
+	var states []fyne.AccessibleState
+	if c.Checked {
+		states = append(states, fyne.AccessibleStateChecked)
+	}
+	if c.Disabled() {
+		states = append(states, fyne.AccessibleStateDisabled)
+	}
+	if c.focused {
+		states = append(states, fyne.AccessibleStateFocused)
+	}
+	return states
+}
+
+// AccessibilityActions reports the actions supported by this check.
+//
+// Since: 2.8
+func (c *Check) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress}
+}
+
+// AccessibilityPerformAction toggles the check when pressed.
+//
+// Since: 2.8
+func (c *Check) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	if action != fyne.AccessibleActionPress || c.Disabled() {
+		return false
+	}
+	c.SetChecked(!c.Checked)
+	return true
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	th := c.Theme()

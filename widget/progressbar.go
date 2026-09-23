@@ -132,6 +132,34 @@ func (p *ProgressBar) MinSize() fyne.Size {
 	return p.BaseWidget.MinSize()
 }
 
+// AccessibilityLabel returns an empty label so the progress bar is announced by role only.
+//
+// Since: 2.8
+func (p *ProgressBar) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleProgressBar.
+//
+// Since: 2.8
+func (p *ProgressBar) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleProgressBar
+}
+
+// AccessibilityValue returns the current progress as a percentage string,
+// or the value produced by TextFormatter when one is configured.
+//
+// Since: 2.8
+func (p *ProgressBar) AccessibilityValue() string {
+	if format := p.TextFormatter; format != nil {
+		return format()
+	}
+	delta := p.Max - p.Min
+	if delta <= 0 {
+		return "0%"
+	}
+	pct := (p.Value - p.Min) / delta * 100
+	return strconv.FormatFloat(pct, 'f', 0, 64) + "%"
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)

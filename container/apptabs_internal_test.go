@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -63,4 +64,98 @@ func Test_tabButtonRenderer_EmptyDeleteAdd(t *testing.T) {
 
 	tabs.Remove(item1)
 	assert.Equal(t, 0, len(tabRenderer.bar.Objects[0].(*fyne.Container).Objects))
+}
+
+func TestAppTabs_AccessibilityRoleAndLabel(t *testing.T) {
+	tabs := NewAppTabs(&TabItem{Text: "One", Content: widget.NewLabel("One")})
+
+	assert.Equal(t, fyne.AccessibleRoleTabList, tabs.AccessibilityRole())
+	assert.Equal(t, "", tabs.AccessibilityLabel())
+}
+
+func TestAppTabs_AccessibilityChildren(t *testing.T) {
+	one := &TabItem{Text: "One", Content: widget.NewLabel("One")}
+	two := &TabItem{Text: "Two", Content: widget.NewLabel("Two")}
+	tabs := NewAppTabs(one, two)
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	children := tabs.AccessibilityChildren()
+
+	r := cache.Renderer(tabs).(*appTabsRenderer)
+	assert.Equal(t, r.Objects(), children)
+}
+
+func TestAppTabs_AccessibilityChildren_NoRendererYet(t *testing.T) {
+	tabs := NewAppTabs(&TabItem{Text: "One", Content: widget.NewLabel("One")})
+
+	assert.Nil(t, tabs.AccessibilityChildren())
+}
+
+func Test_tabButton_AccessibilityMetadata(t *testing.T) {
+	one := &TabItem{Text: "One", Content: widget.NewLabel("One")}
+	two := &TabItem{Text: "Two", Content: widget.NewLabel("Two")}
+	tabs := NewAppTabs(one, two)
+	tabs.Resize(fyne.NewSize(300, 200))
+	tabs.SelectIndex(1)
+
+	r := cache.Renderer(tabs).(*appTabsRenderer)
+	buttons := r.bar.Objects[0].(*fyne.Container).Objects
+	first := buttons[0].(*tabButton)
+	second := buttons[1].(*tabButton)
+
+	assert.Equal(t, fyne.AccessibleRoleTab, first.AccessibilityRole())
+	assert.Equal(t, "One", first.AccessibilityLabel())
+	assert.Equal(t,
+		[]fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect},
+		first.AccessibilityActions())
+
+	assert.Empty(t, first.AccessibilityStates())
+	assert.Equal(t, []fyne.AccessibleState{fyne.AccessibleStateSelected}, second.AccessibilityStates())
+
+	one.disable()
+	assert.Equal(t, []fyne.AccessibleState{fyne.AccessibleStateDisabled}, first.AccessibilityStates())
+}
+
+func Test_tabButton_AccessibilityPerformAction_SelectsTab(t *testing.T) {
+	one := &TabItem{Text: "One", Content: widget.NewLabel("One")}
+	two := &TabItem{Text: "Two", Content: widget.NewLabel("Two")}
+	tabs := NewAppTabs(one, two)
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	r := cache.Renderer(tabs).(*appTabsRenderer)
+	second := r.bar.Objects[0].(*fyne.Container).Objects[1].(*tabButton)
+
+	assert.True(t, second.AccessibilityPerformAction(fyne.AccessibleActionPress))
+	assert.Equal(t, 1, tabs.SelectedIndex())
+
+	tabs.SelectIndex(0)
+	assert.True(t, second.AccessibilityPerformAction(fyne.AccessibleActionSelect))
+	assert.Equal(t, 1, tabs.SelectedIndex())
+
+	assert.False(t, second.AccessibilityPerformAction(fyne.AccessibleActionIncrement))
+}
+
+func Test_tabButton_AccessibilityPerformAction_DisabledIsNoop(t *testing.T) {
+	one := &TabItem{Text: "One", Content: widget.NewLabel("One")}
+	two := &TabItem{Text: "Two", Content: widget.NewLabel("Two")}
+	tabs := NewAppTabs(one, two)
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	r := cache.Renderer(tabs).(*appTabsRenderer)
+	second := r.bar.Objects[0].(*fyne.Container).Objects[1].(*tabButton)
+	two.disable()
+
+	assert.False(t, second.AccessibilityPerformAction(fyne.AccessibleActionPress))
+	assert.Equal(t, 0, tabs.SelectedIndex())
+}
+
+func Test_tabButton_AccessibilityLabel_FallsBackToIcon(t *testing.T) {
+	icon := theme.HomeIcon()
+	tabs := NewAppTabs(&TabItem{Icon: icon, Content: widget.NewLabel("Home")})
+	tabs.Resize(fyne.NewSize(300, 200))
+
+	r := cache.Renderer(tabs).(*appTabsRenderer)
+	first := r.bar.Objects[0].(*fyne.Container).Objects[0].(*tabButton)
+
+	assert.Equal(t, icon.Name(), first.AccessibilityLabel())
 }

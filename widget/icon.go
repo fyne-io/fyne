@@ -61,6 +61,25 @@ func (i *Icon) MinSize() fyne.Size {
 	return i.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this icon to assistive
+// technologies.
+//
+// Since: 2.8
+func (i *Icon) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleImage
+}
+
+// AccessibilityLabel returns the resource name (if any) so assistive
+// technologies can announce the icon.
+//
+// Since: 2.8
+func (i *Icon) AccessibilityLabel() string {
+	if i.Resource == nil {
+		return ""
+	}
+	return i.Resource.Name()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)

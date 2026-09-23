@@ -6,10 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 )
 
 type dummyCanvas struct {
 	fyne.Canvas
+}
+
+func TestOverlayContainer_AccessibilityChildren(t *testing.T) {
+	content := canvas.NewRectangle(nil)
+	overlay := &OverlayContainer{Content: content, Background: canvas.NewRectangle(nil)}
+	assert.Equal(t, []fyne.CanvasObject{content}, overlay.AccessibilityChildren())
+	overlay.Content = nil
+	assert.Nil(t, overlay.AccessibilityChildren())
 }
 
 func TestOverlayContainer_Tapped_Dismiss(t *testing.T) {

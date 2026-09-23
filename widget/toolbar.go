@@ -125,6 +125,37 @@ func (t *Toolbar) MinSize() fyne.Size {
 	return t.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this toolbar to
+// assistive technologies.
+//
+// Since: 2.8
+func (t *Toolbar) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this toolbar.
+//
+// Since: 2.8
+func (t *Toolbar) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the rendered objects for each toolbar item
+// so they can be navigated by assistive technologies.
+//
+// Since: 2.8
+func (t *Toolbar) AccessibilityChildren() []fyne.CanvasObject {
+	out := make([]fyne.CanvasObject, 0, len(t.Items))
+	for _, item := range t.Items {
+		if _, isSpacer := item.(*ToolbarSpacer); isSpacer {
+			continue
+		}
+		out = append(out, item.ToolbarObject())
+	}
+	return out
+}
+
 // NewToolbar creates a new toolbar widget.
 func NewToolbar(items ...ToolbarItem) *Toolbar {
 	t := &Toolbar{Items: items}

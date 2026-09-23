@@ -7,7 +7,22 @@ typedef enum {
     WinAccessibilityRoleButton = 0,
     WinAccessibilityRoleText,
     WinAccessibilityRoleLink,
-    WinAccessibilityRoleGroup
+    WinAccessibilityRoleGroup,
+    WinAccessibilityRoleCheckbox,
+    WinAccessibilityRoleRadio,
+    WinAccessibilityRoleSlider,
+    WinAccessibilityRoleProgressBar,
+    WinAccessibilityRoleTextField,
+    WinAccessibilityRoleList,
+    WinAccessibilityRoleListItem,
+    WinAccessibilityRoleTree,
+    WinAccessibilityRoleTreeItem,
+    WinAccessibilityRoleTable,
+    WinAccessibilityRoleTab,
+    WinAccessibilityRoleTabList,
+    WinAccessibilityRoleImage,
+    WinAccessibilityRoleHeading,
+    WinAccessibilityRoleSeparator
 } WinAccessibilityRole;
 
 void WinAccessibilitySetWindow(void* hwnd);
