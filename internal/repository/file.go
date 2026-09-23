@@ -10,8 +10,29 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/storage/repository"
+)
+
+// Constants for file permissions to be combined using `|`.
+const (
+	PermGroupExec         = 0o10
+	PermGroupRead         = 0o40
+	PermGroupWrite        = 0o20
+	PermOtherExec         = 0o1
+	PermOtherRead         = 0o4
+	PermOtherWrite        = 0o2
+	PermUserExec          = 0o100
+	PermUserRead          = 0o400
+	PermUserReadWriteExec = PermUserExec | PermUserRead | PermUserWrite
+	PermUserWrite         = 0o200
+)
+
+const (
+	dirPermDefault    = PermGroupExec | PermGroupRead | PermOtherExec | PermOtherRead | PermUserReadWriteExec
+	filePathSeparator = "/"
+	filePermDefault   = PermGroupRead | PermGroupWrite | PermOtherRead | PermOtherWrite | PermUserRead | PermUserWrite
 )
 
 // declare conformance with repository types
@@ -60,7 +81,7 @@ func NewFileRepository() *FileRepository {
 // Exists checks if the given URI exists.
 //
 // Since: 2.0
-func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
+func (*FileRepository) Exists(u fyne.URI) (bool, error) {
 	p := u.Path()
 	_, err := os.Stat(p)
 	if err == nil {
@@ -75,15 +96,15 @@ func (r *FileRepository) Exists(u fyne.URI) (bool, error) {
 // Reader returns a reader for the given URI.
 //
 // Since: 2.0
-func (r *FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+func (*FileRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(u, false, false)
 }
 
 // CanRead checks if the given URI can be read.
 //
 // Since: 2.0
-func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_RDONLY, 0o666)
+func (*FileRepository) CanRead(u fyne.URI) (bool, error) {
+	f, err := os.OpenFile(u.Path(), os.O_RDONLY, filePermDefault)
 	if err != nil {
 		if os.IsPermission(err) || os.IsNotExist(err) {
 			return false, nil
@@ -96,29 +117,29 @@ func (r *FileRepository) CanRead(u fyne.URI) (bool, error) {
 }
 
 // Destroy tears down the repository for the specified scheme.
-func (r *FileRepository) Destroy(scheme string) {
+func (*FileRepository) Destroy(string) {
 	// do nothing
 }
 
 // Writer returns a truncating writer for the given URI.
 //
 // Since: 2.0
-func (r *FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
+func (*FileRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true, true)
 }
 
 // Appender returns a writer that appends to the given URI.
 //
 // Since: 2.6
-func (r *FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
+func (*FileRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(u, true, false)
 }
 
 // CanWrite checks if the given URI can be written.
 //
 // Since: 2.0
-func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
-	f, err := os.OpenFile(u.Path(), os.O_WRONLY, 0o666)
+func (*FileRepository) CanWrite(u fyne.URI) (bool, error) {
+	f, err := os.OpenFile(u.Path(), os.O_WRONLY, filePermDefault)
 	if err != nil {
 		if os.IsPermission(err) {
 			return false, nil
@@ -140,47 +161,47 @@ func (r *FileRepository) CanWrite(u fyne.URI) (bool, error) {
 // Delete deletes the given URI.
 //
 // Since: 2.0
-func (r *FileRepository) Delete(u fyne.URI) error {
+func (*FileRepository) Delete(u fyne.URI) error {
 	return os.Remove(u.Path())
 }
 
 // DeleteAll deletes the given URI and all its children.
 //
 // Since: 2.7
-func (r *FileRepository) DeleteAll(u fyne.URI) error {
+func (*FileRepository) DeleteAll(u fyne.URI) error {
 	return os.RemoveAll(u.Path())
 }
 
 // Parent returns the parent URI of the given URI.
 //
 // Since: 2.0
-func (r *FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
+func (*FileRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	child := path.Clean(u.Path())
 	if child == "." || // Clean ending up empty returns ".".
-		strings.HasSuffix(child, "/") || // Only root has trailing slash.
-		runtime.GOOS == "windows" && len(child) == 2 && child[1] == ':' {
+		strings.HasSuffix(child, filePathSeparator) || // Only root has trailing slash.
+		runtime.GOOS == goos.Windows && len(child) == 2 && child[1] == ':' {
 		return nil, repository.ErrURIRoot
 	}
 
 	parent := path.Dir(child)
-	if parent == "/" {
-		return storage.NewFileURI("/"), nil
+	if parent == filePathSeparator {
+		return storage.NewFileURI(filePathSeparator), nil
 	}
 
-	return storage.NewFileURI(parent + "/"), nil
+	return storage.NewFileURI(parent + filePathSeparator), nil
 }
 
 // Child creates a child URI from the given URI and component.
 //
 // Since: 2.0
-func (r *FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
+func (*FileRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return storage.NewFileURI(path.Join(u.Path(), component)), nil
 }
 
 // List returns a list of all child URIs of the given URI.
 //
 // Since: 2.0
-func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
+func (*FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	p := u.Path()
 	files, err := os.ReadDir(p)
 	if err != nil {
@@ -196,15 +217,14 @@ func (r *FileRepository) List(u fyne.URI) ([]fyne.URI, error) {
 }
 
 // CreateListable creates a new directory at the given URI.
-func (r *FileRepository) CreateListable(u fyne.URI) error {
-	path := u.Path()
-	return os.Mkdir(path, 0o755)
+func (*FileRepository) CreateListable(u fyne.URI) error {
+	return os.Mkdir(u.Path(), dirPermDefault)
 }
 
 // CanList checks if the given URI can be listed.
 //
 // Since: 2.0
-func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
+func (*FileRepository) CanList(u fyne.URI) (bool, error) {
 	p := u.Path()
 	info, err := os.Stat(p)
 	if err != nil {
@@ -218,7 +238,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 		return false, nil
 	}
 
-	if runtime.GOOS == "windows" && len(p) <= 3 {
+	if runtime.GOOS == goos.Windows && len(p) <= 3 {
 		return true, nil // assume drives can be read, avoids hang if the drive is temporarily unresponsive
 	}
 
@@ -245,7 +265,7 @@ func (r *FileRepository) CanList(u fyne.URI) (bool, error) {
 // Copy copies the contents of the source URI to the destination URI.
 //
 // Since: 2.0
-func (r *FileRepository) Copy(source, destination fyne.URI) error {
+func (*FileRepository) Copy(source, destination fyne.URI) error {
 	err := fastCopy(destination.Path(), source.Path())
 	if err == nil {
 		return nil
@@ -257,7 +277,7 @@ func (r *FileRepository) Copy(source, destination fyne.URI) error {
 // Move moves the contents of the source URI to the destination URI.
 //
 // Since: 2.0
-func (r *FileRepository) Move(source, destination fyne.URI) error {
+func (*FileRepository) Move(source, destination fyne.URI) error {
 	err := os.Rename(source.Path(), destination.Path())
 	if err == nil {
 		return nil
@@ -322,17 +342,17 @@ func fastCopy(dst, src string) error {
 }
 
 func openFile(uri fyne.URI, write bool, truncate bool) (*file, error) {
-	path := uri.Path()
+	p := uri.Path()
 	var f *os.File
 	var err error
 	if write {
 		if truncate {
-			f, err = os.Create(path) // If it exists this will truncate which is what we wanted
+			f, err = os.Create(p) // If it exists this will truncate which is what we wanted
 		} else {
-			f, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
+			f, err = os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, filePermDefault)
 		}
 	} else {
-		f, err = os.Open(path)
+		f, err = os.Open(p)
 	}
 	return &file{File: f, uri: uri}, err
 }

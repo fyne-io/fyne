@@ -8,13 +8,16 @@ var _ fyne.CanvasObject = (*Blur)(nil)
 // Blur creates a rectangular blur region on the output.
 // All objects drawn under this will be blurred, any above will not be affected.
 //
-// Since: 2.7
+// Since: 2.8
 type Blur struct {
 	baseObject
 
 	// Radius refers to how far from a point should be used to calculate the blur.
 	// It must be greater than 0 but no more than 50.
 	Radius float32
+
+	// Radius used to round the corners of the blur region.
+	CornerRadius float32
 }
 
 // Hide will set this blur to not be visible

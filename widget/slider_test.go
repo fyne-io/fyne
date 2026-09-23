@@ -95,10 +95,10 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_MinSize(t *testing.T) {
-	min := NewSlider(0, 10).MinSize()
+	minSize := NewSlider(0, 10).MinSize()
 	buttonMin := NewButtonWithIcon("", theme.HomeIcon(), func() {}).MinSize()
 
-	assert.Equal(t, min.Height, buttonMin.Height)
+	assert.Equal(t, minSize.Height, buttonMin.Height)
 }
 
 func TestSlider_OutOfRange(t *testing.T) {
@@ -154,15 +154,15 @@ func TestSlider_OnChanged(t *testing.T) {
 	assert.Equal(t, 0, changes)
 
 	drag := &fyne.DragEvent{}
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 1, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 1, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	drag.Position = fyne.NewPos(50, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 
@@ -200,15 +200,15 @@ func TestSlider_OnChangeEnded(t *testing.T) {
 	assert.Equal(t, 0, changes)
 
 	drag := &fyne.DragEvent{}
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 0, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 0, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	drag.Position = fyne.NewPos(50, 2)
 	slider.Dragged(drag)
 	slider.DragEnd()
 	assert.Equal(t, 1, changes)
@@ -248,15 +248,15 @@ func TestSlider_OnChanged_Float(t *testing.T) {
 	assert.Equal(t, 0, changes)
 
 	drag := &fyne.DragEvent{}
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 1, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 1, changes)
 
-	drag.PointEvent.Position = fyne.NewPos(50, 2)
+	drag.Position = fyne.NewPos(50, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 2, changes)
 
@@ -359,7 +359,7 @@ func TestSlider_Disabled(t *testing.T) {
 	assert.Equal(t, 0, changes)
 
 	drag := &fyne.DragEvent{}
-	drag.PointEvent.Position = fyne.NewPos(25, 2)
+	drag.Position = fyne.NewPos(25, 2)
 	slider.Dragged(drag)
 	assert.Equal(t, 0, changes)
 

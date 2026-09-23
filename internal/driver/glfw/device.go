@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/lang"
 )
 
@@ -25,5 +26,5 @@ func (*glDevice) HasKeyboard() bool {
 }
 
 func (*glDevice) IsBrowser() bool {
-	return runtime.GOARCH == "js" || runtime.GOOS == "js"
+	return runtime.GOARCH == "js" || runtime.GOOS == goos.JavaScript
 }

@@ -55,7 +55,7 @@ type Texture struct {
 
 // Uniform identifies the location of a specific uniform variable.
 type Uniform struct {
-	Value int32
+	Value uint32
 }
 
 // A VertexArray is a GL object that holds vertices in an internal format.

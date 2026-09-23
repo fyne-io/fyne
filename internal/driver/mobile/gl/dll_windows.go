@@ -69,13 +69,13 @@ func downloadDLLs() (path string, err error) {
 	}
 
 	writeDLLs := func(path string) error {
-		if err := os.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0o755); err != nil {
+		if err = os.WriteFile(filepath.Join(path, "libglesv2.dll"), bytesGLESv2, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := os.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0o755); err != nil {
+		if err = os.WriteFile(filepath.Join(path, "libegl.dll"), bytesEGL, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
-		if err := os.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0o755); err != nil {
+		if err = os.WriteFile(filepath.Join(path, "d3dcompiler_47.dll"), bytesD3DCompiler, 0o755); err != nil {
 			return fmt.Errorf("gl: cannot install ANGLE: %v", err)
 		}
 		return nil
@@ -85,17 +85,21 @@ func downloadDLLs() (path string, err error) {
 	//
 	// Traditionally we would use the system32 directory, but it is
 	// no longer writable by normal programs.
-	os.MkdirAll(appdataPath(), 0o775)
-	if err := writeDLLs(appdataPath()); err == nil {
+	if err = os.MkdirAll(appdataPath(), 0o775); err != nil {
+		return "", fmt.Errorf("unable to create app data directory: %w", err)
+	}
+
+	if err = writeDLLs(appdataPath()); err == nil {
 		return appdataPath(), nil
 	}
+
 	debug.Printf("DLLs could not be written to %s", appdataPath())
 
 	// Second, install in GOPATH/pkg if it exists.
 	gopath := os.Getenv("GOPATH")
 	gopathpkg := filepath.Join(gopath, "pkg")
-	if _, err := os.Stat(gopathpkg); err == nil && gopath != "" {
-		if err := writeDLLs(gopathpkg); err == nil {
+	if _, err = os.Stat(gopathpkg); err == nil && gopath != "" {
+		if err = writeDLLs(gopathpkg); err == nil {
 			return gopathpkg, nil
 		}
 	}
@@ -103,7 +107,7 @@ func downloadDLLs() (path string, err error) {
 
 	// Third, pick a temporary directory.
 	tmp := os.TempDir()
-	if err := writeDLLs(tmp); err != nil {
+	if err = writeDLLs(tmp); err != nil {
 		return "", fmt.Errorf("gl: unable to install ANGLE DLLs: %v", err)
 	}
 	return tmp, nil
@@ -123,11 +127,11 @@ func containsDLLs(dir string) bool {
 
 		switch file.Machine {
 		case pe.IMAGE_FILE_MACHINE_AMD64:
-			return "amd64" == runtime.GOARCH
+			return runtime.GOARCH == "amd64"
 		case pe.IMAGE_FILE_MACHINE_ARM:
-			return "arm" == runtime.GOARCH
+			return runtime.GOARCH == "arm"
 		case pe.IMAGE_FILE_MACHINE_I386:
-			return "386" == runtime.GOARCH
+			return runtime.GOARCH == "386"
 		}
 		return false
 	}

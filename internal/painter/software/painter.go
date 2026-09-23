@@ -58,6 +58,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawArc(c, o, pos, base, clip)
 		case *canvas.BezierCurve:
 			drawBezierCurve(c, o, pos, base, clip)
+		case *canvas.Ellipse:
+			drawEllipse(c, o, pos, base, clip)
 		}
 
 		return false

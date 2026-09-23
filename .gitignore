@@ -9,6 +9,7 @@ fyne-cross
 *.app
 *.tar.xz
 *.zip
+wasm
 
 ### Tests
 **/testdata/failed
@@ -47,3 +48,6 @@ Session.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# Vendor
+/vendor

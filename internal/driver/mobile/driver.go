@@ -24,6 +24,7 @@ import (
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	pgl "fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -106,9 +107,9 @@ func (d *driver) DoFromGoroutine(fn func(), wait bool) {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := newCanvas(fyne.CurrentDevice()).(*canvas) // silence lint
+	c, _ := newCanvas(fyne.CurrentDevice()).(*canvas)
 	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
-	c.setContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
+	c.applyContent(&fynecanvas.Rectangle{FillColor: theme.Color(theme.ColorNameBackground)})
 	c.SetPainter(pgl.NewPainter(c, ret))
 	d.windows = append(d.windows, ret)
 	return ret
@@ -126,7 +127,7 @@ func (d *driver) currentWindow() *window {
 
 	var last *window
 	for i := len(d.windows) - 1; i >= 0; i-- {
-		last = d.windows[i].(*window)
+		last, _ = d.windows[i].(*window)
 		if last.visible {
 			return last
 		}
@@ -135,15 +136,15 @@ func (d *driver) currentWindow() *window {
 	return last
 }
 
-func (d *driver) Clipboard() fyne.Clipboard {
+func (*driver) Clipboard() fyne.Clipboard {
 	return NewClipboard()
 }
 
-func (d *driver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+func (*driver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, textSize, style, source)
 }
 
-func (d *driver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	if len(d.windows) == 0 {
 		return nil
 	}
@@ -158,17 +159,17 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	mc := c.(*canvas)
+	mc, _ := c.(*canvas)
 	pos := intdriver.AbsolutePositionForObject(co, mc.ObjectTrees())
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
 }
 
-func (d *driver) GoBack() {
+func (*driver) GoBack() {
 	app.GoBack()
 }
 
-func (d *driver) Quit() {
+func (*driver) Quit() {
 	// Android and iOS guidelines say this should not be allowed!
 }
 
@@ -197,7 +198,7 @@ func (d *driver) Run() {
 
 		draw := time.NewTicker(time.Second / 60)
 		defer func() {
-			l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+			l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 
 			// exhaust the event queue
 			go func() {
@@ -225,7 +226,7 @@ func (d *driver) Run() {
 				if current == nil {
 					continue
 				}
-				c := current.Canvas().(*canvas)
+				c, _ := current.Canvas().(*canvas)
 
 				switch e := a.Filter(e).(type) {
 				case lifecycle.Event:
@@ -266,13 +267,14 @@ func (d *driver) Run() {
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
 				case key.Event:
-					if runtime.GOOS == "android" && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
+					if runtime.GOOS == goos.Android && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
 						break // we are getting release/press on backspace during soft backspace
 					}
 
-					if e.Direction == key.DirPress {
+					switch e.Direction {
+					case key.DirPress:
 						d.typeDownCanvas(c, e.Rune, e.Code, e.Modifiers)
-					} else if e.Direction == key.DirRelease {
+					case key.DirRelease:
 						d.typeUpCanvas(c, e.Rune, e.Code, e.Modifiers)
 					}
 				}
@@ -286,7 +288,7 @@ func (*driver) SetDisableScreenBlanking(disable bool) {
 }
 
 func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
-	c := w.Canvas().(*canvas)
+	c, _ := w.Canvas().(*canvas)
 	switch e.Crosses(lifecycle.StageAlive) {
 	case lifecycle.CrossOn:
 		d.onStart()
@@ -309,12 +311,13 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 			f()
 		}
 	case lifecycle.CrossOff: // will enter background
-		if runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
+		if runtime.GOOS == goos.Darwin || runtime.GOOS == goos.IOS {
 			if d.glctx == nil {
 				return
 			}
 
 			s := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+			app.BeginPaint()
 			d.paintWindow(w, s)
 			d.app.Publish()
 		}
@@ -325,7 +328,7 @@ func (d *driver) handleLifecycle(e lifecycle.Event, w *window) {
 }
 
 func (d *driver) handlePaint(e paint.Event, w *window) {
-	c := w.Canvas().(*canvas)
+	c, _ := w.Canvas().(*canvas)
 	if e.Window != 0 { // not all paint events come from hardware
 		w.handle = e.Window
 	}
@@ -333,41 +336,52 @@ func (d *driver) handlePaint(e paint.Event, w *window) {
 	if d.glctx == nil || e.External {
 		return
 	}
-	if !c.initialized {
+
+	d.animation.TickAnimations()
+	needsInit := !c.initialized
+	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
+	if !needsInit && !canvasNeedRefresh {
+		cache.Clean(false)
+		return
+	}
+
+	// Everything below queues GL calls that only the UI thread can run, and it blocks on each one.
+	app.BeginPaint()
+
+	if needsInit {
 		c.initialized = true
 		c.Painter().Init() // we cannot init until the context is set above
 	}
 
-	d.animation.TickAnimations()
-	canvasNeedRefresh := c.FreeDirtyTextures() > 0 || c.CheckDirtyAndClear()
-	if canvasNeedRefresh {
-		newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
-
+	newSize := fyne.NewSize(float32(d.currentSize.WidthPx)/c.scale, float32(d.currentSize.HeightPx)/c.scale)
+	if c.EnsureMinSize() {
+		c.sizeContent(newSize) // force resize of content
+	} else { // if screen changed
 		w.Resize(newSize)
-
-		d.paintWindow(w, newSize)
-		d.app.Publish()
-		w.updateAccessibility()
 	}
-	cache.Clean(canvasNeedRefresh)
+
+	d.paintWindow(w, newSize)
+	d.app.Publish()
+	w.updateAccessibility()
+	cache.Clean(true)
 }
 
-func (d *driver) onStart() {
+func (*driver) onStart() {
 	if f := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle).OnStarted(); f != nil {
 		f()
 	}
 }
 
-func (d *driver) onStop() {
-	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+func (*driver) onStop() {
+	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
 	if f := l.OnStopped(); f != nil {
 		l.QueueEvent(f)
 	}
 }
 
-func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
+func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 	clips := &internal.ClipStack{}
-	c := window.Canvas().(*canvas)
+	c, _ := window.Canvas().(*canvas)
 
 	c.Painter().SetOutputSize(d.currentSize.WidthPx, d.currentSize.HeightPx)
 
@@ -383,10 +397,10 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 			c.Painter().StartClipping(inner.Rect())
 		}
 
-		if size.Width <= 0 || size.Height <= 0 { // iconifying on Windows can do bad things
+		if s.Width <= 0 || s.Height <= 0 { // iconifying on Windows can do bad things
 			return
 		}
-		c.Painter().Paint(obj, pos, size, clips.Top())
+		c.Painter().Paint(obj, pos, s, clips.Top())
 	}
 	afterDraw := func(node *common.RenderCacheNode, pos fyne.Position) {
 		if intdriver.IsClip(node.Obj()) {
@@ -398,7 +412,7 @@ func (d *driver) paintWindow(window fyne.Window, size fyne.Size) {
 		}
 
 		if build.Mode == fyne.BuildDebug {
-			c.DrawDebugOverlay(node.Obj(), pos, size, clips.Top())
+			c.DrawDebugOverlay(node.Obj(), pos, s, clips.Top())
 		}
 	}
 
@@ -427,7 +441,7 @@ func (d *driver) setTheme(dark bool) {
 	d.theme = mode
 }
 
-func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (*driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -435,7 +449,7 @@ func (d *driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	w.canvas.tapDown(pos, int(tapID))
 }
 
-func (d *driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
+func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY+tapYOffset)
@@ -506,6 +520,7 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeReturnEnter:     fyne.KeyReturn,
 	key.CodeTab:             fyne.KeyTab,
 	key.CodeDeleteBackspace: fyne.KeyBackspace,
+	key.CodeDeleteForward:   fyne.KeyDelete,
 	key.CodeInsert:          fyne.KeyInsert,
 	key.CodePageUp:          fyne.KeyPageUp,
 	key.CodePageDown:        fyne.KeyPageDown,
@@ -618,8 +633,7 @@ func runeToPrintable(r rune) rune {
 
 func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.Modifiers) {
 	keyName := keyToName(code)
-	switch keyName {
-	case fyne.KeyTab:
+	if keyName == fyne.KeyTab {
 		capture := false
 		if ent, ok := canvas.Focused().(fyne.Tabbable); ok {
 			capture = ent.AcceptsTab()
@@ -660,7 +674,7 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 	}
 }
 
-func (d *driver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
+func (*driver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
 }
 
 func (d *driver) Device() fyne.Device {
@@ -671,7 +685,7 @@ func (d *driver) SetOnConfigurationChanged(f func(*Configuration)) {
 	d.onConfigChanged = f
 }
 
-func (d *driver) DoubleTapDelay() time.Duration {
+func (*driver) DoubleTapDelay() time.Duration {
 	return tapDoubleDelay
 }
 

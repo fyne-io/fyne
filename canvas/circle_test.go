@@ -6,16 +6,18 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/software"
+	"fyne.io/fyne/v2/test"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCircle_MinSize(t *testing.T) {
 	circle := canvas.NewCircle(color.Black)
-	min := circle.MinSize()
+	minSize := circle.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestCircle_FillColor(t *testing.T) {
@@ -49,4 +51,32 @@ func TestCircle_Move(t *testing.T) {
 	target := fyne.Position{X: 10, Y: 75}
 	circle.Move(target)
 	assert.Equal(t, circle.Position(), target)
+}
+
+func TestCircle_shadow(t *testing.T) {
+	circle := &canvas.Circle{
+		FillColor:   color.NRGBA{R: 255, G: 200, B: 0, A: 180},
+		StrokeColor: color.NRGBA{R: 255, G: 120, B: 0, A: 255},
+		StrokeWidth: 2.0,
+		Shadow: canvas.Shadow{
+			Color:      color.White,
+			Offset:     fyne.NewPos(8, 5),
+			BlurRadius: 3,
+			Variant:    canvas.DropShadow,
+		},
+	}
+
+	circle.Resize(fyne.NewSize(50, 50))
+	test.AssertObjectRendersToMarkup(t, "circle_shadow.xml", circle)
+
+	c := software.NewCanvas()
+	c.SetContent(circle)
+	c.Resize(fyne.NewSize(170, 170))
+	circle.Resize(fyne.NewSize(150, 150))
+	circle.Move(fyne.NewPos(6, 6))
+	test.AssertRendersToImage(t, "circle_stroke_shadow.png", c)
+
+	circle.StrokeWidth = 0
+	circle.Shadow.Variant = canvas.DropShadow
+	test.AssertRendersToImage(t, "circle_shadow.png", c)
 }

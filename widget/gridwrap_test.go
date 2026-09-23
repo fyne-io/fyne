@@ -3,10 +3,12 @@ package widget
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGridWrap_Focus(t *testing.T) {
@@ -16,7 +18,7 @@ func TestGridWrap_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(list.MinSize().Max(fyne.NewSize(150, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	assert.Nil(t, canvas.Focused())
 
 	canvas.FocusNext()
@@ -110,7 +112,7 @@ func TestGridWrap_ScrollToOffset(t *testing.T) {
 	assert.Equal(t, float32(0), g.GetScrollOffset())
 
 	g.ScrollToOffset(10000)
-	assert.LessOrEqual(t, g.GetScrollOffset(), float32(500) /*upper bound on content height*/)
+	assert.LessOrEqual(t, g.GetScrollOffset(), float32(500) /* upper bound on content height */)
 
 	// GridWrap viewport is larger than content size
 	g.Resize(fyne.NewSize(50, 250))
@@ -169,13 +171,13 @@ func createGridWrap(items int) *GridWrap {
 	return list
 }
 
-func TestGridWrap_IndexIsInt(t *testing.T) {
+func TestGridWrap_IndexIsInt(*testing.T) {
 	gw := &GridWrap{}
 
-	// Both of these should be allowed to match List behaviour.
+	// Both of these should be allowed to match List behavior.
 	// It allows the same update item function to be shared between both widgets if necessary.
-	gw.UpdateItem = func(id GridWrapItemID, item fyne.CanvasObject) {}
-	gw.UpdateItem = func(id int, item fyne.CanvasObject) {}
+	gw.UpdateItem = func(GridWrapItemID, fyne.CanvasObject) {}
+	gw.UpdateItem = func(int, fyne.CanvasObject) {}
 }
 
 func TestGridWrap_RefreshItem(t *testing.T) {
@@ -281,11 +283,11 @@ func TestGridWrap_Selection(t *testing.T) {
 	assert.Equal(t, 9, unselected)
 }
 
-func TestGridWrap_ResizeToSameSizeBeforeRender(t *testing.T) {
+func TestGridWrap_ResizeToSameSizeBeforeRender(*testing.T) {
 	g := NewGridWrap(
 		func() int { return 1 },
 		func() fyne.CanvasObject { return NewLabel("") },
-		func(gwii GridWrapItemID, co fyne.CanvasObject) { co.(*Label).SetText("foo") },
+		func(_ GridWrapItemID, co fyne.CanvasObject) { co.(*Label).SetText("foo") },
 	)
 	// will not create renderer.
 	// will crash if GridWrap scroller (not yet created) is accessed
@@ -301,7 +303,7 @@ func TestGridWrap_TypedKey(t *testing.T) {
 	// want 3 columns to make assert navigaiton behavior
 	assert.Equal(t, 3, gridWrap.ColumnCount())
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas := window.Canvas().(software.WindowlessCanvas)
 	canvas.FocusNext()
 	gridWrap.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
 	assert.Equal(t, 3, gridWrap.currentHighlight)

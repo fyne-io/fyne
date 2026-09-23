@@ -27,7 +27,7 @@ func (c *captureImage) SubImage(inner image.Rectangle) *captureImage {
 	}
 }
 
-func (c *captureImage) ColorModel() color.Model {
+func (*captureImage) ColorModel() color.Model {
 	return color.RGBAModel
 }
 
@@ -37,7 +37,9 @@ func (c *captureImage) Bounds() image.Rectangle {
 
 func (c *captureImage) At(x, y int) color.Color {
 	start := ((c.height-y-1)*c.width + x) * 4
-	return color.RGBA{R: c.pix[start], G: c.pix[start+1], B: c.pix[start+2], A: c.pix[start+3]}
+	// The framebuffer colour is already composited against the window background, but blending
+	// leaves an alpha below 255 wherever a shadow or an anti-aliased edge was drawn.
+	return color.RGBA{R: c.pix[start], G: c.pix[start+1], B: c.pix[start+2], A: 0xff}
 }
 
 func (p *painter) Capture(c fyne.Canvas) image.Image {
@@ -49,6 +51,9 @@ func (p *painter) Capture(c fyne.Canvas) image.Image {
 		p.ctx.ReadBuffer(front)
 		p.logError()
 		p.ctx.ReadPixels(0, 0, width, height, colorFormatRGBA, unsignedByte, pixels)
+		p.logError()
+		// Restore the default read buffer for future reads.
+		p.ctx.ReadBuffer(back)
 		p.logError()
 	})
 

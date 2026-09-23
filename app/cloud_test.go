@@ -94,23 +94,23 @@ func (c *mockCloud) Cleanup(_ fyne.App) {
 	c.cleaned = true
 }
 
-func (c *mockCloud) CloudPreferences(fyne.App) fyne.Preferences {
+func (*mockCloud) CloudPreferences(fyne.App) fyne.Preferences {
 	return &internal.InMemoryPreferences{}
 }
 
-func (c *mockCloud) CloudStorage(fyne.App) fyne.Storage {
+func (*mockCloud) CloudStorage(fyne.App) fyne.Storage {
 	return &mockCloudStorage{}
 }
 
-func (c *mockCloud) ProviderDescription() string {
+func (*mockCloud) ProviderDescription() string {
 	return "Mock cloud implementation"
 }
 
-func (c *mockCloud) ProviderIcon() fyne.Resource {
+func (*mockCloud) ProviderIcon() fyne.Resource {
 	return theme.ComputerIcon()
 }
 
-func (c *mockCloud) ProviderName() string {
+func (*mockCloud) ProviderName() string {
 	return "mock"
 }
 
@@ -121,27 +121,27 @@ func (c *mockCloud) Setup(_ fyne.App) error {
 
 type mockCloudStorage struct{}
 
-func (s *mockCloudStorage) Create(name string) (fyne.URIWriteCloser, error) {
+func (*mockCloudStorage) Create(string) (fyne.URIWriteCloser, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *mockCloudStorage) List() []string {
+func (*mockCloudStorage) List() []string {
 	return []string{}
 }
 
-func (s *mockCloudStorage) Open(name string) (fyne.URIReadCloser, error) {
+func (*mockCloudStorage) Open(string) (fyne.URIReadCloser, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (s *mockCloudStorage) Remove(name string) error {
+func (*mockCloudStorage) Remove(string) error {
 	return errors.New("not implemented")
 }
 
-func (s *mockCloudStorage) RootURI() fyne.URI {
+func (*mockCloudStorage) RootURI() fyne.URI {
 	u, _ := storage.ParseURI("mock://")
 	return u
 }
 
-func (s *mockCloudStorage) Save(name string) (fyne.URIWriteCloser, error) {
+func (*mockCloudStorage) Save(string) (fyne.URIWriteCloser, error) {
 	return nil, errors.New("not implemented")
 }

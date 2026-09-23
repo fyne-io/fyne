@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/software"
 	col "fyne.io/fyne/v2/internal/color"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/layout"
@@ -43,7 +44,7 @@ func (r *markupRenderer) setAlignmentAttr(attrs map[string]*string, name string,
 	r.setStringAttr(attrs, name, value)
 }
 
-func (r *markupRenderer) setBoolAttr(attrs map[string]*string, name string, b bool) {
+func (*markupRenderer) setBoolAttr(attrs map[string]*string, name string, b bool) {
 	if !b {
 		return
 	}
@@ -65,7 +66,7 @@ func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name 
 	}
 
 	rd, g, b, a := col.ToNRGBA(c)
-	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
+	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", rd, g, b, a))
 }
 
 func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m fynecanvas.ImageFill) {
@@ -87,7 +88,7 @@ func (r *markupRenderer) setFloatAttr(attrs map[string]*string, name string, f f
 	r.setFloatAttrWithDefault(attrs, name, f, 0)
 }
 
-func (r *markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name string, f float64, d float64) {
+func (*markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name string, f float64, d float64) {
 	if f == d {
 		return
 	}
@@ -95,7 +96,7 @@ func (r *markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, x, y float64) {
+func (*markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, x, y float64) {
 	if x == 0 && y == 0 {
 		return
 	}
@@ -103,7 +104,7 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+func (*markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
 	if int(i) == int(d) {
 		return
 	}
@@ -111,7 +112,7 @@ func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name s
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
+func (*markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
 	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
@@ -153,7 +154,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if !named {
 		// That’s some magic to access the private `source` field of the themed resource.
 		v := reflect.ValueOf(rsc).Elem().Field(0)
-		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
+		src, _ := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
 		r.setResourceAttr(attrs, name, src)
 	}
 	r.setStringAttr(attrs, "themed", variant)
@@ -172,12 +173,12 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 	r.setStringAttr(attrs, name, scaleMode)
 }
 
-func (r *markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
+func (*markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
 	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setStringAttr(attrs map[string]*string, name string, s string) {
+func (*markupRenderer) setStringAttr(attrs map[string]*string, name string, s string) {
 	if s == "" {
 		return
 	}
@@ -187,7 +188,7 @@ func (r *markupRenderer) setStringAttr(attrs map[string]*string, name string, s 
 func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	attrs := map[string]*string{}
 	r.setSizeAttr(attrs, "size", c.Size())
-	if tc, ok := c.(WindowlessCanvas); ok {
+	if tc, ok := c.(software.WindowlessCanvas); ok {
 		r.setBoolAttr(attrs, "padded", tc.Padded())
 	}
 	r.writeTag("canvas", false, attrs)
@@ -251,6 +252,8 @@ func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Posi
 		r.writeBezierCurve(o, attrs)
 	case *fynecanvas.ArbitraryPolygon:
 		r.writeArbitraryPolygon(o, attrs)
+	case *fynecanvas.Ellipse:
+		r.writeEllipse(o, attrs)
 	default:
 		panic(fmt.Sprint("please add support for", reflect.TypeOf(o)))
 	}
@@ -278,6 +281,7 @@ func (r *markupRenderer) writeCircle(c *fynecanvas.Circle, attrs map[string]*str
 	r.setColorAttr(attrs, "fillColor", c.FillColor)
 	r.setColorAttr(attrs, "strokeColor", c.StrokeColor)
 	r.setFloatAttr(attrs, "strokeWidth", float64(c.StrokeWidth))
+	r.setShadowAttrs(attrs, c.Shadow)
 	r.writeTag("circle", true, attrs)
 }
 
@@ -397,7 +401,23 @@ func (r *markupRenderer) writeRectangle(rct *fynecanvas.Rectangle, attrs map[str
 	r.setFloatAttr(attrs, "topLeftRadius", float64(rct.TopLeftCornerRadius))
 	r.setFloatAttr(attrs, "bottomRightRadius", float64(rct.BottomRightCornerRadius))
 	r.setFloatAttr(attrs, "bottomLeftRadius", float64(rct.BottomLeftCornerRadius))
+	r.setShadowAttrs(attrs, rct.Shadow)
 	r.writeTag("rectangle", true, attrs)
+}
+
+func (r *markupRenderer) writeEllipse(e *fynecanvas.Ellipse, attrs map[string]*string) {
+	r.setColorAttr(attrs, "fillColor", e.FillColor)
+	r.setColorAttr(attrs, "strokeColor", e.StrokeColor)
+	r.setFloatAttr(attrs, "strokeWidth", float64(e.StrokeWidth))
+	r.writeTag("ellipse", true, attrs)
+}
+
+func (r *markupRenderer) setShadowAttrs(attrs map[string]*string, s fynecanvas.Shadow) {
+	r.setColorAttr(attrs, "shadowColor", s.Color)
+	r.setFloatAttr(attrs, "shadowBlurRadius", float64(s.BlurRadius))
+	r.setFloatAttr(attrs, "shadowSpread", float64(s.Spread))
+	r.setPosAttr(attrs, "shadowOffset", s.Offset)
+	r.setFloatAttr(attrs, "shadowVariant", float64(s.Variant))
 }
 
 func (r *markupRenderer) writeSpacer(_ *layout.Spacer, attrs map[string]*string) {
@@ -416,7 +436,6 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 			r.w.WriteString(*attrs[key])
 			r.w.WriteRune('"')
 		}
-
 	}
 	if isEmpty {
 		r.w.WriteString("/>\n")
@@ -447,7 +466,7 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 func nrgbaColor(c color.Color) color.NRGBA {
 	// using ColorToNRGBA to avoid problems with colors with 16-bit components or alpha values that aren't 0 or the maximum possible alpha value
 	r, g, b, a := col.ToNRGBA(c)
-	return color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+	return color.NRGBA{R: r, G: g, B: b, A: a}
 }
 
 //gocyclo:ignore

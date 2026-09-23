@@ -14,115 +14,115 @@ type themedApp struct {
 	variant      fyne.ThemeVariant
 }
 
-func (t *themedApp) CloudProvider() fyne.CloudProvider {
+func (*themedApp) CloudProvider() fyne.CloudProvider {
 	return nil
 }
 
-func (t *themedApp) BuildType() fyne.BuildType {
+func (*themedApp) BuildType() fyne.BuildType {
 	return fyne.BuildStandard
 }
 
-func (t *themedApp) NewWindow(_ string) fyne.Window {
+func (*themedApp) NewWindow(_ string) fyne.Window {
 	return nil
 }
 
-func (t *themedApp) OpenURL(_ *url.URL) error {
+func (*themedApp) OpenURL(_ *url.URL) error {
 	return nil
 }
 
-func (t *themedApp) Icon() fyne.Resource {
+func (*themedApp) Icon() fyne.Resource {
 	return nil
 }
 
-func (t *themedApp) SetIcon(fyne.Resource) {
+func (*themedApp) SetIcon(fyne.Resource) {
 }
 
-func (t *themedApp) Run() {
+func (*themedApp) Run() {
 }
 
-func (t *themedApp) Quit() {
+func (*themedApp) Quit() {
 }
 
-func (t *themedApp) Driver() fyne.Driver {
+func (*themedApp) Driver() fyne.Driver {
 	return nil
 }
 
-func (t *themedApp) UniqueID() string {
+func (*themedApp) UniqueID() string {
 	return ""
 }
 
-func (t *themedApp) SendNotification(_ *fyne.Notification) {
+func (*themedApp) SendNotification(_ *fyne.Notification) {
 }
 
-func (t *themedApp) ScheduleNotification(_ *fyne.Notification, _ time.Time) (*fyne.ScheduledNotification, error) {
+func (*themedApp) ScheduleNotification(_ *fyne.Notification, _ time.Time) (*fyne.ScheduledNotification, error) {
 	return nil, nil
 }
 
-func (t *themedApp) CancelScheduledNotification(_ string) error {
+func (*themedApp) CancelScheduledNotification(_ string) error {
 	return nil
 }
 
-func (t *themedApp) Settings() fyne.Settings {
-	return t
+func (a *themedApp) Settings() fyne.Settings {
+	return a
 }
 
-func (t *themedApp) Storage() fyne.Storage {
+func (*themedApp) Storage() fyne.Storage {
 	return nil
 }
 
-func (t *themedApp) Preferences() fyne.Preferences {
+func (*themedApp) Preferences() fyne.Preferences {
 	return nil
 }
 
-func (t *themedApp) Lifecycle() fyne.Lifecycle {
+func (*themedApp) Lifecycle() fyne.Lifecycle {
 	return nil
 }
 
-func (t *themedApp) Metadata() fyne.AppMetadata {
+func (*themedApp) Metadata() fyne.AppMetadata {
 	return fyne.AppMetadata{}
 }
 
-func (t *themedApp) PrimaryColor() string {
-	if t.primaryColor != "" {
-		return t.primaryColor
+func (a *themedApp) PrimaryColor() string {
+	if a.primaryColor != "" {
+		return a.primaryColor
 	}
 
 	return theme.ColorBlue
 }
 
-func (t *themedApp) Theme() fyne.Theme {
-	return t.theme
+func (a *themedApp) Theme() fyne.Theme {
+	return a.theme
 }
 
-func (t *themedApp) SetTheme(theme fyne.Theme) {
-	t.theme = theme
+func (a *themedApp) SetTheme(t fyne.Theme) {
+	a.theme = t
 }
 
-func (t *themedApp) ThemeVariant() fyne.ThemeVariant {
-	return t.variant // The null value is theme.VariantDark
+func (a *themedApp) ThemeVariant() fyne.ThemeVariant {
+	return a.variant // The null value is theme.VariantDark
 }
 
-func (t *themedApp) SetCloudProvider(fyne.CloudProvider) {
+func (*themedApp) SetCloudProvider(fyne.CloudProvider) {
 }
 
-func (t *themedApp) Scale() float32 {
+func (*themedApp) Scale() float32 {
 	return 1.0
 }
 
-func (t *themedApp) ShowAnimations() bool {
+func (*themedApp) ShowAnimations() bool {
 	return true
 }
 
-func (t *themedApp) AddChangeListener(chan fyne.Settings) {
+func (*themedApp) AddChangeListener(chan fyne.Settings) {
 }
 
-func (t *themedApp) AddListener(func(fyne.Settings)) {
+func (*themedApp) AddListener(func(fyne.Settings)) {
 }
 
-func (t *themedApp) Cache() fyne.Cache {
+func (*themedApp) Cache() fyne.Cache {
 	return nil
 }
 
-func (t *themedApp) Clipboard() fyne.Clipboard {
+func (*themedApp) Clipboard() fyne.Clipboard {
 	return nil
 }

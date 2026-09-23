@@ -8,7 +8,7 @@ import (
 )
 
 func TestNot(t *testing.T) {
-	var b bool = true
+	b := true
 
 	bb := BindBool(&b)
 	notbb := Not(bb)
@@ -53,8 +53,9 @@ func TestAnd(t *testing.T) {
 
 		a := true
 		for _, v := range b {
-			if v == false {
+			if !v {
 				a = false
+				break
 			}
 		}
 
@@ -94,8 +95,9 @@ func TestOr(t *testing.T) {
 
 		a := false
 		for _, v := range b {
-			if v == true {
+			if v {
 				a = true
+				break
 			}
 		}
 

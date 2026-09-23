@@ -1,11 +1,11 @@
 package test
 
 import (
-	"image"
 	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
+	fynedriver "fyne.io/fyne/v2/driver"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/painter/software"
@@ -14,13 +14,13 @@ import (
 )
 
 // SoftwarePainter describes a simple type that can render canvases
-type SoftwarePainter interface {
-	Paint(fyne.Canvas) image.Image
-}
+//
+// Deprecated: Use driver.Painter instead.
+type SoftwarePainter = fynedriver.Painter
 
 type driver struct {
 	device       device
-	painter      SoftwarePainter
+	painter      fynedriver.Painter
 	windows      []fyne.Window
 	windowsMutex sync.RWMutex
 }
@@ -45,12 +45,12 @@ func NewDriver() fyne.Driver {
 
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
-func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
-	return &driver{painter: painter}
+func NewDriverWithPainter(p fynedriver.Painter) fyne.Driver {
+	return &driver{painter: p}
 }
 
 // DoFromGoroutine on a test driver ignores the wait flag as our threading is simple
-func (d *driver) DoFromGoroutine(f func(), _ bool) {
+func (*driver) DoFromGoroutine(f func(), _ bool) {
 	// Tests all run on a single (but potentially different per-test) thread
 	f()
 }
@@ -61,8 +61,13 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 		return fyne.NewPos(0, 0)
 	}
 
-	tc := c.(*canvas)
-	pos := intdriver.AbsolutePositionForObject(co, tc.objectTrees())
+	overlays := c.Overlays().List()
+	trees := make([]fyne.CanvasObject, 0, len(overlays)+1)
+	if content := c.Content(); content != nil {
+		trees = append(trees, content)
+	}
+	trees = append(trees, overlays...)
+	pos := intdriver.AbsolutePositionForObject(co, trees)
 	inset, _ := c.InteractiveArea()
 	return pos.Subtract(inset)
 }
@@ -81,13 +86,11 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	c := NewCanvas().(*canvas)
-	if d.painter != nil {
-		c.painter = d.painter
-	} else {
-		c.painter = software.NewPainter()
+	p := d.painter
+	if p == nil {
+		p = software.NewPainter()
 	}
-
+	c := NewCanvasWithPainter(p)
 	w := &window{canvas: c, driver: d, title: title}
 
 	d.windowsMutex.Lock()
@@ -101,28 +104,32 @@ func (d *driver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *driver) RenderedTextSize(text string, size float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+func (*driver) RenderedTextSize(text string, size float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, size, style, source)
 }
 
-func (d *driver) Run() {
+func (*driver) Run() {
 	// no-op
 }
 
-func (d *driver) StartAnimation(a *fyne.Animation) {
-	// currently no animations in test app, we just initialise it and leave
-	a.Tick(1.0)
+func (*driver) StartAnimation(a *fyne.Animation) {
+	// currently no animations in test app, we just initialize it and leave
+	if a.AutoReverse {
+		a.Tick(0.0)
+	} else {
+		a.Tick(1.0)
+	}
 }
 
-func (d *driver) StopAnimation(a *fyne.Animation) {
+func (*driver) StopAnimation(*fyne.Animation) {
 	// currently no animations in test app, do nothing
 }
 
-func (d *driver) Quit() {
+func (*driver) Quit() {
 	// no-op
 }
 
-func (d *driver) Clipboard() fyne.Clipboard {
+func (*driver) Clipboard() fyne.Clipboard {
 	return nil
 }
 
@@ -143,10 +150,10 @@ func (d *driver) removeWindow(w *window) {
 	d.windowsMutex.Unlock()
 }
 
-func (d *driver) DoubleTapDelay() time.Duration {
+func (*driver) DoubleTapDelay() time.Duration {
 	return 300 * time.Millisecond
 }
 
-func (d *driver) SetDisableScreenBlanking(_ bool) {
+func (*driver) SetDisableScreenBlanking(_ bool) {
 	// no-op for test
 }

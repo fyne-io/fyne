@@ -205,6 +205,7 @@ func makeTray(a fyne.App, w fyne.Window) {
 		h := fyne.NewMenuItem("Hello", func() {})
 		h.Icon = theme.HomeIcon()
 		menu := fyne.NewMenu("Hello World", h)
+		h.Shortcut = &desktop.CustomShortcut{KeyName: fyne.KeyW, Modifier: fyne.KeyModifierControl | fyne.KeyModifierAlt}
 		h.Action = func() {
 			log.Println("System tray menu tapped")
 			h.Label = "Welcome"

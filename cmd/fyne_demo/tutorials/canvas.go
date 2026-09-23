@@ -95,5 +95,6 @@ func canvasScreen(_ fyne.Window) fyne.CanvasObject {
 		canvas.NewRasterWithPixels(rgbGradient),
 		gradient,
 		canvas.NewRadialGradient(color.NRGBA{0x80, 0, 0, 0xff}, color.NRGBA{0, 0x80, 0x80, 0xff}),
+		newCubeShader(),
 	)
 }

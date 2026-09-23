@@ -3,10 +3,11 @@ package widget
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewIcon(t *testing.T) {
@@ -32,10 +33,10 @@ func TestIcon_Nil(t *testing.T) {
 
 func TestIcon_MinSize(t *testing.T) {
 	icon := NewIcon(theme.CancelIcon())
-	min := icon.MinSize()
+	minSize := icon.MinSize()
 
-	assert.Equal(t, theme.IconInlineSize(), min.Width)
-	assert.Equal(t, theme.IconInlineSize(), min.Height)
+	assert.Equal(t, theme.IconInlineSize(), minSize.Width)
+	assert.Equal(t, theme.IconInlineSize(), minSize.Height)
 }
 
 func TestIconRenderer_ApplyTheme(t *testing.T) {

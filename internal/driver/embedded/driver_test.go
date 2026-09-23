@@ -5,15 +5,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/embedded"
 	intNoos "fyne.io/fyne/v2/internal/driver/embedded"
-	"github.com/stretchr/testify/assert"
+	_ "fyne.io/fyne/v2/test" // for test app initialization
 )
 
 func TestNoOSDriver(t *testing.T) {
 	count := 0
-	render := func(img image.Image) {
+	render := func(image.Image) {
 		count++
 	}
 	queue := make(chan embedded.Event, 1)
@@ -44,7 +46,7 @@ func TestNoOSDriver(t *testing.T) {
 	d = intNoos.NewNoOSDriver(render, func(f func()) { f() }, queue, size)
 	w := d.CreateWindow("Test")
 	keyed := make(chan bool)
-	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+	w.Canvas().SetOnTypedKey(func(*fyne.KeyEvent) {
 		keyed <- true
 	})
 	go func() {

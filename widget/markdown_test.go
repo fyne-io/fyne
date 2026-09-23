@@ -4,11 +4,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
+	internalWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRichTextMarkdown_Blockquote(t *testing.T) {
@@ -113,10 +115,10 @@ func TestRichTextMarkdown_CodeBlockScrolls(t *testing.T) {
 	long := strings.Repeat("abcdefghij", 50) // one ~500-char line
 	cb := newRichCodeBlock(long)
 	test.TempWidgetRenderer(t, cb)
-	min := cb.MinSize()
+	minSize := cb.MinSize()
 
-	assert.Less(t, min.Width, float32(200)) // scrolls rather than demanding full width
-	assert.Greater(t, min.Height, float32(10))
+	assert.Less(t, minSize.Width, float32(200)) // scrolls rather than demanding full width
+	assert.Greater(t, minSize.Height, float32(10))
 }
 
 func TestRichTextMarkdown_Table(t *testing.T) {
@@ -213,6 +215,17 @@ func TestRichTextMarkdown_TableAlignmentAppliedThroughVisual(t *testing.T) {
 
 	assert.Equal(t, fyne.TextAlignLeading, table.Rows[0][0][0].(*TextSegment).Style.Alignment)
 	assert.Equal(t, fyne.TextAlignTrailing, table.Rows[0][1][0].(*TextSegment).Style.Alignment)
+}
+
+func TestRichTextMarkdown_TableScrollsHorizontally(t *testing.T) {
+	r := NewRichTextFromMarkdown("| Feature | Value |\n| :--- | ---: |\n| " + strings.Repeat("wide", 50) + " | value |")
+	table := r.Segments[0].(*TableSegment)
+
+	visual, ok := table.Visual().(*internalWidget.Scroll)
+	if !ok {
+		t.Fatalf("table visual = %T, want *widget.Scroll", table.Visual())
+	}
+	assert.Equal(t, internalWidget.ScrollHorizontalOnly, visual.Direction)
 }
 
 func TestRichTextMarkdown_Code_Incomplete(t *testing.T) {

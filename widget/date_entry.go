@@ -121,12 +121,21 @@ func (e *DateEntry) Resize(size fyne.Size) {
 func (e *DateEntry) SetDate(d *time.Time) {
 	if d == nil {
 		e.Date = nil
-		e.Entry.SetText("")
+		e.SetText("")
 
 		return
 	}
 
-	e.setDate(*d)
+	e.applyDate(*d)
+}
+
+func (e *DateEntry) applyDate(d time.Time) {
+	e.Date = &d
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
+
+	e.SetText(d.Format(getLocaleDateFormat()))
 }
 
 func (e *DateEntry) popUpPos() fyne.Position {
@@ -134,18 +143,9 @@ func (e *DateEntry) popUpPos() fyne.Position {
 	return entryPos.Add(fyne.NewPos(0, e.Size().Height-e.Theme().Size(theme.SizeNameInputBorder)))
 }
 
-func (e *DateEntry) setDate(d time.Time) {
-	e.Date = &d
-	if e.popUp != nil {
-		e.popUp.Hide()
-	}
-
-	e.Entry.SetText(d.Format(getLocaleDateFormat()))
-}
-
 func (e *DateEntry) setupDropDown() *Button {
 	if e.dropDown == nil {
-		e.dropDown = NewCalendar(time.Now(), e.setDate)
+		e.dropDown = NewCalendar(time.Now(), e.applyDate)
 	}
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())

@@ -76,6 +76,8 @@ type context struct {
 
 func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable.Out() }
 
+func (ctx *context) HasWork() bool { return len(ctx.work) > 0 }
+
 type context3 struct {
 	*context
 }
@@ -157,7 +159,7 @@ const (
 
 // cString creates C string off the Go heap.
 // ret is a *char.
-func (ctx *context) cString(str string) (uintptr, func()) {
+func (*context) cString(str string) (uintptr, func()) {
 	ptr := unsafe.Pointer(C.CString(str))
 	return uintptr(ptr), func() { C.free(ptr) }
 }

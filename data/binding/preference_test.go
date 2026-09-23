@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestBindPreference_DataRace(t *testing.T) {
@@ -153,7 +154,7 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 	select {
 	case <-ch: // bind1 gets initial value
 	case <-time.After(time.Millisecond * 100):
-		t.Errorf("Timed out waiting for data binding to send initial value")
+		t.Error("Timed out waiting for data binding to send initial value")
 	}
 
 	err := bind2.Set("overwritten") // write on a different listener, preferences should trigger all
@@ -161,13 +162,13 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 	select {
 	case <-ch: // bind1 triggered by bind2 changing the same key
 	case <-time.After(time.Millisecond * 100):
-		t.Errorf("Timed out waiting for data binding change to trigger")
+		t.Error("Timed out waiting for data binding change to trigger")
 	}
 
 	p.SetString(key, "overwritten2") // changing preference should trigger as well
 	select {
 	case <-ch: // bind1 triggered by preferences changing the same key directly
 	case <-time.After(time.Millisecond * 300):
-		t.Errorf("Timed out waiting for data binding change to trigger")
+		t.Error("Timed out waiting for data binding change to trigger")
 	}
 }

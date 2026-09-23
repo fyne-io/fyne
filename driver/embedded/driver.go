@@ -1,3 +1,5 @@
+// Package embedded implements the input/paint requirements for using in an embedded device
+// (essentially replacement for the old v1 “set driver” concept).
 package embedded
 
 import (

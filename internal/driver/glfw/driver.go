@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"image"
 	"image/draw"
-	_ "image/jpeg"
+	_ "image/jpeg" // allow to use JPEGs as icon source
 	"image/png"
 	"os"
 	"runtime"
@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	intRepo "fyne.io/fyne/v2/internal/repository"
 	"fyne.io/fyne/v2/storage/repository"
@@ -26,8 +27,14 @@ import (
 
 var curWindow *window
 
-// Declare conformity with Driver
-var _ fyne.Driver = (*gLDriver)(nil)
+// NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
+func NewGLDriver() fyne.Driver {
+	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
+
+	return &gLDriver{
+		done: make(chan struct{}),
+	}
+}
 
 type gLDriver struct {
 	windows     []fyne.Window
@@ -42,78 +49,8 @@ type gLDriver struct {
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
 }
 
-func (d *gLDriver) init() {
-	if !d.initialized {
-		d.initialized = true
-		d.initGLFW()
-	}
-}
-
-func toOSIcon(icon []byte) ([]byte, error) {
-	return toOSIconForRuntime(icon, runtime.GOOS)
-}
-
-// toOSIconForRuntime takes the input image bytes and converts it to an image type
-// that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
-func toOSIconForRuntime(icon []byte, goos string) ([]byte, error) {
-	if goos != "windows" && !usesUnixSystrayIcon(goos) {
-		return icon, nil
-	}
-
-	img, format, err := image.Decode(bytes.NewReader(icon))
-	if err != nil {
-		return nil, err
-	}
-
-	// keep windows behavior: convert to ico
-	if goos == "windows" {
-		buf := &bytes.Buffer{}
-		if err = ico.Encode(buf, img); err != nil {
-			return nil, err
-		}
-		return buf.Bytes(), nil
-	}
-	if format == "png" {
-		return icon, nil
-	}
-
-	// Unix systray expects a PNG bitmap.
-	return convertToPNG(img)
-}
-
-func convertToPNG(img image.Image) ([]byte, error) {
-	bounds := img.Bounds()
-	nrgba := image.NewNRGBA(bounds)
-	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
-
-	buf := &bytes.Buffer{}
-	if err := png.Encode(buf, nrgba); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func usesUnixSystrayIcon(goos string) bool {
-	return goos == "linux" || goos == "freebsd" || goos == "openbsd" || goos == "netbsd"
-}
-
-func (d *gLDriver) DoFromGoroutine(f func(), wait bool) {
-	if wait {
-		async.EnsureNotMain(func() {
-			runOnMainWithWait(f, true)
-		})
-	} else {
-		runOnMainWithWait(f, false)
-	}
-}
-
-func (d *gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
-	return painter.RenderedTextSize(text, textSize, style, source)
-}
-
-func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	return common.CanvasForObject(obj)
-}
+// Declare conformity with Driver
+var _ fyne.Driver = (*gLDriver)(nil)
 
 func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	c := d.CanvasForObject(co)
@@ -121,12 +58,37 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 		return fyne.NewPos(0, 0)
 	}
 
-	glc := c.(*glCanvas)
+	glc, _ := c.(*glCanvas)
 	return driver.AbsolutePositionForObject(co, glc.ObjectTrees())
 }
 
-func (d *gLDriver) Device() fyne.Device {
+func (d *gLDriver) AllWindows() []fyne.Window {
+	return d.windows
+}
+
+func (*gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	return common.CanvasForObject(obj)
+}
+
+func (d *gLDriver) CreateSplashWindow() fyne.Window {
+	win := d.newWindow("", false)
+	win.SetPadded(false)
+	win.CenterOnScreen()
+	return win
+}
+
+func (*gLDriver) Device() fyne.Device {
 	return &glDevice{}
+}
+
+func (*gLDriver) DoFromGoroutine(f func(), wait bool) {
+	if wait {
+		async.EnsureNotMain(func() {
+			runOnMainWithWait(f, true)
+		})
+	} else {
+		runOnMainWithWait(f, false)
+	}
 }
 
 func (d *gLDriver) Quit() {
@@ -146,8 +108,45 @@ func (d *gLDriver) Quit() {
 	}
 }
 
-func (d *gLDriver) addWindow(w *window) {
-	d.windows = append(d.windows, w)
+func (*gLDriver) RenderedTextSize(text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	return painter.RenderedTextSize(text, textSize, style, source)
+}
+
+func (d *gLDriver) Run() {
+	if !async.IsMainGoroutine() {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
+
+	go d.catchTerm()
+	d.runGL()
+
+	// Ensure lifecycle events run to completion before the app exits
+	l, _ := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
+	l.WaitForEvents()
+	l.DestroyEventQueue()
+}
+
+func (*gLDriver) SetDisableScreenBlanking(disable bool) {
+	setDisableScreenBlank(disable)
+}
+
+func (d *gLDriver) newWindow(title string, decorate bool) fyne.Window {
+	var ret *window
+	if title == "" {
+		title = defaultTitle
+	}
+
+	d.init()
+
+	// A window starts with no mouse move outstanding: the zero value would read
+	// as one pending at (0,0), which the first click would then apply.
+	ret = &window{title: title, decorate: decorate, driver: d, mousePosUpdateProcessed: true}
+	ret.frame = newPresentGate(ret)
+	ret.canvas = newCanvas()
+	ret.canvas.context = ret
+	ret.SetIcon(ret.icon)
+	d.windows = append(d.windows, ret)
+	return ret
 }
 
 // a trivial implementation of "focus previous" - return to the most recently opened, or master if set.
@@ -156,7 +155,7 @@ func (d *gLDriver) addWindow(w *window) {
 func (d *gLDriver) focusPreviousWindow() {
 	var chosen *window
 	for _, w := range d.windows {
-		win := w.(*window)
+		win, _ := w.(*window)
 		if !win.visible {
 			continue
 		}
@@ -172,43 +171,67 @@ func (d *gLDriver) focusPreviousWindow() {
 	chosen.RequestFocus()
 }
 
-func (d *gLDriver) windowList() []fyne.Window {
-	return d.windows
+func (d *gLDriver) init() {
+	if !d.initialized {
+		d.initialized = true
+		d.initGLFW()
+	}
 }
 
 func (d *gLDriver) initFailed(msg string, err error) {
 	fyne.LogError(msg, err)
 
-	if !running.Load() {
-		d.Quit()
-	} else {
-		os.Exit(1)
-	}
-}
-
-func (d *gLDriver) Run() {
-	if !async.IsMainGoroutine() {
-		panic("Run() or ShowAndRun() must be called from main goroutine")
+	if running.Load() {
+		os.Exit(1) //revive:disable-line:deep-exit
 	}
 
-	go d.catchTerm()
-	d.runGL()
-
-	// Ensure lifecycle events run to completion before the app exits
-	l := fyne.CurrentApp().Lifecycle().(*intapp.Lifecycle)
-	l.WaitForEvents()
-	l.DestroyEventQueue()
+	d.Quit()
 }
 
-func (d *gLDriver) SetDisableScreenBlanking(disable bool) {
-	setDisableScreenBlank(disable)
-}
+func convertToPNG(img image.Image) ([]byte, error) {
+	bounds := img.Bounds()
+	nrgba := image.NewNRGBA(bounds)
+	draw.Draw(nrgba, bounds, img, bounds.Min, draw.Src)
 
-// NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.
-func NewGLDriver() *gLDriver {
-	repository.Register("file", intRepo.NewFileRepository())
-
-	return &gLDriver{
-		done: make(chan struct{}),
+	buf := &bytes.Buffer{}
+	if err := png.Encode(buf, nrgba); err != nil {
+		return nil, err
 	}
+	return buf.Bytes(), nil
+}
+
+func toOSIcon(icon []byte) ([]byte, error) {
+	return toOSIconForRuntime(icon, runtime.GOOS)
+}
+
+// toOSIconForRuntime takes the input image bytes and converts it to an image type
+// that is suitable for the specified GOOS runtime. Which makes platform-specific icon handling testable.
+func toOSIconForRuntime(icon []byte, osName string) ([]byte, error) {
+	if osName != goos.Windows && !usesUnixSystrayIcon(osName) {
+		return icon, nil
+	}
+
+	img, format, err := image.Decode(bytes.NewReader(icon))
+	if err != nil {
+		return nil, err
+	}
+
+	// keep windows behavior: convert to ico
+	if osName == goos.Windows {
+		buf := &bytes.Buffer{}
+		if err = ico.Encode(buf, img); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	}
+	if format == "png" {
+		return icon, nil
+	}
+
+	// Unix systray expects a PNG bitmap.
+	return convertToPNG(img)
+}
+
+func usesUnixSystrayIcon(osName string) bool {
+	return osName == goos.Linux || goos.IsBSD(osName)
 }

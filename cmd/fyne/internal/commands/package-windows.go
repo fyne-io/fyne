@@ -9,11 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"github.com/fyne-io/image/ico"
 	"github.com/josephspurrier/goversioninfo"
 	"golang.org/x/sys/execabs"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 )
 
 type windowsData struct {
@@ -77,7 +78,7 @@ func (p *Packager) packageWindows(tags []string) error {
 	vi.IconPath = icoPath
 	vi.ManifestPath = manifest
 	vi.StringFileInfo.ProductVersion = p.combinedVersion()
-	vi.StringFileInfo.FileDescription = p.Name
+	vi.FileDescription = p.Name
 	vi.FixedFileInfo.FileVersion = fixedVersionInfo(p.combinedVersion())
 
 	vi.Build()

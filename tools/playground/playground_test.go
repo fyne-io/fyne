@@ -5,13 +5,14 @@ import (
 	"image/color"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/test"
+	_ "fyne.io/fyne/v2/test" // for test app initialization
 	"fyne.io/fyne/v2/theme"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRender(t *testing.T) {
@@ -23,7 +24,7 @@ func TestRender(t *testing.T) {
 
 	enc, err := encodeImage(img)
 	assert.NoError(t, err)
-	assert.Equal(t, "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII=", enc)
+	assert.Equal(t, encodedRect, enc)
 
 	bytes, err := base64.StdEncoding.DecodeString(enc)
 	assert.NoError(t, err)

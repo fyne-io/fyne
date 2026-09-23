@@ -165,7 +165,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	repaintWindow(w)
 	runOnMain(func() {
 		// clear the recorded layouts
-		for layout.popLayoutEvent() != nil {
+		for layout.popLayoutEvent() != nil { //revive:disable-line:empty-block
 		}
 		assert.Nil(t, layout.popLayoutEvent())
 	})
@@ -596,11 +596,11 @@ type recordingLayout struct {
 	layoutEvents []any
 }
 
-func (l *recordingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+func (l *recordingLayout) Layout(_ []fyne.CanvasObject, size fyne.Size) {
 	l.layoutEvents = append(l.layoutEvents, size)
 }
 
-func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
+func (*recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(6, 9)
 }
 
@@ -643,7 +643,7 @@ func (s *safeCanvas) FocusPrevious() {
 	runOnMain(s.glCanvas.FocusPrevious)
 }
 
-func (s *safeCanvas) Focussed() (ret fyne.Focusable) {
+func (s *safeCanvas) Focused() (ret fyne.Focusable) {
 	runOnMain(func() {
 		ret = s.glCanvas.Focused()
 	})
@@ -679,13 +679,13 @@ func (s *safeCanvas) SetPadded(pad bool) {
 
 func (s *safeCanvas) SetScale(scale float32) {
 	runOnMain(func() {
-		s.glCanvas.scale = scale
+		s.scale = scale
 	})
 }
 
 func (s *safeCanvas) SetTexScale(scale float32) {
 	runOnMain(func() {
-		s.glCanvas.texScale = scale
+		s.texScale = scale
 	})
 }
 
@@ -703,7 +703,7 @@ func (s *safeCanvas) Size() (ret fyne.Size) {
 
 func (s *safeCanvas) TexScale() (ret float32) {
 	runOnMain(func() {
-		ret = s.glCanvas.texScale
+		ret = s.texScale
 	})
 
 	return ret

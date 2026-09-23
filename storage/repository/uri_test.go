@@ -63,3 +63,53 @@ func TestURIName(t *testing.T) {
 		assert.Equal(t, "C:", uri.Name())
 	}
 }
+
+func TestURIAuthority(t *testing.T) {
+	cases := []struct {
+		input     string
+		authority string
+		user      string
+		password  string
+		host      string
+	}{
+		{"http://", "", "", "", ""},
+		{"http://@", "", "", "", ""},
+		{"http://foo", "foo", "", "", "foo"},
+		{"http://foo@", "foo@", "foo", "", ""},
+		{"http://foo:bar@", "foo:bar@", "foo", "bar", ""},
+		{"http://foo::bar:@", "foo:%3Abar%3A@", "foo", ":bar:", ""},
+		{"http://foo%3A::bar:@", "foo%3A:%3Abar%3A@", "foo:", ":bar:", ""},
+		{"http://:bar@", ":bar@", "", "bar", ""},
+		{"http://:bar@@", ":bar%40@", "", "bar@", ""},
+		{"http://foo@bar", "foo@bar", "foo", "", "bar"},
+		{"http://@bar", "bar", "", "", "bar"},
+		{"http://foo:bar@baz", "foo:bar@baz", "foo", "bar", "baz"},
+		{"http://foo:bar:baz@quux", "foo:bar%3Abaz@quux", "foo", "bar:baz", "quux"},
+		{"http://foo:bar%3Abaz@quux", "foo:bar%3Abaz@quux", "foo", "bar:baz", "quux"},
+		{"http://foo:bar@", "foo:bar@", "foo", "bar", ""},
+	}
+
+	for _, c := range cases {
+		u, err := ParseURI(c.input)
+		if !assert.NoError(t, err) || !assert.NotNil(t, u) {
+			continue
+		}
+
+		assert.Equal(t, c.authority, u.Authority(), "check authority")
+
+		if !assert.IsType(t, &uri{}, u) {
+			continue
+		}
+		uri := u.(*uri)
+
+		user, password := "", ""
+		if uri.User != nil {
+			user = uri.User.Username()
+			password, _ = uri.User.Password()
+		}
+
+		assert.Equal(t, c.user, user, "check user: %q", c.input)
+		assert.Equal(t, c.password, password, "check password: %q", c.input)
+		assert.Equal(t, c.host, uri.Host, "check host: %q", c.input)
+	}
+}

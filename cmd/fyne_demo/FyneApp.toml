@@ -1,25 +1,25 @@
 [Details]
-  Icon = "../../theme/icons/fyne.png"
-  Name = "Fyne Demo"
-  ID = "io.fyne.demo"
-  Version = "2.7.2"
-  Build = 13
-
-[Migrations]
-  fyneDo = true
-
-[Source]
-  Repo = "https://github.com/fyne-io/fyne"
-  Dir = "cmd/fyne_demo"
+Icon = "../../theme/icons/fyne.png"
+Name = "Fyne Demo"
+ID = "io.fyne.demo"
+Version = "2.8.0"
+Build = 15
 
 [Development]
-  HelperText = "This binary was built with debug symbols"
+HelperText = "This binary was built with debug symbols"
 
 [Release]
-  HelperText = "This binary was built without debug symbols"
+HelperText = "This binary was built without debug symbols"
+
+[Source]
+Repo = "https://github.com/fyne-io/fyne"
+Dir = "cmd/fyne_demo"
 
 [LinuxAndBSD]
-  GenericName = "Toolkit Demo"
-  Categories = ["Development"]
-  Comment = "A demo of Fyne and its capabilities."
-  Keywords = ["demo", "fyne"]
+GenericName = "Toolkit Demo"
+Categories = ["Development"]
+Comment = "A demo of Fyne and its capabilities."
+Keywords = ["demo", "fyne"]
+
+[Migrations]
+fyneDo = true

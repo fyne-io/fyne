@@ -23,4 +23,7 @@ func TestBlur(t *testing.T) {
 	b1.Resize(fyne.NewSize(140, 100))
 
 	test.AssertRendersToImage(t, "blur.png", w.Canvas())
+
+	b1.CornerRadius = 30
+	test.AssertRendersToImage(t, "blur_rounded.png", w.Canvas())
 }

@@ -19,11 +19,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/sys/execabs"
+	"golang.org/x/tools/go/packages"
+
 	"fyne.io/fyne/v2/cmd/fyne/internal/mobile/binres"
 	"fyne.io/fyne/v2/cmd/fyne/internal/templates"
 	"fyne.io/fyne/v2/cmd/fyne/internal/util"
-	"golang.org/x/sys/execabs"
-	"golang.org/x/tools/go/packages"
 )
 
 type manifestTmplData struct {
@@ -174,12 +175,10 @@ func addAssets(apkw *Writer, manifestData []byte, dir, iconPath string, target i
 	}
 	arsc.iconPath = iconPath
 	assetsDir := filepath.Join(dir, "assets")
-	assetsDirExists := true
+	var assetsDirExists bool
 	fi, err := os.Stat(assetsDir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			assetsDirExists = false
-		} else {
+		if !os.IsNotExist(err) {
 			return err
 		}
 	} else {

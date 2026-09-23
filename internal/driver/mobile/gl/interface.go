@@ -119,7 +119,7 @@ type Context interface {
 	// Disable disables various GL capabilities.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDisable.xhtml
-	Disable(cap Enum)
+	Disable(capability Enum)
 
 	// DrawArrays renders geometric primitives from the bound data.
 	//
@@ -129,7 +129,7 @@ type Context interface {
 	// Enable enables various GL capabilities.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glEnable.xhtml
-	Enable(cap Enum)
+	Enable(capability Enum)
 
 	// EnableVertexAttribArray enables a vertex attribute array.
 	//
@@ -152,6 +152,9 @@ type Context interface {
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glGetError.xhtml
 	GetError() Enum
+
+	// GetInteger returns an integer OpenGL state value.
+	GetInteger(pname Enum) int
 
 	// GetProgrami returns a parameter value for a shader.
 	//
@@ -215,15 +218,15 @@ type Context interface {
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glTexParameter.xhtml
 	TexParameteri(target, pname Enum, param int)
 
+	// Uniform1i writes an int uniform variable.
+	//
+	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
+	Uniform1i(dst Uniform, v int)
+
 	// Uniform1f writes a float uniform variable.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
 	Uniform1f(dst Uniform, v float32)
-
-	// Uniform1i writes an int uniform variable, used to bind a sampler to a texture unit.
-	//
-	// http://www.khronos.org/opengles/sdk/docs/man3/html/glUniform.xhtml
-	Uniform1i(dst Uniform, v int)
 
 	// Uniform1fv writes a float array uniform variable.
 	//
@@ -308,4 +311,7 @@ type Worker interface {
 
 	// DoWork performs any pending OpenGL calls.
 	DoWork()
+
+	// HasWork reports whether any OpenGL calls are queued.
+	HasWork() bool
 }

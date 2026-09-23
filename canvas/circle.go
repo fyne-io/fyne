@@ -19,11 +19,16 @@ type Circle struct {
 	FillColor   color.Color // The circle fill color
 	StrokeColor color.Color // The circle stroke color
 	StrokeWidth float32     // The stroke width of the circle
+
+	// Support shadow configuration
+	//
+	// Since: 2.8
+	Shadow Shadow
 }
 
 // NewCircle returns a new Circle instance
-func NewCircle(color color.Color) *Circle {
-	return &Circle{FillColor: color}
+func NewCircle(c color.Color) *Circle {
+	return &Circle{FillColor: c}
 }
 
 // Hide will set this circle to not be visible
@@ -35,7 +40,7 @@ func (c *Circle) Hide() {
 
 // MinSize for a Circle simply returns Size{1, 1} as there is no
 // explicit content
-func (c *Circle) MinSize() fyne.Size {
+func (*Circle) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 

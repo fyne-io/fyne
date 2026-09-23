@@ -23,7 +23,7 @@ type SettingsSchema struct {
 }
 
 // StoragePath returns the location of the settings storage
-func (sc *SettingsSchema) StoragePath() string {
+func (*SettingsSchema) StoragePath() string {
 	return filepath.Join(app.RootConfigDir(), "settings.json")
 }
 
@@ -47,7 +47,7 @@ type settings struct {
 	schema SettingsSchema
 }
 
-func (s *settings) BuildType() fyne.BuildType {
+func (*settings) BuildType() fyne.BuildType {
 	return build.Mode
 }
 
@@ -59,9 +59,9 @@ func (s *settings) PrimaryColor() string {
 // Please make sure that you remember the original settings and call this again to revert the change.
 //
 // Deprecated: Use container.NewThemeOverride to change the appearance of part of your application.
-func (s *settings) OverrideTheme(theme fyne.Theme, name string) {
+func (s *settings) OverrideTheme(t fyne.Theme, name string) {
 	s.schema.PrimaryColor = name
-	s.theme = theme
+	s.theme = t
 }
 
 func (s *settings) Theme() fyne.Theme {
@@ -72,9 +72,9 @@ func (s *settings) Theme() fyne.Theme {
 	return s.theme
 }
 
-func (s *settings) SetTheme(theme fyne.Theme) {
+func (s *settings) SetTheme(t fyne.Theme) {
 	s.themeSpecified = true
-	s.applyTheme(theme, s.variant)
+	s.applyTheme(t, s.variant)
 }
 
 func (s *settings) ShowAnimations() bool {
@@ -85,9 +85,9 @@ func (s *settings) ThemeVariant() fyne.ThemeVariant {
 	return s.variant
 }
 
-func (s *settings) applyTheme(theme fyne.Theme, variant fyne.ThemeVariant) {
+func (s *settings) applyTheme(t fyne.Theme, variant fyne.ThemeVariant) {
 	s.variant = variant
-	s.theme = theme
+	s.theme = t
 	s.apply()
 }
 

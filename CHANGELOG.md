@@ -3,6 +3,97 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 2.8.1 - 26 Aug 2026
+
+### Changed
+
+* File dialog content is now padded using container.NewPadded (#6451)
+* The "large FyneDo" warning is now delayed unless hints are enabled
+* Big performance boost in repainting, walking objects and building render lists (#6449, #6453, #6454)
+
+### Fixed
+
+* MenuItem.Shortcut was missing from systray menus
+* Fix file path handling for URIs on Windows, including paths without a file scheme
+* Support query, fragment and URN forms in ParseURI, with stricter host validation
+* Android: re-create the surface if the window has changed underneath us (#6408)
+* Android: fix duplicated characters when using a hardware keyboard, and add missing delete key support (#6271)
+* Android: fix typo when checking for NULL in native code (#6402)
+* Mobile: multiline Entry ignored scroll position on TouchDown (#6307)
+* Mobile: fix row selection and follow-up behaviour after double/triple tap in Entry
+* Form: rebuild the render slot when a FormItem.Widget is replaced (#1966, #6459)
+* Menu: sync menu item label text on Refresh (#6404)
+* macOS: rebuild the native menu when switching windows (#6431)
+* Fix popup menu immediately dismissing when opened over an existing overlay (#6426)
+* Only skip unfocus on mouse click when the click is over the currently focused widget (#6432)
+* RequestAlwaysOnTop had no effect when called after window creation (#6436, #6441)
+* Prevent crashes from unknown GLFW scancodes, such as the Fn key on Wayland (#6445)
+* Always check for a nil return from monitor.GetVideoMode() (#6472)
+* Fix apps with systray showing a hidden "SystrayMonitor" window on KDE Wayland (#6428)
+* Fix noisy Preferences API warnings for apps that don't use Preferences (#6429)
+* Fix inconsistent vertical positioning of mixed-font text lines (#6448)
+* Fix an issue with the emoji parser
+* Report captured images as opaque so blended output is correct in captures
+* Data binding: handle the edge case where parsing a string as a float fails
+* Fix vendoring of apps using the Wayland build by keeping GLFW include headers
+* Resolve issue where some touch screen Linux taps were missed
+
+
+## 2.8.0 - 11 Jul 2026
+
+### Added
+
+* New canvas objects: ArbitraryPolygon, BezierCurve, Blur, Ellipse & Shader (and NewShaderAnimation)
+* Hardware accelerated shadow support for various canvas elements
+* Add scheduled notifications API
+* Adding Required support to FormItem and Validation to Form
+* New RichText types and Markdown support to load tables, checkboxes & strikethrough
+* Adding accessibility support (currently off by default, use -tags accessibility to test)
+* New support for working with secondary monitors (for fullscreen additional content)
+* Add new Cache API for temporary resources, and new CacheResourceFromURLString helper
+* Add more requests to desktop Window - Always on Top and Position
+* Support for multi-touch drag reporting in mobile driver
+* Added APIs for window stacking of internal windows
+* Support for underline and strikethrough text
+* Add HighlightItem API to collection widgets
+* Secondary cut/copy/paste shortcuts for Unix systems
+* New sizes and colors in theme to support features
+* Added new diagonal resize cursors for desktop
+
+### Changed
+
+* Fyne now requires Go 1.22 as a minimum version, as a result we no longer support windows 7 or 8 and macOS 10.14 or earlier.
+* Wayland is now supported by default and will automatically be picked at runtime
+* Circle canvas object is now always a circle filling centrally in the space
+* Popups (modal and regular) no longer include padding by default
+* Canvas Polygon renamed to RegularPolygon
+* Follow macOS system setting for scroll bar visibility
+* Handle nested lists and quotes in Markdown renderer
+* AppTabs on mobile render with smaller icons and text, in-keeping with the platform
+* Upgrades to RichText rendering and performance including clearer code blocks
+* Apps that have not migrated to the fyne.Do thread handling will warn on app launch
+
+### Fixed
+
+* Increase thread warnings for 2.8 release prep (#6255)
+* Open tree branches when scrolling
+* Fix the Android status bar theming (#1442)
+* Android: Fix canListContentURI (#6119)
+* Fix strange wrapping which results in one char per line (#4303)
+* Android: Allow listContentURI to list content of a subfolder
+* Fix issue with window placement and fullscreen for macOS 26
+* Markdown: Support nested block quotes (#6311, #6297)
+* Clarify the size / resize and position of popups. (#6290)
+* show a static ellipsis on Activity when animations are disabled (#5252)
+* Mobile: Don't let horizontally draggable block vertical dragging (#6158)
+* Reset label selection on text change (#6277)
+* lang: avoid resolving unrelated languages by script similarity (#6176)
+* fix animation progress when duration changes mid-run (#5970
+* Prevent multiline Entry long lines from rendering as black boxes (#678)
+
+**And over 150 other fixes and performance improvements!**
+
+
 ## 2.7.4 - 12 May 2026
 
 ### Fixed

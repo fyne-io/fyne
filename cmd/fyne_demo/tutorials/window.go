@@ -11,7 +11,7 @@ import (
 
 func windowScreen(_ fyne.Window) fyne.CanvasObject {
 	var visibilityWindow fyne.Window = nil
-	var visibilityState bool = false
+	visibilityState := false
 
 	windowGroup := container.NewVBox(
 		widget.NewButton("New window", func() {

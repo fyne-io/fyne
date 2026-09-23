@@ -106,6 +106,9 @@ uintptr_t processFn(struct fnargs* args, char* parg) {
 	case glfnGetError:
 		ret = glGetError();
 		break;
+	case glfnGetIntegerv:
+		glGetIntegerv((GLenum)args->a0, (GLint*)&ret);
+		break;
 	case glfnGetProgramiv:
 		glGetProgramiv((GLint)args->a0, (GLenum)args->a1, (GLint*)&ret);
 		break;

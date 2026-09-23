@@ -37,9 +37,15 @@ type AppTabs struct {
 //
 // Since: 1.4
 func NewAppTabs(items ...*TabItem) *AppTabs {
-	tabs := &AppTabs{Items: items}
+	tabs := &AppTabs{}
+	setItems(tabs, items)
 	tabs.BaseWidget.ExtendBaseWidget(tabs)
 	return tabs
+}
+
+// Append adds a new TabItem to the end of the tab bar.
+func (t *AppTabs) Append(item *TabItem) {
+	t.SetItems(append(t.Items, item))
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -65,11 +71,6 @@ func (t *AppTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.updateIndicator(false)
 	r.applyTheme(t)
 	return r
-}
-
-// Append adds a new TabItem to the end of the tab bar.
-func (t *AppTabs) Append(item *TabItem) {
-	t.SetItems(append(t.Items, item))
 }
 
 // CurrentTab returns the currently selected TabItem.
@@ -195,7 +196,7 @@ func (t *AppTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *AppTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -216,8 +217,19 @@ func (t *AppTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
-func (t *AppTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
+func (t *AppTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
+func (t *AppTabs) getCurrent() int {
+	if len(t.Items) == 0 {
+		return -1
+	}
+	return t.current
+}
+
+func (t *AppTabs) items() []*TabItem {
+	return t.Items
 }
 
 func (t *AppTabs) onSelected() func(*TabItem) {
@@ -231,23 +243,12 @@ func (t *AppTabs) onSelected() func(*TabItem) {
 	}
 }
 
-func (t *AppTabs) items() []*TabItem {
-	return t.Items
+func (t *AppTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
 }
 
-func (t *AppTabs) selected() int {
-	if len(t.Items) == 0 {
-		return -1
-	}
-	return t.current
-}
-
-func (t *AppTabs) setItems(items []*TabItem) {
-	t.Items = items
-}
-
-func (t *AppTabs) setSelected(selected int) {
-	t.current = selected
+func (t *AppTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *AppTabs) setTransitioning(transitioning bool) {
@@ -461,15 +462,15 @@ func (r *appTabsRenderer) updateIndicator(animate bool) {
 	r.moveIndicator(indicatorPos, indicatorSize, th, animate)
 }
 
-func (r *appTabsRenderer) updateTabs(max int) {
+func (r *appTabsRenderer) updateTabs(maxCount int) {
 	tabCount := len(r.appTabs.Items)
 
 	// Set overflow action
-	if tabCount <= max {
+	if tabCount <= maxCount {
 		r.action.Hide()
 		r.bar.Layout = layout.NewStackLayout()
 	} else {
-		tabCount = max
+		tabCount = maxCount
 		r.action.Show()
 
 		// Set layout of tab bar containing tab buttons and overflow action

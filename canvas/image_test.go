@@ -101,7 +101,7 @@ func TestNewImageFromURI_HTTP(t *testing.T) {
 	f, _ := os.ReadFile(path)
 
 	// start a test server to test http calls
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		f, err := os.ReadFile(path)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

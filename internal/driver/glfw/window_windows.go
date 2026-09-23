@@ -7,13 +7,14 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/scale"
 
 	"golang.org/x/sys/windows/registry"
 )
 
 func (w *window) setDarkMode() {
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Windows {
 		hwnd := w.view().GetWin32Window()
 		dark := isDark()
 		// cannot use a go bool.

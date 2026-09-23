@@ -3,6 +3,7 @@ package painter_test
 import (
 	"image"
 	"image/color"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,6 +83,51 @@ func TestDrawString(t *testing.T) {
 			fontMap := &intTest.FontMap{f.Fonts.ResolveFace(' ')} // first (ascii) font
 			painter.DrawString(img, tt.string, tt.color, fontMap, tt.size, 1, fyne.TextStyle{TabWidth: tt.tabWidth})
 			test.AssertImageMatches(t, "font/"+tt.want, img)
+		})
+	}
+}
+
+func TestDrawStringOffset(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		text string
+	}{
+		{name: "long ascii", text: "0123456789" + strings.Repeat(" abcdefghijklmnopqrstuvwxyz", 60)},
+		{name: "ligatures", text: strings.Repeat("office affine official ", 40)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			style := fyne.TextStyle{}
+			size := float32(24)
+			color := color.Black
+			faces := painter.CachedFontFace(style, nil, nil)
+			fontMap := &intTest.FontMap{faces.Fonts.ResolveFace(' ')}
+			textSize, _ := painter.MeasureString(fontMap, tc.text, size, style)
+			width := int(textSize.Width) + 32
+			height := int(textSize.Height) + 32
+			offset := width / 3
+			cropWidth := width / 4
+
+			full := image.NewNRGBA(image.Rect(0, 0, width, height))
+			painter.DrawString(full, tc.text, color, fontMap, size, 1, style)
+
+			cropped := image.NewNRGBA(image.Rect(0, 0, cropWidth, height))
+			painter.DrawStringOffset(cropped, tc.text, color, fontMap, size, 1, style, offset)
+
+			maxDiff := 0
+			for y := 0; y < height; y++ {
+				fullStart := full.PixOffset(offset, y)
+				croppedStart := cropped.PixOffset(0, y)
+				for x := 0; x < cropWidth*4; x++ {
+					diff := int(full.Pix[fullStart+x]) - int(cropped.Pix[croppedStart+x])
+					if diff < 0 {
+						diff = -diff
+					}
+					if diff > maxDiff {
+						maxDiff = diff
+					}
+				}
+			}
+			assert.LessOrEqual(t, maxDiff, 8)
 		})
 	}
 }

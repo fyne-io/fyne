@@ -1,5 +1,9 @@
 package async
 
+// The size of Func, Interface, and CanvasObject are all less than 16 bytes.
+// A CPU cache line (L2) is 256 bytes, thus it can hold 16 entity references.
+const maxEntitiesPerCPUCacheLine = 16
+
 // UnboundedChan is a channel with an unbounded buffer for caching
 // Func objects. A channel must be closed via Close method.
 type UnboundedChan[T any] struct {
@@ -11,10 +15,9 @@ type UnboundedChan[T any] struct {
 // NewUnboundedChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedChan[T any]() *UnboundedChan[T] {
 	ch := &UnboundedChan[T]{
-		// The size of Func, Interface, and CanvasObject are all less than 16 bytes, we use 16 to fit
-		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:    make(chan T, 16),
-		out:   make(chan T, 16),
+		// We make the channels fit into CPU cache lines, which may reduce cache misses.
+		in:    make(chan T, maxEntitiesPerCPUCacheLine),
+		out:   make(chan T, maxEntitiesPerCPUCacheLine),
 		close: make(chan struct{}),
 	}
 	go ch.processing()

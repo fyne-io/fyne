@@ -10,19 +10,19 @@ precision mediump int;
 precision lowp sampler2D;
 #endif
 
-#define MAX_VERTICES 32
+#define MAX_VERTICES 16
 
-uniform vec2 frame_size;
-uniform vec4 rect_coords;
-uniform float edge_softness;
+uniform vec2 frame;
+uniform vec4 bounds;
+uniform float edgeSoftness;
 
 uniform vec2 vertices[MAX_VERTICES];
-uniform float corner_radii[MAX_VERTICES];
-uniform float vertex_count;
+uniform float cornerRadii[MAX_VERTICES];
+uniform float vertexCount;
 
-uniform vec4 fill_color;
-uniform float stroke_width;
-uniform vec4 stroke_color;
+uniform vec4 fillColor;
+uniform float strokeWidth;
+uniform vec4 strokeColor;
 
 const float INF = 1e10;
 const float EPS = 1e-3;
@@ -51,7 +51,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         if (m == num - 2) p_prev2 = vertices[m];
         if (m == num - 1) {
             p_prev1 = vertices[m];
-            r_prev = corner_radii[m];
+            r_prev = cornerRadii[m];
             break;
         }
     }
@@ -121,7 +121,7 @@ float arbitrary_polygon_distance(vec2 p, int num)
         // Shift values for the next iteration
         p_prev2 = point2;
         p_prev1 = point3;
-        r_prev = corner_radii[k];
+        r_prev = cornerRadii[k];
     }
 
     // Phase 2: Distance to straight edge segments between tangent points
@@ -168,23 +168,23 @@ float arbitrary_polygon_distance(vec2 p, int num)
 void main()
 {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame_size.y - gl_FragCoord.y) - rect_coords.xz;
+    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - bounds.xy;
 
-    int num = int(vertex_count);
+    int num = int(vertexCount);
     float dist = arbitrary_polygon_distance(p, num);
-    vec4 final_color = fill_color;
+    vec4 final_color = fillColor;
 
-    if (stroke_width > 0.0)
+    if (strokeWidth > 0.0)
     {
         // create a mask for the fill area (inside, shrunk by stroke width)
-        float fill_mask = smoothstep(-stroke_width + edge_softness, -stroke_width - edge_softness, dist);
+        float fill_mask = smoothstep(-strokeWidth + edgeSoftness, -strokeWidth - edgeSoftness, dist);
 
         // combine fill mask and colors (fill + stroke)
-        final_color = mix(stroke_color, fill_color, fill_mask);
+        final_color = mix(strokeColor, fillColor, fill_mask);
     }
 
     // smooth edges
-    float final_alpha = smoothstep(edge_softness, -edge_softness, dist);
+    float final_alpha = smoothstep(edgeSoftness, -edgeSoftness, dist);
 
     // apply the final alpha to the combined color
     gl_FragColor = vec4(final_color.rgb, final_color.a * final_alpha);

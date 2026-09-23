@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	fynecolor "fyne.io/fyne/v2/internal/color"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -30,6 +31,7 @@ func NewActivity() *Activity {
 	return a
 }
 
+// MinSize implements the [fyne.CanvasObject] interface.
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
@@ -84,6 +86,7 @@ func (a *Activity) Stop() {
 	a.Refresh()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -126,6 +129,10 @@ func (a *activityRenderer) Destroy() {
 func (a *activityRenderer) Layout(size fyne.Size) {
 	a.maxRad = fyne.Min(size.Width, size.Height) / 2
 	a.bound = size
+
+	if a.parent.started && !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.drawStaticEllipsis()
+	}
 }
 
 func (a *activityRenderer) MinSize() fyne.Size {
@@ -176,29 +183,73 @@ func (a *activityRenderer) animate(done float32) {
 }
 
 func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
-	rad := a.maxRad - a.maxRad*off/1.2
+	rad := a.maxRad - a.maxRad*off/1.2 //revive:disable-line:add-constant
 	mid := fyne.NewPos(a.bound.Width/2, a.bound.Height/2)
 
 	dot.Move(mid.Subtract(fyne.NewSquareOffsetPos(rad)))
 	dot.Resize(fyne.NewSquareSize(rad * 2))
 
-	alpha := uint8(0 + int(float32(a.maxCol.A)*off))
+	alpha := uint8(float32(a.maxCol.A) * off)
 	dot.FillColor = color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: alpha}
 	dot.Refresh()
 }
 
 func (a *activityRenderer) start() {
 	a.wasStarted = true
+	if !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.drawStaticEllipsis()
+		return
+	}
 	a.anim.Start()
 }
 
 func (a *activityRenderer) stop() {
 	a.wasStarted = false
 	a.anim.Stop()
+	if !fyne.CurrentApp().Settings().ShowAnimations() {
+		a.hideDots()
+	}
+}
+
+// drawStaticEllipsis places the three dots in a horizontal row, like an
+// ellipsis. Used when animations are disabled so the widget still indicates
+// something is happening without any motion.
+func (a *activityRenderer) drawStaticEllipsis() {
+	th := a.parent.Theme()
+	innerPad := th.Size(theme.SizeNameInnerPadding)
+	d := fyne.Min(a.bound.Width/4, a.bound.Height)
+	if d > th.Size(theme.SizeNameInlineIcon)/2 {
+		d -= innerPad
+	}
+	if d <= 0 {
+		a.hideDots()
+		return
+	}
+	radius := d / 2
+	totalW := 4 * d
+	startX := (a.bound.Width - totalW) / 2
+	cy := a.bound.Height / 2
+	fill := color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: a.maxCol.A}
+	for i, obj := range a.dots {
+		dot, _ := obj.(*canvas.Circle)
+		cx := startX + radius + float32(i)*3*radius
+		dot.Move(fyne.NewPos(cx-radius, cy-radius))
+		dot.Resize(fyne.NewSquareSize(d))
+		dot.FillColor = fill
+		dot.Refresh()
+	}
+}
+
+func (a *activityRenderer) hideDots() {
+	for _, obj := range a.dots {
+		dot, _ := obj.(*canvas.Circle)
+		dot.Resize(fyne.NewSquareSize(0))
+		dot.Refresh()
+	}
 }
 
 func (a *activityRenderer) updateColor() {
 	v := fyne.CurrentApp().Settings().ThemeVariant()
-	rr, gg, bb, aa := a.parent.Theme().Color(theme.ColorNameForeground, v).RGBA()
-	a.maxCol = color.NRGBA{R: uint8(rr >> 8), G: uint8(gg >> 8), B: uint8(bb >> 8), A: uint8(aa >> 8)}
+	rr, gg, bb, aa := fynecolor.ToNRGBA(a.parent.Theme().Color(theme.ColorNameForeground, v))
+	a.maxCol = color.NRGBA{R: rr, G: gg, B: bb, A: aa}
 }

@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2"
 )
 
 //go:embed testdata/fyne.png
@@ -22,9 +23,9 @@ func TestCachedIcon_PATH(t *testing.T) {
 	if path == "" {
 		t.Error("cache path not constructed")
 		return
-	} else {
-		defer os.Remove(path)
 	}
+
+	defer os.Remove(path)
 
 	info, err := os.Stat(path)
 	assert.NoError(t, err)

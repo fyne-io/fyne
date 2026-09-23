@@ -22,7 +22,7 @@ var (
 )
 
 // DataItem is the base interface for all bindable data items.
-// All APIs on bindable data items are safe to invoke directly fron any goroutine.
+// All APIs on bindable data items are safe to invoke directly from any goroutine.
 //
 // Since: 2.0
 type DataItem interface {
@@ -121,7 +121,7 @@ type ExternalUntyped = ExternalItem[any]
 // Since: 2.1
 func BindUntyped(v any) ExternalUntyped {
 	t := reflect.TypeOf(v)
-	if t.Kind() != reflect.Ptr {
+	if t.Kind() != reflect.Pointer {
 		fyne.LogError("Invalid type passed to BindUntyped, must be a pointer", nil)
 		v = nil
 	}

@@ -2,6 +2,7 @@ package test
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/software"
 )
 
 type window struct {
@@ -12,7 +13,7 @@ type window struct {
 	onClosed           func()
 	onCloseIntercepted func()
 
-	canvas *canvas
+	canvas software.WindowlessCanvas
 	driver *driver
 	menu   *fyne.MainMenu
 }
@@ -28,11 +29,11 @@ func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
-func (w *window) CenterOnScreen() {
+func (*window) CenterOnScreen() {
 	// no-op
 }
 
-func (w *window) Clipboard() fyne.Clipboard {
+func (*window) Clipboard() fyne.Clipboard {
 	return NewClipboard()
 }
 
@@ -60,7 +61,7 @@ func (w *window) Hide() {
 	w.focused = false
 }
 
-func (w *window) Icon() fyne.Resource {
+func (*window) Icon() fyne.Resource {
 	return fyne.CurrentApp().Icon()
 }
 
@@ -92,7 +93,7 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 }
 
-func (w *window) SetIcon(_ fyne.Resource) {
+func (*window) SetIcon(_ fyne.Resource) {
 	// no-op
 }
 
@@ -104,7 +105,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 	w.menu = menu
 }
 
-func (w *window) SetMaster() {
+func (*window) SetMaster() {
 	// no-op
 }
 
@@ -116,7 +117,7 @@ func (w *window) SetCloseIntercept(callback func()) {
 	w.onCloseIntercepted = callback
 }
 
-func (w *window) SetOnDropped(dropped func(fyne.Position, []fyne.URI)) {
+func (*window) SetOnDropped(func(fyne.Position, []fyne.URI)) {
 }
 
 func (w *window) SetPadded(padded bool) {

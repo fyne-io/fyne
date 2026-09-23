@@ -68,7 +68,7 @@ func LoadResourceFromPath(path string) (Resource, error) {
 
 // LoadResourceFromURLString creates a new [StaticResource] in memory using the body of the specified URL.
 func LoadResourceFromURLString(urlStr string) (Resource, error) {
-	res, err := http.Get(urlStr)
+	res, err := http.Get(urlStr) //gosec:disable G107 -- applying security measures to the URL is the caller’s responsibility
 	if err != nil {
 		return nil, err
 	}

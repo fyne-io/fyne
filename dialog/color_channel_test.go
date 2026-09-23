@@ -10,8 +10,8 @@ import (
 func Test_colorChannel_Layout(t *testing.T) {
 	test.NewTempApp(t)
 
-	min := 0
-	max := 100
+	minValue := 0
+	maxValue := 100
 	size := fyne.NewSize(250, 50)
 
 	for name, tt := range map[string]struct {
@@ -32,7 +32,7 @@ func Test_colorChannel_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			color := newColorChannel(tt.name, min, max, tt.value, nil)
+			color := newColorChannel(tt.name, minValue, maxValue, tt.value, nil)
 			color.Resize(size)
 
 			window := test.NewTempWindow(t, color)

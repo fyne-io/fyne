@@ -40,7 +40,8 @@ type DocTabs struct {
 //
 // Since: 2.1
 func NewDocTabs(items ...*TabItem) *DocTabs {
-	tabs := &DocTabs{Items: items}
+	tabs := &DocTabs{}
+	setItems(tabs, items)
 	tabs.ExtendBaseWidget(tabs)
 	return tabs
 }
@@ -70,7 +71,7 @@ func (t *DocTabs) CreateRenderer() fyne.WidgetRenderer {
 	r.tabs = t
 
 	r.box = NewHBox(r.create, r.action)
-	r.scroller.OnScrolled = func(offset fyne.Position) {
+	r.scroller.OnScrolled = func(fyne.Position) {
 		r.updateIndicator(false)
 	}
 	r.updateAllTabs()
@@ -154,7 +155,7 @@ func (t *DocTabs) Selected() *TabItem {
 
 // SelectedIndex returns the index of the currently selected TabItem.
 func (t *DocTabs) SelectedIndex() int {
-	return t.selected()
+	return t.getCurrent()
 }
 
 // SetItems sets the containers items and refreshes.
@@ -175,6 +176,10 @@ func (t *DocTabs) Show() {
 	t.SelectIndex(t.current)
 }
 
+func (t *DocTabs) applyItems(items []*TabItem) {
+	t.Items = items
+}
+
 func (t *DocTabs) close(item *TabItem) {
 	if f := t.CloseIntercept; f != nil {
 		f(item)
@@ -186,31 +191,27 @@ func (t *DocTabs) close(item *TabItem) {
 	}
 }
 
-func (t *DocTabs) onUnselected() func(*TabItem) {
-	return t.OnUnselected
-}
-
-func (t *DocTabs) onSelected() func(*TabItem) {
-	return t.OnSelected
-}
-
-func (t *DocTabs) items() []*TabItem {
-	return t.Items
-}
-
-func (t *DocTabs) selected() int {
+func (t *DocTabs) getCurrent() int {
 	if len(t.Items) == 0 {
 		return -1
 	}
 	return t.current
 }
 
-func (t *DocTabs) setItems(items []*TabItem) {
-	t.Items = items
+func (t *DocTabs) items() []*TabItem {
+	return t.Items
 }
 
-func (t *DocTabs) setSelected(selected int) {
-	t.current = selected
+func (t *DocTabs) onSelected() func(*TabItem) {
+	return t.OnSelected
+}
+
+func (t *DocTabs) onUnselected() func(*TabItem) {
+	return t.OnUnselected
+}
+
+func (t *DocTabs) setCurrent(current int) {
+	t.current = current
 }
 
 func (t *DocTabs) setTransitioning(transitioning bool) {
@@ -264,7 +265,7 @@ func (r *docTabsRenderer) Layout(size fyne.Size) {
 	r.layout(r.docTabs, size)
 
 	// lay out buttons before updating indicator, which is relative to their position
-	buttons := r.scroller.Content.(*fyne.Container)
+	buttons, _ := r.scroller.Content.(*fyne.Container)
 	buttons.Layout.Layout(buttons.Objects, buttons.Size())
 	r.updateIndicator(r.docTabs.transitioning())
 
@@ -373,7 +374,7 @@ func (r *docTabsRenderer) buildTabButtons(count int, buttons *fyne.Container) {
 }
 
 func (r *docTabsRenderer) scrollToSelected() {
-	buttons := r.scroller.Content.(*fyne.Container)
+	buttons, _ := r.scroller.Content.(*fyne.Container)
 
 	// https://github.com/fyne-io/fyne/issues/3909
 	// very dirty temporary fix to this crash!

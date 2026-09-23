@@ -13,14 +13,14 @@ func TestQueue(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
 		q := async.NewCanvasObjectQueue()
 		if q.Out() != nil {
-			t.Fatalf("dequeue empty queue returns non-nil")
+			t.Fatal("dequeue empty queue returns non-nil")
 		}
 	})
 
 	t.Run("length", func(t *testing.T) {
 		q := async.NewCanvasObjectQueue()
 		if q.Len() != 0 {
-			t.Fatalf("empty queue has non-zero length")
+			t.Fatal("empty queue has non-zero length")
 		}
 
 		obj := canvas.NewRectangle(color.Black)

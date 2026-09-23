@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 func (*glDevice) IsMobile() bool {
@@ -13,10 +14,10 @@ func (*glDevice) IsMobile() bool {
 }
 
 func (*glDevice) SystemScaleForWindow(w fyne.Window) float32 {
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		return 1.0 // macOS scaling is done at the texture level
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Windows {
 		xScale, _ := w.(*window).viewport.GetContentScale()
 		return xScale
 	}
@@ -29,5 +30,5 @@ func connectKeyboard(*glCanvas) {
 }
 
 func isMacOSRuntime() bool {
-	return runtime.GOOS == "darwin"
+	return runtime.GOOS == goos.Darwin
 }

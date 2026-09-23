@@ -1,0 +1,105 @@
+version: "2"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  enable:
+    - errcheck
+    - gocyclo
+    - gosec
+    - govet
+    - nolintlint
+    - revive
+    - staticcheck
+    - unconvert
+    - unused
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      - path: cmd/fyne/ # The whole tool is deprecated
+        linters:
+          - errcheck
+          - gosec
+          - revive
+          - staticcheck
+      - path: cmd/fyne_demo/ # The whole tool is deprecated
+        linters:
+          - errcheck
+          - gosec
+          - revive
+      - path: test/
+        linters:
+          - staticcheck
+        text: "SA1019" # In tests, the usage of deprecated stuff is valid to check for compatibility.
+      - path: _test\.go
+        linters:
+          - errcheck # TODO: Clarify whether we should explicitly handle errors in tests (e.g., using require.NoError()).
+  settings:
+    gosec:
+      excludes:
+        - G104 # gosec does not have a sophisticated ignore for unchecked errors; we rely on errcheck, instead
+        # 3**: gosec is quite pedantic about permissions … even the standard library does not fulfil the tests
+        - G301
+        - G302
+        - G304
+        - G306
+    revive:
+      severity: error
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          arguments:
+          - allowFloats: "0.0,0.25,0.5,0.75,1.0"
+            allowInts: "0,1,2,3,4,5,100,0xff,0xffff"
+            allowStrs: '""'
+            ignoreFuncs: "strconv\\.Format.*,strconv\\.Parse.*"
+          exclude:
+            - "**/*_test.go"
+            - "**/test/**"
+        - name: argument-limit
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: enforce-switch-style
+          arguments:
+            - allowNoDefault
+        - name: exported
+          exclude:
+            - "**/internal/**" # TODO: enable for internal packages, too?
+        - name: flag-parameter
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: function-result-limit
+          disabled: true
+        - name: import-alias-naming
+          disabled: true # TODO
+        - name: line-length-limit
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: package-comments
+          exclude:
+            - "**/cmd/**"
+            - "**/internal/**"
+        - name: package-naming
+          disabled: true # TODO
+        - name: unchecked-type-assertion
+          arguments:
+            - accept-ignored-assertion-result: true
+          exclude:
+            - "**/*_test.go"
+        - name: unhandled-error
+          disabled: true # we rely on errcheck
+        - name: use-slices-sort
+          disabled: true # TODO
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -SA4023

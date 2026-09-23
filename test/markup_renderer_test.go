@@ -654,6 +654,39 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
+		"ellipse": {
+			content: fynecanvas.NewEllipse(color.NRGBA{R: 100, G: 200, B: 50, A: 0}),
+			size:    fyne.NewSize(17, 42),
+			pos:     fyne.NewPos(42, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<ellipse fillColor=\"rgba(100,200,50,0)\" pos=\"42,17\" size=\"17x42\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"ellipse with theme color": { // we won’t test _all_ valid values … it’s not that important
+			content: fynecanvas.NewEllipse(theme.Color(theme.ColorNameHover)),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<ellipse fillColor=\"hover\" size=\"100x100\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
+		"ellipse with stroke": {
+			content: func() fyne.CanvasObject {
+				r := fynecanvas.NewEllipse(color.NRGBA{R: 200, G: 100, B: 0, A: 50})
+				r.StrokeWidth = 6.375
+				r.StrokeColor = theme.Color(theme.ColorNamePlaceHolder)
+				return r
+			}(),
+			size: fyne.NewSize(42, 42),
+			pos:  fyne.NewPos(17, 17),
+			want: "<canvas size=\"100x100\">\n" +
+				"\t<content>\n" +
+				"\t\t<ellipse fillColor=\"rgba(200,100,0,50)\" pos=\"17,17\" size=\"42x42\" strokeColor=\"placeholder\" strokeWidth=\"6.375\"/>\n" +
+				"\t</content>\n" +
+				"</canvas>\n",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			c := NewCanvas()
@@ -756,7 +789,7 @@ func (w *markupRendererTestWidget) Hide() {
 	w.hidden = true
 }
 
-func (w *markupRendererTestWidget) MinSize() fyne.Size {
+func (*markupRendererTestWidget) MinSize() fyne.Size {
 	return fyne.Size{}
 }
 
@@ -768,7 +801,7 @@ func (w *markupRendererTestWidget) Position() fyne.Position {
 	return w.pos
 }
 
-func (w *markupRendererTestWidget) Refresh() {
+func (*markupRendererTestWidget) Refresh() {
 }
 
 func (w *markupRendererTestWidget) Resize(size fyne.Size) {
@@ -795,13 +828,13 @@ type markupRendererTestWidgetRenderer struct {
 	w *markupRendererTestWidget
 }
 
-func (r *markupRendererTestWidgetRenderer) Destroy() {
+func (*markupRendererTestWidgetRenderer) Destroy() {
 }
 
-func (r *markupRendererTestWidgetRenderer) Layout(_ fyne.Size) {
+func (*markupRendererTestWidgetRenderer) Layout(_ fyne.Size) {
 }
 
-func (r *markupRendererTestWidgetRenderer) MinSize() fyne.Size {
+func (*markupRendererTestWidgetRenderer) MinSize() fyne.Size {
 	return fyne.Size{}
 }
 
@@ -809,7 +842,7 @@ func (r *markupRendererTestWidgetRenderer) Objects() []fyne.CanvasObject {
 	return r.w.objs
 }
 
-func (r *markupRendererTestWidgetRenderer) Refresh() {
+func (*markupRendererTestWidgetRenderer) Refresh() {
 }
 
 var _ fyne.WidgetRenderer = (*markupRendererTestWidgetRenderer)(nil)

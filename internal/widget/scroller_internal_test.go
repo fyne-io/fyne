@@ -55,8 +55,7 @@ func TestScrollContainer_ScrollToTop(t *testing.T) {
 	assert.Equal(t, tmpOffset, scroll.Offset)
 
 	scroll.ScrollToTop()
-	Y := scroll.Offset.Y
-	assert.Equal(t, float32(0), Y)
+	assert.Equal(t, float32(0), scroll.Offset.Y)
 }
 
 func TestScrollContainer_ScrollToBottom(t *testing.T) {
@@ -64,9 +63,8 @@ func TestScrollContainer_ScrollToBottom(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(500, 50))
 	scroll := NewScroll(rect)
 	scroll.ScrollToBottom()
-	ExpectedY := float32(50)
-	Y := scroll.Content.Size().Height - scroll.Size().Height
-	assert.Equal(t, ExpectedY, Y)
+	y := scroll.Content.Size().Height - scroll.Size().Height
+	assert.Equal(t, float32(50), y)
 }
 
 func TestScrollContainer_MinSize_Direction(t *testing.T) {

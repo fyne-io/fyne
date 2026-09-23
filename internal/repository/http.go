@@ -19,14 +19,14 @@ func (f *remoteFile) Close() error {
 	if f.Response == nil {
 		return nil
 	}
-	return f.Response.Body.Close()
+	return f.Body.Close()
 }
 
 func (f *remoteFile) Read(p []byte) (int, error) {
 	if f.Response == nil {
 		return 0, nil
 	}
-	return f.Response.Body.Read(p)
+	return f.Body.Read(p)
 }
 
 func (f *remoteFile) URI() fyne.URI {
@@ -53,7 +53,7 @@ func NewHTTPRepository() *HTTPRepository {
 // non "404 NOT FOUND" response header.
 //
 // Since: 2.1
-func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
+func (*HTTPRepository) Exists(u fyne.URI) (bool, error) {
 	resp, err := http.Head(u.String())
 	if err != nil {
 		return false, err
@@ -69,7 +69,7 @@ func (r *HTTPRepository) Exists(u fyne.URI) (bool, error) {
 // from the request to u.
 //
 // Since: 2.1
-func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+func (*HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 	resp, err := http.Get(u.String())
 	return &remoteFile{Response: resp, uri: u}, err
 }
@@ -79,7 +79,7 @@ func (r *HTTPRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
 // Any response status code apart from 2xx is considered to be invalid.
 //
 // Since: 2.1
-func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
+func (*HTTPRepository) CanRead(u fyne.URI) (bool, error) {
 	resp, err := http.Head(u.String())
 	if err != nil {
 		return false, err
@@ -94,6 +94,6 @@ func (r *HTTPRepository) CanRead(u fyne.URI) (bool, error) {
 // Destroy satisfies the repository.Repository interface.
 //
 // Since: 2.1
-func (r *HTTPRepository) Destroy(string) {
+func (*HTTPRepository) Destroy(string) {
 	// do nothing
 }

@@ -71,7 +71,7 @@ func (l *Line) Move(pos fyne.Position) {
 
 // MinSize for a Line simply returns Size{1, 1} as there is no
 // explicit content
-func (l *Line) MinSize() fyne.Size {
+func (*Line) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 
@@ -100,9 +100,9 @@ func (l *Line) Refresh() {
 }
 
 // NewLine returns a new Line instance
-func NewLine(color color.Color) *Line {
+func NewLine(c color.Color) *Line {
 	return &Line{
-		StrokeColor: color,
+		StrokeColor: c,
 		StrokeWidth: 1,
 	}
 }

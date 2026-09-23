@@ -10,13 +10,16 @@ import (
 
 const (
 	baselineDPI = 120.0
+	maxDPI      = 1000
+	minDPI      = 10
+	mmPerInch   = 25.4
 	scaleEnvKey = "FYNE_SCALE"
 	scaleAuto   = float32(-1.0) // some platforms allow setting auto-scale (linux/BSD)
 )
 
 func calculateDetectedScale(widthMm, widthPx int) float32 {
-	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	if dpi > 1000 || dpi < 10 {
+	dpi := float32(widthPx) / (float32(widthMm) / mmPerInch)
+	if dpi > maxDPI || dpi < minDPI {
 		dpi = baselineDPI
 	}
 
@@ -37,7 +40,7 @@ func calculateScale(user, system, detected float32) float32 {
 	}
 
 	raw := system * user
-	return float32(math.Round(float64(raw*10.0))) / 10.0
+	return float32(math.Round(float64(raw*10.0))) / 10.0 //revive:disable-line:add-constant
 }
 
 func userScale() float32 {

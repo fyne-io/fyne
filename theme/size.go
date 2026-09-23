@@ -84,7 +84,7 @@ const (
 
 	// SizeNameModalBlurRadius is the name of theme lookup for blurring modal popup backgrounds.
 	//
-	// Since: 2.7
+	// Since: 2.8
 	SizeNameModalBlurRadius fyne.ThemeSizeName = "modalBlurRadius"
 
 	// SizeNameSelectionRadius is the name of theme lookup for selection corner radius.
@@ -112,6 +112,17 @@ const (
 	// Since: 2.6
 	SizeNameWindowButtonIcon fyne.ThemeSizeName = "windowButtonIcon"
 
+	// SizeNameWindowShadowActiveRadius controls the overall size of inner window shadows when the
+	// window is active (has focus).
+	//
+	// Since: 2.9
+	SizeNameWindowShadowActiveRadius fyne.ThemeSizeName = "windowShadowActiveRadius"
+
+	// SizeNameWindowShadowRadius controls the overall size of inner window shadows.
+	//
+	// Since: 2.9
+	SizeNameWindowShadowRadius fyne.ThemeSizeName = "windowShadowRadius"
+
 	// SizeNameWindowTitleBarHeight is the height for inner window titleBars.
 	//
 	// Since: 2.6
@@ -121,6 +132,26 @@ const (
 	//
 	// Since: 2.8
 	SizeNameButtonRadius fyne.ThemeSizeName = "buttonRadius"
+
+	// SizeNameCardRadius is the name of theme lookup for card widget corner radius.
+	//
+	// Since: 2.8
+	SizeNameCardRadius fyne.ThemeSizeName = "cardRadius"
+
+	// SizeNameDialogRadius is the name of theme lookup for dialog and modal popup corner radius.
+	//
+	// Since: 2.8
+	SizeNameDialogRadius fyne.ThemeSizeName = "dialogRadius"
+
+	// SizeNamePopupRadius is the name of theme lookup for popup corner radius.
+	//
+	// Since: 2.8
+	SizeNamePopupRadius fyne.ThemeSizeName = "popupRadius"
+
+	// SizeNameMenuRadius is the name of theme lookup for menu corner radius.
+	//
+	// Since: 2.8
+	SizeNameMenuRadius fyne.ThemeSizeName = "menuRadius"
 )
 
 // CaptionTextSize returns the size for caption text.
@@ -224,7 +255,9 @@ func TextSubHeadingSize() float32 {
 	return Current().Size(SizeNameSubHeadingText)
 }
 
-func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+func (*builtinTheme) Size(s fyne.ThemeSizeName) float32 {
+	//revive:disable:add-constant
+	//revive:disable:identical-switch-branches
 	switch s {
 	case SizeNameSeparatorThickness:
 		return 1
@@ -268,10 +301,24 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) float32 {
 		return math.MaxFloat32 // MaxRadius without the import loop
 	case SizeNameWindowButtonIcon:
 		return 14
+	case SizeNameWindowShadowActiveRadius:
+		return 20
+	case SizeNameWindowShadowRadius:
+		return 10
 	case SizeNameWindowTitleBarHeight:
 		return 26
+	case SizeNameCardRadius:
+		return 5
+	case SizeNameDialogRadius:
+		return 10
+	case SizeNamePopupRadius:
+		return 5
+	case SizeNameMenuRadius:
+		return 3
 
 	default:
 		return 0
 	}
+	//revive:enable:identical-switch-branches
+	//revive:enable:add-constant
 }

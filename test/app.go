@@ -44,11 +44,11 @@ func (a *app) CloudProvider() fyne.CloudProvider {
 	return a.cloud
 }
 
-func (a *app) Icon() fyne.Resource {
+func (*app) Icon() fyne.Resource {
 	return nil
 }
 
-func (a *app) SetIcon(fyne.Resource) {
+func (*app) SetIcon(fyne.Resource) {
 	// no-op
 }
 
@@ -56,16 +56,16 @@ func (a *app) NewWindow(title string) fyne.Window {
 	return a.driver.CreateWindow(title)
 }
 
-func (a *app) OpenURL(_ *url.URL) error {
+func (*app) OpenURL(_ *url.URL) error {
 	// no-op
 	return nil
 }
 
-func (a *app) Run() {
+func (*app) Run() {
 	// no-op
 }
 
-func (a *app) Quit() {
+func (*app) Quit() {
 	// no-op
 }
 
@@ -77,7 +77,7 @@ func (a *app) Clipboard() fyne.Clipboard {
 	return a.clip
 }
 
-func (a *app) UniqueID() string {
+func (*app) UniqueID() string {
 	return "testApp" // TODO should this be randomised?
 }
 
@@ -142,7 +142,7 @@ func (a *app) Lifecycle() fyne.Lifecycle {
 	return &a.lifecycle
 }
 
-func (a *app) Metadata() fyne.AppMetadata {
+func (*app) Metadata() fyne.AppMetadata {
 	return fyne.AppMetadata{} // just dummy data
 }
 
@@ -229,7 +229,7 @@ func (s *testSettings) AddListener(listener func(fyne.Settings)) {
 	s.listeners = append(s.listeners, listener)
 }
 
-func (s *testSettings) BuildType() fyne.BuildType {
+func (*testSettings) BuildType() fyne.BuildType {
 	return fyne.BuildStandard
 }
 
@@ -241,15 +241,15 @@ func (s *testSettings) PrimaryColor() string {
 	return theme.ColorBlue
 }
 
-func (s *testSettings) SetTheme(theme fyne.Theme) {
+func (s *testSettings) SetTheme(t fyne.Theme) {
 	s.propertyLock.Lock()
-	s.theme = theme
+	s.theme = t
 	s.propertyLock.Unlock()
 
 	s.apply()
 }
 
-func (s *testSettings) ShowAnimations() bool {
+func (*testSettings) ShowAnimations() bool {
 	return true
 }
 
@@ -264,7 +264,7 @@ func (s *testSettings) Theme() fyne.Theme {
 	return s.theme
 }
 
-func (s *testSettings) ThemeVariant() fyne.ThemeVariant {
+func (*testSettings) ThemeVariant() fyne.ThemeVariant {
 	return 2 // not a preference
 }
 

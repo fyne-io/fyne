@@ -639,7 +639,7 @@ func IconForWidget(name fyne.ThemeIconName, w fyne.Widget) fyne.Resource {
 	return CurrentForWidget(w).Icon(name)
 }
 
-func (t *builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
+func (*builtinTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return icons[n]
 }
 
@@ -745,7 +745,7 @@ func (res *InvertedThemedResource) Content() []byte {
 }
 
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
-func (res *InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
+func (*InvertedThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameBackground
 }
 
@@ -786,7 +786,7 @@ func (res *ErrorThemedResource) Original() fyne.Resource {
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
 //
 // Since: 2.6
-func (res *ErrorThemedResource) ThemeColorName() fyne.ThemeColorName {
+func (*ErrorThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameError
 }
 
@@ -821,7 +821,7 @@ func (res *PrimaryThemedResource) Original() fyne.Resource {
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
 //
 // Since: 2.6
-func (res *PrimaryThemedResource) ThemeColorName() fyne.ThemeColorName {
+func (*PrimaryThemedResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNamePrimary
 }
 
@@ -846,7 +846,7 @@ func (res *DisabledResource) Content() []byte {
 // ThemeColorName returns the fyne.ThemeColorName that is used as foreground color.
 //
 // Since: 2.6
-func (res *DisabledResource) ThemeColorName() fyne.ThemeColorName {
+func (*DisabledResource) ThemeColorName() fyne.ThemeColorName {
 	return ColorNameDisabled
 }
 

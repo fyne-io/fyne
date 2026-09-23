@@ -54,7 +54,7 @@ func TestBindAnyWithNil(t *testing.T) {
 	a.Set(nil)
 	b := 1
 	a.Set(b)
-	var tr any = nil
+	var tr any
 	a.Set(tr)
 
 	a.Set(0)

@@ -78,8 +78,8 @@ type TextGrid struct {
 	BaseWidget
 	Rows []TextGridRow
 
-	scroll  *widget.Scroll
-	content *textGridContent
+	scroller *widget.Scroll
+	content  *textGridContent
 
 	ShowLineNumbers bool
 	ShowWhitespace  bool
@@ -111,9 +111,9 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 	y := p.Y
 	x := p.X
 
-	if t.scroll != nil && t.scroll.Visible() {
-		y += t.scroll.Offset.Y
-		x += t.scroll.Offset.X
+	if t.scroller != nil && t.scroller.Visible() {
+		y += t.scroller.Offset.Y
+		x += t.scroller.Offset.X
 	}
 
 	row = int(y / t.content.cellSize.Height)
@@ -125,7 +125,7 @@ func (t *TextGrid) CursorLocationForPosition(p fyne.Position) (row, col int) {
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToTop() {
-	t.scroll.ScrollToTop()
+	t.scroller.ScrollToTop()
 	t.Refresh()
 }
 
@@ -133,7 +133,7 @@ func (t *TextGrid) ScrollToTop() {
 //
 // Since: 2.7
 func (t *TextGrid) ScrollToBottom() {
-	t.scroll.ScrollToBottom()
+	t.scroller.ScrollToBottom()
 	t.Refresh()
 }
 
@@ -146,9 +146,9 @@ func (t *TextGrid) PositionForCursorLocation(row, col int) fyne.Position {
 	y := float32(row) * t.content.cellSize.Height
 	x := float32(col) * t.content.cellSize.Width
 
-	if t.scroll != nil && t.scroll.Visible() {
-		y -= t.scroll.Offset.Y
-		x -= t.scroll.Offset.X
+	if t.scroller != nil && t.scroller.Visible() {
+		y -= t.scroller.Offset.Y
+		x -= t.scroller.Offset.X
 	}
 
 	return fyne.NewPos(x, y)
@@ -193,10 +193,10 @@ func (t *TextGrid) SetText(text string) {
 
 	// If we don't update the scroll offset when the text is shorter,
 	// we may end up with no text displayed or text appearing partially cut off
-	if t.scroll != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroll.Content != nil {
+	if t.scroller != nil && t.Scroll != fyne.ScrollNone && len(rows) < oldRowsLen && t.scroller.Content != nil {
 		offset := t.PositionForCursorLocation(len(rows), 0)
-		t.scroll.ScrollToOffset(fyne.NewPos(offset.X, t.scroll.Offset.Y))
-		t.scroll.Refresh()
+		t.scroller.ScrollToOffset(fyne.NewPos(offset.X, t.scroller.Offset.Y))
+		t.scroller.Refresh()
 	}
 
 	t.Refresh()
@@ -396,7 +396,7 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 		scroll.Direction = t.Scroll
 		objs[0] = scroll
 	}
-	t.scroll = scroll
+	t.scroller = scroll
 	t.content = content
 	r := &textGridRenderer{text: content, scroll: scroll}
 	r.SetObjects(objs)
@@ -533,7 +533,7 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 	r := &textGridContentRenderer{text: t}
 
 	r.updateCellSize()
-	t.text.scroll.OnScrolled = func(_ fyne.Position) {
+	t.text.scroller.OnScrolled = func(_ fyne.Position) {
 		r.addRowsIfRequired()
 		r.Layout(t.Size())
 	}
@@ -542,7 +542,7 @@ func (t *textGridContent) CreateRenderer() fyne.WidgetRenderer {
 
 func (t *textGridContent) refreshCell(row, col int) {
 	for _, v := range t.visible {
-		if tr := v.(*textGridRow); tr.row == row {
+		if tr, _ := v.(*textGridRow); tr.row == row {
 			tr.refreshCell(col)
 			return
 		}
@@ -566,7 +566,7 @@ func (t *textGridContentRenderer) updateGridSize(size fyne.Size) {
 	t.addRowsIfRequired()
 }
 
-func (t *textGridContentRenderer) Destroy() {
+func (*textGridContentRenderer) Destroy() {
 }
 
 func (t *textGridContentRenderer) Layout(s fyne.Size) {
@@ -611,7 +611,7 @@ func (t *textGridContentRenderer) addRowsIfRequired() {
 	start := 0
 	end := t.text.rows
 	if t.text.text.Scroll == widget.ScrollBoth || t.text.text.Scroll == widget.ScrollVerticalOnly {
-		off := t.text.text.scroll.Offset.Y
+		off := t.text.text.scroller.Offset.Y
 		start = int(math.Floor(float64(off / t.text.cellSize.Height)))
 
 		off += t.text.text.Size().Height
@@ -730,8 +730,8 @@ func (t *textGridRow) setCellRune(str rune, pos int, style, rowStyle TextGridSty
 	if str == 0 {
 		str = ' '
 	}
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-	text := t.objects[pos*2+1].(*canvas.Text)
+	rect, _ := t.objects[pos*2].(*canvas.Rectangle)
+	text, _ := t.objects[pos*2+1].(*canvas.Text)
 
 	fg := t.cachedFGColor
 	text.TextSize = t.cachedTextSize
@@ -921,12 +921,12 @@ func (t *textGridRowRenderer) Refresh() {
 	t.obj.refreshCells()
 }
 
-func (t *textGridRowRenderer) ApplyTheme() {
+func (*textGridRowRenderer) ApplyTheme() {
 }
 
 func (t *textGridRowRenderer) Objects() []fyne.CanvasObject {
 	return t.obj.objects
 }
 
-func (t *textGridRowRenderer) Destroy() {
+func (*textGridRowRenderer) Destroy() {
 }

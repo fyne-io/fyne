@@ -100,7 +100,7 @@ func (s *secureWriteCloser) Close() error {
 }
 
 func deleteURI(u fyne.URI) error {
-	if u.Scheme() != "file" {
+	if u.Scheme() != fyne.URISchemeFile {
 		return errors.New("cannot delete from " + u.Scheme() + " scheme on iOS")
 	}
 
@@ -112,7 +112,7 @@ func deleteURI(u fyne.URI) error {
 }
 
 func existsURI(u fyne.URI) (bool, error) {
-	if u.Scheme() != "file" {
+	if u.Scheme() != fyne.URISchemeFile {
 		return true, errors.New("cannot check existence of " + u.Scheme() + " scheme on iOS")
 	}
 
@@ -154,5 +154,5 @@ func nativeFileSave(f *fileSave, truncate bool) (io.WriteCloser, error) {
 
 func registerRepository(d *driver) {
 	repo := &mobileFileRepo{}
-	repository.Register("file", repo)
+	repository.Register(fyne.URISchemeFile, repo)
 }

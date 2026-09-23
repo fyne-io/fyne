@@ -1,0 +1,5 @@
+//go:build !go1.27
+
+package playground
+
+const encodedRect = "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAAFElEQVR4nGJiwAtGpbECQAAAAP//DogAFaNSFa8AAAAASUVORK5CYII="

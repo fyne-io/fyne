@@ -28,24 +28,33 @@ type Rectangle struct {
 	Aspect float32
 
 	// The radius of the rectangle top-right corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	TopRightCornerRadius float32
 
 	// The radius of the rectangle top-left corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	TopLeftCornerRadius float32
 
 	// The radius of the rectangle bottom-right corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	BottomRightCornerRadius float32
 
 	// The radius of the rectangle bottom-left corner only.
+	// Note: Falls back to [Rectangle.CornerRadius] if 0.
 	//
 	// Since: 2.7
 	BottomLeftCornerRadius float32
+
+	// Support shadow configuration
+	//
+	// Since: 2.8
+	Shadow Shadow
 }
 
 // Hide will set this rectangle to not be visible
@@ -85,8 +94,8 @@ func (r *Rectangle) Resize(s fyne.Size) {
 }
 
 // NewRectangle returns a new Rectangle instance
-func NewRectangle(color color.Color) *Rectangle {
+func NewRectangle(c color.Color) *Rectangle {
 	return &Rectangle{
-		FillColor: color,
+		FillColor: c,
 	}
 }

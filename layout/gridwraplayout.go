@@ -60,7 +60,7 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // For a GridWrapLayout this is simply the specified cellsize as a single column
 // layout has no padding. The returned size does not take into account the number
 // of columns as this layout re-flows dynamically.
-func (g *gridWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+func (g *gridWrapLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	rows := g.rowCount
 	if rows < 1 {
 		rows = 1

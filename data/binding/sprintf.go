@@ -101,7 +101,8 @@ func (s *sprintfString) DataChanged() {
 	}
 
 	r := fmt.Sprintf(s.format, data...)
-	s.String.Set(r)
+	// NewString() delivers an *item and *item#Set() never returns an error.
+	_ = s.String.Set(r)
 }
 
 func (s *sprintfString) Get() (string, error) {
@@ -146,7 +147,7 @@ func (s *sprintfString) Set(str string) error {
 	for i, value := range s.source {
 		switch x := value.(type) {
 		case Bool:
-			v := data[i].(*bool)
+			v, _ := data[i].(*bool)
 
 			err := x.Set(*v)
 			if err != nil {
@@ -155,35 +156,35 @@ func (s *sprintfString) Set(str string) error {
 		case Bytes:
 			return fmt.Errorf("impossible to convert '%s' to []bytes type", str)
 		case Float:
-			v := data[i].(*float64)
+			v, _ := data[i].(*float64)
 
 			err := x.Set(*v)
 			if err != nil {
 				return err
 			}
 		case Int:
-			v := data[i].(*int)
+			v, _ := data[i].(*int)
 
 			err := x.Set(*v)
 			if err != nil {
 				return err
 			}
 		case Rune:
-			v := data[i].(*rune)
+			v, _ := data[i].(*rune)
 
 			err := x.Set(*v)
 			if err != nil {
 				return err
 			}
 		case String:
-			v := data[i].(*string)
+			v, _ := data[i].(*string)
 
 			err := x.Set(*v)
 			if err != nil {
 				return err
 			}
 		case URI:
-			v := data[i].(*string)
+			v, _ := data[i].(*string)
 
 			if v == nil {
 				return fmt.Errorf("URI can not be nil in '%s'", str)

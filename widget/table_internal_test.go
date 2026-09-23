@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -125,12 +126,12 @@ func TestTable_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(table.MinSize().Max(fyne.NewSize(300, 200)))
 
-	canvas := window.Canvas().(test.WindowlessCanvas)
-	assert.Nil(t, canvas.Focused())
+	c := window.Canvas().(software.WindowlessCanvas)
+	assert.Nil(t, c.Focused())
 
-	canvas.FocusNext()
-	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, table, canvas.Focused())
+	c.FocusNext()
+	assert.NotNil(t, c.Focused())
+	assert.Equal(t, table, c.Focused())
 	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
@@ -145,7 +146,7 @@ func TestTable_Focus(t *testing.T) {
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
 	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
-	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
 
 	table.Select(TableCellID{Row: 1, Col: 1})
@@ -850,7 +851,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("")
 		},
-		func(id TableCellID, obj fyne.CanvasObject) {
+		func(TableCellID, fyne.CanvasObject) {
 		},
 	)
 	table.ShowHeaderColumn = false
@@ -932,7 +933,7 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("")
 		},
-		func(id TableCellID, obj fyne.CanvasObject) {
+		func(TableCellID, fyne.CanvasObject) {
 		},
 	)
 	table.ShowHeaderRow = false

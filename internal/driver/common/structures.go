@@ -9,7 +9,7 @@ import (
 
 type deduplicatedObjectQueue struct {
 	queue *async.CanvasObjectQueue
-	dedup async.Map[fyne.CanvasObject, struct{}]
+	dedup async.Map[fyne.CanvasObject, struct{}] //revive:disable-line:nested-structs -- The empty struct here is a common pattern to simulate a set via a map.
 }
 
 // In adds an object to the queue if it is not already present.
@@ -87,9 +87,6 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 
-	for i := overlayCount; i < len(o.renderCaches); i++ {
-		o.renderCaches[i] = nil // release memory reference to removed element
-	}
-
+	clear(o.renderCaches[overlayCount:])
 	o.renderCaches = o.renderCaches[:overlayCount]
 }

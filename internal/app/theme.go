@@ -39,7 +39,7 @@ func ApplySettings(set fyne.Settings, app fyne.App) {
 // ApplySettingsWithCallback ensures that all widgets and themeable objects in an application will be updated for the current theme.
 // It also checks that scale changes are reflected if required. Also it will call `onEveryWindow` on every window
 // interaction
-func ApplySettingsWithCallback(set fyne.Settings, app fyne.App, onEveryWindow func(w fyne.Window)) {
+func ApplySettingsWithCallback(_ fyne.Settings, app fyne.App, onEveryWindow func(w fyne.Window)) {
 	for _, window := range app.Driver().AllWindows() {
 		ApplyThemeTo(window.Content(), window.Canvas())
 		for _, overlay := range window.Canvas().Overlays().List() {

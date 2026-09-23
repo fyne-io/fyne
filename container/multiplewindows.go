@@ -2,6 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/widget"
 )
@@ -30,17 +31,20 @@ func NewMultipleWindows(wins ...*InnerWindow) *MultipleWindows {
 	return m
 }
 
+// Add appends an [InnerWindow] to the managed windows.
 func (m *MultipleWindows) Add(w *InnerWindow) {
 	m.Windows = append(m.Windows, w)
 	m.refreshChildren()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (m *MultipleWindows) CreateRenderer() fyne.WidgetRenderer {
 	m.content = New(&multiWinLayout{})
 	m.refreshChildren()
 	return widget.NewSimpleRenderer(intWidget.NewScroll(m.content))
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (m *MultipleWindows) Refresh() {
 	m.refreshChildren()
 	//	m.BaseWidget.Refresh()
@@ -107,7 +111,7 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 	}
 	w.OnResized = func(ev *fyne.DragEvent) {
 		size := w.Size().Add(ev.Dragged)
-		w.Resize(size.Max(w.MinSize()))
+		w.Resize(internal.MaxSizes(size, w.MinSize()))
 	}
 	w.OnTappedBar = func() {
 		m.RaiseToTop(w)
@@ -116,12 +120,12 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 
 type multiWinLayout struct{}
 
-func (m *multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
+func (*multiWinLayout) Layout(objects []fyne.CanvasObject, _ fyne.Size) {
 	for _, w := range objects { // update the windows so they have real size
-		w.Resize(w.MinSize().Max(w.Size()))
+		w.Resize(internal.MaxSizes(w.MinSize(), w.Size()))
 	}
 }
 
-func (m *multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+func (*multiWinLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	return fyne.Size{}
 }

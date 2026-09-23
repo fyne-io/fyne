@@ -22,12 +22,12 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/glfw/v3.4/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var d = NewGLDriver()
+var d = NewGLDriver().(*gLDriver)
 
 func init() {
 	runtime.LockOSThread()
@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 		time.Sleep(time.Millisecond * 100)
 
 		initMainMenu()
-		os.Exit(m.Run())
+		os.Exit(m.Run()) //revive:disable-line:redundant-test-main-exit
 	}()
 
 	master := createWindow("Master")
@@ -227,7 +227,7 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 		assert.False(t, menuBar.IsActive())
 	})
 
-	t.Run("when canvas has no menu", func(t *testing.T) {
+	t.Run("when canvas has no menu", func(*testing.T) {
 		w = createWindow("Test")
 		w.SetContent(canvas.NewRectangle(color.Black))
 
@@ -326,7 +326,7 @@ func TestWindow_HandleOutsideHoverableObject(t *testing.T) {
 	l := widget.NewList(
 		func() int { return 2 },
 		func() fyne.CanvasObject { return widget.NewEntry() },
-		func(lii widget.ListItemID, co fyne.CanvasObject) {},
+		func(widget.ListItemID, fyne.CanvasObject) {},
 	)
 	l.Resize(fyne.NewSize(200, 300))
 	w.SetContent(l)
@@ -1195,6 +1195,25 @@ func TestWindow_Tapped(t *testing.T) {
 	})
 }
 
+func TestWindow_TouchScreenTappedWithMouseMovePending(t *testing.T) {
+	w := createWindow("Test")
+	left := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	right := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	w.SetContent(container.NewGridWithColumns(2, left, right))
+	w.Resize(fyne.NewSize(200, 100))
+
+	runOnMain(func() {
+		w.moveMouse(20, 50) // the pointer comes to rest over the left object
+
+		w.mouseMoved(w.viewport, 150, 50)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+		assert.Nil(t, left.popTapEvent(), "the tap did not land where the pointer had been")
+		assert.NotNil(t, right.popTapEvent(), "the object under the tap was tapped")
+	})
+}
+
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
 	prop := canvas.NewRectangle(color.White)
@@ -1237,6 +1256,35 @@ func TestWindow_TappedSecondary_RedispatchAfterOverlayDismiss(t *testing.T) {
 		assert.Nil(t, w.canvas.Overlays().Top(), "overlay should be dismissed")
 		assert.Nil(t, o.popTapEvent(), "no primary tap")
 		assert.NotNil(t, o.popSecondaryTapEvent(), "secondary tap should reach widget underneath")
+	})
+}
+
+func TestWindow_TappedSecondary_OpenMenuInsideExistingOverlay(t *testing.T) {
+	w := createWindow("Test")
+	inner := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	inner.SetMinSize(fyne.NewSize(100, 100))
+
+	pop := widget.NewModalPopUp(inner, w.canvas)
+	ensureCanvasSize(t, w, fyne.NewSize(200, 200))
+
+	runOnMain(func() {
+		pop.Show()
+
+		menu := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
+		inner.secondaryTapAction = func(e *fyne.PointEvent) {
+			widget.ShowPopUpMenuAtPosition(menu, w.canvas, e.AbsolutePosition)
+		}
+
+		before := len(w.canvas.Overlays().List())
+
+		// right-click inside the widget under the modal popup, which opens a
+		// new pop-up menu overlay on top of the existing modal overlay
+		w.mousePos = fyne.NewPos(50, 50)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+		w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+
+		after := len(w.canvas.Overlays().List())
+		assert.Equal(t, before+1, after, "the newly opened menu overlay should not be immediately dismissed")
 	})
 }
 
@@ -1595,6 +1643,56 @@ func TestWindow_Focus(t *testing.T) {
 	assert.Equal(t, "ef", e2.Text)
 }
 
+func TestWindow_CollectionEmptyAreaUnfocus(t *testing.T) {
+	// List, GridWrap, Table and Tree are all Focusable themselves (for keyboard
+	// navigation), but that should not stop a tap on an empty area (with no
+	// row/cell/node under the cursor) from unfocusing another currently
+	// focused widget - see https://github.com/fyne-io/fyne/issues/4770.
+	newWidgets := map[string]func() fyne.CanvasObject{
+		"List": func() fyne.CanvasObject {
+			return widget.NewList(func() int { return 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.ListItemID, fyne.CanvasObject) {})
+		},
+		"GridWrap": func() fyne.CanvasObject {
+			return widget.NewGridWrap(func() int { return 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.GridWrapItemID, fyne.CanvasObject) {})
+		},
+		"Table": func() fyne.CanvasObject {
+			return widget.NewTable(func() (int, int) { return 1, 1 },
+				func() fyne.CanvasObject { return widget.NewLabel("Item") },
+				func(widget.TableCellID, fyne.CanvasObject) {})
+		},
+		"Tree": func() fyne.CanvasObject {
+			return widget.NewTreeWithStrings(map[string][]string{"": {"leaf1"}})
+		},
+	}
+
+	for name, newWidget := range newWidgets {
+		t.Run(name, func(t *testing.T) {
+			w := createWindow("Test")
+			entry := widget.NewEntry()
+			coll := newWidget()
+
+			w.SetContent(container.NewBorder(entry, nil, nil, nil, coll))
+			w.Resize(fyne.NewSize(200, 200))
+			repaintWindow(w)
+
+			w.Canvas().Focus(entry)
+			require.Equal(t, entry, w.Canvas().Focused())
+
+			runOnMain(func() {
+				w.moveMouse(20, 150) // well below the single row/cell/node, but still within the widget
+				w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+				w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+			})
+
+			assert.Nil(t, w.Canvas().Focused())
+		})
+	}
+}
+
 func TestWindow_CaptureTypedShortcut(t *testing.T) {
 	w := createWindow("Test")
 	content := &typedShortcutable{}
@@ -1783,11 +1881,59 @@ func TestWindow_ClipboardCopy_DisabledEntry(t *testing.T) {
 	assert.Equal(t, "Testing", NewClipboard().Content())
 }
 
+func TestWindow_KeyDownOnRepeat(t *testing.T) {
+	w := createWindow("Test")
+	content := &keyableFocusable{}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.Canvas().Focus(content)
+
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Press, 0)
+	require.Len(t, content.keyDownEvents, 1)
+	assert.Equal(t, fyne.KeyDown, content.keyDownEvents[0].Name)
+	assert.False(t, content.keyDownEvents[0].Repeat)
+
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Repeat, 0)
+	require.Len(t, content.keyDownEvents, 2)
+	assert.Equal(t, fyne.KeyDown, content.keyDownEvents[1].Name)
+	assert.True(t, content.keyDownEvents[1].Repeat)
+
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Repeat, 0)
+	require.Len(t, content.keyDownEvents, 3)
+	assert.True(t, content.keyDownEvents[2].Repeat)
+
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Release, 0)
+	require.Len(t, content.keyDownEvents, 3) // release does not trigger KeyDown
+}
+
+func TestWindow_KeyDownOnRepeat_NoFocused(t *testing.T) {
+	w := createWindow("Test")
+	w.SetContent(canvas.NewRectangle(color.Black))
+	repaintWindow(w)
+
+	var lastEvent *fyne.KeyEvent
+	w.canvas.onKeyDown = func(ev *fyne.KeyEvent) {
+		lastEvent = ev
+	}
+
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Press, 0)
+	require.NotNil(t, lastEvent)
+	assert.False(t, lastEvent.Repeat)
+
+	lastEvent = nil
+	w.keyPressed(nil, glfw.KeyDown, 0, glfw.Repeat, 0)
+	require.NotNil(t, lastEvent)
+	assert.True(t, lastEvent.Repeat)
+	assert.Equal(t, fyne.KeyDown, lastEvent.Name)
+}
+
 func TestWindow_CloseInterception(t *testing.T) {
 	// Note: The #Close() is run asynchronously when the window is notified about the viewport close.
 	// Therefore, we have to wait some time before checking its state via the onClosed callback.
 
-	d := NewGLDriver()
+	d := NewGLDriver().(*gLDriver)
 	t.Run("when closing window with #Close()", func(t *testing.T) {
 		w := createWindow("test")
 		onIntercepted := false
@@ -1888,7 +2034,7 @@ func TestWindow_Shortcut(t *testing.T) {
 	w.SetContent(content)
 
 	called := ""
-	w.Canvas().AddShortcut(testShortcut, func(sc fyne.Shortcut) {
+	w.Canvas().AddShortcut(testShortcut, func(fyne.Shortcut) {
 		called = "canvas"
 	})
 
@@ -1950,7 +2096,7 @@ func createWindow(title string) *safeWindow {
 		w.create()
 		// disable the GLFW window size callback because it causes a delayed canvas
 		// resize that breaks some tests sometimes
-		w.view().SetSizeCallback(func(_ *glfw.Window, width, height int) {})
+		w.view().SetSizeCallback(func(_ *glfw.Window, _, _ int) {})
 	})
 	return &safeWindow{window: w}
 }
@@ -2092,6 +2238,7 @@ var _ fyne.Tappable = (*tappable)(nil)
 type tappable struct {
 	tapEvents          []any
 	secondaryTapEvents []any
+	secondaryTapAction func(*fyne.PointEvent)
 }
 
 func (t *tappable) Tapped(e *fyne.PointEvent) {
@@ -2100,6 +2247,9 @@ func (t *tappable) Tapped(e *fyne.PointEvent) {
 
 func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
 	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
+	if t.secondaryTapAction != nil {
+		t.secondaryTapAction(e)
+	}
 }
 
 func (t *tappable) popTapEvent() (e any) {
@@ -2123,6 +2273,22 @@ var (
 	_ fyne.Disableable = (*focusable)(nil)
 )
 
+var _ desktop.Keyable = (*keyableFocusable)(nil)
+
+type keyableFocusable struct {
+	focusable
+	keyDownEvents []*fyne.KeyEvent
+	keyUpEvents   []*fyne.KeyEvent
+}
+
+func (k *keyableFocusable) KeyDown(ev *fyne.KeyEvent) {
+	k.keyDownEvents = append(k.keyDownEvents, ev)
+}
+
+func (k *keyableFocusable) KeyUp(ev *fyne.KeyEvent) {
+	k.keyUpEvents = append(k.keyUpEvents, ev)
+}
+
 type focusable struct {
 	canvas.Rectangle
 	id             string // helps identifying instances in comparisons
@@ -2136,10 +2302,10 @@ func (f *focusable) Tapped(*fyne.PointEvent) {
 	d.CanvasForObject(f).Focus(f)
 }
 
-func (f *focusable) TypedRune(rune) {
+func (*focusable) TypedRune(rune) {
 }
 
-func (f *focusable) TypedKey(*fyne.KeyEvent) {
+func (*focusable) TypedKey(*fyne.KeyEvent) {
 }
 
 func (f *focusable) FocusGained() {

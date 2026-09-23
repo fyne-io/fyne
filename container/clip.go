@@ -2,6 +2,7 @@ package container
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -23,6 +24,7 @@ func NewClip(content fyne.CanvasObject) *Clip {
 	return &Clip{Content: content}
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (c *Clip) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 	return newClipRenderer(c)
@@ -44,12 +46,12 @@ func newClipRenderer(c *Clip) *clipRenderer {
 	return &clipRenderer{c: c, objects: []fyne.CanvasObject{c.Content}}
 }
 
-func (r *clipRenderer) Destroy() {
+func (*clipRenderer) Destroy() {
 }
 
 func (r *clipRenderer) Layout(s fyne.Size) {
 	o := r.objects[0]
-	o.Resize(s.Max(o.MinSize()))
+	o.Resize(internal.MaxSizes(s, o.MinSize()))
 }
 
 func (r *clipRenderer) MinSize() fyne.Size {
@@ -67,4 +69,4 @@ func (r *clipRenderer) Refresh() {
 }
 
 // IsClip marks this widget as clipping. It is on the renderer to avoid a public API addition.
-func (r *clipRenderer) IsClip() {}
+func (*clipRenderer) IsClip() {}

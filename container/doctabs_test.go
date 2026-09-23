@@ -33,9 +33,9 @@ func TestDocTabs_Empty(t *testing.T) {
 	assert.Equal(t, 0, len(tabs.Items))
 	assert.Equal(t, -1, tabs.SelectedIndex())
 	assert.Nil(t, tabs.Selected())
-	min := tabs.MinSize()
-	assert.Equal(t, float32(0), min.Width)
-	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), min.Height)
+	minSize := tabs.MinSize()
+	assert.Equal(t, float32(0), minSize.Width)
+	assert.Equal(t, 4*theme.Padding()+theme.IconInlineSize(), minSize.Height)
 
 	tabs = &container.DocTabs{}
 	assert.Equal(t, 0, len(tabs.Items))
@@ -88,10 +88,10 @@ func TestDocTabs_Select(t *testing.T) {
 	assert.Equal(t, tab2, selectedTab)
 	assert.Equal(t, tab1, unselectedTab)
 
-	tabs.OnSelected = func(tab *container.TabItem) {
+	tabs.OnSelected = func(*container.TabItem) {
 		assert.Fail(t, "unexpected tab selected")
 	}
-	tabs.OnUnselected = func(tab *container.TabItem) {
+	tabs.OnUnselected = func(*container.TabItem) {
 		assert.Fail(t, "unexpected tab unselected")
 	}
 	tabs.Select(container.NewTabItem("Test3", widget.NewLabel("Test3")))

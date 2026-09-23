@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"strings"
@@ -99,8 +100,8 @@ func (t *RichText) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
 
 	if t.minCache.IsZero() {
-		min := t.BaseWidget.MinSize()
-		t.minCache = min
+		minSize := t.BaseWidget.MinSize()
+		t.minCache = minSize
 	}
 	return t.minCache
 }
@@ -166,7 +167,7 @@ func (t *RichText) AccessibilityLabel() string {
 }
 
 // charMinSize returns the average char size to use for internal computation
-func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
+func (*RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
 	defaultChar := "M"
 	if concealed {
 		defaultChar = passwordChar
@@ -251,16 +252,16 @@ func (t *RichText) cleanVisualCache() {
 	// mark cache entries that are still valid
 	t.visualCacheGen++
 	for _, seg := range t.Segments {
-		if cache, ok := t.visualCache[seg]; ok {
-			cache.gen = t.visualCacheGen
-			t.visualCache[seg] = cache
+		if c, ok := t.visualCache[seg]; ok {
+			c.gen = t.visualCacheGen
+			t.visualCache[seg] = c
 		}
 	}
 
 	// delete entries that are not marked as valid
 	var deletingSegs []RichTextSegment
-	for seg1, cache := range t.visualCache {
-		if cache.gen != t.visualCacheGen {
+	for seg1, c := range t.visualCache {
+		if c.gen != t.visualCacheGen {
 			deletingSegs = append(deletingSegs, seg1)
 		}
 	}
@@ -275,11 +276,12 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 	start := 0
 	var into *TextSegment
 	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
+		var ok bool
+		if into, ok = seg.(*TextSegment); !ok {
 			continue
 		}
-		end := start + len([]rune(seg.(*TextSegment).Text))
-		into = seg.(*TextSegment)
+
+		end := start + len([]rune(into.Text))
 		index = i
 		if end > pos {
 			break
@@ -573,7 +575,8 @@ func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 		return o, true
 	case *fyne.Container:
 		if _, ok := o.Layout.(*codeInlineLayout); ok {
-			return o.Objects[1].(*canvas.Text), true
+			t, _ := o.Objects[1].(*canvas.Text)
+			return t, true
 		}
 	}
 	return nil, false
@@ -659,35 +662,37 @@ func (r *textRenderer) MinSize() fyne.Size {
 	}
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{}, textSize)
-	min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
+	minSize := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 	if r.obj.scr != nil {
-		r.obj.prop.SetMinSize(min)
+		r.obj.prop.SetMinSize(minSize)
 	}
 
 	if trunc != fyne.TextTruncateOff && r.obj.Scroll == widget.ScrollNone {
 		minBounds := charMinSize
 		if wrap == fyne.TextWrapOff {
-			minBounds.Height = min.Height
+			minBounds.Height = minSize.Height
 		} else {
 			minBounds = minBounds.Add(fyne.NewSquareSize(innerPad * 2).Subtract(r.obj.inset).Subtract(r.obj.inset))
 		}
 		if trunc == fyne.TextTruncateClip {
 			return minBounds
-		} else if trunc == fyne.TextTruncateEllipsis {
+		}
+		if trunc == fyne.TextTruncateEllipsis {
 			ellipsisSize := fyne.MeasureText("…", th.Size(theme.SizeNameText), fyne.TextStyle{})
 			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
 	}
 
+	const minScrolledSize = 32
 	switch scroll {
 	case widget.ScrollBoth:
-		return fyne.NewSize(32, 32)
+		return fyne.NewSize(minScrolledSize, minScrolledSize)
 	case widget.ScrollHorizontalOnly:
-		return fyne.NewSize(32, min.Height)
+		return fyne.NewSize(minScrolledSize, minSize.Height)
 	case widget.ScrollVerticalOnly:
-		return fyne.NewSize(min.Width, 32)
+		return fyne.NewSize(minSize.Width, minScrolledSize)
 	default:
-		return min
+		return minSize
 	}
 }
 
@@ -713,20 +718,20 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 			obj := objs[i]
 			i++
 
-			min := obj.MinSize()
+			minSize := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
 				if newMin := img.MinSize(); newMin != img.oldMin {
 					img.oldMin = newMin
 
-					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
+					minSize := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
-						r.obj.prop.SetMinSize(min)
+						r.obj.prop.SetMinSize(minSize)
 					}
 					r.Refresh() // TODO resolve this in a similar way to #2991
 				}
 			}
-			rowHeight = fyne.Max(rowHeight, min.Height)
-			rowWidth += min.Width
+			rowHeight = fyne.Max(rowHeight, minSize.Height)
+			rowWidth += minSize.Width
 		}
 
 		if wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
@@ -797,7 +802,7 @@ func (r *textRenderer) Refresh() {
 				to, _ := codeInlineText(obj)
 				to.Text = txt
 			} else if isHyperlink {
-				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
+				hl, _ := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
 				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
@@ -807,12 +812,16 @@ func (r *textRenderer) Refresh() {
 	}
 
 	if r.obj.scr != nil {
-		if isEmptyScroll(r.obj.scr) {
-			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-				r.obj.prop, &fyne.Container{Objects: objs},
-			}}
-			r.obj.scr.Direction = scroll
-			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if inner := scrollInnerContainer(r.obj.scr); inner != nil {
+			if inner.Objects == nil {
+				r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+					r.obj.prop, &fyne.Container{Objects: objs},
+				}}
+				r.obj.scr.Direction = scroll
+				r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+			} else {
+				inner.Objects = objs
+			}
 		}
 		r.obj.scr.Refresh()
 	} else {
@@ -828,34 +837,34 @@ func (r *textRenderer) Refresh() {
 func (r *textRenderer) associateSiblings(hl *Hyperlink, hlSeg *HyperlinkSegment, reuse int) {
 	hl.siblings = hl.siblings[:0]
 	for prev := 0; prev < reuse; prev++ {
-		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+		prevHL, _ := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
 		prevHL.siblings = append(prevHL.siblings, hl)
 		hl.siblings = append(hl.siblings, prevHL)
 	}
 }
 
-func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
+func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (x, height float32) {
 	initialX := xPos
 	if len(texts) == 1 {
-		min := texts[0].MinSize()
+		minSize := texts[0].MinSize()
 		if text, ok := codeInlineText(texts[0]); ok {
-			texts[0].Resize(min)
+			texts[0].Resize(minSize)
 			xPad := float32(0)
 			switch text.Alignment {
 			case fyne.TextAlignLeading:
 			case fyne.TextAlignTrailing:
-				xPad = lineWidth - min.Width
+				xPad = lineWidth - minSize.Width
 			case fyne.TextAlignCenter:
-				xPad = (lineWidth - min.Width) / 2
+				xPad = (lineWidth - minSize.Width) / 2
 			}
 			texts[0].Move(fyne.NewPos(xPos+xPad, yPos))
 		} else {
-			texts[0].Resize(fyne.NewSize(lineWidth, min.Height))
+			texts[0].Resize(fyne.NewSize(lineWidth, minSize.Height))
 			texts[0].Move(fyne.NewPos(xPos, yPos))
 		}
-		return min.Width, min.Height
+		return minSize.Width, minSize.Height
 	}
-	height := float32(0)
+	height = float32(0)
 	tallestBaseline := float32(0)
 	realign := false
 	baselines := make([]float32, len(texts))
@@ -948,15 +957,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-func isEmptyScroll(o *widget.Scroll) bool {
+// scrollInnerContainer returns the container holding the visual objects of a RichText
+// scroll content, or nil if the scroll structure is not the expected one.
+func scrollInnerContainer(o *widget.Scroll) *fyne.Container {
 	if c, ok := o.Content.(*fyne.Container); ok {
 		if len(c.Objects) == 2 {
 			if inner, ok := c.Objects[1].(*fyne.Container); ok {
-				return inner.Objects == nil
+				return inner
 			}
 		}
 	}
-	return false
+	return nil
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average
@@ -1007,8 +1018,13 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	}
 
 	prior := bounds[len(bounds)-1]
-	seg := prior.segments[0].(*TextSegment)
-	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+	seg, ok := prior.segments[0].(*TextSegment)
+	if !ok {
+		fyne.LogError(fmt.Sprintf("unexpected rich text segment: %#v", prior.segments[0]), nil)
+		return bounds
+	}
+
+	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)
 	prior.end = prior.begin + fitCount
@@ -1037,7 +1053,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 // measure text size.
 // It will return a slice containing the boundary metadata of each line with the given wrapping applied and the
 // total height required to render the boundaries at the given width/height constraints
-func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
+func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	wrap := t.Wrapping
 	trunc := t.Truncation
 	lines := splitLines(seg)
@@ -1049,23 +1065,23 @@ func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, max fyne.S
 		wrap = fyne.TextWrapOff
 	}
 
-	if max.Width <= 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
+	if maxSize.Width <= 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
 		return lines, 0 // don't bother returning a calculated height, our MinSize is going to cover it
 	}
 
-	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
+	measureWidth := float32(math.Min(float64(firstWidth), float64(maxSize.Width)))
 
 	switch wrap {
 	case fyne.TextWrapBreak:
-		return wrapBreakLines(seg, trunc, measureWidth, max, measurer, lines)
+		return wrapBreakLines(seg, trunc, measureWidth, maxSize, measurer, lines)
 	case fyne.TextWrapWord:
-		return wrapWordLines(seg, trunc, measureWidth, max, measurer, lines)
+		return wrapWordLines(seg, trunc, measureWidth, maxSize, measurer, lines)
 	default:
 		return truncateLines(t, seg, trunc, measureWidth, measurer, lines)
 	}
 }
 
-func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	charSize := measurer([]rune("z"))
 	charWidth := charSize.Width
@@ -1083,26 +1099,25 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 			continue
 		}
 		for low < high {
-			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > maxSize.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, charWidth, measurer), yPos
 			}
 
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
-			if fitCount == high-low { // all characters fit on this line
+			switch fitCount {
+			case high - low: // all characters fit on this line
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 				reuse++
 				low = high
 				high = l.end
-				measureWidth = max.Width
-
+				measureWidth = maxSize.Width
 				yPos += lineHeight
-			} else if fitCount == 0 { // even a character won't fit
+			case 0: // even a character won't fit
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0})
 				reuse++
 				low++
-
 				yPos += lineHeight
-			} else {
+			default:
 				high = low + fitCount
 			}
 		}
@@ -1110,7 +1125,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 	return bounds, yPos
 }
 
-func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	charSize := measurer([]rune("z"))
 	charWidth := charSize.Width
@@ -1128,7 +1143,7 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			continue
 		}
 		for low < high {
-			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > maxSize.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, charWidth, measurer), yPos
 			}
 
@@ -1142,16 +1157,16 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 				if low < high && unicode.IsSpace(text[low]) {
 					low++
 				}
-				measureWidth = max.Width
+				measureWidth = maxSize.Width
 
 				yPos += lineHeight
 				continue
 			}
 			if fitCount == 0 { // even a character won't fit
-				if measureWidth < max.Width {
+				if measureWidth < maxSize.Width {
 					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
 					reuse++
-					measureWidth = max.Width
+					measureWidth = maxSize.Width
 					yPos += lineHeight
 					continue
 				}
@@ -1182,11 +1197,11 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			}
 			oldHigh := high
 			high = low + fitCount
-			if low == 0 && measureWidth < max.Width { // add a newline as there is more space on next
+			if low == 0 && measureWidth < maxSize.Width { // add a newline as there is more space on next
 				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0})
 				reuse++
 				high = oldHigh
-				measureWidth = max.Width
+				measureWidth = maxSize.Width
 
 				yPos += lineHeight
 			}
@@ -1199,7 +1214,7 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 	text := []rune(seg.Textual())
 	yPos := float32(0)
 	var bounds []rowBoundary
-	charSize := measurer([]rune("z"))
+	charSize := measurer([]rune("z")) //revive:disable-line:add-constant -- TODO: clarify whether we want to define a common letter constant for approximate character sizes
 	charWidth := charSize.Width
 	reuse := 0
 	for _, l := range lines {
@@ -1211,7 +1226,8 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			bounds = append(bounds, l)
 			continue
 		}
-		if trunc == fyne.TextTruncateEllipsis {
+		switch trunc {
+		case fyne.TextTruncateEllipsis:
 			txt := []rune(seg.Textual())[low:high]
 			var textObj *canvas.Text
 			switch s := seg.(type) {
@@ -1230,11 +1246,13 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			high = low + end
 			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0})
 			reuse++
-		} else if trunc == fyne.TextTruncateClip {
+		case fyne.TextTruncateClip:
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			high = low + fitCount
 			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0})
 			reuse++
+		case fyne.TextTruncateOff:
+			// don’t do anything
 		}
 	}
 	return bounds, yPos

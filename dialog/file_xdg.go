@@ -18,7 +18,7 @@ func getFavoriteLocation(homeURI fyne.URI, name string) (fyne.URI, error) {
 	}
 
 	lookupName := strings.ToUpper(name)
-	cmd := exec.Command(cmdName, lookupName)
+	cmd := exec.Command(cmdName, lookupName) //gosec:disable G204 - Probably okay to allow arbitrary input for xdg-user-dir. Also, the input is trustworthy as of 2026-06-24.
 	loc, err := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, name)

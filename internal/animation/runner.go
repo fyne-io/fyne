@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const initialAnimationsCapacity = 16
+
 // Runner is the main driver for animations package
 type Runner struct {
 	// animationMutex synchronizes access to `animations` and `pendingAnimations`
@@ -40,14 +42,14 @@ func (r *Runner) Start(a *fyne.Animation) {
 		if r.animations == nil {
 			// initialize with excess capacity to avoid re-allocations
 			// on subsequent Starts
-			r.animations = make([]*anim, 0, 16)
+			r.animations = make([]*anim, 0, initialAnimationsCapacity)
 		}
 		r.animations = append(r.animations, newAnim(a))
 	} else {
 		if r.pendingAnimations == nil {
 			// initialize with excess capacity to avoid re-allocations
 			// on subsequent Starts
-			r.pendingAnimations = make([]*anim, 0, 16)
+			r.pendingAnimations = make([]*anim, 0, initialAnimationsCapacity)
 		}
 		r.pendingAnimations = append(r.pendingAnimations, newAnim(a))
 	}
@@ -113,15 +115,10 @@ func (r *Runner) runOneFrame() (done bool) {
 	r.animationMutex.Lock()
 	// nil out old r.animations for re-use as next r.nextFrameAnimations
 	tmp := r.animations
-	for i := range tmp {
-		tmp[i] = nil
-	}
+	clear(tmp)
 	r.animations = append(r.nextFrameAnimations, r.pendingAnimations...)
 	r.nextFrameAnimations = tmp[:0]
-	// nil out r.pendingAnimations
-	for i := range r.pendingAnimations {
-		r.pendingAnimations[i] = nil
-	}
+	clear(r.pendingAnimations)
 	r.pendingAnimations = r.pendingAnimations[:0]
 	done = len(r.animations) == 0
 	r.animationMutex.Unlock()
@@ -129,8 +126,17 @@ func (r *Runner) runOneFrame() (done bool) {
 }
 
 // tickAnimation will process a frame of animation and return true if this should continue animating
-func (r *Runner) tickAnimation(a *anim) bool {
-	if time.Now().After(a.end) {
+func (*Runner) tickAnimation(a *anim) bool {
+	duration := a.a.Duration
+	now := time.Now()
+
+	if duration != a.lastDuration {
+		a.pinProgress = a.progressFraction(now, a.lastDuration)
+		a.pinTime = now
+		a.lastDuration = duration
+	}
+
+	if !now.Before(a.start.Add(duration)) {
 		if a.reverse {
 			a.a.Tick(0.0)
 			if a.repeatsLeft == 0 {
@@ -152,14 +158,11 @@ func (r *Runner) tickAnimation(a *anim) bool {
 			}
 		}
 
-		a.start = time.Now()
-		a.end = a.start.Add(a.a.Duration)
+		a.resetCycle(time.Now())
 		return true
 	}
 
-	delta := time.Since(a.start).Milliseconds()
-
-	val := float32(delta) / float32(a.total)
+	val := a.progressFraction(now, duration)
 	curve := a.a.Curve
 	if curve == nil {
 		curve = fyne.AnimationEaseInOut

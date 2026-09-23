@@ -56,14 +56,14 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 // AccessibilityLabel for a container just returns "Container".
 //
 // Since: 2.8
-func (c *Container) AccessibilityLabel() string {
+func (*Container) AccessibilityLabel() string {
 	return "Container"
 }
 
 // AccessibilityRole for a container is AccessibleRoleContainer.
 //
 // Since: 2.8
-func (c *Container) AccessibilityRole() AccessibleRole {
+func (*Container) AccessibilityRole() AccessibleRole {
 	return AccessibleRoleContainer
 }
 
@@ -105,7 +105,9 @@ func (c *Container) MinSize() Size {
 
 	minSize := NewSize(1, 1)
 	for _, child := range c.Objects {
-		minSize = minSize.Max(child.MinSize())
+		// inlined internal.MaxSizes, which this package cannot import
+		childMin := child.MinSize()
+		minSize = NewSize(Max(minSize.Width, childMin.Width), Max(minSize.Height, childMin.Height))
 	}
 
 	return minSize
@@ -113,6 +115,10 @@ func (c *Container) MinSize() Size {
 
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
+	if pos == c.position {
+		return
+	}
+
 	c.position = pos
 	repaint(c)
 }

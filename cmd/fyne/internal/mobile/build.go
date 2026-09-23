@@ -235,19 +235,19 @@ var xout io.Writer = os.Stderr
 func printcmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
 	if tmpdir != "" {
-		cmd = strings.Replace(cmd, tmpdir, "$WORK", -1)
+		cmd = strings.ReplaceAll(cmd, tmpdir, "$WORK")
 	}
 	if androidHome := os.Getenv("ANDROID_HOME"); androidHome != "" {
-		cmd = strings.Replace(cmd, androidHome, "$ANDROID_HOME", -1)
+		cmd = strings.ReplaceAll(cmd, androidHome, "$ANDROID_HOME")
 	}
 	if gomobilepath != "" {
-		cmd = strings.Replace(cmd, gomobilepath, "$GOMOBILE", -1)
+		cmd = strings.ReplaceAll(cmd, gomobilepath, "$GOMOBILE")
 	}
 	if gopath := goEnv("GOPATH"); gopath != "" {
-		cmd = strings.Replace(cmd, gopath, "$GOPATH", -1)
+		cmd = strings.ReplaceAll(cmd, gopath, "$GOPATH")
 	}
 	if env := os.Getenv("HOMEPATH"); env != "" {
-		cmd = strings.Replace(cmd, env, "$HOMEPATH", -1)
+		cmd = strings.ReplaceAll(cmd, env, "$HOMEPATH")
 	}
 	fmt.Fprint(xout, cmd)
 }

@@ -40,7 +40,7 @@ type UntypedMap interface {
 //
 // Since: 2.0
 func NewUntypedMap() UntypedMap {
-	return &mapBase{items: make(map[string]reflectUntyped), val: &map[string]any{}}
+	return newExternalUntypedMap()
 }
 
 // BindUntypedMap creates a new map binding of string to any based on the data passed.
@@ -49,7 +49,7 @@ func NewUntypedMap() UntypedMap {
 // Since: 2.0
 func BindUntypedMap(d *map[string]any) ExternalUntypedMap {
 	if d == nil {
-		return NewUntypedMap().(ExternalUntypedMap)
+		return newExternalUntypedMap()
 	}
 	m := &mapBase{items: make(map[string]reflectUntyped), val: d, updateExternal: true}
 
@@ -77,13 +77,13 @@ type Struct interface {
 // Since: 2.0
 func BindStruct(i any) Struct {
 	if i == nil {
-		return NewUntypedMap().(Struct)
+		return newExternalUntypedMap()
 	}
 	t := reflect.TypeOf(i)
-	if t.Kind() != reflect.Ptr ||
+	if t.Kind() != reflect.Pointer ||
 		(reflect.TypeOf(reflect.ValueOf(i).Elem()).Kind() != reflect.Struct) {
 		fyne.LogError("Invalid type passed to BindStruct, must be pointer to struct", nil)
-		return NewUntypedMap().(Struct)
+		return newExternalUntypedMap()
 	}
 
 	s := &boundStruct{orig: i}
@@ -105,6 +105,10 @@ func BindStruct(i any) Struct {
 	}
 
 	return s
+}
+
+func newExternalUntypedMap() ExternalUntypedMap {
+	return &mapBase{items: make(map[string]reflectUntyped), val: &map[string]any{}}
 }
 
 type reflectUntyped interface {
@@ -378,7 +382,7 @@ func (b *boundReflect[T]) Set(val T) error {
 	return b.set(val)
 }
 
-func (b *boundReflect[T]) get() (any, error) {
+func (b *boundReflect[T]) get() (any, error) { //revive:disable-line:confusing-naming - This implements reflectUntyped.
 	if !b.val.CanInterface() {
 		return nil, errors.New("unable to get value from data binding")
 	}
@@ -386,7 +390,7 @@ func (b *boundReflect[T]) get() (any, error) {
 	return b.val.Interface(), nil
 }
 
-func (b *boundReflect[T]) set(val any) error {
+func (b *boundReflect[T]) set(val any) error { //revive:disable-line:confusing-naming - This implements reflectUntyped.
 	if !b.val.CanSet() {
 		return errors.New("unable to set value in data binding")
 	}

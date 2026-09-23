@@ -172,10 +172,10 @@ func TestEntry_AlwaysShowValidationError_WithoutValidator_Error(t *testing.T) {
 
 	entry := widget.NewEntry()
 	entry.AlwaysShowValidationError = true
+	w := test.NewTempWindow(t, entry)
 
 	entry.SetValidationError(errors.New("error"))
 
-	w := test.NewTempWindow(t, entry)
 	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_error.xml", w.Canvas())
 }
 
@@ -186,7 +186,6 @@ func TestEntry_AlwaysShowValidationError_WithoutValidator_Success(t *testing.T) 
 	entry.AlwaysShowValidationError = true
 
 	entry.SetValidationError(errors.New("error"))
-	entry.SetValidationError(nil)
 
 	w := test.NewTempWindow(t, entry)
 	test.AssertRendersToMarkup(t, "entry/always_on_without_validator_success.xml", w.Canvas())

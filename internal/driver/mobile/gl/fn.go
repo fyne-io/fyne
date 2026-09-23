@@ -23,8 +23,6 @@ type fnargs struct {
 	a5 uintptr
 	a6 uintptr
 	a7 uintptr
-	a8 uintptr
-	a9 uintptr
 }
 
 type glfn int
@@ -70,6 +68,7 @@ const (
 	glfnShaderSource
 	glfnTexImage2D
 	glfnTexParameteri
+	glfnUniform1i
 	glfnUniform1f
 	glfnUniform1fv
 	glfnUniform2f
@@ -81,7 +80,7 @@ const (
 	glfnViewport
 	glfnCopyTexSubImage2D
 	glfnDeleteProgram
-	glfnUniform1i
+	glfnGetIntegerv
 )
 
 func goString(buf []byte) string {

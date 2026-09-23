@@ -6,28 +6,16 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 )
 
-// RenderObjectToMarkup renders the given [fyne.io/fyne/v2.CanvasObject] to a markup string.
-//
-// Since: 2.6
-func RenderObjectToMarkup(o fyne.CanvasObject) string {
-	c := NewCanvas()
-	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
-	c.SetContent(o)
-	c.Resize(size) // ensure we are large enough for current size
-
-	return snapshot(c)
-}
-
-// RenderToMarkup renders the given [fyne.io/fyne/v2.Canvas] to a markup string.
-//
-// Since: 2.6
-func RenderToMarkup(c fyne.Canvas) string {
-	return snapshot(c)
+// DoubleTap simulates a double left mouse click on the specified object.
+func DoubleTap(obj fyne.DoubleTappable) {
+	ev, c := prepareTap(obj, fyne.NewPos(1, 1))
+	handleFocusOnTap(c, obj)
+	obj.DoubleTapped(ev)
 }
 
 // Drag drags at an absolute position on the canvas.
@@ -50,27 +38,23 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 }
 
 // FocusNext focuses the next focusable on the canvas.
+//
+// Deprecated: Use fyne.Canvas#FocusNext() instead.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*canvas); ok {
-		tc.focusManager().FocusNext()
-	} else {
-		fyne.LogError("FocusNext can only be called with a test canvas", nil)
-	}
+	c.FocusNext()
 }
 
 // FocusPrevious focuses the previous focusable on the canvas.
+//
+// Deprecated: Use fyne.Canvas#FocusPrevious() instead.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*canvas); ok {
-		tc.focusManager().FocusPrevious()
-	} else {
-		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
-	}
+	c.FocusPrevious()
 }
 
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+		objects = layoutAndCollect(objects, o, internal.MaxSizes(o.MinSize(), o.Size()))
 	}
 	return objects
 }
@@ -92,7 +76,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	}
 	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
-		hovered = o.(desktop.Hoverable)
+		hovered, _ = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{
 				AbsolutePosition: pos,
@@ -115,6 +99,26 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	}
 }
 
+// RenderObjectToMarkup renders the given [fyne.io/fyne/v2.CanvasObject] to a markup string.
+//
+// Since: 2.6
+func RenderObjectToMarkup(o fyne.CanvasObject) string {
+	c := NewCanvas()
+	c.SetPadded(false)
+	size := internal.MaxSizes(o.MinSize(), o.Size())
+	c.SetContent(o)
+	c.Resize(size) // ensure we are large enough for current size
+
+	return snapshot(c)
+}
+
+// RenderToMarkup renders the given [fyne.io/fyne/v2.Canvas] to a markup string.
+//
+// Since: 2.6
+func RenderToMarkup(c fyne.Canvas) string {
+	return snapshot(c)
+}
+
 // Scroll scrolls at an absolute position on the canvas.
 // deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
 func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
@@ -131,13 +135,6 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY float32) {
 	o.(fyne.Scrollable).Scrolled(e)
 }
 
-// DoubleTap simulates a double left mouse click on the specified object.
-func DoubleTap(obj fyne.DoubleTappable) {
-	ev, c := prepareTap(obj, fyne.NewPos(1, 1))
-	handleFocusOnTap(c, obj)
-	obj.DoubleTapped(ev)
-}
-
 // Tap simulates a left mouse click on the specified object.
 func Tap(obj fyne.Tappable) {
 	TapAt(obj, fyne.NewPos(1, 1))
@@ -146,13 +143,13 @@ func Tap(obj fyne.Tappable) {
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
 func TapAt(obj fyne.Tappable, pos fyne.Position) {
 	ev, c := prepareTap(obj, pos)
-	tap(c, obj, ev)
+	performTap(c, obj, ev)
 }
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
 	if o, p := findTappable(c, pos); o != nil {
-		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+		performTap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
 }
 
@@ -198,22 +195,6 @@ func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne
 	return o, p
 }
 
-func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
-	d := fyne.CurrentApp().Driver()
-	ev := &fyne.PointEvent{Position: pos}
-	var c fyne.Canvas
-	if co, ok := obj.(fyne.CanvasObject); ok {
-		c = d.CanvasForObject(co)
-		ev.AbsolutePosition = d.AbsolutePositionForObject(co).Add(pos)
-	}
-	return ev, c
-}
-
-func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
-	handleFocusOnTap(c, obj)
-	obj.Tapped(ev)
-}
-
 func handleFocusOnTap(c fyne.Canvas, obj any) {
 	if c == nil {
 		return
@@ -227,6 +208,42 @@ func handleFocusOnTap(c fyne.Canvas, obj any) {
 	}
 
 	c.Unfocus()
+}
+
+func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
+	objects = append(objects, o)
+	switch c := o.(type) {
+	case fyne.Widget:
+		r := c.CreateRenderer()
+		r.Layout(size)
+		for _, child := range r.Objects() {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	case *fyne.Container:
+		if c.Layout != nil {
+			c.Layout.Layout(c.Objects, size)
+		}
+		for _, child := range c.Objects {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	}
+	return objects
+}
+
+func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
+	d := fyne.CurrentApp().Driver()
+	ev := &fyne.PointEvent{Position: pos}
+	var c fyne.Canvas
+	if co, ok := obj.(fyne.CanvasObject); ok {
+		c = d.CanvasForObject(co)
+		ev.AbsolutePosition = d.AbsolutePositionForObject(co).Add(pos)
+	}
+	return ev, c
+}
+
+func performTap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
+	handleFocusOnTap(c, obj)
+	obj.Tapped(ev)
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

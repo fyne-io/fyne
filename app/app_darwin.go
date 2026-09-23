@@ -29,7 +29,7 @@ import (
 	"fyne.io/fyne/v2"
 )
 
-func (a *fyneApp) SendNotification(n *fyne.Notification) {
+func (*fyneApp) SendNotification(n *fyne.Notification) {
 	if C.isBundled() {
 		titleStr := C.CString(n.Title)
 		defer C.free(unsafe.Pointer(titleStr))
@@ -74,8 +74,7 @@ func (a *fyneApp) ScheduleNotification(n *fyne.Notification, when time.Time) (*f
 
 func (a *fyneApp) CancelScheduledNotification(id string) error {
 	if !C.isBundled() {
-		a.cancelViaScheduler(id)
-		return nil
+		return a.cancelViaScheduler(id)
 	}
 
 	idStr := C.CString(id)

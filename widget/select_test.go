@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/software"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/test"
@@ -108,7 +109,7 @@ func TestSelect_Binding(t *testing.T) {
 func TestSelect_ChangeTheme(t *testing.T) {
 	test.NewTempApp(t)
 
-	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(220, 220))
@@ -238,7 +239,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 		defer w.Close()
 		w.Resize(fyne.NewSize(200, 150))
 
-		c := w.Canvas().(test.WindowlessCanvas)
+		c := w.Canvas().(software.WindowlessCanvas)
 		c.FocusNext()
 		test.AssertRendersToMarkup(t, "select/focus_focused_none_selected.xml", c)
 		sel.Disable()
@@ -461,7 +462,7 @@ func TestSelect_SetSelectedIndex(t *testing.T) {
 
 func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
 	var triggered bool
-	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {
 		triggered = true
 	})
 	combo.SetSelectedIndex(-1)
@@ -475,31 +476,31 @@ func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
 func TestSelect_Tapped(t *testing.T) {
 	test.NewTempApp(t)
 
-	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())
 
 	test.Tap(combo)
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
-	assert.Len(t, canvas.Overlays().List(), 1)
+	c := fyne.CurrentApp().Driver().CanvasForObject(combo)
+	assert.Len(t, c.Overlays().List(), 1)
 	assertRendersToPlatformMarkup(t, "select/%s/tapped.xml", w.Canvas())
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
 	test.NewTempApp(t)
 
-	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())
 
-	canvas := w.Canvas()
-	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
+	c := w.Canvas()
+	combo.Move(fyne.NewPos(c.Size().Width-10, c.Size().Height-10))
 	test.Tap(combo)
-	assert.Len(t, canvas.Overlays().List(), 1)
+	assert.Len(t, c.Overlays().List(), 1)
 	assertRendersToPlatformMarkup(t, "select/%s/tapped_constrained.xml", w.Canvas())
 }
 

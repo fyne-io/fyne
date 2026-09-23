@@ -61,7 +61,7 @@ func (p *progressRenderer) updateBar() {
 	p.label.Text = strconv.Itoa(int(p.ratio*100)) + "%"
 }
 
-// Layout the components of the check widget
+// Layout the components of the progress bar widget
 func (p *progressRenderer) Layout(size fyne.Size) {
 	p.calculateRatio()
 
@@ -204,8 +204,8 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 
 func progressBlendColor(clr color.Color) color.Color {
 	r, g, b, a := col.ToNRGBA(clr)
-	faded := uint8(a) / 2
-	return &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: faded}
+	faded := a / 2
+	return &color.NRGBA{R: r, G: g, B: b, A: faded}
 }
 
 func (p *ProgressBar) updateFromData(data binding.DataItem) {

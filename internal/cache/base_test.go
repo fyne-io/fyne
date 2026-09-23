@@ -2,18 +2,17 @@ package cache
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
-	"fyne.io/fyne/v2"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/v2"
 )
 
 func TestMain(m *testing.M) {
-	ret := m.Run()
+	m.Run()
 	testClearAll()
-	os.Exit(ret)
 }
 
 func TestCacheClean(t *testing.T) {
@@ -217,10 +216,10 @@ func (r *dummyWidgetRenderer) Destroy() {
 	}
 }
 
-func (r *dummyWidgetRenderer) Layout(size fyne.Size) {
+func (*dummyWidgetRenderer) Layout(fyne.Size) {
 }
 
-func (r *dummyWidgetRenderer) MinSize() fyne.Size {
+func (*dummyWidgetRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
@@ -228,22 +227,30 @@ func (r *dummyWidgetRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-func (r *dummyWidgetRenderer) Refresh() {
+func (*dummyWidgetRenderer) Refresh() {
 }
 
 type timeMock struct {
 	now time.Time
 }
 
-func (t *timeMock) createTime(min, sec int) time.Time {
-	return time.Date(2021, time.June, 15, 2, min, sec, 0, time.UTC)
+func (*timeMock) createTime(minute, second int) time.Time {
+	return time.Date(2021, time.June, 15, 2, minute, second, 0, time.UTC)
 }
 
-func (t *timeMock) setTime(min, sec int) {
-	t.now = time.Date(2021, time.June, 15, 2, min, sec, 0, time.UTC)
+func (t *timeMock) setTime(minute, second int) {
+	t.now = time.Date(2021, time.June, 15, 2, minute, second, 0, time.UTC)
 	timeNow = func() time.Time {
 		return t.now
 	}
+	refreshNow()
+}
+
+// advance moves the mock clock, refreshing the sample setAlive reads (the real
+// app refreshes it once per frame in Clean).
+func (t *timeMock) advance(d time.Duration) {
+	t.now = t.now.Add(d)
+	refreshNow()
 }
 
 func testClearAll() {
@@ -255,4 +262,5 @@ func testClearAll() {
 	renderers.Clear()
 	blurKernels.Clear()
 	timeNow = time.Now
+	refreshNow()
 }

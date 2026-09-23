@@ -59,7 +59,9 @@ func (p *preferences) resetSavedRecently() {
 			p.prefLock.Unlock()
 
 			if changedDuringSaving {
-				p.save()
+				if err := p.save(); err != nil {
+					fyne.LogError("failed on saving preferences", err)
+				}
 			}
 		})
 	}()
@@ -83,7 +85,7 @@ func (p *preferences) saveToStorage(writer writeSyncCloser) error {
 	encode := json.NewEncoder(writer)
 
 	var err error
-	p.InMemoryPreferences.ReadValues(func(values map[string]any) {
+	p.ReadValues(func(values map[string]any) {
 		err = encode.Encode(&values)
 	})
 
@@ -112,7 +114,7 @@ func (p *preferences) loadFromStorage(storage io.ReadCloser) (err error) {
 	}()
 	decode := json.NewDecoder(storage)
 
-	p.InMemoryPreferences.WriteValues(func(values map[string]any) {
+	p.WriteValues(func(values map[string]any) {
 		err = decode.Decode(&values)
 		if err != nil {
 			return
@@ -169,20 +171,20 @@ func convertLists(values map[string]any) {
 			case bool:
 				bools := make([]bool, len(items))
 				for i, item := range items {
-					bools[i] = item.(bool)
+					bools[i], _ = item.(bool)
 				}
 				values[k] = bools
 			case float64:
 				floats := make([]float64, len(items))
 				for i, item := range items {
-					floats[i] = item.(float64)
+					floats[i], _ = item.(float64)
 				}
 				values[k] = floats
 			// case int: // json has no int!
 			case string:
 				strings := make([]string, len(items))
 				for i, item := range items {
-					strings[i] = item.(string)
+					strings[i], _ = item.(string)
 				}
 				values[k] = strings
 			}

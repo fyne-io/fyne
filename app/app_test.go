@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/test"
 )
 
-func TestDummyApp(t *testing.T) {
+func TestDummyApp(*testing.T) {
 	app := NewWithID("io.fyne.test")
 
 	app.Quit()

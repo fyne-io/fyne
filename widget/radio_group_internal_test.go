@@ -17,28 +17,28 @@ import (
 
 func TestRadioGroup_MinSize(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
-	min := radio.MinSize()
+	minSize := radio.MinSize()
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 
 	radio2 := NewRadioGroup([]string{"Hi", "H"}, nil)
 	min2 := radio2.MinSize()
 
-	assert.Equal(t, min.Width, min2.Width)
-	assert.Greater(t, min2.Height, min.Height)
+	assert.Equal(t, minSize.Width, min2.Width)
+	assert.Greater(t, min2.Height, minSize.Height)
 }
 
 func TestRadioGroup_MinSize_Horizontal(t *testing.T) {
 	radio := NewRadioGroup([]string{"Hi"}, nil)
-	min := radio.MinSize()
+	minSize := radio.MinSize()
 
 	radio2 := NewRadioGroup([]string{"Hi", "He"}, nil)
 	radio2.Horizontal = true
 	min2 := radio2.MinSize()
 
-	assert.Greater(t, min2.Width, min.Width)
-	assert.Equal(t, min.Height, min2.Height)
+	assert.Greater(t, min2.Width, minSize.Width)
+	assert.Equal(t, minSize.Height, min2.Height)
 }
 
 func TestRadioGroup_Selected(t *testing.T) {

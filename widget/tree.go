@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/widget"
@@ -118,10 +119,10 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 			_, b = data[uid]
 			return b
 		},
-		CreateNode: func(branch bool) fyne.CanvasObject {
+		CreateNode: func(bool) fyne.CanvasObject {
 			return NewLabel("Template Object")
 		},
-		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
+		UpdateNode: func(uid string, _ bool, node fyne.CanvasObject) {
 			node.(*Label).SetText(uid)
 		},
 	}
@@ -263,7 +264,7 @@ func (t *Tree) RefreshItem(id TreeNodeID) {
 // OpenAllBranches opens all branches in the tree.
 func (t *Tree) OpenAllBranches() {
 	t.ensureOpenMap()
-	t.walkAll(func(uid, parent TreeNodeID, branch bool, depth int) {
+	t.walkAll(func(uid, _ TreeNodeID, branch bool, _ int) {
 		if branch {
 			t.open[uid] = true
 		}
@@ -356,11 +357,13 @@ func (t *Tree) ScrollTo(uid TreeNodeID) {
 		return
 	}
 
-	t.openBranches(uid)
-
 	y, size, ok := t.offsetAndSize(uid)
 	if !ok {
-		return
+		t.openBranches(uid)
+
+		if y, size, ok = t.offsetAndSize(uid); !ok {
+			return
+		}
 	}
 
 	newY := t.scroller.Offset.Y
@@ -450,7 +453,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		t.Select(t.currentHighlight)
 	case fyne.KeyDown:
 		next := false
-		t.walk(t.Root, "", 0, false, func(id, p TreeNodeID, _ bool, _ int) {
+		t.walk(t.Root, "", 0, false, func(id, _ TreeNodeID, _ bool, _ int) {
 			if next {
 				t.setItemFocus(id)
 				next = false
@@ -484,7 +487,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 		}
 	case fyne.KeyUp:
 		previous := ""
-		t.walk(t.Root, "", 0, false, func(id, p TreeNodeID, _ bool, _ int) {
+		t.walk(t.Root, "", 0, false, func(id, _ TreeNodeID, _ bool, _ int) {
 			if id == t.currentHighlight && previous != "" {
 				t.setItemFocus(previous)
 			}
@@ -500,7 +503,7 @@ func (t *Tree) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Tree is focused.
-func (t *Tree) TypedRune(_ rune) {
+func (*Tree) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
@@ -630,11 +633,11 @@ type treeRenderer struct {
 	scroller *widget.Scroll
 }
 
-func (r *treeRenderer) MinSize() (min fyne.Size) {
-	min = r.scroller.MinSize()
-	min = min.Max(r.tree.branchMinSize)
-	min = min.Max(r.tree.leafMinSize)
-	return min
+func (r *treeRenderer) MinSize() fyne.Size {
+	minSize := r.scroller.MinSize()
+	minSize = internal.MaxSizes(minSize, r.tree.branchMinSize)
+	minSize = internal.MaxSizes(minSize, r.tree.leafMinSize)
+	return minSize
 }
 
 func (r *treeRenderer) Layout(size fyne.Size) {
@@ -722,8 +725,8 @@ type treeContentRenderer struct {
 	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
-	branchPool  async.Pool[fyne.CanvasObject]
-	leafPool    async.Pool[fyne.CanvasObject]
+	branchPool  async.Pool[*branch]
+	leafPool    async.Pool[*leaf]
 
 	wasVisible   []TreeNodeID
 	visible      []TreeNodeID
@@ -772,11 +775,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
 		}
-		if y+m.Height < offsetY {
-			// Node is above viewport and not visible
-		} else if y > offsetY+viewport.Height {
-			// Node is below viewport and not visible
-		} else {
+		if y+m.Height >= offsetY && y <= offsetY+viewport.Height {
 			// Node is in viewport
 			r.visible = append(r.visible, uid)
 
@@ -854,7 +853,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.leaves = leaves
 }
 
-func (r *treeContentRenderer) MinSize() (min fyne.Size) {
+func (r *treeContentRenderer) MinSize() fyne.Size {
 	if !r.minSizeCache.IsZero() {
 		return r.minSizeCache
 	}
@@ -862,6 +861,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	pad := th.Size(theme.SizeNamePadding)
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 
+	var minSize fyne.Size
 	r.treeContent.tree.walkAll(func(uid, _ string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
 		if r.treeContent.tree.Root == "" {
@@ -873,8 +873,8 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		}
 
 		// If this is not the first item, add a separator
-		if min.Height > 0 {
-			min.Height += pad
+		if minSize.Height > 0 {
+			minSize.Height += pad
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -882,12 +882,12 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 			m = r.treeContent.tree.branchMinSize
 		}
 		m.Width += float32(depth) * (iconSize + pad)
-		min.Width = fyne.Max(min.Width, m.Width)
-		min.Height += m.Height
+		minSize.Width = fyne.Max(minSize.Width, m.Width)
+		minSize.Height += m.Height
 	})
 
-	r.minSizeCache = min
-	return min
+	r.minSizeCache = minSize
+	return minSize
 }
 
 func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
@@ -905,7 +905,7 @@ func (r *treeContentRenderer) Refresh() {
 func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	s := r.treeContent.Size()
 	if s.IsZero() {
-		r.treeContent.Resize(r.treeContent.MinSize().Max(r.treeContent.tree.Size()))
+		r.treeContent.Resize(internal.MaxSizes(r.treeContent.MinSize(), r.treeContent.tree.Size()))
 	} else {
 		r.Layout(s)
 	}
@@ -936,32 +936,28 @@ func (r *treeContentRenderer) refreshForID(toDraw TreeNodeID) {
 	canvas.Refresh(r.treeContent.super())
 }
 
-func (r *treeContentRenderer) getBranch() (b *branch) {
-	o := r.branchPool.Get()
-	if o != nil {
-		b = o.(*branch)
-	} else {
-		var content fyne.CanvasObject
-		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
-		}
-		b = newBranch(r.treeContent.tree, content)
+func (r *treeContentRenderer) getBranch() *branch {
+	if o := r.branchPool.Get(); o != nil {
+		return o
 	}
-	return b
+
+	var content fyne.CanvasObject
+	if f := r.treeContent.tree.CreateNode; f != nil {
+		content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(true) }, r.treeContent.tree)
+	}
+	return newBranch(r.treeContent.tree, content)
 }
 
-func (r *treeContentRenderer) getLeaf() (l *leaf) {
-	o := r.leafPool.Get()
-	if o != nil {
-		l = o.(*leaf)
-	} else {
-		var content fyne.CanvasObject
-		if f := r.treeContent.tree.CreateNode; f != nil {
-			content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
-		}
-		l = newLeaf(r.treeContent.tree, content)
+func (r *treeContentRenderer) getLeaf() *leaf {
+	if o := r.leafPool.Get(); o != nil {
+		return o
 	}
-	return l
+
+	var content fyne.CanvasObject
+	if f := r.treeContent.tree.CreateNode; f != nil {
+		content = createItemAndApplyThemeScope(func() fyne.CanvasObject { return f(false) }, r.treeContent.tree)
+	}
+	return newLeaf(r.treeContent.tree, content)
 }
 
 var (
@@ -1014,7 +1010,7 @@ func (n *treeNode) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (n *treeNode) MouseMoved(*desktop.MouseEvent) {
+func (*treeNode) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
@@ -1025,10 +1021,10 @@ func (n *treeNode) MouseOut() {
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.Select(n.uid)
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(n.tree.super())
-	if canvas != nil && canvas.Focused() != n.tree {
+	c := fyne.CurrentApp().Driver().CanvasForObject(n.tree.super())
+	if c != nil && c.Focused() != n.tree {
 		if !fyne.CurrentDevice().IsMobile() {
-			canvas.Focus(n.tree.super().(fyne.Focusable))
+			c.Focus(n.tree.super().(fyne.Focusable))
 		}
 	}
 	n.Refresh()
@@ -1136,16 +1132,17 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
+func (r *treeNodeRenderer) MinSize() fyne.Size {
+	var minSize fyne.Size
 	if r.treeNode.content != nil {
-		min = r.treeNode.content.MinSize()
+		minSize = r.treeNode.content.MinSize()
 	}
 	th := r.treeNode.Theme()
 	iconSize := th.Size(theme.SizeNameInlineIcon)
 
-	min.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
-	min.Height = fyne.Max(min.Height, iconSize)
-	return min
+	minSize.Width += th.Size(theme.SizeNameInnerPadding) + r.treeNode.Indent() + iconSize
+	minSize.Height = fyne.Max(minSize.Height, iconSize)
+	return minSize
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {

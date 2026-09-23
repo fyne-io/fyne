@@ -23,7 +23,7 @@ func NewDelta(dx float32, dy float32) Delta {
 }
 
 // Components returns the X and Y elements of v.
-func (v Delta) Components() (float32, float32) {
+func (v Delta) Components() (x, y float32) {
 	return v.DX, v.DY
 }
 
@@ -65,7 +65,7 @@ func (p Position) AddXY(x, y float32) Position {
 }
 
 // Components returns the X and Y elements of p.
-func (p Position) Components() (float32, float32) {
+func (p Position) Components() (x, y float32) {
 	return p.X, p.Y
 }
 
@@ -144,7 +144,7 @@ func (s Size) Min(v Vector2) Size {
 }
 
 // Components returns the Width and Height elements of this Size
-func (s Size) Components() (float32, float32) {
+func (s Size) Components() (width, height float32) {
 	return s.Width, s.Height
 }
 

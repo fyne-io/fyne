@@ -83,7 +83,7 @@ func (n *nodeReaderWriter) Read(p []byte) (int, error) {
 	}
 
 	// generate EOF if needed
-	var err error = nil
+	var err error
 	if n.readCursor >= len(data) {
 		err = io.EOF
 	}
@@ -125,7 +125,7 @@ func (n *nodeReaderWriter) Write(p []byte) (int, error) {
 // URI returns the URI of the node.
 func (n *nodeReaderWriter) URI() fyne.URI {
 	// discarding the error because this should never fail
-	u, _ := storage.ParseURI(n.repo.scheme + "://" + n.path)
+	u, _ := storage.ParseURI(n.repo.scheme + fyne.URISchemeSeparator + fyne.URIAuthorityPrefix + n.path)
 	return u
 }
 
@@ -145,48 +145,36 @@ func NewInMemoryRepository(scheme string) *InMemoryRepository {
 //
 // Since: 2.0
 func (m *InMemoryRepository) Exists(u fyne.URI) (bool, error) {
-	path := u.Path()
-	if path == "" {
-		return false, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	_, ok := m.Data[path]
-	return ok, nil
+	return withValidPath(u.Path(), func(path string) bool {
+		_, ok := m.Data[path]
+		return ok
+	})
 }
 
 // Reader reads the contents of the given URI.
 //
 // Since: 2.0
 func (m *InMemoryRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	path := u.Path()
-
-	if path == "" {
-		return nil, fmt.Errorf("invalid path '%s'", path)
+	readable, err := m.CanRead(u)
+	if err != nil {
+		return nil, err
+	}
+	if !readable {
+		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", u.Path())
 	}
 
-	_, ok := m.Data[path]
-	if !ok {
-		return nil, fmt.Errorf("no such path '%s' in InMemoryRepository", path)
-	}
-
-	return &nodeReaderWriter{path: path, repo: m}, nil
+	return &nodeReaderWriter{path: u.Path(), repo: m}, nil
 }
 
 // CanRead checks if the given URI can be read.
 //
 // Since: 2.0
 func (m *InMemoryRepository) CanRead(u fyne.URI) (bool, error) {
-	path := u.Path()
-	if path == "" {
-		return false, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	_, ok := m.Data[path]
-	return ok, nil
+	return m.Exists(u)
 }
 
 // Destroy tears down the InMemoryRepository.
-func (m *InMemoryRepository) Destroy(scheme string) {
+func (*InMemoryRepository) Destroy(string) {
 	// do nothing
 }
 
@@ -194,12 +182,9 @@ func (m *InMemoryRepository) Destroy(scheme string) {
 //
 // Since: 2.0
 func (m *InMemoryRepository) Writer(u fyne.URI) (fyne.URIWriteCloser, error) {
-	path := u.Path()
-	if path == "" {
-		return nil, fmt.Errorf("invalid path '%s'", path)
-	}
-
-	return &nodeReaderWriter{path: path, repo: m}, nil
+	return withValidPath(u.Path(), func(path string) fyne.URIWriteCloser {
+		return &nodeReaderWriter{path: path, repo: m}
+	})
 }
 
 // Appender returns a writer that appends to the given URI.
@@ -217,12 +202,10 @@ func (m *InMemoryRepository) Appender(u fyne.URI) (fyne.URIWriteCloser, error) {
 // CanWrite checks if the given URI can be written to.
 //
 // Since: 2.0
-func (m *InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
-	if p := u.Path(); p == "" {
-		return false, fmt.Errorf("invalid path '%s'", p)
-	}
-
-	return true, nil
+func (*InMemoryRepository) CanWrite(u fyne.URI) (bool, error) {
+	return withValidPath(u.Path(), func(string) bool {
+		return true
+	})
 }
 
 // Delete deletes the given URI.
@@ -241,28 +224,28 @@ func (m *InMemoryRepository) Delete(u fyne.URI) error {
 // Parent returns the parent URI of the given URI.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
+func (*InMemoryRepository) Parent(u fyne.URI) (fyne.URI, error) {
 	return repository.GenericParent(u)
 }
 
 // Child returns the child URI created from the given URI and component.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
+func (*InMemoryRepository) Child(u fyne.URI, component string) (fyne.URI, error) {
 	return repository.GenericChild(u, component)
 }
 
 // Copy copies the source URI to the destination URI.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Copy(source, destination fyne.URI) error {
+func (*InMemoryRepository) Copy(source, destination fyne.URI) error {
 	return repository.GenericCopy(source, destination)
 }
 
 // Move moves the contents of the source URI to the destination.
 //
 // Since: 2.0
-func (m *InMemoryRepository) Move(source, destination fyne.URI) error {
+func (*InMemoryRepository) Move(source, destination fyne.URI) error {
 	return repository.GenericMove(source, destination)
 }
 
@@ -294,11 +277,11 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 	// '/foo/barbaz'.
 	prefix := u.Path()
 
-	if len(prefix) > 0 && prefix[len(prefix)-1] != '/' {
-		prefix = prefix + "/"
+	if !strings.HasSuffix(prefix, fyne.URIPathSeparator) {
+		prefix = prefix + fyne.URIPathSeparator
 	}
 
-	prefixSplit := strings.Split(prefix, "/")
+	prefixSplit := strings.Split(prefix, fyne.URIPathSeparator)
 	prefixSplitLen := len(prefixSplit)
 
 	// Now we can simply loop over all the paths and find the ones with an
@@ -310,14 +293,15 @@ func (m *InMemoryRepository) List(u fyne.URI) ([]fyne.URI, error) {
 		// prefixSplit, which is guaranteed to have a trailing slash,
 		// so we want to also make pSplit be counted in ncomp like it
 		// does not have one.
-		pSplit := strings.Split(p, "/")
+		pSplit := strings.Split(p, fyne.URIPathSeparator)
 		ncomp := len(pSplit)
-		if len(p) > 0 && p[len(p)-1] == '/' {
+
+		if strings.HasSuffix(p, fyne.URIPathSeparator) {
 			ncomp--
 		}
 
 		if strings.HasPrefix(p, prefix) && ncomp == prefixSplitLen {
-			uri, err := storage.ParseURI(m.scheme + "://" + p)
+			uri, err := storage.ParseURI(m.scheme + fyne.URISchemeSeparator + fyne.URIAuthorityPrefix + p)
 			if err != nil {
 				return nil, err
 			}
@@ -343,4 +327,13 @@ func (m *InMemoryRepository) CreateListable(u fyne.URI) error {
 	}
 	m.Data[path] = []byte{}
 	return nil
+}
+
+func withValidPath[R any](path string, fn func(string) R) (R, error) {
+	var noneResult R
+	if path == "" {
+		return noneResult, fmt.Errorf("invalid path '%s'", path)
+	}
+
+	return fn(path), nil
 }

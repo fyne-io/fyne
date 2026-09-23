@@ -23,7 +23,7 @@ var scales = [...]*scaleItems{
 	{scale: 1.8, name: "Huge"},
 }
 
-func (s *Settings) appliedScale(value float32) {
+func (*Settings) appliedScale(value float32) {
 	for _, scale := range scales {
 		scale.preview.TextSize = theme.TextSize() * scale.scale / value
 	}
@@ -68,7 +68,7 @@ func (s *Settings) makeScaleGroup(scale float32) *widget.Card {
 	return widget.NewCard("Scale", "", container.NewVBox(scalePreviewBox, scaleBox, newRefreshMonitor(s)))
 }
 
-func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
+func (*Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 	previews := make([]fyne.CanvasObject, len(scales))
 	for i, scale := range scales {
 		text := canvas.NewText("A", theme.Color(theme.ColorNameForeground))
@@ -82,7 +82,7 @@ func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 	return previews
 }
 
-func (s *Settings) refreshScalePreviews() {
+func (*Settings) refreshScalePreviews() {
 	for _, scale := range scales {
 		scale.preview.Color = theme.Color(theme.ColorNameForeground)
 	}

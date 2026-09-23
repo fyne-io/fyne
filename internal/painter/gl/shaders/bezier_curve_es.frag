@@ -10,17 +10,17 @@ precision mediump int;
 precision lowp sampler2D;
 #endif
 
-uniform vec2 frame_size;
-uniform vec4 rect_coords;
-uniform float edge_softness;
-uniform float stroke_width_half;
-uniform vec4 stroke_color;
+uniform vec2 frame;
+uniform vec4 bounds;
+uniform float edgeSoftness;
+uniform float strokeWidthHalf;
+uniform vec4 strokeColor;
 
-uniform vec2 start_point;
-uniform vec2 end_point;
-uniform vec2 control_point1; // used for quadratic and cubic
-uniform vec2 control_point2; // used for cubic only
-uniform float num_control_points; // 0: linear, 1: quadratic, 2: cubic
+uniform vec2 startPoint;
+uniform vec2 endPoint;
+uniform vec2 controlPoint1; // used for quadratic and cubic
+uniform vec2 controlPoint2; // used for cubic only
+uniform float numControlPoints; // 0: linear, 1: quadratic, 2: cubic
 
 const float EPS = 1e-3;
 
@@ -145,17 +145,17 @@ float cubic_distance(vec2 p, vec2 v0, vec2 v1, vec2 v2, vec2 v3)
 
 void main() {
     // coordinates: (0.0) at rect top-left, +X right, +Y down
-    vec2 p = vec2(gl_FragCoord.x, frame_size.y - gl_FragCoord.y) - rect_coords.xz;
+    vec2 p = vec2(gl_FragCoord.x, frame.y - gl_FragCoord.y) - bounds.xy;
 
     float dist;
-    if (int(num_control_points) == 1) {
-        dist = quadratic_distance(p, start_point, control_point1, end_point);
-    } else if (int(num_control_points) == 2) {
-        dist = cubic_distance(p, start_point, control_point1, control_point2, end_point);
+    if (int(numControlPoints) == 1) {
+        dist = quadratic_distance(p, startPoint, controlPoint1, endPoint);
+    } else if (int(numControlPoints) == 2) {
+        dist = cubic_distance(p, startPoint, controlPoint1, controlPoint2, endPoint);
     } else {
-        dist = linear_distance(p, start_point, end_point);
+        dist = linear_distance(p, startPoint, endPoint);
     }
 
-    float alpha = 1.0 - smoothstep(stroke_width_half - edge_softness, stroke_width_half + edge_softness, dist);
-    gl_FragColor = vec4(stroke_color.rgb, stroke_color.a * alpha);
+    float alpha = 1.0 - smoothstep(strokeWidthHalf - edgeSoftness, strokeWidthHalf + edgeSoftness, dist);
+    gl_FragColor = vec4(strokeColor.rgb, strokeColor.a * alpha);
 }

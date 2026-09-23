@@ -8,7 +8,14 @@ env:
 
 jobs:
   static_analysis:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
 
     steps:
       - uses: actions/checkout@v5
@@ -21,32 +28,29 @@ jobs:
       - name: Get dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev xvfb language-pack-en
+          sudo apt-get install --no-install-recommends clang lld libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev libwayland-dev libx11-dev libxkbcommon-dev xorg-dev xvfb language-pack-en
+        if: ${{ runner.os == 'Linux' }}
 
       - name: Set environment variable LANG
         run: echo "LANG=en_US.UTF-8" >> $GITHUB_ENV
+        if: ${{ runner.os == 'Linux' }}
+
+      - name: golangci-lint
+        if: ${{ runner.os != 'Windows' }} # TODO: On Windows the checks all succeed but there is a compiler issue that cannot be ignored using the configuration.
+        uses: golangci/golangci-lint-action@v9
+        with:
+          args: '--verbose'
 
       - name: Install analysis tools
         run: |
           go install mvdan.cc/gofumpt@latest
           go install golang.org/x/tools/cmd/goimports@latest
-          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-          go install honnef.co/go/tools/cmd/staticcheck@latest
           go install lucor.dev/lian@latest
-
-      - name: Vet
-        run: go vet ./...
 
       - name: Formatting
         run: |
           gofumpt -d -e .
           test -z "$(goimports -e -d . | tee /dev/stderr)"
-
-      - name: Gocyclo
-        run: gocyclo -over 30 .
-
-      - name: Staticcheck
-        run: staticcheck ./...
 
       - name: Check license of dependencies
         run: lian -d --allowed="Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT, ISC"

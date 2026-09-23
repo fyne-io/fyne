@@ -81,10 +81,10 @@ type baseTabs interface {
 	onSelected() func(*TabItem)
 
 	items() []*TabItem
-	setItems([]*TabItem)
+	applyItems([]*TabItem)
 
-	selected() int
-	setSelected(int)
+	getCurrent() int
+	setCurrent(int)
 
 	tabLocation() TabLocation
 
@@ -108,13 +108,15 @@ func tabsAdjustedLocation(l TabLocation, b baseTabs) TabLocation {
 		if o := fyne.CurrentDevice().Orientation(); fyne.IsVertical(o) {
 			if l == TabLocationLeading {
 				return TabLocationTop
-			} else if l == TabLocationTrailing {
+			}
+			if l == TabLocationTrailing {
 				return TabLocationBottom
 			}
 		} else {
 			if l == TabLocationTop {
 				return TabLocationLeading
-			} else if l == TabLocationBottom {
+			}
+			if l == TabLocationBottom {
 				return TabLocationTrailing
 			}
 		}
@@ -166,8 +168,8 @@ func removeIndex(t baseTabs, index int) {
 		return
 	}
 	setItems(t, append(items[:index], items[index+1:]...))
-	if s := t.selected(); index < s {
-		t.setSelected(s - 1)
+	if s := t.getCurrent(); index < s {
+		t.setCurrent(s - 1)
 	}
 }
 
@@ -181,7 +183,7 @@ func removeItem(t baseTabs, item *TabItem) {
 }
 
 func selected(t baseTabs) *TabItem {
-	selected := t.selected()
+	selected := t.getCurrent()
 	items := t.items()
 	if selected < 0 || selected >= len(items) {
 		return nil
@@ -190,7 +192,7 @@ func selected(t baseTabs) *TabItem {
 }
 
 func selectIndex(t baseTabs, index int) {
-	selected := t.selected()
+	selected := t.getCurrent()
 
 	if selected == index {
 		// No change, so do nothing
@@ -210,7 +212,7 @@ func selectIndex(t baseTabs, index int) {
 	}
 
 	t.setTransitioning(true)
-	t.setSelected(index)
+	t.setCurrent(index)
 	t.Refresh()
 
 	if f := t.onSelected(); f != nil {
@@ -232,14 +234,14 @@ func setItems(t baseTabs, items []*TabItem) {
 	if build.HasHints && mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
-	t.setItems(items)
-	selected := t.selected()
+	t.applyItems(items)
+	selected := t.getCurrent()
 	count := len(items)
 	switch {
 	case count == 0:
 		// No items available to be selected
 		selectIndex(t, -1) // Unsure OnUnselected gets called if applicable
-		t.setSelected(-1)
+		t.setCurrent(-1)
 	case selected < 0:
 		// Current is first tab item
 		selectIndex(t, 0)
@@ -315,7 +317,7 @@ type baseTabsRenderer struct {
 	tabs baseTabs
 }
 
-func (r *baseTabsRenderer) Destroy() {
+func (*baseTabsRenderer) Destroy() {
 }
 
 func (r *baseTabsRenderer) applyTheme(t baseTabs) {
@@ -384,7 +386,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 	r.bar.Resize(barSize)
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	selected := t.selected()
+	selected := t.getCurrent()
 	for i, ti := range t.items() {
 		if i == selected {
 			ti.Content.Move(contentPos)
@@ -418,7 +420,7 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 
 	contentMin := fyne.NewSize(0, 0)
 	for _, content := range t.items() {
-		contentMin = contentMin.Max(content.Content.MinSize())
+		contentMin = internal.MaxSizes(contentMin, content.Content.MinSize())
 	}
 
 	switch t.tabLocation() {
@@ -489,7 +491,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fy
 
 func (r *baseTabsRenderer) objects(t baseTabs) []fyne.CanvasObject {
 	objects := []fyne.CanvasObject{r.bar, r.divider, r.indicator}
-	if i, is := t.selected(), t.items(); i >= 0 && i < len(is) {
+	if i, is := t.getCurrent(), t.items(); i >= 0 && i < len(is) {
 		objects = append(objects, is[i].Content)
 	}
 	return objects
@@ -546,7 +548,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	label := canvas.NewText(b.text, th.Color(theme.ColorNameForeground, v))
 	label.TextStyle.Bold = true
 
-	close := &tabCloseButton{
+	buttonClose := &tabCloseButton{
 		parent: b,
 		onTapped: func() {
 			if f := b.onClosed; f != nil {
@@ -554,16 +556,16 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 			}
 		},
 	}
-	close.ExtendBaseWidget(close)
-	close.Hide()
+	buttonClose.ExtendBaseWidget(buttonClose)
+	buttonClose.Hide()
 
-	objects := []fyne.CanvasObject{background, label, close, icon}
+	objects := []fyne.CanvasObject{background, label, buttonClose, icon}
 	return &tabButtonRenderer{
 		button:     b,
 		background: background,
 		icon:       icon,
 		label:      label,
-		close:      close,
+		close:      buttonClose,
 		objects:    objects,
 	}
 }
@@ -582,7 +584,7 @@ func (b *tabButton) MouseIn(*desktop.MouseEvent) {
 	b.Refresh()
 }
 
-func (b *tabButton) MouseMoved(*desktop.MouseEvent) {
+func (*tabButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabButton) MouseOut() {
@@ -632,7 +634,7 @@ func (b *tabButton) AccessibilityStates() []fyne.AccessibleState {
 	}
 	if b.tabs != nil {
 		items := b.tabs.items()
-		if i := b.tabs.selected(); i >= 0 && i < len(items) && items[i].button == b {
+		if i := b.tabs.getCurrent(); i >= 0 && i < len(items) && items[i].button == b {
 			states = append(states, fyne.AccessibleStateSelected)
 		}
 	}
@@ -680,7 +682,7 @@ type tabButtonRenderer struct {
 	objects    []fyne.CanvasObject
 }
 
-func (r *tabButtonRenderer) Destroy() {
+func (*tabButtonRenderer) Destroy() {
 }
 
 func (r *tabButtonRenderer) Layout(size fyne.Size) {
@@ -829,7 +831,7 @@ func (r *tabButtonRenderer) Refresh() {
 func (r *tabButtonRenderer) iconSize() float32 {
 	iconSize := r.button.Theme().Size(theme.SizeNameInlineIcon)
 	if r.button.iconPosition == buttonIconTop {
-		return 1.5 * iconSize
+		return 1.5 * iconSize //revive:disable-line:add-constant
 	}
 
 	return iconSize
@@ -884,7 +886,7 @@ func (b *tabCloseButton) MouseIn(*desktop.MouseEvent) {
 	b.parent.Refresh()
 }
 
-func (b *tabCloseButton) MouseMoved(*desktop.MouseEvent) {
+func (*tabCloseButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (b *tabCloseButton) MouseOut() {
@@ -903,7 +905,7 @@ type tabCloseButtonRenderer struct {
 	objects    []fyne.CanvasObject
 }
 
-func (r *tabCloseButtonRenderer) Destroy() {
+func (*tabCloseButtonRenderer) Destroy() {
 }
 
 func (r *tabCloseButtonRenderer) Layout(size fyne.Size) {
