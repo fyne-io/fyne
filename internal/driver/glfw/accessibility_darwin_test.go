@@ -3,13 +3,41 @@
 package glfw
 
 import (
+	"context"
+	"os/exec"
+	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 )
+
+func TestAccessibilityRoleDescription(t *testing.T) {
+	runAccessibilityProbe(t, "role_description")
+}
+
+func TestAccessibilityHitTest(t *testing.T) {
+	runAccessibilityProbe(t, "hit_test")
+}
+
+func runAccessibilityProbe(t *testing.T, name string) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	binary := filepath.Join(t.TempDir(), name)
+	// Compile the real bridge into an isolated native probe: no window or AX permission is required.
+	cmd := exec.CommandContext(ctx, "clang", "-Wno-deprecated-declarations",
+		"-I.", "-framework", "Cocoa",
+		"testdata/accessibility_"+name+".m", "accessibility_darwin.m", "-o", binary)
+	output, err := cmd.CombinedOutput()
+	require.NoError(t, err, "%s", output)
+	output, err = exec.CommandContext(ctx, binary).CombinedOutput()
+	require.NoError(t, err, "%s", output)
+}
 
 type stateBag struct {
 	canvas.Rectangle
@@ -168,15 +196,14 @@ func (s *setterOnly) AccessibilityValue() string             { return "" }
 func (s *setterOnly) AccessibilitySetValue(_ string) bool    { return true }
 
 func TestActionMaskFor_ValueSetterImpliesSetValue(t *testing.T) {
-	// A widget that implements AccessibleValueSetter but has no AccessibleActions
-	// shouldn't surface SetValue (we need both an action list AND the setter).
-	// However, if AccessibleActions exists and includes SetValue, the mask must
-	// include the SetValue bit even without the setter — the setter implication
-	// only applies when actions are *also* provided.
 	bag := &stateBag{actions: []fyne.AccessibleAction{fyne.AccessibleActionSetValue}}
 	mask, ok := actionMaskFor(bag)
 	assert.True(t, ok)
 	assert.NotZero(t, mask, "set-value action should be present in mask")
+
+	setterMask, ok := actionMaskFor(&setterOnly{})
+	assert.True(t, ok)
+	assert.Equal(t, mask, setterMask, "a value setter does not need AccessibleActions")
 }
 
 func TestActionFromC_RoundTrip(t *testing.T) {

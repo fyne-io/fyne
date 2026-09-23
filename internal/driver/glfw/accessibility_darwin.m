@@ -114,7 +114,8 @@ static BOOL appAccessibilitySwizzled = NO;
     if (self.role == AccessibilityRoleHeading) {
         return @"heading";
     }
-    return [super accessibilityRoleDescription];
+    // The superclass consults our legacy AXRoleDescription attribute, recursing here.
+    return NSAccessibilityRoleDescription([self accessibilityRole], [self accessibilitySubrole]);
 }
 
 - (NSString*)accessibilityLabel {
@@ -126,8 +127,11 @@ static BOOL appAccessibilitySwizzled = NO;
 }
 
 - (id)accessibilityValue {
-    if (self.role == AccessibilityRoleCheckbox || self.role == AccessibilityRoleRadio) {
+    if (self.role == AccessibilityRoleCheckbox) {
         return @(self.checked ? 1 : 0);
+    }
+    if (self.role == AccessibilityRoleRadio || self.role == AccessibilityRoleTab) {
+        return @(self.selected ? 1 : 0);
     }
     return self.value;
 }
@@ -175,6 +179,20 @@ static BOOL appAccessibilitySwizzled = NO;
 
 - (NSArray*)accessibilityChildren {
     return [[self.children copy] autorelease];
+}
+
+- (id)accessibilityHitTest:(NSPoint)point {
+    if (!NSPointInRect(point, [self accessibilityFrame])) {
+        return nil;
+    }
+    // NSAccessibilityElement's default stops at self, even for a tab group.
+    for (AccessibleElement* child in [self.children reverseObjectEnumerator]) {
+        id hit = [child accessibilityHitTest:point];
+        if (hit) {
+            return hit;
+        }
+    }
+    return [self isAccessibilityElement] ? self : nil;
 }
 
 - (BOOL)isAccessibilityEnabled {
@@ -234,7 +252,7 @@ static BOOL appAccessibilitySwizzled = NO;
         return;
     }
     if ([self invokeAction:AccessibilityActionSetValue mask:AccessibilityActionMaskSetValue withValue:[strValue UTF8String]]) {
-        self.value = [[strValue copy] autorelease];
+        // The next refresh reads the widget's value, which may conceal passwords.
         NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
     }
 }
@@ -270,7 +288,8 @@ static BOOL appAccessibilitySwizzled = NO;
         NSAccessibilityFocusedAttribute,
         NSAccessibilityEnabledAttribute,
     ]];
-    if (self.value) {
+    if (self.value || self.role == AccessibilityRoleCheckbox ||
+        self.role == AccessibilityRoleRadio || self.role == AccessibilityRoleTab) {
         [attrs addObject:NSAccessibilityValueAttribute];
     }
     return attrs;

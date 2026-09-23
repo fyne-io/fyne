@@ -13,6 +13,7 @@ wasm
 
 ### Tests
 **/testdata/failed
+/test/accessibility/bin/
 
 ### Go
 # Output of the coverage tool

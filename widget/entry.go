@@ -316,10 +316,13 @@ func (e *Entry) AccessibilityRole() fyne.AccessibleRole {
 	return fyne.AccessibleRoleTextField
 }
 
-// AccessibilityValue returns the entry's text content.
+// AccessibilityValue returns the entry's text content, concealed for password entries.
 //
 // Since: 2.8
 func (e *Entry) AccessibilityValue() string {
+	if e.Password {
+		return strings.Repeat(passwordChar, len([]rune(e.Text)))
+	}
 	return e.Text
 }
 

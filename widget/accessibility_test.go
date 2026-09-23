@@ -88,6 +88,21 @@ func TestEntry_Accessibility(t *testing.T) {
 	assert.Contains(t, e.AccessibilityStates(), fyne.AccessibleStateRequired)
 }
 
+func TestEntry_AccessibilityPassword(t *testing.T) {
+	e := widget.NewPasswordEntry()
+	e.Text = "a\u00e9\U0001f512"
+	assert.Equal(t, "\u2022\u2022\u2022", e.AccessibilityValue())
+	assert.True(t, e.AccessibilitySetValue("replacement"))
+	assert.Equal(t, "replacement", e.Text)
+	assert.NotContains(t, e.AccessibilityValue(), "replacement")
+
+	e.Password = false
+	assert.Equal(t, "replacement", e.AccessibilityValue())
+	e.Password = true
+	e.SetText("")
+	assert.Empty(t, e.AccessibilityValue())
+}
+
 func TestSelect_Accessibility(t *testing.T) {
 	test.NewTempApp(t)
 

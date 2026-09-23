@@ -120,11 +120,14 @@ func stateMaskFor(obj fyne.CanvasObject) int {
 
 // actionMaskFor builds the C action bitmask from a widget's reported actions.
 func actionMaskFor(obj fyne.CanvasObject) (int, bool) {
+	var mask int
+	if _, hasSetter := obj.(fyne.AccessibleValueSetter); hasSetter {
+		mask |= int(C.AccessibilityActionMaskSetValue)
+	}
 	provider, ok := obj.(fyne.AccessibleActions)
 	if !ok {
-		return 0, false
+		return mask, mask != 0
 	}
-	var mask int
 	for _, a := range provider.AccessibilityActions() {
 		switch a {
 		case fyne.AccessibleActionPress:
@@ -140,9 +143,6 @@ func actionMaskFor(obj fyne.CanvasObject) (int, bool) {
 		case fyne.AccessibleActionSetValue:
 			mask |= int(C.AccessibilityActionMaskSetValue)
 		}
-	}
-	if _, hasSetter := obj.(fyne.AccessibleValueSetter); hasSetter {
-		mask |= int(C.AccessibilityActionMaskSetValue)
 	}
 	return mask, mask != 0
 }
