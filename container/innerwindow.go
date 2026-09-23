@@ -73,6 +73,31 @@ func (w *InnerWindow) Close() {
 	w.Hide()
 }
 
+// Cursor returns the default cursor so that objects behind the window cannot set their own.
+//
+// Since: 2.9
+func (*InnerWindow) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
+// MouseIn catches mouse-in events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseIn(*desktop.MouseEvent) {
+}
+
+// MouseMoved catches mouse-moved events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseOut catches mouse-out events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseOut() {
+}
+
 // CreateRenderer implements the [fyne.Widget] interface.
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
