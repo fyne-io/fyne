@@ -9,12 +9,13 @@ import (
 	"github.com/fyne-io/glfw-js"
 )
 
-func (d *gLDriver) initGLFW() {
+func (d *gLDriver) initGLFW() error {
 	err := glfw.Init(gl.ContextWatcher)
 	if err != nil {
 		fyne.LogError("failed to initialise GLFW", err)
-		return
+		return err
 	}
+	return nil
 }
 
 func (d *gLDriver) pollEvents() {

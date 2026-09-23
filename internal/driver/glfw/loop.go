@@ -69,6 +69,11 @@ func (d *gLDriver) drawSingleFrame() {
 			continue
 		}
 
+		if d.rebindPaint && w.visible && w.frame != nil && !w.frame.ready() {
+			w.frame.markReady()
+			w.canvas.SetDirty()
+		}
+
 		if decideRepaint(w.visible, w.frame.ready(), w.canvas.CheckDirtyAndClear) {
 			w.RunWithContext(func() {
 				if w.driver.repaintWindow(w) {
@@ -226,6 +231,7 @@ func (*gLDriver) repaintWindow(w *window) bool {
 	if view != nil && visible {
 		w.frame.requestFrame()
 		view.SwapBuffers()
+		w.driver.rebindPaint = false
 	}
 
 	// mark that we have walked the window and don't
