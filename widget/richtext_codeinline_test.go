@@ -103,7 +103,7 @@ func TestTextSegment_EmphasisedInlineCodeHasBackground(t *testing.T) {
 func TestRichCodeBlock_BackgroundColour(t *testing.T) {
 	test.NewTempApp(t)
 
-	cb := newRichCodeBlock("x")
+	cb := newRichCodeBlock()
 	test.TempWidgetRenderer(t, cb)
 	assert.Equal(t, theme.Color(theme.ColorNameInputBackground), cb.bg.FillColor)
 }
