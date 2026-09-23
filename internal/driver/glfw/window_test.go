@@ -267,6 +267,19 @@ func TestWindow_Cursor(t *testing.T) {
 	})
 }
 
+func TestWindow_CursorUnderInnerWindow(t *testing.T) {
+	w := createWindow("Test")
+	e := widget.NewEntry()
+	iw := container.NewInnerWindow("Inner", widget.NewLabel("Content"))
+
+	w.SetContent(container.NewStack(e, iw))
+	repaintWindow(w)
+	runOnMain(func() {
+		w.moveMouse(float64(iw.Size().Width/2), float64(iw.Size().Height/2))
+		assert.Equal(t, desktop.Cursor(desktop.DefaultCursor), w.cursor)
+	})
+}
+
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := createWindow("Test")
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
