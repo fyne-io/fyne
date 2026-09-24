@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	paint "fyne.io/fyne/v2/internal/painter"
+	"fyne.io/fyne/v2/theme"
 )
 
 const (
@@ -28,6 +29,9 @@ const (
 	attrInset                    = "inset"
 	attrLineWidth                = "lineWidth"
 	attrNormal                   = "normal"
+	attrOrigin                   = "origin"
+	attrOwnColor                 = "ownColor"
+	attrPixelScale               = "pixelScale"
 	attrPointControlCount        = "numControlPoints"
 	attrPointControl1            = "controlPoint1"
 	attrPointControl2            = "controlPoint2"
@@ -884,7 +888,10 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 	p.logError()
 }
 
-func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
+// clip is unused while text is drawn from the glyph atlas: quads are positioned
+// individually rather than as one oversized texture, so there is no clipped
+// fallback path that needs to know the visible region.
+func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size, _ *internal.ClipItem) {
 	if text.Text == "" {
 		return
 	}
@@ -901,30 +908,24 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	case fyne.TextAlignCenter:
 		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
-
 	if containerSize.Height > size.Height {
 		pos = fyne.NewPos(pos.X, pos.Y+(containerSize.Height-size.Height)/2)
 	}
 
-	// text size is sensitive to position on screen
 	size.Width = roundToPixel(size.Width, p.pixScale)
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
-	if fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
-		p.freeClippedTextTexture(text)
-		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
-	} else {
-		visibleOffset, visibleWidth := visibleTextPixels(pos, size, frame, clip, p.pixScale)
-		height := int(math.Ceil(float64(size.Height * p.pixScale)))
-		cached := p.clippedTextTexture(text, visibleOffset, visibleWidth, fullWidth, height)
-		if cache.IsValid(cache.TextureType(cached.texture)) {
-			clipPos := fyne.NewPos(pos.X+float32(cached.offset)/p.pixScale, pos.Y)
-			clipSize := fyne.NewSize(float32(cached.width)/p.pixScale, size.Height)
-			p.drawTextureRegion(cached.texture, clipPos, clipSize, frame, canvas.ImageFillStretch, 1, 1, 0, 0)
-		}
+
+	col := text.Color
+	if col == nil {
+		col = theme.Color(theme.ColorNameForeground)
 	}
+	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
+	p.ensureGlyphAtlas()
+
+	cached := p.glyphGeometry(text, face)
+	p.drawGlyphBatch(cached, col, pos, frame)
 
 	if decorated {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
@@ -939,24 +940,6 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 			p.drawLine(line, strikePos, frame)
 		}
 	}
-}
-
-func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.ClipItem, scale float32) (offset, width int) {
-	clipPos := fyne.Position{}
-	clipSize := frame
-	if clip != nil {
-		clipPos, clipSize = clip.Rect()
-	}
-
-	left := fyne.Max(pos.X, clipPos.X)
-	right := fyne.Min(pos.X+size.Width, clipPos.X+clipSize.Width)
-	if right <= left {
-		return 0, 0
-	}
-
-	offset = int(math.Floor(float64((left - pos.X) * scale)))
-	width = int(math.Ceil(float64((right-pos.X)*scale))) - offset
-	return offset, width
 }
 
 func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect, cornerRadius, pad float32) {

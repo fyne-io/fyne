@@ -18,6 +18,7 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
+	colorFormatAlpha      = gl.ALPHA
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
@@ -288,6 +289,20 @@ func (*coreContext) TexImage2D(target uint32, level, width, height int, colorFor
 		colorFormat,
 		typ,
 		ptr,
+	)
+}
+
+func (*coreContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexSubImage2D(
+		target,
+		int32(level),   //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(xoffset), //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(yoffset), //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(width),   //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		int32(height),  //gosec:disable G115 -- we are definitely fine with limiting the value range here
+		colorFormat,
+		typ,
+		gl.Ptr(data),
 	)
 }
 
