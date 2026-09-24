@@ -65,6 +65,32 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 	cache.DeleteTexture(obj)
 }
 
+func (p *painter) CreateTextTexture(t *canvas.Text, queue chan<- func()) {
+	custom := ""
+	if t.FontSource != nil {
+		custom = t.FontSource.Name()
+	}
+	ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
+	ent.Text = t.Text
+	ent.Size = t.TextSize
+	ent.Style = t.TextStyle
+	ent.Source = custom
+
+	if _, ok := cache.GetTextTexture(ent); !ok {
+		queue <- func() {
+			_, ok := cache.GetTextTexture(ent)
+			if !ok {
+				tex := p.newGlTextTexture(t)
+				texture := cache.TextureType(tex)
+				cache.SetTextTexture(ent, texture, p.canvas, func() {
+					p.ctx.DeleteTexture(tex)
+					p.logError()
+				})
+			}
+		}
+	}
+}
+
 func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	if t, ok := object.(*canvas.Text); ok {
 		custom := ""
