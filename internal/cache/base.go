@@ -45,7 +45,18 @@ func refreshNow() time.Time {
 
 // Clean run cache clean task, it should be called on paint events.
 func Clean(canvasRefreshed bool) {
+	previousSample := cachedNow.Load()
 	now := refreshNow()
+	// If the driver has not painted for longer than the cache lifetime, entries
+	// used since its previous frame were stamped with an already-expired time.
+	// Defer cleanup for one pass so active entries can be stamped from this
+	// refreshed sample before they are considered for expiry.
+	if ValidDuration > 0 && now.UnixNano()-previousSample > ValidDuration.Nanoseconds() {
+		if canvasRefreshed {
+			skippedCleanWithCanvasRefresh = true
+		}
+		return
+	}
 	// do not run clean task too fast
 	if now.Sub(lastClean) < cacheCleanCooldown {
 		if canvasRefreshed {
