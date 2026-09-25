@@ -36,6 +36,18 @@ func init() {
 // TestMain makes sure that our driver is running on the main thread.
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
+	if os.Getenv(runLifecycleShutdownHelperEnv) == "1" {
+		exitCode := make(chan int)
+		go func() {
+			exitCode <- m.Run()
+		}()
+
+		<-runLifecycleShutdownReady
+		d.Run()
+		close(runLifecycleShutdownReturned)
+		os.Exit(<-exitCode)
+	}
+
 	d.init()
 
 	waitForStart := make(chan struct{})
