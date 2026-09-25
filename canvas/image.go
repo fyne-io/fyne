@@ -3,6 +3,7 @@ package canvas
 import (
 	"bytes"
 	"errors"
+	"hash/maphash"
 	"image"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
@@ -58,15 +59,18 @@ const (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Image)(nil)
 
+var svgHashSeed = maphash.MakeSeed()
+
 // Image describes a drawable image area that can render in a Fyne canvas
 // The image may be a vector or a bitmap representation, it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
 type Image struct {
 	baseObject
 
-	aspect float32
-	icon   *svg.Decoder
-	isSVG  bool
+	aspect   float32
+	icon     *svg.Decoder
+	iconHash uint64 // of the SVG content that icon was decoded from
+	isSVG    bool
 
 	// one of the following sources will provide our image data
 	File     string        // Load the image from a file
@@ -309,7 +313,7 @@ func (i *Image) updateReader() (io.ReadCloser, error) {
 			if th != nil {
 				col := th.Color(res.ThemeColorName(), fyne.CurrentApp().Settings().ThemeVariant())
 				var err error
-				content, err = svg.Colorize(content, col)
+				content, err = svg.ColorizeCached(content, col)
 				if err != nil {
 					fyne.LogError("", err)
 				}
@@ -360,11 +364,19 @@ func (i *Image) imageDetailsFromReader(source io.Reader) (reader io.Reader, widt
 	}
 
 	if i.isSVG {
-		var err error
-
-		i.icon, err = svg.NewDecoder(source)
+		data, err := io.ReadAll(source)
 		if err != nil {
 			return nil, 0, 0, 0, err
+		}
+
+		// parsing is slow, keep the decoder if the SVG has not changed
+		hash := maphash.Bytes(svgHashSeed, data)
+		if i.icon == nil || hash != i.iconHash {
+			i.icon, err = svg.NewDecoder(bytes.NewReader(data))
+			if err != nil {
+				return nil, 0, 0, 0, err
+			}
+			i.iconHash = hash
 		}
 		config := i.icon.Config()
 		width, height = config.Width, config.Height

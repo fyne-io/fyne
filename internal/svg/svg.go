@@ -18,6 +18,7 @@ import (
 	"github.com/srwiley/rasterx"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/cache"
 	col "fyne.io/fyne/v2/internal/color"
 )
 
@@ -40,6 +41,24 @@ func Colorize(src []byte, clr color.Color) ([]byte, error) {
 	if err != nil {
 		return src, fmt.Errorf("could not marshal svg, falling back to static content: %v", err)
 	}
+	return colorized, nil
+}
+
+// ColorizeCached is like Colorize but reuses the result of a previous call with the same content and color.
+// The returned slice is shared and must not be modified.
+func ColorizeCached(src []byte, clr color.Color) ([]byte, error) {
+	r, g, b, a := col.ToNRGBA(clr)
+	key := color.NRGBA{R: r, G: g, B: b, A: a}
+	if colorized, ok := cache.GetColorizedSvg(src, key); ok {
+		return colorized, nil
+	}
+
+	colorized, err := Colorize(src, clr)
+	if err != nil {
+		return colorized, err
+	}
+	colorized = colorized[:len(colorized):len(colorized)]
+	cache.SetColorizedSvg(src, key, colorized)
 	return colorized, nil
 }
 

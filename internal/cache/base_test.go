@@ -257,6 +257,7 @@ func testClearAll() {
 	skippedCleanWithCanvasRefresh = false
 	canvases.Clear()
 	svgs.Clear()
+	clear(colorizedSvgs)
 	textTextures.Clear()
 	objectTextures.Clear()
 	renderers.Clear()
