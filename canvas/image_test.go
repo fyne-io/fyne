@@ -47,6 +47,49 @@ func TestImage_RefreshBlank(t *testing.T) {
 	assert.Nil(t, img.Image)
 }
 
+func TestImage_RefreshSVGChanged(t *testing.T) {
+	square := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>`)
+	wide := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><rect width="20" height="10"/></svg>`)
+	tall := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 20"><rect width="10" height="20"/></svg>`)
+
+	res := &fyne.StaticResource{StaticName: "shape.svg", StaticContent: square}
+	img := canvas.NewImageFromResource(res)
+	img.FillMode = canvas.ImageFillOriginal
+	img.Refresh()
+	assert.Equal(t, float32(1), img.Aspect())
+	assert.Equal(t, fyne.NewSize(10, 10), img.MinSize())
+
+	copy(res.StaticContent, wide) // same length, changed in place
+	img.Refresh()
+	assert.Equal(t, float32(2), img.Aspect())
+	assert.Equal(t, fyne.NewSize(20, 10), img.MinSize())
+
+	path := filepath.Join(t.TempDir(), "tall.svg")
+	assert.NoError(t, os.WriteFile(path, tall, 0o644))
+	img.Resource = nil
+	img.File = path
+	img.Refresh()
+	assert.Equal(t, float32(0.5), img.Aspect())
+	assert.Equal(t, fyne.NewSize(10, 20), img.MinSize())
+}
+
+func TestImage_RefreshThemedSVGChanged(t *testing.T) {
+	test.NewTempApp(t)
+	square := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>`)
+	wide := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><rect width="20" height="10"/></svg>`)
+
+	res := &fyne.StaticResource{StaticName: "shape.svg", StaticContent: square}
+	img := canvas.NewImageFromResource(theme.NewThemedResource(res))
+	img.FillMode = canvas.ImageFillOriginal
+	img.Refresh()
+	assert.Equal(t, float32(1), img.Aspect())
+
+	res.StaticContent = wide
+	img.Refresh()
+	assert.Equal(t, float32(2), img.Aspect())
+	assert.Equal(t, fyne.NewSize(20, 10), img.MinSize())
+}
+
 func TestNewImageFromFile(t *testing.T) {
 	pwd, _ := os.Getwd()
 	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")

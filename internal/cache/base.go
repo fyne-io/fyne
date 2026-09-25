@@ -101,6 +101,9 @@ func CleanCanvas(canvas fyne.Canvas) {
 func ResetThemeCaches() {
 	svgs.Clear()
 	fontSizeCache.Clear()
+	colorizedSvgsLock.Lock()
+	clear(colorizedSvgs)
+	colorizedSvgsLock.Unlock()
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.

@@ -152,6 +152,48 @@ func TestColorize(t *testing.T) {
 	}
 }
 
+func TestColorizeCached(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			src, err := os.ReadFile(filepath.Join("testdata", tt.svgFile))
+			require.NoError(t, err)
+			want, err := Colorize(src, tt.color)
+			require.NoError(t, err)
+
+			first, err := ColorizeCached(src, tt.color)
+			require.NoError(t, err)
+			assert.Equal(t, want, first)
+			assert.Equal(t, len(first), cap(first))
+
+			again, err := ColorizeCached(src, tt.color)
+			require.NoError(t, err)
+			assert.Same(t, &first[0], &again[0])
+		})
+	}
+}
+
+func TestColorizeCached_SimilarColors(t *testing.T) {
+	src, err := os.ReadFile("testdata/circles.svg")
+	require.NoError(t, err)
+
+	// each pair is the same color.RGBA once premultiplied, but colorizes differently
+	pairs := [][2]color.Color{
+		{color.NRGBA{R: 200, A: 3}, color.NRGBA{R: 201, A: 3}},
+		{color.NRGBA{R: 200}, color.NRGBA{B: 200}},
+	}
+	for _, pair := range pairs {
+		var outputs [2][]byte
+		for i, c := range pair {
+			want, err := Colorize(src, c)
+			require.NoError(t, err)
+			outputs[i], err = ColorizeCached(src, c)
+			require.NoError(t, err)
+			assert.Equal(t, want, outputs[i])
+		}
+		assert.NotEqual(t, outputs[0], outputs[1])
+	}
+}
+
 func TestSVG_CurrentColor(t *testing.T) {
 	src := []byte("<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"ionicon\" viewBox=\"0 0 512 512\" width=\"42\" height=\"42\"><rect x=\"32\" y=\"128\" width=\"448\" height=\"320\" rx=\"48\" ry=\"48\" fill=\"none\" stroke=\"currentColor\" stroke-linejoin=\"round\" stroke-width=\"32\"/><path d=\"M144 128V96a32 32 0 0132-32h160a32 32 0 0132 32v32M480 240H32M320 240v24a8 8 0 01-8 8H200a8 8 0 01-8-8v-24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"/></svg>")
 	rdr := bytes.NewReader(src)
