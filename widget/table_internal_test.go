@@ -217,7 +217,7 @@ func TestTable_Sticky(t *testing.T) {
 	table.ScrollTo(TableCellID{Row: 7, Col: 2})
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,1"))
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 6,2"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 8,3"))
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "C"))
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "D"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "7"))
@@ -227,8 +227,8 @@ func TestTable_Sticky(t *testing.T) {
 	table.StickyColumnCount = 1
 	table.Refresh()
 	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,2"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,4"))
-	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 9,3"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 7,3"))
+	assert.True(t, areaContainsLabel(cellRenderer.Objects(), "text 8,3"))
 	// stuck cells
 	assert.True(t, areaContainsLabel(table.top.Content.(*fyne.Container).Objects, "text 0,3"))
 	assert.True(t, areaContainsLabel(table.left.Content.(*fyne.Container).Objects, "text 7,0"))
@@ -1023,4 +1023,89 @@ func areaContainsLabel(list []fyne.CanvasObject, text string) bool {
 		}
 	}
 	return false
+}
+
+func TestTable_ScrollTo_Headers(t *testing.T) {
+	test.NewTempApp(t)
+
+	// for this test the separator thickness is 0
+	test.ApplyTheme(t, &paddingZeroTheme{test.Theme()})
+
+	// we will test a 20 row x 5 column table where each cell is 50x50
+	// and any header row or column is 30x30
+	const (
+		maxRows int     = 20
+		maxCols int     = 5
+		cell    float32 = 50
+		header  float32 = 30
+	)
+
+	newTable := func(setup func(*Table)) *Table {
+		templ := canvas.NewRectangle(color.Gray16{})
+		templ.SetMinSize(fyne.Size{Width: cell, Height: cell})
+
+		table := NewTable(
+			func() (int, int) { return maxRows, maxCols },
+			func() fyne.CanvasObject { return templ },
+			func(TableCellID, fyne.CanvasObject) {},
+		)
+		table.CreateHeader = func() fyne.CanvasObject { return canvas.NewRectangle(color.Gray16{}) }
+		table.UpdateHeader = func(TableCellID, fyne.CanvasObject) {}
+		setup(table)
+		table.SetColumnWidth(-1, header)
+		table.SetRowHeight(-1, header)
+		return table
+	}
+
+	// the window ends up the size of one cell plus any header and sticky cells,
+	// so the scrolling viewport is always exactly one cell in each direction.
+	tt := []struct {
+		name  string
+		setup func(*Table)
+		steps []TableCellID
+		want  fyne.Position
+	}{
+		{
+			"header row does not shift the offset when scrolling back",
+			func(table *Table) { table.ShowHeaderRow = true },
+			[]TableCellID{{Row: 10}, {}},
+			fyne.Position{},
+		},
+		{
+			"header column does not shift the offset when scrolling back",
+			func(table *Table) { table.ShowHeaderColumn = true },
+			[]TableCellID{{Col: 4}, {}},
+			fyne.Position{},
+		},
+		{
+			"first non-sticky column is scrolled into view",
+			func(table *Table) { table.StickyColumnCount = 2 },
+			[]TableCellID{{Col: 4}, {Col: 2}},
+			fyne.Position{},
+		},
+		{
+			"sticky row is never scrolled to",
+			func(table *Table) {
+				table.ShowHeaderRow = true
+				table.StickyRowCount = 2
+			},
+			[]TableCellID{{Row: 10}, {Row: 1}},
+			fyne.Position{Y: 8 * cell},
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			table := newTable(tc.setup)
+			w := test.NewWindow(table)
+			defer w.Close()
+
+			for _, id := range tc.steps {
+				table.ScrollTo(id)
+			}
+
+			assert.Equal(t, tc.want, table.offset)
+			assert.Equal(t, tc.want, table.content.Offset)
+		})
+	}
 }
