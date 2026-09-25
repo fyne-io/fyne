@@ -983,6 +983,29 @@ func TestTable_ShowVisible(t *testing.T) {
 	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
 }
 
+func TestTable_DividersBeforeResize(t *testing.T) {
+	length := func() (int, int) { return 1000, 1000 }
+	create := func() fyne.CanvasObject { return NewLabel("text") }
+	update := func(TableCellID, fyne.CanvasObject) {}
+
+	headers := NewTableWithHeaders(length, create, update)
+	stickyRows := NewTable(length, create, update)
+	stickyRows.StickyRowCount = 1
+	stickyCols := NewTable(length, create, update)
+	stickyCols.StickyColumnCount = 1
+
+	for name, table := range map[string]*Table{"headers": headers, "sticky rows": stickyRows, "sticky columns": stickyCols} {
+		t.Run(name, func(t *testing.T) {
+			w := test.NewTempWindow(t, table)
+			w.Resize(fyne.NewSize(120, 120))
+
+			// the renderer is created at 0x0, which must not allocate a divider per row and column
+			cellRenderer := test.TempWidgetRenderer(t, table.cells).(*tableCellsRenderer)
+			assert.Less(t, len(cellRenderer.dividers), 20)
+		})
+	}
+}
+
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {
 	test.NewTempApp(t)
 
