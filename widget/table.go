@@ -918,7 +918,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return visible, offX, minCol, maxCol
+		return visible, offX, minCol, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1018,7 +1018,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return visible, offY, minRow, maxRow
+		return visible, offY, minRow, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
