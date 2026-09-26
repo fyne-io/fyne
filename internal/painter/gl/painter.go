@@ -9,30 +9,15 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/driver"
+	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 )
 
-// Painter defines the functionality of our OpenGL based renderer
-type Painter interface {
-	// Init tell a new painter to initialize, usually called after a context is available
-	Init()
-	// Capture requests that the specified canvas be drawn to an in-memory image
-	Capture(fyne.Canvas) image.Image
-	// Clear tells our painter to prepare a fresh paint
-	Clear()
-	// Free is used to indicate that a certain canvas object is no longer needed
-	Free(fyne.CanvasObject)
-	// Paint a single fyne.CanvasObject but not its children.
-	Paint(fyne.CanvasObject, fyne.Position, fyne.Size, *internal.ClipItem)
-	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
-	SetFrameBufferScale(float32)
-	// SetOutputSize is used to change the resolution of our output viewport
-	SetOutputSize(int, int)
-	// StartClipping tells us that the following paint actions should be clipped to the specified area.
-	StartClipping(fyne.Position, fyne.Size)
-	// StopClipping stops clipping paint actions.
-	StopClipping()
-}
+// Painter defines the functionality of our OpenGL based renderer.
+//
+// The interface itself is renderer independent and is declared in the parent
+// painter package; this alias keeps the long standing gl.Painter spelling.
+type Painter = paint.Painter
 
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialize OpenGL
@@ -43,17 +28,23 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
+	atlas               paint.GlyphAtlas
+	atlasTex            Texture
+	atlasTexValid       bool       // whether atlasTex has been allocated
 	blurKernel          blurKernel // cached 1D kernel texture on GPU
 	blurSnap            blurSnap   // cached texture for GPU-side blur snapshot
 	canvas              fyne.Canvas
 	clippedTextTextures map[*canvas.Text]clippedTextTexture
 	contextProvider     driver.WithContext
 	ctx                 context
-	fbHeight            int // current framebuffer height in pixels
+	fbHeight            int       // current framebuffer height in pixels
+	glyphPending        []float32 // queued batch vertices, glyphVertexFloats each
 	maxTextureSize      int
 	pixScale            float32 // pre-calculate scale*texScale for each draw
 	programs            *programs
+	quadScratch         []paint.GlyphQuad       // one string's glyph quads, reused
 	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
+	stats               drawStats               // FYNE_GL_DEBUG counters
 	texScale            float32
 }
 
@@ -61,6 +52,11 @@ type painter struct {
 var _ Painter = (*painter)(nil)
 
 func (p *painter) Clear() {
+	if glDebug {
+		p.startFrame()
+	}
+	// Anything still queued belongs to a frame that is about to be wiped.
+	p.glyphPending = p.glyphPending[:0]
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
@@ -97,7 +93,14 @@ func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Siz
 		return
 	}
 
+	if !glDebug {
+		p.drawObject(obj, pos, frame, clip)
+		return
+	}
+	draws, batches := p.stats.draws, p.stats.batches
 	p.drawObject(obj, pos, frame, clip)
+	// A batch flushed while drawing obj carried earlier objects, not obj.
+	p.countDraws(obj, p.stats.draws-draws-(p.stats.batches-batches))
 }
 
 func (p *painter) SetFrameBufferScale(scale float32) {
@@ -171,6 +174,7 @@ func (p *painter) SetUniform4f(pState programState, name string, v0, v1, v2, v3 
 }
 
 func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
+	p.FlushGlyphs() // queued quads belong to the outgoing scissor rectangle
 	x := p.textureScale(pos.X)
 	y := p.textureScale(p.canvas.Size().Height - pos.Y - size.Height)
 	w := p.textureScale(size.Width)
@@ -188,6 +192,7 @@ func (p *painter) StartClipping(pos fyne.Position, size fyne.Size) {
 }
 
 func (p *painter) StopClipping() {
+	p.FlushGlyphs() // as in StartClipping: draw under the rectangle still in force
 	p.ctx.Disable(scissorTest)
 	p.logError()
 }
@@ -228,6 +233,12 @@ func (p *painter) compilePrograms() *programs {
 		ellipse: programState{
 			ref:        p.mustCreateProgram(shaderVertPassthrough2D, shaderFragEllipse),
 			buff:       p.createBuffer(coordinatesSizeRectangle),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
+		glyph: programState{
+			ref:        p.mustCreateProgram(shaderVertGlyph, shaderFragGlyph),
+			buff:       p.createBuffer(6 * glyphVertexFloats),
 			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		},
@@ -382,6 +393,7 @@ type programs struct {
 	bezierCurve      programState
 	blur             programState
 	ellipse          programState
+	glyph            programState
 	line             programState
 	polygon          programState
 	rectangle        programState
