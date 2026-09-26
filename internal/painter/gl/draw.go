@@ -53,6 +53,7 @@ const (
 	attrTexture                  = "tex"
 	attrTextureKernel            = "kernelTex"
 	attrVertex                   = "vert"
+	attrVertexColor              = "vertColor"
 	attrVertexCount              = "vertexCount"
 	attrVertexTextureCoordinates = "vertTexCoord"
 	attrVertices                 = "vertices"
@@ -94,6 +95,8 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	if bw <= 0 || bh <= 0 {
 		return
 	}
+	// The snapshot below reads the framebuffer, so queued quads have to be in it.
+	p.FlushGlyphs()
 
 	// Ensure blurSnap.tex exists at the correct size; reallocate only when dimensions change.
 	if !p.blurSnap.texValid || p.blurSnap.width != bw || p.blurSnap.height != bh {
@@ -157,7 +160,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	points[coordinateSize2DWithTexture-1], points[2*coordinateSize2DWithTexture-1] = points[2*coordinateSize2DWithTexture-1], points[coordinateSize2DWithTexture-1]
 	points[3*coordinateSize2DWithTexture-1], points[4*coordinateSize2DWithTexture-1] = points[4*coordinateSize2DWithTexture-1], points[3*coordinateSize2DWithTexture-1]
 
-	p.ctx.UseProgram(p.programs.blur.ref)
+	p.useProgram(p.programs.blur.ref)
 	p.updateBuffer(p.programs.blur.buff, points[:])
 	p.UpdateVertexArray(p.programs.blur, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.blur, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
@@ -210,7 +213,7 @@ func (p *painter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyn
 
 	// Vertex: BEG
 	points, bounds := p.vecSquareCoords(pos, circle, frame, circle.Shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -280,7 +283,7 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 		return
 	}
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	p.ctx.UseProgram(p.programs.line.ref)
+	p.useProgram(p.programs.line.ref)
 	p.updateBuffer(p.programs.line.buff, points[:])
 	p.UpdateVertexArray(p.programs.line, attrVertex, coordinateSize2D, coordinateSize2DWithNormal, 0)
 	p.UpdateVertexArray(p.programs.line, attrNormal, coordinateSize2D, coordinateSize2DWithNormal, coordinateSize2D)
@@ -307,7 +310,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, bezierCurve, frame, 0.0, canvas.Shadow{})
 	program := p.programs.bezierCurve
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -371,7 +374,7 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.programs.arbitraryPolygon
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -523,7 +526,7 @@ func (p *painter) drawShader(shader *canvas.Shader, pos fyne.Position, frame fyn
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, shader, frame, 0.0, canvas.Shadow{})
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -592,6 +595,10 @@ func (p *painter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame
 	topLeftRadius := paint.GetCornerRadius(rect.TopLeftCornerRadius, rect.CornerRadius)
 	bottomRightRadius := paint.GetCornerRadius(rect.BottomRightCornerRadius, rect.CornerRadius)
 	bottomLeftRadius := paint.GetCornerRadius(rect.BottomLeftCornerRadius, rect.CornerRadius)
+	if topRightRadius == 0 && topLeftRadius == 0 && bottomRightRadius == 0 && bottomLeftRadius == 0 &&
+		p.pushSolidRect(rect, pos, frame) {
+		return
+	}
 	p.drawOblong(rect, rect.FillColor, rect.StrokeColor, rect.StrokeWidth, topRightRadius, topLeftRadius, bottomRightRadius, bottomLeftRadius, rect.Aspect, rect.Shadow, pos, frame)
 }
 
@@ -610,7 +617,7 @@ func (p *painter) drawOblong(obj fyne.CanvasObject, fill, stroke color.Color, st
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, obj, frame, aspect, shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -697,7 +704,7 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, polygon, frame, 0.0, canvas.Shadow{})
 	program := p.programs.polygon
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -754,7 +761,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	// Vertex: BEG
 	points, bounds := p.vecRectCoords(pos, arc, frame, 0.0, canvas.Shadow{})
 	program := p.programs.arc
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -828,7 +835,7 @@ func (p *painter) drawEllipse(ellipse *canvas.Ellipse, pos fyne.Position, frame 
 
 	// Vertex: BEG
 	points, bounds := p.vecRectCoordsWithPad(pos, ellipse, frame, -xPad, -yPad, ellipse.Shadow)
-	p.ctx.UseProgram(program.ref)
+	p.useProgram(program.ref)
 	p.updateBuffer(program.buff, points[:])
 	p.UpdateVertexArray(program, attrVertex, coordinateSize2D, coordinateSize2D, 0)
 
@@ -911,8 +918,14 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	size.Height = roundToPixel(size.Height, p.pixScale)
 	size.Width += roundToPixel(paint.VectorPad(text), p.pixScale) // italic overspill to the right
 	size.Height += roundToPixel(paint.TextVectorPad, p.pixScale)  // space below for descenders / underline
-	fullWidth := int(math.Ceil(float64(size.Width * p.pixScale)))
-	if fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
+	// The atlas draws a quad per glyph out of one shared texture, so it needs no
+	// texture of its own and no width limit - both paths after it exist only for
+	// strings it cannot represent.
+	if p.drawTextFromAtlas(text, pos, frame) {
+		// A run that used to be too wide for one texture may have a windowed
+		// texture parked from before; with no width limit here, it is dead.
+		p.freeClippedTextTexture(text)
+	} else if fullWidth := int(math.Ceil(float64(size.Width * p.pixScale))); fullWidth <= p.maxTextureSize || p.maxTextureSize <= 0 {
 		p.freeClippedTextTexture(text)
 		p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0)
 	} else {
@@ -962,7 +975,7 @@ func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.
 func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect, cornerRadius, pad float32) {
 	points, insets, inner := p.rectCoords(size, pos, frame, fill, aspect, pad)
 
-	p.ctx.UseProgram(p.programs.simple.ref)
+	p.useProgram(p.programs.simple.ref)
 	p.updateBuffer(p.programs.simple.buff, points[:])
 	p.UpdateVertexArray(p.programs.simple, attrVertex, coordinateSize2D, coordinateSize2DWithTexture, 0)
 	p.UpdateVertexArray(p.programs.simple, attrVertexTextureCoordinates, coordinateSize2D, coordinateSize2DWithTexture, coordinateSize2D)
