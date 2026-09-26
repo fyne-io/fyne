@@ -36,6 +36,10 @@ const (
 	// reset-and-repack answer the atlas uses. 4096 entries of a dozen glyphs is
 	// roughly 2MB.
 	shapedCacheMax = 4096
+	// whiteBlock is the side of the solid block plain rectangles sample, and
+	// whiteCentre the offset of its centre texel from the block's corner.
+	whiteBlock  = 3
+	whiteCentre = whiteBlock / 2.0
 )
 
 // AtlasTexture is a painter's GPU half of a GlyphAtlas.
@@ -150,18 +154,18 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 // leaves around it can never bleed in.
 func (a *GlyphAtlas) White(tex AtlasTexture) (u, v float32, ok bool) {
 	if !a.whiteOK {
-		x, y, ok := a.place(3, 3, tex)
+		x, y, ok := a.place(whiteBlock, whiteBlock, tex)
 		if !ok {
 			return 0, 0, false
 		}
-		img := image.NewRGBA(image.Rect(0, 0, 3, 3))
+		img := image.NewRGBA(image.Rect(0, 0, whiteBlock, whiteBlock))
 		for i := range img.Pix {
 			img.Pix[i] = 0xff
 		}
 		tex.UploadGlyph(img, x, y)
 		a.whiteX, a.whiteY, a.whiteOK = x, y, true
 	}
-	return (float32(a.whiteX) + 1.5) / AtlasSize, (float32(a.whiteY) + 1.5) / AtlasSize, true
+	return (float32(a.whiteX) + whiteCentre) / AtlasSize, (float32(a.whiteY) + whiteCentre) / AtlasSize, true
 }
 
 // shape returns text's glyphs as WalkGlyphs places them, from the cache when the
@@ -212,10 +216,10 @@ func (a *GlyphAtlas) glyph(pg PlacedGlyph, fontSize, pixScale float32, tex Atlas
 
 	// Ink bounds in destination pixels, relative to the pen position and
 	// baseline. Height is measured downwards from YBearing, so it is negative.
-	relX := fixedToPixels(int32(pg.Glyph.XBearing), pixScale)
-	relY := fixedToPixels(int32(pg.Glyph.YBearing), pixScale)
-	inkW := fixedToPixels(int32(pg.Glyph.Width), pixScale)
-	inkH := -fixedToPixels(int32(pg.Glyph.Height), pixScale)
+	relX := fixed266ToFloat32(pg.Glyph.XBearing) * pixScale
+	relY := fixed266ToFloat32(pg.Glyph.YBearing) * pixScale
+	inkW := fixed266ToFloat32(pg.Glyph.Width) * pixScale
+	inkH := -fixed266ToFloat32(pg.Glyph.Height) * pixScale
 	if inkW <= 0 || inkH <= 0 { // a space, or anything else with no ink
 		a.entries[key] = glyphEntry{}
 		return glyphEntry{}, true
@@ -373,9 +377,4 @@ func (p *atlasPacker) add(w, h int) (x, y int, ok bool) {
 // the old contents first, and forget every glyphEntry they hold.
 func (p *atlasPacker) reset() {
 	p.penX, p.shelfY, p.shelfHeight = 0, 0, 0
-}
-
-// fixedToPixels converts a 26.6 fixed point font metric to destination pixels.
-func fixedToPixels(v int32, scale float32) float32 {
-	return float32(v) / 64 * scale
 }
