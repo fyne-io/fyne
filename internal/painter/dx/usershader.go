@@ -168,7 +168,7 @@ func (s *userShader) bindTextures(p *Painter, shader *canvas.Shader) bool {
 	}
 	// Before binding: flushing draws the glyph batch, which would otherwise
 	// leave the atlas bound over slot 0 for this shader's draw.
-	p.flushGlyphs()
+	p.FlushGlyphs()
 
 	p.g.ctx.PSSetShaderResourcesAt(0, s.srvs)
 	p.g.ctx.PSSetSamplersAt(0, s.samplers)
