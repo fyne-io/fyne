@@ -301,15 +301,8 @@ type Painter struct {
 	glyphbuf *buffer
 	// glyphPending accumulates glyph quads until something forces a flush.
 	glyphPending []glyphInst
-	// glyphScratch and entryScratch are reused by drawText to collect one
-	// string's shaped glyphs and their atlas slots.
-	glyphScratch []paint.PlacedGlyph
-	entryScratch []glyphEntry
-	// shaped caches the result of shaping one string, keyed by everything the
-	// shaper reads. Shaping (segmenting plus HarfBuzz) is the dominant cost of
-	// text once rasterisation and draws are cached and batched, and a UI's
-	// strings mostly repeat frame over frame.
-	shaped map[shapedKey]shapedEntry
+	// quadScratch is reused by drawText to collect one string's glyph quads.
+	quadScratch []paint.GlyphQuad
 
 	atlas glyphAtlas
 
@@ -395,7 +388,6 @@ func NewPainter(c fyne.Canvas, g *GPU) *Painter {
 		canvas: c, g: g,
 		textures: map[uint32]*gpuTexture{},
 		texPool:  map[[2]uint32][]pooledTexture{},
-		shaped:   map[shapedKey]shapedEntry{},
 	}
 	p.SetFrameBufferScale(1.0)
 	return p
@@ -643,7 +635,7 @@ func (p *Painter) SetOutputSize(width, height int) {
 // top-origin canvas coordinates and D3D scissor rects are also top-origin, so
 // the coordinates map directly.
 func (p *Painter) StartClipping(pos fyne.Position, size fyne.Size) {
-	p.flushGlyphs() // queued glyphs belong to the outgoing scissor rectangle
+	p.FlushGlyphs() // queued glyphs belong to the outgoing scissor rectangle
 	x := p.textureScale(pos.X)
 	y := p.textureScale(pos.Y)
 	w := p.textureScale(size.Width)
@@ -666,7 +658,7 @@ func (p *Painter) StopClipping() {
 	if !p.clipping {
 		return
 	}
-	p.flushGlyphs() // as in StartClipping: emit under the rectangle still in force
+	p.FlushGlyphs() // as in StartClipping: emit under the rectangle still in force
 	p.g.ctx.RSSetState(p.rsPlain)
 	p.clipping = false
 }
@@ -743,7 +735,7 @@ func (p *Painter) upload(c *constants, ndcRect [4]float32, vs *vertexShader, ps 
 ) {
 	// Glyphs queued before this object have to reach the back buffer before it
 	// does, or alpha blending sees the wrong order.
-	p.flushGlyphs()
+	p.FlushGlyphs()
 
 	c.NdcRect = ndcRect
 	// Map(WRITE_DISCARD) rather than UpdateSubresource: this buffer is rewritten
@@ -790,16 +782,16 @@ func (p *Painter) setState(vs *vertexShader, ps *pixelShader, topology uint32, b
 // first if it is full.
 func (p *Painter) pushGlyph(inst glyphInst) {
 	if len(p.glyphPending) == glyphBatchMax {
-		p.flushGlyphs()
+		p.FlushGlyphs()
 	}
 	p.glyphPending = append(p.glyphPending, inst)
 }
 
-// flushGlyphs draws every queued glyph quad as one instanced draw. Callers must
+// FlushGlyphs draws every queued glyph quad as one instanced draw. Callers must
 // invoke it before any other draw, before the scissor rectangle moves, before
 // the atlas contents are overwritten, and at the end of the frame; every one of
 // those would otherwise reorder, mis-clip or mis-sample the queue.
-func (p *Painter) flushGlyphs() {
+func (p *Painter) FlushGlyphs() {
 	n := len(p.glyphPending)
 	if n == 0 {
 		return
@@ -837,7 +829,7 @@ func (p *Painter) Flush() {
 	if !p.ready() {
 		return
 	}
-	p.flushGlyphs()
+	p.FlushGlyphs()
 }
 
 // baseConstants fills the fields every shape shader reads.
@@ -910,7 +902,8 @@ func (p *Painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 	if r.FillColor == nil || r.FillColor == color.Transparent {
 		return true // nothing to draw, and no stroke or shadow either
 	}
-	if !p.ensureAtlasWhite() {
+	u, v, ok := p.atlas.White(p)
+	if !ok {
 		return false
 	}
 
@@ -930,7 +923,7 @@ func (p *Painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 			x1/fw*2 - 1, 1 - y1/fh*2,
 			x2/fw*2 - 1, 1 - y2/fh*2,
 		},
-		UV:    [4]float32{p.atlas.whiteU, p.atlas.whiteV, p.atlas.whiteU, p.atlas.whiteV},
+		UV:    [4]float32{u, v, u, v},
 		Color: [4]float32{cr, cg, cb, ca},
 	})
 	p.rectCount++
@@ -1150,115 +1143,30 @@ func (p *Painter) drawTextDecoration(text *canvas.Text, pos fyne.Position, size,
 	}
 }
 
-// shapedKey identifies one shaped string: the text and everything else the
-// shaper reads. The face is the cached *FontCacheItem pointer, whose identity
-// is stable until the font caches are cleared - a theme or font change hands
-// out new pointers, orphaning (not corrupting) old entries.
-type shapedKey struct {
-	text  string
-	face  *paint.FontCacheItem
-	size  float32
-	scale float32
-	style fyne.TextStyle
-}
-
-// shapedEntry is one cached shaping result. ok is false when the string has to
-// take the whole-run texture path (an emoji, in practice), cached so the
-// losing shape is not re-run every frame just to fail again.
-type shapedEntry struct {
-	glyphs []paint.PlacedGlyph
-	ok     bool
-}
-
-// shapedCacheMax caps the shaped-run cache. A UI whose labels churn (counters,
-// live values) grows entries without bound; past the cap the whole cache is
-// dropped and rebuilt from live strings, the same reset-and-repack answer the
-// atlas uses. 4096 entries of a dozen glyphs is roughly 2MB.
-const shapedCacheMax = 4096
-
 // drawTextFromAtlas queues one quad per glyph of the run, reporting false when
 // the string has to go down the whole-run texture path instead.
 func (p *Painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size) bool {
+	var ok bool
+	p.quadScratch, ok = p.atlas.TextQuads(p.quadScratch[:0], text, pos, p.pixScale, p)
+	if !ok {
+		return false
+	}
+
 	col := text.Color
 	if col == nil {
 		col = theme.Color(theme.ColorNameForeground)
 	}
-
-	face := paint.CachedFontFace(text.TextStyle, text.FontSource, text)
-	key := shapedKey{
-		text: text.Text, face: face, size: text.TextSize,
-		scale: p.pixScale, style: text.TextStyle,
-	}
-	entry, ok := p.shaped[key]
-	if !ok {
-		p.glyphScratch = p.glyphScratch[:0]
-		paint.WalkGlyphs(face.Fonts, text.Text, text.TextSize, p.pixScale, text.TextStyle,
-			func(g paint.PlacedGlyph) { p.glyphScratch = append(p.glyphScratch, g) })
-		entry.ok = len(p.glyphScratch) > 0 && shapeable(p.glyphScratch)
-		if entry.ok {
-			entry.glyphs = append([]paint.PlacedGlyph(nil), p.glyphScratch...)
-		}
-		if len(p.shaped) >= shapedCacheMax {
-			clear(p.shaped)
-		}
-		p.shaped[key] = entry
-	}
-	if !entry.ok {
-		return false
-	}
-
-	// The run's own pixel origin. WalkGlyphs positions are relative to it, and
-	// the same rounding the texture path applies to the quad is applied here so
-	// glyphs land on whole pixels either way.
-	originX := roundToPixel(pos.X*p.pixScale, 1.0)
-	originY := roundToPixel(pos.Y*p.pixScale, 1.0)
-
-	// Every glyph is resolved before any quad is queued. Resolving can reset a
-	// full atlas, and failing part way through after queueing would leave half a
-	// string on screen with no way to take it back.
-	p.entryScratch = p.entryScratch[:0]
-	for _, pg := range entry.glyphs {
-		e, ok := p.glyphEntry(pg, text.TextSize)
-		if !ok {
-			return false
-		}
-		p.entryScratch = append(p.entryScratch, e)
-	}
-
 	r, g, b, a := fragmentColor(col)
 	fw, fh := p.scaleFrameSize(frame)
-
-	for i, pg := range entry.glyphs {
-		e := p.entryScratch[i]
-		if e.empty() {
-			continue
-		}
-
-		// Snapped to whole device pixels. The bitmap was rasterised at a whole
-		// pixel origin, so a quad at a fractional position would resample it and
-		// the glyph would come out soft and fringed - the pen position drifts
-		// fractional as the shaped advances accumulate, so this is every glyph
-		// but the first, not an edge case.
-		//
-		// ponytail: whole-pixel placement, so within-run subpixel positioning is
-		// lost and spacing can differ from the whole-run path by under a pixel.
-		// The upgrade, if that is ever visible, is to cache each glyph at a few
-		// horizontal subpixel phases and pick by the fractional pen position.
-		x1 := roundToPixel(originX+pg.X, 1.0) + float32(e.bearX)
-		y1 := roundToPixel(originY+pg.Y, 1.0) + float32(e.bearY)
-		x2, y2 := x1+float32(e.width), y1+float32(e.height)
-
+	for _, q := range p.quadScratch {
 		p.pushGlyph(glyphInst{
 			// Pixels to clip space: x doubles and shifts, y additionally flips,
 			// which is why y1 becomes the larger clip-space value.
 			NDC: [4]float32{
-				x1/fw*2 - 1, 1 - y1/fh*2,
-				x2/fw*2 - 1, 1 - y2/fh*2,
+				q.X1/fw*2 - 1, 1 - q.Y1/fh*2,
+				q.X2/fw*2 - 1, 1 - q.Y2/fh*2,
 			},
-			UV: [4]float32{
-				float32(e.x) / atlasSize, float32(e.y) / atlasSize,
-				float32(e.x+e.width) / atlasSize, float32(e.y+e.height) / atlasSize,
-			},
+			UV:    [4]float32{q.U1, q.V1, q.U2, q.V2},
 			Color: [4]float32{r, g, b, a},
 		})
 	}
@@ -1397,7 +1305,7 @@ func (p *Painter) drawGPUTexture(obj fyne.CanvasObject, tex *gpuTexture,
 
 	// Before binding, not after: flushing draws the glyph batch, which leaves the
 	// atlas in shader slot 0. Binding first would have this draw sample the atlas.
-	p.flushGlyphs()
+	p.FlushGlyphs()
 
 	sampler := p.sampLinear
 	switch o := obj.(type) {
@@ -2325,7 +2233,7 @@ func (p *Painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	// Ahead of both the binding and the snapshot below: queued glyphs have to be
 	// in the back buffer before it is copied, or the blur samples a frame that
 	// is missing its text.
-	p.flushGlyphs()
+	p.FlushGlyphs()
 
 	p.g.ctx.PSSetSamplersAt(0, []*samplerState{p.sampLinear, p.sampNearest})
 	views := []*shaderResourceView{p.blurSnap.srv, p.blurKernel.srv}
