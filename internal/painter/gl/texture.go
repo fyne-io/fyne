@@ -81,6 +81,9 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 
 		if !ok {
 			tex := creator(object)
+			if glDebug {
+				count(&p.stats.textures, object, 1)
+			}
 			texture = cache.TextureType(tex)
 			cache.SetTextTexture(ent, texture, p.canvas, func() {
 				p.ctx.DeleteTexture(tex)
@@ -95,6 +98,9 @@ func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject
 
 	if !ok {
 		texture = cache.TextureType(creator(object))
+		if glDebug {
+			count(&p.stats.textures, object, 1)
+		}
 		cache.SetTexture(object, texture, p.canvas)
 	}
 	if !cache.IsValid(texture) {
