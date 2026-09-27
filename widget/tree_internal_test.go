@@ -356,7 +356,7 @@ func TestTree_Resize(t *testing.T) {
 	separatorThickness := theme.Padding()
 
 	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + theme.InnerPadding()
-	height := fyne.Max(templateMinSize.Height, theme.IconInlineSize())*3 + separatorThickness*2
+	height := max(templateMinSize.Height, theme.IconInlineSize())*3 + separatorThickness*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
@@ -366,17 +366,17 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, float32(0), a.Position().X)
 	assert.Equal(t, float32(0), a.Position().Y)
 	assert.Equal(t, treeSize, a.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), a.Size().Height)
+	assert.Equal(t, max(templateMinSize.Height, theme.IconInlineSize()), a.Size().Height)
 
 	assert.Equal(t, float32(0), b.Position().X)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness, b.Position().Y)
+	assert.Equal(t, max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), b.Size().Height)
+	assert.Equal(t, max(templateMinSize.Height, theme.IconInlineSize()), b.Size().Height)
 
 	assert.Equal(t, float32(0), c.Position().X)
-	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness), c.Position().Y)
+	assert.Equal(t, 2*(max(templateMinSize.Height, theme.IconInlineSize())+separatorThickness), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize()), c.Size().Height)
+	assert.Equal(t, max(templateMinSize.Height, theme.IconInlineSize()), c.Size().Height)
 }
 
 func TestTree_MinSize(t *testing.T) {
@@ -396,7 +396,7 @@ func TestTree_MinSize(t *testing.T) {
 			"small": {
 				fyne.NewSize(1, 1),
 				fyne.NewSize(1, 1),
-				fyne.NewSize(fyne.Max(1+2*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
+				fyne.NewSize(max(1+2*theme.Padding()+theme.IconInlineSize(), float32(32)), float32(32)),
 			},
 			"large-leaf": {
 				fyne.NewSize(100, 100),
@@ -440,7 +440,7 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*theme.Padding()+theme.IconInlineSize(),
-				fyne.Max(templateMinSize.Height, theme.IconInlineSize()),
+				max(templateMinSize.Height, theme.IconInlineSize()),
 			),
 		},
 		"single_item_opened": {
@@ -452,7 +452,7 @@ func TestTree_MinSize(t *testing.T) {
 			opened: []string{"A"},
 			want: fyne.NewSize(
 				templateMinSize.Width+indentation()+2*theme.Padding()+theme.IconInlineSize(),
-				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
+				max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
 			),
 		},
 		"multiple_items": {
@@ -469,7 +469,7 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*theme.Padding()+theme.IconInlineSize(),
-				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
+				max(templateMinSize.Height, theme.IconInlineSize())*2+separatorThickness,
 			),
 		},
 		"multiple_items_opened": {
@@ -487,7 +487,7 @@ func TestTree_MinSize(t *testing.T) {
 			opened: []string{"A", "B", "C"},
 			want: fyne.NewSize(
 				templateMinSize.Width+2*indentation()+theme.IconInlineSize()+2*theme.Padding(),
-				fyne.Max(templateMinSize.Height, theme.IconInlineSize())*6+(5*separatorThickness),
+				max(templateMinSize.Height, theme.IconInlineSize())*6+(5*separatorThickness),
 			),
 		},
 	} {

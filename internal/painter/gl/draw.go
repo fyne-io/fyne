@@ -165,7 +165,7 @@ func (p *painter) drawBlur(b *canvas.Blur, pos fyne.Position, frame fyne.Size) {
 	p.ctx.BlendFunc(one, oneMinusSrcAlpha)
 	p.logError()
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadius(b.Size()), b.CornerRadius)
 	p.SetUniform1f(p.programs.blur, attrRadiusCorner, roundToPixel(cornerRadius*p.pixScale, 1.0))
 	p.SetUniform2f(p.programs.blur, attrSize, float32(bw), float32(bh))
 
@@ -326,7 +326,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
 	// ensure stroke width is not larger than the size of the object
-	strokeWidth := fyne.Min(bezierCurve.StrokeWidth, fyne.Min(bezierCurve.Size().Width, bezierCurve.Size().Height))
+	strokeWidth := min(bezierCurve.StrokeWidth, min(bezierCurve.Size().Width, bezierCurve.Size().Height))
 	if strokeWidth < 1 {
 		strokeWidth = 1
 	}
@@ -348,7 +348,7 @@ func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Posi
 		cp2XScaled, cp2YScaled := roundToPixel(cp[1].X*p.pixScale, 1.0), roundToPixel(cp[1].Y*p.pixScale, 1.0)
 		p.SetUniform2f(program, attrPointControl2, cp2XScaled, cp2YScaled)
 	}
-	p.SetUniform1f(program, attrPointControlCount, fyne.Min(float32(len(cp)), 2))
+	p.SetUniform1f(program, attrPointControlCount, min(float32(len(cp)), 2))
 
 	strokeWidthScaled := roundToPixel(strokeWidth*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrStrokeWidthHalf, strokeWidthScaled*0.5)
@@ -389,12 +389,12 @@ func (p *painter) drawArbitraryPolygon(polygon *canvas.ArbitraryPolygon, pos fyn
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	numPoints := int(fyne.Min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
+	numPoints := int(min(paint.ArbitraryPolygonVerticesMaximum, float32(len(polygon.Points))))
 	p.SetUniform1f(program, attrVertexCount, float32(numPoints))
 
 	size := polygon.Size()
 	clampPoint := func(p fyne.Position) (float32, float32) {
-		return fyne.Min(fyne.Max(p.X, 0), fyne.Max(size.Width, 0)), fyne.Min(fyne.Max(p.Y, 0), fyne.Max(size.Height, 0))
+		return min(max(p.X, 0), max(size.Width, 0)), min(max(p.Y, 0), max(size.Height, 0))
 	}
 
 	fixedPoints := make([]fyne.Position, numPoints)
@@ -715,14 +715,14 @@ func (p *painter) drawPolygon(polygon *canvas.RegularPolygon, pos fyne.Position,
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(size.Width, size.Height) / 2
+	outerRadius := min(size.Width, size.Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusOuter, outerRadiusScaled)
 
 	p.SetUniform1f(program, attrAngle, polygon.Angle)
 	p.SetUniform1f(program, attrSides, float32(polygon.Sides))
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadius(size), polygon.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadius(size), polygon.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusCorner, cornerRadiusScaled)
 
@@ -772,7 +772,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrEdgeSoftness, edgeSoftnessScaled)
 
-	outerRadius := fyne.Min(arc.Size().Width, arc.Size().Height) / 2
+	outerRadius := min(arc.Size().Width, arc.Size().Height) / 2
 	outerRadiusScaled := roundToPixel(outerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusOuter, outerRadiusScaled)
 
@@ -784,7 +784,7 @@ func (p *painter) drawArc(arc *canvas.Arc, pos fyne.Position, frame fyne.Size) {
 	p.SetUniform1f(program, attrAngleStart, startAngle)
 	p.SetUniform1f(program, attrAngleEnd, endAngle)
 
-	cornerRadius := fyne.Min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
+	cornerRadius := min(paint.GetMaximumRadiusArc(outerRadius, innerRadius, arc.EndAngle-arc.StartAngle), arc.CornerRadius)
 	cornerRadiusScaled := roundToPixel(cornerRadius*p.pixScale, 1.0)
 	p.SetUniform1f(program, attrRadiusCorner, cornerRadiusScaled)
 
@@ -948,8 +948,8 @@ func visibleTextPixels(pos fyne.Position, size, frame fyne.Size, clip *internal.
 		clipPos, clipSize = clip.Rect()
 	}
 
-	left := fyne.Max(pos.X, clipPos.X)
-	right := fyne.Min(pos.X+size.Width, clipPos.X+clipSize.Width)
+	left := max(pos.X, clipPos.X)
+	right := min(pos.X+size.Width, clipPos.X+clipSize.Width)
 	if right <= left {
 		return 0, 0
 	}
@@ -969,7 +969,7 @@ func (p *painter) drawTextureRegion(texture Texture, pos fyne.Position, size, fr
 
 	// Set corner radius and texture size in pixels
 	if cornerRadius != 0 {
-		cornerRadius = fyne.Min(paint.GetMaximumRadius(size), cornerRadius) * p.pixScale
+		cornerRadius = min(paint.GetMaximumRadius(size), cornerRadius) * p.pixScale
 	}
 	p.SetUniform1f(p.programs.simple, attrRadiusCorner, cornerRadius)
 	p.SetUniform2f(p.programs.simple, attrSize, inner.Width*p.pixScale, inner.Height*p.pixScale)
@@ -1012,8 +1012,8 @@ func (p *painter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canva
 
 func (p *painter) lineCoords(pos, pos1, pos2 fyne.Position, lineWidth, feather float32, frame fyne.Size) (points [coordinatesSizeLine]float32, halfWidth, featherWidth float32) {
 	// Shift line coordinates so that they match the target position.
-	xPosDiff := pos.X - fyne.Min(pos1.X, pos2.X)
-	yPosDiff := pos.Y - fyne.Min(pos1.Y, pos2.Y)
+	xPosDiff := pos.X - min(pos1.X, pos2.X)
+	yPosDiff := pos.Y - min(pos1.Y, pos2.Y)
 	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
 	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
 	pos2.X = roundToPixel(pos2.X+xPosDiff, p.pixScale)
