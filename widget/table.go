@@ -1474,6 +1474,9 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
+	if s := r.cells.t.content.Size(); s.Width <= 0 || s.Height <= 0 {
+		return // nothing is visible until the table has a size
+	}
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
