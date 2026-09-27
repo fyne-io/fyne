@@ -15,6 +15,8 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -34,8 +36,13 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
@@ -659,5 +666,69 @@ public class GoNativeActivity extends NativeActivity {
             lp.topMargin  = y;
             mA11yContainer.addView(v, lp);
         }
+    }
+
+    private static final String SECRET_KEY_ALIAS = "fyne-secret-preferences";
+    private static final int SECRET_GCM_TAG_BITS = 128;
+
+    static byte[] secretEncrypt(byte[] data) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey());
+            byte[] iv = cipher.getIV();
+            byte[] encrypted = cipher.doFinal(data);
+
+            byte[] out = new byte[1 + iv.length + encrypted.length];
+            out[0] = (byte) iv.length;
+            System.arraycopy(iv, 0, out, 1, iv.length);
+            System.arraycopy(encrypted, 0, out, 1 + iv.length, encrypted.length);
+            return out;
+        } catch (Exception e) {
+            Log.e("Fyne", "Failed to encrypt secret preferences", e);
+            return null;
+        }
+    }
+
+    static byte[] secretDecrypt(byte[] data) {
+        try {
+            if (data == null || data.length < 1) {
+                return null;
+            }
+            int ivLen = data[0] & 0xff;
+            if (data.length < 1 + ivLen) {
+                return null;
+            }
+            byte[] iv = new byte[ivLen];
+            System.arraycopy(data, 1, iv, 0, ivLen);
+
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey(), new GCMParameterSpec(SECRET_GCM_TAG_BITS, iv));
+            return cipher.doFinal(data, 1 + ivLen, data.length - 1 - ivLen);
+        } catch (Exception e) {
+            Log.e("Fyne", "Failed to decrypt secret preferences", e);
+            return null;
+        }
+    }
+
+    private static SecretKey secretKey() throws Exception {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            throw new UnsupportedOperationException("Android Keystore requires API 23");
+        }
+
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        KeyStore.Entry entry = keyStore.getEntry(SECRET_KEY_ALIAS, null);
+        if (entry instanceof KeyStore.SecretKeyEntry) {
+            return ((KeyStore.SecretKeyEntry) entry).getSecretKey();
+        }
+
+        KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+        generator.init(new KeyGenParameterSpec.Builder(SECRET_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build());
+        return generator.generateKey();
     }
 }

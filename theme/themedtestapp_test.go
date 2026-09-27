@@ -74,6 +74,10 @@ func (*themedApp) Preferences() fyne.Preferences {
 	return nil
 }
 
+func (*themedApp) SecretPreferences() fyne.Preferences {
+	return nil
+}
+
 func (*themedApp) Lifecycle() fyne.Lifecycle {
 	return nil
 }

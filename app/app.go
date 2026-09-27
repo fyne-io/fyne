@@ -5,6 +5,7 @@ package app // import "fyne.io/fyne/v2/app"
 
 import (
 	"strconv"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -35,6 +36,10 @@ type fyneApp struct {
 	storage   fyne.Storage
 	prefs     fyne.Preferences
 	scheduler *scheduler.Scheduler
+
+	secretPrefs    *secretPreferences
+	secretKeyLock  sync.Mutex
+	secretKeyCache []byte
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -115,6 +120,13 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *fyneApp) SecretPreferences() fyne.Preferences {
+	if a.missingID {
+		fyne.LogError("SecretPreferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
+	}
+	return a.secretPrefs
+}
+
 func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return &a.lifecycle
 }
@@ -174,11 +186,13 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	fyne.SetCurrentApp(newApp)
 
 	newApp.prefs = newApp.newDefaultPreferences()
+	newApp.secretPrefs = newSecretPreferences(newApp)
 	newApp.lifecycle.InitEventQueue()
 	newApp.lifecycle.SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()
 		}
+		newApp.secretPrefs.forceImmediateSave()
 	})
 
 	newApp.registerRepositories() // for web this may provide docs / settings

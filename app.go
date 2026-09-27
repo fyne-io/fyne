@@ -75,6 +75,18 @@ type App interface {
 	// Preferences returns the application preferences, used for storing configuration and state
 	Preferences() Preferences
 
+	// SecretPreferences returns a preference store for sensitive values such as tokens or passwords.
+	// It has the same API as [App.Preferences] but the values are kept out of the plain text
+	// preferences file. Where the operating system offers secure storage it is used:
+	// the Keychain on iOS and macOS (when running from an app bundle), the Android Keystore
+	// and the Data Protection API on Windows. On other platforms, and in development builds,
+	// the values are encrypted on disk.
+	//
+	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [NewWithID].
+	//
+	// Since: 2.9
+	SecretPreferences() Preferences
+
 	// Storage returns a storage handler specific to this application.
 	Storage() Storage
 
