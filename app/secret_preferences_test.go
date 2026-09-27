@@ -102,8 +102,10 @@ func TestSecretPreferences_SaveAndLoad(t *testing.T) {
 
 	// a fresh app using the same preferences (and so the same key) and blob reads the values back
 	b := &fyneApp{uniqueID: "io.fyne.test.secret", prefs: a.prefs}
-	b.secretPrefs = &secretPreferences{app: b, InMemoryPreferences: internal.NewInMemoryPreferences(),
-		store: &encryptedStore{storage: blob, key: b.secretKey}}
+	b.secretPrefs = &secretPreferences{
+		app: b, InMemoryPreferences: internal.NewInMemoryPreferences(),
+		store: &encryptedStore{storage: blob, key: b.secretKey},
+	}
 	b.secretPrefs.load()
 
 	loaded := b.SecretPreferences()

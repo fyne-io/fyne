@@ -16,7 +16,7 @@ import (
 )
 
 // secretKeyPreference is the key used to keep the random encryption key in the app preferences.
-const secretKeyPreference = "fyne.secret.key"
+const secretKeyPreference = "fyne.secret.key" // #nosec G101 this is not a hard coded credential
 
 // secretStore persists the encoded secret preferences.
 // Implementations either hand the data to a secure operating system store, or protect it and
