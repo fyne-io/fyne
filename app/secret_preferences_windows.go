@@ -35,16 +35,16 @@ func newDataBlob(data []byte) dataBlob {
 // On Windows the data is protected with DPAPI, which ties it to the current Windows user account,
 // with the app's random key used as additional entropy.
 func (a *fyneApp) newSecretStore() secretStore {
-	return &dpapiStore{next: a.newPlainSecretStore(), entropy: a.secretKey}
+	return &dpapiStore{storage: a.newPlainSecretStore(), entropy: a.secretKey}
 }
 
 type dpapiStore struct {
-	next    secretStore
+	storage secretStore
 	entropy func() ([]byte, error)
 }
 
 func (d *dpapiStore) load() ([]byte, error) {
-	data, err := d.next.load()
+	data, err := d.storage.load()
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (d *dpapiStore) save(data []byte) error {
 	if err != nil {
 		return err
 	}
-	return d.next.save(protected)
+	return d.storage.save(protected)
 }
 
 // dpapiCall runs CryptProtectData or CryptUnprotectData, which share a signature:

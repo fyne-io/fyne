@@ -30,11 +30,11 @@ func (m *memorySecretStore) save(data []byte) error {
 }
 
 // newTestSecretApp returns an app with in-memory preferences whose secret store encrypts into the given store.
-func newTestSecretApp(id string, next secretStore) *fyneApp {
+func newTestSecretApp(id string, store secretStore) *fyneApp {
 	a := &fyneApp{uniqueID: id}
 	a.prefs = newPreferences(&fyneApp{}) // in-memory only, no ID so nothing is written to disk
 	a.secretPrefs = newSecretPreferences(a)
-	a.secretPrefs.store = &encryptedStore{next: next, key: a.secretKey}
+	a.secretPrefs.store = &encryptedStore{storage: store, key: a.secretKey}
 	return a
 }
 
@@ -103,7 +103,7 @@ func TestSecretPreferences_SaveAndLoad(t *testing.T) {
 	// a fresh app using the same preferences (and so the same key) and blob reads the values back
 	b := &fyneApp{uniqueID: "io.fyne.test.secret", prefs: a.prefs}
 	b.secretPrefs = &secretPreferences{app: b, InMemoryPreferences: internal.NewInMemoryPreferences(),
-		store: &encryptedStore{next: blob, key: b.secretKey}}
+		store: &encryptedStore{storage: blob, key: b.secretKey}}
 	b.secretPrefs.load()
 
 	loaded := b.SecretPreferences()
@@ -129,7 +129,7 @@ func TestSecretPreferences_Remove(t *testing.T) {
 
 	b := newTestSecretApp("io.fyne.test.secret", blob)
 	b.prefs = a.prefs
-	b.secretPrefs.store = &encryptedStore{next: blob, key: b.secretKey}
+	b.secretPrefs.store = &encryptedStore{storage: blob, key: b.secretKey}
 	b.secretPrefs.load()
 	assert.Equal(t, "yes", b.SecretPreferences().String("keep"))
 	assert.Equal(t, "missing", b.SecretPreferences().StringWithFallback("drop", "missing"))

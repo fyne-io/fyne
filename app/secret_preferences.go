@@ -190,7 +190,7 @@ func (a *fyneApp) secretKey() ([]byte, error) {
 // newEncryptedSecretStore is the portable secure store - AES-256-GCM over the platform's plain store,
 // keyed by the random key that lives in the app preferences.
 func (a *fyneApp) newEncryptedSecretStore() secretStore {
-	return &encryptedStore{next: a.newPlainSecretStore(), key: a.secretKey}
+	return &encryptedStore{storage: a.newPlainSecretStore(), key: a.secretKey}
 }
 
 const (
@@ -200,15 +200,15 @@ const (
 
 var errSecretFormat = errors.New("secret preferences data is not in a recognised format")
 
-// encryptedStore encrypts data with AES-GCM before handing it to the next store.
+// encryptedStore encrypts data with AES-GCM before handing it to the storage store.
 // The stored layout is: version byte, GCM nonce, ciphertext with authentication tag.
 type encryptedStore struct {
-	next secretStore
-	key  func() ([]byte, error)
+	storage secretStore
+	key     func() ([]byte, error)
 }
 
 func (e *encryptedStore) load() ([]byte, error) {
-	data, err := e.next.load()
+	data, err := e.storage.load()
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +228,7 @@ func (e *encryptedStore) save(data []byte) error {
 	if err != nil {
 		return err
 	}
-	return e.next.save(sealed)
+	return e.storage.save(sealed)
 }
 
 func encryptSecret(key, plain []byte) ([]byte, error) {

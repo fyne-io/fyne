@@ -30,11 +30,11 @@ var errKeystoreUnavailable = errors.New("android keystore is not available")
 // If the Java bridge is missing, for example an app packaged with an older toolchain,
 // we fall back to the encrypted file store keyed from the app preferences.
 func (a *fyneApp) newSecretStore() secretStore {
-	return &keystoreStore{next: a.newPlainSecretStore(), fallback: a.newEncryptedSecretStore}
+	return &keystoreStore{storage: a.newPlainSecretStore(), fallback: a.newEncryptedSecretStore}
 }
 
 type keystoreStore struct {
-	next     secretStore
+	storage  secretStore
 	fallback func() secretStore
 
 	once      sync.Once
@@ -59,7 +59,7 @@ func (k *keystoreStore) load() ([]byte, error) {
 	if !k.check() {
 		return k.alt.load()
 	}
-	data, err := k.next.load()
+	data, err := k.storage.load()
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (k *keystoreStore) save(data []byte) error {
 	if err != nil {
 		return err
 	}
-	return k.next.save(sealed)
+	return k.storage.save(sealed)
 }
 
 type keystoreFunc func(env, ctx C.uintptr_t, in unsafe.Pointer, inLen C.int, out *unsafe.Pointer, outLen *C.int) bool
