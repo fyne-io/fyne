@@ -910,11 +910,9 @@ func (p *Painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 	// The same snapping vecRectCoords applies, without the antialiasing skirt
 	// it adds for the generic quad (whose shader clips it back to bounds).
 	size := r.Size()
-	x := roundToPixel(pos.X, p.pixScale)
-	y := roundToPixel(pos.Y, p.pixScale)
-	w := roundToPixel(size.Width, p.pixScale)
-	h := roundToPixel(size.Height, p.pixScale)
-	x1, x2, y1, y2 := p.scaleRectCoords(x, x+w, y, y+h)
+	x1, x2, y1, y2 := p.scaleRectCoords(
+		roundToPixel(pos.X, p.pixScale), roundToPixel(pos.X+size.Width, p.pixScale),
+		roundToPixel(pos.Y, p.pixScale), roundToPixel(pos.Y+size.Height, p.pixScale))
 	fw, fh := p.scaleFrameSize(frame)
 
 	cr, cg, cb, ca := fragmentColor(r.FillColor)
@@ -1349,15 +1347,14 @@ func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame 
 		}
 	}
 
+	// Snap the edges, not the position and the size: see the GL painter's
+	// vecRectCoordsWithPad for the pixel this otherwise loses.
 	size := obj.Size()
-	pos1 := obj.Position()
-
-	xPosDiff := pos.X - pos1.X + xPad
-	yPosDiff := pos.Y - pos1.Y + yPad
-	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
-	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
-	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
-	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
+	left, top := pos.X+xPad, pos.Y+yPad
+	x1Pos := roundToPixel(left, p.pixScale)
+	y1Pos := roundToPixel(top, p.pixScale)
+	x2Pos := roundToPixel(left+size.Width-2*xPad, p.pixScale)
+	y2Pos := roundToPixel(top+size.Height-2*yPad, p.pixScale)
 
 	pads := paint.GetShadowPaddings(shadow)
 	padLeft := roundToPixel(pads[0], p.pixScale)
@@ -1366,13 +1363,9 @@ func (p *Painter) vecRectCoords(pos fyne.Position, obj fyne.CanvasObject, frame 
 	padBottom := roundToPixel(pads[3], p.pixScale)
 
 	softness := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	x1Pos := pos1.X
 	x1Norm := -1 + (x1Pos-softness-padLeft)*2/frame.Width
-	x2Pos := pos1.X + size.Width
 	x2Norm := -1 + (x2Pos+softness+padRight)*2/frame.Width
-	y1Pos := pos1.Y
 	y1Norm := 1 - (y1Pos-softness-padTop)*2/frame.Height
-	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - (y2Pos+softness+padBottom)*2/frame.Height
 
 	return [4]float32{x1Norm, y1Norm, x2Norm, y2Norm}, [4]float32{x1Pos, y1Pos, x2Pos, y2Pos}
