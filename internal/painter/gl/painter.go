@@ -55,6 +55,7 @@ type painter struct {
 	ctx                 context
 	fbHeight            int       // current framebuffer height in pixels
 	glyphPending        []float32 // queued batch vertices, glyphVertexFloats each
+	linePending         []float32 // queued line vertices, lineVertexFloats each
 	maxTextureSize      int
 	pixScale            float32 // pre-calculate scale*texScale for each draw
 	programs            *programs
@@ -74,6 +75,7 @@ func (p *painter) Clear() {
 	}
 	// Anything still queued belongs to a frame that is about to be wiped.
 	p.glyphPending = p.glyphPending[:0]
+	p.linePending = p.linePending[:0]
 	r, g, b, a := theme.Color(theme.ColorNameBackground).RGBA()
 	p.ctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	p.ctx.Clear(bitColorBuffer | bitDepthBuffer)
