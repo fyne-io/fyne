@@ -22,11 +22,10 @@ const (
 	attrColor                    = "color"
 	attrDirection                = "direction"
 	attrEdgeSoftness             = "edgeSoftness"
-	attrFeather                  = "feather"
 	attrFillColor                = "fillColor"
 	attrFrame                    = "frame"
 	attrInset                    = "inset"
-	attrLineWidth                = "lineWidth"
+	attrLineStyle                = "lineStyle"
 	attrNormal                   = "normal"
 	attrPointControlCount        = "numControlPoints"
 	attrPointControl1            = "controlPoint1"
@@ -283,23 +282,12 @@ func (p *painter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size
 		return
 	}
 	points, halfWidth, feather := p.lineCoords(pos, line.Position1, line.Position2, line.StrokeWidth, 0.5, frame)
-	p.useProgram(p.programs.line.ref)
-	p.updateBuffer(p.programs.line.buff, points[:])
-	p.UpdateVertexArray(p.programs.line, attrVertex, coordinateSize2D, coordinateSize2DWithNormal, 0)
-	p.UpdateVertexArray(p.programs.line, attrNormal, coordinateSize2D, coordinateSize2DWithNormal, coordinateSize2D)
-
-	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
-	p.logError()
-
 	r, g, b, a := getFragmentColor(line.StrokeColor)
-	p.SetUniform4f(p.programs.line, attrColor, r, g, b, a)
-
-	p.SetUniform1f(p.programs.line, attrLineWidth, halfWidth)
-
-	p.SetUniform1f(p.programs.line, attrFeather, feather)
-
-	p.ctx.DrawArrays(triangles, 0, vertexCountLine)
-	p.logError()
+	p.flushQuads() // quads queued before this line belong under it
+	for v := range vertexCountLine {
+		pt := points[v*coordinateSize2DWithNormal:]
+		p.linePending = append(p.linePending, pt[0], pt[1], pt[2], pt[3], r, g, b, a, halfWidth, feather)
+	}
 }
 
 func (p *painter) drawBezierCurve(bezierCurve *canvas.BezierCurve, pos fyne.Position, frame fyne.Size) {

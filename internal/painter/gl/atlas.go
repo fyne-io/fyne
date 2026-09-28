@@ -19,6 +19,15 @@ import (
 // coordinate, and a straight-alpha colour.
 const glyphVertexFloats = 2 + 2 + 4
 
+// lineVertexFloats is one batched line vertex: position and normal in clip
+// space, a straight-alpha colour, and the half width and feather the line
+// shader fades the edge over, which start at lineStyleOffset. Lines are queued
+// like quads, so a gauge's ticks cost one draw call instead of one each.
+const (
+	lineStyleOffset  = 2 + 2 + 4
+	lineVertexFloats = lineStyleOffset + 2
+)
+
 // useProgram switches to the program of an object that draws on its own. Every
 // such draw comes through here first, which is what keeps the batch in order:
 // quads queued before the object reach the framebuffer before it does.
@@ -27,11 +36,17 @@ func (p *painter) useProgram(prog Program) {
 	p.ctx.UseProgram(prog)
 }
 
-// FlushGlyphs draws every queued quad in one draw call. It has to run before
-// any other draw, before the scissor rectangle changes, before atlas space is
-// reused and at the end of the frame; each of those would otherwise reorder,
-// mis-clip or mis-sample the queue.
+// FlushGlyphs draws the queued batch, quads or lines, in one draw call. It has
+// to run before any other draw, before the scissor rectangle changes, before
+// atlas space is reused and at the end of the frame; each of those would
+// otherwise reorder, mis-clip or mis-sample the queue. Queuing either kind
+// flushes the other first, so at most one of them holds anything.
 func (p *painter) FlushGlyphs() {
+	p.flushQuads()
+	p.flushLines()
+}
+
+func (p *painter) flushQuads() {
 	vertices := len(p.glyphPending) / glyphVertexFloats
 	if vertices == 0 {
 		return
@@ -54,6 +69,30 @@ func (p *painter) FlushGlyphs() {
 		p.countBatch(vertices / 6)
 	}
 	p.glyphPending = p.glyphPending[:0]
+}
+
+func (p *painter) flushLines() {
+	vertices := len(p.linePending) / lineVertexFloats
+	if vertices == 0 {
+		return
+	}
+
+	prog := p.programs.line
+	p.ctx.UseProgram(prog.ref)
+	p.ctx.BindBuffer(arrayBuffer, prog.buff)
+	p.ctx.BufferData(arrayBuffer, p.linePending, staticDraw)
+	p.UpdateVertexArray(prog, attrVertex, 2, lineVertexFloats, 0)
+	p.UpdateVertexArray(prog, attrNormal, 2, lineVertexFloats, 2)
+	p.UpdateVertexArray(prog, attrVertexColor, 4, lineVertexFloats, 4)
+	p.UpdateVertexArray(prog, attrLineStyle, 2, lineVertexFloats, lineStyleOffset)
+	p.ctx.BlendFunc(srcAlpha, oneMinusSrcAlpha)
+	p.ctx.DrawArrays(triangles, 0, vertices)
+	p.logError()
+
+	if glDebug {
+		p.countBatch(vertices / vertexCountLine)
+	}
+	p.linePending = p.linePending[:0]
 }
 
 // UploadGlyph copies a bitmap from the shared atlas into the texture. The atlas
@@ -147,6 +186,7 @@ func (p *painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 // It is two triangles of six vertices that each carry the colour: GL 2.1 and
 // ES 2 have no instancing, and the whole queue is still a single draw.
 func (p *painter) pushQuad(q paint.GlyphQuad, col [4]float32, fw, fh float32) {
+	p.flushLines() // lines queued before this quad belong under it
 	// Pixels to clip space: x doubles and shifts, y additionally flips.
 	x1, y1 := q.X1/fw*2-1, 1-q.Y1/fh*2
 	x2, y2 := q.X2/fw*2-1, 1-q.Y2/fh*2
