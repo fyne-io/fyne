@@ -112,11 +112,12 @@ func (*coreContext) BlendFunc(srcFactor, destFactor uint32) {
 }
 
 func (*coreContext) BufferData(target uint32, points []float32, usage uint32) {
-	gl.BufferData(target, 4*len(points), gl.Ptr(points), usage)
+	// gl.Ptr would box the slice into an interface, an allocation per draw.
+	gl.BufferData(target, 4*len(points), unsafe.Pointer(unsafe.SliceData(points)), usage) //gosec:disable G103 -- GL reads the data before this returns
 }
 
 func (*coreContext) BufferSubData(target uint32, points []float32) {
-	gl.BufferSubData(target, 0, 4*len(points), gl.Ptr(points))
+	gl.BufferSubData(target, 0, 4*len(points), unsafe.Pointer(unsafe.SliceData(points))) //gosec:disable G103 -- as for BufferData
 }
 
 func (*coreContext) Clear(mask uint32) {
