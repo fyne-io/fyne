@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -60,6 +61,7 @@ func NewRichTextEntry() *RichTextEntry {
 func (e *RichTextEntry) ExtendBaseWidget(wid fyne.Widget) {
 	e.richProvider()
 	e.Entry.ExtendBaseWidget(wid)
+	e.registerStyleShortcuts()
 }
 
 // NewRichTextEntryFromMarkdown creates a new rich text entry widget with the
@@ -327,6 +329,114 @@ func (e *RichTextEntry) applyUndoAction(action entryUndoAction, undo bool) {
 	e.Refresh()
 }
 
+// styleShortcuts lists the keyboard shortcuts that turn a style on and off, for
+// the selected text or for the text that is about to be typed.
+var styleShortcuts = []struct {
+	shortcut *desktop.CustomShortcut
+	enabled  func(RichTextStyle) bool
+	set      func(*RichTextStyle, bool)
+}{
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyB, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Bold },
+		// headings are bold without any marks applied
+		func(s *RichTextStyle, on bool) { s.TextStyle.Bold = on || isHeadingStyle(*s) },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Italic },
+		// quotes are italic without any marks applied
+		func(s *RichTextStyle, on bool) { s.TextStyle.Italic = on || s.QuotingDepth > 0 },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyU, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Underline },
+		func(s *RichTextStyle, on bool) { s.TextStyle.Underline = on },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyX, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift},
+		func(s RichTextStyle) bool { return s.TextStyle.Strikethrough },
+		func(s *RichTextStyle, on bool) { s.TextStyle.Strikethrough = on },
+	},
+}
+
+func (e *RichTextEntry) registerStyleShortcuts() {
+	for _, style := range styleShortcuts {
+		e.shortcut.AddShortcut(style.shortcut, func(fyne.Shortcut) {
+			e.toggleStyle(style.enabled, style.set)
+		})
+	}
+}
+
+// toggleStyle turns a style on or off for the selected text. The style is removed
+// if all of the selection already has it, otherwise it is applied to all of it.
+// Without a selection it changes the style that will be used for text typed at the cursor.
+func (e *RichTextEntry) toggleStyle(enabled func(RichTextStyle) bool, set func(*RichTextStyle, bool)) {
+	if e.Disabled() {
+		return
+	}
+
+	provider := e.richProvider()
+	cursor := e.CursorTextOffset()
+	if !e.hasSelection() {
+		if bound := provider.rowBoundary(e.CursorRow); bound != nil && bound.panel != nil {
+			return // a block such as code has no styles inside it
+		}
+
+		style := e.StyleAtCursor()
+		set(&style, !enabled(style))
+		e.insertEmptySegmentAt(cursor, style)
+		e.finishStyleChange(cursor, -1)
+		return
+	}
+
+	start, end := e.sel.selection()
+	anchor := textPosFromRowCol(e.sel.selectRow, e.sel.selectColumn, provider)
+
+	on := !e.rangeHasStyle(start, end, enabled)
+	e.styleRange(start, end, func(s *RichTextStyle) { set(s, on) })
+	provider.Segments = mergeSegments(provider.Segments)
+	e.finishStyleChange(cursor, anchor)
+}
+
+// rangeHasStyle reports whether all of the text between the two rune offsets has
+// the style that enabled checks for.
+func (e *RichTextEntry) rangeHasStyle(start, end int, enabled func(RichTextStyle) bool) bool {
+	found := false
+	off := 0
+	for _, seg := range e.richProvider().contentSegments() {
+		if off >= end {
+			break
+		}
+
+		length := utf8.RuneCountInString(seg.Textual())
+		if text, ok := seg.(*TextSegment); ok && length > 0 && off+length > start {
+			if !enabled(text.Style) {
+				return false
+			}
+			found = true
+		}
+		off += length
+	}
+	return found
+}
+
+// finishStyleChange updates the entry state after the style of some content was
+// changed, leaving the text as it was. The cursor and the anchor of the selection,
+// which is negative if there is none, are put back at their rune offsets.
+func (e *RichTextEntry) finishStyleChange(cursor, anchor int) {
+	e.updateText(e.Text, false)
+	e.setCursorOffset(cursor)
+	if anchor >= 0 {
+		e.sel.selectRow, e.sel.selectColumn = e.rowColFromTextPos(anchor)
+	}
+
+	if e.OnChanged != nil {
+		e.OnChanged(e.Text)
+	}
+	e.Refresh()
+}
+
 // setCursorOffset moves the cursor to the specified rune offset in the content.
 func (e *RichTextEntry) setCursorOffset(pos int) {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
@@ -511,6 +621,7 @@ func lineStyle(style RichTextStyle) RichTextStyle {
 	style.codeInline = false
 	style.TextStyle.Monospace = false
 	style.TextStyle.Strikethrough = false
+	style.TextStyle.Underline = false
 
 	// headings are bold and quotes italic without any marks applied
 	style.TextStyle.Bold = isHeadingStyle(style)
