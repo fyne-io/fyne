@@ -191,6 +191,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
+	parsedFonts.Clear()
 }
 
 // DrawString draws a string into an image.
@@ -220,13 +221,19 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	})
 }
 
+// loadMeasureFont returns a new face for the font, which callers may use
+// without locking. Faces are not safe for concurrent use, but the parsed Font
+// they share is, so the parse is reused.
 func loadMeasureFont(data fyne.Resource) *font.Face {
+	if ft, ok := parsedFonts.Load(data); ok {
+		return font.NewFace(ft)
+	}
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
-
+	parsedFonts.Store(data, loaded.Font)
 	return loaded
 }
 
@@ -510,6 +517,11 @@ type cacheID struct {
 var (
 	fontCache       async.Map[cacheID, *FontCacheItem]
 	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+
+	// parsedFonts holds each font resource parsed once. Every style's face list
+	// includes the fallback and emoji fonts, and parsing the emoji font alone
+	// takes several MB, so parsing per style multiplied that.
+	parsedFonts async.Map[fyne.Resource, *font.Font]
 )
 
 type noopLogger struct{}
