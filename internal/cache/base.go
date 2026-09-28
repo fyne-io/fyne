@@ -100,7 +100,7 @@ func CleanCanvas(canvas fyne.Canvas) {
 // ResetThemeCaches clears all the svg and text size cache maps
 func ResetThemeCaches() {
 	svgs.Clear()
-	fontSizeCache.Clear()
+	ClearFontMetrics()
 }
 
 // destroyExpiredCanvases deletes objects from the canvases cache.
