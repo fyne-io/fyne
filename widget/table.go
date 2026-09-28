@@ -926,7 +926,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return visible, offX, minCol, maxCol
+		return visible, offX, minCol, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1023,7 +1023,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return visible, offY, minRow, maxRow
+		return visible, offY, minRow, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1474,6 +1474,9 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
+	if s := r.cells.t.content.Size(); s.Width <= 0 || s.Height <= 0 {
+		return // nothing is visible until the table has a size
+	}
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
