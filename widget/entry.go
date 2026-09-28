@@ -120,6 +120,11 @@ type Entry struct {
 	rich bool
 }
 
+type undoProvider interface {
+	Undo()
+	Redo()
+}
+
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
@@ -568,10 +573,10 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	e.requestFocus()
 
-	super := e.super()
+	impl := e.super()
 	app := fyne.CurrentApp()
 	clipboard := app.Clipboard()
-	typedShortcut := super.(fyne.Shortcutable).TypedShortcut
+	typedShortcut := impl.(fyne.Shortcutable).TypedShortcut
 	cutItem := fyne.NewMenuItem(lang.L("Cut"), func() {
 		typedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
@@ -606,13 +611,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 
 	driver := app.Driver()
-	c := driver.CanvasForObject(super)
+	c := driver.CanvasForObject(impl)
 	if c == nil {
 		// Entry was detached from its canvas between the tap event and
 		// this call (see fyne-io/fyne#5965). Skip the context menu.
 		return
 	}
-	entryPos := driver.AbsolutePositionForObject(super)
+	entryPos := driver.AbsolutePositionForObject(impl)
 	popUpPos := entryPos.Add(pe.Position)
 	e.popUp = NewPopUpMenu(fyne.NewMenu("", menuItems...), c)
 	e.popUp.ShowAtPosition(popUpPos)
@@ -1169,14 +1174,8 @@ func (e *Entry) registerShortcut() {
 
 // undoer returns the widget that handles undo and redo for this entry, so that a
 // widget extending it can replace how those changes are applied.
-func (e *Entry) undoer() interface {
-	Undo()
-	Redo()
-} {
-	if impl, ok := e.super().(interface {
-		Undo()
-		Redo()
-	}); ok {
+func (e *Entry) undoer() undoProvider {
+	if impl, ok := e.super().(undoProvider); ok {
 		return impl
 	}
 
