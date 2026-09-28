@@ -81,15 +81,37 @@ func (b *rowBoundsBuilder) appendBlock(seg RichTextSegment, block RichTextBlock,
 	first := len(b.bounds)
 	b.walk(segs, depth+1)
 
+	if len(segs) == 0 { // otherwise the content was counted as it was walked
+		b.docOffset += utf8.RuneCountInString(seg.Textual())
+	}
+
 	if panel, ok := seg.(panelSegment); ok {
-		markPanelRows(b.bounds, first, segs, panel)
+		rows := b.bounds
+		if b.endsAfterBreak(first, segs) {
+			rows = rows[:len(rows)-1]
+			markPanelRows(rows, first, segs, panel)
+
+			b.startRow(depth)
+			b.rowOpen = true
+			b.wrapWidth = b.maxWidth
+			return
+		}
+		markPanelRows(rows, first, segs, panel)
 	}
 	if segmentsEndRow(segs) {
 		b.closeRow(depth)
 	}
-	if len(segs) == 0 { // otherwise the content was counted as it was walked
-		b.docOffset += utf8.RuneCountInString(seg.Textual())
+}
+
+// endsAfterBreak reports whether the content of a block finished with a line
+// break, leaving an empty row after it as the last of those added since first.
+func (b *rowBoundsBuilder) endsAfterBreak(first int, segs []RichTextSegment) bool {
+	if len(b.bounds) <= first || !endsWithNewline(segs) {
+		return false
 	}
+
+	last := &b.bounds[len(b.bounds)-1]
+	return last.docBegin == b.docOffset && last.docEnd == b.docOffset
 }
 
 // appendObject lays out a segment that draws an object instead of text, such as

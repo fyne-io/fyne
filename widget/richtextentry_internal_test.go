@@ -625,8 +625,43 @@ func TestRichTextEntry_BlocksLayOutInRows(t *testing.T) {
 	}
 
 	// the bullets are not part of any row, and the code lines sit on the panel
-	assert.Equal(t, []string{"intro", "one", "two", "code", "here", "", "after"}, rows)
-	assert.Equal(t, []bool{false, false, false, true, true, true, false}, panels)
+	assert.Equal(t, []string{"intro", "one", "two", "code", "here", "after"}, rows)
+	assert.Equal(t, []bool{false, false, false, true, true, false}, panels)
+}
+
+func TestRichTextEntry_CodeFenceLeavesLineBelow(t *testing.T) {
+	test.NewTempApp(t)
+
+	e := NewRichTextEntry()
+	e.TypeMarkdown = true
+	w := test.NewTempWindow(t, e)
+	w.Resize(fyne.NewSize(250, 200))
+
+	typeString(e, "intro")
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+	typeString(e, "```")
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+
+	// the new block has a single line, with an empty one below the panel
+	provider := e.richProvider()
+	assert.Equal(t, 3, provider.rows())
+	assert.NotNil(t, provider.rowBounds[1].panel)
+	assert.Nil(t, provider.rowBounds[2].panel)
+	assert.Equal(t, 1, e.CursorRow)
+
+	typeString(e, "x := 1")
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	typeString(e, "after")
+
+	code, ok := e.Segments()[1].(*CodeBlockSegment)
+	assert.True(t, ok)
+	assert.Equal(t, "x := 1\n", code.Text) // typing below the block is not added to it
+	assert.Equal(t, "intro\nx := 1\nafter", e.Text)
+	assert.Equal(t, []string{"intro", "x := 1", "after"}, []string{
+		string(provider.row(0)), string(provider.row(1)), string(provider.row(2)),
+	})
+	assert.Nil(t, provider.rowBounds[2].panel)
+	assert.Equal(t, "intro\n\n```\nx := 1\n```\n\nafter", e.Markdown())
 }
 
 func TestRichTextEntry_ListItemWrapIndents(t *testing.T) {
@@ -837,7 +872,7 @@ func TestRichTextEntry_BackspaceJoinsLineToCodeBlock(t *testing.T) {
 	e := NewRichTextEntryFromMarkdown("```\ncode\n```\n\nafter")
 	w := test.NewTempWindow(t, e)
 	w.Resize(fyne.NewSize(250, 200))
-	e.CursorRow, e.CursorColumn = 2, 0 // the line below the block
+	e.CursorRow, e.CursorColumn = 1, 0 // the line below the block
 
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
 

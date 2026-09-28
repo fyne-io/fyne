@@ -409,7 +409,7 @@ func (t *RichText) cleanVisualCache() {
 func (t *RichText) insertAt(pos int, runes []rune) {
 	// Find best segment if multiple match.
 	var contains, empty, before, after textHolder
-	beforeEndsLine := false
+	beforeEndsLine, beforeEndsBlock := false, false
 	offset, start := 0, 0
 	for _, seg := range t.contentSegments() {
 		if start > pos {
@@ -431,6 +431,10 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 				before = holder
 				// content that closes a line hands this position to what follows it
 				beforeEndsLine = !seg.Inline() || strings.HasSuffix(holder.content(), "\n")
+
+				// a block that was closed by a line break has the next line below its panel
+				_, isPanel := seg.(panelSegment)
+				beforeEndsBlock = isPanel && strings.HasSuffix(holder.content(), "\n")
 			case start == pos:
 				if after == nil {
 					after = holder
@@ -453,7 +457,7 @@ func (t *RichText) insertAt(pos int, runes []rune) {
 		into, offset = before, utf8.RuneCountInString(before.content())
 	case after != nil:
 		into, offset = after, 0
-	case before != nil: // there is nothing after it, so the line grows instead
+	case before != nil && !beforeEndsBlock: // there is nothing after it, so the line grows instead
 		into, offset = before, utf8.RuneCountInString(before.content())
 	}
 
