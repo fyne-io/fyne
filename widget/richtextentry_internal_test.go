@@ -105,8 +105,8 @@ func TestRichTextEntry_Backspace_AcrossSegments(t *testing.T) {
 	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
 
 	assert.Equal(t, "a  c", e.Text)
-	// the emptied bold segment stays at the cursor, so typing continues in bold
-	assert.Equal(t, []string{"a |", "|b", " c|"}, segmentDump(e))
+	// the emptied segment stays at the cursor, but it does not keep the bold
+	assert.Equal(t, []string{"a |", "|", " c|"}, segmentDump(e))
 	assert.Equal(t, 2, e.CursorColumn)
 }
 
@@ -716,6 +716,79 @@ func TestRichTextEntry_DeleteClearsEmptyStyle(t *testing.T) {
 	typeString(e, "plain")
 
 	assert.Equal(t, "plain", e.Text)
+	assert.Equal(t, RichTextStyleInline, e.StyleAtCursor())
+}
+
+func TestRichTextEntry_BackspaceDropsEmptyMarks(t *testing.T) {
+	e := NewRichTextEntry()
+	e.TypeMarkdown = true
+
+	typeString(e, "*hi*")
+	assert.Equal(t, []string{"hi|i", "|"}, segmentDump(e))
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	assert.Equal(t, []string{"|"}, segmentDump(e))
+
+	// the italic went with the text that it styled
+	typeString(e, "plain")
+	assert.Equal(t, "plain", e.Text)
+	assert.Equal(t, []string{"plain|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_BackspaceDropsEmptyMarks_MidLine(t *testing.T) {
+	e := NewRichTextEntry()
+	e.TypeMarkdown = true
+
+	typeString(e, "a ~~hi~~ b")
+	e.CursorColumn = 4 // just after the struck through "hi"
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	typeString(e, "xyz")
+
+	assert.Equal(t, "a xyz b", e.Text)
+	assert.Equal(t, []string{"a |", "xyz|", " b|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_BackspaceDropsEmptyMarks_InHeading(t *testing.T) {
+	e := NewRichTextEntry()
+	e.TypeMarkdown = true
+
+	typeString(e, "# T *hi*")
+	assert.Equal(t, []string{"T |bh1", "hi|bih1", "|bh1"}, segmentDump(e))
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	typeString(e, "xyz")
+
+	// the style of the line remains, only the marks within it are dropped
+	assert.Equal(t, "T xyz", e.Text)
+	assert.Equal(t, []string{"T |bh1", "xyz|bh1"}, segmentDump(e))
+}
+
+func TestRichTextEntry_DeleteDropsEmptyMarks(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("a `b` c")
+	e.CursorRow, e.CursorColumn = 0, 2
+
+	e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDelete})
+	typeString(e, "xyz")
+
+	assert.Equal(t, "a xyz c", e.Text)
+	assert.Equal(t, []string{"a |", "xyz|", " c|"}, segmentDump(e))
+	assert.Equal(t, RichTextStyleInline, e.Segments()[1].(*TextSegment).Style)
+}
+
+func TestRichTextEntry_BackspaceDropsEmptyMarks_InList(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("- one\n- **two**")
+	e.CursorRow, e.CursorColumn = 1, 3
+
+	for range "two" {
+		e.TypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
+	}
+	typeString(e, "xyz")
+
+	assert.Equal(t, "one\nxyz", e.Text)
+	assert.Equal(t, []string{"one\n", "xyz"}, itemTexts(t, e, 0))
 	assert.Equal(t, RichTextStyleInline, e.StyleAtCursor())
 }
 

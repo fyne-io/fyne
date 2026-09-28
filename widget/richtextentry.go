@@ -459,27 +459,79 @@ func (e *RichTextEntry) insertEmptySegmentAt(pos int, style RichTextStyle) {
 // offset, so that a replacement can take ownership of text typed there.
 func (e *RichTextEntry) dropEmptySegmentsAt(pos int) {
 	provider := e.richProvider()
-	dropEmptySegments(&provider.Segments, 0, false, func(off int) bool { return off == pos })
+	dropEmptySegments(&provider.Segments, 0, false, func(_ *TextSegment, off int) bool { return off == pos })
 }
 
 // pruneEmptySegments drops empty text segments, apart from any at the cursor -
 // where one may have been placed to hold a style that is about to be typed.
-// Returns true if any segment was removed.
+// Returns true if the segments were changed.
 func (e *RichTextEntry) pruneEmptySegments() bool {
 	provider := e.richProvider()
 	cursor := e.CursorTextOffset()
-	_, removed := dropEmptySegments(&provider.Segments, 0, false, func(off int) bool { return off != cursor })
+	spare, cleared := e.clearEmptyStyles(cursor)
+	_, removed := dropEmptySegments(&provider.Segments, 0, false, func(text *TextSegment, off int) bool {
+		return off != cursor || segmentIn(text, spare)
+	})
 
 	if len(provider.Segments) == 0 {
 		provider.Segments = []RichTextSegment{&TextSegment{Style: RichTextStyleInline}}
 	}
-	return removed
+	return removed || cleared
+}
+
+// clearEmptyStyles takes the inline style, such as bold or italic, off any run of text at
+// the given rune offset that has nothing left in it.
+// It returns the segments that are no longer needed and whether any style was changed.
+func (e *RichTextEntry) clearEmptyStyles(pos int) (spare []RichTextSegment, cleared bool) {
+	var marked []RichTextSegment
+	waiting := false // a segment with no marks is already there for the text to come
+
+	off := 0
+	for _, seg := range e.richProvider().contentSegments() {
+		length := utf8.RuneCountInString(seg.Textual())
+		if text, isText := seg.(*TextSegment); isText && length == 0 && off == pos {
+			regular := lineStyle(text.Style)
+			if text.Style == regular {
+				waiting = true
+			} else {
+				text.Style = regular
+				marked = append(marked, text)
+			}
+		}
+
+		off += length
+		if off > pos {
+			break
+		}
+	}
+
+	if len(marked) == 0 {
+		return nil, false
+	}
+	if waiting {
+		return marked, true
+	}
+	return marked[1:], true
+}
+
+// lineStyle returns the style that a line is typed in - the default for content ignoring inline styles.
+func lineStyle(style RichTextStyle) RichTextStyle {
+	style.codeInline = false
+	style.TextStyle.Monospace = false
+	style.TextStyle.Strikethrough = false
+
+	// headings are bold and quotes italic without any marks applied
+	style.TextStyle.Bold = isHeadingStyle(style)
+	style.TextStyle.Italic = style.QuotingDepth > 0
+	return style
 }
 
 // dropEmptySegments removes the empty text segments that drop reports for, looking
 // inside the blocks that hold content. It returns the offset reached and whether any
 // segment was removed.
-func dropEmptySegments(list *[]RichTextSegment, off int, inBlock bool, drop func(off int) bool) (int, bool) {
+func dropEmptySegments(list *[]RichTextSegment, off int, inBlock bool,
+	drop func(text *TextSegment, off int) bool,
+) (int, bool) {
 	removed := false
 	segments := make([]RichTextSegment, 0, len(*list))
 	for _, seg := range *list {
@@ -492,7 +544,7 @@ func dropEmptySegments(list *[]RichTextSegment, off int, inBlock bool, drop func
 		}
 
 		lastInBlock := inBlock && len(*list) == 1
-		if text, ok := seg.(*TextSegment); ok && text.Text == "" && !lastInBlock && drop(off) {
+		if text, ok := seg.(*TextSegment); ok && text.Text == "" && !lastInBlock && drop(text, off) {
 			removed = true
 			continue
 		}
@@ -826,8 +878,14 @@ func markdownBlockPrefix(style RichTextStyle) string {
 	return prefix
 }
 
+// isHeadingStyle reports whether a style is that of a heading, at any level.
+func isHeadingStyle(style RichTextStyle) bool {
+	return style.SizeName == theme.SizeNameHeadingText || style.SizeName == theme.SizeNameSubHeadingText ||
+		style.headingLevel > 0
+}
+
 func markdownInlineMarks(style RichTextStyle) string {
-	if style.SizeName == theme.SizeNameHeadingText || style.SizeName == theme.SizeNameSubHeadingText || style.headingLevel > 0 {
+	if isHeadingStyle(style) {
 		return "" // the heading prefix already covers the emphasis
 	}
 
