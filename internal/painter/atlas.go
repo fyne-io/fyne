@@ -40,6 +40,12 @@ const (
 	// whiteCentre the offset of its centre texel from the block's corner.
 	whiteBlock  = 3
 	whiteCentre = whiteBlock / 2.0
+	// subpixelUnits is the precision a glyph's horizontal sub-pixel offset is
+	// keyed at: 64ths of a pixel, the 26.6 fixed point the shaper works in.
+	subpixelUnits = 64
+	// subpixelPerPoint is how many horizontal sub-pixel positions a glyph is
+	// cached at per logical pixel; see subpixelSteps.
+	subpixelPerPoint = 4
 )
 
 // AtlasTexture is a painter's GPU half of a GlyphAtlas.
@@ -97,6 +103,11 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		return dst, false
 	}
 
+	// The run's pixel origin, rounded the way the whole-run path rounds its quad.
+	originX := float32(math.Round(float64(pos.X * pixScale)))
+	originY := float32(math.Round(float64(pos.Y * pixScale)))
+	steps := subpixelSteps(pixScale)
+
 	// Every glyph is resolved before any quad is handed out. Resolving can reset
 	// a full atlas, which strands the slots resolved before it, so a reset means
 	// resolving the string again; only a string whose glyphs alone overflow the
@@ -105,7 +116,8 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		resets := a.resets
 		a.slotScratch = a.slotScratch[:0]
 		for _, pg := range glyphs {
-			e, ok := a.glyph(pg, text.TextSize, pixScale, tex)
+			_, sub := snapX(originX+pg.X, steps)
+			e, ok := a.glyph(pg, sub, text.TextSize, pixScale, tex)
 			if !ok {
 				return dst, false
 			}
@@ -119,25 +131,19 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		}
 	}
 
-	// The run's pixel origin, rounded the way the whole-run path rounds its quad.
-	originX := float32(math.Round(float64(pos.X * pixScale)))
-	originY := float32(math.Round(float64(pos.Y * pixScale)))
 	for i, pg := range glyphs {
 		e := a.slotScratch[i]
 		if e.empty() {
 			continue
 		}
-		// Snapped to whole device pixels. The bitmap was rasterised at a whole
-		// pixel origin, so a quad at a fractional position would resample it and
-		// the glyph would come out soft and fringed - the pen position drifts
-		// fractional as the shaped advances accumulate, so this is every glyph
-		// but the first, not an edge case.
-		//
-		// ponytail: whole-pixel placement, so within-run subpixel positioning is
-		// lost and spacing can differ from the whole-run path by under a pixel.
-		// The upgrade, if that is ever visible, is to cache each glyph at a few
-		// horizontal subpixel phases and pick by the fractional pen position.
-		x1 := float32(math.Round(float64(originX+pg.X))) + float32(e.bearX)
+		// Quads land on whole device pixels, one texel to one pixel: a quad at a
+		// fractional position would resample its bitmap and the glyph would come
+		// out soft. The pen position's fraction is in the bitmap instead, which
+		// was rasterised that far right of its origin, so spacing follows the
+		// shaped advances as the whole-run path draws them. Vertically the
+		// baseline is already whole, as it is for the whole-run path.
+		ix, _ := snapX(originX+pg.X, steps)
+		x1 := float32(ix + e.bearX)
 		y1 := float32(math.Round(float64(originY+pg.Y))) + float32(e.bearY)
 		dst = append(dst, GlyphQuad{
 			X1: x1, Y1: y1, X2: x1 + float32(e.width), Y2: y1 + float32(e.height),
@@ -194,11 +200,12 @@ func (a *GlyphAtlas) shape(text *canvas.Text, pixScale float32) ([]PlacedGlyph, 
 	return e.glyphs, e.ok
 }
 
-// glyph returns where a glyph lives in the atlas, rasterising and uploading it
-// on first use. The second result is false when the glyph could not be placed
-// at all, which sends the caller to the whole-run fallback.
-func (a *GlyphAtlas) glyph(pg PlacedGlyph, fontSize, pixScale float32, tex AtlasTexture) (glyphEntry, bool) {
-	key := newGlyphKey(pg.Face, pg.Glyph.GlyphID, fontSize, pixScale)
+// glyph returns where a glyph lives in the atlas when drawn sub/64 of a pixel
+// right of a whole pixel, rasterising and uploading it on first use. The second
+// result is false when the glyph could not be placed at all, which sends the
+// caller to the whole-run fallback.
+func (a *GlyphAtlas) glyph(pg PlacedGlyph, sub int, fontSize, pixScale float32, tex AtlasTexture) (glyphEntry, bool) {
+	key := newGlyphKey(pg.Face, pg.Glyph.GlyphID, fontSize, pixScale, sub)
 	if e, ok := a.entries[key]; ok {
 		return e, !e.unsupported
 	}
@@ -225,9 +232,12 @@ func (a *GlyphAtlas) glyph(pg PlacedGlyph, fontSize, pixScale float32, tex Atlas
 		return glyphEntry{}, true
 	}
 
-	// Rasterise at a whole-pixel origin chosen so the ink, plus a pixel of room
-	// for the antialiased edge, lands inside the bitmap.
-	originX := 1 - int(math.Floor(float64(relX)))
+	// Rasterise at an origin chosen so the ink, shifted right by the sub-pixel
+	// offset and with a pixel of room for the antialiased edge, lands inside the
+	// bitmap. The offset is under a pixel and folded into the floor, so the
+	// width below still has room for it.
+	subX := float32(sub) / subpixelUnits
+	originX := 1 - int(math.Floor(float64(relX+subX)))
 	originY := 1 + int(math.Ceil(float64(relY)))
 	w := int(math.Ceil(float64(inkW))) + 3
 	h := int(math.Ceil(float64(inkH))) + 3
@@ -237,7 +247,7 @@ func (a *GlyphAtlas) glyph(pg PlacedGlyph, fontSize, pixScale float32, tex Atlas
 		return glyphEntry{}, false // larger than the atlas itself
 	}
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
-	RasteriseGlyph(img, pg, color.White, fontSize, pixScale, originX, originY)
+	RasteriseGlyph(img, pg, color.White, fontSize, pixScale, originX, originY, subX)
 	tex.UploadGlyph(img, x, y)
 
 	e := glyphEntry{x: x, y: y, width: w, height: h, bearX: -originX, bearY: -originY}
@@ -286,8 +296,8 @@ type shapedEntry struct {
 // path this deliberately does not grow. Whether the glyphs themselves fit is
 // the atlas's answer, and a cached one.
 //
-// ponytail: whole-string fallback rather than a second colour atlas beside this
-// one. Mixed emoji and text then costs one texture per such label, which is
+// Such strings fall back whole rather than getting a second colour atlas beside
+// this one. Mixed emoji and text then costs one texture per such label, which is
 // what every label cost before this existed; a colour atlas is only worth
 // building for an app that is mostly emoji.
 func shapeable(glyphs []PlacedGlyph) bool {
@@ -301,15 +311,42 @@ func shapeable(glyphs []PlacedGlyph) bool {
 
 // glyphKey identifies one rasterised glyph. The size folds in the canvas scale
 // because that is what the rasteriser is given, and it is fixed point so two
-// sizes a hair apart cannot collide through float rounding.
+// sizes a hair apart cannot collide through float rounding. The sub-pixel
+// offset is kept in 64ths rather than as a phase index, because the number of
+// phases depends on the scale and the same index would mean different offsets.
 type glyphKey struct {
 	face *font.Face
 	gid  font.GID
 	size int32 // fontSize * pixScale in 26.6 fixed point
+	sub  int   // horizontal offset the bitmap was rasterised at, in 64ths of a pixel
 }
 
-func newGlyphKey(face *font.Face, gid font.GID, fontSize, pixScale float32) glyphKey {
-	return glyphKey{face: face, gid: gid, size: int32(fontSize * pixScale * 64)}
+func newGlyphKey(face *font.Face, gid font.GID, fontSize, pixScale float32, sub int) glyphKey {
+	return glyphKey{face: face, gid: gid, size: int32(fontSize * pixScale * 64), sub: sub}
+}
+
+// subpixelSteps is how many horizontal positions within a device pixel a glyph
+// is cached at. Snapping each glyph to the nearest one keeps spacing within an
+// eighth of a logical pixel of where the shaper put it. Denser screens need
+// fewer steps for that, and their glyphs cover more texels, so the steps
+// shrink as the scale grows and the atlas holds about as much text at any
+// density: four at 1x, two at 2x and 3x, one from 4x.
+func subpixelSteps(pixScale float32) int {
+	return max(1, min(subpixelPerPoint, int(math.Ceil(float64(subpixelPerPoint/pixScale)))))
+}
+
+// snapX splits a pen position in device pixels into the whole pixel its quad
+// is placed at and the offset, in 64ths of a pixel, its bitmap is rasterised
+// at: the nearest of steps evenly spaced positions. Rounding up past the last
+// position moves on to the next whole pixel, and negative positions (text
+// scrolled off the left edge) floor like any other.
+func snapX(x float32, steps int) (pixel, sub int) {
+	n := int(math.Round(float64(x) * float64(steps)))
+	pixel, phase := n/steps, n%steps
+	if phase < 0 {
+		pixel, phase = pixel-1, phase+steps
+	}
+	return pixel, phase * subpixelUnits / steps
 }
 
 // glyphEntry is where a glyph landed in the atlas and how its bitmap sits
@@ -317,8 +354,8 @@ func newGlyphKey(face *font.Face, gid font.GID, fontSize, pixScale float32) glyp
 type glyphEntry struct {
 	x, y          int // top-left in atlas pixels
 	width, height int
-	// bearX and bearY offset the quad from the pen position and baseline. They
-	// are whole pixels because the bitmap was rasterised at a whole pixel origin.
+	// bearX and bearY offset the quad from the whole pixel the pen position was
+	// snapped to and the baseline; any fraction is inside the bitmap.
 	bearX, bearY int
 	// unsupported marks a glyph a coverage atlas cannot hold - a colour emoji,
 	// in practice. It is cached like any other entry so the decision is made
@@ -333,7 +370,7 @@ func (e glyphEntry) empty() bool { return e.width == 0 || e.height == 0 }
 // left to right in a row whose height is set by the tallest one placed in it,
 // and a full row starts a new one below.
 //
-// ponytail: shelves, not a skyline or a full bin packer. Glyphs of one font
+// Shelves rather than a skyline or a full bin packer, because glyphs of one font
 // size are all much the same height, so a shelf wastes very little, and the
 // whole structure is three ints. If mixed body and heading sizes ever fragment
 // this badly enough to matter, the atlas simply resets and repacks - the

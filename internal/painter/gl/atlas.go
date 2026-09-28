@@ -67,7 +67,7 @@ func (p *painter) UploadGlyph(img *image.RGBA, x, y int) {
 
 // ensureAtlas allocates the atlas texture the first time anything is batched.
 //
-// ponytail: RGBA, although only alpha is read. A single-channel texture would
+// The texture is RGBA, although only alpha is read. A single-channel one would
 // be a quarter of the 4MB, but needs format constants and an unpack alignment
 // call on every GL binding; this needs neither.
 func (p *painter) ensureAtlas() {

@@ -69,14 +69,57 @@ func TestAtlasPackerRejectsAndRecovers(t *testing.T) {
 func TestGlyphKeyDistinguishesSize(t *testing.T) {
 	// Body text and a heading share glyph IDs, so a key that ignored size would
 	// draw the heading at body size. Same face and GID, different size only.
-	a := newGlyphKey(nil, 42, 12, 1)
-	b := newGlyphKey(nil, 42, 24, 1)
+	a := newGlyphKey(nil, 42, 12, 1, 0)
+	b := newGlyphKey(nil, 42, 24, 1, 0)
 	if a == b {
 		t.Fatal("keys for two font sizes must differ")
 	}
 	// Scale folds into the same field: a 12pt glyph at 2x is a 24pt bitmap.
-	if newGlyphKey(nil, 42, 12, 2) != b {
+	if newGlyphKey(nil, 42, 12, 2, 0) != b {
 		t.Error("fontSize*pixScale should determine the key")
+	}
+	// The same glyph rasterised at another sub-pixel offset is another bitmap.
+	if newGlyphKey(nil, 42, 12, 1, 16) == a {
+		t.Error("keys for two sub-pixel offsets must differ")
+	}
+}
+
+func TestSnapX(t *testing.T) {
+	for _, tc := range []struct {
+		x          float32
+		steps      int
+		pixel, sub int
+	}{
+		{10, 4, 10, 0},
+		{10.2, 4, 10, 16}, // nearest quarter is 0.25
+		{10.4, 4, 10, 32}, // 0.5
+		{10.9, 4, 11, 0},  // rounds up past the last quarter into the next pixel
+		{10.4, 2, 10, 32}, // halves at 2x
+		{10.2, 2, 10, 0},  // ...where 0.2 is nearer the whole pixel
+		{10.7, 1, 11, 0},  // one step is plain rounding
+		{-0.2, 4, -1, 48}, // floors below zero: -0.25 is pixel -1 plus 0.75
+		{-1.1, 4, -1, 0},  // ...and -1.0 is the nearest quarter to -1.1
+	} {
+		pixel, sub := snapX(tc.x, tc.steps)
+		if pixel != tc.pixel || sub != tc.sub {
+			t.Errorf("snapX(%v, %d) = %d, %d; want %d, %d", tc.x, tc.steps, pixel, sub, tc.pixel, tc.sub)
+		}
+	}
+}
+
+func TestSubpixelSteps(t *testing.T) {
+	for _, tc := range []struct {
+		scale float32
+		steps int
+	}{{1, 4}, {1.25, 4}, {1.5, 3}, {2, 2}, {3, 2}, {4, 1}, {6, 1}} {
+		if got := subpixelSteps(tc.scale); got != tc.steps {
+			t.Errorf("subpixelSteps(%v) = %d, want %d", tc.scale, got, tc.steps)
+		}
+		// However many steps, the worst snap stays within an eighth of a logical
+		// pixel of where the shaper put the glyph.
+		if worst := 1 / (2 * float32(tc.steps) * tc.scale); worst > 0.125 {
+			t.Errorf("at %vx, %d steps can misplace a glyph by %v logical pixels", tc.scale, tc.steps, worst)
+		}
 	}
 }
 
