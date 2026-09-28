@@ -129,7 +129,7 @@ type menuBarRenderer struct {
 func (r *menuBarRenderer) Layout(size fyne.Size) {
 	minSize := r.MinSize()
 	if size.Height != minSize.Height || size.Width < minSize.Width {
-		r.b.Resize(fyne.NewSize(fyne.Max(size.Width, minSize.Width), minSize.Height))
+		r.b.Resize(fyne.NewSize(max(size.Width, minSize.Width), minSize.Height))
 		return
 	}
 

@@ -73,6 +73,31 @@ func (w *InnerWindow) Close() {
 	w.Hide()
 }
 
+// Cursor returns the default cursor so that objects behind the window cannot set their own.
+//
+// Since: 2.9
+func (*InnerWindow) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
+// MouseIn catches mouse-in events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseIn(*desktop.MouseEvent) {
+}
+
+// MouseMoved catches mouse-moved events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseOut catches mouse-out events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseOut() {
+}
+
 // CreateRenderer implements the [fyne.Widget] interface.
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
@@ -244,7 +269,7 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	contentMin := i.win.Content.MinSize()
 	barHeight := th.Size(theme.SizeNameWindowTitleBarHeight)
 
-	innerWidth := fyne.Max(i.bar.MinSize().Width, contentMin.Width)
+	innerWidth := max(i.bar.MinSize().Width, contentMin.Width)
 
 	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barHeight)
 }
@@ -487,7 +512,7 @@ func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	titleMin := t.title.MinSize() // can truncate
 
 	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
-		fyne.Max(fyne.Max(buttonMin.Height, iconMin.Height), titleMin.Height))
+		max(buttonMin.Height, iconMin.Height, titleMin.Height))
 }
 
 func configureShadow(bg *canvas.Rectangle, active bool, th fyne.Theme, v fyne.ThemeVariant) {
