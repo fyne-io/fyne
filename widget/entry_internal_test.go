@@ -48,7 +48,7 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	ev = getClickPosition("The quick", 0)
 	clickPrimary(entry, ev)
 	entry.DoubleTapped(ev)
-	assert.Equal(t, " ", entry.SelectedText())
+	assert.Equal(t, textSpace, entry.SelectedText())
 
 	entry.sel.doubleTappedAtUnixMillis = 0
 
