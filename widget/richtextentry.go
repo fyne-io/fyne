@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -404,11 +405,7 @@ func splitSegmentsAt(list *[]RichTextSegment, pos, off int) (out *[]RichTextSegm
 			tail := &TextSegment{Style: text.Style, Text: string(runes[cut:])}
 			text.Text = string(runes[:cut])
 
-			segments := make([]RichTextSegment, 0, len(*list)+1)
-			segments = append(segments, (*list)[:i+1]...)
-			segments = append(segments, tail)
-			segments = append(segments, (*list)[i+1:]...)
-			*list = segments
+			*list = slices.Insert(*list, i+1, RichTextSegment(tail))
 			return list, i + 1, pos
 		}
 		off += length
@@ -447,12 +444,7 @@ func (e *RichTextEntry) insertEmptySegmentAt(pos int, style RichTextStyle) {
 	style.Inline = true
 	e.dropEmptySegmentsAt(pos) // only one segment may claim the text typed here
 	list, i := e.splitAt(pos)
-
-	segments := make([]RichTextSegment, 0, len(*list)+1)
-	segments = append(segments, (*list)[:i]...)
-	segments = append(segments, &TextSegment{Style: style})
-	segments = append(segments, (*list)[i:]...)
-	*list = segments
+	*list = slices.Insert(*list, i, RichTextSegment(&TextSegment{Style: style}))
 }
 
 // dropEmptySegmentsAt removes any empty text segments sitting at the given rune
@@ -1215,11 +1207,8 @@ func (e *RichTextEntry) splitListItem(pos int) bool {
 		tail = mergeSegments(tail)
 	}
 
-	items := make([]RichTextSegment, 0, len(item.list.Items)+1)
-	items = append(items, item.list.Items[:item.index]...)
-	items = append(items, &ParagraphSegment{Texts: head}, &ParagraphSegment{Texts: tail})
-	items = append(items, item.list.Items[item.index+1:]...)
-	item.list.Items = items
+	item.list.Items[item.index] = &ParagraphSegment{Texts: head}
+	item.list.Items = slices.Insert(item.list.Items, item.index+1, RichTextSegment(&ParagraphSegment{Texts: tail}))
 	item.list.markers = nil // the bullets are numbered again from the items
 
 	e.finishStyling(pos + 1)
@@ -1240,11 +1229,7 @@ func (e *RichTextEntry) leaveList(item richListItem, pos int) bool {
 		segments = append(segments[:at], segments[at+1:]...)
 	}
 
-	out := make([]RichTextSegment, 0, len(segments)+1)
-	out = append(out, segments[:at]...)
-	out = append(out, &TextSegment{Style: RichTextStyleInline})
-	out = append(out, segments[at:]...)
-	*item.owner = out
+	*item.owner = slices.Insert(segments, at, RichTextSegment(&TextSegment{Style: RichTextStyleInline}))
 
 	e.finishStyling(pos)
 	return true
@@ -1279,11 +1264,7 @@ func (e *RichTextEntry) removeBullet(pos int) bool {
 		segments = append(segments[:at], segments[at+1:]...)
 	}
 
-	out := make([]RichTextSegment, 0, len(segments)+len(texts))
-	out = append(out, segments[:at]...)
-	out = append(out, texts...)
-	out = append(out, segments[at:]...)
-	*item.owner = out
+	*item.owner = slices.Insert(segments, at, texts...)
 
 	e.finishStyling(pos)
 	return true
@@ -1402,7 +1383,8 @@ func (e *RichTextEntry) toggleCodeFence() bool {
 
 		end := blockStart + utf8.RuneCountInString(block.Text)
 		e.dropEmptySegmentsAt(end) // only one segment may claim the text typed here
-		insertSegmentAt(owner, indexOfSegment(*owner, block)+1, &TextSegment{Style: RichTextStyleInline})
+		after := indexOfSegment(*owner, block) + 1
+		*owner = slices.Insert(*owner, after, RichTextSegment(&TextSegment{Style: RichTextStyleInline}))
 
 		e.finishStyling(end)
 		return true
@@ -1411,19 +1393,10 @@ func (e *RichTextEntry) toggleCodeFence() bool {
 	provider.deleteFromTo(lineStart, pos)
 	e.dropEmptySegmentsAt(lineStart)
 	list, at := e.splitAt(lineStart)
-	insertSegmentAt(list, at, &CodeBlockSegment{Text: newLineChar})
+	*list = slices.Insert(*list, at, RichTextSegment(&CodeBlockSegment{Text: newLineChar}))
 
 	e.finishStyling(lineStart)
 	return true
-}
-
-func insertSegmentAt(list *[]RichTextSegment, index int, seg RichTextSegment) {
-	index = min(index, len(*list))
-	segments := make([]RichTextSegment, 0, len(*list)+1)
-	segments = append(segments, (*list)[:index]...)
-	segments = append(segments, seg)
-	segments = append(segments, (*list)[index:]...)
-	*list = segments
 }
 
 // markdownListPrefix reports whether the text typed at the start of a line asks
