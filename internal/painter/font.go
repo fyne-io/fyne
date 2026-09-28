@@ -259,13 +259,16 @@ func WalkGlyphs(f shaping.Fontmap, s string, fontSize, scale float32, style fyne
 }
 
 // RasteriseGlyph draws a single glyph into dst at the given pen position and
-// baseline, using the same renderer settings as DrawString.
-func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scale float32, x, y int) {
+// baseline, using the same renderer settings as DrawString. subX shifts the
+// glyph a fraction of a pixel right of x, which is how a cached bitmap carries
+// the sub-pixel part of a pen position that its quad cannot.
+func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scale float32, x, y int, subX float32) {
 	r := render.Renderer{FontSize: fontSize, PixScale: scale, Color: c}
 	run := shaping.Output{Face: g.Face, Glyphs: []shaping.Glyph{g.Glyph}}
-	// XOffset/YOffset are already folded into the caller's x/y, so zero them
-	// here rather than have DrawShapedRunAt apply them a second time.
-	run.Glyphs[0].XOffset, run.Glyphs[0].YOffset = 0, 0
+	// The shaped XOffset/YOffset are already folded into the caller's x/y, so
+	// they are replaced rather than applied a second time. DrawShapedRunAt scales
+	// XOffset by the pixel scale, hence the division.
+	run.Glyphs[0].XOffset, run.Glyphs[0].YOffset = float32ToFixed266(subX/scale), 0
 	r.DrawShapedRunAt(run, dst, x, y)
 }
 

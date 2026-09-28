@@ -65,11 +65,8 @@ var (
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
 
-// glyphAtlasSupported is false because fyne's mobile GL binding has no
-// TexSubImage2D to fill the atlas with, so text here keeps a texture per
-// string. Enabling it also needs the mobile driver to call FlushGlyphs once it
-// has walked the tree, as the glfw canvas does.
-const glyphAtlasSupported = false
+// glyphAtlasSupported enables batched atlas text; see atlas.go.
+const glyphAtlasSupported = true
 
 func (p *painter) Init() {
 	glctx := p.contextProvider.Context().(gl.Context)
@@ -250,8 +247,9 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 	)
 }
 
-// TexSubImage2D is never reached: glyphAtlasSupported is false here.
-func (c *mobileContext) TexSubImage2D(uint32, int, int, int, int, int, uint32, uint32, []uint8) {}
+func (c *mobileContext) TexSubImage2D(target uint32, level, x, y, width, height int, colorFormat, typ uint32, data []uint8) {
+	c.glContext.TexSubImage2D(gl.Enum(target), level, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ), data)
+}
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
 	c.glContext.TexParameteri(gl.Enum(target), gl.Enum(param), int(value))
