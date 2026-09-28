@@ -592,11 +592,11 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else {
 		canUndo, canRedo := e.undoStack.CanUndo(), e.undoStack.CanRedo()
 		if canUndo {
-			undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)
+			undoItem := fyne.NewMenuItem(lang.L("Undo"), e.undoer().Undo)
 			menuItems = append(menuItems, undoItem)
 		}
 		if canRedo {
-			redoItem := fyne.NewMenuItem(lang.L("Redo"), e.Redo)
+			redoItem := fyne.NewMenuItem(lang.L("Redo"), e.undoer().Redo)
 			menuItems = append(menuItems, redoItem)
 		}
 		if canUndo || canRedo {
@@ -1074,10 +1074,10 @@ func (e *Entry) placeholderProvider() *RichText {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(fyne.Shortcut) {
-		e.Undo()
+		e.undoer().Undo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(fyne.Shortcut) {
-		e.Redo()
+		e.undoer().Redo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut, _ := se.(*fyne.ShortcutCut)
@@ -1165,6 +1165,22 @@ func (e *Entry) registerShortcut() {
 		func(fyne.Shortcut) { e.deleteWord(false) })
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: moveWordModifier},
 		func(fyne.Shortcut) { e.deleteWord(true) })
+}
+
+// undoer returns the widget that handles undo and redo for this entry, so that a
+// widget extending it can replace how those changes are applied.
+func (e *Entry) undoer() interface {
+	Undo()
+	Redo()
+} {
+	if impl, ok := e.super().(interface {
+		Undo()
+		Redo()
+	}); ok {
+		return impl
+	}
+
+	return e
 }
 
 func (e *Entry) requestFocus() {

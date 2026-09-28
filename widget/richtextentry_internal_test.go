@@ -1009,3 +1009,19 @@ func TestRichTextEntry_SelectedText_ListMarkers(t *testing.T) {
 	e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	assert.Equal(t, "• one\n", clipboard.Content())
 }
+
+func TestRichTextEntry_UndoShortcut(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("a **b** c")
+	e.CursorRow, e.CursorColumn = 0, 3
+
+	e.TypedRune('X')
+	assert.Equal(t, "a bX c", e.Text)
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "a b c", e.Text)
+	assert.Equal(t, []string{"a |", "b|b", " c|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "a bX c", e.Text)
+	assert.Equal(t, []string{"a |", "bX|b", " c|"}, segmentDump(e))
+}
