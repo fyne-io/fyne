@@ -186,11 +186,9 @@ func (p *painter) pushSolidRect(r *canvas.Rectangle, pos fyne.Position, frame fy
 	// The snapping vecRectCoords applies, without the antialiasing skirt it adds
 	// for the shader's quad (which the shader then clips back to bounds).
 	size := r.Size()
-	x := roundToPixel(pos.X, p.pixScale)
-	y := roundToPixel(pos.Y, p.pixScale)
-	w := roundToPixel(size.Width, p.pixScale)
-	h := roundToPixel(size.Height, p.pixScale)
-	x1, x2, y1, y2 := p.scaleRectCoords(x, x+w, y, y+h)
+	x1, x2, y1, y2 := p.scaleRectCoords(
+		roundToPixel(pos.X, p.pixScale), roundToPixel(pos.X+size.Width, p.pixScale),
+		roundToPixel(pos.Y, p.pixScale), roundToPixel(pos.Y+size.Height, p.pixScale))
 	fw, fh := p.scaleFrameSize(frame)
 	cr, cg, cb, ca := getFragmentColor(r.FillColor)
 	p.pushQuad(paint.GlyphQuad{X1: x1, Y1: y1, X2: x2, Y2: y2, U1: u, V1: v, U2: u, V2: v},
