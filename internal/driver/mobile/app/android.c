@@ -53,6 +53,9 @@ static jmethodID show_keyboard_method;
 static jmethodID hide_keyboard_method;
 static jmethodID show_file_open_method;
 static jmethodID show_file_save_method;
+static jmethodID capture_camera_photo_method;
+static jmethodID start_camera_preview_method;
+static jmethodID stop_camera_preview_method;
 static jmethodID finish_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
@@ -95,6 +98,9 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
+		capture_camera_photo_method = find_static_method(env, current_class, "captureCameraPhoto", "()V");
+		start_camera_preview_method = find_static_method(env, current_class, "startCameraPreview", "()V");
+		stop_camera_preview_method = find_static_method(env, current_class, "stopCameraPreview", "()V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
@@ -281,9 +287,50 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename) {
 	);
 }
 
+void captureCameraPhoto(JNIEnv* env) {
+    jstring f = (*env)->NewStringUTF(env, " ");
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		capture_camera_photo_method
+	);
+}
+
+void startCameraPreview(JNIEnv* env) {
+    jstring f = (*env)->NewStringUTF(env, " ");
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		start_camera_preview_method
+	);
+}
+
+void stopCameraPreview(JNIEnv* env) {
+    jstring f = (*env)->NewStringUTF(env, " ");
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		stop_camera_preview_method
+	);
+}
+
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str) {
     const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
 	filePickerReturned((char*)cstr);
+}
+
+void Java_org_golang_app_GoNativeActivity_cameraPreviewFrame(JNIEnv *env, jclass clazz, jbyteArray jpegBytes, jint length) {
+    jbyte *buffer = (*env)->GetByteArrayElements(env, jpegBytes, NULL);
+    if (buffer == NULL) return;
+    previewFrameCaptured((char*)buffer, (int)length);
+    (*env)->ReleaseByteArrayElements(env, jpegBytes, buffer, JNI_ABORT);
+}
+
+void Java_org_golang_app_GoNativeActivity_capturePhotoReturned(JNIEnv *env, jclass clazz, jbyteArray jpegBytes, jint length) {
+    jbyte *buffer = (*env)->GetByteArrayElements(env, jpegBytes, NULL);
+    if (buffer == NULL) return;
+    capturePhotoReturned((char*)buffer, (int)length);
+    (*env)->ReleaseByteArrayElements(env, jpegBytes, buffer, JNI_ABORT);
 }
 
 void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
