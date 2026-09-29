@@ -17,6 +17,8 @@ than screens with touch panels.
 #cgo freebsd CFLAGS: -I/usr/local/include/
 #cgo openbsd CFLAGS: -I/usr/X11R6/include/
 
+#include <X11/Xlib.h>
+
 void createWindow(void);
 void processEvents(void);
 void swapBuffers(void);
@@ -105,6 +107,22 @@ func onResize(w, h int) {
 	}
 }
 
+// Mouse buttons as reported by XButtonEvent.button, see Xlib.h.
+const (
+	x11ButtonLeft      = C.Button1
+	x11ButtonMiddle    = C.Button2
+	x11ButtonRight     = C.Button3
+	x11ButtonWheelUp   = C.Button4
+	x11ButtonWheelDown = C.Button5
+)
+
+// x11ButtonIsTouch reports whether a mouse button should be translated into a
+// touch event. Only the left and right button are, so that scrolling with the
+// mouse wheel does not count as a click.
+func x11ButtonIsTouch(button int) bool {
+	return button == x11ButtonLeft || button == x11ButtonRight
+}
+
 func sendTouch(t touch.Type, x, y float32) {
 	theApp.events.In() <- touch.Event{
 		X:        x,
@@ -115,13 +133,25 @@ func sendTouch(t touch.Type, x, y float32) {
 }
 
 //export onTouchBegin
-func onTouchBegin(x, y float32) { sendTouch(touch.TypeBegin, x, y) }
+func onTouchBegin(x, y float32, button int) {
+	if !x11ButtonIsTouch(button) {
+		return
+	}
+
+	sendTouch(touch.TypeBegin, x, y)
+}
 
 //export onTouchMove
 func onTouchMove(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 
 //export onTouchEnd
-func onTouchEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
+func onTouchEnd(x, y float32, button int) {
+	if !x11ButtonIsTouch(button) {
+		return
+	}
+
+	sendTouch(touch.TypeEnd, x, y)
+}
 
 //export onKeyPress
 func onKeyPress(keysym C.long, r C.int, mods C.long) {

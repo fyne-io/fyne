@@ -190,10 +190,12 @@ processEvents(void) {
 		XNextEvent(x_dpy, &ev);
 		switch (ev.type) {
 		case ButtonPress:
-			onTouchBegin((float)ev.xbutton.x, (float)ev.xbutton.y);
+			// the button is passed on so that the driver can ignore the ones
+			// that do not map to a touch, like the scroll wheel
+			onTouchBegin((float)ev.xbutton.x, (float)ev.xbutton.y, ev.xbutton.button);
 			break;
 		case ButtonRelease:
-			onTouchEnd((float)ev.xbutton.x, (float)ev.xbutton.y);
+			onTouchEnd((float)ev.xbutton.x, (float)ev.xbutton.y, ev.xbutton.button);
 			break;
 		case KeyPress:
 			send_key(&ev.xkey, 1);
