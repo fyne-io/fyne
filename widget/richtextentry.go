@@ -43,6 +43,11 @@ type RichTextEntry struct {
 
 	// TypeMarkdown converts markdown into the style that it describes as soon as it has been typed.
 	TypeMarkdown bool
+
+	// undoState is a copy of the content as the undo history last recorded it
+	undoState []RichTextSegment
+	// undoEdit notes what an edit changed beyond the text that was recorded for it
+	undoEdit richTextEdit
 }
 
 // NewRichTextEntry creates a new rich text entry widget.
@@ -94,7 +99,7 @@ func (e *RichTextEntry) SetSegments(segments []RichTextSegment) {
 
 	e.CursorRow, e.CursorColumn = 0, 0
 	e.ClearSelection()
-	e.undoStack.Clear()
+	e.resetUndo()
 	e.updateTextAndRefresh(provider.String(), false)
 	e.updateCursorAndSelection()
 }
@@ -145,6 +150,9 @@ func (e *RichTextEntry) Markdown() string {
 //
 // Since: 2.9
 func (e *RichTextEntry) SetStyleForRange(start, end int, style RichTextStyle) {
+	defer e.commitUndo(e.beginUndo())
+	e.noteEdit(richTextEditStyled)
+
 	style.Inline = true
 	e.styleRange(start, end, func(s *RichTextStyle) {
 		*s = style
@@ -196,6 +204,8 @@ func (e *RichTextEntry) StyleAtCursor() RichTextStyle {
 
 // TypedRune receives text input events when this widget is focused.
 func (e *RichTextEntry) TypedRune(r rune) {
+	defer e.commitUndo(e.beginUndo())
+
 	e.Entry.TypedRune(r)
 
 	if e.TypeMarkdown && e.styleMarkdownAtCursor(r) {
@@ -205,6 +215,8 @@ func (e *RichTextEntry) TypedRune(r rune) {
 
 // TypedKey receives key input events when this widget is focused.
 func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
+	defer e.commitUndo(e.beginUndo())
+
 	switch key.Name {
 	case fyne.KeyBackspace:
 		if e.hasSelection() {
@@ -245,6 +257,7 @@ func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		if e.pruneEmptySegments() {
+			e.noteEdit(richTextEditHidden)
 			e.Refresh()
 		}
 	case fyne.KeyReturn, fyne.KeyEnter:
@@ -252,9 +265,17 @@ func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
 			// headings and quotes cover a single line, so the next one starts
 			// again from the base style
 			e.insertEmptySegmentAt(e.CursorTextOffset(), RichTextStyleInline)
+			e.noteEdit(richTextEditHidden)
 			e.Refresh()
 		}
 	}
+}
+
+// TypedShortcut handles the shortcuts that this widget responds to.
+func (e *RichTextEntry) TypedShortcut(shortcut fyne.Shortcut) {
+	defer e.commitUndo(e.beginUndo())
+
+	e.Entry.TypedShortcut(shortcut)
 }
 
 // startsBlockLine handles a return that does more than break the line, either
@@ -283,50 +304,6 @@ func isBlockStyle(style RichTextStyle) bool {
 		return true
 	}
 	return style.SizeName != "" && style.SizeName != theme.SizeNameText
-}
-
-// Undo un-does the last modifying user-action.
-//
-// Since: 2.9
-func (e *RichTextEntry) Undo() {
-	_, action := e.undoStack.Undo(e.Text)
-	e.applyUndoAction(action, true)
-}
-
-// Redo re-applies the last undone user-action.
-//
-// Since: 2.9
-func (e *RichTextEntry) Redo() {
-	_, action := e.undoStack.Redo(e.Text)
-	e.applyUndoAction(action, false)
-}
-
-// applyUndoAction runs an undo stack entry against the segments to retain style.
-func (e *RichTextEntry) applyUndoAction(action entryUndoAction, undo bool) {
-	modify, ok := action.(*entryModifyAction)
-	if !ok {
-		return
-	}
-
-	provider := e.richProvider()
-	pos := modify.Position
-	if modify.Delete == undo { // put the text back
-		provider.insertAt(pos, modify.Text)
-		pos += len(modify.Text)
-	} else {
-		provider.deleteFromTo(pos, pos+len(modify.Text))
-	}
-
-	e.pruneEmptySegments()
-	content := provider.String()
-	e.updateText(content, false)
-	e.setCursorOffset(pos)
-
-	if e.OnChanged != nil {
-		e.OnChanged(content)
-	}
-	e.validateWithoutRefresh()
-	e.Refresh()
 }
 
 // styleShortcuts lists the keyboard shortcuts that turn a style on and off, for
@@ -425,6 +402,12 @@ func (e *RichTextEntry) rangeHasStyle(start, end int, enabled func(RichTextStyle
 // changed, leaving the text as it was. The cursor and the anchor of the selection,
 // which is negative if there is none, are put back at their rune offsets.
 func (e *RichTextEntry) finishStyleChange(cursor, anchor int) {
+	if anchor < 0 {
+		e.noteEdit(richTextEditHidden) // nothing changes until text is typed in the style
+	} else {
+		e.noteEdit(richTextEditStyled)
+	}
+
 	e.updateText(e.Text, false)
 	e.setCursorOffset(cursor)
 	if anchor >= 0 {
@@ -1191,8 +1174,7 @@ func (e *RichTextEntry) finishStyling(cursor int) {
 	e.updateText(content, false)
 	e.setCursorOffset(cursor)
 
-	// the undo stack holds plain text, which can no longer describe this change
-	e.undoStack.Clear()
+	e.noteEdit(richTextEditStyled)
 
 	if e.OnChanged != nil {
 		e.OnChanged(content)

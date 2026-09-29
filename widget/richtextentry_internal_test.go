@@ -1174,8 +1174,15 @@ func TestRichTextEntry_StyleShortcut_Undo(t *testing.T) {
 
 	selectRange(e, 0, 5)
 	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"hello|b", " world!|"}, segmentDump(e))
 
 	e.TypedShortcut(&fyne.ShortcutUndo{})
-	assert.Equal(t, "hello world", e.Text)
-	assert.Equal(t, []string{"hello|b", " world|"}, segmentDump(e))
+	assert.Equal(t, []string{"hello world!|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, []string{"hello world|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, []string{"hello|b", " world!|"}, segmentDump(e))
 }
