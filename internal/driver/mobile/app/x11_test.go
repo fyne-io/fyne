@@ -4,8 +4,10 @@ package app
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 )
 
 func TestX11KeySymToFyneKeyCode(t *testing.T) {
@@ -104,5 +106,84 @@ func TestX11KeySymToFyneKeyCode(t *testing.T) {
 
 	if got := x11KeySymToFyneKeyCode(0x12345); got != key.CodeUnknown {
 		t.Errorf("unmapped keysym should be CodeUnknown, got %v", got)
+	}
+}
+
+// markerEvent is sent onto the event queue to mark the end of the events that
+// a mouse button has produced, the queue keeps its order.
+type markerEvent struct{}
+
+func TestX11MouseButtons(t *testing.T) {
+	tests := []struct {
+		name   string
+		button int
+		want   []touch.Type
+	}{
+		{name: "left", button: x11ButtonLeft, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
+		{name: "right", button: x11ButtonRight, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
+		// the middle button and the scroll wheel must not be seen as a tap
+		{name: "middle", button: x11ButtonMiddle},
+		{name: "wheel up", button: x11ButtonWheelUp},
+		{name: "wheel down", button: x11ButtonWheelDown},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			onTouchBegin(10, 20, tt.button)
+			onTouchEnd(10, 20, tt.button)
+			theApp.Send(markerEvent{})
+
+			var got []touch.Event
+			for {
+				event := nextEvent(t)
+				if _, ok := event.(markerEvent); ok {
+					break
+				}
+
+				touchEvent, ok := event.(touch.Event)
+				if !ok {
+					t.Fatalf("expected a touch event for button %d, got %#v", tt.button, event)
+				}
+				got = append(got, touchEvent)
+			}
+
+			if len(got) != len(tt.want) {
+				t.Fatalf("expected %d touch events for button %d, got %d: %v",
+					len(tt.want), tt.button, len(got), got)
+			}
+
+			for i, want := range tt.want {
+				if got[i].Type != want {
+					t.Errorf("expected touch event %d for button %d to be %s, was %s",
+						i, tt.button, want, got[i].Type)
+				}
+				if got[i].X != 10 || got[i].Y != 20 {
+					t.Errorf("expected touch event %d for button %d at (10, 20), was (%v, %v)",
+						i, tt.button, got[i].X, got[i].Y)
+				}
+			}
+		})
+	}
+}
+
+func TestX11ButtonIsTouch(t *testing.T) {
+	for button := 1; button <= 10; button++ {
+		want := button == x11ButtonLeft || button == x11ButtonRight
+		if got := x11ButtonIsTouch(button); got != want {
+			t.Errorf("expected button %d to be a touch: %t, was %t", button, want, got)
+		}
+	}
+}
+
+func nextEvent(t *testing.T) any {
+	t.Helper()
+
+	select {
+	case event := <-theApp.Events():
+		return event
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for an event")
+
+		return nil
 	}
 }
