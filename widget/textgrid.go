@@ -160,6 +160,21 @@ func (t *TextGrid) MinSize() fyne.Size {
 	return t.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this text grid to
+// assistive technologies.
+//
+// Since: 2.8
+func (t *TextGrid) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleText
+}
+
+// AccessibilityLabel returns the plain-text content of the grid.
+//
+// Since: 2.8
+func (t *TextGrid) AccessibilityLabel() string {
+	return t.Text()
+}
+
 // Resize is called when this widget changes size. We should make sure that we refresh cells.
 func (t *TextGrid) Resize(size fyne.Size) {
 	t.BaseWidget.Resize(size)

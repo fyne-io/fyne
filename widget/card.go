@@ -93,6 +93,36 @@ func (c *Card) SetTitle(text string) {
 	c.Refresh()
 }
 
+// AccessibilityRole returns the role used to describe this card to assistive
+// technologies.
+//
+// Since: 2.8
+func (c *Card) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityLabel returns the title (falling back to the subtitle) so
+// assistive technologies can announce the card.
+//
+// Since: 2.8
+func (c *Card) AccessibilityLabel() string {
+	if c.Title != "" {
+		return c.Title
+	}
+	return c.Subtitle
+}
+
+// AccessibilityChildren returns the card content so it can be navigated by
+// assistive technologies.
+//
+// Since: 2.8
+func (c *Card) AccessibilityChildren() []fyne.CanvasObject {
+	if c.Content == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{c.Content}
+}
+
 type cardRenderer struct {
 	widget.BaseRenderer
 

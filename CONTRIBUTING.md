@@ -50,6 +50,9 @@ To manage this we have various checks and processes in place that everyone shoul
 
 For detailed Code style, check [Contributing](https://github.com/fyne-io/fyne/wiki/Contributing#code-style) in our wiki please.
 
+For accessibility changes, use the [widget gallery and macOS integration tests](test/accessibility/README.md).
+The gallery has cross-platform tests; the opt-in macOS suite checks the native accessibility tree and actions from a separate process.
+
 # Decision Process
 
 The following points apply to our decision making process:

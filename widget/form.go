@@ -100,6 +100,32 @@ func (f *Form) MinSize() fyne.Size {
 	return f.BaseWidget.MinSize()
 }
 
+// AccessibilityLabel returns an empty label so the form is announced by role only.
+//
+// Since: 2.8
+func (f *Form) AccessibilityLabel() string { return "" }
+
+// AccessibilityRole returns AccessibleRoleContainer.
+//
+// Since: 2.8
+func (f *Form) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleContainer
+}
+
+// AccessibilityChildren returns the rendered item grid and button row.
+//
+// Since: 2.8
+func (f *Form) AccessibilityChildren() []fyne.CanvasObject {
+	children := make([]fyne.CanvasObject, 0, 2)
+	if f.itemGrid != nil {
+		children = append(children, f.itemGrid)
+	}
+	if f.buttonBox != nil {
+		children = append(children, f.buttonBox)
+	}
+	return children
+}
+
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	f.ExtendBaseWidget(f)

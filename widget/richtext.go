@@ -180,6 +180,22 @@ func (t *RichText) String() string {
 	return ret.String()
 }
 
+// AccessibilityRole returns the role used to describe this rich text to
+// assistive technologies.
+//
+// Since: 2.8
+func (t *RichText) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleText
+}
+
+// AccessibilityLabel returns the plain-text representation of the rich
+// text content.
+//
+// Since: 2.8
+func (t *RichText) AccessibilityLabel() string {
+	return t.String()
+}
+
 // contentSegments returns the segments that carry the content of this rich text,
 // in the order that they are laid out. Blocks that keep their content in child
 // segments, such as lists, are replaced by the segments that they hold.

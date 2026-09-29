@@ -17,7 +17,7 @@ jobs:
             tags: ci,migrated_fynedo
             cover: -covermode=atomic -coverprofile=coverage.out
           - os: macos-latest
-            tags: no_glfw,ci,migrated_fynedo
+            tags: no_glfw,ci,migrated_fynedo,accessibility
           - os: windows-latest
             tags: no_glfw,migrated_fynedo
 

@@ -61,6 +61,25 @@ func (i *FileIcon) MinSize() fyne.Size {
 	return i.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this file icon to
+// assistive technologies.
+//
+// Since: 2.8
+func (i *FileIcon) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleImage
+}
+
+// AccessibilityLabel returns the file's display name (or, where the URI is
+// nil, an empty string) so assistive technologies can announce the icon.
+//
+// Since: 2.8
+func (i *FileIcon) AccessibilityLabel() string {
+	if i.URI == nil {
+		return ""
+	}
+	return i.URI.Name()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	th := i.Theme()

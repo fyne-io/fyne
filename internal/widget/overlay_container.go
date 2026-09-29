@@ -31,6 +31,14 @@ func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, onDismiss func
 	return o
 }
 
+// AccessibilityChildren exposes the overlay content, excluding its decorative background.
+func (o *OverlayContainer) AccessibilityChildren() []fyne.CanvasObject {
+	if o.Content == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{o.Content}
+}
+
 // CreateRenderer returns a new renderer for the overlay container.
 func (o *OverlayContainer) CreateRenderer() fyne.WidgetRenderer {
 	objs := []fyne.CanvasObject{o.Content}

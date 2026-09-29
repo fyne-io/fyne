@@ -161,6 +161,44 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	return newListRenderer(objects, l, l.scroller, layout)
 }
 
+// AccessibilityRole returns the role used to describe this list to assistive
+// technologies.
+//
+// Since: 2.8
+func (l *List) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleList
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this list.
+//
+// Since: 2.8
+func (l *List) AccessibilityLabel() string {
+	return ""
+}
+
+// AccessibilityChildren returns the currently visible list items so they
+// appear in the accessibility tree.
+//
+// Since: 2.8
+func (l *List) AccessibilityChildren() []fyne.CanvasObject {
+	r, ok := cache.CachedRenderer(l)
+	if !ok {
+		return nil
+	}
+	lr, ok := r.(*listRenderer)
+	if !ok {
+		return nil
+	}
+	layout, ok := lr.layout.Layout.(*listLayout)
+	if !ok {
+		return nil
+	}
+	out := make([]fyne.CanvasObject, len(layout.children))
+	copy(out, layout.children)
+	return out
+}
+
 // FocusGained is called after this List has gained focus.
 func (l *List) FocusGained() {
 	l.focused = true
@@ -670,6 +708,57 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 		li.Refresh()
 		li.onTapped()
 	}
+}
+
+// AccessibilityRole returns the role used to describe this list item to
+// assistive technologies.
+//
+// Since: 2.8
+func (li *listItem) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleListItem
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this list item, deferring to the wrapped child if it implements
+// [fyne.Accessible].
+//
+// Since: 2.8
+func (li *listItem) AccessibilityLabel() string {
+	if a, ok := li.child.(fyne.Accessible); ok {
+		return a.AccessibilityLabel()
+	}
+	return ""
+}
+
+// AccessibilityStates returns the current state flags that assistive
+// technologies should report alongside this list item.
+//
+// Since: 2.8
+func (li *listItem) AccessibilityStates() []fyne.AccessibleState {
+	if li.selected {
+		return []fyne.AccessibleState{fyne.AccessibleStateSelected}
+	}
+	return nil
+}
+
+// AccessibilityActions reports the actions an assistive technology may
+// trigger on this list item.
+//
+// Since: 2.8
+func (li *listItem) AccessibilityActions() []fyne.AccessibleAction {
+	return []fyne.AccessibleAction{fyne.AccessibleActionPress, fyne.AccessibleActionSelect}
+}
+
+// AccessibilityPerformAction performs the named accessibility action.
+//
+// Since: 2.8
+func (li *listItem) AccessibilityPerformAction(action fyne.AccessibleAction) bool {
+	switch action {
+	case fyne.AccessibleActionPress, fyne.AccessibleActionSelect:
+		li.Tapped(nil)
+		return true
+	}
+	return false
 }
 
 // Declare conformity with the WidgetRenderer interface.

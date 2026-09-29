@@ -54,6 +54,22 @@ func (s *Separator) MinSize() fyne.Size {
 	return s.BaseWidget.MinSize()
 }
 
+// AccessibilityRole returns the role used to describe this separator to
+// assistive technologies.
+//
+// Since: 2.8
+func (s *Separator) AccessibilityRole() fyne.AccessibleRole {
+	return fyne.AccessibleRoleSeparator
+}
+
+// AccessibilityLabel returns the text used by assistive technologies as the
+// name of this separator.
+//
+// Since: 2.8
+func (s *Separator) AccessibilityLabel() string {
+	return ""
+}
+
 var _ fyne.WidgetRenderer = (*separatorRenderer)(nil)
 
 type separatorRenderer struct {

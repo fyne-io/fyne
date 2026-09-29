@@ -125,10 +125,29 @@ static const IID IID_IRawFragRoot =
 
 // UIA control type IDs
 #define UIA_ButtonControlTypeId    50000
+#define UIA_CheckBoxControlTypeId  50002
+#define UIA_ComboBoxControlTypeId  50003
+#define UIA_EditControlTypeId      50004
 #define UIA_HyperlinkControlTypeId 50005
+#define UIA_ImageControlTypeId     50006
+#define UIA_ListItemControlTypeId  50007
+#define UIA_ListControlTypeId      50008
+#define UIA_MenuControlTypeId      50009
+#define UIA_ProgressBarControlTypeId 50012
+#define UIA_RadioButtonControlTypeId 50013
+#define UIA_ScrollBarControlTypeId 50014
+#define UIA_SliderControlTypeId    50015
+#define UIA_SpinnerControlTypeId   50016
+#define UIA_TabControlTypeId       50018
+#define UIA_TabItemControlTypeId   50019
 #define UIA_TextControlTypeId      50020
+#define UIA_TreeControlTypeId      50023
+#define UIA_TreeItemControlTypeId  50024
 #define UIA_GroupControlTypeId     50026
+#define UIA_HeaderControlTypeId    50034
+#define UIA_DataGridControlTypeId  50028
 #define UIA_PaneControlTypeId      50033
+#define UIA_SeparatorControlTypeId 50038
 
 #define UiaAppendRuntimeId  3
 #define UiaRootObjectId    (-25)
@@ -202,11 +221,26 @@ static WCHAR* utf8ToWide(const char* utf8) {
 
 static int roleToUIA(WinAccessibilityRole role) {
     switch (role) {
-    case WinAccessibilityRoleButton: return UIA_ButtonControlTypeId;
-    case WinAccessibilityRoleText:   return UIA_TextControlTypeId;
-    case WinAccessibilityRoleLink:   return UIA_HyperlinkControlTypeId;
-    case WinAccessibilityRoleGroup:  return UIA_GroupControlTypeId;
-    default:                         return UIA_PaneControlTypeId;
+    case WinAccessibilityRoleButton:      return UIA_ButtonControlTypeId;
+    case WinAccessibilityRoleText:        return UIA_TextControlTypeId;
+    case WinAccessibilityRoleLink:        return UIA_HyperlinkControlTypeId;
+    case WinAccessibilityRoleGroup:       return UIA_GroupControlTypeId;
+    case WinAccessibilityRoleCheckbox:    return UIA_CheckBoxControlTypeId;
+    case WinAccessibilityRoleRadio:       return UIA_RadioButtonControlTypeId;
+    case WinAccessibilityRoleSlider:      return UIA_SliderControlTypeId;
+    case WinAccessibilityRoleProgressBar: return UIA_ProgressBarControlTypeId;
+    case WinAccessibilityRoleTextField:   return UIA_EditControlTypeId;
+    case WinAccessibilityRoleList:        return UIA_ListControlTypeId;
+    case WinAccessibilityRoleListItem:    return UIA_ListItemControlTypeId;
+    case WinAccessibilityRoleTree:        return UIA_TreeControlTypeId;
+    case WinAccessibilityRoleTreeItem:    return UIA_TreeItemControlTypeId;
+    case WinAccessibilityRoleTable:       return UIA_DataGridControlTypeId;
+    case WinAccessibilityRoleTab:         return UIA_TabItemControlTypeId;
+    case WinAccessibilityRoleTabList:     return UIA_TabControlTypeId;
+    case WinAccessibilityRoleImage:       return UIA_ImageControlTypeId;
+    case WinAccessibilityRoleHeading:     return UIA_HeaderControlTypeId;
+    case WinAccessibilityRoleSeparator:   return UIA_SeparatorControlTypeId;
+    default:                              return UIA_PaneControlTypeId;
     }
 }
 
