@@ -1,11 +1,13 @@
 package widget
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -41,6 +43,11 @@ type RichTextEntry struct {
 
 	// TypeMarkdown converts markdown into the style that it describes as soon as it has been typed.
 	TypeMarkdown bool
+
+	// undoState is a copy of the content as the undo history last recorded it
+	undoState []RichTextSegment
+	// undoEdit notes what an edit changed beyond the text that was recorded for it
+	undoEdit richTextEdit
 }
 
 // NewRichTextEntry creates a new rich text entry widget.
@@ -59,6 +66,7 @@ func NewRichTextEntry() *RichTextEntry {
 func (e *RichTextEntry) ExtendBaseWidget(wid fyne.Widget) {
 	e.richProvider()
 	e.Entry.ExtendBaseWidget(wid)
+	e.registerStyleShortcuts()
 }
 
 // NewRichTextEntryFromMarkdown creates a new rich text entry widget with the
@@ -91,7 +99,7 @@ func (e *RichTextEntry) SetSegments(segments []RichTextSegment) {
 
 	e.CursorRow, e.CursorColumn = 0, 0
 	e.ClearSelection()
-	e.undoStack.Clear()
+	e.resetUndo()
 	e.updateTextAndRefresh(provider.String(), false)
 	e.updateCursorAndSelection()
 }
@@ -142,6 +150,9 @@ func (e *RichTextEntry) Markdown() string {
 //
 // Since: 2.9
 func (e *RichTextEntry) SetStyleForRange(start, end int, style RichTextStyle) {
+	defer e.commitUndo(e.beginUndo())
+	e.noteEdit(richTextEditStyled)
+
 	style.Inline = true
 	e.styleRange(start, end, func(s *RichTextStyle) {
 		*s = style
@@ -193,6 +204,8 @@ func (e *RichTextEntry) StyleAtCursor() RichTextStyle {
 
 // TypedRune receives text input events when this widget is focused.
 func (e *RichTextEntry) TypedRune(r rune) {
+	defer e.commitUndo(e.beginUndo())
+
 	e.Entry.TypedRune(r)
 
 	if e.TypeMarkdown && e.styleMarkdownAtCursor(r) {
@@ -202,6 +215,8 @@ func (e *RichTextEntry) TypedRune(r rune) {
 
 // TypedKey receives key input events when this widget is focused.
 func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
+	defer e.commitUndo(e.beginUndo())
+
 	switch key.Name {
 	case fyne.KeyBackspace:
 		if e.hasSelection() {
@@ -242,6 +257,7 @@ func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		if e.pruneEmptySegments() {
+			e.noteEdit(richTextEditHidden)
 			e.Refresh()
 		}
 	case fyne.KeyReturn, fyne.KeyEnter:
@@ -249,9 +265,17 @@ func (e *RichTextEntry) TypedKey(key *fyne.KeyEvent) {
 			// headings and quotes cover a single line, so the next one starts
 			// again from the base style
 			e.insertEmptySegmentAt(e.CursorTextOffset(), RichTextStyleInline)
+			e.noteEdit(richTextEditHidden)
 			e.Refresh()
 		}
 	}
+}
+
+// TypedShortcut handles the shortcuts that this widget responds to.
+func (e *RichTextEntry) TypedShortcut(shortcut fyne.Shortcut) {
+	defer e.commitUndo(e.beginUndo())
+
+	e.Entry.TypedShortcut(shortcut)
 }
 
 // startsBlockLine handles a return that does more than break the line, either
@@ -282,47 +306,117 @@ func isBlockStyle(style RichTextStyle) bool {
 	return style.SizeName != "" && style.SizeName != theme.SizeNameText
 }
 
-// Undo un-does the last modifying user-action.
-//
-// Since: 2.9
-func (e *RichTextEntry) Undo() {
-	_, action := e.undoStack.Undo(e.Text)
-	e.applyUndoAction(action, true)
+// styleShortcuts lists the keyboard shortcuts that turn a style on and off, for
+// the selected text or for the text that is about to be typed.
+var styleShortcuts = []struct {
+	shortcut *desktop.CustomShortcut
+	enabled  func(RichTextStyle) bool
+	set      func(*RichTextStyle, bool)
+}{
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyB, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Bold },
+		// headings are bold without any marks applied
+		func(s *RichTextStyle, on bool) { s.TextStyle.Bold = on || isHeadingStyle(*s) },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyI, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Italic },
+		// quotes are italic without any marks applied
+		func(s *RichTextStyle, on bool) { s.TextStyle.Italic = on || s.QuotingDepth > 0 },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyU, Modifier: fyne.KeyModifierShortcutDefault},
+		func(s RichTextStyle) bool { return s.TextStyle.Underline },
+		func(s *RichTextStyle, on bool) { s.TextStyle.Underline = on },
+	},
+	{
+		&desktop.CustomShortcut{KeyName: fyne.KeyX, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift},
+		func(s RichTextStyle) bool { return s.TextStyle.Strikethrough },
+		func(s *RichTextStyle, on bool) { s.TextStyle.Strikethrough = on },
+	},
 }
 
-// Redo re-applies the last undone user-action.
-//
-// Since: 2.9
-func (e *RichTextEntry) Redo() {
-	_, action := e.undoStack.Redo(e.Text)
-	e.applyUndoAction(action, false)
+func (e *RichTextEntry) registerStyleShortcuts() {
+	for _, style := range styleShortcuts {
+		e.shortcut.AddShortcut(style.shortcut, func(fyne.Shortcut) {
+			e.toggleStyle(style.enabled, style.set)
+		})
+	}
 }
 
-// applyUndoAction runs an undo stack entry against the segments to retain style.
-func (e *RichTextEntry) applyUndoAction(action entryUndoAction, undo bool) {
-	modify, ok := action.(*entryModifyAction)
-	if !ok {
+// toggleStyle turns a style on or off for the selected text. The style is removed
+// if all of the selection already has it, otherwise it is applied to all of it.
+// Without a selection it changes the style that will be used for text typed at the cursor.
+func (e *RichTextEntry) toggleStyle(enabled func(RichTextStyle) bool, set func(*RichTextStyle, bool)) {
+	if e.Disabled() {
 		return
 	}
 
 	provider := e.richProvider()
-	pos := modify.Position
-	if modify.Delete == undo { // put the text back
-		provider.insertAt(pos, modify.Text)
-		pos += len(modify.Text)
-	} else {
-		provider.deleteFromTo(pos, pos+len(modify.Text))
+	cursor := e.CursorTextOffset()
+	if !e.hasSelection() {
+		if bound := provider.rowBoundary(e.CursorRow); bound != nil && bound.panel != nil {
+			return // a block such as code has no styles inside it
+		}
+
+		style := e.StyleAtCursor()
+		set(&style, !enabled(style))
+		e.insertEmptySegmentAt(cursor, style)
+		e.finishStyleChange(cursor, -1)
+		return
 	}
 
-	e.pruneEmptySegments()
-	content := provider.String()
-	e.updateText(content, false)
-	e.setCursorOffset(pos)
+	start, end := e.sel.selection()
+	anchor := textPosFromRowCol(e.sel.selectRow, e.sel.selectColumn, provider)
+
+	on := !e.rangeHasStyle(start, end, enabled)
+	e.styleRange(start, end, func(s *RichTextStyle) { set(s, on) })
+	provider.Segments = mergeSegments(provider.Segments)
+	e.finishStyleChange(cursor, anchor)
+}
+
+// rangeHasStyle reports whether all of the text between the two rune offsets has
+// the style that enabled checks for.
+func (e *RichTextEntry) rangeHasStyle(start, end int, enabled func(RichTextStyle) bool) bool {
+	found := false
+	off := 0
+	for _, seg := range e.richProvider().contentSegments() {
+		if off >= end {
+			break
+		}
+
+		length := utf8.RuneCountInString(seg.Textual())
+		if text, ok := seg.(*TextSegment); ok && length > 0 && off+length > start {
+			if !enabled(text.Style) {
+				return false
+			}
+			found = true
+		}
+		off += length
+	}
+	return found
+}
+
+// finishStyleChange updates the entry state after the style of some content was
+// changed, leaving the text as it was. The cursor and the anchor of the selection,
+// which is negative if there is none, are put back at their rune offsets.
+func (e *RichTextEntry) finishStyleChange(cursor, anchor int) {
+	if anchor < 0 {
+		e.noteEdit(richTextEditHidden) // nothing changes until text is typed in the style
+	} else {
+		e.noteEdit(richTextEditStyled)
+	}
+
+	e.updateText(e.Text, false)
+	e.setCursorOffset(cursor)
+	if anchor >= 0 {
+		e.sel.selectRow, e.sel.selectColumn = e.rowColFromTextPos(anchor)
+	}
 
 	if e.OnChanged != nil {
-		e.OnChanged(content)
+		e.OnChanged(e.Text)
 	}
-	e.validateWithoutRefresh()
 	e.Refresh()
 }
 
@@ -404,11 +498,7 @@ func splitSegmentsAt(list *[]RichTextSegment, pos, off int) (out *[]RichTextSegm
 			tail := &TextSegment{Style: text.Style, Text: string(runes[cut:])}
 			text.Text = string(runes[:cut])
 
-			segments := make([]RichTextSegment, 0, len(*list)+1)
-			segments = append(segments, (*list)[:i+1]...)
-			segments = append(segments, tail)
-			segments = append(segments, (*list)[i+1:]...)
-			*list = segments
+			*list = slices.Insert(*list, i+1, RichTextSegment(tail))
 			return list, i + 1, pos
 		}
 		off += length
@@ -447,12 +537,7 @@ func (e *RichTextEntry) insertEmptySegmentAt(pos int, style RichTextStyle) {
 	style.Inline = true
 	e.dropEmptySegmentsAt(pos) // only one segment may claim the text typed here
 	list, i := e.splitAt(pos)
-
-	segments := make([]RichTextSegment, 0, len(*list)+1)
-	segments = append(segments, (*list)[:i]...)
-	segments = append(segments, &TextSegment{Style: style})
-	segments = append(segments, (*list)[i:]...)
-	*list = segments
+	*list = slices.Insert(*list, i, RichTextSegment(&TextSegment{Style: style}))
 }
 
 // dropEmptySegmentsAt removes any empty text segments sitting at the given rune
@@ -519,6 +604,7 @@ func lineStyle(style RichTextStyle) RichTextStyle {
 	style.codeInline = false
 	style.TextStyle.Monospace = false
 	style.TextStyle.Strikethrough = false
+	style.TextStyle.Underline = false
 
 	// headings are bold and quotes italic without any marks applied
 	style.TextStyle.Bold = isHeadingStyle(style)
@@ -1088,8 +1174,7 @@ func (e *RichTextEntry) finishStyling(cursor int) {
 	e.updateText(content, false)
 	e.setCursorOffset(cursor)
 
-	// the undo stack holds plain text, which can no longer describe this change
-	e.undoStack.Clear()
+	e.noteEdit(richTextEditStyled)
 
 	if e.OnChanged != nil {
 		e.OnChanged(content)
@@ -1215,11 +1300,8 @@ func (e *RichTextEntry) splitListItem(pos int) bool {
 		tail = mergeSegments(tail)
 	}
 
-	items := make([]RichTextSegment, 0, len(item.list.Items)+1)
-	items = append(items, item.list.Items[:item.index]...)
-	items = append(items, &ParagraphSegment{Texts: head}, &ParagraphSegment{Texts: tail})
-	items = append(items, item.list.Items[item.index+1:]...)
-	item.list.Items = items
+	item.list.Items[item.index] = &ParagraphSegment{Texts: head}
+	item.list.Items = slices.Insert(item.list.Items, item.index+1, RichTextSegment(&ParagraphSegment{Texts: tail}))
 	item.list.markers = nil // the bullets are numbered again from the items
 
 	e.finishStyling(pos + 1)
@@ -1240,11 +1322,7 @@ func (e *RichTextEntry) leaveList(item richListItem, pos int) bool {
 		segments = append(segments[:at], segments[at+1:]...)
 	}
 
-	out := make([]RichTextSegment, 0, len(segments)+1)
-	out = append(out, segments[:at]...)
-	out = append(out, &TextSegment{Style: RichTextStyleInline})
-	out = append(out, segments[at:]...)
-	*item.owner = out
+	*item.owner = slices.Insert(segments, at, RichTextSegment(&TextSegment{Style: RichTextStyleInline}))
 
 	e.finishStyling(pos)
 	return true
@@ -1279,11 +1357,7 @@ func (e *RichTextEntry) removeBullet(pos int) bool {
 		segments = append(segments[:at], segments[at+1:]...)
 	}
 
-	out := make([]RichTextSegment, 0, len(segments)+len(texts))
-	out = append(out, segments[:at]...)
-	out = append(out, texts...)
-	out = append(out, segments[at:]...)
-	*item.owner = out
+	*item.owner = slices.Insert(segments, at, texts...)
 
 	e.finishStyling(pos)
 	return true
@@ -1402,7 +1476,8 @@ func (e *RichTextEntry) toggleCodeFence() bool {
 
 		end := blockStart + utf8.RuneCountInString(block.Text)
 		e.dropEmptySegmentsAt(end) // only one segment may claim the text typed here
-		insertSegmentAt(owner, indexOfSegment(*owner, block)+1, &TextSegment{Style: RichTextStyleInline})
+		after := indexOfSegment(*owner, block) + 1
+		*owner = slices.Insert(*owner, after, RichTextSegment(&TextSegment{Style: RichTextStyleInline}))
 
 		e.finishStyling(end)
 		return true
@@ -1411,19 +1486,10 @@ func (e *RichTextEntry) toggleCodeFence() bool {
 	provider.deleteFromTo(lineStart, pos)
 	e.dropEmptySegmentsAt(lineStart)
 	list, at := e.splitAt(lineStart)
-	insertSegmentAt(list, at, &CodeBlockSegment{Text: newLineChar})
+	*list = slices.Insert(*list, at, RichTextSegment(&CodeBlockSegment{Text: newLineChar}))
 
 	e.finishStyling(lineStart)
 	return true
-}
-
-func insertSegmentAt(list *[]RichTextSegment, index int, seg RichTextSegment) {
-	index = min(index, len(*list))
-	segments := make([]RichTextSegment, 0, len(*list)+1)
-	segments = append(segments, (*list)[:index]...)
-	segments = append(segments, seg)
-	segments = append(segments, (*list)[index:]...)
-	*list = segments
 }
 
 // markdownListPrefix reports whether the text typed at the start of a line asks

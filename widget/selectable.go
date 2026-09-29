@@ -126,28 +126,7 @@ func (s *selectable) SelectedText() string {
 		return ""
 	}
 
-	out := strings.Builder{}
-	off := 0
-	for _, seg := range s.provider.contentSegments() {
-		if off >= stop {
-			break
-		}
-
-		if marker, ok := seg.(*listMarkerSegment); ok {
-			if off >= start {
-				out.WriteString(marker.SelectedText())
-			}
-			continue
-		}
-
-		r := ([]rune)(seg.Textual())
-		from, to := max(start-off, 0), min(stop-off, len(r))
-		if from < to {
-			out.WriteString(string(r[from:to]))
-		}
-		off += len(r)
-	}
-	return out.String()
+	return s.provider.textBetween(start, stop)
 }
 
 func (s *selectable) Tapped(*fyne.PointEvent) {

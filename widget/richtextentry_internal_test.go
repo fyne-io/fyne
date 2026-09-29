@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
@@ -1008,4 +1009,180 @@ func TestRichTextEntry_SelectedText_ListMarkers(t *testing.T) {
 	selectRange(1, 0, 2, 0)
 	e.TypedShortcut(&fyne.ShortcutCopy{Clipboard: clipboard})
 	assert.Equal(t, "• one\n", clipboard.Content())
+}
+
+func TestRichTextEntry_UndoShortcut(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("a **b** c")
+	e.CursorRow, e.CursorColumn = 0, 3
+
+	e.TypedRune('X')
+	assert.Equal(t, "a bX c", e.Text)
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, "a b c", e.Text)
+	assert.Equal(t, []string{"a |", "b|b", " c|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, "a bX c", e.Text)
+	assert.Equal(t, []string{"a |", "bX|b", " c|"}, segmentDump(e))
+}
+
+func styleShortcut(key fyne.KeyName) fyne.Shortcut {
+	return &desktop.CustomShortcut{KeyName: key, Modifier: fyne.KeyModifierShortcutDefault}
+}
+
+func selectRange(e *RichTextEntry, from, to int) {
+	e.syncSelectable()
+	e.sel.selecting = true
+	e.sel.selectRow, e.sel.selectColumn = e.rowColFromTextPos(from)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(to)
+	e.syncSelectable()
+}
+
+func TestRichTextEntry_StyleShortcut(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("hello world")
+	changed := 0
+	e.OnChanged = func(string) { changed++ }
+	selectRange(e, 6, 11)
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, "hello world", e.Text)
+	assert.Equal(t, []string{"hello |", "world|b"}, segmentDump(e))
+	assert.Equal(t, "hello **world**", e.Markdown())
+	assert.Equal(t, 1, changed)
+
+	start, end := e.sel.selection()
+	assert.Equal(t, 6, start)
+	assert.Equal(t, 11, end)
+	assert.Equal(t, 11, e.CursorTextOffset())
+
+	e.TypedShortcut(styleShortcut(fyne.KeyI))
+	assert.Equal(t, []string{"hello |", "world|bi"}, segmentDump(e))
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"hello |", "world|i"}, segmentDump(e))
+
+	e.TypedShortcut(styleShortcut(fyne.KeyI))
+	assert.Equal(t, []string{"hello world|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_StyleShortcut_Decoration(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("hello world")
+	selectRange(e, 0, 5)
+
+	e.TypedShortcut(styleShortcut(fyne.KeyU))
+	assert.True(t, e.Segments()[0].(*TextSegment).Style.TextStyle.Underline)
+	e.TypedShortcut(styleShortcut(fyne.KeyU))
+	assert.False(t, e.Segments()[0].(*TextSegment).Style.TextStyle.Underline)
+
+	strike := &desktop.CustomShortcut{KeyName: fyne.KeyX, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+	e.TypedShortcut(strike)
+	assert.Equal(t, []string{"hello|s", " world|"}, segmentDump(e))
+	assert.Equal(t, "~~hello~~ world", e.Markdown())
+	e.TypedShortcut(strike)
+	assert.Equal(t, []string{"hello world|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_StyleShortcut_Mixed(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("a **b** c")
+	selectRange(e, 0, 5)
+
+	// part of the selection is not bold, so all of it becomes bold
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"a b c|b"}, segmentDump(e))
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"a b c|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_StyleShortcut_Backwards(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("hello world")
+	selectRange(e, 11, 6)
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"hello |", "world|b"}, segmentDump(e))
+
+	start, end := e.sel.selection()
+	assert.Equal(t, 6, start)
+	assert.Equal(t, 11, end)
+	assert.Equal(t, 6, e.CursorTextOffset())
+}
+
+func TestRichTextEntry_StyleShortcut_Typing(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("ab")
+	e.CursorRow, e.CursorColumn = 0, 1
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.True(t, e.StyleAtCursor().TextStyle.Bold)
+	e.TypedRune('X')
+	e.TypedRune('Y')
+	assert.Equal(t, "aXYb", e.Text)
+	assert.Equal(t, []string{"a|", "XY|b", "b|"}, segmentDump(e))
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.False(t, e.StyleAtCursor().TextStyle.Bold)
+	e.TypedRune('Z')
+	assert.Equal(t, "aXYZb", e.Text)
+	assert.Equal(t, "a**XY**Zb", e.Markdown())
+}
+
+func TestRichTextEntry_StyleShortcut_TypingToggledBack(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("ab")
+	e.CursorRow, e.CursorColumn = 0, 1
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.False(t, e.StyleAtCursor().TextStyle.Bold)
+	e.TypedRune('X')
+	assert.Equal(t, "aXb", e.Markdown())
+}
+
+func TestRichTextEntry_StyleShortcut_Heading(t *testing.T) {
+	e := NewRichTextEntryFromMarkdown("# Title\n\nbody")
+	selectRange(e, 0, 5)
+
+	// a heading is always bold
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, "# Title\n\nbody", e.Markdown())
+	for _, seg := range e.Segments() {
+		if text, ok := seg.(*TextSegment); ok && strings.Contains(text.Text, "T") {
+			assert.True(t, text.Style.TextStyle.Bold)
+		}
+	}
+}
+
+func TestRichTextEntry_StyleShortcut_Disabled(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("hello world")
+	selectRange(e, 0, 5)
+	e.Disable()
+
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"hello world|"}, segmentDump(e))
+}
+
+func TestRichTextEntry_StyleShortcut_Undo(t *testing.T) {
+	e := NewRichTextEntry()
+	e.SetText("hello world")
+	e.CursorRow, e.CursorColumn = 0, 11
+	e.TypedRune('!')
+
+	selectRange(e, 0, 5)
+	e.TypedShortcut(styleShortcut(fyne.KeyB))
+	assert.Equal(t, []string{"hello|b", " world!|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, []string{"hello world!|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutUndo{})
+	assert.Equal(t, []string{"hello world|"}, segmentDump(e))
+
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	e.TypedShortcut(&fyne.ShortcutRedo{})
+	assert.Equal(t, []string{"hello|b", " world!|"}, segmentDump(e))
 }

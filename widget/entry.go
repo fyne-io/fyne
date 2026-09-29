@@ -120,6 +120,11 @@ type Entry struct {
 	rich bool
 }
 
+type undoProvider interface {
+	Undo()
+	Redo()
+}
+
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{Wrapping: fyne.TextWrap(fyne.TextTruncateClip)}
@@ -568,10 +573,10 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	e.requestFocus()
 
-	super := e.super()
+	impl := e.super()
 	app := fyne.CurrentApp()
 	clipboard := app.Clipboard()
-	typedShortcut := super.(fyne.Shortcutable).TypedShortcut
+	typedShortcut := impl.(fyne.Shortcutable).TypedShortcut
 	cutItem := fyne.NewMenuItem(lang.L("Cut"), func() {
 		typedShortcut(&fyne.ShortcutCut{Clipboard: clipboard})
 	})
@@ -592,11 +597,11 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else {
 		canUndo, canRedo := e.undoStack.CanUndo(), e.undoStack.CanRedo()
 		if canUndo {
-			undoItem := fyne.NewMenuItem(lang.L("Undo"), e.Undo)
+			undoItem := fyne.NewMenuItem(lang.L("Undo"), e.undoer().Undo)
 			menuItems = append(menuItems, undoItem)
 		}
 		if canRedo {
-			redoItem := fyne.NewMenuItem(lang.L("Redo"), e.Redo)
+			redoItem := fyne.NewMenuItem(lang.L("Redo"), e.undoer().Redo)
 			menuItems = append(menuItems, redoItem)
 		}
 		if canUndo || canRedo {
@@ -606,13 +611,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 
 	driver := app.Driver()
-	c := driver.CanvasForObject(super)
+	c := driver.CanvasForObject(impl)
 	if c == nil {
 		// Entry was detached from its canvas between the tap event and
 		// this call (see fyne-io/fyne#5965). Skip the context menu.
 		return
 	}
-	entryPos := driver.AbsolutePositionForObject(super)
+	entryPos := driver.AbsolutePositionForObject(impl)
 	popUpPos := entryPos.Add(pe.Position)
 	e.popUp = NewPopUpMenu(fyne.NewMenu("", menuItems...), c)
 	e.popUp.ShowAtPosition(popUpPos)
@@ -1074,10 +1079,10 @@ func (e *Entry) placeholderProvider() *RichText {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutUndo{}, func(fyne.Shortcut) {
-		e.Undo()
+		e.undoer().Undo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutRedo{}, func(fyne.Shortcut) {
-		e.Redo()
+		e.undoer().Redo()
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut, _ := se.(*fyne.ShortcutCut)
@@ -1165,6 +1170,16 @@ func (e *Entry) registerShortcut() {
 		func(fyne.Shortcut) { e.deleteWord(false) })
 	e.shortcut.AddShortcut(&desktop.CustomShortcut{KeyName: fyne.KeyDelete, Modifier: moveWordModifier},
 		func(fyne.Shortcut) { e.deleteWord(true) })
+}
+
+// undoer returns the widget that handles undo and redo for this entry, so that a
+// widget extending it can replace how those changes are applied.
+func (e *Entry) undoer() undoProvider {
+	if impl, ok := e.super().(undoProvider); ok {
+		return impl
+	}
+
+	return e
 }
 
 func (e *Entry) requestFocus() {

@@ -171,13 +171,13 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 func Type(obj fyne.Focusable, chars string) {
 	obj.FocusGained()
 
-	typeChars([]rune(chars), obj.TypedRune)
+	typeChars([]rune(chars), obj.TypedRune, obj.TypedKey)
 }
 
 // TypeOnCanvas is like the Type function but it passes the key events to the canvas object
 // rather than a focusable widget.
 func TypeOnCanvas(c fyne.Canvas, chars string) {
-	typeChars([]rune(chars), c.OnTypedRune())
+	typeChars([]rune(chars), c.OnTypedRune(), c.OnTypedKey())
 }
 
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
@@ -246,9 +246,14 @@ func performTap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	obj.Tapped(ev)
 }
 
-func typeChars(chars []rune, keyDown func(rune)) {
+func typeChars(chars []rune, typedRune func(rune), typedKey func(*fyne.KeyEvent)) {
 	for _, char := range chars {
-		keyDown(char)
+		if char == '\n' {
+			typedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			continue
+		}
+
+		typedRune(char)
 	}
 }
 
