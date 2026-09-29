@@ -246,6 +246,14 @@ This styled row should also wrap as expected, but only *when required*.
 > An interesting quote here, most likely sharing some very interesting wisdom.`)
 	rich.Scroll = container.ScrollBoth
 
+	richEntry := widget.NewRichTextEntryFromMarkdown(`## Editable rich text
+
+Type **markdown** here and it styles *itself* as you go, ` + "`code`" + ` included.
+
+- lists keep their bullets as you edit
+- press return for the next item`)
+	richEntry.TypeMarkdown = true
+
 	radioAlign := widget.NewRadioGroup([]string{"Leading", "Center", "Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
@@ -297,6 +305,9 @@ This styled row should also wrap as expected, but only *when required*.
 		entryLoremIpsum.Wrapping = wrap
 		entryLoremIpsum.Scroll = scroll
 		rich.Wrapping = wrap
+		richEntry.Wrapping = wrap
+		richEntry.Scroll = scroll
+		richEntry.Refresh()
 
 		label.Refresh()
 		hyperlink.Refresh()
@@ -340,7 +351,7 @@ This styled row should also wrap as expected, but only *when required*.
 
 	grid := makeTextGrid()
 	return container.NewBorder(fixed, grid, nil, nil,
-		container.NewGridWithRows(2, rich, entryLoremIpsum))
+		container.NewGridWithRows(3, rich, entryLoremIpsum, richEntry))
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {

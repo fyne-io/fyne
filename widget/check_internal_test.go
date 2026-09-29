@@ -254,11 +254,11 @@ func TestCheck_TypedRune(t *testing.T) {
 	}
 	assert.True(t, check.Checked)
 
-	test.Type(check, " ")
+	test.Type(check, textSpace)
 	assert.False(t, check.Checked)
 
 	check.Disable()
-	test.Type(check, " ")
+	test.Type(check, textSpace)
 	assert.False(t, check.Checked)
 }
 

@@ -23,11 +23,11 @@ func TestSplitContainer_MinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		minSize := NewHSplit(rectA, rectB).MinSize()
 		assert.Equal(t, rectA.MinSize().Width+rectB.MinSize().Width+dividerThickness(nil), minSize.Width)
-		assert.Equal(t, fyne.Max(rectA.MinSize().Height, fyne.Max(rectB.MinSize().Height, dividerLength(nil))), minSize.Height)
+		assert.Equal(t, max(rectA.MinSize().Height, max(rectB.MinSize().Height, dividerLength(nil))), minSize.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		minSize := NewVSplit(rectA, rectB).MinSize()
-		assert.Equal(t, fyne.Max(rectA.MinSize().Width, fyne.Max(rectB.MinSize().Width, dividerLength(nil))), minSize.Width)
+		assert.Equal(t, max(rectA.MinSize().Width, max(rectB.MinSize().Width, dividerLength(nil))), minSize.Width)
 		assert.Equal(t, rectA.MinSize().Height+rectB.MinSize().Height+dividerThickness(nil), minSize.Height)
 	})
 }
@@ -263,9 +263,9 @@ func TestSplitContainer_swap_contents(t *testing.T) {
 	dl := dividerLength(nil)
 	dt := dividerThickness(nil)
 	initialWidth := 10 + 10 + dt
-	initialHeight := fyne.Max(10, dl)
+	initialHeight := max(10, dl)
 	expectedWidth := 100 + 10 + dt
-	expectedHeight := fyne.Max(100, dl)
+	expectedHeight := max(100, dl)
 
 	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objA.SetMinSize(fyne.NewSize(10, 10))
