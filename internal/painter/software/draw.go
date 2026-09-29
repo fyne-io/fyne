@@ -422,12 +422,8 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
 }
 
-// fillRectFastPath writes an opaque, axis-aligned fill directly into base.Pix.
-// image/draw's generic uniform-fill fast path (drawFillOver/drawFillSrc in the
-// standard library) only special-cases an *image.RGBA destination; an
-// *image.NRGBA destination always falls through the slow per-pixel
-// color.Color conversion, even though a fully opaque fill simply replaces the
-// destination pixels and needs no Porter-Duff blending at all.
+// fillRectFastPath writes an opaque fill directly into base.Pix.
+// It returns false if the fill is non-opaque or bounds are empty.
 func fillRectFastPath(base *image.NRGBA, bounds image.Rectangle, fill color.Color) bool {
 	if fill == nil || bounds.Empty() {
 		return false
