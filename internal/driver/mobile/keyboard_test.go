@@ -1,6 +1,7 @@
 package mobile
 
 import (
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,17 +9,37 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/widget"
 )
 
+// shortcutModifier returns the modifier the desktop driver detects the built-in
+// shortcuts with, i.e. fyne.KeyModifierShortcutDefault (Command on macOS,
+// Control everywhere else).
+func shortcutModifier() key.Modifiers {
+	if runtime.GOOS == goos.Darwin {
+		return key.ModMeta
+	}
+	return key.ModControl
+}
+
+// wordModifier returns the modifier widget.Entry registers its word selection
+// and word deletion shortcuts with (Alt on macOS, Control everywhere else).
+func wordModifier() key.Modifiers {
+	if runtime.GOOS == goos.Darwin {
+		return key.ModAlt
+	}
+	return key.ModControl
+}
+
 func TestShortcutForKey(t *testing.T) {
-	assert.IsType(t, &fyne.ShortcutSelectAll{}, shortcutForKey(fyne.KeyA, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutUndo{}, shortcutForKey(fyne.KeyZ, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutRedo{}, shortcutForKey(fyne.KeyY, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutCopy{}, shortcutForKey(fyne.KeyC, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutCut{}, shortcutForKey(fyne.KeyX, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutPaste{}, shortcutForKey(fyne.KeyV, fyne.KeyModifierControl))
-	assert.IsType(t, &fyne.ShortcutCopy{}, shortcutForKey(fyne.KeyInsert, fyne.KeyModifierControl))
+	assert.IsType(t, &fyne.ShortcutSelectAll{}, shortcutForKey(fyne.KeyA, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutUndo{}, shortcutForKey(fyne.KeyZ, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutRedo{}, shortcutForKey(fyne.KeyY, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutCopy{}, shortcutForKey(fyne.KeyC, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutCut{}, shortcutForKey(fyne.KeyX, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutPaste{}, shortcutForKey(fyne.KeyV, fyne.KeyModifierShortcutDefault))
+	assert.IsType(t, &fyne.ShortcutCopy{}, shortcutForKey(fyne.KeyInsert, fyne.KeyModifierShortcutDefault))
 	assert.IsType(t, &fyne.ShortcutPaste{}, shortcutForKey(fyne.KeyInsert, fyne.KeyModifierShift))
 	assert.IsType(t, &fyne.ShortcutCut{}, shortcutForKey(fyne.KeyDelete, fyne.KeyModifierShift))
 
@@ -27,14 +48,16 @@ func TestShortcutForKey(t *testing.T) {
 	assert.Nil(t, shortcutForKey(fyne.KeyLeft, fyne.KeyModifierShift))
 	assert.Nil(t, shortcutForKey(desktop.KeyShiftLeft, fyne.KeyModifierShift))
 
-	// everything else becomes a custom shortcut
-	bs := shortcutForKey(fyne.KeyBackspace, fyne.KeyModifierControl)
+	// everything else becomes a custom shortcut, which widgets match by name
+	bs := shortcutForKey(fyne.KeyBackspace, fyne.KeyModifierShortcutDefault)
 	if assert.NotNil(t, bs) {
-		assert.Equal(t, "CustomDesktop:Control+BackSpace", bs.ShortcutName())
+		want := &desktop.CustomShortcut{KeyName: fyne.KeyBackspace, Modifier: fyne.KeyModifierShortcutDefault}
+		assert.Equal(t, want.ShortcutName(), bs.ShortcutName())
 	}
-	left := shortcutForKey(fyne.KeyLeft, fyne.KeyModifierControl|fyne.KeyModifierShift)
+	left := shortcutForKey(fyne.KeyLeft, fyne.KeyModifierShortcutDefault|fyne.KeyModifierShift)
 	if assert.NotNil(t, left) {
-		assert.Equal(t, "CustomDesktop:Shift+Control+Left", left.ShortcutName())
+		want := &desktop.CustomShortcut{KeyName: fyne.KeyLeft, Modifier: fyne.KeyModifierShortcutDefault | fyne.KeyModifierShift}
+		assert.Equal(t, want.ShortcutName(), left.ShortcutName())
 	}
 }
 
@@ -56,33 +79,33 @@ func keyTestEntry(t *testing.T, text string) (*canvas, *widget.Entry) {
 }
 
 func TestMobileDriverKeyboardShortcuts(t *testing.T) {
-	t.Run("Ctrl+A selects all text", func(t *testing.T) {
+	t.Run("shortcut modifier + A selects all text", func(t *testing.T) {
 		c, entry := keyTestEntry(t, "hello world")
 
 		d.DoFromGoroutine(func() {
-			d.typeDownCanvas(c, -1, key.CodeA, key.ModControl)
+			d.typeDownCanvas(c, -1, key.CodeA, shortcutModifier())
 		}, true)
 
 		assert.Equal(t, "hello world", entry.SelectedText())
 	})
 
-	t.Run("Ctrl+Backspace deletes the preceding word", func(t *testing.T) {
+	t.Run("word modifier + Backspace deletes the preceding word", func(t *testing.T) {
 		c, entry := keyTestEntry(t, "hello world")
 		entry.CursorColumn = len(entry.Text) // place the cursor at the end
 
 		d.DoFromGoroutine(func() {
-			d.typeDownCanvas(c, -1, key.CodeDeleteBackspace, key.ModControl)
+			d.typeDownCanvas(c, -1, key.CodeDeleteBackspace, wordModifier())
 		}, true)
 
 		assert.Equal(t, "hello ", entry.Text)
 	})
 
-	t.Run("Ctrl+Shift+Left selects the preceding word", func(t *testing.T) {
+	t.Run("word modifier + shift + Left selects the preceding word", func(t *testing.T) {
 		c, entry := keyTestEntry(t, "hello world foo")
 		entry.CursorColumn = len(entry.Text)
 
 		d.DoFromGoroutine(func() {
-			d.typeDownCanvas(c, -1, key.CodeLeftArrow, key.ModControl|key.ModShift)
+			d.typeDownCanvas(c, -1, key.CodeLeftArrow, wordModifier()|key.ModShift)
 		}, true)
 
 		assert.Equal(t, "foo", entry.SelectedText())
