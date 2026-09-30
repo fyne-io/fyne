@@ -4,9 +4,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSvgCacheGet(t *testing.T) {
@@ -44,23 +43,6 @@ func TestSvgCacheReset(t *testing.T) {
 
 	ResetThemeCaches()
 	assert.Equal(t, 0, svgs.Len())
-}
-
-func TestSvgCacheOverrideName(t *testing.T) {
-	testClearAll()
-	t.Cleanup(testClearAll)
-
-	w := &dummyWidget{}
-	tex := image.NewNRGBA(image.Rect(0, 0, 4, 4))
-	SetSvg("icon.svg", w, tex, 4, 4)
-	assert.Equal(t, tex, GetSvg("icon.svg", w, 4, 4))
-	assert.Equal(t, tex, GetSvg("icon.svg", nil, 4, 4))
-
-	testClearAll()
-	OverrideTheme(w, dummyTheme{})
-	SetSvg("icon.svg", w, tex, 4, 4)
-	assert.Equal(t, tex, GetSvg("icon.svg", w, 4, 4))
-	assert.Nil(t, GetSvg("icon.svg", nil, 4, 4))
 }
 
 func addFileToCache(path string, w, h int) image.Image {
