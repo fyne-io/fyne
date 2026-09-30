@@ -19,6 +19,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -44,6 +45,7 @@ public class GoNativeActivity extends NativeActivity {
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
+	private static final int UNCONFIGURED_KEYBOARD_CODE = -1;
 	private static final int DEFAULT_KEYBOARD_CODE = 0;
 	private static final int SINGLELINE_KEYBOARD_CODE = 1;
 	private static final int NUMBER_KEYBOARD_CODE = 2;
@@ -59,6 +61,7 @@ public class GoNativeActivity extends NativeActivity {
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 	private boolean keyboardUp = false;
+	private int configuredKeyboardType = UNCONFIGURED_KEYBOARD_CODE;
 
 	// Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
 	// classes (Runnable -> Listener). javac stores a `MethodParameters`
@@ -156,40 +159,10 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                int inputType = DEFAULT_INPUT_TYPE;
-                String keys = "";
-                switch (keyboardType) {
-                    case DEFAULT_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                        break;
-                    case SINGLELINE_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        break;
-                    case NUMBER_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
-                        keys = "0123456789.,-' "; // work around android bug where some number keys are blocked
-                        break;
-                    case PASSWORD_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
-                    default:
-                        Log.e("Fyne", "unknown keyboard type, use default");
+                if (keyboardType != configuredKeyboardType) {
+                    configureKeyboard(keyboardType);
+                    configuredKeyboardType = keyboardType;
                 }
-                mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
-                mTextEdit.setInputType(inputType);
-                if (keys != "") {
-                    mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
-                }
-
-                mTextEdit.setOnEditorActionListener(mEditorActionListener);
-
-                // always place one character so all keyboards can send backspace
-                ignoreKey = true;
-                mTextEdit.setText(" ");
-                mTextEdit.setSelection(mTextEdit.getText().length());
-                ignoreKey = false;
 
                 mTextEdit.setVisibility(View.VISIBLE);
                 mTextEdit.bringToFront();
@@ -199,6 +172,47 @@ public class GoNativeActivity extends NativeActivity {
                 m.showSoftInput(mTextEdit, 0);
             }
         });
+    }
+
+    private void configureKeyboard(int keyboardType) {
+        int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+        int inputType = DEFAULT_INPUT_TYPE;
+        String keys = "";
+        switch (keyboardType) {
+            case DEFAULT_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                break;
+            case SINGLELINE_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                break;
+            case NUMBER_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                keys = "0123456789.,-' "; // work around android bug where some number keys are blocked
+                break;
+            case PASSWORD_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                break;
+            default:
+                Log.e("Fyne", "unknown keyboard type, use default");
+        }
+        mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
+        if (keys.isEmpty() && configuredKeyboardType == NUMBER_KEYBOARD_CODE) {
+            mTextEdit.setKeyListener(TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE));
+        }
+        mTextEdit.setInputType(inputType);
+        if (!keys.isEmpty()) {
+            mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
+        }
+
+        mTextEdit.setOnEditorActionListener(mEditorActionListener);
+
+        // always place one character so all keyboards can send backspace
+        ignoreKey = true;
+        mTextEdit.setText(" ");
+        mTextEdit.setSelection(mTextEdit.getText().length());
+        ignoreKey = false;
     }
 
     static void hideKeyboard() {
