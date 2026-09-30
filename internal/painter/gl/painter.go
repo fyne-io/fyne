@@ -32,6 +32,8 @@ type Painter interface {
 	StartClipping(fyne.Position, fyne.Size)
 	// StopClipping stops clipping paint actions.
 	StopClipping()
+	// CreateTextTexture creates a texture from a canvas.Text object
+	CreateTextTexture(t *canvas.Text, queue chan<- func())
 }
 
 // NewPainter creates a new GL based renderer for the provided canvas.
