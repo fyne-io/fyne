@@ -222,6 +222,11 @@ const (
 	CodeRightGUI     Code = 231
 
 	CodeBackButton Code = 301 // anything above 255 is not used in the USB spec
+	CodeDPadUp     Code = 302
+	CodeDPadDown   Code = 303
+	CodeDPadLeft   Code = 304
+	CodeDPadRight  Code = 305
+	CodeDPadCenter Code = 306
 
 	// The following codes are not part of the standard USB HID Usage IDs for
 	// keyboards. See http://www.usb.org/developers/hidpage/Hut1_12v2.pdf
