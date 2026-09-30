@@ -61,8 +61,6 @@ public class GoNativeActivity extends NativeActivity {
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 	private boolean keyboardUp = false;
-	// Type last applied on the UI thread. keyboardUp only records whether
-	// the IME is up so Back can dismiss it; it is not configuration state.
 	private int configuredKeyboardType = UNCONFIGURED_KEYBOARD_CODE;
 
 	// Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
@@ -161,11 +159,6 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // setInputType/setText restart the input connection and replace
-                // the native buffer with the backspace sentinel. Doing that on
-                // every tap (cursor moves, overlay changes) leaves a single
-                // character, so the next hold-to-delete removes one character
-                // and stops. Same-type requests only present the keyboard.
                 if (keyboardType != configuredKeyboardType) {
                     configureKeyboard(keyboardType);
                     configuredKeyboardType = keyboardType;
@@ -181,8 +174,6 @@ public class GoNativeActivity extends NativeActivity {
         });
     }
 
-    // Applies input configuration and the guarded sentinel. Callers run this
-    // on the UI thread, and only on first use or when the keyboard type changes.
     private void configureKeyboard(int keyboardType) {
         int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
         int inputType = DEFAULT_INPUT_TYPE;
@@ -207,9 +198,6 @@ public class GoNativeActivity extends NativeActivity {
                 Log.e("Fyne", "unknown keyboard type, use default");
         }
         mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
-        // Leaving the number keyboard must drop DigitsKeyListener before the
-        // new input type is applied. setKeyListener overwrites that type, and
-        // the number listener is installed again afterwards when needed.
         if (keys.isEmpty() && configuredKeyboardType == NUMBER_KEYBOARD_CODE) {
             mTextEdit.setKeyListener(TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE));
         }
