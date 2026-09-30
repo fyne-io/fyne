@@ -228,6 +228,7 @@ public class GoNativeActivity extends NativeActivity {
         if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         } else if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.setType("*/*");
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
@@ -441,6 +442,8 @@ public class GoNativeActivity extends NativeActivity {
         }
 
         Uri uri = data.getData();
+        final int takeFlags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        getContentResolver().takePersistableUriPermission(uri, takeFlags);
         filePickerReturned(uri.toString());
     }
 
