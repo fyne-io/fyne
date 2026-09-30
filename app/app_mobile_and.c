@@ -117,7 +117,12 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	jmethodID setContentText = find_method(env, cls, "setContentText", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;");
 	(*env)->CallObjectMethod(env, builder, setContentText, bodyStr);
 
-	int iconID = 17629184; // constant of "unknown app icon"
+	jclass classContext = (*env)->GetObjectClass(env, (jobject)ctx);
+	jmethodID getApplicationInfoMethod = find_method(env, classContext, "getApplicationInfo", "()Landroid/content/pm/ApplicationInfo;");
+	jobject appInfo = (*env)->CallObjectMethod(env, (jobject)ctx, getApplicationInfoMethod);
+	jclass applicationInfoClass = find_class(env, "android/content/pm/ApplicationInfo");
+	jfieldID iconFieldID = (*env)->GetFieldID(env, applicationInfoClass, "icon", "I");
+	jint iconID = (*env)->GetIntField(env, appInfo, iconFieldID);
 	jmethodID setSmallIcon = find_method(env, cls, "setSmallIcon", "(I)Landroid/app/Notification$Builder;");
 	(*env)->CallObjectMethod(env, builder, setSmallIcon, iconID);
 
