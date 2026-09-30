@@ -2,13 +2,34 @@ package cache
 
 import (
 	"image"
+	"image/color"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var svgs async.Map[string, *svgInfo]
+var (
+	svgs async.Map[string, *svgInfo]
+
+	// not an async.Map, ThemedResource.Content() can be called from any goroutine
+	colorizedSvgsLock sync.Mutex
+	colorizedSvgs     = map[colorizedSvgKey]*colorizedSvgInfo{}
+)
+
+// GetColorizedSvg gets the colorized version of an svg from cache if it exists.
+func GetColorizedSvg(src []byte, clr color.NRGBA) ([]byte, bool) {
+	colorizedSvgsLock.Lock()
+	defer colorizedSvgsLock.Unlock()
+	info, ok := colorizedSvgs[colorizedSvgKey{string(src), clr}]
+	if !ok {
+		return nil, false
+	}
+
+	info.setAlive()
+	return info.content, true
+}
 
 // GetSvg gets svg image from cache if it exists.
 func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {
@@ -25,6 +46,15 @@ func GetSvg(name string, o fyne.CanvasObject, w int, h int) *image.NRGBA {
 	return svginfo.pix
 }
 
+// SetColorizedSvg stores the colorized version of an svg in the cache map.
+func SetColorizedSvg(src []byte, clr color.NRGBA, content []byte) {
+	info := &colorizedSvgInfo{content: content}
+	info.setAlive()
+	colorizedSvgsLock.Lock()
+	colorizedSvgs[colorizedSvgKey{string(src), clr}] = info
+	colorizedSvgsLock.Unlock()
+}
+
 // SetSvg sets a svg into the cache map.
 func SetSvg(name string, o fyne.CanvasObject, pix *image.NRGBA, w int, h int) {
 	sinfo := &svgInfo{
@@ -34,6 +64,16 @@ func SetSvg(name string, o fyne.CanvasObject, pix *image.NRGBA, w int, h int) {
 	}
 	sinfo.setAlive()
 	svgs.Store(overriddenName(name, o), sinfo)
+}
+
+type colorizedSvgInfo struct {
+	expiringCache
+	content []byte
+}
+
+type colorizedSvgKey struct {
+	src string
+	clr color.NRGBA
 }
 
 type svgInfo struct {
@@ -50,6 +90,14 @@ func destroyExpiredSvgs(now time.Time) {
 		}
 		return true
 	})
+
+	colorizedSvgsLock.Lock()
+	for key, info := range colorizedSvgs {
+		if info.isExpired(now) {
+			delete(colorizedSvgs, key)
+		}
+	}
+	colorizedSvgsLock.Unlock()
 }
 
 func overriddenName(name string, o fyne.CanvasObject) string {

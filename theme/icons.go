@@ -1401,7 +1401,7 @@ func unwrapResource(res fyne.Resource) fyne.Resource {
 }
 
 func colorizeLogError(src []byte, clr color.Color) []byte {
-	content, err := svg.Colorize(src, clr)
+	content, err := svg.ColorizeCached(src, clr)
 	if err != nil {
 		fyne.LogError("", err)
 	}

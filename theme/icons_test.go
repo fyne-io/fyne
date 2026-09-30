@@ -108,6 +108,18 @@ func TestThemedResource_Name(t *testing.T) {
 	assert.Equal(t, "foreground_"+staticResource.Name(), themedResource.Name())
 }
 
+func TestThemedResource_Content_SourceChanged(t *testing.T) {
+	square := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>`)
+	circle := []byte(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle r="5"/></svg>`)
+	res := &fyne.StaticResource{StaticName: "shape.svg", StaticContent: square}
+	themed := theme.NewThemedResource(res)
+	assert.Contains(t, string(themed.Content()), "rect")
+
+	res.StaticContent = circle
+	assert.Contains(t, string(themed.Content()), "circle")
+	assert.NotContains(t, string(themed.Content()), "rect")
+}
+
 func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")

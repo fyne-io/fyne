@@ -134,3 +134,15 @@ func TestCheck_Resize(t *testing.T) {
 	test.TapAt(check, fyne.NewPos(10, 10))
 	assert.False(t, check.Checked)
 }
+
+func BenchmarkCheck_Refresh(b *testing.B) {
+	test.NewTempApp(b)
+	check := widget.NewCheck("test", nil)
+	w := test.NewTempWindow(b, check)
+	w.Resize(fyne.NewSize(200, 100))
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		check.Refresh()
+	}
+}
