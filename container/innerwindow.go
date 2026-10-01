@@ -56,6 +56,12 @@ type InnerWindow struct {
 	Content *fyne.Container
 
 	maximized, inactive bool
+
+	// tappedBarOwner is the MultipleWindows that last wrapped OnTappedBar with its
+	// own raise-to-top behaviour. The wrapper closure reads it on every tap, so
+	// moving this window to a different MultipleWindows rebinds it without
+	// re-wrapping the user's original callback.
+	tappedBarOwner *MultipleWindows
 }
 
 // NewInnerWindow creates a new window border around the given `content`, displaying the `title` along the top.
