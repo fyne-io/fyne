@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	fynecanvas "fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/driver/mobile"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/animation"
@@ -612,6 +613,15 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeGraveAccent:        fyne.KeyBackTick,
 
 	key.CodeBackButton: mobile.KeyBack,
+
+	key.CodeLeftShift:    desktop.KeyShiftLeft,
+	key.CodeRightShift:   desktop.KeyShiftRight,
+	key.CodeLeftControl:  desktop.KeyControlLeft,
+	key.CodeRightControl: desktop.KeyControlRight,
+	key.CodeLeftAlt:      desktop.KeyAltLeft,
+	key.CodeRightAlt:     desktop.KeyAltRight,
+	key.CodeLeftGUI:      desktop.KeySuperLeft,
+	key.CodeRightGUI:     desktop.KeySuperRight,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
@@ -621,6 +631,89 @@ func keyToName(code key.Code) fyne.KeyName {
 	}
 
 	return ret
+}
+
+func keyModifiers(mod key.Modifiers) fyne.KeyModifier {
+	var ret fyne.KeyModifier
+	if mod&key.ModShift != 0 {
+		ret |= fyne.KeyModifierShift
+	}
+	if mod&key.ModControl != 0 {
+		ret |= fyne.KeyModifierControl
+	}
+	if mod&key.ModAlt != 0 {
+		ret |= fyne.KeyModifierAlt
+	}
+	if mod&key.ModMeta != 0 {
+		ret |= fyne.KeyModifierSuper
+	}
+
+	return ret
+}
+
+func isKeyModifier(keyName fyne.KeyName) bool {
+	return keyName == desktop.KeyShiftLeft || keyName == desktop.KeyShiftRight ||
+		keyName == desktop.KeyControlLeft || keyName == desktop.KeyControlRight ||
+		keyName == desktop.KeyAltLeft || keyName == desktop.KeyAltRight ||
+		keyName == desktop.KeySuperLeft || keyName == desktop.KeySuperRight
+}
+
+// shortcutForKey mirrors the built-in shortcut detection of the desktop driver.
+// All other combinations of a modifier and a key become a desktop.CustomShortcut,
+// which widgets such as Entry use for behaviours like word selection or deletion.
+func shortcutForKey(keyName fyne.KeyName, modifier fyne.KeyModifier) fyne.Shortcut {
+	var shortcut fyne.Shortcut
+	if modifier == fyne.KeyModifierShortcutDefault {
+		switch keyName {
+		case fyne.KeyZ: // detect undo shortcut
+			shortcut = &fyne.ShortcutUndo{}
+		case fyne.KeyY: // detect redo shortcut
+			shortcut = &fyne.ShortcutRedo{}
+		case fyne.KeyV: // detect paste shortcut
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyC: // detect copy shortcut
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyInsert: // detect copy shortcut (alternative)
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		case fyne.KeyX: // detect cut shortcut
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: NewClipboard(),
+			}
+		case fyne.KeyA: // detect selectAll shortcut
+			shortcut = &fyne.ShortcutSelectAll{}
+		}
+	}
+
+	if modifier == fyne.KeyModifierShift {
+		switch keyName {
+		case fyne.KeyInsert: // detect paste shortcut (alternative)
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		case fyne.KeyDelete: // detect cut shortcut (alternative)
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: NewClipboard(),
+				Secondary: true,
+			}
+		}
+	}
+
+	if shortcut == nil && modifier != 0 && !isKeyModifier(keyName) && modifier != fyne.KeyModifierShift {
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: modifier,
+		}
+	}
+
+	return shortcut
 }
 
 func runeToPrintable(r rune) rune {
@@ -650,10 +743,22 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 		}
 	}
 
+	modifier := keyModifiers(mod)
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 
 	if canvas.Focused() != nil {
+		if keyable, ok := canvas.Focused().(desktop.Keyable); ok {
+			keyable.KeyDown(keyEvent)
+		}
+
+		if shortcut := shortcutForKey(keyName, modifier); shortcut != nil {
+			if focusable, ok := canvas.Focused().(fyne.Shortcutable); ok {
+				focusable.TypedShortcut(shortcut)
+				return
+			}
+		}
+
 		if keyName != "" {
 			canvas.Focused().TypedKey(keyEvent)
 		}
@@ -674,7 +779,15 @@ func (d *driver) typeDownCanvas(canvas *canvas, r rune, code key.Code, mod key.M
 	}
 }
 
-func (*driver) typeUpCanvas(_ *canvas, _ rune, _ key.Code, _ key.Modifiers) {
+func (*driver) typeUpCanvas(canvas *canvas, _ rune, code key.Code, _ key.Modifiers) {
+	if canvas.Focused() == nil {
+		return
+	}
+
+	keyEvent := &fyne.KeyEvent{Name: keyToName(code)}
+	if keyable, ok := canvas.Focused().(desktop.Keyable); ok {
+		keyable.KeyUp(keyEvent)
+	}
 }
 
 func (d *driver) Device() fyne.Device {
