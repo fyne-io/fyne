@@ -40,6 +40,18 @@ type app struct {
 	lastCancelledScheduleID   string
 }
 
+func (a *app) StopForegroundService() {
+	// no-op in test app
+}
+
+func (a *app) StartForegroundService(_, _ string) {
+	// no-op in test app
+}
+
+func (a *app) RequestNotificationPermission() {
+	// no-op in test app
+}
+
 func (a *app) CloudProvider() fyne.CloudProvider {
 	return a.cloud
 }

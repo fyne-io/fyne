@@ -13,6 +13,9 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 bool scheduleNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx,
 	char *id, char *title, char *body, long long deliveryMillis);
 void cancelScheduledNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *id);
+void startForegroundService(uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+void stopForegroundService(uintptr_t jni_env, uintptr_t ctx);
+void requestNotificationPermission(uintptr_t jni_env, uintptr_t ctx);
 */
 import "C"
 
@@ -36,6 +39,41 @@ func (a *fyneApp) OpenURL(url *url.URL) error {
 		return nil
 	})
 	return nil
+}
+
+func (a *fyneApp) StartForegroundService(title, content string) {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		cTitle := C.CString(title)
+		cContent := C.CString(content)
+		defer C.free(unsafe.Pointer(cTitle))
+		defer C.free(unsafe.Pointer(cContent))
+
+		C.startForegroundService(C.uintptr_t(env), C.uintptr_t(ctx), cTitle, cContent)
+		return nil
+	})
+}
+
+func (a *fyneApp) StopForegroundService() {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.stopForegroundService(C.uintptr_t(env), C.uintptr_t(ctx))
+		return nil
+	})
+}
+
+// RequestNotificationPermission asks the user to allow this app to post
+// notifications, which Android 13+ requires before any notification is
+// shown. The system dialog is skipped when the permission is already granted
+// or the device runs an older Android version.
+//
+// The request is only issued when the app targets SDK 33 or later, which
+// for Fyne means a release build. Apps with a lower target SDK cannot request
+// this permission themselves; Android prompts on its own when the app first
+// creates a notification channel, so this call is a no-op for them.
+func (a *fyneApp) RequestNotificationPermission() {
+	app.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.requestNotificationPermission(C.uintptr_t(env), C.uintptr_t(ctx))
+		return nil
+	})
 }
 
 func (a *fyneApp) SendNotification(n *fyne.Notification) {
