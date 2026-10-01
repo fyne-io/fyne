@@ -110,18 +110,18 @@ func (m *MultipleWindows) setupChild(w *InnerWindow) {
 		size := w.Size().Add(ev.Dragged)
 		w.Resize(internal.MaxSizes(size, w.MinSize()))
 	}
-	if w.tappedBarWrapped {
-		return
-	}
-	w.tappedBarWrapped = true
-
-	userTappedBar := w.OnTappedBar
-	w.OnTappedBar = func() {
-		if userTappedBar != nil {
-			userTappedBar()
+	if w.tappedBarOwner == nil {
+		userTappedBar := w.OnTappedBar
+		w.OnTappedBar = func() {
+			if userTappedBar != nil {
+				userTappedBar()
+			}
+			if w.tappedBarOwner != nil {
+				w.tappedBarOwner.RaiseToTop(w)
+			}
 		}
-		m.RaiseToTop(w)
 	}
+	w.tappedBarOwner = m
 }
 
 type multiWinLayout struct{}
