@@ -1152,15 +1152,17 @@ func (p *painter) vecRectCoords(pos fyne.Position, rect fyne.CanvasObject, frame
 }
 
 func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject, frame fyne.Size, xPad, yPad float32, shadow canvas.Shadow) ([coordinatesSizeRectangle]float32, [4]float32) {
+	// Snap the edges rather than the position and the size. Rounding those
+	// separately puts the far edge at round(x)+round(w), a pixel away from
+	// round(x+w) whenever the two fractions round opposite ways, so objects
+	// sharing an edge - a bar and the track it fills - part by a pixel as they
+	// move or resize.
 	size := rect.Size()
-	pos1 := rect.Position()
-
-	xPosDiff := pos.X - pos1.X + xPad
-	yPosDiff := pos.Y - pos1.Y + yPad
-	pos1.X = roundToPixel(pos1.X+xPosDiff, p.pixScale)
-	pos1.Y = roundToPixel(pos1.Y+yPosDiff, p.pixScale)
-	size.Width = roundToPixel(size.Width-2*xPad, p.pixScale)
-	size.Height = roundToPixel(size.Height-2*yPad, p.pixScale)
+	left, top := pos.X+xPad, pos.Y+yPad
+	x1Pos := roundToPixel(left, p.pixScale)
+	y1Pos := roundToPixel(top, p.pixScale)
+	x2Pos := roundToPixel(left+size.Width-2*xPad, p.pixScale)
+	y2Pos := roundToPixel(top+size.Height-2*yPad, p.pixScale)
 
 	shadowPads := paint.GetShadowPaddings(shadow)
 	shadowPadLeft := roundToPixel(shadowPads[0], p.pixScale)
@@ -1170,13 +1172,9 @@ func (p *painter) vecRectCoordsWithPad(pos fyne.Position, rect fyne.CanvasObject
 
 	// without edge softness adjustment the rectangle has cropped edges
 	edgeSoftnessScaled := roundToPixel(edgeSoftness*p.pixScale, 1.0)
-	x1Pos := pos1.X
 	x1Norm := -1 + (x1Pos-edgeSoftnessScaled-shadowPadLeft)*2/frame.Width
-	x2Pos := pos1.X + size.Width
 	x2Norm := -1 + (x2Pos+edgeSoftnessScaled+shadowPadRight)*2/frame.Width
-	y1Pos := pos1.Y
 	y1Norm := 1 - (y1Pos-edgeSoftnessScaled-shadowPadTop)*2/frame.Height
-	y2Pos := pos1.Y + size.Height
 	y2Norm := 1 - (y2Pos+edgeSoftnessScaled+shadowPadBottom)*2/frame.Height
 
 	// output a norm for the fill
