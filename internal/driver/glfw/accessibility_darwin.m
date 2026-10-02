@@ -40,6 +40,9 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 }
 
 - (void)dealloc {
+    for (AccessibleElement* child in _children) {
+        child.parentElement = nil;
+    }
     [_children release];
     [_title release];
     [_label release];
@@ -112,7 +115,7 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 }
 
 - (NSArray*)accessibilityChildren {
-    return [self.children copy];
+    return [[self.children copy] autorelease];
 }
 
 - (BOOL)isAccessibilityEnabled {
@@ -148,7 +151,7 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 
 static NSArray* customAccessibilityChildren(id self, SEL _cmd) {
     if (globalAccessibilityElements && [globalAccessibilityElements count] > 0) {
-        return [globalAccessibilityElements copy];
+        return [[globalAccessibilityElements copy] autorelease];
     }
     if (originalAccessibilityChildrenIMP) {
         return ((NSArray*(*)(id, SEL))originalAccessibilityChildrenIMP)(self, _cmd);
@@ -167,26 +170,13 @@ AccessibilityElementRef AccessibilityElementCreate(
 ) {
     @autoreleasepool {
         if (!globalAccessibilityElements) {
-            globalAccessibilityElements = [NSMutableArray array];
+            globalAccessibilityElements = [[NSMutableArray alloc] init];
         }
 
         AccessibleElement* elem = [[AccessibleElement alloc] initWithParent:parent];
         elem.role = role;
         elem.title = title ? [NSString stringWithUTF8String:title] : @"";
         elem.label = label ? [NSString stringWithUTF8String:label] : @"";
-
-        NSWindow* window = [[NSApplication sharedApplication] mainWindow];
-        double winHeight = 0.0;
-        double winY = 0.0;
-        double winX = 0.0;
-        double barHeight = 0.0;
-        if (window) {
-            NSRect windowFrame = [window frame];
-            winX = windowFrame.origin.x;
-            winY = windowFrame.origin.y;
-            winHeight = windowFrame.size.height;
-            barHeight = winHeight - [window contentView].frame.size.height;
-        }
 
         // Store local frame (relative to window content view)
         elem.localFrame = CGRectMake(x, y, width, height);
@@ -195,17 +185,24 @@ AccessibilityElementRef AccessibilityElementCreate(
         elem.actionCallback = callback;
         elem.callbackContext = callbackContext;
 
-        // Manually retain since we're not using ARC
-        return (void*)[elem retain];
+        return (void*)elem;
     }
 }
 
 void AccessibilityElementSetFrame(AccessibilityElementRef elem, double x, double y, double width, double height) {
     @autoreleasepool {
         AccessibleElement* element = (__bridge AccessibleElement*)elem;
-        element.frame = NSMakeRect(x, y, width, height);
-        NSAccessibilityPostNotification(element, NSAccessibilityMovedNotification);
-        NSAccessibilityPostNotification(element, NSAccessibilityResizedNotification);
+        NSRect frame = NSMakeRect(x, y, width, height);
+        BOOL moved = !NSEqualPoints(element.localFrame.origin, frame.origin);
+        BOOL resized = !NSEqualSizes(element.localFrame.size, frame.size);
+        element.localFrame = frame;
+        element.frame = frame;
+        if (moved) {
+            NSAccessibilityPostNotification(element, NSAccessibilityMovedNotification);
+        }
+        if (resized) {
+            NSAccessibilityPostNotification(element, NSAccessibilityResizedNotification);
+        }
     }
 }
 
@@ -220,6 +217,7 @@ void AccessibilityElementSetLabel(AccessibilityElementRef elem, const char* labe
     @autoreleasepool {
         AccessibleElement* element = (__bridge AccessibleElement*)elem;
         element.label = label ? [NSString stringWithUTF8String:label] : @"";
+        NSAccessibilityPostNotification(element, NSAccessibilityTitleChangedNotification);
     }
 }
 
@@ -264,6 +262,7 @@ void AccessibilityElementAddChild(AccessibilityElementRef parent, AccessibilityE
         if (![parentElem.children containsObject:childElem]) {
             [parentElem.children addObject:childElem];
             childElem.parentElement = parentElem;
+            [childElem release];
         }
     }
 }
@@ -272,8 +271,8 @@ void AccessibilityElementRemoveChild(AccessibilityElementRef parent, Accessibili
     @autoreleasepool {
         AccessibleElement* parentElem = (__bridge AccessibleElement*)parent;
         AccessibleElement* childElem = (__bridge AccessibleElement*)child;
-        [parentElem.children removeObject:childElem];
         childElem.parentElement = nil;
+        [parentElem.children removeObject:childElem];
     }
 }
 
@@ -320,7 +319,8 @@ void AccessibilityAttachToWindow(AccessibilityElementRef elem) {
             Method originalMethod = class_getInstanceMethod(viewClass, selector);
             if (originalMethod) {
                 originalAccessibilityChildrenIMP = method_getImplementation(originalMethod);
-                method_setImplementation(originalMethod, (IMP)customAccessibilityChildren);
+                class_replaceMethod(viewClass, selector, (IMP)customAccessibilityChildren,
+                                    method_getTypeEncoding(originalMethod));
             }
         }
 
@@ -350,7 +350,14 @@ void AccessibilityElementDestroy(AccessibilityElementRef elem) {
         if (!elem) return;
 
         AccessibleElement* element = (AccessibleElement*)elem;
-        // Manually release since we're not using ARC
+        [globalAccessibilityElements removeObject:element];
+        if ([element.parentElement isKindOfClass:[AccessibleElement class]]) {
+            AccessibleElement* parent = element.parentElement;
+            element.parentElement = nil;
+            [parent.children removeObject:element];
+            return;
+        }
+        element.parentElement = nil;
         [element release];
     }
 }

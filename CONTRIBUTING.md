@@ -48,6 +48,13 @@ To manage this we have various checks and processes in place that everyone shoul
 * Imports should be ordered according to the GoImports spec - you can use the `goimports` tool instead of `gofmt`.
 * Everything should have a unit test attached (as much as possible, to keep our coverage up)
 
+For desktop event-loop changes, run the main-queue and scheduler tests with
+`go test -race -tags no_glfw,ci,migrated_fynedo ./internal/async ./internal/driver/glfw`.
+On macOS, add `accessibility` to check native element identity and in-place
+attribute updates without requiring Accessibility permission. Also exercise
+a real desktop application: queued `fyne.Do` work and shutdown must wake native
+event waiting, while rendering must retain its normal frame cadence.
+
 For detailed Code style, check [Contributing](https://github.com/fyne-io/fyne/wiki/Contributing#code-style) in our wiki please.
 
 # Decision Process
