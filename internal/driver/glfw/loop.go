@@ -22,7 +22,7 @@ type funcData struct {
 
 // channel for queuing functions on the main thread
 var (
-	funcQueue        = async.NewUnboundedChan[funcData]()
+	funcQueue        = async.NewUnboundedChan[funcData](wakeMainLoop)
 	running, drained atomic.Bool
 )
 
@@ -108,6 +108,7 @@ func (d *gLDriver) runGL() {
 	}
 
 	d.init()
+	waitEvents := startMainLoop()
 	if d.trayStart != nil {
 		d.trayStart()
 	}
@@ -130,11 +131,15 @@ func (d *gLDriver) runGL() {
 		f()
 	}
 
-	eventTick := time.NewTicker(time.Second / 60)
+	frameInterval := time.Second / 60
+	eventTick := time.NewTicker(frameInterval)
+	nextFrame := time.Now().Add(frameInterval)
 	for {
-		select {
-		case <-d.done:
+		event := nextMainLoopEvent(d.done, funcQueue.Out(), eventTick.C, nextFrame, waitEvents)
+		switch event.kind {
+		case mainLoopQuit:
 			eventTick.Stop()
+			stopMainLoop()
 			d.Terminate()
 			l, _ := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
@@ -151,12 +156,14 @@ func (d *gLDriver) runGL() {
 			drained.Store(true)
 			funcQueue.Close()
 			return
-		case f := <-funcQueue.Out():
+		case mainLoopFunction:
+			f := event.function
 			f.f()
 			if f.done != nil {
 				f.done <- struct{}{}
 			}
-		case <-eventTick.C:
+		case mainLoopFrame:
+			nextFrame = event.frameTime.Add(frameInterval)
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
 				w, _ := d.windows[i].(*window)
