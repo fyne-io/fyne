@@ -61,8 +61,7 @@ func (w *window) updateAccessibility() {
 		nodes = w.collectAccessibilityElements(overlay, fyne.NewPos(0, 0), -1, nodes)
 	}
 
-	C.AccessibilitySetTargetWindow(w.view().GetCocoaWindow())
-	accessibilityElements[w] = updateAccessibilityElements(accessibilityElements[w], nodes)
+	accessibilityElements[w] = updateAccessibilityElements(accessibilityElements[w], nodes, w.view().GetCocoaWindow())
 }
 
 func (w *window) collectAccessibilityElements(
@@ -101,18 +100,22 @@ func (w *window) collectAccessibilityElements(
 	return nodes
 }
 
-func updateAccessibilityElements(previous, next []accessibilityNode) []accessibilityNode {
-	rebuild := len(previous) != len(next)
-	if !rebuild {
-		for i := range next {
-			if previous[i].object != next[i].object || previous[i].role != next[i].role ||
-				previous[i].parent != next[i].parent {
-				rebuild = true
-				break
-			}
+func accessibilityTreeChanged(previous, next []accessibilityNode) bool {
+	if len(previous) != len(next) {
+		return true
+	}
+	for i := range next {
+		if previous[i].object != next[i].object || previous[i].role != next[i].role ||
+			previous[i].parent != next[i].parent {
+			return true
 		}
 	}
-	if rebuild {
+	return false
+}
+
+// A nil nativeWindow leaves the tree unattached for window-free tests.
+func updateAccessibilityElements(previous, next []accessibilityNode, nativeWindow unsafe.Pointer) []accessibilityNode {
+	if accessibilityTreeChanged(previous, next) {
 		destroyAccessibilityElements(previous)
 		for i := range next {
 			node := &next[i]
@@ -127,7 +130,7 @@ func updateAccessibilityElements(previous, next []accessibilityNode) []accessibi
 		}
 		for _, node := range next {
 			if node.parent < 0 {
-				C.AccessibilityAttachToWindow(node.element)
+				C.AccessibilityAttachToWindow(node.element, nativeWindow)
 			}
 		}
 		return next
@@ -150,10 +153,8 @@ func updateAccessibilityElements(previous, next []accessibilityNode) []accessibi
 }
 
 func destroyAccessibilityElements(nodes []accessibilityNode) {
-	for _, node := range nodes {
-		if node.parent < 0 {
-			C.AccessibilityElementDestroy(node.element)
-		}
+	for i := len(nodes) - 1; i >= 0; i-- {
+		C.AccessibilityElementDestroy(nodes[i].element)
 	}
 }
 

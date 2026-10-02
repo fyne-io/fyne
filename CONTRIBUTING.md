@@ -54,6 +54,10 @@ On macOS, add `accessibility` to check native element identity and in-place
 attribute updates without requiring Accessibility permission. Also exercise
 a real desktop application: queued `fyne.Do` work and shutdown must wake native
 event waiting, while rendering must retain its normal frame cadence.
+The native accessibility probes also check ownership, window teardown, and
+isolation between simultaneous windows and different content-view classes.
+The unchanged-tree benchmark measures synchronization of collected nodes, not
+the complete canvas traversal or repaint.
 
 For detailed Code style, check [Contributing](https://github.com/fyne-io/fyne/wiki/Contributing#code-style) in our wiki please.
 

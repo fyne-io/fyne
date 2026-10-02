@@ -4,10 +4,8 @@
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 
-static NSMutableArray<NSAccessibilityElement*>* globalAccessibilityElements = nil;
-static NSView* targetContentView = nil;
-static NSWindow* targetWindow = nil;
-static IMP originalAccessibilityChildrenIMP = NULL;
+static char accessibilityRootsKey;
+static char accessibilityChildrenInstalledKey;
 
 @interface AccessibleElement : NSAccessibilityElement
 
@@ -82,11 +80,17 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 }
 
 - (NSRect)accessibilityFrame {
-    if (targetWindow && targetContentView) {
-        NSRect contentBounds = [targetContentView bounds];
+    id parent = self.parentElement;
+    while ([parent isKindOfClass:[AccessibleElement class]]) {
+        parent = [(AccessibleElement*)parent parentElement];
+    }
+    NSView* contentView = [parent isKindOfClass:[NSView class]] ? parent : nil;
+    NSWindow* window = [contentView window];
+    if (window) {
+        NSRect contentBounds = [contentView bounds];
         NSPoint contentBottomLeft = NSMakePoint(0, 0);
-        contentBottomLeft = [targetContentView convertPoint:contentBottomLeft toView:nil];
-        contentBottomLeft = [targetWindow convertPointToScreen:contentBottomLeft];
+        contentBottomLeft = [contentView convertPoint:contentBottomLeft toView:nil];
+        contentBottomLeft = [window convertPointToScreen:contentBottomLeft];
 
         double localX = self.localFrame.origin.x;
         double localY = self.localFrame.origin.y;
@@ -104,14 +108,7 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 }
 
 - (id)accessibilityParent {
-    if (self.parentElement) {
-        return self.parentElement;
-    }
-    if (targetContentView) {
-        return targetContentView;
-    }
-    NSWindow* window = [[NSApplication sharedApplication] mainWindow];
-    return [window contentView];
+    return self.parentElement;
 }
 
 - (NSArray*)accessibilityChildren {
@@ -149,14 +146,37 @@ static IMP originalAccessibilityChildrenIMP = NULL;
 
 @end
 
-static NSArray* customAccessibilityChildren(id self, SEL _cmd) {
-    if (globalAccessibilityElements && [globalAccessibilityElements count] > 0) {
-        return [[globalAccessibilityElements copy] autorelease];
+@interface AccessibilityRoots : NSObject
+@property (nonatomic, readonly) NSMutableArray<AccessibleElement*>* elements;
+@end
+
+@implementation AccessibilityRoots
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _elements = [[NSMutableArray alloc] init];
     }
-    if (originalAccessibilityChildrenIMP) {
-        return ((NSArray*(*)(id, SEL))originalAccessibilityChildrenIMP)(self, _cmd);
+    return self;
+}
+
+- (void)dealloc {
+    for (AccessibleElement* element in _elements) {
+        element.parentElement = nil;
     }
-    return @[];
+    [_elements release];
+    [super dealloc];
+}
+@end
+
+static void detachAccessibilityElement(AccessibleElement* element) {
+    id parent = element.parentElement;
+    element.parentElement = nil;
+    if ([parent isKindOfClass:[AccessibleElement class]]) {
+        [[(AccessibleElement*)parent children] removeObject:element];
+    } else {
+        AccessibilityRoots* roots = objc_getAssociatedObject(parent, &accessibilityRootsKey);
+        [roots.elements removeObject:element];
+    }
 }
 
 AccessibilityElementRef AccessibilityElementCreate(
@@ -169,10 +189,6 @@ AccessibilityElementRef AccessibilityElementCreate(
     void* callbackContext
 ) {
     @autoreleasepool {
-        if (!globalAccessibilityElements) {
-            globalAccessibilityElements = [[NSMutableArray alloc] init];
-        }
-
         AccessibleElement* elem = [[AccessibleElement alloc] initWithParent:parent];
         elem.role = role;
         elem.title = title ? [NSString stringWithUTF8String:title] : @"";
@@ -260,9 +276,9 @@ void AccessibilityElementAddChild(AccessibilityElementRef parent, AccessibilityE
         }
 
         if (![parentElem.children containsObject:childElem]) {
+            detachAccessibilityElement(childElem);
             [parentElem.children addObject:childElem];
             childElem.parentElement = parentElem;
-            [childElem release];
         }
     }
 }
@@ -284,54 +300,47 @@ void AccessibilityElementSetParent(AccessibilityElementRef child, AccessibilityE
     }
 }
 
-void AccessibilitySetTargetWindow(void* nsWindow) {
+void AccessibilityAttachToWindow(AccessibilityElementRef elem, void* nsWindow) {
     @autoreleasepool {
-        targetWindow = (NSWindow*)nsWindow;
-        if (targetWindow) {
-            targetContentView = [targetWindow contentView];
-        }
-    }
-}
-
-void AccessibilityAttachToWindow(AccessibilityElementRef elem) {
-    @autoreleasepool {
-        AccessibleElement* element = (AccessibleElement*)elem;
-
-        if (!globalAccessibilityElements) {
-            globalAccessibilityElements = [[NSMutableArray alloc] init];
-        }
-
-        NSWindow* window = targetWindow;
+        NSWindow* window = (NSWindow*)nsWindow;
         if (!window) {
             return;
         }
 
-        NSView* contentView = targetContentView;
-        if (!contentView) {
-            return;
-        }
-
-        targetContentView = contentView;
-
-        if (!originalAccessibilityChildrenIMP) {
-            Class viewClass = [contentView class];
-            SEL selector = @selector(accessibilityChildren);
+        NSView* contentView = [window contentView];
+        Class viewClass = [contentView class];
+        SEL selector = @selector(accessibilityChildren);
+        if (!objc_getAssociatedObject(viewClass, &accessibilityChildrenInstalledKey)) {
             Method originalMethod = class_getInstanceMethod(viewClass, selector);
-            if (originalMethod) {
-                originalAccessibilityChildrenIMP = method_getImplementation(originalMethod);
-                class_replaceMethod(viewClass, selector, (IMP)customAccessibilityChildren,
-                                    method_getTypeEncoding(originalMethod));
-            }
+            IMP original = method_getImplementation(originalMethod);
+            // Capture each class's original so overrides calling super do not recurse.
+            IMP replacement = imp_implementationWithBlock(^NSArray*(id view) {
+                AccessibilityRoots* roots = objc_getAssociatedObject(view, &accessibilityRootsKey);
+                if ([roots.elements count] > 0) {
+                    return [[roots.elements copy] autorelease];
+                }
+                return ((NSArray*(*)(id, SEL))original)(view, selector);
+            });
+            class_replaceMethod(viewClass, selector, replacement, method_getTypeEncoding(originalMethod));
+            objc_setAssociatedObject(viewClass, &accessibilityChildrenInstalledKey, @YES,
+                                     OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
 
-        element.parentElement = contentView;
-
-        if (![globalAccessibilityElements containsObject:element]) {
-            [globalAccessibilityElements addObject:element];
+        AccessibilityRoots* roots = objc_getAssociatedObject(contentView, &accessibilityRootsKey);
+        if (!roots) {
+            roots = [[AccessibilityRoots alloc] init];
+            objc_setAssociatedObject(contentView, &accessibilityRootsKey, roots, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            [roots release];
         }
 
-        NSAccessibilityPostNotification(contentView, NSAccessibilityCreatedNotification);
-        NSAccessibilityPostNotification(element, NSAccessibilityCreatedNotification);
+        AccessibleElement* element = (AccessibleElement*)elem;
+        if (![roots.elements containsObject:element]) {
+            detachAccessibilityElement(element);
+            element.parentElement = contentView;
+            [roots.elements addObject:element];
+            NSAccessibilityPostNotification(contentView, NSAccessibilityCreatedNotification);
+            NSAccessibilityPostNotification(element, NSAccessibilityCreatedNotification);
+        }
     }
 }
 
@@ -350,14 +359,12 @@ void AccessibilityElementDestroy(AccessibilityElementRef elem) {
         if (!elem) return;
 
         AccessibleElement* element = (AccessibleElement*)elem;
-        [globalAccessibilityElements removeObject:element];
-        if ([element.parentElement isKindOfClass:[AccessibleElement class]]) {
-            AccessibleElement* parent = element.parentElement;
-            element.parentElement = nil;
-            [parent.children removeObject:element];
-            return;
+        detachAccessibilityElement(element);
+        for (AccessibleElement* child in element.children) {
+            child.parentElement = nil;
         }
-        element.parentElement = nil;
+        [element.children removeAllObjects];
+        NSAccessibilityPostNotification(element, NSAccessibilityUIElementDestroyedNotification);
         [element release];
     }
 }
