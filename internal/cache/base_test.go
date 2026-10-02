@@ -134,6 +134,45 @@ func TestCacheClean(t *testing.T) {
 	})
 }
 
+func TestCacheCleanWithStaleClockKeepsRecentlyUsedEntries(t *testing.T) {
+	testClearAll()
+	previousLastClean := lastClean
+	lastClean = time.Time{}
+	t.Cleanup(func() {
+		lastClean = previousLastClean
+		testClearAll()
+	})
+
+	tm := &timeMock{}
+	tm.setTime(10, 10)
+	canvas := &dummyCanvas{}
+	oldObject := &dummyWidget{}
+	recentObject := &dummyWidget{}
+	SetCanvasForObject(oldObject, canvas, nil)
+
+	// Simulate a driver that has not painted for longer than the cache lifetime.
+	// The recent entry is used before the next Clean refreshes the sampled clock.
+	tm.now = tm.now.Add(ValidDuration + time.Second)
+	SetCanvasForObject(recentObject, canvas, nil)
+	Clean(true)
+
+	_, oldFound := canvases.Load(oldObject)
+	_, recentFound := canvases.Load(recentObject)
+	assert.True(t, oldFound)
+	assert.True(t, recentFound)
+
+	// The refreshed sample lets the next pass distinguish an entry used in the
+	// current frame from one that really is expired.
+	SetCanvasForObject(recentObject, canvas, nil)
+	tm.now = tm.now.Add(cacheCleanCooldown + time.Second)
+	Clean(true)
+
+	_, oldFound = canvases.Load(oldObject)
+	_, recentFound = canvases.Load(recentObject)
+	assert.False(t, oldFound)
+	assert.True(t, recentFound)
+}
+
 func TestCleanCanvas(t *testing.T) {
 	destroyedRenderersCnt := 0
 	testClearAll()
