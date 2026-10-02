@@ -273,16 +273,16 @@ func (w *window) fitContent() {
 		return
 	}
 
-	minWidth, minHeight := w.minSizeOnScreen()
+	minWidth, minHeight := w.boundToMonitorSize(w.minSizeOnScreen())
 	view := w.viewport
-	w.shouldWidth, w.shouldHeight = w.width, w.height
-	if w.width < minWidth || w.height < minHeight {
-		if w.width < minWidth {
-			w.shouldWidth = minWidth
-		}
-		if w.height < minHeight {
-			w.shouldHeight = minHeight
-		}
+	w.shouldWidth, w.shouldHeight = w.boundToMonitorSize(w.width, w.height)
+	if w.shouldWidth < minWidth {
+		w.shouldWidth = minWidth
+	}
+	if w.shouldHeight < minHeight {
+		w.shouldHeight = minHeight
+	}
+	if w.shouldWidth != w.width || w.shouldHeight != w.height {
 		w.shouldExpand = true // queue the resize to happen on main
 	}
 	if w.fixedSize {
@@ -292,10 +292,44 @@ func (w *window) fitContent() {
 		if w.shouldHeight > w.requestedHeight {
 			w.requestedHeight = w.shouldHeight
 		}
+		w.requestedWidth, w.requestedHeight = w.boundToMonitorSize(w.requestedWidth, w.requestedHeight)
 		view.SetSizeLimits(w.requestedWidth, w.requestedHeight, w.requestedWidth, w.requestedHeight)
 	} else {
 		view.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
+}
+
+// boundToMonitorSize clamps native window dimensions to the selected monitor's
+// size in GLFW window coordinates. The primary monitor is used before the
+// viewport exists. Unusable monitor or video-mode data leaves the size unchanged.
+func (w *window) boundToMonitorSize(width, height int) (int, int) {
+	var monitor *glfw.Monitor
+	if w.viewport != nil {
+		monitor = w.getMonitorForWindow()
+	} else {
+		monitor = glfw.GetPrimaryMonitor()
+	}
+	if monitor == nil {
+		return clampToMonitorSize(width, height, 0, 0)
+	}
+
+	mode := monitor.GetVideoMode()
+	if mode == nil {
+		return clampToMonitorSize(width, height, 0, 0)
+	}
+	return clampToMonitorSize(width, height, mode.Width, mode.Height)
+}
+
+// clampToMonitorSize limits width and height to the given monitor bounds.
+// Non-positive bounds are treated as unavailable and that dimension is unchanged.
+func clampToMonitorSize(width, height, maxWidth, maxHeight int) (int, int) {
+	if maxWidth > 0 && width > maxWidth {
+		width = maxWidth
+	}
+	if maxHeight > 0 && height > maxHeight {
+		height = maxHeight
+	}
+	return width, height
 }
 
 // getMonitorScale returns the scale factor for a given monitor, handling platform-specific cases
@@ -791,7 +825,7 @@ func (w *window) RescaleContext() {
 	}
 
 	size := internal.MaxSizes(w.canvas.size, w.canvas.MinSize())
-	newWidth, newHeight := w.screenSize(size)
+	newWidth, newHeight := w.boundToMonitorSize(w.screenSize(size))
 	w.viewport.SetSize(newWidth, newHeight)
 
 	// Ensure textures re-rasterize at the new scale
@@ -836,6 +870,7 @@ func (w *window) create() {
 	if pixHeight == 0 {
 		pixHeight = fallbackScreenSize
 	}
+	pixWidth, pixHeight = w.boundToMonitorSize(pixWidth, pixHeight)
 
 	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
 	if err != nil {
@@ -900,11 +935,15 @@ func (w *window) create() {
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.width, w.height = w.boundToMonitorSize(
+			scale.ToScreenCoordinate(w.canvas, bigEnough.Width),
+			scale.ToScreenCoordinate(w.canvas, bigEnough.Height),
+		)
 		w.shouldWidth, w.shouldHeight = w.width, w.height
 	}
 
-	w.requestedWidth, w.requestedHeight = w.width, w.height
+	w.requestedWidth, w.requestedHeight = w.boundToMonitorSize(w.width, w.height)
+	w.shouldWidth, w.shouldHeight = w.boundToMonitorSize(w.shouldWidth, w.shouldHeight)
 	// order of operation matters so we do these last items in order
 	w.viewport.SetSize(w.shouldWidth, w.shouldHeight) // ensure we requested latest size
 

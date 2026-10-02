@@ -129,6 +129,10 @@ func (w *window) fitContent() {
 	w.shouldWidth, w.shouldHeight = w.requestedWidth, w.requestedHeight
 }
 
+func (w *window) boundToMonitorSize(width, height int) (int, int) {
+	return width, height
+}
+
 func (w *window) getMonitorForWindow() *monitor {
 	return glfw.GetPrimaryMonitor()
 }
