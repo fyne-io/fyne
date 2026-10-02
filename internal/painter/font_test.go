@@ -178,3 +178,18 @@ func TestRenderedTextSize(t *testing.T) {
 	assert.Equal(t, size1.Height, size2.Height)
 	assert.Equal(t, baseline1, baseline2)
 }
+
+// BenchmarkCachedFontFace_AllStyles is what resolving fonts costs once the
+// caches are cleared, as a theme change clears them. Every style's face list
+// includes the emoji and symbol fallback fonts, so the same files come up once
+// per style.
+func BenchmarkCachedFontFace_AllStyles(b *testing.B) {
+	styles := []fyne.TextStyle{{}, {Bold: true}, {Italic: true}, {Bold: true, Italic: true}, {Monospace: true}}
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		painter.ClearFontCache()
+		for _, s := range styles {
+			painter.CachedFontFace(s, nil, nil)
+		}
+	}
+}

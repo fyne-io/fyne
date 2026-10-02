@@ -14,7 +14,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/async"
@@ -829,11 +828,11 @@ func (w *window) create() {
 	}
 
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
-	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	pixWidth = int(max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
 		pixWidth = fallbackScreenSize
 	}
-	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	pixHeight = int(max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
 		pixHeight = fallbackScreenSize
 	}
@@ -918,9 +917,4 @@ func (w *window) view() *glfw.Window {
 		return nil
 	}
 	return w.viewport
-}
-
-// wrapInnerWindow is a no-op to match what the web driver provides
-func wrapInnerWindow(*container.InnerWindow, fyne.Window, *gLDriver) fyne.Window {
-	return nil
 }

@@ -183,6 +183,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Cursor implements the [desktop.Cursorable] interface.
 func (t *Table) Cursor() desktop.Cursor {
 	if t.hoverHeaderRow != noCellMatch {
 		return desktop.VResizeCursor
@@ -193,6 +194,7 @@ func (t *Table) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
+// Dragged implements the [fyne.Draggable] interface.
 func (t *Table) Dragged(e *fyne.DragEvent) {
 	minSize := t.cellSize
 	col := t.dragCol
@@ -216,6 +218,7 @@ func (t *Table) Dragged(e *fyne.DragEvent) {
 	}
 }
 
+// DragEnd implements the [fyne.Draggable] interface.
 func (t *Table) DragEnd() {
 	t.dragCol = noCellMatch
 	t.dragRow = noCellMatch
@@ -236,19 +239,22 @@ func (t *Table) FocusLost() {
 	t.Refresh() // Item(t.currentHighlight)
 }
 
+// MouseIn implements the [desktop.Hoverable] interface.
 func (t *Table) MouseIn(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
 // MouseDown response to desktop mouse event
 func (t *Table) MouseDown(e *desktop.MouseEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
+// MouseMoved implements the [desktop.Hoverable] interface.
 func (t *Table) MouseMoved(ev *desktop.MouseEvent) {
 	t.hoverAt(ev.Position)
 }
 
+// MouseOut implements the [desktop.Hoverable] interface.
 func (t *Table) MouseOut() {
 	t.hoverOut()
 }
@@ -344,7 +350,7 @@ func (t *Table) SetRowHeight(id int, height float32) {
 
 // TouchDown response to mobile touch event
 func (t *Table) TouchDown(e *mobile.TouchEvent) {
-	t.tapped(e.Position)
+	t.startDrag(e.Position)
 }
 
 // TouchUp response to mobile touch event
@@ -622,6 +628,7 @@ func (t *Table) ScrollToTrailing() {
 	t.finishScroll()
 }
 
+// Tapped implements the [fyne.Tappable] interface.
 func (t *Table) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= t.Size().Width || e.Position.Y < 0 || e.Position.Y >= t.Size().Height {
 		t.selectedCell = nil
@@ -825,11 +832,10 @@ func (t *Table) rowAt(pos fyne.Position) int {
 	return noCellMatch
 }
 
-func (t *Table) tapped(pos fyne.Position) {
+func (t *Table) startDrag(pos fyne.Position) {
 	if t.dragCol == noCellMatch && t.dragRow == noCellMatch {
 		t.dragStartPos = pos
 		if t.hoverHeaderRow != noCellMatch {
-			t.dragCol = noCellMatch
 			t.dragRow = t.hoverHeaderRow
 			size, ok := t.rowHeights[t.hoverHeaderRow]
 			if !ok {
@@ -838,7 +844,6 @@ func (t *Table) tapped(pos fyne.Position) {
 			t.dragStartSize = size
 		} else if t.hoverHeaderCol != noCellMatch {
 			t.dragCol = t.hoverHeaderCol
-			t.dragRow = noCellMatch
 			size, ok := t.columnWidths[t.hoverHeaderCol]
 			if !ok {
 				size = t.cellSize.Width
@@ -921,7 +926,7 @@ func (t *Table) visibleColumnWidths(colWidth float32, cols int) (visible map[int
 	visible = make(map[int]float32)
 
 	if t.content.Size().Width <= 0 {
-		return visible, offX, minCol, maxCol
+		return visible, offX, minCol, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1018,7 +1023,7 @@ func (t *Table) visibleRowHeights(rowHeight float32, rows int) (visible map[int]
 	visible = make(map[int]float32)
 
 	if t.content.Size().Height <= 0 {
-		return visible, offY, minRow, maxRow
+		return visible, offY, minRow, 0
 	}
 
 	padding := t.Theme().Size(theme.SizeNamePadding)
@@ -1469,6 +1474,9 @@ func (r *tableCellsRenderer) updateCells(toDraw TableCellID, visible, wasVisible
 }
 
 func (r *tableCellsRenderer) moveIndicators() {
+	if s := r.cells.t.content.Size(); s.Width <= 0 || s.Height <= 0 {
+		return // nothing is visible until the table has a size
+	}
 	rows, cols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		rows, cols = r.cells.t.Length()
@@ -1638,11 +1646,11 @@ func (r *tableCellsRenderer) moveMarker(marker fyne.CanvasObject, row, col int, 
 	} else {
 		left := x1
 		if col >= stickCols { // clip X
-			left = fyne.Max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
+			left = max(r.cells.t.stuckXOff+r.cells.t.stuckWidth, x1)
 		}
 		top := y1
 		if row >= stickRows { // clip Y
-			top = fyne.Max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
+			top = max(r.cells.t.stuckYOff+r.cells.t.stuckHeight, y1)
 		}
 		marker.Move(fyne.NewPos(left, top))
 		marker.Resize(fyne.NewSize(x2-left, y2-top))

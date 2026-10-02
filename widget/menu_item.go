@@ -41,6 +41,7 @@ func (i *menuItem) Child() *Menu {
 		child := NewMenu(i.Item.ChildMenu)
 		child.Hide()
 		child.OnDismiss = i.parent.Dismiss
+		child.isSubmenu = true
 		i.child = child
 	}
 	return i.child

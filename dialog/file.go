@@ -26,6 +26,7 @@ import (
 // Since: 2.5
 type ViewLayout int
 
+// Known values for [ViewLayout].
 const (
 	defaultView ViewLayout = iota
 	ListView

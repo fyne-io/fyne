@@ -68,10 +68,12 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
 
       - name: Update coverage
+        env:
+          MIN_TEST_COVERAGE: 60
         run: |
           set -e
           coverage=`go tool cover -func coverage.out | grep total | tr -s '\t' | cut -f 3 | grep -o '[^%]*'`
-          if (( $(echo "$coverage < 60" | bc) )); then echo "Test coverage lowered"; exit 1; fi
+          if (( $(echo "$coverage < $MIN_TEST_COVERAGE" | bc) )); then echo "Test coverage lowered to $coverage (min: $MIN_TEST_COVERAGE)"; exit 1; fi
         if: ${{ runner.os == 'Linux' && matrix.go-version == 'stable' }}
 
       - name: Update PR Coverage

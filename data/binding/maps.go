@@ -382,7 +382,7 @@ func (b *boundReflect[T]) Set(val T) error {
 	return b.set(val)
 }
 
-func (b *boundReflect[T]) get() (any, error) {
+func (b *boundReflect[T]) get() (any, error) { //revive:disable-line:confusing-naming - This implements reflectUntyped.
 	if !b.val.CanInterface() {
 		return nil, errors.New("unable to get value from data binding")
 	}
@@ -390,7 +390,7 @@ func (b *boundReflect[T]) get() (any, error) {
 	return b.val.Interface(), nil
 }
 
-func (b *boundReflect[T]) set(val any) error {
+func (b *boundReflect[T]) set(val any) error { //revive:disable-line:confusing-naming - This implements reflectUntyped.
 	if !b.val.CanSet() {
 		return errors.New("unable to set value in data binding")
 	}

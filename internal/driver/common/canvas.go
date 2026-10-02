@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/app"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/painter/gl"
@@ -281,6 +282,12 @@ func (c *Canvas) Painter() gl.Painter {
 // Refresh refreshes a canvas object.
 func (c *Canvas) Refresh(obj fyne.CanvasObject) {
 	c.refreshQueue.In(obj)
+	// EnsureMain's own check, done here because handing it the c.SetDirty
+	// method value allocates, and this runs for every refreshed object.
+	if build.MigratedToFyneDo() || async.IsMainGoroutine() {
+		c.SetDirty()
+		return
+	}
 	async.EnsureMain(c.SetDirty)
 }
 

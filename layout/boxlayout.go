@@ -120,7 +120,7 @@ func (v vBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 
 		childMin := child.MinSize()
-		minSize.Width = fyne.Max(childMin.Width, minSize.Width)
+		minSize.Width = max(childMin.Width, minSize.Width)
 		minSize.Height += childMin.Height
 		if addPadding {
 			minSize.Height += padding
@@ -206,7 +206,7 @@ func (g hBoxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 
 		childMin := child.MinSize()
-		minSize.Height = fyne.Max(childMin.Height, minSize.Height)
+		minSize.Height = max(childMin.Height, minSize.Height)
 		minSize.Width += childMin.Width
 		if addPadding {
 			minSize.Width += padding

@@ -192,6 +192,7 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
+	parsedFonts.Clear()
 }
 
 // DrawString draws a string into an image.
@@ -206,6 +207,7 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 		PixScale: scale,
 		Color:    c,
 	}
+	s = replaceNewlines(s)
 
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
@@ -228,6 +230,8 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
 	cb func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32),
 ) {
+	s = replaceNewlines(s)
+
 	advance := float32(0)
 	size := float32ToFixed266(fontSize)
 	walkString(f, s, size, style, &advance, scale, func(run shaping.Output, x, y float32) {
@@ -292,19 +296,32 @@ func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel f
 	return img, baseline
 }
 
+// loadMeasureFont returns a new face for the font, which callers may use
+// without locking. Faces are not safe for concurrent use, but the parsed Font
+// they share is, so the parse is reused.
 func loadMeasureFont(data fyne.Resource) *font.Face {
+	if ft, ok := parsedFonts.Load(data); ok {
+		return font.NewFace(ft)
+	}
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
-
+	parsedFonts.Store(data, loaded.Font)
 	return loaded
+}
+
+// replaceNewlines swaps newlines for the replacement character. The string
+// primitive does not support them yet and go-text otherwise cuts the run.
+func replaceNewlines(s string) string {
+	return strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 }
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+	s = replaceNewlines(s)
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32, float32) {})
 }
 
@@ -580,6 +597,11 @@ type cacheID struct {
 var (
 	fontCache       async.Map[cacheID, *FontCacheItem]
 	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+
+	// parsedFonts holds each font resource parsed once. Every style's face list
+	// includes the fallback and emoji fonts, and parsing the emoji font alone
+	// takes several MB, so parsing per style multiplied that.
+	parsedFonts async.Map[fyne.Resource, *font.Font]
 )
 
 type noopLogger struct{}

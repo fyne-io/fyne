@@ -156,9 +156,9 @@ func (r *splitContainerRenderer) MinSize() fyne.Size {
 		minSize := o.MinSize()
 		if r.split.Horizontal {
 			s.Width += minSize.Width
-			s.Height = fyne.Max(s.Height, minSize.Height)
+			s.Height = max(s.Height, minSize.Height)
 		} else {
-			s.Width = fyne.Max(s.Width, minSize.Width)
+			s.Width = max(s.Width, minSize.Width)
 			s.Height += minSize.Height
 		}
 	}

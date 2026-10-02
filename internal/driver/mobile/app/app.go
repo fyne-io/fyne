@@ -15,14 +15,6 @@ import (
 	_ "fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
-// Main is called by the main.main function to run the mobile application.
-//
-// It calls f on the App, in a separate goroutine, as some OS-specific
-// libraries require being on 'the main thread'.
-func Main(f func(App)) {
-	main(f)
-}
-
 // App is how a GUI mobile application interacts with the OS.
 type App interface {
 	// Events returns the events channel. It carries events from the system to

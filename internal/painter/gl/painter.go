@@ -58,6 +58,7 @@ type painter struct {
 	texScale         float32
 	textBatch        []float32                              // scratch used while building a batch
 	textCache        map[cache.FontCacheEntry]*textVertices // cached glyph geometry, keyed by content
+	vertices         []float32                              // updateBuffer's upload buffer, reused
 }
 
 // Declare conformity to Painter interface

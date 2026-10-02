@@ -68,10 +68,37 @@ func NewInnerWindow(title string, content fyne.CanvasObject) *InnerWindow {
 	return w
 }
 
+// Close closes the window by hiding it.
 func (w *InnerWindow) Close() {
 	w.Hide()
 }
 
+// Cursor returns the default cursor so that objects behind the window cannot set their own.
+//
+// Since: 2.9
+func (*InnerWindow) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
+// MouseIn catches mouse-in events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseIn(*desktop.MouseEvent) {
+}
+
+// MouseMoved catches mouse-moved events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseOut catches mouse-out events not handled by the window’s content. It does nothing.
+//
+// Since: 2.9
+func (*InnerWindow) MouseOut() {
+}
+
+// CreateRenderer implements the [fyne.Widget] interface.
 func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
 	th := w.Theme()
@@ -126,6 +153,8 @@ func (w *InnerWindow) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(th.Color(theme.ColorNameInnerWindowBorder, v))
 	bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
+	configureShadow(bg, false, th, v)
+
 	intWidget.ApplyShadowForLevel(&bg.Shadow, intWidget.PopUpLevel, th.Color(theme.ColorNameShadow, v))
 	contentBG := canvas.NewRectangle(th.Color(theme.ColorNameBackground, v))
 	corner := newDraggableCorner(w)
@@ -154,6 +183,8 @@ func (w *InnerWindow) SetActive(active bool) {
 	w.Refresh()
 }
 
+// SetContent replaces the first [fyne.CanvasObject] of thw window’s content with the specified one.
+// The window must have a non-empty content.
 func (w *InnerWindow) SetContent(obj fyne.CanvasObject) {
 	w.Content.Objects[0] = obj
 
@@ -168,6 +199,7 @@ func (w *InnerWindow) SetMaximized(maximized bool) {
 	w.Refresh()
 }
 
+// SetPadded allows applications to specify whether the window should have inner padding.
 func (w *InnerWindow) SetPadded(pad bool) {
 	if pad {
 		w.Content.Layout = layout.NewPaddedLayout()
@@ -177,6 +209,7 @@ func (w *InnerWindow) SetPadded(pad bool) {
 	w.Content.Refresh()
 }
 
+// SetTitle updates the current title of the window.
 func (w *InnerWindow) SetTitle(title string) {
 	w.Title = title
 	w.Refresh()
@@ -236,7 +269,7 @@ func (i *innerWindowRenderer) MinSize() fyne.Size {
 	contentMin := i.win.Content.MinSize()
 	barHeight := th.Size(theme.SizeNameWindowTitleBarHeight)
 
-	innerWidth := fyne.Max(i.bar.MinSize().Width, contentMin.Width)
+	innerWidth := max(i.bar.MinSize().Width, contentMin.Width)
 
 	return fyne.NewSize(innerWidth+pad*2, contentMin.Height+pad+barHeight)
 }
@@ -254,6 +287,7 @@ func (i *innerWindowRenderer) Refresh() {
 	}
 	i.bg.CornerRadius = th.Size(theme.SizeNameInnerWindowRadius)
 	i.bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	configureShadow(i.bg, !i.win.inactive, th, v)
 	i.bg.Refresh()
 	i.contentBG.FillColor = th.Color(theme.ColorNameBackground, v)
 	i.contentBG.Refresh()
@@ -478,5 +512,19 @@ func (t *titleBarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	titleMin := t.title.MinSize() // can truncate
 
 	return fyne.NewSize(buttonMin.Width+iconMin.Width+titleMin.Width,
-		fyne.Max(fyne.Max(buttonMin.Height, iconMin.Height), titleMin.Height))
+		max(buttonMin.Height, iconMin.Height, titleMin.Height))
+}
+
+func configureShadow(bg *canvas.Rectangle, active bool, th fyne.Theme, v fyne.ThemeVariant) {
+	var radius float32
+	if active {
+		radius = th.Size(theme.SizeNameWindowShadowActiveRadius)
+	} else {
+		radius = th.Size(theme.SizeNameWindowShadowRadius)
+	}
+
+	bg.Shadow.Color = th.Color(theme.ColorNameShadow, v)
+	bg.Shadow.Offset = fyne.NewPos(radius/8, radius/4)
+	bg.Shadow.Spread = radius / 2
+	bg.Shadow.BlurRadius = radius
 }

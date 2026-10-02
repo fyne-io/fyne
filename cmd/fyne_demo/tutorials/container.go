@@ -125,11 +125,14 @@ func makeInnerWindowTab(_ fyne.Window) fyne.CanvasObject {
 	win1.OnMinimized = func() {
 		log.Println("Should minimize here")
 	}
+	win1.Move(fyne.NewPos(50, 50))
 
 	win2 := container.NewInnerWindow("Inner2", widget.NewLabel("Win 2"))
+	win2.Resize(fyne.NewSize(100, 35))
+	win2.Move(fyne.NewPos(10, 10))
 
 	multi := container.NewMultipleWindows()
-	multi.Windows = []*container.InnerWindow{win1, win2}
+	multi.Windows = []*container.InnerWindow{win2, win1}
 	return multi
 }
 
