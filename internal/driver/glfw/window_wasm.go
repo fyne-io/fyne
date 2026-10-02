@@ -475,7 +475,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	keyAction := convertAction(action)
 	keyASCII := convertASCII(key)
 
-	w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
+	runOnMain(func() {
+		w.processKeyPressed(keyName, keyASCII, scancode, keyAction, keyDesktopModifier)
+	})
 }
 
 func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
@@ -500,11 +502,15 @@ func desktopModifier(mods glfw.ModifierKey) fyne.KeyModifier {
 //
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
 func (w *window) charInput(viewport *glfw.Window, char rune) {
-	w.processCharInput(char)
+	runOnMain(func() {
+		w.processCharInput(char)
+	})
 }
 
 func (w *window) focused(_ *glfw.Window, focused bool) {
-	w.processFocused(focused)
+	runOnMain(func() {
+		w.processFocused(focused)
+	})
 }
 
 func (w *window) DetachCurrentContext() {
