@@ -74,7 +74,7 @@ func (*themedApp) Preferences() fyne.Preferences {
 	return nil
 }
 
-func (*themedApp) SecretPreferences(func() string) (fyne.Preferences, error) {
+func (*themedApp) SecretPreferences(func() []byte) (fyne.Preferences, error) {
 	return nil, nil
 }
 

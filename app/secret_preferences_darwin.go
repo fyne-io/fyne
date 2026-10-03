@@ -26,7 +26,7 @@ const keychainAccount = "preferences"
 // Apps running from a bundle (all iOS apps, and packaged macOS apps) use the Keychain.
 // Unbundled binaries, such as `go run` during development, fall back to the password encrypted file store
 // because the Keychain ties access to the code signature and would prompt on every rebuild.
-func (a *fyneApp) newSecretStore(password func() string) secretStore {
+func (a *fyneApp) newSecretStore(password func() []byte) secretStore {
 	if !bool(C.isBundled()) {
 		return a.newEncryptedSecretStore(password)
 	}

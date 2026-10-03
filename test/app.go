@@ -135,7 +135,7 @@ func (a *app) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
-func (a *app) SecretPreferences(func() string) (fyne.Preferences, error) {
+func (a *app) SecretPreferences(func() []byte) (fyne.Preferences, error) {
 	return a.secretPrefs, nil
 }
 

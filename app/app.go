@@ -119,14 +119,14 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
-func (a *fyneApp) SecretPreferences(password func() string) (fyne.Preferences, error) {
+func (a *fyneApp) SecretPreferences(password func() []byte) (fyne.Preferences, error) {
 	if a.missingID {
 		fyne.LogError("SecretPreferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
 	}
 	return a.secretPreferencesFrom(a.newSecretStore, password)
 }
 
-func (a *fyneApp) secretPreferencesFrom(newStore func(func() string) secretStore, password func() string) (fyne.Preferences, error) {
+func (a *fyneApp) secretPreferencesFrom(newStore func(func() []byte) secretStore, password func() []byte) (fyne.Preferences, error) {
 	a.secretPrefsLock.Lock()
 	defer a.secretPrefsLock.Unlock()
 	if a.secretPrefs == nil { // created on first use as the fallback store needs the password function

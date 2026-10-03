@@ -92,7 +92,7 @@ type App interface {
 	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [NewWithID].
 	//
 	// Since: 2.9
-	SecretPreferences(password func() string) (Preferences, error)
+	SecretPreferences(password func() []byte) (Preferences, error)
 
 	// Storage returns a storage handler specific to this application.
 	Storage() Storage

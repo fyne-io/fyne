@@ -31,7 +31,7 @@ func (m *memorySecretStore) save(data []byte) error {
 
 // newTestSecretApp returns an app whose secret store encrypts into the given store using the password function.
 // The error is that of loading any existing data from the store.
-func newTestSecretApp(id string, store secretStore, password func() string) (*fyneApp, error) {
+func newTestSecretApp(id string, store secretStore, password func() []byte) (*fyneApp, error) {
 	a := &fyneApp{uniqueID: id}
 	a.prefs = newPreferences(&fyneApp{}) // in-memory only, no ID so nothing is written to disk
 	a.secretPrefs = &secretPreferences{
@@ -41,9 +41,9 @@ func newTestSecretApp(id string, store secretStore, password func() string) (*fy
 	return a, a.secretPrefs.load()
 }
 
-func fixedPassword(password string) func() string {
-	return func() string {
-		return password
+func fixedPassword(password string) func() []byte {
+	return func() []byte {
+		return []byte(password)
 	}
 }
 
@@ -98,13 +98,13 @@ func TestSecretPreferences_DecryptRejectsTamperingAndWrongKey(t *testing.T) {
 
 func TestSecretPreferences_DeriveKey(t *testing.T) {
 	salt := []byte("0123456789abcdef")
-	key := deriveSecretKey("password", salt)
+	key := deriveSecretKey([]byte("password"), salt)
 	assert.Len(t, key, secretKeySize)
 	// PBKDF2-HMAC-SHA256, 600000 iterations, verified against Go's crypto/pbkdf2
 	assert.Equal(t, "996d7c90f74a4a169cf7adef42b06848f7d1bac3e568d1cc94d4f79be1ee0263", hex.EncodeToString(key))
 
-	assert.NotEqual(t, key, deriveSecretKey("other", salt))
-	assert.NotEqual(t, key, deriveSecretKey("password", []byte("fedcba9876543210")))
+	assert.NotEqual(t, key, deriveSecretKey([]byte("other"), salt))
+	assert.NotEqual(t, key, deriveSecretKey([]byte("password"), []byte("fedcba9876543210")))
 }
 
 func TestSecretPreferences_SaveAndLoad(t *testing.T) {
@@ -176,9 +176,9 @@ func TestSecretPreferences_PasswordRequestedOnce(t *testing.T) {
 	test.NewTempApp(t)
 	blob := &memorySecretStore{}
 	calls := 0
-	password := func() string {
+	password := func() []byte {
 		calls++
-		return "pass"
+		return []byte("pass")
 	}
 
 	a, err := newTestSecretApp("io.fyne.test.secret", blob, password)
@@ -199,7 +199,7 @@ func TestSecretPreferences_PasswordRequestedOnce(t *testing.T) {
 
 func TestSecretPreferences_MissingPasswordIsAnError(t *testing.T) {
 	test.NewTempApp(t)
-	for name, password := range map[string]func() string{"nil": nil, "empty": fixedPassword("")} {
+	for name, password := range map[string]func() []byte{"nil": nil, "empty": fixedPassword("")} {
 		t.Run(name, func(t *testing.T) {
 			blob := &memorySecretStore{}
 			_, err := newTestSecretApp("io.fyne.test.secret", blob, password)
@@ -236,7 +236,7 @@ func TestFyneApp_SecretPreferences(t *testing.T) {
 	a := &fyneApp{uniqueID: "io.fyne.test.secret"}
 	a.prefs = newPreferences(&fyneApp{})
 
-	newStore := func(password func() string) secretStore {
+	newStore := func(password func() []byte) secretStore {
 		return &encryptedStore{storage: &memorySecretStore{}, password: password}
 	}
 
@@ -261,7 +261,7 @@ func TestFyneApp_SecretPreferences_ErrorLeavesDataAndCanRetry(t *testing.T) {
 
 	b := &fyneApp{uniqueID: "io.fyne.test.secret"}
 	b.prefs = newPreferences(&fyneApp{})
-	newStore := func(password func() string) secretStore {
+	newStore := func(password func() []byte) secretStore {
 		return &encryptedStore{storage: blob, password: password}
 	}
 

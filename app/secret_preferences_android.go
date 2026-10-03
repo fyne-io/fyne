@@ -29,7 +29,7 @@ var errKeystoreUnavailable = errors.New("android keystore is not available")
 // the device supports it) and the ciphertext is kept in the app's private files directory.
 // If the Java bridge is missing, for example an app packaged with an older toolchain,
 // we fall back to the encrypted file store keyed from the password that the app provides.
-func (a *fyneApp) newSecretStore(password func() string) secretStore {
+func (a *fyneApp) newSecretStore(password func() []byte) secretStore {
 	return &keystoreStore{storage: a.newPlainSecretStore(), fallback: func() secretStore {
 		return a.newEncryptedSecretStore(password)
 	}}

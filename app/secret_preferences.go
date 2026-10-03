@@ -43,7 +43,7 @@ var _ fyne.Preferences = (*secretPreferences)(nil)
 
 // newSecretPreferences returns the secret preferences loaded from the app's secret store.
 // An error is returned if existing data could not be loaded, in which case nothing must be saved over it.
-func newSecretPreferences(a *fyneApp, newStore func(func() string) secretStore, password func() string) (*secretPreferences, error) {
+func newSecretPreferences(a *fyneApp, newStore func(func() []byte) secretStore, password func() []byte) (*secretPreferences, error) {
 	p := &secretPreferences{app: a, InMemoryPreferences: internal.NewInMemoryPreferences()}
 	if a.uniqueID == "" && a.Metadata().ID == "" {
 		return p, nil
@@ -157,7 +157,7 @@ func (p *secretPreferences) resetSavedRecently() {
 
 // newEncryptedSecretStore is the portable secure store - AES-256-GCM over the platform's plain store,
 // keyed from the password returned by the passed function.
-func (a *fyneApp) newEncryptedSecretStore(password func() string) secretStore {
+func (a *fyneApp) newEncryptedSecretStore(password func() []byte) secretStore {
 	return &encryptedStore{storage: a.newPlainSecretStore(), password: password}
 }
 
@@ -179,7 +179,7 @@ var (
 // The stored layout is: version byte, key salt, GCM nonce, ciphertext with authentication tag.
 type encryptedStore struct {
 	storage  secretStore
-	password func() string
+	password func() []byte
 
 	lock      sync.Mutex
 	salt, key []byte
@@ -249,18 +249,20 @@ func (e *encryptedStore) keyForSalt(salt []byte) ([]byte, error) {
 		return nil, errSecretPassword
 	}
 	password := e.password()
-	if password == "" {
+	if len(password) == 0 {
 		return nil, errSecretPassword
 	}
 
 	e.salt = append([]byte{}, salt...)
 	e.key = deriveSecretKey(password, e.salt)
+	clear(password)
 	return e.key, nil
 }
 
 // deriveSecretKey is PBKDF2 (RFC 8018) with HMAC-SHA256, producing a single block which is the size of our key.
-func deriveSecretKey(password string, salt []byte) []byte {
-	prf := hmac.New(sha256.New, []byte(password))
+// We can move this to stdlib once upgraded to Go 1.24
+func deriveSecretKey(password []byte, salt []byte) []byte {
+	prf := hmac.New(sha256.New, password)
 	prf.Write(salt)
 	prf.Write([]byte{0, 0, 0, 1}) // block index
 	u := prf.Sum(nil)
