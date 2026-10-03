@@ -221,6 +221,57 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	})
 }
 
+// PlacedGlyph is one shaped glyph together with the position DrawString would
+// have rasterised it at, in destination pixels.
+type PlacedGlyph struct {
+	Glyph shaping.Glyph
+	Face  *font.Face
+	// X is the pen position, Y the baseline shared by every glyph in the string.
+	X, Y float32
+}
+
+// WalkGlyphs shapes s exactly as DrawString does and reports each glyph with the
+// position it would be drawn at, so a caller can rasterise and cache glyphs
+// individually instead of taking a bitmap of the whole run.
+//
+// Glyph ID 0 is reported as-is. DrawString substitutes the replacement character
+// from another face for those, which this deliberately does not do: a caller that
+// cannot draw a notdef should fall back to DrawString for the whole string rather
+// than have this grow a second shaping path.
+func WalkGlyphs(f shaping.Fontmap, s string, fontSize, scale float32, style fyne.TextStyle, cb func(PlacedGlyph)) {
+	advance := float32(0)
+	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
+		// The truncation of x and the ceiling of y mirror DrawStringOffset and
+		// DrawShapedRunAt; glyphs have to land on the same pixels either way or
+		// the two paths would disagree about where a string sits.
+		penX := float32(int(x))
+		baseline := float32(math.Ceil(float64(y)))
+		for _, g := range run.Glyphs {
+			cb(PlacedGlyph{
+				Glyph: g,
+				Face:  run.Face,
+				X:     penX + fixed266ToFloat32(g.XOffset)*scale,
+				Y:     baseline - fixed266ToFloat32(g.YOffset)*scale,
+			})
+			penX += fixed266ToFloat32(g.Advance) * scale
+		}
+	})
+}
+
+// RasteriseGlyph draws a single glyph into dst at the given pen position and
+// baseline, using the same renderer settings as DrawString. subX shifts the
+// glyph a fraction of a pixel right of x, which is how a cached bitmap carries
+// the sub-pixel part of a pen position that its quad cannot.
+func RasteriseGlyph(dst draw.Image, g PlacedGlyph, c color.Color, fontSize, scale float32, x, y int, subX float32) {
+	r := render.Renderer{FontSize: fontSize, PixScale: scale, Color: c}
+	run := shaping.Output{Face: g.Face, Glyphs: []shaping.Glyph{g.Glyph}}
+	// The shaped XOffset/YOffset are already folded into the caller's x/y, so
+	// they are replaced rather than applied a second time. DrawShapedRunAt scales
+	// XOffset by the pixel scale, hence the division.
+	run.Glyphs[0].XOffset, run.Glyphs[0].YOffset = float32ToFixed266(subX/scale), 0
+	r.DrawShapedRunAt(run, dst, x, y)
+}
+
 // loadMeasureFont returns a new face for the font, which callers may use
 // without locking. Faces are not safe for concurrent use, but the parsed Font
 // they share is, so the parse is reused.

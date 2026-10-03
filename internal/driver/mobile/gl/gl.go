@@ -507,6 +507,28 @@ func (ctx *context) TexImage2D(target Enum, level int, internalFormat int, width
 	})
 }
 
+func (ctx *context) TexSubImage2D(target Enum, level int, x, y, width, height int, format Enum, ty Enum, data []byte) {
+	if len(data) == 0 {
+		return
+	}
+	ctx.enqueue(call{
+		args: fnargs{
+			fn: glfnTexSubImage2D,
+			a0: target.c(),
+			a1: uintptr(level),
+			a2: uintptr(x),
+			a3: uintptr(y),
+			a4: uintptr(width),
+			a5: uintptr(height),
+			a6: format.c(),
+			a7: ty.c(),
+		},
+		parg: unsafe.Pointer(&data[0]), //gosec:disable G103
+		// Blocking, because the worker reads data after this returns otherwise.
+		blocking: true,
+	})
+}
+
 func (ctx *context) TexParameteri(target, pname Enum, param int) {
 	ctx.enqueue(call{
 		args: fnargs{
