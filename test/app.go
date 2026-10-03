@@ -135,8 +135,8 @@ func (a *app) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
-func (a *app) SecretPreferences() fyne.Preferences {
-	return a.secretPrefs
+func (a *app) SecretPreferences(func() string) (fyne.Preferences, error) {
+	return a.secretPrefs, nil
 }
 
 func (a *app) Storage() fyne.Storage {

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"path/filepath"
 	"testing"
 
@@ -29,13 +29,22 @@ func (m *memorySecretStore) save(data []byte) error {
 	return nil
 }
 
-// newTestSecretApp returns an app with in-memory preferences whose secret store encrypts into the given store.
-func newTestSecretApp(id string, store secretStore) *fyneApp {
+// newTestSecretApp returns an app whose secret store encrypts into the given store using the password function.
+// The error is that of loading any existing data from the store.
+func newTestSecretApp(id string, store secretStore, password func() string) (*fyneApp, error) {
 	a := &fyneApp{uniqueID: id}
 	a.prefs = newPreferences(&fyneApp{}) // in-memory only, no ID so nothing is written to disk
-	a.secretPrefs = newSecretPreferences(a)
-	a.secretPrefs.store = &encryptedStore{storage: store, key: a.secretKey}
-	return a
+	a.secretPrefs = &secretPreferences{
+		app: a, InMemoryPreferences: internal.NewInMemoryPreferences(),
+		store: &encryptedStore{storage: store, password: password},
+	}
+	return a, a.secretPrefs.load()
+}
+
+func fixedPassword(password string) func() string {
+	return func() string {
+		return password
+	}
 }
 
 func TestSecretPreferences_EncryptRoundTrip(t *testing.T) {
@@ -43,29 +52,36 @@ func TestSecretPreferences_EncryptRoundTrip(t *testing.T) {
 	for i := range key {
 		key[i] = byte(i)
 	}
+	salt := make([]byte, secretSaltSize)
 
-	sealed, err := encryptSecret(key, []byte(`{"token":"abc"}`))
+	sealed, err := encryptSecret(key, salt, []byte(`{"token":"abc"}`))
 	require.NoError(t, err)
 	assert.NotContains(t, string(sealed), "token")
 	assert.Equal(t, byte(secretFormatVersion), sealed[0])
+	assert.Equal(t, salt, sealed[1:1+secretSaltSize])
 
 	plain, err := decryptSecret(key, sealed)
 	require.NoError(t, err)
 	assert.Equal(t, `{"token":"abc"}`, string(plain))
 
 	// each save uses a fresh nonce so identical content does not produce identical output
-	again, err := encryptSecret(key, []byte(`{"token":"abc"}`))
+	again, err := encryptSecret(key, salt, []byte(`{"token":"abc"}`))
 	require.NoError(t, err)
 	assert.NotEqual(t, sealed, again)
 }
 
 func TestSecretPreferences_DecryptRejectsTamperingAndWrongKey(t *testing.T) {
 	key := make([]byte, secretKeySize)
-	sealed, err := encryptSecret(key, []byte("secret"))
+	sealed, err := encryptSecret(key, make([]byte, secretSaltSize), []byte("secret"))
 	require.NoError(t, err)
 
 	tampered := append([]byte{}, sealed...)
 	tampered[len(tampered)-1] ^= 0xff
+	_, err = decryptSecret(key, tampered)
+	assert.Error(t, err)
+
+	tampered = append([]byte{}, sealed...)
+	tampered[1] ^= 0xff // the salt is authenticated too
 	_, err = decryptSecret(key, tampered)
 	assert.Error(t, err)
 
@@ -80,12 +96,24 @@ func TestSecretPreferences_DecryptRejectsTamperingAndWrongKey(t *testing.T) {
 	assert.ErrorIs(t, err, errSecretFormat)
 }
 
+func TestSecretPreferences_DeriveKey(t *testing.T) {
+	salt := []byte("0123456789abcdef")
+	key := deriveSecretKey("password", salt)
+	assert.Len(t, key, secretKeySize)
+	// PBKDF2-HMAC-SHA256, 600000 iterations, verified against Go's crypto/pbkdf2
+	assert.Equal(t, "996d7c90f74a4a169cf7adef42b06848f7d1bac3e568d1cc94d4f79be1ee0263", hex.EncodeToString(key))
+
+	assert.NotEqual(t, key, deriveSecretKey("other", salt))
+	assert.NotEqual(t, key, deriveSecretKey("password", []byte("fedcba9876543210")))
+}
+
 func TestSecretPreferences_SaveAndLoad(t *testing.T) {
 	test.NewTempApp(t)
 	blob := &memorySecretStore{}
-	a := newTestSecretApp("io.fyne.test.secret", blob)
+	a, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
 
-	p := a.SecretPreferences()
+	p := a.secretPrefs
 	p.SetString("keyString", "value")
 	p.SetStringList("keyStringList", []string{"1", "2", "3"})
 	p.SetInt("keyInt", 4)
@@ -99,16 +127,12 @@ func TestSecretPreferences_SaveAndLoad(t *testing.T) {
 	require.NotNil(t, blob.data)
 	assert.NotContains(t, string(blob.data), "value", "secret values must not be stored in plain text")
 	assert.NotContains(t, string(blob.data), "keyString")
+	assert.Equal(t, "", a.prefs.String("fyne.secret.key"), "no key material may be kept in the app preferences")
 
-	// a fresh app using the same preferences (and so the same key) and blob reads the values back
-	b := &fyneApp{uniqueID: "io.fyne.test.secret", prefs: a.prefs}
-	b.secretPrefs = &secretPreferences{
-		app: b, InMemoryPreferences: internal.NewInMemoryPreferences(),
-		store: &encryptedStore{storage: blob, key: b.secretKey},
-	}
-	b.secretPrefs.load()
-
-	loaded := b.SecretPreferences()
+	// a fresh app given the same password and blob reads the values back
+	b, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
+	loaded := b.secretPrefs
 	assert.Equal(t, "value", loaded.String("keyString"))
 	assert.Equal(t, []string{"1", "2", "3"}, loaded.StringList("keyStringList"))
 	assert.Equal(t, 4, loaded.Int("keyInt"))
@@ -122,73 +146,70 @@ func TestSecretPreferences_SaveAndLoad(t *testing.T) {
 func TestSecretPreferences_Remove(t *testing.T) {
 	test.NewTempApp(t)
 	blob := &memorySecretStore{}
-	a := newTestSecretApp("io.fyne.test.secret", blob)
+	a, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
 
-	a.SecretPreferences().SetString("keep", "yes")
-	a.SecretPreferences().SetString("drop", "no")
-	a.SecretPreferences().RemoveValue("drop")
+	a.secretPrefs.SetString("keep", "yes")
+	a.secretPrefs.SetString("drop", "no")
+	a.secretPrefs.RemoveValue("drop")
 	a.secretPrefs.forceImmediateSave()
 
-	b := newTestSecretApp("io.fyne.test.secret", blob)
-	b.prefs = a.prefs
-	b.secretPrefs.store = &encryptedStore{storage: blob, key: b.secretKey}
-	b.secretPrefs.load()
-	assert.Equal(t, "yes", b.SecretPreferences().String("keep"))
-	assert.Equal(t, "missing", b.SecretPreferences().StringWithFallback("drop", "missing"))
+	b, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
+	assert.Equal(t, "yes", b.secretPrefs.String("keep"))
+	assert.Equal(t, "missing", b.secretPrefs.StringWithFallback("drop", "missing"))
 }
 
-func TestSecretPreferences_WrongKeyLoadsEmpty(t *testing.T) {
+func TestSecretPreferences_WrongPasswordIsAnError(t *testing.T) {
 	test.NewTempApp(t)
 	blob := &memorySecretStore{}
-	a := newTestSecretApp("io.fyne.test.secret", blob)
-	a.SecretPreferences().SetString("token", "abc")
+	a, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
+	a.secretPrefs.SetString("token", "abc")
 	a.secretPrefs.forceImmediateSave()
 
-	// an app whose preferences hold a different key cannot read the data, but must not crash
-	b := newTestSecretApp("io.fyne.test.secret", blob)
-	b.secretPrefs.load()
-	assert.Equal(t, "", b.SecretPreferences().String("token"))
+	_, err = newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("wrong"))
+	assert.ErrorIs(t, err, errSecretDecrypt)
 }
 
-func TestSecretPreferences_KeyStoredInPreferences(t *testing.T) {
-	a := newTestSecretApp("io.fyne.test.secret", &memorySecretStore{})
-	assert.Equal(t, "", a.prefs.String(secretKeyPreference), "no key should exist before first use")
+func TestSecretPreferences_PasswordRequestedOnce(t *testing.T) {
+	test.NewTempApp(t)
+	blob := &memorySecretStore{}
+	calls := 0
+	password := func() string {
+		calls++
+		return "pass"
+	}
 
-	key, err := a.secretKey()
+	a, err := newTestSecretApp("io.fyne.test.secret", blob, password)
 	require.NoError(t, err)
-	assert.Len(t, key, secretKeySize)
+	assert.Equal(t, 1, calls, "the password is requested on load, even with nothing stored yet")
 
-	stored := a.prefs.String(secretKeyPreference)
-	decoded, err := base64.StdEncoding.DecodeString(stored)
-	require.NoError(t, err)
-	assert.Equal(t, key, decoded, "the key is kept in the app preferences")
+	a.secretPrefs.SetString("token", "abc")
+	a.secretPrefs.forceImmediateSave()
+	a.secretPrefs.forceImmediateSave()
+	assert.Equal(t, 1, calls)
 
-	same, err := a.secretKey()
+	b, err := newTestSecretApp("io.fyne.test.secret", blob, password)
 	require.NoError(t, err)
-	assert.Equal(t, key, same)
-
-	// if the preferences are replaced (e.g. by a cloud provider) the key in use is written to the new store
-	a.prefs = newPreferences(&fyneApp{})
-	same, err = a.secretKey()
-	require.NoError(t, err)
-	assert.Equal(t, key, same)
-	assert.Equal(t, stored, a.prefs.String(secretKeyPreference))
-
-	// a new app loading the same preferences derives the same key
-	b := &fyneApp{uniqueID: "io.fyne.test.secret", prefs: a.prefs}
-	loaded, err := b.secretKey()
-	require.NoError(t, err)
-	assert.Equal(t, key, loaded)
+	b.secretPrefs.forceImmediateSave()
+	assert.Equal(t, 2, calls)
+	assert.Equal(t, "abc", b.secretPrefs.String("token"))
 }
 
-func TestSecretPreferences_InvalidStoredKeyIsReplaced(t *testing.T) {
-	a := newTestSecretApp("io.fyne.test.secret", &memorySecretStore{})
-	a.prefs.SetString(secretKeyPreference, "not base64!")
+func TestSecretPreferences_MissingPasswordIsAnError(t *testing.T) {
+	test.NewTempApp(t)
+	for name, password := range map[string]func() string{"nil": nil, "empty": fixedPassword("")} {
+		t.Run(name, func(t *testing.T) {
+			blob := &memorySecretStore{}
+			_, err := newTestSecretApp("io.fyne.test.secret", blob, password)
+			assert.ErrorIs(t, err, errSecretPassword)
 
-	key, err := a.secretKey()
-	require.NoError(t, err)
-	assert.Len(t, key, secretKeySize)
-	assert.NotEqual(t, "not base64!", a.prefs.String(secretKeyPreference))
+			store := &encryptedStore{storage: blob, password: password}
+			assert.ErrorIs(t, store.save([]byte("secret")), errSecretPassword)
+			assert.Nil(t, blob.data)
+		})
+	}
 }
 
 func TestFileSecretStore(t *testing.T) {
@@ -212,7 +233,44 @@ func TestFileSecretStore(t *testing.T) {
 
 func TestFyneApp_SecretPreferences(t *testing.T) {
 	test.NewTempApp(t) // restore the test app when done, so later tests are not left with a real app
-	a := NewWithID("io.fyne.test")
-	assert.NotNil(t, a.SecretPreferences())
-	assert.NotSame(t, a.Preferences(), a.SecretPreferences())
+	a := &fyneApp{uniqueID: "io.fyne.test.secret"}
+	a.prefs = newPreferences(&fyneApp{})
+
+	newStore := func(password func() string) secretStore {
+		return &encryptedStore{storage: &memorySecretStore{}, password: password}
+	}
+
+	secret, err := a.secretPreferencesFrom(newStore, fixedPassword("pass"))
+	require.NoError(t, err)
+	assert.NotNil(t, secret)
+	assert.NotSame(t, a.Preferences(), secret)
+
+	again, err := a.SecretPreferences(nil)
+	require.NoError(t, err)
+	assert.Same(t, secret, again, "later calls return the same store")
+}
+
+func TestFyneApp_SecretPreferences_ErrorLeavesDataAndCanRetry(t *testing.T) {
+	test.NewTempApp(t)
+	blob := &memorySecretStore{}
+	a, err := newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("pass"))
+	require.NoError(t, err)
+	a.secretPrefs.SetString("token", "abc")
+	a.secretPrefs.forceImmediateSave()
+	saved := append([]byte{}, blob.data...)
+
+	b := &fyneApp{uniqueID: "io.fyne.test.secret"}
+	b.prefs = newPreferences(&fyneApp{})
+	newStore := func(password func() string) secretStore {
+		return &encryptedStore{storage: blob, password: password}
+	}
+
+	secret, err := b.secretPreferencesFrom(newStore, fixedPassword("wrong"))
+	assert.ErrorIs(t, err, errSecretDecrypt)
+	assert.Nil(t, secret)
+	assert.Equal(t, saved, blob.data, "a failed load must not change the stored data")
+
+	secret, err = b.secretPreferencesFrom(newStore, fixedPassword("pass"))
+	require.NoError(t, err)
+	assert.Equal(t, "abc", secret.String("token"))
 }

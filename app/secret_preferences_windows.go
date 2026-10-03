@@ -33,14 +33,13 @@ func newDataBlob(data []byte) dataBlob {
 
 // newSecretStore returns the store used for secret preferences.
 // On Windows the data is protected with DPAPI, which ties it to the current Windows user account,
-// with the app's random key used as additional entropy.
-func (a *fyneApp) newSecretStore() secretStore {
-	return &dpapiStore{storage: a.newPlainSecretStore(), entropy: a.secretKey}
+// so the password function is not needed.
+func (a *fyneApp) newSecretStore(func() string) secretStore {
+	return &dpapiStore{storage: a.newPlainSecretStore()}
 }
 
 type dpapiStore struct {
 	storage secretStore
-	entropy func() ([]byte, error)
 }
 
 func (d *dpapiStore) load() ([]byte, error) {
@@ -48,19 +47,11 @@ func (d *dpapiStore) load() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	entropy, err := d.entropy()
-	if err != nil {
-		return nil, err
-	}
-	return dpapiCall(procCryptUnprotectData, data, entropy)
+	return dpapiCall(procCryptUnprotectData, data)
 }
 
 func (d *dpapiStore) save(data []byte) error {
-	entropy, err := d.entropy()
-	if err != nil {
-		return err
-	}
-	protected, err := dpapiCall(procCryptProtectData, data, entropy)
+	protected, err := dpapiCall(procCryptProtectData, data)
 	if err != nil {
 		return err
 	}
@@ -69,18 +60,17 @@ func (d *dpapiStore) save(data []byte) error {
 
 // dpapiCall runs CryptProtectData or CryptUnprotectData, which share a signature:
 // (DATA_BLOB *in, LPCWSTR desc, DATA_BLOB *entropy, void *reserved, PROMPTSTRUCT *prompt, DWORD flags, DATA_BLOB *out)
-func dpapiCall(proc *syscall.LazyProc, in, entropy []byte) ([]byte, error) {
+func dpapiCall(proc *syscall.LazyProc, in []byte) ([]byte, error) {
 	if len(in) == 0 {
 		return nil, errors.New("no data to protect")
 	}
 	inBlob := newDataBlob(in)
-	entropyBlob := newDataBlob(entropy)
 	var outBlob dataBlob
 
 	ret, _, err := proc.Call(
 		uintptr(unsafe.Pointer(&inBlob)),
 		0,
-		uintptr(unsafe.Pointer(&entropyBlob)),
+		0,
 		0,
 		0,
 		cryptProtectUIForbidden,

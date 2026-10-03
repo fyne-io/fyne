@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
-	"encoding/base64"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -14,9 +15,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 )
-
-// secretKeyPreference is the key used to keep the random encryption key in the app preferences.
-const secretKeyPreference = "fyne.secret.key" // #nosec G101 this is not a hard coded credential
 
 // secretStore persists the encoded secret preferences.
 // Implementations either hand the data to a secure operating system store, or protect it and
@@ -43,18 +41,19 @@ type secretPreferences struct {
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*secretPreferences)(nil)
 
-func newSecretPreferences(a *fyneApp) *secretPreferences {
+// newSecretPreferences returns the secret preferences loaded from the app's secret store.
+// An error is returned if existing data could not be loaded, in which case nothing must be saved over it.
+func newSecretPreferences(a *fyneApp, newStore func(func() string) secretStore, password func() string) (*secretPreferences, error) {
 	p := &secretPreferences{app: a, InMemoryPreferences: internal.NewInMemoryPreferences()}
 	if a.uniqueID == "" && a.Metadata().ID == "" {
-		return p
+		return p, nil
 	}
 
-	p.store = a.newSecretStore()
-	p.load()
+	p.store = newStore(password)
+	if err := p.load(); err != nil {
+		return nil, err
+	}
 	p.AddChangeListener(func() {
-		if p != a.secretPrefs {
-			return
-		}
 		p.prefLock.Lock()
 		shouldIgnoreChange := p.savedRecently
 		if p.savedRecently {
@@ -70,7 +69,7 @@ func newSecretPreferences(a *fyneApp) *secretPreferences {
 			fyne.LogError("Failed on saving secret preferences", err)
 		}
 	})
-	return p
+	return p, nil
 }
 
 // forceImmediateSave writes secret preferences to storage immediately, ignoring the debouncing
@@ -84,17 +83,18 @@ func (p *secretPreferences) forceImmediateSave() {
 	}
 }
 
-func (p *secretPreferences) load() {
+func (p *secretPreferences) load() error {
 	if p.store == nil {
-		return
+		return nil
 	}
 	data, err := p.store.load()
-	if err == nil {
-		err = p.loadFromData(data)
+	if err == errEmptyPreferencesStore {
+		return nil
 	}
-	if err != nil && err != errEmptyPreferencesStore {
-		fyne.LogError("Secret preferences load error:", err)
+	if err != nil {
+		return err
 	}
+	return p.loadFromData(data)
 }
 
 func (p *secretPreferences) loadFromData(data []byte) (err error) {
@@ -155,83 +155,129 @@ func (p *secretPreferences) resetSavedRecently() {
 	}()
 }
 
-// secretKey returns the random key material used by the encrypting stores.
-// It is generated on first use and kept in the app preferences so that it survives an app ID change.
-func (a *fyneApp) secretKey() ([]byte, error) {
-	a.secretKeyLock.Lock()
-	defer a.secretKeyLock.Unlock()
-
-	stored := a.prefs.String(secretKeyPreference)
-	if a.secretKeyCache != nil {
-		if stored == "" { // preferences were replaced (e.g. cloud provider), make sure the key follows
-			a.prefs.SetString(secretKeyPreference, base64.StdEncoding.EncodeToString(a.secretKeyCache))
-		}
-		return a.secretKeyCache, nil
-	}
-
-	if stored != "" {
-		key, err := base64.StdEncoding.DecodeString(stored)
-		if err == nil && len(key) == secretKeySize {
-			a.secretKeyCache = key
-			return key, nil
-		}
-		fyne.LogError("Stored secret preferences key is invalid, generating a new one", err)
-	}
-
-	key := make([]byte, secretKeySize)
-	if _, err := rand.Read(key); err != nil {
-		return nil, err
-	}
-	a.prefs.SetString(secretKeyPreference, base64.StdEncoding.EncodeToString(key))
-	a.secretKeyCache = key
-	return key, nil
-}
-
 // newEncryptedSecretStore is the portable secure store - AES-256-GCM over the platform's plain store,
-// keyed by the random key that lives in the app preferences.
-func (a *fyneApp) newEncryptedSecretStore() secretStore {
-	return &encryptedStore{storage: a.newPlainSecretStore(), key: a.secretKey}
+// keyed from the password returned by the passed function.
+func (a *fyneApp) newEncryptedSecretStore(password func() string) secretStore {
+	return &encryptedStore{storage: a.newPlainSecretStore(), password: password}
 }
 
 const (
 	secretKeySize       = 32 // AES-256
-	secretFormatVersion = 1
+	secretSaltSize      = 16
+	secretKeyIterations = 600000
+	secretFormatVersion = 2
 )
 
-var errSecretFormat = errors.New("secret preferences data is not in a recognised format")
+var (
+	errSecretFormat   = errors.New("secret preferences data is not in a recognised format")
+	errSecretPassword = errors.New("no password was provided to protect secret preferences")
+	errSecretDecrypt  = errors.New("secret preferences could not be decrypted, the password may be incorrect")
+)
 
 // encryptedStore encrypts data with AES-GCM before handing it to the storage store.
-// The stored layout is: version byte, GCM nonce, ciphertext with authentication tag.
+// The key is derived, using PBKDF2, from a password that the app provides when it is first needed.
+// The stored layout is: version byte, key salt, GCM nonce, ciphertext with authentication tag.
 type encryptedStore struct {
-	storage secretStore
-	key     func() ([]byte, error)
+	storage  secretStore
+	password func() string
+
+	lock      sync.Mutex
+	salt, key []byte
 }
 
 func (e *encryptedStore) load() ([]byte, error) {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
 	data, err := e.storage.load()
+	if err == errEmptyPreferencesStore { // prepare the key now so a missing password is reported on load
+		if keyErr := e.newKey(); keyErr != nil {
+			return nil, keyErr
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
-	key, err := e.key()
+	if len(data) < 1+secretSaltSize || data[0] != secretFormatVersion {
+		return nil, errSecretFormat
+	}
+
+	key, err := e.keyForSalt(data[1 : 1+secretSaltSize])
 	if err != nil {
 		return nil, err
 	}
-	return decryptSecret(key, data)
+	plain, err := decryptSecret(key, data)
+	if err != nil && err != errSecretFormat {
+		return nil, errSecretDecrypt
+	}
+	return plain, err
+}
+
+// newKey requests the password to derive a key for new data, which needs a new salt.
+func (e *encryptedStore) newKey() error {
+	salt := make([]byte, secretSaltSize)
+	if _, err := rand.Read(salt); err != nil {
+		return err
+	}
+	_, err := e.keyForSalt(salt)
+	return err
 }
 
 func (e *encryptedStore) save(data []byte) error {
-	key, err := e.key()
-	if err != nil {
-		return err
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
+	if e.key == nil { // nothing was loaded
+		if err := e.newKey(); err != nil {
+			return err
+		}
 	}
-	sealed, err := encryptSecret(key, data)
+	sealed, err := encryptSecret(e.key, e.salt, data)
 	if err != nil {
 		return err
 	}
 	return e.storage.save(sealed)
 }
 
-func encryptSecret(key, plain []byte) ([]byte, error) {
+// keyForSalt returns the key for the given salt, requesting the password from the app if it was not already derived.
+// The key is kept, rather than the password, so the app is asked only once.
+func (e *encryptedStore) keyForSalt(salt []byte) ([]byte, error) {
+	if e.key != nil && bytes.Equal(salt, e.salt) {
+		return e.key, nil
+	}
+	if e.password == nil {
+		return nil, errSecretPassword
+	}
+	password := e.password()
+	if password == "" {
+		return nil, errSecretPassword
+	}
+
+	e.salt = append([]byte{}, salt...)
+	e.key = deriveSecretKey(password, e.salt)
+	return e.key, nil
+}
+
+// deriveSecretKey is PBKDF2 (RFC 8018) with HMAC-SHA256, producing a single block which is the size of our key.
+func deriveSecretKey(password string, salt []byte) []byte {
+	prf := hmac.New(sha256.New, []byte(password))
+	prf.Write(salt)
+	prf.Write([]byte{0, 0, 0, 1}) // block index
+	u := prf.Sum(nil)
+
+	key := append([]byte{}, u...)
+	for i := 1; i < secretKeyIterations; i++ {
+		prf.Reset()
+		prf.Write(u)
+		u = prf.Sum(u[:0])
+		for j := range key {
+			key[j] ^= u[j]
+		}
+	}
+	return key
+}
+
+func encryptSecret(key, salt, plain []byte) ([]byte, error) {
 	gcm, err := newSecretCipher(key)
 	if err != nil {
 		return nil, err
@@ -241,10 +287,12 @@ func encryptSecret(key, plain []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	out := make([]byte, 0, 1+len(nonce)+len(plain)+gcm.Overhead())
+	header := 1 + len(salt)
+	out := make([]byte, 0, header+len(nonce)+len(plain)+gcm.Overhead())
 	out = append(out, secretFormatVersion)
+	out = append(out, salt...)
 	out = append(out, nonce...)
-	return gcm.Seal(out, nonce, plain, out[:1]), nil
+	return gcm.Seal(out, nonce, plain, out[:header]), nil
 }
 
 func decryptSecret(key, data []byte) ([]byte, error) {
@@ -252,11 +300,12 @@ func decryptSecret(key, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(data) < 1+gcm.NonceSize() || data[0] != secretFormatVersion {
+	header := 1 + secretSaltSize
+	if len(data) < header+gcm.NonceSize() || data[0] != secretFormatVersion {
 		return nil, errSecretFormat
 	}
-	nonce := data[1 : 1+gcm.NonceSize()]
-	return gcm.Open(nil, nonce, data[1+gcm.NonceSize():], data[:1])
+	nonce := data[header : header+gcm.NonceSize()]
+	return gcm.Open(nil, nonce, data[header+gcm.NonceSize():], data[:header])
 }
 
 func newSecretCipher(key []byte) (cipher.AEAD, error) {

@@ -28,9 +28,11 @@ var errKeystoreUnavailable = errors.New("android keystore is not available")
 // The data is encrypted with an AES key that lives in the Android Keystore (hardware backed where
 // the device supports it) and the ciphertext is kept in the app's private files directory.
 // If the Java bridge is missing, for example an app packaged with an older toolchain,
-// we fall back to the encrypted file store keyed from the app preferences.
-func (a *fyneApp) newSecretStore() secretStore {
-	return &keystoreStore{storage: a.newPlainSecretStore(), fallback: a.newEncryptedSecretStore}
+// we fall back to the encrypted file store keyed from the password that the app provides.
+func (a *fyneApp) newSecretStore(password func() string) secretStore {
+	return &keystoreStore{storage: a.newPlainSecretStore(), fallback: func() secretStore {
+		return a.newEncryptedSecretStore(password)
+	}}
 }
 
 type keystoreStore struct {

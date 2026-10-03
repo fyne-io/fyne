@@ -70,8 +70,8 @@ func (dummyApp) Preferences() Preferences {
 	return nil
 }
 
-func (dummyApp) SecretPreferences() Preferences {
-	return nil
+func (dummyApp) SecretPreferences(func() string) (Preferences, error) {
+	return nil, nil
 }
 
 func (dummyApp) Lifecycle() Lifecycle {
