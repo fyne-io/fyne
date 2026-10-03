@@ -900,7 +900,7 @@ func (w *window) create() {
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.width, w.height = w.screenSize(bigEnough)
 		w.shouldWidth, w.shouldHeight = w.width, w.height
 	}
 

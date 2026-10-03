@@ -22,6 +22,8 @@ type Painter interface {
 	Clear()
 	// Free is used to indicate that a certain canvas object is no longer needed
 	Free(fyne.CanvasObject)
+	// MaxTextureSize returns the largest texture dimension supported by the GL driver, or 0 if not yet known
+	MaxTextureSize() int
 	// Paint a single fyne.CanvasObject but not its children.
 	Paint(fyne.CanvasObject, fyne.Position, fyne.Size, *internal.ClipItem)
 	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
@@ -78,6 +80,10 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 		p.freeClippedTextTexture(text)
 	}
 	p.freeTexture(obj)
+}
+
+func (p *painter) MaxTextureSize() int {
+	return p.maxTextureSize
 }
 
 func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
