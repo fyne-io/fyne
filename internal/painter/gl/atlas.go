@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal"
 	paint "fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/theme"
 )
@@ -123,15 +124,21 @@ func (p *painter) ensureAtlas() {
 	p.atlasTexValid = true
 }
 
-// drawTextFromAtlas queues one quad per glyph of the run, reporting false when
-// the string has to go down the whole-run texture path instead.
-func (p *painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size) bool {
+// drawTextFromAtlas queues one quad per visible glyph of the run, reporting
+// false when the string has to go down the whole-run texture path instead.
+func (p *painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) bool {
 	if !glyphAtlasSupported {
 		return false
 	}
 	p.ensureAtlas()
+	clipPos, clipSize := fyne.Position{}, frame
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
+	}
+	minX := max(clipPos.X, 0) * p.pixScale
+	maxX := min(clipPos.X+clipSize.Width, frame.Width) * p.pixScale
 	var ok bool
-	p.quadScratch, ok = p.atlas.TextQuads(p.quadScratch[:0], text, pos, p.pixScale, p)
+	p.quadScratch, ok = p.atlas.TextQuads(p.quadScratch[:0], text, pos, p.pixScale, minX, maxX, p)
 	if !ok {
 		return false
 	}

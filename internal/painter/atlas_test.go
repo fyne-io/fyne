@@ -6,6 +6,7 @@ import (
 	"image/draw"
 	"math"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,6 +35,10 @@ func (f *fakeAtlasTexture) UploadGlyph(img *image.RGBA, x, y int) {
 	f.live = append(f.live, img.Bounds().Add(image.Pt(x, y)))
 }
 
+// wide is a column range no test string reaches past, for calls that want
+// every glyph.
+const wide = 1e9
+
 // slot is the atlas rectangle a quad samples.
 func slot(q painter.GlyphQuad) image.Rectangle {
 	return image.Rect(int(q.U1*painter.AtlasSize+0.5), int(q.V1*painter.AtlasSize+0.5),
@@ -45,7 +50,7 @@ func TestGlyphAtlas_TextQuadsCachesGlyphs(t *testing.T) {
 	var a painter.GlyphAtlas
 	tex := &fakeAtlasTexture{}
 
-	quads, ok := a.TextQuads(nil, text, fyne.NewPos(10, 20), 1, tex)
+	quads, ok := a.TextQuads(nil, text, fyne.NewPos(10, 20), 1, -wide, wide, tex)
 	require.True(t, ok)
 	assert.Len(t, quads, 7, "one quad per inked glyph; the space has none")
 	assert.LessOrEqual(t, tex.uploads, 7, "at most one bitmap per inked glyph")
@@ -57,7 +62,7 @@ func TestGlyphAtlas_TextQuadsCachesGlyphs(t *testing.T) {
 	}
 
 	uploads := tex.uploads
-	again, ok := a.TextQuads(nil, text, fyne.NewPos(10, 20), 1, tex)
+	again, ok := a.TextQuads(nil, text, fyne.NewPos(10, 20), 1, -wide, wide, tex)
 	require.True(t, ok)
 	assert.Equal(t, quads, again)
 	assert.Equal(t, uploads, tex.uploads, "a string seen before uploads nothing")
@@ -74,13 +79,64 @@ func TestGlyphAtlas_TextQuadsSurvivesReset(t *testing.T) {
 		text := canvas.NewText(s, color.White)
 		text.TextSize = 250
 
-		quads, ok := a.TextQuads(nil, text, fyne.Position{}, 1, tex)
+		quads, ok := a.TextQuads(nil, text, fyne.Position{}, 1, -wide, wide, tex)
 		require.True(t, ok, s)
 		for _, q := range quads {
 			assert.True(t, slices.Contains(tex.live, slot(q)), "%q has a quad sampling %v, which is not live", s, slot(q))
 		}
 	}
 	assert.Positive(t, tex.flushes, "the glyphs should have overflowed the atlas")
+}
+
+// TestGlyphAtlas_TextQuadsSkipsHiddenGlyphs checks that a string much wider
+// than the visible columns yields the visible quads, placed exactly as without
+// the limit, and rasterises nothing for the rest.
+func TestGlyphAtlas_TextQuadsSkipsHiddenGlyphs(t *testing.T) {
+	text := canvas.NewText(strings.Repeat("0123456789 ", 200), color.White)
+	const minX, maxX = 500, 700
+
+	var all painter.GlyphAtlas
+	allTex := &fakeAtlasTexture{}
+	full, ok := all.TextQuads(nil, text, fyne.NewPos(-20, 0), 1, -wide, wide, allTex)
+	require.True(t, ok)
+	var visible painter.GlyphAtlas
+	visibleTex := &fakeAtlasTexture{}
+	culled, ok := visible.TextQuads(nil, text, fyne.NewPos(-20, 0), 1, minX, maxX, visibleTex)
+	require.True(t, ok)
+
+	var want []image.Rectangle
+	for _, q := range full {
+		if q.X2 >= minX && q.X1 <= maxX {
+			want = append(want, image.Rect(int(q.X1), int(q.Y1), int(q.X2), int(q.Y2)))
+		}
+	}
+	var got []image.Rectangle
+	for _, q := range culled {
+		got = append(got, image.Rect(int(q.X1), int(q.Y1), int(q.X2), int(q.Y2)))
+	}
+	require.NotEmpty(t, want)
+	for _, r := range want {
+		assert.Contains(t, got, r, "a glyph in view went missing")
+	}
+	assert.Less(t, len(culled), len(want)+4, "only glyphs at the edges may be kept beyond the columns")
+	assert.Less(t, visibleTex.uploads, allTex.uploads, "hidden glyphs are not rasterised")
+}
+
+// BenchmarkGlyphAtlas_TextQuadsLongLine is a 10,000 character line, the kind a
+// log or a minified document has, seen through a 1920 pixel window: what each
+// frame costs once its visible glyphs are in the atlas.
+func BenchmarkGlyphAtlas_TextQuadsLongLine(b *testing.B) {
+	text := canvas.NewText(strings.Repeat("The quick brown fox jumps over the lazy dog. ", 222), color.White)
+	var a painter.GlyphAtlas
+	tex := &fakeAtlasTexture{}
+	var quads []painter.GlyphQuad
+	quads, _ = a.TextQuads(quads[:0], text, fyne.Position{}, 1, 0, 1920, tex)
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		quads, _ = a.TextQuads(quads[:0], text, fyne.Position{}, 1, 0, 1920, tex)
+	}
+	b.ReportMetric(float64(len(quads)), "quads/op")
 }
 
 func TestGlyphAtlas_White(t *testing.T) {
@@ -109,14 +165,14 @@ func TestGlyphAtlas_TextQuadsSubpixel(t *testing.T) {
 	var a painter.GlyphAtlas
 	tex := &fakeAtlasTexture{}
 
-	at10, ok := a.TextQuads(nil, text, fyne.NewPos(10, 0), 1, tex)
+	at10, ok := a.TextQuads(nil, text, fyne.NewPos(10, 0), 1, -wide, wide, tex)
 	require.True(t, ok)
 	require.Len(t, at10, 12)
 	assert.Greater(t, tex.uploads, 1, "the l lands at more than one sub-pixel position")
 	assert.LessOrEqual(t, tex.uploads, 4, "one bitmap per position at most, and 1x has four")
 
 	uploads := tex.uploads
-	at13, ok := a.TextQuads(nil, text, fyne.NewPos(13, 0), 1, tex)
+	at13, ok := a.TextQuads(nil, text, fyne.NewPos(13, 0), 1, -wide, wide, tex)
 	require.True(t, ok)
 	assert.Equal(t, uploads, tex.uploads, "a whole pixel move reuses every bitmap")
 	for i := range at10 {
@@ -146,7 +202,7 @@ func TestGlyphAtlas_MatchesDrawString(t *testing.T) {
 		text := canvas.NewText(s, color.White)
 		tex := &cpuAtlasTexture{img: image.NewRGBA(image.Rect(0, 0, painter.AtlasSize, painter.AtlasSize))}
 		var a painter.GlyphAtlas
-		quads, ok := a.TextQuads(nil, text, fyne.Position{}, scale, tex)
+		quads, ok := a.TextQuads(nil, text, fyne.Position{}, scale, -wide, wide, tex)
 		require.True(t, ok)
 
 		size, _ := painter.RenderedTextSize(s, text.TextSize, text.TextStyle, nil)

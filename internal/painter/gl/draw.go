@@ -909,7 +909,7 @@ func (p *painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	// The atlas draws a quad per glyph out of one shared texture, so it needs no
 	// texture of its own and no width limit - both paths after it exist only for
 	// strings it cannot represent.
-	if p.drawTextFromAtlas(text, pos, frame) {
+	if p.drawTextFromAtlas(text, pos, frame, clip) {
 		// A run that used to be too wide for one texture may have a windowed
 		// texture parked from before; with no width limit here, it is dead.
 		p.freeClippedTextTexture(text)
