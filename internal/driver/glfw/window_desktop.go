@@ -405,6 +405,12 @@ func (w *window) scaled(_ *glfw.Window, x, _ float32) {
 	}
 
 	w.canvas.texScale = x
+	size := w.canvas.size
+	w.canvas.Resize(size)
+	if w.canvas.size != size { // at this scale we no longer fit in the largest output that can be allocated
+		w.fitContent()
+		w.viewport.SetSize(w.screenSize(w.canvas.size))
+	}
 	w.canvas.Refresh(w.canvas.content)
 }
 
@@ -803,6 +809,8 @@ func (w *window) RescaleContext() {
 
 func (w *window) create() {
 	const fallbackScreenSize = 10
+	// the largest size we can allocate is not known before GL is set up, this is small enough to always work
+	const maxInitialSize = 4096
 
 	// make the window hidden, we will set it up and then show it later
 	glfw.WindowHint(glfw.Visible, glfw.False)
@@ -837,7 +845,8 @@ func (w *window) create() {
 		pixHeight = fallbackScreenSize
 	}
 
-	win, err := glfw.CreateWindow(pixWidth, pixHeight, w.title, nil, nil)
+	// the real size is applied below, once we know our scale and limits
+	win, err := glfw.CreateWindow(min(pixWidth, maxInitialSize), min(pixHeight, maxInitialSize), w.title, nil, nil)
 	if err != nil {
 		w.driver.initFailed("window creation error", err)
 		return
@@ -893,14 +902,14 @@ func (w *window) create() {
 	w.canvas.detectedScale = w.detectScale()
 	w.canvas.scale = w.calculatedScale()
 	w.canvas.texScale = w.detectTextureScale()
+	w.canvas.Resize(w.canvas.size) // apply the output size limit now it is known
 	// update window size now we have scaled detected
 	w.fitContent()
 
 	w.drainPendingEvents()
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
-		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.width, w.height = w.minSizeOnScreen()
 		w.shouldWidth, w.shouldHeight = w.width, w.height
 	}
 

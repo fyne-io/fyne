@@ -16,6 +16,8 @@ import (
 type Painter interface {
 	// Init tell a new painter to initialize, usually called after a context is available
 	Init()
+	// MaxTextureSize returns the largest texture or output dimension that can be allocated, 0 if not known
+	MaxTextureSize() int
 	// Capture requests that the specified canvas be drawn to an in-memory image
 	Capture(fyne.Canvas) image.Image
 	// Clear tells our painter to prepare a fresh paint
@@ -104,6 +106,10 @@ func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Siz
 func (p *painter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
 	p.pixScale = p.canvas.Scale() * p.texScale
+}
+
+func (p *painter) MaxTextureSize() int {
+	return p.maxTextureSize
 }
 
 func (p *painter) SetOutputSize(width, height int) {

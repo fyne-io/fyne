@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/scale"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -96,6 +97,12 @@ func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
+	// the window cannot be larger than the graphics driver can allocate, so neither can we
+	pixWidth, pixHeight := scale.ToScreenCoordinate(c, size.Width), scale.ToScreenCoordinate(c, size.Height)
+	if width, height := c.limitSize(pixWidth, pixHeight); width < pixWidth || height < pixHeight {
+		size = fyne.NewSize(scale.ToFyneCoordinate(c, width), scale.ToFyneCoordinate(c, height))
+	}
+
 	// This might not be the ideal solution, but it effectively avoid the first frame to be blurry due to the
 	// rounding of the size to the loower integer when scale == 1. It does not affect the other cases as far as we tested.
 	// This can easily be seen with fyne/cmd/hello and a scale == 1 as the text will happear blurry without the following line.
@@ -128,6 +135,34 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		menu.Refresh()
 		menu.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
 	}
+}
+
+// limitSize reduces a size in screen coordinates to the largest output the graphics driver can allocate.
+// Content with a huge minimum size (such as a very long label) would otherwise ask for a window that
+// cannot be created. Sizes that fit are never changed. The limit is not known until the painter has been initialised.
+func (c *glCanvas) limitSize(pixWidth, pixHeight int) (width, height int) {
+	// a reduced size stays this fraction below the limit, as the compositor needs room for
+	// the decorations and shadows that it draws around a window
+	const marginFraction = 16
+
+	p := c.Painter()
+	if p == nil {
+		return pixWidth, pixHeight
+	}
+	limit := int(float32(p.MaxTextureSize()) / c.texScale)
+	if limit <= 0 {
+		return pixWidth, pixHeight
+	}
+
+	reduced := limit - limit/marginFraction
+	width, height = pixWidth, pixHeight
+	if width > limit {
+		width = reduced
+	}
+	if height > limit {
+		height = reduced
+	}
+	return width, height
 }
 
 func (c *glCanvas) Scale() float32 {

@@ -1575,6 +1575,26 @@ func TestWindow_Padded(t *testing.T) {
 	})
 }
 
+func TestWindow_MinSize_LargerThanOutputLimit(t *testing.T) {
+	content := canvas.NewRectangle(color.White)
+	content.SetMinSize(fyne.NewSize(1_000_000, 10))
+
+	var w *window
+	runOnMain(func() { // set content before the window is created, as an app normally would
+		w = d.CreateWindow("Test").(*window)
+		w.SetContent(content)
+		w.create()
+
+		limit, _ := w.canvas.limitSize(1_000_000, 10)
+		assert.Less(t, limit, 1_000_000)
+
+		width, _ := w.minSizeOnScreen()
+		assert.Equal(t, limit, width)
+		assert.Equal(t, limit, w.shouldWidth)
+		assert.Equal(t, limit, scale.ToScreenCoordinate(w.canvas, w.canvas.Size().Width))
+	})
+}
+
 func TestWindow_SetPadded(t *testing.T) {
 	var menuHeight float32
 	if build.HasNativeMenu {

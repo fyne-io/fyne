@@ -48,9 +48,10 @@ func (w *window) minSizeOnScreen() (width, height int) {
 	return w.screenSize(w.canvas.MinSize())
 }
 
-// screenSize computes the actual output size of the given content size in screen pixels
+// screenSize computes the actual output size of the given content size in screen pixels,
+// limited to the largest window that the graphics driver can allocate.
 func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
-	return scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
+	return w.canvas.limitSize(scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height))
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -58,7 +59,7 @@ func (w *window) Resize(size fyne.Size) {
 	// we cannot perform this until window is prepared as we don't know its scale!
 	bigEnough := internal.MaxSizes(size, w.canvas.canvasSize(w.canvas.Content().MinSize()))
 	w.runOnMainWhenCreated(func() {
-		width, height := scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		width, height := w.screenSize(bigEnough)
 		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
 			w.shouldWidth, w.shouldHeight = width, height
 			w.width, w.height = width, height
