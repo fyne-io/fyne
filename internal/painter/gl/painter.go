@@ -6,8 +6,8 @@ import (
 	"image"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/theme"
 )
@@ -43,19 +43,22 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 }
 
 type painter struct {
-	blurKernel          blurKernel // cached 1D kernel texture on GPU
-	blurSnap            blurSnap   // cached texture for GPU-side blur snapshot
-	canvas              fyne.Canvas
-	clippedTextTextures map[*canvas.Text]clippedTextTexture
-	contextProvider     driver.WithContext
-	ctx                 context
-	fbHeight            int // current framebuffer height in pixels
-	maxTextureSize      int
-	pixScale            float32 // pre-calculate scale*texScale for each draw
-	programs            *programs
-	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
-	texScale            float32
-	vertices            []float32 // updateBuffer's upload buffer, reused
+	blurKernel       blurKernel // cached 1D kernel texture on GPU
+	blurSnap         blurSnap   // cached texture for GPU-side blur snapshot
+	canvas           fyne.Canvas
+	contextProvider  driver.WithContext
+	ctx              context
+	fbHeight         int            // current framebuffer height in pixels
+	glyphAtlas       *glyphGPUAtlas // shared GPU texture holding glyph coverage
+	glyphColourAtlas *glyphGPUAtlas // and a smaller one for glyphs with colour of their own
+	maxTextureSize   int
+	pixScale         float32 // pre-calculate scale*texScale for each draw
+	programs         *programs
+	shaderPrograms   map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
+	texScale         float32
+	textBatch        []float32                              // scratch used while building a batch
+	textCache        map[cache.FontCacheEntry]*textVertices // cached glyph geometry, keyed by content
+	vertices         []float32                              // updateBuffer's upload buffer, reused
 }
 
 // Declare conformity to Painter interface
@@ -69,14 +72,8 @@ func (p *painter) Clear() {
 }
 
 func (p *painter) Free(obj fyne.CanvasObject) {
-	// Shader programs are immutable and compiled once per Shader.Name, living for
-	// the lifetime of the GL context like the built-in shader programs. They are
-	// deliberately not freed here: Free is also called for every object on each
-	// Refresh (see Canvas.FreeDirtyTextures), so freeing would recompile the
-	// program - and reset its animation clock - every single frame.
-	if text, ok := obj.(*canvas.Text); ok {
-		p.freeClippedTextTexture(text)
-	}
+	// Glyph geometry is keyed by the text rather than the object, so it is left for
+	// the text cache to expire.
 	p.freeTexture(obj)
 }
 
@@ -262,6 +259,14 @@ func (p *painter) compilePrograms() *programs {
 			uniforms:   make(map[string]*uniformState),
 			attributes: make(map[string]Attribute),
 		},
+		text: programState{
+			ref: p.mustCreateProgram(shaderVertText, shaderFragText),
+			// Sized for a typical line. Batches that need more grow the
+			// allocation; see drawGlyphBatch.
+			buff:       p.createBuffer(floatsPerGlyph * 128),
+			uniforms:   make(map[string]*uniformState),
+			attributes: make(map[string]Attribute),
+		},
 	}
 }
 
@@ -388,6 +393,7 @@ type programs struct {
 	rectangle        programState
 	roundRectangle   programState
 	simple           programState
+	text             programState
 }
 
 // shaderState caches a user shader's compiled program and uploaded textures.

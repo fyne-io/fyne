@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"image"
 	"image/color"
 	"image/draw"
 	"math"
@@ -206,8 +207,7 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 		PixScale: scale,
 		Color:    c,
 	}
-	// we do not support newlines in string primitive yet, but the go-text now cuts the run
-	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
+	s = replaceNewlines(s)
 
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
@@ -219,6 +219,86 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 
 		r.DrawShapedRunAt(run, dst, int(x)-offset, yPix)
 	})
+}
+
+// WalkStringGlyphs calls cb once for each glyph in s, passing the shaped run,
+// the glyph's index within it, the pen X at that glyph, the shared baseline Y
+// for the line, and the glyph's X and Y offsets, all in device pixels.
+//
+// Positions are exact rather than rounded, leaving the caller to decide how to
+// land on the pixel grid. Unmappable codepoints yield a replacement character.
+func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.TextStyle, scale float32,
+	cb func(run shaping.Output, idx int, penX, baseY, xOff, yOff float32),
+) {
+	s = replaceNewlines(s)
+
+	advance := float32(0)
+	size := float32ToFixed266(fontSize)
+	walkString(f, s, size, style, &advance, scale, func(run shaping.Output, x, y float32) {
+		// A codepoint no font can provide is drawn as a replacement character, which is
+		// what the software renderer does.
+		if len(run.Glyphs) == 1 && run.Glyphs[0].GlyphID == 0 {
+			face := f.ResolveFace(replacementChar)
+			if face == nil {
+				return
+			}
+			run = shaper.Shape(shaping.Input{
+				Text:      []rune{replacementChar},
+				RunStart:  0,
+				RunEnd:    1,
+				Direction: di.DirectionLTR,
+				Face:      face,
+				Size:      size,
+			})
+			if len(run.Glyphs) == 0 {
+				return
+			}
+		}
+		penX := x
+		for i, g := range run.Glyphs {
+			xOff := fixed266ToFloat32(g.XOffset) * scale
+			yOff := fixed266ToFloat32(g.YOffset) * scale
+			cb(run, i, penX, y, xOff, yOff)
+			penX += fixed266ToFloat32(g.Advance) * scale
+		}
+	})
+}
+
+// RenderGlyphToImage rasterises one glyph of run into a new image, in white so
+// that the bitmap carries coverage rather than colour and serves every colour it
+// is drawn in. subpixel shifts it right by that fraction of a pixel and must be
+// in [0,1). The returned baseline is measured down from the top of the image and
+// bearing is how far the glyph origin sits in from the left edge.
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline, bearing int) {
+	g := run.Glyphs[idx]
+	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: color.White}
+
+	baseline = int(math.Ceil(float64(fixed266ToFloat32(run.LineBounds.Ascent) * scale)))
+	descent := int(math.Ceil(float64(-fixed266ToFloat32(run.LineBounds.Descent) * scale)))
+	h := baseline + descent
+	if h <= 0 {
+		h = 1
+	}
+	italicPad := int(math.Ceil(float64(fontSize * scale / 5)))
+	// Ink can start left of the origin, so inset the glyph by that much.
+	if lsb := fixed266ToFloat32(g.XBearing) * scale; lsb < 0 {
+		bearing = int(math.Ceil(float64(-lsb)))
+	}
+	// One extra column beyond the advance for ink pushed right by subpixel.
+	w := bearing + int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 3
+	if w <= 0 {
+		w = 1
+	}
+
+	img = image.NewRGBA(image.Rect(0, 0, w, h))
+	shifted := g
+	// XOffset is in font units, so undo the pixel scale to express the shift.
+	shifted.XOffset = float32ToFixed266(subpixel / scale)
+	shifted.YOffset = 0
+	singleRun := run
+	singleRun.Glyphs = []shaping.Glyph{shifted}
+	ren.DrawShapedRunAt(singleRun, img, bearing, baseline)
+	return img, baseline, bearing
 }
 
 // loadMeasureFont returns a new face for the font, which callers may use
@@ -237,11 +317,16 @@ func loadMeasureFont(data fyne.Resource) *font.Face {
 	return loaded
 }
 
+// replaceNewlines swaps newlines for the replacement character. The string
+// primitive does not support them yet and go-text otherwise cuts the run.
+func replaceNewlines(s string) string {
+	return strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
+}
+
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
-	// we do not support newlines in string primitive yet, but the go-text now cuts the run
-	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
+	s = replaceNewlines(s)
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32, float32) {})
 }
 

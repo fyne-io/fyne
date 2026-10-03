@@ -14,6 +14,7 @@ const (
 	bitDepthBuffer        = gl.DepthBufferBit
 	clampToEdge           = gl.ClampToEdge
 	colorFormatRGBA       = gl.RGBA
+	colorFormatAlpha      = gl.ALPHA
 	compileStatus         = gl.CompileStatus
 	constantAlpha         = gl.ConstantAlpha
 	float                 = gl.Float
@@ -73,6 +74,7 @@ func (p *painter) Init() {
 	p.maxTextureSize = p.ctx.GetInteger(maxTextureSizeParam)
 	p.blurSnap.texValid = false   // reset on context recreation; old texture IDs are no longer valid
 	p.blurKernel.texValid = false // kernel texture must also be re-created
+	p.glyphAtlas = nil            // GPU atlas texture is invalidated on context recreation
 	if compiled == nil {
 		compiled = p.compilePrograms()
 	}
@@ -242,6 +244,10 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 		gl.Enum(typ),
 		data,
 	)
+}
+
+func (c *mobileContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	c.glContext.TexSubImage2D(gl.Enum(target), level, xoffset, yoffset, width, height, gl.Enum(colorFormat), gl.Enum(typ), data)
 }
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {

@@ -51,6 +51,7 @@ const (
 
 	UnsignedByte = 0x1401
 	Float        = 0x1406
+	ALPHA        = 0x1906
 	RED          = 0x1903
 	RGBA         = 0x1908
 

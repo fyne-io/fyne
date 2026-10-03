@@ -17,6 +17,7 @@ const (
 	bitDepthBuffer        = gl.DEPTH_BUFFER_BIT
 	clampToEdge           = gl.CLAMP_TO_EDGE
 	colorFormatRGBA       = gl.RGBA
+	colorFormatAlpha      = gl.ALPHA
 	compileStatus         = gl.COMPILE_STATUS
 	constantAlpha         = gl.CONSTANT_ALPHA
 	float                 = gl.FLOAT
@@ -268,6 +269,10 @@ func (c *esContext) TexImage2D(target uint32, level, width, height int, colorFor
 		typ,
 		ptr,
 	)
+}
+
+func (c *esContext) TexSubImage2D(target uint32, level, xoffset, yoffset, width, height int, colorFormat, typ uint32, data []uint8) {
+	gl.TexSubImage2D(target, int32(level), int32(xoffset), int32(yoffset), int32(width), int32(height), colorFormat, typ, gl.Ptr(data))
 }
 
 func (c *esContext) TexParameteri(target, param uint32, value int32) {
