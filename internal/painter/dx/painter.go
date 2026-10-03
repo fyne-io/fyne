@@ -1096,7 +1096,7 @@ func (p *Painter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size
 	// The atlas draws a quad per glyph out of one shared texture, so it needs no
 	// texture of its own and no width limit - both of the paths below exist only
 	// for strings it cannot represent.
-	if p.drawTextFromAtlas(text, pos, frame) {
+	if p.drawTextFromAtlas(text, pos, frame, clip) {
 		// An object that used to be too wide for one texture may have a windowed
 		// texture parked from before; the atlas has no width limit, so it is dead.
 		p.freeClippedTextTexture(text)
@@ -1141,11 +1141,17 @@ func (p *Painter) drawTextDecoration(text *canvas.Text, pos fyne.Position, size,
 	}
 }
 
-// drawTextFromAtlas queues one quad per glyph of the run, reporting false when
-// the string has to go down the whole-run texture path instead.
-func (p *Painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size) bool {
+// drawTextFromAtlas queues one quad per visible glyph of the run, reporting
+// false when the string has to go down the whole-run texture path instead.
+func (p *Painter) drawTextFromAtlas(text *canvas.Text, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) bool {
+	clipPos, clipSize := fyne.Position{}, frame
+	if clip != nil {
+		clipPos, clipSize = clip.Rect()
+	}
+	minX := max(clipPos.X, 0) * p.pixScale
+	maxX := min(clipPos.X+clipSize.Width, frame.Width) * p.pixScale
 	var ok bool
-	p.quadScratch, ok = p.atlas.TextQuads(p.quadScratch[:0], text, pos, p.pixScale, p)
+	p.quadScratch, ok = p.atlas.TextQuads(p.quadScratch[:0], text, pos, p.pixScale, minX, maxX, p)
 	if !ok {
 		return false
 	}

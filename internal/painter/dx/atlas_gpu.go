@@ -6,6 +6,7 @@ import (
 	"image"
 	"unsafe"
 
+	"fyne.io/fyne/v2"
 	paint "fyne.io/fyne/v2/internal/painter"
 )
 
@@ -23,21 +24,43 @@ type glyphAtlas struct {
 }
 
 func (p *Painter) initAtlas() error {
+	tex, err := p.newAtlasTexture(paint.AtlasSize)
+	if err != nil {
+		return err
+	}
+	p.atlas = glyphAtlas{tex: tex}
+	return nil
+}
+
+func (p *Painter) newAtlasTexture(size int) (*gpuTexture, error) {
 	tex, err := p.g.dev.CreateTexture2D(&texture2DDesc{
-		Width: paint.AtlasSize, Height: paint.AtlasSize, MipLevels: 1, ArraySize: 1,
+		Width: uint32(size), Height: uint32(size), MipLevels: 1, ArraySize: 1,
 		Format: formatR8Unorm, SampleDesc: dxgiSampleDesc{Count: 1},
 		Usage: usageDefault, BindFlags: bindShaderResource,
 	}, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	srv, err := p.g.dev.CreateShaderResourceView(tex)
 	if err != nil {
 		tex.Release()
-		return err
+		return nil, err
 	}
-	p.atlas = glyphAtlas{tex: &gpuTexture{tex: tex, srv: srv, width: paint.AtlasSize, height: paint.AtlasSize}}
-	return nil
+	return &gpuTexture{tex: tex, srv: srv, width: uint32(size), height: uint32(size)}, nil
+}
+
+// ResizeAtlas swaps the atlas texture for an empty one of the new size, keeping
+// the shared atlas's bookkeeping, which has already emptied itself.
+func (p *Painter) ResizeAtlas(size int) {
+	tex, err := p.newAtlasTexture(size)
+	if err != nil {
+		// A 2048 R8 texture is within every feature level, so this only fails
+		// with the device gone, when nothing is drawn until it is rebuilt.
+		fyne.LogError("directx: growing the glyph atlas", err)
+		return
+	}
+	p.destroyTexture(p.atlas.tex)
+	p.atlas.tex = tex
 }
 
 // UploadGlyph copies the alpha channel of a rasterised glyph into its atlas
