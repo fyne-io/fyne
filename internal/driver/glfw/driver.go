@@ -47,6 +47,9 @@ type gLDriver struct {
 
 	trayStart, trayStop func()     // shut down the system tray, if used
 	systrayMenu         *fyne.Menu // cache the menu set so we know when to refresh
+
+	rebindActive bool // CreateWindow failure during display rebind must not os.Exit
+	rebindPaint  bool // first frame after Terminate/Init; force the frame gate ready
 }
 
 // Declare conformity with Driver
@@ -180,6 +183,10 @@ func (d *gLDriver) init() {
 
 func (d *gLDriver) initFailed(msg string, err error) {
 	fyne.LogError(msg, err)
+
+	if d.rebindActive {
+		return
+	}
 
 	if running.Load() {
 		os.Exit(1) //revive:disable-line:deep-exit
