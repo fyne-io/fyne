@@ -1,3 +1,5 @@
+//go:build cgo && (darwin || linux || openbsd || freebsd)
+
 package gl
 
 import (
