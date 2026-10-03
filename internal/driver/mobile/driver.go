@@ -417,6 +417,11 @@ func (d *driver) paintWindow(window fyne.Window, s fyne.Size) {
 	}
 
 	c.WalkTrees(draw, afterDraw)
+	// The painter batches text and plain rectangles, so the tail of the tree can
+	// still be sitting in a queue when the walk ends.
+	if p, ok := c.Painter().(interface{ FlushGlyphs() }); ok {
+		p.FlushGlyphs()
+	}
 }
 
 func (d *driver) sendPaintEvent() {

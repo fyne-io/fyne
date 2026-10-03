@@ -65,6 +65,9 @@ var (
 	textureFilterToGL = [...]int32{gl.Linear, gl.Nearest, gl.Linear}
 )
 
+// glyphAtlasSupported enables batched atlas text; see atlas.go.
+const glyphAtlasSupported = true
+
 func (p *painter) Init() {
 	glctx := p.contextProvider.Context().(gl.Context)
 	glctx.Disable(gl.DepthTest)
@@ -242,6 +245,10 @@ func (c *mobileContext) TexImage2D(target uint32, level, width, height int, colo
 		gl.Enum(typ),
 		data,
 	)
+}
+
+func (c *mobileContext) TexSubImage2D(target uint32, level, x, y, width, height int, colorFormat, typ uint32, data []uint8) {
+	c.glContext.TexSubImage2D(gl.Enum(target), level, x, y, width, height, gl.Enum(colorFormat), gl.Enum(typ), data)
 }
 
 func (c *mobileContext) TexParameteri(target, param uint32, value int32) {
