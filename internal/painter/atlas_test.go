@@ -21,8 +21,8 @@ import (
 // the texture holds that nothing has been drawn against yet: every upload since
 // the last flush.
 type fakeAtlasTexture struct {
-	uploads, flushes int
-	live             []image.Rectangle
+	uploads, flushes, resizes int
+	live                      []image.Rectangle
 }
 
 func (f *fakeAtlasTexture) FlushGlyphs() {
@@ -35,14 +35,19 @@ func (f *fakeAtlasTexture) UploadGlyph(img *image.RGBA, x, y int) {
 	f.live = append(f.live, img.Bounds().Add(image.Pt(x, y)))
 }
 
+func (f *fakeAtlasTexture) ResizeAtlas(int) {
+	f.resizes++
+	f.live = nil
+}
+
 // wide is a column range no test string reaches past, for calls that want
 // every glyph.
 const wide = 1e9
 
-// slot is the atlas rectangle a quad samples.
-func slot(q painter.GlyphQuad) image.Rectangle {
-	return image.Rect(int(q.U1*painter.AtlasSize+0.5), int(q.V1*painter.AtlasSize+0.5),
-		int(q.U2*painter.AtlasSize+0.5), int(q.V2*painter.AtlasSize+0.5))
+// slot is the rectangle of a's texture a quad samples.
+func slot(a *painter.GlyphAtlas, q painter.GlyphQuad) image.Rectangle {
+	size := float32(a.Size())
+	return image.Rect(int(q.U1*size+0.5), int(q.V1*size+0.5), int(q.U2*size+0.5), int(q.V2*size+0.5))
 }
 
 func TestGlyphAtlas_TextQuadsCachesGlyphs(t *testing.T) {
@@ -56,7 +61,7 @@ func TestGlyphAtlas_TextQuadsCachesGlyphs(t *testing.T) {
 	assert.LessOrEqual(t, tex.uploads, 7, "at most one bitmap per inked glyph")
 	for _, q := range quads {
 		// Glyphs are drawn one texel to one pixel, never resampled.
-		s := slot(q)
+		s := slot(&a, q)
 		assert.Equal(t, float32(s.Dx()), q.X2-q.X1)
 		assert.Equal(t, float32(s.Dy()), q.Y2-q.Y1)
 	}
@@ -77,15 +82,57 @@ func TestGlyphAtlas_TextQuadsSurvivesReset(t *testing.T) {
 	tex := &fakeAtlasTexture{}
 	for _, s := range []string{"abcdefghijklmnop", "ABCDEFGHIJKLMNOP", "qrstuvwxyz012345", "QRSTUVWXYZ6789&?"} {
 		text := canvas.NewText(s, color.White)
-		text.TextSize = 250
+		text.TextSize = 400
 
 		quads, ok := a.TextQuads(nil, text, fyne.Position{}, 1, -wide, wide, tex)
 		require.True(t, ok, s)
 		for _, q := range quads {
-			assert.True(t, slices.Contains(tex.live, slot(q)), "%q has a quad sampling %v, which is not live", s, slot(q))
+			assert.True(t, slices.Contains(tex.live, slot(&a, q)), "%q has a quad sampling %v, which is not live", s, slot(&a, q))
 		}
 	}
-	assert.Positive(t, tex.flushes, "the glyphs should have overflowed the atlas")
+	assert.Equal(t, 1, tex.resizes, "the first overflow grows the atlas, once")
+	assert.Equal(t, painter.AtlasMaxSize, a.Size())
+	assert.Greater(t, tex.flushes, 1, "the glyphs should have overflowed the grown atlas too")
+}
+
+// TestGlyphAtlas_GrowsBeforeThrashing draws a page's worth of styles at 4x, a
+// working set that overflows AtlasSize. Once grown, drawing it again has to
+// find every glyph resident: an atlas that resets every frame re-rasterises
+// and re-uploads all of its text every frame.
+func TestGlyphAtlas_GrowsBeforeThrashing(t *testing.T) {
+	var chars []rune
+	for r := rune('!'); r <= '~'; r++ {
+		chars = append(chars, r)
+	}
+	styles := []struct {
+		size  float32
+		style fyne.TextStyle
+	}{
+		{14, fyne.TextStyle{}}, {14, fyne.TextStyle{Bold: true}}, {14, fyne.TextStyle{Italic: true}},
+		{14, fyne.TextStyle{Monospace: true}}, {24, fyne.TextStyle{Bold: true}}, {18, fyne.TextStyle{Bold: true}},
+		{11, fyne.TextStyle{}},
+	}
+	const scale = 4
+	var a painter.GlyphAtlas
+	tex := &fakeAtlasTexture{}
+	page := func() {
+		for _, s := range styles {
+			text := canvas.NewText(string(chars), color.White)
+			text.TextSize, text.TextStyle = s.size, s.style
+			_, ok := a.TextQuads(nil, text, fyne.Position{}, scale, -wide, wide, tex)
+			require.True(t, ok)
+		}
+	}
+
+	// Growing part way through the page empties the atlas, so the strings drawn
+	// before that are uploaded again on the next page, and only then is it warm.
+	page()
+	page()
+	require.Equal(t, 1, tex.resizes, "the page should overflow the initial atlas")
+	flushes, uploads := tex.flushes, tex.uploads
+	page()
+	assert.Equal(t, flushes, tex.flushes, "the grown atlas holds the page")
+	assert.Equal(t, uploads, tex.uploads, "a page drawn before uploads nothing")
 }
 
 // TestGlyphAtlas_TextQuadsSkipsHiddenGlyphs checks that a string much wider
@@ -177,7 +224,7 @@ func TestGlyphAtlas_TextQuadsSubpixel(t *testing.T) {
 	assert.Equal(t, uploads, tex.uploads, "a whole pixel move reuses every bitmap")
 	for i := range at10 {
 		assert.Equal(t, at10[i].X1+3, at13[i].X1)
-		assert.Equal(t, slot(at10[i]), slot(at13[i]))
+		assert.Equal(t, slot(&a, at10[i]), slot(&a, at13[i]))
 	}
 }
 
@@ -189,6 +236,10 @@ func (*cpuAtlasTexture) FlushGlyphs() {}
 
 func (c *cpuAtlasTexture) UploadGlyph(img *image.RGBA, x, y int) {
 	draw.Draw(c.img, img.Bounds().Add(image.Pt(x, y)), img, image.Point{}, draw.Src)
+}
+
+func (c *cpuAtlasTexture) ResizeAtlas(size int) {
+	c.img = image.NewRGBA(image.Rect(0, 0, size, size))
 }
 
 // TestGlyphAtlas_MatchesDrawString composites a string's quads and compares the
@@ -209,7 +260,7 @@ func TestGlyphAtlas_MatchesDrawString(t *testing.T) {
 		bounds := image.Rect(0, 0, int(math.Ceil(float64(size.Width*scale))), int(math.Ceil(float64(size.Height*scale))))
 		got := image.NewRGBA(bounds)
 		for _, q := range quads {
-			draw.Draw(got, image.Rect(int(q.X1), int(q.Y1), int(q.X2), int(q.Y2)), tex.img, slot(q).Min, draw.Over)
+			draw.Draw(got, image.Rect(int(q.X1), int(q.Y1), int(q.X2), int(q.Y2)), tex.img, slot(&a, q).Min, draw.Over)
 		}
 		want := image.NewRGBA(bounds)
 		face := painter.CachedFontFace(text.TextStyle, nil, nil)

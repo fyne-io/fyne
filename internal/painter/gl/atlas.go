@@ -105,21 +105,30 @@ func (p *painter) UploadGlyph(img *image.RGBA, x, y int) {
 	p.logError()
 }
 
+// ResizeAtlas swaps the atlas texture for an empty one of the new size.
+func (p *painter) ResizeAtlas(int) {
+	if p.atlasTexValid {
+		p.ctx.DeleteTexture(p.atlasTex)
+		p.atlasTexValid = false
+	}
+	p.ensureAtlas()
+}
+
 // ensureAtlas allocates the atlas texture the first time anything is batched.
 //
 // The texture is RGBA, although only alpha is read. A single-channel one would
-// be a quarter of the 4MB, but needs format constants and an unpack alignment
-// call on every GL binding; this needs neither.
+// be a quarter of the 4MB (16MB once grown), but needs format constants and an
+// unpack alignment call on every GL binding; this needs neither.
 func (p *painter) ensureAtlas() {
 	if p.atlasTexValid {
 		return
 	}
+	size := p.atlas.Size()
 	p.atlasTex = p.newTexture(canvas.ImageScaleSmooth)
 	// Cleared rather than left undefined: nothing samples outside the glyphs,
 	// but a driver that hands back stale memory would make any bug in that
 	// promise show up as garbage instead of nothing.
-	p.ctx.TexImage2D(texture2D, 0, paint.AtlasSize, paint.AtlasSize, colorFormatRGBA, unsignedByte,
-		make([]uint8, paint.AtlasSize*paint.AtlasSize*4))
+	p.ctx.TexImage2D(texture2D, 0, size, size, colorFormatRGBA, unsignedByte, make([]uint8, size*size*4))
 	p.logError()
 	p.atlasTexValid = true
 }
