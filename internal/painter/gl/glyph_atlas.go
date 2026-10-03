@@ -294,14 +294,16 @@ type textVertices struct {
 	vertices       int // coverage vertices, from the start of the buffer
 	colourVertices int // colour vertices, following them
 
-	generation int     // atlas generation the texture coordinates came from
-	pixScale   float32 // scale the glyphs were laid out and rasterised at
+	generation       int     // coverage atlas generation the coordinates came from
+	colourGeneration int     // and the colour atlas generation
+	pixScale         float32 // scale the glyphs were laid out and rasterised at
 }
 
 // usable reports whether cached geometry can still be drawn: not after an
 // atlas reset, which moves every texture coordinate, nor after a scale change.
-func (v *textVertices) usable(generation int, pixScale float32) bool {
-	return v != nil && v.generation == generation && v.pixScale == pixScale
+func (v *textVertices) usable(generation, colourGeneration int, pixScale float32) bool {
+	return v != nil && v.generation == generation &&
+		v.colourGeneration == colourGeneration && v.pixScale == pixScale
 }
 
 // appendGlyphQuad adds one glyph's two triangles to points. offX and offY are
@@ -350,7 +352,7 @@ func glyphCacheKey(text *canvas.Text, c fyne.Canvas) cache.FontCacheEntry {
 // glyphGeometry returns the glyph quads for text, building them on a miss.
 func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *textVertices {
 	key := glyphCacheKey(text, p.canvas)
-	if cached := p.textCache[key]; cached.usable(p.glyphAtlas.generation, p.pixScale) {
+	if cached := p.textCache[key]; cached.usable(p.glyphAtlas.generation, p.glyphColourAtlas.generation, p.pixScale) {
 		cache.GetTextTexture(key) // keep the expiry marker alive while still drawn
 		return cached
 	}
@@ -402,7 +404,6 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 		}
 	}
 	p.textBatch = append(p.textBatch, colourBatch...)
-	generation := p.glyphAtlas.generation
 
 	cached, ok := p.textCache[key]
 	if !ok {
@@ -422,7 +423,8 @@ func (p *painter) glyphGeometry(text *canvas.Text, face *paint.FontCacheItem) *t
 	}
 	cached.vertices = (len(p.textBatch) - len(colourBatch)) / coordinateSize2DWithTexture
 	cached.colourVertices = len(colourBatch) / coordinateSize2DWithTexture
-	cached.generation = generation
+	cached.generation = p.glyphAtlas.generation
+	cached.colourGeneration = p.glyphColourAtlas.generation
 	cached.pixScale = p.pixScale
 
 	// The only upload until these words leave the screen. Skipped when empty,

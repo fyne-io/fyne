@@ -218,14 +218,15 @@ func TestGlyphCacheKey(t *testing.T) {
 
 // Cached geometry must not be reused after an atlas reset or a scale change.
 func TestTextVerticesUsable(t *testing.T) {
-	cached := &textVertices{generation: 3, pixScale: 2}
+	cached := &textVertices{generation: 3, colourGeneration: 5, pixScale: 2}
 
-	assert.True(t, cached.usable(3, 2), "unchanged atlas and scale should be reusable")
-	assert.False(t, cached.usable(4, 2), "an atlas reset should invalidate the geometry")
-	assert.False(t, cached.usable(3, 1), "a scale change should invalidate the geometry")
+	assert.True(t, cached.usable(3, 5, 2), "unchanged atlases and scale should be reusable")
+	assert.False(t, cached.usable(4, 5, 2), "a coverage atlas reset should invalidate the geometry")
+	assert.False(t, cached.usable(3, 6, 2), "a colour atlas reset should invalidate it too")
+	assert.False(t, cached.usable(3, 5, 1), "a scale change should invalidate the geometry")
 
 	var missing *textVertices
-	assert.False(t, missing.usable(3, 2), "absent geometry is never usable")
+	assert.False(t, missing.usable(3, 5, 2), "absent geometry is never usable")
 }
 
 func TestAppendGlyphQuad(t *testing.T) {

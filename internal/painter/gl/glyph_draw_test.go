@@ -119,7 +119,7 @@ func TestGlyphGeometryInvalidatedByScale(t *testing.T) {
 	require.NotNil(t, first)
 
 	p.pixScale = 2
-	assert.False(t, first.usable(p.glyphAtlas.generation, p.pixScale),
+	assert.False(t, first.usable(p.glyphAtlas.generation, p.glyphColourAtlas.generation, p.pixScale),
 		"geometry rasterised for one scale cannot be drawn at another")
 }
 
