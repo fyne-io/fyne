@@ -42,8 +42,8 @@ func addGlyph(a *glyphGPUAtlas, run shaping.Output, idx, phase, phases int, size
 	if e, ok := a.entries[key]; ok {
 		return e, image.Rectangle{}
 	}
-	img, baseline := paint.RenderGlyphToImage(run, idx, size, scale, float32(phase)/float32(phases))
-	return a.add(key, img, baseline)
+	img, baseline, bearing := paint.RenderGlyphToImage(run, idx, size, scale, float32(phase)/float32(phases))
+	return a.add(key, img, baseline, bearing)
 }
 
 func TestSubpixelPhaseAt(t *testing.T) {
@@ -289,7 +289,7 @@ func TestIsColour(t *testing.T) {
 		var seen bool
 		paint.WalkStringGlyphs(face.Fonts, s, 32, fyne.TextStyle{}, 1,
 			func(run shaping.Output, idx int, _, _, _, _ float32) {
-				img, _ := paint.RenderGlyphToImage(run, idx, 32, 1, 0)
+				img, _, _ := paint.RenderGlyphToImage(run, idx, 32, 1, 0)
 				colour, seen = isColour(img), true
 			})
 		require.True(t, seen, "expected a glyph for %q", s)

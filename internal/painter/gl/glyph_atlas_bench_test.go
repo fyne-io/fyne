@@ -46,8 +46,8 @@ func BenchmarkGlyphAtlasFill(b *testing.B) {
 		atlas := newGlyphGPUAtlas(glyphAtlasTexSize)
 		for _, g := range glyphs {
 			key := atlas.cacheKey(g.run, g.idx, 0, 14, 1)
-			img, baseline := paint.RenderGlyphToImage(g.run, g.idx, 14, 1, 0)
-			atlas.add(key, img, baseline)
+			img, baseline, bearing := paint.RenderGlyphToImage(g.run, g.idx, 14, 1, 0)
+			atlas.add(key, img, baseline, bearing)
 		}
 	}
 }
@@ -59,8 +59,8 @@ func BenchmarkGlyphAtlasHit(b *testing.B) {
 	atlas := newGlyphGPUAtlas(glyphAtlasTexSize)
 	for _, g := range glyphs {
 		key := atlas.cacheKey(g.run, g.idx, 0, 14, 1)
-		img, baseline := paint.RenderGlyphToImage(g.run, g.idx, 14, 1, 0)
-		atlas.add(key, img, baseline)
+		img, baseline, bearing := paint.RenderGlyphToImage(g.run, g.idx, 14, 1, 0)
+		atlas.add(key, img, baseline, bearing)
 	}
 
 	b.ResetTimer()

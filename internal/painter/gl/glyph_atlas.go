@@ -73,6 +73,7 @@ type glyphAtlasEntry struct {
 	x, y     int  // top-left position in the atlas texture
 	w, h     int  // dimensions in pixels
 	baseline int  // baseline position in pixels down from the top of the glyph bitmap
+	bearing  int  // how far the glyph origin sits in from the left edge
 	colour   bool // lives in the colour atlas and is drawn untinted
 }
 
@@ -147,7 +148,7 @@ func (*glyphGPUAtlas) cacheKey(run shaping.Output, idx, phase int, fontSize, sca
 
 // add packs an already rasterised glyph, returning its entry and the region
 // of the atlas to upload.
-func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline int) (glyphAtlasEntry, image.Rectangle) {
+func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline, bearing int) (glyphAtlasEntry, image.Rectangle) {
 	w, h := glyphImg.Bounds().Dx(), glyphImg.Bounds().Dy()
 
 	// A glyph larger than the atlas cannot be packed at any offset.
@@ -188,7 +189,7 @@ func (a *glyphGPUAtlas) add(key glyphAtlasKey, glyphImg *image.RGBA, baseline in
 
 	// The entry keeps the glyph's true width so quads and texture coordinates
 	// are unaffected by the slot padding.
-	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline, colour: a.bpp == 4}
+	entry := glyphAtlasEntry{x: atlasX, y: atlasY, w: w, h: h, baseline: baseline, bearing: bearing, colour: a.bpp == 4}
 	a.entries[key] = entry
 	if h > a.shelfH {
 		a.shelfH = h
@@ -211,13 +212,13 @@ func (p *painter) glyphEntry(run shaping.Output, idx, phase, phases int, fontSiz
 	}
 
 	subpixel := float32(phase) / float32(phases)
-	glyphImg, baseline := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel)
+	glyphImg, baseline, bearing := paint.RenderGlyphToImage(run, idx, fontSize, scale, subpixel)
 
 	atlas := p.glyphAtlas
 	if isColour(glyphImg) {
 		atlas = p.glyphColourAtlas
 	}
-	entry, dirty := atlas.add(key, glyphImg, baseline)
+	entry, dirty := atlas.add(key, glyphImg, baseline, bearing)
 	if !dirty.Empty() {
 		p.uploadAtlasRegion(atlas, dirty)
 	}
@@ -309,7 +310,7 @@ func (v *textVertices) usable(generation, colourGeneration int, pixScale float32
 // appendGlyphQuad adds one glyph's two triangles to points. offX and offY are
 // its whole-pixel offset from the string origin.
 func (*painter) appendGlyphQuad(points []float32, entry glyphAtlasEntry, offX, offY float32, atlas *glyphGPUAtlas) []float32 {
-	x1 := offX
+	x1 := offX - float32(entry.bearing)
 	y1 := float32(math.Round(float64(offY)))
 	x2 := x1 + float32(entry.w)
 	y2 := y1 + float32(entry.h)

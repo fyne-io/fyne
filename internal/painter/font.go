@@ -267,8 +267,9 @@ func WalkStringGlyphs(f shaping.Fontmap, s string, fontSize float32, style fyne.
 // RenderGlyphToImage rasterises one glyph of run into a new image, in white so
 // that the bitmap carries coverage rather than colour and serves every colour it
 // is drawn in. subpixel shifts it right by that fraction of a pixel and must be
-// in [0,1). The returned baseline is measured down from the top of the image.
-func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline int) {
+// in [0,1). The returned baseline is measured down from the top of the image and
+// bearing is how far the glyph origin sits in from the left edge.
+func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel float32) (img *image.RGBA, baseline, bearing int) {
 	g := run.Glyphs[idx]
 	ren := &render.Renderer{FontSize: fontSize, PixScale: scale, Color: color.White}
 
@@ -279,8 +280,12 @@ func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel f
 		h = 1
 	}
 	italicPad := int(math.Ceil(float64(fontSize * scale / 5)))
+	// Ink can start left of the origin, so inset the glyph by that much.
+	if lsb := fixed266ToFloat32(g.XBearing) * scale; lsb < 0 {
+		bearing = int(math.Ceil(float64(-lsb)))
+	}
 	// One extra column beyond the advance for ink pushed right by subpixel.
-	w := int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 3
+	w := bearing + int(math.Ceil(float64(fixed266ToFloat32(g.Advance)*scale))) + italicPad + 3
 	if w <= 0 {
 		w = 1
 	}
@@ -292,8 +297,8 @@ func RenderGlyphToImage(run shaping.Output, idx int, fontSize, scale, subpixel f
 	shifted.YOffset = 0
 	singleRun := run
 	singleRun.Glyphs = []shaping.Glyph{shifted}
-	ren.DrawShapedRunAt(singleRun, img, 0, baseline)
-	return img, baseline
+	ren.DrawShapedRunAt(singleRun, img, bearing, baseline)
+	return img, baseline, bearing
 }
 
 // loadMeasureFont returns a new face for the font, which callers may use

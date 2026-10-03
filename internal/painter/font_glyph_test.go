@@ -8,6 +8,7 @@ import (
 	"github.com/go-text/typesetting/shaping"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal/painter"
@@ -75,7 +76,7 @@ func TestRenderGlyphToImage(t *testing.T) {
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	img, baseline := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
+	img, baseline, _ := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
 	require.NotNil(t, img)
 
 	assert.Positive(t, img.Bounds().Dx(), "glyph bitmap should have width")
@@ -91,8 +92,8 @@ func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	atZero, baseZero := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0)
-	atHalf, baseHalf := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0.5)
+	atZero, baseZero, _ := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0)
+	atHalf, baseHalf, _ := painter.RenderGlyphToImage(g.run, g.idx, 32, 1, 0.5)
 	require.NotNil(t, atZero)
 	require.NotNil(t, atHalf)
 
@@ -106,13 +107,41 @@ func TestRenderGlyphToImage_SubpixelShiftsInk(t *testing.T) {
 		"a positive sub-pixel offset should not move ink left")
 }
 
+// Ink that starts left of the glyph origin must not be clipped away.
+func TestRenderGlyphToImage_NegativeLeftBearing(t *testing.T) {
+	style := fyne.TextStyle{Italic: true}
+	face := painter.CachedFontFace(style, nil, nil)
+	require.NotNil(t, face)
+
+	bearingOf := func(s string) (int, fixed.Int26_6) {
+		t.Helper()
+		var run shaping.Output
+		var idx int
+		painter.WalkStringGlyphs(face.Fonts, s, 48, style, 1,
+			func(r shaping.Output, i int, _, _, _, _ float32) {
+				run, idx = r, i
+			})
+		require.NotEmpty(t, run.Glyphs, "expected a glyph for %q", s)
+		_, _, bearing := painter.RenderGlyphToImage(run, idx, 48, 1, 0)
+		return bearing, run.Glyphs[idx].XBearing
+	}
+
+	bearing, xb := bearingOf("j")
+	require.Negative(t, int(xb), "italic j should reach left of its origin")
+	assert.GreaterOrEqual(t, bearing, 1, "the bitmap must be inset to hold that ink")
+
+	bearing, xb = bearingOf("W")
+	require.Positive(t, int(xb), "W should start right of its origin")
+	assert.Zero(t, bearing, "no inset is needed when ink starts right of the origin")
+}
+
 // The bitmap must carry coverage, not colour, so one copy serves every colour.
 func TestRenderGlyphToImage_IsCoverageNotColour(t *testing.T) {
 	glyphs := walkGlyphs(t, "X", 24, 1)
 	require.Len(t, glyphs, 1)
 	g := glyphs[0]
 
-	img, _ := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
+	img, _, _ := painter.RenderGlyphToImage(g.run, g.idx, 24, 1, 0)
 	require.NotNil(t, img)
 
 	var inked bool
