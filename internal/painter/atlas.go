@@ -23,10 +23,15 @@ import (
 // changes. One texture is also what lets consecutive text draw as one batch.
 
 const (
-	// AtlasSize is the side of the square texture every glyph is packed into.
-	// It holds several thousand glyphs at UI sizes, which is every character of
-	// every font a normal app uses several times over.
+	// AtlasSize is the side of the square texture every glyph is packed into
+	// at first. It holds several thousand glyphs at UI sizes, which is every
+	// character of every font a normal app uses several times over.
 	AtlasSize = 1024
+	// AtlasMaxSize is the side the atlas grows to the first time it fills. Past
+	// 3x a page mixing body text, bold, italic, code and headings no longer fits
+	// in AtlasSize, and a working set larger than the atlas would reset it every
+	// frame, rasterising and uploading all of it again.
+	AtlasMaxSize = 2 * AtlasSize
 	// atlasPad separates neighbouring glyphs so linear sampling at the edge of
 	// one cannot pick up the next.
 	atlasPad = 1
@@ -57,6 +62,9 @@ type AtlasTexture interface {
 	// at x, y. Only the alpha channel carries anything: glyphs are coverage, and
 	// their colour comes with each quad.
 	UploadGlyph(img *image.RGBA, x, y int)
+	// ResizeAtlas replaces the texture with an empty one size texels square.
+	// Everything queued against the old one has been flushed first.
+	ResizeAtlas(size int)
 }
 
 // GlyphQuad is one glyph to draw: its rectangle in destination pixels and the
@@ -139,6 +147,7 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		}
 	}
 
+	size := float32(a.Size())
 	for i, pg := range glyphs {
 		e := a.slotScratch[i]
 		if e.empty() {
@@ -155,8 +164,8 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		y1 := float32(math.Round(float64(originY+pg.Y))) + float32(e.bearY)
 		dst = append(dst, GlyphQuad{
 			X1: x1, Y1: y1, X2: x1 + float32(e.width), Y2: y1 + float32(e.height),
-			U1: float32(e.x) / AtlasSize, V1: float32(e.y) / AtlasSize,
-			U2: float32(e.x+e.width) / AtlasSize, V2: float32(e.y+e.height) / AtlasSize,
+			U1: float32(e.x) / size, V1: float32(e.y) / size,
+			U2: float32(e.x+e.width) / size, V2: float32(e.y+e.height) / size,
 		})
 	}
 	return dst, true
@@ -179,7 +188,14 @@ func (a *GlyphAtlas) White(tex AtlasTexture) (u, v float32, ok bool) {
 		tex.UploadGlyph(img, x, y)
 		a.whiteX, a.whiteY, a.whiteOK = x, y, true
 	}
-	return (float32(a.whiteX) + whiteCentre) / AtlasSize, (float32(a.whiteY) + whiteCentre) / AtlasSize, true
+	size := float32(a.Size())
+	return (float32(a.whiteX) + whiteCentre) / size, (float32(a.whiteY) + whiteCentre) / size, true
+}
+
+// Size is the side of the square texture the atlas packs into, which a
+// painter allocates before anything is uploaded.
+func (a *GlyphAtlas) Size() int {
+	return a.packer.side()
 }
 
 // shape returns text's glyphs as WalkGlyphs places them, from the cache when the
@@ -263,14 +279,21 @@ func (a *GlyphAtlas) glyph(pg PlacedGlyph, sub int, fontSize, pixScale float32, 
 	return e, true
 }
 
-// place reserves w by h texels, emptying a full atlas first. Quads already
-// queued point at the old contents, so they are drawn before anything is
-// overwritten.
+// place reserves w by h texels, emptying a full atlas first, and growing it
+// if it has not grown yet. Quads already queued point at the old contents, so
+// they are drawn before anything is overwritten.
 func (a *GlyphAtlas) place(w, h int, tex AtlasTexture) (x, y int, ok bool) {
 	if x, y, ok = a.packer.add(w, h); ok {
 		return x, y, true
 	}
 	tex.FlushGlyphs()
+	// It grows once, then resets as before. A working set larger than
+	// AtlasMaxSize still resets every frame; evicting the least recently used
+	// shelf would be the next step if that turns up.
+	if side := a.packer.side(); side < AtlasMaxSize {
+		a.packer.size = side * 2
+		tex.ResizeAtlas(a.packer.size)
+	}
 	a.packer.reset()
 	clear(a.entries)
 	a.whiteOK = false
@@ -397,6 +420,7 @@ func (e glyphEntry) empty() bool { return e.width == 0 || e.height == 0 }
 // this badly enough to matter, the atlas simply resets and repacks - the
 // upgrade path is a skyline packer, not a rewrite of the callers.
 type atlasPacker struct {
+	size        int // side of the square being filled; zero means AtlasSize
 	penX        int // left edge of the next free slot on the current shelf
 	shelfY      int // top of the current shelf
 	shelfHeight int
@@ -408,11 +432,12 @@ type atlasPacker struct {
 // The reservation is a pixel wider and taller than asked for, so neighbours are
 // always separated whether they sit side by side or on adjacent shelves.
 func (p *atlasPacker) add(w, h int) (x, y int, ok bool) {
+	side := p.side()
 	slotW, slotH := w+atlasPad, h+atlasPad
-	if w <= 0 || h <= 0 || slotW > AtlasSize || slotH > AtlasSize {
+	if w <= 0 || h <= 0 || slotW > side || slotH > side {
 		return 0, 0, false
 	}
-	if p.penX+slotW > AtlasSize { // shelf full, open the next one
+	if p.penX+slotW > side { // shelf full, open the next one
 		p.shelfY += p.shelfHeight
 		p.shelfHeight = 0
 		p.penX = 0
@@ -421,7 +446,7 @@ func (p *atlasPacker) add(w, h int) (x, y int, ok bool) {
 		// A taller glyph grows the shelf rather than opening a new one, which
 		// would waste everything already placed on this one. Glyphs already on
 		// the shelf start at its top, so growing it downwards cannot disturb them.
-		if p.shelfY+slotH > AtlasSize {
+		if p.shelfY+slotH > side {
 			return 0, 0, false
 		}
 		p.shelfHeight = slotH
@@ -431,8 +456,16 @@ func (p *atlasPacker) add(w, h int) (x, y int, ok bool) {
 	return x, y, true
 }
 
-// reset empties the atlas. Callers must draw anything already queued against
-// the old contents first, and forget every glyphEntry they hold.
+// reset empties the atlas, keeping its size. Callers must draw anything
+// already queued against the old contents first, and forget every glyphEntry
+// they hold.
 func (p *atlasPacker) reset() {
 	p.penX, p.shelfY, p.shelfHeight = 0, 0, 0
+}
+
+func (p *atlasPacker) side() int {
+	if p.size == 0 {
+		return AtlasSize
+	}
+	return p.size
 }
