@@ -75,6 +75,25 @@ type App interface {
 	// Preferences returns the application preferences, used for storing configuration and state
 	Preferences() Preferences
 
+	// SecretPreferences returns a preference store for sensitive values such as tokens or passwords.
+	// It has the same API as [App.Preferences] but the values are kept out of the plain text
+	// preferences file. Where the operating system offers secure storage it is used:
+	// the Keychain on iOS and macOS (when running from an app bundle), the Android Keystore
+	// and the Data Protection API on Windows.
+	//
+	// On other platforms, and in development builds, there is no secure storage to hold a key, so the
+	// values are encrypted on disk with a key derived from the password returned by the passed function.
+	// The app should obtain this through secure means or by asking the user. It is called during the secret
+	// preference lookup process, so calls should be delayed until it is possible to retreive this information.
+	//
+	// An error is returned, with no store, if the stored values could not be read - for example when the
+	// password is missing or does not match the one the values were saved with.
+	//
+	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [NewWithID].
+	//
+	// Since: 2.9
+	SecretPreferences(password func() []byte) (Preferences, error)
+
 	// Storage returns a storage handler specific to this application.
 	Storage() Storage
 
