@@ -108,8 +108,12 @@ func TestGlyphAtlas_GrowsBeforeThrashing(t *testing.T) {
 		size  float32
 		style fyne.TextStyle
 	}{
-		{14, fyne.TextStyle{}}, {14, fyne.TextStyle{Bold: true}}, {14, fyne.TextStyle{Italic: true}},
-		{14, fyne.TextStyle{Monospace: true}}, {24, fyne.TextStyle{Bold: true}}, {18, fyne.TextStyle{Bold: true}},
+		{14, fyne.TextStyle{}},
+		{14, fyne.TextStyle{Bold: true}},
+		{14, fyne.TextStyle{Italic: true}},
+		{14, fyne.TextStyle{Monospace: true}},
+		{24, fyne.TextStyle{Bold: true}},
+		{18, fyne.TextStyle{Bold: true}},
 		{11, fyne.TextStyle{}},
 	}
 	const scale = 4
