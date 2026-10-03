@@ -94,10 +94,12 @@ type GlyphAtlas struct {
 }
 
 // TextQuads appends a quad per inked glyph of text, whose top-left is at pos, to
-// dst. It reports false with dst unchanged when the string has to take the
-// whole-run texture path instead: a character the shaper found no glyph for,
-// or a glyph a coverage atlas cannot hold, such as a colour emoji.
-func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Position, pixScale float32, tex AtlasTexture) ([]GlyphQuad, bool) {
+// dst. Glyphs wholly outside the device pixel columns minX to maxX are left
+// out, so a string far wider than the screen costs what is visible of it. It
+// reports false with dst unchanged when the string has to take the whole-run
+// texture path instead: a character the shaper found no glyph for, or a glyph
+// a coverage atlas cannot hold, such as a colour emoji.
+func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Position, pixScale, minX, maxX float32, tex AtlasTexture) ([]GlyphQuad, bool) {
 	glyphs, ok := a.shape(text, pixScale)
 	if !ok {
 		return dst, false
@@ -116,6 +118,12 @@ func (a *GlyphAtlas) TextQuads(dst []GlyphQuad, text *canvas.Text, pos fyne.Posi
 		resets := a.resets
 		a.slotScratch = a.slotScratch[:0]
 		for _, pg := range glyphs {
+			// A compare per glyph per frame, even for a 100k glyph line. Pen
+			// positions could be bisected instead if that ever shows up.
+			if !pg.inColumns(originX+pg.X, pixScale, minX, maxX) {
+				a.slotScratch = append(a.slotScratch, glyphEntry{}) // no quad
+				continue
+			}
 			_, sub := snapX(originX+pg.X, steps)
 			e, ok := a.glyph(pg, sub, text.TextSize, pixScale, tex)
 			if !ok {
@@ -288,6 +296,19 @@ type shapedKey struct {
 type shapedEntry struct {
 	glyphs []PlacedGlyph
 	ok     bool
+}
+
+// inColumns reports whether any of the glyph's ink, with its pen at x, can land
+// between the device pixel columns minX and maxX. The pad covers the bitmap's
+// antialiased border and the sub-pixel shift it is rasterised at.
+func (pg PlacedGlyph) inColumns(x, pixScale, minX, maxX float32) bool {
+	const pad = 2
+	left := x + fixed266ToFloat32(pg.Glyph.XBearing)*pixScale
+	right := left + fixed266ToFloat32(pg.Glyph.Width)*pixScale
+	if right < left {
+		left, right = right, left
+	}
+	return right+pad >= minX && left-pad <= maxX
 }
 
 // shapeable reports whether a shaped string is a candidate for the atlas at
