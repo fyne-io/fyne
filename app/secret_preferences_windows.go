@@ -33,8 +33,8 @@ func newDataBlob(data []byte) dataBlob {
 
 // newSecretStore returns the store used for secret preferences.
 // On Windows the data is protected with DPAPI, which ties it to the current Windows user account,
-// so the password function is not needed.
-func (a *fyneApp) newSecretStore(func() []byte) secretStore {
+// so the password is not needed.
+func (a *fyneApp) newSecretStore([]byte) secretStore {
 	return &dpapiStore{storage: a.newPlainSecretStore()}
 }
 

@@ -1,10 +1,24 @@
 package fyne
 
 import (
+	"errors"
 	"net/url"
 	"sync/atomic"
 	"time"
 )
+
+// ErrPasswordRequired is returned when a password is needed to protect data but none was provided,
+// for example by [App.SecretPreferences] when the operating system has no secure storage that can be used.
+// The caller should obtain a password and try again.
+//
+// Since: 2.9
+var ErrPasswordRequired = errors.New("a password is required")
+
+// ErrPasswordIncorrect is returned when a password was provided but the protected data could not be unlocked
+// with it, for example by [App.SecretPreferences] when the stored values were saved with a different password.
+//
+// Since: 2.9
+var ErrPasswordIncorrect = errors.New("the password is incorrect")
 
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, by default they will exit when all windows
@@ -82,17 +96,20 @@ type App interface {
 	// and the Data Protection API on Windows.
 	//
 	// On other platforms, and in development builds, there is no secure storage to hold a key, so the
-	// values are encrypted on disk with a key derived from the password returned by the passed function.
-	// The app should obtain this through secure means or by asking the user. It is called during the secret
-	// preference lookup process, so calls should be delayed until it is possible to retreive this information.
+	// values are encrypted on disk with a key derived from the passed password.
+	// The password may be nil, in which case [ErrPasswordRequired] is returned if this fallback is
+	// needed. The app can then obtain a password, through secure means or by asking the user, and call this
+	// again. The password is not used when operating system secure storage is available, or once the store
+	// has been returned by an earlier call. It is not retained, the caller should clear its content
+	// once it is no longer needed.
 	//
-	// An error is returned, with no store, if the stored values could not be read - for example when the
-	// password is missing or does not match the one the values were saved with.
+	// An error is returned, with no store, if the stored values could not be read - [ErrPasswordIncorrect]
+	// when the password does not match the one the values were saved with. The stored values are left untouched.
 	//
 	// As with [App.Preferences] a unique ID must be set for values to be persisted, see [NewWithID].
 	//
 	// Since: 2.9
-	SecretPreferences(password func() []byte) (Preferences, error)
+	SecretPreferences(password []byte) (Preferences, error)
 
 	// Storage returns a storage handler specific to this application.
 	Storage() Storage

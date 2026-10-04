@@ -43,7 +43,7 @@ var _ fyne.Preferences = (*secretPreferences)(nil)
 
 // newSecretPreferences returns the secret preferences loaded from the app's secret store.
 // An error is returned if existing data could not be loaded, in which case nothing must be saved over it.
-func newSecretPreferences(a *fyneApp, newStore func(func() []byte) secretStore, password func() []byte) (*secretPreferences, error) {
+func newSecretPreferences(a *fyneApp, newStore func([]byte) secretStore, password []byte) (*secretPreferences, error) {
 	p := &secretPreferences{app: a, InMemoryPreferences: internal.NewInMemoryPreferences()}
 	if a.uniqueID == "" && a.Metadata().ID == "" {
 		return p, nil
@@ -156,8 +156,8 @@ func (p *secretPreferences) resetSavedRecently() {
 }
 
 // newEncryptedSecretStore is the portable secure store - AES-256-GCM over the platform's plain store,
-// keyed from the password returned by the passed function.
-func (a *fyneApp) newEncryptedSecretStore(password func() []byte) secretStore {
+// keyed from the passed password.
+func (a *fyneApp) newEncryptedSecretStore(password []byte) secretStore {
 	return &encryptedStore{storage: a.newPlainSecretStore(), password: password}
 }
 
@@ -168,18 +168,14 @@ const (
 	secretFormatVersion = 2
 )
 
-var (
-	errSecretFormat   = errors.New("secret preferences data is not in a recognised format")
-	errSecretPassword = errors.New("no password was provided to protect secret preferences")
-	errSecretDecrypt  = errors.New("secret preferences could not be decrypted, the password may be incorrect")
-)
+var errSecretFormat = errors.New("secret preferences data is not in a recognised format")
 
 // encryptedStore encrypts data with AES-GCM before handing it to the storage store.
-// The key is derived, using PBKDF2, from a password that the app provides when it is first needed.
+// The key is derived, using PBKDF2, from a password that the app provides.
 // The stored layout is: version byte, key salt, GCM nonce, ciphertext with authentication tag.
 type encryptedStore struct {
 	storage  secretStore
-	password func() []byte
+	password []byte
 
 	lock      sync.Mutex
 	salt, key []byte
@@ -208,12 +204,12 @@ func (e *encryptedStore) load() ([]byte, error) {
 	}
 	plain, err := decryptSecret(key, data)
 	if err != nil && err != errSecretFormat {
-		return nil, errSecretDecrypt
+		return nil, fyne.ErrPasswordIncorrect
 	}
 	return plain, err
 }
 
-// newKey requests the password to derive a key for new data, which needs a new salt.
+// newKey derives a key for new data, which needs a new salt.
 func (e *encryptedStore) newKey() error {
 	salt := make([]byte, secretSaltSize)
 	if _, err := rand.Read(salt); err != nil {
@@ -239,23 +235,19 @@ func (e *encryptedStore) save(data []byte) error {
 	return e.storage.save(sealed)
 }
 
-// keyForSalt returns the key for the given salt, requesting the password from the app if it was not already derived.
-// The key is kept, rather than the password, so the app is asked only once.
+// keyForSalt returns the key for the given salt, deriving it from the password if that was not already done.
+// The key is kept, rather than the password, which is not retained once used.
 func (e *encryptedStore) keyForSalt(salt []byte) ([]byte, error) {
 	if e.key != nil && bytes.Equal(salt, e.salt) {
 		return e.key, nil
 	}
-	if e.password == nil {
-		return nil, errSecretPassword
-	}
-	password := e.password()
-	if len(password) == 0 {
-		return nil, errSecretPassword
+	if len(e.password) == 0 {
+		return nil, fyne.ErrPasswordRequired
 	}
 
 	e.salt = append([]byte{}, salt...)
-	e.key = deriveSecretKey(password, e.salt)
-	clear(password)
+	e.key = deriveSecretKey(e.password, e.salt)
+	e.password = nil
 	return e.key, nil
 }
 

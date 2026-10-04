@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/test"
 )
@@ -29,9 +30,9 @@ func (m *memorySecretStore) save(data []byte) error {
 	return nil
 }
 
-// newTestSecretApp returns an app whose secret store encrypts into the given store using the password function.
+// newTestSecretApp returns an app whose secret store encrypts into the given store using the password.
 // The error is that of loading any existing data from the store.
-func newTestSecretApp(id string, store secretStore, password func() []byte) (*fyneApp, error) {
+func newTestSecretApp(id string, store secretStore, password []byte) (*fyneApp, error) {
 	a := &fyneApp{uniqueID: id}
 	a.prefs = newPreferences(&fyneApp{}) // in-memory only, no ID so nothing is written to disk
 	a.secretPrefs = &secretPreferences{
@@ -41,10 +42,8 @@ func newTestSecretApp(id string, store secretStore, password func() []byte) (*fy
 	return a, a.secretPrefs.load()
 }
 
-func fixedPassword(password string) func() []byte {
-	return func() []byte {
-		return []byte(password)
-	}
+func fixedPassword(password string) []byte {
+	return []byte(password)
 }
 
 func TestSecretPreferences_EncryptRoundTrip(t *testing.T) {
@@ -169,44 +168,35 @@ func TestSecretPreferences_WrongPasswordIsAnError(t *testing.T) {
 	a.secretPrefs.forceImmediateSave()
 
 	_, err = newTestSecretApp("io.fyne.test.secret", blob, fixedPassword("wrong"))
-	assert.ErrorIs(t, err, errSecretDecrypt)
+	assert.ErrorIs(t, err, fyne.ErrPasswordIncorrect)
 }
 
-func TestSecretPreferences_PasswordRequestedOnce(t *testing.T) {
+func TestSecretPreferences_PasswordNotRetained(t *testing.T) {
 	test.NewTempApp(t)
 	blob := &memorySecretStore{}
-	calls := 0
-	password := func() []byte {
-		calls++
-		return []byte("pass")
-	}
+	password := fixedPassword("pass")
 
 	a, err := newTestSecretApp("io.fyne.test.secret", blob, password)
 	require.NoError(t, err)
-	assert.Equal(t, 1, calls, "the password is requested on load, even with nothing stored yet")
+	assert.Equal(t, []byte("pass"), password, "the caller's password is not modified")
+	assert.Nil(t, a.secretPrefs.store.(*encryptedStore).password)
 
+	// the derived key is kept, so saving does not need the password again
 	a.secretPrefs.SetString("token", "abc")
 	a.secretPrefs.forceImmediateSave()
-	a.secretPrefs.forceImmediateSave()
-	assert.Equal(t, 1, calls)
-
-	b, err := newTestSecretApp("io.fyne.test.secret", blob, password)
-	require.NoError(t, err)
-	b.secretPrefs.forceImmediateSave()
-	assert.Equal(t, 2, calls)
-	assert.Equal(t, "abc", b.secretPrefs.String("token"))
+	assert.NotNil(t, blob.data)
 }
 
 func TestSecretPreferences_MissingPasswordIsAnError(t *testing.T) {
 	test.NewTempApp(t)
-	for name, password := range map[string]func() []byte{"nil": nil, "empty": fixedPassword("")} {
+	for name, password := range map[string][]byte{"nil": nil, "empty": {}} {
 		t.Run(name, func(t *testing.T) {
 			blob := &memorySecretStore{}
 			_, err := newTestSecretApp("io.fyne.test.secret", blob, password)
-			assert.ErrorIs(t, err, errSecretPassword)
+			assert.ErrorIs(t, err, fyne.ErrPasswordRequired)
 
 			store := &encryptedStore{storage: blob, password: password}
-			assert.ErrorIs(t, store.save([]byte("secret")), errSecretPassword)
+			assert.ErrorIs(t, store.save([]byte("secret")), fyne.ErrPasswordRequired)
 			assert.Nil(t, blob.data)
 		})
 	}
@@ -236,7 +226,7 @@ func TestFyneApp_SecretPreferences(t *testing.T) {
 	a := &fyneApp{uniqueID: "io.fyne.test.secret"}
 	a.prefs = newPreferences(&fyneApp{})
 
-	newStore := func(password func() []byte) secretStore {
+	newStore := func(password []byte) secretStore {
 		return &encryptedStore{storage: &memorySecretStore{}, password: password}
 	}
 
@@ -261,12 +251,16 @@ func TestFyneApp_SecretPreferences_ErrorLeavesDataAndCanRetry(t *testing.T) {
 
 	b := &fyneApp{uniqueID: "io.fyne.test.secret"}
 	b.prefs = newPreferences(&fyneApp{})
-	newStore := func(password func() []byte) secretStore {
+	newStore := func(password []byte) secretStore {
 		return &encryptedStore{storage: blob, password: password}
 	}
 
-	secret, err := b.secretPreferencesFrom(newStore, fixedPassword("wrong"))
-	assert.ErrorIs(t, err, errSecretDecrypt)
+	secret, err := b.secretPreferencesFrom(newStore, nil)
+	assert.ErrorIs(t, err, fyne.ErrPasswordRequired)
+	assert.Nil(t, secret)
+
+	secret, err = b.secretPreferencesFrom(newStore, fixedPassword("wrong"))
+	assert.ErrorIs(t, err, fyne.ErrPasswordIncorrect)
 	assert.Nil(t, secret)
 	assert.Equal(t, saved, blob.data, "a failed load must not change the stored data")
 

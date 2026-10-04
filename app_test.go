@@ -70,7 +70,7 @@ func (dummyApp) Preferences() Preferences {
 	return nil
 }
 
-func (dummyApp) SecretPreferences(func() []byte) (Preferences, error) {
+func (dummyApp) SecretPreferences([]byte) (Preferences, error) {
 	return nil, nil
 }
 
