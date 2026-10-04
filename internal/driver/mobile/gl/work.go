@@ -43,18 +43,27 @@ uintptr_t process(struct fnargs* cargs, char* parg0, char* parg1, char* parg2, i
 import "C"
 
 import (
+	"sync/atomic"
 	"unsafe"
-
-	"fyne.io/fyne/v2/internal/async"
 )
 
-const workbufLen = 3
+const (
+	workbufLen = 3
+
+	// Coalesced wakeups make the worker drain in bursts, so the queue has to
+	// absorb a frame's worth of calls before enqueue has to wait.
+	workQueueLen = 256
+)
 
 type context struct {
 	cptr  uintptr
 	debug int32
 
-	workAvailable *async.UnboundedStructChan
+	workAvailable chan struct{}
+
+	// Producers signal only on the idle to awake transition, so a burst of N
+	// calls wakes the worker once rather than N times.
+	consumerIdle atomic.Bool
 
 	// work is a queue of calls to execute.
 	work chan call
@@ -74,9 +83,27 @@ type context struct {
 	parg  [workbufLen]*C.char
 }
 
-func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable.Out() }
+func (ctx *context) WorkAvailable() <-chan struct{} { return ctx.workAvailable }
 
 func (ctx *context) HasWork() bool { return len(ctx.work) > 0 }
+
+func (ctx *context) signal() {
+	if !ctx.consumerIdle.CompareAndSwap(true, false) {
+		return // worker is awake and will drain the queue itself
+	}
+	select {
+	case ctx.workAvailable <- struct{}{}:
+	default: // a wakeup is already pending
+	}
+}
+
+// drained reports whether the queue is empty and the worker may stop. It
+// publishes the idle state first, because a call arriving while the worker is
+// still awake is not signalled by its producer and has to be caught here.
+func (ctx *context) drained() bool {
+	ctx.consumerIdle.Store(true)
+	return len(ctx.work) == 0
+}
 
 type context3 struct {
 	*context
@@ -87,10 +114,11 @@ type context3 struct {
 // See the Worker interface for more details on how it is used.
 func NewContext() (Context, Worker) {
 	glctx := &context{
-		workAvailable: async.NewUnboundedStructChan(),
-		work:          make(chan call, workbufLen*4),
+		workAvailable: make(chan struct{}, 1),
+		work:          make(chan call, workQueueLen),
 		retvalue:      make(chan C.uintptr_t),
 	}
+	glctx.consumerIdle.Store(true)
 	if C.GLES_VERSION == "GL_ES_2_0" {
 		return glctx, glctx
 	}
@@ -105,7 +133,7 @@ func Version() string {
 
 func (ctx *context) enqueue(c call) uintptr {
 	ctx.work <- c
-	ctx.workAvailable.In() <- struct{}{}
+	ctx.signal()
 
 	if c.blocking {
 		return uintptr(<-ctx.retvalue)
@@ -122,7 +150,10 @@ func (ctx *context) DoWork() {
 		case w := <-ctx.work:
 			queue = append(queue, w)
 		default:
-			return
+			if ctx.drained() {
+				return
+			}
+			continue
 		}
 		blocking := queue[len(queue)-1].blocking
 	enqueue:
