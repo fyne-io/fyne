@@ -13,10 +13,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// shortcutModifier returns the modifier the desktop driver detects the built-in
+// defaultModifier returns the modifier the desktop driver detects the built-in
 // shortcuts with, i.e. fyne.KeyModifierShortcutDefault (Command on macOS,
 // Control everywhere else).
-func shortcutModifier() key.Modifiers {
+func defaultModifier() key.Modifiers {
 	if runtime.GOOS == goos.Darwin {
 		return key.ModMeta
 	}
@@ -79,11 +79,11 @@ func keyTestEntry(t *testing.T, text string) (*canvas, *widget.Entry) {
 }
 
 func TestMobileDriverKeyboardShortcuts(t *testing.T) {
-	t.Run("shortcut modifier + A selects all text", func(t *testing.T) {
+	t.Run("default modifier + A selects all text", func(t *testing.T) {
 		c, entry := keyTestEntry(t, "hello world")
 
 		d.DoFromGoroutine(func() {
-			d.typeDownCanvas(c, -1, key.CodeA, shortcutModifier())
+			d.typeDownCanvas(c, -1, key.CodeA, defaultModifier())
 		}, true)
 
 		assert.Equal(t, "hello world", entry.SelectedText())
