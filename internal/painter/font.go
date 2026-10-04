@@ -191,6 +191,11 @@ func CachedFontFace(style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObj
 func ClearFontCache() {
 	fontCache.Clear()
 	fontCustomCache.Clear()
+	parsedFonts.Clear()
+
+	runBufferMut.Lock()
+	clear(shapeCache)
+	runBufferMut.Unlock()
 }
 
 // DrawString draws a string into an image.
@@ -205,6 +210,8 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 		PixScale: scale,
 		Color:    c,
 	}
+	// we do not support newlines in string primitive yet, but the go-text now cuts the run
+	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 
 	advance := float32(0)
 	walkString(f, s, float32ToFixed266(fontSize), style, &advance, scale, func(run shaping.Output, x, y float32) {
@@ -218,19 +225,27 @@ func DrawStringOffset(dst draw.Image, s string, c color.Color, f shaping.Fontmap
 	})
 }
 
+// loadMeasureFont returns a new face for the font, which callers may use
+// without locking. Faces are not safe for concurrent use, but the parsed Font
+// they share is, so the parse is reused.
 func loadMeasureFont(data fyne.Resource) *font.Face {
+	if ft, ok := parsedFonts.Load(data); ok {
+		return font.NewFace(ft)
+	}
 	loaded, err := font.ParseTTF(bytes.NewReader(data.Content()))
 	if err != nil {
 		fyne.LogError("font load error", err)
 		return nil
 	}
-
+	parsedFonts.Store(data, loaded.Font)
 	return loaded
 }
 
 // MeasureString returns how far dot would advance by drawing s with f.
 // Tabs are translated into a dot location change.
 func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.TextStyle) (size fyne.Size, advance float32) {
+	// we do not support newlines in string primitive yet, but the go-text now cuts the run
+	s = strings.ReplaceAll(s, "\n", string([]rune{replacementChar}))
 	return walkString(f, s, float32ToFixed266(textSize), style, &advance, 1, func(shaping.Output, float32, float32) {})
 }
 
@@ -275,8 +290,39 @@ type shapedRun struct {
 	x   float32
 }
 
+// shapedString is what the shaper made of one string: a space, which sets the
+// tab width and line metrics, then the string's runs in order with the tab
+// stops between them. Shaping depends on the font size alone, not the scale, so
+// measuring a string and drawing it share one.
+type shapedString struct {
+	space shaping.Output
+	steps []shapeStep
+}
+
+// shapeStep is one shaped run, or a tab stop when tab is set.
+type shapeStep struct {
+	out shaping.Output
+	tab bool
+}
+
+type shapeKey struct {
+	text  string
+	faces *dynamicFontMap
+	size  fixed.Int26_6
+}
+
+// shapeCacheMax caps the shaped string cache. A string is needed only until it
+// has been measured and drawn, and labels that churn make new ones without end,
+// so past the cap the cache is emptied and refills from the strings in use.
+// 4096 strings of a dozen glyphs is about 4MB.
+const shapeCacheMax = 4096
+
 var (
-	runBuffer    []shapedRun
+	runBuffer []shapedRun
+	// shapeCache holds strings shaped for measuring until they are drawn, and
+	// the other way round.
+	shapeCache = make(map[shapeKey]*shapedString)
+	// runBufferMut guards runBuffer, shapeCache and the shared shaper.
 	runBufferMut async.Mutex
 )
 
@@ -289,26 +335,14 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 ) (size fyne.Size, base float32) {
 	s = strings.ReplaceAll(s, "\r", "")
 
-	runes := []rune(s)
-	in := shaping.Input{
-		Text:      []rune{' '},
-		RunStart:  0,
-		RunEnd:    1,
-		Direction: di.DirectionLTR,
-		Face:      faces.ResolveFace(' '),
-		Size:      textSize,
-	}
-	segmenter := &shaping.Segmenter{}
-	out := shaper.Shape(in)
-
-	in.Text = runes
-	in.RunStart = 0
-	in.RunEnd = len(runes)
+	runBufferMut.Lock()
+	defer runBufferMut.Unlock()
+	shaped := shapeString(faces, s, textSize)
 
 	x := float32(0)
 	spacew := scale * fontTabSpaceSize
 	if style.Monospace {
-		spacew = scale * fixed266ToFloat32(out.Advance)
+		spacew = scale * fixed266ToFloat32(shaped.space.Advance)
 	}
 
 	maxAscent := fixed.Int26_6(0)
@@ -318,10 +352,54 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 		}
 		runBuffer = append(runBuffer, shapedRun{out: run, x: runX})
 	}
+	for _, step := range shaped.steps {
+		if step.tab {
+			x = tabStop(spacew, x, style.TabWidth)
+		} else {
+			x = layoutRun(step.out, x, scale, collect)
+		}
+	}
 
-	ins := splitEmojiSequences(in, faces, segmenter)
-	runBufferMut.Lock()
-	for _, in := range ins {
+	y := fixed266ToFloat32(maxAscent) * scale
+	for _, run := range runBuffer {
+		cb(run.out, run.x, y)
+	}
+	clear(runBuffer)
+	runBuffer = runBuffer[:0]
+
+	*advance = x
+	return fyne.NewSize(*advance, fixed266ToFloat32(shaped.space.LineBounds.LineThickness())),
+		fixed266ToFloat32(shaped.space.LineBounds.Ascent)
+}
+
+// shapeString returns s shaped in faces at textSize, from the cache when it has
+// been shaped already. Only the painter's own font maps are cached: they are
+// what every caller but tests pass, and comparable.
+func shapeString(faces shaping.Fontmap, s string, textSize fixed.Int26_6) *shapedString {
+	key := shapeKey{text: s, size: textSize}
+	key.faces, _ = faces.(*dynamicFontMap)
+	if key.faces != nil {
+		if shaped, ok := shapeCache[key]; ok {
+			return shaped
+		}
+	}
+
+	in := shaping.Input{
+		Text:      []rune{' '},
+		RunStart:  0,
+		RunEnd:    1,
+		Direction: di.DirectionLTR,
+		Face:      faces.ResolveFace(' '),
+		Size:      textSize,
+	}
+	shaped := &shapedString{space: shaper.Shape(in)}
+
+	runes := []rune(s)
+	in.Text = runes
+	in.RunStart = 0
+	in.RunEnd = len(runes)
+	segmenter := &shaping.Segmenter{}
+	for _, in := range splitEmojiSequences(in, faces, segmenter) {
 		inEnd := in.RunEnd
 
 		pending := false
@@ -329,9 +407,9 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			if r == '\t' {
 				if pending {
 					in.RunEnd = i
-					x = shapeCallback(in, x, scale, collect)
+					shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
 				}
-				x = tabStop(spacew, x, style.TabWidth)
+				shaped.steps = append(shaped.steps, shapeStep{tab: true})
 
 				in.RunStart = i + 1
 				in.RunEnd = inEnd
@@ -341,24 +419,22 @@ func walkString(faces shaping.Fontmap, s string, textSize fixed.Int26_6, style f
 			}
 		}
 
-		x = shapeCallback(in, x, scale, collect)
+		shaped.steps = append(shaped.steps, shapeStep{out: shaper.Shape(in)})
 	}
 
-	y := fixed266ToFloat32(maxAscent) * scale
-	for _, run := range runBuffer {
-		cb(run.out, run.x, y)
+	if key.faces != nil {
+		if len(shapeCache) >= shapeCacheMax {
+			clear(shapeCache)
+		}
+		shapeCache[key] = shaped
 	}
-	clear(runBuffer)
-	runBuffer = runBuffer[:0]
-	runBufferMut.Unlock()
-
-	*advance = x
-	return fyne.NewSize(*advance, fixed266ToFloat32(out.LineBounds.LineThickness())),
-		fixed266ToFloat32(out.LineBounds.Ascent)
+	return shaped
 }
 
-func shapeCallback(in shaping.Input, x, scale float32, cb func(shaping.Output, float32)) float32 {
-	out := shaper.Shape(in)
+// layoutRun places one shaped run with its pen at x, splitting out glyphs the
+// font did not have so each can be drawn on its own, and returns the pen
+// position after it.
+func layoutRun(out shaping.Output, x, scale float32, cb func(shaping.Output, float32)) float32 {
 	glyphs := out.Glyphs
 	start := 0
 	adv := fixed.I(0)
@@ -506,6 +582,11 @@ type cacheID struct {
 var (
 	fontCache       async.Map[cacheID, *FontCacheItem]
 	fontCustomCache async.Map[fyne.Resource, *FontCacheItem] // for custom resources
+
+	// parsedFonts holds each font resource parsed once. Every style's face list
+	// includes the fallback and emoji fonts, and parsing the emoji font alone
+	// takes several MB, so parsing per style multiplied that.
+	parsedFonts async.Map[fyne.Resource, *font.Font]
 )
 
 type noopLogger struct{}

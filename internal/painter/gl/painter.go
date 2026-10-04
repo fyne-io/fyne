@@ -55,6 +55,7 @@ type painter struct {
 	programs            *programs
 	shaderPrograms      map[string]*shaderState // lazily compiled programs for user shaders, keyed by Shader.Name
 	texScale            float32
+	vertices            []float32 // updateBuffer's upload buffer, reused
 }
 
 // Declare conformity to Painter interface

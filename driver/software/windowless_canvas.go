@@ -31,7 +31,7 @@ type WindowlessCanvas interface {
 
 // NewCanvas creates a new canvas in memory that can render without hardware support.
 func NewCanvas() WindowlessCanvas {
-	return newCanvas(software.NewPainter(), false)
+	return createCanvas(software.NewPainter(), false)
 }
 
 // NewCanvasWithPainter creates a new canvas in memory that can render without hardware support
@@ -39,14 +39,14 @@ func NewCanvas() WindowlessCanvas {
 //
 // Since: 2.8
 func NewCanvasWithPainter(painter driver.Painter) WindowlessCanvas {
-	return newCanvas(painter, false)
+	return createCanvas(painter, false)
 }
 
 // NewTransparentCanvas creates a new canvas in memory that can render without hardware support without a background color.
 //
 // Since: 2.2
 func NewTransparentCanvas() WindowlessCanvas {
-	return newCanvas(software.NewPainter(), true)
+	return createCanvas(software.NewPainter(), true)
 }
 
 // NewTransparentCanvasWithPainter creates a new canvas in memory that can render without hardware support
@@ -54,10 +54,10 @@ func NewTransparentCanvas() WindowlessCanvas {
 //
 // Since: 2.8
 func NewTransparentCanvasWithPainter(painter driver.Painter) WindowlessCanvas {
-	return newCanvas(painter, true)
+	return createCanvas(painter, true)
 }
 
-func newCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
+func createCanvas(painter driver.Painter, transparent bool) WindowlessCanvas {
 	c := &canvas{
 		focusMgr:    app.NewFocusManager(nil),
 		padded:      true,

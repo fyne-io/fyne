@@ -61,19 +61,6 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(App)) {
-	//if tid := uint64(C.threadID()); tid != initThreadID {
-	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	//}
-
-	go func() {
-		f(theApp)
-		// TODO(crawshaw): trigger runApp to return
-	}()
-	C.runApp()
-	panic("unexpected return from app.runApp")
-}
-
 var (
 	pixelsPerPt float32
 	screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
@@ -86,6 +73,23 @@ var DisplayMetrics struct {
 
 func GoBack() {
 	// Apple do not permit apps to exit in any way other than user pressing home button / gesture
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
+	// if tid := uint64(C.threadID()); tid != initThreadID {
+	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
+	// }
+
+	go func() {
+		f(theApp)
+		// TODO(crawshaw): trigger runApp to return
+	}()
+	C.runApp()
+	panic("unexpected return from app.runApp")
 }
 
 //export setDisplayMetrics

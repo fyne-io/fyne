@@ -80,10 +80,10 @@ type baseTabs interface {
 	onSelected() func(*TabItem)
 
 	items() []*TabItem
-	setItems([]*TabItem)
+	applyItems([]*TabItem)
 
-	selected() int
-	setSelected(int)
+	getCurrent() int
+	setCurrent(int)
 
 	tabLocation() TabLocation
 
@@ -167,8 +167,8 @@ func removeIndex(t baseTabs, index int) {
 		return
 	}
 	setItems(t, append(items[:index], items[index+1:]...))
-	if s := t.selected(); index < s {
-		t.setSelected(s - 1)
+	if s := t.getCurrent(); index < s {
+		t.setCurrent(s - 1)
 	}
 }
 
@@ -182,7 +182,7 @@ func removeItem(t baseTabs, item *TabItem) {
 }
 
 func selected(t baseTabs) *TabItem {
-	selected := t.selected()
+	selected := t.getCurrent()
 	items := t.items()
 	if selected < 0 || selected >= len(items) {
 		return nil
@@ -191,7 +191,7 @@ func selected(t baseTabs) *TabItem {
 }
 
 func selectIndex(t baseTabs, index int) {
-	selected := t.selected()
+	selected := t.getCurrent()
 
 	if selected == index {
 		// No change, so do nothing
@@ -211,7 +211,7 @@ func selectIndex(t baseTabs, index int) {
 	}
 
 	t.setTransitioning(true)
-	t.setSelected(index)
+	t.setCurrent(index)
 	t.Refresh()
 
 	if f := t.onSelected(); f != nil {
@@ -233,14 +233,14 @@ func setItems(t baseTabs, items []*TabItem) {
 	if build.HasHints && mismatchedTabItems(items) {
 		internal.LogHint("Tab items should all have the same type of content (text, icons or both)")
 	}
-	t.setItems(items)
-	selected := t.selected()
+	t.applyItems(items)
+	selected := t.getCurrent()
 	count := len(items)
 	switch {
 	case count == 0:
 		// No items available to be selected
 		selectIndex(t, -1) // Unsure OnUnselected gets called if applicable
-		t.setSelected(-1)
+		t.setCurrent(-1)
 	case selected < 0:
 		// Current is first tab item
 		selectIndex(t, 0)
@@ -385,7 +385,7 @@ func (r *baseTabsRenderer) layout(t baseTabs, size fyne.Size) {
 	r.bar.Resize(barSize)
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	selected := t.selected()
+	selected := t.getCurrent()
 	for i, ti := range t.items() {
 		if i == selected {
 			ti.Content.Move(contentPos)
@@ -425,9 +425,9 @@ func (r *baseTabsRenderer) minSize(t baseTabs) fyne.Size {
 	switch t.tabLocation() {
 	case TabLocationLeading, TabLocationTrailing:
 		return fyne.NewSize(barMin.Width+contentMin.Width+pad,
-			fyne.Max(contentMin.Height, accessoryMin.Height+buttonPad+tabsMin.Height))
+			max(contentMin.Height, accessoryMin.Height+buttonPad+tabsMin.Height))
 	default:
-		return fyne.NewSize(fyne.Max(contentMin.Width, accessoryMin.Width+buttonPad+tabsMin.Width),
+		return fyne.NewSize(max(contentMin.Width, accessoryMin.Width+buttonPad+tabsMin.Width),
 			barMin.Height+contentMin.Height+pad)
 	}
 }
@@ -490,7 +490,7 @@ func (r *baseTabsRenderer) moveIndicator(pos fyne.Position, siz fyne.Size, th fy
 
 func (r *baseTabsRenderer) objects(t baseTabs) []fyne.CanvasObject {
 	objects := []fyne.CanvasObject{r.bar, r.divider, r.indicator}
-	if i, is := t.selected(), t.items(); i >= 0 && i < len(is) {
+	if i, is := t.getCurrent(), t.items(); i >= 0 && i < len(is) {
 		objects = append(objects, is[i].Content)
 	}
 	return objects
@@ -662,7 +662,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	iconSize := r.iconSize()
 	padding := th.Size(theme.SizeNamePadding)
 	if r.button.iconPosition == buttonIconTop {
-		contentWidth = fyne.Max(textSize.Width, iconSize)
+		contentWidth = max(textSize.Width, iconSize)
 		if r.icon.Visible() {
 			contentHeight += iconSize - padding*2
 		}
@@ -673,7 +673,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 			contentHeight += textSize.Height
 		}
 	} else {
-		contentHeight = fyne.Max(textSize.Height, iconSize)
+		contentHeight = max(textSize.Height, iconSize)
 		if r.icon.Visible() {
 			contentWidth += iconSize
 		}
@@ -687,7 +687,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	if r.button.onClosed != nil {
 		inlineIconSize := th.Size(theme.SizeNameInlineIcon)
 		contentWidth += inlineIconSize + padding
-		contentHeight = fyne.Max(contentHeight, inlineIconSize)
+		contentHeight = max(contentHeight, inlineIconSize)
 	}
 	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
 }

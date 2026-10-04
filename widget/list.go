@@ -233,7 +233,7 @@ func (l *List) Unbind() {
 	l.Refresh()
 }
 
-func (l *List) scrollTo(id ListItemID) {
+func (l *List) scrollWithoutItemCheckTo(id ListItemID) {
 	if l.scroller == nil {
 		return
 	}
@@ -295,7 +295,7 @@ func (l *List) Highlight(id ListItemID) {
 		newID = l.Length() - 1
 	}
 
-	l.scrollTo(newID)
+	l.scrollWithoutItemCheckTo(newID)
 	l.currentHighlight = newID
 	if l.OnHighlighted != nil {
 		l.OnHighlighted(newID)
@@ -325,7 +325,7 @@ func (l *List) Select(id ListItemID) {
 			f(id)
 		}
 	}()
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -340,7 +340,7 @@ func (l *List) ScrollTo(id ListItemID) {
 	if id < 0 || id >= length {
 		return
 	}
-	l.scrollTo(id)
+	l.scrollWithoutItemCheckTo(id)
 	l.Refresh()
 }
 
@@ -401,7 +401,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight++
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	case fyne.KeyUp:
 		if l.currentHighlight <= 0 {
@@ -409,7 +409,7 @@ func (l *List) TypedKey(event *fyne.KeyEvent) {
 		}
 		l.RefreshItem(l.currentHighlight)
 		l.currentHighlight--
-		l.scrollTo(l.currentHighlight)
+		l.scrollWithoutItemCheckTo(l.currentHighlight)
 		l.RefreshItem(l.currentHighlight)
 	}
 

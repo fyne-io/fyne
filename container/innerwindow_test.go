@@ -70,6 +70,22 @@ func TestInnerWindow_MinSize(t *testing.T) {
 	assert.Equal(t, winMin, w2.MinSize())
 }
 
+func TestInnerWindow_SetActive(t *testing.T) {
+	w := NewInnerWindow("Title", widget.NewLabel("Content"))
+	bg := cache.Renderer(w).(*innerWindowRenderer).bg
+
+	w.SetActive(true)
+	active := bg.Shadow
+
+	w.SetActive(false)
+	inactive := bg.Shadow
+
+	assert.Less(t, inactive.BlurRadius, active.BlurRadius)
+	assert.Less(t, inactive.Spread, active.Spread)
+	assert.Less(t, inactive.Offset.X, active.Offset.X)
+	assert.Less(t, inactive.Offset.Y, active.Offset.Y)
+}
+
 func TestInnerWindow_SetContent(t *testing.T) {
 	w := NewInnerWindow("Title", widget.NewLabel("Content"))
 	r := cache.Renderer(w).(*innerWindowRenderer)

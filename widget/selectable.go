@@ -1,7 +1,8 @@
 package widget
 
 import (
-	"math"
+	"sort"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -73,10 +74,6 @@ func (s *selectable) DragEnd() {
 }
 
 func (s *selectable) Dragged(d *fyne.DragEvent) {
-	s.dragged(d)
-}
-
-func (s *selectable) dragged(d *fyne.DragEvent) {
 	if !s.selecting || s.selectEnded {
 		s.selectEnded = false
 		s.updateMousePointer(d.Position)
@@ -117,6 +114,8 @@ func (s *selectable) MouseUp(ev *desktop.MouseEvent) {
 
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
+// The styling is left behind, but each list item that the selection starts is
+// introduced by its marker so that the structure of a list is kept.
 func (s *selectable) SelectedText() string {
 	if s == nil || !s.selecting {
 		return ""
@@ -126,8 +125,8 @@ func (s *selectable) SelectedText() string {
 	if start == stop {
 		return ""
 	}
-	r := ([]rune)(s.provider.String())
-	return string(r[start:stop])
+
+	return s.provider.textBetween(start, stop)
 }
 
 func (s *selectable) Tapped(*fyne.PointEvent) {
@@ -177,29 +176,43 @@ func (s *selectable) TypedShortcut(sh fyne.Shortcut) {
 	}
 }
 
-func (s *selectable) cursorColAt(text []rune, pos fyne.Position) int {
+func (s *selectable) cursorColAt(row int, pos fyne.Position) int {
 	th := s.theme
-	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
+	provider := s.provider
 
-	for i := 0; i < len(text); i++ {
-		str := string(text[0:i])
-		wid := fyne.MeasureText(str, textSize, s.style).Width
-		charWid := fyne.MeasureText(string(text[i]), textSize, s.style).Width
-		if pos.X < innerPad+wid+(charWid/2) {
-			return i
+	bound := provider.rowBoundary(row)
+	if bound != nil && len(bound.segments) == 1 {
+		if text, ok := bound.segments[0].(*TextSegment); ok {
+			runes := rowSegmentRunes(bound, 0)
+			if concealed(text) {
+				runes = []rune(strings.Repeat(passwordChar, len(runes)))
+			}
+			size, style := text.size(), text.Style.TextStyle
+			for i := 0; i < len(runes); i++ {
+				wid := fyne.MeasureText(string(runes[0:i]), size, style).Width
+				charWid := fyne.MeasureText(string(runes[i]), size, style).Width
+				if pos.X < innerPad+wid+(charWid/2) {
+					return i
+				}
+			}
+			return len(runes)
 		}
 	}
-	return len(text)
+
+	textSize := th.Size(s.getSizeName())
+	return sort.Search(provider.rowLength(row), func(i int) bool {
+		mid := (provider.lineSizeToColumn(i, row, textSize, innerPad).Width +
+			provider.lineSizeToColumn(i+1, row, textSize, innerPad).Width) / 2
+		return pos.X < mid
+	})
 }
 
 func (s *selectable) getRowCol(p fyne.Position) (row, col int) {
 	th := s.theme
-	textSize := th.Size(s.getSizeName())
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
-	rowHeight := s.provider.charMinSize(false, s.style, textSize).Height // TODO handle Password
-	row = int(math.Floor(float64(p.Y-innerPad+th.Size(theme.SizeNameLineSpacing)) / float64(rowHeight)))
+	row = s.provider.rowAt(p.Y - innerPad + th.Size(theme.SizeNameLineSpacing))
 	col = 0
 	if row < 0 {
 		row = 0
@@ -207,8 +220,9 @@ func (s *selectable) getRowCol(p fyne.Position) (row, col int) {
 		row = s.provider.rows() - 1
 		col = s.provider.rowLength(row)
 	} else {
+		textSize := th.Size(s.getSizeName())
 		offset := s.provider.rowAlignOffset(row, textSize, innerPad)
-		col = s.cursorColAt(s.provider.row(row), p.SubtractXY(offset, 0))
+		col = s.cursorColAt(row, p.SubtractXY(offset, 0))
 	}
 
 	return row, col
@@ -259,7 +273,7 @@ func textPosFromRowCol(row, col int, prov *RichText) int {
 	if b == nil {
 		return col
 	}
-	return b.begin + col
+	return b.docBegin + col
 }
 
 func (s *selectable) updateMousePointer(p fyne.Position) {
@@ -296,12 +310,20 @@ func (*selectableRenderer) MinSize() fyne.Size {
 }
 
 func (r *selectableRenderer) Objects() []fyne.CanvasObject {
+	if r.sel.provider != nil && len(r.sel.provider.decor) > 0 {
+		return nil // the text draws them, above the panels that its blocks sit on
+	}
+
 	return r.selections
 }
 
 func (r *selectableRenderer) Refresh() {
 	r.buildSelection()
 	selections := r.selections
+	if r.sel.provider != nil {
+		// hand them over so the text can draw them above any panels that it has
+		r.sel.provider.setHighlights(r.sel, selections)
+	}
 	v := fyne.CurrentApp().Settings().ThemeVariant()
 
 	selectionColor := r.sel.theme.Color(theme.ColorNameSelection, v)
@@ -347,10 +369,13 @@ func (r *selectableRenderer) buildSelection() {
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (float32, float32) {
 		sz := provider.lineSizeToColumn(column, row, textSize, innerPad)
-		return sz.Width + provider.rowAlignOffset(row, textSize, innerPad), sz.Height*float32(row) - th.Size(theme.SizeNameInputBorder) + innerPad
+		y, _ := provider.rowGeometry(row)
+		return sz.Width + provider.rowAlignOffset(row, textSize, innerPad), y - th.Size(theme.SizeNameInputBorder) + innerPad
 	}
-
-	lineHeight := r.sel.provider.charMinSize(r.sel.password, r.sel.style, textSize).Height
+	rowHeight := func(row int) float32 {
+		_, h := provider.rowGeometry(row)
+		return h
+	}
 
 	minmax := func(a, b int) (int, int) {
 		if a < b {
@@ -398,7 +423,7 @@ func (r *selectableRenderer) buildSelection() {
 		x2, _ := getCoordinates(endCol, row)
 
 		// resize and reposition each rectangle
-		r.selections[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
+		r.selections[i].Resize(fyne.NewSize(x2-x1+1, rowHeight(row)))
 		r.selections[i].Move(fyne.NewPos(x1-1, y1))
 	}
 }
