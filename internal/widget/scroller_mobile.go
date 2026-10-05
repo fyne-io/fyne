@@ -10,7 +10,7 @@ func (s *Scroll) DragEnd() {
 
 // Dragged will scroll on any drag - bar or otherwise - for mobile
 func (s *Scroll) Dragged(e *fyne.DragEvent) {
-	if s.updateOffset(e.Dragged.DX, e.Dragged.DY) {
-		s.refreshWithoutOffsetUpdate()
+	if s.scrollTo(s.Content.Size(), -e.Dragged.DX, -e.Dragged.DY) {
+		s.offsetUpdated()
 	}
 }
