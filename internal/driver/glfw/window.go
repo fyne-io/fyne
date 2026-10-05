@@ -56,8 +56,13 @@ func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
 		maxTexture = p.MaxTextureSize()
 	}
 	limit := maxWindowSize(maxTexture, w.canvas.texScale)
-	return min(scale.ToScreenCoordinate(w.canvas, canvasSize.Width), limit),
-		min(scale.ToScreenCoordinate(w.canvas, canvasSize.Height), limit)
+	width, height = scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
+	if width > limit || height > limit {
+		if warner, ok := any(w).(interface{ warnSizeLimit() }); ok {
+			warner.warnSizeLimit()
+		}
+	}
+	return min(width, limit), min(height, limit)
 }
 
 // maxWindowSize returns the largest window dimension, in screen pixels, that can be drawn.

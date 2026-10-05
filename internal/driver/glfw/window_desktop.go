@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -118,7 +119,14 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
+}
+
+func (w *window) warnSizeLimit() {
+	w.sizeLimitWarning.Do(func() {
+		fyne.LogError("Window content is wider or taller than the maximum supported size and has been clamped; consider wrapping, truncation, or scrolling", nil)
+	})
 }
 
 func (w *window) SetFullScreen(full bool) {
