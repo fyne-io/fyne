@@ -309,3 +309,29 @@ func TestExternalTree_AppendSetAndReload(t *testing.T) {
 	assert.Equal(t, []string{"b"}, f.ChildIDs(DataTreeRootID))
 	assert.Equal(t, map[string][]string{DataTreeRootID: {"b"}}, ids)
 }
+
+func TestExternalTree_NilIDs(t *testing.T) {
+	var ids map[string][]string
+	m := map[string]string{}
+	f := BindStringTree(&ids, &m)
+	assert.Empty(t, f.ChildIDs(DataTreeRootID))
+
+	assert.Nil(t, f.Append(DataTreeRootID, "a", "A"))
+	assert.Nil(t, f.Append("a", "a1", "A1"))
+	assert.Equal(t, map[string][]string{DataTreeRootID: {"a"}, "a": {"a1"}}, ids)
+
+	assert.Nil(t, f.Reload())
+	assert.Equal(t, []string{"a"}, f.ChildIDs(DataTreeRootID))
+	assert.Equal(t, []string{"a1"}, f.ChildIDs("a"))
+}
+
+func TestExternalTree_NilIDsReload(t *testing.T) {
+	var ids map[string][]string
+	m := map[string]string{}
+	f := BindStringTree(&ids, &m)
+
+	ids = nil
+	assert.Nil(t, f.Reload())
+	assert.Nil(t, f.Append(DataTreeRootID, "a", "A"))
+	assert.Equal(t, map[string][]string{DataTreeRootID: {"a"}}, ids)
+}
