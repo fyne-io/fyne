@@ -657,15 +657,15 @@ func (w *window) processMouseScrolled(xoff float64, yoff float64) {
 		return ok
 	})
 	if wid, ok := co.(fyne.Scrollable); ok {
-		if math.Abs(xoff) >= scrollAccelerateCutoff {
-			xoff *= scrollAccelerateRate
+		if math.Abs(xoff) >= common.ScrollAccelerateCutoff {
+			xoff *= common.ScrollAccelerateRate
 		}
-		if math.Abs(yoff) >= scrollAccelerateCutoff {
-			yoff *= scrollAccelerateRate
+		if math.Abs(yoff) >= common.ScrollAccelerateCutoff {
+			yoff *= common.ScrollAccelerateRate
 		}
 
 		ev := &fyne.ScrollEvent{}
-		ev.Scrolled = fyne.NewDelta(float32(xoff)*scrollSpeed, float32(yoff)*scrollSpeed)
+		ev.Scrolled = fyne.NewDelta(float32(xoff)*common.ScrollSpeed, float32(yoff)*common.ScrollSpeed)
 		ev.Position = pos
 		ev.AbsolutePosition = mousePos
 		wid.Scrolled(ev)
