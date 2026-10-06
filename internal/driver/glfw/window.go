@@ -58,11 +58,15 @@ func (w *window) screenSize(canvasSize fyne.Size) (width, height int) {
 	limit := maxWindowSize(maxTexture, w.canvas.texScale)
 	width, height = scale.ToScreenCoordinate(w.canvas, canvasSize.Width), scale.ToScreenCoordinate(w.canvas, canvasSize.Height)
 	if width > limit || height > limit {
-		if warner, ok := any(w).(interface{ warnSizeLimit() }); ok {
-			warner.warnSizeLimit()
-		}
+		w.warnSizeLimit()
 	}
 	return min(width, limit), min(height, limit)
+}
+
+func (w *window) warnSizeLimit() {
+	w.sizeLimitWarning.Do(func() {
+		fyne.LogError("Window content is wider or taller than the maximum supported size and has been clamped; consider wrapping, truncation, or scrolling", nil)
+	})
 }
 
 // maxWindowSize returns the largest window dimension, in screen pixels, that can be drawn.
