@@ -274,3 +274,38 @@ func TestFloatTree_NotifyOnlyOnceWhenChange(t *testing.T) {
 	f.Set(map[string][]string{"": {"1"}}, map[string]float64{"1": 32})
 	assert.Equal(t, 1, triggered)
 }
+
+func TestExternalTree_ReloadNested(t *testing.T) {
+	ids := map[string][]string{}
+	m := map[string]string{}
+	f := BindStringTree(&ids, &m)
+	assert.Empty(t, f.ChildIDs(DataTreeRootID))
+
+	ids[DataTreeRootID] = []string{"a", "b"}
+	ids["a"] = []string{"a1", "a2"}
+	m["a"], m["b"], m["a1"], m["a2"] = "A", "B", "A1", "A2"
+	assert.Nil(t, f.Reload())
+
+	assert.Equal(t, []string{"a", "b"}, f.ChildIDs(DataTreeRootID))
+	assert.Equal(t, []string{"a1", "a2"}, f.ChildIDs("a"))
+
+	ids["a"] = []string{"a1"}
+	delete(m, "a2")
+	assert.Nil(t, f.Reload())
+	assert.Equal(t, []string{"a1"}, f.ChildIDs("a"))
+}
+
+func TestExternalTree_AppendSetAndReload(t *testing.T) {
+	ids := map[string][]string{DataTreeRootID: {"a"}}
+	m := map[string]string{"a": "A"}
+	f := BindStringTree(&ids, &m)
+
+	assert.Nil(t, f.Append("a", "a1", "A1"))
+	assert.Nil(t, f.Reload())
+	assert.Equal(t, []string{"a1"}, f.ChildIDs("a"))
+
+	assert.Nil(t, f.Set(map[string][]string{DataTreeRootID: {"b"}}, map[string]string{"b": "B"}))
+	assert.Nil(t, f.Reload())
+	assert.Equal(t, []string{"b"}, f.ChildIDs(DataTreeRootID))
+	assert.Equal(t, map[string][]string{DataTreeRootID: {"b"}}, ids)
+}

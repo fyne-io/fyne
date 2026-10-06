@@ -52,6 +52,11 @@ func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(
 	}
 
 	t := newBoundTree(v, comparator)
+	t.extIDs = ids
+	t.ids = *ids
+	if t.ids == nil {
+		t.ids = make(map[string][]string)
+	}
 	for parent, children := range *ids {
 		for _, leaf := range children {
 			t.appendItem(bindTreeItem(v, leaf, t.updateExternal, t.comparator), leaf, parent)
@@ -382,6 +387,7 @@ type boundTree[T any] struct {
 	treeBase
 
 	comparator     func(T, T) bool
+	extIDs         *map[string][]string
 	val            *map[string]T
 	updateExternal bool
 }
@@ -480,6 +486,9 @@ func (t *boundTree[T]) Reload() error {
 func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 	t.lock.Lock()
 	t.ids = ids
+	if t.extIDs != nil {
+		*t.extIDs = ids
+	}
 	*t.val = v
 
 	trigger, err := t.doReload()
@@ -493,6 +502,14 @@ func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 }
 
 func (t *boundTree[T]) doReload() (fire bool, retErr error) {
+	if t.extIDs != nil {
+		// the external ids may have been changed by the caller
+		t.ids = *t.extIDs
+		if t.ids == nil {
+			t.ids = make(map[string][]string)
+		}
+	}
+
 	updated := []string{}
 	for id := range *t.val {
 		if _, ok := t.items[id]; ok {
