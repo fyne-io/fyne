@@ -190,8 +190,8 @@ processEvents(void) {
 		XNextEvent(x_dpy, &ev);
 		switch (ev.type) {
 		case ButtonPress:
-			// the button is passed on so that the driver can ignore the ones
-			// that do not map to a touch, like the scroll wheel
+			// the button is passed on so that the Go side can decide what it
+			// maps to: a touch, a scroll (mouse wheel) or nothing at all
 			onTouchBegin((float)ev.xbutton.x, (float)ev.xbutton.y, ev.xbutton.button);
 			break;
 		case ButtonRelease:
