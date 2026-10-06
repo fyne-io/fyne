@@ -415,7 +415,7 @@ func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 	c := r.scroll.Content
-	c.Resize(internal.MaxSizes(c.MinSize(), size)) // not guarded: tableCells redraws on any Resize
+	c.Resize(internal.MaxSizes(c.MinSize(), size))
 
 	r.layoutBars(size)
 }
