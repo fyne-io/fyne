@@ -35,6 +35,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"text/template"
 
 	"github.com/jeandeaual/go-locale"
@@ -44,6 +45,11 @@ import (
 
 	"golang.org/x/text/language"
 )
+
+const fallbackLang = "en"
+
+// localeLookupReady is a variable so tests can simulate an unready runtime.
+var localeLookupReady = platformLocaleReady
 
 var (
 	// L is a shortcut to localize a string, similar to the gettext "_" function.
@@ -62,9 +68,14 @@ var (
 	// More info available on the `LocalizePluralKey` function.
 	XN = LocalizePluralKey
 
-	bundle    *i18n.Bundle
-	localizer *i18n.Localizer
+	bundle *i18n.Bundle
+
+	localizerMu sync.RWMutex
+	localizer   *i18n.Localizer
+
 	setupOnce sync.Once
+
+	localePending atomic.Bool
 
 	//go:embed translations
 	translations embed.FS
@@ -83,12 +94,14 @@ func Localize(in string, data ...any) string {
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func LocalizeKey(key, fallback string, data ...any) string {
+	ensureLocalizer()
+
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
 	}
 
-	ret, err := localizer.Localize(&i18n.LocalizeConfig{
+	ret, err := getLocalizer().Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    key,
 			Other: fallback,
@@ -120,12 +133,14 @@ func LocalizePlural(in string, count int, data ...any) string {
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func LocalizePluralKey(key, fallback string, count int, data ...any) string {
+	ensureLocalizer()
+
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
 	}
 
-	ret, err := localizer.Localize(&i18n.LocalizeConfig{
+	ret, err := getLocalizer().Localize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    key,
 			Other: fallback,
@@ -209,7 +224,7 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	translated = []language.Tag{language.Make("en")} // the first item in this list will be the fallback if none match
+	translated = []language.Tag{language.Make(fallbackLang)} // the first item in this list will be the fallback if none match
 	err := AddTranslationsFS(translations, "translations")
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
@@ -229,17 +244,45 @@ func fallbackWithData(key, fallback string, data any) string {
 
 // A utility for setting up languages - available to unit tests for overriding system
 func setupLang(lang string) {
-	localizer = i18n.NewLocalizer(bundle, lang)
+	l := i18n.NewLocalizer(bundle, lang)
+
+	localizerMu.Lock()
+	localizer = l
+	localizerMu.Unlock()
+}
+
+func getLocalizer() *i18n.Localizer {
+	localizerMu.RLock()
+	defer localizerMu.RUnlock()
+
+	return localizer
 }
 
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
 	setupOnce.Do(initRuntime)
 
+	if !localeLookupReady() {
+		// Android package init runs before the JVM context is registered.
+		localePending.Store(true)
+		setupLang(fallbackLang)
+		return
+	}
+
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
+		all = []string{fallbackLang}
 	}
 	setupLang(closestSupportedLocale(all).LanguageString())
+	localePending.Store(false)
+}
+
+// ensureLocalizer retries a locale lookup that was skipped during init.
+func ensureLocalizer() {
+	if !localePending.Load() {
+		return
+	}
+
+	updateLocalizer()
 }
