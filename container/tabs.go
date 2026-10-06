@@ -664,12 +664,9 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	if r.button.iconPosition == buttonIconTop {
 		contentWidth = max(textSize.Width, iconSize)
 		if r.icon.Visible() {
-			contentHeight += iconSize - padding*2
+			contentHeight += iconSize
 		}
 		if r.label.Text != "" {
-			if r.icon.Visible() {
-				contentHeight += padding
-			}
 			contentHeight += textSize.Height
 		}
 	} else {
