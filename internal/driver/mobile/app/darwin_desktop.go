@@ -174,12 +174,14 @@ func eventMouseDragged(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 //export eventMouseEnd
 func eventMouseEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
 
+// preciseScrollScale scales the precise deltas of a trackpad or Magic Mouse
+// down so they compare to the whole lines a scroll wheel reports.
+const preciseScrollScale = float32(0.1)
+
 //export eventScrollWheel
 func eventScrollWheel(x, y, dy float32, precise int) {
 	if precise != 0 {
-		// A trackpad or Magic Mouse reports precise deltas in points, scale
-		// them down so they compare to the whole lines a scroll wheel reports.
-		dy *= 0.1
+		dy *= preciseScrollScale
 	}
 
 	sendScroll(x, y, dy)
