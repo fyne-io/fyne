@@ -737,7 +737,7 @@ func desktopModifierCorrected(mods glfw.ModifierKey, key glfw.Key, action glfw.A
 	// https://github.com/glfw/glfw/issues/1630
 	if action == glfw.Press {
 		mods |= glfwKeyToModifier(key)
-	} else {
+	} else if action == glfw.Release {
 		mods &= ^glfwKeyToModifier(key)
 	}
 	return desktopModifier(mods)
