@@ -184,6 +184,7 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
+			w.ensurePositionProcessed()
 			dropped(w.mousePos, uris)
 		})
 	})

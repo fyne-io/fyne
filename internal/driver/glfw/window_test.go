@@ -1227,6 +1227,26 @@ func TestWindow_TouchScreenTappedWithMouseMovePending(t *testing.T) {
 	})
 }
 
+func TestWindow_DroppedWithMouseMovePending(t *testing.T) {
+	w := createWindow("Test")
+	w.Resize(fyne.NewSize(200, 100))
+
+	runOnMain(func() {
+		var droppedAt fyne.Position
+		w.SetOnDropped(func(pos fyne.Position, _ []fyne.URI) {
+			droppedAt = pos
+		})
+		w.moveMouse(20, 50)
+
+		// On macOS and Windows, GLFW reports the drop point just before the drop callback
+		w.mouseMoved(w.viewport, 150, 50)
+		dropped := w.viewport.SetDropCallback(nil)
+		dropped(w.viewport, []string{"file.txt"})
+
+		assert.Equal(t, fyne.NewPos(150, 50), droppedAt)
+	})
+}
+
 func TestWindow_TappedSecondary(t *testing.T) {
 	w := createWindow("Test")
 	prop := canvas.NewRectangle(color.White)
