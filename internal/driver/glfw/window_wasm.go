@@ -5,6 +5,7 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -92,7 +93,8 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
 }
 
 func (w *window) SetFullScreen(full bool) {

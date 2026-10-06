@@ -107,6 +107,22 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 	assertCanvasSize(t, w, minSizePlusPadding)
 }
 
+func TestWindow_MinSize_Oversized(t *testing.T) {
+	assert.Equal(t, 16384, maxWindowSize(0, 1))
+	assert.Equal(t, 8192, maxWindowSize(8192, 1))
+	assert.Equal(t, 32767, maxWindowSize(65536, 1))
+	assert.Equal(t, 8192, maxWindowSize(16384, 2))
+
+	w := createWindow("Test")
+	r := canvas.NewRectangle(color.White)
+	r.SetMinSize(fyne.NewSize(100_000, 100))
+	w.SetContent(r)
+
+	width, height := w.minSizeOnScreen()
+	assert.LessOrEqual(t, width, 32767)
+	assert.Less(t, height, 1000)
+}
+
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test")
 	c := w.Canvas()
