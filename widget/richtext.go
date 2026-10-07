@@ -24,6 +24,7 @@ import (
 
 const (
 	averageChar  = "M"
+	ellipsisChar = "…"
 	passwordChar = "•"
 )
 
@@ -646,6 +647,30 @@ func (t *RichText) lineSizeToColumn(col, row int, textSize, innerPad float32) fy
 	return total.Add(fyne.NewSize(innerPad-t.inset.Width+leftPad, 0))
 }
 
+// rowAlignOffset returns the horizontal offset of the text in the specified row
+// caused by it being center or trailing aligned within the widget width.
+func (t *RichText) rowAlignOffset(row int, textSize, innerPad float32) float32 {
+	bound := t.rowBoundary(row)
+	if bound == nil {
+		return 0
+	}
+	_, align := t.rowPaddingAndAlign(*bound, 0, fyne.TextAlignLeading)
+	if align == fyne.TextAlignLeading {
+		return 0
+	}
+
+	xInset := innerPad - t.inset.Width
+	lineWidth := t.Size().Width - xInset*2
+	textWidth := t.lineSizeToColumn(t.rowLength(row), row, textSize, innerPad).Width - xInset
+	if text, ok := bound.segments[len(bound.segments)-1].(*TextSegment); ok && bound.ellipsis {
+		textWidth += fyne.MeasureText(ellipsisChar, text.size(), text.Style.TextStyle).Width
+	}
+	if align == fyne.TextAlignCenter {
+		return (lineWidth - textWidth) / 2
+	}
+	return lineWidth - textWidth
+}
+
 // Row returns the characters in the row specified.
 // The row parameter should be between 0 and t.Rows()-1.
 func (t *RichText) row(row int) []rune {
@@ -1186,7 +1211,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 			return minBounds
 		}
 		if trunc == fyne.TextTruncateEllipsis {
-			ellipsisSize := fyne.MeasureText("…", th.Size(theme.SizeNameText), fyne.TextStyle{})
+			ellipsisSize := fyne.MeasureText(ellipsisChar, th.Size(theme.SizeNameText), fyne.TextStyle{})
 			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
 	}
@@ -1308,7 +1333,7 @@ func (r *textRenderer) Refresh() {
 				txt = string(runes)
 			}
 			if bound.ellipsis && i == len(bound.segments)-1 {
-				txt = txt + "…"
+				txt = txt + ellipsisChar
 			}
 
 			if concealed(seg) {
@@ -1545,7 +1570,7 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 		return bounds
 	}
 
-	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle) //revive:disable-line:add-constant
+	ellipsisSize := fyne.MeasureText(ellipsisChar, seg.size(), seg.Style.TextStyle)
 
 	fitCount := howManyRunesFit([]rune(seg.Text)[prior.segBegin:prior.segEnd], width-ellipsisSize.Width, charWidth, measurer)
 	prior.segEnd = prior.segBegin + fitCount

@@ -78,6 +78,10 @@ func (p *painter) Free(obj fyne.CanvasObject) {
 	p.freeTexture(obj)
 }
 
+func (p *painter) MaxTextureSize() int {
+	return p.maxTextureSize
+}
+
 func (p *painter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size, clip *internal.ClipItem) {
 	if !obj.Visible() {
 		return

@@ -1646,6 +1646,14 @@ func (p *Painter) sweepTexPool() {
 	}
 }
 
+// MaxTextureSize returns the largest texture dimension the device supports, or 0 before Init.
+func (p *Painter) MaxTextureSize() int {
+	if p.g == nil {
+		return 0
+	}
+	return p.g.MaxTextureSize()
+}
+
 func (p *Painter) Free(obj fyne.CanvasObject) {
 	if text, ok := obj.(*canvas.Text); ok {
 		p.freeClippedTextTexture(text)
