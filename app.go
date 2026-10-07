@@ -111,6 +111,29 @@ type App interface {
 	//
 	// Since: 2.8
 	Cache() Cache
+
+	// StartForegroundService asks the operating system to keep this app's
+	// process alive while it is in the background. Android requires the user
+	// to be told, so the given title and content are shown in an ongoing
+	// notification for as long as the app is elevated.
+	// It's a no-op on any other OS than Android.
+	//
+	// On Android the app must opt in by supplying its own
+	// AndroidManifest.xml, next to the Go files of the main package, that
+	// declares the org.golang.app.GoForegroundService service along with an
+	// android:foregroundServiceType and the permissions that type requires.
+	// Without it the system refuses to start the service and the reason is
+	// written to the log.
+	StartForegroundService(title, content string)
+
+	// StopForegroundService returns this app to a normal background state
+	// and removes the notification that StartForegroundService showed.
+	StopForegroundService()
+
+	// RequestNotificationPermission asks the user to allow this app to post
+	// notifications where the platform requires it (Android 13+). It does
+	// nothing on other platforms or when the permission is already granted.
+	RequestNotificationPermission()
 }
 
 var app atomic.Pointer[App]
