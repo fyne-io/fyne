@@ -107,6 +107,22 @@ func TestWindow_MinSize_Fixed(t *testing.T) {
 	assertCanvasSize(t, w, minSizePlusPadding)
 }
 
+func TestWindow_MinSize_Oversized(t *testing.T) {
+	assert.Equal(t, 16384, maxWindowSize(0, 1))
+	assert.Equal(t, 8192, maxWindowSize(8192, 1))
+	assert.Equal(t, 32767, maxWindowSize(65536, 1))
+	assert.Equal(t, 8192, maxWindowSize(16384, 2))
+
+	w := createWindow("Test")
+	r := canvas.NewRectangle(color.White)
+	r.SetMinSize(fyne.NewSize(100_000, 100))
+	w.SetContent(r)
+
+	width, height := w.minSizeOnScreen()
+	assert.LessOrEqual(t, width, 32767)
+	assert.Less(t, height, 1000)
+}
+
 func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test")
 	c := w.Canvas()
@@ -1224,6 +1240,26 @@ func TestWindow_TouchScreenTappedWithMouseMovePending(t *testing.T) {
 
 		assert.Nil(t, left.popTapEvent(), "the tap did not land where the pointer had been")
 		assert.NotNil(t, right.popTapEvent(), "the object under the tap was tapped")
+	})
+}
+
+func TestWindow_DroppedWithMouseMovePending(t *testing.T) {
+	w := createWindow("Test")
+	w.Resize(fyne.NewSize(200, 100))
+
+	runOnMain(func() {
+		var droppedAt fyne.Position
+		w.SetOnDropped(func(pos fyne.Position, _ []fyne.URI) {
+			droppedAt = pos
+		})
+		w.moveMouse(20, 50)
+
+		// On macOS and Windows, GLFW reports the drop point just before the drop callback
+		w.mouseMoved(w.viewport, 150, 50)
+		dropped := w.viewport.SetDropCallback(nil)
+		dropped(w.viewport, []string{"file.txt"})
+
+		assert.Equal(t, fyne.NewPos(150, 50), droppedAt)
 	})
 }
 

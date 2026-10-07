@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -118,7 +119,8 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
 }
 
 func (w *window) SetFullScreen(full bool) {
@@ -184,6 +186,7 @@ func (w *window) SetOnDropped(dropped func(pos fyne.Position, items []fyne.URI))
 				uris[i] = storage.NewFileURI(name)
 			}
 
+			w.ensurePositionProcessed()
 			dropped(w.mousePos, uris)
 		})
 	})
@@ -900,7 +903,7 @@ func (w *window) create() {
 
 	if w.FixedSize() && (w.requestedWidth == 0 || w.requestedHeight == 0) {
 		bigEnough := w.canvas.canvasSize(w.canvas.Content().MinSize())
-		w.width, w.height = scale.ToScreenCoordinate(w.canvas, bigEnough.Width), scale.ToScreenCoordinate(w.canvas, bigEnough.Height)
+		w.width, w.height = w.screenSize(bigEnough)
 		w.shouldWidth, w.shouldHeight = w.width, w.height
 	}
 
