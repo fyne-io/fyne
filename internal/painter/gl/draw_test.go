@@ -173,8 +173,8 @@ func TestVecRectCoordsWithPad_SharedEdge(t *testing.T) {
 				bar.Resize(fyne.NewSize(50, fill))
 				barY := trackY + track.Size().Height - fill
 
-				_, tb := p.vecRectCoordsWithPad(fyne.NewPos(0, trackY), track, frame, 0, 0, canvas.Shadow{})
-				_, bb := p.vecRectCoordsWithPad(fyne.NewPos(0, barY), bar, frame, 0, 0, canvas.Shadow{})
+				tb, _ := p.vecRectCoordsWithPad(fyne.NewPos(0, trackY), track, frame, 0, 0, canvas.Shadow{})
+				bb, _ := p.vecRectCoordsWithPad(fyne.NewPos(0, barY), bar, frame, 0, 0, canvas.Shadow{})
 				if tb[3] != bb[3] {
 					t.Fatalf("scale %v, track at %v, fill %v: track bottom %v, bar bottom %v", scale, trackY, fill, tb[3], bb[3])
 				}
