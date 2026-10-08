@@ -25,6 +25,7 @@ type app struct {
 	driver       *driver
 	settings     *testSettings
 	prefs        fyne.Preferences
+	secretPrefs  fyne.Preferences
 	propertyLock sync.RWMutex
 	storage      fyne.Storage
 	lifecycle    intapp.Lifecycle
@@ -134,6 +135,10 @@ func (a *app) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *app) SecretPreferences([]byte) (fyne.Preferences, error) {
+	return a.secretPrefs, nil
+}
+
 func (a *app) Storage() fyne.Storage {
 	return a.storage
 }
@@ -191,10 +196,11 @@ func (a *app) transitionCloud(p fyne.CloudProvider) {
 func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0, theme: Theme()}
 	prefs := internal.NewInMemoryPreferences()
+	secretPrefs := internal.NewInMemoryPreferences()
 	store := &testStorage{}
 	testApp := &app{
-		settings: settings, prefs: prefs, storage: store, driver: NewDriver().(*driver), clip: NewClipboard(),
-		cache: makeCache(),
+		settings: settings, prefs: prefs, secretPrefs: secretPrefs, storage: store, driver: NewDriver().(*driver),
+		clip: NewClipboard(), cache: makeCache(),
 	}
 	settings.app = testApp
 	root, _ := store.docRootURI()

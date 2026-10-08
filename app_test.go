@@ -70,6 +70,10 @@ func (dummyApp) Preferences() Preferences {
 	return nil
 }
 
+func (dummyApp) SecretPreferences([]byte) (Preferences, error) {
+	return nil, nil
+}
+
 func (dummyApp) Lifecycle() Lifecycle {
 	return nil
 }

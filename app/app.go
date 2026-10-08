@@ -5,6 +5,7 @@ package app // import "fyne.io/fyne/v2/app"
 
 import (
 	"strconv"
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -35,6 +36,9 @@ type fyneApp struct {
 	storage   fyne.Storage
 	prefs     fyne.Preferences
 	scheduler *scheduler.Scheduler
+
+	secretPrefs     *secretPreferences
+	secretPrefsLock sync.Mutex
 }
 
 func (a *fyneApp) CloudProvider() fyne.CloudProvider {
@@ -115,6 +119,26 @@ func (a *fyneApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *fyneApp) SecretPreferences(password []byte) (fyne.Preferences, error) {
+	if a.missingID {
+		fyne.LogError("SecretPreferences API requires a unique ID, use app.NewWithID() or the FyneApp.toml ID field", nil)
+	}
+	return a.secretPreferencesFrom(a.newSecretStore, password)
+}
+
+func (a *fyneApp) secretPreferencesFrom(newStore func([]byte) secretStore, password []byte) (fyne.Preferences, error) {
+	a.secretPrefsLock.Lock()
+	defer a.secretPrefsLock.Unlock()
+	if a.secretPrefs == nil { // created on first use as the fallback store needs the password
+		p, err := newSecretPreferences(a, newStore, password)
+		if err != nil { // not kept, so the stored data is never overwritten and the app can try again
+			return nil, err
+		}
+		a.secretPrefs = p
+	}
+	return a.secretPrefs, nil
+}
+
 func (a *fyneApp) Lifecycle() fyne.Lifecycle {
 	return &a.lifecycle
 }
@@ -178,6 +202,12 @@ func newAppWithDriver(d fyne.Driver, clipboard fyne.Clipboard, id string) fyne.A
 	newApp.lifecycle.SetOnStoppedHookExecuted(func() {
 		if prefs, ok := newApp.prefs.(*preferences); ok {
 			prefs.forceImmediateSave()
+		}
+		newApp.secretPrefsLock.Lock()
+		secretPrefs := newApp.secretPrefs
+		newApp.secretPrefsLock.Unlock()
+		if secretPrefs != nil {
+			secretPrefs.forceImmediateSave()
 		}
 	})
 
