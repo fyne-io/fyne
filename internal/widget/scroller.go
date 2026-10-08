@@ -390,7 +390,6 @@ type scrollContainerRenderer struct {
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *Shadow
 	topShadow, bottomShadow *Shadow
-	oldMinSize              fyne.Size
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
@@ -437,16 +436,8 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.Objects()[0] = r.scroll.Content
 	}
-	size := r.scroll.Size()
-	newMin := r.scroll.Content.MinSize()
-	if r.oldMinSize == newMin && r.oldMinSize == r.scroll.Content.Size() &&
-		(size.Width <= r.oldMinSize.Width && size.Height <= r.oldMinSize.Height) {
-		r.layoutBars(size)
-		return
-	}
 
-	r.oldMinSize = newMin
-	r.Layout(size)
+	r.Layout(r.scroll.Size())
 }
 
 func (r *scrollContainerRenderer) handleAreaVisibility(contentSize, scrollSize float32, area *scrollBarArea) {
@@ -612,13 +603,28 @@ func (s *Scroll) refreshWithoutOffsetUpdate() {
 	s.Base.Refresh()
 }
 
+// offsetUpdated repaints after a scroll. Only the content position and the bar
+// thumbs change, so this skips the refresh that re-measures the whole content tree.
+func (s *Scroll) offsetUpdated() {
+	r, ok := cache.Renderer(s).(*scrollContainerRenderer)
+	if !ok {
+		s.refreshWithoutOffsetUpdate()
+		return
+	}
+
+	r.updatePosition()
+}
+
 // Scrolled is called when an input device triggers a scroll event
 func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 	if s.Direction != ScrollNone {
 		s.scrollBy(ev.Scrolled.DX, ev.Scrolled.DY)
 	}
 	if !scrollBarAlwaysVisible() {
-		s.scrolling = true
+		if !s.scrolling {
+			s.scrolling = true
+			s.refreshBars() // make the bars visible for the duration of this scroll
+		}
 		if s.scrollEndTimer != nil {
 			s.scrollEndTimer.Reset(scrollEndDelay)
 		} else {
@@ -629,42 +635,40 @@ func (s *Scroll) Scrolled(ev *fyne.ScrollEvent) {
 				})
 			})
 		}
-		s.refreshBars()
 	}
 }
 
 func (s *Scroll) refreshBars() {
-	s.updateOffset(0, 0)
+	// the content may have been resized, so measure it rather than trusting the
+	// laid out size. Not on the scroll path, where the laid out size is current.
+	s.scrollTo(s.Content.MinSize(), 0, 0)
 	s.refreshWithoutOffsetUpdate()
 }
 
 func (s *Scroll) scrollBy(dx, dy float32) {
-	minSize := s.Content.MinSize()
+	contentSize := s.Content.Size() // laid out to at least its minimum, and far cheaper to read
 	size := s.Size()
-	if size.Width < minSize.Width && size.Height >= minSize.Height && dx == 0 {
+	if size.Width < contentSize.Width && size.Height >= contentSize.Height && dx == 0 {
 		dx, dy = dy, dx
 	}
-	if s.updateOffset(dx, dy) {
-		s.refreshWithoutOffsetUpdate()
+
+	// a scroll delta moves against the finger, hence the negation
+	if s.scrollTo(contentSize, -dx, -dy) {
+		s.offsetUpdated()
 	}
 }
 
-func (s *Scroll) updateOffset(deltaX, deltaY float32) bool {
+// scrollTo moves the offset within contentBounds and reports whether it moved.
+func (s *Scroll) scrollTo(contentBounds fyne.Size, deltaX, deltaY float32) bool {
 	size := s.Size()
-	contentSize := s.Content.Size()
-	if contentSize.Width <= size.Width && contentSize.Height <= size.Height {
-		if s.Offset.X != 0 || s.Offset.Y != 0 {
-			s.Offset.X = 0
-			s.Offset.Y = 0
-			return true
-		}
-		return false
-	}
 	oldX := s.Offset.X
 	oldY := s.Offset.Y
-	minSize := s.Content.MinSize()
-	s.Offset.X = computeOffset(s.Offset.X, -deltaX, size.Width, minSize.Width)
-	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, size.Height, minSize.Height)
+	if contentBounds.Width <= size.Width && contentBounds.Height <= size.Height {
+		s.Offset = fyne.Position{}
+	} else {
+		s.Offset.X = computeOffset(s.Offset.X, deltaX, size.Width, contentBounds.Width)
+		s.Offset.Y = computeOffset(s.Offset.Y, deltaY, size.Height, contentBounds.Height)
+	}
 
 	moved := s.Offset.X != oldX || s.Offset.Y != oldY
 	if f := s.OnScrolled; f != nil && moved {
