@@ -69,6 +69,8 @@ var (
 	//go:embed translations
 	translations embed.FS
 	translated   []language.Tag
+
+	overriddenLocale fyne.Locale
 )
 
 // Localize asks the translation engine to translate a string, this behaves like the gettext "_" function.
@@ -235,6 +237,11 @@ func setupLang(lang string) {
 // updateLocalizer Finds the closest translation from the user's locale list and sets it up
 func updateLocalizer() {
 	setupOnce.Do(initRuntime)
+
+	if overriddenLocale != "" {
+		setupLang(closestSupportedLocale([]string{overriddenLocale.String()}).LanguageString())
+		return
+	}
 
 	all, err := locale.GetLocales()
 	if err != nil {
