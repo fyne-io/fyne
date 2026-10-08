@@ -640,27 +640,23 @@ func (e *Entry) TouchDown(ev *mobile.TouchEvent) {
 	}
 
 	pos := ev.Position.Add(e.scroller.Offset)
-	row, col := e.sel.getRowCol(pos)
 	start, end := e.sel.selection()
-	inside := false
 	if e.sel.selecting && start != -1 && end != -1 && start != end {
+		row, col := e.sel.getRowCol(pos)
 		textPos := textPosFromRowCol(row, col, e.textProvider())
 		if textPos >= start && textPos < end {
-			inside = true
+			e.CursorRow = row
+			e.CursorColumn = col
+			e.syncSelectable()
+			return
 		}
 	}
 
-	if e.sel.selecting && !inside {
+	if e.sel.selecting {
 		e.sel.selecting = false
 	}
 
-	if !inside {
-		e.updateMousePointer(pos, false)
-	} else {
-		e.CursorRow = row
-		e.CursorColumn = col
-		e.syncSelectable()
-	}
+	e.updateMousePointer(pos, false)
 }
 
 // TouchUp is called when this entry gets a touch up event on mobile device.
