@@ -43,6 +43,11 @@ var (
 	fm           *fontscan.FontMap
 	fontScanLock sync.Mutex
 	loaded       bool
+
+	// systemLang is looked up once, as finding the locale can be slow (on macOS it may run a command).
+	systemLang     language.Language
+	systemLangDone bool
+	systemLocale   = lang.SystemLocale
 )
 
 var shaper = &shaping.HarfbuzzShaper{}
@@ -69,8 +74,17 @@ func lookupLangFont(family string, aspect font.Aspect) *font.Face {
 	}
 
 	fm.SetQuery(fontscan.Query{Families: []string{family}, Aspect: aspect})
-	l, _ := language.NewLangID(language.NewLanguage(lang.SystemLocale().LanguageString()))
+	l, _ := language.NewLangID(lookupSystemLang())
 	return fm.ResolveFaceForLang(l)
+}
+
+// lookupSystemLang returns the cached system language, the caller must hold fontScanLock.
+func lookupSystemLang() language.Language {
+	if !systemLangDone {
+		systemLang = language.NewLanguage(systemLocale().LanguageString())
+		systemLangDone = true
+	}
+	return systemLang
 }
 
 func lookupRuneFont(r rune, family string, aspect font.Aspect) *font.Face {

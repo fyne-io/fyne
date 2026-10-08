@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/language"
 	"github.com/go-text/typesetting/shaping"
 	"github.com/stretchr/testify/assert"
 )
@@ -474,3 +475,24 @@ func TestWalkStringKeycapInText(t *testing.T) {
 //	f.IndexInvoked = true
 //	return f.IndexFunc(r)
 //}
+
+func TestLookupSystemLang_Cached(t *testing.T) {
+	origLocale, origLang, origDone := systemLocale, systemLang, systemLangDone
+	t.Cleanup(func() {
+		systemLocale, systemLang, systemLangDone = origLocale, origLang, origDone
+	})
+
+	calls := 0
+	systemLocale = func() fyne.Locale {
+		calls++
+		return "fr-FR"
+	}
+	systemLangDone = false
+
+	fontScanLock.Lock()
+	defer fontScanLock.Unlock()
+	for range 3 {
+		assert.Equal(t, language.NewLanguage("fr-FR"), lookupSystemLang())
+	}
+	assert.Equal(t, 1, calls)
+}
