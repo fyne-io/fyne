@@ -5,8 +5,8 @@
 // panel only report touch events.
 package mouse // import "fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 
-// Event is a mouse scroll event.
-type Event struct {
+// ScrollEvent is a mouse scroll event.
+type ScrollEvent struct {
 	// X and Y are the mouse location, in pixels from the top-left of the screen.
 	X, Y float32
 
