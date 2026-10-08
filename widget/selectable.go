@@ -160,10 +160,21 @@ func (s *selectable) TouchCancel(m *mobile.TouchEvent) {
 	s.TouchUp(m)
 }
 
-func (s *selectable) TouchDown(*mobile.TouchEvent) {
+func (s *selectable) TouchDown(ev *mobile.TouchEvent) {
 	if isTripleTap(s.doubleTappedAtUnixMillis, time.Now().UnixMilli()) {
 		s.selectCurrentRow(true)
 		return
+	}
+
+	if ev != nil && s.selecting {
+		row, col := s.getRowCol(ev.Position)
+		start, end := s.selection()
+		if start != -1 && end != -1 && start != end {
+			textPos := textPosFromRowCol(row, col, s.provider)
+			if textPos >= start && textPos < end {
+				return
+			}
+		}
 	}
 }
 
