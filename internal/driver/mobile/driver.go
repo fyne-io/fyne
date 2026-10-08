@@ -268,7 +268,7 @@ func (d *driver) Run() {
 					case touch.TypeEnd:
 						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
 					}
-				case mouse.Event:
+				case mouse.ScrollEvent:
 					d.scrollCanvas(current, e)
 				case key.Event:
 					if runtime.GOOS == goos.Android && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
@@ -521,7 +521,7 @@ func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
 // scrollCanvas sends a vertical mouse wheel scroll from the simulator to the
 // scrollable object under the mouse, if there is one at that position. It
 // uses the shared scroll speed, without the desktop driver's acceleration.
-func (*driver) scrollCanvas(w *window, e mouse.Event) {
+func (*driver) scrollCanvas(w *window, e mouse.ScrollEvent) {
 	pos := fyne.NewPos(scale.ToFyneCoordinate(w.canvas, int(e.X)),
 		scale.ToFyneCoordinate(w.canvas, int(e.Y))+tapYOffset)
 

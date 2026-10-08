@@ -19,7 +19,7 @@ import (
 // scrollAt scrolls vertically at the given position, which is given in canvas
 // coordinates while the mouse reports screen pixels.
 func scrollAt(drv *driver, w *window, x, y, dy float32) {
-	drv.scrollCanvas(w, mouse.Event{
+	drv.scrollCanvas(w, mouse.ScrollEvent{
 		X:       float32(scale.ToScreenCoordinate(w.canvas, x)),
 		Y:       float32(scale.ToScreenCoordinate(w.canvas, y)),
 		ScrollY: dy,

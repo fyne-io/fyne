@@ -167,10 +167,10 @@ func TestX11ScrollWheel(t *testing.T) {
 	tests := []struct {
 		name   string
 		button int
-		want   mouse.Event
+		want   mouse.ScrollEvent
 	}{
-		{name: "up", button: x11ButtonWheelUp, want: mouse.Event{X: 10, Y: 20, ScrollY: 1}},
-		{name: "down", button: x11ButtonWheelDown, want: mouse.Event{X: 10, Y: 20, ScrollY: -1}},
+		{name: "up", button: x11ButtonWheelUp, want: mouse.ScrollEvent{X: 10, Y: 20, ScrollY: 1}},
+		{name: "down", button: x11ButtonWheelDown, want: mouse.ScrollEvent{X: 10, Y: 20, ScrollY: -1}},
 	}
 
 	for _, tt := range tests {
@@ -185,7 +185,7 @@ func TestX11ScrollWheel(t *testing.T) {
 				t.Fatalf("expected 1 event for button %d, got %d: %#v", tt.button, len(events), events)
 			}
 
-			got, ok := events[0].(mouse.Event)
+			got, ok := events[0].(mouse.ScrollEvent)
 			if !ok {
 				t.Fatalf("expected a scroll event for button %d, got %#v", tt.button, events[0])
 			}

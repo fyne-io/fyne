@@ -158,7 +158,7 @@ func sendTouch(t touch.Type, x, y float32) {
 }
 
 func sendScroll(x, y, dy float32) {
-	theApp.events.In() <- mouse.Event{
+	theApp.events.In() <- mouse.ScrollEvent{
 		X:       x,
 		Y:       windowHeightPx - y,
 		ScrollY: dy,
