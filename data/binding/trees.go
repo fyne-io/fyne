@@ -44,7 +44,6 @@ func NewTree[T any](comparator func(T, T) bool) Tree[T] {
 // BindTree returns a bound tree of values with type T, based on the contents of the passed values.
 // The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
-// The tree shares the ids map with the caller and updates it when items are added or removed through the binding.
 //
 // Since: 2.7
 func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) ExternalTree[T] {
@@ -271,7 +270,7 @@ func BindURITree(ids *map[string][]string, v *map[string]fyne.URI) ExternalTree[
 type treeBase struct {
 	base
 
-	ids   map[string][]string
+	ids   *map[string][]string
 	items map[string]DataItem
 }
 
@@ -292,7 +291,7 @@ func (t *treeBase) ChildIDs(id string) []string {
 	t.lock.RLock()
 	defer t.lock.RUnlock()
 
-	if ids, ok := t.ids[id]; ok {
+	if ids, ok := (*t.ids)[id]; ok {
 		return ids
 	}
 
@@ -302,19 +301,19 @@ func (t *treeBase) ChildIDs(id string) []string {
 func (t *treeBase) appendItem(i DataItem, id, parent string) {
 	t.items[id] = i
 
-	ids := t.ids[parent]
+	ids := (*t.ids)[parent]
 	for _, in := range ids {
 		if in == id {
 			return
 		}
 	}
-	t.ids[parent] = append(ids, id)
+	(*t.ids)[parent] = append(ids, id)
 }
 
 func (t *treeBase) deleteItem(id, parent string) {
 	delete(t.items, id)
 
-	ids, ok := t.ids[parent]
+	ids, ok := (*t.ids)[parent]
 	if !ok {
 		return
 	}
@@ -329,7 +328,7 @@ func (t *treeBase) deleteItem(id, parent string) {
 	if off == -1 {
 		return
 	}
-	t.ids[parent] = append(ids[:off], ids[off+1:]...)
+	(*t.ids)[parent] = append(ids[:off], ids[off+1:]...)
 }
 
 func parentIDFor(id string, ids map[string][]string) string {
@@ -346,7 +345,7 @@ func parentIDFor(id string, ids map[string][]string) string {
 
 func newTree[T any](comparator func(T, T) bool) *boundTree[T] {
 	t := &boundTree[T]{val: &map[string]T{}, comparator: comparator}
-	t.ids = make(map[string][]string)
+	t.ids = &map[string][]string{}
 	t.items = make(map[string]DataItem)
 	return t
 }
@@ -361,12 +360,7 @@ func bindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(
 	}
 
 	t := &boundTree[T]{val: v, updateExternal: true, comparator: comparator}
-	t.extIDs = ids
-	t.ids = *ids
-	if t.ids == nil {
-		t.ids = make(map[string][]string)
-		*ids = t.ids
-	}
+	t.ids = ids
 	t.items = make(map[string]DataItem)
 
 	for parent, children := range *ids {
@@ -385,9 +379,7 @@ func bindTreeComparable[T comparable](ids *map[string][]string, v *map[string]T)
 type boundTree[T any] struct {
 	treeBase
 
-	comparator func(T, T) bool
-	// extIDs is the caller's ids map; the tree shares and updates it rather than keeping a private copy.
-	extIDs         *map[string][]string
+	comparator     func(T, T) bool
 	val            *map[string]T
 	updateExternal bool
 }
@@ -395,7 +387,7 @@ type boundTree[T any] struct {
 func (t *boundTree[T]) Append(parent, id string, val T) error {
 	t.lock.Lock()
 
-	t.ids[parent] = append(t.ids[parent], id)
+	(*t.ids)[parent] = append((*t.ids)[parent], id)
 	v := *t.val
 	v[id] = val
 
@@ -413,7 +405,7 @@ func (t *boundTree[T]) Get() (map[string][]string, map[string]T, error) {
 	t.lock.RLock()
 	defer t.lock.RUnlock()
 
-	return t.ids, *t.val, nil
+	return *t.ids, *t.val, nil
 }
 
 func (t *boundTree[T]) GetValue(id string) (T, error) {
@@ -430,7 +422,7 @@ func (t *boundTree[T]) GetValue(id string) (T, error) {
 func (t *boundTree[T]) Prepend(parent, id string, val T) error {
 	t.lock.Lock()
 
-	t.ids[parent] = append([]string{id}, t.ids[parent]...)
+	(*t.ids)[parent] = append([]string{id}, (*t.ids)[parent]...)
 	v := *t.val
 	v[id] = val
 
@@ -447,7 +439,7 @@ func (t *boundTree[T]) Prepend(parent, id string, val T) error {
 func (t *boundTree[T]) Remove(id string) error {
 	t.lock.Lock()
 	t.removeChildren(id)
-	delete(t.ids, id)
+	delete(*t.ids, id)
 	v := *t.val
 	delete(v, id)
 
@@ -462,10 +454,10 @@ func (t *boundTree[T]) Remove(id string) error {
 }
 
 func (t *boundTree[T]) removeChildren(id string) {
-	for _, cid := range t.ids[id] {
+	for _, cid := range (*t.ids)[id] {
 		t.removeChildren(cid)
 
-		delete(t.ids, cid)
+		delete(*t.ids, cid)
 		v := *t.val
 		delete(v, cid)
 	}
@@ -485,10 +477,7 @@ func (t *boundTree[T]) Reload() error {
 
 func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 	t.lock.Lock()
-	t.ids = ids
-	if t.extIDs != nil {
-		*t.extIDs = ids
-	}
+	*t.ids = ids
 	*t.val = v
 
 	trigger, err := t.doReload()
@@ -502,15 +491,6 @@ func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 }
 
 func (t *boundTree[T]) doReload() (fire bool, retErr error) {
-	if t.extIDs != nil {
-		// the external ids may have been changed by the caller
-		t.ids = *t.extIDs
-		if t.ids == nil {
-			t.ids = make(map[string][]string)
-			*t.extIDs = t.ids
-		}
-	}
-
 	updated := []string{}
 	for id := range *t.val {
 		found := false
@@ -526,7 +506,7 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 		}
 
 		// append new
-		t.appendItem(bindTreeItem(t.val, id, t.updateExternal, t.comparator), id, parentIDFor(id, t.ids))
+		t.appendItem(bindTreeItem(t.val, id, t.updateExternal, t.comparator), id, parentIDFor(id, *t.ids))
 		updated = append(updated, id)
 		fire = true
 	}
@@ -542,7 +522,7 @@ func (t *boundTree[T]) doReload() (fire bool, retErr error) {
 
 		if remove { // remove item no longer present
 			fire = true
-			t.deleteItem(id, parentIDFor(id, t.ids))
+			t.deleteItem(id, parentIDFor(id, *t.ids))
 		}
 	}
 
