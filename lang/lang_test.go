@@ -93,22 +93,22 @@ func TestLoadBuiltInTranslations(t *testing.T) {
 }
 
 func TestUpdateLocalizer_RetriesAfterRuntimeIsReady(t *testing.T) {
-	origReady := localeLookupReady
+	origReady := runtimeReady
 	defer func() {
-		localeLookupReady = origReady
+		runtimeReady = origReady
 		updateLocalizer()
 	}()
 
 	// Simulate Android package init, where the JVM context is not registered.
-	localeLookupReady = func() bool { return false }
+	runtimeReady = func() bool { return false }
 	updateLocalizer()
 	require.True(t, localePending.Load())
-	require.NotNil(t, getLocalizer())
+	require.NotNil(t, localizer)
 
 	assert.Equal(t, "Missing", L("Missing"))
 	require.True(t, localePending.Load())
 
-	localeLookupReady = origReady
+	runtimeReady = origReady
 	assert.Equal(t, "Missing", L("Missing"))
 	assert.False(t, localePending.Load())
 }

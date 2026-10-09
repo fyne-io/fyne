@@ -11,7 +11,7 @@ func initRuntime() {
 	locale.SetRunOnJVM(app.RunOnJVM)
 }
 
-// platformLocaleReady reports whether we can call into the JVM yet.
-func platformLocaleReady() bool {
+// runtimeReady reports whether we can call into the JVM yet.
+var runtimeReady = func() bool {
 	return mobileinit.HasContext()
 }

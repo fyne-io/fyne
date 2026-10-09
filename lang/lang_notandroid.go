@@ -4,6 +4,6 @@ package lang
 
 func initRuntime() {}
 
-func platformLocaleReady() bool {
+var runtimeReady = func() bool {
 	return true
 }
