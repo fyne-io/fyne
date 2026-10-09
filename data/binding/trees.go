@@ -44,6 +44,7 @@ func NewTree[T any](comparator func(T, T) bool) Tree[T] {
 // BindTree returns a bound tree of values with type T, based on the contents of the passed values.
 // The ids map specifies how each item relates to its parent (with id ""), with the values being in the v map.
 // If your code changes the content of the maps this refers to you should call Reload() to inform the bindings.
+// The tree shares the ids map with the caller and updates it when items are added or removed through the binding.
 //
 // Since: 2.7
 func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(T, T) bool) ExternalTree[T] {
@@ -52,6 +53,12 @@ func BindTree[T any](ids *map[string][]string, v *map[string]T, comparator func(
 	}
 
 	t := newBoundTree(v, comparator)
+	t.extIDs = ids
+	t.ids = *ids
+	if t.ids == nil {
+		t.ids = make(map[string][]string)
+		*ids = t.ids
+	}
 	for parent, children := range *ids {
 		for _, leaf := range children {
 			t.appendItem(bindTreeItem(v, leaf, t.updateExternal, t.comparator), leaf, parent)
@@ -381,7 +388,9 @@ func bindTreeComparable[T comparable](ids *map[string][]string, v *map[string]T)
 type boundTree[T any] struct {
 	treeBase
 
-	comparator     func(T, T) bool
+	comparator func(T, T) bool
+	// extIDs is the caller's ids map; the tree shares and updates it rather than keeping a private copy.
+	extIDs         *map[string][]string
 	val            *map[string]T
 	updateExternal bool
 }
@@ -480,6 +489,9 @@ func (t *boundTree[T]) Reload() error {
 func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 	t.lock.Lock()
 	t.ids = ids
+	if t.extIDs != nil {
+		*t.extIDs = ids
+	}
 	*t.val = v
 
 	trigger, err := t.doReload()
@@ -493,6 +505,15 @@ func (t *boundTree[T]) Set(ids map[string][]string, v map[string]T) error {
 }
 
 func (t *boundTree[T]) doReload() (fire bool, retErr error) {
+	if t.extIDs != nil {
+		// the external ids may have been changed by the caller
+		t.ids = *t.extIDs
+		if t.ids == nil {
+			t.ids = make(map[string][]string)
+			*t.extIDs = t.ids
+		}
+	}
+
 	updated := []string{}
 	for id := range *t.val {
 		if _, ok := t.items[id]; ok {
