@@ -18,6 +18,7 @@ import (
 	"unsafe"
 
 	"fyne.io/fyne/v2"
+	intdriver "fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/mobile/app"
 	"fyne.io/fyne/v2/internal/scale"
 )
@@ -124,10 +125,8 @@ func (w *window) collectAndroidNodes(
 		}
 	}
 
-	if cont, ok := obj.(*fyne.Container); ok {
-		for _, child := range cont.Objects {
-			w.collectAndroidNodes(child, objPos, nodes, nextID)
-		}
+	for _, child := range intdriver.AccessibilityChildren(obj) {
+		w.collectAndroidNodes(child, objPos, nodes, nextID)
 	}
 }
 

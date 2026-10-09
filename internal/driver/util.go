@@ -237,3 +237,21 @@ func isClipWithRenderer(o fyne.CanvasObject, r fyne.WidgetRenderer) bool {
 	_, clip := r.(interface{ IsClip() })
 	return clip
 }
+
+// AccessibilityChildren returns the objects that an accessibility walker should
+// descend into for the given object. Leaf accessible elements (anything that is
+// not a container) return no children, containers return their objects and
+// widgets that are not leaf elements expose the objects of their renderer.
+func AccessibilityChildren(obj fyne.CanvasObject) []fyne.CanvasObject {
+	if a, ok := obj.(fyne.Accessible); ok && a.AccessibilityRole() != fyne.AccessibleRoleContainer {
+		return nil
+	}
+
+	switch o := obj.(type) {
+	case *fyne.Container:
+		return o.Objects
+	case fyne.Widget:
+		return cache.Renderer(o).Objects()
+	}
+	return nil
+}
