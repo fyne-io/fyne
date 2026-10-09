@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -152,4 +153,28 @@ func TestRichText_Select_Scroll(t *testing.T) {
 
 	rich.ClearSelection()
 	assert.Len(t, scrollInnerContainer(rich.scr).Objects, before)
+}
+
+func TestRichText_Select_TappedSecondaryPosition(t *testing.T) {
+	rich := NewRichTextWithText("Hello")
+	rich.Selectable = true
+	rich.Resize(rich.MinSize())
+	w := test.NewTempWindow(t, rich)
+	w.Resize(fyne.NewSize(200, 200))
+
+	sel := test.WidgetRenderer(rich).Objects()[0].(*focusSelectable)
+
+	rel := fyne.NewPos(12, 10)
+	// On mobile the tap's AbsolutePosition is relative to the whole canvas while the
+	// pop-up must be placed relative to the interactive area. Simulate that mismatch
+	// so this test fails if the absolute position is used directly.
+	absolute := fyne.NewPos(500, 500)
+	sel.TappedSecondary(&fyne.PointEvent{Position: rel, AbsolutePosition: absolute})
+
+	top := w.Canvas().Overlays().Top()
+	require.NotNil(t, top)
+	pop := top.(*widget.OverlayContainer).Content.(*PopUpMenu)
+
+	expected := fyne.CurrentApp().Driver().AbsolutePositionForObject(sel).Add(rel)
+	assert.Equal(t, expected, pop.Position())
 }

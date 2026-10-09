@@ -144,7 +144,11 @@ func (s *selectable) Tapped(*fyne.PointEvent) {
 
 func (s *selectable) TappedSecondary(ev *fyne.PointEvent) {
 	app := fyne.CurrentApp()
-	c := app.Driver().CanvasForObject(s.focus.(fyne.CanvasObject))
+	focus, ok := s.focus.(fyne.CanvasObject)
+	if !ok {
+		return
+	}
+	c := app.Driver().CanvasForObject(focus)
 	if c == nil {
 		return
 	}
@@ -153,7 +157,8 @@ func (s *selectable) TappedSecondary(ev *fyne.PointEvent) {
 		fyne.NewMenuItem(lang.L("Copy"), func() {
 			app.Clipboard().SetContent(s.SelectedText())
 		}))
-	ShowPopUpMenuAtPosition(m, c, ev.AbsolutePosition)
+	pos := app.Driver().AbsolutePositionForObject(focus).Add(ev.Position)
+	ShowPopUpMenuAtPosition(m, c, pos)
 }
 
 func (s *selectable) TouchCancel(m *mobile.TouchEvent) {
