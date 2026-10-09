@@ -183,11 +183,34 @@ static CGFloat keyboardHeight;
 #define TOUCH_TYPE_MOVE  1 // touch.TypeMove
 #define TOUCH_TYPE_END   2 // touch.TypeEnd
 
+// touchIsPrecise reports Apple Pencil and indirect pointer input.
+// Direct touches and indirect touchpad contacts stay on the finger path.
+// Pencil is iOS 9.1 and indirect pointer is iOS 13.4; the deployment target
+// can be older, so both the SDK and the runtime are checked.
+static int touchIsPrecise(UITouch *touch) {
+#if defined(__IPHONE_9_1) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_1
+	if (@available(iOS 9.1, *)) {
+		if (touch.type == UITouchTypePencil) {
+			return 1;
+		}
+	}
+#endif
+#if defined(__IPHONE_13_4) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_4
+	if (@available(iOS 13.4, *)) {
+		if (touch.type == UITouchTypeIndirectPointer) {
+			return 1;
+		}
+	}
+#endif
+	(void)touch;
+	return 0;
+}
+
 static void sendTouches(int change, NSSet* touches) {
 	CGFloat scale = [UIScreen mainScreen].nativeScale;
 	for (UITouch* touch in touches) {
 		CGPoint p = [touch locationInView:touch.view];
-		sendTouch((GoUintptr)touch, (GoUintptr)change, p.x*scale, p.y*scale);
+		sendTouch((GoUintptr)touch, (GoUintptr)change, p.x*scale, p.y*scale, touchIsPrecise(touch));
 	}
 }
 
