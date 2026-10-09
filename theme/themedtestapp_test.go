@@ -74,6 +74,10 @@ func (*themedApp) Preferences() fyne.Preferences {
 	return nil
 }
 
+func (*themedApp) SecretPreferences([]byte) (fyne.Preferences, error) {
+	return nil, nil
+}
+
 func (*themedApp) Lifecycle() fyne.Lifecycle {
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
 )
 
@@ -121,10 +122,11 @@ func TestX11MouseButtons(t *testing.T) {
 	}{
 		{name: "left", button: x11ButtonLeft, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
 		{name: "right", button: x11ButtonRight, want: []touch.Type{touch.TypeBegin, touch.TypeEnd}},
-		// the middle button and the scroll wheel must not be seen as a tap
+		// the middle button does not produce any event
 		{name: "middle", button: x11ButtonMiddle},
-		{name: "wheel up", button: x11ButtonWheelUp},
-		{name: "wheel down", button: x11ButtonWheelDown},
+		// the wheel tilt buttons 6 and 7 are not supported, no event
+		{name: "wheel tilt left", button: 6},
+		{name: "wheel tilt right", button: 7},
 	}
 
 	for _, tt := range tests {
@@ -134,12 +136,7 @@ func TestX11MouseButtons(t *testing.T) {
 			theApp.Send(markerEvent{})
 
 			var got []touch.Event
-			for {
-				event := nextEvent(t)
-				if _, ok := event.(markerEvent); ok {
-					break
-				}
-
+			for _, event := range collectEvents(t) {
 				touchEvent, ok := event.(touch.Event)
 				if !ok {
 					t.Fatalf("expected a touch event for button %d, got %#v", tt.button, event)
@@ -166,12 +163,61 @@ func TestX11MouseButtons(t *testing.T) {
 	}
 }
 
+func TestX11ScrollWheel(t *testing.T) {
+	tests := []struct {
+		name   string
+		button int
+		want   mouse.ScrollEvent
+	}{
+		{name: "up", button: x11ButtonWheelUp, want: mouse.ScrollEvent{X: 10, Y: 20, ScrollY: 1}},
+		{name: "down", button: x11ButtonWheelDown, want: mouse.ScrollEvent{X: 10, Y: 20, ScrollY: -1}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// a scroll wheel reports a press and a release, only the press scrolls
+			onTouchBegin(10, 20, tt.button)
+			onTouchEnd(10, 20, tt.button)
+			theApp.Send(markerEvent{})
+
+			events := collectEvents(t)
+			if len(events) != 1 {
+				t.Fatalf("expected 1 event for button %d, got %d: %#v", tt.button, len(events), events)
+			}
+
+			got, ok := events[0].(mouse.ScrollEvent)
+			if !ok {
+				t.Fatalf("expected a scroll event for button %d, got %#v", tt.button, events[0])
+			}
+			if got != tt.want {
+				t.Errorf("expected scroll event %#v for button %d, got %#v", tt.want, tt.button, got)
+			}
+		})
+	}
+}
+
 func TestX11ButtonIsTouch(t *testing.T) {
 	for button := 1; button <= 10; button++ {
 		want := button == x11ButtonLeft || button == x11ButtonRight
 		if got := x11ButtonIsTouch(button); got != want {
 			t.Errorf("expected button %d to be a touch: %t, was %t", button, want, got)
 		}
+	}
+}
+
+// collectEvents gathers the events a mouse button produced, up to the marker
+// event - the queue keeps their order.
+func collectEvents(t *testing.T) []any {
+	t.Helper()
+
+	var events []any
+	for {
+		event := nextEvent(t)
+		if _, ok := event.(markerEvent); ok {
+			return events
+		}
+
+		events = append(events, event)
 	}
 }
 
