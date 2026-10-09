@@ -35,6 +35,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"text/template"
 
 	"github.com/jeandeaual/go-locale"
@@ -44,6 +45,8 @@ import (
 
 	"golang.org/x/text/language"
 )
+
+const fallbackLang = "en"
 
 var (
 	// L is a shortcut to localize a string, similar to the gettext "_" function.
@@ -64,7 +67,12 @@ var (
 
 	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
+
 	setupOnce sync.Once
+	retryOnce sync.Once
+
+	// localePending defers the initial lookup until the runtime is ready.
+	localePending atomic.Bool
 
 	//go:embed translations
 	translations embed.FS
@@ -83,6 +91,8 @@ func Localize(in string, data ...any) string {
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func LocalizeKey(key, fallback string, data ...any) string {
+	ensureLocalizer()
+
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
@@ -120,6 +130,8 @@ func LocalizePlural(in string, count int, data ...any) string {
 // The string can be templated and the template data can be passed as a struct with exported fields,
 // or as a map of string keys to any suitable value.
 func LocalizePluralKey(key, fallback string, count int, data ...any) string {
+	ensureLocalizer()
+
 	var d0 any
 	if len(data) > 0 {
 		d0 = data[0]
@@ -209,7 +221,7 @@ func init() {
 	bundle = i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	translated = []language.Tag{language.Make("en")} // the first item in this list will be the fallback if none match
+	translated = []language.Tag{language.Make(fallbackLang)} // the first item in this list will be the fallback if none match
 	err := AddTranslationsFS(translations, "translations")
 	if err != nil {
 		fyne.LogError("Error occurred loading built-in translations", err)
@@ -236,10 +248,25 @@ func setupLang(lang string) {
 func updateLocalizer() {
 	setupOnce.Do(initRuntime)
 
+	if !runtimeReady() {
+		// Android package init runs before the JVM context is registered.
+		localePending.Store(true)
+		setupLang(fallbackLang)
+		return
+	}
+
 	all, err := locale.GetLocales()
 	if err != nil {
 		fyne.LogError("Failed to load user locales", err)
-		all = []string{"en"}
+		all = []string{fallbackLang}
 	}
 	setupLang(closestSupportedLocale(all).LanguageString())
+	localePending.Store(false)
+}
+
+// ensureLocalizer retries a locale lookup that was skipped during init.
+func ensureLocalizer() {
+	if localePending.Load() && runtimeReady() {
+		retryOnce.Do(updateLocalizer)
+	}
 }

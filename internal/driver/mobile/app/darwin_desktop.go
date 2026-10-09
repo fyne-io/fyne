@@ -30,6 +30,7 @@ import (
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -156,6 +157,14 @@ func sendTouch(t touch.Type, x, y float32) {
 	}
 }
 
+func sendScroll(x, y, dy float32) {
+	theApp.events.In() <- mouse.ScrollEvent{
+		X:       x,
+		Y:       windowHeightPx - y,
+		ScrollY: dy,
+	}
+}
+
 //export eventMouseDown
 func eventMouseDown(x, y float32) { sendTouch(touch.TypeBegin, x, y) }
 
@@ -164,6 +173,19 @@ func eventMouseDragged(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 
 //export eventMouseEnd
 func eventMouseEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
+
+// preciseScrollScale scales the precise deltas of a trackpad or Magic Mouse
+// down so they compare to the whole lines a scroll wheel reports.
+const preciseScrollScale = float32(0.1)
+
+//export eventScrollWheel
+func eventScrollWheel(x, y, dy float32, precise int) {
+	if precise != 0 {
+		dy *= preciseScrollScale
+	}
+
+	sendScroll(x, y, dy)
+}
 
 var stopped = false
 

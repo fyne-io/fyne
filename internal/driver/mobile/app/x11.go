@@ -31,6 +31,7 @@ import (
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -123,6 +124,20 @@ func x11ButtonIsTouch(button int) bool {
 	return button == x11ButtonLeft || button == x11ButtonRight
 }
 
+// x11ScrollDelta reports the scroll movement a mouse button stands for, X11
+// reports wheel movement as button presses. The wheel tilt buttons 6 and 7
+// for horizontal scrolling are not supported.
+func x11ScrollDelta(button int) (dy float32, ok bool) {
+	switch button {
+	case x11ButtonWheelUp:
+		return 1, true
+	case x11ButtonWheelDown:
+		return -1, true
+	}
+
+	return 0, false
+}
+
 func sendTouch(t touch.Type, x, y float32) {
 	theApp.events.In() <- touch.Event{
 		X:        x,
@@ -132,8 +147,21 @@ func sendTouch(t touch.Type, x, y float32) {
 	}
 }
 
+func sendScroll(x, y, dy float32) {
+	theApp.events.In() <- mouse.ScrollEvent{
+		X:       x,
+		Y:       y,
+		ScrollY: dy,
+	}
+}
+
 //export onTouchBegin
 func onTouchBegin(x, y float32, button int) {
+	if dy, ok := x11ScrollDelta(button); ok {
+		sendScroll(x, y, dy)
+		return
+	}
+
 	if !x11ButtonIsTouch(button) {
 		return
 	}
