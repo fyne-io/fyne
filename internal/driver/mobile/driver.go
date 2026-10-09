@@ -261,11 +261,11 @@ func (d *driver) Run() {
 				case touch.Event:
 					switch e.Type {
 					case touch.TypeBegin:
-						d.tapDownCanvas(current, e.X, e.Y, e.Sequence)
+						d.tapDownCanvas(current, e.X, e.Y, e.Sequence, e.Precise)
 					case touch.TypeMove:
-						d.tapMoveCanvas(current, e.X, e.Y, e.Sequence)
+						d.tapMoveCanvas(current, e.X, e.Y, e.Sequence, e.Precise)
 					case touch.TypeEnd:
-						d.tapUpCanvas(current, e.X, e.Y, e.Sequence)
+						d.tapUpCanvas(current, e.X, e.Y, e.Sequence, e.Precise)
 					}
 				case key.Event:
 					if runtime.GOOS == goos.Android && e.Code == key.CodeDeleteBackspace && e.Rune < 0 && d.device.keyboardShown {
@@ -442,18 +442,27 @@ func (d *driver) setTheme(dark bool) {
 	d.theme = mode
 }
 
-func (*driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence) {
+// tapPosition converts a touch from device pixels into Fyne coordinates.
+// fingerOffset is the platform compensation for a finger or an unknown tool and
+// is applied after scaling. Precise pointers, such as a stylus or mouse, keep
+// the scaled position.
+func tapPosition(w *window, x, y, fingerOffset float32, precise bool) fyne.Position {
 	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
 	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY+tapYOffset)
+	if !precise {
+		tapY += fingerOffset
+	}
+	return fyne.NewPos(tapX, tapY)
+}
+
+func (*driver) tapDownCanvas(w *window, x, y float32, tapID touch.Sequence, precise bool) {
+	pos := tapPosition(w, x, y, tapYOffset, precise)
 
 	w.canvas.tapDown(pos, int(tapID))
 }
 
-func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
-	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY+tapYOffset)
+func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence, precise bool) {
+	pos := tapPosition(w, x, y, tapYOffset, precise)
 
 	co, posMovable, _ := w.canvas.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(mobile.Movable); ok {
@@ -478,10 +487,8 @@ func (*driver) tapMoveCanvas(w *window, x, y float32, tapID touch.Sequence) {
 	}
 }
 
-func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence) {
-	tapX := scale.ToFyneCoordinate(w.canvas, int(x))
-	tapY := scale.ToFyneCoordinate(w.canvas, int(y))
-	pos := fyne.NewPos(tapX, tapY+tapYOffset)
+func (d *driver) tapUpCanvas(w *window, x, y float32, tapID touch.Sequence, precise bool) {
+	pos := tapPosition(w, x, y, tapYOffset, precise)
 
 	w.canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
