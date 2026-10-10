@@ -15,10 +15,13 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -34,8 +37,13 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
@@ -44,6 +52,7 @@ public class GoNativeActivity extends NativeActivity {
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
+	private static final int UNCONFIGURED_KEYBOARD_CODE = -1;
 	private static final int DEFAULT_KEYBOARD_CODE = 0;
 	private static final int SINGLELINE_KEYBOARD_CODE = 1;
 	private static final int NUMBER_KEYBOARD_CODE = 2;
@@ -59,6 +68,7 @@ public class GoNativeActivity extends NativeActivity {
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 	private boolean keyboardUp = false;
+	private int configuredKeyboardType = UNCONFIGURED_KEYBOARD_CODE;
 
 	// Hoisted out of doShowKeyboard / setupEntry to avoid nested anonymous
 	// classes (Runnable -> Listener). javac stores a `MethodParameters`
@@ -156,40 +166,10 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                int inputType = DEFAULT_INPUT_TYPE;
-                String keys = "";
-                switch (keyboardType) {
-                    case DEFAULT_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
-                        break;
-                    case SINGLELINE_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        break;
-                    case NUMBER_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
-                        keys = "0123456789.,-' "; // work around android bug where some number keys are blocked
-                        break;
-                    case PASSWORD_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
-                    default:
-                        Log.e("Fyne", "unknown keyboard type, use default");
+                if (keyboardType != configuredKeyboardType) {
+                    configureKeyboard(keyboardType);
+                    configuredKeyboardType = keyboardType;
                 }
-                mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
-                mTextEdit.setInputType(inputType);
-                if (keys != "") {
-                    mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
-                }
-
-                mTextEdit.setOnEditorActionListener(mEditorActionListener);
-
-                // always place one character so all keyboards can send backspace
-                ignoreKey = true;
-                mTextEdit.setText(" ");
-                mTextEdit.setSelection(mTextEdit.getText().length());
-                ignoreKey = false;
 
                 mTextEdit.setVisibility(View.VISIBLE);
                 mTextEdit.bringToFront();
@@ -199,6 +179,47 @@ public class GoNativeActivity extends NativeActivity {
                 m.showSoftInput(mTextEdit, 0);
             }
         });
+    }
+
+    private void configureKeyboard(int keyboardType) {
+        int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+        int inputType = DEFAULT_INPUT_TYPE;
+        String keys = "";
+        switch (keyboardType) {
+            case DEFAULT_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                break;
+            case SINGLELINE_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                break;
+            case NUMBER_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                inputType |= InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                keys = "0123456789.,-' "; // work around android bug where some number keys are blocked
+                break;
+            case PASSWORD_KEYBOARD_CODE:
+                imeOptions = EditorInfo.IME_ACTION_DONE;
+                inputType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                break;
+            default:
+                Log.e("Fyne", "unknown keyboard type, use default");
+        }
+        mTextEdit.setImeOptions(imeOptions|EditorInfo.IME_FLAG_NO_FULLSCREEN);
+        if (keys.isEmpty() && configuredKeyboardType == NUMBER_KEYBOARD_CODE) {
+            mTextEdit.setKeyListener(TextKeyListener.getInstance(false, TextKeyListener.Capitalize.NONE));
+        }
+        mTextEdit.setInputType(inputType);
+        if (!keys.isEmpty()) {
+            mTextEdit.setKeyListener(DigitsKeyListener.getInstance(keys));
+        }
+
+        mTextEdit.setOnEditorActionListener(mEditorActionListener);
+
+        // always place one character so all keyboards can send backspace
+        ignoreKey = true;
+        mTextEdit.setText(" ");
+        mTextEdit.setSelection(mTextEdit.getText().length());
+        ignoreKey = false;
     }
 
     static void hideKeyboard() {
@@ -228,6 +249,7 @@ public class GoNativeActivity extends NativeActivity {
         if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         } else if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.setType("*/*");
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
@@ -441,6 +463,8 @@ public class GoNativeActivity extends NativeActivity {
         }
 
         Uri uri = data.getData();
+        final int takeFlags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        getContentResolver().takePersistableUriPermission(uri, takeFlags);
         filePickerReturned(uri.toString());
     }
 
@@ -659,5 +683,69 @@ public class GoNativeActivity extends NativeActivity {
             lp.topMargin  = y;
             mA11yContainer.addView(v, lp);
         }
+    }
+
+    private static final String SECRET_KEY_ALIAS = "fyne-secret-preferences";
+    private static final int SECRET_GCM_TAG_BITS = 128;
+
+    static byte[] secretEncrypt(byte[] data) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey());
+            byte[] iv = cipher.getIV();
+            byte[] encrypted = cipher.doFinal(data);
+
+            byte[] out = new byte[1 + iv.length + encrypted.length];
+            out[0] = (byte) iv.length;
+            System.arraycopy(iv, 0, out, 1, iv.length);
+            System.arraycopy(encrypted, 0, out, 1 + iv.length, encrypted.length);
+            return out;
+        } catch (Exception e) {
+            Log.e("Fyne", "Failed to encrypt secret preferences", e);
+            return null;
+        }
+    }
+
+    static byte[] secretDecrypt(byte[] data) {
+        try {
+            if (data == null || data.length < 1) {
+                return null;
+            }
+            int ivLen = data[0] & 0xff;
+            if (data.length < 1 + ivLen) {
+                return null;
+            }
+            byte[] iv = new byte[ivLen];
+            System.arraycopy(data, 1, iv, 0, ivLen);
+
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey(), new GCMParameterSpec(SECRET_GCM_TAG_BITS, iv));
+            return cipher.doFinal(data, 1 + ivLen, data.length - 1 - ivLen);
+        } catch (Exception e) {
+            Log.e("Fyne", "Failed to decrypt secret preferences", e);
+            return null;
+        }
+    }
+
+    private static SecretKey secretKey() throws Exception {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            throw new UnsupportedOperationException("Android Keystore requires API 23");
+        }
+
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        KeyStore.Entry entry = keyStore.getEntry(SECRET_KEY_ALIAS, null);
+        if (entry instanceof KeyStore.SecretKeyEntry) {
+            return ((KeyStore.SecretKeyEntry) entry).getSecretKey();
+        }
+
+        KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+        generator.init(new KeyGenParameterSpec.Builder(SECRET_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build());
+        return generator.generateKey();
     }
 }

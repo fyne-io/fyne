@@ -31,6 +31,7 @@ func NewActivity() *Activity {
 	return a
 }
 
+// MinSize implements the [fyne.CanvasObject] interface.
 func (a *Activity) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
@@ -58,6 +59,7 @@ func (a *Activity) Stop() {
 	a.Refresh()
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (a *Activity) CreateRenderer() fyne.WidgetRenderer {
 	dots := make([]fyne.CanvasObject, 3)
 	v := fyne.CurrentApp().Settings().ThemeVariant()
@@ -98,7 +100,7 @@ func (a *activityRenderer) Destroy() {
 }
 
 func (a *activityRenderer) Layout(size fyne.Size) {
-	a.maxRad = fyne.Min(size.Width, size.Height) / 2
+	a.maxRad = min(size.Width, size.Height) / 2
 	a.bound = size
 
 	if a.parent.started && !fyne.CurrentApp().Settings().ShowAnimations() {
@@ -154,7 +156,7 @@ func (a *activityRenderer) animate(done float32) {
 }
 
 func (a *activityRenderer) scaleDot(dot *canvas.Circle, off float32) {
-	rad := a.maxRad - a.maxRad*off/1.2
+	rad := a.maxRad - a.maxRad*off/1.2 //revive:disable-line:add-constant
 	mid := fyne.NewPos(a.bound.Width/2, a.bound.Height/2)
 
 	dot.Move(mid.Subtract(fyne.NewSquareOffsetPos(rad)))
@@ -188,7 +190,7 @@ func (a *activityRenderer) stop() {
 func (a *activityRenderer) drawStaticEllipsis() {
 	th := a.parent.Theme()
 	innerPad := th.Size(theme.SizeNameInnerPadding)
-	d := fyne.Min(a.bound.Width/4, a.bound.Height)
+	d := min(a.bound.Width/4, a.bound.Height)
 	if d > th.Size(theme.SizeNameInlineIcon)/2 {
 		d -= innerPad
 	}
@@ -202,8 +204,8 @@ func (a *activityRenderer) drawStaticEllipsis() {
 	cy := a.bound.Height / 2
 	fill := color.NRGBA{R: a.maxCol.R, G: a.maxCol.G, B: a.maxCol.B, A: a.maxCol.A}
 	for i, obj := range a.dots {
-		dot := obj.(*canvas.Circle)
-		cx := startX + radius + float32(i)*1.5*d
+		dot, _ := obj.(*canvas.Circle)
+		cx := startX + radius + float32(i)*3*radius
 		dot.Move(fyne.NewPos(cx-radius, cy-radius))
 		dot.Resize(fyne.NewSquareSize(d))
 		dot.FillColor = fill
@@ -213,7 +215,7 @@ func (a *activityRenderer) drawStaticEllipsis() {
 
 func (a *activityRenderer) hideDots() {
 	for _, obj := range a.dots {
-		dot := obj.(*canvas.Circle)
+		dot, _ := obj.(*canvas.Circle)
 		dot.Resize(fyne.NewSquareSize(0))
 		dot.Refresh()
 	}

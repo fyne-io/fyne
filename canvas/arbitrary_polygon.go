@@ -13,6 +13,7 @@ var _ fyne.CanvasObject = (*ArbitraryPolygon)(nil)
 // The polygon is defined by a list of vertex positions in clockwise order,
 // relative to the object (top-left is (0,0), bottom-right is (width,height)).
 // Each corner can have an individually specified rounding radius.
+// The implementation is limited to 16 vertices.
 //
 // Since: 2.8
 type ArbitraryPolygon struct {

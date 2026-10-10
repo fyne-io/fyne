@@ -45,12 +45,12 @@ func NewDriver() fyne.Driver {
 
 // NewDriverWithPainter creates a new dummy driver that will pass the given
 // painter to all canvases created
-func NewDriverWithPainter(painter fynedriver.Painter) fyne.Driver {
-	return &driver{painter: painter}
+func NewDriverWithPainter(p fynedriver.Painter) fyne.Driver {
+	return &driver{painter: p}
 }
 
 // DoFromGoroutine on a test driver ignores the wait flag as our threading is simple
-func (d *driver) DoFromGoroutine(f func(), _ bool) {
+func (*driver) DoFromGoroutine(f func(), _ bool) {
 	// Tests all run on a single (but potentially different per-test) thread
 	f()
 }
@@ -104,16 +104,16 @@ func (d *driver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *driver) RenderedTextSize(text string, size float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+func (*driver) RenderedTextSize(text string, size float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
 	return painter.RenderedTextSize(text, size, style, source)
 }
 
-func (d *driver) Run() {
+func (*driver) Run() {
 	// no-op
 }
 
-func (d *driver) StartAnimation(a *fyne.Animation) {
-	// currently no animations in test app, we just initialise it and leave
+func (*driver) StartAnimation(a *fyne.Animation) {
+	// currently no animations in test app, we just initialize it and leave
 	if a.AutoReverse {
 		a.Tick(0.0)
 	} else {
@@ -121,15 +121,15 @@ func (d *driver) StartAnimation(a *fyne.Animation) {
 	}
 }
 
-func (d *driver) StopAnimation(a *fyne.Animation) {
+func (*driver) StopAnimation(*fyne.Animation) {
 	// currently no animations in test app, do nothing
 }
 
-func (d *driver) Quit() {
+func (*driver) Quit() {
 	// no-op
 }
 
-func (d *driver) Clipboard() fyne.Clipboard {
+func (*driver) Clipboard() fyne.Clipboard {
 	return nil
 }
 
@@ -150,10 +150,10 @@ func (d *driver) removeWindow(w *window) {
 	d.windowsMutex.Unlock()
 }
 
-func (d *driver) DoubleTapDelay() time.Duration {
+func (*driver) DoubleTapDelay() time.Duration {
 	return 300 * time.Millisecond
 }
 
-func (d *driver) SetDisableScreenBlanking(_ bool) {
+func (*driver) SetDisableScreenBlanking(_ bool) {
 	// no-op for test
 }

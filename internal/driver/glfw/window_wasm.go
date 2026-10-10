@@ -5,11 +5,13 @@ package glfw
 import (
 	"context"
 	_ "image/png" // for the icon
+	"sync"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter/gl"
 	"fyne.io/fyne/v2/internal/scale"
@@ -46,6 +48,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport  *glfw.Window
+	frame     presentGate
 	created   bool
 	decorate  bool
 	closing   bool
@@ -90,7 +93,8 @@ type window struct {
 
 	pending []func()
 
-	lastWalkedTime time.Time
+	lastWalkedTime   time.Time
+	sizeLimitWarning sync.Once
 }
 
 func (w *window) SetFullScreen(full bool) {
@@ -205,6 +209,10 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*Cursor, bool) {
 		name = "ew-resize"
 	case desktop.VResizeCursor:
 		name = "ns-resize"
+	case desktop.NESWResizeCursor:
+		name = "nesw-resize"
+	case desktop.NWSEResizeCursor:
+		name = "nwse-resize"
 	case desktop.HiddenCursor:
 		name = "none"
 	}
@@ -529,11 +537,11 @@ func (w *window) create() {
 	initWindowHints()
 
 	pixWidth, pixHeight := w.screenSize(w.canvas.size)
-	pixWidth = int(fyne.Max(float32(pixWidth), float32(w.width)))
+	pixWidth = int(max(float32(pixWidth), float32(w.width)))
 	if pixWidth == 0 {
 		pixWidth = 10
 	}
-	pixHeight = int(fyne.Max(float32(pixHeight), float32(w.height)))
+	pixHeight = int(max(float32(pixHeight), float32(w.height)))
 	if pixHeight == 0 {
 		pixHeight = 10
 	}
@@ -658,7 +666,7 @@ func (w *wrapInner) doCenter() {
 	multi := c.webExtraWindows
 
 	min := w.inner.MinSize()
-	min = min.Max(w.inner.Size())
+	min = internal.MaxSizes(min, w.inner.Size())
 
 	x := (multi.Size().Width - min.Width) / 2
 	y := (multi.Size().Height - min.Height) / 2

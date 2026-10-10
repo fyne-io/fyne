@@ -65,31 +65,31 @@ func (a *Arc) Resize(s fyne.Size) {
 }
 
 // NewArc returns a new Arc instance with the specified start and end angles (in degrees), fill color and cutout ratio.
-func NewArc(startAngle, endAngle, cutoutRatio float32, color color.Color) *Arc {
+func NewArc(startAngle, endAngle, cutoutRatio float32, c color.Color) *Arc {
 	return &Arc{
 		StartAngle:  startAngle,
 		EndAngle:    endAngle,
-		FillColor:   color,
+		FillColor:   c,
 		CutoutRatio: cutoutRatio,
 	}
 }
 
 // NewPieArc returns a new pie-shaped Arc instance with the specified start and end angles (in degrees), fill color and cutout ratio set to 0.
-func NewPieArc(startAngle, endAngle float32, color color.Color) *Arc {
+func NewPieArc(startAngle, endAngle float32, c color.Color) *Arc {
 	return &Arc{
 		StartAngle:  startAngle,
 		EndAngle:    endAngle,
-		FillColor:   color,
+		FillColor:   c,
 		CutoutRatio: 0.0,
 	}
 }
 
 // NewDoughnutArc returns a new doughnut-shaped Arc instance with the specified start and end angles (in degrees), fill color and cutout ratio set to 0.5.
-func NewDoughnutArc(startAngle, endAngle float32, color color.Color) *Arc {
+func NewDoughnutArc(startAngle, endAngle float32, c color.Color) *Arc {
 	return &Arc{
 		StartAngle:  startAngle,
 		EndAngle:    endAngle,
-		FillColor:   color,
+		FillColor:   c,
 		CutoutRatio: 0.5,
 	}
 }

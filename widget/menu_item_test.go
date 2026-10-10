@@ -106,3 +106,17 @@ func TestMenuItem_Disabled(t *testing.T) {
 		assert.Equal(t, "", buf.String()) // should not log an error
 	})
 }
+
+func TestMenuItem_Refresh(t *testing.T) {
+	i := fyne.NewMenuItem("before", func() {})
+	m := fyne.NewMenu("top", i)
+	w := newMenuItem(i, NewMenu(m))
+	r := cache.Renderer(w).(*menuItemRenderer)
+
+	assert.Equal(t, "before", r.text.Text)
+
+	i.Label = "after"
+	w.Refresh()
+
+	assert.Equal(t, "after", r.text.Text)
+}

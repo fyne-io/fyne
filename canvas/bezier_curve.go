@@ -63,34 +63,34 @@ func (r *BezierCurve) Resize(s fyne.Size) {
 }
 
 // NewLinearBezierCurve creates a linear bezier curve with 0 control points
-func NewLinearBezierCurve(startPoint, endPoint fyne.Position, color color.Color) *BezierCurve {
+func NewLinearBezierCurve(startPoint, endPoint fyne.Position, c color.Color) *BezierCurve {
 	return &BezierCurve{
 		StartPoint:    startPoint,
 		EndPoint:      endPoint,
 		ControlPoints: []fyne.Position{},
-		StrokeColor:   color,
+		StrokeColor:   c,
 		StrokeWidth:   1,
 	}
 }
 
 // NewQuadraticBezierCurve creates a quadratic bezier curve with 1 control points
-func NewQuadraticBezierCurve(startPoint, controlPoint, endPoint fyne.Position, color color.Color) *BezierCurve {
+func NewQuadraticBezierCurve(startPoint, controlPoint, endPoint fyne.Position, c color.Color) *BezierCurve {
 	return &BezierCurve{
 		StartPoint:    startPoint,
 		EndPoint:      endPoint,
 		ControlPoints: []fyne.Position{controlPoint},
-		StrokeColor:   color,
+		StrokeColor:   c,
 		StrokeWidth:   1,
 	}
 }
 
 // NewCubicBezierCurve creates a cubic bezier curve with 2 control points
-func NewCubicBezierCurve(startPoint, controlPoint1, controlPoint2, endPoint fyne.Position, color color.Color) *BezierCurve {
+func NewCubicBezierCurve(startPoint, controlPoint1, controlPoint2, endPoint fyne.Position, c color.Color) *BezierCurve {
 	return &BezierCurve{
 		StartPoint:    startPoint,
 		EndPoint:      endPoint,
 		ControlPoints: []fyne.Position{controlPoint1, controlPoint2},
-		StrokeColor:   color,
+		StrokeColor:   c,
 		StrokeWidth:   1,
 	}
 }

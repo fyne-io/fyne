@@ -43,7 +43,7 @@ func (t *RichText) AppendMarkdown(content string) {
 
 type markdownRenderer []RichTextSegment
 
-func (m *markdownRenderer) AddOptions(...renderer.Option) {}
+func (*markdownRenderer) AddOptions(...renderer.Option) {}
 
 func (m *markdownRenderer) Render(_ io.Writer, source []byte, n ast.Node) error {
 	segs, err := renderNode(source, n, 0, 0)
@@ -117,10 +117,10 @@ func renderNode(source []byte, n ast.Node, quotingDepth int, listDepth int) ([]R
 		text := string(t.Value(source))
 		if text == "" {
 			// These empty text elements indicate single line breaks after non-text elements in goldmark.
-			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: " "}}, nil
+			return []RichTextSegment{&TextSegment{Style: RichTextStyleInline, Text: textSpace}}, nil
 		}
 		if n.(*ast.Text).SoftLineBreak() {
-			text = text + " "
+			text = text + textSpace
 		}
 		if quotingDepth > 0 {
 			style := RichTextStyleBlockquote
@@ -252,6 +252,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 		style = RichTextStyleSubHeading
 	default:
 		style = RichTextStyleStrong
+		style.headingLevel = n.(*ast.Heading).Level
 	}
 	if quotingDepth > 0 {
 		style.QuotingDepth = quotingDepth
@@ -273,6 +274,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 				if t, ok := seg.(*TextSegment); ok { // apply heading to other text
 					t.Style.SizeName = style.SizeName
 					t.Style.TextStyle.Bold = true
+					t.Style.headingLevel = style.headingLevel
 				}
 			}
 			children = append(children, segs...)
@@ -284,8 +286,7 @@ func renderHeading(source []byte, n ast.Node, quotingDepth int, listDepth int) (
 	}
 
 	for _, child := range children {
-		switch t := child.(type) {
-		case *HyperlinkSegment:
+		if t, ok := child.(*HyperlinkSegment); ok {
 			t.TextStyle = style.TextStyle
 			t.SizeName = style.SizeName
 		}
@@ -300,15 +301,14 @@ func forceIntoText(source []byte, n ast.Node) string {
 	// ast.Walk() only ever returns an error if the walker does and our walker does not.
 	_ = ast.Walk(n, func(n2 ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
-			switch t := n2.(type) {
-			case *ast.Text:
+			if t, ok := n2.(*ast.Text); ok {
 				text.Write(t.Value(source))
 				text.WriteByte(' ')
 			}
 		}
 		return ast.WalkContinue, nil
 	})
-	return strings.TrimSuffix(text.String(), " ")
+	return strings.TrimSuffix(text.String(), textSpace)
 }
 
 func parseMarkdown(content string) []RichTextSegment {

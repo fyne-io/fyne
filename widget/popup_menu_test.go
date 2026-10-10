@@ -44,6 +44,9 @@ func TestPopUpMenu_Resize(t *testing.T) {
 	test.AssertRendersToMarkup(t, "popup_menu/canvas_too_small.xml", c)
 	_, areaSize := c.InteractiveArea()
 	assert.Equal(t, fyne.NewSize(largeSize.Width, areaSize.Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
+
+	m.Resize(fyne.NewSize(largeSize.Width, 10))
+	assert.Equal(t, fyne.NewSize(largeSize.Width, m.MinSize().Height), m.Size(), "less height than the content needs grows back to the minimum")
 }
 
 func TestPopUpMenu_Show(t *testing.T) {

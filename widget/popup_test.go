@@ -109,7 +109,7 @@ func TestPopUp_Show(t *testing.T) {
 	cSize := fyne.NewSize(100, 100)
 	c.Resize(cSize)
 	label := NewLabel("Hi")
-	pop := newPopUp(label, c)
+	pop := NewPopUp(label, c)
 	require.Nil(t, c.Overlays().Top())
 
 	pop.Show()
@@ -124,7 +124,7 @@ func TestPopUp_ShowAtPosition(t *testing.T) {
 	cSize := fyne.NewSize(100, 100)
 	c.Resize(cSize)
 	label := NewLabel("Hi")
-	pop := newPopUp(label, c)
+	pop := NewPopUp(label, c)
 	pos := fyne.NewPos(6, 9)
 	require.Nil(t, c.Overlays().Top())
 
@@ -147,6 +147,48 @@ func TestPopUp_Hide(t *testing.T) {
 	assert.Empty(t, test.Canvas().Overlays().List())
 }
 
+func TestPopUp_OnDismiss(t *testing.T) {
+	label := NewLabel("Hi")
+	pop := NewPopUp(label, test.Canvas())
+
+	dismissed := false
+	pop.OnDismiss = func() {
+		dismissed = true
+	}
+
+	pop.Show()
+	assert.True(t, pop.Visible())
+	assert.False(t, dismissed)
+
+	pop.Hide()
+	assert.False(t, pop.Visible())
+	assert.True(t, dismissed)
+}
+
+func TestPopUp_OnDismiss_TapOutside(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewTempWindow(t, NewLabel(""))
+	c := win.Canvas()
+	win.Resize(fyne.NewSize(120, 30))
+	pop := NewPopUp(label, c)
+
+	dismissed := false
+	pop.OnDismiss = func() {
+		dismissed = true
+	}
+
+	pop.Show()
+	assert.True(t, pop.Visible())
+
+	test.Tap(pop)
+	assert.True(t, pop.Visible())
+	assert.False(t, dismissed)
+
+	test.TapCanvas(c, fyne.NewPos(100, 20))
+	assert.False(t, pop.Visible())
+	assert.True(t, dismissed)
+}
+
 func TestPopUp_MinSize(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewPopUp(label, test.Canvas())
@@ -155,9 +197,9 @@ func TestPopUp_MinSize(t *testing.T) {
 	assert.Equal(t, label.MinSize().Width, inner.Width)
 	assert.Equal(t, label.MinSize().Height, inner.Height)
 
-	min := pop.MinSize()
-	assert.Equal(t, label.MinSize().Width, min.Width)
-	assert.Equal(t, label.MinSize().Height, min.Height)
+	minSize := pop.MinSize()
+	assert.Equal(t, label.MinSize().Width, minSize.Width)
+	assert.Equal(t, label.MinSize().Height, minSize.Height)
 }
 
 func TestPopUp_Move(t *testing.T) {
@@ -165,7 +207,7 @@ func TestPopUp_Move(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
 	win.Resize(fyne.NewSize(70, 70))
-	pop := newPopUp(label, win.Canvas())
+	pop := NewPopUp(label, win.Canvas())
 	defer pop.Hide()
 
 	pos := fyne.NewPos(10, 10)
@@ -205,7 +247,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	//	"content Y position is adjusted to keep the content inside the window")
 }
 
-func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
+func TestPopUp_Move_ConstrainedWindowToSmall(*testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
@@ -229,7 +271,7 @@ func TestPopUp_Resize(t *testing.T) {
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
 
-	pop := newPopUp(label, win.Canvas())
+	pop := NewPopUp(label, win.Canvas())
 	pop.Show()
 	defer pop.Hide()
 
@@ -315,7 +357,7 @@ func TestPopUp_Layout(t *testing.T) {
 	win.Resize(fyne.NewSize(80, 80))
 
 	content := NewLabel("Hi")
-	pop := newPopUp(content, win.Canvas())
+	pop := NewPopUp(content, win.Canvas())
 	pos := fyne.NewPos(6, 9)
 	pop.ShowAtPosition(pos)
 	defer pop.Hide()
@@ -434,7 +476,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
 
-	pop := newModalPopUp(label, win.Canvas())
+	pop := NewModalPopUp(label, win.Canvas())
 
 	size := fyne.NewSize(50, 48)
 	pop.Resize(size)
@@ -456,7 +498,7 @@ func TestModalPopUp_TappedInside(t *testing.T) {
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
 
-	pop := newPopUp(label, win.Canvas())
+	pop := NewPopUp(label, win.Canvas())
 	pop.Show()
 	defer pop.Hide()
 

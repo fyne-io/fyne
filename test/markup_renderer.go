@@ -44,7 +44,7 @@ func (r *markupRenderer) setAlignmentAttr(attrs map[string]*string, name string,
 	r.setStringAttr(attrs, name, value)
 }
 
-func (r *markupRenderer) setBoolAttr(attrs map[string]*string, name string, b bool) {
+func (*markupRenderer) setBoolAttr(attrs map[string]*string, name string, b bool) {
 	if !b {
 		return
 	}
@@ -88,7 +88,7 @@ func (r *markupRenderer) setFloatAttr(attrs map[string]*string, name string, f f
 	r.setFloatAttrWithDefault(attrs, name, f, 0)
 }
 
-func (r *markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name string, f float64, d float64) {
+func (*markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name string, f float64, d float64) {
 	if f == d {
 		return
 	}
@@ -96,7 +96,7 @@ func (r *markupRenderer) setFloatAttrWithDefault(attrs map[string]*string, name 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, x, y float64) {
+func (*markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, x, y float64) {
 	if x == 0 && y == 0 {
 		return
 	}
@@ -104,7 +104,7 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
+func (*markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name string, i float32, d float32) {
 	if int(i) == int(d) {
 		return
 	}
@@ -112,7 +112,7 @@ func (r *markupRenderer) setSizeAttrWithDefault(attrs map[string]*string, name s
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
+func (*markupRenderer) setPosAttr(attrs map[string]*string, name string, pos fyne.Position) {
 	if int(pos.X) == 0 && int(pos.Y) == 0 {
 		return
 	}
@@ -154,7 +154,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if !named {
 		// That’s some magic to access the private `source` field of the themed resource.
 		v := reflect.ValueOf(rsc).Elem().Field(0)
-		src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
+		src, _ := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource) //gosec:disable G103
 		r.setResourceAttr(attrs, name, src)
 	}
 	r.setStringAttr(attrs, "themed", variant)
@@ -173,12 +173,12 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 	r.setStringAttr(attrs, name, scaleMode)
 }
 
-func (r *markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
+func (*markupRenderer) setSizeAttr(attrs map[string]*string, name string, size fyne.Size) {
 	value := fmt.Sprintf("%dx%d", int(size.Width), int(size.Height))
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setStringAttr(attrs map[string]*string, name string, s string) {
+func (*markupRenderer) setStringAttr(attrs map[string]*string, name string, s string) {
 	if s == "" {
 		return
 	}
@@ -436,7 +436,6 @@ func (r *markupRenderer) writeTag(name string, isEmpty bool, attrs map[string]*s
 			r.w.WriteString(*attrs[key])
 			r.w.WriteRune('"')
 		}
-
 	}
 	if isEmpty {
 		r.w.WriteString("/>\n")

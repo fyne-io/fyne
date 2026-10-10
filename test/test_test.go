@@ -291,10 +291,10 @@ func (f *focusable) FocusLost() {
 	f.focused = false
 }
 
-func (f *focusable) TypedKey(event *fyne.KeyEvent) {
+func (*focusable) TypedKey(*fyne.KeyEvent) {
 }
 
-func (f *focusable) TypedRune(r rune) {
+func (*focusable) TypedRune(rune) {
 }
 
 var _ fyne.Scrollable = (*scrollable)(nil)

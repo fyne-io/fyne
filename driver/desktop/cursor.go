@@ -8,7 +8,7 @@ import "image"
 type Cursor interface {
 	// Image returns the image for the given cursor, or nil if none should be shown.
 	// It also returns the x and y pixels that should act as the hot-spot (measured from top left corner).
-	Image() (image.Image, int, int)
+	Image() (img image.Image, hotspotX, hotspotY int)
 }
 
 // StandardCursor represents a standard Fyne cursor.
@@ -20,7 +20,7 @@ type StandardCursor int
 // Image is not used for any of the StandardCursor types.
 //
 // Since: 2.0
-func (d StandardCursor) Image() (image.Image, int, int) {
+func (StandardCursor) Image() (img image.Image, hotspotX, hotspotY int) {
 	return nil, 0, 0
 }
 
@@ -37,6 +37,14 @@ const (
 	HResizeCursor
 	// VResizeCursor is the cursor often used to indicate vertical resize
 	VResizeCursor
+	// NESWResizeCursor is the cursor often used to indicate diagonal resize (top-right to bottom-left)
+	//
+	// Since: 2.8
+	NESWResizeCursor
+	// NWSEResizeCursor is the cursor often used to indicate diagonal resize (top-left to bottom-right)
+	//
+	// Since: 2.8
+	NWSEResizeCursor
 	// HiddenCursor will cause the cursor to not be shown
 	HiddenCursor
 )

@@ -10,7 +10,7 @@ type TouchDownEvent struct {
 	ID       int
 }
 
-func (t *TouchDownEvent) isEvent() {}
+func (*TouchDownEvent) isEvent() {}
 
 // TouchMoveEvent is for indicating that an embedded device touch screen or pointing device was moved whilst being pressed.
 //
@@ -20,7 +20,7 @@ type TouchMoveEvent struct {
 	ID       int
 }
 
-func (t *TouchMoveEvent) isEvent() {}
+func (*TouchMoveEvent) isEvent() {}
 
 // TouchUpEvent is for indicating that an embedded device touch screen or pointing device was released.
 //
@@ -30,4 +30,4 @@ type TouchUpEvent struct {
 	ID       int
 }
 
-func (t *TouchUpEvent) isEvent() {}
+func (*TouchUpEvent) isEvent() {}

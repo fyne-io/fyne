@@ -2,10 +2,12 @@ package dialog
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	col "fyne.io/fyne/v2/internal/color"
+	"fyne.io/fyne/v2/internal/painter/geom"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -64,14 +66,14 @@ type colorAdvancedPicker struct {
 }
 
 // newColorAdvancedPicker returns a new color widget set to the given color.
-func newColorAdvancedPicker(color color.Color, onChange func(color.Color)) *colorAdvancedPicker {
-	c := &colorAdvancedPicker{
+func newColorAdvancedPicker(c color.Color, onChange func(color.Color)) *colorAdvancedPicker {
+	p := &colorAdvancedPicker{
 		onChange: onChange,
 	}
-	c.ExtendBaseWidget(c)
-	c.previousColor = color
-	c.updateColor(color)
-	return c
+	p.ExtendBaseWidget(p)
+	p.previousColor = c
+	p.updateColor(c)
+	return p
 }
 
 // Color returns the currently selected color.
@@ -85,12 +87,12 @@ func (p *colorAdvancedPicker) Color() color.Color {
 }
 
 // SetColor updates the color selected in this color widget.
-func (p *colorAdvancedPicker) SetColor(color color.Color) {
-	p.previousColor = color
-	if p.updateColor(color) {
+func (p *colorAdvancedPicker) SetColor(c color.Color) {
+	p.previousColor = c
+	if p.updateColor(c) {
 		p.Refresh()
 		if f := p.onChange; f != nil {
-			f(color)
+			f(c)
 		}
 	}
 }
@@ -109,7 +111,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	preview := newColorPreview(p.previousColor)
 
 	// HSL
-	hueChannel := newColorChannel("H", 0, 360, p.Hue, func(h int) {
+	hueChannel := newColorChannel("H", 0, geom.AngleFull, p.Hue, func(h int) {
 		p.setHSLA(h, p.Saturation, p.Lightness, p.Alpha)
 	})
 	saturationChannel := newColorChannel("S", 0, 100, p.Saturation, func(s int) {
@@ -125,13 +127,13 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	)
 
 	// RGB
-	redChannel := newColorChannel("R", 0, 255, int(p.Red), func(r int) {
+	redChannel := newColorChannel("R", 0, math.MaxUint8, int(p.Red), func(r int) {
 		p.setRGBA(uint8(r), p.Green, p.Blue, p.Alpha) //gosec:disable G115 -- r’s value is limited by newColorChannel
 	})
-	greenChannel := newColorChannel("G", 0, 255, int(p.Green), func(g int) {
+	greenChannel := newColorChannel("G", 0, math.MaxUint8, int(p.Green), func(g int) {
 		p.setRGBA(p.Red, uint8(g), p.Blue, p.Alpha) //gosec:disable G115 -- g’s value is limited by newColorChannel
 	})
-	blueChannel := newColorChannel("B", 0, 255, int(p.Blue), func(b int) {
+	blueChannel := newColorChannel("B", 0, math.MaxUint8, int(p.Blue), func(b int) {
 		p.setRGBA(p.Red, p.Green, uint8(b), p.Alpha) //gosec:disable G115 -- b’s value is limited by newColorChannel
 	})
 	rgbBox := container.NewVBox(
@@ -146,14 +148,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 
 	// Alpha
-	alphaChannel := newColorChannel("A", 0, 255, int(p.Alpha), func(a int) {
+	alphaChannel := newColorChannel("A", 0, math.MaxUint8, int(p.Alpha), func(a int) {
 		p.setRGBA(p.Red, p.Green, p.Blue, uint8(a)) //gosec:disable G115 -- a’s value is limited by newColorChannel
 	})
 
 	// Hex
 	hex := newUserChangeEntry("")
 	hex.setOnChanged(func(text string) {
-		c, err := stringToColor(text)
+		c, err := col.Parse(text)
 		if err != nil {
 			fyne.LogError("Error parsing color: "+text, err)
 			// TODO trigger entry invalid state
@@ -215,8 +217,8 @@ func (p *colorAdvancedPicker) setRGBA(r, g, b, a uint8) {
 	}
 }
 
-func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := col.ToNRGBA(color)
+func (p *colorAdvancedPicker) updateColor(c color.Color) bool {
+	r, g, b, a := col.ToNRGBA(c)
 	return p.updateRGBA(r, g, b, a)
 }
 
@@ -285,14 +287,14 @@ func (r *colorPickerRenderer) updateObjects() {
 	// Wheel
 	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
 
-	color := r.picker.Color()
+	c := r.picker.Color()
 
 	// Preview
-	r.preview.SetColor(color)
+	r.preview.SetColor(c)
 
 	// Alpha
 	r.alphaChannel.SetValue(int(r.picker.Alpha))
 
 	// Hex
-	r.hex.SetText(colorToString(color))
+	r.hex.SetText(colorToString(c))
 }

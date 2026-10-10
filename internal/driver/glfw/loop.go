@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/goos"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/scale"
 )
@@ -56,49 +57,46 @@ func runOnMainWithWait(f func(), wait bool) {
 	}
 }
 
+func decideRepaint(visible, ready bool, checkDirtyAndClear func() bool) bool {
+	return visible && ready && checkDirtyAndClear()
+}
+
 func (d *gLDriver) drawSingleFrame() {
 	refreshed := false
-	for _, win := range d.windowList() {
-		w := win.(*window)
+	for _, win := range d.AllWindows() {
+		w, _ := win.(*window)
 		if w.closing {
 			continue
 		}
 
-		// CheckDirtyAndClear must be checked after visibility,
-		// because when a window becomes visible, it could be
-		// showing old content without a dirty flag set to true.
-		// Do the clear if and only if the window is visible.
-		if !w.visible || !w.canvas.CheckDirtyAndClear() {
-			// Window hidden or not being redrawn, mark canvasForObject
-			// cache alive if it hasn't been done recently
-			// n.b. we need to make sure threshold is a bit *after*
-			// time.Now() - CacheDuration()
-			threshold := time.Now().Add(10*time.Second - cache.ValidDuration)
-			if w.lastWalkedTime.Before(threshold) {
-				w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
-					// marks canvas for object cache entry alive
-					_ = cache.GetCanvasForObject(node.Obj())
-					// marks renderer cache entry alive
-					if wid, ok := node.Obj().(fyne.Widget); ok {
-						_, _ = cache.CachedRenderer(wid)
-					}
-				})
-				w.lastWalkedTime = time.Now()
-			}
-			continue
+		if decideRepaint(w.visible, w.frame.ready(), w.canvas.CheckDirtyAndClear) {
+			w.RunWithContext(func() {
+				if w.driver.repaintWindow(w) {
+					refreshed = true
+				}
+			})
+			w.updateAccessibility()
+		} else {
+			w.markCacheAlive()
 		}
-
-		w.RunWithContext(func() {
-			if w.driver.repaintWindow(w) {
-				refreshed = true
-			}
-		})
-		w.updateAccessibility()
 	}
 	cache.Clean(refreshed)
 }
 
-func (d *gLDriver) applyThemeToWindow(w fyne.Window) {
+func (w *window) markCacheAlive() {
+	threshold := time.Now().Add(10*time.Second - cache.ValidDuration)
+	if w.lastWalkedTime.Before(threshold) {
+		w.canvas.WalkTrees(nil, func(node *common.RenderCacheNode, _ fyne.Position) {
+			_ = cache.GetCanvasForObject(node.Obj())
+			if wid, ok := node.Obj().(fyne.Widget); ok {
+				_, _ = cache.CachedRenderer(wid)
+			}
+		})
+		w.lastWalkedTime = time.Now()
+	}
+}
+
+func (*gLDriver) applyThemeToWindow(w fyne.Window) {
 	if win, ok := w.(*window); ok {
 		win.setDarkMode()
 	}
@@ -138,7 +136,7 @@ func (d *gLDriver) runGL() {
 		case <-d.done:
 			eventTick.Stop()
 			d.Terminate()
-			l := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
+			l, _ := fyne.CurrentApp().Lifecycle().(*app.Lifecycle)
 			if f := l.OnStopped(); f != nil {
 				l.QueueEvent(f)
 			}
@@ -161,11 +159,8 @@ func (d *gLDriver) runGL() {
 		case <-eventTick.C:
 			d.pollEvents()
 			for i := 0; i < len(d.windows); i++ {
-				w := d.windows[i].(*window)
-				if !w.mousePosUpdateProcessed {
-					w.processMouseMoved(w.newMousePosX, w.newMousePosY)
-					w.mousePosUpdateProcessed = true
-				}
+				w, _ := d.windows[i].(*window)
+				w.ensurePositionProcessed()
 
 				if w.viewport == nil {
 					continue
@@ -186,7 +181,7 @@ func (d *gLDriver) runGL() {
 					w.shouldExpand = false
 					view := w.viewport
 
-					if shouldExpand && runtime.GOOS != "js" {
+					if shouldExpand && runtime.GOOS != goos.JavaScript {
 						view.SetSize(w.shouldWidth, w.shouldHeight)
 					}
 				}
@@ -214,7 +209,7 @@ func (d *gLDriver) destroyWindow(w *window, index int) {
 	}
 }
 
-func (d *gLDriver) repaintWindow(w *window) bool {
+func (*gLDriver) repaintWindow(w *window) bool {
 	canvas := w.canvas
 	freed := false
 	if canvas.EnsureMinSize() {
@@ -229,6 +224,7 @@ func (d *gLDriver) repaintWindow(w *window) bool {
 	visible := w.visible
 
 	if view != nil && visible {
+		w.frame.requestFrame()
 		view.SwapBuffers()
 	}
 

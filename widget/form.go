@@ -166,11 +166,11 @@ func (f *Form) RemoveItem(item *FormItem) {
 			}
 		}
 
-		if pos != -1 {
-			f.Items = append(f.Items[:pos], f.Items[pos+1:]...)
-		} else {
+		if pos == -1 {
 			return
 		}
+
+		f.Items = append(f.Items[:pos], f.Items[pos+1:]...)
 	}
 
 	f.Refresh()
@@ -220,7 +220,32 @@ func (f *Form) createInput(item *FormItem) fyne.CanvasObject {
 	return &fyne.Container{Layout: formItemLayout{form: f}, Objects: []fyne.CanvasObject{item.Widget, textContainer}}
 }
 
-func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
+// unwrapItemWidget returns the widget actually shown by rendered, stripping the
+// hint/validation container createInput sometimes wraps it in.
+func (*Form) unwrapItemWidget(rendered fyne.CanvasObject) fyne.CanvasObject {
+	if c, ok := rendered.(*fyne.Container); ok && len(c.Objects) > 0 {
+		return c.Objects[0]
+	}
+	return rendered
+}
+
+func (f *Form) itemRendersWidget(rendered, widget fyne.CanvasObject) bool {
+	return f.unwrapItemWidget(rendered) == widget
+}
+
+// detachValidation unhooks the callbacks setUpValidation registered on widget, so a
+// caller that keeps interacting with a widget no longer shown by the form can't have
+// it write stale state into the FormItem slot it used to occupy.
+func (*Form) detachValidation(widget fyne.CanvasObject) {
+	if v, ok := widget.(fyne.Validatable); ok {
+		v.SetOnValidationChanged(nil)
+	}
+	if r, ok := widget.(fyne.Requireable); ok {
+		r.SetOnRequiredChanged(nil)
+	}
+}
+
+func (*Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	value := reflect.ValueOf(w).Elem()
 	validatorField := value.FieldByName("Validator")
 	if validatorField == (reflect.Value{}) {
@@ -233,9 +258,9 @@ func (f *Form) itemWidgetHasValidator(w fyne.CanvasObject) bool {
 	return validator != nil
 }
 
-func (f *Form) createLabel(item *FormItem) fyne.CanvasObject {
+func (f *Form) createLabel(item *FormItem) *RichText {
 	label := NewRichTextWithText(item.Text)
-	seg1 := label.Segments[0].(*TextSegment)
+	seg1, _ := label.Segments[0].(*TextSegment)
 	seg1.Style.Alignment = fyne.TextAlignTrailing
 	seg1.Style.TextStyle.Bold = true
 	if f.isVertical() {
@@ -297,6 +322,7 @@ func (f *Form) checkValidation(err error) {
 			f.submitButton.Disable()
 			return
 		}
+
 		if item.Required {
 			if has, ok := item.Widget.(fyne.Requireable); ok && !has.HasValue() {
 				f.submitButton.Disable()
@@ -313,10 +339,10 @@ func (f *Form) checkValidation(err error) {
 			f.validateText.Show()
 			f.submitButton.Disable()
 			return
-		} else {
-			f.validationError = nil
-			f.validateText.Hide()
 		}
+
+		f.validationError = nil
+		f.validateText.Hide()
 	}
 
 	if !f.disabled {
@@ -326,6 +352,23 @@ func (f *Form) checkValidation(err error) {
 
 func (f *Form) ensureRenderItems() {
 	done := len(f.itemGrid.Objects) / 2
+	for i := 0; i < done && i < len(f.Items); i++ {
+		item := f.Items[i]
+		old := f.itemGrid.Objects[i*2+1]
+		if f.itemRendersWidget(old, item.Widget) {
+			continue
+		}
+
+		f.detachValidation(f.unwrapItemWidget(old))
+		item.validationError = nil
+		item.invalid = false
+		item.wasFocused = false
+		item.helperOutput = nil
+
+		f.setUpValidation(item.Widget, i)
+		f.itemGrid.Objects[i*2+1] = f.createInput(item)
+	}
+
 	if done >= len(f.Items) {
 		f.itemGrid.Objects = f.itemGrid.Objects[0 : len(f.Items)*2]
 		return
@@ -458,7 +501,7 @@ func (f *Form) updateHelperText(item *FormItem) {
 
 func (f *Form) updateLabels() {
 	for i, item := range f.Items {
-		r := f.itemGrid.Objects[i*2].(*RichText)
+		r, _ := f.itemGrid.Objects[i*2].(*RichText)
 
 		if len(r.Segments) == 1 {
 			if item.Required {
@@ -474,7 +517,7 @@ func (f *Form) updateLabels() {
 		}
 
 		if item.Required {
-			m := r.Segments[0].(*TextSegment)
+			m, _ := r.Segments[0].(*TextSegment)
 			if dis, ok := item.Widget.(fyne.Disableable); ok && dis.Disabled() {
 				m.Style.ColorName = theme.ColorNameDisabled
 			} else {
@@ -482,7 +525,7 @@ func (f *Form) updateLabels() {
 			}
 		}
 
-		l := r.Segments[len(r.Segments)-1].(*TextSegment)
+		l, _ := r.Segments[len(r.Segments)-1].(*TextSegment)
 		if dis, ok := item.Widget.(fyne.Disableable); ok {
 			if dis.Disabled() {
 				l.Style.ColorName = theme.ColorNameDisabled
@@ -564,7 +607,7 @@ func (f formItemLayout) MinSize(objs []fyne.CanvasObject) fyne.Size {
 	min0 := objs[0].MinSize()
 	min1 := objs[1].MinSize()
 
-	minWidth := fyne.Max(min0.Width, min1.Width)
+	minWidth := max(min0.Width, min1.Width)
 	height := min0.Height
 
 	items := objs[1].(*fyne.Container).Objects

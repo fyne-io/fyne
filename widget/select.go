@@ -8,10 +8,9 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 )
-
-const defaultPlaceHolder string = "(Select one)"
 
 var (
 	_ fyne.Widget       = (*Select)(nil)
@@ -20,6 +19,10 @@ var (
 	_ fyne.Focusable    = (*Select)(nil)
 	_ fyne.Disableable  = (*Select)(nil)
 )
+
+func defaultPlaceHolder() string {
+	return lang.L("(Select one)")
+}
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
@@ -47,7 +50,7 @@ func NewSelect(options []string, changed func(string)) *Select {
 	s := &Select{
 		OnChanged:   changed,
 		Options:     options,
-		PlaceHolder: defaultPlaceHolder,
+		PlaceHolder: defaultPlaceHolder(),
 	}
 	s.ExtendBaseWidget(s)
 	return s
@@ -92,7 +95,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	icon := NewIcon(th.Icon(theme.IconNameArrowDropDown))
 	if s.PlaceHolder == "" {
-		s.PlaceHolder = defaultPlaceHolder
+		s.PlaceHolder = defaultPlaceHolder()
 	}
 	txtProv := NewRichTextWithText(s.Selected)
 	txtProv.inset = fyne.NewSquareSize(th.Size(theme.SizeNamePadding))
@@ -149,7 +152,7 @@ func (s *Select) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (s *Select) MouseMoved(*desktop.MouseEvent) {
+func (*Select) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
@@ -251,7 +254,7 @@ func (s *Select) TypedKey(event *fyne.KeyEvent) {
 }
 
 // TypedRune is called if a text event happens while this Select is focused.
-func (s *Select) TypedRune(_ rune) {
+func (*Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
@@ -370,7 +373,7 @@ func (s *selectRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *selectRenderer) Destroy() {}
+func (*selectRenderer) Destroy() {}
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
@@ -398,10 +401,10 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	innerPad := th.Size(theme.SizeNameInnerPadding)
 
 	minPlaceholderWidth := fyne.MeasureText(s.combo.PlaceHolder, th.Size(theme.SizeNameText), fyne.TextStyle{}).Width
-	min := s.label.MinSize()
-	min.Width = minPlaceholderWidth
-	min = min.Add(fyne.NewSize(innerPad*3, innerPad))
-	return min.Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+innerPad, 0))
+	minSize := s.label.MinSize()
+	minSize.Width = minPlaceholderWidth
+	minSize = minSize.Add(fyne.NewSize(innerPad*3, innerPad))
+	return minSize.Add(fyne.NewSize(th.Size(theme.SizeNameInlineIcon)+innerPad, 0))
 }
 
 func (s *selectRenderer) Refresh() {
@@ -449,10 +452,10 @@ func (s *selectRenderer) updateIcon(th fyne.Theme) {
 
 func (s *selectRenderer) updateLabel() {
 	if s.combo.PlaceHolder == "" {
-		s.combo.PlaceHolder = defaultPlaceHolder
+		s.combo.PlaceHolder = defaultPlaceHolder()
 	}
 
-	segment := s.label.Segments[0].(*TextSegment)
+	segment, _ := s.label.Segments[0].(*TextSegment)
 	segment.Style.Alignment = s.combo.Alignment
 	if s.combo.Disabled() {
 		segment.Style.ColorName = theme.ColorNameDisabled

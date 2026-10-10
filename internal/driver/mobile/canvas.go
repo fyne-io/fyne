@@ -4,6 +4,7 @@ import (
 	"context"
 	"image"
 	"math"
+	"slices"
 	"sync"
 	"time"
 
@@ -31,7 +32,7 @@ type canvas struct {
 	scale          float32
 	size           fyne.Size
 	touched        map[int]mobile.Touchable
-	windowHead     fyne.CanvasObject
+	windowHead     *fyne.Container
 
 	dragOffset     fyne.Position
 	dragStart      fyne.Position
@@ -53,7 +54,7 @@ func newCanvas(dev fyne.Device) fyne.Canvas {
 	ret := &canvas{
 		Canvas: common.Canvas{
 			OnFocus:   d.handleKeyboard,
-			OnUnfocus: d.hideVirtualKeyboard,
+			OnUnfocus: d.HideVirtualKeyboard,
 		},
 		device:         d,
 		lastTapDown:    make(map[int]time.Time),
@@ -109,7 +110,7 @@ func (c *canvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+func (c *canvas) PixelCoordinateForPosition(pos fyne.Position) (x, y int) {
 	return int(pos.X * c.scale), int(pos.Y * c.scale)
 }
 
@@ -126,7 +127,7 @@ func (c *canvas) Scale() float32 {
 }
 
 func (c *canvas) SetContent(content fyne.CanvasObject) {
-	c.setContent(content)
+	c.applyContent(content)
 	c.sizeContent(c.Size()) // fixed window size for mobile, cannot stretch to new content
 	c.SetDirty()
 }
@@ -143,6 +144,11 @@ func (c *canvas) Size() fyne.Size {
 	return c.size
 }
 
+func (c *canvas) applyContent(content fyne.CanvasObject) {
+	c.content = content
+	c.SetContentTreeAndFocusMgr(content)
+}
+
 func (c *canvas) applyThemeOutOfTreeObjects() {
 	if c.menu != nil {
 		app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
@@ -157,7 +163,11 @@ func (c *canvas) findObjectAtPositionMatching(pos fyne.Position, test func(objec
 		return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.menu)
 	}
 
-	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), c.windowHead, c.content)
+	var wh fyne.CanvasObject
+	if c.windowHead != nil {
+		wh = c.windowHead
+	}
+	return intdriver.FindObjectAtPositionMatching(pos, test, c.Overlays().Top(), wh, c.content)
 }
 
 func (c *canvas) overlayChanged() {
@@ -165,17 +175,12 @@ func (c *canvas) overlayChanged() {
 	c.SetDirty()
 }
 
-func (c *canvas) setContent(content fyne.CanvasObject) {
-	c.content = content
-	c.SetContentTreeAndFocusMgr(content)
-}
-
 func (c *canvas) setMenu(menu fyne.CanvasObject) {
 	c.menu = menu
 	c.SetMenuTreeAndFocusMgr(menu)
 }
 
-func (c *canvas) setWindowHead(head fyne.CanvasObject) {
+func (c *canvas) setWindowHead(head *fyne.Container) {
 	if c.padded {
 		head = container.NewPadded(head)
 	}
@@ -303,15 +308,16 @@ func (c *canvas) tapMove(pos fyne.Position, tapID int,
 	}
 
 	if c.dragging == nil {
-		if drag, ok := co.(fyne.Draggable); ok {
-			c.dragging = drag
-			c.dragOffset = previousPos.Subtract(objPos)
-			c.dragStart = co.Position()
-			if scrollOtherDirection != nil {
-				c.draggingOuter = scrollOtherDirection.(fyne.Draggable)
-			}
-		} else {
+		drag, ok := co.(fyne.Draggable)
+		if !ok {
 			return
+		}
+
+		c.dragging = drag
+		c.dragOffset = previousPos.Subtract(objPos)
+		c.dragStart = co.Position()
+		if scrollOtherDirection != nil {
+			c.draggingOuter, _ = scrollOtherDirection.(fyne.Draggable)
 		}
 	}
 
@@ -419,8 +425,9 @@ func (c *canvas) tapUp(pos fyne.Position, tapID int,
 			prevOverlay := c.Overlays().Top()
 			tapAltCallback(wid, ev)
 
-			// if the secondary tap dismissed an overlay, forward the event to the widget underneath
-			if prevOverlay != nil && c.Overlays().Top() != prevOverlay {
+			// if the secondary tap dismissed an overlay (rather than opening a new
+			// one on top), forward the event to the widget underneath
+			if prevOverlay != nil && !slices.Contains(c.Overlays().List(), prevOverlay) {
 				co2, objPos2, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 					_, ok := object.(fyne.SecondaryTappable)
 					return ok
@@ -471,9 +478,9 @@ func (c *canvas) windowHeadIsDisplacing() bool {
 		return false
 	}
 
-	chromeBox := c.windowHead.(*fyne.Container)
+	chromeBox := c.windowHead
 	if c.padded {
-		chromeBox = chromeBox.Objects[0].(*fyne.Container) // the padded container
+		chromeBox, _ = chromeBox.Objects[0].(*fyne.Container) // the padded container
 	}
 	return len(chromeBox.Objects) > 1
 }

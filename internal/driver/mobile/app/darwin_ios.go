@@ -38,7 +38,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"time"
+	"sync/atomic"
 	"unsafe"
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
@@ -61,19 +61,6 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(App)) {
-	//if tid := uint64(C.threadID()); tid != initThreadID {
-	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	//}
-
-	go func() {
-		f(theApp)
-		// TODO(crawshaw): trigger runApp to return
-	}()
-	C.runApp()
-	panic("unexpected return from app.runApp")
-}
-
 var (
 	pixelsPerPt float32
 	screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
@@ -86,6 +73,23 @@ var DisplayMetrics struct {
 
 func GoBack() {
 	// Apple do not permit apps to exit in any way other than user pressing home button / gesture
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
+	// if tid := uint64(C.threadID()); tid != initThreadID {
+	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
+	// }
+
+	go func() {
+		f(theApp)
+		// TODO(crawshaw): trigger runApp to return
+	}()
+	C.runApp()
+	panic("unexpected return from app.runApp")
 }
 
 //export setDisplayMetrics
@@ -218,19 +222,44 @@ func lifecycleMemoryWarning() {
 	cleanCaches()
 }
 
+// painting is true from BeginPaint until drawloop takes the publish that ends
+// the frame. The UI thread reads it, so it has to be atomic.
+var painting atomic.Bool
+
+// BeginPaint records that the driver is about to queue a frame's GL calls and
+// will follow them with a Publish.
+func BeginPaint() {
+	painting.Store(true)
+}
+
+// needsDraw reports whether the UI thread has pending changes to draw.
+//
+//export needsDraw
+func needsDraw() C.int {
+	if painting.Load() || theApp.worker.HasWork() {
+		return 1
+	}
+	return 0
+}
+
 //export drawloop
 func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for workAvailable := theApp.worker.WorkAvailable(); ; {
+	workAvailable := theApp.worker.WorkAvailable()
+	for {
+		theApp.worker.DoWork() // returns straight away when nothing is queued
+
+		if !painting.Load() {
+			return // no frame is coming, so hand the thread back to UIKit
+		}
+
 		select {
-		case <-workAvailable:
-			theApp.worker.DoWork()
+		case <-workAvailable: // loop round and run it
 		case <-theApp.publish:
+			painting.Store(false)
 			theApp.publishResult <- PublishResult{}
-			return
-		case <-time.After(100 * time.Millisecond): // in case the method blocked!!
 			return
 		}
 	}

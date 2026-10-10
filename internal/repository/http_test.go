@@ -13,17 +13,16 @@ import (
 )
 
 // helper function to register the HTTP and HTTPS repositories
-func registerRepositories() (*HTTPRepository, *HTTPRepository) {
-	http := NewHTTPRepository()
-	repository.Register("http", http)
-	https := NewHTTPRepository()
-	repository.Register("https", https)
-
-	return http, https
+func registerRepositories() (httpRepo, httpsRepo *HTTPRepository) {
+	httpRepo = NewHTTPRepository()
+	repository.Register("http", httpRepo)
+	httpsRepo = NewHTTPRepository()
+	repository.Register("https", httpsRepo)
+	return httpRepo, httpsRepo
 }
 
 func TestHTTPRepositoryRegistration(t *testing.T) {
-	http, https := registerRepositories()
+	registeredHTTPRepo, registeredHTTPSRepo := registerRepositories()
 
 	// Test HTTPRespository registration for http scheme
 	httpurl, err := storage.ParseURI("http://foo.com/bar")
@@ -31,7 +30,7 @@ func TestHTTPRepositoryRegistration(t *testing.T) {
 
 	httpRepo, err := repository.ForURI(httpurl)
 	assert.Nil(t, err)
-	assert.Equal(t, http, httpRepo)
+	assert.Equal(t, registeredHTTPRepo, httpRepo)
 
 	// test HTTPRepository registration for https scheme
 	httpsurl, err := storage.ParseURI("https://foo.com/bar")
@@ -39,7 +38,7 @@ func TestHTTPRepositoryRegistration(t *testing.T) {
 
 	httpsRepo, err := repository.ForURI(httpsurl)
 	assert.Nil(t, err)
-	assert.Equal(t, https, httpsRepo)
+	assert.Equal(t, registeredHTTPSRepo, httpsRepo)
 }
 
 func TestHTTPRepositoryExists(t *testing.T) {

@@ -123,8 +123,8 @@ func TestCheck_Tapped(t *testing.T) {
 func TestCheck_Resize(t *testing.T) {
 	check := &widget.Check{Text: "test"}
 	check.Resize(fyne.NewSize(300, 200))
-	min := check.MinSize() // set up min cache
-	assert.Less(t, min.Height, check.Size().Height)
+	minSize := check.MinSize() // set up min cache
+	assert.Less(t, minSize.Height, check.Size().Height)
 
 	test.TapAt(check, fyne.NewPos(10, 100))
 	assert.True(t, check.Checked)

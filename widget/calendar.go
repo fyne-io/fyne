@@ -93,9 +93,9 @@ func (c *Calendar) CreateRenderer() fyne.WidgetRenderer {
 func (c *Calendar) calendarObjects() []fyne.CanvasObject {
 	offset := 0
 	switch getLocaleWeekStart() {
-	case "Saturday":
-		offset = 6
-	case "Sunday":
+	case saturday:
+		offset = daysPerWeek - 1
+	case sunday:
 	default:
 		offset = 1
 	}
@@ -121,13 +121,13 @@ func (c *Calendar) daysOfMonth() []fyne.CanvasObject {
 	dayIndex := int(start.Weekday())
 	// account for Go time pkg starting on sunday at index 0
 	switch getLocaleWeekStart() {
-	case "Saturday":
+	case saturday:
 		if dayIndex == daysPerWeek-1 {
 			dayIndex = 0
 		} else {
 			dayIndex++
 		}
-	case "Sunday": // nothing to do
+	case sunday: // nothing to do
 	default:
 		if dayIndex == 0 {
 			dayIndex += daysPerWeek - 1
@@ -210,7 +210,7 @@ func (g *calendarLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 }
 
 // MinSize sets the minimum size for the calendar
-func (g *calendarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
+func (*calendarLayout) MinSize(_ []fyne.CanvasObject) fyne.Size {
 	pad := theme.Padding()
 	largestMin := minCellContent.MinSize()
 	return fyne.NewSize(largestMin.Width*daysPerWeek+pad*(daysPerWeek-1),

@@ -14,6 +14,9 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
+// listIndentSpaces is how many spaces of indentation each level of list nesting adds.
+const listIndentSpaces = 4
+
 var (
 	// RichTextStyleBlockquote represents a quote presented in an indented block.
 	//
@@ -127,7 +130,7 @@ type HyperlinkSegment struct {
 }
 
 // Inline returns true as hyperlinks are inside other elements.
-func (h *HyperlinkSegment) Inline() bool {
+func (*HyperlinkSegment) Inline() bool {
 	return true
 }
 
@@ -146,7 +149,7 @@ func (h *HyperlinkSegment) Visual() fyne.CanvasObject {
 
 // Update applies the current state of this hyperlink segment to an existing visual.
 func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
-	link := o.(*fyne.Container).Objects[0].(*Hyperlink)
+	link, _ := o.(*fyne.Container).Objects[0].(*Hyperlink)
 	link.URL = h.URL
 	link.Alignment = h.Alignment
 	link.SizeName = h.SizeName
@@ -156,18 +159,18 @@ func (h *HyperlinkSegment) Update(o fyne.CanvasObject) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (h *HyperlinkSegment) Select(begin, end fyne.Position) {
+func (*HyperlinkSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (h *HyperlinkSegment) SelectedText() string {
+func (*HyperlinkSegment) SelectedText() string {
 	// no-op: this will be added when we progress to editor
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (h *HyperlinkSegment) Unselect() {
+func (*HyperlinkSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 
@@ -184,7 +187,7 @@ type ImageSegment struct {
 }
 
 // Inline returns false as images in rich text are blocks.
-func (i *ImageSegment) Inline() bool {
+func (*ImageSegment) Inline() bool {
 	return false
 }
 
@@ -201,7 +204,7 @@ func (i *ImageSegment) Visual() fyne.CanvasObject {
 // Update applies the current state of this image segment to an existing visual.
 func (i *ImageSegment) Update(o fyne.CanvasObject) {
 	newer := canvas.NewImageFromURI(i.Source)
-	img := o.(*richImage)
+	img, _ := o.(*richImage)
 
 	// one of the following will be used
 	img.img.File = newer.File
@@ -212,18 +215,18 @@ func (i *ImageSegment) Update(o fyne.CanvasObject) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (i *ImageSegment) Select(begin, end fyne.Position) {
+func (*ImageSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (i *ImageSegment) SelectedText() string {
+func (*ImageSegment) SelectedText() string {
 	// no-op: images have no text rendering
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (i *ImageSegment) Unselect() {
+func (*ImageSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 
@@ -243,6 +246,9 @@ type ListSegment struct {
 	startIndex       int
 	indentationLevel int
 	quotingLevel     int
+
+	// markers are re-used between calls to Segments
+	markers []*listMarkerSegment
 }
 
 // SetStartNumber sets the starting number for an ordered list.
@@ -261,7 +267,7 @@ func (l *ListSegment) StartNumber() int {
 }
 
 // Inline returns false as a list should be in a block.
-func (l *ListSegment) Inline() bool {
+func (*ListSegment) Inline() bool {
 	return false
 }
 
@@ -272,16 +278,8 @@ func (l *ListSegment) Segments() []RichTextSegment {
 	for i, in := range l.Items {
 		var texts []RichTextSegment
 		if _, ok := in.(*ListSegment); !ok {
-			txt := "• "
-			if l.Ordered {
-				txt = strconv.Itoa(j) + "."
-				j++
-			}
-			indentation := strings.Repeat(" ", l.indentationLevel*4)
-			style := RichTextStyleStrong
-			style.QuotingDepth = l.quotingLevel
-			bullet := &TextSegment{Text: indentation + txt + " ", Style: style}
-			texts = append(texts, bullet)
+			texts = append(texts, l.marker(i, j))
+			j++
 			if _, ok := in.(*ParagraphSegment); !ok {
 				in = &ParagraphSegment{Texts: []RichTextSegment{in}}
 			}
@@ -292,31 +290,116 @@ func (l *ListSegment) Segments() []RichTextSegment {
 	return out
 }
 
+// marker returns the bullet, or number, that introduces the item at the given
+// index. Markers are kept between calls so that they hold on to their visuals.
+func (l *ListSegment) marker(i, number int) *listMarkerSegment {
+	for len(l.markers) <= i {
+		l.markers = append(l.markers, &listMarkerSegment{})
+	}
+
+	marker := l.markers[i]
+	marker.ordered = l.Ordered
+	marker.number = number
+	marker.indent = l.indentationLevel
+	marker.quoting = l.quotingLevel
+	return marker
+}
+
 // Textual returns no content for a list as the content is in sub-segments.
-func (l *ListSegment) Textual() string {
+func (*ListSegment) Textual() string {
 	return ""
 }
 
 // Visual returns no additional elements for this segment.
-func (l *ListSegment) Visual() fyne.CanvasObject {
+func (*ListSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
 // Update doesn't need to change a list visual.
-func (l *ListSegment) Update(fyne.CanvasObject) {
+func (*ListSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a list container.
-func (l *ListSegment) Select(_, _ fyne.Position) {
+func (*ListSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this list.
-func (l *ListSegment) SelectedText() string {
+func (*ListSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a list container.
-func (l *ListSegment) Unselect() {
+func (*ListSegment) Unselect() {
+}
+
+// listMarkerSegment draws the bullet, or number, that introduces a list item.
+// It adds no characters to the content, so an editor can treat the text of the
+// item as ordinary text while the marker is drawn alongside it.
+type listMarkerSegment struct {
+	ordered bool
+	number  int
+	indent  int
+	quoting int
+
+	colorName fyne.ThemeColorName
+	parent    *RichText
+}
+
+// Inline returns true as a marker is followed by the text of its item.
+func (*listMarkerSegment) Inline() bool {
+	return true
+}
+
+// Textual returns no content, the marker is a decoration rather than text.
+func (*listMarkerSegment) Textual() string {
+	return ""
+}
+
+// marker returns the text drawn to introduce this item.
+func (l *listMarkerSegment) marker() string {
+	bullet := "\u2022 "
+	if l.ordered {
+		bullet = strconv.Itoa(l.number) + "."
+	}
+
+	return strings.Repeat(textSpace, l.indent*listIndentSpaces) + bullet + textSpace
+}
+
+// Visual returns a new text object drawing this marker.
+func (l *listMarkerSegment) Visual() fyne.CanvasObject {
+	text := canvas.NewText("", color.Transparent)
+	l.Update(text)
+	return text
+}
+
+// Update applies the current state of this marker to an existing visual.
+func (l *listMarkerSegment) Update(o fyne.CanvasObject) {
+	text, ok := o.(*canvas.Text)
+	if !ok {
+		return
+	}
+	text.Text = l.marker()
+	col := l.colorName
+	if col == "" {
+		col = theme.ColorNameForeground
+	}
+	text.Color = theme.ColorForWidget(col, l.parent)
+	text.TextSize = theme.SizeForWidget(theme.SizeNameText, l.parent)
+	text.TextStyle = fyne.TextStyle{Bold: true}
+	text.Refresh()
+}
+
+// Select does nothing for a list marker.
+func (*listMarkerSegment) Select(_, _ fyne.Position) {
+}
+
+// SelectedText returns the marker as it introduces this item in selected text.
+func (l *listMarkerSegment) SelectedText() string {
+	return strings.TrimRight(l.marker(), textSpace) + textSpace
+}
+
+// Unselect does nothing for a list marker.
+func (*listMarkerSegment) Unselect() {
 }
 
 // ParagraphSegment wraps a number of text elements in a paragraph.
@@ -328,7 +411,7 @@ type ParagraphSegment struct {
 }
 
 // Inline returns false as a paragraph should be in a block.
-func (p *ParagraphSegment) Inline() bool {
+func (*ParagraphSegment) Inline() bool {
 	return false
 }
 
@@ -338,30 +421,30 @@ func (p *ParagraphSegment) Segments() []RichTextSegment {
 }
 
 // Textual returns no content for a paragraph container.
-func (p *ParagraphSegment) Textual() string {
+func (*ParagraphSegment) Textual() string {
 	return ""
 }
 
 // Visual returns the no extra elements.
-func (p *ParagraphSegment) Visual() fyne.CanvasObject {
+func (*ParagraphSegment) Visual() fyne.CanvasObject {
 	return nil
 }
 
 // Update doesn't need to change a paragraph container.
-func (p *ParagraphSegment) Update(fyne.CanvasObject) {
+func (*ParagraphSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a paragraph container.
-func (p *ParagraphSegment) Select(_, _ fyne.Position) {
+func (*ParagraphSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this paragraph container.
-func (p *ParagraphSegment) SelectedText() string {
+func (*ParagraphSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a paragraph container.
-func (p *ParagraphSegment) Unselect() {
+func (*ParagraphSegment) Unselect() {
 }
 
 // SeparatorSegment includes a horizontal separator in a rich text widget.
@@ -372,35 +455,35 @@ type SeparatorSegment struct {
 }
 
 // Inline returns false as a separator should be full width.
-func (s *SeparatorSegment) Inline() bool {
+func (*SeparatorSegment) Inline() bool {
 	return false
 }
 
 // Textual returns no content for a separator element.
-func (s *SeparatorSegment) Textual() string {
+func (*SeparatorSegment) Textual() string {
 	return ""
 }
 
 // Visual returns a new instance of a separator widget for this segment.
-func (s *SeparatorSegment) Visual() fyne.CanvasObject {
+func (*SeparatorSegment) Visual() fyne.CanvasObject {
 	return NewSeparator()
 }
 
 // Update doesn't need to change a separator visual.
-func (s *SeparatorSegment) Update(fyne.CanvasObject) {
+func (*SeparatorSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a separator.
-func (s *SeparatorSegment) Select(_, _ fyne.Position) {
+func (*SeparatorSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for this separator.
-func (s *SeparatorSegment) SelectedText() string {
+func (*SeparatorSegment) SelectedText() string {
 	return "" // TODO maybe return "---\n"?
 }
 
 // Unselect does nothing for a separator.
-func (s *SeparatorSegment) Unselect() {
+func (*SeparatorSegment) Unselect() {
 }
 
 // CodeBlockSegment represents a fenced or indented code block. It renders its
@@ -411,10 +494,13 @@ func (s *SeparatorSegment) Unselect() {
 type CodeBlockSegment struct {
 	Text         string
 	quotingLevel int
+
+	body *TextSegment
+	bg   *richCodeBlock
 }
 
 // Inline returns false as a code block is a full-width block element.
-func (c *CodeBlockSegment) Inline() bool {
+func (*CodeBlockSegment) Inline() bool {
 	return false
 }
 
@@ -423,18 +509,47 @@ func (c *CodeBlockSegment) Textual() string {
 	return c.Text
 }
 
-// Visual returns a new panel widget rendering this code block.
-func (c *CodeBlockSegment) Visual() fyne.CanvasObject {
-	return newRichCodeBlock(c.Text)
+// content returns the code that this block holds.
+func (c *CodeBlockSegment) content() string {
+	return c.Text
 }
 
-// Update applies the current content of this segment to an existing visual.
-func (c *CodeBlockSegment) Update(o fyne.CanvasObject) {
-	o.(*richCodeBlock).setText(c.Text)
+// setContent replaces the code that this block holds.
+func (c *CodeBlockSegment) setContent(text string) {
+	c.Text = text
+}
+
+// Segments returns the content of this block as a run of monospace text, so that
+// the lines of code lay out, select and edit like the text around them.
+func (c *CodeBlockSegment) Segments() []RichTextSegment {
+	if c.body == nil {
+		c.body = &TextSegment{Style: RichTextStyleCodeBlock}
+	}
+
+	c.body.Text = c.Text
+	c.body.Style.QuotingDepth = c.quotingLevel
+	return []RichTextSegment{c.body}
+}
+
+// panel returns the background that the lines of this block are drawn on.
+func (c *CodeBlockSegment) panel() fyne.CanvasObject {
+	if c.bg == nil {
+		c.bg = newRichCodeBlock()
+	}
+	return c.bg
+}
+
+// Visual returns a new panel widget for the background of this code block.
+func (*CodeBlockSegment) Visual() fyne.CanvasObject {
+	return newRichCodeBlock()
+}
+
+// Update has nothing to change, the content is drawn as text on the panel.
+func (*CodeBlockSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a code block.
-func (c *CodeBlockSegment) Select(_, _ fyne.Position) {
+func (*CodeBlockSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the code block content.
@@ -443,53 +558,42 @@ func (c *CodeBlockSegment) SelectedText() string {
 }
 
 // Unselect does nothing for a code block.
-func (c *CodeBlockSegment) Unselect() {
+func (*CodeBlockSegment) Unselect() {
 }
 
-// richCodeBlock is the internal widget that draws a code block: monospace text
-// on a rounded, bordered panel.
+// richCodeBlock is the internal widget that draws the panel a code block sits on,
+// a rounded and bordered fill behind the rows of code.
 type richCodeBlock struct {
 	BaseWidget
-	text  string
-	bg    *canvas.Rectangle
-	label *Label
+	bg *canvas.Rectangle
 }
 
-func newRichCodeBlock(text string) *richCodeBlock {
-	c := &richCodeBlock{text: text}
+func newRichCodeBlock() *richCodeBlock {
+	c := &richCodeBlock{}
 	c.ExtendBaseWidget(c)
 	return c
 }
 
-func (c *richCodeBlock) setText(text string) {
-	c.text = text
-	if c.label != nil {
-		c.label.SetText(text)
-	}
-}
-
 func (c *richCodeBlock) CreateRenderer() fyne.WidgetRenderer {
-	c.bg = canvas.NewRectangle(theme.Color(theme.ColorNameInputBackground))
-	c.bg.StrokeColor = theme.Color(theme.ColorNameInputBorder)
-	c.bg.StrokeWidth = 1
-	c.bg.CornerRadius = theme.Size(theme.SizeNameInputRadius)
-	c.label = NewLabelWithStyle(c.text, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
-	scroll := widget.NewHScroll(c.label)
-	cont := &fyne.Container{Layout: &richCodeBlockLayout{}, Objects: []fyne.CanvasObject{c.bg, scroll}}
-	return NewSimpleRenderer(cont)
+	c.bg = canvas.NewRectangle(color.Transparent)
+	c.applyTheme()
+	return NewSimpleRenderer(c.bg)
 }
 
-type richCodeBlockLayout struct{}
-
-func (l *richCodeBlockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return objects[1].MinSize()
-}
-
-func (l *richCodeBlockLayout) Layout(objects []fyne.CanvasObject, s fyne.Size) {
-	for _, o := range objects {
-		o.Move(fyne.NewPos(0, 0))
-		o.Resize(s)
+func (c *richCodeBlock) Refresh() {
+	if c.bg != nil {
+		c.applyTheme()
 	}
+
+	c.BaseWidget.Refresh()
+}
+
+func (c *richCodeBlock) applyTheme() {
+	c.bg.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, c)
+	c.bg.StrokeColor = theme.ColorForWidget(theme.ColorNameInputBorder, c)
+	c.bg.StrokeWidth = theme.SizeForWidget(theme.SizeNameInputBorder, c)
+	c.bg.CornerRadius = theme.SizeForWidget(theme.SizeNameInputRadius, c)
+	c.bg.Refresh()
 }
 
 // CheckBoxSegment represents checkbox (with text) in a rich text widget.
@@ -501,7 +605,7 @@ type CheckBoxSegment struct {
 }
 
 // Inline returns true as a CheckBoxSegment is usually part of a list item.
-func (c *CheckBoxSegment) Inline() bool {
+func (*CheckBoxSegment) Inline() bool {
 	return true
 }
 
@@ -523,20 +627,20 @@ func (c *CheckBoxSegment) Visual() fyne.CanvasObject {
 }
 
 // Update doesn't need to change a checkbox
-func (c *CheckBoxSegment) Update(fyne.CanvasObject) {
+func (*CheckBoxSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a checkbox.
-func (c *CheckBoxSegment) Select(_, _ fyne.Position) {
+func (*CheckBoxSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the empty string for a checkbox.
-func (c *CheckBoxSegment) SelectedText() string {
+func (*CheckBoxSegment) SelectedText() string {
 	return ""
 }
 
 // Unselect does nothing for a checkbox.
-func (c *CheckBoxSegment) Unselect() {
+func (*CheckBoxSegment) Unselect() {
 }
 
 // TableSegment represents a table within a rich text widget.
@@ -551,7 +655,7 @@ type TableSegment struct {
 }
 
 // Inline returns false as a table is a full-width block element.
-func (t *TableSegment) Inline() bool {
+func (*TableSegment) Inline() bool {
 	return false
 }
 
@@ -628,11 +732,11 @@ func (t *TableSegment) Visual() fyne.CanvasObject {
 }
 
 // Update does nothing; a table visual is rebuilt rather than updated.
-func (t *TableSegment) Update(fyne.CanvasObject) {
+func (*TableSegment) Update(fyne.CanvasObject) {
 }
 
 // Select does nothing for a table.
-func (t *TableSegment) Select(_, _ fyne.Position) {
+func (*TableSegment) Select(_, _ fyne.Position) {
 }
 
 // SelectedText returns the table content as text.
@@ -641,7 +745,7 @@ func (t *TableSegment) SelectedText() string {
 }
 
 // Unselect does nothing for a table.
-func (t *TableSegment) Unselect() {
+func (*TableSegment) Unselect() {
 }
 
 // newTableCell builds a single table cell: padded rich-text content over a fill,
@@ -668,7 +772,7 @@ func newTableCell(segs []RichTextSegment, align fyne.TextAlign, header bool) fyn
 		cell = append(cell, s)
 	}
 	if len(cell) == 0 {
-		cell = append(cell, &TextSegment{Style: RichTextStyleInline, Text: " "})
+		cell = append(cell, &TextSegment{Style: RichTextStyleInline, Text: textSpace})
 	}
 
 	text := NewRichText(cell...)
@@ -764,6 +868,9 @@ type RichTextStyle struct {
 
 	// an internal detail marking inline code, which renders on a background fill
 	codeInline bool
+
+	// an internal detail recording the level of a heading that has no size of its own (3 and deeper)
+	headingLevel int
 }
 
 // RichTextSegment describes any element that can be rendered in a RichText widget.
@@ -788,6 +895,16 @@ type TextSegment struct {
 	Text  string
 
 	parent *RichText
+}
+
+// content returns the text that this segment holds.
+func (t *TextSegment) content() string {
+	return t.Text
+}
+
+// setContent replaces the text that this segment holds.
+func (t *TextSegment) setContent(text string) {
+	t.Text = text
 }
 
 // Inline should return true if this text can be included within other elements, or false if it creates a new block.
@@ -818,11 +935,11 @@ func (t *TextSegment) Visual() fyne.CanvasObject {
 func (t *TextSegment) Update(o fyne.CanvasObject) {
 	obj, ok := o.(*canvas.Text)
 	if !ok { // inline code container: [background, text]
-		c := o.(*fyne.Container)
-		bg := c.Objects[0].(*canvas.Rectangle)
+		c, _ := o.(*fyne.Container)
+		bg, _ := c.Objects[0].(*canvas.Rectangle)
 		bg.FillColor = theme.ColorForWidget(theme.ColorNameInputBackground, t.parent)
 		bg.Refresh()
-		obj = c.Objects[1].(*canvas.Text)
+		obj, _ = c.Objects[1].(*canvas.Text)
 	}
 	obj.Text = t.Text
 	obj.Color = t.color()
@@ -850,18 +967,18 @@ func (codeInlineLayout) Layout(o []fyne.CanvasObject, _ fyne.Size) {
 }
 
 // Select tells the segment that the user is selecting the content between the two positions.
-func (t *TextSegment) Select(begin, end fyne.Position) {
+func (*TextSegment) Select(_, _ fyne.Position) {
 	// no-op: this will be added when we progress to editor
 }
 
 // SelectedText should return the text representation of any content currently selected through the Select call.
-func (t *TextSegment) SelectedText() string {
+func (*TextSegment) SelectedText() string {
 	// no-op: this will be added when we progress to editor
 	return ""
 }
 
 // Unselect tells the segment that the user is has cancelled the previous selection.
-func (t *TextSegment) Unselect() {
+func (*TextSegment) Unselect() {
 	// no-op: this will be added when we progress to editor
 }
 

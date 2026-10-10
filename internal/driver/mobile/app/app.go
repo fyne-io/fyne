@@ -15,14 +15,6 @@ import (
 	_ "fyne.io/fyne/v2/internal/driver/mobile/mobileinit"
 )
 
-// Main is called by the main.main function to run the mobile application.
-//
-// It calls f on the App, in a separate goroutine, as some OS-specific
-// libraries require being on 'the main thread'.
-func Main(f func(App)) {
-	main(f)
-}
-
 // App is how a GUI mobile application interacts with the OS.
 type App interface {
 	// Events returns the events channel. It carries events from the system to
@@ -128,18 +120,18 @@ func (a *app) RegisterFilter(f func(any) any) {
 	a.filters = append(a.filters, f)
 }
 
-func (a *app) ShowVirtualKeyboard(keyboard KeyboardType) {
+func (*app) ShowVirtualKeyboard(keyboard KeyboardType) {
 	driverShowVirtualKeyboard(keyboard)
 }
 
-func (a *app) HideVirtualKeyboard() {
+func (*app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
-func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
+func (*app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	driverShowFileOpenPicker(callback, filter)
 }
 
-func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
+func (*app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	driverShowFileSavePicker(callback, filter, filename)
 }

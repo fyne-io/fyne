@@ -20,11 +20,21 @@ func GetCanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 // SetCanvasForObject sets the canvas for the specified object.
 // The passed function will be called if the item was not previously attached to this canvas
 func SetCanvasForObject(obj fyne.CanvasObject, c fyne.Canvas, setup func()) {
+	// this runs for every visible object on every repaint, so avoid allocating
+	// a canvasInfo we would only throw away - and keep the entry alive so a
+	// constantly repainting window does not expire its own cache.
+	if old, found := canvases.Load(obj); found && old.canvas == c {
+		old.setAlive()
+		return
+	}
+
+	// not cached, or moved to a different canvas - an object may only be on one
+	// canvas at a time, so replace the entry and re-run setup for the new canvas.
 	cinfo := &canvasInfo{canvas: c}
 	cinfo.setAlive()
+	canvases.Store(obj, cinfo)
 
-	old, found := canvases.LoadOrStore(obj, cinfo)
-	if (!found || old.canvas != c) && setup != nil {
+	if setup != nil {
 		setup()
 	}
 }

@@ -789,7 +789,7 @@ func (w *markupRendererTestWidget) Hide() {
 	w.hidden = true
 }
 
-func (w *markupRendererTestWidget) MinSize() fyne.Size {
+func (*markupRendererTestWidget) MinSize() fyne.Size {
 	return fyne.Size{}
 }
 
@@ -801,7 +801,7 @@ func (w *markupRendererTestWidget) Position() fyne.Position {
 	return w.pos
 }
 
-func (w *markupRendererTestWidget) Refresh() {
+func (*markupRendererTestWidget) Refresh() {
 }
 
 func (w *markupRendererTestWidget) Resize(size fyne.Size) {
@@ -828,13 +828,13 @@ type markupRendererTestWidgetRenderer struct {
 	w *markupRendererTestWidget
 }
 
-func (r *markupRendererTestWidgetRenderer) Destroy() {
+func (*markupRendererTestWidgetRenderer) Destroy() {
 }
 
-func (r *markupRendererTestWidgetRenderer) Layout(_ fyne.Size) {
+func (*markupRendererTestWidgetRenderer) Layout(_ fyne.Size) {
 }
 
-func (r *markupRendererTestWidgetRenderer) MinSize() fyne.Size {
+func (*markupRendererTestWidgetRenderer) MinSize() fyne.Size {
 	return fyne.Size{}
 }
 
@@ -842,7 +842,7 @@ func (r *markupRendererTestWidgetRenderer) Objects() []fyne.CanvasObject {
 	return r.w.objs
 }
 
-func (r *markupRendererTestWidgetRenderer) Refresh() {
+func (*markupRendererTestWidgetRenderer) Refresh() {
 }
 
 var _ fyne.WidgetRenderer = (*markupRendererTestWidgetRenderer)(nil)

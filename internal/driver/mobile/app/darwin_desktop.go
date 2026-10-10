@@ -30,6 +30,7 @@ import (
 
 	"fyne.io/fyne/v2/internal/driver/mobile/event/key"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
+	"fyne.io/fyne/v2/internal/driver/mobile/event/mouse"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/paint"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/touch"
@@ -49,9 +50,17 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(App)) {
+func GoBack() {
+	// When simulating mobile there are no other activities open (and we can't just force background)
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
 	if tid := uint64(C.threadID()); tid != initThreadID {
-		log.Fatalf("app.Main called on thread %d, but app.init ran on %d", tid, initThreadID)
+		log.Fatalf("app.Main called on thread %d, but app.init ran on %d", tid, initThreadID) //revive:disable-line:deep-exit
 	}
 
 	go func() {
@@ -61,10 +70,6 @@ func main(f func(App)) {
 	}()
 
 	C.runApp()
-}
-
-func GoBack() {
-	// When simulating mobile there are no other activities open (and we can't just force background)
 }
 
 // loop is the primary drawing loop.
@@ -152,6 +157,14 @@ func sendTouch(t touch.Type, x, y float32) {
 	}
 }
 
+func sendScroll(x, y, dy float32) {
+	theApp.events.In() <- mouse.ScrollEvent{
+		X:       x,
+		Y:       windowHeightPx - y,
+		ScrollY: dy,
+	}
+}
+
 //export eventMouseDown
 func eventMouseDown(x, y float32) { sendTouch(touch.TypeBegin, x, y) }
 
@@ -160,6 +173,19 @@ func eventMouseDragged(x, y float32) { sendTouch(touch.TypeMove, x, y) }
 
 //export eventMouseEnd
 func eventMouseEnd(x, y float32) { sendTouch(touch.TypeEnd, x, y) }
+
+// preciseScrollScale scales the precise deltas of a trackpad or Magic Mouse
+// down so they compare to the whole lines a scroll wheel reports.
+const preciseScrollScale = float32(0.1)
+
+//export eventScrollWheel
+func eventScrollWheel(x, y, dy float32, precise int) {
+	if precise != 0 {
+		dy *= preciseScrollScale
+	}
+
+	sendScroll(x, y, dy)
+}
 
 var stopped = false
 
@@ -184,7 +210,7 @@ func eventKey(runeVal int32, direction uint8, code uint16, flags uint32) {
 	}
 
 	theApp.events.In() <- key.Event{
-		Rune:      convRune(rune(runeVal)),
+		Rune:      convRune(runeVal),
 		Code:      convVirtualKeyCode(code),
 		Modifiers: modifiers,
 		Direction: key.Direction(direction),

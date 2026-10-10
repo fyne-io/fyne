@@ -1,5 +1,9 @@
 package async
 
+// The size of Struct is less than 16 bytes.
+// A CPU cache line (L2) is 256 bytes, thus it can hold 16 struct references.
+const maxStructsPerCPUCacheLine = 16
+
 // UnboundedStructChan is a channel with an unbounded buffer for caching
 // struct{} objects. This implementation is a specialized version that
 // optimizes for struct{} objects than other types. A channel must be
@@ -12,10 +16,9 @@ type UnboundedStructChan struct {
 // NewUnboundedStructChan returns a unbounded channel with unlimited capacity.
 func NewUnboundedStructChan() *UnboundedStructChan {
 	ch := &UnboundedStructChan{
-		// The size of Struct is less than 16 bytes, we use 16 to fit
-		// a CPU cache line (L2, 256 Bytes), which may reduce cache misses.
-		in:    make(chan struct{}, 16),
-		out:   make(chan struct{}, 16),
+		// We make the channels fit into CPU cache lines, which may reduce cache misses.
+		in:    make(chan struct{}, maxStructsPerCPUCacheLine),
+		out:   make(chan struct{}, maxStructsPerCPUCacheLine),
 		close: make(chan struct{}),
 	}
 	go ch.processing()

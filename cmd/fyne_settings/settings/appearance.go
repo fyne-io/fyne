@@ -12,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	internalapp "fyne.io/fyne/v2/internal/app"
+	"fyne.io/fyne/v2/internal/goos"
+	"fyne.io/fyne/v2/internal/repository"
 	internaltheme "fyne.io/fyne/v2/internal/theme"
 	intWidget "fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/layout"
@@ -47,7 +49,7 @@ func NewSettings() *Settings {
 }
 
 // AppearanceIcon returns the icon for appearance settings
-func (s *Settings) AppearanceIcon() fyne.Resource {
+func (*Settings) AppearanceIcon() fyne.Resource {
 	return theme.NewThemedResource(resourceAppearanceSvg)
 }
 
@@ -62,7 +64,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	def := s.fyneSettings.ThemeName
 	themeNames := []string{themeNameDark, themeNameLight}
-	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
+	if runtime.GOOS == goos.Darwin || runtime.GOOS == goos.Windows {
 		themeNames = append(themeNames, themeNameSystemLabel)
 		if s.fyneSettings.ThemeName == themeNameSystem {
 			def = themeNameSystemLabel
@@ -137,12 +139,9 @@ func (s *Settings) loadFromFile(path string) error {
 	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(filepath.Dir(path), 0o700)
-			if err != nil {
-				return err
-			}
-			return nil
+			return os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec)
 		}
+
 		return err
 	}
 	decode := json.NewDecoder(file)
@@ -160,8 +159,7 @@ func (s *Settings) save() error {
 }
 
 func (s *Settings) saveToFile(path string) error {
-	err := os.MkdirAll(filepath.Dir(path), 0o700)
-	if err != nil { // this is not an exists error according to docs
+	if err := os.MkdirAll(filepath.Dir(path), repository.PermUserReadWriteExec); err != nil { // this is not an exists error according to docs
 		return err
 	}
 
@@ -170,7 +168,7 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	return os.WriteFile(path, data, 0o644)
+	return os.WriteFile(path, data, repository.PermGroupRead|repository.PermOtherRead|repository.PermUserRead|repository.PermUserWrite)
 }
 
 type primaryColorButton struct {
@@ -217,8 +215,8 @@ func (c *primaryColorButtonRenderer) Layout(s fyne.Size) {
 	c.rect.Resize(s)
 }
 
-func (c *primaryColorButtonRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(20, 32)
+func (*primaryColorButtonRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(20, 32) //revive:disable-line:add-constant
 }
 
 func (c *primaryColorButtonRenderer) Refresh() {
@@ -237,7 +235,7 @@ func (c *primaryColorButtonRenderer) Objects() []fyne.CanvasObject {
 	return c.objs
 }
 
-func (c *primaryColorButtonRenderer) Destroy() {
+func (*primaryColorButtonRenderer) Destroy() {
 }
 
 type previewTheme struct {

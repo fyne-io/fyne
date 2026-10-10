@@ -56,6 +56,7 @@ func (nav *Navigation) Push(obj fyne.CanvasObject) {
 //
 // Since: 2.7
 func (nav *Navigation) PushWithTitle(obj fyne.CanvasObject, s string) {
+	nav.setup()
 	obj.Show()
 	objs := nav.stack.Objects[:nav.level]
 	if len(objs) > 0 {
@@ -128,7 +129,12 @@ func (nav *Navigation) SetCurrentTitle(s string) {
 	}
 }
 
+// setup prepares the stack the first time it is needed.
 func (nav *Navigation) setup() {
+	if nav.stack.Layout != nil {
+		return
+	}
+
 	objs := []fyne.CanvasObject{}
 	titles := []string{}
 	if nav.Root != nil {
@@ -149,9 +155,10 @@ type navigatorRenderer struct {
 	back    widget.Button
 	forward widget.Button
 	title   widget.Label
-	object  fyne.CanvasObject
+	objects []fyne.CanvasObject
 }
 
+// CreateRenderer implements the [fyne.Widget] interface.
 func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	r := &navigatorRenderer{
 		nav: nav,
@@ -175,31 +182,31 @@ func (nav *Navigation) CreateRenderer() fyne.WidgetRenderer {
 	nav.setup()
 
 	pad := r.back.MinSize().Width
-	r.object = NewBorder(
+	r.objects = []fyne.CanvasObject{NewBorder(
 		NewStack(NewHBox(&r.back, layout.NewSpacer(), &r.forward),
 			&fyne.Container{Layout: layout.NewCustomPaddedLayout(0, 0, pad, pad), Objects: []fyne.CanvasObject{&r.title}}),
 		nil,
 		nil,
 		nil,
 		&nav.stack,
-	)
+	)}
 
 	return r
 }
 
-func (r *navigatorRenderer) Destroy() {
+func (*navigatorRenderer) Destroy() {
 }
 
 func (r *navigatorRenderer) Layout(s fyne.Size) {
-	r.object.Resize(s)
+	r.objects[0].Resize(s)
 }
 
 func (r *navigatorRenderer) MinSize() fyne.Size {
-	return r.object.MinSize()
+	return r.objects[0].MinSize()
 }
 
 func (r *navigatorRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{r.object}
+	return r.objects
 }
 
 func (r *navigatorRenderer) Refresh() {
@@ -221,5 +228,5 @@ func (r *navigatorRenderer) Refresh() {
 		r.title.Text = r.nav.Title
 	}
 
-	r.object.Refresh()
+	r.objects[0].Refresh()
 }

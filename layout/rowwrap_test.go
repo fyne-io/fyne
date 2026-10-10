@@ -4,12 +4,13 @@ import (
 	"image/color"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRowWrapLayout_MinSize(t *testing.T) {
@@ -172,7 +173,7 @@ func TestRowWrapLayout_Layout(t *testing.T) {
 		assert.Equal(t, fyne.NewPos(0, 0), a.Position())
 		assert.Equal(t, fyne.NewPos(0, 10+p), b.Position())
 	})
-	t.Run("should do nothing when container is empty", func(t *testing.T) {
+	t.Run("should do nothing when container is empty", func(*testing.T) {
 		containerSize := fyne.NewSize(125, 125)
 		container := &fyne.Container{}
 		container.Resize(containerSize)

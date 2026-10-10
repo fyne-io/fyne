@@ -24,15 +24,15 @@ func TestParseURI(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "file://C:/tmp/foo.txt", uri.String())
 
-	IPv6url := "http://[2001:db8:4006:812::200e]:8080/path/page.html"
-	uri, err = ParseURI(IPv6url)
+	ipv6url := "http://[2001:db8:4006:812::200e]:8080/path/page.html"
+	uri, err = ParseURI(ipv6url)
 	assert.NoError(t, err)
-	assert.Equal(t, IPv6url, uri.String())
+	assert.Equal(t, ipv6url, uri.String())
 
-	IPv6url = "http://[2001:db8:4006:812::200e]/path/page.html"
-	uri, err = ParseURI(IPv6url)
+	ipv6url = "http://[2001:db8:4006:812::200e]/path/page.html"
+	uri, err = ParseURI(ipv6url)
 	assert.NoError(t, err)
-	assert.Equal(t, IPv6url, uri.String())
+	assert.Equal(t, ipv6url, uri.String())
 }
 
 func TestParseInvalidURI(t *testing.T) {
@@ -57,6 +57,14 @@ func TestParseInvalidURI(t *testing.T) {
 	assert.Nil(t, uri)
 
 	uri, err = ParseURI("scheme://0[]/invalid")
+	assert.Error(t, err)
+	assert.Nil(t, uri)
+
+	uri, err = ParseURI("scheme://aaaaaaaaaa22222222223333333333444444444455555555556666666666bbbb/too/long")
+	assert.Error(t, err)
+	assert.Nil(t, uri)
+
+	uri, err = ParseURI("scheme://1..2/wrong")
 	assert.Error(t, err)
 	assert.Nil(t, uri)
 }

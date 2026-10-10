@@ -16,7 +16,7 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func TestDrawImage_Ratio(t *testing.T) {
+func TestDrawImage_Ratio(*testing.T) {
 	//	d := NewGLDriver()
 	//	win := d.CreateWindow("Test")
 	//	c := win.Canvas().(*glCanvas)
@@ -29,7 +29,7 @@ func TestDrawImage_Ratio(t *testing.T) {
 	//	assert.Equal(t, float32(1.0), c.aspects[img])
 }
 
-func TestDrawImage_Ratio2(t *testing.T) {
+func TestDrawImage_Ratio2(*testing.T) {
 	//	d := NewGLDriver()
 	//	win := d.CreateWindow("Test")
 	//	c := win.Canvas().(*glCanvas)

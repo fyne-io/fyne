@@ -13,12 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var minSize fyne.Size
-
 func BenchmarkFormLayout(b *testing.B) {
 	b.StopTimer()
 
-	min := fyne.Size{}
+	minSize := fyne.Size{}
 	form := layout.NewFormLayout()
 	label1 := canvas.NewRectangle(color.Black)
 	content1 := canvas.NewRectangle(color.Black)
@@ -31,10 +29,10 @@ func BenchmarkFormLayout(b *testing.B) {
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		min = form.MinSize(objects)
+		minSize = form.MinSize(objects)
 	}
 
-	minSize = min
+	assert.Equal(b, minSize, minSize)
 }
 
 func TestFormLayout(t *testing.T) {
@@ -189,7 +187,7 @@ func TestFormLayout_MinSize_CanvasText_SingleRow(t *testing.T) {
 	min2 := text2.MinSize()
 	expectedWidth := (min1.Width + inner*2) + (min2.Width + inner*2) + theme.Padding()
 
-	expectedHeight := fyne.Max(min1.Height, min2.Height) + inner*2
+	expectedHeight := max(min1.Height, min2.Height) + inner*2
 
 	assert.Equal(t, fyne.NewSize(expectedWidth, expectedHeight), layoutMin)
 }
@@ -208,11 +206,11 @@ func TestFormLayout_MinSize_CanvasText_TwoRows(t *testing.T) {
 	l2 := label2.MinSize()
 	v1 := value1.MinSize()
 	v2 := value2.MinSize()
-	labelCol := fyne.Max(l1.Width+inner*2, l2.Width+inner*2)
-	valueCol := fyne.Max(v1.Width+inner*2, v2.Width+inner*2)
+	labelCol := max(l1.Width+inner*2, l2.Width+inner*2)
+	valueCol := max(v1.Width+inner*2, v2.Width+inner*2)
 	expectedWidth := labelCol + valueCol + theme.Padding()
-	row1 := fyne.Max(l1.Height+inner*2, v1.Height+inner*2)
-	row2 := fyne.Max(l2.Height+inner*2, v2.Height+inner*2)
+	row1 := max(l1.Height+inner*2, v1.Height+inner*2)
+	row2 := max(l2.Height+inner*2, v2.Height+inner*2)
 	expectedHeight := row1 + row2 + theme.Padding()
 
 	assert.Equal(t, fyne.NewSize(expectedWidth, expectedHeight), layoutMin)

@@ -105,7 +105,7 @@ func (i *menuBarItem) MouseOut() {
 // Tapped toggles the activation state of the menu bar.
 // It shows the item’s menu if the bar is activated and hides it if the bar is deactivated.
 func (i *menuBarItem) Tapped(*fyne.PointEvent) {
-	i.Parent.toggle(i)
+	i.Parent.toggleItem(i)
 }
 
 func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
@@ -127,7 +127,7 @@ func (i *menuBarItem) TypedKey(event *fyne.KeyEvent) {
 	}
 }
 
-func (i *menuBarItem) TypedRune(_ rune) {
+func (*menuBarItem) TypedRune(_ rune) {
 }
 
 type menuBarItemRenderer struct {
@@ -167,6 +167,6 @@ func (r *menuBarItemRenderer) Refresh() {
 	canvas.Refresh(r.i)
 }
 
-func (r *menuBarItemRenderer) padding() fyne.Size {
+func (*menuBarItemRenderer) padding() fyne.Size {
 	return fyne.NewSize(theme.InnerPadding()*2, theme.InnerPadding())
 }

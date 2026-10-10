@@ -119,7 +119,7 @@ type Context interface {
 	// Disable disables various GL capabilities.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glDisable.xhtml
-	Disable(cap Enum)
+	Disable(capability Enum)
 
 	// DrawArrays renders geometric primitives from the bound data.
 	//
@@ -129,7 +129,7 @@ type Context interface {
 	// Enable enables various GL capabilities.
 	//
 	// http://www.khronos.org/opengles/sdk/docs/man3/html/glEnable.xhtml
-	Enable(cap Enum)
+	Enable(capability Enum)
 
 	// EnableVertexAttribArray enables a vertex attribute array.
 	//
@@ -311,4 +311,7 @@ type Worker interface {
 
 	// DoWork performs any pending OpenGL calls.
 	DoWork()
+
+	// HasWork reports whether any OpenGL calls are queued.
+	HasWork() bool
 }

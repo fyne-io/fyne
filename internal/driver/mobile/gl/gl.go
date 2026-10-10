@@ -226,11 +226,11 @@ func (ctx *context) DeleteTexture(v Texture) {
 	})
 }
 
-func (ctx *context) Disable(cap Enum) {
+func (ctx *context) Disable(c Enum) {
 	ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnDisable,
-			a0: cap.c(),
+			a0: c.c(),
 		},
 	})
 }
@@ -246,11 +246,11 @@ func (ctx *context) DrawArrays(mode Enum, first, count int) {
 	})
 }
 
-func (ctx *context) Enable(cap Enum) {
+func (ctx *context) Enable(c Enum) {
 	ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnEnable,
-			a0: cap.c(),
+			a0: c.c(),
 		},
 	})
 }
@@ -387,7 +387,8 @@ func (ctx *context) GetShaderSource(s Shader) string {
 	return goString(buf)
 }
 
-func (ctx *context) GetTexParameteriv(dst []int32, target, pname Enum) {
+func (ctx *context) GetTexParameteriv(pname Enum) Enum {
+	var target Enum
 	ctx.enqueue(call{
 		args: fnargs{
 			fn: glfnGetTexParameteriv,
@@ -396,6 +397,7 @@ func (ctx *context) GetTexParameteriv(dst []int32, target, pname Enum) {
 		},
 		blocking: true,
 	})
+	return target
 }
 
 func (ctx *context) GetUniformLocation(p Program, name string) Uniform {

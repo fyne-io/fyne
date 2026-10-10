@@ -23,16 +23,16 @@ import (
 
 const systemTheme = fyne.ThemeVariant(99)
 
-func (a *fyneApp) OpenURL(url *url.URL) error {
+func (*fyneApp) OpenURL(u *url.URL) error {
 	if build.IsFlatpak {
-		err := openuri.OpenURI("", url.String(), nil)
+		err := openuri.OpenURI("", u.String(), nil)
 		if err != nil {
 			fyne.LogError("Opening url in portal failed", err)
 		}
 		return err
 	}
 
-	cmd := exec.Command("xdg-open", url.String()) //gosec:disable G204 -- It’s the callers responsibility to validate the input.
+	cmd := exec.Command("xdg-open", u.String()) //gosec:disable G204 -- It’s the callers responsibility to validate the input.
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Start()
 }
@@ -154,7 +154,7 @@ func watchTheme(s *settings) {
 	}()
 }
 
-func (a *fyneApp) registerRepositories() {
+func (*fyneApp) registerRepositories() {
 	// no-op
 }
 

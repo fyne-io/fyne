@@ -18,7 +18,7 @@ type formLayout struct{}
 // This includes the width of the label column (maximum width of all labels),
 // the width of the content column (maximum width of all content cells and remaining space in container)
 // and the total minimum height of the form.
-func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (labelWidth float32, contentWidth float32, height float32) {
+func (*formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerWidth float32) (labelWidth float32, contentWidth float32, height float32) {
 	if len(objects)%formLayoutCols != 0 {
 		return 0, 0, 0
 	}
@@ -37,7 +37,7 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 			labelSize.Width += innerPadding * 2
 			labelSize.Height += innerPadding * 2
 		}
-		labelWidth = fyne.Max(labelWidth, labelSize.Width)
+		labelWidth = max(labelWidth, labelSize.Width)
 
 		// Content column width is the maximum of all content items.
 		contentSize := contentCell.MinSize()
@@ -45,15 +45,15 @@ func (f *formLayout) calculateTableSizes(objects []fyne.CanvasObject, containerW
 			contentSize.Width += innerPadding * 2
 			contentSize.Height += innerPadding * 2
 		}
-		contentWidth = fyne.Max(contentWidth, contentSize.Width)
+		contentWidth = max(contentWidth, contentSize.Width)
 
-		rowHeight := fyne.Max(labelSize.Height, contentSize.Height)
+		rowHeight := max(labelSize.Height, contentSize.Height)
 		height += rowHeight
 		rows++
 	}
 
 	padding := theme.Padding()
-	contentWidth = fyne.Max(contentWidth, containerWidth-labelWidth-padding)
+	contentWidth = max(contentWidth, containerWidth-labelWidth-padding)
 	return labelWidth, contentWidth, height + float32(rows-1)*padding
 }
 
@@ -95,7 +95,7 @@ func (f *formLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		if _, ok := contentCell.(*canvas.Text); ok {
 			contentHeight += innerPadding * 2
 		}
-		rowHeight := fyne.Max(labelHeight, contentHeight)
+		rowHeight := max(labelHeight, contentHeight)
 
 		pos, size := objectLayout(labelCell, 0, labelWidth, rowHeight, labelMin.Height)
 		labelCell.Move(pos)

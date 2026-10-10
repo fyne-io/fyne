@@ -8,18 +8,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-var _ fyne.Widget = (*Shadow)(nil)
-
-// Shadow is a widget that renders a shadow.
-type Shadow struct {
-	Base
-	level ElevationLevel
-	typ   ShadowType
-}
-
-// ElevationLevel is the level of elevation of the shadow casting object.
-type ElevationLevel int
-
+// All known values for ElevationLevel.
 const (
 	BaseLevel             ElevationLevel = 0
 	MenuBarLevel          ElevationLevel = 1
@@ -31,9 +20,6 @@ const (
 	DialogLevel           ElevationLevel = 24
 )
 
-// ShadowType specifies the type of the shadow.
-type ShadowType int
-
 // ShadowType constants
 const (
 	ShadowAround ShadowType = iota
@@ -42,6 +28,39 @@ const (
 	ShadowBottom
 	ShadowTop
 )
+
+const (
+	shadowBlurRadiusLevelCard    = 8
+	shadowBlurRadiusLevelDialog  = 18
+	shadowBlurRadiusLevelMenu    = 6
+	shadowBlurRadiusLevelMenuBar = 2
+	shadowBlurRadiusLevelPopUp   = 14
+
+	shadowVerticalOffsetLevelCard    = 2
+	shadowVerticalOffsetLevelDialog  = 6
+	shadowVerticalOffsetLevelMenu    = 2
+	shadowVerticalOffsetLevelMenuBar = 1
+	shadowVerticalOffsetLevelPopUp   = 4
+
+	shadowOffsetRatioHorizontal = 0.2
+	shadowOffsetRatioVertical   = shadowOffsetRatioHorizontal * 2
+	shadowRadialCenterOffset    = 0.5
+)
+
+// ElevationLevel is the level of elevation of the shadow casting object.
+type ElevationLevel int
+
+// Shadow is a widget that renders a shadow.
+type Shadow struct {
+	Base
+	level ElevationLevel
+	typ   ShadowType
+}
+
+var _ fyne.Widget = (*Shadow)(nil)
+
+// ShadowType specifies the type of the shadow.
+type ShadowType int
 
 // ApplyShadowForLevel applies Material Design inspired shadow parameters (only downward Y-axis offset + blur) to the given shadow.
 // The Variant is always [canvas.DropShadow].
@@ -53,20 +72,20 @@ func ApplyShadowForLevel(s *canvas.Shadow, level ElevationLevel, shadowColor col
 	case level <= BaseLevel:
 		// no shadow
 	case level <= MenuBarLevel:
-		blurRadius = 2
-		offset = fyne.NewPos(0, 1)
+		blurRadius = shadowBlurRadiusLevelMenuBar
+		offset = fyne.NewPos(0, shadowVerticalOffsetLevelMenuBar)
 	case level <= MenuLevel:
-		blurRadius = 6
-		offset = fyne.NewPos(0, 2)
+		blurRadius = shadowBlurRadiusLevelMenu
+		offset = fyne.NewPos(0, shadowVerticalOffsetLevelMenu)
 	case level <= CardLevel: // equal to ButtonLevel
-		blurRadius = 8
-		offset = fyne.NewPos(0, 2)
+		blurRadius = shadowBlurRadiusLevelCard
+		offset = fyne.NewPos(0, shadowVerticalOffsetLevelCard)
 	case level <= PopUpLevel:
-		blurRadius = 14
-		offset = fyne.NewPos(0, 4)
+		blurRadius = shadowBlurRadiusLevelPopUp
+		offset = fyne.NewPos(0, shadowVerticalOffsetLevelPopUp)
 	default: // DialogLevel or more
-		blurRadius = 18
-		offset = fyne.NewPos(0, 6)
+		blurRadius = shadowBlurRadiusLevelDialog
+		offset = fyne.NewPos(0, shadowVerticalOffsetLevelDialog)
 	}
 
 	s.Color = shadowColor
@@ -100,43 +119,43 @@ type shadowRenderer struct {
 
 func (r *shadowRenderer) Layout(size fyne.Size) {
 	depth := float32(r.s.level)
-	sideOff, topOff := float32(0.0), float32(0.0)
+	horizontalOffset, verticalOffset := float32(0.0), float32(0.0)
 	if r.s.typ == ShadowAround {
-		sideOff = depth * 0.2
-		topOff = sideOff * 2
+		horizontalOffset = depth * shadowOffsetRatioHorizontal
+		verticalOffset = depth * shadowOffsetRatioVertical
 	}
 
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(depth, depth))
-		r.tl.Move(fyne.NewPos(-depth+sideOff, -depth+topOff))
+		r.tl.Move(fyne.NewPos(-depth+horizontalOffset, -depth+verticalOffset))
 	}
 	if r.t != nil {
-		r.t.Resize(fyne.NewSize(size.Width-sideOff*2, depth))
-		r.t.Move(fyne.NewPos(sideOff, -depth+topOff))
+		r.t.Resize(fyne.NewSize(size.Width-horizontalOffset*2, depth))
+		r.t.Move(fyne.NewPos(horizontalOffset, -depth+verticalOffset))
 	}
 	if r.tr != nil {
 		r.tr.Resize(fyne.NewSize(depth, depth))
-		r.tr.Move(fyne.NewPos(size.Width-sideOff, -depth+topOff))
+		r.tr.Move(fyne.NewPos(size.Width-horizontalOffset, -depth+verticalOffset))
 	}
 	if r.r != nil {
-		r.r.Resize(fyne.NewSize(depth, size.Height-topOff))
-		r.r.Move(fyne.NewPos(size.Width-sideOff, topOff))
+		r.r.Resize(fyne.NewSize(depth, size.Height-verticalOffset))
+		r.r.Move(fyne.NewPos(size.Width-horizontalOffset, verticalOffset))
 	}
 	if r.br != nil {
 		r.br.Resize(fyne.NewSize(depth, depth))
-		r.br.Move(fyne.NewPos(size.Width-sideOff, size.Height))
+		r.br.Move(fyne.NewPos(size.Width-horizontalOffset, size.Height))
 	}
 	if r.b != nil {
-		r.b.Resize(fyne.NewSize(size.Width-sideOff*2, depth))
-		r.b.Move(fyne.NewPos(sideOff, size.Height))
+		r.b.Resize(fyne.NewSize(size.Width-horizontalOffset*2, depth))
+		r.b.Move(fyne.NewPos(horizontalOffset, size.Height))
 	}
 	if r.bl != nil {
 		r.bl.Resize(fyne.NewSize(depth, depth))
-		r.bl.Move(fyne.NewPos(-depth+sideOff, size.Height))
+		r.bl.Move(fyne.NewPos(-depth+horizontalOffset, size.Height))
 	}
 	if r.l != nil {
-		r.l.Resize(fyne.NewSize(depth, size.Height-topOff))
-		r.l.Move(fyne.NewPos(-depth+sideOff, topOff))
+		r.l.Resize(fyne.NewSize(depth, size.Height-verticalOffset))
+		r.l.Move(fyne.NewPos(-depth+horizontalOffset, verticalOffset))
 	}
 }
 
@@ -170,20 +189,20 @@ func (r *shadowRenderer) createShadows() {
 		r.SetObjects([]fyne.CanvasObject{r.t})
 	case ShadowAround:
 		r.tl = canvas.NewRadialGradient(fg, color.Transparent)
-		r.tl.CenterOffsetX = 0.5
-		r.tl.CenterOffsetY = 0.5
+		r.tl.CenterOffsetX = shadowRadialCenterOffset
+		r.tl.CenterOffsetY = shadowRadialCenterOffset
 		r.t = canvas.NewVerticalGradient(color.Transparent, fg)
 		r.tr = canvas.NewRadialGradient(fg, color.Transparent)
-		r.tr.CenterOffsetX = -0.5
-		r.tr.CenterOffsetY = 0.5
+		r.tr.CenterOffsetX = -shadowRadialCenterOffset
+		r.tr.CenterOffsetY = shadowRadialCenterOffset
 		r.r = canvas.NewHorizontalGradient(fg, color.Transparent)
 		r.br = canvas.NewRadialGradient(fg, color.Transparent)
-		r.br.CenterOffsetX = -0.5
-		r.br.CenterOffsetY = -0.5
+		r.br.CenterOffsetX = -shadowRadialCenterOffset
+		r.br.CenterOffsetY = -shadowRadialCenterOffset
 		r.b = canvas.NewVerticalGradient(fg, color.Transparent)
 		r.bl = canvas.NewRadialGradient(fg, color.Transparent)
-		r.bl.CenterOffsetX = 0.5
-		r.bl.CenterOffsetY = -0.5
+		r.bl.CenterOffsetX = shadowRadialCenterOffset
+		r.bl.CenterOffsetY = -shadowRadialCenterOffset
 		r.l = canvas.NewHorizontalGradient(color.Transparent, fg)
 		r.SetObjects([]fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l})
 	}

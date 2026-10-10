@@ -14,10 +14,10 @@ import (
 
 func TestCircle_MinSize(t *testing.T) {
 	circle := canvas.NewCircle(color.Black)
-	min := circle.MinSize()
+	minSize := circle.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestCircle_FillColor(t *testing.T) {

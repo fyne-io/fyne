@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func rootConfigDir() string {
+func RootConfigDir() string {
 	filesDir := os.Getenv("FILESDIR")
 	if filesDir == "" {
 		log.Println("FILESDIR env was not set by android native code")

@@ -31,5 +31,5 @@ func nativeFileSave(*fileSave, bool) (io.WriteCloser, error) {
 }
 
 func registerRepository(_ *driver) {
-	repository.Register("file", intRepo.NewFileRepository())
+	repository.Register(fyne.URISchemeFile, intRepo.NewFileRepository())
 }

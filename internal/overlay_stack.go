@@ -63,10 +63,8 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 		return
 	}
 	// set removed elements in backing array to nil to release memory references
-	for i := overlayIdx; i < len(s.overlays); i++ {
-		s.overlays[i] = nil
-		s.focusManagers[i] = nil
-	}
+	clear(s.overlays[overlayIdx:])
+	clear(s.focusManagers[overlayIdx:])
 	s.overlays = s.overlays[:overlayIdx]
 	s.focusManagers = s.focusManagers[:overlayIdx]
 }

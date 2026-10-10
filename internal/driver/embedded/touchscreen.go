@@ -115,13 +115,14 @@ func (c *touchCanvas) tapMove(pos fyne.Position, tapID int,
 	}
 
 	if c.dragging == nil {
-		if drag, ok := co.(fyne.Draggable); ok {
-			c.dragging = drag
-			c.dragOffset = previousPos.Subtract(objPos)
-			c.dragStart = co.Position()
-		} else {
+		drag, ok := co.(fyne.Draggable)
+		if !ok {
 			return
 		}
+
+		c.dragging = drag
+		c.dragOffset = previousPos.Subtract(objPos)
+		c.dragStart = co.Position()
 	}
 
 	ev := &fyne.DragEvent{}

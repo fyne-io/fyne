@@ -441,6 +441,21 @@ func TestEntry_EmptySelection(t *testing.T) {
 	assert.Equal(t, "", entry.SelectedText())
 }
 
+func TestEntry_ClearSelection(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.SetText("Testing")
+
+	typeKeys(entry, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, keyShiftLeftUp)
+	assert.Equal(t, "st", entry.SelectedText())
+
+	entry.ClearSelection()
+	assert.Equal(t, "", entry.SelectedText())
+
+	// calling again with nothing selected is a no-op
+	entry.ClearSelection()
+	assert.Equal(t, "", entry.SelectedText())
+}
+
 func TestEntry_Focus(t *testing.T) {
 	entry, window := setupImageTest(t, false)
 	c := window.Canvas()
@@ -490,65 +505,65 @@ func TestEntry_HidePopUpOnEntry(t *testing.T) {
 
 func TestEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetPlaceHolder("")
-	assert.Equal(t, min, entry.MinSize())
+	assert.Equal(t, minSize, entry.MinSize())
 	entry.SetText("")
-	assert.Equal(t, min, entry.MinSize())
+	assert.Equal(t, minSize, entry.MinSize())
 	entry.SetPlaceHolder("Hello")
-	assert.Equal(t, entry.MinSize().Width, min.Width)
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.Refresh()
-	assert.Greater(t, entry.MinSize().Width, min.Width)
+	assert.Greater(t, entry.MinSize().Width, minSize.Width)
 
-	min = entry.MinSize()
+	minSize = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
 	entry.Refresh()
-	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0)), entry.MinSize())
+	assert.Equal(t, minSize.Add(fyne.NewSize(theme.IconInlineSize()+theme.LineSpacing(), 0)), entry.MinSize())
 }
 
 func TestEntryMultiline_MinSize(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetText("Hello")
-	assert.Equal(t, entry.MinSize().Width, min.Width)
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
-	assert.Greater(t, min.Width, theme.InnerPadding())
-	assert.Greater(t, min.Height, theme.InnerPadding())
+	assert.Greater(t, minSize.Width, theme.InnerPadding())
+	assert.Greater(t, minSize.Height, theme.InnerPadding())
 
 	entry.Wrapping = fyne.TextWrapOff
 	entry.Scroll = container.ScrollNone
 	entry.Refresh()
-	assert.Greater(t, entry.MinSize().Width, min.Width)
+	assert.Greater(t, entry.MinSize().Width, minSize.Width)
 
 	entry.Wrapping = fyne.TextWrapBreak
 	entry.Refresh()
-	assert.Equal(t, entry.MinSize().Width, min.Width)
+	assert.Equal(t, entry.MinSize().Width, minSize.Width)
 
-	min = entry.MinSize()
+	minSize = entry.MinSize()
 	entry.ActionItem = canvas.NewCircle(color.Black)
 	entry.Refresh()
-	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
+	assert.Equal(t, minSize.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
 func TestEntryMultiline_SetMinRowsVisible(t *testing.T) {
 	entry := widget.NewMultiLineEntry()
-	min := entry.MinSize()
+	minSize := entry.MinSize()
 	entry.SetText("Hello")
-	assert.Equal(t, entry.MinSize().Height, min.Height)
+	assert.Equal(t, entry.MinSize().Height, minSize.Height)
 
 	entry.SetMinRowsVisible(2)
-	assert.Less(t, entry.MinSize().Height, min.Height)
+	assert.Less(t, entry.MinSize().Height, minSize.Height)
 
 	entry.SetMinRowsVisible(5)
-	assert.Greater(t, entry.MinSize().Height, min.Height)
+	assert.Greater(t, entry.MinSize().Height, minSize.Height)
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {
@@ -736,6 +751,53 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	entry.TypedKey(key)
 
 	assert.Equal(t, "", entry.Text)
+}
+
+func TestEntry_Backspace_AfterMiddleEdit(t *testing.T) {
+	test.NewApp()
+	t.Cleanup(func() { test.NewApp() })
+
+	entry := widget.NewEntry()
+	w := test.NewTempWindow(t, entry)
+	w.Canvas().Focus(entry)
+	assert.Equal(t, entry, w.Canvas().Focused())
+
+	test.Type(entry, "Hello")
+	assert.Equal(t, "Hello", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 5, entry.CursorColumn)
+
+	// Edit earlier in the value, then return to the end and hold backspace.
+	typeKeys(entry, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	test.Type(entry, "XY")
+	assert.Equal(t, "HeXYllo", entry.Text)
+	assert.Equal(t, 4, entry.CursorColumn)
+
+	typeKeys(entry, fyne.KeyBackspace)
+	assert.Equal(t, "HeXllo", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 3, entry.CursorColumn)
+
+	typeKeys(entry, fyne.KeyEnd)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 6, entry.CursorColumn)
+
+	want := []string{"HeXll", "HeXl", "HeX", "He", "H", ""}
+	for _, text := range want {
+		typeKeys(entry, fyne.KeyBackspace)
+		assert.Equal(t, text, entry.Text)
+		assert.Equal(t, 0, entry.CursorRow)
+		assert.Equal(t, len(text), entry.CursorColumn)
+	}
+
+	// Extra deletion once the entry is empty does not move the cursor.
+	typeKeys(entry, fyne.KeyBackspace, fyne.KeyBackspace)
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 }
 
 func TestEntry_OnKeyDown_BackspaceBeyondTextAndNewLine(t *testing.T) {

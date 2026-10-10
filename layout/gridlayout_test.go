@@ -21,12 +21,12 @@ func TestGridLayout(t *testing.T) {
 	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
-	container := &fyne.Container{
+	c := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
-	container.Resize(gridSize)
+	c.Resize(gridSize)
 
-	layout.NewGridLayout(2).Layout(container.Objects, gridSize)
+	layout.NewGridLayout(2).Layout(c.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
@@ -42,12 +42,12 @@ func TestGridLayoutRounding(t *testing.T) {
 	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
-	container := &fyne.Container{
+	c := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
-	container.Resize(gridSize)
+	c.Resize(gridSize)
 
-	layout.NewGridLayout(3).Layout(container.Objects, gridSize)
+	layout.NewGridLayout(3).Layout(c.Objects, gridSize)
 
 	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
 	assert.Equal(t, fyne.NewSize(33, 50), obj1.Size())
@@ -65,12 +65,12 @@ func TestGridLayout_Vertical(t *testing.T) {
 	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
-	container := &fyne.Container{
+	c := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
-	container.Resize(gridSize)
+	c.Resize(gridSize)
 
-	layout.NewGridLayoutWithRows(2).Layout(container.Objects, gridSize)
+	layout.NewGridLayoutWithRows(2).Layout(c.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
@@ -84,8 +84,8 @@ func TestGridLayout_MinSize(t *testing.T) {
 	text2 := canvas.NewText("small", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text2.MinSize().Height+theme.Padding()))
 
-	container := container.NewWithoutLayout(text1, text2)
-	layoutMin := layout.NewGridLayout(1).MinSize(container.Objects)
+	c := container.NewWithoutLayout(text1, text2)
+	layoutMin := layout.NewGridLayout(1).MinSize(c.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
@@ -95,8 +95,8 @@ func TestGridLayout_MinSize_Vertical(t *testing.T) {
 	text2 := canvas.NewText("Text", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(text2.MinSize().Width+theme.Padding(), 0))
 
-	container := container.NewWithoutLayout(text1, text2)
-	layoutMin := layout.NewGridLayoutWithRows(1).MinSize(container.Objects)
+	c := container.NewWithoutLayout(text1, text2)
+	layoutMin := layout.NewGridLayoutWithRows(1).MinSize(c.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
@@ -108,11 +108,11 @@ func TestGridLayout_MinSize_HiddenItem(t *testing.T) {
 	text3 := canvas.NewText("small", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text3.MinSize().Height+theme.Padding()))
 
-	container := container.NewWithoutLayout(text1, text2, text3)
-	layoutMin := layout.NewGridLayout(1).MinSize(container.Objects)
+	c := container.NewWithoutLayout(text1, text2, text3)
+	layoutMin := layout.NewGridLayout(1).MinSize(c.Objects)
 	assert.Equal(t, minSize, layoutMin)
 
 	// someone set to 0 rows/cols
-	layoutMin = layout.NewGridLayout(0).MinSize(container.Objects)
+	layoutMin = layout.NewGridLayout(0).MinSize(c.Objects)
 	assert.Equal(t, minSize, layoutMin)
 }

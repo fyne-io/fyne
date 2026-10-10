@@ -62,9 +62,9 @@ func (r *RegularPolygon) Resize(s fyne.Size) {
 // NewRegularPolygon returns a new RegularPolygon instance
 //
 // Since: 2.8
-func NewRegularPolygon(sides uint, color color.Color) *RegularPolygon {
+func NewRegularPolygon(sides uint, c color.Color) *RegularPolygon {
 	return &RegularPolygon{
 		Sides:     sides,
-		FillColor: color,
+		FillColor: c,
 	}
 }

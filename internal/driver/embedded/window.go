@@ -19,29 +19,29 @@ func (w *noosWindow) SetTitle(s string) {
 	w.title = s
 }
 
-func (w *noosWindow) FullScreen() bool {
+func (*noosWindow) FullScreen() bool {
 	return true
 }
 
-func (w *noosWindow) SetFullScreen(_ bool) {
+func (*noosWindow) SetFullScreen(_ bool) {
 }
 
 func (w *noosWindow) Resize(s fyne.Size) {
 	w.c.Resize(s)
 }
 
-func (w *noosWindow) RequestFocus() {
+func (*noosWindow) RequestFocus() {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (w *noosWindow) FixedSize() bool {
+func (*noosWindow) FixedSize() bool {
 	return true
 }
 
-func (w *noosWindow) SetFixedSize(bool) {}
+func (*noosWindow) SetFixedSize(bool) {}
 
-func (w *noosWindow) CenterOnScreen() {}
+func (*noosWindow) CenterOnScreen() {}
 
 func (w *noosWindow) Padded() bool {
 	return w.c.Padded()
@@ -51,43 +51,43 @@ func (w *noosWindow) SetPadded(pad bool) {
 	w.c.SetPadded(pad)
 }
 
-func (w *noosWindow) Icon() fyne.Resource {
+func (*noosWindow) Icon() fyne.Resource {
 	// TODO implement me
 	return nil
 }
 
-func (w *noosWindow) SetIcon(fyne.Resource) {
+func (*noosWindow) SetIcon(fyne.Resource) {
 	// TODO implement me
 }
 
-func (w *noosWindow) SetMaster() {
+func (*noosWindow) SetMaster() {
 	// TODO implement me
 }
 
-func (w *noosWindow) MainMenu() *fyne.MainMenu {
+func (*noosWindow) MainMenu() *fyne.MainMenu {
 	// TODO implement me
 	return nil
 }
 
-func (w *noosWindow) SetMainMenu(menu *fyne.MainMenu) {
+func (*noosWindow) SetMainMenu(*fyne.MainMenu) {
 	// TODO implement me
 }
 
-func (w *noosWindow) SetOnClosed(f func()) {
+func (*noosWindow) SetOnClosed(func()) {
 	// TODO implement me
 }
 
-func (w *noosWindow) SetCloseIntercept(f func()) {
+func (*noosWindow) SetCloseIntercept(func()) {
 	// TODO implement me
 }
 
-func (w *noosWindow) SetOnDropped(func(fyne.Position, []fyne.URI)) {}
+func (*noosWindow) SetOnDropped(func(fyne.Position, []fyne.URI)) {}
 
 func (w *noosWindow) Show() {
 	w.d.renderWindow(w)
 }
 
-func (w *noosWindow) Hide() {}
+func (*noosWindow) Hide() {}
 
 func (w *noosWindow) Close() {
 	i := -1
@@ -127,7 +127,7 @@ func (w *noosWindow) Canvas() fyne.Canvas {
 	return w.c
 }
 
-func (w *noosWindow) Clipboard() fyne.Clipboard {
+func (*noosWindow) Clipboard() fyne.Clipboard {
 	// TODO implement me
 	return nil
 }

@@ -568,6 +568,6 @@ func newNotFocusableButton(l string, f func()) *notFocusableButton {
 	return n
 }
 
-func (n *notFocusableButton) Tapped(e *fyne.PointEvent) {
+func (n *notFocusableButton) Tapped(*fyne.PointEvent) {
 	n.f()
 }

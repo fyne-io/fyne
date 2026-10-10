@@ -70,7 +70,7 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) *ToolbarAction {
 type ToolbarSpacer struct{}
 
 // ToolbarObject gets the actual spacer object for this ToolbarSpacer
-func (t *ToolbarSpacer) ToolbarObject() fyne.CanvasObject {
+func (*ToolbarSpacer) ToolbarObject() fyne.CanvasObject {
 	return layout.NewSpacer()
 }
 
@@ -84,7 +84,7 @@ func NewToolbarSpacer() *ToolbarSpacer {
 type ToolbarSeparator struct{}
 
 // ToolbarObject gets the visible line object for this ToolbarSeparator
-func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
+func (*ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
 	return &Separator{invert: true}
 }
 

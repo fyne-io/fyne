@@ -165,7 +165,7 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	repaintWindow(w)
 	runOnMain(func() {
 		// clear the recorded layouts
-		for layout.popLayoutEvent() != nil {
+		for layout.popLayoutEvent() != nil { //revive:disable-line:empty-block
 		}
 		assert.Nil(t, layout.popLayoutEvent())
 	})
@@ -596,11 +596,11 @@ type recordingLayout struct {
 	layoutEvents []any
 }
 
-func (l *recordingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+func (l *recordingLayout) Layout(_ []fyne.CanvasObject, size fyne.Size) {
 	l.layoutEvents = append(l.layoutEvents, size)
 }
 
-func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
+func (*recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(6, 9)
 }
 

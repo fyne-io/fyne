@@ -109,6 +109,7 @@ func (r *RadioGroup) itemTapped(item *radioItem, idx int) {
 	r.Refresh()
 }
 
+// Refresh implements the [fyne.CanvasObject] interface.
 func (r *RadioGroup) Refresh() {
 	r.updateSelectedIndex()
 	r.BaseWidget.Refresh()
@@ -191,8 +192,8 @@ func (r *radioGroupRenderer) MinSize() fyne.Size {
 	for _, item := range r.items {
 		itemMin := item.MinSize()
 
-		width = fyne.Max(width, itemMin.Width)
-		height = fyne.Max(height, itemMin.Height)
+		width = max(width, itemMin.Width)
+		height = max(height, itemMin.Height)
 	}
 
 	if r.radio.Horizontal {
@@ -226,7 +227,7 @@ func (r *radioGroupRenderer) updateItems(refresh bool) {
 	r.SetObjects(r.items)
 
 	for i, item := range r.items {
-		item := item.(*radioItem)
+		item, _ := item.(*radioItem)
 		changed := false
 		if l := r.radio.Options[i]; l != item.Label {
 			item.Label = r.radio.Options[i]

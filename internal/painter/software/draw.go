@@ -36,7 +36,7 @@ func drawBlur(c fyne.Canvas, blurObj *canvas.Blur, pos fyne.Position, base *imag
 	crop := base.SubImage(bounds)
 	blurred := blur.Gaussian(crop, float64(blurObj.Radius*c.Scale()))
 
-	cornerRadius := fyne.Min(painter.GetMaximumRadius(blurObj.Size()), blurObj.CornerRadius)
+	cornerRadius := min(painter.GetMaximumRadius(blurObj.Size()), blurObj.CornerRadius)
 
 	if cornerRadius > 0.5 {
 		applyRoundedCorners(blurred, cornerRadius*c.Scale())
@@ -151,7 +151,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		}
 	}
 
-	cornerRadius := fyne.Min(painter.GetMaximumRadius(bounds), img.CornerRadius)
+	cornerRadius := min(painter.GetMaximumRadius(bounds), img.CornerRadius)
 	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, rawImg, clip, img.Alpha(), cornerRadius*c.Scale())
 }
 
@@ -245,13 +245,13 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	height := scale.ToScreenCoordinate(c, bounds.Height+painter.TextVectorPad) // space below for descenders / underline
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
 
-	color := text.Color
-	if color == nil {
-		color = theme.Color(theme.ColorNameForeground)
+	textColor := text.Color
+	if textColor == nil {
+		textColor = theme.Color(theme.ColorNameForeground)
 	}
 
 	face := painter.CachedFontFace(text.TextStyle, text.FontSource, text)
-	painter.DrawString(txtImg, text.Text, color, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
+	painter.DrawString(txtImg, text.Text, textColor, face.Fonts, text.TextSize, c.Scale(), text.TextStyle)
 
 	size := text.Size()
 	offsetX := float32(0)
@@ -274,7 +274,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 
 	if text.TextStyle.Underline || text.TextStyle.Strikethrough {
 		_, baseline := cache.GetFontMetrics(text.Text, text.TextSize, text.TextStyle, text.FontSource)
-		line := canvas.NewLine(color)
+		line := canvas.NewLine(textColor)
 		line.Resize(fyne.NewSize(bounds.Width, 0))
 		if text.TextStyle.Underline {
 			underlinePos := fyne.NewPos(pos.X, pos.Y+baseline+painter.UnderlineOffsetFromBaseline)
@@ -415,7 +415,38 @@ func drawOblong(c fyne.Canvas, obj fyne.CanvasObject, fill, stroke color.Color, 
 		drawShadow(c, obj, fyne.NewSize(width, height), shadow, 0, base, clip, pos)
 	}
 
+	if fillRectFastPath(base, bounds, fill) {
+		return
+	}
+
 	draw.Draw(base, bounds, image.NewUniform(fill), image.Point{}, draw.Over)
+}
+
+// fillRectFastPath writes an opaque fill directly into base.Pix.
+// It returns false if the fill is non-opaque or bounds are empty.
+func fillRectFastPath(base *image.NRGBA, bounds image.Rectangle, fill color.Color) bool {
+	if fill == nil || bounds.Empty() {
+		return false
+	}
+
+	r, g, b, a := fill.RGBA()
+	if a != 0xffff {
+		return false
+	}
+
+	nr, ng, nb := uint8(r>>8), uint8(g>>8), uint8(b>>8) //gosec:disable G115 -- RGBA() components are 16-bit, >>8 always fits uint8
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		off := base.PixOffset(bounds.Min.X, y)
+		end := base.PixOffset(bounds.Max.X, y)
+		row := base.Pix[off:end]
+		for p := 0; p < len(row); p += 4 {
+			row[p] = nr
+			row[p+1] = ng
+			row[p+2] = nb
+			row[p+3] = 0xff
+		}
+	}
+	return true
 }
 
 func drawEllipse(c fyne.Canvas, ellipse *canvas.Ellipse, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -483,7 +514,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 			TopLeftCornerRadius:     o.TopLeftCornerRadius,
 			BottomRightCornerRadius: o.BottomRightCornerRadius,
 			BottomLeftCornerRadius:  o.BottomLeftCornerRadius,
-		}, fyne.Max(objSize.Width+2*shadowSpread, 0), fyne.Max(objSize.Height+2*shadowSpread, 0), vPad, func(in float32) float32 {
+		}, max(objSize.Width+2*shadowSpread, 0), max(objSize.Height+2*shadowSpread, 0), vPad, func(in float32) float32 {
 			return float32(math.Round(float64(in) * float64(c.Scale())))
 		})
 		maskRaw = painter.DrawRectangle(&canvas.Rectangle{
@@ -553,11 +584,11 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 		var objAlpha float32
 		if fill != nil {
 			_, _, _, a := fill.RGBA()
-			objAlpha = float32(a) / 65535.0
+			objAlpha = float32(a) / math.MaxUint16
 		}
 		if strokeCol != nil && strokeWidth > 0 {
 			_, _, _, a := strokeCol.RGBA()
-			sa := float32(a) / 65535.0
+			sa := float32(a) / math.MaxUint16
 			if sa > objAlpha {
 				objAlpha = sa
 			}
@@ -571,7 +602,7 @@ func drawShadow(c fyne.Canvas, obj fyne.CanvasObject, objSize fyne.Size, shadow 
 				_, _, _, maskA := maskRaw.At(mx, my).RGBA()
 				if maskA > 0 {
 					pixel := blurred.RGBAAt(x, y)
-					cVal := float32(maskA) / 65535.0
+					cVal := float32(maskA) / math.MaxUint16
 					den := 1.0 - cVal*objAlpha
 					var invMA float32
 					if den <= 0 {

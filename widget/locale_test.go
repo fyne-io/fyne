@@ -7,12 +7,12 @@ import (
 )
 
 func TestGetLocaleWeekStart(t *testing.T) {
-	assert.Equal(t, "Monday", lookupLocaleSetting("").weekStartDay.String())
-	assert.Equal(t, "Monday", lookupLocaleSetting("en").weekStartDay.String())
-	assert.Equal(t, "Monday", lookupLocaleSetting("en-GB").weekStartDay.String())
-	assert.Equal(t, "Sunday", lookupLocaleSetting("en-US").weekStartDay.String())
-	assert.Equal(t, "Sunday", lookupLocaleSetting("es-US").weekStartDay.String())
-	assert.Equal(t, "Monday", lookupLocaleSetting("de-DE").weekStartDay.String())
+	assert.Equal(t, monday, lookupLocaleSetting("").weekStartDay)
+	assert.Equal(t, monday, lookupLocaleSetting("en").weekStartDay)
+	assert.Equal(t, monday, lookupLocaleSetting("en-GB").weekStartDay)
+	assert.Equal(t, sunday, lookupLocaleSetting("en-US").weekStartDay)
+	assert.Equal(t, sunday, lookupLocaleSetting("es-US").weekStartDay)
+	assert.Equal(t, monday, lookupLocaleSetting("de-DE").weekStartDay)
 }
 
 func TestGetLocaleDateFormat(t *testing.T) {

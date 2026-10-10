@@ -131,7 +131,7 @@ func TestContainer_Show(t *testing.T) {
 
 type customLayout struct{}
 
-func (c *customLayout) Layout(objs []CanvasObject, size Size) {
+func (*customLayout) Layout(objs []CanvasObject, size Size) {
 	y := float32(0)
 	for _, child := range objs {
 		child.Resize(size)
@@ -140,7 +140,7 @@ func (c *customLayout) Layout(objs []CanvasObject, size Size) {
 	}
 }
 
-func (c *customLayout) MinSize(objs []CanvasObject) Size {
+func (*customLayout) MinSize(objs []CanvasObject) Size {
 	return NewSize(10, float32(10*len(objs)))
 }
 
@@ -154,7 +154,7 @@ func (d *dummyObject) Hide() {
 	d.hidden = true
 }
 
-func (d *dummyObject) MinSize() Size {
+func (*dummyObject) MinSize() Size {
 	return NewSize(5, 5)
 }
 
@@ -166,7 +166,7 @@ func (d *dummyObject) Position() Position {
 	return d.pos
 }
 
-func (d *dummyObject) Refresh() {
+func (*dummyObject) Refresh() {
 }
 
 func (d *dummyObject) Resize(size Size) {

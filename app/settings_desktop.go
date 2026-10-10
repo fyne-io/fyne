@@ -9,6 +9,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/repository"
 )
 
 func watchFileAddTarget(watcher *fsnotify.Watcher, path string) {
@@ -26,7 +27,7 @@ func ensureDirExists(dir string) {
 		return
 	}
 
-	err := os.MkdirAll(dir, 0o700)
+	err := os.MkdirAll(dir, repository.PermUserReadWriteExec)
 	if err != nil {
 		fyne.LogError("Unable to create settings storage:", err)
 	}

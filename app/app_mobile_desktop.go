@@ -10,10 +10,11 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 func (a *fyneApp) OpenURL(url *url.URL) error {
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == goos.Darwin {
 		cmd := exec.Command("open", url.String())
 		cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 		return cmd.Run()

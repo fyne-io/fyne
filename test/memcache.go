@@ -18,7 +18,7 @@ func makeCache() fyne.Cache {
 	return &memCache{memStore: make(map[string][]byte)}
 }
 
-func (c *memCache) RootURI() fyne.URI {
+func (*memCache) RootURI() fyne.URI {
 	return storage.NewFileURI(os.TempDir()) // in case anyone wants to manually handle storage
 }
 

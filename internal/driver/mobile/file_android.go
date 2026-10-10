@@ -206,6 +206,6 @@ func existsURI(uri fyne.URI) (bool, error) {
 
 func registerRepository(d *driver) {
 	repo := &mobileFileRepo{}
-	repository.Register("file", repo)
+	repository.Register(fyne.URISchemeFile, repo)
 	repository.Register("content", repo)
 }

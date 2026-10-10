@@ -12,10 +12,10 @@ import (
 
 func TestLine_MinSize(t *testing.T) {
 	line := canvas.NewLine(color.Black)
-	min := line.MinSize()
+	minSize := line.MinSize()
 
-	assert.Positive(t, min.Width)
-	assert.Positive(t, min.Height)
+	assert.Positive(t, minSize.Width)
+	assert.Positive(t, minSize.Height)
 }
 
 func TestLine_Move(t *testing.T) {

@@ -126,12 +126,12 @@ func TestTable_Focus(t *testing.T) {
 	defer window.Close()
 	window.Resize(table.MinSize().Max(fyne.NewSize(300, 200)))
 
-	canvas := window.Canvas().(software.WindowlessCanvas)
-	assert.Nil(t, canvas.Focused())
+	c := window.Canvas().(software.WindowlessCanvas)
+	assert.Nil(t, c.Focused())
 
-	canvas.FocusNext()
-	assert.NotNil(t, canvas.Focused())
-	assert.Equal(t, table, canvas.Focused())
+	c.FocusNext()
+	assert.NotNil(t, c.Focused())
+	assert.Equal(t, table, c.Focused())
 	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
@@ -146,7 +146,7 @@ func TestTable_Focus(t *testing.T) {
 	table.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
 	assert.Equal(t, TableCellID{0, 0}, table.currentHighlight)
 
-	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	c.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
 	assert.Equal(t, &TableCellID{0, 0}, table.selectedCell)
 
 	table.Select(TableCellID{Row: 1, Col: 1})
@@ -851,7 +851,7 @@ func TestTable_SetColumnWidth_Dragged(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("")
 		},
-		func(id TableCellID, obj fyne.CanvasObject) {
+		func(TableCellID, fyne.CanvasObject) {
 		},
 	)
 	table.ShowHeaderColumn = false
@@ -933,7 +933,7 @@ func TestTable_SetRowHeight_Dragged(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("")
 		},
-		func(id TableCellID, obj fyne.CanvasObject) {
+		func(TableCellID, fyne.CanvasObject) {
 		},
 	)
 	table.ShowHeaderRow = false
@@ -981,6 +981,29 @@ func TestTable_ShowVisible(t *testing.T) {
 	cellRenderer := test.TempWidgetRenderer(t, table.content.Content.(*tableCells))
 	cellRenderer.Refresh()
 	assert.Len(t, cellRenderer.(*tableCellsRenderer).visible, 8)
+}
+
+func TestTable_DividersBeforeResize(t *testing.T) {
+	length := func() (int, int) { return 1000, 1000 }
+	create := func() fyne.CanvasObject { return NewLabel("text") }
+	update := func(TableCellID, fyne.CanvasObject) {}
+
+	headers := NewTableWithHeaders(length, create, update)
+	stickyRows := NewTable(length, create, update)
+	stickyRows.StickyRowCount = 1
+	stickyCols := NewTable(length, create, update)
+	stickyCols.StickyColumnCount = 1
+
+	for name, table := range map[string]*Table{"headers": headers, "sticky rows": stickyRows, "sticky columns": stickyCols} {
+		t.Run(name, func(t *testing.T) {
+			w := test.NewTempWindow(t, table)
+			w.Resize(fyne.NewSize(120, 120))
+
+			// the renderer is created at 0x0, which must not allocate a divider per row and column
+			cellRenderer := test.TempWidgetRenderer(t, table.cells).(*tableCellsRenderer)
+			assert.Less(t, len(cellRenderer.dividers), 20)
+		})
+	}
 }
 
 func TestTable_SeparatorThicknessZero_NotPanics(t *testing.T) {

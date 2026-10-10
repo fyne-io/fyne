@@ -8,7 +8,13 @@ import (
 	"fyne.io/fyne/v2/internal/async"
 )
 
-var fontSizeCache async.Map[fontSizeEntry, *fontMetric]
+// fontSizeCache is read by every canvas.Text on every frame the canvas is
+// walked, so it is a typed map: async.Map keys by interface, which boxes the
+// struct and hashes it field by field through reflection on each lookup.
+var (
+	fontSizeLock  async.Mutex
+	fontSizeCache = map[fontSizeEntry]*fontMetric{}
+)
 
 type fontMetric struct {
 	expiringCache
@@ -36,8 +42,9 @@ func GetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source 
 	if source != nil {
 		name = source.Name()
 	}
-	ent := fontSizeEntry{text, fontSize, style, name}
-	ret, ok := fontSizeCache.Load(ent)
+	fontSizeLock.Lock()
+	defer fontSizeLock.Unlock()
+	ret, ok := fontSizeCache[fontSizeEntry{text, fontSize, style, name}]
 	if !ok {
 		return fyne.Size{Width: 0, Height: 0}, 0
 	}
@@ -54,20 +61,25 @@ func SetFontMetrics(text string, fontSize float32, style fyne.TextStyle, source 
 	ent := fontSizeEntry{text, fontSize, style, name}
 	metric := &fontMetric{size: size, baseLine: base}
 	metric.setAlive()
-	fontSizeCache.Store(ent, metric)
+	fontSizeLock.Lock()
+	fontSizeCache[ent] = metric
+	fontSizeLock.Unlock()
 }
 
 // ClearFontMetrics clears the fontSizeCache (for testing/benchmarks)
 func ClearFontMetrics() {
-	fontSizeCache = async.Map[fontSizeEntry, *fontMetric]{}
+	fontSizeLock.Lock()
+	fontSizeCache = map[fontSizeEntry]*fontMetric{}
+	fontSizeLock.Unlock()
 }
 
 // destroyExpiredFontMetrics destroys expired fontSizeCache entries
 func destroyExpiredFontMetrics(now time.Time) {
-	fontSizeCache.Range(func(k fontSizeEntry, v *fontMetric) bool {
+	fontSizeLock.Lock()
+	for k, v := range fontSizeCache {
 		if v.isExpired(now) {
-			fontSizeCache.Delete(k)
+			delete(fontSizeCache, k)
 		}
-		return true
-	})
+	}
+	fontSizeLock.Unlock()
 }

@@ -173,10 +173,10 @@ func (f *focusable) FocusLost() {
 	f.focused = false
 }
 
-func (f *focusable) TypedRune(_ rune) {
+func (*focusable) TypedRune(_ rune) {
 }
 
-func (f *focusable) TypedKey(_ *fyne.KeyEvent) {
+func (*focusable) TypedKey(_ *fyne.KeyEvent) {
 }
 
 func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visibleInsideHidden, entry2, disabled, entry3 *focusable) {

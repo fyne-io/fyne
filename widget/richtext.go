@@ -1,8 +1,10 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"math"
+	"sort"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -20,7 +22,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-const passwordChar = "•"
+const (
+	averageChar  = "M"
+	ellipsisChar = "…"
+	passwordChar = "•"
+)
 
 var _ fyne.Widget = (*RichText)(nil)
 
@@ -38,6 +44,12 @@ type RichText struct {
 	// Since: 2.4
 	Truncation fyne.TextTruncation
 
+	// If set to true, Selectable indicates that this rich text should support select interaction
+	// to allow the text to be copied.
+	//
+	// Since: 2.9
+	Selectable bool
+
 	inset     fyne.Size     // this varies due to how the widget works (entry with scroller vs others with padding)
 	rowBounds []rowBoundary // cache for boundaries
 	scr       *widget.Scroll
@@ -46,6 +58,33 @@ type RichText struct {
 	visualCache    map[RichTextSegment]visualCacheEntry
 	visualCacheGen int64
 	minCache       fyne.Size
+	geometryValid  bool // whether rowBounds carries up to date row positions
+	decor          []rowDecoration
+
+	// highlight is the selection whose rectangles are drawn over this content,
+	// above the panels that blocks sit on but below the text
+	highlight  *selectable
+	highlights []fyne.CanvasObject
+
+	selection *focusSelectable    // handles select interaction when Selectable is set
+	visuals   []fyne.CanvasObject // everything we draw, apart from selection highlights
+	lead      int                 // how many of the visuals come before those of the text
+}
+
+// rowDecoration is a graphical element drawn behind a run of rows, such as the
+// panel that sits under the lines of a code block.
+type rowDecoration struct {
+	obj      fyne.CanvasObject
+	from, to int // the first and last row that this decoration covers
+}
+
+// panelSegment is a block segment whose content is drawn on a panel, so that the
+// rows of the block appear inside it.
+type panelSegment interface {
+	RichTextSegment
+	RichTextBlock
+
+	panel() fyne.CanvasObject
 }
 
 type visualCacheEntry struct {
@@ -99,8 +138,8 @@ func (t *RichText) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
 
 	if t.minCache.IsZero() {
-		min := t.BaseWidget.MinSize()
-		t.minCache = min
+		minSize := t.BaseWidget.MinSize()
+		t.minCache = minSize
 	}
 	return t.minCache
 }
@@ -109,10 +148,14 @@ func (t *RichText) MinSize() fyne.Size {
 func (t *RichText) Refresh() {
 	t.minCache = fyne.Size{}
 	t.updateRowBounds()
+	t.checkSelection()
 
 	for _, s := range t.Segments {
-		if txt, ok := s.(*TextSegment); ok {
-			txt.parent = t
+		switch seg := s.(type) {
+		case *TextSegment:
+			seg.parent = t
+		case *listMarkerSegment:
+			seg.parent = t
 		}
 	}
 
@@ -140,18 +183,164 @@ func (t *RichText) Resize(size fyne.Size) {
 	t.Refresh()
 }
 
+// SelectedText returns the text currently selected in this RichText.
+// If the rich text is not Selectable it will return an empty string.
+// If there is no selection it will return the empty string.
+//
+// Since: 2.9
+func (t *RichText) SelectedText() string {
+	if !t.Selectable || t.selection == nil {
+		return ""
+	}
+
+	return t.selection.SelectedText()
+}
+
+// ClearSelection removes any active text selection in this RichText.
+// It has no effect if the RichText is not Selectable or nothing is currently selected.
+//
+// Since: 2.9
+func (t *RichText) ClearSelection() {
+	if !t.Selectable || t.selection == nil || !t.selection.selecting {
+		return
+	}
+	t.selection.selecting = false
+	t.Refresh()
+}
+
 // String returns the text widget buffer as string
 func (t *RichText) String() string {
 	ret := strings.Builder{}
-	for _, seg := range t.Segments {
+	for _, seg := range t.contentSegments() {
 		ret.WriteString(seg.Textual())
 	}
 	return ret.String()
 }
 
+// textBetween returns the text between the specified positions, which are rune
+// offsets into the whole content. A line break is added wherever the range spans
+// a change of block, such as from one paragraph to the next, that the content
+// does not mark with a new line of its own. Each list item that starts inside the
+// range is introduced by its marker, so that the structure of a list is kept.
+func (t *RichText) textBetween(start, stop int) string {
+	runes := []rune(t.String())
+	stop = min(stop, len(runes))
+	start = max(min(start, stop), 0)
+
+	markers := t.markersBetween(start, stop)
+	ret := strings.Builder{}
+	writeTo := func(pos int) {
+		for len(markers) > 0 && markers[0].pos < pos {
+			ret.WriteString(string(runes[start:markers[0].pos]))
+			ret.WriteString(markers[0].text)
+			start = markers[0].pos
+			markers = markers[1:]
+		}
+		ret.WriteString(string(runes[start:pos]))
+		start = pos
+	}
+
+	for row := 0; row < t.rows()-1; row++ {
+		bound, next := &t.rowBounds[row], &t.rowBounds[row+1]
+		if next.docBegin <= start {
+			continue
+		}
+		if next.docBegin >= stop {
+			break
+		}
+
+		lastSeg := bound.segments[len(bound.segments)-1]
+		if next.segments[0] == lastSeg || bound.docEnd != next.docBegin {
+			continue // a wrapped line, or a new line that is part of the text
+		}
+		writeTo(next.docBegin)
+		ret.WriteByte('\n')
+	}
+
+	writeTo(stop)
+	return ret.String()
+}
+
+// selectedMarker is the text of a list marker and the rune offset of the item it introduces.
+type selectedMarker struct {
+	pos  int
+	text string
+}
+
+// markersBetween returns the markers of the list items that start inside the
+// specified range of rune offsets, in the order that they appear.
+func (t *RichText) markersBetween(start, stop int) []selectedMarker {
+	var markers []selectedMarker
+	off := 0
+	for _, seg := range t.contentSegments() {
+		if off >= stop {
+			break
+		}
+
+		if marker, ok := seg.(*listMarkerSegment); ok {
+			if off >= start {
+				markers = append(markers, selectedMarker{pos: off, text: marker.SelectedText()})
+			}
+			continue
+		}
+		off += utf8.RuneCountInString(seg.Textual())
+	}
+	return markers
+}
+
+// contentSegments returns the segments that carry the content of this rich text,
+// in the order that they are laid out. Blocks that keep their content in child
+// segments, such as lists, are replaced by the segments that they hold.
+func (t *RichText) contentSegments() []RichTextSegment {
+	for _, seg := range t.Segments {
+		if holdsContent(seg) {
+			return appendContentSegments(make([]RichTextSegment, 0, len(t.Segments)+2), t.Segments)
+		}
+	}
+
+	return t.Segments // the common case of content that is not nested
+}
+
+// appendContentSegments adds the content carrying segments of src to dst and returns the extended slice.
+func appendContentSegments(dst, src []RichTextSegment) []RichTextSegment {
+	for _, seg := range src {
+		if holdsContent(seg) {
+			dst = appendContentSegments(dst, seg.(RichTextBlock).Segments())
+			continue
+		}
+
+		dst = append(dst, seg)
+	}
+	return dst
+}
+
+// holdsContent reports whether a segment keeps its content in the segments inside
+// it. A block such as code, that holds the text itself, does not.
+func holdsContent(seg RichTextSegment) bool {
+	if _, ok := seg.(textHolder); ok {
+		return false
+	}
+
+	_, ok := seg.(RichTextBlock)
+	return ok
+}
+
+// contentIs reports whether the segments spell out exactly the given text.
+// It avoids building a string to compare against, as this runs on every edit.
+func (t *RichText) contentIs(text string) bool {
+	for _, seg := range t.contentSegments() {
+		content := seg.Textual()
+		if !strings.HasPrefix(text, content) {
+			return false
+		}
+		text = text[len(content):]
+	}
+	return text == ""
+}
+
 // charMinSize returns the average char size to use for internal computation
-func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
-	defaultChar := "M"
+func (*RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize float32) fyne.Size {
+	defaultChar := averageChar
 	if concealed {
 		defaultChar = passwordChar
 	}
@@ -159,7 +348,16 @@ func (t *RichText) charMinSize(concealed bool, style fyne.TextStyle, textSize fl
 	return fyne.MeasureText(defaultChar, textSize, style)
 }
 
-// deleteFromTo removes the text between the specified positions
+// textHolder is content that an editor can add text to and remove text from.
+// A text segment is the usual case, a code block holds the lines of code that it
+// draws on its panel.
+type textHolder interface {
+	content() string
+	setContent(string)
+}
+
+// deleteFromTo removes the text between the specified positions.
+// Positions are rune offsets into the whole content, spanning all segments.
 func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
 	if lowBound >= highBound {
 		return []rune{}
@@ -167,42 +365,95 @@ func (t *RichText) deleteFromTo(lowBound int, highBound int) []rune {
 
 	start := 0
 	ret := make([]rune, 0, highBound-lowBound)
-	deleting := false
-	var segs []RichTextSegment
-	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
-			if !deleting {
-				segs = append(segs, seg)
-			}
-			continue
-		}
-		r := ([]rune)(seg.(*TextSegment).Text)
-		end := start + len(r)
-		if end < lowBound {
-			segs = append(segs, seg)
+	var dropped []RichTextSegment
+	for _, seg := range t.contentSegments() {
+		end := start + utf8.RuneCountInString(seg.Textual())
+
+		if end <= lowBound || start >= highBound { // wholly outside the deleted range
 			start = end
 			continue
 		}
 
-		startOff := int(math.Max(float64(lowBound-start), 0))
-		endOff := int(math.Min(float64(end), float64(highBound))) - start
-		ret = append(ret, r[startOff:endOff]...)
-		r2 := append(r[:startOff], r[endOff:]...)
-		seg.(*TextSegment).Text = string(r2)
-		segs = append(segs, seg)
-
-		// prepare next iteration
-		start = end
-		if start >= highBound {
-			segs = append(segs, t.Segments[i+1:]...)
-			break
-		} else if start >= lowBound {
-			deleting = true
+		if holder, ok := seg.(textHolder); ok {
+			r := []rune(holder.content())
+			from := max(lowBound-start, 0)
+			to := min(highBound-start, len(r))
+			ret = append(ret, r[from:to]...)
+			holder.setContent(string(r[:from]) + string(r[to:]))
+		} else { // an object cannot be split, so it goes entirely
+			ret = append(ret, []rune(seg.Textual())...)
+			dropped = append(dropped, seg)
 		}
+		start = end
 	}
-	t.Segments = segs
+
+	if len(dropped) > 0 {
+		t.Segments = removeSegments(t.Segments, dropped)
+	}
+
 	t.Refresh()
 	return ret
+}
+
+// removeSegments takes the given segments out of the content, looking inside the
+// blocks that hold them.
+func removeSegments(in []RichTextSegment, drop []RichTextSegment) []RichTextSegment {
+	out := make([]RichTextSegment, 0, len(in))
+	for _, seg := range in {
+		if segmentIn(seg, drop) {
+			continue
+		}
+
+		switch block := seg.(type) {
+		case *ListSegment:
+			block.Items = removeListItems(block, drop)
+			if len(block.Items) == 0 {
+				continue
+			}
+		case *ParagraphSegment:
+			block.Texts = removeSegments(block.Texts, drop)
+		}
+
+		out = append(out, seg)
+	}
+	return out
+}
+
+// removeListItems drops the items of a list whose bullet was deleted, keeping the
+// content of each one by moving it into the item before.
+func removeListItems(l *ListSegment, drop []RichTextSegment) []RichTextSegment {
+	items := make([]RichTextSegment, 0, len(l.Items))
+	for i, item := range l.Items {
+		if i > 0 && i < len(l.markers) && segmentIn(l.markers[i], drop) && len(items) > 0 {
+			last := items[len(items)-1]
+			items[len(items)-1] = &ParagraphSegment{Texts: append(blockContent(last), blockContent(item)...)}
+			continue
+		}
+
+		items = append(items, removeSegments([]RichTextSegment{item}, drop)...)
+	}
+
+	l.markers = nil // the bullets are made again to match the items that are left
+	return items
+}
+
+// blockContent returns the segments inside a block, or the segment itself if it
+// is not one that holds others.
+func blockContent(seg RichTextSegment) []RichTextSegment {
+	if block, ok := seg.(*ParagraphSegment); ok {
+		return block.Texts
+	}
+
+	return []RichTextSegment{seg}
+}
+
+func segmentIn(seg RichTextSegment, list []RichTextSegment) bool {
+	for _, in := range list {
+		if in == seg {
+			return true
+		}
+	}
+	return false
 }
 
 // cachedSegmentVisual returns a cached segment visual representation.
@@ -234,17 +485,25 @@ func (t *RichText) cleanVisualCache() {
 
 	// mark cache entries that are still valid
 	t.visualCacheGen++
+	mark := func(seg RichTextSegment) {
+		if c, ok := t.visualCache[seg]; ok {
+			c.gen = t.visualCacheGen
+			t.visualCache[seg] = c
+		}
+	}
 	for _, seg := range t.Segments {
-		if cache, ok := t.visualCache[seg]; ok {
-			cache.gen = t.visualCacheGen
-			t.visualCache[seg] = cache
+		mark(seg)
+	}
+	for i := range t.rowBounds { // content inside blocks is only found in the rows
+		for _, seg := range t.rowBounds[i].segments {
+			mark(seg)
 		}
 	}
 
 	// delete entries that are not marked as valid
 	var deletingSegs []RichTextSegment
-	for seg1, cache := range t.visualCache {
-		if cache.gen != t.visualCacheGen {
+	for seg1, c := range t.visualCache {
+		if c.gen != t.visualCacheGen {
 			deletingSegs = append(deletingSegs, seg1)
 		}
 	}
@@ -253,44 +512,81 @@ func (t *RichText) cleanVisualCache() {
 	}
 }
 
-// insertAt inserts the text at the specified position
+// insertAt inserts the text at the specified position.
+// The position is a rune offset into the whole content, spanning all segments.
 func (t *RichText) insertAt(pos int, runes []rune) {
-	index := 0
-	start := 0
-	var into *TextSegment
-	for i, seg := range t.Segments {
-		if _, ok := seg.(*TextSegment); !ok {
-			continue
-		}
-		end := start + len([]rune(seg.(*TextSegment).Text))
-		into = seg.(*TextSegment)
-		index = i
-		if end > pos {
+	// Find best segment if multiple match.
+	var contains, empty, before, after textHolder
+	beforeEndsLine, beforeEndsBlock := false, false
+	offset, start := 0, 0
+	for _, seg := range t.contentSegments() {
+		if start > pos {
 			break
 		}
+		end := start + utf8.RuneCountInString(seg.Textual())
 
+		if holder, ok := seg.(textHolder); ok {
+			switch {
+			case start < pos && pos < end:
+				if contains == nil {
+					contains, offset = holder, pos-start
+				}
+			case start == pos && end == pos:
+				if empty == nil {
+					empty = holder
+				}
+			case end == pos:
+				before = holder
+				// content that closes a line hands this position to what follows it
+				beforeEndsLine = !seg.Inline() || strings.HasSuffix(holder.content(), "\n")
+
+				// a block that was closed by a line break has the next line below its panel
+				_, isPanel := seg.(panelSegment)
+				beforeEndsBlock = isPanel && strings.HasSuffix(holder.content(), "\n")
+			case start == pos:
+				if after == nil {
+					after = holder
+				}
+			}
+		} else if start == pos && end == pos {
+			// a decoration such as a list bullet sits here, so text typed at this
+			// position belongs to the content that follows it
+			empty, before = nil, nil
+		}
 		start = end
 	}
 
-	if into == nil {
+	into := contains
+	switch {
+	case into != nil:
+	case empty != nil:
+		into, offset = empty, 0
+	case before != nil && !beforeEndsLine:
+		into, offset = before, utf8.RuneCountInString(before.content())
+	case after != nil:
+		into, offset = after, 0
+	case before != nil && !beforeEndsBlock: // there is nothing after it, so the line grows instead
+		into, offset = before, utf8.RuneCountInString(before.content())
+	}
+
+	if into == nil { // no text segment covers this position, so start a new one
+		t.Segments = append(t.Segments, &TextSegment{Style: RichTextStyleInline, Text: string(runes), parent: t})
 		return
 	}
-	r := ([]rune)(into.Text)
-	if pos > len(r) { // safety in case position is out of bounds for the segment
-		pos = len(r)
-	}
-	r2 := make([]rune, len(r)+len(runes))
-	copy(r2, r[:pos])
-	copy(r2[pos:], runes)
-	copy(r2[pos+len(runes):], r[pos:])
-	into.Text = string(r2)
-	t.Segments[index] = into
+
+	r := []rune(into.content())
+	offset = min(offset, len(r))
+	r2 := make([]rune, 0, len(r)+len(runes))
+	r2 = append(r2, r[:offset]...)
+	r2 = append(r2, runes...)
+	r2 = append(r2, r[offset:]...)
+	into.setContent(string(r2))
 }
 
 // Len returns the text widget buffer length
 func (t *RichText) len() int {
 	ret := 0
-	for _, seg := range t.Segments {
+	for _, seg := range t.contentSegments() {
 		ret += utf8.RuneCountInString(seg.Textual())
 	}
 	return ret
@@ -311,35 +607,68 @@ func (t *RichText) lineSizeToColumn(col, row int, textSize, innerPad float32) fy
 	if bound == nil {
 		return t.charMinSize(false, fyne.TextStyle{}, textSize)
 	}
+
+	leftPad, _ := t.rowPaddingAndAlign(*bound, t.Theme().Size(theme.SizeNameLineSpacing), fyne.TextAlignLeading)
 	for i, seg := range bound.segments {
 		var size fyne.Size
+		measureText := rowSegmentRunes(bound, i)
+		partial := false
+		if col < counted+len(measureText) {
+			measureText = measureText[0 : col-counted]
+			partial = true
+			last = true
+		}
+		counted += len(measureText)
+
 		if text, ok := seg.(*TextSegment); ok {
-			start := 0
-			if i == 0 {
-				start = bound.begin
-			}
-			measureText := []rune(text.Text)[start:]
-			if col < counted+len(measureText) {
-				measureText = measureText[0 : col-counted]
-				last = true
-			}
 			if concealed(seg) {
 				measureText = []rune(strings.Repeat(passwordChar, len(measureText)))
 			}
-			counted += len(measureText)
 
 			size, _ = fyne.CurrentApp().Driver().RenderedTextSize(string(measureText), text.size(), text.Style.TextStyle, nil)
+		} else if link, ok := seg.(*HyperlinkSegment); ok {
+			sizeName := link.SizeName
+			if sizeName == "" {
+				sizeName = theme.SizeNameText
+			}
+			size, _ = fyne.CurrentApp().Driver().RenderedTextSize(string(measureText), t.Theme().Size(sizeName), link.TextStyle, nil)
+		} else if partial {
+			size = fyne.Size{} // the cursor is before this object, so it adds no width
 		} else {
 			size = t.cachedSegmentVisual(seg, 0).MinSize()
 		}
 
 		total.Width += size.Width
-		total.Height = fyne.Max(total.Height, size.Height)
+		total.Height = max(total.Height, size.Height)
 		if last {
 			break
 		}
 	}
-	return total.Add(fyne.NewSize(innerPad-t.inset.Width, 0))
+	return total.Add(fyne.NewSize(innerPad-t.inset.Width+leftPad, 0))
+}
+
+// rowAlignOffset returns the horizontal offset of the text in the specified row
+// caused by it being center or trailing aligned within the widget width.
+func (t *RichText) rowAlignOffset(row int, textSize, innerPad float32) float32 {
+	bound := t.rowBoundary(row)
+	if bound == nil {
+		return 0
+	}
+	_, align := t.rowPaddingAndAlign(*bound, 0, fyne.TextAlignLeading)
+	if align == fyne.TextAlignLeading {
+		return 0
+	}
+
+	xInset := innerPad - t.inset.Width
+	lineWidth := t.Size().Width - xInset*2
+	textWidth := t.lineSizeToColumn(t.rowLength(row), row, textSize, innerPad).Width - xInset
+	if text, ok := bound.segments[len(bound.segments)-1].(*TextSegment); ok && bound.ellipsis {
+		textWidth += fyne.MeasureText(ellipsisChar, text.size(), text.Style.TextStyle).Width
+	}
+	if align == fyne.TextAlignCenter {
+		return (lineWidth - textWidth) / 2
+	}
+	return lineWidth - textWidth
 }
 
 // Row returns the characters in the row specified.
@@ -348,20 +677,10 @@ func (t *RichText) row(row int) []rune {
 	if row < 0 || row >= t.rows() {
 		return nil
 	}
-	bound := t.rowBounds[row]
+	bound := &t.rowBounds[row]
 	var ret []rune
-	for i, seg := range bound.segments {
-		if text, ok := seg.(*TextSegment); ok {
-			if i == 0 {
-				if len(bound.segments) == 1 {
-					ret = append(ret, []rune(text.Text)[bound.begin:bound.end]...)
-				} else {
-					ret = append(ret, []rune(text.Text)[bound.begin:]...)
-				}
-			} else if i == len(bound.segments)-1 && len(bound.segments) > 1 && bound.end != 0 {
-				ret = append(ret, []rune(text.Text)[:bound.end]...)
-			}
-		}
+	for i := range bound.segments {
+		ret = append(ret, rowSegmentRunes(bound, i)...)
 	}
 	return ret
 }
@@ -393,146 +712,207 @@ func (t *RichText) rows() int {
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time a segment Text, widget Wrapping or size changes.
 func (t *RichText) updateRowBounds() {
-	th := t.Theme()
-	innerPadding := th.Size(theme.SizeNameInnerPadding)
-	fitSize := t.Size()
-	if t.scr != nil {
-		fitSize = t.scr.Content.MinSize()
+	b := newRowBoundsBuilder(t)
+	b.walk(t.Segments, 0)
+
+	t.rowBounds = b.bounds
+	t.geometryValid = false // calculated on demand, as this runs on every edit
+}
+
+// segmentsEndRow reports whether these segments closed the row that they were laid
+// out on, so that whatever follows them starts a new one.
+func segmentsEndRow(segs []RichTextSegment) bool {
+	if len(segs) == 0 {
+		return false
 	}
-	fitSize.Height -= (innerPadding + t.inset.Height) * 2
 
-	var bounds []rowBoundary
-	maxWidth := t.Size().Width - 2*innerPadding + 2*t.inset.Width
-	wrapWidth := maxWidth
+	last := segs[len(segs)-1]
+	if block, ok := last.(RichTextBlock); ok {
+		inner := block.Segments()
+		if segmentsEndRow(inner) {
+			return true
+		}
 
-	var currentBound *rowBoundary
-	currentBoundDepth := 0
-	rowContinuationIndent := float32(-1)
-	var iterateSegments func(segList []RichTextSegment, depth int)
-	iterateSegments = func(segList []RichTextSegment, depth int) {
-		for _, seg := range segList {
-			if parent, ok := seg.(RichTextBlock); ok {
-				segs := parent.Segments()
-				iterateSegments(segs, depth+1)
-				if len(segs) > 0 && !segs[len(segs)-1].Inline() {
-					wrapWidth = maxWidth
-					currentBound = nil
-					currentBoundDepth = depth
-					rowContinuationIndent = -1
-				}
-				continue
-			}
-			_, isText := seg.(*TextSegment)
-			_, isHyperlink := seg.(*HyperlinkSegment)
-			if !isText && !isHyperlink {
-				if currentBound == nil {
-					bound := rowBoundary{segments: []RichTextSegment{seg}}
-					bounds = append(bounds, bound)
-					currentBound = &bound
-					currentBoundDepth = depth
-				} else {
-					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-				}
+		// a block stands on its own line unless its content ended the row already
+		return !endsWithNewline(inner)
+	}
+	return !last.Inline()
+}
 
-				itemMin := t.cachedSegmentVisual(seg, 0).MinSize()
-				if seg.Inline() {
-					wrapWidth -= itemMin.Width
-				} else {
-					wrapWidth = maxWidth
-					currentBound = nil
-					currentBoundDepth = depth
-					rowContinuationIndent = -1
-					fitSize.Height -= itemMin.Height + th.Size(theme.SizeNameLineSpacing)
-				}
-				continue
-			}
-			var textStyle fyne.TextStyle
-			var textSize float32
-			leftPad := float32(0)
-			if textSeg, ok := seg.(*TextSegment); ok {
-				textStyle = textSeg.Style.TextStyle
-				textSize = textSeg.size()
-				if textSeg.Style.QuotingDepth > 0 {
-					leftPad = innerPadding * 2 * float32(textSeg.Style.QuotingDepth)
-				}
-			} else if linkSeg, ok := seg.(*HyperlinkSegment); ok {
-				textStyle = linkSeg.TextStyle
-				textSize = theme.SizeForWidget(theme.SizeNameText, t)
-				if linkSeg.quotingLevel > 0 {
-					leftPad = innerPadding * 2 * float32(linkSeg.quotingLevel)
-				}
-			}
-			retBounds, height := lineBounds(t, seg, wrapWidth-leftPad, fyne.NewSize(maxWidth, fitSize.Height), func(text []rune) fyne.Size {
-				return fyne.MeasureText(string(text), textSize, textStyle)
-			})
-			boundWasNil := currentBound == nil
-			if currentBound != nil {
-				if len(retBounds) > 0 {
-					bounds[len(bounds)-1].end = retBounds[0].end // invalidate row ending as we have more content
-					bounds[len(bounds)-1].segments = append(bounds[len(bounds)-1].segments, seg)
-					if depth > currentBoundDepth {
-						if rowContinuationIndent == -1 {
-							rowContinuationIndent = maxWidth - wrapWidth
-						}
-						if rowContinuationIndent > 0 {
-							runes := []rune(seg.Textual())
-							for i := range retBounds[1:] {
-								b := &retBounds[1+i]
-								if b.begin > 0 && b.begin <= len(runes) && runes[b.begin-1] == '\n' {
-									continue
-								}
-								b.indent = rowContinuationIndent
-							}
-						}
-					}
-					bounds = append(bounds, retBounds[1:]...)
+// markPanelRows records that the rows a block just added are drawn on its panel.
+// The block may have started on a row that was already open, so the row before
+// the ones it added is included when it holds content of the block.
+func markPanelRows(bounds []rowBoundary, first int, segs []RichTextSegment, block panelSegment) {
+	if first > 0 && rowHoldsAny(&bounds[first-1], segs) {
+		first--
+	}
 
-					fitSize.Height -= height
-				}
-			} else {
-				bounds = append(bounds, retBounds...)
+	for i := first; i < len(bounds); i++ {
+		bounds[i].panel = block
+	}
+}
 
-				fitSize.Height -= height
-			}
-			currentBound = &bounds[len(bounds)-1]
-			if boundWasNil {
-				currentBoundDepth = depth
-				rowContinuationIndent = -1
-			}
-			if seg.Inline() {
-				last := bounds[len(bounds)-1]
-				begin := 0
-				if len(last.segments) == 1 {
-					begin = last.begin
-				}
-				runes := []rune(seg.Textual())
-				// check ranges - as we resize it can be wrong?
-				if begin > len(runes) {
-					begin = len(runes)
-				}
-				end := last.end
-				if end > len(runes) {
-					end = len(runes)
-				}
-				text := string(runes[begin:end])
-				measured := fyne.MeasureText(text, textSize, textStyle)
-				lastWidth := measured.Width
-				if len(retBounds) == 1 {
-					wrapWidth -= lastWidth
-				} else {
-					wrapWidth = maxWidth - lastWidth
-				}
-			} else {
-				currentBound = nil
-				currentBoundDepth = depth
-				rowContinuationIndent = -1
-				wrapWidth = maxWidth
+// rowHoldsAny reports whether any of the given segments puts content on a row.
+func rowHoldsAny(bound *rowBoundary, segs []RichTextSegment) bool {
+	for _, in := range bound.segments {
+		for _, seg := range segs {
+			if in == seg {
+				return true
 			}
 		}
 	}
+	return false
+}
 
-	iterateSegments(t.Segments, 0)
-	t.rowBounds = bounds
+// ensureRowGeometry calculates the row positions if they are not already known.
+func (t *RichText) ensureRowGeometry() {
+	if t.geometryValid {
+		return
+	}
+
+	t.geometryValid = true
+	t.updateRowGeometry()
+}
+
+// updateRowGeometry records the vertical offset and height of each row.
+func (t *RichText) updateRowGeometry() {
+	if t.uniformRowGeometry() {
+		return
+	}
+
+	th := t.Theme()
+	lineSpacing := th.Size(theme.SizeNameLineSpacing)
+	textSize := th.Size(theme.SizeNameText)
+
+	yPos := float32(0)
+	for i := range t.rowBounds {
+		bound := &t.rowBounds[i]
+		height := float32(0)
+		for j, seg := range bound.segments {
+			if j == 0 && rowStartsWithSpentText(bound) {
+				continue
+			}
+
+			var segHeight float32
+			switch s := seg.(type) {
+			case *TextSegment:
+				segHeight = fyne.MeasureText(string(rowSegmentRunes(bound, j)), s.size(), s.Style.TextStyle).Height
+			case *HyperlinkSegment:
+				sizeName := s.SizeName
+				if sizeName == "" {
+					sizeName = theme.SizeNameText
+				}
+				segHeight = fyne.MeasureText(string(rowSegmentRunes(bound, j)), th.Size(sizeName), s.TextStyle).Height
+			default:
+				segHeight = t.cachedSegmentVisual(seg, 0).MinSize().Height
+			}
+			height = max(height, segHeight)
+		}
+		if height == 0 {
+			height = fyne.MeasureText(averageChar, textSize, fyne.TextStyle{}).Height
+		}
+
+		bound.yPos = yPos
+		bound.height = height
+		yPos += height
+
+		lastSeg := bound.segments[len(bound.segments)-1]
+		if !lastSeg.Inline() && i < len(t.rowBounds)-1 && t.rowBounds[i+1].segments[0] != lastSeg {
+			yPos += lineSpacing
+		}
+	}
+}
+
+// uniformRowGeometry handles the common case of content that is one run of text,
+// returning true if the geometry was calculated.
+func (t *RichText) uniformRowGeometry() bool {
+	if len(t.Segments) != 1 {
+		return false
+	}
+	text, ok := t.Segments[0].(*TextSegment)
+	if !ok {
+		return false
+	}
+
+	height := fyne.MeasureText(averageChar, text.size(), text.Style.TextStyle).Height
+	yPos := float32(0)
+	for i := range t.rowBounds {
+		t.rowBounds[i].yPos = yPos
+		t.rowBounds[i].height = height
+		yPos += height
+	}
+	return true
+}
+
+// rowStartsWithSpentText reports whether the first segment of this row is text
+// that ended with the line break before it.
+func rowStartsWithSpentText(bound *rowBoundary) bool {
+	if len(bound.segments) < 2 || bound.segBegin == 0 {
+		return false
+	}
+
+	switch bound.segments[0].(type) {
+	case *TextSegment, *HyperlinkSegment:
+		return bound.segBegin >= utf8.RuneCountInString(bound.segments[0].Textual())
+	}
+	return false
+}
+
+// rowFirstVisibleSegment returns the first segment that puts content on this row.
+func rowFirstVisibleSegment(bound *rowBoundary) RichTextSegment {
+	for i, seg := range bound.segments {
+		if i == 0 && len(bound.segments) > 1 && bound.segBegin >= utf8.RuneCountInString(seg.Textual()) {
+			continue
+		}
+		return seg
+	}
+	return nil
+}
+
+// rowAt returns the index of the row rendered at the specified vertical offset.
+func (t *RichText) rowAt(y float32) int {
+	rows := t.rows()
+	t.ensureRowGeometry()
+
+	return sort.Search(rows, func(i int) bool {
+		bound := &t.rowBounds[i]
+		return y < bound.yPos+bound.height
+	})
+}
+
+// rowGeometry returns the vertical offset and height of the specified row.
+func (t *RichText) rowGeometry(row int) (y, height float32) {
+	if row < 0 || row >= t.rows() {
+		th := t.Theme()
+		return 0, fyne.MeasureText(averageChar, th.Size(theme.SizeNameText), fyne.TextStyle{}).Height
+	}
+	t.ensureRowGeometry()
+
+	bound := &t.rowBounds[row]
+	if bound.height == 0 {
+		th := t.Theme()
+		return bound.yPos, fyne.MeasureText(averageChar, th.Size(theme.SizeNameText), fyne.TextStyle{}).Height
+	}
+	return bound.yPos, bound.height
+}
+
+// rowSegmentRunes returns the runes of the segment at index i within the given
+// row that are visible on that row.
+func rowSegmentRunes(bound *rowBoundary, i int) []rune {
+	runes := []rune(bound.segments[i].Textual())
+	last := len(bound.segments) - 1
+
+	if i == 0 {
+		begin := min(bound.segBegin, len(runes))
+		if last == 0 {
+			return runes[begin:max(min(bound.segEnd, len(runes)), begin)]
+		}
+		return runes[begin:]
+	}
+	if i == last {
+		return runes[:min(bound.segEnd, len(runes))]
+	}
+	return runes
 }
 
 // RichTextBlock is an extension of a text segment that contains other segments
@@ -540,6 +920,121 @@ func (t *RichText) updateRowBounds() {
 // Since: 2.1
 type RichTextBlock interface {
 	Segments() []RichTextSegment
+}
+
+// setHighlights records the rectangles that a selection wants drawn over this
+// content.
+func (t *RichText) setHighlights(sel *selectable, objs []fyne.CanvasObject) {
+	t.highlight, t.highlights = sel, objs
+
+	t.updateScrollContent() // scrolled content is not asked for its objects, so slot them in now
+	canvas.Refresh(t.super())
+}
+
+// layeredVisuals returns everything that this rich text draws, from the back to
+// the front. Any selection highlights are slotted in above the panels that blocks
+// sit on and below the text itself.
+func (t *RichText) layeredVisuals() []fyne.CanvasObject {
+	objs := t.visuals
+	if len(t.decor) == 0 {
+		return objs
+	}
+
+	highlights := t.highlightObjects()
+	if len(highlights) == 0 {
+		return objs
+	}
+
+	at := min(t.lead, len(objs))
+	out := make([]fyne.CanvasObject, 0, len(objs)+len(highlights))
+	out = append(out, objs[:at]...)
+	out = append(out, highlights...)
+	return append(out, objs[at:]...)
+}
+
+// updateScrollContent sets what is drawn inside the scroller, if we have one.
+func (t *RichText) updateScrollContent() {
+	if t.scr == nil {
+		return
+	}
+	if inner := scrollInnerContainer(t.scr); inner != nil && inner.Objects != nil {
+		inner.Objects = t.layeredVisuals()
+	}
+}
+
+// selectionWidget returns the widget that handles select interaction for this
+// content, or nil if it is not Selectable.
+func (t *RichText) selectionWidget() *focusSelectable {
+	if !t.Selectable {
+		if t.selection != nil {
+			t.selection.selecting = false
+		}
+		return nil
+	}
+
+	if t.selection == nil {
+		t.selection = &focusSelectable{}
+		t.selection.ExtendBaseWidget(t.selection)
+		t.selection.focus = t.selection
+		t.selection.provider = t
+	}
+	t.selection.theme = t.Theme()
+	return t.selection
+}
+
+// checkSelection drops a selection that the content no longer reaches, which can
+// happen when the segments are changed whilst text is selected.
+func (t *RichText) checkSelection() {
+	sel := t.selection
+	if sel == nil || !sel.selecting {
+		return
+	}
+
+	inContent := func(row, col int) bool {
+		return row < t.rows() && col <= t.rowLength(row)
+	}
+	if !inContent(sel.cursorRow, sel.cursorColumn) || !inContent(sel.selectRow, sel.selectColumn) {
+		sel.selecting = false
+	}
+}
+
+// highlightObjects returns the selection rectangles to draw over this content.
+func (t *RichText) highlightObjects() []fyne.CanvasObject {
+	if t.highlight == nil || !t.highlight.selecting {
+		return nil
+	}
+
+	return t.highlights
+}
+
+// updateDecorations prepares the graphical elements drawn behind rows. It returns the
+// objects to draw, which are added before the text so that they appear behind it.
+func (t *RichText) updateDecorations() []fyne.CanvasObject {
+	var decor []rowDecoration
+	var current panelSegment
+	for row := range t.rowBounds {
+		block := t.rowBounds[row].panel
+		if block == nil {
+			current = nil
+			continue
+		}
+
+		if block == current { // another row of the block we are already drawing
+			decor[len(decor)-1].to = row
+			continue
+		}
+
+		current = block
+		decor = append(decor, rowDecoration{obj: block.panel(), from: row, to: row})
+	}
+
+	objs := make([]fyne.CanvasObject, len(decor))
+	for i, d := range decor {
+		objs[i] = d.obj
+		d.obj.Refresh()
+	}
+	t.decor = decor
+	return objs
 }
 
 // Renderer
@@ -557,20 +1052,45 @@ func codeInlineText(obj fyne.CanvasObject) (*canvas.Text, bool) {
 		return o, true
 	case *fyne.Container:
 		if _, ok := o.Layout.(*codeInlineLayout); ok {
-			return o.Objects[1].(*canvas.Text), true
+			t, _ := o.Objects[1].(*canvas.Text)
+			return t, true
 		}
 	}
 	return nil, false
 }
 
+// textObjects returns the visuals of the rendered segments, leaving out the
+// decorations that are drawn behind them.
+func (r *textRenderer) textObjects() []fyne.CanvasObject {
+	if r.obj.lead > len(r.obj.visuals) {
+		return nil
+	}
+	return r.obj.visuals[r.obj.lead:]
+}
+
+// Objects returns the visuals of this rich text, or the scroller that holds them.
+func (r *textRenderer) Objects() []fyne.CanvasObject {
+	if r.obj.scr != nil {
+		return r.BaseRenderer.Objects()
+	}
+
+	return r.obj.layeredVisuals()
+}
+
 func (r *textRenderer) Layout(size fyne.Size) {
 	th := r.obj.Theme()
 	bounds := r.obj.rowBounds
-	objs := r.Objects()
 	if r.obj.scr != nil {
 		r.obj.scr.Resize(size)
-		objs = r.obj.scr.Content.(*fyne.Container).Objects[1].(*fyne.Container).Objects
 	}
+	if sel := r.obj.selection; sel != nil {
+		if r.obj.scr != nil {
+			sel.Resize(r.obj.scr.Content.Size()) // cover everything that can be scrolled to
+		} else {
+			sel.Resize(size)
+		}
+	}
+	objs := r.textObjects()
 
 	// Accessing theme here is slow, so we cache the value
 	innerPadding := th.Size(theme.SizeNameInnerPadding)
@@ -584,8 +1104,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	rowAlign := fyne.TextAlignLeading
 	i := 0
 	for row, bound := range bounds {
-		leftPad, align := rowPaddingAndAlign(bound, lineSpacing, rowAlign)
+		leftPad, align := r.obj.rowPaddingAndAlign(bound, lineSpacing, rowAlign)
 		rowAlign = align
+		rowY := yPos
 
 		for segI := range bound.segments {
 			if i == len(objs) {
@@ -594,6 +1115,11 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			inline := segI < len(bound.segments)-1
 			obj := objs[i]
 			i++
+			if segI == 0 && rowStartsWithSpentText(&bound) {
+				obj.Move(fyne.NewPos(left+leftPad, yPos))
+				obj.Resize(fyne.Size{})
+				continue
+			}
 			_, isText := codeInlineText(obj) // code-inline containers are text-like, not blocks
 			if !isText && !inline {
 				if len(rowItems) != 0 {
@@ -619,10 +1145,39 @@ func (r *textRenderer) Layout(size fyne.Size) {
 			rowItems = nil
 		}
 
+		// record where this row landed so a cursor or selection can be placed quickly.
+		bounds[row].yPos = rowY - (innerPadding - r.obj.inset.Height)
+		bounds[row].height = yPos - rowY
+
 		lastSeg := bound.segments[len(bound.segments)-1]
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
 			yPos += lineSpacing
 		}
+	}
+	r.obj.geometryValid = true
+
+	r.layoutDecorations(bounds, xInset, lineWidth, innerPadding-r.obj.inset.Height, lineSpacing)
+}
+
+// layoutDecorations places the elements drawn behind rows, now that the rows
+// they cover have been positioned.
+func (r *textRenderer) layoutDecorations(bounds []rowBoundary, xInset, lineWidth, yOffset, lineSpacing float32) {
+	if len(r.obj.decor) == 0 {
+		return
+	}
+
+	inset := r.obj.Theme().Size(theme.SizeNameInnerPadding)
+	for _, d := range r.obj.decor {
+		if d.to >= len(bounds) {
+			continue
+		}
+
+		top, bottom := bounds[d.from], bounds[d.to]
+		leftPad, _ := r.obj.rowPaddingAndAlign(top, lineSpacing, fyne.TextAlignLeading)
+		leftPad -= inset // the panel surrounds the text rather than starting at it
+
+		d.obj.Move(fyne.NewPos(xInset+leftPad, top.yPos+yOffset-lineSpacing/2))
+		d.obj.Resize(fyne.NewSize(lineWidth-leftPad, bottom.yPos+bottom.height-top.yPos+lineSpacing))
 	}
 }
 
@@ -637,21 +1192,18 @@ func (r *textRenderer) MinSize() fyne.Size {
 	wrap := r.obj.Wrapping
 	trunc := r.obj.Truncation
 	scroll := r.obj.Scroll
-	objs := r.Objects()
-	if r.obj.scr != nil {
-		objs = r.obj.scr.Content.(*fyne.Container).Objects[1].(*fyne.Container).Objects
-	}
+	objs := r.textObjects()
 
 	charMinSize := r.obj.charMinSize(false, fyne.TextStyle{}, textSize)
-	min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
+	minSize := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 	if r.obj.scr != nil {
-		r.obj.prop.SetMinSize(min)
+		r.obj.prop.SetMinSize(minSize)
 	}
 
 	if trunc != fyne.TextTruncateOff && r.obj.Scroll == widget.ScrollNone {
 		minBounds := charMinSize
 		if wrap == fyne.TextWrapOff {
-			minBounds.Height = min.Height
+			minBounds.Height = minSize.Height
 		} else {
 			minBounds = minBounds.Add(fyne.NewSquareSize(innerPad * 2).Subtract(r.obj.inset).Subtract(r.obj.inset))
 		}
@@ -659,20 +1211,21 @@ func (r *textRenderer) MinSize() fyne.Size {
 			return minBounds
 		}
 		if trunc == fyne.TextTruncateEllipsis || trunc == fyne.TextTruncateMiddle {
-			ellipsisSize := fyne.MeasureText("…", th.Size(theme.SizeNameText), fyne.TextStyle{})
+			ellipsisSize := fyne.MeasureText(ellipsisChar, th.Size(theme.SizeNameText), fyne.TextStyle{})
 			return minBounds.AddWidthHeight(ellipsisSize.Width, 0)
 		}
 	}
 
+	const minScrolledSize = 32
 	switch scroll {
 	case widget.ScrollBoth:
-		return fyne.NewSize(32, 32)
+		return fyne.NewSize(minScrolledSize, minScrolledSize)
 	case widget.ScrollHorizontalOnly:
-		return fyne.NewSize(32, min.Height)
+		return fyne.NewSize(minScrolledSize, minSize.Height)
 	case widget.ScrollVerticalOnly:
-		return fyne.NewSize(min.Width, 32)
+		return fyne.NewSize(minSize.Width, minScrolledSize)
 	default:
-		return min
+		return minSize
 	}
 }
 
@@ -691,31 +1244,34 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 
 	i := 0
 	for row, bound := range bounds {
-		for range bound.segments {
+		for segI := range bound.segments {
 			if i == len(objs) {
 				break // Refresh may not have created all objects for all rows yet...
 			}
 			obj := objs[i]
 			i++
+			if segI == 0 && rowStartsWithSpentText(&bound) {
+				continue
+			}
 
-			min := obj.MinSize()
+			minSize := obj.MinSize()
 			if img, ok := obj.(*richImage); ok {
 				if newMin := img.MinSize(); newMin != img.oldMin {
 					img.oldMin = newMin
 
-					min := r.calculateMin(bounds, wrap, objs, charMinSize, th)
+					minSize := r.calculateMin(bounds, wrap, objs, charMinSize, th)
 					if r.obj.scr != nil {
-						r.obj.prop.SetMinSize(min)
+						r.obj.prop.SetMinSize(minSize)
 					}
 					r.Refresh() // TODO resolve this in a similar way to #2991
 				}
 			}
-			rowHeight = fyne.Max(rowHeight, min.Height)
-			rowWidth += min.Width
+			rowHeight = max(rowHeight, minSize.Height)
+			rowWidth += minSize.Width
 		}
 
 		if wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
-			width = fyne.Max(width, rowWidth)
+			width = max(width, rowWidth)
 		}
 		height += rowHeight
 		rowHeight = 0
@@ -739,6 +1295,12 @@ func (r *textRenderer) Refresh() {
 	scroll := r.obj.Scroll
 
 	var objs []fyne.CanvasObject
+	sel := r.obj.selectionWidget()
+	if sel != nil {
+		objs = append(objs, sel) // behind the content, so that hyperlinks etc can still be tapped
+	}
+	objs = append(objs, r.obj.updateDecorations()...)
+	lead := len(objs)
 	for _, bound := range bounds {
 		for i, seg := range bound.segments {
 			_, isText := seg.(*TextSegment)
@@ -763,17 +1325,17 @@ func (r *textRenderer) Refresh() {
 				txt = bound.displayText
 			} else if i == 0 {
 				if len(bound.segments) == 1 {
-					txt = string(runes[bound.begin:bound.end])
+					txt = string(runes[bound.segBegin:bound.segEnd])
 				} else {
-					txt = string(runes[bound.begin:])
+					txt = string(runes[bound.segBegin:])
 				}
 			} else if i == len(bound.segments)-1 && len(bound.segments) > 1 {
-				txt = string(runes[:bound.end])
+				txt = string(runes[:bound.segEnd])
 			} else {
 				txt = string(runes)
 			}
 			if bound.ellipsis && i == len(bound.segments)-1 {
-				txt = txt + "…"
+				txt = txt + ellipsisChar
 			}
 
 			if concealed(seg) {
@@ -784,7 +1346,7 @@ func (r *textRenderer) Refresh() {
 				to, _ := codeInlineText(obj)
 				to.Text = txt
 			} else if isHyperlink {
-				hl := obj.(*fyne.Container).Objects[0].(*Hyperlink)
+				hl, _ := obj.(*fyne.Container).Objects[0].(*Hyperlink)
 				hl.Text = txt
 				r.associateSiblings(hl, hlSeg, reuse)
 				hl.Refresh()
@@ -793,13 +1355,18 @@ func (r *textRenderer) Refresh() {
 		}
 	}
 
+	r.obj.visuals, r.obj.lead = objs, lead
 	if r.obj.scr != nil {
-		if isEmptyScroll(r.obj.scr) {
-			r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
-				r.obj.prop, &fyne.Container{Objects: objs},
-			}}
-			r.obj.scr.Direction = scroll
-			r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+		if inner := scrollInnerContainer(r.obj.scr); inner != nil {
+			if inner.Objects == nil {
+				r.obj.scr.Content = &fyne.Container{Layout: layout.NewStackLayout(), Objects: []fyne.CanvasObject{
+					r.obj.prop, &fyne.Container{Objects: r.obj.layeredVisuals()},
+				}}
+				r.obj.scr.Direction = scroll
+				r.SetObjects([]fyne.CanvasObject{r.obj.scr})
+			} else {
+				inner.Objects = r.obj.layeredVisuals()
+			}
 		}
 		r.obj.scr.Refresh()
 	} else {
@@ -807,6 +1374,9 @@ func (r *textRenderer) Refresh() {
 	}
 
 	r.Layout(r.obj.Size())
+	if sel != nil {
+		sel.Refresh() // the rows may have moved under what is selected
+	}
 	canvas.Refresh(r.obj.super())
 
 	r.obj.cleanVisualCache()
@@ -815,34 +1385,34 @@ func (r *textRenderer) Refresh() {
 func (r *textRenderer) associateSiblings(hl *Hyperlink, hlSeg *HyperlinkSegment, reuse int) {
 	hl.siblings = hl.siblings[:0]
 	for prev := 0; prev < reuse; prev++ {
-		prevHL := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
+		prevHL, _ := r.obj.cachedSegmentVisual(hlSeg, prev).(*fyne.Container).Objects[0].(*Hyperlink)
 		prevHL.siblings = append(prevHL.siblings, hl)
 		hl.siblings = append(hl.siblings, prevHL)
 	}
 }
 
-func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (float32, float32) {
+func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign, xPos, yPos, lineWidth float32) (x, height float32) {
 	initialX := xPos
 	if len(texts) == 1 {
-		min := texts[0].MinSize()
+		minSize := texts[0].MinSize()
 		if text, ok := codeInlineText(texts[0]); ok {
-			texts[0].Resize(min)
+			texts[0].Resize(minSize)
 			xPad := float32(0)
 			switch text.Alignment {
 			case fyne.TextAlignLeading:
 			case fyne.TextAlignTrailing:
-				xPad = lineWidth - min.Width
+				xPad = lineWidth - minSize.Width
 			case fyne.TextAlignCenter:
-				xPad = (lineWidth - min.Width) / 2
+				xPad = (lineWidth - minSize.Width) / 2
 			}
 			texts[0].Move(fyne.NewPos(xPos+xPad, yPos))
 		} else {
-			texts[0].Resize(fyne.NewSize(lineWidth, min.Height))
+			texts[0].Resize(fyne.NewSize(lineWidth, minSize.Height))
 			texts[0].Move(fyne.NewPos(xPos, yPos))
 		}
-		return min.Width, min.Height
+		return minSize.Width, minSize.Height
 	}
-	height := float32(0)
+	height = float32(0)
 	tallestBaseline := float32(0)
 	realign := false
 	baselines := make([]float32, len(texts))
@@ -889,7 +1459,7 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 		if height == 0 {
 			height = size.Height
 		} else if height != size.Height {
-			height = fyne.Max(height, size.Height)
+			height = max(height, size.Height)
 			realign = true
 		}
 	}
@@ -935,15 +1505,17 @@ func (r *textRenderer) layoutRow(texts []fyne.CanvasObject, align fyne.TextAlign
 	return xPos - initialX, height
 }
 
-func isEmptyScroll(o *widget.Scroll) bool {
+// scrollInnerContainer returns the container holding the visual objects of a RichText
+// scroll content, or nil if the scroll structure is not the expected one.
+func scrollInnerContainer(o *widget.Scroll) *fyne.Container {
 	if c, ok := o.Content.(*fyne.Container); ok {
 		if len(c.Objects) == 2 {
 			if inner, ok := c.Objects[1].(*fyne.Container); ok {
-				return inner.Objects == nil
+				return inner
 			}
 		}
 	}
-	return false
+	return nil
 }
 
 // howManyRunesFit accepts a rune slice, an available width, an average
@@ -994,11 +1566,16 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	}
 
 	prior := bounds[len(bounds)-1]
-	seg := prior.segments[0].(*TextSegment)
-	ellipsisSize := fyne.MeasureText("…", seg.size(), seg.Style.TextStyle)
+	seg, ok := prior.segments[0].(*TextSegment)
+	if !ok {
+		fyne.LogError(fmt.Sprintf("unexpected rich text segment: %#v", prior.segments[0]), nil)
+		return bounds
+	}
 
-	fitCount := howManyRunesFit([]rune(seg.Text)[prior.begin:prior.end], width-ellipsisSize.Width, charWidth, measurer)
-	prior.end = prior.begin + fitCount
+	ellipsisSize := fyne.MeasureText(ellipsisChar, seg.size(), seg.Style.TextStyle)
+
+	fitCount := howManyRunesFit([]rune(seg.Text)[prior.segBegin:prior.segEnd], width-ellipsisSize.Width, charWidth, measurer)
+	prior.segEnd = prior.segBegin + fitCount
 
 	prior.ellipsis = true
 	bounds[len(bounds)-1] = prior
@@ -1024,7 +1601,7 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 // measure text size.
 // It will return a slice containing the boundary metadata of each line with the given wrapping applied and the
 // total height required to render the boundaries at the given width/height constraints
-func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, max fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
+func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size) ([]rowBoundary, float32) {
 	wrap := t.Wrapping
 	trunc := t.Truncation
 	lines := splitLines(seg)
@@ -1036,23 +1613,23 @@ func lineBounds(t *RichText, seg RichTextSegment, firstWidth float32, max fyne.S
 		wrap = fyne.TextWrapOff
 	}
 
-	if max.Width <= 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
+	if maxSize.Width <= 0 || wrap == fyne.TextWrapOff && trunc == fyne.TextTruncateOff {
 		return lines, 0 // don't bother returning a calculated height, our MinSize is going to cover it
 	}
 
-	measureWidth := float32(math.Min(float64(firstWidth), float64(max.Width)))
+	measureWidth := float32(math.Min(float64(firstWidth), float64(maxSize.Width)))
 
 	switch wrap {
 	case fyne.TextWrapBreak:
-		return wrapBreakLines(seg, trunc, measureWidth, max, measurer, lines)
+		return wrapBreakLines(seg, trunc, measureWidth, maxSize, measurer, lines)
 	case fyne.TextWrapWord:
-		return wrapWordLines(seg, trunc, measureWidth, max, measurer, lines)
+		return wrapWordLines(seg, trunc, measureWidth, maxSize, measurer, lines)
 	default:
 		return truncateLines(t, seg, trunc, measureWidth, measurer, lines)
 	}
 }
 
-func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	charSize := measurer([]rune("z"))
 	charWidth := charSize.Width
@@ -1061,8 +1638,8 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 	yPos := float32(0)
 	var bounds []rowBoundary
 	for _, l := range lines {
-		low := l.begin
-		high := l.end
+		low := l.segBegin
+		high := l.segEnd
 		if low == high {
 			l.firstSegmentReuse = reuse
 			reuse++
@@ -1070,21 +1647,21 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 			continue
 		}
 		for low < high {
-			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > maxSize.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, charWidth, measurer), yPos
 			}
 
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			switch fitCount {
 			case high - low: // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
+				bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: high, ellipsis: false})
 				reuse++
 				low = high
-				high = l.end
-				measureWidth = max.Width
+				high = l.segEnd
+				measureWidth = maxSize.Width
 				yPos += lineHeight
 			case 0: // even a character won't fit
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + 1, false, 0, ""})
+				bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: low + 1, ellipsis: false})
 				reuse++
 				low++
 				yPos += lineHeight
@@ -1096,7 +1673,7 @@ func wrapBreakLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth
 	return bounds, yPos
 }
 
-func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, max fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
+func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth float32, maxSize fyne.Size, measurer func([]rune) fyne.Size, lines []rowBoundary) ([]rowBoundary, float32) {
 	text := []rune(seg.Textual())
 	charSize := measurer([]rune("z"))
 	charWidth := charSize.Width
@@ -1105,8 +1682,8 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 	yPos := float32(0)
 	var bounds []rowBoundary
 	for _, l := range lines {
-		low := l.begin
-		high := l.end
+		low := l.segBegin
+		high := l.segEnd
 		if low == high {
 			l.firstSegmentReuse = reuse
 			reuse++
@@ -1114,30 +1691,30 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			continue
 		}
 		for low < high {
-			if yPos+lineHeight > max.Height && trunc != fyne.TextTruncateOff {
+			if yPos+lineHeight > maxSize.Height && trunc != fyne.TextTruncateOff {
 				return ellipsisPriorBound(bounds, trunc, measureWidth, charWidth, measurer), yPos
 			}
 
 			sub := text[low:high]
 			fitCount := howManyRunesFit(sub, measureWidth, charWidth, measurer)
 			if fitCount == high-low { // all characters fit on this line
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
+				bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: high, ellipsis: false})
 				reuse++
 				low = high
-				high = l.end
+				high = l.segEnd
 				if low < high && unicode.IsSpace(text[low]) {
 					low++
 				}
-				measureWidth = max.Width
+				measureWidth = maxSize.Width
 
 				yPos += lineHeight
 				continue
 			}
 			if fitCount == 0 { // even a character won't fit
-				if measureWidth < max.Width {
-					bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0, ""})
+				if measureWidth < maxSize.Width {
+					bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: low, ellipsis: false})
 					reuse++
-					measureWidth = max.Width
+					measureWidth = maxSize.Width
 					yPos += lineHeight
 					continue
 				}
@@ -1147,13 +1724,13 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 					include = 0
 					ellipsis = true
 				}
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low + include, ellipsis, 0, ""})
+				bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: low + include, ellipsis: ellipsis})
 				low++
 				high = low + 1
 				reuse++
 
 				yPos += lineHeight
-				if high > l.end {
+				if high > l.segEnd {
 					return bounds, yPos
 				}
 				continue
@@ -1168,11 +1745,11 @@ func wrapWordLines(seg RichTextSegment, trunc fyne.TextTruncation, measureWidth 
 			}
 			oldHigh := high
 			high = low + fitCount
-			if low == 0 && measureWidth < max.Width { // add a newline as there is more space on next
-				bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, low, false, 0, ""})
+			if low == 0 && measureWidth < maxSize.Width { // add a newline as there is more space on next
+				bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: low, ellipsis: false})
 				reuse++
 				high = oldHigh
-				measureWidth = max.Width
+				measureWidth = maxSize.Width
 
 				yPos += lineHeight
 			}
@@ -1185,12 +1762,12 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 	text := []rune(seg.Textual())
 	yPos := float32(0)
 	var bounds []rowBoundary
-	charSize := measurer([]rune("z"))
+	charSize := measurer([]rune("z")) //revive:disable-line:add-constant -- TODO: clarify whether we want to define a common letter constant for approximate character sizes
 	charWidth := charSize.Width
 	reuse := 0
 	for _, l := range lines {
-		low := l.begin
-		high := l.end
+		low := l.segBegin
+		high := l.segEnd
 		if low == high {
 			l.firstSegmentReuse = reuse
 			reuse++
@@ -1215,21 +1792,21 @@ func truncateLines(t *RichText, seg RichTextSegment, trunc fyne.TextTruncation, 
 			}
 			end, full := truncateLimit(string(txt), textObj, int(measureWidth), []rune{'…'})
 			high = low + end
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, !full, 0, ""})
+			bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: high, ellipsis: !full})
 			reuse++
 		case fyne.TextTruncateClip:
 			fitCount := howManyRunesFit(text[low:high], measureWidth, charWidth, measurer)
 			high = low + fitCount
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, ""})
+			bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: high, ellipsis: false})
 			reuse++
 		case fyne.TextTruncateMiddle:
 			txt := text[low:high]
 			prefix, suffix, full := truncateMiddle(txt, measureWidth, measurer)
 			display := ""
 			if !full {
-				display = string(txt[:prefix]) + "…" + string(txt[len(txt)-suffix:])
+				display = string(txt[:prefix]) + ellipsisChar + string(txt[len(txt)-suffix:])
 			}
-			bounds = append(bounds, rowBoundary{[]RichTextSegment{seg}, reuse, low, high, false, 0, display})
+			bounds = append(bounds, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: reuse, segBegin: low, segEnd: high, ellipsis: false, displayText: display})
 			reuse++
 		case fyne.TextTruncateOff:
 			// don’t do anything
@@ -1253,26 +1830,31 @@ func setAlign(obj fyne.CanvasObject, align fyne.TextAlign) {
 }
 
 // rowPaddingAndAlign returns the left padding and text alignment for a row.
-func rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyne.TextAlign) (float32, fyne.TextAlign) {
+func (t *RichText) rowPaddingAndAlign(bound rowBoundary, lineSpacing float32, currentAlign fyne.TextAlign) (float32, fyne.TextAlign) {
 	leftPad := bound.indent
 	align := currentAlign
-	if len(bound.segments) > 0 {
-		if text, ok := bound.segments[0].(*TextSegment); ok {
-			align = text.Style.Alignment
-			if text.Style.QuotingDepth > 0 {
-				leftPad = lineSpacing * 4 * float32(text.Style.QuotingDepth)
-			}
-		} else if link, ok := bound.segments[0].(*HyperlinkSegment); ok {
-			align = link.Alignment
-			if link.quotingLevel > 0 {
-				leftPad = lineSpacing * 4 * float32(link.quotingLevel)
-			}
-		} else if block, ok := bound.segments[0].(*CodeBlockSegment); ok {
-			align = fyne.TextAlignLeading
-			if block.quotingLevel > 0 {
-				leftPad = lineSpacing * 4 * float32(block.quotingLevel)
-			}
-		}
+	quoting := 0
+
+	switch first := rowFirstVisibleSegment(&bound).(type) {
+	case *TextSegment:
+		align = first.Style.Alignment
+		quoting = first.Style.QuotingDepth
+	case *HyperlinkSegment:
+		align = first.Alignment
+		quoting = first.quotingLevel
+	case *CodeBlockSegment:
+		align = fyne.TextAlignLeading
+		quoting = first.quotingLevel
+	case *listMarkerSegment:
+		align = fyne.TextAlignLeading
+		quoting = first.quoting
+	}
+
+	if quoting > 0 {
+		leftPad = lineSpacing * 4 * float32(quoting)
+	}
+	if bound.panel != nil { // the rows sit inside the panel, not against its edge
+		leftPad += theme.SizeForWidget(theme.SizeNameInnerPadding, t)
 	}
 	return leftPad, align
 }
@@ -1287,11 +1869,11 @@ func splitLines(seg RichTextSegment) []rowBoundary {
 	for i := 0; i < length; i++ {
 		if text[i] == '\n' {
 			high = i
-			lines = append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, high, false, 0, ""})
+			lines = append(lines, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: len(lines), segBegin: low, segEnd: high, ellipsis: false})
 			low = i + 1
 		}
 	}
-	return append(lines, rowBoundary{[]RichTextSegment{seg}, len(lines), low, length, false, 0, ""})
+	return append(lines, rowBoundary{segments: []RichTextSegment{seg}, firstSegmentReuse: len(lines), segBegin: low, segEnd: length, ellipsis: false})
 }
 
 // truncateMiddle finds the largest prefix and suffix rune counts such that
@@ -1304,7 +1886,7 @@ func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.S
 		return n, 0, true
 	}
 
-	ellipsis := []rune{'…'}
+	ellipsis := []rune(ellipsisChar)
 	if measurer(ellipsis).Width > maxWidth {
 		return 0, 0, false
 	}
@@ -1381,9 +1963,27 @@ func truncateLimit(s string, text *canvas.Text, limit int, ellipsis []rune) (int
 type rowBoundary struct {
 	segments          []RichTextSegment
 	firstSegmentReuse int
-	begin, end        int
-	ellipsis          bool
-	indent            float32
-	// displayText overrides the [begin:end] slice when rendering.
+
+	// segBegin indexes into the first segment of this row and segEnd into the
+	// last, as a row may start or finish part way through a segment that it
+	// shares with its neighbours.
+	segBegin, segEnd int
+
+	// docBegin and docEnd are the rune offsets of this row within the whole
+	// text, which is what a cursor or selection position is measured in.
+	docBegin, docEnd int
+
+	ellipsis bool
+	indent   float32
+
+	// panel is set when this row is part of a block that draws its content on a
+	// panel, such as a code block.
+	panel panelSegment
+
+	// yPos and height record where this row was placed by the renderer, so that
+	// widgets can position a cursor or selection against rows of differing size.
+	yPos, height float32
+
+	// displayText overrides the [segBegin:segEnd] slice when rendering.
 	displayText string
 }

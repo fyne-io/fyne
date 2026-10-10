@@ -5,6 +5,14 @@ import (
 	"io"
 )
 
+// URI component constants
+const (
+	URIAuthorityPrefix = "//"
+	URIPathSeparator   = "/"
+	URISchemeFile      = "file"
+	URISchemeSeparator = ":"
+)
+
 // URIReadCloser represents a cross platform data stream from a file or provider of data.
 // It may refer to an item on a filesystem or data in another application that we have access to.
 type URIReadCloser interface {

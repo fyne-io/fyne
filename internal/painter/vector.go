@@ -13,6 +13,7 @@ const TextVectorPad = 1
 // This is to accommodate overflow caused by stroke and line endings etc.
 // THe result is in fyne.Size type coordinates and should be scaled for output.
 func VectorPad(obj fyne.CanvasObject) float32 {
+	//revive:disable:add-constant
 	switch co := obj.(type) {
 	case *canvas.Circle:
 		if co.StrokeWidth > 0 && co.StrokeColor != nil {
@@ -53,6 +54,7 @@ func VectorPad(obj fyne.CanvasObject) float32 {
 		}
 		return 1 // anti-alias on ellipse fill
 	}
+	//revive:enable:add-constant
 
 	return 0
 }

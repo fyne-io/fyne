@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 
 		ret := m.Run()
 		fyne.SetCurrentApp(currentApp)
-		os.Exit(ret)
+		os.Exit(ret) //revive:disable-line:redundant-test-main-exit
 	}()
 
 	close(waitForStart) // Signal that execution can continue.
@@ -260,10 +260,10 @@ func Test_canvas_Tappable(t *testing.T) {
 	c.tapDown(fyne.NewPos(15, 15), 0)
 	assert.True(t, content.down)
 
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapUp(fyne.NewPos(15, 15), 0, func(fyne.Tappable, *fyne.PointEvent) {
+	}, func(fyne.SecondaryTappable, *fyne.PointEvent) {
+	}, func(fyne.DoubleTappable, *fyne.PointEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 	assert.True(t, content.up)
 
@@ -283,18 +283,18 @@ func Test_canvas_TouchID(t *testing.T) {
 	content.Resize(fyne.NewSize(24, 24))
 
 	c.tapDown(fyne.NewPos(15, 15), 0)
-	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapUp(fyne.NewPos(15, 15), 0, func(fyne.Tappable, *fyne.PointEvent) {
+	}, func(fyne.SecondaryTappable, *fyne.PointEvent) {
+	}, func(fyne.DoubleTappable, *fyne.PointEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 	assert.True(t, content.ids[0])
 
 	c.tapDown(fyne.NewPos(15, 15), 1)
-	c.tapUp(fyne.NewPos(15, 15), 1, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapUp(fyne.NewPos(15, 15), 1, func(fyne.Tappable, *fyne.PointEvent) {
+	}, func(fyne.SecondaryTappable, *fyne.PointEvent) {
+	}, func(fyne.DoubleTappable, *fyne.PointEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 	assert.True(t, content.ids[1])
 }
@@ -325,7 +325,7 @@ func Test_canvas_Tapped(t *testing.T) {
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 
 	assert.True(t, tapped, "tap primary")
@@ -378,10 +378,10 @@ func Test_canvas_TappedMulti(t *testing.T) {
 	c.tapDown(tapPos, 0)
 	c.tapUp(tapPos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) { // different tapID
 		wid.Tapped(ev)
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(fyne.SecondaryTappable, *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 
 	assert.False(t, buttonTap, "button should not be tapped")
@@ -410,7 +410,7 @@ func Test_canvas_TappedSecondary(t *testing.T) {
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 
 	assert.False(t, obj.tap, "don't tap primary")
@@ -480,7 +480,7 @@ func (f *focusableEntry) FocusLost() {
 	f.Entry.FocusLost()
 }
 
-func (f *focusableEntry) Tapped(ev *fyne.PointEvent) {
+func (f *focusableEntry) Tapped(*fyne.PointEvent) {
 	f.c.Focus(f)
 }
 
@@ -506,10 +506,10 @@ func simulateTap(c *canvas) {
 	time.Sleep(50 * time.Millisecond)
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
-	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
+	}, func(fyne.SecondaryTappable, *fyne.PointEvent) {
 	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
-	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	}, func(fyne.Draggable, *fyne.DragEvent) {
 	})
 }
 
@@ -522,7 +522,7 @@ func (a *mobileApp) Driver() fyne.Driver {
 	return a.driver
 }
 
-func (a *mobileApp) Run() {
+func (*mobileApp) Run() {
 	// This is an incomplete driver loop - our CI does not currently support booting the mobile graphics
 	// TODO replace with a full mobileApp.Run() once that is resolved
 	async.SetMainGoroutine()

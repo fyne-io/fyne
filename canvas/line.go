@@ -51,7 +51,7 @@ func (l *Line) Resize(size fyne.Size) {
 
 // Position gets the current top-left position of this line object, relative to its parent / canvas
 func (l *Line) Position() fyne.Position {
-	return fyne.NewPos(fyne.Min(l.Position1.X, l.Position2.X), fyne.Min(l.Position1.Y, l.Position2.Y))
+	return fyne.NewPos(min(l.Position1.X, l.Position2.X), min(l.Position1.Y, l.Position2.Y))
 }
 
 // Move the line object to a new position, relative to its parent / canvas
@@ -71,7 +71,7 @@ func (l *Line) Move(pos fyne.Position) {
 
 // MinSize for a Line simply returns Size{1, 1} as there is no
 // explicit content
-func (l *Line) MinSize() fyne.Size {
+func (*Line) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 
@@ -100,9 +100,9 @@ func (l *Line) Refresh() {
 }
 
 // NewLine returns a new Line instance
-func NewLine(color color.Color) *Line {
+func NewLine(c color.Color) *Line {
 	return &Line{
-		StrokeColor: color,
+		StrokeColor: c,
 		StrokeWidth: 1,
 	}
 }

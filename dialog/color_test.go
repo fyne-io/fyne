@@ -46,7 +46,7 @@ func TestColorDialog_Theme(t *testing.T) {
 	d.Resize(d.MinSize())
 	test.AssertRendersToImage(t, "color/dialog_theme_ugly.png", w.Canvas())
 
-	d.advanced.Open(0)
+	d.additionalSettings.Open(0)
 
 	test.ApplyTheme(t, test.Theme())
 	d.Resize(d.MinSize())
@@ -305,20 +305,6 @@ func Test_colorToString(t *testing.T) {
 			assert.Equal(t, tt.hex, hex)
 		})
 	}
-}
-
-func Test_stringToColor(t *testing.T) {
-	for name, tt := range rgbhslMap {
-		t.Run(name, func(t *testing.T) {
-			c, err := stringToColor(tt.hex)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.hex, colorToString(c))
-		})
-	}
-	t.Run("Invalid", func(t *testing.T) {
-		_, err := stringToColor("potato")
-		assert.Error(t, err)
-	})
 }
 
 func Test_colorToHSLA(t *testing.T) {

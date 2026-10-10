@@ -33,7 +33,7 @@ func (f *file) Save() (io.WriteCloser, error) {
 	return os.Open(f.path)
 }
 
-func (f *file) ReadOnly() bool {
+func (*file) ReadOnly() bool {
 	return true
 }
 
@@ -60,15 +60,15 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 	return &file{File: f, path: path}, err
 }
 
-func (d *driver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
+func (*driver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (d *driver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
+func (*driver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
 }
 
-func (d *driver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+func (*driver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
 		return nil, errUnsupportedURLProtocol
 	}

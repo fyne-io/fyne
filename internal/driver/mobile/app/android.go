@@ -58,6 +58,7 @@ import (
 	"log"
 	"mime"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -85,6 +86,26 @@ func GoBack() {
 	})
 	if err != nil {
 		log.Fatalf("app: %v", err)
+	}
+}
+
+// Main is called by the main.main function to run the mobile application.
+//
+// It calls f on the App, in a separate goroutine, as some OS-specific
+// libraries require being on 'the main thread'.
+func Main(f func(App)) {
+	mainUserFn = f
+	// TODO: merge the runInputQueue and mainUI functions?
+	go func() {
+		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
+			log.Fatalf("app: %v", err) //revive:disable-line:deep-exit
+		}
+	}()
+	// Preserve this OS thread for:
+	//	1. the attached JNI thread
+	//	2. the GL context
+	if err := mobileinit.RunOnJVM(mainUI); err != nil {
+		log.Fatalf("app: %v", err) //revive:disable-line:deep-exit
 	}
 }
 
@@ -302,22 +323,6 @@ func init() {
 	theApp.registerGLViewportFilter()
 }
 
-func main(f func(App)) {
-	mainUserFn = f
-	// TODO: merge the runInputQueue and mainUI functions?
-	go func() {
-		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
-			log.Fatalf("app: %v", err)
-		}
-	}()
-	// Preserve this OS thread for:
-	//	1. the attached JNI thread
-	//	2. the GL context
-	if err := mobileinit.RunOnJVM(mainUI); err != nil {
-		log.Fatalf("app: %v", err)
-	}
-}
-
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
 func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
@@ -447,7 +452,28 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var pixelsPerPt float32
-	var surfaceInitialized, wasDestroyed bool
+
+	var currentWindow *C.ANativeWindow
+	ensureSurface := func(w *C.ANativeWindow) error {
+		if C.surface != nil {
+			if currentWindow == w {
+				return nil
+			}
+			if errStr := C.destroyEGLSurface(); errStr != nil {
+				return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+			}
+			C.surface = nil
+			currentWindow = nil
+		}
+
+		if errStr := C.createEGLSurface(w); errStr != nil {
+			return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
+		}
+		currentWindow = w
+		DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
+		DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+		return nil
+	}
 
 	for {
 		select {
@@ -456,22 +482,12 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 		case cfg := <-windowConfigChange:
 			pixelsPerPt = cfg.pixelsPerPt
 		case w := <-windowCreated:
-			if surfaceInitialized && !wasDestroyed {
-				if errStr := C.destroyEGLSurface(); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 		case w := <-windowRedrawNeeded:
-			if C.surface == nil {
-				if errStr := C.createEGLSurface(w); errStr != nil {
-					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-				}
-				surfaceInitialized = true
-				DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
-				DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
+			if err := ensureSurface(w); err != nil {
+				return err
 			}
 			theApp.sendLifecycle(lifecycle.StageFocused)
 			widthPx := int(C.ANativeWindow_getWidth(w))
@@ -498,7 +514,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				}
 			}
 			C.surface = nil
-			wasDestroyed = true
+			currentWindow = nil
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
 			theApp.sendLifecycle(lifecycle.StageDead)
@@ -564,15 +580,21 @@ func processEvents(env *C.JNIEnv, q *C.AInputQueue) {
 		if C.AInputQueue_preDispatchEvent(q, e) != 0 {
 			continue
 		}
-		processEvent(env, e)
-		C.AInputQueue_finishEvent(q, e, 0)
+		handled := C.int(0)
+		if processEvent(env, e) {
+			handled = 1
+		}
+		C.AInputQueue_finishEvent(q, e, handled)
 	}
 }
 
-func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
+// processEvent passes an Android input event to the Fyne event queue.
+// It reports whether the event was consumed, so that Android will not
+// also dispatch it to the view hierarchy.
+func processEvent(env *C.JNIEnv, e *C.AInputEvent) bool {
 	switch C.AInputEvent_getType(e) {
 	case C.AINPUT_EVENT_TYPE_KEY:
-		processKey(env, e)
+		return processKey(env, e)
 	case C.AINPUT_EVENT_TYPE_MOTION:
 		// At most one of the events in this batch is an up or down event; get its index and change.
 		upDownIndex := C.size_t(C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> C.AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT
@@ -599,13 +621,14 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
 	}
+	return false
 }
 
-func processKey(env *C.JNIEnv, e *C.AInputEvent) {
+func processKey(env *C.JNIEnv, e *C.AInputEvent) bool {
 	deviceID := C.AInputEvent_getDeviceId(e)
 	if deviceID == 0 {
 		// Software keyboard input, leaving for scribe/IME.
-		return
+		return false
 	}
 
 	k := key.Event{
@@ -613,7 +636,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		Code: convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e))),
 	}
 	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
-		return
+		return false
 	}
 	switch C.AKeyEvent_getAction(e) {
 	case C.AKEY_STATE_DOWN:
@@ -625,6 +648,23 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	}
 	// TODO(crawshaw): set Modifiers.
 	theApp.events.In() <- k
+
+	return keyEditsText(k)
+}
+
+// keyEditsText reports whether Android would also apply this key to the hidden
+// EditText that backs the soft keyboard. Deletion is the exception - it always
+// travels through the text watcher, as some keyboards delete through the input
+// connection where we cannot intercept it.
+func keyEditsText(k key.Event) bool {
+	switch k.Code {
+	case key.CodeDeleteBackspace, key.CodeDeleteForward:
+		return false
+	case key.CodeReturnEnter, key.CodeTab:
+		return true
+	}
+
+	return strconv.IsPrint(k.Rune)
 }
 
 func eglGetError() string {

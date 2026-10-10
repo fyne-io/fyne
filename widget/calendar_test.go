@@ -68,19 +68,19 @@ func TestNewCalendar_Resize(t *testing.T) {
 
 	baseSize := c.MinSize()
 	r.Layout(baseSize)
-	min := layout.cellSize
+	minSize := layout.cellSize
 
 	r.Layout(baseSize.AddWidthHeight(100, 0))
-	assert.Greater(t, layout.cellSize.Width, min.Width)
-	assert.Equal(t, layout.cellSize.Height, min.Height)
+	assert.Greater(t, layout.cellSize.Width, minSize.Width)
+	assert.Equal(t, layout.cellSize.Height, minSize.Height)
 
 	r.Layout(baseSize.AddWidthHeight(0, 100))
-	assert.Equal(t, layout.cellSize.Width, min.Width)
-	assert.Greater(t, layout.cellSize.Height, min.Height)
+	assert.Equal(t, layout.cellSize.Width, minSize.Width)
+	assert.Greater(t, layout.cellSize.Height, minSize.Height)
 
 	r.Layout(baseSize.AddWidthHeight(100, 100))
-	assert.Greater(t, layout.cellSize.Width, min.Width)
-	assert.Greater(t, layout.cellSize.Height, min.Height)
+	assert.Greater(t, layout.cellSize.Width, minSize.Width)
+	assert.Greater(t, layout.cellSize.Height, minSize.Height)
 }
 
 func firstDateButton(c *fyne.Container) *Button {

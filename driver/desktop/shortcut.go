@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/goos"
 )
 
 // Declare conformity with Shortcut interface
@@ -49,7 +50,7 @@ func writeModifiers(w *strings.Builder, mods fyne.KeyModifier) {
 		w.WriteString("Alt+")
 	}
 	if (mods & fyne.KeyModifierSuper) != 0 {
-		if runtime.GOOS == "darwin" {
+		if runtime.GOOS == goos.Darwin {
 			w.WriteString("Command+")
 		} else {
 			w.WriteString("Super+")

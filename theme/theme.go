@@ -24,6 +24,10 @@ const (
 	VariantLight = internaltheme.VariantLight
 )
 
+const (
+	fontVariantRegular = "Regular"
+)
+
 var defaultTheme, systemTheme fyne.Theme
 
 // DarkTheme defines the built-in dark theme colors and sizes.
@@ -80,7 +84,7 @@ func (t *builtinTheme) initFonts() {
 
 	font := os.Getenv("FYNE_FONT")
 	if font != "" {
-		t.regular = loadCustomFont(font, "Regular", regular)
+		t.regular = loadCustomFont(font, fontVariantRegular, regular)
 		if t.regular == regular { // failed to load
 			t.bold = loadCustomFont(font, "Bold", bold)
 			t.italic = loadCustomFont(font, "Italic", italic)
@@ -93,11 +97,11 @@ func (t *builtinTheme) initFonts() {
 	}
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {
-		t.monospace = loadCustomFont(font, "Regular", monospace)
+		t.monospace = loadCustomFont(font, fontVariantRegular, monospace)
 	}
 	font = os.Getenv("FYNE_FONT_SYMBOL")
 	if font != "" {
-		t.symbol = loadCustomFont(font, "Regular", symbol)
+		t.symbol = loadCustomFont(font, fontVariantRegular, symbol)
 	}
 }
 

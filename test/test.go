@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/internal"
 	"fyne.io/fyne/v2/internal/cache"
 	intdriver "fyne.io/fyne/v2/internal/driver"
 )
@@ -53,7 +54,7 @@ func FocusPrevious(c fyne.Canvas) {
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+		objects = layoutAndCollect(objects, o, internal.MaxSizes(o.MinSize(), o.Size()))
 	}
 	return objects
 }
@@ -75,7 +76,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	}
 	o, p, _ := intdriver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
-		hovered = o.(desktop.Hoverable)
+		hovered, _ = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{
 				AbsolutePosition: pos,
@@ -104,7 +105,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 func RenderObjectToMarkup(o fyne.CanvasObject) string {
 	c := NewCanvas()
 	c.SetPadded(false)
-	size := o.MinSize().Max(o.Size())
+	size := internal.MaxSizes(o.MinSize(), o.Size())
 	c.SetContent(o)
 	c.Resize(size) // ensure we are large enough for current size
 
@@ -142,13 +143,13 @@ func Tap(obj fyne.Tappable) {
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
 func TapAt(obj fyne.Tappable, pos fyne.Position) {
 	ev, c := prepareTap(obj, pos)
-	tap(c, obj, ev)
+	performTap(c, obj, ev)
 }
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
 	if o, p := findTappable(c, pos); o != nil {
-		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
+		performTap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
 }
 
@@ -170,13 +171,13 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 func Type(obj fyne.Focusable, chars string) {
 	obj.FocusGained()
 
-	typeChars([]rune(chars), obj.TypedRune)
+	typeChars([]rune(chars), obj.TypedRune, obj.TypedKey)
 }
 
 // TypeOnCanvas is like the Type function but it passes the key events to the canvas object
 // rather than a focusable widget.
 func TypeOnCanvas(c fyne.Canvas, chars string) {
-	typeChars([]rune(chars), c.OnTypedRune())
+	typeChars([]rune(chars), c.OnTypedRune(), c.OnTypedKey())
 }
 
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
@@ -240,14 +241,19 @@ func prepareTap(obj any, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
 	return ev, c
 }
 
-func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
+func performTap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
 }
 
-func typeChars(chars []rune, keyDown func(rune)) {
+func typeChars(chars []rune, typedRune func(rune), typedKey func(*fyne.KeyEvent)) {
 	for _, char := range chars {
-		keyDown(char)
+		if char == '\n' {
+			typedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+			continue
+		}
+
+		typedRune(char)
 	}
 }
 

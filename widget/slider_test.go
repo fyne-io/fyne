@@ -95,10 +95,10 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_MinSize(t *testing.T) {
-	min := NewSlider(0, 10).MinSize()
+	minSize := NewSlider(0, 10).MinSize()
 	buttonMin := NewButtonWithIcon("", theme.HomeIcon(), func() {}).MinSize()
 
-	assert.Equal(t, min.Height, buttonMin.Height)
+	assert.Equal(t, minSize.Height, buttonMin.Height)
 }
 
 func TestSlider_OutOfRange(t *testing.T) {

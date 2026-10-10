@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/internal/scale"
 )
 
-func (w *window) setDarkMode() {
+func (*window) setDarkMode() {
 }
 
 func (w *window) computeCanvasSize(width, height int) fyne.Size {

@@ -70,75 +70,7 @@ func (p *painter) Init() {
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Enable(gl.BLEND)
 	p.logError()
-	p.program = programState{
-		ref:        p.createProgram("simple_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.blurProgram = programState{
-		ref:        p.createProgram("blur_es"),
-		buff:       p.createBuffer(20),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.lineProgram = programState{
-		ref:        p.createProgram("line_es"),
-		buff:       p.createBuffer(24),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.rectangleProgram = programState{
-		ref:        p.createProgram("rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.roundRectangleProgram = programState{
-		ref:        p.createProgram("round_rectangle_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.polygonProgram = programState{
-		ref:        p.createProgram("polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arcProgram = programState{
-		ref:        p.createProgram("arc_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.bezierCurveProgram = programState{
-		ref:        p.createProgram("bezier_curve_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.arbitraryPolygonProgram = programState{
-		ref:        p.createProgram("arbitrary_polygon_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
-
-	p.ellipseProgram = programState{
-		ref:        p.createProgram("ellipse_es"),
-		buff:       p.createBuffer(16),
-		uniforms:   make(map[string]*uniformState),
-		attributes: make(map[string]Attribute),
-	}
+	p.programs = p.compilePrograms()
 }
 
 type xjsContext struct{}

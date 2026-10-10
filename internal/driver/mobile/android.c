@@ -447,7 +447,7 @@ char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
-	if (getDoc == NULL) { // API 26
+	if (query == NULL) { // API 26
 		return "ERROR: Cannot list content for URI";
 	}
 

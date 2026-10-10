@@ -152,17 +152,22 @@ func walkObjectTree(
 	}
 	pos := obj.Position().Add(offset)
 
+	// The renderer lookup is a cache map hit per node per walk, and a walk runs
+	// several times per frame - so look it up once here and hand it to the clip
+	// check rather than letting IsClip repeat it.
 	var children []fyne.CanvasObject
+	var renderer fyne.WidgetRenderer
 	switch co := obj.(type) {
 	case *fyne.Container:
 		children = co.Objects
 	case fyne.Widget:
-		if cache.IsRendered(co) || requireVisible {
-			children = cache.Renderer(co).Objects()
+		if requireVisible || cache.IsRendered(co) {
+			renderer = cache.Renderer(co)
+			children = renderer.Objects()
 		}
 	}
 
-	if IsClip(obj) {
+	if isClipWithRenderer(obj, renderer) {
 		clipPos = pos
 		clipSize = obj.Size()
 	}
@@ -202,16 +207,30 @@ func walkObjectTree(
 }
 
 func IsClip(o fyne.CanvasObject) bool {
-	_, scroll := o.(fyne.Scrollable)
-	if scroll {
+	if _, scroll := o.(fyne.Scrollable); scroll {
 		return true
 	}
 
-	if _, isWid := o.(fyne.Widget); !isWid {
+	wid, isWid := o.(fyne.Widget)
+	if !isWid {
 		return false
 	}
-	r, rendered := cache.CachedRenderer(o.(fyne.Widget))
+	r, rendered := cache.CachedRenderer(wid)
 	if !rendered {
+		return false
+	}
+
+	_, clip := r.(interface{ IsClip() })
+	return clip
+}
+
+// isClipWithRenderer is IsClip for a caller that already holds the object's
+// renderer (nil if it has none), saving the repeated cache lookup.
+func isClipWithRenderer(o fyne.CanvasObject, r fyne.WidgetRenderer) bool {
+	if _, scroll := o.(fyne.Scrollable); scroll {
+		return true
+	}
+	if r == nil {
 		return false
 	}
 

@@ -2,6 +2,144 @@
 
 package painter
 
+import (
+	"testing"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
+	"github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/shaping"
+	"github.com/stretchr/testify/assert"
+)
+
+// splitFaceMap resolves ASCII runes to one face and everything else to another,
+// modeling a string whose glyphs get shaped across two different fallback fonts
+// (as happens with mixed-script text, or text mixed with symbols/emoji).
+type splitFaceMap struct {
+	ascii, other *font.Face
+}
+
+func (m splitFaceMap) ResolveFace(r rune) *font.Face {
+	if r < 128 {
+		return m.ascii
+	}
+	return m.other
+}
+
+// TestWalkStringSharedLineAscent ensures that when a string is shaped across more
+// than one font (e.g. mixed CJK fallback fonts, or text mixed with symbols/emoji),
+// every run is positioned against the same, shared line ascent rather than each
+// run's own font ascent - which is what previously caused visibly inconsistent
+// vertical positioning within a single line (fyne-io/fyne#6446).
+func TestWalkStringSharedLineAscent(t *testing.T) {
+	ascii := loadMeasureFont(theme.DefaultTextFont())
+	other := loadMeasureFont(theme.DefaultSymbolFont())
+	if ascii == nil || other == nil {
+		t.Fatal("failed to load bundled fonts for test")
+	}
+	faces := splitFaceMap{ascii: ascii, other: other}
+
+	// soloAscent shapes a single-face string in isolation, so its one (and only)
+	// run necessarily gets its own font's true ascent - this gives us a reference
+	// value to compare against, without hard-coding font metrics in the test.
+	soloAscent := func(s string) float32 {
+		var y float32
+		found := false
+		adv := float32(0)
+		walkString(faces, s, float32ToFixed266(24), fyne.TextStyle{}, &adv, 1, func(_ shaping.Output, _, ry float32) {
+			y = ry
+			found = true
+		})
+		if !found {
+			t.Fatalf("no run produced for %q", s)
+		}
+		return y
+	}
+
+	asciiAscent := soloAscent("A")
+	otherAscent := soloAscent("⌘") // '⌘', present in the symbol font but not the text font
+	if asciiAscent == otherAscent {
+		t.Fatal("test fonts have identical ascent, can't verify sharing between distinct ascents")
+	}
+	expected := asciiAscent
+	if otherAscent > expected {
+		expected = otherAscent
+	}
+
+	for _, s := range []string{"A⌘", "⌘A", "A⌘A⌘"} {
+		var ys []float32
+		adv := float32(0)
+		walkString(faces, s, float32ToFixed266(24), fyne.TextStyle{}, &adv, 1, func(_ shaping.Output, _, y float32) {
+			ys = append(ys, y)
+		})
+
+		if assert.NotEmpty(t, ys, "expected at least one shaped run for %q", s) {
+			for i, y := range ys {
+				assert.Equal(t, expected, y, "run %d of %q should share the line's max ascent", i, s)
+			}
+		}
+	}
+}
+
+// TestWalkStringKeycapSequences ensures an emoji sequence whose base rune also
+// exists in the text font is still shaped in the emoji font, as a whole.
+//
+// A keycap is three runes - "0️⃣" is 0030 FE0F 20E3 - make sure we render as 1 emoji.
+func TestWalkStringKeycapSequences(t *testing.T) {
+	text := loadMeasureFont(theme.DefaultTextFont())
+	emoji := loadMeasureFont(theme.DefaultEmojiFont())
+	if text == nil || emoji == nil {
+		t.Fatal("failed to load bundled fonts for test")
+	}
+	faces := &dynamicFontMap{family: "sans-serif", faces: []*font.Face{text, emoji}}
+
+	shape := func(s string) []shaping.Output {
+		var runs []shaping.Output
+		adv := float32(0)
+		walkString(faces, s, float32ToFixed266(24), fyne.TextStyle{}, &adv, 1,
+			func(run shaping.Output, _, _ float32) {
+				runs = append(runs, run)
+			})
+		return runs
+	}
+
+	for _, s := range []string{"#️⃣", "*️⃣", "0️⃣", "5️⃣", "9️⃣", "🔟"} {
+		runs := shape(s)
+		if !assert.Len(t, runs, 1, "%q should shape as one run", s) {
+			continue
+		}
+		assert.Same(t, emoji, runs[0].Face, "%q should be drawn by the emoji font", s)
+		if assert.Len(t, runs[0].Glyphs, 1, "%q should ligate into one glyph", s) {
+			assert.NotZero(t, runs[0].Glyphs[0].GlyphID, "%q shaped to .notdef", s)
+		}
+	}
+}
+
+// TestWalkStringKeycapInText ensures taking a keycap into the emoji font does
+// not drag its neighbors along with it.
+func TestWalkStringKeycapInText(t *testing.T) {
+	text := loadMeasureFont(theme.DefaultTextFont())
+	emoji := loadMeasureFont(theme.DefaultEmojiFont())
+	if text == nil || emoji == nil {
+		t.Fatal("failed to load bundled fonts for test")
+	}
+	faces := &dynamicFontMap{family: "sans-serif", faces: []*font.Face{text, emoji}}
+
+	var runs []shaping.Output
+	adv := float32(0)
+	walkString(faces, "1 1️⃣ 1", float32ToFixed266(24), fyne.TextStyle{}, &adv, 1,
+		func(run shaping.Output, _, _ float32) {
+			runs = append(runs, run)
+		})
+
+	if assert.Len(t, runs, 3, "the keycap should split the text either side of it") {
+		assert.Same(t, text, runs[0].Face)
+		assert.Same(t, emoji, runs[1].Face)
+		assert.Same(t, text, runs[2].Face)
+		assert.Len(t, runs[1].Glyphs, 1, "the keycap should ligate into one glyph")
+	}
+}
+
 //
 //func Test_compositeFace_Close(t *testing.T) {
 //	chosenFont := &truetype.Font{}
