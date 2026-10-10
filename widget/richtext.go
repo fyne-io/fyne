@@ -1878,9 +1878,8 @@ func splitLines(seg RichTextSegment) []rowBoundary {
 
 // truncateMiddle finds the largest prefix and suffix rune counts such that
 // runes[:prefix] + "…" + runes[len(runes)-suffix:] fits within maxWidth when
-// measured. The third return value is true when the entire input fits without
-// truncation.
-func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.Size) (int, int, bool) {
+// measured. full is true when the entire input fits without truncation.
+func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.Size) (prefix, suffix int, full bool) {
 	n := len(runes)
 	if n == 0 || measurer(runes).Width <= maxWidth {
 		return n, 0, true
@@ -1892,12 +1891,12 @@ func truncateMiddle(runes []rune, maxWidth float32, measurer func([]rune) fyne.S
 	}
 
 	fits := func(k int) bool {
-		prefix := (k + 1) / 2
-		suffix := k / 2
-		candidate := make([]rune, 0, prefix+1+suffix)
-		candidate = append(candidate, runes[:prefix]...)
+		head := (k + 1) / 2
+		tail := k / 2
+		candidate := make([]rune, 0, head+1+tail)
+		candidate = append(candidate, runes[:head]...)
 		candidate = append(candidate, ellipsis...)
-		candidate = append(candidate, runes[n-suffix:]...)
+		candidate = append(candidate, runes[n-tail:]...)
 		return measurer(candidate).Width <= maxWidth
 	}
 
