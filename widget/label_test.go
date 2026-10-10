@@ -208,14 +208,9 @@ func TestLabel_TruncateMiddle(t *testing.T) {
 	c.SetPadded(false)
 	original := "/home/user/projects/fyne/widget/label.go"
 	label := NewLabel(original)
-	c.SetContent(label)
-	natural := label.MinSize()
-	c.Resize(natural)
-
-	truncSize := fyne.NewSize(natural.Width/2, natural.Height)
-	label.Resize(truncSize)
 	label.Truncation = fyne.TextTruncateMiddle
-	label.Refresh()
+	c.SetContent(label)
+	c.Resize(fyne.NewSize(100, label.MinSize().Height))
 
 	rendered := richTextRenderTexts(label.provider)
 	assert.Equal(t, 1, len(rendered))
