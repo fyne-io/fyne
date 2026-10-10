@@ -67,15 +67,20 @@ func (p *painter) freeTexture(obj fyne.CanvasObject) {
 
 func (p *painter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
 	if t, ok := object.(*canvas.Text); ok {
-		custom := ""
+		custom, scope := "", ""
 		if t.FontSource != nil {
 			custom = t.FontSource.Name()
+		} else {
+			// a text texture holds glyphs of one font: without a source,
+			// the font of the text's theme scope, so the scope is in the key
+			scope = cache.WidgetScopeID(t)
 		}
 		ent := cache.FontCacheEntry{Color: t.Color, Canvas: p.canvas}
 		ent.Text = t.Text
 		ent.Size = t.TextSize
 		ent.Style = t.TextStyle
 		ent.Source = custom
+		ent.Scope = scope
 
 		texture, ok := cache.GetTextTexture(ent)
 

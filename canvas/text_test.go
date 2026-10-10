@@ -10,6 +10,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/internal/cache"
+	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
@@ -215,4 +217,33 @@ func TestText_CarriageReturn(t *testing.T) {
 			test.AssertObjectRendersToImage(t, "text/layout_"+name+".png", text)
 		})
 	}
+}
+
+type monoFontTheme struct {
+	fyne.Theme
+	mono fyne.Resource
+}
+
+func (m *monoFontTheme) Font(s fyne.TextStyle) fyne.Resource {
+	if s.Monospace {
+		return m.mono
+	}
+	return m.Theme.Font(s)
+}
+
+// Text under a ThemeOverride is measured in the override's font, also when
+// the same text was measured in the app theme first (both shared one cached
+// size, measured in the app theme's font).
+func TestText_MinSize_ThemeOverrideFont(t *testing.T) {
+	test.NewTempApp(t)
+	th := &monoFontTheme{Theme: test.Theme(), mono: theme.DefaultTextFont()} // measures unlike the default mono
+	style := fyne.TextStyle{Monospace: true}
+	want, _ := painter.RenderedTextSize("ABCDEFG", 21, style, th.mono)
+
+	plain := &canvas.Text{Text: "ABCDEFG", TextSize: 21, TextStyle: style}
+	assert.NotEqual(t, want, plain.MinSize(), "the fonts must measure differently for this test")
+
+	under := &canvas.Text{Text: "ABCDEFG", TextSize: 21, TextStyle: style}
+	cache.OverrideTheme(under, th)
+	assert.Equal(t, want, under.MinSize())
 }

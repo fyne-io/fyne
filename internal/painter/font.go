@@ -252,13 +252,25 @@ func MeasureString(f shaping.Fontmap, s string, textSize float32, style fyne.Tex
 // RenderedTextSize looks up how big a string would be if drawn on screen.
 // It also returns the distance from top to the text baseline.
 func RenderedTextSize(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
-	size, base := cache.GetFontMetrics(text, fontSize, style, source)
+	return RenderedTextSizeFor(nil, text, fontSize, style, source)
+}
+
+// RenderedTextSizeFor is RenderedTextSize for text drawn as part of o.
+// Text without a source is drawn in the fonts of the theme scope o is in
+// (CachedFontFace with o), so it is measured in them and cached under that
+// scope: its size then matches how it is drawn.
+func RenderedTextSizeFor(o fyne.CanvasObject, text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (size fyne.Size, baseline float32) {
+	scope := ""
+	if o != nil {
+		scope = cache.WidgetScopeID(o)
+	}
+	size, base := cache.GetFontMetrics(text, fontSize, style, source, scope)
 	if base != 0 {
 		return size, base
 	}
 
-	size, base = measureText(text, fontSize, style, source)
-	cache.SetFontMetrics(text, fontSize, style, source, size, base)
+	size, base = measureText(text, fontSize, style, source, o)
+	cache.SetFontMetrics(text, fontSize, style, source, scope, size, base)
 	return size, base
 }
 
@@ -270,8 +282,8 @@ func float32ToFixed266(f float32) fixed.Int26_6 {
 	return fixed.Int26_6(float64(f) * (1 << 6))
 }
 
-func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
-	face := CachedFontFace(style, source, nil)
+func measureText(text string, fontSize float32, style fyne.TextStyle, source fyne.Resource, o fyne.CanvasObject) (fyne.Size, float32) {
+	face := CachedFontFace(style, source, o)
 	return MeasureString(face.Fonts, text, fontSize, style)
 }
 
