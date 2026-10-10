@@ -51,6 +51,8 @@ type Shader struct {
 	// already declared; the shader's own Uniforms must be declared as a flat
 	// "cbuffer <anything> : register(b1)", and its Textures bind to t0 upwards
 	// with a matching sampler at s0 upwards, ordered by sorted texture name.
+	//
+	// Since: 2.9
 	SourceHLSL []byte
 
 	// Textures supplies named images to the shader. Each entry is uploaded to
