@@ -11,7 +11,9 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/theme"
 
+	"fyne.io/fyne/v2/internal/cache"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTextGrid(t *testing.T) {
@@ -489,4 +491,30 @@ func assertGridStyle(t *testing.T, g *TextGrid, content string, expectedStyles m
 func rendererCell(r *textGridRowRenderer, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := col * 2
 	return r.obj.objects[i].(*canvas.Rectangle), r.obj.objects[i+1].(*canvas.Text)
+}
+
+// Rows and cells a grid makes after a theme override was applied join its
+// scope, as List and Tree items do; they were drawn in the app theme's font
+// and size (letters of mixed sizes, #6589).
+func TestTextGrid_NewCellsInTheOverrideScope(t *testing.T) {
+	test.NewTempApp(t)
+	grid := NewTextGridFromString("a")
+	cache.OverrideTheme(grid, test.Theme())
+	w := test.NewTempWindow(t, grid)
+	w.Resize(fyne.NewSize(400, 300))
+	grid.SetText(strings.Repeat("longer row of text\n", 8)) // new rows and cells
+	scope := cache.WidgetScopeID(grid)
+	require.NotEmpty(t, scope)
+	cells := 0
+	for _, r := range grid.content.visible {
+		row := r.(*textGridRow)
+		assert.Equal(t, scope, cache.WidgetScopeID(row), "row")
+		for _, o := range row.objects {
+			if txt, ok := o.(*canvas.Text); ok {
+				cells++
+				assert.Equal(t, scope, cache.WidgetScopeID(txt), "cell %q", txt.Text)
+			}
+		}
+	}
+	assert.Greater(t, cells, 50)
 }

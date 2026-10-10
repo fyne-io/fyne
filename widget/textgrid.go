@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/internal/async"
+	"fyne.io/fyne/v2/internal/cache"
 	"fyne.io/fyne/v2/internal/painter"
 	"fyne.io/fyne/v2/internal/widget"
 	"fyne.io/fyne/v2/theme"
@@ -668,6 +669,8 @@ type textGridRow struct {
 func newTextGridRow(t *textGridContent, row int) *textGridRow {
 	newRow := &textGridRow{text: t, row: row}
 	newRow.ExtendBaseWidget(newRow)
+	// in the grid's theme scope, like its cells (see appendTextCell)
+	cache.OverrideThemeMatchingScope(newRow, t.text)
 
 	return newRow
 }
@@ -694,6 +697,13 @@ func (t *textGridRow) appendTextCell(str rune) {
 
 	bg := canvas.NewRectangle(color.Transparent)
 
+	// A widget's objects belong to its theme scope. The grid makes rows and
+	// cells after a ThemeOverride was applied to it (as its text grows or
+	// rows are reused), so they join the grid's scope here, as List and Tree
+	// do with the items they make; outside it they are drawn with the app
+	// theme's font and size.
+	cache.OverrideThemeMatchingScope(text, t.text.text)
+	cache.OverrideThemeMatchingScope(bg, t.text.text)
 	t.objects = append(t.objects, bg, text)
 }
 
