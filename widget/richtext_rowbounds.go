@@ -128,6 +128,9 @@ func (b *rowBoundsBuilder) endsAfterBreak(first int, segs []RichTextSegment) boo
 func (b *rowBoundsBuilder) appendObject(seg RichTextSegment, depth int) {
 	segLen := utf8.RuneCountInString(seg.Textual())
 	if b.full || b.rowOpen && b.rowCut && seg.Inline() { // truncated away
+		if !b.full {
+			b.bounds[len(b.bounds)-1].hiddenEnd = seg
+		}
 		b.docOffset += segLen
 		return
 	}
@@ -219,12 +222,14 @@ func (b *rowBoundsBuilder) continueRow(seg RichTextSegment, rows []rowBoundary, 
 	switch {
 	case b.rowCut:
 		// the end of the open row is hidden, so this text only shows from its next line
+		b.bounds[len(b.bounds)-1].hiddenEnd = seg
 	case first.truncated && first.segEnd == first.segBegin:
 		// none of this text fits, so the open row ends with what it has already
 		if first.ellipsis {
 			b.endRowWithEllipsis()
 		}
 		b.rowCut = true
+		b.bounds[len(b.bounds)-1].hiddenEnd = seg
 	default:
 		// this row now runs on into another segment, so segEnd moves to
 		// index the new last segment rather than the previous one

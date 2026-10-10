@@ -815,7 +815,7 @@ func (t *RichText) updateRowGeometry() {
 		bound.height = height
 		yPos += height
 
-		lastSeg := bound.segments[len(bound.segments)-1]
+		lastSeg := rowEndSegment(bound)
 		if !lastSeg.Inline() && i < len(t.rowBounds)-1 && t.rowBounds[i+1].segments[0] != lastSeg {
 			yPos += lineSpacing
 		}
@@ -855,6 +855,15 @@ func rowStartsWithSpentText(bound *rowBoundary) bool {
 		return bound.segBegin >= utf8.RuneCountInString(bound.segments[0].Textual())
 	}
 	return false
+}
+
+// rowEndSegment returns the segment that ends this row, including one that truncation hid,
+// so that rows are spaced the same whether or not they were truncated.
+func rowEndSegment(bound *rowBoundary) RichTextSegment {
+	if bound.hiddenEnd != nil {
+		return bound.hiddenEnd
+	}
+	return bound.segments[len(bound.segments)-1]
 }
 
 // rowFirstVisibleSegment returns the first segment that puts content on this row.
@@ -1148,7 +1157,7 @@ func (r *textRenderer) Layout(size fyne.Size) {
 		bounds[row].yPos = rowY - (innerPadding - r.obj.inset.Height)
 		bounds[row].height = yPos - rowY
 
-		lastSeg := bound.segments[len(bound.segments)-1]
+		lastSeg := rowEndSegment(&bound)
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
 			yPos += lineSpacing
 		}
@@ -1276,7 +1285,7 @@ func (r *textRenderer) calculateMin(bounds []rowBoundary, wrap fyne.TextWrap, ob
 		rowHeight = 0
 		rowWidth = 0
 
-		lastSeg := bound.segments[len(bound.segments)-1]
+		lastSeg := rowEndSegment(&bound)
 		if !lastSeg.Inline() && row < len(bounds)-1 && bounds[row+1].segments[0] != lastSeg { // ignore wrapped lines etc
 			height += lineSpacing
 		}
@@ -1941,6 +1950,8 @@ type rowBoundary struct {
 
 	// truncated is set when truncation hid text that follows this row in its segment.
 	truncated bool
+	// hiddenEnd is the last segment that truncation hid from the end of this row, if any.
+	hiddenEnd RichTextSegment
 
 	// panel is set when this row is part of a block that draws its content on a
 	// panel, such as a code block.

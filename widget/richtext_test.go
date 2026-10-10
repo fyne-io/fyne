@@ -1303,6 +1303,25 @@ func TestText_Truncate_Segments(t *testing.T) {
 	}
 }
 
+func TestText_Truncate_ParagraphSpacing(t *testing.T) {
+	md := "Normal **Bold** and some text, which is long enough to be truncated.\n\n> A quote"
+	for _, trunc := range []fyne.TextTruncation{fyne.TextTruncateClip, fyne.TextTruncateEllipsis} {
+		full := NewRichTextFromMarkdown(md)
+		full.Truncation = trunc
+		full.Resize(fyne.NewSize(1000, 100))
+		text := NewRichTextFromMarkdown(md)
+		text.Truncation = trunc
+		text.Resize(fyne.NewSize(200, 100))
+
+		// the quote should not move up when the paragraph above it is truncated
+		assert.Len(t, text.rowBounds, len(full.rowBounds))
+		wantY, _ := full.rowGeometry(1)
+		gotY, _ := text.rowGeometry(1)
+		assert.Equal(t, wantY, gotY, "truncation %d", trunc)
+		assert.Equal(t, full.MinSize().Height, text.MinSize().Height, "truncation %d", trunc)
+	}
+}
+
 func TestText_WrapTruncate_Segments(t *testing.T) {
 	md := "Normal **Bold** *Italic* [Link](https://fyne.io/) and some `Code`.\n" +
 		"This styled row should also wrap as expected, but only *when required*."
