@@ -193,6 +193,17 @@ func (i *Image) Refresh() {
 	Refresh(i)
 }
 
+// RefreshRegion causes this image to be redrawn after the pixels of Image have
+// changed, but only within the region r of it. Just those pixels are sent to the
+// graphics card, so a small change to a large image is much faster than Refresh.
+// Any other change to the image, including to the size of Image, needs Refresh.
+//
+// Since: 2.9
+func (i *Image) RefreshRegion(r image.Rectangle) {
+	cache.SetTextureDirty(i, r)
+	repaint(i)
+}
+
 // Resize on an image will scale the content or reposition it according to FillMode.
 // It will normally cause a Refresh to ensure the pixels are recalculated.
 func (i *Image) Resize(s fyne.Size) {
