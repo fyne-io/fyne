@@ -19,7 +19,8 @@ func (a *fyneApp) storageRoot() string {
 }
 
 func (p *preferences) watch() {
-	watchFile(p.storagePath(), func() {
+	p.watcherPath = p.storagePath()
+	p.watcher = watchFile(p.watcherPath, func() {
 		p.prefLock.RLock()
 		shouldIgnoreChange := p.savedRecently
 		p.prefLock.RUnlock()
@@ -29,4 +30,13 @@ func (p *preferences) watch() {
 
 		p.load()
 	})
+}
+
+// ensureWatching adds the watcher target if it wasn't added during watch() due to
+// the directory not existing yet. Called after directory creation during first save.
+func (p *preferences) ensureWatching() {
+	if p.watcher == nil || p.watcherPath == "" {
+		return
+	}
+	addWatcherTarget(p.watcher, p.watcherPath)
 }
