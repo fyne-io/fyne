@@ -21,11 +21,16 @@ type rowBoundsBuilder struct {
 	wrapWidth float32 // the width that is left on the row being built
 
 	rowOpen         bool    // whether the last of bounds can take more inline content
+	rowCut          bool    // whether truncation hid the end of the open row, so more inline content is hidden too
+	rowPaid         bool    // whether the height of the open row was taken from fitSize already
 	rowDepth        int     // the nesting depth of the segment that started the open row
 	rowIndent       float32 // how far rows that continue this one are indented, -1 until known
 	rowMarkerIndent float32 // the width of a list bullet that introduces this row
 
 	docOffset int // rune offset of the current segment within the whole text
+
+	truncating bool // whether rows are truncated to the width, rather than wrapped
+	full       bool // whether truncation ran out of height, so no more content is shown
 }
 
 func newRowBoundsBuilder(t *RichText) *rowBoundsBuilder {
@@ -38,10 +43,12 @@ func newRowBoundsBuilder(t *RichText) *rowBoundsBuilder {
 	}
 	fitSize.Height -= (innerPadding + t.inset.Height) * 2
 	maxWidth := t.Size().Width - 2*innerPadding + 2*t.inset.Width
+	truncating := t.Wrapping == fyne.TextWrap(fyne.TextTruncateClip) ||
+		t.Wrapping == fyne.TextWrapOff && t.Truncation != fyne.TextTruncateOff
 
 	return &rowBoundsBuilder{
 		text: t, theme: th, innerPadding: innerPadding, fitSize: fitSize,
-		maxWidth: maxWidth, wrapWidth: maxWidth, rowIndent: -1,
+		maxWidth: maxWidth, wrapWidth: maxWidth, rowIndent: -1, truncating: truncating,
 	}
 }
 
@@ -65,6 +72,8 @@ func (b *rowBoundsBuilder) startRow(depth int) {
 	b.rowDepth = depth
 	b.rowIndent = -1
 	b.rowMarkerIndent = 0
+	b.rowCut = false
+	b.rowPaid = false
 }
 
 // closeRow ends the row being built so that the next segment starts a new one.
@@ -118,6 +127,11 @@ func (b *rowBoundsBuilder) endsAfterBreak(first int, segs []RichTextSegment) boo
 // an image or a list bullet.
 func (b *rowBoundsBuilder) appendObject(seg RichTextSegment, depth int) {
 	segLen := utf8.RuneCountInString(seg.Textual())
+	if b.full || b.rowOpen && b.rowCut && seg.Inline() { // truncated away
+		b.docOffset += segLen
+		return
+	}
+
 	if b.rowOpen {
 		row := &b.bounds[len(b.bounds)-1]
 		row.segments = append(row.segments, seg)
@@ -148,52 +162,101 @@ func (b *rowBoundsBuilder) appendObject(seg RichTextSegment, depth int) {
 // appendText lays out a text or hyperlink segment, wrapping it over as many
 // rows as it needs.
 func (b *rowBoundsBuilder) appendText(seg RichTextSegment, depth int) {
+	runes := []rune(seg.Textual())
+	if b.full {
+		b.docOffset += len(runes)
+		return
+	}
+
 	style, size, leftPad := b.textAttributes(seg)
-	rows, height := lineBounds(b.text, seg, b.wrapWidth-leftPad, fyne.NewSize(b.maxWidth, b.fitSize.Height),
-		func(text []rune) fyne.Size {
-			return fyne.MeasureText(string(text), size, style)
-		})
+	measurer := func(text []rune) fyne.Size {
+		return fyne.MeasureText(string(text), size, style)
+	}
+
+	// the first line of this text runs on along the open row, which may have paid for its height already
+	shared := float32(0)
+	if b.rowOpen && b.rowPaid && len(runes) > 0 && runes[0] != '\n' {
+		shared = measurer([]rune(averageChar)).Height
+	}
+	rows, height := lineBounds(b.text, seg, b.wrapWidth-leftPad, fyne.NewSize(b.maxWidth, b.fitSize.Height+shared), measurer)
 	for i := range rows {
 		rows[i].docBegin = b.docOffset + rows[i].segBegin
 		rows[i].docEnd = b.docOffset + rows[i].segEnd
 	}
+	b.fitSize.Height -= max(height-shared, 0)
+	b.docOffset += len(runes)
+
+	if len(rows) == 0 || !b.truncating && rows[len(rows)-1].truncated {
+		b.full = true // there was not enough height left to show all of this text
+	}
+	if len(rows) == 0 {
+		if b.rowOpen && b.text.Truncation == fyne.TextTruncateEllipsis {
+			b.endRowWithEllipsis()
+		}
+		return
+	}
 
 	if b.rowOpen {
-		b.continueRow(seg, rows, depth, height)
+		b.continueRow(seg, rows, depth)
 	} else {
 		b.bounds = append(b.bounds, rows...)
-		b.fitSize.Height -= height
 		b.rowOpen = true
 		b.startRow(depth)
 	}
+	b.updateRowState(runes, rows, height)
 
-	if seg.Inline() {
-		b.advanceRow(seg, rows, style, size)
-	} else {
+	if !seg.Inline() {
 		b.closeRow(depth)
+	} else if !b.rowCut {
+		b.advanceRow(seg, rows, style, size)
 	}
-	b.docOffset += utf8.RuneCountInString(seg.Textual())
 }
 
 // continueRow adds the first of the new rows to the row that is already open,
 // as the segment runs on from the content that is there, then appends the rest.
-func (b *rowBoundsBuilder) continueRow(seg RichTextSegment, rows []rowBoundary, depth int, height float32) {
-	if len(rows) == 0 {
-		return
+func (b *rowBoundsBuilder) continueRow(seg RichTextSegment, rows []rowBoundary, depth int) {
+	first := rows[0]
+	switch {
+	case b.rowCut:
+		// the end of the open row is hidden, so this text only shows from its next line
+	case first.truncated && first.segEnd == first.segBegin:
+		// none of this text fits, so the open row ends with what it has already
+		if first.ellipsis {
+			b.endRowWithEllipsis()
+		}
+		b.rowCut = true
+	default:
+		// this row now runs on into another segment, so segEnd moves to
+		// index the new last segment rather than the previous one
+		row := &b.bounds[len(b.bounds)-1]
+		row.segEnd = first.segEnd
+		row.docEnd = first.docEnd
+		row.ellipsis = first.ellipsis
+		row.truncated = first.truncated
+		row.segments = append(row.segments, seg)
 	}
-
-	// this row now runs on into another segment, so segEnd moves to
-	// index the new last segment rather than the previous one
-	row := &b.bounds[len(b.bounds)-1]
-	row.segEnd = rows[0].segEnd
-	row.docEnd = b.docOffset + rows[0].segEnd
-	row.segments = append(row.segments, seg)
 
 	if depth > b.rowDepth || b.rowMarkerIndent > 0 {
 		b.indentContinuation(seg, rows[1:])
 	}
 	b.bounds = append(b.bounds, rows[1:]...)
-	b.fitSize.Height -= height
+}
+
+// updateRowState records whether the open row was truncated and whether its height
+// is paid for, now that the given rows of this text were added.
+func (b *rowBoundsBuilder) updateRowState(runes []rune, rows []rowBoundary, height float32) {
+	last := rows[len(rows)-1]
+	if len(rows) > 1 { // the open row is the last of these rows, not the one that they continued
+		b.rowCut = false
+		b.rowPaid = false
+	}
+
+	if b.truncating {
+		b.rowCut = b.rowCut || last.truncated
+	}
+	if height > 0 && (len(runes) == 0 || runes[len(runes)-1] != '\n') {
+		b.rowPaid = true
+	}
 }
 
 // indentContinuation lines the rows that a wrapped segment ran on to up with the
@@ -241,6 +304,49 @@ func (b *rowBoundsBuilder) advanceRow(seg RichTextSegment, rows []rowBoundary, s
 	if strings.ContainsRune(seg.Textual(), '\n') {
 		b.rowMarkerIndent = 0 // we are past the line that a bullet introduced
 	}
+}
+
+// endRowWithEllipsis ends the open row with an ellipsis after the text on it,
+// shortening that text if there is not enough room left for the ellipsis.
+func (b *rowBoundsBuilder) endRowWithEllipsis() {
+	row := &b.bounds[len(b.bounds)-1]
+	space := b.wrapWidth
+	b.rowCut = true
+	for {
+		last := len(row.segments) - 1
+		if !isTextSegment(row.segments[last]) {
+			return // the ellipsis is drawn at the end of text, so there is nowhere to put it
+		}
+
+		style, size, _ := b.textAttributes(row.segments[last])
+		measurer := func(text []rune) fyne.Size {
+			return fyne.MeasureText(string(text), size, style)
+		}
+		runes := rowSegmentRunes(row, last)
+		width := measurer(runes).Width
+		fit := howManyRunesFit(runes, width+space-measurer([]rune(ellipsisChar)).Width, measurer([]rune(averageChar)).Width, measurer)
+		if fit > 0 || last == 0 || !isTextSegment(row.segments[last-1]) {
+			row.segEnd -= len(runes) - fit
+			row.docEnd -= len(runes) - fit
+			row.ellipsis = true
+			return
+		}
+
+		// none of this text fits, so the ellipsis goes on the text before it instead
+		space += width
+		row.docEnd -= len(runes)
+		row.segments = row.segments[:last]
+		row.segEnd = utf8.RuneCountInString(row.segments[last-1].Textual()) // which was shown in full
+	}
+}
+
+// isTextSegment reports whether a segment is drawn as text, which an ellipsis can be added to.
+func isTextSegment(seg RichTextSegment) bool {
+	switch seg.(type) {
+	case *TextSegment, *HyperlinkSegment:
+		return true
+	}
+	return false
 }
 
 // textAttributes returns the style and size that a text or hyperlink segment is
