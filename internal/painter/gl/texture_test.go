@@ -23,15 +23,15 @@ type subImageContext struct {
 	data          []uint8
 }
 
-func (_ *subImageContext) ActiveTexture(uint32) {}
+func (*subImageContext) ActiveTexture(uint32) {}
 
 func (c *subImageContext) BindTexture(_ uint32, texture Texture) {
 	c.bound = texture
 }
 
-func (_ *subImageContext) DeleteTexture(Texture) {}
+func (*subImageContext) DeleteTexture(Texture) {}
 
-func (_ *subImageContext) GetError() uint32 {
+func (*subImageContext) GetError() uint32 {
 	return 0
 }
 
