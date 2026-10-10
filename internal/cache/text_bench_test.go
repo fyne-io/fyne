@@ -13,12 +13,12 @@ func BenchmarkGetFontMetrics(b *testing.B) {
 	texts := make([]string, 300)
 	for i := range texts {
 		texts[i] = strconv.FormatFloat(float64(i)*1.37, 'f', 2, 64)
-		SetFontMetrics(texts[i], 11, fyne.TextStyle{}, nil, fyne.NewSize(20, 11), 9)
+		SetFontMetrics(texts[i], 11, fyne.TextStyle{}, nil, "", fyne.NewSize(20, 11), 9)
 	}
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		for _, t := range texts {
-			GetFontMetrics(t, 11, fyne.TextStyle{}, nil)
+			GetFontMetrics(t, 11, fyne.TextStyle{}, nil, "")
 		}
 	}
 }

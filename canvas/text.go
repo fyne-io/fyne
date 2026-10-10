@@ -37,10 +37,26 @@ func (t *Text) Hide() {
 	repaint(t)
 }
 
+// scopedTextMeasurer is a driver that measures text in the font of the
+// theme scope it is drawn in.
+type scopedTextMeasurer interface {
+	RenderedTextSizeFor(fyne.CanvasObject, string, float32, fyne.TextStyle, fyne.Resource) (fyne.Size, float32)
+}
+
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	s, _ := fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
+	// A Text is measured in the font it is drawn in. Without a FontSource
+	// that is the font of the theme scope the text is in (a ThemeOverride
+	// around it), which only the object can tell: a driver that measures
+	// by object (RenderedTextSizeFor) does so; RenderedTextSize knows only
+	// the app theme.
+	d := fyne.CurrentApp().Driver()
+	if scoped, ok := d.(scopedTextMeasurer); ok {
+		s, _ := scoped.RenderedTextSizeFor(t, t.Text, t.TextSize, t.TextStyle, t.FontSource)
+		return s
+	}
+	s, _ := d.RenderedTextSize(t.Text, t.TextSize, t.TextStyle, t.FontSource)
 	return s
 }
 

@@ -841,3 +841,9 @@ func NewGoMobileDriver() fyne.Driver {
 	registerRepository(d)
 	return d
 }
+
+// RenderedTextSizeFor measures text drawn as part of o in the fonts of the
+// theme scope o is in, where it is drawn; canvas.Text measures through it.
+func (*driver) RenderedTextSizeFor(o fyne.CanvasObject, text string, textSize float32, style fyne.TextStyle, source fyne.Resource) (fyne.Size, float32) {
+	return painter.RenderedTextSizeFor(o, text, textSize, style, source)
+}
