@@ -345,7 +345,6 @@ func (b *rowBoundsBuilder) endRowWithEllipsis() {
 	}
 }
 
-// isTextSegment reports whether a segment is drawn as text, which an ellipsis can be added to.
 func isTextSegment(seg RichTextSegment) bool {
 	switch seg.(type) {
 	case *TextSegment, *HyperlinkSegment:

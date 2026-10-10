@@ -857,8 +857,6 @@ func rowStartsWithSpentText(bound *rowBoundary) bool {
 	return false
 }
 
-// rowEndSegment returns the segment that ends this row, including one that truncation hid,
-// so that rows are spaced the same whether or not they were truncated.
 func rowEndSegment(bound *rowBoundary) RichTextSegment {
 	if bound.hiddenEnd != nil {
 		return bound.hiddenEnd
@@ -1586,8 +1584,6 @@ func ellipsisPriorBound(bounds []rowBoundary, trunc fyne.TextTruncation, width f
 	return bounds
 }
 
-// priorWidth returns the width that the last of these rows had to fit within.
-// The first row shares its space with any content before it, the others are full width.
 func priorWidth(bounds []rowBoundary, firstWidth, maxWidth float32) float32 {
 	if len(bounds) == 1 {
 		return firstWidth
