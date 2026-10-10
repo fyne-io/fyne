@@ -162,35 +162,41 @@ func itemForMenuItem(i *fyne.MenuItem, parent *systray.MenuItem) *systray.MenuIt
 	if s, ok := i.Shortcut.(fyne.KeyboardShortcut); ok {
 		item.SetShortcut(systrayModifiers(s.Mod()), systrayShortcutKey(s.Key()))
 	}
-	if i.Icon != nil {
-		data := i.Icon.Content()
-		if svg.IsResourceSVG(i.Icon) {
-			b := &bytes.Buffer{}
-			res := i.Icon
-			if runtime.GOOS == goos.Windows && isDark() { // windows menus don't match dark mode so invert icons
-				res = theme.NewInvertedThemedResource(i.Icon)
-			}
-			img := painter.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
-			err := png.Encode(b, img)
-			if err != nil {
-				fyne.LogError("Failed to encode SVG icon for menu", err)
-			} else {
-				data = b.Bytes()
-			}
-		}
 
-		img, err := toOSIcon(data)
+	return item
+}
+
+func applyMenuItemIcon(i *fyne.MenuItem, item *systray.MenuItem) {
+	if i.Icon == nil {
+		return
+	}
+
+	data := i.Icon.Content()
+	if svg.IsResourceSVG(i.Icon) {
+		b := &bytes.Buffer{}
+		res := i.Icon
+		if runtime.GOOS == goos.Windows && isDark() { // windows menus don't match dark mode so invert icons
+			res = theme.NewInvertedThemedResource(i.Icon)
+		}
+		img := painter.PaintImage(canvas.NewImageFromResource(res), nil, systrayIconSize, systrayIconSize)
+		err := png.Encode(b, img)
 		if err != nil {
-			fyne.LogError("Failed to convert systray icon", err)
+			fyne.LogError("Failed to encode SVG icon for menu", err)
 		} else {
-			if _, ok := i.Icon.(*theme.ThemedResource); ok {
-				item.SetTemplateIcon(img, img)
-			} else {
-				item.SetIcon(img)
-			}
+			data = b.Bytes()
 		}
 	}
-	return item
+
+	img, err := toOSIcon(data)
+	if err != nil {
+		fyne.LogError("Failed to convert systray icon", err)
+	} else {
+		if _, ok := i.Icon.(*theme.ThemedResource); ok {
+			item.SetTemplateIcon(img, img)
+		} else {
+			item.SetIcon(img)
+		}
+	}
 }
 
 func (d *gLDriver) refreshSystray(m *fyne.Menu) {
@@ -214,6 +220,9 @@ func (d *gLDriver) refreshSystrayMenu(m *fyne.Menu, parent *systray.MenuItem) {
 		}
 		if i.ChildMenu != nil {
 			d.refreshSystrayMenu(i.ChildMenu, item)
+		}
+		if i.Icon != nil {
+			applyMenuItemIcon(i, item)
 		}
 
 		fn := i.Action
