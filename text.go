@@ -30,6 +30,11 @@ const (
 	//
 	// Since: 2.4
 	TextTruncateEllipsis
+	// TextTruncateMiddle shortens text that does not fit by inserting an ellipsis (…) in the middle,
+	// preserving the beginning and end of the string.
+	//
+	// Since: 2.9
+	TextTruncateMiddle
 )
 
 // TextWrap represents how text longer than the widget's width will be wrapped.

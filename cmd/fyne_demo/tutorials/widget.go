@@ -317,7 +317,7 @@ Type **markdown** here and it styles *itself* as you go, ` + "`code`" + ` includ
 	radioWrap.Horizontal = true
 	radioWrap.SetSelected("Word")
 
-	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis"}, func(s string) {
+	radioTrunc := widget.NewRadioGroup([]string{"Off", "Clip", "Ellipsis", "Middle"}, func(s string) {
 		var trunc fyne.TextTruncation
 		switch s {
 		case "Off":
@@ -326,6 +326,8 @@ Type **markdown** here and it styles *itself* as you go, ` + "`code`" + ` includ
 			trunc = fyne.TextTruncateClip
 		case "Ellipsis":
 			trunc = fyne.TextTruncateEllipsis
+		case "Middle":
+			trunc = fyne.TextTruncateMiddle
 		}
 
 		label.Truncation = trunc
