@@ -17,9 +17,18 @@ import (
 func TestMainLoopNativeLifecycle(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
+	for _, tags := range []string{"migrated_fynedo", "accessibility,migrated_fynedo"} {
+		t.Run(tags, func(t *testing.T) {
+			checkNativeLifecycle(ctx, t, tags)
+		})
+	}
+}
+
+func checkNativeLifecycle(ctx context.Context, t *testing.T, tags string) {
+	t.Helper()
 	binary := filepath.Join(t.TempDir(), "main-loop")
 	//nolint:gosec // Fixed repository fixture, compiled into a test-owned temporary directory.
-	build := exec.CommandContext(ctx, "go", "build", "-tags", "accessibility,migrated_fynedo",
+	build := exec.CommandContext(ctx, "go", "build", "-tags", tags,
 		"-ldflags=-linkmode=external", "-o", binary, "./testdata/main_loop")
 	output, err := build.CombinedOutput()
 	require.NoError(t, err, "%s", output)
@@ -48,7 +57,9 @@ func TestMainLoopNativeLifecycle(t *testing.T) {
 			require.GreaterOrEqual(t, result.Elapsed, int64(time.Second))
 			if mode == "repaint" {
 				require.InDelta(t, 60, float64(result.Frames)*float64(time.Second)/float64(result.Elapsed), 20)
-				require.Greater(t, result.Updates, int64(20))
+				if tags == "accessibility,migrated_fynedo" {
+					require.Greater(t, result.Updates, int64(20))
+				}
 			} else {
 				require.Zero(t, result.Frames)
 				require.Less(t, float64(result.CPU)/float64(result.Elapsed), 0.25, "idle native loop kept the CPU busy")

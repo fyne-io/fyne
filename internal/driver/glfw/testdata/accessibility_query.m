@@ -18,8 +18,11 @@ static int compare(const void* left, const void* right) {
 
 static void report(const char* name, double* times, int count) {
     qsort(times, count, sizeof(double), compare);
+    int middle = count / 2;
+    double median = count % 2 ? times[middle] : (times[middle - 1] + times[middle]) / 2;
+    int p95 = (count * 95 + 99) / 100 - 1;
     printf("%s median_ms=%.3f p95_ms=%.3f max_ms=%.3f\n",
-           name, times[count / 2], times[(count - 1) * 95 / 100], times[count - 1]);
+           name, median, times[p95], times[count - 1]);
 }
 
 static CFTypeRef attribute(AXUIElementRef element, CFStringRef name) {
@@ -96,7 +99,10 @@ int main(int argc, char** argv) {
         }
         CFTypeRef position = attribute(retained, kAXPositionAttribute);
         CGPoint point;
-        AXValueGetValue(position, kAXValueCGPointType, &point);
+        if (!AXValueGetValue(position, kAXValueCGPointType, &point)) {
+            fprintf(stderr, "The accessible text has no valid screen position.\n");
+            return 1;
+        }
         CFRelease(position);
         point.x += 5;
         point.y += 5;
