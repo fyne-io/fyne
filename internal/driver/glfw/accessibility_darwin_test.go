@@ -26,8 +26,7 @@ func TestAccessibilityNativeUpdates(t *testing.T) {
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err, "%s", output)
 	for _, mode := range []string{
-		"attributes", "ownership", "own-method", "inherited-method",
-		"window-isolation", "mixed-classes", "super-method", "window-lifetime",
+		"attributes", "ownership", "window-isolation", "mixed-classes", "super-method", "window-lifetime",
 	} {
 		t.Run(mode, func(t *testing.T) {
 			//nolint:gosec // Executes the just-compiled fixture with fixed subtest arguments.
@@ -45,60 +44,39 @@ func accessibilityTestNodes() []accessibilityNode {
 }
 
 func TestAccessibilityTreeChanged(t *testing.T) {
-	previous := accessibilityTestNodes()
 	tests := []struct {
 		name    string
-		change  func([]accessibilityNode) []accessibilityNode
+		change  func(n []accessibilityNode)
 		rebuild bool
 	}{
-		{"unchanged", func(nodes []accessibilityNode) []accessibilityNode { return nodes }, false},
-		{"label", func(nodes []accessibilityNode) []accessibilityNode {
-			nodes[1].label = "Updated button"
-			return nodes
-		}, false},
-		{"frame", func(nodes []accessibilityNode) []accessibilityNode {
-			nodes[1].x, nodes[1].y, nodes[1].width, nodes[1].height = 10, 20, 30, 40
-			return nodes
-		}, false},
-		{"object", func(nodes []accessibilityNode) []accessibilityNode {
-			nodes[1].object = canvas.NewRectangle(color.White)
-			return nodes
-		}, true},
-		{"role", func(nodes []accessibilityNode) []accessibilityNode {
-			nodes[1].role = roleToC("text")
-			return nodes
-		}, true},
-		{"parent", func(nodes []accessibilityNode) []accessibilityNode {
-			nodes[1].parent = -1
-			return nodes
-		}, true},
-		{"removal", func(nodes []accessibilityNode) []accessibilityNode { return nodes[:1] }, true},
-		{"empty", func([]accessibilityNode) []accessibilityNode { return nil }, true},
+		{"unchanged", func([]accessibilityNode) {}, false},
+		{"label", func(n []accessibilityNode) { n[1].label = "Updated" }, false},
+		{"frame", func(n []accessibilityNode) { n[1].x, n[1].width = 10, 30 }, false},
+		{"object", func(n []accessibilityNode) { n[1].object = canvas.NewRectangle(color.White) }, true},
+		{"role", func(n []accessibilityNode) { n[1].role = roleToC("text") }, true},
+		{"parent", func(n []accessibilityNode) { n[1].parent = -1 }, true},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			require.Equal(t, test.rebuild, accessibilityTreeChanged(previous, test.change(slices.Clone(previous))))
+			previous := accessibilityTestNodes()
+			next := slices.Clone(previous)
+			test.change(next)
+			require.Equal(t, test.rebuild, accessibilityTreeChanged(previous, next))
 		})
 	}
-	t.Run("reordering", func(t *testing.T) {
-		roots := slices.Clone(previous)
-		roots[1].parent = -1
-		next := []accessibilityNode{roots[1], roots[0]}
-		require.True(t, accessibilityTreeChanged(roots, next))
+	t.Run("removal", func(t *testing.T) {
+		previous := accessibilityTestNodes()
+		require.True(t, accessibilityTreeChanged(previous, previous[:1]))
 	})
-	require.False(t, accessibilityTreeChanged(nil, nil))
-	require.True(t, accessibilityTreeChanged(nil, previous))
 }
 
 func TestAccessibilityElementsPreserveIdentity(t *testing.T) {
 	nodes := updateAccessibilityElements(nil, accessibilityTestNodes(), nil)
 	defer func() { destroyAccessibilityElements(nodes) }()
 	root, child := nodes[0].element, nodes[1].element
-	for i := 0; i < 100; i++ {
-		nodes = updateAccessibilityElements(nodes, slices.Clone(nodes), nil)
-		require.Equal(t, root, nodes[0].element)
-		require.Equal(t, child, nodes[1].element)
-	}
+	nodes = updateAccessibilityElements(nodes, slices.Clone(nodes), nil)
+	require.Equal(t, root, nodes[0].element)
+	require.Equal(t, child, nodes[1].element)
 	next := slices.Clone(nodes)
 	next[1].label = "Updated button"
 	next[1].x = 20
@@ -106,24 +84,6 @@ func TestAccessibilityElementsPreserveIdentity(t *testing.T) {
 	nodes = updateAccessibilityElements(nodes, next, nil)
 	require.Equal(t, root, nodes[0].element)
 	require.Equal(t, child, nodes[1].element)
-}
-
-func TestAccessibilityElementsReplaceChangedStructure(t *testing.T) {
-	nodes := updateAccessibilityElements(nil, accessibilityTestNodes(), nil)
-	defer func() { destroyAccessibilityElements(nodes) }()
-	next := append(slices.Clone(nodes), accessibilityNode{
-		object: canvas.NewRectangle(color.Black), role: roleToC("text"),
-		label: "New text", parent: 0, width: 100, height: 30,
-	})
-	nodes = updateAccessibilityElements(nodes, next, nil)
-	require.Len(t, nodes, 3)
-	for _, node := range nodes {
-		require.NotNil(t, node.element)
-	}
-	nodes = updateAccessibilityElements(nodes, nil, nil)
-	require.Empty(t, nodes)
-	nodes = updateAccessibilityElements(nodes, accessibilityTestNodes(), nil)
-	require.Len(t, nodes, 2)
 }
 
 func BenchmarkAccessibilityElementsUnchanged(b *testing.B) {

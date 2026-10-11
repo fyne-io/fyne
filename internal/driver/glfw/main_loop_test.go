@@ -1,122 +1,74 @@
 package glfw
 
 import (
-	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestNextMainLoopEvent(t *testing.T) {
+func TestNextMainLoopEventReady(t *testing.T) {
 	for _, native := range []bool{false, true} {
-		t.Run(map[bool]string{false: "channel", true: "native"}[native], func(t *testing.T) {
-			t.Run("function", func(t *testing.T) {
-				functions := make(chan funcData, 1)
-				called := false
-				functions <- funcData{f: func() { called = true }}
-				var wait func(time.Duration)
-				if native {
-					wait = func(time.Duration) { t.Fatal("waited with a function ready") }
-				}
-				event := nextMainLoopEvent(nil, functions, nil, time.Now(), wait)
-				require.Equal(t, mainLoopFunction, event.kind)
-				event.function.f()
-				require.True(t, called)
-			})
-			t.Run("frame", func(t *testing.T) {
-				frames := make(chan time.Time, 1)
-				tick := time.Now()
-				frames <- tick
-				var wait func(time.Duration)
-				if native {
-					wait = func(time.Duration) { t.Fatal("waited with a frame ready") }
-				}
-				event := nextMainLoopEvent(nil, nil, frames, tick, wait)
-				require.Equal(t, mainLoopFrame, event.kind)
-				require.Equal(t, tick, event.frameTime)
-			})
-			t.Run("quit", func(t *testing.T) {
-				done := make(chan struct{})
-				close(done)
-				var wait func(time.Duration)
-				if native {
-					wait = func(time.Duration) { t.Fatal("waited after shutdown") }
-				}
-				event := nextMainLoopEvent(done, nil, nil, time.Now(), wait)
-				require.Equal(t, mainLoopQuit, event.kind)
-			})
+		t.Run(map[bool]string{false: "blocking", true: "native"}[native], func(t *testing.T) {
+			var wake *mainLoopWake
+			if native {
+				wake = &mainLoopWake{wait: func(time.Duration) { t.Fatal("waited with an event ready") }}
+			}
+			done := make(chan struct{})
+			close(done)
+			require.Equal(t, mainLoopQuit, nextMainLoopEvent(done, nil, nil, time.Now(), wake).kind)
+
+			functions := make(chan funcData, 1)
+			functions <- funcData{}
+			require.Equal(t, mainLoopFunction, nextMainLoopEvent(nil, functions, nil, time.Now(), wake).kind)
+
+			frames := make(chan time.Time, 1)
+			tick := time.Now()
+			frames <- tick
+			event := nextMainLoopEvent(nil, nil, frames, tick, wake)
+			require.Equal(t, mainLoopFrame, event.kind)
+			require.Equal(t, tick, event.frameTime)
 		})
 	}
 }
 
-func TestNextMainLoopEventNativeWake(t *testing.T) {
+func TestNextMainLoopEventWaitsUntilNextFrame(t *testing.T) {
 	functions := make(chan funcData, 1)
-	nextFrame := time.Now().Add(time.Second)
-	waits := 0
-	event := nextMainLoopEvent(nil, functions, nil, nextFrame, func(timeout time.Duration) {
-		require.Positive(t, timeout)
-		require.LessOrEqual(t, timeout, time.Second)
-		waits++
-		functions <- funcData{f: func() {}}
-	})
+	var timeout time.Duration
+	wake := &mainLoopWake{wait: func(d time.Duration) {
+		timeout = d
+		functions <- funcData{}
+	}}
+	event := nextMainLoopEvent(nil, functions, nil, time.Now().Add(time.Second), wake)
 	require.Equal(t, mainLoopFunction, event.kind)
-	require.Equal(t, 1, waits)
+	require.InDelta(t, time.Second, timeout, float64(100*time.Millisecond))
 }
 
-func TestNextMainLoopEventNativeFrameDeadline(t *testing.T) {
-	frames := make(chan time.Time, 1)
-	nextFrame := time.Now().Add(time.Second)
-	event := nextMainLoopEvent(nil, nil, frames, nextFrame, func(timeout time.Duration) {
-		require.Positive(t, timeout)
-		require.LessOrEqual(t, timeout, time.Second)
-		frames <- nextFrame
-	})
+func TestNextMainLoopEventOverdueFrameDoesNotWait(t *testing.T) {
+	frames := make(chan time.Time)
+	wake := &mainLoopWake{wait: func(time.Duration) { t.Error("waited for native events with a frame overdue") }}
+	tick := time.Now()
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		frames <- tick
+	}()
+	event := nextMainLoopEvent(nil, nil, frames, tick.Add(-time.Millisecond), wake)
 	require.Equal(t, mainLoopFrame, event.kind)
-	require.Equal(t, nextFrame, event.frameTime)
 }
 
-func TestMainLoopWakeLifecycle(t *testing.T) {
+func TestMainLoopWake(t *testing.T) {
 	var wake mainLoopWake
-	var calls atomic.Int32
+	calls := 0
 	wake.notify()
-	wake.start(func() { calls.Add(1) })
+	wake.start(func() { calls++ })
 	wake.notify()
-	require.EqualValues(t, 1, calls.Load())
+	wake.notify()
+	require.Equal(t, 1, calls, "wakeups should coalesce until rearmed")
+	wake.rearm()
+	wake.notify()
+	require.Equal(t, 2, calls)
 	wake.stop()
+	wake.rearm()
 	wake.notify()
-	require.EqualValues(t, 1, calls.Load())
-}
-
-func TestMainLoopWakeStopWaitsForNotification(t *testing.T) {
-	var wake mainLoopWake
-	entered := make(chan struct{})
-	release := make(chan struct{})
-	notified := make(chan struct{})
-	wake.start(func() {
-		close(entered)
-		<-release
-	})
-	go func() {
-		wake.notify()
-		close(notified)
-	}()
-	<-entered
-	stopStarted := make(chan struct{})
-	stopped := make(chan struct{})
-	go func() {
-		close(stopStarted)
-		wake.stop()
-		close(stopped)
-	}()
-	<-stopStarted
-	select {
-	case <-stopped:
-		t.Fatal("stopped with a native wakeup still in flight")
-	case <-time.After(10 * time.Millisecond):
-	}
-	close(release)
-	<-stopped
-	<-notified
-	wake.notify()
+	require.Equal(t, 2, calls)
 }

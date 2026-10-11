@@ -312,6 +312,9 @@ void AccessibilityAttachToWindow(AccessibilityElementRef elem, void* nsWindow) {
         SEL selector = @selector(accessibilityChildren);
         if (!objc_getAssociatedObject(viewClass, &accessibilityChildrenInstalledKey)) {
             Method originalMethod = class_getInstanceMethod(viewClass, selector);
+            if (!originalMethod) {
+                return;
+            }
             IMP original = method_getImplementation(originalMethod);
             // Capture each class's original so overrides calling super do not recurse.
             IMP replacement = imp_implementationWithBlock(^NSArray*(id view) {

@@ -2,9 +2,7 @@
 
 package glfw
 
-import "time"
-
-func startMainLoop() func(time.Duration) {
+func startMainLoop() *mainLoopWake {
 	return nil
 }
 

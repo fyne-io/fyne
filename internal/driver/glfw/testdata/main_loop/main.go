@@ -1,5 +1,19 @@
 //go:build darwin
 
+// Command main_loop is a manual fixture for measuring macOS accessibility latency.
+//
+// Build the fixture and the AX probe on each revision being compared:
+//
+//	go build -tags accessibility,migrated_fynedo -ldflags=-linkmode=external -o /tmp/fyne-main-loop ./internal/driver/glfw/testdata/main_loop
+//	clang -framework Cocoa -framework ApplicationServices internal/driver/glfw/testdata/accessibility_query.m -o /tmp/fyne-ax-query
+//	/tmp/fyne-main-loop -duration=30s -elements=16 -repaint -repaint-delay=1s
+//
+// After the fixture prints "READY <pid>", run "/tmp/fyne-ax-query <pid> 200" from
+// another terminal. The probe needs macOS Accessibility permission and reports
+// median, p95 and maximum window-attribute and hit-test latency. The repaint delay
+// lets the probe retain an element before repainting starts. Repeat without
+// -repaint and with -elements=256. On exit the fixture prints animation frames,
+// accessibility updates and CPU time as JSON.
 package main
 
 import (
@@ -14,7 +28,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -33,12 +46,10 @@ func (*accessibleText) AccessibilityRole() fyne.AccessibleRole {
 }
 
 type result struct {
-	Frames        int64         `json:"frames"`
-	Updates       int64         `json:"updates"`
-	Elapsed       time.Duration `json:"elapsed_ns"`
-	CPU           time.Duration `json:"cpu_ns"`
-	Queued        int           `json:"queued"`
-	SecondaryDone bool          `json:"secondary_closed"`
+	Frames  int64         `json:"frames"`
+	Updates int64         `json:"updates"`
+	Elapsed time.Duration `json:"elapsed_ns"`
+	CPU     time.Duration `json:"cpu_ns"`
 }
 
 func cpuTime() time.Duration {
@@ -56,7 +67,6 @@ func main() {
 	duration := flag.Duration("duration", 5*time.Second, "Measurement duration after startup")
 	repaint := flag.Bool("repaint", false, "Continuously repaint at the animation cadence")
 	repaintDelay := flag.Duration("repaint-delay", 0, "Delay repainting after readiness so an AX client can retain an element")
-	exercise := flag.Bool("exercise", false, "Exercise queued work, menus, dialogs and window teardown")
 	flag.Parse()
 	if *elements < 1 || *duration <= 0 {
 		panic("elements and duration must be positive")
@@ -87,23 +97,6 @@ func main() {
 	a.Lifecycle().SetOnStarted(func() {
 		go func() {
 			time.Sleep(time.Second)
-			if *exercise {
-				fyne.DoAndWait(func() {
-					second := a.NewWindow("Secondary probe")
-					second.SetContent(widget.NewLabel("Second window"))
-					second.SetOnClosed(func() { measured.SecondaryDone = true })
-					second.Show()
-					w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Probe", fyne.NewMenuItem("Action", func() {}))))
-					popup := dialog.NewInformation("Probe", "Native event-loop dialog", w)
-					popup.Show()
-					popup.Hide()
-					second.Close()
-				})
-				for range 100 {
-					fyne.DoAndWait(func() { measured.Queued++ })
-					time.Sleep(time.Millisecond)
-				}
-			}
 			if *repaint && *repaintDelay == 0 {
 				fyne.DoAndWait(animation.Start)
 			}

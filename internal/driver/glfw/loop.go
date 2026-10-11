@@ -108,7 +108,7 @@ func (d *gLDriver) runGL() {
 	}
 
 	d.init()
-	waitEvents := startMainLoop()
+	wake := startMainLoop()
 	if d.trayStart != nil {
 		d.trayStart()
 	}
@@ -135,7 +135,7 @@ func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(frameInterval)
 	nextFrame := time.Now().Add(frameInterval)
 	for {
-		event := nextMainLoopEvent(d.done, funcQueue.Out(), eventTick.C, nextFrame, waitEvents)
+		event := nextMainLoopEvent(d.done, funcQueue.Out(), eventTick.C, nextFrame, wake)
 		switch event.kind {
 		case mainLoopQuit:
 			eventTick.Stop()

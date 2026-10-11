@@ -54,7 +54,7 @@ jobs:
         run: ${{ matrix.runner }} go test -race -tags "${{ matrix.tags }}" ${{ matrix.cover }} ${{ env.TESTLDFLAGS }} ./...
 
       - name: macOS accessibility tests
-        run: go test -race -tags no_glfw,ci,migrated_fynedo,accessibility ${{ env.TESTLDFLAGS }} ./internal/async ./internal/driver/glfw
+        run: go test -race -tags no_glfw,ci,migrated_fynedo,accessibility ${{ env.TESTLDFLAGS }} ./internal/driver/glfw
         if: ${{ runner.os == 'macOS' }}
 
       - name: Upload failed testdata

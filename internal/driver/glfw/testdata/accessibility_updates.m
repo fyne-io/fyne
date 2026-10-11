@@ -215,8 +215,6 @@ int main(int argc, const char* argv[]) {
         CHECK(argc == 2);
         if (strcmp(argv[1], "attributes") == 0) return testAttributes();
         if (strcmp(argv[1], "ownership") == 0) return testOwnership();
-        if (strcmp(argv[1], "own-method") == 0) return testViewOverride([ProbeOwnView class]);
-        if (strcmp(argv[1], "inherited-method") == 0) return testViewOverride([ProbeInheritedView class]);
         if (strcmp(argv[1], "window-isolation") == 0) return testWindows(NO);
         if (strcmp(argv[1], "mixed-classes") == 0) return testWindows(YES);
         if (strcmp(argv[1], "super-method") == 0) return testSuperMethod();

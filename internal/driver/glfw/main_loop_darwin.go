@@ -8,15 +8,13 @@ import (
 	"github.com/go-gl/glfw/v3.4/glfw"
 )
 
-var nativeMainLoopWake mainLoopWake
+var nativeMainLoopWake = mainLoopWake{wait: func(timeout time.Duration) {
+	glfw.WaitEventsTimeout(timeout.Seconds())
+}}
 
-func startMainLoop() func(time.Duration) {
+func startMainLoop() *mainLoopWake {
 	nativeMainLoopWake.start(glfw.PostEmptyEvent)
-	return func(timeout time.Duration) {
-		if timeout > 0 {
-			glfw.WaitEventsTimeout(timeout.Seconds())
-		}
-	}
+	return &nativeMainLoopWake
 }
 
 func stopMainLoop() {
